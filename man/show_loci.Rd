@@ -5,12 +5,12 @@
 \alias{show_loci.gen_tbl}
 \title{Show the loci information of a \code{gen_tibble}}
 \usage{
-show_loci(x, ...)
+show_loci(.data, ...)
 
-\method{show_loci}{gen_tbl}(x, ...)
+\method{show_loci}{gen_tbl}(.data, ...)
 }
 \arguments{
-\item{x}{a \code{\link{gen_tibble}} object.}
+\item{.data}{a \code{\link{gen_tibble}} object.}
 
 \item{...}{currently unused}
 }

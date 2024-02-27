@@ -6,14 +6,14 @@
 \alias{show_genotypes.list}
 \title{Show the genotypes of a \code{gen_tibble}}
 \usage{
-show_genotypes(x, ...)
+show_genotypes(.data, ...)
 
-\method{show_genotypes}{gen_tbl}(x, ...)
+\method{show_genotypes}{gen_tbl}(.data, ...)
 
-\method{show_genotypes}{list}(x, ...)
+\method{show_genotypes}{list}(.data, ...)
 }
 \arguments{
-\item{x}{a \code{\link{gen_tibble}} object.}
+\item{.data}{a \code{\link{gen_tibble}} object.}
 
 \item{...}{currently unused}
 }

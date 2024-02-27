@@ -62,6 +62,10 @@ library(tidypopgen)
 test_gen <- gen_tibble(ind_meta, genotypes, loci)
 test_gen
 ```
+Note that, since ploidy was not defined, it defaulted to 2. For different ploidy,
+just provide a 'ploidy' column in `ind_meta`.
+
+
 We can then inspect the information about the loci with
 ```{r}
 test_gen %>% show_loci()
@@ -81,10 +85,23 @@ test_pop1
 There are a number of functions that compute population genetics quantities for each
 individual, such as heterozygosity. We can compute them simply with:
 ```{r}
-test_gen %>% heterozygosity()
+test_gen %>% heterozygosity(genotypes)
 ```
+
+We can then simply add a column with:
 ```{r}
-test_gen <- test_gen %>% mutate(het = heterozygosity(test_gen))
+test_gen <- test_gen %>% mutate(het = heterozygosity(genotypes))
 test_gen
 ```
 
+# Reading data
+
+Currently, `tidypopgen` can read data only from PLINK raw files:
+
+```{r}
+raw_path <- system.file("extdata/san.raw", package = "tidypopgen")
+map_path <- system.file("extdata/san.map", package = "tidypopgen")
+san_gen_tbl <- read_plink_raw(file = raw_path, map_file = map_path)
+san_gen_tbl
+
+```

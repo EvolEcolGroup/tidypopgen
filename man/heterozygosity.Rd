@@ -6,14 +6,14 @@
 \alias{heterozygosity.list}
 \title{Estimate individual heterozygosity}
 \usage{
-heterozygosity(x, ...)
+heterozygosity(.data, ...)
 
-\method{heterozygosity}{gen_tbl}(x, ...)
+\method{heterozygosity}{gen_tbl}(.data, ...)
 
-\method{heterozygosity}{list}(x, ...)
+\method{heterozygosity}{list}(.data, ...)
 }
 \arguments{
-\item{x}{a \code{\link{gen_tibble}} object.}
+\item{.data}{a \code{\link{gen_tibble}} object.}
 
 \item{...}{currently unused}
 }
