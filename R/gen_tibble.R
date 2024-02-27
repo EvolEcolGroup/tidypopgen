@@ -1,0 +1,50 @@
+#' Constructor for a `gen_tibble`
+#'
+#' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
+#' here the format
+#' @param ind_meta a list, data.frame or tibble with compulsory columns 'id'
+#' 'population', plus any additional metadata of interest. If 'ploidy' is not
+#' specified, diploids are assumed.
+#' @param genotypes a matrix of counts of alternative alleles, one row per
+#' individual and a column per locus
+#' @param loci a data.frame or tibble, with compulsory columns 'name', 'chromosome',
+#' and 'position'
+#' @returns an object of the class `gen_tbl`.
+#' @examples
+#' ind_meta <- data.frame (id=c("a","b","c"),
+#' population = c("pop1","pop1","pop2"))
+#' genotypes <- rbind(c(1,1,0,1,1,0),
+#'                    c(2,1,1,0,0,0),
+#'                    c(2,2,0,0,1,1))
+#' loci <- data.frame(name=paste0("rs",1:6),
+#'                    chromosome=c(1,1,1,1,2,2),
+#'                    position=c(3,5,65,343,23,456),
+#'                    allele_ref = c("a","t","c","g","c","t"),
+#'                    allele_alt = c("t","c", NA,"c","g","a"))
+#' test_gen <- gen_tibble(ind_meta, genotypes, loci)
+#' test_gen
+#' @import adegenet
+#' @export
+
+gen_tibble <- function(ind_meta, genotypes, loci){
+  # TODO check object types
+  if (!all(c("id", "population") %in% names(ind_meta))){
+    stop("ind_meta does not include the compulsory columns 'id' and 'population")
+  }
+  if (!"ploidy" %in% names(ind_meta)){
+    ind_meta$ploidy <- rep(2, nrow(ind_meta))
+  }
+  if (!all(c('name', 'chromosome', 'position','allele_ref','allele_alt') %in% names(loci))){
+    stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','allele_ref','allele_alt'")
+  }
+  ind_meta <- as.list(ind_meta)
+
+  ind_meta$genotypes <- lapply(1:nrow(genotypes), function(i) methods::new("SNPbin", as.integer(genotypes[i,]),ploidy=ind_meta$ploidy[i]) )
+  ind_meta$ploidy <- unlist(lapply(ind_meta$genotypes, adegenet::ploidy))
+
+  tibble::new_tibble(
+    ind_meta,
+    loci = tibble::as_tibble(loci),
+    class = "gen_tbl"
+  )
+}

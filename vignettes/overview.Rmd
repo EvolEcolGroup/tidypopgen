@@ -1,0 +1,90 @@
+---
+title: "overview"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## tidy data in population genetics
+
+The fundamental tenet of tidy data that is that each observation should have its
+own row and each variable its own column, such that each value has its own cell.
+Applying this logic to population genetic data means that each individual should
+have its own row, with individual metadata (such as its population, sex, phenotype, etc)
+as the variables. Genotypes for each locus can also be thought as variables, however, due
+to the large number of loci and the restricted values that each genotype can take, it would
+be very inefficient to store them as individual standard columns. 
+
+In `tidypopgen`, we represent data as a `gen_tbl`, a subclass of `tibble` which has
+four compulsory columns: `id` of the individual (as a `character`, which must 
+be unique for each individual), `population` giving the population the 
+individuals belong to (a `factor`), `ploidy` giving the ploidy of the individual, and `genotypes` (
+using `SNPBin` to provide a compressed representation of all the genotypes, which
+can be decompressed as needed). In order to define the loci stored in the `SNPBin` objects,
+we also require an additional tibble stored as the attribute `loci` to the main `gen_tbl`. 
+The `loci` tibble includes columns
+`name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (`a factor`, if known, 
+otherwise set to `NA`), `position` for the position on the chromosome (`numeric`, if known, 
+otherwise set to `NA`), `allele_ref` for the the reference allele (a character),
+and `allele_alt` for the alternate allele (a character, which can be `NA` for
+monomorphic loci). Additional individual metadata can be stored as columns in
+the main `gen_tbl`, whilst additional loci information (such as the position in 
+centimorgans) can be added as columns in the `loci` attribute table.
+
+# The grammar of population genetics
+
+Given information about the individuals, their genotypes, and the loci:
+```{r}
+ind_meta <- data.frame (id=c("a","b","c"),
+                       population = c("pop1","pop1","pop2"))
+genotypes <- rbind(c(1,1,0,1,1,0), 
+                   c(2,1,1,0,0,0), 
+                   c(2,2,0,0,1,1))
+loci <- data.frame(name=paste0("rs",1:6),
+                   chromosome=c(1,1,1,1,2,2),
+                   position=c(3,5,65,343,23,456),
+                   allele_ref = c("a","t","c","g","c","t"),
+                   allele_alt = c("t","c", NA,"c","g","a"))
+```
+
+We can create a simple `gen_tbl` object with
+```{r}
+library(tidypopgen)
+test_gen <- gen_tibble(ind_meta, genotypes, loci)
+test_gen
+```
+We can then inspect the information about the loci with
+```{r}
+test_gen %>% show_loci()
+```
+And retrieve the genotypes with:
+```{r}
+test_gen %>% show_genotypes()
+```
+The individual metadata can then be processed with the usual `tidiverse` grammar.
+So, we can filter individuals by population with
+```{r}
+library(dplyr)
+test_pop1 <- test_gen %>% filter (population=="pop1")
+test_pop1
+```
+
+There are a number of functions that compute population genetics quantities for each
+individual, such as heterozygosity. We can compute them simply with:
+```{r}
+test_gen %>% heterozygosity()
+```
+```{r}
+test_gen <- test_gen %>% mutate(het = heterozygosity(test_gen))
+test_gen
+```
+
