@@ -6,20 +6,25 @@
 \alias{show_genotypes.list}
 \title{Show the genotypes of a \code{gen_tibble}}
 \usage{
-show_genotypes(.data, ...)
+show_genotypes(.x, ...)
 
-\method{show_genotypes}{gen_tbl}(.data, ...)
+\method{show_genotypes}{gen_tbl}(.x, .col, ...)
 
-\method{show_genotypes}{list}(.data, ...)
+\method{show_genotypes}{list}(.x, ...)
 }
 \arguments{
-\item{.data}{a \code{\link{gen_tibble}} object.}
+\item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
+a \code{\link{gen_tibble}} object),
+or a \code{\link{gen_tibble}}.}
 
-\item{...}{currently unused}
+\item{...}{currently unused.}
+
+\item{.col}{if \code{.x} is a \code{\link{gen_tibble}}, the column containing the genotypes
+(usually \code{genotypes})}
 }
 \value{
-a \code{\link[tibble:tibble]{tibble::tibble}} of information (see\code{\link{gen_tibble}} for details
-on compulsory columns that will always be present)
+a matrix of counts of the alternative alleles (see \code{\link[=show_loci]{show_loci()}}) to
+extract information on the alleles for those loci from a \code{\link{gen_tibble}}.
 }
 \description{
 Extract the genotypes (as a matrix) from a  \code{gen_tibble}.

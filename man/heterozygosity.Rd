@@ -6,19 +6,24 @@
 \alias{heterozygosity.list}
 \title{Estimate individual heterozygosity}
 \usage{
-heterozygosity(.data, ...)
+heterozygosity(.x, ...)
 
-\method{heterozygosity}{gen_tbl}(.data, ...)
+\method{heterozygosity}{gen_tbl}(.x, .col, ...)
 
-\method{heterozygosity}{list}(.data, ...)
+\method{heterozygosity}{list}(.x, ...)
 }
 \arguments{
-\item{.data}{a \code{\link{gen_tibble}} object.}
+\item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
+a \code{\link{gen_tibble}} object),
+or a \code{\link{gen_tibble}}.}
 
-\item{...}{currently unused}
+\item{...}{currently unused.}
+
+\item{.col}{if \code{.x} is a \code{\link{gen_tibble}}, the column containing the genotypes
+(usually \code{genotypes})}
 }
 \value{
-a vector of heterozygosities
+a vector of heterozygosities, one per individuals in the \code{\link{gen_tibble}}
 }
 \description{
 Estimate heterozygosity for each individual.

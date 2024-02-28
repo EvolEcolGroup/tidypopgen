@@ -1,33 +1,35 @@
 #' Show the genotypes of a `gen_tibble`
 #'
 #' Extract the genotypes (as a matrix) from a  `gen_tibble`.
-#' @param .data a [`gen_tibble`] object.
-#' @param ... currently unused
-#' @returns a [`tibble::tibble`] of information (see[`gen_tibble`] for details
-#' on compulsory columns that will always be present)
+#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' a [`gen_tibble`] object),
+#' or a [`gen_tibble`].
+#' @param ... currently unused.
+#' @returns a matrix of counts of the alternative alleles (see [show_loci()]) to
+#' extract information on the alleles for those loci from a [`gen_tibble`].
 #' @rdname show_genotypes
 #' @export
-show_genotypes <- function(.data, ...) {
-  UseMethod("show_genotypes", .data)
+show_genotypes <- function(.x, ...) {
+  UseMethod("show_genotypes", .x)
+}
+
+#' @param .col if `.x` is a [`gen_tibble`], the column containing the genotypes
+#' (usually `genotypes`)
+#' @export
+#' @rdname show_genotypes
+show_genotypes.gen_tbl <- function(.x, .col, ...){
+  # extract the column and hand it over to its method
+  show_genotypes.list(.x[[rlang::ensym(.col)]])
 }
 
 #' @export
 #' @rdname show_genotypes
-show_genotypes.gen_tbl <- function(.data, ...){
-  res <- unlist(lapply(.data$genotypes, as.integer))
-  res <- matrix(res, ncol=nrow(attr(.data,"loci")), nrow = nrow(.data), byrow=TRUE)
-  colnames(res) <- attr(.data,"loci")$name
-  rownames(res) <- .data$id
-  res
-}
-
-#' @export
-#' @rdname show_genotypes
-show_genotypes.list <- function(.data, ...){
-  if (!inherits(.data[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
+show_genotypes.list <- function(.x, ...){
+  if (!inherits(.x[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
     stop("x is not a list of SNPbin objects")
   }
-  res <- unlist(lapply(.data, as.integer))
-  res <- matrix(res, nrow = length(.data), byrow=TRUE)
+  res <- unlist(lapply(.x, as.integer))
+  res <- matrix(res, ncol=nrow(attr(.x,"loci")), nrow = length(.x), byrow=TRUE)
+  colnames(res) <- attr(.x,"loci")$name
   res
 }

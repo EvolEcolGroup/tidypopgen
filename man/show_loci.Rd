@@ -3,16 +3,24 @@
 \name{show_loci}
 \alias{show_loci}
 \alias{show_loci.gen_tbl}
+\alias{show_loci.list}
 \title{Show the loci information of a \code{gen_tibble}}
 \usage{
-show_loci(.data, ...)
+show_loci(.x, ...)
 
-\method{show_loci}{gen_tbl}(.data, ...)
+\method{show_loci}{gen_tbl}(.x, .col, ...)
+
+\method{show_loci}{list}(.x, ...)
 }
 \arguments{
-\item{.data}{a \code{\link{gen_tibble}} object.}
+\item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
+a \code{\link{gen_tibble}} object),
+or a \code{\link{gen_tibble}}.}
 
-\item{...}{currently unused}
+\item{...}{currently unused.}
+
+\item{.col}{if \code{.x} is a \code{\link{gen_tibble}}, the column containing the genotypes
+(usually \code{genotypes})}
 }
 \value{
 a \code{\link[tibble:tibble]{tibble::tibble}} of information (see\code{\link{gen_tibble}} for details

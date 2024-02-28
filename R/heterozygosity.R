@@ -2,28 +2,32 @@
 #'
 #' Estimate heterozygosity for each individual.
 #'
-#' @param .data a [`gen_tibble`] object.
-#' @param ... currently unused
-#' @returns a vector of heterozygosities
+#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' a [`gen_tibble`] object),
+#' or a [`gen_tibble`].
+#' @param ... currently unused.
+#' @returns a vector of heterozygosities, one per individuals in the [`gen_tibble`]
 #' @rdname heterozygosity
 #' @export
-heterozygosity <- function(.data, ...) {
-  UseMethod("heterozygosity", .data)
+heterozygosity <- function(.x, ...) {
+  UseMethod("heterozygosity", .x)
+}
+
+#' @param .col if `.x` is a [`gen_tibble`], the column containing the genotypes
+#' (usually `genotypes`)
+#' @export
+#' @rdname heterozygosity
+heterozygosity.gen_tbl <- function(.x, .col, ...){
+  # extract the column and hand it over to its method
+  heterozygosity(.x[[rlang::ensym(.col)]], ...)
 }
 
 #' @export
 #' @rdname heterozygosity
-heterozygosity.gen_tbl <- function(.data, ...){
-  ## TODO we should implement loci means directly on the SNPbin objects
-  rowMeans(show_genotypes(.data) == 1, na.rm = TRUE)
-}
-
-#' @export
-#' @rdname heterozygosity
-heterozygosity.list <- function(.data, ...){
-  if (!inherits(.data[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
-    stop(".data is not a list of SNPbin objects")
+heterozygosity.list <- function(.x, ...){
+  if (!inherits(.x[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
+    stop(".x is not a list of SNPbin objects")
   }
   ## TODO we should implement loci means directly on the SNPbin objects
-  rowMeans(show_genotypes(.data) == 1, na.rm = TRUE)
+  rowMeans(show_genotypes(.x) == 1, na.rm = TRUE)
 }

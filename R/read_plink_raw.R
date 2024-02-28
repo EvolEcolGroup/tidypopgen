@@ -8,8 +8,8 @@
 #' with the extension ".raw"
 #' @param map_file character string indicating the path to a ".map" file,
 #' which contains information about the SNPs (chromosome, position).
-#' @param quiet logical stating whether a conversion messages should be printed
-#'  (TRUE) or not (FALSE, default).
+#' @param quiet logical stating whether conversion messages should be printed
+#'  (TRUE, default) or not (FALSE).
 #' @param chunk_size an integer indicating the number of genomes to be read at a time;
 #' larger values require more RAM but decrease the time needed to read the data.
 #' @param parallel a logical indicating whether multiple cores -if available-
@@ -131,7 +131,6 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
 
   ind_meta_list
 
- # ind_meta <- tibble::as_tibble(ind_meta_list)
   names(ind_meta_list) <- c("population","id","pat","mat","sex","phenotype")
   ind_meta_list <- ind_meta_list[c("id","population","sex","pat","mat","phenotype")]
   # recode some of these values

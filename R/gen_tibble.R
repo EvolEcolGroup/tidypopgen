@@ -11,19 +11,20 @@
 #' and 'position'
 #' @returns an object of the class `gen_tbl`.
 #' @examples
-#' ind_meta <- data.frame (id=c("a","b","c"),
-#' population = c("pop1","pop1","pop2"))
-#' genotypes <- rbind(c(1,1,0,1,1,0),
-#'                    c(2,1,1,0,0,0),
-#'                    c(2,2,0,0,1,1))
-#' loci <- data.frame(name=paste0("rs",1:6),
-#'                    chromosome=c(1,1,1,1,2,2),
-#'                    position=c(3,5,65,343,23,456),
-#'                    allele_ref = c("a","t","c","g","c","t"),
-#'                    allele_alt = c("t","c", NA,"c","g","a"))
-#' test_gen <- gen_tibble(ind_meta, genotypes, loci)
+#' test_ind_meta <- data.frame (id=c("a","b","c"),
+#'                              population = c("pop1","pop1","pop2"))
+#' test_genotypes <- rbind(c(1,1,0,1,1,0),
+#'                         c(2,1,0,0,0,0),
+#'                         c(2,2,0,0,1,1))
+#' test_loci <- data.frame(name=paste0("rs",1:6),
+#'                         chromosome=c(1,1,1,1,2,2),
+#'                         position=c(3,5,65,343,23,456),
+#'                         allele_ref = c("a","t","c","g","c","t"),
+#'                         allele_alt = c("t","c", NA,"c","g","a"))
+#' test_gen <- gen_tibble(ind_meta = test_ind_meta,
+#'                        genotypes = test_genotypes,
+#'                        loci = test_loci)
 #' test_gen
-#' @import adegenet
 #' @export
 
 gen_tibble <- function(ind_meta, genotypes, loci){
@@ -40,7 +41,9 @@ gen_tibble <- function(ind_meta, genotypes, loci){
   ind_meta <- as.list(ind_meta)
 
   ind_meta$genotypes <- lapply(1:nrow(genotypes), function(i) methods::new("SNPbin", as.integer(genotypes[i,]),ploidy=ind_meta$ploidy[i]) )
-  ind_meta$ploidy <- unlist(lapply(ind_meta$genotypes, adegenet::ploidy))
+  #ind_meta$ploidy <- unlist(lapply(ind_meta$genotypes, adegenet::ploidy))
+  attr(ind_meta$genotypes,"loci")<-tibble::as_tibble(loci)
+
 
   tibble::new_tibble(
     ind_meta,
