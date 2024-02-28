@@ -85,15 +85,23 @@ test_pop1
 ```
 
 There are a number of functions that compute population genetics quantities for each
-individual, such as heterozygosity. We can compute them simply with:
+individual, such as individual observed heterozygosity. We can compute them simply with:
 ```{r}
-test_gen %>% heterozygosity(genotypes)
+test_gen %>% ind_H_obs(genotypes)
 ```
 
-We can then simply add a column with:
+We can use `mutate` to add observed heterozygosity as a column to our `gen_tibble`:
 ```{r}
-test_gen <- test_gen %>% mutate(het = heterozygosity(genotypes))
+test_gen <- test_gen %>% mutate(het_obs = ind_H_obs(genotypes))
 test_gen
+```
+
+
+We can group our `gen_tibble` by population and count the number of individuals 
+per population, as well as their mean heterozygosity:
+```{r}
+test_gen %>% group_by(population) %>% summarise(n= n(), mean_het = mean(het_obs))
+
 ```
 
 # Reading data

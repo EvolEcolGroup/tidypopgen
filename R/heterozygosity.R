@@ -1,4 +1,4 @@
-#' Estimate individual heterozygosity
+#' Estimate individual observed heterozygosity
 #'
 #' Estimate heterozygosity for each individual.
 #'
@@ -7,24 +7,24 @@
 #' or a [`gen_tibble`].
 #' @param ... currently unused.
 #' @returns a vector of heterozygosities, one per individuals in the [`gen_tibble`]
-#' @rdname heterozygosity
+#' @rdname ind_H_obs
 #' @export
-heterozygosity <- function(.x, ...) {
-  UseMethod("heterozygosity", .x)
+ind_H_obs <- function(.x, ...) {
+  UseMethod("ind_H_obs", .x)
 }
 
 #' @param .col if `.x` is a [`gen_tibble`], the column containing the genotypes
 #' (usually `genotypes`)
 #' @export
-#' @rdname heterozygosity
-heterozygosity.gen_tbl <- function(.x, .col, ...){
+#' @rdname ind_H_obs
+ind_H_obs.gen_tbl <- function(.x, .col, ...){
   # extract the column and hand it over to its method
-  heterozygosity(.x[[rlang::ensym(.col)]], ...)
+  ind_H_obs(.x[[rlang::ensym(.col)]], ...)
 }
 
 #' @export
-#' @rdname heterozygosity
-heterozygosity.list <- function(.x, ...){
+#' @rdname ind_H_obs
+ind_H_obs.list <- function(.x, ...){
   if (!inherits(.x[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
     stop(".x is not a list of SNPbin objects")
   }
