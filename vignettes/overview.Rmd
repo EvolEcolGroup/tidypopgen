@@ -100,8 +100,7 @@ test_gen
 We can group our `gen_tibble` by population and count the number of individuals 
 per population, as well as their mean heterozygosity:
 ```{r}
-test_gen %>% group_by(population) %>% summarise(n= n(), mean_het = mean(het_obs))
-
+test_gen %>% group_by(population) %>% summarise(n= n(), mean_het = mean(ind_H_obs(genotypes)))
 ```
 
 # Reading data
