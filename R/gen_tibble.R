@@ -3,12 +3,13 @@
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
 #' @param ind_meta a list, data.frame or tibble with compulsory columns 'id'
-#' 'population', plus any additional metadata of interest. If 'ploidy' is not
-#' specified, diploids are assumed.
+#' 'population', plus any additional metadata of interest.
 #' @param genotypes a matrix of counts of alternative alleles, one row per
 #' individual and a column per locus
 #' @param loci a data.frame or tibble, with compulsory columns 'name', 'chromosome',
 #' and 'position'
+#' @param ploidy a vector giving the ploidy of each individual. If 'ploidy' is not
+#' specified, diploids are assumed.
 #' @returns an object of the class `gen_tbl`.
 #' @examples
 #' test_ind_meta <- data.frame (id=c("a","b","c"),
@@ -27,13 +28,13 @@
 #' test_gen
 #' @export
 
-gen_tibble <- function(ind_meta, genotypes, loci){
+gen_tibble <- function(ind_meta, genotypes, loci, ploidy=NULL){
   # TODO check object types
   if (!all(c("id", "population") %in% names(ind_meta))){
     stop("ind_meta does not include the compulsory columns 'id' and 'population")
   }
-  if (!"ploidy" %in% names(ind_meta)){
-    ind_meta$ploidy <- rep(2, nrow(ind_meta))
+  if (is.null(ploidy)){
+    ploidy <- rep(2, nrow(ind_meta))
   }
   if (!all(c('name', 'chromosome', 'position','allele_ref','allele_alt') %in% names(loci))){
     stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','allele_ref','allele_alt'")
@@ -43,7 +44,7 @@ gen_tibble <- function(ind_meta, genotypes, loci){
   ind_meta$genotypes <- lapply(1:nrow(genotypes), function(i) methods::new("SNPbin", as.integer(genotypes[i,]),ploidy=ind_meta$ploidy[i]) )
   #ind_meta$ploidy <- unlist(lapply(ind_meta$genotypes, adegenet::ploidy))
   attr(ind_meta$genotypes,"loci")<-tibble::as_tibble(loci)
-
+  attr(ind_meta$genotypes,"ploidy")<-ploidy
 
   tibble::new_tibble(
     ind_meta,

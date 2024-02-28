@@ -4,18 +4,20 @@
 \alias{gen_tibble}
 \title{Constructor for a \code{gen_tibble}}
 \usage{
-gen_tibble(ind_meta, genotypes, loci)
+gen_tibble(ind_meta, genotypes, loci, ploidy = NULL)
 }
 \arguments{
 \item{ind_meta}{a list, data.frame or tibble with compulsory columns 'id'
-'population', plus any additional metadata of interest. If 'ploidy' is not
-specified, diploids are assumed.}
+'population', plus any additional metadata of interest.}
 
 \item{genotypes}{a matrix of counts of alternative alleles, one row per
 individual and a column per locus}
 
 \item{loci}{a data.frame or tibble, with compulsory columns 'name', 'chromosome',
 and 'position'}
+
+\item{ploidy}{a vector giving the ploidy of each individual. If 'ploidy' is not
+specified, diploids are assumed.}
 }
 \value{
 an object of the class \code{gen_tbl}.

@@ -34,12 +34,12 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
   ext <- adegenet::.readExt(file)
   ext <- toupper(ext)
   if(ext != "RAW") warning("wrong file extension - '.raw' expected")
-  if(!quiet) cat("\n Reading PLINK raw format into a gen_tibble... \n\n")
+  if(!quiet) cat("Reading PLINK raw format into a gen_tibble... \n\n")
   if(parallel && is.null(n.cores)){
     n.cores <- parallel::detectCores()
   }
 
-  if(!quiet) cat("\n Reading loci information... \n")
+  if(!quiet) cat("Reading loci information... \n")
   col_names <- scan(file,what="character",sep=" ",quiet=TRUE,  nlines=1, blank.lines.skip=FALSE)
   ind_meta_list <- lapply(1:6,function(i) NULL)
   names(ind_meta_list) <- col_names[1:6]
@@ -74,7 +74,7 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
 
 
 
-  if(!quiet) cat("\n Reading and converting genotypes... \n")
+  if(!quiet) cat("Reading and converting genotypes... \n")
 
   res <- list() # this will be a list of SNPbin objects
 
@@ -127,10 +127,7 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
   }
 
 
-  if(!quiet) cat("\n Reading individual metadata... \n")
-
-  ind_meta_list
-
+  if(!quiet) cat("Reading individual metadata... \n")
   names(ind_meta_list) <- c("population","id","pat","mat","sex","phenotype")
   ind_meta_list <- ind_meta_list[c("id","population","sex","pat","mat","phenotype")]
   # recode some of these values
@@ -154,8 +151,7 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
   )
   ind_meta_list$genotypes <- res
 
-  if(!quiet) cat("\n Building final object... \n")
-
+  if(!quiet) cat("Building final object... \n")
   res <- tibble::new_tibble(
     ind_meta_list,
     loci = loci,
@@ -163,9 +159,7 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
   )
 
 
-  ## RETURN OUTPUT ##
-  if(!quiet) cat("\n...done.\n\n")
-
+  if(!quiet) cat("...done.\n")
   return(res)
-} # end read_plink_raw
+}
 

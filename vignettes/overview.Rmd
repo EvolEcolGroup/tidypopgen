@@ -27,10 +27,12 @@ be very inefficient to store them as individual standard columns.
 In `tidypopgen`, we represent data as a `gen_tbl`, a subclass of `tibble` which has
 four compulsory columns: `id` of the individual (as a `character`, which must 
 be unique for each individual), `population` giving the population the 
-individuals belong to (a `factor`), `ploidy` giving the ploidy of the individual, and `genotypes` (
+individuals belong to (a `factor`), and `genotypes` (
 using `SNPBin` to provide a compressed representation of all the genotypes, which
 can be decompressed as needed). In order to define the loci stored in the `SNPBin` objects,
-we also require an additional tibble stored as the attribute `loci` to the column `genotypes`. 
+we also require an additional tibble stored as the attribute `loci` to the column `genotypes`,
+and a vector defining the ploidy of each individual, stored as the attribute 
+`ploidy` to the column `genotypes`. 
 The `loci` tibble includes columns
 `name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (`a factor`, if known, 
 otherwise set to `NA`), `position` for the position on the chromosome (`numeric`, if known, 
@@ -76,6 +78,7 @@ we say:
 ```{r}
 test_gen %>% show_loci(genotypes)
 ```
+
 The individual metadata can then be processed with the usual `tidiverse` grammar.
 So, we can filter individuals by population with
 ```{r}
@@ -96,11 +99,15 @@ test_gen <- test_gen %>% mutate(het_obs = ind_H_obs(genotypes))
 test_gen
 ```
 
-
 We can group our `gen_tibble` by population and count the number of individuals 
 per population, as well as their mean heterozygosity:
 ```{r}
 test_gen %>% group_by(population) %>% summarise(n= n(), mean_het = mean(ind_H_obs(genotypes)))
+```
+
+We can get the frequency of the alternate alleles per population with:
+```{r}
+test_gen %>% group_by(population) %>% reframe(sums=genotypes_sum(genotypes))
 ```
 
 # Reading data
@@ -112,5 +119,4 @@ raw_path <- system.file("extdata/san.raw", package = "tidypopgen")
 map_path <- system.file("extdata/san.map", package = "tidypopgen")
 san_gen_tbl <- read_plink_raw(file = raw_path, map_file = map_path)
 san_gen_tbl
-
 ```
