@@ -28,6 +28,9 @@ ind_H_obs.list <- function(.x, ...){
   if (!inherits(.x[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
     stop(".x is not a list of SNPbin objects")
   }
-  ## TODO we should implement loci means directly on the SNPbin objects
-  rowMeans(show_genotypes(.x) == 1, na.rm = TRUE)
+  ## function to compute observed homozygosity in a SNPbin
+  h_obs <- function(this_snpbin){
+    mean(as.integer(this_snpbin)==1, na.rm = TRUE)
+  }
+  unlist(lapply(.x,h_obs))
 }

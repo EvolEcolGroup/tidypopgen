@@ -107,7 +107,7 @@ test_gen %>% group_by(population) %>% summarise(n= n(), mean_het = mean(ind_H_ob
 
 We can get the frequency of the alternate alleles per population with:
 ```{r}
-test_gen %>% group_by(population) %>% reframe(sums=genotypes_sum(genotypes))
+test_gen %>% group_by(population) %>% reframe(sums=.genotypes_sums(genotypes))
 ```
 
 # Reading data

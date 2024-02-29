@@ -8,7 +8,7 @@ gen_tibble(ind_meta, genotypes, loci, ploidy = NULL)
 }
 \arguments{
 \item{ind_meta}{a list, data.frame or tibble with compulsory columns 'id'
-'population', plus any additional metadata of interest.}
+and 'population', plus any additional metadata of interest.}
 
 \item{genotypes}{a matrix of counts of alternative alleles, one row per
 individual and a column per locus}
