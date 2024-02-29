@@ -13,18 +13,18 @@ show_genotypes <- function(.x, ...) {
   UseMethod("show_genotypes", .x)
 }
 
-#' @param .col if `.x` is a [`gen_tibble`], the column containing the genotypes
-#' (usually `genotypes`)
 #' @export
 #' @rdname show_genotypes
-show_genotypes.gen_tbl <- function(.x, .col, ...){
+show_genotypes.gen_tbl <- function(.x, ...){
   # extract the column and hand it over to its method
-  show_genotypes.list(.x[[rlang::ensym(.col)]])
+  #show_genotypes.list(.x[[rlang::ensym(.col)]])
+  show_genotypes(.x$genotypes)
 }
 
 #' @export
 #' @rdname show_genotypes
 show_genotypes.list <- function(.x, ...){
+  rlang::check_dots_empty()
   if (!inherits(.x[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
     stop("x is not a list of SNPbin objects")
   }

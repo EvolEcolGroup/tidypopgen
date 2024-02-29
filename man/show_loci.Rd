@@ -8,7 +8,7 @@
 \usage{
 show_loci(.x, ...)
 
-\method{show_loci}{gen_tbl}(.x, .col, ...)
+\method{show_loci}{gen_tbl}(.x, ...)
 
 \method{show_loci}{list}(.x, ...)
 }
@@ -18,9 +18,6 @@ a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
 \item{...}{currently unused.}
-
-\item{.col}{if \code{.x} is a \code{\link{gen_tibble}}, the column containing the genotypes
-(usually \code{genotypes})}
 }
 \value{
 a \code{\link[tibble:tibble]{tibble::tibble}} of information (see\code{\link{gen_tibble}} for details

@@ -18,13 +18,11 @@ a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
 \item{...}{currently unused.}
-
-\item{.col}{if \code{.x} is a \code{\link{gen_tibble}}, the column containing the genotypes
-(usually \code{genotypes})}
 }
 \value{
 a vector of heterozygosities, one per individuals in the \code{\link{gen_tibble}}
 }
 \description{
-Estimate heterozygosity for each individual.
+Estimate observed heterozygosity (H_obs) for each individual (i.e. the frequency of
+loci that are heterozygous in an individual).
 }

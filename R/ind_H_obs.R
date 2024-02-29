@@ -1,6 +1,7 @@
 #' Estimate individual observed heterozygosity
 #'
-#' Estimate heterozygosity for each individual.
+#' Estimate observed heterozygosity (H_obs) for each individual (i.e. the frequency of
+#' loci that are heterozygous in an individual).
 #'
 #' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
 #' a [`gen_tibble`] object),
@@ -13,18 +14,17 @@ ind_H_obs <- function(.x, ...) {
   UseMethod("ind_H_obs", .x)
 }
 
-#' @param .col if `.x` is a [`gen_tibble`], the column containing the genotypes
-#' (usually `genotypes`)
 #' @export
 #' @rdname ind_H_obs
 ind_H_obs.gen_tbl <- function(.x, .col, ...){
   # extract the column and hand it over to its method
-  ind_H_obs(.x[[rlang::ensym(.col)]], ...)
+  ind_H_obs(.x$genotypes, ...)
 }
 
 #' @export
 #' @rdname ind_H_obs
 ind_H_obs.list <- function(.x, ...){
+  rlang::check_dots_empty()
   if (!inherits(.x[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
     stop(".x is not a list of SNPbin objects")
   }

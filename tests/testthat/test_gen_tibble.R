@@ -13,17 +13,17 @@ testthat::test_that("gen_tibble stores data correctly",{
   test_gen <- gen_tibble(test_ind_meta, test_genotypes, test_loci)
   expect_true(inherits(test_gen,"gen_tbl"))
   # we can extract the genotypes correctly
-  extracted_genotypes <- test_gen %>% show_genotypes(genotypes)
+  extracted_genotypes <- test_gen %>% show_genotypes()
   expect_true(all(extracted_genotypes==test_genotypes))
   # extract them from the list directly
   expect_true(all(show_genotypes(test_gen$genotypes)==test_genotypes))
   # we can extract the loci correctly
-  extracted_loci <- test_gen %>% show_loci(genotypes)
+  extracted_loci <- test_gen %>% show_loci()
   expect_identical(extracted_loci, as_tibble(test_loci))
   expect_identical( show_loci(test_gen$genotypes), as_tibble(test_loci))
   # check ploidy (it should be diploid by default)
   # not that ploidy is stored as integers
-  extracted_ploidy <- test_gen %>% show_ploidy(genotypes)
+  extracted_ploidy <- test_gen %>% show_ploidy()
   expect_identical(extracted_ploidy, as.integer(rep(2,nrow(test_ind_meta))))
   expect_identical(show_ploidy(test_gen$genotypes),as.integer(rep(2,nrow(test_ind_meta))))
 

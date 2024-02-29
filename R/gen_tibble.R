@@ -47,7 +47,6 @@ gen_tibble <- function(ind_meta, genotypes, loci, ploidy=NULL){
 
   tibble::new_tibble(
     ind_meta,
-    loci = tibble::as_tibble(loci),
     class = "gen_tbl"
   )
 }

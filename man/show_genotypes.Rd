@@ -8,7 +8,7 @@
 \usage{
 show_genotypes(.x, ...)
 
-\method{show_genotypes}{gen_tbl}(.x, .col, ...)
+\method{show_genotypes}{gen_tbl}(.x, ...)
 
 \method{show_genotypes}{list}(.x, ...)
 }
@@ -18,9 +18,6 @@ a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
 \item{...}{currently unused.}
-
-\item{.col}{if \code{.x} is a \code{\link{gen_tibble}}, the column containing the genotypes
-(usually \code{genotypes})}
 }
 \value{
 a matrix of counts of the alternative alleles (see \code{\link[=show_loci]{show_loci()}}) to

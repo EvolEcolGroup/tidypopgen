@@ -13,17 +13,17 @@ show_loci <- function(.x, ...) {
   UseMethod("show_loci", .x)
 }
 
-#' @param .col if `.x` is a [`gen_tibble`], the column containing the genotypes
-#' (usually `genotypes`)
 #' @export
 #' @rdname show_loci
-show_loci.gen_tbl <- function(.x, .col, ...){
+show_loci.gen_tbl <- function(.x, ...){
   # extract the column and hand it over to its method
-  show_loci.list(.x[[rlang::ensym(.col)]], ...)
+  #show_loci.list(.x[[rlang::ensym(.col)]], ...)
+  show_loci(.x$genotypes)
 }
 
 #' @export
 #' @rdname show_loci
 show_loci.list <- function(.x, ...){
+  rlang::check_dots_empty()
   attr(.x,"loci")
 }

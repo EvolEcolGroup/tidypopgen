@@ -40,15 +40,17 @@ monomorphic loci). Additional individual metadata can be stored as columns in
 the main `gen_tbl`, whilst additional loci information (such as the position in 
 centimorgans) can be added as columns in the `loci` attribute table.
 
-# The grammar of population genetics
+## The grammar of population genetics
+
+### The `gen_tibble`
 
 Given information about the individuals, their genotypes, and the loci:
 ```{r}
 test_ind_meta <- data.frame (id=c("a","b","c"),
                        population = c("pop1","pop1","pop2"))
-test_genotypes <- rbind(c(1,1,0,1,1,0), 
-                   c(2,1,0,0,0,0), 
-                   c(2,2,0,0,1,1))
+test_genotypes <- rbind(c(1, 1, 0, 1, 1, 0), 
+                        c(2, 0, 0, 0,NA, 0), 
+                        c(1, 2, 0, 0, 1, 1))
 test_loci <- data.frame(name=paste0("rs",1:6),
                    chromosome=c(1,1,1,1,2,2),
                    position=c(3,5,65,343,23,456),
@@ -56,31 +58,52 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                    allele_alt = c("t","c", NA,"c","g","a"))
 ```
 
-We can create a simple `gen_tbl` object with
+We can create a simple `gen_tibble` object (of class `gen_tbl`) with
 ```{r}
 library(tidypopgen)
 test_gen <- gen_tibble(test_ind_meta, test_genotypes, test_loci)
 test_gen
 ```
-Note that, since ploidy was not defined, it defaulted to 2. For different ploidy,
-just provide a 'ploidy' column in `ind_meta`.
+As discussed above, in this tibble, genotypes are stored as a list of 
+compressed `SNPbin` objects.
+
+Note that, since ploidy was not defined, it defaulted to 2:
+```{r}
+test_gen %>% show_ploidy()
+```
+For different ploidy, just provide a vector of values to the parameter `ploidy`
+in `gen_tibble`.
+
+Note that, if we are passing a `gen_tibble` to a function that works on
+genotypes, it is not necessary to pass the column `genotypes` in the call.
+However, if such a function is used within a `dplyr` verb such as `mutate`,
+we need to pass the `genotype` column to the function:
+
+```{r}
+test_gen %>% mutate (ploidy = show_ploidy(.data$genotypes))
+```
+Or, more simply:
+```{r}
+test_gen %>% mutate (ploidy = show_ploidy(genotypes))
+```
 
 To retrieve the genotypes (which are compressed), we use:
 ```{r}
-test_gen %>% show_genotypes(genotypes)
+test_gen %>% show_genotypes()
 ```
 
 If we want to extract the information about the loci for which we have genotypes
 (which are stored as an attribute of that column),
 we say:
 ```{r}
-test_gen %>% show_loci(genotypes)
+test_gen %>% show_loci()
 ```
+
+## Standard `dplyr` verbs to manipulate the tibble
 
 The individual metadata can then be processed with the usual `tidiverse` grammar.
 So, we can filter individuals by population with
 ```{r}
-library(dplyr)
 test_pop1 <- test_gen %>% filter (population=="pop1")
 test_pop1
 ```
@@ -88,10 +111,14 @@ test_pop1
 There are a number of functions that compute population genetics quantities for each
 individual, such as individual observed heterozygosity. We can compute them simply with:
 ```{r}
-test_gen %>% ind_H_obs(genotypes)
+test_gen %>% ind_H_obs()
 ```
 
-We can use `mutate` to add observed heterozygosity as a column to our `gen_tibble`:
+We can use `mutate` to add observed heterozygosity as a column to our
+`gen_tibble` (again, note that functions that work on genotypes don't need
+to be passed any arguments if the tibble is passed directly to them, but
+the column `genotypes` has to be provided when they are used within
+`dplyr` verbs such as `mutate`):
 ```{r}
 test_gen <- test_gen %>% mutate(het_obs = ind_H_obs(genotypes))
 test_gen
@@ -103,8 +130,31 @@ per population, as well as their mean heterozygosity:
 test_gen %>% group_by(population) %>% summarise(n= n(), mean_het = mean(ind_H_obs(genotypes)))
 ```
 
-We can get the frequency of the alternate alleles per population with:
+# Using verbs on loci
+
+Since the genotypes of the loci are stored as a compressed list in one column,
+it is not possible to use standard `dplyr` verbs on them. However, `tidypopgen` provides
+a number of specialised verbs, postfixed by `_loci`, to manipulate loci.
+
+For example, we might want to impose a minimum allele frequency for the alternate
+allele. We can quickly inspect the frequencies with: 
 ```{r}
+test_gen %>% loci_freq()
+```
+
+We can then select the desired alleles (e.g. with MAF>=0.2) with:
+```{r eval=FALSE}
+test_gen_sub <- test_gen %>% select_loci_if(loci_freq(genotypes)>0.2)
+crit <- c(FALSE, FALSE, TRUE, FALSE, TRUE, FALSE)
+test_gen_sub2 <- test_gen %>% select_loci_if(crit)
+
+#test_gen_sub %>% show_genotypes()
+
+
+```
+
+We can get the frequency of the alternate alleles per population with:
+```{r eval=FALSE}
 test_gen %>% group_by(population) %>% reframe(sums=.genotypes_sums(genotypes))
 ```
 
