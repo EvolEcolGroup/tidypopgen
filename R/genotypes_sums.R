@@ -1,6 +1,8 @@
 #' Sum of genotypes
 #'
-#' This function sums the number of alternate alleles in each SNP.
+#' This function sums the number of alternate alleles in each SNP. It is not
+#' meant to be used as a general summary, but it is used within other functions to
+#' compute intermediate quantities.
 #' When ploidy varies across individuals, the outputs of this function depend
 #' on whether the information units are individuals, or
 #' alleles within individuals (see details).
@@ -23,7 +25,7 @@
 #' to allele_as_units = FALSE.
 #'
 #' Note that when all individuals have the same ploidy, this distinction
-#' becomes pointless.
+#' does not hold any more.
 #'
 #' This function is a modified version
 #' of [adegenet::glSum], recoded to work on lists of `SNPbin` objects as used
@@ -32,7 +34,7 @@
 #' by Andrea Manica for 'tidypopgen'
 #' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
 #' a [`gen_tibble`] object),
-#' @param alleles_as_unit a logical indicating whether alleles are considered
+#' @param alleles_as_units a logical indicating whether alleles are considered
 #' as units (i.e., a diploid genotype equals two samples, a triploid, three,
 #' etc.) or whether individuals are considered as units of information.
 #' @param use_c a logical indicating whether compiled C code should be used
@@ -41,7 +43,7 @@
 #' on compulsory columns that will always be present)
 #' @export
 
-genotypes_sum <- function (.x, alleles_as_unit=TRUE, use_c=FALSE){
+.genotypes_sums <- function (.x, alleles_as_units=TRUE, use_c=FALSE){
 
   nInd <- length(.x)
   nLoci <- nrow(attr(.x,"loci"))
@@ -53,7 +55,7 @@ genotypes_sum <- function (.x, alleles_as_unit=TRUE, use_c=FALSE){
       naPosi <- lapply(.x,adegenet::NA.posi)
       nbNa <- sapply(naPosi, length)
       naPosi <- unlist(naPosi)
-      if(alleles_as_unit){
+      if(alleles_as_units){
         ## use ploidy (sum absolute frequencies)
         res <- .C("GLsumInt", vecbyte, nbVec, length(.x[[1]]@snp[[1]]), nbNa, naPosi,
                 nInd, nLoci, ploidy,
@@ -66,7 +68,7 @@ genotypes_sum <- function (.x, alleles_as_unit=TRUE, use_c=FALSE){
       }
   } else {
     ## use ploidy (sum absolute frequencies)
-    if(alleles_as_unit){
+    if(alleles_as_units){
       res <- integer(nLoci)
       for(e in .x){
         temp <- as.integer(e)
