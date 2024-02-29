@@ -1,0 +1,9 @@
+LEA for clustering
+SNPRelate for LD pruning
+StAMPP for distances/Fst
+genio for reading/writing PLINK
+
+
+An excellent tutorial in R showing a full workflow with adegenet:
+https://tomjenkins.netlify.app/tutorials/r-popgen-getting-started/#contents
+

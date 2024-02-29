@@ -30,7 +30,7 @@
            use_c = FALSE) {
     nInd <- length(.x)
     nLoci <- nrow(attr(.x, "loci"))
-    ploidy <- attr(.x, "ploidy")
+    ploidy <- show_ploidy(.x)
 
     ## DEFAULT, VECTOR-WISE PROCEDURE ##
     res <- numeric(nLoci)

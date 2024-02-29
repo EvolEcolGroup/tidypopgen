@@ -30,9 +30,7 @@ be unique for each individual), `population` giving the population the
 individuals belong to (a `factor`), and `genotypes` (
 using `SNPBin` to provide a compressed representation of all the genotypes, which
 can be decompressed as needed). In order to define the loci stored in the `SNPBin` objects,
-we also require an additional tibble stored as the attribute `loci` to the column `genotypes`,
-and a vector defining the ploidy of each individual, stored as the attribute 
-`ploidy` to the column `genotypes`. 
+we also require an additional tibble stored as the attribute `loci` to the column `genotypes`. 
 The `loci` tibble includes columns
 `name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (`a factor`, if known, 
 otherwise set to `NA`), `position` for the position on the chromosome (`numeric`, if known, 

@@ -72,10 +72,10 @@
       lowerTriSize <- (nInd*(nInd-1))/2
       resSize <- lowerTriSize + nInd
 
-#      return(list(vecbyte, nbVec, length(.x[[1]]@snp[[1]]), nbNa, naPosi, nInd, nLoci, attr(.x,"ploidy"),
+#      return(list(vecbyte, nbVec, length(.x[[1]]@snp[[1]]), nbNa, naPosi, nInd, nLoci, show_ploidy(.x),
 #                  as.double(mu), as.double(s), as.integer(!alleles_as_units), double(resSize)))
       ## CALL C FUNCTION ##return
-      temp <- .C("GLdotProd", vecbyte, nbVec, length(.x[[1]]@snp[[1]]), nbNa, naPosi, nInd, nLoci, attr(.x,"ploidy"),
+      temp <- .C("GLdotProd", vecbyte, nbVec, length(.x[[1]]@snp[[1]]), nbNa, naPosi, nInd, nLoci, show_ploidy(.x),
                  as.double(mu), as.double(s), as.integer(!alleles_as_units), double(resSize), PACKAGE="adegenet")[[12]]
 #      return(temp)
     } else { # USE MULTIPLE CORES

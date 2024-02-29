@@ -1,18 +1,17 @@
-testthat::test_that(".genotypes_means computes correctly",{
+testthat::test_that(".genotypes_vars computes correctly",{
   test_ind_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
-  test_genotypes <- rbind(c(0,0,1,1,0, NA),
-                          c(1,1,1,0,0,1),
-                          c(0,0,0,1,1,1))
   test_loci <- data.frame(name=paste0("rs",1:6),
                           chromosome=c(1,1,1,1,2,2),
                           position=c(3,5,65,343,23,432),
                           allele_ref = c("a","t","g","c","t","a"),
                           allele_alt = c("t","c","c","g","a","g"))
-  test_gen <- gen_tibble(test_ind_meta, test_genotypes, test_loci)
 
   # tests adapted from adegenet
   # same ploidy everywhere
+  test_genotypes <- rbind(c(0,0,1,1,0, NA),
+                          c(1,1,1,0,0,1),
+                          c(0,0,0,1,1,1))
   test_gen <- gen_tibble(test_ind_meta, test_genotypes, test_loci,ploidy=c(1,1,1))
   f1 <- function(e) {return(mean((e-mean(e, na.rm=TRUE))^2, na.rm=TRUE))}
   expect_true(all.equal(.genotypes_vars(test_gen$genotypes),

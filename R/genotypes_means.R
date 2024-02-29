@@ -22,7 +22,7 @@
 
   ## DEFAULT, VECTOR-WISE PROCEDURE ##
   if(alleles_as_units){ # use alleles
-    ploidy <- attr(.x,"ploidy")
+    ploidy <- show_ploidy(.x)
     N <- sum(ploidy) - .genotypes_count_na(.x, alleles_as_units=TRUE)
   } else { # use relative frequencies of individuals
     nInd <- length(.x)

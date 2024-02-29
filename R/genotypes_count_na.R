@@ -25,7 +25,7 @@
 
   naPosi <- lapply(.x,adegenet::NA.posi)
   nLoci <- nrow(attr(.x,"loci"))
-  ploidy <- attr(.x,"ploidy")
+  ploidy <- show_ploidy(.x)
 
   ## DEFAULT, VECTOR-WISE PROCEDURE ##
   res <- integer(nLoci)

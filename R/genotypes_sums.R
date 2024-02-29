@@ -47,7 +47,7 @@
 
   nInd <- length(.x)
   nLoci <- nrow(attr(.x,"loci"))
-  ploidy <- attr(.x,"ploidy")
+  ploidy <- show_ploidy(.x)
 
   if(use_c){
       vecbyte <- unlist(lapply(.x, function(e) e$snp))

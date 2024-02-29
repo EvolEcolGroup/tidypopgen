@@ -40,11 +40,10 @@ gen_tibble <- function(ind_meta, genotypes, loci, ploidy=NULL){
     stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','allele_ref','allele_alt'")
   }
   ind_meta <- as.list(ind_meta)
-
-  ind_meta$genotypes <- lapply(1:nrow(genotypes), function(i) methods::new("SNPbin", as.integer(genotypes[i,]),ploidy=ind_meta$ploidy[i]) )
-  #ind_meta$ploidy <- unlist(lapply(ind_meta$genotypes, adegenet::ploidy))
+  #browser()
+  ind_meta$genotypes <- lapply(1:nrow(genotypes), function(i) methods::new("SNPbin",
+                                                                           as.integer(genotypes[i,]),ploidy=ploidy[i]) )
   attr(ind_meta$genotypes,"loci")<-tibble::as_tibble(loci)
-  attr(ind_meta$genotypes,"ploidy")<-as.integer(ploidy)
 
   tibble::new_tibble(
     ind_meta,

@@ -25,5 +25,5 @@ show_ploidy.gen_tbl <- function(.x, .col, ...){
 #' @export
 #' @rdname show_ploidy
 show_ploidy.list <- function(.x, ...){
-  attr(.x,"ploidy")
+  unlist(lapply(.x,adegenet::ploidy))
 }
