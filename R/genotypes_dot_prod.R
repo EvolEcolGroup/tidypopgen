@@ -14,19 +14,29 @@
 #' @author Thibaut Jombart for the original [adegenet::glDotProd], modified
 #' by Andrea Manica for 'tidypopgen'
 #' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
-#' a [`gen_tibble`] object),
+#' a [`gen_tibble`] object).
+#' @param center a logical indicating whether SNPs should be centred to mean zero.
+#' @param scale a logical indicating whether SNPs should be scaled to unit variance.
 #' @param alleles_as_units a logical indicating whether alleles are considered
 #' as units (i.e., a diploid genotype equals two samples, a triploid, three,
 #' etc.) or whether individuals are considered as units of information.
+#' @param parallel a logical indicating whether multiple cores -if
+#' available- should be used for the computations (TRUE, default), or
+#' not (FALSE); requires the package `parallel` to be installed
+#' (see details); this option cannot be used alongside use_c option
+#' @param n_cores if `parallel` is TRUE, the number of cores to
+#' be used in the computations; if NULL, then the maximum number of
+#' cores available on the computer is used.
+
 #' @returns a vector of counts of NAs
 #' @export
 
 
 .genotypes_dot_prod <- function(.x, center=FALSE, scale=FALSE, alleles_as_units=FALSE,
-                        parallel=FALSE, n.cores=NULL){
+                        parallel=FALSE, n_cores=NULL){
 
-    if(parallel && is.null(n.cores)){
-      n.cores <- parallel::detectCores()
+    if(parallel && is.null(n_cores)){
+      n_cores <- parallel::detectCores()
     }
 
 
@@ -71,7 +81,9 @@
     } else { # USE MULTIPLE CORES
       stop("this has not been implemented yet!")
       # @FIXME we need to implement something equivalent to seploc!!!!
-      .x <- seploc(.x, n.block = n.cores) # one block per core (x is now a list of genlight)
+      # I don't think this is efficient, as it creates a bit copy in memory
+      # we would be better off indexing the blocks
+      .x <- seploc(.x, n.block = n_cores) # one block per core (x is now a list of genlight)
       temp <- list()
       i <- 0
       for(block in .x){
@@ -121,8 +133,7 @@
     res <- as.matrix(res)
     diag(res) <- temp[(lowerTriSize+1):length(temp)]
 
-#    colnames(res) <- rownames(res) <- ind.names
     return(res)
-  } # end glDotProd
+  }
 
 

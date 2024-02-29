@@ -22,9 +22,10 @@ testthat::test_that("gen_tibble stores data correctly",{
   expect_identical(extracted_loci, as_tibble(test_loci))
   expect_identical( show_loci(test_gen$genotypes), as_tibble(test_loci))
   # check ploidy (it should be diploid by default)
+  # not that ploidy is stored as integers
   extracted_ploidy <- test_gen %>% show_ploidy(genotypes)
-  expect_identical(extracted_ploidy, rep(2,nrow(test_ind_meta)))
-  expect_identical(show_ploidy(test_gen$genotypes),rep(2,nrow(test_ind_meta)))
+  expect_identical(extracted_ploidy, as.integer(rep(2,nrow(test_ind_meta))))
+  expect_identical(show_ploidy(test_gen$genotypes),as.integer(rep(2,nrow(test_ind_meta))))
 
   # example of dropping the genotypes
   #test_gen %>% select(-genotypes)

@@ -13,6 +13,9 @@ a \code{\link{gen_tibble}} object),}
 \item{alleles_as_units}{a logical indicating whether alleles are considered
 as units (i.e., a diploid genotype equals two samples, a triploid, three,
 etc.) or whether individuals are considered as units of information.}
+
+\item{use_c}{a logical indicating whether compiled C code should be used
+(TRUE) or not (FALSE, default).}
 }
 \value{
 a vector of counts of NAs

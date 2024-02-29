@@ -10,16 +10,29 @@
   scale = FALSE,
   alleles_as_units = FALSE,
   parallel = FALSE,
-  n.cores = NULL
+  n_cores = NULL
 )
 }
 \arguments{
 \item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object),}
+a \code{\link{gen_tibble}} object).}
+
+\item{center}{a logical indicating whether SNPs should be centred to mean zero.}
+
+\item{scale}{a logical indicating whether SNPs should be scaled to unit variance.}
 
 \item{alleles_as_units}{a logical indicating whether alleles are considered
 as units (i.e., a diploid genotype equals two samples, a triploid, three,
 etc.) or whether individuals are considered as units of information.}
+
+\item{parallel}{a logical indicating whether multiple cores -if
+available- should be used for the computations (TRUE, default), or
+not (FALSE); requires the package \code{parallel} to be installed
+(see details); this option cannot be used alongside use_c option}
+
+\item{n_cores}{if \code{parallel} is TRUE, the number of cores to
+be used in the computations; if NULL, then the maximum number of
+cores available on the computer is used.}
 }
 \value{
 a vector of counts of NAs
