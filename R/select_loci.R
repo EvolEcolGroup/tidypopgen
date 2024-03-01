@@ -12,11 +12,15 @@
 #' @export
 #'
 select_loci <-function(.data, .sel_arg, .swap_arg = NULL, .swap_if_arg = NULL){
-  if (all(!is.null(.swap_arg),!is.null(.swap_if_arg))){
-    stop("only one of 'swap' or 'swap_if' can be used at any one time")
-  }
   # defuse the selection criteria
   sel_defused <- rlang::enquo(.sel_arg)
+  # defuse the swap criteria
+  swap_defused <- rlang::enquo(.swap_arg)
+  swap_if_defused <- rlang::enquo(.swap_if_arg)
+
+  if (all(!rlang::quo_is_null(swap_defused),!rlang::quo_is_null(swap_if_defused))){
+    stop("only one of 'swap' or 'swap_if' can be used at any one time")
+  }
   # create a named vector of all loci
   loci_names_vec <- stats::setNames(seq_len(nrow(show_loci(.data))),
                              nm = show_loci_names(.data))
@@ -24,8 +28,29 @@ select_loci <-function(.data, .sel_arg, .swap_arg = NULL, .swap_if_arg = NULL){
   loci_sel <- tidyselect::eval_select(expr=sel_defused, data = loci_names_vec)
   #extract the loci table
   loci_info <- attr(.data$genotypes,"loci")
+
   # subset the genotypes
-  .data$genotypes <- lapply(.data$genotypes, .SNPbin_subset, loci_sel)
+  if (all(rlang::quo_is_null(swap_defused),rlang::quo_is_null(swap_if_defused))){
+    .data$genotypes <- lapply(.data$genotypes, .SNPbin_subset, loci_sel)
+  } else{ # subset and swap genotypes (slower)
+
+    # if we also want to swap based on a select argument
+    if (!rlang::quo_is_null(swap_defused)){
+      loci_swap <- tidyselect::eval_select(expr=swap_defused, data = loci_names_vec)
+      # turn them into a boolean
+      #browser()
+    } else { # based on an if (boolean) argument
+      loci_swap <- rlang::eval_tidy(swap_if_defused,data=.data)
+    }
+    # swap alleles in the snpbin_list
+    .data$genotypes <- lapply(.data$genotypes, select_swap_snpbin,
+                              sel_indices = loci_sel,
+                              to_swap = loci_swap)
+    # swap alleles in table
+    old_ref <- loci_info[loci_swap,"allele_ref"]
+    loci_info[loci_swap,"allele_ref"] <- loci_info[loci_swap,"allele_alt"]
+    loci_info[loci_swap,"allele_alt"] <- old_ref
+  }
   # reintroduce the subsetted table
   attr(.data$genotypes,"loci") <- loci_info[loci_sel,]
   .data

@@ -24,4 +24,30 @@ testthat::test_that("select_loci subsets correctly",{
   # use 2:4 range expressions
   test_gen_sub <- test_gen %>% select_loci (2:4)
   expect_identical(test_loci$name[2:4], show_loci_names(test_gen_sub))
+
+  # now let's test some swapping
+  # don't swap anything (but we use a different function for repacking that can swap)
+  test_gen_sub <- test_gen %>% select_loci (c(3,1,5))
+  test_gen_sub1 <- test_gen %>% select_loci (c(3,1,5),
+                                             .swap_if_arg = rep(FALSE,6))
+  expect_identical(test_gen_sub, test_gen_sub1)
+  # swap the first SNP (which ends as the second)
+  test_gen_sub2 <- test_gen %>% select_loci (c(3,1,5),
+                                             .swap_if_arg = c(TRUE, rep(FALSE,5)))
+  expect_true(all.equal(show_genotypes(test_gen_sub2)[,2],
+                        c(1,0,0)))
+  all.equal(show_loci(test_gen)[1,4:5], show_loci(test_gen_sub2)[2,5:4],
+            check.attributes = FALSE)
+  # swap snps based on chromosome
+  test_gen_sub3 <- test_gen %>% select_loci (everything(),
+                                             .swap_if_arg = show_loci(test_gen)$chromosome==2)
+  expect_true(all.equal(show_genotypes(test_gen_sub3)[,5],
+                        c(1,2,1)))
+  all.equal(show_loci(test_gen)[5:6,4:5], show_loci(test_gen_sub3)[5:6,5:4],
+            check.attributes = FALSE)
+  # swap based on snp names (the "x" snps are the one on chromosome 2)
+  test_gen_sub4 <- test_gen %>% select_loci (everything(),
+                                             .swap_arg = starts_with("x"))
+  expect_identical(test_gen_sub3,test_gen_sub4)
+
 })

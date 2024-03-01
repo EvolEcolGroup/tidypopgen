@@ -188,8 +188,11 @@ We can now create a vector of indices of loci with a minimum allele frequency
 
 ```{r}
 sel_indices <- which((test_gen %>% loci_freq())>0.2)
-test_gen %>% select_loci (sel_indices) %>% show_loci()
+test_gen %>% select_loci (all_of(sel_indices)) %>% show_loci()
 ```
+
+Note that passing a variable direclty to `select` is deprecated, and so we have
+to use `all_of` to wrap it.
 
 `select_loci_if` allows us to avoid creating a temporary variable to store indices:
 
