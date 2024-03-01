@@ -20,7 +20,8 @@ Depends:
 Imports:
     magrittr,
     methods,
-    rlang
+    rlang,
+    tidyselect
 Suggests: 
     knitr,
     rmarkdown,

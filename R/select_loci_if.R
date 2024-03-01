@@ -12,17 +12,19 @@ select_loci_if <-function(.data, .sel_logical){
   # defuse the boolean argument
   sel_defused <- rlang::enquo(.sel_logical)
   # and now evaluate it, allowing it to see the data
-  .sel_logical <- rlang::eval_tidy(sel_defused,data=.data)
-  if (!inherits(.sel_logical,"logical")){
+  loci_sel <- rlang::eval_tidy(sel_defused,data=.data)
+  if (!inherits(loci_sel,"logical")){
     stop(".sel_logical should be a logical (boolean) vector")
   }
-  if (length(.sel_logical) != ncol(show_genotypes(.data$genotypes))){
+  if (length(loci_sel) != ncol(show_genotypes(.data$genotypes))){
     stop(".sel_logical should be the same length as the number of loci")
   }
-  #TODO we need to get the loci table and move it over
+  #extract the loci table
   loci_info <- attr(.data$genotypes,"loci")
-  .data$genotypes <- lapply(.data$genotypes, .SNPbin_subset, .sel_logical)
-  attr(.data$genotypes,"loci") <- loci_info[.sel_logical,]
+  # subset the genotypes
+  .data$genotypes <- lapply(.data$genotypes, .SNPbin_subset, loci_sel)
+  # reintroduce the subsetted table
+  attr(.data$genotypes,"loci") <- loci_info[loci_sel,]
   .data
 }
 

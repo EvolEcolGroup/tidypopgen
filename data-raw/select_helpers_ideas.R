@@ -11,6 +11,7 @@ names(my_data) <- c("rs123","rs143","rs67","ps4343","rs125")
 sub_sel (my_data, ends_with("3"))
 sub_sel (my_data, c(3,1,4))
 
+
 ## we could parse the defused FUN and eval_select only if it contains a selection
 ## helper
 ## or better select_loci_if

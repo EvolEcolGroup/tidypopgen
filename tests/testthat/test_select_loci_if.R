@@ -1,4 +1,4 @@
-testthat::test_that(".genotypes_means computes correctly",{
+testthat::test_that("select_loci_if subsets correctly",{
   test_ind_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,2),
