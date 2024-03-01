@@ -28,9 +28,10 @@ be very inefficient to store them as individual standard columns.
 In `tidypopgen`, we represent data as a `gen_tbl`, a subclass of `tibble` which has
 four compulsory columns: `id` of the individual (as a `character`, which must 
 be unique for each individual), `population` giving the population the 
-individuals belong to (a `factor`), and `genotypes` (
-using `SNPBin` to provide a compressed representation of all the genotypes, which
-can be decompressed as needed). In order to define the loci stored in the `SNPBin` objects,
+individuals belong to (a `factor`), and `genotypes` (stored in a compressed format
+as a list, one
+object per individual representing its genotypes for all loci). 
+In order to define the loci stored in the compressed objects in the `genotype` list,
 we also require an additional tibble stored as the attribute `loci` to the column `genotypes`. 
 The `loci` tibble includes columns
 `name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (`a factor`, if known, 
@@ -40,6 +41,13 @@ and `allele_alt` for the alternate allele (a character, which can be `NA` for
 monomorphic loci). Additional individual metadata can be stored as columns in
 the main `gen_tbl`, whilst additional loci information (such as the position in 
 centimorgans) can be added as columns in the `loci` attribute table.
+
+In principle, it is possible to use use multiple ways to compress the genotypes.
+`tidypopgen` currently uses `SNPBin` from the package `adegenet`. It is very
+memory efficient, and it is flexible in representing multiple ploidy. But the
+infrastructure is present to adopt alternative compression approaches in the future
+the only constraint is that the data have to be representable as a list of n elements
+where n is the number of individuals (i.e. one object per individual).
 
 ## The grammar of population genetics
 
