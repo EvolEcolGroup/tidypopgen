@@ -1,3 +1,4 @@
+#' @export
 select_loci_if <-function(.data, .sel_logical){
   # defuse the boolean argument
   sel_defused <- rlang::enquo(.sel_logical)
@@ -10,7 +11,9 @@ select_loci_if <-function(.data, .sel_logical){
     stop(".sel_logical should be the same length as the number of loci")
   }
   #TODO we need to get the loci table and move it over
+  loci_info <- attr(.data$genotypes,"loci")
   .data$genotypes <- lapply(.data$genotypes, .SNPbin_subset, .sel_logical)
+  attr(.data$genotypes,"loci") <- loci_info[.sel_logical,]
   .data
 }
 

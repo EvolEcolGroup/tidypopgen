@@ -20,7 +20,11 @@ loci_freq <- function(.x, ...) {
 #' (TRUE) or not (FALSE, default).
 #' @export
 #' @rdname loci_freq
-loci_freq.gen_tbl <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE) {
+loci_freq.tbl_df <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE) {
+  #TODO this is a hack to deal with the class being dropped when going through group_map
+  if (!"genotypes" %in% names(.x)){
+    stop(".x is not a gen_tbl object!")
+  }
   loci_freq(.x$genotypes, ..., minor = minor, alleles_as_units = alleles_as_units, use_c = use_c)
 }
 
@@ -31,7 +35,15 @@ loci_freq.list <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c
   rlang::check_dots_empty()
   freq <- .genotypes_means(.x, alleles_as_units = alleles_as_units, use_c = use_c)
   if (minor){
-    freq[freq>0.5] <- 1 - freq[freq>0.5]
+    # TODO this fails because freq can be NA!!!
+    freq[freq>0.5 & !is.na(freq)] <- 1 - freq[freq>0.5 & !is.na(freq)]
   }
   freq
 }
+
+#' @export
+#' @rdname loci_freq
+loci_freq.grouped_df <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE) {
+  group_map(.x, .f=~loci_freq(.x, minor = minor, alleles_as_units = alleles_as_units, use_c = use_c))
+}
+

@@ -1,7 +1,7 @@
 #' @export
 group_by.gen_tbl <- function(.data, ..., .add = FALSE, .drop = group_by_drop_default(.data)) {
   out <- NextMethod()
-  class(out) <- c("gen_grouped_df",class(out))
+  class(out) <- c("grouped_df", "gen_tbl", class(out)[-1])
   return(out)
 
 }

@@ -143,19 +143,14 @@ test_gen %>% loci_freq()
 ```
 
 We can then select the desired alleles (e.g. with MAF>=0.2) with:
-```{r eval=FALSE}
+```{r}
 test_gen_sub <- test_gen %>% select_loci_if(loci_freq(genotypes)>0.2)
-crit <- c(FALSE, FALSE, TRUE, FALSE, TRUE, FALSE)
-test_gen_sub2 <- test_gen %>% select_loci_if(crit)
-
-#test_gen_sub %>% show_genotypes()
-
-
+test_gen_sub %>% show_genotypes()
 ```
 
 We can get the frequency of the alternate alleles per population with:
-```{r eval=FALSE}
-test_gen %>% group_by(population) %>% reframe(sums=.genotypes_sums(genotypes))
+```{r}
+test_gen %>% group_by(population) %>% loci_freq()
 ```
 
 # Reading data

@@ -2,15 +2,18 @@
 % Please edit documentation in R/loci_freq.R
 \name{loci_freq}
 \alias{loci_freq}
-\alias{loci_freq.gen_tbl}
+\alias{loci_freq.tbl_df}
 \alias{loci_freq.list}
+\alias{loci_freq.grouped_df}
 \title{Estimate allele frequencies at each each locus}
 \usage{
 loci_freq(.x, ...)
 
-\method{loci_freq}{gen_tbl}(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE)
+\method{loci_freq}{tbl_df}(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE)
 
 \method{loci_freq}{list}(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE)
+
+\method{loci_freq}{grouped_df}(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE)
 }
 \arguments{
 \item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
