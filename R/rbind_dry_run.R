@@ -32,6 +32,7 @@
 rbind_dry_run <- function(ref, target, flip_strand = FALSE,
                           remove_ambiguous = FALSE, quiet = FALSE){
   # create a data.frame with loci names, numeric_id, and alleles
+  # it requires a specific formatting to work
   target_df <- target %>% show_loci()
   target_df <- target_df %>% mutate(id = seq_len(nrow(target_df)))
   ref_df <- ref %>% show_loci()
@@ -39,6 +40,7 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
   # replace NA with "m" for missing allele to avoid subsetting headaches
   ref_df$allele_alt[is.na(ref_df$allele_alt)]<-"m"
   target_df$allele_alt[is.na(target_df$allele_alt)]<-"m"
+  # rename the alleles
   ref_df <- ref_df %>% rename(allele_1 = allele_alt, allele_2 = allele_ref)
   target_df <- target_df %>% rename(allele_1 = allele_alt, allele_2 = allele_ref)
   #browser()

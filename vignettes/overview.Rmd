@@ -349,9 +349,13 @@ The report object contains details about why each locus was either kept
 or removed, but usually the report is sufficient to make decisions on whether
 we want to go ahead. If we are happy with the likely outcome, we can
 proceed with the `rbind`:
-```{r eval=FALSE}
-# THIS IS NOT FULLY IMPLEMENTED YET
-plink_gen_tbl <- rbind(plink_gen_tbl, plink_gen_tbl2)
+```{r}
+plink_gen_tbl_new <- rbind_gen_tbl(plink_gen_tbl, plink_gen_tbl2, flip_strand = TRUE,
+                        remove_ambiguous = TRUE)
 
 ```
 
+```{r}
+plink_gen_tbl_new %>% show_loci()
+
+```
