@@ -24,4 +24,28 @@ testthat::test_that("select_loci_if subsets correctly",{
   expect_identical(test_gen_sub,
                    test_gen %>% select_loci_if(criterion))
   #TODO test errors
+
+
+  # now let's test some swapping
+  # don't swap anything (but we use a different function for repacking that can swap)
+  test_gen_sub <- test_gen %>% select_loci_if (criterion)
+  test_gen_sub1 <- test_gen %>% select_loci_if (criterion,
+                                             .swap_if_arg = rep(FALSE,6))
+  expect_identical(test_gen_sub, test_gen_sub1)
+  # swap the first SNP
+  test_gen_sub2 <- test_gen %>% select_loci_if (criterion,
+                                             .swap_if_arg = c(TRUE, rep(FALSE,5)))
+  expect_true(all.equal(show_genotypes(test_gen_sub2)[,1],
+                        c(1,0,0)))
+  # check the alleles
+  all.equal(show_loci(test_gen)[1,4:5], show_loci(test_gen_sub2)[1,5:4],
+            check.attributes = FALSE)
+  # swap snps based on chromosome
+  test_gen_sub3 <- test_gen %>% select_loci_if (rep(TRUE, 6),
+                                             .swap_if_arg = show_loci(test_gen)$chromosome==2)
+  expect_true(all.equal(show_genotypes(test_gen_sub3)[,5],
+                        c(1,2,1)))
+  all.equal(show_loci(test_gen)[5:6,4:5], show_loci(test_gen_sub3)[5:6,5:4],
+            check.attributes = FALSE)
+
 })

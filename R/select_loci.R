@@ -1,12 +1,25 @@
-#' The `select_if` verb for `loci`
+#' The `select` verb for `loci`
 #'
-#' An equivalent to [dplyr::select_if()] that works on the `genotype` column
-#' of a `gen_tibble`. Tidy evaluation should work as expected.
+#' An equivalent to [dplyr::select()] that works on the `genotype` column
+#' of a `gen_tibble`, using the mini-grammar available for `tidyselect`. The
+#' `select`-like evaluation only has access to the names of the loci (i.e. it
+#' can select only based on names, not summary statistics of those loci; look
+#' at [select_loci_if()] for that feature. There is also the possibility
+#' of swapping reference and alternate alleles whilst selecting loci, using
+#' either the argument `.swap_arg` (which has `select`-like mini-grammar on names)
+#' or `.swap_arg_if` (which has access to the genotypes like `select_loci_if`)
 #' @param .data a `gen_tibble`
-#' @param .sel_arg one unquoted expression
-#' @param .swap_arg not used yet
-#' @param .swap_if_arg not used yet
-#' @returns a list of `SNPbin` object that have been subsetted. Variable names
+#' @param .sel_arg one unquoted expression, using the mini-grammar of
+#'  [dplyr::select()] to select loci
+#' @param .swap_arg one unquoted expression, using the mini-grammar of
+#'  [dplyr::select()] determining at which loci the reference and alterante
+#'  allele will be swapped.
+#' @param .swap_if_arg a logical vector of length equal to the number of loci,
+#' or an expression that will tidy evaluate to such a vector.
+#' @returns a list of `SNPbin` object that have been sub-setted to the selected
+#' loci.
+#'
+#' Variable names
 #' can be used as if they were positions in the data frame, so expressions
 #' like x:y can be used to select a range of variables.
 #' @export
