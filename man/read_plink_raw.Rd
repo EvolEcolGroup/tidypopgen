@@ -47,8 +47,8 @@ the data as a \code{gen_tibble}. The raw file should be generated with the flags
 you will need to run PLINK twice to generate the necessary files).
 }
 \examples{
-raw_path <- system.file("extdata/san.raw", package = "tidypopgen")
-map_path <- system.file("extdata/san.map", package = "tidypopgen")
+raw_path <- system.file("extdata/pop_a.raw", package = "tidypopgen")
+map_path <- system.file("extdata/pop_a.map", package = "tidypopgen")
 san_gen_tbl <- read_plink_raw(file = raw_path, map_file = map_path)
 
 }

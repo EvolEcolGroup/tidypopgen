@@ -21,8 +21,8 @@
 #' @param ... other arguments to be passed to other functions - currently not used.
 #' @returns an object of the class `gen_tbl`.
 #' @examples
-#' raw_path <- system.file("extdata/san.raw", package = "tidypopgen")
-#' map_path <- system.file("extdata/san.map", package = "tidypopgen")
+#' raw_path <- system.file("extdata/pop_a.raw", package = "tidypopgen")
+#' map_path <- system.file("extdata/pop_a.map", package = "tidypopgen")
 #' san_gen_tbl <- read_plink_raw(file = raw_path, map_file = map_path)
 #'
 #' @export
@@ -45,7 +45,7 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
   names(ind_meta_list) <- col_names[1:6]
   loci_names <- col_names[7:length(col_names)]
   # remove underscore followed by a digit at the end of locus name
-  # when would this happen?!?
+  # why would that be a problem?!?
 #  loci_names <- gsub("_[1-9]$","",loci_names)
 
   # now parse the alleles
