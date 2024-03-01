@@ -215,6 +215,54 @@ test_gen %>% select_loci_if(show_loci(genotypes)$chromosome==2 &
                              loci_freq(genotypes)>0.2) %>% show_loci()
 ```
 
+Sometimes it is also of interest to use a particular type of allele (the minor or
+the major) when representing gentoypes, either for specific analysis 
+or for exporting data. The representation 
+we have used so far is arbitrary, but we can use an additional feature of 
+`select_loci` and `select_loci_if` to swap the reference and alternate allele.
+Both functions include a `.swap_arg` and a `.swap_if_arg`. We case use either
+of those parameters to perform select-like operations that define which loci are
+swapped. `.swap_arg` is equivalent to `select_loci` in using the `select` mini-grammar
+on loci name (but it is blidn to genotype content), whilst `.swap_if_arg` works 
+like `select_loci_if` (having access to the genotyes but not the names).
+
+Let us look at the genotypes in our dataset:
+```{r}
+test_gen %>% show_genotypes()
+```
+
+We can see that they are a mix of major and minor allele counts. We can turn
+them into minor allele counts simply with:
+```{r}
+test_gen %>% 
+  select_loci(everything(),
+              .swap_if_arg = loci_freq(genotypes, minor=FALSE)>0.5) %>%
+  show_genotypes()
+```
+
+Note that we use `minor=FALSE` in `loci_freq` to get the raw frequencies (earlier,
+we used the default `minor=TRUE` which returns the minor allele frequencies). In
+this case we selected all loci (`everything`). Alternatively, we could 
+generate major allele frequencies only for SNPs with an `rs` code:
+
+```{r}
+test_gen %>% 
+  select_loci(starts_with("rs"),
+              .swap_if_arg = loci_freq(genotypes, minor=FALSE)<0.5) %>%
+  show_genotypes()
+
+```
+
+Or only select and simultaneously swap all alleles on chromosome 2 (not sure
+why you would want to do that, but it illustrates another combination of selecting
+and swapping criteria:
+```{r}
+test_gen %>% 
+  select_loci_if(show_loci(genotypes)$chromosome==2,
+              .swap_if_arg = show_loci(genotypes)$chromosome==2) %>%
+  show_genotypes()
+```
+
 # Grouping individuals in populations
 
 In population genetics, we are generally interested in computing quantities that
@@ -248,7 +296,7 @@ In reality, such grouped methods are nothing more than a wrapper for the
 the appropriate `group_map` syntax, but they do make life a little bit simpler.
 
 
-# Reading data
+# Reading and exporting data
 
 Currently, `tidypopgen` can read data only from PLINK raw files generated with 
 the flags `--include-alt` and `--recodeA`.
@@ -259,3 +307,51 @@ map_path <- system.file("extdata/pop_a.map", package = "tidypopgen")
 plink_gen_tbl <- read_plink_raw(file = raw_path, map_file = map_path)
 plink_gen_tbl
 ```
+
+It is also possible to export data into `adegenet` `genelight` objects, which are
+well integrated into a number of existing packages to explore the data with, for example, PCA and
+clustering, as well as a wealth of export possibilities.
+
+# Merging data
+
+Merging data from different sources is a common problem, especially in human population
+genetics where there is a wealth of SNP chips available. In `tidypopgen`, merging is
+enacted with an `rbind` operation between `gen_tibbles`. If the datasets have the same
+loci, then the merge is trivial. If not, then it is necessary to subset to the same
+loci, and ensure that the data are coded with the same reference and alternate 
+alleles (or swap if needed). Additionally, if data come from SNP chips, there is
+the added complication that the strand is not always consistent, so it might also
+be necessary to flip strand (in that case, ambiguous SNPs have to be filtered).
+The `rbind` method for `gen_tibbles` has a number of parameters that allow us to
+control the behaviour of the merge.
+
+Let us start by bringing in an additional dataset:
+```{r}
+raw_path2 <- system.file("extdata/pop_b.raw", package = "tidypopgen")
+map_path2 <- system.file("extdata/pop_b.map", package = "tidypopgen")
+plink_gen_tbl2 <- read_plink_raw(file = raw_path2, map_file = map_path2)
+plink_gen_tbl2
+```
+
+Here we are using very small datasets, but in real life, `rbind` operations
+are very demanding. Before performing such an operation, we can run
+`rbind_dry_run`:
+```{r}
+report <- rbind_dry_run(plink_gen_tbl, plink_gen_tbl2, flip_strand = TRUE,
+                        remove_ambiguous = TRUE)
+```
+
+Note that, by default, `rbind` will NOT flip strand or remove ambiguous SNPs
+(as they are only relevant when merging different SNP chips),
+you need to set those options to TRUE if you want to use them.
+
+The report object contains details about why each locus was either kept 
+or removed, but usually the report is sufficient to make decisions on whether
+we want to go ahead. If we are happy with the likely outcome, we can
+proceed with the `rbind`:
+```{r eval=FALSE}
+# THIS IS NOT FULLY IMPLEMENTED YET
+plink_gen_tbl <- rbind(plink_gen_tbl, plink_gen_tbl2)
+
+```
+
