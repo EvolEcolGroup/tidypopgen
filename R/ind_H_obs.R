@@ -16,7 +16,7 @@ ind_H_obs <- function(.x, ...) {
 
 #' @export
 #' @rdname ind_H_obs
-ind_H_obs.gen_tbl <- function(.x, .col, ...){
+ind_H_obs.gen_tbl <- function(.x, ...){
   # extract the column and hand it over to its method
   ind_H_obs(.x$genotypes, ...)
 }

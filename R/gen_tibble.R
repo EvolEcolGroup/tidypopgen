@@ -50,3 +50,30 @@ gen_tibble <- function(ind_meta, genotypes, loci, ploidy=NULL){
     class = "gen_tbl"
   )
 }
+
+#' Test if a tibble is really `gen_tibble`
+#'
+#' Some `dplyr` operations strip the subclass from the tibble. This function
+#' is used to check if the tibble is, in reality, still of class `gen_tbl`
+#' @param .x the tibble
+#' @returns NULL
+#' @keywords internal
+
+stopifnot_gen_tibble <- function(.x){
+  if ("gentoypes" %in% names(.x)){
+    stopifnot(.x$genotypes)
+  }
+}
+
+#' Test if a list is made of `SNPbin`
+#'
+#' At some point, this will be obsolete if we use `vctrs`. But for the moment,
+#' it allows us to check if a list is genotypes is properly formatted.
+#' @param .x the tibble
+#' @returns NULL
+#' @keywords internal
+stopifnot_snpbin_list <- function(.x){
+  if(!inherits(.x[[1]],"SNPbin")){
+    stop("genotypes is not a list of SNPbin")
+  }
+}

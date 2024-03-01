@@ -22,9 +22,7 @@ loci_freq <- function(.x, ...) {
 #' @rdname loci_freq
 loci_freq.tbl_df <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
-  if (!"genotypes" %in% names(.x)){
-    stop(".x is not a gen_tbl object!")
-  }
+  stopifnot_gen_tibble(.x)
   loci_freq(.x$genotypes, ..., minor = minor, alleles_as_units = alleles_as_units, use_c = use_c)
 }
 
@@ -33,6 +31,7 @@ loci_freq.tbl_df <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use
 #' @rdname loci_freq
 loci_freq.list <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE) {
   rlang::check_dots_empty()
+  stopifnot_snpbin_list(.x)
   freq <- .genotypes_means(.x, alleles_as_units = alleles_as_units, use_c = use_c)
   if (minor){
     # TODO this fails because freq can be NA!!!

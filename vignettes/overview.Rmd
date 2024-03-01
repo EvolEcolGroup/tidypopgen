@@ -136,8 +136,8 @@ Since the genotypes of the loci are stored as a compressed list in one column,
 it is not possible to use standard `dplyr` verbs on them. However, `tidypopgen` provides
 a number of specialised verbs, postfixed by `_loci`, to manipulate loci.
 
-For example, we might want to impose a minimum allele frequency for the alternate
-allele. We can quickly inspect the frequencies with: 
+For example, we might want to impose a minimum minor allele frequency. 
+`loci_freq()` allows us to inspect the frequencies in a `gen_tibble`: 
 ```{r}
 test_gen %>% loci_freq()
 ```
@@ -148,10 +148,25 @@ test_gen_sub <- test_gen %>% select_loci_if(loci_freq(genotypes)>0.2)
 test_gen_sub %>% show_genotypes()
 ```
 
-We can get the frequency of the alternate alleles per population with:
+Note that, as we need to tidy evaluate `loci_freq` within a `select_*` verb,
+we need to provide it with the column that we want to use (even though it has
+to be `genotypes`).
+
+We can map a function such as `loci_freq` over a grouped tibble with:
+```{r}
+test_gen %>% group_by(population) %>% group_map(.f=~loci_freq(.x))
+```
+
+Some functions, like `loci_freq()` have a method for grouped tibbles that 
+allow an even easier syntax:
+
 ```{r}
 test_gen %>% group_by(population) %>% loci_freq()
 ```
+
+In reality, such grouped methods are nothing more than a wrapper for the
+the appropriate `group_map` syntax, but they do make life a little bit simpler.
+
 
 # Reading data
 

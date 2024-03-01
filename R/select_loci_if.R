@@ -1,4 +1,13 @@
+#' The `select_if` verb for `loci`
+#'
+#' An equivalent to [dplyr::select_if()] that works on the `genotype` column
+#' of a `gen_tibble`. Tidy evaluation should work as expected.
+#' @param .data a `gen_tibble`
+#' @param .sel_logical a logical vector of length equal to the number of loci,
+#' or an expression that will tidy evaluate to such a vector
+#' @returns a list of `SNPbin` object that have been subsetted.
 #' @export
+#'
 select_loci_if <-function(.data, .sel_logical){
   # defuse the boolean argument
   sel_defused <- rlang::enquo(.sel_logical)
@@ -18,10 +27,11 @@ select_loci_if <-function(.data, .sel_logical){
 }
 
 
+# this a copy of an unexported function from adegenet
 .SNPbin_subset <- function(x, i){
   if (missing(i)) i <- TRUE
   temp <- .SNPbin2int(x) # data as integers with NAs
-  x <- new("SNPbin", snp=temp[i], label=x@label, ploidy=x@ploidy)
+  x <- methods::new("SNPbin", snp=temp[i], label=x@label, ploidy=x@ploidy)
   return(x)
 }
 
@@ -29,30 +39,13 @@ select_loci_if <-function(.data, .sel_logical){
 ## .SNPbin2int
 #############
 ## convert SNPbin to integers (0/1/2...)
+# this a copy of an unexported function from adegenet
 .SNPbin2int <- function(x){
-  ##res <- lapply(x@snp, .raw2bin)
   resSize <- length(x@snp[[1]])*8
-  # Wed Apr 12 08:49:02 2017 ------------------------------
-  # I am leaving this function along as it does not necessarily break solaris,
-  # but I am leaving the code and timings just in case.
-  #
-  # ZNK
   res <- .C("bytesToInt", unlist(x@snp), length(x@snp[[1]]), length(x@snp),
             integer(resSize), as.integer(resSize), PACKAGE="adegenet")[[4]][1:nLoc(x)]
-  # library(microbenchmark)
-  # set.seed(5000)
-  # dat <- sample(c(0:2,NA), 1e5, prob=c(rep(.995/5,3), 0.005), replace=TRUE)
-  # x <- new("SNPbin", dat)
-  # y <- microbenchmark(C = .SNPbin2int(x), base = .SNPbin2int1(x), times = 1000)
-  # print(y, "relative")
-  ## Unit: relative
-  ##  expr      min       lq     mean   median      uq       max neval cld
-  ##     C 1.000000 1.000000 1.000000 1.000000 1.00000 1.0000000  1000   a
-  ##  base 2.206831 1.200831 1.019783 1.168149 1.02654 0.1668163  1000   a
-  # res     <- vapply(x@snp, function(x) as.integer(rawToBits(x)), integer(resSize))
-  # res     <- apply(res[1:nLoc(x), ], 1, sum)
   if (length(x@NA.posi) > 0){
     res[x@NA.posi] <- NA_integer_
   }
   return(res)
-} # end .SNPbin2int
+}
