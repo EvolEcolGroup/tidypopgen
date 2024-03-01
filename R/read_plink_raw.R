@@ -150,11 +150,11 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
     .ptype = factor(levels = c("female", "male"))
   )
   ind_meta_list$genotypes <- res
+  attr(ind_meta_list$genotypes,"loci")<-tibble::as_tibble(loci)
 
   if(!quiet) cat("Building final object... \n")
   res <- tibble::new_tibble(
     ind_meta_list,
-    loci = loci,
     class = "gen_tbl"
   )
 

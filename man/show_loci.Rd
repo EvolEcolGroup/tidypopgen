@@ -2,13 +2,13 @@
 % Please edit documentation in R/show_loci.R
 \name{show_loci}
 \alias{show_loci}
-\alias{show_loci.gen_tbl}
+\alias{show_loci.tbl_df}
 \alias{show_loci.list}
 \title{Show the loci information of a \code{gen_tibble}}
 \usage{
 show_loci(.x, ...)
 
-\method{show_loci}{gen_tbl}(.x, ...)
+\method{show_loci}{tbl_df}(.x, ...)
 
 \method{show_loci}{list}(.x, ...)
 }

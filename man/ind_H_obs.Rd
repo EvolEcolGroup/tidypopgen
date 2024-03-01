@@ -2,13 +2,13 @@
 % Please edit documentation in R/ind_H_obs.R
 \name{ind_H_obs}
 \alias{ind_H_obs}
-\alias{ind_H_obs.gen_tbl}
+\alias{ind_H_obs.tbl_df}
 \alias{ind_H_obs.list}
 \title{Estimate individual observed heterozygosity}
 \usage{
 ind_H_obs(.x, ...)
 
-\method{ind_H_obs}{gen_tbl}(.x, .col, ...)
+\method{ind_H_obs}{tbl_df}(.x, ...)
 
 \method{ind_H_obs}{list}(.x, ...)
 }

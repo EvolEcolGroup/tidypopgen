@@ -15,6 +15,6 @@ testthat::test_that("ind_H_obs computes correctly",{
   expect_true(all(ind_H_obs(test_gen$genotypes)==
                     rowMeans(test_genotypes==1,na.rm=TRUE)))
   # passing tibble
-  expect_true(all(ind_H_obs(test_gen, genotypes)==
+  expect_true(all(ind_H_obs(test_gen)==
                     rowMeans(test_genotypes==1,na.rm=TRUE)))
 })

@@ -2,13 +2,13 @@
 % Please edit documentation in R/show_genotypes.R
 \name{show_genotypes}
 \alias{show_genotypes}
-\alias{show_genotypes.gen_tbl}
+\alias{show_genotypes.tbl_df}
 \alias{show_genotypes.list}
 \title{Show the genotypes of a \code{gen_tibble}}
 \usage{
 show_genotypes(.x, ...)
 
-\method{show_genotypes}{gen_tbl}(.x, ...)
+\method{show_genotypes}{tbl_df}(.x, ...)
 
 \method{show_genotypes}{list}(.x, ...)
 }

@@ -1,6 +1,7 @@
 ---
 title: "overview"
-output: rmarkdown::html_vignette
+output: #rmarkdown::html_vignette
+        pdf_document
 vignette: >
   %\VignetteIndexEntry{overview}
   %\VignetteEngine{knitr::rmarkdown}

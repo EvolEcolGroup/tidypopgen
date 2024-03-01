@@ -15,13 +15,21 @@ dplyr_reconstruct.gen_tbl <-function(data, template)
     message("as genotypes were dropped, this is not longer a 'gen_tbl'")
     class(out) <- class(out)[-1]
   }
-  browser()
+  #browser()
   out
 }
 
+#' #' @export
+#' dplyr_row_slice.gen_tbl<-function(data, i, ...){
+#'   #browser()
+#'   NextMethod()
+#'
+#' }
+#' #' @export
+#' dplyr_col_modify.gen_tbl<-function(data, cols){
+#'   #browser()
+#'   NextMethod()
+#'
+#' }
 
-# dplyr_row_slice.gen_tbl(data, i, ...){
-#   #browser()
-#   NextMethod()
-#
-# }
+

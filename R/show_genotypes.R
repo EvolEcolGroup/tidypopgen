@@ -15,9 +15,9 @@ show_genotypes <- function(.x, ...) {
 
 #' @export
 #' @rdname show_genotypes
-show_genotypes.gen_tbl <- function(.x, ...){
+show_genotypes.tbl_df <- function(.x, ...){
+  stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  #show_genotypes.list(.x[[rlang::ensym(.col)]])
   show_genotypes(.x$genotypes)
 }
 
@@ -25,9 +25,7 @@ show_genotypes.gen_tbl <- function(.x, ...){
 #' @rdname show_genotypes
 show_genotypes.list <- function(.x, ...){
   rlang::check_dots_empty()
-  if (!inherits(.x[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
-    stop("x is not a list of SNPbin objects")
-  }
+  stopifnot_snpbin_list(.x)
   res <- unlist(lapply(.x, as.integer))
   res <- matrix(res, ncol=nrow(attr(.x,"loci")), nrow = length(.x), byrow=TRUE)
   colnames(res) <- attr(.x,"loci")$name

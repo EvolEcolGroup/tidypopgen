@@ -22,6 +22,10 @@ or a \code{\link{gen_tibble}}.}
 
 \item{...}{other arguments passed to specific methods.}
 
+\item{minor}{a logical indicating whether we should give the frequencies of
+the minor allele (TRUE, the default). If FALSE, the frequencies of the
+alternate allele are given.}
+
 \item{alleles_as_units}{a logical indicating whether alleles are considered
 as units (i.e., a diploid genotype equals two samples, a triploid, three,
 etc.) or whether individuals are considered as units of information.}

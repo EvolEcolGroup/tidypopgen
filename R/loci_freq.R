@@ -18,6 +18,9 @@ loci_freq <- function(.x, ...) {
 #' etc.) or whether individuals are considered as units of information.
 #' @param use_c a logical indicating whether compiled C code should be used
 #' (TRUE) or not (FALSE, default).
+#' @param minor a logical indicating whether we should give the frequencies of
+#' the minor allele (TRUE, the default). If FALSE, the frequencies of the
+#' alternate allele are given.
 #' @export
 #' @rdname loci_freq
 loci_freq.tbl_df <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE) {

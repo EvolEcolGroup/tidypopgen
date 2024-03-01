@@ -16,8 +16,7 @@ show_ploidy <- function(.x, ...) {
 #' @export
 #' @rdname show_ploidy
 show_ploidy.gen_tbl <- function(.x, ...){
-  # extract the column and hand it over to its method
-  #show_ploidy.list(.x[[rlang::ensym(.col)]], ...)
+  stopifnot_gen_tibble(.x)
   show_ploidy(.x$genotypes, ...)
 }
 
@@ -25,5 +24,6 @@ show_ploidy.gen_tbl <- function(.x, ...){
 #' @rdname show_ploidy
 show_ploidy.list <- function(.x, ...){
   rlang::check_dots_empty()
+  stopifnot_snpbin_list(.x)
   unlist(lapply(.x,adegenet::ploidy))
 }

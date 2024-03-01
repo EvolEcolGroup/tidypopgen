@@ -2,6 +2,7 @@
 #'
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
+#'
 #' @param ind_meta a list, data.frame or tibble with compulsory columns 'id'
 #'  and 'population', plus any additional metadata of interest.
 #' @param genotypes a matrix of counts of alternative alleles, one row per
@@ -77,3 +78,13 @@ stopifnot_snpbin_list <- function(.x){
     stop("genotypes is not a list of SNPbin")
   }
 }
+
+# print method
+#' @export
+tbl_sum.gen_tbl <- function(x, ...) {
+  c(
+    "A gen_tibble" = paste(nrow(show_loci(x))," loci"),
+    NextMethod()
+  )
+}
+

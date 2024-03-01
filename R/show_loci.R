@@ -15,9 +15,9 @@ show_loci <- function(.x, ...) {
 
 #' @export
 #' @rdname show_loci
-show_loci.gen_tbl <- function(.x, ...){
+show_loci.tbl_df <- function(.x, ...){
+  stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  #show_loci.list(.x[[rlang::ensym(.col)]], ...)
   show_loci(.x$genotypes)
 }
 
@@ -25,5 +25,6 @@ show_loci.gen_tbl <- function(.x, ...){
 #' @rdname show_loci
 show_loci.list <- function(.x, ...){
   rlang::check_dots_empty()
+  stopifnot_snpbin_list(.x)
   attr(.x,"loci")
 }
