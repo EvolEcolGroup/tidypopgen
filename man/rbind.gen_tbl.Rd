@@ -35,7 +35,7 @@ a \code{\link{gen_tibble}} with the merged data.
 This function combined two \link{gen_tibble}s. By defaults, it subsets the loci
 and swaps ref and alt alleles to make the two datasets compatible (this
 behaviour can be switched off with \code{as_is}).
-The first object is used as a "reference2 , and SNPs
+The first object is used as a "reference" , and SNPs
 in the other dataset will be flipped and/or alleles swapped
 as needed. SNPs that have different alleles in the two datasets
 (i.e. triallelic) will also be

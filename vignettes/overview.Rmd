@@ -55,12 +55,12 @@ where n is the number of individuals (i.e. one object per individual).
 
 Given information about the individuals, their genotypes, and the loci:
 ```{r}
-test_ind_meta <- data.frame (id=c("a","b","c"),
+example_ind_meta <- data.frame (id=c("a","b","c"),
                        population = c("pop1","pop1","pop2"))
-test_genotypes <- rbind(c(1, 1, 0, 1, 1, 0), 
+example_gtotypes <- rbind(c(1, 1, 0, 1, 1, 0), 
                         c(2, 0, 0, 0,NA, 0), 
                         c(1, 2, 0, 0, 1, 1))
-test_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
+example_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
                    chromosome=c(1,1,1,1,2,2),
                    position=c(3,5,65,343,23,456),
                    allele_ref = c("a","t","c","g","c","t"),
@@ -70,15 +70,15 @@ test_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
 We can create a simple `gen_tibble` object (of class `gen_tbl`) with
 ```{r}
 library(tidypopgen)
-test_gen <- gen_tibble(test_ind_meta, test_genotypes, test_loci)
-test_gen
+example_gt <- gen_tibble(example_ind_meta, example_gtotypes, example_loci)
+example_gt
 ```
 As discussed above, in this tibble, genotypes are stored as a list of 
 compressed `SNPbin` objects.
 
 Note that, since ploidy was not defined, it defaulted to 2:
 ```{r}
-test_gen %>% show_ploidy()
+example_gt %>% show_ploidy()
 ```
 For different ploidy, just provide a vector of values to the parameter `ploidy`
 in `gen_tibble`.
@@ -89,23 +89,23 @@ However, if such a function is used within a `dplyr` verb such as `mutate`,
 we need to pass the `genotype` column to the function:
 
 ```{r}
-test_gen %>% mutate (ploidy = show_ploidy(.data$genotypes))
+example_gt %>% mutate (ploidy = show_ploidy(.data$genotypes))
 ```
 Or, more simply:
 ```{r}
-test_gen %>% mutate (ploidy = show_ploidy(genotypes))
+example_gt %>% mutate (ploidy = show_ploidy(genotypes))
 ```
 
 To retrieve the genotypes (which are compressed), we use:
 ```{r}
-test_gen %>% show_genotypes()
+example_gt %>% show_genotypes()
 ```
 
 If we want to extract the information about the loci for which we have genotypes
 (which are stored as an attribute of that column),
 we say:
 ```{r}
-test_gen %>% show_loci()
+example_gt %>% show_loci()
 ```
 
 ## Standard `dplyr` verbs to manipulate the tibble
@@ -113,14 +113,14 @@ test_gen %>% show_loci()
 The individual metadata can then be processed with the usual `tidiverse` grammar.
 So, we can filter individuals by population with
 ```{r}
-test_pop1 <- test_gen %>% filter (population=="pop1")
-test_pop1
+example_pop1 <- example_gt %>% filter (population=="pop1")
+example_pop1
 ```
 
 There are a number of functions that compute population genetics quantities for each
 individual, such as individual observed heterozygosity. We can compute them simply with:
 ```{r}
-test_gen %>% ind_H_obs()
+example_gt %>% ind_H_obs()
 ```
 
 We can use `mutate` to add observed heterozygosity as a column to our
@@ -129,7 +129,7 @@ to be passed any arguments if the tibble is passed directly to them, but
 the column `genotypes` has to be provided when they are used within
 `dplyr` verbs such as `mutate`):
 ```{r}
-test_gen %>% mutate(het_obs = ind_H_obs(genotypes))
+example_gt %>% mutate(het_obs = ind_H_obs(genotypes))
 ```
 
 # Using verbs on loci
@@ -149,7 +149,7 @@ genotypes but is blind to the names of loci.
 
 Let us start by looking at the loci names in our simple dataset:
 ```{r}
-show_loci_names(test_gen)
+show_loci_names(example_gt)
 
 ```
 
@@ -157,20 +157,20 @@ We can see that there are two categories of loci, one starting with "rs" and
 the other with "x". If we wanted to select only loci that have an "rs" code,
 we would use:
 ```{r}
-test_sub <- test_gen %>% select_loci (starts_with("rs"))
-test_sub
+example_sub <- example_gt %>% select_loci (starts_with("rs"))
+example_sub
 ```
 This gives us a `gen_tibble` with only 4 loci, as expected. We can confirm that
 we have the correct loci with:
 ```{r}
-show_loci_names(test_sub)
+show_loci_names(example_sub)
 ```
 
 We can also subset and reorder by passing indeces (note that we extract the loci
 information, but in reality we have reordered and subsetted the genotypes
 for all individuals):
 ```{r}
-test_gen %>% select_loci (c(2,6,1)) %>% show_loci()
+example_gt %>% select_loci (c(2,6,1)) %>% show_loci()
 ```
 This operation could be helpful when merging datasets that do not fully
 overlap on their loci (more on that later).
@@ -180,15 +180,15 @@ We can do that separately and then feed the result as a set of indeces. For
 example, we might want to impose a minimum minor allele frequency. 
 `loci_freq()` allows us to inspect the frequencies in a `gen_tibble`: 
 ```{r}
-test_gen %>% loci_freq()
+example_gt %>% loci_freq()
 ```
 
 We can now create a vector of indices of loci with a minimum allele frequency
 (MAF) larger than 0.2, and use it to select:
 
 ```{r}
-sel_indices <- which((test_gen %>% loci_freq())>0.2)
-test_gen %>% select_loci (all_of(sel_indices)) %>% show_loci()
+sel_indices <- which((example_gt %>% loci_freq())>0.2)
+example_gt %>% select_loci (all_of(sel_indices)) %>% show_loci()
 ```
 
 Note that passing a variable direclty to `select` is deprecated, and so we have
@@ -197,8 +197,8 @@ to use `all_of` to wrap it.
 `select_loci_if` allows us to avoid creating a temporary variable to store indices:
 
 ```{r}
-test_gen_sub <- test_gen %>% select_loci_if(loci_freq(genotypes)>0.2)
-test_gen_sub %>% show_genotypes()
+example_gt_sub <- example_gt %>% select_loci_if(loci_freq(genotypes)>0.2)
+example_gt_sub %>% show_genotypes()
 ```
 
 Note that, as we need to tidy evaluate `loci_freq` within the `select_loci_if` verb,
@@ -211,7 +211,7 @@ greater than 0.2 that are also on chromosome 2
 
 We can use a similar approach to select only alleles on a given chromosome:
 ```{r}
-test_gen %>% select_loci_if(show_loci(genotypes)$chromosome==2 &
+example_gt %>% select_loci_if(show_loci(genotypes)$chromosome==2 &
                              loci_freq(genotypes)>0.2) %>% show_loci()
 ```
 
@@ -228,13 +228,13 @@ like `select_loci_if` (having access to the genotyes but not the names).
 
 Let us look at the genotypes in our dataset:
 ```{r}
-test_gen %>% show_genotypes()
+example_gt %>% show_genotypes()
 ```
 
 We can see that they are a mix of major and minor allele counts. We can turn
 them into minor allele counts simply with:
 ```{r}
-test_gen %>% 
+example_gt %>% 
   select_loci(everything(),
               .swap_if_arg = loci_freq(genotypes, minor=FALSE)>0.5) %>%
   show_genotypes()
@@ -246,7 +246,7 @@ this case we selected all loci (`everything`). Alternatively, we could
 generate major allele frequencies only for SNPs with an `rs` code:
 
 ```{r}
-test_gen %>% 
+example_gt %>% 
   select_loci(starts_with("rs"),
               .swap_if_arg = loci_freq(genotypes, minor=FALSE)<0.5) %>%
   show_genotypes()
@@ -257,7 +257,7 @@ Or only select and simultaneously swap all alleles on chromosome 2 (not sure
 why you would want to do that, but it illustrates another combination of selecting
 and swapping criteria:
 ```{r}
-test_gen %>% 
+example_gt %>% 
   select_loci_if(show_loci(genotypes)$chromosome==2,
               .swap_if_arg = show_loci(genotypes)$chromosome==2) %>%
   show_genotypes()
@@ -274,14 +274,14 @@ For functions that return one result per individual (such as
 new `tibble` with one line per population. For example, we can count the number of individuals 
 per population, as well as their mean heterozygosity with :
 ```{r}
-test_gen %>% group_by(population) %>% 
+example_gt %>% group_by(population) %>% 
   summarise(n= n(), mean_het = mean(ind_H_obs(genotypes)))
 ```
 
 For functions that return a quantity per locus (e.g. `loci_freq`), we can use 
  `group_by` together with `group_map` to apply such functions over populations:
 ```{r}
-test_gen %>% group_by(population) %>% group_map(.f = ~loci_freq(.x))
+example_gt %>% group_by(population) %>% group_map(.f = ~loci_freq(.x))
 ```
 
 For more details on the syntax of `group_map`, see its help page. Some 
@@ -289,7 +289,7 @@ functions, such as `loci_freq()`, also have a method for grouped tibbles that
 allows an even easier syntax:
 
 ```{r}
-test_gen %>% group_by(population) %>% loci_freq()
+example_gt %>% group_by(population) %>% loci_freq()
 ```
 
 In reality, such grouped methods are nothing more than a wrapper for the
@@ -304,8 +304,8 @@ the flags `--include-alt` and `--recodeA`.
 ```{r}
 raw_path <- system.file("extdata/pop_a.raw", package = "tidypopgen")
 map_path <- system.file("extdata/pop_a.map", package = "tidypopgen")
-plink_gen_tbl <- read_plink_raw(file = raw_path, map_file = map_path)
-plink_gen_tbl
+plink_gt <- read_plink_raw(file = raw_path, map_file = map_path)
+plink_gt
 ```
 
 It is also possible to export data into `adegenet` `genelight` objects, which are
@@ -329,15 +329,15 @@ Let us start by bringing in an additional dataset:
 ```{r}
 raw_path2 <- system.file("extdata/pop_b.raw", package = "tidypopgen")
 map_path2 <- system.file("extdata/pop_b.map", package = "tidypopgen")
-plink_gen_tbl2 <- read_plink_raw(file = raw_path2, map_file = map_path2)
-plink_gen_tbl2
+plink_gt2 <- read_plink_raw(file = raw_path2, map_file = map_path2)
+plink_gt2
 ```
 
 Here we are using very small datasets, but in real life, `rbind` operations
 are very demanding. Before performing such an operation, we can run
 `rbind_dry_run`:
 ```{r}
-report <- rbind_dry_run(plink_gen_tbl, plink_gen_tbl2, flip_strand = TRUE,
+report <- rbind_dry_run(plink_gt, plink_gt2, flip_strand = TRUE,
                         remove_ambiguous = TRUE)
 ```
 
@@ -350,7 +350,7 @@ or removed, but usually the report is sufficient to make decisions on whether
 we want to go ahead. If we are happy with the likely outcome, we can
 proceed with the `rbind`:
 ```{r}
-plink_merged <- rbind(plink_gen_tbl, plink_gen_tbl2, flip_strand = TRUE,
+plink_merged <- rbind(plink_gt, plink_gt2, flip_strand = TRUE,
                         remove_ambiguous = TRUE)
 
 ```
