@@ -350,7 +350,7 @@ or removed, but usually the report is sufficient to make decisions on whether
 we want to go ahead. If we are happy with the likely outcome, we can
 proceed with the `rbind`:
 ```{r}
-plink_merged <- rbind_gen_tbl(plink_gen_tbl, plink_gen_tbl2, flip_strand = TRUE,
+plink_merged <- rbind(plink_gen_tbl, plink_gen_tbl2, flip_strand = TRUE,
                         remove_ambiguous = TRUE)
 
 ```

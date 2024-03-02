@@ -3,7 +3,7 @@
 #' This function combined two [gen_tibble]s. By defaults, it subsets the loci
 #' and swaps ref and alt alleles to make the two datasets compatible (this
 #' behaviour can be switched off with `as_is`).
-#' The first object is used as a "reference2 , and SNPs
+#' The first object is used as a "reference" , and SNPs
 #' in the other dataset will be flipped and/or alleles swapped
 #' as needed. SNPs that have different alleles in the two datasets
 #' (i.e. triallelic) will also be
@@ -12,12 +12,8 @@
 #' and remove ambiguous alleles (c/g and a/t) where the correct strand can not
 #' be guessed.
 #'
-#' @param ref either a [`gen_tibble`] object, or the path to the PLINK file;
-#' the alleles in this objects will
-#' be used as template to flip the ones in `target` and/or
-#' swap their order as necessary.
-#' @param target either a [`gen_tibble`] object, or the path to the PLINK file
-#' (saved in raw format, see details in [read_plink_raw()].
+#' @param ... two [`gen_tibble`] objects. Note tha this function can not take
+#' more objects, `rbind` has to be done sequentially for large sets of objects.
 #' @param as_is boolean determining whether the loci should be left as they are
 #' before merging. If FALSE (the defaults), `rbind` will attempt to subset and
 #' swap alleles as needed.
@@ -28,8 +24,14 @@
 #' @param quiet boolean whether to omit reporting to screen
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
-rbind_gen_tbl <- function(ref, target, as_is = FALSE, flip_strand = FALSE,
+rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
               remove_ambiguous = FALSE, quiet = FALSE){
+  dots <- list(...)
+  if (length(dots)!=2){
+    stop("rbind for gen_tibble can only take two tibbles at a time")
+  }
+  ref <-dots[[1]]
+  target <- dots[[2]]
   if (!quiet){
     if (as_is){
       if (any(flip_strand, remove_ambiguous)){
@@ -67,9 +69,8 @@ rbind_gen_tbl <- function(ref, target, as_is = FALSE, flip_strand = FALSE,
     } else {
       stop("'rbind' attempted to harmonise the loci but something went WRONG")
     }
-
   }
-  ref <- rbind(ref, target)
 
-  return(ref)
+  # for the use of the data.frame method (we can't use NextMethod with rbind)
+  return(base::rbind.data.frame(ref,target))
 }

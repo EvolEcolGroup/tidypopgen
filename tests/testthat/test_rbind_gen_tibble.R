@@ -9,7 +9,7 @@ map_path_pop_a <- system.file("extdata/pop_a.map", package = "tidypopgen")
 pop_a_gen <- read_plink_raw(file = raw_path_pop_a, map_file = map_path_pop_a, quiet = TRUE)
 
 #create merge report
-merged_gen <- rbind_gen_tbl(pop_b_gen, pop_a_gen, flip_strand = TRUE,
+merged_gen <- rbind(pop_b_gen, pop_a_gen, flip_strand = TRUE,
                             remove_ambiguous = TRUE, quiet = TRUE)
 
 testthat::test_that("merge combines datasets correctly",{
