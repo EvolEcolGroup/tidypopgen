@@ -1,31 +1,75 @@
+#' Combine two gen_tibbles
+#'
+#' This function combined two [gen_tibble]s. By defaults, it subsets the loci
+#' and swaps ref and alt alleles to make the two datasets compatible (this
+#' behaviour can be switched off with `as_is`).
+#' The first object is used as a "reference2 , and SNPs
+#' in the other dataset will be flipped and/or alleles swapped
+#' as needed. SNPs that have different alleles in the two datasets
+#' (i.e. triallelic) will also be
+#' dropped. There are also options (NOT default) to attempt strand flipping to
+#' match alleles (often needed in human datasets from different SNP chips),
+#' and remove ambiguous alleles (c/g and a/t) where the correct strand can not
+#' be guessed.
+#'
+#' @param ref either a [`gen_tibble`] object, or the path to the PLINK file;
+#' the alleles in this objects will
+#' be used as template to flip the ones in `target` and/or
+#' swap their order as necessary.
+#' @param target either a [`gen_tibble`] object, or the path to the PLINK file
+#' (saved in raw format, see details in [read_plink_raw()].
+#' @param as_is boolean determining whether the loci should be left as they are
+#' before merging. If FALSE (the defaults), `rbind` will attempt to subset and
+#' swap alleles as needed.
+#' @param flip_strand boolean on whether strand flipping should be checked to
+#' match the two datasets. It defaults to FALSE
+#' @param remove_ambiguous boolean whether ambiguous SNPs (i.e. a/t and c/g)
+#' should be removed. It defaults to FALSE
+#' @param quiet boolean whether to omit reporting to screen
+#' @returns a [`gen_tibble`] with the merged data.
 #' @export
-rbind_gen_tbl <- function(ref, target, flip_strand = FALSE,
+rbind_gen_tbl <- function(ref, target, as_is = FALSE, flip_strand = FALSE,
               remove_ambiguous = FALSE, quiet = FALSE){
-  report <- rbind_dry_run(target, ref, flip_strand=flip_strand,
+  if (!quiet){
+    if (as_is){
+      if (any(flip_strand, remove_ambiguous)){
+        stop("if 'as_is' is set to TRUE, 'flip_strand' and 'remove_ambiguous' have to be FALSE")
+      }
+      message("rbind will not attempt to harmonise the loci (e.g. flip strand, reorder or subset\n",
+              "set 'as_is' to FALSE to subset to loci in common\n")
+    }
+  }
+  report <- rbind_dry_run(ref = ref, target = target, flip_strand=flip_strand,
                           remove_ambiguous = remove_ambiguous, quiet = quiet)
   # now edit the gen_tibble objects
   # for the ref object, we fix the missing alleles
   id_missing <- which(!is.na(report$ref$missing_allele))
-  if (length(id_missing)>0){
-    attr(ref, "loci")$allele_alt <- report$ref$missing_allele[id_missing]
-#    adegenet::alleles(ref)[id_missing] <- paste0(report$ref$missing_allele[id_missing],
-#                                                 substr(adegenet::alleles(ref)[id_missing],2,3))
-  }
- # stop("this is not yet implemented!!!")
+#  if (length(id_missing)>0){
+    attr(ref$genotypes, "loci")$allele_alt[id_missing] <- report$ref$missing_allele[id_missing]
+#  }
+  ref <- ref %>% select_loci(order(report$ref$new_id,na.last=NA))
+  # fix missing alleles in target
+  id_missing_target <- which(!is.na(report$target$missing_allele))
+  attr(target$genotypes, "loci")$allele_alt[id_missing_target] <- report$target$missing_allele[id_missing_target]
+  to_flip <- report$target$to_flip
+  attr(target$genotypes, "loci")$allele_alt[to_flip] <- flip(attr(target$genotypes, "loci")$allele_alt[to_flip])
+  attr(target$genotypes, "loci")$allele_ref[to_flip] <- flip(attr(target$genotypes, "loci")$allele_ref[to_flip])
 
-  # and then use adegenet native cropping
-  # @TODO get the native cropping for the list of snpbin
-#  ref_to_keep <- which(!is.na(report$ref$new_id))
-#  ref_sub <- ref[,which(!is.na(report$ref$new_id))]
-  ref$genotypes <- select_swap_snpbin_list(ref$genotypes, new_order = report$ref$new_id,
-                                          to_flip = rep(FALSE, nrow(report$ref)),
-                                          to_swap = rep(FALSE, nrow(report$ref)),
-                                          missing_allele = rep(NA, nrow(report$ref)))
-  # for the target, we use our own function as the transformation is more complicated
-  target$genotypes <- select_swap_snpbin_list(target$genotypes, new_order = report$target$new_id,
-                                     to_flip = report$target$to_flip,
-                                     to_swap = report$target$to_swap,
-                                     missing_allele = report$target$missing_allele)
-  ref_sub <- rbind(ref,target)
-  return(ref_sub)
+  ## TODO we should also flip to later check integrity before the merge
+  target <- target %>% select_loci (order(report$target$new_id,na.last=NA),
+                                    .swap_if_arg = report$target$to_swap)
+
+  #check that the loci tables are the same
+  if(!identical(show_loci(ref)%>% dplyr::select("name", "allele_ref", "allele_alt"),
+            show_loci(target) %>% dplyr::select("name", "allele_ref", "allele_alt"))){
+    if (as_is){
+      stop("the two datasets have different loci; set 'as_is'=FALSE to let 'rbind' attempt to harmonise them")
+    } else {
+      stop("'rbind' attempted to harmonise the loci but something went WRONG")
+    }
+
+  }
+  ref <- rbind(ref, target)
+
+  return(ref)
 }

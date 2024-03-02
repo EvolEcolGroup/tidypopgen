@@ -37,12 +37,12 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
   target_df <- target_df %>% mutate(id = seq_len(nrow(target_df)))
   ref_df <- ref %>% show_loci()
   ref_df <- ref_df %>% mutate(id = seq_len(nrow(ref_df)))
-  # replace NA with "m" for missing allele to avoid subsetting headaches
+  # replace NA with "m" for missing allele to avoid subsetting headaches (NA does not play nice with subsetting)
   ref_df$allele_alt[is.na(ref_df$allele_alt)]<-"m"
   target_df$allele_alt[is.na(target_df$allele_alt)]<-"m"
   # rename the alleles
-  ref_df <- ref_df %>% rename(allele_1 = allele_alt, allele_2 = allele_ref)
-  target_df <- target_df %>% rename(allele_1 = allele_alt, allele_2 = allele_ref)
+  ref_df <- ref_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
+  target_df <- target_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
   #browser()
   rbind_dry_run_df(ref_df = ref_df,
                    target_df = target_df,
@@ -57,7 +57,7 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
 # the dataframes
 ##############################################################################
 
-rbind_dry_run_df <- function(target_df, ref_df, flip_strand, remove_ambiguous, quiet){
+rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, quiet){
   #browser()
   # now filter for alleles in common
   target_sub <- target_df[target_df$name %in% ref_df$name,]
@@ -131,6 +131,8 @@ rbind_dry_run_df <- function(target_df, ref_df, flip_strand, remove_ambiguous, q
 
   report <- list(target = target_report, ref = ref_report)
   class(report) <- c("rbind_report",class(report))
+  attr(report,"flip_strand") <- flip_strand
+  attr(report,"remove_ambiguous") <- remove_ambiguous
   if (!quiet){
     summary(report)
   }
