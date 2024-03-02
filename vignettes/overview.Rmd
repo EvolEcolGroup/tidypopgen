@@ -308,9 +308,18 @@ plink_gt <- read_plink_raw(file = raw_path, map_file = map_path)
 plink_gt
 ```
 
-It is also possible to export data into `adegenet` `genelight` objects, which are
+It can export data in the same format. We will save the dataset to
+a file in the temporary directory:
+```{r}
+out_file <- tempfile()
+write_plink_raw(plink_gt, file = out_file)
+```
+
+It is also possible to import data from `adegenet::genelight` objects, which are
 well integrated into a number of existing packages to explore the data with, for example, PCA and
-clustering, as well as a wealth of export possibilities.
+clustering, as well as a wealth of export possibilities. Given an object
+`x_genlight`, we can simply create a `gen_tibble` object with
+`as_gen_tibble(x_genlight)`.
 
 # Merging data
 

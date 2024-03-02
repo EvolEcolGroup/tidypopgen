@@ -77,13 +77,12 @@ write_plink_raw <- function(x, file, chunk_size = 10000, overwrite = TRUE){
 
   }
   ## now write the map file
-
   loci_meta <- show_loci(x)
   map_file <- paste0(substr(file, 1, nchar(file)-4),".map")
-  map_table <- data.frame(chrom = pull_NA(x,"chromosome"),
-                          id = pull_NA(x,"name"),
-                          cM = pull_NA(x,"cM"),
-                          position = pull_NA(x,"position"))
+  map_table <- tibble(chrom = pull_NA(loci_meta,"chromosome"),
+                          id = pull_NA(loci_meta,"name"),
+                          cM = pull_NA(loci_meta,"cM"),
+                          position = pull_NA(loci_meta,"position"))
   map_table[is.na(map_table)]<-0
   utils::write.table(
     map_table,

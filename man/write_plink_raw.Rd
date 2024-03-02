@@ -7,7 +7,7 @@
 write_plink_raw(x, file, chunk_size = 10000, overwrite = TRUE)
 }
 \arguments{
-\item{x}{a \link{`gen_tibble} object}
+\item{x}{a \code{\link{gen_tibble}} object}
 
 \item{file}{a character string giving the path to the file to convert,
 with the extension ".raw"}
