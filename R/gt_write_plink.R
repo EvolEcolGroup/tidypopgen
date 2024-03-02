@@ -23,7 +23,7 @@ gt_write_plink <- function(x, file, plink_format = c("raw","ped"), chunk_size = 
 
   plink_format <- match.arg(plink_format)
   if (tolower(adegenet::.readExt(file))!=plink_format){
-    file <- paste0(file,plink_format)
+    file <- paste0(file,".",plink_format)
   }
 
   if (file.exists(file)){
@@ -70,8 +70,8 @@ gt_write_plink <- function(x, file, plink_format = c("raw","ped"), chunk_size = 
       show_genotypes(x[chunk,]))
 
     # now recode the genotypes with letters if raw
-    if (format=="raw"){
-      for (i in 1:(nrow(raw_table)-6)){
+    if (plink_format=="ped"){
+      for (i in 1:(ncol(raw_table)-6)){
         raw_table[,i+6]<-recode_genotype(raw_table[,i+6], loci$allele_ref[i], loci$allele_alt[i])
       }
     }
@@ -82,7 +82,7 @@ gt_write_plink <- function(x, file, plink_format = c("raw","ped"), chunk_size = 
                 file=file,
                 sep = " ",
                 row.names = FALSE,
-                col.names=(!file.exists(file) & format=="raw"),
+                col.names=(!file.exists(file) & plink_format=="raw"),
                 append = file.exists(file),
                 quote = FALSE)
 
@@ -119,8 +119,15 @@ pull_NA <- function(.x, .col_name) {
 
 # recode dosage as letter genotypes
 recode_genotype <- function(x, allele_ref, allele_alt){
-  x[x==0] <- paste(allele_ref, allele_ref)
-  x[x==1] <- paste(allele_ref, allele_alt)
-  x[x==2] <- paste(allele_alt, allele_alt)
-  x
+  x <-as.character(x)
+  genotypes <- c(paste(allele_ref, allele_ref),
+                 paste(allele_ref, allele_alt),
+                 paste(allele_alt, allele_alt))
+  dplyr::case_match(
+    x,
+    "0" ~ genotypes[1],
+    "1" ~ genotypes[2],
+    "2" ~ genotypes[3]
+  )
+
 }
