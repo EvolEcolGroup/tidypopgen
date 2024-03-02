@@ -315,6 +315,12 @@ out_file <- tempfile()
 write_plink_raw(plink_gt, file = out_file)
 ```
 
+Alternatively, we can write a plink `ped` file with:
+```{r}
+gt_write_plink(plink_gt, file = out_file, plink_format = "ped")
+```
+
+
 It is also possible to import data from `adegenet::genelight` objects, which are
 well integrated into a number of existing packages to explore the data with, for example, PCA and
 clustering, as well as a wealth of export possibilities. Given an object
