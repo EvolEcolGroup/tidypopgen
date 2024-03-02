@@ -312,7 +312,7 @@ It can export data in the same format. We will save the dataset to
 a file in the temporary directory:
 ```{r}
 out_file <- tempfile()
-write_plink_raw(plink_gt, file = out_file)
+gt_write_plink(plink_gt, file = out_file)
 ```
 
 Alternatively, we can write a plink `ped` file with:
