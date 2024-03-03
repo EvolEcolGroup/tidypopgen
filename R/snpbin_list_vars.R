@@ -6,7 +6,7 @@
 #' compute intermediate quantities.
 #' When ploidy varies across individuals, the outputs of this function depend
 #' on whether the information units are individuals, or
-#' alleles within individuals (see details for [.genotypes_sums()]).
+#' alleles within individuals (see details for [snpbin_list_sums()]).
 #'
 #' This function is a modified version
 #' of [adegenet::glNA], recoded to work on lists of `SNPbin` objects as used
@@ -24,7 +24,7 @@
 #' @export
 
 
-.genotypes_vars <-
+snpbin_list_vars <-
   function(.x,
            alleles_as_units = TRUE,
            use_c = FALSE) {
@@ -38,9 +38,9 @@
     if (alleles_as_units) {
       # use alleles
       N <-
-        sum(ploidy) - .genotypes_count_na(.x, alleles_as_units = TRUE)
+        sum(ploidy) - snpbin_list_count_na(.x, alleles_as_units = TRUE)
       xbar <-
-        .genotypes_means(.x, alleles_as_units = TRUE, use_c = use_c)
+        snpbin_list_means(.x, alleles_as_units = TRUE, use_c = use_c)
       for (i in 1:nInd) {
         temp <- (as.integer(.x[[i]]) / ploidy[i] - xbar) ^ 2
         temp[is.na(temp)] <- 0
@@ -49,9 +49,9 @@
       res <- res / N
     } else {
       # use relative frequencies of individuals
-      N <- nInd - .genotypes_count_na(.x, alleles_as_units = FALSE)
+      N <- nInd - snpbin_list_count_na(.x, alleles_as_units = FALSE)
       xbar <-
-        .genotypes_means(.x, alleles_as_units = FALSE, use_c = use_c)
+        snpbin_list_means(.x, alleles_as_units = FALSE, use_c = use_c)
 
       for (i in 1:nInd) {
         temp <- (as.integer(.x[[i]]) / ploidy[i] - xbar) ^ 2

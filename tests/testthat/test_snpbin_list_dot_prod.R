@@ -1,6 +1,6 @@
 
 
-testthat::test_that(".genotypes_dot_prod computes correctly",{
+testthat::test_that("snpbin_list_dot_prod computes correctly",{
    # tests taken from adegenet
    # TESTING DOT PRODUCTS
    set.seed(123)
@@ -18,18 +18,18 @@ testthat::test_that(".genotypes_dot_prod computes correctly",{
 
 
    # not centred, not scaled
-   res1 <- .genotypes_dot_prod(test_gen$genotypes,alleles_as_units=FALSE, center=FALSE, scale=FALSE)
+   res1 <- snpbin_list_dot_prod(test_gen$genotypes,alleles_as_units=FALSE, center=FALSE, scale=FALSE)
    res2 <- M %*% t(M)
    expect_true(all.equal(res1, res2, check.attributes=FALSE))
 
    #  centred, not scaled
-   res1c <- .genotypes_dot_prod(test_gen$genotypes,alleles_as_units=FALSE, center=TRUE, scale=FALSE)
+   res1c <- snpbin_list_dot_prod(test_gen$genotypes,alleles_as_units=FALSE, center=TRUE, scale=FALSE)
    M1 <- scalewt(M,center=TRUE,scale=FALSE)
    res2c <- M1 %*% t(M1)
    expect_true(all.equal(res1c,res2c, check.attributes=FALSE))
 
    #  centred, scaled
-   res1cs <- .genotypes_dot_prod(test_gen$genotypes,alleles_as_units=FALSE, center=TRUE, scale=TRUE)
+   res1cs <- snpbin_list_dot_prod(test_gen$genotypes,alleles_as_units=FALSE, center=TRUE, scale=TRUE)
    M2 <- scalewt(M,center=TRUE,scale=TRUE)
    res2cs <- M2 %*% t(M2)
    expect_true(all.equal(res1cs,res2cs, check.attributes=FALSE))

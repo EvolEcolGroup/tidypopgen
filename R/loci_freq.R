@@ -35,9 +35,8 @@ loci_freq.tbl_df <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use
 loci_freq.list <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE) {
   rlang::check_dots_empty()
   stopifnot_snpbin_list(.x)
-  freq <- .genotypes_means(.x, alleles_as_units = alleles_as_units, use_c = use_c)
+  freq <- snpbin_list_means(.x, alleles_as_units = alleles_as_units, use_c = use_c)
   if (minor){
-    # TODO this fails because freq can be NA!!!
     freq[freq>0.5 & !is.na(freq)] <- 1 - freq[freq>0.5 & !is.na(freq)]
   }
   freq

@@ -1,4 +1,4 @@
-testthat::test_that(".genotypes_means computes correctly",{
+testthat::test_that("snpbin_list_means computes correctly",{
   test_ind_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,2),
@@ -11,8 +11,8 @@ testthat::test_that(".genotypes_means computes correctly",{
                           allele_alt = c("t","c", NA,"c","g","a"))
   test_gen <- gen_tibble(test_ind_meta, test_genotypes, test_loci)
 
-  expect_true(all(.genotypes_means(test_gen$genotypes, use_c = FALSE)==
+  expect_true(all(snpbin_list_means(test_gen$genotypes, use_c = FALSE)==
                     colSums(test_genotypes, na.rm=TRUE)/(c(3,3,3,2,3,1)*2)))
-  expect_true(all(.genotypes_means(test_gen$genotypes, use_c = TRUE)==
+  expect_true(all(snpbin_list_means(test_gen$genotypes, use_c = TRUE)==
                     colSums(test_genotypes, na.rm=TRUE)/(c(3,3,3,2,3,1)*2)))
 })

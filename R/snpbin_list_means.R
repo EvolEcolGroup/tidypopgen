@@ -18,17 +18,17 @@
 #' @export
 
 
-.genotypes_means <- function(.x, alleles_as_units = TRUE, use_c = FALSE){
+snpbin_list_means <- function(.x, alleles_as_units = TRUE, use_c = FALSE){
 
   ## DEFAULT, VECTOR-WISE PROCEDURE ##
   if(alleles_as_units){ # use alleles
     ploidy <- show_ploidy(.x)
-    N <- sum(ploidy) - .genotypes_count_na(.x, alleles_as_units=TRUE)
+    N <- sum(ploidy) - snpbin_list_count_na(.x, alleles_as_units=TRUE)
   } else { # use relative frequencies of individuals
     nInd <- length(.x)
-    N <- nInd - .genotypes_count_na(.x, alleles_as_units=FALSE)
+    N <- nInd - snpbin_list_count_na(.x, alleles_as_units=FALSE)
   }
-  res <- .genotypes_sums(.x, alleles_as_units=alleles_as_units, use_c = use_c)/N
+  res <- snpbin_list_sums(.x, alleles_as_units=alleles_as_units, use_c = use_c)/N
 
   names(res) <- attr(.x,"loci")$name
   return(res)

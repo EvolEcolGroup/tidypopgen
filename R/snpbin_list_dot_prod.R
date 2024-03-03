@@ -6,7 +6,7 @@
 #' compute intermediate quantities.
 #' When ploidy varies across individuals, the outputs of this function depend
 #' on whether the information units are individuals, or
-#' alleles within individuals (see details for [.genotypes_sums()]).
+#' alleles within individuals (see details for [snpbin_list_sums()]).
 #'
 #' This function is a modified version
 #' of [adegenet::glDotProd], recoded to work on lists of `SNPbin` objects as used
@@ -32,7 +32,7 @@
 #' @export
 
 
-.genotypes_dot_prod <- function(.x, center=FALSE, scale=FALSE, alleles_as_units=FALSE,
+snpbin_list_dot_prod <- function(.x, center=FALSE, scale=FALSE, alleles_as_units=FALSE,
                         parallel=FALSE, n_cores=NULL){
 
     if(parallel && is.null(n_cores)){
@@ -50,13 +50,13 @@
     if(!parallel){ # DO NOT USE MULTIPLE CORES
       ## GET INPUTS TO C PROCEDURE ##
       if(center){
-        mu <- .genotypes_means(.x,alleles_as_units=alleles_as_units)
+        mu <- snpbin_list_means(.x,alleles_as_units=alleles_as_units)
       } else {
         mu <- rep(0, nLoci)
       }
 
       if(scale){
-        s <- sqrt(.genotypes_vars(.x,alleles_as_units=alleles_as_units))
+        s <- sqrt(snpbin_list_vars(.x,alleles_as_units=alleles_as_units))
         if(any(s<1e-10)) {
           warning("Null variances have been detected; corresponding alleles won't be standardized.")
         }
@@ -90,13 +90,13 @@
         i <- i+1
         ## GET INPUTS TO C PROCEDURE ##
         if(center){
-          mu <- .genotypes_means(block,alleles_as_units=alleles_as_units)
+          mu <- snpbin_list_means(block,alleles_as_units=alleles_as_units)
         } else {
           mu <- rep(0, nrow(attr(block,"loci")))
         }
 
         if(scale){
-          s <- sqrt(.genotypes_vars(block,alleles_as_units=alleles_as_units))
+          s <- sqrt(snpbin_list_vars(block,alleles_as_units=alleles_as_units))
           if(any(s<1e-10)) {
             warning("Null variances have been detected; corresponding alleles won't be standardized.")
           }

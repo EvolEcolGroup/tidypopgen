@@ -43,7 +43,7 @@
 #' on compulsory columns that will always be present)
 #' @export
 
-.genotypes_sums <- function (.x, alleles_as_units=TRUE, use_c=FALSE){
+snpbin_list_sums <- function (.x, alleles_as_units=TRUE, use_c=FALSE){
 
   nInd <- length(.x)
   nLoci <- nrow(attr(.x,"loci"))
