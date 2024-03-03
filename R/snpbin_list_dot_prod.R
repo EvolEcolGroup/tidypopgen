@@ -81,8 +81,6 @@ snpbin_list_dot_prod <- function(.x, center=FALSE, scale=FALSE, alleles_as_units
     } else { # USE MULTIPLE CORES
       stop("this has not been implemented yet!")
       # @FIXME we need to implement something equivalent to seploc!!!!
-      # I don't think this is efficient, as it creates a bit copy in memory
-      # we would be better off indexing the blocks
       .x <- seploc(.x, n.block = n_cores) # one block per core (x is now a list of genlight)
       temp <- list()
       i <- 0

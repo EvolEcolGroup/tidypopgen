@@ -1,46 +1,18 @@
-a1<-15
-n1<-25
-# expect het for a locus
-h1 <- (a1*(n1-a1))/(n1*(n1-1))
-h1
-
-
-
-#########
-a1 <- colSums2(as.matrix(pop1),na.rm=T)
-a2 <- colSums2(as.matrix(pop2),na.rm=T)
-n1 <- apply(as.matrix(pop1),2,function(x) 2*sum(!is.na(x)))
-n2 <- apply(as.matrix(pop2),2,function(x) 2*sum(!is.na(x)))
-
-h1 <- (a1*(n1-a1))/(n1*(n1-1))
-h2 <- (a2*(n2-a2))/(n2*(n2-1))
-
-N <- (a1/n1 - a2/n2)^2 - h1/n1 - h2/n2
-D <- N + h1 + h2
-
-F <- sum(N, na.rm=T)/sum(D, na.rm=T)
-
-
-pairwise_fst <- function(.x) {
-  # check that the data are diploid
-
-  #@TODO
-  # loci sums
-  # do something clever like first count na and then apply addition by column
-}
-
-# make such a function using loci_freq as a template
-# then do the same for het_obs
-# finally use these two functions for ind functions (by taking the mean)
-loci_het_exp <- function(.x){
-  sums <- snpbin_list_sums(.x, alleles_as_units = TRUE)
-  n <- snpbin_list_n(.x, alleles_as_units = TRUE)
-  return((sums*(n-sums))/(n*(n-1)))
-}
+#' Compute pairwise Hudson Fst
+#'
+#' This function computes pairwise Fst using the formulation by Hudson.
+#' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
+#' @param by_locus boolean, determining whether Fst should be returned by locus(TRUE),
+#' or as a single genome wide value obtained by taking the ratio of the mean numerator
+#' and denominator (FALSE, the default).
+#' @returns a tibble with each pairwise combination as a row
+#' @export
 
 gt_pairwise_fst <- function(.x, by_locus=FALSE){
-
-  warning("this function is not properly tested yet!!!")
+  if (!inherits(.x,"grouped_df")){
+    stop (".x should be a grouped df")
+  }
+  message("this function is not properly tested yet!!!")
   # check matrix(unlist(z, use.names = FALSE), ncol = 10, byrow = TRUE)
   # is known to be faster than do.call(rbind,f)
   # see https://stackoverflow.com/questions/13224553/how-to-convert-a-huge-list-of-vector-to-a-matrix-more-efficiently
@@ -54,16 +26,16 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
   # get the total  number of alleles (i.e. removing NAs) for each locus in each group
   n <- matrix(unlist(.x %>%
                        group_map(.f=~snpbin_list_n(.x$genotypes, alleles_as_units = TRUE)),
-                        use.names = FALSE), ncol = n_loci, byrow = TRUE)
+                     use.names = FALSE), ncol = n_loci, byrow = TRUE)
   # function to compute het by row
   het_exp_by_row <- function(i, sums, n){(sums[i,]*(n[i,]-sums[i,]))/(n[i,]*(n[i,]-1))}
   # get het at each locus for each population
   het <- matrix(unlist(lapply(1:nrow(sums), het_exp_by_row, sums, n),
-                     use.names = FALSE), ncol = n_loci, byrow = TRUE)
+                       use.names = FALSE), ncol = n_loci, byrow = TRUE)
 
   # get the grouping column, and creat all pairwise combination of indeces
   .group_levels = .x %>% group_keys()
-  pairwise_combn <- t(combn(nrow(.group_levels),2))
+  pairwise_combn <- t(utils::combn(nrow(.group_levels),2))
   numerator <- matrix(NA_real_, nrow = nrow(pairwise_combn), ncol = n_loci)
   denominator <- matrix(NA_real_, nrow = nrow(pairwise_combn), ncol = n_loci)
   for (i_row in seq_len(nrow(pairwise_combn))){
@@ -90,7 +62,7 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
       return(numerator[i,]/denominator[i,])
     }
     fst_vals <- matrix(unlist(lapply(seq_len(nrow(numerator)),fst_by_row, numerator, denominator),
-                         use.names = FALSE), ncol = n_loci, byrow = TRUE)
+                              use.names = FALSE), ncol = n_loci, byrow = TRUE)
     colnames(fst_vals) <- show_loci_names(.x)
     return(fst %>% cbind(fst_vals))
   }

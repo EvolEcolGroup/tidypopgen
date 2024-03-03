@@ -269,6 +269,11 @@ In population genetics, we are generally interested in computing quantities that
 describe groups of individuals (i.e. populations). Grouping can be used in a 
 number of ways.
 
+As a starting point, we can group by population and get pop sizes:
+```{r}
+example_gt %>% group_by(population) %>% tally()
+```
+
 For functions that return one result per individual (such as
 `ind_H_obs` that we used before), we can use summarise, which returns a
 new `tibble` with one line per population. For example, we can count the number of individuals 
@@ -295,6 +300,7 @@ example_gt %>% group_by(population) %>% loci_freq()
 In reality, such grouped methods are nothing more than a wrapper for the
 the appropriate `group_map` syntax, but they do make life a little bit simpler.
 
+Certain metrics and analyiss are naturally defined by a grouped tibble 
 
 # Reading and exporting data
 
