@@ -14,6 +14,6 @@ testthat::test_that("gt_pairwise_fst computes Hudson Fst correctly",{
   grouped_gt <- test_gen %>% group_by(population)
   #we need some tests! Are we happy with the above, or do we need a more complex test?
   # ideally , we should look for an implementation that we can use a reference (hierfsta??)
-  #fst <- grouped_gt %>% gt_pairwise_fst()
-  #fst_by_locus <- grouped_gt %>% gt_pairwise_fst(by_locus = TRUE)
+  fst <- grouped_gt %>% gt_pairwise_fst()
+  fst_by_locus <- grouped_gt %>% gt_pairwise_fst(by_locus = TRUE)
 })

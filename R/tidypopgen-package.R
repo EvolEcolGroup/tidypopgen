@@ -5,5 +5,6 @@
 #' @import adegenet
 #' @import dplyr
 #' @import tibble
+#' @importFrom rlang :=
 ## usethis namespace: end
 NULL

@@ -1,15 +1,11 @@
 #' Principal Component Analysis for `gen_tibble` object
 #'
 #' This function implements Principal Component Analysis for `gen_tibble`. It
-#' is a modified version of [adegenet::glPca], and returns an object that is
+#' is a modified version of [adegenet::glPca()], and returns an object that is
 #' of class `glPca`, meaning that it is possible to use plotting and summary
 #' functions from the
-#' the package `adegenet`.
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
-#' a [`gen_tibble`] object),
-#' or a [`gen_tibble`].
-
-
+#' the package `adegenet` (for details on those function, see the help page
+#' for [adegenet::glPca()].
 #' @param x	a [gen_tibble] object
 #' @param center a logical indicating whether the numbers of alleles should
 #' be centered; defaults to TRUE
@@ -127,7 +123,7 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
 
 
       ## COMPUTE ALL POSSIBLE DOT PRODUCTS (XX^T / n) ##
-      allComb <- combn(1:nInd, 2)
+      allComb <- utils::combn(1:nInd, 2)
       if(parallel){
         allProd <- unlist(parallel::mclapply(1:ncol(allComb), function(i) dotProd(x[[allComb[1,i]]], x$genotypes[[allComb[2,i]]], myPloidy[allComb[1,i]], myPloidy[allComb[2,i]]),
                                              mc.cores=n_cores, mc.silent=TRUE, mc.cleanup=TRUE, mc.preschedule=FALSE))
@@ -168,7 +164,7 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
 
   ## scan nb of axes retained
   if(is.null(nf)){
-    barplot(eigRes$values, main="Eigenvalues", col=heat.colors(rank))
+    graphic::barplot(eigRes$values, main="Eigenvalues", col=grDevices::heat.colors(rank))
     cat("Select the number of axes: ")
     nf <- as.integer(readLines(con = getOption('adegenet.testcon'), n = 1))
   }
@@ -225,7 +221,7 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
 
   if(!is.null(res$loadings)){
     colnames(res$loadings) <- paste("Axis", 1:nf, sep="")
-    # TODO quick hack
+    # TODO quick hack, bring back the lables AM
     # if(!is.null(show_loci_names(x_gt)) & !is.null(alleles(x))){
     #   rownames(res$loadings) <- paste(show_loci_names(x_gt),alleles(x), sep=".")
     # } else {
