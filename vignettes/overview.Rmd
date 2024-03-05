@@ -300,7 +300,13 @@ example_gt %>% group_by(population) %>% loci_freq()
 In reality, such grouped methods are nothing more than a wrapper for the
 the appropriate `group_map` syntax, but they do make life a little bit simpler.
 
-Certain metrics and analyiss are naturally defined by a grouped tibble 
+Certain metrics and analysis are naturally defined by a grouped tibble, such as
+distance metrics among populations. For example:
+
+```{r}
+example_gt %>% group_by(population) %>% gt_pairwise_fst()
+
+```
 
 # Reading and exporting data
 
@@ -321,17 +327,28 @@ out_file <- tempfile()
 gt_write_plink(plink_gt, file = out_file)
 ```
 
-Alternatively, we can write a plink `ped` file with:
+This will write both a `.raw` file as well as a `.map` file
+
+Alternatively, we can write a plink `.ped` instead ofa `.raw` file with:
 ```{r}
 gt_write_plink(plink_gt, file = out_file, plink_format = "ped")
 ```
 
-
-It is also possible to import data from `adegenet::genelight` objects, which are
+It is also possible to convert back and from from `adegenet::genelight` objects, which are
 well integrated into a number of existing packages to explore the data with, for example, PCA and
-clustering, as well as a wealth of export possibilities. Given an object
-`x_genlight`, we can simply create a `gen_tibble` object with
-`as_gen_tibble(x_genlight)`.
+clustering, as well as a wealth of export possibilities.
+
+```{r}
+plink_gl <- as_genlight(plink_gt)
+plink_gl
+```
+And back to `gen_tibble` (note that we have lost the additional metadata (such
+as sex) which are not coded in `genlight` objects:
+```{r}
+plink_back_gt <- as_gen_tibble(plink_gl)
+plink_back_gt
+
+```
 
 # Merging data
 
@@ -381,3 +398,25 @@ determine the strand and order of alleles):
 ```{r}
 plink_merged %>% show_loci()
 ```
+
+# Population genetics analyses
+
+Besides using various metrics to describe populations, we often want to perform
+more complex analyses, such as Principal Component Analysis or clustering. 
+
+For example, we can ran a PCA with:
+
+```{r}
+pca_merged <- plink_merged %>% gt_pca(nf=2)
+pca_merged
+```
+Note that the object has both class `gt_pca` and `glPca` (the class for PCA
+from `genlight` objects from the `adegenet` package). This means that we can
+use all functions from the `adegenet` package for exploring the PCA. E.g.:
+```{r}
+scatter(pca_merged)
+```
+In the future, we will add methods to `broom` and `augment` this object, but for
+the moment refer to the `adegenet` tutorials and help pages to see how you can modify
+the plots.
+

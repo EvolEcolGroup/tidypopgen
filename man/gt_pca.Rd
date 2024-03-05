@@ -5,21 +5,21 @@
 \title{Principal Component Analysis for \code{gen_tibble} object}
 \usage{
 gt_pca(
-  x,
+  .x,
   center = TRUE,
   scale = FALSE,
   nf = NULL,
   loadings = TRUE,
   alleles_as_units = FALSE,
-  useC = TRUE,
+  use_c = TRUE,
   parallel = FALSE,
   n_cores = NULL,
-  returnDotProd = FALSE,
-  matDotProd = NULL
+  return_dot_prod = FALSE,
+  mat_dot_prod = NULL
 )
 }
 \arguments{
-\item{x}{a \link{gen_tibble} object}
+\item{.x}{a \link{gen_tibble} object}
 
 \item{center}{a logical indicating whether the numbers of alleles should
 be centered; defaults to TRUE}
@@ -35,28 +35,28 @@ will be asked for a number of retained axes.}
 be computed (TRUE, default), or not (FALSE). Vectors of loadings are not
 always useful, and can take a large amount of RAM when millions of SNPs are considered.}
 
-\item{useC}{a logical indicating whether compiled C code should be used for
+\item{alleles_as_units}{a logical indicating whether alleles are considered as
+units (i.e., a diploid genotype equals two samples, a triploid, three, etc.)
+or whether individuals are considered as units of information.}
+
+\item{use_c}{a logical indicating whether compiled C code should be used for
 faster computations; this option cannot be used alongside parallel option.}
 
 \item{parallel}{a logical indicating whether multiple cores -if available-
 should be used for the computations (TRUE), or not (FALSE, default); requires
 the package parallel to be installed (see details); this option cannot be
-used alongside useCoption.}
+used alongside use_coption.}
 
-\item{returnDotProd}{a logical indicating whether the matrix of dot products
+\item{n_cores}{if parallel is TRUE, the number of cores to be used in the
+computations; if NULL, then the maximum number of cores available on the computer is used.}
+
+\item{return_dot_prod}{a logical indicating whether the matrix of dot products
 between individuals should be returned (TRUE) or not (FALSE, default).}
 
-\item{matDotProd}{an optional matrix of dot products between individuals,
+\item{mat_dot_prod}{an optional matrix of dot products between individuals,
 NULL by default. This option is used internally to speed up computation
 time when re-running the same PCA several times. Leave this argument as NULL
 unless you really know what you are doing.}
-
-\item{alleleAsUnit}{a logical indicating whether alleles are considered as
-units (i.e., a diploid genotype equals two samples, a triploid, three, etc.)
-or whether individuals are considered as units of information.}
-
-\item{n.cores}{if parallel is TRUE, the number of cores to be used in the
-computations; if NULL, then the maximum number of cores available on the computer is used.}
 }
 \value{
 an object of class \code{gt_pca} (a subclass of \code{\link[adegenet:glPca]{adegenet::glPca}}, with the following components:

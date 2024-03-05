@@ -6,7 +6,7 @@
 #' functions from the
 #' the package `adegenet` (for details on those function, see the help page
 #' for [adegenet::glPca()].
-#' @param x	a [gen_tibble] object
+#' @param .x	a [gen_tibble] object
 #' @param center a logical indicating whether the numbers of alleles should
 #' be centered; defaults to TRUE
 #' @param scale	a logical indicating whether the numbers of alleles should
@@ -17,20 +17,20 @@
 #' @param loadings a logical indicating whether loadings of the alleles should
 #' be computed (TRUE, default), or not (FALSE). Vectors of loadings are not
 #' always useful, and can take a large amount of RAM when millions of SNPs are considered.
-#' @param alleleAsUnit a logical indicating whether alleles are considered as
+#' @param alleles_as_units a logical indicating whether alleles are considered as
 #' units (i.e., a diploid genotype equals two samples, a triploid, three, etc.)
 #' or whether individuals are considered as units of information.
-#' @param useC a logical indicating whether compiled C code should be used for
+#' @param use_c a logical indicating whether compiled C code should be used for
 #' faster computations; this option cannot be used alongside parallel option.
 #' @param parallel a logical indicating whether multiple cores -if available-
 #' should be used for the computations (TRUE), or not (FALSE, default); requires
 #' the package parallel to be installed (see details); this option cannot be
-#' used alongside useCoption.
-#' @param n.cores	if parallel is TRUE, the number of cores to be used in the
+#' used alongside use_coption.
+#' @param n_cores	if parallel is TRUE, the number of cores to be used in the
 #' computations; if NULL, then the maximum number of cores available on the computer is used.
-#' @param returnDotProd	a logical indicating whether the matrix of dot products
+#' @param return_dot_prod	a logical indicating whether the matrix of dot products
 #' between individuals should be returned (TRUE) or not (FALSE, default).
-#' @param matDotProd an optional matrix of dot products between individuals,
+#' @param mat_dot_prod an optional matrix of dot products between individuals,
 #' NULL by default. This option is used internally to speed up computation
 #' time when re-running the same PCA several times. Leave this argument as NULL
 #' unless you really know what you are doing.
@@ -41,31 +41,31 @@
 #' loadings (optional) a matrix of loadings, containing the loadings of each SNP (in row) for each principal axis (in column).
 #' @export
 
-gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_as_units=FALSE,
-                  useC=TRUE, parallel=FALSE, n_cores=NULL,
-                  returnDotProd=FALSE, matDotProd=NULL){
+gt_pca <- function(.x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_as_units=FALSE,
+                  use_c=TRUE, parallel=FALSE, n_cores=NULL,
+                  return_dot_prod=FALSE, mat_dot_prod=NULL){
   #browser()
-  nInd <- nrow(x)
-  nLoc <- nrow(show_loci(x))
+  nInd <- nrow(.x)
+  nLoc <- nrow(show_loci(.x))
   ## COMPUTE MEANS AND VARIANCES ##
   if(center) {
-    vecMeans <- snpbin_list_means(x$genotypes, alleles_as_units=alleles_as_units)
+    vecMeans <- snpbin_list_means(.x$genotypes, alleles_as_units=alleles_as_units)
     if(any(is.na(vecMeans))) stop("NAs detected in the vector of means")
   }
 
   if(scale){
-    vecVar <- snpbin_list_vars(x$genotypes, alleles_as_units=alleles_as_units)
+    vecVar <- snpbin_list_vars(.x$genotypes, alleles_as_units=alleles_as_units)
     if(any(is.na(vecVar))) stop("NAs detected in the vector of variances")
   }
 
 
-  myPloidy <- show_ploidy(x)
+  myPloidy <- show_ploidy(.x)
 
   ## NEED TO COMPUTE DOT PRODUCTS ##
-  if(is.null(matDotProd)){
+  if(is.null(mat_dot_prod)){
 
     ## == if non-C code is used ==
-    if(!useC){
+    if(!use_c){
       ## if(parallel && !require(parallel)) stop("parallel package requested but not installed")
       if(parallel && is.null(n_cores)){
         n_cores <- parallel::detectCores()
@@ -125,10 +125,10 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
       ## COMPUTE ALL POSSIBLE DOT PRODUCTS (XX^T / n) ##
       allComb <- utils::combn(1:nInd, 2)
       if(parallel){
-        allProd <- unlist(parallel::mclapply(1:ncol(allComb), function(i) dotProd(x[[allComb[1,i]]], x$genotypes[[allComb[2,i]]], myPloidy[allComb[1,i]], myPloidy[allComb[2,i]]),
+        allProd <- unlist(parallel::mclapply(1:ncol(allComb), function(i) dotProd(.x[[allComb[1,i]]], .x$genotypes[[allComb[2,i]]], myPloidy[allComb[1,i]], myPloidy[allComb[2,i]]),
                                              mc.cores=n_cores, mc.silent=TRUE, mc.cleanup=TRUE, mc.preschedule=FALSE))
       } else {
-        allProd <- unlist(lapply(1:ncol(allComb), function(i) dotProd(x$genotypes[[allComb[1,i]]], x$genotypes[[allComb[2,i]]], myPloidy[allComb[1,i]], myPloidy[allComb[2,i]]) ))
+        allProd <- unlist(lapply(1:ncol(allComb), function(i) dotProd(.x$genotypes[[allComb[1,i]]], .x$genotypes[[allComb[2,i]]], myPloidy[allComb[1,i]], myPloidy[allComb[2,i]]) ))
       }
       allProd <- allProd / nInd # assume uniform weights
 
@@ -141,18 +141,18 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
 
       ## compute the diagonal
       if(parallel){
-        temp <- unlist(parallel::mclapply(1:nInd, function(i) dotProd(x$genotypes[[i]], x$genotypes[[i]], myPloidy[i], myPloidy[i]),
+        temp <- unlist(parallel::mclapply(1:nInd, function(i) dotProd(.x$genotypes[[i]], .x$genotypes[[i]], myPloidy[i], myPloidy[i]),
                                           mc.cores=n_cores, mc.silent=TRUE, mc.cleanup=TRUE, mc.preschedule=FALSE))/nInd
       } else {
-        temp <- unlist(lapply(1:nInd, function(i) dotProd(x$genotypes[[i]], x$genotypes[[i]], myPloidy[i], myPloidy[i]) ))/nInd
+        temp <- unlist(lapply(1:nInd, function(i) dotProd(.x$genotypes[[i]], .x$genotypes[[i]], myPloidy[i], myPloidy[i]) ))/nInd
       }
       diag(allProd) <- temp
     } else { # === use C computations ====
-      allProd <- snpbin_list_dot_prod(x$genotypes, center=center, scale=scale, alleles_as_units=alleles_as_units, parallel=parallel, n_cores=n_cores)/nInd
+      allProd <- snpbin_list_dot_prod(.x$genotypes, center=center, scale=scale, alleles_as_units=alleles_as_units, parallel=parallel, n_cores=n_cores)/nInd
     }
   } else { # END NEED TO COMPUTE DOTPROD
-    if(!all(dim(matDotProd)==nInd)) stop("matDotProd has wrong dimensions.")
-    allProd <- matDotProd
+    if(!all(dim(mat_dot_prod)==nInd)) stop("mat_dot_prod has wrong dimensions.")
+    allProd <- mat_dot_prod
   }
 
   ## PERFORM THE ANALYSIS ##
@@ -164,7 +164,7 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
 
   ## scan nb of axes retained
   if(is.null(nf)){
-    graphic::barplot(eigRes$values, main="Eigenvalues", col=grDevices::heat.colors(rank))
+    graphics::barplot(eigRes$values, main="Eigenvalues", col=grDevices::heat.colors(rank))
     cat("Select the number of axes: ")
     nf <- as.integer(readLines(con = getOption('adegenet.testcon'), n = 1))
   }
@@ -192,7 +192,7 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
     ## and X^TV = A_1 + ... + A_n
     ## with A_k = X_[k-]^T v[k-]
     for(k in 1:nInd){
-      temp <- as.integer(x$genotypes[[k]]) / myPloidy[k]
+      temp <- as.integer(.x$genotypes[[k]]) / myPloidy[k]
       if(center) {
         temp[is.na(temp)] <- vecMeans[is.na(temp)]
         temp <- temp - vecMeans
@@ -213,8 +213,8 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
   #browser()
   ## FORMAT OUTPUT ##
   colnames(res$scores) <- paste("PC", 1:nf, sep="")
-  if(!is.null(x$id)){
-    rownames(res$scores) <- x$id
+  if(!is.null(.x$id)){
+    rownames(res$scores) <- .x$id
   } else {
     rownames(res$scores) <- 1:nInd
   }
@@ -229,9 +229,9 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
     # }
   }
 
-  if(returnDotProd){
+  if(return_dot_prod){
     res$dotProd <- allProd
-    rownames(res$dotProd) <- colnames(res$dotProd) <- x$id
+    rownames(res$dotProd) <- colnames(res$dotProd) <- .x$id
   }
 
   res$call <- match.call()
@@ -240,4 +240,23 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
 
   return(res)
 
+}
+
+# a print method
+#' @method print gt_pca
+#' @export
+print.gt_pca <- function(x, ...){
+  cat(" === PCA of gen_tibble object ===")
+  cat("\nClass: list of type gt_pca glPca")
+  cat("\nCall ($call):")
+  print(x$call)
+  cat("\nEigenvalues ($eig):\n", round(utils::head(x$eig,6),3), ifelse(length(x$eig)>6, "...\n", "\n") )
+  cat("\nPrincipal components ($scores):\n matrix with", nrow(x$scores), "rows (individuals) and", ncol(x$scores), "columns (axes)", "\n")
+  if(!is.null(x$loadings)){
+    cat("\nPrincipal axes ($loadings):\n matrix with", nrow(x$loadings), "rows (SNPs) and", ncol(x$loadings), "columns (axes)", "\n")
+  }
+  if(!is.null(x$dotProd)){
+    cat("\nDot products between individuals ($dotProd):\n matrix with", nrow(x$dotProd), "rows and", ncol(x$dotProd), "columns", "\n")
+  }
+  cat("\n")
 }

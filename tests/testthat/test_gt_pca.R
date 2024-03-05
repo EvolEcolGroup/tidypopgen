@@ -11,6 +11,6 @@ library(adegenet)
   pca_gt <- gt_pca(x_gt, nf=2)
   expect_true(all.equal(pca_gl$scores,pca_gt$scores, check.attributes = FALSE))
   # now use C to compute the dot product
-  pca_gt_c <- gt_pca(x_gt, nf=2, useC = TRUE)
+  pca_gt_c <- gt_pca(x_gt, nf=2, use_c = TRUE)
   expect_identical(pca_gt$scores, pca_gt_c$scores)
 })

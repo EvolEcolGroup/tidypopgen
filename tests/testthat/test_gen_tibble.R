@@ -27,7 +27,8 @@ testthat::test_that("gen_tibble stores data correctly",{
   expect_identical(extracted_ploidy, as.integer(rep(2,nrow(test_ind_meta))))
   expect_identical(show_ploidy(test_gen$genotypes),as.integer(rep(2,nrow(test_ind_meta))))
 
-  # example of dropping the genotypes
-  #test_gen %>% select(-genotypes)
+  # example of dropping the genotypes, leading to a change in class
+  test_drop <- test_gen %>% select(-genotypes)
+  expect_false(inherits(test_drop,"gen_tbl"))
 
 })
