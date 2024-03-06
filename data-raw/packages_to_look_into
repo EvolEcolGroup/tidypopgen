@@ -7,3 +7,7 @@ genio for reading/writing PLINK
 An excellent tutorial in R showing a full workflow with adegenet:
 https://tomjenkins.netlify.app/tutorials/r-popgen-getting-started/#contents
 
+
+Very nice walkthrough of how to tidy plot ADMIXTURE results:
+https://owensgl.github.io/biol525D/Topic_8-9/plotting_structure.html
+

@@ -9,7 +9,7 @@
 #' @export
 #' @export
 as_genlight <- function(x, ...) {
-  new_gl <- new("genlight")
+  new_gl <- methods::new("genlight")
   new_gl@gen <- x$genotypes
   new_gl@n.loc <- nrow(show_loci(x))
   new_gl@ind.names <- x$id
@@ -21,7 +21,7 @@ as_genlight <- function(x, ...) {
   new_gl@chromosome <- as.factor(show_loci(x)$chromosome)
   new_gl@position <- as.integer(show_loci(x)$position)
   new_gl@ploidy <- unlist(lapply(x$genotypes,adegenet::ploidy))
-  if (!validObject(new_gl)){
+  if (!methods::validObject(new_gl)){
     stop("something went wrong when converting")
   } else{
     return(new_gl)

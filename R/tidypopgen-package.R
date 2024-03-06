@@ -8,3 +8,8 @@
 #' @importFrom rlang :=
 ## usethis namespace: end
 NULL
+
+#' @importFrom generics tidy
+#' @importFrom generics augment
+#' @export
+generics::tidy
