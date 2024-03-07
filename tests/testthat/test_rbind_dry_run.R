@@ -134,3 +134,43 @@ testthat::test_that("missing cases are given the correct alleles",{
 
 })
 
+
+
+#reference file reordered
+raw_path_reordered_pop_b <- system.file("extdata/pop_b_reordered.raw", package = "tidypopgen")
+map_path_reordered_pop_b <- system.file("extdata/pop_b_reordered.map", package = "tidypopgen")
+pop_b_gen_reordered <- read_plink_raw(file = raw_path_reordered_pop_b, map_file = map_path_reordered_pop_b, quiet = TRUE)
+
+
+testthat::test_that("reordering",{
+
+  #create merge report
+  report <- rbind_dry_run(pop_b_gen, pop_a_gen, flip_strand = TRUE,
+                          remove_ambiguous = TRUE, quiet = TRUE)
+
+  #create a new merge report with a dataset in a different order
+  report2 <- rbind_dry_run(pop_b_gen_reordered, pop_a_gen, flip_strand = TRUE,
+                          remove_ambiguous = TRUE, quiet = TRUE)
+
+  #Store the results of the merge report for the target data
+  report_original <- report$target
+  report_new_order <- report2$target
+
+  #Order both reports
+  report_original <- report_original[order(report_original$name),]
+  report_new_order <- report_new_order[order(report_new_order$name),]
+
+  #Deselect the new_id column
+  report_original <- report_original[c(1,3:7)]
+  report_new_order <- report_new_order[c(1,3:7)]
+
+  #Check whether merge report is the same
+  testthat::expect_identical(report_original,report_new_order)
+  #This is where the test fails
+
+
+
+})
+
+
+
