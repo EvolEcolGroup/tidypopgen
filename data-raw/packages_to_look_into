@@ -11,3 +11,5 @@ https://tomjenkins.netlify.app/tutorials/r-popgen-getting-started/#contents
 Very nice walkthrough of how to tidy plot ADMIXTURE results:
 https://owensgl.github.io/biol525D/Topic_8-9/plotting_structure.html
 
+pop genomics in R, with ggplot examples for adegenet
+https://grunwaldlab.github.io/Population_Genetics_in_R/clustering_plot.html
