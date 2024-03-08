@@ -25,7 +25,8 @@ testthat::test_that("merge report detects matching rsID's correctly",{
 
 
   # now create report directly from the files and check that it is the same as from the genlight objects
-#  report_char <- em_merge_report(target = raw_path_pop_a, ref = raw_path_pop_b, quiet = TRUE)
+#  report_char <- rbind_dry_run(ref = raw_path_pop_b, target = raw_path_pop_a, flip_strand = TRUE,
+#                               remove_ambiguous = TRUE, quiet = TRUE)
 #  testthat::expect_identical(report, report_char)
 
 })
@@ -42,14 +43,35 @@ testthat::test_that("merge report evaluates non-matching target loci correctly",
 
 })
 
+testthat::test_that("merge report detects ambiguous alleles correctly",{
+  #Based on expectations from manual inspection of the data
+
+  #Ambiguous found in both sets
+  ambiguous_both_sets <- subset(report$target,report$target$name == "rs1240719")
+  testthat::expect_true(ambiguous_both_sets$ambiguous)
+  testthat::expect_true(is.na(ambiguous_both_sets$new_id))
+
+  #Ambiguous in the target set only
+  ambiguous_target_set <- subset(report$target,report$target$name == "rs307354")
+  testthat::expect_true(ambiguous_both_sets$ambiguous)
+  testthat::expect_true(is.na(ambiguous_both_sets$new_id))
+
+  #Ambiguous in the ref set only
+  ambiguous_ref_set <- subset(report$target,report$target$name == "rs2843130")
+  testthat::expect_true(ambiguous_both_sets$ambiguous)
+  testthat::expect_true(is.na(ambiguous_both_sets$new_id))
+
+
+})
+
 
 testthat::test_that("merge report detects flip alleles correctly",{
  #Based on expectations from manual inspection of the data
 
   #Matching strand, matching order:
   condition1 <- subset(report$target, report$target$name %in% c("rs3094315", "rs3131972", "rs1110052"))
-  testthat::expect_false(all(condition1$to_flip))
-  testthat::expect_false(all(condition1$to_swap))
+  testthat::expect_true(all(condition1$to_flip == FALSE))
+  testthat::expect_true(all(condition1$to_swap == FALSE))
 
   #Matching strand, opposite order:
   condition2 <- subset(report$target, report$target$name %in% c("rs11240777"))
@@ -63,31 +85,92 @@ testthat::test_that("merge report detects opposite strand alleles correctly",{
 
   #Opposite strand, matching order:
   condition3 <- subset(report$target, report$target$name %in% c("rs2862633","rs28569024"))
-  testthat::expect_true(all(condition3$to_flip))
-  testthat::expect_false(all(condition3$to_swap))
+  testthat::expect_true(all(condition3$to_flip == TRUE))
+  testthat::expect_true(all(condition3$to_swap == FALSE))
 
   #Opposite strand, opposite order:
-  condition4 <- subset(report$target, report$target$name %in% c("rs10106770"))
+  condition4 <- subset(report$target, report$target$name == "rs10106770")
   testthat::expect_true(all(condition4$to_flip))
   testthat::expect_true(all(condition4$to_swap))
 
 })
 
-testthat::test_that("missing cases are given the correct allele",{
+testthat::test_that("missing cases are given the correct alleles",{
 
-  #Manually check case rs1110052: a T/G snp, coded m/t in pop_b_gen
-  missing_pop_b <- subset(report$ref, name == "rs1110052")
-  testthat::expect_equal(missing_pop_b$missing_allele, "t")
+  #rs4477212: missing allele in target data, but snp not in ref data
 
-  #Manually check cases rs3094315 and rs11942835:
-  missing_pop_a <- subset(report$target, name %in% c("rs3094315","rs11942835"))
-  testthat::expect_equal(missing_pop_a$missing_allele, c("g","c"))
-
-  #Check no missing allele given if rsID isn't in reference set
-
-  #rs4477212 missing allele in target data, but snp not in ref data
+  #Expect NA
   missing_pop_a_non_overlapping <- subset(report$target, name == "rs4477212")
   testthat::expect_true(is.na(missing_pop_a_non_overlapping$missing_allele))
 
+  #rs12124819 and rs6657048: missing in target, same order, same strand
+  #Target 0 A, reference G A
+  #Target 0 C, reference T C
+
+  #Expect false to_flip and to_swap
+  miss_pop_a_ordered <- subset(report$target, report$target$name %in% c("rs12124819","rs6657048"))
+  testthat::expect_true(miss_pop_a_ordered$missing_allele[1] == "g")
+  testthat::expect_true(miss_pop_a_ordered$missing_allele[2] == "t")
+  testthat::expect_true(all(miss_pop_a_ordered$to_swap == FALSE))
+  testthat::expect_true(all(miss_pop_a_ordered$to_flip == FALSE))
+
+  #rs2488991: missing in target, different order, same strand
+  #Target 0 T, reference T G
+
+  #Expect false to_flip and true to_swap
+  miss_pop_a_swapped <- subset(report$target, report$target$name %in% c("rs2488991"))
+  testthat::expect_true(miss_pop_a_swapped$missing_allele == "g")
+  testthat::expect_false(miss_pop_a_swapped$to_flip)
+  testthat::expect_true(miss_pop_a_swapped$to_swap)
+
+  #rs5945676: missing in target, different strand, same order
+  #Target 0 T, reference C A
+
+  #Expect true to_flip and false to_swap
+  miss_pop_a_flipped_swapped <- subset(report$target, report$target$name %in% c("rs5945676"))
+  testthat::expect_true(miss_pop_a_flipped_swapped$missing_allele == "g")
+  testthat::expect_false(miss_pop_a_flipped_swapped$to_swap)
+  testthat::expect_true(miss_pop_a_flipped_swapped$to_flip)
+
 })
+
+
+
+#reference file reordered
+raw_path_reordered_pop_b <- system.file("extdata/pop_b_reordered.raw", package = "tidypopgen")
+map_path_reordered_pop_b <- system.file("extdata/pop_b_reordered.map", package = "tidypopgen")
+pop_b_gen_reordered <- read_plink_raw(file = raw_path_reordered_pop_b, map_file = map_path_reordered_pop_b, quiet = TRUE)
+
+
+testthat::test_that("reordering",{
+
+  #create merge report
+  report <- rbind_dry_run(pop_b_gen, pop_a_gen, flip_strand = TRUE,
+                          remove_ambiguous = TRUE, quiet = TRUE)
+
+  #create a new merge report with a dataset in a different order
+  report2 <- rbind_dry_run(pop_b_gen_reordered, pop_a_gen, flip_strand = TRUE,
+                          remove_ambiguous = TRUE, quiet = TRUE)
+
+  #Store the results of the merge report for the target data
+  report_original <- report$target
+  report_new_order <- report2$target
+
+  #Order both reports
+  report_original <- report_original[order(report_original$name),]
+  report_new_order <- report_new_order[order(report_new_order$name),]
+
+  #Deselect the new_id column
+  report_original <- report_original[c(1,3:7)]
+  report_new_order <- report_new_order[c(1,3:7)]
+
+  #Check whether merge report is the same
+  testthat::expect_identical(report_original,report_new_order)
+  #This is where the test fails
+
+
+
+})
+
+
 
