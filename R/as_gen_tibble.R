@@ -118,7 +118,7 @@ as_gen_tibble.vcfR<- function(.x, n_cores=1,...){
 
     ind_meta <- tibble(id = colnames(.x), population = NA)
 
-    .x <- gen_tibble(ind_meta= ind_meta, genotypes = .x, loci = loci)
+    .x <- gen_tibble(ind_meta= ind_meta, genotypes = t(.x), loci = loci)
 
     return(.x)
   } else {

@@ -17,34 +17,35 @@ knitr::opts_chunk$set(
 
 
 ## An example workflow with real data
-We take the data from :
-https://connor-french.github.io/intro-pop-structure-r/
+We will explore the genetic structure of *Anolis punctatus* in South America,
+using data from Prates et al 2018. We downloaded the vcf file of the genotypes
+from "https://github.com/ivanprates/2018_Anolis_EcolEvol/blob/master/data/VCFtools_SNMF_punctatus_t70_s10_n46/punctatus_t70_s10_n46_filtered.recode.vcf?raw=true" and compressed it to a vcf.gz file.
 
-
-We read in the data that we donwloaded from github (using a gz version of the vcf):
+We read in the data from the compressed vcf with:
 ```{r}
 library(tidypopgen)
-anole_vcf <-
-  vcfR::read.vcfR(
-    "./data_files/punctatus_t70_s10_n46_filtered.recode.vcf.gz"
-  )
+vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+                        package = "tidypopgen")
+anole_vcf <- vcfR::read.vcfR(vcf_path)
 anole_gt <- as_gen_tibble(anole_vcf)
 anole_gt
 ```
 
 Let us simplify the ids, which wll have a "punc_" prefix
 ```{r}
-anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"".data$id,))
+anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
 
 ```
 
 We can see that we have 46 individuals, from 3249 loci. Note that we don't have any
-information on population from the vcf. We need to add this manually:
+information on population from the vcf. That information can be found
+from another file on the github repository ("https://github.com/ivanprates/2018_Anolis_EcolEvol/raw/master/data/plot_order_punctatus_n46.csv).
+We will have add the population information manually. Let's start by reading the
+file:
 ```{r}
-pops <-
-  readr::read_csv(
-    "./data_files/plot_order_punctatus_n46.csv"
-  )
+pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
+                        package = "tidypopgen")
+pops <- readr::read_csv(pops_path)
 pops
 ```
 
@@ -58,7 +59,7 @@ anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
 anole_gt
 ```
 
-Now we cn bring in the pop information:
+Now we can bring in the pop information:
 ```{r}
 anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
 anole_gt

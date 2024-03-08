@@ -122,11 +122,10 @@ tidy.gt_pca <- function(x, matrix = "u", ...) {
 #'  to 'FALSE']containing the original data along with
 #'   additional columns containing each observation's projection into
 #'   PCA space.
-#' @importFrom generics augment
 #' @export
 #' @seealso [gt_pca()] [gt_pca_tidiers]
-#'
-augment.gt_pca <- function(x, data = NULL, drop_genotypes = TRUE,...) {
+
+augment.gt_pca <- function(x, data = NULL, drop_genotypes = TRUE, ...) {
   if (!is.null(data) & drop_genotypes){
       data <- data %>% select(-dplyr::any_of("genotypes"))
     }

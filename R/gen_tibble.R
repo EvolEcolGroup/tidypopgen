@@ -43,7 +43,6 @@ gen_tibble <- function(ind_meta, genotypes, loci, ploidy=NULL){
 #    stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','allele_ref','allele_alt'")
 #  }
   ind_meta <- as.list(ind_meta)
-  #browser()
   #TODO this could be parallelised
   ind_meta$genotypes <- lapply(1:nrow(genotypes), function(i) methods::new("SNPbin",
                                                                            as.integer(genotypes[i,]),ploidy=ploidy[i]) )

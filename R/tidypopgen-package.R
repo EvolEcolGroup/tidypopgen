@@ -10,6 +10,9 @@
 NULL
 
 #' @importFrom generics tidy
-#' @importFrom generics augment
 #' @export
 generics::tidy
+
+#' @importFrom generics augment
+#' @export
+generics::augment

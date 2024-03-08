@@ -35,5 +35,5 @@ a \code{\link[tibble:tibble]{tibble::tibble}} of information (see \code{\link{ge
 on compulsory columns that will always be present)
 }
 \description{
-Extract the information on loci from a  \code{gen_tibble}.
+Extract and set the information on loci from a  \code{gen_tibble}.
 }

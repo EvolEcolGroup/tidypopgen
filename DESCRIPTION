@@ -29,6 +29,7 @@ Suggests:
     ggplot2,
     knitr,
     rmarkdown,
+    readr,
     testthat (>= 3.0.0),
     vcfR
 VignetteBuilder: knitr

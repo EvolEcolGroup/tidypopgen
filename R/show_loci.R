@@ -1,6 +1,6 @@
 #' Show the loci information of a `gen_tibble`
 #'
-#' Extract the information on loci from a  `gen_tibble`.
+#' Extract and set the information on loci from a  `gen_tibble`.
 #' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].

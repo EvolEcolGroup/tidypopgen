@@ -1,7 +1,6 @@
 #################
 ## dapc.genlight
 #################
-#' @method dapc gen_tibble
 #' @export
 gt_dapc <- function(x,
                     pop = NULL,
