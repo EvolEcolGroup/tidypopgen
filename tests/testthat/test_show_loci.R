@@ -22,4 +22,7 @@ testthat::test_that("show_loci gets and sets information",{
   # with some proper dplyr
   show_loci(test_gen) <- show_loci(test_gen) %>% mutate(chromosome="old")
   expect_true(all(show_loci(test_gen)$chromosome=="old"))
+  test_loci3 <- test_loci3[-1,]
+  expect_error(show_loci(test_gen) <- test_loci3,
+               "the replacement loci tibble does")
 })

@@ -5,7 +5,7 @@
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param ... currently unused.
-#' @returns a [`tibble::tibble`] of information (see[`gen_tibble`] for details
+#' @returns a [`tibble::tibble`] of information (see [`gen_tibble`] for details
 #' on compulsory columns that will always be present)
 #' @rdname show_loci
 #' @export
@@ -29,6 +29,9 @@ show_loci.list <- function(.x, ...){
   attr(.x,"loci")
 }
 
+#' @export
+#' @param value a data.frame or tibble of loci information to replace the current one.
+#' @rdname show_loci
 "show_loci<-" <- function(.x, value) {
   UseMethod("show_loci<-", .x)
 }
@@ -48,6 +51,9 @@ show_loci.list <- function(.x, ...){
   stopifnot_snpbin_list(.x)
   # test for validity of loci
   check_valid_loci(value)
+  if (nrow(show_loci(.x))!=nrow(value)){
+    stop("the replacement loci tibble does not have the same number of loci as the original one")
+  }
   attr(.x,"loci") <- tibble::as_tibble(value)
   .x
 }
