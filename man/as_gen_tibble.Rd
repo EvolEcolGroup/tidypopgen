@@ -3,11 +3,14 @@
 \name{as_gen_tibble}
 \alias{as_gen_tibble}
 \alias{as_gen_tibble.genlight}
+\alias{as_gen_tibble.vcfR}
 \title{Cast to a \code{gen_tibble}}
 \usage{
 as_gen_tibble(.x, ...)
 
 \method{as_gen_tibble}{genlight}(.x, ..., ignore_null_slots = TRUE)
+
+\method{as_gen_tibble}{vcfR}(.x, n_cores = 1, ...)
 }
 \arguments{
 \item{.x}{the object to convert}
@@ -16,6 +19,8 @@ as_gen_tibble(.x, ...)
 
 \item{ignore_null_slots}{boolean on whether null slots should be ignored
 (and thus filled with default values), or whether an error will be thrown}
+
+\item{n_cores}{currently unused, for future parallelisation}
 }
 \value{
 a \code{gen_tbl} object

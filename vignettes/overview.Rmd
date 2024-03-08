@@ -350,6 +350,16 @@ plink_back_gt
 
 ```
 
+Furthermore, it is possible to import vcf files via `vcfR`. If we have a `vcfR`
+object, we can simply:
+```{r}
+library(vcfR)
+data(vcfR_test)
+vcf_gt <- as_gen_tibble(vcfR_test)
+vcf_gt
+
+```
+
 # Merging data
 
 Merging data from different sources is a common problem, especially in human population

@@ -2,6 +2,7 @@
 
 S3method("[",gen_tbl)
 S3method(as_gen_tibble,genlight)
+S3method(as_gen_tibble,vcfR)
 S3method(augment,gt_pca)
 S3method(dplyr_reconstruct,gen_tbl)
 S3method(group_by,gen_tbl)

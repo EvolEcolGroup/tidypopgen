@@ -1,0 +1,19 @@
+---
+title: "Population genetics analyiss"
+author: "Andrea"
+date: "2024-03-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+We read in the data from github:
+```{r}
+lobster = read.csv("data_files/Lobster_SNP_Genotypes.csv")
+lobster_wide = reshape(lobster, idvar = c("ID","Site"), timevar = "Locus", direction = "wide", sep = "")
+
+```

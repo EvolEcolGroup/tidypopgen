@@ -14,6 +14,11 @@ as_gen_tibble <- function(.x, ...) {
   UseMethod("as_gen_tibble", .x)
 }
 
+#################################################################
+## method for genlight
+#################################################################
+
+
 #' @rdname as_gen_tibble
 #' @param ignore_null_slots boolean on whether null slots should be ignored
 #' (and thus filled with default values), or whether an error will be thrown
@@ -68,5 +73,58 @@ fix_null_slot <- function(object, slot_string, replacement, ignore_null_slots=TR
     }
   } else {
     return(methods::slot(object,slot_string))
+  }
+}
+
+#################################################################
+## method for vcfR
+#################################################################
+
+#' @rdname as_gen_tibble
+#' @param n_cores currently unused, for future parallelisation
+#' @export
+
+as_gen_tibble.vcfR<- function(.x, n_cores=1,...){
+  if (requireNamespace("vcfR", quietly = TRUE)) {
+    # subset to biallelic loci only
+    bi <- vcfR::is.biallelic(.x)
+    if(sum(!bi) > 0){
+      msg <- paste("Found", sum(!bi), "loci with more than two alleles.")
+      msg <- c(msg, "\n", paste("Objects of class gen_tibble only support loci with two alleles."))
+      msg <- c(msg, "\n", paste(sum(!bi), 'loci will be omitted from the gen_tibble object.'))
+      warning(msg)
+      .x <- .x[bi,]
+    }
+
+    # fill in any missing IDs of loci
+    .x <- vcfR::addID(.x)
+
+    # create loci table
+    loci <- tibble(name = vcfR::getID(.x),
+                   chromosome = vcfR::getCHROM(.x),
+                   position = vcfR::getPOS(.x),
+                   allele_ref = vcfR::getREF(.x),
+                   allele_alt = vcfR::getALT(.x))
+
+    .x <- vcfR::extract.gt(.x)
+    .x[.x=="0|0"] <- 0
+    .x[.x=="0|1"] <- 1
+    .x[.x=="1|0"] <- 1
+    .x[.x=="1|1"] <- 2
+    .x[.x=="0/0"] <- 0
+    .x[.x=="0/1"] <- 1
+    .x[.x=="1/0"] <- 1
+    .x[.x=="1/1"] <- 2
+
+    ind_meta <- tibble(id = colnames(.x), population = NA)
+
+    .x <- gen_tibble(ind_meta= ind_meta, genotypes = .x, loci = loci)
+
+    return(.x)
+  } else {
+    stop(
+      "to convert from vcfR objects, first install package 'vcfR' with\n",
+      "install.packages('vcfR')"
+    )
   }
 }

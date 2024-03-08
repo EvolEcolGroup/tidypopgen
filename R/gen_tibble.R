@@ -42,6 +42,7 @@ gen_tibble <- function(ind_meta, genotypes, loci, ploidy=NULL){
   }
   ind_meta <- as.list(ind_meta)
   #browser()
+  #TODO this could be parallelised
   ind_meta$genotypes <- lapply(1:nrow(genotypes), function(i) methods::new("SNPbin",
                                                                            as.integer(genotypes[i,]),ploidy=ploidy[i]) )
   attr(ind_meta$genotypes,"loci")<-tibble::as_tibble(loci)

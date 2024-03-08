@@ -13,3 +13,13 @@ expect_true (all.equal(test_genlight$ind.names,
 expect_error (as_gen_tibble(test_genlight,ignore_null_slots = FALSE),
               "pop is null ")
 })
+
+testthat::test_that("as_gen_tibble works on genlight",{
+  library(vcfR ,quietly = TRUE)
+  data(vcfR_test)
+  # cast it, we will get an error about biallelic
+  expect_warning(test_gt <- as_gen_tibble(vcfR_test))
+  vcf_bi <- vcfR_test[is.biallelic(vcfR_test)]
+  expect_true(nrow(show_loci(test_gt))==nrow(vcf_bi@fix))
+  expect_true(nrow(test_gt)==(ncol(vcf_bi@gt)-1))
+})
