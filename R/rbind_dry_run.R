@@ -63,8 +63,10 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, 
   target_sub <- target_df[target_df$name %in% ref_df$name,]
   ref_sub <- ref_df[ref_df$name %in% target_df$name,]
   # reorder target_sub to match ref_sub
-  target_sub <- target_sub[match(target_sub$name, ref_sub$name),]
+  #target_sub <- target_sub[match(target_sub$name, ref_sub$name),]
+  target_sub <- target_sub[match(ref_sub$name, target_sub$name),]
   # we now have two data.frames with the same loci and in the same order
+ stopifnot(all.equal(target_sub$name,ref_sub$name))
 
   # fix any missing alleles
   target_sub$missing_allele <- resolve_missing_alleles(missing_table = target_sub, other_table = ref_sub)
@@ -105,6 +107,8 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, 
     to_flip <- to_flip & !ambiguous_sub
     to_swap <- to_swap & !ambiguous_sub
   }
+ # browser()
+
   # now we create the two reporting data.frames
   # note that they include all loci (including the ones we dropped because they
   # did not exist in one of the datasets)
@@ -125,9 +129,10 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, 
                               ambiguous = ambiguous(target_df))
 
   # update the to_keep list
-  target_report$to_flip[target_report$name %in% target_sub$name[to_flip]]<-TRUE
-  target_report$to_swap[target_report$name %in% target_sub$name[to_swap]]<-TRUE
-  target_report$missing_allele[match(target_sub$name,target_df$name)] <- target_sub$missing_allele
+  #browser()
+  target_report$to_flip[match(target_sub$name[to_flip], target_report$name)]<-TRUE
+  target_report$to_swap[match(target_sub$name[to_swap], target_report$name)]<-TRUE
+  target_report$missing_allele[match(target_sub$name,target_report$name)] <- target_sub$missing_allele
 
   report <- list(target = target_report, ref = ref_report)
   class(report) <- c("rbind_report",class(report))
