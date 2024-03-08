@@ -8,7 +8,7 @@ raw_path_pop_a <- system.file("extdata/pop_a.raw", package = "tidypopgen")
 map_path_pop_a <- system.file("extdata/pop_a.map", package = "tidypopgen")
 pop_a_gen <- read_plink_raw(file = raw_path_pop_a, map_file = map_path_pop_a, quiet = TRUE)
 
-#create merge report
+#create merge
 merged_gen <- rbind(pop_b_gen, pop_a_gen, flip_strand = TRUE,
                             remove_ambiguous = TRUE, quiet = TRUE)
 
@@ -23,19 +23,19 @@ testthat::test_that("merge combines datasets correctly",{
   #Check pop_b
   pop_b_merged <- merged_gen %>% filter(population == "pop_b") %>% show_genotypes()
 
-  #All San genotypes should stay the same, as they are the reference
-  testthat::expect_equal(pop_b_merged,pop_b_geno[,c(1,2,3,4,9,10,11,12)])
+  #All pop_b genotypes should stay the same, as they are the reference
+  testthat::expect_equal(pop_b_merged,pop_b_geno[,c(1,2,3,4,5,6,7,13,14,15,16,17)])
 
   #Check pop_b
   pop_a_merged <- merged_gen %>% filter(population == "pop_a") %>% show_genotypes()
 
   #Check genotypes of non-swapped alleles are the same before and after merge
-  testthat::expect_equal(pop_a_merged[,c(1,2,4,5,6)],pop_a_geno[,c(2,3,5,9,10)])
+  testthat::expect_equal(pop_a_merged[,c(1,2,3)],pop_a_geno[,c(2,3,4)])
 
   #Check swapped alleles have genotypes swapped correctly
-  testthat::expect_true(all(pop_a_merged[,3] == c(2,2,0,2,1))) #rs11240777
-  testthat::expect_true(all(pop_a_merged[,7] == c(1,2,1,1,1))) #rs10106770
-  testthat::expect_true(all(pop_a_merged[,8] == c(2,1,2,1,2))) #rs11942835
+  testthat::expect_true(all(pop_a_merged[,4] == c(2,2,0,2,1))) #rs11240777
+  testthat::expect_true(all(pop_a_merged[,10] == c(1,2,1,1,1))) #rs10106770
+  testthat::expect_true(all(pop_a_merged[,11] == c(2,1,2,1,2))) #rs11942835
 
 
   #Check ambiguous SNPs are dropped (remove_ambiguous TRUE by default)
