@@ -28,3 +28,28 @@ show_loci.list <- function(.x, ...){
   stopifnot_snpbin_list(.x)
   attr(.x,"loci")
 }
+
+"show_loci<-" <- function(.x, value) {
+  UseMethod("show_loci<-", .x)
+}
+
+#' @export
+#' @rdname show_loci
+"show_loci<-.tbl_df" <- function(.x, value){
+  stopifnot_gen_tibble(.x)
+  # extract the column and hand it over to its method
+  show_loci(.x$genotypes)<-value
+  .x
+}
+
+#' @export
+#' @rdname show_loci
+"show_loci<-.list" <- function(.x, value){
+  stopifnot_snpbin_list(.x)
+  # test for validity of loci
+  check_valid_loci(value)
+  attr(.x,"loci") <- tibble::as_tibble(value)
+  .x
+}
+
+

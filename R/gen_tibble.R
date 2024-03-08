@@ -37,9 +37,11 @@ gen_tibble <- function(ind_meta, genotypes, loci, ploidy=NULL){
   if (is.null(ploidy)){
     ploidy <- rep(2, nrow(ind_meta))
   }
-  if (!all(c('name', 'chromosome', 'position','allele_ref','allele_alt') %in% names(loci))){
-    stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','allele_ref','allele_alt'")
-  }
+
+  check_valid_loci(loci)
+#  if (!all(c('name', 'chromosome', 'position','allele_ref','allele_alt') %in% names(loci))){
+#    stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','allele_ref','allele_alt'")
+#  }
   ind_meta <- as.list(ind_meta)
   #browser()
   #TODO this could be parallelised
@@ -52,6 +54,16 @@ gen_tibble <- function(ind_meta, genotypes, loci, ploidy=NULL){
     class = "gen_tbl"
   )
 }
+
+
+check_valid_loci <- function(loci_df){
+  loci_df <- as_tibble(loci_df)
+  if (!all(c('name', 'chromosome', 'position','allele_ref','allele_alt') %in% names(loci_df))){
+    stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','allele_ref','allele_alt'")
+  }
+}
+
+
 
 #' Test if a tibble is really `gen_tibble`
 #'

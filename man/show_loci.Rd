@@ -4,6 +4,8 @@
 \alias{show_loci}
 \alias{show_loci.tbl_df}
 \alias{show_loci.list}
+\alias{show_loci<-.tbl_df}
+\alias{show_loci<-.list}
 \title{Show the loci information of a \code{gen_tibble}}
 \usage{
 show_loci(.x, ...)
@@ -11,6 +13,10 @@ show_loci(.x, ...)
 \method{show_loci}{tbl_df}(.x, ...)
 
 \method{show_loci}{list}(.x, ...)
+
+\method{show_loci}{tbl_df}(.x, loci) <- value
+
+\method{show_loci}{list}(.x, loci) <- value
 }
 \arguments{
 \item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
