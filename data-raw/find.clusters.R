@@ -2,12 +2,12 @@
 #' @method find.clusters gen_tibble
 #' @export
 ##########################
-find.clusters.gentibble <- function(x, clust = NULL, n.pca = NULL, n.clust = NULL,
+find.clusters.gen_tibble <- function(x, clust = NULL, n.pca = NULL, n.clust = NULL,
                                    method = c("kmeans", "ward"),
                                    stat = c("BIC", "AIC", "WSS"),
                                    choose.n.clust = TRUE,
                                    criterion = c("diffNgroup", "min","goesup", "smoothNgoesup", "goodfit"),
-                                   max.n.clust = round(nInd(x)/10), n.iter = 1e5, n.start = 10,
+                                   max.n.clust = round(nrow(x)/10), n.iter = 1e5, n.start = 10,
                                    scale = FALSE, pca.select = c("nbEig","percVar"),
                                    perc.pca = NULL, glPca = NULL, ...){
 

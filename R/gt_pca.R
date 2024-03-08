@@ -12,8 +12,7 @@
 #' @param scale	a logical indicating whether the numbers of alleles should
 #' be scaled; defaults to FALSE
 #' @param nf an integer indicating the number of principal components to be
-#' retained; if NULL, a screeplot of eigenvalues will be displayed and the user
-#' will be asked for a number of retained axes.
+#' retained; if NULL, all components with an eigen value larger than 1e-10 are kept.
 #' @param loadings a logical indicating whether loadings of the alleles should
 #' be computed (TRUE, default), or not (FALSE). Vectors of loadings are not
 #' always useful, and can take a large amount of RAM when millions of SNPs are considered.
@@ -162,11 +161,8 @@ gt_pca <- function(.x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles
   eigRes$values <- eigRes$values[1:rank]
   eigRes$vectors <- eigRes$vectors[, 1:rank, drop=FALSE]
 
-  ## scan nb of axes retained
-  if(is.null(nf)){
-    graphics::barplot(eigRes$values, main="Eigenvalues", col=grDevices::heat.colors(rank))
-    cat("Select the number of axes: ")
-    nf <- as.integer(readLines(con = getOption('adegenet.testcon'), n = 1))
+  if (is.null(nf)){
+    nf <- rank
   }
 
   ## rescale PCs

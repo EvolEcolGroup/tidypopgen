@@ -28,8 +28,7 @@ be centered; defaults to TRUE}
 be scaled; defaults to FALSE}
 
 \item{nf}{an integer indicating the number of principal components to be
-retained; if NULL, a screeplot of eigenvalues will be displayed and the user
-will be asked for a number of retained axes.}
+retained; if NULL, all components with an eigen value larger than 1e-10 are kept.}
 
 \item{loadings}{a logical indicating whether loadings of the alleles should
 be computed (TRUE, default), or not (FALSE). Vectors of loadings are not
