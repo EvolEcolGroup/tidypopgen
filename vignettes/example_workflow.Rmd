@@ -93,7 +93,7 @@ a k-clustering algorithm applied to the principal components (allowing us to red
 the dimensions from the thousands of loci to just a few tens components). We need to decide how 
 many components to use; this decision is often made based on a plot of the cumulative
 explained variance of the components.
-Using `tidy` on the pca object allows us easily obtain those quantities, and it is then
+Using `tidy` on the `gt_pca` object allows us easily obtain those quantities, and it is then
 trivial to plot them:
 ```{r}
 library(ggplot2)
@@ -117,11 +117,12 @@ general, it is worth exploring the sensitivity of the results to any of these de
 For this analysis, we will go with 17 components:
 
 ```{r}
-anole_clusters <- gt_pca_find_clusters(anole_pca, n.pca = 17)
+anole_clusters <- gt_pca_find_clusters(anole_pca, n_pca = 17)
 ```
 
-This object retains information about a large number of possible k. We can choose
-the best k with:
+This object retains information about a large number of possible *k*. We can choose
+the best k with `gt_pca_clust_choose_n()` (we will use the defaults, but there
+are multiple statistics and criteria that we can use to choose *n*):
 ```{r}
 anole_clusters <- gt_pca_clust_choose_n(anole_clusters)
 ```
@@ -131,9 +132,13 @@ Now we can run a DAPC:
 anole_dapc <- gt_dapc(anole_clusters)
 ```
 
-This is of class dapc, so we can use the standard `adegenet` functions:
+Note that `gt_dapc()` takes automatically 3 clusters form the `anole_clusters` object,
+but can change that behaviour by setting some of its parameters (see the help
+page for `gt_dapc()`).
+`anole_dapc` is of class `dapc`, so we can use the standard `adegenet` functions:
 ```{r}
 anole_dapc
 scatter(anole_dapc)
-
 ```
+
+
