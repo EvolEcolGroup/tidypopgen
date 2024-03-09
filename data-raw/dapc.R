@@ -3,8 +3,12 @@
 #################
 #' @export
 gt_dapc <- function(x, pop=NULL, n.pca=NULL, n.da=NULL,
-                          scale=FALSE,  var.contrib=TRUE, var.loadings=FALSE, pca.info=TRUE,
-                          pca.select=c("nbEig","percVar"), perc.pca=NULL, glPca=NULL, ...){
+                          var.contrib=TRUE,
+                      var.loadings=FALSE, pca.info=TRUE){
+  if (is.null(x$cent)){
+    stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
+  }
+
   pca.select <- match.arg(pca.select)
 
   if(is.null(pop)) {
@@ -85,35 +89,32 @@ gt_dapc <- function(x, pop=NULL, n.pca=NULL, n.da=NULL,
   res$assign <- predX$class
   res$call <- match.call()
 
-
-  #TODO these needs to checked and potentially modified to work without the original output
-
   # ## optional: store loadings of variables
-  # if(pca.info){
-  #   res$pca.loadings <- as.matrix(U)
-  #   res$pca.cent <- snpbin_list_means(x,alleles_as_units =FALSE)
-  #   if(scale) {
-  #     res$pca.norm <- sqrt(snpbin_list_vars(x,alleles_as_units = FALSE))
-  #   } else {
-  #     res$pca.norm <- rep(1, nLoc(x))
-  #   }
-  #   res$pca.eig <- x$eig
-  # }
-  #
-  # ## optional: get loadings of variables
-  # if(var.contrib || var.loadings){
-  #   var.load <- as.matrix(U) %*% as.matrix(ldaX$scaling[,1:n.da,drop=FALSE])
-  #
-  #   if(var.contrib){
-  #     f1 <- function(x){
-  #       temp <- sum(x*x)
-  #       if(temp < 1e-12) return(rep(0, length(x)))
-  #       return(x*x / temp)
-  #     }
-  #     res$var.contr <- apply(var.load, 2, f1)
-  #   }
-  #   if(var.loadings) res$var.load <- var.load
-  # }
+   if(pca.info){
+    res$pca.loadings <- as.matrix(U)
+     res$pca.cent <- x$cent
+     if(!is.null(x$norm)) {
+       res$pca.norm <- x$norm
+     } else {
+       res$pca.norm <- rep(1, length(x$cent))
+     }
+     res$pca.eig <- x$eig
+  }
+
+  ## optional: get loadings of variables
+  if(var.contrib || var.loadings){
+    var.load <- as.matrix(U) %*% as.matrix(ldaX$scaling[,1:n.da,drop=FALSE])
+
+    if(var.contrib){
+      f1 <- function(x){
+        temp <- sum(x*x)
+        if(temp < 1e-12) return(rep(0, length(x)))
+        return(x*x / temp)
+      }
+      res$var.contr <- apply(var.load, 2, f1)
+    }
+    if(var.loadings) res$var.load <- var.load
+  }
 
   class(res) <- "dapc"
   return(res)

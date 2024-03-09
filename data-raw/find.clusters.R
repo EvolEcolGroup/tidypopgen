@@ -1,4 +1,4 @@
-#'
+#' Run K-clustering on principal components
 #'
 #' This function implements the clustering procedure used in Discriminant
 #' Analysis of Principal Components (DAPC, Jombart et al. 2010).
@@ -94,13 +94,13 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
     WSS.ori <- sum(apply(x$scores[,seq_len(n_pca)], 2, function(v) sum((v-mean(v))^2) ))
     WSS <- c(WSS.ori,WSS)
     # add the classification for 1 cluster (they are all 1!)
-    append(cluster_list$groups,
-           setNames(rep(1,N),names(cluster_list$groups[[2]])),
+    cluster_list$groups <- append(cluster_list$groups,
+           list(setNames(rep(1,N),names(cluster_list$groups[[2]]))),
            after =0)
-    ncClust <- c(1,nbClust)
+    nbClust <- c(1,nbClust)
   }
-  cluster_list$AIC <- N*log(WSS/N) + 2*c(1,nbClust)
-  cluster_list$BIC <- N*log(WSS/N) + log(N) *c(1,nbClust)
+  cluster_list$AIC <- N*log(WSS/N) + 2 * nbClust
+  cluster_list$BIC <- N*log(WSS/N) + log(N) *nbClust
   cluster_list$WSS <- WSS
 
   names(cluster_list$groups)<-nbClust

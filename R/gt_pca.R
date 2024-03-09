@@ -217,7 +217,7 @@ gt_pca <- function(.x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles
 
   if(!is.null(res$loadings)){
     colnames(res$loadings) <- paste("Axis", 1:nf, sep="")
-    # TODO quick hack, bring back the lables AM
+    # TODO quick hack, bring back the labels AM
     # if(!is.null(show_loci_names(x_gt)) & !is.null(alleles(x))){
     #   rownames(res$loadings) <- paste(show_loci_names(x_gt),alleles(x), sep=".")
     # } else {
@@ -228,6 +228,15 @@ gt_pca <- function(.x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles
   if(return_dot_prod){
     res$dotProd <- allProd
     rownames(res$dotProd) <- colnames(res$dotProd) <- .x$id
+  }
+
+  # save center and scale information
+  if(center) {
+    res$cent <- vecMeans
+  }
+
+  if(scale){
+    res$norm <- sqrt(vecVar)
   }
 
   res$call <- match.call()

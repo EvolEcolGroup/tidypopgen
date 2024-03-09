@@ -68,7 +68,7 @@ anole_gt
 That was easy. The loci had already been filtered and cleaned, so we don't need 
 to do any QC. Let us jump straight into analysis and run a PCA:
 ```{r}
-anole_pca <- anole_gt %>% gt_pca()
+anole_pca <- anole_gt %>% gt_pca(center=TRUE)
 anole_pca
 ```
 
