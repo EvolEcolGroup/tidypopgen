@@ -117,11 +117,23 @@ general, it is worth exploring the sensitivity of the results to any of these de
 For this analysis, we will go with 17 components:
 
 ```{r}
-anole_clusters <- gt_find_clusters(anole_gt, anole_pca, n.pca = 17)
+anole_clusters <- gt_pca_find_clusters(anole_pca, n.pca = 17)
 ```
 
 This object retains information about a large number of possible k. We can choose
 the best k with:
 ```{r}
-gt_choose_n_clusters(anole_clusters)
+anole_clusters <- gt_pca_clust_choose_n(anole_clusters)
+```
+
+Now we can run a DAPC:
+```{r}
+anole_dapc <- gt_dapc(anole_clusters)
+```
+
+This is of class dapc, so we can use the standard `adegenet` functions:
+```{r}
+anole_dapc
+scatter(anole_dapc)
+
 ```
