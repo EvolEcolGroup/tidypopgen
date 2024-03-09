@@ -81,3 +81,47 @@ anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) +
   geom_point(size = 1.5)
 ```
 We can see that the three population do separate nicely on the PCA.
+
+# Explore population structure with DAPC
+
+DAPC is a powerful tool to investigate population structure. It has the advantage of
+scaling well to very large datasets, and it does not have the assumptions of STRUCTURE or
+ADMIXTURE (but that can also be a drawback).
+
+The first step is to determine the number of genetic clusters in the dataset. We will use
+a k-clustering algorithm applied to the principal components (allowing us to reduce
+the dimensions from the thousands of loci to just a few tens components). We need to decide how 
+many components to use; this decision is often made based on a plot of the cumulative
+explained variance of the components.
+Using `tidy` on the pca object allows us easily obtain those quantities, and it is then
+trivial to plot them:
+```{r}
+library(ggplot2)
+tidy(anole_pca,matrix="eigenvalues") %>%
+  ggplot(mapping =aes(x=PC, y=cumulative)) +
+  geom_point()
+
+```
+
+Ideally, we are looking for the point where the curve starts flattening. In this case, we can
+not see a very clear flattening, but by component 35 the increments are pretty small. Another
+way to think about this is to consider the number of components that explain a large amount
+of variation. We can see that the first 17 components already explain over 90% of the variance.  We can also
+get the number of components programmatically by using:
+```{r}
+tidy(anole_pca,matrix="eigenvalues") %>% filter(cumulative<0.9) %>% nrow() +1 
+```
+
+Note that there isn't anything magical about 90%, and you might use another threshold. In
+general, it is worth exploring the sensitivity of the results to any of these decisions.
+For this analysis, we will go with 17 components:
+
+```{r}
+anole_clusters <- gt_find_clusters(anole_gt, anole_pca, n.pca = 17)
+```
+
+This object retains information about a large number of possible k. We can choose
+the best k with:
+```{r}
+gt_choose_n_clusters(anole_clusters)
+```
