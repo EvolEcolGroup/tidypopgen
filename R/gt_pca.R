@@ -24,7 +24,7 @@
 #' @param parallel a logical indicating whether multiple cores -if available-
 #' should be used for the computations (TRUE), or not (FALSE, default); requires
 #' the package parallel to be installed (see details); this option cannot be
-#' used alongside use_coption.
+#' used alongside use_c option.
 #' @param n_cores	if parallel is TRUE, the number of cores to be used in the
 #' computations; if NULL, then the maximum number of cores available on the computer is used.
 #' @param return_dot_prod	a logical indicating whether the matrix of dot products
@@ -217,7 +217,7 @@ gt_pca <- function(.x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles
 
   if(!is.null(res$loadings)){
     colnames(res$loadings) <- paste("Axis", 1:nf, sep="")
-    # TODO quick hack, bring back the lables AM
+    # TODO quick hack, bring back the labels AM
     # if(!is.null(show_loci_names(x_gt)) & !is.null(alleles(x))){
     #   rownames(res$loadings) <- paste(show_loci_names(x_gt),alleles(x), sep=".")
     # } else {
@@ -228,6 +228,15 @@ gt_pca <- function(.x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles
   if(return_dot_prod){
     res$dotProd <- allProd
     rownames(res$dotProd) <- colnames(res$dotProd) <- .x$id
+  }
+
+  # save center and scale information
+  if(center) {
+    res$cent <- vecMeans
+  }
+
+  if(scale){
+    res$norm <- sqrt(vecVar)
   }
 
   res$call <- match.call()

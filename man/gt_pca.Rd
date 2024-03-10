@@ -44,7 +44,7 @@ faster computations; this option cannot be used alongside parallel option.}
 \item{parallel}{a logical indicating whether multiple cores -if available-
 should be used for the computations (TRUE), or not (FALSE, default); requires
 the package parallel to be installed (see details); this option cannot be
-used alongside use_coption.}
+used alongside use_c option.}
 
 \item{n_cores}{if parallel is TRUE, the number of cores to be used in the
 computations; if NULL, then the maximum number of cores available on the computer is used.}
