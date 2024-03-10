@@ -21,6 +21,7 @@ Imports:
     generics,
     magrittr,
     methods,
+    MASS,
     rlang,
     stringr,
     tidyr,

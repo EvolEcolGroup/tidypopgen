@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 ```
 
 
+# Ideally redo this with a dataset that does have some intermediates (e.g. subset from the HGDP)
+
 ## An example workflow with real data
 We will explore the genetic structure of *Anolis punctatus* in South America,
 using data from Prates et al 2018. We downloaded the vcf file of the genotypes
@@ -124,7 +126,7 @@ This object retains information about a large number of possible *k*. We can cho
 the best k with `gt_pca_clust_choose_n()` (we will use the defaults, but there
 are multiple statistics and criteria that we can use to choose *n*):
 ```{r}
-anole_clusters <- gt_pca_clust_choose_n(anole_clusters)
+anole_clusters <- gt_pca_best_k(anole_clusters)
 ```
 
 Now we can run a DAPC:
@@ -140,5 +142,19 @@ page for `gt_dapc()`).
 anole_dapc
 scatter(anole_dapc)
 ```
+We can inspect the assignment by DAPC with `assignplot`, ordering the samples
+by the original population label:
+```{r}
+assignplot(anole_dapc,subset=order(anole_gt$population))
+```
 
 
+As one would expect from the clear separation in the PCA and DAPC scatterplots,
+individuals are all fully assigned to a single cluster, with no individual with
+mixed ancestry.
+
+```{r}
+compoplot(anole_dapc, subset=order(anole_gt$population), posi="bottomright",
+txt.leg=paste("Cluster", 1:3), lab="",
+ncol=2, xlab="individuals", col=funky(3))
+```

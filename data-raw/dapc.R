@@ -2,9 +2,9 @@
 ## dapc for gen_tibble
 #################
 #' @export
-gt_dapc <- function(x, pop=NULL, n.pca=NULL, n.da=NULL,
-                          var.contrib=TRUE,
-                      var.loadings=FALSE, pca.info=TRUE){
+gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
+                          var_contrib=TRUE,
+                      var_loadings=FALSE, pca_info =TRUE){
   if (is.null(x$cent)){
     stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
   }
@@ -22,22 +22,22 @@ gt_dapc <- function(x, pop=NULL, n.pca=NULL, n.da=NULL,
 
   if(is.null(pop.fac)) stop("x does not include pre-defined populations, and `pop' is not provided")
 
-  if (is.null(n.pca)){
-    if (inherits(x,"gt_pca_clust")){
-      n.pca <- x$clusters$n_pca
-    } else { # use all principal components
-      n.pca <- length(x$eig)
+  if (i s .null(n_pca ) ){
+    if (inherits(x,"gt_pca_clust " )){
+      n_pca   <- x$clusters$n_pca
+    } else { # use all principal compon e nts
+      n_pca   <- length(x$eig)
     }
-  } else { # if n_pca was given, check that it is not too large
-    if(n.pca > ncol(x$scores)) {
-      n.pca <- ncol(x$scores)
+  } else { # if n_pca was given, check that it is not too lar g e
+    if(n_pca   > ncol(x$scores ) ) {
+      n_pca   <- ncol(x$scores)
     }
   }
 
 
-    if(is.null(x$loadings) & var.contrib) {
+    if(is.null(x$loadings) & var_contrib) {
       warning("Contribution of variables requested but x' object provided without loadings.")
-      var.contrib <- FALSE
+      var_contrib <- FALSE
     }
 
   # TODO decide what to do with this old code to choose n.pca based on percenta variance
@@ -48,9 +48,9 @@ gt_dapc <- function(x, pop=NULL, n.pca=NULL, n.da=NULL,
   #   if(n.pca<1) n.pca <- 1
   # }
 
-  U <- x$loadings[, 1:n.pca, drop=FALSE] # principal axes
-  XU <- x$scores[, 1:n.pca, drop=FALSE] # principal components
-  XU.lambda <- sum(x$eig[1:n.pca])/sum(x$eig) # sum of retained eigenvalues
+  U <- x$loadings[, 1:n_pca ,  drop=FALSE] # principal axes
+  XU <- x$scores[, 1:n_pca ,  drop=FALSE] # principal components
+  XU.lambda <- sum(x $ eig[1:n_pca ] )/sum(x$eig) # sum of retained eigenvalues
   names(U) <- paste("PCA-pa", 1:ncol(U), sep=".")
   names(XU) <- paste("PCA-pc", 1:ncol(XU), sep=".")
 
@@ -67,20 +67,20 @@ gt_dapc <- function(x, pop=NULL, n.pca=NULL, n.da=NULL,
   #   n.da <- as.integer(readLines(con = getOption('adegenet.testcon'), n = 1))
   # }
 
-  n.da <- min(n.da, length(levels(pop.fac))-1, n.pca, sum(ldaX$svd>1e-10)) # can't be more than K-1 disc. func., or more than n.pca
-  n.da <- round(n.da)
-  predX <- predict(ldaX, dimen=n.da)
+  n_da <- min(n_da, length(levels(pop.fac ))-1, n_pca ,  sum(ldaX$svd>1e-10)) # can't be more than K-1 disc. func., or more than n.pca
+  n_da <- round(n_da)
+  predX <- predict(ldaX, dimen=n_da)
 
 
   ## BUILD RESULT
   res <- list()
-  res$n.pca <- n.pca
-  res$n.da <- n.da
+  res$n. pca <- n_pca
+   res$n.da <- n_da
   res$tab <- XU
   res$grp <- pop.fac
   res$var <- XU.lambda
   res$eig <- ldaX$svd^2
-  res$loadings <- ldaX$scaling[, 1:n.da, drop=FALSE]
+  res$loadings <- ldaX$scaling[, 1:n_da, drop=FALSE]
   res$means <- ldaX$means
   res$ind.coord <-predX$x
   res$grp.coord <- apply(res$ind.coord, 2, tapply, pop.fac, mean)
@@ -90,7 +90,7 @@ gt_dapc <- function(x, pop=NULL, n.pca=NULL, n.da=NULL,
   res$call <- match.call()
 
   # ## optional: store loadings of variables
-   if(pca.info){
+   if(pca_info ){
     res$pca.loadings <- as.matrix(U)
      res$pca.cent <- x$cent
      if(!is.null(x$norm)) {
@@ -102,10 +102,10 @@ gt_dapc <- function(x, pop=NULL, n.pca=NULL, n.da=NULL,
   }
 
   ## optional: get loadings of variables
-  if(var.contrib || var.loadings){
-    var.load <- as.matrix(U) %*% as.matrix(ldaX$scaling[,1:n.da,drop=FALSE])
+  if(var_contrib || var_loadings){
+    var.load <- as.matrix(U) %*% as.matrix(ldaX$scaling[,1:n_da,drop=FALSE])
 
-    if(var.contrib){
+    if(var_contrib){
       f1 <- function(x){
         temp <- sum(x*x)
         if(temp < 1e-12) return(rep(0, length(x)))
@@ -113,10 +113,10 @@ gt_dapc <- function(x, pop=NULL, n.pca=NULL, n.da=NULL,
       }
       res$var.contr <- apply(var.load, 2, f1)
     }
-    if(var.loadings) res$var.load <- var.load
+    if(var_loadings) res$var.load <- var.load
   }
 
   class(res) <- "dapc"
   return(res)
-} # end dapc.genlight
+}
 
