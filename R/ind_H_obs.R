@@ -8,30 +8,43 @@
 #' or a [`gen_tibble`].
 #' @param ... currently unused.
 #' @returns a vector of heterozygosities, one per individuals in the [`gen_tibble`]
-#' @rdname ind_H_obs
+#' @rdname ind_het_obs
 #' @export
-ind_H_obs <- function(.x, ...) {
-  UseMethod("ind_H_obs", .x)
+ind_het_obs <- function(.x, ...) {
+  UseMethod("ind_het_obs", .x)
 }
 
 #' @export
-#' @rdname ind_H_obs
-ind_H_obs.tbl_df <- function(.x, ...){
+#' @rdname ind_het_obs
+ind_het_obs.tbl_df <- function(.x, ...){
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  ind_H_obs(.x$genotypes, ...)
+  ind_het_obs(.x$genotypes, ...)
 }
 
 #' @export
-#' @rdname ind_H_obs
-ind_H_obs.list <- function(.x, ...){
+#' @rdname ind_het_obs
+ind_het_obs.vctrs_bigSNP <- function(.x, ...){
   rlang::check_dots_empty()
-  if (!inherits(.x[[1]],"SNPbin")){ # for the sake of speed, we only check the first element
-    stop(".x is not a list of SNPbin objects")
-  }
-  ## function to compute observed homozygosity in a SNPbin
-  h_obs <- function(this_snpbin){
-    mean(as.integer(this_snpbin)==1, na.rm = TRUE)
-  }
-  unlist(lapply(.x,h_obs))
+  X <- attr(.x,"bigsnp")$genotypes
+
+
+  rowsums <- bigstatsr::big_apply(X, a.FUN = function(X, ind) row_count_1(X[, ind]),
+                      ind=attr(.x,"loci")$big_index,
+                       a.combine = 'plus')
+  rowNA <- bigstatsr::big_apply(X, a.FUN = function(X, ind) row_count_NA(X[, ind]),
+                                ind=attr(.x,"loci")$big_index,
+                     a.combine = 'plus')
+  rowsums/(ncol(X)-rowNA)
+}
+
+
+row_count_NA <- function(X){
+  count_na <- function(a){sum(is.na(a))}
+  apply(X,1,count_na)
+}
+
+row_count_1 <- function(X){
+  count_1 <- function(a){sum(a==1, na.rm = TRUE)}
+  apply(X,1,count_1)
 }

@@ -23,8 +23,7 @@ show_loci_names.tbl_df <- function(.x, ...){
 
 #' @export
 #' @rdname show_loci_names
-show_loci_names.list <- function(.x, ...){
+show_loci_names.vctrs_bigSNP <- function(.x, ...){
   rlang::check_dots_empty()
-  stopifnot_snpbin_list(.x)
   attr(.x,"loci")$name
 }

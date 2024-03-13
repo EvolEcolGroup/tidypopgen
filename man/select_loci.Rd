@@ -11,13 +11,6 @@ select_loci(.data, .sel_arg, .swap_arg = NULL, .swap_if_arg = NULL)
 
 \item{.sel_arg}{one unquoted expression, using the mini-grammar of
 \code{\link[dplyr:select]{dplyr::select()}} to select loci}
-
-\item{.swap_arg}{one unquoted expression, using the mini-grammar of
-\code{\link[dplyr:select]{dplyr::select()}} determining at which loci the reference and alterante
-allele will be swapped.}
-
-\item{.swap_if_arg}{a logical vector of length equal to the number of loci,
-or an expression that will tidy evaluate to such a vector.}
 }
 \value{
 a list of \code{SNPbin} object that have been sub-setted to the selected

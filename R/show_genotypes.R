@@ -15,19 +15,23 @@ show_genotypes <- function(.x, ...) {
 
 #' @export
 #' @rdname show_genotypes
-show_genotypes.tbl_df <- function(.x, ...){
+show_genotypes.tbl_df <- function(.x, ind_indices=NULL, loci_indices=NULL, ...){
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  show_genotypes(.x$genotypes)
+  show_genotypes(.x$genotypes, ind_indices=ind_indices, loci_indices=loci_indices, ...)
 }
 
 #' @export
 #' @rdname show_genotypes
-show_genotypes.list <- function(.x, ...){
+show_genotypes.vctrs_bigSNP <- function(.x, ind_indices=NULL, loci_indices=NULL, ...){
   rlang::check_dots_empty()
-  stopifnot_snpbin_list(.x)
-  res <- unlist(lapply(.x, as.integer))
-  res <- matrix(res, ncol=nrow(attr(.x,"loci")), nrow = length(.x), byrow=TRUE)
-  colnames(res) <- attr(.x,"loci")$name
-  res
+  if (is.null(ind_indices) & is.null(loci_indices)){
+    attr(.x,"bigsnp")$genotypes[,attr(.x,"loci")$big_index]
+  } else if (is.null(ind_indices)){
+    attr(.x,"bigsnp")$genotypes[,attr(.x,"loci")$big_index[loci_indices]]
+  } else if (is.null(loci_indices)){
+    attr(.x,"bigsnp")$genotypes[ind_indices,]
+  } else {
+    attr(.x,"bigsnp")$genotypes[ind_indices,attr(.x,"loci")$big_index[loci_indices]]
+  }
 }

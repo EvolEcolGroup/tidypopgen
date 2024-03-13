@@ -3,7 +3,7 @@
 \name{show_loci}
 \alias{show_loci}
 \alias{show_loci.tbl_df}
-\alias{show_loci.list}
+\alias{show_loci.vctrs_bigSNP}
 \alias{show_loci<-}
 \alias{show_loci<-.tbl_df}
 \alias{show_loci<-.list}
@@ -13,7 +13,7 @@ show_loci(.x, ...)
 
 \method{show_loci}{tbl_df}(.x, ...)
 
-\method{show_loci}{list}(.x, ...)
+\method{show_loci}{vctrs_bigSNP}(.x, ...)
 
 show_loci(.x) <- value
 

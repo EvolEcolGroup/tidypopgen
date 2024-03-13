@@ -1,0 +1,58 @@
+---
+title: "test vctrs"
+author: "Andrea"
+date: "2024-03-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+example_ind_meta <- data.frame (id=c("a","b","c"),
+                       population = c("pop1","pop1","pop2"))
+example_genotypes <- rbind(c(1, 1, 0, 1, 1, 0), 
+                        c(2, 0, 0, 0,NA, 0), 
+                        c(1, 2, 0, 0, 1, 1))
+example_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
+                   chromosome=c(1,1,1,1,2,2),
+                   position=c(3,5,65,343,23,456),
+                   allele_ref = c("a","t","c","g","c","t"),
+                   allele_alt = c("t","c", NA,"c","g","a"))
+```
+
+We create a plink BED file:
+```{r}
+bed_prefix <- tempfile('test_data_')
+tidypopgen::make_test_bed(example_genotypes, example_loci, example_ind_meta, bed_prefix)
+bed_path <- paste0(bed_prefix,".bed")
+
+```
+
+```{r}
+bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile("test_bigfile_"))
+
+```
+
+
+Now use it in a tibble
+
+```{r}
+bar3 <- gen_tibble(bigsnp_path)
+```
+
+```{r}
+bar3
+
+```
+
+
+```{r}
+attr(bar3$genotypes,"bigsnp")
+
+```
+
+Given information about the individuals, their genotypes, and the loci:

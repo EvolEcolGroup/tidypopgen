@@ -21,13 +21,15 @@ show_loci.tbl_df <- function(.x, ...){
   show_loci(.x$genotypes)
 }
 
+
 #' @export
 #' @rdname show_loci
-show_loci.list <- function(.x, ...){
+show_loci.vctrs_bigSNP <- function(.x, ...){
   rlang::check_dots_empty()
-  stopifnot_snpbin_list(.x)
   attr(.x,"loci")
 }
+
+
 
 #' @export
 #' @param value a data.frame or tibble of loci information to replace the current one.

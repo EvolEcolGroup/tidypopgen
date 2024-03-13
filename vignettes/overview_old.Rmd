@@ -55,7 +55,8 @@ where n is the number of individuals (i.e. one object per individual).
 
 Given information about the individuals, their genotypes, and the loci:
 ```{r}
-library(tidypopgen)
+#library(tidypopgen)
+library(vctrs)
 example_ind_meta <- data.frame (id=c("a","b","c"),
                        population = c("pop1","pop1","pop2"))
 example_genotypes <- rbind(c(1, 1, 0, 1, 1, 0), 
@@ -84,7 +85,7 @@ bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile("test_bigfi
 
 We can create a simple `gen_tibble` object (of class `gen_tbl`) with
 ```{r}
-example_gt <- gen_tibble(bigsnp_path)
+example_gt <- gen_tibble(genotypes=bigsnp_path)
 example_gt
 ```
 As discussed above, in this tibble, genotypes are stored as a list of 
@@ -97,11 +98,11 @@ However, if such a function is used within a `dplyr` verb such as `mutate`,
 we need to pass the `genotype` column to the function:
 
 ```{r}
-example_gt %>% mutate (het_obs = ind_het_obs(.data$genotypes))
+example_gt %>% mutate (ploidy = ind_missingness(.data$genotypes))
 ```
 Or, more simply:
 ```{r}
-example_gt %>% mutate (het_obs = ind_het_obs(genotypes))
+example_gt %>% mutate (ploidy = show_ploidy(genotypes))
 ```
 
 To retrieve the genotypes (which are compressed), we use:
@@ -128,7 +129,7 @@ example_pop1
 There are a number of functions that compute population genetics quantities for each
 individual, such as individual observed heterozygosity. We can compute them simply with:
 ```{r}
-example_gt %>% ind_het_obs()
+example_gt %>% ind_H_obs()
 ```
 
 We can use `mutate` to add observed heterozygosity as a column to our
@@ -137,7 +138,7 @@ to be passed any arguments if the tibble is passed directly to them, but
 the column `genotypes` has to be provided when they are used within
 `dplyr` verbs such as `mutate`):
 ```{r}
-example_gt %>% mutate(het_obs = ind_het_obs(genotypes))
+example_gt %>% mutate(het_obs = ind_H_obs(genotypes))
 ```
 
 # Using verbs on loci
@@ -174,11 +175,6 @@ we have the correct loci with:
 show_loci_names(example_sub)
 ```
 
-Let us check that this has indeed impacted the individual heterozygosity
-```{r}
-example_sub %>% ind_het_obs()
-```
-
 We can also subset and reorder by passing indeces (note that we extract the loci
 information, but in reality we have reordered and subsetted the genotypes
 for all individuals):
@@ -187,11 +183,6 @@ example_gt %>% select_loci (c(2,6,1)) %>% show_loci()
 ```
 This operation could be helpful when merging datasets that do not fully
 overlap on their loci (more on that later).
-
-```{r}
-example_gt %>% select_loci (c(2,6,1)) %>% show_genotypes()
-```
-
 
 The limit of `select_loci` is that it can not directly summarise the genotypes.
 We can do that separately and then feed the result as a set of indeces. For 

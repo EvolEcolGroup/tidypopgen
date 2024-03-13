@@ -3,14 +3,14 @@
 \name{show_genotypes}
 \alias{show_genotypes}
 \alias{show_genotypes.tbl_df}
-\alias{show_genotypes.list}
+\alias{show_genotypes.vctrs_bigSNP}
 \title{Show the genotypes of a \code{gen_tibble}}
 \usage{
 show_genotypes(.x, ...)
 
-\method{show_genotypes}{tbl_df}(.x, ...)
+\method{show_genotypes}{tbl_df}(.x, ind_indices = NULL, loci_indices = NULL, ...)
 
-\method{show_genotypes}{list}(.x, ...)
+\method{show_genotypes}{vctrs_bigSNP}(.x, ind_indices = NULL, loci_indices = NULL, ...)
 }
 \arguments{
 \item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of

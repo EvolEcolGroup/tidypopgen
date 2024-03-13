@@ -1,57 +1,37 @@
-#' Constructor for a `gen_tibble`
-#'
-#' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
-#' here the format
-#'
-#' @param ind_meta a list, data.frame or tibble with compulsory columns 'id'
-#'  and 'population', plus any additional metadata of interest.
-#' @param genotypes a matrix of counts of alternative alleles, one row per
-#' individual and a column per locus
-#' @param loci a data.frame or tibble, with compulsory columns 'name', 'chromosome',
-#' and 'position'
-#' @param ploidy a vector giving the ploidy of each individual. If 'ploidy' is not
-#' specified, diploids are assumed.
-#' @returns an object of the class `gen_tbl`.
-#' @examples
-#' test_ind_meta <- data.frame (id=c("a","b","c"),
-#'                              population = c("pop1","pop1","pop2"))
-#' test_genotypes <- rbind(c(1,1,0,1,1,0),
-#'                         c(2,1,0,0,0,0),
-#'                         c(2,2,0,0,1,1))
-#' test_loci <- data.frame(name=paste0("rs",1:6),
-#'                         chromosome=c(1,1,1,1,2,2),
-#'                         position=c(3,5,65,343,23,456),
-#'                         allele_ref = c("a","t","c","g","c","t"),
-#'                         allele_alt = c("t","c", NA,"c","g","a"))
-#' test_gen <- gen_tibble(ind_meta = test_ind_meta,
-#'                        genotypes = test_genotypes,
-#'                        loci = test_loci)
-#' test_gen
+
+
 #' @export
-
-gen_tibble <- function(ind_meta, genotypes, loci, ploidy=NULL){
-  # TODO check object types
-  if (!all(c("id", "population") %in% names(ind_meta))){
-    stop("ind_meta does not include the compulsory columns 'id' and 'population")
+gen_tibble <- function(bigsnp_path){
+  if (is.character(bigsnp_path)){
+    bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
+  } else {
+    stop("bigsnp_path should be pointing to a bigsnp rds file")
   }
-  if (is.null(ploidy)){
-    ploidy <- rep(2, nrow(ind_meta))
-  }
+  ind_meta <- list(id = bigsnp_obj$fam$sample.ID,
+                             population = bigsnp_obj$fam$family.ID)
 
-  check_valid_loci(loci)
-#  if (!all(c('name', 'chromosome', 'position','allele_ref','allele_alt') %in% names(loci))){
-#    stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','allele_ref','allele_alt'")
-#  }
-  ind_meta <- as.list(ind_meta)
-  #TODO this could be parallelised
-  ind_meta$genotypes <- lapply(1:nrow(genotypes), function(i) methods::new("SNPbin",
-                                                                           as.integer(genotypes[i,]),ploidy=ploidy[i]) )
-  attr(ind_meta$genotypes,"loci")<-tibble::as_tibble(loci)
+  ind_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj)
 
   tibble::new_tibble(
     ind_meta,
     class = "gen_tbl"
   )
+}
+
+
+
+new_vctrs_bigsnp <- function(bigsnp_obj) {
+  loci <- tibble::tibble(big_index = seq_len(nrow(bigsnp_obj$map)),
+                         name = bigsnp_obj$map$marker.ID,
+                         chromosome = bigsnp_obj$map$chromosome,
+                         position = bigsnp_obj$map$physical.pos,
+                         genetic_dist = bigsnp_obj$map$genetic.dist,
+                         allele_ref = bigsnp_obj$map$allele2,
+                         allele_alt = bigsnp_obj$map$allele1
+  )
+  vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
+                  bigsnp = bigsnp_obj,
+                  loci=loci, class = "vctrs_bigSNP")
 }
 
 
@@ -75,19 +55,6 @@ check_valid_loci <- function(loci_df){
 stopifnot_gen_tibble <- function(.x){
   if ("gentoypes" %in% names(.x)){
     stopifnot(.x$genotypes)
-  }
-}
-
-#' Test if a list is made of `SNPbin`
-#'
-#' At some point, this will be obsolete if we use `vctrs`. But for the moment,
-#' it allows us to check if a list is genotypes is properly formatted.
-#' @param .x the tibble
-#' @returns NULL
-#' @keywords internal
-stopifnot_snpbin_list <- function(.x){
-  if(!inherits(.x[[1]],"SNPbin")){
-    stop("genotypes is not a list of SNPbin")
   }
 }
 
