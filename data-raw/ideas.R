@@ -21,3 +21,11 @@
 # for plotting dudi.pca
 # And some ideas from factorextra (not fully tidy, but some interesting ideas)
 # http://www.sthda.com/english/wiki/get-pca-extract-the-results-for-individuals-variables-in-principal-component-analysis-r-software-and-data-mining
+
+
+
+
+
+##################################
+#big SVD
+# https://stackoverflow.com/questions/46253537/computing-the-null-space-of-a-bigmatrix-in-r/46380540#46380540

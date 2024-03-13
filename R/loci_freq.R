@@ -57,6 +57,7 @@ loci_freq.vctrs_bigSNP <- function(.x, ..., minor = TRUE) {
 #' @export
 #' @rdname loci_freq
 loci_freq.grouped_df <- function(.x, ..., minor = TRUE) {
+  # TODO this is seriously inefficient, we need to cast it into a big_apply problem
   group_map(.x, .f=~loci_freq(.x, minor = minor))
 }
 

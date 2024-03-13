@@ -1,22 +1,22 @@
 #' Generate a report of what would happen to each SNP in a merge
 #'
 #' This function provides an overview of the fate of each SNP in two
-#' [`adegenet::genlight`] objects in the case of a merge. Only SNPs found in
+#' [`gen_tibble`] objects in the case of a merge. Only SNPs found in
 #' both objects will be kept. One object is used as a `reference`, and SNPs
 #' in the other dataset will be flipped and/or alleles swapped
 #' as needed. SNPs that have different alleles in the two datasets will also be
 #' dropped.
 #'
-#' @param ref either a [`gen_tibble`] object, or the path to the PLINK file;
+#' @param ref either a [`gen_tibble`] object, or the path to the PLINK bim file;
 #' the alleles in this objects will
 #' be used as template to flip the ones in `target` and/or
 #' swap their order as necessary.
-#' @param target either a [`gen_tibble`] object, or the path to the PLINK file
-#' (saved in raw format, see details in [read_plink_raw()].
+#' @param target either a [`gen_tibble`] object, or the path to the PLINK bim file
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #' match the two datasets. It defaults to FALSE
 #' @param remove_ambiguous boolean whether ambiguous SNPs (i.e. a/t and c/g)
-#' should be removed. It defaults to FALSE
+#' should be removed. It defaults to FALSE. It is set to true if strand flipping
+#' is set to TRUE.
 #' @param quiet boolean whether to omit reporting to screen
 #' @returns a list with two `data.frames`, named `target` and `ref`. Each
 #' data.frame has `nrow()` equal to the number of loci in the respective dataset,
@@ -31,15 +31,18 @@
 
 rbind_dry_run <- function(ref, target, flip_strand = FALSE,
                           remove_ambiguous = FALSE, quiet = FALSE){
+  if (flip_strand){
+    remove_ambiguous <- TRUE
+  }
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
   target_df <- target %>% show_loci()
   target_df <- target_df %>% mutate(id = seq_len(nrow(target_df)))
   ref_df <- ref %>% show_loci()
   ref_df <- ref_df %>% mutate(id = seq_len(nrow(ref_df)))
-  # replace NA with "m" for missing allele to avoid subsetting headaches (NA does not play nice with subsetting)
-  ref_df$allele_alt[is.na(ref_df$allele_alt)]<-"m"
-  target_df$allele_alt[is.na(target_df$allele_alt)]<-"m"
+  # replace NA with "0" for missing allele to avoid subsetting headaches (NA does not play nice with subsetting)
+  ref_df$allele_alt[is.na(ref_df$allele_alt)]<-"0"
+  target_df$allele_alt[is.na(target_df$allele_alt)]<-"0"
   # rename the alleles
   ref_df <- ref_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
   target_df <- target_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
@@ -70,10 +73,10 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, 
 
   # fix any missing alleles
   target_sub$missing_allele <- resolve_missing_alleles(missing_table = target_sub, other_table = ref_sub)
-  target_missing_to_fix <- target_sub$allele_1=="m" & !is.na(target_sub$missing_allele)
+  target_missing_to_fix <- target_sub$allele_1=="0" & !is.na(target_sub$missing_allele)
   target_sub$allele_1[target_missing_to_fix] <- target_sub$missing_allele[target_missing_to_fix]
   ref_sub$missing_allele <- resolve_missing_alleles(missing_table = ref_sub, other_table = target_sub)
-  ref_missing_to_fix <- ref_sub$allele_1=="m" & !is.na(ref_sub$missing_allele)
+  ref_missing_to_fix <- ref_sub$allele_1=="0" & !is.na(ref_sub$missing_allele)
   ref_sub$allele_1[ref_missing_to_fix] <- ref_sub$missing_allele[ref_missing_to_fix]
 
   # preliminary list of alleles to keep based on whether alleles are correct
@@ -149,12 +152,12 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, 
 resolve_missing_alleles <- function(missing_table, other_table){
   #browser()
   missing_replacements <- rep(NA, nrow(missing_table))
-  for (i_row in which(missing_table$allele_1=="m")){
+  for (i_row in which(missing_table$allele_1=="0")){
     # get non-missing allele
     known_allele <- missing_table[i_row,"allele_2"]
     other_alleles <- unlist(other_table[i_row,c("allele_1","allele_2")])
     # as long as we don't have a missing allele in the other table as well
-    if (other_alleles[1]!="m"){
+    if (other_alleles[1]!="0"){
       if (known_allele %in% other_alleles){
         missing_replacements[i_row] <- other_alleles[!other_alleles %in% known_allele]
       } else if (known_allele %in% flip(other_alleles)){
@@ -171,9 +174,9 @@ resolve_missing_alleles <- function(missing_table, other_table){
 
 
 ambiguous <- function(alleles_df){
-  (((alleles_df$allele_1=="a") & (alleles_df$allele_2=="t")) |
-     ((alleles_df$allele_1=="t") & (alleles_df$allele_2=="a")) |
-     ((alleles_df$allele_1=="c") & (alleles_df$allele_2=="g")) |
-     ((alleles_df$allele_1=="g") & (alleles_df$allele_2=="c")))
+  (((alleles_df$allele_1=="A") & (alleles_df$allele_2=="T")) |
+     ((alleles_df$allele_1=="T") & (alleles_df$allele_2=="A")) |
+     ((alleles_df$allele_1=="C") & (alleles_df$allele_2=="G")) |
+     ((alleles_df$allele_1=="G") & (alleles_df$allele_2=="C")))
 }
 

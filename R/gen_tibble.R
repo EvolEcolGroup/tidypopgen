@@ -16,7 +16,7 @@ gen_tibble <- function(bigsnp_path){
   ind_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
 
-  ind_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj)
+  ind_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj, bigsnp_obj$fam$sample.ID)
 
   tibble::new_tibble(
     ind_meta,
@@ -26,7 +26,7 @@ gen_tibble <- function(bigsnp_path){
 
 
 
-new_vctrs_bigsnp <- function(bigsnp_obj) {
+new_vctrs_bigsnp <- function(bigsnp_obj, names) {
   loci <- tibble::tibble(big_index = seq_len(nrow(bigsnp_obj$map)),
                          name = bigsnp_obj$map$marker.ID,
                          chromosome = bigsnp_obj$map$chromosome,
@@ -37,7 +37,14 @@ new_vctrs_bigsnp <- function(bigsnp_obj) {
   )
   vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
                   bigsnp = bigsnp_obj,
-                  loci=loci, class = "vctrs_bigSNP")
+                  loci=loci,
+                  names=names,
+                  class = "vctrs_bigSNP")
+}
+
+#' @export
+summary.vctrs_bigSNP <- function(object, ...){
+  summary(rep("bigSNP-genotypes",length(object)))
 }
 
 

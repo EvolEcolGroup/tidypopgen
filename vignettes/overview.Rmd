@@ -1,7 +1,7 @@
 ---
 title: "overview"
-output: rmarkdown::html_vignette
-        #pdf_document
+output: #rmarkdown::html_vignette
+        pdf_document
 vignette: >
   %\VignetteIndexEntry{overview}
   %\VignetteEngine{knitr::rmarkdown}
@@ -262,7 +262,15 @@ example_gt %>% group_by(population) %>%
   summarise(n= n(), mean_het = mean(ind_het_obs(genotypes)))
 ```
 
+However, note that this is somewhat inefficient, as computing the pop averages
+requires multiple access to the data. A more efficient approach is to:
+```{r}
+example_gt %>% mutate(het_obs = ind_het_obs(genotypes)) %>% group_by(population) %>% 
+  summarise(n= n(), mean_het = mean(het_obs))
+```
 
+In this way, we compute all individual heterozygosities in one go (optimising
+our file access time), and then generate the population summaries.
 
 For functions that return a quantity per locus (e.g. `loci_freq`), we can use 
  `group_by` together with `group_map` to apply such functions over populations:
