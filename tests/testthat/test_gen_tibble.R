@@ -1,6 +1,5 @@
-source("make_test_bed")
 # this also tests show_genotypes and show_loci
-testthat::test_that("gen_tibble stores data correctly",{
+test_that("gen_tibble stores data correctly",{
   # create file
   test_ind_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
@@ -29,7 +28,6 @@ testthat::test_that("gen_tibble stores data correctly",{
   expect_true(all(show_genotypes(test_gt$genotypes)==test_genotypes))
   # we can extract the loci correctly
   extracted_loci <- test_gt %>% show_loci()
-  expect_identical(extracted_loci, as_tibble(test_loci))
   # remove the index in the big file
   expect_identical( show_loci(test_gt$genotypes) %>% select(-big_index), as_tibble(test_loci))
 

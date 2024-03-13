@@ -4,19 +4,18 @@
 #' of a `gen_tibble`, using the mini-grammar available for `tidyselect`. The
 #' `select`-like evaluation only has access to the names of the loci (i.e. it
 #' can select only based on names, not summary statistics of those loci; look
-#' at [select_loci_if()] for that feature. There is also the possibility
-#' of swapping reference and alternate alleles whilst selecting loci, using
-#' either the argument `.swap_arg` (which has `select`-like mini-grammar on names)
-#' or `.swap_arg_if` (which has access to the genotypes like `select_loci_if`)
+#' at [select_loci_if()] for that feature.
+#'
+#' Note that the `select_loci` verb does not modify the backing FBM files,
+#' but rather it subsets the list of loci to be used stored in the `gen_tibble`.
 #' @param .data a `gen_tibble`
 #' @param .sel_arg one unquoted expression, using the mini-grammar of
-#'  [dplyr::select()] to select loci
-#' @returns a list of `SNPbin` object that have been sub-setted to the selected
-#' loci.
-#'
-#' Variable names
+#'  [dplyr::select()] to select loci. Variable names
 #' can be used as if they were positions in the data frame, so expressions
 #' like x:y can be used to select a range of variables.
+#' @returns a `gen_tibble` with a subset of the loci.
+#'
+
 #' @export
 #'
 select_loci <-function(.data, .sel_arg, .swap_arg = NULL, .swap_if_arg = NULL){

@@ -56,11 +56,13 @@ where n is the number of individuals (i.e. one object per individual).
 Given information about the individuals, their genotypes, and the loci:
 ```{r}
 library(tidypopgen)
-example_ind_meta <- data.frame (id=c("a","b","c"),
-                       population = c("pop1","pop1","pop2"))
+example_ind_meta <- data.frame (id=c("a","b","c","d","e"),
+                       population = c("pop1","pop1","pop2","pop2","pop2"))
 example_genotypes <- rbind(c(1, 1, 0, 1, 1, 0), 
                         c(2, 0, 0, 0,NA, 0), 
-                        c(1, 2, 0, 0, 1, 1))
+                        c(1, 2, 0, 0, 1, 1),
+                        c(0, 2, 0, 1, 2, 1),
+                        c(1, 1,NA, 2, 1, 0))
 example_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
                    chromosome=c(1,1,1,1,2,2),
                    position=c(3,5,65,343,23,456),
@@ -121,7 +123,7 @@ example_gt %>% show_loci()
 The individual metadata can then be processed with the usual `tidiverse` grammar.
 So, we can filter individuals by population with
 ```{r}
-example_pop1 <- example_gt %>% filter (population=="pop1")
+example_pop1 <- example_gt %>% filter (population=="pop2")
 example_pop1
 ```
 
@@ -129,6 +131,12 @@ There are a number of functions that compute population genetics quantities for 
 individual, such as individual observed heterozygosity. We can compute them simply with:
 ```{r}
 example_gt %>% ind_het_obs()
+```
+
+Or after filtering:
+```{r}
+example_gt %>% filter (population=="pop2") %>% ind_het_obs()
+
 ```
 
 We can use `mutate` to add observed heterozygosity as a column to our
@@ -233,53 +241,6 @@ example_gt %>% select_loci_if(show_loci(genotypes)$chromosome==2 &
                              loci_freq(genotypes)>0.2) %>% show_loci()
 ```
 
-Sometimes it is also of interest to use a particular type of allele (the minor or
-the major) when representing gentoypes, either for specific analysis 
-or for exporting data. The representation 
-we have used so far is arbitrary, but we can use an additional feature of 
-`select_loci` and `select_loci_if` to swap the reference and alternate allele.
-Both functions include a `.swap_arg` and a `.swap_if_arg`. We case use either
-of those parameters to perform select-like operations that define which loci are
-swapped. `.swap_arg` is equivalent to `select_loci` in using the `select` mini-grammar
-on loci name (but it is blidn to genotype content), whilst `.swap_if_arg` works 
-like `select_loci_if` (having access to the genotyes but not the names).
-
-Let us look at the genotypes in our dataset:
-```{r}
-example_gt %>% show_genotypes()
-```
-
-We can see that they are a mix of major and minor allele counts. We can turn
-them into minor allele counts simply with:
-```{r}
-example_gt %>% 
-  select_loci(everything(),
-              .swap_if_arg = loci_freq(genotypes, minor=FALSE)>0.5) %>%
-  show_genotypes()
-```
-
-Note that we use `minor=FALSE` in `loci_freq` to get the raw frequencies (earlier,
-we used the default `minor=TRUE` which returns the minor allele frequencies). In
-this case we selected all loci (`everything`). Alternatively, we could 
-generate major allele frequencies only for SNPs with an `rs` code:
-
-```{r}
-example_gt %>% 
-  select_loci(starts_with("rs"),
-              .swap_if_arg = loci_freq(genotypes, minor=FALSE)<0.5) %>%
-  show_genotypes()
-
-```
-
-Or only select and simultaneously swap all alleles on chromosome 2 (not sure
-why you would want to do that, but it illustrates another combination of selecting
-and swapping criteria:
-```{r}
-example_gt %>% 
-  select_loci_if(show_loci(genotypes)$chromosome==2,
-              .swap_if_arg = show_loci(genotypes)$chromosome==2) %>%
-  show_genotypes()
-```
 
 # Grouping individuals in populations
 
@@ -298,8 +259,10 @@ new `tibble` with one line per population. For example, we can count the number 
 per population, as well as their mean heterozygosity with :
 ```{r}
 example_gt %>% group_by(population) %>% 
-  summarise(n= n(), mean_het = mean(ind_H_obs(genotypes)))
+  summarise(n= n(), mean_het = mean(ind_het_obs(genotypes)))
 ```
+
+
 
 For functions that return a quantity per locus (e.g. `loci_freq`), we can use 
  `group_by` together with `group_map` to apply such functions over populations:
@@ -323,20 +286,12 @@ distance metrics among populations. For example:
 
 ```{r}
 example_gt %>% group_by(population) %>% gt_pairwise_fst()
-
 ```
 
 # Reading and exporting data
 
-Currently, `tidypopgen` can read data only from PLINK raw files generated with 
-the flags `--include-alt` and `--recodeA`.
-
-```{r}
-raw_path <- system.file("extdata/pop_a.raw", package = "tidypopgen")
-map_path <- system.file("extdata/pop_a.map", package = "tidypopgen")
-plink_gt <- read_plink_raw(file = raw_path, map_file = map_path)
-plink_gt
-```
+Currently, `tidypopgen` can read data only from PLINK bed files. Plink has the
+ability to convert a large number of formats.
 
 It can export data in the same format. We will save the dataset to
 a file in the temporary directory:
@@ -346,27 +301,6 @@ gt_write_plink(plink_gt, file = out_file)
 ```
 
 This will write both a `.raw` file as well as a `.map` file
-
-Alternatively, we can write a plink `.ped` instead ofa `.raw` file with:
-```{r}
-gt_write_plink(plink_gt, file = out_file, plink_format = "ped")
-```
-
-It is also possible to convert back and from from `adegenet::genelight` objects, which are
-well integrated into a number of existing packages to explore the data with, for example, PCA and
-clustering, as well as a wealth of export possibilities.
-
-```{r}
-plink_gl <- as_genlight(plink_gt)
-plink_gl
-```
-And back to `gen_tibble` (note that we have lost the additional metadata (such
-as sex) which are not coded in `genlight` objects:
-```{r}
-plink_back_gt <- as_gen_tibble(plink_gl)
-plink_back_gt
-
-```
 
 Furthermore, it is possible to import vcf files via `vcfR`. If we have a `vcfR`
 object, we can simply:
@@ -483,3 +417,22 @@ This means that we can also use all functions from the `adegenet` package for ex
 ```{r}
 scatter(pca_merged)
 ```
+
+# Obsolete
+
+# This will have to be reconsidered, as swapping alleles on a file based system is VERY intensive
+# we can implement it as part of the merging, but not as something to do on the fly
+Sometimes it is also of interest to use a particular type of allele (the minor or
+the major) when representing gentoypes, either for specific analysis 
+or for exporting data. The representation 
+we have used so far is arbitrary, but we can use an additional feature of 
+`select_loci` and `select_loci_if` to swap the reference and alternate allele.
+Both functions include a `.swap_arg` and a `.swap_if_arg`. We case use either
+of those parameters to perform select-like operations that define which loci are
+swapped. `.swap_arg` is equivalent to `select_loci` in using the `select` mini-grammar
+on loci name (but it is blidn to genotype content), whilst `.swap_if_arg` works 
+like `select_loci_if` (having access to the genotyes but not the names).
+
+
+
+

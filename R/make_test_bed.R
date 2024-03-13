@@ -21,5 +21,5 @@ make_test_bed <- function(genotypes, loci, ind_meta, path_out){
   rownames(genotypes) <- bim$id
   colnames(genotypes) <- fam$id
 
-  genio::write_plink(path_out, genotypes, bim, fam)
+  genio::write_plink(path_out, genotypes, bim, fam, verbose=FALSE)
 }

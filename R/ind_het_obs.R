@@ -26,25 +26,25 @@ ind_het_obs.tbl_df <- function(.x, ...){
 #' @rdname ind_het_obs
 ind_het_obs.vctrs_bigSNP <- function(.x, ...){
   rlang::check_dots_empty()
+  # get the FBM
   X <- attr(.x,"bigsnp")$genotypes
+  # rows (individuals) that we want to use
+  rows_to_keep <- vctrs::vec_data(.x)
+  # col means for submatrix (all rows, only some columns)
 
+  # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
+  col_1_NA <- function(X, ind, rows_to_keep) {
+    count_1 <- function(a){sum(a==1, na.rm = TRUE)}
+    res <- apply(X[rows_to_keep,ind],1,count_1)
+    count_na <- function(a){sum(is.na(a))}
+    res <- rbind(res,apply(X[rows_to_keep,ind],1,count_na))
+  }
 
-  rowsums <- bigstatsr::big_apply(X, a.FUN = function(X, ind) row_count_1(X[, ind]),
+  # @TODO this is inefficient!!!, as we load files twice. We should do everything in one go
+  this_col_1_na <- bigstatsr::big_apply(X, a.FUN = col_1_NA,
                       ind=attr(.x,"loci")$big_index,
-                       a.combine = 'plus')
-  rowNA <- bigstatsr::big_apply(X, a.FUN = function(X, ind) row_count_NA(X[, ind]),
-                                ind=attr(.x,"loci")$big_index,
-                     a.combine = 'plus')
-  rowsums/(ncol(X)-rowNA)
+                       a.combine = 'plus', rows_to_keep=rows_to_keep)
+  this_col_1_na[1,]/(ncol(X)-this_col_1_na[2,])
 }
 
 
-row_count_NA <- function(X){
-  count_na <- function(a){sum(is.na(a))}
-  apply(X,1,count_na)
-}
-
-row_count_1 <- function(X){
-  count_1 <- function(a){sum(a==1, na.rm = TRUE)}
-  apply(X,1,count_1)
-}

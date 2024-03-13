@@ -16,8 +16,6 @@ loci_freq <- function(.x, ...) {
 #' @param alleles_as_units a logical indicating whether alleles are considered
 #' as units (i.e., a diploid genotype equals two samples, a triploid, three,
 #' etc.) or whether individuals are considered as units of information.
-#' @param use_c a logical indicating whether compiled C code should be used
-#' (TRUE) or not (FALSE, default).
 #' @param minor a logical indicating whether we should give the frequencies of
 #' the minor allele (TRUE, the default). If FALSE, the frequencies of the
 #' alternate allele are given.
@@ -32,10 +30,27 @@ loci_freq.tbl_df <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use
 
 #' @export
 #' @rdname loci_freq
-loci_freq.list <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE) {
+loci_freq.vctrs_bigSNP <- function(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE) {
   rlang::check_dots_empty()
-  stopifnot_snpbin_list(.x)
-  freq <- snpbin_list_means(.x, alleles_as_units = alleles_as_units, use_c = use_c)
+  # get the FBM
+  geno_fbm <- attr(.x,"bigsnp")$genotypes
+  # rows (individuals) that we want to use
+  rows_to_keep <- vctrs::vec_data(.x)
+  # as long as we have more than one individual
+  if (length(rows_to_keep)>1){
+    # col means for submatrix (all rows, only some columns)
+    colMeans_sub <- function(X, ind, rows_to_keep) {
+      colMeans(X[rows_to_keep, ind], na.rm=TRUE)
+    }
+    freq <- bigstatsr::big_apply(geno_fbm, a.FUN = colMeans_sub,
+                                 rows_to_keep = rows_to_keep,
+                                 ind=attr(.x,"loci")$big_index,
+                                 a.combine = 'c')
+  } else { # if we have a single individual
+    freq <- X[rows_to_keep,attr(.x,"loci")$big_index]
+  }
+  # sort out frequencies for diploids
+  freq <- freq/2
   if (minor){
     freq[freq>0.5 & !is.na(freq)] <- 1 - freq[freq>0.5 & !is.na(freq)]
   }
