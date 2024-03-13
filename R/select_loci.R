@@ -18,7 +18,7 @@
 
 #' @export
 #'
-select_loci <-function(.data, .sel_arg, .swap_arg = NULL, .swap_if_arg = NULL){
+select_loci <-function(.data, .sel_arg){
   # defuse the selection criteria
   sel_defused <- rlang::enquo(.sel_arg)
 

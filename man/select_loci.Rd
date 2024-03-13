@@ -4,7 +4,7 @@
 \alias{select_loci}
 \title{The \code{select} verb for \code{loci}}
 \usage{
-select_loci(.data, .sel_arg, .swap_arg = NULL, .swap_if_arg = NULL)
+select_loci(.data, .sel_arg)
 }
 \arguments{
 \item{.data}{a \code{gen_tibble}}

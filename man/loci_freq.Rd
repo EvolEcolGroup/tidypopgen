@@ -9,11 +9,11 @@
 \usage{
 loci_freq(.x, ...)
 
-\method{loci_freq}{tbl_df}(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE)
+\method{loci_freq}{tbl_df}(.x, ..., minor = TRUE)
 
-\method{loci_freq}{vctrs_bigSNP}(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE)
+\method{loci_freq}{vctrs_bigSNP}(.x, ..., minor = TRUE)
 
-\method{loci_freq}{grouped_df}(.x, ..., minor = TRUE, alleles_as_units = TRUE, use_c = FALSE)
+\method{loci_freq}{grouped_df}(.x, ..., minor = TRUE)
 }
 \arguments{
 \item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
@@ -25,10 +25,6 @@ or a \code{\link{gen_tibble}}.}
 \item{minor}{a logical indicating whether we should give the frequencies of
 the minor allele (TRUE, the default). If FALSE, the frequencies of the
 alternate allele are given.}
-
-\item{alleles_as_units}{a logical indicating whether alleles are considered
-as units (i.e., a diploid genotype equals two samples, a triploid, three,
-etc.) or whether individuals are considered as units of information.}
 }
 \value{
 a vector of frequencies, one per locus

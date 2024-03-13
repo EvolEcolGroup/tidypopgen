@@ -1,6 +1,12 @@
-
-
+#' Constructor for a `gen_tibble`
+#'
+#' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
+#' here the format
+#' @param bigsnp_path the path to a [`bigsnpr::bigSNP`] file created with
+#' [bigsnpr::snp_readBed()]
+#' @returns an object of the class `gen_tbl`.
 #' @export
+
 gen_tibble <- function(bigsnp_path){
   if (is.character(bigsnp_path)){
     bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)

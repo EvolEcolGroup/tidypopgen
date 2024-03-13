@@ -17,14 +17,14 @@ Depends:
     dplyr,
     tibble
 Imports:
+    bigsnpr,
+    bigstatsr,
     generics,
+    genio,
     magrittr,
-    methods,
-    MASS,
     rlang,
-    stringr,
-    tidyr,
-    tidyselect
+    tidyselect,
+    vctrs
 Suggests: 
     ggplot2,
     knitr,

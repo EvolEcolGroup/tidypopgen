@@ -2,9 +2,22 @@
 % Please edit documentation in R/make_test_bed.R
 \name{make_test_bed}
 \alias{make_test_bed}
-\title{simple function to write a test plink BED file}
+\title{Simple function to write a test plink BED file}
 \usage{
 make_test_bed(genotypes, loci, ind_meta, path_out)
+}
+\arguments{
+\item{genotypes}{a matrix of genotype dosages}
+
+\item{loci}{a table of loci information (as used in \code{\link{gen_tibble}})}
+
+\item{ind_meta}{a table with 'id' and 'population'}
+
+\item{path_out}{is the path and the previx, to which '.bed', '.bim', and '.fam'
+will be added.}
+}
+\value{
+NULL it writes the files
 }
 \description{
 We start with data in the format that we expect to come out later on
