@@ -19,12 +19,12 @@
 #' swap alleles as needed.
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #' match the two datasets. It defaults to FALSE
-#' @param remove_ambiguous boolean whether ambiguous SNPs (i.e. a/t and c/g)
+#' @param remove_ambiguous boolean whether ambiguous SNPs (i.e. A/T and C/G)
 #' should be removed. It defaults to FALSE
 #' @param quiet boolean whether to omit reporting to screen
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
-rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
+rbind_gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
               remove_ambiguous = FALSE, quiet = FALSE){
   dots <- list(...)
   if (length(dots)!=2){
@@ -44,12 +44,32 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   report <- rbind_dry_run(ref = ref, target = target, flip_strand=flip_strand,
                           remove_ambiguous = remove_ambiguous, quiet = quiet)
   # now edit the gen_tibble objects
-  # for the ref object, we fix the missing alleles
+  ###########
+  # we start with the ref object
+  # we fix the missing alleles
+  ## in the gt_table
   id_missing <- which(!is.na(report$ref$missing_allele))
-#  if (length(id_missing)>0){
-    attr(ref$genotypes, "loci")$allele_alt[id_missing] <- report$ref$missing_allele[id_missing]
-#  }
+  attr(ref$genotypes, "loci")$allele_alt[id_missing] <- report$ref$missing_allele[id_missing]
+  browser()
+  ## and then in the bigSNP object
+  attr(ref$genotypes,"bigsnp")$map$allele
+  # now we subset the SNP object
+  ## in the gt_table
+
   ref <- ref %>% select_loci(order(report$ref$new_id,na.last=NA))
+
+  # Now subset the FBM with a deep copy with indices
+
+  # update the other tables in the bigSNP object
+
+  # update the loci table in the gen_tibble
+
+  ###########
+  # now we move to the target object
+
+
+
+  #
   # fix missing alleles in target
   id_missing_target <- which(!is.na(report$target$missing_allele))
   attr(target$genotypes, "loci")$allele_alt[id_missing_target] <- report$target$missing_allele[id_missing_target]
@@ -73,4 +93,10 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
 
   # for the use of the data.frame method (we can't use NextMethod with rbind)
   return(base::rbind.data.frame(ref,target))
+}
+
+
+subset_gen_tbl <- function(x, indiv_indices=NULL, loci_indices=NULL, swap_indices=NULL,
+         backingfile = NULL) {
+
 }

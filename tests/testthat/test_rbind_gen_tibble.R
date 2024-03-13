@@ -1,24 +1,21 @@
-#reference file
-raw_path_pop_b <- system.file("extdata/pop_b.raw", package = "tidypopgen")
-map_path_pop_b <- system.file("extdata/pop_b.map", package = "tidypopgen")
-pop_b_gen <- read_plink_raw(file = raw_path_pop_b, map_file = map_path_pop_b, quiet = TRUE)
-
+raw_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+bigsnp_path_b <- bigsnpr::snp_readBed(raw_path_pop_b, backingfile = tempfile("test_b_"))
+pop_b_gt <- gen_tibble(bigsnp_path_b)
 #target file
-raw_path_pop_a <- system.file("extdata/pop_a.raw", package = "tidypopgen")
-map_path_pop_a <- system.file("extdata/pop_a.map", package = "tidypopgen")
-pop_a_gen <- read_plink_raw(file = raw_path_pop_a, map_file = map_path_pop_a, quiet = TRUE)
+raw_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+bigsnp_path_a <- bigsnpr::snp_readBed(raw_path_pop_a, backingfile = tempfile("test_a_"))
+pop_a_gt <- gen_tibble(bigsnp_path_a)
+# #create merge
+ merged_gen <- rbind.gen_tbl(pop_b_gt, pop_a_gt, flip_strand = TRUE,
+                             remove_ambiguous = TRUE, quiet = TRUE)
 
-#create merge
-merged_gen <- rbind(pop_b_gen, pop_a_gen, flip_strand = TRUE,
-                            remove_ambiguous = TRUE, quiet = TRUE)
-
-testthat::test_that("merge combines datasets correctly",{
+test_that("merge combines datasets correctly",{
 
   genotypes <- show_genotypes(merged_gen)
 
   #Genotypes before merging
-  pop_b_geno <- show_genotypes(pop_b_gen)
-  pop_a_geno <- show_genotypes(pop_a_gen)
+  pop_b_geno <- show_genotypes(pop_b_gt)
+  pop_a_geno <- show_genotypes(pop_a_gt)
 
   #Check pop_b
   pop_b_merged <- merged_gen %>% filter(population == "pop_b") %>% show_genotypes()

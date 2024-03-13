@@ -5,6 +5,9 @@ X[1,] <-line
 X$is_saved
 X$save()
 
+foo<-big_copy(X,ind.row=c(3,1))
+
+
 X$save()
 
 first_file <- X$backingfile

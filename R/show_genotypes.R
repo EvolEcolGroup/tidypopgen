@@ -27,13 +27,14 @@ show_genotypes.tbl_df <- function(.x, indiv_indices=NULL, loci_indices=NULL, ...
 #' @rdname show_genotypes
 show_genotypes.vctrs_bigSNP <- function(.x, indiv_indices=NULL, loci_indices=NULL, ...){
   rlang::check_dots_empty()
-  if (is.null(indiv_indices) & is.null(loci_indices)){
-    attr(.x,"bigsnp")$genotypes[,attr(.x,"loci")$big_index]
-  } else if (is.null(indiv_indices)){
-    attr(.x,"bigsnp")$genotypes[,attr(.x,"loci")$big_index[loci_indices]]
-  } else if (is.null(loci_indices)){
-    attr(.x,"bigsnp")$genotypes[indiv_indices,]
-  } else {
-    attr(.x,"bigsnp")$genotypes[indiv_indices,attr(.x,"loci")$big_index[loci_indices]]
+  #browser()
+  indiv_big_index <- vctrs::vec_data(.x)
+  if (!is.null(indiv_indices)){
+    indiv_big_index <-  indiv_big_index[indiv_indices]
   }
+  loci_big_index <- show_loci(.x)$big_index
+  if (!is.null(indiv_indices)){
+    loci_big_index <-  loci_big_index[loci_indices]
+  }
+  attr(.x,"bigsnp")$genotypes[indiv_big_index, loci_big_index]
 }
