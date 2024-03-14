@@ -396,3 +396,66 @@ merged_gt %>% show_loci()
 Again, note that the `big_index` values have changed compared to the original files,
 as we generated a new FBM with the merged data. 
 
+# Population genetics analyses
+Besides using various metrics to describe populations, we often want to perform
+more complex analyses, such as Principal Component Analysis or clustering. 
+
+We will us the example dataset from `vigsnpr`:
+```{r}
+library(tidypopgen)
+library(bigsnpr)
+bedfile <- system.file("extdata", "example.bed", package = "bigsnpr")
+snp_file <- snp_readBed(bedfile, backingfile = tempfile())
+example_gt <- gen_tibble(snp_file)
+```
+
+Let us explore our table:
+```{r}
+example_gt
+```
+
+Let's get an overview of the populations:
+```{r}
+example_gt %>% group_by(population) %>% tally()
+```
+The loci had already been filtered and cleaned, so we don't need 
+to do any QC. Let us jump straight into analysis and run a PCA:
+```{r}
+example_pca <- example_gt %>% gt_pca()
+```
+
+We can get a quick summary of the resulting object:
+```{r}
+example_pca
+```
+Objects outputted by different packages and analyese can be difficult to manipulate.
+The package `broom` from the `tidyverse` offers methods 
+to easily extract information in form of tibbles (`tidy`) and merge some of those outputs with the
+original data (`augment`).
+`tidypopgen` implements such methods for objects created from its functions. So, 
+we can tidy the results as we would do for a standard PCA object from `prcomp`.
+So, we can get the eigen values with:
+```{r}
+tidy(example_pca, matrix="eigenvalues")
+```
+
+And the scores for each individual:
+```{r}
+tidy(example_pca)
+```
+
+Rather than wrangling the scores obtained in this way to match them to the
+original data table, we can simply use `augment`:
+
+```{r}
+example_gt <- augment(example_pca , data= example_gt, k=2)
+example_gt
+```
+
+We can then easily plot our data with:
+```{r}
+library(ggplot2)
+example_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) + 
+  geom_point(size = 1.5)
+```
+We can see that the population do separate nicely into 3 main groups on the PCA.
