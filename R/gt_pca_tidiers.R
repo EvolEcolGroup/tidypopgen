@@ -90,7 +90,9 @@ tidy.gt_pca <- function(x, matrix = "u", ...) {
       )
     if (is.null(rownames(x$rotation))) ret$column <- as.integer(ret$column)
   } else if (matrix %in% c("x", "samples", "u", "scores")) {
-    ret <- x$u %>%
+    ret <- x$u
+    colnames(ret) <- paste0("PC",seq_len(ncol(ret)))
+    ret <- ret %>%
       tibble::as_tibble(rownames = "row") %>%
       tidyr::pivot_longer(
         cols = -"row",

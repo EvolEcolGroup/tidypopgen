@@ -40,7 +40,7 @@ ind_het_obs.vctrs_bigSNP <- function(.x, ...){
     res <- rbind(res,apply(X[rows_to_keep,ind],1,count_na))
   }
 
-  # @TODO this is inefficient!!!, as we load files twice. We should do everything in one go
+  # count heterozygotes and nas in one go
   this_col_1_na <- bigstatsr::big_apply(X, a.FUN = col_1_NA,
                       ind=attr(.x,"loci")$big_index,
                        a.combine = 'plus', rows_to_keep=rows_to_keep)
@@ -50,5 +50,5 @@ ind_het_obs.vctrs_bigSNP <- function(.x, ...){
 #' @export
 #' @rdname ind_het_obs
 ind_het_obs.grouped_df <- function(.x, ...){
-  .x %>% mutate(ind_het_obs = ind_het_obs(genotypes)) %>% summarise(het_obs = mean(ind_het_obs))
+  .x %>% mutate(ind_het_obs = ind_het_obs(.data$genotypes)) %>% summarise(het_obs = mean(ind_het_obs))
 }
