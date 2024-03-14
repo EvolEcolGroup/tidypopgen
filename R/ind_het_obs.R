@@ -47,4 +47,8 @@ ind_het_obs.vctrs_bigSNP <- function(.x, ...){
   this_col_1_na[1,]/(ncol(X)-this_col_1_na[2,])
 }
 
-
+#' @export
+#' @rdname ind_het_obs
+ind_het_obs.grouped_df <- function(.x, ...){
+  .x %>% mutate(ind_het_obs = ind_het_obs(genotypes)) %>% summarise(het_obs = mean(ind_het_obs))
+}

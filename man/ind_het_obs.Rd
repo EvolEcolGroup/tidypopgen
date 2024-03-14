@@ -4,6 +4,7 @@
 \alias{ind_het_obs}
 \alias{ind_het_obs.tbl_df}
 \alias{ind_het_obs.vctrs_bigSNP}
+\alias{ind_het_obs.grouped_df}
 \title{Estimate individual observed heterozygosity}
 \usage{
 ind_het_obs(.x, ...)
@@ -11,6 +12,8 @@ ind_het_obs(.x, ...)
 \method{ind_het_obs}{tbl_df}(.x, ...)
 
 \method{ind_het_obs}{vctrs_bigSNP}(.x, ...)
+
+\method{ind_het_obs}{grouped_df}(.x, ...)
 }
 \arguments{
 \item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of

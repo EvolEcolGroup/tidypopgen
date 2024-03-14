@@ -179,7 +179,6 @@ genotypes but is blind to the names of loci.
 Let us start by looking at the loci names in our simple dataset:
 ```{r}
 show_loci_names(example_gt)
-
 ```
 
 We can see that there are two categories of loci, one starting with "rs" and
@@ -384,11 +383,16 @@ Let's check the resulting `gen_tibble`:
 ```{r}
 merged_gt
 ```
+Note that the values in the genotype column (which corresponds to the id in the
+FBM file) have changed to reflect that we have a new, larger FBM with both
+datasets.
+
 We can look at the subsetted loci (note that we used the first population as reference to
 determine the strand and order of alleles):
 ```{r}
 merged_gt %>% show_loci()
 ```
 
-Note that the `big_index` values have changed compared to the original files,
+Again, note that the `big_index` values have changed compared to the original files,
 as we generated a new FBM with the merged data. 
+

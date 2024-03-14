@@ -120,7 +120,7 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   saveRDS(merged_snp, merged_rds)
   # Now we need to create the gen_tibble
   # TODO we need to turn genotype into a string!!!
-  merged_tbl <- rbind(ref %>% select(-genotypes), target %>% select(-genotypes))
+  merged_tbl <- rbind(ref %>% select(-dplyr::any_of("genotypes")), target %>% select(-dplyr::any_of("genotypes")))
   # make sure that the genotypes vector points to the correct rows
   vctrs::vec_data(ref$genotypes)
   #and finally append the loci table

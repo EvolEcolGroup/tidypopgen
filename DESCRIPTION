@@ -23,7 +23,9 @@ Imports:
     genio,
     magrittr,
     rlang,
+    stringr,
     tidyselect,
+    tidyr,
     vctrs
 Suggests: 
     ggplot2,
