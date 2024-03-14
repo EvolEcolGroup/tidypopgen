@@ -28,6 +28,10 @@ match the two datasets. It defaults to FALSE}
 should be removed. It defaults to FALSE}
 
 \item{quiet}{boolean whether to omit reporting to screen}
+
+\item{backingfile}{the path and prefix of the files used to store the
+merged data (it will be a .RDS to store the \code{bigSNP} object and a .bk file
+as its backing file for the FBM)}
 }
 \value{
 a \code{\link{gen_tibble}} with the merged data.

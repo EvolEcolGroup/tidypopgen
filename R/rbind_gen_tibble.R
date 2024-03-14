@@ -22,6 +22,9 @@
 #' @param remove_ambiguous boolean whether ambiguous SNPs (i.e. A/T and C/G)
 #' should be removed. It defaults to FALSE
 #' @param quiet boolean whether to omit reporting to screen
+#' @param backingfile the path and prefix of the files used to store the
+#' merged data (it will be a .RDS to store the `bigSNP` object and a .bk file
+#' as its backing file for the FBM)
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
 rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
@@ -41,6 +44,14 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
               "set 'as_is' to FALSE to subset to loci in common\n")
     }
   }
+  # sort out paths
+  if (is.null(backingfile)){
+    save_path <- dirname(attr(ref$genotypes,"bigsnp")$genotypes$backingfile)
+    backingfile <- tempfile("gt_merged_",tmpdir = save_path, fileext = "")
+  }
+
+
+
   report <- rbind_dry_run(ref = ref, target = target, flip_strand=flip_strand,
                           remove_ambiguous = remove_ambiguous, quiet = quiet)
   # now edit the gen_tibble objects
@@ -100,11 +111,13 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   # and amend the new number of columns
   t_ref_fbm$ncol<-t_ref_fbm$ncol+t_target_fbm$ncol
   # now flip the file around
-  merged_fbm <- bigstatsr::big_transpose(t_ref_fbm) # TODO this should be written in the director of interest
+  merged_fbm <- bigstatsr::big_transpose(t_ref_fbm, backingfile = backingfile) # TODO this should be written in the director of interest
   merged_snp <- structure(list(genotypes = merged_fbm,
                              fam = rbind(ref_snp$fam, target_snp$fam),
                              map = ref_snp$map),
                         class = "bigSNP")
+  merged_rds <- paste0(backingfile,".rds")
+  saveRDS(merged_snp, merged_rds)
   # Now we need to create the gen_tibble
   # TODO we need to turn genotype into a string!!!
   merged_tbl <- rbind(ref %>% select(-genotypes), target %>% select(-genotypes))
@@ -120,8 +133,16 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
                   loci=new_ref_loci_tbl,
                   names=indivs_with_big_names,
                   class = "vctrs_bigSNP")
+
   # TODO check that the snp is saved (it should be), and let the user know what the new
   # name of the files are!!!
-  return(merged_tbl)
+  if (!quiet){
+    message("\n\nthe new bigSNP file is: ", merged_rds)
+    message("the new backing file is: ", attr(merged_tbl$genotypes,"bigsnp")$genotypes$backingfile)
+  }
+  tibble::new_tibble(
+    merged_tbl,
+    class = "gen_tbl"
+  )
 }
 

@@ -29,25 +29,33 @@ In `tidypopgen`, we represent data as a `gen_tbl`, a subclass of `tibble` which 
 four compulsory columns: `id` of the individual (as a `character`, which must 
 be unique for each individual), `population` giving the population the 
 individuals belong to (a `factor`), and `genotypes` (stored in a compressed format
-as a list, one
-object per individual representing its genotypes for all loci). 
-In order to define the loci stored in the compressed objects in the `genotype` list,
-we also require an additional tibble stored as the attribute `loci` to the column `genotypes`. 
-The `loci` tibble includes columns
+as a File-Backed Matrix, with the vector in the tibble providing the row indices of the matrix
+for each individual). The real data reside on disk, and an attribute `bigsnp` of
+the `genotype` column contains all the information to acess it. There is also an
+additional attribute , `loci` which provides all the information about the loci,
+including the column indices that represent in each locu in the FBM.
+The vector of row indices and the table of loci can be subsetted and reordered without
+changing the data on disk; thus, any operation on the `gen_tibble` is fast as it
+shapes the indices of the genotyp matrix rather than the matrix itself.  
+The `loci` tibble includes columns `big_index` for the index in the FBM,
 `name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (`a factor`, if known, 
 otherwise set to `NA`), `position` for the position on the chromosome (`numeric`, if known, 
-otherwise set to `NA`), `allele_ref` for the the reference allele (a character),
-and `allele_alt` for the alternate allele (a character, which can be `NA` for
-monomorphic loci). Additional individual metadata can be stored as columns in
+otherwise set to `NA`), `genetic_dist` for the gentic distance on the chromosome (`numeric`, if known, else set to 0) `allele_ref` for the the reference allele (a character),
+and `allele_alt` for the alternate allele (a character, which can be `0` for
+monomorphic loci, following the same convention as plink). Additional individual metadata can be stored as columns in
 the main `gen_tbl`, whilst additional loci information (such as the position in 
 centimorgans) can be added as columns in the `loci` attribute table.
 
+[the class type of each column needs checking!!!]
+
 In principle, it is possible to use use multiple ways to compress the genotypes.
-`tidypopgen` currently uses `SNPBin` from the package `adegenet`. It is very
-memory efficient, and it is flexible in representing multiple ploidy. But the
+`tidypopgen` currently uses `bigSNP` from the package `bigsnpr`. It is very
+fast and well documented, but it is mostly geared towards diploid data. However,
+with a bit of work it could be expanded to multiple ploidy. NOte that the
 infrastructure is present to adopt alternative compression approaches in the future
 the only constraint is that the data have to be representable as a list of n elements
-where n is the number of individuals (i.e. one object per individual).
+where n is the number of individuals (i.e. one object per individual). For example,
+we could keep the data in memory, and have a `SNPBin` object in each element of the list.
 
 ## The grammar of population genetics
 
@@ -89,12 +97,27 @@ We can create a simple `gen_tibble` object (of class `gen_tbl`) with
 example_gt <- gen_tibble(bigsnp_path)
 example_gt
 ```
-As discussed above, in this tibble, genotypes are stored as a list of 
-compressed `SNPbin` objects.
+As discussed above, in this tibble, `genotypes` contains the indices of the
+individuals in the FBM as values, and the FBM as an attribute.
 
+To retrieve the genotypes (which are compressed in the FBM), we use:
+```{r}
+example_gt %>% show_genotypes()
+```
+
+If we want to extract the information about the loci for which we have genotypes
+(which are stored as an attribute of that column),
+we say:
+```{r}
+example_gt %>% show_loci()
+```
 
 Note that, if we are passing a `gen_tibble` to a function that works on
-genotypes, it is not necessary to pass the column `genotypes` in the call.
+genotypes, it is generally not necessary to pass the column `genotypes` in the call:
+
+```{r}
+example_gt %>% ind_het_obs()
+```
 However, if such a function is used within a `dplyr` verb such as `mutate`,
 we need to pass the `genotype` column to the function:
 
@@ -106,17 +129,7 @@ Or, more simply:
 example_gt %>% mutate (het_obs = ind_het_obs(genotypes))
 ```
 
-To retrieve the genotypes (which are compressed), we use:
-```{r}
-example_gt %>% show_genotypes()
-```
 
-If we want to extract the information about the loci for which we have genotypes
-(which are stored as an attribute of that column),
-we say:
-```{r}
-example_gt %>% show_loci()
-```
 
 ## Standard `dplyr` verbs to manipulate the tibble
 
@@ -187,9 +200,7 @@ Let us check that this has indeed impacted the individual heterozygosity
 example_sub %>% ind_het_obs()
 ```
 
-We can also subset and reorder by passing indeces (note that we extract the loci
-information, but in reality we have reordered and subsetted the genotypes
-for all individuals):
+We can also subset and reorder by passing indeces:
 ```{r}
 example_gt %>% select_loci (c(2,6,1)) %>% show_loci()
 ```
@@ -299,5 +310,85 @@ example_gt %>% group_by(population) %>% gt_pairwise_fst()
 
 # Reading and exporting data
 
-Currently, `tidypopgen` can read data only from PLINK bed files. Plink has the
-ability to convert a large number of formats.
+Currently, `tidypopgen` can read data only from `bigSNP` objects from the `bigsnpr` package. That package has import functions for plink BED files. We will
+need to add some more functionality. It would be good to read the bed files directly (easy) and import from vcfR (not too difficult via `genio`, we just
+need to block process the data).
+
+`bigSNP` can be exported to BED, we just need a wrapper to subsets individuals
+and loci based on the `gen_tbl`. That's easy.
+
+# Merging data
+
+# Merging data
+
+Merging data from different sources is a common problem, especially in human population
+genetics where there is a wealth of SNP chips available. In `tidypopgen`, merging is
+enacted with an `rbind` operation between `gen_tibbles`. If the datasets have the same
+loci, then the merge is trivial. If not, then it is necessary to subset to the same
+loci, and ensure that the data are coded with the same reference and alternate 
+alleles (or swap if needed). Additionally, if data come from SNP chips, there is
+the added complication that the strand is not always consistent, so it might also
+be necessary to flip strand (in that case, ambiguous SNPs have to be filtered).
+The `rbind` method for `gen_tibbles` has a number of parameters that allow us to
+control the behaviour of the merge.
+
+Let us start by bringing in two sample datasets:
+```{r}
+bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+bigsnp_path_a <- bigsnpr::snp_readBed(bed_path_pop_a)
+pop_a_gt <- gen_tibble(bigsnp_path_a)
+bed_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+bigsnp_path_b <- bigsnpr::snp_readBed(bed_path_pop_b)
+pop_b_gt <- gen_tibble(bigsnp_path_b)
+```
+
+And inspect them:
+```{r}
+pop_a_gt
+```
+
+And the other one:
+```{r}
+pop_b_gt
+```
+
+Here we are using very small datasets, but in real life, `rbind` operations
+are very demanding. Before performing such an operation, we can run
+`rbind_dry_run`:
+```{r}
+report <- rbind_dry_run(pop_a_gt, pop_b_gt, flip_strand = TRUE)
+```
+
+Note that, by default, `rbind` will NOT flip strand or remove ambiguous SNPs
+(as they are only relevant when merging different SNP chips),
+you need to set those options to TRUE if you want to use them
+(`flip_strand`=TRUE automatically sets `remove_ambiguous` to TRUE).
+
+The report object contains details about why each locus was either kept 
+or removed, but usually the report is sufficient to make decisions on whether
+we want to go ahead. If we are happy with the likely outcome, we can
+proceed with the `rbind`. Note that the data will be saved to disk.
+We can either provide a path and prefix, to which '.RDS' and '.bk' will be 
+appended for the `bigSNP` file and its backing file; or let the function
+save the files in the same path as the original backing file of the first object).
+
+NOTE: In this vignette, we save to the temporary directory, but in real life you want to save in
+a directory where you will be able to retrive the file at a later date!!!
+```{r}
+# #create merge
+merged_gt <- rbind(pop_a_gt, pop_b_gt, flip_strand = TRUE,
+                           backingfile = file.path(tempdir(),"gt_merged"))
+```
+
+Let's check the resulting `gen_tibble`:
+```{r}
+merged_gt
+```
+We can look at the subsetted loci (note that we used the first population as reference to
+determine the strand and order of alleles):
+```{r}
+merged_gt %>% show_loci()
+```
+
+Note that the `big_index` values have changed compared to the original files,
+as we generated a new FBM with the merged data. 

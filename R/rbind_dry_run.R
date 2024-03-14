@@ -61,12 +61,10 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
 ##############################################################################
 
 rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, quiet){
-  #browser()
   # now filter for alleles in common
   target_sub <- target_df[target_df$name %in% ref_df$name,]
   ref_sub <- ref_df[ref_df$name %in% target_df$name,]
   # reorder target_sub to match ref_sub
-  #target_sub <- target_sub[match(target_sub$name, ref_sub$name),]
   target_sub <- target_sub[match(ref_sub$name, target_sub$name),]
   # we now have two data.frames with the same loci and in the same order
  stopifnot(all.equal(target_sub$name,ref_sub$name))
@@ -132,7 +130,6 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, 
                               ambiguous = ambiguous(target_df))
 
   # update the to_keep list
-  #browser()
   target_report$to_flip[match(target_sub$name[to_flip], target_report$name)]<-TRUE
   target_report$to_swap[match(target_sub$name[to_swap], target_report$name)]<-TRUE
   target_report$missing_allele[match(target_sub$name,target_report$name)] <- target_sub$missing_allele
@@ -146,7 +143,6 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, 
   }
   return(report)
 }
-
 
 
 resolve_missing_alleles <- function(missing_table, other_table){

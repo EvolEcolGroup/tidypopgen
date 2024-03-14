@@ -7,7 +7,8 @@ bigsnp_path_a <- bigsnpr::snp_readBed(raw_path_pop_a, backingfile = tempfile("te
 pop_a_gt <- gen_tibble(bigsnp_path_a)
 # #create merge
  merged_gen <- rbind.gen_tbl(pop_b_gt, pop_a_gt, flip_strand = TRUE,
-                             remove_ambiguous = TRUE, quiet = TRUE)
+                             remove_ambiguous = TRUE, quiet = TRUE,
+                             backingfile = tempfile())
 
 test_that("merge combines datasets correctly",{
 
