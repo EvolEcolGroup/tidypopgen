@@ -318,8 +318,6 @@ and loci based on the `gen_tbl`. That's easy.
 
 # Merging data
 
-# Merging data
-
 Merging data from different sources is a common problem, especially in human population
 genetics where there is a wealth of SNP chips available. In `tidypopgen`, merging is
 enacted with an `rbind` operation between `gen_tibbles`. If the datasets have the same
@@ -331,13 +329,16 @@ be necessary to flip strand (in that case, ambiguous SNPs have to be filtered).
 The `rbind` method for `gen_tibbles` has a number of parameters that allow us to
 control the behaviour of the merge.
 
-Let us start by bringing in two sample datasets:
+Let us start by bringing in two sample datasets (note that we use tempfiles
+to store the data; in real applications, we will usually avoid defining
+a backingfile and let the function create backing files where the bed file is
+stored):
 ```{r}
 bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
-bigsnp_path_a <- bigsnpr::snp_readBed(bed_path_pop_a)
+bigsnp_path_a <- bigsnpr::snp_readBed(bed_path_pop_a, backingfile = tempfile("pop_a_"))
 pop_a_gt <- gen_tibble(bigsnp_path_a)
 bed_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
-bigsnp_path_b <- bigsnpr::snp_readBed(bed_path_pop_b)
+bigsnp_path_b <- bigsnpr::snp_readBed(bed_path_pop_b, backingfile =  tempfile("pop_b_"))
 pop_b_gt <- gen_tibble(bigsnp_path_b)
 ```
 
@@ -400,12 +401,12 @@ as we generated a new FBM with the merged data.
 Besides using various metrics to describe populations, we often want to perform
 more complex analyses, such as Principal Component Analysis or clustering. 
 
-We will us the example dataset from `vigsnpr`:
+We will us the example dataset from `bigsnpr`:
 ```{r}
 library(tidypopgen)
 library(bigsnpr)
 bedfile <- system.file("extdata", "example.bed", package = "bigsnpr")
-snp_file <- snp_readBed(bedfile, backingfile = tempfile())
+snp_file <- snp_readBed(bedfile, backingfile = tempfile("example_"))
 example_gt <- gen_tibble(snp_file)
 ```
 
@@ -464,7 +465,7 @@ Note that a number of analysis, such as PCA, do not allow for missing data. Let
 us consider such a dataset:
 ```{r}
 bedfile <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-snp_file <- snp_readBed(bedfile, backingfile = tempfile())
+snp_file <- snp_readBed(bedfile, backingfile = tempfile("missing_"))
 missing_gt <- gen_tibble(snp_file)
 missing_gt
 ```
