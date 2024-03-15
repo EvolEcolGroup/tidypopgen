@@ -4,7 +4,7 @@
 \alias{gt_write_bed_from_dfs}
 \title{Simple function to write a plink BED file from data.frames}
 \usage{
-gt_write_bed_from_dfs(genotypes, loci, ind_meta, path_out)
+gt_write_bed_from_dfs(genotypes, loci, ind_meta, path_out = NULL)
 }
 \arguments{
 \item{genotypes}{a matrix of genotype dosages}
