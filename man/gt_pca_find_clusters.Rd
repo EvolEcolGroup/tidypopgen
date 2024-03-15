@@ -15,7 +15,7 @@ gt_pca_find_clusters(
 )
 }
 \arguments{
-\item{x}{an object of class \code{gt_pca}, generated with \code{\link[=gt_pca]{gt_pca()}}.}
+\item{x}{a \code{gt_pca} object returned by one of the \verb{gt_pca_*} functions.}
 
 \item{n_pca}{number of principal components to be fed to the LDA.}
 
@@ -33,7 +33,7 @@ it will use 1 to the number of pca components divided by 10 (a reasonable guess)
 screen (defaults to FALSE)}
 }
 \value{
-a \code{gt_pca_clust} object, which is a subclass of \code{\link{gt_pca}} with
+a \code{gt_pca_clust} object, which is a subclass of \code{gt_pca} with
 an additional element 'cluster', a list with elements:
 \itemize{
 \item 'method' the clustering method (either kmeans or ward)

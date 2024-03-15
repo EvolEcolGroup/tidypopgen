@@ -7,9 +7,9 @@
 \method{augment}{gt_pca}(x, data = NULL, k = NULL, ...)
 }
 \arguments{
-\item{x}{A \code{gt_pca} object returned by \code{\link[=gt_pca]{gt_pca()}}.}
+\item{x}{A \code{gt_pca} object returned by one of the \verb{gt_pca_*} functions.}
 
-\item{data}{the \code{gen_tibble} used to run \code{\link[=gt_pca]{gt_pca()}}.}
+\item{data}{the \code{gen_tibble} used to run the PCA.}
 
 \item{k}{the number of components to add}
 
@@ -31,5 +31,5 @@ any scripts written for data augmented with \link[broom:augment.prcomp]{broom::a
 work out of the box (this is especially helpful when adapting plotting scripts).
 }
 \seealso{
-\code{\link[=gt_pca]{gt_pca()}} \link{gt_pca_tidiers}
+\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \link{gt_pca_tidiers}
 }

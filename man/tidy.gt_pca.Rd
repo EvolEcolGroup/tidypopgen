@@ -8,7 +8,7 @@
 \method{tidy}{gt_pca}(x, matrix = "u", ...)
 }
 \arguments{
-\item{x}{A \code{gt_pca} object returned by \link{gt_pca}.}
+\item{x}{A \code{gt_pca} object returned by one of the \verb{gt_pca_*} functions.}
 
 \item{matrix}{Character specifying which component of the PCA should be
 tidied.
@@ -62,9 +62,9 @@ principle components up to this component (a numeric value between 0 and
 This summarizes information about the components of a \code{gt_pca} from the
 \code{tidypopgen} package. The parameter \code{matrix} determines which element is
 returned. Column names of the tidied output match those returned by
-\link[broom:tidy.prcomp]{broom::tidy.prcomp}, the tidier for the standard pca objects returned
+\link[broom:tidy.prcomp]{broom::tidy.prcomp}, the tidier for the standard PCA objects returned
 by \link[stats:prcomp]{stats::prcomp}.
 }
 \seealso{
-\code{\link[=gt_pca]{gt_pca()}} \code{\link[=augment.gt_pca]{augment.gt_pca()}}
+\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \code{\link[=augment.gt_pca]{augment.gt_pca()}}
 }

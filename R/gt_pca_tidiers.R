@@ -3,10 +3,10 @@
 #' This summarizes information about the components of a `gt_pca` from the
 #' `tidypopgen` package. The parameter `matrix` determines which element is
 #' returned. Column names of the tidied output match those returned by
-#' [broom::tidy.prcomp], the tidier for the standard pca objects returned
+#' [broom::tidy.prcomp], the tidier for the standard PCA objects returned
 #' by [stats::prcomp].
 #'
-#' @param x A `gt_pca` object returned by [gt_pca].
+#' @param x A `gt_pca` object returned by one of the `gt_pca_*` functions.
 #' @param matrix Character specifying which component of the PCA should be
 #'   tidied.
 #'
@@ -57,7 +57,7 @@
 #'
 #' @aliases gt_pca_tidiers
 #' @export
-#' @seealso [gt_pca()] [augment.gt_pca()]
+#' @seealso [gt_pca_autoSVD()] [augment.gt_pca()]
 
 tidy.gt_pca <- function(x, matrix = "u", ...) {
   if (length(matrix) > 1) {
@@ -117,15 +117,15 @@ tidy.gt_pca <- function(x, matrix = "u", ...) {
 #' ".rownames" is also returned; it is a copy of 'id', but it ensures that
 #' any scripts written for data augmented with [broom::augment.prcomp] will
 #' work out of the box (this is especially helpful when adapting plotting scripts).
-#' @param x A `gt_pca` object returned by [gt_pca()].
-#' @param data the `gen_tibble` used to run [gt_pca()].
+#' @param x  A `gt_pca` object returned by one of the `gt_pca_*` functions.
+#' @param data the `gen_tibble` used to run the PCA.
 #' @param k the number of components to add
 #' @param ... Not used. Needed to match generic signature only.
 #' @return A  [gen_tibble] containing the original data along with
 #'   additional columns containing each observation's projection into
 #'   PCA space.
 #' @export
-#' @seealso [gt_pca()] [gt_pca_tidiers]
+#' @seealso [gt_pca_autoSVD()] [gt_pca_tidiers]
 
 augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
     if (is.null(k) | (k > ncol(x$u))){
@@ -147,4 +147,19 @@ augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
     ret
 }
 
+
+# a print method
+#' @method print gt_pca
+#' @export
+print.gt_pca <- function(x, ...){
+  cat(" === PCA of gen_tibble object ===")
+  cat("\nMethod: ")
+  print(x$method)
+  cat("\nCall ($call):")
+  print(x$call)
+  cat("\nEigenvalues ($d):\n", round(utils::head(x$d,6),3), ifelse(length(x$d)>6, "...\n", "\n") )
+  cat("\nPrincipal component scores ($u):\n matrix with", nrow(x$u), "rows (individuals) and", ncol(x$u), "columns (axes)", "\n")
+  cat("\nLoadings (Principal axes) ($v):\n matrix with", nrow(x$v), "rows (SNPs) and", ncol(x$v), "columns (axes)", "\n")
+  cat("\n")
+}
 

@@ -10,7 +10,7 @@
 #' [gt_pca_best_k()].
 #' See details for a description of how to select the optimal k
 #' and vignette("adegenet-dapc") for a tutorial.
-#' @param x an object of class `gt_pca`, generated with [gt_pca()].
+#' @param  x a `gt_pca` object returned by one of the `gt_pca_*` functions.
 #' @param n_pca number of principal components to be fed to the LDA.
 #' @param k_clusters number of clusters to explore, either a single value, or
 #' a vector of length 2 giving the minimum and maximum (e.g. 1:5). If left NULL,
@@ -20,7 +20,7 @@
 #' @param n_start number of starting points for kmeans (only used if `method="kmeans"`)
 #' @param quiet boolean on whether to silence outputting information to the
 #'  screen (defaults to FALSE)
-#' @returns a `gt_pca_clust` object, which is a subclass of [`gt_pca`] with
+#' @returns a `gt_pca_clust` object, which is a subclass of `gt_pca` with
 #' an additional element 'cluster', a list with elements:
 #' - 'method' the clustering method (either kmeans or ward)
 #' - 'n_pca' number of principal components used for clustering

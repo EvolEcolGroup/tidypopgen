@@ -422,7 +422,7 @@ example_gt %>% group_by(population) %>% tally()
 The loci had already been QC, but not cleaned for LD. We will use a PCA method, ''autoSVD',
 that is designed to deal with LD directly via clumping:
 ```{r}
-example_pca <- example_gt %>% gt_pca()
+example_pca <- example_gt %>% gt_pca_autoSVD()
 ```
 
 We can get a quick summary of the resulting object:
@@ -472,7 +472,7 @@ missing_gt
 
 If we attempt to run a PCA on this dataset, we get:
 ```{r, error = TRUE}
-missing_pca <- missing_gt %>% gt_pca()
+missing_pca <- missing_gt %>% gt_pca_autoSVD()
 ```
 
 It is possible to obviate to this problem by filtering loci with missing data,
@@ -490,7 +490,7 @@ missing_gt <- gt_impute_simple(missing_gt)
 ```
 We can now run the analysis (but it fails because we have too few SNPs!!!!):
 ```{r, error=TRUE}
-missing_pca <- missing_gt %>% gt_pca()
+missing_pca <- missing_gt %>% gt_pca_autoSVD()
 ```
 
 The moral of the story is that we need to write a wrapper for a standard PCA which is
