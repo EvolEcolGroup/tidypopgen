@@ -27,16 +27,16 @@ We read in the data from the compressed vcf with:
 ```{r}
 library(tidypopgen)
 vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
-                        package = "tidypopgen")
-anole_vcf <- vcfR::read.vcfR(vcf_path)
-anole_gt <- as_gen_tibble(anole_vcf)
-anole_gt
+                          package = "tidypopgen")
+bed_path <- gt_vcf_to_bed(vcf_path, bed_path = tempfile("anolis_"))
+anole_gt <- gen_tibble(bed_path)
 ```
+Note that the `gt_vcf_to_bed` function reads the whole vcf in memory before writing
+the bed, so it is only suitable for smallish datasets.
 
-Let us simplify the ids, which wll have a "punc_" prefix
+Now let's inspect our `gen_tibble`:
 ```{r}
-anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
-
+anole_gt
 ```
 
 We can see that we have 46 individuals, from 3249 loci. Note that we don't have any
@@ -69,15 +69,26 @@ anole_gt
 
 That was easy. The loci had already been filtered and cleaned, so we don't need 
 to do any QC. Let us jump straight into analysis and run a PCA:
-```{r}
-anole_pca <- anole_gt %>% gt_pca(center=TRUE)
-anole_pca
+```{r, error=TRUE}
+anole_pca <- anole_gt %>% gt_pca_partialSVD(k=10)
 ```
 
-Let us add the PC scores to our `gen_tibble` (since we have a small dataset,
-we add them directly to the object, without dropping the genotypes):
+
+We need to quickly impute the data
 ```{r}
-anole_gt <- augment(anole_pca , data = anole_gt, drop_genotypes = FALSE)
+anole_gt <- gt_impute_simple(anole_gt)
+```
+
+And now:
+```{r}
+anole_pca <- anole_gt %>% gt_pca_partialSVD(k=45)
+```
+
+
+
+Let us add the PC scores to our `gen_tibble`:
+```{r}
+anole_gt <- augment(anole_pca , data = anole_gt)
 library(ggplot2)
 anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) + 
   geom_point(size = 1.5)

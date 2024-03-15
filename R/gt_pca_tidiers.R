@@ -70,16 +70,13 @@ tidy.gt_pca <- function(x, matrix = "u", ...) {
   )
   matrix <- rlang::arg_match(matrix, MATRIX)
 
-
-  # totalvar = sum(scale^2)
-
-  #ncomp <- NCOL(x$rotation)
   if (matrix %in% c("pcs", "d", "eigenvalues")) {
-    total_var <- sum(sum(x$scale^2))
+    total_var <- sum(x$scale)
     ret <- tibble(PC = seq_len(length(x$d)),
-                  "std.dev" = sqrt(x$d)) %>%
-      mutate(percent = .data$std.dev/total_var,
-             cumulative = cumsum(.data$percent))
+                  "std.dev" = sqrt(x$d^2/nrow(x$u)))
+    #%>%
+    # mutate(percent =  (std.dev)^2/nrow(x$d),
+    #       cumulative = cumsum(.data$percent))
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
     ret <- x$v %>%
       tibble::as_tibble(rownames = "column") %>%
@@ -88,9 +85,10 @@ tidy.gt_pca <- function(x, matrix = "u", ...) {
         names_to = "PC",
         values_to = "value"
       )
-    if (is.null(rownames(x$rotation))) ret$column <- as.integer(ret$column)
+    ret <- mutate(ret, PC = as.numeric(stringr::str_replace(.data$PC, "V", "")))
+    if (is.null(rownames(x$v))) ret$column <- as.integer(ret$column)
   } else if (matrix %in% c("x", "samples", "u", "scores")) {
-    ret <- x$u
+    ret <- sweep(x$u, 2, x$d, '*')
     colnames(ret) <- paste0("PC",seq_len(ncol(ret)))
     ret <- ret %>%
       tibble::as_tibble(rownames = "row") %>%
@@ -98,7 +96,7 @@ tidy.gt_pca <- function(x, matrix = "u", ...) {
         cols = -"row",
         names_to = "PC",
         values_to = "value")
-    if (is.null(rownames(x$scores))) ret$row <- as.integer(ret$row)
+    if (is.null(rownames(x$u))) ret$row <- as.integer(ret$row)
   }
 
   # change the PC to a numeric
@@ -128,10 +126,10 @@ tidy.gt_pca <- function(x, matrix = "u", ...) {
 #' @seealso [gt_pca_autoSVD()] [gt_pca_tidiers]
 
 augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
-    if (is.null(k) | (k > ncol(x$u))){
+    if (any(is.null(k), (k > ncol(x$u)))){
       k <- ncol(x$u)
     }
-    pred <- as.data.frame(x$u[,1:k])
+    pred <- as.data.frame(sweep(x$u, 2, x$d, '*'))[,1:k]
     names(pred) <- paste0(".fittedPC", seq_len(ncol(pred)))
     # browser()
     ret <- if (!missing(data) && !is.null(data)) {

@@ -67,11 +67,15 @@ gt_pca_autoSVD <- function(x, k = 10,
                            verbose = TRUE) {
 
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
-  # check that in the dots we don't have ind.col or ind.row
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
+  if (is.character(show_loci(x)$chromosome)){
+    infos_chr <- as.numeric(factor(show_loci(x)$chromosome))
+  } else {
+    infos_chr <- show_loci(x)$chromosome
+  }
   this_svd  <- bigsnpr::snp_autoSVD(X$genotypes,
-                      infos.chr = show_loci(x)$chromosome,
+                      infos.chr = infos_chr,
                       infos.pos = if (use_positions) {show_loci(x)$position} else {NULL},
                       ind.row = vctrs::vec_data(x$genotypes),
                       ind.col = show_loci(x)$big_index,

@@ -410,8 +410,7 @@ We will us the example dataset from `bigsnpr`:
 library(tidypopgen)
 library(bigsnpr)
 bedfile <- system.file("extdata", "example.bed", package = "bigsnpr")
-snp_file <- snp_readBed(bedfile, backingfile = tempfile("example_"))
-example_gt <- gen_tibble(snp_file)
+example_gt <- gen_tibble(bedfile, backingfile = tempfile("example_bed"))
 ```
 
 Let us explore our table:
@@ -497,5 +496,8 @@ We can now run the analysis (but it fails because we have too few SNPs!!!!):
 missing_pca <- missing_gt %>% gt_pca_autoSVD()
 ```
 
-The moral of the story is that we need to write a wrapper for a standard PCA which is
-less demanding in terms of data!
+We can use a standard PCA:
+```{r}
+missing_pca <- missing_gt %>% gt_pca_partialSVD()
+missing_pca
+```
