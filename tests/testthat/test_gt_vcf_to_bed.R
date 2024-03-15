@@ -1,4 +1,4 @@
-testthat::test_that("as_gen_tibble works on genlight",{
+test_that("vcf is correctly converted and imported",{
   vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
                           package = "tidypopgen")
   bed_path <- gt_vcf_to_bed(vcf_path, bed_path = tempfile("anolis_"))

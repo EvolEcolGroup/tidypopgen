@@ -467,9 +467,8 @@ We can see that the population do separate nicely into 3 main groups on the PCA.
 Note that a number of analysis, such as PCA, do not allow for missing data. Let
 us consider such a dataset:
 ```{r}
-bedfile <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-snp_file <- snp_readBed(bedfile, backingfile = tempfile("missing_"))
-missing_gt <- gen_tibble(snp_file)
+bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+missing_gt <- gen_tibble(bed_file,  backingfile = tempfile("missing_"))
 missing_gt
 ```
 
@@ -501,3 +500,9 @@ We can use a standard PCA:
 missing_pca <- missing_gt %>% gt_pca_partialSVD()
 missing_pca
 ```
+Note that the observed genotypes have been kept, and we can go back to using 
+them (and thus have missing values) with:
+```{r}
+missing_gt <- gt_set_imputed(FALSE)
+```
+

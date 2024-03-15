@@ -11,11 +11,24 @@
 #' [bigsnpr::snp_scaleBinom()], which is the appropriate function for biallelic SNPs.
 #' Alternatively it is possible to use  custom function
 #' (see [bigsnpr::snp_autoSVD()] for details.
+#' @returns a `gt_pca` object, which is a subclass of `bigSVD`; this is
+#' an S3 list with elements:
+#' A named list (an S3 class "big_SVD") of
+#' - `d`, the eigenvalues (singular values, i.e. as variances),
+#' - `u`, the scores for each sample on each component (the left singular vectors)
+#' - `v`, the loadings (the right singular vectors)
+#' - `center`, the centering vector,
+#' - `scale`, the scaling vector,
+#' - `method`, a string defining the method (in this case 'partialSVD'),
+#' - `call`, the call that generated the object.
 #'
+#' Note: rather than accessing these elements directly, it is better to use
+#' `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @export
 
 
-gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()) {
+gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
+                              ) {
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
@@ -29,7 +42,7 @@ gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
                                     ind.row = vctrs::vec_data(x$genotypes),
                                     ind.col = show_loci(x)$big_index,
                                     fun.scaling = fun_scaling,
-                                    block.size= block_size(nrow(X$genotypes)))
+                                    block.size= bigstatsr::block_size(nrow(X$genotypes))) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
   this_svd$method <- "partialSVD"
