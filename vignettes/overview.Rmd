@@ -78,25 +78,30 @@ example_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
                    allele_alt = c("t","c", NA,"c","g","a"))
 ```
 
-We create a plink BED file:
+We create a plink BED file (we save it into a temp file for this vignette):
 ```{r}
-bed_prefix <- tempfile('test_data_')
-make_test_bed(example_genotypes, example_loci, example_ind_meta, bed_prefix)
-bed_path <- paste0(bed_prefix,".bed")
-
+bed_path <- gt_write_bed_from_dfs(genotypes = example_genotypes, 
+                  loci = example_loci, 
+                  ind_meta = example_ind_meta, 
+                  path_out = file.path(tempdir(),'test_data'))
+bed_path
 ```
 
-We convert the BED file into a bigSNP file format (this will generate a backing file and an RDS file,
-with prefix "test_bigfile_":
-```{r}
-bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile("test_bigfile_"))
-```
 
 We can create a simple `gen_tibble` object (of class `gen_tbl`) with
 ```{r}
-example_gt <- gen_tibble(bigsnp_path)
+example_gt <- gen_tibble(bed_path)
+```
+We are provided information on where the two files underlying the genotype information
+are stored. As we did use the default options, they are placed in the same directory
+as the original .bed file, using the same basename "test_data". It is important that these
+files are not deleted or moved. 
+
+Now let's have a look at our `gen_tibble`:
+```{r}
 example_gt
 ```
+
 As discussed above, in this tibble, `genotypes` contains the indices of the
 individuals in the FBM as values, and the FBM as an attribute.
 
@@ -361,8 +366,7 @@ report <- rbind_dry_run(pop_a_gt, pop_b_gt, flip_strand = TRUE)
 
 Note that, by default, `rbind` will NOT flip strand or remove ambiguous SNPs
 (as they are only relevant when merging different SNP chips),
-you need to set those options to TRUE if you want to use them
-(`flip_strand`=TRUE automatically sets `remove_ambiguous` to TRUE).
+you need to set `flip_strand` to TRUE.
 
 The report object contains details about why each locus was either kept 
 or removed, but usually the report is sufficient to make decisions on whether

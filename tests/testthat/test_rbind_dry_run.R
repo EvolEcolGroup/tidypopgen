@@ -1,16 +1,16 @@
 #reference file
 raw_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
 bigsnp_path_b <- bigsnpr::snp_readBed(raw_path_pop_b, backingfile = tempfile("test_b_"))
-pop_b_gt <- gen_tibble(bigsnp_path_b)
+pop_b_gt <- gen_tibble(bigsnp_path_b, quiet = TRUE)
 #target file
 raw_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
 bigsnp_path_a <- bigsnpr::snp_readBed(raw_path_pop_a, backingfile = tempfile("test_a_"))
-pop_a_gt <- gen_tibble(bigsnp_path_a)
+pop_a_gt <- gen_tibble(bigsnp_path_a, quiet = TRUE)
 
 
 #create merge report
 report <- rbind_dry_run(pop_b_gt, pop_a_gt, flip_strand = TRUE,
-                        remove_ambiguous = TRUE, quiet = TRUE)
+                        quiet = TRUE)
 
 
 test_that("merge report detects matching rsID's correctly",{
@@ -24,9 +24,9 @@ test_that("merge report detects matching rsID's correctly",{
   testthat::expect_true(all(index_pair_target[,c(1,2)] == index_pair_ref[,c(1,2)]))
 
 
-  # now create report directly from the files and check that it is the same as from the genlight objects
+  # now create report directly from the bim files and check that it is the same as from the gen_tibble objects
 #  report_char <- rbind_dry_run(ref = raw_path_pop_b, target = raw_path_pop_a, flip_strand = TRUE,
-#                               remove_ambiguous = TRUE, quiet = TRUE)
+#                               quiet = TRUE)
 #  testthat::expect_identical(report, report_char)
 
 })
@@ -146,11 +146,11 @@ testthat::test_that("missing cases are given the correct alleles",{
 #
 #   #create merge report
 #   report <- rbind_dry_run(pop_b_gt, pop_a_gt, flip_strand = TRUE,
-#                           remove_ambiguous = TRUE, quiet = TRUE)
+#                           quiet = TRUE)
 #
 #   #create a new merge report with a dataset in a different order
 #   report2 <- rbind_dry_run(pop_b_gen_reordered, pop_a_gt, flip_strand = TRUE,
-#                           remove_ambiguous = TRUE, quiet = TRUE)
+#                           quiet = TRUE)
 #
 #   #Store the results of the merge report for the target data
 #   report_original <- report$target

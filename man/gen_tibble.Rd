@@ -4,11 +4,18 @@
 \alias{gen_tibble}
 \title{Constructor for a \code{gen_tibble}}
 \usage{
-gen_tibble(bigsnp_path)
+gen_tibble(file_path, backingfile = NULL, quiet = FALSE)
 }
 \arguments{
-\item{bigsnp_path}{the path to a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}} file created with
-\code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}}}
+\item{file_path}{the path to a plink BED file, or a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}} RDS
+file (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})}
+
+\item{backingfile}{the backing file used to store the data, if converting from
+BED. If not set, the backing file will be saved in the same directory as the
+bed file, using the same file name but with a different file type (.bk rather
+than .bed)}
+
+\item{quiet}{provide information on the files used to store the data}
 }
 \value{
 an object of the class \code{gen_tbl}.

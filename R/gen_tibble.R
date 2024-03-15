@@ -2,17 +2,37 @@
 #'
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
-#' @param bigsnp_path the path to a [`bigsnpr::bigSNP`] file created with
-#' [bigsnpr::snp_readBed()]
+#' @param file_path the path to a plink BED file, or a [`bigsnpr::bigSNP`] RDS
+#' file (usually created with [bigsnpr::snp_readBed()])
+#' @param backingfile the backing file used to store the data, if converting from
+#' BED. If not set, the backing file will be saved in the same directory as the
+#' bed file, using the same file name but with a different file type (.bk rather
+#' than .bed)
+#' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @export
 
-gen_tibble <- function(bigsnp_path){
-  if (is.character(bigsnp_path)){
-    bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
+gen_tibble <- function(file_path, backingfile = NULL, quiet = FALSE){
+  # if it is a bed file, we convert it to a bigsnpr
+  if (tolower(file_ext(file_path))=="bed"){
+    if (is.null(backingfile)){
+      backingfile <- bigsnpr::sub_bed(file_path)
+    }
+    bigsnp_path <- bigsnpr::snp_readBed(file_path,
+                                        backingfile = backingfile)
+  }  else if (tolower(file_ext(file_path))=="rds"){
+    bigsnp_path <- file_path
   } else {
-    stop("bigsnp_path should be pointing to a bigsnp rds file")
+    stop("file_path should be pointing to a either a PLINK .bed file or a bigSNP .rds file")
   }
+
+  bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
+  if (!quiet){
+    message("\n\nusing bigSNP file: ", bigsnp_path)
+    message("with backing file: ", bigsnp_obj$genotypes$backingfile)
+    message("make sure that you keep those files and don't delete them!")
+  }
+
   ind_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
 
@@ -24,6 +44,11 @@ gen_tibble <- function(bigsnp_path){
   )
 }
 
+
+# simple function to extract the extension of a file
+file_ext <- function(x){
+  utils::tail(unlist(strsplit(x,".",fixed = TRUE)),n=1)
+}
 
 
 new_vctrs_bigsnp <- function(bigsnp_obj, names) {

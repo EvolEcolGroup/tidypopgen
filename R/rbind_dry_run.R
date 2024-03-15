@@ -13,10 +13,8 @@
 #' swap their order as necessary.
 #' @param target either a [`gen_tibble`] object, or the path to the PLINK bim file
 #' @param flip_strand boolean on whether strand flipping should be checked to
-#' match the two datasets. It defaults to FALSE
-#' @param remove_ambiguous boolean whether ambiguous SNPs (i.e. a/t and c/g)
-#' should be removed. It defaults to FALSE. It is set to true if strand flipping
-#' is set to TRUE.
+#' match the two datasets. Ambiguous SNPs (i.e. A/T and C/G)
+#' will also be removed.  It defaults to FALSE
 #' @param quiet boolean whether to omit reporting to screen
 #' @returns a list with two `data.frames`, named `target` and `ref`. Each
 #' data.frame has `nrow()` equal to the number of loci in the respective dataset,
@@ -30,10 +28,7 @@
 #' @export
 
 rbind_dry_run <- function(ref, target, flip_strand = FALSE,
-                          remove_ambiguous = FALSE, quiet = FALSE){
-  if (flip_strand){
-    remove_ambiguous <- TRUE
-  }
+                          quiet = FALSE){
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
   target_df <- target %>% show_loci()
@@ -50,7 +45,6 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
   rbind_dry_run_df(ref_df = ref_df,
                    target_df = target_df,
                    flip_strand = flip_strand,
-                     remove_ambiguous = remove_ambiguous,
                      quiet = quiet)
   }
 
@@ -60,7 +54,7 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
 # the dataframes
 ##############################################################################
 
-rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, quiet){
+rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, quiet){
   # now filter for alleles in common
   target_sub <- target_df[target_df$name %in% ref_df$name,]
   ref_sub <- ref_df[ref_df$name %in% target_df$name,]
@@ -101,7 +95,7 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, 
   # and now check which have to be swapped
   to_swap <- (target_sub$allele_1 == ref_sub$allele_2) &
     (target_sub$allele_2 == ref_sub$allele_1)
-  if(remove_ambiguous){
+  if(flip_strand){
     # remove ambiguous snps from the boolean vectors
     ambiguous_sub <- ambiguous(target_sub)
     to_keep_flip <- to_keep_flip & !ambiguous_sub
@@ -137,7 +131,7 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, remove_ambiguous, 
   report <- list(target = target_report, ref = ref_report)
   class(report) <- c("rbind_report",class(report))
   attr(report,"flip_strand") <- flip_strand
-  attr(report,"remove_ambiguous") <- remove_ambiguous
+  attr(report,"remove_ambiguous") <- flip_strand
   if (!quiet){
     summary(report)
   }

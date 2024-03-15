@@ -4,13 +4,7 @@
 \alias{rbind_dry_run}
 \title{Generate a report of what would happen to each SNP in a merge}
 \usage{
-rbind_dry_run(
-  ref,
-  target,
-  flip_strand = FALSE,
-  remove_ambiguous = FALSE,
-  quiet = FALSE
-)
+rbind_dry_run(ref, target, flip_strand = FALSE, quiet = FALSE)
 }
 \arguments{
 \item{ref}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim file;
@@ -21,11 +15,8 @@ swap their order as necessary.}
 \item{target}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim file}
 
 \item{flip_strand}{boolean on whether strand flipping should be checked to
-match the two datasets. It defaults to FALSE}
-
-\item{remove_ambiguous}{boolean whether ambiguous SNPs (i.e. a/t and c/g)
-should be removed. It defaults to FALSE. It is set to true if strand flipping
-is set to TRUE.}
+match the two datasets. Ambiguous SNPs (i.e. A/T and C/G)
+will also be removed.  It defaults to FALSE}
 
 \item{quiet}{boolean whether to omit reporting to screen}
 }

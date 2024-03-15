@@ -1,16 +1,19 @@
-#' Simple function to write a test plink BED file
+#' Simple function to write a plink BED file from data.frames
 #'
-#' We start with data in the format that we expect to come out later on
+#' This function write a bed file using information in tables with the same format
+#' as they are stored in various parts of a [`gen_tibble`]. This is mostly used
+#' for creating small test files, but could also be used to convert small datasets
+#' manually into BED files (and the appropriate BIM and FAM companions).
 #'
 #' @param genotypes a matrix of genotype dosages
 #' @param loci a table of loci information (as used in [`gen_tibble`])
 #' @param ind_meta a table with 'id' and 'population'
-#' @param path_out is the path and the previx, to which '.bed', '.bim', and '.fam'
+#' @param path_out is the path and the prefix, to which '.bed', '.bim', and '.fam'
 #' will be added.
 #' @returns NULL it writes the files
 #' @export
 
-make_test_bed <- function(genotypes, loci, ind_meta, path_out){
+gt_write_bed_from_dfs <- function(genotypes, loci, ind_meta, path_out){
   if (nrow(genotypes)!=nrow(loci)){
     genotypes <- t(genotypes)
   }
@@ -29,4 +32,5 @@ make_test_bed <- function(genotypes, loci, ind_meta, path_out){
   colnames(genotypes) <- fam$id
 
   genio::write_plink(path_out, genotypes, bim, fam, verbose=FALSE)
+  return(paste0(path_out,".bed"))
 }

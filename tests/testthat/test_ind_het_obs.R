@@ -10,13 +10,11 @@ test_that("ind_het_obs computes correctly",{
                           genetic_dist = as.integer(rep(0,6)),
                           allele_ref = c("a","t","c","g","c","t"),
                           allele_alt = c("t","c", NA,"c","g","a"))
-  file_plink <- tempfile('test_data_')
-  make_test_bed(test_genotypes, test_loci, test_ind_meta, file_plink)
-  file_plink<-paste0(file_plink,".bed")
-  # convert bed to bigsnp
-  path_rds <- bigsnpr::snp_readBed(file_plink, backingfile = tempfile("test_bigfile_"))
-  # convert to gen_tibble
-  test_gt <- gen_tibble(path_rds)
+  bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
+                                    loci = test_loci,
+                                    ind_meta = test_ind_meta,
+                                    path_out = tempfile('test_data_'))
+  test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
   # feeding the list of SNPbin directly
   expect_true(all(ind_het_obs(test_gt$genotypes)==

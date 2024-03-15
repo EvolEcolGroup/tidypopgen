@@ -1,13 +1,13 @@
 raw_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
 bigsnp_path_b <- bigsnpr::snp_readBed(raw_path_pop_b, backingfile = tempfile("test_b_"))
-pop_b_gt <- gen_tibble(bigsnp_path_b)
+pop_b_gt <- gen_tibble(bigsnp_path_b, quiet=TRUE)
 #target file
 raw_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
 bigsnp_path_a <- bigsnpr::snp_readBed(raw_path_pop_a, backingfile = tempfile("test_a_"))
-pop_a_gt <- gen_tibble(bigsnp_path_a)
+pop_a_gt <- gen_tibble(bigsnp_path_a, quiet=TRUE)
 # #create merge
  merged_gen <- rbind.gen_tbl(pop_b_gt, pop_a_gt, flip_strand = TRUE,
-                             remove_ambiguous = TRUE, quiet = TRUE,
+                             quiet = TRUE,
                              backingfile = tempfile())
 
 test_that("merge combines datasets correctly",{
