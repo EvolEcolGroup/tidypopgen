@@ -19,10 +19,10 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
   # see https://stackoverflow.com/questions/13224553/how-to-convert-a-huge-list-of-vector-to-a-matrix-more-efficiently
   # do not modify the approach used below:
 
-  n_loci <- adegenet::nLoc(.x$genotypes[[1]])
+  n_loci <- nrows(show_loci(.x))
   # sum alt alleles over each locus in each group
   sums <- matrix(unlist(.x %>%
-                          loci_sums()),
+                          loci_sums(),
                         use.names = FALSE), ncol = n_loci, byrow = TRUE)
   # get the total  number of alleles (i.e. removing NAs) for each locus in each group
   n <- matrix(unlist(.x %>%
@@ -34,7 +34,7 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
   het <- matrix(unlist(lapply(1:nrow(sums), het_exp_by_row, sums, n),
                        use.names = FALSE), ncol = n_loci, byrow = TRUE)
 
-  # get the grouping column, and creat all pairwise combination of indeces
+  # get the grouping column, and create all pairwise combination of indeces
   .group_levels = .x %>% group_keys()
   pairwise_combn <- t(utils::combn(nrow(.group_levels),2))
   numerator <- matrix(NA_real_, nrow = nrow(pairwise_combn), ncol = n_loci)
