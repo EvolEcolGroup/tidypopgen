@@ -22,7 +22,7 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
   n_loci <- adegenet::nLoc(.x$genotypes[[1]])
   # sum alt alleles over each locus in each group
   sums <- matrix(unlist(.x %>%
-                          group_map(.f=~snpbin_list_sums(.x$genotypes, alleles_as_units = TRUE)),
+                          loci_sums()),
                         use.names = FALSE), ncol = n_loci, byrow = TRUE)
   # get the total  number of alleles (i.e. removing NAs) for each locus in each group
   n <- matrix(unlist(.x %>%

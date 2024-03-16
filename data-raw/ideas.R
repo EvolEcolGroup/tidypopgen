@@ -29,3 +29,8 @@
 ##################################
 #big SVD
 # https://stackoverflow.com/questions/46253537/computing-the-null-space-of-a-bigmatrix-in-r/46380540#46380540
+
+# armadillo logical operations
+https://stackoverflow.com/questions/17628366/how-to-perform-element-wise-boolean-operation-in-a-matrix-in-armadillo?rq=4
+
+

@@ -15,6 +15,9 @@ loci_missingness <- function(.x, as_counts = FALSE, ...) {
   UseMethod("loci_missingness", .x)
 }
 
+# We should write a cpp counts function. We can't use the snp_* family of functions
+# as they ignore NAs
+
 #' @export
 #' @rdname loci_missingness
 loci_missingness.tbl_df <- function(.x, as_counts = FALSE, ...) {
