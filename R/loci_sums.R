@@ -1,6 +1,7 @@
 #' Estimates the sum of genotypes at each each locus
 #'
-#' Estimate the sum of the alternate allele at each locus.
+#' Estimate the sum of the alternate allele at each locus. This is unlikely to be useful
+#' directly, but it is used by other functions that compute various statistics.
 #'
 #' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
 #' a [`gen_tibble`] object),
@@ -13,15 +14,12 @@ loci_sums <- function(.x, ...) {
   UseMethod("loci_sums", .x)
 }
 
-#' @param minor a logical indicating whether we should give the frequencies of
-#' the minor allele (TRUE, the default). If FALSE, the frequencies of the
-#' alternate allele are given.
 #' @export
 #' @rdname loci_sums
 loci_sums.tbl_df <- function(.x, ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
-  loci_sums(.x$genotypes, ..., minor = minor)
+  loci_sums(.x$genotypes, ...)
 }
 
 
@@ -39,14 +37,14 @@ loci_sums.vctrs_bigSNP <- function(.x, ...) {
     colMeans_sub <- function(X, ind, rows_to_keep) {
       colSums(X[rows_to_keep, ind], na.rm=TRUE)
     }
-    freq <- bigstatsr::big_apply(geno_fbm, a.FUN = colMeans_sub,
+    sums <- bigstatsr::big_apply(geno_fbm, a.FUN = colMeans_sub,
                                  rows_to_keep = rows_to_keep,
                                  ind=attr(.x,"loci")$big_index,
                                  a.combine = 'c')
   } else { # if we have a single individual
-    freq <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index]
+    sums <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index]
   }
-  freq
+  sums
 }
 
 #' @export
@@ -54,6 +52,6 @@ loci_sums.vctrs_bigSNP <- function(.x, ...) {
 loci_sums.grouped_df <- function(.x, ...) {
   # TODO this is seriously inefficient, we need to cast it into a big_apply problem
   # of maybe it isn't that bad...
-  group_map(.x, .f=~loci_sums(.x, minor = minor))
+  group_map(.x, .f=~loci_sums(.x))
 }
 

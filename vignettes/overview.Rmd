@@ -307,7 +307,7 @@ the appropriate `group_map` syntax, but they do make life a little bit simpler.
 Certain metrics and analysis are naturally defined by a grouped tibble, such as
 distance metrics among populations. For example:
 
-```{r eval=FALSE}
+```{r}
 # not reimplemented yet!
 example_gt %>% group_by(population) %>% gt_pairwise_fst()
 ```
@@ -503,6 +503,6 @@ missing_pca
 Note that the observed genotypes have been kept, and we can go back to using 
 them (and thus have missing values) with:
 ```{r}
-missing_gt <- gt_set_imputed(FALSE)
+missing_gt <- missing_gt  %>% gt_set_imputed(FALSE)
 ```
 

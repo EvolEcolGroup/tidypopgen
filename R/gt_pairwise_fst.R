@@ -13,27 +13,28 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
     stop (".x should be a grouped df")
   }
   message("this function is not properly tested yet!!!")
-  message("if you have time, test the results against hierfstat and report back")
+  message("if you have time, test the results against something like hierfstat and create a unit test")
   # check matrix(unlist(z, use.names = FALSE), ncol = 10, byrow = TRUE)
   # is known to be faster than do.call(rbind,f)
   # see https://stackoverflow.com/questions/13224553/how-to-convert-a-huge-list-of-vector-to-a-matrix-more-efficiently
   # do not modify the approach used below:
-
-  n_loci <- nrows(show_loci(.x))
+  n_loci <- nrow(show_loci(.x))
   # sum alt alleles over each locus in each group
   sums <- matrix(unlist(.x %>%
                           loci_sums(),
                         use.names = FALSE), ncol = n_loci, byrow = TRUE)
   # get the total  number of alleles (i.e. removing NAs) for each locus in each group
-  n <- matrix(unlist(.x %>%
-                       group_map(.f=~snpbin_list_n(.x$genotypes, alleles_as_units = TRUE)),
+  n_missing <- matrix(unlist(.x %>%
+                       loci_missingness(as_counts=TRUE),
                      use.names = FALSE), ncol = n_loci, byrow = TRUE)
+  n_ind <- (.x %>% tally() %>% pull(.data$n)) # number of individuals per population
+
+  n_alleles <- sweep(-n_missing,1,n_ind, FUN = "+")*2
   # function to compute het by row
   het_exp_by_row <- function(i, sums, n){(sums[i,]*(n[i,]-sums[i,]))/(n[i,]*(n[i,]-1))}
   # get het at each locus for each population
-  het <- matrix(unlist(lapply(1:nrow(sums), het_exp_by_row, sums, n),
+  het <- matrix(unlist(lapply(1:nrow(sums), het_exp_by_row, sums, n_alleles),
                        use.names = FALSE), ncol = n_loci, byrow = TRUE)
-
   # get the grouping column, and create all pairwise combination of indeces
   .group_levels = .x %>% group_keys()
   pairwise_combn <- t(utils::combn(nrow(.group_levels),2))
@@ -42,8 +43,8 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
   for (i_row in seq_len(nrow(pairwise_combn))){
     pop1 <- pairwise_combn[i_row,1]
     pop2 <- pairwise_combn[i_row,2]
-    numerator[i_row,] <- (sums[pop1,]/n[pop1,] - sums[pop2,]/n[pop2,])^2 -
-      het[pop1,]/n[pop1,] - het[pop2,]/n[pop2,]
+    numerator[i_row,] <- (sums[pop1,]/n_alleles[pop1,] - sums[pop2,]/n_alleles[pop2,])^2 -
+      het[pop1,]/n_alleles[pop1,] - het[pop2,]/n_alleles[pop2,]
     denominator[i_row,] <- numerator[i_row,] + het[pop1,] + het[pop2,]
   }
 
