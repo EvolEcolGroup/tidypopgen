@@ -4,7 +4,7 @@
 #' by partial SVD through the eigen decomposition of the covariance. It works well
 #' if the number of individuals is much smaller than the number of loci; otherwise,
 #' [gt_pca_randomSVD()] is a better option. This function is a wrapper
-#' for [bigsnpr::snp_autoSVD()]
+#' for [bigstatsr::big_SVD()]
 #'
 #' @param x a `gen_tbl` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.

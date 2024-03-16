@@ -21,14 +21,11 @@ a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
 \item{...}{other arguments passed to specific methods.}
-
-\item{minor}{a logical indicating whether we should give the frequencies of
-the minor allele (TRUE, the default). If FALSE, the frequencies of the
-alternate allele are given.}
 }
 \value{
 a vector of frequencies, one per locus
 }
 \description{
-Estimate the sum of the alternate allele at each locus.
+Estimate the sum of the alternate allele at each locus. This is unlikely to be useful
+directly, but it is used by other functions that compute various statistics.
 }
