@@ -72,9 +72,9 @@ to do any QC. Let us jump straight into analysis and run a PCA:
 ```{r, error=TRUE}
 anole_pca <- anole_gt %>% gt_pca_partialSVD(k=10)
 ```
+Ok, we jumped too quickly. There are missing data, and we need first 
+to impute them:
 
-
-We need to quickly impute the data
 ```{r}
 anole_gt <- gt_impute_simple(anole_gt)
 ```
@@ -117,20 +117,12 @@ tidy(anole_pca,matrix="eigenvalues") %>%
 ```
 
 Ideally, we are looking for the point where the curve starts flattening. In this case, we can
-not see a very clear flattening, but by component 35 the increments are pretty small. Another
-way to think about this is to consider the number of components that explain a large amount
-of variation. We can see that the first 17 components already explain over 90% of the variance.  We can also
-get the number of components programmatically by using:
-```{r}
-tidy(anole_pca,matrix="eigenvalues") %>% filter(cumulative<0.9) %>% nrow() +1 
-```
-
-Note that there isn't anything magical about 90%, and you might use another threshold. In
-general, it is worth exploring the sensitivity of the results to any of these decisions.
-For this analysis, we will go with 17 components:
+not see a very clear flattening, but by PC 30 the increase in explained variance as markedly
+decelerated. As the k-clustering algorithm is somewhat data hungry,
+we will go with that somewhat generous number
 
 ```{r}
-anole_clusters <- gt_pca_find_clusters(anole_pca, n_pca = 17)
+anole_clusters <- gt_pca_find_clusters(anole_pca, n_pca = 40)
 ```
 
 This object retains information about a large number of possible *k*. We can choose
@@ -139,6 +131,8 @@ are multiple statistics and criteria that we can use to choose *n*):
 ```{r}
 anole_clusters <- gt_pca_best_k(anole_clusters)
 ```
+
+
 
 Now we can run a DAPC:
 ```{r}
@@ -153,6 +147,34 @@ page for `gt_dapc()`).
 anole_dapc
 scatter(anole_dapc)
 ```
+
+
+```{r}
+dapc_data_df <-
+  # as_tibble() converts the ind.coord matrix to a special data frame called a tibble. 
+  as_tibble(anole_dapc$ind.coord, rownames = "individual") %>%
+  # mutate changes or adds columns to a data frame. Here, we're adding the population and group assignment columns to the data frame
+  mutate(population = pops$pop,
+         group = anole_dapc$grp)
+dapc_plot <-
+  ggplot(dapc_data_df, aes(
+    x = LD1,
+    y = LD2,
+    fill = population
+  )) +
+  geom_point(shape = 21, size = 3) +
+  #reverse the color direction to better reflect Prates et al. 2018
+  scale_fill_viridis_d(direction = -1) + 
+  theme_bw(base_size = 16)
+
+dapc_plot
+
+```
+
+
+
+
+
 We can inspect the assignment by DAPC with `assignplot`, ordering the samples
 by the original population label:
 ```{r}
@@ -166,6 +188,6 @@ mixed ancestry.
 
 ```{r}
 compoplot(anole_dapc, subset=order(anole_gt$population), posi="bottomright",
-txt.leg=paste("Cluster", 1:3), lab="",
-ncol=2, xlab="individuals", col=funky(3))
+txt.leg=paste("Cluster", 1:5), lab="",
+ncol=2, xlab="individuals", col=funky(5))
 ```

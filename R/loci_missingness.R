@@ -1,33 +1,32 @@
-#' Estimate allele frequencies at each each locus
+#' Estimate missingness at each locus
 #'
-#' Estimate the frequency of the alternate allele at each locus.
+#' Estimate the rate of missingness at each locus.
 #'
 #' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
+#' @param as_counts booelean defining whether the count of NAs (rather than the rate)
+#' should be returned. It defaults to FALSE (i.e. rates are returned by default).
 #' @param ... other arguments passed to specific methods.
 #' @returns a vector of frequencies, one per locus
-#' @rdname loci_freq
+#' @rdname loci_missingness
 #' @export
-loci_freq <- function(.x, ...) {
-  UseMethod("loci_freq", .x)
+loci_missingness <- function(.x, as_counts = FALSE, ...) {
+  UseMethod("loci_missingness", .x)
 }
 
-#' @param minor a logical indicating whether we should give the frequencies of
-#' the minor allele (TRUE, the default). If FALSE, the frequencies of the
-#' alternate allele are given.
 #' @export
-#' @rdname loci_freq
-loci_freq.tbl_df <- function(.x, ..., minor = TRUE) {
+#' @rdname loci_missingness
+loci_missingness.tbl_df <- function(.x, as_counts = FALSE, ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
-  loci_freq(.x$genotypes, ..., minor = minor)
+  loci_missingness(.x$genotypes, as_counts = as_counts, ...)
 }
 
 
 #' @export
-#' @rdname loci_freq
-loci_freq.vctrs_bigSNP <- function(.x, ..., minor = TRUE) {
+#' @rdname loci_missingness
+loci_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   rlang::check_dots_empty()
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
@@ -37,28 +36,27 @@ loci_freq.vctrs_bigSNP <- function(.x, ..., minor = TRUE) {
   if (length(rows_to_keep)>1){
     # col means for submatrix (all rows, only some columns)
     colMeans_sub <- function(X, ind, rows_to_keep) {
-      colMeans(X[rows_to_keep, ind], na.rm=TRUE)
+      count_na <- function(x){sum(is.na(x))}
+      apply(X[rows_to_keep, ind], 2, count_na)
     }
-    freq <- bigstatsr::big_apply(geno_fbm, a.FUN = colMeans_sub,
+    n_na <- bigstatsr::big_apply(geno_fbm, a.FUN = colMeans_sub,
                                  rows_to_keep = rows_to_keep,
                                  ind=attr(.x,"loci")$big_index,
                                  a.combine = 'c')
+    if (!as_counts){
+      n_na <- n_na/length(rows_to_keep)
+    }
   } else { # if we have a single individual
-    freq <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index]
+    n_na <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index]
   }
-  # sort out frequencies for diploids
-  freq <- freq/2
-  if (minor){
-    freq[freq>0.5 & !is.na(freq)] <- 1 - freq[freq>0.5 & !is.na(freq)]
-  }
-  freq
+  n_na
 }
 
 #' @export
-#' @rdname loci_freq
-loci_freq.grouped_df <- function(.x, ..., minor = TRUE) {
+#' @rdname loci_missingness
+loci_missingness.grouped_df <- function(.x, as_counts = FALSE, ...) {
   # TODO this is seriously inefficient, we need to cast it into a big_apply problem
   # of maybe it isn't that bad...
-  group_map(.x, .f=~loci_freq(.x, minor = minor))
+  group_map(.x, .f=~loci_missingness(.x, as_counts=as_counts))
 }
 

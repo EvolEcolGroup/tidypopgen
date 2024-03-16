@@ -2,7 +2,7 @@
 % Please edit documentation in R/gt_pca_partialSVD.R
 \name{gt_pca_partialSVD}
 \alias{gt_pca_partialSVD}
-\title{PCA controlling for LD for \code{gen_tibble} objects}
+\title{PCA for \code{gen_tibble} objects by partial SVD}
 \usage{
 gt_pca_partialSVD(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom())
 }
@@ -17,8 +17,27 @@ gt_pca_partialSVD(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom())
 Alternatively it is possible to use  custom function
 (see \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}} for details.}
 }
+\value{
+a \code{gt_pca} object, which is a subclass of \code{bigSVD}; this is
+an S3 list with elements:
+A named list (an S3 class "big_SVD") of
+\itemize{
+\item \code{d}, the eigenvalues (singular values, i.e. as variances),
+\item \code{u}, the scores for each sample on each component (the left singular vectors)
+\item \code{v}, the loadings (the right singular vectors)
+\item \code{center}, the centering vector,
+\item \code{scale}, the scaling vector,
+\item \code{method}, a string defining the method (in this case 'partialSVD'),
+\item \code{call}, the call that generated the object.
+}
+
+Note: rather than accessing these elements directly, it is better to use
+\code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
+}
 \description{
 This function performs Principal Component Analysis on a \code{gen_tibble},
-using a fast truncated SVD with initial pruning and then iterative removal
-of long-range LD regions. This function is a wrapper for \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}
+by partial SVD through the eigen decomposition of the covariance. It works well
+if the number of individuals is much smaller than the number of loci; otherwise,
+\code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is a better option. This function is a wrapper
+for \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}
 }

@@ -56,7 +56,7 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   if (!inherits(x,"gt_pca")){
     stop("'x' should be a 'gt_pca' object")
   }
-  if (is.null(x$cent)){
+  if (is.null(x$center)){
     stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
   }
 
@@ -77,11 +77,11 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
     if (inherits(x,"gt_pca_clust")){ # if we generated clusters, use the same pca
       n_pca   <- x$clusters$n_pca
     } else { # use all principal components
-      n_pca   <- length(x$eig)
+      n_pca   <- length(x$d)
     }
   } else { # if n_pca was given, check that it is not too large
-    if(n_pca > ncol(x$scores)) {
-      n_pca <- ncol(x$scores)
+    if(n_pca > ncol(x$u)) {
+      n_pca <- ncol(x$u)
     }
   }
 
@@ -92,9 +92,9 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
     }
 
 
-  U <- x$loadings[, 1:n_pca ,  drop=FALSE] # principal axes
-  XU <- x$scores[, 1:n_pca ,  drop=FALSE] # principal components
-  XU.lambda <- sum(x $ eig[1:n_pca ] )/sum(x$eig) # sum of retained eigenvalues
+  U <- x$u[, 1:n_pca ,  drop=FALSE] # principal axes
+  XU <- sweep(x$u, 2, x$d, '*')[, 1:n_pca ,  drop=FALSE] # principal components
+  XU.lambda <- sum(x$d[1:n_pca ] )/sum(x$d) # sum of retained eigenvalues
   names(U) <- paste("PCA-pa", 1:ncol(U), sep=".")
   names(XU) <- paste("PCA-pc", 1:ncol(XU), sep=".")
 

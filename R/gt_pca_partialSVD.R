@@ -1,8 +1,10 @@
-#' PCA controlling for LD for `gen_tibble` objects
+#' PCA for `gen_tibble` objects by partial SVD
 #'
 #' This function performs Principal Component Analysis on a `gen_tibble`,
-#' using a fast truncated SVD with initial pruning and then iterative removal
-#' of long-range LD regions. This function is a wrapper for [bigsnpr::snp_autoSVD()]
+#' by partial SVD through the eigen decomposition of the covariance. It works well
+#' if the number of individuals is much smaller than the number of loci; otherwise,
+#' [gt_pca_randomSVD()] is a better option. This function is a wrapper
+#' for [bigsnpr::snp_autoSVD()]
 #'
 #' @param x a `gen_tbl` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.

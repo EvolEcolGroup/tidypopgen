@@ -13,6 +13,7 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
     stop (".x should be a grouped df")
   }
   message("this function is not properly tested yet!!!")
+  message("if you have time, test the results against hierfstat and report back")
   # check matrix(unlist(z, use.names = FALSE), ncol = 10, byrow = TRUE)
   # is known to be faster than do.call(rbind,f)
   # see https://stackoverflow.com/questions/13224553/how-to-convert-a-huge-list-of-vector-to-a-matrix-more-efficiently
