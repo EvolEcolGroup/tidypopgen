@@ -2,18 +2,35 @@
 % Please edit documentation in R/gen_tibble.R
 \name{gen_tibble}
 \alias{gen_tibble}
+\alias{gen_tibble.character}
 \title{Constructor for a \code{gen_tibble}}
 \usage{
-gen_tibble(file_path, backingfile = NULL, quiet = FALSE)
+gen_tibble(x, ..., backingfile = NULL, quiet = FALSE)
+
+\method{gen_tibble}{character}(x, ..., backingfile = NULL, quiet = FALSE)
 }
 \arguments{
-\item{file_path}{the path to a plink BED file, or a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}} RDS
-file (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})}
+\item{x}{can be:
+\itemize{
+\item a string giving the path to a plink BED file, or a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}}
+\item a string giving the path to a RDS file storing a \code{bigSNP} object from
+the \code{bigsnpr} package (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})
+\item a genotype matrix of dosages (0, 1, 2, NA) giing the dosage of the alternate
+allele.
+}}
 
-\item{backingfile}{the backing file used to store the data, if converting from
-BED. If not set, the backing file will be saved in the same directory as the
+\item{...}{unused (necessary for the method to accept different parameters depending
+on \code{x})}
+
+\item{backingfile}{the path, including the file name without extension,
+for backing files used to store the data (they will be given a .bk
+and .RDS automatically). This is not needed if \code{x} is already an .RDS file.
+If \code{x} is a .BED file and \code{backingfile} is left NULL, the backing file will
+be saved in the same directory as the
 bed file, using the same file name but with a different file type (.bk rather
-than .bed)}
+than .bed). If \code{x} is a genotype matrix and \code{backingfile} is NULL, then a
+temporary file will be created (but note that R will delete it at the end of
+the session!)}
 
 \item{quiet}{provide information on the files used to store the data}
 }

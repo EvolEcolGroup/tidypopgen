@@ -1,4 +1,4 @@
-test_that("ind_het_obs computes correctly",{
+test_that("indiv_het_obs computes correctly",{
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,2),
@@ -17,9 +17,9 @@ test_that("ind_het_obs computes correctly",{
   test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
   # feeding the list of SNPbin directly
-  expect_true(all(ind_het_obs(test_gt$genotypes)==
+  expect_true(all(indiv_het_obs(test_gt$genotypes)==
                     rowMeans(test_genotypes==1,na.rm=TRUE)))
   # passing tibble
-  expect_true(all(ind_het_obs(test_gt)==
+  expect_true(all(indiv_het_obs(test_gt)==
                     rowMeans(test_genotypes==1,na.rm=TRUE)))
 })

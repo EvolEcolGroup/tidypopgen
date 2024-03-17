@@ -10,23 +10,23 @@
 #' should be returned. It defaults to FALSE (i.e. rates are returned by default).
 #' @param ... currently unused.
 #' @returns a vector of heterozygosities, one per individuals in the [`gen_tibble`]
-#' @rdname ind_missingness
+#' @rdname indiv_missingness
 #' @export
-ind_missingness <- function(.x, as_counts = FALSE, ...) {
-  UseMethod("ind_missingness", .x)
+indiv_missingness <- function(.x, as_counts = FALSE, ...) {
+  UseMethod("indiv_missingness", .x)
 }
 
 #' @export
-#' @rdname ind_missingness
-ind_missingness.tbl_df <- function(.x, as_counts = FALSE, ...){
+#' @rdname indiv_missingness
+indiv_missingness.tbl_df <- function(.x, as_counts = FALSE, ...){
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  ind_missingness(.x$genotypes, ...)
+  indiv_missingness(.x$genotypes, ...)
 }
 
 #' @export
-#' @rdname ind_missingness
-ind_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
+#' @rdname indiv_missingness
+indiv_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
   warning("this function is not finished!!!!")
   rlang::check_dots_empty()
   # get the FBM
@@ -52,7 +52,7 @@ ind_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
 }
 
 #' @export
-#' @rdname ind_missingness
-ind_missingness.grouped_df <- function(.x, as_counts = FALSE, ...){
-  .x %>% mutate(ind_missingness = ind_missingness(.data$genotypes)) %>% summarise(het_obs = mean(ind_missingness))
+#' @rdname indiv_missingness
+indiv_missingness.grouped_df <- function(.x, as_counts = FALSE, ...){
+  .x %>% mutate(indiv_missingness = indiv_missingness(.data$genotypes)) %>% summarise(het_obs = mean(indiv_missingness))
 }

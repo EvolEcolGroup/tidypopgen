@@ -36,7 +36,7 @@ example_gt
 
 We can now explore the data a little bit. We could estimate observed heterozygosity:
 ```{r}
-example_gt %>% group_by(population) %>% ind_het_obs()
+example_gt %>% group_by(population) %>% indiv_het_obs()
 ```
 
 

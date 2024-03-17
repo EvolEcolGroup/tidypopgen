@@ -99,11 +99,11 @@ However, if such a function is used within a `dplyr` verb such as `mutate`,
 we need to pass the `genotype` column to the function:
 
 ```{r}
-example_gt %>% mutate (het_obs = ind_het_obs(.data$genotypes))
+example_gt %>% mutate (het_obs = indiv_het_obs(.data$genotypes))
 ```
 Or, more simply:
 ```{r}
-example_gt %>% mutate (het_obs = ind_het_obs(genotypes))
+example_gt %>% mutate (het_obs = indiv_het_obs(genotypes))
 ```
 
 To retrieve the genotypes (which are compressed), we use:
@@ -130,12 +130,12 @@ example_pop1
 There are a number of functions that compute population genetics quantities for each
 individual, such as individual observed heterozygosity. We can compute them simply with:
 ```{r}
-example_gt %>% ind_het_obs()
+example_gt %>% indiv_het_obs()
 ```
 
 Or after filtering:
 ```{r}
-example_gt %>% filter (population=="pop2") %>% ind_het_obs()
+example_gt %>% filter (population=="pop2") %>% indiv_het_obs()
 
 ```
 
@@ -145,7 +145,7 @@ to be passed any arguments if the tibble is passed directly to them, but
 the column `genotypes` has to be provided when they are used within
 `dplyr` verbs such as `mutate`):
 ```{r}
-example_gt %>% mutate(het_obs = ind_het_obs(genotypes))
+example_gt %>% mutate(het_obs = indiv_het_obs(genotypes))
 ```
 
 # Using verbs on loci
@@ -184,7 +184,7 @@ show_loci_names(example_sub)
 
 Let us check that this has indeed impacted the individual heterozygosity
 ```{r}
-example_sub %>% ind_het_obs()
+example_sub %>% indiv_het_obs()
 ```
 
 We can also subset and reorder by passing indeces (note that we extract the loci
@@ -259,7 +259,7 @@ new `tibble` with one line per population. For example, we can count the number 
 per population, as well as their mean heterozygosity with :
 ```{r}
 example_gt %>% group_by(population) %>% 
-  summarise(n= n(), mean_het = mean(ind_het_obs(genotypes)))
+  summarise(n= n(), mean_het = mean(indiv_het_obs(genotypes)))
 ```
 
 

@@ -8,23 +8,23 @@
 #' or a [`gen_tibble`].
 #' @param ... currently unused.
 #' @returns a vector of heterozygosities, one per individuals in the [`gen_tibble`]
-#' @rdname ind_het_obs
+#' @rdname indiv_het_obs
 #' @export
-ind_het_obs <- function(.x, ...) {
-  UseMethod("ind_het_obs", .x)
+indiv_het_obs <- function(.x, ...) {
+  UseMethod("indiv_het_obs", .x)
 }
 
 #' @export
-#' @rdname ind_het_obs
-ind_het_obs.tbl_df <- function(.x, ...){
+#' @rdname indiv_het_obs
+indiv_het_obs.tbl_df <- function(.x, ...){
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  ind_het_obs(.x$genotypes, ...)
+  indiv_het_obs(.x$genotypes, ...)
 }
 
 #' @export
-#' @rdname ind_het_obs
-ind_het_obs.vctrs_bigSNP <- function(.x, ...){
+#' @rdname indiv_het_obs
+indiv_het_obs.vctrs_bigSNP <- function(.x, ...){
   rlang::check_dots_empty()
   # get the FBM
   X <- attr(.x,"bigsnp")$genotypes
@@ -48,7 +48,7 @@ ind_het_obs.vctrs_bigSNP <- function(.x, ...){
 }
 
 #' @export
-#' @rdname ind_het_obs
-ind_het_obs.grouped_df <- function(.x, ...){
-  .x %>% mutate(ind_het_obs = ind_het_obs(.data$genotypes)) %>% summarise(het_obs = mean(ind_het_obs))
+#' @rdname indiv_het_obs
+indiv_het_obs.grouped_df <- function(.x, ...){
+  .x %>% mutate(indiv_het_obs = indiv_het_obs(.data$genotypes)) %>% summarise(het_obs = mean(indiv_het_obs))
 }

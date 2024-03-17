@@ -98,7 +98,7 @@ However, if such a function is used within a `dplyr` verb such as `mutate`,
 we need to pass the `genotype` column to the function:
 
 ```{r}
-example_gt %>% mutate (ploidy = ind_missingness(.data$genotypes))
+example_gt %>% mutate (ploidy = indiv_missingness(.data$genotypes))
 ```
 Or, more simply:
 ```{r}

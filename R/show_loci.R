@@ -59,4 +59,3 @@ show_loci.vctrs_bigSNP <- function(.x, ...){
   .x
 }
 
-

@@ -26,6 +26,7 @@ gt_write_bed_from_dfs <- function(genotypes, loci, indiv_meta, path_out=NULL){
   bim$chr <- loci$chromosome
   bim$id <- loci$name
   bim$pos <- loci$position
+  # bim$posg <- loci$genetic_dist
   bim$alt <- loci$allele_alt
   bim$ref <- loci$allele_ref
 

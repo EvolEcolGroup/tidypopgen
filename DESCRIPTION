@@ -8,7 +8,7 @@ Authors@R:
       person("Evie", "Carter", role = c("aut")))   
 Description: We provide a tidy grammar of population genetics, facilitating 
     the manipulation and analysis of data on biallelic single nucleotide
-    polymorphisms.
+    polymorphisms (SNPs).
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
