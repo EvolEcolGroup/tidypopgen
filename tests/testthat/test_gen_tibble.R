@@ -1,7 +1,7 @@
 # this also tests show_genotypes and show_loci
 test_that("gen_tibble stores data correctly",{
   # create file
-  test_ind_meta <- data.frame (id=c("a","b","c"),
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,0),
                           c(2,1,0,0,0,0),
@@ -14,7 +14,7 @@ test_that("gen_tibble stores data correctly",{
                           allele_alt = c("t","c", NA,"c","g","a"))
   bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
                                     loci = test_loci,
-                                    ind_meta = test_ind_meta,
+                                    indiv_meta = test_indiv_meta,
                                     path_out = tempfile('test_data_'))
   test_gt <- gen_tibble(bed_path, quiet = TRUE)
   expect_true(inherits(test_gt,"gen_tbl"))
@@ -35,7 +35,7 @@ test_that("gen_tibble stores data correctly",{
 })
 
 # file_plink <- tempfile('test_data_')
-# gt_write_bed_from_dfs(test_genotypes, test_loci, test_ind_meta, file_plink)
+# gt_write_bed_from_dfs(test_genotypes, test_loci, test_indiv_meta, file_plink)
 # file_plink<-paste0(file_plink,".bed")
 # # convert bed to bigsnp
 # path_rds <- bigsnpr::snp_readBed(file_plink, backingfile = tempfile("test_bigfile_"))

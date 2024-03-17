@@ -39,10 +39,10 @@ centimorgans) can be added as columns in the `loci` attribute table.
 
 We can create a simple `gen_tbl` object with
 ```{r}
-test_gen <- gen_tibble(ind_metadata, genotypes, loci)
+test_gen <- gen_tibble(indiv_metadata, genotypes, loci)
 ```
 
-where `ind_metadata` is a tibble of individual metadata, `genotypes` is a matrix of counts of alternate
+where `indiv_metadata` is a tibble of individual metadata, `genotypes` is a matrix of counts of alternate
 allele, and `loci` is a tibble of loci metadata.
 
 The individual metadata can then be processed with the usual `tidiverse` grammar.

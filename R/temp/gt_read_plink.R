@@ -41,8 +41,8 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
 
   if(!quiet) cat("Reading loci information... \n")
   col_names <- scan(file,what="character",sep=" ",quiet=TRUE,  nlines=1, blank.lines.skip=FALSE)
-  ind_meta_list <- lapply(1:6,function(i) NULL)
-  names(ind_meta_list) <- col_names[1:6]
+  indiv_meta_list <- lapply(1:6,function(i) NULL)
+  names(indiv_meta_list) <- col_names[1:6]
   loci_names <- col_names[7:length(col_names)]
   # remove underscore followed by a digit at the end of locus name
   # why would that be a problem?!?
@@ -99,7 +99,7 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
     ## handle misc info
     temp <- lapply(txt, function(e) e[1:6])
     for(i in 1:6){
-      ind_meta_list[[i]] <- c(ind_meta_list[[i]], unlist(lapply(temp, function(e) e[[i]])) )
+      indiv_meta_list[[i]] <- c(indiv_meta_list[[i]], unlist(lapply(temp, function(e) e[[i]])) )
     }
 
 
@@ -128,33 +128,33 @@ read_plink_raw <- function(file, map_file=NULL, quiet=FALSE, chunk_size=1000,
 
 
   if(!quiet) cat("Reading individual metadata... \n")
-  names(ind_meta_list) <- c("population","id","pat","mat","sex","phenotype")
-  ind_meta_list <- ind_meta_list[c("id","population","sex","pat","mat","phenotype")]
+  names(indiv_meta_list) <- c("population","id","pat","mat","sex","phenotype")
+  indiv_meta_list <- indiv_meta_list[c("id","population","sex","pat","mat","phenotype")]
   # recode some of these values
-  ind_meta_list$population <- factor(ind_meta_list$population)
-  ind_meta_list$pat <- as.character(dplyr::recode(ind_meta_list$pat,"0" = NA))
-  ind_meta_list$mat <- as.character(dplyr::recode(ind_meta_list$mat,"0" = NA))
-  ind_meta_list$phenotype <- dplyr::case_match(
-    ind_meta_list$phenotype,
+  indiv_meta_list$population <- factor(indiv_meta_list$population)
+  indiv_meta_list$pat <- as.character(dplyr::recode(indiv_meta_list$pat,"0" = NA))
+  indiv_meta_list$mat <- as.character(dplyr::recode(indiv_meta_list$mat,"0" = NA))
+  indiv_meta_list$phenotype <- dplyr::case_match(
+    indiv_meta_list$phenotype,
     "1" ~ "control",
     "2" ~ "case",
     "-9" ~ NA,
     .default = NA,
     .ptype = factor(levels = c("control", "case"))
   )
-  ind_meta_list$sex <-   dplyr::case_match(
-    ind_meta_list$sex,
+  indiv_meta_list$sex <-   dplyr::case_match(
+    indiv_meta_list$sex,
     "1" ~ "male",
     "2" ~ "female",
     .default = NA,
     .ptype = factor(levels = c("female", "male"))
   )
-  ind_meta_list$genotypes <- res
-  attr(ind_meta_list$genotypes,"loci")<-tibble::as_tibble(loci)
+  indiv_meta_list$genotypes <- res
+  attr(indiv_meta_list$genotypes,"loci")<-tibble::as_tibble(loci)
 
   if(!quiet) cat("Building final object... \n")
   res <- tibble::new_tibble(
-    ind_meta_list,
+    indiv_meta_list,
     class = "gen_tbl"
   )
 

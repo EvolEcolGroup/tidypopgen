@@ -11,10 +11,10 @@ testthat::test_that("snpbin_list_dot_prod computes correctly",{
                            position=rep(0,n_loci),
                            allele_ref =rep("a",n_loci),
                            allele_alt = rep("t",n_loci))
-   test_ind_meta <- data.frame (id=paste0("ind",nrow(M)),
+   test_indiv_meta <- data.frame (id=paste0("ind",nrow(M)),
                                 population = rep(c("pop1","pop2"),each=50))
 
-   test_gen <- gen_tibble(test_ind_meta, M, test_loci, ploidy = rep(1,100))
+   test_gen <- gen_tibble(test_indiv_meta, M, test_loci, ploidy = rep(1,100))
 
 
    # not centred, not scaled

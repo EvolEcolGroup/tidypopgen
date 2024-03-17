@@ -48,14 +48,14 @@ gt_vcf_to_bed <- read_vcf <- function(vcf_path, bed_path=NULL, quiet = TRUE, ...
     # remove warnings about NAs
     suppressWarnings(storage.mode(.x) <- "integer")
 
-    ind_meta <- tibble(id = colnames(.x), population = NA)
+    indiv_meta <- tibble(id = colnames(.x), population = NA)
 
     if (is.null(bed_path)){
       bed_path <- sub_vcf(vcf_path)
     } else if (file_ext(bed_path)=="bed"){
       bed_path <- bigsnpr::sub_bed(bed_path,"")
     }
-    bed_path <- gt_write_bed_from_dfs(ind_meta= ind_meta,
+    bed_path <- gt_write_bed_from_dfs(indiv_meta= indiv_meta,
                           genotypes = t(.x),
                           loci = loci,
                           path_out = bed_path)

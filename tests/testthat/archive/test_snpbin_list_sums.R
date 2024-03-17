@@ -1,5 +1,5 @@
 testthat::test_that("snpbin_list_sums computes correctly",{
-  test_ind_meta <- data.frame (id=c("a","b","c"),
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,NA),
                           c(2,1,0,NA,0,NA),
@@ -9,7 +9,7 @@ testthat::test_that("snpbin_list_sums computes correctly",{
                           position=c(3,5,65,343,23,456),
                           allele_ref = c("a","t","c","g","c","t"),
                           allele_alt = c("t","c", NA,"c","g","a"))
-  test_gen <- gen_tibble(test_ind_meta, test_genotypes, test_loci)
+  test_gen <- gen_tibble(test_indiv_meta, test_genotypes, test_loci)
   expect_true(all(snpbin_list_sums(test_gen$genotypes, use_c = FALSE)==colSums(test_genotypes, na.rm=TRUE)))
   expect_true(all(snpbin_list_sums(test_gen$genotypes, use_c = TRUE)==colSums(test_genotypes,na.rm=TRUE)))
 })

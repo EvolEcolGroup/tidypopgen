@@ -4,14 +4,14 @@
 \alias{gt_write_bed_from_dfs}
 \title{Simple function to write a plink BED file from data.frames}
 \usage{
-gt_write_bed_from_dfs(genotypes, loci, ind_meta, path_out = NULL)
+gt_write_bed_from_dfs(genotypes, loci, indiv_meta, path_out = NULL)
 }
 \arguments{
 \item{genotypes}{a matrix of genotype dosages}
 
 \item{loci}{a table of loci information (as used in \code{\link{gen_tibble}})}
 
-\item{ind_meta}{a table with 'id' and 'population'}
+\item{indiv_meta}{a table with 'id' and 'population'}
 
 \item{path_out}{is the path and the prefix, to which '.bed', '.bim', and '.fam'
 will be added.}

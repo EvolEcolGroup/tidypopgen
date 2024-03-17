@@ -33,13 +33,15 @@ gen_tibble <- function(file_path, backingfile = NULL, quiet = FALSE){
     message("make sure that you keep those files and don't delete them!")
   }
 
-  ind_meta <- list(id = bigsnp_obj$fam$sample.ID,
+  indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
 
-  ind_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj, bigsnp_obj$fam$sample.ID)
+  indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
+                                           bigsnp_file = bigsnp_path,
+                                           indiv_id = bigsnp_obj$fam$sample.ID)
 
   tibble::new_tibble(
-    ind_meta,
+    indiv_meta,
     class = "gen_tbl"
   )
 }
@@ -50,8 +52,13 @@ file_ext <- function(x){
   utils::tail(unlist(strsplit(x,".",fixed = TRUE)),n=1)
 }
 
-
-new_vctrs_bigsnp <- function(bigsnp_obj, names) {
+#' create a vctrs_bigSNP
+#' @param bigsnp_obj the bigsnp object
+#' @param bigsnp_file the file to which the bigsnp object was saved
+#' @param indiv_id ids of individuals
+#' @returns a vctrs_bigSNP object
+#' @keywords internal
+new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
   loci <- tibble::tibble(big_index = seq_len(nrow(bigsnp_obj$map)),
                          name = bigsnp_obj$map$marker.ID,
                          chromosome = bigsnp_obj$map$chromosome,
@@ -62,8 +69,9 @@ new_vctrs_bigsnp <- function(bigsnp_obj, names) {
   )
   vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
                   bigsnp = bigsnp_obj,
+                  bigsnp_file = bigsnp_file,
                   loci=loci,
-                  names=names,
+                  names=indiv_id,
                   class = "vctrs_bigSNP")
 }
 

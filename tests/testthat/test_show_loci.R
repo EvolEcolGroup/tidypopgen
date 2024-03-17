@@ -1,5 +1,5 @@
 test_that("show_loci gets and sets information",{
-  test_ind_meta <- data.frame (id=c("a","b","c"),
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,2),
                           c(2,1,0,NA,0,NA),
@@ -12,7 +12,7 @@ test_that("show_loci gets and sets information",{
                           allele_alt = c("t","c", NA,"c","g","a"))
   bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
                                     loci = test_loci,
-                                    ind_meta = test_ind_meta,
+                                    indiv_meta = test_indiv_meta,
                                     path_out = tempfile('test_data_'))
   test_gt <- gen_tibble(bed_path, quiet = TRUE)
 

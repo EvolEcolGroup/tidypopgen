@@ -9,7 +9,7 @@
 #' in the bim table and in the genotypes)
 #' @param backingfile the backing file (if null, a tempfile will be used)
 #' @returns a [`bigsnpr::bigSNP`] object
-#' @export
+#' @keywords internal
 
 subset_bigSNP <- function(X, indiv_indices=NULL, loci_indices=NULL, swap_indices=NULL,
                           backingfile = NULL){

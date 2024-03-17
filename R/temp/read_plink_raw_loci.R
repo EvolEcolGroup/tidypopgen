@@ -14,8 +14,8 @@ read_plink_raw_loci <- function(file){
   ext <- toupper(ext)
   if(ext != "RAW") warning("wrong file extension - '.raw' expected")
   col_names <- scan(file,what="character",sep=" ",quiet=TRUE,  nlines=1, blank.lines.skip=FALSE)
-  ind_meta_list <- lapply(1:6,function(i) NULL)
-  names(ind_meta_list) <- col_names[1:6]
+  indiv_meta_list <- lapply(1:6,function(i) NULL)
+  names(indiv_meta_list) <- col_names[1:6]
   loci_names <- col_names[7:length(col_names)]
   # remove underscore followed by a digit at the end of locus name
   # why would that be a problem?!?

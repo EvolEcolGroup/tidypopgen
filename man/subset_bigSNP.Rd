@@ -31,3 +31,4 @@ a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}} object
 This function subsets an \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}} object, creating a new backing file with the
 information subsetted and reorders as required.
 }
+\keyword{internal}

@@ -27,7 +27,7 @@ as_gen_tibble <- function(.x, ...) {
 as_gen_tibble.genlight <- function(.x, ..., ignore_null_slots = TRUE){
   n_ind <- adegenet::nInd(.x)
   n_loci <- adegenet::nLoc(.x)
-  ind_meta_list <- list(id = fix_null_slot(.x,"ind.names",
+  indiv_meta_list <- list(id = fix_null_slot(.x,"ind.names",
                                            paste0("ind",seq_len(n_ind)),
                                            ignore_null_slots),
                         population = fix_null_slot(.x,"pop",
@@ -54,11 +54,11 @@ as_gen_tibble.genlight <- function(.x, ..., ignore_null_slots = TRUE){
                                     rep("y",n_loci),
                                     ignore_null_slots)
   }
-  ind_meta_list$genotypes <- .x$gen
-  attr(ind_meta_list$genotypes,"loci")<-loci
+  indiv_meta_list$genotypes <- .x$gen
+  attr(indiv_meta_list$genotypes,"loci")<-loci
 
   tibble::new_tibble(
-    ind_meta_list,
+    indiv_meta_list,
     class = "gen_tbl"
   )
 }
@@ -116,9 +116,9 @@ as_gen_tibble.vcfR<- function(.x, n_cores=1,...){
     .x[.x=="1/0"] <- 1
     .x[.x=="1/1"] <- 2
 
-    ind_meta <- tibble(id = colnames(.x), population = NA)
+    indiv_meta <- tibble(id = colnames(.x), population = NA)
 
-    .x <- gen_tibble(ind_meta= ind_meta, genotypes = t(.x), loci = loci)
+    .x <- gen_tibble(indiv_meta= indiv_meta, genotypes = t(.x), loci = loci)
 
     return(.x)
   } else {

@@ -57,7 +57,7 @@ Given information about the individuals, their genotypes, and the loci:
 ```{r}
 #library(tidypopgen)
 library(vctrs)
-example_ind_meta <- data.frame (id=c("a","b","c"),
+example_indiv_meta <- data.frame (id=c("a","b","c"),
                        population = c("pop1","pop1","pop2"))
 example_genotypes <- rbind(c(1, 1, 0, 1, 1, 0), 
                         c(2, 0, 0, 0,NA, 0), 
@@ -72,7 +72,7 @@ example_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
 We create a plink BED file:
 ```{r}
 bed_prefix <- tempfile('test_data_')
-gt_write_bed_from_dfs(example_genotypes, example_loci, example_ind_meta, bed_prefix)
+gt_write_bed_from_dfs(example_genotypes, example_loci, example_indiv_meta, bed_prefix)
 bed_path <- paste0(bed_prefix,".bed")
 
 ```

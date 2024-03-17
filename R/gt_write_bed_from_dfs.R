@@ -7,13 +7,13 @@
 #'
 #' @param genotypes a matrix of genotype dosages
 #' @param loci a table of loci information (as used in [`gen_tibble`])
-#' @param ind_meta a table with 'id' and 'population'
+#' @param indiv_meta a table with 'id' and 'population'
 #' @param path_out is the path and the prefix, to which '.bed', '.bim', and '.fam'
 #' will be added.
 #' @returns NULL it writes the files
 #' @export
 
-gt_write_bed_from_dfs <- function(genotypes, loci, ind_meta, path_out=NULL){
+gt_write_bed_from_dfs <- function(genotypes, loci, indiv_meta, path_out=NULL){
 
   if (is.null(path_out)){
     stop ("path_out needs to be given")
@@ -29,9 +29,9 @@ gt_write_bed_from_dfs <- function(genotypes, loci, ind_meta, path_out=NULL){
   bim$alt <- loci$allele_alt
   bim$ref <- loci$allele_ref
 
-  fam <- genio::make_fam(n= nrow(ind_meta))
-  fam$fam <- ind_meta$population
-  fam$id <- ind_meta$id
+  fam <- genio::make_fam(n= nrow(indiv_meta))
+  fam$fam <- indiv_meta$population
+  fam$id <- indiv_meta$id
   rownames(genotypes) <- bim$id
   colnames(genotypes) <- fam$id
 

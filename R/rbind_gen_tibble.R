@@ -129,6 +129,7 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   # TODO check that all individuals in tibble and bigsnp object are the same
   merged_tbl$genotypes <- vctrs::new_vctr(match(indivs_with_big_names,merged_snp$fam$sample.ID), # TODO check that this is the correct order!!!!
                   bigsnp = merged_snp,
+                  bigsnp_file = merged_rds,
                   loci=new_ref_loci_tbl,
                   names=indivs_with_big_names,
                   class = "vctrs_bigSNP")

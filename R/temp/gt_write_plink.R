@@ -44,7 +44,7 @@ gt_write_plink <- function(x, file, plink_format = c("raw","ped"), chunk_size = 
     paste0(loci$name,"_",toupper(loci$allele_alt),"(/",toupper(loci$allele_ref),")"))
 
   # create the info for the fam file
-  ind_meta <- tibble(population = x$population,
+  indiv_meta <- tibble(population = x$population,
                      id = x$id,
                      pat = pull_NA(x, "pat"),
                      mat = pull_NA(x, "mat"),
@@ -52,12 +52,12 @@ gt_write_plink <- function(x, file, plink_format = c("raw","ped"), chunk_size = 
                      phenotype = pull_NA(x, "phenotype")
                      )
   # recode some variables
-  ind_meta$sex<- dplyr::case_match(as.character(ind_meta$sex),'female'~'2','male'~'1',.default="0")
-  ind_meta$pat[is.na(ind_meta$pat)]<-0
-  ind_meta$mat[is.na(ind_meta$mat)]<-0
-  ind_meta$phenotype<-dplyr::case_match(as.character(ind_meta$phenotype),
-                    'control'~"1",'case'~"2", .default=ind_meta$phenotype )
-  ind_meta$phenotype[is.na(ind_meta$phenotype)]<--9
+  indiv_meta$sex<- dplyr::case_match(as.character(indiv_meta$sex),'female'~'2','male'~'1',.default="0")
+  indiv_meta$pat[is.na(indiv_meta$pat)]<-0
+  indiv_meta$mat[is.na(indiv_meta$mat)]<-0
+  indiv_meta$phenotype<-dplyr::case_match(as.character(indiv_meta$phenotype),
+                    'control'~"1",'case'~"2", .default=indiv_meta$phenotype )
+  indiv_meta$phenotype[is.na(indiv_meta$phenotype)]<--9
 
   # create chunks
   n_ind <- nrow(x)
@@ -66,7 +66,7 @@ gt_write_plink <- function(x, file, plink_format = c("raw","ped"), chunk_size = 
   # loop over to write
   for (i_chunk in seq_len(length(chunks))){
     chunk <- chunks[[i_chunk]]
-    raw_table <- cbind(ind_meta[chunk,],
+    raw_table <- cbind(indiv_meta[chunk,],
       show_genotypes(x[chunk,]))
 
     # now recode the genotypes with letters if raw

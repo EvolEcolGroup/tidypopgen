@@ -3,7 +3,7 @@
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
 #'
-#' @param ind_meta a list, data.frame or tibble with compulsory columns 'id'
+#' @param indiv_meta a list, data.frame or tibble with compulsory columns 'id'
 #'  and 'population', plus any additional metadata of interest.
 #' @param genotypes a matrix of counts of alternative alleles, one row per
 #' individual and a column per locus
@@ -11,7 +11,7 @@
 #' and 'position'
 #' @returns an object of the class `gen_tbl`.
 #' @examples
-#' test_ind_meta <- data.frame (id=c("a","b","c"),
+#' test_indiv_meta <- data.frame (id=c("a","b","c"),
 #'                              population = c("pop1","pop1","pop2"))
 #' test_genotypes <- rbind(c(1,1,0,1,1,0),
 #'                         c(2,1,0,0,0,0),
@@ -21,13 +21,13 @@
 #'                         position=c(3,5,65,343,23,456),
 #'                         allele_ref = c("a","t","c","g","c","t"),
 #'                         allele_alt = c("t","c", NA,"c","g","a"))
-#' test_gen <- gen_tibble(ind_meta = test_ind_meta,
+#' test_gen <- gen_tibble(indiv_meta = test_indiv_meta,
 #'                        genotypes = test_genotypes,
 #'                        loci = test_loci)
 #' test_gen
 #' @export
 
-gen_tibble <- function(genotypes, ind_meta = NULL, loci = NULL){
+gen_tibble <- function(genotypes, indiv_meta = NULL, loci = NULL){
   # TODO check object types
 
   if (is.character(genotypes)){
@@ -36,23 +36,23 @@ gen_tibble <- function(genotypes, ind_meta = NULL, loci = NULL){
     stop("genotypes should be pointing to a bigsnpr rds file")
   }
 
-  if (is.null(ind_meta)){
-    ind_meta <- tibble::tibble(id = genotypes_big$fam$sample.ID,
+  if (is.null(indiv_meta)){
+    indiv_meta <- tibble::tibble(id = genotypes_big$fam$sample.ID,
                                population = genotypes_big$fam$family.ID)
   }
-  if (!all(c("id", "population") %in% names(ind_meta))){
-    stop("ind_meta does not include the compulsory columns 'id' and 'population")
+  if (!all(c("id", "population") %in% names(indiv_meta))){
+    stop("indiv_meta does not include the compulsory columns 'id' and 'population")
   }
 
 #  check_valid_loci(loci)
-  ind_meta <- as.list(ind_meta)
+  indiv_meta <- as.list(indiv_meta)
   #TODO this could be parallelised
-  ind_meta$genotypes <- vctrs_bigsnp(ind_meta$id, genotypes_big)
+  indiv_meta$genotypes <- vctrs_bigsnp(indiv_meta$id, genotypes_big)
 
   browser()
 
   tibble::new_tibble(
-    ind_meta,
+    indiv_meta,
     class = "gen_tbl"
   )
 }

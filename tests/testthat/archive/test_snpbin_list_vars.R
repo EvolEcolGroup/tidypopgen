@@ -1,5 +1,5 @@
 testthat::test_that("snpbin_list_vars computes correctly",{
-  test_ind_meta <- data.frame (id=c("a","b","c"),
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_loci <- data.frame(name=paste0("rs",1:6),
                           chromosome=c(1,1,1,1,2,2),
@@ -12,7 +12,7 @@ testthat::test_that("snpbin_list_vars computes correctly",{
   test_genotypes <- rbind(c(0,0,1,1,0, NA),
                           c(1,1,1,0,0,1),
                           c(0,0,0,1,1,1))
-  test_gen <- gen_tibble(test_ind_meta, test_genotypes, test_loci,ploidy=c(1,1,1))
+  test_gen <- gen_tibble(test_indiv_meta, test_genotypes, test_loci,ploidy=c(1,1,1))
   f1 <- function(e) {return(mean((e-mean(e, na.rm=TRUE))^2, na.rm=TRUE))}
   expect_true(all.equal(snpbin_list_vars(test_gen$genotypes),
                          apply(show_genotypes(test_gen, genotypes), 2, f1 )))
@@ -21,7 +21,7 @@ testthat::test_that("snpbin_list_vars computes correctly",{
 
   #  differences in ploidy
   test_genotypes <- rbind(c(0,0,1,1,0,NA), c(1,1,1,0,0,1), c(2,1,1,1,1,NA))
-  test_gen <- gen_tibble(test_ind_meta, test_genotypes, test_loci,ploidy=c(1,1,2))
+  test_gen <- gen_tibble(test_indiv_meta, test_genotypes, test_loci,ploidy=c(1,1,2))
   temp <- sweep(show_genotypes(test_gen, genotypes), 1, c(1,1,2), "/")
   f2 <- function(e,w) {
     mu <- weighted.mean(e, w, na.rm=TRUE)
