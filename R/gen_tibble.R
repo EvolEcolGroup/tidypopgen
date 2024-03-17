@@ -8,6 +8,10 @@
 #' the `bigsnpr` package (usually created with [bigsnpr::snp_readBed()])
 #' - a genotype matrix of dosages (0, 1, 2, NA) giing the dosage of the alternate
 #' allele.
+#' @param indiv_meta a list, data.frame or tibble with compulsory columns 'id'
+#'  and 'population', plus any additional metadata of interest.
+#' @param loci a data.frame or tibble, with compulsory columns 'name', 'chromosome',
+#' and 'position','genetic_dist', 'allele_ref' and 'allele_alt'
 #' @param ... unused (necessary for the method to accept different parameters depending
 #' on `x`)
 #' @param backingfile the path, including the file name without extension,
@@ -66,6 +70,46 @@ gen_tibble.character <- function(x, ..., backingfile = NULL, quiet = FALSE){
 }
 
 
+#' @export
+#' @rdname gen_tibble
+gen_tibble.matrix <- function(x, indiv_meta, loci, ..., backingfile = NULL, quiet = FALSE){
+  rlang::check_dots_empty()
+  # TODO check object types
+  if (!all(c("id", "population") %in% names(indiv_meta))){
+    stop("ind_meta does not include the compulsory columns 'id' and 'population")
+  }
+  # TODO check that genotypes is numeric
+
+  # use code for NA in FBM.256
+  x[is.na(x)]<-3
+
+
+  bigsnp_obj <- gt_write_bigsnp_from_dfs(genotypes = x,
+                                          indiv_meta = indiv_meta,
+                                          loci = loci,
+                                          backingfile = backingfile)
+  bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile,".rds")
+  if (!quiet){
+    message("\n\nusing bigSNP file: ", bigsnp_path)
+    message("with backing file: ", bigsnp_obj$genotypes$backingfile)
+    message("make sure that you keep those files and don't delete them!")
+  }
+
+  indiv_meta <- as.list (indiv_meta)
+  indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
+                                           bigsnp_file = bigsnp_path,
+                                           indiv_id = bigsnp_obj$fam$sample.ID)
+
+  tibble::new_tibble(
+    indiv_meta,
+    class = "gen_tbl"
+  )
+
+
+
+}
+
+
 # simple function to extract the extension of a file
 file_ext <- function(x){
   utils::tail(unlist(strsplit(x,".",fixed = TRUE)),n=1)
@@ -115,9 +159,20 @@ check_valid_loci <- function(loci_df){
 #' @param indiv_meta the individual meta information
 #' @param loci the loci table
 #' @keywords internal
-bignsnp_from_dfs <- function(genotypes, indiv_meta, loci){
-  warning("this function still needs testing")
+gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
+                                      backingfile=NULL){
+  if (is.null(backingfile)){
+    backingfile <- tempfile()
+  }
   check_valid_loci(loci)
+  bigGeno <- bigstatsr::FBM.code256(
+    nrow = nrow(genotypes),
+    ncol = ncol(genotypes),
+    code = bigsnpr::CODE_012,
+    backingfile = backingfile,
+    init = NULL,
+    create_bk = TRUE
+  )
   bigGeno[] <- genotypes
   fam <- tibble(family.ID = indiv_meta$population,
                 sample.ID = indiv_meta$id,
@@ -132,12 +187,13 @@ bignsnp_from_dfs <- function(genotypes, indiv_meta, loci){
                 allele1 = loci$allele_alt,
                 allele2 = loci$allele_ref)
   # Create the bigSNP object
-  snp.list <- structure(list(genotypes = bigGeno, fam = fam, map = map),
+  snp_list <- structure(list(genotypes = bigGeno, fam = fam, map = map),
                         class = "bigSNP")
 
   # save it and return the path of the saved object
   rds <- bigstatsr::sub_bk(bigGeno$backingfile, ".rds")
-  saveRDS(snp.list, rds)
+  saveRDS(snp_list, rds)
+  return(snp_list)
 }
 
 
@@ -171,26 +227,3 @@ tbl_sum.gen_tbl <- function(x, ...) {
   )
 }
 
-
-bignsnp_from_dfs <- function(genotypes, indiv_meta, loci){
-  bigGeno[] <- genotypes
-  fam <- tibble(family.ID = indiv_meta$population,
-                sample.ID = indiv_meta$id,
-                paternal.ID = 0,
-                maternal.ID = 0,
-                sex = 0,
-                affection = 0)
-  map <- tibble(chromosome = loci$chromosome,
-                marker.ID = loci$name,
-                genetic.dist = loci$genetic_dist,
-                physical.pos = loci$position,
-                allele1 = loci$allele_alt,
-                allele2 = loci$allele_ref)
-  # Create the bigSNP object
-  snp.list <- structure(list(genotypes = bigGeno, fam = fam, map = bim),
-                        class = "bigSNP")
-
-  # save it and return the path of the saved object
-  rds <- sub_bk(bigGeno$backingfile, ".rds")
-  saveRDS(snp.list, rds)
-}

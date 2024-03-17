@@ -74,28 +74,24 @@ example_genotypes <- rbind(c(1, 1, 0, 1, 1, 0),
 example_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
                    chromosome=c(1,1,1,1,2,2),
                    position=c(3,5,65,343,23,456),
+                   genetic_dist = c(0,0,0,0,0,0),
                    allele_ref = c("a","t","c","g","c","t"),
                    allele_alt = c("t","c", NA,"c","g","a"))
-```
-
-We create a plink BED file (we save it into a temp file for this vignette):
-```{r}
-bed_path <- gt_write_bed_from_dfs(genotypes = example_genotypes, 
-                  loci = example_loci, 
-                  indiv_meta = example_indiv_meta, 
-                  path_out = file.path(tempdir(),'test_data'))
-bed_path
 ```
 
 
 We can create a simple `gen_tibble` object (of class `gen_tbl`) with
 ```{r}
-example_gt <- gen_tibble(bed_path)
+example_gt <- gen_tibble(example_genotypes, 
+                         indiv_meta = example_indiv_meta,
+                         loci=example_loci,
+                         backingfile = tempfile())
 ```
 We are provided information on where the two files underlying the genotype information
-are stored. As we did use the default options, they are placed in the same directory
-as the original .bed file, using the same basename "test_data". It is important that these
-files are not deleted or moved. 
+are stored. As we don't want to keep the files, we used the tmp directory; normally
+you will want to use your working directory so that the files will not be cleared
+by R at the end of the session. It is important that these
+files are not deleted or moved, as `gen_tibble` stores their paths for future use. 
 
 Now let's have a look at our `gen_tibble`:
 ```{r}

@@ -3,11 +3,14 @@
 \name{gen_tibble}
 \alias{gen_tibble}
 \alias{gen_tibble.character}
+\alias{gen_tibble.matrix}
 \title{Constructor for a \code{gen_tibble}}
 \usage{
 gen_tibble(x, ..., backingfile = NULL, quiet = FALSE)
 
 \method{gen_tibble}{character}(x, ..., backingfile = NULL, quiet = FALSE)
+
+\method{gen_tibble}{matrix}(x, indiv_meta, loci, ..., backingfile = NULL, quiet = FALSE)
 }
 \arguments{
 \item{x}{can be:
@@ -33,6 +36,12 @@ temporary file will be created (but note that R will delete it at the end of
 the session!)}
 
 \item{quiet}{provide information on the files used to store the data}
+
+\item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
+and 'population', plus any additional metadata of interest.}
+
+\item{loci}{a data.frame or tibble, with compulsory columns 'name', 'chromosome',
+and 'position','genetic_dist', 'allele_ref' and 'allele_alt'}
 }
 \value{
 an object of the class \code{gen_tbl}.
