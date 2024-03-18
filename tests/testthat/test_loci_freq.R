@@ -22,4 +22,5 @@ test_that("snpbin_list_means computes correctly",{
   # convert to minor frequencies
   freq[freq>0.5] <- 1 - freq[freq>0.5]
   expect_true(all(loci_freq(test_gt$genotypes)==freq))
+
 })

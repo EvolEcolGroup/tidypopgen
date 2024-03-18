@@ -2,7 +2,7 @@
 #'
 #' Estimate the frequency of the alternate allele at each locus.
 #'
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param ... other arguments passed to specific methods.

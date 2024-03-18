@@ -16,7 +16,7 @@ loci_freq(.x, ...)
 \method{loci_freq}{grouped_df}(.x, ..., minor = TRUE)
 }
 \arguments{
-\item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
+\item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
 a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
