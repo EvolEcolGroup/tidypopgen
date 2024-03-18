@@ -27,7 +27,6 @@ indiv_missingness.tbl_df <- function(.x, as_counts = FALSE, ...){
 #' @export
 #' @rdname indiv_missingness
 indiv_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
-  warning("this function is not finished!!!!")
   rlang::check_dots_empty()
   # get the FBM
   X <- attr(.x,"bigsnp")$genotypes
@@ -42,13 +41,13 @@ indiv_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
   }
 
   # count nas in one go
-  this_col_na <- bigstatsr::big_apply(X, a.FUN = col_NA,
+  this_row_na <- bigstatsr::big_apply(X, a.FUN = col_NA,
                       ind=attr(.x,"loci")$big_index,
                        a.combine = 'plus', rows_to_keep=rows_to_keep)
   if (!as_counts){
-    this_col_na <- this_col_na/length(show_loci_names(.x))
+    this_row_na <- this_row_na/length(show_loci_names(.x))
   }
-  this_col_na
+  this_row_na
 }
 
 #' @export

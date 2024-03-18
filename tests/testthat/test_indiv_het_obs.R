@@ -1,4 +1,4 @@
-test_that("indiv_het_obs computes correctly",{
+test_that("indiv_missingness computes correctly",{
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,2),
@@ -17,10 +17,11 @@ test_that("indiv_het_obs computes correctly",{
                                     path_out = tempfile('test_data_'))
   test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
-  # feeding the list of SNPbin directly
-  expect_true(all(indiv_het_obs(test_gt$genotypes)==
-                    rowMeans(test_genotypes==1,na.rm=TRUE)))
+  sum_na <- function(x){sum(is.na(x))}
+  # feeding the genotypes directly
+  expect_true(all(indiv_missingness(test_gt$genotypes)==
+                    apply(test_genotypes,1,sum_na)/ncol(test_genotypes)))
   # passing tibble
-  expect_true(all(indiv_het_obs(test_gt)==
-                    rowMeans(test_genotypes==1,na.rm=TRUE)))
+  expect_true(all(indiv_missingness(test_gt)==
+                    apply(test_genotypes,1,sum_na)/ncol(test_genotypes)))
 })
