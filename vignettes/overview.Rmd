@@ -72,11 +72,12 @@ example_genotypes <- rbind(c(1, 1, 0, 1, 1, 0),
                         c(0, 2, 0, 1, 2, 1),
                         c(1, 1,NA, 2, 1, 0))
 example_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
-                   chromosome=c(1,1,1,1,2,2),
-                   position=c(3,5,65,343,23,456),
-                   genetic_dist = c(0,0,0,0,0,0),
-                   allele_ref = c("a","t","c","g","c","t"),
-                   allele_alt = c("t","c", NA,"c","g","a"))
+                           chromosome=c(1,1,1,1,2,2),
+                           position=c(3,5,65,343,23,456),
+                           genetic_dist = c(0,0,0,0,0,0),
+                           allele_ref = c("A","T","C","G","C","T"),
+                           allele_alt = c("T","C", NA,"C","G","A"))
+
 ```
 
 

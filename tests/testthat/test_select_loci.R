@@ -8,8 +8,8 @@ test_that("select_loci subsets correctly",{
                           chromosome=c(1,1,1,1,2,2),
                           position=c(3,5,65,343,23,456),
                           genetic_dist = as.integer(rep(0,6)),
-                          allele_ref = c("a","t","c","g","c","t"),
-                          allele_alt = c("t","c", NA,"c","g","a"))
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
   bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
                                     loci = test_loci,
                                     indiv_meta = test_indiv_meta,

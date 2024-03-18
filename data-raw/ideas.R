@@ -22,6 +22,11 @@
 # And some ideas from factorextra (not fully tidy, but some interesting ideas)
 # http://www.sthda.com/english/wiki/get-pca-extract-the-results-for-individuals-variables-in-principal-component-analysis-r-software-and-data-mining
 
+## A tutorial for analysis of SNP with adegenet that we could try to repeat with our pipeline:
+#https://grunwaldlab.github.io/Population_Genetics_in_R/gbs_analysis.html
+
+# Pipeline with adegenet and hierfstat to test pop gen summaries:
+#https://popgen.nescent.org/DifferentiationSNP.html
 
 
 

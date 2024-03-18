@@ -27,8 +27,10 @@ gt_write_bed_from_dfs <- function(genotypes, loci, indiv_meta, path_out=NULL){
   bim$id <- loci$name
   bim$pos <- loci$position
   # bim$posg <- loci$genetic_dist
-  bim$alt <- loci$allele_alt
   bim$ref <- loci$allele_ref
+  bim$alt <- loci$allele_alt
+  # replace missing alleles with 0 (the plink default)
+  bim$alt[is.na(bim$alt)] <- "0"
 
   fam <- genio::make_fam(n= nrow(indiv_meta))
   fam$fam <- indiv_meta$population
