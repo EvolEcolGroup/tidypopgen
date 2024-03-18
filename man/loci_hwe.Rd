@@ -9,7 +9,7 @@
 \usage{
 loci_hwe(.x, ...)
 
-\method{loci_hwe}{tbl_df}(.x, as_counts = FALSE, ...)
+\method{loci_hwe}{tbl_df}(.x, ...)
 
 \method{loci_hwe}{vctrs_bigSNP}(.x, ...)
 
@@ -20,7 +20,7 @@ loci_hwe(.x, ...)
 a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
-\item{...}{curretnly unused.}
+\item{...}{further arguments to pass to \code{\link[HardyWeinberg:HWExact]{HardyWeinberg::HWExact()}}.}
 }
 \value{
 a vector of probabilities from HWE exact test, one per locus

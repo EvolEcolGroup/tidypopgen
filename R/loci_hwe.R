@@ -20,7 +20,7 @@ loci_hwe <- function(.x, ...) {
 
 #' @export
 #' @rdname loci_hwe
-loci_hwe.tbl_df <- function(.x, as_counts = FALSE, ...) {
+loci_hwe.tbl_df <- function(.x, ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
   loci_hwe(.x$genotypes, ...)
@@ -58,7 +58,7 @@ loci_hwe.vctrs_bigSNP <- function(.x, ...) {
 loci_hwe.grouped_df <- function(.x, ...) {
   # TODO this is seriously inefficient, we need to cast it into a big_apply problem
   # of maybe it isn't that bad...
-  group_map(.x, .f=~loci_hwe(.x, as_counts=as_counts))
+  group_map(.x, .f=~loci_hwe(.x))
 }
 
 .genotypes_freq <- function(x){
