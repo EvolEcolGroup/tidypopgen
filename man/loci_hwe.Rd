@@ -26,8 +26,12 @@ or a \code{\link{gen_tibble}}.}
 a vector of probabilities from HWE exact test, one per locus
 }
 \description{
-Return the p-value from an exact test of HWE (using \code{\link[HardyWeinberg:HWExactMat]{HardyWeinberg::HWExactMat()}}).
+Return the p-value from an exact test of HWE. It uses an implementation
+based on \code{\link[HardyWeinberg:HWExact]{HardyWeinberg::HWExact()}}), optimised for speed.
 }
 \details{
 NOTE There are no tests for this function yet! Unit tests are needed.
+}
+\author{
+based on code originally written by Jan Graffleman, optimised by Andrea Manica for speed
 }

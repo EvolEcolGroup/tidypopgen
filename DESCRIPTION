@@ -21,7 +21,6 @@ Imports:
     bigstatsr,
     generics,
     genio,
-    HardyWeinberg,
     magrittr,
     rlang,
     stringr,
