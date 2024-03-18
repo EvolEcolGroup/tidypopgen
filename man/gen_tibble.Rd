@@ -18,12 +18,15 @@ gen_tibble(x, ..., backingfile = NULL, quiet = FALSE)
 \item a string giving the path to a plink BED file, or a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}}
 \item a string giving the path to a RDS file storing a \code{bigSNP} object from
 the \code{bigsnpr} package (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})
+\item a string giving the path to a vcf file. Note that we currently read the whole
+vcf in memory with \code{vcfR}, so only smallish vcf can be imported. Only biallelic
+SNPs will be considered.
 \item a genotype matrix of dosages (0, 1, 2, NA) giing the dosage of the alternate
 allele.
 }}
 
-\item{...}{unused (necessary for the method to accept different parameters depending
-on \code{x})}
+\item{...}{if \code{x} is the name of a vcf file, additional arguments
+passed to \code{\link[vcfR:io_vcfR]{vcfR::read.vcfR()}}. Otherwise, unused.}
 
 \item{backingfile}{the path, including the file name without extension,
 for backing files used to store the data (they will be given a .bk
