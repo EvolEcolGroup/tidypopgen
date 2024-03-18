@@ -16,17 +16,23 @@ bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
                                   path_out = tempfile('test_data_'))
 test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
-# this also tests show_genotypes and show_loci
-test_that("write a bed file",{
-  bed_path <- gt_write_plink(test_gt, bedfile = paste0(tempfile(),".bed"))
-  # now read the file back in
-  test_gt2 <- gen_tibble(bed_path, quiet=TRUE)
-  ## continue here
+# we now replace NA with 0 for the test_loci
+test_loci[is.na(test_loci)]<-"0"
 
-  # because of the different backing file info, we cannot use identical on the whole object
-  expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt2)))
-  expect_true(identical(show_loci(test_gt), show_loci(test_gt2)))
-  expect_true(identical(test_gt %>% select(-genotypes),
-                        test_gt2 %>% select(-genotypes)))
+# this also tests show_genotypes and show_loci
+test_that("save and load gt",{
+  expect_true(inherits(test_gt,"gen_tbl"))
+  # now save the tibble
+  all_file_names <- gt_save(test_gt)
+  # check that the new file exists
+  expect_true(file.exists(all_file_names[1]))
+  new_test_gt <- gt_load(all_file_names[1])
+
+  # check that we preserved the genotypes
+  expect_true(all(show_genotypes(new_test_gt$genotypes)==test_genotypes))
+  # check that we preserved the loci
+  expect_identical( show_loci(new_test_gt$genotypes) %>% select(-big_index), as_tibble(test_loci))
+
 })
+
 

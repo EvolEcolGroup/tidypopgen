@@ -4,12 +4,12 @@
 \alias{gt_write_plink}
 \title{Export a \code{gen_tibble} object to PLINK ped format}
 \usage{
-gt_write_plink(x, file = NULL, overwrite = TRUE)
+gt_write_plink(x, bedfile = NULL, overwrite = TRUE)
 }
 \arguments{
 \item{x}{a \code{\link{gen_tibble}} object}
 
-\item{file}{a character string giving the path to the file to convert,
+\item{bedfile}{a character string giving the path to the file to convert,
 with the extension ".raw" or "ped"}
 
 \item{overwrite}{boolean whether to overwrite the file}

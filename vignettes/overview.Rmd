@@ -309,14 +309,51 @@ distance metrics among populations. For example:
 example_gt %>% group_by(population) %>% gt_pairwise_fst()
 ```
 
-# Reading and exporting data
+# Saving and reading data
 
-Currently, `tidypopgen` can read data only from `bigSNP` objects from the `bigsnpr` package. That package has import functions for plink BED files. We will
-need to add some more functionality. It would be good to read the bed files directly (easy) and import from vcfR (not too difficult via `genio`, we just
-need to block process the data).
+We can save a `gen_tibble` with `gt_save()`. This command will save a file with
+extension `.gt`. Together with the `.rds` and `.bk` files, the `.gt` file include
+all the information stored in the `gen_tibble`. Note that, whilst the `.rds` and `.bk`
+file have to share name, the `.gt` file can be named differently (but, by default, if
+no specific name is given, `gt_save` will use the same pattern as for the `.rds` 
+and `.bk` file).
 
-`bigSNP` can be exported to BED, we just need a wrapper to subsets individuals
-and loci based on the `gen_tbl`. That's easy.
+So, let us save our file:
+```{r}
+gt_file_name <- gt_save(example_gt)
+gt_file_name
+
+```
+
+In a later session, we could reload the data with:
+```{r}
+new_example_gt <- gt_load(gt_file_name[1])
+new_example_gt %>% show_genotypes()
+```
+
+We can see that our genotypes were recovered correctly.
+
+As we saw at the beginning of this vignette, it is possible to create a `gen_tibble` with data
+in data.frames and tibbles. We can use that function to wrangle data in various formats (including
+from vcf files via `vcfR`), but more commonly SNP data are stored as PLINK bed files.
+`gen_tibble` can directly read bed files:
+
+```{r}
+bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+pop_a_gt <- gen_tibble(bed_path_pop_a, backingfile = tempfile("pop_a_"))
+```
+
+For this vignette, we don't want to keep files, so we are using again a temporary
+path for the backing files, but in normal instances, we can simply
+omit the `backinfile` parameter, and the `.rds` and `.bk` file will be saved with the same name and
+path as the original `.bed` file.
+
+We can also export data to a .bed file. Note that, from the main tibble, only information
+on `id`, `population` and `sex` will be preserved (TODO think about the other elements
+of a fam file):
+```{r}
+gt_write_plink(example_gt, bedfile =  tempfile("new_bed_"))
+```
 
 # Merging data
 

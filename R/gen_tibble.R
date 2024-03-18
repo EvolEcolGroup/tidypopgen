@@ -148,7 +148,7 @@ summary.vctrs_bigSNP <- function(object, ...){
 check_valid_loci <- function(loci_df){
   loci_df <- as_tibble(loci_df)
   if (!all(c('name', 'chromosome', 'position','genetic_dist', 'allele_ref','allele_alt') %in% names(loci_df))){
-    stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','allele_ref','allele_alt'")
+    stop("loci does not include the compulsory columns 'name', 'chromosome', 'position','genetic_dist', allele_ref','allele_alt'")
   }
 }
 

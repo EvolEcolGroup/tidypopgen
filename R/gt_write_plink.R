@@ -8,28 +8,31 @@
 #' `--recodeA`), as well as a map file (as generated with `--recode`).
 #'
 #' @param x a [`gen_tibble`] object
-#' @param file a character string giving the path to the file to convert,
+#' @param bedfile a character string giving the path to the file to convert,
 #' with the extension ".raw" or "ped"
 #' @param overwrite boolean whether to overwrite the file
 #' @returns TRUE if successful
 #' @export
 
 
-gt_write_plink <- function(x, file = NULL,
+gt_write_plink <- function(x, bedfile = NULL,
                            overwrite = TRUE){
-  if (is.null(file)){
-    file <- bigstatsr::sub_bk(attr(x$genotypes,"bigsnp")$genotypes$backingfile,".bed")
+  if (is.null(bedfile)){
+    bedfile <- bigstatsr::sub_bk(attr(x$genotypes,"bigsnp")$genotypes$backingfile,".bed")
   }
-  if (file.exists(file)){
+  if (file_ext(bedfile)!="bed"){
+    bedfile <- paste0(bedfile,".bed")
+  }
+  if (file.exists(bedfile)){
     if (overwrite){
-      file.remove(file)
+      file.remove(bedfile)
     } else {
-      stop(file," already exists; remove if first or set 'overwrite' = TRUE")
+      stop(bedfile," already exists; remove if first or set 'overwrite' = TRUE")
     }
   }
 
   bed_path <- bigsnpr::snp_writeBed(attr(x$genotypes,"bigsnp"),
-                        bedfile = file,
+                        bedfile = bedfile,
                         ind.row = vctrs::vec_data(x$genotypes),
                         ind.col = show_loci(x)$big_index)
   # the bim and fam file only contain the original information in the bigSNP object
