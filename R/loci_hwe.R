@@ -42,7 +42,8 @@ loci_hwe.vctrs_bigSNP <- function(.x, ...) {
     # col means for submatrix (all rows, only some columns)
     colHWE_sub <- function(X, ind, rows_to_keep) {
       #apply(X[rows_to_keep, ind], 2, HWExact_geno_vec)
-      apply(X[rows_to_keep, ind], 2, HWExact_geno_vec)
+      geno_counts <- bigstatsr::big_counts(X,ind.row = rows_to_keep, ind.col = ind)
+      apply(geno_counts,2,HWExact_geno_col)
     }
     hwe_p <- bigstatsr::big_apply(geno_fbm, a.FUN = colHWE_sub,
                                  rows_to_keep = rows_to_keep,
@@ -60,15 +61,6 @@ loci_hwe.grouped_df <- function(.x, ...) {
   # TODO this is seriously inefficient, we need to cast it into a big_apply problem
   # of maybe it isn't that bad...
   group_map(.x, .f=~loci_hwe(.x))
-}
-
-HWExact_geno_vec <- function(x){
-  # use C++ unexported function from HardyWeinberg
-  # it would be even better to do the counting in C++
-  HardyWeinberg:::SNPHWE2(sum(x==1, na.rm = TRUE),
-                          sum(x==0, na.rm = TRUE),
-                            sum(x==2, na.rm = TRUE),
-                           midp=TRUE)
 }
 
 HWExact_geno_col <- function(x){
