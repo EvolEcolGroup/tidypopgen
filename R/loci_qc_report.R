@@ -15,3 +15,46 @@ loci_qc_report <- function (.x, ...){
  qc_report
 }
 
+
+autoplot.loci_qc_report <- function(.x, ...){
+
+  qc_report <- .x
+
+  #Missingness (according to MAF thresholds)
+  qc_highmaf <- subset(qc_report, qc_report$maf > 0.05)
+  qc_lowmaf <- subset(qc_report, qc_report$maf <= 0.05)
+
+  p_highMAF <- ggplot(qc_highmaf,aes(x=missingness))+geom_histogram(position = "dodge",binwidth = 0.005,fill="#66C2A5") + labs(x="Proportion of missing data",y="Number of SNPs",title = "SNPs with MAF > 0.05")+
+    geom_vline(xintercept=0.01, lty=2, col="red")+
+    scale_color_brewer(palette = "Dark2")
+
+  p_lowMAF <- ggplot(qc_lowmaf,aes(x=missingness))+geom_histogram(position = "dodge",binwidth=0.005,fill="#66C2A5") + labs(x="Proportion of missing data",y="Number of SNPs", title = "SNPs with MAF < 0.05") +
+    geom_vline(xintercept=0.01, lty=2, col="red")+
+    scale_color_brewer(palette = "Dark2")
+
+  mafmiss <- cowplot::plot_grid(p_lowMAF, p_highMAF)
+
+
+  #Minor allele frequency distribution
+  maf <- ggplot(qc_report,aes(x=maf))+geom_histogram(binwidth= 0.01,fill="#66C2A5")+ labs(x="Minor allele frequency",y="Number of SNPs", title = "Minor allele frequency distribution")+ geom_vline(xintercept = 0.05, lty=2, col="red")
+
+  #Hardy weinberg exact test p-val distribution
+  qc_report$hwe_p_log <- -log10(qc_report$hwe_p)
+  qc_lowhwe <- subset(qc_report,qc_report$hwe_p < 0.01)
+
+  hwe_all <- ggplot(qc_report,aes(x=hwe_p_log))+geom_histogram(binwidth = 0.5,fill="#66C2A5")+ labs(x=expression("-log"[10]*" of HWE exact p-value"),y="Number of SNPs", title = "HWE exact")+ geom_vline(xintercept= 5, lty=2, col="red")
+  hwe_low <- ggplot(qc_lowhwe,aes(x=hwe_p_log))+geom_histogram(binwidth = 0.5,fill="#66C2A5")+ labs(x=expression("-log"[10]* " of HWE exact p-value"),y="Number of SNPs", title = "HWE exact p-val <0.01")+ geom_vline(xintercept= 5, lty=2, col="red")
+
+  hwes <- cowplot::plot_grid(hwe_all,hwe_low)
+
+  plots_markerQC <- list(mafmiss, maf, hwes)
+  subplotLabels <- LETTERS[1:length(plots_markerQC)]
+
+  final_plot <- cowplot::plot_grid(plotlist=plots_markerQC,
+                                   nrow=length(plots_markerQC),
+                                   labels=subplotLabels,
+                                   rel_heights=c(rep(1,
+                                                     length(plots_markerQC)),
+                                                 1.5))
+  return(final_plot)
+}
