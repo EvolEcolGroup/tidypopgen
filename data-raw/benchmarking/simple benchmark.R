@@ -5,7 +5,7 @@ gt_save(hgdp_gt)
 
 hdgp_sub <- hgdp_gt %>% select_loci(1:5000)
 tic()
-foo <- hdgp_sub %>% loci_hwe_old()
+foo <- hgdp_gt %>% loci_hwe
 toc()
 
 tic()
