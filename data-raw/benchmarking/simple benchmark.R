@@ -4,5 +4,5 @@ missing_gt <- gen_tibble(bed_file,  backingfile = tempfile("missing_"))
 
 
 tic()
-missing_gt %>% loci_missingness()
+missing_gt %>% loci_hwe()
 toc()
