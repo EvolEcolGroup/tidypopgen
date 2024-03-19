@@ -37,15 +37,17 @@ loci_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep)>1){
-    # col means for submatrix (all rows, only some columns)
-    colMeans_sub <- function(X, ind, rows_to_keep) {
-      count_na <- function(x){sum(is.na(x))}
-      apply(X[rows_to_keep, ind], 2, count_na)
-    }
-    n_na <- bigstatsr::big_apply(geno_fbm, a.FUN = colMeans_sub,
-                                 rows_to_keep = rows_to_keep,
-                                 ind=attr(.x,"loci")$big_index,
-                                 a.combine = 'c')
+    # # col means for submatrix (all rows, only some columns)
+    # colMeans_sub <- function(X, ind, rows_to_keep) {
+    #   count_na <- function(x){sum(is.na(x))}
+    #   apply(X[rows_to_keep, ind], 2, count_na)
+    # }
+    # n_na <- bigstatsr::big_apply(geno_fbm, a.FUN = colMeans_sub,
+    #                              rows_to_keep = rows_to_keep,
+    #                              ind=attr(.x,"loci")$big_index,
+    #                              a.combine = 'c')
+    n_na <- bigstatsr::big_counts(geno_fbm, ind.row = rows_to_keep,
+                          ind.col = attr(.x,"loci")$big_index)[4,]
     if (!as_counts){
       n_na <- n_na/length(rows_to_keep)
     }
