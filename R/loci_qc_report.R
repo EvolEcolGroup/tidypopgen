@@ -26,7 +26,7 @@ autoplot.loci_qc_report <- function(.x, type = c("overview","all"), ...) {
   } else if (type == "all") {
     final_plot <- autoplot_l_qc_all(.x)
   } else {
-    stop("Invalid type argument")
+    stop("Invalid type argument. Please choose from 'overview' or 'all'")
   }
 
   return(final_plot)
