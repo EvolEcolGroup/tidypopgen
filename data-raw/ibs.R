@@ -108,12 +108,12 @@ my_counts <- bigstatsr::big_apply(geno, a.FUN = ibs_counts, a.combine = "plus")
 all.equal(my_counts/(2*p),IBS)
 
 
-snp_ibs <- function(X,
+snp_ibs_R <- function(X,
                     row.ind = bigstatsr::rows_along(X),
                     col.ind = bigstatsr::cols_along(X),
-                    as.counts = FALSE,
+                    as.counts = TRUE,
                     block.size = block_size(nrow(X), ncores)) {
-  # TODO check that the dataset is imputed!!!!
+  # TODO check that the dataset has no NAs!!!!
 
   # IBS (as counts) for a matrix slice
   # TODO this is prime material for converting with RccpArmadillo
@@ -150,13 +150,13 @@ geno2 <- geno$copy()
 
 # the codes
 # create code for X==0
-code_0 <- rep(NA_real_, 256)
+code_0 <- rep(0, 256)
 code_0[1:3] <- c(1,0,0)
 # create code for X==1
-code_1 <- rep(NA_real_, 256)
+code_1 <- rep(0, 256)
 code_1[1:3] <- c(0,1,0)
 # create code for X==2
-code_2 <- rep(NA_real_, 256)
+code_2 <- rep(0, 256)
 code_2[1:3] <- c(0,0,1)
 
 geno <- add_code256(geno, code_1)
