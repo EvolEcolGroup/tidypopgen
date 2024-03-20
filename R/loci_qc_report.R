@@ -8,7 +8,7 @@
 #' @returns a tibble with 3 elements: maf, missingness and hwe_p
 #' @export
 loci_qc_report <- function (.x, ...){
-  qc_report <- .x %>% reframe(maf=loci_freq(.data$genotypes),
+  qc_report <- .x %>% reframe(snp_id = show_loci_names(.x),maf=loci_freq(.data$genotypes),
                               missingness = loci_missingness(.data$genotypes),
                     hwe_p = loci_hwe(.data$genotypes, ...))
  class(qc_report) <- c("loci_qc_report",class(qc_report))
@@ -16,7 +16,27 @@ loci_qc_report <- function (.x, ...){
 }
 
 
-autoplot.loci_qc_report <- function(.x, ...){
+#' @export
+autoplot.loci_qc_report <- function(.x, type = c("overview","all"), ...) {
+  type <- match.arg(type)
+
+
+  if (type == "overview") {
+    final_plot <- autoplot_l_qc_overview(.x)
+  } else if (type == "all") {
+    final_plot <- autoplot_l_qc_all(.x)
+  } else {
+    stop("Invalid type argument")
+  }
+
+  return(final_plot)
+}
+
+
+
+
+
+autoplot_l_qc_all <- function(.x,...){
 
   qc_report <- .x
 
@@ -50,11 +70,35 @@ autoplot.loci_qc_report <- function(.x, ...){
   plots_markerQC <- list(mafmiss, maf, hwes)
   subplotLabels <- LETTERS[1:length(plots_markerQC)]
 
-  final_plot <- cowplot::plot_grid(plotlist=plots_markerQC,
+  final_plot_all <- cowplot::plot_grid(plotlist=plots_markerQC,
                                    nrow=length(plots_markerQC),
                                    labels=subplotLabels,
                                    rel_heights=c(rep(1,
                                                      length(plots_markerQC)),
                                                  1.5))
-  return(final_plot)
+  return(final_plot_all)
+}
+
+
+autoplot_l_qc_overview <- function(.x,...){
+
+
+  qc_report <- .x
+
+  qc_lowmaf <- subset(qc_report, qc_report$maf <= 0.05)
+  qc_lowhwe <- subset(qc_report,qc_report$hwe_p < 0.01)
+
+
+  maf_fail <- c(qc_lowmaf$snp_id)
+  hwe_fail <- c(qc_lowhwe$snp_id)
+
+  qc_highmissing <- subset(qc_report,qc_report$missingness>=0.05)
+  missing_fail <- c(qc_highmissing$snp_id)
+
+  list <- list(MAF = maf_fail, HWE = hwe_fail, Missing = missing_fail)
+
+  final_plot_overview <- UpSetR::upset(UpSetR::fromList(list),order.by = "freq",main.bar.color="#66C2A5", matrix.color="#66C2A5",
+                                       sets.bar.color="#FC8D62")
+
+  return(final_plot_overview)
 }
