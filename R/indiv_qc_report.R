@@ -49,5 +49,4 @@ autoplot_indiv_qc_report <- function(.x, miss_threshold = miss_threshold,...){
 
   final_plot <- ggplot(.x,aes(x=missingness,y=het_obs))+geom_point()+labs(x="Missingness",y="Observed Heterozygosity",title="Heterozygosity and missingness by individual")+ geom_vline(xintercept= miss_threshold, lty=2, col="red")+geom_hline(yintercept = c(upper,lower,mid_upper,mid_lower),lty=2,col="blue")
 
-  return(final_plot)
 }
