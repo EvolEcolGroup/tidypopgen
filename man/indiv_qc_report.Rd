@@ -4,13 +4,10 @@
 \alias{indiv_qc_report}
 \title{Create a Quality Control report for individuals}
 \usage{
-indiv_qc_report(.x, as_counts = as_counts, ...)
+indiv_qc_report(.x, ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object.}
-
-\item{as_counts}{booelean defining whether the count of NAs (rather than the rate)
-should be returned in indiv_missingness. It defaults to FALSE (i.e. rates are returned by default).}
 }
 \value{
 a tibble with 2 elements: het_obs and missingness

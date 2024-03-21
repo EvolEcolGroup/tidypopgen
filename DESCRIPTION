@@ -21,14 +21,14 @@ Imports:
     bigstatsr,
     generics,
     genio,
+    ggplot2,
     magrittr,
     rlang,
     stringr,
     tidyselect,
     tidyr,
     vctrs
-Suggests: 
-    ggplot2,
+Suggests:
     knitr,
     rmarkdown,
     readr,

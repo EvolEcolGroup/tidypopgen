@@ -21,7 +21,7 @@ indiv_missingness <- function(.x, as_counts = FALSE, ...) {
 indiv_missingness.tbl_df <- function(.x, as_counts = FALSE, ...){
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  indiv_missingness(.x$genotypes, ...)
+  indiv_missingness(.x$genotypes, as_counts = as_counts, ...)
 }
 
 #' @export
@@ -53,5 +53,6 @@ indiv_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
 #' @export
 #' @rdname indiv_missingness
 indiv_missingness.grouped_df <- function(.x, as_counts = FALSE, ...){
-  .x %>% mutate(indiv_missingness = indiv_missingness(.data$genotypes)) %>% summarise(het_obs = mean(indiv_missingness))
+  .x %>% mutate(indiv_missingness = indiv_missingness(.data$genotypes, as_counts = as_counts)) %>%
+    summarise(het_obs = mean(indiv_missingness))
 }
