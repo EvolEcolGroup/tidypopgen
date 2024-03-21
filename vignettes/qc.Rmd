@@ -1,0 +1,123 @@
+---
+title: "QC"
+output: rmarkdown::html_vignette
+date: "2024-03-21"
+vignette: >
+  %\VignetteIndexEntry{QC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Quality control for SNP datasets
+
+Genomic data are typically quality controlled by filtering out loci and individual samples that do not meet specified thresholds.
+
+tidypopgen has two functions to examine the quality of data in this way: 'loci_qc_report' and 'indiv_qc_report'
+
+# Read data into gen_tibble format
+
+```{r}
+bed_path <- "C:/Users/eviec/OneDrive - Anglia Ruskin University/gitdata/data/raw/data_input/GSE76645_INDONESIA_SUMBA_TIMOR.bed"
+
+#bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = sub_bed(bed_path))
+bigsnp_path <- "C:/Users/eviec/OneDrive - Anglia Ruskin University/gitdata/data/raw/data_input/GSE76645_INDONESIA_SUMBA_TIMOR.rds"
+
+data <- gen_tibble(bigsnp_path)
+
+```
+
+# Quality control for loci
+
+```{r}
+loci_report <- loci_qc_report(data)
+summary(loci_report)
+```
+The output of 'loci_qc_report' supplies minor allele frequency, rate of missingness, and a Hardy-Weinberg exact test p-value for each SNP.
+
+These data can be visualised in autoplot through specified methods:
+
+```{r}
+autoplot(loci_report, type = "overview")
+```
+
+The overview plot shows how many SNPs in the dataset are affected by high missingness, low minor allele frequency, or Hardy-Weinberg disequilibrium. 
+
+The thresholds for each statistic can be adjusted using the parameters provided in autoplot. For example:
+
+```{r}
+autoplot(loci_report, type = "overview", miss_threshold = 0.03, maf_threshold = 0.02, p_val = 0.01)
+```
+
+To examine each QC measure in further detail, we can plot a different summary panel
+
+```{r}
+autoplot(loci_report, type = "all", miss_threshold = 0.03, maf_threshold = 0.02, p_val = 0.01)
+```
+
+We can then begin to consider how to quality control this raw dataset. Let's start by filtering SNPs according to their minor allele frequency. We can visualise the MAF distribution using:
+
+```{r}
+autoplot(loci_report, type = "maf")
+```
+Here we can see there are many monomorphic SNPs in the dataset. Let's filter out loci with a minor allele frequency lower than 2%, by using 'select_loci_if'. Here, we select all SNPs with a MAF greater than 2%. This operation is equivalent to plink --maf 0.02
+
+```{r}
+data <- data %>% select_loci_if(loci_freq(genotypes)>0.02)
+nrow(show_loci(data))
+```
+Our dataset has now reduced from x to y SNPs. Following this, we can remove SNPs with a high rate of missingness. Lets say we want to remove SNPs that are missing in more than 5% of individuals, equivalent to using plink --geno 0.05
+
+```{r}
+autoplot(loci_report, type = "missing",miss_threshold = 0.05)
+```
+We can see here that most SNPs have low missingness, under our 5% threshold, but some do have missingness up to around 10%. To remove these SNPs, we can again use 'select_loci_if'.
+
+```{r}
+data <- data %>% select_loci_if(loci_missingness(genotypes)<0.05)
+nrow(show_loci(data))
+```
+Finally, if we may want to remove SNPs that show significant deviation from Hardy-Weinberg equilibrium, if our study design is not interested in these. To visualise SNPs with significant p-values in the Hardy-Weinberg exact test, we can again call autoplot:
+
+```{r}
+autoplot(loci_report,type = "significant hwe", p_val = 0.01)
+```
+Few SNPs in our data have significat HWE p-values, however we may want to cut out the most extreme cases, as these could indicate genotyping errors. Calculating HWE for the whole dataset can be time consuming.
+
+```{r}
+#data <- data %>% select_loci_if(loci_hwe(genotypes)<0.01)
+#nrow(show_loci(data))
+
+```
+
+Once we have quality controlled the SNPs in our data, we can turn to QC of individuals. 
+
+#Quality control for individuals
+
+```{r}
+individual_report <- indiv_qc_report(data)
+summary(individual_report)
+```
+
+The output of 'loci_qc_report' supplies observed heterozygosity per individual, and rate of missingness per individual. 
+
+These data can also be visualised using autoplot:
+
+```{r}
+autoplot(individual_report)
+```
+Here we can see that most individuals have low missingess. If we wanted to filter individuals to remove those with more than 3% of their genotypes missing, we can use 'filter'.
+
+```{r}
+data <- data %>% filter(indiv_missingness(genotypes)<0.03)
+nrow(data)
+```
+
+```{r}
+
+```
+
+
