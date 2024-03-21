@@ -8,6 +8,8 @@ indiv_qc_report(.x, ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object.}
+
+\item{...}{further arguments to pass}
 }
 \value{
 a tibble with 2 elements: het_obs and missingness

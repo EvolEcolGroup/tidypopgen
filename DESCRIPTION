@@ -23,10 +23,13 @@ Imports:
     genio,
     ggplot2,
     magrittr,
+    patchwork,
     rlang,
+    stats,
     stringr,
     tidyselect,
     tidyr,
+    UpSetR,
     vctrs
 Suggests:
     knitr,
