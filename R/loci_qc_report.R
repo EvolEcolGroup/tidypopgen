@@ -78,11 +78,11 @@ autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold, miss_thresh
   qc_highmaf <- subset(qc_report, qc_report$maf > maf_threshold)
   qc_lowmaf <- subset(qc_report, qc_report$maf <= maf_threshold)
 
-  p_highMAF <- ggplot2::ggplot(qc_highmaf,ggplot2::aes(x=.data$missingness))+ggplot2::geom_histogram(position = "dodge",binwidth = 0.005,fill="#66C2A5") + ggplot2::labs(x="Proportion of missing data",y="Number of SNPs",title = "SNPs with MAF > threshold")+
+  p_highMAF <- ggplot2::ggplot(qc_highmaf,ggplot2::aes(x=.data$missingness))+ggplot2::geom_histogram(position = "dodge",binwidth = 0.005,fill="#66C2A5") + ggplot2::labs(x="Proportion of missing data",y="Number of SNPs",title = paste("SNPs with MAF > ", maf_threshold))+
     ggplot2::geom_vline(xintercept=miss_threshold, lty=2, col="red")+
     ggplot2::scale_color_brewer(palette = "Dark2")
 
-  p_lowMAF <- ggplot2::ggplot(qc_lowmaf,ggplot2::aes(x=.data$missingness))+ggplot2::geom_histogram(position = "dodge",binwidth=0.005,fill="#66C2A5") + ggplot2::labs(x="Proportion of missing data",y="Number of SNPs", title = "SNPs with MAF < threshold") +
+  p_lowMAF <- ggplot2::ggplot(qc_lowmaf,ggplot2::aes(x=.data$missingness))+ggplot2::geom_histogram(position = "dodge",binwidth=0.005,fill="#66C2A5") + ggplot2::labs(x="Proportion of missing data",y="Number of SNPs", title = paste("SNPs with MAF < ", maf_threshold)) +
     ggplot2::geom_vline(xintercept=miss_threshold, lty=2, col="red")+
     ggplot2::scale_color_brewer(palette = "Dark2")
 
@@ -96,8 +96,8 @@ autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold, miss_thresh
   qc_report$hwe_p_log <- -log10(qc_report$hwe_p)
   qc_lowhwe <- subset(qc_report,qc_report$hwe_p < p_val)
 
-  hwe_all <- ggplot2::ggplot(qc_report,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]*" of HWE exact p-value"),y="Number of SNPs", title = "HWE exact")+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
-  hwe_low <- ggplot2::ggplot(qc_lowhwe,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]* " of HWE exact p-value"),y="Number of SNPs", title = "HWE exact significant p-val")+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
+  hwe_all <- ggplot2::ggplot(qc_report,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]*" of HWE exact p-value"),y="Number of SNPs", title = "Hardy-Weinberg exact test")+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
+  hwe_low <- ggplot2::ggplot(qc_lowhwe,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]* " of HWE exact p-value"),y="Number of SNPs", title = paste("HWE exact p-value <", p_val))+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
 
   hwes <- patchwork::wrap_plots(hwe_all,hwe_low)
 
@@ -142,7 +142,7 @@ autoplot_l_qc_hwe <- function(object,logp,...){
   #Hardy weinberg exact test p-val distribution
   qc_report$hwe_p_log <- -log10(qc_report$hwe_p)
 
-  hwe_all <- ggplot2::ggplot(qc_report,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]*" of HWE exact p-value"),y="Number of SNPs", title = "HWE exact")+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
+  hwe_all <- ggplot2::ggplot(qc_report,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]*" of HWE exact p-value"),y="Number of SNPs", title = "Hardy-Weinberg exact test")+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
 
 }
 
@@ -154,7 +154,7 @@ autoplot_l_qc_sig_hwe <- function(object,p_val=p_val,logp,...){
   qc_report$hwe_p_log <- -log10(qc_report$hwe_p)
   qc_lowhwe <- subset(qc_report,qc_report$hwe_p < p_val)
 
-  hwe_low <- ggplot2::ggplot(qc_lowhwe,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]* " of HWE exact p-value"),y="Number of SNPs", title = "HWE exact significant")+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
+  hwe_low <- ggplot2::ggplot(qc_lowhwe,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]* " of HWE exact p-value"),y="Number of SNPs", title = paste("HWE exact p-value <", p_val))+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
 }
 
 autoplot_l_qc_missing <- function(object, miss_threshold = miss_threshold, ...){
@@ -174,7 +174,7 @@ autoplot_l_qc_missing_low_maf <- function(object,maf_threshold=maf_threshold,mis
 
   qc_lowmaf <- subset(qc_report, qc_report$maf <= maf_threshold)
 
-  p_highMAF <- ggplot2::ggplot(qc_lowmaf,ggplot2::aes(x=.data$missingness))+ggplot2::geom_histogram(position = "dodge",binwidth=0.005,fill="#66C2A5") + ggplot2::labs(x="Proportion of missing data",y="Number of SNPs", title = "SNPs with MAF < threshold") +
+  p_highMAF <- ggplot2::ggplot(qc_lowmaf,ggplot2::aes(x=.data$missingness))+ggplot2::geom_histogram(position = "dodge",binwidth=0.005,fill="#66C2A5") + ggplot2::labs(x="Proportion of missing data",y="Number of SNPs", title = paste("SNPs with MAF <",maf_threshold)) +
     ggplot2::geom_vline(xintercept=miss_threshold, lty=2, col="red")+
     ggplot2::scale_color_brewer(palette = "Dark2")
 }
@@ -185,7 +185,7 @@ autoplot_l_qc_missing_high_maf <- function(object,maf_threshold=maf_threshold,mi
 
   qc_highmaf <- subset(qc_report, qc_report$maf > maf_threshold)
 
-  p_highMAF <- ggplot2::ggplot(qc_highmaf,ggplot2::aes(x=.data$missingness))+ggplot2::geom_histogram(position = "dodge",binwidth = 0.005,fill="#66C2A5") + ggplot2::labs(x="Proportion of missing data",y="Number of SNPs",title = "SNPs with MAF > threshold")+
+  p_highMAF <- ggplot2::ggplot(qc_highmaf,ggplot2::aes(x=.data$missingness))+ggplot2::geom_histogram(position = "dodge",binwidth = 0.005,fill="#66C2A5") + ggplot2::labs(x="Proportion of missing data",y="Number of SNPs",title = paste("SNPs with MAF >",maf_threshold))+
     ggplot2::geom_vline(xintercept=miss_threshold, lty=2, col="red")+
     ggplot2::scale_color_brewer(palette = "Dark2")
 }
