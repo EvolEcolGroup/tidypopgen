@@ -9,9 +9,9 @@
 \usage{
 loci_hwe(.x, ...)
 
-\method{loci_hwe}{tbl_df}(.x, ...)
+\method{loci_hwe}{tbl_df}(.x, mid_p = TRUE, ...)
 
-\method{loci_hwe}{vctrs_bigSNP}(.x, ...)
+\method{loci_hwe}{vctrs_bigSNP}(.x, mid_p = TRUE, ...)
 
 \method{loci_hwe}{grouped_df}(.x, ...)
 }
@@ -21,17 +21,23 @@ a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
 \item{...}{further arguments to pass to \code{\link[HardyWeinberg:HWExact]{HardyWeinberg::HWExact()}}.}
+
+\item{mid_p}{boolean on whether the mid-p value should be computed.
+Default is TRUE, as in PLINK.}
 }
 \value{
 a vector of probabilities from HWE exact test, one per locus
 }
 \description{
-Return the p-value from an exact test of HWE. It uses direclty the C++ code
-from PLINK as provided in \code{\link[HardyWeinberg:HWExactStats]{HardyWeinberg::HWExactStats()}}).
+Return the p-value from an exact test of HWE.
 }
 \details{
+This function uses the original C++ algorithm
+from PLINK 1.90.
+
 NOTE There are no tests for this function yet! Unit tests are needed.
 }
 \author{
-based on code originally written by Jan Graffleman, optimised by Andrea Manica for speed
+the C++ algorithm was written by Christopher Chang for PLINK 1.90, based on
+original code by Jan Wigginton (the code was released under GPL3).
 }

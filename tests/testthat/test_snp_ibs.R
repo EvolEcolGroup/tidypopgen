@@ -20,14 +20,14 @@ test_gt <- gen_tibble(bed_path, quiet = TRUE)
 # this also tests show_genotypes and show_loci
 test_that("snp_ibs_r and gt_ibs compute ibs-robust correctly",{
   test_fbm <- tidypopgen:::gt_get_bigsnp(test_gt)$genotypes
-  test_ibs <- snp_ibs_r(test_fbm)
+  test_ibs <- snp_ibs(test_fbm, as.counts=TRUE)
   # compare indiv 1 vs 2
-  in_common<-sum(c(1,2,2,1,1,2)/12)
-  expect_identical(in_common, test_ibs[1,2])
+  in_common<-sum(c(1,2,2,1,1,2))
+  expect_identical(in_common, test_ibs$IBS_counts[1,2])
 
   # now estimate it with gen_tibble
-  test_ibs_gt <- gt_ibs(test_gt)
-  expect_true(all.equal(test_ibs, test_ibs_gt,
+  test_ibs_gt <- gt_ibs(test_gt, as_counts = TRUE)
+  expect_true(all.equal(test_ibs$IBS_counts[], test_ibs_gt$IBS_counts[],
                         check.attributes=FALSE))
 })
 

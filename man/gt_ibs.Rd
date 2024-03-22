@@ -7,7 +7,7 @@
 gt_ibs(
   x,
   as_counts = FALSE,
-  block_size = bigstatsr::block_size(length(show_loci_names(x)))
+  block_size = bigstatsr::block_size(length(show_loci_names(x))) * 2
 )
 }
 \arguments{
@@ -19,14 +19,14 @@ should be returned (FALSE by default).}
 \item{block_size}{maximum number of loci read at once. More loci should improve speed,
 but will tax memory.}
 }
+\value{
+a list of two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles (i.e. 2\emph{n loci),
+and one of valid alleles (i.e. 2}n_loci - 2*missing_loci)
+}
 \description{
-This function computes the IBS matrix. Missing genotypes will have to be
-imputed before using this function. Computing the IBS of 1k individuals for
-a million markers will take over 10 mins, so the function will not scale to
-huge datasets. But for smaller dataset, it allows estimating the IBS directly
-in R.
+This function computes the IBS matrix.
 }
 \details{
-Note that monomorphic sites are currently counted. It would be better to filter
-them beforehand.
+Note that monomorphic sites are currently counted. Should we filter
+them beforehand? What does plink do?
 }

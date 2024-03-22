@@ -17,17 +17,18 @@ Depends:
     dplyr,
     tibble
 Imports:
+    bigparallelr,
     bigsnpr,
     bigstatsr,
     generics,
     genio,
-    HardyWeinberg,
     magrittr,
     rlang,
     stringr,
     tidyselect,
     tidyr,
-    vctrs
+    vctrs,
+    Rcpp
 Suggests: 
     ggplot2,
     knitr,
@@ -37,3 +38,8 @@ Suggests:
     vcfR
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo (>= 0.9.600),
+    bigstatsr,
+    rmio
