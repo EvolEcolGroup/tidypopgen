@@ -22,15 +22,18 @@ Imports:
     bigstatsr,
     generics,
     genio,
+    ggplot2,
     magrittr,
+    patchwork,
     rlang,
+    stats,
     stringr,
     tidyselect,
     tidyr,
-    vctrs,
     Rcpp
-Suggests: 
-    ggplot2,
+    UpSetR,
+    vctrs
+Suggests:
     knitr,
     rmarkdown,
     readr,
