@@ -5,6 +5,7 @@
 #' @import dplyr
 #' @import tibble
 #' @importFrom rlang :=
+#' @importFrom ggplot2 autoplot
 ## usethis namespace: end
 NULL
 
