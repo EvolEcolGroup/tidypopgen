@@ -87,4 +87,3 @@ test_that("gen_tibble catches invalid alleles",{
 
 })
 
-
