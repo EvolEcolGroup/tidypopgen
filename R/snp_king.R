@@ -18,11 +18,11 @@
 snp_king <- function(X,
                       ind.row = bigstatsr::rows_along(X),
                       ind.col = bigstatsr::cols_along(X),
-                      block.size = bigstatsr::block_size(nrow(X))) {
+                      block.size = bigstatsr::block_size(nrow(X))*3) {
   #check_args()
 
   n <- length(ind.row)
-  # FBM matrix to count the IBS counts
+  # FBM matrix for the KING numerator
   K_numerator <- bigstatsr::FBM(n, n, init = 0)
   m <- length(ind.col)
 
@@ -51,9 +51,22 @@ snp_king <- function(X,
   # sum of how many genotypes are 1
   row_sums_1 <- bigstatsr::big_counts(X,byrow=TRUE)[2,]
 
-
-  K_denominator = matrix(rep(row_sums_1, nrow(X)), nrow = nrow(X), byrow = T) +
-    matrix(rep(row_sums_1, nrow(X)), nrow = nrow(X), byrow = F)
-  # TODO this is not clever, we could do much better!!!!
-  K_numerator[] / K_denominator
+  # divide KING num by den for a set of rows 'ind'
+  divide_king_sub <- function (K_num_sub, ind, row_sums_1){
+    X_sub <- K_num_sub[,ind]
+    n_rows <- nrow(K_num_sub)
+    # denominator of KING for these columns
+    K_den_sub <- K_den <- matrix(rep(row_sums_1[ind],nrow(K_num_sub)),nrow=nrow(K_num_sub), byrow=T)+
+      matrix(rep(row_sums_1,length(ind)),nrow=nrow(K_num_sub), byrow=F)
+    # the ratio
+    X_sub/K_den_sub
+  }
+  # This works, but could be done with a FBM in c++ for added speed
+  ibs_counts_matrix <- bigstatsr::big_apply(K_numerator,
+                                            a.FUN = divide_king_sub,
+                                            ind = seq_len(ncol(K_numerator)),
+                                            row_sums_1 = row_sums_1,
+                                            a.combine = "cbind",
+                                            # in theory block size coudl be our previouse block size * 3
+                                            block.size = bigstatsr::block_size(nrow(K_numerator)))
 }

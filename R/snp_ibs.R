@@ -58,7 +58,7 @@ snp_ibs <- function(
                          ind.col.ind)
   }
 
-  return(list(IBS_counts = K, valid_n = K2))
+  return(list(ibs = K, valid_n = K2))
 }
 
 

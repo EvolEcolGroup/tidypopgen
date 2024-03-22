@@ -23,11 +23,16 @@ test_that("snp_ibs_r and gt_ibs compute ibs-robust correctly",{
   test_ibs <- snp_ibs(test_fbm, as.counts=TRUE)
   # compare indiv 1 vs 2
   in_common<-sum(c(1,2,2,1,1,2))
-  expect_identical(in_common, test_ibs$IBS_counts[1,2])
+  expect_identical(in_common, test_ibs$ibs[1,2])
+  # check that we get the same result if we split the operation into two blocks
+  test_ibs_2blocks <- snp_ibs(test_fbm, block.size = 3)
+  expect_identical(test_ibs_2blocks$ibs[], test_ibs$ibs[])
+
+
 
   # now estimate it with gen_tibble
   test_ibs_gt <- gt_ibs(test_gt, as_counts = TRUE)
-  expect_true(all.equal(test_ibs$IBS_counts[], test_ibs_gt$IBS_counts[],
+  expect_true(all.equal(test_ibs$ibs[], test_ibs_gt$ibs[],
                         check.attributes=FALSE))
 })
 
