@@ -285,7 +285,7 @@ Certain metrics and analysis are naturally defined by a grouped tibble, such as
 distance metrics among populations. For example:
 
 ```{r}
-example_gt %>% group_by(population) %>% gt_pairwise_fst()
+example_gt %>% group_by(population) %>% pop_pairwise_fst()
 ```
 
 # Reading and exporting data

@@ -28,6 +28,9 @@
 # Pipeline with adegenet and hierfstat to test pop gen summaries:
 #https://popgen.nescent.org/DifferentiationSNP.html
 
+# additional notes on stats
+# https://www.uwyo.edu/dbmcd/popecol/maylects/fst.html
+
 
 # reading vcf in chunks
 #https://rdrr.io/bioc/genotypeeval/man/ReadVCFDataChunk.html

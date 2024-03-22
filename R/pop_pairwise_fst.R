@@ -8,7 +8,7 @@
 #' @returns a tibble with each pairwise combination as a row
 #' @export
 
-gt_pairwise_fst <- function(.x, by_locus=FALSE){
+pop_pairwise_fst <- function(.x, by_locus=FALSE){
   if (!inherits(.x,"grouped_df")){
     stop (".x should be a grouped df")
   }

@@ -158,15 +158,8 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ..., backingfile = NULL, quie
     class = "gen_tbl"
   )
 
-
-
 }
 
-
-# simple function to extract the extension of a file
-file_ext <- function(x){
-  utils::tail(unlist(strsplit(x,".",fixed = TRUE)),n=1)
-}
 
 #' create a vctrs_bigSNP
 #' @param bigsnp_obj the bigsnp object
@@ -280,5 +273,16 @@ tbl_sum.gen_tbl <- function(x, ...) {
     "A gen_tibble" = paste(nrow(show_loci(x))," loci"),
     NextMethod()
   )
+}
+
+
+##########################################
+# convenient functs
+.gt_bigsnp_cols <- function(.x){
+  show_loci(.x)$big_index
+}
+
+.gt_bigsnp_rows <- function(.x){
+  vctrs::vec_data(.x$genotypes)
 }
 

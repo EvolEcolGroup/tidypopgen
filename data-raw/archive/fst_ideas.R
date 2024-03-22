@@ -38,7 +38,7 @@ loci_het_exp <- function(.x){
   return((sums*(n-sums))/(n*(n-1)))
 }
 
-gt_pairwise_fst <- function(.x, by_locus=FALSE){
+pop_pairwise_fst <- function(.x, by_locus=FALSE){
 
   warning("this function is not properly tested yet!!!")
   # check matrix(unlist(z, use.names = FALSE), ncol = 10, byrow = TRUE)
