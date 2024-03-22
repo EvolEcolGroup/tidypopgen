@@ -49,3 +49,12 @@ test_that("create gen_tibble from dfs",{
                         test_dfs_gt %>% select(-genotypes)))
 })
 
+test_genotypes_c <- rbind(c("1","1","0","1","1","0"),
+                          c("2","1","0","0","0","0"),
+                          c("2","2","0","0","1","1"))
+
+
+test_that("check gen_tibble does not accept character matrix",{
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes_c, indiv_meta = test_indiv_meta,
+                                         loci = test_loci, quiet = TRUE),"'x' is not a matrix of integers")
+})
