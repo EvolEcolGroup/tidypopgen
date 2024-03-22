@@ -17,3 +17,7 @@ increment_ibs_counts <- function(K, K2, part_temp0, part_temp1, part_temp2, BM, 
     invisible(.Call(`_tidypopgen_increment_ibs_counts`, K, K2, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd))
 }
 
+increment_king_numerator <- function(K, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd) {
+    invisible(.Call(`_tidypopgen_increment_king_numerator`, K, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd))
+}
+

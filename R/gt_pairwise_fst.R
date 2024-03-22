@@ -35,7 +35,7 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
   # get het at each locus for each population
   het <- matrix(unlist(lapply(1:nrow(sums), het_exp_by_row, sums, n_alleles),
                        use.names = FALSE), ncol = n_loci, byrow = TRUE)
-  # get the grouping column, and create all pairwise combination of indeces
+  # get the grouping column, and create all pairwise combination of indices
   .group_levels = .x %>% group_keys()
   pairwise_combn <- t(utils::combn(nrow(.group_levels),2))
   numerator <- matrix(NA_real_, nrow = nrow(pairwise_combn), ncol = n_loci)

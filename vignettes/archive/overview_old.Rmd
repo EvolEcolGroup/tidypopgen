@@ -175,7 +175,7 @@ we have the correct loci with:
 show_loci_names(example_sub)
 ```
 
-We can also subset and reorder by passing indeces (note that we extract the loci
+We can also subset and reorder by passing indices (note that we extract the loci
 information, but in reality we have reordered and subsetted the genotypes
 for all individuals):
 ```{r}
@@ -185,7 +185,7 @@ This operation could be helpful when merging datasets that do not fully
 overlap on their loci (more on that later).
 
 The limit of `select_loci` is that it can not directly summarise the genotypes.
-We can do that separately and then feed the result as a set of indeces. For 
+We can do that separately and then feed the result as a set of indices. For 
 example, we might want to impose a minimum minor allele frequency. 
 `loci_freq()` allows us to inspect the frequencies in a `gen_tibble`: 
 ```{r}

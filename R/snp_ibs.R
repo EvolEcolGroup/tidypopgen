@@ -46,13 +46,16 @@ snp_ibs <- function(
   X_part_temp2 <- matrix(0, n, max(intervals[, "size"]))
 
   for (j in bigstatsr::rows_along(intervals)) {
-    ind <- seq2(intervals[j, ]) # this iteration indeces
-    ind.col.ind <- ind.col[ind] #subset given indeces by the iteration indeces
-    increment_ibs_counts(K, K2, X_part_temp0,
+    ind <- seq2(intervals[j, ]) # this iteration indices
+    ind.col.ind <- ind.col[ind] #subset given indices by the iteration indices
+    increment_ibs_counts(K,
+                         K2,
+                         X_part_temp0,
                          X_part_temp1,
                          X_part_temp2,
                          X,
-                                ind.row, ind.col.ind)
+                         ind.row,
+                         ind.col.ind)
   }
 
   return(list(IBS_counts = K, valid_n = K2))

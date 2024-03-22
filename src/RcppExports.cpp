@@ -70,12 +70,29 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// increment_king_numerator
+void increment_king_numerator(Environment K, arma::mat& part_temp0, arma::mat& part_temp1, arma::mat& part_temp2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
+RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP KSEXP, SEXP part_temp0SEXP, SEXP part_temp1SEXP, SEXP part_temp2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type K(KSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type part_temp0(part_temp0SEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type part_temp1(part_temp1SEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type part_temp2(part_temp2SEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    increment_king_numerator(K, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_SNPHWE2", (DL_FUNC) &_tidypopgen_SNPHWE2, 4},
     {"_tidypopgen_SNPHWE_t", (DL_FUNC) &_tidypopgen_SNPHWE_t, 4},
     {"_tidypopgen_SNPHWE_midp_t", (DL_FUNC) &_tidypopgen_SNPHWE_midp_t, 4},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
+    {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 7},
     {NULL, NULL, 0}
 };
 

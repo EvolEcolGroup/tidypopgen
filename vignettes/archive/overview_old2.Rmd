@@ -187,7 +187,7 @@ Let us check that this has indeed impacted the individual heterozygosity
 example_sub %>% indiv_het_obs()
 ```
 
-We can also subset and reorder by passing indeces (note that we extract the loci
+We can also subset and reorder by passing indices (note that we extract the loci
 information, but in reality we have reordered and subsetted the genotypes
 for all individuals):
 ```{r}
@@ -202,7 +202,7 @@ example_gt %>% select_loci (c(2,6,1)) %>% show_genotypes()
 
 
 The limit of `select_loci` is that it can not directly summarise the genotypes.
-We can do that separately and then feed the result as a set of indeces. For 
+We can do that separately and then feed the result as a set of indices. For 
 example, we might want to impose a minimum minor allele frequency. 
 `loci_freq()` allows us to inspect the frequencies in a `gen_tibble`: 
 ```{r}
