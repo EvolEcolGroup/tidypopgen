@@ -18,16 +18,23 @@ test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
 
 # this also tests show_genotypes and show_loci
-test_that("snp_ibs_r and gt_ibs compute ibs-robust correctly",{
+test_that("snp_king_r and gt_king compute king-robust correctly",{
   test_fbm <- tidypopgen:::gt_get_bigsnp(test_gt)$genotypes
-  test_ibs <- snp_ibs_r(test_fbm)
-  # compare indiv 1 vs 2
-  in_common<-sum(c(1,2,2,1,1,2)/12)
-  expect_identical(in_common, test_ibs[1,2])
+  test_king <- snp_king(test_fbm)
+  # king by hand
+  # code from https://www.mv.helsinki.fi/home/mjxpirin/GWAS_course/material/GWAS5.html
+  X <- test_genotypes
+  denominator = matrix(rep(rowSums(X==1), nrow(X)), nrow = nrow(X), byrow = T) +
+    matrix(rep(rowSums(X==1), nrow(X)), nrow = nrow(X), byrow = F)
+  king.r = 2*((X==1) %*% t(X==1) - 2*((X==0) %*% t(X==2) + (X==2) %*% t(X==0)) ) / denominator
+  expect_identical(king.r, test_king)
+  # check that we get the same result if we split the operation into two blocks
+  test_king_2blocks <- snp_king(test_fbm, block.size = 3)
+  expect_identical(test_king_2blocks, test_king)
 
   # now estimate it with gen_tibble
-  test_ibs_gt <- gt_ibs(test_gt)
-  expect_true(all.equal(test_ibs, test_ibs_gt,
+  test_king_gt <- gt_king(test_gt)
+  expect_true(all.equal(test_king, test_king_gt,
                         check.attributes=FALSE))
 })
 

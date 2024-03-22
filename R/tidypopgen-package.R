@@ -4,7 +4,9 @@
 ## usethis namespace: start
 #' @import dplyr
 #' @import tibble
+#' @importFrom Rcpp sourceCpp
 #' @importFrom rlang :=
+#' @useDynLib tidypopgen, .registration = TRUE
 #' @importFrom ggplot2 autoplot
 ## usethis namespace: end
 NULL

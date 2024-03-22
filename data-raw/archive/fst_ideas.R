@@ -61,7 +61,7 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
   het <- matrix(unlist(lapply(1:nrow(sums), het_exp_by_row, sums, n),
                      use.names = FALSE), ncol = n_loci, byrow = TRUE)
 
-  # get the grouping column, and creat all pairwise combination of indeces
+  # get the grouping column, and creat all pairwise combination of indices
   .group_levels = .x %>% group_keys()
   pairwise_combn <- t(combn(nrow(.group_levels),2))
   numerator <- matrix(NA_real_, nrow = nrow(pairwise_combn), ncol = n_loci)

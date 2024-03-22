@@ -32,7 +32,7 @@
 # reading vcf in chunks
 #https://rdrr.io/bioc/genotypeeval/man/ReadVCFDataChunk.html
 
-
+# https://github.com/Zilong-Li/vcfpp
 
 ##################################
 #big SVD
