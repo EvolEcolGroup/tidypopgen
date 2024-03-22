@@ -22,6 +22,7 @@ Imports:
     generics,
     genio,
     ggplot2,
+    HardyWeinberg,
     magrittr,
     patchwork,
     rlang,

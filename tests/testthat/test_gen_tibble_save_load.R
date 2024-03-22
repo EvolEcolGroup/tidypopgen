@@ -33,6 +33,26 @@ test_that("save and load gt",{
   # check that we preserved the loci
   expect_identical( show_loci(new_test_gt$genotypes) %>% select(-big_index), as_tibble(test_loci))
 
+  # now remove the tibble
+  rm(new_test_gt)
+  # now move the backing files
+  new_dir <- file.path(dirname(all_file_names[1]),"test")
+  dir.create(new_dir)
+  expect_true(file.copy(from=all_file_names[2],
+                        to=file.path(new_dir, basename(all_file_names[2]))))
+  expect_true(file.copy(from=all_file_names[3],
+                        to=file.path(new_dir, basename(all_file_names[3]))))
+  expect_true(file.remove(all_file_names[2]))
+  expect_true(file.remove(all_file_names[3]))
+  # loading should fail
+  expect_error(new_test_gt2 <- gt_load(all_file_names[1]))
+  # this should now work:
+  new_test_gt2 <- gt_load(all_file_names[1], reattach_to = file.path(new_dir, basename(all_file_names[2])))
+  # verify that we have all the info
+  # check that we preserved the genotypes
+  expect_true(all(show_genotypes(new_test_gt2$genotypes)==test_genotypes))
+  # check that we preserved the loci
+  expect_identical( show_loci(new_test_gt2$genotypes) %>% select(-big_index), as_tibble(test_loci))
 })
 
 

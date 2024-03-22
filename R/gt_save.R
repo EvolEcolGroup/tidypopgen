@@ -27,11 +27,11 @@ gt_save <-function(x, file_name = NULL) {
 }
 
 
-sub_gt <- function (path, replacement = "gt", stop_if_not_ext = TRUE)
+sub_gt <- function (path, replacement = "", stop_if_not_ext = TRUE)
 {
   pattern <- "\\.gt$"
   if (!grepl(pattern, path))
-    stop("Path '%s' must have 'bed' extension.", path)
+    stop("Path '%s' must have 'gt' extension.", path)
   if (stop_if_not_ext && (nchar(replacement) > 0) && (substr(replacement,
                                                              1, 1) != "."))
     stop("Replacement must be an extension starting with '.' if provided.")
@@ -45,8 +45,6 @@ sub_gt <- function (path, replacement = "gt", stop_if_not_ext = TRUE)
 #' @param x a [`gen_tibble`]
 #' @returns a character vector with the names and paths of the two files
 #' @export
-
-
 gt_get_file_names <- function(x){
   return(c(attr(x$genotypes,"bigsnp")$genotypes$rds,
     attr(x$genotypes,"bigsnp")$genotypes$backingfile))
