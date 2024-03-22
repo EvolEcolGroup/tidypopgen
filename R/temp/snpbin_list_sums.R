@@ -32,7 +32,7 @@
 #' in the `genotypes` column of [gen_tibble].
 #' @author Thibaut Jombart for the original [adegenet::glSum], modified
 #' by Andrea Manica for 'tidypopgen'
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' @param alleles_as_units a logical indicating whether alleles are considered
 #' as units (i.e., a diploid genotype equals two samples, a triploid, three,

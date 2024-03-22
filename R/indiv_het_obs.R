@@ -3,7 +3,7 @@
 #' Estimate observed heterozygosity (H_obs) for each individual (i.e. the frequency of
 #' loci that are heterozygous in an individual).
 #'
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param ... currently unused.

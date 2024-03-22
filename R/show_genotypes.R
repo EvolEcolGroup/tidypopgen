@@ -1,7 +1,7 @@
 #' Show the genotypes of a `gen_tibble`
 #'
 #' Extract the genotypes (as a matrix) from a  `gen_tibble`.
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param indiv_indices indices of individuals

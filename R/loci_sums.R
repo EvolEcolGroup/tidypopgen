@@ -3,7 +3,7 @@
 #' Estimate the sum of the alternate allele at each locus. This is unlikely to be useful
 #' directly, but it is used by other functions that compute various statistics.
 #'
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param ... other arguments passed to specific methods.

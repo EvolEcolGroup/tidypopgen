@@ -1,7 +1,7 @@
 #' Show the loci information of a `gen_tibble`
 #'
 #' Extract the information on ploidy from a `gen_tibble`.
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param ... currently unused.

@@ -125,7 +125,13 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ..., backingfile = NULL, quie
   if (!all(c("id", "population") %in% names(indiv_meta))){
     stop("ind_meta does not include the compulsory columns 'id' and 'population")
   }
-  # TODO check that genotypes is numeric
+  # check that x (the genotypes) is numeric matrix
+  if (inherits(x,"data.frame")){
+    x <- as.matrix(x)
+  }
+  if (any(!inherits(x,"matrix"), !is.numeric(x))){
+    stop("'x' is not a matrix of integers")
+  }
 
   # use code for NA in FBM.256
   x[is.na(x)]<-3
@@ -209,6 +215,7 @@ check_valid_loci <- function(loci_df){
 #' @keywords internal
 gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
                                       backingfile=NULL){
+
   if (is.null(backingfile)){
     backingfile <- tempfile()
   }

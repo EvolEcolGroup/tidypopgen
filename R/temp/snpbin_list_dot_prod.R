@@ -13,7 +13,7 @@
 #' in the `genotypes` column of [gen_tibble].
 #' @author Thibaut Jombart for the original [adegenet::glDotProd], modified
 #' by Andrea Manica for 'tidypopgen'
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object).
 #' @param center a logical indicating whether SNPs should be centred to mean zero.
 #' @param scale a logical indicating whether SNPs should be scaled to unit variance.

@@ -3,7 +3,7 @@
 #' Estimate missingnes for each individual (i.e. the frequency of
 #' missing genotypes in an individual).
 #'
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param as_counts booelean defining whether the count of NAs (rather than the rate)
