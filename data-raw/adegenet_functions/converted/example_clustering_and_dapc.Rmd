@@ -99,9 +99,12 @@ We can see that the three population do separate nicely on the PCA.
 
 DAPC is a powerful tool to investigate population structure. It has the advantage of
 scaling well to very large datasets, and it does not have the assumptions of STRUCTURE or
-ADMIXTURE (but that can also be a drawback).
+ADMIXTURE (but it does have the drawback that it does not allow for mixed ancestry, it assignes
+individually fully to one group or another).
 
-The first step is to determine the number of genetic clusters in the dataset. We will use
+The first step is to determine the number of genetic clusters in the dataset. We could
+test any a-priori grouping hypothesies, or we can use the data to suggest clusters. We will
+go for the latter option in this case, and we will use
 a k-clustering algorithm applied to the principal components (allowing us to reduce
 the dimensions from the thousands of loci to just a few tens components). We need to decide how 
 many components to use; this decision is often made based on a plot of the cumulative
@@ -116,42 +119,57 @@ tidy(anole_pca,matrix="eigenvalues") %>%
 
 ```
 
-Ideally, we are looking for the point where the curve starts flattening. In this case, we can
-not see a very clear flattening, but by PC 10 the increase in explained variance as markedly
+Note that, as we were working with a truncated SVD algorithm for our PCA, we can not easily
+phrase the eigenvalues in terms of proportion of total variance, so the cumulative y axis simply
+shows the cumulative sum of the eigen values. Ideally, we are looking for the point where 
+the curve starts flattening. In this case, we can
+not see a very clear flattening, but by PC 10 the increase in explained variance has markedly
 decelerated. 
 
 ```{r}
 anole_clusters <- gt_pca_find_clusters(anole_pca, n_pca = 10)
 ```
 
-This object retains information about a large number of possible *k*. We can choose
-the best k with `gt_pca_clust_choose_n()` (we will use the defaults, but there
-are multiple statistics and criteria that we can use to choose *n*):
+This object retains information about a large number of possible *k*. To choose an appropriate
+*k*, we plot the number of clusters against a measure of fit. BIC has been shown
+to be a very good metric under many scenarios:
 ```{r}
-anole_clusters <- gt_pca_best_k(anole_clusters)
+# we need an autoplot function for this type of object
 plot(anole_clusters$clusters$BIC~c(1:5))
 ```
-Overwrite it:
+
+We are looking for the minimum value of BIC. However, we notice that there is a quick levelling
+off in the decrease in BIC at
+3 clusters. Argubaly, these are sufficient to capture the main structure (and that makes
+sense given what we saw in the PCA). We can also use a number of algorithmic approaches to choose the best *k* value
+from this plot through `gt_pca_clust_choose_n()`. We will use the defaults (BIC with "diffNgroup",
+see the help page for a description of the various options):
 ```{r}
-anole_clusters$best_k<-3
+anole_clusters <- gt_pca_best_k(anole_clusters)
 ```
+The algorithm confirms our choice. Note that this function simply adds an element
+`$best_k` to the `gt_pca_clust` object:
+```{r}
+anole_clusters$best_k
+```
+If we decided that we wanted to explore a different value, we could simply overwrite
+that number with `anole_clusters$best_k<-5`
 
-
-Now we can run a DAPC:
+In this case, we are happy with the option of 3 clusters, and we can run a DAPC:
 ```{r}
 anole_dapc <- gt_dapc(anole_clusters)
 ```
 
-Note that `gt_dapc()` takes automatically 3 clusters form the `anole_clusters` object,
+Note that `gt_dapc()` takes automatically the number of clusters form the `anole_clusters` object,
 but can change that behaviour by setting some of its parameters (see the help
 page for `gt_dapc()`).
 `anole_dapc` is of class `dapc`, so we can use the standard `adegenet` functions:
 ```{r}
 anole_dapc
-scatter(anole_dapc)
+scatter(anole_dapc, posi.da="bottomleft")
 ```
 
-
+Plotting with ggplot (we should really add autoplot and tidiers)
 ```{r}
 dapc_data_df <-
   # as_tibble() converts the ind.coord matrix to a special data frame called a tibble. 
@@ -174,9 +192,12 @@ dapc_plot
 
 ```
 
+We can check the choice of the number of retained Discriminant Axes. In this case, with only three groups,
+2 axes are sensible.
 
-
-
+```{r}
+barplot(anole_dapc$eig, xlab="Linear Discriminants", ylab="F-statistic", main="Discriminant analysis eigenvalues")
+```
 
 We can inspect the assignment by DAPC with `assignplot`, ordering the samples
 by the original population label:
@@ -185,11 +206,10 @@ assignplot(anole_dapc,subset=order(anole_gt$population))
 ```
 
 
-As one would expect from the clear separation in the PCA and DAPC scatterplots,
-individuals are all fully assigned to a single cluster, with no individual with
-mixed ancestry.
+Or we can make a more conventional assignment plot:
 
-```{r}
+```{r eval=FALSE}
+# something is wrong here.
 compoplot(anole_dapc, subset=order(anole_gt$population), posi="bottomright",
 txt.leg=paste("Cluster", 1:5), lab="",
 ncol=2, xlab="individuals", col=funky(5))

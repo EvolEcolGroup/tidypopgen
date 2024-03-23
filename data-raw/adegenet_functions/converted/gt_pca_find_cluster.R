@@ -81,26 +81,28 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
   }
   # vector to store within sum of squares
   WSS <- numeric(0)
+  # get the scores
+  x_scores <- sweep(x$u, 2, x$d, '*')[,seq_len(n_pca)]
 
   # TODO this is an obvious place where to parallelise
   for(i in 1:length(nbClust)){
     if (method == "kmeans") {
       ## kmeans clustering (original method)
-      groups_assignments <- stats::kmeans(x$u[,seq_len(n_pca)],
+      groups_assignments <- stats::kmeans(x_scores,
                                    centers = nbClust[i],
                                    iter.max = n_iter, nstart = n_start)$cluster
     } else {
       ## ward clustering
-      groups_assignments <- stats::cutree(stats::hclust(stats::dist(x$u[,seq_len(n_pca)])^2,
+      groups_assignments <- stats::cutree(stats::hclust(stats::dist(x_scores)^2,
                                           method = "ward.D2"), k = nbClust[i])
     }
-    WSS[i] <- .compute.wss(x$u[,seq_len(n_pca)], groups_assignments)
+    WSS[i] <- .compute.wss(x_scores, groups_assignments)
     cluster_list$groups[[i]]<- groups_assignments
 
   }
   # compute statistics of goodnees of fit
   if (add_clust_of_1){
-    WSS.ori <- sum(apply(x$u[,seq_len(n_pca)], 2, function(v) sum((v-mean(v))^2) ))
+    WSS.ori <- sum(apply(x_scores, 2, function(v) sum((v-mean(v))^2) ))
     WSS <- c(WSS.ori,WSS)
     # add the classification for 1 cluster (they are all 1!)
     cluster_list$groups <- append(cluster_list$groups,

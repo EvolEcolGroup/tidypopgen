@@ -46,21 +46,27 @@ anole_gl_pca <- glPca(anole_genlight, nf = 30)
 ```
 
 ```{r}
+scatter(anole_gl_pca, clabel = 0)
+
+```
+
+
+```{r}
 pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
                         package = "tidypopgen")
 pops <- readr::read_csv(pops_path)
 pops
 ```
 ```{r}
-num_clust <- find.clusters(anole_genlight,n.pca = 10,n.clust = 3)
+num_clust <- find.clusters(anole_genlight,n.pca = 10)
 ```
 
 ```{r}
-anole_dapc <- dapc(anole_genlight, num_clust$grp,n.pca = 10,n.da = 2)
+anole_gl_dapc <- dapc(anole_genlight, num_clust$grp,n.pca = 10,n.da = 2)
 
 ```
 
 ```{r}
-scatter(anole_dapc, posi.da="bottomleft")
+scatter(anole_gl_dapc, posi.da="bottomleft")
 
 ```

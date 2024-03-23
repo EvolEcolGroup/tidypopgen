@@ -1,0 +1,142 @@
+/// The expected probability of IBS i, given IBD j is EPrIBS_IBD[i][j]
+double EPrIBS_IBD[3][3];
+
+/// Initialzie the expected probability of IBS i, given by IBD
+// AlleleFreq should have enough buffer
+
+//AM from the genotype counts, we can compute the frequencies
+void Init_EPrIBD_IBS(const double in_afreq[], double out_afreq[],
+		bool CorrectFactor, long nSNP = -1)
+	{
+		if (nSNP < 0)
+			nSNP = MCWorkingGeno.Space().SNPNum();
+
+		// clear EPrIBS_IBD
+		memset((void*)EPrIBS_IBD, 0, sizeof(EPrIBS_IBD));
+		vector<int> AA(nSNP), AB(nSNP), BB(nSNP);
+
+		if (!in_afreq)
+		{
+			MCWorkingGeno.Space().GetABNumPerSNP(&AA[0], &AB[0], &BB[0]);
+		}
+
+		// for-loop each snp
+		long nValid = 0;
+		for (long i=0; i < nSNP; i++)
+		{
+			long n = 2 * (AA[i] + AB[i] + BB[i]);
+			double p = (n > 0) ? (double(2*AA[i] + AB[i]) / n) : R_NaN;
+
+			if (in_afreq)
+			{
+				p = in_afreq[i];
+				if (R_FINITE(p))
+				{
+					if ((p < 0) || (p > 1))
+						p = R_NaN;
+				}
+			}
+			
+			if (out_afreq) out_afreq[i] = p;
+
+			// Second, the expected probability of IBS i, given by IBD
+			double q = 1-p, Na = n;
+			double x = 2*AA[i] + AB[i], y = 2*BB[i] + AB[i];
+			double a00, a01, a02, a11, a12;
+
+			if (CorrectFactor)
+			{
+				a00 =
+					2*p*p*q*q * ( (x-1)/x * (y-1)/y *
+					(Na/(Na-1)) *(Na/(Na-2)) * (Na/(Na-3)) );
+				a01 =
+					4*p*p*p*q * ( (x-1)/x * (x-2)/x * (Na/(Na-1)) *
+					(Na/(Na-2)) * (Na/(Na-3)) ) + 4*p*q*q*q * ( (y-1)/y * (y-2)/y *
+					(Na/(Na-1)) * (Na/(Na-2)) * (Na/(Na-3)) );
+				a02 =
+					q*q*q*q * ( (y-1)/y * (y-2)/y * (y-3)/y *
+					(Na/(Na-1)) * (Na/(Na-2)) * (Na/(Na-3)) ) + p*p*p*p *
+					( (x-1)/x * (x-2)/x * (x-3)/x * (Na/(Na-1)) * (Na/(Na-2)) *
+					(Na/(Na-3)) ) + 4*p*p*q*q * ( (x-1)/x * (y-1)/y * (Na/(Na-1)) *
+					(Na/(Na-2)) * (Na/(Na-3)) );
+				a11 =
+					2*p*p*q * ( (x-1)/x *  Na/(Na-1) * Na/(Na-2) ) +
+					2*p*q*q * ( (y-1)/y *  Na/(Na-1) * Na/(Na-2) );
+				a12 =
+					p*p*p * ((x-1)/x * (x-2)/x *  Na/(Na-1) * Na/(Na-2)) +
+					q*q*q * ( (y-1)/y * (y-2)/y *  Na/(Na-1) * Na/(Na-2)) +
+					p*p*q * ( (x-1)/x * Na/(Na-1) * Na/(Na-2) ) +
+					p*q*q * ((y-1)/y  * Na/(Na-1) * Na/(Na-2));
+			} else {
+				a00 = 2*p*p*q*q;
+				a01 = 4*p*p*p*q + 4*p*q*q*q;
+				a02 = q*q*q*q + p*p*p*p + 4*p*p*q*q;
+				a11 = 2*p*p*q + 2*p*q*q;
+				a12 = p*p*p + q*q*q + p*p*q + p*q*q;
+			}
+
+			if (R_FINITE(a00) && R_FINITE(a01) &&
+				R_FINITE(a02) && R_FINITE(a11) && R_FINITE(a12))
+			{
+				EPrIBS_IBD[0][0] += a00;
+				EPrIBS_IBD[0][1] += a01;
+				EPrIBS_IBD[0][2] += a02;
+				EPrIBS_IBD[1][1] += a11;
+				EPrIBS_IBD[1][2] += a12;
+				nValid++;
+			}
+		}
+
+		EPrIBS_IBD[0][0] /= nValid; EPrIBS_IBD[1][0] = 0;       EPrIBS_IBD[2][0] = 0;
+		EPrIBS_IBD[0][1] /= nValid; EPrIBS_IBD[1][1] /= nValid; EPrIBS_IBD[2][1] = 0;
+		EPrIBS_IBD[0][2] /= nValid; EPrIBS_IBD[1][2] /= nValid; EPrIBS_IBD[2][2] = 1;
+	}
+
+	// estimate k0, k1 and k2
+	// AM from the 3 IBS for each individual
+	void Est_PLINK_Kinship(int IBS0, int IBS1, int IBS2, double &k0, double &k1,
+		bool constraint)
+	{
+		// AM expected counts (p of each genotype times the total number of overlapping alleles
+		
+		int nIBS012 = IBS0 + IBS1 + IBS2;
+		double e00 = EPrIBS_IBD[0][0] * nIBS012;
+		double e01 = EPrIBS_IBD[0][1] * nIBS012;
+		double e11 = EPrIBS_IBD[1][1] * nIBS012;
+		double e02 = EPrIBS_IBD[0][2] * nIBS012;
+		double e12 = EPrIBS_IBD[1][2] * nIBS012;
+		double e22 = EPrIBS_IBD[2][2] * nIBS012;
+
+		k0 = IBS0 / e00;
+		k1 = (IBS1 - k0 * e01) / e11;
+		double k2 = (IBS2 - k0*e02 - k1*e12) / e22;
+
+		// Bound IBD estimates to sum to 1, and fall within 0-1 range
+		if (k0 > 1) { k0 = 1; k1 = k2 = 0; }
+		if (k1 > 1) { k1 = 1; k0 = k2 = 0; }
+		if (k2 > 1) { k2 = 1; k0 = k1 = 0; }
+		if (k0 < 0) { double S = k1+k2; k1 /= S; k2 /= S; k0 = 0; }
+		if (k1 < 0) { double S = k0+k2; k0 /= S; k2 /= S; k1 = 0; }
+		if (k2 < 0) { double S = k0+k1; k0 /= S; k1 /= S; k2 = 0; }
+
+		if (constraint)
+		{
+			// Possibly constrain IBD estimates to within possible triangle
+			// i.e. 0.5 0.0 0.5 is invalid
+			//
+			// Constraint : z1^2 - 4 z0 z2 >= 0
+			//            : x^2 - 2 pi x + z2  = 0
+			//              where pi = (z1 + 2 z2) / 2
+			//
+			// So the constaint can also be written as
+			//              pi^2 >=  z2
+			k2 = 1 - k0 - k1;
+			double pihat = k1 / 2 + k2 ;
+			if (pihat*pihat < k2)
+			{
+				k0 = (1-pihat) * (1-pihat);
+				k1 = 2 * pihat * (1-pihat);
+			}
+		}
+	}
+
