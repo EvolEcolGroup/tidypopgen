@@ -1,5 +1,6 @@
 # https://genomicsclass.github.io/book/pages/pca_svd.html
-# The elements of D are formed by taking the sum of the squares of the principal components but not dividing by the sample size.
+# The elements of D are formed by taking the sum of the squares of the principal
+# components but not dividing by the sample size.
 
 # We need to center the matrix for the svd to make sense, and ideally scale
 # if we scale, then the
@@ -39,8 +40,9 @@ all.equal(
   a_svd$d^2/(nrow(a) - 1),
   check.attributes = FALSE)
 
-# for an uncentered matrix
-sum(a_prcomp$sdev^2)==sum(apply(a_mat,2,var))
+# for an centered matrix (but not scaled), the sum of the eigen vectors is equal
+to the sum of variances
+all.equal(sum(a_prcomp$sdev^2), sum(apply(a_mat,2,var)))
 
 
 

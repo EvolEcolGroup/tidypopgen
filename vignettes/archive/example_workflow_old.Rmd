@@ -81,7 +81,7 @@ anole_gt <- gt_impute_simple(anole_gt)
 
 And now:
 ```{r}
-anole_pca <- anole_gt %>% gt_pca_partialSVD(k=45)
+anole_pca <- anole_gt %>% gt_pca_partialSVD(k=45, fun_scaling = big_scale(scale=FALSE))
 ```
 
 
@@ -117,12 +117,11 @@ tidy(anole_pca,matrix="eigenvalues") %>%
 ```
 
 Ideally, we are looking for the point where the curve starts flattening. In this case, we can
-not see a very clear flattening, but by PC 30 the increase in explained variance as markedly
-decelerated. As the k-clustering algorithm is somewhat data hungry,
-we will go with that somewhat generous number
+not see a very clear flattening, but by PC 10 the increase in explained variance as markedly
+decelerated. 
 
 ```{r}
-anole_clusters <- gt_pca_find_clusters(anole_pca, n_pca = 40)
+anole_clusters <- gt_pca_find_clusters(anole_pca, n_pca = 10)
 ```
 
 This object retains information about a large number of possible *k*. We can choose
@@ -130,8 +129,12 @@ the best k with `gt_pca_clust_choose_n()` (we will use the defaults, but there
 are multiple statistics and criteria that we can use to choose *n*):
 ```{r}
 anole_clusters <- gt_pca_best_k(anole_clusters)
+plot(anole_clusters$clusters$BIC~c(1:5))
 ```
-
+Overwrite it:
+```{r}
+anole_clusters$best_k<-3
+```
 
 
 Now we can run a DAPC:
