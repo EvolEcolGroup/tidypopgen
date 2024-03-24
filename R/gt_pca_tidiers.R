@@ -10,8 +10,9 @@
 #' @param matrix Character specifying which component of the PCA should be
 #'   tidied.
 #'
-#'   - `"u"`, `"samples"`, `"scores"`, or `"x"`: returns information about
-#'     the map from the original space into principle components space.
+#'   - `"samples"`, `"scores"`, or `"x"`: returns information about
+#'     the map from the original space into principle components space
+#'     (this is equivalent to produce of *u* and *d*).
 #'
 #'   - `"v"`, `"rotation"`, `"loadings"` or `"variables"`: returns information
 #'     about the map from principle components space back into the original
@@ -48,12 +49,12 @@
 #'   If `"eigenvalues"`, the columns are:
 #'
 #'   \item{`PC`}{An integer vector indicating the principal component.}
-#'   \item{`std.dev`}{Standard deviation explained by this PC.}
-#'   \item{`percent`}{Fraction of variation explained by this component
-#'     (a numeric value between 0 and 1).}
-#'   \item{`cumulative`}{Cumulative fraction of variation explained by
-#'     principle components up to this component (a numeric value between 0 and
-#'     1).}
+#'   \item{`std.dev`}{Standard deviation (i.e. sqrt(eig/(n-1))) explained by
+#'   this PC (for compatibility with `prcomp`.}
+#'   \item{`cumulative`}{Cumulative variation explained by
+#'     principal components up to this component (note that this is NOT
+#'     phrased as a percentage of total variance, since many methods
+#'     only estimate a truncated SVD.}
 #'
 #' @aliases gt_pca_tidiers
 #' @export
@@ -65,7 +66,7 @@ tidy.gt_pca <- function(x, matrix = "u", ...) {
   }
 
   MATRIX <- c(
-    "rotation", "x", "variables", "samples", "v", "u", "pcs", "d",
+    "rotation", "x", "variables", "samples", "v", "pcs", "d",
     "scores", "loadings", "eigenvalues"
   )
   matrix <- rlang::arg_match(matrix, MATRIX)

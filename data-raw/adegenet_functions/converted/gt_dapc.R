@@ -24,7 +24,7 @@
 #' @references Jombart T, Devillard S and Balloux F (2010) Discriminant analysis of
 #' principal components: a new method for the analysis of genetically
 #' structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
-
+#'
 #'
 #' @param x an object of class `gt_pca`, or its subclass `gt_pca_clust`
 #' @param pop either a factor indicating the group membership of individuals;
@@ -50,6 +50,17 @@
 #' but makes the object slightly bigger.
 #' @returns an object of class [adegenet::dapc]
 #' @export
+
+# AM: Thoughts about data structures. The original DAPC blended pca info
+# within the object. For a cleaner job at predicting, it would be best to
+# simply store the pca object as an element within the object. This would break
+# compatibility, but only with the predict function, which in any case will not
+# work.
+# Once we have tidiers and autoplot, it might be best to reorganise the
+# object to fully fit our purposes, and give up trying to be backcompatible
+# with adegenet
+
+
 gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
                           var_contrib=TRUE,
                       var_loadings=FALSE, pca_info =TRUE){
@@ -139,20 +150,21 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   # @BUG we need to sort out the slots as these are not correct
   # @TODO out objects are missing several of these slots
    if(pca_info){
-     stop("conversion of objects slots is inconmplete, don't use this option yet!")
+     warning("conversion of objects slots is inconmplete, don't use this option yet!")
     res$pca.loadings <- as.matrix(U)
-     res$pca.cent <- x$cent
-     if(!is.null(x$norm)) {
-       res$pca.norm <- x$norm
-     } else {
-       res$pca.norm <- rep(1, length(x$cent))
-     }
-     res$pca.eig <- x$u # TODO check
+     # res$pca.cent <- x$cent
+     # if(!is.null(x$norm)) {
+     #   res$pca.norm <- x$norm
+     # } else {
+     #   res$pca.norm <- rep(1, length(x$cent))
+     # }
+     res$pca.eig <- x$d^2 # TODO check, this should get back the eigen from glPCA
+     # note that the default allele.as.unit is FALSE for glPCA
   }
 
   ## optional: get loadings of variables
   if(var_contrib || var_loadings){
-    stop("conversion of objects slots is inconmplete, don't use this option yet!")
+    message("conversion of objects slots needs to be tested for this option")
     var.load <- as.matrix(U) %*% as.matrix(ldaX$scaling[,1:n_da,drop=FALSE])
 
     if(var_contrib){
