@@ -5,7 +5,7 @@
 \alias{gt_pca_tidiers}
 \title{tidy a \code{gt_pca} object}
 \usage{
-\method{tidy}{gt_pca}(x, matrix = "u", ...)
+\method{tidy}{gt_pca}(x, matrix = "eigenvalues", ...)
 }
 \arguments{
 \item{x}{A \code{gt_pca} object returned by one of the \verb{gt_pca_*} functions.}
@@ -13,8 +13,9 @@
 \item{matrix}{Character specifying which component of the PCA should be
 tidied.
 \itemize{
-\item \code{"u"}, \code{"samples"}, \code{"scores"}, or \code{"x"}: returns information about
-the map from the original space into principle components space.
+\item \code{"samples"}, \code{"scores"}, or \code{"x"}: returns information about
+the map from the original space into principle components space
+(this is equivalent to produce of \emph{u} and \emph{d}).
 \item \code{"v"}, \code{"rotation"}, \code{"loadings"} or \code{"variables"}: returns information
 about the map from principle components space back into the original
 space.
@@ -51,12 +52,12 @@ indicated principal component.}
 If \code{"eigenvalues"}, the columns are:
 
 \item{\code{PC}}{An integer vector indicating the principal component.}
-\item{\code{std.dev}}{Standard deviation explained by this PC.}
-\item{\code{percent}}{Fraction of variation explained by this component
-(a numeric value between 0 and 1).}
-\item{\code{cumulative}}{Cumulative fraction of variation explained by
-principle components up to this component (a numeric value between 0 and
-1).}
+\item{\code{std.dev}}{Standard deviation (i.e. sqrt(eig/(n-1))) explained by
+this PC (for compatibility with \code{prcomp}.}
+\item{\code{cumulative}}{Cumulative variation explained by
+principal components up to this component (note that this is NOT
+phrased as a percentage of total variance, since many methods
+only estimate a truncated SVD.}
 }
 \description{
 This summarizes information about the components of a \code{gt_pca} from the

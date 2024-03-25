@@ -60,7 +60,7 @@
 #' @export
 #' @seealso [gt_pca_autoSVD()] [augment.gt_pca()]
 
-tidy.gt_pca <- function(x, matrix = "u", ...) {
+tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
   if (length(matrix) > 1) {
     stop("Must select a single matrix to tidy.", call. = FALSE)
   }
@@ -87,7 +87,7 @@ tidy.gt_pca <- function(x, matrix = "u", ...) {
       )
     ret <- mutate(ret, PC = as.numeric(stringr::str_replace(.data$PC, "V", "")))
     if (is.null(rownames(x$v))) ret$column <- as.integer(ret$column)
-  } else if (matrix %in% c("x", "samples", "u", "scores")) {
+  } else if (matrix %in% c("x", "samples", "scores")) {
     ret <- sweep(x$u, 2, x$d, '*')
     colnames(ret) <- paste0("PC",seq_len(ncol(ret)))
     ret <- ret %>%

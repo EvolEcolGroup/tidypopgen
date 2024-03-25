@@ -2,27 +2,21 @@
 % Please edit documentation in R/gt_write_plink.R
 \name{gt_write_plink}
 \alias{gt_write_plink}
-\title{Export a \code{gen_tibble} object to PLINK ped format}
+\title{Export a \code{gen_tibble} object to PLINK bed format}
 \usage{
 gt_write_plink(x, bedfile = NULL, overwrite = TRUE)
 }
 \arguments{
 \item{x}{a \code{\link{gen_tibble}} object}
 
-\item{bedfile}{a character string giving the path to the file to convert,
-with the extension ".raw" or "ped"}
+\item{bedfile}{a character string giving the path to output bed file.}
 
-\item{overwrite}{boolean whether to overwrite the file}
+\item{overwrite}{boolean whether to overwrite the file.}
 }
 \value{
 TRUE if successful
 }
 \description{
 This function exports all the information of a \code{gen_tibble} object into
-a PLINK ped file.
-}
-\details{
-This function generates a PLINK raw file with alternate allele information
-(as outputted using \code{--include-alt} and
-\code{--recodeA}), as well as a map file (as generated with \code{--recode}).
+a PLINK bed file.
 }
