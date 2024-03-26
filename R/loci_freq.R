@@ -1,33 +1,34 @@
 #' Estimate allele frequencies at each each locus
 #'
-#' Estimate the frequency of the alternate allele at each locus.
+#' Allele frequencies can be estimates as minimum allele frequencies (MAF) with
+#' `loci_maf()` or the frequency of the alternate allele (with `loci_alt_freq()`).
+#' The latter are in line with the genotypes matrix (e.g. as extracted by
+#'  [`show_loci()`]). Most users will be in interested in the MAF, but the
+#'  raw frequencies might be useful when computing aggregated statistics.
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
-#' @param ... other arguments passed to specific methods.
+#' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a vector of frequencies, one per locus
-#' @rdname loci_freq
+#' @rdname loci_alt_freq
 #' @export
-loci_freq <- function(.x, ...) {
-  UseMethod("loci_freq", .x)
+loci_alt_freq <- function(.x, ...) {
+  UseMethod("loci_alt_freq", .x)
 }
 
-#' @param minor a logical indicating whether we should give the frequencies of
-#' the minor allele (TRUE, the default). If FALSE, the frequencies of the
-#' alternate allele are given.
 #' @export
-#' @rdname loci_freq
-loci_freq.tbl_df <- function(.x, ..., minor = TRUE) {
+#' @rdname loci_alt_freq
+loci_alt_freq.tbl_df <- function(.x, ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
-  loci_freq(.x$genotypes, ..., minor = minor)
+  loci_alt_freq(.x$genotypes, ...)
 }
 
 
 #' @export
-#' @rdname loci_freq
-loci_freq.vctrs_bigSNP <- function(.x, ..., minor = TRUE) {
+#' @rdname loci_alt_freq
+loci_alt_freq.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
@@ -47,18 +48,46 @@ loci_freq.vctrs_bigSNP <- function(.x, ..., minor = TRUE) {
     freq <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index]
   }
   # sort out frequencies for diploids
+  # @TODO get ploidy from the tibble once we have it
+  # @TODO for mixed ploidy, we will need a different approach
   freq <- freq/2
-  if (minor){
-    freq[freq>0.5 & !is.na(freq)] <- 1 - freq[freq>0.5 & !is.na(freq)]
-  }
   freq
 }
 
 #' @export
-#' @rdname loci_freq
-loci_freq.grouped_df <- function(.x, ..., minor = TRUE) {
+#' @rdname loci_alt_freq
+loci_alt_freq.grouped_df <- function(.x, ...) {
   # TODO this is seriously inefficient, we need to cast it into a big_apply problem
   # of maybe it isn't that bad...
-  group_map(.x, .f=~loci_freq(.x, minor = minor))
+  group_map(.x, .f=~loci_alt_freq(.x,, ...))
 }
 
+#' @rdname loci_alt_freq
+#' @export
+loci_maf <- function(.x, ...) {
+  UseMethod("loci_maf", .x)
+}
+
+#' @export
+#' @rdname loci_alt_freq
+loci_maf.tbl_df <- function(.x, ...) {
+  #TODO this is a hack to deal with the class being dropped when going through group_map
+  stopifnot_gen_tibble(.x)
+  loci_maf(.x$genotypes, ...)
+}
+
+#' @export
+#' @rdname loci_alt_freq
+loci_maf.vctrs_bigSNP <- function(.x, ...) {
+  freq <- loci_alt_freq(.x,)
+  freq[freq>0.5 & !is.na(freq)] <- 1 - freq[freq>0.5 & !is.na(freq)]
+  freq
+}
+
+#' @export
+#' @rdname loci_alt_freq
+loci_maf.grouped_df <- function(.x, ...) {
+  # TODO this is seriously inefficient, we need to cast it into a big_apply problem
+  # of maybe it isn't that bad...
+  group_map(.x, .f=~loci_maf(.x, ...))
+}

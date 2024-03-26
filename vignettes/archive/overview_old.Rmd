@@ -187,16 +187,16 @@ overlap on their loci (more on that later).
 The limit of `select_loci` is that it can not directly summarise the genotypes.
 We can do that separately and then feed the result as a set of indices. For 
 example, we might want to impose a minimum minor allele frequency. 
-`loci_freq()` allows us to inspect the frequencies in a `gen_tibble`: 
+`loci_alt_freq()` allows us to inspect the frequencies in a `gen_tibble`: 
 ```{r}
-example_gt %>% loci_freq()
+example_gt %>% loci_alt_freq()
 ```
 
 We can now create a vector of indices of loci with a minimum allele frequency
 (MAF) larger than 0.2, and use it to select:
 
 ```{r}
-sel_indices <- which((example_gt %>% loci_freq())>0.2)
+sel_indices <- which((example_gt %>% loci_alt_freq())>0.2)
 example_gt %>% select_loci (all_of(sel_indices)) %>% show_loci()
 ```
 
@@ -206,11 +206,11 @@ to use `all_of` to wrap it.
 `select_loci_if` allows us to avoid creating a temporary variable to store indices:
 
 ```{r}
-example_gt_sub <- example_gt %>% select_loci_if(loci_freq(genotypes)>0.2)
+example_gt_sub <- example_gt %>% select_loci_if(loci_alt_freq(genotypes)>0.2)
 example_gt_sub %>% show_genotypes()
 ```
 
-Note that, as we need to tidy evaluate `loci_freq` within the `select_loci_if` verb,
+Note that, as we need to tidy evaluate `loci_alt_freq` within the `select_loci_if` verb,
 we need to provide it with the column that we want to use (even though it has
 to be `genotypes`). Also note that, with `select_loci_if`, we can not reorder
 the loci.
@@ -221,7 +221,7 @@ greater than 0.2 that are also on chromosome 2
 We can use a similar approach to select only alleles on a given chromosome:
 ```{r}
 example_gt %>% select_loci_if(show_loci(genotypes)$chromosome==2 &
-                             loci_freq(genotypes)>0.2) %>% show_loci()
+                             loci_alt_freq(genotypes)>0.2) %>% show_loci()
 ```
 
 Sometimes it is also of interest to use a particular type of allele (the minor or
@@ -245,11 +245,11 @@ them into minor allele counts simply with:
 ```{r}
 example_gt %>% 
   select_loci(everything(),
-              .swap_if_arg = loci_freq(genotypes, minor=FALSE)>0.5) %>%
+              .swap_if_arg = loci_alt_freq(genotypes, minor=FALSE)>0.5) %>%
   show_genotypes()
 ```
 
-Note that we use `minor=FALSE` in `loci_freq` to get the raw frequencies (earlier,
+Note that we use `minor=FALSE` in `loci_alt_freq` to get the raw frequencies (earlier,
 we used the default `minor=TRUE` which returns the minor allele frequencies). In
 this case we selected all loci (`everything`). Alternatively, we could 
 generate major allele frequencies only for SNPs with an `rs` code:
@@ -257,7 +257,7 @@ generate major allele frequencies only for SNPs with an `rs` code:
 ```{r}
 example_gt %>% 
   select_loci(starts_with("rs"),
-              .swap_if_arg = loci_freq(genotypes, minor=FALSE)<0.5) %>%
+              .swap_if_arg = loci_alt_freq(genotypes, minor=FALSE)<0.5) %>%
   show_genotypes()
 
 ```
@@ -292,18 +292,18 @@ example_gt %>% group_by(population) %>%
   summarise(n= n(), mean_het = mean(ind_H_obs(genotypes)))
 ```
 
-For functions that return a quantity per locus (e.g. `loci_freq`), we can use 
+For functions that return a quantity per locus (e.g. `loci_alt_freq`), we can use 
  `group_by` together with `group_map` to apply such functions over populations:
 ```{r}
-example_gt %>% group_by(population) %>% group_map(.f = ~loci_freq(.x))
+example_gt %>% group_by(population) %>% group_map(.f = ~loci_alt_freq(.x))
 ```
 
 For more details on the syntax of `group_map`, see its help page. Some 
-functions, such as `loci_freq()`, also have a method for grouped tibbles that 
+functions, such as `loci_alt_freq()`, also have a method for grouped tibbles that 
 allows an even easier syntax:
 
 ```{r}
-example_gt %>% group_by(population) %>% loci_freq()
+example_gt %>% group_by(population) %>% loci_alt_freq()
 ```
 
 In reality, such grouped methods are nothing more than a wrapper for the

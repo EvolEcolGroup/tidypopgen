@@ -18,9 +18,9 @@ test_that("snpbin_list_means computes correctly",{
 
   # raw frequencies
   freq <- colSums(test_genotypes, na.rm=TRUE)/(c(3,3,3,2,3,1)*2)
-  expect_true(all(loci_freq(test_gt$genotypes, minor = FALSE)==freq))
+  expect_true(all(loci_alt_freq(test_gt$genotypes)==freq))
   # convert to minor frequencies
   freq[freq>0.5] <- 1 - freq[freq>0.5]
-  expect_true(all(loci_freq(test_gt$genotypes)==freq))
+  expect_true(all(loci_maf(test_gt$genotypes)==freq))
 
 })

@@ -18,13 +18,13 @@ test_that("select_loci_if subsets correctly",{
 
 
   # raw frequencies
-  freq <- test_gt %>% loci_freq()
+  freq <- test_gt %>% loci_maf()
   # remove monomorphic
-  test_gen_sub <- test_gt %>% select_loci_if(loci_freq(genotypes)!=0)
+  test_gen_sub <- test_gt %>% select_loci_if(loci_maf(genotypes)!=0)
   expect_true(!any(c("rs3","x2") %in% show_loci(test_gen_sub)$name))
   # same subsetting with .data
   expect_identical(test_gen_sub,
-                   test_gt %>% select_loci_if(loci_freq(.data$genotypes)!=0))
+                   test_gt %>% select_loci_if(loci_maf(.data$genotypes)!=0))
   # same manually
   criterion <- c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE)
   expect_identical(test_gen_sub,
