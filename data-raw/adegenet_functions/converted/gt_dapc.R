@@ -24,6 +24,9 @@
 #' @references Jombart T, Devillard S and Balloux F (2010) Discriminant analysis of
 #' principal components: a new method for the analysis of genetically
 #' structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
+#' Thia, J. A. (2023). Guidelines for standardizing the application of
+#' discriminant analysis of principal components to genotype data.
+#' Molecular Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
 #'
 #'
 #' @param x an object of class `gt_pca`, or its subclass `gt_pca_clust`
