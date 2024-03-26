@@ -8,8 +8,11 @@
 #' @returns a tibble with 3 elements: maf, missingness and hwe_p
 #' @export
 loci_qc_report <- function (.x, ...){
+<<<<<<< HEAD
   rlang::check_dots_empty()
   stopifnot_diploid(.x$genotypes)
+=======
+>>>>>>> 86ce9f6 (Implement loci_maf())
   qc_report <- .x %>% reframe(snp_id = show_loci_names(.x),maf=loci_maf(.data$genotypes),
                               missingness = loci_missingness(.data$genotypes),
                     hwe_p = loci_hwe(.data$genotypes))
