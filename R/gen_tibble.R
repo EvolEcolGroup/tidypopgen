@@ -179,7 +179,7 @@ new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
   vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
                   bigsnp = bigsnp_obj,
                   bigsnp_file = bigsnp_file, # TODO is this redundant with the info in the bigSNP object?
-                  bigsnp_file = tools::md5sum(bigsnp_file), # TODO make sure this does not take too long
+                  bigsnp_md5sum = tools::md5sum(bigsnp_file), # TODO make sure this does not take too long
                   loci=loci,
                   names=indiv_id,
                   class = "vctrs_bigSNP")
