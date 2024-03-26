@@ -21,7 +21,7 @@ the \code{bigsnpr} package (usually created with \code{\link[bigsnpr:snp_readBed
 \item a string giving the path to a vcf file. Note that we currently read the whole
 vcf in memory with \code{vcfR}, so only smallish vcf can be imported. Only biallelic
 SNPs will be considered.
-\item a genotype matrix of dosages (0, 1, 2, NA) giing the dosage of the alternate
+\item a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
 allele.
 }}
 

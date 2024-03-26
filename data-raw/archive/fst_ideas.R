@@ -29,7 +29,7 @@ pairwise_fst <- function(.x) {
   # do something clever like first count na and then apply addition by column
 }
 
-# make such a function using loci_freq as a template
+# make such a function using loci_alt_freq as a template
 # then do the same for het_obs
 # finally use these two functions for ind functions (by taking the mean)
 loci_het_exp <- function(.x){

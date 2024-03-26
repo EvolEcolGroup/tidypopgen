@@ -9,7 +9,7 @@
 #' - a string giving the path to a vcf file. Note that we currently read the whole
 #' vcf in memory with `vcfR`, so only smallish vcf can be imported. Only biallelic
 #' SNPs will be considered.
-#' - a genotype matrix of dosages (0, 1, 2, NA) giing the dosage of the alternate
+#' - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
 #' allele.
 #' @param indiv_meta a list, data.frame or tibble with compulsory columns 'id'
 #'  and 'population', plus any additional metadata of interest.

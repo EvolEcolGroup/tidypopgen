@@ -220,16 +220,16 @@ example_gt %>% select_loci (c(2,6,1)) %>% show_genotypes()
 The limit of `select_loci` is that it can not directly summarise the genotypes.
 We can do that separately and then feed the result as a set of indices. For 
 example, we might want to impose a minimum minor allele frequency. 
-`loci_freq()` allows us to inspect the frequencies in a `gen_tibble`: 
+`loci_maf()` allows us to inspect the minimum allele frequencies in a `gen_tibble`: 
 ```{r}
-example_gt %>% loci_freq()
+example_gt %>% loci_maf()
 ```
 
 We can now create a vector of indices of loci with a minimum allele frequency
 (MAF) larger than 0.2, and use it to select:
 
 ```{r}
-sel_indices <- which((example_gt %>% loci_freq())>0.2)
+sel_indices <- which((example_gt %>% loci_maf())>0.2)
 example_gt %>% select_loci (all_of(sel_indices)) %>% show_loci()
 ```
 
@@ -239,11 +239,11 @@ to use `all_of` to wrap it.
 `select_loci_if` allows us to avoid creating a temporary variable to store indices:
 
 ```{r}
-example_gt_sub <- example_gt %>% select_loci_if(loci_freq(genotypes)>0.2)
+example_gt_sub <- example_gt %>% select_loci_if(loci_maf(genotypes)>0.2)
 example_gt_sub %>% show_genotypes()
 ```
 
-Note that, as we need to tidy evaluate `loci_freq` within the `select_loci_if` verb,
+Note that, as we need to tidy evaluate `loci_maf` within the `select_loci_if` verb,
 we need to provide it with the column that we want to use (even though it has
 to be `genotypes`). Also note that, with `select_loci_if`, we can not reorder
 the loci.
@@ -254,10 +254,10 @@ greater than 0.2 that are also on chromosome 2.
 We can use a similar approach to select only alleles on a given chromosome:
 ```{r}
 example_gt %>% select_loci_if(show_loci(genotypes)$chromosome==2 &
-                             loci_freq(genotypes)>0.2) %>% show_loci()
+                             loci_maf(genotypes)>0.2) %>% show_loci()
 ```
 
-Incidentally, `loci_freq()` is one of several functions that compute quantities
+Incidentally, `loci_maf()` is one of several functions that compute quantities
 by locus; they can be identified as they start with `loci_`.
 
 
@@ -291,18 +291,18 @@ example_gt %>% mutate(het_obs = indiv_het_obs(genotypes)) %>% group_by(populatio
 In this way, we compute all individual heterozygosities in one go (optimising
 our file access time), and then generate the population summaries.
 
-For functions that return a quantity per locus (e.g. `loci_freq`), we can use 
+For functions that return a quantity per locus (e.g. `loci_maf`), we can use 
  `group_by` together with `group_map` to apply such functions over populations:
 ```{r}
-example_gt %>% group_by(population) %>% group_map(.f = ~loci_freq(.x))
+example_gt %>% group_by(population) %>% group_map(.f = ~loci_maf(.x))
 ```
 
 For more details on the syntax of `group_map`, see its help page. Some 
-functions, such as `loci_freq()`, also have a method for grouped tibbles that 
+functions, such as `loci_maf()`, also have a method for grouped tibbles that 
 allows an even easier syntax:
 
 ```{r}
-example_gt %>% group_by(population) %>% loci_freq()
+example_gt %>% group_by(population) %>% loci_maf()
 ```
 
 In reality, such grouped methods are nothing more than a wrapper for the

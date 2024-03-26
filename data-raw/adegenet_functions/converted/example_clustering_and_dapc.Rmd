@@ -140,8 +140,8 @@ plot(anole_clusters$clusters$BIC~c(1:5))
 
 We are looking for the minimum value of BIC. However, we notice that there is a quick levelling
 off in the decrease in BIC at
-3 clusters. Argubaly, these are sufficient to capture the main structure (and that makes
-sense given what we saw in the PCA). We can also use a number of algorithmic approaches to choose the best *k* value
+3 clusters. Arguably, these are sufficient to capture the main structure (and that makes
+sense given what we saw in the PCA). We can also use a number of algorithmic approaches (based on the original `find.clusters()` function in `adegenet`) to choose the best *k* value
 from this plot through `gt_pca_clust_choose_n()`. We will use the defaults (BIC with "diffNgroup",
 see the help page for a description of the various options):
 ```{r}
