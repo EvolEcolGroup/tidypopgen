@@ -33,7 +33,7 @@
 #' usually generated with [gt_pca_best_k()],
 #' which will be used to select the clustering level.
 #' @param n_pca number of principal components to be used in the Discriminant
-#' Analysis. If NULL, all components will be used.
+#' Analysis. If NULL, k-1 will be used.
 #' @param n_da an integer indicating the number of axes retained in the
 #' Discriminant Analysis step.
 #' @param var_contrib a logical indicating whether the contribution of
@@ -83,12 +83,18 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   }
 
   if(is.null(pop.fac)) stop("x does not include pre-defined populations, and `pop' is not provided")
+  n_pop <- nlevels(pop)
+
 
   if (is.null(n_pca) ){
     if (inherits(x,"gt_pca_clust")){ # if we generated clusters, use the same pca
       n_pca   <- x$clusters$n_pca
     } else { # use all principal components
       n_pca   <- length(x$d)
+    }
+    # by default, use number of clusters minus 1
+    if (n_pca>n_pop){
+      n_pca <- n_pop - 1
     }
   } else { # if n_pca was given, check that it is not too large
     if(n_pca > ncol(x$u)) {
@@ -148,7 +154,7 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
 
   # ## optional: store loadings of variables
   # @BUG we need to sort out the slots as these are not correct
-  # @TODO out objects are missing several of these slots
+  # @TODO our objects are missing several of these slots
    if(pca_info){
      warning("conversion of objects slots is inconmplete, don't use this option yet!")
     res$pca.loadings <- as.matrix(U)
