@@ -12,23 +12,23 @@
 #' @export
 #' @examples
 #' vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
-#' package = "tidypopgen")
+#'   package = "tidypopgen"
+#' )
 #' count_vcf_variants(vcf_path)
-
-count_vcf_variants <-  function(file, chunk_size=50e6) {
-  if (!is.character(file)){
+count_vcf_variants <- function(file, chunk_size = 50e6) {
+  if (!is.character(file)) {
     stop("file should be a character giving the path of the vcf")
   }
-  if (!file.exists(file)){
+  if (!file.exists(file)) {
     stop("file is not a valid path to a vcf file")
   }
-  con <- gzfile(file, open="rb")
+  con <- gzfile(file, open = "rb")
   on.exit(close(con))
 
   # skip the header (all lines start with #)
-  while(TRUE){
+  while (TRUE) {
     a_line <- readLines(con, n = 1)
-    if (!substr(a_line,1,1)=="#"){
+    if (!substr(a_line, 1, 1) == "#") {
       break
     }
   }
@@ -40,17 +40,19 @@ count_vcf_variants <-  function(file, chunk_size=50e6) {
   isLastCR <- isLastLF <- FALSE
   isEmpty <- TRUE
   nbrOfLines <- 0L
-  while(TRUE) {
-    bfr <- readBin(con=con, what=raw(), n=chunk_size)
+  while (TRUE) {
+    bfr <- readBin(con = con, what = raw(), n = chunk_size)
     if (isLastCR) {
       # Don't count LF following a CR in previous chunk.
-      if (bfr[1L] == LF)
+      if (bfr[1L] == LF) {
         bfr[1L] <- SPC
+      }
     }
 
     n <- length(bfr)
-    if (n == 0L)
+    if (n == 0L) {
       break
+    }
 
     isEmpty <- FALSE
 
@@ -62,7 +64,7 @@ count_vcf_variants <-  function(file, chunk_size=50e6) {
       if (length(idxsCRLF) > 0L) {
         bfr <- bfr[-idxsCRLF]
         n <- length(bfr)
-        idxsCRLF <- NULL; # Not needed anymore
+        idxsCRLF <- NULL # Not needed anymore
         nCR <- length(which(bfr == CR))
       }
     }
@@ -89,5 +91,48 @@ count_vcf_variants <-  function(file, chunk_size=50e6) {
   }
 
   # note the +1, since we read one variant whilst checking for the header
-  nbrOfLines+1
+  nbrOfLines + 1
+}
+
+
+#' Counts the number of individuals in a vcf file
+#'
+#' Count the number of VCF individuals by first parsing the header, and then
+#' getting the first line, then separating on tabs.
+#'
+#' @author author Henrik Bengtsson for the original `countLines` in `R.utils`;
+#' Andrea Manica for the modified version focussed on vcf; Max Carter-Brown modified
+#' the file above.
+#' @param file name and path of vcf file (it can be compressed)
+#' @returns the number of individuals (an integer)
+#' @export
+#' @examples
+#' vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+#'   package = "tidypopgen"
+#' )
+#' count_vcf_individuals(vcf_path)
+count_vcf_individuals <- function(file) {
+  if (!is.character(file)) {
+    stop("file should be a character giving the path of the vcf")
+  }
+  if (!file.exists(file)) {
+    stop("file is not a valid path to a vcf file")
+  }
+  con <- gzfile(file, open = "rb")
+  on.exit(close(con))
+
+  # skip the header (all lines start with #)
+  while (TRUE) {
+    a_line <- readLines(con, n = 1)
+    if (!substr(a_line, 1, 1) == "#") {
+      break
+    }
+  }
+
+  # read the first variant line
+  a_line <- readLines(con, n = 1)
+  # split the line by tab
+  a_line <- strsplit(a_line, "\t")[[1]]
+  # count the number of individuals
+  sum(a_line[10:length(a_line)] != ".")
 }
