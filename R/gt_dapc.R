@@ -66,7 +66,7 @@
 
 gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
                           var_contrib=TRUE,
-                      var_loadings=FALSE, pca_info =TRUE){
+                      var_loadings=FALSE, pca_info =FALSE){
   if (!inherits(x,"gt_pca")){
     stop("'x' should be a 'gt_pca' object")
   }
@@ -86,7 +86,7 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   }
 
   if(is.null(pop.fac)) stop("x does not include pre-defined populations, and `pop' is not provided")
-  n_pop <- nlevels(pop)
+  n_pop <- nlevels(pop.fac)
 
 
   if (is.null(n_pca) ){

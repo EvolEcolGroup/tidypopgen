@@ -25,6 +25,7 @@ Imports:
     genio,
     ggplot2,
     magrittr,
+    MASS,
     patchwork,
     rlang,
     stats,
@@ -35,7 +36,9 @@ Imports:
     UpSetR,
     vctrs
 Suggests:
+    adegenet,
     knitr,
+    LEA,
     rmarkdown,
     readr,
     testthat (>= 3.0.0),
