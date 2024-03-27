@@ -66,16 +66,24 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
   } else {
     .positions <- NULL
   }
+  # now figure out if we have any snp which have already been removed
+  # those will go into `exclude`
+  loci_not_in_tibble <- seq_len(nrow(attr(.x,"bigsnp")$map))[!seq_len(nrow(attr(.x,"bigsnp")$map)) %in%
+                                         .gt_bigsnp_cols(.x)]
+  exclude <- c(loci_not_in_tibble,.gt_bigsnp_cols(.x)[exclude])
+  if (length(exclude)==0){
+    exclude <- NULL
+  }
+
   # as long as we have more than one individual
-  snp_clump_ids <- bigsnpr::snp_clumping(G = .x,
+  snp_clump_ids <- bigsnpr::snp_clumping(G = attr(.x,"bigsnp")$genotypes,
                         infos.chr = show_loci(.x)$chromosome,
-                        ind.row = .gt_bigsnp_rows(.x),
-                        ind.col = .gt_bigsnp_cols(.x),
+                        ind.row = vctrs::vec_data(.x),
                         S = S,
                         thr.r2 = thr_r2,
                         infos.pos = .positions,
                         size = size,
-                        exclude = .gt_bigsnp_cols(.x)[exclude],
+                        exclude = exclude,
                         ncores = n_cores)
   warning("this is yet to be tested!!!")
   match(snp_clump_ids, show_loci(.x)$bid_id)
