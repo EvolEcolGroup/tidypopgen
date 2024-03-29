@@ -18,3 +18,7 @@ generics::tidy
 #' @importFrom generics augment
 #' @export
 generics::augment
+
+#' @importFrom ggplot2 autoplot
+#' @export
+ggplot2::autoplot

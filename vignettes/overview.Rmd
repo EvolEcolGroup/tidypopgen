@@ -492,8 +492,30 @@ And the scores for each individual:
 tidy(example_pca)
 ```
 
-Rather than wrangling the scores obtained in this way to match them to the
-original data table, we can simply use `augment`:
+We can create quick plots with `autoplot`:
+```{r}
+autoplot(example_pca)
+```
+
+And look at the scores with:
+```{r}
+autoplot(example_pca, type = "scores")
+
+```
+`autoplots` are delibeartely kept simple, they are just a way to quickly inspect the results.
+They are `ggplot2` objects, and so they can be further improved with the usual
+`ggplot2` grammar:
+```{r}
+library(ggplot2)
+autoplot(example_pca, type = "scores") +
+  aes(color = example_gt$population) +
+  labs(color = "population")
+
+```
+
+For more advanced/customised plots, we generally want to bring the information into the
+`gen_tibble`, so that we can create the plots from scratch. `augment` allows us
+to do just that, without any complex wrangling:
 
 ```{r}
 example_gt <- augment(example_pca , data= example_gt, k=2)

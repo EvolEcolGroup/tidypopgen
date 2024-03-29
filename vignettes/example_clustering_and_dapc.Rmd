@@ -84,7 +84,6 @@ anole_pca <- anole_gt %>% gt_pca_partialSVD(k=30)
 ```
 
 
-
 Let us add the PC scores to our `gen_tibble`:
 ```{r}
 anole_gt <- augment(anole_pca , data = anole_gt)

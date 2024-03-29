@@ -5,6 +5,7 @@
 \alias{reexports}
 \alias{tidy}
 \alias{augment}
+\alias{autoplot}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -13,5 +14,7 @@ below to see their documentation.
 
 \describe{
   \item{generics}{\code{\link[generics]{augment}}, \code{\link[generics]{tidy}}}
+
+  \item{ggplot2}{\code{\link[ggplot2]{autoplot}}}
 }}
 

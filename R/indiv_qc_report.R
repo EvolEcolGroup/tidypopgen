@@ -14,7 +14,7 @@ indiv_qc_report <- function(.x,...){
 }
 
 #' @export
-autoplot.indiv_qc_report <- function(object, type = c("scatter"),miss_threshold = NULL,...){
+autoplot.indiv_qc_report <- function(object, type = c("scatter"),miss_threshold = NULL, ...){
 
   rlang::check_dots_empty()
 
@@ -37,7 +37,7 @@ autoplot.indiv_qc_report <- function(object, type = c("scatter"),miss_threshold 
 }
 
 
-autoplot_indiv_qc_report <- function(object, miss_threshold = miss_threshold,...){
+autoplot_indiv_qc_report <- function(object, miss_threshold = miss_threshold){
 
   miss_threshold <- miss_threshold
 
