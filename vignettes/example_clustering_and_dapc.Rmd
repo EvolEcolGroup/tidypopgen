@@ -165,6 +165,13 @@ anole_dapc <- gt_dapc(anole_clusters)
 Note that `gt_dapc()` takes automatically the number of clusters form the `anole_clusters` object,
 but can change that behaviour by setting some of its parameters (see the help
 page for `gt_dapc()`).
+`anole_dapc` is of class `gt_dapc`, which is a subclass of `dapc` from `adegenet`. `gt_dapc` has its
+own tidiers and autoplot function, but it is possible to use a number of functions from `adegenet` if
+the functionality is not yet available in `tidypopgen` (at some point, we probably will remove this,
+as the objects are mostly compatible, but not fully...).
+
+[ADD SOME CODE TO SHOW OFF THE TIDIERS AND AUTOPLOT INSTEAD OF USING ADEGENET FUNCTIONS]
+
 `anole_dapc` is of class `dapc`, so we can use the standard `adegenet` functions:
 ```{r}
 anole_dapc

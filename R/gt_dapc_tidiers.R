@@ -1,30 +1,27 @@
-#' Tidy a `gt_pca` object
+#' Tidy a `gt_dapc` object
 #'
-#' This summarizes information about the components of a `gt_pca` from the
+#' This summarizes information about the components of a `gt_dapc` from the
 #' `tidypopgen` package. The parameter `matrix` determines which element is
-#' returned. Column names of the tidied output match those returned by
-#' [broom::tidy.prcomp], the tidier for the standard PCA objects returned
-#' by [stats::prcomp].
+#' returned.
 #'
-#' @param x A `gt_pca` object returned by one of the `gt_pca_*` functions.
-#' @param matrix Character specifying which component of the PCA should be
+#' @param x A `gt_dapc` object (as returned by [gt_dapc()]).
+#' @param matrix Character specifying which component of the DAPC should be
 #'   tidied.
 #'
 #'   - `"samples"`, `"scores"`, or `"x"`: returns information about
-#'     the map from the original space into principle components space
-#'     (this is equivalent to product of *u* and *d*).
+#'     the map from the original space into the least discriminant axes.
 #'
 #'   - `"v"`, `"rotation"`, `"loadings"` or `"variables"`: returns information
-#'     about the map from principle components space back into the original
+#'     about the map from discriminant axes space back into the original
 #'     space.
 #'
-#'   - `"d"`, `"eigenvalues"` or `"pcs"`: returns information about the
+#'   - `"d"`, `"eigenvalues"` or `"lds"`: returns information about the
 #'     eigenvalues.
 #'
 #' @param ... Not used. Needed to match generic signature only.
 #'
 #' @return A [tibble::tibble] with columns depending on the component of
-#'   PCA being tidied.
+#'   DAPC being tidied.
 #'
 #'   If `"scores"` each row in the
 #'   tidied output corresponds to the original data in PCA space. The columns
@@ -32,7 +29,7 @@
 #'
 #'   \item{`row`}{ID of the original observation (i.e. rowname from original
 #'     data).}
-#'   \item{`PC`}{Integer indicating a principal component.}
+#'   \item{`LD`}{Integer indicating a principal component.}
 #'   \item{`value`}{The score of the observation for that particular principal
 #'     component. That is, the location of the observation in PCA space.}
 #'
@@ -42,80 +39,77 @@
 #'
 #'   \item{`row`}{The variable labels (colnames) of the data set on
 #'   which PCA was performed.}
-#'   \item{`PC`}{An integer vector indicating the principal component.}
+#'   \item{`LD`}{An integer vector indicating the principal component.}
 #'   \item{`value`}{The value of the eigenvector (axis score) on the
 #'   indicated principal component.}
 #'
 #'   If `"eigenvalues"`, the columns are:
 #'
-#'   \item{`PC`}{An integer vector indicating the principal component.}
+#'   \item{`LD`}{An integer vector indicating the discriminant axis.}
 #'   \item{`std.dev`}{Standard deviation (i.e. sqrt(eig/(n-1))) explained by
-#'   this PC (for compatibility with `prcomp`.}
+#'   this DA (for compatibility with `prcomp`.}
 #'   \item{`cumulative`}{Cumulative variation explained by
 #'     principal components up to this component (note that this is NOT
 #'     phrased as a percentage of total variance, since many methods
 #'     only estimate a truncated SVD.}
 #'
-#' @aliases gt_pca_tidiers
+#' @aliases gt_dapc_tidiers
 #' @export
-#' @seealso [gt_pca_autoSVD()] [augment.gt_pca()]
+#' @seealso [gt_dapc()] [augment.gt_dapc()]
 
-tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
+tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
   if (length(matrix) > 1) {
     stop("Must select a single matrix to tidy.", call. = FALSE)
   }
 
   MATRIX <- c(
-    "rotation", "x", "variables", "samples", "v", "pcs", "d",
+    "rotation", "x", "variables", "samples", "v", "lds", "d",
     "scores", "loadings", "eigenvalues"
   )
   matrix <- rlang::arg_match(matrix, MATRIX)
 
-  if (matrix %in% c("pcs", "d", "eigenvalues")) {
-    total_var <- sum(x$scale)
-    ret <- tibble(PC = seq_len(length(x$d)),
-                  "std.dev" = sqrt(x$d^2/nrow(x$u)))  %>%
+  if (matrix %in% c("lds", "d", "eigenvalues")) {
+    # total_var <- sum(x$eig)
+    ret <- tibble(LC = seq_len(length(x$eig)),
+                  "eigenvalue" = x$eig)  %>%
     # mutate(percent =  (std.dev)^2/nrow(x$d),
-      mutate( cumulative = cumsum(.data$std.dev))
+      mutate( cumulative = cumsum(.data$eigenvalue))
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
-    ret <- x$v %>%
+    ret <- x$loadings %>%
       tibble::as_tibble(rownames = "column") %>%
       tidyr::pivot_longer(
         cols = -"column",
-        names_to = "PC",
+        names_to = "LD",
         values_to = "value"
       )
-    ret <- mutate(ret, PC = as.numeric(stringr::str_replace(.data$PC, "V", "")))
-    if (is.null(rownames(x$v))) ret$column <- as.integer(ret$column)
   } else if (matrix %in% c("x", "samples", "scores")) {
-    ret <- sweep(x$u, 2, x$d, '*')
-    colnames(ret) <- paste0("PC",seq_len(ncol(ret)))
+    ret <- x$ind.coord
     ret <- ret %>%
       tibble::as_tibble(rownames = "row") %>%
       tidyr::pivot_longer(
         cols = -"row",
-        names_to = "PC",
+        names_to = "LD",
         values_to = "value")
-    if (is.null(rownames(x$u))) ret$row <- as.integer(ret$row)
+    # change the LD to a numeric
+    ret <- mutate(ret, LD = as.numeric(stringr::str_replace(.data$LD, "LD", "")))
+
   }
 
-  # change the PC to a numeric
-  ret <- mutate(ret, PC = as.integer(stringr::str_replace(.data$PC, "PC", "")))
   as_tibble(ret)
 }
 
 
-#' Augment data with information from a gt_pca object
+#' Augment data with information from a gt_dapc object
 #'
-#' Augment for `gt_pca` accepts a model object and a dataset and adds
+#' Augment for `gt_dapc` accepts a model object and a dataset and adds
 #' scores to each
 #' observation in the dataset. Scores for each component are stored in a
-#' separate column, which is given name with the pattern ".fittedPC1",
-#' ".fittedPC2", etc. For consistency with [broom::augment.prcomp], a column
+#' separate column, which is given name with the pattern ".fittedLD1",
+#' ".fittedLD2", etc. For consistency with [broom::augment.prcomp], a column
 #' ".rownames" is also returned; it is a copy of 'id', but it ensures that
 #' any scripts written for data augmented with [broom::augment.prcomp] will
 #' work out of the box (this is especially helpful when adapting plotting scripts).
-#' @param x  A `gt_pca` object returned by one of the `gt_pca_*` functions.
+#' @param x  A `gt_dapc` object returned by [gt_dapc()].
 #' @param data the `gen_tibble` used to run the PCA.
 #' @param k the number of components to add
 #' @param ... Not used. Needed to match generic signature only.
@@ -123,23 +117,23 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
 #'   additional columns containing each observation's projection into
 #'   PCA space.
 #' @export
-#' @seealso [gt_pca_autoSVD()] [gt_pca_tidiers]
+#' @seealso [gt_dapc()] [gt_dapc_tidiers]
 
-augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
-    if (any(is.null(k), (k > ncol(x$u)))){
-      k <- ncol(x$u)
-    }
-    pred <- as.data.frame(sweep(x$u, 2, x$d, '*'))[,1:k]
-    names(pred) <- paste0(".fittedPC", seq_len(ncol(pred)))
+augment.gt_dapc <- function(x, data = NULL, k= NULL, ...) {
+  if (is.null(k)){
+    k <- ncol(x$ind.coord)
+  }
+    pred <- as.data.frame(x$ind.coord)[,1:k]
+    names(pred) <- paste0(".fittedLD", seq_len(ncol(pred)))
     # browser()
     ret <- if (!missing(data) && !is.null(data)) {
       #check that names of the two columns are in sync
-      if (!all.equal(data$id, rownames(as.data.frame(x$u)))){
-        stop("the data id column does not correspond to the individuals in the pca object 'x'")
+      if (!all.equal(data$id, rownames(pred))){
+        stop("the data id column does not correspond to the individuals in the gt_dapc object 'x'")
       }
       data %>% dplyr::mutate(.rownames = data$id) %>% tibble::add_column(pred)
     } else {
-      tibble(.rownames = rownames(as.data.frame(x$u[,1:k]))) %>%
+      tibble(.rownames = rownames(pred)) %>%
         add_column(pred)
     }
     ret
@@ -147,17 +141,15 @@ augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
 
 
 # a print method
-#' @method print gt_pca
+#' @method print gt_dapc
 #' @export
-print.gt_pca <- function(x, ...){
-  cat(" === PCA of gen_tibble object ===")
-  cat("\nMethod: ")
-  print(x$method)
+print.gt_dapc <- function(x, ...){
+  cat(" === DAPC of gen_tibble object ===")
   cat("\nCall ($call):")
   print(x$call)
-  cat("\nEigenvalues ($d):\n", round(utils::head(x$d,6),3), ifelse(length(x$d)>6, "...\n", "\n") )
-  cat("\nPrincipal component scores ($u):\n matrix with", nrow(x$u), "rows (individuals) and", ncol(x$u), "columns (axes)", "\n")
-  cat("\nLoadings (Principal axes) ($v):\n matrix with", nrow(x$v), "rows (SNPs) and", ncol(x$v), "columns (axes)", "\n")
+  cat("\nEigenvalues ($eig):\n", round(utils::head(x$eig,6),3), ifelse(length(x$eig)>6, "...\n", "\n") )
+  cat("\nLD scores ($ind.coord):\n matrix with", nrow(x$ind.coord), "rows (individuals) and", ncol(x$ind.coord), "columns (LD axes)", "\n")
+  cat("\nLoadings ($loadings):\n matrix with", nrow(x$loadings), "rows (PC axes) and", ncol(x$loadings), "columns (LD axes)", "\n")
   cat("\n")
 }
 
