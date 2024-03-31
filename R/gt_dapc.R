@@ -33,7 +33,7 @@
 #' @param pop either a factor indicating the group membership of individuals;
 #' or an integer defining the desired *k* if x is a `gt_pca_clust`; or NULL, if
 #' 'x' is a `gt_pca_clust` and contain an element 'best_k',
-#' usually generated with [gt_pca_best_k()],
+#' usually generated with [gt_pca_clust_best_k()],
 #' which will be used to select the clustering level.
 #' @param n_pca number of principal components to be used in the Discriminant
 #' Analysis. If NULL, k-1 will be used.
@@ -194,17 +194,19 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
 
 #' Autoplots for `gt_dapc` objects
 #'
-#' This function produces simple plots to quickly inspect an object. They are
-#' not customisable; we recommend that you use `ggplot2` to produce publication
-#' ready plots. For `gt_dapc`, the following types of plots are available:
+#' For `gt_dapc`, the following types of plots are available:
 #' - `screeplot`: a plot of the eigenvalues of the discriminant axes
 #' - `scores` a scatterplot of the scores of each individual on two discriminant
-#' axes (defined by `da`)
-#' - `loadings` a plot of loadings of all loci for a discriminant axis (chosen with `da`)
+#' axes (defined by `ld`)
+#' - `loadings` a plot of loadings of all loci for a discriminant axis (chosen with `ld`)
+#'
+#' `autoplot` produces simple plots to quickly inspect an object. They are
+#' not customisable; we recommend that you use `ggplot2` to produce publication
+#' ready plots.
 #'
 #' @param object an object of class `gt_dapc`
 #' @param type the type of plot (one of "screeplot", "scores" and "loadings")
-#' @param k the principal components to be plotted: for scores, a pair of values
+#' @param ld the principal components to be plotted: for scores, a pair of values
 #' e.g. c(1,2); for `loadings` either one or more values.
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
@@ -212,24 +214,25 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
 #' @export
 autoplot.gt_pca <- function(object,
                             type=c("screeplot", "scores","loadings"),
-                            k = NULL, ...)
+                            ld = NULL, ...)
 {
   rlang::check_dots_empty()
   type <- match.arg(type)
+  stop("autoplot for gt_dapc not avaialble yet")
   if (type== "screeplot") {
     plot(object, type="screeplot")
   } else if (type == "scores"){
-    if (is.null(k)){
-      k <- c(1,2)
+    if (is.null(ld)){
+      ld <- c(1,2)
     }
-    if (length(k)!=2){
-      stop("for 'scores' plots, 'pc' should be a pair of values, e.g. c(1,2)")
+    if (length(ld)!=2){
+      stop("for 'scores' plots, 'ld' should be a pair of values, e.g. c(1,2)")
     }
-    plot(object, type = "scores", scores = k)
+    plot(object, type = "scores", scores = ld)
   } else if (type == "loadings"){
-    if (is.null(k)){
-      k <- 1
+    if (is.null(ld)){
+      ld <- 1
     }
-    plot(object, type = "loadings", loadings = k)
+    plot(object, type = "loadings", loadings = ld)
   }
 }

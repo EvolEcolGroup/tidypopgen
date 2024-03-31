@@ -7,7 +7,7 @@
 #' a principal component analysis (PCA). For each model,
 #' several statistical measures of goodness of fit
 #' are computed, which allows to choose the optimal k using the function
-#' [gt_pca_best_k()].
+#' [gt_pca_clust_best_k()].
 #' See details for a description of how to select the optimal k
 #' and vignette("adegenet-dapc") for a tutorial.
 #' @param x an object of class `gt_pca`, generated with [gt_pca()].

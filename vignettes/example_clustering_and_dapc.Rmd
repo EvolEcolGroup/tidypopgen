@@ -80,16 +80,41 @@ anole_gt <- gt_impute_simple(anole_gt)
 And now:
 ```{r}
 anole_pca <- anole_gt %>% gt_pca_partialSVD(k=30)
-#, fun_scaling = big_scale(scale=FALSE))
 ```
 
+Let us look at the object:
+```{r}
+anole_pca
+```
 
-Let us add the PC scores to our `gen_tibble`:
+The `print` function (implicitely called when we type the name of the object)
+gives us information about the most important elements in the object.
+
+We can extract those elements with the `tidy` function, which returns a tibble
+that can be easily used for further analysis, e.g.:
+```{r}
+tidy(anole_pca, matrix="eigenvalues")
+
+```
+
+There is also an `autoplot` method that allows to visualise those elements:
+```{r}
+autoplot(anole_pca, type="screeplot")
+```
+
+To plot the sample in principal coordinates space, we can simply use:
+```{r}
+autoplot(anole_pca, type ="scores")
+```
+
+For more complex/publication ready plots, we will want to add the PC scores
+to the tibble, so that we can create a custom plot with `ggplot2`. We can easily
+add the data with the `augment` method:
 ```{r}
 anole_gt <- augment(anole_pca , data = anole_gt)
 ```
 
-And plot the data in PCA space:
+And now we can use `ggplot2` directly to generate our plot:
 ```{r}
 library(ggplot2)
 anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) + 
@@ -136,18 +161,17 @@ This object retains information about a large number of possible *k*. To choose 
 *k*, we plot the number of clusters against a measure of fit. BIC has been shown
 to be a very good metric under many scenarios:
 ```{r}
-# we need an autoplot function for this type of object
-plot(anole_clusters$clusters$BIC~c(1:5))
+autoplot(anole_clusters)
 ```
 
 We are looking for the minimum value of BIC. However, we notice that there is a quick levelling
 off in the decrease in BIC at
 3 clusters. Arguably, these are sufficient to capture the main structure (and that makes
 sense given what we saw in the PCA). We can also use a number of algorithmic approaches (based on the original `find.clusters()` function in `adegenet`) to choose the best *k* value
-from this plot through `gt_pca_clust_choose_n()`. We will use the defaults (BIC with "diffNgroup",
+from this plot through `gt_pca_clust_best_k()`. We will use the defaults (BIC with "diffNgroup",
 see the help page for a description of the various options):
 ```{r}
-anole_clusters <- gt_pca_best_k(anole_clusters)
+anole_clusters <- gt_pca_clust_best_k(anole_clusters)
 ```
 The algorithm confirms our choice. Note that this function simply adds an element
 `$best_k` to the `gt_pca_clust` object:
@@ -164,10 +188,21 @@ anole_dapc <- gt_dapc(anole_clusters)
 
 Note that `gt_dapc()` takes automatically the number of clusters form the `anole_clusters` object,
 but can change that behaviour by setting some of its parameters (see the help
-page for `gt_dapc()`).
+page for `gt_dapc()`). Whenwe print the object, we are given information about
+the most important elements of the object:
+
+```{r}
+anole_dapc
+
+```
+
+these elements can be obtained with tidiers
+
+
+
 `anole_dapc` is of class `gt_dapc`, which is a subclass of `dapc` from `adegenet`. `gt_dapc` has its
 own tidiers and autoplot function, but it is possible to use a number of functions from `adegenet` if
-the functionality is not yet available in `tidypopgen` (at some point, we probably will remove this,
+the functionality is not yet available in `tidypopgen` (at some point, we might remove this,
 as the objects are mostly compatible, but not fully...).
 
 [ADD SOME CODE TO SHOW OFF THE TIDIERS AND AUTOPLOT INSTEAD OF USING ADEGENET FUNCTIONS]

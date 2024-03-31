@@ -117,7 +117,7 @@ This object retains information about a large number of possible *k*. We can cho
 the best k with `gt_pca_clust_choose_n()` (we will use the defaults, but there
 are multiple statistics and criteria that we can use to choose *n*):
 ```{r}
-example_clusters <- gt_pca_best_k(example_clusters)
+example_clusters <- gt_pca_clust_best_k(example_clusters)
 ```
 
 Now we can run a DAPC:

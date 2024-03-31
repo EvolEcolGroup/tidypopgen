@@ -68,7 +68,7 @@
 #' @returns a 'gt_pca_clust' object with an added element 'best_k'
 #' @export
 
-gt_pca_best_k <- function(x, stat = c("BIC", "AIC", "WSS"),
+gt_pca_clust_best_k <- function(x, stat = c("BIC", "AIC", "WSS"),
                                   criterion = c("diffNgroup", "min", "goesup",
                                                 "smoothNgoesup", "goodfit"),
                                   quiet=FALSE){

@@ -16,14 +16,16 @@ NULL
 
 #' Autoplots for `gt_pca` objects
 #'
-#' This function produces simple plots to quickly inspect an object. They are
-#' not customisable; we recommend that you use `ggplot2` to produce publication
-#' ready plots. For `gt_pca`, the following types of plots are available:
+#' For `gt_pca`, the following types of plots are available:
 #' - `screeplot`: a plot of the eigenvalues of the principal components (currently
 #' it plots the singular value)
 #' - `scores` a scatterplot of the scores of each individual on two principal
 #' components (defined by `pc`)
 #' - `loadings` a plot of loadings of all loci for a given component (chosen with `pc`)
+#'
+#' `autoplot` produces simple plots to quickly inspect an object. They are
+#' not customisable; we recommend that you use `ggplot2` to produce publication
+#' ready plots.
 #'
 #' @param object an object of class `gt_pca`
 #' @param type the type of plot (one of "screeplot", "scores" and "loadings")

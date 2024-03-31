@@ -7,7 +7,7 @@
 #' a principal component analysis (PCA). For each model,
 #' several statistical measures of goodness of fit
 #' are computed, which allows to choose the optimal k using the function
-#' [gt_pca_best_k()].
+#' [gt_pca_clust_best_k()].
 #' See details for a description of how to select the optimal k
 #' and vignette("adegenet-dapc") for a tutorial.
 #' @param  x a `gt_pca` object returned by one of the `gt_pca_*` functions.
@@ -126,4 +126,43 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
 .compute.wss <- function(x, f) {
   x.group.mean <- apply(x, 2, tapply, f, mean)
   sum((x - x.group.mean[as.character(f),])^2)
+}
+
+
+#' Autoplots for `gt_pca_clust` objects
+#'
+#' For `gt_pca_clust`, `autoplot` produces a plot of a metric of choice ('BIC',
+#' 'AIC' or 'WSS') against the number of clusters (*k*). This plot is can be
+#' used to infer the best value of *k*, which corresponds to the smallest
+#' value of the metric (the minimum in an 'elbow' shaped curve). In some cases,
+#' there is not 'elbow' and the metric keeps decreasing with increasing *k*;
+#' in such cases, it is customary to choose the value of *k* at which the
+#' decrease in the metric reaches as plateau. For a programmatic way of choosing
+#' *k*, use [gt_pca_clust_best_k()].
+#'
+#' `autoplot` produces simple plots to quickly inspect an object. They are
+#' not customisable; we recommend that you use `ggplot2` to produce publication
+#' ready plots.
+#'
+#' @param object an object of class `gt_dapc`
+#' @param metric the metric to plot on the y axies, one of 'BIC', 'AIC', or
+#' 'WSS' (with sum of squares)
+#' @param ... not currently used.
+#' @returns a `ggplot2` object
+#' @rdname autoplot_gt_pca
+#' @export
+
+autoplot.gt_pca_clust <- function(object,
+                            metric = c("BIC", "AIC", "WSS"),
+                            ...)
+{
+  metric <- match.arg(metric)
+  # create a small tibble with the data of interest
+  metric_tbl <- tibble::tibble(metric = object$clusters[[metric]],
+                               k = object$clusters$k)
+  ggplot2::ggplot(data=metric_tbl, ggplot2::aes(x=.data$k, y=.data$metric))+
+    ggplot2::geom_point()+
+    ggplot2::geom_line()+
+    ggplot2::labs(y=metric)
+
 }

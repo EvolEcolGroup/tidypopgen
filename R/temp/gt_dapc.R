@@ -30,7 +30,7 @@
 #' @param pop either a factor indicating the group membership of individuals;
 #' or an integer defining the desired *k* if x is a `gt_pca_clust`; or NULL, if
 #' 'x' is a `gt_pca_clust` and contain an element 'best_k',
-#' usually generated with [gt_pca_best_k()],
+#' usually generated with [gt_pca_clust_best_k()],
 #' which will be used to select the clustering level.
 #' @param n_pca number of principal components to be used in the Discriminant
 #' Analysis. If NULL, all components will be used.

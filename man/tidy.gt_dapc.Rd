@@ -64,5 +64,5 @@ This summarizes information about the components of a \code{gt_dapc} from the
 returned.
 }
 \seealso{
-\code{\link[=gt_dapc]{gt_dapc()}} \code{\link[=augment.dapc]{augment.dapc()}}
+\code{\link[=gt_dapc]{gt_dapc()}} \code{\link[=augment.gt_dapc]{augment.gt_dapc()}}
 }

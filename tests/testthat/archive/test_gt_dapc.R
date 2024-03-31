@@ -9,7 +9,7 @@ testthat::test_that("gt_pca is equivalent to adegenet glPca",{
   test_clusters <- gt_pca_find_clusters(test_pca)
   # in the assignments for k=3, the maximum group id should be 3
   expect_true(max(test_clusters$clusters$groups[[3]])==3)
-  test_clusters <- gt_pca_best_k(test_clusters, quiet=TRUE)
+  test_clusters <- gt_pca_clust_best_k(test_clusters, quiet=TRUE)
   # check that we now have the info
   expect_true(!is.null(test_clusters$best_k))
   # and now dapc

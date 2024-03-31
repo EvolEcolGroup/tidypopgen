@@ -20,7 +20,7 @@ gt_dapc(
 \item{pop}{either a factor indicating the group membership of individuals;
 or an integer defining the desired \emph{k} if x is a \code{gt_pca_clust}; or NULL, if
 'x' is a \code{gt_pca_clust} and contain an element 'best_k',
-usually generated with \code{\link[=gt_pca_best_k]{gt_pca_best_k()}},
+usually generated with \code{\link[=gt_pca_clust_best_k]{gt_pca_clust_best_k()}},
 which will be used to select the clustering level.}
 
 \item{n_pca}{number of principal components to be used in the Discriminant

@@ -53,7 +53,7 @@ increasing number of clusters (k), after transforming data using
 a principal component analysis (PCA). For each model,
 several statistical measures of goodness of fit
 are computed, which allows to choose the optimal k using the function
-\code{\link[=gt_pca_best_k]{gt_pca_best_k()}}.
+\code{\link[=gt_pca_clust_best_k]{gt_pca_clust_best_k()}}.
 See details for a description of how to select the optimal k
 and vignette("adegenet-dapc") for a tutorial.
 }
