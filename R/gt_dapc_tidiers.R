@@ -70,7 +70,7 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
 
   if (matrix %in% c("lds", "d", "eigenvalues")) {
     # total_var <- sum(x$eig)
-    ret <- tibble(LC = seq_len(length(x$eig)),
+    ret <- tibble(LD = seq_len(length(x$eig)),
                   "eigenvalue" = x$eig)  %>%
     # mutate(percent =  (std.dev)^2/nrow(x$d),
       mutate( cumulative = cumsum(.data$eigenvalue))

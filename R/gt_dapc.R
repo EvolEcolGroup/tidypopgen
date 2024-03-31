@@ -212,15 +212,18 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
 #' @returns a `ggplot2` object
 #' @rdname autoplot_gt_pca
 #' @export
-autoplot.gt_pca <- function(object,
+autoplot.gt_dapc <- function(object,
                             type=c("screeplot", "scores","loadings"),
                             ld = NULL, ...)
 {
   rlang::check_dots_empty()
   type <- match.arg(type)
-  stop("autoplot for gt_dapc not avaialble yet")
+#  stop("autoplot for gt_dapc not avaialble yet")
   if (type== "screeplot") {
-    plot(object, type="screeplot")
+    tidy(object, matrix="eigenvalues") %>%
+      ggplot2::ggplot(ggplot2::aes(x=.data$LD,y=.data$eigenvalue)) +
+      ggplot2::geom_point()+
+      ggplot2::geom_line()
   } else if (type == "scores"){
     if (is.null(ld)){
       ld <- c(1,2)
