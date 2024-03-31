@@ -198,12 +198,17 @@ anole_dapc
 
 These elements can be obtained with tidiers, as for pca:
 ```{r}
-tidy(anole_dapc)
+tidy(anole_dapc, matrix="eigenvalues")
 ```
 
 And they can be visualised with `autoplot`:
 ```{r}
-autoplot(anole_dapc)
+autoplot(anole_dapc, type="screeplot")
+```
+
+We can plot the scores with:
+```{r}
+autoplot(anole_dapc, type="scores")
 ```
 
 

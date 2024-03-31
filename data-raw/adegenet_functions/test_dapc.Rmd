@@ -62,7 +62,8 @@ num_clust <- find.clusters(anole_genlight,n.pca = 10)
 ```
 
 ```{r}
-anole_gl_dapc <- dapc(anole_genlight, num_clust$grp,n.pca = 10,n.da = 2)
+anole_gl_dapc <- dapc(anole_genlight, num_clust$grp,n.pca = 10,n.da = 2,
+                      var.loadings=TRUE)
 
 ```
 

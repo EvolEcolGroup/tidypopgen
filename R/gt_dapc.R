@@ -66,7 +66,7 @@
 
 gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
                           var_contrib=TRUE,
-                      var_loadings=FALSE, pca_info =FALSE){
+                      var_loadings=TRUE, pca_info =FALSE){
   if (!inherits(x,"gt_pca")){
     stop("'x' should be a 'gt_pca' object")
   }
@@ -112,11 +112,11 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
     }
 
 
-  U <- x$u[, 1:n_pca ,  drop=FALSE] # principal axes
+  V <- x$v[, 1:n_pca ,  drop=FALSE] # principal axes
   XU <- sweep(x$u, 2, x$d, '*')[, 1:n_pca ,  drop=FALSE] # principal components
   # note taht this is the proportion of variance out of the variance we started with (i.e. what we retained with the PCAs)
   XU.lambda <- sum(x$d[1:n_pca ] )/sum(x$d) # sum of retained eigenvalues
-  names(U) <- paste("PCA-pa", 1:ncol(U), sep=".")
+  names(V) <- paste("PCA-pa", 1:ncol(V), sep=".")
   names(XU) <- paste("PCA-pc", 1:ncol(XU), sep=".")
 
 
@@ -136,7 +136,6 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   n_da <- min(n_da, length(levels(pop.fac ))-1, n_pca ,  sum(ldaX$svd>1e-10)) # can't be more than K-1 disc. func., or more than n.pca
   n_da <- round(n_da)
   predX <- stats::predict(ldaX, dimen=n_da)
-
 
   ## BUILD RESULT
   res <- list()
@@ -160,7 +159,7 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   # @TODO our objects are missing several of these slots
    if(pca_info){
      warning("conversion of objects slots is inconmplete, don't use this option yet!")
-    res$pca.loadings <- as.matrix(U)
+    res$pca.loadings <- as.matrix(V)
      # res$pca.cent <- x$cent
      # if(!is.null(x$norm)) {
      #   res$pca.norm <- x$norm
@@ -173,9 +172,11 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
 
   ## optional: get loadings of variables
   if(var_contrib || var_loadings){
+    browser()
     message("conversion of objects slots needs to be tested for this option")
-    var.load <- as.matrix(U) %*% as.matrix(ldaX$scaling[,1:n_da,drop=FALSE])
-
+    var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[,1:n_da,drop=FALSE])
+    # TODO we need to add rownames for pca$v in the pca functions
+    #rownames(var.load)
     if(var_contrib){
       f1 <- function(x){
         temp <- sum(x*x)
@@ -231,7 +232,14 @@ autoplot.gt_dapc <- function(object,
     if (length(ld)!=2){
       stop("for 'scores' plots, 'ld' should be a pair of values, e.g. c(1,2)")
     }
-    plot(object, type = "scores", scores = ld)
+    tibble(cluster=object$grp) %>%
+      mutate(LDa = object$ind.coord[,ld[1]],
+             LDb = object$ind.coord[,ld[2]]) %>%
+      ggplot2::ggplot(ggplot2::aes(x=.data$LDa, y=.data$LDb,
+                                   colour = .data$cluster))+
+      ggplot2::geom_point()+
+      ggplot2::stat_ellipse()+
+      ggplot2::labs(x=paste0("LD",ld[1]), y=paste0("LD",ld[2]))
   } else if (type == "loadings"){
     if (is.null(ld)){
       ld <- 1
