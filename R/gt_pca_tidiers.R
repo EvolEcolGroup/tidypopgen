@@ -57,8 +57,9 @@
 #'     only estimate a truncated SVD.}
 #'
 #' @aliases gt_pca_tidiers
+#' @rdname tidy_gt_pca
 #' @export
-#' @seealso [gt_pca_autoSVD()] [augment.gt_pca()]
+#' @seealso [gt_pca_autoSVD()] [augment_gt_pca]
 
 tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
   if (length(matrix) > 1) {
@@ -123,6 +124,7 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
 #'   additional columns containing each observation's projection into
 #'   PCA space.
 #' @export
+#' @name augment_gt_pca
 #' @seealso [gt_pca_autoSVD()] [gt_pca_tidiers]
 
 augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
@@ -144,6 +146,46 @@ augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
     }
     ret
 }
+
+
+#' Augment the loci table with information from a gt_pca object
+#'
+#' Augment for `gt_pca` accepts a model object and a `gen_tibble` and adds
+#' loadings for each locus to the loci table. Loadings for each component are stored in a
+#' separate column, which is given name with the pattern ".loadingPC1",
+#' ".loadingPC2", etc. If `data` is missing, then a tibble with the lodings is returned.
+#' @param x  A `gt_pca` object returned by one of the `gt_pca_*` functions.
+#' @param data the `gen_tibble` used to run the PCA.
+#' @param k the number of components to add
+#' @param ... Not used. Needed to match generic signature only.
+#' @return A [gen_tibble] with a loadings added to the loci tibble (accessible
+#' with [show_loci()]. If `data` is missing, a tibble of loadings.
+#' @export
+#' @name augment_loci_gt_pca
+#' @seealso [gt_pca_autoSVD()] [gt_pca_tidiers]
+
+augment_loci.gt_pca <- function(x, data = NULL, k= NULL, ...) {
+  if (any(is.null(k), (k > ncol(x$v)))){
+    k <- ncol(x$v)
+  }
+  loadings <- as.data.frame(x$v)[,1:k]
+  names(loadings) <- paste0(".loadingPC", seq_len(ncol(loadings)))
+  # browser()
+  ret <- if (!missing(data) && !is.null(data)) {
+    #check that names of the two columns are in sync
+# @TODO reinstate this check once we have rownames in the pca object for loadings
+   if (!all.equal(show_loci_names(data), rownames(as.data.frame(x$v)))){
+     stop("the loci names in 'data' do not correspond to the loci in the pca object 'x'")
+   }
+    show_loci(data) <- show_loci(data) %>% tibble::add_column(loadings)
+  } else {
+    # @TODO fir this once we have loci names in the pca object
+    tibble(.rownames = rownames(x$v)) %>%
+      add_column(loadings)
+  }
+  ret
+}
+
 
 
 # a print method

@@ -67,5 +67,5 @@ returned. Column names of the tidied output match those returned by
 by \link[stats:prcomp]{stats::prcomp}.
 }
 \seealso{
-\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \code{\link[=augment.gt_pca]{augment.gt_pca()}}
+\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \link{augment_gt_pca}
 }

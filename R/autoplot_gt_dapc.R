@@ -4,7 +4,7 @@
 #' - `screeplot`: a plot of the eigenvalues of the discriminant axes
 #' - `scores` a scatterplot of the scores of each individual on two discriminant
 #' axes (defined by `ld`)
-#' - `loadings` a plot of loadings of all loci for a discriminant axis (chosen with `ld`)
+#' - `loci_loadings` a plot of loadings of all loci for a discriminant axis (chosen with `ld`)
 #'
 #' `autoplot` produces simple plots to quickly inspect an object. They are
 #' not customisable; we recommend that you use `ggplot2` to produce publication
@@ -19,7 +19,7 @@
 #' @rdname autoplot_gt_pca
 #' @export
 autoplot.gt_dapc <- function(object,
-                             type=c("screeplot", "scores","loadings"),
+                             type=c("screeplot", "scores","loci_loadings"),
                              ld = NULL, ...)
 {
   rlang::check_dots_empty()
@@ -45,7 +45,7 @@ autoplot.gt_dapc <- function(object,
       ggplot2::geom_point()+
       ggplot2::stat_ellipse()+
       ggplot2::labs(x=paste0("LD",ld[1]), y=paste0("LD",ld[2]))
-  } else if (type == "loadings"){
+  } else if (type == "loci_loadings"){
     if (is.null(ld)){
       ld <- 1
     }

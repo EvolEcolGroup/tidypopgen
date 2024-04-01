@@ -110,7 +110,7 @@ autoplot(anole_pca, type ="scores")
 ```
 
 `autoplots` are deliberately kept simple: they are just a way to quickly inspect the results.
-They are `ggplot2` objects, and so they can be further embellished with the usual
+They generate `ggplot2` objects, and so they can be further embellished with the usual
 `ggplot2` grammar:
 ```{r}
 library(ggplot2)
@@ -133,6 +133,21 @@ anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) +
 ```
 We can see that the three population do separate nicely on the PCA, with just one individual
 from Wam sitting inbetween the other Wam individuals and those from Eam.
+
+It is also possible to inspect which loci contibute the most to a given component:
+
+```{r}
+autoplot(anole_pca, type = "loadings")
+```
+
+By using information from the loci table, we could easily embellish the plot, for example
+colouring by chromosome or maf.
+
+For more complect plots, we can augment the loci table with the loadings using `augment_loci()`:
+```{r}
+anole_gt_load <- augment_loci(anole_pca, data= anole_gt)
+
+```
 
 # Explore population structure with DAPC
 

@@ -7,7 +7,12 @@
 \alias{autoplot.gt_pca_clust}
 \title{Autoplots for \code{gt_dapc} objects}
 \usage{
-\method{autoplot}{gt_dapc}(object, type = c("screeplot", "scores", "loadings"), ld = NULL, ...)
+\method{autoplot}{gt_dapc}(
+  object,
+  type = c("screeplot", "scores", "loci_loadings"),
+  ld = NULL,
+  ...
+)
 
 \method{autoplot}{gt_pca}(object, type = c("screeplot", "scores", "loadings"), k = NULL, ...)
 
@@ -42,7 +47,7 @@ For \code{gt_dapc}, the following types of plots are available:
 \item \code{screeplot}: a plot of the eigenvalues of the discriminant axes
 \item \code{scores} a scatterplot of the scores of each individual on two discriminant
 axes (defined by \code{ld})
-\item \code{loadings} a plot of loadings of all loci for a discriminant axis (chosen with \code{ld})
+\item \code{loci_loadings} a plot of loadings of all loci for a discriminant axis (chosen with \code{ld})
 }
 
 For \code{gt_pca}, the following types of plots are available:

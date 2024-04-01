@@ -72,6 +72,7 @@ gt_pca_randomSVD <- function(x, k = 10,
                                   fun.cprod = fun_cprod) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
+  rownames(this_svd$v) <- show_loci_names(x)
   this_svd$method <- "randomSVD"
   this_svd$call <- match.call()
   class(this_svd) <- c("gt_pca", class(this_svd))

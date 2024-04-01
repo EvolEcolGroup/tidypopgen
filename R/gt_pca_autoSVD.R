@@ -92,6 +92,7 @@ gt_pca_autoSVD <- function(x, k = 10,
                       verbose = verbose)
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
+
   this_svd$method <- "autoSVD"
   this_svd$call <- match.call()
   class(this_svd) <- c("gt_pca", class(this_svd))
