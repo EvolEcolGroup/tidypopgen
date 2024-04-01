@@ -9,8 +9,7 @@ gt_dapc(
   pop = NULL,
   n_pca = NULL,
   n_da = NULL,
-  var_contrib = TRUE,
-  var_loadings = FALSE,
+  loci_details = TRUE,
   pca_info = FALSE
 )
 }
@@ -29,15 +28,10 @@ Analysis. If NULL, k-1 will be used.}
 \item{n_da}{an integer indicating the number of axes retained in the
 Discriminant Analysis step.}
 
-\item{var_contrib}{a logical indicating whether the contribution of
-loci should be stored
-(TRUE, default) or not (FALSE). Such output can be useful, but can
-also create huge matrices when there are a lot of loci.}
-
-\item{var_loadings}{a logical indicating whether the loadings of loci should
-be stored (TRUE) or
-not (FALSE, default). Such output can be useful, but can also create
-huge matrices when there are a lot of loci.}
+\item{loci_details}{a logical indicating whether the loadings and contribution of loci should
+be stored (TRUE, default) or
+not (FALSE). Such output can be useful, but can also create
+large matrices when there are a lot of loci and many dimensions.}
 
 \item{pca_info}{a logical indicating whether information about the prior
 PCA should be stored (TRUE, default) or not (FALSE). This information

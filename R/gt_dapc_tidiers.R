@@ -149,7 +149,10 @@ print.gt_dapc <- function(x, ...){
   print(x$call)
   cat("\nEigenvalues ($eig):\n", round(utils::head(x$eig,6),3), ifelse(length(x$eig)>6, "...\n", "\n") )
   cat("\nLD scores ($ind.coord):\n matrix with", nrow(x$ind.coord), "rows (individuals) and", ncol(x$ind.coord), "columns (LD axes)", "\n")
-  cat("\nLoadings ($loadings):\n matrix with", nrow(x$loadings), "rows (PC axes) and", ncol(x$loadings), "columns (LD axes)", "\n")
-  cat("\n")
+  cat("\nLoadings by PC ($loadings):\n matrix with", nrow(x$loadings), "rows (PC axes) and", ncol(x$loadings), "columns (LD axes)", "\n")
+  if(!is.null(x$var.contr)){
+    cat("\nLoadings by locus($var.load):\n matrix with", nrow(x$var.load), "rows (loci) and", ncol(x$var.load), "columns (LD axes)", "\n")
+  }
+    cat("\n")
 }
 

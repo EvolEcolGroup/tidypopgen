@@ -445,6 +445,8 @@ merged_gt %>% show_loci()
 Again, note that the `big_index` values have changed compared to the original files,
 as we generated a new FBM with the merged data. 
 
+# This should be changed to just a section on imputation, and move the details of analysis into its own vignette.
+
 # Population genetics analyses
 Besides using various metrics to describe populations, we often want to perform
 more complex analyses, such as Principal Component Analysis or clustering. 

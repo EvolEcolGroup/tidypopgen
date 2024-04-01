@@ -39,14 +39,10 @@
 #' Analysis. If NULL, k-1 will be used.
 #' @param n_da an integer indicating the number of axes retained in the
 #' Discriminant Analysis step.
-#' @param var_contrib a logical indicating whether the contribution of
-#' loci should be stored
-#' (TRUE, default) or not (FALSE). Such output can be useful, but can
-#' also create huge matrices when there are a lot of loci.
-#' @param var_loadings a logical indicating whether the loadings of loci should
-#' be stored (TRUE) or
-#' not (FALSE, default). Such output can be useful, but can also create
-#' huge matrices when there are a lot of loci.
+#' @param loci_details a logical indicating whether the loadings and contribution of loci should
+#' be stored (TRUE, default) or
+#' not (FALSE). Such output can be useful, but can also create
+#' large matrices when there are a lot of loci and many dimensions.
 #' @param pca_info a logical indicating whether information about the prior
 #' PCA should be stored (TRUE, default) or not (FALSE). This information
 #' is required to predict group membership of new individuals using predict,
@@ -65,8 +61,8 @@
 
 
 gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
-                          var_contrib=TRUE,
-                      var_loadings=TRUE, pca_info =FALSE){
+                      loci_details = TRUE, pca_info =FALSE){
+
   if (!inherits(x,"gt_pca")){
     stop("'x' should be a 'gt_pca' object")
   }
@@ -105,18 +101,9 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
     }
   }
 
-
-    if(is.null(x$v) & var_contrib) {
-      warning("'var_contrib' is set to true, but 'x' object provided without loadings ($v).")
-      var_contrib <- FALSE
-    }
-
-
-  V <- x$v[, 1:n_pca ,  drop=FALSE] # principal axes
   XU <- sweep(x$u, 2, x$d, '*')[, 1:n_pca ,  drop=FALSE] # principal components
   # note taht this is the proportion of variance out of the variance we started with (i.e. what we retained with the PCAs)
   XU.lambda <- sum(x$d[1:n_pca ] )/sum(x$d) # sum of retained eigenvalues
-  names(V) <- paste("PCA-pa", 1:ncol(V), sep=".")
   names(XU) <- paste("PCA-pc", 1:ncol(XU), sep=".")
 
 
@@ -125,13 +112,6 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   lda.dim <- sum(ldaX$svd^2 > 1e-10)
   ldaX$svd <- ldaX$svd[1:lda.dim]
   ldaX$scaling <- ldaX$scaling[,1:lda.dim,drop=FALSE]
-
-  # @TODO we need to bring this back as an autoplot for this object type.
-  # if(is.null(n.da)){
-  #   barplot(ldaX$svd^2, xlab="Linear Discriminants", ylab="F-statistic", main="Discriminant analysis eigenvalues", col=heat.colors(length(levels(pop.fac))) )
-  #   cat("Choose the number discriminant functions to retain (>=1): ")
-  #   n.da <- as.integer(readLines(con = getOption('adegenet.testcon'), n = 1))
-  # }
 
   n_da <- min(n_da, length(levels(pop.fac ))-1, n_pca ,  sum(ldaX$svd>1e-10)) # can't be more than K-1 disc. func., or more than n.pca
   n_da <- round(n_da)
@@ -171,21 +151,19 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   }
 
   ## optional: get loadings of variables
-  if(var_contrib || var_loadings){
-    browser()
-    message("conversion of objects slots needs to be tested for this option")
+  if(loci_details){
+    V <- x$v[, 1:n_pca ,  drop=FALSE] # principal axes
+    names(V) <- paste("PCA-pa", 1:ncol(V), sep=".")
     var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[,1:n_da,drop=FALSE])
     # TODO we need to add rownames for pca$v in the pca functions
     #rownames(var.load)
-    if(var_contrib){
-      f1 <- function(x){
-        temp <- sum(x*x)
-        if(temp < 1e-12) return(rep(0, length(x)))
-        return(x*x / temp)
-      }
-      res$var.contr <- apply(var.load, 2, f1)
+    f1 <- function(x){
+      temp <- sum(x*x)
+      if(temp < 1e-12) return(rep(0, length(x)))
+      return(x*x / temp)
     }
-    if(var_loadings) res$var.load <- var.load
+    res$var.contr <- apply(var.load, 2, f1)
+    res$var.load <- var.load
   }
 
   class(res) <- c("gt_dapc", "dapc")
@@ -193,57 +171,3 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
 }
 
 
-#' Autoplots for `gt_dapc` objects
-#'
-#' For `gt_dapc`, the following types of plots are available:
-#' - `screeplot`: a plot of the eigenvalues of the discriminant axes
-#' - `scores` a scatterplot of the scores of each individual on two discriminant
-#' axes (defined by `ld`)
-#' - `loadings` a plot of loadings of all loci for a discriminant axis (chosen with `ld`)
-#'
-#' `autoplot` produces simple plots to quickly inspect an object. They are
-#' not customisable; we recommend that you use `ggplot2` to produce publication
-#' ready plots.
-#'
-#' @param object an object of class `gt_dapc`
-#' @param type the type of plot (one of "screeplot", "scores" and "loadings")
-#' @param ld the principal components to be plotted: for scores, a pair of values
-#' e.g. c(1,2); for `loadings` either one or more values.
-#' @param ... not currently used.
-#' @returns a `ggplot2` object
-#' @rdname autoplot_gt_pca
-#' @export
-autoplot.gt_dapc <- function(object,
-                            type=c("screeplot", "scores","loadings"),
-                            ld = NULL, ...)
-{
-  rlang::check_dots_empty()
-  type <- match.arg(type)
-#  stop("autoplot for gt_dapc not avaialble yet")
-  if (type== "screeplot") {
-    tidy(object, matrix="eigenvalues") %>%
-      ggplot2::ggplot(ggplot2::aes(x=.data$LD,y=.data$eigenvalue)) +
-      ggplot2::geom_point()+
-      ggplot2::geom_line()
-  } else if (type == "scores"){
-    if (is.null(ld)){
-      ld <- c(1,2)
-    }
-    if (length(ld)!=2){
-      stop("for 'scores' plots, 'ld' should be a pair of values, e.g. c(1,2)")
-    }
-    tibble(cluster=object$grp) %>%
-      mutate(LDa = object$ind.coord[,ld[1]],
-             LDb = object$ind.coord[,ld[2]]) %>%
-      ggplot2::ggplot(ggplot2::aes(x=.data$LDa, y=.data$LDb,
-                                   colour = .data$cluster))+
-      ggplot2::geom_point()+
-      ggplot2::stat_ellipse()+
-      ggplot2::labs(x=paste0("LD",ld[1]), y=paste0("LD",ld[2]))
-  } else if (type == "loadings"){
-    if (is.null(ld)){
-      ld <- 1
-    }
-    plot(object, type = "loadings", loadings = ld)
-  }
-}

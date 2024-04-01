@@ -87,8 +87,9 @@ Let us look at the object:
 anole_pca
 ```
 
-The `print` function (implicitely called when we type the name of the object)
-gives us information about the most important elements in the object.
+The `print` function (implicitly called when we type the name of the object)
+gives us information about the most important elements in the object (and the names
+of the elements in which they are stored).
 
 We can extract those elements with the `tidy` function, which returns a tibble
 that can be easily used for further analysis, e.g.:
@@ -96,8 +97,9 @@ that can be easily used for further analysis, e.g.:
 tidy(anole_pca, matrix="eigenvalues")
 
 ```
-
-There is also an `autoplot` method that allows to visualise those elements:
+We can return information on the *eigenvalues*, *scores* and *loadings* of the pca.
+There is also an `autoplot` method that allows to visualise those elements (type *screeplot* for
+*eigenvalues*, type *scores* for *scores*, and *loadings* for *loadings*:
 ```{r}
 autoplot(anole_pca, type="screeplot")
 ```
@@ -107,6 +109,16 @@ To plot the sample in principal coordinates space, we can simply use:
 autoplot(anole_pca, type ="scores")
 ```
 
+`autoplots` are deliberately kept simple: they are just a way to quickly inspect the results.
+They are `ggplot2` objects, and so they can be further embellished with the usual
+`ggplot2` grammar:
+```{r}
+library(ggplot2)
+autoplot(anole_pca, type = "scores") +
+  aes(color = anole_gt$population) +
+  labs(color = "population")
+
+```
 For more complex/publication ready plots, we will want to add the PC scores
 to the tibble, so that we can create a custom plot with `ggplot2`. We can easily
 add the data with the `augment` method:
@@ -116,24 +128,24 @@ anole_gt <- augment(anole_pca , data = anole_gt)
 
 And now we can use `ggplot2` directly to generate our plot:
 ```{r}
-library(ggplot2)
 anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) + 
-  geom_point(size = 1.5)
+  geom_point()
 ```
-We can see that the three population do separate nicely on the PCA.
+We can see that the three population do separate nicely on the PCA, with just one individual
+from Wam sitting inbetween the other Wam individuals and those from Eam.
 
 # Explore population structure with DAPC
 
 DAPC is a powerful tool to investigate population structure. It has the advantage of
-scaling well to very large datasets, and it does not have the assumptions of STRUCTURE or
-ADMIXTURE (but it does have the drawback that it does not allow for mixed ancestry, it assignes
-individually fully to one group or another).
+scaling well to very large datasets. It does not have the assumptions of STRUCTURE or
+ADMIXTURE (which also limits its power).
 
 The first step is to determine the number of genetic clusters in the dataset. We could
-test any a-priori grouping hypothesies, or we can use the data to suggest clusters. We will
-go for the latter option in this case, and we will use
+test any a-priori grouping hypothesies, or we can use the data to suggest clusters. In this
+case, we did not have any strong expectations of structure in our study system, so we will
+go for the latter option in this case. We will use
 a k-clustering algorithm applied to the principal components (allowing us to reduce
-the dimensions from the thousands of loci to just a few tens components). We need to decide how 
+the dimensions from the thousands of loci to just a few tens of components). We need to decide how 
 many components to use; this decision is often made based on a plot of the cumulative
 explained variance of the components.
 Using `tidy` on the `gt_pca` object allows us easily obtain those quantities, and it is then
@@ -151,25 +163,27 @@ phrase the eigenvalues in terms of proportion of total variance, so the cumulati
 shows the cumulative sum of the eigen values. Ideally, we are looking for the point where 
 the curve starts flattening. In this case, we can
 not see a very clear flattening, but by PC 10 the increase in explained variance has markedly
-decelerated. 
+decelerated. We can now find clusters based on those 10 PCs:
 
 ```{r}
 anole_clusters <- gt_pca_find_clusters(anole_pca, n_pca = 10)
 ```
 
-This object retains information about a large number of possible *k*. To choose an appropriate
+This object retains information about a large number of possible *k* (by default,
+1 to 5, use the paramter `k` to change the range. To choose an appropriate
 *k*, we plot the number of clusters against a measure of fit. BIC has been shown
 to be a very good metric under many scenarios:
 ```{r}
 autoplot(anole_clusters)
 ```
 
-We are looking for the minimum value of BIC. However, we notice that there is a quick levelling
+We are looking for the minimum value of BIC. There is no clear elbow (a minimum after which BIC increases
+with increasing k). However, we notice that there is a quick levelling
 off in the decrease in BIC at
 3 clusters. Arguably, these are sufficient to capture the main structure (and that makes
 sense given what we saw in the PCA). We can also use a number of algorithmic approaches (based on the original `find.clusters()` function in `adegenet`) to choose the best *k* value
 from this plot through `gt_pca_clust_best_k()`. We will use the defaults (BIC with "diffNgroup",
-see the help page for a description of the various options):
+see the help page for `gt_pca_clust_best_k()` for a description of the various options):
 ```{r}
 anole_clusters <- gt_pca_clust_best_k(anole_clusters)
 ```
@@ -188,15 +202,15 @@ anole_dapc <- gt_dapc(anole_clusters)
 
 Note that `gt_dapc()` takes automatically the number of clusters form the `anole_clusters` object,
 but can change that behaviour by setting some of its parameters (see the help
-page for `gt_dapc()`). Whenwe print the object, we are given information about
-the most important elements of the object:
+page for `gt_dapc()`). When we print the object, we are given information about
+the most important elements of the object and where to find them (as we saw for `gt_pca`):
 
 ```{r}
 anole_dapc
-
 ```
 
-These elements can be obtained with tidiers, as for pca:
+Again, these elements can be obtained with tidiers (with `matrix` equal to `eigenvalues`,
+`scores`,`ld_loadings` and `loci_loadings`):
 ```{r}
 tidy(anole_dapc, matrix="eigenvalues")
 ```
@@ -215,45 +229,13 @@ autoplot(anole_dapc, type="scores")
 
 `anole_dapc` is of class `gt_dapc`, which is a subclass of `dapc` from `adegenet`. `gt_dapc` has its
 own tidiers and autoplot function, but it is possible to use a number of functions from `adegenet` if
-the functionality is not yet available in `tidypopgen` (at some point, we might remove this,
-as the objects are mostly compatible, but not fully...).
-
-[ADD SOME CODE TO SHOW OFF THE TIDIERS AND AUTOPLOT INSTEAD OF USING ADEGENET FUNCTIONS]
+the functionality is not yet available in `tidypopgen` (the only exception is `adegenet::predict.dapc`, 
+which does not work because the underlying pca object is different).
 
 `anole_dapc` is of class `dapc`, so we can use the standard `adegenet` functions:
 ```{r}
-anole_dapc
 library(adegenet)
 scatter(anole_dapc, posi.da="bottomright")
-```
-
-Plotting with ggplot (we should really add autoplot and tidiers)
-```{r}
-dapc_data_df <-
-  # as_tibble() converts the ind.coord matrix to a special data frame called a tibble. 
-  as_tibble(anole_dapc$ind.coord, rownames = "individual") %>%
-  # mutate changes or adds columns to a data frame. Here, we're adding the population and group assignment columns to the data frame
-  mutate(population = pops$pop,
-         group = anole_dapc$grp)
-dapc_plot <-
-  ggplot(dapc_data_df, aes(
-    x = LD1,
-    y = LD2,
-    fill = population
-  )) +
-  geom_point(shape = 21, size = 3) +
-  #reverse the color direction to better reflect Prates et al. 2018
-  scale_fill_viridis_d(direction = -1) + 
-  theme_bw(base_size = 16)
-
-dapc_plot
-
-```
-
-We can look at the relative contribution of each LD axis:
-
-```{r}
-barplot(anole_dapc$eig, xlab="Linear Discriminants", ylab="F-statistic", main="Discriminant analysis eigenvalues")
 ```
 
 We can inspect the assignment by DAPC with `assignplot`, ordering the samples
@@ -265,13 +247,14 @@ We can see that all individuals but one assign back to their original population
 
 Or we can make a more conventional assignment plot:
 
-```{r eval=FALSE}
-# something is wrong here.
+```{r}
 compoplot(anole_dapc, subset=order(anole_gt$population), posi="bottomright",
-txt.leg=paste("Cluster", 1:5), lab="",
-ncol=2, xlab="individuals", col=funky(5))
+txt.leg=paste("Cluster", 1:3), lab="",
+ncol=2, xlab="individuals", col=funky(3))
 ```
-
+Note that, given the very clear separation we observed when plotting the LD scores,
+no individual is modelled as a mixture, all assignments are with 100% probability 
+to a single cluster.
 
 
 # Clustering with sNMF
