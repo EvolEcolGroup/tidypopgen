@@ -9,7 +9,7 @@ gt_dapc(
   pop = NULL,
   n_pca = NULL,
   n_da = NULL,
-  loci_details = TRUE,
+  loadings_by_locus = TRUE,
   pca_info = FALSE
 )
 }
@@ -28,7 +28,8 @@ Analysis. If NULL, k-1 will be used.}
 \item{n_da}{an integer indicating the number of axes retained in the
 Discriminant Analysis step.}
 
-\item{loci_details}{a logical indicating whether the loadings and contribution of loci should
+\item{loadings_by_locus}{a logical indicating whether the loadings and
+contribution of each locus should
 be stored (TRUE, default) or
 not (FALSE). Such output can be useful, but can also create
 large matrices when there are a lot of loci and many dimensions.}

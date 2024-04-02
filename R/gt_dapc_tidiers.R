@@ -13,7 +13,9 @@
 #'
 #'   - `"v"`, `"rotation"`, `"loadings"` or `"variables"`: returns information
 #'     about the map from discriminant axes space back into the original
-#'     space.
+#'     space (i.e. the genotype frequencies). Note that this are different
+#'     from the loadings linking to the PCA scores (which are available in the
+#'     element $loadings of the dapc object).
 #'
 #'   - `"d"`, `"eigenvalues"` or `"lds"`: returns information about the
 #'     eigenvalues.
@@ -75,7 +77,7 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
     # mutate(percent =  (std.dev)^2/nrow(x$d),
       mutate( cumulative = cumsum(.data$eigenvalue))
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
-    ret <- x$loadings %>%
+    ret <- x$var.load %>%
       tibble::as_tibble(rownames = "column") %>%
       tidyr::pivot_longer(
         cols = -"column",

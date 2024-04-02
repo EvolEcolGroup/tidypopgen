@@ -9,8 +9,10 @@
 \usage{
 \method{autoplot}{gt_dapc}(
   object,
-  type = c("screeplot", "scores", "loci_loadings"),
+  type = c("screeplot", "scores", "loadings", "components"),
   ld = NULL,
+  group = NULL,
+  n_col = 1,
   ...
 )
 
@@ -25,6 +27,13 @@
 
 \item{ld}{the principal components to be plotted: for scores, a pair of values
 e.g. c(1,2); for \code{loadings} either one or more values.}
+
+\item{group}{a vector of group memberships to order the individuals
+in "components" plot. If NULL, the
+clusters used for the DAPC will be used.}
+
+\item{n_col}{for \code{loadings} plots, if multiple LD axis are plotted, how many
+columns should be used.}
 
 \item{...}{not currently used.}
 
@@ -47,7 +56,8 @@ For \code{gt_dapc}, the following types of plots are available:
 \item \code{screeplot}: a plot of the eigenvalues of the discriminant axes
 \item \code{scores} a scatterplot of the scores of each individual on two discriminant
 axes (defined by \code{ld})
-\item \code{loci_loadings} a plot of loadings of all loci for a discriminant axis (chosen with \code{ld})
+\item \code{loadings} a plot of loadings of all loci for a discriminant axis (chosen with \code{ld})
+\item \code{components} a bar plot showing the probability of assignment to each cluster
 }
 
 For \code{gt_pca}, the following types of plots are available:

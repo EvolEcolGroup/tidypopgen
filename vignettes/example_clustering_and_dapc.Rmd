@@ -155,10 +155,12 @@ DAPC is a powerful tool to investigate population structure. It has the advantag
 scaling well to very large datasets. It does not have the assumptions of STRUCTURE or
 ADMIXTURE (which also limits its power).
 
-The first step is to determine the number of genetic clusters in the dataset. We could
-test any a-priori grouping hypothesies, or we can use the data to suggest clusters. In this
+The first step is to determine the number of genetic clusters in the dataset. 
+DAPC can be either used to test a a-prioriy hypothesis, or we can use the data to
+suggest the number of clusters.
+In this
 case, we did not have any strong expectations of structure in our study system, so we will
-go for the latter option in this case. We will use
+let the data inform the number of possible genetic clusters. We will use
 a k-clustering algorithm applied to the principal components (allowing us to reduce
 the dimensions from the thousands of loci to just a few tens of components). We need to decide how 
 many components to use; this decision is often made based on a plot of the cumulative
@@ -184,8 +186,8 @@ decelerated. We can now find clusters based on those 10 PCs:
 anole_clusters <- gt_pca_find_clusters(anole_pca, n_pca = 10)
 ```
 
-This object retains information about a large number of possible *k* (by default,
-1 to 5, use the paramter `k` to change the range. To choose an appropriate
+As we did not define the *k* values to explore, the default 1 to 5 was used (we
+can change that by setting the `k` parameter to change the range). To choose an appropriate
 *k*, we plot the number of clusters against a measure of fit. BIC has been shown
 to be a very good metric under many scenarios:
 ```{r}
@@ -235,41 +237,52 @@ And they can be visualised with `autoplot`:
 autoplot(anole_dapc, type="screeplot")
 ```
 
+As for pca, there is a `tidy` method that can be used to extract information
+from `gt_dapc` objects. For example, if we want to create a bar plot of
+the eigenvalues (since we only have two), we could simply use:
+```{r}
+tidy(anole_dapc, matrix="eigenvalues") %>%
+  ggplot(aes(x=LD,y=eigenvalue)) +
+  geom_col()
+```
+
 We can plot the scores with:
 ```{r}
 autoplot(anole_dapc, type="scores")
 ```
 
+We can inspect the assignment by DAPC with `autoplot` using the type
+`components`, ordering the samples
+by the original population labels:
 
+```{r}
+autoplot(anole_dapc, type="components", group = anole_gt$population)
+```
 
-`anole_dapc` is of class `gt_dapc`, which is a subclass of `dapc` from `adegenet`. `gt_dapc` has its
-own tidiers and autoplot function, but it is possible to use a number of functions from `adegenet` if
-the functionality is not yet available in `tidypopgen` (the only exception is `adegenet::predict.dapc`, 
-which does not work because the underlying pca object is different).
+Because of the very clear separation we observed when plotting the LD scores,
+no individual is modelled as a mixture: all assignments are with 100% probability 
+to a single cluster.
 
-`anole_dapc` is of class `dapc`, so we can use the standard `adegenet` functions:
+Finally, we can explore which loci have the biggest impact on separating the clusters
+(either because of drift or selection):
+
+```{r}
+autoplot(anole_dapc, "loadings")
+```
+
+There is no strong outlier, suggesting drift across many loci has created the signal
+picked up by DAPC.
+
+Note that `anole_dapc` is of class `gt_dapc`, which is a subclass of `dapc` 
+from `adegenet`. This means that funcitons written to work on `dapc` objects
+should work out of the box (the only exception is `adegenet::predict.dapc`, 
+which does not work because the underlying pca object is different). For example,
+we can obtain the standard dapc plot with:
 ```{r}
 library(adegenet)
 scatter(anole_dapc, posi.da="bottomright")
 ```
 
-We can inspect the assignment by DAPC with `assignplot`, ordering the samples
-by the original population label:
-```{r}
-assignplot(anole_dapc,subset=order(anole_gt$population))
-```
-We can see that all individuals but one assign back to their original population.
-
-Or we can make a more conventional assignment plot:
-
-```{r}
-compoplot(anole_dapc, subset=order(anole_gt$population), posi="bottomright",
-txt.leg=paste("Cluster", 1:3), lab="",
-ncol=2, xlab="individuals", col=funky(3))
-```
-Note that, given the very clear separation we observed when plotting the LD scores,
-no individual is modelled as a mixture, all assignments are with 100% probability 
-to a single cluster.
 
 
 # Clustering with sNMF

@@ -17,7 +17,9 @@ tidied.
 the map from the original space into the least discriminant axes.
 \item \code{"v"}, \code{"rotation"}, \code{"loadings"} or \code{"variables"}: returns information
 about the map from discriminant axes space back into the original
-space.
+space (i.e. the genotype frequencies). Note that this are different
+from the loadings linking to the PCA scores (which are available in the
+element $loadings of the dapc object).
 \item \code{"d"}, \code{"eigenvalues"} or \code{"lds"}: returns information about the
 eigenvalues.
 }}

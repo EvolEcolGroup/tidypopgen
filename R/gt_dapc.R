@@ -39,7 +39,8 @@
 #' Analysis. If NULL, k-1 will be used.
 #' @param n_da an integer indicating the number of axes retained in the
 #' Discriminant Analysis step.
-#' @param loci_details a logical indicating whether the loadings and contribution of loci should
+#' @param loadings_by_locus a logical indicating whether the loadings and
+#' contribution of each locus should
 #' be stored (TRUE, default) or
 #' not (FALSE). Such output can be useful, but can also create
 #' large matrices when there are a lot of loci and many dimensions.
@@ -61,7 +62,7 @@
 
 
 gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
-                      loci_details = TRUE, pca_info =FALSE){
+                      loadings_by_locus = TRUE, pca_info =FALSE){
 
   if (!inherits(x,"gt_pca")){
     stop("'x' should be a 'gt_pca' object")
@@ -151,12 +152,10 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   }
 
   ## optional: get loadings of variables
-  if(loci_details){
+  if(loadings_by_locus){
     V <- x$v[, 1:n_pca ,  drop=FALSE] # principal axes
     names(V) <- paste("PCA-pa", 1:ncol(V), sep=".")
     var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[,1:n_da,drop=FALSE])
-    # TODO we need to add rownames for pca$v in the pca functions
-    #rownames(var.load)
     f1 <- function(x){
       temp <- sum(x*x)
       if(temp < 1e-12) return(rep(0, length(x)))
