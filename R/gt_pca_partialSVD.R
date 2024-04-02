@@ -31,6 +31,10 @@
 
 gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
                               ) {
+  if (gt_has_imputed(x)){
+    gt_set_imputed(x, set = TRUE)
+    on.exit(gt_set_imputed(x, set = FALSE))
+  }
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)

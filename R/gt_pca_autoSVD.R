@@ -65,7 +65,10 @@ gt_pca_autoSVD <- function(x, k = 10,
                            max_iter = 5,
                            n_cores = 1,
                            verbose = TRUE) {
-
+  if (gt_has_imputed(x)){
+    gt_set_imputed(x, set = TRUE)
+    on.exit(gt_set_imputed(x, set = FALSE))
+  }
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)

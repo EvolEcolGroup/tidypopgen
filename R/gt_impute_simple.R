@@ -33,5 +33,6 @@ gt_impute_simple <-function(x,
     ncores = n_cores
   )
   attr(x$genotypes,"imputed")<-"simple"
+  gt_set_imputed(x, set= FALSE)
   x
 }

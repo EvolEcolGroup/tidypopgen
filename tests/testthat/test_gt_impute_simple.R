@@ -9,14 +9,11 @@ test_that("impute and use the imputation",{
                "this dataset does not have any imputated")
   # now impute
   missing_gt <- gt_impute_simple(missing_gt)
+  # we have imputed
   expect_true(gt_has_imputed(missing_gt))
-  expect_true(gt_uses_imputed(missing_gt))
+  # but don't use it by default
+  expect_false(gt_uses_imputed(missing_gt))
   # now we return a pca successfully
-  expect_true(inherits(missing_gt %>% gt_pca_partialSVD(),"gt_pca"))
-  missing_gt <- gt_set_imputed(missing_gt, FALSE)
-  expect_error(missing_gt %>% gt_pca_partialSVD(),
-               "You can't have missing values")
-  missing_gt <- gt_set_imputed(missing_gt, TRUE)
   expect_true(inherits(missing_gt %>% gt_pca_partialSVD(),"gt_pca"))
   # simple error message
   expect_error(gt_set_imputed(missing_gt),

@@ -40,8 +40,7 @@ gt_uses_imputed <- function (x){
 #'
 #' @param x a `gen_tibble`
 #' @param set a boolean defining whether imputed data should be used
-#' @returns the `gen_tibble` with the code switched to either use or
-#' not use imputed values (depending on `set`)
+#' @returns NULL
 #' @export
 
 gt_set_imputed <- function (x, set = NULL){
@@ -58,5 +57,5 @@ gt_set_imputed <- function (x, set = NULL){
       attr(x$genotypes,"bigsnp")$genotypes$code256 <- bigsnpr::CODE_IMPUTE_PRED
     }
   }
-  x
+  return(invisible(NULL))
 }
