@@ -44,3 +44,6 @@
 # really good tutorial on the maths of gwas
 #https://www.mv.helsinki.fi/home/mjxpirin/GWAS_course/material/GWAS5.html
 
+
+# Note  on running admixture and pca by John Novembre:
+# https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8722024/

@@ -308,5 +308,5 @@ anole_snmf <- snmf(input.file = geno_file,
                   )
 ```
 
-Look at https://connor-french.github.io/intro-pop-structure-r/ for how to wrangle the data for plotting. But we should just be able ot grab functions
+Look at https://connor-french.github.io/intro-pop-structure-r/ for how to wrangle the data for plotting. But we should just be able to grab functions
 designed for ADMXITURE and use those on the Q matrices created by sNMF. So, we need some tidiers.
