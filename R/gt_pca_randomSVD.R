@@ -15,7 +15,7 @@
 #' [bigsnpr::snp_scaleBinom()], which is the appropriate function for biallelic SNPs.
 #' Alternatively it is possible to use  custom function
 #' (see [bigsnpr::snp_autoSVD()] for details.
-#' @param n_cores Number of cores used.
+#' @param ncores Number of cores used.
 #' @param tol Precision parameter of [svds][RSpectra::svds]. Default is `1e-4`.
 #' @param verbose Should some progress be printed? Default is `FALSE`.
 #' @param fun_prod Function that takes 6 arguments (in this order):
@@ -48,7 +48,7 @@ gt_pca_randomSVD <- function(x, k = 10,
                               fun_scaling = bigsnpr::snp_scaleBinom(),
                               tol = 1e-4,
                               verbose = FALSE,
-                              n_cores = 1,
+                              ncores = 1,
                               fun_prod = bigstatsr::big_prodVec,
                               fun_cprod = bigstatsr::big_cprodVec
                               ) {
@@ -67,7 +67,7 @@ gt_pca_randomSVD <- function(x, k = 10,
                                     fun.scaling = fun_scaling,
                                     tol = tol,
                                   verbose = verbose,
-                                  n_cores = n_cores,
+                                  ncores = ncores,
                                   fun.prod = fun_prod,
                                   fun.cprod = fun_cprod) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
   # add names to the scores (to match them to data later)

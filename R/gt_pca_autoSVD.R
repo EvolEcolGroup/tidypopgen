@@ -32,7 +32,7 @@
 #'   Default is `10`.
 #' @param max_iter Maximum number of iterations of outlier detection.
 #'   Default is `5`.
-#' @param n_cores Number of cores used. Default doesn't use parallelism.
+#' @param ncores Number of cores used. Default doesn't use parallelism.
 #' You may use [bigstatsr::nb_cores()].
 #' @returns a `gt_pca` object, which is a subclass of `bigSVD`; this is
 #' an S3 list with elements:
@@ -63,7 +63,7 @@ gt_pca_autoSVD <- function(x, k = 10,
                            alpha_tukey = 0.05,
                            min_mac = 10,
                            max_iter = 5,
-                           n_cores = 1,
+                           ncores = 1,
                            verbose = TRUE) {
 
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
@@ -88,7 +88,7 @@ gt_pca_autoSVD <- function(x, k = 10,
                       alpha.tukey = alpha_tukey,
                       min.mac = min_mac,
                       max.iter = max_iter,
-                      ncores = n_cores,
+                      ncores = ncores,
                       verbose = verbose)
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
