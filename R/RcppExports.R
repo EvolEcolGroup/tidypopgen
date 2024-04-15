@@ -13,11 +13,11 @@ SNPHWE_midp_t <- function(obs_hets, obs_hom1, obs_hom2, thresh) {
     .Call(`_tidypopgen_SNPHWE_midp_t`, obs_hets, obs_hom1, obs_hom2, thresh)
 }
 
-increment_ibs_counts <- function(K, K2, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd) {
-    invisible(.Call(`_tidypopgen_increment_ibs_counts`, K, K2, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd))
+increment_ibs_counts <- function(k, k2, genotype0, genotype1, genotype2, BM, rowInd, colInd) {
+    invisible(.Call(`_tidypopgen_increment_ibs_counts`, k, k2, genotype0, genotype1, genotype2, BM, rowInd, colInd))
 }
 
-increment_king_numerator <- function(K, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd) {
-    invisible(.Call(`_tidypopgen_increment_king_numerator`, K, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd))
+increment_king_numerator <- function(k, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd) {
+    invisible(.Call(`_tidypopgen_increment_king_numerator`, k, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd))
 }
 

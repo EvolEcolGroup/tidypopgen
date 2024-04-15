@@ -18,82 +18,60 @@ inline arma::mat FBM_RW2arma(Rcpp::Environment BM) {
 
 /******************************************************************************/
 
-template <class C>
-void increment_ibs_counts(arma::mat& K,
-                          arma::mat& K2,
-                          arma::mat& part_temp0,
-                          arma::mat& part_temp1,
-                          arma::mat& part_temp2,
-                          C macc,
-                          const IntegerVector& rowInd,
-                          const IntegerVector& colInd) {
+  // [[Rcpp::export]]
+  void increment_ibs_counts(Environment k,
+                            Environment k2,
+                            arma::mat& genotype0,
+                            arma::mat& genotype1,
+                            arma::mat& genotype2,
+                            Environment BM,
+                            const IntegerVector& rowInd,
+                            const IntegerVector& colInd) {
 
-  // extract the slice of matrix we will operate on
-  //part_temp = _extract_submat(macc, part_temp0, part_temp1,part_temp2, rowInd, colInd);
+    arma::mat K = FBM_RW2arma(k);
+    arma::mat K2 = FBM_RW2arma(k2);
 
-  part_temp0.zeros();
-  part_temp1.zeros();
-  part_temp2.zeros();
+  XPtr<FBM> xpBM = BM["address"];
+  SubBMAcc<unsigned char> macc(xpBM, rowInd, colInd, 1);
 
-  std::vector<size_t> rows = vec_int_to_size(rowInd, macc.nrow(), 1);
-  std::vector<size_t> cols = vec_int_to_size(colInd, macc.ncol(), 1);
 
-  int n = rowInd.size();
-  int m = colInd.size();
+  genotype0.zeros();
+  genotype1.zeros();
+  genotype2.zeros();
+
+  size_t n = macc.nrow();
+  size_t m = macc.ncol();
 
   for (int j = 0; j < m; j++) {
     for (int i = 0; i < n; i++) {
-      int value = (macc(rows[i], cols[j]));
+      int value = (macc(i,j));
       if (value == 0){
-        part_temp0(i, j) = 1;
+        genotype0(i, j) = 1;
       } else if (value==1){
-        part_temp1(i, j) = 1;
+        genotype1(i, j) = 1;
       } else if (value==2){
-        part_temp2(i,j) = 1;
+        genotype2(i,j) = 1;
       }
     }}
 
   // fill the rest with 0s (should be 1 column max)
-  int m2 = part_temp0.n_cols;
+  int m2 = genotype0.n_cols;
   if (m2 > m) {
     myassert(m2 == (m + 1), ERROR_BUG);
     for (int i = 0; i < n; i++) {
-      part_temp0(i, m) = 0;
-      part_temp1(i, m) = 0;
-      part_temp2(i, m) = 0;
+      genotype0(i, m) = 0;
+      genotype1(i, m) = 0;
+      genotype2(i, m) = 0;
     }
   }
-  K += 2 *( part_temp2 * part_temp2.t() + part_temp1 * part_temp1.t() + part_temp0 * part_temp0.t()) +
-  part_temp1 * (part_temp0 + part_temp2).t() + (part_temp0 + part_temp2) * part_temp1.t();
+  K += 2 *( genotype2 * genotype2.t() + genotype1 * genotype1.t() + genotype0 * genotype0.t()) +
+  genotype1 * (genotype0 + genotype2).t() + (genotype0 + genotype2) * genotype1.t();
   // replace in place to be economical with memory
-  part_temp0 = part_temp0 + part_temp1+part_temp2;
-  K2 += 2* part_temp0 * part_temp0.t();
+  // this is to count the available genotypes (i.e. non-missing)
+  genotype0 = genotype0 + genotype1 + genotype2;
+  K2 += 2* genotype0 * genotype0.t();
 
 }
 
 /******************************************************************************/
 
-#define CALL_INCR_IBS_COUNTS(ACC) {                                                                      \
-return increment_ibs_counts(armaK, armaK2, part_temp0, part_temp1, part_temp2, ACC,                      \
-                            rowInd, colInd);                                                             \
-}                                                                                                        \
-
-
-// Dispatch function for increment_ibs_counts
-// [[Rcpp::export]]
-void increment_ibs_counts(Environment K,
-                           Environment K2,
-                           arma::mat& part_temp0,
-                           arma::mat& part_temp1,
-                           arma::mat& part_temp2,
-                           Environment BM,
-                           const IntegerVector& rowInd,
-                           const IntegerVector& colInd) {
-
-  arma::mat armaK = FBM_RW2arma(K);
-  arma::mat armaK2 = FBM_RW2arma(K2);
-
-  DISPATCH_MATACC(CALL_INCR_IBS_COUNTS)
-}
-
-/******************************************************************************/

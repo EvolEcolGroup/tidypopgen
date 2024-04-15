@@ -54,35 +54,35 @@ BEGIN_RCPP
 END_RCPP
 }
 // increment_ibs_counts
-void increment_ibs_counts(Environment K, Environment K2, arma::mat& part_temp0, arma::mat& part_temp1, arma::mat& part_temp2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
-RcppExport SEXP _tidypopgen_increment_ibs_counts(SEXP KSEXP, SEXP K2SEXP, SEXP part_temp0SEXP, SEXP part_temp1SEXP, SEXP part_temp2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
+void increment_ibs_counts(Environment k, Environment k2, arma::mat& genotype0, arma::mat& genotype1, arma::mat& genotype2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
+RcppExport SEXP _tidypopgen_increment_ibs_counts(SEXP kSEXP, SEXP k2SEXP, SEXP genotype0SEXP, SEXP genotype1SEXP, SEXP genotype2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Environment >::type K(KSEXP);
-    Rcpp::traits::input_parameter< Environment >::type K2(K2SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type part_temp0(part_temp0SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type part_temp1(part_temp1SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type part_temp2(part_temp2SEXP);
+    Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
+    Rcpp::traits::input_parameter< Environment >::type k2(k2SEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type genotype0(genotype0SEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type genotype1(genotype1SEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type genotype2(genotype2SEXP);
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    increment_ibs_counts(K, K2, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd);
+    increment_ibs_counts(k, k2, genotype0, genotype1, genotype2, BM, rowInd, colInd);
     return R_NilValue;
 END_RCPP
 }
 // increment_king_numerator
-void increment_king_numerator(Environment K, arma::mat& part_temp0, arma::mat& part_temp1, arma::mat& part_temp2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
-RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP KSEXP, SEXP part_temp0SEXP, SEXP part_temp1SEXP, SEXP part_temp2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
+void increment_king_numerator(Environment k, arma::mat& part_temp0, arma::mat& part_temp1, arma::mat& part_temp2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
+RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP kSEXP, SEXP part_temp0SEXP, SEXP part_temp1SEXP, SEXP part_temp2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Environment >::type K(KSEXP);
+    Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type part_temp0(part_temp0SEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type part_temp1(part_temp1SEXP);
     Rcpp::traits::input_parameter< arma::mat& >::type part_temp2(part_temp2SEXP);
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    increment_king_numerator(K, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd);
+    increment_king_numerator(k, part_temp0, part_temp1, part_temp2, BM, rowInd, colInd);
     return R_NilValue;
 END_RCPP
 }
