@@ -26,7 +26,7 @@ test_that("snp_king_r and gt_king compute king-robust correctly",{
   X <- test_genotypes
   denominator = matrix(rep(rowSums(X==1), nrow(X)), nrow = nrow(X), byrow = T) +
     matrix(rep(rowSums(X==1), nrow(X)), nrow = nrow(X), byrow = F)
-  king.r = 2*((X==1) %*% t(X==1) - 2*((X==0) %*% t(X==2) + (X==2) %*% t(X==0)) ) / denominator
+  king.r = ((X==1) %*% t(X==1) - ((X==0) %*% t(X==2) + (X==2) %*% t(X==0)) ) / denominator
   expect_identical(king.r, test_king)
   # check that we get the same result if we split the operation into two blocks
   test_king_2blocks <- snp_king(test_fbm, block.size = 3)

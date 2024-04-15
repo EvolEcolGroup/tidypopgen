@@ -62,7 +62,7 @@ void increment_king_numerator(arma::mat& K,
       part_temp2(i, m) = 0;
     }
   }
-  K += 2 *( part_temp1 * part_temp1.t() -2 *(part_temp0 * part_temp2.t() + part_temp2 * part_temp0.t()));
+  K += ( part_temp1 * part_temp1.t() -(part_temp0 * part_temp2.t() + part_temp2 * part_temp0.t()));
   // replace in place to be economical with memory
 //  part_temp0 = part_temp0 + part_temp1+part_temp2;
 //  K2 += 2* part_temp0 * part_temp0.t();
