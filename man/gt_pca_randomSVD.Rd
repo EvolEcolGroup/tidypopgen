@@ -10,7 +10,7 @@ gt_pca_randomSVD(
   fun_scaling = bigsnpr::snp_scaleBinom(),
   tol = 1e-04,
   verbose = FALSE,
-  ncores = 1,
+  n_cores = 1,
   fun_prod = bigstatsr::big_prodVec,
   fun_cprod = bigstatsr::big_cprodVec
 )
@@ -30,7 +30,7 @@ Alternatively it is possible to use  custom function
 
 \item{verbose}{Should some progress be printed? Default is \code{FALSE}.}
 
-\item{ncores}{Number of cores used.}
+\item{n_cores}{Number of cores used.}
 
 \item{fun_prod}{Function that takes 6 arguments (in this order):
 \itemize{

@@ -16,7 +16,7 @@ gt_pca_autoSVD(
   alpha_tukey = 0.05,
   min_mac = 10,
   max_iter = 5,
-  ncores = 1,
+  n_cores = 1,
   verbose = TRUE
 )
 }
@@ -59,7 +59,7 @@ Default is \code{10}.}
 \item{max_iter}{Maximum number of iterations of outlier detection.
 Default is \code{5}.}
 
-\item{ncores}{Number of cores used. Default doesn't use parallelism.
+\item{n_cores}{Number of cores used. Default doesn't use parallelism.
 You may use \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}.}
 
 \item{verbose}{Output some information on the iterations? Default is \code{TRUE}.}
