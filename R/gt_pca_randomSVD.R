@@ -71,7 +71,7 @@ gt_pca_randomSVD <- function(x, k = 10,
                                     fun.scaling = fun_scaling,
                                     tol = tol,
                                   verbose = verbose,
-                                  n_cores = n_cores,
+                                  ncores = n_cores,
                                   fun.prod = fun_prod,
                                   fun.cprod = fun_cprod) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
   # add names to the scores (to match them to data later)

@@ -5,6 +5,9 @@
 #' PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a better
 #' spread of SNPs over the chromosome.
 #'
+#' Any missing values in the genotypes of a `gen_tibble` passed to `loci_ld_clump`
+#' will cause an error. To deal with missingness, see `gt_impute_simple`.
+#'
 #' TODO we should really return a boolean rather than indices, so that it can
 #' be easily used with `select_loci_if`
 #'
@@ -86,7 +89,7 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
                         exclude = exclude,
                         ncores = n_cores)
   warning("this is yet to be tested!!!")
-  match(snp_clump_ids, show_loci(.x)$bid_id)
+  match(snp_clump_ids, show_loci(.x)$big_index)
   ## @TODO test that this works as expected
 }
 
