@@ -60,6 +60,6 @@ inline arma::mat FBM_RW2arma(Rcpp::Environment BM) {
       genotype2(i, m) = 0;
     }
   }
-  K += ( genotype1 * genotype1.t() -(genotype0 * genotype2.t() + genotype2 * genotype0.t()));
+  K += ( genotype1 * genotype1.t() -2 *(genotype0 * genotype2.t() + genotype2 * genotype0.t()));
 
 }
