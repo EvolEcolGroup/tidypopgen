@@ -18,7 +18,7 @@ test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
 
 # this also tests show_genotypes and show_loci
-test_that("snp_king_r and gt_king compute king-robust correctly",{
+test_that("snp_king and gt_king compute king-robust correctly",{
   test_fbm <- tidypopgen:::gt_get_bigsnp(test_gt)$genotypes
   test_king <- snp_king(test_fbm)
   # king by hand
