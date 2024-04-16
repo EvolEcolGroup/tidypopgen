@@ -17,8 +17,7 @@ bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
 test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
 
-# this also tests show_genotypes and show_loci
-test_that("snp_ibs_r and gt_ibs compute ibs-robust correctly",{
+test_that("snp_ibs and gt_ibs computes ibs correctly",{
   test_fbm <- tidypopgen:::gt_get_bigsnp(test_gt)$genotypes
   test_ibs <- snp_ibs(test_fbm, as.counts=TRUE)
   # compare indiv 1 vs 2
