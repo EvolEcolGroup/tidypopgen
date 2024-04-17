@@ -29,8 +29,8 @@ should be returned (FALSE by default). CURRENTLY ALWAYS RETURNS COUNTS!!!}
 speed of matrix operations, we have to store in memory 3 times the columns.}
 }
 \value{
-a list of two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles (i.e. 2\emph{n loci),
-and one of valid alleles (i.e. 2}n_loci - 2*missing_loci)
+a list of two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles (i.e. 2*n loci),
+and one of valid alleles (i.e. 2 * n_loci - 2 * missing_loci)
 }
 \description{
 This function computes the IBS matrix.

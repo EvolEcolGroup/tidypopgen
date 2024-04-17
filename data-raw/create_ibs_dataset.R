@@ -38,7 +38,7 @@ offspring.geno <- function(n.families, n.snps, fs = rep(0.5,n.snps), n.shared.pa
   return (X)
 }
 set.seed(123)
-p = 10000 #SNPs
+p = 1000 #SNPs
 fs = runif(p, 0.05, 0.5) #MAF at each SNP is Uniform(0.05, 0.5)
 
 X = rbind(offspring.geno(n.families = 2, n.snps = p, fs = fs, n.shared.parents = 0),
@@ -46,6 +46,15 @@ X = rbind(offspring.geno(n.families = 2, n.snps = p, fs = fs, n.shared.parents =
           offspring.geno(n.families = 2, n.snps = p, fs = fs, n.shared.parents = 2))
 
 X = X[,apply(X,2,var) > 0] #remove possible monomorphic variants
+
+# sprinkle some missing data
+na_n <- 100
+na_rows<- sample(dim(X)[1],na_n, replace = TRUE)
+na_cols <- sample(dim(X)[2],na_n, replace = TRUE)
+for (i in 1:na_n){
+  X[na_rows[i], na_cols[i]] <- NA
+}
+
 
 # transpose it
 X = t(X)

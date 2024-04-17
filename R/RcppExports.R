@@ -17,7 +17,7 @@ increment_ibs_counts <- function(k, k2, genotype0, genotype1, genotype2, BM, row
     invisible(.Call(`_tidypopgen_increment_ibs_counts`, k, k2, genotype0, genotype1, genotype2, BM, rowInd, colInd))
 }
 
-increment_king_numerator <- function(k, genotype0, genotype1, genotype2, BM, rowInd, colInd) {
-    invisible(.Call(`_tidypopgen_increment_king_numerator`, k, genotype0, genotype1, genotype2, BM, rowInd, colInd))
+increment_king_numerator <- function(k, n_Aa_i, genotype0, genotype1, genotype2, genotype_valid, BM, rowInd, colInd) {
+    invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, genotype0, genotype1, genotype2, genotype_valid, BM, rowInd, colInd))
 }
 

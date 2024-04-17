@@ -16,18 +16,29 @@ bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
                                   path_out = tempfile('test_data_'))
 test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
+# function to compute robust king in R
+king_r <- function(X_mat){
+  X_mat0 <- X_mat==0
+  X_mat0[is.na(X_mat0)]<-0
+  X_mat1 <-X_mat==1
+  X_mat1[is.na(X_mat1)]<-0
+  X_mat2 <-X_mat==2
+  X_mat2[is.na(X_mat2)]<-0
+  king_num <- (X_mat1 %*% t(X_mat1) - 2* ((X_mat0) %*% t(X_mat2) + (X_mat2) %*% t(X_mat0)) )
+  X_mat_valid <- !is.na(X_mat)
+  N_mat_Aa_i <- X_mat1 %*% t(X_mat_valid)
+  N_mat_Aa_j <- t(N_mat_Aa_i)
+  king_num/(2* pmin(N_mat_Aa_i,N_mat_Aa_j))+0.5-0.25*(N_mat_Aa_i+N_mat_Aa_j)/pmin(N_mat_Aa_i,N_mat_Aa_j)
+}
+
 
 # this also tests show_genotypes and show_loci
 test_that("snp_king and gt_king compute king-robust correctly",{
   test_fbm <- tidypopgen:::gt_get_bigsnp(test_gt)$genotypes
   test_king <- snp_king(test_fbm)
   # king by hand
-  # code from https://www.mv.helsinki.fi/home/mjxpirin/GWAS_course/material/GWAS5.html
-  X <- test_genotypes
-  denominator = matrix(rep(rowSums(X==1), nrow(X)), nrow = nrow(X), byrow = T) +
-    matrix(rep(rowSums(X==1), nrow(X)), nrow = nrow(X), byrow = F)
-  king.r = ((X==1) %*% t(X==1) - 2* ((X==0) %*% t(X==2) + (X==2) %*% t(X==0)) ) / denominator
-  expect_identical(king.r, test_king)
+  test_king_r <- king_r(show_genotypes(test_gt))
+  expect_identical(test_king_r, test_king)
   # check that we get the same result if we split the operation into two blocks
   test_king_2blocks <- snp_king(test_fbm, block.size = 3)
   expect_identical(test_king_2blocks, test_king)
@@ -36,5 +47,18 @@ test_that("snp_king and gt_king compute king-robust correctly",{
   test_king_gt <- gt_king(test_gt)
   expect_true(all.equal(test_king, test_king_gt,
                         check.attributes=FALSE))
+
+  # now test with missing data
+  test_na_gt <- gen_tibble(system.file("extdata/related/families.bed", package="tidypopgen"), quiet = TRUE,
+                           backingfile = tempfile())
+  test_na_fbm <- tidypopgen:::gt_get_bigsnp(test_na_gt)$genotypes
+  test_na_king <- snp_king(test_na_fbm)
+  # king by hand
+  test_na_king_r <- king_r(show_genotypes(test_na_gt))
+  expect_identical(test_na_king_r, test_na_king)
+
+  # check that we get the same result if we split the operation into two blocks
+  test_na_king_2blocks <- snp_king(test_na_fbm, block.size = 300)
+  expect_identical(test_na_king_2blocks, test_na_king)
 })
 

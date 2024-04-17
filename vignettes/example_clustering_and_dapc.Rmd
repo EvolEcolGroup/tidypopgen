@@ -247,7 +247,7 @@ tidy(anole_dapc, matrix="eigenvalues") %>%
 ```
 
 We can plot the scores with:
-```{r}
+```{r plot_scatter_dapc}
 autoplot(anole_dapc, type="scores")
 ```
 

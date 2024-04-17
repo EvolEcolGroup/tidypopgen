@@ -15,7 +15,7 @@
 #' @param block.size maximum number of columns read at once. Note that, to optimise the
 #' speed of matrix operations, we have to store in memory 3 times the columns.
 #' @returns a list of two [bigstatsr::FBM] matrices, one of counts of IBS by alleles (i.e. 2*n loci),
-#' and one of valid alleles (i.e. 2*n_loci - 2*missing_loci)
+#' and one of valid alleles (i.e. 2 * n_loci - 2 * missing_loci)
 #' @export
 
 snp_ibs <- function(
@@ -30,9 +30,9 @@ snp_ibs <- function(
 
   n <- length(ind.row)
   # FBM matrix to count the IBS counts
-  K <- bigstatsr::FBM(n, n, init = 0)
+  IBS <- bigstatsr::FBM(n, n, init = 0)
   # FBM matrix to store valid number of comparisons (i.e NOT NA)
-  K2 <- bigstatsr::FBM(n, n, init = 0)
+  IBS_valid_loci <- bigstatsr::FBM(n, n, init = 0)
   m <- length(ind.col)
 
   intervals <- CutBySize(m, block.size)
@@ -41,24 +41,24 @@ snp_ibs <- function(
   # For efficiency, when we read in the slice,
   # we will immediately recode it into these3 matrices,
   # one per genotype, equivalent to X==0, X==1, and X==2 respectively
-  X_part_temp0 <- matrix(0, n, max(intervals[, "size"]))
-  X_part_temp1 <- matrix(0, n, max(intervals[, "size"]))
-  X_part_temp2 <- matrix(0, n, max(intervals[, "size"]))
+  X_0_part <- matrix(0, n, max(intervals[, "size"]))
+  X_1_part <- matrix(0, n, max(intervals[, "size"]))
+  X_2_part <- matrix(0, n, max(intervals[, "size"]))
 
   for (j in bigstatsr::rows_along(intervals)) {
     ind <- seq2(intervals[j, ]) # this iteration indices
     ind.col.ind <- ind.col[ind] #subset given indices by the iteration indices
-    increment_ibs_counts(K,
-                         K2,
-                         X_part_temp0,
-                         X_part_temp1,
-                         X_part_temp2,
+    increment_ibs_counts(IBS,
+                         IBS_valid_loci,
+                         X_0_part,
+                         X_1_part,
+                         X_2_part,
                          X,
                          ind.row,
                          ind.col.ind)
   }
 
-  return(list(ibs = K, valid_n = K2))
+  return(list(ibs = IBS, valid_n = IBS_valid_loci))
 }
 
 
