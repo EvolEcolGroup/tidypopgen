@@ -7,8 +7,8 @@
 flip(bases)
 }
 \arguments{
-\item{bases}{a vector of characters. The only valid characters are "a", "t",
-"c" and "g".}
+\item{bases}{a vector of characters. The only valid characters are "A", "T",
+"C" and "G".}
 }
 \value{
 a vector of recoded bases

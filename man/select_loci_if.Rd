@@ -4,31 +4,21 @@
 \alias{select_loci_if}
 \title{The \code{select_if} verb for \code{loci}}
 \usage{
-select_loci_if(.data, .sel_logical, .swap_arg = NULL, .swap_if_arg = NULL)
+select_loci_if(.data, .sel_logical)
 }
 \arguments{
 \item{.data}{a \code{gen_tibble}}
 
 \item{.sel_logical}{a logical vector of length equal to the number of loci,
 or an expression that will tidy evaluate to such a vector.}
-
-\item{.swap_arg}{one unquoted expression, using the mini-grammar of
-\code{\link[dplyr:select]{dplyr::select()}} determining at which loci the reference and alterante
-allele will be swapped.}
-
-\item{.swap_if_arg}{a logical vector of length equal to the number of loci,
-or an expression that will tidy evaluate to such a vector.}
-}
-\value{
-a list of \code{SNPbin} object that have been sub-setted to the selected
-loci.
 }
 \description{
 An equivalent to \code{\link[dplyr:select_all]{dplyr::select_if()}} that works on the \code{genotype} column
 of a \code{gen_tibble}. This function has access to the genotypes (and thus can
 work on summary statistics to select), but not the names of the loci (look
-at \code{\link[=select_loci]{select_loci()}} for that feature. There is also the possibility
-of swapping reference and alternate alleles whilst selecting loci, using
-either the argument \code{.swap_arg} (which has \code{select}-like mini-grammar on names)
-or \code{.swap_arg_if} (which has access to the genotypes like \code{select_loci_if})
+at \code{\link[=select_loci]{select_loci()}} for that feature.
+}
+\details{
+#' Note that the \code{select_loci_if} verb does not modify the backing FBM files,
+but rather it subsets the list of loci to be used stored in the \code{gen_tibble}.
 }

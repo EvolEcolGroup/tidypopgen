@@ -2,7 +2,7 @@
 #'
 #' Extract the loci names from a  `gen_tibble` (or directly from its `genotype`
 #' column).
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param ... currently unused.
@@ -23,8 +23,7 @@ show_loci_names.tbl_df <- function(.x, ...){
 
 #' @export
 #' @rdname show_loci_names
-show_loci_names.list <- function(.x, ...){
+show_loci_names.vctrs_bigSNP <- function(.x, ...){
   rlang::check_dots_empty()
-  stopifnot_snpbin_list(.x)
   attr(.x,"loci")$name
 }

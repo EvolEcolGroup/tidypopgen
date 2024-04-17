@@ -1,28 +1,32 @@
-raw_path_pop_a <- system.file("extdata/pop_a.raw", package = "tidypopgen")
-map_path_pop_a <- system.file("extdata/pop_a.map", package = "tidypopgen")
-pop_a_gt <- read_plink_raw(file = raw_path_pop_a, map_file = map_path_pop_a, quiet = TRUE)
-out_file <- tempfile()
+# create file
+test_indiv_meta <- data.frame (id=c("a","b","c"),
+                               population = c("pop1","pop1","pop2"))
+test_genotypes <- rbind(c(1,1,0,1,1,0),
+                        c(2,1,0,0,0,0),
+                        c(2,2,0,0,1,1))
+test_loci <- data.frame(name=paste0("rs",1:6),
+                        chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                        position=as.integer(c(3,5,65,343,23,456)),
+                        genetic_dist = as.integer(rep(0,6)),
+                        allele_ref = c("A","T","C","G","C","T"),
+                        allele_alt = c("T","C", NA,"C","G","A"))
+bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
+                                  loci = test_loci,
+                                  indiv_meta = test_indiv_meta,
+                                  path_out = tempfile('test_data_'))
+test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
-testthat::test_that("we can export to plink raw",{
-  # delete any files if they already exists (unlikely)
-  unlink(paste0(out_file,"*"))
-  expect_true(gt_write_plink(pop_a_gt, file = out_file, chunk_size = 2))
-  out_file_raw <- paste0(out_file,".raw")
-  expect_true(file.exists(out_file_raw))
-  # check that the file that we generated is identical to the original
-  expect_true(tools::md5sum(out_file_raw)==tools::md5sum(raw_path_pop_a))
+# this also tests show_genotypes and show_loci
+test_that("write a bed file",{
+  bed_path <- gt_write_plink(test_gt, bedfile = paste0(tempfile(),".bed"))
+  # now read the file back in
+  test_gt2 <- gen_tibble(bed_path, quiet=TRUE)
+  ## continue here
 
-  out_file_map <- paste0(out_file,".map")
-  expect_true(file.exists(out_file_map))
-  new_pop_a_gt <- read_plink_raw(file = out_file_raw,
-                                 map_file = out_file_map, quiet = TRUE)
-  expect_identical(pop_a_gt, new_pop_a_gt)
+  # because of the different backing file info, we cannot use identical on the whole object
+  expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt2)))
+  expect_true(identical(show_loci(test_gt), show_loci(test_gt2)))
+  expect_true(identical(test_gt %>% select(-genotypes),
+                        test_gt2 %>% select(-genotypes)))
 })
 
-testthat::test_that("we can export to plink ped",{
-  # delete any files if they already exists
-  unlink(paste0(out_file,"*"))
-  expect_true(gt_write_plink(pop_a_gt, file = out_file, plink_format = "ped", chunk_size = 2))
-  out_file_raw <- paste0(out_file,".ped")
-  expect_true(file.exists(out_file_raw))
-})

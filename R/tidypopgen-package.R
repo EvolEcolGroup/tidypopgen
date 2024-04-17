@@ -2,10 +2,12 @@
 "_PACKAGE"
 
 ## usethis namespace: start
-#' @import adegenet
 #' @import dplyr
 #' @import tibble
+#' @importFrom Rcpp sourceCpp
 #' @importFrom rlang :=
+#' @useDynLib tidypopgen, .registration = TRUE
+#' @importFrom ggplot2 autoplot
 ## usethis namespace: end
 NULL
 
@@ -16,3 +18,7 @@ generics::tidy
 #' @importFrom generics augment
 #' @export
 generics::augment
+
+#' @importFrom ggplot2 autoplot
+#' @export
+ggplot2::autoplot

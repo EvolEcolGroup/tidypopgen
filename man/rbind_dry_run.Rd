@@ -4,28 +4,19 @@
 \alias{rbind_dry_run}
 \title{Generate a report of what would happen to each SNP in a merge}
 \usage{
-rbind_dry_run(
-  ref,
-  target,
-  flip_strand = FALSE,
-  remove_ambiguous = FALSE,
-  quiet = FALSE
-)
+rbind_dry_run(ref, target, flip_strand = FALSE, quiet = FALSE)
 }
 \arguments{
-\item{ref}{either a \code{\link{gen_tibble}} object, or the path to the PLINK file;
+\item{ref}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim file;
 the alleles in this objects will
 be used as template to flip the ones in \code{target} and/or
 swap their order as necessary.}
 
-\item{target}{either a \code{\link{gen_tibble}} object, or the path to the PLINK file
-(saved in raw format, see details in \code{\link[=read_plink_raw]{read_plink_raw()}}.}
+\item{target}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim file}
 
 \item{flip_strand}{boolean on whether strand flipping should be checked to
-match the two datasets. It defaults to FALSE}
-
-\item{remove_ambiguous}{boolean whether ambiguous SNPs (i.e. a/t and c/g)
-should be removed. It defaults to FALSE}
+match the two datasets. Ambiguous SNPs (i.e. A/T and C/G)
+will also be removed.  It defaults to FALSE}
 
 \item{quiet}{boolean whether to omit reporting to screen}
 }
@@ -42,7 +33,7 @@ to align the two datasets, \code{target} data.frame)
 }
 \description{
 This function provides an overview of the fate of each SNP in two
-\code{\link[adegenet:genlight]{adegenet::genlight}} objects in the case of a merge. Only SNPs found in
+\code{\link{gen_tibble}} objects in the case of a merge. Only SNPs found in
 both objects will be kept. One object is used as a \code{reference}, and SNPs
 in the other dataset will be flipped and/or alleles swapped
 as needed. SNPs that have different alleles in the two datasets will also be

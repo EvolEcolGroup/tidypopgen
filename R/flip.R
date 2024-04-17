@@ -5,19 +5,19 @@
 #' Note that it does not check that all bases are valid. Also, missing alleles
 #' "m" are kept as "m".
 #'
-#' @param bases a vector of characters. The only valid characters are "a", "t",
-#' "c" and "g".
+#' @param bases a vector of characters. The only valid characters are "A", "T",
+#' "C" and "G".
 #' @returns a vector of recoded bases
 #' @keywords internal
 
 flip <-function(bases){
-  to_a <- bases=="t"
-  to_t <- bases=="a"
-  to_c <- bases=="g"
-  to_g <- bases=="c"
-  bases[to_a] <- "a"
-  bases[to_t] <- "t"
-  bases[to_c] <- "c"
-  bases[to_g] <- "g"
+  to_a <- bases=="T"
+  to_t <- bases=="A"
+  to_c <- bases=="G"
+  to_g <- bases=="C"
+  bases[to_a] <- "A"
+  bases[to_t] <- "T"
+  bases[to_c] <- "C"
+  bases[to_g] <- "G"
   return(bases)
 }

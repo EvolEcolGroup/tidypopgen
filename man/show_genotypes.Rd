@@ -3,21 +3,25 @@
 \name{show_genotypes}
 \alias{show_genotypes}
 \alias{show_genotypes.tbl_df}
-\alias{show_genotypes.list}
+\alias{show_genotypes.vctrs_bigSNP}
 \title{Show the genotypes of a \code{gen_tibble}}
 \usage{
 show_genotypes(.x, ...)
 
-\method{show_genotypes}{tbl_df}(.x, ...)
+\method{show_genotypes}{tbl_df}(.x, indiv_indices = NULL, loci_indices = NULL, ...)
 
-\method{show_genotypes}{list}(.x, ...)
+\method{show_genotypes}{vctrs_bigSNP}(.x, indiv_indices = NULL, loci_indices = NULL, ...)
 }
 \arguments{
-\item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
+\item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
 a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
 \item{...}{currently unused.}
+
+\item{indiv_indices}{indices of individuals}
+
+\item{loci_indices}{indices of loci}
 }
 \value{
 a matrix of counts of the alternative alleles (see \code{\link[=show_loci]{show_loci()}}) to

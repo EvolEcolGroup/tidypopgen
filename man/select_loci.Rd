@@ -4,36 +4,27 @@
 \alias{select_loci}
 \title{The \code{select} verb for \code{loci}}
 \usage{
-select_loci(.data, .sel_arg, .swap_arg = NULL, .swap_if_arg = NULL)
+select_loci(.data, .sel_arg)
 }
 \arguments{
 \item{.data}{a \code{gen_tibble}}
 
 \item{.sel_arg}{one unquoted expression, using the mini-grammar of
-\code{\link[dplyr:select]{dplyr::select()}} to select loci}
-
-\item{.swap_arg}{one unquoted expression, using the mini-grammar of
-\code{\link[dplyr:select]{dplyr::select()}} determining at which loci the reference and alterante
-allele will be swapped.}
-
-\item{.swap_if_arg}{a logical vector of length equal to the number of loci,
-or an expression that will tidy evaluate to such a vector.}
+\code{\link[dplyr:select]{dplyr::select()}} to select loci. Variable names
+can be used as if they were positions in the data frame, so expressions
+like x:y can be used to select a range of variables.}
 }
 \value{
-a list of \code{SNPbin} object that have been sub-setted to the selected
-loci.
-
-Variable names
-can be used as if they were positions in the data frame, so expressions
-like x:y can be used to select a range of variables.
+a \code{gen_tibble} with a subset of the loci.
 }
 \description{
 An equivalent to \code{\link[dplyr:select]{dplyr::select()}} that works on the \code{genotype} column
 of a \code{gen_tibble}, using the mini-grammar available for \code{tidyselect}. The
 \code{select}-like evaluation only has access to the names of the loci (i.e. it
 can select only based on names, not summary statistics of those loci; look
-at \code{\link[=select_loci_if]{select_loci_if()}} for that feature. There is also the possibility
-of swapping reference and alternate alleles whilst selecting loci, using
-either the argument \code{.swap_arg} (which has \code{select}-like mini-grammar on names)
-or \code{.swap_arg_if} (which has access to the genotypes like \code{select_loci_if})
+at \code{\link[=select_loci_if]{select_loci_if()}} for that feature.
+}
+\details{
+Note that the \code{select_loci} verb does not modify the backing FBM files,
+but rather it subsets the list of loci to be used stored in the \code{gen_tibble}.
 }

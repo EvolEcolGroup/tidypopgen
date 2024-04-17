@@ -5,7 +5,7 @@
 #' of class `glPca`, meaning that it is possible to use plotting and summary
 #' functions from the
 #' the package `adegenet`.
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 

@@ -9,9 +9,8 @@ gt_dapc(
   pop = NULL,
   n_pca = NULL,
   n_da = NULL,
-  var_contrib = TRUE,
-  var_loadings = FALSE,
-  pca_info = TRUE
+  loadings_by_locus = TRUE,
+  pca_info = FALSE
 )
 }
 \arguments{
@@ -20,24 +19,20 @@ gt_dapc(
 \item{pop}{either a factor indicating the group membership of individuals;
 or an integer defining the desired \emph{k} if x is a \code{gt_pca_clust}; or NULL, if
 'x' is a \code{gt_pca_clust} and contain an element 'best_k',
-usually generated with \code{\link[=gt_pca_best_k]{gt_pca_best_k()}},
+usually generated with \code{\link[=gt_pca_clust_best_k]{gt_pca_clust_best_k()}},
 which will be used to select the clustering level.}
 
 \item{n_pca}{number of principal components to be used in the Discriminant
-Analysis. If NULL, all components will be used.}
+Analysis. If NULL, k-1 will be used.}
 
 \item{n_da}{an integer indicating the number of axes retained in the
 Discriminant Analysis step.}
 
-\item{var_contrib}{a logical indicating whether the contribution of
-loci should be stored
-(TRUE, default) or not (FALSE). Such output can be useful, but can
-also create huge matrices when there are a lot of loci.}
-
-\item{var_loadings}{a logical indicating whether the loadings of loci should
-be stored (TRUE) or
-not (FALSE, default). Such output can be useful, but can also create
-huge matrices when there are a lot of loci.}
+\item{loadings_by_locus}{a logical indicating whether the loadings and
+contribution of each locus should
+be stored (TRUE, default) or
+not (FALSE). Such output can be useful, but can also create
+large matrices when there are a lot of loci and many dimensions.}
 
 \item{pca_info}{a logical indicating whether information about the prior
 PCA should be stored (TRUE, default) or not (FALSE). This information
@@ -74,4 +69,7 @@ details about the computation of DAPC are to be found in the indicated reference
 Jombart T, Devillard S and Balloux F (2010) Discriminant analysis of
 principal components: a new method for the analysis of genetically
 structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
+Thia, J. A. (2023). Guidelines for standardizing the application of
+discriminant analysis of principal components to genotype data.
+Molecular Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
 }

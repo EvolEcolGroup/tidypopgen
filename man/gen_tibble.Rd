@@ -2,22 +2,49 @@
 % Please edit documentation in R/gen_tibble.R
 \name{gen_tibble}
 \alias{gen_tibble}
+\alias{gen_tibble.character}
+\alias{gen_tibble.matrix}
 \title{Constructor for a \code{gen_tibble}}
 \usage{
-gen_tibble(ind_meta, genotypes, loci, ploidy = NULL)
+gen_tibble(x, ..., backingfile = NULL, quiet = FALSE)
+
+\method{gen_tibble}{character}(x, ..., backingfile = NULL, quiet = FALSE)
+
+\method{gen_tibble}{matrix}(x, indiv_meta, loci, ..., backingfile = NULL, quiet = FALSE)
 }
 \arguments{
-\item{ind_meta}{a list, data.frame or tibble with compulsory columns 'id'
+\item{x}{can be:
+\itemize{
+\item a string giving the path to a plink BED file, or a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}}
+\item a string giving the path to a RDS file storing a \code{bigSNP} object from
+the \code{bigsnpr} package (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})
+\item a string giving the path to a vcf file. Note that we currently read the whole
+vcf in memory with \code{vcfR}, so only smallish vcf can be imported. Only biallelic
+SNPs will be considered.
+\item a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
+allele.
+}}
+
+\item{...}{if \code{x} is the name of a vcf file, additional arguments
+passed to \code{\link[vcfR:io_vcfR]{vcfR::read.vcfR()}}. Otherwise, unused.}
+
+\item{backingfile}{the path, including the file name without extension,
+for backing files used to store the data (they will be given a .bk
+and .RDS automatically). This is not needed if \code{x} is already an .RDS file.
+If \code{x} is a .BED file and \code{backingfile} is left NULL, the backing file will
+be saved in the same directory as the
+bed file, using the same file name but with a different file type (.bk rather
+than .bed). If \code{x} is a genotype matrix and \code{backingfile} is NULL, then a
+temporary file will be created (but note that R will delete it at the end of
+the session!)}
+
+\item{quiet}{provide information on the files used to store the data}
+
+\item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest.}
 
-\item{genotypes}{a matrix of counts of alternative alleles, one row per
-individual and a column per locus}
-
 \item{loci}{a data.frame or tibble, with compulsory columns 'name', 'chromosome',
-and 'position'}
-
-\item{ploidy}{a vector giving the ploidy of each individual. If 'ploidy' is not
-specified, diploids are assumed.}
+and 'position','genetic_dist', 'allele_ref' and 'allele_alt'}
 }
 \value{
 an object of the class \code{gen_tbl}.
@@ -25,20 +52,4 @@ an object of the class \code{gen_tbl}.
 \description{
 A \code{gen_tibble} stores genotypes for individuals in a tidy format. DESCRIBE
 here the format
-}
-\examples{
-test_ind_meta <- data.frame (id=c("a","b","c"),
-                             population = c("pop1","pop1","pop2"))
-test_genotypes <- rbind(c(1,1,0,1,1,0),
-                        c(2,1,0,0,0,0),
-                        c(2,2,0,0,1,1))
-test_loci <- data.frame(name=paste0("rs",1:6),
-                        chromosome=c(1,1,1,1,2,2),
-                        position=c(3,5,65,343,23,456),
-                        allele_ref = c("a","t","c","g","c","t"),
-                        allele_alt = c("t","c", NA,"c","g","a"))
-test_gen <- gen_tibble(ind_meta = test_ind_meta,
-                       genotypes = test_genotypes,
-                       loci = test_loci)
-test_gen
 }

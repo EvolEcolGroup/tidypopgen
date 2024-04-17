@@ -8,12 +8,12 @@
   ...,
   as_is = FALSE,
   flip_strand = FALSE,
-  remove_ambiguous = FALSE,
-  quiet = FALSE
+  quiet = FALSE,
+  backingfile = NULL
 )
 }
 \arguments{
-\item{...}{two \code{\link{gen_tibble}} objects. Note tha this function can not take
+\item{...}{two \code{\link{gen_tibble}} objects. Note that this function can not take
 more objects, \code{rbind} has to be done sequentially for large sets of objects.}
 
 \item{as_is}{boolean determining whether the loci should be left as they are
@@ -21,12 +21,14 @@ before merging. If FALSE (the defaults), \code{rbind} will attempt to subset and
 swap alleles as needed.}
 
 \item{flip_strand}{boolean on whether strand flipping should be checked to
-match the two datasets. It defaults to FALSE}
-
-\item{remove_ambiguous}{boolean whether ambiguous SNPs (i.e. a/t and c/g)
-should be removed. It defaults to FALSE}
+match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T and C/G)
+will also be removed. It defaults to FALSE}
 
 \item{quiet}{boolean whether to omit reporting to screen}
+
+\item{backingfile}{the path and prefix of the files used to store the
+merged data (it will be a .RDS to store the \code{bigSNP} object and a .bk file
+as its backing file for the FBM)}
 }
 \value{
 a \code{\link{gen_tibble}} with the merged data.
@@ -41,6 +43,6 @@ as needed. SNPs that have different alleles in the two datasets
 (i.e. triallelic) will also be
 dropped. There are also options (NOT default) to attempt strand flipping to
 match alleles (often needed in human datasets from different SNP chips),
-and remove ambiguous alleles (c/g and a/t) where the correct strand can not
+and remove ambiguous alleles (C/G and A/T) where the correct strand can not
 be guessed.
 }

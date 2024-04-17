@@ -3,26 +3,26 @@
 \name{show_loci}
 \alias{show_loci}
 \alias{show_loci.tbl_df}
-\alias{show_loci.list}
+\alias{show_loci.vctrs_bigSNP}
 \alias{show_loci<-}
 \alias{show_loci<-.tbl_df}
-\alias{show_loci<-.list}
+\alias{show_loci<-.vctrs_bigSNP}
 \title{Show the loci information of a \code{gen_tibble}}
 \usage{
 show_loci(.x, ...)
 
 \method{show_loci}{tbl_df}(.x, ...)
 
-\method{show_loci}{list}(.x, ...)
+\method{show_loci}{vctrs_bigSNP}(.x, ...)
 
 show_loci(.x) <- value
 
 \method{show_loci}{tbl_df}(.x) <- value
 
-\method{show_loci}{list}(.x) <- value
+\method{show_loci}{vctrs_bigSNP}(.x) <- value
 }
 \arguments{
-\item{.x}{a list of \code{\link[adegenet:SNPbin]{adegenet::SNPbin}} objects (usually the \code{genotype} column of
+\item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
 a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 

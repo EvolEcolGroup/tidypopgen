@@ -1,7 +1,7 @@
 #' Show the loci information of a `gen_tibble`
 #'
 #' Extract and set the information on loci from a  `gen_tibble`.
-#' @param .x a list of [`adegenet::SNPbin`] objects (usually the `genotype` column of
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param ... currently unused.
@@ -21,13 +21,15 @@ show_loci.tbl_df <- function(.x, ...){
   show_loci(.x$genotypes)
 }
 
+
 #' @export
 #' @rdname show_loci
-show_loci.list <- function(.x, ...){
+show_loci.vctrs_bigSNP <- function(.x, ...){
   rlang::check_dots_empty()
-  stopifnot_snpbin_list(.x)
   attr(.x,"loci")
 }
+
+
 
 #' @export
 #' @param value a data.frame or tibble of loci information to replace the current one.
@@ -47,8 +49,7 @@ show_loci.list <- function(.x, ...){
 
 #' @export
 #' @rdname show_loci
-"show_loci<-.list" <- function(.x, value){
-  stopifnot_snpbin_list(.x)
+"show_loci<-.vctrs_bigSNP" <- function(.x, value){
   # test for validity of loci
   check_valid_loci(value)
   if (nrow(show_loci(.x))!=nrow(value)){
@@ -57,5 +58,4 @@ show_loci.list <- function(.x, ...){
   attr(.x,"loci") <- tibble::as_tibble(value)
   .x
 }
-
 

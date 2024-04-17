@@ -7,10 +7,10 @@
 #' a principal component analysis (PCA). For each model,
 #' several statistical measures of goodness of fit
 #' are computed, which allows to choose the optimal k using the function
-#' [gt_pca_best_k()].
+#' [gt_pca_clust_best_k()].
 #' See details for a description of how to select the optimal k
 #' and vignette("adegenet-dapc") for a tutorial.
-#' @param x an object of class `gt_pca`, generated with [gt_pca()].
+#' @param  x a `gt_pca` object returned by one of the `gt_pca_*` functions.
 #' @param n_pca number of principal components to be fed to the LDA.
 #' @param k_clusters number of clusters to explore, either a single value, or
 #' a vector of length 2 giving the minimum and maximum (e.g. 1:5). If left NULL,
@@ -20,7 +20,7 @@
 #' @param n_start number of starting points for kmeans (only used if `method="kmeans"`)
 #' @param quiet boolean on whether to silence outputting information to the
 #'  screen (defaults to FALSE)
-#' @returns a `gt_pca_clust` object, which is a subclass of [`gt_pca`] with
+#' @returns a `gt_pca_clust` object, which is a subclass of `gt_pca` with
 #' an additional element 'cluster', a list with elements:
 #' - 'method' the clustering method (either kmeans or ward)
 #' - 'n_pca' number of principal components used for clustering
@@ -32,7 +32,7 @@
 #' @export
 
 gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
-                                 k_clusters = c(1,round(nrow(x$scores)/10)),
+                                 k_clusters = c(1,round(nrow(x$u)/10)),
                                  method=c("kmeans","ward"),
                                  n_iter = 1e5, n_start = 10,
                                  quiet = FALSE){
@@ -45,10 +45,10 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
   method <- match.arg(method)
 
   ## SOME GENERAL VARIABLES ##
-  N <- nrow(x$scores)
+  N <- nrow(x$u)
   # if we don't give the number of pca, then use them all
   if(is.null(n_pca)){
-    n_pca <- length(x$eig)
+    n_pca <- length(x$d)
     if (!quiet){
       message("'n.pca' was not set: all ", n_pca, " components were used")
     }
@@ -81,26 +81,28 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
   }
   # vector to store within sum of squares
   WSS <- numeric(0)
+  # get the scores
+  x_scores <- sweep(x$u, 2, x$d, '*')[,seq_len(n_pca)]
 
   # TODO this is an obvious place where to parallelise
   for(i in 1:length(nbClust)){
     if (method == "kmeans") {
       ## kmeans clustering (original method)
-      groups_assignments <- stats::kmeans(x$scores[,seq_len(n_pca)],
+      groups_assignments <- stats::kmeans(x_scores,
                                    centers = nbClust[i],
                                    iter.max = n_iter, nstart = n_start)$cluster
     } else {
       ## ward clustering
-      groups_assignments <- stats::cutree(stats::hclust(stats::dist(x$scores[,seq_len(n_pca)])^2,
+      groups_assignments <- stats::cutree(stats::hclust(stats::dist(x_scores)^2,
                                           method = "ward.D2"), k = nbClust[i])
     }
-    WSS[i] <- .compute.wss(x$scores[,seq_len(n_pca)], groups_assignments)
+    WSS[i] <- .compute.wss(x_scores, groups_assignments)
     cluster_list$groups[[i]]<- groups_assignments
 
   }
   # compute statistics of goodnees of fit
   if (add_clust_of_1){
-    WSS.ori <- sum(apply(x$scores[,seq_len(n_pca)], 2, function(v) sum((v-mean(v))^2) ))
+    WSS.ori <- sum(apply(x_scores, 2, function(v) sum((v-mean(v))^2) ))
     WSS <- c(WSS.ori,WSS)
     # add the classification for 1 cluster (they are all 1!)
     cluster_list$groups <- append(cluster_list$groups,
@@ -124,4 +126,43 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
 .compute.wss <- function(x, f) {
   x.group.mean <- apply(x, 2, tapply, f, mean)
   sum((x - x.group.mean[as.character(f),])^2)
+}
+
+
+#' Autoplots for `gt_pca_clust` objects
+#'
+#' For `gt_pca_clust`, `autoplot` produces a plot of a metric of choice ('BIC',
+#' 'AIC' or 'WSS') against the number of clusters (*k*). This plot is can be
+#' used to infer the best value of *k*, which corresponds to the smallest
+#' value of the metric (the minimum in an 'elbow' shaped curve). In some cases,
+#' there is not 'elbow' and the metric keeps decreasing with increasing *k*;
+#' in such cases, it is customary to choose the value of *k* at which the
+#' decrease in the metric reaches as plateau. For a programmatic way of choosing
+#' *k*, use [gt_pca_clust_best_k()].
+#'
+#' `autoplot` produces simple plots to quickly inspect an object. They are
+#' not customisable; we recommend that you use `ggplot2` to produce publication
+#' ready plots.
+#'
+#' @param object an object of class `gt_dapc`
+#' @param metric the metric to plot on the y axies, one of 'BIC', 'AIC', or
+#' 'WSS' (with sum of squares)
+#' @param ... not currently used.
+#' @returns a `ggplot2` object
+#' @rdname autoplot_gt_pca
+#' @export
+
+autoplot.gt_pca_clust <- function(object,
+                            metric = c("BIC", "AIC", "WSS"),
+                            ...)
+{
+  metric <- match.arg(metric)
+  # create a small tibble with the data of interest
+  metric_tbl <- tibble::tibble(metric = object$clusters[[metric]],
+                               k = object$clusters$k)
+  ggplot2::ggplot(data=metric_tbl, ggplot2::aes(x=.data$k, y=.data$metric))+
+    ggplot2::geom_point()+
+    ggplot2::geom_line()+
+    ggplot2::labs(y=metric)
+
 }

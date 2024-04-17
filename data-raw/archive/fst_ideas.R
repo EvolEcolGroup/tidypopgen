@@ -29,7 +29,7 @@ pairwise_fst <- function(.x) {
   # do something clever like first count na and then apply addition by column
 }
 
-# make such a function using loci_freq as a template
+# make such a function using loci_alt_freq as a template
 # then do the same for het_obs
 # finally use these two functions for ind functions (by taking the mean)
 loci_het_exp <- function(.x){
@@ -38,7 +38,7 @@ loci_het_exp <- function(.x){
   return((sums*(n-sums))/(n*(n-1)))
 }
 
-gt_pairwise_fst <- function(.x, by_locus=FALSE){
+pop_pairwise_fst <- function(.x, by_locus=FALSE){
 
   warning("this function is not properly tested yet!!!")
   # check matrix(unlist(z, use.names = FALSE), ncol = 10, byrow = TRUE)
@@ -61,7 +61,7 @@ gt_pairwise_fst <- function(.x, by_locus=FALSE){
   het <- matrix(unlist(lapply(1:nrow(sums), het_exp_by_row, sums, n),
                      use.names = FALSE), ncol = n_loci, byrow = TRUE)
 
-  # get the grouping column, and creat all pairwise combination of indeces
+  # get the grouping column, and creat all pairwise combination of indices
   .group_levels = .x %>% group_keys()
   pairwise_combn <- t(combn(nrow(.group_levels),2))
   numerator <- matrix(NA_real_, nrow = nrow(pairwise_combn), ncol = n_loci)

@@ -52,9 +52,9 @@ vcfR2gen_tibble <- function(x, n_cores=1){
   x[x=="1/0"] <- 1
   x[x=="1/1"] <- 2
 
-  ind_meta <- tibble(id = colnames(x), population = NA)
+  indiv_meta <- tibble(id = colnames(x), population = NA)
 
-  x <- gen_tibble(ind_meta= ind_meta, genotypes = x, loci = loci)
+  x <- gen_tibble(indiv_meta= indiv_meta, genotypes = x, loci = loci)
 
   return(x)
 }

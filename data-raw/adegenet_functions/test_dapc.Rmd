@@ -1,0 +1,73 @@
+---
+title: "test_dapc"
+author: "Andrea"
+date: "2024-03-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r cars}
+library(adegenet) # for dapc
+library(vcfR) # for reading in genetic data
+#library(tidyverse) # for manipulating and plotting data
+library(dplyr)
+library(ggplot2)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r }
+#read in anolis vcf file that we're pulling from github and convert to genlight object
+vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+                          package = "tidypopgen")
+
+anole_vcf <-
+  read.vcfR(
+    vcf_path
+  )
+anole_genlight <- vcfR2genlight(anole_vcf)
+```
+
+```{r}
+anole_genlight
+```
+
+
+```{r}
+anole_gl_pca <- glPca(anole_genlight, nf = 30)
+
+```
+
+```{r}
+scatter(anole_gl_pca, clabel = 0)
+
+```
+
+
+```{r}
+pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
+                        package = "tidypopgen")
+pops <- readr::read_csv(pops_path)
+pops
+```
+```{r}
+num_clust <- find.clusters(anole_genlight,n.pca = 10)
+```
+
+```{r}
+anole_gl_dapc <- dapc(anole_genlight, num_clust$grp,n.pca = 10,n.da = 2,
+                      var.loadings=TRUE)
+
+```
+
+```{r}
+scatter(anole_gl_dapc, posi.da="bottomleft")
+
+```

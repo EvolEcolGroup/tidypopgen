@@ -2,73 +2,16 @@
 % Please edit documentation in R/gt_pca.R
 \name{gt_pca}
 \alias{gt_pca}
-\title{Principal Component Analysis for \code{gen_tibble} object}
-\usage{
-gt_pca(
-  .x,
-  center = TRUE,
-  scale = FALSE,
-  nf = NULL,
-  loadings = TRUE,
-  alleles_as_units = FALSE,
-  use_c = TRUE,
-  parallel = FALSE,
-  n_cores = NULL,
-  return_dot_prod = FALSE,
-  mat_dot_prod = NULL
-)
-}
-\arguments{
-\item{.x}{a \link{gen_tibble} object}
-
-\item{center}{a logical indicating whether the numbers of alleles should
-be centered; defaults to TRUE}
-
-\item{scale}{a logical indicating whether the numbers of alleles should
-be scaled; defaults to FALSE}
-
-\item{nf}{an integer indicating the number of principal components to be
-retained; if NULL, all components with an eigen value larger than 1e-10 are kept.}
-
-\item{loadings}{a logical indicating whether loadings of the alleles should
-be computed (TRUE, default), or not (FALSE). Vectors of loadings are not
-always useful, and can take a large amount of RAM when millions of SNPs are considered.}
-
-\item{alleles_as_units}{a logical indicating whether alleles are considered as
-units (i.e., a diploid genotype equals two samples, a triploid, three, etc.)
-or whether individuals are considered as units of information.}
-
-\item{use_c}{a logical indicating whether compiled C code should be used for
-faster computations; this option cannot be used alongside parallel option.}
-
-\item{parallel}{a logical indicating whether multiple cores -if available-
-should be used for the computations (TRUE), or not (FALSE, default); requires
-the package parallel to be installed (see details); this option cannot be
-used alongside use_c option.}
-
-\item{n_cores}{if parallel is TRUE, the number of cores to be used in the
-computations; if NULL, then the maximum number of cores available on the computer is used.}
-
-\item{return_dot_prod}{a logical indicating whether the matrix of dot products
-between individuals should be returned (TRUE) or not (FALSE, default).}
-
-\item{mat_dot_prod}{an optional matrix of dot products between individuals,
-NULL by default. This option is used internally to speed up computation
-time when re-running the same PCA several times. Leave this argument as NULL
-unless you really know what you are doing.}
-}
-\value{
-an object of class \code{gt_pca} (a subclass of \code{\link[adegenet:glPca]{adegenet::glPca}}, with the following components:
-call	the matched call.
-eig a numeric vector of eigenvalues.
-scores a matrix of principal components, containing the coordinates of each individual (in row) on each principal axis (in column).
-loadings (optional) a matrix of loadings, containing the loadings of each SNP (in row) for each principal axis (in column).
-}
+\title{Principal Component Analysis for \code{gen_tibble} objects}
 \description{
-This function implements Principal Component Analysis for \code{gen_tibble}. It
-is a modified version of \code{\link[adegenet:glPca]{adegenet::glPca()}}, and returns an object that is
-of class \code{glPca}, meaning that it is possible to use plotting and summary
-functions from the
-the package \code{adegenet} (for details on those function, see the help page
-for \code{\link[adegenet:glPca]{adegenet::glPca()}}.
+There are a number of PCA methods available for \code{gen_tibble} objects. They
+are mostly designed to work on very large datasets, so they only compute
+a limited number of components. For smaller datasets, \code{gt_partialSVD} allows
+the use of partial (truncated) SVD to fit the PCA; this method is suitable when
+the number of individuals is much smaller than the number of loci. For larger
+dataset, \code{gt_randomSVD} is more appropriate. Finally, there is a method
+specifically designed for dealing with LD in large datasets, \code{gt_autoSVD}.
+Whilst this is arguably the best option, it is somewhat data hungry, and so
+only suitable for very large datasets (hundreds of individuals with several hundred
+thousands markers, or larger).
 }

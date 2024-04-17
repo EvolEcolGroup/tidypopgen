@@ -7,7 +7,7 @@
 gt_pca_find_clusters(
   x = NULL,
   n_pca = NULL,
-  k_clusters = c(1, round(nrow(x$scores)/10)),
+  k_clusters = c(1, round(nrow(x$u)/10)),
   method = c("kmeans", "ward"),
   n_iter = 1e+05,
   n_start = 10,
@@ -15,7 +15,7 @@ gt_pca_find_clusters(
 )
 }
 \arguments{
-\item{x}{an object of class \code{gt_pca}, generated with \code{\link[=gt_pca]{gt_pca()}}.}
+\item{x}{a \code{gt_pca} object returned by one of the \verb{gt_pca_*} functions.}
 
 \item{n_pca}{number of principal components to be fed to the LDA.}
 
@@ -33,7 +33,7 @@ it will use 1 to the number of pca components divided by 10 (a reasonable guess)
 screen (defaults to FALSE)}
 }
 \value{
-a \code{gt_pca_clust} object, which is a subclass of \code{\link{gt_pca}} with
+a \code{gt_pca_clust} object, which is a subclass of \code{gt_pca} with
 an additional element 'cluster', a list with elements:
 \itemize{
 \item 'method' the clustering method (either kmeans or ward)
@@ -53,7 +53,7 @@ increasing number of clusters (k), after transforming data using
 a principal component analysis (PCA). For each model,
 several statistical measures of goodness of fit
 are computed, which allows to choose the optimal k using the function
-\code{\link[=gt_pca_best_k]{gt_pca_best_k()}}.
+\code{\link[=gt_pca_clust_best_k]{gt_pca_clust_best_k()}}.
 See details for a description of how to select the optimal k
 and vignette("adegenet-dapc") for a tutorial.
 }
