@@ -60,5 +60,50 @@ test_that("snp_king and gt_king compute king-robust correctly",{
   # check that we get the same result if we split the operation into two blocks
   test_na_king_2blocks <- snp_king(test_na_fbm, block.size = 300)
   expect_identical(test_na_king_2blocks, test_na_king)
+
+
 })
+
+test_that("snp_king gives the same results as plink",{
+
+  #Create gentibble for our data
+  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
+  #families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = bigsnpr::sub_bed(bed_path))
+  families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
+  families <- gen_tibble(families_bigsnp_path)
+
+  #Get snp_king results
+  families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes
+  families_king <- snp_king(families_fbm)
+
+  #Read in results from king -b families_k.bed --kinship
+  king <- read.table(system.file("extdata/related/test_king.kin0", package = "tidypopgen"),header = FALSE)
+
+  #Create empty matrix
+  king_matrix <- matrix(nrow = 12, ncol = 12)
+
+  #Fill matrix
+  for (i in 1:nrow(king)){
+
+    x <- as.numeric(king[i,2])
+    y <- as.numeric(king[i,3])
+
+    king_matrix[x,y] <- king[i,8]
+    king_matrix[y,x] <- king[i, 8]
+
+  }
+
+  #Replace diagonal
+  diag(king_matrix) <- 0.5000
+
+  diff <- king_matrix - families_king
+
+  result <- all.equal(king_matrix, families_king, tolerance = 0.06)
+
+  #Check results are the same
+  expect_true(result)
+
+})
+
+
 

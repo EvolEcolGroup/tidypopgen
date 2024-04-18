@@ -35,3 +35,66 @@ test_that("snp_ibs and gt_ibs computes ibs correctly",{
                         check.attributes=FALSE))
 })
 
+
+test_that("snp_ibs gives the same results as plink",{
+
+  #Read in results from plink --bfile families --distance square flat-missing
+  plink_ibs <- read.table(system.file("extdata/related/test_plinkIBS.dist", package = "tidypopgen"), header = FALSE)
+  #Transform to matrix
+  plink_matrix <- unname(as.matrix(plink_ibs))
+
+  #Create gentibble for the same data
+  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
+  #families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = bigsnpr::sub_bed(bed_path))
+  families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
+  families <- gen_tibble(families_bigsnp_path)
+
+  #Get snp_ibs results
+  families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes
+  tidy_ibs <- snp_ibs(families_fbm, as.counts=TRUE)
+
+
+  #Get the first output of snp_ibs
+  tidy_matrix <- tidy_ibs[[1]][,]
+
+  #plink data is a distance matrix
+  #tidypopgen snp_ibs counts IBS by allele
+  #tidypopgen needs transforming to compare to plink
+
+  #Correct for number of valid loci (missingness)
+  valid_loci <- tidy_ibs[[2]][,]
+  n_loci <- 1922
+  #flat-missing is '1-<missing call frequency>) denominator'
+  correction <- valid_loci/n_loci
+  tidy_matrix <- tidy_matrix/(valid_loci/n_loci)
+  plink_matrix <- unname(as.matrix(plink_ibs))
+
+  #Replace cases comparing an individual to itself
+  diag(tidy_matrix) <- 0
+  zero_indices <- which(tidy_matrix == 0, arr.ind = TRUE)
+  tidy_transformed <- matrix(NA, nrow = nrow(tidy_matrix), ncol = ncol(tidy_matrix))
+
+  #Fill these with 0
+  for (i in 1:nrow(zero_indices)) {
+    tidy_transformed[zero_indices[i, 1], zero_indices[i, 2]] <- 0
+  }
+
+  #Fill remaining values
+  non_zero_indices <- which(tidy_matrix != 0, arr.ind = TRUE)
+  #value_map <- c(1921:0)
+  #tidy_transformed[non_zero_indices] <- value_map[tidy_matrix[non_zero_indices]]
+  tidy_transformed[non_zero_indices] <- 1922 - tidy_matrix[non_zero_indices]
+
+  #Check both are numeric and round
+  tidy_transformed <- as.numeric(tidy_transformed)
+  plink_matrix <- as.numeric(plink_matrix)
+  tidy_transformed <- round(tidy_transformed, 3)
+
+  #Check matrices are equal
+  expect_true(identical(tidy_transformed,plink_matrix))
+
+
+})
+
+
+
