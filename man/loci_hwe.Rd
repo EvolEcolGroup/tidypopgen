@@ -20,7 +20,7 @@ loci_hwe(.x, ...)
 a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
-\item{...}{further arguments to pass to \code{\link[HardyWeinberg:HWExact]{HardyWeinberg::HWExact()}}.}
+\item{...}{not used.}
 
 \item{mid_p}{boolean on whether the mid-p value should be computed.
 Default is TRUE, as in PLINK.}

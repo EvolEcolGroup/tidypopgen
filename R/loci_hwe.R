@@ -12,7 +12,7 @@
 #' or a [`gen_tibble`].
 #' @param mid_p boolean on whether the mid-p value should be computed.
 #' Default is TRUE, as in PLINK.
-#' @param ... further arguments to pass to [HardyWeinberg::HWExact()].
+#' @param ... not used.
 #' @returns a vector of probabilities from HWE exact test, one per locus
 #' @author the C++ algorithm was written by Christopher Chang for PLINK 1.90, based on
 #' original code by Jan Wigginton (the code was released under GPL3).
@@ -35,7 +35,7 @@ loci_hwe.tbl_df <- function(.x, mid_p = TRUE, ...) {
 #' @export
 #' @rdname loci_hwe
 loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
-  #rlang::check_dots_empty()
+  rlang::check_dots_empty()
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use
