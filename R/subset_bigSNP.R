@@ -26,6 +26,7 @@ subset_bigSNP <- function(X, indiv_indices=NULL, loci_indices=NULL, swap_indices
       x_new <- x
       x_new[x==2]<-0
       x_new[x==0]<-2
+      x_new[is.na(x_new)]<-3
       x_new
     }
     # change the genotypes
