@@ -1,8 +1,8 @@
-#' Write a geno file for sNMF
+#' Write a geno file for sNMF from the LEA package
 #'
 #' This function writes a geno file fom a [`gen_tibble`]. Unless a file path is given,
 #' a file with suffix .geno is written in the same location as the .rds and .bk
-#' file that underpin the [`gen_tibble`].
+#' files that underpin the [`gen_tibble`].
 #'
 #' @param x a [`gen_tibble`]
 #' @param file the .geno filename with a path, or NULL (the default) to use the
