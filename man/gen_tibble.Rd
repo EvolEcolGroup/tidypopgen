@@ -6,11 +6,34 @@
 \alias{gen_tibble.matrix}
 \title{Constructor for a \code{gen_tibble}}
 \usage{
-gen_tibble(x, ..., backingfile = NULL, quiet = FALSE)
+gen_tibble(
+  x,
+  ...,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  backingfile = NULL,
+  quiet = FALSE
+)
 
-\method{gen_tibble}{character}(x, ..., backingfile = NULL, quiet = FALSE)
+\method{gen_tibble}{character}(
+  x,
+  ...,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  backingfile = NULL,
+  quiet = FALSE
+)
 
-\method{gen_tibble}{matrix}(x, indiv_meta, loci, ..., backingfile = NULL, quiet = FALSE)
+\method{gen_tibble}{matrix}(
+  x,
+  indiv_meta,
+  loci,
+  ...,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  backingfile = NULL,
+  quiet = FALSE
+)
 }
 \arguments{
 \item{x}{can be:
@@ -27,6 +50,13 @@ allele.
 
 \item{...}{if \code{x} is the name of a vcf file, additional arguments
 passed to \code{\link[vcfR:io_vcfR]{vcfR::read.vcfR()}}. Otherwise, unused.}
+
+\item{valid_alleles}{a vector of valid allele values; it defaults to 'A','T',
+'C' and 'G'.}
+
+\item{missing_alleles}{a vector of values in the BIM file/loci dataframe that
+indicate a missing value for the allele value (e.g. when we have a monomorphic
+locus with only one allele). It defalts to '0' and '.' (the same as PLINK 1.9).}
 
 \item{backingfile}{the path, including the file name without extension,
 for backing files used to store the data (they will be given a .bk

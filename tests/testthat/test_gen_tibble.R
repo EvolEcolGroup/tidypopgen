@@ -54,7 +54,37 @@ test_genotypes_c <- rbind(c("1","1","0","1","1","0"),
                           c("2","2","0","0","1","1"))
 
 
-test_that("check gen_tibble does not accept character matrix",{
+test_that("gen_tibble does not accept character matrix",{
   expect_error(test_dfs_gt <- gen_tibble(test_genotypes_c, indiv_meta = test_indiv_meta,
                                          loci = test_loci, quiet = TRUE),"'x' is not a matrix of integers")
 })
+
+test_that("gen_tibble catches invalid alleles",{
+  test_loci_wrong <- test_loci
+  test_loci_wrong$allele_alt[1] <- "N"
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                                           loci = test_loci_wrong, quiet = TRUE),"valid alleles are")
+  # now add N to the valid alleles
+  test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                                         loci = test_loci_wrong,
+                                         valid_alleles = c("A","C","T","G","N"),
+                            quiet = TRUE)
+  expect_true("N" %in% show_loci(test_dfs_gt)$allele_alt)
+  # but if we add to missing values it shoudl be turned into a zero
+  test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                            loci = test_loci_wrong,
+                            missing_alleles = c("0",".","N"),
+                            quiet = TRUE)
+  expect_false("N" %in% show_loci(test_dfs_gt)$allele_alt)
+  expect_true(show_loci(test_dfs_gt)$allele_alt[1]=="0")
+  # and finally throw an error if we try to use 0 as a missing value
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                            loci = test_loci_wrong,
+                            valid_alleles = c("A","C","T","G","0"),
+                            quiet = TRUE), "can not be a valid allele")
+
+
+
+})
+
+

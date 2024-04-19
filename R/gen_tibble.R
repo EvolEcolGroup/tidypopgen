@@ -17,6 +17,11 @@
 #' and 'position','genetic_dist', 'allele_ref' and 'allele_alt'
 #' @param ... if `x` is the name of a vcf file, additional arguments
 #' passed to [vcfR::read.vcfR()]. Otherwise, unused.
+#' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
+#' 'C' and 'G'.
+#' @param missing_alleles a vector of values in the BIM file/loci dataframe that
+#' indicate a missing value for the allele value (e.g. when we have a monomorphic
+#' locus with only one allele). It defalts to '0' and '.' (the same as PLINK 1.9).
 #' @param backingfile the path, including the file name without extension,
 #' for backing files used to store the data (they will be given a .bk
 #' and .RDS automatically). This is not needed if `x` is already an .RDS file.
@@ -31,26 +36,57 @@
 #' @rdname gen_tibble
 #' @export
 
-gen_tibble <- function(x, ...,  backingfile = NULL, quiet = FALSE) {
+gen_tibble <-
+  function(x,
+           ...,
+           valid_alleles = c("A", "T", "C", "G"),
+           missing_alleles = c("0","."),
+           backingfile = NULL,
+           quiet = FALSE) {
+
   UseMethod("gen_tibble", x)
 }
 
+###############################################################################
+# character method for files
+###############################################################################
 #' @export
 #' @rdname gen_tibble
-gen_tibble.character <- function(x, ..., backingfile = NULL, quiet = FALSE){
+gen_tibble.character <-
+  function(x,
+           ...,
+           valid_alleles = c("A", "T", "C", "G"),
+           missing_alleles = c("0","."),
+           backingfile = NULL,
+           quiet = FALSE) {
+
+  # check that valid alleles does not contain zero
+  if ("0" %in% valid_alleles){
+    stop ("'0' can not be a valid allele (it is the default missing allele value!)")
+  }
 
   if ((tolower(file_ext(x))=="bed") || (tolower(file_ext(x))=="rds")){
     rlang::check_dots_empty()
-    gen_tibble_bed_rds(x = x, ..., backingfile = backingfile, quiet = quiet)
-  } else if (tolower(file_ext(x))=="vcf"){
-    gen_tibble_vcf(x = x, ..., backingfile = backingfile, quiet = quiet)
+    gen_tibble_bed_rds(x = x, ...,
+                       valid_alleles= valid_alleles,
+                       missing_alleles= missing_alleles,
+                       backingfile = backingfile,
+                       quiet = quiet)
+  } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="vcf.gz")){
+    gen_tibble_vcf(x = x, ...,
+                   valid_alleles= valid_alleles,
+                   missing_alleles= missing_alleles,
+                   backingfile = backingfile, quiet = quiet)
   } else {
-    stop("file_path should be pointing to a either a PLINK .bed file or a bigSNP .rds file")
+    stop("file_path should be pointing to a either a PLINK .bed file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
 }
 
 
-gen_tibble_bed_rds <- function(x, ..., backingfile = NULL, quiet = FALSE){
+gen_tibble_bed_rds <- function(x, ...,
+                               valid_alleles = c("A", "T", "C", "G"),
+                               missing_alleles = c("0","."),
+                               backingfile = NULL, quiet = FALSE){
 
   # if it is a bed file, we convert it to a bigsnpr
   if (tolower(file_ext(x))=="bed"){
@@ -77,13 +113,21 @@ gen_tibble_bed_rds <- function(x, ..., backingfile = NULL, quiet = FALSE){
                                            bigsnp_file = bigsnp_path,
                                            indiv_id = bigsnp_obj$fam$sample.ID)
 
-  tibble::new_tibble(
+  new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
     class = "gen_tbl"
   )
+  check_allele_alphabet (new_gen_tbl, valid_alleles = valid_alleles,
+                         missing_alleles = missing_alleles)
+  show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
+  return(new_gen_tbl)
+
 }
 
-gen_tibble_vcf <- function(x, ..., backingfile = NULL, quiet = FALSE) {
+gen_tibble_vcf <- function(x, ...,
+                           valid_alleles = c("A", "T", "C", "G"),
+                           missing_alleles = c("0","."),
+                           backingfile = NULL, quiet = FALSE) {
   x <- vcfR::read.vcfR(file = x, verbose = !quiet, ...)
 
   x <- vcfR::addID(x)
@@ -111,16 +155,34 @@ gen_tibble_vcf <- function(x, ..., backingfile = NULL, quiet = FALSE) {
   ind_meta <- tibble(id = colnames(x), population = NA)
 
   # using the gen_tibble.matrix method
-  gen_tibble(x = x,
+  new_gen_tbl <- gen_tibble(x = x,
              indiv_meta = ind_meta,
              loci = loci,
              backingfile = backingfile)
+  check_allele_alphabet (new_gen_tbl, valid_alleles = valid_alleles,
+                         missing_alleles = missing_alleles)
+  show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
+  return(new_gen_tbl)
+
 }
+
+###############################################################################
+# matrix method to provide data directly from R
+###############################################################################
 
 #' @export
 #' @rdname gen_tibble
-gen_tibble.matrix <- function(x, indiv_meta, loci, ..., backingfile = NULL, quiet = FALSE){
+gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
+                              valid_alleles = c("A", "T", "C", "G"),
+                              missing_alleles = c("0","."),
+                              backingfile = NULL, quiet = FALSE){
   rlang::check_dots_empty()
+
+  # check that valid alleles does not contain zero
+  if ("0" %in% valid_alleles){
+    stop ("'0' can not be a valid allele (it is the default missing allele value!)")
+  }
+
   # TODO check object types
   if (!all(c("id", "population") %in% names(indiv_meta))){
     stop("ind_meta does not include the compulsory columns 'id' and 'population")
@@ -153,41 +215,15 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ..., backingfile = NULL, quie
                                            bigsnp_file = bigsnp_path,
                                            indiv_id = bigsnp_obj$fam$sample.ID)
 
-  tibble::new_tibble(
+  new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
     class = "gen_tbl"
   )
+  check_allele_alphabet (new_gen_tbl, valid_alleles = valid_alleles,
+                         missing_alleles = missing_alleles)
+  show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
+  return(new_gen_tbl)
 
-}
-
-
-#' create a vctrs_bigSNP
-#' @param bigsnp_obj the bigsnp object
-#' @param bigsnp_file the file to which the bigsnp object was saved
-#' @param indiv_id ids of individuals
-#' @returns a vctrs_bigSNP object
-#' @keywords internal
-new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
-  loci <- tibble::tibble(big_index = seq_len(nrow(bigsnp_obj$map)),
-                         name = bigsnp_obj$map$marker.ID,
-                         chromosome = bigsnp_obj$map$chromosome,
-                         position = bigsnp_obj$map$physical.pos,
-                         genetic_dist = bigsnp_obj$map$genetic.dist,
-                         allele_ref = bigsnp_obj$map$allele2,
-                         allele_alt = bigsnp_obj$map$allele1
-  )
-  vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
-                  bigsnp = bigsnp_obj,
-                  bigsnp_file = bigsnp_file, # TODO is this redundant with the info in the bigSNP object?
-                  bigsnp_md5sum = tools::md5sum(bigsnp_file), # TODO make sure this does not take too long
-                  loci=loci,
-                  names=indiv_id,
-                  class = "vctrs_bigSNP")
-}
-
-#' @export
-summary.vctrs_bigSNP <- function(object, ...){
-  summary(rep("bigSNP-genotypes",length(object)))
 }
 
 
@@ -244,6 +280,38 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
   return(snp_list)
 }
 
+################################################################################
+## vctrs_bigSNP class to store the genotype info in a gen_tibble
+################################################################################
+
+#' create a vctrs_bigSNP
+#' @param bigsnp_obj the bigsnp object
+#' @param bigsnp_file the file to which the bigsnp object was saved
+#' @param indiv_id ids of individuals
+#' @returns a vctrs_bigSNP object
+#' @keywords internal
+new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
+  loci <- tibble::tibble(big_index = seq_len(nrow(bigsnp_obj$map)),
+                         name = bigsnp_obj$map$marker.ID,
+                         chromosome = bigsnp_obj$map$chromosome,
+                         position = bigsnp_obj$map$physical.pos,
+                         genetic_dist = bigsnp_obj$map$genetic.dist,
+                         allele_ref = bigsnp_obj$map$allele2,
+                         allele_alt = bigsnp_obj$map$allele1
+  )
+  vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
+                  bigsnp = bigsnp_obj,
+                  bigsnp_file = bigsnp_file, # TODO is this redundant with the info in the bigSNP object?
+                  bigsnp_md5sum = tools::md5sum(bigsnp_file), # TODO make sure this does not take too long
+                  loci=loci,
+                  names=indiv_id,
+                  class = "vctrs_bigSNP")
+}
+
+#' @export
+summary.vctrs_bigSNP <- function(object, ...){
+  summary(rep("bigSNP-genotypes",length(object)))
+}
 
 
 
@@ -275,6 +343,27 @@ tbl_sum.gen_tbl <- function(x, ...) {
   )
 }
 
+
+# function to check the allele alphabet
+check_allele_alphabet <- function(x,
+                                  valid_alleles = c("A", "T", "C", "G"),
+                                  missing_alleles = c("0",".")){
+  if (any(!show_loci(x)$allele_ref %in% c(valid_alleles,missing_alleles,NA),
+          !show_loci(x)$allele_alt %in% c(valid_alleles,missing_alleles,NA))){
+    stop("valid alleles are ", paste(c(valid_alleles,missing_alleles), collapse=" ")," but ",
+         paste(unique(c(show_loci(x)$allele_ref,show_loci(x)$allele_alt)), collapse=" "),
+         " were found.")
+  }
+
+}
+
+# make all missing value equal to 0
+# loci_info is usually from show_loci()
+harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
+  loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles]<-"0"
+  loci_info$allele_alt[loci_info$allele_alt %in% missing_alleles]<-"0"
+  return(loci_info)
+}
 
 ##########################################
 # convenient functs
