@@ -38,6 +38,7 @@ Imports:
 Suggests:
     adegenet,
     knitr,
+    detectRUNS,
     LEA,
     rmarkdown,
     readr,
