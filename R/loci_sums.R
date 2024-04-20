@@ -33,7 +33,7 @@ loci_sums.vctrs_bigSNP <- function(.x, ...) {
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep)>1){
-    # col means for submatrix (all rows, only some columns)
+    # col sums for submatrix (all rows, only some columns)
     colMeans_sub <- function(X, ind, rows_to_keep) {
       colSums(X[rows_to_keep, ind], na.rm=TRUE)
     }
