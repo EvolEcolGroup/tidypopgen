@@ -60,6 +60,7 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
                                        ...)
 {
   rlang::check_dots_empty()
+  stopifnot_diploid(.x)
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use

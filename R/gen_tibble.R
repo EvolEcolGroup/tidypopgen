@@ -111,7 +111,9 @@ gen_tibble_bed_rds <- function(x, ...,
 
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
                                            bigsnp_file = bigsnp_path,
-                                           indiv_id = bigsnp_obj$fam$sample.ID)
+                                           indiv_id = bigsnp_obj$fam$sample.ID,
+                                           ploidy = 2) # when importing a bigsnpr object or a bed, we only have diploids
+  # we might want to reconside this for rds
 
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
@@ -141,6 +143,10 @@ gen_tibble_vcf <- function(x, ...,
                  allele_alt = vcfR::getALT(x))
 
   x <- vcfR::extract.gt(x)
+  # TODO from the first locus, we should figure out the ploidy
+  # for the moment, we hardcode to ploidy 2
+  ploidy = 2
+
   x[x=="0|0"] <- 0
   x[x=="0|1"] <- 1
   x[x=="1|0"] <- 1
@@ -158,7 +164,8 @@ gen_tibble_vcf <- function(x, ...,
   new_gen_tbl <- gen_tibble(x = x,
              indiv_meta = ind_meta,
              loci = loci,
-             backingfile = backingfile)
+             backingfile = backingfile,
+             ploidy = ploidy)
   check_allele_alphabet (new_gen_tbl, valid_alleles = valid_alleles,
                          missing_alleles = missing_alleles)
   show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
@@ -169,10 +176,13 @@ gen_tibble_vcf <- function(x, ...,
 ###############################################################################
 # matrix method to provide data directly from R
 ###############################################################################
-
+#' @param ploidy the ploidy of the samples (0 for mixed ploidy). Only used if creating
+#' a gen_tibble from a matrix of data; otherwise, ploidy is determined automatically
+#' from the data as they are read.
 #' @export
 #' @rdname gen_tibble
 gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
+                              ploidy = 2,
                               valid_alleles = c("A", "T", "C", "G"),
                               missing_alleles = c("0","."),
                               backingfile = NULL, quiet = FALSE){
@@ -197,7 +207,6 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
 
   # use code for NA in FBM.256
   x[is.na(x)]<-3
-
 
   bigsnp_obj <- gt_write_bigsnp_from_dfs(genotypes = x,
                                           indiv_meta = indiv_meta,
@@ -288,9 +297,11 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
 #' @param bigsnp_obj the bigsnp object
 #' @param bigsnp_file the file to which the bigsnp object was saved
 #' @param indiv_id ids of individuals
+#' @param ploidy an integer giving the ploidy (0 indicates mixed ploidy, which
+#' then relies on the ploidy column of the loci table)
 #' @returns a vctrs_bigSNP object
 #' @keywords internal
-new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
+new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
   loci <- tibble::tibble(big_index = seq_len(nrow(bigsnp_obj$map)),
                          name = bigsnp_obj$map$marker.ID,
                          chromosome = bigsnp_obj$map$chromosome,
@@ -305,6 +316,7 @@ new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
                   bigsnp_md5sum = tools::md5sum(bigsnp_file), # TODO make sure this does not take too long
                   loci=loci,
                   names=indiv_id,
+                  ploidy = ploidy,
                   class = "vctrs_bigSNP")
 }
 

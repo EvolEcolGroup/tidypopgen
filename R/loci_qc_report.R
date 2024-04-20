@@ -9,6 +9,7 @@
 #' @export
 loci_qc_report <- function (.x, ...){
   rlang::check_dots_empty()
+  stopifnot_diploid(.x$genotypes)
   qc_report <- .x %>% reframe(snp_id = show_loci_names(.x),maf=loci_maf(.data$genotypes),
                               missingness = loci_missingness(.data$genotypes),
                     hwe_p = loci_hwe(.data$genotypes))

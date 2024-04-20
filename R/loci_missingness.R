@@ -31,6 +31,7 @@ loci_missingness.tbl_df <- function(.x, as_counts = FALSE, ...) {
 #' @rdname loci_missingness
 loci_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   rlang::check_dots_empty()
+  stopifnot_diploid(.x)
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use

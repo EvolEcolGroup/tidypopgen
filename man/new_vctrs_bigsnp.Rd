@@ -4,7 +4,7 @@
 \alias{new_vctrs_bigsnp}
 \title{create a vctrs_bigSNP}
 \usage{
-new_vctrs_bigsnp(bigsnp_obj, bigsnp_file, indiv_id)
+new_vctrs_bigsnp(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2)
 }
 \arguments{
 \item{bigsnp_obj}{the bigsnp object}
@@ -12,6 +12,9 @@ new_vctrs_bigsnp(bigsnp_obj, bigsnp_file, indiv_id)
 \item{bigsnp_file}{the file to which the bigsnp object was saved}
 
 \item{indiv_id}{ids of individuals}
+
+\item{ploidy}{an integer giving the ploidy (0 indicates mixed ploidy, which
+then relies on the ploidy column of the loci table)}
 }
 \value{
 a vctrs_bigSNP object

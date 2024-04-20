@@ -7,6 +7,7 @@
 #' @returns a tibble with 2 elements: het_obs and missingness
 #' @export
 indiv_qc_report <- function(.x,...){
+  stopifnot_diploid(.x$genotypes)
   indiv_qc_report <- .x %>% reframe(het_obs = indiv_het_obs(.x),
                               missingness = indiv_missingness(.x,as_counts=FALSE))
   class(indiv_qc_report) <- c("indiv_qc_report",class(indiv_qc_report))

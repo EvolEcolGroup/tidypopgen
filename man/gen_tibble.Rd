@@ -29,6 +29,7 @@ gen_tibble(
   indiv_meta,
   loci,
   ...,
+  ploidy = 2,
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
@@ -75,6 +76,10 @@ and 'population', plus any additional metadata of interest.}
 
 \item{loci}{a data.frame or tibble, with compulsory columns 'name', 'chromosome',
 and 'position','genetic_dist', 'allele_ref' and 'allele_alt'}
+
+\item{ploidy}{the ploidy of the samples (0 for mixed ploidy). Only used if creating
+a gen_tibble from a matrix of data; otherwise, ploidy is determined automatically
+from the data as they are read.}
 }
 \value{
 an object of the class \code{gen_tbl}.

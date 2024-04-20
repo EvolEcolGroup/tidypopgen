@@ -9,6 +9,7 @@
 #' @export
 
 pop_pairwise_fst <- function(.x, by_locus=FALSE){
+  stopifnot_diploid(.x$genotypes)
   if (!inherits(.x,"grouped_df")){
     stop (".x should be a grouped df")
   }

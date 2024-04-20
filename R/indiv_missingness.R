@@ -28,6 +28,7 @@ indiv_missingness.tbl_df <- function(.x, as_counts = FALSE, ...){
 #' @rdname indiv_missingness
 indiv_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
   rlang::check_dots_empty()
+  stopifnot_diploid(.x)
   # get the FBM
   X <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use
