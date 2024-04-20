@@ -45,8 +45,8 @@ test_that("snp_ibs gives the same results as plink",{
 
   #Create gentibble for the same data
   bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  #families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = bigsnpr::sub_bed(bed_path))
-  families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
+  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) #bigsnpr::sub_bed(bed_path)
+  #families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
   families <- gen_tibble(families_bigsnp_path)
 
   #Get snp_ibs results
