@@ -17,7 +17,7 @@ test_that("show_loci gets and sets information",{
   test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
   # we now replace NA with 0 for the test_loci
-  test_loci[is.na(test_loci)]<-"0"
+  #test_loci[is.na(test_loci)]<-"0"
 
 
   # check that we retrieve the info we put in (as a tibble)

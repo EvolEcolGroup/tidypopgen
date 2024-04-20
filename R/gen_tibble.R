@@ -359,11 +359,24 @@ check_allele_alphabet <- function(x,
 
 # make all missing value equal to 0
 # loci_info is usually from show_loci()
+#harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
+#  loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles]<-"0"
+#  loci_info$allele_alt[loci_info$allele_alt %in% missing_alleles]<-"0"
+#  return(loci_info)
+#}
+
 harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
-  loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles]<-"0"
-  loci_info$allele_alt[loci_info$allele_alt %in% missing_alleles]<-"0"
+  # 0 is always considered as a missing value
+  if ("0" %in% missing_alleles){
+    missing_alleles <- c(missing_alleles, "0")
+  }
+  loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles]<-NA
+  loci_info$allele_alt[loci_info$allele_alt %in% missing_alleles]<-NA
   return(loci_info)
 }
+
+
+
 
 ##########################################
 # convenient functs
