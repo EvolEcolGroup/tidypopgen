@@ -155,6 +155,13 @@ gen_tibble_vcf <- function(x, ...,
   x[x=="0/1"] <- 1
   x[x=="1/0"] <- 1
   x[x=="1/1"] <- 2
+  # additional conversion for tetraploids
+  # but it would be better to make the conversion more generic for all ploidies
+  # x[x == "1/1/1/1"] <- 4
+  # x[x == "0/1/1/1"] <- 3
+  # x[x == "0/0/1/1"] <- 2
+  # x[x == "0/0/0/1"] <- 1
+  # x[x == "0/0/0/0"] <- 0
   # make sure these are numeric
   x <- apply(x, 2, as.numeric)
 
