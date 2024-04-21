@@ -83,7 +83,9 @@ loci_alt_freq_diploid <- function(.x){
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep)>1){
-    col_counts <- bigstatsr::big_counts(geno_fbm)
+    col_counts <- bigstatsr::big_counts(geno_fbm,
+                                        ind.row = rows_to_keep,
+                                        ind.col = attr(.x,"loci")$big_index)
     means_from_counts <- function(x){
       (x[2]+x[3]*2)/((x[1]+x[2]+x[3])*2)
     }
