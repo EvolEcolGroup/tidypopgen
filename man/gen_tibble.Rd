@@ -77,7 +77,8 @@ and 'population', plus any additional metadata of interest.}
 \item{loci}{a data.frame or tibble, with compulsory columns 'name', 'chromosome',
 and 'position','genetic_dist', 'allele_ref' and 'allele_alt'}
 
-\item{ploidy}{the ploidy of the samples (0 for mixed ploidy). Only used if creating
+\item{ploidy}{the ploidy of the samples (either a single value, or
+a vector of values for mixed ploidy). Only used if creating
 a gen_tibble from a matrix of data; otherwise, ploidy is determined automatically
 from the data as they are read.}
 }

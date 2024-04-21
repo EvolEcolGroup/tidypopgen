@@ -50,7 +50,6 @@ rbind_gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   ## in the gt_table
   id_missing <- which(!is.na(report$ref$missing_allele))
   attr(ref$genotypes, "loci")$allele_alt[id_missing] <- report$ref$missing_allele[id_missing]
-  browser()
   ## and then in the bigSNP object
   attr(ref$genotypes,"bigsnp")$map$allele
   # now we subset the SNP object

@@ -108,12 +108,13 @@ gen_tibble_bed_rds <- function(x, ...,
 
   indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
-
+  # TODO check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
+  # right now, we hardcode it
+  ploidy <- 2
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
                                            bigsnp_file = bigsnp_path,
                                            indiv_id = bigsnp_obj$fam$sample.ID,
-                                           ploidy = 2) # when importing a bigsnpr object or a bed, we only have diploids
-  # we might want to reconside this for rds
+                                           ploidy = ploidy)
 
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
@@ -143,7 +144,6 @@ gen_tibble_vcf <- function(x, ...,
                  allele_alt = vcfR::getALT(x))
 
   x <- vcfR::extract.gt(x)
-  browser()
   # TODO from the first locus, we should figure out the ploidy
   # for the moment, we hardcode to ploidy 2
   ploidy = 2
@@ -184,7 +184,8 @@ gen_tibble_vcf <- function(x, ...,
 ###############################################################################
 # matrix method to provide data directly from R
 ###############################################################################
-#' @param ploidy the ploidy of the samples (0 for mixed ploidy). Only used if creating
+#' @param ploidy the ploidy of the samples (either a single value, or
+#' a vector of values for mixed ploidy). Only used if creating
 #' a gen_tibble from a matrix of data; otherwise, ploidy is determined automatically
 #' from the data as they are read.
 #' @export
@@ -269,18 +270,25 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
     backingfile <- tempfile()
   }
   check_valid_loci(loci)
+  # set up code (accounting for ploidy)
   code256 <- rep(NA, 256)
-  if (ploidy<1){
-    # check that we have ploidy info
-    if (!"ploidy" %in% names(indiv_meta)){
-      stop("mixed ploidy ('ploidy=0') requires a 'ploidy' column in the individual metadata table")
-    }
-    ploidy <- max(indiv_meta$ploidy)
-    if (is.na(ploidy)){
-      stop("the 'ploidy' column in the individual metadata table can not contain NAs")
-    }
+  if (length(ploidy>1)){
+    max_ploidy <- max(ploidy)
+  } else {
+    max_ploidy <- ploidy
   }
-  code256[1:(ploidy+1)]<-seq(0,ploidy)
+
+  if (is.na(max_ploidy)){
+    stop("'ploidy' can not contain NAs")
+  }
+
+  code256[1:(max_ploidy+1)]<-seq(0,max_ploidy)
+
+  # ensure max_ploidy is appropriate for the data
+  if (any (genotypes>max_ploidy, na.rm=TRUE)){
+    stop("max ploidy is set to ",max_ploidy," but genotypes contains indviduals with greater ploidy")
+  }
+
 
   bigGeno <- bigstatsr::FBM.code256(
     nrow = nrow(genotypes),
@@ -290,14 +298,16 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
     init = NULL,
     create_bk = TRUE
   )
-  genotypes[is.na(genotypes)]<-ploidy+1
+  genotypes[is.na(genotypes)]<-max_ploidy+1
   bigGeno[] <- as.raw(genotypes)
   fam <- tibble(family.ID = indiv_meta$population,
                 sample.ID = indiv_meta$id,
                 paternal.ID = 0,
                 maternal.ID = 0,
                 sex = 0,
-                affection = 0)
+                affection = 0,
+                ploidy = ploidy)
+
   map <- tibble(chromosome = loci$chromosome,
                 marker.ID = loci$name,
                 genetic.dist = loci$genetic_dist,
@@ -322,8 +332,8 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
 #' @param bigsnp_obj the bigsnp object
 #' @param bigsnp_file the file to which the bigsnp object was saved
 #' @param indiv_id ids of individuals
-#' @param ploidy an integer giving the ploidy (0 indicates mixed ploidy, which
-#' then relies on the ploidy column of the loci table)
+#' @param ploidy the ploidy of the samples (either a single value, or
+#' a vector of values for mixed ploidy).
 #' @returns a vctrs_bigSNP object
 #' @keywords internal
 new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
@@ -335,13 +345,19 @@ new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
                          allele_ref = bigsnp_obj$map$allele2,
                          allele_alt = bigsnp_obj$map$allele1
   )
+
+  if (length(unique(ploidy))>1){
+    max_ploidy <- 0
+  } else {
+    max_ploidy <- max(ploidy)
+  }
   vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
                   bigsnp = bigsnp_obj,
                   bigsnp_file = bigsnp_file, # TODO is this redundant with the info in the bigSNP object?
                   bigsnp_md5sum = tools::md5sum(bigsnp_file), # TODO make sure this does not take too long
                   loci=loci,
                   names=indiv_id,
-                  ploidy = ploidy,
+                  ploidy = max_ploidy,
                   class = "vctrs_bigSNP")
 }
 

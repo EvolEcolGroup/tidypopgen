@@ -36,16 +36,15 @@ test_that("show_ploidy works correctly", {
       ploidy = 0,
       quiet = TRUE
     ),
-    "mixed ploidy "
+    "max ploidy "
   )
   # add ploidy info for each individual
-  test_indiv_meta$ploidy <- c(2, 4, 2)
   test_gt <- gen_tibble(
     test_genotypes,
     indiv_meta = test_indiv_meta,
     loci = test_loci,
     backingfile = tempfile(),
-    ploidy = 0,
+    ploidy = c(2,4,2),
     quiet = TRUE
   )
   # check that we have the correct genotypes

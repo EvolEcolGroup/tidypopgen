@@ -133,7 +133,6 @@ augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
     }
     pred <- as.data.frame(sweep(x$u, 2, x$d, '*'))[,1:k]
     names(pred) <- paste0(".fittedPC", seq_len(ncol(pred)))
-    # browser()
     ret <- if (!missing(data) && !is.null(data)) {
       #check that names of the two columns are in sync
       if (!all.equal(data$id, rownames(as.data.frame(x$u)))){
@@ -170,7 +169,6 @@ augment_loci.gt_pca <- function(x, data = NULL, k= NULL, ...) {
   }
   loadings <- as.data.frame(x$v)[,1:k]
   names(loadings) <- paste0(".loadingPC", seq_len(ncol(loadings)))
-  # browser()
   ret <- if (!missing(data) && !is.null(data)) {
     #check that names of the two columns are in sync
 # @TODO reinstate this check once we have rownames in the pca object for loadings

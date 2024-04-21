@@ -35,7 +35,6 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   ref <-dots[[1]]
   target <- dots[[2]]
   # only bind diploid tibbles
-  browser()
   stopifnot_diploid(ref$genotypes)
   stopifnot_diploid(target$genotypes)
   if (!quiet){

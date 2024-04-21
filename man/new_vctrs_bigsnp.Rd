@@ -13,8 +13,8 @@ new_vctrs_bigsnp(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2)
 
 \item{indiv_id}{ids of individuals}
 
-\item{ploidy}{an integer giving the ploidy (0 indicates mixed ploidy, which
-then relies on the ploidy column of the loci table)}
+\item{ploidy}{the ploidy of the samples (either a single value, or
+a vector of values for mixed ploidy).}
 }
 \value{
 a vctrs_bigSNP object
