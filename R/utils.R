@@ -12,4 +12,3 @@ stopifnot_diploid <- function(x){
   }
 }
 
-

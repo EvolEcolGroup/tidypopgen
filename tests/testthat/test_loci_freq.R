@@ -1,4 +1,4 @@
-test_that("snpbin_list_means computes correctly",{
+test_that("loci_alt_freq and loci_maf computes correctly",{
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,2),

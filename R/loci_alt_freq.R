@@ -31,28 +31,10 @@ loci_alt_freq.tbl_df <- function(.x, ...) {
 loci_alt_freq.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
-  # get the FBM
-  geno_fbm <- attr(.x,"bigsnp")$genotypes
-  # rows (individuals) that we want to use
-  rows_to_keep <- vctrs::vec_data(.x)
-  # as long as we have more than one individual
-  if (length(rows_to_keep)>1){
-    # col means for submatrix (all rows, only some columns)
-    colMeans_sub <- function(X, ind, rows_to_keep) {
-      colMeans(X[rows_to_keep, ind], na.rm=TRUE)
-    }
-    freq <- bigstatsr::big_apply(geno_fbm, a.FUN = colMeans_sub,
-                                 rows_to_keep = rows_to_keep,
-                                 ind=attr(.x,"loci")$big_index,
-                                 a.combine = 'c')
-  } else { # if we have a single individual
-    freq <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index]
+  # if we have diploid
+  if (attr(.x,"ploidy")==2){
+    loci_alt_freq_diploid(.x)
   }
-  # sort out frequencies for diploids
-  # @TODO get ploidy from the tibble once we have it
-  # @TODO for mixed ploidy, we will need a different approach
-  freq <- freq/2
-  freq
 }
 
 #' @export
@@ -91,4 +73,32 @@ loci_maf.grouped_df <- function(.x, ...) {
   # TODO this is seriously inefficient, we need to cast it into a big_apply problem
   # of maybe it isn't that bad...
   group_map(.x, .f=~loci_maf(.x, ...))
+}
+
+# function to estimate frequencies for diploid
+loci_alt_freq_diploid <- function(.x){
+  # get the FBM
+  geno_fbm <- attr(.x,"bigsnp")$genotypes
+  # rows (individuals) that we want to use
+  rows_to_keep <- vctrs::vec_data(.x)
+  # as long as we have more than one individual
+  if (length(rows_to_keep)>1){
+    col_counts <- bigstatsr::big_counts(geno_fbm)
+    means_from_counts <- function(x){
+      (x[2]+x[3]*2)/((x[1]+x[2]+x[3])*2)
+    }
+    freq <- apply(col_counts, 2, means_from_counts)
+  } else { # if we have a single individual
+    freq <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index] /2
+  }
+  # sort out frequencies for diploids
+  # @TODO get ploidy from the tibble once we have it
+  # @TODO for mixed ploidy, we will need a different approach
+  freq
+}
+
+loci_alt_freq_polyploid <- function(.x, ...){
+  stop("not implemented yet")
+
+
 }
