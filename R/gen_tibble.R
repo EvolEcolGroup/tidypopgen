@@ -143,6 +143,7 @@ gen_tibble_vcf <- function(x, ...,
                  allele_alt = vcfR::getALT(x))
 
   x <- vcfR::extract.gt(x)
+  browser()
   # TODO from the first locus, we should figure out the ploidy
   # for the moment, we hardcode to ploidy 2
   ploidy = 2
@@ -213,12 +214,13 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   }
 
   # use code for NA in FBM.256
-  x[is.na(x)]<-3
+#  x[is.na(x)]<-3
 
   bigsnp_obj <- gt_write_bigsnp_from_dfs(genotypes = x,
                                           indiv_meta = indiv_meta,
                                           loci = loci,
-                                          backingfile = backingfile)
+                                          backingfile = backingfile,
+                                         ploidy = ploidy)
   bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile,".rds")
   if (!quiet){
     message("\n\nusing bigSNP file: ", bigsnp_path)
@@ -229,7 +231,8 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   indiv_meta <- as.list (indiv_meta)
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
                                            bigsnp_file = bigsnp_path,
-                                           indiv_id = bigsnp_obj$fam$sample.ID)
+                                           indiv_id = bigsnp_obj$fam$sample.ID,
+                                           ploidy= ploidy)
 
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
@@ -259,21 +262,36 @@ check_valid_loci <- function(loci_df){
 #' @param loci the loci table
 #' @keywords internal
 gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
-                                      backingfile=NULL){
+                                      backingfile=NULL,
+                                      ploidy = ploidy){
 
   if (is.null(backingfile)){
     backingfile <- tempfile()
   }
   check_valid_loci(loci)
+  code256 <- rep(NA, 256)
+  if (ploidy<1){
+    # check that we have ploidy info
+    if (!"ploidy" %in% names(indiv_meta)){
+      stop("mixed ploidy ('ploidy=0') requires a 'ploidy' column in the individual metadata table")
+    }
+    ploidy <- max(indiv_meta$ploidy)
+    if (is.na(ploidy)){
+      stop("the 'ploidy' column in the individual metadata table can not contain NAs")
+    }
+  }
+  code256[1:(ploidy+1)]<-seq(0,ploidy)
+
   bigGeno <- bigstatsr::FBM.code256(
     nrow = nrow(genotypes),
     ncol = ncol(genotypes),
-    code = bigsnpr::CODE_012,
+    code = code256,
     backingfile = backingfile,
     init = NULL,
     create_bk = TRUE
   )
-  bigGeno[] <- genotypes
+  genotypes[is.na(genotypes)]<-ploidy+1
+  bigGeno[] <- as.raw(genotypes)
   fam <- tibble(family.ID = indiv_meta$population,
                 sample.ID = indiv_meta$id,
                 paternal.ID = 0,
