@@ -22,6 +22,9 @@ test_that("show_ploidy works correctly", {
   # we expect a diploid by default
   expect_true(show_ploidy(test_gt) == 2)
   expect_true(show_ploidy(test_gt$genotypes) == 2)
+  # get ploidy for each individual
+  expect_true(all(indiv_ploidy(test_gt)==c(2,2,2)))
+  expect_true(all(indiv_ploidy(test_gt$genotypes)==c(2,2,2)))
   # now let's create a tetraploid for individual 2
   test_genotypes <- rbind(c(1, 1, 0, 1, 1, 2),
                           c(4, 1, 3, NA, 0, NA),
@@ -51,6 +54,10 @@ test_that("show_ploidy works correctly", {
   expect_true(all.equal(test_genotypes,
                         show_genotypes(test_gt)))
   expect_true(show_ploidy(test_gt)==0)
+  # get ploidy for each individual
+  expect_true(all(indiv_ploidy(test_gt)==c(2,4,2)))
+  expect_true(all(indiv_ploidy(test_gt$genotypes)==c(2,4,2)))
+
   # expect error when trying to do something with a mixed ploidy object
-  expect_error(test_gt %>% loci_maf(), "this function only works ")
+  expect_warning(test_gt %>% loci_maf(), "this function ")
 })

@@ -44,7 +44,12 @@ gt_load <-function(file = NULL, reattach_to = NULL) {
 }
 
 gt_get_bigsnp<-function(x){
-  attr(x$genotypes,"bigsnp")
+  if (inherits(x,"gen_tbl")){
+    attr(x$genotypes,"bigsnp")
+  } else {
+    attr(x,"bigsnp")
+  }
+
 }
 
 

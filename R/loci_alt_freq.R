@@ -30,10 +30,12 @@ loci_alt_freq.tbl_df <- function(.x, ...) {
 #' @rdname loci_alt_freq
 loci_alt_freq.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
-  stopifnot_diploid(.x)
+  #stopifnot_diploid(.x)
   # if we have diploid
   if (attr(.x,"ploidy")==2){
     loci_alt_freq_diploid(.x)
+  } else {
+    loci_alt_freq_polyploid(.x)
   }
 }
 
@@ -100,7 +102,30 @@ loci_alt_freq_diploid <- function(.x){
 }
 
 loci_alt_freq_polyploid <- function(.x, ...){
-  stop("not implemented yet")
+  warning("this function still needs a proper unit test!!!")
+  # get the FBM
+  geno_fbm <- attr(.x,"bigsnp")$genotypes
+  # rows (individuals) that we want to use
+  rows_to_keep <- vctrs::vec_data(.x)
+  # as long as we have more than one individual
+  ploidy_by_indiv <- indiv_ploidy(.x)
+  if (length(rows_to_keep)>1){
+    # col means for submatrix (all rows, only some columns)
+    col_sums_na <- function(X, ind, rows_to_keep, ploidy_by_indiv) {
 
-
+      res <- colSums(X[rows_to_keep, ind], na.rm=TRUE)
+      col_na <- function(a, ploidy_by_indiv){sum(is.na(a)*ploidy_by_indiv)}
+      res <- cbind(res,apply(X[rows_to_keep,ind],2,col_na, ploidy_by_indiv = ploidy_by_indiv))
+      res
+    }
+    col_sums_na_mat <- bigstatsr::big_apply(geno_fbm, a.FUN = col_sums_na,
+                                 rows_to_keep = rows_to_keep,
+                                 ind=attr(.x,"loci")$big_index,
+                                 ploidy_by_indiv = ploidy_by_indiv,
+                                 a.combine = 'rbind')
+    # now get frequency accounting for missing values
+    col_sums_na_mat[,1]/(sum(ploidy_by_indiv) - col_sums_na_mat[,2])
+  } else { # if we have a single individual
+    geno_fbm[rows_to_keep,attr(.x,"loci")$big_index]/ploidy_by_indiv
+  }
 }
