@@ -1,4 +1,4 @@
-test_that("show_ploidy works correctly", {
+test_that("ploidy works correctly", {
   test_indiv_meta <- data.frame (id = c("a", "b", "c"),
                                  population = c("pop1", "pop1", "pop2"))
   test_genotypes <- rbind(c(1, 1, 0, 1, 1, 2),
@@ -60,4 +60,9 @@ test_that("show_ploidy works correctly", {
 
   # expect error when trying to do something with a mixed ploidy object
   expect_warning(test_gt %>% loci_maf(), "this function ")
+
+  # missingness
+  count_na <- function(x){sum(is.na(x))}
+  freq_na <- apply(test_genotypes, 2, count_na)/nrow(test_genotypes)
+  expect_true(all(loci_missingness(test_gt$genotypes)==freq_na))
 })
