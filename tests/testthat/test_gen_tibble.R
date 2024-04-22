@@ -16,9 +16,6 @@ bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
                                   path_out = tempfile('test_data_'))
 test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
-# we now replace NA with 0 for the test_loci
-#test_loci[is.na(test_loci)]<-"0"
-
 # this also tests show_genotypes and show_loci
 test_that("create gen_tibble from bed",{
   expect_true(inherits(test_gt,"gen_tbl"))

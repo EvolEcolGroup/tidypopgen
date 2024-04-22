@@ -16,10 +16,6 @@ test_that("show_loci gets and sets information",{
                                     path_out = tempfile('test_data_'))
   test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
-  # we now replace NA with 0 for the test_loci
-  #test_loci[is.na(test_loci)]<-"0"
-
-
   # check that we retrieve the info we put in (as a tibble)
   expect_identical(show_loci(test_gt) %>% select(-big_index),as_tibble(test_loci))
   # now change it directly on the genotype column
