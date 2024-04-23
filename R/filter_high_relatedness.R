@@ -19,27 +19,19 @@
 filter_high_relatedness <-
   function(matrix, .x = NULL, cutoff = NULL, verbose = FALSE) {
 
-    print(summary(.x))
-
     var_num <- dim(matrix)[1]
-    print(var_num)
 
     if(is.null(dimnames(matrix))){
-      print("is null dimnames")
       if(is.null(.x)){
-        print("is null gen tibble")
         colnames(matrix) <- 1:ncol(matrix)
         rownames(matrix) <- 1:nrow(matrix)
       } else {
-        print(matrix[1:6,])
-        print(nrow((.x)$id))
         colnames(matrix) <- (.x)$id
         rownames(matrix) <- (.x)$id
       }
     }
 
     var_names <- dimnames(matrix)[[1]]
-    print(var_names)
 
     matrix <- abs(matrix)
 
@@ -57,7 +49,6 @@ filter_high_relatedness <-
       order(apply(tmp, 2, average_corr), decreasing = TRUE)
     matrix <- matrix[max_abs_cor_order, max_abs_cor_order]
     newOrder <- original_order[max_abs_cor_order]
-    print(newOrder)
     rm(tmp)
 
     col_to_delete <- rep(FALSE, var_num)
