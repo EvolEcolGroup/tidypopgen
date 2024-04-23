@@ -1,6 +1,6 @@
 # now test with missing data
 test_na_gt <- gen_tibble(system.file("extdata/related/families.bed", package="tidypopgen"), quiet = TRUE,
-                         backingfile = tempfile())
+                         backingfile = tempfile(), valid_alleles = c(1,2))
 
 
 ###########################
@@ -94,12 +94,11 @@ X_mat1[is.na(X_mat1)]<-0
 X_mat2 <-X_mat==2
 X_mat2[is.na(X_mat2)]<-0
 
+ibs0 <- (X_mat0) %*% t(X_mat2) + (X_mat2) %*% t(X_mat0)
+ibs1 = (X_mat1) %*% t(X_mat0 | X_mat2) + (X_mat0 | X_mat2) %*% t(X_mat1)
+ibs2 = (X_mat2) %*% t(X_mat2) + (X_mat1) %*% t(X_mat1) + (X_mat0) %*% t(X_mat0)
 
-## Should the snps be polarised to the major allele?
-## otherwise it makes little sense to compare probabilities of 0, 1 and 2
-ibs0 <- (X_mat0) %*% t(X_mat0)
-ibs1 <- (X_mat1) %*% t(X_mat1)
-ibs2 <- (X_mat2) %*% t(X_mat2)
+
 
 n_ind <- nrow(X_mat)
 # function to compute the quantities
