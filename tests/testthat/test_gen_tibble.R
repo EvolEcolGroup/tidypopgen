@@ -10,14 +10,8 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                         genetic_dist = as.integer(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
-bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
-                                  loci = test_loci,
-                                  indiv_meta = test_indiv_meta,
-                                  path_out = tempfile('test_data_'))
-test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
-# we now replace NA with 0 for the test_loci
-test_loci[is.na(test_loci)]<-"0"
+test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 # this also tests show_genotypes and show_loci
 test_that("create gen_tibble from bed",{
@@ -54,7 +48,37 @@ test_genotypes_c <- rbind(c("1","1","0","1","1","0"),
                           c("2","2","0","0","1","1"))
 
 
-test_that("check gen_tibble does not accept character matrix",{
+test_that("gen_tibble does not accept character matrix",{
   expect_error(test_dfs_gt <- gen_tibble(test_genotypes_c, indiv_meta = test_indiv_meta,
                                          loci = test_loci, quiet = TRUE),"'x' is not a matrix of integers")
 })
+
+test_that("gen_tibble catches invalid alleles",{
+  test_loci_wrong <- test_loci
+  test_loci_wrong$allele_alt[1] <- "N"
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                                           loci = test_loci_wrong, quiet = TRUE),"valid alleles are")
+  # now add N to the valid alleles
+  test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                                         loci = test_loci_wrong,
+                                         valid_alleles = c("A","C","T","G","N"),
+                            quiet = TRUE)
+  expect_true("N" %in% show_loci(test_dfs_gt)$allele_alt)
+  # but if we add to missing values it shoudl be turned into a zero
+  test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                            loci = test_loci_wrong,
+                            missing_alleles = c("0",".","N"),
+                            quiet = TRUE)
+  expect_false("N" %in% show_loci(test_dfs_gt)$allele_alt)
+  expect_true(is.na(show_loci(test_dfs_gt)$allele_alt[1]))
+  # and finally throw an error if we try to use 0 as a missing value
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                            loci = test_loci_wrong,
+                            valid_alleles = c("A","C","T","G","0"),
+                            quiet = TRUE), "can not be a valid allele")
+
+
+
+})
+
+

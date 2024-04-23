@@ -21,6 +21,8 @@ gt_write_plink <- function(x, bedfile = NULL,
   if (file.exists(bedfile)){
     if (overwrite){
       file.remove(bedfile)
+      file.remove(bigsnpr::sub_bed(bedfile,".bim"))
+      file.remove(bigsnpr::sub_bed(bedfile,".fam"))
     } else {
       stop(bedfile," already exists; remove if first or set 'overwrite' = TRUE")
     }

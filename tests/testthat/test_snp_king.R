@@ -10,11 +10,9 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                         genetic_dist = as.integer(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
-bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
-                                  loci = test_loci,
-                                  indiv_meta = test_indiv_meta,
-                                  path_out = tempfile('test_data_'))
-test_gt <- gen_tibble(bed_path, quiet = TRUE)
+
+test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+
 
 # function to compute robust king in R
 king_r <- function(X_mat){
@@ -50,7 +48,7 @@ test_that("snp_king and gt_king compute king-robust correctly",{
 
   # now test with missing data
   test_na_gt <- gen_tibble(system.file("extdata/related/families.bed", package="tidypopgen"), quiet = TRUE,
-                           backingfile = tempfile())
+                           backingfile = tempfile(), valid_alleles = c("1","2"))
   test_na_fbm <- tidypopgen:::gt_get_bigsnp(test_na_gt)$genotypes
   test_na_king <- snp_king(test_na_fbm)
   # king by hand
@@ -68,9 +66,9 @@ test_that("snp_king gives the same results as plink",{
 
   #Create gentibble for our data
   bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  #families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = bigsnpr::sub_bed(bed_path))
-  families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
-  families <- gen_tibble(families_bigsnp_path)
+  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) #bigsnpr::sub_bed(bed_path)
+  #families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
+  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
 
   #Get snp_king results
   families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes

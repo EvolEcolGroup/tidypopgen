@@ -10,15 +10,8 @@ test_that("show_loci gets and sets information",{
                           genetic_dist = as.integer(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-  bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
-                                    loci = test_loci,
-                                    indiv_meta = test_indiv_meta,
-                                    path_out = tempfile('test_data_'))
-  test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
-  # we now replace NA with 0 for the test_loci
-  test_loci[is.na(test_loci)]<-"0"
-
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
   # check that we retrieve the info we put in (as a tibble)
   expect_identical(show_loci(test_gt) %>% select(-big_index),as_tibble(test_loci))

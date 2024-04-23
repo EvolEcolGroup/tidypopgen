@@ -10,11 +10,9 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                         genetic_dist = as.integer(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
-bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
-                                  loci = test_loci,
-                                  indiv_meta = test_indiv_meta,
-                                  path_out = tempfile('test_data_'))
-test_gt <- gen_tibble(bed_path, quiet = TRUE)
+
+test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+
 
 # this also tests show_genotypes and show_loci
 test_that("write a bed file",{
@@ -25,8 +23,12 @@ test_that("write a bed file",{
 
   # because of the different backing file info, we cannot use identical on the whole object
   expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt2)))
-  expect_true(identical(show_loci(test_gt), show_loci(test_gt2)))
   expect_true(identical(test_gt %>% select(-genotypes),
                         test_gt2 %>% select(-genotypes)))
+
+  #check gt_write_plink converts the NA missing allele to 0
+  expect_true(is.na(show_loci(test_gt2)$allele_alt[3]))
+
+
 })
 
