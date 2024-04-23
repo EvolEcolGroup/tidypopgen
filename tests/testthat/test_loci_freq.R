@@ -10,11 +10,9 @@ test_that("snpbin_list_means computes correctly",{
                           genetic_dist = as.integer(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-  bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
-                                    loci = test_loci,
-                                    indiv_meta = test_indiv_meta,
-                                    path_out = tempfile('test_data_'))
-  test_gt <- gen_tibble(bed_path, quiet = TRUE)
+
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta)
+
 
   # raw frequencies
   freq <- colSums(test_genotypes, na.rm=TRUE)/(c(3,3,3,2,3,1)*2)
