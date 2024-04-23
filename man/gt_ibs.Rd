@@ -6,22 +6,23 @@
 \usage{
 gt_ibs(
   x,
-  as_counts = FALSE,
-  block_size = bigstatsr::block_size(length(show_loci_names(x))) * 2
+  type = c("proportion", "adjusted_counts", "raw_counts"),
+  block_size = bigstatsr::block_size(count_loci(x))
 )
 }
 \arguments{
 \item{x}{a \code{gen_tibble} object.}
 
-\item{as_counts}{whether the counts of similar alleles, rather than the proportion,
-should be returned (FALSE by default).}
+\item{type}{one of "proportion" (equivalent to "ibs" in PLINK), "adjusted_counts" ("distance" in PLINK),
+and "raw_counts" (the counts of identical alleles and non-missing alleles, from which the two other quantities are computed)}
 
 \item{block_size}{maximum number of loci read at once. More loci should improve speed,
 but will tax memory.}
 }
 \value{
-a list of two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles (i.e. 2\emph{n loci),
-and one of valid alleles (i.e. 2}n_loci - 2*missing_loci)
+a \link[bigstatsr:FBM-class]{bigstatsr::FBM} of proportion or adjusted counts, or a list of
+two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles,
+and one of number of valid alleles (i.e. 2\emph{n_loci - 2}missing_loci)
 }
 \description{
 This function computes the IBS matrix.

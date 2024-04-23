@@ -69,7 +69,8 @@ snp_ibs <- function(
     if (type=="proportion"){
       return(ibs_prop)
     } else { # for adjusted counts
-
+      ibs_adj <- ibs_prop* m
+      return(ibs_adj)
     }
 
   }

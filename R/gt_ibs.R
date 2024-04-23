@@ -25,8 +25,8 @@ gt_ibs <- function(x,
             ind.col = x_ind_col,
             type = type,
             block.size = block_size)
-  if (inherits(ibs_matrix,"FBM")){
-    attr(ibs_matrix,"indiv_names") <- x$id
+  if (inherits(ibs_matrix,"matrix")){
+    dimnames(ibs_matrix)<-list(x$id, x$id)
   } else { # else if we have a list of two count matrices
     attr(ibs_matrix[[1]],"indiv_names") <- x$id
     attr(ibs_matrix[[2]],"indiv_names") <- x$id

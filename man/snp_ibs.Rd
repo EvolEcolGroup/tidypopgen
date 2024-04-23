@@ -8,7 +8,7 @@ snp_ibs(
   X,
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
-  as.counts = FALSE,
+  type = c("proportion", "adjusted_counts", "raw_counts"),
   block.size = bigstatsr::block_size(nrow(X))
 )
 }
@@ -22,8 +22,8 @@ If not specified, all rows are used. Don't use negative indices.}
 \item{ind.col}{An optional vector of the column indices that are used. If not
 specified, all columns are used. Don't use negative indices.}
 
-\item{as.counts}{whether the counts of similar alleles, rather than the proportion,
-should be returned (FALSE by default).}
+\item{type}{one of "proportion" (equivalent to "ibs" in PLINK), "adjusted_counts" ("distance" in PLINK),
+and "raw_counts" (the counts of identical alleles and non-missing alleles, from which the two other quantities are computed)}
 
 \item{block.size}{maximum number of columns read at once. Note that, to optimise the
 speed of matrix operations, we have to store in memory 3 times the columns.}

@@ -30,7 +30,7 @@ test_that("snp_ibs and gt_ibs computes ibs correctly",{
   expect_true(all.equal(test_ibs$ibs[], test_ibs_gt$ibs[],
                         check.attributes=FALSE))
   test_ibs_gt_prop <- gt_ibs(test_gt)
-  expect_true (all.equal(test_ibs_gt_prop[], test_ibs$ibs[]/test_ibs$valid_n[]))
+  expect_true (all.equal(test_ibs_gt_prop, test_ibs$ibs[]/test_ibs$valid_n[], check.attributes = FALSE))
 
   # now subset to the first and second individual, and a subset of loci
   test_gt_sub <- test_gt[c(1,3),]
