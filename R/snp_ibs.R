@@ -11,11 +11,11 @@
 #' @param ind.col An optional vector of the column indices that are used. If not
 #'  specified, all columns are used. Don't use negative indices.
 #' @param as.counts whether the counts of similar alleles, rather than the proportion,
-#' should be returned (FALSE by default). CURRENTLY ALWAYS RETURNS COUNTS!!!
+#' should be returned (FALSE by default).
 #' @param block.size maximum number of columns read at once. Note that, to optimise the
 #' speed of matrix operations, we have to store in memory 3 times the columns.
-#' @returns a list of two [bigstatsr::FBM] matrices, one of counts of IBS by alleles (i.e. 2*n loci),
-#' and one of valid alleles (i.e. 2 * n_loci - 2 * missing_loci)
+#' @returns if as.counts = TRUE function returns a list of two [bigstatsr::FBM] matrices, one of counts of IBS by alleles (i.e. 2*n loci),
+#' and one of valid alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns a single matrix of IBS proportions.
 #' @export
 
 snp_ibs <- function(
@@ -58,7 +58,30 @@ snp_ibs <- function(
                          ind.col.ind)
   }
 
-  return(list(ibs = IBS, valid_n = IBS_valid_loci))
+  #IBS proportion
+  n_loci <- m*2
+  proportion_matrix <- IBS[,]/(IBS_valid_loci[,]/n_loci)
+
+  diag(proportion_matrix) <- 0 #Replace cases comparing an individual to itself
+  zero_indices <- which(proportion_matrix == 0, arr.ind = TRUE)
+
+  #Create new matrix for proportion
+  proportion_transformed <- matrix(NA, nrow = nrow(proportion_matrix), ncol = ncol(proportion_matrix))
+  for (i in 1:nrow(zero_indices)) {   #Fill these with 0
+    proportion_transformed[zero_indices[i, 1], zero_indices[i, 2]] <- 0
+  }
+  non_zero_indices <- which(proportion_matrix != 0, arr.ind = TRUE)
+  proportion_transformed[non_zero_indices] <- n_loci - proportion_matrix[non_zero_indices] #Fill remaining values
+
+
+  if(as.counts == TRUE){
+    return(list(ibs = IBS, valid_n = IBS_valid_loci))
+  } else{
+
+    return(proportion = proportion_transformed)
+  }
+
+  #return(list(proportion = proportion_transformed, ibs = IBS, valid_n = IBS_valid_loci))
 }
 
 
