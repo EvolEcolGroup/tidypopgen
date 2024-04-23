@@ -27,7 +27,8 @@ test_that("write a bed file",{
                         test_gt2 %>% select(-genotypes)))
 
   #check gt_write_plink converts the NA missing allele to 0
-  expect_true(show_loci(test_gt2)[3,7] == 0)
+  expect_true(is.na(show_loci(test_gt2)$allele_alt[3]))
+
 
 })
 

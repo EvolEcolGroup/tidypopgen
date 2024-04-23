@@ -1,14 +1,14 @@
 PLINK v1.90b7.2 64-bit (11 Dec 2023)
 Options in effect:
   --bfile families
-  --distance flat-missing square
+  --distance flat-missing square ibs
   --out C:\Users\eviec\Git\tidypopgen\inst\extdata\related\test_plinkIBS
 
 Hostname: LAPTOP-S7R1KB1T
 Working directory: C:\Users\eviec\Git\tidypopgen\inst\extdata\related
-Start time: Thu Apr 18 13:43:24 2024
+Start time: Tue Apr 23 10:00:17 2024
 
-Random number seed: 1713444204
+Random number seed: 1713862817
 8080 MB RAM detected; reserving 4040 MB for main workspace.
 961 variants loaded from .bim file.
 12 people (0 males, 0 females, 12 ambiguous) loaded from .fam.
@@ -22,8 +22,8 @@ Total genotyping rate is 0.991328.
 Note: No phenotypes present.
 Distance matrix calculation complete.
 IDs written to
-C:\Users\eviec\Git\tidypopgen\inst\extdata\related\test_plinkIBS.dist.id .
-Distances (allele counts) written to
-C:\Users\eviec\Git\tidypopgen\inst\extdata\related\test_plinkIBS.dist .
+C:\Users\eviec\Git\tidypopgen\inst\extdata\related\test_plinkIBS.mibs.id .
+IBS matrix written to
+C:\Users\eviec\Git\tidypopgen\inst\extdata\related\test_plinkIBS.mibs .
 
-End time: Thu Apr 18 13:43:24 2024
+End time: Tue Apr 23 10:00:17 2024

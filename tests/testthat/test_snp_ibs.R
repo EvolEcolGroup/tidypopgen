@@ -45,8 +45,8 @@ test_that("snp_ibs and gt_ibs computes ibs correctly",{
 
 test_that("snp_ibs as.counts = FALSE gives the same results as plink",{
 
-  #Read in results from plink --bfile families --distance square flat-missing
-  plink_ibs <- read.table(system.file("extdata/related/test_plinkIBS.dist", package = "tidypopgen"), header = FALSE)
+  #Read in results from plink --bfile families --distance square flat-missing ibs
+  plink_ibs <- read.table(system.file("extdata/related/test_plinkIBS.mibs", package = "tidypopgen"), header = FALSE)
   #Transform to matrix
   plink_matrix <- unname(as.matrix(plink_ibs))
 
@@ -62,10 +62,10 @@ test_that("snp_ibs as.counts = FALSE gives the same results as plink",{
   #Check both are numeric and round
   tidy_ibs <- as.numeric(tidy_ibs)
   plink_matrix <- as.numeric(plink_matrix)
-  tidy_ibs <- round(tidy_ibs, 3)
+  tidy_ibs <- round(tidy_ibs, 6)
 
   #Check matrices are equal
-  expect_true(identical(tidy_ibs,plink_matrix))
+  expect_true(all.equal(tidy_ibs,plink_matrix))
 
 
 })
