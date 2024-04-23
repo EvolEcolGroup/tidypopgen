@@ -31,7 +31,7 @@ filter_high_relatedness <-
         colnames(matrix) <- 1:ncol(matrix)
         rownames(matrix) <- 1:nrow(matrix)
       } else {
-        print(head(matrix))
+        print(matrix[1:6,])
         print(nrow((.x)$id))
         colnames(matrix) <- (.x)$id
         rownames(matrix) <- (.x)$id
@@ -114,15 +114,11 @@ filter_high_relatedness <-
       }
     }
 
-    #print(var_names)
 
     # return variable names
     passed_filter <- var_names[newOrder][!col_to_delete]
     #attr(passed_filter, "to_remove")
     to_remove <- var_names[!var_names %in% passed_filter]
-
-    #print(passed_filter)
-    #print(to_remove)
 
     var_names <- var_names %in% passed_filter == TRUE
 
