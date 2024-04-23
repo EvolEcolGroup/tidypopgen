@@ -58,30 +58,16 @@ snp_ibs <- function(
                          ind.col.ind)
   }
 
-  #IBS proportion
-  n_loci <- m*2
-  proportion_matrix <- IBS[,]/(IBS_valid_loci[,]/n_loci)
-
-  diag(proportion_matrix) <- 0 #Replace cases comparing an individual to itself
-  zero_indices <- which(proportion_matrix == 0, arr.ind = TRUE)
-
-  #Create new matrix for proportion
-  proportion_transformed <- matrix(NA, nrow = nrow(proportion_matrix), ncol = ncol(proportion_matrix))
-  for (i in 1:nrow(zero_indices)) {   #Fill these with 0
-    proportion_transformed[zero_indices[i, 1], zero_indices[i, 2]] <- 0
-  }
-  non_zero_indices <- which(proportion_matrix != 0, arr.ind = TRUE)
-  proportion_transformed[non_zero_indices] <- n_loci - proportion_matrix[non_zero_indices] #Fill remaining values
-
-
   if(as.counts == TRUE){
     return(list(ibs = IBS, valid_n = IBS_valid_loci))
   } else{
 
-    return(proportion = proportion_transformed)
+  #IBS proportion
+    # get the means of each column
+    divide_sub <- function(X, ind, Y) (X[, ind]/Y[,ind])
+    ibs_prop <- bigstatsr::big_apply(IBS, a.FUN = divide_sub, Y=IBS_valid_loci, a.combine = 'cbind')
+    return(ibs_prop)
   }
-
-  #return(list(proportion = proportion_transformed, ibs = IBS, valid_n = IBS_valid_loci))
 }
 
 

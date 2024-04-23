@@ -51,7 +51,7 @@ test_that("snp_ibs as.counts = FALSE gives the same results as plink",{
   #Create gentibble for the same data
   bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
   families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
-  families <- gen_tibble(families_bigsnp_path, quiet = TRUE)
+  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
 
   #Get snp_ibs results
   families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes
