@@ -16,8 +16,8 @@ filter_high_relatedness(matrix, .x = NULL, cutoff = NULL, verbose = FALSE)
 \item{verbose}{boolean whether to report to screen}
 }
 \value{
-a list where [\link{1}] is individual ID's to retain, [\link{2}]
-is individual ID's to remove, and [\link{3}] is a boolean where individuals to keep
+a list where '1' is individual ID's to retain, '2'
+is individual ID's to remove, and '3' is a boolean where individuals to keep
 are TRUE and individuals to remove are FALSE
 }
 \description{
