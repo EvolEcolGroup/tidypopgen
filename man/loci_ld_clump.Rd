@@ -64,6 +64,9 @@ PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a better
 spread of SNPs over the chromosome.
 }
 \details{
+Any missing values in the genotypes of a \code{gen_tibble} passed to \code{loci_ld_clump}
+will cause an error. To deal with missingness, see \code{gt_impute_simple}.
+
 TODO we should really return a boolean rather than indices, so that it can
 be easily used with \code{select_loci_if}
 }

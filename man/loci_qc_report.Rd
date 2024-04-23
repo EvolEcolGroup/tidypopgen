@@ -9,7 +9,7 @@ loci_qc_report(.x, ...)
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object.}
 
-\item{...}{further arguments to pass to \code{\link[HardyWeinberg:HWExact]{HardyWeinberg::HWExact()}} for changing
+\item{...}{currently unused
 the HWE test.}
 }
 \value{

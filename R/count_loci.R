@@ -2,11 +2,10 @@
 #'
 #' Count the number of loci in `gen_tibble` (or directly from its `genotype`
 #' column).
-#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
-#' a [`gen_tibble`] object),
-#' or a [`gen_tibble`].
+#' @param .x a [`gen_tibble`], or a vector of class `vctrs_bigSNP` (usually the `genotype` column of
+#' a [`gen_tibble`] object).
 #' @param ... currently unused.
-#' @returns a character vector of names
+#' @returns the number of loci
 #' @rdname count_loci
 #' @export
 count_loci <- function(.x, ...) {
