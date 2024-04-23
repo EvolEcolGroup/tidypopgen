@@ -11,7 +11,7 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta)
+test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 
 # function to compute robust king in R
@@ -68,7 +68,7 @@ test_that("snp_king gives the same results as plink",{
   bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
   families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) #bigsnpr::sub_bed(bed_path)
   #families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
-  families <- gen_tibble(families_bigsnp_path)
+  families <- gen_tibble(families_bigsnp_path, quiet = TRUE)
 
   #Get snp_king results
   families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes

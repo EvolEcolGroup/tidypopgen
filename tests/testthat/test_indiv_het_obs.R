@@ -12,7 +12,7 @@ test_that("indiv_het_obs computes correctly",{
                           allele_alt = c("T","C", NA,"C","G","A"))
 
 
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta)
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 
   # feeding the list of SNPbin directly

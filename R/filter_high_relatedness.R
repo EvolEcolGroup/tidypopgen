@@ -10,8 +10,8 @@
 #' @param .x a [`gen_tibble`] object
 #' @param cutoff a threshold over which
 #' @param verbose boolean whether to report to screen
-#' @return a list where [[1]] is individual ID's to retain, [[2]]
-#' is individual ID's to remove, and [[3]] is a boolean where individuals to keep
+#' @return a list where '1' is individual ID's to retain, '2'
+#' is individual ID's to remove, and '3' is a boolean where individuals to keep
 #' are TRUE and individuals to remove are FALSE
 #' @rdname filter_high_relatedness
 #' @export

@@ -11,7 +11,7 @@ test_that("snpbin_list_means computes correctly",{
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
 
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta)
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 
   # raw frequencies

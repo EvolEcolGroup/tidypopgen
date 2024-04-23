@@ -11,7 +11,7 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta)
+test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 
 
@@ -35,8 +35,8 @@ test_that("snp_ibs and gt_ibs computes ibs correctly",{
   loci_subset <- c(2,3,5,6)
   in_common_1vs3 <- sum(c(1,1,2,1,2,1)[loci_subset])
 
-  test_gt_sub <- test_gt_sub %>% select_loci(loci_subset)
-  test_ibs_sub <- gt_ibs(test_gt_sub)
+  test_gt_sub <- test_gt_sub %>% select_loci(dplyr::all_of(loci_subset))
+  test_ibs_sub <- gt_ibs(test_gt_sub, as_counts = TRUE)
   expect_identical(in_common_1vs3, test_ibs_sub$ibs[1,2])
 })
 
@@ -51,7 +51,7 @@ test_that("snp_ibs as.counts = FALSE gives the same results as plink",{
   #Create gentibble for the same data
   bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
   families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
-  families <- gen_tibble(families_bigsnp_path)
+  families <- gen_tibble(families_bigsnp_path, quiet = TRUE)
 
   #Get snp_ibs results
   families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes
