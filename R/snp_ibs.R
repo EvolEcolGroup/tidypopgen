@@ -10,8 +10,8 @@
 #' If not specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not
 #'  specified, all columns are used. Don't use negative indices.
-#' @param as.counts whether the counts of similar alleles, rather than the proportion,
-#' should be returned (FALSE by default).
+#' @param type one of "proportion" (equivalent to "ibs" in PLINK), "adjusted_counts" ("distance" in PLINK),
+#' and "raw_counts" (the counts of identical alleles and non-missing alleles, from which the two other quantities are computed)
 #' @param block.size maximum number of columns read at once. Note that, to optimise the
 #' speed of matrix operations, we have to store in memory 3 times the columns.
 #' @returns if as.counts = TRUE function returns a list of two [bigstatsr::FBM] matrices, one of counts of IBS by alleles (i.e. 2*n loci),
@@ -22,10 +22,10 @@ snp_ibs <- function(
   X,
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
-  as.counts = FALSE,
+  type = c("proportion","adjusted_counts","raw_counts"),
   block.size = bigstatsr::block_size(nrow(X))
   ) {
-
+  type <- match.arg(type)
   #check_args()
 
   n <- length(ind.row)
@@ -58,7 +58,7 @@ snp_ibs <- function(
                          ind.col.ind)
   }
 
-  if(as.counts == TRUE){
+  if(type == "raw_counts"){
     return(list(ibs = IBS, valid_n = IBS_valid_loci))
   } else{
 
@@ -66,7 +66,12 @@ snp_ibs <- function(
     # get the means of each column
     divide_sub <- function(X, ind, Y) (X[, ind]/Y[,ind])
     ibs_prop <- bigstatsr::big_apply(IBS, a.FUN = divide_sub, Y=IBS_valid_loci, a.combine = 'cbind')
-    return(ibs_prop)
+    if (type=="proportion"){
+      return(ibs_prop)
+    } else { # for adjusted counts
+
+    }
+
   }
 }
 

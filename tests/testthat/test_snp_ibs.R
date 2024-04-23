@@ -17,18 +17,20 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 
 test_that("snp_ibs and gt_ibs computes ibs correctly",{
   test_fbm <- tidypopgen:::gt_get_bigsnp(test_gt)$genotypes
-  test_ibs <- snp_ibs(test_fbm, as.counts=TRUE)
+  test_ibs <- snp_ibs(test_fbm, type="raw_counts")
   # compare indiv 1 vs 2
   in_common<-sum(c(1,2,2,1,1,2))
   expect_identical(in_common, test_ibs$ibs[1,2])
   # check that we get the same result if we split the operation into two blocks
-  test_ibs_2blocks <- snp_ibs(test_fbm, block.size = 3, as.counts=TRUE)
+  test_ibs_2blocks <- snp_ibs(test_fbm, block.size = 3, type="raw_counts")
   expect_identical(test_ibs_2blocks$ibs[], test_ibs$ibs[])
 
   # now estimate it with gen_tibble
-  test_ibs_gt <- gt_ibs(test_gt, as_counts = TRUE)
+  test_ibs_gt <- gt_ibs(test_gt, type="raw_counts")
   expect_true(all.equal(test_ibs$ibs[], test_ibs_gt$ibs[],
                         check.attributes=FALSE))
+  test_ibs_gt_prop <- gt_ibs(test_gt)
+  expect_true (all.equal(test_ibs_gt_prop[], test_ibs$ibs[]/test_ibs$valid_n[]))
 
   # now subset to the first and second individual, and a subset of loci
   test_gt_sub <- test_gt[c(1,3),]
@@ -36,7 +38,7 @@ test_that("snp_ibs and gt_ibs computes ibs correctly",{
   in_common_1vs3 <- sum(c(1,1,2,1,2,1)[loci_subset])
 
   test_gt_sub <- test_gt_sub %>% select_loci(dplyr::all_of(loci_subset))
-  test_ibs_sub <- gt_ibs(test_gt_sub, as_counts = TRUE)
+  test_ibs_sub <- gt_ibs(test_gt_sub, type="raw_counts")
   expect_identical(in_common_1vs3, test_ibs_sub$ibs[1,2])
 })
 
@@ -55,7 +57,7 @@ test_that("snp_ibs as.counts = FALSE gives the same results as plink",{
 
   #Get snp_ibs results
   families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes
-  tidy_ibs <- snp_ibs(families_fbm, as.counts=FALSE)
+  tidy_ibs <- snp_ibs(families_fbm)
 
   #Check both are numeric and round
   tidy_ibs <- as.numeric(tidy_ibs)
