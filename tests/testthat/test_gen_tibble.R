@@ -16,9 +16,6 @@ bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
                                   path_out = tempfile('test_data_'))
 test_gt <- gen_tibble(bed_path, quiet = TRUE)
 
-# we now replace NA with 0 for the test_loci
-test_loci[is.na(test_loci)]<-"0"
-
 # this also tests show_genotypes and show_loci
 test_that("create gen_tibble from bed",{
   expect_true(inherits(test_gt,"gen_tbl"))
@@ -76,7 +73,7 @@ test_that("gen_tibble catches invalid alleles",{
                             missing_alleles = c("0",".","N"),
                             quiet = TRUE)
   expect_false("N" %in% show_loci(test_dfs_gt)$allele_alt)
-  expect_true(show_loci(test_dfs_gt)$allele_alt[1]=="0")
+  expect_true(is.na(show_loci(test_dfs_gt)$allele_alt[1]))
   # and finally throw an error if we try to use 0 as a missing value
   expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
                             loci = test_loci_wrong,
