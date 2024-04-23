@@ -15,7 +15,6 @@
 gt_ibs <- function(x,
                       as_counts = FALSE,
                       block_size = bigstatsr::block_size(length(show_loci_names(x)))*2) {
-
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)

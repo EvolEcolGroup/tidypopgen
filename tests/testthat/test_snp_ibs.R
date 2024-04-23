@@ -33,6 +33,15 @@ test_that("snp_ibs and gt_ibs computes ibs correctly",{
   test_ibs_gt <- gt_ibs(test_gt, as_counts = TRUE)
   expect_true(all.equal(test_ibs$ibs[], test_ibs_gt$ibs[],
                         check.attributes=FALSE))
+
+  # now subset to the first and second individual, and a subset of loci
+  test_gt_sub <- test_gt[c(1,3),]
+  loci_subset <- c(2,3,5,6)
+  in_common_1vs3 <- sum(c(1,1,2,1,2,1)[loci_subset])
+
+  test_gt_sub <- test_gt_sub %>% select_loci(loci_subset)
+  test_ibs_sub <- gt_ibs(test_gt_sub)
+  expect_identical(in_common_1vs3, test_ibs_sub$ibs[1,2])
 })
 
 
