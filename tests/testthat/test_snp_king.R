@@ -48,7 +48,7 @@ test_that("snp_king and gt_king compute king-robust correctly",{
 
   # now test with missing data
   test_na_gt <- gen_tibble(system.file("extdata/related/families.bed", package="tidypopgen"), quiet = TRUE,
-                           backingfile = tempfile())
+                           backingfile = tempfile(), valid_alleles = c("1","2"))
   test_na_fbm <- tidypopgen:::gt_get_bigsnp(test_na_gt)$genotypes
   test_na_king <- snp_king(test_na_fbm)
   # king by hand
@@ -68,7 +68,7 @@ test_that("snp_king gives the same results as plink",{
   bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
   families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) #bigsnpr::sub_bed(bed_path)
   #families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
-  families <- gen_tibble(families_bigsnp_path, quiet = TRUE)
+  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
 
   #Get snp_king results
   families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes
