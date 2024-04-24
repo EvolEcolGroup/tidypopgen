@@ -4,7 +4,7 @@
 #' It is equivalent to plotting the metric against the *k* values, and selecting
 #' the *k* that fulfils a given criterion (see details for an explanation of
 #' each criterion). This function simply adds an element 'best_k' to the
-#' `gt_pca_clust` returned by [gt_pca_find_clusters()]. The choice can be
+#' `gt_cluster_pca` returned by [gt_cluster_pca()]. The choice can be
 #' over-ridden simply by assigning a different value to that element (e.g.
 #' for an object x and a desired *k* of 8, simply use `x$best_k <- 8`)
 #'
@@ -59,21 +59,21 @@
 #' principal components: a new method for the analysis of genetically
 #' structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
 #'
-#' @param x a `gt_pca_clust` object obtained with [gt_pca_find_clusters()]
+#' @param x a `gt_cluster_pca` object obtained with [gt_cluster_pca()]
 #' @param stat a statistics, one of "BIC", "AIC" or "WSS"
 #' @param criterion one of "diffNgroup", "min", "goesup", "smoothNgoesup", "goodfit",
 #' see details for a discussion of each approach.
 #' @param quiet boolean on whether to silence outputting information to the
 #'  screen (defaults to FALSE)
-#' @returns a 'gt_pca_clust' object with an added element 'best_k'
+#' @returns a 'gt_cluster_pca' object with an added element 'best_k'
 #' @export
 
-gt_pca_clust_best_k <- function(x, stat = c("BIC", "AIC", "WSS"),
+gt_cluster_pca_best_k <- function(x, stat = c("BIC", "AIC", "WSS"),
                                   criterion = c("diffNgroup", "min", "goesup",
                                                 "smoothNgoesup", "goodfit"),
                                   quiet=FALSE){
-  if (!inherits(x, "gt_pca_clust")){
-    stop("'x' should be a 'gt_pca_clusters' object generated with 'gt_pca_find_clusters()'")
+  if (!inherits(x, "gt_cluster_pca")){
+    stop("'x' should be a 'gt_cluster_pcaers' object generated with 'gt_cluster_pca()'")
   }
 
   stat <- match.arg(stat)

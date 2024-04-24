@@ -110,14 +110,14 @@ general, it is worth exploring the sensitivity of the results to any of these de
 For this analysis, we will go with 17 components:
 
 ```{r}
-example_clusters <- gt_pca_find_clusters(example_pca, n_pca = 165)
+example_clusters <- gt_cluster_pca(example_pca, n_pca = 165)
 ```
 
 This object retains information about a large number of possible *k*. We can choose
-the best k with `gt_pca_clust_choose_n()` (we will use the defaults, but there
+the best k with `gt_cluster_pca_choose_n()` (we will use the defaults, but there
 are multiple statistics and criteria that we can use to choose *n*):
 ```{r}
-example_clusters <- gt_pca_clust_best_k(example_clusters)
+example_clusters <- gt_cluster_pca_best_k(example_clusters)
 ```
 
 Now we can run a DAPC:

@@ -7,7 +7,7 @@
 #' a principal component analysis (PCA). For each model,
 #' several statistical measures of goodness of fit
 #' are computed, which allows to choose the optimal k using the function
-#' [gt_pca_clust_best_k()].
+#' [gt_cluster_pca_best_k()].
 #' See details for a description of how to select the optimal k
 #' and vignette("adegenet-dapc") for a tutorial.
 #' @param  x a `gt_pca` object returned by one of the `gt_pca_*` functions.
@@ -20,7 +20,7 @@
 #' @param n_start number of starting points for kmeans (only used if `method="kmeans"`)
 #' @param quiet boolean on whether to silence outputting information to the
 #'  screen (defaults to FALSE)
-#' @returns a `gt_pca_clust` object, which is a subclass of `gt_pca` with
+#' @returns a `gt_cluster_pca` object, which is a subclass of `gt_pca` with
 #' an additional element 'cluster', a list with elements:
 #' - 'method' the clustering method (either kmeans or ward)
 #' - 'n_pca' number of principal components used for clustering
@@ -31,7 +31,7 @@
 #' - 'groups' a list, with each element giving the group assignments for a given k
 #' @export
 
-gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
+gt_cluster_pca <- function(x = NULL, n_pca = NULL,
                                  k_clusters = c(1,round(nrow(x$u)/10)),
                                  method=c("kmeans","ward"),
                                  n_iter = 1e5, n_start = 10,
@@ -117,7 +117,7 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
   names(cluster_list$groups)<-nbClust
 
   x$clusters <- cluster_list
-  class(x) <- c("gt_pca_clust", class(x))
+  class(x) <- c("gt_cluster_pca", class(x))
   return(x)
 
 }
@@ -129,16 +129,16 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
 }
 
 
-#' Autoplots for `gt_pca_clust` objects
+#' Autoplots for `gt_cluster_pca` objects
 #'
-#' For `gt_pca_clust`, `autoplot` produces a plot of a metric of choice ('BIC',
+#' For `gt_cluster_pca`, `autoplot` produces a plot of a metric of choice ('BIC',
 #' 'AIC' or 'WSS') against the number of clusters (*k*). This plot is can be
 #' used to infer the best value of *k*, which corresponds to the smallest
 #' value of the metric (the minimum in an 'elbow' shaped curve). In some cases,
 #' there is not 'elbow' and the metric keeps decreasing with increasing *k*;
 #' in such cases, it is customary to choose the value of *k* at which the
 #' decrease in the metric reaches as plateau. For a programmatic way of choosing
-#' *k*, use [gt_pca_clust_best_k()].
+#' *k*, use [gt_cluster_pca_best_k()].
 #'
 #' `autoplot` produces simple plots to quickly inspect an object. They are
 #' not customisable; we recommend that you use `ggplot2` to produce publication
@@ -152,7 +152,7 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
 #' @rdname autoplot_gt_pca
 #' @export
 
-autoplot.gt_pca_clust <- function(object,
+autoplot.gt_cluster_pca <- function(object,
                             metric = c("BIC", "AIC", "WSS"),
                             ...)
 {

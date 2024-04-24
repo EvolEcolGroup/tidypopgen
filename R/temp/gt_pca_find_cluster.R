@@ -7,7 +7,7 @@
 #' a principal component analysis (PCA). For each model,
 #' several statistical measures of goodness of fit
 #' are computed, which allows to choose the optimal k using the function
-#' [gt_pca_clust_best_k()].
+#' [gt_cluster_pca_best_k()].
 #' See details for a description of how to select the optimal k
 #' and vignette("adegenet-dapc") for a tutorial.
 #' @param x an object of class `gt_pca`, generated with [gt_pca()].
@@ -20,7 +20,7 @@
 #' @param n_start number of starting points for kmeans (only used if `method="kmeans"`)
 #' @param quiet boolean on whether to silence outputting information to the
 #'  screen (defaults to FALSE)
-#' @returns a `gt_pca_clust` object, which is a subclass of [`gt_pca`] with
+#' @returns a `gt_cluster_pca` object, which is a subclass of [`gt_pca`] with
 #' an additional element 'cluster', a list with elements:
 #' - 'method' the clustering method (either kmeans or ward)
 #' - 'n_pca' number of principal components used for clustering
@@ -31,7 +31,7 @@
 #' - 'groups' a list, with each element giving the group assignments for a given k
 #' @export
 
-gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
+gt_cluster_pca <- function(x = NULL, n_pca = NULL,
                                  k_clusters = c(1,round(nrow(x$scores)/10)),
                                  method=c("kmeans","ward"),
                                  n_iter = 1e5, n_start = 10,
@@ -115,7 +115,7 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
   names(cluster_list$groups)<-nbClust
 
   x$clusters <- cluster_list
-  class(x) <- c("gt_pca_clust", class(x))
+  class(x) <- c("gt_cluster_pca", class(x))
   return(x)
 
 }

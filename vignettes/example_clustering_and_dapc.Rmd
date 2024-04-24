@@ -184,7 +184,7 @@ not see a very clear flattening, but by PC 10 the increase in explained variance
 decelerated. We can now find clusters based on those 10 PCs:
 
 ```{r}
-anole_clusters <- gt_pca_find_clusters(anole_pca, n_pca = 10)
+anole_clusters <- gt_cluster_pca(anole_pca, n_pca = 10)
 ```
 
 As we did not define the *k* values to explore, the default 1 to 5 was used (we
@@ -200,13 +200,13 @@ with increasing k). However, we notice that there is a quick levelling
 off in the decrease in BIC at
 3 clusters. Arguably, these are sufficient to capture the main structure (and that makes
 sense given what we saw in the PCA). We can also use a number of algorithmic approaches (based on the original `find.clusters()` function in `adegenet`) to choose the best *k* value
-from this plot through `gt_pca_clust_best_k()`. We will use the defaults (BIC with "diffNgroup",
-see the help page for `gt_pca_clust_best_k()` for a description of the various options):
+from this plot through `gt_cluster_pca_best_k()`. We will use the defaults (BIC with "diffNgroup",
+see the help page for `gt_cluster_pca_best_k()` for a description of the various options):
 ```{r}
-anole_clusters <- gt_pca_clust_best_k(anole_clusters)
+anole_clusters <- gt_cluster_pca_best_k(anole_clusters)
 ```
 The algorithm confirms our choice. Note that this function simply adds an element
-`$best_k` to the `gt_pca_clust` object:
+`$best_k` to the `gt_cluster_pca` object:
 ```{r}
 anole_clusters$best_k
 ```
