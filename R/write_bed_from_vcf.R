@@ -12,7 +12,7 @@
 #' @returns the file path where the BED file was saved.
 #' @export
 
-gt_vcf_to_bed <- read_vcf <- function(vcf_path, bed_path=NULL, quiet = TRUE, ...) {
+write_bed_from_vcf <- read_vcf <- function(vcf_path, bed_path=NULL, quiet = TRUE, ...) {
 
   if (requireNamespace("vcfR", quietly = TRUE)) {
     .x <- vcfR::read.vcfR(file = vcf_path, verbose = !quiet, ...)
@@ -55,7 +55,7 @@ gt_vcf_to_bed <- read_vcf <- function(vcf_path, bed_path=NULL, quiet = TRUE, ...
     } else if (file_ext(bed_path)=="bed"){
       bed_path <- bigsnpr::sub_bed(bed_path,"")
     }
-    bed_path <- gt_write_bed_from_dfs(indiv_meta= indiv_meta,
+    bed_path <- write_bed_from_dfs(indiv_meta= indiv_meta,
                           genotypes = t(.x),
                           loci = loci,
                           path_out = bed_path)

@@ -13,7 +13,7 @@
 #' @returns NULL it writes the files
 #' @export
 
-gt_write_bed_from_dfs <- function(genotypes, loci, indiv_meta, path_out=NULL){
+write_bed_from_dfs <- function(genotypes, loci, indiv_meta, path_out=NULL){
 
   if (is.null(path_out)){
     stop ("path_out needs to be given")

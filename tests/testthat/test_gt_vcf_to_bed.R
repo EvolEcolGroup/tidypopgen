@@ -1,7 +1,7 @@
 test_that("vcf is correctly converted and imported",{
   vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
                           package = "tidypopgen")
-  bed_path <- gt_vcf_to_bed(vcf_path, bed_path = tempfile("anolis_"))
+  bed_path <- write_bed_from_vcf(vcf_path, bed_path = tempfile("anolis_"))
   test_gt <- gen_tibble(bed_path,quiet = TRUE)
 
   vcf_test <- vcfR::read.vcfR(file = vcf_path, verbose = FALSE)

@@ -13,7 +13,7 @@
 #' two [bigstatsr::FBM] matrices, one of counts of IBS by alleles,
 #' and one of number of valid alleles (i.e. 2*n_loci - 2*missing_loci)
 #' @export
-gt_ibs <- function(x,
+pairwise_ibs <- function(x,
                       type = c("proportion","adjusted_counts","raw_counts"),
                       block_size = bigstatsr::block_size(count_loci(x))) {
   type <- match.arg(type)

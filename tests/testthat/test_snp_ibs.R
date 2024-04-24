@@ -15,7 +15,7 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 
 
 
-test_that("snp_ibs and gt_ibs computes ibs correctly",{
+test_that("snp_ibs and pairwise_ibs computes ibs correctly",{
   test_fbm <- tidypopgen:::.gt_get_bigsnp(test_gt)$genotypes
   test_ibs <- snp_ibs(test_fbm, type="raw_counts")
   # compare indiv 1 vs 2
@@ -26,10 +26,10 @@ test_that("snp_ibs and gt_ibs computes ibs correctly",{
   expect_identical(test_ibs_2blocks$ibs[], test_ibs$ibs[])
 
   # now estimate it with gen_tibble
-  test_ibs_gt <- gt_ibs(test_gt, type="raw_counts")
+  test_ibs_gt <- pairwise_ibs(test_gt, type="raw_counts")
   expect_true(all.equal(test_ibs$ibs[], test_ibs_gt$ibs[],
                         check.attributes=FALSE))
-  test_ibs_gt_prop <- gt_ibs(test_gt)
+  test_ibs_gt_prop <- pairwise_ibs(test_gt)
   expect_true (all.equal(test_ibs_gt_prop, test_ibs$ibs[]/test_ibs$valid_n[], check.attributes = FALSE))
 
   # now subset to the first and second individual, and a subset of loci
@@ -38,7 +38,7 @@ test_that("snp_ibs and gt_ibs computes ibs correctly",{
   in_common_1vs3 <- sum(c(1,1,2,1,2,1)[loci_subset])
 
   test_gt_sub <- test_gt_sub %>% select_loci(dplyr::all_of(loci_subset))
-  test_ibs_sub <- gt_ibs(test_gt_sub, type="raw_counts")
+  test_ibs_sub <- pairwise_ibs(test_gt_sub, type="raw_counts")
   expect_identical(in_common_1vs3, test_ibs_sub$ibs[1,2])
 })
 

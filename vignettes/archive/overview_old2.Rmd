@@ -73,7 +73,7 @@ example_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
 We create a plink BED file:
 ```{r}
 bed_prefix <- tempfile('test_data_')
-gt_write_bed_from_dfs(example_genotypes, example_loci, example_indiv_meta, bed_prefix)
+write_bed_from_dfs(example_genotypes, example_loci, example_indiv_meta, bed_prefix)
 bed_path <- paste0(bed_prefix,".bed")
 
 ```
