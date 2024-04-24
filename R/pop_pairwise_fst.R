@@ -1,17 +1,27 @@
-#' Compute pairwise Hudson Fst
+#' Compute pairwise population Fst
 #'
-#' This function computes pairwise Fst using the formulation by Hudson.
+#' This function computes pairwise Fst, currently using the formulation by Hudson.
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param by_locus boolean, determining whether Fst should be returned by locus(TRUE),
 #' or as a single genome wide value obtained by taking the ratio of the mean numerator
 #' and denominator (FALSE, the default).
+#' @param method currently only "Hudson" is implemented
 #' @returns a tibble with each pairwise combination as a row
 #' @export
 
-pop_pairwise_fst <- function(.x, by_locus=FALSE){
+pairwise_pop_fst <- function(.x, by_locus=FALSE, method= "Hudson"){
   if (!inherits(.x,"grouped_df")){
     stop (".x should be a grouped df")
   }
+  method <- match.arg(method)
+  if (method=="Hudson"){
+    pairwise_pop_fst_hudson(.x=.x, by_locus=by_locus)
+  }
+}
+
+
+pairwise_pop_fst_hudson <- function(.x, by_locus=FALSE){
+
   message("this function is not properly tested yet!!!")
   message("if you have time, test the results against something like hierfstat and create a unit test")
   # check matrix(unlist(z, use.names = FALSE), ncol = 10, byrow = TRUE)

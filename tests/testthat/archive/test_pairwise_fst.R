@@ -1,4 +1,4 @@
-testthat::test_that("pop_pairwise_fst computes Hudson Fst correctly",{
+testthat::test_that("pairwise_pop_fst computes Hudson Fst correctly",{
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,2),
@@ -14,6 +14,6 @@ testthat::test_that("pop_pairwise_fst computes Hudson Fst correctly",{
   grouped_gt <- test_gen %>% group_by(population)
   #we need some tests! Are we happy with the above, or do we need a more complex test?
   # ideally , we should look for an implementation that we can use a reference (hierfsta??)
-  fst <- grouped_gt %>% pop_pairwise_fst()
-  fst_by_locus <- grouped_gt %>% pop_pairwise_fst(by_locus = TRUE)
+  fst <- grouped_gt %>% pairwise_pop_fst()
+  fst_by_locus <- grouped_gt %>% pairwise_pop_fst(by_locus = TRUE)
 })

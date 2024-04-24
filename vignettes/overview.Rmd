@@ -314,7 +314,7 @@ distance metrics among populations. For example:
 
 ```{r}
 # not reimplemented yet!
-example_gt %>% group_by(population) %>% pop_pairwise_fst()
+example_gt %>% group_by(population) %>% pairwise_pop_fst()
 ```
 
 These type of functions are prefixed with `pop`.
