@@ -338,7 +338,7 @@ stopifnot_gen_tibble <- function(.x){
 #' @export
 tbl_sum.gen_tbl <- function(x, ...) {
   c(
-    "A gen_tibble" = paste(nrow(show_loci(x))," loci"),
+    "A gen_tibble" = paste(count_loci(x)," loci"),
     NextMethod()
   )
 }
@@ -372,13 +372,4 @@ harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
 
 
 
-##########################################
-# convenient functs
-.gt_bigsnp_cols <- function(.x){
-  show_loci(.x)$big_index
-}
-
-.gt_bigsnp_rows <- function(.x){
-  vctrs::vec_data(.x$genotypes)
-}
 

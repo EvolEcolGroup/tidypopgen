@@ -32,7 +32,7 @@ king_r <- function(X_mat){
 
 # this also tests show_genotypes and show_loci
 test_that("snp_king and gt_king compute king-robust correctly",{
-  test_fbm <- tidypopgen:::gt_get_bigsnp(test_gt)$genotypes
+  test_fbm <- tidypopgen:::.gt_get_bigsnp(test_gt)$genotypes
   test_king <- snp_king(test_fbm)
   # king by hand
   test_king_r <- king_r(show_genotypes(test_gt))
@@ -49,7 +49,7 @@ test_that("snp_king and gt_king compute king-robust correctly",{
   # now test with missing data
   test_na_gt <- gen_tibble(system.file("extdata/related/families.bed", package="tidypopgen"), quiet = TRUE,
                            backingfile = tempfile(), valid_alleles = c("1","2"))
-  test_na_fbm <- tidypopgen:::gt_get_bigsnp(test_na_gt)$genotypes
+  test_na_fbm <- tidypopgen:::.gt_get_bigsnp(test_na_gt)$genotypes
   test_na_king <- snp_king(test_na_fbm)
   # king by hand
   test_na_king_r <- king_r(show_genotypes(test_na_gt))
@@ -71,7 +71,7 @@ test_that("snp_king gives the same results as plink",{
   families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
 
   #Get snp_king results
-  families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes
+  families_fbm <- tidypopgen:::.gt_get_bigsnp(families)$genotypes
   families_king <- snp_king(families_fbm)
 
   #Read in results from king -b families_k.bed --kinship

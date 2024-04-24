@@ -43,10 +43,6 @@ gt_load <-function(file = NULL, reattach_to = NULL) {
   return(x)
 }
 
-gt_get_bigsnp<-function(x){
-  attr(x$genotypes,"bigsnp")
-}
-
 
 sub_rds <- function (path, replacement = "", stop_if_not_ext = TRUE)
 {

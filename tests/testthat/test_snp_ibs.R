@@ -16,7 +16,7 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 
 
 test_that("snp_ibs and gt_ibs computes ibs correctly",{
-  test_fbm <- tidypopgen:::gt_get_bigsnp(test_gt)$genotypes
+  test_fbm <- tidypopgen:::.gt_get_bigsnp(test_gt)$genotypes
   test_ibs <- snp_ibs(test_fbm, type="raw_counts")
   # compare indiv 1 vs 2
   in_common<-sum(c(1,2,2,1,1,2))
@@ -56,7 +56,7 @@ test_that("snp_ibs as.counts = FALSE gives the same results as plink",{
   families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
 
   #Get snp_ibs results
-  families_fbm <- tidypopgen:::gt_get_bigsnp(families)$genotypes
+  families_fbm <- tidypopgen:::.gt_get_bigsnp(families)$genotypes
   tidy_ibs <- snp_ibs(families_fbm)
 
   #Check both are numeric and round

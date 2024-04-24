@@ -33,6 +33,6 @@ N_mat_Aa_i <- X_mat1 %*% t(X_mat_valid)
 N_mat_Aa_j <- t(N_mat_Aa_i)
 king.r <- king_num/(2* pmin(N_mat_Aa_i,N_mat_Aa_j))+0.5-0.25*(N_mat_Aa_i+N_mat_Aa_j)/pmin(N_mat_Aa_i,N_mat_Aa_j)
 
-X <- gt_get_bigsnp(test_gt)
+X <- .gt_get_bigsnp(test_gt)
 snp_king(X)
 
