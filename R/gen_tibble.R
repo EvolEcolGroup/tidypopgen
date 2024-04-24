@@ -3,7 +3,7 @@
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
 #' @param x can be:
-#' - a string giving the path to a plink BED file, or a [`bigsnpr::bigSNP`]
+#' - a string giving the path to a PLINK BED file, or a [`bigsnpr::bigSNP`]
 #' - a string giving the path to a RDS file storing a `bigSNP` object from
 #' the `bigsnpr` package (usually created with [bigsnpr::snp_readBed()])
 #' - a string giving the path to a vcf file. Note that we currently read the whole
@@ -21,7 +21,7 @@
 #' 'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
 #' indicate a missing value for the allele value (e.g. when we have a monomorphic
-#' locus with only one allele). It defalts to '0' and '.' (the same as PLINK 1.9).
+#' locus with only one allele). It defaults to '0' and '.' (the same as PLINK 1.9).
 #' @param backingfile the path, including the file name without extension,
 #' for backing files used to store the data (they will be given a .bk
 #' and .RDS automatically). This is not needed if `x` is already an .RDS file.
@@ -361,7 +361,7 @@ check_allele_alphabet <- function(x,
 # loci_info is usually from show_loci()
 harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
   # 0 is always considered as a missing value
-  if ("0" %in% missing_alleles){
+  if (!"0" %in% missing_alleles){
     missing_alleles <- c(missing_alleles, "0")
   }
   loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles]<-NA
