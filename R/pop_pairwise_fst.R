@@ -1,6 +1,10 @@
 #' Compute pairwise population Fst
 #'
-#' This function computes pairwise Fst, currently using the formulation by Hudson.
+#' This function computes pairwise Fst, currently using the formulation by
+#' Hudson, following the reccomandations by Bhatia et al (2013).
+#'
+#' @references Bhatia G, Patterson N, Sankararaman S, Price AL. Estimating and Interpreting
+#' FST: The Impact of Rare Variants. Genome Research. 2013;23(9):1514–1521.
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param by_locus boolean, determining whether Fst should be returned by locus(TRUE),
 #' or as a single genome wide value obtained by taking the ratio of the mean numerator
@@ -80,15 +84,4 @@ pairwise_pop_fst_hudson <- function(.x, by_locus=FALSE){
   }
 }
 
-
-# TODO this needs to be formatted in a manner similar to Hudson fst
-pairwise_pop_fst_wc <- function(.x, by_locus=FALSE){
-  # simple function to create a dataframe with af and N (allele freq and number of valid alleles)
-  make_ac_df <- function(x){
-    n_tot <- nrow(x)*2
-    x %>% reframe(af = loci_maf(x),N= n_tot - loci_missingness(x, as_counts=TRUE)*2)
-  }
-  ac_list <- group_map(.x, .f=~make_ac_df(.x))
-  bigsnpr::snp_fst(ac_list,overall=!by_locus)
-
-}
+## use tidyr::pivot_wider to turn into a matrix if that's what is requested.

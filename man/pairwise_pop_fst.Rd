@@ -19,5 +19,10 @@ and denominator (FALSE, the default).}
 a tibble with each pairwise combination as a row
 }
 \description{
-This function computes pairwise Fst, currently using the formulation by Hudson.
+This function computes pairwise Fst, currently using the formulation by
+Hudson, following the reccomandations by Bhatia et al (2013).
+}
+\references{
+Bhatia G, Patterson N, Sankararaman S, Price AL. Estimating and Interpreting
+FST: The Impact of Rare Variants. Genome Research. 2013;23(9):1514–1521.
 }
