@@ -52,6 +52,9 @@ snp_as <- function(
                          ind.row,
                          ind.col.ind)
   }
+  # The allele sharing matrix is:
+  # Mij <- 1/2 * (1+1/tcrossprod(na) * tcrossprod(dos-1))
+  # where dos is a dosage matrix (with missing values replaced by 1) and na is a matrix with 0 for NAs and 1 for valid values
   # TODO this could be done in chunks to avoid bringing everything to memory at once
   return(1/2 * (1+1/na_tcross[] * dos_tcross[]) )
 }
