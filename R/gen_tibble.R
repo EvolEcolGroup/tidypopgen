@@ -155,7 +155,7 @@ gen_tibble_vcf <- function(x, ...,
   ind_meta <- tibble(id = colnames(x), population = NA)
 
   # using the gen_tibble.matrix method
-  new_gen_tbl <- gen_tibble(x = x,
+  new_gen_tbl <- gen_tibble(x = t(x),
              indiv_meta = ind_meta,
              loci = loci,
              backingfile = backingfile)
@@ -193,6 +193,14 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   }
   if (any(!inherits(x,"matrix"), !is.numeric(x))){
     stop("'x' is not a matrix of integers")
+  }
+
+  # check dimensions
+  if (ncol(x)!=nrow(loci)){
+    stop ("there is a mismatch between the number of loci in the genotype table x and in the loci table")
+  }
+  if (nrow(x)!=nrow(indiv_meta)){
+    stop ("there is a mismatch between the number of loci in the genotype table x and in the loci table")
   }
 
   # use code for NA in FBM.256
