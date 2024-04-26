@@ -16,11 +16,12 @@ and denominator (FALSE, the default).}
 \item{method}{currently only "Hudson" is implemented}
 }
 \value{
-a tibble with each pairwise combination as a row
+a tibble with each pairwise combination as a row (if \code{tidy=TRUE}), else
+a matrix
 }
 \description{
 This function computes pairwise Fst, currently using the formulation by
-Hudson, following the reccomandations by Bhatia et al (2013).
+Hudson (following the recommendations by Bhatia et al (2013)).
 }
 \references{
 Bhatia G, Patterson N, Sankararaman S, Price AL. Estimating and Interpreting
