@@ -13,19 +13,19 @@ test_loci <- data.frame(name=paste0("rs",1:6),
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 
-test_that("snp_as and pairwise_as computes allele sharing correctly",{
+test_that("snp_allele_sharing and pairwise_allele_sharing computes allele sharing correctly",{
   test_fbm <- tidypopgen:::.gt_get_bigsnp(test_gt)$genotypes
-  test_as <- snp_as(test_fbm)
+  test_as <- snp_allele_sharing(test_fbm)
   # use hierfstat to compute it
   dos_hier_match <- hierfstat::matching(test_genotypes)
   expect_true (all.equal(test_as, dos_hier_match))
 
   # check that we get the same result if we split the operation into two blocks
-  test_as_2blocks <- snp_as(test_fbm, block.size = 3)
+  test_as_2blocks <- snp_allele_sharing(test_fbm, block.size = 3)
   expect_identical(test_as_2blocks[], test_as[])
 
   # now estimate it with gen_tibble
-  test_as_gt <- pairwise_as(test_gt)
+  test_as_gt <- pairwise_allele_sharing(test_gt, as_matrix=TRUE)
   expect_true(all.equal(test_as, test_as_gt,
                         check.attributes=FALSE))
 

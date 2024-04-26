@@ -26,7 +26,7 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 dos_hier_match <- hierfstat::matching(test_genotypes)
 
 test_fbm <- tidypopgen:::.gt_get_bigsnp(test_gt)$genotypes
-test_as <- snp_as(test_fbm)
+test_as <- snp_allele_sharing(test_fbm)
 
 
 

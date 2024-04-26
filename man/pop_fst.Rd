@@ -4,17 +4,17 @@
 \alias{pop_fst}
 \title{Compute population specific Fst}
 \usage{
-pop_fst(.x, include_global = FALSE, as_matrix = NULL)
+pop_fst(.x, include_global = FALSE, allele_sharing_mat = NULL)
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
-\item{include_global}{boolean determing whether, besides the population specific Fst, a global
+\item{include_global}{boolean determining whether, besides the population specific Fst, a global
 Fst should be appended. Note that this will return a vector of n populations plus 1 (the global value)}
 
-\item{as_matrix}{optional, the matrix of Allele Sharing returned by
-\code{\link[=pairwise_as]{pairwise_as()}}. As a number of statistics can be derived from the AS matrix,
-it it sometimes more efficient to precompute this matrix.}
+\item{allele_sharing_mat}{optional, the matrix of Allele Sharing returned by
+\code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with \code{as_matrix=TRUE}. As a number of statistics can be
+derived from the Allele Sharing matrix,}
 }
 \value{
 a vector of population specific Fst (plus the global value if \code{include_global=TRUE})

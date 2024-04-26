@@ -17,7 +17,7 @@
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
 
-snp_as <- function(
+snp_allele_sharing <- function(
   X,
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
