@@ -30,7 +30,16 @@ test_that("snp_ibs and pairwise_ibs computes ibs correctly",{
   expect_true(all.equal(test_ibs$ibs[], test_ibs_gt$ibs[],
                         check.attributes=FALSE))
   test_ibs_gt_prop <- pairwise_ibs(test_gt)
-  expect_true (all.equal(test_ibs_gt_prop, test_ibs$ibs[]/test_ibs$valid_n[], check.attributes = FALSE))
+  #expect_true (all.equal(test_ibs_gt_prop, test_ibs$ibs[]/test_ibs$valid_n[], check.attributes = FALSE))
+
+  #use raw_counts matrices to calculate proportion
+  by_hand <- as.data.frame(test_ibs$ibs[]/test_ibs$valid_n[])
+  colnames(by_hand) <- c("a","b","c")
+
+  #check against proportion value
+  expect_true(all.equal(test_ibs_gt_prop$value[1],by_hand$a[2])) #a and b
+  expect_true(all.equal(test_ibs_gt_prop$value[2],by_hand$a[3])) #a and c
+  expect_true(all.equal(test_ibs_gt_prop$value[3],by_hand$b[3])) #b and c
 
   # now subset to the first and second individual, and a subset of loci
   test_gt_sub <- test_gt[c(1,3),]
