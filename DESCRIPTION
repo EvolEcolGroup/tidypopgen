@@ -37,6 +37,7 @@ Imports:
     vctrs
 Suggests:
     adegenet,
+    broom,
     hierfstat,
     knitr,
     detectRUNS,
