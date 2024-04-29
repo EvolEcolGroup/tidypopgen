@@ -1,6 +1,6 @@
-#' Write a geno file for sNMF from the LEA package
+#' Convert a `gentibble` to a .geno file for sNMF from the LEA package
 #'
-#' This function writes a geno file fom a [`gen_tibble`]. Unless a file path is given,
+#' This function writes a .geno file fom a [`gen_tibble`]. Unless a file path is given,
 #' a file with suffix .geno is written in the same location as the .rds and .bk
 #' files that underpin the [`gen_tibble`].
 #'
@@ -12,7 +12,7 @@
 #'
 
 # Write a geno file (as used by LEA)
-gt_write_lea_geno <- function(x, file = NULL){
+gt_as_geno_lea <- function(x, file = NULL){
   if (is.null(file)){
     file <- sub_rds(gt_get_file_names(x)[1],".geno")
   }

@@ -14,6 +14,34 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
+## These could be the basis for gt_as_genind and gt_as_hierfstat
+## we should also have gt2genlight (we should have it in the old branch)
+
+# convert to genind (which can in turn be used for hierfstat)
+df_for_genind <- test_genotypes
+df_for_genind [df_for_genind ==0]<-"11"
+df_for_genind [df_for_genind ==1]<-"12"
+df_for_genind [df_for_genind ==2]<-"22"
+test_genind <- adegenet::df2genind(X = df_for_genind, ind.names = test_indiv_meta$id,
+                    pop = test_indiv_meta$population,ncode=1,
+                    loc.names = test_loci$name)
+
+# directly to hierfstat
+test_hier <- gt_as_hierfstat(test_gt)
+
+all.equal(test_hier,hierfstat::genind2hierfstat(test_genind),
+          check.attributes=FALSE)
+
+
+hier_basic <- hierfstat::basic.stats(test_hier)
+# note that Fstp, FIS and Dest are not simply averages
+
+hier_fst_wc <- hierfstat::pairwise.WCfst(test_hier)
+hier_fst_nei <- hierfstat::pairwise.neifst(test_hier)
+
+
+
+
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 test_gt <- test_gt %>% group_by(population)

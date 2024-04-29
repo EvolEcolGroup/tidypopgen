@@ -291,7 +291,7 @@ scatter(anole_dapc, posi.da="bottomright")
 sNMF is a fast clustering algorithm which provides results similar to STRUCTURE and ADMIXTURE. We can run it directly form R. We have first to generate a file
 with our genotype data:
 ```{r}
-geno_file <- gt_write_lea_geno(anole_gt)
+geno_file <- gt_as_geno_lea(anole_gt)
 geno_file
 ```
 
