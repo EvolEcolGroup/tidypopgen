@@ -42,7 +42,7 @@ test_that("snp_king and gt_king compute king-robust correctly",{
   expect_identical(test_king_2blocks, test_king)
 
   # now estimate it with gen_tibble
-  test_king_gt <- gt_king(test_gt)
+  test_king_gt <- gt_king(test_gt, as_matrix = TRUE)
   expect_true(all.equal(test_king, test_king_gt,
                         check.attributes=FALSE))
 
