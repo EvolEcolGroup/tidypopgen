@@ -52,7 +52,7 @@ gt_pca_randomSVD <- function(x, k = 10,
                               fun_prod = bigstatsr::big_prodVec,
                               fun_cprod = bigstatsr::big_cprodVec
                               ) {
-  if (gt_has_imputed(x)){
+  if (gt_has_imputed(x) && gt_uses_imputed(x)==FALSE){
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
   }

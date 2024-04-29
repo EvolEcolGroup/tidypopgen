@@ -6,12 +6,16 @@
 \usage{
 pairwise_ibs(
   x,
+  as_matrix = FALSE,
   type = c("proportion", "adjusted_counts", "raw_counts"),
   block_size = bigstatsr::block_size(count_loci(x))
 )
 }
 \arguments{
 \item{x}{a \code{gen_tibble} object.}
+
+\item{as_matrix}{boolean, determining whether the results should be a square symmetrical matrix (TRUE),
+or a tidied tibble (FALSE, the default)}
 
 \item{type}{one of "proportion" (equivalent to "ibs" in PLINK), "adjusted_counts" ("distance" in PLINK),
 and "raw_counts" (the counts of identical alleles and non-missing alleles, from which the two other quantities are computed)}

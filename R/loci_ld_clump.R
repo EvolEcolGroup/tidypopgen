@@ -44,6 +44,12 @@ loci_ld_clump <- function(.x, ...) {
 loci_ld_clump.tbl_df <- function(.x, ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
+
+  if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
+    gt_set_imputed(.x, set = TRUE)
+    on.exit(gt_set_imputed(.x, set = FALSE))
+  }
+
   loci_ld_clump(.x$genotypes, ...)
 }
 
