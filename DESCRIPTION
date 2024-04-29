@@ -25,6 +25,7 @@ Imports:
     genio,
     ggplot2,
     magrittr,
+    methods,
     MASS,
     patchwork,
     rlang,
