@@ -22,4 +22,8 @@ test_that("show_loci gets and sets information",{
   # now test that the two objects are identical (minus the row names, which are abritrary)
   expect_true(all.equal(test_hier,hierfstat::genind2hierfstat(test_genind),
             check.attributes=FALSE))
+
+  test_genlight <- gt_as_genlight(test_gt)
+  expect_true(all.equal(show_genotypes(test_gt), as.matrix(test_genlight),
+                        check.attributes=FALSE))
 })

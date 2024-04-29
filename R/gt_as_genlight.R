@@ -1,26 +1,22 @@
-#' Convert a `gen_tibble` to a `genind` object from `adegenet`
+#' Convert a `gen_tibble` to a `genlight` object from `adegenet`
 #'
-#' This function converts a `gen_tibble` to a `genind` object from `adegenet`
+#' This function converts a `gen_tibble` to a `genlight` object from `adegenet`
 #'
 #' @param x a [`gen_tibble`], with population coded as 'population'
-#' @returns a `genind` object
+#' @returns a `genlight` object
 #' @export
 #'
 
-gt_as_genind <- function(x){
+gt_as_genlight <- function(x){
   if (!requireNamespace("adegenet", quietly = TRUE)) {
     stop(
       "to use this function, first install package 'adegenet' with\n",
       "install.packages('adegenet')")
   }
-  df_for_genind <- show_genotypes(x)
-  df_for_genind [df_for_genind ==0]<-"11"
-  df_for_genind [df_for_genind ==1]<-"12"
-  df_for_genind [df_for_genind ==2]<-"22"
-  adegenet::df2genind(X = df_for_genind,
+  test_genlight <- new("genlight", gen = show_genotypes(x),
+                       ploidy=2, # TODO update this when ploidy is implemented
                                      ind.names = x$id,
                                      pop = x$population,
-                                     ncode=1,
                                      loc.names = show_loci_names(x))
 }
 
