@@ -25,6 +25,7 @@ Imports:
     genio,
     ggplot2,
     magrittr,
+    methods,
     MASS,
     patchwork,
     rlang,
@@ -37,6 +38,7 @@ Imports:
     vctrs
 Suggests:
     adegenet,
+    broom,
     hierfstat,
     knitr,
     detectRUNS,

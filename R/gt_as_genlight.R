@@ -13,7 +13,7 @@ gt_as_genlight <- function(x){
       "to use this function, first install package 'adegenet' with\n",
       "install.packages('adegenet')")
   }
-  test_genlight <- new("genlight", gen = show_genotypes(x),
+  test_genlight <- methods::new("genlight", gen = show_genotypes(x),
                        ploidy=2, # TODO update this when ploidy is implemented
                                      ind.names = x$id,
                                      pop = x$population,

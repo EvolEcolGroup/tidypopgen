@@ -44,7 +44,7 @@ gt_uses_imputed <- function (x){
 #' @export
 
 gt_set_imputed <- function (x, set = NULL){
-  if (is.logical(set)){
+  if (!is.logical(set)){
     stop ("set should be either TRUE (to use imputed) or FALSE (to use the raw calls")
   }
   if (!gt_has_imputed(x)){
