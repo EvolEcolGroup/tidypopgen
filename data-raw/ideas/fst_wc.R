@@ -41,10 +41,16 @@ hier_fst_nei <- hierfstat::pairwise.neifst(test_hier)
   sums_alt <- apply(counts,2,function(x) x[2]+2*x[3])
   n <- apply(counts,2,function(x) sum(x[1:3])*2)
   sums_ref <- n - sums_alt
+  freq_alt <- sums_alt/n
+  freq_ref <- 1- freq_alt
+  het_count <- apply(counts,2,function(x) x[2]) # This should be simply a row from the counts matrix
   het_obs <- apply(counts,2,function(x) x[2]/sum(x[1:3]))
   het_exp <- 2 * sums_alt/n * sums_ref/n
   return (list(sums_alt = sums_alt,
                sums_ref = sums_ref,
+               freq_alt = freq_alt,
+               freq_ref = freq_ref,
+               het_count = het_count,
                n = n,
                het_obs = het_obs,
                het_exp = het_exp))
@@ -86,12 +92,13 @@ pairwise_pop_fst_nei83 <- function(.x, by_locus = FALSE){
   .group_levels = .x %>% group_keys()
   pairwise_combn <- utils::combn(nrow(.group_levels),2)
   n_loci <- count_loci(.x)
-  Hs_pair <- matrix(NA_real_, nrow = n_loci, ncol = ncol(pairwise_combn))
-  Ht_pair <- matrix(NA_real_, nrow = n_loci, ncol = ncol(pairwise_combn))
+#  Hs_pair <- matrix(NA_real_, nrow = n_loci, ncol = ncol(pairwise_combn))
+#  Ht_pair <- matrix(NA_real_, nrow = n_loci, ncol = ncol(pairwise_combn))
   for (i_col in seq_len(ncol(pairwise_combn))){
     pop1 <- pairwise_combn[1,i_col]
     pop2 <- pairwise_combn[2,i_col]
-    Hs_pair[,i_col] <-  (pop_counts_df[[pop1]]$het_exp + pop_counts_df[[pop2]]$het_exp)/2
+    Hs_pair <-  (pop_counts_df[[pop1]]$het_count + pop_counts_df[[pop2]]$het_count)/
+      (pop_counts_df[[pop1]]$n + pop_counts_df[[pop2]]$n)
     # Ht_pair is 1-p_bar^2 - q_bar^2
     Ht_pair[, i_col] <-
       1 - ((pop_counts_df[[pop1]]$sums_alt + pop_counts_df[[pop2]]$sums_alt) /
@@ -125,7 +132,7 @@ pop_counts_df <- group_map(.x, .f=~.gt_pop_counts(.x))
 hierfstat::basic.stats(test_hier)->foo
 
 ########################################################
-data<-test_hier
+data<-test_sub_hier
 diploid = TRUE
 dum.pop<-FALSE
 if (length(table(data[, 1])) < 2){
@@ -147,7 +154,7 @@ if (diploid) {
   sHo <- NA
   mHo <- NA
 }
-sp2 <- lapply(p, fun <- function(x) apply(x, 2, fun2 <- function(x) sum(x^2)))
+sp2 <- lapply(p, fun <- function(x) apply(x, 2, fun2 <- function(x) sum(x^2))) # cols sums of squares
 sp2 <- matrix(unlist(sp2), nrow = dim(data[, -1])[2], byrow = TRUE)
 if (diploid) {
   Hs <- (1 - sp2 - sHo/2/n)
@@ -169,8 +176,7 @@ if (diploid) {
   mHs <- mn/(mn - 1) * (1 - msp2 - mHo/2/mn)
   Ht <- 1 - mp2 + mHs/mn/np - mHo/2/mn/np
   mFis = 1 - mHo/mHs
-}
-else {
+} else {
   mHs <- mn/(mn - 1) * (1 - msp2)
   Ht <- 1 - mp2 + mHs/mn/np
   mFis <- NA
@@ -213,3 +219,45 @@ all.res <- list(n.ind.samp = n, pop.freq = lapply(p, round,
                 overall = round(overall, digits))
 class(all.res) <- "basic.stats"
 all.res
+
+
+
+## steps
+# create a hierfstat object with just two populations
+test_sub_gt <- test_gt %>% filter(population%in%c("pop1","pop2"))
+# contrast our estimates with Jerome's estimates, making sure that we use all the appropriate corrections as implemented in hierfstat
+test_sub_hier <- test_sub_gt %>% gt_as_hierfstat()
+# rename the dataset to the internal name in the functions to follow the estimates
+data <- test_sub_hier
+.x <- test_sub_gt %>% group_by(population)
+
+n <- do.call(cbind, lapply(pop_counts_df, function(X) X[["n"]]))
+sHo <- do.call(cbind, lapply(pop_counts_df, function(X) X[["het_obs"]]))
+# sum of squared frequencies
+sp2 <- lapply(pop_counts_df, fun <- function(x) ((x$freq_alt)^2+(x$freq_ref)^2))
+sp2 <- matrix(unlist(sp2, use.names = FALSE), ncol=2, byrow = FALSE)
+
+# square of mean frequency
+mp <- lapply(p, fun <- function(x) apply(x, 1, mean, na.rm = TRUE))
+sp2 <- lapply(pop_counts_df, fun <- function(x) ((x$freq_alt)+(x$freq_ref))/2)
+
+mp2 <- unlist(lapply(mp, fun1 <- function(x) sum(x^2)))
+
+Hs <- (1 - sp2 - sHo/2/n)
+Hs <- n/(n - 1) * Hs
+
+np <- apply(n, 1, fun <- function(x) sum(!is.na(x)))
+mn <- apply(n, 1, fun <- function(x) {
+  np <- sum(!is.na(x))
+  np/sum(1/x[!is.na(x)])
+})
+msp2 <- apply(sp2, 1, mean, na.rm = TRUE)
+mp <- lapply(p, fun <- function(x) apply(x, 1, mean, na.rm = TRUE))
+mp2 <- unlist(lapply(mp, fun1 <- function(x) sum(x^2)))
+mHs <- mn/(mn - 1) * (1 - msp2 - mHo/2/mn)
+Ht <- 1 - mp2 + mHs/mn/np - mHo/2/mn/np
+
+Dst <- Ht - mHs
+Dstp <- np/(np - 1) * Dst
+Htp = mHs + Dstp
+Fst = Dst/Ht
