@@ -48,17 +48,19 @@ X = rbind(offspring.geno(n.families = 2, n.snps = p, fs = fs, n.shared.parents =
 X = X[,apply(X,2,var) > 0] #remove possible monomorphic variants
 
 # sprinkle some missing data
-na_n <- 100
+na_n <- 450
 na_rows<- sample(dim(X)[1],na_n, replace = TRUE)
 na_cols <- sample(dim(X)[2],na_n, replace = TRUE)
 for (i in 1:na_n){
   X[na_rows[i], na_cols[i]] <- NA
 }
 
-
 # transpose it
 X = t(X)
 fake_bim <- genio::make_bim(n=nrow(X))
 fake_fam <- genio::make_fam(n=ncol(X))
 # this should be saved directly into inst, I think...
-genio::write_plink("./data-raw/datasets/families", X,bim=fake_bim, fam=fake_fam)
+#genio::write_plink("./data-raw/datasets/families", X,bim=fake_bim, fam=fake_fam)
+genio::write_plink("./inst/extdata/related/families", X,bim=fake_bim, fam=fake_fam)
+
+

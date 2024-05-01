@@ -1,0 +1,15 @@
+PLINK v1.90b7.2 64-bit (11 Dec 2023)
+Options in effect:
+  --bfile families
+  --distance flat-missing square ibs
+  --out test_plinkIBS
+
+Hostname: LAPTOP-S7R1KB1T
+Working directory: C:\Users\eviec\Git\tidypopgen
+Start time: Wed May 01 07:51:23 2024
+
+Random number seed: 1714546283
+8080 MB RAM detected; reserving 4040 MB for main workspace.
+Error: Failed to open families.bed.
+
+End time: Wed May 01 07:51:23 2024
