@@ -4,7 +4,7 @@
 \alias{pairwise_pop_fst}
 \title{Compute pairwise population Fst}
 \usage{
-pairwise_pop_fst(.x, by_locus = FALSE, method = "Hudson")
+pairwise_pop_fst(.x, by_locus = FALSE, method = c("Hudson", "Nei87"))
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
@@ -13,17 +13,32 @@ pairwise_pop_fst(.x, by_locus = FALSE, method = "Hudson")
 or as a single genome wide value obtained by taking the ratio of the mean numerator
 and denominator (FALSE, the default).}
 
-\item{method}{currently only "Hudson" is implemented}
+\item{method}{one of 'Hudson', 'Nei86', 'Nei87', and 'WC84'}
 }
 \value{
-a tibble with each pairwise combination as a row (if \code{tidy=TRUE}), else
+a tibble of genome-wide pairwise Fst values with each pairwise combination
+as a row if "by_locus=FALSE", else
+a list including the tibble of genome-wide values as well as a matrix with pairwise
+Fst by locus with loci as rows and and pairwise
+combinations as columns.
 a matrix
 }
 \description{
-This function computes pairwise Fst, currently using the formulation by
-Hudson (following the recommendations by Bhatia et al (2013)).
+This function computes pairwise Fst. The following methods are implemented:
+\itemize{
+\item 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013) for diploids.
+\item 'Nei86' : Gst according to Nei (1986), as derived in Bhatia et al (2013) for diploids.
+\item 'Nei87': Fst according to Nei (1987) - this is equivalent to \code{hierfstat::pairwise.neifst()}
+\item 'WC84' : Weir adn Cockerham (1984), as derived in Bhatia et al (2013) for diploids.
+}
+}
+\details{
+For all formulae, the genome wide estimate is obtained by taking the ratio of the mean
+numerators and denominators over all relevant SNPs.
 }
 \references{
 Bhatia G, Patterson N, Sankararaman S, Price AL. Estimating and Interpreting
 FST: The Impact of Rare Variants. Genome Research. 2013;23(9):1514–1521.
+
+Nei, M. (1987) Molecular Evolutionary Genetics. Columbia University Press
 }

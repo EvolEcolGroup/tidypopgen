@@ -19,9 +19,13 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 
 test_that("pop_fst and pop_fist compute correctly",{
   test_gt <- test_gt %>% dplyr::group_by(population)
+  test_hier <- gt_as_hierfstat(test_gt)
+  # compare results against hierfstat for Nei
+  nei_gt <- test_gt %>% pairwise_pop_fst(method="Nei")
+  nei_hier <- hierfstat::pairwise.neifst(test_hier)
+  # hiefstat values are rounded to 4 dp
+  expect_true(all.equal(tidy_dist_matrix(nei_hier)$value, round(nei_gt$value,4)))
 
-  # compare results against raw hierfstat code
-  pair_fst <- test_gt %>% pairwise_pop_fst()
-  pair_fst_locus <- test_gt %>% pairwise_pop_fst(by_locus = TRUE)
+  #pair_fst_locus <- test_gt %>% pairwise_pop_fst(by_locus = TRUE)
 
 })
