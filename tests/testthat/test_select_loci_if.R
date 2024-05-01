@@ -27,6 +27,10 @@ test_that("select_loci_if subsets correctly",{
   criterion <- c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE)
   expect_identical(test_gen_sub,
                    test_gt %>% select_loci_if(criterion))
+  # treat NA as if it was FALSE
+  criterion_na <- c(TRUE, TRUE, NA, TRUE, TRUE, FALSE)
+  expect_identical(test_gen_sub,
+                   test_gt %>% select_loci_if(criterion_na))
   #TODO test errors
 
 })

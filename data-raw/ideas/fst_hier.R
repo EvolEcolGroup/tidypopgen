@@ -18,10 +18,10 @@ test_loci <- data.frame(name=paste0("rs",1:6),
 
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 test_gt <- test_gt %>% group_by(population)
-test_gt_sub <- test_gt %>% filter(population%in%c("pop1","pop2"))
+test_sub_gt <- test_gt %>% filter(population%in%c("pop1","pop2"))
 
 # convert to hierfstat
-test_hier <- gt_as_hierfstat(test_gt)
+test_hier <- gt_as_hierfstat(test_sub_gt)
 
 #hier_basic <- hierfstat::basic.stats(test_hier)
 # note that Fstp, FIS and Dest are not simply averages
