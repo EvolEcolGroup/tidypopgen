@@ -17,15 +17,15 @@ test_that("select_loci subsets correctly",{
 
   # select snps with an rs
   test_gt_sub <- test_gt %>% select_loci (starts_with("rs"))
-  expect_true(!any(c("x1","x2") %in% show_loci_names(test_gt_sub)))
+  expect_true(!any(c("x1","x2") %in% loci_names(test_gt_sub)))
   # subsetting by id with reordering
   test_gt_sub <- test_gt %>% select_loci (c(3,1,5))
-  expect_identical(c("rs3","rs1","x1"), show_loci_names(test_gt_sub))
+  expect_identical(c("rs3","rs1","x1"), loci_names(test_gt_sub))
   # get everything
   test_gt_sub <- test_gt %>% select_loci (everything())
   expect_identical(test_gt, test_gt_sub)
   # use 2:4 range expressions
   test_gt_sub <- test_gt %>% select_loci (2:4)
-  expect_identical(test_loci$name[2:4], show_loci_names(test_gt_sub))
+  expect_identical(test_loci$name[2:4], loci_names(test_gt_sub))
 
 })

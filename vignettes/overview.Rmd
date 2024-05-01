@@ -184,7 +184,7 @@ genotypes but is blind to the names of loci.
 
 Let us start by looking at the loci names in our simple dataset:
 ```{r}
-show_loci_names(example_gt)
+loci_names(example_gt)
 ```
 
 We can see that there are two categories of loci, one starting with "rs" and
@@ -197,7 +197,7 @@ example_sub
 This gives us a `gen_tibble` with only 4 loci, as expected. We can confirm that
 we have the correct loci with:
 ```{r}
-show_loci_names(example_sub)
+loci_names(example_sub)
 ```
 
 Let us check that this has indeed impacted the individual heterozygosity
@@ -253,7 +253,7 @@ greater than 0.2 that are also on chromosome 2.
 
 We can use a similar approach to select only alleles on a given chromosome:
 ```{r}
-example_gt %>% select_loci_if(show_loci(genotypes)$chromosome==2 &
+example_gt %>% select_loci_if(loci_chromosomes(genotypes)==2 &
                              loci_maf(genotypes)>0.2) %>% show_loci()
 ```
 

@@ -38,7 +38,7 @@ pairwise_pop_fst_wc <- function(.x, by_locus=FALSE){
   names(group_combinations) <- c(paste0(dplyr::group_vars(.x),"_1"),paste0(dplyr::group_vars(.x),"_2"))
   Fst_tot <- tibble::tibble(group_combinations,value=Fst_tot)
   if (by_locus){
-    rownames(Fst_locus)<-show_loci_names(.x)
+    rownames(Fst_locus)<-loci_names(.x)
     colnames(Fst_locus)<- apply(group_combinations,1,function(x)paste(x,collapse = "."))
   }
   if (by_locus){
@@ -81,7 +81,7 @@ pairwise_pop_fst_nei86 <- function(.x, by_locus=FALSE){
   names(group_combinations) <- c(paste0(dplyr::group_vars(.x),"_1"),paste0(dplyr::group_vars(.x),"_2"))
   Fst_tot <- tibble::tibble(group_combinations,value=Fst_tot)
   if (by_locus){
-    rownames(Fst_locus)<-show_loci_names(.x)
+    rownames(Fst_locus)<-loci_names(.x)
     colnames(Fst_locus)<- apply(group_combinations,1,function(x)paste(x,collapse = "."))
   }
   if (by_locus){

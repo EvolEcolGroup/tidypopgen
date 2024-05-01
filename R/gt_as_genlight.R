@@ -17,6 +17,6 @@ gt_as_genlight <- function(x){
                        ploidy=2, # TODO update this when ploidy is implemented
                                      ind.names = x$id,
                                      pop = x$population,
-                                     loc.names = show_loci_names(x))
+                                     loc.names = loci_names(x))
 }
 

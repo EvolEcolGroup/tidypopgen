@@ -10,7 +10,7 @@
 #' but will tax memory.
 #' @export
 gt_king <- function(x, as_matrix = FALSE,
-                      block_size = bigstatsr::block_size(length(show_loci_names(x)))) {
+                      block_size = bigstatsr::block_size(length(loci_names(x)))) {
 
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index

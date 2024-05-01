@@ -7,7 +7,7 @@
 gt_king(
   x,
   as_matrix = FALSE,
-  block_size = bigstatsr::block_size(length(show_loci_names(x)))
+  block_size = bigstatsr::block_size(length(loci_names(x)))
 )
 }
 \arguments{

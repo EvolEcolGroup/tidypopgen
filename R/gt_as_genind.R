@@ -21,6 +21,6 @@ gt_as_genind <- function(x){
                                      ind.names = x$id,
                                      pop = x$population,
                                      ncode=1,
-                                     loc.names = show_loci_names(x))
+                                     loc.names = loci_names(x))
 }
 

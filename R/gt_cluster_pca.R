@@ -149,7 +149,7 @@ gt_cluster_pca <- function(x = NULL, n_pca = NULL,
 #' 'WSS' (with sum of squares)
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
-#' @rdname autoplot_gt_pca
+#' @rdname autoplot_gt_cluster_pca
 #' @export
 
 autoplot.gt_cluster_pca <- function(object,

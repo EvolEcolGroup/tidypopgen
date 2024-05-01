@@ -9,7 +9,7 @@
 #' @export
 loci_qc_report <- function (.x, ...){
   rlang::check_dots_empty()
-  qc_report <- .x %>% reframe(snp_id = show_loci_names(.x),maf=loci_maf(.data$genotypes),
+  qc_report <- .x %>% reframe(snp_id = loci_names(.x),maf=loci_maf(.data$genotypes),
                               missingness = loci_missingness(.data$genotypes),
                     hwe_p = loci_hwe(.data$genotypes))
  class(qc_report) <- c("loci_qc_report",class(qc_report))
@@ -18,7 +18,9 @@ loci_qc_report <- function (.x, ...){
 
 
 #' @export
-autoplot.loci_qc_report <- function(object, type = c("overview","all","missing","missing low maf","missing high maf","maf","hwe","significant hwe"), maf_threshold = NULL, miss_threshold = NULL, p_val = NULL,...) {
+autoplot.loci_qc_report <- function(object,
+                                    type = c("overview","all","missing","missing low maf","missing high maf","maf","hwe","significant hwe"),
+                                    maf_threshold = NULL, miss_threshold = NULL, p_val = NULL,...) {
 
   type <- match.arg(type)
 

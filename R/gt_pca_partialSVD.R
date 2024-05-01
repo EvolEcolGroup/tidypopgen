@@ -51,7 +51,7 @@ gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
                                     block.size= bigstatsr::block_size(nrow(X$genotypes))) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
-  rownames(this_svd$v) <- show_loci_names(x)
+  rownames(this_svd$v) <- loci_names(x)
   this_svd$method <- "partialSVD"
   this_svd$call <- match.call()
   class(this_svd) <- c("gt_pca", class(this_svd))

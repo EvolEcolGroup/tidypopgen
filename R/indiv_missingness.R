@@ -45,7 +45,7 @@ indiv_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
                       ind=attr(.x,"loci")$big_index,
                        a.combine = 'plus', rows_to_keep=rows_to_keep)
   if (!as_counts){
-    this_row_na <- this_row_na/length(show_loci_names(.x))
+    this_row_na <- this_row_na/length(loci_names(.x))
   }
   this_row_na
 }

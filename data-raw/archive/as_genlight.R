@@ -16,7 +16,7 @@ as_genlight <- function(x, ...) {
   if ("population" %in% names(x)){
     new_gl@pop <- as.factor(x$population)
   }
-  new_gl@loc.names<-show_loci_names(x)
+  new_gl@loc.names<-loci_names(x)
   new_gl@loc.all <- paste0(show_loci(x)$allele_ref,"/",show_loci(x)$allele_alt) # TODO is this the right order?!?
   new_gl@chromosome <- as.factor(show_loci(x)$chromosome)
   new_gl@position <- as.integer(show_loci(x)$position)

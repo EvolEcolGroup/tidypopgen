@@ -91,7 +91,7 @@ pairwise_pop_fst <- function(.x, by_locus=FALSE){
     }
     fst_vals <- matrix(unlist(lapply(seq_len(nrow(numerator)),fst_by_row, numerator, denominator),
                          use.names = FALSE), ncol = n_loci, byrow = TRUE)
-    colnames(fst_vals) <- show_loci_names(.x)
+    colnames(fst_vals) <- loci_names(.x)
     return(fst %>% cbind(fst_vals))
   }
 }

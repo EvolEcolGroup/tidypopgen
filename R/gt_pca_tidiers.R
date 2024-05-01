@@ -174,7 +174,7 @@ augment_loci.gt_pca <- function(x, data = NULL, k= NULL, ...) {
   ret <- if (!missing(data) && !is.null(data)) {
     #check that names of the two columns are in sync
 # @TODO reinstate this check once we have rownames in the pca object for loadings
-   if (!all.equal(show_loci_names(data), rownames(as.data.frame(x$v)))){
+   if (!all.equal(loci_names(data), rownames(as.data.frame(x$v)))){
      stop("the loci names in 'data' do not correspond to the loci in the pca object 'x'")
    }
     show_loci(data) <- show_loci(data) %>% tibble::add_column(loadings)
