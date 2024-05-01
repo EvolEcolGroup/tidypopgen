@@ -4,7 +4,7 @@
 #' - 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013) for diploids.
 #' - 'Nei86' : Gst according to Nei (1986), as derived in Bhatia et al (2013) for diploids.
 #' - 'Nei87': Fst according to Nei (1987) - this is equivalent to `hierfstat::pairwise.neifst()`
-#' - 'WC84' : Weir adn Cockerham (1984), as derived in Bhatia et al (2013) for diploids.
+#' - 'WC84' : Weir and Cockerham (1984), as derived in Bhatia et al (2013) for diploids.
 #'
 #' For all formulae, the genome wide estimate is obtained by taking the ratio of the mean
 #' numerators and denominators over all relevant SNPs.
@@ -31,7 +31,7 @@
 # #' returns a matrix. THIS IS NOT IMPLEMENT YET.
 
 
-pairwise_pop_fst <- function(.x, by_locus=FALSE, method= c("Hudson","Nei87")){
+pairwise_pop_fst <- function(.x, by_locus=FALSE, method= c("Hudson","Nei87","Nei86","WC84")){
   if (!inherits(.x,"grouped_df")){
     stop (".x should be a grouped df")
   }
@@ -40,6 +40,10 @@ pairwise_pop_fst <- function(.x, by_locus=FALSE, method= c("Hudson","Nei87")){
     pairwise_pop_fst_hudson(.x=.x, by_locus=by_locus)
   } else if (method=="Nei87"){
     pairwise_pop_fst_nei87(.x=.x, by_locus=by_locus)
+  } else if (method=="Nei86"){
+    pairwise_pop_fst_nei86(.x=.x, by_locus=by_locus)
+  } else if (method=="WC84"){
+    pairwise_pop_fst_wc84(.x=.x, by_locus=by_locus)
   }
 }
 
@@ -153,7 +157,7 @@ pairwise_pop_fst_nei87 <- function(.x, by_locus = FALSE){
 
 
 # based on the formula in Bhatia 2013
-pairwise_pop_fst_wc <- function(.x, by_locus=FALSE){
+pairwise_pop_fst_wc84 <- function(.x, by_locus=FALSE){
 
   message("this function is not properly tested yet!!!")
   message("if you have time, test the results against something like hierfstat and create a unit test")

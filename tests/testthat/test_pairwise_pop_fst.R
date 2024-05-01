@@ -21,7 +21,7 @@ test_that("pop_fst and pop_fist compute correctly",{
   test_gt <- test_gt %>% dplyr::group_by(population)
   test_hier <- gt_as_hierfstat(test_gt)
   # compare results against hierfstat for Nei
-  nei_gt <- test_gt %>% pairwise_pop_fst(method="Nei")
+  nei_gt <- test_gt %>% pairwise_pop_fst(method="Nei87")
   nei_hier <- hierfstat::pairwise.neifst(test_hier)
   # hiefstat values are rounded to 4 dp
   expect_true(all.equal(tidy_dist_matrix(nei_hier)$value, round(nei_gt$value,4)))

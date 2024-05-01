@@ -4,7 +4,11 @@
 \alias{pairwise_pop_fst}
 \title{Compute pairwise population Fst}
 \usage{
-pairwise_pop_fst(.x, by_locus = FALSE, method = c("Hudson", "Nei87"))
+pairwise_pop_fst(
+  .x,
+  by_locus = FALSE,
+  method = c("Hudson", "Nei87", "Nei86", "WC84")
+)
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
@@ -29,7 +33,7 @@ This function computes pairwise Fst. The following methods are implemented:
 \item 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013) for diploids.
 \item 'Nei86' : Gst according to Nei (1986), as derived in Bhatia et al (2013) for diploids.
 \item 'Nei87': Fst according to Nei (1987) - this is equivalent to \code{hierfstat::pairwise.neifst()}
-\item 'WC84' : Weir adn Cockerham (1984), as derived in Bhatia et al (2013) for diploids.
+\item 'WC84' : Weir and Cockerham (1984), as derived in Bhatia et al (2013) for diploids.
 }
 }
 \details{
