@@ -32,6 +32,22 @@ qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
 }
 
 
+#' Autoplots for `qc_report_indiv` objects
+#'
+#' For `qc_report_indiv`, the following types of plots are available:
+#' - `scatter`: a plot of missingness and observed heterozygosity within
+#' individuals.
+#'
+#' `autoplot` produces simple plots to quickly inspect an object. They are
+#' not customisable; we recommend that you use `ggplot2` to produce publication
+#' ready plots.
+#'
+#' @param object an object of class `qc_report_indiv`
+#' @param type the type of plot (`scatter`)
+#' @param miss_threshold a threshold for the accepted rate of missingness within
+#' individuals
+#' @param ... not currently used.
+#' @returns a `ggplot2` object
 #' @export
 autoplot.qc_report_indiv <- function(object, type = c("scatter"),miss_threshold = NULL, ...){
 

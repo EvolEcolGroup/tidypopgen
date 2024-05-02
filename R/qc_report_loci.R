@@ -16,7 +16,37 @@ qc_report_loci <- function (.x, ...){
  qc_report
 }
 
-
+#' Autoplots for `qc_report_loci` objects
+#'
+#' For `qc_report_loci`, the following types of plots are available:
+#' - `overview`: an UpSet plot, giving counts of snps over the threshold for
+#' missingness, minor allele frequency, and Hardy-Weinberg equilibrium P-value,
+#' and visualising the interaction between these
+#' - `all`: a four panel plot, containing `missing high maf`, `missing low maf`,
+#' `hwe`, and `significant hwe` plots
+#' - `missing`: a histogram of proportion of missing data
+#' - `missing low maf`: a histogram of the proportion of missing data for
+#' snps with low minor allele freqency
+#' - `missing high maf`:a histogram of the proportion of missing data for
+#' snps with high minor allele freqency
+#' - `maf`: a histogram of minor allele frequency
+#' - `hwe`: a histogram of HWE exact test p-values
+#' - `significant hwe`: a histogram of significant HWE exact test p-values
+#'
+#' `autoplot` produces simple plots to quickly inspect an object. They are
+#' not customisable; we recommend that you use `ggplot2` to produce publication
+#' ready plots.
+#'
+#' @param object an object of class `qc_report_loci`
+#' @param type the type of plot (one of `overview`, `all`, `missing`,
+#' `missing low maf`, `missing high maf`, `maf`, `hwe`, and `significant hwe`)
+#' @param maf_threshold a threshold for the accepted rate of minor allele
+#' frequency of loci
+#' @param miss_threshold a threshold for the accepted rate of missingness per
+#' loci
+#' @param hwe_p a threshold of significance for Hardy-Weinberg exact p-values
+#' @param ... not currently used.
+#' @returns a `ggplot2` object
 #' @export
 autoplot.qc_report_loci <- function(object,
                                     type = c("overview","all","missing","missing low maf","missing high maf","maf","hwe","significant hwe"),
@@ -68,9 +98,6 @@ autoplot.qc_report_loci <- function(object,
 
   return(final_plot)
 }
-
-
-
 
 
 autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold, miss_threshold = miss_threshold, hwe_p = hwe_p, logp = logp,...){
