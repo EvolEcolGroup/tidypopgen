@@ -4,12 +4,12 @@
 \alias{qc_report_indiv}
 \title{Create a Quality Control report for individuals}
 \usage{
-qc_report_indiv(.x, cutoff = NULL, ...)
+qc_report_indiv(.x, kings_threshold = NULL, ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object.}
 
-\item{cutoff}{an optional numeric, a threshold of relatedness for the sample}
+\item{kings_threshold}{an optional numeric, a threshold of relatedness for the sample}
 
 \item{...}{further arguments to pass}
 }

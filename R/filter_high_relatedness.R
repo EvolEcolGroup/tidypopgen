@@ -8,7 +8,7 @@
 #'
 #' @param matrix a square symmetric matrix of individuals containing relationship coefficients
 #' @param .x a [`gen_tibble`] object
-#' @param cutoff a threshold over which
+#' @param kings_threshold a threshold over which
 #' @param verbose boolean whether to report to screen
 #' @return a list where '1' is individual ID's to retain, '2'
 #' is individual ID's to remove, and '3' is a boolean where individuals to keep
@@ -17,7 +17,7 @@
 #' @export
 #'
 filter_high_relatedness <-
-  function(matrix, .x = NULL, cutoff = NULL, verbose = FALSE) {
+  function(matrix, .x = NULL, kings_threshold = NULL, verbose = FALSE) {
 
     var_num <- dim(matrix)[1]
 
@@ -57,9 +57,9 @@ filter_high_relatedness <-
     diag(matrix2) <- NA
 
     for (i in 1:(var_num - 1)) {
-      if (!any(matrix2[!is.na(matrix2)] > cutoff)) {
+      if (!any(matrix2[!is.na(matrix2)] > kings_threshold)) {
         if (verbose) {
-          message("All correlations <=", cutoff, "\n")
+          message("All correlations <=", kings_threshold, "\n")
         }
         break()
       }
@@ -68,7 +68,7 @@ filter_high_relatedness <-
       }
       for (j in (i + 1):var_num) {
         if (!col_to_delete[i] & !col_to_delete[j]) {
-          if (matrix[i, j] > cutoff) {
+          if (matrix[i, j] > kings_threshold) {
             mn1 <- mean(matrix2[i, ], na.rm = TRUE)
             mn2 <- mean(matrix2[-j, ], na.rm = TRUE)
             if (verbose) {

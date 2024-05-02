@@ -20,7 +20,7 @@ qc_report_loci <- function (.x, ...){
 #' @export
 autoplot.qc_report_loci <- function(object,
                                     type = c("overview","all","missing","missing low maf","missing high maf","maf","hwe","significant hwe"),
-                                    maf_threshold = NULL, miss_threshold = NULL, p_val = NULL,...) {
+                                    maf_threshold = NULL, miss_threshold = NULL, hwe_p = NULL,...) {
 
   type <- match.arg(type)
 
@@ -38,18 +38,18 @@ autoplot.qc_report_loci <- function(object,
     miss_threshold
   }
 
-  p_val <- if(is.null(p_val)){
+  hwe_p <- if(is.null(hwe_p)){
     0.01
   } else {
-    p_val
+    hwe_p
   }
 
-  logp <- -log10(p_val)
+  logp <- -log10(hwe_p)
 
   if (type == "overview") {
     final_plot <- autoplot_l_qc_overview(object, maf_threshold, miss_threshold)
   } else if (type == "all") {
-    final_plot <- autoplot_l_qc_all(object, maf_threshold, miss_threshold, p_val,logp)
+    final_plot <- autoplot_l_qc_all(object, maf_threshold, miss_threshold, hwe_p,logp)
   } else if (type == "missing") {
     final_plot <- autoplot_l_qc_missing(object, miss_threshold)
   } else if (type == "missing low maf") {
@@ -61,7 +61,7 @@ autoplot.qc_report_loci <- function(object,
   } else if (type == "hwe") {
     final_plot <- autoplot_l_qc_hwe(object,logp)
   } else if (type == "significant hwe") {
-    final_plot <- autoplot_l_qc_sig_hwe(object,p_val,logp)
+    final_plot <- autoplot_l_qc_sig_hwe(object,hwe_p,logp)
   } else {
     stop("Invalid type argument. Please choose from 'overview','all','maf','hwe','significant hwe'")
   }
@@ -73,7 +73,7 @@ autoplot.qc_report_loci <- function(object,
 
 
 
-autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold, miss_threshold = miss_threshold, p_val = p_val, logp = logp,...){
+autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold, miss_threshold = miss_threshold, hwe_p = hwe_p, logp = logp,...){
 
   qc_report <- object
 
@@ -97,10 +97,10 @@ autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold, miss_thresh
 
   #Hardy weinberg exact test p-val distribution
   qc_report$hwe_p_log <- -log10(qc_report$hwe_p)
-  qc_lowhwe <- subset(qc_report,qc_report$hwe_p < p_val)
+  qc_lowhwe <- subset(qc_report,qc_report$hwe_p < hwe_p)
 
   hwe_all <- ggplot2::ggplot(qc_report,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]*" of HWE exact p-value"),y="Number of SNPs", title = "Hardy-Weinberg exact test")+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
-  hwe_low <- ggplot2::ggplot(qc_lowhwe,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]* " of HWE exact p-value"),y="Number of SNPs", title = paste("HWE exact p-value <", p_val))+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
+  hwe_low <- ggplot2::ggplot(qc_lowhwe,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]* " of HWE exact p-value"),y="Number of SNPs", title = paste("HWE exact p-value <", hwe_p))+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
 
   hwes <- patchwork::wrap_plots(hwe_all,hwe_low)
 
@@ -149,15 +149,15 @@ autoplot_l_qc_hwe <- function(object,logp,...){
 
 }
 
-autoplot_l_qc_sig_hwe <- function(object,p_val=p_val,logp,...){
+autoplot_l_qc_sig_hwe <- function(object,hwe_p=hwe_p,logp,...){
 
   qc_report <- object
 
   #Hardy weinberg exact test p-val distribution
   qc_report$hwe_p_log <- -log10(qc_report$hwe_p)
-  qc_lowhwe <- subset(qc_report,qc_report$hwe_p < p_val)
+  qc_lowhwe <- subset(qc_report,qc_report$hwe_p < hwe_p)
 
-  hwe_low <- ggplot2::ggplot(qc_lowhwe,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]* " of HWE exact p-value"),y="Number of SNPs", title = paste("HWE exact p-value <", p_val))+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
+  hwe_low <- ggplot2::ggplot(qc_lowhwe,ggplot2::aes(x=.data$hwe_p_log))+ggplot2::geom_histogram(binwidth = 0.5,fill="#66C2A5")+ ggplot2::labs(x=expression("-log"[10]* " of HWE exact p-value"),y="Number of SNPs", title = paste("HWE exact p-value <", hwe_p))+ ggplot2::geom_vline(xintercept= logp, lty=2, col="red")
 }
 
 autoplot_l_qc_missing <- function(object, miss_threshold = miss_threshold, ...){

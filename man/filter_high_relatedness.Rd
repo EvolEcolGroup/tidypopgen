@@ -4,14 +4,19 @@
 \alias{filter_high_relatedness}
 \title{Filter individuals based on a relationship threshold}
 \usage{
-filter_high_relatedness(matrix, .x = NULL, cutoff = NULL, verbose = FALSE)
+filter_high_relatedness(
+  matrix,
+  .x = NULL,
+  kings_threshold = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{matrix}{a square symmetric matrix of individuals containing relationship coefficients}
 
 \item{.x}{a \code{\link{gen_tibble}} object}
 
-\item{cutoff}{a threshold over which}
+\item{kings_threshold}{a threshold over which}
 
 \item{verbose}{boolean whether to report to screen}
 }

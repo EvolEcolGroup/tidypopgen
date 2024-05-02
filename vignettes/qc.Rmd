@@ -40,13 +40,13 @@ autoplot(loci_report, type = "overview")
 The overview plot shows how many SNPs in the data set are affected by high missingness, with some also affected by low minor allele frequency and Hardy-Weinberg disequilibrium. The thresholds for each parameter, (level of missingness that is accepted etc) can be adjusted using the parameters provided in autoplot. For example:
 
 ```{r}
-autoplot(loci_report, type = "overview", miss_threshold = 0.03, maf_threshold = 0.02, p_val = 0.01)
+autoplot(loci_report, type = "overview", miss_threshold = 0.03, maf_threshold = 0.02, hwe_p = 0.01)
 ```
 
 To examine each QC measure in further detail, we can plot a different summary panel.
 
 ```{r}
-autoplot(loci_report, type = "all", miss_threshold = 0.03, maf_threshold = 0.02, p_val = 0.01)
+autoplot(loci_report, type = "all", miss_threshold = 0.03, maf_threshold = 0.02, hwe_p = 0.01)
 ```
 
 We can then begin to consider how to quality control this raw data set. Let's start by filtering SNPs according to their minor allele frequency. We can visualise the MAF distribution using:
@@ -68,7 +68,7 @@ Following this, we can remove SNPs with a high rate of missingness. Lets say we 
 autoplot(loci_report, type = "missing",miss_threshold = 0.05)
 ```
 
-We can see here that most SNPs have low missingness, under our 5% threshold, some do, however, have missingness over our cutoff. To remove these SNPs, we can again use `select_loci_if`.
+We can see here that most SNPs have low missingness, under our 5% threshold, some do, however, have missingness over our kings_threshold. To remove these SNPs, we can again use `select_loci_if`.
 
 ```{r}
 data <- data %>% select_loci_if(loci_missingness(genotypes)<0.05)
@@ -78,7 +78,7 @@ count_loci(data)
 Finally, if we may want to remove SNPs that show significant deviation from Hardy-Weinberg equilibrium, if our study design requires. To visualise SNPs with significant p-values in the Hardy-Weinberg exact test, we can again call autoplot:
 
 ```{r}
-autoplot(loci_report,type = "significant hwe", p_val = 0.01)
+autoplot(loci_report,type = "significant hwe", hwe_p = 0.01)
 ```
 
 Few SNPs in our data have significant HWE p-values, however there may be circumstances where we would want to cut out the most extreme cases, if these data were real, these cases could indicate genotyping errors.
@@ -127,10 +127,10 @@ data <- data %>% filter(indiv_het_obs(genotypes) < upper)
 nrow(data)
 ```
 
-Next, we can look at relatedness within our sample. If the parameter `cutoff` is provided to qc_report_indiv, then the report also calculates KING coefficient of relatedness of the sample. This threshold is used to create an output of the largest possible group with no related individuals, and the third boolean column `to_keep` recommends which individuals to remove to achieve this set.
+Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to qc_report_indiv, then the report also calculates KING coefficient of relatedness of the sample. This threshold is used to create an output of the largest possible group with no related individuals, and the third boolean column `to_keep` recommends which individuals to remove to achieve this set.
 
 ```{r}
-individual_report <- qc_report_indiv(data, cutoff = 0.177)
+individual_report <- qc_report_indiv(data, kings_threshold = 0.177)
 summary(individual_report)
 ```
 

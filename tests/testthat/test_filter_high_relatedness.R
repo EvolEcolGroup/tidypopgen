@@ -10,7 +10,7 @@ test_that("filter_high_relatedness removes necessary individuals",{
   king_matrix <- snp_king(families_fbm)
 
   #Find which individuals are over an arbitrary relateness threshold
-  res <- filter_high_relatedness(king_matrix, cutoff = 0.2, verbose = FALSE)
+  res <- filter_high_relatedness(king_matrix, kings_threshold = 0.2, verbose = FALSE)
 
   #individuals 11 and 12 at 0.2294
   #individuals 9 and 10 at 0.2742
@@ -19,7 +19,7 @@ test_that("filter_high_relatedness removes necessary individuals",{
   sub_matrix <- king_matrix[c(as.numeric(res[[1]])),c(as.numeric(res[[1]]))]
 
   #If we rerun, all individuals should be retained (all TRUE in res2 output [[3]])
-  res2 <- filter_high_relatedness(sub_matrix, cutoff = 0.2, verbose = FALSE)
+  res2 <- filter_high_relatedness(sub_matrix, kings_threshold = 0.2, verbose = FALSE)
   expect_true(all(res2[[3]]))
 
 })

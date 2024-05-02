@@ -3,23 +3,23 @@
 #'#' Return QC information to assess loci (Observed heterozygosity and missingness).
 #'
 #' @param .x a [`gen_tibble`] object.
-#' @param cutoff an optional numeric, a threshold of relatedness for the sample
+#' @param kings_threshold an optional numeric, a threshold of relatedness for the sample
 #' @param ... further arguments to pass
 #' @returns a tibble with 2 elements: het_obs and missingness
 #' @export
 
 
-qc_report_indiv <- function(.x, cutoff = NULL, ...){
+qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
   rlang::check_dots_empty()
 
-  if(is.null(cutoff)){
+  if(is.null(kings_threshold)){
     qc_report_indiv <- .x %>% reframe(het_obs = indiv_het_obs(.x),
                                       missingness = indiv_missingness(.x,as_counts=FALSE))
   } else {
 
     king <- gt_king(.x, as_matrix = TRUE)
 
-    relatives <- filter_high_relatedness(matrix = king, .x = .x, cutoff = cutoff,...)
+    relatives <- filter_high_relatedness(matrix = king, .x = .x, kings_threshold = kings_threshold,...)
 
     qc_report_indiv <- .x %>% reframe(het_obs = indiv_het_obs(.x),
                                       missingness = indiv_missingness(.x,as_counts=FALSE))
