@@ -46,3 +46,9 @@ match alleles (often needed in human datasets from different SNP chips),
 and remove ambiguous alleles (C/G and A/T) where the correct strand can not
 be guessed.
 }
+\details{
+rbind differs from merging data with plink, which swaps the order of allele1
+and allele2 according to minor allele frequency when merging datasets. rbind
+flips and/or swaps alleles according to the reference dataset, not according
+to allele frequency.
+}
