@@ -7,18 +7,18 @@
 #' the HWE test.
 #' @returns a tibble with 3 elements: maf, missingness and hwe_p
 #' @export
-loci_qc_report <- function (.x, ...){
+qc_report_loci <- function (.x, ...){
   rlang::check_dots_empty()
   qc_report <- .x %>% reframe(snp_id = loci_names(.x),maf=loci_maf(.data$genotypes),
                               missingness = loci_missingness(.data$genotypes),
                     hwe_p = loci_hwe(.data$genotypes))
- class(qc_report) <- c("loci_qc_report",class(qc_report))
+ class(qc_report) <- c("qc_report_loci",class(qc_report))
  qc_report
 }
 
 
 #' @export
-autoplot.loci_qc_report <- function(object,
+autoplot.qc_report_loci <- function(object,
                                     type = c("overview","all","missing","missing low maf","missing high maf","maf","hwe","significant hwe"),
                                     maf_threshold = NULL, miss_threshold = NULL, p_val = NULL,...) {
 

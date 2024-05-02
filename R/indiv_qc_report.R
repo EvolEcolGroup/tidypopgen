@@ -9,11 +9,11 @@
 #' @export
 
 
-indiv_qc_report <- function(.x, cutoff = NULL, ...){
+qc_report_indiv <- function(.x, cutoff = NULL, ...){
   rlang::check_dots_empty()
 
   if(is.null(cutoff)){
-    indiv_qc_report <- .x %>% reframe(het_obs = indiv_het_obs(.x),
+    qc_report_indiv <- .x %>% reframe(het_obs = indiv_het_obs(.x),
                                       missingness = indiv_missingness(.x,as_counts=FALSE))
   } else {
 
@@ -21,19 +21,19 @@ indiv_qc_report <- function(.x, cutoff = NULL, ...){
 
     relatives <- filter_high_relatedness(matrix = king, .x = .x, cutoff = cutoff,...)
 
-    indiv_qc_report <- .x %>% reframe(het_obs = indiv_het_obs(.x),
+    qc_report_indiv <- .x %>% reframe(het_obs = indiv_het_obs(.x),
                                       missingness = indiv_missingness(.x,as_counts=FALSE))
-    indiv_qc_report$to_keep <- relatives[[3]]
-    indiv_qc_report$id <- .x$id
+    qc_report_indiv$to_keep <- relatives[[3]]
+    qc_report_indiv$id <- .x$id
   }
 
-  class(indiv_qc_report) <- c("indiv_qc_report",class(indiv_qc_report))
-  indiv_qc_report
+  class(qc_report_indiv) <- c("qc_report_indiv",class(qc_report_indiv))
+  qc_report_indiv
 }
 
 
 #' @export
-autoplot.indiv_qc_report <- function(object, type = c("scatter"),miss_threshold = NULL, ...){
+autoplot.qc_report_indiv <- function(object, type = c("scatter"),miss_threshold = NULL, ...){
 
   rlang::check_dots_empty()
 
@@ -47,7 +47,7 @@ autoplot.indiv_qc_report <- function(object, type = c("scatter"),miss_threshold 
   type <- match.arg(type)
 
   if (type == "scatter") {
-    final_plot <- autoplot_indiv_qc_report(object,miss_threshold)
+    final_plot <- autoplot_qc_report_indiv(object,miss_threshold)
   } else {
     stop("Invalid type argument. Please choose from 'scatter' or 'relatedness'")
   }
@@ -56,7 +56,7 @@ autoplot.indiv_qc_report <- function(object, type = c("scatter"),miss_threshold 
 
 }
 
-autoplot_indiv_qc_report <- function(object, miss_threshold = miss_threshold){
+autoplot_qc_report_indiv <- function(object, miss_threshold = miss_threshold){
 
   miss_threshold <- miss_threshold
 

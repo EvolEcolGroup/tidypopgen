@@ -15,7 +15,7 @@ library(ggplot2)
 
 # Quality control for SNP datasets
 
-tidypopgen has two key functions to examine the quality of data across loci and across individuals: `loci_qc_report` and `indiv_qc_report`. This vignette uses a simulated data set to illustrate these methods of data cleaning.
+tidypopgen has two key functions to examine the quality of data across loci and across individuals: `qc_report_loci` and `qc_report_indiv`. This vignette uses a simulated data set to illustrate these methods of data cleaning.
 
 # Read data into gen_tibble format
 
@@ -27,11 +27,11 @@ data <- gen_tibble(system.file("extdata/related/families.bed", package="tidypopg
 # Quality control for loci
 
 ```{r}
-loci_report <- loci_qc_report(data)
+loci_report <- qc_report_loci(data)
 summary(loci_report)
 ```
 
-The output of `loci_qc_report` supplies minor allele frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP. These data can be visualised in autoplot :
+The output of `qc_report_loci` supplies minor allele frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP. These data can be visualised in autoplot :
 
 ```{r}
 autoplot(loci_report, type = "overview")
@@ -59,7 +59,7 @@ Here we can see there are many monomorphic SNPs in the data set. Let's filter ou
 
 ```{r}
 data <- data %>% select_loci_if(loci_maf(genotypes)>0.02)
-nrow(show_loci(data))
+count_loci(data)
 ```
 
 Following this, we can remove SNPs with a high rate of missingness. Lets say we want to remove SNPs that are missing in more than 5% of individuals, equivalent to using plink --geno 0.05
@@ -68,11 +68,11 @@ Following this, we can remove SNPs with a high rate of missingness. Lets say we 
 autoplot(loci_report, type = "missing",miss_threshold = 0.05)
 ```
 
-We can see here that most SNPs have low missingness, under our 5% threshold, some do, however, have missingness up to around 10%. To remove these SNPs, we can again use `select_loci_if`.
+We can see here that most SNPs have low missingness, under our 5% threshold, some do, however, have missingness over our cutoff. To remove these SNPs, we can again use `select_loci_if`.
 
 ```{r}
 data <- data %>% select_loci_if(loci_missingness(genotypes)<0.05)
-nrow(show_loci(data))
+count_loci(data)
 ```
 
 Finally, if we may want to remove SNPs that show significant deviation from Hardy-Weinberg equilibrium, if our study design requires. To visualise SNPs with significant p-values in the Hardy-Weinberg exact test, we can again call autoplot:
@@ -85,7 +85,7 @@ Few SNPs in our data have significant HWE p-values, however there may be circums
 
 ```{r}
 data <- data %>% select_loci_if(loci_hwe(genotypes)>0.01)
-nrow(show_loci(data))
+count_loci(data)
 
 ```
 
@@ -94,11 +94,11 @@ Once we have quality controlled the SNPs in our data, we can turn to individual 
 #Quality control for individuals
 
 ```{r}
-individual_report <- indiv_qc_report(data)
+individual_report <- qc_report_indiv(data)
 summary(individual_report)
 ```
 
-The output of `loci_qc_report` supplies observed heterozygosity per individual, and rate of missingness per individual as standard.
+The output of `qc_report_loci` supplies observed heterozygosity per individual, and rate of missingness per individual as standard.
 
 These data can also be visualised using autoplot:
 
@@ -106,7 +106,7 @@ These data can also be visualised using autoplot:
 autoplot(individual_report)
 ```
 
-Here we can see that most individuals have low missingess. If we wanted to filter individuals to remove those with more than 3% of their genotypes missing, we can use `filter`.
+Here we can see that most individuals have low missingness. If we wanted to filter individuals to remove those with more than 3% of their genotypes missing, we can use `filter`.
 
 ```{r}
 data <- data %>% filter(indiv_missingness(genotypes)<0.03)
@@ -127,10 +127,10 @@ data <- data %>% filter(indiv_het_obs(genotypes) < upper)
 nrow(data)
 ```
 
-Next, we can look at relatedness within our sample. If the parameter `cutoff` is provided to indiv_qc_report, then the report also calculates KING coefficient of relatedness of the sample. This threshold is used to create an output of the largest possible group with no related individuals, and the third boolean column `to_keep` recommends which individuals to remove to achieve this set.
+Next, we can look at relatedness within our sample. If the parameter `cutoff` is provided to qc_report_indiv, then the report also calculates KING coefficient of relatedness of the sample. This threshold is used to create an output of the largest possible group with no related individuals, and the third boolean column `to_keep` recommends which individuals to remove to achieve this set.
 
 ```{r}
-individual_report <- indiv_qc_report(data, cutoff = 0.177)
+individual_report <- qc_report_indiv(data, cutoff = 0.177)
 summary(individual_report)
 ```
 
