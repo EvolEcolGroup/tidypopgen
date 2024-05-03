@@ -3,5 +3,5 @@ test_that("count_vcf_individuals with gzfile",{
                           package = "tidypopgen")
   n_individuals <- count_vcf_individuals(vcf_path)
   vcfr_obj <- vcfR::read.vcfR(vcf_path, verbose = FALSE)
-  expect_true(n_individuals == dim(vcfr_obj)[2])
+  expect_true(n_individuals == ncol(vcfR::extract.gt(vcfr_obj)))
 })

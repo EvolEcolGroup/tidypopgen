@@ -1,11 +1,9 @@
-#' Estimate individual ploidy
+#' Return individual ploidy
 #'
-#' Estimate missingnes for each individual (i.e. the frequency of
-#' missing genotypes in an individual).
+#' Returns the ploidy for each individual.
 #'
-#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
-#' a [`gen_tibble`] object),
-#' or a [`gen_tibble`].
+#' @param .x a [`gen_tibble`], or a vector of class `vctrs_bigSNP` (usually the `genotype` column of
+#' a [`gen_tibble`] object)
 #' @param ... currently unused.
 #' @returns a vector of ploidy, one per individuals in the [`gen_tibble`]
 #' @rdname indiv_ploidy
@@ -29,7 +27,7 @@ indiv_ploidy.vctrs_bigSNP <- function(.x, ...){
   if (show_ploidy(.x)!=0){
     rep(show_ploidy(.x),length(.x))
   } else {
-    gt_get_bigsnp(.x)$fam$ploidy
+    attr(.x,"bigsnp")$fam$ploidy
   }
 }
 
@@ -37,5 +35,5 @@ indiv_ploidy.vctrs_bigSNP <- function(.x, ...){
 #' @rdname indiv_ploidy
 indiv_ploidy.grouped_df <- function(.x, ...){
   .x %>% mutate(indiv_ploidy = indiv_ploidy(.data$genotypes)) %>%
-    summarise(het_obs = mean(indiv_ploidy))
+    summarise(ploidy = mean(indiv_ploidy))
 }

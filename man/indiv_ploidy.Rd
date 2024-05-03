@@ -5,7 +5,7 @@
 \alias{indiv_ploidy.tbl_df}
 \alias{indiv_ploidy.vctrs_bigSNP}
 \alias{indiv_ploidy.grouped_df}
-\title{Estimate individual ploidy}
+\title{Return individual ploidy}
 \usage{
 indiv_ploidy(.x, ...)
 
@@ -16,9 +16,8 @@ indiv_ploidy(.x, ...)
 \method{indiv_ploidy}{grouped_df}(.x, ...)
 }
 \arguments{
-\item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object),
-or a \code{\link{gen_tibble}}.}
+\item{.x}{a \code{\link{gen_tibble}}, or a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
+a \code{\link{gen_tibble}} object)}
 
 \item{...}{currently unused.}
 }
@@ -26,6 +25,5 @@ or a \code{\link{gen_tibble}}.}
 a vector of ploidy, one per individuals in the \code{\link{gen_tibble}}
 }
 \description{
-Estimate missingnes for each individual (i.e. the frequency of
-missing genotypes in an individual).
+Returns the ploidy for each individual.
 }

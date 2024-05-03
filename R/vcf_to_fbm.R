@@ -5,7 +5,7 @@
 #' TODO: this function is not yet complete.
 #'
 #' @param vcf_path the path to the vcf
-#' @param the chunk size to use on the vcf when loading the file
+#' @param chunks the chunk size to use on the vcf when loading the file
 #' @param backingfile the name of the file to use as the backing file
 #' @return path to the resulting rds file as class bigSNP.
 #' @export

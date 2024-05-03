@@ -317,7 +317,7 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
   }
   check_valid_loci(loci)
   # set up code (accounting for ploidy)
-  code256 <- rep(NA, 256)
+  code256 <- rep(NA_real_, 256)
   if (length(ploidy>1)){
     max_ploidy <- max(ploidy)
   } else {
