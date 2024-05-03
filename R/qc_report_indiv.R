@@ -96,26 +96,28 @@ autoplot_qc_report_indiv <- function(object, miss_threshold = miss_threshold){
 
 autoplot_qc_report_indiv_king <- function(object, kings_threshold = kings_threshold){
 
+  browser()
   king <- as.data.frame(attr(object$to_keep, "king"))
   num_samples <- nrow(king)
   king$row <- colnames(king)
 
   #format into 3 columns: ID1, ID2, and their relatedness coefficient
-  king <- tidyr::gather(king, column, value, -row)
+  # TODO gather is superseded, and should be rewritten with pivot_longer
+  king <- tidyr::gather(king, "column", "value", -"row")
   colnames(king) <- c("ID1","ID2","kinship")
 
   #remove duplication from the new df
   king_sorted <- king %>%
     mutate(
-      row_min = pmin(ID1, ID2),
-      row_max = pmax(ID1, ID2)
+      row_min = pmin(.data$ID1, .data$ID2),
+      row_max = pmax(.data$ID1, .data$ID2)
     ) %>%
-    dplyr::select(-ID1, -ID2) %>%
-    distinct(row_min, row_max, .keep_all = TRUE) %>%
-    rename(ID1 = row_min, ID2 = row_max)
+    dplyr::select(-dplyr::all_of(c("ID1", "ID2"))) %>%
+    distinct(.data$row_min, .data$row_max, .keep_all = TRUE) %>%
+    rename("ID1" = .data$row_min, "ID2" = .data$row_max)
 
   # remove cases of individuals relatedness with themselves
-  king_sorted <- king_sorted %>% filter(ID1 != ID2)
+  king_sorted <- king_sorted %>% filter(.data$ID1 != .data$ID2)
 
   #add a check for correct number of pairs
   total_pairs <- num_samples * (num_samples -1)/2
@@ -124,7 +126,11 @@ autoplot_qc_report_indiv_king <- function(object, kings_threshold = kings_thresh
     stop("Relatedness matrix must be symmetric ")
   }
 
-  p <- ggplot2::ggplot(king_sorted, ggplot2::aes(x=.data$kinship))+ggplot2::geom_histogram(bins = 40)+ggplot2::labs(x="KING robust kinship estimator",y = "Number of pairs", title = "Distribution of paired kinship coefficients")+ggplot2::geom_vline(xintercept = kings_threshold, lty=2, col="red")
+  p <- ggplot2::ggplot(king_sorted, ggplot2::aes(x=.data$kinship)) +
+    ggplot2::geom_histogram(bins = 40) +
+    ggplot2::labs(x="KING robust kinship estimator",y = "Number of pairs",
+                  title = "Distribution of paired kinship coefficients") +
+    ggplot2::geom_vline(xintercept = kings_threshold, lty=2, col="red")
 
 
   }

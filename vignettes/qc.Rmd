@@ -127,7 +127,7 @@ data <- data %>% filter(indiv_het_obs(genotypes) < upper)
 nrow(data)
 ```
 
-Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to qc_report_indiv, then the report also calculates KING coefficient of relatedness of the sample. This threshold is used to create an output of the largest possible group with no related individuals, and the third boolean column `to_keep` recommends which individuals to remove to achieve this set.
+Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to `qc_report_indiv()`, then the report also calculates KING coefficient of relatedness of the sample. This threshold is used to create an output of the largest possible group with no related individuals, and the third boolean column `to_keep` recommends which individuals to remove to achieve this set.
 
 ```{r}
 individual_report <- qc_report_indiv(data, kings_threshold = 0.177)
