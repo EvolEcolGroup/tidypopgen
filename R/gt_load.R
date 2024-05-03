@@ -43,15 +43,6 @@ gt_load <-function(file = NULL, reattach_to = NULL) {
   return(x)
 }
 
-gt_get_bigsnp<-function(x){
-  if (inherits(x,"gen_tbl")){
-    attr(x$genotypes,"bigsnp")
-  } else {
-    attr(x,"bigsnp")
-  }
-
-}
-
 
 sub_rds <- function (path, replacement = "", stop_if_not_ext = TRUE)
 {

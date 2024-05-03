@@ -17,7 +17,7 @@
 #' e.g. c(1,2); for `loadings` either one or more values.
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
-#' @rdname autoplot_gt_pca
+#' @name autoplot_gt_pca
 #' @export
 autoplot.gt_pca <- function(object,
                             type=c("screeplot", "scores","loadings"),

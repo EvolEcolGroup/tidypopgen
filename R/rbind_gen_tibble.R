@@ -12,6 +12,11 @@
 #' and remove ambiguous alleles (C/G and A/T) where the correct strand can not
 #' be guessed.
 #'
+#' rbind differs from merging data with plink, which swaps the order of allele1
+#' and allele2 according to minor allele frequency when merging datasets. rbind
+#' flips and/or swaps alleles according to the reference dataset, not according
+#' to allele frequency.
+#'
 #' @param ... two [`gen_tibble`] objects. Note that this function can not take
 #' more objects, `rbind` has to be done sequentially for large sets of objects.
 #' @param as_is boolean determining whether the loci should be left as they are

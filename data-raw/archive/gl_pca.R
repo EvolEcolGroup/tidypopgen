@@ -226,8 +226,8 @@ gt_pca <- function(x, center=TRUE, scale=FALSE, nf=NULL, loadings=TRUE, alleles_
   if(!is.null(res$loadings)){
     colnames(res$loadings) <- paste("Axis", 1:nf, sep="")
     # TODO quick hack
-    # if(!is.null(show_loci_names(x_gt)) & !is.null(alleles(x))){
-    #   rownames(res$loadings) <- paste(show_loci_names(x_gt),alleles(x), sep=".")
+    # if(!is.null(loci_names(x_gt)) & !is.null(alleles(x))){
+    #   rownames(res$loadings) <- paste(loci_names(x_gt),alleles(x), sep=".")
     # } else {
       rownames(res$loadings) <- 1:nLoc
     # }

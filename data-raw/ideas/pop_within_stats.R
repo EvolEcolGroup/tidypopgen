@@ -2,7 +2,7 @@
 .x <- .x[1:5,] %>% select_loci(1:10)
 # we compute quantities by locus (the can then be combined for individuals later)
 # counts of genotypes
-.counts <- bigstatsr::big_counts(gt_get_bigsnp(.x)$genotypes,
+.counts <- bigstatsr::big_counts(.gt_get_bigsnp(.x)$genotypes,
                                  ind.row = .gt_bigsnp_rows(.x),
                                  ind.col = .gt_bigsnp_cols(.x))
 # number of alleles

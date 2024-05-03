@@ -38,7 +38,7 @@ loci_het_exp <- function(.x){
   return((sums*(n-sums))/(n*(n-1)))
 }
 
-pop_pairwise_fst <- function(.x, by_locus=FALSE){
+pairwise_pop_fst <- function(.x, by_locus=FALSE){
 
   warning("this function is not properly tested yet!!!")
   # check matrix(unlist(z, use.names = FALSE), ncol = 10, byrow = TRUE)
@@ -91,7 +91,7 @@ pop_pairwise_fst <- function(.x, by_locus=FALSE){
     }
     fst_vals <- matrix(unlist(lapply(seq_len(nrow(numerator)),fst_by_row, numerator, denominator),
                          use.names = FALSE), ncol = n_loci, byrow = TRUE)
-    colnames(fst_vals) <- show_loci_names(.x)
+    colnames(fst_vals) <- loci_names(.x)
     return(fst %>% cbind(fst_vals))
   }
 }

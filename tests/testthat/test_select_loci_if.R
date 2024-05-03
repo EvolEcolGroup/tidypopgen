@@ -10,11 +10,9 @@ test_that("select_loci_if subsets correctly",{
                           genetic_dist = as.integer(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-  bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
-                                    loci = test_loci,
-                                    indiv_meta = test_indiv_meta,
-                                    path_out = tempfile('test_data_'))
-  test_gt <- gen_tibble(bed_path, quiet = TRUE)
+
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+
 
 
   # raw frequencies
@@ -29,6 +27,10 @@ test_that("select_loci_if subsets correctly",{
   criterion <- c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE)
   expect_identical(test_gen_sub,
                    test_gt %>% select_loci_if(criterion))
+  # treat NA as if it was FALSE
+  criterion_na <- c(TRUE, TRUE, NA, TRUE, TRUE, FALSE)
+  expect_identical(test_gen_sub,
+                   test_gt %>% select_loci_if(criterion_na))
   #TODO test errors
 
 })

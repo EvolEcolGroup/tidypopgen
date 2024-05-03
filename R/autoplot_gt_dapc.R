@@ -22,7 +22,7 @@
 #' columns should be used.
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
-#' @rdname autoplot_gt_pca
+#' @rdname autoplot_gt_dapc
 #' @export
 autoplot.gt_dapc <- function(object,
                              type=c("screeplot", "scores", "loadings", "components"),

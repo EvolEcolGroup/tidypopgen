@@ -27,7 +27,7 @@ slidingRUNS.run <- function(x, windowSize = 15, threshold = 0.05,
   }
 
   # pointer to the FBM
-  X <- gt_get_bigsnp(x)$genotypes
+  X <- .gt_get_bigsnp(x)$genotypes
 
   for (i_chromosome in chromosomes){
     # get loci for this chromosome

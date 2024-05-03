@@ -8,7 +8,7 @@ snp_king(
   X,
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
-  block.size = bigstatsr::block_size(nrow(X)) * 3
+  block.size = bigstatsr::block_size(nrow(X)) * 4
 )
 }
 \arguments{

@@ -31,7 +31,7 @@ gt_dapc <- function(x,
 
   if (REDUCEDIM) {
     # if no glPca provided
-    maxRank <- min(c(nrow(x), length(show_loci_names(x))))
+    maxRank <- min(c(nrow(x), length(loci_names(x))))
     pcaX <-
       gt_pca(
         x,

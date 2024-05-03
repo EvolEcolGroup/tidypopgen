@@ -24,7 +24,7 @@ select_loci <-function(.data, .sel_arg){
 
   # create a named vector of all loci
   loci_names_vec <- stats::setNames(seq_len(nrow(show_loci(.data))),
-                             nm = show_loci_names(.data))
+                             nm = loci_names(.data))
   # and now evaluate the selection criteria, giving it the loci names to work with
   loci_sel <- tidyselect::eval_select(expr=sel_defused, data = loci_names_vec)
 

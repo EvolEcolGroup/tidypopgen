@@ -39,7 +39,9 @@ gen_tibble(
 \arguments{
 \item{x}{can be:
 \itemize{
-\item a string giving the path to a plink BED file, or a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}}
+\item a string giving the path to a PLINK BED or PED file. The correspective
+BIM and FAM fiel for the BED, or MAP for PED are expected to be in the same
+directory and have the same file name.
 \item a string giving the path to a RDS file storing a \code{bigSNP} object from
 the \code{bigsnpr} package (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})
 \item a string giving the path to a vcf file. Note that we currently read the whole
@@ -57,7 +59,7 @@ passed to \code{\link[vcfR:io_vcfR]{vcfR::read.vcfR()}}. Otherwise, unused.}
 
 \item{missing_alleles}{a vector of values in the BIM file/loci dataframe that
 indicate a missing value for the allele value (e.g. when we have a monomorphic
-locus with only one allele). It defalts to '0' and '.' (the same as PLINK 1.9).}
+locus with only one allele). It defaults to '0' and '.' (the same as PLINK 1.9).}
 
 \item{backingfile}{the path, including the file name without extension,
 for backing files used to store the data (they will be given a .bk

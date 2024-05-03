@@ -12,8 +12,8 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   pca.select <- match.arg(pca.select)
 
   if(is.null(pop)) {
-    if (any(!inherits(x,"gt_pca_clust"),is.null(x$n_clust))){
-      stop("if 'pop' is not set, 'x' should be a 'gt_pca_clust ")
+    if (any(!inherits(x,"gt_cluster_pca"),is.null(x$n_clust))){
+      stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca ")
     }
     pop.fac <- as.factor(x$clusters$groups[[x$n_clust]])
   } else {
@@ -23,7 +23,7 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   if(is.null(pop.fac)) stop("x does not include pre-defined populations, and `pop' is not provided")
 
   if (i s .null(n_pca ) ){
-    if (inherits(x,"gt_pca_clust " )){
+    if (inherits(x,"gt_cluster_pca " )){
       n_pca   <- x$clusters$n_pca
     } else { # use all principal compon e nts
       n_pca   <- length(x$eig)

@@ -3,7 +3,9 @@
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
 #' @param x can be:
-#' - a string giving the path to a plink BED file, or a [`bigsnpr::bigSNP`]
+#' - a string giving the path to a PLINK BED or PED file. The correspective
+#' BIM and FAM fiel for the BED, or MAP for PED are expected to be in the same
+#' directory and have the same file name.
 #' - a string giving the path to a RDS file storing a `bigSNP` object from
 #' the `bigsnpr` package (usually created with [bigsnpr::snp_readBed()])
 #' - a string giving the path to a vcf file. Note that we currently read the whole
@@ -21,7 +23,7 @@
 #' 'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
 #' indicate a missing value for the allele value (e.g. when we have a monomorphic
-#' locus with only one allele). It defalts to '0' and '.' (the same as PLINK 1.9).
+#' locus with only one allele). It defaults to '0' and '.' (the same as PLINK 1.9).
 #' @param backingfile the path, including the file name without extension,
 #' for backing files used to store the data (they will be given a .bk
 #' and .RDS automatically). This is not needed if `x` is already an .RDS file.
@@ -72,12 +74,18 @@ gen_tibble.character <-
                        missing_alleles= missing_alleles,
                        backingfile = backingfile,
                        quiet = quiet)
-  } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="vcf.gz")){
+  } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
     gen_tibble_vcf(x = x, ...,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet)
-  } else {
+  } else if (tolower(file_ext(x))=="ped"){
+    gen_tibble_ped(x = x, ...,
+                       valid_alleles= valid_alleles,
+                       missing_alleles= missing_alleles,
+                       backingfile = backingfile,
+                       quiet = quiet)
+  } else  {
     stop("file_path should be pointing to a either a PLINK .bed file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
 }
@@ -169,7 +177,7 @@ gen_tibble_vcf <- function(x, ...,
   ind_meta <- tibble(id = colnames(x), population = NA)
 
   # using the gen_tibble.matrix method
-  new_gen_tbl <- gen_tibble(x = x,
+  new_gen_tbl <- gen_tibble(x = t(x),
              indiv_meta = ind_meta,
              loci = loci,
              backingfile = backingfile,
@@ -212,6 +220,14 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   }
   if (any(!inherits(x,"matrix"), !is.numeric(x))){
     stop("'x' is not a matrix of integers")
+  }
+
+  # check dimensions
+  if (ncol(x)!=nrow(loci)){
+    stop ("there is a mismatch between the number of loci in the genotype table x and in the loci table")
+  }
+  if (nrow(x)!=nrow(indiv_meta)){
+    stop ("there is a mismatch between the number of loci in the genotype table x and in the loci table")
   }
 
   # use code for NA in FBM.256
@@ -421,7 +437,7 @@ stopifnot_gen_tibble <- function(.x){
 #' @export
 tbl_sum.gen_tbl <- function(x, ...) {
   c(
-    "A gen_tibble" = paste(nrow(show_loci(x))," loci"),
+    "A gen_tibble" = paste(count_loci(x)," loci"),
     NextMethod()
   )
 }
@@ -440,21 +456,19 @@ check_allele_alphabet <- function(x,
 
 }
 
-# make all missing value equal to 0
+# set all missing values to NA
 # loci_info is usually from show_loci()
 harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
-  loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles]<-"0"
-  loci_info$allele_alt[loci_info$allele_alt %in% missing_alleles]<-"0"
+  # 0 is always considered as a missing value
+  if (!"0" %in% missing_alleles){
+    missing_alleles <- c(missing_alleles, "0")
+  }
+  loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles]<-NA
+  loci_info$allele_alt[loci_info$allele_alt %in% missing_alleles]<-NA
   return(loci_info)
 }
 
-##########################################
-# convenient functs
-.gt_bigsnp_cols <- function(.x){
-  show_loci(.x)$big_index
-}
 
-.gt_bigsnp_rows <- function(.x){
-  vctrs::vec_data(.x$genotypes)
-}
+
+
 

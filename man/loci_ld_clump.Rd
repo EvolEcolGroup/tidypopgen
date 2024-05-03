@@ -19,6 +19,7 @@ loci_ld_clump(.x, ...)
   exclude = NULL,
   use_positions = TRUE,
   n_cores = 1,
+  return_id = FALSE,
   ...
 )
 
@@ -53,9 +54,14 @@ can be for thresholding with respect to p-values associated with \code{S}.}
 size is the number of SNPs.}
 
 \item{n_cores}{number of cores to be used}
+
+\item{return_id}{boolean on whether the id of SNPs to keep should be returned.
+It defaults to FALSE, which returns a vector of booleans (TRUE or FALSE)}
 }
 \value{
-a vector of snp indices to be kept
+a boolean vector indicating whether the SNP should be kept (if
+'return_id = FALSE', the default), else a vector of SNP indices to be kept (if
+'return_id = TRUE')
 }
 \description{
 This function uses clumping to remove SNPs at high LD. When used with its
@@ -65,8 +71,5 @@ spread of SNPs over the chromosome.
 }
 \details{
 Any missing values in the genotypes of a \code{gen_tibble} passed to \code{loci_ld_clump}
-will cause an error. To deal with missingness, see \code{gt_impute_simple}.
-
-TODO we should really return a boolean rather than indices, so that it can
-be easily used with \code{select_loci_if}
+will cause an error. To deal with missingness, see \code{\link[=gt_impute_simple]{gt_impute_simple()}}.
 }

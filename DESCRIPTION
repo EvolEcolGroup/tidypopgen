@@ -22,9 +22,9 @@ Imports:
     bigsnpr,
     bigstatsr,
     generics,
-    genio,
     ggplot2,
     magrittr,
+    methods,
     MASS,
     patchwork,
     rlang,
@@ -38,6 +38,7 @@ Imports:
 Suggests:
     adegenet,
     broom,
+    hierfstat,
     knitr,
     detectRUNS,
     LEA,

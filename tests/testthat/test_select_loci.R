@@ -10,24 +10,22 @@ test_that("select_loci subsets correctly",{
                           genetic_dist = as.integer(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-  bed_path <- gt_write_bed_from_dfs(genotypes = test_genotypes,
-                                    loci = test_loci,
-                                    indiv_meta = test_indiv_meta,
-                                    path_out = tempfile('test_data_'))
-  test_gt <- gen_tibble(bed_path, quiet = TRUE)
+
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+
 
 
   # select snps with an rs
   test_gt_sub <- test_gt %>% select_loci (starts_with("rs"))
-  expect_true(!any(c("x1","x2") %in% show_loci_names(test_gt_sub)))
+  expect_true(!any(c("x1","x2") %in% loci_names(test_gt_sub)))
   # subsetting by id with reordering
   test_gt_sub <- test_gt %>% select_loci (c(3,1,5))
-  expect_identical(c("rs3","rs1","x1"), show_loci_names(test_gt_sub))
+  expect_identical(c("rs3","rs1","x1"), loci_names(test_gt_sub))
   # get everything
   test_gt_sub <- test_gt %>% select_loci (everything())
   expect_identical(test_gt, test_gt_sub)
   # use 2:4 range expressions
   test_gt_sub <- test_gt %>% select_loci (2:4)
-  expect_identical(test_loci$name[2:4], show_loci_names(test_gt_sub))
+  expect_identical(test_loci$name[2:4], loci_names(test_gt_sub))
 
 })

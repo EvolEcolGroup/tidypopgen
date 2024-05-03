@@ -84,7 +84,7 @@ gt_roh <-  function(x, window_size = 15, threshold = 0.05,
   # naively process it by row (the parallelism is implemented within individual)
   # access time is horrible, but I don't think this is the bottleneck
   # it needs some profiling
-  X <- gt_get_bigsnp(x)$genotypes # pointer for the FBM
+  X <- .gt_get_bigsnp(x)$genotypes # pointer for the FBM
   for (i in seq_len(nrow(x))){
     this_genotype <- X[i,]
     this_indiv <- list(FID=groups[i], IID=x$id[i])
