@@ -4,7 +4,13 @@
 \alias{autoplot.qc_report_indiv}
 \title{Autoplots for \code{qc_report_indiv} objects}
 \usage{
-\method{autoplot}{qc_report_indiv}(object, type = c("scatter"), miss_threshold = NULL, ...)
+\method{autoplot}{qc_report_indiv}(
+  object,
+  type = c("scatter", "relatedness"),
+  miss_threshold = NULL,
+  kings_threshold = kings_threshold,
+  ...
+)
 }
 \arguments{
 \item{object}{an object of class \code{qc_report_indiv}}
@@ -13,6 +19,8 @@
 
 \item{miss_threshold}{a threshold for the accepted rate of missingness within
 individuals}
+
+\item{kings_threshold}{an optional numeric, a threshold of relatedness for the sample}
 
 \item{...}{not currently used.}
 }
@@ -24,6 +32,7 @@ For \code{qc_report_indiv}, the following types of plots are available:
 \itemize{
 \item \code{scatter}: a plot of missingness and observed heterozygosity within
 individuals.
+\item \code{relatedness}: a histogram of paired kinship coefficients
 }
 }
 \details{

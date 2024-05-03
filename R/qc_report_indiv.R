@@ -25,6 +25,8 @@ qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
                                       missingness = indiv_missingness(.x,as_counts=FALSE))
     qc_report_indiv$to_keep <- relatives[[3]]
     qc_report_indiv$id <- .x$id
+    attr(qc_report_indiv$to_keep, "king") <- king
+
   }
 
   class(qc_report_indiv) <- c("qc_report_indiv",class(qc_report_indiv))
@@ -37,6 +39,7 @@ qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
 #' For `qc_report_indiv`, the following types of plots are available:
 #' - `scatter`: a plot of missingness and observed heterozygosity within
 #' individuals.
+#' - `relatedness`: a histogram of paired kinship coefficients
 #'
 #' `autoplot` produces simple plots to quickly inspect an object. They are
 #' not customisable; we recommend that you use `ggplot2` to produce publication
@@ -46,10 +49,11 @@ qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
 #' @param type the type of plot (`scatter`)
 #' @param miss_threshold a threshold for the accepted rate of missingness within
 #' individuals
+#' @param kings_threshold an optional numeric, a threshold of relatedness for the sample
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @export
-autoplot.qc_report_indiv <- function(object, type = c("scatter"),miss_threshold = NULL, ...){
+autoplot.qc_report_indiv <- function(object, type = c("scatter", "relatedness"),miss_threshold = NULL, kings_threshold = kings_threshold, ...){
 
   rlang::check_dots_empty()
 
@@ -59,11 +63,12 @@ autoplot.qc_report_indiv <- function(object, type = c("scatter"),miss_threshold 
     miss_threshold
   }
 
-
   type <- match.arg(type)
 
   if (type == "scatter") {
     final_plot <- autoplot_qc_report_indiv(object,miss_threshold)
+  } else if (type == "relatedness") {
+    final_plot <- autoplot_qc_report_indiv_king(object,kings_threshold)
   } else {
     stop("Invalid type argument. Please choose from 'scatter' or 'relatedness'")
   }
@@ -88,3 +93,39 @@ autoplot_qc_report_indiv <- function(object, miss_threshold = miss_threshold){
   final_plot <- ggplot2::ggplot(object,ggplot2::aes(x=.data$missingness,y=.data$het_obs))+ggplot2::geom_point()+ggplot2::labs(x="Missingness",y="Observed Heterozygosity",title="Heterozygosity and missingness by individual")+ ggplot2::geom_vline(xintercept= miss_threshold, lty=2, col="red")+ggplot2::geom_hline(yintercept = c(upper,lower,mid_upper,mid_lower),lty=2,col="blue")
 
 }
+
+autoplot_qc_report_indiv_king <- function(object, kings_threshold = kings_threshold){
+
+  king <- as.data.frame(attr(object$to_keep, "king"))
+  num_samples <- nrow(king)
+  king$row <- colnames(king)
+
+  #format into 3 columns: ID1, ID2, and their relatedness coefficient
+  king <- tidyr::gather(king, column, value, -row)
+  colnames(king) <- c("ID1","ID2","kinship")
+
+  #remove duplication from the new df
+  king_sorted <- king %>%
+    mutate(
+      row_min = pmin(ID1, ID2),
+      row_max = pmax(ID1, ID2)
+    ) %>%
+    dplyr::select(-ID1, -ID2) %>%
+    distinct(row_min, row_max, .keep_all = TRUE) %>%
+    rename(ID1 = row_min, ID2 = row_max)
+
+  # remove cases of individuals relatedness with themselves
+  king_sorted <- king_sorted %>% filter(ID1 != ID2)
+
+  #add a check for correct number of pairs
+  total_pairs <- num_samples * (num_samples -1)/2
+
+  if (total_pairs != nrow(king_sorted)){
+    stop("Relatedness matrix must be symmetric ")
+  }
+
+  p <- ggplot2::ggplot(king_sorted, ggplot2::aes(x=.data$kinship))+ggplot2::geom_histogram(bins = 40)+ggplot2::labs(x="KING robust kinship estimator",y = "Number of pairs", title = "Distribution of paired kinship coefficients")+ggplot2::geom_vline(xintercept = kings_threshold, lty=2, col="red")
+
+
+  }
+
