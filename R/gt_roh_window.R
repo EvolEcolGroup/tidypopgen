@@ -44,8 +44,10 @@
 #' @examples
 #' # don't run the example
 #' if (FALSE) {
-#' sheep_bed <- system.file("extdata/sheep.bed", package="tidypopgen")
-#' sheep_gt <- tidypopgen::gen_tibble(sheep_bed, backingfile = tempfile(), quiet=TRUE)
+#' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
+#'     package="detectRUNS")
+#' sheep_gt <- tidypopgen::gen_tibble(sheep_ped, backingfile = tempfile(),
+#'     quiet=TRUE)
 #' sheep_gt <- sheep_gt %>% group_by(population)
 #' sheep_roh <- gt_roh_window(sheep_gt)
 #' detectRUNS::plot_Runs(runs = sheep_roh)

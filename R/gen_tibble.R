@@ -3,7 +3,9 @@
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
 #' @param x can be:
-#' - a string giving the path to a PLINK BED file, or a [`bigsnpr::bigSNP`]
+#' - a string giving the path to a PLINK BED or PED file. The correspective
+#' BIM and FAM fiel for the BED, or MAP for PED are expected to be in the same
+#' directory and have the same file name.
 #' - a string giving the path to a RDS file storing a `bigSNP` object from
 #' the `bigsnpr` package (usually created with [bigsnpr::snp_readBed()])
 #' - a string giving the path to a vcf file. Note that we currently read the whole
@@ -77,7 +79,13 @@ gen_tibble.character <-
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet)
-  } else {
+  } else if (tolower(file_ext(x))=="ped"){
+    gen_tibble_ped(x = x, ...,
+                       valid_alleles= valid_alleles,
+                       missing_alleles= missing_alleles,
+                       backingfile = backingfile,
+                       quiet = quiet)
+  } else  {
     stop("file_path should be pointing to a either a PLINK .bed file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
 }

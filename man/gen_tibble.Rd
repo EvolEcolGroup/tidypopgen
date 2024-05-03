@@ -38,7 +38,9 @@ gen_tibble(
 \arguments{
 \item{x}{can be:
 \itemize{
-\item a string giving the path to a PLINK BED file, or a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}}
+\item a string giving the path to a PLINK BED or PED file. The correspective
+BIM and FAM fiel for the BED, or MAP for PED are expected to be in the same
+directory and have the same file name.
 \item a string giving the path to a RDS file storing a \code{bigSNP} object from
 the \code{bigsnpr} package (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})
 \item a string giving the path to a vcf file. Note that we currently read the whole
