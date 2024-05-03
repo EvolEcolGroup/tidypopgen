@@ -20,7 +20,8 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 test_that("pop_fst and pop_fist compute correctly",{
   test_gt <- test_gt %>% dplyr::group_by(population)
   test_hier <- gt_as_hierfstat(test_gt)
-  # compare results against hierfstat for Nei
+  # compare results against hierfstat for Nei87 (Nei86 does not correct for Ho
+  # when computing Ht, so it gives a different result)
   nei_gt <- test_gt %>% pairwise_pop_fst(method="Nei87")
   nei_hier <- hierfstat::pairwise.neifst(test_hier)
   # hiefstat values are rounded to 4 dp

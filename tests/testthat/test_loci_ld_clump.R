@@ -14,7 +14,7 @@ test_gt <- gen_tibble(x = test_genotypes, indiv_meta = test_indiv_meta, loci = t
 
 test_that("ld clumping runs",{
 
-  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2)
+  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id=TRUE)
   expect_true(all.equal(keep, c(1, 2, 3, 4, 6)) == TRUE)
 
 })

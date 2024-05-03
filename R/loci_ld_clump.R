@@ -6,10 +6,7 @@
 #' spread of SNPs over the chromosome.
 #'
 #' Any missing values in the genotypes of a `gen_tibble` passed to `loci_ld_clump`
-#' will cause an error. To deal with missingness, see `gt_impute_simple`.
-#'
-#' TODO we should really return a boolean rather than indices, so that it can
-#' be easily used with `select_loci_if`
+#' will cause an error. To deal with missingness, see [gt_impute_simple()].
 #'
 #' @param .x a [`gen_tibble`] object
 #' @param thr_r2 Threshold over the squared correlation between two SNPs.
@@ -31,8 +28,12 @@
 #' can be used to exclude long-range LD regions (see Price2008). Another use
 #' can be for thresholding with respect to p-values associated with `S`.
 #' @param n_cores number of cores to be used
+#' @param return_id boolean on whether the id of SNPs to keep should be returned.
+#' It defaults to FALSE, which returns a vector of booleans (TRUE or FALSE)
 #' @param ... currently not used.
-#' @return a vector of snp indices to be kept
+#' @return a boolean vector indicating whether the SNP should be kept (if
+#' 'return_id = FALSE', the default), else a vector of SNP indices to be kept (if
+#' 'return_id = TRUE')
 #' @rdname loci_ld_clump
 #' @export
 loci_ld_clump <- function(.x, ...) {
@@ -44,11 +45,6 @@ loci_ld_clump <- function(.x, ...) {
 loci_ld_clump.tbl_df <- function(.x, ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
-
-  if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
-    gt_set_imputed(.x, set = TRUE)
-    on.exit(gt_set_imputed(.x, set = FALSE))
-  }
 
   loci_ld_clump(.x$genotypes, ...)
 }
@@ -63,9 +59,16 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
                                        exclude = NULL,
                                        use_positions = TRUE,
                                        n_cores = 1,
+                                       return_id = FALSE,
                                        ...)
 {
   rlang::check_dots_empty()
+
+  if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
+    gt_set_imputed(.x, set = TRUE)
+    on.exit(gt_set_imputed(.x, set = FALSE))
+  }
+
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use
@@ -94,9 +97,14 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
                         size = size,
                         exclude = exclude,
                         ncores = n_cores)
-  warning("this is yet to be tested!!!")
-  match(snp_clump_ids, show_loci(.x)$big_index)
-  ## @TODO test that this works as expected
+  to_keep_id <- match(snp_clump_ids, show_loci(.x)$big_index)
+  if (return_id){
+    to_keep_id
+  } else {
+    keep_bool <- rep(FALSE,count_loci(.x))
+    keep_bool[to_keep_id]<-TRUE
+    keep_bool
+  }
 }
 
 #' @export

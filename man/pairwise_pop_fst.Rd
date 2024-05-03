@@ -32,7 +32,8 @@ This function computes pairwise Fst. The following methods are implemented:
 \itemize{
 \item 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013) for diploids.
 \item 'Nei86' : Gst according to Nei (1986), as derived in Bhatia et al (2013) for diploids.
-\item 'Nei87': Fst according to Nei (1987) - this is equivalent to \code{hierfstat::pairwise.neifst()}
+\item 'Nei87' : Fst according to Nei (1987) - this is equivalent to \code{hierfstat::pairwise.neifst()},
+and includes the correction for heterozygosity when computing Ht
 \item 'WC84' : Weir and Cockerham (1984), as derived in Bhatia et al (2013) for diploids.
 }
 }

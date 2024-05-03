@@ -3,7 +3,8 @@
 #' This function computes pairwise Fst. The following methods are implemented:
 #' - 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013) for diploids.
 #' - 'Nei86' : Gst according to Nei (1986), as derived in Bhatia et al (2013) for diploids.
-#' - 'Nei87': Fst according to Nei (1987) - this is equivalent to `hierfstat::pairwise.neifst()`
+#' - 'Nei87' : Fst according to Nei (1987) - this is equivalent to `hierfstat::pairwise.neifst()`,
+#' and includes the correction for heterozygosity when computing Ht
 #' - 'WC84' : Weir and Cockerham (1984), as derived in Bhatia et al (2013) for diploids.
 #'
 #' For all formulae, the genome wide estimate is obtained by taking the ratio of the mean
@@ -13,6 +14,7 @@
 #' FST: The Impact of Rare Variants. Genome Research. 2013;23(9):1514–1521.
 #'
 #' Nei, M. (1987) Molecular Evolutionary Genetics. Columbia University Press
+#'
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param by_locus boolean, determining whether Fst should be returned by locus(TRUE),
 #' or as a single genome wide value obtained by taking the ratio of the mean numerator

@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
 
 ```{r, include = FALSE}
 library(tidypopgen)
-#Create gentibble for examples
+#Create gen_tibble for examples
 bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
 bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
 data <- gen_tibble(bigsnp_path, quiet = TRUE)
@@ -25,83 +25,83 @@ data <- gen_tibble(bigsnp_path, quiet = TRUE)
 
 ## File management and reading data:
 
-| plink                         | tidypopgen                                  |
-|-------------------------------|---------------------------------------------|
-| --make-bed --out              | gt_write_plink(data, bedfile = my_file)     |
-| --recode                      | (TODO? generate .ped and .raw again)        |
-| --allele1234 and --alleleACGT | See gen_tibble() parameters 'valid_alleles' |
+| PLINK                         | `tidypopgen`                                   |
+|-------------------------------|----------------------------------------------|
+| --make-bed --out              | `gt_write_plink(data, bedfile = my_file)`    |
+| --recode                      | (TODO? generate .ped and .raw again)         |
+| --allele1234 and --alleleACGT | See `gen_tibble()` parameter 'valid_alleles' |
 
-plink flags --update-alleles, --allele1234, and --alleleACGT, all alter the coding of alleles. In tidypopgen, valid alleles are supplied when reading in a gentibble.
+PLINK flags --update-alleles, --allele1234, and --alleleACGT, all alter the coding of alleles. In `tidypopgen`, valid alleles are supplied when reading in a `gen_tibble`.
 
 ## Quality control:
 
-| plink      | tidypopgen                    |
-|------------|-------------------------------|
-| --maf      | data %\>% loci_maf()          |
-| --geno     | data %\>% loci_missingness()  |
-| --mind     | data %\>% indiv_missingness() |
-| --hwe      | data %\>% loci_hwe()          |
-| --het      | data %\>% indiv_het_obs()     |
-| --distance | data %\>% gt_ibs()            |
+| PLINK      | `tidypopgen`                      |
+|------------|---------------------------------|
+| --maf      | `data %\>% loci_maf()`          |
+| --geno     | `data %\>% loci_missingness()`  |
+| --mind     | `data %\>% indiv_missingness()` |
+| --hwe      | `data %\>% loci_hwe()`          |
+| --het      | `data %\>% indiv_het_obs()`     |
+| --distance | `data %\>% gt_ibs()`            |
 
-To filter out variants in tidypopgen, in a similar way to plink flags such as --extract or --autosome, it is necessary to use the gen_tibble with `select_loci_if()`. For example:
+To filter out variants in `tidypopgen`, in a similar way to PLINK flags such as --extract or --autosome, it is necessary to use the `gen_tibble` with `select_loci_if()`. For example:
 
 ```{r}
-data %>% select_loci_if(show_loci(genotypes)$chromosome %in% c(1:22)) 
+data %>% select_loci_if(loci_chromosomes(genotypes) %in% c(1:22)) 
 ```
 
 will select autosomal loci in the same way as --autosome. Or alternatively:
 
 ```{r}
-my_snps <- as.list(show_loci(data)[1:5,2])
+my_snps <- c("rs4477212","rs3094315","rs3131972","rs12124819","rs11240777")
 
-data %>% select_loci_if(show_loci(genotypes)$name %in% my_snps$name) %>% show_loci()
+data %>% select_loci_if(loci_names(genotypes) %in% my_snps) %>% show_loci()
 ```
 
 will select loci from a previously defined set in the same way as --extract.
 
-Similarly, to filter out individuals, as might be performed with --keep in plink, requires using filter:
+Similarly, to filter out individuals, as might be performed with --keep in PLINK, requires using filter:
 
 ```{r}
-my_individuals <- data$id[1:3]
+my_individuals <- c("GRC14300079", "GRC14300142", "GRC14300159")
 
 data %>% filter(id %in% my_individuals)
 ```
 
 ## Quality control for linkage
 
-Linkage is managed through clumping in tidypopgen with loci_ld_clump().
+Linkage is managed through clumping in `tidypopgen` with loci_ld_clump().
 
-This option is similar to the --indep-pairwise flag in plink, but results in a more even distribution of loci when compared to LD pruning.
+This option is similar to the --indep-pairwise flag in PLINK, but results in a more even distribution of loci when compared to LD pruning.
 
 To explore why clumping is preferable to pruning, see <https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html>
 
 ## Quality control for relatedness (KING)
 
-| KING        | tidypopgen                |
-|-------------|---------------------------|
-| --kinship   | gt_king() or snp_king()   |
-| --unrelated | filter_high_relatedness() |
+| KING        | `tidypopgen`                  |
+|-------------|-----------------------------|
+| --kinship   | `gt_king()`                 |
+| --unrelated | `filter_high_relatedness()` |
 
 gt_king() implements the KING-robust estimator of kinship equivalent to --kinship in KING. To remove related individuals, instead of using --unrelated --degree, the user can pass the resulting kinship matrix and a relatedness threshold to filter_high_relatedness, which will return the largest possible set of unrelated individuals.
 
 ## Merging datasets:
 
-| plink       | tidypopgen                                             |
+| PLINK       | `tidypopgen`                                             |
 |-------------|--------------------------------------------------------|
-| --bmerge    | rbind()                                                |
-| --flip-scan | rbind_dry_run()                                        |
-| --flip      | flip() (internally implemented on merging using rbind) |
+| --bmerge    | `rbind()`                                              |
+| --flip-scan | `rbind_dry_run()`                                      |
+| --flip      | use 'flip_stran=TRUE' in `rbind()`                     |
 
-In plink, data merging can fail due to strand inconsistencies that are not addressed prior to merging. plink documentation suggests to users to try a 'trial flip' of data to address this, and then to 'unflip' any errors that remain. In tidypopgen, when data are merged with rbind, strand inconsistencies are identified and automatically flipped, avoiding multiple rounds of flipping before merging.
+In PLINK, data merging can fail due to strand inconsistencies that are not addressed prior to merging. PLINK documentation suggests to users to try a 'trial flip' of data to address this, and then to 'unflip' any errors that remain. In `tidypopgen`, when data are merged with rbind, strand inconsistencies are identified and automatically flipped, avoiding multiple rounds of flipping before merging.
 
-plink does allow users to identify inconsistencies prior to merging with --flip-scan, and this functionality is included in the tidypopgen rbind_dry_run(). rbind_dry_run() reports the numeric overlap of datasets, alongside the number of SNPs to 'flip' in the new target dataset, as well as the number of ambiguous SNPs.
+PLINK does allow users to identify inconsistencies prior to merging with --flip-scan, and this functionality is included in the `tidypopgen` rbind_dry_run(). rbind_dry_run() reports the numeric overlap of datasets, alongside the number of SNPs to 'flip' in the new target dataset, as well as the number of ambiguous SNPs.
 
 Data are only merged one set at a time, there is no equivalent to --merge-list.
 
 ## Analysis:
 
-| plink     | tidypopgen                         |
+| PLINK     | `tidypopgen`                         |
 |-----------|------------------------------------|
 | --pca     | See gt_pca() for pca options       |
 | --fst     | pairwise_pop_fst() with group_by() |
