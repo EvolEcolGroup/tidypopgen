@@ -8,7 +8,10 @@
 #' @export
 
 gt_has_imputed <- function (x){
-  !is.null(attr(x$genotypes,"imputed"))
+  if (inherits(x,"gen_tbl")){
+    x <- x$genotypes
+  }
+  !is.null(attr(x,"imputed"))
 }
 
 #' Checks if a `gen_tibble` uses imputed data
@@ -21,11 +24,14 @@ gt_has_imputed <- function (x){
 #' @export
 
 gt_uses_imputed <- function (x){
+  if (inherits(x,"gen_tbl")){
+    x <- x$genotypes
+  }
   if (!gt_has_imputed(x)){
     stop("this dataset does not have any imputated values to use!")
   }
-  if (identical(attr(x$genotypes,"bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) |
-      identical(attr(x$genotypes,"bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)){
+  if (identical(attr(x,"bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) |
+      identical(attr(x,"bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)){
     return(TRUE)
   } else{
     return(FALSE)
@@ -44,17 +50,20 @@ gt_uses_imputed <- function (x){
 #' @export
 
 gt_set_imputed <- function (x, set = NULL){
-  if (is.null(set)){
+  if (inherits(x,"gen_tbl")){
+    x <- x$genotypes
+  }
+  if (!is.logical(set)){
     stop ("set should be either TRUE (to use imputed) or FALSE (to use the raw calls")
   }
   if (!gt_has_imputed(x)){
     stop("this dataset does not have imputed values to use!")
   }
   if (set==FALSE){
-    attr(x$genotypes,"bigsnp")$genotypes$code256 <- bigsnpr::CODE_012
+    attr(x,"bigsnp")$genotypes$code256 <- bigsnpr::CODE_012
   } else {
-    if (attr(x$genotypes,"imputed") %in% c("simple","xgboost")){
-      attr(x$genotypes,"bigsnp")$genotypes$code256 <- bigsnpr::CODE_IMPUTE_PRED
+    if (attr(x,"imputed") %in% c("simple","xgboost")){
+      attr(x,"bigsnp")$genotypes$code256 <- bigsnpr::CODE_IMPUTE_PRED
     }
   }
   return(invisible(NULL))

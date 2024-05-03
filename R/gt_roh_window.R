@@ -44,8 +44,10 @@
 #' @examples
 #' # don't run the example
 #' if (FALSE) {
-#' sheep_bed <- system.file("extdata/sheep.bed", package="tidypopgen")
-#' sheep_gt <- tidypopgen::gen_tibble(sheep_bed, backingfile = tempfile(), quiet=TRUE)
+#' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
+#'     package="detectRUNS")
+#' sheep_gt <- tidypopgen::gen_tibble(sheep_ped, backingfile = tempfile(),
+#'     quiet=TRUE)
 #' sheep_gt <- sheep_gt %>% group_by(population)
 #' sheep_roh <- gt_roh_window(sheep_gt)
 #' detectRUNS::plot_Runs(runs = sheep_roh)
@@ -85,7 +87,7 @@ gt_roh_window <-  function(x, window_size = 15, threshold = 0.05,
   # naively process it by row (the parallelism is implemented within individual)
   # access time is horrible, but I don't think this is the bottleneck
   # it needs some profiling
-  X <- gt_get_bigsnp(x)$genotypes # pointer for the FBM
+  X <- .gt_get_bigsnp(x)$genotypes # pointer for the FBM
   for (i in seq_len(nrow(x))){
     this_genotype <- X[i,]
     this_indiv <- list(FID=groups[i], IID=x$id[i])

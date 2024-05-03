@@ -52,7 +52,7 @@ gt_pca_randomSVD <- function(x, k = 10,
                               fun_prod = bigstatsr::big_prodVec,
                               fun_cprod = bigstatsr::big_cprodVec
                               ) {
-  if (gt_has_imputed(x)){
+  if (gt_has_imputed(x) && gt_uses_imputed(x)==FALSE){
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
   }
@@ -76,7 +76,7 @@ gt_pca_randomSVD <- function(x, k = 10,
                                   fun.cprod = fun_cprod) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
-  rownames(this_svd$v) <- show_loci_names(x)
+  rownames(this_svd$v) <- loci_names(x)
   this_svd$method <- "randomSVD"
   this_svd$call <- match.call()
   class(this_svd) <- c("gt_pca", class(this_svd))

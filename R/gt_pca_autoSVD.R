@@ -65,7 +65,7 @@ gt_pca_autoSVD <- function(x, k = 10,
                            max_iter = 5,
                            n_cores = 1,
                            verbose = TRUE) {
-  if (gt_has_imputed(x)){
+  if (gt_has_imputed(x) && gt_uses_imputed(x)==FALSE){
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
   }

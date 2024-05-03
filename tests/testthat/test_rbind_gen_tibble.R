@@ -37,7 +37,7 @@ test_that("merge combines datasets correctly",{
 
 
   #Check ambiguous SNPs are dropped (remove_ambiguous TRUE by default)
-  testthat::expect_false("rs1240719" %in% show_loci_names(merged_gen))
-  testthat::expect_false("rs307354" %in% show_loci_names(merged_gen))
+  testthat::expect_false("rs1240719" %in% loci_names(merged_gen))
+  testthat::expect_false("rs307354" %in% loci_names(merged_gen))
 
 })

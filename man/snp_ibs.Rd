@@ -8,7 +8,7 @@ snp_ibs(
   X,
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
-  as.counts = FALSE,
+  type = c("proportion", "adjusted_counts", "raw_counts"),
   block.size = bigstatsr::block_size(nrow(X))
 )
 }
@@ -22,15 +22,15 @@ If not specified, all rows are used. Don't use negative indices.}
 \item{ind.col}{An optional vector of the column indices that are used. If not
 specified, all columns are used. Don't use negative indices.}
 
-\item{as.counts}{whether the counts of similar alleles, rather than the proportion,
-should be returned (FALSE by default). CURRENTLY ALWAYS RETURNS COUNTS!!!}
+\item{type}{one of "proportion" (equivalent to "ibs" in PLINK), "adjusted_counts" ("distance" in PLINK),
+and "raw_counts" (the counts of identical alleles and non-missing alleles, from which the two other quantities are computed)}
 
 \item{block.size}{maximum number of columns read at once. Note that, to optimise the
 speed of matrix operations, we have to store in memory 3 times the columns.}
 }
 \value{
-a list of two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles (i.e. 2\emph{n loci),
-and one of valid alleles (i.e. 2}n_loci - 2*missing_loci)
+if as.counts = TRUE function returns a list of two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles (i.e. 2*n loci),
+and one of valid alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns a single matrix of IBS proportions.
 }
 \description{
 This function computes the IBS matrix.

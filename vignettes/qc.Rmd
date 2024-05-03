@@ -1,0 +1,183 @@
+---
+title: "QC"
+output: rmarkdown::html_vignette
+
+vignette: >
+  %\VignetteIndexEntry{QC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+# Quality control for SNP datasets
+
+tidypopgen has two key functions to examine the quality of data across loci and across individuals: `qc_report_loci` and `qc_report_indiv`. This vignette uses a simulated data set to illustrate these methods of data cleaning.
+
+# Read data into gen_tibble format
+
+```{r}
+library(tidypopgen)
+data <- gen_tibble(system.file("extdata/related/families.bed", package="tidypopgen"), quiet = TRUE, backingfile = tempfile(), valid_alleles = c("1","2"))
+```
+
+# Quality control for loci
+
+```{r}
+loci_report <- qc_report_loci(data)
+summary(loci_report)
+```
+
+The output of `qc_report_loci` supplies minor allele frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP. These data can be visualised in autoplot :
+
+```{r}
+autoplot(loci_report, type = "overview")
+```
+
+The overview plot shows how many SNPs in the data set are affected by high missingness, with some also affected by low minor allele frequency and Hardy-Weinberg disequilibrium. The thresholds for each parameter, (level of missingness that is accepted etc) can be adjusted using the parameters provided in autoplot. For example:
+
+```{r}
+autoplot(loci_report, type = "overview", miss_threshold = 0.03, maf_threshold = 0.02, hwe_p = 0.01)
+```
+
+To examine each QC measure in further detail, we can plot a different summary panel.
+
+```{r}
+autoplot(loci_report, type = "all", miss_threshold = 0.03, maf_threshold = 0.02, hwe_p = 0.01)
+```
+
+We can then begin to consider how to quality control this raw data set. Let's start by filtering SNPs according to their minor allele frequency. We can visualise the MAF distribution using:
+
+```{r}
+autoplot(loci_report, type = "maf")
+```
+
+Here we can see there are many monomorphic SNPs in the data set. Let's filter out loci with a minor allele frequency lower than 2%, by using `select_loci_if`. Here, we select all SNPs with a MAF greater than 2%. This operation is equivalent to plink --maf 0.02.
+
+```{r}
+data <- data %>% select_loci_if(loci_maf(genotypes)>0.02)
+count_loci(data)
+```
+
+Following this, we can remove SNPs with a high rate of missingness. Lets say we want to remove SNPs that are missing in more than 5% of individuals, equivalent to using plink --geno 0.05
+
+```{r}
+autoplot(loci_report, type = "missing",miss_threshold = 0.05)
+```
+
+We can see here that most SNPs have low missingness, under our 5% threshold, some do, however, have missingness over our kings_threshold. To remove these SNPs, we can again use `select_loci_if`.
+
+```{r}
+data <- data %>% select_loci_if(loci_missingness(genotypes)<0.05)
+count_loci(data)
+```
+
+Finally, if we may want to remove SNPs that show significant deviation from Hardy-Weinberg equilibrium, if our study design requires. To visualise SNPs with significant p-values in the Hardy-Weinberg exact test, we can again call autoplot:
+
+```{r}
+autoplot(loci_report,type = "significant hwe", hwe_p = 0.01)
+```
+
+Few SNPs in our data have significant HWE p-values, however there may be circumstances where we would want to cut out the most extreme cases, if these data were real, these cases could indicate genotyping errors.
+
+```{r}
+data <- data %>% select_loci_if(loci_hwe(genotypes)>0.01)
+count_loci(data)
+
+```
+
+Once we have quality controlled the SNPs in our data, we can turn to individual samples.
+
+#Quality control for individuals
+
+```{r}
+individual_report <- qc_report_indiv(data)
+summary(individual_report)
+```
+
+The output of `qc_report_loci` supplies observed heterozygosity per individual, and rate of missingness per individual as standard.
+
+These data can also be visualised using autoplot:
+
+```{r}
+autoplot(individual_report)
+```
+
+Here we can see that most individuals have low missingness. If we wanted to filter individuals to remove those with more than 3% of their genotypes missing, we can use `filter`.
+
+```{r}
+data <- data %>% filter(indiv_missingness(genotypes)<0.03)
+nrow(data)
+```
+
+And if we wanted to remove outliers with particularly high or low heterozygosity, we can again do so by using `filter`. Here we remove observations that lie more than 3 standard deviations from the mean.
+
+```{r}
+mean_val <- mean(individual_report$het_obs)
+sd_val <- stats::sd(individual_report$het_obs)
+
+lower <- mean_val - 3*(sd_val)
+upper <- mean_val + 3*(sd_val)
+
+data <- data %>% filter(indiv_het_obs(genotypes) > lower)
+data <- data %>% filter(indiv_het_obs(genotypes) < upper)
+nrow(data)
+```
+
+Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to `qc_report_indiv()`, then the report also calculates KING coefficient of relatedness of the sample. This threshold is used to create an output of the largest possible group with no related individuals, and the third boolean column `to_keep` recommends which individuals to remove to achieve this set.
+
+```{r}
+individual_report <- qc_report_indiv(data, kings_threshold = 0.177)
+summary(individual_report)
+```
+
+We can remove the recommended individuals by using:
+
+```{r}
+data <- data %>% filter(id %in% individual_report$id & individual_report$to_keep == TRUE)
+```
+
+We can now view a summary of our cleaned data set again, showing that our data has reduced from 12 to 10 individuals.
+
+```{r}
+summary(data)
+```
+
+# Linkage Disequilibrium
+
+For further analyses, it may be necessary to control for linkage in the data set. tidypopgen provides LD clumping. This option is similar to the --indep-pairwise flag in plink, but results in a more even distribution of loci when compared to LD pruning.
+
+To explore why clumping is preferable to pruning, see <https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html>
+
+LD clumping requires a data set with no missingness. This means we need to create an imputed data set before LD pruning, which we can do quickly with `gt_impute_simple`.
+
+```{r}
+imputed_data <- gt_impute_simple(data, method = "random")
+```
+
+In this example, if we want to remove SNPs with a correlation greater than 0.2 in windows of 10 SNPs at a time, we can set these parameters with `thr_r2` and `size` respectively.
+
+```{r}
+to_keep_LD <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+```
+
+`loci_ld_clump` then provides an output list of SNPs to keep in our data set. We can then use this list to create a pruned version of our data:
+
+```{r}
+ld_data <- imputed_data %>% select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, size = 10)) 
+```
+
+
+# Save 
+
+The benefit of operating on a `gen_tibble` is that each quality control step can be observed visually, and easily reversed if necessary.
+
+When we are happy with the quality of our data, we can create and save a final quality controlled version of our `gen_tibble` using `gt_save`.
+
+```{r}
+gt_save(ld_data, file_name = tempfile())
+```
+

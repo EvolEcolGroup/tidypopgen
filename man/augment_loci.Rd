@@ -7,14 +7,14 @@
 augment_loci(x, data, ...)
 }
 \arguments{
-\item{x}{A \code{gt_pca} object returned by one of the \verb{gt_pca_*} functions.}
+\item{x}{An object returned by one of the \code{gt_} functions (e.g. \code{\link[=gt_pca]{gt_pca()}}).}
 
 \item{data}{the \code{gen_tibble} used to run the PCA.}
 
-\item{...}{Additional paramters passed to the individual methods.}
+\item{...}{Additional parameters passed to the individual methods.}
 }
 \value{
-A \link{gen_tibble} with additiona columns added to the loci tibble (accessible
+A \link{gen_tibble} with additional columns added to the loci tibble (accessible
 with \code{\link[=show_loci]{show_loci()}}. If \code{data} is missing, a tibble of the information, with a
 column \code{.rownames} giving the loci names.
 }

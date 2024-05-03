@@ -10,7 +10,8 @@ select_loci_if(.data, .sel_logical)
 \item{.data}{a \code{gen_tibble}}
 
 \item{.sel_logical}{a logical vector of length equal to the number of loci,
-or an expression that will tidy evaluate to such a vector.}
+or an expression that will tidy evaluate to such a vector. Only loci
+for which .sel_logical is TRUE will be selected; NA will be treated as FALSE.}
 }
 \description{
 An equivalent to \code{\link[dplyr:select_all]{dplyr::select_if()}} that works on the \code{genotype} column

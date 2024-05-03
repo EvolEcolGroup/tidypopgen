@@ -26,7 +26,7 @@
 #' - 'groups' a list, with each element giving the group assignments for a given k
 #' @export
 
-gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
+gt_cluster_pca <- function(x = NULL, n_pca = NULL,
                                  n_clusters = c(1,round(nrow(x$scores)/10)),
                                  method=c("kmeans","ward"),
                                    n_iter = 1e5, n_start = 10){
@@ -107,7 +107,7 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
   names(cluster_list$groups)<-nbClust
 
   x$clusters <- cluster_list
-  class(x) <- c("gt_pca_clust", class(x))
+  class(x) <- c("gt_cluster_pca", class(x))
   return(x)
 
 }
@@ -121,12 +121,12 @@ gt_pca_find_clusters <- function(x = NULL, n_pca = NULL,
 
 
 ##TODO this function should add to the previous object
-gt_pca_clust_choose_n <- function(x, stat = c("BIC", "AIC", "WSS"),
+gt_cluster_pca_choose_n <- function(x, stat = c("BIC", "AIC", "WSS"),
                                  criterion = c("diffNgroup", "min", "goesup",
                                                   "smoothNgoesup", "goodfit"),
                                  quiet=FALSE){
-  if (!inherits(x, "gt_pca_clust")){
-    stop("'x' should be a 'gt_pca_clusters' object generated with 'gt_pca_find_clusters()'")
+  if (!inherits(x, "gt_cluster_pca")){
+    stop("'x' should be a 'gt_cluster_pcaers' object generated with 'gt_cluster_pca()'")
   }
 
   stat <- match.arg(stat)

@@ -1,0 +1,26 @@
+---
+title: "create plink and king outputs"
+output: html_document
+date: "2024-05-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+path <- system.file("extdata/related", package="tidypopgen")
+knitr::opts_knit$set(root.dir = path)
+```
+
+# IBS 
+
+```{bash}
+plink --bfile families --distance flat-missing square ibs --out test_plinkIBS
+```
+# KING
+
+```{bash}
+king -b families.bed --kinship --prefix test_king
+```
+
+
+

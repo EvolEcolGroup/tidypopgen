@@ -14,12 +14,12 @@ gt_dapc(
 )
 }
 \arguments{
-\item{x}{an object of class \code{gt_pca}, or its subclass \code{gt_pca_clust}}
+\item{x}{an object of class \code{gt_pca}, or its subclass \code{gt_cluster_pca}}
 
 \item{pop}{either a factor indicating the group membership of individuals;
-or an integer defining the desired \emph{k} if x is a \code{gt_pca_clust}; or NULL, if
-'x' is a \code{gt_pca_clust} and contain an element 'best_k',
-usually generated with \code{\link[=gt_pca_clust_best_k]{gt_pca_clust_best_k()}},
+or an integer defining the desired \emph{k} if x is a \code{gt_cluster_pca}; or NULL, if
+'x' is a \code{gt_cluster_pca} and contain an element 'best_k',
+usually generated with \code{\link[=gt_cluster_pca_best_k]{gt_cluster_pca_best_k()}},
 which will be used to select the clustering level.}
 
 \item{n_pca}{number of principal components to be used in the Discriminant
@@ -45,7 +45,7 @@ an object of class \link[adegenet:dapc]{adegenet::dapc}
 \description{
 This function implements the Discriminant Analysis of Principal Components
 (DAPC, Jombart et al. 2010). This method descibes the diversity between
-pre-defined groups. When groups are unknown, use \code{\link[=gt_pca_find_clusters]{gt_pca_find_clusters()}} to
+pre-defined groups. When groups are unknown, use \code{\link[=gt_cluster_pca]{gt_cluster_pca()}} to
 infer genetic clusters. See 'details' section for a succint
 description of the method, and the vignette in the package \code{adegenet}
 ("adegenet-dapc") for a

@@ -1,0 +1,26 @@
+PLINK v1.90b7.2 64-bit (11 Dec 2023)
+Options in effect:
+  --bfile families
+  --distance flat-missing square ibs
+  --out test_plinkIBS
+
+Hostname: LAPTOP-S7R1KB1T
+Working directory: C:\Users\eviec\Git\tidypopgen\inst\extdata\related
+Start time: Wed May 01 09:03:43 2024
+
+Random number seed: 1714550623
+8080 MB RAM detected; reserving 4040 MB for main workspace.
+961 variants loaded from .bim file.
+12 people (0 males, 0 females, 12 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to test_plinkIBS.nosex .
+Using up to 4 threads (change this with --threads).
+Before main variant filters, 12 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is 0.961325.
+961 variants and 12 people pass filters and QC.
+Note: No phenotypes present.
+Distance matrix calculation complete.
+IDs written to test_plinkIBS.mibs.id .
+IBS matrix written to test_plinkIBS.mibs .
+
+End time: Wed May 01 09:03:43 2024

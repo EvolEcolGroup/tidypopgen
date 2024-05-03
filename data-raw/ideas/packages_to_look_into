@@ -25,4 +25,12 @@ Plot dapc with ggplot2
 https://luisdva.github.io/rstats/dapc-plot/
 
 
+# Paper showing how to use Hail (with tutorials). Can we match them in tidypopgen?
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9900804/
+
+#Implementation of pairwise hudson Fst (to validate ours)
+https://github.com/OchoaLab/popkinsuppl
+
+
+
 

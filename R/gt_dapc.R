@@ -2,7 +2,7 @@
 #'
 #' This function implements the Discriminant Analysis of Principal Components
 #' (DAPC, Jombart et al. 2010). This method descibes the diversity between
-#' pre-defined groups. When groups are unknown, use [gt_pca_find_clusters()] to
+#' pre-defined groups. When groups are unknown, use [gt_cluster_pca()] to
 #' infer genetic clusters. See 'details' section for a succint
 #' description of the method, and the vignette in the package `adegenet`
 #' ("adegenet-dapc") for a
@@ -29,11 +29,11 @@
 #' Molecular Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
 #'
 #'
-#' @param x an object of class `gt_pca`, or its subclass `gt_pca_clust`
+#' @param x an object of class `gt_pca`, or its subclass `gt_cluster_pca`
 #' @param pop either a factor indicating the group membership of individuals;
-#' or an integer defining the desired *k* if x is a `gt_pca_clust`; or NULL, if
-#' 'x' is a `gt_pca_clust` and contain an element 'best_k',
-#' usually generated with [gt_pca_clust_best_k()],
+#' or an integer defining the desired *k* if x is a `gt_cluster_pca`; or NULL, if
+#' 'x' is a `gt_cluster_pca` and contain an element 'best_k',
+#' usually generated with [gt_cluster_pca_best_k()],
 #' which will be used to select the clustering level.
 #' @param n_pca number of principal components to be used in the Discriminant
 #' Analysis. If NULL, k-1 will be used.
@@ -72,13 +72,13 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   }
 
   if(is.null(pop)) { # if no pop was given, use best_k
-    if (any(!inherits(x,"gt_pca_clust"),is.null(x$best_k))){
-      stop("if 'pop' is not set, 'x' should be a 'gt_pca_clust ")
+    if (any(!inherits(x,"gt_cluster_pca"),is.null(x$best_k))){
+      stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca ")
     }
     pop.fac <- as.factor(x$clusters$groups[[x$best_k]])
   } else if (is.factor(pop)) { # if a factor with all assignments was given
     pop.fac <- pop
-  } else if (is.numeric(pop) & inherits(x,"gt_pca_clust")) { # if pop is the k value
+  } else if (is.numeric(pop) & inherits(x,"gt_cluster_pca")) { # if pop is the k value
     pop.fac <- as.factor(x$clusters$groups[[pop]])
   }
 
@@ -87,7 +87,7 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
 
 
   if (is.null(n_pca) ){
-    if (inherits(x,"gt_pca_clust")){ # if we generated clusters, use the same pca
+    if (inherits(x,"gt_cluster_pca")){ # if we generated clusters, use the same pca
       n_pca   <- x$clusters$n_pca
     } else { # use all principal components
       n_pca   <- length(x$d)
