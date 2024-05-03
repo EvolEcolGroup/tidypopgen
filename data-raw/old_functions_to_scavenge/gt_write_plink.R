@@ -19,7 +19,7 @@
 #' @export
 
 
-gt_write_plink <- function(x, file, plink_format = c("raw","ped"), chunk_size = 10000, overwrite = TRUE){
+gt_as_plink <- function(x, file, plink_format = c("raw","ped"), chunk_size = 10000, overwrite = TRUE){
 
   plink_format <- match.arg(plink_format)
   if (tolower(adegenet::.readExt(file))!=plink_format){

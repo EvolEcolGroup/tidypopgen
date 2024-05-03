@@ -16,7 +16,7 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 
 # this also tests show_genotypes and show_loci
 test_that("write a bed file",{
-  bed_path <- gt_write_plink(test_gt, bedfile = paste0(tempfile(),".bed"))
+  bed_path <- gt_as_plink(test_gt, bedfile = paste0(tempfile(),".bed"))
   # now read the file back in
   test_gt2 <- gen_tibble(bed_path, quiet=TRUE)
   ## continue here
@@ -26,7 +26,7 @@ test_that("write a bed file",{
   expect_true(identical(test_gt %>% select(-genotypes),
                         test_gt2 %>% select(-genotypes)))
 
-  #check gt_write_plink converts the NA missing allele to 0
+  #check gt_as_plink converts the NA missing allele to 0
   expect_true(is.na(show_loci(test_gt2)$allele_alt[3]))
 
 

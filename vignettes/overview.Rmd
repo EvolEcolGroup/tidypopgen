@@ -344,9 +344,11 @@ new_example_gt %>% show_genotypes()
 We can see that our genotypes were recovered correctly.
 
 As we saw at the beginning of this vignette, it is possible to create a `gen_tibble` with data
-in data.frames and tibbles. We can use that function to wrangle data in various formats (including
-from vcf files via `vcfR`), but more commonly SNP data are stored as PLINK bed files.
-`gen_tibble` can directly read bed files:
+in data.frames and tibbles. We can use that function to wrangle small datasets 
+in custom formats, but more commonly SNP data are stored as PLINK bed files or VCF files.
+`gen_tibble` can directly read both types of files (including gzipped vcf files), we just need to provide the 
+path to file as the first argument of `gen_tibble`; for example, if we want to 
+read a PLINK bed file, we can simply use:
 
 ```{r}
 bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
@@ -358,12 +360,19 @@ path for the backing files, but in normal instances, we can simply
 omit the `backinfile` parameter, and the `.rds` and `.bk` file will be saved with the same name and
 path as the original `.bed` file.
 
-We can also export data to a .bed file. Note that, from the main tibble, only information
-on `id`, `population` and `sex` will be preserved (TODO think about the other elements
-of a fam file):
+We can also export data into various formats with the family of functions `gt_as_*()`.
+Some functions, such as `gt_as_hierfstat()`, `gt_as_genind()` or `gt_as_genlight()` return
+an object in of  the appropriate type; other functions, such as `gt_as_plink()` or `gt_as_geno_lea()`
+write a file in the appropriate format, and return the name of that file onc completion.
+For example, to export to a PLINK .bed file, we simply use:
+
 ```{r}
-gt_write_plink(example_gt, bedfile =  tempfile("new_bed_"))
+gt_as_plink(example_gt, bedfile =  tempfile("new_bed_"))
 ```
+
+This will also write a .bim and .fam file and save them together with the .bed file. 
+Note that, from the main tibble, only
+on `id`, `population` and `sex` will be preserved in the .fam file.
 
 # Merging data
 

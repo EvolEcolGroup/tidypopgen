@@ -6,7 +6,7 @@ out_file <- tempfile()
 testthat::test_that("we can export to plink raw",{
   # delete any files if they already exists (unlikely)
   unlink(paste0(out_file,"*"))
-  expect_true(gt_write_plink(pop_a_gt, file = out_file, chunk_size = 2))
+  expect_true(gt_as_plink(pop_a_gt, file = out_file, chunk_size = 2))
   out_file_raw <- paste0(out_file,".raw")
   expect_true(file.exists(out_file_raw))
   # check that the file that we generated is identical to the original
@@ -22,7 +22,7 @@ testthat::test_that("we can export to plink raw",{
 testthat::test_that("we can export to plink ped",{
   # delete any files if they already exists
   unlink(paste0(out_file,"*"))
-  expect_true(gt_write_plink(pop_a_gt, file = out_file, plink_format = "ped", chunk_size = 2))
+  expect_true(gt_as_plink(pop_a_gt, file = out_file, plink_format = "ped", chunk_size = 2))
   out_file_raw <- paste0(out_file,".ped")
   expect_true(file.exists(out_file_raw))
 })

@@ -36,7 +36,7 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 Now export it:
 ```{r}
 bed_file <- tempfile("bed_")
-gt_write_plink(test_gt, bedfile = bed_file)
+gt_as_plink(test_gt, bedfile = bed_file)
 ```
 
 Use radiator to rexport it:

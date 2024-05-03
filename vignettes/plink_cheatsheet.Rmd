@@ -27,7 +27,7 @@ data <- gen_tibble(bigsnp_path, quiet = TRUE)
 
 | PLINK                         | `tidypopgen`                                   |
 |-------------------------------|----------------------------------------------|
-| --make-bed --out              | `gt_write_plink(data, bedfile = my_file)`    |
+| --make-bed --out              | `gt_as_plink(data, bedfile = my_file)`    |
 | --recode                      | (TODO? generate .ped and .raw again)         |
 | --allele1234 and --alleleACGT | See `gen_tibble()` parameter 'valid_alleles' |
 

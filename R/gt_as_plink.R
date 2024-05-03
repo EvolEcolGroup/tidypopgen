@@ -10,7 +10,7 @@
 #' @export
 
 
-gt_write_plink <- function(x, bedfile = NULL,
+gt_as_plink <- function(x, bedfile = NULL,
                            overwrite = TRUE){
   if (is.null(bedfile)){
     bedfile <- bigstatsr::sub_bk(attr(x$genotypes,"bigsnp")$genotypes$backingfile,".bed")
