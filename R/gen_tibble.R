@@ -247,6 +247,36 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
 }
 
 
+#' create a vctrs_bigSNP
+#' @param bigsnp_obj the bigsnp object
+#' @param bigsnp_file the file to which the bigsnp object was saved
+#' @param indiv_id ids of individuals
+#' @returns a vctrs_bigSNP object
+#' @keywords internal
+new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
+  loci <- tibble::tibble(big_index = seq_len(nrow(bigsnp_obj$map)),
+                         name = bigsnp_obj$map$marker.ID,
+                         chromosome = bigsnp_obj$map$chromosome,
+                         position = bigsnp_obj$map$physical.pos,
+                         genetic_dist = bigsnp_obj$map$genetic.dist,
+                         allele_ref = bigsnp_obj$map$allele2,
+                         allele_alt = bigsnp_obj$map$allele1
+  )
+  vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
+                  bigsnp = bigsnp_obj,
+                  bigsnp_file = bigsnp_file, # TODO is this redundant with the info in the bigSNP object?
+                  bigsnp_md5sum = tools::md5sum(bigsnp_file), # TODO make sure this does not take too long
+                  loci=loci,
+                  names=indiv_id,
+                  class = "vctrs_bigSNP")
+}
+
+#' @export
+summary.vctrs_bigSNP <- function(object, ...){
+  summary(rep("bigSNP-genotypes",length(object)))
+}
+
+
 check_valid_loci <- function(loci_df){
   loci_df <- as_tibble(loci_df)
   if (!all(c('name', 'chromosome', 'position','genetic_dist', 'allele_ref','allele_alt') %in% names(loci_df))){
