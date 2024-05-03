@@ -41,7 +41,7 @@ all.equal(
   check.attributes = FALSE)
 
 # for an centered matrix (but not scaled), the sum of the eigen vectors is equal
-to the sum of variances
+#to the sum of variances
 all.equal(sum(a_prcomp$sdev^2), sum(apply(a_mat,2,var)))
 
 

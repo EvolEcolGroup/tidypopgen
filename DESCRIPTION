@@ -22,7 +22,6 @@ Imports:
     bigsnpr,
     bigstatsr,
     generics,
-    genio,
     ggplot2,
     magrittr,
     methods,
