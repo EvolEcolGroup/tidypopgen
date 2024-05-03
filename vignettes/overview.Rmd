@@ -362,8 +362,8 @@ path as the original `.bed` file.
 
 We can also export data into various formats with the family of functions `gt_as_*()`.
 Some functions, such as `gt_as_hierfstat()`, `gt_as_genind()` or `gt_as_genlight()` return
-an object in of  the appropriate type; other functions, such as `gt_as_plink()` or `gt_as_geno_lea()`
-write a file in the appropriate format, and return the name of that file onc completion.
+an object of the appropriate type; other functions, such as `gt_as_plink()` or `gt_as_geno_lea()`
+write a file in the appropriate format, and return the name of that file on completion.
 For example, to export to a PLINK .bed file, we simply use:
 
 ```{r}

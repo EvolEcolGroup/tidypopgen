@@ -72,7 +72,7 @@ gen_tibble.character <-
                        missing_alleles= missing_alleles,
                        backingfile = backingfile,
                        quiet = quiet)
-  } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="vcf.gz")){
+  } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
     gen_tibble_vcf(x = x, ...,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,

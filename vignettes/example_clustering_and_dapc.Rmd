@@ -27,11 +27,9 @@ We read in the data from the compressed vcf with:
 library(tidypopgen)
 vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
                           package = "tidypopgen")
-bed_path <- write_bed_from_vcf(vcf_path, bed_path = tempfile("anolis_"))
-anole_gt <- gen_tibble(bed_path)
+anole_gt <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+
 ```
-Note that the `write_bed_from_vcf` function reads the whole vcf in memory before writing
-the bed, so it is only suitable for smallish datasets.
 
 Now let's inspect our `gen_tibble`:
 ```{r}

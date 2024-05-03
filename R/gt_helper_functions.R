@@ -23,14 +23,10 @@
   sums_ref <- n - sums_alt
   freq_alt <- sums_alt/n
   freq_ref <- 1- freq_alt
-  #  het_count <- apply(counts,2,function(x) x[2]) # This should be simply a row from the counts matrix
   het_obs <- apply(counts,2,function(x) x[2]/sum(x[1:3]))
-  #het_exp <- 2 * sums_alt/n * sums_ref/n
-  return (list(#sums_alt = sums_alt,
-    #sums_ref = sums_ref,
+  return (list(
     freq_alt = freq_alt,
     freq_ref = freq_ref,
-    #het_count = het_count,
     n = n,
     het_obs = het_obs))
 }
