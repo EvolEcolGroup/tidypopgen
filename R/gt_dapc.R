@@ -83,6 +83,7 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   }
 
   if(is.null(pop.fac)) stop("x does not include pre-defined populations, and `pop' is not provided")
+  # FIXME: is this actually nlevels(pop)?
   n_pop <- nlevels(pop.fac)
 
 
