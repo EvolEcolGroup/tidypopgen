@@ -37,6 +37,7 @@ Imports:
     vctrs
 Suggests:
     adegenet,
+    admixtools,
     broom,
     hierfstat,
     knitr,
@@ -46,6 +47,8 @@ Suggests:
     readr,
     testthat (>= 3.0.0),
     vcfR
+Remotes:
+    uqrmaie1/admixtools
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LinkingTo: 
