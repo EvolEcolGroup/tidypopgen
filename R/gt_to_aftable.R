@@ -56,6 +56,26 @@ gt_extract_afs <- function(.x, outdir = "./afs", cols_per_chunk = 10, blgsize = 
   invisible(afdat$snpfile)
 }
 
+#' Compute adn store blocked f2 statistics for a `gen_tibble`
+#'
+#' This function prepares data for various `ADMIXTOOLS 2` function, and it is
+#' equivalent to `admixtools::extract_f2`. An important difference is that
+#' the filtering for snps (e.g. by maf) or populations is not performed by this
+#' function; it is expected that the `gen_tibble` has been filtered appropriately.
+#'
+#' @param .x the `gen_tibble`, appropriately filtered for individuals, populations and snps
+#' @param outdir the directory where the f2 stats will be stored. If left NULL, a directory
+#' names 'f2' will be created in the same path as the RDS fo the `gen_tibble`
+#' @param blgsize SNP block size in Morgan. Default is 0.05 (5 cM). If `blgsize`
+#' is 100 or greater, if will be interpreted as base pair distance rather than centimorgan distance.
+#' @param cols_per_chunk Number of allele frequency chunks to store on disk.
+#' Setting this to a positive integer makes the function slower,
+#' but requires less memory. The default value for cols_per_chunk
+#' in extract_afs is 10. Lower numbers will lower the memory requirement
+#' but increase the time it takes.
+#' @param quiet boolean on whether the progess should be silenced
+#' @returns SNP metadata (invisibly)
+#' @export
 
 gt_extract_f2 <- function(.x , outdir=NULL, cols_per_chunk = 10, blgsize = 0.05, quiet=FALSE){
   if (!inherits(.x,"grouped_df")){
