@@ -6,7 +6,7 @@ gen_tibble_geno <- function(x, ...,
   # Substitute .ped with .map
   map_file <- sub("\\.geno$", ".snp", x)
   if (!file.exists(map_file)){
-    stop("map file ",map_file," does not exist")
+    stop("snp file ",map_file," does not exist")
   }
   ind_file <- sub("\\.geno$", ".ind", x)
   if (!file.exists(ind_file)){
@@ -14,7 +14,8 @@ gen_tibble_geno <- function(x, ...,
   }
 
   res <- admixtools::read_packedancestrymap(sub("\\.geno$", "", x),
-                                                  transpose = TRUE)
+                                                  transpose = TRUE,
+                                            ...)
   names(res$ind)<-c("id","sex","population")
   #TODO check that allele_ref and allele_alt are not swapped
   names(res$snp)<-c("name", "chromosome",'genetic_dist','position', 'allele_ref','allele_alt')
