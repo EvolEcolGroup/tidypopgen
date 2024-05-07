@@ -21,4 +21,13 @@ test_that("snpbin_list_means computes correctly",{
   freq[freq>0.5] <- 1 - freq[freq>0.5]
   expect_true(all(loci_maf(test_gt$genotypes)==freq))
 
+  # repeat the tests for a subset of the data
+  # remove the 2nd individual and the 3rd and 5th snp
+  test_genotypes <- test_genotypes[-2,c(-3,-5)]
+  test_gt <- test_gt %>% filter(id!="b") %>% select_loci(c(-3,-5))
+  freq <- colSums(test_genotypes, na.rm=TRUE)/(c(2,2,2,1)*2)
+  expect_true(all(loci_alt_freq(test_gt$genotypes)==freq))
+  # convert to minor frequencies
+  freq[freq>0.5] <- 1 - freq[freq>0.5]
+  expect_true(all(loci_maf(test_gt$genotypes)==freq))
 })
