@@ -5,7 +5,7 @@
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
-#' @param as_counts booelean defining whether the count of NAs (rather than the rate)
+#' @param as_counts boolean defining whether the count of NAs (rather than the rate)
 #' should be returned. It defaults to FALSE (i.e. rates are returned by default).
 #' @param ... other arguments passed to specific methods.
 #' @returns a vector of frequencies, one per locus
@@ -14,9 +14,6 @@
 loci_missingness <- function(.x, as_counts = FALSE, ...) {
   UseMethod("loci_missingness", .x)
 }
-
-# We should write a cpp counts function. We can't use the snp_* family of functions
-# as they ignore NAs
 
 #' @export
 #' @rdname loci_missingness
