@@ -1,4 +1,4 @@
-#A function to read geno packedancestry files
+#A function to read geno packedancestrymap files
 gen_tibble_geno <- function(x, ...,
                             valid_alleles = c("A", "T", "C", "G"),
                             missing_alleles = c("0","."),
