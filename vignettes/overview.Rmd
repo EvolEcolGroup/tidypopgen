@@ -533,5 +533,5 @@ gt_uses_imputed(missing_gt)
 missing_gt %>% loci_missingness() %>% hist()
 ```
 
-More datails about PCA and other analysis is found in the vignette on population
+More details about PCA and other analysis is found in the vignette on population
 genetic analysis.
