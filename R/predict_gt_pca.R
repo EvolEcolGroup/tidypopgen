@@ -11,6 +11,8 @@
 #' of components depends on how many were estimated in the [`gt_pca`] object
 #' @rdname predict_gt_pca
 #' @export
+
+# this is a modified version of bigstatsr::predict.big_SVD
 predict.gt_pca <- function(object, new_data=NULL,block_size = NULL, ...){
   rlang::check_dots_empty()
   if (is.null(new_data)) {
@@ -24,16 +26,14 @@ predict.gt_pca <- function(object, new_data=NULL,block_size = NULL, ...){
       gt_set_imputed(new_data, set = TRUE)
       on.exit(gt_set_imputed(new_data, set = FALSE))
     }
-    ind.col <- .gt_bigsnp_cols(new_data)
-    ind.row <- .gt_bigsnp_rows(new_data)
-    X <- .gt_get_bigsnp(new_data)$genotypes
     if (is.null(block_size)){
-      block_size <- bigstatsr::block_size(nrow(X))
+      block_size <- bigstatsr::block_size(nrow(new_data))
     }
     # X * V
-    bigstatsr::big_prodMat(X, object$v,
-                ind.row = ind.row,
-                ind.col = ind.col,
+    bigstatsr::big_prodMat(.gt_get_bigsnp(new_data)$genotypes,
+                           object$v,
+                ind.row = .gt_bigsnp_rows(new_data),
+                ind.col = .gt_bigsnp_cols(new_data),
                 block.size = block_size,
                 center = object$center,
                 scale  = object$scale)
