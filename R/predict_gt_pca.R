@@ -6,6 +6,7 @@
 #' @param new_data a gen_tibble if scores are requested for a new dataset
 #' @param block_size number of loci read simultaneously (larger values will speed up
 #' computation, but require more memory)
+#' @param ... no used
 #' @returns a matrix of predictions, with samples as rows and components as columns. The number
 #' of components depends on how many were estimated in the [`gt_pca`] object
 #' @rdname predict_gt_pca

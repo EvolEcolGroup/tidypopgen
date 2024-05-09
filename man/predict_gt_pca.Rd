@@ -13,6 +13,8 @@
 
 \item{block_size}{number of loci read simultaneously (larger values will speed up
 computation, but require more memory)}
+
+\item{...}{no used}
 }
 \value{
 a matrix of predictions, with samples as rows and components as columns. The number
