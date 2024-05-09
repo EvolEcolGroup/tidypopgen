@@ -5,7 +5,7 @@
 \alias{loci_transversions.tbl_df}
 \alias{loci_transversions.vctrs_bigSNP}
 \alias{loci_transversions.grouped_df}
-\title{Estimates the sum of genotypes at each each locus}
+\title{Find transversions}
 \usage{
 loci_transversions(.x, ...)
 
@@ -26,6 +26,5 @@ or a \code{\link{gen_tibble}}.}
 a vector of frequencies, one per locus
 }
 \description{
-Estimate the sum of the alternate allele at each locus. This is unlikely to be useful
-directly, but it is used by other functions that compute various statistics.
+Use the loci table to define which loci are transversions
 }

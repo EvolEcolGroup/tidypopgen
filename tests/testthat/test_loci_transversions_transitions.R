@@ -14,4 +14,5 @@ test_that("find transitions and transversions",{
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
   transv_bool <- c(TRUE, FALSE, NA, TRUE, TRUE, TRUE)
   expect_true(all.equal(loci_transversions(test_gt), transv_bool))
+  expect_true(all.equal(loci_transitions(test_gt), !transv_bool))
 })
