@@ -116,14 +116,43 @@ gen_tibble_bed_rds <- function(x, ...,
 
   indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
-  # TODO check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
   # right now, we hardcode it
+  # TODO check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
   ploidy <- 2
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
                                            bigsnp_file = bigsnp_path,
                                            indiv_id = bigsnp_obj$fam$sample.ID,
                                            ploidy = ploidy)
 
+  # transfer some of the fam info to the metadata table if it is not missing (0 is the default missing value)
+  fam_info <- .gt_get_bigsnp(indiv_meta)$fam
+  if(!all(fam_info$paternal.id==0)){
+    indiv_meta$paternal_ID <- fam_info$paternal.id
+    indiv_meta$paternal_ID[indiv_meta$paternal_ID==0]<-NA
+  }
+  if(!all(fam_info$maternal.id==0)){
+    indiv_meta$maternal_ID <- fam_info$maternal.id
+    indiv_meta$maternal_ID[indiv_meta$maternal_ID==0]<-NA
+  }
+  if(!all(fam_info$sex==0)){
+    indiv_meta$sex <-   dplyr::case_match(
+      fam_info$sex,
+      1 ~ "male",
+      2 ~ "female",
+      .default = NA,
+      .ptype = factor(levels = c("female", "male"))
+    )
+  }
+  if(!all(fam_info$affection %in% c(0,-9))){
+  indiv_meta$phenotype <- dplyr::case_match(
+    fam_info$affection,
+    1 ~ "control",
+    2 ~ "case",
+    -9 ~ NA,
+    .default = NA,
+    .ptype = factor(levels = c("control", "case"))
+  )
+  }
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
     class = "gen_tbl"

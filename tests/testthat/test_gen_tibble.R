@@ -14,7 +14,7 @@ test_loci <- data.frame(name=paste0("rs",1:6),
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 # this also tests show_genotypes and show_loci
-test_that("create gen_tibble from bed",{
+test_that("create gen_tibble from dfs",{
   expect_true(inherits(test_gt,"gen_tbl"))
   # we can extract the genotypes correctly
   extracted_genotypes <- test_gt %>% show_genotypes()
@@ -30,17 +30,6 @@ test_that("create gen_tibble from bed",{
   test_drop <- test_gt %>% select(-genotypes)
   expect_false(inherits(test_drop,"gen_tbl"))
 
-})
-
-# now create it directly from the dfs
-test_that("create gen_tibble from dfs",{
-  test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
-             loci = test_loci, quiet = TRUE)
-  # because of the different backing file info, we cannot use identical on the whole object
-  expect_true(identical(show_genotypes(test_gt), show_genotypes(test_dfs_gt)))
-  expect_true(identical(show_loci(test_gt), show_loci(test_dfs_gt)))
-  expect_true(identical(test_gt %>% select(-genotypes),
-                        test_dfs_gt %>% select(-genotypes)))
 })
 
 test_genotypes_c <- rbind(c("1","1","0","1","1","0"),
@@ -81,3 +70,17 @@ test_that("gen_tibble catches invalid alleles",{
 
 })
 
+test_that("gen_tibble from a bed file",{
+  bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  pop_a_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+  # now read the dosages created by plink when saving in raw format
+  raw_file_pop_a <- read.table(system.file("extdata/pop_a.raw", package = "tidypopgen"), header= TRUE)
+  mat <- as.matrix(raw_file_pop_a[,7:ncol(raw_file_pop_a)])
+  mat <- unname(mat)
+  expect_true(all.equal(mat,show_genotypes(pop_a_gt)))
+  # now read in the ped file
+  ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
+  pop_a_ped_gt <- gen_tibble(ped_path, quiet=TRUE,backingfile = tempfile())
+  all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_ped_gt))
+
+})
