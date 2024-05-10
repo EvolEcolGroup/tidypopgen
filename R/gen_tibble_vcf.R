@@ -15,7 +15,7 @@ gen_tibble_vcf <- function(x, ...,
                  allele_ref = vcfR::getREF(x),
                  allele_alt = vcfR::getALT(x))
 
-  bi <- is.biallelix(x)
+  bi <- vcfR::is.biallelic(x)
   x <- vcfR::extract.gt(x)
   x <- x[bi,]
   # TODO from the first locus, we should figure out the ploidy

@@ -21,3 +21,4 @@ Convert a vcf file to a Filebacked Big Matrix (FBM) object.
 This should work even for large vcf files that would not fit in memory.
 TODO: this function is not yet complete.
 }
+\keyword{internal}
