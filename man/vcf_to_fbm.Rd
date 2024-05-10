@@ -4,7 +4,7 @@
 \alias{vcf_to_fbm}
 \title{Convert vcf to FBM.}
 \usage{
-vcf_to_fbm(vcf_path, chunks = 1000, backingfile = "vcf_matrix.bin")
+vcf_to_fbm(vcf_path, chunks = 1000, backingfile = tempfile("vcf_matrix.bin"))
 }
 \arguments{
 \item{vcf_path}{the path to the vcf}

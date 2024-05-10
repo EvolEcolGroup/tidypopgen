@@ -29,7 +29,7 @@ vcf_to_fbm <- function(
   # figure out ploidy from the first 1000 markers
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
-    nrow = 1000
+    nrow = min(1000,no_variants)
   )
   temp_gt <- vcfR::extract.gt(temp_vcf)
   ploidy <- apply(temp_gt,2,get_ploidy)
@@ -39,6 +39,22 @@ vcf_to_fbm <- function(
   code256 <- rep(NA_real_, 256)
   code256[1:(max_ploidy+1)]<-seq(0,max_ploidy)
 
+  # metadata
+  fam <- tibble(family.ID = 0,
+                sample.ID = colnames(temp_gt),
+                paternal.ID = 0,
+                maternal.ID = 0,
+                sex = 0,
+                affection = -9,
+                ploidy = ploidy)
+
+
+  loci <- tibble(chromosome = NULL,
+                 marker.id = NULL,
+                 genetic.dist = NULL,
+                 physical.pos = NULL,
+                 allele1 = NULL,
+                 allele2 = NULL)
 
   # create the file backed matrix
   file_backed_matrix <- bigstatsr::FBM.code256(
@@ -75,14 +91,26 @@ vcf_to_fbm <- function(
       ,
       index_start:(index_start+ncol(gt)-1)
     ] <- gt
+
+    # add metadata
+    # empty metadata
+    temp_vcf <- vcfR::addID(temp_vcf)
+
+    # create loci table
+    loci <- rbind(loci, tibble(
+                   chromosome = vcfR::getCHROM(temp_vcf)[bi],
+                   marker.id = vcfR::getID(temp_vcf)[bi],
+                   genetic.dist = 0,
+                   physical.pos = vcfR::getPOS(temp_vcf)[bi],
+                   allele1 = vcfR::getALT(temp_vcf)[bi],
+                   allele2 = vcfR::getREF(temp_vcf)[bi]))
+
   }
 
   bigsnp_save <- structure(list(
     genotypes = file_backed_matrix,
-    # TODO: these will have to be filled in?
-    # YES they do! copy what we do in gen_tibble_vcf
-    fam = NULL,
-    map = NULL
+    fam = fam,
+    map = loci
   ), class = "bigSNP")
 
   # add .rds extension to backingfile
