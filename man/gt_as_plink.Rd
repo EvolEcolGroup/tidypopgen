@@ -4,19 +4,23 @@
 \alias{gt_as_plink}
 \title{Export a \code{gen_tibble} object to PLINK bed format}
 \usage{
-gt_as_plink(x, bedfile = NULL, overwrite = TRUE)
+gt_as_plink(x, file = NULL, type = c("bed", "ped", "raw"), overwrite = TRUE)
 }
 \arguments{
 \item{x}{a \code{\link{gen_tibble}} object}
 
-\item{bedfile}{a character string giving the path to output bed file.}
+\item{file}{a character string giving the path to output file. If left to NULL,
+the output file will have the same path and prefix of the backingfile.}
+
+\item{type}{one of "bed", "ped" or "raw"}
 
 \item{overwrite}{boolean whether to overwrite the file.}
 }
 \value{
-TRUE if successful
+the path of the saved file
 }
 \description{
 This function exports all the information of a \code{gen_tibble} object into
-a PLINK bed file.
+a PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for .bed;
+.fam for .ped).
 }

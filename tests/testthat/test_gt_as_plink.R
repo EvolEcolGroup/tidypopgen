@@ -3,7 +3,7 @@ test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
 test_genotypes <- rbind(c(1,1,0,1,1,0),
                         c(2,1,0,0,0,0),
-                        c(2,2,0,0,1,1))
+                        c(2,2,0,0,NA,1))
 test_loci <- data.frame(name=paste0("rs",1:6),
                         chromosome=paste0("chr",c(1,1,1,1,2,2)),
                         position=as.integer(c(3,5,65,343,23,456)),
@@ -16,7 +16,7 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 
 # this also tests show_genotypes and show_loci
 test_that("write a bed file",{
-  bed_path <- gt_as_plink(test_gt, bedfile = paste0(tempfile(),".bed"))
+  bed_path <- gt_as_plink(test_gt, file = paste0(tempfile(),".bed"))
   # now read the file back in
   test_gt2 <- gen_tibble(bed_path, quiet=TRUE)
   ## continue here
@@ -30,5 +30,18 @@ test_that("write a bed file",{
   expect_true(is.na(show_loci(test_gt2)$allele_alt[3]))
 
 
+  # now write it as a ped
+  ped_path <- gt_as_plink(test_gt, file = paste0(tempfile(),".ped"), type = "ped")
+  test_gt3 <- gen_tibble(ped_path, quiet=TRUE)
+  # the gen tibble from the bed and ped should contain the same information
+  expect_true(all.equal(show_loci(test_gt3),show_loci(test_gt2), check.attributes=FALSE))
+  expect_true(all.equal(show_genotypes(test_gt3),show_genotypes(test_gt2)))
+
+  # write it as raw
+  raw_path <- gt_as_plink(test_gt,file=tempfile(),type="raw")
+  raw_file_test <- read.table(raw_path, header= TRUE)
+  mat <- as.matrix(raw_file_test[,7:ncol(raw_file_test)])
+  mat <- unname(mat)
+  expect_true(all.equal(mat,show_genotypes(test_gt)))
 })
 
