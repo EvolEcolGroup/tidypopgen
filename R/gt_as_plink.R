@@ -155,12 +155,14 @@ recode_genotype <- function(x, allele_ref, allele_alt){
   genotypes <- c(paste(allele_ref, allele_ref),
                  paste(allele_ref, allele_alt),
                  paste(allele_alt, allele_alt))
-  dplyr::case_match(
+  x <- dplyr::case_match(
     x,
     "0" ~ genotypes[1],
     "1" ~ genotypes[2],
     "2" ~ genotypes[3]
   )
+  x[is.na(x)]<-c("0 0")
+  x
 
 }
 

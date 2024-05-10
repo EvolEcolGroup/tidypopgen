@@ -72,7 +72,7 @@ test_that("gen_tibble catches invalid alleles",{
 
 test_that("gen_tibble from a bed file",{
   bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
-  pop_a_gt <- gen_tibble(bed_path, quiet=TRUE)
+  pop_a_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
   # now read the dosages created by plink when saving in raw format
   raw_file_pop_a <- read.table(system.file("extdata/pop_a.raw", package = "tidypopgen"), header= TRUE)
   mat <- as.matrix(raw_file_pop_a[,7:ncol(raw_file_pop_a)])
@@ -81,6 +81,6 @@ test_that("gen_tibble from a bed file",{
   # now read in the ped file
   ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
   pop_a_ped_gt <- gen_tibble(ped_path, quiet=TRUE,backingfile = tempfile())
-
+  all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_ped_gt))
 
 })

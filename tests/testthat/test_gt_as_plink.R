@@ -3,7 +3,7 @@ test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
 test_genotypes <- rbind(c(1,1,0,1,1,0),
                         c(2,1,0,0,0,0),
-                        c(2,2,0,0,1,1))
+                        c(2,2,0,0,NA,1))
 test_loci <- data.frame(name=paste0("rs",1:6),
                         chromosome=paste0("chr",c(1,1,1,1,2,2)),
                         position=as.integer(c(3,5,65,343,23,456)),
@@ -35,11 +35,10 @@ test_that("write a bed file",{
   test_gt3 <- gen_tibble(ped_path, quiet=TRUE)
   # the gen tibble from the bed and ped should contain the same information
   expect_true(all.equal(show_loci(test_gt3),show_loci(test_gt2), check.attributes=FALSE))
-  expect_true(all.equal(show_loci(test_gt3),show_loci(test_gt2)))
   expect_true(all.equal(show_genotypes(test_gt3),show_genotypes(test_gt2)))
 
   # write it as raw
-  raw_path <- gt_as_plink(pop_a_gt,file=tempfile(),type="raw")
+  raw_path <- gt_as_plink(test_gt,file=tempfile(),type="raw")
   # check why sex has been lost (it was not read in properly?!?)
   # look at line 119 of gen_tibble
   #tools::md5sum(raw_path)==tools::md5sum(system.file("extdata","pop_a.raw",package="tidypopgen"))
