@@ -13,7 +13,7 @@
 vcf_to_fbm <- function(
     vcf_path,
     chunks = 1000,
-    backingfile = "vcf_matrix.bin") {
+    backingfile = tempfile("vcf_matrix.bin")) {
   # count the variants in the file
   no_variants <- count_vcf_variants(vcf_path)
   no_individuals <- count_vcf_individuals(vcf_path)

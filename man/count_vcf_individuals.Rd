@@ -27,3 +27,4 @@ author Henrik Bengtsson for the original \code{countLines} in \code{R.utils};
 Andrea Manica for the modified version focussed on vcf; Max Carter-Brown modified
 the file above.
 }
+\keyword{internal}

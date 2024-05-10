@@ -29,3 +29,4 @@ count_vcf_variants(vcf_path)
 author Henrik Bengtsson for the original \code{countLines} in \code{R.utils};
 Andrea Manica for the modified version focussed on vcf
 }
+\keyword{internal}
