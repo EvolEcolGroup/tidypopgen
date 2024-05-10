@@ -39,9 +39,9 @@ test_that("write a bed file",{
 
   # write it as raw
   raw_path <- gt_as_plink(test_gt,file=tempfile(),type="raw")
-  # check why sex has been lost (it was not read in properly?!?)
-  # look at line 119 of gen_tibble
-  #tools::md5sum(raw_path)==tools::md5sum(system.file("extdata","pop_a.raw",package="tidypopgen"))
-
+  raw_file_test <- read.table(raw_path, header= TRUE)
+  mat <- as.matrix(raw_file_test[,7:ncol(raw_file_test)])
+  mat <- unname(mat)
+  expect_true(all.equal(mat,show_genotypes(test_gt)))
 })
 
