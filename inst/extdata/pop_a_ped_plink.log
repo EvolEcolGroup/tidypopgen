@@ -1,0 +1,24 @@
+PLINK v1.90b7.2 64-bit (11 Dec 2023)
+Options in effect:
+  --bfile C:/Users/eviec/Git/tidypopgen/inst/extdata/pop_a
+  --out C:/Users/eviec/Git/tidypopgen/inst/extdata/pop_a_ped_plink
+  --recode
+
+Hostname: LAPTOP-S7R1KB1T
+Working directory: C:\Users\eviec\OneDrive\Desktop\PhD\tidypopgen\ped_check
+Start time: Fri May 10 06:29:41 2024
+
+Random number seed: 1715318981
+8080 MB RAM detected; reserving 4040 MB for main workspace.
+16 variants loaded from .bim file.
+5 people (5 males, 0 females) loaded from .fam.
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 5 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is exactly 1.
+16 variants and 5 people pass filters and QC.
+Note: No phenotypes present.
+--recode ped to C:/Users/eviec/Git/tidypopgen/inst/extdata/pop_a_ped_plink.ped
++ C:/Users/eviec/Git/tidypopgen/inst/extdata/pop_a_ped_plink.map ... done.
+
+End time: Fri May 10 06:29:41 2024
