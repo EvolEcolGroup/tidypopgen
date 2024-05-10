@@ -42,8 +42,8 @@ inline arma::mat FBM_RW2arma(Rcpp::Environment BM) {
   size_t n = macc.nrow();
   size_t m = macc.ncol();
 
-  for (int j = 0; j < m; j++) {
-    for (int i = 0; i < n; i++) {
+  for (unsigned int j = 0; j < m; j++) {
+    for (unsigned int i = 0; i < n; i++) {
       int value = (macc(i,j));
       if (value == 0){
         genotype0(i, j) = 1;
@@ -58,10 +58,10 @@ inline arma::mat FBM_RW2arma(Rcpp::Environment BM) {
     }}
 
   // fill the rest with 0s (should be 1 column max)
-  int m2 = genotype0.n_cols;
+  size_t m2 = genotype0.n_cols;
   if (m2 > m) {
     myassert(m2 == (m + 1), ERROR_BUG);
-    for (int i = 0; i < n; i++) {
+    for (unsigned int i = 0; i < n; i++) {
       genotype0(i, m) = 0;
       genotype1(i, m) = 0;
       genotype2(i, m) = 0;
