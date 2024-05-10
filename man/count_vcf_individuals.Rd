@@ -16,12 +16,6 @@ the number of individuals (an integer)
 Count the number of VCF individuals by first parsing the header, and then
 getting the first line, then separating on tabs.
 }
-\examples{
-vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
-  package = "tidypopgen"
-)
-count_vcf_individuals(vcf_path)
-}
 \author{
 author Henrik Bengtsson for the original \code{countLines} in \code{R.utils};
 Andrea Manica for the modified version focussed on vcf; Max Carter-Brown modified

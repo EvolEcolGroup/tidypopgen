@@ -10,11 +10,7 @@
 #' @param chunk_size The number of bytes read in each chunk.
 #' @returns the number of variants (an integer)
 #' @keywords internal
-#' @examples
-#' vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
-#'   package = "tidypopgen"
-#' )
-#' count_vcf_variants(vcf_path)
+
 count_vcf_variants <- function(file, chunk_size = 50e6) {
   if (!is.character(file)) {
     stop("file should be a character giving the path of the vcf")
@@ -106,11 +102,7 @@ count_vcf_variants <- function(file, chunk_size = 50e6) {
 #' @param file name and path of vcf file (it can be compressed)
 #' @returns the number of individuals (an integer)
 #' @keywords internal
-#' @examples
-#' vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
-#'   package = "tidypopgen"
-#' )
-#' count_vcf_individuals(vcf_path)
+
 count_vcf_individuals <- function(file) {
   if (!is.character(file)) {
     stop("file should be a character giving the path of the vcf")

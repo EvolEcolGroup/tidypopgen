@@ -19,12 +19,6 @@ Count the number of VCF variants by first parsing the header, and then
 rapidly counting the number of platform-independent
 newlines (CR, LF, and CR+LF), including a last line with neither.
 }
-\examples{
-vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
-  package = "tidypopgen"
-)
-count_vcf_variants(vcf_path)
-}
 \author{
 author Henrik Bengtsson for the original \code{countLines} in \code{R.utils};
 Andrea Manica for the modified version focussed on vcf
