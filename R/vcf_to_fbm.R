@@ -14,21 +14,37 @@ vcf_to_fbm <- function(
     vcf_path,
     chunks = 1000,
     backingfile = tempfile("vcf_matrix.bin")) {
+
   # count the variants in the file
   no_variants <- count_vcf_variants(vcf_path)
+  # count individuals in the file
   no_individuals <- count_vcf_individuals(vcf_path)
+  # set up chunks
   chunks_vec <- c(
     rep(chunks, floor(no_variants / chunks)),
     no_variants %% chunks
   )
   chunks_vec_index <- c(1, chunks_vec)
 
+  # figure out ploidy from the first 1000 markers
+  temp_vcf <- vcfR::read.vcfR(
+    vcf_path,
+    nrow = 1000
+  )
+  temp_gt <- vcfR::extract.gt(temp_vcf)
+  ploidy <- apply(temp_gt,2,get_ploidy)
+  max_ploidy <- max(ploidy, na.rm = TRUE) # remove NA in case we failed to figure out the ploidy of an individual
+
+  # set up codes for the appropriate ploidy level
+  code256 <- rep(NA_real_, 256)
+  code256[1:(max_ploidy+1)]<-seq(0,max_ploidy)
+
+
   # create the file backed matrix
   file_backed_matrix <- bigstatsr::FBM.code256(
     nrow = no_individuals,
     ncol = 0,
-    # TODO: when ploidy code comes in, this will have to be changed
-    code = bigsnpr::CODE_012,
+    code = code256,
     backingfile = backingfile
   )
 
@@ -36,31 +52,35 @@ vcf_to_fbm <- function(
     temp_vcf <- vcfR::read.vcfR(
       vcf_path,
       nrow = chunks_vec[i],
-      skip = sum(chunks_vec[1:(i - 1)])
+      skip = sum(chunks_vec[seq_len(i-1)])
     )
-
+    # filter any marker that is not biallelic
+    bi <- vcfR::is.biallelic(temp_vcf)
     gt <- vcfR::extract.gt(temp_vcf)
-    gt[gt == "0|0"] <- 0
-    gt[gt == "0|1"] <- 1
-    gt[gt == "1|0"] <- 1
-    gt[gt == "1|1"] <- 2
-    gt[gt == "0/0"] <- 0
-    gt[gt == "0/1"] <- 1
-    gt[gt == "1/0"] <- 1
-    gt[gt == "1/1"] <- 2
-    # FIXME: this is currently generating loads of warnings.
-    gt <- apply(gt, 2, as.raw)
-
-    file_backed_matrix$add_columns(chunks_vec[i])
+    gt <- gt[bi,,drop=FALSE]
+    if (nrow(gt)>1){
+      gt <- t(apply(gt,2,poly_indiv_dosage, max_ploidy=max_ploidy))
+    } else if (nrow(gt)==1){ # if we only have one marker
+      gt <- matrix(apply(gt,2,poly_indiv_dosage, max_ploidy=max_ploidy),ncol=1)
+    } else  {
+      next
+    }
+    # expand the file backed matrix according to the size of the gt matrix
+    # get current size
+    index_start <- dim(file_backed_matrix)[2]+1
+    # add the new columns
+    file_backed_matrix$add_columns(ncol(gt))
+    # fill them in
     file_backed_matrix[
       ,
-      cumsum(chunks_vec_index)[i]:cumsum(chunks_vec)[i]
-    ] <- t(gt)
+      index_start:(index_start+ncol(gt)-1)
+    ] <- gt
   }
 
   bigsnp_save <- structure(list(
     genotypes = file_backed_matrix,
     # TODO: these will have to be filled in?
+    # YES they do! copy what we do in gen_tibble_vcf
     fam = NULL,
     map = NULL
   ), class = "bigSNP")
@@ -71,3 +91,23 @@ vcf_to_fbm <- function(
   # and return the path to the rds
   out
 }
+
+# get ploidy for a given individual
+get_ploidy <- function(x){
+  max(sapply(strsplit(x,"[/|]"),function(x) length(x) ))
+}
+
+# get dosages for all the genotypes of an individual (x is a vector of genotypes in the standard vcf format)
+poly_indiv_dosage <- function (x, max_ploidy){
+  sapply(strsplit(x,"[/|]"),poly_genotype_dosage , max_ploidy)
+}
+
+# get dosages for a genotype x (as a vector of 0 and 1)
+poly_genotype_dosage <- function (x, max_ploidy){
+  if (!is.na(x[1]) && x[1]!="."){
+    as.raw(sum(as.numeric(x))+1)
+  } else {
+    return(as.raw(max_ploidy+2))
+  }
+}
+
