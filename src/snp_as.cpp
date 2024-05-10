@@ -41,8 +41,8 @@ inline arma::mat FBM_RW2arma(Rcpp::Environment BM) {
   size_t n = macc.nrow();
   size_t m = macc.ncol();
 
-  for (int j = 0; j < m; j++) {
-    for (int i = 0; i < n; i++) {
+  for (unsigned int j = 0; j < m; j++) {
+    for (unsigned int i = 0; i < n; i++) {
       int value = (macc(i,j));
       if (value <3){
         dos_mat(i, j) = value-1; // note that we want the matrix of (dos-1)
@@ -53,10 +53,10 @@ inline arma::mat FBM_RW2arma(Rcpp::Environment BM) {
     }}
 
   // fill the rest with 0s (should be 1 column max)
-  int m2 = dos_mat.n_cols;
+  size_t m2 = dos_mat.n_cols;
   if (m2 > m) {
     myassert(m2 == (m + 1), ERROR_BUG);
-    for (int i = 0; i < n; i++) {
+    for (unsigned int i = 0; i < n; i++) {
       dos_mat(i, m) = 1;
       na_mat(i, m) = 0;
     }

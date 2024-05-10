@@ -40,9 +40,9 @@ read.pedfile <- function(file, n, snps, which, split="\t| +", sep=".",
 #  r3 <- as.raw(3)
 
   r0 <- 3
-  r1 <- 2
+  r1 <- 0
   r2 <- 1
-  r3 <- 0
+  r3 <- 2
 
   ## Input file
   con <- gzfile(file)

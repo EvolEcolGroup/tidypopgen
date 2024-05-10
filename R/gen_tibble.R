@@ -116,6 +116,8 @@ gen_tibble_bed_rds <- function(x, ...,
 
   indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
+  # TODO check if other elements are informative; if they are, bring them over
+
 
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
                                            bigsnp_file = bigsnp_path,
