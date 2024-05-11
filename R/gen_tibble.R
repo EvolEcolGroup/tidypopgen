@@ -116,9 +116,13 @@ gen_tibble_bed_rds <- function(x, ...,
 
   indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
-  # right now, we hardcode it
-  # TODO check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
-  ploidy <- 2
+  # check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
+  if ("ploidy" %in% names(bigsnp_obj$fam)){
+    ploidy <- bigsnp_obj$fam$ploidy
+  } else {
+    ploidy <- 2
+  }
+
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
                                            bigsnp_file = bigsnp_path,
                                            indiv_id = bigsnp_obj$fam$sample.ID,
@@ -126,12 +130,12 @@ gen_tibble_bed_rds <- function(x, ...,
 
   # transfer some of the fam info to the metadata table if it is not missing (0 is the default missing value)
   fam_info <- .gt_get_bigsnp(indiv_meta)$fam
-  if(!all(fam_info$paternal.id==0)){
-    indiv_meta$paternal_ID <- fam_info$paternal.id
+  if(!all(fam_info$paternal.ID==0)){
+    indiv_meta$paternal_ID <- fam_info$paternal.ID
     indiv_meta$paternal_ID[indiv_meta$paternal_ID==0]<-NA
   }
-  if(!all(fam_info$maternal.id==0)){
-    indiv_meta$maternal_ID <- fam_info$maternal.id
+  if(!all(fam_info$maternal.ID==0)){
+    indiv_meta$maternal_ID <- fam_info$maternal.ID
     indiv_meta$maternal_ID[indiv_meta$maternal_ID==0]<-NA
   }
   if(!all(fam_info$sex==0)){
@@ -236,36 +240,6 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
   return(new_gen_tbl)
 
-}
-
-
-#' create a vctrs_bigSNP
-#' @param bigsnp_obj the bigsnp object
-#' @param bigsnp_file the file to which the bigsnp object was saved
-#' @param indiv_id ids of individuals
-#' @returns a vctrs_bigSNP object
-#' @keywords internal
-new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
-  loci <- tibble::tibble(big_index = seq_len(nrow(bigsnp_obj$map)),
-                         name = bigsnp_obj$map$marker.ID,
-                         chromosome = bigsnp_obj$map$chromosome,
-                         position = bigsnp_obj$map$physical.pos,
-                         genetic_dist = bigsnp_obj$map$genetic.dist,
-                         allele_ref = bigsnp_obj$map$allele2,
-                         allele_alt = bigsnp_obj$map$allele1
-  )
-  vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
-                  bigsnp = bigsnp_obj,
-                  bigsnp_file = bigsnp_file, # TODO is this redundant with the info in the bigSNP object?
-                  bigsnp_md5sum = tools::md5sum(bigsnp_file), # TODO make sure this does not take too long
-                  loci=loci,
-                  names=indiv_id,
-                  class = "vctrs_bigSNP")
-}
-
-#' @export
-summary.vctrs_bigSNP <- function(object, ...){
-  summary(rep("bigSNP-genotypes",length(object)))
 }
 
 

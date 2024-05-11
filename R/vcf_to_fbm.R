@@ -12,8 +12,19 @@
 
 vcf_to_fbm <- function(
     vcf_path,
-    chunks = 1000,
-    backingfile = tempfile("vcf_matrix.bin")) {
+    loci_per_chunk = 1000,
+    backingfile = NULL,
+    quiet=FALSE) {
+
+  if (is.null(backingfile)){
+    backingfile <- vcf_path
+    backingfile <- sub("\\.vcf.gz$", "", backingfile)
+    backingfile <- sub("\\.vcf$", "", backingfile)
+  }
+  if (file_ext(backingfile)=="bk"){
+    backingfile <- bigstatsr::sub_bk(backingfile,"")
+  }
+
 
   # count the variants in the file
   no_variants <- count_vcf_variants(vcf_path)
@@ -21,15 +32,16 @@ vcf_to_fbm <- function(
   no_individuals <- count_vcf_individuals(vcf_path)
   # set up chunks
   chunks_vec <- c(
-    rep(chunks, floor(no_variants / chunks)),
-    no_variants %% chunks
+    rep(loci_per_chunk, floor(no_variants / loci_per_chunk)),
+    no_variants %% loci_per_chunk
   )
   chunks_vec_index <- c(1, chunks_vec)
 
   # figure out ploidy from the first 1000 markers
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
-    nrow = min(1000,no_variants)
+    nrow = min(1000,no_variants),
+    verbose = !quiet
   )
   temp_gt <- vcfR::extract.gt(temp_vcf)
   ploidy <- apply(temp_gt,2,get_ploidy)
@@ -68,7 +80,8 @@ vcf_to_fbm <- function(
     temp_vcf <- vcfR::read.vcfR(
       vcf_path,
       nrow = chunks_vec[i],
-      skip = sum(chunks_vec[seq_len(i-1)])
+      skip = sum(chunks_vec[seq_len(i-1)]),
+      verbose = !quiet
     )
     # filter any marker that is not biallelic
     bi <- vcfR::is.biallelic(temp_vcf)
@@ -99,25 +112,24 @@ vcf_to_fbm <- function(
     # create loci table
     loci <- rbind(loci, tibble(
                    chromosome = vcfR::getCHROM(temp_vcf)[bi],
-                   marker.id = vcfR::getID(temp_vcf)[bi],
+                   marker.ID = vcfR::getID(temp_vcf)[bi],
                    genetic.dist = 0,
                    physical.pos = vcfR::getPOS(temp_vcf)[bi],
                    allele1 = vcfR::getALT(temp_vcf)[bi],
                    allele2 = vcfR::getREF(temp_vcf)[bi]))
-
   }
+  # save it
+  file_backed_matrix$save()
 
-  bigsnp_save <- structure(list(
+  bigsnp_obj <- structure(list(
     genotypes = file_backed_matrix,
     fam = fam,
     map = loci
   ), class = "bigSNP")
 
-  # add .rds extension to backingfile
-  out <- paste0(backingfile, ".rds")
-  saveRDS(bigsnp_save, file = out)
+  bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
   # and return the path to the rds
-  out
+  bigsnp_obj$genotypes$rds
 }
 
 # get ploidy for a given individual

@@ -4,14 +4,14 @@
 \alias{vcf_to_fbm}
 \title{Convert vcf to FBM.}
 \usage{
-vcf_to_fbm(vcf_path, chunks = 1000, backingfile = tempfile("vcf_matrix.bin"))
+vcf_to_fbm(vcf_path, loci_per_chunk = 1000, backingfile = NULL, quiet = FALSE)
 }
 \arguments{
 \item{vcf_path}{the path to the vcf}
 
-\item{chunks}{the chunk size to use on the vcf when loading the file}
-
 \item{backingfile}{the name of the file to use as the backing file}
+
+\item{chunks}{the chunk size to use on the vcf when loading the file}
 }
 \value{
 path to the resulting rds file as class bigSNP.

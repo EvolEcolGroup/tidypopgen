@@ -5,8 +5,6 @@
 \title{create a vctrs_bigSNP}
 \usage{
 new_vctrs_bigsnp(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2)
-
-new_vctrs_bigsnp(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2)
 }
 \arguments{
 \item{bigsnp_obj}{the bigsnp object}
@@ -20,12 +18,8 @@ a vector of values for mixed ploidy).}
 }
 \value{
 a vctrs_bigSNP object
-
-a vctrs_bigSNP object
 }
 \description{
-create a vctrs_bigSNP
-
 create a vctrs_bigSNP
 }
 \keyword{internal}
