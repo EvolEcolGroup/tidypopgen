@@ -9,9 +9,9 @@ vcf_to_fbm(vcf_path, loci_per_chunk = 1000, backingfile = NULL, quiet = FALSE)
 \arguments{
 \item{vcf_path}{the path to the vcf}
 
-\item{backingfile}{the name of the file to use as the backing file}
+\item{loci_per_chunk}{the chunk size to use on the vcf when loading the file}
 
-\item{chunks}{the chunk size to use on the vcf when loading the file}
+\item{backingfile}{the name of the file to use as the backing file}
 }
 \value{
 path to the resulting rds file as class bigSNP.

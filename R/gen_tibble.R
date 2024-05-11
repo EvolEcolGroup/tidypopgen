@@ -14,9 +14,15 @@
 #' - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
 #' allele.
 #' @param indiv_meta a list, data.frame or tibble with compulsory columns 'id'
-#'  and 'population', plus any additional metadata of interest.
+#'  and 'population', plus any additional metadata of interest. This is only used
+#' if `x` is a genotype matrix. Otherwise this information is extracted directly from
+#' the files.
 #' @param loci a data.frame or tibble, with compulsory columns 'name', 'chromosome',
-#' and 'position','genetic_dist', 'allele_ref' and 'allele_alt'
+#' and 'position','genetic_dist', 'allele_ref' and 'allele_alt'. This is only used
+#' if `x` is a genotype matrix. Otherwise this information is extracted directly from
+#' the files.
+#' @param loci_per_chunk the number of loci processed at a time (currently only used
+#' if `x` is a vcf file)
 #' @param ... if `x` is the name of a vcf file, additional arguments
 #' passed to [vcfR::read.vcfR()]. Otherwise, unused.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
@@ -56,7 +62,7 @@ gen_tibble <-
 #' @rdname gen_tibble
 gen_tibble.character <-
   function(x,
-           ...,
+           ..., loci_per_chunk = 10000,
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0","."),
            backingfile = NULL,
@@ -75,7 +81,7 @@ gen_tibble.character <-
                        backingfile = backingfile,
                        quiet = quiet)
   } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
-    gen_tibble_vcf(x = x, ...,
+    gen_tibble_vcf(x = x, ..., loci_per_chunk = loci_per_chunk,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet)

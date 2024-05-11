@@ -5,7 +5,7 @@
 #' TODO: this function is not yet complete.
 #'
 #' @param vcf_path the path to the vcf
-#' @param chunks the chunk size to use on the vcf when loading the file
+#' @param loci_per_chunk the chunk size to use on the vcf when loading the file
 #' @param backingfile the name of the file to use as the backing file
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
@@ -145,9 +145,9 @@ poly_indiv_dosage <- function (x, max_ploidy){
 # get dosages for a genotype x (as a vector of 0 and 1)
 poly_genotype_dosage <- function (x, max_ploidy){
   if (!is.na(x[1]) && x[1]!="."){
-    as.raw(sum(as.numeric(x))+1)
+    as.raw(sum(as.numeric(x)))
   } else {
-    return(as.raw(max_ploidy+2))
+    return(as.raw(max_ploidy+1))
   }
 }
 
