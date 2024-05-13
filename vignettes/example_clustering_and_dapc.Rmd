@@ -3,7 +3,7 @@ title: "example workflow with tidypopgen"
 output: rmarkdown::html_vignette
         #pdf_document
 vignette: >
-  %\VignetteIndexEntry{example_workflow}
+  %\VignetteIndexEntry{example workflow with tidypopgen}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -30,24 +30,16 @@ indiv_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
   rlang::check_dots_empty()
   # get the FBM
   X <- attr(.x,"bigsnp")$genotypes
-  # rows (individuals) that we want to use
-  rows_to_keep <- vctrs::vec_data(.x)
-  # col means for submatrix (all rows, only some columns)
-
-  # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
-  col_NA <- function(X, ind, rows_to_keep) {
-    count_na <- function(a){sum(is.na(a))}
-    res <- apply(X[rows_to_keep,ind],1,count_na)
-  }
-
-  # count nas in one go
-  this_row_na <- bigstatsr::big_apply(X, a.FUN = col_NA,
-                      ind=attr(.x,"loci")$big_index,
-                       a.combine = 'plus', rows_to_keep=rows_to_keep)
+  # for polyploids, this can generate a very large matrix
+  # it would be better to just write a C function that counts na
+  row_counts <- bigstatsr::big_counts(X, ind.col=attr(.x,"loci")$big_index,
+                        ind.row = vctrs::vec_data(.x),
+                        byrow = TRUE)
+  row_na <- row_counts[nrow(row_counts),]
   if (!as_counts){
-    this_row_na <- this_row_na/length(loci_names(.x))
+    row_na <- row_na/count_loci(.x)
   }
-  this_row_na
+  row_na
 }
 
 #' @export

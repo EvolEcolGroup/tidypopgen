@@ -20,7 +20,7 @@ loci_missingness(.x, as_counts = FALSE, ...)
 a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
-\item{as_counts}{booelean defining whether the count of NAs (rather than the rate)
+\item{as_counts}{boolean defining whether the count of NAs (rather than the rate)
 should be returned. It defaults to FALSE (i.e. rates are returned by default).}
 
 \item{...}{other arguments passed to specific methods.}

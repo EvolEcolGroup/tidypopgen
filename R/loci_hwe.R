@@ -36,6 +36,7 @@ loci_hwe.tbl_df <- function(.x, mid_p = TRUE, ...) {
 #' @rdname loci_hwe
 loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
   rlang::check_dots_empty()
+  stopifnot_diploid(.x)
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use

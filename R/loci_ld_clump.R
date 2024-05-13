@@ -69,6 +69,7 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
     on.exit(gt_set_imputed(.x, set = FALSE))
   }
 
+  stopifnot_diploid(.x)
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use
