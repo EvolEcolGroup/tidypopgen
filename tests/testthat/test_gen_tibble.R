@@ -91,6 +91,11 @@ test_that("gen_tibble from files",{
   # now read in vcf
   vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
   pop_a_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
-  all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_vcf_gt))
+  expect_true(all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_vcf_gt)))
+  # reload it in chunks
+  pop_a_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), loci_per_chunk=2)
+  expect_true(all.equal(show_genotypes(pop_a_vcf_gt2),show_genotypes(pop_a_vcf_gt)))
+  expect_true(all.equal(show_loci(pop_a_vcf_gt2),show_loci(pop_a_vcf_gt)))
+  # we should add similar tests for pop b, which has missing data
 
 })
