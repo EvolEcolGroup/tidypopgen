@@ -21,3 +21,11 @@ tidy_dist_matrix<- function(mat){
   xy %>% tibble::as_tibble() %>%
     dplyr::mutate(value=mat[xy])
 }
+
+# stop if not diploid
+stopifnot_diploid <- function(x){
+  if (attr(x,"ploidy")!=2){
+    stop("this function only works on diploid data")
+  }
+}
+
