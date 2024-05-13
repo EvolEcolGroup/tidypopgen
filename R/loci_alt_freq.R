@@ -102,7 +102,7 @@ loci_alt_freq_diploid <- function(.x){
 }
 
 loci_alt_freq_polyploid <- function(.x, ...){
-  warning("this function still needs a proper unit test!!!")
+  warning("this function still needs a proper unit test!!! It assumes alleles are the unit of observation")
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use
