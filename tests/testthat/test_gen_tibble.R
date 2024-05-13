@@ -70,7 +70,7 @@ test_that("gen_tibble catches invalid alleles",{
 
 })
 
-test_that("gen_tibble from a bed file",{
+test_that("gen_tibble from files",{
   bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
   pop_a_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
   # now read the dosages created by plink when saving in raw format
@@ -81,6 +81,16 @@ test_that("gen_tibble from a bed file",{
   # now read in the ped file
   ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
   pop_a_ped_gt <- gen_tibble(ped_path, quiet=TRUE,backingfile = tempfile())
-  all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_ped_gt))
+  # because ref and alt are defined based on which occurs first in a ped, some alleles will be swapped
+  equal_geno <- show_genotypes(pop_a_gt)==show_genotypes(pop_a_ped_gt)
+  not_equal <- which(!apply(equal_geno,2,all))
+  # check that the alleles for loci that are mismatched are indeed swapped
+  expect_true(all(show_loci(pop_a_gt)$allele_alt[not_equal] == show_loci(pop_a_ped_gt)$allele_ref[not_equal]))
+  # check that the mismatches are all in the homozygotes
+  expect_true(all(abs(show_genotypes(pop_a_gt)[, not_equal]-show_genotypes(pop_a_ped_gt)[, not_equal]) %in% c(0,2)))
+  # now read in vcf
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  pop_a_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
+  all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_vcf_gt))
 
 })
