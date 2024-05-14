@@ -31,6 +31,14 @@ test_that("select_loci_if subsets correctly",{
   criterion_na <- c(TRUE, TRUE, NA, TRUE, TRUE, FALSE)
   expect_identical(test_gen_sub,
                    test_gt %>% select_loci_if(criterion_na))
-  #TODO test errors
+
+  #Test error warnings: boolean criteria too short
+  criterion_na <- c(TRUE, TRUE, NA, TRUE, TRUE)
+  expect_error(test_gt %>% select_loci_if(criterion_na), ".sel_logical should be the same length ")
+
+  #Test error warnings: selection criteria not boolean
+  rsID <- c("rs1", "rs2", "rs3", "rs4", "x1", "x2")
+  expect_error(test_gt %>% select_loci_if(rsID), ".sel_logical should be a logical boolean vector")
+
 
 })

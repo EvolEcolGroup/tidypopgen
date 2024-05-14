@@ -18,6 +18,7 @@ loci_transversions <- function(.x, ...) {
 loci_transversions.tbl_df <- function(.x, ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
+  check_allele_alphabet(.x$genotypes)
   loci_transversions(.x$genotypes, ...)
 }
 
