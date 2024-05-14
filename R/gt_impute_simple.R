@@ -7,7 +7,7 @@
 #'
 #' @param x a [gen_tibble] with missing data
 #' @param method one of
-#' - 'median': the most frequent genotype
+#' - 'mode': the most frequent genotype
 #' - 'mean0': the mean rounded to the nearest integer
 #' - 'mean2': the mean rounded to 2 decimal places
 #' - 'random': randomly sample a genotype based on the observed allele frequencies
