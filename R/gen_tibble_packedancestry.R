@@ -1,5 +1,5 @@
 #A function to read geno packedancestrymap files
-gen_tibble_geno <- function(x, ...,
+gen_tibble_packedancestry <- function(x, ...,
                             valid_alleles = c("A", "T", "C", "G"),
                             missing_alleles = c("0","."),
                             backingfile = NULL, quiet = FALSE) {
@@ -25,10 +25,8 @@ gen_tibble_geno <- function(x, ...,
   new_gen_tbl <- gen_tibble(x = res$geno,
                             indiv_meta = res$ind,
                             loci = res$snp,
-                            backingfile = backingfile, quiet=quiet)
-  check_allele_alphabet (new_gen_tbl, valid_alleles = valid_alleles,
-                         missing_alleles = missing_alleles)
-  show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
+                            backingfile = backingfile, quiet=quiet, valid_alleles = valid_alleles,missing_alleles = missing_alleles)
+
   return(new_gen_tbl)
 
 }
