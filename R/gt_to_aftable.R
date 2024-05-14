@@ -81,6 +81,7 @@ gt_extract_f2 <- function(.x , outdir=NULL, cols_per_chunk = 10, blgsize = 0.05,
   if (!inherits(.x,"grouped_df")){
     stop (".x should be a grouped df")
   }
+  browser()
   # if no outdir is given, create a subdirectory f2 in the path of the gen_tibble rds
   if (is.null(outdir)){
     outdir <- file.path(dirname(.gt_get_bigsnp(.x)$genotypes$rds),"f2")
@@ -90,9 +91,10 @@ gt_extract_f2 <- function(.x , outdir=NULL, cols_per_chunk = 10, blgsize = 0.05,
   if (!dir.exists(af_dir)){
     dir.create(af_dir,recursive = TRUE)
   }
-  gt_extract_afs(test_gt, outdir = af_dir, cols_per_chunk = cols_per_chunk,
+  gt_extract_afs(.x, outdir = af_dir, cols_per_chunk = cols_per_chunk,
                  blgsize = blgsize, quiet= quiet)
   numchunks = length(list.files(af_dir, 'afs.+rds'))
+  browser()
   for(i in 1:numchunks) {
     for(j in i:numchunks) {
       admixtools::afs_to_f2(af_dir, outdir, chunk1 = i, chunk2 = j)

@@ -13,6 +13,13 @@ gen_tibble_packedancestry <- function(x, ...,
     stop("ind file ",ind_file," does not exist")
   }
 
+  if (is.null(backingfile)){
+    backingfile <- sub("\\.geno$", "", x)
+  }
+  if (file_ext(backingfile)=="bk"){
+    backingfile <- bigstatsr::sub_bk(backingfile,"")
+  }
+
   res <- admixtools::read_packedancestrymap(sub("\\.geno$", "", x),
                                                   transpose = TRUE,
                                             ...)
@@ -20,12 +27,14 @@ gen_tibble_packedancestry <- function(x, ...,
   #TODO check that allele_ref and allele_alt are not swapped
   names(res$snp)<-c("name", "chromosome",'genetic_dist','position', 'allele_ref','allele_alt')
 
-
   # using the gen_tibble.matrix method
   new_gen_tbl <- gen_tibble(x = res$geno,
                             indiv_meta = res$ind,
                             loci = res$snp,
-                            backingfile = backingfile, quiet=quiet, valid_alleles = valid_alleles,missing_alleles = missing_alleles)
+                            backingfile = backingfile,
+                            quiet=quiet,
+                            valid_alleles = valid_alleles,
+                            missing_alleles = missing_alleles)
 
   return(new_gen_tbl)
 
