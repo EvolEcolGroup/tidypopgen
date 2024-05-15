@@ -7,7 +7,8 @@
 pairwise_pop_fst(
   .x,
   by_locus = FALSE,
-  method = c("Hudson", "Nei87", "Nei86", "WC84")
+  method = c("Hudson", "Nei87", "Nei86", "WC84"),
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
@@ -18,6 +19,8 @@ or as a single genome wide value obtained by taking the ratio of the mean numera
 and denominator (FALSE, the default).}
 
 \item{method}{one of 'Hudson', 'Nei86', 'Nei87', and 'WC84'}
+
+\item{n_cores}{number of cores to be used, it defaults to \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
 \value{
 a tibble of genome-wide pairwise Fst values with each pairwise combination
@@ -25,7 +28,6 @@ as a row if "by_locus=FALSE", else
 a list including the tibble of genome-wide values as well as a matrix with pairwise
 Fst by locus with loci as rows and and pairwise
 combinations as columns.
-a matrix
 }
 \description{
 This function computes pairwise Fst. The following methods are implemented:

@@ -3,6 +3,9 @@
 #include <bigstatsr/BMCodeAcc.h>
 
 /******************************************************************************/
+// Summarise a grouped gen_tibble
+// this only works for diploid data
+
 
 // [[Rcpp::export]]
 ListOf<NumericMatrix> gt_grouped_summaries(Environment BM,

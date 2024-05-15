@@ -4,7 +4,7 @@
 \alias{vcf_to_fbm}
 \title{Convert vcf to FBM.}
 \usage{
-vcf_to_fbm(vcf_path, loci_per_chunk = 1000, backingfile = NULL, quiet = FALSE)
+vcf_to_fbm(vcf_path, loci_per_chunk = 1e+05, backingfile = NULL, quiet = FALSE)
 }
 \arguments{
 \item{vcf_path}{the path to the vcf}
