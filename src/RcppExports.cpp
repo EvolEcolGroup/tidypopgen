@@ -11,6 +11,22 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// gt_grouped_alt_freq_diploid
+ListOf<NumericMatrix> gt_grouped_alt_freq_diploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, int ncores);
+RcppExport SEXP _tidypopgen_gt_grouped_alt_freq_diploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_grouped_alt_freq_diploid(BM, rowInd, colInd, groupIds, ngroups, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SNPHWE2
 double SNPHWE2(int32_t obs_hets, int32_t obs_hom1, int32_t obs_hom2, uint32_t midp);
 RcppExport SEXP _tidypopgen_SNPHWE2(SEXP obs_hetsSEXP, SEXP obs_hom1SEXP, SEXP obs_hom2SEXP, SEXP midpSEXP) {
@@ -106,6 +122,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_tidypopgen_gt_grouped_alt_freq_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_alt_freq_diploid, 6},
     {"_tidypopgen_SNPHWE2", (DL_FUNC) &_tidypopgen_SNPHWE2, 4},
     {"_tidypopgen_SNPHWE_t", (DL_FUNC) &_tidypopgen_SNPHWE_t, 4},
     {"_tidypopgen_SNPHWE_midp_t", (DL_FUNC) &_tidypopgen_SNPHWE_midp_t, 4},

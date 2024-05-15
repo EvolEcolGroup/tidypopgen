@@ -47,7 +47,7 @@ gt_extract_afs <- function(.x, outdir = "./afs", cols_per_chunk = 10, blgsize = 
                                                                         "/afs"), verbose = verbose)
   admixtools::split_mat(afdat$counts, cols_per_chunk = cols_per_chunk,
             prefix = paste0(outdir, "/counts"), verbose = verbose)
-  block_lengths = admixtools::get_block_lengths(afdat$snpfile %>% filter(poly),
+  block_lengths = admixtools::get_block_lengths(afdat$snpfile %>% filter(.data$poly),
                                     blgsize = blgsize)
   block_lengths_a = admixtools::get_block_lengths(afdat$snpfile, blgsize = blgsize)
   saveRDS(block_lengths, file = paste0(outdir, "/block_lengths.rds"))

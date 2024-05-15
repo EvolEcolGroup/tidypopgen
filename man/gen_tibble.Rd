@@ -40,14 +40,17 @@ gen_tibble(
 \arguments{
 \item{x}{can be:
 \itemize{
-\item a string giving the path to a PLINK BED or PED file. The correspective
-BIM and FAM fiel for the BED, or MAP for PED are expected to be in the same
+\item a string giving the path to a PLINK BED or PED file. The associated
+BIM and FAM files for the BED, or MAP for PED are expected to be in the same
 directory and have the same file name.
 \item a string giving the path to a RDS file storing a \code{bigSNP} object from
 the \code{bigsnpr} package (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})
 \item a string giving the path to a vcf file. Note that we currently read the whole
 vcf in memory with \code{vcfR}, so only smallish vcf can be imported. Only biallelic
 SNPs will be considered.
+\item a string giving the path to a packedancestry .geno file. The associated
+.ind and .snp files are expected to be in the same directory and share the
+same file name prefix.
 \item a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
 allele.
 }}

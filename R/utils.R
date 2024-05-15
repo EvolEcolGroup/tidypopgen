@@ -29,3 +29,10 @@ stopifnot_diploid <- function(x){
   }
 }
 
+is_diploid_only <- function(x){
+  if (inherits(x,"gen_tbl")){
+    (attr(x$genotypes,"ploidy")==2)
+  } else {
+    (attr(x,"ploidy")==2)
+  }
+}
