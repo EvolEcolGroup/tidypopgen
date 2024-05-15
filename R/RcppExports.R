@@ -9,6 +9,10 @@ gt_grouped_missingness <- function(BM, rowInd, colInd, groupIds, ngroups, ncores
     .Call(`_tidypopgen_gt_grouped_missingness`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
+gt_grouped_summaries <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
+    .Call(`_tidypopgen_gt_grouped_summaries`, BM, rowInd, colInd, groupIds, ngroups, ncores)
+}
+
 SNPHWE2 <- function(obs_hets, obs_hom1, obs_hom2, midp) {
     .Call(`_tidypopgen_SNPHWE2`, obs_hets, obs_hom1, obs_hom2, midp)
 }

@@ -12,7 +12,7 @@
 
 vcf_to_fbm <- function(
     vcf_path,
-    loci_per_chunk = 1000,
+    loci_per_chunk = 100000,
     backingfile = NULL,
     quiet=FALSE) {
 
@@ -37,15 +37,18 @@ vcf_to_fbm <- function(
   )
   chunks_vec_index <- c(1, chunks_vec)
 
-  # figure out ploidy from the first 1000 markers
+  # figure out ploidy from the first marker
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
-    nrow = min(1000,no_variants),
+    nrow = 1,
     verbose = !quiet
   )
-  temp_gt <- vcfR::extract.gt(temp_vcf)
+  temp_gt <- vcfR::extract.gt(temp_vcf,convertNA = FALSE)
   ploidy <- apply(temp_gt,2,get_ploidy)
-  max_ploidy <- max(ploidy, na.rm = TRUE) # remove NA in case we failed to figure out the ploidy of an individual
+  if (any(is.na(ploidy))){
+    stop("error whilst determining ploidy")
+  }
+  max_ploidy <- max(ploidy)
 
   # set up codes for the appropriate ploidy level
   code256 <- rep(NA_real_, 256)
@@ -142,7 +145,7 @@ poly_indiv_dosage <- function (x, max_ploidy){
   sapply(strsplit(x,"[/|]"),poly_genotype_dosage , max_ploidy)
 }
 
-# get dosages for a genotype x (as a vector of 0 and 1)
+# get dosages for a genotype x and return them as raw for inclusion in the filebacked matrix
 poly_genotype_dosage <- function (x, max_ploidy){
   if (!is.na(x[1]) && x[1]!="."){
     as.raw(sum(as.numeric(x)))

@@ -25,12 +25,11 @@
 #' a list including the tibble of genome-wide values as well as a matrix with pairwise
 #'  Fst by locus with loci as rows and and pairwise
 #' combinations as columns.
-#' a matrix
 #' @export
 
 
 # #' @param tidy boolean whether to return a tidy tibble. Default is TRUE, FALSE
-# #' returns a matrix. THIS IS NOT IMPLEMENT YET.
+# #' returns a matrix. THIS IS NOT IMPLEMENTED YET.
 
 
 pairwise_pop_fst <- function(.x, by_locus=FALSE, method= c("Hudson","Nei87","Nei86","WC84")){
