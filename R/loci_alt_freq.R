@@ -53,7 +53,7 @@ loci_alt_freq.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
                   ngroups = max(dplyr::group_indices(.x)),
                   ncores = n_cores)$freq_alt
     # return a list to mimic a group_map
-    lapply(seq_len(nrow(freq_mat)), function(i) freq_mat[i,])
+    lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[,i])
   } else {
     # TODO this is seriously inefficient, we should replace it with a cpp function
     group_map(.x, .f=~loci_alt_freq(.x,, ...))
@@ -98,7 +98,7 @@ loci_maf.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
                                             ncores = n_cores)$freq_alt
     freq_mat[freq_mat>0.5 & !is.na(freq_mat)] <- 1 - freq_mat[freq_mat>0.5 & !is.na(freq_mat)]
     # return a list to mimic a group_map
-    lapply(seq_len(nrow(freq_mat)), function(i) freq_mat[i,])
+    lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[,i])
   } else {
     # TODO this is seriously inefficient, we should replace it with a cpp function
     group_map(.x, .f=~loci_maf(.x,, ...))

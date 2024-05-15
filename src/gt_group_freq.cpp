@@ -18,21 +18,21 @@ ListOf<NumericMatrix> gt_grouped_alt_freq_diploid(Environment BM,
   size_t n = macc.nrow(); // number of individuals
   size_t m = macc.ncol(); // number of loci
 
-  NumericMatrix freq(ngroups, m);
-  NumericMatrix valid_alleles(ngroups, m);
+  NumericMatrix freq(m, ngroups);
+  NumericMatrix valid_alleles(m, ngroups);
 
 #pragma omp parallel for num_threads(ncores)
   for (size_t j = 0; j < m; j++) {
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
       if (x>-1){
-        freq(groupIds[i],j) += x;
-        valid_alleles(groupIds[i],j) +=2;
+        freq(j, groupIds[i]) += x;
+        valid_alleles(j, groupIds[i]) +=2;
       }
     }
     // now for each group, divide freq by valid_alleles
     for (size_t group_i = 0; group_i < ngroups; group_i++) {
-      freq(group_i,j) = freq(group_i,j) / valid_alleles(group_i,j);
+      freq(j, group_i) = freq(j, group_i) / valid_alleles(j, group_i);
     }
   }
 

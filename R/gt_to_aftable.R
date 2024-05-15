@@ -1,26 +1,36 @@
 # admixtools equivalent functions
 
-gt_to_aftable <- function(.x){
+gt_to_aftable <- function(.x, n_cores = bigstatsr::nb_cores()){
   if (!inherits(.x,"grouped_df")){
     stop (".x should be a grouped df")
   }
+  geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+
+  aftable <- gt_grouped_alt_freq_diploid(BM = geno_fbm,rowInd = .gt_bigsnp_rows(.x),
+                                          colInd = .gt_bigsnp_cols(.x),
+                                          groupIds = dplyr::group_indices(.x)-1,
+                                          ngroups = max(dplyr::group_indices(.x)),
+                                          ncores = n_cores)
+  names(aftable)<-c("afs","counts")
+
   .group_levels = .x %>% group_keys() %>% pull(1)
   # summarise population frequencies
-  pop_freqs_list <- group_map(.x, .f=~.gt_pop_freqs(.x))
+  # pop_freqs_list <- group_map(.x, .f=~.gt_pop_freqs(.x))
+  # afs <- do.call("cbind",lapply(pop_freqs_list,function(x)x[["freq_alt"]]))
+  # counts <- do.call("cbind",lapply(pop_freqs_list,function(x)x[["n"]]))
 
-  afs <- do.call("cbind",lapply(pop_freqs_list,function(x)x[["freq_alt"]]))
-  dimnames(afs)<-list(loci_names(.x),.group_levels)
-  counts <- do.call("cbind",lapply(pop_freqs_list,function(x)x[["n"]]))
-  dimnames(counts)<-list(loci_names(.x),.group_levels)
+  dimnames(aftable$afs)<-list(loci_names(.x),.group_levels)
+  dimnames(aftable$counts)<-list(loci_names(.x),.group_levels)
+
+
+
   loci_new_names <- c(SNP = "name", CHR = "chromosome", POS="position",cm="genetic_dist",
                       A1 = "allele_ref",A2 = "allele_alt")
   snp <- show_loci(.x) %>% select(-all_of("big_index")) %>%
     rename(dplyr::all_of(loci_new_names)) %>% dplyr::relocate(all_of("cm"),.before="POS")
   c("SNP","CHR","cm","POS","A1","A2")
 
-  aftable <- list(afs = afs,
-                  counts = counts,
-                  snpfile = snp)
+  aftable$snpfile <- snp
   return(aftable)
 }
 
