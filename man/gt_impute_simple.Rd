@@ -15,7 +15,7 @@ gt_impute_simple(
 
 \item{method}{one of
 \itemize{
-\item 'median': the most frequent genotype
+\item 'mode': the most frequent genotype
 \item 'mean0': the mean rounded to the nearest integer
 \item 'mean2': the mean rounded to 2 decimal places
 \item 'random': randomly sample a genotype based on the observed allele frequencies
