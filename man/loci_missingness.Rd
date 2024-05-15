@@ -13,7 +13,7 @@ loci_missingness(.x, as_counts = FALSE, ...)
 
 \method{loci_missingness}{vctrs_bigSNP}(.x, as_counts = FALSE, ...)
 
-\method{loci_missingness}{grouped_df}(.x, as_counts = FALSE, ...)
+\method{loci_missingness}{grouped_df}(.x, as_counts = FALSE, n_cores = bigstatsr::nb_cores(), ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of

@@ -58,5 +58,5 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles",{
   loci_maf_map <- test_gt %>% group_map(.f=~loci_maf(.x))
   # use fast cpp code (limit cores to 2)
   loci_maf_grp <- test_gt %>% loci_maf(n_cores=2)
-  all.equal(loci_maf_map, loci_maf_grp)
+  expect_true(all.equal(loci_maf_map, loci_maf_grp))
 })

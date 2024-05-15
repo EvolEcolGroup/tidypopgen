@@ -35,19 +35,9 @@ loci_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep)>1){
-    # # col means for submatrix (all rows, only some columns)
-    # colMeans_sub <- function(X, ind, rows_to_keep) {
-    #   count_na <- function(x){sum(is.na(x))}
-    #   apply(X[rows_to_keep, ind], 2, count_na)
-    # }
-    # n_na <- bigstatsr::big_apply(geno_fbm, a.FUN = colMeans_sub,
-    #                              rows_to_keep = rows_to_keep,
-    #                              ind=attr(.x,"loci")$big_index,
-    #                              a.combine = 'c')
-
     n_na <- bigstatsr::big_counts(geno_fbm, ind.row = rows_to_keep,
                           ind.col = attr(.x,"loci")$big_index)
-    n_na <- n_na[nrow(n_na),]
+    n_na <- n_na[nrow(n_na),] # this should work also with polyploids
     if (!as_counts){
       n_na <- n_na/length(rows_to_keep)
     }
@@ -59,9 +49,22 @@ loci_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
 
 #' @export
 #' @rdname loci_missingness
-loci_missingness.grouped_df <- function(.x, as_counts = FALSE, ...) {
-  # TODO this is seriously inefficient, we need to cast it into a big_apply problem
-  # of maybe it isn't that bad...
-  group_map(.x, .f=~loci_missingness(.x, as_counts=as_counts))
+loci_missingness.grouped_df <- function(.x, as_counts = FALSE,
+                                        n_cores = bigstatsr::nb_cores(), ...) {
+  rlang::check_dots_empty()
+    geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+
+    na_mat <- gt_grouped_missingness(BM = geno_fbm,rowInd = .gt_bigsnp_rows(.x),
+                                            colInd = .gt_bigsnp_cols(.x),
+                                            groupIds = dplyr::group_indices(.x)-1,
+                                            ngroups = max(dplyr::group_indices(.x)),
+                                            ncores = n_cores)
+    group_sizes <- tally(.x) %>% dplyr::pull(dplyr::all_of("n"))
+    if (!as_counts){
+     na_mat <- sweep(na_mat, MARGIN=2, STATS=group_sizes,FUN="/")
+    }
+
+    # return a list to mimic a group_map
+    lapply(seq_len(ncol(na_mat)), function(i) na_mat[,i])
 }
 
