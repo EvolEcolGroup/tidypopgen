@@ -11,7 +11,7 @@
 #' extract information on the alleles for those loci from a [`gen_tibble`].
 #' @rdname show_genotypes
 #' @export
-show_genotypes <- function(.x, ...) {
+show_genotypes <- function(.x, indiv_indices=NULL, loci_indices=NULL, ...) {
   UseMethod("show_genotypes", .x)
 }
 

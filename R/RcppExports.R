@@ -5,6 +5,10 @@ gt_grouped_alt_freq_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, n
     .Call(`_tidypopgen_gt_grouped_alt_freq_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
+gt_grouped_alt_freq_pseudohap <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores) {
+    .Call(`_tidypopgen_gt_grouped_alt_freq_pseudohap`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores)
+}
+
 gt_grouped_missingness <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
     .Call(`_tidypopgen_gt_grouped_missingness`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }

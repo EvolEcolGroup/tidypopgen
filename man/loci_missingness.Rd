@@ -24,6 +24,8 @@ or a \code{\link{gen_tibble}}.}
 should be returned. It defaults to FALSE (i.e. rates are returned by default).}
 
 \item{...}{other arguments passed to specific methods.}
+
+\item{n_cores}{number of cores to be used, it defaults to \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
 \value{
 a vector of frequencies, one per locus

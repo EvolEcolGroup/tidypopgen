@@ -27,6 +27,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gt_grouped_alt_freq_pseudohap
+ListOf<NumericMatrix> gt_grouped_alt_freq_pseudohap(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const IntegerVector& ploidy, int ncores);
+RcppExport SEXP _tidypopgen_gt_grouped_alt_freq_pseudohap(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_grouped_alt_freq_pseudohap(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // gt_grouped_missingness
 NumericMatrix gt_grouped_missingness(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, int ncores);
 RcppExport SEXP _tidypopgen_gt_grouped_missingness(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP) {
@@ -155,6 +172,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_alt_freq_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_alt_freq_diploid, 6},
+    {"_tidypopgen_gt_grouped_alt_freq_pseudohap", (DL_FUNC) &_tidypopgen_gt_grouped_alt_freq_pseudohap, 7},
     {"_tidypopgen_gt_grouped_missingness", (DL_FUNC) &_tidypopgen_gt_grouped_missingness, 6},
     {"_tidypopgen_gt_grouped_summaries", (DL_FUNC) &_tidypopgen_gt_grouped_summaries, 6},
     {"_tidypopgen_SNPHWE2", (DL_FUNC) &_tidypopgen_SNPHWE2, 4},
