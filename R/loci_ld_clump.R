@@ -69,6 +69,11 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
     on.exit(gt_set_imputed(.x, set = FALSE))
   }
 
+  if(!identical(show_loci(.x),.x %>% show_loci() %>% arrange(show_loci(.x)$chromosome,show_loci(.x)$position))){
+    stop("Your loci are not sorted, try using: show_loci(.data) <- .data %>% show_loci() %>% arrange(chromosome,position)")
+
+  }
+
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use

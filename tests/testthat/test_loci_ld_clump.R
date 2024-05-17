@@ -60,3 +60,32 @@ test_that("loci_ld_clump returns the same as bigsnpr",{
 })
 
 
+test_that("loci_ld_clump error unsorted loci",{
+
+  pop_b <- gen_tibble(system.file("extdata/pop_b.bed", package="tidypopgen"),backingfile = tempfile(), quiet = TRUE)
+
+  #now scramble the loci
+  set.seed(123)
+  random_order <- sample(1:17)
+  show_loci(pop_b) <- pop_b %>% select_loci(all_of(random_order)) %>% show_loci()
+
+  #impute
+  pop_b_imputed <- gt_impute_simple(pop_b, method = "mode")
+
+  #ld
+  expect_error(loci_ld_clump(pop_b_imputed, thr_r2 = 0.2), "Your loci are not sorted, try using:")
+  expect_false(identical(show_loci(pop_b_imputed), pop_b_imputed %>% show_loci() %>% arrange(chromosome,position)))
+
+  #reorder the loci
+  show_loci(pop_b_imputed) <- pop_b_imputed %>% show_loci() %>% arrange(chromosome,position)
+
+  #try again
+  expect_equal(loci_ld_clump(pop_b_imputed, thr_r2 = 0.2),
+               c(FALSE,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE))
+  expect_true(identical(show_loci(pop_b_imputed), pop_b_imputed %>% show_loci() %>% arrange(chromosome,position)))
+
+})
+
+
+
+
