@@ -1,6 +1,6 @@
 Package: tidypopgen
 Title: Tidy Population Genetics
-Version: 0.0.0.9011
+Version: 0.0.0.9012
 Authors@R: 
     c(person("Andrea", "Manica", email = "am315@cam.ac.uk", 
            role = c("aut", "cre"),
@@ -37,6 +37,7 @@ Imports:
     vctrs
 Suggests:
     adegenet,
+    admixtools,
     broom,
     hierfstat,
     knitr,
@@ -46,6 +47,8 @@ Suggests:
     readr,
     testthat (>= 3.0.0),
     vcfR
+Remotes:
+    uqrmaie1/admixtools
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LinkingTo: 

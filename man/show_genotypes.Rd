@@ -6,7 +6,7 @@
 \alias{show_genotypes.vctrs_bigSNP}
 \title{Show the genotypes of a \code{gen_tibble}}
 \usage{
-show_genotypes(.x, ...)
+show_genotypes(.x, indiv_indices = NULL, loci_indices = NULL, ...)
 
 \method{show_genotypes}{tbl_df}(.x, indiv_indices = NULL, loci_indices = NULL, ...)
 
@@ -17,11 +17,11 @@ show_genotypes(.x, ...)
 a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
 
-\item{...}{currently unused.}
-
 \item{indiv_indices}{indices of individuals}
 
 \item{loci_indices}{indices of loci}
+
+\item{...}{currently unused.}
 }
 \value{
 a matrix of counts of the alternative alleles (see \code{\link[=show_loci]{show_loci()}}) to

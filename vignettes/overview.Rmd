@@ -31,12 +31,12 @@ be unique for each individual), `population` giving the population the
 individuals belong to (a `factor`), and `genotypes` (stored in a compressed format
 as a File-Backed Matrix, with the vector in the tibble providing the row indices of the matrix
 for each individual). The real data reside on disk, and an attribute `bigsnp` of
-the `genotype` column contains all the information to acess it. There is also an
+the `genotype` column contains all the information to access it. There is also an
 additional attribute , `loci` which provides all the information about the loci,
 including the column indices that represent in each locu in the FBM.
 The vector of row indices and the table of loci can be subsetted and reordered without
 changing the data on disk; thus, any operation on the `gen_tibble` is fast as it
-shapes the indices of the genotyp matrix rather than the matrix itself.  
+shapes the indices of the genotype matrix rather than the matrix itself.  
 The `loci` tibble includes columns `big_index` for the index in the FBM,
 `name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (`a factor`, if known, 
 otherwise set to `NA`), `position` for the position on the chromosome (`numeric`, if known, 
@@ -49,13 +49,12 @@ centimorgans) can be added as columns in the `loci` attribute table.
 [the class type of each column needs checking!!!]
 
 In principle, it is possible to use use multiple ways to compress the genotypes.
-`tidypopgen` currently uses `bigSNP` from the package `bigsnpr`. It is very
-fast and well documented, but it is mostly geared towards diploid data. However,
-with a bit of work it could be expanded to multiple ploidy. NOte that the
-infrastructure is present to adopt alternative compression approaches in the future
-the only constraint is that the data have to be representable as a list of n elements
-where n is the number of individuals (i.e. one object per individual). For example,
-we could keep the data in memory, and have a `SNPBin` object in each element of the list.
+`tidypopgen` currently uses a `bigSNP` object from the package `bigsnpr`. It is very
+fast and well documented, but it is mostly geared towards diploid data. `tidypopgen`
+expands that object to deal with different levels of ploidy, including multiple ploidy
+within a single dataset; however, most functions are currently incompatible with
+ploidy levels other than 2 (but they will return a clear error message and avoid
+computing anything incorrectly).
 
 ## The grammar of population genetics
 

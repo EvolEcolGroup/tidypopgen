@@ -18,7 +18,7 @@ show_loci <- function(.x, ...) {
 show_loci.tbl_df <- function(.x, ...){
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  show_loci(.x$genotypes)
+  show_loci(.x$genotypes, ...)
 }
 
 

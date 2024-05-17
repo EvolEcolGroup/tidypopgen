@@ -15,19 +15,11 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+test_gt <- test_gt %>% dplyr::group_by(population)
 
+.x<-test_gt
+geno_fbm <- .gt_get_bigsnp(.x)$genotypes
 
-test_that("pairwise_pop_fst compute correctly",{
-  test_gt <- test_gt %>% dplyr::group_by(population)
-  test_hier <- gt_as_hierfstat(test_gt)
-  # compare results against hierfstat for Nei87 (Nei86 does not correct for Ho
-  # when computing Ht, so it gives a different result)
-  nei_gt <- test_gt %>% pairwise_pop_fst(method="Nei87")
+foo<-gt_group_freq(geno_fbm, .gt_bigsnp_rows(.x),.gt_bigsnp_cols(.x),dplyr::group_indices(.x)-1,max(dplyr::group_indices(.x)),1)
 
-  nei_hier <- hierfstat::pairwise.neifst(test_hier)
-  # hiefstat values are rounded to 4 dp
-  expect_true(all.equal(tidy_dist_matrix(nei_hier)$value, round(nei_gt$value,4)))
-
-  #pair_fst_locus <- test_gt %>% pairwise_pop_fst(by_locus = TRUE)
-
-})
+foo2 <-  group_map(.x, .f=~.gt_pop_freqs(.x))

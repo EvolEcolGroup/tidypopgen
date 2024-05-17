@@ -3,14 +3,17 @@
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
 #' @param x can be:
-#' - a string giving the path to a PLINK BED or PED file. The correspective
-#' BIM and FAM fiel for the BED, or MAP for PED are expected to be in the same
+#' - a string giving the path to a PLINK BED or PED file. The associated
+#' BIM and FAM files for the BED, or MAP for PED are expected to be in the same
 #' directory and have the same file name.
 #' - a string giving the path to a RDS file storing a `bigSNP` object from
 #' the `bigsnpr` package (usually created with [bigsnpr::snp_readBed()])
 #' - a string giving the path to a vcf file. Note that we currently read the whole
 #' vcf in memory with `vcfR`, so only smallish vcf can be imported. Only biallelic
 #' SNPs will be considered.
+#' - a string giving the path to a packedancestry .geno file. The associated
+#' .ind and .snp files are expected to be in the same directory and share the
+#' same file name prefix.
 #' - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
 #' allele.
 #' @param indiv_meta a list, data.frame or tibble with compulsory columns 'id'
@@ -91,6 +94,12 @@ gen_tibble.character <-
                        missing_alleles= missing_alleles,
                        backingfile = backingfile,
                        quiet = quiet)
+  } else if (tolower(file_ext(x))=="geno"){
+    gen_tibble_packedancestry(x = x, ...,
+                   valid_alleles= valid_alleles,
+                   missing_alleles= missing_alleles,
+                   backingfile = backingfile,
+                   quiet = quiet)
   } else  {
     stop("file_path should be pointing to a either a PLINK .bed or .ped file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
