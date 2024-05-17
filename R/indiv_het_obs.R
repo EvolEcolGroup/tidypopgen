@@ -26,6 +26,7 @@ indiv_het_obs.tbl_df <- function(.x, ...){
 #' @rdname indiv_het_obs
 indiv_het_obs.vctrs_bigSNP <- function(.x, ...){
   rlang::check_dots_empty()
+  stopifnot_diploid(.x)
   # get the FBM
   X <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use

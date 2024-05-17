@@ -127,7 +127,6 @@ augment.gt_dapc <- function(x, data = NULL, k= NULL, ...) {
   }
     pred <- as.data.frame(x$ind.coord)[,1:k]
     names(pred) <- paste0(".fittedLD", seq_len(ncol(pred)))
-    # browser()
     ret <- if (!missing(data) && !is.null(data)) {
       #check that names of the two columns are in sync
       if (!all.equal(data$id, rownames(pred))){

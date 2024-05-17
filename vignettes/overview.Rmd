@@ -367,12 +367,14 @@ write a file in the appropriate format, and return the name of that file on comp
 For example, to export to a PLINK .bed file, we simply use:
 
 ```{r}
-gt_as_plink(example_gt, bedfile =  tempfile("new_bed_"))
+gt_as_plink(example_gt, file =  tempfile("new_bed_"))
 ```
 
 This will also write a .bim and .fam file and save them together with the .bed file. 
 Note that, from the main tibble, only
 on `id`, `population` and `sex` will be preserved in the .fam file.
+It is also possible to write .ped and .raw files by specifying `type="ped"` or
+`type="raw"` in `gt_as_plink()` (see the help page for `gt_as_plink()` for details).
 
 # Merging data
 

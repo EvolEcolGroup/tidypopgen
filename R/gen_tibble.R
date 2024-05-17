@@ -14,9 +14,15 @@
 #' - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
 #' allele.
 #' @param indiv_meta a list, data.frame or tibble with compulsory columns 'id'
-#'  and 'population', plus any additional metadata of interest.
+#'  and 'population', plus any additional metadata of interest. This is only used
+#' if `x` is a genotype matrix. Otherwise this information is extracted directly from
+#' the files.
 #' @param loci a data.frame or tibble, with compulsory columns 'name', 'chromosome',
-#' and 'position','genetic_dist', 'allele_ref' and 'allele_alt'
+#' and 'position','genetic_dist', 'allele_ref' and 'allele_alt'. This is only used
+#' if `x` is a genotype matrix. Otherwise this information is extracted directly from
+#' the files.
+#' @param loci_per_chunk the number of loci processed at a time (currently only used
+#' if `x` is a vcf file)
 #' @param ... if `x` is the name of a vcf file, additional arguments
 #' passed to [vcfR::read.vcfR()]. Otherwise, unused.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
@@ -56,7 +62,7 @@ gen_tibble <-
 #' @rdname gen_tibble
 gen_tibble.character <-
   function(x,
-           ...,
+           ..., loci_per_chunk = 10000,
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0","."),
            backingfile = NULL,
@@ -75,7 +81,7 @@ gen_tibble.character <-
                        backingfile = backingfile,
                        quiet = quiet)
   } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
-    gen_tibble_vcf(x = x, ...,
+    gen_tibble_vcf(x = x, ..., loci_per_chunk = loci_per_chunk,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet)
@@ -86,7 +92,7 @@ gen_tibble.character <-
                        backingfile = backingfile,
                        quiet = quiet)
   } else  {
-    stop("file_path should be pointing to a either a PLINK .bed file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
+    stop("file_path should be pointing to a either a PLINK .bed or .ped file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
 }
 
@@ -116,11 +122,47 @@ gen_tibble_bed_rds <- function(x, ...,
 
   indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
+  # check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
+  if ("ploidy" %in% names(bigsnp_obj$fam)){
+    ploidy <- bigsnp_obj$fam$ploidy
+  } else {
+    ploidy <- 2
+  }
 
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
                                            bigsnp_file = bigsnp_path,
-                                           indiv_id = bigsnp_obj$fam$sample.ID)
+                                           indiv_id = bigsnp_obj$fam$sample.ID,
+                                           ploidy = ploidy)
 
+  # transfer some of the fam info to the metadata table if it is not missing (0 is the default missing value)
+  fam_info <- .gt_get_bigsnp(indiv_meta)$fam
+  if(!all(fam_info$paternal.ID==0)){
+    indiv_meta$paternal_ID <- fam_info$paternal.ID
+    indiv_meta$paternal_ID[indiv_meta$paternal_ID==0]<-NA
+  }
+  if(!all(fam_info$maternal.ID==0)){
+    indiv_meta$maternal_ID <- fam_info$maternal.ID
+    indiv_meta$maternal_ID[indiv_meta$maternal_ID==0]<-NA
+  }
+  if(!all(fam_info$sex==0)){
+    indiv_meta$sex <-   dplyr::case_match(
+      fam_info$sex,
+      1 ~ "male",
+      2 ~ "female",
+      .default = NA,
+      .ptype = factor(levels = c("female", "male"))
+    )
+  }
+  if(!all(fam_info$affection %in% c(0,-9))){
+  indiv_meta$phenotype <- dplyr::case_match(
+    fam_info$affection,
+    1 ~ "control",
+    2 ~ "case",
+    -9 ~ NA,
+    .default = NA,
+    .ptype = factor(levels = c("control", "case"))
+  )
+  }
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
     class = "gen_tbl"
@@ -132,55 +174,18 @@ gen_tibble_bed_rds <- function(x, ...,
 
 }
 
-gen_tibble_vcf <- function(x, ...,
-                           valid_alleles = c("A", "T", "C", "G"),
-                           missing_alleles = c("0","."),
-                           backingfile = NULL, quiet = FALSE) {
-  x <- vcfR::read.vcfR(file = x, verbose = !quiet, ...)
-
-  x <- vcfR::addID(x)
-
-  # create loci table
-  loci <- tibble(name = vcfR::getID(x),
-                 chromosome = vcfR::getCHROM(x),
-                 position = vcfR::getPOS(x),
-                 genetic_dist = 0,
-                 allele_ref = vcfR::getREF(x),
-                 allele_alt = vcfR::getALT(x))
-
-  x <- vcfR::extract.gt(x)
-  x[x=="0|0"] <- 0
-  x[x=="0|1"] <- 1
-  x[x=="1|0"] <- 1
-  x[x=="1|1"] <- 2
-  x[x=="0/0"] <- 0
-  x[x=="0/1"] <- 1
-  x[x=="1/0"] <- 1
-  x[x=="1/1"] <- 2
-  # make sure these are numeric
-  x <- apply(x, 2, as.numeric)
-
-  ind_meta <- tibble(id = colnames(x), population = NA)
-
-  # using the gen_tibble.matrix method
-  new_gen_tbl <- gen_tibble(x = t(x),
-             indiv_meta = ind_meta,
-             loci = loci,
-             backingfile = backingfile)
-  check_allele_alphabet (new_gen_tbl, valid_alleles = valid_alleles,
-                         missing_alleles = missing_alleles)
-  show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
-  return(new_gen_tbl)
-
-}
 
 ###############################################################################
 # matrix method to provide data directly from R
 ###############################################################################
-
+#' @param ploidy the ploidy of the samples (either a single value, or
+#' a vector of values for mixed ploidy). Only used if creating
+#' a gen_tibble from a matrix of data; otherwise, ploidy is determined automatically
+#' from the data as they are read.
 #' @export
 #' @rdname gen_tibble
 gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
+                              ploidy = 2,
                               valid_alleles = c("A", "T", "C", "G"),
                               missing_alleles = c("0","."),
                               backingfile = NULL, quiet = FALSE){
@@ -217,13 +222,13 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   }
 
   # use code for NA in FBM.256
-  x[is.na(x)]<-3
-
+#  x[is.na(x)]<-3
 
   bigsnp_obj <- gt_write_bigsnp_from_dfs(genotypes = x,
                                           indiv_meta = indiv_meta,
                                           loci = loci,
-                                          backingfile = backingfile)
+                                          backingfile = backingfile,
+                                         ploidy = ploidy)
   bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile,".rds")
   if (!quiet){
     message("\n\nusing bigSNP file: ", bigsnp_path)
@@ -234,7 +239,8 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   indiv_meta <- as.list (indiv_meta)
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
                                            bigsnp_file = bigsnp_path,
-                                           indiv_id = bigsnp_obj$fam$sample.ID)
+                                           indiv_id = bigsnp_obj$fam$sample.ID,
+                                           ploidy= ploidy)
 
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
@@ -264,27 +270,51 @@ check_valid_loci <- function(loci_df){
 #' @param loci the loci table
 #' @keywords internal
 gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
-                                      backingfile=NULL){
+                                      backingfile=NULL,
+                                      ploidy = ploidy){
 
   if (is.null(backingfile)){
     backingfile <- tempfile()
   }
   check_valid_loci(loci)
+  # set up code (accounting for ploidy)
+  code256 <- rep(NA_real_, 256)
+  if (length(ploidy>1)){
+    max_ploidy <- max(ploidy)
+  } else {
+    max_ploidy <- ploidy
+  }
+
+  if (is.na(max_ploidy)){
+    stop("'ploidy' can not contain NAs")
+  }
+
+  code256[1:(max_ploidy+1)]<-seq(0,max_ploidy)
+
+  # ensure max_ploidy is appropriate for the data
+  if (any (genotypes>max_ploidy, na.rm=TRUE)){
+    stop("max ploidy is set to ",max_ploidy," but genotypes contains indviduals with greater ploidy")
+  }
+
+
   bigGeno <- bigstatsr::FBM.code256(
     nrow = nrow(genotypes),
     ncol = ncol(genotypes),
-    code = bigsnpr::CODE_012,
+    code = code256,
     backingfile = backingfile,
     init = NULL,
     create_bk = TRUE
   )
-  bigGeno[] <- genotypes
+  genotypes[is.na(genotypes)]<-max_ploidy+1
+  bigGeno[] <- as.raw(genotypes)
   fam <- tibble(family.ID = indiv_meta$population,
                 sample.ID = indiv_meta$id,
                 paternal.ID = 0,
                 maternal.ID = 0,
                 sex = 0,
-                affection = 0)
+                affection = 0,
+                ploidy = ploidy)
+
   map <- tibble(chromosome = loci$chromosome,
                 marker.ID = loci$name,
                 genetic.dist = loci$genetic_dist,
@@ -309,9 +339,11 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
 #' @param bigsnp_obj the bigsnp object
 #' @param bigsnp_file the file to which the bigsnp object was saved
 #' @param indiv_id ids of individuals
+#' @param ploidy the ploidy of the samples (either a single value, or
+#' a vector of values for mixed ploidy).
 #' @returns a vctrs_bigSNP object
 #' @keywords internal
-new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
+new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
   loci <- tibble::tibble(big_index = seq_len(nrow(bigsnp_obj$map)),
                          name = bigsnp_obj$map$marker.ID,
                          chromosome = bigsnp_obj$map$chromosome,
@@ -320,12 +352,19 @@ new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id) {
                          allele_ref = bigsnp_obj$map$allele2,
                          allele_alt = bigsnp_obj$map$allele1
   )
+
+  if (length(unique(ploidy))>1){
+    max_ploidy <- 0
+  } else {
+    max_ploidy <- max(ploidy)
+  }
   vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
                   bigsnp = bigsnp_obj,
                   bigsnp_file = bigsnp_file, # TODO is this redundant with the info in the bigSNP object?
                   bigsnp_md5sum = tools::md5sum(bigsnp_file), # TODO make sure this does not take too long
                   loci=loci,
                   names=indiv_id,
+                  ploidy = max_ploidy,
                   class = "vctrs_bigSNP")
 }
 

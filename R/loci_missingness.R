@@ -28,6 +28,7 @@ loci_missingness.tbl_df <- function(.x, as_counts = FALSE, ...) {
 #' @rdname loci_missingness
 loci_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   rlang::check_dots_empty()
+#  stopifnot_diploid(.x)
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use
@@ -43,8 +44,10 @@ loci_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
     #                              rows_to_keep = rows_to_keep,
     #                              ind=attr(.x,"loci")$big_index,
     #                              a.combine = 'c')
+
     n_na <- bigstatsr::big_counts(geno_fbm, ind.row = rows_to_keep,
-                          ind.col = attr(.x,"loci")$big_index)[4,]
+                          ind.col = attr(.x,"loci")$big_index)
+    n_na <- n_na[nrow(n_na),]
     if (!as_counts){
       n_na <- n_na/length(rows_to_keep)
     }

@@ -10,7 +10,9 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
-test_gt <- gen_tibble(x = test_genotypes, indiv_meta = test_indiv_meta, loci = test_loci, quiet = TRUE)
+
+test_gt <- gen_tibble(x = test_genotypes, indiv_meta = test_indiv_meta, loci = test_loci,
+                      backingfile = tempfile(), quiet = TRUE)
 
 test_that("ld clumping runs",{
 
