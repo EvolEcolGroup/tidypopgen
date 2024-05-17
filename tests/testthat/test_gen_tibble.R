@@ -85,11 +85,34 @@ test_that("gen_tibble wrong filetype error",{
                "file_path should be pointing to a either a PLINK .bed file,")
 })
 
+test_that("gen_tibble loci is dataframe or tbl",{
+
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                          position=as.integer(c(3,5,65,343,23,456)),
+                          genetic_dist = as.integer(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  wrong_loci_matrix <- as.matrix(test_loci)
+
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                                         loci = wrong_loci_matrix, quiet = TRUE),"loci must be one of data.frame or tbl")
+})
+
 test_that("gen_tibble required id and population",{
   wrong_indiv_meta <- data.frame (x =c("a","b","c"),
                                   y = c("pop1","pop1","pop2"))
   expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = wrong_indiv_meta,
                                          loci = test_loci, quiet = TRUE),"ind_meta does not include the compulsory columns")
+})
+
+test_that("gen_tibble indiv_meta is list, dataframe, or tbl",{
+  wrong_indiv_meta <- data.frame (id=c("a","b","c"),
+                                  population = c("pop1","pop1","pop2"))
+  wrong_indiv_meta_matrix <- as.matrix(wrong_indiv_meta)
+
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = wrong_indiv_meta_matrix,
+                                         loci = test_loci, quiet = TRUE),"indiv_meta must be one of data.frame, tbl, or list")
 })
 
 test_that("gen_tibble identifies wrong dimensions in genotypes",{
