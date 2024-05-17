@@ -72,6 +72,26 @@ test_that("gen_tibble catches invalid alleles",{
 
 })
 
+test_that("if order of loci is changed, order of genotypes also changes",{
+
+  pop_b <- gen_tibble(system.file("extdata/pop_b.bed", package="tidypopgen"),backingfile = tempfile(), quiet = TRUE)
+  #original genotypes
+  pop_b_gen <- show_genotypes(pop_b)
+
+  #now scramble the loci
+  set.seed(123)
+  random_order <- sample(1:17)
+  show_loci(pop_b) <- pop_b %>% select_loci(all_of(random_order)) %>% show_loci()
+
+  #reorder the original genotypes according to 'random_order'
+  pop_b_gen_reordered <- pop_b_gen[,random_order]
+
+  #check that genotypes are now reordered according to random order
+  expect_equal(pop_b_gen_reordered, show_genotypes(pop_b))
+
+
+})
+
 test_that("gen_tibble does not accept character matrix",{
   test_genotypes_c <- rbind(c("1","1","0","1","1","0"),
                             c("2","1","0","0","0","0"),
