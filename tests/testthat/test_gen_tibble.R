@@ -104,7 +104,7 @@ test_that("gen_tibble does not accept character matrix",{
 
 test_that("gen_tibble wrong filetype error",{
   expect_error(test_dfs_gt <- gen_tibble(system.file("extdata/related/test_king.kin0", package = "tidypopgen")),
-               "file_path should be pointing to a either a PLINK .bed file,")
+               "file_path should be pointing ")
 })
 
 test_that("gen_tibble loci is dataframe or tbl",{
