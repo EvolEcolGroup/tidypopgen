@@ -63,13 +63,18 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
                                        ...)
 {
   rlang::check_dots_empty()
-
+  stopifnot_diploid(.x)
+  
   if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
     gt_set_imputed(.x, set = TRUE)
     on.exit(gt_set_imputed(.x, set = FALSE))
   }
 
-  stopifnot_diploid(.x)
+  if(!identical(show_loci(.x),.x %>% show_loci() %>% arrange(show_loci(.x)$chromosome,show_loci(.x)$position))){
+    stop("Your loci are not sorted, try using: show_loci(.data) <- .data %>% show_loci() %>% arrange(chromosome,position)")
+
+  }
+
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use

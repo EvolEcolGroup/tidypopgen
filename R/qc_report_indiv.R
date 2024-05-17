@@ -46,7 +46,7 @@ qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
 #' ready plots.
 #'
 #' @param object an object of class `qc_report_indiv`
-#' @param type the type of plot (`scatter`)
+#' @param type the type of plot (`scatter`,`relatedness`)
 #' @param miss_threshold a threshold for the accepted rate of missingness within
 #' individuals
 #' @param kings_threshold an optional numeric, a threshold of relatedness for the sample
@@ -96,7 +96,6 @@ autoplot_qc_report_indiv <- function(object, miss_threshold = miss_threshold){
 
 autoplot_qc_report_indiv_king <- function(object, kings_threshold = kings_threshold){
 
-  browser()
   king <- as.data.frame(attr(object$to_keep, "king"))
   num_samples <- nrow(king)
   king$row <- colnames(king)

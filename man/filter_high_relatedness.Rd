@@ -30,6 +30,3 @@ This function takes a matrix of x by y individuals containing relatedness
 coefficients and returns the maximum set of individuals that contains no
 relationships above the given threshold.
 }
-\details{
-TODO this function needs a test
-}

@@ -20,7 +20,7 @@ select_loci_if <-function(.data, .sel_logical){
   # and now evaluate it, allowing it to see the data
   loci_sel <- rlang::eval_tidy(sel_defused,data=.data)
   if (!inherits(loci_sel,"logical")){
-    stop(".sel_logical should be a logical (boolean) vector")
+    stop(".sel_logical should be a logical boolean vector")
   }
   if (length(loci_sel) != ncol(show_genotypes(.data$genotypes))){
     stop(".sel_logical should be the same length as the number of loci")

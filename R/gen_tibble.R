@@ -196,7 +196,12 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
     stop ("'0' can not be a valid allele (it is the default missing allele value!)")
   }
 
-  # TODO check object types
+  if (!inherits(loci, "data.frame") || inherits(x, "tbl")){
+    stop("loci must be one of data.frame or tbl")
+  }
+  if (!inherits(indiv_meta, "data.frame") || inherits(x, "tbl") || is.list(x)){
+    stop("indiv_meta must be one of data.frame, tbl, or list")
+  }
   if (!all(c("id", "population") %in% names(indiv_meta))){
     stop("ind_meta does not include the compulsory columns 'id' and 'population")
   }

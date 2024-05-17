@@ -32,15 +32,18 @@ test_that("create gen_tibble from dfs",{
 
 })
 
-test_genotypes_c <- rbind(c("1","1","0","1","1","0"),
-                          c("2","1","0","0","0","0"),
-                          c("2","2","0","0","1","1"))
 
-
-test_that("gen_tibble does not accept character matrix",{
-  expect_error(test_dfs_gt <- gen_tibble(test_genotypes_c, indiv_meta = test_indiv_meta,
-                                         loci = test_loci, quiet = TRUE),"'x' is not a matrix of integers")
+# now create it directly from the dfs
+test_that("create gen_tibble from dfs",{
+  test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+             loci = test_loci, quiet = TRUE)
+  # because of the different backing file info, we cannot use identical on the whole object
+  expect_true(identical(show_genotypes(test_gt), show_genotypes(test_dfs_gt)))
+  expect_true(identical(show_loci(test_gt), show_loci(test_dfs_gt)))
+  expect_true(identical(test_gt %>% select(-genotypes),
+                        test_dfs_gt %>% select(-genotypes)))
 })
+
 
 test_that("gen_tibble catches invalid alleles",{
   test_loci_wrong <- test_loci
@@ -69,6 +72,92 @@ test_that("gen_tibble catches invalid alleles",{
 
 
 })
+
+
+test_that("if order of loci is changed, order of genotypes also changes",{
+
+  pop_b <- gen_tibble(system.file("extdata/pop_b.bed", package="tidypopgen"),backingfile = tempfile(), quiet = TRUE)
+  #original genotypes
+  pop_b_gen <- show_genotypes(pop_b)
+
+  #now scramble the loci
+  set.seed(123)
+  random_order <- sample(1:17)
+  show_loci(pop_b) <- pop_b %>% select_loci(all_of(random_order)) %>% show_loci()
+
+  #reorder the original genotypes according to 'random_order'
+  pop_b_gen_reordered <- pop_b_gen[,random_order]
+
+  #check that genotypes are now reordered according to random order
+  expect_equal(pop_b_gen_reordered, show_genotypes(pop_b))
+
+
+})
+
+test_that("gen_tibble does not accept character matrix",{
+  test_genotypes_c <- rbind(c("1","1","0","1","1","0"),
+                            c("2","1","0","0","0","0"),
+                            c("2","2","0","0","1","1"))
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes_c, indiv_meta = test_indiv_meta,
+                                         loci = test_loci, quiet = TRUE),"'x' is not a matrix of integers")
+})
+
+test_that("gen_tibble wrong filetype error",{
+  expect_error(test_dfs_gt <- gen_tibble(system.file("extdata/related/test_king.kin0", package = "tidypopgen")),
+               "file_path should be pointing ")
+})
+
+test_that("gen_tibble loci is dataframe or tbl",{
+
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                          position=as.integer(c(3,5,65,343,23,456)),
+                          genetic_dist = as.integer(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  wrong_loci_matrix <- as.matrix(test_loci)
+
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                                         loci = wrong_loci_matrix, quiet = TRUE),"loci must be one of data.frame or tbl")
+})
+
+test_that("gen_tibble required id and population",{
+  wrong_indiv_meta <- data.frame (x =c("a","b","c"),
+                                  y = c("pop1","pop1","pop2"))
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = wrong_indiv_meta,
+                                         loci = test_loci, quiet = TRUE),"ind_meta does not include the compulsory columns")
+})
+
+test_that("gen_tibble indiv_meta is list, dataframe, or tbl",{
+  wrong_indiv_meta <- data.frame (id=c("a","b","c"),
+                                  population = c("pop1","pop1","pop2"))
+  wrong_indiv_meta_matrix <- as.matrix(wrong_indiv_meta)
+
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = wrong_indiv_meta_matrix,
+                                         loci = test_loci, quiet = TRUE),"indiv_meta must be one of data.frame, tbl, or list")
+})
+
+test_that("gen_tibble identifies wrong dimensions in genotypes",{
+  wrong_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0))
+  expect_error(test_dfs_gt <- gen_tibble(wrong_genotypes, indiv_meta = test_indiv_meta,
+                                         loci = test_loci, quiet = TRUE),
+               "there is a mismatch between the number of loci in the genotype table x and in the loci table")
+
+})
+
+test_that("gen_tibble identifies wrong loci table columns",{
+  wrong_loci <- data.frame(a=paste0("rs",1:6),
+                          b=paste0("chr",c(1,1,1,1,2,2)),
+                          c=as.integer(c(3,5,65,343,23,456)),
+                          d = as.integer(rep(0,6)),
+                          e = c("A","T","C","G","C","T"),
+                          f = c("T","C", NA,"C","G","A"))
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                                         loci = wrong_loci, quiet = TRUE),
+               "loci does not include the compulsory columns")
+})
+
 
 test_that("gen_tibble from files",{
   bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")

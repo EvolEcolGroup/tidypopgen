@@ -23,11 +23,46 @@ test_that("loci_alt_freq and loci_maf computes correctly",{
 
   # repeat the tests for a subset of the data
   # remove the 2nd individual and the 3rd and 5th snp
-  test_genotypes <- test_genotypes[-2,c(-3,-5)]
-  test_gt <- test_gt %>% filter(id!="b") %>% select_loci(c(-3,-5))
-  freq <- colSums(test_genotypes, na.rm=TRUE)/(c(2,2,2,1)*2)
-  expect_true(all(loci_alt_freq(test_gt$genotypes)==freq))
+  test_genotypes_subset1 <- test_genotypes[-2,c(-3,-5)]
+  test_gt_subset1 <- test_gt %>% filter(id!="b") %>% select_loci(c(-3,-5))
+  freq <- colSums(test_genotypes_subset1, na.rm=TRUE)/(c(2,2,2,1)*2)
+  expect_true(all(loci_alt_freq(test_gt_subset1$genotypes)==freq))
   # convert to minor frequencies
   freq[freq>0.5] <- 1 - freq[freq>0.5]
-  expect_true(all(loci_maf(test_gt$genotypes)==freq))
+  expect_true(all(loci_maf(test_gt_subset1$genotypes)==freq))
+
+  # repeat the tests for a subset where for loci 6, all genotypes are missing
+  # remove the 1st individual and the 3rd and 4th snp
+  test_genotypes_subset2 <- test_genotypes[-1,c(-3,-4)]
+  test_gt_subset2 <- test_gt %>% filter(id!="a") %>% select_loci(c(-3,-4))
+
+  #we expect NaN for loci 6 - as both genotypes are NA
+  freq <- colSums(test_genotypes_subset2, na.rm=TRUE)/(c(2,2,2,NA)*2)
+  expect_equal(loci_alt_freq(test_gt_subset2$genotypes),freq)
+
+  # convert to minor frequencies
+  freq[freq>0.5 & !is.na(freq)] <- 1-freq[freq>0.5 & !is.na(freq)]
+  expect_equal(loci_maf(test_gt_subset2$genotypes),freq)
+
+  #Test NA in centre
+  test_genotypes2 <- rbind(c(1,1,0,1,1,2),
+                          c(2,1,0,NA,0,NA),
+                          c(2,2,0,NA,1,NA))
+
+  test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+
+  # repeat the tests for a subset where for loci 6, all genotypes are missing
+  # remove the 1st individual
+  test_genotypes_subset3 <- test_genotypes2[-1,]
+  test_gt_subset3 <- test_gt2 %>% filter(id!="a") #%>% select_loci(c(-3,-4))
+
+  #we expect NaN for loci 4 and 6 - as both genotypes are NA
+  freq2 <- colSums(test_genotypes_subset3, na.rm=TRUE)/(c(2,2,2,NA,2,NA)*2)
+  expect_equal(loci_alt_freq(test_gt_subset3$genotypes),freq2)
+
+
+  # convert to minor frequencies
+  freq2[freq2>0.5 & !is.na(freq2)] <- 1-freq2[freq2>0.5 & !is.na(freq2)]
+  expect_equal(loci_maf(test_gt_subset3$genotypes),freq2)
+
 })

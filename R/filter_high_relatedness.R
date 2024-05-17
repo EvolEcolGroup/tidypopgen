@@ -4,7 +4,6 @@
 #' coefficients and returns the maximum set of individuals that contains no
 #' relationships above the given threshold.
 #'
-#' TODO this function needs a test
 #'
 #' @param matrix a square symmetric matrix of individuals containing relationship coefficients
 #' @param .x a [`gen_tibble`] object

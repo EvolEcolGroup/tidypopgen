@@ -20,4 +20,17 @@ test_that("snpbin_list_means computes correctly",{
   expect_true(all(loci_missingness(test_gt$genotypes, as_counts = TRUE)==n_na))
   # convert to frequencies
   expect_true(all(loci_missingness(test_gt$genotypes)==n_na/nrow(test_genotypes)))
+
+  #create a subset gt
+  test_gt_subset1 <- test_gt %>% filter(id!="a")
+  #subset genotypes
+  test_genotypes_subset1 <- test_genotypes[-1,]
+
+  n_na <- apply(test_genotypes_subset1, 2, count_na)
+  expect_true(all(loci_missingness(test_gt_subset1$genotypes, as_counts = TRUE)==n_na))
+  # convert to frequencies
+  expect_true(all(loci_missingness(test_gt_subset1$genotypes)==n_na/nrow(test_genotypes_subset1)))
+
+
+
 })

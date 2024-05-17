@@ -25,10 +25,10 @@ data <- gen_tibble(bigsnp_path, quiet = TRUE)
 
 ## File management and reading data:
 
-| PLINK                         | `tidypopgen`                                   |
+| PLINK                         | `tidypopgen`                                 |
 |-------------------------------|----------------------------------------------|
-| --make-bed --out              | `gt_as_plink(data, bedfile = my_file)`    |
-| --recode                      | (TODO? generate .ped and .raw again)         |
+| --make-bed --out              | `gt_as_plink(data, bedfile = my_file)`       |
+| --recode                      | `gt_as_plink(data, bedfile = my_file         |
 | --allele1234 and --alleleACGT | See `gen_tibble()` parameter 'valid_alleles' |
 
 PLINK flags --update-alleles, --allele1234, and --alleleACGT, all alter the coding of alleles. In `tidypopgen`, valid alleles are supplied when reading in a `gen_tibble`.

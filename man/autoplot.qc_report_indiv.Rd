@@ -15,7 +15,7 @@
 \arguments{
 \item{object}{an object of class \code{qc_report_indiv}}
 
-\item{type}{the type of plot (\code{scatter})}
+\item{type}{the type of plot (\code{scatter},\code{relatedness})}
 
 \item{miss_threshold}{a threshold for the accepted rate of missingness within
 individuals}

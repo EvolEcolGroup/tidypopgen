@@ -28,7 +28,7 @@ gt_uses_imputed <- function (x){
     x <- x$genotypes
   }
   if (!gt_has_imputed(x)){
-    stop("this dataset does not have any imputated values to use!")
+    stop("this dataset does not have any imputed values to use!")
   }
   if (identical(attr(x,"bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) |
       identical(attr(x,"bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)){
