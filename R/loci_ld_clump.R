@@ -63,7 +63,8 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
                                        ...)
 {
   rlang::check_dots_empty()
-
+  stopifnot_diploid(.x)
+  
   if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
     gt_set_imputed(.x, set = TRUE)
     on.exit(gt_set_imputed(.x, set = FALSE))

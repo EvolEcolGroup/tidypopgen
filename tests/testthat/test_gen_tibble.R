@@ -14,7 +14,7 @@ test_loci <- data.frame(name=paste0("rs",1:6),
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 # this also tests show_genotypes and show_loci
-test_that("create gen_tibble from bed",{
+test_that("create gen_tibble from dfs",{
   expect_true(inherits(test_gt,"gen_tbl"))
   # we can extract the genotypes correctly
   extracted_genotypes <- test_gt %>% show_genotypes()
@@ -31,6 +31,7 @@ test_that("create gen_tibble from bed",{
   expect_false(inherits(test_drop,"gen_tbl"))
 
 })
+
 
 # now create it directly from the dfs
 test_that("create gen_tibble from dfs",{
@@ -71,6 +72,7 @@ test_that("gen_tibble catches invalid alleles",{
 
 
 })
+
 
 test_that("if order of loci is changed, order of genotypes also changes",{
 
@@ -157,4 +159,32 @@ test_that("gen_tibble identifies wrong loci table columns",{
 })
 
 
+test_that("gen_tibble from files",{
+  bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  pop_a_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+  # now read the dosages created by plink when saving in raw format
+  raw_file_pop_a <- read.table(system.file("extdata/pop_a.raw", package = "tidypopgen"), header= TRUE)
+  mat <- as.matrix(raw_file_pop_a[,7:ncol(raw_file_pop_a)])
+  mat <- unname(mat)
+  expect_true(all.equal(mat,show_genotypes(pop_a_gt)))
+  # now read in the ped file
+  ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
+  pop_a_ped_gt <- gen_tibble(ped_path, quiet=TRUE,backingfile = tempfile())
+  # because ref and alt are defined based on which occurs first in a ped, some alleles will be swapped
+  equal_geno <- show_genotypes(pop_a_gt)==show_genotypes(pop_a_ped_gt)
+  not_equal <- which(!apply(equal_geno,2,all))
+  # check that the alleles for loci that are mismatched are indeed swapped
+  expect_true(all(show_loci(pop_a_gt)$allele_alt[not_equal] == show_loci(pop_a_ped_gt)$allele_ref[not_equal]))
+  # check that the mismatches are all in the homozygotes
+  expect_true(all(abs(show_genotypes(pop_a_gt)[, not_equal]-show_genotypes(pop_a_ped_gt)[, not_equal]) %in% c(0,2)))
+  # now read in vcf
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  pop_a_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
+  expect_true(all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_vcf_gt)))
+  # reload it in chunks
+  pop_a_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), loci_per_chunk=2)
+  expect_true(all.equal(show_genotypes(pop_a_vcf_gt2),show_genotypes(pop_a_vcf_gt)))
+  expect_true(all.equal(show_loci(pop_a_vcf_gt2),show_loci(pop_a_vcf_gt)))
+  # we should add similar tests for pop b, which has missing data
 
+})

@@ -18,9 +18,9 @@
 gt_impute_simple <-function(x,
                             method = c("mode", "mean0", "mean2", "random"),
                             n_cores = 1) {
-  if (!identical(attr(x$genotypes,"bigsnp")$genotypes$code256,bigsnpr::CODE_012)){
-    if (identical(attr(x$genotypes,"bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) |
-        identical(attr(x$genotypes,"bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)){
+  if (!all.equal(attr(x$genotypes,"bigsnp")$genotypes$code256,bigsnpr::CODE_012)){
+    if (all.equal(attr(x$genotypes,"bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) |
+        all.equal(attr(x$genotypes,"bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)){
       stop("object x is already imputed")
     } else {
       stop ("object x uses a code256 that is not compatible with imputation")

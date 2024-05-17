@@ -4,7 +4,13 @@
 \alias{gt_write_bigsnp_from_dfs}
 \title{Create a bigSNP object from data.frames}
 \usage{
-gt_write_bigsnp_from_dfs(genotypes, indiv_meta, loci, backingfile = NULL)
+gt_write_bigsnp_from_dfs(
+  genotypes,
+  indiv_meta,
+  loci,
+  backingfile = NULL,
+  ploidy = ploidy
+)
 }
 \arguments{
 \item{genotypes}{a genotype matrix}
