@@ -188,3 +188,37 @@ test_that("gen_tibble from files",{
   # we should add similar tests for pop b, which has missing data
 
 })
+
+test_that("gen_tibble from files with missingness",{
+  bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+  pop_b_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+  # now read the dosages created by plink when saving in raw format
+  raw_file_pop_b <- read.table(system.file("extdata/pop_b.raw", package = "tidypopgen"), header= TRUE)
+  mat <- as.matrix(raw_file_pop_b[,7:ncol(raw_file_pop_b)])
+  mat <- unname(mat)
+  expect_true(all.equal(mat,show_genotypes(pop_b_gt)))
+  # now read in the ped file
+  ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
+  pop_b_ped_gt <- gen_tibble(ped_path, quiet=TRUE,backingfile = tempfile())
+  # because ref and alt are defined based on which occurs first in a ped, some alleles will be swapped
+  equal_geno <- show_genotypes(pop_b_gt)==show_genotypes(pop_b_ped_gt)
+  not_equal <- which(!apply(equal_geno,2,all))
+  # check that the alleles for loci that are mismatched are indeed swapped
+  expect_true(all(show_loci(pop_b_gt)$allele_alt[not_equal] == show_loci(pop_b_ped_gt)$allele_ref[not_equal]))
+  # check that the mismatches are all in the homozygotes
+  expect_true(all(abs(show_genotypes(pop_b_gt)[, not_equal]-show_genotypes(pop_b_ped_gt)[, not_equal]) %in% c(0,2)))
+  # now read in vcf
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
+  expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_gt)))
+  # reload it in chunks
+  pop_b_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), loci_per_chunk=2)
+  expect_true(all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt)))
+  expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
+
+  #column names are different here - see
+  show_loci(pop_b_vcf_gt)$name
+  #compared to
+  show_loci(pop_b_vcf_gt2)$name
+
+})
