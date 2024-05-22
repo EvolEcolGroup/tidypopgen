@@ -114,12 +114,13 @@ vcf_to_fbm <- function(
 
     # create loci table
     loci <- rbind(loci, tibble(
-                   chromosome = vcfR::getCHROM(temp_vcf)[bi],
-                   marker.ID = vcfR::getID(temp_vcf)[bi],
+                   chromosome = unname(vcfR::getCHROM(temp_vcf)[bi]),
+                   marker.ID = unname(vcfR::getID(temp_vcf)[bi]), # remove names as it does have ID as a name
                    genetic.dist = 0,
                    physical.pos = vcfR::getPOS(temp_vcf)[bi],
-                   allele1 = vcfR::getALT(temp_vcf)[bi],
-                   allele2 = vcfR::getREF(temp_vcf)[bi]))
+                   allele1 = unname(vcfR::getALT(temp_vcf)[bi]),
+                   allele2 = unname(vcfR::getREF(temp_vcf)[bi])))
+
   }
   # save it
   file_backed_matrix$save()

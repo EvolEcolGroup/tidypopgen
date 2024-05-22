@@ -216,9 +216,4 @@ test_that("gen_tibble from files with missingness",{
   expect_true(all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt)))
   expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
 
-  #column names are different here - see
-  show_loci(pop_b_vcf_gt)$name
-  #compared to
-  show_loci(pop_b_vcf_gt2)$name
-
 })
