@@ -1,7 +1,7 @@
 test_that("augment_loci adds to loci_table",{
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(bed_file,  backingfile = tempfile("missing_"),quiet=TRUE)
-  missing_gt <- gt_impute_simple(missing_gt)
+  missing_gt <- gt_impute_simple(missing_gt, method = "mode")
   missing_pca <- missing_gt %>% gt_pca_partialSVD()
 
   #Add loadings to loci table

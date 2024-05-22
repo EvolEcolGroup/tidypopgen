@@ -4,11 +4,7 @@
 \alias{gt_impute_simple}
 \title{Simple imputation based on allele frequencies}
 \usage{
-gt_impute_simple(
-  x,
-  method = c("mode", "mean0", "mean2", "random"),
-  n_cores = 1
-)
+gt_impute_simple(x, method = c("mode", "mean0", "random"), n_cores = 1)
 }
 \arguments{
 \item{x}{a \link{gen_tibble} with missing data}
@@ -17,7 +13,6 @@ gt_impute_simple(
 \itemize{
 \item 'mode': the most frequent genotype
 \item 'mean0': the mean rounded to the nearest integer
-\item 'mean2': the mean rounded to 2 decimal places
 \item 'random': randomly sample a genotype based on the observed allele frequencies
 }}
 

@@ -8,7 +8,7 @@ test_that("impute and use the imputation",{
   expect_error(gt_uses_imputed(missing_gt),
                "this dataset does not have any imputed")
   # now impute
-  missing_gt <- gt_impute_simple(missing_gt)
+  missing_gt <- gt_impute_simple(missing_gt, method = "mode")
   # we have imputed
   expect_true(gt_has_imputed(missing_gt))
   # but don't use it by default
@@ -98,15 +98,15 @@ test_that("gt_impute imputes properly",{
 
 
   #impute method = 'mean2'
-  imputed_gt_mean2 <- gt_impute_simple(test_gt, method = "mean2")
+  #imputed_gt_mean2 <- gt_impute_simple(test_gt, method = "mean2")
 
   #set imputation
-  gt_set_imputed(imputed_gt_mean2, TRUE)
-  expect_false(any(is.na(show_genotypes(imputed_gt_mean2))))
+  #gt_set_imputed(imputed_gt_mean2, TRUE)
+  #expect_false(any(is.na(show_genotypes(imputed_gt_mean2))))
 
   #check imputed 'mean2' method
-  means2 <- round(colMeans(test_genotypes, na.rm = TRUE), digit = 2)
-  expect_true(all(means2 == show_genotypes(imputed_gt_mean2)[6,]))
+  #means2 <- round(colMeans(test_genotypes, na.rm = TRUE), digit = 2)
+  #expect_true(all(means2 == show_genotypes(imputed_gt_mean2)[6,]))
 
 })
 

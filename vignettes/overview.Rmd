@@ -489,7 +489,7 @@ sophisticated imputation (e.g. of low coverage genomes).
 
 We use the simple approach to fix our dataset:
 ```{r}
-missing_gt <- gt_impute_simple(missing_gt)
+missing_gt <- gt_impute_simple(missing_gt, method = "mode")
 ```
 
 We can now check that our dataset has indeed been imputed:

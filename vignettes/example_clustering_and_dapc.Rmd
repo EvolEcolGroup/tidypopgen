@@ -73,7 +73,7 @@ Ok, we jumped too quickly. There are missing data, and we need first
 to impute them:
 
 ```{r}
-anole_gt <- gt_impute_simple(anole_gt)
+anole_gt <- gt_impute_simple(anole_gt, method = "mode")
 ```
 
 And now:
