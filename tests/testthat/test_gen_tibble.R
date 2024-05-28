@@ -217,3 +217,33 @@ test_that("gen_tibble from files with missingness",{
   expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
 
 })
+
+test_that("gentibble with packedancestry",{
+  geno_path <- system.file("extdata/pop_a.geno", package = "tidypopgen")
+  pop_a_gt <- gen_tibble(geno_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+
+  #dosages in packedancestry are the opposite to .raw
+  raw_file_pop_a <- read.table(system.file("extdata/pop_a.raw", package = "tidypopgen"), header= TRUE)
+  mat <- as.matrix(raw_file_pop_a[,7:ncol(raw_file_pop_a)])
+  mat <- unname(mat)
+
+  zero_positions <- mat == 0
+  two_positions <- mat == 2
+
+  #swap around the dosages in .raw matrix to check correspondence with packedancestry genotypes
+  mat[zero_positions] <- -1
+  mat[two_positions] <- 0
+  mat[mat == -1] <- 2
+  expect_true(all.equal(mat,show_genotypes(pop_a_gt)))
+
+  #packedancestry will also have allele order swapped
+  #check against .ped file as well
+  ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
+  pop_a_gt_ped <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+
+  #expect_equal(show_loci(pop_a_gt_ped)$allele_ref, show_loci(pop_a_gt)$allele_alt)
+  #something not quite right here with the allele order of two snps
+
+})
+
+

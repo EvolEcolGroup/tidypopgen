@@ -2,6 +2,10 @@
 #'
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
+#'
+#' When loading packedancestry files, missing alleles will be converted from
+#' 'X' to NA
+#'
 #' @param x can be:
 #' - a string giving the path to a PLINK BED or PED file. The associated
 #' BIM and FAM files for the BED, or MAP for PED are expected to be in the same

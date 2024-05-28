@@ -102,3 +102,7 @@ an object of the class \code{gen_tbl}.
 A \code{gen_tibble} stores genotypes for individuals in a tidy format. DESCRIBE
 here the format
 }
+\details{
+When loading packedancestry files, missing alleles will be converted from
+'X' to NA
+}
