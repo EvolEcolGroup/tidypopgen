@@ -90,8 +90,9 @@ gt_pca_autoSVD <- function(x, k = 10,
     infos_pos <- rep(0,nrow(.gt_get_bigsnp(x)$map))
     infos_pos[.gt_bigsnp_cols(x)] <- show_loci(x)$position
   }
-  # hack
-  library(bigsnpr)
+  # hack to get around the use of a dataset by bigsnpr
+  # TODO remove after bignspr is patched
+  attachNamespace("bigsnpr")
   this_svd  <- bigsnpr::snp_autoSVD(X$genotypes,
                       infos.chr = infos_chr,
                       infos.pos = infos_pos,
