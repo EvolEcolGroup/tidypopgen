@@ -402,8 +402,11 @@ summary.vctrs_bigSNP <- function(object, ...){
 #' @keywords internal
 
 stopifnot_gen_tibble <- function(.x){
-  if ("gentoypes" %in% names(.x)){
-    stopifnot(.x$genotypes)
+  if (!"genotypes" %in% names(.x)){
+    stop("not a gen_tibble, 'genotype' column is missing")
+  }
+  if (!inherits(.x$genotypes,"vctrs_bigSNP")){
+    stop("not a gen_tibble, the genotype column is not of class vctrs_bigSNP")
   }
 }
 

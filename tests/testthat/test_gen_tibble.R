@@ -285,7 +285,8 @@ test_that("gentibble with packedancestry",{
 
 test_that("gentibble with packedancestry and missingness",{
   geno_path <- system.file("extdata/pop_b.geno", package = "tidypopgen")
-  pop_b_gt <- gen_tibble(geno_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+  pop_b_gt <- gen_tibble(geno_path, quiet=TRUE, backingfile = tempfile(),
+                         valid_alleles = c("A","G","C","T"))
 
   #dosages in packedancestry are the opposite to .raw
   raw_file_pop_b <- read.table(system.file("extdata/pop_b.raw", package = "tidypopgen"), header= TRUE)
@@ -303,7 +304,8 @@ test_that("gentibble with packedancestry and missingness",{
 
   #read in ped to check loci
   ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
-  pop_b_gt_ped <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+  pop_b_gt_ped <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile(),
+                             valid_alleles = c("A","G","C","T"))
 
   #allele_alt and allele_ref are also swapped in packedancestry
   #snps 15 and 16 both have their genotypes and loci switched
