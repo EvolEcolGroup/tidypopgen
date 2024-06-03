@@ -1,9 +1,9 @@
 #' Discriminant Analysis of Principal Components for gen_tibble
 #'
 #' This function implements the Discriminant Analysis of Principal Components
-#' (DAPC, Jombart et al. 2010). This method descibes the diversity between
+#' (DAPC, Jombart et al. 2010). This method describes the diversity between
 #' pre-defined groups. When groups are unknown, use [gt_cluster_pca()] to
-#' infer genetic clusters. See 'details' section for a succint
+#' infer genetic clusters. See 'details' section for a succinct
 #' description of the method, and the vignette in the package `adegenet`
 #' ("adegenet-dapc") for a
 #' tutorial. This function returns objects of class [`adegenet::dapc`] which are compatible

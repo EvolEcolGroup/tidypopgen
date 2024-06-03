@@ -70,7 +70,7 @@ precomputing f2 from a \code{\link{gen_tibble}}).}
 \item{outpop}{Keep only SNPs which are heterozygous in this population}
 
 \item{outpop_scale}{Scale f2-statistics by the inverse \code{outpop}
-heteroygosity (\code{1/(p*(1-p))}). Providing \code{outpop} and setting
+heterozygosity (\code{1/(p*(1-p))}). Providing \code{outpop} and setting
 \code{outpop_scale} to \code{TRUE} will give the same results as the original
 \emph{qpGraph} when the \code{outpop} parameter has been set, but it has the
 disadvantage of treating one population different from the others. This

@@ -39,7 +39,7 @@
 #' precomputing f2 from a [`gen_tibble`]).
 #' @param outpop Keep only SNPs which are heterozygous in this population
 #' @param outpop_scale Scale f2-statistics by the inverse `outpop`
-#' heteroygosity (`1/(p*(1-p))`). Providing `outpop` and setting
+#' heterozygosity (`1/(p*(1-p))`). Providing `outpop` and setting
 #' `outpop_scale` to `TRUE` will give the same results as the original
 #' *qpGraph* when the `outpop` parameter has been set, but it has the
 #' disadvantage of treating one population different from the others. This
