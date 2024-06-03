@@ -33,7 +33,7 @@ as a File-Backed Matrix, with the vector in the tibble providing the row indices
 for each individual). The real data reside on disk, and an attribute `bigsnp` of
 the `genotype` column contains all the information to access it. There is also an
 additional attribute , `loci` which provides all the information about the loci,
-including the column indices that represent in each locu in the FBM.
+including the column indices that represent in each locus in the FBM.
 The vector of row indices and the table of loci can be subsetted and reordered without
 changing the data on disk; thus, any operation on the `gen_tibble` is fast as it
 shapes the indices of the genotype matrix rather than the matrix itself.  
@@ -431,7 +431,7 @@ appended for the `bigSNP` file and its backing file; or let the function
 save the files in the same path as the original backing file of the first object).
 
 NOTE: In this vignette, we save to the temporary directory, but in real life you want to save in
-a directory where you will be able to retrive the file at a later date!!!
+a directory where you will be able to retrieve the file at a later date!!!
 ```{r}
 # #create merge
 merged_gt <- rbind(pop_a_gt, pop_b_gt, flip_strand = TRUE,

@@ -52,7 +52,7 @@ The ids from the VCF are in a different format than the ones we just got from
 the pop csv. We need a bit of string wrangling, but it looks easy, we just need
 to remove "punc_":
 
-Let us simplify the ids, which wll have a "punc_" prefix
+Let us simplify the ids, which will have a "punc_" prefix
 ```{r}
 anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
 anole_gt
@@ -273,7 +273,7 @@ There is no strong outlier, suggesting drift across many loci has created the si
 picked up by DAPC.
 
 Note that `anole_dapc` is of class `gt_dapc`, which is a subclass of `dapc` 
-from `adegenet`. This means that funcitons written to work on `dapc` objects
+from `adegenet`. This means that functions written to work on `dapc` objects
 should work out of the box (the only exception is `adegenet::predict.dapc`, 
 which does not work because the underlying pca object is different). For example,
 we can obtain the standard dapc plot with:

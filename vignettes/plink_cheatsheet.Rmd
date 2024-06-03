@@ -91,7 +91,7 @@ gt_king() implements the KING-robust estimator of kinship equivalent to --kinshi
 |-------------|--------------------------------------------------------|
 | --bmerge    | `rbind()`                                              |
 | --flip-scan | `rbind_dry_run()`                                      |
-| --flip      | use 'flip_stran=TRUE' in `rbind()`                     |
+| --flip      | use 'flip_strand = TRUE' in `rbind()`                     |
 
 In PLINK, data merging can fail due to strand inconsistencies that are not addressed prior to merging. PLINK documentation suggests to users to try a 'trial flip' of data to address this, and then to 'unflip' any errors that remain. In `tidypopgen`, when data are merged with rbind, strand inconsistencies are identified and automatically flipped, avoiding multiple rounds of flipping before merging.
 
