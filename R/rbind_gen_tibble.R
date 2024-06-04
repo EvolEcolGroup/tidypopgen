@@ -145,8 +145,10 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   merged_tbl$genotypes <- vctrs::new_vctr(match(indivs_with_big_names,merged_snp$fam$sample.ID), # TODO check that this is the correct order!!!!
                   bigsnp = merged_snp,
                   bigsnp_file = merged_rds,
+                  bigsnp_md5sum = tools::md5sum(merged_rds),
                   loci=new_ref_loci_tbl,
                   names=indivs_with_big_names,
+                  ploidy = 2, # TODO hardcoded as we currently only work for diploid
                   class = "vctrs_bigSNP")
 
   # TODO check that the snp is saved (it should be), and let the user know what the new
