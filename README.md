@@ -24,7 +24,7 @@ devtools::install_github("EvolEcolGroup/tidypopgen")
 
 There are a several vignettes designed to teach you how to use `tidypopgen`. 
 The
-'overview' vignette explains how the data structures are designes, and provides a illustration
+'overview' vignette explains how the data structures are designed, and provides a illustration
 of the grammar used to manipulate individuals and loci. 
 
 The 'example workflow' vignette provides a fully annotated example of how to 

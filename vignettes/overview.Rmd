@@ -162,7 +162,7 @@ the column `genotypes` has to be provided when they are used within
 example_gt %>% mutate(het_obs = indiv_het_obs(genotypes))
 ```
 
-There are a number of functions that extimate quantities at the *individual* 
+There are a number of functions that estimate quantities at the *individual* 
 level, and they are prefixed by `indiv_`. 
 
 
