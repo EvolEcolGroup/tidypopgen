@@ -53,8 +53,9 @@ pairwise_pop_fst <- function(.x, by_locus=FALSE,
 
 pairwise_pop_fst_hudson <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_cores()){
 
-  message("this function is not properly tested yet!!!")
-  message("if you have time, test the results against something like hierfstat and create a unit test")
+  #message("this function is not properly tested yet!!!")
+  #message("if you have time, test the results against something like hierfstat and create a unit test")
+  message("Whilst this function should work, it has not been extensively tested. Check your results to ensure they make sense")
   # get the populations
   .group_levels = .x %>% group_keys()
   # create all combinations
@@ -107,8 +108,9 @@ pairwise_pop_fst_hudson <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_
 # based on the formula in Bhatia 2013
 pairwise_pop_fst_wc84 <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_cores()){
 
-  message("this function is not properly tested yet!!!")
-  message("if you have time, test the results against something like hierfstat and create a unit test")
+  #message("this function is not properly tested yet!!!")
+  #message("if you have time, test the results against something like hierfstat and create a unit test")
+  message("Whilst this function should work, it has not been extensively tested. Check your results to ensure they make sense")
   # get the populations
   .group_levels = .x %>% group_keys()
   # create all combinations
@@ -162,8 +164,9 @@ pairwise_pop_fst_wc84 <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_co
 # based on the formula in Bhatia 2013
 pairwise_pop_fst_nei86 <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_cores()){
 
-  message("this function is not properly tested yet!!!")
-  message("if you have time, test the results against something like hierfstat and create a unit test")
+  #message("this function is not properly tested yet!!!")
+  #message("if you have time, test the results against something like hierfstat and create a unit test")
+  message("Whilst this function should work, it has not been extensively tested. Check your results to ensure they make sense")
   # get the populations
   .group_levels = .x %>% group_keys()
   # create all combinations
