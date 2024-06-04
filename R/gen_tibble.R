@@ -140,6 +140,7 @@ gen_tibble_bed_rds <- function(x, ...,
     ploidy <- bigsnp_obj$fam$ploidy
   } else {
     ploidy <- 2
+    bigsnp_obj$fam$ploidy <- 2
   }
 
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
