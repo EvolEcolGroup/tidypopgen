@@ -33,7 +33,7 @@ show_genotypes.vctrs_bigSNP <- function(.x, indiv_indices=NULL, loci_indices=NUL
     indiv_big_index <-  indiv_big_index[indiv_indices]
   }
   loci_big_index <- show_loci(.x)$big_index
-  if (!is.null(indiv_indices)){
+  if (!is.null(loci_indices)){
     loci_big_index <-  loci_big_index[loci_indices]
   }
   attr(.x,"bigsnp")$genotypes[indiv_big_index, loci_big_index]
