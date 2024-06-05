@@ -52,7 +52,7 @@ The ids from the VCF are in a different format than the ones we just got from
 the pop csv. We need a bit of string wrangling, but it looks easy, we just need
 to remove "punc_":
 
-Let us simplify the ids, which wll have a "punc_" prefix
+Let us simplify the ids, which will have a "punc_" prefix
 ```{r}
 anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
 anole_gt
@@ -69,7 +69,7 @@ to do any QC. Let us jump straight into analysis and run a PCA:
 ```{r, error=TRUE}
 anole_pca <- anole_gt %>% gt_pca_partialSVD(k=30)
 ```
-Ok, we jumped too quickly. There are missing data, and we need first 
+OK, we jumped too quickly. There are missing data, and we need first 
 to impute them:
 
 ```{r}
@@ -131,9 +131,9 @@ anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) +
   geom_point()
 ```
 We can see that the three population do separate nicely on the PCA, with just one individual
-from Wam sitting inbetween the other Wam individuals and those from Eam.
+from Wam sitting in-between the other Wam individuals and those from Eam.
 
-It is also possible to inspect which loci contibute the most to a given component:
+It is also possible to inspect which loci contribute the most to a given component:
 
 ```{r}
 autoplot(anole_pca, type = "loadings")
@@ -142,7 +142,7 @@ autoplot(anole_pca, type = "loadings")
 By using information from the loci table, we could easily embellish the plot, for example
 colouring by chromosome or maf.
 
-For more complect plots, we can augment the loci table with the loadings using `augment_loci()`:
+For more complex plots, we can augment the loci table with the loadings using `augment_loci()`:
 ```{r}
 anole_gt_load <- augment_loci(anole_pca, data= anole_gt)
 
@@ -155,7 +155,7 @@ scaling well to very large datasets. It does not have the assumptions of STRUCTU
 ADMIXTURE (which also limits its power).
 
 The first step is to determine the number of genetic clusters in the dataset. 
-DAPC can be either used to test a a-prioriy hypothesis, or we can use the data to
+DAPC can be either used to test a a-priori hypothesis, or we can use the data to
 suggest the number of clusters.
 In this
 case, we did not have any strong expectations of structure in our study system, so we will
@@ -273,7 +273,7 @@ There is no strong outlier, suggesting drift across many loci has created the si
 picked up by DAPC.
 
 Note that `anole_dapc` is of class `gt_dapc`, which is a subclass of `dapc` 
-from `adegenet`. This means that funcitons written to work on `dapc` objects
+from `adegenet`. This means that functions written to work on `dapc` objects
 should work out of the box (the only exception is `adegenet::predict.dapc`, 
 which does not work because the underlying pca object is different). For example,
 we can obtain the standard dapc plot with:
