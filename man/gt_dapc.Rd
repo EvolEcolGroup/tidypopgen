@@ -44,9 +44,9 @@ an object of class \link[adegenet:dapc]{adegenet::dapc}
 }
 \description{
 This function implements the Discriminant Analysis of Principal Components
-(DAPC, Jombart et al. 2010). This method descibes the diversity between
+(DAPC, Jombart et al. 2010). This method describes the diversity between
 pre-defined groups. When groups are unknown, use \code{\link[=gt_cluster_pca]{gt_cluster_pca()}} to
-infer genetic clusters. See 'details' section for a succint
+infer genetic clusters. See 'details' section for a succinct
 description of the method, and the vignette in the package \code{adegenet}
 ("adegenet-dapc") for a
 tutorial. This function returns objects of class \code{\link[adegenet:dapc]{adegenet::dapc}} which are compatible

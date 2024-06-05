@@ -188,3 +188,205 @@ test_that("gen_tibble from files",{
   # we should add similar tests for pop b, which has missing data
 
 })
+
+test_that("gen_tibble from files with missingness",{
+  bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+  pop_b_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+  # now read the dosages created by plink when saving in raw format
+  raw_file_pop_b <- read.table(system.file("extdata/pop_b.raw", package = "tidypopgen"), header= TRUE)
+  mat <- as.matrix(raw_file_pop_b[,7:ncol(raw_file_pop_b)])
+  mat <- unname(mat)
+  expect_true(all.equal(mat,show_genotypes(pop_b_gt)))
+  # now read in the ped file
+  ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
+  pop_b_ped_gt <- gen_tibble(ped_path, quiet=TRUE,backingfile = tempfile())
+  # because ref and alt are defined based on which occurs first in a ped, some alleles will be swapped
+  equal_geno <- show_genotypes(pop_b_gt)==show_genotypes(pop_b_ped_gt)
+  not_equal <- which(!apply(equal_geno,2,all))
+  # check that the alleles for loci that are mismatched are indeed swapped
+  expect_true(all(show_loci(pop_b_gt)$allele_alt[not_equal] == show_loci(pop_b_ped_gt)$allele_ref[not_equal]))
+  # check that the mismatches are all in the homozygotes
+  expect_true(all(abs(show_genotypes(pop_b_gt)[, not_equal]-show_genotypes(pop_b_ped_gt)[, not_equal]) %in% c(0,2)))
+  # now read in vcf
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
+  expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_gt)))
+  # reload it in chunks
+  pop_b_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), loci_per_chunk=2)
+  expect_true(all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt)))
+  expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
+
+})
+
+test_that("gentibble with packedancestry",{
+  geno_path <- system.file("extdata/pop_a.geno", package = "tidypopgen")
+  pop_a_gt <- gen_tibble(geno_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+
+  #dosages in packedancestry are the opposite to .raw
+  raw_file_pop_a <- read.table(system.file("extdata/pop_a.raw", package = "tidypopgen"), header= TRUE)
+  mat <- as.matrix(raw_file_pop_a[,7:ncol(raw_file_pop_a)])
+  mat <- unname(mat)
+
+  zero_positions <- mat == 0
+  two_positions <- mat == 2
+
+  #swap around the dosages in .raw matrix to check correspondence with packedancestry genotypes
+  mat[zero_positions] <- -1
+  mat[two_positions] <- 0
+  mat[mat == -1] <- 2
+  expect_true(all.equal(mat,show_genotypes(pop_a_gt)))
+
+  #read in ped to check loci
+  ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
+  pop_a_gt_ped <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+
+  #allele_alt and allele_ref are also swapped in packedancestry
+
+  #snps 6 and 14 both have their genotypes and loci switched
+  #rs1110052 and rs10106770
+  #for these two, the gen_tibble from ped and gen_tibble from geno should therefore match
+
+  keep <- which(show_loci(pop_a_gt_ped)$name %in% c("rs1110052","rs10106770"))
+  pop_a_gt_ped_swap <- pop_a_gt_ped %>% select_loci(all_of(keep))
+  keep <- which(show_loci(pop_a_gt)$name %in% c("rs1110052","rs10106770"))
+  pop_a_gt_swap <- pop_a_gt %>% select_loci(all_of(keep))
+
+  #check loci and genotypes
+  expect_equal(show_loci(pop_a_gt_ped_swap)$allele_ref, show_loci(pop_a_gt_swap)$allele_ref)
+  expect_equal(show_loci(pop_a_gt_ped_swap)$allele_alt, show_loci(pop_a_gt_swap)$allele_alt)
+  expect_equal(show_genotypes(pop_a_gt_ped_swap), show_genotypes(pop_a_gt_swap))
+
+
+  #for the rest, allele ref and allele alt should match
+  keep <- which(!show_loci(pop_a_gt_ped)$name %in% c("rs1110052","rs10106770"))
+  pop_a_gt_ped_snp <- pop_a_gt_ped %>% select_loci(all_of(keep))
+  keep <- which(!show_loci(pop_a_gt)$name %in% c("rs1110052","rs10106770"))
+  pop_a_gt_snp <- pop_a_gt %>% select_loci(all_of(keep))
+
+  expect_equal(show_loci(pop_a_gt_ped_snp)$allele_ref, show_loci(pop_a_gt_snp)$allele_alt)
+  expect_equal(show_loci(pop_a_gt_ped_snp)$allele_alt, show_loci(pop_a_gt_snp)$allele_ref)
+
+  #0 and 2 dosages will be switched
+  ped_gtypes <- show_genotypes(pop_a_gt_ped)
+  ped_gtypes <- unname(ped_gtypes)
+  zero_positions <- ped_gtypes == 0
+  two_positions <- ped_gtypes == 2
+
+  #swap around the dosages in .ped_gtypes matrix to check correspondence with packedancestry genotypes
+  ped_gtypes[zero_positions] <- -1
+  ped_gtypes[two_positions] <- 0
+  ped_gtypes[ped_gtypes == -1] <- 2
+
+  #remove the snps above
+  ped_gtypes <- ped_gtypes[,-c(6,14)]
+  expect_equal(ped_gtypes,show_genotypes(pop_a_gt_snp))
+
+})
+
+test_that("gentibble with packedancestry and missingness",{
+  geno_path <- system.file("extdata/pop_b.geno", package = "tidypopgen")
+  pop_b_gt <- gen_tibble(geno_path, quiet=TRUE, backingfile = tempfile(),
+                         valid_alleles = c("A","G","C","T"))
+
+  #dosages in packedancestry are the opposite to .raw
+  raw_file_pop_b <- read.table(system.file("extdata/pop_b.raw", package = "tidypopgen"), header= TRUE)
+  mat <- as.matrix(raw_file_pop_b[,7:ncol(raw_file_pop_b)])
+  mat <- unname(mat)
+
+  zero_positions <- mat == 0
+  two_positions <- mat == 2
+
+  #swap around the dosages in .raw matrix to check correspondence with packedancestry genotypes
+  mat[zero_positions] <- -1
+  mat[two_positions] <- 0
+  mat[mat == -1] <- 2
+  expect_true(all.equal(mat,show_genotypes(pop_b_gt)))
+
+  #read in ped to check loci
+  ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
+  pop_b_gt_ped <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile(),
+                             valid_alleles = c("A","G","C","T"))
+
+  #allele_alt and allele_ref are also swapped in packedancestry
+  #snps 15 and 16 both have their genotypes and loci switched
+  #rs10106770 and rs11942835
+  #for these two, the gen_tibble from ped and gen_tibble from geno should therefore match
+
+  keep <- which(show_loci(pop_b_gt_ped)$name %in% c("rs11942835","rs10106770"))
+  pop_b_gt_ped_swap <- pop_b_gt_ped %>% select_loci(all_of(keep))
+  keep <- which(show_loci(pop_b_gt)$name %in% c("rs11942835","rs10106770"))
+  pop_b_gt_swap <- pop_b_gt %>% select_loci(all_of(keep))
+
+  #check loci and genotypes
+  expect_equal(show_loci(pop_b_gt_ped_swap)$allele_ref, show_loci(pop_b_gt_swap)$allele_ref)
+  expect_equal(show_loci(pop_b_gt_ped_swap)$allele_alt, show_loci(pop_b_gt_swap)$allele_alt)
+  expect_equal(show_genotypes(pop_b_gt_ped_swap), show_genotypes(pop_b_gt_swap))
+
+  #for the rest, allele ref and allele alt should match
+  keep <- which(!show_loci(pop_b_gt_ped)$name %in% c("rs11942835","rs10106770"))
+  pop_b_gt_ped_snp <- pop_b_gt_ped %>% select_loci(all_of(keep))
+  keep <- which(!show_loci(pop_b_gt)$name %in% c("rs11942835","rs10106770"))
+  pop_b_gt_snp <- pop_b_gt %>% select_loci(all_of(keep))
+
+  #check loci and genotypes
+  expect_equal(show_loci(pop_b_gt_ped_snp)$allele_ref, show_loci(pop_b_gt_snp)$allele_alt)
+  expect_equal(show_loci(pop_b_gt_ped_snp)$allele_alt, show_loci(pop_b_gt_snp)$allele_ref)
+
+  #and genotypes should be the opposite
+
+  #0 and 2 dosages will be switched
+  ped_gtypes <- show_genotypes(pop_b_gt_ped)
+  ped_gtypes <- unname(ped_gtypes)
+  zero_positions <- ped_gtypes == 0
+  two_positions <- ped_gtypes == 2
+
+  #swap around the dosages in .ped_gtypes matrix to check correspondence with packedancestry genotypes
+  ped_gtypes[zero_positions] <- -1
+  ped_gtypes[two_positions] <- 0
+  ped_gtypes[ped_gtypes == -1] <- 2
+
+  #remove the snps above
+  ped_gtypes <- ped_gtypes[,-c(15,16)]
+  expect_equal(ped_gtypes,show_genotypes(pop_b_gt_snp))
+
+})
+
+test_that("check summary stats are the same for gen_tibbles read in different ways",{
+  geno_path <- system.file("extdata/pop_a.geno", package = "tidypopgen")
+  pop_a_gt_geno <- gen_tibble(geno_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+
+  bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  pop_a_gt_bed <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+
+  ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
+  pop_a_gt_ped <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+
+  # MAF
+  bed_maf <- pop_a_gt_bed %>% loci_maf()
+  ped_maf <- pop_a_gt_ped %>% loci_maf()
+  geno_maf <- pop_a_gt_geno %>% loci_maf()
+  expect_equal(bed_maf,ped_maf)
+  expect_equal(bed_maf,geno_maf)
+  expect_equal(ped_maf,geno_maf)
+
+  # Missing loci
+  bed_miss <- pop_a_gt_bed %>% loci_missingness()
+  ped_miss <- pop_a_gt_ped %>% loci_missingness()
+  geno_miss <- pop_a_gt_geno %>% loci_missingness()
+
+  expect_equal(bed_miss,ped_miss)
+  expect_equal(bed_miss,geno_miss)
+  expect_equal(ped_miss,geno_miss)
+
+  # Missing individuals
+  bed_miss <- pop_a_gt_bed %>% indiv_missingness()
+  ped_miss <- pop_a_gt_ped %>% indiv_missingness()
+  geno_miss <- pop_a_gt_geno %>% indiv_missingness()
+
+  expect_equal(bed_miss,ped_miss)
+  expect_equal(bed_miss,geno_miss)
+  expect_equal(ped_miss,geno_miss)
+
+})
+
+

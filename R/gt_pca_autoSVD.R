@@ -72,16 +72,32 @@ gt_pca_autoSVD <- function(x, k = 10,
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
+  # we need to create a chromosome vector that is as long as the complete bigsnp object
+  infos_chr<-rep(1,nrow(.gt_get_bigsnp(x)$map))
   if (is.character(show_loci(x)$chromosome)){
-    infos_chr <- as.numeric(factor(show_loci(x)$chromosome))
+
+    infos_chr[.gt_bigsnp_cols(x)] <- as.numeric(factor(show_loci(x)$chromosome))
+
   } else {
-    infos_chr <- show_loci(x)$chromosome
+    infos_chr[.gt_bigsnp_cols(x)] <- show_loci(x)$chromosome
   }
+  # chromosomes have to be positive numbers
+  if (min(infos_chr)<1){
+    infos_chr <- infos_chr+abs(min(infos_chr)+1)
+  }
+  infos_pos <- NULL
+  if (use_positions){
+    infos_pos <- rep(0,nrow(.gt_get_bigsnp(x)$map))
+    infos_pos[.gt_bigsnp_cols(x)] <- show_loci(x)$position
+  }
+  # hack to get around the use of a dataset by bigsnpr
+  # TODO remove after bignspr is patched
+  attachNamespace("bigsnpr")
   this_svd  <- bigsnpr::snp_autoSVD(X$genotypes,
                       infos.chr = infos_chr,
-                      infos.pos = if (use_positions) {show_loci(x)$position} else {NULL},
-                      ind.row = vctrs::vec_data(x$genotypes),
-                      ind.col = show_loci(x)$big_index,
+                      infos.pos = infos_pos,
+                      ind.row = .gt_bigsnp_rows(x),
+                      ind.col = .gt_bigsnp_cols(x),
                       fun.scaling = fun_scaling,
                       thr.r2 = thr_r2,
                       size = size,

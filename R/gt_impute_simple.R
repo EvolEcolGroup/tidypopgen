@@ -9,14 +9,13 @@
 #' @param method one of
 #' - 'mode': the most frequent genotype
 #' - 'mean0': the mean rounded to the nearest integer
-#' - 'mean2': the mean rounded to 2 decimal places
 #' - 'random': randomly sample a genotype based on the observed allele frequencies
 #' @param n_cores the number of cores to be used
 #' @returns a [gen_tibble] with imputed genotypes
 #' @export
 
 gt_impute_simple <-function(x,
-                            method = c("mode", "mean0", "mean2", "random"),
+                            method = c("mode", "mean0", "random"),
                             n_cores = 1) {
   if (!all.equal(attr(x$genotypes,"bigsnp")$genotypes$code256,bigsnpr::CODE_012)){
     if (all.equal(attr(x$genotypes,"bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) |

@@ -14,5 +14,5 @@ gt_set_imputed(x, set = NULL)
 \description{
 This function sets or unsets the use of imputed data. For some analysis,
 such as PCA, that does not allow for missing data, we have to use imputation,
-but for other analysis it might be preferabble to allow for missing data.
+but for other analysis it might be preferable to allow for missing data.
 }

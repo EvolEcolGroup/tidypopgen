@@ -101,8 +101,10 @@ autoplot_qc_report_indiv_king <- function(object, kings_threshold = kings_thresh
   king$row <- colnames(king)
 
   #format into 3 columns: ID1, ID2, and their relatedness coefficient
-  # TODO gather is superseded, and should be rewritten with pivot_longer
-  king <- tidyr::gather(king, "column", "value", -"row")
+  king <- tidyr::pivot_longer(king, cols = !row, names_to = "Column",
+                              values_to = "Value")
+  king <- dplyr::filter(king, king$row < king$Column)
+
   colnames(king) <- c("ID1","ID2","kinship")
 
   #remove duplication from the new df

@@ -119,6 +119,10 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   t_ref_fbm$ncol<-t_ref_fbm$ncol+t_target_fbm$ncol
   # now flip the file around
   merged_fbm <- bigstatsr::big_transpose(t_ref_fbm, backingfile = backingfile) # TODO this should be written in the director of interest
+  # Make sure that the two fam tibbles have the same columns
+  ref_snp$fam <- add_missing_cols(ref_snp$fam, target_snp$fam)
+  target_snp$fam <- add_missing_cols(target_snp$fam, ref_snp$fam)
+  # now create a bigsnp object
   merged_snp <- structure(list(genotypes = merged_fbm,
                              fam = rbind(ref_snp$fam, target_snp$fam),
                              map = ref_snp$map),
@@ -126,8 +130,11 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   merged_rds <- paste0(backingfile,".rds")
   saveRDS(merged_snp, merged_rds)
   # Now we need to create the gen_tibble
-  # TODO we need to turn genotype into a string!!!
-  merged_tbl <- rbind(ref %>% select(-dplyr::any_of("genotypes")), target %>% select(-dplyr::any_of("genotypes")))
+  # Make sure that the two tibbles have the same columns
+  ref <- add_missing_cols(ref, target)
+  target <- add_missing_cols(target, ref)
+  merged_tbl <- rbind(ref %>% select(-dplyr::any_of("genotypes")),
+                      target %>% select(-dplyr::any_of("genotypes")))
   # make sure that the genotypes vector points to the correct rows
   vctrs::vec_data(ref$genotypes)
   #and finally append the loci table
@@ -138,8 +145,10 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   merged_tbl$genotypes <- vctrs::new_vctr(match(indivs_with_big_names,merged_snp$fam$sample.ID), # TODO check that this is the correct order!!!!
                   bigsnp = merged_snp,
                   bigsnp_file = merged_rds,
+                  bigsnp_md5sum = tools::md5sum(merged_rds),
                   loci=new_ref_loci_tbl,
                   names=indivs_with_big_names,
+                  ploidy = 2, # TODO hardcoded as we currently only work for diploid
                   class = "vctrs_bigSNP")
 
   # TODO check that the snp is saved (it should be), and let the user know what the new
@@ -154,3 +163,13 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   )
 }
 
+
+add_missing_cols <- function (x, y){
+  missing_cols <- names(y)[!names(y) %in% names(x)]
+  if (length(missing_cols)>0){
+    for (col_i in missing_cols){
+      x[col_i]<-NA
+    }
+  }
+  x
+}

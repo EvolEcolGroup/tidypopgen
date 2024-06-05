@@ -55,7 +55,7 @@ The ids from the VCF are in a different format than the ones we just got from
 the pop csv. We need a bit of string wrangling, but it looks easy, we just need
 to remove "punc_":
 
-Let us simplify the ids, which wll have a "punc_" prefix
+Let us simplify the ids, which will have a "punc_" prefix
 ```{r}
 anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
 anole_gt

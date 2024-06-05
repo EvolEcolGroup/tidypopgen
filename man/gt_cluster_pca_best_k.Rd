@@ -55,7 +55,7 @@ and validate the programmatic selection. The criteria available in this
 function are:
 \itemize{
 \item "diffNgroup": differences between successive values of the summary
-statistics (by default, BIC) are splitted into two groups using a Ward's
+statistics (by default, BIC) are split into two groups using a Ward's
 clustering method (see ?hclust), to differentiate sharp decrease from mild
 decreases or increases. The retained K is the one before the first group
 switch. This criterion appears to work well for island/hierarchical models, and decently

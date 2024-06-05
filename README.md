@@ -8,6 +8,9 @@ The goal of `tidypopgen` is to provide a tidy grammar of population genetics, fa
 the manipulation and analysis of genetic data. Currently, it is focussed on biallelic single nucleotide
 polymorphisms (SNPs).
 
+We are making available a *preview* version of the package. Everything should work,
+but be vigilant as not everything has been tested extensively.
+
 ## Installation
 
 You need `devtools` to install `tidypopgen`. If you haven't done so already, install it with:
@@ -24,7 +27,7 @@ devtools::install_github("EvolEcolGroup/tidypopgen")
 
 There are a several vignettes designed to teach you how to use `tidypopgen`. 
 The
-'overview' vignette explains how the data structures are designes, and provides a illustration
+'overview' vignette explains how the data structures are designed, and provides a illustration
 of the grammar used to manipulate individuals and loci. 
 
 The 'example workflow' vignette provides a fully annotated example of how to 
@@ -36,3 +39,14 @@ running a fully QC of a dataset before analysis.
 Finally, we provide a 'PLINK cheatsheet' aimed at translating common tasks
 performed in PLINK into `tidypopgen` commands.
 
+## When something does not work
+
+This is a preview version of `tidypopgen`. Everything should work, but not all
+elements have been extensively tested. If something does not work, check the [issues on
+GitHub](https://github.com/EvolEcolGroup/pastclim/issues) to see whether
+the problem has already been reported. If not, feel free to create an
+new issue. Please make sure you have updated to the latest version of
+`pastclim` on CRAN, as well as updating all other packages on your
+system, and provide [a reproducible
+example](https://reprex.tidyverse.org/)
+for the developers to investigate the problem.

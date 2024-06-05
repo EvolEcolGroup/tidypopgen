@@ -1,12 +1,12 @@
 #' Estimate individual missingness
 #'
-#' Estimate missingnes for each individual (i.e. the frequency of
+#' Estimate missingness for each individual (i.e. the frequency of
 #' missing genotypes in an individual).
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
-#' @param as_counts booelean defining whether the count of NAs (rather than the rate)
+#' @param as_counts boolean defining whether the count of NAs (rather than the rate)
 #' should be returned. It defaults to FALSE (i.e. rates are returned by default).
 #' @param ... currently unused.
 #' @returns a vector of heterozygosities, one per individuals in the [`gen_tibble`]

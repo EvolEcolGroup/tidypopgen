@@ -27,7 +27,6 @@ specified, all columns are used. Don't use negative indices.}
 This function computes the KING-robust estimator of kinship.
 }
 \details{
-The results should be equivalent to PLINK, but that SHOULD be tested!!!!
 The last step is not optimised yet, as it does the division of the num by the
 den all in memory (on my TODO list...).
 }

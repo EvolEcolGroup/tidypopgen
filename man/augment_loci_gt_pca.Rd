@@ -24,7 +24,7 @@ with \code{\link[=show_loci]{show_loci()}}. If \code{data} is missing, a tibble 
 Augment for \code{gt_pca} accepts a model object and a \code{gen_tibble} and adds
 loadings for each locus to the loci table. Loadings for each component are stored in a
 separate column, which is given name with the pattern ".loadingPC1",
-".loadingPC2", etc. If \code{data} is missing, then a tibble with the lodings is returned.
+".loadingPC2", etc. If \code{data} is missing, then a tibble with the loadings is returned.
 }
 \seealso{
 \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \link{gt_pca_tidiers}

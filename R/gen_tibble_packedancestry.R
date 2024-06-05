@@ -27,10 +27,22 @@ gen_tibble_packedancestry <- function(x, ...,
   #TODO check that allele_ref and allele_alt are not swapped
   names(res$snp)<-c("name", "chromosome",'genetic_dist','position', 'allele_ref','allele_alt')
 
+  #browser()
+
+  allele_alt <- res$snp$allele_ref
+  allele_ref <- res$snp$allele_alt
+
+  loci <- cbind(res$snp[,c(1:4)], allele_ref, allele_alt)
+
+  xs <- which(loci$allele_ref == "X")
+
+  loci[xs, "allele_ref"] <- NA
+
   # using the gen_tibble.matrix method
   new_gen_tbl <- gen_tibble(x = res$geno,
                             indiv_meta = res$ind,
-                            loci = res$snp,
+                            #loci = res$snp,
+                            loci = loci,
                             backingfile = backingfile,
                             quiet=quiet,
                             valid_alleles = valid_alleles,

@@ -152,7 +152,7 @@ augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
 #' Augment for `gt_pca` accepts a model object and a `gen_tibble` and adds
 #' loadings for each locus to the loci table. Loadings for each component are stored in a
 #' separate column, which is given name with the pattern ".loadingPC1",
-#' ".loadingPC2", etc. If `data` is missing, then a tibble with the lodings is returned.
+#' ".loadingPC2", etc. If `data` is missing, then a tibble with the loadings is returned.
 #' @param x  A `gt_pca` object returned by one of the `gt_pca_*` functions.
 #' @param data the `gen_tibble` used to run the PCA.
 #' @param k the number of components to add
