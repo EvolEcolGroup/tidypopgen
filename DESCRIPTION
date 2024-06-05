@@ -21,6 +21,7 @@ Imports:
     bigparallelr,
     bigsnpr,
     bigstatsr,
+    forcats,
     generics,
     ggplot2,
     magrittr,
@@ -56,3 +57,4 @@ LinkingTo:
     RcppArmadillo (>= 0.9.600),
     bigstatsr,
     rmio
+LazyData: true

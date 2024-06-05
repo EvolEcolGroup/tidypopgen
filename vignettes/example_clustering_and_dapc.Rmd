@@ -296,17 +296,17 @@ geno_file
 Note that the .geno file is placed by default in the same directory and using
 the same name as the backing file of the `gen_tibble`
 
-Now can run K clusters from k =1 to k=10:
-```{r}
+Now can run K clusters from k =1 to k=10. We will use just one repeat, but ideally
+we should run multiple repetition for each K:
+```{r results='hide'}
 library(LEA)
 anole_snmf <- snmf(input.file = geno_file,
                    K = 1:10,
                    entropy = TRUE,
-                   repetitions = 5,
+                   repetitions = 3,
                    alpha = 100
                   )
 ```
-
 
 We can examine the suitability of our K values by plotting with: 
 
@@ -322,12 +322,12 @@ ce <-  cross.entropy(anole_snmf, K = 3)
 quick_run <- which.min(ce)
 ```
 
-And then to plot our clusters, we can begin by extracting the Q matrix from our snmf object: 
+And then to plot our clusters, we can begin by extracting the Q matrix from our `snmf` object,
+and covert it to a `q_matrix` object as used by `tidypopgen`:
 
 ```{r}
 q_mat <- LEA::Q(anole_snmf, K = 3, run = quick_run) 
-
-colnames(q_mat) <- paste0("P", 1:3)
+q_mat <- as_q_matrix(q_mat)
 
 head(q_mat)
 ```
@@ -335,33 +335,40 @@ head(q_mat)
 Then we can tidy our q matrix, and attach the population and id data from our original gen_tibble:
 
 ```{r}
-tidy_q <- tidy_q(q_mat, anole_gt)
+tidy_q <- tidy(q_mat, anole_gt)
+head(tidy_q)
 ```
 
 
 And we can plot the data using ggplot
 
 ```{r}
-tidy_q %>% 
-  ggplot() +
-  geom_col(aes(x = id, y = q, fill = pop)) +
-  labs(fill = "Population", x = "Individual", y = "Ancestry Proportion") +
-  theme_minimal() +
-  theme(axis.line = element_blank(),
-        axis.text = element_blank(),
-        strip.background = element_rect(fill = "transparent", color = "black"),
-        panel.background = element_blank(),
-        panel.grid = element_blank()
-        )
+# set up the ggplot object
+plt <- ggplot2::ggplot(tidy_q,
+                       ggplot2::aes(x = id,
+                                    y = percentage,
+                                    fill = q)) +
+  # add the columns based on percentage membership to each cluster
+  ggplot2::geom_col(width = 1,
+                    position = ggplot2::position_stack(reverse = TRUE))+
+  # set the y label
+  ggplot2::labs(y = "K = 4")+
+  # use a theme to match the distruct look, removing most decorations
+  theme_distruct() +
+  # set the colour scale to be the same as in distruct and clumppling
+  scale_fill_distruct()
+
+plt
 ```
+
 
 To clean up the plot, we can order our individuals based on their population of origin and proportion derived from the q matrix:
 
 ```{r}
-
+# @TODO we should do this as part of tidying
 dominant_q <- tidy_q %>%
   group_by(id) %>%
-  summarize(dominant_pop = pop[which.max(q)], dominant_q = max(q), .groups = 'drop')
+  summarize(dominant_pop = group[which.max(percentage)], dominant_q = max(percentage), .groups = 'drop')
 
 tidy_q <- tidy_q %>%
   left_join(dominant_q, by = "id")
@@ -370,17 +377,27 @@ tidy_q <- tidy_q %>%
   arrange(group, desc(dominant_q)) %>%
   mutate(plot_order = row_number(),  # Create plot_order column
          id = factor(id, levels = unique(id[order(group, -dominant_q)])))
-tidy_q %>% 
-  ggplot() +
-  geom_col(aes(x = id, y = q, fill = pop)) +
-  labs(fill = "Population", x = "Individual", y = "Ancestry Proportion") +
-  theme_minimal() +
-  theme(axis.line = element_blank(),
-        axis.text = element_blank(),
-        strip.background = element_rect(fill = "transparent", color = "black"),
-        panel.background = element_blank(),
-        panel.grid = element_blank()
-        )
 ```
+
+And replot it
+```{r}
+# set up the ggplot object
+plt <- ggplot2::ggplot(tidy_q,
+                       ggplot2::aes(x = id,
+                                    y = percentage,
+                                    fill = q)) +
+  # add the columns based on percentage membership to each cluster
+  ggplot2::geom_col(width = 1,
+                    position = ggplot2::position_stack(reverse = TRUE))+
+  # set the y label
+  ggplot2::labs(y = "K = 4")+
+  # use a theme to match the distruct look, removing most decorations
+  theme_distruct() +
+  # set the colour scale to be the same as in distruct and clumppling
+  scale_fill_distruct()
+
+plt
+```
+
 
 
