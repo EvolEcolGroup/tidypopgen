@@ -52,7 +52,7 @@ The ids from the VCF are in a different format than the ones we just got from
 the pop csv. We need a bit of string wrangling, but it looks easy, we just need
 to remove "punc_":
 
-Let us simplify the ids, which will have a "punc_" prefix
+Let us simplify the ids, which wll have a "punc_" prefix
 ```{r}
 anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
 anole_gt
@@ -133,7 +133,7 @@ anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) +
 We can see that the three population do separate nicely on the PCA, with just one individual
 from Wam sitting inbetween the other Wam individuals and those from Eam.
 
-It is also possible to inspect which loci contribute the most to a given component:
+It is also possible to inspect which loci contibute the most to a given component:
 
 ```{r}
 autoplot(anole_pca, type = "loadings")
@@ -142,7 +142,7 @@ autoplot(anole_pca, type = "loadings")
 By using information from the loci table, we could easily embellish the plot, for example
 colouring by chromosome or maf.
 
-For more complex plots, we can augment the loci table with the loadings using `augment_loci()`:
+For more complect plots, we can augment the loci table with the loadings using `augment_loci()`:
 ```{r}
 anole_gt_load <- augment_loci(anole_pca, data= anole_gt)
 
@@ -155,7 +155,7 @@ scaling well to very large datasets. It does not have the assumptions of STRUCTU
 ADMIXTURE (which also limits its power).
 
 The first step is to determine the number of genetic clusters in the dataset. 
-DAPC can be either used to test a a-priori hypothesis, or we can use the data to
+DAPC can be either used to test a a-prioriy hypothesis, or we can use the data to
 suggest the number of clusters.
 In this
 case, we did not have any strong expectations of structure in our study system, so we will
@@ -273,7 +273,7 @@ There is no strong outlier, suggesting drift across many loci has created the si
 picked up by DAPC.
 
 Note that `anole_dapc` is of class `gt_dapc`, which is a subclass of `dapc` 
-from `adegenet`. This means that functions written to work on `dapc` objects
+from `adegenet`. This means that funcitons written to work on `dapc` objects
 should work out of the box (the only exception is `adegenet::predict.dapc`, 
 which does not work because the underlying pca object is different). For example,
 we can obtain the standard dapc plot with:
@@ -307,5 +307,80 @@ anole_snmf <- snmf(input.file = geno_file,
                   )
 ```
 
-Look at https://connor-french.github.io/intro-pop-structure-r/ for how to wrangle the data for plotting. But we should just be able to grab functions
-designed for ADMIXTURE and use those on the Q matrices created by sNMF. So, we need some tidiers.
+
+We can examine the suitability of our K values by plotting with: 
+
+```{r}
+plot(anole_snmf, cex = 1.2, pch = 19)
+```
+
+From which we can see that K = 3 is a sensible choice, as 3 represents the 'elbow' in the plot. We can select the fastest run using: 
+
+
+```{r}
+ce <-  cross.entropy(anole_snmf, K = 3)
+quick_run <- which.min(ce)
+```
+
+And then to plot our clusters, we can begin by extracting the Q matrix from our snmf object: 
+
+```{r}
+q_mat <- LEA::Q(anole_snmf, K = 3, run = quick_run) 
+
+colnames(q_mat) <- paste0("P", 1:3)
+
+head(q_mat)
+```
+
+Then we can tidy our q matrix, and attach the population and id data from our original gen_tibble:
+
+```{r}
+tidy_q <- tidy_q(q_mat, anole_gt)
+```
+
+
+And we can plot the data using ggplot
+
+```{r}
+tidy_q %>% 
+  ggplot() +
+  geom_col(aes(x = id, y = q, fill = pop)) +
+  labs(fill = "Population", x = "Individual", y = "Ancestry Proportion") +
+  theme_minimal() +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        strip.background = element_rect(fill = "transparent", color = "black"),
+        panel.background = element_blank(),
+        panel.grid = element_blank()
+        )
+```
+
+To clean up the plot, we can order our individuals based on their population of origin and proportion derived from the q matrix:
+
+```{r}
+
+dominant_q <- tidy_q %>%
+  group_by(id) %>%
+  summarize(dominant_pop = pop[which.max(q)], dominant_q = max(q), .groups = 'drop')
+
+tidy_q <- tidy_q %>%
+  left_join(dominant_q, by = "id")
+
+tidy_q <- tidy_q %>%
+  arrange(group, desc(dominant_q)) %>%
+  mutate(plot_order = row_number(),  # Create plot_order column
+         id = factor(id, levels = unique(id[order(group, -dominant_q)])))
+tidy_q %>% 
+  ggplot() +
+  geom_col(aes(x = id, y = q, fill = pop)) +
+  labs(fill = "Population", x = "Individual", y = "Ancestry Proportion") +
+  theme_minimal() +
+  theme(axis.line = element_blank(),
+        axis.text = element_blank(),
+        strip.background = element_rect(fill = "transparent", color = "black"),
+        panel.background = element_blank(),
+        panel.grid = element_blank()
+        )
+```
+
+

@@ -157,3 +157,27 @@ print.gt_dapc <- function(x, ...){
     cat("\n")
 }
 
+#
+
+
+
+
+#' Tidy a Q matrix
+#'
+#' @param q_mat A Q matrix object (as returned by LEA::Q()).
+#' @param gen_tbl An associated gen_tibble
+#' @return A tidied matrix
+#' @export
+tidy_q <- function(q_mat, gen_tbl){
+  q_tbl <- q_mat %>%
+    tibble::as_tibble() %>%
+    # add the pops data for plotting
+    dplyr::mutate(id = gen_tbl$id,
+                  group = gen_tbl$population)
+
+  q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with("P"),
+                                         names_to = "pop", values_to = "q")
+  q_tbl
+
+}
+
