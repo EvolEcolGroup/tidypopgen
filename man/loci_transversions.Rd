@@ -23,7 +23,7 @@ or a \code{\link{gen_tibble}}.}
 \item{...}{other arguments passed to specific methods.}
 }
 \value{
-a vector of frequencies, one per locus
+a logical vector defining which loci are transversions
 }
 \description{
 Use the loci table to define which loci are transversions

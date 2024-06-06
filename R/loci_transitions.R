@@ -6,7 +6,7 @@
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param ... other arguments passed to specific methods.
-#' @returns a vector of frequencies, one per locus
+#' @returns a logical vector defining which loci are transitions
 #' @rdname loci_transitions
 #' @export
 loci_transitions <- function(.x, ...) {

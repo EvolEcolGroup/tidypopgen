@@ -57,8 +57,6 @@ gt_pca_randomSVD <- function(x, k = 10,
     on.exit(gt_set_imputed(x, set = FALSE))
   }
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
-  x_ind_col <- show_loci(x)$big_index
-  x_ind_row <- vctrs::vec_data(x$genotypes)
   if (is.character(show_loci(x)$chromosome)){
     infos_chr <- as.numeric(factor(show_loci(x)$chromosome))
   } else {
@@ -66,14 +64,14 @@ gt_pca_randomSVD <- function(x, k = 10,
   }
   this_svd  <- bigstatsr::big_randomSVD(X$genotypes,
                                   k=k,
-                                    ind.row = vctrs::vec_data(x$genotypes),
-                                    ind.col = show_loci(x)$big_index,
+                                    ind.row = .gt_bigsnp_rows(x),
+                                    ind.col = .gt_bigsnp_cols(x),
                                     fun.scaling = fun_scaling,
                                     tol = tol,
                                   verbose = verbose,
                                   ncores = n_cores,
                                   fun.prod = fun_prod,
-                                  fun.cprod = fun_cprod) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
+                                  fun.cprod = fun_cprod) # TODO check that this is correct and expose it, maybe create convenience function to get the values
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
   rownames(this_svd$v) <- loci_names(x)
