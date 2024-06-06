@@ -157,3 +157,6 @@ print.gt_dapc <- function(x, ...){
     cat("\n")
 }
 
+#
+
+

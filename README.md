@@ -9,7 +9,7 @@ the manipulation and analysis of genetic data. Currently, it is focussed on bial
 polymorphisms (SNPs).
 
 We are making available a *preview* version of the package. Everything should work,
-but be vigilant as not everything has been tested extensively.
+but be vigilant as not all functions have been tested extensively.
 
 ## Installation
 
