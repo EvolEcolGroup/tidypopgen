@@ -35,6 +35,7 @@ tidy.q_matrix <- function(x, gen_tbl, ...){
   q_tbl <- x %>%
     tibble::as_tibble() %>%
     # add the pops data for plotting
+    # @TODO we should get this from the grouped tibble, not hardcode it!
     dplyr::mutate(id = gen_tbl$id,
                   group = gen_tbl$population)
 
