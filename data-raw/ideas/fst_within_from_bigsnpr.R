@@ -8,7 +8,6 @@ pairwise_pop_fst_wc <- function(.x, by_locus=FALSE){
     x %>% reframe(af = loci_maf(x),N= n_tot - loci_missingness(x, as_counts=TRUE)*2)
   }
   ac_list <- group_map(.x, .f=~make_ac_df(.x))
-  browser()
   bigsnpr::snp_fst(ac_list,overall=!by_locus)
 
 }

@@ -1,6 +1,6 @@
 # read in a vcf
 gen_tibble_vcf <- function(x, ...,
-                           loci_per_chunk = 10000,
+                           loci_per_chunk = 100000,
                            valid_alleles = c("A", "T", "C", "G"),
                            missing_alleles = c("0","."),
                            backingfile = NULL, quiet = FALSE) {

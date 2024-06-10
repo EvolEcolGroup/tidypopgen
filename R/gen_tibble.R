@@ -43,7 +43,7 @@
 #' If `x` is a .BED file and `backingfile` is left NULL, the backing file will
 #' be saved in the same directory as the
 #' bed file, using the same file name but with a different file type (.bk rather
-#' than .bed). If `x` is a genotype matrix and `backingfile` is NULL, then a
+#' than .bed). The same logic applies to .vcf files. If `x` is a genotype matrix and `backingfile` is NULL, then a
 #' temporary file will be created (but note that R will delete it at the end of
 #' the session!)
 #' @param quiet provide information on the files used to store the data
@@ -82,24 +82,24 @@ gen_tibble.character <-
 
   if ((tolower(file_ext(x))=="bed") || (tolower(file_ext(x))=="rds")){
     rlang::check_dots_empty()
-    gen_tibble_bed_rds(x = x, ...,
+    x_gt <- gen_tibble_bed_rds(x = x, ...,
                        valid_alleles= valid_alleles,
                        missing_alleles= missing_alleles,
                        backingfile = backingfile,
                        quiet = quiet)
   } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
-    gen_tibble_vcf(x = x, ..., loci_per_chunk = loci_per_chunk,
+    x_gt <- gen_tibble_vcf(x = x, ..., loci_per_chunk = loci_per_chunk,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet)
   } else if (tolower(file_ext(x))=="ped"){
-    gen_tibble_ped(x = x, ...,
+    x_gt <- gen_tibble_ped(x = x, ...,
                        valid_alleles= valid_alleles,
                        missing_alleles= missing_alleles,
                        backingfile = backingfile,
                        quiet = quiet)
   } else if (tolower(file_ext(x))=="geno"){
-    gen_tibble_packedancestry(x = x, ...,
+    x_gt <- gen_tibble_packedancestry(x = x, ...,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile,
@@ -107,6 +107,8 @@ gen_tibble.character <-
   } else  {
     stop("file_path should be pointing to a either a PLINK .bed or .ped file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
+  file_in_use <- gt_save(x_gt, quiet = quiet)
+  return(x_gt)
 }
 
 
@@ -127,11 +129,6 @@ gen_tibble_bed_rds <- function(x, ...,
   }
 
   bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
-  if (!quiet){
-    message("\n\nusing bigSNP file: ", bigsnp_path)
-    message("with backing file: ", bigsnp_obj$genotypes$backingfile)
-    message("make sure that you keep those files and don't delete them!")
-  }
 
   indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
@@ -244,11 +241,6 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
                                           backingfile = backingfile,
                                          ploidy = ploidy)
   bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile,".rds")
-  if (!quiet){
-    message("\n\nusing bigSNP file: ", bigsnp_path)
-    message("with backing file: ", bigsnp_obj$genotypes$backingfile)
-    message("make sure that you keep those files and don't delete them!")
-  }
 
   indiv_meta <- as.list (indiv_meta)
   indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
@@ -263,6 +255,7 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   check_allele_alphabet (new_gen_tbl, valid_alleles = valid_alleles,
                          missing_alleles = missing_alleles)
   show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
+  files_in_use <- gt_save(new_gen_tbl, quiet = quiet)
   return(new_gen_tbl)
 
 }

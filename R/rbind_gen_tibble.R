@@ -139,7 +139,6 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   vctrs::vec_data(ref$genotypes)
   #and finally append the loci table
   indivs_with_big_names <- c(names(ref$genotypes),names(target$genotypes))
-  #browser()
   new_ref_loci_tbl$big_index<-match(new_ref_loci_tbl$name,merged_snp$map$marker.ID) # TODO check that this is the correct order!!!!
   # TODO check that all individuals in tibble and bigsnp object are the same
   merged_tbl$genotypes <- vctrs::new_vctr(match(indivs_with_big_names,merged_snp$fam$sample.ID), # TODO check that this is the correct order!!!!
@@ -151,16 +150,12 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
                   ploidy = 2, # TODO hardcoded as we currently only work for diploid
                   class = "vctrs_bigSNP")
 
-  # TODO check that the snp is saved (it should be), and let the user know what the new
-  # name of the files are!!!
-  if (!quiet){
-    message("\n\nthe new bigSNP file is: ", merged_rds)
-    message("the new backing file is: ", attr(merged_tbl$genotypes,"bigsnp")$genotypes$backingfile)
-  }
-  tibble::new_tibble(
+  merged_tibble <- tibble::new_tibble(
     merged_tbl,
     class = "gen_tbl"
   )
+  gt_save(merged_tibble, quiet = quiet)
+  return(merged_tibble)
 }
 
 
