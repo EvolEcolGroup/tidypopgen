@@ -27,8 +27,6 @@ gen_tibble_packedancestry <- function(x, ...,
   #TODO check that allele_ref and allele_alt are not swapped
   names(res$snp)<-c("name", "chromosome",'genetic_dist','position', 'allele_ref','allele_alt')
 
-  #browser()
-
   allele_alt <- res$snp$allele_ref
   allele_ref <- res$snp$allele_alt
 

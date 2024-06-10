@@ -11,13 +11,14 @@ test_loci <- data.frame(name=paste0("rs",1:6),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
+                      indiv_meta = test_indiv_meta, quiet = TRUE)
 
 # this also tests show_genotypes and show_loci
 test_that("save and load gt",{
   expect_true(inherits(test_gt,"gen_tbl"))
   # now save the tibble
-  all_file_names <- gt_save(test_gt)
+  all_file_names <- gt_save(test_gt, quiet = TRUE)
   # check that the new file exists
   expect_true(file.exists(all_file_names[1]))
   new_test_gt <- gt_load(all_file_names[1])

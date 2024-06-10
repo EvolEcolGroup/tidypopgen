@@ -112,7 +112,6 @@ Est_PLINK_Kinship <- function(IBS0, IBS1, IBS2, EPrIBS_IBD, constraint = FALSE) 
   e12 <- EPrIBS_IBD[2, 3] * nIBS012
   e22 <- EPrIBS_IBD[3, 3] * nIBS012
 
-  #browser()
   k0 <- IBS0 / e00
   k1 <- (IBS1 - k0 * e01) / e11
   k2 <- (IBS2 - k0 * e02 - k1 * e12) / e22

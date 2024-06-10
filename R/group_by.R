@@ -31,14 +31,12 @@ dplyr_reconstruct.gen_tbl <-function(data, template)
 
 # #' @export
 # dplyr_row_slice.gen_tbl<-function(data, i, ...){
-#   #browser()
 #   NextMethod()
 #
 #}
 
 # #' @export
 # dplyr_col_modify.gen_tbl<-function(data, cols){
-#   browser()
 #   NextMethod()
 #
 # }

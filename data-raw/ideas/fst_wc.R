@@ -57,7 +57,6 @@ hier_fst_nei <- hierfstat::pairwise.neifst(test_hier)
 }
 
 pairwise_pop_fst_nei73 <- function(.x, by_locus = FALSE){
-  browser()
   pop_counts_df <- group_map(.x, .f=~.gt_pop_counts(.x))
   # get the grouping column, and create all pairwise combination of indices
   .group_levels = .x %>% group_keys()
