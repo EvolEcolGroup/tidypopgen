@@ -10,3 +10,17 @@ test_that("fit_gt_pca_and_predict",{
                         check.attributes=FALSE))
 })
 
+test_that("fit_gt_pca_and_predict_splitted_data",{
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(bed_file,  backingfile = tempfile("missing_"),quiet=TRUE)
+  # create a fake ancient set by subsetting
+  ancient_gt <- missing_gt[1:20,]
+  # now extract the modern data (to be imputed)
+  modern_gt <- missing_gt[-c(1:20),]
+
+  modern_gt <- gt_impute_simple(modern_gt, method = "mode")
+  modern_pca <- modern_gt %>% gt_pca_partialSVD()
+  # if we just try to predict, we find that the new data have missing data
+  expect_error(predict(modern_pca, new_data = ancient_gt),
+                        "You can't have")
+})
