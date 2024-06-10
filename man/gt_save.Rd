@@ -4,13 +4,15 @@
 \alias{gt_save}
 \title{Save a gen_tibble}
 \usage{
-gt_save(x, file_name = NULL)
+gt_save(x, file_name = NULL, quiet = FALSE)
 }
 \arguments{
 \item{x}{a \code{\link{gen_tibble}}}
 
 \item{file_name}{the file name, including the full path. If it does not end
 with '.gt', the extension will be added.}
+
+\item{quiet}{boolean to suppress information about hte files}
 }
 \value{
 the file name and path of the .gt file, together with the .rds and .bk files

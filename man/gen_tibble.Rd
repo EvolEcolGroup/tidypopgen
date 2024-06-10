@@ -71,7 +71,7 @@ and .RDS automatically). This is not needed if \code{x} is already an .RDS file.
 If \code{x} is a .BED file and \code{backingfile} is left NULL, the backing file will
 be saved in the same directory as the
 bed file, using the same file name but with a different file type (.bk rather
-than .bed). If \code{x} is a genotype matrix and \code{backingfile} is NULL, then a
+than .bed). The same logic applies to .vcf files. If \code{x} is a genotype matrix and \code{backingfile} is NULL, then a
 temporary file will be created (but note that R will delete it at the end of
 the session!)}
 
