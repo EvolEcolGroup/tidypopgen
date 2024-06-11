@@ -1,12 +1,21 @@
 #' Save a gen_tibble
 #'
-#' Save the tibble (and update the backing files). A full explanation of files (names,extensions, etc.)
+#' Save the tibble (and update the backing files). The `gen_tibble` object is
+#' saved to a file with extension *.gt*, togethe with update its *.rds* and *.bk*
+#' files. Note that multiple *.gt* files can be linked to the same *.rds* and *.bk*
+#' files; generally, this occurs when we create multiple subsets of the data.
+#' The *.gt* file then stores the information on what subset of the full dataset
+#' we are interested in, whilst the *.rds* and *.bk* file store the full dataset.
+#' To reload a `gen_tibble`, you can pass the name of the *.gt* file with
+#' [gt_load()].
 #'
 #' @param x a [`gen_tibble`]
 #' @param file_name the file name, including the full path. If it does not end
-#' with '.gt', the extension will be added.
+#' with *.gt*, the extension will be added.
 #' @param quiet boolean to suppress information about hte files
-#' @returns the file name and path of the .gt file, together with the .rds and .bk files
+#' @returns the file name and path of the *.gt* file, together with the *.rds*
+#' and *.bk* files
+#' @seealso [gt_load()]
 #' @export
 
 gt_save <-function(x, file_name = NULL, quiet = FALSE) {

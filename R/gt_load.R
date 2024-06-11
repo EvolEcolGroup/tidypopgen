@@ -1,16 +1,18 @@
 #' Load a gen_tibble
 #'
-#' Load a `gen_tibble` previously saved with [gt_save()]. If the files have not
+#' Load a `gen_tibble` previously saved with [gt_save()]. If the *.rds* and
+#'  *.bk* files have not
 #' been moved, they should be found automatically. If they were moved, use
-#' `reattach_to` to point to the .rds file (the .bk file needs to be in the same
-#' directory as the .rds file).
+#' `reattach_to` to point to the *.rds* file (the *.bk* file needs to be in the same
+#' directory as the *.rds* file).
 #'
 #' @param file the file name, including the full path. If it does not end
-#' with '.gt', the extension will be added.
-#' @param reattach_to the file name, including the full path, of the .rds file
-#' if it was moved. It assumes that the .bk file is found in the same path.
+#' with *.gt*, the extension will be added.
+#' @param reattach_to the file name, including the full path, of the *.rds* file
+#' if it was moved. It assumes that the *.bk* file is found in the same path.
 #' You should be able to leave this to NULL unless you have moved the files.
 #' @returns a [`gen_tibble`]
+#' @seealso [gt_save()]
 #' @export
 
 gt_load <-function(file = NULL, reattach_to = NULL) {

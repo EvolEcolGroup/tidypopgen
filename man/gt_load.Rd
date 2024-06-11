@@ -8,18 +8,22 @@ gt_load(file = NULL, reattach_to = NULL)
 }
 \arguments{
 \item{file}{the file name, including the full path. If it does not end
-with '.gt', the extension will be added.}
+with \emph{.gt}, the extension will be added.}
 
-\item{reattach_to}{the file name, including the full path, of the .rds file
-if it was moved. It assumes that the .bk file is found in the same path.
+\item{reattach_to}{the file name, including the full path, of the \emph{.rds} file
+if it was moved. It assumes that the \emph{.bk} file is found in the same path.
 You should be able to leave this to NULL unless you have moved the files.}
 }
 \value{
 a \code{\link{gen_tibble}}
 }
 \description{
-Load a \code{gen_tibble} previously saved with \code{\link[=gt_save]{gt_save()}}. If the files have not
+Load a \code{gen_tibble} previously saved with \code{\link[=gt_save]{gt_save()}}. If the \emph{.rds} and
+\emph{.bk} files have not
 been moved, they should be found automatically. If they were moved, use
-\code{reattach_to} to point to the .rds file (the .bk file needs to be in the same
-directory as the .rds file).
+\code{reattach_to} to point to the \emph{.rds} file (the \emph{.bk} file needs to be in the same
+directory as the \emph{.rds} file).
+}
+\seealso{
+\code{\link[=gt_save]{gt_save()}}
 }
