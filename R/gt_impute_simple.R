@@ -17,6 +17,8 @@
 gt_impute_simple <-function(x,
                             method = c("mode", "mean0", "random"),
                             n_cores = 1) {
+  method <- match.arg(method)
+
   if (!all.equal(attr(x$genotypes,"bigsnp")$genotypes$code256,bigsnpr::CODE_012)){
     if (all.equal(attr(x$genotypes,"bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) |
         all.equal(attr(x$genotypes,"bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)){
