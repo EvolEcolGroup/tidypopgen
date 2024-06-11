@@ -8,6 +8,22 @@ test_that("fit_gt_pca_and_predict",{
   expect_true(all.equal(predict(missing_pca),
                         predict(missing_pca, new_data = missing_gt),
                         check.attributes=FALSE))
+  # now mismatch the loci table
+  missing_gt_edited <- missing_gt
+  show_loci(missing_gt_edited)$name[3] <- "blah"
+  expect_error(predict(missing_pca, new_data = missing_gt_edited),
+               "loci used in object")
+  missing_gt_edited <- missing_gt
+  show_loci(missing_gt_edited)$allele_ref[3] <- "blah"
+  expect_error(predict(missing_pca, new_data = missing_gt_edited),
+               "ref and alt alleles differ")
+  # predict when new dataset has extra positions
+  missing_gt_sub <- missing_gt %>% select_loci(100:450)
+  missing_sub_pca <- missing_gt_sub  %>% gt_pca_partialSVD()
+  expect_true(all.equal(predict(missing_sub_pca),
+                        predict(missing_sub_pca, new_data = missing_gt),
+                        check.attributes=FALSE))
+
 })
 
 test_that("fit_gt_pca_and_predict_splitted_data",{

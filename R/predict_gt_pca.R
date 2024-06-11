@@ -22,6 +22,17 @@ predict.gt_pca <- function(object, new_data=NULL,block_size = NULL, ...){
     if (!inherits(new_data,"gen_tbl")){
       stop ("new_data should be a gen_tibble")
     }
+    # check the new_data have the same loci as the dataset used to build the pca
+    if (!all(object$loci$name %in% show_loci(new_data)$name)){
+      stop("loci used in object are not present in new_data")
+    }
+    # get id of loci in new_data
+    loci_subset <- match(object$loci$name, show_loci(new_data)$name)
+    if (!all(all(show_loci(new_data)$allele_ref[loci_subset]==object$loci$allele_ref),
+             all(show_loci(new_data)$allele_alt[loci_subset]==object$loci$allele_alt))){
+      stop("ref and alt alleles differ between new_data and the data used to create the pca object")
+    }
+
     if (gt_has_imputed(new_data) && !gt_uses_imputed(new_data)){
       gt_set_imputed(new_data, set = TRUE)
       on.exit(gt_set_imputed(new_data, set = FALSE))
@@ -33,7 +44,7 @@ predict.gt_pca <- function(object, new_data=NULL,block_size = NULL, ...){
     bigstatsr::big_prodMat(.gt_get_bigsnp(new_data)$genotypes,
                            object$v,
                 ind.row = .gt_bigsnp_rows(new_data),
-                ind.col = .gt_bigsnp_cols(new_data),
+                ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
                 block.size = block_size,
                 center = object$center,
                 scale  = object$scale)
