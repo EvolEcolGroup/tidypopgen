@@ -4,22 +4,45 @@
 \alias{predict.gt_pca}
 \title{Predict scores of a PCA}
 \usage{
-\method{predict}{gt_pca}(object, new_data = NULL, block_size = NULL, ...)
+\method{predict}{gt_pca}(
+  object,
+  new_data = NULL,
+  impute_to_center = TRUE,
+  prediction_type = "simple",
+  block_size = NULL,
+  n_cores = 1,
+  ...
+)
 }
 \arguments{
 \item{object}{the \code{\link{gt_pca}} object}
 
 \item{new_data}{a gen_tibble if scores are requested for a new dataset}
 
+\item{impute_to_center}{boolean on whether to impute missing values in
+\code{new_data} to the mean values used
+to center the pca. This option is used to e.g. project ancient data onto a PCA
+fitted to modern data. It defaults to TRUE.}
+
+\item{prediction_type}{a string taking the value of "simple" and/or OADP (Online Augmentation, Decomposition, and Procrustes (OADP) projection)}
+
 \item{block_size}{number of loci read simultaneously (larger values will speed up
 computation, but require more memory)}
+
+\item{n_cores}{number of cores}
 
 \item{...}{no used}
 }
 \value{
 a matrix of predictions, with samples as rows and components as columns. The number
-of components depends on how many were estimated in the \code{\link{gt_pca}} object
+of components depends on how many were estimated in the \code{\link{gt_pca}} object. If prediction
+type is equal to c("simple","OADP"), then a list of two matrices is returned
 }
 \description{
-Predict the PCA scores for a \code{\link{gt_pca}}, either for the original data or for new data.
+Predict the PCA scores for a \code{\link{gt_pca}}, either for the original data or
+projecting new data.
+}
+\references{
+Zhang et al (2020). Fast and robust ancestry prediction using
+principal component analysis  36(11): 3439–3446.
 }

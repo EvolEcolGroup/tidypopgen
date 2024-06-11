@@ -114,6 +114,8 @@ gt_pca_autoSVD <- function(x, k = 10,
 
   this_svd$method <- "autoSVD"
   this_svd$call <- match.call()
+  # subset the loci table to have only the snps of interest
+  this_svd$loci <- show_loci(x)[.gt_bigsnp_cols %in% attr(x,"subset"),]
   class(this_svd) <- c("gt_pca", class(this_svd))
   this_svd
 }

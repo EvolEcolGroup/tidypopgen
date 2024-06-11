@@ -54,6 +54,7 @@ gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
   rownames(this_svd$v) <- loci_names(x)
   this_svd$method <- "partialSVD"
   this_svd$call <- match.call()
+  this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
   this_svd
 }
