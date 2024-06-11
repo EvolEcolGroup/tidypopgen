@@ -20,6 +20,9 @@ test_gt <- gen_tibble(x = test_genotypes,
                       quiet = TRUE)
 test_gt <- test_gt %>% group_by(population)
 
+# TODO I don't understand why this does not silence all messages
+options("rlib_message_verbosity" = "quiet")
+
 test_that("extract f2 correctly",{
   # process the data with admixtools (note that we get some warnings)
   bed_file <- gt_as_plink(test_gt, file = tempfile("test_bed"))

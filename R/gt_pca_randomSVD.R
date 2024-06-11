@@ -77,6 +77,7 @@ gt_pca_randomSVD <- function(x, k = 10,
   rownames(this_svd$v) <- loci_names(x)
   this_svd$method <- "randomSVD"
   this_svd$call <- match.call()
+  this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
   this_svd
 }
