@@ -1,11 +1,11 @@
 Package: tidypopgen
 Title: Tidy Population Genetics
-Version: 0.0.0.9012
+Version: 0.0.0.9013
 Authors@R: 
-    c(person("Andrea", "Manica", email = "am315@cam.ac.uk", 
+    c(person("Evie", "Carter", role = c("aut")),
+    person("Andrea", "Manica", email = "am315@cam.ac.uk", 
            role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0003-1895-450X")),
-      person("Evie", "Carter", role = c("aut")))   
+           comment = c(ORCID = "0000-0003-1895-450X")))   
 Description: We provide a tidy grammar of population genetics, facilitating 
     the manipulation and analysis of data on biallelic single nucleotide
     polymorphisms (SNPs).
