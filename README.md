@@ -8,8 +8,12 @@ The goal of `tidypopgen` is to provide a tidy grammar of population genetics, fa
 the manipulation and analysis of genetic data. Currently, it is focussed on biallelic single nucleotide
 polymorphisms (SNPs).
 
-We are making available a *preview* version of the package. Everything should work,
-but be vigilant as not all functions have been tested extensively.
+We are making available a **preview** version of the package. Everything should work,
+but be vigilant as not all functions have been tested extensively. Also, the syntax of
+functions is still slightly in flux, so the names and order of some parameters might
+change. Make sure you don't rely on position when giving multiple parameters to
+a function, so that any change will trigger an informative error in the code that 
+will allow you to update.
 
 ## Installation
 
@@ -41,12 +45,14 @@ performed in PLINK into `tidypopgen` commands.
 
 ## When something does not work
 
-This is a preview version of `tidypopgen`. Everything should work, but not all
+This is a **preview** version of `tidypopgen`. Everything should work, but not all
 elements have been extensively tested. If something does not work, check the [issues on
-GitHub](https://github.com/EvolEcolGroup/pastclim/issues) to see whether
+GitHub](https://github.com/EvolEcolGroup/tidypopgen/issues) to see whether
 the problem has already been reported. If not, feel free to create an
 new issue. Please make sure you have updated to the latest version of
-`pastclim` on CRAN, as well as updating all other packages on your
+`tidypopgen` on Github, as well as updating all other packages on your
 system, and provide [a reproducible
 example](https://reprex.tidyverse.org/)
-for the developers to investigate the problem.
+for the developers to investigate the problem. Ideally, try to create a minimalistic
+dataset that reproduces the error, as it will be much easier (and thus faster!)
+for the developers to track down the problem. 
