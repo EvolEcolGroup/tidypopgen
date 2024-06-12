@@ -5,7 +5,7 @@ gen_tibble_packedancestry <- function(x, ...,
                             chunk_size = NULL,
                             backingfile = NULL, quiet = FALSE) {
   if (is.null(chunk_size)){
-    chunk_size <- 500
+    chunk_size <- 100
   }
 
   # Substitute .ped with .map
