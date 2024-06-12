@@ -2,17 +2,16 @@
 #'
 #' Convert a vcf file to a Filebacked Big Matrix (FBM) object.
 #' This should work even for large vcf files that would not fit in memory.
-#' TODO: this function is not yet complete.
 #'
 #' @param vcf_path the path to the vcf
-#' @param loci_per_chunk the chunk size to use on the vcf when loading the file
+#' @param chunk_size the chunk size to use on the vcf when loading the file
 #' @param backingfile the name of the file to use as the backing file
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 
 vcf_to_fbm <- function(
     vcf_path,
-    loci_per_chunk = 100000,
+    chunk_size = 100000,
     backingfile = NULL,
     quiet=FALSE) {
 
@@ -32,8 +31,8 @@ vcf_to_fbm <- function(
   no_individuals <- count_vcf_individuals(vcf_path)
   # set up chunks
   chunks_vec <- c(
-    rep(loci_per_chunk, floor(no_variants / loci_per_chunk)),
-    no_variants %% loci_per_chunk
+    rep(chunk_size, floor(no_variants / chunk_size)),
+    no_variants %% chunk_size
   )
   chunks_vec_index <- c(1, chunks_vec)
 

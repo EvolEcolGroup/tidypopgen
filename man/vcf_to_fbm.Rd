@@ -4,12 +4,12 @@
 \alias{vcf_to_fbm}
 \title{Convert vcf to FBM.}
 \usage{
-vcf_to_fbm(vcf_path, loci_per_chunk = 1e+05, backingfile = NULL, quiet = FALSE)
+vcf_to_fbm(vcf_path, chunk_size = 1e+05, backingfile = NULL, quiet = FALSE)
 }
 \arguments{
 \item{vcf_path}{the path to the vcf}
 
-\item{loci_per_chunk}{the chunk size to use on the vcf when loading the file}
+\item{chunk_size}{the chunk size to use on the vcf when loading the file}
 
 \item{backingfile}{the name of the file to use as the backing file}
 }
@@ -19,6 +19,5 @@ path to the resulting rds file as class bigSNP.
 \description{
 Convert a vcf file to a Filebacked Big Matrix (FBM) object.
 This should work even for large vcf files that would not fit in memory.
-TODO: this function is not yet complete.
 }
 \keyword{internal}

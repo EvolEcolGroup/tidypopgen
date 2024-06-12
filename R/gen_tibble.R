@@ -28,8 +28,9 @@
 #' and 'position','genetic_dist', 'allele_ref' and 'allele_alt'. This is only used
 #' if `x` is a genotype matrix. Otherwise this information is extracted directly from
 #' the files.
-#' @param loci_per_chunk the number of loci processed at a time (currently only used
-#' if `x` is a vcf file)
+#' @param chunk_size the number of loci or individuals (depending on the format)
+#'  processed at a time (currently used
+#' if `x` is a vcf or packedancestry file)
 #' @param ... if `x` is the name of a vcf file, additional arguments
 #' passed to [vcfR::read.vcfR()]. Otherwise, unused.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
@@ -69,7 +70,7 @@ gen_tibble <-
 #' @rdname gen_tibble
 gen_tibble.character <-
   function(x,
-           ..., loci_per_chunk = 10000,
+           ..., chunk_size = NULL,
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0","."),
            backingfile = NULL,
@@ -88,7 +89,7 @@ gen_tibble.character <-
                        backingfile = backingfile,
                        quiet = quiet)
   } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
-    x_gt <- gen_tibble_vcf(x = x, ..., loci_per_chunk = loci_per_chunk,
+    x_gt <- gen_tibble_vcf(x = x, ..., chunk_size = chunk_size,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet)
@@ -155,15 +156,20 @@ gen_tibble_bed_rds <- function(x, ...,
     indiv_meta$maternal_ID <- fam_info$maternal.ID
     indiv_meta$maternal_ID[indiv_meta$maternal_ID==0]<-NA
   }
-  if(!all(fam_info$sex==0)){
-    indiv_meta$sex <-   dplyr::case_match(
-      fam_info$sex,
-      1 ~ "male",
-      2 ~ "female",
-      .default = NA,
-      .ptype = factor(levels = c("female", "male"))
-    )
+  # if sex is numeric
+  if (inherits(fam_info$sex,"numeric")){
+    if(!all(fam_info$sex==0)){
+      indiv_meta$sex <-   dplyr::case_match(
+        fam_info$sex,
+        1 ~ "male",
+        2 ~ "female",
+        .default = NA,
+        .ptype = factor(levels = c("female", "male"))
+      )
+    }
   }
+
+  if (inherits(fam_info$affection,"numeric")){
   if(!all(fam_info$affection %in% c(0,-9))){
   indiv_meta$phenotype <- dplyr::case_match(
     fam_info$affection,
@@ -174,6 +180,8 @@ gen_tibble_bed_rds <- function(x, ...,
     .ptype = factor(levels = c("control", "case"))
   )
   }
+  }
+
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
     class = "gen_tbl"

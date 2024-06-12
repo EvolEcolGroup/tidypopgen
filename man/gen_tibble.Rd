@@ -18,7 +18,7 @@ gen_tibble(
 \method{gen_tibble}{character}(
   x,
   ...,
-  loci_per_chunk = 10000,
+  chunk_size = NULL,
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
@@ -77,8 +77,9 @@ the session!)}
 
 \item{quiet}{provide information on the files used to store the data}
 
-\item{loci_per_chunk}{the number of loci processed at a time (currently only used
-if \code{x} is a vcf file)}
+\item{chunk_size}{the number of loci or individuals (depending on the format)
+processed at a time (currently used
+if \code{x} is a vcf or packedancestry file)}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only used
