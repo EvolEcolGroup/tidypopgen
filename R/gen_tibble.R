@@ -28,8 +28,9 @@
 #' and 'position','genetic_dist', 'allele_ref' and 'allele_alt'. This is only used
 #' if `x` is a genotype matrix. Otherwise this information is extracted directly from
 #' the files.
-#' @param loci_per_chunk the number of loci processed at a time (currently only used
-#' if `x` is a vcf file)
+#' @param chunk_size the number of loci or individuals (depending on the format)
+#'  processed at a time (currently used
+#' if `x` is a vcf or packedancestry file)
 #' @param ... if `x` is the name of a vcf file, additional arguments
 #' passed to [vcfR::read.vcfR()]. Otherwise, unused.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
@@ -69,7 +70,7 @@ gen_tibble <-
 #' @rdname gen_tibble
 gen_tibble.character <-
   function(x,
-           ..., loci_per_chunk = 10000,
+           ..., chunk_size = NULL,
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0","."),
            backingfile = NULL,
@@ -88,7 +89,7 @@ gen_tibble.character <-
                        backingfile = backingfile,
                        quiet = quiet)
   } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
-    x_gt <- gen_tibble_vcf(x = x, ..., loci_per_chunk = loci_per_chunk,
+    x_gt <- gen_tibble_vcf(x = x, ..., chunk_size = chunk_size,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet)

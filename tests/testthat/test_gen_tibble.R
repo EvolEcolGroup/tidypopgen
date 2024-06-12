@@ -189,7 +189,8 @@ test_that("gen_tibble from files",{
   pop_a_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
   expect_true(all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_vcf_gt)))
   # reload it in chunks
-  pop_a_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), loci_per_chunk=2)
+  pop_a_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                              chunk_size = 2)
   expect_true(all.equal(show_genotypes(pop_a_vcf_gt2),show_genotypes(pop_a_vcf_gt)))
   expect_true(all.equal(show_loci(pop_a_vcf_gt2),show_loci(pop_a_vcf_gt)))
 
@@ -220,7 +221,8 @@ test_that("gen_tibble from files with missingness",{
   pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
   expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_gt)))
   # reload it in chunks
-  pop_b_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), loci_per_chunk=2)
+  pop_b_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                              chunk_size = 2)
   expect_true(all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt)))
   expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
 
