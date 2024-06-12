@@ -21,7 +21,9 @@ tidypopgen has two key functions to examine the quality of data across loci and 
 
 ```{r}
 library(tidypopgen)
-data <- gen_tibble(system.file("extdata/related/families.bed", package="tidypopgen"), quiet = TRUE, backingfile = tempfile(), valid_alleles = c("1","2"))
+data <- gen_tibble(system.file("extdata/related/families.bed",
+  package="tidypopgen"), quiet = TRUE, backingfile = tempfile(),
+  valid_alleles = c("1","2"))
 ```
 
 # Quality control for loci
@@ -37,7 +39,11 @@ The output of `qc_report_loci` supplies minor allele frequency, rate of missingn
 autoplot(loci_report, type = "overview")
 ```
 
-The overview plot shows how many SNPs in the data set are affected by high missingness, with some also affected by low minor allele frequency and Hardy-Weinberg disequilibrium. The thresholds for each parameter, (level of missingness that is accepted etc) can be adjusted using the parameters provided in autoplot. For example:
+Using 'overview' provides an Upset plot, which is designed to show the intersection of different sets in the same way as a Venn diagram. SNPs can be divided into 'sets' that each pass predefined quality control threshold; a set of SNPs with missingness under a given threshold, a set of SNPs with MAF above a given threshold, and a set of SNPs with a Hardy-Weinberg exact p-value that falls above a given significance level.
+
+The upset plot then visualises our 961 SNPs within their respective sets. The number above the first bar indicates that, of our total SNPs, 609 occur in all 3 sets, meaning 609 SNPs pass all of our automatic QC measures. The combined total of the first and second bars represents the number of SNPs that pass our MAF and HWE thresholds, here, 956.
+
+The thresholds for each parameter, (level of missingness that is accepted etc) can be adjusted using the parameters provided in autoplot. For example:
 
 ```{r}
 autoplot(loci_report, type = "overview", miss_threshold = 0.03, maf_threshold = 0.02, hwe_p = 0.01)

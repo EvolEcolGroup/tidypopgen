@@ -78,21 +78,21 @@ autoplot.qc_report_loci <- function(object,
   logp <- -log10(hwe_p)
 
   if (type == "overview") {
-    final_plot <- autoplot_l_qc_overview(object, maf_threshold, miss_threshold, hwe_p)
+    final_plot <- autoplot_l_qc_overview(object, maf_threshold = maf_threshold, miss_threshold = miss_threshold, hwe_p = hwe_p)
   } else if (type == "all") {
-    final_plot <- autoplot_l_qc_all(object, maf_threshold, miss_threshold, hwe_p,logp)
+    final_plot <- autoplot_l_qc_all(object, maf_threshold = maf_threshold, miss_threshold = miss_threshold, hwe_p = hwe_p, logp = logp)
   } else if (type == "missing") {
-    final_plot <- autoplot_l_qc_missing(object, miss_threshold)
+    final_plot <- autoplot_l_qc_missing(object, miss_threshold = miss_threshold)
   } else if (type == "missing low maf") {
-    final_plot <- autoplot_l_qc_missing_low_maf(object, maf_threshold, miss_threshold)
+    final_plot <- autoplot_l_qc_missing_low_maf(object, maf_threshold = maf_threshold, miss_threshold = miss_threshold)
   } else if (type == "missing high maf") {
-    final_plot <- autoplot_l_qc_missing_high_maf(object, maf_threshold, miss_threshold)
+    final_plot <- autoplot_l_qc_missing_high_maf(object, maf_threshold = maf_threshold, miss_threshold = miss_threshold)
   } else if (type == "maf") {
-    final_plot <- autoplot_l_qc_maf(object, maf_threshold)
+    final_plot <- autoplot_l_qc_maf(object, maf_threshold = maf_threshold)
   } else if (type == "hwe") {
-    final_plot <- autoplot_l_qc_hwe(object,logp)
+    final_plot <- autoplot_l_qc_hwe(object,logp = logp)
   } else if (type == "significant hwe") {
-    final_plot <- autoplot_l_qc_sig_hwe(object,hwe_p,logp)
+    final_plot <- autoplot_l_qc_sig_hwe(object,hwe_p = hwe_p,logp = logp)
   } else {
     stop("Invalid type argument. Please choose from 'overview','all','maf','hwe','significant hwe'")
   }
@@ -140,25 +140,35 @@ autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold, miss_thresh
 }
 
 
-autoplot_l_qc_overview <- function(object,hwe_p = hwe_p, maf_threshold=maf_threshold, miss_threshold = miss_threshold,...){
+autoplot_l_qc_overview <- function(object, maf_threshold=maf_threshold, miss_threshold = miss_threshold, hwe_p = hwe_p,...){
 
   qc_report <- object
 
-  qc_lowmaf <- subset(qc_report, qc_report$maf >= maf_threshold)
-  qc_lowhwe <- subset(qc_report,qc_report$hwe_p >= hwe_p)
+  #qc_maf <- subset(qc_report, qc_report$maf >= maf_threshold)
+  #qc_hwe <- subset(qc_report,qc_report$hwe_p >= 0.01)
+  qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p, ]
+  qc_maf <- qc_report[qc_report$maf >= maf_threshold, ]
+
+  maf_pass <- c(qc_maf$snp_id)
+  hwe_pass <- c(qc_hwe$snp_id)
+
+  #qc_missing <- subset(qc_report,qc_report$missingness <= miss_threshold)
+  qc_missing <- qc_report[qc_report$missingness >= miss_threshold, ]
+  missing_pass <- c(qc_missing$snp_id)
+
+  pass_list <- list(MAF = maf_pass, HWE = hwe_pass, Missing = missing_pass)
+
+  unique_markers <- unique(unlist(pass_list))
+  pass_counts <- UpSetR::fromList(pass_list)
+  rownames(pass_counts) <-  unique_markers
 
 
-  maf_fail <- c(qc_lowmaf$snp_id)
-  hwe_fail <- c(qc_lowhwe$snp_id)
-
-  qc_highmissing <- subset(qc_report,qc_report$missingness <= miss_threshold)
-  missing_fail <- c(qc_highmissing$snp_id)
-
-  list <- list(MAF = maf_fail, HWE = hwe_fail, Missing = missing_fail)
-
-  final_plot_overview <- UpSetR::upset(UpSetR::fromList(list),order.by = "freq",main.bar.color="#66C2A5", matrix.color="#66C2A5",
+  #UpSetR::fromList(list)
+  final_plot_overview <- UpSetR::upset(pass_counts,order.by = "freq",main.bar.color="#66C2A5", matrix.color="#66C2A5",
                                        sets.bar.color="#FC8D62")
+  #final_plot_overview
 }
+
 
 autoplot_l_qc_maf <- function(object,maf_threshold=maf_threshold,...){
 
