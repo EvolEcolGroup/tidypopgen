@@ -25,17 +25,17 @@ data <- gen_tibble(bigsnp_path, quiet = TRUE)
 
 ## File management and reading data:
 
-| PLINK                         | `tidypopgen`                                 |
-|-------------------------------|----------------------------------------------|
-| --make-bed --out              | `gt_as_plink(data, bedfile = my_file)`       |
-| --recode                      | `gt_as_plink(data, bedfile = my_file         |
-| --allele1234 and --alleleACGT | See `gen_tibble()` parameter 'valid_alleles' |
+| PLINK                         | `tidypopgen`                                  |
+|-------------------------------|-----------------------------------------|
+| --make-bed --out              | `gt_as_plink(data, bedfile = my_file)`        |
+| --recode                      | \`gt_as_plink(data, bedfile = my_file         |
+| --allele1234 and --alleleACGT | See `gen_tibble()\` parameter 'valid_alleles' |
 
 PLINK flags --update-alleles, --allele1234, and --alleleACGT, all alter the coding of alleles. In `tidypopgen`, valid alleles are supplied when reading in a `gen_tibble`.
 
 ## Quality control:
 
-| PLINK      | `tidypopgen`                      |
+| PLINK      | `tidypopgen`                    |
 |------------|---------------------------------|
 | --maf      | `data %\>% loci_maf()`          |
 | --geno     | `data %\>% loci_missingness()`  |
@@ -78,7 +78,7 @@ To explore why clumping is preferable to pruning, see <https://privefl.github.io
 
 ## Quality control for relatedness (KING)
 
-| KING        | `tidypopgen`                  |
+| KING        | `tidypopgen`                |
 |-------------|-----------------------------|
 | --kinship   | `gt_king()`                 |
 | --unrelated | `filter_high_relatedness()` |
@@ -87,11 +87,11 @@ gt_king() implements the KING-robust estimator of kinship equivalent to --kinshi
 
 ## Merging datasets:
 
-| PLINK       | `tidypopgen`                                             |
-|-------------|--------------------------------------------------------|
-| --bmerge    | `rbind()`                                              |
-| --flip-scan | `rbind_dry_run()`                                      |
-| --flip      | use 'flip_strand = TRUE' in `rbind()`                     |
+| PLINK       | `tidypopgen`                          |
+|-------------|---------------------------------------|
+| --bmerge    | `rbind()`                             |
+| --flip-scan | `rbind_dry_run()`                     |
+| --flip      | use 'flip_strand = TRUE' in `rbind()` |
 
 In PLINK, data merging can fail due to strand inconsistencies that are not addressed prior to merging. PLINK documentation suggests to users to try a 'trial flip' of data to address this, and then to 'unflip' any errors that remain. In `tidypopgen`, when data are merged with rbind, strand inconsistencies are identified and automatically flipped, avoiding multiple rounds of flipping before merging.
 
@@ -101,12 +101,8 @@ Data are only merged one set at a time, there is no equivalent to --merge-list.
 
 ## Analysis:
 
-| PLINK     | `tidypopgen`                         |
+| PLINK     | `tidypopgen`                       |
 |-----------|------------------------------------|
 | --pca     | See gt_pca() for pca options       |
 | --fst     | pairwise_pop_fst() with group_by() |
 | --homozyg | gt_roh_window()                    |
-
-
-
-
