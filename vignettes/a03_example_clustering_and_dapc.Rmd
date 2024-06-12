@@ -181,7 +181,7 @@ tidy(anole_pca,matrix="eigenvalues") %>%
 
 Note that, as we were working with a truncated SVD algorithm for our PCA, we can not easily
 phrase the eigenvalues in terms of proportion of total variance, so the cumulative y axis simply
-shows the cumulative sum of the eigen values. Ideally, we are looking for the point where 
+shows the cumulative sum of the eigenvalues. Ideally, we are looking for the point where 
 the curve starts flattening. In this case, we can
 not see a very clear flattening, but by PC 10 the increase in explained variance has markedly
 decelerated. We can now find clusters based on those 10 PCs:
@@ -221,7 +221,7 @@ In this case, we are happy with the option of 3 clusters, and we can run a DAPC:
 anole_dapc <- gt_dapc(anole_clusters)
 ```
 
-Note that `gt_dapc()` takes automatically the number of clusters form the `anole_clusters` object,
+Note that `gt_dapc()` takes automatically the number of clusters from the `anole_clusters` object,
 but can change that behaviour by setting some of its parameters (see the help
 page for `gt_dapc()`). When we print the object, we are given information about
 the most important elements of the object and where to find them (as we saw for `gt_pca`):
@@ -291,7 +291,7 @@ scatter(anole_dapc, posi.da="bottomright")
 
 # Clustering with sNMF
 
-sNMF is a fast clustering algorithm which provides results similar to STRUCTURE and ADMIXTURE. We can run it directly form R. We have first to generate a file
+sNMF is a fast clustering algorithm which provides results similar to STRUCTURE and ADMIXTURE. We can run it directly from R. We have first to generate a file
 with our genotype data:
 ```{r}
 geno_file <- gt_as_geno_lea(anole_gt)
@@ -301,7 +301,7 @@ geno_file
 Note that the .geno file is placed by default in the same directory and using
 the same name as the backing file of the `gen_tibble`
 
-Now can run K clusters from k =1 to k=10. We will use just one repeat, but ideally
+Now we can run K clusters from k=1 to k=10. We will use just one repeat, but ideally
 we should run multiple repetition for each K:
 ```{r results='hide'}
 library(LEA)

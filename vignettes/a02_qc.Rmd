@@ -61,7 +61,7 @@ We can then begin to consider how to quality control this raw data set. Let's st
 autoplot(loci_report, type = "maf")
 ```
 
-Here we can see there are many monomorphic SNPs in the data set. Let's filter out loci with a minor allele frequency lower than 2%, by using `select_loci_if`. Here, we select all SNPs with a MAF greater than 2%. This operation is equivalent to plink --maf 0.02.
+Here we can see there are some monomorphic SNPs in the data set. Let's filter out loci with a minor allele frequency lower than 2%, by using `select_loci_if`. Here, we select all SNPs with a MAF greater than 2%. This operation is equivalent to plink --maf 0.02.
 
 ```{r}
 data <- data %>% select_loci_if(loci_maf(genotypes)>0.02)
@@ -71,23 +71,23 @@ count_loci(data)
 Following this, we can remove SNPs with a high rate of missingness. Lets say we want to remove SNPs that are missing in more than 5% of individuals, equivalent to using plink --geno 0.05
 
 ```{r}
-autoplot(loci_report, type = "missing",miss_threshold = 0.05)
+autoplot(loci_report, type = "missing", miss_threshold = 0.05)
 ```
 
-We can see here that most SNPs have low missingness, under our 5% threshold, some do, however, have missingness over our kings_threshold. To remove these SNPs, we can again use `select_loci_if`.
+We can see here that most SNPs have low missingness, under our 5% threshold, some do, however, have missingness over our threshold. To remove these SNPs, we can again use `select_loci_if`.
 
 ```{r}
 data <- data %>% select_loci_if(loci_missingness(genotypes)<0.05)
 count_loci(data)
 ```
 
-Finally, if we may want to remove SNPs that show significant deviation from Hardy-Weinberg equilibrium, if our study design requires. To visualise SNPs with significant p-values in the Hardy-Weinberg exact test, we can again call autoplot:
+Finally, we may want to remove SNPs that show significant deviation from Hardy-Weinberg equilibrium, if our study design requires. To visualise SNPs with significant p-values in the Hardy-Weinberg exact test, we can again call autoplot:
 
 ```{r}
 autoplot(loci_report,type = "significant hwe", hwe_p = 0.01)
 ```
 
-Few SNPs in our data have significant HWE p-values, however there may be circumstances where we would want to cut out the most extreme cases, if these data were real, these cases could indicate genotyping errors.
+Few SNPs in our data are significant, however there may be circumstances where we would want to cut out the most extreme cases, if these data were real, these cases could indicate genotyping errors.
 
 ```{r}
 data <- data %>% select_loci_if(loci_hwe(genotypes)>0.01)
@@ -104,7 +104,7 @@ individual_report <- qc_report_indiv(data)
 summary(individual_report)
 ```
 
-The output of `qc_report_loci` supplies observed heterozygosity per individual, and rate of missingness per individual as standard.
+The output of `qc_report_indiv` supplies observed heterozygosity per individual, and rate of missingness per individual as standard.
 
 These data can also be visualised using autoplot:
 
@@ -119,7 +119,7 @@ data <- data %>% filter(indiv_missingness(genotypes)<0.03)
 nrow(data)
 ```
 
-And if we wanted to remove outliers with particularly high or low heterozygosity, we can again do so by using `filter`. Here we remove observations that lie more than 3 standard deviations from the mean.
+And if we wanted to remove outliers with particularly high or low heterozygosity, we can again do so by using `filter`. As an example, here we remove observations that lie more than 3 standard deviations from the mean.
 
 ```{r}
 mean_val <- mean(individual_report$het_obs)
@@ -133,7 +133,7 @@ data <- data %>% filter(indiv_het_obs(genotypes) < upper)
 nrow(data)
 ```
 
-Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to `qc_report_indiv()`, then the report also calculates KING coefficient of relatedness of the sample. This threshold is used to create an output of the largest possible group with no related individuals, and the third boolean column `to_keep` recommends which individuals to remove to achieve this set.
+Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to `qc_report_indiv()`, then the report also calculates a KING coefficient of relatedness matrix using the sample. The `kings_threshold` is used to provide an output of the largest possible group with no related individuals in the third column `to_keep`. This boolean column recommends which individuals to remove (FALSE) and to keep (TRUE) to achieve an unrelated sample.
 
 ```{r}
 individual_report <- qc_report_indiv(data, kings_threshold = 0.177)
@@ -168,9 +168,10 @@ In this example, if we want to remove SNPs with a correlation greater than 0.2 i
 
 ```{r}
 to_keep_LD <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+head(to_keep_LD)
 ```
 
-`loci_ld_clump` then provides an output list of SNPs to keep in our data set. We can then use this list to create a pruned version of our data:
+`loci_ld_clump` provides a boolean vector the same length as our list of SNPs, telling us which to keep in the data set. We can then use this list to create a pruned version of our data:
 
 ```{r}
 ld_data <- imputed_data %>% select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, size = 10)) 
