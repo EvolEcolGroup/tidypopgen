@@ -18,7 +18,7 @@ here the format"><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tidypopgen</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.0.9013</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.0.9014</span>
       </span>
     </div>
 
@@ -78,7 +78,7 @@ here the format</p>
 <span><span class="fu">gen_tibble</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  loci_per_chunk <span class="op">=</span> <span class="fl">10000</span>,</span>
+<span>  chunk_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  valid_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"T"</span>, <span class="st">"C"</span>, <span class="st">"G"</span><span class="op">)</span>,</span>
 <span>  missing_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0"</span>, <span class="st">"."</span><span class="op">)</span>,</span>
 <span>  backingfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -150,9 +150,10 @@ the session!)</p></dd>
 <dd><p>provide information on the files used to store the data</p></dd>
 
 
-<dt>loci_per_chunk</dt>
-<dd><p>the number of loci processed at a time (currently only used
-if <code>x</code> is a vcf file)</p></dd>
+<dt>chunk_size</dt>
+<dd><p>the number of loci or individuals (depending on the format)
+processed at a time (currently used
+if <code>x</code> is a vcf or packedancestry file)</p></dd>
 
 
 <dt>indiv_meta</dt>
