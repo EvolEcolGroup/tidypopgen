@@ -118,18 +118,22 @@ autoplot(anole_pca, type = "scores") +
   labs(color = "population")
 
 ```
+
 For more complex/publication ready plots, we will want to add the PC scores
 to the tibble, so that we can create a custom plot with `ggplot2`. We can easily
 add the data with the `augment` method:
+
 ```{r}
 anole_gt <- augment(anole_pca , data = anole_gt)
 ```
 
 And now we can use `ggplot2` directly to generate our plot:
+
 ```{r}
 anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) + 
   geom_point()
 ```
+
 We can see that the three population do separate nicely on the PCA, with just one individual
 from Wam sitting in-between the other Wam individuals and those from Eam.
 
@@ -143,6 +147,7 @@ By using information from the loci table, we could easily embellish the plot, fo
 colouring by chromosome or maf.
 
 For more complex plots, we can augment the loci table with the loadings using `augment_loci()`:
+
 ```{r}
 anole_gt_load <- augment_loci(anole_pca, data= anole_gt)
 
