@@ -92,8 +92,8 @@
 </h2>
 <table class="table">
 <colgroup>
-<col width="40%">
-<col width="59%">
+<col width="43%">
+<col width="56%">
 </colgroup>
 <thead><tr class="header">
 <th>PLINK</th>
@@ -106,9 +106,11 @@
 </tr>
 <tr class="even">
 <td>–recode</td>
-<td>
-<code>gt_as_plink(data, bedfile = my_file         | | --allele1234 and --alleleACGT | See</code>gen_tibble()`
-parameter ‘valid_alleles’</td>
+<td>`gt_as_plink(data, bedfile = my_file</td>
+</tr>
+<tr class="odd">
+<td>–allele1234 and –alleleACGT</td>
+<td>See <code>gen_tibble()\</code> parameter ‘valid_alleles’</td>
 </tr>
 </tbody>
 </table>
@@ -159,13 +161,13 @@ example:</p>
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_chromosomes.html">loci_chromosomes</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">22</span><span class="op">)</span><span class="op">)</span> </span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A gen_tibble: 15 loci</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     5 × 3</span></span></span>
-<span><span class="co">#&gt;   id          population  genotypes</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> GRC14300079 pop_a               1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> GRC14300142 pop_a               2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> GRC14300159 pop_a               3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> GRC14300286 pop_a               4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> GRC14300305 pop_a               5</span></span></code></pre></div>
+<span><span class="co">#&gt;   id    population  genotypes</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> GRC24 pop_a               1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> GRC25 pop_a               2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> GRC26 pop_a               3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> GRC27 pop_a               4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> GRC28 pop_a               5</span></span></code></pre></div>
 <p>will select autosomal loci in the same way as –autosome. Or
 alternatively:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -189,12 +191,8 @@ alternatively:</p>
 <span></span>
 <span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">my_individuals</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A gen_tibble: 16 loci</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     3 × 3</span></span></span>
-<span><span class="co">#&gt;   id          population  genotypes</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> GRC14300079 pop_a               1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> GRC14300142 pop_a               2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> GRC14300159 pop_a               3</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     0 × 3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 variables: id &lt;chr&gt;, population &lt;chr&gt;, genotypes &lt;vctr_SNP&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quality-control-for-linkage">Quality control for linkage<a class="anchor" aria-label="anchor" href="#quality-control-for-linkage"></a>
@@ -235,10 +233,6 @@ largest possible set of unrelated individuals.</p>
 <h2 id="merging-datasets">Merging datasets:<a class="anchor" aria-label="anchor" href="#merging-datasets"></a>
 </h2>
 <table class="table">
-<colgroup>
-<col width="18%">
-<col width="81%">
-</colgroup>
 <thead><tr class="header">
 <th>PLINK</th>
 <th><code>tidypopgen</code></th>

@@ -277,8 +277,8 @@ objects, and so they can be further embellished with the usual
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_pca</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">anole_gt</span><span class="op">$</span><span class="va">population</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"population"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-14-1.png" width="700">
-For more complex/publication ready plots, we will want to add the PC
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-14-1.png" width="700"></p>
+<p>For more complex/publication ready plots, we will want to add the PC
 scores to the tibble, so that we can create a custom plot with
 <code>ggplot2</code>. We can easily add the data with the
 <code>augment</code> method:</p>
@@ -289,9 +289,9 @@ plot:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">.fittedPC1</span>, <span class="va">.fittedPC2</span>, color <span class="op">=</span> <span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-16-1.png" width="700">
-We can see that the three population do separate nicely on the PCA, with
-just one individual from Wam sitting in-between the other Wam
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
+<p>We can see that the three population do separate nicely on the PCA,
+with just one individual from Wam sitting in-between the other Wam
 individuals and those from Eam.</p>
 <p>It is also possible to inspect which loci contribute the most to a
 given component:</p>
@@ -333,7 +333,7 @@ it is then trivial to plot them:</p>
 <p>Note that, as we were working with a truncated SVD algorithm for our
 PCA, we can not easily phrase the eigenvalues in terms of proportion of
 total variance, so the cumulative y axis simply shows the cumulative sum
-of the eigen values. Ideally, we are looking for the point where the
+of the eigenvalues. Ideally, we are looking for the point where the
 curve starts flattening. In this case, we can not see a very clear
 flattening, but by PC 10 the increase in explained variance has markedly
 decelerated. We can now find clusters based on those 10 PCs:</p>
@@ -375,7 +375,7 @@ run a DAPC:</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anole_dapc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_dapc.html">gt_dapc</a></span><span class="op">(</span><span class="va">anole_clusters</span><span class="op">)</span></span></code></pre></div>
 <p>Note that <code><a href="../reference/gt_dapc.html">gt_dapc()</a></code> takes automatically the number of
-clusters form the <code>anole_clusters</code> object, but can change
+clusters from the <code>anole_clusters</code> object, but can change
 that behaviour by setting some of its parameters (see the help page for
 <code><a href="../reference/gt_dapc.html">gt_dapc()</a></code>). When we print the object, we are given
 information about the most important elements of the object and where to
@@ -464,16 +464,16 @@ standard dapc plot with:</p>
 <h2 id="clustering-with-snmf">Clustering with sNMF<a class="anchor" aria-label="anchor" href="#clustering-with-snmf"></a>
 </h2>
 <p>sNMF is a fast clustering algorithm which provides results similar to
-STRUCTURE and ADMIXTURE. We can run it directly form R. We have first to
+STRUCTURE and ADMIXTURE. We can run it directly from R. We have first to
 generate a file with our genotype data:</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">geno_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_as_geno_lea.html">gt_as_geno_lea</a></span><span class="op">(</span><span class="va">anole_gt</span><span class="op">)</span></span>
 <span><span class="va">geno_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/Rtmpydbep2/anolis_1d425bf46ee.geno"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmpmuZXrJ/anolis_1cef7825ad6f.geno"</span></span></code></pre></div>
 <p>Note that the .geno file is placed by default in the same directory
 and using the same name as the backing file of the
 <code>gen_tibble</code></p>
-<p>Now can run K clusters from k =1 to k=10. We will use just one
+<p>Now we can run K clusters from k=1 to k=10. We will use just one
 repeat, but ideally we should run multiple repetition for each K:</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://membres-timc.imag.fr/Olivier.Francois/lea.html" class="external-link">LEA</a></span><span class="op">)</span></span>
