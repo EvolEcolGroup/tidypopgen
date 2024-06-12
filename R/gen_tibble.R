@@ -155,15 +155,20 @@ gen_tibble_bed_rds <- function(x, ...,
     indiv_meta$maternal_ID <- fam_info$maternal.ID
     indiv_meta$maternal_ID[indiv_meta$maternal_ID==0]<-NA
   }
-  if(!all(fam_info$sex==0)){
-    indiv_meta$sex <-   dplyr::case_match(
-      fam_info$sex,
-      1 ~ "male",
-      2 ~ "female",
-      .default = NA,
-      .ptype = factor(levels = c("female", "male"))
-    )
+  # if sex is numeric
+  if (inherits(fam_info$sex,"numeric")){
+    if(!all(fam_info$sex==0)){
+      indiv_meta$sex <-   dplyr::case_match(
+        fam_info$sex,
+        1 ~ "male",
+        2 ~ "female",
+        .default = NA,
+        .ptype = factor(levels = c("female", "male"))
+      )
+    }
   }
+
+  if (inherits(fam_info$affection,"numeric")){
   if(!all(fam_info$affection %in% c(0,-9))){
   indiv_meta$phenotype <- dplyr::case_match(
     fam_info$affection,
@@ -174,6 +179,8 @@ gen_tibble_bed_rds <- function(x, ...,
     .ptype = factor(levels = c("control", "case"))
   )
   }
+  }
+
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
     class = "gen_tbl"
