@@ -22,6 +22,7 @@ Imports:
     bigsnpr,
     bigstatsr,
     forcats,
+    foreach,
     generics,
     ggplot2,
     magrittr,

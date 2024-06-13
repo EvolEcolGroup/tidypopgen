@@ -7,8 +7,8 @@
 \method{predict}{gt_pca}(
   object,
   new_data = NULL,
-  impute_to_center = TRUE,
-  prediction_type = "simple",
+  project_method = c("none", "simple", "OADP", "least_squares"),
+  lsq_pcs = c(1, 2),
   block_size = NULL,
   n_cores = 1,
   ...
@@ -19,12 +19,12 @@
 
 \item{new_data}{a gen_tibble if scores are requested for a new dataset}
 
-\item{impute_to_center}{boolean on whether to impute missing values in
-\code{new_data} to the mean values used
-to center the pca. This option is used to e.g. project ancient data onto a PCA
-fitted to modern data. It defaults to TRUE.}
+\item{project_method}{a string taking the value of either "simple",
+"OADP" (Online Augmentation, Decomposition, and Procrustes (OADP) projection),
+or "least_squares" (as done by SMARTPCA)}
 
-\item{prediction_type}{a string taking the value of "simple" and/or OADP (Online Augmentation, Decomposition, and Procrustes (OADP) projection)}
+\item{lsq_pcs}{a vector of length two with the values of the two principal components
+to use for the least square fitting. Only relevant if\code{project_method = 'least_squares'}}
 
 \item{block_size}{number of loci read simultaneously (larger values will speed up
 computation, but require more memory)}
@@ -35,8 +35,7 @@ computation, but require more memory)}
 }
 \value{
 a matrix of predictions, with samples as rows and components as columns. The number
-of components depends on how many were estimated in the \code{\link{gt_pca}} object. If prediction
-type is equal to c("simple","OADP"), then a list of two matrices is returned
+of components depends on how many were estimated in the \code{\link{gt_pca}} object.
 }
 \description{
 Predict the PCA scores for a \code{\link{gt_pca}}, either for the original data or
