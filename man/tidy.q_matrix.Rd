@@ -14,7 +14,7 @@
 \item{...}{not currently used}
 }
 \value{
-A tidied matrix
+A tidied tibble
 }
 \description{
 Takes a \code{q_matrix} object, which is a matrix, and returns a tidied tibble.

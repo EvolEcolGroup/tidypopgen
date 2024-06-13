@@ -34,8 +34,6 @@ tidy.q_matrix <- function(x, gen_tbl, ...){
   rlang::check_dots_empty()
   q_tbl <- x %>%
     tibble::as_tibble() %>%
-    # add the pops data for plotting
-    # @TODO we should get this from the grouped tibble, not hardcode it!
     dplyr::mutate(id = gen_tbl$id,
                   group = gen_tbl$population)
 
@@ -43,15 +41,55 @@ tidy.q_matrix <- function(x, gen_tbl, ...){
                                          names_to = "q", values_to = "percentage")
   #q_tbl
   dominant_q <- q_tbl %>%
-    group_by(id) %>%
-    summarize(dominant_pop = group[which.max(percentage)], dominant_q = max(percentage), .groups = 'drop')
+    dplyr::group_by(.data$id) %>%
+    dplyr::summarize(dominant_pop = .data$group[which.max(.data$percentage)], dominant_q = max(.data$percentage), .groups = 'drop')
 
   q_tbl <- q_tbl %>%
-    left_join(dominant_q, by = "id")
+    dplyr::left_join(dominant_q, by = "id")
 
   q_tbl <- q_tbl %>%
-    arrange(group, desc(dominant_q)) %>%
-    mutate(plot_order = row_number(),  # Create plot_order column
-           id = factor(id, levels = unique(id[order(group, -dominant_q)])))
+    dplyr::arrange(.data$group, dplyr::desc(.data$dominant_q)) %>%
+    dplyr::mutate(plot_order = dplyr::row_number(),  # Create plot_order column
+           id = factor(.data$id, levels = unique(.data$id[order(.data$group, -.data$dominant_q)])))
 }
+
+
+#' Tidy ADMXITURE output files into plots
+#'
+#' Takes the name of a directory containing .Q file outputs, and
+#' produces a list of tidied tibbles ready to plot.
+#'
+#' @param x the name of a directory containing .Q files
+#' @param gen_tbl  An associated gen_tibble
+#' @returns a list of `q_matrix` objects to plot
+#'
+#' @export
+
+read_q_matrix_list <- function(x, gen_tbl){
+
+  files <- list.files(x, pattern = "\\.Q$", full.names = TRUE)
+
+  # Read all .Q files into a list
+  data_list <- lapply(files, function(file) utils::read.table(file, header = FALSE))
+
+  # Turn each into a Q matrix
+  matrix_list <- lapply(data_list, FUN = as_q_matrix)
+
+  # Sort matrix_list by the number of columns
+  matrix_list <- matrix_list[order(sapply(matrix_list, ncol))]
+
+  # Tidy each
+  matrix_list <- lapply(matrix_list, function(x) tidy.q_matrix(x, gen_tbl = gen_tbl))
+
+  matrix_list
+}
+
+
+
+
+
+
+
+
+
 
