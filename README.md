@@ -1,4 +1,4 @@
-# tidypopgen
+# tidypopgen <img src="./man/figures/logo.png" align="right" width="150"/>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/EvolEcolGroup/tidypopgen/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EvolEcolGroup/tidypopgen/actions/workflows/R-CMD-check.yaml)

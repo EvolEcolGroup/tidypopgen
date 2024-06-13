@@ -38,7 +38,8 @@ gt_save <-function(x, file_name = NULL, quiet = FALSE) {
     message("using bigSNP file: ", gt_get_file_names(x)[1])
     message("with backing file: ", gt_get_file_names(x)[2])
     message("make sure that you do NOT delete those files!")
-    message("to reload the gen_tibble in another session, use gt_load('",file_name,"')")
+    message("to reload the gen_tibble in another session, use:")
+    message("gt_load('",file_name,"')")
   }
   return(c(file_name,gt_get_file_names(x)))
 }
