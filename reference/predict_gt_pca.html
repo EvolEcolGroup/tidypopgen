@@ -69,8 +69,8 @@ projecting new data.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span></span>
 <span>  <span class="va">object</span>,</span>
 <span>  new_data <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  impute_to_center <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  prediction_type <span class="op">=</span> <span class="st">"simple"</span>,</span>
+<span>  project_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"simple"</span>, <span class="st">"OADP"</span>, <span class="st">"least_squares"</span><span class="op">)</span>,</span>
+<span>  lsq_pcs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>,</span>
 <span>  block_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -87,15 +87,15 @@ projecting new data.</p>
 <dd><p>a gen_tibble if scores are requested for a new dataset</p></dd>
 
 
-<dt>impute_to_center</dt>
-<dd><p>boolean on whether to impute missing values in
-<code>new_data</code> to the mean values used
-to center the pca. This option is used to e.g. project ancient data onto a PCA
-fitted to modern data. It defaults to TRUE.</p></dd>
+<dt>project_method</dt>
+<dd><p>a string taking the value of either "simple",
+"OADP" (Online Augmentation, Decomposition, and Procrustes (OADP) projection),
+or "least_squares" (as done by SMARTPCA)</p></dd>
 
 
-<dt>prediction_type</dt>
-<dd><p>a string taking the value of "simple" and/or OADP (Online Augmentation, Decomposition, and Procrustes (OADP) projection)</p></dd>
+<dt>lsq_pcs</dt>
+<dd><p>a vector of length two with the values of the two principal components
+to use for the least square fitting. Only relevant if<code>project_method = 'least_squares'</code></p></dd>
 
 
 <dt>block_size</dt>
@@ -116,8 +116,7 @@ computation, but require more memory)</p></dd>
     
 
 <p>a matrix of predictions, with samples as rows and components as columns. The number
-of components depends on how many were estimated in the <code><a href="gt_pca.html">gt_pca</a></code> object. If prediction
-type is equal to c("simple","OADP"), then a list of two matrices is returned</p>
+of components depends on how many were estimated in the <code><a href="gt_pca.html">gt_pca</a></code> object.</p>
     </div>
     <div id="references">
     <h2>References</h2>
