@@ -28,7 +28,7 @@ as_q_matrix <- function(x){
 #' @param x A Q matrix object (as returned by LEA::Q()).
 #' @param gen_tbl An associated gen_tibble
 #' @param ... not currently used
-#' @return A tidied matrix
+#' @return A tidied tibble
 #' @export
 tidy.q_matrix <- function(x, gen_tbl, ...){
   rlang::check_dots_empty()
@@ -41,6 +41,17 @@ tidy.q_matrix <- function(x, gen_tbl, ...){
 
   q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
                                          names_to = "q", values_to = "percentage")
-  q_tbl
+  #q_tbl
+  dominant_q <- q_tbl %>%
+    group_by(id) %>%
+    summarize(dominant_pop = group[which.max(percentage)], dominant_q = max(percentage), .groups = 'drop')
 
+  q_tbl <- q_tbl %>%
+    left_join(dominant_q, by = "id")
+
+  q_tbl <- q_tbl %>%
+    arrange(group, desc(dominant_q)) %>%
+    mutate(plot_order = row_number(),  # Create plot_order column
+           id = factor(id, levels = unique(id[order(group, -dominant_q)])))
 }
+

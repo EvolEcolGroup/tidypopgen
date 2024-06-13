@@ -367,42 +367,4 @@ plt
 ```
 
 
-To clean up the plot, we can order our individuals based on their population of origin and proportion derived from the q matrix:
-
-```{r}
-# @TODO we should do this as part of tidying
-dominant_q <- tidy_q %>%
-  group_by(id) %>%
-  summarize(dominant_pop = group[which.max(percentage)], dominant_q = max(percentage), .groups = 'drop')
-
-tidy_q <- tidy_q %>%
-  left_join(dominant_q, by = "id")
-
-tidy_q <- tidy_q %>%
-  arrange(group, desc(dominant_q)) %>%
-  mutate(plot_order = row_number(),  # Create plot_order column
-         id = factor(id, levels = unique(id[order(group, -dominant_q)])))
-```
-
-And replot it
-```{r}
-# set up the ggplot object
-plt <- ggplot2::ggplot(tidy_q,
-                       ggplot2::aes(x = id,
-                                    y = percentage,
-                                    fill = q)) +
-  # add the columns based on percentage membership to each cluster
-  ggplot2::geom_col(width = 1,
-                    position = ggplot2::position_stack(reverse = TRUE))+
-  # set the y label
-  ggplot2::labs(y = "K = 4")+
-  # use a theme to match the distruct look, removing most decorations
-  theme_distruct() +
-  # set the colour scale to be the same as in distruct and clumppling
-  scale_fill_distruct()
-
-plt
-```
-
-
 
