@@ -69,6 +69,7 @@ gt_pca_autoSVD <- function(x, k = 10,
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
   }
+  #browser()
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
@@ -92,7 +93,7 @@ gt_pca_autoSVD <- function(x, k = 10,
   }
   # hack to get around the use of a dataset by bigsnpr
   # TODO remove after bignspr is patched
-  attachNamespace("bigsnpr")
+  # attachNamespace("bigsnpr")
   this_svd  <- bigsnpr::snp_autoSVD(X$genotypes,
                       infos.chr = infos_chr,
                       infos.pos = infos_pos,
@@ -111,11 +112,12 @@ gt_pca_autoSVD <- function(x, k = 10,
                       verbose = verbose)
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
-
+  #browser()
   this_svd$method <- "autoSVD"
   this_svd$call <- match.call()
   # subset the loci table to have only the snps of interest
-  this_svd$loci <- show_loci(x)[.gt_bigsnp_cols %in% attr(x,"subset"),]
+  # this_svd$loci <- show_loci(x)[.gt_bigsnp_cols %in% attr(x,"subset"),]
+  this_svd$loci <- show_loci(x)[.gt_bigsnp_cols(x) %in% attr(this_svd,"subset"),]
   class(this_svd) <- c("gt_pca", class(this_svd))
   this_svd
 }
