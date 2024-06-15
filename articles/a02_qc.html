@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QC • tidypopgen</title>
+<title>Quality Control • tidypopgen</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
 <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png">
@@ -17,7 +17,7 @@
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="QC">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Quality Control">
 <meta property="og:description" content="tidypopgen">
 <meta property="og:image" content="/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -57,13 +57,13 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="../articles/a01_overview.html">overview</a>
+      <a href="../articles/a01_overview.html">Overview</a>
     </li>
     <li>
-      <a href="../articles/a02_qc.html">QC</a>
+      <a href="../articles/a02_qc.html">Quality Control</a>
     </li>
     <li>
-      <a href="../articles/a03_example_clustering_and_dapc.html">example workflow with tidypopgen</a>
+      <a href="../articles/a03_example_clustering_and_dapc.html">Example workflow with tidypopgen</a>
     </li>
     <li>
       <a href="../articles/a99_plink_cheatsheet.html">plink cheatsheet</a>
@@ -84,7 +84,7 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>QC</h1>
+      <h1 data-toc-skip>Quality Control</h1>
             
       
       
@@ -318,15 +318,15 @@ using <code>gt_save</code>.</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/RtmpmdIDAC/file1cf4d4585d0.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using bigSNP file: /tmp/RtmpmdIDAC/file1cf47cb01a2d.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with backing file: /tmp/RtmpmdIDAC/file1cf47cb01a2d.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/RtmpSjpxpo/file1cae27bffc26.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using bigSNP file: /tmp/RtmpSjpxpo/file1cae6aeab742.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with backing file: /tmp/RtmpSjpxpo/file1cae6aeab742.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/RtmpmdIDAC/file1cf4d4585d0.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/RtmpmdIDAC/file1cf4d4585d0.gt"  </span></span>
-<span><span class="co">## [2] "/tmp/RtmpmdIDAC/file1cf47cb01a2d.rds"</span></span>
-<span><span class="co">## [3] "/tmp/RtmpmdIDAC/file1cf47cb01a2d.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/RtmpSjpxpo/file1cae27bffc26.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/RtmpSjpxpo/file1cae27bffc26.gt" </span></span>
+<span><span class="co">## [2] "/tmp/RtmpSjpxpo/file1cae6aeab742.rds"</span></span>
+<span><span class="co">## [3] "/tmp/RtmpSjpxpo/file1cae6aeab742.bk"</span></span></code></pre>
 </div>
   </div>
 
