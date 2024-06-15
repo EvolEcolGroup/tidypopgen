@@ -89,10 +89,10 @@ gen_tibble.character <-
                        backingfile = backingfile,
                        quiet = quiet)
   } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
-    x_gt <- gen_tibble_vcf(x = x, ..., chunk_size = chunk_size,
+    return(gen_tibble_vcf(x = x, ..., chunk_size = chunk_size,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
-                   backingfile = backingfile, quiet = quiet)
+                   backingfile = backingfile, quiet = quiet))
   } else if (tolower(file_ext(x))=="ped"){
     x_gt <- gen_tibble_ped(x = x, ...,
                        valid_alleles= valid_alleles,

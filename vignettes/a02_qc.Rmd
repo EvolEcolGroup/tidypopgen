@@ -1,9 +1,9 @@
 ---
-title: "QC"
+title: "Quality Control"
 output: rmarkdown::html_vignette
 
 vignette: >
-  %\VignetteIndexEntry{QC}
+  %\VignetteIndexEntry{Quality Control}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -11,7 +11,7 @@
 
 vcf_to_fbm <- function(
     vcf_path,
-    chunk_size = 100000,
+    chunk_size = NULL,
     backingfile = NULL,
     quiet=FALSE) {
 
@@ -29,6 +29,11 @@ vcf_to_fbm <- function(
   no_variants <- count_vcf_variants(vcf_path)
   # count individuals in the file
   no_individuals <- count_vcf_individuals(vcf_path)
+  # if chunk is null, get the best guess of an efficient approach
+  if (is.null(chunk_size)){
+    chunk_size <- bigstatsr::block_size(no_individuals)
+  }
+
   # set up chunks
   chunks_vec <- c(
     rep(chunk_size, floor(no_variants / chunk_size)),
