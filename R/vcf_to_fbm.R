@@ -95,6 +95,7 @@ vcf_to_fbm <- function(
     gt <- vcfR::extract.gt(temp_vcf)
     gt <- gt[bi,,drop=FALSE]
     if (nrow(gt)>1){
+      # @TODO we could parallelise here
       gt <- t(apply(gt,2,poly_indiv_dosage, max_ploidy=max_ploidy))
     } else if (nrow(gt)==1){ # if we only have one marker
       gt <- matrix(apply(gt,2,poly_indiv_dosage, max_ploidy=max_ploidy),ncol=1)

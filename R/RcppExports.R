@@ -25,14 +25,6 @@ SNPHWE2 <- function(obs_hets, obs_hom1, obs_hom2, midp) {
     .Call(`_tidypopgen_SNPHWE2`, obs_hets, obs_hom1, obs_hom2, midp)
 }
 
-SNPHWE_t <- function(obs_hets, obs_hom1, obs_hom2, thresh) {
-    .Call(`_tidypopgen_SNPHWE_t`, obs_hets, obs_hom1, obs_hom2, thresh)
-}
-
-SNPHWE_midp_t <- function(obs_hets, obs_hom1, obs_hom2, thresh) {
-    .Call(`_tidypopgen_SNPHWE_midp_t`, obs_hets, obs_hom1, obs_hom2, thresh)
-}
-
 increment_as_counts <- function(k, k2, na_mat, dos_mat, BM, rowInd, colInd) {
     invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, na_mat, dos_mat, BM, rowInd, colInd))
 }

@@ -64,6 +64,8 @@ anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
 anole_gt
 ```
 
+## PCA
+
 That was easy. The loci had already been filtered and cleaned, so we don't need 
 to do any QC. Let us jump straight into analysis and run a PCA:
 ```{r, error=TRUE}
