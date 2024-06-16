@@ -24,7 +24,6 @@ vcf_to_fbm <- function(
     backingfile <- bigstatsr::sub_bk(backingfile,"")
   }
 
-
   # count the variants in the file
   no_variants <- count_vcf_variants(vcf_path)
   # count individuals in the file
@@ -45,7 +44,8 @@ vcf_to_fbm <- function(
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
     nrow = 1,
-    verbose = !quiet
+    verbose = !quiet,
+    convertNA = FALSE
   )
   temp_gt <- vcfR::extract.gt(temp_vcf,convertNA = FALSE)
   ploidy <- apply(temp_gt,2,get_ploidy)
