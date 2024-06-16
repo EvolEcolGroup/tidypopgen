@@ -66,7 +66,7 @@
       <a href="../articles/a03_example_clustering_and_dapc.html">Example workflow with tidypopgen</a>
     </li>
     <li>
-      <a href="../articles/a99_plink_cheatsheet.html">plink cheatsheet</a>
+      <a href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a>
     </li>
   </ul>
 </li>
@@ -210,6 +210,10 @@ easy, we just need to remove “punc_”:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> JFT773       AF                  9</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> LG1299       AF                 10</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 36 more rows</span></span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="pca">PCA<a class="anchor" aria-label="anchor" href="#pca"></a>
+</h3>
 <p>That was easy. The loci had already been filtered and cleaned, so we
 don’t need to do any QC. Let us jump straight into analysis and run a
 PCA:</p>
@@ -476,7 +480,7 @@ generate a file with our genotype data:</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">geno_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_as_geno_lea.html">gt_as_geno_lea</a></span><span class="op">(</span><span class="va">anole_gt</span><span class="op">)</span></span>
 <span><span class="va">geno_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpnD0MPp/anolis_1cef7c3fd5e1.geno"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/Rtmp45mkl3/anolis_1cd21e1b93cd.geno"</span></span></code></pre></div>
 <p>Note that the .geno file is placed by default in the same directory
 and using the same name as the backing file of the
 <code>gen_tibble</code></p>
