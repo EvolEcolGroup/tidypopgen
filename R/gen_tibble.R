@@ -60,8 +60,8 @@ gen_tibble <-
            backingfile = NULL,
            quiet = FALSE) {
 
-  UseMethod("gen_tibble", x)
-}
+    UseMethod("gen_tibble", x)
+  }
 
 ###############################################################################
 # character method for files
@@ -76,41 +76,48 @@ gen_tibble.character <-
            backingfile = NULL,
            quiet = FALSE) {
 
-  # check that valid alleles does not contain zero
-  if ("0" %in% valid_alleles){
-    stop ("'0' can not be a valid allele (it is the default missing allele value!)")
-  }
+    # check for empty string
+    if (x==""){
+      stop("x is an empty string")
+    }
 
-  if ((tolower(file_ext(x))=="bed") || (tolower(file_ext(x))=="rds")){
-    rlang::check_dots_empty()
-    x_gt <- gen_tibble_bed_rds(x = x, ...,
-                       valid_alleles= valid_alleles,
-                       missing_alleles= missing_alleles,
-                       backingfile = backingfile,
-                       quiet = quiet)
-  } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
-    return(gen_tibble_vcf(x = x, ..., chunk_size = chunk_size,
-                   valid_alleles= valid_alleles,
-                   missing_alleles= missing_alleles,
-                   backingfile = backingfile, quiet = quiet))
-  } else if (tolower(file_ext(x))=="ped"){
-    x_gt <- gen_tibble_ped(x = x, ...,
-                       valid_alleles= valid_alleles,
-                       missing_alleles= missing_alleles,
-                       backingfile = backingfile,
-                       quiet = quiet)
-  } else if (tolower(file_ext(x))=="geno"){
-    x_gt <- gen_tibble_packedancestry(x = x, ...,
-                   valid_alleles= valid_alleles,
-                   missing_alleles= missing_alleles,
-                   backingfile = backingfile,
-                   quiet = quiet)
-  } else  {
-    stop("file_path should be pointing to a either a PLINK .bed or .ped file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
+    # check that valid alleles does not contain zero
+    if ("0" %in% valid_alleles){
+      stop ("'0' can not be a valid allele (it is the default missing allele value!)")
+    }
+
+    if ((tolower(file_ext(x))=="bed") || (tolower(file_ext(x))=="rds")){
+      rlang::check_dots_empty()
+      x_gt <- gen_tibble_bed_rds(x = x, ...,
+                                 valid_alleles= valid_alleles,
+                                 missing_alleles= missing_alleles,
+                                 backingfile = backingfile,
+                                 quiet = quiet)
+    } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
+      # return as the gen_tibble will be saved by an internal call to gen_tibble
+      return(gen_tibble_vcf(x = x, ..., chunk_size = chunk_size,
+                            valid_alleles= valid_alleles,
+                            missing_alleles= missing_alleles,
+                            backingfile = backingfile, quiet = quiet))
+    } else if (tolower(file_ext(x))=="ped"){
+      # return as the gen_tibble will be saved by an internal call to gen_tibble
+      return(gen_tibble_ped(x = x, ...,
+                             valid_alleles= valid_alleles,
+                             missing_alleles= missing_alleles,
+                             backingfile = backingfile,
+                             quiet = quiet))
+    } else if (tolower(file_ext(x))=="geno"){
+      x_gt <- gen_tibble_packedancestry(x = x, ...,
+                                        valid_alleles= valid_alleles,
+                                        missing_alleles= missing_alleles,
+                                        backingfile = backingfile,
+                                        quiet = quiet)
+    } else  {
+      stop("file_path should be pointing to a either a PLINK .bed or .ped file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
+    }
+    file_in_use <- gt_save(x_gt, quiet = quiet)
+    return(x_gt)
   }
-  file_in_use <- gt_save(x_gt, quiet = quiet)
-  return(x_gt)
-}
 
 
 gen_tibble_bed_rds <- function(x, ...,
@@ -132,7 +139,7 @@ gen_tibble_bed_rds <- function(x, ...,
   bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
 
   indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
-                             population = bigsnp_obj$fam$family.ID)
+                     population = bigsnp_obj$fam$family.ID)
   # check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
   if ("ploidy" %in% names(bigsnp_obj$fam)){
     ploidy <- bigsnp_obj$fam$ploidy
@@ -170,16 +177,21 @@ gen_tibble_bed_rds <- function(x, ...,
   }
 
   if (inherits(fam_info$affection,"numeric")){
-  if(!all(fam_info$affection %in% c(0,-9))){
-  indiv_meta$phenotype <- dplyr::case_match(
-    fam_info$affection,
-    1 ~ "control",
-    2 ~ "case",
-    -9 ~ NA,
-    .default = NA,
-    .ptype = factor(levels = c("control", "case"))
-  )
+    if(!all(fam_info$affection %in% c(0,-9))){
+      indiv_meta$phenotype <- dplyr::case_match(
+        fam_info$affection,
+        1 ~ "control",
+        2 ~ "case",
+        -9 ~ NA,
+        .default = NA,
+        .ptype = factor(levels = c("control", "case"))
+      )
+    }
   }
+
+  # if we transferred the paternal and maternal, recode population to family_ID
+  if (any("paternal_ID","maternal_ID") %in% names(indiv_meta)){
+    rename(indiv_meta, any_of(family_ID = "population"))
   }
 
   new_gen_tbl <- tibble::new_tibble(
@@ -241,12 +253,12 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   }
 
   # use code for NA in FBM.256
-#  x[is.na(x)]<-3
+  #  x[is.na(x)]<-3
 
   bigsnp_obj <- gt_write_bigsnp_from_dfs(genotypes = x,
-                                          indiv_meta = indiv_meta,
-                                          loci = loci,
-                                          backingfile = backingfile,
+                                         indiv_meta = indiv_meta,
+                                         loci = loci,
+                                         backingfile = backingfile,
                                          ploidy = ploidy)
   bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile,".rds")
 
@@ -285,8 +297,8 @@ check_valid_loci <- function(loci_df){
 #' @param loci the loci table
 #' @keywords internal
 gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
-                                      backingfile=NULL,
-                                      ploidy = ploidy){
+                                     backingfile=NULL,
+                                     ploidy = ploidy){
 
   if (is.null(backingfile)){
     backingfile <- tempfile()

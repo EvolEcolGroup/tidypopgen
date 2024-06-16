@@ -196,6 +196,9 @@ test_that("gen_tibble from files",{
 
   # @TODO we should add similar tests for pop b, which has missing data
 
+
+  # error on empty string
+  expect_error(gen_tibble(""), "x is an empty string")
 })
 
 test_that("gen_tibble from files with missingness",{
@@ -399,4 +402,10 @@ test_that("check summary stats are the same for gen_tibbles read in different wa
 
 })
 
+## pedigree info
+test_that("read pedigree correctly",{
+
+  pedigree_file <- system.file("extdata/pedigree_min.ped", package = "tidypopgen")
+  gen_tibble(pedigree_file)
+})
 

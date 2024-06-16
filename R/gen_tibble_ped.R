@@ -8,7 +8,10 @@ gen_tibble_ped <- function(x, ...,
   if (!file.exists(map_file)){
     stop("map file ",map_file," does not exist")
   }
-
+  # if backingfile is NULL, use the path of the file
+  if (is.null(backingfile)){
+    backingfile <- sub("\\.ped$", "", x)
+  }
 
   res <- read.pedfile(file =x , snps = map_file,
                       na.strings = missing_alleles,
@@ -20,7 +23,8 @@ gen_tibble_ped <- function(x, ...,
                             backingfile = backingfile, quiet=quiet)
   check_allele_alphabet (new_gen_tbl, valid_alleles = valid_alleles,
                          missing_alleles = missing_alleles)
-  show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
+  show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl),
+                                                     missing_alleles = missing_alleles)
   return(new_gen_tbl)
 
 }
@@ -173,7 +177,6 @@ read.pedfile <- function(file, n, snps, which, split="\t| +", sep=".",
   else
     rnames <- ped
   dimnames(result) <- list(rnames, snps)
-#  result <- new("SnpMatrix", result)
 
   ## Subject support file
   fam <- data.frame(row.names=rnames, population=ped, id=mem,
@@ -192,3 +195,15 @@ read.pedfile <- function(file, n, snps, which, split="\t| +", sep=".",
   }
   list(genotypes=result, fam=fam, map=map)
 }
+
+
+############################
+#' A function to format the indiv meta from the fam information
+#'
+#' The fam information is extracted either from a fam file, or from
+#' the .ped file
+#'
+#' @keywords internal
+
+fam_to_indiv_meta <-
+  ("../../Downloads/vcf_test/pileup_Jar_burial.pileUp_Choskar.fixREF.vcf.gz",)
