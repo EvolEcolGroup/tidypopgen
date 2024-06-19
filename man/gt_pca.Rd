@@ -15,3 +15,7 @@ Whilst this is arguably the best option, it is somewhat data hungry, and so
 only suitable for very large datasets (hundreds of individuals with several hundred
 thousands markers, or larger).
 }
+\details{
+NOTE: using gt_pca_autoSVD with a small dataset will likely cause an error,
+see man page for details.
+}

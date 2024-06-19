@@ -4,6 +4,9 @@
 #' using a fast truncated SVD with initial pruning and then iterative removal
 #' of long-range LD regions. This function is a wrapper for [bigsnpr::snp_autoSVD()]
 #'
+#' Using gt_pca_autoSVD requires a reasonably large dataset, as the function
+#' iteratively removes regions of long range LD.
+#'
 #' @param x a `gen_tbl` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
 #'   **This algorithm should be used to compute a few singular vectors/values.**

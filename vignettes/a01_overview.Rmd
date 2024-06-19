@@ -475,6 +475,9 @@ If we attempt to run a PCA on this dataset, we get:
 missing_pca <- missing_gt %>% gt_pca_autoSVD()
 ```
 
+Note that using gt_pca_autoSVD with a small dataset will likely cause an error, 
+see manual page for details.
+
 It is possible to obviate to this problem by filtering loci with missing data,
 but that might lose a lot of loci. The alternative is to impute the missing
 the data. `tidypopgen` provides wrappers for two fast imputation approaches
