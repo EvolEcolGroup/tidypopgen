@@ -85,10 +85,58 @@ read_q_matrix_list <- function(x, gen_tbl){
 }
 
 
+#' Autoplots for `q_matrix` objects
+#'
+#' @param object A Q matrix object (as returned by `as_q_matrix`).
+#' @param gen_tbl An associated gen_tibble
+#' @param ... not currently used.
+#' @returns a barplot of individuals, coloured by ancestry proportion
+#'
+#' @export
 
+autoplot.q_matrix <- function(object, gen_tbl = NULL, ...){
 
+  rlang::check_dots_empty()
 
+  if (is.null(gen_tbl)) {
 
+    K <- ncol(q)
+
+    q <- as.data.frame(q)
+
+    q$id <- 1:nrow(q)
+
+    q_tbl <- q %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
+                                       names_to = "q", values_to = "percentage")
+
+    plt <- ggplot2::ggplot(q_tbl,
+                           ggplot2::aes(x = .data$id,
+                                        y = .data$percentage,
+                                        fill = .data$q)) +
+      ggplot2::geom_col(width = 1,
+                        position = ggplot2::position_stack(reverse = TRUE))+
+      ggplot2::labs(y = paste("K = ", K))+
+      theme_distruct() +
+      scale_fill_distruct()
+    plt
+
+  } else {
+    K <- ncol(object)
+
+    q_tbl <- tidy.q_matrix(object, gen_tbl)
+
+    plt <- ggplot2::ggplot(q_tbl,
+                           ggplot2::aes(x = .data$id,
+                                        y = .data$percentage,
+                                        fill = .data$q)) +
+      ggplot2::geom_col(width = 1,
+                        position = ggplot2::position_stack(reverse = TRUE))+
+      ggplot2::labs(y = paste("K = ", K))+
+      theme_distruct() +
+      scale_fill_distruct()
+    plt
+  }
+}
 
 
 
