@@ -1,4 +1,4 @@
-#' Convert vcf to FBM.
+#' Convert vcf to FBM using vcfR as a parser.
 #'
 #' Convert a vcf file to a Filebacked Big Matrix (FBM) object.
 #' This should work even for large vcf files that would not fit in memory.
@@ -9,7 +9,7 @@
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 
-vcf_to_fbm_fast <- function(
+vcf_to_fbm_vcfR <- function(
     vcf_path,
     chunk_size = NULL,
     backingfile = NULL,
@@ -24,6 +24,8 @@ vcf_to_fbm_fast <- function(
     backingfile <- bigstatsr::sub_bk(backingfile,"")
   }
 
+  # count the variants in the file
+  no_variants <- count_vcf_variants(vcf_path)
   # count individuals in the file
   no_individuals <- count_vcf_individuals(vcf_path)
   # if chunk is null, get the best guess of an efficient approach
@@ -31,11 +33,13 @@ vcf_to_fbm_fast <- function(
     chunk_size <- bigstatsr::block_size(no_individuals)
   }
 
-  # preassign a genotype matrix that we will then fill at each pass of the vcf
-  genotypes_matrix <- matrix(NA_integer_, ncol=chunk_size,
-                             nrow = no_individuals)
+  # set up chunks
+  chunks_vec <- c(
+    rep(chunk_size, floor(no_variants / chunk_size)),
+    no_variants %% chunk_size
+  )
+  chunks_vec_index <- c(1, chunks_vec)
 
-  # TODO we should figure out number of individuals and ploidy in one go
   # figure out ploidy from the first marker
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
@@ -78,24 +82,6 @@ vcf_to_fbm_fast <- function(
     code = code256,
     backingfile = backingfile
   )
-
-  # flag that will be changed when a chunk reaches the end of the file
-  file_end <- FALSE
-  start_locus <- 0
-
-  while (!file_end){
-  # we need a function that reads chunk_size loci, staring from start_locus
-  # it edits the genotype_matrix, plus returns the number of valid columns (i.e. number
-  # of biallelic markers in this chunk), and a loci table
-
-  # we now add the right number of columns (markers) to the FBM
-
-  # copy over the markers to the FBM
-
-  # update the metadata
-
-
-  }
 
   for (i in seq_along(chunks_vec)) {
     temp_vcf <- vcfR::read.vcfR(

@@ -33,6 +33,10 @@
 #' if `x` is a vcf or packedancestry file)
 #' @param ... if `x` is the name of a vcf file, additional arguments
 #' passed to [vcfR::read.vcfR()]. Otherwise, unused.
+#' @param parser the name of the parser used for VCF, either "cpp" to use
+#' a fast C++ parser, or "vcfR" to use the R package `vcfR`. The latter is slower
+#' but more robust; if "cpp" gives error, try using "vcfR" in case your VCF has
+#' an unusual structure.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #' 'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -70,11 +74,19 @@ gen_tibble <-
 #' @rdname gen_tibble
 gen_tibble.character <-
   function(x,
-           ..., chunk_size = NULL,
+           ...,
+           parser = c("vcfR","cpp"),
+           chunk_size = NULL,
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0","."),
            backingfile = NULL,
            quiet = FALSE) {
+
+    # parser for vcf
+    parser <- match.arg(parser)
+    if (parser=="cpp"){
+      message("The cpp parser is still experimental, use vcfR for serious work")
+    }
 
   # check that valid alleles does not contain zero
   if ("0" %in% valid_alleles){
@@ -89,7 +101,7 @@ gen_tibble.character <-
                        backingfile = backingfile,
                        quiet = quiet)
   } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
-    return(gen_tibble_vcf(x = x, ..., chunk_size = chunk_size,
+    return(gen_tibble_vcf(x = x, ..., parser = parser, chunk_size = chunk_size,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet))
