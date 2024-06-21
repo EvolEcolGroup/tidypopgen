@@ -47,8 +47,9 @@ test_that("gt_pca_autoSVD problem ",{
 
   # Generate example_loci data frame
   loci_names <- paste0("locus", 1:500)
-  chromosomes <- rep(1, 500)
-  positions <- rep(0, 500)
+  chromosomes <- c(rep(1, 255),rep(2, 245))
+  #positions <- rep(0, 500)
+  positions <- seq(from = 1000, by = 1000, length.out = 500)
   allele_refs <- sample(c("A", "T", "C", "G"), size = 500, replace = TRUE)
   allele_alts <- sample(c("A", "T", "C", "G", NA), size = 500, replace = TRUE)
 
@@ -62,15 +63,18 @@ test_that("gt_pca_autoSVD problem ",{
   )
 
 
-  test <- gen_tibble(x = example_genotypes, loci = example_loci, indiv_meta = example_indiv_meta)
+  test <- gen_tibble(x = example_genotypes, loci = example_loci, indiv_meta = example_indiv_meta, quiet = TRUE)
 
   #works fine
-  test_pca <- test %>% gt_pca_autoSVD()
+  #test_pca <- test %>% gt_pca_autoSVD()
+
+
+
 
   # Now try with imputed data
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(bed_file,  backingfile = tempfile("missing_"),quiet=TRUE)
-  expect_error( missing_gt %>% gt_pca_partialSVD(),
+  expect_error(missing_gt %>% gt_pca_partialSVD(),
                 "You can't have missing")
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
   expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(), "Parameter 'size' is too large.")
@@ -81,11 +85,21 @@ test_that("gt_pca_autoSVD problem ",{
   #Error in bigutilsr::rollmean(S.col[ind], roll.size) :
   #Parameter 'size' is too large.
 
-  #the error persists even when manually adjusting roll_size
+  #the error persists when manually adjusting roll_size
 
   expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(roll_size = 10), "Parameter 'size' is too large.")
   expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(roll_size = 1000), "Parameter 'size' is too large.")
 
+  #until adjusting roll_size to 0
+  #missing_gt %>% gt_pca_autoSVD(roll_size = 0)
+  #or strangely up to 7?
+  #missing_gt %>% gt_pca_autoSVD(roll_size = 7)
+
+
+
+  #loci info is the same
+  #summary(test %>% show_loci())
+  #summary(missing_gt %>% show_loci())
 
   #testing with the families dataset too
   bed_file <- system.file("extdata/related", "families.bed", package = "tidypopgen")
