@@ -128,8 +128,8 @@ List extractAltAlleleCountsFromVCF(std::string filename,
       chromosome.push_back(fields[0]);
       physical_pos.push_back(fields[1]);
       marker_id.push_back(fields[2]);
-      allele1.push_back(fields[3]);
-      allele2.push_back(fields[4]);
+      allele1.push_back(fields[4]);
+      allele2.push_back(fields[3]);
 
 
       // Collect alternate allele counts for all individuals
@@ -142,6 +142,16 @@ List extractAltAlleleCountsFromVCF(std::string filename,
       lociCount++;
     }
     lineCount++;
+  }
+  // test if the next line would have been the end of file
+  bool gotLine;
+  if (is_gz) {
+    gotLine = getline_gz(vcfGzFile, line);
+  } else {
+    gotLine = (bool)std::getline(vcfFile, line);
+  }
+  if (!gotLine) {
+    end_of_file = true; // we got to the end of the file
   }
 
   if (is_gz) {

@@ -196,6 +196,16 @@ test_that("gen_tibble from files",{
 
   # @TODO we should add similar tests for pop b, which has missing data
 
+  # check our cpp parser
+  pop_a_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
+  expect_true(all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_vcf_fast_gt)))
+  # check loci table against the vcfR parser
+  expect_true(all.equal(show_loci(pop_a_vcf_gt), show_loci(pop_a_vcf_fast_gt)))
+  # reload it in chunks
+  pop_a_vcf_fast_gt2 <- gen_tibble(vcf_path, quiet=TRUE, backingfile = tempfile(),
+                              chunk_size = 2, parser="cpp")
+  expect_true(all.equal(show_genotypes(pop_a_vcf_fast_gt2),show_genotypes(pop_a_vcf_fast_gt)))
+  expect_true(all.equal(show_loci(pop_a_vcf_gt), show_loci(pop_a_vcf_fast_gt)))
 })
 
 test_that("gen_tibble from files with missingness",{
