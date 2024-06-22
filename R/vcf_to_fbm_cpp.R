@@ -83,7 +83,6 @@ vcf_to_fbm_cpp <- function(
   index_start <- dim(file_backed_matrix)[2]+1
   # add the new columns
   file_backed_matrix$add_columns(chunk_info$num_loci)
-  browser()
   # fill them in
   file_backed_matrix[
     ,
