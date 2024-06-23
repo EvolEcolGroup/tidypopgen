@@ -75,7 +75,8 @@ vcf_to_fbm_cpp <- function(
   # it edits the genotype_matrix, plus returns the number of valid columns (i.e. number
   # of biallelic markers in this chunk), and a loci table
   chunk_info <-  extractAltAlleleCountsFromVCF(vcf_path,
-                                  genotypes_matrix, no_individuals, max_ploidy+1,
+                                  genotypes_matrix, ploidy,
+                                  no_individuals, max_ploidy+1,
                                   chunk_size, start_locus)
   # expand the file backed matrix according to the size of the gt matrix
   # get current size

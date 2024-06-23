@@ -23,18 +23,14 @@ std::vector<std::string> split(const std::string &s, const std::string &delimite
 }
 
 // Function to count the number of alternate alleles from genotype information
-int countAlternateAlleles(const std::string &genotype, const int missingValue) {
-  // extract the genotype
-  size_t colonPos = genotype.find(':');
-  std::string pureGenotype = (colonPos == std::string::npos) ? genotype : genotype.substr(0, colonPos);
-
+// missingValue is max_ploidy +1
+int countAlternateAlleles(const std::string &genotype, const int missingValue, const int ploidy) {
   int count = 0;
-  std::vector<std::string> alleles = split(pureGenotype, "/|");
-  for (const std::string &allele : alleles) {
-    if (allele == ".") {
-      return missingValue;
-      // return NA_INTEGER; // Handle missing allele
-    } else if (allele == "1") {
+  if (genotype[0] == '.'){
+    return missingValue;
+  }
+  for (int pos_i = 0; pos_i < ploidy; pos_i++){
+    if (genotype[0+pos_i*2] == '1'){
       count++;
     }
   }
@@ -58,8 +54,10 @@ bool getline_gz(gzFile file, std::string &line) {
 
 // [[Rcpp::export]]
 List extractAltAlleleCountsFromVCF(std::string filename,
-                                   IntegerMatrix& allele_counts, int numIndividuals, int missingValue,
+                                   IntegerMatrix& allele_counts, IntegerVector& ploidy,
+                                   int numIndividuals, int missingValue,
                                    int maxLoci = 1000, int skipLoci = 100, bool diploid = false) {
+
   bool is_gz = (filename.substr(filename.size() - 3) == ".gz");
   std::ifstream vcfFile;
   gzFile vcfGzFile;
@@ -125,20 +123,25 @@ List extractAltAlleleCountsFromVCF(std::string filename,
     // @TODO @BUG but this does not check that it is only one CHARACTER!!!!
     //if (fields.size() > 4 && split(fields[4], ",").size() == 1) {
     //if (split(fields[4], ",").size() == 1) {
-    if (fields[3].length() ==1 & fields[4].length() ==1) {
+    if ((fields[3].length() ==1) & (fields[4].length() ==1)) {
       chromosome.push_back(fields[0]);
       physical_pos.push_back(fields[1]);
       marker_id.push_back(fields[2]);
       allele1.push_back(fields[4]);
       allele2.push_back(fields[3]);
 
-
       // Collect alternate allele counts for all individuals
-      std::vector<int> lociCounts(numIndividuals, NA_INTEGER);
-      for (unsigned int i = 9; i < fields.size(); ++i) {
-        int count = countAlternateAlleles(fields[i], missingValue);
-        allele_counts(i - 9, lociCount) = count;
+      if (fields[4][0] != '.'){
+        for (unsigned int i = 9; i < fields.size(); ++i) {
+          int count = countAlternateAlleles(fields[i], missingValue, ploidy[i-9]);
+          allele_counts(i - 9, lociCount) = count;
+        }
+      } else { // if this is an invariant site
+        for (unsigned int i = 9; i < fields.size(); ++i) {
+          allele_counts(i - 9, lociCount) = 0;
+        }
       }
+
 
       lociCount++;
     }
@@ -168,7 +171,7 @@ List extractAltAlleleCountsFromVCF(std::string filename,
                                             _["allele1"] = allele1,
                                             _["allele2"] = allele2);
 
-  // Return a list containing the matrix and the ploidy vector
+  // Return a list with useful information
   return List::create(
     Named("loci_table") = loci_table,
     Named("num_loci") = lociCount,
@@ -226,8 +229,8 @@ List get_ploidy_from_VCF(std::string filename) {
     numIndividuals = fields.size() - 9; // 9 fixed fields before individual data
     ploidy.resize(numIndividuals, 0);
     for (unsigned int i = 9; i < fields.size(); ++i) {
-      //ploidy[i - 9] = split(fields[i], "/|").size();
-      ploidy[i - 9] = 1+ (fields[i].length()-1)/2;
+      ploidy[i - 9] = split(fields[i], "/|").size();
+      //ploidy[i - 9] = 1+ (fields[i].length()-1)/2;
     }
     // now process names
     fields = split(line_old, "\t");

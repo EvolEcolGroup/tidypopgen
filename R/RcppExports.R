@@ -37,8 +37,8 @@ increment_king_numerator <- function(k, n_Aa_i, genotype0, genotype1, genotype2,
     invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, genotype0, genotype1, genotype2, genotype_valid, BM, rowInd, colInd))
 }
 
-extractAltAlleleCountsFromVCF <- function(filename, allele_counts, numIndividuals, missingValue, maxLoci = 1000L, skipLoci = 100L, diploid = FALSE) {
-    .Call(`_tidypopgen_extractAltAlleleCountsFromVCF`, filename, allele_counts, numIndividuals, missingValue, maxLoci, skipLoci, diploid)
+extractAltAlleleCountsFromVCF <- function(filename, allele_counts, ploidy, numIndividuals, missingValue, maxLoci = 1000L, skipLoci = 100L, diploid = FALSE) {
+    .Call(`_tidypopgen_extractAltAlleleCountsFromVCF`, filename, allele_counts, ploidy, numIndividuals, missingValue, maxLoci, skipLoci, diploid)
 }
 
 get_ploidy_from_VCF <- function(filename) {
