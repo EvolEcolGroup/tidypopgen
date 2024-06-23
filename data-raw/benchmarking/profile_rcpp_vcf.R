@@ -19,3 +19,10 @@ Rprof()
 pop_a_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
 Rprof(NULL)
 summaryRprof()
+
+
+##
+library(tictoc)
+tic()
+pop_a_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
+toc()

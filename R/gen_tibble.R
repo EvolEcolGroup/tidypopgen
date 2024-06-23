@@ -120,7 +120,7 @@ gen_tibble.character <-
   } else  {
     stop("file_path should be pointing to a either a PLINK .bed or .ped file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
-  file_in_use <- gt_save(x_gt, quiet = quiet)
+  file_in_use <- gt_save_light(x_gt, quiet = quiet)
   return(x_gt)
 }
 

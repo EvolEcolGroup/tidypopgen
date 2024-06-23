@@ -102,7 +102,7 @@ vcf_to_fbm_cpp <- function(
   file_backed_matrix$save()
 
   # add an empty genetic.pos column
-  loci <- loci %>% mutate(genetic.dist = 0, .after = physical.pos)
+  loci <- loci %>% mutate(genetic.dist = 0, .after = "physical.pos")
   loci$physical.pos <- as.integer(loci$physical.pos)
   # if loci names are missing, create a name with scaffold and position (same behaviour as vcfR)
   missing_loci_ids <- which(loci$marker.ID==".")
