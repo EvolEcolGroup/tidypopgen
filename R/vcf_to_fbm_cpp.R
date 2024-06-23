@@ -52,7 +52,6 @@ vcf_to_fbm_cpp <- function(
                 affection = -9,
                 ploidy = ploidy)
 
-
   loci <- tibble(chromosome = NULL,
                  marker.ID = NULL,
                  physical.pos = NULL,
@@ -104,6 +103,12 @@ vcf_to_fbm_cpp <- function(
   # add an empty genetic.pos column
   loci <- loci %>% mutate(genetic.dist = 0, .after = physical.pos)
   loci$physical.pos <- as.integer(loci$physical.pos)
+  # if loci names are missing, create a name with scaffold and position (same behaviour as vcfR)
+  missing_loci_ids <- which(loci$marker.ID==".")
+  if (length(missing_loci_ids)>0){
+    loci$marker.ID[missing_loci_ids] <- paste(loci$chromosome[missing_loci_ids],
+                                              loci$physical.pos, sep = "_")
+  }
 
   bigsnp_obj <- structure(list(
     genotypes = file_backed_matrix,

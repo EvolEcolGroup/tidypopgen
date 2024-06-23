@@ -6,4 +6,10 @@ test_that("import a vcf with multiple ploidy",{
   expect_true(show_ploidy(test_gt)==0)
   # individuals are either 2 or 4
   expect_true(all(indiv_ploidy(test_gt) %in% c(2,4)))
+  # now try the cpp parser
+  test_cpp_gt <- gen_tibble(vcf_path, backingfile = tempfile(), quiet = TRUE, parser="cpp")
+  expect_true(all.equal(show_genotypes(test_gt), show_genotypes(test_cpp_gt)))
+  expect_true(all.equal(show_ploidy(test_gt), show_ploidy(test_cpp_gt)))
+  expect_true(all.equal(show_loci(test_gt), show_loci(test_cpp_gt)))
+
 })
