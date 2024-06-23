@@ -186,6 +186,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// write_to_FBM
+void write_to_FBM(Environment BM, IntegerMatrix& allele_counts, const int col_start, const int n_loci, int ncores);
+RcppExport SEXP _tidypopgen_write_to_FBM(SEXP BMSEXP, SEXP allele_countsSEXP, SEXP col_startSEXP, SEXP n_lociSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix& >::type allele_counts(allele_countsSEXP);
+    Rcpp::traits::input_parameter< const int >::type col_start(col_startSEXP);
+    Rcpp::traits::input_parameter< const int >::type n_loci(n_lociSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    write_to_FBM(BM, allele_counts, col_start, n_loci, ncores);
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 6},
@@ -199,6 +213,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},
     {"_tidypopgen_extractAltAlleleCountsFromVCF", (DL_FUNC) &_tidypopgen_extractAltAlleleCountsFromVCF, 8},
     {"_tidypopgen_get_ploidy_from_VCF", (DL_FUNC) &_tidypopgen_get_ploidy_from_VCF, 1},
+    {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}
 };
 

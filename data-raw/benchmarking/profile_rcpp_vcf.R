@@ -23,6 +23,7 @@ summaryRprof()
 
 ##
 library(tictoc)
+vcf_path <- "../../Downloads/vcf_test/pileup_Jar_burial.pileUp_Choskar.fixREF.vcf.gz"
 tic()
 pop_a_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
 toc()

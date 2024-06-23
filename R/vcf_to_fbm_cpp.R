@@ -15,6 +15,8 @@ vcf_to_fbm_cpp <- function(
     backingfile = NULL,
     quiet=FALSE) {
 
+  n_cores <- 3
+
   if (is.null(backingfile)){
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)
@@ -84,10 +86,16 @@ vcf_to_fbm_cpp <- function(
   # add the new columns
   file_backed_matrix$add_columns(chunk_info$num_loci)
   # fill them in
-  file_backed_matrix[
-    ,
-    index_start:(index_start+chunk_info$num_loci-1)
-  ] <- genotypes_matrix[,1:chunk_info$num_loci]
+  # file_backed_matrix[
+  #   ,
+  #   index_start:(index_start+chunk_info$num_loci-1)
+  # ] <- genotypes_matrix[,1:chunk_info$num_loci]
+
+  write_to_FBM(file_backed_matrix,
+               allele_counts = genotypes_matrix,
+               col_start = index_start-1,
+               n_loci = chunk_info$num_loci,
+               ncores = n_cores)
   # update the metadata
   loci <- rbind(loci, chunk_info$loci_table)
 

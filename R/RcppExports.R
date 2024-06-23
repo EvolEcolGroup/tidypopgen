@@ -45,3 +45,7 @@ get_ploidy_from_VCF <- function(filename) {
     .Call(`_tidypopgen_get_ploidy_from_VCF`, filename)
 }
 
+write_to_FBM <- function(BM, allele_counts, col_start, n_loci, ncores) {
+    invisible(.Call(`_tidypopgen_write_to_FBM`, BM, allele_counts, col_start, n_loci, ncores))
+}
+
