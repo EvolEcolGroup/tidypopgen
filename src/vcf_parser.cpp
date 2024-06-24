@@ -119,11 +119,8 @@ List extractAltAlleleCountsFromVCF(std::string filename,
     // Split the VCF line into fields
     std::vector<std::string> fields = split(line, "\t");
 
-    // Check if the marker is biallelic (one ALT allele)
-    // @TODO @BUG but this does not check that it is only one CHARACTER!!!!
-    //if (fields.size() > 4 && split(fields[4], ",").size() == 1) {
-    //if (split(fields[4], ",").size() == 1) {
-    if ((fields[3].length() ==1) & (fields[4].length() ==1)) {
+    // Check if the marker is biallelic SNP (REF and ALT allele are single character)
+    if ((fields[3].length() ==1) && (fields[4].length() ==1)) {
       chromosome.push_back(fields[0]);
       physical_pos.push_back(fields[1]);
       marker_id.push_back(fields[2]);
