@@ -46,7 +46,7 @@ test_that("merge by position works correctly",{
   pop_a_renamed_gt <- pop_a_gt
   show_loci(pop_a_renamed_gt)$name <- paste("new_name",1:count_loci(pop_a_renamed_gt),sep="_")
   # if we bind by name we should get zero (or an error)
-  expect_error(rbind(pop_a_renamed_gt,pop_b_gt, quiet=TRUE), "there are no loci in common")
-  pos_merge <- rbind(pop_a_renamed_gt,pop_b_gt, flip_strand = TRUE, use_position = TRUE)
+  expect_error(rbind(pop_b_gt, pop_a_renamed_gt, quiet=TRUE), "there are no loci in common")
+  pos_merge <- rbind(pop_b_gt, pop_a_renamed_gt, flip_strand = TRUE, use_position = TRUE)
   expect_true(all.equal(show_genotypes(merged_gen),show_genotypes(pos_merge)))
 })
