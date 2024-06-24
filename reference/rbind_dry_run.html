@@ -22,7 +22,7 @@ dropped."><meta property="og:image" content="/logo.png"><!-- mathjax --><script 
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tidypopgen</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.0.9014</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.0.9015</span>
       </span>
     </div>
 
@@ -73,7 +73,13 @@ dropped.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rbind_dry_run</span><span class="op">(</span><span class="va">ref</span>, <span class="va">target</span>, flip_strand <span class="op">=</span> <span class="cn">FALSE</span>, quiet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rbind_dry_run</span><span class="op">(</span></span>
+<span>  <span class="va">ref</span>,</span>
+<span>  <span class="va">target</span>,</span>
+<span>  use_position <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  flip_strand <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -87,6 +93,15 @@ swap their order as necessary.</p></dd>
 
 <dt>target</dt>
 <dd><p>either a <code><a href="gen_tibble.html">gen_tibble</a></code> object, or the path to the PLINK bim file</p></dd>
+
+
+<dt>use_position</dt>
+<dd><p>boolean of whether a combination of chromosome and position
+should be used for matching SNPs. By default, <code>rbind</code> uses the locus name,
+so this is set to FALSE. When using 'use_position=TRUE', make sure chromosomes
+are coded in the same way in both <code>gen_tibbles</code> (a mix of e.g. 'chr1', '1' or
+'chromosome1' can be the reasons if an unexpectedly large number variants
+are dropped when merging).</p></dd>
 
 
 <dt>flip_strand</dt>
