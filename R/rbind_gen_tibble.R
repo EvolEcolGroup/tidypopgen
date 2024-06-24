@@ -61,6 +61,14 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
 
   report <- rbind_dry_run(ref = ref, target = target, flip_strand=flip_strand,
                           quiet = quiet)
+
+  #check there is overlap
+  if(all(is.na(report$target$new_id)) && all(is.na(report$ref$new_id))){
+
+    stop ("There are no overlapping loci. Try checking your chromosome coding.")
+  }
+
+
   # now edit the gen_tibble objects
   ###########
   # we start with the ref object
