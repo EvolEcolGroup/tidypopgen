@@ -12,6 +12,12 @@
 #' be used as template to flip the ones in `target` and/or
 #' swap their order as necessary.
 #' @param target either a [`gen_tibble`] object, or the path to the PLINK bim file
+#' @param use_position boolean of whether a combination of chromosome and position
+#' should be used for matching SNPs. By default, `rbind` uses the locus name,
+#' so this is set to FALSE. When using 'use_position=TRUE', make sure chromosomes
+#' are coded in the same way in both `gen_tibbles` (a mix of e.g. 'chr1', '1' or
+#' 'chromosome1' can be the reasons if an unexpectedly large number variants
+#' are dropped when merging).
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #' match the two datasets. Ambiguous SNPs (i.e. A/T and C/G)
 #' will also be removed.  It defaults to FALSE
@@ -27,7 +33,7 @@
 #' to align the two datasets, `target` data.frame)
 #' @export
 
-rbind_dry_run <- function(ref, target, flip_strand = FALSE,
+rbind_dry_run <- function(ref, target, use_position = FALSE, flip_strand = FALSE,
                           quiet = FALSE){
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
@@ -38,6 +44,13 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
   # replace NA with "0" for missing allele to avoid subsetting headaches (NA does not play nice with subsetting)
   ref_df$allele_alt[is.na(ref_df$allele_alt)]<-"0"
   target_df$allele_alt[is.na(target_df$allele_alt)]<-"0"
+
+  # replace the names with a combination of chromosome and position
+  if (use_position){
+    target_df <- target_df %>% mutate(name_old = .data$name, name = paste(.data$chromosome,.data$position, sep="_") )
+    ref_df <- ref_df %>% mutate(name_old = .data$name, name = paste(.data$chromosome,.data$position, sep="_") )
+  }
+
   # rename the alleles
   ref_df <- ref_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
   target_df <- target_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
@@ -61,7 +74,7 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, quiet){
   # reorder target_sub to match ref_sub
   target_sub <- target_sub[match(ref_sub$name, target_sub$name),]
   # we now have two data.frames with the same loci and in the same order
- stopifnot(all.equal(target_sub$name,ref_sub$name))
+  stopifnot(all.equal(target_sub$name,ref_sub$name))
 
   # fix any missing alleles
   target_sub$missing_allele <- resolve_missing_alleles(missing_table = target_sub, other_table = ref_sub)

@@ -22,6 +22,12 @@
 #' @param as_is boolean determining whether the loci should be left as they are
 #' before merging. If FALSE (the defaults), `rbind` will attempt to subset and
 #' swap alleles as needed.
+#' @param use_position boolean of whether a combination of chromosome and position
+#' should be used for matching SNPs. By default, `rbind` uses the locus name,
+#' so this is set to FALSE. When using 'use_position=TRUE', make sure chromosomes
+#' are coded in the same way in both `gen_tibbles` (a mix of e.g. 'chr1', '1' or
+#' 'chromosome1' can be the reasons if an unexpectedly large number variants
+#' are dropped when merging).
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #' match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T and C/G)
 #' will also be removed. It defaults to FALSE
@@ -31,7 +37,7 @@
 #' as its backing file for the FBM)
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
-rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
+rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE, use_position = FALSE,
               quiet = FALSE, backingfile=NULL){
   dots <- list(...)
   if (length(dots)!=2){
@@ -57,10 +63,15 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
     backingfile <- tempfile("gt_merged_",tmpdir = save_path, fileext = "")
   }
 
+  # if we use position, we update the names of the loci
+  if (use_position){
+    show_loci(ref) <- show_loci(ref) %>% mutate(name_old = .data$name, name = paste(.data$chromosome,.data$position, sep="_") )
+    show_loci(target) <- show_loci(target) %>% mutate(name_old = .data$name, name = paste(.data$chromosome,.data$position, sep="_") )
+  }
 
 
   report <- rbind_dry_run(ref = ref, target = target, flip_strand=flip_strand,
-                          quiet = quiet)
+                          quiet = quiet, use_position = use_position)
   # now edit the gen_tibble objects
   ###########
   # we start with the ref object
@@ -74,6 +85,9 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id,na.last=NA),]
   # now we subset the SNP object
   ## in the snp object
+  if (nrow(new_ref_loci_tbl)==0){
+    stop("there are no loci in common between the two gen_tibbles")
+  }
   ref_snp <- subset_bigSNP(attr(ref$genotypes,"bigsnp"),
                            loci_indices = new_ref_loci_tbl$big_index,
                            indiv_indices = vctrs::vec_data(ref$genotypes))
@@ -139,7 +153,10 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   vctrs::vec_data(ref$genotypes)
   #and finally append the loci table
   indivs_with_big_names <- c(names(ref$genotypes),names(target$genotypes))
-  new_ref_loci_tbl$big_index<-match(new_ref_loci_tbl$name,merged_snp$map$marker.ID) # TODO check that this is the correct order!!!!
+  #browser()
+  #new_ref_loci_tbl$big_index<-match(new_ref_loci_tbl$name,merged_snp$map$marker.ID) # TODO check that this is the correct order!!!!
+  new_ref_loci_tbl$big_index<-1:nrow(new_ref_loci_tbl) # by default, this should just be a subset in the same order as the reference
+
   # TODO check that all individuals in tibble and bigsnp object are the same
   merged_tbl$genotypes <- vctrs::new_vctr(match(indivs_with_big_names,merged_snp$fam$sample.ID), # TODO check that this is the correct order!!!!
                   bigsnp = merged_snp,
