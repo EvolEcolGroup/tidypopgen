@@ -73,6 +73,9 @@ test_that("warning when no snps overlap",{
                            allele_alt = c("T","C", NA,"C","G","A"))
   test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci2, indiv_meta = test_indiv_meta2, quiet = TRUE)
 
+  report1 <-  rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE)
+
+
   #merge
   expect_error(rbind.gen_tbl(test_gt, test_gt2, flip_strand = TRUE,
                              quiet = TRUE,
@@ -95,15 +98,12 @@ test_that("warning when no snps overlap",{
                            allele_alt = c("T","C", NA,"C","G","A"))
   test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci2, indiv_meta = test_indiv_meta2, quiet = TRUE)
 
-  report <- rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE)
+  report2 <- rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE)
 
   #merge
   merged_gt <- rbind.gen_tbl(test_gt, test_gt2, flip_strand = TRUE,
-                             quiet = TRUE,
-                             backingfile = tempfile())
+                             backingfile = tempfile(), quiet = TRUE)
 
-  #only two remain - ambiguous are removed but message suggests they aren't?
-  #"( 4 are ambiguous, of which 0 were removed)"
   expect_true(all(show_loci(merged_gt)$"chromosome" == c(1,1)))
   expect_true(all(show_loci(merged_gt)$"position" == c(5,65)))
 
