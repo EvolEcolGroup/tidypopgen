@@ -8,6 +8,7 @@
   ...,
   as_is = FALSE,
   flip_strand = FALSE,
+  use_position = FALSE,
   quiet = FALSE,
   backingfile = NULL
 )
@@ -23,6 +24,13 @@ swap alleles as needed.}
 \item{flip_strand}{boolean on whether strand flipping should be checked to
 match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T and C/G)
 will also be removed. It defaults to FALSE}
+
+\item{use_position}{boolean of whether a combination of chromosome and position
+should be used for matching SNPs. By default, \code{rbind} uses the locus name,
+so this is set to FALSE. When using 'use_position=TRUE', make sure chromosomes
+are coded in the same way in both \code{gen_tibbles} (a mix of e.g. 'chr1', '1' or
+'chromosome1' can be the reasons if an unexpectedly large number variants
+are dropped when merging).}
 
 \item{quiet}{boolean whether to omit reporting to screen}
 

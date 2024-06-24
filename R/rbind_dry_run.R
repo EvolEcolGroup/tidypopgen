@@ -12,6 +12,12 @@
 #' be used as template to flip the ones in `target` and/or
 #' swap their order as necessary.
 #' @param target either a [`gen_tibble`] object, or the path to the PLINK bim file
+#' @param use_position boolean of whether a combination of chromosome and position
+#' should be used for matching SNPs. By default, `rbind` uses the locus name,
+#' so this is set to FALSE. When using 'use_position=TRUE', make sure chromosomes
+#' are coded in the same way in both `gen_tibbles` (a mix of e.g. 'chr1', '1' or
+#' 'chromosome1' can be the reasons if an unexpectedly large number variants
+#' are dropped when merging).
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #' match the two datasets. Ambiguous SNPs (i.e. A/T and C/G)
 #' will also be removed.  It defaults to FALSE
@@ -27,8 +33,8 @@
 #' to align the two datasets, `target` data.frame)
 #' @export
 
-rbind_dry_run <- function(ref, target, flip_strand = FALSE,
-                          quiet = FALSE, use_position = FALSE){
+rbind_dry_run <- function(ref, target, use_position = FALSE, flip_strand = FALSE,
+                          quiet = FALSE){
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
   target_df <- target %>% show_loci()

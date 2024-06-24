@@ -22,6 +22,12 @@
 #' @param as_is boolean determining whether the loci should be left as they are
 #' before merging. If FALSE (the defaults), `rbind` will attempt to subset and
 #' swap alleles as needed.
+#' @param use_position boolean of whether a combination of chromosome and position
+#' should be used for matching SNPs. By default, `rbind` uses the locus name,
+#' so this is set to FALSE. When using 'use_position=TRUE', make sure chromosomes
+#' are coded in the same way in both `gen_tibbles` (a mix of e.g. 'chr1', '1' or
+#' 'chromosome1' can be the reasons if an unexpectedly large number variants
+#' are dropped when merging).
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #' match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T and C/G)
 #' will also be removed. It defaults to FALSE
@@ -31,8 +37,8 @@
 #' as its backing file for the FBM)
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
-rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
-              quiet = FALSE, backingfile=NULL, use_position = FALSE){
+rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE, use_position = FALSE,
+              quiet = FALSE, backingfile=NULL){
   dots <- list(...)
   if (length(dots)!=2){
     stop("rbind for gen_tibble can only take two tibbles at a time")
