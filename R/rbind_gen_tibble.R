@@ -57,6 +57,11 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
     backingfile <- tempfile("gt_merged_",tmpdir = save_path, fileext = "")
   }
 
+  # if we use position, we update the names of the loci
+  if (use_position){
+    show_loci(ref) <- show_loci(ref) %>% mutate(name_old = .data$name, name = paste(.data$chromosome,.data$position, sep="_") )
+    show_loci(target) <- show_loci(target) %>% mutate(name_old = .data$name, name = paste(.data$chromosome,.data$position, sep="_") )
+  }
 
 
   report <- rbind_dry_run(ref = ref, target = target, flip_strand=flip_strand,
@@ -142,8 +147,10 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   vctrs::vec_data(ref$genotypes)
   #and finally append the loci table
   indivs_with_big_names <- c(names(ref$genotypes),names(target$genotypes))
-  browser()
-  new_ref_loci_tbl$big_index<-match(new_ref_loci_tbl$name,merged_snp$map$marker.ID) # TODO check that this is the correct order!!!!
+  #browser()
+  #new_ref_loci_tbl$big_index<-match(new_ref_loci_tbl$name,merged_snp$map$marker.ID) # TODO check that this is the correct order!!!!
+  new_ref_loci_tbl$big_index<-1:nrow(new_ref_loci_tbl) # by default, this should just be a subset in the same order as the reference
+
   # TODO check that all individuals in tibble and bigsnp object are the same
   merged_tbl$genotypes <- vctrs::new_vctr(match(indivs_with_big_names,merged_snp$fam$sample.ID), # TODO check that this is the correct order!!!!
                   bigsnp = merged_snp,

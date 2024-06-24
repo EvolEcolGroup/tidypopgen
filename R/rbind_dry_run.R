@@ -62,7 +62,6 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
 ##############################################################################
 
 rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, quiet){
-  browser()
   # now filter for alleles in common
   target_sub <- target_df[target_df$name %in% ref_df$name,]
   ref_sub <- ref_df[ref_df$name %in% target_df$name,]
