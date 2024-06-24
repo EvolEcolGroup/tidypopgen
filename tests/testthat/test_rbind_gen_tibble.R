@@ -76,7 +76,36 @@ test_that("warning when no snps overlap",{
   #merge
   expect_error(rbind.gen_tbl(test_gt, test_gt2, flip_strand = TRUE,
                              quiet = TRUE,
-                             backingfile = tempfile()), "There are no overlapping loci. Try checking your chromosome coding.")
+                             backingfile = tempfile()), "There are no overlapping loci")
+
+  #Now try with the same snp ID but different CHR
+
+  #These should merge, with CHR and POS in merged GT being equal to test_gt2
+
+  test_indiv_meta2 <- data.frame (id=c("a","b","c"),
+                                  population = c("pop1","pop1","pop2"))
+  test_genotypes2 <- rbind(c(1,1,0,1,1,2),
+                           c(2,1,0,NA,0,NA),
+                           c(2,2,0,0,1,NA))
+  test_loci2 <- data.frame(name=paste0("rs",1:6),
+                           chromosome=c(3,3,3,3,4,4),
+                           position=c(3,5,65,343,23,456),
+                           genetic_dist = as.integer(rep(0,6)),
+                           allele_ref = c("A","T","C","G","C","T"),
+                           allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci2, indiv_meta = test_indiv_meta2, quiet = TRUE)
+
+  report <- rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE)
+
+  #merge
+  merged_gt <- rbind.gen_tbl(test_gt, test_gt2, flip_strand = TRUE,
+                             quiet = TRUE,
+                             backingfile = tempfile())
+
+  #only two remain - ambiguous are removed but message suggests they aren't?
+  #"( 4 are ambiguous, of which 0 were removed)"
+  expect_true(all(show_loci(merged_gt)$"chromosome" == c(1,1)))
+  expect_true(all(show_loci(merged_gt)$"position" == c(5,65)))
 
 })
 

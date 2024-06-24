@@ -65,7 +65,7 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   #check there is overlap
   if(all(is.na(report$target$new_id)) && all(is.na(report$ref$new_id))){
 
-    stop ("There are no overlapping loci. Try checking your chromosome coding.")
+    stop ("There are no overlapping loci")
   }
 
 
