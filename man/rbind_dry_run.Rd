@@ -4,7 +4,13 @@
 \alias{rbind_dry_run}
 \title{Generate a report of what would happen to each SNP in a merge}
 \usage{
-rbind_dry_run(ref, target, flip_strand = FALSE, quiet = FALSE)
+rbind_dry_run(
+  ref,
+  target,
+  flip_strand = FALSE,
+  quiet = FALSE,
+  use_position = FALSE
+)
 }
 \arguments{
 \item{ref}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim file;

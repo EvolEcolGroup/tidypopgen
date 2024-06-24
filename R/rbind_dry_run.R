@@ -28,7 +28,7 @@
 #' @export
 
 rbind_dry_run <- function(ref, target, flip_strand = FALSE,
-                          quiet = FALSE){
+                          quiet = FALSE, use_position = FALSE){
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
   target_df <- target %>% show_loci()
@@ -38,6 +38,13 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
   # replace NA with "0" for missing allele to avoid subsetting headaches (NA does not play nice with subsetting)
   ref_df$allele_alt[is.na(ref_df$allele_alt)]<-"0"
   target_df$allele_alt[is.na(target_df$allele_alt)]<-"0"
+
+  # replace the names with a combination of chromosome and position
+  if (use_position){
+    target_df <- target_df %>% mutate(name_old = .data$name, name = paste(.data$chromosome,.data$position, sep="_") )
+    ref_df <- ref_df %>% mutate(name_old = .data$name, name = paste(.data$chromosome,.data$position, sep="_") )
+  }
+
   # rename the alleles
   ref_df <- ref_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
   target_df <- target_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
@@ -55,13 +62,14 @@ rbind_dry_run <- function(ref, target, flip_strand = FALSE,
 ##############################################################################
 
 rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, quiet){
+  browser()
   # now filter for alleles in common
   target_sub <- target_df[target_df$name %in% ref_df$name,]
   ref_sub <- ref_df[ref_df$name %in% target_df$name,]
   # reorder target_sub to match ref_sub
   target_sub <- target_sub[match(ref_sub$name, target_sub$name),]
   # we now have two data.frames with the same loci and in the same order
- stopifnot(all.equal(target_sub$name,ref_sub$name))
+  stopifnot(all.equal(target_sub$name,ref_sub$name))
 
   # fix any missing alleles
   target_sub$missing_allele <- resolve_missing_alleles(missing_table = target_sub, other_table = ref_sub)

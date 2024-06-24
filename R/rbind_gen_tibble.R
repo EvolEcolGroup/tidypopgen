@@ -32,7 +32,7 @@
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
 rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
-              quiet = FALSE, backingfile=NULL){
+              quiet = FALSE, backingfile=NULL, use_position = FALSE){
   dots <- list(...)
   if (length(dots)!=2){
     stop("rbind for gen_tibble can only take two tibbles at a time")
@@ -60,7 +60,7 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
 
 
   report <- rbind_dry_run(ref = ref, target = target, flip_strand=flip_strand,
-                          quiet = quiet)
+                          quiet = quiet, use_position = use_position)
   # now edit the gen_tibble objects
   ###########
   # we start with the ref object
@@ -74,6 +74,9 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id,na.last=NA),]
   # now we subset the SNP object
   ## in the snp object
+  if (nrow(new_ref_loci_tbl)==0){
+    stop("there are no loci in common between the two gen_tibbles")
+  }
   ref_snp <- subset_bigSNP(attr(ref$genotypes,"bigsnp"),
                            loci_indices = new_ref_loci_tbl$big_index,
                            indiv_indices = vctrs::vec_data(ref$genotypes))
@@ -139,6 +142,7 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   vctrs::vec_data(ref$genotypes)
   #and finally append the loci table
   indivs_with_big_names <- c(names(ref$genotypes),names(target$genotypes))
+  browser()
   new_ref_loci_tbl$big_index<-match(new_ref_loci_tbl$name,merged_snp$map$marker.ID) # TODO check that this is the correct order!!!!
   # TODO check that all individuals in tibble and bigsnp object are the same
   merged_tbl$genotypes <- vctrs::new_vctr(match(indivs_with_big_names,merged_snp$fam$sample.ID), # TODO check that this is the correct order!!!!

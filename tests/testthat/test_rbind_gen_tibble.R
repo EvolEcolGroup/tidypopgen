@@ -6,7 +6,7 @@ raw_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
 bigsnp_path_a <- bigsnpr::snp_readBed(raw_path_pop_a, backingfile = tempfile("test_a_"))
 pop_a_gt <- gen_tibble(bigsnp_path_a, quiet=TRUE)
 # #create merge
- merged_gen <- rbind.gen_tbl(pop_b_gt, pop_a_gt, flip_strand = TRUE,
+merged_gen <- rbind.gen_tbl(pop_b_gt, pop_a_gt, flip_strand = TRUE,
                              quiet = TRUE,
                              backingfile = tempfile())
 
@@ -40,4 +40,13 @@ test_that("merge combines datasets correctly",{
   testthat::expect_false("rs1240719" %in% loci_names(merged_gen))
   testthat::expect_false("rs307354" %in% loci_names(merged_gen))
 
+})
+
+test_that("merge by position works correctly",{
+  pop_a_renamed_gt <- pop_a_gt
+  show_loci(pop_a_renamed_gt)$name <- paste("new_name",1:count_loci(pop_a_renamed_gt),sep="_")
+  # if we bind by name we should get zero (or an error)
+  expect_error(rbind(pop_a_renamed_gt,pop_b_gt, quiet=TRUE), "there are no loci in common")
+  pos_merge <- rbind(pop_a_renamed_gt,pop_b_gt, use_position = TRUE)
+  expect_true(all.equal(show_genotypes(merged_gen, pos_merge)))
 })
