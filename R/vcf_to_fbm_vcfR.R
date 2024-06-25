@@ -65,7 +65,7 @@ vcf_to_fbm_vcfR <- function(
                 maternal.ID = 0,
                 sex = 0,
                 affection = -9,
-                ploidy = ploidy)
+                ploidy = unname(ploidy))
 
 
   loci <- tibble(chromosome = NULL,

@@ -9,7 +9,7 @@ test_that("import a vcf with multiple ploidy",{
   # now try the cpp parser
   test_cpp_gt <- gen_tibble(vcf_path, backingfile = tempfile(), quiet = TRUE, parser="cpp")
   expect_true(all.equal(show_genotypes(test_gt), show_genotypes(test_cpp_gt)))
-  expect_true(all.equal(indiv_ploidy(test_gt), indiv_ploidy(test_cpp_gt), check.attributes = FALSE))
+  expect_true(all.equal(indiv_ploidy(test_gt), indiv_ploidy(test_cpp_gt)))
   # @TODO why does the above have names with one parser and NOT the other?!?
   expect_true(all.equal(show_ploidy(test_gt), show_ploidy(test_cpp_gt)))
   expect_true(all.equal(show_loci(test_gt), show_loci(test_cpp_gt)))
