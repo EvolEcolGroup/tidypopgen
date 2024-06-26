@@ -73,13 +73,13 @@ test_that("warning when no snps overlap",{
                            allele_alt = c("T","C", NA,"C","G","A"))
   test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci2, indiv_meta = test_indiv_meta2, quiet = TRUE)
 
-  report1 <-  rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE)
+  report1 <-  rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE, quiet = TRUE)
 
 
   #merge
-  expect_error(rbind.gen_tbl(test_gt, test_gt2, flip_strand = TRUE,
+  expect_error(rbind(test_gt, test_gt2, flip_strand = TRUE,
                              quiet = TRUE,
-                             backingfile = tempfile()), "There are no overlapping loci")
+                             backingfile = tempfile()), "there are no loci in common between")
 
   #Now try with the same snp ID but different CHR
 
@@ -98,10 +98,10 @@ test_that("warning when no snps overlap",{
                            allele_alt = c("T","C", NA,"C","G","A"))
   test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci2, indiv_meta = test_indiv_meta2, quiet = TRUE)
 
-  report2 <- rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE)
+  report2 <- rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE, quiet = TRUE)
 
   #merge
-  merged_gt <- rbind.gen_tbl(test_gt, test_gt2, flip_strand = TRUE,
+  merged_gt <- rbind(test_gt, test_gt2, flip_strand = TRUE,
                              backingfile = tempfile(), quiet = TRUE)
 
   expect_true(all(show_loci(merged_gt)$"chromosome" == c(1,1)))
@@ -117,6 +117,6 @@ test_that("merge by position works correctly",{
   show_loci(pop_a_renamed_gt)$name <- paste("new_name",1:count_loci(pop_a_renamed_gt),sep="_")
   # if we bind by name we should get zero (or an error)
   expect_error(rbind(pop_b_gt, pop_a_renamed_gt, quiet=TRUE), "there are no loci in common")
-  pos_merge <- rbind(pop_b_gt, pop_a_renamed_gt, flip_strand = TRUE, use_position = TRUE)
+  pos_merge <- rbind(pop_b_gt, pop_a_renamed_gt, flip_strand = TRUE, use_position = TRUE, quiet = TRUE)
   expect_true(all.equal(show_genotypes(merged_gen),show_genotypes(pos_merge)))
 })

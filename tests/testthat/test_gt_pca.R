@@ -76,7 +76,7 @@ test_that("gt_pca_autoSVD problem ",{
   expect_error(missing_gt %>% gt_pca_partialSVD(),
                 "You can't have missing")
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
-  expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(), "Parameter 'size' is too large.")
+  expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(verbose = FALSE), "Parameter 'size' is too large.")
 
   #Issue for bigutilsr below:
   #https://github.com/privefl/bigutilsr/issues/2
@@ -86,8 +86,8 @@ test_that("gt_pca_autoSVD problem ",{
 
   #the error persists when manually adjusting roll_size
 
-  expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(roll_size = 10), "Parameter 'size' is too large.")
-  expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(roll_size = 1000), "Parameter 'size' is too large.")
+  expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(roll_size = 10, verbose = FALSE), "Parameter 'size' is too large.")
+  expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(roll_size = 1000, verbose = FALSE), "Parameter 'size' is too large.")
 
   #until adjusting roll_size to 0
   #missing_gt %>% gt_pca_autoSVD(roll_size = 0)
@@ -108,7 +108,7 @@ test_that("gt_pca_autoSVD problem ",{
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
 
   # the same error occurs
-  expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(), "Parameter 'size' is too large.")
+  expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(verbose = FALSE), "Parameter 'size' is too large.")
 
 })
 
