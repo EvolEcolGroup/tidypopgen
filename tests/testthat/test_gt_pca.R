@@ -34,6 +34,10 @@ test_that("fit_gt_pca_and_predict",{
 
 test_that("gt_pca_autoSVD problem ",{
 
+  # @TODO remove this hack when the patch makes it through to cran
+  library(bigsnpr)
+
+
   # Generate example_indiv_meta data frame
   individual_ids <- paste0("indiv", 1:200)
   populations <- sample(c("pop1", "pop2", "pop3", "pop4"), size = 200, replace = TRUE)
