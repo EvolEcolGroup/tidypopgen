@@ -4,11 +4,10 @@
 \alias{annotate_group_info}
 \title{Annotate an adxmiture barplot with information about the populations}
 \usage{
-annotate_group_info(group)
+annotate_group_info(q_tbl)
 }
 \arguments{
-\item{group}{a vector with the names of the populations for each
-individuals. Note that individuals belonging to a given populaiton need to
+\item{q_tbl}{a tidied \code{q_matrix}
 be in a block, all adjacent to each other}
 }
 \value{
@@ -18,3 +17,4 @@ modifier for a ggplot, added with the usual '+'
 Add vertical lines to separate individuals from different populations,
 and add optional x labels with their names
 }
+\keyword{internal}

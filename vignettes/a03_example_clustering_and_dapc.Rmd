@@ -339,15 +339,22 @@ q_mat <- as_q_matrix(q_mat)
 head(q_mat)
 ```
 
-Then we can tidy our q matrix, and attach the population and id data from our original gen_tibble:
+We can quickly plot it with
+```{r}
+autoplot(q_mat,gen_tbl = anole_gt)
+```
+
+We can tidy our q matrix, and attach the population and id data from our original gen_tibble, returning it
+in a format which is suitable for plotting:
 
 ```{r}
 tidy_q <- tidy(q_mat, anole_gt)
 head(tidy_q)
 ```
+Note that we also add the dominant `q` for a given individual, as well as the dominant population which is associated
+with that `q`
 
-
-And we can plot the data using ggplot
+And we can plot the tibble directly with `ggplot`:
 
 ```{r}
 # set up the ggplot object
@@ -359,7 +366,7 @@ plt <- ggplot2::ggplot(tidy_q,
   ggplot2::geom_col(width = 1,
                     position = ggplot2::position_stack(reverse = TRUE))+
   # set the y label
-  ggplot2::labs(y = "K = 4")+
+  ggplot2::labs(y = "K = 3")+
   # use a theme to match the distruct look, removing most decorations
   theme_distruct() +
   # set the colour scale to be the same as in distruct and clumppling

@@ -4,12 +4,15 @@
 \alias{autoplot.q_matrix}
 \title{Autoplots for \code{q_matrix} objects}
 \usage{
-\method{autoplot}{q_matrix}(object, gen_tbl = NULL, ...)
+\method{autoplot}{q_matrix}(object, gen_tbl = NULL, annotate_group = TRUE, ...)
 }
 \arguments{
 \item{object}{A Q matrix object (as returned by \code{as_q_matrix}).}
 
 \item{gen_tbl}{An associated gen_tibble}
+
+\item{annotate_group}{Boolean determining whether to annonate the plot with the
+group information}
 
 \item{...}{not currently used.}
 }
