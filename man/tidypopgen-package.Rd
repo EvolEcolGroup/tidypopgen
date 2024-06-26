@@ -6,6 +6,8 @@
 \alias{tidypopgen-package}
 \title{tidypopgen: Tidy Population Genetics}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 We provide a tidy grammar of population genetics, facilitating the manipulation and analysis of data on biallelic single nucleotide polymorphisms (SNPs).
 }
 \author{

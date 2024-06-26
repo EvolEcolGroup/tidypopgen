@@ -4,7 +4,13 @@
 \alias{rbind_dry_run}
 \title{Generate a report of what would happen to each SNP in a merge}
 \usage{
-rbind_dry_run(ref, target, flip_strand = FALSE, quiet = FALSE)
+rbind_dry_run(
+  ref,
+  target,
+  use_position = FALSE,
+  flip_strand = FALSE,
+  quiet = FALSE
+)
 }
 \arguments{
 \item{ref}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim file;
@@ -13,6 +19,13 @@ be used as template to flip the ones in \code{target} and/or
 swap their order as necessary.}
 
 \item{target}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim file}
+
+\item{use_position}{boolean of whether a combination of chromosome and position
+should be used for matching SNPs. By default, \code{rbind} uses the locus name,
+so this is set to FALSE. When using 'use_position=TRUE', make sure chromosomes
+are coded in the same way in both \code{gen_tibbles} (a mix of e.g. 'chr1', '1' or
+'chromosome1' can be the reasons if an unexpectedly large number variants
+are dropped when merging).}
 
 \item{flip_strand}{boolean on whether strand flipping should be checked to
 match the two datasets. Ambiguous SNPs (i.e. A/T and C/G)

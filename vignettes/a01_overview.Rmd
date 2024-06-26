@@ -1,9 +1,9 @@
 ---
-title: "overview"
+title: "Overview"
 output: rmarkdown::html_vignette
         #pdf_document
 vignette: >
-  %\VignetteIndexEntry{overview}
+  %\VignetteIndexEntry{Overview}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -450,7 +450,13 @@ merged_gt %>% show_loci()
 ```
 
 Again, note that the `big_index` values have changed compared to the original files,
-as we generated a new FBM with the merged data. 
+as we generated a new FBM with the merged data.
+
+By default, `rbind` using the loci names to match the two datasets. The option
+'use_position = TRUE' forces matching by chromosome and position; note that a common
+source of problems when merging is the coding of chromosomes (e.g. a dataset has
+'chromosome1' and the other 'chr1'). If using 'use_position = TRUE', you should
+also make sure that the two datasets were aligned to the same reference genome assembly.
 
 # Imputation
 

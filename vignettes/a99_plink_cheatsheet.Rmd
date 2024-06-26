@@ -1,9 +1,9 @@
 ---
-title: "plink cheatsheet"
+title: "PLINK cheatsheet"
 output: rmarkdown::html_vignette
         #pdf_document
 vignette: >
-  %\VignetteIndexEntry{plink cheatsheet}
+  %\VignetteIndexEntry{PLINK cheatsheet}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

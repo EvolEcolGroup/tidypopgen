@@ -4,7 +4,7 @@
 #' by partial SVD through the eigen decomposition of the covariance. It works well
 #' if the number of individuals is much smaller than the number of loci; otherwise,
 #' [gt_pca_randomSVD()] is a better option. This function is a wrapper
-#' for [bigstatsr::big_SVD()]
+#' for [bigstatsr::big_SVD()].
 #'
 #' @param x a `gen_tbl` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
@@ -30,7 +30,7 @@
 
 
 gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
-                              ) {
+) {
   if (gt_has_imputed(x) && gt_uses_imputed(x)==FALSE){
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
@@ -45,10 +45,10 @@ gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
   }
   this_svd  <- bigstatsr::big_SVD(X$genotypes,
                                   k=k,
-                                    ind.row = vctrs::vec_data(x$genotypes),
-                                    ind.col = show_loci(x)$big_index,
-                                    fun.scaling = fun_scaling,
-                                    block.size= bigstatsr::block_size(nrow(X$genotypes))) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
+                                  ind.row = vctrs::vec_data(x$genotypes),
+                                  ind.col = show_loci(x)$big_index,
+                                  fun.scaling = fun_scaling,
+                                  block.size= bigstatsr::block_size(nrow(X$genotypes))) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
   rownames(this_svd$v) <- loci_names(x)

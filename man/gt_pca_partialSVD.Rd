@@ -39,5 +39,5 @@ This function performs Principal Component Analysis on a \code{gen_tibble},
 by partial SVD through the eigen decomposition of the covariance. It works well
 if the number of individuals is much smaller than the number of loci; otherwise,
 \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is a better option. This function is a wrapper
-for \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}}
+for \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}}.
 }

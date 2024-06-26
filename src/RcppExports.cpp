@@ -106,34 +106,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// SNPHWE_t
-int32_t SNPHWE_t(int32_t obs_hets, int32_t obs_hom1, int32_t obs_hom2, double thresh);
-RcppExport SEXP _tidypopgen_SNPHWE_t(SEXP obs_hetsSEXP, SEXP obs_hom1SEXP, SEXP obs_hom2SEXP, SEXP threshSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int32_t >::type obs_hets(obs_hetsSEXP);
-    Rcpp::traits::input_parameter< int32_t >::type obs_hom1(obs_hom1SEXP);
-    Rcpp::traits::input_parameter< int32_t >::type obs_hom2(obs_hom2SEXP);
-    Rcpp::traits::input_parameter< double >::type thresh(threshSEXP);
-    rcpp_result_gen = Rcpp::wrap(SNPHWE_t(obs_hets, obs_hom1, obs_hom2, thresh));
-    return rcpp_result_gen;
-END_RCPP
-}
-// SNPHWE_midp_t
-int32_t SNPHWE_midp_t(int32_t obs_hets, int32_t obs_hom1, int32_t obs_hom2, double thresh);
-RcppExport SEXP _tidypopgen_SNPHWE_midp_t(SEXP obs_hetsSEXP, SEXP obs_hom1SEXP, SEXP obs_hom2SEXP, SEXP threshSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int32_t >::type obs_hets(obs_hetsSEXP);
-    Rcpp::traits::input_parameter< int32_t >::type obs_hom1(obs_hom1SEXP);
-    Rcpp::traits::input_parameter< int32_t >::type obs_hom2(obs_hom2SEXP);
-    Rcpp::traits::input_parameter< double >::type thresh(threshSEXP);
-    rcpp_result_gen = Rcpp::wrap(SNPHWE_midp_t(obs_hets, obs_hom1, obs_hom2, thresh));
-    return rcpp_result_gen;
-END_RCPP
-}
 // increment_as_counts
 void increment_as_counts(Environment k, Environment k2, arma::mat& na_mat, arma::mat& dos_mat, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
 RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP na_matSEXP, SEXP dos_matSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
@@ -193,8 +165,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_missingness", (DL_FUNC) &_tidypopgen_gt_grouped_missingness, 6},
     {"_tidypopgen_gt_grouped_summaries", (DL_FUNC) &_tidypopgen_gt_grouped_summaries, 6},
     {"_tidypopgen_SNPHWE2", (DL_FUNC) &_tidypopgen_SNPHWE2, 4},
-    {"_tidypopgen_SNPHWE_t", (DL_FUNC) &_tidypopgen_SNPHWE_t, 4},
-    {"_tidypopgen_SNPHWE_midp_t", (DL_FUNC) &_tidypopgen_SNPHWE_midp_t, 4},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},

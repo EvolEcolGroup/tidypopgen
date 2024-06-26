@@ -1,9 +1,9 @@
 ---
-title: "example workflow with tidypopgen"
+title: "Example workflow with tidypopgen"
 output: rmarkdown::html_vignette
         #pdf_document
 vignette: >
-  %\VignetteIndexEntry{example workflow with tidypopgen}
+  %\VignetteIndexEntry{Example workflow with tidypopgen}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -63,6 +63,8 @@ Now we can bring in the pop information:
 anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
 anole_gt
 ```
+
+## PCA
 
 That was easy. The loci had already been filtered and cleaned, so we don't need 
 to do any QC. Let us jump straight into analysis and run a PCA:

@@ -5,36 +5,37 @@
 #'
 #' @param object the [`gt_pca`] object
 #' @param new_data a gen_tibble if scores are requested for a new dataset
-#' @param impute_to_center boolean on whether to impute missing values in
-#' `new_data` to the mean values used
-#' to center the pca. This option is used to e.g. project ancient data onto a PCA
-#' fitted to modern data. It defaults to TRUE.
-#' @param prediction_type a string taking the value of "simple" and/or OADP (Online Augmentation, Decomposition, and Procrustes (OADP) projection)
+#' @param project_method a string taking the value of either "simple",
+#' "OADP" (Online Augmentation, Decomposition, and Procrustes (OADP) projection),
+#' or "least_squares" (as done by SMARTPCA)
+#' @param lsq_pcs a vector of length two with the values of the two principal components
+#' to use for the least square fitting. Only relevant if`project_method = 'least_squares'`
 #' @param block_size number of loci read simultaneously (larger values will speed up
 #' computation, but require more memory)
 #' @param n_cores number of cores
 #' @param ... no used
 #' @returns a matrix of predictions, with samples as rows and components as columns. The number
-#' of components depends on how many were estimated in the [`gt_pca`] object. If prediction
-#' type is equal to c("simple","OADP"), then a list of two matrices is returned
+#' of components depends on how many were estimated in the [`gt_pca`] object.
 #' @references Zhang et al (2020). Fast and robust ancestry prediction using
 #' principal component analysis  36(11): 3439–3446.
 #' @rdname predict_gt_pca
+#' @importFrom foreach %do%
 #' @export
 
 # this is a modified version of bigstatsr::predict.big_SVD
-predict.gt_pca <- function(object, new_data=NULL, impute_to_center = TRUE,
-                           prediction_type = "simple",
+predict.gt_pca <- function(object, new_data=NULL,
+                           project_method = c("none", "simple", "OADP", "least_squares"),
+                           lsq_pcs = c(1,2),
                            block_size = NULL,
                            n_cores = 1, ...){
   rlang::check_dots_empty()
-  if (!all(prediction_type %in% c("simple", "OADP"))){
-    stop("prediction_type can only take values 'simple' or 'OADP'")
-  }
+  project_method <- match.arg(project_method)
 
   if (is.null(new_data)) {
     # U * D
-    sweep(object$u, 2, object$d, '*')
+    UD <- sweep(object$u, 2, object$d, '*')
+    dimnames(UD)<-list(rownames(object$u),paste0(".PC",1:ncol(UD)))
+    return(UD)
   } else {
     if (!inherits(new_data,"gen_tbl")){
       stop ("new_data should be a gen_tibble")
@@ -50,7 +51,7 @@ predict.gt_pca <- function(object, new_data=NULL, impute_to_center = TRUE,
       stop("ref and alt alleles differ between new_data and the data used to create the pca object")
     }
 
-    if (!impute_to_center){
+    if (project_method=="none"){
       if (gt_has_imputed(new_data) && !gt_uses_imputed(new_data)){
         gt_set_imputed(new_data, set = TRUE)
         on.exit(gt_set_imputed(new_data, set = FALSE))
@@ -67,11 +68,11 @@ predict.gt_pca <- function(object, new_data=NULL, impute_to_center = TRUE,
                                    block.size = block_size,
                                    center = object$center,
                                    scale  = object$scale)
-      # if we use OADP, then we need to compute Xnorm
-      if ("OADP" %in% prediction_type){
-        stop ("OADP currently only implemented for when `impute_to_center = TRUE`")
-      }
-    } else {
+     dimnames(XV)<-list(new_data$id,paste0(".PC",1:ncol(XV)))
+      return(XV)
+
+    } else if (any(c("simple","OADP") %in% project_method)){
+
 
       X_norm <- bigstatsr::FBM(nrow(new_data), 1, init = 0)
       XV     <- bigstatsr::FBM(nrow(new_data), ncol(object$u), init = 0)
@@ -89,22 +90,36 @@ predict.gt_pca <- function(object, new_data=NULL, impute_to_center = TRUE,
         XV = XV,
         X_norm = X_norm
       )
-
-      if ("OADP" %in% prediction_type){
-        oadp_proj <- utils::getFromNamespace("OADP_proj", "bigsnpr")(XV, X_norm, object$d, ncores = n_cores)
+      if (project_method=="simple"){
+        XV <- XV[,, drop = FALSE]
+        dimnames(XV)<-list(new_data$id, paste0(".PC",1:ncol(XV)))
+        return(XV)
+      } else {
+        XV <- utils::getFromNamespace("OADP_proj", "bigsnpr")(XV, X_norm, object$d,
+                                                              ncores = n_cores)
+        dimnames(XV)<-list(new_data$id, paste0(".PC",1:ncol(XV)))
+        return(XV)
       }
-    }
-    if (all(c("simple","OADP") %in% prediction_type)){
-      return(    list(
-        simple_proj = XV[, , drop = FALSE],
-        OADP_proj   = oadp_proj
-      ))
-    } else if ("simple" %in% prediction_type) {
-      return(XV[,, drop = FALSE])
-    } else {
-      return (oadp_proj)
-    }
-    return(XV[,, drop = FALSE])
+      } else if (project_method == "least_squares"){
+       if (length(lsq_pcs)!=2 | any(lsq_pcs>ncol(object$v))){
+         stop("lsq_pcs should include two components that were computed for the object, e.g. c(1,2)")
+       }
+       X <- .gt_get_bigsnp(new_data)$genotypes # handy pointer for FBM
+       proj_i <- NULL # hack to define iterator
+       lsq_proj <- foreach::foreach(proj_i = 1:nrow(new_data),
+                                     .final = t,
+                                     .combine = cbind) %do% {
+       # scaled genotypes for this individual
+       genotypes <- X[.gt_bigsnp_rows(new_data)[proj_i], .gt_bigsnp_cols(new_data)[loci_subset]]
+       genotypes_scaled <- (genotypes - object$center) / object$scale
+       na_ids <- which(!is.na(genotypes_scaled))
+       genotypes_scaled <- genotypes_scaled[na_ids]
+       v_sub <- object$v[na_ids,lsq_pcs]
+       solve(crossprod(v_sub), crossprod(v_sub, genotypes_scaled))
+                                     }
+       dimnames(lsq_proj)<-list(new_data$id, paste0(".PC",1:ncol(lsq_proj)))
+       return(lsq_proj)
+      }
   }
 }
 

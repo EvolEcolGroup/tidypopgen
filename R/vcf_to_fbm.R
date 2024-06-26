@@ -11,7 +11,7 @@
 
 vcf_to_fbm <- function(
     vcf_path,
-    chunk_size = 100000,
+    chunk_size = NULL,
     backingfile = NULL,
     quiet=FALSE) {
 
@@ -24,11 +24,15 @@ vcf_to_fbm <- function(
     backingfile <- bigstatsr::sub_bk(backingfile,"")
   }
 
-
   # count the variants in the file
   no_variants <- count_vcf_variants(vcf_path)
   # count individuals in the file
   no_individuals <- count_vcf_individuals(vcf_path)
+  # if chunk is null, get the best guess of an efficient approach
+  if (is.null(chunk_size)){
+    chunk_size <- bigstatsr::block_size(no_individuals)
+  }
+
   # set up chunks
   chunks_vec <- c(
     rep(chunk_size, floor(no_variants / chunk_size)),
@@ -40,7 +44,8 @@ vcf_to_fbm <- function(
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
     nrow = 1,
-    verbose = !quiet
+    verbose = !quiet,
+    convertNA = FALSE
   )
   temp_gt <- vcfR::extract.gt(temp_vcf,convertNA = FALSE)
   ploidy <- apply(temp_gt,2,get_ploidy)
@@ -90,6 +95,7 @@ vcf_to_fbm <- function(
     gt <- vcfR::extract.gt(temp_vcf)
     gt <- gt[bi,,drop=FALSE]
     if (nrow(gt)>1){
+      # @TODO we could parallelise here
       gt <- t(apply(gt,2,poly_indiv_dosage, max_ploidy=max_ploidy))
     } else if (nrow(gt)==1){ # if we only have one marker
       gt <- matrix(apply(gt,2,poly_indiv_dosage, max_ploidy=max_ploidy),ncol=1)
