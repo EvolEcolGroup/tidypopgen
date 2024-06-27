@@ -38,7 +38,6 @@ vcf_to_fbm_vcfR <- function(
     rep(chunk_size, floor(no_variants / chunk_size)),
     no_variants %% chunk_size
   )
-  chunks_vec_index <- c(1, chunks_vec)
 
   # figure out ploidy from the first marker
   temp_vcf <- vcfR::read.vcfR(
