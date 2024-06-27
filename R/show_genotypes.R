@@ -27,7 +27,6 @@ show_genotypes.tbl_df <- function(.x, indiv_indices=NULL, loci_indices=NULL, ...
 #' @rdname show_genotypes
 show_genotypes.vctrs_bigSNP <- function(.x, indiv_indices=NULL, loci_indices=NULL, ...){
   rlang::check_dots_empty()
-  #browser()
   indiv_big_index <- vctrs::vec_data(.x)
   if (!is.null(indiv_indices)){
     indiv_big_index <-  indiv_big_index[indiv_indices]

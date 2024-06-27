@@ -13,5 +13,4 @@ test_that("import a vcf with multiple ploidy",{
   # @TODO why does the above have names with one parser and NOT the other?!?
   expect_true(all.equal(show_ploidy(test_gt), show_ploidy(test_cpp_gt)))
   expect_true(all.equal(show_loci(test_gt), show_loci(test_cpp_gt)))
-
 })
