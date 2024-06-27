@@ -92,7 +92,7 @@ read_q_matrix_list <- function(x, gen_tbl){
 #'
 #' @param object A Q matrix object (as returned by `as_q_matrix`).
 #' @param gen_tbl An associated gen_tibble
-#' @param annotate_group Boolean determining whether to annonate the plot with the
+#' @param annotate_group Boolean determining whether to annotate the plot with the
 #' group information
 #' @param ... not currently used.
 #' @returns a barplot of individuals, coloured by ancestry proportion
