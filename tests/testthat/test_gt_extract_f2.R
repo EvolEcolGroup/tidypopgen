@@ -20,37 +20,37 @@ test_gt <- gen_tibble(x = test_genotypes,
                       quiet = TRUE)
 test_gt <- test_gt %>% group_by(population)
 
-# TODO I don't understand why this does not silence all messages
-options("rlib_message_verbosity" = "quiet")
-
 test_that("extract f2 correctly",{
   # process the data with admixtools (note that we get some warnings)
   bed_file <- gt_as_plink(test_gt, file = tempfile("test_bed"))
 
   # test af table
   # without adjusting pseudohaploids
-  adm_aftable <- admixtools:::anygeno_to_aftable(bigsnpr::sub_bed(bed_file),
-                                                 adjust_pseudohaploid = FALSE)
+ adm_aftable <- admixtools:::anygeno_to_aftable(bigsnpr::sub_bed(bed_file),
+                                                 adjust_pseudohaploid = FALSE,
+                                                verbose = FALSE)
   gt_aftable <- gt_to_aftable(test_gt, adjust_pseudohaploid = FALSE)
   expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE))
   # now adjusting the pseudohaploids
   adm_aftable <- admixtools:::anygeno_to_aftable(bigsnpr::sub_bed(bed_file),
-                                                 adjust_pseudohaploid = TRUE)
+                                                 adjust_pseudohaploid = TRUE,
+                                                 verbose = FALSE)
   gt_aftable <- gt_to_aftable(test_gt)
   expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE))
 
   adm_outdir <- file.path(tempdir(),"adm_f2")
   unlink(file.path(adm_outdir,"*"),recursive = TRUE)
   # we get a few warnings due to the small sample size
-  suppressWarnings(admixtools::extract_f2(bigsnpr::sub_bed(bed_file), outdir = adm_outdir))
-  expect_warning(adm_f2 <- admixtools::f2_from_precomp(adm_outdir))
+  suppressWarnings(admixtools::extract_f2(bigsnpr::sub_bed(bed_file), outdir = adm_outdir,
+                                          verbose = FALSE))
+  expect_warning(adm_f2 <- admixtools::f2_from_precomp(adm_outdir, verbose = FALSE))
   # now try to do the same with gen_tibble
   gt_outdir <- file.path(tempdir(),"gt_f2")
   unlink(file.path(gt_outdir,"*"),recursive = TRUE)
   # we get same warning due to the small dataset
   # TODO can we capture the warnings above and then check that they are the same?!?
-  suppressWarnings(gt_extract_f2(test_gt, outdir = gt_outdir))
-  expect_warning(gt_f2 <- admixtools::f2_from_precomp(adm_outdir))
+  suppressWarnings(gt_extract_f2(test_gt, outdir = gt_outdir, quiet = TRUE))
+  expect_warning(gt_f2 <- admixtools::f2_from_precomp(adm_outdir, verbose = FALSE))
   expect_true(all.equal(adm_f2, gt_f2))
 
 

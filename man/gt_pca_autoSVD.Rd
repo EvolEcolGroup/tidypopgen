@@ -86,3 +86,7 @@ This function performs Principal Component Analysis on a \code{gen_tibble},
 using a fast truncated SVD with initial pruning and then iterative removal
 of long-range LD regions. This function is a wrapper for \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}
 }
+\details{
+Using gt_pca_autoSVD requires a reasonably large dataset, as the function
+iteratively removes regions of long range LD.
+}

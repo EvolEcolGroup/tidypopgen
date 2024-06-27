@@ -42,11 +42,81 @@ test_that("merge combines datasets correctly",{
 
 })
 
+test_that("warning when no snps overlap",{
+
+  #Create two datasets
+
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,2),
+                          c(2,1,0,NA,0,NA),
+                          c(2,2,0,0,1,NA))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=c(1,1,1,1,2,2),
+                          position=c(3,5,65,343,23,456),
+                          genetic_dist = as.integer(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+
+
+  test_indiv_meta2 <- data.frame (id=c("a","b","c"),
+                                  population = c("pop1","pop1","pop2"))
+  test_genotypes2 <- rbind(c(1,1,0,1,1,2),
+                           c(2,1,0,NA,0,NA),
+                           c(2,2,0,0,1,NA))
+  test_loci2 <- data.frame(name=paste0("rs",7:12),
+                           chromosome=c(1,1,1,1,2,2),
+                           position=c(3,5,65,343,23,456),
+                           genetic_dist = as.integer(rep(0,6)),
+                           allele_ref = c("A","T","C","G","C","T"),
+                           allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci2, indiv_meta = test_indiv_meta2, quiet = TRUE)
+
+  report1 <-  rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE, quiet = TRUE)
+
+
+  #merge
+  expect_error(rbind(test_gt, test_gt2, flip_strand = TRUE,
+                             quiet = TRUE,
+                             backingfile = tempfile()), "there are no loci in common between")
+
+  #Now try with the same snp ID but different CHR
+
+  #These should merge, with CHR and POS in merged GT being equal to test_gt2
+
+  test_indiv_meta2 <- data.frame (id=c("a","b","c"),
+                                  population = c("pop1","pop1","pop2"))
+  test_genotypes2 <- rbind(c(1,1,0,1,1,2),
+                           c(2,1,0,NA,0,NA),
+                           c(2,2,0,0,1,NA))
+  test_loci2 <- data.frame(name=paste0("rs",1:6),
+                           chromosome=c(3,3,3,3,4,4),
+                           position=c(3,5,65,343,23,456),
+                           genetic_dist = as.integer(rep(0,6)),
+                           allele_ref = c("A","T","C","G","C","T"),
+                           allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci2, indiv_meta = test_indiv_meta2, quiet = TRUE)
+
+  report2 <- rbind_dry_run(test_gt, test_gt2, flip_strand = TRUE, quiet = TRUE)
+
+  #merge
+  merged_gt <- rbind(test_gt, test_gt2, flip_strand = TRUE,
+                             backingfile = tempfile(), quiet = TRUE)
+
+  expect_true(all(show_loci(merged_gt)$"chromosome" == c(1,1)))
+  expect_true(all(show_loci(merged_gt)$"position" == c(5,65)))
+
+})
+
+
+
+
 test_that("merge by position works correctly",{
   pop_a_renamed_gt <- pop_a_gt
   show_loci(pop_a_renamed_gt)$name <- paste("new_name",1:count_loci(pop_a_renamed_gt),sep="_")
   # if we bind by name we should get zero (or an error)
   expect_error(rbind(pop_b_gt, pop_a_renamed_gt, quiet=TRUE), "there are no loci in common")
-  pos_merge <- rbind(pop_b_gt, pop_a_renamed_gt, flip_strand = TRUE, use_position = TRUE)
+  pos_merge <- rbind(pop_b_gt, pop_a_renamed_gt, flip_strand = TRUE, use_position = TRUE, quiet = TRUE)
   expect_true(all.equal(show_genotypes(merged_gen),show_genotypes(pos_merge)))
 })

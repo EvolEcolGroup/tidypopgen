@@ -3,13 +3,13 @@
 #' Add vertical lines to separate individuals from different populations,
 #' and add optional x labels with their names
 #'
-#' @param group a vector with the names of the populations for each
-#' individuals. Note that individuals belonging to a given populaiton need to
+#' @param q_tbl a tidied `q_matrix`
 #' be in a block, all adjacent to each other
 #' @returns modifier for a ggplot, added with the usual '+'
-#' @export
+#' @keywords internal
 
-annotate_group_info <- function(group){
+annotate_group_info <- function(q_tbl){
+  group <- q_tbl %>% dplyr::distinct(id,group) %>% dplyr::pull(group)
   if (length(rle(group)$values)!=length(unique(group))) {
     stop("values in 'group' are not ordered (they should be in consecutive blocks, one per group")
   }
@@ -20,8 +20,8 @@ annotate_group_info <- function(group){
 #  }
   group_x <- cumsum(table(forcats::fct_inorder(group)))
   segment_data = data.frame(
-    x = group_x,
-    xend = group_x,
+    x = group_x+0.5,
+    xend = group_x+0.5,
     y = rep(0,length(group_x)),
     yend = rep(1, length(group_x))
   )
@@ -29,6 +29,7 @@ annotate_group_info <- function(group){
   get_mid_points <- function (vec){
     (vec[-length(vec)] + vec[-1L])/2.
   }
+
   list(
   ggplot2::geom_segment(data = segment_data,
                         ggplot2::aes(x = .data$x,
@@ -36,7 +37,7 @@ annotate_group_info <- function(group){
                                      xend = .data$xend,
                                      yend = .data$yend),
                         inherit.aes = FALSE),
-    ggplot2::scale_x_continuous(breaks = get_mid_points(c(0,group_x)),
+    ggplot2::scale_x_discrete(breaks = unique(q_tbl$id)[get_mid_points(c(0,group_x))],
                                 labels = names(group_x)),
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust=1)))
 
