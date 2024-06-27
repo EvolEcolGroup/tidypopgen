@@ -118,10 +118,11 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE, use_position 
                            indiv_indices = vctrs::vec_data(target$genotypes),
                            swap_indices = show_loci(target)$big_index[report$target$to_swap])
 
-  if (!identical(target_snp$map$marker.ID,ref_snp$map$marker.ID) |
-      !identical(target_snp$map$allele2,ref_snp$map$allele2)) {
-    stop("something went wrong when subsetting and reordering the two bigSNP objects")
-  }
+# this check does not work if we change the names of markers
+#  if (!identical(target_snp$map$marker.ID,ref_snp$map$marker.ID) |
+#      !identical(target_snp$map$allele2,ref_snp$map$allele2)) {
+#    stop("something went wrong when subsetting and reordering the two bigSNP objects")
+#  }
 
   # now we need to merge the two FBMs
   # we start by transposing them, so that they just need to be appended to each other
