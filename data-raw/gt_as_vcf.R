@@ -28,7 +28,11 @@ vcf_header <- c(vcf_header, paste0("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINF
 
 # iterate over genotypes in chunks and append to the vcf body
 for (chunk_i in seq_along(chunks_vec)) {
-  genotypes_matrix <- show_genotypes(x,loci_indices = chunks_vec_index[chunk_i]:chunks_vec_index[chunk_i]+1)
+  genotypes_matrix <- show_genotypes(x,loci_indices = chunks_vec_index[chunk_i]:chunks_vec_index[chunk_i+1])
+  genotypes_matrix[genotypes_matrix==0] <- "0/0"
+  genotypes_matrix[genotypes_matrix==1] <- "1/0"
+  genotypes_matrix[genotypes_matrix==2] <- "1/1"
+  genotypes_matrix[is.na(genotypes_matrix)] <- "./."
 }
 
 
