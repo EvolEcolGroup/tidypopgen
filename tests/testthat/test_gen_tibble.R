@@ -206,9 +206,13 @@ test_that("gen_tibble from files",{
                               chunk_size = 2, parser="cpp")
   expect_true(all.equal(show_genotypes(pop_a_vcf_fast_gt2),show_genotypes(pop_a_vcf_fast_gt)))
   expect_true(all.equal(show_loci(pop_a_vcf_gt), show_loci(pop_a_vcf_fast_gt)))
+
 })
 
 test_that("gen_tibble from files with missingness",{
+  ########################
+  # PLINK BED files
+  ########################
   bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
   pop_b_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
   # now read the dosages created by plink when saving in raw format
@@ -216,7 +220,9 @@ test_that("gen_tibble from files with missingness",{
   mat <- as.matrix(raw_file_pop_b[,7:ncol(raw_file_pop_b)])
   mat <- unname(mat)
   expect_true(all.equal(mat,show_genotypes(pop_b_gt)))
-  # now read in the ped file
+  ########################
+  # PLINK PED files
+  ########################
   ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
   pop_b_ped_gt <- gen_tibble(ped_path, quiet=TRUE,backingfile = tempfile())
   # because ref and alt are defined based on which occurs first in a ped, some alleles will be swapped
@@ -226,7 +232,9 @@ test_that("gen_tibble from files with missingness",{
   expect_true(all(show_loci(pop_b_gt)$allele_alt[not_equal] == show_loci(pop_b_ped_gt)$allele_ref[not_equal]))
   # check that the mismatches are all in the homozygotes
   expect_true(all(abs(show_genotypes(pop_b_gt)[, not_equal]-show_genotypes(pop_b_ped_gt)[, not_equal]) %in% c(0,2)))
-  # now read in vcf
+  ########################
+  # PLINK VCF files
+  ########################
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
   pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
   expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_gt)))

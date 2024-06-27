@@ -28,19 +28,108 @@ as_q_matrix <- function(x){
 #' @param x A Q matrix object (as returned by LEA::Q()).
 #' @param gen_tbl An associated gen_tibble
 #' @param ... not currently used
-#' @return A tidied matrix
+#' @return A tidied tibble
 #' @export
 tidy.q_matrix <- function(x, gen_tbl, ...){
   rlang::check_dots_empty()
   q_tbl <- x %>%
     tibble::as_tibble() %>%
-    # add the pops data for plotting
-    # @TODO we should get this from the grouped tibble, not hardcode it!
     dplyr::mutate(id = gen_tbl$id,
+                  # @TODO we should get this from the grouped tibble, not hardcode it!
                   group = gen_tbl$population)
 
   q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
                                          names_to = "q", values_to = "percentage")
-  q_tbl
+  q_tbl$percentage <- as.numeric(q_tbl$percentage)
+  #q_tbl
+  dominant_q <- q_tbl %>%
+    dplyr::group_by(.data$id) %>%
+    dplyr::summarize(dominant_pop = .data$group[which.max(.data$percentage)], dominant_q = max(.data$percentage), .groups = 'drop')
 
+  q_tbl <- q_tbl %>%
+    dplyr::left_join(dominant_q, by = "id")
+
+  q_tbl <- q_tbl %>%
+    dplyr::arrange(.data$group, dplyr::desc(.data$dominant_q)) %>%
+    dplyr::mutate(plot_order = dplyr::row_number(),  # Create plot_order column
+           id = factor(.data$id, levels = unique(.data$id[order(.data$group, -.data$dominant_q)])))
+  q_tbl
 }
+
+
+#' Tidy ADMXITURE output files into plots
+#'
+#' Takes the name of a directory containing .Q file outputs, and
+#' produces a list of tidied tibbles ready to plot.
+#'
+#' @param x the name of a directory containing .Q files
+#' @param gen_tbl  An associated gen_tibble
+#' @returns a list of `q_matrix` objects to plot
+#'
+#' @export
+
+read_q_matrix_list <- function(x, gen_tbl){
+
+  files <- list.files(x, pattern = "\\.Q$", full.names = TRUE)
+
+  # Read all .Q files into a list
+  data_list <- lapply(files, function(file) utils::read.table(file, header = FALSE))
+
+  # Turn each into a Q matrix
+  matrix_list <- lapply(data_list, FUN = as_q_matrix)
+
+  # Sort matrix_list by the number of columns
+  matrix_list <- matrix_list[order(sapply(matrix_list, ncol))]
+
+  # Tidy each
+  matrix_list <- lapply(matrix_list, function(x) tidy(x, gen_tbl = gen_tbl))
+
+  matrix_list
+}
+
+
+#' Autoplots for `q_matrix` objects
+#'
+#' @param object A Q matrix object (as returned by `as_q_matrix`).
+#' @param gen_tbl An associated gen_tibble
+#' @param annotate_group Boolean determining whether to annotate the plot with the
+#' group information
+#' @param ... not currently used.
+#' @returns a barplot of individuals, coloured by ancestry proportion
+#'
+#' @export
+
+autoplot.q_matrix <- function(object, gen_tbl = NULL, annotate_group = TRUE, ...){
+
+  rlang::check_dots_empty()
+  K <- ncol(object)
+  if (is.null(gen_tbl)) {
+    q_tbl <- as.data.frame(object)
+    q_tbl$id <- 1:nrow(q_tbl)
+    q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
+                                       names_to = "q", values_to = "percentage")
+  } else {
+    q_tbl <- tidy(object, gen_tbl)
+  }
+    plt <- ggplot2::ggplot(q_tbl,
+                           ggplot2::aes(x = .data$id,
+                                        y = .data$percentage,
+                                        fill = .data$q)) +
+      ggplot2::geom_col(width = 1,
+                        position = ggplot2::position_stack(reverse = TRUE))+
+      ggplot2::labs(y = paste("K = ", K))+
+      theme_distruct() +
+      scale_fill_distruct()
+    if (annotate_group){
+      if (is.null(gen_tbl)){
+        warning("no annotation possible if 'gen_tbl' is NULL")
+      } else {
+        plt <- plt + annotate_group_info(q_tbl)
+      }
+    }
+    plt
+}
+
+
+
+

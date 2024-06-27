@@ -94,24 +94,10 @@ test_that("gt_impute imputes properly",{
   gt_set_imputed(imputed_gt_random, TRUE)
   expect_false(any(is.na(show_genotypes(imputed_gt_random))))
 
-  # Problem with method 'mean2'?
-
-
-  #impute method = 'mean2'
-  #imputed_gt_mean2 <- gt_impute_simple(test_gt, method = "mean2")
-
-  #set imputation
-  #gt_set_imputed(imputed_gt_mean2, TRUE)
-  #expect_false(any(is.na(show_genotypes(imputed_gt_mean2))))
-
-  #check imputed 'mean2' method
-  #means2 <- round(colMeans(test_genotypes, na.rm = TRUE), digit = 2)
-  #expect_true(all(means2 == show_genotypes(imputed_gt_mean2)[6,]))
-
 })
 
 
-test_that("imputing a subset of data doesn't impute the whole gen_tibble",{
+test_that("imputing subsets",{
 
   test_indiv_meta <- data.frame (id=c("a","b","c","d","e","f"),
                                  population = c("pop1","pop1","pop2","pop1","pop1","pop2"))
@@ -159,7 +145,8 @@ test_that("imputing a subset of data doesn't impute the whole gen_tibble",{
   expect_true(any(is.na(show_genotypes(test_gt))))
 
 
-  #is it then possible to have two imputation methods on two subsets of same object?
+  #But it is not possible to have two imputation methods on two subsets of
+  #the same data
 
 
   #the rest of the individuals and SNPs: 1 and 2

@@ -450,7 +450,13 @@ merged_gt %>% show_loci()
 ```
 
 Again, note that the `big_index` values have changed compared to the original files,
-as we generated a new FBM with the merged data. 
+as we generated a new FBM with the merged data.
+
+By default, `rbind` using the loci names to match the two datasets. The option
+'use_position = TRUE' forces matching by chromosome and position; note that a common
+source of problems when merging is the coding of chromosomes (e.g. a dataset has
+'chromosome1' and the other 'chr1'). If using 'use_position = TRUE', you should
+also make sure that the two datasets were aligned to the same reference genome assembly.
 
 # Imputation
 
@@ -474,6 +480,9 @@ If we attempt to run a PCA on this dataset, we get:
 ```{r, error = TRUE}
 missing_pca <- missing_gt %>% gt_pca_autoSVD()
 ```
+
+Note that using gt_pca_autoSVD with a small dataset will likely cause an error, 
+see manual page for details.
 
 It is possible to obviate to this problem by filtering loci with missing data,
 but that might lose a lot of loci. The alternative is to impute the missing
