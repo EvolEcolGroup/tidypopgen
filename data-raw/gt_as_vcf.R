@@ -5,7 +5,7 @@
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @param file the .vcf filename with a path, or NULL (the default) to use the
 #' location of the backing files.
-#' @returns the path of the .geno file
+#' @returns the path of the .vcf file
 #' @export
 #'
 
