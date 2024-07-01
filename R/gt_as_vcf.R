@@ -14,6 +14,9 @@
 
 gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE){
 
+  # vcf writing currently only works for diploid data
+  stopifnot_diploid(x)
+
   if (is.null(file)){
     file <- bigstatsr::sub_bk(attr(x$genotypes,"bigsnp")$genotypes$backingfile,paste0(".vcf"))
   }
