@@ -1,4 +1,15 @@
-gt_as_plink <- function(x, file = NULL, overwrite = TRUE){
+#' Convert a `gen_tibble` to a VCF
+#'
+#' This function write a VCF from a `gen_tibble`.
+#'
+#' @param x a [`gen_tibble`], with population coded as 'population'
+#' @param file the .vcf filename with a path, or NULL (the default) to use the
+#' location of the backing files.
+#' @returns the path of the .geno file
+#' @export
+#'
+
+gt_as_vcf <- function(x, file = NULL, overwrite = TRUE){
 
   if (is.null(file)){
     file <- bigstatsr::sub_bk(attr(x$genotypes,"bigsnp")$genotypes$backingfile,paste0(".vcf"))
@@ -74,9 +85,3 @@ gt_as_plink <- function(x, file = NULL, overwrite = TRUE){
 # rewrite it as a vcf
 # re-read it and check that we got back what we started with
 
-
-vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
-pop_a_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
-
-x <- pop_a_vcf_gt
-chunk_size <- 10
