@@ -17,10 +17,14 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_in
 test_that("test we can write and read a vcf",{
   vcf_path <- gt_as_vcf(test_gt, file = paste0(tempfile(),".vcf"))
   # now read the file back in
-  test_gt2 <- gen_tibble(vcf_path, quiet=TRUE)
-  ## continue here
-
+  test_gt2 <- gen_tibble(vcf_path, quiet=TRUE, parser = "vcfR", backingfile = tempfile())
   # because of the different backing file info, we cannot use identical on the whole object
+  expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt2)))
+  #check gt_as_plink converts the NA missing allele to 0
+  expect_true(is.na(show_loci(test_gt2)$allele_alt[3]))
+  # now use the cpp parser
+  test_gt2 <- gen_tibble(vcf_path, quiet=TRUE, parser = "cpp", backingfile = tempfile())
+
   expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt2)))
   #check gt_as_plink converts the NA missing allele to 0
   expect_true(is.na(show_loci(test_gt2)$allele_alt[3]))

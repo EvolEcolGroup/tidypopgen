@@ -34,6 +34,7 @@ Imports:
     stringr,
     tidyselect,
     tidyr,
+    utils,
     Rcpp,
     UpSetR,
     vctrs

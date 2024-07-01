@@ -3,15 +3,16 @@
 #' This function write a VCF from a `gen_tibble`.
 #'
 #' @param x a [`gen_tibble`], with population coded as 'population'
-#' @param file the .vcf filename with a path, or NULL (the default) to use the
+#' @param file the .vcf file name with a path, or NULL (the default) to use the
 #' location of the backing files.
 #' @param chunk_size the number of loci
-#'  processed at a time. Autmatically set if left to NULL
+#'  processed at a time. Automatically set if left to NULL
+#' @param overwrite logical, should the file be overwritten if it already exists?
 #' @returns the path of the .vcf file
 #' @export
 #'
 
-gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = TRUE){
+gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE){
 
   if (is.null(file)){
     file <- bigstatsr::sub_bk(attr(x$genotypes,"bigsnp")$genotypes$backingfile,paste0(".vcf"))
@@ -38,13 +39,13 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = TRUE){
   # generate the header
   vcf_header <- c("##fileformat=VCFv4.3",
                   paste0("##fileDate=",format(Sys.time(), "%Y%m%e")),
-                  paste0("##source=tidypopgen_v",packageVersion("tidypopgen")))
+                  paste0("##source=tidypopgen_v",utils::packageVersion("tidypopgen")))
   # create copy of loci table
   loci_tbl <- show_loci(x)
   # reorder chromosomes levels in the order in which they appear
   loci_tbl$chromosome <- forcats::fct_inorder(loci_tbl$chromosome)
   # get max position for each chromosome
-  chromosome_summary <- loci_tbl %>% group_by(chromosome) %>% summarise(max = max(.data$position))
+  chromosome_summary <- loci_tbl %>% group_by(.data$chromosome) %>% summarise(max = max(.data$position))
   for (chrom_i in 1:nrow(chromosome_summary)){
     vcf_header <- c(vcf_header,
                     paste0("##contig=<ID=", chromosome_summary$chromosome[chrom_i],
@@ -56,7 +57,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = TRUE){
   vcf_header <- c(vcf_header, paste0("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t",
                                      paste(x$id, collapse="\t")))
   # write it to file
-  write.table(vcf_header, file = file, quote = FALSE, row.names = FALSE,
+  utils::write.table(vcf_header, file = file, quote = FALSE, row.names = FALSE,
               col.names = F)
   # iterate over genotypes in chunks and append to the vcf body
   for (chunk_i in seq_along(chunks_vec)) {
@@ -76,7 +77,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = TRUE){
     loci_sub[is.na(loci_sub)] <- "."
     genotypes_matrix <- cbind(loci_sub, genotypes_matrix)
     # append table to previous chunk
-    write.table(genotypes_matrix, file = file, quote = FALSE, append = TRUE, sep="\t",
+    utils::write.table(genotypes_matrix, file = file, quote = FALSE, append = TRUE, sep="\t",
                 col.names = FALSE, row.names = FALSE)
   }
   return(file)

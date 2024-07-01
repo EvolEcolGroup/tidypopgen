@@ -4,16 +4,18 @@
 \alias{gt_as_vcf}
 \title{Convert a \code{gen_tibble} to a VCF}
 \usage{
-gt_as_vcf(x, file = NULL, chunk_size = NULL, overwrite = TRUE)
+gt_as_vcf(x, file = NULL, chunk_size = NULL, overwrite = FALSE)
 }
 \arguments{
 \item{x}{a \code{\link{gen_tibble}}, with population coded as 'population'}
 
-\item{file}{the .vcf filename with a path, or NULL (the default) to use the
+\item{file}{the .vcf file name with a path, or NULL (the default) to use the
 location of the backing files.}
 
 \item{chunk_size}{the number of loci
-processed at a time. Autmatically set if left to NULL}
+processed at a time. Automatically set if left to NULL}
+
+\item{overwrite}{logical, should the file be overwritten if it already exists?}
 }
 \value{
 the path of the .vcf file
