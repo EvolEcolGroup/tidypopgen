@@ -5,11 +5,13 @@
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @param file the .vcf filename with a path, or NULL (the default) to use the
 #' location of the backing files.
+#' @param chunk_size the number of loci
+#'  processed at a time. Autmatically set if left to NULL
 #' @returns the path of the .vcf file
 #' @export
 #'
 
-gt_as_vcf <- function(x, file = NULL, overwrite = TRUE){
+gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = TRUE){
 
   if (is.null(file)){
     file <- bigstatsr::sub_bk(attr(x$genotypes,"bigsnp")$genotypes$backingfile,paste0(".vcf"))
