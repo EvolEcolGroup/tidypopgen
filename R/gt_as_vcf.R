@@ -76,7 +76,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = TRUE){
     loci_sub[is.na(loci_sub)] <- "."
     genotypes_matrix <- cbind(loci_sub, genotypes_matrix)
     # append table to previous chunk
-    write.table(genotypes_matrix, file = file, quote = FALSE, append = TRUE,
+    write.table(genotypes_matrix, file = file, quote = FALSE, append = TRUE, sep="\t",
                 col.names = FALSE, row.names = FALSE)
   }
   return(file)
