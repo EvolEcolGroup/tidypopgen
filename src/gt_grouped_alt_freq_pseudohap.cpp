@@ -37,7 +37,7 @@ ListOf<NumericMatrix> gt_grouped_alt_freq_pseudohap(Environment BM,
       }
     }
     // now for each group, divide freq by valid_alleles
-    for (size_t group_i = 0; group_i < ngroups; group_i++) {
+    for (int group_i = 0; group_i < ngroups; group_i++) {
       freq(j, group_i) = freq(j, group_i) / valid_alleles(j, group_i);
     }
   }

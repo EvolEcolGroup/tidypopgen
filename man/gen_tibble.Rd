@@ -18,6 +18,7 @@ gen_tibble(
 \method{gen_tibble}{character}(
   x,
   ...,
+  parser = c("vcfR", "cpp"),
   chunk_size = NULL,
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
@@ -76,6 +77,11 @@ temporary file will be created (but note that R will delete it at the end of
 the session!)}
 
 \item{quiet}{provide information on the files used to store the data}
+
+\item{parser}{the name of the parser used for VCF, either "cpp" to use
+a fast C++ parser, or "vcfR" to use the R package \code{vcfR}. The latter is slower
+but more robust; if "cpp" gives error, try using "vcfR" in case your VCF has
+an unusual structure.}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used

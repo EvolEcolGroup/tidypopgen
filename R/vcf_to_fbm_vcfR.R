@@ -1,4 +1,4 @@
-#' Convert vcf to FBM.
+#' Convert vcf to FBM using vcfR as a parser.
 #'
 #' Convert a vcf file to a Filebacked Big Matrix (FBM) object.
 #' This should work even for large vcf files that would not fit in memory.
@@ -9,7 +9,7 @@
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 
-vcf_to_fbm <- function(
+vcf_to_fbm_vcfR <- function(
     vcf_path,
     chunk_size = NULL,
     backingfile = NULL,
@@ -38,7 +38,6 @@ vcf_to_fbm <- function(
     rep(chunk_size, floor(no_variants / chunk_size)),
     no_variants %% chunk_size
   )
-  chunks_vec_index <- c(1, chunks_vec)
 
   # figure out ploidy from the first marker
   temp_vcf <- vcfR::read.vcfR(
@@ -65,7 +64,7 @@ vcf_to_fbm <- function(
                 maternal.ID = 0,
                 sex = 0,
                 affection = -9,
-                ploidy = ploidy)
+                ploidy = unname(ploidy))
 
 
   loci <- tibble(chromosome = NULL,

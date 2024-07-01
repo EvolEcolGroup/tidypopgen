@@ -11,7 +11,7 @@
 
 \item{gen_tbl}{An associated gen_tibble}
 
-\item{annotate_group}{Boolean determining whether to annonate the plot with the
+\item{annotate_group}{Boolean determining whether to annotate the plot with the
 group information}
 
 \item{...}{not currently used.}

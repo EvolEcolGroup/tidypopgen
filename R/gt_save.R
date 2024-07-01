@@ -18,10 +18,12 @@
 #' @seealso [gt_load()]
 #' @export
 
-gt_save <-function(x, file_name = NULL, quiet = FALSE) {
+gt_save <- function(x, file_name = NULL, quiet = FALSE) {
   if (!inherits(x, "gen_tbl")){
     stop("x should be a gen_tibble")
   }
+  # we update the bigsnp object
+  bigsnpr::snp_save(attr(x$genotypes,"bigsnp"))
 
   if (is.null(file_name)){
     file_name <-  bigstatsr::sub_bk(gt_get_file_names(x)[2],".gt")
@@ -29,8 +31,36 @@ gt_save <-function(x, file_name = NULL, quiet = FALSE) {
   if (file_ext(file_name)!="gt"){
     file_name <- paste0(file_name,".gt")
   }
-  # we update the bigsnp object
-  bigsnpr::snp_save(attr(x$genotypes,"bigsnp"))
+  # and now save our gen_tibble
+  saveRDS(x,file_name)
+  if (!quiet){
+    message("\ngen_tibble saved to ", file_name)
+    message("using bigSNP file: ", gt_get_file_names(x)[1])
+    message("with backing file: ", gt_get_file_names(x)[2])
+    message("make sure that you do NOT delete those files!")
+    message("to reload the gen_tibble in another session, use:")
+    message("gt_load('",file_name,"')")
+  }
+  return(c(file_name,gt_get_file_names(x)))
+}
+
+#' a light version of gt_save that does not resave the RDS, to be used internally
+#' when creating a gen_tibble (if we have just created it, there is not need
+#' to resave it)
+#' @param x a [`gen_tibble`]
+#' @param file_name the file name, including the full path. If it does not end
+#' with *.gt*, the extension will be added.
+#' @param quiet boolean to suppress information about hte files
+#' @returns the file name and path of the *.gt* file, together with the *.rds*
+#' and *.bk* files
+#' @keywords internal
+gt_save_light <- function(x, file_name = NULL, quiet = FALSE) {
+  if (is.null(file_name)){
+    file_name <-  bigstatsr::sub_bk(gt_get_file_names(x)[2],".gt")
+  }
+  if (file_ext(file_name)!="gt"){
+    file_name <- paste0(file_name,".gt")
+  }
   # and now save our gen_tibble
   saveRDS(x,file_name)
   if (!quiet){
