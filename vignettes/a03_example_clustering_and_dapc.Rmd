@@ -341,7 +341,7 @@ head(q_mat)
 
 We can quickly plot it with
 ```{r}
-autoplot(q_mat,gen_tbl = anole_gt)
+autoplot(q_mat, data = anole_gt)
 ```
 
 We can tidy our q matrix, and attach the population and id data from our original gen_tibble, returning it

@@ -4,14 +4,15 @@
 \alias{autoplot.q_matrix}
 \title{Autoplots for \code{q_matrix} objects}
 \usage{
-\method{autoplot}{q_matrix}(object, gen_tbl = NULL, annotate_group = TRUE, ...)
+\method{autoplot}{q_matrix}(object, data = NULL, annotate_group = TRUE, ...)
 }
 \arguments{
-\item{object}{A Q matrix object (as returned by \code{as_q_matrix}).}
+\item{object}{A Q matrix object (as returned by \code{\link[=as_q_matrix]{as_q_matrix()}}).}
 
-\item{gen_tbl}{An associated gen_tibble}
+\item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the individuals in the same order as the data used to
+generate the Q matrix}
 
-\item{annotate_group}{Boolean determining whether to annonate the plot with the
+\item{annotate_group}{Boolean determining whether to annotate the plot with the
 group information}
 
 \item{...}{not currently used.}

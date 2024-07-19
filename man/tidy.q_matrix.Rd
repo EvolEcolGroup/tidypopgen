@@ -4,12 +4,13 @@
 \alias{tidy.q_matrix}
 \title{Tidy a Q matrix}
 \usage{
-\method{tidy}{q_matrix}(x, gen_tbl, ...)
+\method{tidy}{q_matrix}(x, data, ...)
 }
 \arguments{
 \item{x}{A Q matrix object (as returned by LEA::Q()).}
 
-\item{gen_tbl}{An associated gen_tibble}
+\item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the individuals in the same order as the data used to
+generate the Q matrix}
 
 \item{...}{not currently used}
 }
