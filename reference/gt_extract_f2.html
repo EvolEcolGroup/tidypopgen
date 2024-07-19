@@ -8,7 +8,7 @@ admixtools::extract_f2()."><meta property="og:image" content="/logo.png"><!-- ma
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -33,7 +33,7 @@ admixtools::extract_f2()."><meta property="og:image" content="/logo.png"><!-- ma
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -53,13 +53,13 @@ admixtools::extract_f2()."><meta property="og:image" content="/logo.png"><!-- ma
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Compute and store blocked f2 statistics for ADMIXTOOLS 2</h1>
-    
+
     <div class="hidden name"><code>gt_extract_f2.Rd</code></div>
     </div>
 
@@ -99,21 +99,23 @@ and writes the results to <code>outdir</code>. It is equivalent to
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>.x</dt>
+
+
+<dl><dt id="arg--x">.x<a class="anchor" aria-label="anchor" href="#arg--x"></a></dt>
 <dd><p>a <code><a href="gen_tibble.html">gen_tibble</a></code></p></dd>
 
 
-<dt>outdir</dt>
+<dt id="arg-outdir">outdir<a class="anchor" aria-label="anchor" href="#arg-outdir"></a></dt>
 <dd><p>Directory where data will be stored.</p></dd>
 
 
-<dt>blgsize</dt>
+<dt id="arg-blgsize">blgsize<a class="anchor" aria-label="anchor" href="#arg-blgsize"></a></dt>
 <dd><p>SNP block size in Morgan. Default is 0.05 (5 cM). If <code>blgsize</code>
 is 100 or greater, if will be interpreted as base pair distance rather than
 centimorgan distance.</p></dd>
 
 
-<dt>maxmem</dt>
+<dt id="arg-maxmem">maxmem<a class="anchor" aria-label="anchor" href="#arg-maxmem"></a></dt>
 <dd><p>Maximum amount of memory to be used. If the required amount
 of memory exceeds <code>maxmem</code>, allele frequency data will be split into blocks,
 and the computation will be performed separately on each block pair.
@@ -123,21 +125,21 @@ while running this function. Set it to higher values if this function is
 too slow and you have lots of memory.</p></dd>
 
 
-<dt>maxmiss</dt>
+<dt id="arg-maxmiss">maxmiss<a class="anchor" aria-label="anchor" href="#arg-maxmiss"></a></dt>
 <dd><p>Discard SNPs which are missing in a fraction of populations
 higher than <code>maxmiss</code></p></dd>
 
 
-<dt>minmaf</dt>
+<dt id="arg-minmaf">minmaf<a class="anchor" aria-label="anchor" href="#arg-minmaf"></a></dt>
 <dd><p>Discard SNPs with minor allele frequency less than <code>minmaf</code></p></dd>
 
 
-<dt>maxmaf</dt>
+<dt id="arg-maxmaf">maxmaf<a class="anchor" aria-label="anchor" href="#arg-maxmaf"></a></dt>
 <dd><p>Discard SNPs with minor allele frequency greater than
 than <code>maxmaf</code></p></dd>
 
 
-<dt>minac2</dt>
+<dt id="arg-minac-">minac2<a class="anchor" aria-label="anchor" href="#arg-minac-"></a></dt>
 <dd><p>Discard SNPs with allele count lower than 2 in any population
 (default <code>FALSE</code>). This option should be set to <code>TRUE</code> when computing
 f3-statistics where one population consists mostly of pseudohaploid samples.
@@ -154,11 +156,11 @@ a genotype file; i.e. it is applied directly to a genotype file, not via
 precomputing f2 from a <code><a href="gen_tibble.html">gen_tibble</a></code>).</p></dd>
 
 
-<dt>outpop</dt>
+<dt id="arg-outpop">outpop<a class="anchor" aria-label="anchor" href="#arg-outpop"></a></dt>
 <dd><p>Keep only SNPs which are heterozygous in this population</p></dd>
 
 
-<dt>outpop_scale</dt>
+<dt id="arg-outpop-scale">outpop_scale<a class="anchor" aria-label="anchor" href="#arg-outpop-scale"></a></dt>
 <dd><p>Scale f2-statistics by the inverse <code>outpop</code>
 heterozygosity (<code>1/(p*(1-p))</code>). Providing <code>outpop</code> and setting
 <code>outpop_scale</code> to <code>TRUE</code> will give the same results as the original
@@ -167,19 +169,19 @@ disadvantage of treating one population different from the others. This
 may limit the use of these f2-statistics for other models.</p></dd>
 
 
-<dt>transitions</dt>
+<dt id="arg-transitions">transitions<a class="anchor" aria-label="anchor" href="#arg-transitions"></a></dt>
 <dd><p>Set this to <code>FALSE</code> to exclude transition SNPs</p></dd>
 
 
-<dt>transversions</dt>
+<dt id="arg-transversions">transversions<a class="anchor" aria-label="anchor" href="#arg-transversions"></a></dt>
 <dd><p>Set this to <code>FALSE</code> to exclude transversion SNPs</p></dd>
 
 
-<dt>overwrite</dt>
+<dt id="arg-overwrite">overwrite<a class="anchor" aria-label="anchor" href="#arg-overwrite"></a></dt>
 <dd><p>Overwrite existing files in <code>outdir</code></p></dd>
 
 
-<dt>adjust_pseudohaploid</dt>
+<dt id="arg-adjust-pseudohaploid">adjust_pseudohaploid<a class="anchor" aria-label="anchor" href="#arg-adjust-pseudohaploid"></a></dt>
 <dd><p>Genotypes of pseudohaploid samples are
 usually coded as <code>0</code> or <code>2</code>, even though only one allele is observed.
 <code>adjust_pseudohaploid</code> ensures that the observed allele count increases
@@ -191,18 +193,18 @@ treats all samples as diploid and is equivalent to the <em>ADMIXTOOLS</em> <code
 will check the first <code>n</code> SNPs instead of the first 1000 SNPs.</p></dd>
 
 
-<dt>fst</dt>
+<dt id="arg-fst">fst<a class="anchor" aria-label="anchor" href="#arg-fst"></a></dt>
 <dd><p>Write files with pairwise FST for every population pair.
 Setting this to FALSE can make <code>extract_f2</code> faster and will require less memory.</p></dd>
 
 
-<dt>afprod</dt>
+<dt id="arg-afprod">afprod<a class="anchor" aria-label="anchor" href="#arg-afprod"></a></dt>
 <dd><p>Write files with allele frequency products for every
 population pair. Setting this to FALSE can make <code>extract_f2</code> faster and
 will require less memory.</p></dd>
 
 
-<dt>poly_only</dt>
+<dt id="arg-poly-only">poly_only<a class="anchor" aria-label="anchor" href="#arg-poly-only"></a></dt>
 <dd><p>Specify whether SNPs with identical allele frequencies in
 every population should be discarded (<code>poly_only = TRUE</code>), or whether they
 should be used (<code>poly_only = FALSE</code>). By default (<code>poly_only = c("f2")</code>),
@@ -210,24 +212,22 @@ these SNPs will be used to compute FST and allele frequency products, but
 not to compute f2 (this is the default option in the original ADMIXTOOLS).</p></dd>
 
 
-<dt>apply_corr</dt>
+<dt id="arg-apply-corr">apply_corr<a class="anchor" aria-label="anchor" href="#arg-apply-corr"></a></dt>
 <dd><p>Apply small-sample-size correction when computing
 f2-statistics (default <code>TRUE</code>)</p></dd>
 
 
-<dt>n_cores</dt>
+<dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
 <dd><p>Parallelize computation across <code>n_cores</code> cores.</p></dd>
 
 
-<dt>quiet</dt>
+<dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
 <dd><p>Suppress printing of progress updates</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>SNP metadata (invisibly)</p>
+    <p>SNP metadata (invisibly)</p>
     </div>
 
   </div>
@@ -242,15 +242,15 @@ f2-statistics (default <code>TRUE</code>)</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
