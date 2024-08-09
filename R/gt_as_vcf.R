@@ -13,9 +13,11 @@
 #'
 
 gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE){
+  # check that x is a gen_tibble
+  stopifnot_gen_tibble(x)
 
   # vcf writing currently only works for diploid data
-  stopifnot_diploid(x)
+  stopifnot_diploid(x$genotypes)
 
   if (is.null(file)){
     file <- bigstatsr::sub_bk(attr(x$genotypes,"bigsnp")$genotypes$backingfile,paste0(".vcf"))
