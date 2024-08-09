@@ -34,6 +34,7 @@
 <url><loc>/reference/gt_as_geno_lea.html</loc></url>
 <url><loc>/reference/gt_as_hierfstat.html</loc></url>
 <url><loc>/reference/gt_as_plink.html</loc></url>
+<url><loc>/reference/gt_as_vcf.html</loc></url>
 <url><loc>/reference/gt_cluster_pca.html</loc></url>
 <url><loc>/reference/gt_cluster_pca_best_k.html</loc></url>
 <url><loc>/reference/gt_dapc.html</loc></url>
@@ -49,6 +50,7 @@
 <url><loc>/reference/gt_pca_randomSVD.html</loc></url>
 <url><loc>/reference/gt_roh_window.html</loc></url>
 <url><loc>/reference/gt_save.html</loc></url>
+<url><loc>/reference/gt_save_light.html</loc></url>
 <url><loc>/reference/gt_set_imputed.html</loc></url>
 <url><loc>/reference/gt_to_aftable.html</loc></url>
 <url><loc>/reference/gt_uses_imputed.html</loc></url>
@@ -97,6 +99,7 @@
 <url><loc>/reference/tidy.q_matrix.html</loc></url>
 <url><loc>/reference/tidy_gt_pca.html</loc></url>
 <url><loc>/reference/tidypopgen-package.html</loc></url>
-<url><loc>/reference/vcf_to_fbm.html</loc></url>
+<url><loc>/reference/vcf_to_fbm_cpp.html</loc></url>
+<url><loc>/reference/vcf_to_fbm_vcfR.html</loc></url>
 </urlset>
 
