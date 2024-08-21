@@ -42,6 +42,8 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
     ncores = n_cores
   )
 
+  # add the loci table to the object
+  attr(res, "loci") <- show_loci(x)
   class(res) <- c("gt_pcadapt", class(res))
   # Return the result
   return(res)
