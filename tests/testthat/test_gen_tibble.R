@@ -56,7 +56,7 @@ test_that("gen_tibble catches invalid alleles",{
                                          valid_alleles = c("A","C","T","G","N"),
                             quiet = TRUE)
   expect_true("N" %in% show_loci(test_dfs_gt)$allele_alt)
-  # but if we add to missing values it shoudl be turned into a zero
+  # but if we add to missing values it should be turned into a zero
   test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
                             loci = test_loci_wrong,
                             missing_alleles = c("0",".","N"),
@@ -174,7 +174,7 @@ test_that("gen_tibble from files",{
   # PLINK PED files
   ########################
   ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
-  pop_a_ped_gt <- gen_tibble(ped_path, quiet=TRUE,backingfile = tempfile())
+  pop_a_ped_gt <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile())
   # because ref and alt are defined based on which occurs first in a ped, some alleles will be swapped
   equal_geno <- show_genotypes(pop_a_gt)==show_genotypes(pop_a_ped_gt)
   not_equal <- which(!apply(equal_geno,2,all))
@@ -417,4 +417,30 @@ test_that("check summary stats are the same for gen_tibbles read in different wa
 
 })
 
-
+test_that("on error, we remove the old fils",{
+  # create file
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                          position=as.integer(c(3,5,65,343,23,456)),
+                          genetic_dist = as.integer(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_loci_wrong <- test_loci
+  test_loci_wrong$allele_alt[1] <- "N"
+  this_bkfile <- tempfile()
+  expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                                         loci = test_loci_wrong,
+                                         backingfile = this_bkfile,
+                                         quiet = TRUE),"valid alleles are")
+  expect_false(file.exists(paste0(this_bkfile,".bk")))
+  test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
+                            loci = test_loci,
+                            backingfile = this_bkfile,
+                            quiet = TRUE)
+  expect_true(file.exists(paste0(this_bkfile,".bk")))
+})
