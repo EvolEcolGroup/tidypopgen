@@ -84,9 +84,6 @@ gen_tibble.character <-
 
     # parser for vcf
     parser <- match.arg(parser)
-    if (parser=="cpp"){
-      message("The cpp parser is still experimental, use vcfR for serious work")
-    }
 
   # check that valid alleles does not contain zero
   if ("0" %in% valid_alleles){

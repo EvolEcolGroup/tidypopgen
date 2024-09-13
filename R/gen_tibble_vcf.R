@@ -1,9 +1,10 @@
 # read in a vcf
-gen_tibble_vcf <- function(x, ..., parser = "vcfR",
+gen_tibble_vcf <- function(x, ..., parser = "cpp",
                            chunk_size = NULL,
                            valid_alleles = c("A", "T", "C", "G"),
                            missing_alleles = c("0","."),
                            backingfile = NULL, quiet = FALSE) {
+  parser <- match.arg(parser, c("vcfR", "cpp"))
   if (parser == "cpp"){
     rds_path <- vcf_to_fbm_cpp(x,
                                 backingfile = backingfile,
