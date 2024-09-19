@@ -120,3 +120,70 @@ test_that("merge by position works correctly",{
   pos_merge <- rbind(pop_b_gt, pop_a_renamed_gt, flip_strand = TRUE, use_position = TRUE, quiet = TRUE)
   expect_true(all.equal(show_genotypes(merged_gen),show_genotypes(pos_merge)))
 })
+
+test_that("original gen_tibble objects remain the same after merge",{
+
+  # reference
+
+  raw_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+  bigsnp_path_b <- bigsnpr::snp_readBed(raw_path_pop_b, backingfile = tempfile("test_b_"))
+  pop_b_gt <- gen_tibble(bigsnp_path_b, quiet=TRUE)
+
+  # hash before merge
+
+  md5_before_b_rds <- tools::md5sum(bigsnp_path_b)
+  bk_path_b <- sub("\\.rds$", ".bk", bigsnp_path_b)
+  md5_before_b_bk <- tools::md5sum(bk_path_b)
+
+  # copy object
+
+  pop_b_gt_copy <- pop_b_gt
+
+  # target
+
+  raw_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  bigsnp_path_a <- bigsnpr::snp_readBed(raw_path_pop_a, backingfile = tempfile("test_a_"))
+  pop_a_gt <- gen_tibble(bigsnp_path_a, quiet=TRUE)
+
+  # hash before merge
+
+  md5_before_a_rds <- tools::md5sum(bigsnp_path_a)
+  bk_path_a <- sub("\\.rds$", ".bk", bigsnp_path_a)
+  md5_before_a_bk <- tools::md5sum(bk_path_a)
+
+  # copy object
+
+  pop_a_gt_copy <- pop_a_gt
+
+  # merge
+
+  merged_gen <- rbind.gen_tbl(pop_b_gt, pop_a_gt, flip_strand = TRUE,
+                              quiet = TRUE,
+                              backingfile = tempfile())
+
+  # check objects
+
+  expect_equal(pop_a_gt_copy,pop_a_gt)
+  expect_equal(pop_b_gt_copy,pop_b_gt)
+
+  #check attributes
+  expect_equal(attributes(pop_a_gt_copy), attributes(pop_a_gt))
+  expect_equal(attributes(pop_b_gt_copy), attributes(pop_b_gt))
+
+  # hash after merge
+
+  md5_after_b_rds <- tools::md5sum(bigsnp_path_b)
+  md5_after_a_rds <- tools::md5sum(bigsnp_path_a)
+
+  # hash after merge
+
+  md5_after_b_bk <- tools::md5sum(bk_path_b)
+  md5_after_a_bk <- tools::md5sum(bk_path_a)
+
+  expect_equal(md5_before_a_rds, md5_after_a_rds)
+  expect_equal(md5_before_b_rds, md5_after_b_rds)
+
+  expect_equal(md5_before_a_bk, md5_after_a_bk)
+  expect_equal(md5_before_b_bk, md5_after_b_bk)
+
+})

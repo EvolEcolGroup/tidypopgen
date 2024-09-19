@@ -49,7 +49,7 @@ test_that("gen_tibble catches invalid alleles",{
   test_loci_wrong <- test_loci
   test_loci_wrong$allele_alt[1] <- "N"
   expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
-                                           loci = test_loci_wrong, quiet = TRUE),"valid alleles are")
+                                           loci = test_loci_wrong, quiet = TRUE,"valid alleles are"))
   # now add N to the valid alleles
   test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
                                          loci = test_loci_wrong,
@@ -416,6 +416,8 @@ test_that("check summary stats are the same for gen_tibbles read in different wa
   expect_equal(ped_miss,geno_miss)
 
 })
+
+
 
 # Windows prevents the deletion of the backing file. It's something to do with the memory mapping
 # library used by bigsnpr

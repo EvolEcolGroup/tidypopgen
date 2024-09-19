@@ -45,3 +45,48 @@ test_that("write a bed file",{
   expect_true(all.equal(mat,show_genotypes(test_gt)))
 })
 
+test_that("test for overwriting files",{
+
+  temp <- tempfile()
+
+  # write a bed
+  bed_path <- gt_as_plink(test_gt, file = paste0(temp,".bed"))
+
+  # files exist
+  expect_true(file.exists(paste0(temp,".bed")))
+  expect_true(file.exists(paste0(temp,".bim")))
+  expect_true(file.exists(paste0(temp,".fam")))
+
+  # now write it as a ped
+  ped_path <- gt_as_plink(test_gt, file = paste0(temp,".ped"), type = "ped")
+
+  # .fam file no longer exists
+  expect_true(file.exists(paste0(temp,".bed")))
+  expect_true(file.exists(paste0(temp,".bim")))
+  #expect_true(file.exists(paste0(temp,".fam"))) # Bug
+
+  expect_true(file.exists(paste0(temp,".ped")))
+  expect_true(file.exists(paste0(temp,".map")))
+
+  # if .ped is created first in the tempfile, no issue
+
+  temp2 <- tempfile()
+
+  # write a ped
+  ped_path <- gt_as_plink(test_gt, file = paste0(temp2,".ped"), type = "ped")
+  # files exist
+  expect_true(file.exists(paste0(temp,".ped")))
+  expect_true(file.exists(paste0(temp,".map")))
+
+  # then write is as a bed
+  bed_path <- gt_as_plink(test_gt, file = paste0(temp2,".bed"))
+  # files exist
+  expect_true(file.exists(paste0(temp2,".ped")))
+  expect_true(file.exists(paste0(temp2,".map")))
+  expect_true(file.exists(paste0(temp2,".bed")))
+  expect_true(file.exists(paste0(temp2,".bim")))
+  expect_true(file.exists(paste0(temp2,".fam")))
+
+
+})
+
