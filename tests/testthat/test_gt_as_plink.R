@@ -60,15 +60,14 @@ test_that("test for overwriting files",{
   # now write it as a ped
   ped_path <- gt_as_plink(test_gt, file = paste0(temp,".ped"), type = "ped")
 
-  # .fam file no longer exists
+  # files exist
   expect_true(file.exists(paste0(temp,".bed")))
   expect_true(file.exists(paste0(temp,".bim")))
-  #expect_true(file.exists(paste0(temp,".fam"))) # Bug
-
+  expect_true(file.exists(paste0(temp,".fam")))
   expect_true(file.exists(paste0(temp,".ped")))
   expect_true(file.exists(paste0(temp,".map")))
 
-  # if .ped is created first in the tempfile, no issue
+  # if .ped is created first
 
   temp2 <- tempfile()
 
