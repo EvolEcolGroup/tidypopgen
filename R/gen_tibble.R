@@ -482,17 +482,20 @@ filenaming <- function(file){
 
     version <- 1
 
-    version_pattern <- "_v(\\d+)$"
+    base_name <- basename(file)
+
+    version_pattern <- paste0(base_name, "_v(\\d+)\\.bk$")
 
     # read existing files to check for existing versions
-    existing_files <- list.files(dirname(bk), pattern = paste0("^", basename(file), "_v\\d+\\.bk$"))
+  existing_files <- list.files(dirname(bk), pattern = paste0("^", base_name, "_v\\d+\\.bk$"))
 
 
     if (length(existing_files) > 0) {
-      # increase version number
       versions <- sub(version_pattern, "\\1", existing_files)
       versions <- as.numeric(versions)
-      version <- max(versions) + 1
+      if (!any(is.na(versions))) {
+        version <- max(versions) + 1
+      }
     }
 
     new_file <- paste0(file,"_v",version)

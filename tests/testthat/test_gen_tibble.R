@@ -451,6 +451,18 @@ test_that("versioning if .bk already exists",{
 
   expect_equal(new_files[2], paste0(file,"_v1.bk"))
 
+  file.remove(new_files[1])
+
+  file.exists(new_files[1])
+  file.exists(new_files[2])
+
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
+                        indiv_meta = test_indiv_meta, quiet = TRUE,
+                        backingfile = file)
+
+  new_version_files <- gt_get_file_names(test_gt)
+
+  expect_equal(new_version_files[2], paste0(file,"_v2.bk"))
 
 })
 
