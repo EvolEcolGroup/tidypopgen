@@ -418,6 +418,43 @@ test_that("check summary stats are the same for gen_tibbles read in different wa
 })
 
 
+test_indiv_meta <- data.frame (id=c("a","b","c"),
+                               population = c("pop1","pop1","pop2"))
+test_genotypes <- rbind(c(1,1,0,1,1,0),
+                        c(2,1,0,0,0,0),
+                        c(2,2,0,0,1,1))
+test_loci <- data.frame(name=paste0("rs",1:6),
+                        chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                        position=as.integer(c(3,5,65,343,23,456)),
+                        genetic_dist = as.integer(rep(0,6)),
+                        allele_ref = c("A","T","C","G","C","T"),
+                        allele_alt = c("T","C", NA,"C","G","A"))
+
+
+test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
+                      indiv_meta = test_indiv_meta, quiet = TRUE,
+                      backingfile = tempfile())
+
+test_that("versioning if .bk already exists",{
+
+  files <-  gt_get_file_names(test_gt)
+
+  file.remove(files[1])
+
+  file <- gsub(".bk","",files[2],)
+
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
+                        indiv_meta = test_indiv_meta, quiet = TRUE,
+                        backingfile = file)
+
+  new_files <- gt_get_file_names(test_gt)
+
+  expect_equal(new_files[2], paste0(file,"_v1.bk"))
+
+
+})
+
+
 
 # Windows prevents the deletion of the backing file. It's something to do with the memory mapping
 # library used by bigsnpr

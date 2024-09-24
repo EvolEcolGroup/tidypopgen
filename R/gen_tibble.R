@@ -90,6 +90,8 @@ gen_tibble.character <-
     stop ("'0' can not be a valid allele (it is the default missing allele value!)")
   }
 
+  backingfile <- filenaming(backingfile)
+
   if ((tolower(file_ext(x))=="bed") || (tolower(file_ext(x))=="rds")){
     rlang::check_dots_empty()
     x_gt <- gen_tibble_bed_rds(x = x, ...,
@@ -249,6 +251,8 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   if (nrow(x)!=nrow(indiv_meta)){
     stop ("there is a mismatch between the number of loci in the genotype table x and in the loci table")
   }
+
+  backingfile <- filenaming(backingfile)
 
   # use code for NA in FBM.256
 #  x[is.na(x)]<-3
@@ -468,6 +472,36 @@ harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
 }
 
 
+# check for existing .bk files
+filenaming <- function(file){
 
+  bk <- paste0(file, ".bk")
+  rds <- paste0(file, ".rds")
+
+  if(file.exists(bk) & !file.exists(rds)){
+
+    version <- 1
+
+    version_pattern <- "_v(\\d+)$"
+
+    # read existing files to check for existing versions
+    existing_files <- list.files(dirname(bk), pattern = paste0("^", basename(file), "_v\\d+\\.bk$"))
+
+
+    if (length(existing_files) > 0) {
+      # increase version number
+      versions <- sub(version_pattern, "\\1", existing_files)
+      versions <- as.numeric(versions)
+      version <- max(versions) + 1
+    }
+
+    new_file <- paste0(file,"_v",version)
+
+    return(new_file)
+  }
+
+  return(file)
+
+}
 
 
