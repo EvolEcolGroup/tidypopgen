@@ -64,14 +64,14 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
 {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
-  
+
   if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
     gt_set_imputed(.x, set = TRUE)
     on.exit(gt_set_imputed(.x, set = FALSE))
   }
 
-  if(!identical(show_loci(.x),.x %>% show_loci() %>% arrange(show_loci(.x)$chromosome,show_loci(.x)$position))){
-    stop("Your loci are not sorted, try using: show_loci(.data) <- .data %>% show_loci() %>% arrange(chromosome,position)")
+  if(!identical(show_loci(.x),.x %>% show_loci() %>% arrange(show_loci(.x)$chr_int,show_loci(.x)$position))){
+    stop("Your loci are not sorted, try using: show_loci(.data) <- .data %>% show_loci() %>% arrange(chr_int,position)")
 
   }
 
@@ -95,7 +95,7 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
 
   # as long as we have more than one individual
   snp_clump_ids <- bigsnpr::snp_clumping(G = attr(.x,"bigsnp")$genotypes,
-                        infos.chr = show_loci(.x)$chromosome,
+                        infos.chr = show_loci(.x)$chr_int,
                         ind.row = vctrs::vec_data(.x),
                         S = S,
                         thr.r2 = thr_r2,

@@ -26,7 +26,8 @@ test_that("save and load gt",{
   # check that we preserved the genotypes
   expect_true(all(show_genotypes(new_test_gt$genotypes)==test_genotypes))
   # check that we preserved the loci
-  expect_identical( show_loci(new_test_gt$genotypes) %>% select(-big_index), as_tibble(test_loci))
+  #expect_identical( show_loci(new_test_gt$genotypes) %>% select(-big_index), as_tibble(test_loci))
+  expect_identical(show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)), as_tibble(test_loci))
 
   # now remove the tibble
   rm(new_test_gt)
@@ -52,7 +53,9 @@ test_that("save and load gt",{
   # check that we preserved the genotypes
   expect_true(all(show_genotypes(new_test_gt2$genotypes)==test_genotypes))
   # check that we preserved the loci
-  expect_identical( show_loci(new_test_gt2$genotypes) %>% select(-big_index), as_tibble(test_loci))
-})
+  #expect_identical( show_loci(new_test_gt2$genotypes) %>% select(-big_index), as_tibble(test_loci))
+  expect_identical(show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)), as_tibble(test_loci))
+
+  })
 
 

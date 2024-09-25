@@ -76,18 +76,46 @@ test_that("loci_ld_clump error unsorted loci",{
 
   #ld
   expect_error(loci_ld_clump(pop_b_imputed, thr_r2 = 0.2), "Your loci are not sorted, try using:")
-  expect_false(identical(show_loci(pop_b_imputed), pop_b_imputed %>% show_loci() %>% arrange(chromosome,position)))
+  expect_false(identical(show_loci(pop_b_imputed), pop_b_imputed %>% show_loci() %>% arrange(chr_int,position)))
 
   #reorder the loci
-  show_loci(pop_b_imputed) <- pop_b_imputed %>% show_loci() %>% arrange(chromosome,position)
+  show_loci(pop_b_imputed) <- pop_b_imputed %>% show_loci() %>% arrange(chr_int,position)
 
   #try again
   expect_equal(loci_ld_clump(pop_b_imputed, thr_r2 = 0.2),
                c(FALSE,TRUE,TRUE,FALSE,TRUE,TRUE,FALSE,FALSE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE,TRUE))
-  expect_true(identical(show_loci(pop_b_imputed), pop_b_imputed %>% show_loci() %>% arrange(chromosome,position)))
+  expect_true(identical(show_loci(pop_b_imputed), pop_b_imputed %>% show_loci() %>% arrange(chr_int,position)))
 
 })
 
+test_that("loci order",{
 
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(2,2,0,1,1,2),
+                          c(2,2,0,0,0,1),
+                          c(2,2,0,0,1,1))
+
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=c("chr2","chr1","chr1","chr1","chr2","chr1"),
+                          position=c(3,5,65,343,23,456),
+                          genetic_dist = as.integer(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+
+  test_gt <- gen_tibble(x = test_genotypes, indiv_meta = test_indiv_meta, loci = test_loci,
+                        backingfile = tempfile(), quiet = TRUE)
+
+  #ld
+  expect_error(loci_ld_clump(test_gt, thr_r2 = 0.2), "Your loci are not sorted, try using:")
+  #reorder the loci
+  show_loci(test_gt) <- test_gt %>% show_loci() %>% arrange(chr_int,position)
+
+  show_loci(test_gt)
+
+  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id=TRUE)
+  expect_true(all.equal(keep, c(5, 1, 2, 3, 4)) == TRUE)
+
+})
 
 

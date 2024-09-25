@@ -85,6 +85,8 @@ gen_tibble.character <-
     # parser for vcf
     parser <- match.arg(parser)
 
+    #browser()
+
   # check that valid alleles does not contain zero
   if ("0" %in% valid_alleles){
     stop ("'0' can not be a valid allele (it is the default missing allele value!)")
@@ -119,6 +121,11 @@ gen_tibble.character <-
   } else  {
     stop("file_path should be pointing to a either a PLINK .bed or .ped file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
+
+  loci <- show_loci(x_gt)
+  new_loci <- integers(loci)
+  show_loci(x_gt) <- new_loci
+
   file_in_use <- gt_save_light(x_gt, quiet = quiet)
   return(x_gt)
 }
@@ -128,6 +135,8 @@ gen_tibble_bed_rds <- function(x, ...,
                                valid_alleles = c("A", "T", "C", "G"),
                                missing_alleles = c("0","."),
                                backingfile = NULL, quiet = FALSE){
+
+  #browser()
 
   # if it is a bed file, we convert it to a bigsnpr
   if (tolower(file_ext(x))=="bed"){
@@ -141,6 +150,10 @@ gen_tibble_bed_rds <- function(x, ...,
   }
 
   bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
+
+
+  #bigsnp_obj <- integers(bigsnp_obj)
+
 
   indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
@@ -222,6 +235,8 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
                               backingfile = NULL, quiet = FALSE){
   rlang::check_dots_empty()
 
+  #browser()
+
   # check that valid alleles does not contain zero
   if ("0" %in% valid_alleles){
     stop ("'0' can not be a valid allele (it is the default missing allele value!)")
@@ -262,6 +277,9 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
                                           loci = loci,
                                           backingfile = backingfile,
                                          ploidy = ploidy)
+
+  #bigsnp_obj <- integers(bigsnp_obj)
+
   bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile,".rds")
 
   indiv_meta <- as.list (indiv_meta)
@@ -278,6 +296,11 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
                          missing_alleles = missing_alleles,
                         remove_on_fail = TRUE)
   show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
+
+  loci <- show_loci(new_gen_tbl)
+  new_loci <- integers(loci)
+  show_loci(new_gen_tbl) <- new_loci
+
   files_in_use <- gt_save(new_gen_tbl, quiet = quiet)
   return(new_gen_tbl)
 
@@ -507,4 +530,40 @@ filenaming <- function(file){
 
 }
 
+# adding a chr_int column
+integers <- function(loci){
+
+
+  if(is.integer(loci$chromosome)){
+    loci$chr_int <- loci$chromosome
+
+  } else if(is.numeric(loci$chromosome)){
+    non_na_id <- !is.na(loci$chromosome)
+    chr_int <- as.integer(loci$chromosome[non_na_id])
+
+    loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
+    loci$chr_int[non_na_id] <- chr_int
+
+  } else if(is.character(loci$chromosome)){
+    non_na_id <- !is.na(loci$chromosome)
+    chr_factor <- as.factor(loci$chromosome[non_na_id])
+    chr_int <- as.integer(chr_factor)
+
+    loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
+    loci$chr_int[non_na_id] <- chr_int
+
+
+  } else if(is.factor(loci$chromosome)){
+    non_na_id <- !is.na(loci$chromosome)
+    chr_int <- as.integer(loci$chromosome[non_na_id])
+
+    loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
+    loci$chr_int[non_na_id] <- chr_int
+
+  } else {
+
+    stop("Chromosome column should be integer, character, or factor")
+  }
+  return(loci)
+}
 
