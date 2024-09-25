@@ -33,7 +33,6 @@ dplyr_reconstruct.gen_tbl <-function(data, template)
 dplyr_reconstruct.grouped_gen_tbl <-function(data, template)
 {
   out <- NextMethod()
-  browser()
   # if the genotypes are gone, drop the tbl_df class
   if (!"genotypes" %in% names(data)){
     message("as genotypes were dropped, this is not longer a 'gen_tbl'")

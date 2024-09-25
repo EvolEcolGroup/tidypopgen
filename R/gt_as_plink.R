@@ -31,7 +31,7 @@ gt_as_plink <- function(x, file = NULL, type = c("bed","ped","raw"),
                    )
   } else if (type=="ped"){
     all_files <- c(file,
-                   gsub(".ped",".fam",file))
+                   gsub(".ped",".map",file))
   } else if (type=="raw"){
     all_files <- file
   }

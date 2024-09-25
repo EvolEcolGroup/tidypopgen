@@ -329,7 +329,13 @@ So, let us save our file:
 ```{r}
 gt_file_name <- gt_save(example_gt)
 gt_file_name
+```
 
+And if we ever need to retrieve the location of the `.bk` and `.rds` files for a 
+gen_tibble, we can use:
+
+```{r}
+gt_get_file_names(example_gt)
 ```
 
 In a later session, we could reload the data with:
