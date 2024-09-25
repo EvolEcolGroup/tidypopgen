@@ -475,7 +475,7 @@ generate a file with our genotype data:</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">geno_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_as_geno_lea.html">gt_as_geno_lea</a></span><span class="op">(</span><span class="va">anole_gt</span><span class="op">)</span></span>
 <span><span class="va">geno_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpeAxKon/anolis_1d3b2f81a37d.geno"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmpUILpcW/anolis_213d56945c4f.geno"</span></span></code></pre></div>
 <p>Note that the .geno file is placed by default in the same directory
 and using the same name as the backing file of the
 <code>gen_tibble</code></p>
@@ -518,28 +518,40 @@ matrix from our <code>snmf</code> object, and covert it to a
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">q_mat</span>, data <span class="op">=</span> <span class="va">anole_gt</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-37-1.png" width="700"></p>
-<p>We can tidy our q matrix, and attach the population and id data from
-our original gen_tibble, returning it in a format which is suitable for
-plotting:</p>
+<p>We can tidy our q matrix into a tibble, returning it in a format
+which is suitable for plotting:</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tidy_q</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">q_mat</span>, <span class="va">anole_gt</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tidy_q</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;   id           group q     percentage dominant_pop dominant_q plot_order</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> IBSPCRIB0361 AF    .Q1     0.000<span style="text-decoration: underline;">100</span> AF                 1.00          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> IBSPCRIB0361 AF    .Q2     1.00     AF                 1.00          2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> IBSPCRIB0361 AF    .Q3     0.000<span style="text-decoration: underline;">100</span> AF                 1.00          3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> JFT459       AF    .Q1     0.000<span style="text-decoration: underline;">100</span> AF                 1.00          4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> JFT459       AF    .Q2     1.00     AF                 1.00          5</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> JFT459       AF    .Q3     0.000<span style="text-decoration: underline;">100</span> AF                 1.00          6</span></span></code></pre></div>
-<p>Note that we also add the dominant <code>q</code> for a given
-individual, as well as the dominant population which is associated with
-that <code>q</code></p>
-<p>And we can plot the tibble directly with <code>ggplot</code>:</p>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
+<span><span class="co">#&gt;   .Q1        .Q2        .Q3        id           group</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;q_matrix&gt;</span> <span style="color: #949494; font-style: italic;">&lt;q_matrix&gt;</span> <span style="color: #949494; font-style: italic;">&lt;q_matrix&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 9.999e-05  9.999e-05  9.998e-01  BM288        Eam  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 9.999e-05  9.999e-05  9.998e-01  GN71         Eam  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 9.998e-01  9.999e-05  9.999e-05  H1907        Wam  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 9.998e-01  9.999e-05  9.999e-05  H1911        Wam  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 9.998e-01  9.999e-05  9.999e-05  H2546        Wam  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 9.999e-05  9.998e-01  9.999e-05  IBSPCRIB0361 AF</span></span></code></pre></div>
+<p>For more complex plots, we can add the clusters to the tibble, so
+that we can create a custom plot with <code>ggplot2</code>. We can
+easily add the data with the <code>augment</code> method:</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># set up the ggplot object</span></span>
-<span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tidy_q</span>,</span>
+<code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">q_mat</span>, data <span class="op">=</span> <span class="va">anole_gt</span><span class="op">)</span></span></code></pre></div>
+<p>And now we can use <code>ggplot2</code> directly to generate our
+plot:</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">".Q"</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"q"</span>, values_to <span class="op">=</span> <span class="st">"percentage"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>percentage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">percentage</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>dominant_q <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">percentage</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">population</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">dominant_q</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>plot_order <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">id</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">anole_gt</span>,</span>
 <span>                       <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">id</span>,</span>
 <span>                                    y <span class="op">=</span> <span class="va">percentage</span>,</span>
 <span>                                    fill <span class="op">=</span> <span class="va">q</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
@@ -547,14 +559,14 @@ that <code>q</code></p>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>                    position <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/position_stack.html" class="external-link">position_stack</a></span><span class="op">(</span>reverse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
 <span>  <span class="co"># set the y label</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"K = 3"</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Population Structure for K = 3"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="co"># use a theme to match the distruct look, removing most decorations</span></span>
 <span>  <span class="fu"><a href="../reference/theme_distruct.html">theme_distruct</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="co"># set the colour scale to be the same as in distruct and clumppling</span></span>
 <span>  <span class="fu"><a href="../reference/scale_fill_distruct.html">scale_fill_distruct</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">plt</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-39-1.png" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-40-1.png" width="700"></p>
 </div>
   </div>
 
@@ -573,7 +585,7 @@ that <code>q</code></p>
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer>
