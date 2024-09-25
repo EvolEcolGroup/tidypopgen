@@ -4,13 +4,10 @@
 \alias{read_q_matrix_list}
 \title{Tidy ADMXITURE output files into plots}
 \usage{
-read_q_matrix_list(x, data)
+read_q_matrix_list(x)
 }
 \arguments{
 \item{x}{the name of a directory containing .Q files}
-
-\item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the individuals in the same order as the data used to
-generate the Q matrix}
 }
 \value{
 a list of \code{q_matrix} objects to plot

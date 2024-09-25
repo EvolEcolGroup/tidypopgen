@@ -19,8 +19,6 @@ as_q_matrix <- function(x){
 
 
 
-
-
 #' Tidy a Q matrix
 #'
 #' Takes a `q_matrix` object, which is a matrix, and returns a tidied tibble.
@@ -33,28 +31,48 @@ as_q_matrix <- function(x){
 #' @export
 tidy.q_matrix <- function(x, data, ...){
   rlang::check_dots_empty()
+
   q_tbl <- x %>%
-    tibble::as_tibble() %>%
+    tibble::as_tibble()
+
+  q_tbl <- q_tbl  %>%
     dplyr::mutate(id = data$id,
-                  # @TODO we should get this from the grouped tibble, not hardcode it!
+                  #@TODO
                   group = data$population)
 
-  q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
-                                         names_to = "q", values_to = "percentage")
-  q_tbl$percentage <- as.numeric(q_tbl$percentage)
-  #q_tbl
-  dominant_q <- q_tbl %>%
-    dplyr::group_by(.data$id) %>%
-    dplyr::summarize(dominant_pop = .data$group[which.max(.data$percentage)], dominant_q = max(.data$percentage), .groups = 'drop')
-
-  q_tbl <- q_tbl %>%
-    dplyr::left_join(dominant_q, by = "id")
-
-  q_tbl <- q_tbl %>%
-    dplyr::arrange(.data$group, dplyr::desc(.data$dominant_q)) %>%
-    dplyr::mutate(plot_order = dplyr::row_number(),  # Create plot_order column
-           id = factor(.data$id, levels = unique(.data$id[order(.data$group, -.data$dominant_q)])))
   q_tbl
+}
+
+
+#' Augment data with information from a q_matrix object
+#'
+#' Augment for `q_matrix` accepts a model object and a dataset and adds
+#' Q values to each observation in the dataset.
+#' Q values  are stored in separate columns, which is given name with the
+#' pattern ".Q1",".Q2", etc. For consistency with [broom::augment.prcomp], a column
+#' ".rownames" is also returned; it is a copy of 'id', but it ensures that
+#' any scripts written for data augmented with [broom::augment.prcomp] will
+#' work out of the box (this is especially helpful when adapting plotting scripts).
+#' @param x  A `q_matrix` object
+#' @param data the `gen_tibble` used to run the clustering algorithm
+#' @param ... Not used. Needed to match generic signature only.
+#' @return A  [gen_tibble] containing the original data along with
+#'   additional columns containing each observation's Q values.
+#' @export
+#' @name augment_q_matrix
+
+augment.q_matrix <- function(x, data = NULL, ...) {
+
+  if (!".rownames" %in% names(data)) {
+    data <- data %>%
+      dplyr::mutate(.rownames = data$id)
+  }
+
+
+  q_tbl <- tidy(x,data)
+
+  data <- dplyr::left_join(data,q_tbl, by = "id")
+
 }
 
 
@@ -64,13 +82,12 @@ tidy.q_matrix <- function(x, data, ...){
 #' produces a list of tidied tibbles ready to plot.
 #'
 #' @param x the name of a directory containing .Q files
-#' @param data  An associated tibble (e.g. a [`gen_tibble`]), with the individuals in the same order as the data used to
-#' generate the Q matrix
 #' @returns a list of `q_matrix` objects to plot
 #'
 #' @export
 
-read_q_matrix_list <- function(x, data){
+read_q_matrix_list <- function(x){
+
 
   files <- list.files(x, pattern = "\\.Q$", full.names = TRUE)
 
@@ -82,9 +99,6 @@ read_q_matrix_list <- function(x, data){
 
   # Sort matrix_list by the number of columns
   matrix_list <- matrix_list[order(sapply(matrix_list, ncol))]
-
-  # Tidy each
-  matrix_list <- lapply(matrix_list, function(x) tidy(x, gen_tbl = data))
 
   matrix_list
 }
@@ -111,9 +125,36 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
     q_tbl$id <- 1:nrow(q_tbl)
     q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
                                        names_to = "q", values_to = "percentage")
+    plt <- ggplot2::ggplot(q_tbl,
+                           ggplot2::aes(x = .data$id,
+                                        y = .data$percentage,
+                                        fill = .data$q)) +
+      ggplot2::geom_col(width = 1,
+                        position = ggplot2::position_stack(reverse = TRUE))+
+      ggplot2::labs(y = paste("K = ", K))+
+      theme_distruct() +
+      scale_fill_distruct()
+
+    plt
+
   } else {
     q_tbl <- tidy(object, data)
-  }
+
+    q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
+                                           names_to = "q", values_to = "percentage")
+    q_tbl$percentage <- as.numeric(q_tbl$percentage)
+
+    dominant_q <- q_tbl %>%
+      dplyr::group_by(.data$id) %>%
+      dplyr::summarize(dominant_q = max(.data$percentage), .populations = 'drop')
+
+    q_tbl <- q_tbl %>%
+      dplyr::left_join(dominant_q, by = "id")
+
+    q_tbl <- q_tbl %>%
+      dplyr::arrange(.data$group, dplyr::desc(.data$dominant_q)) %>%
+      dplyr::mutate(plot_order = dplyr::row_number(),  # Create plot_order column
+             id = factor(.data$id, levels = unique(.data$id[order(.data$group, -.data$dominant_q)])))
     plt <- ggplot2::ggplot(q_tbl,
                            ggplot2::aes(x = .data$id,
                                         y = .data$percentage,
@@ -131,6 +172,8 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
       }
     }
     plt
+  }
+
 }
 
 

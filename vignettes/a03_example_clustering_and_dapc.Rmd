@@ -344,21 +344,35 @@ We can quickly plot it with
 autoplot(q_mat, data = anole_gt)
 ```
 
-We can tidy our q matrix, and attach the population and id data from our original gen_tibble, returning it
+We can tidy our q matrix into a tibble, returning it
 in a format which is suitable for plotting:
 
 ```{r}
 tidy_q <- tidy(q_mat, anole_gt)
 head(tidy_q)
 ```
-Note that we also add the dominant `q` for a given individual, as well as the dominant population which is associated
-with that `q`
-
-And we can plot the tibble directly with `ggplot`:
+For more complex plots, we can add the clusters to the tibble, so that we can 
+create a custom plot with `ggplot2`. We can easily add the data with the `augment` method:
 
 ```{r}
-# set up the ggplot object
-plt <- ggplot2::ggplot(tidy_q,
+anole_gt <- augment(q_mat, data = anole_gt)
+```
+
+And now we can use `ggplot2` directly to generate our plot:
+
+```{r}
+
+anole_gt <- anole_gt %>%
+  tidyr::pivot_longer(cols = dplyr::starts_with(".Q"), names_to = "q", values_to = "percentage") %>%
+  dplyr::mutate(percentage = as.numeric(percentage)) %>%
+  dplyr::group_by(id) %>%
+  dplyr::mutate(dominant_q = max(percentage)) %>%
+  dplyr::ungroup() %>%
+  dplyr::arrange(population, dplyr::desc(dominant_q)) %>%
+  dplyr::mutate(plot_order = dplyr::row_number(),
+                id = factor(id, levels = unique(id)))
+
+plt <- ggplot2::ggplot(anole_gt,
                        ggplot2::aes(x = id,
                                     y = percentage,
                                     fill = q)) +
@@ -366,7 +380,7 @@ plt <- ggplot2::ggplot(tidy_q,
   ggplot2::geom_col(width = 1,
                     position = ggplot2::position_stack(reverse = TRUE))+
   # set the y label
-  ggplot2::labs(y = "K = 3")+
+  ggplot2::labs(y = "Population Structure for K = 3") +
   # use a theme to match the distruct look, removing most decorations
   theme_distruct() +
   # set the colour scale to be the same as in distruct and clumppling
@@ -374,6 +388,3 @@ plt <- ggplot2::ggplot(tidy_q,
 
 plt
 ```
-
-
-
