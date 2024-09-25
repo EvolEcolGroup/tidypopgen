@@ -472,6 +472,15 @@ test_that("chr_int is always an integer",{
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
   expect_true(is.integer(show_loci(test_gt)$chr_int))
 
+  test_loci_fac <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.factor(paste0("chr",c(1,1,1,1,2,2))),
+                          position=as.integer(c(3,5,65,343,23,456)),
+                          genetic_dist = as.integer(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci_fac, indiv_meta = test_indiv_meta, quiet = TRUE)
+  expect_true(is.integer(show_loci(test_gt)$chr_int))
+
   # character methods
   bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
   pop_a_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
