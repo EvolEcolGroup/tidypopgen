@@ -92,9 +92,9 @@ gen_tibble.character <-
   }
 
   if(is.null(backingfile)){
-    backingfile <- check_file_duplicates(x)
+    backingfile <- change_duplicated_file_name(x)
   } else if(!is.null(backingfile)){
-    backingfile <- check_file_duplicates(backingfile)
+    backingfile <- change_duplicated_file_name(backingfile)
   }
 
 
@@ -266,7 +266,7 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
 
 
   if(!is.null(backingfile)){
-    backingfile <- check_file_duplicates(backingfile)
+    backingfile <- change_duplicated_file_name(backingfile)
   }
 
   # use code for NA in FBM.256
@@ -494,7 +494,7 @@ harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
 
 
 # check for existing .bk files
-check_file_duplicates <- function(file){
+change_duplicated_file_name <- function(file){
 
   file <- tools::file_path_sans_ext(file)
 
