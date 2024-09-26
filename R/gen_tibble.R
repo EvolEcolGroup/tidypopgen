@@ -92,9 +92,9 @@ gen_tibble.character <-
   }
 
   if(is.null(backingfile)){
-    backingfile <- filenaming(x)
+    backingfile <- check_file_duplicates(x)
   } else if(!is.null(backingfile)){
-    backingfile <- filenaming(backingfile)
+    backingfile <- check_file_duplicates(backingfile)
   }
 
 
@@ -127,7 +127,7 @@ gen_tibble.character <-
   }
 
   loci <- show_loci(x_gt)
-  new_loci <- integers(loci)
+  new_loci <- add_chromosome_as_int(loci)
   show_loci(x_gt) <- new_loci
 
   file_in_use <- gt_save_light(x_gt, quiet = quiet)
@@ -153,10 +153,6 @@ gen_tibble_bed_rds <- function(x, ...,
   }
 
   bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
-
-
-  #bigsnp_obj <- integers(bigsnp_obj)
-
 
   indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
                              population = bigsnp_obj$fam$family.ID)
@@ -268,10 +264,9 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
     stop ("there is a mismatch between the number of loci in the genotype table x and in the loci table")
   }
 
-  #backingfile <- filenaming(backingfile)
 
   if(!is.null(backingfile)){
-    backingfile <- filenaming(backingfile)
+    backingfile <- check_file_duplicates(backingfile)
   }
 
   # use code for NA in FBM.256
@@ -282,8 +277,6 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
                                           loci = loci,
                                           backingfile = backingfile,
                                          ploidy = ploidy)
-
-  #bigsnp_obj <- integers(bigsnp_obj)
 
   bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile,".rds")
 
@@ -303,7 +296,7 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
 
   loci <- show_loci(new_gen_tbl)
-  new_loci <- integers(loci)
+  new_loci <- add_chromosome_as_int(loci)
   show_loci(new_gen_tbl) <- new_loci
 
   files_in_use <- gt_save(new_gen_tbl, quiet = quiet)
@@ -501,7 +494,7 @@ harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
 
 
 # check for existing .bk files
-filenaming <- function(file){
+check_file_duplicates <- function(file){
 
   file <- tools::file_path_sans_ext(file)
 
@@ -561,7 +554,7 @@ filenaming <- function(file){
 }
 
 # adding a chr_int column
-integers <- function(loci){
+add_chromosome_as_int <- function(loci){
 
 
   if(is.integer(loci$chromosome)){
