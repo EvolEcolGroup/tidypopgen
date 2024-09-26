@@ -85,12 +85,18 @@ gen_tibble.character <-
     # parser for vcf
     parser <- match.arg(parser)
 
+
   # check that valid alleles does not contain zero
   if ("0" %in% valid_alleles){
     stop ("'0' can not be a valid allele (it is the default missing allele value!)")
   }
 
-  backingfile <- filenaming(backingfile)
+  if(is.null(backingfile)){
+    backingfile <- change_duplicated_file_name(x)
+  } else if(!is.null(backingfile)){
+    backingfile <- change_duplicated_file_name(backingfile)
+  }
+
 
   if ((tolower(file_ext(x))=="bed") || (tolower(file_ext(x))=="rds")){
     rlang::check_dots_empty()
@@ -119,6 +125,11 @@ gen_tibble.character <-
   } else  {
     stop("file_path should be pointing to a either a PLINK .bed or .ped file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
+
+  loci <- show_loci(x_gt)
+  new_loci <- add_chromosome_as_int(loci)
+  show_loci(x_gt) <- new_loci
+
   file_in_use <- gt_save_light(x_gt, quiet = quiet)
   return(x_gt)
 }
@@ -128,6 +139,7 @@ gen_tibble_bed_rds <- function(x, ...,
                                valid_alleles = c("A", "T", "C", "G"),
                                missing_alleles = c("0","."),
                                backingfile = NULL, quiet = FALSE){
+
 
   # if it is a bed file, we convert it to a bigsnpr
   if (tolower(file_ext(x))=="bed"){
@@ -252,7 +264,10 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
     stop ("there is a mismatch between the number of loci in the genotype table x and in the loci table")
   }
 
-  backingfile <- filenaming(backingfile)
+
+  if(!is.null(backingfile)){
+    backingfile <- change_duplicated_file_name(backingfile)
+  }
 
   # use code for NA in FBM.256
 #  x[is.na(x)]<-3
@@ -262,6 +277,7 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
                                           loci = loci,
                                           backingfile = backingfile,
                                          ploidy = ploidy)
+
   bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile,".rds")
 
   indiv_meta <- as.list (indiv_meta)
@@ -278,6 +294,11 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
                          missing_alleles = missing_alleles,
                         remove_on_fail = TRUE)
   show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
+
+  loci <- show_loci(new_gen_tbl)
+  new_loci <- add_chromosome_as_int(loci)
+  show_loci(new_gen_tbl) <- new_loci
+
   files_in_use <- gt_save(new_gen_tbl, quiet = quiet)
   return(new_gen_tbl)
 
@@ -473,12 +494,14 @@ harmonise_missing_values <- function (loci_info, missing_alleles =c("0",".")){
 
 
 # check for existing .bk files
-filenaming <- function(file){
+change_duplicated_file_name <- function(file){
+
+  file <- tools::file_path_sans_ext(file)
 
   bk <- paste0(file, ".bk")
   rds <- paste0(file, ".rds")
 
-  if(file.exists(bk) & !file.exists(rds)){
+  if(file.exists(bk) && !file.exists(rds)){
 
     version <- 1
 
@@ -501,10 +524,69 @@ filenaming <- function(file){
     new_file <- paste0(file,"_v",version)
 
     return(new_file)
+  } else if (file.exists(bk) && file.exists(rds)){
+
+    version <- 1
+
+    base_name <- basename(file)
+
+    version_pattern <- paste0(base_name, "_v(\\d+)\\.bk$")
+
+    # read existing files to check for existing versions
+    existing_files <- list.files(dirname(bk), pattern = paste0("^", base_name, "_v\\d+\\.bk$"))
+
+
+    if (length(existing_files) > 0) {
+      versions <- sub(version_pattern, "\\1", existing_files)
+      versions <- as.numeric(versions)
+      if (!any(is.na(versions))) {
+        version <- max(versions) + 1
+      }
+    }
+
+    new_file <- paste0(file,"_v",version)
+
+    return(new_file)
   }
 
   return(file)
 
 }
 
+# adding a chr_int column
+add_chromosome_as_int <- function(loci){
+
+
+  if(is.integer(loci$chromosome)){
+    loci$chr_int <- loci$chromosome
+
+  } else if(is.numeric(loci$chromosome)){
+    non_na_id <- !is.na(loci$chromosome)
+    chr_int <- as.integer(loci$chromosome[non_na_id])
+
+    loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
+    loci$chr_int[non_na_id] <- chr_int
+
+  } else if(is.character(loci$chromosome)){
+    non_na_id <- !is.na(loci$chromosome)
+    chr_factor <- as.factor(loci$chromosome[non_na_id])
+    chr_int <- as.integer(chr_factor)
+
+    loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
+    loci$chr_int[non_na_id] <- chr_int
+
+
+  } else if(is.factor(loci$chromosome)){
+    non_na_id <- !is.na(loci$chromosome)
+    chr_int <- as.integer(loci$chromosome[non_na_id])
+
+    loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
+    loci$chr_int[non_na_id] <- chr_int
+
+  } else {
+
+    stop("Chromosome column should be integer, character, or factor")
+  }
+  return(loci)
+}
 

@@ -30,13 +30,22 @@ test_that("extract f2 correctly",{
                                                  adjust_pseudohaploid = FALSE,
                                                 verbose = FALSE)
   gt_aftable <- gt_to_aftable(test_gt, adjust_pseudohaploid = FALSE)
-  expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE))
+  #expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE))
+
+  expect_true(all.equal(adm_aftable$afs, gt_aftable$afs, check.attributes= FALSE))
+  expect_true(all.equal(adm_aftable$counts, gt_aftable$counts, check.attributes= FALSE))
+  expect_true(all.equal(adm_aftable$snpfile, gt_aftable$snpfile %>% select(-chr_int), check.attributes= FALSE))
+
   # now adjusting the pseudohaploids
   adm_aftable <- admixtools:::anygeno_to_aftable(bigsnpr::sub_bed(bed_file),
                                                  adjust_pseudohaploid = TRUE,
                                                  verbose = FALSE)
   gt_aftable <- gt_to_aftable(test_gt)
-  expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE))
+  #expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE))
+
+  expect_true(all.equal(adm_aftable$afs, gt_aftable$afs, check.attributes= FALSE))
+  expect_true(all.equal(adm_aftable$counts, gt_aftable$counts, check.attributes= FALSE))
+  expect_true(all.equal(adm_aftable$snpfile, gt_aftable$snpfile %>% select(-chr_int), check.attributes= FALSE))
 
   adm_outdir <- file.path(tempdir(),"adm_f2")
   unlink(file.path(adm_outdir,"*"),recursive = TRUE)

@@ -24,8 +24,8 @@ test_that("create gen_tibble from dfs",{
   # we can extract the loci correctly
   extracted_loci <- test_gt %>% show_loci()
   # remove the index in the big file
-  expect_identical( show_loci(test_gt$genotypes) %>% select(-big_index), as_tibble(test_loci))
-
+  # expect_identical(show_loci(test_gt$genotypes) %>% select(-big_index), as_tibble(test_loci))
+  expect_identical(show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)), as_tibble(test_loci))
   # example of dropping the genotypes, leading to a change in class
   test_drop <- test_gt %>% select(-genotypes)
   expect_false(inherits(test_drop,"gen_tbl"))
@@ -193,7 +193,7 @@ test_that("gen_tibble from files",{
                               chunk_size = 2)
   expect_true(all.equal(show_genotypes(pop_a_vcf_gt2),show_genotypes(pop_a_vcf_gt)))
   expect_true(all.equal(show_loci(pop_a_vcf_gt2),show_loci(pop_a_vcf_gt)))
-
+  expect_true(is.integer(show_loci(pop_a_vcf_gt)$chr_int))
   # @TODO we should add similar tests for pop b, which has missing data
 
   # check our cpp parser
@@ -206,7 +206,7 @@ test_that("gen_tibble from files",{
                               chunk_size = 2, parser="cpp")
   expect_true(all.equal(show_genotypes(pop_a_vcf_fast_gt2),show_genotypes(pop_a_vcf_fast_gt)))
   expect_true(all.equal(show_loci(pop_a_vcf_gt), show_loci(pop_a_vcf_fast_gt)))
-
+  expect_true(is.integer(show_loci(pop_a_vcf_fast_gt)$chr_int))
 })
 
 test_that("gen_tibble from files with missingness",{
@@ -283,7 +283,6 @@ test_that("gentibble with packedancestry",{
   expect_equal(show_loci(pop_a_gt_ped_swap)$allele_ref, show_loci(pop_a_gt_swap)$allele_ref)
   expect_equal(show_loci(pop_a_gt_ped_swap)$allele_alt, show_loci(pop_a_gt_swap)$allele_alt)
   expect_equal(show_genotypes(pop_a_gt_ped_swap), show_genotypes(pop_a_gt_swap))
-
 
   #for the rest, allele ref and allele alt should match
   keep <- which(!show_loci(pop_a_gt_ped)$name %in% c("rs1110052","rs10106770"))
@@ -466,6 +465,47 @@ test_that("versioning if .bk already exists",{
 
 })
 
+
+test_that("chr_int is always an integer",{
+
+  # matrix method
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  expect_true(is.integer(show_loci(test_gt)$chr_int))
+
+  test_loci_fac <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.factor(paste0("chr",c(1,1,1,1,2,2))),
+                          position=as.integer(c(3,5,65,343,23,456)),
+                          genetic_dist = as.integer(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci_fac, indiv_meta = test_indiv_meta, quiet = TRUE)
+  expect_true(is.integer(show_loci(test_gt)$chr_int))
+
+  # character methods
+  bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  pop_a_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+  expect_true(is.integer(show_loci(pop_a_gt)$chr_int))
+
+  ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
+  pop_a_ped_gt <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile())
+  expect_true(is.integer(show_loci(pop_a_ped_gt)$chr_int))
+
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  pop_a_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="vcfR")
+  expect_true(is.integer(show_loci(pop_a_vcf_gt)$chr_int))
+  pop_a_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
+  expect_true(is.integer(show_loci(pop_a_vcf_fast_gt)$chr_int))
+
+
+  geno_path <- system.file("extdata/pop_a.geno", package = "tidypopgen")
+  pop_a_gt <- gen_tibble(geno_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+  expect_true(is.integer(show_loci(pop_a_gt)$chr_int))
+  geno_path <- system.file("extdata/pop_b.geno", package = "tidypopgen")
+  pop_b_gt <- gen_tibble(geno_path, quiet=TRUE, backingfile = tempfile(), valid_alleles = c("A","G","C","T"))
+  expect_true(is.integer(show_loci(pop_b_gt)$chr_int))
+
+
+})
 
 
 # Windows prevents the deletion of the backing file. It's something to do with the memory mapping
