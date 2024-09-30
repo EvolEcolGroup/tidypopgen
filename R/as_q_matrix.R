@@ -137,33 +137,48 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
 
     plt
 
+    # thin vertical lines show when plot is saved as .pdf and opened with certain viewers,
+    # this is a product of the specific viewer (seen on unix and mac), knitting to
+    # html instead fixes, or choosing a different output (not pdf)
+
   } else {
     q_tbl <- tidy(object, data)
 
     q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
-                                           names_to = "q", values_to = "percentage")
-    q_tbl$percentage <- as.numeric(q_tbl$percentage)
+                                           names_to = "q", values_to = "percentage") %>%
+      dplyr::mutate(percentage = as.numeric(.data$percentage))
+
+    q_tbl <- q_tbl %>%
+      dplyr::group_by(.data$group, .data$id) %>%
+      dplyr::arrange(.data$group, .data$id) %>%
+      dplyr::mutate(q = factor(.data$q, levels = .data$q[order(.data$percentage, decreasing = FALSE)]))
 
     dominant_q <- q_tbl %>%
       dplyr::group_by(.data$id) %>%
-      dplyr::summarize(dominant_q = max(.data$percentage), .populations = 'drop')
+      dplyr::summarize(dominant_q = max(.data$percentage), .groups = 'drop')
 
     q_tbl <- q_tbl %>%
       dplyr::left_join(dominant_q, by = "id")
 
     q_tbl <- q_tbl %>%
-      dplyr::arrange(.data$group, dplyr::desc(.data$dominant_q)) %>%
-      dplyr::mutate(plot_order = dplyr::row_number(),  # Create plot_order column
-             id = factor(.data$id, levels = unique(.data$id[order(.data$group, -.data$dominant_q)])))
+      dplyr::group_by(.data$group) %>%
+      dplyr::arrange(desc(.data$dominant_q), .by_group = TRUE)
+
+    levels_q <- unique(q_tbl$id)
+
+    q_tbl <- q_tbl %>%
+      dplyr::mutate(id = factor(.data$id, levels = levels_q))
+
     plt <- ggplot2::ggplot(q_tbl,
                            ggplot2::aes(x = .data$id,
                                         y = .data$percentage,
                                         fill = .data$q)) +
       ggplot2::geom_col(width = 1,
-                        position = ggplot2::position_stack(reverse = TRUE))+
+                        position = "stack")+
       ggplot2::labs(y = paste("K = ", K))+
       theme_distruct() +
       scale_fill_distruct()
+
     if (annotate_group){
       if (is.null(data)){
         warning("no annotation possible if 'gen_tbl' is NULL")
