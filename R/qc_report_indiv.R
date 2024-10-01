@@ -17,7 +17,7 @@ qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
                                       missingness = indiv_missingness(.x,as_counts=FALSE))
   } else {
 
-    king <- gt_king(.x, as_matrix = TRUE)
+    king <- pairwise_king(.x, as_matrix = TRUE)
 
     relatives <- filter_high_relatedness(matrix = king, .x = .x, kings_threshold = kings_threshold,...)
 

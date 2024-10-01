@@ -38,11 +38,9 @@ gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
-  if (is.character(show_loci(x)$chromosome)){
-    infos_chr <- as.numeric(factor(show_loci(x)$chromosome))
-  } else {
-    infos_chr <- show_loci(x)$chromosome
-  }
+
+  infos_chr <- show_loci(x)$chr_int
+
   this_svd  <- bigstatsr::big_SVD(X$genotypes,
                                   k=k,
                                   ind.row = vctrs::vec_data(x$genotypes),

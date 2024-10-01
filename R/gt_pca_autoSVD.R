@@ -78,13 +78,8 @@ gt_pca_autoSVD <- function(x, k = 10,
   x_ind_row <- vctrs::vec_data(x$genotypes)
   # we need to create a chromosome vector that is as long as the complete bigsnp object
   infos_chr<-rep(1,nrow(.gt_get_bigsnp(x)$map))
-  if (is.character(show_loci(x)$chromosome)){
 
-    infos_chr[.gt_bigsnp_cols(x)] <- as.numeric(factor(show_loci(x)$chromosome))
-
-  } else {
-    infos_chr[.gt_bigsnp_cols(x)] <- show_loci(x)$chromosome
-  }
+  infos_chr[.gt_bigsnp_cols(x)] <- show_loci(x)$chr_int
   # chromosomes have to be positive numbers
   if (min(infos_chr)<1){
     infos_chr <- infos_chr+abs(min(infos_chr)+1)

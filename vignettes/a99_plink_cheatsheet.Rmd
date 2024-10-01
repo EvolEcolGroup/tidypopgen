@@ -80,10 +80,10 @@ To explore why clumping is preferable to pruning, see <https://privefl.github.io
 
 | KING        | `tidypopgen`                |
 |-------------|-----------------------------|
-| --kinship   | `gt_king()`                 |
+| --kinship   | `pairwise_king()`                 |
 | --unrelated | `filter_high_relatedness()` |
 
-gt_king() implements the KING-robust estimator of kinship equivalent to --kinship in KING. To remove related individuals, instead of using --unrelated --degree, the user can pass the resulting kinship matrix and a relatedness threshold to filter_high_relatedness, which will return the largest possible set of unrelated individuals.
+pairwise_king() implements the KING-robust estimator of kinship equivalent to --kinship in KING. To remove related individuals, instead of using --unrelated --degree, the user can pass the resulting kinship matrix and a relatedness threshold to filter_high_relatedness, which will return the largest possible set of unrelated individuals.
 
 ## Merging datasets:
 

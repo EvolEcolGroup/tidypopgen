@@ -31,7 +31,7 @@ king_r <- function(X_mat){
 
 
 # this also tests show_genotypes and show_loci
-test_that("snp_king and gt_king compute king-robust correctly",{
+test_that("snp_king and pairwise_king compute king-robust correctly",{
   test_fbm <- tidypopgen:::.gt_get_bigsnp(test_gt)$genotypes
   test_king <- snp_king(test_fbm)
   # king by hand
@@ -42,7 +42,7 @@ test_that("snp_king and gt_king compute king-robust correctly",{
   expect_identical(test_king_2blocks, test_king)
 
   # now estimate it with gen_tibble
-  test_king_gt <- gt_king(test_gt, as_matrix = TRUE)
+  test_king_gt <- pairwise_king(test_gt, as_matrix = TRUE)
   expect_true(all.equal(test_king, test_king_gt,
                         check.attributes=FALSE))
 

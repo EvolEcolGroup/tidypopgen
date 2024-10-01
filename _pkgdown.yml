@@ -1,0 +1,123 @@
+url: https://evolecolgroup.github.io/tidypopgen/
+template:
+  bootstrap: 5
+development:
+  mode: auto
+reference:
+  - title: "gen_tibble"
+    desc: "Functions for creating, saving, and loading gen_tibble objects."
+    contents:
+        - gen_tibble
+        - gt_save
+        - gt_load
+        - gt_get_file_names
+  - title: "Show"
+    desc: "Functions to view loci and genotype information stored in a gen_tibble."
+    contents:
+        - show_genotypes
+        - show_loci
+        - "show_loci<-"
+        - show_ploidy
+  - title: "Selecting loci"
+    desc: "Functions to select loci from a gen_tibble, either based on loci information, or genotype information."
+    contents:
+        - select_loci
+        - select_loci_if
+  - title: "Quality control"
+    desc: "Functions reporting summary statistics for a gen_tibble."
+    contents:
+        - qc_report_loci
+        - qc_report_indiv
+        - autoplot.qc_report_loci
+        - autoplot.qc_report_indiv
+        - filter_high_relatedness
+  - title: "Loci"
+    desc: "Functions operating across loci."
+    contents:
+        - starts_with("loci_")
+  - title: "Individual"
+    desc: "Functions operating across individuals."
+    contents:
+        - starts_with("indiv_")
+  - title: "Merging"
+    desc: "Functions for merging gen_tibble objects."
+    contents:
+        - rbind_dry_run
+        - rbind.gen_tbl
+        - summary.rbind_report
+  - title: "Imputing"
+    desc: "Functions for imputing missing data in a gen_tibble."
+    contents:
+        - gt_impute_simple
+        - gt_has_imputed
+        - gt_uses_imputed
+        - gt_set_imputed
+  - title: "Population"
+    desc: "Functions operating on a gen_tibble grouped by population."
+    contents:
+        - starts_with("pop_")
+  - title: "Pairwise"
+    desc: "Functions comparing individuals or populations."
+    contents:
+        - pairwise_allele_sharing
+        - pairwise_ibs
+        - pairwise_pop_fst
+        - pairwise_king
+  - title: "Exporting"
+    desc: "Functions for exporting a gen_tibble to another format."
+    contents:
+        - starts_with("gt_as_")
+  - title: "PCA"
+    desc: "Functions for performing Principal Component Analysis."
+    contents:
+        - gt_pca
+        - gt_pca_autoSVD
+        - gt_pca_partialSVD
+        - gt_pca_randomSVD
+        - predict.gt_pca
+        - tidy.gt_pca
+        - augment.gt_pca
+        - augment_loci.gt_pca
+        - autoplot.gt_pca
+  - title: "DAPC"
+    desc: "Functions for performing Discriminant Analysis of Principal Components."
+    contents:
+        - gt_dapc
+        - gt_cluster_pca
+        - gt_cluster_pca_best_k
+        - tidy.gt_dapc
+        - augment.gt_dapc
+        - autoplot.gt_dapc
+        - autoplot.gt_cluster_pca
+  - title: "Clustering"
+    desc: "Functions for creating, tidying, and visualising q_matrix objects."
+    contents:
+        - as_q_matrix
+        - read_q_matrix_list
+        - tidy.q_matrix
+        - augment.q_matrix
+        - autoplot.q_matrix
+  - title: "Other analyses"
+    desc: "Functions for other analyses within R."
+    contents:
+        - gt_extract_f2
+        - gt_roh_window
+        - gt_pcadapt
+        - autoplot.gt_pcadapt
+  - title: "Plotting"
+    desc: "Functions for plotting with distruct."
+    contents:
+        - distruct_colours
+        - scale_fill_distruct
+        - theme_distruct
+  - title: "bigSNP"
+    desc: "Functions for operating directly on a bigSNp object."
+    contents:
+        - snp_allele_sharing
+        - snp_ibs
+        - snp_king
+  - title: "Other"
+    desc: "Additional helpful functions."
+    contents:
+        - augment_loci
+        - count_loci

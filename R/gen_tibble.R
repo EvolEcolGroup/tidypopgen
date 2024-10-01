@@ -154,8 +154,12 @@ gen_tibble_bed_rds <- function(x, ...,
 
   bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
 
-  indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
-                             population = bigsnp_obj$fam$family.ID)
+  if (!("family.ID" %in% names(bigsnp_obj$fam))){
+    indiv_meta <- list(id = bigsnp_obj$fam$sample.ID)
+  } else {
+    indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
+                       population = bigsnp_obj$fam$family.ID)
+  }
   # check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
   if ("ploidy" %in% names(bigsnp_obj$fam)){
     ploidy <- bigsnp_obj$fam$ploidy
@@ -245,8 +249,11 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   if (!inherits(indiv_meta, "data.frame") || inherits(x, "tbl") || is.list(x)){
     stop("indiv_meta must be one of data.frame, tbl, or list")
   }
-  if (!all(c("id", "population") %in% names(indiv_meta))){
-    stop("ind_meta does not include the compulsory columns 'id' and 'population")
+  #if (!all(c("id", "population") %in% names(indiv_meta))){
+  #  stop("ind_meta does not include the compulsory columns 'id' and 'population")
+  #}
+  if (!all(c("id") %in% names(indiv_meta))){
+    stop("ind_meta does not include the compulsory column 'id")
   }
   # check that x (the genotypes) is numeric matrix
   if (inherits(x,"data.frame")){
