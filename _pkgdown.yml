@@ -110,11 +110,14 @@ reference:
         - distruct_colours
         - scale_fill_distruct
         - theme_distruct
+  - title: "bigSNP"
+    desc: "Functions for operating directly on a bigSNp object."
+    contents:
+        - snp_allele_sharing
+        - snp_ibs
+        - snp_king
   - title: "Other"
     desc: "Additional helpful functions."
     contents:
         - augment_loci
         - count_loci
-        - snp_allele_sharing
-        - snp_ibs
-        - snp_king
