@@ -125,7 +125,7 @@ test_that("gen_tibble required id and population",{
   wrong_indiv_meta <- data.frame (x =c("a","b","c"),
                                   y = c("pop1","pop1","pop2"))
   expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = wrong_indiv_meta,
-                                         loci = test_loci, quiet = TRUE),"ind_meta does not include the compulsory columns")
+                                         loci = test_loci, quiet = TRUE),"ind_meta does not include the compulsory column 'id")
 })
 
 test_that("gen_tibble indiv_meta is list, dataframe, or tbl",{
@@ -505,6 +505,44 @@ test_that("chr_int is always an integer",{
   expect_true(is.integer(show_loci(pop_b_gt)$chr_int))
 
 
+})
+
+test_indiv_meta <- data.frame (id=c("a","b","c"))
+test_genotypes <- rbind(c(1,1,0,1,1,0),
+                        c(2,1,0,0,0,0),
+                        c(2,2,0,0,1,1))
+test_loci <- data.frame(name=paste0("rs",1:6),
+                        chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                        position=as.integer(c(3,5,65,343,23,456)),
+                        genetic_dist = as.integer(rep(0,6)),
+                        allele_ref = c("A","T","C","G","C","T"),
+                        allele_alt = c("T","C", NA,"C","G","A"))
+
+test_that("gt without population is valid",{
+
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
+                        indiv_meta = test_indiv_meta, quiet = TRUE,
+                        backingfile = tempfile())
+
+  # still inherits gen_tbl
+  stopifnot_gen_tibble(test_gt)
+  expect_true(inherits(test_gt,"gen_tbl"))
+
+  # can save an load as usual
+  file_names <- gt_save(test_gt, file = tempfile(), quiet = TRUE)
+  gt_load(file_names[1])
+
+  # will fail in functions that require grouping
+  expect_error(pop_fis(test_gt), ".x should be a grouped df")
+  # functions that require grouping work after adding groups
+  test_gt$groups <- c("A","A","B")
+  test_gt <- test_gt %>% group_by(groups)
+  expect_equal(unname(pop_fis(test_gt)), c(-0.25, NaN))
+
+  # gen_tbl from vcf does not have population automatically
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
+  expect_true(!("population" %in% names(pop_b_vcf_gt)))
 })
 
 
