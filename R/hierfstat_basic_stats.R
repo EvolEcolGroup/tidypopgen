@@ -13,14 +13,13 @@
 hierfstat_basic_stats <- function(.x, n_cores = bigstatsr::nb_cores()){
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble
-  if (!inherits(.x,"grouped_df")){
+  if (inherits(.x,"grouped_df")){
     .group_levels <- .x %>% group_keys()
     .group_ids <- dplyr::group_indices(.x)-1
   } else { # create a dummy pop
-    .group_levels = "pop"
+    .group_levels = tibble(population="pop")
     .group_ids <- rep(0,nrow(.x))
   }
-
 
   # summarise population frequencies
   pop_freqs_df <- gt_grouped_summaries(.gt_get_bigsnp(.x)$genotypes,
@@ -29,6 +28,7 @@ hierfstat_basic_stats <- function(.x, n_cores = bigstatsr::nb_cores()){
                                        groupIds = .group_ids,
                                        ngroups = nrow(.group_levels),
                                        ncores = n_cores)
+
   # get the number of individuals
   n <-pop_freqs_df$n/2
   # is this correct?
