@@ -26,7 +26,7 @@ test_that("pairwise_pop_fst compute correctly",{
 
   basic_hier <- hierfstat::basic.stats(test_hier)
   # hiefstat values are rounded to 4 dp
-  expect_true(all.equal(basic_hier$perloc, round(basic_gt,4),check.attributes=FALSE))
+  expect_true(all.equal(basic_hier$perloc, basic_gt$perloc, check.attributes=FALSE))
 
   #pair_fst_locus <- test_gt %>% pairwise_pop_fst(by_locus = TRUE)
 
