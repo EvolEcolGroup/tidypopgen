@@ -81,9 +81,3 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = TRUE){
   }
 
 }
-
-# TODO for tests
-# read pop_a_vcf
-# rewrite it as a vcf
-# re-read it and check that we got back what we started with
-

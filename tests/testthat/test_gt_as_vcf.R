@@ -29,3 +29,17 @@ test_that("test we can write and read a vcf",{
   #check gt_as_plink converts the NA missing allele to 0
   expect_true(is.na(show_loci(test_gt2)$allele_alt[3]))
 })
+
+test_that("test reading and writing is equivalent",{
+  # read in .vcf
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  pop_a_vcf <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="vcfR")
+  # write it out again
+  file <- paste0(tempfile(),".vcf")
+  write_vcf_path <- gt_as_vcf(pop_a_vcf, file = file)
+  # reread
+  pop_a_vcf_rewrite <- gen_tibble(write_vcf_path, quiet=TRUE,backingfile = tempfile(), parser="vcfR")
+  # because of the different backing file info, we cannot use identical on the whole object
+  expect_true(identical(show_genotypes(pop_a_vcf), show_genotypes(pop_a_vcf_rewrite)))
+  expect_true(identical(show_loci(pop_a_vcf), show_loci(pop_a_vcf_rewrite)))
+})

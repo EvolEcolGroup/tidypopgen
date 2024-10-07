@@ -35,10 +35,6 @@ reference:
     desc: "Functions operating across loci."
     contents:
         - starts_with("loci_")
-  - title: "Individual"
-    desc: "Functions operating across individuals."
-    contents:
-        - starts_with("indiv_")
   - title: "Merging"
     desc: "Functions for merging gen_tibble objects."
     contents:
@@ -52,6 +48,10 @@ reference:
         - gt_has_imputed
         - gt_uses_imputed
         - gt_set_imputed
+  - title: "Individual"
+    desc: "Functions operating across individuals."
+    contents:
+        - starts_with("indiv_")
   - title: "Population"
     desc: "Functions operating on a gen_tibble grouped by population."
     contents:
@@ -97,6 +97,9 @@ reference:
         - tidy.q_matrix
         - augment.q_matrix
         - autoplot.q_matrix
+        - distruct_colours
+        - scale_fill_distruct
+        - theme_distruct
   - title: "Other analyses"
     desc: "Functions for other analyses within R."
     contents:
@@ -104,12 +107,6 @@ reference:
         - gt_roh_window
         - gt_pcadapt
         - autoplot.gt_pcadapt
-  - title: "Plotting"
-    desc: "Functions for plotting with distruct."
-    contents:
-        - distruct_colours
-        - scale_fill_distruct
-        - theme_distruct
   - title: "bigSNP"
     desc: "Functions for operating directly on a bigSNp object."
     contents:
