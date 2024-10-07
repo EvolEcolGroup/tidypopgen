@@ -6,10 +6,17 @@ gen_tibble_vcf <- function(x, ..., parser = "cpp",
                            backingfile = NULL, quiet = FALSE) {
   parser <- match.arg(parser, c("vcfR", "cpp"))
   if (parser == "cpp"){
-    rds_path <- vcf_to_fbm_cpp(x,
-                                backingfile = backingfile,
-                                chunk_size = chunk_size,
-                                quiet = quiet)
+    if(.Platform$OS.type!="windows"){
+      rds_path <- vcf_to_fbm_cpp(x,
+                                 backingfile = backingfile,
+                                 chunk_size = chunk_size,
+                                 quiet = quiet)
+    } else {
+      rds_path <- vcf_to_fbm_vcfR(x,
+                                  backingfile = backingfile,
+                                  chunk_size = chunk_size,
+                                  quiet = quiet)
+    }
   } else {
     rds_path <- vcf_to_fbm_vcfR(x,
                                 backingfile = backingfile,
