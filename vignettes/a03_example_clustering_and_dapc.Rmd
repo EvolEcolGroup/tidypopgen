@@ -334,14 +334,15 @@ and covert it to a `q_matrix` object as used by `tidypopgen`:
 
 ```{r}
 q_mat <- LEA::Q(anole_snmf, K = 3, run = quick_run) 
-q_mat <- as_q_matrix(q_mat)
+q_mat <- q_matrix(q_mat)
 
 head(q_mat)
 ```
 
 We can quickly plot it with
 ```{r}
-autoplot(q_mat, data = anole_gt)
+anole_gt <- anole_gt %>% group_by(population)
+autoplot(q_mat, data = anole_gt, annotate_group = TRUE)
 ```
 
 We can tidy our q matrix into a tibble, returning it
