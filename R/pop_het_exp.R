@@ -3,12 +3,13 @@
 #' This function computes expected population heterozygosity (also
 #' referred to as gene diversity, to avoid the potentially misleading use of the term "expected" in this context), using the formula of Nei (1987).
 #'
-#' @details Within population expected heterozygosity (gene diversity) is defined as:
-#'  \eqn{Hs=\tilde{n}/(\tilde{n}-1)[1-\sum_i\bar{p_i^2}-Ho/2\tilde{n}],}
+#' @details Within population expected heterozygosity (gene diversity)  \eqn{\hat{h}_s} for a locus with \eqn{m} alleles is defined as:\cr
+#'  \eqn{\hat{h}_s=\tilde{n}/(\tilde{n}-1)[1-\sum_{i}^{m}\bar{\hat{x}_i^2}-\hat{h}_o/2\tilde{n}]}\cr
 #'
-#'  where \eqn{\tilde{n}=np/\sum_k 1/n_k} and
-#'  \eqn{\bar{p_i^2}=\sum_k p_{ki}^2/np}
-#' following Nei(1987) in pp.164--5
+#'  where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of \eqn{n_k}) and\cr
+#'  \eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
+#' following equation 7.39 in Nei(1987) on pp.164. In our specific case, there are only two alleles, so \eqn{m=2}.  \eqn{\hat{h}_s} at
+#' the genome level for each population is simply the mean of the locus estimates for each population.
 #'
 #' @references Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press
 #'

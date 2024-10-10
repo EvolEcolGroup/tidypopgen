@@ -2,11 +2,14 @@
 #'
 #' This function computes population heterozygosity, using the formula of Nei (1987).
 #'
-#' @details Within population observed heterozygosity is defined as:
-#'  \eqn{Ho= 1-\sum_k \sum_i  P_{k,ii}/n_p}
-#' where \eqn{P_{k,ii}} represents the proportion of homozygote \eqn{i} in sample \eqn{k} and
-#' \eqn{n_{p}} the number of samples.
-#' following Nei(1987) in pp.164--5
+#' @details Within population observed heterozygosity \eqn{\hat{h}_o} for a locus with \eqn{m} alleles is defined as:\cr
+#'  \eqn{\hat{h}_o= 1-\sum_{k=1}^{s} \sum_{i=1}^{m}  \hat{X}_{kii}/s}\cr
+#' where\cr
+#' \eqn{\hat{X}_{kii}} represents the proportion of homozygote \eqn{i} in the sample for the \eqn{k}th population and\cr
+#' \eqn{s} the number of populations,\cr
+#' following equation 7.38 in Nei(1987) on pp.164. In our specific case, there are only two alleles, so \eqn{m=2}.  \eqn{\hat{h}_o} at
+#' the genome level is simply the mean of the locus estimates. The global estimate for each locus is the (unweighted) mean of the population estimates,
+#' and its genome-wide value is the mean of the global locus estimates.
 #'
 #' @references Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press
 #'

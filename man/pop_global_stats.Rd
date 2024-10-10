@@ -19,7 +19,20 @@ or as a single genome wide value (FALSE, the default).}
 a tibble of population statistics, with populations as rows and statistics as columns
 }
 \description{
-This function computes basic population global statistics, following the formulas used in \code{hietfstat::basic.stats}.
+This function computes basic population global statistics, following the notation in Nei 1987 (which in turn is based on Nei and Chesser 1983):
+#' - observed heterozygosity (\code{Ho})
+\itemize{
+\item expected heterozygosity (\code{Hs})
+\item total heterozygosity (\code{Ht})
+\item within population diversity (\code{Dst})
+\item total population diversity (\code{Htp})
+\item total population diversity (\code{Dstp})
+\item Fst
+\item Fst prime
+\item Fis
+\item Dest
+following the formulas used in \code{hietfstat::basic.stats}.
+}
 }
 \details{
 TO BE CORRECTED (THIS IS INCOMPLETE, AND FORMULAE WERE FILLED IN BY COPILOT)

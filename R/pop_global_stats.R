@@ -1,6 +1,17 @@
 #' Compute basic population global statistics
 #'
-#' This function computes basic population global statistics, following the formulas used in `hietfstat::basic.stats`.
+#' This function computes basic population global statistics, following the notation in Nei 1987 (which in turn is based on Nei and Chesser 1983):
+#' #' - observed heterozygosity (`Ho`)
+#' - expected heterozygosity (`Hs`)
+#' - total heterozygosity (`Ht`)
+#' - within population diversity (`Dst`)
+#' - total population diversity (`Htp`)
+#' - total population diversity (`Dstp`)
+#' - Fst
+#' - Fst prime
+#' - Fis
+#' - Dest
+#'  following the formulas used in `hietfstat::basic.stats`.
 #'
 #' @details TO BE CORRECTED (THIS IS INCOMPLETE, AND FORMULAE WERE FILLED IN BY COPILOT)
 #' The statistics computed are:
@@ -14,6 +25,7 @@
 #' - Fst prime
 #' - Fis
 #' - Dest
+#'
 #' @details The formulas used are:
 #' \eqn{Ho= 1-\sum_k \sum_i  P_{k,ii}/n_p}
 #' where \eqn{P_{k,ii}} represents the proportion of homozygote \eqn{i} in sample \eqn{k} and
