@@ -4,15 +4,28 @@
 \alias{pop_fis}
 \title{Compute population specific FIS}
 \usage{
-pop_fis(.x, include_global = FALSE, allele_sharing_mat = NULL)
+pop_fis(
+  .x,
+  method = c("Nei87", "WG17"),
+  by_locus = FALSE,
+  include_global = FALSE,
+  allele_sharing_mat = NULL
+)
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
-\item{include_global}{boolean determining whether, besides the population specific fis, a global
-fis should be appended. Note that this will return a vector of n populations plus 1 (the global value)}
+\item{method}{one of "Nei87" (based on Nei 1987) or "WG17" (for Weir and Goudet 2017) to compute FIS}
 
-\item{allele_sharing_mat}{optional, the matrix of Allele Sharing returned by
+\item{by_locus}{boolean, determining whether FIS should be returned by locus(TRUE),
+or as a single genome wide value (FALSE, the default). Note that this is only relevant for "Nei87",
+as "WG17" always returns a single value.}
+
+\item{include_global}{boolean determining whether, besides the population specific estiamtes, a global
+estimate should be appended. Note that this will return a vector of n populations plus 1 (the global value),
+or a matrix with n+1 columns if \code{by_locus=TRUE}.}
+
+\item{allele_sharing_mat}{optional and only relevant for "WG17", the matrix of Allele Sharing returned by
 \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with \code{as_matrix=TRUE}. As a number of statistics can be
 derived from the Allele Sharing matrix,
 it it sometimes more efficient to pre-compute this matrix.}
@@ -21,5 +34,10 @@ it it sometimes more efficient to pre-compute this matrix.}
 a vector of population specific fis (plus the global value if \code{include_global=TRUE})
 }
 \description{
-This function computes population specific FIS (as computed by \code{\link[hierfstat:fs.dosage]{hierfstat::fis.dosage()}}).
+This function computes population specific FIS, using either the approach of Nei 1987 ((as computed by \code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}}).) or of Weir and Goudet 2017
+(as computed by \code{\link[hierfstat:fs.dosage]{hierfstat::fis.dosage()}}).
+}
+\references{
+Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press
+Weir, BS and Goudet J (2017) A Unified Characterization of Population Structure and Relatedness. Genetics (2017) 206:2085
 }

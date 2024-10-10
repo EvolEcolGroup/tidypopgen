@@ -1,6 +1,8 @@
 #' Compute population specific Fst
 #'
-#' This function computes population specific Fst (as computed by [hierfstat::fst.dosage()]).
+#' This function computes population specific Fst, using the approach in Weir and Goudet 2017
+#' (as computed by [hierfstat::fst.dosage()]).
+#' @references Weir, BS and Goudet J (2017) A Unified Characterization of Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param include_global boolean determining whether, besides the population specific Fst, a global
 #' Fst should be appended. Note that this will return a vector of n populations plus 1 (the global value)

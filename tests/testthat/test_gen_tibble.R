@@ -533,11 +533,11 @@ test_that("gt without population is valid",{
   gt_load(file_names[1])
 
   # will fail in functions that require grouping
-  expect_error(pop_fis(test_gt), ".x should be a grouped df")
+  expect_error(pop_fst(test_gt), ".x should be a grouped df")
   # functions that require grouping work after adding groups
   test_gt$groups <- c("A","A","B")
   test_gt <- test_gt %>% group_by(groups)
-  expect_equal(unname(pop_fis(test_gt)), c(-0.25, NaN))
+  expect_equal(unname(pop_fst(test_gt)), c(-0, NaN))
 
   # gen_tbl from vcf does not have population automatically
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
