@@ -9,9 +9,9 @@
 #' - a path to a single .Q file
 #' - a matrix
 #' @returns either:
-#' - a list of q_matrix objects
-#' - a list of lists (for directories containing multiple runs) of q_matrix objects
-#' - a single q_matrix object
+#' - a single `q_matrix` object
+#' - a list of `q_matrix` objects
+#' - a `q_matrix_list` object (for directories containing multiple runs) of q_matrix objects
 #' @export
 
 q_matrix <- function(x) {
@@ -42,6 +42,7 @@ q_matrix <- function(x) {
       # Rename the list so that each K is prefixed with "k"
       names(list_of_lists) <- paste0("k", names(list_of_lists))
       # Return the list of lists
+      class(list_of_lists) <- c("q_matrix_list", class(list_of_lists))
       list_of_lists
     } else {
       # Action if input is a file
@@ -240,6 +241,30 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
 
 }
 
+#' Summarise a Q matrix list
+#'
+#' Takes a `q_matrix_list` object and returns a summary.
+#'
+#' @param object A `q_matrix_list` object.
+#' @param ... not currently used
+#' @return A summary of the object.
+#' @export
+summary.q_matrix_list <- function(object, ...) {
+  k_values <- names(object)
+
+  summary_df <- data.frame(K = integer(), Repeats = integer())
+
+  for (k in k_values) {
+    k_numeric <- as.numeric(sub("k", "", k))
+
+    num_repeats <- length(object[[k]])
+
+    summary_df <- rbind(summary_df, data.frame(K = k_numeric, Repeats = num_repeats))
+  }
+  return(summary_df)
+}
+
+
 as_q_matrix <- function(x){
   if (inherits(x,"data.frame")){
     x <- as.matrix(x)
@@ -250,20 +275,7 @@ as_q_matrix <- function(x){
 }
 
 
-summarise_q_matrices <- function(list_of_lists) {
-  k_values <- names(list_of_lists)
 
-  summary_df <- data.frame(K = integer(), Repeats = integer())
-
-  for (k in k_values) {
-    k_numeric <- as.numeric(sub("k", "", k))
-
-    num_repeats <- length(list_of_lists[[k]])
-
-    summary_df <- rbind(summary_df, data.frame(K = k_numeric, Repeats = num_repeats))
-  }
-  return(summary_df)
-}
 
 
 
