@@ -12,6 +12,7 @@ q_matrix(x)
 \item a path to a directory containing .Q files
 \item a path to a single .Q file
 \item a matrix
+\item a dataframe
 }}
 }
 \value{
