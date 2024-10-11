@@ -2,7 +2,7 @@
 #'
 #' This function computes basic population global statistics, following the notation in Nei 1987 (which in turn is based on Nei and Chesser 1983):
 #' - observed heterozygosity (\eqn{h_o}, column header `Ho`)
-#' - expected heterozygosity (\eqn{h_s}, `Hs`)
+#' - expected heterozygosity, also known as gene diversity (\eqn{h_s}, `Hs`)
 #' - total heterozygosity (\eqn{h_t}, `Ht`)
 #' - within population diversity (`Dst`)
 #' - total population diversity (`Htp`)
@@ -11,24 +11,29 @@
 #' - Fst prime
 #' - Fis
 #' - Dest
-#' @details We use the notation of Nei 1987. That notation was for loci with `m` alleles, but in our case we only have two alleles, so `m=2`.
-#' Within population observed heterozygosity \eqn{\hat{h}_o} for a locus with \eqn{m} alleles is defined as:\cr
+#' @details We use the notation of Nei 1987. That notation was for loci with \eqn{m} alleles, but in our case we only have two alleles, so `m=2`.
+#' - Within population observed heterozygosity \eqn{\hat{h}_o} for a locus with \eqn{m} alleles is defined as:\cr
 #'  \eqn{\hat{h}_o= 1-\sum_{k=1}^{s} \sum_{i=1}^{m}  \hat{X}_{kii}/s}\cr
 #' where\cr
 #' \eqn{\hat{X}_{kii}} represents the proportion of homozygote \eqn{i} in the sample for the \eqn{k}th population and\cr
 #' \eqn{s} the number of populations,\cr
 #' following equation 7.38 in Nei(1987) on pp.164.\cr
 #'
-#' Within population expected heterozygosity (gene diversity)  \eqn{\hat{h}_s} for a locus with \eqn{m} alleles is defined as:\cr
-#'  \eqn{\hat{h}_s=\tilde{n}/(\tilde{n}-1)[1-\sum_{i}^{m}\bar{\hat{x}_i^2}-\hat{h}_o/2\tilde{n}]}\cr
-#'
+#' - Within population expected heterozygosity (gene diversity)  \eqn{\hat{h}_s} for a locus with \eqn{m} alleles is defined as:\cr
+#'  \eqn{\hat{h}_s=(\tilde{n}/(\tilde{n}-1))[1-\sum_{i=1}^{m}\bar{\hat{x}_i^2}-\hat{h}_o/2\tilde{n}]}\cr
 #'  where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of \eqn{n_k}) and\cr
 #'  \eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
 #' following equation 7.39 in Nei(1987) on pp.164.
 #'
-#' \eqn{Ht=1-\sum_k \bar{p_k^2} + \bar{Hs}/\tilde{n}/np - Ho/2/\tilde{n}/np}
-#' \eqn{Dst=Ht - Hs}
+#' - Total heterozygosity (total gene diversity) \eqn{\hat{h}_t} for a locus with \eqn{m} alleles is defined as:\cr
+#' \eqn{\hat{h}_t = 1-\sum_{i=1}^{m} \bar{\hat{x}_i^2} + \hat{h}_s/(\tilde{n}s) - \hat{h}_o/(2\tilde{n}s)}\cr
+#' where \cr
+#'  \eqn{\hat{x}_i=\sum_k \hat{x}_{ki}/s}\cr
+#' following equation 7.40 in Nei(1987) on pp.164.\cr
+#' - The amount of gene diversity among samples \eqn{Dst} is defined as:\cr
+#' \eqn{Dst=Ht - Hs}\cr
 #'
+#' - Total corrected heterozygosity (total gene diversity) \eqn{\hat{h}_t}
 #'
 #' @param .x a [`gen_tibble`] (usually grouped, as obtained by using [dplyr::group_by()]; use on
 #' a single population will return a number of quantities as NA/NaN)

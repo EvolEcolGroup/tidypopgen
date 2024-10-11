@@ -1,12 +1,12 @@
 #' Compute population specific FIS
 #'
-#' This function computes population specific FIS, using either the approach of Nei 1987 ((as computed by [hierfstat::basic.stats()]).) or of Weir and Goudet 2017
+#' This function computes population specific FIS, using either the approach of Nei 1987 (as computed by [hierfstat::basic.stats()]) or of Weir and Goudet 2017
 #' (as computed by [hierfstat::fis.dosage()]).
 #' @references
 #' Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press
 #' Weir, BS and Goudet J (2017) A Unified Characterization of Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
-#' @param method one of "Nei87" (based on Nei 1987) or "WG17" (for Weir and Goudet 2017) to compute FIS
+#' @param method one of "Nei87" (based on Nei 1987, eqn 7.41) or "WG17" (for Weir and Goudet 2017) to compute FIS
 #' @param by_locus boolean, determining whether FIS should be returned by locus(TRUE),
 #' or as a single genome wide value (FALSE, the default). Note that this is only relevant for "Nei87",
 #' as "WG17" always returns a single value.

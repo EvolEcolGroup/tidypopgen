@@ -15,7 +15,7 @@ pop_fis(
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
-\item{method}{one of "Nei87" (based on Nei 1987) or "WG17" (for Weir and Goudet 2017) to compute FIS}
+\item{method}{one of "Nei87" (based on Nei 1987, eqn 7.41) or "WG17" (for Weir and Goudet 2017) to compute FIS}
 
 \item{by_locus}{boolean, determining whether FIS should be returned by locus(TRUE),
 or as a single genome wide value (FALSE, the default). Note that this is only relevant for "Nei87",
@@ -34,7 +34,7 @@ it it sometimes more efficient to pre-compute this matrix.}
 a vector of population specific fis (plus the global value if \code{include_global=TRUE})
 }
 \description{
-This function computes population specific FIS, using either the approach of Nei 1987 ((as computed by \code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}}).) or of Weir and Goudet 2017
+This function computes population specific FIS, using either the approach of Nei 1987 (as computed by \code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}}) or of Weir and Goudet 2017
 (as computed by \code{\link[hierfstat:fs.dosage]{hierfstat::fis.dosage()}}).
 }
 \references{

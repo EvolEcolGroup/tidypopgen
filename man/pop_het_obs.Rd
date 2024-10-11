@@ -26,7 +26,7 @@ or a matrix with n+1 columns if \code{by_locus=TRUE}.}
 }
 \value{
 a vector of mean population observed heterozygosities (if \code{by_locus=FALSE}), or a matrix of
-estimates by locus (rows are loci, clumns are populations, \code{by_locus=TRUE})
+estimates by locus (rows are loci, columns are populations, \code{by_locus=TRUE})
 }
 \description{
 This function computes population heterozygosity, using the formula of Nei (1987).
@@ -38,7 +38,7 @@ where\cr
 \eqn{\hat{X}_{kii}} represents the proportion of homozygote \eqn{i} in the sample for the \eqn{k}th population and\cr
 \eqn{s} the number of populations,\cr
 following equation 7.38 in Nei(1987) on pp.164. In our specific case, there are only two alleles, so \eqn{m=2}. For
-popoulation specific estimates, the sum is done over a single value of \eqn{k}. \eqn{\hat{h}_o} at
+population specific estimates, the sum is done over a single value of \eqn{k}. \eqn{\hat{h}_o} at
 the genome level is simply the mean of the locus estimates.
 }
 \references{
