@@ -41,7 +41,7 @@ Within population expected heterozygosity (gene diversity)  \eqn{\hat{h}_s} for 
 
 where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of \eqn{n_k}) and\cr
 \eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
-following equation 7.39 in Nei(1987) on pp.164. In our specific case, there are only two alleles, so \eqn{m=2}.  \eqn{\hat{h}_s} at
+following equation 7.39 in Nei(1987) on pp.164. In our specific case, there are only two alleles, so \eqn{m=2}. \eqn{\hat{h}_s} at
 the genome level for each population is simply the mean of the locus estimates for each population.
 }
 \references{

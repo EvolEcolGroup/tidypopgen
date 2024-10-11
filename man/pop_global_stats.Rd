@@ -49,13 +49,6 @@ where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of \eqn{n_k}) an
 \eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
 following equation 7.39 in Nei(1987) on pp.164.
 
-The formulas used are:
-\eqn{Ho= 1-\sum_k \sum_i  P_{k,ii}/n_p}
-where \eqn{P_{k,ii}} represents the proportion of homozygote \eqn{i} in sample \eqn{k} and
-\eqn{n_{p}} the number of samples.
-\eqn{Hs=\tilde{n}/(\tilde{n}-1)[1-\sum_i\bar{p_i^2}-Ho/2\tilde{n}]}
-where \eqn{\tilde{n}=np/\sum_k 1/n_k} and
-\eqn{\bar{p_i^2}=\sum_k p_{ki}^2/np}
 \eqn{Ht=1-\sum_k \bar{p_k^2} + \bar{Hs}/\tilde{n}/np - Ho/2/\tilde{n}/np}
 \eqn{Dst=Ht - Hs}
 }

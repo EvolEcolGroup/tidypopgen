@@ -7,9 +7,9 @@
 #' where\cr
 #' \eqn{\hat{X}_{kii}} represents the proportion of homozygote \eqn{i} in the sample for the \eqn{k}th population and\cr
 #' \eqn{s} the number of populations,\cr
-#' following equation 7.38 in Nei(1987) on pp.164. In our specific case, there are only two alleles, so \eqn{m=2}.  \eqn{\hat{h}_o} at
-#' the genome level is simply the mean of the locus estimates. The global estimate for each locus is the (unweighted) mean of the population estimates,
-#' and its genome-wide value is the mean of the global locus estimates.
+#' following equation 7.38 in Nei(1987) on pp.164. In our specific case, there are only two alleles, so \eqn{m=2}. For
+#' popoulation specific estimates, the sum is done over a single value of \eqn{k}. \eqn{\hat{h}_o} at
+#' the genome level is simply the mean of the locus estimates.
 #'
 #' @references Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press
 #'
