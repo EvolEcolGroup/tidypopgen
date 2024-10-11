@@ -23,6 +23,23 @@ reference:
     contents:
         - select_loci
         - select_loci_if
+  - title: "Imputing"
+    desc: "Functions for imputing missing data in a gen_tibble."
+    contents:
+        - gt_impute_simple
+        - gt_has_imputed
+        - gt_uses_imputed
+        - gt_set_imputed
+  - title: "Merging"
+    desc: "Functions for merging gen_tibble objects."
+    contents:
+        - rbind_dry_run
+        - rbind.gen_tbl
+        - summary.rbind_report
+  - title: "Exporting"
+    desc: "Functions for exporting a gen_tibble to another format."
+    contents:
+        - starts_with("gt_as_")
   - title: "Quality control"
     desc: "Functions reporting summary statistics for a gen_tibble."
     contents:
@@ -35,19 +52,6 @@ reference:
     desc: "Functions operating across loci."
     contents:
         - starts_with("loci_")
-  - title: "Merging"
-    desc: "Functions for merging gen_tibble objects."
-    contents:
-        - rbind_dry_run
-        - rbind.gen_tbl
-        - summary.rbind_report
-  - title: "Imputing"
-    desc: "Functions for imputing missing data in a gen_tibble."
-    contents:
-        - gt_impute_simple
-        - gt_has_imputed
-        - gt_uses_imputed
-        - gt_set_imputed
   - title: "Individual"
     desc: "Functions operating across individuals."
     contents:
@@ -63,10 +67,6 @@ reference:
         - pairwise_ibs
         - pairwise_pop_fst
         - pairwise_king
-  - title: "Exporting"
-    desc: "Functions for exporting a gen_tibble to another format."
-    contents:
-        - starts_with("gt_as_")
   - title: "PCA"
     desc: "Functions for performing Principal Component Analysis."
     contents:
@@ -89,7 +89,7 @@ reference:
         - augment.gt_dapc
         - autoplot.gt_dapc
         - autoplot.gt_cluster_pca
-  - title: "Clustering"
+  - title: "K-clustering"
     desc: "Functions for creating, tidying, and visualising q_matrix objects."
     contents:
         - as_q_matrix
