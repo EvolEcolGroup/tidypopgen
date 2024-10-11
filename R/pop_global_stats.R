@@ -1,9 +1,9 @@
 #' Compute basic population global statistics
 #'
 #' This function computes basic population global statistics, following the notation in Nei 1987 (which in turn is based on Nei and Chesser 1983):
-#' #' - observed heterozygosity (`Ho`)
-#' - expected heterozygosity (`Hs`)
-#' - total heterozygosity (`Ht`)
+#' - observed heterozygosity (\eqn{h_o}, column header `Ho`)
+#' - expected heterozygosity (\eqn{h_s}, `Hs`)
+#' - total heterozygosity (\eqn{h_t}, `Ht`)
 #' - within population diversity (`Dst`)
 #' - total population diversity (`Htp`)
 #' - total population diversity (`Dstp`)
@@ -11,28 +11,21 @@
 #' - Fst prime
 #' - Fis
 #' - Dest
-#'  following the formulas used in `hietfstat::basic.stats`.
+#' @details We use the notation of Nei 1987. That notation was for loci with `m` alleles, but in our case we only have two alleles, so `m=2`.
+#' Within population observed heterozygosity \eqn{\hat{h}_o} for a locus with \eqn{m} alleles is defined as:\cr
+#'  \eqn{\hat{h}_o= 1-\sum_{k=1}^{s} \sum_{i=1}^{m}  \hat{X}_{kii}/s}\cr
+#' where\cr
+#' \eqn{\hat{X}_{kii}} represents the proportion of homozygote \eqn{i} in the sample for the \eqn{k}th population and\cr
+#' \eqn{s} the number of populations,\cr
+#' following equation 7.38 in Nei(1987) on pp.164.\cr
 #'
-#' @details TO BE CORRECTED (THIS IS INCOMPLETE, AND FORMULAE WERE FILLED IN BY COPILOT)
-#' The statistics computed are:
-#' - observed heterozygosity (`Ho`)
-#' - expected heterozygosity (`Hs`)
-#' - total heterozygosity (`Ht`)
-#' - within population diversity (`Dst`)
-#' - total population diversity (`Htp`)
-#' - total population diversity (`Dstp`)
-#' - Fst
-#' - Fst prime
-#' - Fis
-#' - Dest
+#' Within population expected heterozygosity (gene diversity)  \eqn{\hat{h}_s} for a locus with \eqn{m} alleles is defined as:\cr
+#'  \eqn{\hat{h}_s=\tilde{n}/(\tilde{n}-1)[1-\sum_{i}^{m}\bar{\hat{x}_i^2}-\hat{h}_o/2\tilde{n}]}\cr
 #'
-#' @details The formulas used are:
-#' \eqn{Ho= 1-\sum_k \sum_i  P_{k,ii}/n_p}
-#' where \eqn{P_{k,ii}} represents the proportion of homozygote \eqn{i} in sample \eqn{k} and
-#' \eqn{n_{p}} the number of samples.
-#' \eqn{Hs=\tilde{n}/(\tilde{n}-1)[1-\sum_i\bar{p_i^2}-Ho/2\tilde{n}]}
-#' where \eqn{\tilde{n}=np/\sum_k 1/n_k} and
-#' \eqn{\bar{p_i^2}=\sum_k p_{ki}^2/np}
+#'  where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of \eqn{n_k}) and\cr
+#'  \eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
+#' following equation 7.39 in Nei(1987) on pp.164.
+#'
 #' \eqn{Ht=1-\sum_k \bar{p_k^2} + \bar{Hs}/\tilde{n}/np - Ho/2/\tilde{n}/np}
 #' \eqn{Dst=Ht - Hs}
 #'

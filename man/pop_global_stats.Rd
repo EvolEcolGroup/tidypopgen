@@ -20,10 +20,10 @@ a tibble of population statistics, with populations as rows and statistics as co
 }
 \description{
 This function computes basic population global statistics, following the notation in Nei 1987 (which in turn is based on Nei and Chesser 1983):
-#' - observed heterozygosity (\code{Ho})
 \itemize{
-\item expected heterozygosity (\code{Hs})
-\item total heterozygosity (\code{Ht})
+\item observed heterozygosity (\eqn{h_o}, column header \code{Ho})
+\item expected heterozygosity (\eqn{h_s}, \code{Hs})
+\item total heterozygosity (\eqn{h_t}, \code{Ht})
 \item within population diversity (\code{Dst})
 \item total population diversity (\code{Htp})
 \item total population diversity (\code{Dstp})
@@ -31,24 +31,23 @@ This function computes basic population global statistics, following the notatio
 \item Fst prime
 \item Fis
 \item Dest
-following the formulas used in \code{hietfstat::basic.stats}.
 }
 }
 \details{
-TO BE CORRECTED (THIS IS INCOMPLETE, AND FORMULAE WERE FILLED IN BY COPILOT)
-The statistics computed are:
-\itemize{
-\item observed heterozygosity (\code{Ho})
-\item expected heterozygosity (\code{Hs})
-\item total heterozygosity (\code{Ht})
-\item within population diversity (\code{Dst})
-\item total population diversity (\code{Htp})
-\item total population diversity (\code{Dstp})
-\item Fst
-\item Fst prime
-\item Fis
-\item Dest
-}
+We use the notation of Nei 1987. That notation was for loci with \code{m} alleles, but in our case we only have two alleles, so \code{m=2}.
+Within population observed heterozygosity \eqn{\hat{h}_o} for a locus with \eqn{m} alleles is defined as:\cr
+\eqn{\hat{h}_o= 1-\sum_{k=1}^{s} \sum_{i=1}^{m}  \hat{X}_{kii}/s}\cr
+where\cr
+\eqn{\hat{X}_{kii}} represents the proportion of homozygote \eqn{i} in the sample for the \eqn{k}th population and\cr
+\eqn{s} the number of populations,\cr
+following equation 7.38 in Nei(1987) on pp.164.\cr
+
+Within population expected heterozygosity (gene diversity)  \eqn{\hat{h}_s} for a locus with \eqn{m} alleles is defined as:\cr
+\eqn{\hat{h}_s=\tilde{n}/(\tilde{n}-1)[1-\sum_{i}^{m}\bar{\hat{x}_i^2}-\hat{h}_o/2\tilde{n}]}\cr
+
+where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of \eqn{n_k}) and\cr
+\eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
+following equation 7.39 in Nei(1987) on pp.164.
 
 The formulas used are:
 \eqn{Ho= 1-\sum_k \sum_i  P_{k,ii}/n_p}
