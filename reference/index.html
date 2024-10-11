@@ -123,6 +123,117 @@
         </dt>
         <dd>The <code>select_if</code> verb for <code>loci</code></dd>
       </dl></div><div class="section level2">
+      <h2 id="imputing">Imputing<a class="anchor" aria-label="anchor" href="#imputing"></a></h2>
+
+      <div class="section-desc"><p>Functions for imputing missing data in a gen_tibble.</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="gt_impute_simple.html">gt_impute_simple()</a></code>
+
+        </dt>
+        <dd>Simple imputation based on allele frequencies</dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_has_imputed.html">gt_has_imputed()</a></code>
+
+        </dt>
+        <dd>Checks if a <code>gen_tibble</code> has been imputed</dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_uses_imputed.html">gt_uses_imputed()</a></code>
+
+        </dt>
+        <dd>Checks if a <code>gen_tibble</code> uses imputed data</dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_set_imputed.html">gt_set_imputed()</a></code>
+
+        </dt>
+        <dd>Sets a <code>gen_tibble</code> to use imputed data</dd>
+      </dl></div><div class="section level2">
+      <h2 id="merging">Merging<a class="anchor" aria-label="anchor" href="#merging"></a></h2>
+
+      <div class="section-desc"><p>Functions for merging gen_tibble objects.</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="rbind_dry_run.html">rbind_dry_run()</a></code>
+
+        </dt>
+        <dd>Generate a report of what would happen to each SNP in a merge</dd>
+      </dl><dl><dt>
+
+          <code><a href="rbind.gen_tbl.html">rbind(<i>&lt;gen_tbl&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Combine two gen_tibbles</dd>
+      </dl><dl><dt>
+
+          <code><a href="summary_rbind_dry_run.html">summary(<i>&lt;rbind_report&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print a summary of a merge report</dd>
+      </dl></div><div class="section level2">
+      <h2 id="exporting">Exporting<a class="anchor" aria-label="anchor" href="#exporting"></a></h2>
+
+      <div class="section-desc"><p>Functions for exporting a gen_tibble to another format.</p></div>
+
+
+    </div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="gt_as_genind.html">gt_as_genind()</a></code>
+
+        </dt>
+        <dd>Convert a <code>gen_tibble</code> to a <code>genind</code> object from <code>adegenet</code></dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_as_genlight.html">gt_as_genlight()</a></code>
+
+        </dt>
+        <dd>Convert a <code>gen_tibble</code> to a <code>genlight</code> object from <code>adegenet</code></dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_as_geno_lea.html">gt_as_geno_lea()</a></code>
+
+        </dt>
+        <dd>Convert a <code>gentibble</code> to a .geno file for sNMF from the LEA package</dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_as_hierfstat.html">gt_as_hierfstat()</a></code>
+
+        </dt>
+        <dd>Convert a <code>gen_tibble</code> to a data.frame compatible with <code>hierfstat</code></dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_as_plink.html">gt_as_plink()</a></code>
+
+        </dt>
+        <dd>Export a <code>gen_tibble</code> object to PLINK bed format</dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_as_vcf.html">gt_as_vcf()</a></code>
+
+        </dt>
+        <dd>Convert a <code>gen_tibble</code> to a VCF</dd>
+      </dl></div><div class="section level2">
       <h2 id="quality-control">Quality control<a class="anchor" aria-label="anchor" href="#quality-control"></a></h2>
 
       <div class="section-desc"><p>Functions reporting summary statistics for a gen_tibble.</p></div>
@@ -223,70 +334,6 @@
         </dt>
         <dd>Find transversions</dd>
       </dl></div><div class="section level2">
-      <h2 id="merging">Merging<a class="anchor" aria-label="anchor" href="#merging"></a></h2>
-
-      <div class="section-desc"><p>Functions for merging gen_tibble objects.</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="rbind_dry_run.html">rbind_dry_run()</a></code>
-
-        </dt>
-        <dd>Generate a report of what would happen to each SNP in a merge</dd>
-      </dl><dl><dt>
-
-          <code><a href="rbind.gen_tbl.html">rbind(<i>&lt;gen_tbl&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Combine two gen_tibbles</dd>
-      </dl><dl><dt>
-
-          <code><a href="summary_rbind_dry_run.html">summary(<i>&lt;rbind_report&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Print a summary of a merge report</dd>
-      </dl></div><div class="section level2">
-      <h2 id="imputing">Imputing<a class="anchor" aria-label="anchor" href="#imputing"></a></h2>
-
-      <div class="section-desc"><p>Functions for imputing missing data in a gen_tibble.</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="gt_impute_simple.html">gt_impute_simple()</a></code>
-
-        </dt>
-        <dd>Simple imputation based on allele frequencies</dd>
-      </dl><dl><dt>
-
-          <code><a href="gt_has_imputed.html">gt_has_imputed()</a></code>
-
-        </dt>
-        <dd>Checks if a <code>gen_tibble</code> has been imputed</dd>
-      </dl><dl><dt>
-
-          <code><a href="gt_uses_imputed.html">gt_uses_imputed()</a></code>
-
-        </dt>
-        <dd>Checks if a <code>gen_tibble</code> uses imputed data</dd>
-      </dl><dl><dt>
-
-          <code><a href="gt_set_imputed.html">gt_set_imputed()</a></code>
-
-        </dt>
-        <dd>Sets a <code>gen_tibble</code> to use imputed data</dd>
-      </dl></div><div class="section level2">
       <h2 id="individual">Individual<a class="anchor" aria-label="anchor" href="#individual"></a></h2>
 
       <div class="section-desc"><p>Functions operating across individuals.</p></div>
@@ -373,53 +420,6 @@
 
         </dt>
         <dd>Compute the KING-robust Matrix for a a <code>gen_tibble</code> object</dd>
-      </dl></div><div class="section level2">
-      <h2 id="exporting">Exporting<a class="anchor" aria-label="anchor" href="#exporting"></a></h2>
-
-      <div class="section-desc"><p>Functions for exporting a gen_tibble to another format.</p></div>
-
-
-    </div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="gt_as_genind.html">gt_as_genind()</a></code>
-
-        </dt>
-        <dd>Convert a <code>gen_tibble</code> to a <code>genind</code> object from <code>adegenet</code></dd>
-      </dl><dl><dt>
-
-          <code><a href="gt_as_genlight.html">gt_as_genlight()</a></code>
-
-        </dt>
-        <dd>Convert a <code>gen_tibble</code> to a <code>genlight</code> object from <code>adegenet</code></dd>
-      </dl><dl><dt>
-
-          <code><a href="gt_as_geno_lea.html">gt_as_geno_lea()</a></code>
-
-        </dt>
-        <dd>Convert a <code>gentibble</code> to a .geno file for sNMF from the LEA package</dd>
-      </dl><dl><dt>
-
-          <code><a href="gt_as_hierfstat.html">gt_as_hierfstat()</a></code>
-
-        </dt>
-        <dd>Convert a <code>gen_tibble</code> to a data.frame compatible with <code>hierfstat</code></dd>
-      </dl><dl><dt>
-
-          <code><a href="gt_as_plink.html">gt_as_plink()</a></code>
-
-        </dt>
-        <dd>Export a <code>gen_tibble</code> object to PLINK bed format</dd>
-      </dl><dl><dt>
-
-          <code><a href="gt_as_vcf.html">gt_as_vcf()</a></code>
-
-        </dt>
-        <dd>Convert a <code>gen_tibble</code> to a VCF</dd>
       </dl></div><div class="section level2">
       <h2 id="pca">PCA<a class="anchor" aria-label="anchor" href="#pca"></a></h2>
 
@@ -539,7 +539,7 @@
         </dt>
         <dd>Autoplots for <code>gt_cluster_pca</code> objects</dd>
       </dl></div><div class="section level2">
-      <h2 id="clustering">Clustering<a class="anchor" aria-label="anchor" href="#clustering"></a></h2>
+      <h2 id="k-clustering">K-clustering<a class="anchor" aria-label="anchor" href="#k-clustering"></a></h2>
 
       <div class="section-desc"><p>Functions for creating, tidying, and visualising q_matrix objects.</p></div>
 
