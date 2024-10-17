@@ -25,5 +25,7 @@ a \link{gen_tibble} with imputed genotypes
 This function provides a very simple imputation algorithm for \code{gen_tibble}
 objects by using the mode, mean or sampling from the allele frequencies.
 Each locus is imputed independently (and thus linkage information is ignored).
-It is a wrapper around \code{\link[bigsnpr:snp_fastImputeSimple]{bigsnpr::snp_fastImputeSimple()}}.
+}
+\details{
+This function is a wrapper around \code{\link[bigsnpr:snp_fastImputeSimple]{bigsnpr::snp_fastImputeSimple()}}.
 }

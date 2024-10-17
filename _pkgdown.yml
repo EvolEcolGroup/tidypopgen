@@ -93,7 +93,6 @@ reference:
     desc: "Functions for creating, tidying, and visualising q_matrix objects."
     contents:
         - q_matrix
-        - read_q_matrix_list
         - tidy.q_matrix
         - augment.q_matrix
         - autoplot.q_matrix

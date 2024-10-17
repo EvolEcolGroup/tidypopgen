@@ -14,6 +14,7 @@
 #' - a list of `q_matrix` objects
 #' - a `q_matrix_list` object (for directories containing multiple runs) of q_matrix objects
 #' @export
+#' @aliases q_matrix_list
 q_matrix <- function(x) {
 
   if (inherits(x, "data.frame") || inherits(x, "matrix")) {
@@ -63,7 +64,7 @@ q_matrix <- function(x) {
 #'
 #' Takes a `q_matrix` object, which is a matrix, and returns a tidied tibble.
 #'
-#' @param x A Q matrix object (as returned by LEA::Q()).
+#' @param x A Q matrix object (as returned by ['q_matrix']).
 #' @param data An associated tibble (e.g. a [`gen_tibble`]), with the individuals in the same order as the data used to
 #' generate the Q matrix
 #' @param ... not currently used

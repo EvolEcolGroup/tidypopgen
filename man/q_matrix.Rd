@@ -2,6 +2,7 @@
 % Please edit documentation in R/q_matrix.R
 \name{q_matrix}
 \alias{q_matrix}
+\alias{q_matrix_list}
 \title{Read and structure .Q files or existing matrices as 'q_matrix' objects.}
 \usage{
 q_matrix(x)
