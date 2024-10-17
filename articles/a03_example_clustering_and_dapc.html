@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9016</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9017</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -454,7 +454,7 @@ generate a file with our genotype data:</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">geno_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_as_geno_lea.html">gt_as_geno_lea</a></span><span class="op">(</span><span class="va">anole_gt</span><span class="op">)</span></span>
 <span><span class="va">geno_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpzhOEwN/anolis_1f8130e63b0f.geno"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/Rtmpn8hGMy/anolis_1f9976729236.geno"</span></span></code></pre></div>
 <p>Note that the .geno file is placed by default in the same directory
 and using the same name as the backing file of the
 <code>gen_tibble</code></p>
@@ -483,7 +483,7 @@ matrix from our <code>snmf</code> object, and covert it to a
 <code>q_matrix</code> object as used by <code>tidypopgen</code>:</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">q_mat</span> <span class="op">&lt;-</span> <span class="fu">LEA</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/LEA/man/Q.html" class="external-link">Q</a></span><span class="op">(</span><span class="va">anole_snmf</span>, K <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="va">quick_run</span><span class="op">)</span> </span>
-<span><span class="va">q_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/as_q_matrix.html">as_q_matrix</a></span><span class="op">(</span><span class="va">q_mat</span><span class="op">)</span></span>
+<span><span class="va">q_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/q_matrix.html">q_matrix</a></span><span class="op">(</span><span class="va">q_mat</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">q_mat</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            .Q1       .Q2       .Q3</span></span>
@@ -495,7 +495,8 @@ matrix from our <code>snmf</code> object, and covert it to a
 <span><span class="co">#&gt; [6,] 9.999e-05 9.998e-01 9.999e-05</span></span></code></pre></div>
 <p>We can quickly plot it with</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">q_mat</span>, data <span class="op">=</span> <span class="va">anole_gt</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">q_mat</span>, data <span class="op">=</span> <span class="va">anole_gt</span>, annotate_group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-37-1.png" width="700"></p>
 <p>We can tidy our q matrix into a tibble, returning it in a format
 which is suitable for plotting:</p>
