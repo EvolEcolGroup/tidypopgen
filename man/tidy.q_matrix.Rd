@@ -7,7 +7,7 @@
 \method{tidy}{q_matrix}(x, data, ...)
 }
 \arguments{
-\item{x}{A Q matrix object (as returned by \link{'q_matrix'}).}
+\item{x}{A Q matrix object (as returned by \code{\link{q_matrix}}).}
 
 \item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the individuals in the same order as the data used to
 generate the Q matrix}

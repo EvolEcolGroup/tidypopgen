@@ -89,7 +89,7 @@ reference:
         - augment.gt_dapc
         - autoplot.gt_dapc
         - autoplot.gt_cluster_pca
-  - title: "K-clustering"
+  - title: "K-clustering (e.g. ADMXITURE)"
     desc: "Functions for creating, tidying, and visualising q_matrix objects."
     contents:
         - q_matrix
@@ -100,7 +100,7 @@ reference:
         - distruct_colours
         - scale_fill_distruct
         - theme_distruct
-  - title: "Other analyses"
+  - title: "Other analyses (e.g. ADMIXTOOLS2, pcadapt)"
     desc: "Functions for other analyses within R."
     contents:
         - gt_extract_f2

@@ -64,7 +64,7 @@ q_matrix <- function(x) {
 #'
 #' Takes a `q_matrix` object, which is a matrix, and returns a tidied tibble.
 #'
-#' @param x A Q matrix object (as returned by ['q_matrix']).
+#' @param x A Q matrix object (as returned by [`q_matrix`]).
 #' @param data An associated tibble (e.g. a [`gen_tibble`]), with the individuals in the same order as the data used to
 #' generate the Q matrix
 #' @param ... not currently used
