@@ -510,7 +510,7 @@ change_duplicated_file_name <- function(file){
 
   if(file.exists(bk) && !file.exists(rds)){
 
-    version <- 1
+    version <- 2
 
     base_name <- basename(file)
 
@@ -533,7 +533,7 @@ change_duplicated_file_name <- function(file){
     return(new_file)
   } else if (file.exists(bk) && file.exists(rds)){
 
-    version <- 1
+    version <- 2
 
     base_name <- basename(file)
 

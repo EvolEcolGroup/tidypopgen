@@ -447,24 +447,29 @@ test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
 
 test_that("versioning if .bk already exists",{
 
+  # get the gt filenames
   files <-  gt_get_file_names(test_gt)
 
-  file.remove(files[1])
+  # remove the .rds
+  expect_true(file.remove(files[1]))
 
   file <- gsub(".bk","",files[2],)
 
+  # create gt using the same backingfile name
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
                         indiv_meta = test_indiv_meta, quiet = TRUE,
                         backingfile = file)
 
+  # get new file names
   new_files <- gt_get_file_names(test_gt)
 
-  expect_equal(new_files[2], paste0(file,"_v1.bk"))
+  # new_files has the same name as original file, plus a version extension
+  expect_equal(new_files[2], paste0(file,"_v2.bk"))
 
-  file.remove(new_files[1])
-
-  file.exists(new_files[1])
-  file.exists(new_files[2])
+  # repeating the process creates another version
+  expect_true(file.remove(new_files[1]))
+  expect_false(file.exists(new_files[1]))
+  expect_true(file.exists(new_files[2]))
 
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
                         indiv_meta = test_indiv_meta, quiet = TRUE,
@@ -472,7 +477,7 @@ test_that("versioning if .bk already exists",{
 
   new_version_files <- gt_get_file_names(test_gt)
 
-  expect_equal(new_version_files[2], paste0(file,"_v2.bk"))
+  expect_equal(new_version_files[2], paste0(file,"_v3.bk"))
 
 })
 
