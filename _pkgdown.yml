@@ -96,6 +96,7 @@ reference:
         - tidy.q_matrix
         - augment.q_matrix
         - autoplot.q_matrix
+        - summary.q_matrix_list
         - distruct_colours
         - scale_fill_distruct
         - theme_distruct
