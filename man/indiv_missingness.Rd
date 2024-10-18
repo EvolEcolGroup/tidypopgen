@@ -4,7 +4,6 @@
 \alias{indiv_missingness}
 \alias{indiv_missingness.tbl_df}
 \alias{indiv_missingness.vctrs_bigSNP}
-\alias{indiv_missingness.grouped_df}
 \title{Estimate individual missingness}
 \usage{
 indiv_missingness(.x, as_counts = FALSE, ...)
@@ -12,8 +11,6 @@ indiv_missingness(.x, as_counts = FALSE, ...)
 \method{indiv_missingness}{tbl_df}(.x, as_counts = FALSE, ...)
 
 \method{indiv_missingness}{vctrs_bigSNP}(.x, as_counts = FALSE, ...)
-
-\method{indiv_missingness}{grouped_df}(.x, as_counts = FALSE, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of

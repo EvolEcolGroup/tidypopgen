@@ -4,7 +4,6 @@
 \alias{indiv_ploidy}
 \alias{indiv_ploidy.tbl_df}
 \alias{indiv_ploidy.vctrs_bigSNP}
-\alias{indiv_ploidy.grouped_df}
 \title{Return individual ploidy}
 \usage{
 indiv_ploidy(.x, ...)
@@ -12,8 +11,6 @@ indiv_ploidy(.x, ...)
 \method{indiv_ploidy}{tbl_df}(.x, ...)
 
 \method{indiv_ploidy}{vctrs_bigSNP}(.x, ...)
-
-\method{indiv_ploidy}{grouped_df}(.x, ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}}, or a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of

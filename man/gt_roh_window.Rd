@@ -74,8 +74,8 @@ group table. Otherwise, the group 'column' is filled with the same values as the
 column
 }
 \examples{
-# don't run the example
-if (FALSE) {
+# run the example only if we have the package installed
+if (requireNamespace("detectRUNS", quietly = TRUE)) {
 sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
     package="detectRUNS")
 sheep_gt <- tidypopgen::gen_tibble(sheep_ped, backingfile = tempfile(),

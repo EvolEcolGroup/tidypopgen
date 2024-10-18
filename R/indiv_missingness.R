@@ -42,9 +42,9 @@ indiv_missingness.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...){
   row_na
 }
 
-#' @export
-#' @rdname indiv_missingness
-indiv_missingness.grouped_df <- function(.x, as_counts = FALSE, ...){
-  .x %>% mutate(indiv_missingness = indiv_missingness(.data$genotypes, as_counts = as_counts)) %>%
-    summarise(het_obs = mean(indiv_missingness))
-}
+#' #' @export
+#' #' @rdname indiv_missingness
+#' indiv_missingness.grouped_df <- function(.x, as_counts = FALSE, ...){
+#'   .x %>% mutate(indiv_missingness = indiv_missingness(.data$genotypes, as_counts = as_counts)) %>%
+#'     summarise(het_obs = mean(indiv_missingness))
+#' }
