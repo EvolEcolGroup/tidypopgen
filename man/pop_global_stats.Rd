@@ -21,16 +21,16 @@ a tibble of population statistics, with populations as rows and statistics as co
 \description{
 This function computes basic population global statistics, following the notation in Nei 1987 (which in turn is based on Nei and Chesser 1983):
 \itemize{
-\item observed heterozygosity (\eqn{h_o}, column header \code{Ho})
-\item expected heterozygosity, also known as gene diversity (\eqn{h_s}, \code{Hs})
-\item total heterozygosity (\eqn{h_t}, \code{Ht})
-\item within population diversity (\code{Dst})
-\item total population diversity (\code{Htp})
-\item total population diversity (\code{Dstp})
-\item Fst
-\item Fst prime
-\item Fis
-\item Dest
+\item observed heterozygosity ( \eqn{\hat{h}_o}, column header \code{Ho})
+\item expected heterozygosity, also known as gene diversity ( \eqn{\hat{h}_s}, \code{Hs})
+\item total heterozygosity ( \eqn{\hat{h}_t}, \code{Ht})
+\item genetic differentiation between subpopulations (\eqn{D_{st}}, \code{Dst})
+\item corrected total population diversity (\eqn{h'_t}, \code{Htp})
+\item corrected genetic differentiation between subpopulations (\eqn{D'_{st}}, \code{Dstp})
+\item \eqn{\hat{F}_{ST}} (column header, \code{Fst})
+\item corrected \eqn{\hat{F'}_{ST}} (column header \code{Fstp})
+\item \eqn{\hat{F}_{IS}} (column header, \code{Fis})
+\item Jost's \eqn{\hat{D}} (column header, \code{Dest})
 }
 }
 \details{
@@ -52,8 +52,35 @@ following equation 7.39 in Nei(1987) on pp.164.
 where \cr
 \eqn{\hat{x}_i=\sum_k \hat{x}_{ki}/s}\cr
 following equation 7.40 in Nei(1987) on pp.164.\cr
-\item The amount of gene diversity among samples \eqn{Dst} is defined as:\cr
-\eqn{Dst=Ht - Hs}\cr
-\item Total corrected heterozygosity (total gene diversity) \eqn{\hat{h}_t}
+\item The amount of gene diversity among samples \eqn{D_{ST}} is defined as:\cr
+\eqn{D_{ST} = \hat{h}_t - \hat{h}_s}\cr
+following the equation provided in the text at the top of page 165 in Nei(1987).
+\item The corrected amount of gene diversity among samples \eqn{D'_{ST}} is defined as:\cr
+\eqn{D'_{ST} = (s/(s-1))D'_{ST}}\cr
+following the equation provided in the text at the top of page 165 in Nei(1987).
+\item Total corrected heterozygosity (total gene diversity) \eqn{\hat{h}_t} is defined as:\cr
+\eqn{\hat{h'}_t = \hat{h}_s + D'_{ST}}\cr
+following the equation provided in the text at the top of page 165 in Nei(1987).
+\item \eqn{\hat{F}_{IS}} is defined as:\cr
+\eqn{\hat{F}_{IS} = 1 - \hat{h}_o/\hat{h}_s}\cr
+following equation 7.41 in Nei(1987) on pp.164.\cr
+\item \eqn{\hat{F}_{ST}} is defined as:\cr
+\eqn{\hat{F}_{ST} = 1 - \hat{h}_s/\hat{h}_t = D_{ST}/\hat{h}_t}\cr
+following equation 7.43 in Nei(1987) on pp.165.\cr
+\item \eqn{\hat{F'}_{ST}} is defined as:\cr
+\eqn{\hat{F'}_{ST} = D'_{ST}/\hat{h'}_t}\cr
+following the explanation provided in the text at the top of page 165 in Nei(1987).
+\item Jost's \eqn{\hat{D}} is defined as:\cr
+\eqn{\hat{D} = (s/(s-1))((\hat{h'}_t-\hat{h}_s)/(1-\hat{h}_s))}\cr
+as defined by Jost(2008)
 }
+
+All these statistics are first computed by locus, and then averaged across loci (including any
+monorphic locus) to obtain genome-wide values. The function uses the same algorithm as
+\code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}} but is optimized for speed and memory usage.
+}
+\references{
+Nei M, Chesser R (1983) Estimation of fixation indexes and gene diversities. Annals of Human Genetics, 47, 253-259.
+Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press, pp. 164-165.
+Jost L (2008) GST and its relatives do not measure differentiation. Molecular Ecology, 17, 4015-4026.
 }

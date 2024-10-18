@@ -70,6 +70,9 @@ pop_het_exp <- function(.x, by_locus = FALSE, include_global = FALSE, n_cores = 
 # alias for gene diversity
 #' @export
 #' @rdname pop_het_exp
-pop_gene_div <- function (...){
-  pop_het_exp(...)
+pop_gene_div <- function (.x, by_locus = FALSE, include_global = FALSE, n_cores = bigstatsr::nb_cores()){
+  pop_het_exp(.x=.x,
+              by_locus = by_locus,
+              include_global = include_global,
+              n_cores = n_cores)
 }

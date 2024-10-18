@@ -12,7 +12,12 @@ pop_het_exp(
   n_cores = bigstatsr::nb_cores()
 )
 
-pop_gene_div(...)
+pop_gene_div(
+  .x,
+  by_locus = FALSE,
+  include_global = FALSE,
+  n_cores = bigstatsr::nb_cores()
+)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} (usually grouped, as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}}, otherwise the full tibble
