@@ -6,10 +6,6 @@ gen_tibble_vcf <- function(x, ..., parser = "cpp",
                            backingfile = NULL, quiet = FALSE) {
   parser <- match.arg(parser, c("vcfR", "cpp"))
 
-  if(.Platform$OS.type=="windows"){
-    parser == "vcfR"
-  }
-
   if (parser == "cpp"){
       rds_path <- vcf_to_fbm_cpp(x,
                                  backingfile = backingfile,
