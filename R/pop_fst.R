@@ -14,7 +14,7 @@
 
 pop_fst <- function(.x, include_global=FALSE, allele_sharing_mat = NULL){
   if (!inherits(.x,"grouped_df")){
-    stop (".x should be a grouped df")
+    stop (".x should be a grouped gen_tibble")
   }
   if (is.null(allele_sharing_mat)){
     allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
