@@ -70,5 +70,19 @@ test_that("pop_* basic stats functions work correctly",{
   # test Fis errors for incorrect parameters for WG17
   expect_error(test_gt %>% pop_fis(by_locus = TRUE, method= "WG17", allele_sharing_mat = matrix(1, nrow=7, ncol=7)),
                "by_locus not implemented for WG17")
+  # test alias for pop_het_exp
+  expect_identical(test_het_exp, test_gt %>% pop_gene_div(by_locus = FALSE, include_global = TRUE))
+
+})
+
+test_that("pop_* basic stats work on a single population",{
+  test_het_obs <- test_gt %>% pop_het_obs(by_locus = TRUE)
+  expect_true(ncol(test_het_obs) == 1) # just one column, as we only have one population
+  test_fis <- test_gt %>% pop_fis(by_locus = TRUE)
+  expect_true(ncol(test_fis) == 1) # just one column, as we only have one population
+  test_het_exp <- test_gt %>% pop_het_exp(by_locus = TRUE)
+  expect_true(ncol(test_het_exp) == 1) # just one column, as we only have one population
+  test_global_stats <- test_gt %>% pop_global_stats(by_locus = TRUE)
+  expect_true(all(is.nan(test_global_stats$Fstp))) # Fstp is not defined for a single population
 
 })
