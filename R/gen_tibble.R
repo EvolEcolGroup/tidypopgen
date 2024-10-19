@@ -37,6 +37,7 @@
 #' a fast C++ parser, or "vcfR" to use the R package `vcfR`. The latter is slower
 #' but more robust; if "cpp" gives error, try using "vcfR" in case your VCF has
 #' an unusual structure.
+#' @param n_cores the number of cores to use for parallel processing
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #' 'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -76,6 +77,7 @@ gen_tibble.character <-
   function(x,
            ...,
            parser = c("vcfR","cpp"),
+           n_cores = 1,
            chunk_size = NULL,
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0","."),
@@ -107,6 +109,7 @@ gen_tibble.character <-
                        quiet = quiet)
   } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
     return(gen_tibble_vcf(x = x, ..., parser = parser, chunk_size = chunk_size,
+                          n_cores = n_cores,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet))

@@ -190,7 +190,7 @@ test_that("gen_tibble from files",{
   expect_true(all.equal(show_genotypes(pop_a_gt),show_genotypes(pop_a_vcf_gt)))
   # reload it in chunks
   pop_a_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
-                              chunk_size = 2)
+                              chunk_size = 2, parser="vcfR")
   expect_true(all.equal(show_genotypes(pop_a_vcf_gt2),show_genotypes(pop_a_vcf_gt)))
   expect_true(all.equal(show_loci(pop_a_vcf_gt2),show_loci(pop_a_vcf_gt)))
   expect_true(is.integer(show_loci(pop_a_vcf_gt)$chr_int))
@@ -235,11 +235,12 @@ test_that("gen_tibble from files with missingness",{
   # PLINK VCF files
   ########################
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
-  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                             parser="vcfR")
   expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_gt)))
   # reload it in chunks
   pop_b_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
-                              chunk_size = 2)
+                              chunk_size = 2, parser = "vcfR")
   expect_true(all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt)))
   expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
   expect_true(is.integer(show_loci(pop_b_vcf_gt2)$chr_int))
@@ -549,17 +550,32 @@ test_that("gt without population is valid",{
   gt_load(file_names[1])
 
   # will fail in functions that require grouping
-  expect_error(pop_fis(test_gt), ".x should be a grouped df")
+  expect_error(pop_fst(test_gt), ".x should be a grouped gen_tibble")
   # functions that require grouping work after adding groups
   test_gt$groups <- c("A","A","B")
   test_gt <- test_gt %>% group_by(groups)
-  expect_equal(unname(pop_fis(test_gt)), c(-0.25, NaN))
+  expect_equal(unname(pop_fst(test_gt)), c(-0, NaN))
 
   # gen_tbl from vcf does not have population automatically
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
   pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile())
   expect_true(!("population" %in% names(pop_b_vcf_gt)))
 })
+
+
+test_that("additional vcf tests with larger file",{
+  vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+                          package = "tidypopgen")
+  anole_gt <- gen_tibble(vcf_path, quiet = TRUE, parser = "cpp", backingfile = tempfile("anolis_"))
+  anole_gt_vcfr <- gen_tibble(vcf_path, quiet = TRUE, parser = "vcfR",
+                              backingfile = tempfile("anolis_"))
+  expect_true(all.equal(show_genotypes(anole_gt),show_genotypes(anole_gt_vcfr)))
+  anole_gt2 <- gen_tibble(vcf_path, quiet = TRUE, parser = "cpp", backingfile = tempfile("anolis_"),
+                          chunk_size = 1000, n_cores = 2)
+  expect_true(all.equal(show_genotypes(anole_gt2),show_genotypes(anole_gt_vcfr)))
+}
+)
+
 
 
 # Windows prevents the deletion of the backing file. It's something to do with the memory mapping

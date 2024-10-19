@@ -19,6 +19,7 @@ gen_tibble(
   x,
   ...,
   parser = c("vcfR", "cpp"),
+  n_cores = 1,
   chunk_size = NULL,
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
@@ -82,6 +83,8 @@ the session!)}
 a fast C++ parser, or "vcfR" to use the R package \code{vcfR}. The latter is slower
 but more robust; if "cpp" gives error, try using "vcfR" in case your VCF has
 an unusual structure.}
+
+\item{n_cores}{the number of cores to use for parallel processing}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used

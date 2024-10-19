@@ -15,9 +15,7 @@ test_that("q_matrix reads q_files",{
   expect_true(inherits(anolis_q_k3_mat,"q_matrix"))
 
   #read multiple .Q
-  package_path <- find.package("tidypopgen")
-  folder <- "/extdata/anolis"
-  q_folder <- file.path(package_path, folder)
+  q_folder <- system.file("/extdata/anolis", package = "tidypopgen")
   anolis_q <- q_matrix(q_folder)
   expect_true(inherits(anolis_q,"q_matrix_list"))
   expect_true(inherits(anolis_q[[1]][[1]],"q_matrix"))

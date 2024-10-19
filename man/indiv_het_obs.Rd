@@ -4,7 +4,6 @@
 \alias{indiv_het_obs}
 \alias{indiv_het_obs.tbl_df}
 \alias{indiv_het_obs.vctrs_bigSNP}
-\alias{indiv_het_obs.grouped_df}
 \title{Estimate individual observed heterozygosity}
 \usage{
 indiv_het_obs(.x, ...)
@@ -12,8 +11,6 @@ indiv_het_obs(.x, ...)
 \method{indiv_het_obs}{tbl_df}(.x, ...)
 
 \method{indiv_het_obs}{vctrs_bigSNP}(.x, ...)
-
-\method{indiv_het_obs}{grouped_df}(.x, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
