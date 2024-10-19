@@ -44,7 +44,7 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
-                          devtools
+                          any::devtools
           needs: check
 
 #      - uses: r-lib/actions/check-r-package@v2
@@ -58,9 +58,8 @@ jobs:
             vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
             pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
                              parser="vcfR")
-            all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_gt))
             # reload it in chunks
-            pop_b_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
-                              chunk_size = 2, parser = "vcfR")
-            all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt))
+            pop_b_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                              chunk_size = 2, parser = "cpp")
+            all.equal(show_genotypes(pop_b_vcf_fast_gt),show_genotypes(pop_b_vcf_gt))
         shell: Rscript {0}
