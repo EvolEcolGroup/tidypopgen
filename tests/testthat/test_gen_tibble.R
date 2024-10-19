@@ -262,10 +262,9 @@ test_that("gen_tibble from files with missingness",{
                                    chunk_size = 2, parser="cpp")
 
   # debug
-  if (!all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt))) {
     print(show_genotypes(pop_b_vcf_fast_gt2))
     print(show_genotypes(pop_b_vcf_fast_gt))
-  }
+
 
   expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)))
   expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
