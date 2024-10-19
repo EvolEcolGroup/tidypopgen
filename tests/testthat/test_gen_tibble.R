@@ -247,12 +247,26 @@ test_that("gen_tibble from files with missingness",{
 
   # check our cpp parser
   pop_b_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
+
+  # debug
+  if (!all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt))) {
+    print(show_genotypes(pop_b_gt))
+    print(show_genotypes(pop_b_vcf_fast_gt))
+  }
+
   expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)))
   # check loci table against the vcfR parser
   expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
   # reload it in chunks
   pop_b_vcf_fast_gt2 <- gen_tibble(vcf_path, quiet=TRUE, backingfile = tempfile(),
                                    chunk_size = 2, parser="cpp")
+
+  # debug
+  if (!all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt))) {
+    print(show_genotypes(pop_b_vcf_fast_gt2))
+    print(show_genotypes(pop_b_vcf_fast_gt))
+  }
+
   expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)))
   expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
   expect_true(is.integer(show_loci(pop_b_vcf_fast_gt)$chr_int))
