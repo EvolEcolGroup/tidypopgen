@@ -68,4 +68,5 @@ jobs:
             } else {
               message("all is well)")
             }
+            devtools::test()
         shell: Rscript {0}

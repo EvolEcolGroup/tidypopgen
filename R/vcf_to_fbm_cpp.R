@@ -91,6 +91,9 @@ vcf_to_fbm_cpp <- function(
   #   index_start:(index_start+chunk_info$num_loci-1)
   # ] <- genotypes_matrix[,1:chunk_info$num_loci]
 
+  # debug
+  print(genotypes_matrix)
+
   write_to_FBM(file_backed_matrix,
                allele_counts = genotypes_matrix,
                col_start = index_start-1,
