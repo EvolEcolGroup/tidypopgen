@@ -101,6 +101,8 @@ the files.}
 a vector of values for mixed ploidy). Only used if creating
 a gen_tibble from a matrix of data; otherwise, ploidy is determined automatically
 from the data as they are read.}
+
+\item{n_cores}{the number of cores to use for parallel processing}
 }
 \value{
 an object of the class \code{gen_tbl}.

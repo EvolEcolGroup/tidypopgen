@@ -37,6 +37,7 @@
 #' a fast C++ parser, or "vcfR" to use the R package `vcfR`. The latter is slower
 #' but more robust; if "cpp" gives error, try using "vcfR" in case your VCF has
 #' an unusual structure.
+#' @param n_cores the number of cores to use for parallel processing
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #' 'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
