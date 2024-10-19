@@ -11,7 +11,7 @@ which implements an approach equivalent to the one in PLINK."><meta property="og
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9017</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9018</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -145,8 +145,8 @@ column</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># don't run the example</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># run the example only if we have the package installed</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"detectRUNS"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span><span class="va">sheep_ped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"Kijas2016_Sheep_subset.ped"</span>,</span></span>
 <span class="r-in"><span>    package<span class="op">=</span><span class="st">"detectRUNS"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sheep_gt</span> <span class="op">&lt;-</span> <span class="fu">tidypopgen</span><span class="fu">::</span><span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">sheep_ped</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
@@ -155,6 +155,108 @@ column</p>
 <span class="r-in"><span><span class="va">sheep_roh</span> <span class="op">&lt;-</span> <span class="fu">gt_roh_window</span><span class="op">(</span><span class="va">sheep_gt</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">detectRUNS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/detectRUNS/man/plot_Runs.html" class="external-link">plot_Runs</a></span><span class="op">(</span>runs <span class="op">=</span> <span class="va">sheep_roh</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H114 is: 27</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H115 is: 29</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H116 is: 28</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H26 is: 25</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H32 is: 21</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H38 is: 16</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H44 is: 14</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H56 is: 14</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H50 is: 29</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H27 is: 18</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H33 is: 21</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H39 is: 17</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H45 is: 18</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H51 is: 29</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H57 is: 20</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H28 is: 13</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H34 is: 18</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H40 is: 28</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H46 is: 29</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H52 is: 20</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H58 is: 13</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H29 is: 17</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H35 is: 27</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H41 is: 19</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H47 is: 22</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H53 is: 25</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H59 is: 28</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H30 is: 19</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H42 is: 20</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H48 is: 32</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H54 is: 20</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H60 is: 17</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H31 is: 15</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H37 is: 17</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H43 is: 14</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H49 is: 19</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H55 is: 33</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H1 is: 21</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H9 is: 13</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H17 is: 29</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H2 is: 19</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H10 is: 20</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H19 is: 22</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H3 is: 25</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H11 is: 21</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H20 is: 36</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H4 is: 20</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H12 is: 17</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H21 is: 25</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H13 is: 22</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H22 is: 30</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H6 is: 17</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H14 is: 20</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H7 is: 31</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H15 is: 15</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H24 is: 22</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H8 is: 23</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H16 is: 35</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H25 is: 22</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H64 is: 30</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H62 is: 20</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H63 is: 11</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H118 is: 30</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H119 is: 27</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H120 is: 28</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H121 is: 31</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H122 is: 31</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H123 is: 22</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H124 is: 31</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H125 is: 22</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H126 is: 26</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H127 is: 28</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H128 is: 33</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H129 is: 19</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H130 is: 30</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H131 is: 33</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H132 is: 30</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H133 is: 33</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H134 is: 27</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H135 is: 27</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H136 is: 17</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H137 is: 33</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H138 is: 23</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H139 is: 32</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H140 is: 27</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H141 is: 28</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H142 is: 27</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H143 is: 24</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H144 is: 26</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H145 is: 32</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H146 is: 23</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H147 is: 23</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H148 is: 25</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H149 is: 26</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H150 is: 31</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H151 is: 36</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H152 is: 26</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H153 is: 27</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H154 is: 31</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> N. of RUNS for individual H155 is: 32</span>
+<span class="r-plt img"><img src="gt_roh_window-1.png" alt="" width="700" height="433"></span>
+<span class="r-plt img"><img src="gt_roh_window-2.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

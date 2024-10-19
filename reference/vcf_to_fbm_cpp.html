@@ -9,7 +9,7 @@ This should work even for large vcf files that would not fit in memory."><meta p
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9017</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9018</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,13 @@ This should work even for large vcf files that would not fit in memory.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vcf_to_fbm_cpp</span><span class="op">(</span><span class="va">vcf_path</span>, chunk_size <span class="op">=</span> <span class="cn">NULL</span>, backingfile <span class="op">=</span> <span class="cn">NULL</span>, quiet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">vcf_to_fbm_cpp</span><span class="op">(</span></span>
+<span>  <span class="va">vcf_path</span>,</span>
+<span>  chunk_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  backingfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -58,11 +64,15 @@ This should work even for large vcf files that would not fit in memory.</p>
 
 
 <dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
-<dd><p>the chunk size to use on the vcf when loading the file</p></dd>
+<dd><p>the chunk size to use on the vcf when loading the file. If NULL, a best guess will be made.</p></dd>
 
 
 <dt id="arg-backingfile">backingfile<a class="anchor" aria-label="anchor" href="#arg-backingfile"></a></dt>
-<dd><p>the name of the file to use as the backing file</p></dd>
+<dd><p>the name of the file to use as the backing file for the FBM. If NULL, the vcf path will be used.</p></dd>
+
+
+<dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
+<dd><p>the number of cores to use when reading the vcf file. Default is 1.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -9,7 +9,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9017</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9018</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,6 +60,7 @@ here the format</p>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  parser <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vcfR"</span>, <span class="st">"cpp"</span><span class="op">)</span>,</span>
+<span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  chunk_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  valid_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"T"</span>, <span class="st">"C"</span>, <span class="st">"G"</span><span class="op">)</span>,</span>
 <span>  missing_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0"</span>, <span class="st">"."</span><span class="op">)</span>,</span>
@@ -139,6 +140,10 @@ the session!)</p></dd>
 a fast C++ parser, or "vcfR" to use the R package <code>vcfR</code>. The latter is slower
 but more robust; if "cpp" gives error, try using "vcfR" in case your VCF has
 an unusual structure.</p></dd>
+
+
+<dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
+<dd><p>the number of cores to use for parallel processing</p></dd>
 
 
 <dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
