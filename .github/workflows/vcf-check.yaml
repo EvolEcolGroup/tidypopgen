@@ -53,7 +53,7 @@ jobs:
 
       - name: Test vcf
         run: |
-
+            devtools::load_all()
             vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
             pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
                              parser="vcfR")
