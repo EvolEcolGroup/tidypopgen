@@ -24,6 +24,9 @@ tidy_dist_matrix<- function(mat){
 
 # stop if not diploid
 stopifnot_diploid <- function(x){
+  if (inherits(x, "gen_tbl")){
+    x <- x$genotypes
+  }
   if (attr(x,"ploidy")!=2){
     stop("this function only works on diploid data")
   }

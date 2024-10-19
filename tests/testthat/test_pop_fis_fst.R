@@ -17,18 +17,24 @@ test_loci <- data.frame(name=paste0("rs",1:6),
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 
-test_that("pop_fst and pop_fist compute correctly",{
+test_that("pop_fst and pop_fist WG17 compute correctly",{
+  # expect error if the tibble is not grouped
+  expect_error(test_gt %>% pop_fis(method="WG17"),
+               ".x should be a grouped gen_tibble")
+
+  expect_error(test_gt %>% pop_fst(),
+               ".x should be a grouped gen_tibble")
+
+  # group the tibble
   test_gt <- test_gt %>% dplyr::group_by(population)
 
   # compare results against raw hierfstat code
-  fis_by_pop <- test_gt %>% pop_fis(include_global=TRUE)
+  fis_by_pop <- test_gt %>% pop_fis(include_global=TRUE, method = "WG17")
   fis_by_pop_hier <- hierfstat::fis.dosage(test_genotypes,pop=test_indiv_meta$population)
   expect_true(all.equal(fis_by_pop, fis_by_pop_hier,check.attributes = FALSE))
   # now check that we don't get the global
-  fis_by_pop_sub <- test_gt %>% pop_fis()
+  fis_by_pop_sub <- test_gt %>% pop_fis(method = "WG17")
   expect_true (all.equal(fis_by_pop[-length(fis_by_pop)], fis_by_pop_sub))
-
-
 
   # compare results against raw hierfstat code
   fst_by_pop <- test_gt %>% pop_fst(include_global=TRUE)
