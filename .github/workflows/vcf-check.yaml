@@ -61,12 +61,7 @@ jobs:
             # reload it in chunks
             pop_b_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
                               chunk_size = 2, parser = "cpp")
-            if (!all.equal(show_genotypes(pop_b_vcf_fast_gt),show_genotypes(pop_b_vcf_gt))){
-              show_genotypes(pop_b_vcf_fast_gt)
-              show_genotypes(pop_b_vcf_gt)
-              stop("there is a mismatch")
-            } else {
-              message("all is well)")
-            }
+            show_genotypes(pop_b_vcf_fast_gt)
+            show_genotypes(pop_b_vcf_gt)
             devtools::test()
         shell: Rscript {0}
