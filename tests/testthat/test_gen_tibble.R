@@ -160,6 +160,71 @@ test_that("gen_tibble identifies wrong loci table columns",{
 })
 
 
+test_that("PROBLEM TEST gentibble from VCF with missingness issue",{
+  ########################
+  # PLINK BED files
+  ########################
+  bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+  pop_b_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+
+  ########################
+  # PLINK VCF files
+  ########################
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                             parser="vcfR")
+  expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_gt)))
+  # reload it in chunks
+  pop_b_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                              chunk_size = 2, parser = "vcfR")
+  expect_true(all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt)))
+  expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
+  expect_true(is.integer(show_loci(pop_b_vcf_gt2)$chr_int))
+
+  # check our cpp parser
+  pop_b_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
+
+  # debug
+  if (!all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt))) {
+    print(show_genotypes(pop_b_gt))
+    print(show_genotypes(pop_b_vcf_fast_gt))
+  }
+
+  for(i in 1:10){
+
+    genotypes_info <- paste0(
+      "Iteration: ", i, "\n",
+      "Pop B GT: ", show_genotypes(pop_b_gt), "\n",
+      "Pop B VCF Fast GT: ", show_genotypes(pop_b_vcf_fast_gt)
+    )
+    expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)),info = genotypes_info)
+  }
+  # check loci table against the vcfR parser
+  expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
+  # reload it in chunks
+  pop_b_vcf_fast_gt2 <- gen_tibble(vcf_path, quiet=TRUE, backingfile = tempfile(),
+                                   chunk_size = 2, parser="cpp")
+
+  # debug
+  print(show_genotypes(pop_b_vcf_fast_gt2))
+  print(show_genotypes(pop_b_vcf_fast_gt))
+
+  for(i in 1:10){
+
+    genotypes_info <- paste0(
+      "Iteration: ", i, "\n",
+      "Pop B GT: ", show_genotypes(pop_b_vcf_fast_gt), "\n",
+      "Pop B VCF Fast GT: ", show_genotypes(pop_b_vcf_fast_gt2)
+    )
+
+    expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)), info = genotypes_info)
+  }
+
+  expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
+  expect_true(is.integer(show_loci(pop_b_vcf_fast_gt)$chr_int))
+
+})
+
 test_that("gen_tibble from files",{
   ########################
   # PLINK BED files
@@ -245,48 +310,6 @@ test_that("gen_tibble from files with missingness",{
   expect_true(all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt)))
   expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
   expect_true(is.integer(show_loci(pop_b_vcf_gt2)$chr_int))
-
-  # check our cpp parser
-  pop_b_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
-
-  # debug
-  if (!all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt))) {
-    print(show_genotypes(pop_b_gt))
-    print(show_genotypes(pop_b_vcf_fast_gt))
-  }
-
-  for(i in 1:10){
-
-    genotypes_info <- paste0(
-      "Iteration: ", i, "\n",
-      "Pop B GT: ", show_genotypes(pop_b_gt), "\n",
-      "Pop B VCF Fast GT: ", show_genotypes(pop_b_vcf_fast_gt)
-    )
-    expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)),info = genotypes_info)
-  }
-  # check loci table against the vcfR parser
-  expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
-  # reload it in chunks
-  pop_b_vcf_fast_gt2 <- gen_tibble(vcf_path, quiet=TRUE, backingfile = tempfile(),
-                                   chunk_size = 2, parser="cpp")
-
-  # debug
-    print(show_genotypes(pop_b_vcf_fast_gt2))
-    print(show_genotypes(pop_b_vcf_fast_gt))
-
-    for(i in 1:10){
-
-      genotypes_info <- paste0(
-        "Iteration: ", i, "\n",
-        "Pop B GT: ", show_genotypes(pop_b_vcf_fast_gt), "\n",
-        "Pop B VCF Fast GT: ", show_genotypes(pop_b_vcf_fast_gt2)
-      )
-
-      expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)), info = genotypes_info)
-    }
-
-    expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
-    expect_true(is.integer(show_loci(pop_b_vcf_fast_gt)$chr_int))
 })
 
 test_that("gentibble with packedancestry",{
