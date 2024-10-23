@@ -255,7 +255,15 @@ test_that("gen_tibble from files with missingness",{
     print(show_genotypes(pop_b_vcf_fast_gt))
   }
 
-  expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)),info = print(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)))
+  for(i in 1:10){
+
+    genotypes_info <- paste0(
+      "Iteration: ", i, "\n",
+      "Pop B GT: ", show_genotypes(pop_b_gt), "\n",
+      "Pop B VCF Fast GT: ", show_genotypes(pop_b_vcf_fast_gt)
+    )
+    expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)),info = genotypes_info)
+  }
   # check loci table against the vcfR parser
   expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
   # reload it in chunks
@@ -266,10 +274,19 @@ test_that("gen_tibble from files with missingness",{
     print(show_genotypes(pop_b_vcf_fast_gt2))
     print(show_genotypes(pop_b_vcf_fast_gt))
 
+    for(i in 1:10){
 
-  expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)), info = print(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)))
-  expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
-  expect_true(is.integer(show_loci(pop_b_vcf_fast_gt)$chr_int))
+      genotypes_info <- paste0(
+        "Iteration: ", i, "\n",
+        "Pop B GT: ", show_genotypes(pop_b_vcf_fast_gt), "\n",
+        "Pop B VCF Fast GT: ", show_genotypes(pop_b_vcf_fast_gt2)
+      )
+
+      expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)), info = genotypes_info)
+    }
+
+    expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
+    expect_true(is.integer(show_loci(pop_b_vcf_fast_gt)$chr_int))
 })
 
 test_that("gentibble with packedancestry",{
