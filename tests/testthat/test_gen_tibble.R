@@ -255,7 +255,7 @@ test_that("gen_tibble from files with missingness",{
     print(show_genotypes(pop_b_vcf_fast_gt))
   }
 
-  expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)))
+  expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)),info = print(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)))
   # check loci table against the vcfR parser
   expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
   # reload it in chunks
@@ -267,7 +267,7 @@ test_that("gen_tibble from files with missingness",{
     print(show_genotypes(pop_b_vcf_fast_gt))
 
 
-  expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)))
+  expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)), info = print(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)))
   expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
   expect_true(is.integer(show_loci(pop_b_vcf_fast_gt)$chr_int))
 })
