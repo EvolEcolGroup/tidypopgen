@@ -8,7 +8,7 @@ test_genotypes <- rbind(c(1,1,0,1,1,0),
 test_loci <- data.frame(name=paste0("rs",1:6),
                         chromosome=paste0("chr",c(1,1,1,1,2,2)),
                         position=as.integer(c(3,5,65,343,23,456)),
-                        genetic_dist = as.integer(rep(0,6)),
+                        genetic_dist = as.double(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
@@ -44,10 +44,7 @@ test_that("test reading and writing is equivalent",{
   expect_true(identical(show_loci(pop_a_vcf), show_loci(pop_a_vcf_rewrite)))
 })
 
-#TESTS TO SHOW PROBLEM WITH CHUNKING:
 
-# when read file back in with cpp it lets you read it in despite duplicates so can
-# see the issue
 test_that("test reading and writing with chunking is equivalent cpp",{
   # write out to vcf with chunk size - smaller chunk size = more duplicates
   vcf_path_chunked <- gt_as_vcf(test_gt, file = paste0(tempfile(),".vcf"), chunk_size = 2)
@@ -70,8 +67,7 @@ test_that("test reading and writing with chunking is equivalent cpp",{
 
 })
 
-# when read file back in with vcfR it throws an error because of the duplicates
-# so wont read in
+
 test_that("test reading and writing with chunking is equivalent rvcf",{
   # write out to vcf with chunk size
   vcf_path_chunked <- gt_as_vcf(test_gt, file = paste0(tempfile(),".vcf"), chunk_size = 2)

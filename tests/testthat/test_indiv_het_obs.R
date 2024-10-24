@@ -7,7 +7,7 @@ test_that("indiv_het_obs computes correctly",{
   test_loci <- data.frame(name=paste0("rs",1:6),
                           chromosome=c(1,1,1,1,2,2),
                           position=c(3,5,65,343,23,456),
-                          genetic_dist = as.integer(rep(0,6)),
+                          genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
 
@@ -33,7 +33,7 @@ test_that("indiv_het_obs returns 0's when all genotypes are homozygous", {
   test_loci <- data.frame(name=paste0("rs",1:6),
                           chromosome=c(1,1,1,1,2,2),
                           position=c(3,5,65,343,23,456),
-                          genetic_dist = as.integer(rep(0,6)),
+                          genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
 
