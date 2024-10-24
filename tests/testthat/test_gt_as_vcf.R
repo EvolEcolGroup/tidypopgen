@@ -43,3 +43,39 @@ test_that("test reading and writing is equivalent",{
   expect_true(identical(show_genotypes(pop_a_vcf), show_genotypes(pop_a_vcf_rewrite)))
   expect_true(identical(show_loci(pop_a_vcf), show_loci(pop_a_vcf_rewrite)))
 })
+
+#TESTS TO SHOW PROBLEM WITH CHUNKING:
+
+# when read file back in with cpp it lets you read it in despite duplicates so can
+# see the issue
+test_that("test reading and writing with chunking is equivalent cpp",{
+  # write out to vcf with chunk size - smaller chunk size = more duplicates
+  vcf_path_chunked <- gt_as_vcf(test_gt, file = paste0(tempfile(),".vcf"), chunk_size = 2)
+  # read vcf back in with cpp
+  test_gt_chunked <- gen_tibble(vcf_path_chunked, quiet=TRUE, parser = "cpp", backingfile = tempfile("anolis_chunk_"))
+  # check they are the same
+  expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt_chunked)))
+  expect_true(identical(show_loci(test_gt), show_loci(test_gt_chunked)))
+  expect_equal(count_loci(test_gt_chunked), count_loci(test_gt))
+})
+
+# when read file back in with vcfR it throws an error because of the duplicates
+# so wont read in
+test_that("test reading and writing with chunking is equivalent rvcf",{
+  # write out to vcf with chunk size
+  vcf_path_chunked <- gt_as_vcf(test_gt, file = paste0(tempfile(),".vcf"), chunk_size = 2)
+  # read vcf back in with vcfR
+  test_gt_chunked <- gen_tibble(vcf_path_chunked, quiet=TRUE, parser = "vcfR", backingfile = tempfile("anolis_chunk_"))
+  # check they are the same
+  expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt_chunked)))
+  expect_true(identical(show_loci(test_gt), show_loci(test_gt_chunked)))
+  expect_equal(count_loci(test_gt_chunked), count_loci(test_gt))
+})
+
+
+
+
+
+
+
+
