@@ -18,6 +18,8 @@ reference:
         - show_loci
         - "show_loci<-"
         - show_ploidy
+        - count_loci
+        - augment_loci
   - title: "Selecting loci"
     desc: "Functions to select loci from a gen_tibble, either based on loci information, or genotype information."
     contents:
@@ -108,13 +110,10 @@ reference:
         - gt_pcadapt
         - autoplot.gt_pcadapt
   - title: "bigSNP"
-    desc: "Functions for operating directly on a bigSNp object."
+    desc: "Mostly for developers: Functions for operating directly on bigSNp objects."
     contents:
         - snp_allele_sharing
         - snp_ibs
         - snp_king
-  - title: "Other"
-    desc: "Additional helpful functions."
-    contents:
-        - augment_loci
-        - count_loci
+
+
