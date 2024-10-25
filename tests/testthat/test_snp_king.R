@@ -7,7 +7,7 @@ test_genotypes <- rbind(c(1,1,0,1,1,0),
 test_loci <- data.frame(name=paste0("rs",1:6),
                         chromosome=paste0("chr",c(1,1,1,1,2,2)),
                         position=as.integer(c(3,5,65,343,23,456)),
-                        genetic_dist = as.integer(rep(0,6)),
+                        genetic_dist = as.double(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 

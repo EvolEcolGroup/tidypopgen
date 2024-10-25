@@ -378,7 +378,7 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
 
   map <- tibble(chromosome = loci$chromosome,
                 marker.ID = loci$name,
-                genetic.dist = loci$genetic_dist,
+                genetic.dist = as.double(loci$genetic_dist), ## make sure that genetic.dist is double
                 physical.pos = loci$position,
                 allele1 = loci$allele_alt,
                 allele2 = loci$allele_ref)

@@ -54,7 +54,7 @@ test_that("warning when no snps overlap",{
   test_loci <- data.frame(name=paste0("rs",1:6),
                           chromosome=c(1,1,1,1,2,2),
                           position=c(3,5,65,343,23,456),
-                          genetic_dist = as.integer(rep(0,6)),
+                          genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
@@ -68,7 +68,7 @@ test_that("warning when no snps overlap",{
   test_loci2 <- data.frame(name=paste0("rs",7:12),
                            chromosome=c(1,1,1,1,2,2),
                            position=c(3,5,65,343,23,456),
-                           genetic_dist = as.integer(rep(0,6)),
+                           genetic_dist = as.double(rep(0,6)),
                            allele_ref = c("A","T","C","G","C","T"),
                            allele_alt = c("T","C", NA,"C","G","A"))
   test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci2, indiv_meta = test_indiv_meta2, quiet = TRUE)
@@ -93,7 +93,7 @@ test_that("warning when no snps overlap",{
   test_loci2 <- data.frame(name=paste0("rs",1:6),
                            chromosome=c(3,3,3,3,4,4),
                            position=c(3,5,65,343,23,456),
-                           genetic_dist = as.integer(rep(0,6)),
+                           genetic_dist = as.double(rep(0,6)),
                            allele_ref = c("A","T","C","G","C","T"),
                            allele_alt = c("T","C", NA,"C","G","A"))
   test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci2, indiv_meta = test_indiv_meta2, quiet = TRUE)

@@ -7,7 +7,7 @@ test_genotypes <- rbind(c(1,1,0,1,1,0),
 test_loci <- data.frame(name=paste0("rs",1:6),
                         chromosome=paste0("chr",c(1,1,1,1,2,2)),
                         position=as.integer(c(3,5,65,343,23,456)),
-                        genetic_dist = as.integer(rep(0,6)),
+                        genetic_dist = as.double(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
@@ -112,7 +112,7 @@ test_that("gen_tibble loci is dataframe or tbl",{
   test_loci <- data.frame(name=paste0("rs",1:6),
                           chromosome=paste0("chr",c(1,1,1,1,2,2)),
                           position=as.integer(c(3,5,65,343,23,456)),
-                          genetic_dist = as.integer(rep(0,6)),
+                          genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
   wrong_loci_matrix <- as.matrix(test_loci)
@@ -150,7 +150,7 @@ test_that("gen_tibble identifies wrong loci table columns",{
   wrong_loci <- data.frame(a=paste0("rs",1:6),
                           b=paste0("chr",c(1,1,1,1,2,2)),
                           c=as.integer(c(3,5,65,343,23,456)),
-                          d = as.integer(rep(0,6)),
+                          d = as.double(rep(0,6)),
                           e = c("A","T","C","G","C","T"),
                           f = c("T","C", NA,"C","G","A"))
   expect_error(test_dfs_gt <- gen_tibble(test_genotypes, indiv_meta = test_indiv_meta,
@@ -437,7 +437,7 @@ test_genotypes <- rbind(c(1,1,0,1,1,0),
 test_loci <- data.frame(name=paste0("rs",1:6),
                         chromosome=paste0("chr",c(1,1,1,1,2,2)),
                         position=as.integer(c(3,5,65,343,23,456)),
-                        genetic_dist = as.integer(rep(0,6)),
+                        genetic_dist = as.double(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
@@ -492,7 +492,7 @@ test_that("chr_int is always an integer",{
   test_loci_fac <- data.frame(name=paste0("rs",1:6),
                           chromosome=as.factor(paste0("chr",c(1,1,1,1,2,2))),
                           position=as.integer(c(3,5,65,343,23,456)),
-                          genetic_dist = as.integer(rep(0,6)),
+                          genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci_fac, indiv_meta = test_indiv_meta, quiet = TRUE)
@@ -531,7 +531,7 @@ test_genotypes <- rbind(c(1,1,0,1,1,0),
 test_loci <- data.frame(name=paste0("rs",1:6),
                         chromosome=paste0("chr",c(1,1,1,1,2,2)),
                         position=as.integer(c(3,5,65,343,23,456)),
-                        genetic_dist = as.integer(rep(0,6)),
+                        genetic_dist = as.double(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
@@ -590,7 +590,7 @@ test_that("additional vcf tests with larger file",{
 #   test_loci <- data.frame(name=paste0("rs",1:6),
 #                           chromosome=paste0("chr",c(1,1,1,1,2,2)),
 #                           position=as.integer(c(3,5,65,343,23,456)),
-#                           genetic_dist = as.integer(rep(0,6)),
+#                           genetic_dist = as.double(rep(0,6)),
 #                           allele_ref = c("A","T","C","G","C","T"),
 #                           allele_alt = c("T","C", NA,"C","G","A"))
 #   test_loci_wrong <- test_loci

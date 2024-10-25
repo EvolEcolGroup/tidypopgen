@@ -7,7 +7,7 @@ test_that("find transitions and transversions",{
   test_loci <- data.frame(name=paste0("rs",1:6),
                           chromosome=c(1,1,1,1,2,2),
                           position=c(3,5,65,343,23,456),
-                          genetic_dist = as.integer(rep(0,6)),
+                          genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
 
@@ -26,7 +26,7 @@ test_that("check warning message for different alleles",{
   test_loci <- data.frame(name=paste0("rs",1:6),
                           chromosome=c(1,1,1,1,2,2),
                           position=c(3,5,65,343,23,456),
-                          genetic_dist = as.integer(rep(0,6)),
+                          genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("a","t","c","g","c","t"),
                           allele_alt = c("t","c", NA,"c","g","a"))
 
