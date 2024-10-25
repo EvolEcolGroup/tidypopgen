@@ -1,6 +1,8 @@
 url: https://evolecolgroup.github.io/tidypopgen/
 template:
   bootstrap: 5
+  bslib:
+    danger: "#A6081A"
 development:
   mode: auto
 reference:
