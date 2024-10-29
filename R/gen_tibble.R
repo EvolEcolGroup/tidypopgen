@@ -157,7 +157,6 @@ gen_tibble_bed_rds <- function(x, ...,
 
   bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
 
-  #if (!("family.ID" %in% names(bigsnp_obj$fam))){
   if (all(bigsnp_obj$fam$family.ID==bigsnp_obj$fam$sample.ID)){
     indiv_meta <- list(id = bigsnp_obj$fam$sample.ID)
   } else {
