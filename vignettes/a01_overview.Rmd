@@ -478,7 +478,7 @@ missing_gt
 ```
 
 We can visualise the amount of missingness with:
-```{r}
+```{r, fig.alt = "Histogram of loci missingness, showing that most loci have no missing data, while some have a small proportion of missing data"}
 missing_gt %>% loci_missingness() %>% hist()
 ```
 
@@ -516,19 +516,19 @@ gt_uses_imputed(missing_gt)
 ```
 
 And indeed, if we summarise missingness, we still get:
-```{r}
+```{r, fig.alt = "Histogram of loci missingness as above, showing that the use of imputed data is not automatic"}
 missing_gt %>% loci_missingness() %>% hist()
 ```
 
 We can manually force a `gen_tibble` to use the imputed data:
-```{r}
+```{r, fig.alt = "Histogram of loci missingness after setting use of imputed data to true, showing that there is no missingness"}
 gt_set_imputed(missing_gt, set = TRUE)
 missing_gt %>% loci_missingness() %>% hist()
 ```
 
 However, this is generally not needed, we can keep our `gen_tibble` set to use
 the raw data:
-```{r}
+```{r, fig.alt = "Histogram of loci missingness after setting use of imputed data to false again"}
 gt_set_imputed(missing_gt, set = FALSE)
 missing_gt %>% loci_missingness() %>% hist()
 ```
@@ -541,7 +541,7 @@ missing_pca
 
 Note that, when the function is finished, the `gen_tibble` is back to using
 the raw genotypes:
-```{r}
+```{r, fig.alt = "Histogram of loci missingness, showing that use of imputed data is not automatically set to true, after using a PCA function"}
 gt_uses_imputed(missing_gt)
 missing_gt %>% loci_missingness() %>% hist()
 ```
