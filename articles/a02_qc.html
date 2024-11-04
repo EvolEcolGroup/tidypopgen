@@ -117,7 +117,7 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for
 each SNP. These data can be visualised in autoplot :</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"overview"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a02_qc_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
+<p><img src="a02_qc_files/figure-html/unnamed-chunk-3-1.png" alt="UpSet plot giving counts of snps over the threshold for: missingness, minor allele frequency, and Hardy-Weinberg equilibrium P-value" width="700"></p>
 <p>Using ‘overview’ provides an Upset plot, which is designed to show
 the intersection of different sets in the same way as a Venn diagram.
 SNPs can be divided into ‘sets’ that each pass predefined quality
@@ -135,18 +135,18 @@ accepted etc) can be adjusted using the parameters provided in autoplot.
 For example:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"overview"</span>, miss_threshold <span class="op">=</span> <span class="fl">0.03</span>, maf_threshold <span class="op">=</span> <span class="fl">0.02</span>, hwe_p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a02_qc_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
+<p><img src="a02_qc_files/figure-html/unnamed-chunk-4-1.png" alt="Upset plot as above, with adjusted thresholds" width="700"></p>
 <p>To examine each QC measure in further detail, we can plot a different
 summary panel.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"all"</span>, miss_threshold <span class="op">=</span> <span class="fl">0.03</span>, maf_threshold <span class="op">=</span> <span class="fl">0.02</span>, hwe_p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a02_qc_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<p><img src="a02_qc_files/figure-html/unnamed-chunk-5-1.png" alt="Four panel plot, containing: a histogram of the proportion of missing data for snps with minor allele freqency above the threshold, a histogram of the proportion of missing data for snps with minor allele freqency below the threshold, a histogram of HWE exact test p-values, and a histogram of significant HWE exact test p-values" width="700"></p>
 <p>We can then begin to consider how to quality control this raw data
 set. Let’s start by filtering SNPs according to their minor allele
 frequency. We can visualise the MAF distribution using:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"maf"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a02_qc_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<p><img src="a02_qc_files/figure-html/unnamed-chunk-6-1.png" alt="Histogram of minor allele frequency" width="700"></p>
 <p>Here we can see there are some monomorphic SNPs in the data set.
 Let’s filter out loci with a minor allele frequency lower than 2%, by
 using <code>select_loci_if</code>. Here, we select all SNPs with a MAF
@@ -160,7 +160,7 @@ Lets say we want to remove SNPs that are missing in more than 5% of
 individuals, equivalent to using plink –geno 0.05</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"missing"</span>, miss_threshold <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a02_qc_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
+<p><img src="a02_qc_files/figure-html/unnamed-chunk-8-1.png" alt="Histogram of the proportion of missing data" width="700"></p>
 <p>We can see here that most SNPs have low missingness, under our 5%
 threshold, some do, however, have missingness over our threshold. To
 remove these SNPs, we can again use <code>select_loci_if</code>.</p>
@@ -174,7 +174,7 @@ visualise SNPs with significant p-values in the Hardy-Weinberg exact
 test, we can again call autoplot:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>,type <span class="op">=</span> <span class="st">"significant hwe"</span>, hwe_p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a02_qc_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
+<p><img src="a02_qc_files/figure-html/unnamed-chunk-10-1.png" alt="Histogram of significant HWE exact test p-values" width="700"></p>
 <p>Few SNPs in our data are significant, however there may be
 circumstances where we would want to cut out the most extreme cases, if
 these data were real, these cases could indicate genotyping errors.</p>
@@ -201,7 +201,7 @@ standard.</p>
 <p>These data can also be visualised using autoplot:</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">individual_report</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a02_qc_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
+<p><img src="a02_qc_files/figure-html/unnamed-chunk-13-1.png" alt="Scatter plot of missingness proportion and observed heterozygosity for each individual" width="700"></p>
 <p>Here we can see that most individuals have low missingness. If we
 wanted to filter individuals to remove those with more than 3% of their
 genotypes missing, we can use <code>filter</code>.</p>
@@ -295,15 +295,15 @@ using <code>gt_save</code>.</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/Rtmp4Va0HY/file1e5616696360.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using bigSNP file: /tmp/Rtmp4Va0HY/file1e561ae50a03.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with backing file: /tmp/Rtmp4Va0HY/file1e561ae50a03.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/RtmpVcYvTQ/file22082a49f16e.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using bigSNP file: /tmp/RtmpVcYvTQ/file22086d91738a.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with backing file: /tmp/RtmpVcYvTQ/file22086d91738a.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/Rtmp4Va0HY/file1e5616696360.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/Rtmp4Va0HY/file1e5616696360.gt" </span></span>
-<span><span class="co">## [2] "/tmp/Rtmp4Va0HY/file1e561ae50a03.rds"</span></span>
-<span><span class="co">## [3] "/tmp/Rtmp4Va0HY/file1e561ae50a03.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/RtmpVcYvTQ/file22082a49f16e.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/RtmpVcYvTQ/file22082a49f16e.gt" </span></span>
+<span><span class="co">## [2] "/tmp/RtmpVcYvTQ/file22086d91738a.rds"</span></span>
+<span><span class="co">## [3] "/tmp/RtmpVcYvTQ/file22086d91738a.bk"</span></span></code></pre>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
