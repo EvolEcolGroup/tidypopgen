@@ -72,6 +72,89 @@ q_matrix <- function(x) {
   }
 }
 
+#' Return a single Q matrix from a `q_matrix_list` object
+#'
+#' This function retrieves a single Q matrix from a `q_matrix_list` object
+#' based on the specified k value and run number.
+#'
+#' @param x A `q_matrix_list` object containing multiple Q matrices
+#' @param k The k value of the desired Q matrix
+#' @param run The run number of the desired Q matrix
+#' @return A single Q matrix from the `q_matrix_list` object
+#' @export
+
+get_q <- function(x, ..., k, run) {
+  # Check if 'x' is a valid q_matrix_list object
+  if (!inherits(x, "q_matrix_list")) {
+    stop("Input must be a 'q_matrix_list' object")
+  }
+
+  # Check if the requested k exists in k_indices
+  k_name <- paste0("k", k)
+  if (!k_name %in% names(x$k_indices)) {
+    stop("Specified k value not found in q_matrix_list")
+  }
+
+  # Get the indices for the specified k
+  k_indices <- x$k_indices[[k_name]]
+
+  # Check if the specified run is valid within the chosen k
+  if (run < 1 || run > length(k_indices)) {
+    stop("Specified run is out of range for the given k value")
+  }
+
+  # Get the index of the desired q-matrix in q_matrices
+  matrix_index <- k_indices[run]
+
+  # Retrieve and return the q-matrix
+  q_matrix <- x$q_matrices[[matrix_index]]
+  return(q_matrix)
+}
+
+#' Return a single P matrix from a `q_matrix_list` object
+#'
+#' This function retrieves a single P matrix from a `q_matrix_list` object
+#' based on the specified k value and run number.
+#'
+#' @param x A `q_matrix_list` object containing P matrices
+#' @param k The k value of the desired P matrix
+#' @param run The run number of the desired P matrix
+#' @return A single P matrix from the `q_matrix_list` object
+#' @export
+
+get_p <- function(x, ..., k, run) {
+  # Check if 'x' is a valid q_matrix_list object
+  if (!inherits(x, "q_matrix_list")) {
+    stop("Input must be a 'q_matrix_list' object")
+  }
+
+  # Check if p_matrices exists in x
+  if (!"p_matrices" %in% names(x)) {
+    stop("Input object does not contain any P matrices")
+  }
+
+  # Check if the requested k exists in k_indices
+  k_name <- paste0("k", k)
+  if (!k_name %in% names(x$k_indices)) {
+    stop("Specified k value not found in q_matrix_list")
+  }
+
+  # Get the indices for the specified k
+  k_indices <- x$k_indices[[k_name]]
+
+  # Check if the specified run is valid within the chosen k
+  if (run < 1 || run > length(k_indices)) {
+    stop("Specified run is out of range for the given k value")
+  }
+
+  # Get the index of the desired p-matrix in p_matrices
+  matrix_index <- k_indices[run]
+
+  # Retrieve and return the p-matrix
+  p_matrix <- x$p_matrices[[matrix_index]]
+  return(p_matrix)
+}
+
 #' Tidy a Q matrix
 #'
 #' Takes a `q_matrix` object, which is a matrix, and returns a tidied tibble.
@@ -272,7 +355,7 @@ summary.q_matrix_list <- function(object, ...) {
   return(summary_df)
 }
 
-
+# Convert a matrix to a q_matrix object
 as_q_matrix <- function(x){
   if (inherits(x,"data.frame")){
     x <- as.matrix(x)
@@ -281,10 +364,6 @@ as_q_matrix <- function(x){
   class(x) <- c("q_matrix",class(x))
   x
 }
-
-
-
-
 
 
 
