@@ -9,32 +9,54 @@
 #' - a path to a single .Q file
 #' - a matrix
 #' - a dataframe
-#' @returns either:
-#' - a single `q_matrix` object
-#' - a list of `q_matrix` objects
-#' - a `q_matrix_list` object (for directories containing multiple runs) of q_matrix objects
+#' - a list of dataframes or matrices
+#' @returns A `q_matrix_list` object containing a list of Q matrices and a list of indices for each Q matrix separated by K
 #' @export
 #' @aliases q_matrix_list
+
 q_matrix <- function(x) {
+  # Sub function to process q-matrix and create output list
+  process_q_matrix <- function(matrix_list) {
+    # Get the number of columns for each Q matrix (which corresponds to K)
+    k_values <- sapply(matrix_list, ncol)
+    # Create a list of lists, grouping matrix indices by k
+    k_list_of_lists <- split(seq_along(matrix_list), k_values)
+    # Rename the list so that each K is prefixed with "k"
+    names(k_list_of_lists) <- paste0("k", names(k_list_of_lists))
+    # Create main list containing k_list and matrix list
+    q_matrix_list <- list(k_indices = k_list_of_lists, q_matrices = matrix_list)
+    # Set class and return the final list
+    class(q_matrix_list) <- c("q_matrix_list", class(q_matrix_list))
+    return(q_matrix_list)
+  }
 
+  # Check if input is a single data frame or matrix
   if (inherits(x, "data.frame") || inherits(x, "matrix")) {
-    x <- as_q_matrix(x)
-    return(x)
+    # Convert df to q-matrix and process
+    matrix_list <- list(as_q_matrix(x))
+    return(process_q_matrix(matrix_list))
 
+    # Check if input is a flat list of q-matrices
+  } else if (is.list(x) && all(sapply(x, function(element) inherits(element, c("data.frame", "matrix"))))) {
+    # Convert each element to a q-matrix
+    matrix_list <- lapply(x, as_q_matrix)
+    return(process_q_matrix(matrix_list))
+
+    # Check if input is an invalid path
   } else if (!dir.exists(x) && !file.exists(x)){
-    stop("Input is not a valid dataframe, file or directory")
+    stop("Input is not a valid dataframe, file, directory, or list of q-matrices")
 
-  } else if (!dir.exists(x) && file.exists(x)){
-      if ((grepl("\\.Q$", x)) == FALSE){
-        #if input file does not end in Q
-        stop("Input file does not end in '.Q'")
-      }
-    # Action if input is a file
-    if (grepl("\\.Q$", x) == TRUE) {
-      x <- utils::read.table(x, header = FALSE)
-      x <- as_q_matrix(x)
-      return(x)
+    # Check if input is a single file path
+  } else if (!dir.exists(x) && file.exists(x)) {
+    if (!grepl("\\.Q$", x)) {
+      stop("Input file does not end in '.Q'")
     }
+    # Read file, convert to q-matrix, and process
+    x <- as_q_matrix(utils::read.table(x, header = FALSE))
+    matrix_list <- list(x)
+    return(process_q_matrix(matrix_list))
+
+    # Check if input is a directory of q-files
   } else if (dir.exists(x)) {
     # List all .Q files in the directory
     files <- list.files(x, pattern = "\\.Q$", full.names = TRUE)
@@ -43,20 +65,10 @@ q_matrix <- function(x) {
     if (length(files) == 0) {
       stop("No .Q files found in the directory")
     }
-    # Read all .Q files into a list
-    data_list <- lapply(files, function(file) utils::read.table(file, header = FALSE))
-    # Turn each data frame into a Q matrix
-    matrix_list <- lapply(data_list, FUN = as_q_matrix)
-    # Get the number of columns for each Q matrix (which corresponds to K)
-    k_values <- sapply(matrix_list, ncol)
-    # Create a list of lists, grouping matrices by their number of columns (K)
-    list_of_lists <- split(matrix_list, k_values)
-    # Rename the list so that each K is prefixed with "k"
-    names(list_of_lists) <- paste0("k", names(list_of_lists))
-    # Return the list of lists
-    class(list_of_lists) <- c("q_matrix_list", class(list_of_lists))
-    return(list_of_lists)
 
+    # Read all .Q files into a list and convert each to a q-matrix
+    matrix_list <- lapply(files, function(file) as_q_matrix(utils::read.table(file, header = FALSE)))
+    return(process_q_matrix(matrix_list))
   }
 }
 
