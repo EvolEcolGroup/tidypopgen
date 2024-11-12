@@ -7,7 +7,7 @@
 qc_report_indiv(.x, kings_threshold = NULL, ...)
 }
 \arguments{
-\item{.x}{a \code{\link{gen_tibble}} object.}
+\item{.x}{either a \code{\link{gen_tibble}} object or a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
 \item{kings_threshold}{an optional numeric, a threshold of relatedness for the sample}
 
