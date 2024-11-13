@@ -119,3 +119,31 @@ test_that("loci order",{
 })
 
 
+test_that("loci_ld_clump works on a grouped gt",{
+
+  bedfile <- system.file("extdata/related/families.bed", package="tidypopgen")
+  rds <- bigsnpr::snp_readBed(bedfile, backingfile = tempfile())
+  bigsnp <- bigsnpr::snp_attach(rds)
+
+  gen_tbl <- gen_tibble(bedfile, quiet = TRUE,
+                        backingfile = tempfile(), valid_alleles = c("1","2"))
+
+  gen_tbl$population <- rep(c("population_1","population_2"), each = 6)
+  gen_tbl <- gen_tbl %>% group_by(population)
+
+  imputed_data <- gt_impute_simple(gen_tbl, method = "random")
+  to_keep_LD <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+
+  #the same error occurs with a different dataset
+
+  #test with .bed
+  bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  pop_a_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+  pop_a_gt$population <- c("pop1","pop1","pop2","pop2","pop1")
+  #group
+  pop_a_gt <- pop_a_gt %>% group_by(population)
+  imputed_pop_a <- gt_impute_simple(pop_a_gt, method = "random")
+  to_keep_LD <- loci_ld_clump(imputed_pop_a, thr_r2 = 0.2, size = 10)
+
+})
+
