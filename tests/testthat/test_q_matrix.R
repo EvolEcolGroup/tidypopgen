@@ -14,8 +14,15 @@ test_that("q_matrix reads q_files",{
   anolis_q_k3_mat <- q_matrix(q_mat)
   expect_true(inherits(anolis_q_k3_mat,"q_matrix"))
 
-  #read multiple .Q
+  #read from list of .Qs
   q_folder <- system.file("/extdata/anolis", package = "tidypopgen")
+  q_list_no_structure <- list(as.matrix(read.table(system.file("/extdata/anolis/anolis_ld_run1.3.Q", package = "tidypopgen"), header = TRUE)),
+                              as.matrix(read.table(system.file("/extdata/anolis/anolis_ld_run1.4.Q", package = "tidypopgen"), header = TRUE)))
+  anolis_q <- q_matrix(q_list_no_structure)
+  expect_true(inherits(anolis_q,"q_matrix_list"))
+  expect_true(inherits(anolis_q$q_matrices[[1]],"q_matrix"))
+
+  #read multiple .Q
   anolis_q <- q_matrix(q_folder)
   expect_true(inherits(anolis_q,"q_matrix_list"))
   expect_true(inherits(anolis_q$q_matrices[[1]],"q_matrix"))
@@ -29,7 +36,7 @@ test_that("q_matrix reads q_files",{
   expect_error(q_matrix(path_no_q),"No .Q files found in the directory")
 })
 
-test_that("get_q returns correct matrix",{
+test_that("get_q returns correct q-matrix",{
   #read multiple q into a list
   q_folder <- system.file("/extdata/anolis", package = "tidypopgen")
   q_list <- q_matrix(q_folder)
@@ -54,7 +61,7 @@ test_that("get_q returns correct matrix",{
   expect_error(get_q(q_list$q_matrices[[1]], k=3, run=1),"Input must be a 'q_matrix_list' object")
 })
 
-test_that("get_p only returns p",{
+test_that("get_p returns correct p-matrix",{
   #read multiple q into a list
   q_folder <- system.file("/extdata/anolis", package = "tidypopgen")
   q_list <- q_matrix(q_folder)
@@ -67,6 +74,24 @@ test_that("get_p only returns p",{
                               as.matrix(read.table(system.file("/extdata/anolis/anolis_ld_run1.4.Q", package = "tidypopgen"), header = TRUE)))
   expect_error(get_p(q_list_no_structure, k=3, run=1),"Input must be a 'q_matrix_list' object")
   expect_error(get_p(q_list$q_matrices[[1]], k=3, run=1),"Input must be a 'q_matrix_list' object")
+
+  #add P files to q_list
+  q_list$p_matrices <- list(as.matrix(read.table(system.file("/extdata/anolis/anolis_ld_run1.3.P", package = "tidypopgen"), header = TRUE)),
+                            as.matrix(read.table(system.file("/extdata/anolis/anolis_ld_run1.4.P", package = "tidypopgen"), header = TRUE)))
+
+  #check returns a single q-matrix object
+  anolis_p_k3_r1 <- get_p(q_list, k=3, run=1)
+  expect_true(inherits(anolis_p_k3_r1,"matrix"))
+
+  #check number of cols of p-matrix is equal to k
+  anolis_p_k3_r1 <- get_p(q_list, k=3, run=1)
+  anolis_p_k4_r1 <- get_p(q_list, k=4, run=1)
+  expect_equal(ncol(anolis_p_k3_r1),3)
+  expect_equal(ncol(anolis_p_k4_r1),4)
+
+  #check errors if outside of k or run range
+  expect_error(get_p(q_list, k=5, run=1),"Specified k value not found in q_matrix_list")
+  expect_error(get_p(q_list, k=3, run=2),"Specified run is out of range for the given k value")
 })
 
 test_that("summary of q_matrix",{
