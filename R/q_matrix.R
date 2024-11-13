@@ -10,7 +10,9 @@
 #' - a matrix
 #' - a dataframe
 #' - a list of dataframes or matrices
-#' @returns A `q_matrix_list` object containing a list of Q matrices and a list of indices for each Q matrix separated by K
+#' @returns either:
+#' - a single `q_matrix` object
+#' - a `q_matrix_list` object containing a list of Q matrices and a list of indices for each Q matrix separated by K
 #' @export
 #' @aliases q_matrix_list
 
@@ -32,9 +34,8 @@ q_matrix <- function(x) {
 
   # Check if input is a single data frame or matrix
   if (inherits(x, "data.frame") || inherits(x, "matrix")) {
-    # Convert df to q-matrix and process
-    matrix_list <- list(as_q_matrix(x))
-    return(process_q_matrix(matrix_list))
+      x <- as_q_matrix(x)
+      return(x)
 
     # Check if input is a flat list of q-matrices
   } else if (is.list(x) && all(sapply(x, function(element) inherits(element, c("data.frame", "matrix"))))) {
@@ -52,9 +53,9 @@ q_matrix <- function(x) {
       stop("Input file does not end in '.Q'")
     }
     # Read file, convert to q-matrix, and process
-    x <- as_q_matrix(utils::read.table(x, header = FALSE))
-    matrix_list <- list(x)
-    return(process_q_matrix(matrix_list))
+      x <- utils::read.table(x, header = FALSE)
+      x <- as_q_matrix(x)
+      return(x)
 
     # Check if input is a directory of q-files
   } else if (dir.exists(x)) {
@@ -78,6 +79,7 @@ q_matrix <- function(x) {
 #' based on the specified k value and run number.
 #'
 #' @param x A `q_matrix_list` object containing multiple Q matrices
+#' @param ... Not used
 #' @param k The k value of the desired Q matrix
 #' @param run The run number of the desired Q matrix
 #' @return A single Q matrix from the `q_matrix_list` object
@@ -117,6 +119,7 @@ get_q <- function(x, ..., k, run) {
 #' based on the specified k value and run number.
 #'
 #' @param x A `q_matrix_list` object containing P matrices
+#' @param ... Not used
 #' @param k The k value of the desired P matrix
 #' @param run The run number of the desired P matrix
 #' @return A single P matrix from the `q_matrix_list` object
@@ -341,15 +344,15 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
 #' @return A summary of the object.
 #' @export
 summary.q_matrix_list <- function(object, ...) {
-  k_values <- names(object)
-
+  # Check if 'x' is a valid q_matrix_list object
+  if (!inherits(object, "q_matrix_list")) {
+    stop("Input must be a 'q_matrix_list' object")
+  }
+  k_values <- names(object$k_indices)
   summary_df <- data.frame(K = integer(), Repeats = integer())
-
   for (k in k_values) {
     k_numeric <- as.numeric(sub("k", "", k))
-
-    num_repeats <- length(object[[k]])
-
+    num_repeats <- length(object$k_indices[[k]])
     summary_df <- rbind(summary_df, data.frame(K = k_numeric, Repeats = num_repeats))
   }
   return(summary_df)
@@ -364,6 +367,4 @@ as_q_matrix <- function(x){
   class(x) <- c("q_matrix",class(x))
   x
 }
-
-
 

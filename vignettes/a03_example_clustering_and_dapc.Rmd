@@ -424,13 +424,13 @@ access a single matrix from the list by selecting the run number and K value of 
 For example, if we would like to view the second run of K = 3:
 
 ```{r}
-q_list[[3]][[2]]
+get_q(q_list, k = 3, run = 2)
 ```
 
 Similarly to before, we can then autoplot any of these matrices by selecting from the `q_matrix_list`:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
-autoplot(q_list[[3]][[2]], data = anole_gt)
+autoplot(get_q(q_list, k = 3, run = 2), data = anole_gt)
 ```
 
 In this way, `tidypopgen` integrates with external clustering software (such as 

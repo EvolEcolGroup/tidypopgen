@@ -14,14 +14,14 @@ q_matrix(x)
 \item a path to a single .Q file
 \item a matrix
 \item a dataframe
+\item a list of dataframes or matrices
 }}
 }
 \value{
 either:
 \itemize{
 \item a single \code{q_matrix} object
-\item a list of \code{q_matrix} objects
-\item a \code{q_matrix_list} object (for directories containing multiple runs) of q_matrix objects
+\item a \code{q_matrix_list} object containing a list of Q matrices and a list of indices for each Q matrix separated by K
 }
 }
 \description{
