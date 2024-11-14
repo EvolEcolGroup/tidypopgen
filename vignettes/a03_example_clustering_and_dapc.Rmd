@@ -380,3 +380,58 @@ plt <- ggplot2::ggplot(anole_gt_sNMF, ggplot2::aes(x = id, y = percentage, fill 
 
 plt
 ```
+
+# ADMIXTURE and handling multiple Q matrices
+
+Usually, clustering algorithms are run multiple times for different values of K.
+The function `q_matrix()` can take a path to a directory containing results
+from multiple runs of a clustering algorithm (such as ADMIXTURE), read the .Q files,
+and summarise them in a single `q_matrix_list` object.
+
+In the analysis above, through `snmf()`, we ran 3 repetitions for each value of K. 
+
+To exemplify how `q_matrix()` can read directly from output folders, we can write 
+the outputs to a temporary file: 
+
+```{r}
+runs <- c(1:3)
+k_values <- c(1:10)
+q_matrices <- list()
+dir <- tempdir()
+
+for(x in k_values){
+  
+  q_matrices[[x]] <- list()
+  
+  for(i in runs){
+  q_matrices[[x]][[i]] <- LEA::Q(anole_snmf, K = x, run = i)
+  
+  write.table(q_matrices[[x]][[i]], file = paste0(dir,"/K",x,"run",i,".Q"), col.names = FALSE, row.names = FALSE, quote = FALSE)
+  
+  }
+}
+```
+
+And read them back into a `q_matrix_list`:
+
+```{r}
+q_list <- q_matrix(dir)
+summary(q_list)
+```
+
+q_matrix has read and summarised the .Q files from our analysis,and we can 
+access a single matrix from the list by selecting the run number and K value of interest.
+For example, if we would like to view the second run of K = 3:
+
+```{r}
+get_q_matrix(q_list, k = 3, run = 2)
+```
+
+Similarly to before, we can then autoplot any of these matrices by selecting from the `q_matrix_list`:
+
+```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
+autoplot(get_q_matrix(q_list, k = 3, run = 2), data = anole_gt)
+```
+
+In this way, `tidypopgen` integrates with external clustering software (such as 
+ADMIXTURE or STRUCTURE) seamlessly for quick, easy plotting. 

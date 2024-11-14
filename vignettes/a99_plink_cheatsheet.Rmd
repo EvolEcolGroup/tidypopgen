@@ -23,26 +23,30 @@ bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
 data <- gen_tibble(bigsnp_path, quiet = TRUE)
 ```
 
+The following flags and corresponding tidypopgen functions are based on 
+plink version 1.9.
+
 ## File management and reading data:
 
-| PLINK                         | `tidypopgen`                                  |
-|-------------------------------|-----------------------------------------|
-| --make-bed --out              | `gt_as_plink(data, bedfile = my_file)`        |
-| --recode                      | \`gt_as_plink(data, bedfile = my_file         |
-| --allele1234 and --alleleACGT | See `gen_tibble()\` parameter 'valid_alleles' |
+| PLINK 1.9                        | `tidypopgen`                                             |
+|----------------------------------|----------------------------------------------------------|
+| --make-bed --out                 | `gt_as_plink(data, file = my_file, type = "bed")`        |
+| --recode                         | `gt_as_plink(data, file = my_file, type = "ped")`        |
+| --recode vcf                     | `gt_as_vcf(data, file = my_file)`                        |
+| --allele1234 and --alleleACGT    | See `gen_tibble()` parameter 'valid_alleles'             |
 
 PLINK flags --update-alleles, --allele1234, and --alleleACGT, all alter the coding of alleles. In `tidypopgen`, valid alleles are supplied when reading in a `gen_tibble`.
 
 ## Quality control:
 
-| PLINK      | `tidypopgen`                    |
-|------------|---------------------------------|
-| --maf      | `data %\>% loci_maf()`          |
-| --geno     | `data %\>% loci_missingness()`  |
-| --mind     | `data %\>% indiv_missingness()` |
-| --hwe      | `data %\>% loci_hwe()`          |
-| --het      | `data %\>% indiv_het_obs()`     |
-| --distance | `data %\>% gt_ibs()`            |
+| PLINK              | `tidypopgen`                    |
+|--------------------|---------------------------------|
+| --maf              | `data %\>% loci_maf()`          |
+| --geno             | `data %\>% loci_missingness()`  |
+| --hwe              | `data %\>% loci_hwe()`          |
+| --freq --a2-allele | `data %\>% loci_alt_freq()`     |
+| --mind             | `data %\>% indiv_missingness()` |
+| --het              | `data %\>% indiv_het_obs()`     |
 
 To filter out variants in `tidypopgen`, in a similar way to PLINK flags such as --extract or --autosome, it is necessary to use the `gen_tibble` with `select_loci_if()`. For example:
 
@@ -80,7 +84,8 @@ To explore why clumping is preferable to pruning, see <https://privefl.github.io
 
 | KING        | `tidypopgen`                |
 |-------------|-----------------------------|
-| --kinship   | `pairwise_king()`                 |
+| --kinship   | `pairwise_king()`           |
+| --distance  | `pairwise_ibs()`            |
 | --unrelated | `filter_high_relatedness()` |
 
 pairwise_king() implements the KING-robust estimator of kinship equivalent to --kinship in KING. To remove related individuals, instead of using --unrelated --degree, the user can pass the resulting kinship matrix and a relatedness threshold to filter_high_relatedness, which will return the largest possible set of unrelated individuals.
@@ -101,8 +106,9 @@ Data are only merged one set at a time, there is no equivalent to --merge-list.
 
 ## Analysis:
 
-| PLINK     | `tidypopgen`                       |
-|-----------|------------------------------------|
-| --pca     | See gt_pca() for pca options       |
-| --fst     | pairwise_pop_fst() with group_by() |
-| --homozyg | gt_roh_window()                    |
+| PLINK     | `tidypopgen`                           |
+|-----------|----------------------------------------|
+| --pca     | See `gt_pca()` for pca options         |
+| --fst     | `pairwise_pop_fst()` with `group_by()` |
+| --homozyg | `gt_roh_window()`                      |
+
