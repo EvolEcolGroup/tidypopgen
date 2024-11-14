@@ -12,8 +12,9 @@
 \item{...}{not currently used}
 }
 \value{
-A summary of the object.
+A summary of the number of repeats for each K value.
 }
 \description{
-Takes a \code{q_matrix_list} object and returns a summary.
+Takes a \code{q_matrix_list} object and returns a summary of the Q files in the
+object based on the number of repeats for each K value.
 }
