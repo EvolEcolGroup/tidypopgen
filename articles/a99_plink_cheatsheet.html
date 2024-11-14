@@ -71,30 +71,36 @@
 
     
     
+<p>The following flags and corresponding tidypopgen functions are based
+on plink version 1.9.</p>
 <div class="section level2">
 <h2 id="file-management-and-reading-data">File management and reading data:<a class="anchor" aria-label="anchor" href="#file-management-and-reading-data"></a>
 </h2>
 <table class="table">
 <colgroup>
-<col width="43%">
-<col width="56%">
+<col width="36%">
+<col width="63%">
 </colgroup>
 <thead><tr class="header">
-<th>PLINK</th>
+<th>PLINK 1.9</th>
 <th><code>tidypopgen</code></th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td>–make-bed –out</td>
-<td><code>gt_as_plink(data, bedfile = my_file)</code></td>
+<td><code>gt_as_plink(data, file = my_file, type = "bed")</code></td>
 </tr>
 <tr class="even">
 <td>–recode</td>
-<td>`gt_as_plink(data, bedfile = my_file</td>
+<td><code>gt_as_plink(data, file = my_file, type = "ped")</code></td>
 </tr>
 <tr class="odd">
+<td>–recode vcf</td>
+<td><code>gt_as_vcf(data, file = my_file)</code></td>
+</tr>
+<tr class="even">
 <td>–allele1234 and –alleleACGT</td>
-<td>See <code>gen_tibble()\</code> parameter ‘valid_alleles’</td>
+<td>See <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> parameter ‘valid_alleles’</td>
 </tr>
 </tbody>
 </table>
@@ -120,20 +126,20 @@ supplied when reading in a <code>gen_tibble</code>.</p>
 <td><code>data %\&gt;% loci_missingness()</code></td>
 </tr>
 <tr class="odd">
+<td>–hwe</td>
+<td><code>data %\&gt;% loci_hwe()</code></td>
+</tr>
+<tr class="even">
+<td>–freq –a2-allele</td>
+<td><code>data %\&gt;% loci_alt_freq()</code></td>
+</tr>
+<tr class="odd">
 <td>–mind</td>
 <td><code>data %\&gt;% indiv_missingness()</code></td>
 </tr>
 <tr class="even">
-<td>–hwe</td>
-<td><code>data %\&gt;% loci_hwe()</code></td>
-</tr>
-<tr class="odd">
 <td>–het</td>
 <td><code>data %\&gt;% indiv_het_obs()</code></td>
-</tr>
-<tr class="even">
-<td>–distance</td>
-<td><code>data %\&gt;% gt_ibs()</code></td>
 </tr>
 </tbody>
 </table>
@@ -202,6 +208,10 @@ pruning.</p>
 <td><code><a href="../reference/pairwise_king.html">pairwise_king()</a></code></td>
 </tr>
 <tr class="even">
+<td>–distance</td>
+<td><code><a href="../reference/pairwise_ibs.html">pairwise_ibs()</a></code></td>
+</tr>
+<tr class="odd">
 <td>–unrelated</td>
 <td><code><a href="../reference/filter_high_relatedness.html">filter_high_relatedness()</a></code></td>
 </tr>
@@ -263,15 +273,17 @@ the new target dataset, as well as the number of ambiguous SNPs.</p>
 <tbody>
 <tr class="odd">
 <td>–pca</td>
-<td>See gt_pca() for pca options</td>
+<td>See <code><a href="../reference/gt_pca.html">gt_pca()</a></code> for pca options</td>
 </tr>
 <tr class="even">
 <td>–fst</td>
-<td>pairwise_pop_fst() with group_by()</td>
+<td>
+<code><a href="../reference/pairwise_pop_fst.html">pairwise_pop_fst()</a></code> with <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code>
+</td>
 </tr>
 <tr class="odd">
 <td>–homozyg</td>
-<td>gt_roh_window()</td>
+<td><code><a href="../reference/gt_roh_window.html">gt_roh_window()</a></code></td>
 </tr>
 </tbody>
 </table>

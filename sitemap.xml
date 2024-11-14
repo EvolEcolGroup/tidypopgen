@@ -11,6 +11,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/authors.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/index.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/annotate_group_info.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/as_q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/augment.gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/augment_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/augment_loci.html</loc></url>
@@ -23,6 +24,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_pcadapt.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/cast_list_to_q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/count_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/count_vcf_individuals.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/count_vcf_variants.html</loc></url>
@@ -30,6 +32,8 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/filter_high_relatedness.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/flip.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/get_p_matrix.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/get_q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_as_genind.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_as_genlight.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_as_geno_lea.html</loc></url>
