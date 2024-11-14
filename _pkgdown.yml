@@ -97,8 +97,8 @@ reference:
     desc: "Functions for creating, tidying, and visualising q_matrix objects."
     contents:
         - q_matrix
-        - get_q
-        - get_p
+        - get_q_matrix
+        - get_p_matrix
         - tidy.q_matrix
         - augment.q_matrix
         - autoplot.q_matrix

@@ -85,7 +85,7 @@ q_matrix <- function(x) {
 #' @return A single Q matrix from the `q_matrix_list` object
 #' @export
 
-get_q <- function(x, ..., k, run) {
+get_q_matrix <- function(x, ..., k, run) {
   # Check if 'x' is a valid q_matrix_list object
   if (!inherits(x, "q_matrix_list")) {
     stop("Input must be a 'q_matrix_list' object")
@@ -125,7 +125,7 @@ get_q <- function(x, ..., k, run) {
 #' @return A single P matrix from the `q_matrix_list` object
 #' @export
 
-get_p <- function(x, ..., k, run) {
+get_p_matrix <- function(x, ..., k, run) {
   # Check if 'x' is a valid q_matrix_list object
   if (!inherits(x, "q_matrix_list")) {
     stop("Input must be a 'q_matrix_list' object")
