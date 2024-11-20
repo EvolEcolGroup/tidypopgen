@@ -135,8 +135,6 @@ nrow(data)
 Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to `qc_report_indiv()`, then the report also calculates a KING coefficient of relatedness matrix using the sample. The `kings_threshold` is used to provide an output of the largest possible group with no related individuals in the third column `to_keep`. This boolean column recommends which individuals to remove (FALSE) and to keep (TRUE) to achieve an unrelated sample. 
 
 ```{r}
-data$population <- "population_1"
-data <- data %>% group_by(population)
 individual_report <- qc_report_indiv(data, kings_threshold = 0.177)
 summary(individual_report)
 ```
@@ -145,7 +143,6 @@ We can remove the recommended individuals by using:
 
 ```{r}
 data <- data %>% filter(id %in% individual_report$id & individual_report$to_keep == TRUE)
-data <- data %>% ungroup()
 ```
 
 We can now view a summary of our cleaned data set again, showing that our data has reduced from 12 to 10 individuals.
