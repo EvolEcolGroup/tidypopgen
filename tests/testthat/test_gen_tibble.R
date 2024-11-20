@@ -185,9 +185,10 @@ test_that("PROBLEM TEST gentibble from VCF with missingness issue",{
   pop_b_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
 
   # debug
-  if (!all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt))) {
-    print(show_genotypes(pop_b_gt))
-    print(show_genotypes(pop_b_vcf_fast_gt))
+  if (!identical(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt))) {
+    stop("genotypes are not equal \n",
+    print(show_genotypes(pop_b_gt)),"\n",
+    print(show_genotypes(pop_b_vcf_fast_gt)))
   }
 
   for(i in 1:10){
