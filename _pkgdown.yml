@@ -1,6 +1,8 @@
 url: https://evolecolgroup.github.io/tidypopgen/
 template:
   bootstrap: 5
+  bslib:
+    danger: "#A6081A"
 development:
   mode: auto
 reference:
@@ -18,6 +20,8 @@ reference:
         - show_loci
         - "show_loci<-"
         - show_ploidy
+        - count_loci
+        - augment_loci
   - title: "Selecting loci"
     desc: "Functions to select loci from a gen_tibble, either based on loci information, or genotype information."
     contents:
@@ -93,6 +97,8 @@ reference:
     desc: "Functions for creating, tidying, and visualising q_matrix objects."
     contents:
         - q_matrix
+        - get_q_matrix
+        - get_p_matrix
         - tidy.q_matrix
         - augment.q_matrix
         - autoplot.q_matrix
@@ -108,13 +114,10 @@ reference:
         - gt_pcadapt
         - autoplot.gt_pcadapt
   - title: "bigSNP"
-    desc: "Functions for operating directly on a bigSNp object."
+    desc: "Mostly for developers: Functions for operating directly on bigSNp objects."
     contents:
         - snp_allele_sharing
         - snp_ibs
         - snp_king
-  - title: "Other"
-    desc: "Additional helpful functions."
-    contents:
-        - augment_loci
-        - count_loci
+
+

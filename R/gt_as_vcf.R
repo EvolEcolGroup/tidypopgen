@@ -35,11 +35,12 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE){
   }
 
   # set up chunks
-  chunks_vec <- c(
-    rep(chunk_size, floor(count_loci(x) / chunk_size)),
-    count_loci(x) %% chunk_size
-  )
-  chunks_vec_index <- c(1,cumsum(chunks_vec))
+  chunks_vec <- rep(chunk_size, floor(count_loci(x) / chunk_size))
+  if (count_loci(x) %% chunk_size != 0){
+    chunks_vec <- c(chunks_vec, count_loci(x) %% chunk_size)
+  }
+  chunks_vec_index <- c(0,cumsum(chunks_vec))
+
 
   # generate the header
   vcf_header <- c("##fileformat=VCFv4.3",
@@ -68,13 +69,13 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE){
   for (chunk_i in seq_along(chunks_vec)) {
     genotypes_matrix <- t(show_genotypes(x,
                                          loci_indices =
-                                           chunks_vec_index[chunk_i]:chunks_vec_index[chunk_i+1]))
+                                           (chunks_vec_index[chunk_i]+1):chunks_vec_index[chunk_i+1]))
     genotypes_matrix[genotypes_matrix==0] <- "0/0"
     genotypes_matrix[genotypes_matrix==1] <- "0/1"
     genotypes_matrix[genotypes_matrix==2] <- "1/1"
     genotypes_matrix[is.na(genotypes_matrix)] <- "./."
     # subset loci to this chunk
-    loci_sub <- show_loci(x)[chunks_vec_index[chunk_i]:chunks_vec_index[chunk_i+1],]
+    loci_sub <- show_loci(x)[(chunks_vec_index[chunk_i]+1):chunks_vec_index[chunk_i+1],]
     # add the other columns needed for the
     loci_cols <- c("chromosome", "position", "name", "allele_ref", "allele_alt")
     loci_sub <- loci_sub %>% select(any_of(loci_cols)) %>%
