@@ -15,6 +15,11 @@
 
 gt_as_plink <- function(x, file = NULL, type = c("bed","ped","raw"),
                            overwrite = TRUE){
+  # check that x is a gen_tibble
+  if (!is(x, "gen_tbl")){
+    stop("x must be a gen_tibble")
+  }
+
   type <- match.arg(type)
 
   if (is.null(file)){
@@ -57,9 +62,26 @@ gt_write_bed <- function(x, file) {
                         bedfile = file,
                         ind.row = vctrs::vec_data(x$genotypes),
                         ind.col = show_loci(x)$big_index)
-  # the bim and fam file only contain the original information in the bigSNP object
-  # TODO we should update them with the info from the gentibble
-  bed_path
+  # the bim and fam files written by bigsnpr contain the information of the original bigsnpr object
+  # we now update that information with the info from the gen_tibble
+  if (FALSE){ # TODO skip until we test this section
+    bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
+    # TODO check that ref adn alt are in the right order
+    bim_table <- show_loci(x) %>%
+      dplyr::select(dplyr::all_of(c("chromosome", "name", "genetic_dist", "position", "allele_ref", "allele_alt")))
+    write.table(bim_table,"bim_path", row.names = FALSE, col.names = FALSE, quote = FALSE)
+    fam_path <- bigsnpr::sub_bed(bed_path, ".fam")
+    fam_table <- read.table(fam_path)
+    fam_table$V2 <- x$id
+    # if this is a group tibble, use the grouping variable
+    if(inherits(x,"grouped_gen_tbl")){
+      fam_table$V1 <- x[group_vars(x)]
+    }
+    write.table(fam_table, fam_path, row.names = FALSE, col.names = FALSE, quote = FALSE)
+  }
+
+  # return the path to the file
+  return(bed_path)
 }
 
 

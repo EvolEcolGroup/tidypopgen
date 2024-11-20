@@ -63,8 +63,8 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto")
   } else { # if reticulate is available
     # if we have "auto" and the conda environment rtidygenclust does not exist, or
     if (conda_env =="auto") {
-      if (("rtidygenclust" %in% reticulate::conda_list()[["name"]])){
-        conda_env <- "rtidygenclust"
+      if (("rfastmixture" %in% reticulate::conda_list()[["name"]])){
+        conda_env <- "rfastmixture"
       } else {
         conda_env <- "none"
       }
