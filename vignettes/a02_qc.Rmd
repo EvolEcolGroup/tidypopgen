@@ -187,3 +187,30 @@ When we are happy with the quality of our data, we can create and save a final q
 gt_save(ld_data, file_name = tempfile())
 ```
 
+# Grouping data 
+
+For some quality control measures, if you have a gen_tibble that includes multiple datasets you may want to group by population before running the quality control. This can be done using `group_by`. 
+
+First, lets add some imaginary population data to our gen_tibble:
+
+```{r}
+data <- data %>% mutate(population = rep(c("A", "B"), each = 5))
+```
+
+We can then group by population and run quality control on each group:
+
+```{r}
+grouped_loci_report <- data %>% group_by(population) %>% qc_report_loci()
+head(grouped_loci_report)
+```
+
+The loci report that we receive here will calculate Hardy-Weinberg equilibrium for each SNP within each population separately, providing a Bonferroni corrected p-value for each SNP.
+
+Similarly, we can run a quality control report for individuals within each population:
+
+```{r}
+grouped_individual_report <- data %>% group_by(population) %>% qc_report_indiv(kings_threshold = 0.177)
+head(grouped_individual_report)
+```
+
+This is important when we have related individuals, as background population structure can affect the filtering of relatives.
