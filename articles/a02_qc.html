@@ -14,8 +14,8 @@
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Quality Control">
 </head>
 <body>
@@ -295,15 +295,59 @@ using <code>gt_save</code>.</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/Rtmpbw47mi/file228f7a299929.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using bigSNP file: /tmp/Rtmpbw47mi/file228f1e7a7366.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with backing file: /tmp/Rtmpbw47mi/file228f1e7a7366.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/Rtmpk1aQ4d/file1f07319da149.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using bigSNP file: /tmp/Rtmpk1aQ4d/file1f0762ddf94d.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with backing file: /tmp/Rtmpk1aQ4d/file1f0762ddf94d.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/Rtmpbw47mi/file228f7a299929.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/Rtmpbw47mi/file228f7a299929.gt" </span></span>
-<span><span class="co">## [2] "/tmp/Rtmpbw47mi/file228f1e7a7366.rds"</span></span>
-<span><span class="co">## [3] "/tmp/Rtmpbw47mi/file228f1e7a7366.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/Rtmpk1aQ4d/file1f07319da149.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/Rtmpk1aQ4d/file1f07319da149.gt" </span></span>
+<span><span class="co">## [2] "/tmp/Rtmpk1aQ4d/file1f0762ddf94d.rds"</span></span>
+<span><span class="co">## [3] "/tmp/Rtmpk1aQ4d/file1f0762ddf94d.bk"</span></span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="grouping-data">Grouping data<a class="anchor" aria-label="anchor" href="#grouping-data"></a>
+</h2>
+<p>For some quality control measures, if you have a gen_tibble that
+includes multiple datasets you may want to group by population before
+running the quality control. This can be done using
+<code>group_by</code>.</p>
+<p>First, lets add some imaginary population data to our gen_tibble:</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>population <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>We can then group by population and run quality control on each
+group:</p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">grouped_loci_report</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">grouped_loci_report</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">##   snp_id   maf missingness hwe_p</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>      2  0.3            0 1    </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>      3  0.2            0 1.11 </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>      5  0.35           0 0.127</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>      8  0.3            0 0.127</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>     10  0.5            0 0.476</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>     11  0.1            0 1</span></span></code></pre>
+<p>The loci report that we receive here will calculate Hardy-Weinberg
+equilibrium for each SNP within each population separately, providing a
+Bonferroni corrected p-value for each SNP.</p>
+<p>Similarly, we can run a quality control report for individuals within
+each population:</p>
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">grouped_individual_report</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span>kings_threshold <span class="op">=</span> <span class="fl">0.177</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">grouped_individual_report</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">##   het_obs missingness to_keep    id</span></span>
+<span><span class="co">##     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>   0.223           0 TRUE        1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>   0.228           0 TRUE        2</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>   0.223           0 TRUE        3</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>   0.233           0 TRUE        4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>   0.236           0 TRUE        5</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>   0.222           0 TRUE        6</span></span></code></pre>
+<p>This is important when we have related individuals, as background
+population structure can affect the filtering of relatives.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
