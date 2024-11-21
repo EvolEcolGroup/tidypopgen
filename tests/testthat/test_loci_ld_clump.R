@@ -118,3 +118,28 @@ test_that("loci order",{
 
 })
 
+test_that("loci_ld_clump works on a grouped gt",{
+
+  bedfile <- system.file("extdata/related/families.bed", package="tidypopgen")
+  rds <- bigsnpr::snp_readBed(bedfile, backingfile = tempfile())
+  bigsnp <- bigsnpr::snp_attach(rds)
+
+  gen_tbl <- gen_tibble(bedfile, quiet = TRUE,
+                        backingfile = tempfile(), valid_alleles = c("1","2"))
+
+  imputed_data <- gt_impute_simple(gen_tbl, method = "random")
+  to_keep_LD_ungrouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+
+  gen_tbl$population <- rep(c("population_1","population_2"), each = 6)
+  gen_tbl <- gen_tbl %>% group_by(population)
+
+  imputed_data <- gt_impute_simple(gen_tbl, method = "random")
+  to_keep_LD_grouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+
+  # Removed loci are chosen at random, so we can't use expect equal
+  # However, the same number of loci should be removed in both cases
+  expect_equal(length(to_keep_LD_ungrouped == FALSE), length(to_keep_LD_grouped == FALSE))
+  expect_equal(length(to_keep_LD_ungrouped == TRUE), length(to_keep_LD_grouped == TRUE))
+
+})
+
