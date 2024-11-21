@@ -12,7 +12,7 @@ ListOf<NumericMatrix> gt_grouped_summaries(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
                                    const IntegerVector& groupIds,
-                                   int ngroups,
+                                   size_t ngroups,
                                    int ncores) {
 
   XPtr<FBM> xpBM = BM["address"];
