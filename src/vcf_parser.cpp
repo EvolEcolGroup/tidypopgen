@@ -37,10 +37,18 @@ int countAlternateAlleles(const std::string &genotype, const int missingValue) {
   }
 
   //Rcout<<genotype<<std::endl;
-  for (int pos_i = 0; pos_i < ((colon_pos-1)/2+1); pos_i++){
-    if (genotype[0+pos_i*2] == '1'){
+  for (int pos_i = 0; pos_i < genotype.size(); pos_i++){
+    if (genotype[pos_i] == '1'){
       count++;
     }
+    pos_i++;
+    //
+    if (pos_i< genotype.size()){ // don't read from string if we got beyond the limit
+      if (genotype[pos_i] == ':'){
+        break;
+      }
+    }
+
   }
   return count;
 }
