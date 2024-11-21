@@ -35,7 +35,11 @@ int countAlternateAlleles(const std::string &genotype, const int missingValue) {
     if (genotype[pos_i] == '1'){
       count++;
     }
+
     pos_i++;
+    if (pos_i> (missingValue*2)){
+      Rcpp::stop("Error: a genotype has more than max_ploidy alleles. We estimate max_plody from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome).");
+    }
     //
     if (pos_i< genotype.size()){ // don't read from string if we got beyond the limit
       if (genotype[pos_i] == ':'){
@@ -97,6 +101,7 @@ List extractAltAlleleCountsFromVCF(std::string filename,
   allele2.reserve(maxLoci);
 
   std::string line;
+  std::string this_chromosome = ""; // chromosome of the current line
   int lociCount = 0; // number of biallelic loci
   int lineCount = 0; // number of valid lines
   int skippedLoci = 0;
