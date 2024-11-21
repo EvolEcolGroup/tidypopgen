@@ -24,12 +24,20 @@ std::vector<std::string> split(const std::string &s, const std::string &delimite
 
 // Function to count the number of alternate alleles from genotype information
 // missingValue is max_ploidy +1
-int countAlternateAlleles(const std::string &genotype, const int missingValue, const int ploidy) {
+int countAlternateAlleles(const std::string &genotype, const int missingValue) {
   int count = 0;
   if (genotype[0] == '.'){
     return missingValue;
   }
-  for (int pos_i = 0; pos_i < ploidy; pos_i++){
+  // find first : in the string genotype
+  int colon_pos = genotype.find_first_of(":");
+  //Rcout<<colon_pos<<std::endl;
+  if (colon_pos == -1){
+    colon_pos = genotype.size();
+  }
+
+  //Rcout<<genotype<<std::endl;
+  for (int pos_i = 0; pos_i < ((colon_pos-1)/2+1); pos_i++){
     if (genotype[0+pos_i*2] == '1'){
       count++;
     }
@@ -130,7 +138,7 @@ List extractAltAlleleCountsFromVCF(std::string filename,
       // Collect alternate allele counts for all individuals
       if (fields[4][0] != '.'){
         for (unsigned int i = 9; i < fields.size(); ++i) {
-          int count = countAlternateAlleles(fields[i], missingValue, ploidy[i-9]);
+          int count = countAlternateAlleles(fields[i], missingValue);
           allele_counts(i - 9, lociCount) = count;
         }
       } else { // if this is an invariant site
