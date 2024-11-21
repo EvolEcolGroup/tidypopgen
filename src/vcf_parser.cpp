@@ -24,14 +24,14 @@ std::vector<std::string> split(const std::string &s, const std::string &delimite
 
 // Function to count the number of alternate alleles from genotype information
 // missingValue is max_ploidy +1
-int countAlternateAlleles(const std::string &genotype, const int missingValue) {
+int countAlternateAlleles(const std::string &genotype, const size_t missingValue) {
   int count = 0;
   if (genotype[0] == '.'){
     return missingValue;
   }
 
   //For odd positions, we have the allele; for even positions, we might have : for end of genotype field
-  for (int pos_i = 0; pos_i < genotype.size(); pos_i++){
+  for (size_t pos_i = 0; pos_i < genotype.size(); pos_i++){
     if (genotype[pos_i] == '1'){
       count++;
     }
