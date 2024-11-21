@@ -2,14 +2,20 @@
 #'
 #'#' Return QC information to assess loci (Observed heterozygosity and missingness).
 #'
-#' @param .x a [`gen_tibble`] object.
+#' @param .x either a [`gen_tibble`] object or a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param kings_threshold an optional numeric, a threshold of relatedness for the sample
 #' @param ... further arguments to pass
 #' @returns a tibble with 2 elements: het_obs and missingness
+#' @rdname qc_report_indiv
 #' @export
+qc_report_indiv <- function(.x, ...) {
+  UseMethod("qc_report_indiv", .x)
+}
 
 
-qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
+#' @export
+#' @rdname qc_report_indiv
+qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...){
   rlang::check_dots_empty()
 
   if(is.null(kings_threshold)){
@@ -17,6 +23,7 @@ qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
                                       missingness = indiv_missingness(.x,as_counts=FALSE))
   } else {
 
+    # calculate the kinship matrix
     king <- pairwise_king(.x, as_matrix = TRUE)
 
     relatives <- filter_high_relatedness(matrix = king, .x = .x, kings_threshold = kings_threshold,...)
@@ -28,10 +35,65 @@ qc_report_indiv <- function(.x, kings_threshold = NULL, ...){
     attr(qc_report_indiv$to_keep, "king") <- king
 
   }
-
   class(qc_report_indiv) <- c("qc_report_indiv",class(qc_report_indiv))
   qc_report_indiv
 }
+
+
+#' @export
+#' @rdname qc_report_indiv
+qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...){
+  rlang::check_dots_empty()
+
+  if(is.null(kings_threshold)){
+    qc_report_indiv <- .x %>% ungroup() %>% reframe(het_obs = indiv_het_obs(.x),
+                                      missingness = indiv_missingness(.x,as_counts=FALSE))
+  } else {
+
+  # calculate the kinship matrix
+  king <- pairwise_king(.x, as_matrix = TRUE)
+
+  relatives <- .x %>%
+    group_map(~ {
+      # Subset the matrix for the current group
+      group_matrix <- king[rownames(king) %in% .x$id, colnames(king) %in% .x$id]
+
+      # Apply filter_high_relatedness to the group-specific matrix
+      filter_high_relatedness(matrix = group_matrix, .x = .x, kings_threshold = kings_threshold)
+    })
+
+
+  # Combine all retained IDs (element `1` in each sublist)
+  all_retained_ids <- unlist(lapply(relatives, function(x) x[[1]]))
+
+  # Combine all removed IDs (element `2` in each sublist)
+  all_removed_ids <- unlist(lapply(relatives, function(x) x[[2]]))
+
+  # Combine the boolean TRUE/FALSE values (element `3` in each sublist)
+  all_flags <- unlist(lapply(relatives, function(x) x[[3]]))
+
+  # The resulting lists are now of length = n rows, not split by groups
+  relatives <- list(retained = all_retained_ids,
+                    removed = all_removed_ids,
+                    flags = all_flags)
+
+  # find the group variable of .x
+  group_var <- attr(.x, "group_vars")
+
+  qc_report_indiv <- .x %>% ungroup() %>% reframe(het_obs = indiv_het_obs(.x),
+                                                  missingness = indiv_missingness(.x,as_counts=FALSE))
+  qc_report_indiv$to_keep <- relatives$flags
+  qc_report_indiv$id <- .x$id
+  attr(qc_report_indiv$to_keep, "king") <- king
+
+  }
+
+  class(qc_report_indiv) <- c("qc_report_indiv",class(qc_report_indiv))
+  qc_report_indiv
+
+}
+
+
 
 
 #' Autoplots for `qc_report_indiv` objects
