@@ -29,14 +29,8 @@ int countAlternateAlleles(const std::string &genotype, const int missingValue) {
   if (genotype[0] == '.'){
     return missingValue;
   }
-  // find first : in the string genotype
-  int colon_pos = genotype.find_first_of(":");
-  //Rcout<<colon_pos<<std::endl;
-  if (colon_pos == -1){
-    colon_pos = genotype.size();
-  }
 
-  //Rcout<<genotype<<std::endl;
+  //For odd positions, we have the allele; for even positions, we might have : for end of genotype field
   for (int pos_i = 0; pos_i < genotype.size(); pos_i++){
     if (genotype[pos_i] == '1'){
       count++;
