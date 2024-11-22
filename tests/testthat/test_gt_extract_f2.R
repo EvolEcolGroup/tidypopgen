@@ -24,6 +24,8 @@ test_that("extract f2 correctly",{
   # process the data with admixtools (note that we get some warnings)
   bed_file <- gt_as_plink(test_gt, file = tempfile("test_bed"))
 
+  test_gt2 <- gen_tibble(bed_file, quiet=TRUE)
+
   # test af table
   # without adjusting pseudohaploids
  adm_aftable <- admixtools:::anygeno_to_aftable(bigsnpr::sub_bed(bed_file),

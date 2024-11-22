@@ -9,15 +9,20 @@
 #' the output file will have the same path and prefix of the backingfile.
 #' @param type one of "bed", "ped" or "raw"
 #' @param overwrite boolean whether to overwrite the file.
+#' @param use_integer boolean whether to use the integer representation of the chromosomes
 #' @returns the path of the saved file
 #' @export
 
 
 gt_as_plink <- function(x, file = NULL, type = c("bed","ped","raw"),
-                           overwrite = TRUE){
+                           overwrite = TRUE, use_integer = NULL){
   # check that x is a gen_tibble
-  if (!is(x, "gen_tbl")){
+  if (!methods::is(x, "gen_tbl")){
     stop("x must be a gen_tibble")
+  }
+
+  if (is.null(use_integer)){
+    use_integer = FALSE
   }
 
   type <- match.arg(type)
@@ -50,35 +55,46 @@ gt_as_plink <- function(x, file = NULL, type = c("bed","ped","raw"),
   }
 
   if (type == "bed"){
-    gt_write_bed(x, file)
+    gt_write_bed(x, file, use_integer)
   } else {
     gt_write_ped_raw(x,file,type)
   }
 }
 
 
-gt_write_bed <- function(x, file) {
+gt_write_bed <- function(x, file, use_integer) {
   bed_path <- bigsnpr::snp_writeBed(attr(x$genotypes,"bigsnp"),
                         bedfile = file,
                         ind.row = vctrs::vec_data(x$genotypes),
                         ind.col = show_loci(x)$big_index)
   # the bim and fam files written by bigsnpr contain the information of the original bigsnpr object
   # we now update that information with the info from the gen_tibble
-  if (FALSE){ # TODO skip until we test this section
+  if(use_integer == FALSE){
     bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
-    # TODO check that ref adn alt are in the right order
     bim_table <- show_loci(x) %>%
-      dplyr::select(dplyr::all_of(c("chromosome", "name", "genetic_dist", "position", "allele_ref", "allele_alt")))
-    write.table(bim_table,"bim_path", row.names = FALSE, col.names = FALSE, quote = FALSE)
+      dplyr::select(dplyr::all_of(c("chromosome", "name", "genetic_dist", "position", "allele_alt","allele_ref")))
+    colnames(bim_table) <- c("chromosome", "name", "genetic_dist", "position", "allele_ref","allele_alt")
+    bim_table$allele_alt[is.na(bim_table$allele_alt)]<-"0"
+    bim_table$allele_ref[is.na(bim_table$allele_ref)]<-"0"
+    utils::write.table(bim_table,bim_path, row.names = FALSE, col.names = FALSE, quote = FALSE)
+  } else if(use_integer == TRUE){
+    bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
+    bim_table <- show_loci(x) %>%
+      dplyr::select(dplyr::all_of(c("chr_int", "name", "genetic_dist", "position", "allele_alt","allele_ref")))
+    colnames(bim_table) <- c("chr_int", "name", "genetic_dist", "position", "allele_ref","allele_alt")
+    bim_table$allele_alt[is.na(bim_table$allele_alt)]<-"0"
+    bim_table$allele_ref[is.na(bim_table$allele_ref)]<-"0"
+    utils::write.table(bim_table,bim_path, row.names = FALSE, col.names = FALSE, quote = FALSE)
+  }
     fam_path <- bigsnpr::sub_bed(bed_path, ".fam")
-    fam_table <- read.table(fam_path)
+    fam_table <- utils::read.table(fam_path)
     fam_table$V2 <- x$id
     # if this is a group tibble, use the grouping variable
     if(inherits(x,"grouped_gen_tbl")){
-      fam_table$V1 <- x[group_vars(x)]
+      #fam_table$V1 <- x[group_vars(x)]
+      fam_table$V1 <- x %>% select(dplyr::group_vars(x)) %>% dplyr::pull(1)
     }
-    write.table(fam_table, fam_path, row.names = FALSE, col.names = FALSE, quote = FALSE)
-  }
+    utils::write.table(fam_table, fam_path, row.names = FALSE, col.names = FALSE, quote = FALSE)
 
   # return the path to the file
   return(bed_path)

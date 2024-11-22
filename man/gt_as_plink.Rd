@@ -4,7 +4,13 @@
 \alias{gt_as_plink}
 \title{Export a \code{gen_tibble} object to PLINK bed format}
 \usage{
-gt_as_plink(x, file = NULL, type = c("bed", "ped", "raw"), overwrite = TRUE)
+gt_as_plink(
+  x,
+  file = NULL,
+  type = c("bed", "ped", "raw"),
+  overwrite = TRUE,
+  use_integer = NULL
+)
 }
 \arguments{
 \item{x}{a \code{\link{gen_tibble}} object}
@@ -15,6 +21,8 @@ the output file will have the same path and prefix of the backingfile.}
 \item{type}{one of "bed", "ped" or "raw"}
 
 \item{overwrite}{boolean whether to overwrite the file.}
+
+\item{use_integer}{boolean whether to use the integer representation of the chromosomes}
 }
 \value{
 the path of the saved file

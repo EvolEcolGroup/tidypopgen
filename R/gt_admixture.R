@@ -10,7 +10,7 @@
 #' @param x a `gen_tibble` or a character giving the path of the input file
 #' @param k an integer giving the number of clusters
 #' @param crossval boolean, should cross validation be used to assess the fit (defaults ot FALSE)
-#' @param n_cors number of cores (defaults to 1)
+#' @param n_cores number of cores (defaults to 1)
 #' @param conda_env the name of the conda environment to use. If set to "auto", the default,
 #' a copy from `tidygenclust` will be preferred if available, otherwise a local copy will
 #' be used. "none" forces the use of a local copy, whilst any other string will
@@ -30,7 +30,7 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto")
     }
     input_file <- x
   } else { # if x is a gen_tibble
-    if (!is(x, "gen_tibble")) {
+    if (!methods::is(x, "gen_tibble")) {
       stop("x must be a gen_tibble or a character")
     }
     # write the gen_tibble to a temp file
@@ -88,10 +88,10 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto")
   }
 
   # read the output
-  Q <- read.table(paste0(input_file, ".Q"), header = FALSE)
-  loglik <- read.table(paste0(input_file, ".log"), header = FALSE)
+  Q <- utils::read.table(paste0(input_file, ".Q"), header = FALSE)
+  loglik <- utils::read.table(paste0(input_file, ".log"), header = FALSE)
   if (crossval) {
-    cv <- read.table(paste0(input_file, ".cv"), header = FALSE)
+    cv <- utils::read.table(paste0(input_file, ".cv"), header = FALSE)
     return(list(Q = Q, loglik = loglik, cv = cv))
   } else {
     return(list(Q = Q, loglik = loglik))
