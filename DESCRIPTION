@@ -48,6 +48,7 @@ Suggests:
     LEA,
     rmarkdown,
     readr,
+    reticulate,
     testthat (>= 3.0.0),
     vcfR
 Remotes:
