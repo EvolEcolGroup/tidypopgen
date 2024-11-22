@@ -46,7 +46,7 @@ vcf_to_fbm_cpp <- function(
   code256[1:(max_ploidy+1)]<-seq(0,max_ploidy)
 
   # metadata
-  fam <- tibble(#family.ID = 0,
+  fam <- tibble(family.ID = vcf_meta$sample_names,
                 sample.ID = vcf_meta$sample_names,
                 paternal.ID = 0,
                 maternal.ID = 0,

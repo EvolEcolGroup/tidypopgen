@@ -24,3 +24,7 @@ This function exports all the information of a \code{gen_tibble} object into
 a PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for .bed;
 .fam for .ped).
 }
+\details{
+If the gen_tibble has been read in from vcf format, family.ID in the resulting
+plink files will be the same as sample.ID.
+}
