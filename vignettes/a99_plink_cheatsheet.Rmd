@@ -41,12 +41,12 @@ PLINK flags --update-alleles, --allele1234, and --alleleACGT, all alter the codi
 
 | PLINK              | `tidypopgen`                    |
 |--------------------|---------------------------------|
-| --maf              | `data %\>% loci_maf()`          |
-| --geno             | `data %\>% loci_missingness()`  |
-| --hwe              | `data %\>% loci_hwe()`          |
-| --freq --a2-allele | `data %\>% loci_alt_freq()`     |
-| --mind             | `data %\>% indiv_missingness()` |
-| --het              | `data %\>% indiv_het_obs()`     |
+| --maf              | `data %>% loci_maf()`          |
+| --geno             | `data %>% loci_missingness()`  |
+| --hwe              | `data %>% loci_hwe()`          |
+| --freq --a2-allele | `data %>% loci_alt_freq()`     |
+| --mind             | `data %>% indiv_missingness()` |
+| --het              | `data %>% indiv_het_obs()`     |
 
 To filter out variants in `tidypopgen`, in a similar way to PLINK flags such as --extract or --autosome, it is necessary to use the `gen_tibble` with `select_loci_if()`. For example:
 
@@ -74,7 +74,7 @@ data %>% filter(id %in% my_individuals)
 
 ## Quality control for linkage
 
-Linkage is managed through clumping in `tidypopgen` with loci_ld_clump().
+Linkage is managed through clumping in `tidypopgen` with `loci_ld_clump()`.
 
 This option is similar to the --indep-pairwise flag in PLINK, but results in a more even distribution of loci when compared to LD pruning.
 
