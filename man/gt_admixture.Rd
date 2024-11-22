@@ -4,16 +4,27 @@
 \alias{gt_admixture}
 \title{Run ADMIXTURE from R}
 \usage{
-gt_admixture(x, k, crossval = FALSE, n_cores = 1, conda_env = "auto")
+gt_admixture(
+  x,
+  k,
+  crossval = FALSE,
+  n_cores = 1,
+  out = NULL,
+  conda_env = "auto"
+)
 }
 \arguments{
-\item{x}{a \code{gen_tibble} or a character giving the path of the input file}
+\item{x}{a \code{gen_tibble} or a character giving the path of the input PLINK bed file}
 
 \item{k}{an integer giving the number of clusters}
 
 \item{crossval}{boolean, should cross validation be used to assess the fit (defaults ot FALSE)}
 
 \item{n_cores}{number of cores (defaults to 1)}
+
+\item{out}{the output path for the results. It defaults to NULL, in which case, if \code{x} is a \code{gen_tibble}, the output
+will be written to a temporary directory; esle if \code{x} is the path of a PLINK bed file,
+the output will be saved in the same directory as the input file.}
 
 \item{conda_env}{the name of the conda environment to use. If set to "auto", the default,
 a copy from \code{tidygenclust} will be preferred if available, otherwise a local copy will

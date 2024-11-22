@@ -85,7 +85,7 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1,
   # if we conda_env is none
   if (conda_env == "none") {
     # use the system version of admixture (if it is installed)
-    if (system2("which", args = "admixture") == 0) {
+    if (system2("which", args = "admixture", stdout = NULL) == 0) {
       # store working directory
       wd <- getwd()
       # change to the directory of the input file

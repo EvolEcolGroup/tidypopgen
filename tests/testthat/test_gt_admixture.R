@@ -14,6 +14,8 @@ test_that("run admixture correctly", {
   # we create a plink file to test the function
   anole_plink <- gt_as_plink(anole_gt, file = tempfile(), chromosomes_as_int=TRUE)
   # run admixture
-  gt_admixture(anole_plink, k = 3, crossval = FALSE, n_cores = 1, conda_env = "none")
-
+  anole_adm <- gt_admixture(anole_plink, k = 3, crossval = FALSE, n_cores = 1, conda_env = "none")
+  # check the output
+  expect_true(nrow(anole_adm$Q)==nrow(anole_gt))
+  expect_true(ncol(anole_adm$Q)==3)
 })
