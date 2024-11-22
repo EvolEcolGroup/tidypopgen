@@ -20,5 +20,9 @@ derived from the Allele Sharing matrix,}
 a vector of population specific Fst (plus the global value if \code{include_global=TRUE})
 }
 \description{
-This function computes population specific Fst (as computed by \code{\link[hierfstat:fs.dosage]{hierfstat::fst.dosage()}}).
+This function computes population specific Fst, using the approach in Weir and Goudet 2017
+(as computed by \code{\link[hierfstat:fs.dosage]{hierfstat::fst.dosage()}}).
+}
+\references{
+Weir, BS and Goudet J (2017) A Unified Characterization of Population Structure and Relatedness. Genetics (2017) 206:2085
 }

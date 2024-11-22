@@ -57,11 +57,9 @@ gt_pca_randomSVD <- function(x, k = 10,
     on.exit(gt_set_imputed(x, set = FALSE))
   }
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
-  if (is.character(show_loci(x)$chromosome)){
-    infos_chr <- as.numeric(factor(show_loci(x)$chromosome))
-  } else {
-    infos_chr <- show_loci(x)$chromosome
-  }
+
+  infos_chr <- show_loci(x)$chr_int
+
   this_svd  <- bigstatsr::big_randomSVD(X$genotypes,
                                   k=k,
                                     ind.row = .gt_bigsnp_rows(x),

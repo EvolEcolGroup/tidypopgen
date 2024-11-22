@@ -18,8 +18,10 @@
 filter_high_relatedness <-
   function(matrix, .x = NULL, kings_threshold = NULL, verbose = FALSE) {
 
+    # get number of individuals
     var_num <- dim(matrix)[1]
 
+    # append row and col names
     if(is.null(dimnames(matrix))){
       if(is.null(.x)){
         colnames(matrix) <- 1:ncol(matrix)
@@ -30,32 +32,47 @@ filter_high_relatedness <-
       }
     }
 
+    # get individual names
     var_names <- dimnames(matrix)[[1]]
 
+    # take absolute value of each relationship
     matrix <- abs(matrix)
 
     # re-ordered columns based on max absolute correlation
     original_order <- 1:var_num
 
+    # function to calculate average relatedness
     average_corr <-
       function(matrix) {
         mean(matrix, na.rm = TRUE)
       }
     tmp <- matrix
+
+    # remove self-relatedness (diagonal)
     diag(tmp) <- NA
 
+    # calculate average relatedness and a new order
     max_abs_cor_order <-
       order(apply(tmp, 2, average_corr), decreasing = TRUE)
+
+    # re-order individuals in matrix based on relatedness
     matrix <- matrix[max_abs_cor_order, max_abs_cor_order]
+
+    # record new order
     newOrder <- original_order[max_abs_cor_order]
     rm(tmp)
 
+    # initialize new variables
     col_to_delete <- rep(FALSE, var_num)
-
     matrix2 <- matrix
     diag(matrix2) <- NA
 
+
+    # loop through each individual
+    # for pairs with higher than kings_threshold relatedness
+    # the individual with higher average relatedness is removed
     for (i in 1:(var_num - 1)) {
+      #browser()
       if (!any(matrix2[!is.na(matrix2)] > kings_threshold)) {
         if (verbose) {
           message("All correlations <=", kings_threshold, "\n")

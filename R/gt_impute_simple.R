@@ -3,7 +3,8 @@
 #' This function provides a very simple imputation algorithm for `gen_tibble`
 #' objects by using the mode, mean or sampling from the allele frequencies.
 #' Each locus is imputed independently (and thus linkage information is ignored).
-#' It is a wrapper around [bigsnpr::snp_fastImputeSimple()].
+#'
+#' This function is a wrapper around [bigsnpr::snp_fastImputeSimple()].
 #'
 #' @param x a [gen_tibble] with missing data
 #' @param method one of

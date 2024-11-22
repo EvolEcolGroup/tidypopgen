@@ -5,11 +5,12 @@ gen_tibble_vcf <- function(x, ..., parser = "cpp",
                            missing_alleles = c("0","."),
                            backingfile = NULL, quiet = FALSE) {
   parser <- match.arg(parser, c("vcfR", "cpp"))
+
   if (parser == "cpp"){
-    rds_path <- vcf_to_fbm_cpp(x,
-                                backingfile = backingfile,
-                                chunk_size = chunk_size,
-                                quiet = quiet)
+      rds_path <- vcf_to_fbm_cpp(x,
+                                 backingfile = backingfile,
+                                 chunk_size = chunk_size,
+                                 quiet = quiet)
   } else {
     rds_path <- vcf_to_fbm_vcfR(x,
                                 backingfile = backingfile,

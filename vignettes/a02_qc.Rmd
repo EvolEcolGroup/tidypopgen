@@ -35,7 +35,7 @@ summary(loci_report)
 
 The output of `qc_report_loci` supplies minor allele frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP. These data can be visualised in autoplot :
 
-```{r}
+```{r, fig.alt = "UpSet plot giving counts of snps over the threshold for: missingness, minor allele frequency, and Hardy-Weinberg equilibrium P-value"}
 autoplot(loci_report, type = "overview")
 ```
 
@@ -45,19 +45,19 @@ The upset plot then visualises our 961 SNPs within their respective sets. The nu
 
 The thresholds for each parameter, (level of missingness that is accepted etc) can be adjusted using the parameters provided in autoplot. For example:
 
-```{r}
+```{r, fig.alt = "Upset plot as above, with adjusted thresholds"}
 autoplot(loci_report, type = "overview", miss_threshold = 0.03, maf_threshold = 0.02, hwe_p = 0.01)
 ```
 
 To examine each QC measure in further detail, we can plot a different summary panel.
 
-```{r}
+```{r, fig.alt = "Four panel plot, containing: a histogram of the proportion of missing data for snps with minor allele freqency above the threshold, a histogram of the proportion of missing data for snps with minor allele freqency below the threshold, a histogram of HWE exact test p-values, and a histogram of significant HWE exact test p-values"}
 autoplot(loci_report, type = "all", miss_threshold = 0.03, maf_threshold = 0.02, hwe_p = 0.01)
 ```
 
 We can then begin to consider how to quality control this raw data set. Let's start by filtering SNPs according to their minor allele frequency. We can visualise the MAF distribution using:
 
-```{r}
+```{r, fig.alt = "Histogram of minor allele frequency"}
 autoplot(loci_report, type = "maf")
 ```
 
@@ -70,7 +70,7 @@ count_loci(data)
 
 Following this, we can remove SNPs with a high rate of missingness. Lets say we want to remove SNPs that are missing in more than 5% of individuals, equivalent to using plink --geno 0.05
 
-```{r}
+```{r, fig.alt = "Histogram of the proportion of missing data"}
 autoplot(loci_report, type = "missing", miss_threshold = 0.05)
 ```
 
@@ -83,7 +83,7 @@ count_loci(data)
 
 Finally, we may want to remove SNPs that show significant deviation from Hardy-Weinberg equilibrium, if our study design requires. To visualise SNPs with significant p-values in the Hardy-Weinberg exact test, we can again call autoplot:
 
-```{r}
+```{r, fig.alt = "Histogram of significant HWE exact test p-values"}
 autoplot(loci_report,type = "significant hwe", hwe_p = 0.01)
 ```
 
@@ -92,7 +92,6 @@ Few SNPs in our data are significant, however there may be circumstances where w
 ```{r}
 data <- data %>% select_loci_if(loci_hwe(genotypes)>0.01)
 count_loci(data)
-
 ```
 
 Once we have quality controlled the SNPs in our data, we can turn to individual samples.
@@ -108,7 +107,7 @@ The output of `qc_report_indiv` supplies observed heterozygosity per individual,
 
 These data can also be visualised using autoplot:
 
-```{r}
+```{r, fig.alt = "Scatter plot of missingness proportion and observed heterozygosity for each individual"}
 autoplot(individual_report)
 ```
 
@@ -133,7 +132,7 @@ data <- data %>% filter(indiv_het_obs(genotypes) < upper)
 nrow(data)
 ```
 
-Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to `qc_report_indiv()`, then the report also calculates a KING coefficient of relatedness matrix using the sample. The `kings_threshold` is used to provide an output of the largest possible group with no related individuals in the third column `to_keep`. This boolean column recommends which individuals to remove (FALSE) and to keep (TRUE) to achieve an unrelated sample.
+Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to `qc_report_indiv()`, then the report also calculates a KING coefficient of relatedness matrix using the sample. The `kings_threshold` is used to provide an output of the largest possible group with no related individuals in the third column `to_keep`. This boolean column recommends which individuals to remove (FALSE) and to keep (TRUE) to achieve an unrelated sample. 
 
 ```{r}
 individual_report <- qc_report_indiv(data, kings_threshold = 0.177)
@@ -188,3 +187,30 @@ When we are happy with the quality of our data, we can create and save a final q
 gt_save(ld_data, file_name = tempfile())
 ```
 
+# Grouping data 
+
+For some quality control measures, if you have a gen_tibble that includes multiple datasets you may want to group by population before running the quality control. This can be done using `group_by`. 
+
+First, lets add some imaginary population data to our gen_tibble:
+
+```{r}
+data <- data %>% mutate(population = rep(c("A", "B"), each = 5))
+```
+
+We can then group by population and run quality control on each group:
+
+```{r}
+grouped_loci_report <- data %>% group_by(population) %>% qc_report_loci()
+head(grouped_loci_report)
+```
+
+The loci report that we receive here will calculate Hardy-Weinberg equilibrium for each SNP within each population separately, providing a Bonferroni corrected p-value for each SNP.
+
+Similarly, we can run a quality control report for individuals within each population:
+
+```{r}
+grouped_individual_report <- data %>% group_by(population) %>% qc_report_indiv(kings_threshold = 0.177)
+head(grouped_individual_report)
+```
+
+This is important when we have related individuals, as background population structure can affect the filtering of relatives.

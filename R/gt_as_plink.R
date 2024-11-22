@@ -4,6 +4,9 @@
 #' a PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for .bed;
 #' .fam for .ped).
 #'
+#' If the gen_tibble has been read in from vcf format, family.ID in the resulting
+#' plink files will be the same as sample.ID.
+#'
 #' @param x a [`gen_tibble`] object
 #' @param file a character string giving the path to output file. If left to NULL,
 #' the output file will have the same path and prefix of the backingfile.

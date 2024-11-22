@@ -7,7 +7,7 @@ test_that("select_loci_if subsets correctly",{
   test_loci <- data.frame(name=c(paste0("rs",1:4),paste0("x",1:2)),
                           chromosome=c(1,1,1,1,2,2),
                           position=c(3,5,65,343,23,456),
-                          genetic_dist = as.integer(rep(0,6)),
+                          genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
 

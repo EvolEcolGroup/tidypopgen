@@ -7,7 +7,7 @@ test_genotypes <- rbind(c(1,1,0,1,1,0),
 test_loci <- data.frame(name=paste0("rs",1:6),
                         chromosome=paste0("chr",c(1,1,1,1,2,2)),
                         position=as.integer(c(3,5,65,343,23,456)),
-                        genetic_dist = as.integer(rep(0,6)),
+                        genetic_dist = as.double(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
@@ -31,7 +31,7 @@ king_r <- function(X_mat){
 
 
 # this also tests show_genotypes and show_loci
-test_that("snp_king and gt_king compute king-robust correctly",{
+test_that("snp_king and pairwise_king compute king-robust correctly",{
   test_fbm <- tidypopgen:::.gt_get_bigsnp(test_gt)$genotypes
   test_king <- snp_king(test_fbm)
   # king by hand
@@ -42,7 +42,7 @@ test_that("snp_king and gt_king compute king-robust correctly",{
   expect_identical(test_king_2blocks, test_king)
 
   # now estimate it with gen_tibble
-  test_king_gt <- gt_king(test_gt, as_matrix = TRUE)
+  test_king_gt <- pairwise_king(test_gt, as_matrix = TRUE)
   expect_true(all.equal(test_king, test_king_gt,
                         check.attributes=FALSE))
 

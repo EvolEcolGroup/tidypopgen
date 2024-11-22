@@ -6,8 +6,16 @@
 #' @param ... currently unused
 #' the HWE test.
 #' @returns a tibble with 3 elements: maf, missingness and hwe_p
+#' @rdname qc_report_loci
 #' @export
-qc_report_loci <- function (.x, ...){
+qc_report_loci <- function(.x, ...) {
+  UseMethod("qc_report_loci", .x)
+}
+
+
+#' @export
+#' @rdname qc_report_loci
+qc_report_loci.tbl_df <- function (.x, ...){
   rlang::check_dots_empty()
   stopifnot_diploid(.x$genotypes)
   qc_report <- .x %>% reframe(snp_id = loci_names(.x),maf=loci_maf(.data$genotypes),
@@ -15,6 +23,31 @@ qc_report_loci <- function (.x, ...){
                     hwe_p = loci_hwe(.data$genotypes))
  class(qc_report) <- c("qc_report_loci",class(qc_report))
  qc_report
+}
+
+#' @export
+#' @rdname qc_report_loci
+qc_report_loci.grouped_df <- function (.x, ...){
+  rlang::check_dots_empty()
+  stopifnot_diploid(.x$genotypes)
+
+  # Find number of groups
+  pops <- .x %>% select(dplyr::group_vars(.x)) %>% dplyr::pull(1)
+
+  # Take grouped variable pops and find how many unique groups
+  pops <- length(unique(pops))
+
+  # Calculate hwe across groups
+  hwe_res <- .x %>% group_map(.f = ~loci_hwe(.x$genotypes))
+  hwe_res <- do.call("cbind",hwe_res)
+  hwe_res <- as.data.frame(hwe_res)
+  hwe_res$p_corrected <- apply(hwe_res,1,function(row) min(row) * pops)
+
+  qc_report <- .x %>% ungroup() %>% reframe(snp_id = loci_names(.x),maf=loci_maf(.data$genotypes),
+                              missingness = loci_missingness(.data$genotypes),
+                              hwe_p = hwe_res$p_corrected)
+  class(qc_report) <- c("qc_report_loci",class(qc_report))
+  qc_report
 }
 
 #' Autoplots for `qc_report_loci` objects

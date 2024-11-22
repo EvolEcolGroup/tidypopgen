@@ -1,6 +1,6 @@
 Package: tidypopgen
 Title: Tidy Population Genetics
-Version: 0.0.0.9016
+Version: 0.0.0.9019
 Authors@R: 
     c(person("Evie", "Carter", role = c("aut")),
     person("Andrea", "Manica", email = "am315@cam.ac.uk", 
@@ -11,6 +11,7 @@ Description: We provide a tidy grammar of population genetics, facilitating
     polymorphisms (SNPs).
 License: GPL (>= 3)
 Encoding: UTF-8
+URL: https://evolecolgroup.github.io/tidypopgen
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends:

@@ -6,7 +6,7 @@ test_genotypes <- rbind(c(2,2,0,1,1,2),
 test_loci <- data.frame(name=paste0("rs",1:6),
                         chromosome=c(1,1,1,1,2,2),
                         position=c(3,5,65,343,23,456),
-                        genetic_dist = as.integer(rep(0,6)),
+                        genetic_dist = as.double(rep(0,6)),
                         allele_ref = c("A","T","C","G","C","T"),
                         allele_alt = c("T","C", NA,"C","G","A"))
 
@@ -99,7 +99,7 @@ test_that("loci order",{
   test_loci <- data.frame(name=paste0("rs",1:6),
                           chromosome=c("chr2","chr1","chr1","chr1","chr2","chr1"),
                           position=c(3,5,65,343,23,456),
-                          genetic_dist = as.integer(rep(0,6)),
+                          genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
 
@@ -118,4 +118,28 @@ test_that("loci order",{
 
 })
 
+test_that("loci_ld_clump works on a grouped gt",{
+
+  bedfile <- system.file("extdata/related/families.bed", package="tidypopgen")
+  rds <- bigsnpr::snp_readBed(bedfile, backingfile = tempfile())
+  bigsnp <- bigsnpr::snp_attach(rds)
+
+  gen_tbl <- gen_tibble(bedfile, quiet = TRUE,
+                        backingfile = tempfile(), valid_alleles = c("1","2"))
+
+  imputed_data <- gt_impute_simple(gen_tbl, method = "random")
+  to_keep_LD_ungrouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+
+  gen_tbl$population <- rep(c("population_1","population_2"), each = 6)
+  gen_tbl <- gen_tbl %>% group_by(population)
+
+  imputed_data <- gt_impute_simple(gen_tbl, method = "random")
+  to_keep_LD_grouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+
+  # Removed loci are chosen at random, so we can't use expect equal
+  # However, the same number of loci should be removed in both cases
+  expect_equal(length(to_keep_LD_ungrouped == FALSE), length(to_keep_LD_grouped == FALSE))
+  expect_equal(length(to_keep_LD_ungrouped == TRUE), length(to_keep_LD_grouped == TRUE))
+
+})
 

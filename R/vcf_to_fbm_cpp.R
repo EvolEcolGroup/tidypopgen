@@ -4,8 +4,9 @@
 #' This should work even for large vcf files that would not fit in memory.
 #'
 #' @param vcf_path the path to the vcf
-#' @param chunk_size the chunk size to use on the vcf when loading the file
-#' @param backingfile the name of the file to use as the backing file
+#' @param chunk_size the chunk size to use on the vcf when loading the file. If NULL, a best guess will be made.
+#' @param backingfile the name of the file to use as the backing file for the FBM. If NULL, the vcf path will be used.
+#' @param n_cores the number of cores to use when reading the vcf file. Default is 1.
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 
@@ -13,9 +14,8 @@ vcf_to_fbm_cpp <- function(
     vcf_path,
     chunk_size = NULL,
     backingfile = NULL,
+    n_cores = 1,
     quiet=FALSE) {
-
-  n_cores <- 3
 
   if (is.null(backingfile)){
     backingfile <- vcf_path
@@ -46,7 +46,7 @@ vcf_to_fbm_cpp <- function(
   code256[1:(max_ploidy+1)]<-seq(0,max_ploidy)
 
   # metadata
-  fam <- tibble(family.ID = 0,
+  fam <- tibble(family.ID = vcf_meta$sample_names,
                 sample.ID = vcf_meta$sample_names,
                 paternal.ID = 0,
                 maternal.ID = 0,

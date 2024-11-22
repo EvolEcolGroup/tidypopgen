@@ -37,6 +37,7 @@
 #' a fast C++ parser, or "vcfR" to use the R package `vcfR`. The latter is slower
 #' but more robust; if "cpp" gives error, try using "vcfR" in case your VCF has
 #' an unusual structure.
+#' @param n_cores the number of cores to use for parallel processing
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #' 'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -76,6 +77,7 @@ gen_tibble.character <-
   function(x,
            ...,
            parser = c("vcfR","cpp"),
+           n_cores = 1,
            chunk_size = NULL,
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0","."),
@@ -107,6 +109,7 @@ gen_tibble.character <-
                        quiet = quiet)
   } else if ((tolower(file_ext(x))=="vcf") || (tolower(file_ext(x))=="gz")){
     return(gen_tibble_vcf(x = x, ..., parser = parser, chunk_size = chunk_size,
+                          n_cores = n_cores,
                    valid_alleles= valid_alleles,
                    missing_alleles= missing_alleles,
                    backingfile = backingfile, quiet = quiet))
@@ -154,8 +157,12 @@ gen_tibble_bed_rds <- function(x, ...,
 
   bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
 
-  indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
-                             population = bigsnp_obj$fam$family.ID)
+  if (all(bigsnp_obj$fam$family.ID==bigsnp_obj$fam$sample.ID)){
+    indiv_meta <- list(id = bigsnp_obj$fam$sample.ID)
+  } else {
+    indiv_meta <- list(id = bigsnp_obj$fam$sample.ID,
+                       population = bigsnp_obj$fam$family.ID)
+  }
   # check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
   if ("ploidy" %in% names(bigsnp_obj$fam)){
     ploidy <- bigsnp_obj$fam$ploidy
@@ -245,8 +252,11 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   if (!inherits(indiv_meta, "data.frame") || inherits(x, "tbl") || is.list(x)){
     stop("indiv_meta must be one of data.frame, tbl, or list")
   }
-  if (!all(c("id", "population") %in% names(indiv_meta))){
-    stop("ind_meta does not include the compulsory columns 'id' and 'population")
+  #if (!all(c("id", "population") %in% names(indiv_meta))){
+  #  stop("ind_meta does not include the compulsory columns 'id' and 'population")
+  #}
+  if (!all(c("id") %in% names(indiv_meta))){
+    stop("ind_meta does not include the compulsory column 'id")
   }
   # check that x (the genotypes) is numeric matrix
   if (inherits(x,"data.frame")){
@@ -368,7 +378,7 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
 
   map <- tibble(chromosome = loci$chromosome,
                 marker.ID = loci$name,
-                genetic.dist = loci$genetic_dist,
+                genetic.dist = as.double(loci$genetic_dist), ## make sure that genetic.dist is double
                 physical.pos = loci$position,
                 allele1 = loci$allele_alt,
                 allele2 = loci$allele_ref)
@@ -503,7 +513,7 @@ change_duplicated_file_name <- function(file){
 
   if(file.exists(bk) && !file.exists(rds)){
 
-    version <- 1
+    version <- 2
 
     base_name <- basename(file)
 
@@ -526,7 +536,7 @@ change_duplicated_file_name <- function(file){
     return(new_file)
   } else if (file.exists(bk) && file.exists(rds)){
 
-    version <- 1
+    version <- 2
 
     base_name <- basename(file)
 

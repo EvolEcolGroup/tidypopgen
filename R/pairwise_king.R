@@ -9,7 +9,7 @@
 #' @param block_size maximum number of loci read at once. More loci should improve speed,
 #' but will tax memory.
 #' @export
-gt_king <- function(x, as_matrix = FALSE,
+pairwise_king <- function(x, as_matrix = FALSE,
                       block_size = bigstatsr::block_size(length(loci_names(x)))) {
 
   X <- attr(x$genotypes,"bigsnp") # convenient pointer

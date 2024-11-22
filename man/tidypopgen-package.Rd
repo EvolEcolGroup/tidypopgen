@@ -10,6 +10,13 @@
 
 We provide a tidy grammar of population genetics, facilitating the manipulation and analysis of data on biallelic single nucleotide polymorphisms (SNPs).
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://evolecolgroup.github.io/tidypopgen}
+}
+
+}
 \author{
 \strong{Maintainer}: Andrea Manica \email{am315@cam.ac.uk} (\href{https://orcid.org/0000-0003-1895-450X}{ORCID})
 
