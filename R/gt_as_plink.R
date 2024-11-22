@@ -12,20 +12,20 @@
 #' the output file will have the same path and prefix of the backingfile.
 #' @param type one of "bed", "ped" or "raw"
 #' @param overwrite boolean whether to overwrite the file.
-#' @param use_integer boolean whether to use the integer representation of the chromosomes
+#' @param chromosomes_as_int boolean whether to use the integer representation of the chromosomes
 #' @returns the path of the saved file
 #' @export
 
 
 gt_as_plink <- function(x, file = NULL, type = c("bed","ped","raw"),
-                           overwrite = TRUE, use_integer = NULL){
+                           overwrite = TRUE, chromosomes_as_int = FALSE){
   # check that x is a gen_tibble
   if (!methods::is(x, "gen_tbl")){
     stop("x must be a gen_tibble")
   }
 
-  if (is.null(use_integer)){
-    use_integer = FALSE
+  if (is.null(chromosomes_as_int)){
+    chromosomes_as_int = FALSE
   }
 
   type <- match.arg(type)
@@ -58,21 +58,21 @@ gt_as_plink <- function(x, file = NULL, type = c("bed","ped","raw"),
   }
 
   if (type == "bed"){
-    gt_write_bed(x, file, use_integer)
+    gt_write_bed(x, file, chromosomes_as_int)
   } else {
     gt_write_ped_raw(x,file,type)
   }
 }
 
 
-gt_write_bed <- function(x, file, use_integer) {
+gt_write_bed <- function(x, file, chromosomes_as_int) {
   bed_path <- bigsnpr::snp_writeBed(attr(x$genotypes,"bigsnp"),
                         bedfile = file,
                         ind.row = vctrs::vec_data(x$genotypes),
                         ind.col = show_loci(x)$big_index)
   # the bim and fam files written by bigsnpr contain the information of the original bigsnpr object
   # we now update that information with the info from the gen_tibble
-  if(use_integer == FALSE){
+  if(!chromosomes_as_int){
     bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
     bim_table <- show_loci(x) %>%
       dplyr::select(dplyr::all_of(c("chromosome", "name", "genetic_dist", "position", "allele_alt","allele_ref")))
@@ -80,7 +80,7 @@ gt_write_bed <- function(x, file, use_integer) {
     bim_table$allele_alt[is.na(bim_table$allele_alt)]<-"0"
     bim_table$allele_ref[is.na(bim_table$allele_ref)]<-"0"
     utils::write.table(bim_table,bim_path, row.names = FALSE, col.names = FALSE, quote = FALSE)
-  } else if(use_integer == TRUE){
+  } else {
     bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
     bim_table <- show_loci(x) %>%
       dplyr::select(dplyr::all_of(c("chr_int", "name", "genetic_dist", "position", "allele_alt","allele_ref")))

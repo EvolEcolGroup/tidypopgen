@@ -9,7 +9,7 @@ gt_as_plink(
   file = NULL,
   type = c("bed", "ped", "raw"),
   overwrite = TRUE,
-  use_integer = NULL
+  chromosomes_as_int = FALSE
 )
 }
 \arguments{
@@ -22,7 +22,7 @@ the output file will have the same path and prefix of the backingfile.}
 
 \item{overwrite}{boolean whether to overwrite the file.}
 
-\item{use_integer}{boolean whether to use the integer representation of the chromosomes}
+\item{chromosomes_as_int}{boolean whether to use the integer representation of the chromosomes}
 }
 \value{
 the path of the saved file

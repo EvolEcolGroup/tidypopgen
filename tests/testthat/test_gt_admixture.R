@@ -12,8 +12,8 @@ test_that("run admixture correctly", {
   anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
  # anole_gt <- anole_gt %>% group_by(population)
   # we create a plink file to test the function
-  anole_plink <- gt_as_plink(anole_gt, file = tempfile())
+  anole_plink <- gt_as_plink(anole_gt, file = tempfile(), chromosomes_as_int=TRUE)
   # run admixture
-  #gt_admixture(anole_plink, k = 3, crossval = FALSE, n_cores = 1, conda_env = "none")
+  gt_admixture(anole_plink, k = 3, crossval = FALSE, n_cores = 1, conda_env = "none")
 
 })

@@ -7,10 +7,13 @@
 #' environment. If the package `tidygenclust` is installed, and its conda environment
 #' has been set up with `ADMIXTURE` in it (the default), it will automatically
 #' use that version unless you change `conda_env` to "none".
-#' @param x a `gen_tibble` or a character giving the path of the input file
+#' @param x a `gen_tibble` or a character giving the path of the input PLINK bed file
 #' @param k an integer giving the number of clusters
 #' @param crossval boolean, should cross validation be used to assess the fit (defaults ot FALSE)
 #' @param n_cores number of cores (defaults to 1)
+#' @param out the output path for the results. It defaults to NULL, in which case, if `x` is a `gen_tibble`, the output
+#' will be written to a temporary directory; esle if `x` is the path of a PLINK bed file,
+#' the output will be saved in the same directory as the input file.
 #' @param conda_env the name of the conda environment to use. If set to "auto", the default,
 #' a copy from `tidygenclust` will be preferred if available, otherwise a local copy will
 #' be used. "none" forces the use of a local copy, whilst any other string will
@@ -22,7 +25,8 @@
 #' @export
 
 
-gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto"){
+gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1,
+                          out = NULL, conda_env="auto"){
   # if x is a character, check that it is file that exists
   if (is.character(x)) {
     if (!file.exists(x)) {
@@ -35,6 +39,10 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto")
     }
     # write the gen_tibble to a temp file
     input_file <- gt_as_plink(x, file = tempfile(fileext = "."))
+  }
+
+  if (is.null(out)){
+    out <-dirname(input_file)
   }
 
   # cast k as an integer
@@ -78,7 +86,13 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto")
   if (conda_env == "none") {
     # use the system version of admixture (if it is installed)
     if (system2("which", args = "admixture") == 0) {
-      system2("admixture", args = admixture_args)
+      # store working directory
+      wd <- getwd()
+      # change to the directory of the input file
+      setwd(dirname(input_file))
+      adm_out <- system2("admixture", args = admixture_args, stdout = TRUE)
+      # change back to the original working directory
+      setwd(wd)
     } else {
       stop("admixture is not installed in this path")
     }
@@ -88,13 +102,15 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto")
   }
 
   # read the output
-  Q <- utils::read.table(paste0(input_file, ".Q"), header = FALSE)
-  loglik <- utils::read.table(paste0(input_file, ".log"), header = FALSE)
+  #browser()
+  output_prefix <- file.path(out, gsub(".bed", "", basename(input_file)))
+  Q <- utils::read.table(paste(output_prefix,k,"Q",sep="."), header = FALSE)
+  P <- utils::read.table(paste(output_prefix,k,"P",sep="."), header = FALSE)
   if (crossval) {
     cv <- utils::read.table(paste0(input_file, ".cv"), header = FALSE)
     return(list(Q = Q, loglik = loglik, cv = cv))
   } else {
-    return(list(Q = Q, loglik = loglik))
+    return(list(Q = q_matrix(Q), P = P, log = adm_out))
   }
 
 }
