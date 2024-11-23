@@ -179,9 +179,15 @@ from the data as they are read.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>When loading packedancestry files, missing alleles will be converted from
-'X' to NA</p>
-    </div>
+
+<ul><li><p><em>VCF</em> files: the fast <code>cpp</code> parser is used by default. It attempts to establish
+ploidy from the first variant; if that variant is found in a sex chromosome (or mtDNA),
+it will fail. To use the fast parser, change the order of variants so that the first chromosome is an
+autosome using a tool such as <code>vcftools</code>. Alternatively, the slower but more robust
+<code>vcfR</code> parser should be used instead.</p></li>
+<li><p><em>packedancestry</em> files: When loading <em>packedancestry</em> files, missing alleles will be converted from
+'X' to NA</p></li>
+</ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
