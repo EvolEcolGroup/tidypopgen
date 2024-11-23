@@ -3,7 +3,13 @@
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
 #'
-#' When loading packedancestry files, missing alleles will be converted from
+#' - *VCF* files: the fast `cpp` parser is used by default. It attempts to establish
+#' ploidy from the first variant; if that variant is found in a sex chromosome (or mtDNA),
+#' it will fail. To use the fast parser, change the order of variants so that the first chromosome is an
+#' autosome using a tool such as `vcftools`. Alternatively, the slower but more robust
+#' `vcfR` parser should be used instead.
+#'
+#' - *packedancestry* files: When loading *packedancestry* files, missing alleles will be converted from
 #' 'X' to NA
 #'
 #' @param x can be:

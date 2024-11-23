@@ -113,6 +113,13 @@ A \code{gen_tibble} stores genotypes for individuals in a tidy format. DESCRIBE
 here the format
 }
 \details{
-When loading packedancestry files, missing alleles will be converted from
+\itemize{
+\item \emph{VCF} files: the fast \code{cpp} parser is used by default. It attempts to establish
+ploidy from the first variant; if that variant is found in a sex chromosome (or mtDNA),
+it will fail. To use the fast parser, change the order of variants so that the first chromosome is an
+autosome using a tool such as \code{vcftools}. Alternatively, the slower but more robust
+\code{vcfR} parser should be used instead.
+\item \emph{packedancestry} files: When loading \emph{packedancestry} files, missing alleles will be converted from
 'X' to NA
+}
 }
