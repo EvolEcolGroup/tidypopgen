@@ -30,7 +30,6 @@ c.gt_admix <- function(...) {
   } else {
     cv <- NULL
   }
-  cv <- sapply(list(...), function(x) x$cv)
   # create a new combined object
   combined_obj <- list (k = k, Q = Q, P = P, log = log)
   # if cv is not NULL, add it to the list
