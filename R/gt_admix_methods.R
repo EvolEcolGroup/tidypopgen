@@ -43,7 +43,8 @@ c.gt_admix <- function(...) {
 
 #' Summary method for gt_admix objects
 #'
-#' @param ojbect a `gt_admix` object
+#' @param object a `gt_admix` object
+#' @param ... unused (necessary for compatibility with generic function)
 #' @return A summary of the `gt_admix` object
 #' @export
 summary.gt_admix <- function(object, ...) {

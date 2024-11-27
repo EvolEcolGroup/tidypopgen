@@ -7,7 +7,9 @@
 \method{summary}{gt_admix}(object, ...)
 }
 \arguments{
-\item{ojbect}{a \code{gt_admix} object}
+\item{object}{a \code{gt_admix} object}
+
+\item{...}{unused (necessary for compatibility with generic function)}
 }
 \value{
 A summary of the \code{gt_admix} object
