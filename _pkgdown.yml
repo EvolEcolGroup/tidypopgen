@@ -93,10 +93,14 @@ reference:
         - augment.gt_dapc
         - autoplot.gt_dapc
         - autoplot.gt_cluster_pca
-  - title: "K-clustering (e.g. ADMXITURE)"
+  - title: "K-clustering and ADMXITURE"
     desc: "Functions for creating, tidying, and visualising `q_matrix` objects."
     contents:
+        - run_admixture
+        - summary.gt_admix
+        - c.gt_admix
         - q_matrix
+        - read_q_files
         - get_q_matrix
         - get_p_matrix
         - tidy.q_matrix
