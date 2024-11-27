@@ -54,7 +54,6 @@ rbind_dry_run <- function(ref, target, use_position = FALSE, flip_strand = FALSE
   # rename the alleles
   ref_df <- ref_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
   target_df <- target_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
-  #browser()
   rbind_dry_run_df(ref_df = ref_df,
                    target_df = target_df,
                    flip_strand = flip_strand,
@@ -115,8 +114,6 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, quiet){
     to_flip <- to_flip & !ambiguous_sub
     to_swap <- to_swap & !ambiguous_sub
   }
- # browser()
-
   # now we create the two reporting data.frames
   # note that they include all loci (including the ones we dropped because they
   # did not exist in one of the datasets)
@@ -153,7 +150,6 @@ rbind_dry_run_df <- function(ref_df, target_df,  flip_strand, quiet){
 
 
 resolve_missing_alleles <- function(missing_table, other_table){
-  #browser()
   missing_replacements <- rep(NA, nrow(missing_table))
   for (i_row in which(missing_table$allele_1=="0")){
     # get non-missing allele
