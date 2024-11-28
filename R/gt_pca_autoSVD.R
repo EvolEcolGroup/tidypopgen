@@ -50,6 +50,10 @@
 #'
 #' Note: rather than accessing these elements directly, it is better to use
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
+#' Note: If you encounter 'Error in rollmean(): Parameter 'size' is too large.'
+#' roll_size is exceeding the number of variants on at least one of your chromosomes.
+#' If you have pre-specified roll_size, you will need to reduce this parameter.
+#' If not, try specifying a reduced 'roll_size' to avoid this error.
 #'
 #' @export
 
@@ -72,7 +76,13 @@ gt_pca_autoSVD <- function(x, k = 10,
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
   }
-  #browser()
+
+  if(is.null(roll_size)){
+    message("If you encounter 'Error in rollmean(): Parameter 'size' is too large.'
+          roll_size exceeds the number of variants on at least one of your chromosomes.
+          Try reducing 'roll_size' to avoid this error.")
+  }
+
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
@@ -110,7 +120,6 @@ gt_pca_autoSVD <- function(x, k = 10,
                       verbose = verbose)
   # add names to the scores (to match them to data later)
   rownames(this_svd$u)<-x$id
-  #browser()
   this_svd$method <- "autoSVD"
   this_svd$call <- match.call()
   # subset the loci table to have only the snps of interest
