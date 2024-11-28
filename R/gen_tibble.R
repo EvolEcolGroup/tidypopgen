@@ -7,7 +7,9 @@
 #' ploidy from the first variant; if that variant is found in a sex chromosome (or mtDNA),
 #' it will fail. To use the fast parser, change the order of variants so that the first chromosome is an
 #' autosome using a tool such as `vcftools`. Alternatively, the slower but more robust
-#' `vcfR` parser should be used instead.
+#' `vcfR` parser should be used instead. Currently, only biallelic SNPs are supported. If haploid
+#' variants (e.g. sex chromosomes) are included in the vcf, they are not transformed into homozygous calls.
+#' Instad, reference alleles will be counted as 0 and alternative alleles will be counted as 1.
 #'
 #' - *packedancestry* files: When loading *packedancestry* files, missing alleles will be converted from
 #' 'X' to NA
