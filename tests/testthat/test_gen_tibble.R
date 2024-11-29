@@ -686,7 +686,7 @@ test_that("gen_tibble family.ID from vcf",{
 
   # If the gen_tibble has been read in from vcf format, family.ID in the resulting
   # plink files will be the same as sample.ID.
-  
+
 
   ####  With vcfr parser
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
@@ -725,7 +725,7 @@ test_that("gen_tibble family.ID from vcf",{
 
 
 
- eletion of the backing file. It's something to do with the memory mapping
+# Windows prevents the deletion of the backing file. It's something to do with the memory mapping
 # library used by bigsnpr
 # test_that("on error, we remove the old files",{
 #   # create file
