@@ -649,7 +649,7 @@ test_that("vcf's with haploid markers",{
 
   # vcfr reads correctly
   expect_equal(show_genotypes(pop_a_vcf_gt_hapmid_vcfR)[,show_loci(pop_a_vcf_gt_hapmid_vcfR)$chromosome == 23], c(1,0,0,0,0))
-  # cpp does not
+  # cpp reads correctly
   expect_equal(show_genotypes(pop_a_vcf_gt_hapmid_cpp)[,show_loci(pop_a_vcf_gt_hapmid_cpp)$chromosome == 23], c(1,0,0,0,0))
 
 })
