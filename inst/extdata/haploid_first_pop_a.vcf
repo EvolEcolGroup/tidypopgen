@@ -8,7 +8,7 @@
 ##INFO=<ID=PR,Number=0,Type=Flag,Description="Provisional reference allele, may not be based on real reference genome">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	popa_GRC14300079	popa_GRC14300142	popa_GRC14300159	popa_GRC14300286	popa_GRC14300305
-23	51433071	rs5945676	T	.	.	.	PR	GT	0	0	0	0	0
+23	51433071	rs5945676	T	.	.	.	PR	GT	1	0	0	0	0
 1	82154	rs4477212	A	.	.	.	PR	GT	0/0	0/0	0/0	0/0	0/0
 1	752566	rs3094315	A	G	.	.	PR	GT	0/0	0/0	0/1	0/0	0/0
 1	752721	rs3131972	G	A	.	.	PR	GT	0/0	0/0	0/1	0/0	0/1

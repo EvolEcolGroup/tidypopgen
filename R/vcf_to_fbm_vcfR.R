@@ -153,7 +153,12 @@ poly_indiv_dosage <- function (x, max_ploidy){
 # get dosages for a genotype x and return them as raw for inclusion in the filebacked matrix
 poly_genotype_dosage <- function (x, max_ploidy){
   if (!is.na(x[1]) && x[1]!="."){
-    as.raw(sum(as.numeric(x)))
+    dosage <- sum(as.numeric(x))
+    if (dosage<(max_ploidy+1)){
+      return(as.raw(dosage))
+    } else{
+      stop("a genotype has more than max_ploidy alleles. We estimate max_plody from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome).")
+    }
   } else {
     return(as.raw(max_ploidy+1))
   }

@@ -25,6 +25,7 @@ std::vector<std::string> split(const std::string &s, const std::string &delimite
 // Function to count the number of alternate alleles from genotype information
 // missingValue is max_ploidy +1
 int countAlternateAlleles(const std::string &genotype, const size_t missingValue) {
+  // Rcout<<genotype<<std::endl;
   int count = 0;
   if (genotype[0] == '.'){
     return missingValue;
@@ -37,9 +38,14 @@ int countAlternateAlleles(const std::string &genotype, const size_t missingValue
     }
 
     pos_i++;
-    if (pos_i> (missingValue*2)){
-      Rcpp::stop("Error: a genotype has more than max_ploidy alleles. We estimate max_plody from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome).");
+    // Rcout<<pos_i<<"\t"<<missingValue<<std::endl;
+    // if (genotype=="1/1"){
+    //   Rcout<<pos_i<<"\t"<<missingValue<<std::endl;
+    // }
+    if (pos_i> ((missingValue-1)*2)){
+      Rcpp::stop("a genotype has more than max_ploidy alleles. We estimate max_plody from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome).");
     }
+
     //
     if (pos_i< genotype.size()){ // don't read from string if we got beyond the limit
       if (genotype[pos_i] == ':'){

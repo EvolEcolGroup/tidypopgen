@@ -634,16 +634,16 @@ test_that("additional vcf tests with larger file",{
 test_that("vcf's with haploid markers first give errors",{
 
   # read vcf
-  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
   vcf_path_haploid <- system.file("extdata/haploid_first_pop_a.vcf", package = "tidypopgen")
-  pop_a_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
-  # should expect an error?
-  expect_error(pop_a_vcf_gt_hap_cpp <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="cpp"))
-  expect_error(pop_a_vcf_gt_hap_vcfR <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="vcfR"))
-  show_genotypes(pop_a_vcf_gt)
-  show_genotypes(pop_a_vcf_gt_hap_cpp)
-  show_genotypes(pop_a_vcf_gt_hap_vcfR)
+  # the cpp parser catches the problem
+  expect_error(pop_a_vcf_gt_hap_cpp <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="cpp"),
+               "a genotype")
+  # vcfR fails to raise an error
+  expect_error(pop_a_vcf_gt_hap_vcfR <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="vcfR"),
+                  "a genotype")
 })
+
+
 
 # Windows prevents the deletion of the backing file. It's something to do with the memory mapping
 # library used by bigsnpr
