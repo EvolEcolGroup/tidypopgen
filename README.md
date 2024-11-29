@@ -18,13 +18,15 @@ will allow you to update.
 
 ## Installation
 
-You need `devtools` to install `tidypopgen`. If you haven't done so already, install it with:
+You can install the latest version of `tidypopgen` directly from r-universe (reccomended):
 ``` r
-install.packages("devtools")
+install.packages('tidypopgen', repos = "https://evolecolgroup.r-universe.dev")
 ```
 
-You are then ready to install the development version of `tidypopgen` from [GitHub](https://github.com/) with:
+Alternatively, you can install `tidypopgen`using `devtools` (but you might need to set up your development environment, 
+which can be a bit more complex):
 ``` r
+install.packages("devtools")
 devtools::install_github("EvolEcolGroup/tidypopgen")
 ```
 

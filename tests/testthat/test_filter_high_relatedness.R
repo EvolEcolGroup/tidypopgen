@@ -15,6 +15,10 @@ test_that("filter_high_relatedness removes necessary individuals",{
   #individuals 11 and 12 at 0.2294
   #individuals 9 and 10 at 0.2742
 
+  families$population <- c(rep("pop1",12))
+  families <- families %>% group_by(population)
+  qc_report_fam <- qc_report_indiv(families, kings_threshold = 0.2)
+
   #Subset the matrix using res[[1]] - the individuals to keep
   sub_matrix <- king_matrix[c(as.numeric(res[[1]])),c(as.numeric(res[[1]]))]
 

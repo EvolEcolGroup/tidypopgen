@@ -631,9 +631,9 @@ test_that("additional vcf tests with larger file",{
 }
 )
 
-test_that("vcf's with haploid markers",{
 
-  # read vcf with haploid markers first
+test_that("vcf's with haploid markers",{
+# read vcf with haploid markers first
   vcf_path_haploid <- system.file("extdata/haploid_first_pop_a.vcf", package = "tidypopgen")
   # the cpp parser catches the problem
   expect_error(pop_a_vcf_gt_hap_cpp <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="cpp"),
@@ -641,8 +641,7 @@ test_that("vcf's with haploid markers",{
   # vcfR catches the problem
   expect_error(pop_a_vcf_gt_hap_vcfR <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="vcfR"),
                   "a genotype")
-
-  # read vcf with haploid in the middle
+ # read vcf with haploid in the middle
   vcf_path_haploid_middle <- system.file("extdata/haploid_middle_pop_a.vcf", package = "tidypopgen")
   pop_a_vcf_gt_hapmid_cpp <- gen_tibble(vcf_path_haploid_middle, quiet=TRUE,backingfile = tempfile(), parser="cpp")
   pop_a_vcf_gt_hapmid_vcfR <- gen_tibble(vcf_path_haploid_middle, quiet=TRUE,backingfile = tempfile(), parser="vcfR")
@@ -682,8 +681,51 @@ test_that("chr_int is correct",{
 })
 
 
+test_that("gen_tibble family.ID from vcf",{
 
-# Windows prevents the deletion of the backing file. It's something to do with the memory mapping
+
+  # If the gen_tibble has been read in from vcf format, family.ID in the resulting
+  # plink files will be the same as sample.ID.
+  
+
+  ####  With vcfr parser
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                             parser="vcfR")
+
+  # write vcf_path using gt_as_plink
+  pop_b_bed <- gt_as_plink(pop_b_vcf_gt, tempfile())
+
+  # substitute ".bed" for ".fam" in pop_b_bed
+  fam_path <- gsub(".bed",".fam",pop_b_bed)
+
+  # read in the .fam file
+  fam <- read.table(fam_path, header = FALSE, stringsAsFactors = FALSE)
+
+  expect_true(all(fam$V1 == pop_b_vcf_gt$id))
+  expect_true(all(fam$V1 == fam$V2))
+
+  ####  With cpp parser
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                             parser="cpp")
+
+  # write vcf_path using gt_as_plink
+  pop_b_bed <- gt_as_plink(pop_b_vcf_gt, tempfile())
+
+  # substitute ".bed" for ".fam" in pop_b_bed
+  fam_path <- gsub(".bed",".fam",pop_b_bed)
+
+  # read in the .fam file
+  fam <- read.table(fam_path, header = FALSE, stringsAsFactors = FALSE)
+
+  expect_true(all(fam$V1 == pop_b_vcf_gt$id))
+  expect_true(all(fam$V1 == fam$V2))
+})
+
+
+
+ eletion of the backing file. It's something to do with the memory mapping
 # library used by bigsnpr
 # test_that("on error, we remove the old files",{
 #   # create file

@@ -6,15 +6,15 @@ template:
 development:
   mode: auto
 reference:
-  - title: "gen_tibble"
-    desc: "Functions for creating, saving, and loading gen_tibble objects."
+  - title: "`gen_tibble`"
+    desc: "Functions for creating, saving, and loading `gen_tibble` objects."
     contents:
         - gen_tibble
         - gt_save
         - gt_load
         - gt_get_file_names
   - title: "Show"
-    desc: "Functions to view loci and genotype information stored in a gen_tibble."
+    desc: "Functions to view loci and genotype information stored in a `gen_tibble`."
     contents:
         - show_genotypes
         - show_loci
@@ -23,29 +23,29 @@ reference:
         - count_loci
         - augment_loci
   - title: "Selecting loci"
-    desc: "Functions to select loci from a gen_tibble, either based on loci information, or genotype information."
+    desc: "Functions to select loci from a `gen_tibble`, either based on loci information, or genotype information."
     contents:
         - select_loci
         - select_loci_if
   - title: "Imputing"
-    desc: "Functions for imputing missing data in a gen_tibble."
+    desc: "Functions for imputing missing data in a `gen_tibble`."
     contents:
         - gt_impute_simple
         - gt_has_imputed
         - gt_uses_imputed
         - gt_set_imputed
   - title: "Merging"
-    desc: "Functions for merging gen_tibble objects."
+    desc: "Functions for merging `gen_tibble` objects."
     contents:
         - rbind_dry_run
         - rbind.gen_tbl
         - summary.rbind_report
   - title: "Exporting"
-    desc: "Functions for exporting a gen_tibble to another format."
+    desc: "Functions for exporting a `gen_tibble` to another format."
     contents:
         - starts_with("gt_as_")
   - title: "Quality control"
-    desc: "Functions reporting summary statistics for a gen_tibble."
+    desc: "Functions reporting summary statistics for a `gen_tibble`."
     contents:
         - qc_report_loci
         - qc_report_indiv
@@ -61,7 +61,7 @@ reference:
     contents:
         - starts_with("indiv_")
   - title: "Population"
-    desc: "Functions operating on a gen_tibble grouped by population."
+    desc: "Functions operating on a `gen_tibble` grouped by population."
     contents:
         - starts_with("pop_")
   - title: "Pairwise"
@@ -94,7 +94,7 @@ reference:
         - autoplot.gt_dapc
         - autoplot.gt_cluster_pca
   - title: "K-clustering (e.g. ADMXITURE)"
-    desc: "Functions for creating, tidying, and visualising q_matrix objects."
+    desc: "Functions for creating, tidying, and visualising `q_matrix` objects."
     contents:
         - q_matrix
         - get_q_matrix
@@ -107,17 +107,15 @@ reference:
         - scale_fill_distruct
         - theme_distruct
   - title: "Other analyses (e.g. ADMIXTOOLS2, pcadapt)"
-    desc: "Functions for other analyses within R."
+    desc: "Functions for other analyses within `R`."
     contents:
         - gt_extract_f2
         - gt_roh_window
         - gt_pcadapt
         - autoplot.gt_pcadapt
-  - title: "bigSNP"
-    desc: "Mostly for developers: Functions for operating directly on bigSNp objects."
+  - title: "`bigSNP`"
+    desc: "Mostly for developers: Functions for operating directly on `bigSNP` objects."
     contents:
         - snp_allele_sharing
         - snp_ibs
         - snp_king
-
-
