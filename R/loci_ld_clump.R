@@ -81,10 +81,15 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
   rows_to_keep <- vctrs::vec_data(.x)
   if (use_positions){
     #.positions <- show_loci(.x)$position
-    .positions <- attr(.x,"bigsnp")$map$position
+    #.positions <- attr(.x,"bigsnp")$map$physical.pos
+    .positions <- rep(NA, nrow(attr(.x,"bigsnp")$map))
+    .positions[show_loci(.x)$big_index] <- show_loci(.x)$position
   } else {
     .positions <- NULL
   }
+  # create a chromosome vector (fill gaps between bigsnpr and show_loci)
+  .chromosome <- rep(2147483647L, nrow(attr(.x,"bigsnp")$map))
+  .chromosome[show_loci(.x)$big_index] <- show_loci(.x)$chr_int
   # now figure out if we have any snp which have already been removed
   # those will go into `exclude`
   loci_not_in_tibble <- seq_len(nrow(attr(.x,"bigsnp")$map))[!seq_len(nrow(attr(.x,"bigsnp")$map)) %in%
@@ -98,7 +103,8 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
   snp_clump_ids <- bigsnpr::snp_clumping(G = attr(.x,"bigsnp")$genotypes,
                         #infos.chr = show_loci(.x)$chr_int,
                         # TEMP HACK using the info from the bigsnpr object
-                        infos.chr = cast_chromosome_to_int(attr(.x,"bigsnp")$map$chromosome),
+                        #infos.chr = cast_chromosome_to_int(attr(.x,"bigsnp")$map$chromosome),
+                        infos.chr = .chromosome,
                         ind.row = vctrs::vec_data(.x),
                         S = S,
                         thr.r2 = thr_r2,
