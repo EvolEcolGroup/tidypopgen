@@ -654,6 +654,15 @@ test_that("vcf's with haploid markers",{
 })
 
 test_that("chr_int is correct",{
+  # unit tests for the casting function
+  chromosome_names <- c("1", "2", NA, "4")
+  expect_true(identical(c(1L,2L,NA,4L), cast_chromosome_to_int(chromosome_names)))
+  chromosome_names <- c("chr1", "chr2", NA, "chr4")
+  expect_true(identical(c(1L,2L,NA,3L), cast_chromosome_to_int(chromosome_names)))
+  chromosome_names <- c("a", "b", NA, "c")
+  expect_true(identical(c(1L,2L,NA,3L), cast_chromosome_to_int(chromosome_names)))
+
+  # a real life example
 
   # read bed
   bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
