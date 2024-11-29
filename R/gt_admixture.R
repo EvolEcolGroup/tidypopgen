@@ -112,11 +112,14 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, seed = NULL,
   output_prefix <- file.path(out, gsub(".bed", "", basename(input_file)))
   Q <- utils::read.table(paste(output_prefix,k,"Q",sep="."), header = FALSE)
   P <- utils::read.table(paste(output_prefix,k,"P",sep="."), header = FALSE)
-  res <- list(k = k, Q = list(q_matrix(Q)), P = list(P), log = list(adm_out))
+  log_lik <- as.numeric(strsplit(grep("^Loglikelihood", adm_out, value = TRUE),":")[[1]][2])
+  res <- list(k = k, Q = list(q_matrix(Q)), P = list(P),
+              log_lik = log_lik, log = list(adm_out))
   class(res) <- c("gt_admix","list")
   if (crossval) {
-    cv <- utils::read.table(paste0(input_file, ".cv"), header = FALSE)
-    res$csv <- list(cv)
+    # extract value from line with CV error (number after :)
+    cv <- as.numeric(strsplit(grep("CV error", adm_out, value = TRUE),":")[[1]][2])
+    res$cv <- cv
   }
   return(res)
 

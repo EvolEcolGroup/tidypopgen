@@ -18,6 +18,13 @@ c.gt_admix <- function(...) {
   } else {
     P <- NULL
   }
+  # if we have a log_lik element in any of the objects, combine it
+  if (all(sapply(list(...), function(x) !is.null(x$log_lik)))) {
+    log_lik <- unlist(sapply(list(...), function(x) x$log_lik))
+  } else {
+    log_lik <- NULL
+  }
+
   # if we have a log element in any of the objects, combine it
   if (all(sapply(list(...), function(x) !is.null(x$log)))) {
     log <- sapply(list(...), function(x) x$log)
@@ -26,12 +33,12 @@ c.gt_admix <- function(...) {
   }
   # if we have a cv element in any of the objects, combine it
   if (all(sapply(list(...), function(x) !is.null(x$cv)))) {
-    cv <- sapply(list(...), function(x) x$cv)
+    cv <- unlist(sapply(list(...), function(x) x$cv))
   } else {
     cv <- NULL
   }
   # create a new combined object
-  combined_obj <- list (k = k, Q = Q, P = P, log = log)
+  combined_obj <- list (k = k, Q = Q, P = P, log = log, log_lik = log_lik)
   # if cv is not NULL, add it to the list
   if (!is.null(cv)) {
     combined_obj$cv <- cv
