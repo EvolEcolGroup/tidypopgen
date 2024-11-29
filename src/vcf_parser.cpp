@@ -43,7 +43,7 @@ int countAlternateAlleles(const std::string &genotype, const size_t missingValue
     //   Rcout<<pos_i<<"\t"<<missingValue<<std::endl;
     // }
     if (pos_i> ((missingValue-1)*2)){
-      Rcpp::stop("a genotype has more than max_ploidy alleles. We estimate max_plody from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome).");
+      Rcpp::stop("a genotype has more than max_ploidy alleles. We estimate max_ploidy from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome).");
     }
 
     //

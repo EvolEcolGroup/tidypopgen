@@ -157,7 +157,7 @@ poly_genotype_dosage <- function (x, max_ploidy){
     if (dosage<(max_ploidy+1)){
       return(as.raw(dosage))
     } else{
-      stop("a genotype has more than max_ploidy alleles. We estimate max_plody from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome).")
+      stop("a genotype has more than max_ploidy alleles. We estimate max_ploidy from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome).")
     }
   } else {
     return(as.raw(max_ploidy+1))

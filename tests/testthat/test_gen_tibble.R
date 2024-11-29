@@ -638,7 +638,7 @@ test_that("vcf's with haploid markers first give errors",{
   # the cpp parser catches the problem
   expect_error(pop_a_vcf_gt_hap_cpp <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="cpp"),
                "a genotype")
-  # vcfR fails to raise an error
+  # vcfR catches the problem
   expect_error(pop_a_vcf_gt_hap_vcfR <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="vcfR"),
                   "a genotype")
 })

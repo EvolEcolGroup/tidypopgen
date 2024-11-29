@@ -3,7 +3,17 @@
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
 #'
-#' When loading packedancestry files, missing alleles will be converted from
+#'- *VCF* files: the fast `cpp` parser is used by default. Both `cpp` and `vcfR` parsers
+#' attempt to establish ploidy from the first variant; if that variant is found in a
+#' sex chromosome (or mtDNA), the parser will fail with 'Error: a genotype has more
+#' than max_ploidy alleles...'. To use the fast parser, change the order of variants
+#' so that the first chromosome is an autosome using a tool such as `vcftools`.
+#' Currently, only biallelic SNPs are supported. If haploid variants (e.g. sex
+#' chromosomes) are included in the vcf, they are not transformed into homozygous
+#' calls. Instead, reference alleles will be counted as 0 and alternative alleles
+#' will be counted as 1.
+#'
+#' - *packedancestry* files: When loading *packedancestry* files, missing alleles will be converted from
 #' 'X' to NA
 #'
 #' @param x can be:
