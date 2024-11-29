@@ -80,7 +80,8 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   if (use_positions){
-    .positions <- show_loci(.x)$position
+    #.positions <- show_loci(.x)$position
+    .positions <- attr(.x,"bigsnp")$map$position
   } else {
     .positions <- NULL
   }
@@ -95,7 +96,9 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
 
   # as long as we have more than one individual
   snp_clump_ids <- bigsnpr::snp_clumping(G = attr(.x,"bigsnp")$genotypes,
-                        infos.chr = show_loci(.x)$chr_int,
+                        #infos.chr = show_loci(.x)$chr_int,
+                        # TEMP HACK using the info from the bigsnpr object
+                        infos.chr = cast_chromosome_to_int(attr(.x,"bigsnp")$map$chromosome),
                         ind.row = vctrs::vec_data(.x),
                         S = S,
                         thr.r2 = thr_r2,
