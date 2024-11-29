@@ -631,9 +631,9 @@ test_that("additional vcf tests with larger file",{
 }
 )
 
-test_that("vcf's with haploid markers first give errors",{
+test_that("vcf's with haploid markers",{
 
-  # read vcf
+  # read vcf with haploid markers first
   vcf_path_haploid <- system.file("extdata/haploid_first_pop_a.vcf", package = "tidypopgen")
   # the cpp parser catches the problem
   expect_error(pop_a_vcf_gt_hap_cpp <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="cpp"),
@@ -641,6 +641,44 @@ test_that("vcf's with haploid markers first give errors",{
   # vcfR catches the problem
   expect_error(pop_a_vcf_gt_hap_vcfR <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="vcfR"),
                   "a genotype")
+
+  # read vcf with haploid in the middle
+  vcf_path_haploid_middle <- system.file("extdata/haploid_middle_pop_a.vcf", package = "tidypopgen")
+  pop_a_vcf_gt_hapmid_cpp <- gen_tibble(vcf_path_haploid_middle, quiet=TRUE,backingfile = tempfile(), parser="cpp")
+  pop_a_vcf_gt_hapmid_vcfR <- gen_tibble(vcf_path_haploid_middle, quiet=TRUE,backingfile = tempfile(), parser="vcfR")
+
+  # vcfr reads correctly
+  expect_equal(show_genotypes(pop_a_vcf_gt_hapmid_vcfR)[,show_loci(pop_a_vcf_gt_hapmid_vcfR)$chromosome == 23], c(1,0,0,0,0))
+  # cpp does not
+  expect_equal(show_genotypes(pop_a_vcf_gt_hapmid_cpp)[,show_loci(pop_a_vcf_gt_hapmid_cpp)$chromosome == 23], c(1,0,0,0,0))
+
+})
+
+test_that("chr_int is correct",{
+
+  # read bed
+  bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+  pop_b_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+
+  # chr_int is correct for bed files
+  expect_equal(show_loci(pop_b_gt)$chr_int, show_loci(pop_b_gt)$chromosome)
+
+  # read ped
+  ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
+  pop_b_ped_gt <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile())
+
+  # chr_int is correct for ped files
+  expect_equal(show_loci(pop_b_ped_gt)$chr_int, show_loci(pop_b_ped_gt)$chromosome)
+
+  # read vcf
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  pop_a_vcfr_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser = "vcfR")
+  pop_a_cpp_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser = "cpp")
+
+  # chr_int is correct for vcf
+  expect_equal(show_loci(pop_a_vcfr_gt)$chr_int, as.integer(show_loci(pop_a_vcfr_gt)$chromosome))
+  expect_equal(show_loci(pop_a_cpp_gt)$chr_int, as.integer(show_loci(pop_a_cpp_gt)$chromosome))
+
 })
 
 

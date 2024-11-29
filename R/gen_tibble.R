@@ -576,7 +576,6 @@ change_duplicated_file_name <- function(file){
 # adding a chr_int column
 add_chromosome_as_int <- function(loci){
 
-
   if(is.integer(loci$chromosome)){
     loci$chr_int <- loci$chromosome
 
@@ -589,12 +588,10 @@ add_chromosome_as_int <- function(loci){
 
   } else if(is.character(loci$chromosome)){
     non_na_id <- !is.na(loci$chromosome)
-    chr_factor <- as.factor(loci$chromosome[non_na_id])
-    chr_int <- as.integer(chr_factor)
+    chr_int <- as.integer(gsub("\\D", "", loci$chromosome[non_na_id]))
 
     loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
     loci$chr_int[non_na_id] <- chr_int
-
 
   } else if(is.factor(loci$chromosome)){
     non_na_id <- !is.na(loci$chromosome)
