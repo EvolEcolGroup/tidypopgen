@@ -26,7 +26,3 @@ specified, all columns are used. Don't use negative indices.}
 \description{
 This function computes the KING-robust estimator of kinship.
 }
-\details{
-The last step is not optimised yet, as it does the division of the num by the
-den all in memory (on my TODO list...).
-}
