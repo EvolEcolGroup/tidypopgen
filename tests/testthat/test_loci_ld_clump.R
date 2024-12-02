@@ -92,30 +92,31 @@ test_that("loci order",{
 
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                  population = c("pop1","pop1","pop2"))
-  test_genotypes <- rbind(c(2,2,0,1,1,2),
-                          c(2,2,0,0,0,1),
-                          c(2,2,0,0,1,1))
+  test_genotypes <- rbind(c(1,2,2,0,1,2),
+                          c(0,2,2,0,0,1),
+                          c(1,2,2,0,0,1))
 
-  test_loci <- data.frame(name=paste0("rs",1:6),
-                          chromosome=c("chr2","chr1","chr1","chr1","chr2","chr1"),
-                          position=c(3,5,65,343,23,456),
+  test_loci <- data.frame(name=paste0("rs",c(5,rep(1:4,1),6)),
+                          chromosome=c("chr2","chr1","chr1","chr1","chr1","chr2"),
+                          position=c(23,3,5,65,343,456),
                           genetic_dist = as.double(rep(0,6)),
-                          allele_ref = c("A","T","C","G","C","T"),
-                          allele_alt = c("T","C", NA,"C","G","A"))
+                          allele_ref = c("C","A","T","C","G","T"),
+                          allele_alt = c("G","T","C", NA,"C","A"))
 
-  test_gt <- gen_tibble(x = test_genotypes, indiv_meta = test_indiv_meta, loci = test_loci,
+  test_gt_new_order <- gen_tibble(x = test_genotypes, indiv_meta = test_indiv_meta, loci = test_loci,
                         backingfile = tempfile(), quiet = TRUE)
 
-  #ld
-  expect_error(loci_ld_clump(test_gt, thr_r2 = 0.2), "Your loci are not sorted, try using:")
-  #reorder the loci
-  show_loci(test_gt) <- test_gt %>% show_loci() %>% arrange(chr_int,position)
+  # clumping generates erro
+  expect_error(loci_ld_clump(test_gt_new_order, thr_r2 = 0.2), "Your loci are not sorted, try using:")
+  # reorder the loci
+  show_loci(test_gt_new_order) <- test_gt_new_order %>% show_loci() %>% arrange(chr_int,position)
+  # try again
+  keep_reordered <- loci_ld_clump(test_gt_new_order, thr_r2 = 0.2, return_id=TRUE)
 
-  show_loci(test_gt)
-
+  # calculate the expected result
   keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id=TRUE)
-  expect_true(all.equal(keep, c(5, 1, 2, 3, 4)) == TRUE)
-
+  # compare
+  expect_equal(keep, keep_reordered)
 })
 
 test_that("loci_ld_clump works on a grouped gt",{

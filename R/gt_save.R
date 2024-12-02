@@ -44,7 +44,7 @@ gt_save <- function(x, file_name = NULL, quiet = FALSE) {
   return(c(file_name,gt_get_file_names(x)))
 }
 
-#' a light version of gt_save that does not resave the RDS, to be used internally
+#' a light version of gt_save that does not resave the bigSNP RDS or backing file, to be used internally
 #' when creating a gen_tibble (if we have just created it, there is not need
 #' to resave it)
 #' @param x a [`gen_tibble`]

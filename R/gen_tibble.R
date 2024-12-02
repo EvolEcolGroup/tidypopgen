@@ -3,13 +3,15 @@
 #' A `gen_tibble` stores genotypes for individuals in a tidy format. DESCRIBE
 #' here the format
 #'
-#' - *VCF* files: the fast `cpp` parser is used by default. It attempts to establish
-#' ploidy from the first variant; if that variant is found in a sex chromosome (or mtDNA),
-#' it will fail. To use the fast parser, change the order of variants so that the first chromosome is an
-#' autosome using a tool such as `vcftools`. Alternatively, the slower but more robust
-#' `vcfR` parser should be used instead. Currently, only biallelic SNPs are supported. If haploid
-#' variants (e.g. sex chromosomes) are included in the vcf, they are not transformed into homozygous calls.
-#' Instad, reference alleles will be counted as 0 and alternative alleles will be counted as 1.
+#'- *VCF* files: the fast `cpp` parser is used by default. Both `cpp` and `vcfR` parsers
+#' attempt to establish ploidy from the first variant; if that variant is found in a
+#' sex chromosome (or mtDNA), the parser will fail with 'Error: a genotype has more
+#' than max_ploidy alleles...'. To successful import such a *VCF*, change the order of variants
+#' so that the first chromosome is an autosome using a tool such as `vcftools`.
+#' Currently, only biallelic SNPs are supported. If haploid variants (e.g. sex
+#' chromosomes) are included in the *VCF*, they are not transformed into homozygous
+#' calls. Instead, reference alleles will be counted as 0 and alternative alleles
+#' will be counted as 1.
 #'
 #' - *packedancestry* files: When loading *packedancestry* files, missing alleles will be converted from
 #' 'X' to NA
@@ -21,9 +23,9 @@
 #' - a string giving the path to a RDS file storing a `bigSNP` object from
 #' the `bigsnpr` package (usually created with [bigsnpr::snp_readBed()])
 #' - a string giving the path to a vcf file. Note that we currently read the whole
-#' vcf in memory with `vcfR`, so only smallish vcf can be imported. Only biallelic
+#' vcf in memory with `vcfR`, so only smallish *VCF* can be imported. Only biallelic
 #' SNPs will be considered.
-#' - a string giving the path to a packedancestry .geno file. The associated
+#' - a string giving the path to a *packedancestry* .geno file. The associated
 #' .ind and .snp files are expected to be in the same directory and share the
 #' same file name prefix.
 #' - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
@@ -41,9 +43,9 @@
 #' if `x` is a vcf or packedancestry file)
 #' @param ... if `x` is the name of a vcf file, additional arguments
 #' passed to [vcfR::read.vcfR()]. Otherwise, unused.
-#' @param parser the name of the parser used for VCF, either "cpp" to use
+#' @param parser the name of the parser used for *VCF*, either "cpp" to use
 #' a fast C++ parser, or "vcfR" to use the R package `vcfR`. The latter is slower
-#' but more robust; if "cpp" gives error, try using "vcfR" in case your VCF has
+#' but more robust; if "cpp" gives error, try using "vcfR" in case your *VCF* has
 #' an unusual structure.
 #' @param n_cores the number of cores to use for parallel processing
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
@@ -54,10 +56,10 @@
 #' @param backingfile the path, including the file name without extension,
 #' for backing files used to store the data (they will be given a .bk
 #' and .RDS automatically). This is not needed if `x` is already an .RDS file.
-#' If `x` is a .BED file and `backingfile` is left NULL, the backing file will
+#' If `x` is a .BED or a *VCF* file and `backingfile` is left NULL, the backing file will
 #' be saved in the same directory as the
 #' bed file, using the same file name but with a different file type (.bk rather
-#' than .bed). The same logic applies to .vcf files. If `x` is a genotype matrix and `backingfile` is NULL, then a
+#' than .bed). If `x` is a genotype matrix and `backingfile` is NULL, then a
 #' temporary file will be created (but note that R will delete it at the end of
 #' the session!)
 #' @param quiet provide information on the files used to store the data
@@ -137,9 +139,8 @@ gen_tibble.character <-
     stop("file_path should be pointing to a either a PLINK .bed or .ped file, a bigSNP .rds file or a VCF .vcf or .vcf.gz file")
   }
 
-  loci <- show_loci(x_gt)
-  new_loci <- add_chromosome_as_int(loci)
-  show_loci(x_gt) <- new_loci
+  # create a chr_int column
+  show_loci(x_gt)$chr_int <- cast_chromosome_to_int(show_loci(x_gt)$chromosome)
 
   file_in_use <- gt_save_light(x_gt, quiet = quiet)
   return(x_gt)
@@ -313,9 +314,8 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
                         remove_on_fail = TRUE)
   show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl), missing_alleles = missing_alleles)
 
-  loci <- show_loci(new_gen_tbl)
-  new_loci <- add_chromosome_as_int(loci)
-  show_loci(new_gen_tbl) <- new_loci
+  # create a chr_int column
+  show_loci(new_gen_tbl)$chr_int <- cast_chromosome_to_int(show_loci(new_gen_tbl)$chromosome)
 
   files_in_use <- gt_save(new_gen_tbl, quiet = quiet)
   return(new_gen_tbl)
@@ -572,39 +572,23 @@ change_duplicated_file_name <- function(file){
 }
 
 # adding a chr_int column
-add_chromosome_as_int <- function(loci){
-
-
-  if(is.integer(loci$chromosome)){
-    loci$chr_int <- loci$chromosome
-
-  } else if(is.numeric(loci$chromosome)){
-    non_na_id <- !is.na(loci$chromosome)
-    chr_int <- as.integer(loci$chromosome[non_na_id])
-
-    loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
-    loci$chr_int[non_na_id] <- chr_int
-
-  } else if(is.character(loci$chromosome)){
-    non_na_id <- !is.na(loci$chromosome)
-    chr_factor <- as.factor(loci$chromosome[non_na_id])
-    chr_int <- as.integer(chr_factor)
-
-    loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
-    loci$chr_int[non_na_id] <- chr_int
-
-
-  } else if(is.factor(loci$chromosome)){
-    non_na_id <- !is.na(loci$chromosome)
-    chr_int <- as.integer(loci$chromosome[non_na_id])
-
-    loci$chr_int <- rep(NA_integer_, length(loci$chromosome))
-    loci$chr_int[non_na_id] <- chr_int
-
+cast_chromosome_to_int <- function(chromosome){
+  # if chromosome is an factor, then cast it to character
+  if (is.factor(chromosome)){
+    chromosome <- as.character(chromosome)
+  }
+  # if chromosome is a character, then cast it to integer
+  if (is.character(chromosome)){
+    chromosome <- tryCatch(as.integer(chromosome), warning = function(e) {as.integer(as.factor(chromosome))})
+  }
+  if (is.numeric(chromosome)){
+    chromosome <- as.integer(chromosome)
+  }
+  if (is.integer(chromosome)){
+    return(chromosome)
   } else {
-
     stop("Chromosome column should be integer, character, or factor")
   }
-  return(loci)
+
 }
 

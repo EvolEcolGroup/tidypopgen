@@ -1,3 +1,4 @@
+
 # create file
 test_indiv_meta <- data.frame (id=c("a","b","c"),
                                population = c("pop1","pop1","pop2"))
@@ -159,6 +160,72 @@ test_that("gen_tibble identifies wrong loci table columns",{
 })
 
 
+test_that("PROBLEM TEST gentibble from VCF with missingness issue",{
+  ########################
+  # PLINK BED files
+  ########################
+  bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+  pop_b_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+
+  ########################
+  # PLINK VCF files
+  ########################
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                             parser="vcfR")
+  expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_gt)))
+  # reload it in chunks
+  pop_b_vcf_gt2 <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                              chunk_size = 2, parser = "vcfR")
+  expect_true(all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt)))
+  expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
+  expect_true(is.integer(show_loci(pop_b_vcf_gt2)$chr_int))
+
+  # check our cpp parser
+  pop_b_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
+
+  # debug
+  # if (!identical(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt))) {
+  #   stop("genotypes are not equal \n",
+  #   print(show_genotypes(pop_b_gt)),"\n",
+  #   print(show_genotypes(pop_b_vcf_fast_gt)))
+  # }
+  #
+  # for(i in 1:10){
+  #
+  #   genotypes_info <- paste0(
+  #     "Iteration: ", i, "\n",
+  #     "Pop B GT: ", show_genotypes(pop_b_gt), "\n",
+  #     "Pop B VCF Fast GT: ", show_genotypes(pop_b_vcf_fast_gt)
+  #   )
+  #   expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)),info = genotypes_info)
+  # }
+  # check loci table against the vcfR parser
+  expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
+  # reload it in chunks
+  pop_b_vcf_fast_gt2 <- gen_tibble(vcf_path, quiet=TRUE, backingfile = tempfile(),
+                                   chunk_size = 2, parser="cpp")
+
+  # # debug
+  # print(show_genotypes(pop_b_vcf_fast_gt2))
+  # print(show_genotypes(pop_b_vcf_fast_gt))
+  #
+  # for(i in 1:10){
+  #
+  #   genotypes_info <- paste0(
+  #     "Iteration: ", i, "\n",
+  #     "Pop B GT: ", show_genotypes(pop_b_vcf_fast_gt), "\n",
+  #     "Pop B VCF Fast GT: ", show_genotypes(pop_b_vcf_fast_gt2)
+  #   )
+  #
+  #   expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)), info = genotypes_info)
+  # }
+
+  expect_true(all.equal(show_loci(pop_b_vcf_fast_gt2), show_loci(pop_b_vcf_fast_gt)))
+  expect_true(is.integer(show_loci(pop_b_vcf_fast_gt2)$chr_int))
+
+})
+
 test_that("gen_tibble from files",{
   ########################
   # PLINK BED files
@@ -244,18 +311,6 @@ test_that("gen_tibble from files with missingness",{
   expect_true(all.equal(show_genotypes(pop_b_vcf_gt2),show_genotypes(pop_b_vcf_gt)))
   expect_true(all.equal(show_loci(pop_b_vcf_gt2),show_loci(pop_b_vcf_gt)))
   expect_true(is.integer(show_loci(pop_b_vcf_gt2)$chr_int))
-
-  # check our cpp parser
-  pop_b_vcf_fast_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser="cpp")
-  expect_true(all.equal(show_genotypes(pop_b_gt),show_genotypes(pop_b_vcf_fast_gt)))
-  # check loci table against the vcfR parser
-  expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
-  # reload it in chunks
-  pop_b_vcf_fast_gt2 <- gen_tibble(vcf_path, quiet=TRUE, backingfile = tempfile(),
-                                   chunk_size = 2, parser="cpp")
-  expect_true(all.equal(show_genotypes(pop_b_vcf_fast_gt2),show_genotypes(pop_b_vcf_fast_gt)))
-  expect_true(all.equal(show_loci(pop_b_vcf_gt), show_loci(pop_b_vcf_fast_gt)))
-  expect_true(is.integer(show_loci(pop_b_vcf_fast_gt)$chr_int))
 })
 
 test_that("gentibble with packedancestry",{
@@ -576,10 +631,71 @@ test_that("additional vcf tests with larger file",{
 }
 )
 
+
+test_that("vcf's with haploid markers",{
+# read vcf with haploid markers first
+  vcf_path_haploid <- system.file("extdata/haploid_first_pop_a.vcf", package = "tidypopgen")
+  # the cpp parser catches the problem
+  expect_error(pop_a_vcf_gt_hap_cpp <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="cpp"),
+               "a genotype")
+  # vcfR catches the problem
+  expect_error(pop_a_vcf_gt_hap_vcfR <- gen_tibble(vcf_path_haploid, quiet=TRUE,backingfile = tempfile(), parser="vcfR"),
+                  "a genotype")
+ # read vcf with haploid in the middle
+  vcf_path_haploid_middle <- system.file("extdata/haploid_middle_pop_a.vcf", package = "tidypopgen")
+  pop_a_vcf_gt_hapmid_cpp <- gen_tibble(vcf_path_haploid_middle, quiet=TRUE,backingfile = tempfile(), parser="cpp")
+  pop_a_vcf_gt_hapmid_vcfR <- gen_tibble(vcf_path_haploid_middle, quiet=TRUE,backingfile = tempfile(), parser="vcfR")
+
+  # vcfr reads correctly
+  expect_equal(show_genotypes(pop_a_vcf_gt_hapmid_vcfR)[,show_loci(pop_a_vcf_gt_hapmid_vcfR)$chromosome == 23], c(1,0,0,0,0))
+  # cpp reads correctly
+  expect_equal(show_genotypes(pop_a_vcf_gt_hapmid_cpp)[,show_loci(pop_a_vcf_gt_hapmid_cpp)$chromosome == 23], c(1,0,0,0,0))
+
+})
+
+test_that("chr_int is correct",{
+  # unit tests for the casting function
+  chromosome_names <- c("1", "2", NA, "4")
+  expect_true(identical(c(1L,2L,NA,4L), cast_chromosome_to_int(chromosome_names)))
+  chromosome_names <- c("chr1", "chr2", NA, "chr4")
+  expect_true(identical(c(1L,2L,NA,3L), cast_chromosome_to_int(chromosome_names)))
+  chromosome_names <- c("a", "b", NA, "c")
+  expect_true(identical(c(1L,2L,NA,3L), cast_chromosome_to_int(chromosome_names)))
+
+  # a real life example
+
+  # read bed
+  bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+  pop_b_gt <- gen_tibble(bed_path, quiet=TRUE, backingfile = tempfile())
+
+  # chr_int is correct for bed files
+  expect_equal(show_loci(pop_b_gt)$chr_int, show_loci(pop_b_gt)$chromosome)
+
+  # read ped
+  ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
+  pop_b_ped_gt <- gen_tibble(ped_path, quiet=TRUE, backingfile = tempfile())
+
+  # chr_int is correct for ped files
+  expect_equal(show_loci(pop_b_ped_gt)$chr_int, show_loci(pop_b_ped_gt)$chromosome)
+
+  # read vcf
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  pop_a_vcfr_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser = "vcfR")
+  pop_a_cpp_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(), parser = "cpp")
+
+  # chr_int is correct for vcf
+  expect_equal(show_loci(pop_a_vcfr_gt)$chr_int, as.integer(show_loci(pop_a_vcfr_gt)$chromosome))
+  expect_equal(show_loci(pop_a_cpp_gt)$chr_int, as.integer(show_loci(pop_a_cpp_gt)$chromosome))
+
+})
+
+
 test_that("gen_tibble family.ID from vcf",{
+
 
   # If the gen_tibble has been read in from vcf format, family.ID in the resulting
   # plink files will be the same as sample.ID.
+
 
   ####  With vcfr parser
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
