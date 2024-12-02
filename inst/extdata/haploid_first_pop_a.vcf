@@ -1,0 +1,26 @@
+##fileformat=VCFv4.2
+##fileDate=20240510
+##source=PLINKv1.90
+##contig=<ID=1,length=1346906>
+##contig=<ID=2,length=235832764>
+##contig=<ID=3,length=155913652>
+##contig=<ID=23,length=51433072>
+##INFO=<ID=PR,Number=0,Type=Flag,Description="Provisional reference allele, may not be based on real reference genome">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	popa_GRC14300079	popa_GRC14300142	popa_GRC14300159	popa_GRC14300286	popa_GRC14300305
+23	51433071	rs5945676	T	.	.	.	PR	GT	1	0	0	0	0
+1	82154	rs4477212	A	.	.	.	PR	GT	0/0	0/0	0/0	0/0	0/0
+1	752566	rs3094315	A	G	.	.	PR	GT	0/0	0/0	0/1	0/0	0/0
+1	752721	rs3131972	G	A	.	.	PR	GT	0/0	0/0	0/1	0/0	0/1
+1	776546	rs12124819	A	.	.	.	PR	GT	0/0	0/0	0/0	0/0	0/0
+1	798959	rs11240777	G	A	.	.	PR	GT	0/0	0/0	1/1	0/0	0/1
+1	873558	rs1110052	G	T	.	.	PR	GT	0/1	0/0	0/1	0/0	1/1
+1	934345	rs9697457	G	.	.	.	PR	GT	0/0	0/0	0/0	0/0	0/0
+1	957640	rs6657048	C	.	.	.	PR	GT	0/0	0/0	0/0	0/0	0/0
+1	994391	rs2488991	T	.	.	.	PR	GT	0/0	0/0	0/0	0/0	0/0
+1	1264539	rs307354	C	G	.	.	PR	GT	0/0	0/1	0/0	0/1	0/0
+1	1346905	rs1240719	T	A	.	.	PR	GT	0/0	0/1	0/0	0/0	0/0
+2	61974443	rs2862633	G	.	.	.	PR	GT	0/0	0/0	0/0	0/0	0/0
+2	139008811	rs28569024	T	.	.	.	PR	GT	0/0	0/0	0/0	0/0	0/0
+2	235832763	rs10106770	G	A	.	.	PR	GT	0/1	0/0	0/1	0/1	0/1
+3	155913651	rs11942835	T	C	.	.	PR	GT	0/0	0/1	0/0	0/1	0/0

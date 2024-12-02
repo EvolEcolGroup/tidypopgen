@@ -72,7 +72,6 @@ filter_high_relatedness <-
     # for pairs with higher than kings_threshold relatedness
     # the individual with higher average relatedness is removed
     for (i in 1:(var_num - 1)) {
-      #browser()
       if (!any(matrix2[!is.na(matrix2)] > kings_threshold)) {
         if (verbose) {
           message("All correlations <=", kings_threshold, "\n")

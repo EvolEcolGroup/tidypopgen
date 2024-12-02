@@ -55,7 +55,6 @@ gen_tibble_packedancestry <- function(x, ...,
                                               inds = indiv_table$id[i],
                                             ..., verbose = !quiet)
     res$geno[is.na(res$geno)]<-3
-    #browser()
     # now insert the genotypes in the FBM
     file_backed_matrix[
       i,

@@ -24,15 +24,35 @@ std::vector<std::string> split(const std::string &s, const std::string &delimite
 
 // Function to count the number of alternate alleles from genotype information
 // missingValue is max_ploidy +1
-int countAlternateAlleles(const std::string &genotype, const int missingValue, const int ploidy) {
+int countAlternateAlleles(const std::string &genotype, const size_t missingValue) {
+  // Rcout<<genotype<<std::endl;
   int count = 0;
   if (genotype[0] == '.'){
     return missingValue;
   }
-  for (int pos_i = 0; pos_i < ploidy; pos_i++){
-    if (genotype[0+pos_i*2] == '1'){
+
+  //For odd positions, we have the allele; for even positions, we might have : for end of genotype field
+  for (size_t pos_i = 0; pos_i < genotype.size(); pos_i++){
+    if (genotype[pos_i] == '1'){
       count++;
     }
+
+    pos_i++;
+    // Rcout<<pos_i<<"\t"<<missingValue<<std::endl;
+    // if (genotype=="1/1"){
+    //   Rcout<<pos_i<<"\t"<<missingValue<<std::endl;
+    // }
+    if (pos_i> ((missingValue-1)*2)){
+      Rcpp::stop("a genotype has more than max_ploidy alleles. We estimate max_ploidy from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome).");
+    }
+
+    //
+    if (pos_i< genotype.size()){ // don't read from string if we got beyond the limit
+      if (genotype[pos_i] == ':'){
+        break;
+      }
+    }
+
   }
   return count;
 }
@@ -87,6 +107,7 @@ List extractAltAlleleCountsFromVCF(std::string filename,
   allele2.reserve(maxLoci);
 
   std::string line;
+  std::string this_chromosome = ""; // chromosome of the current line
   int lociCount = 0; // number of biallelic loci
   int lineCount = 0; // number of valid lines
   int skippedLoci = 0;
@@ -130,7 +151,7 @@ List extractAltAlleleCountsFromVCF(std::string filename,
       // Collect alternate allele counts for all individuals
       if (fields[4][0] != '.'){
         for (unsigned int i = 9; i < fields.size(); ++i) {
-          int count = countAlternateAlleles(fields[i], missingValue, ploidy[i-9]);
+          int count = countAlternateAlleles(fields[i], missingValue);
           allele_counts(i - 9, lociCount) = count;
         }
       } else { // if this is an invariant site

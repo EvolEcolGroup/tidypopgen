@@ -2,9 +2,6 @@
 #'
 #' This function computes the KING-robust estimator of kinship.
 #'
-#' The last step is not optimised yet, as it does the division of the num by the
-#' den all in memory (on my TODO list...).
-#'
 #' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
 #' slot of a [bigsnpr::bigSNP] object).
 #' @param ind.row An optional vector of the row indices that are used.
