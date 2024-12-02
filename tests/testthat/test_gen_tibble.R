@@ -731,9 +731,6 @@ test_that("gen_tibble family.ID from vcf",{
   expect_true(all(fam$V1 == pop_b_vcf_gt$id))
   expect_true(all(fam$V1 == fam$V2))
 })
-
-
-
 # Windows prevents the deletion of the backing file. It's something to do with the memory mapping
 # library used by bigsnpr
 # test_that("on error, we remove the old files",{
