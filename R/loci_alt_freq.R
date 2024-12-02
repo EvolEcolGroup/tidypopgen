@@ -91,6 +91,7 @@ loci_maf.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
   if (is_diploid_only(.x)){
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
 
+    # TODO we need this to happen within a big_apply to use chunks of very large datasets
     freq_mat <- gt_grouped_alt_freq_diploid(BM = geno_fbm,rowInd = .gt_bigsnp_rows(.x),
                                             colInd = .gt_bigsnp_cols(.x),
                                             groupIds = dplyr::group_indices(.x)-1,
@@ -130,14 +131,6 @@ loci_alt_freq_diploid <- function(.x){
                                  ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
                                  block.size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
                                  a.combine = 'c')
-
-    # col_counts <- bigstatsr::big_counts(geno_fbm,
-    #                                     ind.row = rows_to_keep,
-    #                                     ind.col = attr(.x,"loci")$big_index)
-    # means_from_counts <- function(x){
-    #   (x[2]+x[3]*2)/((x[1]+x[2]+x[3])*2)
-    # }
-    # freq <- apply(col_counts, 2, means_from_counts)
   } else { # if we have a single individual
     freq <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index] /2
   }
