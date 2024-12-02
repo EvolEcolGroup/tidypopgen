@@ -93,9 +93,9 @@ directory and have the same file name.</p></li>
 <li><p>a string giving the path to a RDS file storing a <code>bigSNP</code> object from
 the <code>bigsnpr</code> package (usually created with <code><a href="https://privefl.github.io/bigsnpr/reference/snp_readBed.html" class="external-link">bigsnpr::snp_readBed()</a></code>)</p></li>
 <li><p>a string giving the path to a vcf file. Note that we currently read the whole
-vcf in memory with <code>vcfR</code>, so only smallish vcf can be imported. Only biallelic
+vcf in memory with <code>vcfR</code>, so only smallish <em>VCF</em> can be imported. Only biallelic
 SNPs will be considered.</p></li>
-<li><p>a string giving the path to a packedancestry .geno file. The associated
+<li><p>a string giving the path to a <em>packedancestry</em> .geno file. The associated
 .ind and .snp files are expected to be in the same directory and share the
 same file name prefix.</p></li>
 <li><p>a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
@@ -123,10 +123,10 @@ locus with only one allele). It defaults to '0' and '.' (the same as PLINK 1.9).
 <dd><p>the path, including the file name without extension,
 for backing files used to store the data (they will be given a .bk
 and .RDS automatically). This is not needed if <code>x</code> is already an .RDS file.
-If <code>x</code> is a .BED file and <code>backingfile</code> is left NULL, the backing file will
+If <code>x</code> is a .BED or a <em>VCF</em> file and <code>backingfile</code> is left NULL, the backing file will
 be saved in the same directory as the
 bed file, using the same file name but with a different file type (.bk rather
-than .bed). The same logic applies to .vcf files. If <code>x</code> is a genotype matrix and <code>backingfile</code> is NULL, then a
+than .bed). If <code>x</code> is a genotype matrix and <code>backingfile</code> is NULL, then a
 temporary file will be created (but note that R will delete it at the end of
 the session!)</p></dd>
 
@@ -136,9 +136,9 @@ the session!)</p></dd>
 
 
 <dt id="arg-parser">parser<a class="anchor" aria-label="anchor" href="#arg-parser"></a></dt>
-<dd><p>the name of the parser used for VCF, either "cpp" to use
+<dd><p>the name of the parser used for <em>VCF</em>, either "cpp" to use
 a fast C++ parser, or "vcfR" to use the R package <code>vcfR</code>. The latter is slower
-but more robust; if "cpp" gives error, try using "vcfR" in case your VCF has
+but more robust; if "cpp" gives error, try using "vcfR" in case your <em>VCF</em> has
 an unusual structure.</p></dd>
 
 
@@ -180,11 +180,15 @@ from the data as they are read.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
 
-<ul><li><p><em>VCF</em> files: the fast <code>cpp</code> parser is used by default. It attempts to establish
-ploidy from the first variant; if that variant is found in a sex chromosome (or mtDNA),
-it will fail. To use the fast parser, change the order of variants so that the first chromosome is an
-autosome using a tool such as <code>vcftools</code>. Alternatively, the slower but more robust
-<code>vcfR</code> parser should be used instead.</p></li>
+<ul><li><p><em>VCF</em> files: the fast <code>cpp</code> parser is used by default. Both <code>cpp</code> and <code>vcfR</code> parsers
+attempt to establish ploidy from the first variant; if that variant is found in a
+sex chromosome (or mtDNA), the parser will fail with 'Error: a genotype has more
+than max_ploidy alleles...'. To successful import such a <em>VCF</em>, change the order of variants
+so that the first chromosome is an autosome using a tool such as <code>vcftools</code>.
+Currently, only biallelic SNPs are supported. If haploid variants (e.g. sex
+chromosomes) are included in the <em>VCF</em>, they are not transformed into homozygous
+calls. Instead, reference alleles will be counted as 0 and alternative alleles
+will be counted as 1.</p></li>
 <li><p><em>packedancestry</em> files: When loading <em>packedancestry</em> files, missing alleles will be converted from
 'X' to NA</p></li>
 </ul></div>
