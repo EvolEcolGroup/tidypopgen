@@ -25,7 +25,7 @@ thousands markers, or larger)."><meta property="og:image" content="https://evole
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9019</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9020</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +73,9 @@ thousands markers, or larger).</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>NOTE: using gt_pca_autoSVD with a small dataset will likely cause an error,
 see man page for details.</p>
+<p>NOTE: monomorphic markers must be removed before PCA is computed. The error
+message 'Error: some variables have zero scaling; remove them before attempting
+to scale.' indicates that monomorphic markers are present.</p>
     </div>
 
   </main></div>

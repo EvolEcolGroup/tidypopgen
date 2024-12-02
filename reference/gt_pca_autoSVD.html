@@ -11,7 +11,7 @@ of long-range LD regions. This function is a wrapper for bigsnpr::snp_autoSVD()"
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9019</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9020</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -151,7 +151,11 @@ A named list (an S3 class "big_SVD") of</p><ul><li><p><code>d</code>, the eigenv
 <li><p><code>method</code>, a string defining the method (in this case 'autoSVD'),</p></li>
 <li><p><code>call</code>, the call that generated the object.</p></li>
 </ul><p>Note: rather than accessing these elements directly, it is better to use
-<code>tidy</code> and <code>augment</code>. See <code><a href="tidy_gt_pca.html">gt_pca_tidiers</a></code>.</p>
+<code>tidy</code> and <code>augment</code>. See <code><a href="tidy_gt_pca.html">gt_pca_tidiers</a></code>.
+Note: If you encounter 'Error in rollmean(): Parameter 'size' is too large.'
+roll_size is exceeding the number of variants on at least one of your chromosomes.
+If you have pre-specified roll_size, you will need to reduce this parameter.
+If not, try specifying a reduced 'roll_size' to avoid this error.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
