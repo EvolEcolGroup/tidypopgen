@@ -91,6 +91,7 @@ loci_maf.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
   if (is_diploid_only(.x)){
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
 
+    # TODO we need this to happen within a big_apply to use chunks of very large datasets
     freq_mat <- gt_grouped_alt_freq_diploid(BM = geno_fbm,rowInd = .gt_bigsnp_rows(.x),
                                             colInd = .gt_bigsnp_cols(.x),
                                             groupIds = dplyr::group_indices(.x)-1,
@@ -99,7 +100,7 @@ loci_maf.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
     freq_mat[freq_mat>0.5 & !is.na(freq_mat)] <- 1 - freq_mat[freq_mat>0.5 & !is.na(freq_mat)]
     # return a list to mimic a group_map
     lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[,i])
-  } else {
+  } else { # the polyploid case
     # TODO this is seriously inefficient, we should replace it with a cpp function
     group_map(.x, .f=~loci_maf(.x,, ...))
   }
@@ -113,13 +114,23 @@ loci_alt_freq_diploid <- function(.x){
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep)>1){
-    col_counts <- bigstatsr::big_counts(geno_fbm,
-                                        ind.row = rows_to_keep,
-                                        ind.col = attr(.x,"loci")$big_index)
-    means_from_counts <- function(x){
-      (x[2]+x[3]*2)/((x[1]+x[2]+x[3])*2)
+    # create function to use in big_apply
+    big_sub_counts <- function (X, ind, rows_to_keep) {
+      col_counts <- bigstatsr::big_counts(X,
+                                          ind.row = rows_to_keep,
+                                          ind.col = ind)
+      means_from_counts <- function(x){
+        (x[2]+x[3]*2)/((x[1]+x[2]+x[3])*2)
+      }
+      freq_sub <- apply(col_counts, 2, means_from_counts)
+      freq_sub
     }
-    freq <- apply(col_counts, 2, means_from_counts)
+    freq <- bigstatsr::big_apply(geno_fbm, a.FUN = big_sub_counts,
+                                 rows_to_keep = rows_to_keep,
+                                 ind=attr(.x,"loci")$big_index,
+                                 ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
+                                 block.size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                 a.combine = 'c')
   } else { # if we have a single individual
     freq <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index] /2
   }
