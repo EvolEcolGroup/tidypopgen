@@ -75,7 +75,7 @@ test_that("loci_ld_clump error unsorted loci",{
   pop_b_imputed <- gt_impute_simple(pop_b, method = "mode")
 
   #ld
-  expect_error(loci_ld_clump(pop_b_imputed, thr_r2 = 0.2), "Your loci are not sorted, try using:")
+  expect_error(loci_ld_clump(pop_b_imputed, thr_r2 = 0.2), "Your loci have been resorted")
   expect_false(identical(show_loci(pop_b_imputed), pop_b_imputed %>% show_loci() %>% arrange(chr_int,position)))
 
   #reorder the loci

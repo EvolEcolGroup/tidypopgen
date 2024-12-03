@@ -64,16 +64,29 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
 {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
+  # check that the loci have not been resorted
+  # check that big_index in the loci table is an increasing sequence of indeces
+  if (is.unsorted(show_loci(.x)$big_index, strictly = TRUE)){
+    stop("Your loci have been resorted, this is bad!!!!")
+  }
+
+  # check that within each chromosome positions are sorted
+  are_positions_unsorted <- function(x){is.unsorted(x$position)}
+  if (any(unlist(show_loci(.x) %>%
+           group_by(chr_int) %>%
+           group_map(~ are_positions_unsorted(.x))))){
+    stop("Your loci are not sorted within chromosomes")
+  }
 
   if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
     gt_set_imputed(.x, set = TRUE)
     on.exit(gt_set_imputed(.x, set = FALSE))
   }
 
-  if(!identical(show_loci(.x),.x %>% show_loci() %>% arrange(show_loci(.x)$chr_int,show_loci(.x)$position))){
-    stop("Your loci are not sorted, try using: show_loci(.data) <- .data %>% show_loci() %>% arrange(chr_int,position)")
-
-  }
+  # if(!identical(show_loci(.x),.x %>% show_loci() %>% arrange(show_loci(.x)$chr_int,show_loci(.x)$position))){
+  #   stop("Your loci are not sorted, try using: show_loci(.data) <- .data %>% show_loci() %>% arrange(chr_int,position)")
+  #
+  # }
 
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
