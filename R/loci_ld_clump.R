@@ -67,21 +67,33 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
   # check that the loci have not been resorted
   # check that big_index in the loci table is an increasing sequence of indeces
   if (is.unsorted(show_loci(.x)$big_index, strictly = TRUE)){
-    stop("Your loci have been resorted, this is bad!!!!")
+    stop("Your loci have been resorted, this is incompatible with clumping")
   }
 
   # check that within each chromosome positions are sorted
-  are_positions_unsorted <- function(x){is.unsorted(x$position)}
   if (any(unlist(show_loci(.x) %>%
            group_by(chr_int) %>%
-           group_map(~ are_positions_unsorted(.x))))){
+           group_map(~ is.unsorted(.x$position))))){
     stop("Your loci are not sorted within chromosomes")
   }
+  # now check that all positions in each chromosomes are adjacent
+  # in a vector, check that all duplicates are adjacent
+  chrom_range <- show_loci(.x) %>%
+    group_by(chr_int) %>%
+    group_map(~ range(.x$position)) %>%
+    unlist()
+  ## TODO
 
   if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
     gt_set_imputed(.x, set = TRUE)
     on.exit(gt_set_imputed(.x, set = FALSE))
   }
+
+  # check that all positions in a chromosome are adjacent
+  if(any(duplicated(rle(show_loci(.x)$chr_int)$values))){
+    stop("All SNPs in a chromosome should be adjacent in the loci table")
+  }
+
 
   # if(!identical(show_loci(.x),.x %>% show_loci() %>% arrange(show_loci(.x)$chr_int,show_loci(.x)$position))){
   #   stop("Your loci are not sorted, try using: show_loci(.data) <- .data %>% show_loci() %>% arrange(chr_int,position)")

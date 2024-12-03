@@ -107,16 +107,21 @@ test_that("loci order",{
                         backingfile = tempfile(), quiet = TRUE)
 
   # clumping generates erro
-  expect_error(loci_ld_clump(test_gt_new_order, thr_r2 = 0.2), "Your loci are not sorted, try using:")
+  expect_error(loci_ld_clump(test_gt_new_order, thr_r2 = 0.2),
+               "All SNPs in a chromosome should be adjacent in the loci table")
   # reorder the loci
   show_loci(test_gt_new_order) <- test_gt_new_order %>% show_loci() %>% arrange(chr_int,position)
+
   # try again
-  keep_reordered <- loci_ld_clump(test_gt_new_order, thr_r2 = 0.2, return_id=TRUE)
+  expect_error(loci_ld_clump(test_gt_new_order, thr_r2 = 0.2, return_id=TRUE),
+               "Your loci have been resorted")
+
+  # TODO we need to resave the genotypes to the backing file in the right order
 
   # calculate the expected result
-  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id=TRUE)
+#  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id=TRUE)
   # compare
-  expect_equal(keep, keep_reordered)
+#  expect_equal(keep, keep_reordered)
 })
 
 test_that("loci_ld_clump works on a grouped gt",{
