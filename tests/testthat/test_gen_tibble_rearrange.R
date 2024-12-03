@@ -25,5 +25,5 @@ expect_true(all(original_freq_alt[new_order] == reordered_freq_alt))
 
 test_gt %>% loci_ld_clump(thr_r2 = 0.2)
 expect_error(reorder_test_gt %>% loci_ld_clump(thr_r2 = 0.2),
-             "Your loci have been resorted, this is bad!!!!")
+             "Your loci have been resorted")
 

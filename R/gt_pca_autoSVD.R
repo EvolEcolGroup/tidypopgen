@@ -86,7 +86,8 @@ gt_pca_autoSVD <- function(x, k = 10,
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
-  # we need to create a chromosome vector that is as long as the complete bigsnp object
+  # we need to create a chromosome vector that is as long as
+  # the complete bigsnp object
   infos_chr<-rep(1,nrow(.gt_get_bigsnp(x)$map))
 
   infos_chr[.gt_bigsnp_cols(x)] <- show_loci(x)$chr_int
@@ -96,12 +97,14 @@ gt_pca_autoSVD <- function(x, k = 10,
   }
   infos_pos <- NULL
   if (use_positions){
+    is_loci_table_ordered(x, error_on_false = TRUE)
     infos_pos <- rep(0,nrow(.gt_get_bigsnp(x)$map))
     infos_pos[.gt_bigsnp_cols(x)] <- show_loci(x)$position
   }
-  # hack to get around the use of a dataset by bigsnpr
-  # TODO remove after bignspr is patched
-  # attachNamespace("bigsnpr")
+  # TODO
+  # Do we want to use the code from loci_clump to create chromosomes and
+  # positions (it is a bit neater)
+
   this_svd  <- bigsnpr::snp_autoSVD(X$genotypes,
                       infos.chr = infos_chr,
                       infos.pos = infos_pos,

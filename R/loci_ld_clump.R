@@ -70,43 +70,18 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
     stop("Your loci have been resorted, this is incompatible with clumping")
   }
 
-  # check that within each chromosome positions are sorted
-  if (any(unlist(show_loci(.x) %>%
-           group_by(chr_int) %>%
-           group_map(~ is.unsorted(.x$position))))){
-    stop("Your loci are not sorted within chromosomes")
-  }
-  # now check that all positions in each chromosomes are adjacent
-  # in a vector, check that all duplicates are adjacent
-  chrom_range <- show_loci(.x) %>%
-    group_by(chr_int) %>%
-    group_map(~ range(.x$position)) %>%
-    unlist()
-  ## TODO
 
   if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
     gt_set_imputed(.x, set = TRUE)
     on.exit(gt_set_imputed(.x, set = FALSE))
   }
 
-  # check that all positions in a chromosome are adjacent
-  if(any(duplicated(rle(show_loci(.x)$chr_int)$values))){
-    stop("All SNPs in a chromosome should be adjacent in the loci table")
-  }
-
-
-  # if(!identical(show_loci(.x),.x %>% show_loci() %>% arrange(show_loci(.x)$chr_int,show_loci(.x)$position))){
-  #   stop("Your loci are not sorted, try using: show_loci(.data) <- .data %>% show_loci() %>% arrange(chr_int,position)")
-  #
-  # }
+  is_loci_table_ordered(.x, error_on_false = TRUE)
 
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use
-  rows_to_keep <- vctrs::vec_data(.x)
   if (use_positions){
-    #.positions <- show_loci(.x)$position
-    #.positions <- attr(.x,"bigsnp")$map$physical.pos
     .positions <- rep(NA, nrow(attr(.x,"bigsnp")$map))
     .positions[show_loci(.x)$big_index] <- show_loci(.x)$position
   } else {
