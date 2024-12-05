@@ -16,13 +16,14 @@ gt_update_backing_file <- function (.x, backingfile = NULL, chunk_size = NULL,
                                     quiet = FALSE){
   # if the backingfile is null, create a name based on the current backing file
   if (is.null(backingfile)){
-    old_file <- bigstatsr::sub_bk(gt_get_file_names(.x)[2],replacement = "")
-    # create fandom hash
-    hash <- tempfile(pattern = "", tmpdir= "")
-    hash <- substr(hash,2, nchar(hash))
-    backingfile <- paste0(old_file, hash,".bk")
+    backingfile <- change_duplicated_file_name(gt_get_file_names(.x)[2])
   }
+  # if the file extension is not bk, then add it
+#  if (!grepl(".bk$", backingfile)){
+#    backingfile <- paste0(backingfile, ".bk")
+#  }
 
+  # if the chunk size is null, set it to the block size
   if (is.null(chunk_size)){
     chunk_size <- bigstatsr::block_size(nrow(.x))
   }
@@ -93,8 +94,8 @@ gt_update_backing_file <- function (.x, backingfile = NULL, chunk_size = NULL,
 
   if (!quiet){
       message("\ngen_backing files updated, now")
-      message("using bigSNP file: ", gt_get_file_names(x)[1])
-      message("with backing file: ", gt_get_file_names(x)[2])
+      message("using bigSNP file: ", gt_get_file_names(new_gen_tbl)[1])
+      message("with backing file: ", gt_get_file_names(new_gen_tbl)[2])
       message("make sure that you do NOT delete those files!")
     }
 

@@ -1,0 +1,26 @@
+#' Order the loci table of a gen_tibble
+#'
+#' This function reorders the loci table so that positions within a chromosome
+#' are sequential. It also re-saves the genotypes into a new file backed matrix
+#' with the new order, so that it can be used by functions such as [loci_ld_clump()]
+#' and [gt_pca_autoSVD()]. If the loci table is already ordered, the original
+#' `gen_tibble` is returned.
+#'
+#' @param .x a ['gen_tibble']
+#' @param use_current_table boolean, if FALSE (the default), the table will be
+#' reordered; if TRUE, then the current loci table, which might have been reordered
+#' manually, will be used, but only if the positions within each chromosome are
+#' sequential
+#' @return a ['gen_tibble']
+#'
+
+gt_order_loci <- function(.x, use_current_table = FALSE){
+  if (use_current_table){
+    new_table <- show_loci(.x)
+  } else {
+    new_table <- show_loci(.x) %>% dplyr::arrange(any("chr_int", "postion"))
+  }
+  # if asked to use the current table, check that it is ordered
+  is_loci_table_ordered(.x, error_on_false = TRUE)
+
+}

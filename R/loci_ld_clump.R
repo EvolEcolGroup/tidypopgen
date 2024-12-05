@@ -67,7 +67,7 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
   # check that the loci have not been resorted
   # check that big_index in the loci table is an increasing sequence of indeces
   if (is.unsorted(show_loci(.x)$big_index, strictly = TRUE)){
-    stop("Your loci have been resorted, this is incompatible with clumping")
+    stop("Your loci have been resorted; first save the new file backed matrix with `gt_update_baking_file()")
   }
 
 
