@@ -11,7 +11,7 @@
 #' use that version unless you change `conda_env` to "none".
 #' @param x a `gen_tibble` or a character giving the path of the input PLINK bed file
 #' @param k an integer giving the number of clusters
-#' @param n_repeats the number of repeats for each k value (defaults to 1)
+#' @param n_runs the number of runs for each k value (defaults to 1)
 #' @param crossval boolean, should cross validation be used to assess the fit (defaults ot FALSE)
 #' @param n_cores number of cores (defaults to 1)
 #' @param seed the seed for the random number generator (defaults to NULL)
@@ -31,11 +31,11 @@
 #' @export
 
 
-gt_admixture <- function (x, k, n_repeats = 1, crossval = FALSE, n_cores = 1, seed = NULL,
+gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed = NULL,
                           conda_env="auto"){
   # check that we have the right number of repeats
-  if (length(seed)!= n_repeats){
-    stop("'seeds' should be a vector of length 'n_repeats'")
+  if (length(seed)!= n_runs){
+    stop("'seeds' should be a vector of length 'n_runs'")
   }
 
   # if x is a character, check that it is file that exists
@@ -101,7 +101,7 @@ gt_admixture <- function (x, k, n_repeats = 1, crossval = FALSE, n_cores = 1, se
   # loop over values of k and number of repeats
   index <- 1
   for (this_k in as.integer(k)) {
-    for (this_rep in seq_len(n_repeats)) {
+    for (this_rep in seq_len(n_runs)) {
       # set the arguments for admixture
       admixture_args <- paste(input_file, this_k)
       if (crossval) {

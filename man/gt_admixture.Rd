@@ -7,7 +7,7 @@
 gt_admixture(
   x,
   k,
-  n_repeats = 1,
+  n_runs = 1,
   crossval = FALSE,
   n_cores = 1,
   seed = NULL,
@@ -19,7 +19,7 @@ gt_admixture(
 
 \item{k}{an integer giving the number of clusters}
 
-\item{n_repeats}{the number of repeats for each k value (defaults to 1)}
+\item{n_runs}{the number of runs for each k value (defaults to 1)}
 
 \item{crossval}{boolean, should cross validation be used to assess the fit (defaults ot FALSE)}
 
@@ -28,7 +28,7 @@ gt_admixture(
 \item{seed}{the seed for the random number generator (defaults to NULL)}
 
 \item{conda_env}{the name of the conda environment to use. If set to "auto", the default,
-a copy from \code{tidygenclust} will be preferred if available, otherwise a local copy will
+a copy from \code{fastmixturer} will be preferred if available, otherwise a local copy will
 be used. "none" forces the use of a local copy, whilst any other string will
 direct the function to use a custom conda environment.}
 }

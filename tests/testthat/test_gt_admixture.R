@@ -27,15 +27,17 @@ test_that("run admixture as single run", {
   expect_true(ncol(anole_adm_comb$Q[[2]])==2)
   expect_true(all(anole_adm_comb$k==c(3,2)))
   # run admixture with crossval
-  anole_adm3 <- gt_admixture(anole_plink, k = 3, crossval = TRUE, n_cores = 2, seed = 345, conda_env = "none")
+  anole_adm3 <- gt_admixture(anole_gt, k = 3, crossval = TRUE, n_cores = 2, seed = 345, conda_env = "none")
   expect_false(is.null(anole_adm3$cv))
-  anole_adm4 <- gt_admixture(anole_plink, k = 3, crossval = TRUE, n_cores = 2, seed = 123, conda_env = "none")
+  anole_adm4 <- gt_admixture(anole_gt, k = 3, crossval = TRUE, n_cores = 2, seed = 123, conda_env = "none")
   anole_adm_comb2 <- c(anole_adm3, anole_adm4)
+  # TODO write some check for the object above
+
 })
 
 test_that("run admixture as multiple runs", {
   anole_gt <-  anole_gt %>% dplyr::group_by(population)
-  anole_adm_cv <- gt_admixture(anole_gt, k = 2:4, n_repeats =2, crossval = TRUE, n_cores = 2, seed = c(123,234), conda_env = "none")
+  anole_adm_cv <- gt_admixture(anole_gt, k = 2:4, n_runs =2, crossval = TRUE, n_cores = 2, seed = c(123,234), conda_env = "none")
   expect_true(length(anole_adm_cv$k)==6)
   expect_true(length(anole_adm_cv$Q)==6)
   expect_true(length(anole_adm_cv$cv)==6)
@@ -43,6 +45,6 @@ test_that("run admixture as multiple runs", {
   expect_true(length(anole_adm_cv$id)==nrow(anole_gt))
   expect_true(length(anole_adm_cv$group)==nrow(anole_gt))
   # error if we have the wrong number of seeds
-  expect_error(gt_admixture(anole_gt, k = 2:4, n_repeats =2, crossval = TRUE, n_cores = 2, seed = c(123), conda_env = "none"),
+  expect_error(gt_admixture(anole_gt, k = 2:4, n_runs =2, crossval = TRUE, n_cores = 2, seed = c(123), conda_env = "none"),
                "'seeds' should be a vector of ")
 })
