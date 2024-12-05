@@ -9,39 +9,35 @@ c.gt_admix <- function(...) {
   if (!all(sapply(list(...), function(x) inherits(x, "gt_admix")))) {
     stop("All the objects must be of class gt_admix")
   }
+
+  combined_obj <- list()
   # combine all the elements from each list
-  k <- sapply(list(...), function(x) x$k)
-  Q <- sapply(list(...), function(x) x$Q)
+  combined_obj$k <- sapply(list(...), function(x) x$k)
+  combined_obj$Q <- sapply(list(...), function(x) x$Q)
   # if we have a P element in any of the objects, combine it
   if (all(sapply(list(...), function(x) !is.null(x$P)))) {
-    P <- sapply(list(...), function(x) x$P)
-  } else {
-    P <- NULL
+    combined_obj$P <- sapply(list(...), function(x) x$P)
   }
   # if we have a log_lik element in any of the objects, combine it
   if (all(sapply(list(...), function(x) !is.null(x$log_lik)))) {
-    log_lik <- unlist(sapply(list(...), function(x) x$log_lik))
-  } else {
-    log_lik <- NULL
+    combined_obj$loglik <- unlist(sapply(list(...), function(x) x$loglik))
   }
 
   # if we have a log element in any of the objects, combine it
   if (all(sapply(list(...), function(x) !is.null(x$log)))) {
-    log <- sapply(list(...), function(x) x$log)
-  } else {
-    log <- NULL
+    combined_obj$log <- sapply(list(...), function(x) x$log)
   }
   # if we have a cv element in any of the objects, combine it
   if (all(sapply(list(...), function(x) !is.null(x$cv)))) {
-    cv <- unlist(sapply(list(...), function(x) x$cv))
-  } else {
-    cv <- NULL
+    combined_obj$cv <- unlist(sapply(list(...), function(x) x$cv))
   }
-  # create a new combined object
-  combined_obj <- list (k = k, Q = Q, P = P, log = log, log_lik = log_lik)
-  # if cv is not NULL, add it to the list
-  if (!is.null(cv)) {
-    combined_obj$cv <- cv
+  # if the first object has an id element, use it in the combined object
+  if (!is.null(list(...)[[1]]$id)) {
+    combined_obj$id <- list(...)[[1]]$id
+  }
+  # if the first object has a group element, use it in the combined object
+  if (!is.null(list(...)[[1]]$group)) {
+    combined_obj$group <- list(...)[[1]]$group
   }
   # set the class of the object
   class(combined_obj) <- c("gt_admix", "list")

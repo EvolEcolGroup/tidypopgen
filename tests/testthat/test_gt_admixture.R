@@ -1,15 +1,16 @@
-test_that("run admixture correctly", {
-  # skip if admixture is not installed
-  skip_if((system2("which", args = "admixture", stdout = NULL) != 0)||!requireNamespace("fastmixturer", quietly = TRUE))
-  # set the input file
-  vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
-                          package = "tidypopgen")
-  anole_gt <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
-  pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
-                           package = "tidypopgen")
-  pops <- readr::read_csv(pops_path, show_col_types = FALSE)
-  anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
-  anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
+# skip if admixture is not installed
+skip_if((system2("which", args = "admixture", stdout = NULL) != 0)||!requireNamespace("fastmixturer", quietly = TRUE))
+# set the input file
+vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+                        package = "tidypopgen")
+anole_gt <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
+                         package = "tidypopgen")
+pops <- readr::read_csv(pops_path, show_col_types = FALSE)
+anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
+anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
+
+test_that("run admixture as single run", {
   # we create a plink file to test the function
   anole_plink <- gt_as_plink(anole_gt, file = tempfile(), chromosomes_as_int=TRUE)
   # run admixture
@@ -30,6 +31,18 @@ test_that("run admixture correctly", {
   expect_false(is.null(anole_adm3$cv))
   anole_adm4 <- gt_admixture(anole_plink, k = 3, crossval = TRUE, n_cores = 2, seed = 123, conda_env = "none")
   anole_adm_comb2 <- c(anole_adm3, anole_adm4)
+})
 
-
+test_that("run admixture as multiple runs", {
+  anole_gt <-  anole_gt %>% dplyr::group_by(population)
+  anole_adm_cv <- gt_admixture(anole_gt, k = 2:4, n_repeats =2, crossval = TRUE, n_cores = 2, seed = c(123,234), conda_env = "none")
+  expect_true(length(anole_adm_cv$k)==6)
+  expect_true(length(anole_adm_cv$Q)==6)
+  expect_true(length(anole_adm_cv$cv)==6)
+  # if we created the object from a grouped gen_tibble, we should have the id and group columns
+  expect_true(length(anole_adm_cv$id)==nrow(anole_gt))
+  expect_true(length(anole_adm_cv$group)==nrow(anole_gt))
+  # error if we have the wrong number of seeds
+  expect_error(gt_admixture(anole_gt, k = 2:4, n_repeats =2, crossval = TRUE, n_cores = 2, seed = c(123), conda_env = "none"),
+               "'seeds' should be a vector of ")
 })
