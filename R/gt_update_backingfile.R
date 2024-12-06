@@ -2,7 +2,8 @@
 #'
 #' This functions forces a re-write of the file backing matrix to match the
 #' [`gen_tibble`]. Individuals and loci are subsetted and reordered according to
-#' the current state of the `gen_tibble`.
+#' the current state of the `gen_tibble`. Tests for this function are in
+#' test_gt_order_loci.R
 #' @param .x a `gen_tibble` object
 #' @param backingfile @param backingfile the path, including the file name without extension,
 #' for backing files used to store the data (they will be given a .bk
