@@ -6,21 +6,25 @@
 #' and [gt_pca_autoSVD()]. If the loci table is already ordered, the original
 #' `gen_tibble` is returned.
 #'
-#' @param .x a ['gen_tibble']
+#' @param .x a [`gen_tibble`]
 #' @param use_current_table boolean, if FALSE (the default), the table will be
 #' reordered; if TRUE, then the current loci table, which might have been reordered
 #' manually, will be used, but only if the positions within each chromosome are
 #' sequential
-#' @return a ['gen_tibble']
-#'
+#' @param quiet boolean to suppress information about the files
+#' @param ... other arguments
+#' @return A [gen_tibble]
+#' @export
 
-gt_order_loci <- function(.x, use_current_table = FALSE){
+gt_order_loci <- function(.x, use_current_table = FALSE, quiet = FALSE, ...){
   if (use_current_table){
     new_table <- show_loci(.x)
   } else {
-    new_table <- show_loci(.x) %>% dplyr::arrange(any("chr_int", "postion"))
+    new_table <- show_loci(.x) %>% dplyr::arrange(.data$chr_int, .data$position)
+    show_loci(.x) <- new_table
   }
   # if asked to use the current table, check that it is ordered
   is_loci_table_ordered(.x, error_on_false = TRUE)
+  gt_update_backing_file(.x, quiet=quiet, ...)
 
 }

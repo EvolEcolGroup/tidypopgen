@@ -26,6 +26,6 @@ are not ordered.}
 a logical vector defining which loci are transversions
 }
 \description{
-This functions checks that all SNPs in a choroosome are adjacent in the loci table,
+This functions checks that all SNPs in a chromosome are adjacent in the loci table,
 and that positions are sorted within chromosomes.
 }

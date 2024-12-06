@@ -1,6 +1,6 @@
 #' Test if the loci table is ordered
 #'
-#' This functions checks that all SNPs in a choroosome are adjacent in the loci table,
+#' This functions checks that all SNPs in a chromosome are adjacent in the loci table,
 #' and that positions are sorted within chromosomes.
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
@@ -21,7 +21,7 @@ is_loci_table_ordered <- function(.x, error_on_false = FALSE, ...) {
 is_loci_table_ordered.tbl_df <- function(.x, error_on_false = FALSE, ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
-  is_loci_table_ordered(.x$genotypes, ...)
+  is_loci_table_ordered(.x$genotypes, error_on_false, ...)
 }
 
 

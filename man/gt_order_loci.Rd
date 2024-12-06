@@ -4,18 +4,22 @@
 \alias{gt_order_loci}
 \title{Order the loci table of a gen_tibble}
 \usage{
-gt_order_loci(.x, use_current_table = FALSE)
+gt_order_loci(.x, use_current_table = FALSE, quiet = FALSE, ...)
 }
 \arguments{
-\item{.x}{a \link{'gen_tibble'}}
+\item{.x}{a \code{\link{gen_tibble}}}
 
 \item{use_current_table}{boolean, if FALSE (the default), the table will be
 reordered; if TRUE, then the current loci table, which might have been reordered
 manually, will be used, but only if the positions within each chromosome are
 sequential}
+
+\item{quiet}{boolean to suppress information about the files}
+
+\item{...}{other arguments}
 }
 \value{
-a \link{'gen_tibble'}
+A \link{gen_tibble}
 }
 \description{
 This function reorders the loci table so that positions within a chromosome

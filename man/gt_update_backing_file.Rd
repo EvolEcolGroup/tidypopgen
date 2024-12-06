@@ -19,6 +19,8 @@ for backing files used to store the data (they will be given a .bk
 and .RDS automatically). If left to NULL (the default), the file name
 will be based on the name f the current backing file.}
 
+\item{chunk_size}{the number of loci to process at once}
+
 \item{quiet}{boolean to suppress information about the files}
 }
 \value{

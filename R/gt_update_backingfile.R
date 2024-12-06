@@ -8,6 +8,7 @@
 #' for backing files used to store the data (they will be given a .bk
 #' and .RDS automatically). If left to NULL (the default), the file name
 #' will be based on the name f the current backing file.
+#' @param chunk_size the number of loci to process at once
 #' @param quiet boolean to suppress information about the files
 #' @returns a [`gen_tibble`] with a backing file (i.e. a new File Backed Matrix)
 #' @export
