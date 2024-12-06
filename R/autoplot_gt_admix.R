@@ -41,7 +41,7 @@ autoplot.gt_admix <- function(object,
       stop("You must specify a value for repeat")
     }
     # get the Q matrix for the specified k and repeat
-    Q <- get_q(object, k = k, run = run)
+    Q <- get_q_matrix(object, k = k, run = run)
     autoplot(Q)
   }
 }

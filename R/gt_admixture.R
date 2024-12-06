@@ -52,7 +52,8 @@ gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed 
     input_file <- gt_as_plink(x, file = tempfile(), chromosomes_as_int=TRUE)
   }
 
-  out <- tempdir()
+  # expand path to file to be full path
+  input_file <- normalizePath(input_file)
 
   # cast k as an integer
   k <- as.integer(k)
@@ -85,6 +86,22 @@ gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed 
     }
   }
 
+  # if conda is "none", check that we have admixture
+  if (conda_env == "none") {
+    if (system2("which", args = "admixture", stdout = NULL) != 0) {
+      stop("ADMIXTURE is not installed in this path")
+    }
+  }
+
+  # set the working path to the tempdir, where admixture will dump the text files
+  out <- tempdir()
+  # store working directory
+  wd <- getwd()
+  # change to the directory of the input file
+  setwd(out)
+  on.exit(setwd(wd))
+
+
   # initialise list to store results
   adm_list <- list(
     k = integer(),
@@ -116,18 +133,8 @@ gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed 
 
       # if we conda_env is none
       if (conda_env == "none") {
-        # use the system version of admixture (if it is installed)
-        if (system2("which", args = "admixture", stdout = NULL) == 0) {
-          # store working directory
-          wd <- getwd()
-          # change to the directory of the input file
-          setwd(dirname(input_file))
           adm_out <- system2("admixture", args = admixture_args, stdout = TRUE)
           # change back to the original working directory
-          setwd(wd)
-        } else {
-          stop("admixture is not installed in this path")
-        }
       } else {
         reticulate::conda_run2("admixture", args = admixture_args,
                                conda = conda_env)
@@ -136,7 +143,7 @@ gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed 
       # read the output
       output_prefix <- file.path(out, gsub(".bed", "", basename(input_file)))
       adm_list$k[index] <- this_k
-      adm_list$Q[[index]] <- utils::read.table(paste(output_prefix,this_k,"Q",sep="."), header = FALSE)
+      adm_list$Q[[index]] <- q_matrix(utils::read.table(paste(output_prefix,this_k,"Q",sep="."), header = FALSE))
       adm_list$P[[index]] <- utils::read.table(paste(output_prefix,this_k,"P",sep="."), header = FALSE)
       adm_list$loglik[index] <- as.numeric(strsplit(grep("^Loglikelihood", adm_out, value = TRUE),":")[[1]][2])
       adm_list$log[[index]] <- adm_out

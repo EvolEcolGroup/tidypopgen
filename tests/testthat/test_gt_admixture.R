@@ -47,4 +47,16 @@ test_that("run admixture as multiple runs", {
   # error if we have the wrong number of seeds
   expect_error(gt_admixture(anole_gt, k = 2:4, n_runs =2, crossval = TRUE, n_cores = 2, seed = c(123), conda_env = "none"),
                "'seeds' should be a vector of ")
+  # plot the crossval
+  cross_plot <- autoplot(anole_adm_cv)
+  # check that this is indeed a ggplot object
+  expect_true(inherits(cross_plot, "ggplot"))
+  # plot the admixture results
+  expect_error(autoplot(anole_adm_cv, type = "barplot"),
+               "^You must specify a value for k")
+  expect_error(autoplot(anole_adm_cv, type = "barplot", k=2),
+               "^You must specify a value for repeat")
+  bar_plot <- autoplot(anole_adm_cv, type = "barplot", k=2,run = 1)
+  # check that this is indeed a ggplot object
+  expect_true(inherits(bar_plot, "ggplot"))
 })
