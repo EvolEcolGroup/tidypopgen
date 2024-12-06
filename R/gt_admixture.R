@@ -72,7 +72,7 @@ gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed 
       }
     }
   } else { # if reticulate is available
-    # if we have "auto" and the conda environment rtidygenclust does not exist, or
+    # if we have "auto" and the conda environment rfastmixture does not exist, or
     if (conda_env =="auto") {
       if (("rfastmixture" %in% reticulate::conda_list()[["name"]])){
         conda_env <- "rfastmixture"
@@ -86,7 +86,7 @@ gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed 
     }
   }
 
-  # if conda is "none", check that we have admixture
+  # if conda is "none", check that we have admixture installed
   if (conda_env == "none") {
     if (system2("which", args = "admixture", stdout = NULL) != 0) {
       stop("ADMIXTURE is not installed in this path")
