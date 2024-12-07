@@ -6,18 +6,14 @@
 #'
 #' @details This is a wrapper for the command line program ADMIXTURE. It can either
 #' use a binary present in the main environment, or use a copy installed in a conda
-#' environment. If the package `fastmixturer` is installed, and its conda environment
-#' has been set up with `ADMIXTURE` in it (the default), it will automatically
-#' use that version unless you change `conda_env` to "none".
+#' environment.
 #' @param x a `gen_tibble` or a character giving the path of the input PLINK bed file
 #' @param k an integer giving the number of clusters
 #' @param n_runs the number of runs for each k value (defaults to 1)
 #' @param crossval boolean, should cross validation be used to assess the fit (defaults ot FALSE)
 #' @param n_cores number of cores (defaults to 1)
 #' @param seed the seed for the random number generator (defaults to NULL)
-#' @param conda_env the name of the conda environment to use. If set to "auto", the default,
-#' a copy from `fastmixturer` will be preferred if available, otherwise a local copy will
-#' be used. "none" forces the use of a local copy, whilst any other string will
+#' @param conda_env the name of the conda environment to use. "none" forces the use of a local copy, whilst any other string will
 #' direct the function to use a custom conda environment.
 #' @return an object of class `gt_admix` consisting of a list with the following elements:
 #' - `k` the number of clusters
@@ -31,8 +27,15 @@
 #' @export
 
 
+# If the package `fastmixturer` is installed, and its conda environment
+# has been set up with `ADMIXTURE` in it (the default), it will automatically
+# use that version unless you change `conda_env` to "none".
+# If set to "auto", the default,
+# a copy from `fastmixturer` will be preferred if available, otherwise a local copy will
+# be used.
+
 gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed = NULL,
-                          conda_env="auto"){
+                          conda_env="none"){
   # check that we have the right number of repeats
   if (length(seed)!= n_runs){
     stop("'seeds' should be a vector of length 'n_runs'")
