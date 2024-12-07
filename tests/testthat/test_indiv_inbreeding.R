@@ -27,5 +27,13 @@ test_that("indiv_inbreeding compute correctly",{
   test_gt <- test_gt %>% dplyr::group_by(population)
   # is this right???
   inbreed_group_gt <- test_gt %>% indiv_inbreeding(method = "WG17")
+  # subset gentibble to a single population, pop 1
+  pop1_gt <- test_gt %>% dplyr::filter(population == "pop1")
+  inbreed_pop1_hier <- diag(hierfstat::beta.dosage(show_genotypes(pop1_gt)))
+  expect_true(all.equal(inbreed_pop1_hier, inbreed_group_gt[[1]], check.attributes = FALSE))
+  # subset gentibble to a single population, pop 2
+  pop2_gt <- test_gt %>% dplyr::filter(population == "pop2")
+  inbreed_pop2_hier <- diag(hierfstat::beta.dosage(show_genotypes(pop2_gt)))
+  expect_true(all.equal(inbreed_pop2_hier, inbreed_group_gt[[2]], check.attributes = FALSE))
 
 })
