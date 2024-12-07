@@ -59,5 +59,5 @@ indiv_inbreeding.grouped_df <- function(.x, method = c("WG17"), allele_sharing_m
     stop("allele_sharing_mat can not be provided for grouped_df objects")
   }
   message("the grouped version of this function has not been fully tested yet")
-  group_map(.x, .f=~indiv_inbreeding.(.x, method = method, allele_sharing_mat=NULL, ...))
+  group_map(.x, .f=~indiv_inbreeding(.x, method = method, allele_sharing_mat=NULL))
 }
