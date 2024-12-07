@@ -1,7 +1,7 @@
 #' Individual inbreeding coefficient
 #'
 #' This function calculates the inbreeding coefficient for each individual
-#' based on the beat estimate of Weir and Goudet (2017).
+#' based on the beta estimate from Weir and Goudet (2017).
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
@@ -51,7 +51,7 @@ indiv_inbreeding.vctrs_bigSNP <- function(.x, method = c("WG17"), allele_sharing
 }
 
 #' @export
-#' @rdname loci_alt_freq
+#' @rdname indiv_inbreeding
 indiv_inbreeding.grouped_df <- function(.x, method = c("WG17"), allele_sharing_mat = NULL, ...){
   rlang::check_dots_empty()
   stopifnot_diploid(.x)

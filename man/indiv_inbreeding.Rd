@@ -4,6 +4,7 @@
 \alias{indiv_inbreeding}
 \alias{indiv_inbreeding.tbl_df}
 \alias{indiv_inbreeding.vctrs_bigSNP}
+\alias{indiv_inbreeding.grouped_df}
 \title{Individual inbreeding coefficient}
 \usage{
 indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
@@ -11,6 +12,8 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 \method{indiv_inbreeding}{tbl_df}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
 \method{indiv_inbreeding}{vctrs_bigSNP}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
+
+\method{indiv_inbreeding}{grouped_df}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
@@ -32,5 +35,5 @@ a numeric vector of inbreeding coefficients.
 }
 \description{
 This function calculates the inbreeding coefficient for each individual
-based on the beat estimate of Weir and Goudet (2017).
+based on the beta estimate from Weir and Goudet (2017).
 }
