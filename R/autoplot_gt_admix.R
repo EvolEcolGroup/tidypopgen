@@ -14,7 +14,7 @@
 #' param repeat the repeat to plot (for `barplot` type only)
 #' @param ... not used.
 #' @returns a `ggplot2` object
-#' @name autoplot_gt_pcadapt
+#' @name autoplot_gt_admix
 #' @export
 autoplot.gt_admix <- function(object,
                             type=c("cv", "barplot"),
@@ -27,7 +27,7 @@ autoplot.gt_admix <- function(object,
     if (is.null(object$cv)){
       stop("No cross validation error available")
     }
-    ggplot2::ggplot(data.frame(k=object$k, cv=object$cv), ggplot2::aes(x=k, y=cv)) +
+    ggplot2::ggplot(data.frame(k=object$k, cv=object$cv), ggplot2::aes(x=.data$k, y=.data$cv)) +
       ggplot2::geom_point() +
       ggplot2::geom_line() +
       ggplot2::labs(x="k", y="Cross validation error")

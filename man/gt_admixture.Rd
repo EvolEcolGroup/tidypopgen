@@ -11,7 +11,7 @@ gt_admixture(
   crossval = FALSE,
   n_cores = 1,
   seed = NULL,
-  conda_env = "auto"
+  conda_env = "none"
 )
 }
 \arguments{
@@ -27,9 +27,7 @@ gt_admixture(
 
 \item{seed}{the seed for the random number generator (defaults to NULL)}
 
-\item{conda_env}{the name of the conda environment to use. If set to "auto", the default,
-a copy from \code{fastmixturer} will be preferred if available, otherwise a local copy will
-be used. "none" forces the use of a local copy, whilst any other string will
+\item{conda_env}{the name of the conda environment to use. "none" forces the use of a local copy, whilst any other string will
 direct the function to use a custom conda environment.}
 }
 \value{
@@ -53,7 +51,5 @@ into R. It can run multiple values of \code{k} and multiple repeats for each \co
 \details{
 This is a wrapper for the command line program ADMIXTURE. It can either
 use a binary present in the main environment, or use a copy installed in a conda
-environment. If the package \code{fastmixturer} is installed, and its conda environment
-has been set up with \code{ADMIXTURE} in it (the default), it will automatically
-use that version unless you change \code{conda_env} to "none".
+environment.
 }

@@ -64,7 +64,7 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ",{
   test <- gen_tibble(x = example_genotypes, loci = example_loci, indiv_meta = example_indiv_meta, quiet = TRUE)
 
   # gen_tibble with no missingness runs
-  test_pca <- test %>% gt_pca_autoSVD()
+  test_pca <- test %>% gt_pca_autoSVD(verbose = FALSE)
 
   # Now try with imputed data
   library(bigsnpr)
@@ -78,9 +78,9 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ",{
   expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(verbose = FALSE), "Parameter 'size' is too large.")
 
   # adjusting roll_size fixes the error
-  test_pca_roll0 <- missing_gt %>% gt_pca_autoSVD(roll_size = 0)
+  test_pca_roll0 <- missing_gt %>% gt_pca_autoSVD(roll_size = 0, verbose = FALSE)
   expect_s3_class(test_pca_roll0, "gt_pca")
-  test_pca_roll7 <- missing_gt %>% gt_pca_autoSVD(roll_size = 7)
+  test_pca_roll7 <- missing_gt %>% gt_pca_autoSVD(roll_size = 7, verbose = FALSE)
   expect_s3_class(test_pca_roll7, "gt_pca")
 
 
@@ -95,7 +95,7 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ",{
   expect_error(missing_pca <- families %>% gt_pca_autoSVD(verbose = FALSE), "Parameter 'size' is too large.")
 
   # adjusting roll_size fixes the error
-  test_pca_families_roll7 <- families %>% gt_pca_autoSVD(roll_size = 7)
+  test_pca_families_roll7 <- families %>% gt_pca_autoSVD(roll_size = 7, verbose = FALSE)
   expect_s3_class(test_pca_families_roll7, "gt_pca")
 })
 
