@@ -67,10 +67,7 @@ reference:
   - title: "Pairwise"
     desc: "Functions comparing individuals or populations."
     contents:
-        - pairwise_allele_sharing
-        - pairwise_ibs
-        - pairwise_pop_fst
-        - pairwise_king
+        - starts_with("pairwise_")
   - title: "PCA"
     desc: "Functions for performing Principal Component Analysis."
     contents:
