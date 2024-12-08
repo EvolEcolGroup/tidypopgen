@@ -12,6 +12,7 @@
 #' @param type the type of plot (one of "cv", and "boxplot")
 #' @param k the value of `k` to plot (for `barplot` type only)
 #' param repeat the repeat to plot (for `barplot` type only)
+#' @param run the run to plot (for `barplot` type only)
 #' @param ... not used.
 #' @returns a `ggplot2` object
 #' @name autoplot_gt_admix
