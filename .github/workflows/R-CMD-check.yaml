@@ -54,6 +54,7 @@ jobs:
              wget https://dalexander.github.io/admixture/binaries/admixture_linux-1.3.0.tar.gz
              tar -xvzf admixture_linux-1.3.0.tar.gz
              cd ..
+             dir
              ln ./admixture/dist/admixture_linux-1.3.0/admixture ~/.local/bin/admixture
 
       - uses: r-lib/actions/check-r-package@v2
