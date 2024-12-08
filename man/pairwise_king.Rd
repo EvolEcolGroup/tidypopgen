@@ -23,5 +23,6 @@ but will tax memory.}
 This function computes the KING-robust estimator of kinship.
 }
 \details{
-Note that monomorphic sites are currently considered. What does PLINK do???
+Note that monomorphic sites are currently considered. Remove monomorphic sites
+before running pairwise_king if this is a concern.
 }

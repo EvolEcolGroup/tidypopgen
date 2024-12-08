@@ -2,7 +2,8 @@
 #'
 #' This function computes the KING-robust estimator of kinship.
 #'
-#' Note that monomorphic sites are currently considered. What does PLINK do???
+#' Note that monomorphic sites are currently considered. Remove monomorphic sites
+#' before running pairwise_king if this is a concern.
 #' @param x a `gen_tibble` object.
 #' @param as_matrix boolean, determining whether the results should be a square symmetrical matrix (TRUE),
 #' or a tidied tibble (FALSE, the default)

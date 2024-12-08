@@ -154,7 +154,6 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE, use_position 
   vctrs::vec_data(ref$genotypes)
   #and finally append the loci table
   indivs_with_big_names <- c(names(ref$genotypes),names(target$genotypes))
-  #browser()
   #new_ref_loci_tbl$big_index<-match(new_ref_loci_tbl$name,merged_snp$map$marker.ID) # TODO check that this is the correct order!!!!
   new_ref_loci_tbl$big_index<-1:nrow(new_ref_loci_tbl) # by default, this should just be a subset in the same order as the reference
 

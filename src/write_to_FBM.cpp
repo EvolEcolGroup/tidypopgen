@@ -20,7 +20,7 @@ void write_to_FBM (Environment BM,
 
   #pragma omp parallel for num_threads(ncores)
   for (int locus_i = 0; locus_i < n_loci; locus_i++){
-    for (int indiv_i = 0; indiv_i < n_indiv; indiv_i++)
+    for (size_t indiv_i = 0; indiv_i < n_indiv; indiv_i++)
       macc_fbm(indiv_i,col_start+locus_i) = allele_counts(indiv_i, locus_i);
   }
 
