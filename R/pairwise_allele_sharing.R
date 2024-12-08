@@ -1,7 +1,7 @@
 #' Compute the Pairwise Allele Sharing Matrix for a `gen_tibble` object
 #'
 #' This function computes the Allele Sharing matrix.
-#' Estimates Allele Sharing (matching in `hierfstat`)) between pairs of individuals
+#' Estimates Allele Sharing ([hierfstat::matching()])) between pairs of individuals
 #' (for each locus, gives 1 if the two individuals are homozygous
 #' for the same allele, 0 if they are homozygous for a different allele, and 1/2 if at least one individual
 #' is heterozygous. Matching is the average of these 0, 1/2 and 1s)
