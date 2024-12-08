@@ -54,8 +54,15 @@ jobs:
              wget https://dalexander.github.io/admixture/binaries/admixture_linux-1.3.0.tar.gz
              tar -xvzf admixture_linux-1.3.0.tar.gz
              cd ..
-             echo "$PWD/admixture/dist/admixture_linux-1.3.0"
-             echo "$PWD/admixture/dist/admixture_linux-1.3.0" >> $GITHUB_PATH
+             echo "$HOME/admixture/dist/admixture_linux-1.3.0"
+             ls "$HOME/admixture/dist/admixture_linux-1.3.0"
+             echo "$HOME/admixture/dist/admixture_linux-1.3.0" >> "$GITHUB_PATH"
+             echo "$PATH"
+
+      - name: Test ADMIXTURE for linux
+        if: matrix.config.os == 'ubuntu-latest'
+        run: |
+             echo "$PATH"
              admixture
 
       - uses: r-lib/actions/check-r-package@v2
