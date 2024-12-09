@@ -29,5 +29,6 @@ a \code{\link{gen_tibble}} with a backing file (i.e. a new File Backed Matrix)
 \description{
 This functions forces a re-write of the file backing matrix to match the
 \code{\link{gen_tibble}}. Individuals and loci are subsetted and reordered according to
-the current state of the \code{gen_tibble}.
+the current state of the \code{gen_tibble}. Tests for this function are in
+test_gt_order_loci.R
 }

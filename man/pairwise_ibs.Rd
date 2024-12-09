@@ -32,6 +32,6 @@ and one of number of valid alleles (i.e. 2\emph{n_loci - 2}missing_loci)
 This function computes the IBS matrix.
 }
 \details{
-Note that monomorphic sites are currently counted. Should we filter
-them beforehand? What does plink do?
+Note that monomorphic sites are currently considered. Remove monomorphic sites
+before running pairwise_king if this is a concern.
 }
