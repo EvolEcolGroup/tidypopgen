@@ -30,7 +30,7 @@ test_that("manually resorted table is respected by loci functions",{
                "Your loci have been resorted")
 })
 
-test_that("gt_update_backing_file correctly updates",{
+test_that("gt_udpate_backingfile correctly updates",{
   test_indiv_meta <- data.frame (id=c("a","b","c","d","e"),
                                  population = c("pop1","pop1","pop2","pop2","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,0),
@@ -51,7 +51,7 @@ test_that("gt_update_backing_file correctly updates",{
   expect_true(is_loci_table_ordered(subset_reorder_test_gt, error_on_false = FALSE))
   subset_reorder_test_gt <- subset_reorder_test_gt[c(2,1,4,5),]
   # now save the udpated backing matrix
-  new_gt <- gt_update_backing_file(subset_reorder_test_gt, quiet = TRUE)
+  new_gt <- gt_udpate_backingfile(subset_reorder_test_gt, quiet = TRUE)
   # the new gt should be identical to the original one, minus the big indices
   expect_identical(show_genotypes(new_gt), show_genotypes(subset_reorder_test_gt))
   expect_identical(show_loci(new_gt)[,-1], show_loci(subset_reorder_test_gt)[,-1])
