@@ -519,7 +519,7 @@ change_duplicated_file_name <- function(file){
   bk <- paste0(file, ".bk")
   rds <- paste0(file, ".rds")
 
-  if(file.exists(bk) && !file.exists(rds)){
+  if(file.exists(bk) | file.exists(rds)){
 
     version <- 2
 
@@ -542,31 +542,7 @@ change_duplicated_file_name <- function(file){
     new_file <- paste0(file,"_v",version)
 
     return(new_file)
-  } else if (file.exists(bk) && file.exists(rds)){
-
-    version <- 2
-
-    base_name <- basename(file)
-
-    version_pattern <- paste0(base_name, "_v(\\d+)\\.bk$")
-
-    # read existing files to check for existing versions
-    existing_files <- list.files(dirname(bk), pattern = paste0("^", base_name, "_v\\d+\\.bk$"))
-
-
-    if (length(existing_files) > 0) {
-      versions <- sub(version_pattern, "\\1", existing_files)
-      versions <- as.numeric(versions)
-      if (!any(is.na(versions))) {
-        version <- max(versions) + 1
-      }
-    }
-
-    new_file <- paste0(file,"_v",version)
-
-    return(new_file)
   }
-
   return(file)
 
 }
