@@ -29,6 +29,16 @@ jobs:
           extra-packages: any::covr, any::xml2
           needs: coverage
 
+      - name: Get ADMIXTURE for linux
+        run: |
+             mkdir admixture
+             cd admixture
+             wget https://dalexander.github.io/admixture/binaries/admixture_linux-1.3.0.tar.gz
+             tar -xvzf admixture_linux-1.3.0.tar.gz
+             cd ..
+             echo "$PWD/admixture/dist/admixture_linux-1.3.0" >> "$GITHUB_PATH"
+
+
       - name: Test coverage
         run: |
           cov <- covr::package_coverage(

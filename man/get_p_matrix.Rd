@@ -2,12 +2,12 @@
 % Please edit documentation in R/q_matrix.R
 \name{get_p_matrix}
 \alias{get_p_matrix}
-\title{Return a single P matrix from a \code{q_matrix_list} object}
+\title{Return a single P matrix from a \code{gt_admix} object}
 \usage{
 get_p_matrix(x, ..., k, run)
 }
 \arguments{
-\item{x}{A \code{q_matrix_list} object containing P matrices}
+\item{x}{A \code{gt_admix} object containing P matrices}
 
 \item{...}{Not used}
 
@@ -16,9 +16,9 @@ get_p_matrix(x, ..., k, run)
 \item{run}{The run number of the desired P matrix}
 }
 \value{
-A single P matrix from the \code{q_matrix_list} object
+A single P matrix from the \code{gt_admix} object
 }
 \description{
-This function retrieves a single P matrix from a \code{q_matrix_list} object
+This function retrieves a single P matrix from a \code{gt_admix} object
 based on the specified k value and run number.
 }

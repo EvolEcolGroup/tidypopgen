@@ -13,6 +13,8 @@ reference:
         - gt_save
         - gt_load
         - gt_get_file_names
+        - gt_order_loci
+        - gt_update_backingfile
   - title: "Show"
     desc: "Functions to view loci and genotype information stored in a `gen_tibble`."
     contents:
@@ -22,6 +24,7 @@ reference:
         - show_ploidy
         - count_loci
         - augment_loci
+        - is_loci_table_ordered
   - title: "Selecting loci"
     desc: "Functions to select loci from a `gen_tibble`, either based on loci information, or genotype information."
     contents:
@@ -90,16 +93,20 @@ reference:
         - augment.gt_dapc
         - autoplot.gt_dapc
         - autoplot.gt_cluster_pca
-  - title: "K-clustering (e.g. ADMXITURE)"
-    desc: "Functions for creating, tidying, and visualising `q_matrix` objects."
+  - title: "K-clustering and ADMXITURE"
+    desc: "Functions for creating, tidying, and visualising `gt_admix` and `q_matrix` objects."
     contents:
+        - gt_admixture
+        - autoplot.gt_admix
+        - summary.gt_admix
+        - c.gt_admix
         - q_matrix
+        - read_q_files
         - get_q_matrix
         - get_p_matrix
         - tidy.q_matrix
         - augment.q_matrix
         - autoplot.q_matrix
-        - summary.q_matrix_list
         - distruct_colours
         - scale_fill_distruct
         - theme_distruct

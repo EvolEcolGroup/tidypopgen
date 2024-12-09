@@ -2,12 +2,12 @@
 % Please edit documentation in R/q_matrix.R
 \name{get_q_matrix}
 \alias{get_q_matrix}
-\title{Return a single Q matrix from a \code{q_matrix_list} object}
+\title{Return a single Q matrix from a \code{gt_admix} object}
 \usage{
 get_q_matrix(x, ..., k, run)
 }
 \arguments{
-\item{x}{A \code{q_matrix_list} object containing multiple Q matrices}
+\item{x}{A \code{gt_admix} object containing multiple Q matrices}
 
 \item{...}{Not used}
 
@@ -16,9 +16,9 @@ get_q_matrix(x, ..., k, run)
 \item{run}{The run number of the desired Q matrix}
 }
 \value{
-A single Q matrix from the \code{q_matrix_list} object
+A single Q matrix from the \code{gt_admix} object
 }
 \description{
-This function retrieves a single Q matrix from a \code{q_matrix_list} object
+This function retrieves a single Q matrix from a \code{gt_admix} object
 based on the specified k value and run number.
 }
