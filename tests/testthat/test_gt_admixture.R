@@ -1,5 +1,6 @@
+
 # skip if admixture is not installed
-skip_if((system2("which", args = "admixture", stdout = NULL) != 0)||!requireNamespace("fastmixturer", quietly = TRUE))
+skip_if((system2("which", args = "admixture", stdout = NULL) != 0) && !requireNamespace("fastmixturer", quietly = TRUE))
 # set the input file
 vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
                         package = "tidypopgen")

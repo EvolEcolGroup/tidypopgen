@@ -94,7 +94,7 @@ reference:
         - autoplot.gt_dapc
         - autoplot.gt_cluster_pca
   - title: "K-clustering and ADMXITURE"
-    desc: "Functions for creating, tidying, and visualising `q_matrix` objects."
+    desc: "Functions for creating, tidying, and visualising `gt_admix` and `q_matrix` objects."
     contents:
         - gt_admixture
         - autoplot.gt_admix
@@ -107,7 +107,6 @@ reference:
         - tidy.q_matrix
         - augment.q_matrix
         - autoplot.q_matrix
-        - summary.q_matrix_list
         - distruct_colours
         - scale_fill_distruct
         - theme_distruct
