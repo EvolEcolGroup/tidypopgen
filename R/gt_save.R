@@ -12,7 +12,7 @@
 #' @param x a [`gen_tibble`]
 #' @param file_name the file name, including the full path. If it does not end
 #' with *.gt*, the extension will be added.
-#' @param quiet boolean to suppress information about hte files
+#' @param quiet boolean to suppress information about the files
 #' @returns the file name and path of the *.gt* file, together with the *.rds*
 #' and *.bk* files
 #' @seealso [gt_load()]

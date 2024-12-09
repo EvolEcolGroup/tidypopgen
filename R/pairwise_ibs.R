@@ -2,8 +2,8 @@
 #'
 #' This function computes the IBS matrix.
 #'
-#' Note that monomorphic sites are currently counted. Should we filter
-#' them beforehand? What does plink do?
+#' Note that monomorphic sites are currently considered. Remove monomorphic sites
+#' before running pairwise_king if this is a concern.
 #' @param x a `gen_tibble` object.
 #' @param as_matrix boolean, determining whether the results should be a square symmetrical matrix (TRUE),
 #' or a tidied tibble (FALSE, the default)

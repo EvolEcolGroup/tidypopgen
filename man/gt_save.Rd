@@ -12,7 +12,7 @@ gt_save(x, file_name = NULL, quiet = FALSE)
 \item{file_name}{the file name, including the full path. If it does not end
 with \emph{.gt}, the extension will be added.}
 
-\item{quiet}{boolean to suppress information about hte files}
+\item{quiet}{boolean to suppress information about the files}
 }
 \value{
 the file name and path of the \emph{.gt} file, together with the \emph{.rds}

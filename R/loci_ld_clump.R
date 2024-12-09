@@ -64,24 +64,24 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
 {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
+  # check that the loci have not been resorted
+  # check that big_index in the loci table is an increasing sequence of indeces
+  if (is.unsorted(show_loci(.x)$big_index, strictly = TRUE)){
+    stop("Your loci have been resorted; first save the new file backed matrix with `gt_update_baking_file()")
+  }
+
 
   if (gt_has_imputed(.x) && gt_uses_imputed(.x)==FALSE){ #but not uses_imputed
     gt_set_imputed(.x, set = TRUE)
     on.exit(gt_set_imputed(.x, set = FALSE))
   }
 
-  if(!identical(show_loci(.x),.x %>% show_loci() %>% arrange(show_loci(.x)$chr_int,show_loci(.x)$position))){
-    stop("Your loci are not sorted, try using: show_loci(.data) <- .data %>% show_loci() %>% arrange(chr_int,position)")
-
-  }
+  is_loci_table_ordered(.x, error_on_false = TRUE)
 
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use
-  rows_to_keep <- vctrs::vec_data(.x)
   if (use_positions){
-    #.positions <- show_loci(.x)$position
-    #.positions <- attr(.x,"bigsnp")$map$physical.pos
     .positions <- rep(NA, nrow(attr(.x,"bigsnp")$map))
     .positions[show_loci(.x)$big_index] <- show_loci(.x)$position
   } else {
