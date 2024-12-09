@@ -99,7 +99,8 @@ test_that("gt_order_loci reorders and regenerates backingfiles",{
 
   # loci are now ordered, and backingfiles updated (v2)
   expect_true(is_loci_table_ordered(reorder_test_gt))
-  expect_equal(gt_get_file_names(reorder_test_gt),c(paste0(path,"_v2.rds"),paste0(path,"_v2.bk")))
+  expect_equal(normalizePath(gt_get_file_names(reorder_test_gt)),
+               normalizePath(c(paste0(path,"_v2.rds"),paste0(path,"_v2.bk"))))
 
   # now save the gen_tibble
   gt_save(reorder_test_gt, quiet = TRUE)
@@ -143,7 +144,8 @@ test_that("gt_order_loci use_current_table = TRUE",{
   expect_equal(show_loci(test_gt)%>%select(-big_index),loci[new_order,]%>%select(-big_index))
 
   # but the backingfile has been updated
-  expect_equal(gt_get_file_names(test_gt),c(paste0(path,"_v2.rds"),paste0(path,"_v2.bk")))
+  expect_equal(normalizePath(gt_get_file_names(test_gt)),
+               normalizePath(c(paste0(path,"_v2.rds"),paste0(path,"_v2.bk"))))
 
   # if use_current_table = TRUE, but the loci are not ordered, check for errors
 
