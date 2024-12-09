@@ -57,7 +57,7 @@ jobs:
              echo "$PATH"
              echo "$HOME"
              mkdir -p /home/runner/.local/bin
-             cp "$PWD/admixture/dist/admixture_linux-1.3.0/admixture" "/home/runner/.local/bin/admixture"
+             cp "$PWD/admixture/dist/admixture_linux-1.3.0/admixture" "/usr/local/bin/admixture"
              # echo "$PWD/admixture/dist/admixture_linux-1.3.0" >> "$GITHUB_PATH"
 
       - name: Test ADMIXTURE for linux

@@ -97,6 +97,7 @@ reference:
     desc: "Functions for creating, tidying, and visualising `q_matrix` objects."
     contents:
         - gt_admixture
+        - autoplot.gt_admix
         - summary.gt_admix
         - c.gt_admix
         - q_matrix
