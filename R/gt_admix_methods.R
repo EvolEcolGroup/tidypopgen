@@ -19,7 +19,7 @@ c.gt_admix <- function(...) {
     combined_obj$P <- sapply(list(...), function(x) x$P)
   }
   # if we have a log_lik element in any of the objects, combine it
-  if (all(sapply(list(...), function(x) !is.null(x$log_lik)))) {
+  if (all(sapply(list(...), function(x) !is.null(x$loglik)))) {
     combined_obj$loglik <- unlist(sapply(list(...), function(x) x$loglik))
   }
 
