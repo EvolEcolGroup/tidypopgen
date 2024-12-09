@@ -25,6 +25,6 @@ gt_order_loci <- function(.x, use_current_table = FALSE, quiet = FALSE, ...){
   }
   # if asked to use the current table, check that it is ordered
   is_loci_table_ordered(.x, error_on_false = TRUE)
-  gt_udpate_backingfile(.x, quiet=quiet, ...)
+  gt_update_backingfile(.x, quiet=quiet, ...)
 
 }
