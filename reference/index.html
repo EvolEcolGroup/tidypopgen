@@ -70,6 +70,18 @@
 
         </dt>
         <dd>Get the names of files storing the genotypes of a <code>gen_tibble</code></dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_order_loci.html">gt_order_loci()</a></code>
+
+        </dt>
+        <dd>Order the loci table of a gen_tibble</dd>
+      </dl><dl><dt>
+
+          <code><a href="gt_update_backingfile.html">gt_update_backingfile()</a></code>
+
+        </dt>
+        <dd>Update the backing matrix</dd>
       </dl></div><div class="section level2">
       <h2 id="show">Show<a class="anchor" aria-label="anchor" href="#show"></a></h2>
 
@@ -111,6 +123,12 @@
 
         </dt>
         <dd>Augment the loci table with information from a analysis object</dd>
+      </dl><dl><dt>
+
+          <code><a href="is_loci_table_ordered.html">is_loci_table_ordered()</a></code>
+
+        </dt>
+        <dd>Test if the loci table is ordered</dd>
       </dl></div><div class="section level2">
       <h2 id="selecting-loci">Selecting loci<a class="anchor" aria-label="anchor" href="#selecting-loci"></a></h2>
 
@@ -581,9 +599,9 @@
         </dt>
         <dd>Autoplots for <code>gt_cluster_pca</code> objects</dd>
       </dl></div><div class="section level2">
-      <h2 id="k-clustering-e-g-admxiture-">K-clustering (e.g. ADMXITURE)<a class="anchor" aria-label="anchor" href="#k-clustering-e-g-admxiture-"></a></h2>
+      <h2 id="k-clustering-and-admxiture">K-clustering and ADMXITURE<a class="anchor" aria-label="anchor" href="#k-clustering-and-admxiture"></a></h2>
 
-      <div class="section-desc"><p>Functions for creating, tidying, and visualising <code>q_matrix</code> objects.</p></div>
+      <div class="section-desc"><p>Functions for creating, tidying, and visualising <code>gt_admix</code> and <code>q_matrix</code> objects.</p></div>
 
 
     </div><div class="section level2">
@@ -593,22 +611,52 @@
 
       <dl><dt>
 
+          <code><a href="gt_admixture.html">gt_admixture()</a></code>
+
+        </dt>
+        <dd>Run ADMIXTURE from R</dd>
+      </dl><dl><dt>
+
+          <code><a href="autoplot_gt_admix.html">autoplot(<i>&lt;gt_admix&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Autoplots for <code>gt_admix</code> objects</dd>
+      </dl><dl><dt>
+
+          <code><a href="summary.gt_admix.html">summary(<i>&lt;gt_admix&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summary method for gt_admix objects</dd>
+      </dl><dl><dt>
+
+          <code><a href="c.gt_admix.html">c(<i>&lt;gt_admix&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Combine method for gt_admix objects</dd>
+      </dl><dl><dt>
+
           <code><a href="q_matrix.html">q_matrix()</a></code>
 
         </dt>
-        <dd>Read and structure .Q files or existing matrices as <code>q_matrix</code> or <code>q_matrix_list</code> objects.</dd>
+        <dd>Convert a standard matrix to a <code>q_matrix</code> object</dd>
+      </dl><dl><dt>
+
+          <code><a href="read_q_files.html">read_q_files()</a></code>
+
+        </dt>
+        <dd>Read and structure .Q files or existing matrices as <code>q_matrix</code> or <code>gt_admix</code> objects.</dd>
       </dl><dl><dt>
 
           <code><a href="get_q_matrix.html">get_q_matrix()</a></code>
 
         </dt>
-        <dd>Return a single Q matrix from a <code>q_matrix_list</code> object</dd>
+        <dd>Return a single Q matrix from a <code>gt_admix</code> object</dd>
       </dl><dl><dt>
 
           <code><a href="get_p_matrix.html">get_p_matrix()</a></code>
 
         </dt>
-        <dd>Return a single P matrix from a <code>q_matrix_list</code> object</dd>
+        <dd>Return a single P matrix from a <code>gt_admix</code> object</dd>
       </dl><dl><dt>
 
           <code><a href="tidy.q_matrix.html">tidy(<i>&lt;q_matrix&gt;</i>)</a></code>
@@ -627,12 +675,6 @@
 
         </dt>
         <dd>Autoplots for <code>q_matrix</code> objects</dd>
-      </dl><dl><dt>
-
-          <code><a href="summary.q_matrix_list.html">summary(<i>&lt;q_matrix_list&gt;</i>)</a></code>
-
-        </dt>
-        <dd>Summarise a Q matrix list</dd>
       </dl><dl><dt>
 
           <code><a href="distruct_colours.html">distruct_colours</a></code>

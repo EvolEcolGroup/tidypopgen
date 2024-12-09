@@ -49,7 +49,13 @@ a PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for .bed;
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gt_as_plink</span><span class="op">(</span><span class="va">x</span>, file <span class="op">=</span> <span class="cn">NULL</span>, type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bed"</span>, <span class="st">"ped"</span>, <span class="st">"raw"</span><span class="op">)</span>, overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gt_as_plink</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  file <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bed"</span>, <span class="st">"ped"</span>, <span class="st">"raw"</span><span class="op">)</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  chromosomes_as_int <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -71,6 +77,10 @@ the output file will have the same path and prefix of the backingfile.</p></dd>
 
 <dt id="arg-overwrite">overwrite<a class="anchor" aria-label="anchor" href="#arg-overwrite"></a></dt>
 <dd><p>boolean whether to overwrite the file.</p></dd>
+
+
+<dt id="arg-chromosomes-as-int">chromosomes_as_int<a class="anchor" aria-label="anchor" href="#arg-chromosomes-as-int"></a></dt>
+<dd><p>boolean whether to use the integer representation of the chromosomes</p></dd>
 
 </dl></div>
     <div class="section level2">

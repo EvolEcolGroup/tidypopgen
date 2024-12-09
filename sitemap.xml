@@ -11,7 +11,6 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/authors.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/index.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/annotate_group_info.html</loc></url>
-<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/as_q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/augment.gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/augment_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/augment_loci.html</loc></url>
@@ -20,11 +19,12 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot.q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot.qc_report_indiv.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot.qc_report_loci.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_admix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_cluster_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_pcadapt.html</loc></url>
-<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/cast_list_to_q_matrix.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/c.gt_admix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/count_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/count_vcf_individuals.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/count_vcf_variants.html</loc></url>
@@ -34,6 +34,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/get_p_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/get_q_matrix.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_admixture.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_as_genind.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_as_genlight.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_as_geno_lea.html</loc></url>
@@ -48,6 +49,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_has_imputed.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_impute_simple.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_load.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_order_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_autoSVD.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_partialSVD.html</loc></url>
@@ -58,6 +60,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_save_light.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_set_imputed.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_to_aftable.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_update_backingfile.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_uses_imputed.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_write_bigsnp_from_dfs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/identify_pseudohaploids.html</loc></url>
@@ -66,6 +69,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/indiv_inbreeding.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/indiv_missingness.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/indiv_ploidy.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/is_loci_table_ordered.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/loci_alt_freq.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/loci_chromosomes.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/loci_hwe.html</loc></url>
@@ -92,6 +96,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/qc_report_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/rbind.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/rbind_dry_run.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/read_q_files.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/reexports.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/scale_fill_distruct.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/select_loci.html</loc></url>
@@ -104,7 +109,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/snp_king.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/stopifnot_gen_tibble.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/subset_bigSNP.html</loc></url>
-<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/summary.q_matrix_list.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/summary.gt_admix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/summary_rbind_dry_run.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/theme_distruct.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/tidy.gt_dapc.html</loc></url>
