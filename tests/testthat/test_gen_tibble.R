@@ -69,9 +69,6 @@ test_that("gen_tibble catches invalid alleles",{
                             loci = test_loci_wrong,
                             valid_alleles = c("A","C","T","G","0"),
                             quiet = TRUE), "can not be a valid allele")
-
-
-
 })
 
 
@@ -91,8 +88,6 @@ test_that("if order of loci is changed, order of genotypes also changes",{
 
   #check that genotypes are now reordered according to random order
   expect_equal(pop_b_gen_reordered, show_genotypes(pop_b))
-
-
 })
 
 test_that("gen_tibble does not accept character matrix",{
@@ -485,7 +480,6 @@ test_that("check summary stats are the same for gen_tibbles read in different wa
 
 
 test_that("versioning if .bk already exists",{
-
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                  population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,0),
@@ -497,20 +491,16 @@ test_that("versioning if .bk already exists",{
                           genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-
-
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
                         indiv_meta = test_indiv_meta, quiet = TRUE,
                         backingfile = tempfile())
 
   # get the gt filenames
   files <-  gt_get_file_names(test_gt)
-
   # remove the .rds
   expect_true(file.remove(files[1]))
-
-  file <- gsub(".bk","",files[2],)
-
+  # remove extension
+  file <- gsub(".bk","",files[2])
   # create gt using the same backingfile name
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
                         indiv_meta = test_indiv_meta, quiet = TRUE,
@@ -535,6 +525,44 @@ test_that("versioning if .bk already exists",{
 
   expect_equal(new_version_files[2], paste0(file,"_v3.bk"))
 
+})
+
+test_that("versioning updates correctly through gt_order_loci",{
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                          position=as.integer(c(3,5,65,343,23,456)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
+                        indiv_meta = test_indiv_meta, quiet = TRUE,
+                        backingfile = tempfile())
+
+  # get the gt filenames
+  files <-  gt_get_file_names(test_gt)
+  # remove extension
+  file <- gsub(".bk","",files[2])
+  # create gt using the same backingfile name
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
+                        indiv_meta = test_indiv_meta, quiet = TRUE,
+                        backingfile = file)
+
+  # get new file names
+  new_files <- gt_get_file_names(test_gt)
+
+  # mess with the loci table
+  test_gt <- test_gt %>% select_loci(c(2,4,5,1,6))
+  test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
+  gt_save(test_gt, quiet = TRUE)
+
+  # check file names
+  expect_equal(gt_get_file_names(test_gt)[1], paste0(file,"_v3.rds"))
+  expect_equal(gt_get_file_names(test_gt)[2], paste0(file,"_v3.bk"))
 })
 
 
@@ -579,19 +607,19 @@ test_that("chr_int is always an integer",{
 
 })
 
-test_indiv_meta <- data.frame (id=c("a","b","c"))
-test_genotypes <- rbind(c(1,1,0,1,1,0),
-                        c(2,1,0,0,0,0),
-                        c(2,2,0,0,1,1))
-test_loci <- data.frame(name=paste0("rs",1:6),
-                        chromosome=paste0("chr",c(1,1,1,1,2,2)),
-                        position=as.integer(c(3,5,65,343,23,456)),
-                        genetic_dist = as.double(rep(0,6)),
-                        allele_ref = c("A","T","C","G","C","T"),
-                        allele_alt = c("T","C", NA,"C","G","A"))
+
 
 test_that("gt without population is valid",{
-
+  test_indiv_meta <- data.frame (id=c("a","b","c"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                          position=as.integer(c(3,5,65,343,23,456)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
                         indiv_meta = test_indiv_meta, quiet = TRUE,
                         backingfile = tempfile())
@@ -628,8 +656,7 @@ test_that("additional vcf tests with larger file",{
   anole_gt2 <- gen_tibble(vcf_path, quiet = TRUE, parser = "cpp", backingfile = tempfile("anolis_"),
                           chunk_size = 1000, n_cores = 2)
   expect_true(all.equal(show_genotypes(anole_gt2),show_genotypes(anole_gt_vcfr)))
-}
-)
+})
 
 
 test_that("vcf's with haploid markers",{
@@ -691,8 +718,6 @@ test_that("chr_int is correct",{
 
 
 test_that("gen_tibble family.ID from vcf",{
-
-
   # If the gen_tibble has been read in from vcf format, family.ID in the resulting
   # plink files will be the same as sample.ID.
 

@@ -520,26 +520,34 @@ change_duplicated_file_name <- function(file){
   rds <- paste0(file, ".rds")
 
   if(file.exists(bk) | file.exists(rds)){
-
     version <- 2
+    # extract the base name and version number
+    base_name_pattern <- "^(.*)_v(\\d+)$"
+    # check for any matches
+    matches <- regmatches(basename(file), regexec(base_name_pattern, basename(file)))
 
-    base_name <- basename(file)
+    if (length(matches[[1]]) > 0) {
+      # Extract base name without version and current version number
+      base_name <- matches[[1]][2] # Part before "_v<number>"
+      current_version <- as.numeric(matches[[1]][3]) # extract current version number
+    } else {
+      base_name <- basename(file) # Use the full name if there's no "_v" suffix
+      current_version <- 1
+    }
 
     version_pattern <- paste0(base_name, "_v(\\d+)\\.bk$")
-
-    # read existing files to check for existing versions
-  existing_files <- list.files(dirname(bk), pattern = paste0("^", base_name, "_v\\d+\\.bk$"))
-
+    # read files to check for existing versions
+    existing_files <- list.files(dirname(bk), pattern = paste0("^", base_name, "_v\\d+\\.bk$"))
 
     if (length(existing_files) > 0) {
       versions <- sub(version_pattern, "\\1", existing_files)
       versions <- as.numeric(versions)
       if (!any(is.na(versions))) {
-        version <- max(versions) + 1
+        version <- max(versions) + 1 # add 1 to the version number
       }
     }
-
-    new_file <- paste0(file,"_v",version)
+    # create new file path
+    new_file <- paste0(dirname(file), "/", base_name, "_v", version)
 
     return(new_file)
   }
