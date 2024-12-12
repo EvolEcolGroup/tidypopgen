@@ -91,15 +91,27 @@ summary.gt_admix <- function(object, ...) {
 #' @export
 
 gt_admix_reorder_q <- function(x, group = NULL) {
+  # check that x is a gt_admix object
+  if (!inherits(x, "gt_admix")) {
+    stop("x must be a gt_admix object")
+  }
+  # if we have a gruop variable,
+  if (!is.null(group)){
+    # check that it is the same length as the q matrix
+    if (length(group) != nrow(x$Q[[1]])) {
+      stop("The length of the group variable must be the same as the number of rows in the Q matrix")
+    }
+    # and use it
+    if (!is.null(group)) {
+      x$group <- group
+    }
+  }
+  # if we have no group variable, check that we have one in the object
   if (is.null(x$group) ) {
     # if group is null
     if (is.null(group)) {
       stop("You must provide a group variable if there is no grouping information in the gt_admix object")
     }
-    if (length(group) != nrow(x$Q[1])) {
-      stop("The length of the group variable must be the same as the number of rows in the Q matrix")
-    }
-    x$group <- group
   }
   group_meta<- tibble(id = seq(1, length(x$group)), group = x$group)
   # sort group meta by group
@@ -112,11 +124,8 @@ gt_admix_reorder_q <- function(x, group = NULL) {
   } else {
     x$id <- group_meta$id
   }
-  # if we have a group element, reorder it
-  if (!is.null(x$group)) {
-    x$group <- x$group[group_meta$id]
-  } else {
-    x$group <- group_meta$group
-  }
+  # reorder the group element
+  x$group <- x$group[group_meta$id]
+
   return(x)
 }
