@@ -16,7 +16,6 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/augment_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/augment_loci_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/augment_q_matrix.html</loc></url>
-<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot.q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot.qc_report_indiv.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot.qc_report_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_admix.html</loc></url>
@@ -24,6 +23,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_gt_pcadapt.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/autoplot_q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/c.gt_admix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/count_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/count_vcf_individuals.html</loc></url>
@@ -34,6 +34,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/get_p_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/get_q_matrix.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_admix_reorder_q.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_admixture.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_as_genind.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_as_genlight.html</loc></url>
