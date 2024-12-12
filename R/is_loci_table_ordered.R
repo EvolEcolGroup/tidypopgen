@@ -32,7 +32,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(.x, error_on_false = FALSE, ...) 
 
   # check that within each chromosome positions are sorted
   if (any(unlist(show_loci(.x) %>%
-                 group_by(chr_int) %>%
+                 group_by(.data$chr_int) %>%
                  group_map(~ is.unsorted(.x$position))))){
     if (error_on_false){
       stop("Your loci are not sorted within chromosomes")

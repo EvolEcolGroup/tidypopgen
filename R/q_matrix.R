@@ -92,6 +92,10 @@ get_q_matrix <- function(x, ..., k, run) {
 
   # Retrieve and return the q-matrix
   q_matrix <- x$Q[[matrix_index]]
+  # if the id variable exists, add it as an attribute
+  if ("id" %in% names(x)){
+    attr(q_matrix, "id") <- x$id
+  }
   # if a grouping varible exist, add it as an attribute
   if ("group" %in% names(x)){
     attr(q_matrix, "group") <- x$group
@@ -177,11 +181,11 @@ tidy.q_matrix <- function(x, data, ...){
     q_tbl <- q_tbl  %>%
       dplyr::mutate(id = data$id,
                     group = colu)
-  # } else if ("population" %in% names(data)){
-  #   q_tbl <- x %>%
-  #     tibble::as_tibble() %>%
-  #     dplyr::mutate(id = data$id,
-  #                   group = data$population)
+    # } else if ("population" %in% names(data)){
+    #   q_tbl <- x %>%
+    #     tibble::as_tibble() %>%
+    #     dplyr::mutate(id = data$id,
+    #                   group = data$population)
   } else {
     q_tbl <- x %>%
       tibble::as_tibble() %>%
@@ -227,11 +231,11 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 
   q_tbl <- tidy(x,data)
 
-  if ("population" %in% names(data)) {
-    if(all(data$population == q_tbl$group)){
-      q_tbl <- q_tbl %>% dplyr::select(-.data$group)
-    }
-  }
+  # if ("population" %in% names(data)) {
+  #   if(all(data$population == q_tbl$group)){
+  #     q_tbl <- q_tbl %>% dplyr::select(-.data$group)
+  #   }
+  # }
 
   data <- dplyr::left_join(data,q_tbl, by = "id")
 }
@@ -244,18 +248,31 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #' generate the Q matrix
 #' @param annotate_group Boolean determining whether to annotate the plot with the
 #' group information
+#' @param reorder_within_groups Boolean determining whether to reorder the individuals within each group based
+#' on their ancestry proportion (note that this is not advised if you are making multiple plots, as you would get
+#' a different order for each plot!). If TRUE, `annotate_group` must also be TRUE.
 #' @param ... not currently used.
 #' @returns a barplot of individuals, coloured by ancestry proportion
-#'
+#' @name autoplot_q_matrix
 #' @export
-autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
+autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, reorder_within_groups = FALSE, ...){
 
   rlang::check_dots_empty()
+  # test that if reorder_within_groups is TRUE, annotate_group should also be TRUE
+  if (reorder_within_groups & !annotate_group){
+    stop("If reorder_within_groups is TRUE, annotate_group should also be TRUE")
+  }
+
   K <- ncol(object)
   # create dataset if we don't have a gen_tibble
   if (is.null(data)) {
     q_tbl <- as.data.frame(object)
-    q_tbl$id <- 1:nrow(q_tbl)
+    # if the q_matrix has an id attribute, add it to the data
+    if ("id" %in% names(attributes(object))){
+      q_tbl$id <- attr(object, "id")
+    } else {
+      q_tbl$id <- 1:nrow(q_tbl)
+    }
     # if the q_matrix has a group attribute, add it to the data
     if ("group" %in% names(attributes(object))){
       q_tbl$group <- rep(attr(object, "group"), each=nrow(q_tbl)/length(attr(object, "group")))
@@ -263,16 +280,24 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
   } else { # if we have the info from the gen_tibble
     q_tbl <- tidy(object, data)
   }
-    q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
-                                           names_to = "q", values_to = "percentage") %>%
-      dplyr::mutate(percentage = as.numeric(.data$percentage))
+  # if we have a grouping variable and we plan to use it, then reorder by it
+  q_tbl$id <- 1:nrow(q_tbl)
+  if (("group" %in% names(q_tbl)) && annotate_group){
+    q_tbl <- q_tbl %>%
+      dplyr::arrange(.data$group, .data$id)
+  }
+  # now reset the id to the new order
+  q_tbl$id <- 1:nrow(q_tbl)
+  q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
+                                         names_to = "q", values_to = "percentage") %>%
+    dplyr::mutate(percentage = as.numeric(.data$percentage))
 
-    # resort data if we have a grouping variable and we plan to use it
-    if (("group" %in% names(q_tbl))&&annotate_group){
-
+  # if we reorder within group
+  if (("group" %in% names(q_tbl)) && reorder_within_groups){
     q_tbl <- q_tbl %>%
       dplyr::group_by(.data$group, .data$id) %>%
-      dplyr::arrange(.data$group, .data$id) %>%
+      #dplyr::arrange(.data$group, .data$id) %>%
+      dplyr::arrange(.data$group) %>% # only sort by group, so that we don't reorder individuals within groups
       dplyr::mutate(q = factor(.data$q, levels = .data$q[order(.data$percentage, decreasing = FALSE)]))
 
     dominant_q <- q_tbl %>%
@@ -290,26 +315,26 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
 
     q_tbl <- q_tbl %>%
       dplyr::mutate(id = factor(.data$id, levels = levels_q))
-    }
+  }
 
-    plt <- ggplot2::ggplot(q_tbl,
-                           ggplot2::aes(x = .data$id,
-                                        y = .data$percentage,
-                                        fill = .data$q)) +
-      ggplot2::geom_col(width = 1,
-                        position = "stack")+
-      ggplot2::labs(y = paste("K = ", K))+
-      theme_distruct() +
-      scale_fill_distruct()
+  plt <- ggplot2::ggplot(q_tbl,
+                         ggplot2::aes(x = .data$id,
+                                      y = .data$percentage,
+                                      fill = .data$q)) +
+    ggplot2::geom_col(width = 1,
+                      position = "stack")+
+    ggplot2::labs(y = paste("K = ", K))+
+    theme_distruct() +
+    scale_fill_distruct()
 
-    if (annotate_group){
-      if (!"group" %in% names(q_tbl)) {
-        warning("no annotation possible if 'gen_tbl' is NULL and q_matrix does not contain group information")
-      } else {
-        plt <- plt + annotate_group_info(q_tbl)
-      }
+  if (annotate_group){
+    if (!"group" %in% names(q_tbl)) {
+      warning("no annotation possible if 'gen_tbl' is NULL and q_matrix does not contain group information")
+    } else {
+      plt <- plt + annotate_group_info(q_tbl)
     }
-    plt
+  }
+  plt
 
 }
 # thin vertical lines show when plot is saved as .pdf and opened with certain viewers,

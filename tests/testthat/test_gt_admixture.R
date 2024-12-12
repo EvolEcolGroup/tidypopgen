@@ -60,4 +60,49 @@ test_that("run admixture as multiple runs", {
   bar_plot <- autoplot(anole_adm_cv, type = "barplot", k=2,run = 1)
   # check that this is indeed a ggplot object
   expect_true(inherits(bar_plot, "ggplot"))
+
+  # test the reorder of q matrices
+  anole_adm_cv_reorder <- gt_admix_reorder_q(anole_adm_cv)
+  # check plot ordering
+  unord_plot <- autoplot(anole_adm_cv, type = "barplot", k=3,run = 1, annotate_group=FALSE)
+  ord_plot <- autoplot(anole_adm_cv_reorder, type = "barplot", k=3,run = 1, annotate_group=TRUE)
+  reord_plot <- autoplot(anole_adm_cv_reorder, type = "barplot", k=3,run = 1, annotate_group=TRUE)
+  expect_identical (ord_plot, reord_plot)
+  expect_false (identical (unord_plot, ord_plot))
+  # reordering within plot changes the order further
+  ord_within_plot <- autoplot(anole_adm_cv_reorder, type = "barplot", k=3,run = 1,
+                              annotate_group=TRUE, reorder_within_groups=TRUE)
+  expect_false (identical (ord_plot, ord_within_plot))
+
+  # get q matrix and augment it
+  anole_q <- get_q_matrix(anole_adm_cv, k=3, run=1)
+  augment_q <- augment(anole_q, data= anole_gt)
+  expect_true(nrow(augment_q)==nrow(anole_gt))
+  # TODO should we try to check that the data are in the same order as the q matrix?
+
+  # tidy matrix with grouped and ungrouped data
+  q_tidy_group <- tidy(get_q_matrix(anole_adm_cv, k=3, run=1), anole_gt)
+  expect_true("group" %in% colnames(q_tidy_group))
+  q_tidy_ind <- tidy(get_q_matrix(anole_adm_cv, k=3, run=1), anole_gt %>% dplyr::ungroup())
+  expect_false("group" %in% colnames(q_tidy_ind))
+
+  # reorder errors
+  # wrong object
+  expect_error(gt_admix_reorder_q(anole_gt),
+               "x must be a gt_admix object")
+  # wrong group length
+  expect_error(gt_admix_reorder_q(anole_adm_cv, group=c(1,2)),
+               "The length of the group variable must be the same as the number of rows in the Q matrix")
+  # no group when we have no group info
+  anole_adm_no_group <- anole_adm_cv
+  anole_adm_no_group$group <- NULL
+  expect_error(gt_admix_reorder_q(anole_adm_no_group),
+               "You must provide a group variable if there is no grouping information in the gt_admix object")
+  # use gt_adm without id and group
+  anole_adm_no_group$id <- NULL
+  anole_adm_no_group$group <- NULL
+  adm_reord_no_meta <- gt_admix_reorder_q(anole_adm_no_group, group=anole_gt$population)
+  # now check that we have an id and group elements in the list
+  expect_true(length(adm_reord_no_meta$id)==nrow(anole_gt))
+  expect_true(length(adm_reord_no_meta$group)==nrow(anole_gt))
 })

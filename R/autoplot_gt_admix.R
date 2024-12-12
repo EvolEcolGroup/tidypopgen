@@ -13,7 +13,7 @@
 #' @param k the value of `k` to plot (for `barplot` type only)
 #' param repeat the repeat to plot (for `barplot` type only)
 #' @param run the run to plot (for `barplot` type only)
-#' @param ... not used.
+#' @param ... additional arguments to be passed to autoplot method for q_matrices [autoplot_q_matrix()].
 #' @returns a `ggplot2` object
 #' @name autoplot_gt_admix
 #' @export
@@ -43,6 +43,6 @@ autoplot.gt_admix <- function(object,
     }
     # get the Q matrix for the specified k and repeat
     Q <- get_q_matrix(object, k = k, run = run)
-    autoplot(Q)
+    autoplot(Q, ...)
   }
 }
