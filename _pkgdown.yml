@@ -100,6 +100,7 @@ reference:
         - autoplot.gt_admix
         - summary.gt_admix
         - c.gt_admix
+        - gt_admix_reorder_q
         - q_matrix
         - read_q_files
         - get_q_matrix
