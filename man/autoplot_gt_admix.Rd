@@ -17,7 +17,7 @@ param repeat the repeat to plot (for \code{barplot} type only)}
 
 \item{run}{the run to plot (for \code{barplot} type only)}
 
-\item{...}{not used.}
+\item{...}{additional arguments to be passed to autoplot method for q_matrices \code{\link[=autoplot_q_matrix]{autoplot_q_matrix()}}.}
 }
 \value{
 a \code{ggplot2} object

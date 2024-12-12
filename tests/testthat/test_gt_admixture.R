@@ -64,6 +64,6 @@ test_that("run admixture as multiple runs", {
   # test the reorder of q matrices
   anole_adm_cv_reorder <- gt_admix_reorder_q(anole_adm_cv)
   # TODO check how ordering is done automatically when plotting
-  autoplot(anole_adm_cv, type = "barplot", k=3,run = 1)
+  autoplot(anole_adm_cv, type = "barplot", k=3,run = 1, annotate_group=FALSE)
   autoplot(anole_adm_cv_reorder, type = "barplot", k=3,run = 1)
 })
