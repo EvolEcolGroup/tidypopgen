@@ -169,6 +169,9 @@ gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed 
     }
   }
 
+  # add info on algorithm
+  adm_list$algorithm <- "ADMIXTURE"
+
   return(adm_list)
 
 }
