@@ -5,7 +5,13 @@
 \alias{autoplot.q_matrix}
 \title{Autoplots for \code{q_matrix} objects}
 \usage{
-\method{autoplot}{q_matrix}(object, data = NULL, annotate_group = TRUE, ...)
+\method{autoplot}{q_matrix}(
+  object,
+  data = NULL,
+  annotate_group = TRUE,
+  reorder_within_groups = FALSE,
+  ...
+)
 }
 \arguments{
 \item{object}{A Q matrix object (as returned by \code{\link[=q_matrix]{q_matrix()}}).}
@@ -15,6 +21,10 @@ generate the Q matrix}
 
 \item{annotate_group}{Boolean determining whether to annotate the plot with the
 group information}
+
+\item{reorder_within_groups}{Boolean determining whether to reorder the individuals within each group based
+on their ancestry proportion (note that this is not advised if you are making multiple plots, as you would get
+a different order for each plot!). If TRUE, \code{annotate_group} must also be TRUE.}
 
 \item{...}{not currently used.}
 }

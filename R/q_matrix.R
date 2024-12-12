@@ -248,13 +248,21 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #' generate the Q matrix
 #' @param annotate_group Boolean determining whether to annotate the plot with the
 #' group information
+#' @param reorder_within_groups Boolean determining whether to reorder the individuals within each group based
+#' on their ancestry proportion (note that this is not advised if you are making multiple plots, as you would get
+#' a different order for each plot!). If TRUE, `annotate_group` must also be TRUE.
 #' @param ... not currently used.
 #' @returns a barplot of individuals, coloured by ancestry proportion
 #' @name autoplot_q_matrix
 #' @export
-autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
+autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, reorder_within_groups = FALSE, ...){
 
   rlang::check_dots_empty()
+  # test that if reorder_within_groups is TRUE, annotate_group should also be TRUE
+  if (reorder_within_groups & !annotate_group){
+    stop("If reorder_within_groups is TRUE, annotate_group should also be TRUE")
+  }
+
   K <- ncol(object)
   # create dataset if we don't have a gen_tibble
   if (is.null(data)) {
@@ -269,17 +277,23 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, ...){
     if ("group" %in% names(attributes(object))){
       q_tbl$group <- rep(attr(object, "group"), each=nrow(q_tbl)/length(attr(object, "group")))
     }
-    browser()
   } else { # if we have the info from the gen_tibble
     q_tbl <- tidy(object, data)
   }
+  # if we have a grouping variable and we plan to use it, then reorder by it
+  q_tbl$id <- 1:nrow(q_tbl)
+  if (("group" %in% names(q_tbl)) && annotate_group){
+    q_tbl <- q_tbl %>%
+      dplyr::arrange(.data$group, .data$id)
+  }
+  # now reset the id to the new order
+  q_tbl$id <- 1:nrow(q_tbl)
   q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
                                          names_to = "q", values_to = "percentage") %>%
     dplyr::mutate(percentage = as.numeric(.data$percentage))
 
-  # resort data if we have a grouping variable and we plan to use it
-  if (("group" %in% names(q_tbl))&&annotate_group){
-
+  # if we reorder within group
+  if (("group" %in% names(q_tbl)) && reorder_within_groups){
     q_tbl <- q_tbl %>%
       dplyr::group_by(.data$group, .data$id) %>%
       #dplyr::arrange(.data$group, .data$id) %>%
