@@ -78,3 +78,45 @@ summary.gt_admix <- function(object, ...) {
     cat("$cv for cross validation error\n")
   }
 }
+
+
+#' Reorder the q matrices based on the grouping variable
+#'
+#' This function reorders the q matrices in a `gt_admix` object based on the grouping variable. This is useful before plotting when the
+#' samples from each group are not adjacent to each other in the q matrix.
+#'
+#' @param x a `gt_admix` object, possibly with a grouping variable
+#' @param group a character vector with the grouping variable (if there is no grouping variable info in `x`)
+#' @return a `gt_admix` object with the q matrices reordered
+#' @export
+
+gt_admix_reorder_q <- function(x, group = NULL) {
+  if (is.null(x$group) ) {
+    # if group is null
+    if (is.null(group)) {
+      stop("You must provide a group variable if there is no grouping information in the gt_admix object")
+    }
+    if (length(group) != nrow(x$Q[1])) {
+      stop("The length of the group variable must be the same as the number of rows in the Q matrix")
+    }
+    x$group <- group
+  }
+  group_meta<- tibble(id = seq(1, length(x$group)), group = x$group)
+  # sort group meta by group
+  group_meta <- group_meta[order(group_meta$group),]
+  # reorder the q matrices
+  x$Q <- lapply(x$Q, function(y) y[group_meta$id,])
+  # if we have an id element, reorder it
+  if (!is.null(x$id)) {
+    x$id <- x$id[group_meta$id]
+  } else {
+    x$id <- group_meta$id
+  }
+  # if we have a group element, reorder it
+  if (!is.null(x$group)) {
+    x$group <- x$group[group_meta$id]
+  } else {
+    x$group <- group_meta$group
+  }
+  return(x)
+}

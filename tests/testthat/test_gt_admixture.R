@@ -60,4 +60,10 @@ test_that("run admixture as multiple runs", {
   bar_plot <- autoplot(anole_adm_cv, type = "barplot", k=2,run = 1)
   # check that this is indeed a ggplot object
   expect_true(inherits(bar_plot, "ggplot"))
+
+  # test the reorder of q matrices
+  anole_adm_cv_reorder <- gt_admix_reorder_q(anole_adm_cv)
+  # TODO check how ordering is done automatically when plotting
+  autoplot(anole_adm_cv, type = "barplot", k=3,run = 1)
+  autoplot(anole_adm_cv_reorder, type = "barplot", k=3,run = 1)
 })

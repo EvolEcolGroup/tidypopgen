@@ -92,6 +92,10 @@ get_q_matrix <- function(x, ..., k, run) {
 
   # Retrieve and return the q-matrix
   q_matrix <- x$Q[[matrix_index]]
+  # if the id variable exists, add it as an attribute
+  if ("id" %in% names(x)){
+    attr(q_matrix, "id") <- x$id
+  }
   # if a grouping varible exist, add it as an attribute
   if ("group" %in% names(x)){
     attr(q_matrix, "group") <- x$group
@@ -227,11 +231,11 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 
   q_tbl <- tidy(x,data)
 
-  if ("population" %in% names(data)) {
-    if(all(data$population == q_tbl$group)){
-      q_tbl <- q_tbl %>% dplyr::select(-.data$group)
-    }
-  }
+  # if ("population" %in% names(data)) {
+  #   if(all(data$population == q_tbl$group)){
+  #     q_tbl <- q_tbl %>% dplyr::select(-.data$group)
+  #   }
+  # }
 
   data <- dplyr::left_join(data,q_tbl, by = "id")
 }
