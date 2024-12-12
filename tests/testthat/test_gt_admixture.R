@@ -80,6 +80,12 @@ test_that("run admixture as multiple runs", {
   expect_true(nrow(augment_q)==nrow(anole_gt))
   # TODO should we try to check that the data are in the same order as the q matrix?
 
+  # tidy matrix with grouped and ungrouped data
+  q_tidy_group <- tidy(get_q_matrix(anole_adm_cv, k=3, run=1), anole_gt)
+  expect_true("group" %in% colnames(q_tidy_group))
+  q_tidy_ind <- tidy(get_q_matrix(anole_adm_cv, k=3, run=1), anole_gt %>% dplyr::ungroup())
+  expect_false("group" %in% colnames(q_tidy_ind))
+
   # reorder errors
   # wrong object
   expect_error(gt_admix_reorder_q(anole_gt),
