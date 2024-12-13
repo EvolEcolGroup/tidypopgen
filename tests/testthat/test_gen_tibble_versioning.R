@@ -16,8 +16,19 @@ test_that("versioning updates correctly through gt_order_loci",{
 
   # get the gt filenames
   files <-  gt_get_file_names(test_gt)
+
+  # do the files exist?
+  expect_true(file.exists(files[1]))
+  expect_true(file.exists(files[2]))
+
   # remove extension
   file <- gsub(".bk","",files[2])
+
+  # does the directory still exist?
+  print(dirname(file))
+  tempfile_dir <- dirname(file)
+  expect_true(dir.exists(tempfile_dir))
+
   # create gt using the same backingfile name
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
                         indiv_meta = test_indiv_meta, quiet = TRUE,
@@ -55,12 +66,19 @@ test_that("versioning if .bk already exists",{
 
   # get the gt filenames
   files <-  gt_get_file_names(test_gt)
+
+  # do the files exist?
+  expect_true(file.exists(files[1]))
+  expect_true(file.exists(files[2]))
+
   # remove the .rds
   expect_true(file.remove(files[1]))
 
+  # remove extension
   file <- gsub(".bk","",files[2])
 
-  # check the directory
+  # does the directory still exist?
+  print(dirname(file))
   tempfile_dir <- dirname(file)
   expect_true(dir.exists(tempfile_dir))
 
