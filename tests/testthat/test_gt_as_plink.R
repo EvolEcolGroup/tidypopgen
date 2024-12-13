@@ -137,3 +137,35 @@ test_that("gt_as_plink can use chr_int",{
   expect_equal(result, show_loci(test_gt_chr_int)$chromosome)
 })
 
+test_that("family.ID equals sample.ID from vcf",{
+  # If the gen_tibble has been read in from vcf format, family.ID in the resulting
+  # plink files will be the same as sample.ID.
+
+  ####  With vcfr parser
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                             parser="vcfR")
+  # write vcf_path using gt_as_plink
+  pop_b_bed <- gt_as_plink(pop_b_vcf_gt, tempfile())
+  # substitute ".bed" for ".fam"
+  fam_path <- gsub(".bed",".fam",pop_b_bed)
+  # read in the .fam file
+  fam <- read.table(fam_path, header = FALSE, stringsAsFactors = FALSE)
+  # check that family.ID is the same as sample.ID
+  expect_true(all(fam$V1 == pop_b_vcf_gt$id))
+  expect_true(all(fam$V1 == fam$V2))
+
+  ####  With cpp parser
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
+                             parser="cpp")
+  # write vcf_path using gt_as_plink
+  pop_b_bed <- gt_as_plink(pop_b_vcf_gt, tempfile())
+  # substitute ".bed" for ".fam"
+  fam_path <- gsub(".bed",".fam",pop_b_bed)
+  # read in the .fam file
+  fam <- read.table(fam_path, header = FALSE, stringsAsFactors = FALSE)
+  # check that family.ID is the same as sample.ID
+  expect_true(all(fam$V1 == pop_b_vcf_gt$id))
+  expect_true(all(fam$V1 == fam$V2))
+})
