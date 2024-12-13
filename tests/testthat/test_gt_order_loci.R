@@ -173,7 +173,7 @@ test_that("chr_int from character chromosomes",{
                           c(2,1,0,0,0,0),
                           c(2,2,0,0,1,1))
   test_loci <- data.frame(name=paste0("rs",1:6),
-                          chromosome=as.character(paste0("chr",c(2,13,8,1,2,3))),
+                          chromosome=as.character(c(2,13,8,1,2,3)),
                           position=as.integer(c(23,3,5,65,343,46)),
                           genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
@@ -186,8 +186,8 @@ test_that("chr_int from character chromosomes",{
 
   # use gt_order_loci to reorder
   test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
-  expect_equal(show_loci(test_gt)$chr_int, c(1,13,2,2,3,8))
-  expect_equal(show_loci(test_gt)$chromosome, c("chr1","chr2","chr2","chr3","chr8","chr13"))
+  expect_equal(show_loci(test_gt)$chr_int, c(1,2,2,3,8,13))
+  expect_equal(show_loci(test_gt)$chromosome, c("1","2","2","3","8","13"))
 })
 
 
