@@ -166,6 +166,34 @@ test_that("gt_order_loci use_current_table = TRUE",{
   expect_error(gt_order_loci(test_gt, use_current_table = TRUE, quiet = TRUE),"Your loci are not sorted within chromosomes")
 })
 
+test_that("gt_order_loci catches physical positions out of sync",{
+
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                          position=as.integer(c(3,5,65,343,27,83)),
+                          genetic_dist = as.double(c(0.3,0.7,0,0.2,0.0,0.3)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+
+  path <- tempfile()
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = path)
+
+  expect_true(is_loci_table_ordered(test_gt))
+  expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
+  # now order it
+  ordered_test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
+  # now we pass the test as we set genetic distances to zero
+  expect_true(is_loci_table_ordered(ordered_test_gt, ignore_genetic_dist = FALSE))
+  # check that genetic_dist is all zeroes
+  expect_equal(show_loci(ordered_test_gt)$genetic_dist, rep(0,6))
+})
+
+
 test_that("chr_int from character chromosomes",{
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                  population = c("pop1","pop1","pop2"))

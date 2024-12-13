@@ -4,7 +4,13 @@
 \alias{gt_order_loci}
 \title{Order the loci table of a gen_tibble}
 \usage{
-gt_order_loci(.x, use_current_table = FALSE, quiet = FALSE, ...)
+gt_order_loci(
+  .x,
+  use_current_table = FALSE,
+  ignore_genetic_dist = TRUE,
+  quiet = FALSE,
+  ...
+)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}}}
@@ -13,6 +19,10 @@ gt_order_loci(.x, use_current_table = FALSE, quiet = FALSE, ...)
 reordered; if TRUE, then the current loci table, which might have been reordered
 manually, will be used, but only if the positions within each chromosome are
 sequential}
+
+\item{ignore_genetic_dist}{boolean to ignore the genetic distance when checking. Note
+that, if \code{gentic_dist} are being ignored and they are not sorted, the function will
+set them to zero to avoid problems with other software.}
 
 \item{quiet}{boolean to suppress information about the files}
 

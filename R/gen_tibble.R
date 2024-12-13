@@ -288,9 +288,6 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
     backingfile <- change_duplicated_file_name(backingfile)
   }
 
-  # use code for NA in FBM.256
-#  x[is.na(x)]<-3
-
   bigsnp_obj <- gt_write_bigsnp_from_dfs(genotypes = x,
                                           indiv_meta = indiv_meta,
                                           loci = loci,
@@ -383,7 +380,6 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
                 sex = 0,
                 affection = 0,
                 ploidy = ploidy)
-
   map <- tibble(chromosome = loci$chromosome,
                 marker.ID = loci$name,
                 genetic.dist = as.double(loci$genetic_dist), ## make sure that genetic.dist is double
