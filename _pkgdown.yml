@@ -13,7 +13,6 @@ reference:
         - gt_save
         - gt_load
         - gt_get_file_names
-        - gt_update_backingfile
   - title: "Show"
     desc: "Functions to view loci and genotype information stored in a `gen_tibble`."
     contents:
@@ -57,8 +56,6 @@ reference:
     desc: "Functions operating across loci."
     contents:
         - starts_with("loci_")
-        - gt_order_loci
-        - is_loci_table_ordered
   - title: "Individual"
     desc: "Functions operating across individuals."
     contents:
