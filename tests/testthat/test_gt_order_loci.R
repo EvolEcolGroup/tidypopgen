@@ -166,3 +166,59 @@ test_that("gt_order_loci use_current_table = TRUE",{
   expect_error(gt_order_loci(test_gt, use_current_table = TRUE, quiet = TRUE),"Your loci are not sorted within chromosomes")
 })
 
+test_that("chr_int from character chromosomes",{
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(paste0("chr",c(2,13,8,1,2,3))),
+                          position=as.integer(c(23,3,5,65,343,46)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+
+  # check chr_int makes sense
+  expect_equal(show_loci(test_gt)$chr_int, c(2,13,8,1,2,3))
+
+  # use gt_order_loci to reorder
+  test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
+  expect_equal(show_loci(test_gt)$chr_int, c(1,13,2,2,3,8))
+  expect_equal(show_loci(test_gt)$chromosome, c("chr1","chr2","chr2","chr3","chr8","chr13"))
+})
+
+
+test_that("chr_int from factor chromosomes",{
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.factor(c(2,13,8,1,2,3)),
+                          position=as.integer(c(23,3,5,65,343,46)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+
+  # check chr_int makes sense
+  expect_equal(show_loci(test_gt)$chr_int, c(2,13,8,1,2,3))
+
+  # use gt_order_loci to reorder
+  test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
+  expect_equal(show_loci(test_gt)$chr_int, c(1,2,2,3,8,13))
+  expect_equal(show_loci(test_gt)$chromosome, c(1,2,2,3,8,13))
+})
+
+
+
+
+
+
+
+
