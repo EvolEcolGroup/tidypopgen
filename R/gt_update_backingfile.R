@@ -14,7 +14,7 @@
 #' @returns a [`gen_tibble`] with a backing file (i.e. a new File Backed Matrix)
 #' @export
 
-gt_update_backing_file <- function (.x, backingfile = NULL, chunk_size = NULL,
+gt_update_backingfile <- function (.x, backingfile = NULL, chunk_size = NULL,
                                     quiet = FALSE){
   # if the backingfile is null, create a name based on the current backing file
   if (is.null(backingfile)){

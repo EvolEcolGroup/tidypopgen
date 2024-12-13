@@ -89,35 +89,51 @@ test_that("test for overwriting files",{
 
 })
 
-test_that("family.ID equals sample.ID from vcf",{
-  # If the gen_tibble has been read in from vcf format, family.ID in the resulting
-  # plink files will be the same as sample.ID.
+test_that("gt_as_plink uses loci and indiv information from the gen_tibble",{
 
-  ####  With vcfr parser
-  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
-  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
-                             parser="vcfR")
-  # write vcf_path using gt_as_plink
-  pop_b_bed <- gt_as_plink(pop_b_vcf_gt, tempfile())
-  # substitute ".bed" for ".fam"
-  fam_path <- gsub(".bed",".fam",pop_b_bed)
-  # read in the .fam file
-  fam <- read.table(fam_path, header = FALSE, stringsAsFactors = FALSE)
-  # check that family.ID is the same as sample.ID
-  expect_true(all(fam$V1 == pop_b_vcf_gt$id))
-  expect_true(all(fam$V1 == fam$V2))
+  test_gt$population <- c("population1","population1","population2")
+  test_gt$id <- c("indiv1","indiv2","indiv3")
 
-  ####  With cpp parser
-  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
-  pop_b_vcf_gt <- gen_tibble(vcf_path, quiet=TRUE,backingfile = tempfile(),
-                             parser="cpp")
-  # write vcf_path using gt_as_plink
-  pop_b_bed <- gt_as_plink(pop_b_vcf_gt, tempfile())
-  # substitute ".bed" for ".fam"
-  fam_path <- gsub(".bed",".fam",pop_b_bed)
-  # read in the .fam file
-  fam <- read.table(fam_path, header = FALSE, stringsAsFactors = FALSE)
-  # check that family.ID is the same as sample.ID
-  expect_true(all(fam$V1 == pop_b_vcf_gt$id))
-  expect_true(all(fam$V1 == fam$V2))
+  loci <- show_loci(test_gt)
+  loci$name <- paste0("rs_id",1:6)
+  show_loci(test_gt) <- loci
+
+  # save using gt_as_plink
+  bed_path <- gt_as_plink(test_gt, file = paste0(tempfile(),".bed"))
+
+  # read the bed file
+  test_gt2 <- gen_tibble(bed_path, quiet=TRUE)
+
+  expect_equal(show_loci(test_gt),show_loci(test_gt2))
+  expect_equal(test_gt$id, test_gt2$id)
+
+  # now check the same with a grouped gen_tibble
+  test_gt_grouped <- test_gt %>% group_by(population)
+
+  # write the bed
+  bed_path2 <- gt_as_plink(test_gt_grouped, file = paste0(tempfile(),".bed"))
+
+  # read the bed
+  test_gt3 <- gen_tibble(bed_path2, quiet=TRUE)
+
+  expect_equal(show_loci(test_gt),show_loci(test_gt3))
+  expect_equal(test_gt$id, test_gt3$id)
+  expect_equal(test_gt$population, test_gt3$population)
+
 })
+
+test_that("gt_as_plink can use chr_int",{
+
+  # save using gt_as_plink with chromosomes_as_int TRUE
+  bed_path <- gt_as_plink(test_gt, file = paste0(tempfile(),".bed"), chromosomes_as_int = TRUE)
+
+  # read the bed file
+  test_gt_chr_int <- gen_tibble(bed_path, quiet=TRUE)
+
+  # take original bed, remove the chr and transform to an integer
+  result <- as.integer(sub("^chr", "", show_loci(test_gt)$chromosome))
+
+  # compare
+  expect_equal(result, show_loci(test_gt_chr_int)$chromosome)
+})
+

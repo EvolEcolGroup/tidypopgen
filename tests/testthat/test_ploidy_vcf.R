@@ -1,5 +1,5 @@
 test_that("import a vcf with multiple ploidy",{
-  vcf_path <- system.file("/extdata/ploidy_test.vcf.gz",
+  vcf_path <- system.file("/extdata/ploidy/ploidy_test.vcf.gz",
                           package = "tidypopgen")
   test_gt <- gen_tibble(vcf_path, backingfile = tempfile(), quiet = TRUE)
   # it's mixed ploidy

@@ -21,9 +21,9 @@ a \code{ggplot2} object
 \description{
 For \code{gt_pcadapt}, the following types of plots are available:
 \itemize{
-\item \code{qq}: a qunatile-quantile plot of the p-values from pcadapt
+\item \code{qq}: a qunatile-quantile plot of the p-values from \code{pcadapt}
 (wrapping \code{\link[bigsnpr:snp_qq]{bigsnpr::snp_qq()}})
-\item \code{manhattan} a manhattan plot of the p-values from pcadapt
+\item \code{manhattan} a manhattan plot of the p-values from \code{pcadapt}
 (wrapping \code{\link[bigsnpr:snp_manhattan]{bigsnpr::snp_manhattan()}})
 }
 }

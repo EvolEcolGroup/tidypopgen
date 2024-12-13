@@ -415,7 +415,7 @@ for(x in k_values){
 And read them back into a `q_matrix_list`:
 
 ```{r}
-q_list <- q_matrix(dir)
+q_list <- read_q_files(dir)
 summary(q_list)
 ```
 

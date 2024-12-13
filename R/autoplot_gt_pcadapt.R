@@ -1,9 +1,9 @@
 #' Autoplots for `gt_pcadapt` objects
 #'
 #' For `gt_pcadapt`, the following types of plots are available:
-#' - `qq`: a qunatile-quantile plot of the p-values from pcadapt
+#' - `qq`: a qunatile-quantile plot of the p-values from `pcadapt`
 #' (wrapping [bigsnpr::snp_qq()])
-#' - `manhattan` a manhattan plot of the p-values from pcadapt
+#' - `manhattan` a manhattan plot of the p-values from `pcadapt`
 #' (wrapping [bigsnpr::snp_manhattan()])
 #'
 #' `autoplot` produces simple plots to quickly inspect an object. They are

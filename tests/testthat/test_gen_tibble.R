@@ -499,8 +499,9 @@ test_that("versioning if .bk already exists",{
   files <-  gt_get_file_names(test_gt)
   # remove the .rds
   expect_true(file.remove(files[1]))
-  # remove extension
+
   file <- gsub(".bk","",files[2])
+
   # create gt using the same backingfile name
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
                         indiv_meta = test_indiv_meta, quiet = TRUE,
