@@ -563,6 +563,8 @@ cast_chromosome_to_int <- function(chromosome){
   }
   # if chromosome is a character, then cast it to integer
   if (is.character(chromosome)){
+    # attempt to strip chr from the chromosome
+    chromosome <- gsub("^(chromosome_|chr_|chromosome|chr)", "", chromosome, ignore.case = TRUE)
     chromosome <- tryCatch(as.integer(chromosome), warning = function(e) {as.integer(as.factor(chromosome))})
   }
   if (is.numeric(chromosome)){
