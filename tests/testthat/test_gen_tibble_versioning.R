@@ -22,6 +22,10 @@ test_that("versioning if .bk already exists",{
 
   file <- gsub(".bk","",files[2])
 
+  # check the directory
+  tempfile_dir <- dirname(file)
+  expect_true(dir.exists(tempfile_dir))
+
   # create gt using the same backingfile name
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
                         indiv_meta = test_indiv_meta, quiet = TRUE,
