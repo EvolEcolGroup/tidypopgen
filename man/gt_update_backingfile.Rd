@@ -4,7 +4,13 @@
 \alias{gt_update_backingfile}
 \title{Update the backing matrix}
 \usage{
-gt_update_backingfile(.x, backingfile = NULL, chunk_size = NULL, quiet = FALSE)
+gt_update_backingfile(
+  .x,
+  backingfile = NULL,
+  chunk_size = NULL,
+  ignore_genetic_dist = TRUE,
+  quiet = FALSE
+)
 }
 \arguments{
 \item{.x}{a \code{gen_tibble} object}
@@ -15,6 +21,10 @@ and .RDS automatically). If left to NULL (the default), the file name
 will be based on the name f the current backing file.}
 
 \item{chunk_size}{the number of loci to process at once}
+
+\item{ignore_genetic_dist}{boolean to ignore the genetic distance when checking. Note
+that, if \code{gentic_dist} are being ignored and they are not sorted, the function will
+set them to zero to avoid problems with other software.}
 
 \item{quiet}{boolean to suppress information about the files}
 }

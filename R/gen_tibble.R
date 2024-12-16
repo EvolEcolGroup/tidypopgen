@@ -288,9 +288,6 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
     backingfile <- change_duplicated_file_name(backingfile)
   }
 
-  # use code for NA in FBM.256
-#  x[is.na(x)]<-3
-
   bigsnp_obj <- gt_write_bigsnp_from_dfs(genotypes = x,
                                           indiv_meta = indiv_meta,
                                           loci = loci,
@@ -383,7 +380,6 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
                 sex = 0,
                 affection = 0,
                 ploidy = ploidy)
-
   map <- tibble(chromosome = loci$chromosome,
                 marker.ID = loci$name,
                 genetic.dist = as.double(loci$genetic_dist), ## make sure that genetic.dist is double
@@ -519,54 +515,38 @@ change_duplicated_file_name <- function(file){
   bk <- paste0(file, ".bk")
   rds <- paste0(file, ".rds")
 
-  if(file.exists(bk) && !file.exists(rds)){
-
+  if(file.exists(bk) | file.exists(rds)){
     version <- 2
+    # extract the base name and version number
+    base_name_pattern <- "^(.*)_v(\\d+)$"
+    # check for any matches
+    matches <- regmatches(basename(file), regexec(base_name_pattern, basename(file)))
 
-    base_name <- basename(file)
-
-    version_pattern <- paste0(base_name, "_v(\\d+)\\.bk$")
-
-    # read existing files to check for existing versions
-  existing_files <- list.files(dirname(bk), pattern = paste0("^", base_name, "_v\\d+\\.bk$"))
-
-
-    if (length(existing_files) > 0) {
-      versions <- sub(version_pattern, "\\1", existing_files)
-      versions <- as.numeric(versions)
-      if (!any(is.na(versions))) {
-        version <- max(versions) + 1
-      }
+    if (length(matches[[1]]) > 0) {
+      # Extract base name without version and current version number
+      base_name <- matches[[1]][2] # Part before "_v<number>"
+      current_version <- as.numeric(matches[[1]][3]) # extract current version number
+    } else {
+      base_name <- basename(file) # Use the full name if there's no "_v" suffix
+      current_version <- 1
     }
 
-    new_file <- paste0(file,"_v",version)
-
-    return(new_file)
-  } else if (file.exists(bk) && file.exists(rds)){
-
-    version <- 2
-
-    base_name <- basename(file)
-
     version_pattern <- paste0(base_name, "_v(\\d+)\\.bk$")
-
-    # read existing files to check for existing versions
+    # read files to check for existing versions
     existing_files <- list.files(dirname(bk), pattern = paste0("^", base_name, "_v\\d+\\.bk$"))
 
-
     if (length(existing_files) > 0) {
       versions <- sub(version_pattern, "\\1", existing_files)
       versions <- as.numeric(versions)
       if (!any(is.na(versions))) {
-        version <- max(versions) + 1
+        version <- max(versions) + 1 # add 1 to the version number
       }
     }
-
-    new_file <- paste0(file,"_v",version)
+    # create new file path
+    new_file <- paste0(dirname(file), "/", base_name, "_v", version)
 
     return(new_file)
   }
-
   return(file)
 
 }
@@ -579,6 +559,8 @@ cast_chromosome_to_int <- function(chromosome){
   }
   # if chromosome is a character, then cast it to integer
   if (is.character(chromosome)){
+    # attempt to strip chr from the chromosome
+    chromosome <- gsub("^(chromosome_|chr_|chromosome|chr)", "", chromosome, ignore.case = TRUE)
     chromosome <- tryCatch(as.integer(chromosome), warning = function(e) {as.integer(as.factor(chromosome))})
   }
   if (is.numeric(chromosome)){

@@ -6,11 +6,26 @@
 \alias{is_loci_table_ordered.vctrs_bigSNP}
 \title{Test if the loci table is ordered}
 \usage{
-is_loci_table_ordered(.x, error_on_false = FALSE, ...)
+is_loci_table_ordered(
+  .x,
+  error_on_false = FALSE,
+  ignore_genetic_dist = TRUE,
+  ...
+)
 
-\method{is_loci_table_ordered}{tbl_df}(.x, error_on_false = FALSE, ...)
+\method{is_loci_table_ordered}{tbl_df}(
+  .x,
+  error_on_false = FALSE,
+  ignore_genetic_dist = TRUE,
+  ...
+)
 
-\method{is_loci_table_ordered}{vctrs_bigSNP}(.x, error_on_false = FALSE, ...)
+\method{is_loci_table_ordered}{vctrs_bigSNP}(
+  .x,
+  error_on_false = FALSE,
+  ignore_genetic_dist = TRUE,
+  ...
+)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
@@ -19,6 +34,8 @@ or a \code{\link{gen_tibble}}.}
 
 \item{error_on_false}{logical, if \code{TRUE} an error is thrown if the loci
 are not ordered.}
+
+\item{ignore_genetic_dist}{logical, if \code{TRUE} the physical position is not checked.}
 
 \item{...}{other arguments passed to specific methods.}
 }
