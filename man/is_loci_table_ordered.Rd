@@ -35,9 +35,9 @@ or a \code{\link{gen_tibble}}.}
 \item{error_on_false}{logical, if \code{TRUE} an error is thrown if the loci
 are not ordered.}
 
-\item{...}{other arguments passed to specific methods.}
+\item{ignore_genetic_dist}{logical, if \code{TRUE} the physical position is not checked.}
 
-\item{ignore_physical}{logical, if \code{TRUE} the physical position is not checked.}
+\item{...}{other arguments passed to specific methods.}
 }
 \value{
 a logical vector defining which loci are transversions

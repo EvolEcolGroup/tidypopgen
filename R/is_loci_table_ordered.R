@@ -8,7 +8,7 @@
 #' or a [`gen_tibble`].
 #' @param error_on_false logical, if `TRUE` an error is thrown if the loci
 #' are not ordered.
-#' @param ignore_physical logical, if `TRUE` the physical position is not checked.
+#' @param ignore_genetic_dist logical, if `TRUE` the physical position is not checked.
 #' @param ... other arguments passed to specific methods.
 #' @returns a logical vector defining which loci are transversions
 #' @rdname is_loci_table_ordered
