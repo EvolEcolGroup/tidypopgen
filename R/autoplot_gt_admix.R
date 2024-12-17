@@ -13,7 +13,8 @@
 #' @param k the value of `k` to plot (for `barplot` type only)
 #' param repeat the repeat to plot (for `barplot` type only)
 #' @param run the run to plot (for `barplot` type only)
-#' @param ... additional arguments to be passed to autoplot method for q_matrices [autoplot_q_matrix()].
+#' @param ... additional arguments to be passed to autoplot method
+#' for q_matrices [autoplot_q_matrix()], used when type is `barplot`.
 #' @returns a `ggplot2` object
 #' @name autoplot_gt_admix
 #' @export

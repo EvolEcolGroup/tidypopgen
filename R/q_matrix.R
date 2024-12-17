@@ -248,6 +248,16 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #' generate the Q matrix
 #' @param annotate_group Boolean determining whether to annotate the plot with the
 #' group information
+#' @param arrange_by_group Boolean determining whether to arrange the individuals
+#' by group. If the grouping variable in the `gen_tibble` or the metadata of the
+#' `gt_admixt` object is a factor, the data will be ordered
+#' by the levels of the factor; else it will be ordered alphabetically.
+#' @param arrange_by_indiv Boolean determining whether to arrange the individuals
+#' by their individual id (if arrange_by_group is TRUE, they will be arranged by group first
+#' and then by individual id, i.e. within each group). If `id` in the `get_tibble` or
+#' the metadata of the `gt_admix` object
+#' is a factor, it will be ordered by the levels of the factor; else it will be ordered
+#' alphabetically.
 #' @param reorder_within_groups Boolean determining whether to reorder the individuals within each group based
 #' on their ancestry proportion (note that this is not advised if you are making multiple plots, as you would get
 #' a different order for each plot!). If TRUE, `annotate_group` must also be TRUE.
@@ -255,7 +265,9 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #' @returns a barplot of individuals, coloured by ancestry proportion
 #' @name autoplot_q_matrix
 #' @export
-autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, reorder_within_groups = FALSE, ...){
+autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE,
+                              arrange_by_group = TRUE, arrange_by_indiv = TRUE,
+                              reorder_within_groups = FALSE, ...){
 
   rlang::check_dots_empty()
   # test that if reorder_within_groups is TRUE, annotate_group should also be TRUE
@@ -283,8 +295,16 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE, reorde
   # if we have a grouping variable and we plan to use it, then reorder by it
   q_tbl$id <- 1:nrow(q_tbl)
   if (("group" %in% names(q_tbl)) && annotate_group){
-    q_tbl <- q_tbl %>%
-      dplyr::arrange(.data$group, .data$id)
+    if (arrange_by_group && arrange_by_indiv){
+      q_tbl <- q_tbl %>%
+        dplyr::arrange(.data$group, .data$id)
+    } else if (arrange_by_group){
+      q_tbl <- q_tbl %>%
+        dplyr::arrange(.data$group)
+    } else if (arrange_by_indiv){
+      q_tbl <- q_tbl %>%
+        dplyr::arrange(.data$group)
+    }
   }
   # now reset the id to the new order
   q_tbl$id <- 1:nrow(q_tbl)
