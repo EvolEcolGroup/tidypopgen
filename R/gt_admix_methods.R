@@ -113,9 +113,10 @@ gt_admix_reorder_q <- function(x, group = NULL) {
       stop("You must provide a group variable if there is no grouping information in the gt_admix object")
     }
   }
+
   group_meta<- tibble(id = seq(1, length(x$group)), group = x$group)
   # sort group meta by group
-  group_meta <- group_meta[order(group_meta$group),]
+  group_meta <- group_meta %>% arrange(.data$group)
   # reorder the q matrices
   x$Q <- lapply(x$Q, function(y) y[group_meta$id,])
   # if we have an id element, reorder it

@@ -10,7 +10,7 @@
 
 annotate_group_info <- function(q_tbl){
   group <- q_tbl %>% dplyr::distinct(id,group) %>% dplyr::pull(group)
-  if (length(rle(group)$values)!=length(unique(group))) {
+  if (length(rle(as.character(group))$values)!=length(unique(group))) {
     stop("values in 'group' are not ordered (they should be in consecutive blocks, one per group")
   }
 # is there a way to get the aesthetic from the plot, so that we can check that
