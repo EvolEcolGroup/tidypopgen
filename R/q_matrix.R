@@ -175,7 +175,7 @@ tidy.q_matrix <- function(x, data, ...){
     for (i in seq_len(nrow(groupdf))) {
       group_rows <- groupdf$.rows[[i]]
       group_name <- groupdf[[1]][i]
-      colu[group_rows] <- group_name
+      colu[group_rows] <- as.character(group_name)
     }
 
     q_tbl <- q_tbl  %>%
