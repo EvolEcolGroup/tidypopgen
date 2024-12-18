@@ -331,11 +331,12 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE,
       dplyr::group_by(.data$group) %>%
       dplyr::arrange(desc(.data$dominant_q), .by_group = TRUE)
 
-    levels_q <- unique(q_tbl$id)
+  }
 
+    levels_q <- unique(q_tbl$id)
     q_tbl <- q_tbl %>%
       dplyr::mutate(id = factor(.data$id, levels = levels_q))
-  }
+
 
   plt <- ggplot2::ggplot(q_tbl,
                          ggplot2::aes(x = .data$id,
