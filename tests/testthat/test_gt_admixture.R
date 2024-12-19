@@ -141,9 +141,6 @@ test_that("assigning factor levels reorders populations in autoplot",{
   expect_true(plt2$data$group[1]=="AF")
   # group of the last individual is therefore "Wam"
   expect_true(plt2$data$group[138]=="Wam")
-  # BUT the plt2 does not change!!!
-
-
 })
 
 test_that("rearranging gt_admix",{
