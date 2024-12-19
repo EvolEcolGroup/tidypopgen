@@ -114,7 +114,6 @@ test_that("assigning factor levels reorders populations in autoplot",{
     mutate(population = factor(population, levels = c("AF", "Wam", "Eam")))
   anole_gt <- anole_gt %>% group_by(population)
   anole_adm <- gt_admixture(anole_gt, k = 3, crossval = FALSE, n_cores = 1, seed = 123, conda_env = "none")
-  anole_adm <- gt_admix_reorder_q(anole_adm)
   plt <- autoplot(anole_adm, type = "barplot", k = 3, run = 1,
                   annotate_group = TRUE, arrange_by_group = TRUE,
                   arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
@@ -131,7 +130,6 @@ test_that("assigning factor levels reorders populations in autoplot",{
     mutate(population = factor(population, levels = c("AF", "Eam", "Wam")))
   anole_gt <- anole_gt %>% group_by(population)
   anole_adm2 <- gt_admixture(anole_gt, k = 3, crossval = FALSE, n_cores = 1, seed = 123, conda_env = "none")
-  anole_adm2 <- gt_admix_reorder_q(anole_adm2)
   plt2 <- autoplot(anole_adm2, type = "barplot", k = 3, run = 1,
                    annotate_group = TRUE, arrange_by_group = TRUE,
                    arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
