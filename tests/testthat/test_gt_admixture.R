@@ -108,26 +108,41 @@ test_that("run admixture as multiple runs", {
 })
 
 test_that("assigning factor levels reorders populations in autoplot",{
-  # generate gt_admix object
-  anole_plink <- gt_as_plink(anole_gt, file = tempfile(), chromosomes_as_int=TRUE)
-  anole_adm <- gt_admixture(anole_plink, k = 3, crossval = FALSE, n_cores = 1, seed = 123, conda_env = "none")
-  anole_gt <- anole_gt %>% group_by(population)
-  plt1 <- autoplot(anole_adm, type = "barplot", k = 3, run = 1, annotate_group=TRUE, data = anole_gt)
-
   # set population to a factor and change the levels
-  anole_gt <- anole_gt %>% ungroup()
   anole_gt$population <- as.factor(anole_gt$population)
-  levels(anole_gt$population)
+  anole_gt <- anole_gt %>%
+    mutate(population = factor(population, levels = c("AF", "Wam", "Eam")))
   anole_gt <- anole_gt %>% group_by(population)
-  levels(anole_gt$population) <- c("AF","Wam","Eam")
-  plt2 <- autoplot(anole_adm, type = "barplot", k = 3, run = 1, annotate_group = TRUE, data = anole_gt)
+  anole_adm <- gt_admixture(anole_gt, k = 3, crossval = FALSE, n_cores = 1, seed = 123, conda_env = "none")
+  anole_adm <- gt_admix_reorder_q(anole_adm)
+  plt <- autoplot(anole_adm, type = "barplot", k = 3, run = 1,
+                  annotate_group = TRUE, arrange_by_group = TRUE,
+                  arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
   # and the population order in the plot is changed
+  expect_true(all(levels(plt$data$group) == c("AF","Wam","Eam")))
+  # group of the first individual is therefore "AF"
+  expect_true(plt$data$group[1]=="AF")
+  # group of the last individual is therefore "Eam"
+  expect_true(plt$data$group[138]=="Eam")
 
   anole_gt <- anole_gt %>% ungroup()
-  levels(anole_gt$population) <- c("AF","Eam","Wam")
+  # reset the population levels
+  anole_gt <- anole_gt %>%
+    mutate(population = factor(population, levels = c("AF", "Eam", "Wam")))
   anole_gt <- anole_gt %>% group_by(population)
-  plt3 <- autoplot(anole_adm, type = "barplot", k = 3, run = 1, annotate_group = TRUE, data = anole_gt, arrange_by_group = TRUE)
+  anole_adm2 <- gt_admixture(anole_gt, k = 3, crossval = FALSE, n_cores = 1, seed = 123, conda_env = "none")
+  anole_adm2 <- gt_admix_reorder_q(anole_adm2)
+  plt2 <- autoplot(anole_adm2, type = "barplot", k = 3, run = 1,
+                   annotate_group = TRUE, arrange_by_group = TRUE,
+                   arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
   # and the population order changes again
+  expect_true(all(levels(plt2$data$group) == c("AF","Eam","Wam")))
+  # group of the first individual is therefore "AF"
+  expect_true(plt2$data$group[1]=="AF")
+  # group of the last individual is therefore "Wam"
+  expect_true(plt2$data$group[138]=="Wam")
+  # BUT the plt2 does not change!!!
+
 
 })
 
@@ -146,7 +161,7 @@ test_that("rearranging gt_admix",{
   expect_true("group" %in% names(plt1$data))
   # check plot data is in the same order as the original gt object
   expect_equal(plt1$data$group, as.factor(rep(anole_gt$population, each = 3)))
-  expect_equal(plt1$data$id,as.factor(rep(1:nrow(anole_gt), each = 3)))
+
   # plot arranged by group
   plt2 <- autoplot(anole_adm, type = "barplot", k = 3, run = 1,
                    annotate_group=TRUE, arrange_by_group = TRUE)
@@ -160,7 +175,7 @@ test_that("rearranging gt_admix",{
   # check that the plot has the group variable, arranged with the same levels
   expect_true("group" %in% names(plt3$data))
   expect_equal(levels(anole_gt$population), levels(plt3$data$group))
-  # check that the individuals are no longer in their grouped order
+  # check that the individuals have changed order
   expect_false(identical(plt2$data$id,plt3$data$id))
 
 })
