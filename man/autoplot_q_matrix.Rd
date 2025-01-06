@@ -46,5 +46,8 @@ a different order for each plot!). If TRUE, \code{annotate_group} must also be T
 a barplot of individuals, coloured by ancestry proportion
 }
 \description{
-Autoplots for \code{q_matrix} objects
+This autoplot will automatically rearrange individuals according to their id and
+any grouping variables if an associated 'data' gen_tibble is provided.
+To avoid any automatic re-sorting of individuals, set \code{arrange_by_group} and
+\code{arrange_by_indiv} to FALSE.
 }

@@ -8,6 +8,11 @@
 #' not customisable; we recommend that you use `ggplot2` to produce publication
 #' ready plots.
 #'
+#' This autoplot will automatically rearrange individuals according to
+#' their id and any grouping variables if an associated 'data' gen_tibble is provided.
+#' To avoid any automatic re-sorting of individuals, set `arrange_by_group` and
+#' `arrange_by_indiv` to FALSE. See `autoplot.q_matrix` for further details.
+#'
 #' @param object an object of class `gt_admixture`
 #' @param type the type of plot (one of "cv", and "boxplot")
 #' @param k the value of `k` to plot (for `barplot` type only)

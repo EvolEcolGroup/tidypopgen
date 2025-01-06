@@ -243,6 +243,11 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 
 #' Autoplots for `q_matrix` objects
 #'
+#' This autoplot will automatically rearrange individuals according to their id and
+#' any grouping variables if an associated 'data' gen_tibble is provided.
+#' To avoid any automatic re-sorting of individuals, set `arrange_by_group` and
+#' `arrange_by_indiv` to FALSE.
+#'
 #' @param object A Q matrix object (as returned by [q_matrix()]).
 #' @param data An associated tibble (e.g. a [`gen_tibble`]), with the individuals in the same order as the data used to
 #' generate the Q matrix

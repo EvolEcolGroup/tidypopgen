@@ -34,4 +34,9 @@ For \code{gt_admix}, the following types of plots are available:
 \code{autoplot} produces simple plots to quickly inspect an object. They are
 not customisable; we recommend that you use \code{ggplot2} to produce publication
 ready plots.
+
+This autoplot will automatically rearrange individuals according to
+their id and any grouping variables if an associated 'data' gen_tibble is provided.
+To avoid any automatic re-sorting of individuals, set \code{arrange_by_group} and
+\code{arrange_by_indiv} to FALSE. See \code{autoplot.q_matrix} for further details.
 }
