@@ -94,6 +94,8 @@ test_that("run admixture as multiple runs", {
   # tidy matrix with grouped and ungrouped data
   q_tidy_group <- tidy(get_q_matrix(anole_adm_cv, k=3, run=1), anole_gt)
   expect_true("group" %in% colnames(q_tidy_group))
+  # check that data are in tidy format, each id appears k times
+  expect_true(all(table(q_tidy_group$id)==3))
   #q_tidy_ind <- tidy(get_q_matrix(anole_adm_cv, k=3, run=1), anole_gt %>% dplyr::ungroup())
   #expect_false("group" %in% colnames(q_tidy_ind))
 
