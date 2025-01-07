@@ -33,7 +33,7 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
 
   # add seed check again!!!
   if (length(seed)!= n_runs){
-    stop("'seeds' should be a vector of length 'n_runs'")
+    stop("'seed' should be a vector of length 'n_runs'")
   }
 
   # if entropy = TRUE check percentage is given
@@ -53,10 +53,16 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
     out_file <- sub(".geno","", input_file)
     file_name <- sub(".geno","", basename(input_file))
   } else if(inherits(x, "character")){
+    if (!file.exists(x)) {
+      stop("The file ", x, " does not exist")
+    }
+    # check whether the file ends in .geno
+    if (!grepl(".geno$", x)) {
+      stop("The input file must be a .geno file")
+    }
     input_file <- x
     out_file <- sub(".geno","", input_file)
     file_name <- sub(".geno","", basename(input_file))
-    # add an option for not ending in .geno
   } else if(!inherits(x, "character")){
     stop("x must be a gen_tibble or a character giving the path to the input geno file")
   }
@@ -76,7 +82,7 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
 
   # if seed is not given
   if (is.null(seed)) {
-    snmf_res <- LEA::snmf(input.file = input_file,
+    snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
                           K = k,
                           project = project, #
                           repetitions = n_runs,
@@ -86,9 +92,9 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
                           percentage = percentage, #
                           I = I, #
                           iterations = iterations, #
-                          ploidy = ploidy)
+                          ploidy = ploidy))
   } else {
-    snmf_res <- LEA::snmf(input.file = input_file,
+    snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
                           K = k,
                           project = project, #
                           repetitions = n_runs,
@@ -99,7 +105,7 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
                           I = I, #
                           iterations = iterations, #
                           ploidy = ploidy, #
-                          seed = seed)
+                          seed = seed))
   }
 
   # loop over values of k and number of repeats
@@ -114,6 +120,9 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
       index <- index + 1
     }
   }
+
+  # add log
+  adm_list$log <- snmf_res
 
   # add metadata if x is a gen_tibble
   if (inherits(x, "gen_tbl")) {
