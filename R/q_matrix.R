@@ -152,6 +152,7 @@ get_p_matrix <- function(x, ..., k, run) {
 }
 
 
+
 #' Tidy a Q matrix
 #'
 #' Takes a `q_matrix` object, which is a matrix, and returns a tidied tibble.
@@ -160,40 +161,55 @@ get_p_matrix <- function(x, ..., k, run) {
 #' @param data An associated tibble (e.g. a [`gen_tibble`]), with the individuals in the same order as the data used to
 #' generate the Q matrix
 #' @param ... not currently used
-#' @return A tidied tibble
+#' @return A tidied tibble containing columns:
+#'   \item{`row`}{ID of the original observation (i.e. rowname from original
+#'     data).}
+#'   \item{`Q`}{Integer indicating a Q component.}
+#'   \item{`value`}{The proportion for that particular Q value.}
+#'
 #' @export
+
 tidy.q_matrix <- function(x, data, ...){
   rlang::check_dots_empty()
 
-  if(inherits(data,"grouped_df")){
-    q_tbl <- x %>%
-      tibble::as_tibble()
+  #convert to tibble
+  q_tbl <- x %>%
+    tibble::as_tibble()
 
+  # use attributes if supplied
+  if(!is.null(attr(x, "id")) && !is.null(attr(x, "group"))){
+    q_tbl$id <- attr(x,"id")
+    q_tbl$group <- attr(x,"group")
+    for (i in seq_len(ncol(q_tbl))) {
+      attr(q_tbl[[i]], "id") <- NULL
+      attr(q_tbl[[i]], "group") <- NULL
+      attr(q_tbl[[i]], "class") <- NULL
+    }
+
+    # otherwise use supplied gen_tibble
+  } else if(is.null(attr(x, "id")) && is.null(attr(x, "group")) && inherits(data,"grouped_df")){
     groupdf <- data %>% dplyr::group_data()
     colu <- seq(1,nrow(data))
-
     for (i in seq_len(nrow(groupdf))) {
       group_rows <- groupdf$.rows[[i]]
       group_name <- groupdf[[1]][i]
       colu[group_rows] <- as.character(group_name)
     }
-
     q_tbl <- q_tbl  %>%
       dplyr::mutate(id = data$id,
                     group = colu)
-    # } else if ("population" %in% names(data)){
-    #   q_tbl <- x %>%
-    #     tibble::as_tibble() %>%
-    #     dplyr::mutate(id = data$id,
-    #                   group = data$population)
   } else {
-    q_tbl <- x %>%
-      tibble::as_tibble() %>%
+    q_tbl <- q_tbl %>%
       dplyr::mutate(id = data$id)
   }
+
+  # pivot the resulting data
+  q_tbl <- q_tbl %>% tidyr::pivot_longer(cols = dplyr::starts_with(".Q"),
+                                         names_to = "q", values_to = "percentage") %>%
+    dplyr::mutate(percentage = as.numeric(.data$percentage))
+
   q_tbl
 }
-
 
 #' Augment data with information from a q_matrix object
 #'
@@ -229,15 +245,43 @@ augment.q_matrix <- function(x, data = NULL, ...) {
     }
   }
 
-  q_tbl <- tidy(x,data)
+  q_tbl <- x %>%
+    tibble::as_tibble()
 
-  # if ("population" %in% names(data)) {
-  #   if(all(data$population == q_tbl$group)){
-  #     q_tbl <- q_tbl %>% dplyr::select(-.data$group)
-  #   }
-  # }
+  if(!is.null(attr(x, "id")) && !is.null(attr(x, "group"))){
+    q_tbl$id <- attr(x,"id")
+    q_tbl$group <- attr(x,"group")
 
+    for (i in seq_len(ncol(q_tbl))) {
+      attr(q_tbl[[i]], "id") <- NULL
+      attr(q_tbl[[i]], "group") <- NULL
+      attr(q_tbl[[i]], "class") <- NULL
+    }
+
+  } else if(is.null(attr(x, "id")) && is.null(attr(x, "group")) && inherits(data,"grouped_df")){
+
+    groupdf <- data %>% dplyr::group_data()
+    colu <- seq(1,nrow(data))
+
+    for (i in seq_len(nrow(groupdf))) {
+      group_rows <- groupdf$.rows[[i]]
+      group_name <- groupdf[[1]][i]
+      colu[group_rows] <- as.character(group_name)
+    }
+
+    q_tbl <- q_tbl  %>%
+      dplyr::mutate(id = data$id,
+                    group = colu)
+
+  } else {
+    q_tbl <- q_tbl %>%
+      dplyr::mutate(id = data$id)
+  }
+  q_tbl
+
+  # and finally left join
   data <- dplyr::left_join(data,q_tbl, by = "id")
+  data
 }
 
 
@@ -295,7 +339,7 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE,
       q_tbl$group <- rep(attr(object, "group"), each=nrow(q_tbl)/length(attr(object, "group")))
     }
   } else { # if we have the info from the gen_tibble
-    q_tbl <- tidy(object, data)
+    q_tbl <- augment(object, data)
   }
   # if we have a grouping variable and we plan to use it, then reorder by it
   q_tbl$id <- 1:nrow(q_tbl)
@@ -321,7 +365,6 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE,
   if (("group" %in% names(q_tbl)) && reorder_within_groups){
     q_tbl <- q_tbl %>%
       dplyr::group_by(.data$group, .data$id) %>%
-      #dplyr::arrange(.data$group, .data$id) %>%
       dplyr::arrange(.data$group) %>% # only sort by group, so that we don't reorder individuals within groups
       dplyr::mutate(q = factor(.data$q, levels = .data$q[order(.data$percentage, decreasing = FALSE)]))
 

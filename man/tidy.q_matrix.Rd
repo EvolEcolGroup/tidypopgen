@@ -15,7 +15,11 @@ generate the Q matrix}
 \item{...}{not currently used}
 }
 \value{
-A tidied tibble
+A tidied tibble containing columns:
+\item{\code{row}}{ID of the original observation (i.e. rowname from original
+data).}
+\item{\code{Q}}{Integer indicating a Q component.}
+\item{\code{value}}{The proportion for that particular Q value.}
 }
 \description{
 Takes a \code{q_matrix} object, which is a matrix, and returns a tidied tibble.
