@@ -76,7 +76,8 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
     Q = list(),
     P = list(),
     log = list(),
-    loglik = numeric()
+    loglik = numeric(),
+    G = list()
   )
   class(adm_list) <- c("gt_admix","list")
 
@@ -137,6 +138,10 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
       adm_list$Q[[index]] <- q_matrix(utils::read.table(paste0(out_file,".snmf/K",this_k,
                                                                "/run",this_rep,"/",file_name,
                                                                "_r",this_rep,".",this_k,".Q"), header = FALSE))
+      adm_list$G[[index]] <- q_matrix(utils::read.table(paste0(out_file,".snmf/K",this_k,
+                                                               "/run",this_rep,"/",file_name,
+                                                               "_r",this_rep,".",this_k,".G"), header = FALSE))
+      # TODO add entropy to cv slot
       #if (entropy) {
         # extract value from line with cross-Entropy (number after :)
       #  adm_list$cv[index] <- as.numeric(strsplit(grep("cross-Entropy", snmf_res, value = TRUE),":")[[1]][2])
