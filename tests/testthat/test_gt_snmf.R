@@ -1,12 +1,78 @@
+# set the input file
 vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
                         package = "tidypopgen")
-anole_gt <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile())
-test_that("snmf clusters correctly",{
-  geno_file <- gt_as_geno_lea(anole_gt)
-  # silence verbose snmf function
-  sink(file=tempfile())
-  snmf_project <- LEA::snmf(geno_file, K = 3)
-  # end of sinking
-  sink()
-  expect_true(inherits(snmf_project,"snmfProject"))
+anole_gt <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
+                         package = "tidypopgen")
+pops <- readr::read_csv(pops_path, show_col_types = FALSE)
+anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
+anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
+
+library(LEA)
+
+test_that("gt_snmf error messages",{
+  # wrong file input
+  expect_error(gt_snmf(x = pops_path, project = "force", k = 1:10, entropy = TRUE,
+                       percentage = 0.5, n_runs = 1, seed = 1, alpha = 100), "The input file must be a .geno")
+  # file that doesn't exist
+  invalid_geno <- paste0(tempfile(),".geno")
+  expect_error(gt_snmf(x = invalid_geno, project = "force", k = 1:10, entropy = TRUE,
+                       percentage = 0.5, n_runs = 1, seed = 1, alpha = 100), "does not exist")
+  # random object
+  expect_error(gt_snmf(x = 1, project = "force", k = 1:10, entropy = TRUE,
+                       percentage = 0.5, n_runs = 1, seed = 1, alpha = 100), "x must be a gen_tibble or a character giving the path")
+  # percentage if entropy = TRUE
+  expect_error(gt_snmf(x = anole_gt, project = "force", k = 1:10, entropy = TRUE,
+                       n_runs = 1, seed = 1, alpha = 100), "percentage must be given")
+  # seed != n_runs
+  expect_error(gt_snmf(x = anole_gt, project = "force", k = 1:10, entropy = TRUE,
+                       percentage = 0.5, n_runs = 1, seed = c(1,2), alpha = 100), "'seed' should be a vector of length 'n_runs'")
 })
+
+test_that("gt_snmf from file and from gen_tibble are the same",{
+  # using.geno file
+  input_file <- gt_as_geno_lea(anole_gt)
+  anole_snmf_file <- gt_snmf(x = input_file,
+                        project = "force",
+                        k = 1:10,
+                        entropy = TRUE,
+                        percentage = 0.5,
+                        n_runs = 1,
+                        seed = 1,
+                        alpha = 100)
+  # using gen_tibble
+  anole_snmf_gt <- gt_snmf(x = anole_gt,
+                        project = "force",
+                        k = 1:10,
+                        entropy = TRUE,
+                        percentage = 0.5,
+                        n_runs = 1,
+                        seed = 1,
+                        alpha = 100)
+  # check that the results are the same
+  expect_equal(anole_snmf_file$Q, anole_snmf_gt$Q)
+})
+
+test_that("changing arguments is handled",{
+  # remove entropy
+  anole_snmf_gt <- gt_snmf(x = anole_gt,
+                           project = "force",
+                           k = 1:10,
+                           n_runs = 1,
+                           seed = 1,
+                           alpha = 100)
+  # remove seed
+  anole_snmf_gt <- gt_snmf(x = anole_gt,
+                           project = "force",
+                           k = 1:10,
+                           entropy = TRUE,
+                           percentage = 0.5,
+                           n_runs = 1,
+                           alpha = 100)
+  # remove both
+  anole_snmf_gt <- gt_snmf(x = anole_gt,
+                           project = "force",
+                           k = 1)
+
+})
+

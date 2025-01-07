@@ -28,11 +28,11 @@
 #' - `group` the group column of the input `gen_tibble` (if applicable)
 #' @export
 
-gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, entropy = TRUE,
+gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, entropy = FALSE,
                      percentage = NULL, I, iterations, ploidy = 2, seed = NULL){
 
   # add seed check again!!!
-  if (length(seed)!= n_runs){
+  if (!is.null(seed) && length(seed)!= n_runs){
     stop("'seed' should be a vector of length 'n_runs'")
   }
 
@@ -80,31 +80,51 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
   )
   class(adm_list) <- c("gt_admix","list")
 
-  # if seed is not given
-  if (is.null(seed)) {
+  if (is.null(seed) & entropy) {
     snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
                           K = k,
-                          project = project, #
+                          project = project,
                           repetitions = n_runs,
-                          alpha = alpha, #
-                          tolerance = tolerance, #
+                          alpha = alpha,
+                          tolerance = tolerance,
                           entropy = entropy,
-                          percentage = percentage, #
-                          I = I, #
-                          iterations = iterations, #
+                          percentage = percentage,
+                          I = I,
+                          iterations = iterations,
+                          ploidy = ploidy))
+  } else if(!entropy & !is.null(seed)){
+    snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
+                          K = k,
+                          project = project,
+                          repetitions = n_runs,
+                          alpha = alpha,
+                          tolerance = tolerance,
+                          I = I,
+                          iterations = iterations,
+                          ploidy = ploidy,
+                          seed = seed))
+  } else if (!entropy & is.null(seed)){
+    snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
+                          K = k,
+                          project = project,
+                          repetitions = n_runs,
+                          alpha = alpha,
+                          tolerance = tolerance,
+                          I = I,
+                          iterations = iterations,
                           ploidy = ploidy))
   } else {
     snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
                           K = k,
-                          project = project, #
+                          project = project,
                           repetitions = n_runs,
-                          alpha = alpha, #
-                          tolerance = tolerance, #
+                          alpha = alpha,
+                          tolerance = tolerance,
                           entropy = entropy,
-                          percentage = percentage, #
-                          I = I, #
-                          iterations = iterations, #
-                          ploidy = ploidy, #
+                          percentage = percentage,
+                          I = I,
+                          iterations = iterations,
+                          ploidy = ploidy,
                           seed = seed))
   }
 
@@ -117,7 +137,11 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
       adm_list$Q[[index]] <- q_matrix(utils::read.table(paste0(out_file,".snmf/K",this_k,
                                                                "/run",this_rep,"/",file_name,
                                                                "_r",this_rep,".",this_k,".Q"), header = FALSE))
-      index <- index + 1
+      #if (entropy) {
+        # extract value from line with cross-Entropy (number after :)
+      #  adm_list$cv[index] <- as.numeric(strsplit(grep("cross-Entropy", snmf_res, value = TRUE),":")[[1]][2])
+      #}
+     index <- index + 1
     }
   }
 

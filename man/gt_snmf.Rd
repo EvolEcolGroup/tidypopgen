@@ -11,7 +11,7 @@ gt_snmf(
   n_runs = 1,
   alpha,
   tolerance,
-  entropy = TRUE,
+  entropy = FALSE,
   percentage = NULL,
   I,
   iterations,
