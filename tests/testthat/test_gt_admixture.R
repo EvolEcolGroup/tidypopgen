@@ -11,6 +11,35 @@ pops <- readr::read_csv(pops_path, show_col_types = FALSE)
 anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
 anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
 
+test_that("gt_admixture error messages",{
+  # file that doesn't exist
+  invalid_bed <- paste0(tempfile(),".bed")
+  expect_error(gt_admixture(x = invalid_bed,k = 3, crossval = FALSE,
+                            n_cores = 1, seed = 123, conda_env = "none"), "does not exist")
+  # random object
+  tibble <- tibble::tibble(a = 1:10, b = letters[1:10])
+  expect_error(gt_admixture(x = tibble, k = 3, crossval = FALSE,
+                            n_cores = 1, seed = 123, conda_env = "none"), "x must be a gen_tibble or a character")
+  # exisitng bed file, but all genotypes missing for one individual
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(NA,NA,NA,NA,NA,NA),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                          position=as.integer(c(3,5,65,343,23,456)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  bed_file <- gt_as_plink(test_gt, file = tempfile(), chromosomes_as_int=TRUE)
+  # suppress the warning that admixture has status 255
+  # expect printing of error message
+  suppressWarnings(expect_error(gt_admixture(x = bed_file, k = 3, crossval = FALSE,
+               n_cores = 1, seed = 123, conda_env = "none"),"detected that all genotypes are missing for an individual"))
+})
+
 test_that("run admixture as single run", {
   # we create a plink file to test the function
   anole_plink <- gt_as_plink(anole_gt, file = tempfile(), chromosomes_as_int=TRUE)
