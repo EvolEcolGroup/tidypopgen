@@ -21,9 +21,6 @@ test_that("gt_snmf error messages",{
   # random object
   expect_error(gt_snmf(x = 1, project = "force", k = 1:10, entropy = TRUE,
                        percentage = 0.5, n_runs = 1, seed = 1, alpha = 100), "x must be a gen_tibble or a character giving the path")
-  # percentage if entropy = TRUE
-  expect_error(gt_snmf(x = anole_gt, project = "force", k = 1:10, entropy = TRUE,
-                       n_runs = 1, seed = 1, alpha = 100), "percentage must be given")
   # seed != n_runs
   expect_error(gt_snmf(x = anole_gt, project = "force", k = 1:10, entropy = TRUE,
                        percentage = 0.5, n_runs = 1, seed = c(1,2), alpha = 100), "'seed' should be a vector of length 'n_runs'")
@@ -53,6 +50,16 @@ test_that("gt_snmf from file and from gen_tibble are the same",{
   expect_equal(anole_snmf_file$Q, anole_snmf_gt$Q)
   expect_equal(anole_snmf_file$G, anole_snmf_gt$G)
   expect_equal(anole_snmf_file$cv, anole_snmf_gt$cv)
+
+  # check against snmf
+  anole_snmf_lea <- LEA::snmf(input.file = input_file,
+                             project = "force",
+                             K = 1:10,
+                             entropy = TRUE,
+                             percentage = 0.5,
+                             repetitions = 1,
+                             seed = 1,
+                             alpha = 100)
 
   # after removing entropy arguments
   anole_snmf_gt_ne <- gt_snmf(x = anole_gt,

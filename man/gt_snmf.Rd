@@ -12,7 +12,7 @@ gt_snmf(
   alpha,
   tolerance,
   entropy = FALSE,
-  percentage = NULL,
+  percentage = 0.05,
   I,
   iterations,
   ploidy = 2,
