@@ -386,29 +386,29 @@ To exemplify how `q_matrix()` can read directly from output folders, we can writ
 the outputs to a temporary file: 
 
 ```{r}
-#runs <- c(1)
-#k_values <- c(1:10)
-#q_matrices <- list()
-#dir <- tempdir()
+runs <- c(1)
+k_values <- c(1:10)
+q_matrices <- list()
+dir <- tempdir()
 
-#for(x in k_values){
+for(x in k_values){
   
-#  q_matrices[[x]] <- list()
+  q_matrices[[x]] <- list()
   
-#  for(i in runs){
-#  q_matrices[[x]][[i]] <- LEA::Q(anole_snmf, K = x, run = i)
+  for(i in runs){
+  q_matrices[[x]][[i]] <- get_q_matrix(anole_snmf, k = x, run = i)
   
-#  write.table(q_matrices[[x]][[i]], file = paste0(dir,"/K",x,"run",i,".Q"), col.names = FALSE, row.names = FALSE, quote = FALSE)
+  write.table(q_matrices[[x]][[i]], file = paste0(dir,"/K",x,"run",i,".Q"), col.names = FALSE, row.names = FALSE, quote = FALSE)
   
-#  }
-#}
+  }
+}
 ```
 
 And read them back into a `q_matrix_list`:
 
 ```{r}
-#q_list <- read_q_files(dir)
-#summary(q_list)
+q_list <- read_q_files(dir)
+summary(q_list)
 ```
 
 q_matrix has read and summarised the .Q files from our analysis,and we can 
@@ -416,19 +416,15 @@ access a single matrix from the list by selecting the run number and K value of 
 For example, if we would like to view the second run of K = 3:
 
 ```{r}
-#get_q_matrix(q_list, k = 3, run = 2)
+get_q_matrix(q_list, k = 3, run = 1)
 ```
 
 Similarly to before, we can then autoplot any of these matrices by selecting from the `q_matrix_list`:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
-#autoplot(get_q_matrix(q_list, k = 3, run = 2), data = anole_gt)
+autoplot(get_q_matrix(q_list, k = 3, run = 1), data = anole_gt)
 ```
 
 In this way, `tidypopgen` integrates with external clustering software (such as 
 ADMIXTURE or STRUCTURE) seamlessly for quick, easy plotting. 
-
-```{r}
-
-```
 
