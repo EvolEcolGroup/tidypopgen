@@ -9,12 +9,12 @@
 #' if the .geno input file has been altered,
 #' @param n_runs the number of runs for each k value (defaults to 1)
 #' @param alpha numeric snmf regularization parameter. See LEA::snmf for details
-#' @param tolerance numeric value of tolerate error
+#' @param tolerance numeric value of tolerance (default 0.00001)
 #' @param entropy boolean indicating whether to estimate cross-entropy
 #' @param percentage numeric value indicating percentage of masked genotypes,
 #' ranging between 0 and 1, to be used when entropy = TRUE
 #' @param I number of SNPs for initialising the snmf algorithm
-#' @param iterations numeric integer for maximum iterations
+#' @param iterations numeric integer for maximum iterations (default 200)
 #' @param ploidy the ploidy of the input data (defaults to 2)
 #' @param seed the seed for the random number generator
 #' @return an object of class `gt_admix` consisting of a list with the following elements:
@@ -28,8 +28,8 @@
 #' - `group` the group column of the input `gen_tibble` (if applicable)
 #' @export
 
-gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, entropy = FALSE,
-                     percentage = 0.05, I, iterations, ploidy = 2, seed = -1){
+gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance = 0.00001, entropy = FALSE,
+                     percentage = 0.05, I, iterations = 200, ploidy = 2, seed = -1){
 
   # add seed check again!!!
   if (!is.null(seed) && length(seed)!= n_runs){
