@@ -293,53 +293,45 @@ scatter(anole_dapc, posi.da="bottomright")
 
 # Clustering with sNMF
 
-sNMF is a fast clustering algorithm which provides results similar to STRUCTURE and ADMIXTURE. We can run it directly from R. We have first to generate a file
-with our genotype data:
-```{r}
-geno_file <- gt_as_geno_lea(anole_gt)
-geno_file
-```
+sNMF is a fast clustering algorithm which provides results similar to STRUCTURE and ADMIXTURE. We can run it directly from tidypopgen using the `gt_snmf` function.
 
-Note that the .geno file is placed by default in the same directory and using
-the same name as the backing file of the `gen_tibble`
+The function `gt_snmf` creates a .geno file to be used by LEA. This is placed by
+default in the same directory as the backing file of the `gen_tibble`, and uses 
+the same name. 
+
+The output of `gt_snmf` is a `gt_admix` object. 
 
 Now we can run K clusters from k=1 to k=10. We will use just one repeat, but ideally
 we should run multiple repetitions for each K:
 ```{r results='hide'}
-library(LEA)
-anole_snmf <- snmf(input.file = geno_file,
-                   K = 1:10,
-                   entropy = TRUE,
-                   repetitions = 3,
-                   alpha = 100
-                  )
+anole_snmf <- gt_snmf(x = anole_gt,
+                         project = "new",
+                         k = 1:10,
+                         entropy = TRUE,
+                         n_runs = 1,
+                         alpha = 100,
+                         seed = 1
+)
 ```
 
 We can examine the suitability of our K values by plotting with: 
 
 ```{r, fig.alt = "Plot of cross-entropy for each value of K, showing K = 3 has the lowest cross-entropy"}
-plot(anole_snmf, cex = 1.2, pch = 19)
+plot(anole_snmf$cv, cex = 1.2, pch = 19)
 ```
 
-From which we can see that K = 3 is a sensible choice, as 3 represents the 'elbow' in the plot. We can select the fastest run using: 
+From which we can see that K = 3 is a sensible choice, as 3 represents the 'elbow' in the plot. 
 
-
-```{r}
-ce <-  cross.entropy(anole_snmf, K = 3)
-quick_run <- which.min(ce)
-```
-
-And then to plot our clusters, we can begin by extracting the Q matrix from our `snmf` object,
-and covert it to a `q_matrix` object as used by `tidypopgen`:
+And then to plot our clusters, we can begin by extracting the Q matrix from our `gt_admix` object, and covert it to a `q_matrix` object as used by `tidypopgen`:
 
 ```{r}
-q_mat <- LEA::Q(anole_snmf, K = 3, run = quick_run) 
+q_mat <- get_q_matrix(anole_snmf, k = 3, run = 1)
 q_mat <- q_matrix(q_mat)
-
 head(q_mat)
 ```
 
-We can quickly plot it with
+We can quickly plot it with:
+
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
 anole_gt <- anole_gt %>% group_by(population)
 autoplot(q_mat, data = anole_gt, annotate_group = TRUE)
@@ -394,29 +386,29 @@ To exemplify how `q_matrix()` can read directly from output folders, we can writ
 the outputs to a temporary file: 
 
 ```{r}
-runs <- c(1:3)
-k_values <- c(1:10)
-q_matrices <- list()
-dir <- tempdir()
+#runs <- c(1)
+#k_values <- c(1:10)
+#q_matrices <- list()
+#dir <- tempdir()
 
-for(x in k_values){
+#for(x in k_values){
   
-  q_matrices[[x]] <- list()
+#  q_matrices[[x]] <- list()
   
-  for(i in runs){
-  q_matrices[[x]][[i]] <- LEA::Q(anole_snmf, K = x, run = i)
+#  for(i in runs){
+#  q_matrices[[x]][[i]] <- LEA::Q(anole_snmf, K = x, run = i)
   
-  write.table(q_matrices[[x]][[i]], file = paste0(dir,"/K",x,"run",i,".Q"), col.names = FALSE, row.names = FALSE, quote = FALSE)
+#  write.table(q_matrices[[x]][[i]], file = paste0(dir,"/K",x,"run",i,".Q"), col.names = FALSE, row.names = FALSE, quote = FALSE)
   
-  }
-}
+#  }
+#}
 ```
 
 And read them back into a `q_matrix_list`:
 
 ```{r}
-q_list <- read_q_files(dir)
-summary(q_list)
+#q_list <- read_q_files(dir)
+#summary(q_list)
 ```
 
 q_matrix has read and summarised the .Q files from our analysis,and we can 
@@ -424,14 +416,19 @@ access a single matrix from the list by selecting the run number and K value of 
 For example, if we would like to view the second run of K = 3:
 
 ```{r}
-get_q_matrix(q_list, k = 3, run = 2)
+#get_q_matrix(q_list, k = 3, run = 2)
 ```
 
 Similarly to before, we can then autoplot any of these matrices by selecting from the `q_matrix_list`:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
-autoplot(get_q_matrix(q_list, k = 3, run = 2), data = anole_gt)
+#autoplot(get_q_matrix(q_list, k = 3, run = 2), data = anole_gt)
 ```
 
 In this way, `tidypopgen` integrates with external clustering software (such as 
 ADMIXTURE or STRUCTURE) seamlessly for quick, easy plotting. 
+
+```{r}
+
+```
+

@@ -60,6 +60,10 @@ test_that("gt_snmf from file and from gen_tibble are the same",{
                              repetitions = 1,
                              seed = 1,
                              alpha = 100)
+  lea_q <- LEA::Q(anole_snmf_lea, K = 1, run = 1)
+  gt_q <- get_q_matrix(anole_snmf_file, k = 1, run = 1)
+  expect_true(all(lea_q) == all(gt_q))
+
 
   # after removing entropy arguments
   anole_snmf_gt_ne <- gt_snmf(x = anole_gt,
