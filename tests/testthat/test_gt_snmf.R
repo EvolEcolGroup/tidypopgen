@@ -52,6 +52,7 @@ test_that("gt_snmf from file and from gen_tibble are the same",{
   # check that the results are the same
   expect_equal(anole_snmf_file$Q, anole_snmf_gt$Q)
   expect_equal(anole_snmf_file$G, anole_snmf_gt$G)
+  expect_equal(anole_snmf_file$cv, anole_snmf_gt$cv)
 
   # after removing entropy arguments
   anole_snmf_gt_ne <- gt_snmf(x = anole_gt,

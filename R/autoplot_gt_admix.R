@@ -34,10 +34,19 @@ autoplot.gt_admix <- function(object,
     if (is.null(object$cv)){
       stop("No cross validation error available")
     }
-    ggplot2::ggplot(data.frame(k=object$k, cv=object$cv), ggplot2::aes(x=.data$k, y=.data$cv)) +
-      ggplot2::geom_point() +
-      ggplot2::geom_line() +
-      ggplot2::labs(x="k", y="Cross validation error")
+
+    if(object$algorithm == "SNMF"){
+      ggplot2::ggplot(data.frame(k=object$k, cv=object$cv), ggplot2::aes(x=.data$k, y=.data$cv)) +
+        ggplot2::geom_point() +
+        ggplot2::geom_line() +
+        ggplot2::labs(x="k", y="Cross-Entropy")
+    } else {
+      ggplot2::ggplot(data.frame(k=object$k, cv=object$cv), ggplot2::aes(x=.data$k, y=.data$cv)) +
+        ggplot2::geom_point() +
+        ggplot2::geom_line() +
+        ggplot2::labs(x="k", y="Cross validation error")
+    }
+
   } else if (type == "barplot") {
     # check that k is specified
     if (is.null(k)){

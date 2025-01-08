@@ -119,17 +119,19 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
       adm_list$G[[index]] <- q_matrix(utils::read.table(paste0(out_file,".snmf/K",this_k,
                                                                "/run",this_rep,"/",file_name,
                                                                "_r",this_rep,".",this_k,".G"), header = FALSE))
-      # TODO add entropy to cv slot
-      #if (entropy) {
-        # extract value from line with cross-Entropy (number after :)
-      #  adm_list$cv[index] <- as.numeric(strsplit(grep("cross-Entropy", snmf_res, value = TRUE),":")[[1]][2])
-      #}
      index <- index + 1
     }
   }
 
   # add log
   adm_list$log <- snmf_res
+
+  # add entropy to cv slot
+  if (entropy) {
+    # extract value from line with cross-Entropy (number after :)
+    entropy <- extract_cross_entropy(snmf_res)
+    adm_list$cv <- entropy$cross_entropy_all
+  }
 
   # add metadata if x is a gen_tibble
   if (inherits(x, "gen_tbl")) {
@@ -144,4 +146,48 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
   adm_list$algorithm <- "SNMF"
 
   return(adm_list)
+}
+
+
+# Internal function for extracting cross-entropy from the log output
+extract_cross_entropy <- function(log_text) {
+  # Initialize an empty tibble
+  results <- tibble(K = integer(),
+                    repetition = integer(),
+                    cross_entropy_all = numeric(),
+                    cross_entropy_masked = numeric())
+
+  # Loop through the text and extract data
+  for (i in seq_along(log_text)) {
+    line <- log_text[i]
+
+    # Match the "sNMF K = x repetition y" line
+    if (grepl("sNMF K = \\d+  repetition \\d+", line)) {
+      # Extract K and repetition
+      matches <- regmatches(line, regexec("sNMF K = (\\d+)  repetition (\\d+)", line))
+      K <- as.integer(matches[[1]][2])
+      repetition <- as.integer(matches[[1]][3])
+    }
+
+    # Match the "Cross-Entropy (all data):" line
+    if (grepl("Cross-Entropy \\(all data\\):", line)) {
+      matches <- regmatches(line, regexec("Cross-Entropy \\(all data\\):\\s+([0-9.]+)", line))
+      cross_entropy_all <- as.numeric(matches[[1]][2])
+    }
+
+    # Match the "Cross-Entropy (masked data):" line
+    if (grepl("Cross-Entropy \\(masked data\\):", line)) {
+      matches <- regmatches(line, regexec("Cross-Entropy \\(masked data\\):\\s+([0-9.]+)", line))
+      cross_entropy_masked <- as.numeric(matches[[1]][2])
+
+      # Add the collected data to the tibble
+      results <- add_row(results,
+                         K = K,
+                         repetition = repetition,
+                         cross_entropy_all = cross_entropy_all,
+                         cross_entropy_masked = cross_entropy_masked)
+    }
+  }
+
+  return(results)
 }
