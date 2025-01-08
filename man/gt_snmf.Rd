@@ -16,7 +16,7 @@ gt_snmf(
   I,
   iterations,
   ploidy = 2,
-  seed = NULL
+  seed = -1
 )
 }
 \arguments{

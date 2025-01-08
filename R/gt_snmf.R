@@ -29,7 +29,7 @@
 #' @export
 
 gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, entropy = FALSE,
-                     percentage = NULL, I, iterations, ploidy = 2, seed = NULL){
+                     percentage = NULL, I, iterations, ploidy = 2, seed = -1){
 
   # add seed check again!!!
   if (!is.null(seed) && length(seed)!= n_runs){
@@ -81,52 +81,30 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance, e
   )
   class(adm_list) <- c("gt_admix","list")
 
-  if (is.null(seed) & entropy) {
+  if(entropy){
     snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
-                          K = k,
-                          project = project,
-                          repetitions = n_runs,
-                          alpha = alpha,
-                          tolerance = tolerance,
-                          entropy = entropy,
-                          percentage = percentage,
-                          I = I,
-                          iterations = iterations,
-                          ploidy = ploidy))
-  } else if(!entropy & !is.null(seed)){
-    snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
-                          K = k,
-                          project = project,
-                          repetitions = n_runs,
-                          alpha = alpha,
-                          tolerance = tolerance,
-                          I = I,
-                          iterations = iterations,
-                          ploidy = ploidy,
-                          seed = seed))
-  } else if (!entropy & is.null(seed)){
-    snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
-                          K = k,
-                          project = project,
-                          repetitions = n_runs,
-                          alpha = alpha,
-                          tolerance = tolerance,
-                          I = I,
-                          iterations = iterations,
-                          ploidy = ploidy))
+                                                K = k,
+                                                project = project,
+                                                repetitions = n_runs,
+                                                alpha = alpha,
+                                                tolerance = tolerance,
+                                                entropy = entropy,
+                                                percentage = percentage,
+                                                I = I,
+                                                iterations = iterations,
+                                                ploidy = ploidy,
+                                                seed = seed))
   } else {
     snmf_res <- utils::capture.output(LEA::snmf(input.file = input_file,
-                          K = k,
-                          project = project,
-                          repetitions = n_runs,
-                          alpha = alpha,
-                          tolerance = tolerance,
-                          entropy = entropy,
-                          percentage = percentage,
-                          I = I,
-                          iterations = iterations,
-                          ploidy = ploidy,
-                          seed = seed))
+                                                K = k,
+                                                project = project,
+                                                repetitions = n_runs,
+                                                alpha = alpha,
+                                                tolerance = tolerance,
+                                                I = I,
+                                                iterations = iterations,
+                                                ploidy = ploidy,
+                                                seed = seed))
   }
 
   # loop over values of k and number of repeats
