@@ -14,7 +14,7 @@
 #' `arrange_by_indiv` to FALSE. See `autoplot.q_matrix` for further details.
 #'
 #' @param object an object of class `gt_admixture`
-#' @param type the type of plot (one of "cv", and "boxplot")
+#' @param type the type of plot (one of "cv", and "barplot")
 #' @param k the value of `k` to plot (for `barplot` type only)
 #' param repeat the repeat to plot (for `barplot` type only)
 #' @param run the run to plot (for `barplot` type only)
