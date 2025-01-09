@@ -164,8 +164,7 @@ ADMIXTURE (which also limits its power).
 The first step is to determine the number of genetic clusters in the dataset. 
 DAPC can be either used to test a a-priori hypothesis, or we can use the data to
 suggest the number of clusters.
-In this
-case, we did not have any strong expectations of structure in our study system, so we will
+In this case, we did not have any strong expectations of structure in our study system, so we will
 let the data inform the number of possible genetic clusters. We will use
 a k-clustering algorithm applied to the principal components (allowing us to reduce
 the dimensions from the thousands of loci to just a few tens of components). We need to decide how 
@@ -289,21 +288,24 @@ library(adegenet)
 scatter(anole_dapc, posi.da="bottomright")
 ```
 
-
-
 # Clustering with sNMF
 
-sNMF is a fast clustering algorithm which provides results similar to STRUCTURE and ADMIXTURE. We can run it directly from tidypopgen using the `gt_snmf` function.
+sNMF is a fast clustering algorithm which provides results similar to STRUCTURE 
+and ADMIXTURE. We can run it directly from tidypopgen using the `gt_snmf` function.
 
 The function `gt_snmf` creates a .geno file to be used by LEA. This is placed by
 default in the same directory as the backing file of the `gen_tibble`, and uses 
 the same name. 
 
-The output of `gt_snmf` is a `gt_admix` object. 
+The output of `gt_snmf` is a `gt_admix` object. `gt_admix` objects are designed to 
+make visualising data from different clustering algorithms swift and easy.
 
-Now we can run K clusters from k=1 to k=10. We will use just one repeat, but ideally
-we should run multiple repetitions for each K:
+Lets begin by running `gt_snmf`. We can run K clusters from k=1 to k=10. 
+We will use just one repeat, but ideally we should run multiple repetitions for each K:
+
 ```{r results='hide'}
+anole_gt <- anole_gt %>% group_by(population)
+
 anole_snmf <- gt_snmf(x = anole_gt,
                          project = "new",
                          k = 1:10,
@@ -314,73 +316,99 @@ anole_snmf <- gt_snmf(x = anole_gt,
 )
 ```
 
-We can examine the suitability of our K values by plotting with: 
+We can examine the suitability of our K values by plotting the cross-entropy values
+for each K value, which is contained in the `cv` element of the `gt_admix` object: 
 
 ```{r, fig.alt = "Plot of cross-entropy for each value of K, showing K = 3 has the lowest cross-entropy"}
 plot(anole_snmf$cv, cex = 1.2, pch = 19)
 ```
 
-From which we can see that K = 3 is a sensible choice, as 3 represents the 'elbow' in the plot. 
+Here we can see that K = 3 is a sensible choice, as K = 3 represents the 'elbow' 
+in the plot, where cross-entropy is at it's lowest. 
 
-And then to plot our clusters, we can begin by extracting the Q matrix from our `gt_admix` object, and covert it to a `q_matrix` object as used by `tidypopgen`:
+We can quickly plot this data with `autoplot` by using the type `barplot` and selecting 
+our chosen value of `k`:
+
+```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
+autoplot(anole_snmf, k = 3, run = 1, data = anole_gt, annotate_group = FALSE, type = "barplot")
+```
+
+This plot is fine, but it is messy, and not a very helpful visualisation if we 
+want to understand how our populations are structured.
+
+To re-order this plot, grouping individuals by population, we can use the `annotate_group` 
+and `arrange_by_group` arguments in autoplot:
+
+```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
+autoplot(anole_snmf, type = "barplot", k = 3, run = 1, data = anole_gt, annotate_group = TRUE, arrange_by_group = TRUE)
+```
+
+This plot is much better. Now the plot is labelled by population we can see that
+the individuals from each population are grouped together, with a few individuals
+showing mixed ancestry between populations.
+
+However, for a more visually appealing plot, we can re-order the individuals within 
+each population as follows:
+
+```{r}
+autoplot(anole_snmf, type = "barplot", k = 3, run = 1, data = anole_gt, annotate_group = TRUE, arrange_by_group = TRUE, arrange_by_indiv = TRUE, reorder_within_groups = TRUE)
+```
+
+Now individuals are neatly ordered within each population.
+
+For more complex/publication ready plots, we can extract the specific K value 
+and run that we are interested in plotting, and add this .Q matrix to our 
+gen_tibble object, so that we can create a custom plot with `ggplot2`. 
+
+First we extract the q_matrix of interest using the `get_q_matrix` function:
 
 ```{r}
 q_mat <- get_q_matrix(anole_snmf, k = 3, run = 1)
-q_mat <- q_matrix(q_mat)
-head(q_mat)
 ```
 
-We can quickly plot it with:
+Then we can easily add the data with the `augment` method:
 
-```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
-anole_gt <- anole_gt %>% group_by(population)
-autoplot(q_mat, data = anole_gt, annotate_group = TRUE)
+```{r}
+anole_gt_sNMF <- augment(q_mat, data = anole_gt)
+head(anole_gt_sNMF)
 ```
 
-We can tidy our q matrix into a tibble, returning it
-in a format which is suitable for plotting:
+Alternatively, we can convert our q matrix into `tidy` format, which is more 
+suitable for plotting:
 
 ```{r}
 tidy_q <- tidy(q_mat, anole_gt)
 head(tidy_q)
 ```
-For more complex plots, we can add the clusters to the tibble, so that we can 
-create a custom plot with `ggplot2`. We can easily add the data with the `augment` method:
 
-```{r}
-anole_gt_sNMF <- augment(q_mat, data = anole_gt)
-```
-
-And now we can use `ggplot2` directly to generate our plot:
+And now we can use `ggplot2` directly to generate our custom plot:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
 
-anole_gt_sNMF <- anole_gt_sNMF %>%
-  tidyr::pivot_longer(cols = dplyr::starts_with(".Q"), names_to = "q", values_to = "percentage") %>%
-  dplyr::mutate(percentage = as.numeric(percentage)) %>%
+tidy_q <- tidy_q %>%
   dplyr::group_by(id) %>%
   dplyr::mutate(dominant_q = max(percentage)) %>%
   dplyr::ungroup() %>%
-  dplyr::arrange(population, dplyr::desc(dominant_q)) %>%
+  dplyr::arrange(group, dplyr::desc(dominant_q)) %>%
   dplyr::mutate(plot_order = dplyr::row_number(), id = factor(id, levels = unique(id)))
 
-plt <- ggplot2::ggplot(anole_gt_sNMF, ggplot2::aes(x = id, y = percentage, fill = q)) +
+plt <- ggplot2::ggplot(tidy_q, ggplot2::aes(x = id, y = percentage, fill = q)) +
   ggplot2::geom_col(width = 1, position = ggplot2::position_stack(reverse = TRUE))+
-  ggplot2::labs(y = "Population Structure for K = 3") +
+  ggplot2::labs(y = "Population Structure for K = 3", title = "Clustering at K = 3 for Anolis punctatus using sNMF algorithm") +
   theme_distruct() +
   scale_fill_distruct()
 
 plt
 ```
 
-# ADMIXTURE and handling multiple Q matrices
+# Handling Q matrices
 
-Usually, clustering algorithms are run multiple times for different values of K.
-The function `q_matrix()` can take a path to a directory containing results
-from multiple runs of a clustering algorithm (such as ADMIXTURE), read the .Q files,
-and summarise them in a single `q_matrix_list` object.
+For clustering algorithms that operate outside the R environment(such as ADMIXTURE), 
+the function `q_matrix()` can take a path to a directory containing results from multiple runs 
+of a clustering algorithm for multiple values of K, read the .Q files, and summarise 
+them in a single `q_matrix_list` object.
 
-In the analysis above, through `snmf()`, we ran 3 repetitions for each value of K. 
+In the analysis above, through `gt_snmf()`, we ran 1 repetition for K values 1 to 10. 
 
 To exemplify how `q_matrix()` can read directly from output folders, we can write 
 the outputs to a temporary file: 
@@ -404,27 +432,33 @@ for(x in k_values){
 }
 ```
 
-And read them back into a `q_matrix_list`:
+And read them back into our R environment using `q_matrix_list`:
 
 ```{r}
 q_list <- read_q_files(dir)
 summary(q_list)
 ```
 
-q_matrix has read and summarised the .Q files from our analysis,and we can 
-access a single matrix from the list by selecting the run number and K value of interest.
+`q_matrix_list` has read and summarised the .Q files from our analysis, and we can 
+access a single matrix from the list by selecting the run number and K value of interest 
+using `get_q_matrix` as before.
+
 For example, if we would like to view the second run of K = 3:
 
 ```{r}
 get_q_matrix(q_list, k = 3, run = 1)
 ```
 
-Similarly to before, we can then autoplot any of these matrices by selecting from the `q_matrix_list`:
+And, again, we can then autoplot any matrix by selecting from the `q_matrix_list` object:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
-autoplot(get_q_matrix(q_list, k = 3, run = 1), data = anole_gt)
+autoplot(get_q_matrix(q_list, k = 3, run = 1), data = anole_gt, annotate_group = TRUE, arrange_by_group = TRUE, arrange_by_indiv = TRUE, reorder_within_groups = TRUE)
 ```
 
 In this way, `tidypopgen` integrates with external clustering software (such as 
 ADMIXTURE or STRUCTURE) seamlessly for quick, easy plotting. 
+
+```{r}
+
+```
 
