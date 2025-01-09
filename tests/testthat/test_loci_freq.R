@@ -62,6 +62,10 @@ test_that("loci_alt_freq and loci_maf computes correctly",{
   freq2[freq2>0.5 & !is.na(freq2)] <- 1-freq2[freq2>0.5 & !is.na(freq2)]
   expect_equal(loci_maf(test_gt_subset3$genotypes),freq2)
 
+  # now repeat with multiple blocks of snps
+  loci_freq_chunked <- loci_alt_freq(test_gt$genotypes, block_size=2)
+  expect_true(all(loci_alt_freq(test_gt$genotypes)==loci_freq_chunked))
+
 })
 
 test_that("loci_alt_freq and loci_maf on grouped tibbles",{
@@ -94,4 +98,9 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles",{
   # use fast cpp code (limit cores to 2)
   loci_maf_grp <- test_gt %>% loci_maf(n_cores=2)
   expect_true(all.equal(loci_maf_map, loci_maf_grp))
+
+  # now repeat with multiple blocks of snps
+  loci_freq_grp_chunked <- test_gt %>% loci_maf(n_cores=2, block_size=2)
+  expect_true(all.equal(loci_maf_grp, loci_freq_grp_chunked))
+
 })

@@ -1,3 +1,9 @@
+# TODO check if we need n_cores (or is it just done in openMP?!?)
+# TODO check that we pass block_size to all functions
+# TODO alt_freq for groups should do the same as maf for groups (and ideally we should use
+# alt_freq to then compute maf)
+
+
 #' Estimate allele frequencies at each each locus
 #'
 #' Allele frequencies can be estimates as minimum allele frequencies (MAF) with
@@ -10,17 +16,24 @@
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].
 #' @param n_cores number of cores to be used, it defaults to [bigstatsr::nb_cores()]
+#' @param block_size maximum number of loci read at once.
 #' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_alt_freq
 #' @export
-loci_alt_freq <- function(.x, ...) {
+loci_alt_freq <- function(.x,
+                          n_cores = bigstatsr::nb_cores(),
+                          block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                          ...) {
   UseMethod("loci_alt_freq", .x)
 }
 
 #' @export
 #' @rdname loci_alt_freq
-loci_alt_freq.tbl_df <- function(.x, ...) {
+loci_alt_freq.tbl_df <- function(.x,
+                                 n_cores = bigstatsr::nb_cores(),
+                                 block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                 ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
   loci_alt_freq(.x$genotypes)
@@ -29,7 +42,10 @@ loci_alt_freq.tbl_df <- function(.x, ...) {
 
 #' @export
 #' @rdname loci_alt_freq
-loci_alt_freq.vctrs_bigSNP <- function(.x, ...) {
+loci_alt_freq.vctrs_bigSNP <- function(.x,
+                                       n_cores = bigstatsr::nb_cores(),
+                                       block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                       ...) {
   rlang::check_dots_empty()
   #stopifnot_diploid(.x)
   # if we have diploid
@@ -42,7 +58,8 @@ loci_alt_freq.vctrs_bigSNP <- function(.x, ...) {
 
 #' @export
 #' @rdname loci_alt_freq
-loci_alt_freq.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
+loci_alt_freq.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(),
+                                     block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),...) {
   rlang::check_dots_empty()
   if (is_diploid_only(.x)){
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
@@ -56,7 +73,7 @@ loci_alt_freq.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
     lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[,i])
   } else {
     # TODO this is seriously inefficient, we should replace it with a cpp function
-    group_map(.x, .f=~loci_alt_freq(.x,, ...))
+    group_map(.x, .f=~loci_alt_freq(.x,, n_cores= n_cores, block_size = block_size, ...))
   }
 
 
@@ -64,45 +81,68 @@ loci_alt_freq.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
 
 #' @rdname loci_alt_freq
 #' @export
-loci_maf <- function(.x, ...) {
+loci_maf <- function(.x,
+                     n_cores = bigstatsr::nb_cores(),
+                     block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                     ...) {
   UseMethod("loci_maf", .x)
 }
 
 #' @export
 #' @rdname loci_alt_freq
-loci_maf.tbl_df <- function(.x, ...) {
+loci_maf.tbl_df <- function(.x,
+                            n_cores = bigstatsr::nb_cores(),
+                            block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                            ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
-  loci_maf(.x$genotypes, ...)
+  loci_maf(.x$genotypes, n_cores = n_cores, block_size = block_size, ...)
 }
 
 #' @export
 #' @rdname loci_alt_freq
-loci_maf.vctrs_bigSNP <- function(.x, ...) {
-  freq <- loci_alt_freq(.x,)
+loci_maf.vctrs_bigSNP <- function(.x,
+                                  n_cores = bigstatsr::nb_cores(),
+                                  block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                  ...) {
+  freq <- loci_alt_freq(.x, n_cores = n_cores, block_size = block_size, ...)
   freq[freq>0.5 & !is.na(freq)] <- 1 - freq[freq>0.5 & !is.na(freq)]
   freq
 }
 
 #' @export
 #' @rdname loci_alt_freq
-loci_maf.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
+loci_maf.grouped_df <- function(.x,
+                                n_cores = bigstatsr::nb_cores(),
+                                block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                ...) {
   rlang::check_dots_empty()
   if (is_diploid_only(.x)){
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+    # rows (individuals) that we want to use
+    rows_to_keep <- vctrs::vec_data(.x$genotypes)
 
-    # TODO we need this to happen within a big_apply to use chunks of very large datasets
-    freq_mat <- gt_grouped_alt_freq_diploid(BM = geno_fbm,rowInd = .gt_bigsnp_rows(.x),
-                                            colInd = .gt_bigsnp_cols(.x),
-                                            groupIds = dplyr::group_indices(.x)-1,
-                                            ngroups = max(dplyr::group_indices(.x)),
-                                            ncores = n_cores)$freq_alt
+    # internal function that can be used with a big_apply
+    gt_group_alt_freq_freq_sub <- function(BM, ind, rows_to_keep){
+      freq_mat <- gt_grouped_alt_freq_diploid(BM = BM,rowInd = rows_to_keep,
+                                              colInd = ind,
+                                              groupIds = dplyr::group_indices(.x)-1,
+                                              ngroups = max(dplyr::group_indices(.x)),
+                                              ncores = n_cores)$freq_alt
+    }
+    freq_mat <- bigstatsr::big_apply(geno_fbm, a.FUN = gt_group_alt_freq_freq_sub,
+                                 rows_to_keep = rows_to_keep,
+                                 ind=show_loci(.x)$big_index,
+                                 ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
+                                 # block.size = bigstatsr::block_size(show_loci(.x)$big_index, 1),
+                                 block.size = block_size,
+                                 a.combine = 'rbind')
     freq_mat[freq_mat>0.5 & !is.na(freq_mat)] <- 1 - freq_mat[freq_mat>0.5 & !is.na(freq_mat)]
     # return a list to mimic a group_map
     lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[,i])
   } else { # the polyploid case
     # TODO this is seriously inefficient, we should replace it with a cpp function
-    group_map(.x, .f=~loci_maf(.x,, ...))
+    group_map(.x, .f=~loci_maf(.x, n_cores=n_cores, block_size=block_size, ...))
   }
 }
 
