@@ -97,7 +97,7 @@ loci_maf <- function(.x,
 #' @rdname loci_alt_freq
 loci_maf.tbl_df <- function(.x,
                             n_cores = bigstatsr::nb_cores(),
-                            block_size = bigstatsr::block_size(nrow(attr(.x,"loci")), 1),
+                            block_size = bigstatsr::block_size(nrow(attr(.x$genotypes,"loci")), 1),
                             ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
@@ -202,7 +202,7 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...){
                                  rows_to_keep = rows_to_keep,
                                  ind=attr(.x,"loci")$big_index,
                                  ploidy_by_indiv = ploidy_by_indiv,
-                                 ncores = n_cores, # there is no OpenMP parallelization, so we us multiple cores here
+                                 ncores = 1,  # parallelisation is used within the function
                                  block.size = block_size,
                                  a.combine = 'rbind')
     # now get frequency accounting for missing values

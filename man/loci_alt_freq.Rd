@@ -39,7 +39,7 @@ loci_maf(.x, n_cores, block_size, ...)
 \method{loci_maf}{tbl_df}(
   .x,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
   ...
 )
 

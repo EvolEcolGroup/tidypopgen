@@ -58,7 +58,7 @@ test_that("ploidy works correctly", {
   expect_true(all(indiv_ploidy(test_gt)==c(2,4,2)))
   expect_true(all(indiv_ploidy(test_gt$genotypes)==c(2,4,2)))
 
-  # expect error when trying to do something with a mixed ploidy object
+  # expect warning when trying to do something with a mixed ploidy object
   expect_warning(test_gt %>% loci_maf(), "this function ")
 
   # missingness
