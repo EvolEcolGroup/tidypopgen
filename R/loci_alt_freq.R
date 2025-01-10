@@ -22,8 +22,8 @@
 #' @rdname loci_alt_freq
 #' @export
 loci_alt_freq <- function(.x,
-                          n_cores = bigstatsr::nb_cores(),
-                          block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                          n_cores,
+                          block_size,
                           ...) {
   UseMethod("loci_alt_freq", .x)
 }
@@ -31,8 +31,8 @@ loci_alt_freq <- function(.x,
 #' @export
 #' @rdname loci_alt_freq
 loci_alt_freq.tbl_df <- function(.x,
-                                 n_cores = bigstatsr::nb_cores(),
-                                 block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                 n_cores = bigstatsr::nb_cores(), # multicore is used by openMP within the freq cpp function
+                                 block_size = bigstatsr::block_size(nrow(attr(.x$genotypes,"loci")), 1), #the bigapply that splits in blocks is not multithreaded, as we use the multiple threads for openMP
                                  ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
@@ -44,7 +44,7 @@ loci_alt_freq.tbl_df <- function(.x,
 #' @rdname loci_alt_freq
 loci_alt_freq.vctrs_bigSNP <- function(.x,
                                        n_cores = bigstatsr::nb_cores(),
-                                       block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                       block_size = bigstatsr::block_size(nrow(attr(.x,"loci")), 1),
                                        ...) {
   rlang::check_dots_empty()
   #stopifnot_diploid(.x)
@@ -59,16 +59,27 @@ loci_alt_freq.vctrs_bigSNP <- function(.x,
 #' @export
 #' @rdname loci_alt_freq
 loci_alt_freq.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(),
-                                     block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),...) {
+                                     block_size = bigstatsr::block_size(nrow(attr(.x,"loci")), 1),...) {
   rlang::check_dots_empty()
   if (is_diploid_only(.x)){
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+    # rows (individuals) that we want to use
+    rows_to_keep <- vctrs::vec_data(.x$genotypes)
 
-    freq_mat <- gt_grouped_alt_freq_diploid(BM = geno_fbm,rowInd = .gt_bigsnp_rows(.x),
-                  colInd = .gt_bigsnp_cols(.x),
-                  groupIds = dplyr::group_indices(.x)-1,
-                  ngroups = max(dplyr::group_indices(.x)),
-                  ncores = n_cores)$freq_alt
+    # internal function that can be used with a big_apply
+    gt_group_alt_freq_freq_sub <- function(BM, ind, rows_to_keep){
+      freq_mat <- gt_grouped_alt_freq_diploid(BM = BM,rowInd = rows_to_keep,
+                                              colInd = ind,
+                                              groupIds = dplyr::group_indices(.x)-1,
+                                              ngroups = max(dplyr::group_indices(.x)),
+                                              ncores = n_cores)$freq_alt
+    }
+    freq_mat <- bigstatsr::big_apply(geno_fbm, a.FUN = gt_group_alt_freq_freq_sub,
+                                     rows_to_keep = rows_to_keep,
+                                     ind=show_loci(.x)$big_index,
+                                     ncores = 1, # we only use 1 cpu, we let openMP use multiple cores in the cpp code
+                                     block.size = block_size,
+                                     a.combine = 'rbind')
     # return a list to mimic a group_map
     lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[,i])
   } else {
@@ -82,8 +93,8 @@ loci_alt_freq.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(),
 #' @rdname loci_alt_freq
 #' @export
 loci_maf <- function(.x,
-                     n_cores = bigstatsr::nb_cores(),
-                     block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                     n_cores,
+                     block_size,
                      ...) {
   UseMethod("loci_maf", .x)
 }
@@ -92,7 +103,7 @@ loci_maf <- function(.x,
 #' @rdname loci_alt_freq
 loci_maf.tbl_df <- function(.x,
                             n_cores = bigstatsr::nb_cores(),
-                            block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                            block_size = bigstatsr::block_size(nrow(attr(.x,"loci")), 1),
                             ...) {
   #TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
@@ -103,7 +114,7 @@ loci_maf.tbl_df <- function(.x,
 #' @rdname loci_alt_freq
 loci_maf.vctrs_bigSNP <- function(.x,
                                   n_cores = bigstatsr::nb_cores(),
-                                  block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                  block_size = bigstatsr::block_size(nrow(attr(.x,"loci")), 1),
                                   ...) {
   freq <- loci_alt_freq(.x, n_cores = n_cores, block_size = block_size, ...)
   freq[freq>0.5 & !is.na(freq)] <- 1 - freq[freq>0.5 & !is.na(freq)]
@@ -114,7 +125,7 @@ loci_maf.vctrs_bigSNP <- function(.x,
 #' @rdname loci_alt_freq
 loci_maf.grouped_df <- function(.x,
                                 n_cores = bigstatsr::nb_cores(),
-                                block_size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                block_size = bigstatsr::block_size(nrow(attr(.x,"loci")), 1),
                                 ...) {
   rlang::check_dots_empty()
   if (is_diploid_only(.x)){
@@ -133,8 +144,7 @@ loci_maf.grouped_df <- function(.x,
     freq_mat <- bigstatsr::big_apply(geno_fbm, a.FUN = gt_group_alt_freq_freq_sub,
                                  rows_to_keep = rows_to_keep,
                                  ind=show_loci(.x)$big_index,
-                                 ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-                                 # block.size = bigstatsr::block_size(show_loci(.x)$big_index, 1),
+                                 ncores = 1, # we only use 1 cpu, we let openMP use multiple cores in the cpp code
                                  block.size = block_size,
                                  a.combine = 'rbind')
     freq_mat[freq_mat>0.5 & !is.na(freq_mat)] <- 1 - freq_mat[freq_mat>0.5 & !is.na(freq_mat)]

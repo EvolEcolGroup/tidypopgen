@@ -92,6 +92,10 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles",{
   # use fast cpp code (limit cores to 2)
   loci_freq_grp <- test_gt %>% loci_alt_freq(n_cores=2)
   all.equal(loci_freq_map, loci_freq_grp)
+  # now repeat with multiple blocks of snps
+  loci_freq_grp_chunked <- test_gt %>% loci_alt_freq(n_cores=2, block_size=2)
+  expect_true(all.equal(loci_freq_grp, loci_freq_grp_chunked))
+
   # and now for maf
   # compute by using group map
   loci_maf_map <- test_gt %>% group_map(.f=~loci_maf(.x))
