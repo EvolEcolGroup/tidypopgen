@@ -1,9 +1,3 @@
-# TODO check if we need n_cores (or is it just done in openMP?!?)
-# TODO check that we pass block_size to all functions
-# TODO alt_freq for groups should do the same as maf for groups (and ideally we should use
-# alt_freq to then compute maf)
-
-
 #' Estimate allele frequencies at each each locus
 #'
 #' Allele frequencies can be estimates as minimum allele frequencies (MAF) with
