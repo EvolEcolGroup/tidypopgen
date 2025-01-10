@@ -50,9 +50,9 @@ loci_alt_freq.vctrs_bigSNP <- function(.x,
   #stopifnot_diploid(.x)
   # if we have diploid
   if (is_diploid_only(.x)){
-    loci_alt_freq_diploid(.x)
+    loci_alt_freq_diploid(.x, n_cores = n_cores, block_size = block_size)
   } else {
-    loci_alt_freq_polyploid(.x)
+    loci_alt_freq_polyploid(.x, n_cores = n_cores, block_size = block_size, ...)
   }
 }
 
@@ -157,7 +157,7 @@ loci_maf.grouped_df <- function(.x,
 }
 
 # function to estimate frequencies for diploid
-loci_alt_freq_diploid <- function(.x){
+loci_alt_freq_diploid <- function(.x, n_cores, block_size){
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
   # rows (individuals) that we want to use
@@ -178,8 +178,8 @@ loci_alt_freq_diploid <- function(.x){
     freq <- bigstatsr::big_apply(geno_fbm, a.FUN = big_sub_counts,
                                  rows_to_keep = rows_to_keep,
                                  ind=attr(.x,"loci")$big_index,
-                                 ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-                                 block.size = bigstatsr::block_size(attr(.x,"loci")$big_index, 1),
+                                 ncores = 1, # parallelisation is used within the function
+                                 block.size = block_size,
                                  a.combine = 'c')
   } else { # if we have a single individual
     freq <-geno_fbm[rows_to_keep,attr(.x,"loci")$big_index] /2
@@ -187,7 +187,7 @@ loci_alt_freq_diploid <- function(.x){
   freq
 }
 
-loci_alt_freq_polyploid <- function(.x, ...){
+loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...){
   warning("this function still needs a proper unit test!!! It assumes alleles are the unit of observation")
   # get the FBM
   geno_fbm <- attr(.x,"bigsnp")$genotypes
@@ -208,6 +208,8 @@ loci_alt_freq_polyploid <- function(.x, ...){
                                  rows_to_keep = rows_to_keep,
                                  ind=attr(.x,"loci")$big_index,
                                  ploidy_by_indiv = ploidy_by_indiv,
+                                 ncores = n_cores, # there is no OpenMP parallelization, so we us multiple cores here
+                                 block.size = block_size,
                                  a.combine = 'rbind')
     # now get frequency accounting for missing values
     col_sums_na_mat[,1]/(sum(ploidy_by_indiv) - col_sums_na_mat[,2])
