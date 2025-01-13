@@ -6,11 +6,21 @@
 \alias{indiv_missingness.vctrs_bigSNP}
 \title{Estimate individual missingness}
 \usage{
-indiv_missingness(.x, as_counts = FALSE, ...)
+indiv_missingness(.x, as_counts, block_size, ...)
 
-\method{indiv_missingness}{tbl_df}(.x, as_counts = FALSE, ...)
+\method{indiv_missingness}{tbl_df}(
+  .x,
+  as_counts = FALSE,
+  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  ...
+)
 
-\method{indiv_missingness}{vctrs_bigSNP}(.x, as_counts = FALSE, ...)
+\method{indiv_missingness}{vctrs_bigSNP}(
+  .x,
+  as_counts = FALSE,
+  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  ...
+)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
@@ -19,6 +29,8 @@ or a \code{\link{gen_tibble}}.}
 
 \item{as_counts}{boolean defining whether the count of NAs (rather than the rate)
 should be returned. It defaults to FALSE (i.e. rates are returned by default).}
+
+\item{block_size}{maximum number of loci read at once.}
 
 \item{...}{currently unused.}
 }
