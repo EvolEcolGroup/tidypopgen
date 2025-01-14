@@ -61,8 +61,9 @@ test_that("run admixture as single run", {
   expect_false(is.null(anole_adm3$cv))
   anole_adm4 <- gt_admixture(anole_gt, k = 3, crossval = TRUE, n_cores = 2, seed = 123, conda_env = "none")
   anole_adm_comb2 <- c(anole_adm3, anole_adm4)
-  # TODO write some check for the object above
-
+  expect_true(ncol(anole_adm_comb2$Q[[1]])==ncol(anole_adm_comb2$Q[[2]]))
+  expect_true(all(anole_adm_comb2$k==c(3,3)))
+  expect_true(all(anole_adm_comb2$cv == c(anole_adm3$cv, anole_adm4$cv)))
 })
 
 test_that("run admixture as multiple runs", {
@@ -94,14 +95,15 @@ test_that("run admixture as multiple runs", {
   anole_adm_cv_reorder <- gt_admix_reorder_q(anole_adm_cv)
   # check plot ordering
   unord_plot <- autoplot(anole_adm_cv, type = "barplot", k=3,run = 1, annotate_group=FALSE)
-  ord_plot <- autoplot(anole_adm_cv_reorder, type = "barplot", k=3,run = 1, annotate_group=TRUE)
+  ord_plot <- autoplot(anole_adm_cv, type = "barplot", k=3,run = 1, annotate_group=TRUE)
   reord_plot <- autoplot(anole_adm_cv_reorder, type = "barplot", k=3,run = 1, annotate_group=TRUE)
-  expect_identical (ord_plot, reord_plot)
+
+  expect_identical (ord_plot$data, reord_plot$data)
   expect_false (identical (unord_plot, ord_plot))
   # reordering within plot changes the order further
   ord_within_plot <- autoplot(anole_adm_cv_reorder, type = "barplot", k=3,run = 1,
                               annotate_group=TRUE, reorder_within_groups=TRUE)
-  expect_false (identical (ord_plot, ord_within_plot))
+  expect_false(identical(ord_plot, ord_within_plot))
 
   # get q matrix and augment it
   anole_q <- get_q_matrix(anole_adm_cv, k=3, run=1)
@@ -128,6 +130,9 @@ test_that("run admixture as multiple runs", {
   #q_tidy_ind <- tidy(get_q_matrix(anole_adm_cv, k=3, run=1), anole_gt %>% dplyr::ungroup())
   #expect_false("group" %in% colnames(q_tidy_ind))
 
+  # TODO tidy q_matrix with gt that has a different grouping variable
+  # to the one used to create the q_matrix and see what happens
+
   # reorder errors
   # wrong object
   expect_error(gt_admix_reorder_q(anole_gt),
@@ -135,7 +140,7 @@ test_that("run admixture as multiple runs", {
   # wrong group length
   expect_error(gt_admix_reorder_q(anole_adm_cv, group=c(1,2)),
                "The length of the group variable must be the same as the number of rows in the Q matrix")
-  # no group when we have no group info
+  # no group when we have no group information in the gt_admix object
   anole_adm_no_group <- anole_adm_cv
   anole_adm_no_group$group <- NULL
   expect_error(gt_admix_reorder_q(anole_adm_no_group),
@@ -171,6 +176,25 @@ test_that("assigning factor levels reorders populations in autoplot",{
   anole_gt <- anole_gt %>%
     mutate(population = factor(population, levels = c("AF", "Eam", "Wam")))
   anole_gt <- anole_gt %>% group_by(population)
+
+  # reorder the gt_admix object
+  anole_adm_reordered1 <- gt_admix_reorder_q(anole_adm, group = anole_gt$population)
+  plt_b <- autoplot(anole_adm_reordered1, type = "barplot", k = 3, run = 1,
+                  annotate_group = TRUE, arrange_by_group = TRUE,
+                  arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
+  # and the population order changes
+  expect_true(all(levels(plt_b$data$group) == c("AF","Eam","Wam")))
+  # group of the first individual is therefore "AF"
+  expect_true(plt_b$data$group[1]=="AF")
+  # group of the last individual is therefore "Wam"
+  expect_true(plt_b$data$group[138]=="Wam")
+
+  # now test this against the same grouping before running gt_admixture
+  anole_gt <- anole_gt %>% ungroup()
+  # reset the population levels
+  anole_gt <- anole_gt %>%
+    mutate(population = factor(population, levels = c("AF", "Eam", "Wam")))
+  anole_gt <- anole_gt %>% group_by(population)
   anole_adm2 <- gt_admixture(anole_gt, k = 3, crossval = FALSE, n_cores = 1, seed = 123, conda_env = "none")
   plt2 <- autoplot(anole_adm2, type = "barplot", k = 3, run = 1,
                    annotate_group = TRUE, arrange_by_group = TRUE,
@@ -181,9 +205,12 @@ test_that("assigning factor levels reorders populations in autoplot",{
   expect_true(plt2$data$group[1]=="AF")
   # group of the last individual is therefore "Wam"
   expect_true(plt2$data$group[138]=="Wam")
+
+  # both plots should be the same
+  expect_identical(plt_b$data, plt2$data)
 })
 
-test_that("rearranging gt_admix",{
+test_that("checking autoplot arrange_ and annotate_ arguments work",{
   # randomly reorder the gt
   order <- sample(1:nrow(anole_gt))
   anole_gt <- anole_gt %>% arrange(order)
@@ -218,3 +245,41 @@ test_that("rearranging gt_admix",{
 })
 
 
+test_that("grouping before running gt_admxiture vs reordering after running gt_admixture",{
+  # Plots grouping BEFORE running admixture
+  anole_gt <- anole_gt %>% group_by(population)
+  anole_adm_cv <- gt_admixture(anole_gt, k = 2:4, n_runs =2, crossval = TRUE, n_cores = 2, seed = c(123,234), conda_env = "none")
+  basic_plot1 <- autoplot(anole_adm_cv, type = "barplot", k = 3, run = 1,
+                         annotate_group=FALSE, arrange_by_group = FALSE,
+                         arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
+  labels <- autoplot(anole_adm_cv, type = "barplot", k = 3, run = 1,
+                           annotate_group=TRUE, arrange_by_group = TRUE,
+                           arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
+
+  anole_gt <- anole_gt %>% ungroup()
+
+  # Plots grouping and reordering AFTER running admixture
+  anole_adm_cv <- gt_admixture(anole_gt, k = 2:4, n_runs =2, crossval = TRUE, n_cores = 2, seed = c(123,234), conda_env = "none")
+  basic_plot2 <- autoplot(anole_adm_cv, type = "barplot", k = 3, run = 1,
+           annotate_group=FALSE, arrange_by_group = FALSE,
+           arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
+  # Expect basic plots to be the same, no reordering has taken place
+  expect_identical(basic_plot1$data$id,basic_plot2$data$id)
+  expect_identical(basic_plot1$data$percentage,basic_plot2$data$percentage)
+  # group and reorder gt_admix
+  anole_gt <- anole_gt %>% group_by(population)
+  anole_adm_cv_reorder <- gt_admix_reorder_q(anole_adm_cv, group = anole_gt$population)
+  # autoplot should now be ordered by group, even when arrange_ and annotate_ are false
+  reord <- autoplot(anole_adm_cv_reorder, type = "barplot", k = 3, run = 1,
+           annotate_group=FALSE, arrange_by_group = FALSE,
+           arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
+  # annotate and arranging by group should keep the same order
+  reord_labels <- autoplot(anole_adm_cv_reorder, type = "barplot", k = 3, run = 1,
+           annotate_group=TRUE, arrange_by_group = TRUE,
+           arrange_by_indiv = FALSE, reorder_within_groups = FALSE)
+  expect_identical(reord$data,reord_labels$data)
+
+  # the plot from gt_admix taken from grouped gen_tibble should be identical to
+  # the plot from a reordered gt_admix object
+  expect_identical(labels$data, reord_labels$data)
+  })
