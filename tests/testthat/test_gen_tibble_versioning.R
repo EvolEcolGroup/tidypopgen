@@ -21,6 +21,13 @@ test_that("versioning updates correctly through gt_order_loci",{
   expect_true(file.exists(files[1]))
   expect_true(file.exists(files[2]))
 
+  # do the file directories exist?
+  expect_true(dir.exists(dirname(files[1])))
+  expect_true(dir.exists(dirname(files[2])))
+
+  # print the directory
+  print(dirname(files[1]))
+
   # remove extension
   file <- gsub(".bk","",files[2])
 
