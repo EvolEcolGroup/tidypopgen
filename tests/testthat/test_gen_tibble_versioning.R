@@ -10,9 +10,14 @@ test_that("versioning updates correctly through gt_order_loci",{
                           genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
+
+  tempfile <- tempfile()
+
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci,
                         indiv_meta = test_indiv_meta, quiet = TRUE,
-                        backingfile = tempfile())
+                        backingfile = tempfile)
+
+  expect_true(dir.exists(dirname(tempfile)))
 
   # get the gt filenames
   files <-  gt_get_file_names(test_gt)
