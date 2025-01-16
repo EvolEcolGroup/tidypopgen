@@ -422,7 +422,7 @@ anole_snmf <- gt_admix_reorder_q(anole_snmf, group = anole_gt$forest)
 And replot the data:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources, labelled Atlantic forest or Amazonian forest"}
-autoplot(anole_snmf, type = "barplot", k = 3, run = 1, data = anole_gt, annotate_group = TRUE, arrange_by_group = TRUE, arrange_by_indiv = TRUE, reorder_within_groups = TRUE)
+autoplot(anole_snmf, type = "barplot", k = 3, run = 1, annotate_group = TRUE, arrange_by_group = TRUE, arrange_by_indiv = TRUE, reorder_within_groups = TRUE)
 ```
 
 And here we can see that the Atlantic Forest individuals clearly separate from
