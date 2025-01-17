@@ -84,3 +84,32 @@ test_that("get_p_matrix returns correct p-matrix",{
   expect_error(get_p_matrix(q_list, k=3, run=3),"Specified run is out of range")
 })
 
+test_that("tidying a q_matrix",{
+  # read a single .Q
+  Q_path <- system.file("/extdata/anolis/anolis_ld_run1.3.Q", package = "tidypopgen")
+  q_mat <- read.table(Q_path)
+  anolis_q_k3_mat <- q_matrix(q_mat)
+
+  # create gt and metadata
+  vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz", package = "tidypopgen")
+  anole_gt <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+  pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv", package = "tidypopgen")
+  pops <- readr::read_csv(pops_path, show_col_types = FALSE)
+  anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
+  anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
+
+  # tidy without group info
+  tidy_q <- tidy(anolis_q_k3_mat, anole_gt)
+  expect_false("group" %in% colnames(tidy_q))
+  expect_equal(tidy_q$id, rep(anole_gt$id, each = 3))
+
+  anole_gt <- anole_gt %>% group_by(population)
+
+  # tidy using group from gen_tibble
+  tidy_q <- tidy(anolis_q_k3_mat, anole_gt)
+  expect_true("group" %in% colnames(tidy_q))
+  expect_equal(tidy_q$group, rep(anole_gt$population, each = 3))
+  expect_equal(tidy_q$id, rep(anole_gt$id, each = 3))
+})
+
+
