@@ -186,6 +186,7 @@ test_that("handling of duplicated loci",{
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
   # duplicated positions are registered by is_loci_table_ordered
   expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
+  expect_error(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE, error_on_false = TRUE),"Your loci are not sorted within chromosomes")
   # but currently we can still write the plink fileset and read back into a gt without a warning
   file <- gt_as_plink(test_gt, file = paste0(tempfile(),".bed"), chromosomes_as_int = TRUE)
   test_gt_reload <- gen_tibble(file, backingfile = tempfile(), quiet = TRUE)

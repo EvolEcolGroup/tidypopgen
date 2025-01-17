@@ -38,7 +38,7 @@ gt_snmf <- function (x, k, project = "continue", n_runs = 1, alpha, tolerance = 
 
   # if required install LEA
   if (!requireNamespace("LEA", quietly = TRUE)) {
-    install.packages("LEA")
+    utils::install.packages("LEA")
   }
 
   if(inherits(x, "gen_tbl")){

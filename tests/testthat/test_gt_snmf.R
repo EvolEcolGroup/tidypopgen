@@ -74,4 +74,8 @@ test_that("gt_snmf from file and from gen_tibble are the same",{
                            alpha = 100)
   expect_equal(anole_snmf_gt$Q, anole_snmf_gt_ne$Q)
   expect_equal(anole_snmf_gt$G, anole_snmf_gt_ne$G)
+
+  # test plot
+  plt <- autoplot(anole_snmf_gt)
+  expect_true(plt$labels$y == "Cross-Entropy")
 })
