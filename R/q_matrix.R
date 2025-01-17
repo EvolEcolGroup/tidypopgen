@@ -281,6 +281,11 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 
   # and finally left join
   data <- dplyr::left_join(data,q_tbl, by = "id")
+
+  if(inherits(data,"grouped_df")){
+    data <- data %>% dplyr::group_by(across(group_vars(data)))
+    class(data) <- c("gen_tbl", class(data))
+  }
   data
 }
 

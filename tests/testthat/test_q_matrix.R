@@ -84,7 +84,7 @@ test_that("get_p_matrix returns correct p-matrix",{
   expect_error(get_p_matrix(q_list, k=3, run=3),"Specified run is out of range")
 })
 
-test_that("tidying a q_matrix",{
+test_that("tidying and augmenting a q_matrix",{
   # read a single .Q
   Q_path <- system.file("/extdata/anolis/anolis_ld_run1.3.Q", package = "tidypopgen")
   q_mat <- read.table(Q_path)
@@ -103,6 +103,12 @@ test_that("tidying a q_matrix",{
   expect_false("group" %in% colnames(tidy_q))
   expect_equal(tidy_q$id, rep(anole_gt$id, each = 3))
 
+  # augment without group info
+  augment_q <- augment(anolis_q_k3_mat, anole_gt)
+  expect_false("group" %in% colnames(anolis_q_k3_mat))
+  expect_equal(augment_q$id, anole_gt$id)
+  expect_true(inherits(augment_q,"gen_tbl"))
+
   anole_gt <- anole_gt %>% group_by(population)
 
   # tidy using group from gen_tibble
@@ -110,6 +116,13 @@ test_that("tidying a q_matrix",{
   expect_true("group" %in% colnames(tidy_q))
   expect_equal(tidy_q$group, rep(anole_gt$population, each = 3))
   expect_equal(tidy_q$id, rep(anole_gt$id, each = 3))
+
+  # augment using group from gen_tibble
+  augment_q <- augment(anolis_q_k3_mat, anole_gt)
+  expect_true(inherits(augment_q,"gen_tbl"))
+  expect_true("group" %in% colnames(augment_q))
+  expect_equal(augment_q$group, anole_gt$population)
+  expect_equal(augment_q$id, anole_gt$id)
 })
 
 
