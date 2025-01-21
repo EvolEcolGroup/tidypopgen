@@ -48,7 +48,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(.x, error_on_false = FALSE, ignor
                  group_by(.data$chr_int) %>%
                  group_map(~ duplicated(.x$position))))){
     if (error_on_false){
-      stop("Your loci are not sorted within chromosomes")
+      stop("Your loci table contains duplicates")
     } else {
       return(FALSE)
     }
