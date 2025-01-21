@@ -449,110 +449,161 @@ standard dapc plot with:</p>
 <h2 id="clustering-with-snmf">Clustering with sNMF<a class="anchor" aria-label="anchor" href="#clustering-with-snmf"></a>
 </h2>
 <p>sNMF is a fast clustering algorithm which provides results similar to
-STRUCTURE and ADMIXTURE. We can run it directly from R. We have first to
-generate a file with our genotype data:</p>
+STRUCTURE and ADMIXTURE. We can run it directly from tidypopgen using
+the <code>gt_snmf</code> function.</p>
+<p>The function <code>gt_snmf</code> creates a .geno file to be used by
+LEA. This is placed by default in the same directory as the backing file
+of the <code>gen_tibble</code>, and uses the same name.</p>
+<p>The output of <code>gt_snmf</code> is a <code>gt_admix</code> object.
+<code>gt_admix</code> objects are designed to make visualising data from
+different clustering algorithms swift and easy.</p>
+<p>Lets begin by running <code>gt_snmf</code>. We can run K clusters
+from k=1 to k=10. We will use just one repeat, but ideally we should run
+multiple repetitions for each K:</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">geno_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_as_geno_lea.html">gt_as_geno_lea</a></span><span class="op">(</span><span class="va">anole_gt</span><span class="op">)</span></span>
-<span><span class="va">geno_file</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpuLWp28/anolis_1f8d67200ae3.geno"</span></span></code></pre></div>
-<p>Note that the .geno file is placed by default in the same directory
-and using the same name as the backing file of the
-<code>gen_tibble</code></p>
-<p>Now we can run K clusters from k=1 to k=10. We will use just one
-repeat, but ideally we should run multiple repetitions for each K:</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://membres-timc.imag.fr/Olivier.Francois/lea.html" class="external-link">LEA</a></span><span class="op">)</span></span>
-<span><span class="va">anole_snmf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/LEA/man/main_sNMF.html" class="external-link">snmf</a></span><span class="op">(</span>input.file <span class="op">=</span> <span class="va">geno_file</span>,</span>
-<span>                   K <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
-<span>                   entropy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                   repetitions <span class="op">=</span> <span class="fl">3</span>,</span>
-<span>                   alpha <span class="op">=</span> <span class="fl">100</span></span>
-<span>                  <span class="op">)</span></span></code></pre></div>
-<p>We can examine the suitability of our K values by plotting with:</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anole_snmf</span>, cex <span class="op">=</span> <span class="fl">1.2</span>, pch <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-35-1.png" alt="Plot of cross-entropy for each value of K, showing K = 3 has the lowest cross-entropy" width="700"></p>
-<p>From which we can see that K = 3 is a sensible choice, as 3
-represents the ‘elbow’ in the plot. We can select the fastest run
-using:</p>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ce</span> <span class="op">&lt;-</span>  <span class="fu"><a href="https://rdrr.io/pkg/LEA/man/crossEntropy.html" class="external-link">cross.entropy</a></span><span class="op">(</span><span class="va">anole_snmf</span>, K <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="va">quick_run</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.min</a></span><span class="op">(</span><span class="va">ce</span><span class="op">)</span></span></code></pre></div>
-<p>And then to plot our clusters, we can begin by extracting the Q
-matrix from our <code>snmf</code> object, and covert it to a
-<code>q_matrix</code> object as used by <code>tidypopgen</code>:</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">q_mat</span> <span class="op">&lt;-</span> <span class="fu">LEA</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/LEA/man/Q.html" class="external-link">Q</a></span><span class="op">(</span><span class="va">anole_snmf</span>, K <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="va">quick_run</span><span class="op">)</span> </span>
-<span><span class="va">q_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/q_matrix.html">q_matrix</a></span><span class="op">(</span><span class="va">q_mat</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">q_mat</span><span class="op">)</span></span>
-<span><span class="co">#&gt;            .Q1       .Q2       .Q3</span></span>
-<span><span class="co">#&gt; [1,] 9.999e-05 9.999e-05 9.998e-01</span></span>
-<span><span class="co">#&gt; [2,] 9.999e-05 9.999e-05 9.998e-01</span></span>
-<span><span class="co">#&gt; [3,] 9.998e-01 9.999e-05 9.999e-05</span></span>
-<span><span class="co">#&gt; [4,] 9.998e-01 9.999e-05 9.999e-05</span></span>
-<span><span class="co">#&gt; [5,] 9.998e-01 9.999e-05 9.999e-05</span></span>
-<span><span class="co">#&gt; [6,] 9.999e-05 9.998e-01 9.999e-05</span></span></code></pre></div>
-<p>We can quickly plot it with</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">q_mat</span>, data <span class="op">=</span> <span class="va">anole_gt</span>, annotate_group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-38-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
-<p>We can tidy our q matrix into a tibble, returning it in a format
-which is suitable for plotting:</p>
+<span></span>
+<span><span class="va">anole_snmf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_snmf.html">gt_snmf</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">anole_gt</span>,</span>
+<span>                         project <span class="op">=</span> <span class="st">"new"</span>,</span>
+<span>                         k <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span>
+<span>                         entropy <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                         n_runs <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                         alpha <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>                         seed <span class="op">=</span> <span class="fl">1</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>We can examine the suitability of our K values by plotting the
+cross-entropy values for each K value, which is contained in the
+<code>cv</code> element of the <code>gt_admix</code> object:</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">anole_snmf</span><span class="op">$</span><span class="va">cv</span>, cex <span class="op">=</span> <span class="fl">1.2</span>, pch <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span></code></pre></div>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-34-1.png" alt="Plot of cross-entropy for each value of K, showing K = 3 has the lowest cross-entropy" width="700"></p>
+<p>Here we can see that K = 3 is a sensible choice, as K = 3 represents
+the ‘elbow’ in the plot, where cross-entropy is at it’s lowest.</p>
+<p>We can quickly plot this data with <code>autoplot</code> by using the
+type <code>barplot</code> and selecting our chosen value of
+<code>k</code>:</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_snmf</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">anole_gt</span>, annotate_group <span class="op">=</span> <span class="cn">FALSE</span>, type <span class="op">=</span> <span class="st">"barplot"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-35-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
+<p>This plot is fine, but it is messy, and not a very helpful
+visualisation if we want to understand how our populations are
+structured.</p>
+<p>To re-order this plot, grouping individuals by population, we can use
+the <code>annotate_group</code> and <code>arrange_by_group</code>
+arguments in autoplot:</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_snmf</span>, type <span class="op">=</span> <span class="st">"barplot"</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">anole_gt</span>, annotate_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-36-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
+<p>This plot is much better. Now the plot is labelled by population we
+can see that the individuals from each population are grouped together,
+with a few individuals showing mixed ancestry between populations.</p>
+<p>However, for a more visually appealing plot, we can re-order the
+individuals within each population as follows:</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_snmf</span>, type <span class="op">=</span> <span class="st">"barplot"</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">anole_gt</span>, annotate_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_indiv <span class="op">=</span> <span class="cn">TRUE</span>, reorder_within_groups <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-37-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources, with individuals arranged according to their dominant ancestry propotion" width="700"></p>
+<p>Now individuals are neatly ordered within each population.</p>
+<p>For more complex/publication ready plots, we can extract the specific
+K value and run that we are interested in plotting, and add this .Q
+matrix to our gen_tibble object, so that we can create a custom plot
+with <code>ggplot2</code>.</p>
+<p>First we extract the q_matrix of interest using the
+<code>get_q_matrix</code> function:</p>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">q_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">anole_snmf</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p>Then we can easily add the data with the <code>augment</code>
+method:</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anole_gt_sNMF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">q_mat</span>, data <span class="op">=</span> <span class="va">anole_gt</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">anole_gt_sNMF</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 38</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   population [3]</span></span></span>
+<span><span class="co">#&gt;   id            genotypes population .rownames  .fittedPC1 .fittedPC2 .fittedPC3</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> BM288                 1 Eam        BM288            20.8      40.7     -<span style="color: #BB0000;">14.9</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> GN71                  2 Eam        GN71             19.5      44.8     -<span style="color: #BB0000;">20.2</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> H1907                 3 Wam        H1907           -<span style="color: #BB0000;">91.2</span>     -<span style="color: #BB0000;">11.3</span>       8.70 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> H1911                 4 Wam        H1911          -<span style="color: #BB0000;">101.</span>      -<span style="color: #BB0000;">18.2</span>     -<span style="color: #BB0000;">30.4</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> H2546                 5 Wam        H2546           -<span style="color: #BB0000;">88.9</span>      -<span style="color: #BB0000;">9.65</span>     12.8  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> IBSPCRIB0361          6 AF         IBSPCRIB0…       43.7     -<span style="color: #BB0000;">30.4</span>       0.908</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 31 more variables: .fittedPC4 &lt;dbl&gt;, .fittedPC5 &lt;dbl&gt;, .fittedPC6 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .fittedPC7 &lt;dbl&gt;, .fittedPC8 &lt;dbl&gt;, .fittedPC9 &lt;dbl&gt;, .fittedPC10 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .fittedPC11 &lt;dbl&gt;, .fittedPC12 &lt;dbl&gt;, .fittedPC13 &lt;dbl&gt;, .fittedPC14 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .fittedPC15 &lt;dbl&gt;, .fittedPC16 &lt;dbl&gt;, .fittedPC17 &lt;dbl&gt;, .fittedPC18 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .fittedPC19 &lt;dbl&gt;, .fittedPC20 &lt;dbl&gt;, .fittedPC21 &lt;dbl&gt;, .fittedPC22 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .fittedPC23 &lt;dbl&gt;, .fittedPC24 &lt;dbl&gt;, .fittedPC25 &lt;dbl&gt;, .fittedPC26 &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   .fittedPC27 &lt;dbl&gt;, .fittedPC28 &lt;dbl&gt;, .fittedPC29 &lt;dbl&gt;, …</span></span></span></code></pre></div>
+<p>Alternatively, we can convert our q matrix into <code>tidy</code>
+format, which is more suitable for plotting:</p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tidy_q</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">q_mat</span>, <span class="va">anole_gt</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tidy_q</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
-<span><span class="co">#&gt;   .Q1        .Q2        .Q3        id           group</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;q_matrix&gt;</span> <span style="color: #949494; font-style: italic;">&lt;q_matrix&gt;</span> <span style="color: #949494; font-style: italic;">&lt;q_matrix&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 9.999e-05  9.999e-05  9.998e-01  BM288        Eam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 9.999e-05  9.999e-05  9.998e-01  GN71         Eam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 9.998e-01  9.999e-05  9.999e-05  H1907        Wam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 9.998e-01  9.999e-05  9.999e-05  H1911        Wam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 9.998e-01  9.999e-05  9.999e-05  H2546        Wam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 9.999e-05  9.998e-01  9.999e-05  IBSPCRIB0361 AF</span></span></code></pre></div>
-<p>For more complex plots, we can add the clusters to the tibble, so
-that we can create a custom plot with <code>ggplot2</code>. We can
-easily add the data with the <code>augment</code> method:</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">anole_gt_sNMF</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">q_mat</span>, data <span class="op">=</span> <span class="va">anole_gt</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">#&gt;   id    group q     percentage</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> BM288 Eam   .Q1     1.00    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> BM288 Eam   .Q2     0.000<span style="text-decoration: underline;">100</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> BM288 Eam   .Q3     0.000<span style="text-decoration: underline;">100</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> GN71  Eam   .Q1     1.00    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> GN71  Eam   .Q2     0.000<span style="text-decoration: underline;">100</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> GN71  Eam   .Q3     0.000<span style="text-decoration: underline;">100</span></span></span></code></pre></div>
 <p>And now we can use <code>ggplot2</code> directly to generate our
-plot:</p>
+custom plot:</p>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="va">anole_gt_sNMF</span> <span class="op">&lt;-</span> <span class="va">anole_gt_sNMF</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_longer.html" class="external-link">pivot_longer</a></span><span class="op">(</span>cols <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">".Q"</span><span class="op">)</span>, names_to <span class="op">=</span> <span class="st">"q"</span>, values_to <span class="op">=</span> <span class="st">"percentage"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>percentage <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">percentage</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">tidy_q</span> <span class="op">&lt;-</span> <span class="va">tidy_q</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>dominant_q <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">percentage</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">population</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">dominant_q</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">group</span>, <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/desc.html" class="external-link">desc</a></span><span class="op">(</span><span class="va">dominant_q</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>plot_order <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span>, id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">id</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">anole_gt_sNMF</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">id</span>, y <span class="op">=</span> <span class="va">percentage</span>, fill <span class="op">=</span> <span class="va">q</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">tidy_q</span>, <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">id</span>, y <span class="op">=</span> <span class="va">percentage</span>, fill <span class="op">=</span> <span class="va">q</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span>width <span class="op">=</span> <span class="fl">1</span>, position <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/position_stack.html" class="external-link">position_stack</a></span><span class="op">(</span>reverse <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
-<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Population Structure for K = 3"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>y <span class="op">=</span> <span class="st">"Population Structure for K = 3"</span>, title <span class="op">=</span> <span class="st">"Clustering at K = 3 for Anolis punctatus using sNMF algorithm"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_distruct.html">theme_distruct</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/scale_fill_distruct.html">scale_fill_distruct</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">plt</span></span></code></pre></div>
 <p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-41-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
+<p>In the Prates et al 2018 data, anolis lizards were sampled from three
+regions, described as Af, Eam, and Wam. These acronyms correspond to
+samples from the Atlantic Forest, Eastern Amazonia, and Western Amazonia
+of Brazil.</p>
+<p>Lets say we wanted to change the grouping variable of our plot, to
+explore how Atlantic Forest individuals differ from all Amazonian
+individuals. We can do this by adding a <code>forest</code> group to our
+gen_tibble:</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anole_gt</span><span class="op">$</span><span class="va">forest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">anole_gt</span><span class="op">$</span><span class="va">population</span> <span class="op">==</span> <span class="st">"AF"</span>, <span class="st">"Atlantic Forest"</span>, <span class="st">"Amazonian Forest"</span><span class="op">)</span></span></code></pre></div>
+<p>Then we can change the grouping variable of our <code>gt_admix</code>
+object using <code>gt_admix_reorder_q</code>:</p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">anole_snmf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_admix_reorder_q.html">gt_admix_reorder_q</a></span><span class="op">(</span><span class="va">anole_snmf</span>, group <span class="op">=</span> <span class="va">anole_gt</span><span class="op">$</span><span class="va">forest</span><span class="op">)</span></span></code></pre></div>
+<p>And replot the data:</p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_snmf</span>, type <span class="op">=</span> <span class="st">"barplot"</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span>, annotate_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_indiv <span class="op">=</span> <span class="cn">TRUE</span>, reorder_within_groups <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-44-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources, labelled Atlantic forest or Amazonian forest" width="700"></p>
+<p>And here we can see that the Atlantic Forest individuals clearly
+separate from Amazonian individuals. However, there are two clear
+clusters among the Amazonian individuals, showing that there is still a
+strong distinction between Eastern and Western anolis lizards within the
+Amazonian forest.</p>
 </div>
 <div class="section level2">
-<h2 id="admixture-and-handling-multiple-q-matrices">ADMIXTURE and handling multiple Q matrices<a class="anchor" aria-label="anchor" href="#admixture-and-handling-multiple-q-matrices"></a>
+<h2 id="handling-q-matrices">Handling Q matrices<a class="anchor" aria-label="anchor" href="#handling-q-matrices"></a>
 </h2>
-<p>Usually, clustering algorithms are run multiple times for different
-values of K. The function <code><a href="../reference/q_matrix.html">q_matrix()</a></code> can take a path to a
+<p>For clustering algorithms that operate outside the R environment(such
+as ADMIXTURE), the function <code><a href="../reference/q_matrix.html">q_matrix()</a></code> can take a path to a
 directory containing results from multiple runs of a clustering
-algorithm (such as ADMIXTURE), read the .Q files, and summarise them in
-a single <code>q_matrix_list</code> object.</p>
-<p>In the analysis above, through <code><a href="https://rdrr.io/pkg/LEA/man/main_sNMF.html" class="external-link">snmf()</a></code>, we ran 3
-repetitions for each value of K.</p>
+algorithm for multiple values of K, read the .Q files, and summarise
+them in a single <code>q_matrix_list</code> object.</p>
+<p>In the analysis above, through <code><a href="../reference/gt_snmf.html">gt_snmf()</a></code>, we ran 1
+repetition for K values 1 to 10.</p>
 <p>To exemplify how <code><a href="../reference/q_matrix.html">q_matrix()</a></code> can read directly from
 output folders, we can write the outputs to a temporary file:</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">k_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">q_matrices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -562,81 +613,83 @@ output folders, we can write the outputs to a temporary file:</p>
 <span>  <span class="va">q_matrices</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">runs</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">q_matrices</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">LEA</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/LEA/man/Q.html" class="external-link">Q</a></span><span class="op">(</span><span class="va">anole_snmf</span>, K <span class="op">=</span> <span class="va">x</span>, run <span class="op">=</span> <span class="va">i</span><span class="op">)</span></span>
+<span>  <span class="va">q_matrices</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">anole_snmf</span>, k <span class="op">=</span> <span class="va">x</span>, run <span class="op">=</span> <span class="va">i</span><span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.table</a></span><span class="op">(</span><span class="va">q_matrices</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dir</span>,<span class="st">"/K"</span>,<span class="va">x</span>,<span class="st">"run"</span>,<span class="va">i</span>,<span class="st">".Q"</span><span class="op">)</span>, col.names <span class="op">=</span> <span class="cn">FALSE</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>, quote <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span>  </span>
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<p>And read them back into a <code>q_matrix_list</code>:</p>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<p>And read them back into our R environment using
+<code>q_matrix_list</code>:</p>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">q_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_q_files.html">read_q_files</a></span><span class="op">(</span><span class="va">dir</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">q_list</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Admixture results for multiple runs:                      </span></span>
 <span><span class="co">#&gt; k 1 2 3 4 5 6 7 8 9 10</span></span>
-<span><span class="co">#&gt; n 3 3 3 3 3 3 3 3 3  3</span></span>
+<span><span class="co">#&gt; n 1 1 1 1 1 1 1 1 1  1</span></span>
 <span><span class="co">#&gt; with slots:</span></span>
 <span><span class="co">#&gt; $Q for Q matrices</span></span></code></pre></div>
-<p>q_matrix has read and summarised the .Q files from our analysis,and
-we can access a single matrix from the list by selecting the run number
-and K value of interest. For example, if we would like to view the
-second run of K = 3:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">q_list</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;               .Q1         .Q2        .Q3</span></span>
-<span><span class="co">#&gt;  [1,] 0.000099990 0.000099990 0.99980000</span></span>
-<span><span class="co">#&gt;  [2,] 0.000099990 0.000099990 0.99980000</span></span>
-<span><span class="co">#&gt;  [3,] 0.999800000 0.000099990 0.00009999</span></span>
-<span><span class="co">#&gt;  [4,] 0.999800000 0.000099990 0.00009999</span></span>
-<span><span class="co">#&gt;  [5,] 0.999800000 0.000099990 0.00009999</span></span>
-<span><span class="co">#&gt;  [6,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt;  [7,] 0.000099990 0.801337000 0.19856300</span></span>
-<span><span class="co">#&gt;  [8,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt;  [9,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [10,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [11,] 0.559491000 0.181639000 0.25887000</span></span>
-<span><span class="co">#&gt; [12,] 0.811919000 0.034168200 0.15391300</span></span>
-<span><span class="co">#&gt; [13,] 0.234834000 0.000099991 0.76506600</span></span>
-<span><span class="co">#&gt; [14,] 0.999800000 0.000099990 0.00009999</span></span>
-<span><span class="co">#&gt; [15,] 0.000099990 0.000099990 0.99980000</span></span>
-<span><span class="co">#&gt; [16,] 0.999800000 0.000099990 0.00009999</span></span>
-<span><span class="co">#&gt; [17,] 0.000099990 0.000099990 0.99980000</span></span>
-<span><span class="co">#&gt; [18,] 0.999800000 0.000099990 0.00009999</span></span>
-<span><span class="co">#&gt; [19,] 0.030865000 0.214975000 0.75416000</span></span>
-<span><span class="co">#&gt; [20,] 0.000099990 0.000099990 0.99980000</span></span>
-<span><span class="co">#&gt; [21,] 0.016124800 0.392110000 0.59176500</span></span>
-<span><span class="co">#&gt; [22,] 0.000099990 0.000099990 0.99980000</span></span>
-<span><span class="co">#&gt; [23,] 0.000099990 0.000099990 0.99980000</span></span>
-<span><span class="co">#&gt; [24,] 0.000099990 0.000099990 0.99980000</span></span>
-<span><span class="co">#&gt; [25,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [26,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [27,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [28,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [29,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [30,] 0.999800000 0.000099990 0.00009999</span></span>
-<span><span class="co">#&gt; [31,] 0.000099991 0.036791300 0.96310900</span></span>
-<span><span class="co">#&gt; [32,] 0.073108700 0.135951000 0.79094000</span></span>
-<span><span class="co">#&gt; [33,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [34,] 0.999800000 0.000099990 0.00009999</span></span>
-<span><span class="co">#&gt; [35,] 0.000099991 0.030821400 0.96907900</span></span>
-<span><span class="co">#&gt; [36,] 0.206381000 0.000099991 0.79351900</span></span>
-<span><span class="co">#&gt; [37,] 0.254406000 0.000099991 0.74549400</span></span>
-<span><span class="co">#&gt; [38,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [39,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [40,] 0.000099991 0.033945100 0.96595500</span></span>
-<span><span class="co">#&gt; [41,] 0.000099991 0.342076000 0.65782400</span></span>
-<span><span class="co">#&gt; [42,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [43,] 0.000099990 0.999800000 0.00009999</span></span>
-<span><span class="co">#&gt; [44,] 0.000099991 0.806520000 0.19338000</span></span>
-<span><span class="co">#&gt; [45,] 0.850262000 0.027241300 0.12249600</span></span>
-<span><span class="co">#&gt; [46,] 0.999800000 0.000099990 0.00009999</span></span>
+<p><code>q_matrix_list</code> has read and summarised the .Q files from
+our analysis, and we can access a single matrix from the list by
+selecting the run number and K value of interest using
+<code>get_q_matrix</code> as before.</p>
+<p>For example, if we would like to view the second run of K = 3:</p>
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">q_list</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt;              .Q1         .Q2         .Q3</span></span>
+<span><span class="co">#&gt;  [1,] 0.99980000 9.99900e-05 0.000099990</span></span>
+<span><span class="co">#&gt;  [2,] 0.99980000 9.99900e-05 0.000099990</span></span>
+<span><span class="co">#&gt;  [3,] 0.00009999 9.99900e-05 0.999800000</span></span>
+<span><span class="co">#&gt;  [4,] 0.00009999 9.99900e-05 0.999800000</span></span>
+<span><span class="co">#&gt;  [5,] 0.00009999 9.99900e-05 0.999800000</span></span>
+<span><span class="co">#&gt;  [6,] 0.22744500 2.24013e-01 0.548541000</span></span>
+<span><span class="co">#&gt;  [7,] 0.16160000 2.11511e-02 0.817248000</span></span>
+<span><span class="co">#&gt;  [8,] 0.76707500 9.99910e-05 0.232825000</span></span>
+<span><span class="co">#&gt;  [9,] 0.00009999 9.99900e-05 0.999800000</span></span>
+<span><span class="co">#&gt; [10,] 0.99980000 9.99900e-05 0.000099990</span></span>
+<span><span class="co">#&gt; [11,] 0.00468650 9.99911e-05 0.995214000</span></span>
+<span><span class="co">#&gt; [12,] 0.99980000 9.99900e-05 0.000099990</span></span>
+<span><span class="co">#&gt; [13,] 0.00009999 9.99900e-05 0.999800000</span></span>
+<span><span class="co">#&gt; [14,] 0.77902900 1.90400e-01 0.030570500</span></span>
+<span><span class="co">#&gt; [15,] 0.98083300 1.90675e-02 0.000099991</span></span>
+<span><span class="co">#&gt; [16,] 0.62619600 3.63449e-01 0.010354700</span></span>
+<span><span class="co">#&gt; [17,] 0.99980000 9.99900e-05 0.000099990</span></span>
+<span><span class="co">#&gt; [18,] 0.99980000 9.99900e-05 0.000099990</span></span>
+<span><span class="co">#&gt; [19,] 0.99980000 9.99900e-05 0.000099990</span></span>
+<span><span class="co">#&gt; [20,] 0.00009999 9.99900e-05 0.999800000</span></span>
+<span><span class="co">#&gt; [21,] 0.96162000 3.82797e-02 0.000099991</span></span>
+<span><span class="co">#&gt; [22,] 0.77225200 1.48102e-01 0.079646000</span></span>
+<span><span class="co">#&gt; [23,] 0.00009999 9.99900e-05 0.999800000</span></span>
+<span><span class="co">#&gt; [24,] 0.97051600 2.93841e-02 0.000099991</span></span>
+<span><span class="co">#&gt; [25,] 0.78666100 9.99910e-05 0.213239000</span></span>
+<span><span class="co">#&gt; [26,] 0.74774700 9.99910e-05 0.252153000</span></span>
+<span><span class="co">#&gt; [27,] 0.97680100 2.30986e-02 0.000099991</span></span>
+<span><span class="co">#&gt; [28,] 0.66003700 3.39863e-01 0.000099991</span></span>
+<span><span class="co">#&gt; [29,] 0.10954200 4.69100e-02 0.843548000</span></span>
+<span><span class="co">#&gt; [30,] 0.00009999 9.99900e-05 0.999800000</span></span>
+<span><span class="co">#&gt; [31,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [32,] 0.18031500 8.19585e-01 0.000099991</span></span>
+<span><span class="co">#&gt; [33,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [34,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [35,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [36,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [37,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [38,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [39,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [40,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [41,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [42,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [43,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [44,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [45,] 0.00009999 9.99800e-01 0.000099990</span></span>
+<span><span class="co">#&gt; [46,] 0.18782000 8.12080e-01 0.000099991</span></span>
 <span><span class="co">#&gt; attr(,"class")</span></span>
 <span><span class="co">#&gt; [1] "q_matrix" "q_matrix" "matrix"   "array"</span></span></code></pre></div>
-<p>Similarly to before, we can then autoplot any of these matrices by
-selecting from the <code>q_matrix_list</code>:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">q_list</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">anole_gt</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-45-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
+<p>And, again, we can then autoplot any matrix by selecting from the
+<code>q_matrix_list</code> object:</p>
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">q_list</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">anole_gt</span>, annotate_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_indiv <span class="op">=</span> <span class="cn">TRUE</span>, reorder_within_groups <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-48-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
 <p>In this way, <code>tidypopgen</code> integrates with external
 clustering software (such as ADMIXTURE or STRUCTURE) seamlessly for
 quick, easy plotting.</p>

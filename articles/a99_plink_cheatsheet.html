@@ -179,7 +179,7 @@ alternatively:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">my_individuals</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"GRC14300079"</span>, <span class="st">"GRC14300142"</span>, <span class="st">"GRC14300159"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">my_individuals</span><span class="op">)</span></span>
+<span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">my_individuals</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A gen_tibble: 16 loci</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     0 × 3</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 variables: id &lt;chr&gt;, population &lt;chr&gt;, genotypes &lt;vctr_SNP&gt;</span></span></span></code></pre></div>

@@ -65,7 +65,7 @@ barplot a standard barplot of the admixture proportions
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>the type of plot (one of "cv", and "boxplot")</p></dd>
+<dd><p>the type of plot (one of "cv", and "barplot")</p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
@@ -78,7 +78,8 @@ param repeat the repeat to plot (for <code>barplot</code> type only)</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>additional arguments to be passed to autoplot method for q_matrices <code><a href="autoplot_q_matrix.html">autoplot_q_matrix()</a></code>.</p></dd>
+<dd><p>additional arguments to be passed to autoplot method
+for q_matrices <code><a href="autoplot_q_matrix.html">autoplot_q_matrix()</a></code>, used when type is <code>barplot</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -90,6 +91,10 @@ param repeat the repeat to plot (for <code>barplot</code> type only)</p></dd>
     <p><code>autoplot</code> produces simple plots to quickly inspect an object. They are
 not customisable; we recommend that you use <code>ggplot2</code> to produce publication
 ready plots.</p>
+<p>This autoplot will automatically rearrange individuals according to
+their id and any grouping variables if an associated 'data' gen_tibble is provided.
+To avoid any automatic re-sorting of individuals, set <code>arrange_by_group</code> and
+<code>arrange_by_indiv</code> to FALSE. See <code>autoplot.q_matrix</code> for further details.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
