@@ -47,6 +47,7 @@ test_that("gt_update_backingfile correctly updates",{
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
   # subset and reorder
   expect_false(is_loci_table_ordered(test_gt, error_on_false = FALSE))
+  expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE),"All SNPs in a chromosome should be adjacent")
   subset_reorder_test_gt <- test_gt %>% select_loci(c(2,4,5,1,6))
   expect_true(is_loci_table_ordered(subset_reorder_test_gt, error_on_false = FALSE))
   subset_reorder_test_gt <- subset_reorder_test_gt[c(2,1,4,5),]
@@ -93,6 +94,7 @@ test_that("gt_order_loci reorders and regenerates backingfiles",{
 
   # loci are out of order
   expect_false(is_loci_table_ordered(reorder_test_gt))
+  expect_error(is_loci_table_ordered(reorder_test_gt, error_on_false = TRUE),"Your loci are not sorted within chromosomes")
 
   # test gt_order_loci
   reorder_test_gt <- gt_order_loci(reorder_test_gt, use_current_table = FALSE, quiet = TRUE)
@@ -160,7 +162,8 @@ test_that("gt_order_loci use_current_table = TRUE",{
   # manually reorder the loci for positions to be out of order
   new_order <- c(3,4,2,5,1,6)
   show_loci(test_gt) <- show_loci(test_gt)[new_order,]
-  expect_false(is_loci_table_ordered(test_gt))
+  expect_false(is_loci_table_ordered(test_gt), "Your loci are not sorted within chromosomes")
+
 
   # test gt_order_loci use_current_table = TRUE
   expect_error(gt_order_loci(test_gt, use_current_table = TRUE, quiet = TRUE),"Your loci are not sorted within chromosomes")
@@ -244,8 +247,48 @@ test_that("chr_int from factor chromosomes",{
 })
 
 
+test_that("correct error when genetic_dist is not sorted",{
 
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(c(1,1,1,1,1,1)),
+                          position=as.integer(c(3,5,25,46,65,343)),
+                          genetic_dist = c(0.1,0.3,0.2,0.4,0.5,0.6),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
 
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+
+  expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
+  expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE, ignore_genetic_dist = FALSE),
+               "Your genetic distances are not sorted ")
+})
+
+test_that("correct error when loci table contains duplicates",{
+
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(c(1,1,1,1,1,1)),
+                          position=as.integer(c(3,3,25,46,65,343)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+
+  expect_false(is_loci_table_ordered(test_gt))
+  expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE),
+               "Your loci table contains duplicates")
+
+})
 
 
 

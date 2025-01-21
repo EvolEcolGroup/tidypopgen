@@ -10,14 +10,15 @@
 \arguments{
 \item{object}{an object of class \code{gt_admixture}}
 
-\item{type}{the type of plot (one of "cv", and "boxplot")}
+\item{type}{the type of plot (one of "cv", and "barplot")}
 
 \item{k}{the value of \code{k} to plot (for \code{barplot} type only)
 param repeat the repeat to plot (for \code{barplot} type only)}
 
 \item{run}{the run to plot (for \code{barplot} type only)}
 
-\item{...}{additional arguments to be passed to autoplot method for q_matrices \code{\link[=autoplot_q_matrix]{autoplot_q_matrix()}}.}
+\item{...}{additional arguments to be passed to autoplot method
+for q_matrices \code{\link[=autoplot_q_matrix]{autoplot_q_matrix()}}, used when type is \code{barplot}.}
 }
 \value{
 a \code{ggplot2} object
@@ -33,4 +34,9 @@ For \code{gt_admix}, the following types of plots are available:
 \code{autoplot} produces simple plots to quickly inspect an object. They are
 not customisable; we recommend that you use \code{ggplot2} to produce publication
 ready plots.
+
+This autoplot will automatically rearrange individuals according to
+their id and any grouping variables if an associated 'data' gen_tibble is provided.
+To avoid any automatic re-sorting of individuals, set \code{arrange_by_group} and
+\code{arrange_by_indiv} to FALSE. See \code{autoplot.q_matrix} for further details.
 }

@@ -46,7 +46,7 @@ test_that("save and load gt",{
 
 
   # loading should fail
-  expect_error(new_test_gt2 <- gt_load(all_file_names[1]))
+  expect_error(new_test_gt2 <- gt_load(all_file_names[1]),".rds does not exist")
   # this should now work:
   new_test_gt2 <- gt_load(all_file_names[1], reattach_to = file.path(new_dir, basename(all_file_names[2])))
   # verify that we have all the info
