@@ -1,3 +1,5 @@
+library(KRIS)
+
 test_genotypes <- rbind(c(1,1,0,1,1,0),
                         c(2,1,0,NA,0,0),
                         c(2,NA,0,0,1,1),
@@ -31,3 +33,48 @@ test_that("pairwise_pop_fst compute correctly",{
   #pair_fst_locus <- test_gt %>% pairwise_pop_fst(by_locus = TRUE)
 
 })
+
+test_that("pairwise_pop_fst Hudson method computes correctly",{
+  # Load anolis data: 46 individuals and 3249 variants
+  vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+                          package = "tidypopgen")
+  anole_gt <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+  # attach metadata
+  pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
+                           package = "tidypopgen")
+  pops <- readr::read_csv(pops_path)
+  anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
+  anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
+  # group by population
+  anole_gt <- anole_gt %>% dplyr::group_by(population)
+  # impute
+  anole_gt <- anole_gt %>% gt_impute_simple(method = "mode")
+  gt_set_imputed(anole_gt, TRUE)
+  # calculate pairwise Fst in tidypopgen
+  hudson <- anole_gt %>% pairwise_pop_fst(method="Hudson")
+
+  # select individuals from each population
+  af <- which(anole_gt$population == 'AF')
+  eam <- which(anole_gt$population == 'Eam')
+  wam <- which(anole_gt$population == 'Wam')
+  # get genotypes matrix
+  genotypes <- show_genotypes(anole_gt)
+  # calculate pairwise Fst in KRIS
+  kris_af_eam <- fst.hudson(genotypes,af,eam)
+  kris_af_wam <- fst.hudson(genotypes,af,wam)
+  kris_eam_wam <- fst.hudson(genotypes,eam,wam)
+
+
+  expect_equal(hudson$value[1],kris_af_eam)
+  expect_equal(hudson$value[2],kris_af_wam)
+  expect_equal(hudson$value[3],kris_eam_wam)
+
+  # And by locus
+  # tidypop_locus_fst <- anole_gt %>% pairwise_pop_fst(method = "Hudson",by_locus = TRUE)
+  # kris_locus_fst <- fst.each.snp.hudson(genotypes,af,eam)
+  # kris_locus_fst <- fst.each.snp.hudson(genotypes,af,wam)
+  # kris_locus_fst <- fst.each.snp.hudson(genotypes,eam,wam)
+
+})
+
+
