@@ -19,7 +19,7 @@ test_loci <- data.frame(name=paste0("rs",1:6),
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 
-test_that("pairwise_pop_fst compute correctly",{
+test_that("pairwise_pop_fst Nei 87 computes correctly",{
   test_gt <- test_gt %>% dplyr::group_by(population)
   test_hier <- gt_as_hierfstat(test_gt)
   # compare results against hierfstat for Nei87 (Nei86 does not correct for Ho
