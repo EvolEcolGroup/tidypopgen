@@ -1,3 +1,5 @@
+options(mc_doScale_quiet=TRUE)
+
 test_that("fit_gt_pca_and_predict",{
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(bed_file,  backingfile = tempfile("missing_"),quiet=TRUE)
@@ -142,4 +144,20 @@ test_that("PCA functions work with loci out of order",{
   expect_equal(missing_rand_pca1$loadings, missing_rand_pca2$loadings)
 })
 
+test_that("PCA computes total variance correctly",{
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(bed_file,  backingfile = tempfile("missing_"),quiet=TRUE)
+  missing_gt <- gt_impute_simple(missing_gt, method = "mode")
+  missing_part_pca1 <- missing_gt %>% gt_pca_partialSVD()
+  expect_true ("total_var" %in% names(missing_part_pca1))
+  tidy_pca_out <- tidy(missing_part_pca1,matrix = "eigenvalues")
+  expect_true ("cumulative" %in% names(tidy_pca_out))
+  # now repeat without estimating variance
+  missing_part_pca2 <- missing_gt %>% gt_pca_partialSVD(total_var = FALSE)
+  expect_false ("total_var" %in% names(missing_part_pca2))
+  tidy_pca_out <- tidy(missing_part_pca2,matrix = "eigenvalues")
+  expect_false ("cumulative" %in% names(tidy_pca_out))
+  # TODO we should repeat the PCA on a toy dataset to check that it is equivalent to a full PCA done by hand
+
+})
 

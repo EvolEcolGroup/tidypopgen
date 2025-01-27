@@ -13,6 +13,9 @@
 #' [bigsnpr::snp_scaleBinom()], which is the appropriate function for biallelic SNPs.
 #' Alternatively it is possible to use  custom function
 #' (see [bigsnpr::snp_autoSVD()] for details.
+#' @param total_var a boolean indicating whether to compute the total variance of the matrix. Default is `TRUE`.
+#' Using `FALSE` will speed up computation, but the total variance will not be stored in the output (and thus it will
+#' not be possible to assign a proportion of variance explained to the components).
 #' @returns a `gt_pca` object, which is a subclass of `bigSVD`; this is
 #' an S3 list with elements:
 #' A named list (an S3 class "big_SVD") of
@@ -23,13 +26,15 @@
 #' - `scale`, the scaling vector,
 #' - `method`, a string defining the method (in this case 'partialSVD'),
 #' - `call`, the call that generated the object.
+#' - `total_var`, the total variance of the matrix (optional)
 #'
 #' Note: rather than accessing these elements directly, it is better to use
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @export
 
 
-gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
+gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom(),
+                               total_var = TRUE
 ) {
   if (gt_has_imputed(x) && gt_uses_imputed(x)==FALSE){
     gt_set_imputed(x, set = TRUE)
@@ -43,8 +48,8 @@ gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
 
   this_svd  <- bigstatsr::big_SVD(X$genotypes,
                                   k=k,
-                                  ind.row = vctrs::vec_data(x$genotypes),
-                                  ind.col = show_loci(x)$big_index,
+                                  ind.row = x_ind_row,
+                                  ind.col = x_ind_col,
                                   fun.scaling = fun_scaling,
                                   block.size= bigstatsr::block_size(nrow(X$genotypes))) # TODO check that this is correct and expose it, maybe creat convenience function to get the values
   # add names to the scores (to match them to data later)
@@ -54,5 +59,10 @@ gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
   this_svd$call <- match.call()
   this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
+  if (total_var){
+    this_svd$total_var <- pca_total_variance(X$genotypes, x_ind_row, x_ind_col,
+                                             center = this_svd$center,
+                                             scale = this_svd$scale)
+  }
   this_svd
 }
