@@ -30,11 +30,58 @@ test_that("pairwise_pop_fst compute correctly",{
   # hiefstat values are rounded to 4 dp
   expect_true(all.equal(tidy_dist_matrix(nei_hier)$value, round(nei_gt$value,4)))
 
-  #pair_fst_locus <- test_gt %>% pairwise_pop_fst(by_locus = TRUE)
-
 })
 
 test_that("pairwise_pop_fst Hudson method computes correctly",{
+  # We use the fst.hudson function from KRIS to compute pairwise Fst
+  # This is a version with the ratio of means; it is meant to be the default version
+  # in KRIS, but there is a problem with a double declaration of the function and the
+  # wrong version is used for the package in CRAN. KRIS is now archived, so the CRAN
+  # package can not be fixed
+
+  fst.hudson <-function(X, idx.p1, idx.p2){
+    prestep.fst.one.marker <- function(alleles,idx.p1,idx.p2){
+
+      #Pop 1
+      G = alleles[idx.p1]
+      no.AA=length(which(G==0))
+      no.AB=length(which(G==1))
+      no.BB=length(which(G==2))
+      n1=(no.AA+no.AB+no.BB)*2
+      p.A=(no.AA*2 + no.AB)/n1
+      #p.B=(no.BB*2 + no.AB)/n1
+      #p1 = min(p.A,p.B,na.rm = T)
+      p1 = p.A
+
+      #Pop 2
+      G = alleles[idx.p2]
+      no.AA=length(which(G==0))
+      no.AB=length(which(G==1))
+      no.BB=length(which(G==2))
+      n2=(no.AA+no.AB+no.BB)*2
+      p.A=(no.AA*2 + no.AB)/n2
+      #p.B=(no.BB*2 + no.AB)/n2
+      #p2 = min(p.A,p.B,na.rm = T)
+      p2 = p.A
+
+
+      N = (p1 - p2)^2 - p1*(1-p1)/(n1-1) - p2*(1-p2)/(n2-1)
+      D = p1*(1-p2) + p2*(1-p1)
+
+      return(c(N,D))
+    }
+
+    set.fst = apply(X,2,prestep.fst.one.marker,idx.p1=idx.p1, idx.p2=idx.p2)
+
+    # Bhatia, et al 2013, "This is the basis of our recommendation that FST be estimated as a ratio of averages."
+
+    fst = mean(set.fst[1,],na.rm=T) / mean(set.fst[2,],na.rm=T)
+    #fst = mean(set.fst[1,]/set.fst[2,],na.rm = T)
+
+    return(fst)
+  }
+
+
   # Load anolis data: 46 individuals and 3249 variants
   vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
                           package = "tidypopgen")

@@ -85,7 +85,7 @@ pairwise_pop_fst_hudson <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_
     if (by_locus){
       Fst_locus[,i_col] = numerator/denominator
     }
-    Fst_tot[i_col]<-mean(numerator)/mean(denominator)
+    Fst_tot[i_col]<-mean(numerator, na.rm = TRUE)/mean(denominator, na.rm = TRUE)
   }
   # format nicely the objects
   group_combinations <- cbind(.group_levels[pairwise_combn[1,],],.group_levels[pairwise_combn[2,],])
