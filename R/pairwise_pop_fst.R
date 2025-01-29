@@ -329,7 +329,6 @@ pairwise_pop_fst_wc84 <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_co
       (p_bar * (1 - p_bar) - (r - 1) / r * s2 - (2 * n_bar - 1) / (4 * n_bar) * h_bar)
     c <- h_bar / 2
 
-    browser()
     numerator <- a
     denominator <- a+b+c
     if (by_locus){
