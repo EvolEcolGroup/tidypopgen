@@ -78,8 +78,8 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
                   "std.dev" = sqrt(x$d^2/nrow(x$u)))
     if ("total_var" %in% names(x)) {
       ret <- ret %>%
-        mutate(percent =  (std.dev)^2/total_var) %>%
-        mutate( cumulative = cumsum(.data$std.dev))
+        mutate(percent =  (x$d^2)/total_var) %>%
+        mutate( cumulative = cumsum(.data$percent))
     }
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
     ret <- x$v %>%
