@@ -64,6 +64,23 @@ test_that("pairwise_pop_fst weir_cockerham",{
 
   wc_scikit <- as.numeric(readLines(system.file("/extdata/fst_scikit-allel/fst_wc.txt", package = "tidypopgen")))
   expect_equal(wc_tidypopgen$value, wc_scikit)
+
+  ########### test with a monomorphic loci
+  test_genotypes <- rbind(c(2,1,0,1,1,0),
+                          c(2,1,0,NA,0,0),
+                          c(2,NA,0,0,1,1),
+                          c(2,0,0,1,0,0),
+                          c(2,2,0,1,2,1),
+                          c(2,0,0,0,NA,1),
+                          c(2,1,1,0,1,NA))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  wc_tidypopgen_mono <- test_gt %>% pairwise_pop_fst(method="WC84")
+
+  # read in output
+  wc_scikit_mono <- as.numeric(readLines(system.file("/extdata/fst_scikit-allel/fst_wc_monomorphic.txt", package = "tidypopgen")))
+  expect_equal(wc_tidypopgen_mono$value, wc_scikit_mono)
 })
 
 
@@ -94,6 +111,24 @@ test_that("pairwise_pop_fst hudson",{
   # read in output
   hudson_scikit <- as.numeric(readLines(system.file("/extdata/fst_scikit-allel/fst_hudson.txt", package = "tidypopgen")))
   expect_equal(hudson_tidypopgen$value, hudson_scikit)
+
+  ########### test with a monomorphic loci
+  test_genotypes <- rbind(c(2,1,0,1,1,0),
+                          c(2,1,0,NA,0,0),
+                          c(2,NA,0,0,1,1),
+                          c(2,0,0,1,0,0),
+                          c(2,2,0,1,2,1),
+                          c(2,0,0,0,NA,1),
+                          c(2,1,1,0,1,NA))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  hudson_tidypopgen_mono <- test_gt %>% pairwise_pop_fst(method="Hudson")
+
+  # read in output
+  hudson_scikit_mono <- as.numeric(readLines(system.file("/extdata/fst_scikit-allel/fst_hudson_monomorphic.txt", package = "tidypopgen")))
+  expect_equal(hudson_tidypopgen_mono$value, hudson_scikit_mono)
+
 })
 
 
