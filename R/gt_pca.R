@@ -38,7 +38,7 @@ NULL
 #' @return The square of the Frobenius norm of the matrix
 #' @keywords internal
 
-pca_total_variance <- function(X, ind.row = rows_along(X), ind.col = cols_along(X),
+pca_total_variance <- function(X, ind.row = bigstatsr::rows_along(X), ind.col = bigstatsr::cols_along(X),
                      center = rep(0, length(ind.col)),
                      scale = rep(1, length(ind.col))) {
   bigassertr::assert_lengths(center, scale, ind.col)

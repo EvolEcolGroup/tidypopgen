@@ -4,7 +4,12 @@
 \alias{gt_pca_partialSVD}
 \title{PCA for \code{gen_tibble} objects by partial SVD}
 \usage{
-gt_pca_partialSVD(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom())
+gt_pca_partialSVD(
+  x,
+  k = 10,
+  fun_scaling = bigsnpr::snp_scaleBinom(),
+  total_var = TRUE
+)
 }
 \arguments{
 \item{x}{a \code{gen_tbl} object}
@@ -16,6 +21,10 @@ gt_pca_partialSVD(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom())
 \code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}}, which is the appropriate function for biallelic SNPs.
 Alternatively it is possible to use  custom function
 (see \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}} for details.}
+
+\item{total_var}{a boolean indicating whether to compute the total variance of the matrix. Default is \code{TRUE}.
+Using \code{FALSE} will speed up computation, but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the components).}
 }
 \value{
 a \code{gt_pca} object, which is a subclass of \code{bigSVD}; this is
@@ -29,6 +38,7 @@ A named list (an S3 class "big_SVD") of
 \item \code{scale}, the scaling vector,
 \item \code{method}, a string defining the method (in this case 'partialSVD'),
 \item \code{call}, the call that generated the object.
+\item \code{total_var}, the total variance of the matrix (optional)
 }
 
 Note: rather than accessing these elements directly, it is better to use
