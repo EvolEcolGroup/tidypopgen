@@ -8,7 +8,7 @@ gt_update_backingfile(
   .x,
   backingfile = NULL,
   chunk_size = NULL,
-  ignore_genetic_dist = TRUE,
+  rm_unsorted_genetic_dist = TRUE,
   quiet = FALSE
 )
 }
@@ -22,9 +22,8 @@ will be based on the name f the current backing file.}
 
 \item{chunk_size}{the number of loci to process at once}
 
-\item{ignore_genetic_dist}{boolean to ignore the genetic distance when checking. Note
-that, if \code{gentic_dist} are being ignored and they are not sorted, the function will
-set them to zero to avoid problems with other software.}
+\item{rm_unsorted_genetic_dist}{boolean to set \code{gentic_dist} to zero (i.e. remove it)
+if it is unsorted within the chromosomes.}
 
 \item{quiet}{boolean to suppress information about the files}
 }
