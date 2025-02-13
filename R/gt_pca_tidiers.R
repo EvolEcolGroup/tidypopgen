@@ -75,8 +75,8 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
   if (matrix %in% c("pcs", "d", "eigenvalues")) {
     ret <- tibble(PC = seq_len(length(x$d)),
                   "std.dev" = sqrt(x$d^2/nrow(x$u)))
-    if ("total_var" %in% names(x)) {
-      rssq <- x$total_var
+    if ("square_frobenious" %in% names(x)) {
+      rssq <- x$square_frobenious
       var_exp <- x$d^2/rssq
       percentage <- var_exp*100
       cum_percentage <- cumsum(var_exp)*100

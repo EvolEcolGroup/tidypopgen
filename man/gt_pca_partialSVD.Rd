@@ -38,7 +38,7 @@ A named list (an S3 class "big_SVD") of
 \item \code{scale}, the scaling vector,
 \item \code{method}, a string defining the method (in this case 'partialSVD'),
 \item \code{call}, the call that generated the object.
-\item \code{total_var}, the total variance of the matrix (optional)
+\item \code{square_frobenious}, used to compute the proportion of variance explained by the components (optional)
 }
 
 Note: rather than accessing these elements directly, it is better to use

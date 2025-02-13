@@ -26,7 +26,7 @@
 #' - `scale`, the scaling vector,
 #' - `method`, a string defining the method (in this case 'partialSVD'),
 #' - `call`, the call that generated the object.
-#' - `total_var`, the total variance of the matrix (optional)
+#' - `square_frobenious`, used to compute the proportion of variance explained by the components (optional)
 #'
 #' Note: rather than accessing these elements directly, it is better to use
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
@@ -60,7 +60,7 @@ gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
   this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var){
-    this_svd$total_var <- pca_total_variance(X$genotypes, x_ind_row, x_ind_col,
+    this_svd$square_frobenious <- total_var(X$genotypes, x_ind_row, x_ind_col,
                                              center = this_svd$center,
                                              scale = this_svd$scale)
   }
