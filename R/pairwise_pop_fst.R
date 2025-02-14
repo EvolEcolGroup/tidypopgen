@@ -52,11 +52,7 @@ pairwise_pop_fst <- function(.x, by_locus=FALSE,
 }
 
 pairwise_pop_fst_hudson <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_cores()){
-
-  #message("this function is not properly tested yet!!!")
-  #message("if you have time, test the results against something like hierfstat and create a unit test")
-  message("Whilst this function should work, it has not been extensively tested. Check your results to ensure they make sense")
-  # get the populations
+# get the populations
   .group_levels = .x %>% group_keys()
   # create all combinations
   pairwise_combn <- utils::combn(nrow(.group_levels),2)
@@ -144,7 +140,7 @@ pairwise_pop_fst_wc84_b <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_
     if (by_locus){
       Fst_locus[,i_col] = 1-numerator/denominator
     }
-    Fst_tot[i_col]<-1-mean(numerator)/mean(denominator)
+    Fst_tot[i_col]<-1-mean(numerator, na.rm = TRUE)/mean(denominator, na.rm = TRUE)
   }
   # format nicely the objects
   group_combinations <- cbind(.group_levels[pairwise_combn[1,],],.group_levels[pairwise_combn[2,],])
@@ -194,7 +190,7 @@ pairwise_pop_fst_nei86 <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_c
     if (by_locus){
       Fst_locus[,i_col] = numerator/denominator
     }
-    Fst_tot[i_col]<-mean(numerator)/mean(denominator)
+    Fst_tot[i_col]<-mean(numerator, na.rm = TRUE)/mean(denominator, na.rm = TRUE)
   }
   # format nicely the objects
   group_combinations <- cbind(.group_levels[pairwise_combn[1,],],.group_levels[pairwise_combn[2,],])
@@ -285,10 +281,6 @@ pairwise_pop_fst_nei87 <- function(.x, by_locus = FALSE, n_cores = bigstatsr::nb
 
 # based on the formula in Bhatia 2013
 pairwise_pop_fst_wc84 <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_cores()){
-
-  #message("this function is not properly tested yet!!!")
-  #message("if you have time, test the results against something like hierfstat and create a unit test")
-  message("Whilst this function should work, it has not been extensively tested. Check your results to ensure they make sense")
   # get the populations
   .group_levels = .x %>% group_keys()
   # create all combinations
@@ -334,7 +326,7 @@ pairwise_pop_fst_wc84 <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_co
     if (by_locus){
       Fst_locus[,i_col] = numerator/denominator
     }
-    Fst_tot[i_col]<-mean(numerator)/mean(denominator)
+    Fst_tot[i_col]<-mean(numerator, na.rm = TRUE)/mean(denominator, na.rm = TRUE)
   }
   # format nicely the objects
   group_combinations <- cbind(.group_levels[pairwise_combn[1,],],.group_levels[pairwise_combn[2,],])
