@@ -17,11 +17,10 @@ test_loci <- data.frame(name=paste0("rs",1:6),
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 
-test_that("pairwise_pop_fst compute correctly",{
+test_that("pairwise_pop_fst Nei87",{
   test_gt <- test_gt %>% dplyr::group_by(population)
   test_hier <- gt_as_hierfstat(test_gt)
-  # compare results against hierfstat for Nei87 (Nei86 does not correct for Ho
-  # when computing Ht, so it gives a different result)
+  # compare results against hierfstat for Nei87
   nei_gt <- test_gt %>% pairwise_pop_fst(method="Nei87")
 
   nei_hier <- hierfstat::pairwise.neifst(test_hier)
@@ -33,7 +32,7 @@ test_that("pairwise_pop_fst compute correctly",{
 })
 
 
-test_that("pairwise_pop_fst weir_cockerham",{
+test_that("pairwise_pop_fst WC84",{
   test_genotypes <- rbind(c(1,1,0,1,1,0),
                           c(2,1,0,NA,0,0),
                           c(2,NA,0,0,1,1),
@@ -62,7 +61,7 @@ test_that("pairwise_pop_fst weir_cockerham",{
   # compared to scikit-allel version 1.3.13
   # See create_scikit-allel_test_data for script
 
-  wc_scikit <- as.numeric(readLines(system.file("/extdata/fst_scikit-allel/fst_wc.txt", package = "tidypopgen")))
+  wc_scikit <- as.numeric(readLines(test_path("testdata/fst_scikit-allel","fst_wc.txt")))
   expect_equal(wc_tidypopgen$value, wc_scikit)
 
   ########### test with a monomorphic loci
@@ -79,7 +78,7 @@ test_that("pairwise_pop_fst weir_cockerham",{
   wc_tidypopgen_mono <- test_gt %>% pairwise_pop_fst(method="WC84")
 
   # read in output
-  wc_scikit_mono <- as.numeric(readLines(system.file("/extdata/fst_scikit-allel/fst_wc_monomorphic.txt", package = "tidypopgen")))
+  wc_scikit_mono <- as.numeric(readLines(test_path("testdata/fst_scikit-allel","fst_wc_monomorphic.txt")))
   expect_equal(wc_tidypopgen_mono$value, wc_scikit_mono)
   ######################
   # test with 1st loci missing for all individuals in 1st population
@@ -140,7 +139,7 @@ test_that("pairwise_pop_fst hudson",{
   # See create_scikit-allel_test_data for script
 
   # read in output
-  hudson_scikit <- as.numeric(readLines(system.file("/extdata/fst_scikit-allel/fst_hudson.txt", package = "tidypopgen")))
+  hudson_scikit <- as.numeric(readLines(test_path("testdata/fst_scikit-allel", "fst_hudson.txt")))
   expect_equal(hudson_tidypopgen$value, hudson_scikit)
 
   ######################
@@ -159,7 +158,7 @@ test_that("pairwise_pop_fst hudson",{
   hudson_tidypopgen_mono <- test_gt %>% pairwise_pop_fst(method="Hudson")
 
   # read in output
-  hudson_scikit_mono <- as.numeric(readLines(system.file("/extdata/fst_scikit-allel/fst_hudson_monomorphic.txt", package = "tidypopgen")))
+  hudson_scikit_mono <- as.numeric(readLines(test_path("testdata/fst_scikit-allel","fst_hudson_monomorphic.txt")))
   expect_equal(hudson_tidypopgen_mono$value, hudson_scikit_mono)
 
   ######################
