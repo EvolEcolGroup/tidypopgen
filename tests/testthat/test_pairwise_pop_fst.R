@@ -16,6 +16,10 @@ test_loci <- data.frame(name=paste0("rs",1:6),
 
 test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
+test_that("requires a grouped gen_tibble",{
+  expect_error(test_gt %>% pairwise_pop_fst(method="Nei87"),
+               ".x should be a grouped df")
+})
 
 test_that("pairwise_pop_fst Nei87",{
   test_gt <- test_gt %>% dplyr::group_by(population)
@@ -52,6 +56,7 @@ test_that("pairwise_pop_fst WC84",{
 
   test_gt <- test_gt %>% dplyr::group_by(population)
   wc_tidypopgen <- test_gt %>% pairwise_pop_fst(method="WC84")
+  wc_tidypopgen_per_loc <- test_gt %>% pairwise_pop_fst(method="WC84", by_locus = TRUE)
 
   # compared to hierfstat
   test_heir <- gt_as_hierfstat(test_gt)
@@ -63,6 +68,11 @@ test_that("pairwise_pop_fst WC84",{
 
   wc_scikit <- as.numeric(readLines(test_path("testdata/fst_scikit-allel","fst_wc.txt")))
   expect_equal(wc_tidypopgen$value, wc_scikit)
+
+  # compare per locus Fst estimate
+  wc_scikit_per_loc <- as.numeric(readLines(test_path("testdata/fst_scikit-allel","fst_wc_per_loc.txt")))
+  expect_equal(wc_scikit_per_loc, as.vector(wc_tidypopgen_per_loc$Fst_by_locus))
+
 
   ########### test with a monomorphic loci
   test_genotypes <- rbind(c(2,1,0,1,1,0),
@@ -134,13 +144,21 @@ test_that("pairwise_pop_fst hudson",{
 
   test_gt <- test_gt %>% dplyr::group_by(population)
   hudson_tidypopgen <- test_gt %>% pairwise_pop_fst(method="Hudson")
+  hudson_tidypopgen_per_loc <- test_gt %>% pairwise_pop_fst(method="Hudson", by_locus = TRUE)
 
   # compared to scikit-allel version 1.3.13
   # See create_scikit-allel_test_data for script
 
   # read in output
   hudson_scikit <- as.numeric(readLines(test_path("testdata/fst_scikit-allel", "fst_hudson.txt")))
+
+  # compare total Fst estimate
+  hudson_scikit <- as.numeric(readLines(test_path("testdata/fst_scikit-allel","fst_hudson.txt")))
   expect_equal(hudson_tidypopgen$value, hudson_scikit)
+  # compare per locus Fst estimate
+
+  hudson_scikit_per_loc <- as.numeric(readLines(test_path("testdata/fst_scikit-allel","fst_hudson_per_loc.txt")))
+  expect_equal(hudson_scikit_per_loc, as.vector(hudson_tidypopgen_per_loc$Fst_by_locus))
 
   ######################
   # test with a monomorphic loci
