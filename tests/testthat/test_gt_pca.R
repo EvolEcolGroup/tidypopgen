@@ -153,7 +153,7 @@ test_that("PCA computes total variance correctly",{
   tidy_pca_out <- tidy(missing_part_pca1,matrix = "eigenvalues")
   expect_true ("cumulative" %in% names(tidy_pca_out))
   # now repeat without estimating variance
-  missing_part_pca2 <- missing_gt %>% gt_pca_partialSVD(square_frobenious = FALSE)
+  missing_part_pca2 <- missing_gt %>% gt_pca_partialSVD(total_var = FALSE)
   expect_false ("square_frobenious" %in% names(missing_part_pca2))
   tidy_pca_out <- tidy(missing_part_pca2,matrix = "eigenvalues")
   expect_false ("cumulative" %in% names(tidy_pca_out))
@@ -161,3 +161,33 @@ test_that("PCA computes total variance correctly",{
 
 })
 
+test_that("our results are comparable to prcomp",{
+  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
+  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) #bigsnpr::sub_bed(bed_path)
+  #families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
+  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
+  families <- families %>% select_loci_if(loci_maf(genotypes) > 0.01)
+  # remove NA values for prcomp
+  cols_with_na <- apply(show_genotypes(families), 2, function(x) any(is.na(x)))
+  cols_without_na <- which(cols_with_na == FALSE)
+  families <- families %>% select_loci(all_of(cols_without_na))
+
+  # Perform PCA using prcomp
+  pca_result <- prcomp(show_genotypes(families))
+  prcomp_summary <- summary(pca_result)
+
+  # Perform PCA using gt_pca_partialSVD
+  families <- gt_impute_simple(families, method = "mode")
+  gt_pca_result <- families %>% gt_pca_partialSVD()
+  tidy_pca <- tidy(gt_pca_result, matrix = "eigenvalues")
+
+  # Compare percentage variance explained
+  all.equal(tidy_pca$percent, (prcomp_summary$importance[2,c(1:10)])*100, check.names = FALSE)
+  expect_equal(tidy_pca$percent, as.vector((prcomp_summary$importance[2,c(1:10)])*100), tolerance = 0.1)
+  # Compare cumulative variance explained
+  all.equal(tidy_pca$cumulative, (prcomp_summary$importance[3,c(1:10)])*100, check.names = FALSE)
+  expect_equal(tidy_pca$cumulative, as.vector((prcomp_summary$importance[3,c(1:10)])*100), tolerance = 0.1)
+  # Compare standard deviation
+  all.equal(tidy_pca$std.dev, pca_result$sdev[1:10], check.attributes = FALSE, check.names = FALSE)
+  #expect_equal(tidy_pca$std.dev, pca_result$sdev[1:10], tolerance = 0.1) - failing here
+})

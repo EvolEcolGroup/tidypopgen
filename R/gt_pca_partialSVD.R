@@ -60,7 +60,7 @@ gt_pca_partialSVD <- function(x, k = 10, fun_scaling = bigsnpr::snp_scaleBinom()
   this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var){
-    this_svd$square_frobenious <- total_var(X$genotypes, x_ind_row, x_ind_col,
+    this_svd$square_frobenious <- square_frobenious(X$genotypes, x_ind_row, x_ind_col,
                                              center = this_svd$center,
                                              scale = this_svd$scale)
   }

@@ -41,7 +41,9 @@ NULL
 square_frobenious <- function(X, ind.row = bigstatsr::rows_along(X), ind.col = bigstatsr::cols_along(X),
                      center = rep(0, length(ind.col)),
                      scale = rep(1, length(ind.col))) {
-  bigassertr::assert_lengths(center, scale, ind.col)
+  if(length(center) != length(ind.col) || length(scale) != length(ind.col)){
+    stop("center and scale must be the same length as the number of columns in the matrix")
+  }
   stats <- bigstatsr::big_colstats(X, ind.row, ind.col)
   n <- length(ind.row)
   sum(((n - 1) * stats$var + n * (stats$sum / n - center)^2) / scale^2)
