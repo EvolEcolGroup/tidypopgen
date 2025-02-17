@@ -28,6 +28,6 @@ gt_order_loci <- function(.x, use_current_table = FALSE, ignore_genetic_dist = T
   }
   # if asked to use the current table, check that it is ordered
   is_loci_table_ordered(.x, error_on_false = TRUE, ignore_genetic_dist = ignore_genetic_dist)
-  gt_update_backingfile(.x, quiet = quiet, rm_unsorted_dist = ignore_genetic_dist, ...)
+  gt_update_backingfile(.x, quiet=quiet, rm_unsorted_genetic_dist = ignore_genetic_dist, ...)
 
 }
