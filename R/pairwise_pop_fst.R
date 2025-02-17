@@ -91,8 +91,6 @@ pairwise_pop_fst_hudson <- function(.x, by_locus=FALSE, n_cores = bigstatsr::nb_
   if (by_locus){
     rownames(Fst_locus)<-loci_names(.x)
     colnames(Fst_locus)<- apply(group_combinations,1,function(x)paste(x,collapse = "."))
-  }
-  if (by_locus){
     return(list(Fst_by_locus = Fst_locus, Fst = Fst_tot))
   } else{
     return(Fst_tot)
@@ -160,8 +158,6 @@ pairwise_pop_fst_nei87 <- function(.x, by_locus = FALSE, n_cores = bigstatsr::nb
   if (by_locus){
     rownames(Fst_locus)<-loci_names(.x)
     colnames(Fst_locus)<- apply(group_combinations,1,function(x)paste(x,collapse = "."))
-  }
-  if (by_locus){
     return(list(Fst_by_locus = Fst_locus, Fst = Fst_tot))
   } else{
     return(Fst_tot)
