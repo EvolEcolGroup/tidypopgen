@@ -9,7 +9,7 @@
 #' for backing files used to store the data (they will be given a .bk
 #' and .RDS automatically). If left to NULL (the default), the file name
 #' will be based on the name f the current backing file.
-#' @param rm_unsorted_genetic_dist boolean to set `gentic_dist` to zero (i.e. remove it)
+#' @param rm_unsorted_dist boolean to set `gentic_dist` to zero (i.e. remove it)
 #' if it is unsorted within the chromosomes.
 #' @param chunk_size the number of loci to process at once
 #' @param quiet boolean to suppress information about the files
@@ -17,7 +17,7 @@
 #' @export
 
 gt_update_backingfile <- function (.x, backingfile = NULL, chunk_size = NULL,
-                                   rm_unsorted_genetic_dist = TRUE, quiet = FALSE){
+                                   rm_unsorted_dist = TRUE, quiet = FALSE){
   # if the backingfile is null, create a name based on the current backing file
   if (is.null(backingfile)){
     backingfile <- change_duplicated_file_name(gt_get_file_names(.x)[2])
@@ -72,7 +72,8 @@ gt_update_backingfile <- function (.x, backingfile = NULL, chunk_size = NULL,
   map <- attr(.x$genotypes,"bigsnp")$map
   map <- map[.gt_bigsnp_cols(.x),]
   # if we remove unsorted genetic distance, set it to zero if it is not sorted
-  if (rm_unsorted_genetic_dist){
+  if (rm_unsorted_dist){
+    browser()
     if (any(unlist(show_loci(.x) %>%
                    group_by(.data$chr_int) %>%
                    group_map(~ is.unsorted(.x$genetic_dist))))){
