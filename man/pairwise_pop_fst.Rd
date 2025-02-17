@@ -7,7 +7,7 @@
 pairwise_pop_fst(
   .x,
   by_locus = FALSE,
-  method = c("Hudson", "Nei87", "Nei86", "WC84"),
+  method = c("Hudson", "Nei87", "WC84"),
   n_cores = bigstatsr::nb_cores()
 )
 }
@@ -18,7 +18,7 @@ pairwise_pop_fst(
 or as a single genome wide value obtained by taking the ratio of the mean numerator
 and denominator (FALSE, the default).}
 
-\item{method}{one of 'Hudson', 'Nei86', 'Nei87', and 'WC84'}
+\item{method}{one of 'Hudson', 'Nei87', and 'WC84'}
 
 \item{n_cores}{number of cores to be used, it defaults to \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
@@ -33,10 +33,10 @@ combinations as columns.
 This function computes pairwise Fst. The following methods are implemented:
 \itemize{
 \item 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013) for diploids.
-\item 'Nei86' : Gst according to Nei (1986), as derived in Bhatia et al (2013) for diploids.
-\item 'Nei87' : Fst according to Nei (1987) - this is equivalent to \code{hierfstat::pairwise.neifst()},
-and includes the correction for heterozygosity when computing Ht
-\item 'WC84' : Weir and Cockerham (1984), as derived in Bhatia et al (2013) for diploids.
+\item 'Nei87' : Fst according to Nei (1987) - includes the correction for
+heterozygosity when computing Ht, and is equivalent to \code{hierfstat::pairwise.neifst()},
+\item 'WC84' : Weir and Cockerham (1984), correcting for missing data and is
+equivalent to \code{hierfstat::pairwise.WCfst()}.
 }
 }
 \details{
@@ -44,8 +44,11 @@ For all formulae, the genome wide estimate is obtained by taking the ratio of th
 numerators and denominators over all relevant SNPs.
 }
 \references{
-Bhatia G, Patterson N, Sankararaman S, Price AL. Estimating and Interpreting
-FST: The Impact of Rare Variants. Genome Research. 2013;23(9):1514–1521.
+Bhatia G, Patterson N, Sankararaman S, Price AL. (2013) Estimating and Interpreting
+FST: The Impact of Rare Variants. Genome Research, 23(9):1514–1521.
 
 Nei, M. (1987) Molecular Evolutionary Genetics. Columbia University Press
+
+Weir, B. S., & Cockerham, C. C. (1984). Estimating F-statistics for the analysis of
+population structure. Evolution, 38(6): 1358–1370.
 }
