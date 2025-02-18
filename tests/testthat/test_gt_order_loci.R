@@ -262,6 +262,23 @@ test_that("is_loci_table_ordered correct error when genetic_dist is not sorted",
                "Your genetic distances are not sorted ")
 })
 
+test_that("gt_update_backingfile correct message when rm_unsorted_dist = TRUE",{
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(c(1,1,1,1,1,1)),
+                          position=as.integer(c(3,5,25,46,65,343)),
+                          genetic_dist = c(0.1,0.3,0.2,0.4,0.5,0.6),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+  expect_message(gt_update_backingfile(test_gt, rm_unsorted_dist = TRUE),
+               "Genetic distances are not sorted, setting them to zero")
+})
+
 test_that("is_loci_table_ordered catches duplicates in position and genetic_dist",{
   # is_loci_table_ordered catches duplicated positions
   test_indiv_meta <- data.frame (id=c("a","b","c"),
@@ -313,7 +330,7 @@ test_that("check updated positions/distances are inherited by the merged gt",{
   # Edit genetic_dist in loci table of pop_a_gt
   show_loci(pop_a_gt)$genetic_dist <- c(seq(0.01, 0.16,0.01))
   # Update backingfiles to store this change
-  pop_a_gt <- gt_update_backingfile(pop_a_gt, rm_unsorted_genetic_dist = FALSE)
+  pop_a_gt <- gt_update_backingfile(pop_a_gt, rm_unsorted_dist = FALSE)
   # check we're now using the correct backingfiles
   #gt_get_file_names(pop_a_gt)
   merged_gen <- rbind.gen_tbl(pop_a_gt, pop_b_gt, flip_strand = TRUE,

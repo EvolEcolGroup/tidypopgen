@@ -73,7 +73,6 @@ gt_update_backingfile <- function (.x, backingfile = NULL, chunk_size = NULL,
   map <- map[.gt_bigsnp_cols(.x),]
   # if we remove unsorted genetic distance, set it to zero if it is not sorted
   if (rm_unsorted_dist){
-    browser()
     if (any(unlist(show_loci(.x) %>%
                    group_by(.data$chr_int) %>%
                    group_map(~ is.unsorted(.x$genetic_dist))))){
