@@ -74,7 +74,7 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
 
   if (matrix %in% c("pcs", "d", "eigenvalues")) {
     ret <- tibble(PC = seq_len(length(x$d)),
-                  "std.dev" = sqrt(x$d^2/nrow(x$u)))
+                  "std.dev" = x$d/sqrt(nrow(x$u)-1))
     if ("square_frobenious" %in% names(x)) {
       rssq <- x$square_frobenious
       var_exp <- x$d^2/rssq

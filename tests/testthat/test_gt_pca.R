@@ -144,7 +144,7 @@ test_that("PCA functions work with loci out of order",{
   expect_equal(missing_rand_pca1$loadings, missing_rand_pca2$loadings)
 })
 
-test_that("PCA computes total variance correctly",{
+test_that("PCA computes frobenious when needed",{
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(bed_file,  backingfile = tempfile("missing_"),quiet=TRUE)
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
@@ -161,7 +161,7 @@ test_that("PCA computes total variance correctly",{
 
 })
 
-test_that("our results are comparable to prcomp",{
+test_that("our stdevs are comparable to prcomp",{
   bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
   families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) #bigsnpr::sub_bed(bed_path)
   #families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
@@ -172,22 +172,25 @@ test_that("our results are comparable to prcomp",{
   cols_without_na <- which(cols_with_na == FALSE)
   families <- families %>% select_loci(all_of(cols_without_na))
 
-  # Perform PCA using prcomp
-  pca_result <- prcomp(show_genotypes(families))
-  prcomp_summary <- summary(pca_result)
-
   # Perform PCA using gt_pca_partialSVD
+  # TODO there seems to be a bug in the gt_pca_partialSVD function where missing values are detected even when excluded
   families <- gt_impute_simple(families, method = "mode")
   gt_pca_result <- families %>% gt_pca_partialSVD()
   tidy_pca <- tidy(gt_pca_result, matrix = "eigenvalues")
 
-  # Compare percentage variance explained
-  all.equal(tidy_pca$percent, (prcomp_summary$importance[2,c(1:10)])*100, check.names = FALSE)
-  expect_equal(tidy_pca$percent, as.vector((prcomp_summary$importance[2,c(1:10)])*100), tolerance = 0.1)
-  # Compare cumulative variance explained
-  all.equal(tidy_pca$cumulative, (prcomp_summary$importance[3,c(1:10)])*100, check.names = FALSE)
-  expect_equal(tidy_pca$cumulative, as.vector((prcomp_summary$importance[3,c(1:10)])*100), tolerance = 0.1)
+
+  # Perform PCA using prcomp
+  pca_result <- prcomp(show_genotypes(families), center = gt_pca_result$center,
+                       scale. = gt_pca_result$scale)
+  prcomp_summary <- summary(pca_result)
+
+  TOL <- 1e-4
   # Compare standard deviation
-  all.equal(tidy_pca$std.dev, pca_result$sdev[1:10], check.attributes = FALSE, check.names = FALSE)
-  #expect_equal(tidy_pca$std.dev, pca_result$sdev[1:10], tolerance = 0.1) - failing here
+  expect_equal(tidy_pca$std.dev, pca_result$sdev[1:10], tolerance = TOL)
+  # Compare percentage variance explained
+  expect_equal(tidy_pca$percent, as.vector((prcomp_summary$importance[2,c(1:10)])*100), tolerance = TOL)
+  # Compare cumulative variance explained
+  expect_equal(tidy_pca$cumulative, as.vector((prcomp_summary$importance[3,c(1:10)])*100), tolerance = TOL)
+
 })
+
