@@ -5,11 +5,11 @@
 #' the current state of the `gen_tibble`. Tests for this function are in
 #' test_gt_order_loci.R
 #' @param .x a `gen_tibble` object
-#' @param backingfile @param backingfile the path, including the file name without extension,
+#' @param backingfile the path, including the file name without extension,
 #' for backing files used to store the data (they will be given a .bk
 #' and .RDS automatically). If left to NULL (the default), the file name
 #' will be based on the name f the current backing file.
-#' @param rm_unsorted_dist boolean to set `gentic_dist` to zero (i.e. remove it)
+#' @param rm_unsorted_dist boolean to set `genetic_dist` to zero (i.e. remove it)
 #' if it is unsorted within the chromosomes.
 #' @param chunk_size the number of loci to process at once
 #' @param quiet boolean to suppress information about the files
@@ -75,7 +75,10 @@ gt_update_backingfile <- function (.x, backingfile = NULL, chunk_size = NULL,
   if (rm_unsorted_dist){
     if (any(unlist(show_loci(.x) %>%
                    group_by(.data$chr_int) %>%
-                   group_map(~ is.unsorted(.x$genetic_dist))))){
+                   group_map(~ is.unsorted(.x$genetic_dist)))) ||
+                   any(unlist(show_loci(.x) %>%
+                              group_by(.data$chr_int) %>%
+                              group_map(~ duplicated(.x$genetic_dist))))){
       if (!quiet){
         message("Genetic distances are not sorted, setting them to zero")
       }

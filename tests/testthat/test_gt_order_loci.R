@@ -262,7 +262,7 @@ test_that("is_loci_table_ordered correct error when genetic_dist is not sorted",
                "Your genetic distances are not sorted ")
 })
 
-test_that("gt_update_backingfile correct message when rm_unsorted_dist = TRUE",{
+test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist when rm_unsorted_dist = TRUE",{
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                  population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,0),
@@ -277,6 +277,15 @@ test_that("gt_update_backingfile correct message when rm_unsorted_dist = TRUE",{
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
   expect_message(gt_update_backingfile(test_gt, rm_unsorted_dist = TRUE),
                "Genetic distances are not sorted, setting them to zero")
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(c(1,1,1,1,1,1)),
+                          position=as.integer(c(3,5,25,46,65,343)),
+                          genetic_dist = c(0,0,0.2,0.4,0.5,0.6),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+  expect_message(gt_update_backingfile(test_gt, rm_unsorted_dist = TRUE),
+                 "Genetic distances are not sorted, setting them to zero")
 })
 
 test_that("is_loci_table_ordered catches duplicates in position and genetic_dist",{
