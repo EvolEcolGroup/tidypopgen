@@ -166,13 +166,17 @@ test_that("our stdevs are comparable to prcomp",{
   families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) #bigsnpr::sub_bed(bed_path)
   #families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
   families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
+  count_loci(families) #941
   families <- families %>% select_loci_if(loci_maf(genotypes) > 0.01)
   # remove NA values for prcomp
   cols_with_na <- apply(show_genotypes(families), 2, function(x) any(is.na(x)))
   cols_without_na <- which(cols_with_na == FALSE)
   families <- families %>% select_loci(all_of(cols_without_na))
+  count_loci(families) #609
 
+  #########################
   # Perform PCA using gt_pca_partialSVD
+  #########################
   # TODO there seems to be a bug in the gt_pca_partialSVD function where missing values are detected even when excluded
   families <- gt_impute_simple(families, method = "mode")
   gt_pca_result <- families %>% gt_pca_partialSVD()
@@ -183,8 +187,8 @@ test_that("our stdevs are comparable to prcomp",{
   pca_result <- prcomp(show_genotypes(families), center = gt_pca_result$center,
                        scale. = gt_pca_result$scale)
   prcomp_summary <- summary(pca_result)
-
   TOL <- 1e-4
+
   # Compare standard deviation
   expect_equal(tidy_pca$std.dev, pca_result$sdev[1:10], tolerance = TOL)
   # Compare percentage variance explained
@@ -192,5 +196,27 @@ test_that("our stdevs are comparable to prcomp",{
   # Compare cumulative variance explained
   expect_equal(tidy_pca$cumulative, as.vector((prcomp_summary$importance[3,c(1:10)])*100), tolerance = TOL)
 
+  #########################
+  # Perform PCA using gt_pca_autoSVD
+  #########################
+  families <- gt_impute_simple(families, method = "mode")
+  gt_pca_auto_result <- families %>% gt_pca_autoSVD(roll_size = 7)
+  tidy_pca <- tidy(gt_pca_auto_result, matrix = "eigenvalues")
+
+  loci <- gt_pca_auto_result$loci
+  select <- which(show_loci(families)$name %in% loci$name)
+  families_autoSVD_subset <-families %>% select_loci(all_of(select)) %>% show_genotypes()
+
+  # Perform PCA using prcomp
+  pca_result <- prcomp(families_autoSVD_subset, center = gt_pca_auto_result$center,
+                       scale. = gt_pca_auto_result$scale)
+  prcomp_summary <- summary(pca_result)
+
+  # Compare standard deviation
+  expect_equal(tidy_pca$std.dev, pca_result$sdev[1:10], tolerance = TOL)
+  # Compare percentage variance explained
+  expect_equal(tidy_pca$percent, as.vector((prcomp_summary$importance[2,c(1:10)])*100), tolerance = TOL)
+  # Compare cumulative variance explained
+  expect_equal(tidy_pca$cumulative, as.vector((prcomp_summary$importance[3,c(1:10)])*100), tolerance = TOL)
 })
 

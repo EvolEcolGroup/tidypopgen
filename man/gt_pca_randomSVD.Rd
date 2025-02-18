@@ -12,7 +12,8 @@ gt_pca_randomSVD(
   verbose = FALSE,
   n_cores = 1,
   fun_prod = bigstatsr::big_prodVec,
-  fun_cprod = bigstatsr::big_cprodVec
+  fun_cprod = bigstatsr::big_cprodVec,
+  total_var = TRUE
 )
 }
 \arguments{
@@ -44,6 +45,10 @@ and compute the product of \code{X} (subsetted and scaled) with \code{x}.
 }}
 
 \item{fun_cprod}{Same as \code{fun.prod}, but for the \emph{transpose} of \code{X}.}
+
+\item{total_var}{a boolean indicating whether to compute the total variance of the matrix. Default is \code{TRUE}.
+Using \code{FALSE} will speed up computation, but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the components).}
 }
 \value{
 a \code{gt_pca} object, which is a subclass of \code{bigSVD}; this is

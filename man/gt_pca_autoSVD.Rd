@@ -17,7 +17,8 @@ gt_pca_autoSVD(
   min_mac = 10,
   max_iter = 5,
   n_cores = 1,
-  verbose = TRUE
+  verbose = TRUE,
+  total_var = TRUE
 )
 }
 \arguments{
@@ -63,6 +64,10 @@ Default is \code{5}.}
 You may use \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}.}
 
 \item{verbose}{Output some information on the iterations? Default is \code{TRUE}.}
+
+\item{total_var}{a boolean indicating whether to compute the total variance of the matrix. Default is \code{TRUE}.
+Using \code{FALSE} will speed up computation, but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the components).}
 }
 \value{
 a \code{gt_pca} object, which is a subclass of \code{bigSVD}; this is
@@ -76,6 +81,7 @@ A named list (an S3 class "big_SVD") of
 \item \code{scale}, the scaling vector,
 \item \code{method}, a string defining the method (in this case 'autoSVD'),
 \item \code{call}, the call that generated the object.
+\item \code{loci}, the loci used after long range LD removal.
 }
 
 Note: rather than accessing these elements directly, it is better to use
