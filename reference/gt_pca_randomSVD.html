@@ -69,7 +69,8 @@ for <code><a href="https://privefl.github.io/bigstatsr/reference/big_randomSVD.h
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  fun_prod <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="va"><a href="https://privefl.github.io/bigstatsr/reference/big_prodVec.html" class="external-link">big_prodVec</a></span>,</span>
-<span>  fun_cprod <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="va"><a href="https://privefl.github.io/bigstatsr/reference/big_cprodVec.html" class="external-link">big_cprodVec</a></span></span>
+<span>  fun_cprod <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="va"><a href="https://privefl.github.io/bigstatsr/reference/big_cprodVec.html" class="external-link">big_cprodVec</a></span>,</span>
+<span>  total_var <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -118,6 +119,12 @@ and compute the product of <code>X</code> (subsetted and scaled) with <code>x</c
 
 <dt id="arg-fun-cprod">fun_cprod<a class="anchor" aria-label="anchor" href="#arg-fun-cprod"></a></dt>
 <dd><p>Same as <code>fun.prod</code>, but for the <em>transpose</em> of <code>X</code>.</p></dd>
+
+
+<dt id="arg-total-var">total_var<a class="anchor" aria-label="anchor" href="#arg-total-var"></a></dt>
+<dd><p>a boolean indicating whether to compute the total variance of the matrix. Default is <code>TRUE</code>.
+Using <code>FALSE</code> will speed up computation, but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the components).</p></dd>
 
 </dl></div>
     <div class="section level2">

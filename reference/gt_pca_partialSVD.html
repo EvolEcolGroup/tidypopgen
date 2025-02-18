@@ -55,7 +55,12 @@ for <code><a href="https://privefl.github.io/bigstatsr/reference/big_SVD.html" c
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gt_pca_partialSVD</span><span class="op">(</span><span class="va">x</span>, k <span class="op">=</span> <span class="fl">10</span>, fun_scaling <span class="op">=</span> <span class="fu">bigsnpr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigsnpr/reference/snp_scaleBinom.html" class="external-link">snp_scaleBinom</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gt_pca_partialSVD</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  k <span class="op">=</span> <span class="fl">10</span>,</span>
+<span>  fun_scaling <span class="op">=</span> <span class="fu">bigsnpr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigsnpr/reference/snp_scaleBinom.html" class="external-link">snp_scaleBinom</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  total_var <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -77,6 +82,12 @@ for <code><a href="https://privefl.github.io/bigstatsr/reference/big_SVD.html" c
 Alternatively it is possible to use  custom function
 (see <code><a href="https://privefl.github.io/bigsnpr/reference/snp_autoSVD.html" class="external-link">bigsnpr::snp_autoSVD()</a></code> for details.</p></dd>
 
+
+<dt id="arg-total-var">total_var<a class="anchor" aria-label="anchor" href="#arg-total-var"></a></dt>
+<dd><p>a boolean indicating whether to compute the total variance of the matrix. Default is <code>TRUE</code>.
+Using <code>FALSE</code> will speed up computation, but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the components).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -89,6 +100,7 @@ A named list (an S3 class "big_SVD") of</p><ul><li><p><code>d</code>, the eigenv
 <li><p><code>scale</code>, the scaling vector,</p></li>
 <li><p><code>method</code>, a string defining the method (in this case 'partialSVD'),</p></li>
 <li><p><code>call</code>, the call that generated the object.</p></li>
+<li><p><code>square_frobenious</code>, used to compute the proportion of variance explained by the components (optional)</p></li>
 </ul><p>Note: rather than accessing these elements directly, it is better to use
 <code>tidy</code> and <code>augment</code>. See <code><a href="tidy_gt_pca.html">gt_pca_tidiers</a></code>.</p>
     </div>

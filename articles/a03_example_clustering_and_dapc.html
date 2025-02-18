@@ -227,19 +227,19 @@ which returns a tibble that can be easily used for further analysis,
 e.g.:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">anole_pca</span>, matrix<span class="op">=</span><span class="st">"eigenvalues"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 30 × 3</span></span></span>
-<span><span class="co">#&gt;       PC std.dev cumulative</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1   51.9        51.9</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2   28.4        80.3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3   16.7        97.0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4   15.4       112. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5   12.9       125. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6   12.3       138. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7   10.2       148. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8    9.92      158. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9    9.13      167. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10    8.80      176. </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 30 × 4</span></span></span>
+<span><span class="co">#&gt;       PC std.dev percent cumulative</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1   52.5    45.9        45.9</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2   28.7    13.7        59.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3   16.9     4.78       64.5</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4   15.6     4.05       68.5</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5   13.1     2.85       71.4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6   12.4     2.58       73.9</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7   10.3     1.79       75.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8   10.0     1.68       77.4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9    9.23    1.42       78.8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10    8.90    1.32       80.2</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 20 more rows</span></span></span></code></pre></div>
 <p>We can return information on the <em>eigenvalues</em>,
 <em>scores</em> and <em>loadings</em> of the pca. There is also an

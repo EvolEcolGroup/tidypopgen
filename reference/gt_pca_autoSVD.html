@@ -62,7 +62,8 @@ of long-range LD regions. This function is a wrapper for <code><a href="https://
 <span>  min_mac <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  max_iter <span class="op">=</span> <span class="fl">5</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  total_var <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -138,6 +139,12 @@ You may use <code><a href="https://privefl.github.io/bigstatsr/reference/reexpor
 <dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>Output some information on the iterations? Default is <code>TRUE</code>.</p></dd>
 
+
+<dt id="arg-total-var">total_var<a class="anchor" aria-label="anchor" href="#arg-total-var"></a></dt>
+<dd><p>a boolean indicating whether to compute the total variance of the matrix. Default is <code>TRUE</code>.
+Using <code>FALSE</code> will speed up computation, but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the components).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -150,6 +157,7 @@ A named list (an S3 class "big_SVD") of</p><ul><li><p><code>d</code>, the eigenv
 <li><p><code>scale</code>, the scaling vector,</p></li>
 <li><p><code>method</code>, a string defining the method (in this case 'autoSVD'),</p></li>
 <li><p><code>call</code>, the call that generated the object.</p></li>
+<li><p><code>loci</code>, the loci used after long range LD removal.</p></li>
 </ul><p>Note: rather than accessing these elements directly, it is better to use
 <code>tidy</code> and <code>augment</code>. See <code><a href="tidy_gt_pca.html">gt_pca_tidiers</a></code>.
 Note: If you encounter 'Error in rollmean(): Parameter 'size' is too large.'
