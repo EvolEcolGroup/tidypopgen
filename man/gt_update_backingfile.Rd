@@ -15,14 +15,14 @@ gt_update_backingfile(
 \arguments{
 \item{.x}{a \code{gen_tibble} object}
 
-\item{backingfile}{@param backingfile the path, including the file name without extension,
+\item{backingfile}{the path, including the file name without extension,
 for backing files used to store the data (they will be given a .bk
 and .RDS automatically). If left to NULL (the default), the file name
 will be based on the name f the current backing file.}
 
 \item{chunk_size}{the number of loci to process at once}
 
-\item{rm_unsorted_dist}{boolean to set \code{gentic_dist} to zero (i.e. remove it)
+\item{rm_unsorted_dist}{boolean to set \code{genetic_dist} to zero (i.e. remove it)
 if it is unsorted within the chromosomes.}
 
 \item{quiet}{boolean to suppress information about the files}
