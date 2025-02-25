@@ -1,9 +1,10 @@
-test_that("qc_report_indiv filters relatives within groups",{
-  # Create gentibble
-  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
-  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
+# Create gentibble
+bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
+families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
+families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
 
+
+test_that("qc_report_indiv filters relatives within groups",{
   ungrouped <- qc_report_indiv(families, kings_threshold = 0.2)
 
   # Put relatives in different populations
@@ -39,10 +40,6 @@ test_that("qc_report_indiv filters relatives within groups",{
 })
 
 test_that("qc_report_indiv$to_keep is correctly ordered",{
-  # Create gentibble
-  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
-  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1","2"))
   # create a population
   families$population <- c(rep("pop1",6), rep("GroupA",6))
   # make it a factor
@@ -64,5 +61,20 @@ test_that("qc_report_indiv$to_keep is correctly ordered",{
   GroupA_report <- qc_report_indiv(GroupA, kings_threshold = 0.2)
   # The correct individuals are removed
   expect_equal(as.vector(grouped$to_keep), c(pop1_report$to_keep,GroupA_report$to_keep))
+})
+
+test_that("autoplot list",{
+  ungrouped <- qc_report_indiv(families, kings_threshold = 0.2)
+  expect_error(autoplot(ungrouped, type = "blah"),"'arg' should be one of")
+  plot1 <- autoplot(ungrouped, type = "relatedness",kings_threshold = 0.2)
+  expect_equal(as.vector(class(plot1)),c("gg","ggplot"))
+
+  families$population <- c(rep("pop1",5), rep("pop2",4),"pop1","pop2","pop1")
+  families <- families %>% group_by(population)
+  grouped <- qc_report_indiv(families, kings_threshold = 0.2)
+
+  plot2 <- autoplot(grouped, type = "relatedness",kings_threshold = 0.2)
+  # expect plot2 is a list, one plot for each population
+  expect_equal(names(plot2),c("pop1","pop2"))
 })
 

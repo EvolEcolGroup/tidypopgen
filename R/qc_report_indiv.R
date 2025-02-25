@@ -147,12 +147,8 @@ autoplot.qc_report_indiv <- function(object, type = c("scatter", "relatedness"),
   } else if (type == "relatedness") {
     final_plot <- autoplot_qc_report_indiv_king(object,
                                                 kings_threshold = kings_threshold)
-  } else {
-    stop("Invalid type argument. Please choose from 'scatter' or 'relatedness'")
   }
-
   return(final_plot)
-
 }
 
 autoplot_qc_report_indiv <- function(object, miss_threshold = miss_threshold) {
