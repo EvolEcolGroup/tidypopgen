@@ -294,15 +294,15 @@ using <code>gt_save</code>.</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/Rtmp345xhz/file245d50e27fc5.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using bigSNP file: /tmp/Rtmp345xhz/file245d5e55e662.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with backing file: /tmp/Rtmp345xhz/file245d5e55e662.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/Rtmp3Istq0/file28071c0a44b4.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using bigSNP file: /tmp/Rtmp3Istq0/file28076b498f0d.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with backing file: /tmp/Rtmp3Istq0/file28076b498f0d.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/Rtmp345xhz/file245d50e27fc5.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/Rtmp345xhz/file245d50e27fc5.gt" </span></span>
-<span><span class="co">## [2] "/tmp/Rtmp345xhz/file245d5e55e662.rds"</span></span>
-<span><span class="co">## [3] "/tmp/Rtmp345xhz/file245d5e55e662.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/Rtmp3Istq0/file28071c0a44b4.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/Rtmp3Istq0/file28071c0a44b4.gt" </span></span>
+<span><span class="co">## [2] "/tmp/Rtmp3Istq0/file28076b498f0d.rds"</span></span>
+<span><span class="co">## [3] "/tmp/Rtmp3Istq0/file28076b498f0d.bk"</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="grouping-data">Grouping data<a class="anchor" aria-label="anchor" href="#grouping-data"></a>
@@ -336,15 +336,15 @@ each population:</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grouped_individual_report</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span>kings_threshold <span class="op">=</span> <span class="fl">0.177</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">grouped_individual_report</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
-<span><span class="co">##   het_obs missingness to_keep    id</span></span>
-<span><span class="co">##     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>   0.262           0 TRUE        1</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span>   0.251           0 TRUE        2</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span>   0.258           0 TRUE        4</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span>   0.270           0 TRUE        5</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span>   0.262           0 TRUE        6</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span>   0.285           0 TRUE        7</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
+<span><span class="co">##   het_obs missingness    id group to_keep</span></span>
+<span><span class="co">##     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>   0.262           0     1 A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>   0.251           0     2 A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>   0.258           0     4 A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>   0.270           0     5 A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>   0.262           0     6 B     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>   0.285           0     7 B     TRUE</span></span></code></pre>
 <p>This is important when we have related individuals, as background
 population structure can affect the filtering of relatives.</p>
 </div>
