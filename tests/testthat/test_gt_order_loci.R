@@ -45,23 +45,25 @@ test_that("gt_update_backingfile correctly updates",{
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
-  # subset and reorder
-  expect_false(is_loci_table_ordered(test_gt, error_on_false = FALSE))
-  expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE),"All SNPs in a chromosome should be adjacent")
   subset_reorder_test_gt <- test_gt %>% select_loci(c(2,4,5,1,6))
   expect_true(is_loci_table_ordered(subset_reorder_test_gt, error_on_false = FALSE))
   subset_reorder_test_gt <- subset_reorder_test_gt[c(2,1,4,5),]
-  # now save the udpated backing matrix
+  # now save the updated backing matrix
+  expect_message(gt_update_backingfile(subset_reorder_test_gt, quiet = FALSE),"backing files updated, now")
   new_gt <- gt_update_backingfile(subset_reorder_test_gt, quiet = TRUE)
   # the new gt should be identical to the original one, minus the big indices
   expect_identical(show_genotypes(new_gt), show_genotypes(subset_reorder_test_gt))
   expect_identical(show_loci(new_gt)[,-1], show_loci(subset_reorder_test_gt)[,-1])
   # loci big index should now be sequential
   expect_identical(show_loci(new_gt)$big_index,1:count_loci(new_gt))
+
+  # if loci are out of order, gt_update_backingfile proceeds, and does not error
+  show_loci(subset_reorder_test_gt) <- show_loci(subset_reorder_test_gt)[c(1,3,2,4,5),]
+  out_of_order <- gt_update_backingfile(subset_reorder_test_gt, quiet = TRUE, rm_unsorted_dist = TRUE)
+  expect_identical(show_loci(subset_reorder_test_gt)[,-1], show_loci(out_of_order)[,-1])
 })
 
 test_that("gt_order_loci reorders and regenerates backingfiles",{
-
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                  population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,0),
@@ -73,7 +75,6 @@ test_that("gt_order_loci reorders and regenerates backingfiles",{
                           genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
   # create new tibble to reorder
@@ -114,8 +115,8 @@ test_that("gt_order_loci reorders and regenerates backingfiles",{
 
 })
 
-test_that("gt_order_loci use_current_table = TRUE",{
-
+test_that("gt_order_loci catches unsorted and duplicated positions when use_current_table = TRUE, and
+          duplicated positions when use_current_table = FALSE",{
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                  population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,0),
@@ -127,7 +128,6 @@ test_that("gt_order_loci use_current_table = TRUE",{
                           genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-
   path <- tempfile()
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = path)
 
@@ -150,27 +150,32 @@ test_that("gt_order_loci use_current_table = TRUE",{
                normalizePath(c(paste0(path,"_v2.rds"),paste0(path,"_v2.bk"))))
 
   # if use_current_table = TRUE, but the loci are not ordered, check for errors
-
-  # manually reorder the loci for chromosomes to be out of order
-  new_order <- c(5,1,2,3,4,6)
+  new_order <- c(5,1,2,3,4,6) # manually reorder the loci for chromosomes to be out of order
   show_loci(test_gt) <- show_loci(test_gt)[new_order,]
-
-  # test gt_order_loci use_current_table = TRUE
   expect_error(gt_order_loci(test_gt, use_current_table = TRUE, quiet = TRUE),"All SNPs in a chromosome should be adjacent in the loci table")
   gt_save(test_gt, quiet = TRUE)
-
-  # manually reorder the loci for positions to be out of order
-  new_order <- c(3,4,2,5,1,6)
+  new_order <- c(3,4,2,5,1,6) # manually reorder the loci for positions to be out of order
   show_loci(test_gt) <- show_loci(test_gt)[new_order,]
   expect_false(is_loci_table_ordered(test_gt), "Your loci are not sorted within chromosomes")
-
-
-  # test gt_order_loci use_current_table = TRUE
   expect_error(gt_order_loci(test_gt, use_current_table = TRUE, quiet = TRUE),"Your loci are not sorted within chromosomes")
+  # if use_current_table = TRUE, but the loci contain duplicates, check for errors
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(1,1,1,1,1,1)),
+                          position=as.integer(c(3,3,5,65,343,46)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  path <- tempfile()
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = path)
+  new_order <- c(1,2,3,6,4,5)
+  show_loci(test_gt) <- show_loci(test_gt)[new_order,] # manually reorder so loci are ordered, but have duplicates
+  expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE), "Your loci table contains duplicates")
+  expect_error(gt_order_loci(test_gt, use_current_table = TRUE, quiet = TRUE),"Your loci table contains duplicates")
+  # and if use_current_table = FALSE, check for errors too
+  expect_error(gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE),"Your loci table contains duplicates")
 })
 
-test_that("gt_order_loci catches physical positions out of sync",{
-
+test_that("gt_order_loci catches unsorted and duplicated genetic_dist when use_current_table = TRUE",{
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                  population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,0),
@@ -182,73 +187,37 @@ test_that("gt_order_loci catches physical positions out of sync",{
                           genetic_dist = as.double(c(0.3,0.7,0,0.2,0.0,0.3)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-
   path <- tempfile()
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = path)
-
-  expect_true(is_loci_table_ordered(test_gt))
+  expect_true(is_loci_table_ordered(test_gt, ignore_genetic_dist = TRUE))
   expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
   # now order it
-  ordered_test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
+  expect_message(gt_order_loci(test_gt, use_current_table = TRUE, ignore_genetic_dist = TRUE),"Genetic distances are not sorted, setting them to zero")
+  expect_message(ordered_test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, ignore_genetic_dist = TRUE),"Genetic distances are not sorted, setting them to zero")
+  expect_error(gt_order_loci(test_gt, use_current_table = TRUE, ignore_genetic_dist = FALSE),"Your genetic distances are not sorted within chromosomes")
+  expect_error(gt_order_loci(test_gt, use_current_table = FALSE, ignore_genetic_dist = FALSE),"Your genetic distances are not sorted within chromosomes")
+
   # now we pass the test as we set genetic distances to zero
+  expect_message(is_loci_table_ordered(ordered_test_gt, ignore_genetic_dist = FALSE, error_on_false = TRUE),"Your genetic distances have been set to 0")
   expect_true(is_loci_table_ordered(ordered_test_gt, ignore_genetic_dist = FALSE))
-  # check that genetic_dist is all zeroes
+  # check that genetic_dist is all zero
   expect_equal(show_loci(ordered_test_gt)$genetic_dist, rep(0,6))
-})
-
-
-test_that("chr_int from character chromosomes",{
-  test_indiv_meta <- data.frame (id=c("a","b","c"),
-                                 population = c("pop1","pop1","pop2"))
-  test_genotypes <- rbind(c(1,1,0,1,1,0),
-                          c(2,1,0,0,0,0),
-                          c(2,2,0,0,1,1))
+  # check the same for duplicated genetic_dist
   test_loci <- data.frame(name=paste0("rs",1:6),
-                          chromosome=as.character(c(2,13,8,1,2,3)),
-                          position=as.integer(c(23,3,5,65,343,46)),
-                          genetic_dist = as.double(rep(0,6)),
+                          chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                          position=as.integer(c(3,5,65,343,27,83)),
+                          genetic_dist = as.double(c(0,0,0,0.2,0.3,0.4)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
-
-  # check chr_int makes sense
-  expect_equal(show_loci(test_gt)$chr_int, c(2,13,8,1,2,3))
-
-  # use gt_order_loci to reorder
-  test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
-  expect_equal(show_loci(test_gt)$chr_int, c(1,2,2,3,8,13))
-  expect_equal(show_loci(test_gt)$chromosome, c("1","2","2","3","8","13"))
+  path <- tempfile()
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = path)
+  expect_message(gt_order_loci(test_gt, use_current_table = TRUE, ignore_genetic_dist = TRUE),"Genetic distances are not sorted, setting them to zero")
+  expect_message(gt_order_loci(test_gt, use_current_table = FALSE, ignore_genetic_dist = TRUE),"Genetic distances are not sorted, setting them to zero")
+  expect_error(gt_order_loci(test_gt, use_current_table = TRUE, ignore_genetic_dist = FALSE),"Your loci table contains duplicated genetic distances")
+  expect_error(gt_order_loci(test_gt, use_current_table = FALSE, ignore_genetic_dist = FALSE),"Your loci table contains duplicated genetic distances")
 })
 
-
-test_that("chr_int from factor chromosomes",{
-  test_indiv_meta <- data.frame (id=c("a","b","c"),
-                                 population = c("pop1","pop1","pop2"))
-  test_genotypes <- rbind(c(1,1,0,1,1,0),
-                          c(2,1,0,0,0,0),
-                          c(2,2,0,0,1,1))
-  test_loci <- data.frame(name=paste0("rs",1:6),
-                          chromosome=as.factor(c(2,13,8,1,2,3)),
-                          position=as.integer(c(23,3,5,65,343,46)),
-                          genetic_dist = as.double(rep(0,6)),
-                          allele_ref = c("A","T","C","G","C","T"),
-                          allele_alt = c("T","C", NA,"C","G","A"))
-
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
-
-  # check chr_int makes sense
-  expect_equal(show_loci(test_gt)$chr_int, c(2,13,8,1,2,3))
-
-  # use gt_order_loci to reorder
-  test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
-  expect_equal(show_loci(test_gt)$chr_int, c(1,2,2,3,8,13))
-  expect_equal(as.character(show_loci(test_gt)$chromosome),as.character(c(1,2,2,3,8,13)))
-})
-
-
-test_that("correct error when genetic_dist is not sorted",{
-
+test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist when rm_unsorted_dist = TRUE",{
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                  population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,0),
@@ -260,16 +229,66 @@ test_that("correct error when genetic_dist is not sorted",{
                           genetic_dist = c(0.1,0.3,0.2,0.4,0.5,0.6),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
-
-  expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
-  expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE, ignore_genetic_dist = FALSE),
-               "Your genetic distances are not sorted ")
+  expect_message(gt_update_backingfile(test_gt, rm_unsorted_dist = FALSE),
+                 "gen_backing files updated, now")
+  expect_message(gt_update_backingfile(test_gt, rm_unsorted_dist = TRUE),
+               "Genetic distances are not sorted, setting them to zero")
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(c(1,1,1,1,1,1)),
+                          position=as.integer(c(3,5,25,46,65,343)),
+                          genetic_dist = c(0,0,0.2,0.4,0.5,0.6),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+  expect_message(gt_update_backingfile(test_gt, rm_unsorted_dist = FALSE),
+                 "gen_backing files updated, now")
+  expect_message(gt_update_backingfile(test_gt, rm_unsorted_dist = TRUE),
+                 "Genetic distances are not sorted, setting them to zero")
 })
 
-test_that("correct error when loci table contains duplicates",{
 
+test_that("is_loci_table_ordered catches unsorted and duplicated genetic_dist when ignore_genetic_dist = FALSE",{
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(c(1,1,1,1,1,1)),
+                          position=as.integer(c(3,5,25,46,65,343)),
+                          genetic_dist = c(0.1,0.3,0.2,0.4,0.5,0.6),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+  expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
+  expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE, ignore_genetic_dist = FALSE),
+               "Your genetic distances are not sorted within chromosomes")
+  # is_loci_table_ordered catches duplicated genetic_dist
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(c(1,1,1,1,1,1)),
+                          position=as.integer(c(3,4,25,46,65,343)),
+                          genetic_dist = as.double(c(0.01,seq(0.01, 0.05,0.01))),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+  expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
+  expect_error(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE, error_on_false = TRUE),
+               "Your loci table contains duplicated genetic distances")
+  # is_loci_table_ordered ignores duplication and returns TRUE warning when all genetic_dist is set to 0
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(c(1,1,1,1,1,1)),
+                          position=as.integer(c(3,4,25,46,65,343)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+  expect_true(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
+  expect_message(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE, error_on_false = TRUE),"Your genetic distances have been set to 0")
+})
+
+test_that("is_loci_table_ordered catches unsorted and duplicated positions",{
+  # is_loci_table_ordered catches duplicated positions
   test_indiv_meta <- data.frame (id=c("a","b","c"),
                                  population = c("pop1","pop1","pop2"))
   test_genotypes <- rbind(c(1,1,0,1,1,0),
@@ -281,15 +300,94 @@ test_that("correct error when loci table contains duplicates",{
                           genetic_dist = as.double(rep(0,6)),
                           allele_ref = c("A","T","C","G","C","T"),
                           allele_alt = c("T","C", NA,"C","G","A"))
-
   test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
-
   expect_false(is_loci_table_ordered(test_gt))
   expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE),
                "Your loci table contains duplicates")
-
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(2,1,1,1,1,2)),
+                          position=as.integer(c(23,3,5,65,343,46)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  # subset and reorder
+  expect_false(is_loci_table_ordered(test_gt, error_on_false = FALSE))
+  expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE),
+               "All SNPs in a chromosome should be adjacent")
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=paste0("chr",c(1,1,1,1,2,2)),
+                          position=as.integer(c(5,3,65,343,23,456)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  # loci are out of order
+  expect_false(is_loci_table_ordered(test_gt))
+  expect_error(is_loci_table_ordered(test_gt, error_on_false = TRUE),"Your loci are not sorted within chromosomes")
 })
 
 
+test_that("check updated positions/distances are inherited by the merged gt",{
+  raw_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+  bigsnp_path_b <- bigsnpr::snp_readBed(raw_path_pop_b, backingfile = tempfile("test_b_"))
+  pop_b_gt <- gen_tibble(bigsnp_path_b, quiet=TRUE)
+  raw_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  bigsnp_path_a <- bigsnpr::snp_readBed(raw_path_pop_a, backingfile = tempfile("test_a_"))
+  pop_a_gt <- gen_tibble(bigsnp_path_a, quiet=TRUE)
+  # Edit genetic_dist in loci table of pop_a_gt
+  show_loci(pop_a_gt)$genetic_dist <- c(seq(0.01, 0.16,0.01))
+  # Update backingfiles to store this change
+  pop_a_gt <- gt_update_backingfile(pop_a_gt, rm_unsorted_dist = FALSE, quiet = TRUE)
+  # check we're now using the correct backingfiles
+  #gt_get_file_names(pop_a_gt)
+  merged_gen <- rbind.gen_tbl(pop_a_gt, pop_b_gt, flip_strand = TRUE,
+                              quiet = TRUE,
+                              backingfile = tempfile())
+  # check that the genetic_dist is as expected in the merged gt
+  expect_equal(show_loci(merged_gen)$genetic_dist, c(seq(0.02, 0.06,0.01),0.08,0.09,seq(0.12, 0.16,0.01)))
+})
 
 
+test_that("gt_order_loci works respects chr_int, when original chromosome is character",{
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.character(c(2,13,8,1,2,3)),
+                          position=as.integer(c(23,3,5,65,343,46)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+  # check chr_int makes sense
+  expect_equal(show_loci(test_gt)$chr_int, c(2,13,8,1,2,3))
+  # use gt_order_loci to reorder
+  test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
+  expect_equal(show_loci(test_gt)$chr_int, c(1,2,2,3,8,13))
+  expect_equal(show_loci(test_gt)$chromosome, c("1","2","2","3","8","13"))
+})
+
+
+test_that("gt_order_loci works respects chr_int, when original chromosome is factor",{
+  test_indiv_meta <- data.frame (id=c("a","b","c"),
+                                 population = c("pop1","pop1","pop2"))
+  test_genotypes <- rbind(c(1,1,0,1,1,0),
+                          c(2,1,0,0,0,0),
+                          c(2,2,0,0,1,1))
+  test_loci <- data.frame(name=paste0("rs",1:6),
+                          chromosome=as.factor(c(2,13,8,1,2,3)),
+                          position=as.integer(c(23,3,5,65,343,46)),
+                          genetic_dist = as.double(rep(0,6)),
+                          allele_ref = c("A","T","C","G","C","T"),
+                          allele_alt = c("T","C", NA,"C","G","A"))
+  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, backingfile = tempfile())
+  # check chr_int makes sense
+  expect_equal(show_loci(test_gt)$chr_int, c(2,13,8,1,2,3))
+  # use gt_order_loci to reorder
+  test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
+  expect_equal(show_loci(test_gt)$chr_int, c(1,2,2,3,8,13))
+  expect_equal(as.character(show_loci(test_gt)$chromosome),as.character(c(1,2,2,3,8,13)))
+})
