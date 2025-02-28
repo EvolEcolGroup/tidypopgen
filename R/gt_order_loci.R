@@ -12,7 +12,7 @@
 #' manually, will be used, but only if the positions within each chromosome are
 #' sequential
 #' @param ignore_genetic_dist boolean to ignore the genetic distance when checking. Note
-#' that, if `gentic_dist` are being ignored and they are not sorted, the function will
+#' that, if `genetic_dist` are being ignored and they are not sorted, the function will
 #' set them to zero to avoid problems with other software.
 #' @param quiet boolean to suppress information about the files
 #' @param ... other arguments
@@ -28,6 +28,6 @@ gt_order_loci <- function(.x, use_current_table = FALSE, ignore_genetic_dist = T
   }
   # if asked to use the current table, check that it is ordered
   is_loci_table_ordered(.x, error_on_false = TRUE, ignore_genetic_dist = ignore_genetic_dist)
-  gt_update_backingfile(.x, quiet=quiet, ignore_genetic_dist = ignore_genetic_dist, ...)
+  gt_update_backingfile(.x, quiet=quiet, rm_unsorted_dist = ignore_genetic_dist, ...)
 
 }
