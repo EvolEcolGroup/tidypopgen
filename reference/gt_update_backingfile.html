@@ -56,7 +56,7 @@ test_gt_order_loci.R</p>
 <span>  <span class="va">.x</span>,</span>
 <span>  backingfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  chunk_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  ignore_genetic_dist <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  rm_unsorted_dist <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -70,7 +70,7 @@ test_gt_order_loci.R</p>
 
 
 <dt id="arg-backingfile">backingfile<a class="anchor" aria-label="anchor" href="#arg-backingfile"></a></dt>
-<dd><p>@param backingfile the path, including the file name without extension,
+<dd><p>the path, including the file name without extension,
 for backing files used to store the data (they will be given a .bk
 and .RDS automatically). If left to NULL (the default), the file name
 will be based on the name f the current backing file.</p></dd>
@@ -80,10 +80,9 @@ will be based on the name f the current backing file.</p></dd>
 <dd><p>the number of loci to process at once</p></dd>
 
 
-<dt id="arg-ignore-genetic-dist">ignore_genetic_dist<a class="anchor" aria-label="anchor" href="#arg-ignore-genetic-dist"></a></dt>
-<dd><p>boolean to ignore the genetic distance when checking. Note
-that, if <code>gentic_dist</code> are being ignored and they are not sorted, the function will
-set them to zero to avoid problems with other software.</p></dd>
+<dt id="arg-rm-unsorted-dist">rm_unsorted_dist<a class="anchor" aria-label="anchor" href="#arg-rm-unsorted-dist"></a></dt>
+<dd><p>boolean to set <code>genetic_dist</code> to zero (i.e. remove it)
+if it is unsorted within the chromosomes.</p></dd>
 
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
