@@ -88,8 +88,9 @@ gt_roh_window <-  function(x, window_size = 15, threshold = 0.05,
   # access time is horrible, but I don't think this is the bottleneck
   # it needs some profiling
   X <- .gt_get_bigsnp(x)$genotypes # pointer for the FBM
+  col_ind <-.gt_bigsnp_cols(x) #column indeces for the snps to consider
   for (i in seq_len(nrow(x))){
-    this_genotype <- X[i,]
+    this_genotype <- X[i, col_ind]
     this_indiv <- list(FID=groups[i], IID=x$id[i])
     # find runs for this individual
     this_runs <- utils::getFromNamespace("slidingRuns", "detectRUNS")(this_genotype, this_indiv, map, gaps, parameters)
