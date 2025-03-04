@@ -14,11 +14,11 @@ augment_loci(x, data, ...)
 \item{...}{Additional parameters passed to the individual methods.}
 }
 \value{
-A \link{gen_tibble} with additional columns added to the loci tibble (accessible
-with \code{\link[=show_loci]{show_loci()}}. If \code{data} is missing, a tibble of the information, with a
-column \code{.rownames} giving the loci names.
+A \link{gen_tibble} with additional columns added to the loci tibble
+(accessible with \code{\link[=show_loci]{show_loci()}}. If \code{data} is missing, a tibble of the
+information, with a column \code{.rownames} giving the loci names.
 }
 \description{
-\code{augment_loci} add columns to the loci table of a \code{gen_tibble} related
-to information from a given analysis.
+\code{augment_loci} add columns to the loci table of a \code{gen_tibble} related to
+information from a given analysis.
 }

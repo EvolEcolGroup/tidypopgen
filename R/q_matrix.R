@@ -405,7 +405,7 @@ autoplot.q_matrix <- function(object, data = NULL, annotate_group = TRUE,
     if (!"group" %in% names(q_tbl)) {
       warning("no annotation possible if 'gen_tbl' is NULL and q_matrix does not contain group information")
     } else {
-      plt <- plt + annotate_group_info(q_tbl)
+      plt <- plt + annotate_group_info(q_tbl,plt)
     }
   }
   plt

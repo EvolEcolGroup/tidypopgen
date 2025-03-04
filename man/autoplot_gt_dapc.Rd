@@ -18,12 +18,11 @@
 
 \item{type}{the type of plot (one of "screeplot", "scores" and "loadings")}
 
-\item{ld}{the principal components to be plotted: for scores, a pair of values
-e.g. c(1,2); for \code{loadings} either one or more values.}
+\item{ld}{the principal components to be plotted: for scores, a pair of
+values e.g. c(1,2); for \code{loadings} either one or more values.}
 
-\item{group}{a vector of group memberships to order the individuals
-in "components" plot. If NULL, the
-clusters used for the DAPC will be used.}
+\item{group}{a vector of group memberships to order the individuals in
+"components" plot. If NULL, the clusters used for the DAPC will be used.}
 
 \item{n_col}{for \code{loadings} plots, if multiple LD axis are plotted, how many
 columns should be used.}
@@ -39,12 +38,14 @@ For \code{gt_dapc}, the following types of plots are available:
 \item \code{screeplot}: a plot of the eigenvalues of the discriminant axes
 \item \code{scores} a scatterplot of the scores of each individual on two discriminant
 axes (defined by \code{ld})
-\item \code{loadings} a plot of loadings of all loci for a discriminant axis (chosen with \code{ld})
-\item \code{components} a bar plot showing the probability of assignment to each cluster
+\item \code{loadings} a plot of loadings of all loci for a discriminant axis
+(chosen with \code{ld})
+\item \code{components} a bar plot showing the probability of assignment to
+each cluster
 }
 }
 \details{
-\code{autoplot} produces simple plots to quickly inspect an object. They are
-not customisable; we recommend that you use \code{ggplot2} to produce publication
+\code{autoplot} produces simple plots to quickly inspect an object. They are not
+customisable; we recommend that you use \code{ggplot2} to produce publication
 ready plots.
 }

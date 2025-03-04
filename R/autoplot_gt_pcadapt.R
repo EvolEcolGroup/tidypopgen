@@ -18,16 +18,16 @@
 #' @name autoplot_gt_pcadapt
 #' @export
 autoplot.gt_pcadapt <- function(object,
-                            type=c("qq", "manhattan"),
-                            ...)
-{
+                                type = c("qq", "manhattan"),
+                                ...) {
   type <- match.arg(type)
-  if (type== "qq") {
+  if (type == "qq") {
     bigsnpr::snp_qq(object, ...)
-  } else if (type == "manhattan"){
+  } else if (type == "manhattan") {
     bigsnpr::snp_manhattan(object,
-                  infos.chr = attr(object,"loci")$chromosome,
-                  infos.pos = attr(object,"loci")$position,
-                  ...)
+      infos.chr = attr(object, "loci")$chromosome,
+      infos.pos = attr(object, "loci")$position,
+      ...
+    )
   }
 }

@@ -23,15 +23,16 @@ a \code{ggplot2} object
 \description{
 For \code{gt_pca}, the following types of plots are available:
 \itemize{
-\item \code{screeplot}: a plot of the eigenvalues of the principal components (currently
-it plots the singular value)
+\item \code{screeplot}: a plot of the eigenvalues of the principal components
+(currently it plots the singular value)
 \item \code{scores} a scatterplot of the scores of each individual on two principal
 components (defined by \code{pc})
-\item \code{loadings} a plot of loadings of all loci for a given component (chosen with \code{pc})
+\item \code{loadings} a plot of loadings of all loci for a given component
+(chosen with \code{pc})
 }
 }
 \details{
-\code{autoplot} produces simple plots to quickly inspect an object. They are
-not customisable; we recommend that you use \code{ggplot2} to produce publication
+\code{autoplot} produces simple plots to quickly inspect an object. They are not
+customisable; we recommend that you use \code{ggplot2} to produce publication
 ready plots.
 }
