@@ -146,6 +146,7 @@ gt_write_ped_raw <- function(x, file, plink_format = c("raw","ped"), chunk_size 
 
     # now recode the genotypes with letters if raw
     if (plink_format=="ped"){
+      # TODO this would be faster as an apply function
       for (i in 1:(ncol(raw_table)-6)){
         raw_table[,i+6]<-recode_genotype(raw_table[,i+6], loci$allele_ref[i], loci$allele_alt[i])
       }
