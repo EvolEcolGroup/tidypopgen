@@ -17,7 +17,8 @@ the number of variants (an integer)
 \description{
 Count the number of VCF variants by first parsing the header, and then
 rapidly counting the number of platform-independent
-newlines (CR, LF, and CR+LF), including a last line with neither.
+newlines (carriage_return, line_feed, and carriage_return+line_feed),
+including a last line with neither.
 }
 \author{
 author Henrik Bengtsson for the original \code{countLines} in \code{R.utils};

@@ -2,7 +2,8 @@
 #'
 #' Count the number of VCF variants by first parsing the header, and then
 #' rapidly counting the number of platform-independent
-#' newlines (CR, LF, and CR+LF), including a last line with neither.
+#' newlines (carriage_return, line_feed, and carriage_return+line_feed),
+#' including a last line with neither.
 #'
 #' @author author Henrik Bengtsson for the original `countLines` in `R.utils`;
 #' Andrea Manica for the modified version focussed on vcf
@@ -29,19 +30,19 @@ count_vcf_variants <- function(file, chunk_size = 50e6) {
     }
   }
 
-  LF <- as.raw(0x0a)
-  CR <- as.raw(0x0d)
-  SPC <- as.raw(32L)
+  line_feed <- as.raw(0x0a)
+  carriage_return <- as.raw(0x0d)
+  spc <- as.raw(32L)
 
-  isLastCR <- isLastLF <- FALSE
-  isEmpty <- TRUE
-  nbrOfLines <- 0L
+  is_last_carriage_return <- is_last_line_feed <- FALSE
+  is_empty <- TRUE
+  nbr_of_lines <- 0L
   while (TRUE) {
     bfr <- readBin(con = con, what = raw(), n = chunk_size)
-    if (isLastCR) {
-      # Don't count LF following a CR in previous chunk.
-      if (bfr[1L] == LF) {
-        bfr[1L] <- SPC
+    if (is_last_carriage_return) {
+      # Don't count line_feed following a carriage_return in previous chunk.
+      if (bfr[1L] == line_feed) {
+        bfr[1L] <- spc
       }
     }
 
@@ -50,44 +51,45 @@ count_vcf_variants <- function(file, chunk_size = 50e6) {
       break
     }
 
-    isEmpty <- FALSE
+    is_empty <- FALSE
 
-    # Replace all CRLF:s to become LF:s
-    idxsCR <- which(bfr == CR)
-    nCR <- length(idxsCR)
-    if (nCR > 0L) {
-      idxsCRLF <- idxsCR[(bfr[idxsCR + 1L] == LF)]
-      if (length(idxsCRLF) > 0L) {
-        bfr <- bfr[-idxsCRLF]
+    # Replace all CRLF:s to become line_feed:s
+    idxs_carriage_return <- which(bfr == carriage_return)
+    n_carriage_return <- length(idxs_carriage_return)
+    if (n_carriage_return > 0L) {
+      idxs_cr_lf <- idxs_carriage_return[(bfr[idxs_carriage_return + 1L]
+                                          == line_feed)]
+      if (length(idxs_cr_lf) > 0L) {
+        bfr <- bfr[-idxs_cr_lf]
         n <- length(bfr)
-        idxsCRLF <- NULL # Not needed anymore
-        nCR <- length(which(bfr == CR))
+        idxs_cr_lf <- NULL # Not needed anymore
+        n_carriage_return <- length(which(bfr == carriage_return))
       }
     }
 
-    # Count all CR:s and LF:s
-    nLF <- length(which(bfr == LF))
-    nbrOfLines <- nbrOfLines + (nCR + nLF)
+    # Count all carriage_return:s and line_feed:s
+    n_line_feed <- length(which(bfr == line_feed))
+    nbr_of_lines <- nbr_of_lines + (n_carriage_return + n_line_feed)
 
     if (n == 0L) {
-      isLastCR <- isLastLF <- FALSE
+      is_last_carriage_return <- is_last_line_feed <- FALSE
     } else {
-      # If last symbol is CR it might be followed by a LF in
-      # the next chunk. If so, don't count that next LF.
-      bfrN <- bfr[n]
-      isLastCR <- (bfrN == CR)
-      isLastLF <- (bfrN == LF)
+      # If last symbol is carriage_return it might be followed by a line_feed in
+      # the next chunk. If so, don't count that next line_feed.
+      bfr_n <- bfr[n]
+      is_last_carriage_return <- (bfr_n == carriage_return)
+      is_last_line_feed <- (bfr_n == line_feed)
     }
   } # while()
 
   # Count any last line without newline too
-  if (!isEmpty) {
-    if (!isLastLF) nbrOfLines <- nbrOfLines + 1L
-    attr(nbrOfLines, "lastLineHasNewline") <- isLastLF
+  if (!is_empty) {
+    if (!is_last_line_feed) nbr_of_lines <- nbr_of_lines + 1L
+    attr(nbr_of_lines, "lastLineHasNewline") <- is_last_line_feed
   }
 
   # note the +1, since we read one variant whilst checking for the header
-  nbrOfLines + 1
+  nbr_of_lines + 1
 }
 
 
@@ -97,8 +99,8 @@ count_vcf_variants <- function(file, chunk_size = 50e6) {
 #' getting the first line, then separating on tabs.
 #'
 #' @author author Henrik Bengtsson for the original `countLines` in `R.utils`;
-#' Andrea Manica for the modified version focussed on vcf; Max Carter-Brown modified
-#' the file above.
+#'   Andrea Manica for the modified version focussed on vcf; Max Carter-Brown
+#'   modified the file above.
 #' @param file name and path of vcf file (it can be compressed)
 #' @returns the number of individuals (an integer)
 #' @keywords internal
