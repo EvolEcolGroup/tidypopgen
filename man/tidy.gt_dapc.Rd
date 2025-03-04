@@ -16,10 +16,10 @@ tidied.
 \item \code{"samples"}, \code{"scores"}, or \code{"x"}: returns information about
 the map from the original space into the least discriminant axes.
 \item \code{"v"}, \code{"rotation"}, \code{"loadings"} or \code{"variables"}: returns information
-about the map from discriminant axes space back into the original
-space (i.e. the genotype frequencies). Note that this are different
-from the loadings linking to the PCA scores (which are available in the
-element $loadings of the dapc object).
+about the map from discriminant axes space back into the original space
+(i.e. the genotype frequencies). Note that this are different from the
+loadings linking to the PCA scores (which are available in the element
+$loadings of the dapc object).
 \item \code{"d"}, \code{"eigenvalues"} or \code{"lds"}: returns information about the
 eigenvalues.
 }}
@@ -27,12 +27,11 @@ eigenvalues.
 \item{...}{Not used. Needed to match generic signature only.}
 }
 \value{
-A \link[tibble:tibble]{tibble::tibble} with columns depending on the component of
-DAPC being tidied.
+A \link[tibble:tibble]{tibble::tibble} with columns depending on the component of DAPC
+being tidied.
 
-If \code{"scores"} each row in the
-tidied output corresponds to the original data in PCA space. The columns
-are:
+If \code{"scores"} each row in the tidied output corresponds to the original
+data in PCA space. The columns are:
 
 \item{\code{row}}{ID of the original observation (i.e. rowname from original
 data).}
@@ -40,9 +39,9 @@ data).}
 \item{\code{value}}{The score of the observation for that particular principal
 component. That is, the location of the observation in PCA space.}
 
-If \code{matrix} is  \code{"loadings"}, each
-row in the tidied output corresponds to information about the principle
-components in the original space. The columns are:
+If \code{matrix} is  \code{"loadings"}, each row in the tidied output corresponds to
+information about the principle components in the original space. The
+columns are:
 
 \item{\code{row}}{The variable labels (colnames) of the data set on
 which PCA was performed.}

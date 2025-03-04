@@ -16,19 +16,17 @@
 \item{...}{Not used. Needed to match generic signature only.}
 }
 \value{
-A  \link{gen_tibble} containing the original data along with
-additional columns containing each observation's projection into
-PCA space.
+A  \link{gen_tibble} containing the original data along with additional
+columns containing each observation's projection into PCA space.
 }
 \description{
-Augment for \code{gt_dapc} accepts a model object and a dataset and adds
-scores to each
-observation in the dataset. Scores for each component are stored in a
+Augment for \code{gt_dapc} accepts a model object and a dataset and adds scores to
+each observation in the dataset. Scores for each component are stored in a
 separate column, which is given name with the pattern ".fittedLD1",
 ".fittedLD2", etc. For consistency with \link[broom:augment.prcomp]{broom::augment.prcomp}, a column
-".rownames" is also returned; it is a copy of 'id', but it ensures that
-any scripts written for data augmented with \link[broom:augment.prcomp]{broom::augment.prcomp} will
-work out of the box (this is especially helpful when adapting plotting scripts).
+".rownames" is also returned; it is a copy of 'id', but it ensures that any
+scripts written for data augmented with \link[broom:augment.prcomp]{broom::augment.prcomp} will work out
+of the box (this is especially helpful when adapting plotting scripts).
 }
 \seealso{
 \code{\link[=gt_dapc]{gt_dapc()}} \link{gt_dapc_tidiers}
