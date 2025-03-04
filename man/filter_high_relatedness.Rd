@@ -12,7 +12,8 @@ filter_high_relatedness(
 )
 }
 \arguments{
-\item{matrix}{a square symmetric matrix of individuals containing relationship coefficients}
+\item{matrix}{a square symmetric matrix of individuals containing
+relationship coefficients}
 
 \item{.x}{a \code{\link{gen_tibble}} object}
 
@@ -21,9 +22,9 @@ filter_high_relatedness(
 \item{verbose}{boolean whether to report to screen}
 }
 \value{
-a list where '1' is individual ID's to retain, '2'
-is individual ID's to remove, and '3' is a boolean where individuals to keep
-are TRUE and individuals to remove are FALSE
+a list where '1' is individual ID's to retain, '2' is individual ID's
+to remove, and '3' is a boolean where individuals to keep are TRUE and
+individuals to remove are FALSE
 }
 \description{
 This function takes a matrix of x by y individuals containing relatedness
