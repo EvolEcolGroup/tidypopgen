@@ -20,3 +20,7 @@ This function writes a .geno file fom a \code{\link{gen_tibble}}. Unless a file 
 a file with suffix .geno is written in the same location as the .rds and .bk
 files that underpin the \code{\link{gen_tibble}}.
 }
+\details{
+NOTE that we currently read all the data into memory to write the file, so this
+function is not suitable for very large datasets.
+}

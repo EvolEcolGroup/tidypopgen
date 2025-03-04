@@ -4,6 +4,9 @@
 #' a file with suffix .geno is written in the same location as the .rds and .bk
 #' files that underpin the [`gen_tibble`].
 #'
+#' NOTE that we currently read all the data into memory to write the file, so this
+#' function is not suitable for very large datasets.
+#'
 #' @param x a [`gen_tibble`]
 #' @param file the .geno filename with a path, or NULL (the default) to use the
 #' location of the backing files.

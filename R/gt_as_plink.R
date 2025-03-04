@@ -6,6 +6,8 @@
 #'
 #' If the gen_tibble has been read in from vcf format, family.ID in the resulting
 #' plink files will be the same as sample.ID.
+#' NOTE that writing to bed has been optimised for speed, but writing to ped or raw
+#' is slower, especially for large datasets.
 #'
 #' @param x a [`gen_tibble`] object
 #' @param file a character string giving the path to output file. If left to NULL,
