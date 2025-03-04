@@ -43,7 +43,7 @@ loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep)>1){
-    # col means for submatrix (all rows, only some columns)
+    # col hwe for submatrix (some rows, and some columns)
     colHWE_sub <- function(X, ind, rows_to_keep) {
       #apply(X[rows_to_keep, ind], 2, HWExact_geno_vec)
       geno_counts <- bigstatsr::big_counts(X,ind.row = rows_to_keep, ind.col = ind)

@@ -8,7 +8,6 @@
 #' @param as_counts boolean defining whether the count of NAs (rather than the rate)
 #' should be returned. It defaults to FALSE (i.e. rates are returned by default).
 #' @param n_cores number of cores to be used, it defaults to [bigstatsr::nb_cores()]
-#' @param block_size maximum number of loci read at once.
 #' @param ... other arguments passed to specific methods.
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_missingness
@@ -68,8 +67,8 @@ loci_missingness.vctrs_bigSNP <- function(.x,
 #' @export
 #' @rdname loci_missingness
 loci_missingness.grouped_df <- function(.x, as_counts = FALSE,
-                                        block_size = bigstatsr::block_size(nrow(attr(.x,"loci")), 1),
                                         n_cores = bigstatsr::nb_cores(),
+                                        block_size = bigstatsr::block_size(nrow(attr(.x,"loci")), 1),
                                         ...) {
     rlang::check_dots_empty()
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes

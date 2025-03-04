@@ -23,6 +23,9 @@ test_that("indiv_missingness computes correctly",{
   # passing tibble
   expect_true(all(indiv_missingness(test_gt)==
                     apply(test_genotypes,1,sum_na)/ncol(test_genotypes)))
+  # now using block_size to chunk the operation
+  expect_true(all(indiv_missingness(test_gt, block_size = 2)==
+                    apply(test_genotypes,1,sum_na)/ncol(test_genotypes)))
 })
 
 
@@ -48,7 +51,7 @@ test_genotypes_moreNA <- rbind(c(1,1,0,1,1,2),
 test_gt2 <- gen_tibble(x = test_genotypes_moreNA, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
 
 
-test_that("behaviour of indiv_missingness",{
+test_that("indiv_missingness on a subset",{
 
   #create a subset gt
   test_gt2_subset <- test_gt2 %>% select_loci(c(2,3,4,5,6))

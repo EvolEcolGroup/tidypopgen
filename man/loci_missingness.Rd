@@ -7,13 +7,29 @@
 \alias{loci_missingness.grouped_df}
 \title{Estimate missingness at each locus}
 \usage{
-loci_missingness(.x, as_counts = FALSE, ...)
+loci_missingness(.x, as_counts = FALSE, block_size, ...)
 
-\method{loci_missingness}{tbl_df}(.x, as_counts = FALSE, ...)
+\method{loci_missingness}{tbl_df}(
+  .x,
+  as_counts = FALSE,
+  block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
+  ...
+)
 
-\method{loci_missingness}{vctrs_bigSNP}(.x, as_counts = FALSE, ...)
+\method{loci_missingness}{vctrs_bigSNP}(
+  .x,
+  as_counts = FALSE,
+  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  ...
+)
 
-\method{loci_missingness}{grouped_df}(.x, as_counts = FALSE, n_cores = bigstatsr::nb_cores(), ...)
+\method{loci_missingness}{grouped_df}(
+  .x,
+  as_counts = FALSE,
+  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  n_cores = bigstatsr::nb_cores(),
+  ...
+)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
@@ -22,6 +38,8 @@ or a \code{\link{gen_tibble}}.}
 
 \item{as_counts}{boolean defining whether the count of NAs (rather than the rate)
 should be returned. It defaults to FALSE (i.e. rates are returned by default).}
+
+\item{block_size}{maximum number of loci read at once.}
 
 \item{...}{other arguments passed to specific methods.}
 
