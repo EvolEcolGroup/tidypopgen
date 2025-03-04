@@ -46,13 +46,23 @@ missing genotypes in an individual).</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">indiv_missingness</span><span class="op">(</span><span class="va">.x</span>, as_counts <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">indiv_missingness</span><span class="op">(</span><span class="va">.x</span>, <span class="va">as_counts</span>, <span class="va">block_size</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'tbl_df'</span></span>
-<span><span class="fu">indiv_missingness</span><span class="op">(</span><span class="va">.x</span>, as_counts <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu">indiv_missingness</span><span class="op">(</span></span>
+<span>  <span class="va">.x</span>,</span>
+<span>  as_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"loci"</span><span class="op">)</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'vctrs_bigSNP'</span></span>
-<span><span class="fu">indiv_missingness</span><span class="op">(</span><span class="va">.x</span>, as_counts <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">indiv_missingness</span><span class="op">(</span></span>
+<span>  <span class="va">.x</span>,</span>
+<span>  as_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">.x</span>, <span class="st">"loci"</span><span class="op">)</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -68,6 +78,10 @@ or a <code><a href="gen_tibble.html">gen_tibble</a></code>.</p></dd>
 <dt id="arg-as-counts">as_counts<a class="anchor" aria-label="anchor" href="#arg-as-counts"></a></dt>
 <dd><p>boolean defining whether the count of NAs (rather than the rate)
 should be returned. It defaults to FALSE (i.e. rates are returned by default).</p></dd>
+
+
+<dt id="arg-block-size">block_size<a class="anchor" aria-label="anchor" href="#arg-block-size"></a></dt>
+<dd><p>maximum number of loci read at once.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
