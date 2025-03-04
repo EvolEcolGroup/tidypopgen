@@ -15,6 +15,9 @@
 #' [bigsnpr::snp_scaleBinom()], which is the appropriate function for biallelic SNPs.
 #' Alternatively it is possible to use  custom function
 #' (see [bigsnpr::snp_autoSVD()] for details.
+#' @param total_var a boolean indicating whether to compute the total variance of the matrix. Default is `TRUE`.
+#' Using `FALSE` will speed up computation, but the total variance will not be stored in the output (and thus it will
+#' not be possible to assign a proportion of variance explained to the components).
 #' @param n_cores Number of cores used.
 #' @param tol Precision parameter of [svds][RSpectra::svds]. Default is `1e-4`.
 #' @param verbose Should some progress be printed? Default is `FALSE`.
@@ -50,13 +53,15 @@ gt_pca_randomSVD <- function(x, k = 10,
                               verbose = FALSE,
                               n_cores = 1,
                               fun_prod = bigstatsr::big_prodVec,
-                              fun_cprod = bigstatsr::big_cprodVec
-                              ) {
+                              fun_cprod = bigstatsr::big_cprodVec,
+                              total_var = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x)==FALSE){
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
   }
   X <- attr(x$genotypes,"bigsnp") # convenient pointer
+  x_ind_col <- show_loci(x)$big_index
+  x_ind_row <- vctrs::vec_data(x$genotypes)
 
   infos_chr <- show_loci(x)$chr_int
 
@@ -77,5 +82,10 @@ gt_pca_randomSVD <- function(x, k = 10,
   this_svd$call <- match.call()
   this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
+  if (total_var){
+    this_svd$square_frobenious <- square_frobenious(X$genotypes, x_ind_row, x_ind_col,
+                                                    center = this_svd$center,
+                                                    scale = this_svd$scale)
+  }
   this_svd
 }

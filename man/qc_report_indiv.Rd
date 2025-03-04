@@ -13,15 +13,18 @@ qc_report_indiv(.x, ...)
 \method{qc_report_indiv}{grouped_df}(.x, kings_threshold = NULL, ...)
 }
 \arguments{
-\item{.x}{either a \code{\link{gen_tibble}} object or a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
+\item{.x}{either a \code{\link{gen_tibble}} object or a grouped \code{\link{gen_tibble}} (as
+obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
 \item{...}{further arguments to pass}
 
-\item{kings_threshold}{an optional numeric, a threshold of relatedness for the sample}
+\item{kings_threshold}{an optional numeric, a threshold of relatedness for the
+sample}
 }
 \value{
 a tibble with 2 elements: het_obs and missingness
 }
 \description{
-#' Return QC information to assess loci (Observed heterozygosity and missingness).
+Return QC information to assess loci (Observed heterozygosity and
+missingness).
 }

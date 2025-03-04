@@ -20,7 +20,8 @@
 \item{miss_threshold}{a threshold for the accepted rate of missingness within
 individuals}
 
-\item{kings_threshold}{an optional numeric, a threshold of relatedness for the sample}
+\item{kings_threshold}{an optional numeric, a threshold of relatedness for
+the sample}
 
 \item{...}{not currently used.}
 }
@@ -36,7 +37,7 @@ individuals.
 }
 }
 \details{
-\code{autoplot} produces simple plots to quickly inspect an object. They are
-not customisable; we recommend that you use \code{ggplot2} to produce publication
+\code{autoplot} produces simple plots to quickly inspect an object. They are not
+customisable; we recommend that you use \code{ggplot2} to produce publication
 ready plots.
 }

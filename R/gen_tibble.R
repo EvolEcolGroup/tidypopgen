@@ -543,7 +543,7 @@ change_duplicated_file_name <- function(file){
       }
     }
     # create new file path
-    new_file <- paste0(dirname(file), "/", base_name, "_v", version)
+    new_file <- file.path(dirname(file), paste0(base_name, "_v", version))
 
     return(new_file)
   }

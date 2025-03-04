@@ -143,6 +143,12 @@ gt_admixture <- function (x, k, n_runs = 1, crossval = FALSE, n_cores = 1, seed 
                                conda = conda_env)
       }
 
+      # check if no .Q files were written and if adm_out contains "Error:"
+      # stop and print adm_out if both are true
+      if (length(grep(".Q", list.files(out))) == 0 & length(grep("Error:", adm_out)) > 0){
+        stop(adm_out)
+      }
+
       # read the output
       output_prefix <- file.path(out, gsub(".bed", "", basename(input_file)))
       adm_list$k[index] <- this_k

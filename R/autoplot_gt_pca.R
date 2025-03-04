@@ -34,7 +34,15 @@ autoplot.gt_pca <- function(object,
     if (length(k)!=2){
       stop("for 'scores' plots, 'pc' should be a pair of values, e.g. c(1,2)")
     }
-    plot(object, type = "scores", scores = k)
+    if("square_frobenious" %in% names(object)){
+      tidy_pca <- tidy(object, "eigenvalues")
+      k_percentage <- tidy_pca$percent[k]
+      plot(object, type = "scores", scores = k)+
+        ggplot2::labs(x = paste0("PC",k[1], " (", round(k_percentage[1],2), "%)"),
+             y = paste0("PC",k[2], " (", round(k_percentage[2],2), "%)"))
+    } else{
+      plot(object, type = "scores", scores = k)
+    }
   } else if (type == "loadings"){
     if (is.null(k)){
       k <- 1

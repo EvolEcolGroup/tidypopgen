@@ -97,6 +97,7 @@ reference:
     desc: "Functions for creating, tidying, and visualising `gt_admix` and `q_matrix` objects."
     contents:
         - gt_admixture
+        - gt_snmf
         - autoplot.gt_admix
         - summary.gt_admix
         - c.gt_admix

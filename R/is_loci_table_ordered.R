@@ -43,6 +43,17 @@ is_loci_table_ordered.vctrs_bigSNP <- function(.x, error_on_false = FALSE, ignor
     }
   }
 
+  # check that within each chromosome positions are unique
+  if (any(unlist(show_loci(.x) %>%
+                 group_by(.data$chr_int) %>%
+                 group_map(~ duplicated(.x$position))))){
+    if (error_on_false){
+      stop("Your loci table contains duplicates")
+    } else {
+      return(FALSE)
+    }
+  }
+
   # check that all positions in a chromosome are adjacent
   if(any(duplicated(rle(show_loci(.x)$chr_int)$values))){
     if (error_on_false){
@@ -63,8 +74,21 @@ is_loci_table_ordered.vctrs_bigSNP <- function(.x, error_on_false = FALSE, ignor
         return(FALSE)
       }
     }
+    if (any(unlist(show_loci(.x) %>%
+                   group_by(.data$chr_int) %>%
+                   group_map(~ duplicated(.x$genetic_dist))))){
+      if(all(show_loci(.x)$genetic_dist==0) && error_on_false){
+        message("Your genetic distances have been set to 0")
+        return(TRUE)
+      } else if(all(show_loci(.x)$genetic_dist==0) && !error_on_false){
+        return(TRUE)
+      } else if (!all(show_loci(.x)$genetic_dist==0) && error_on_false){
+        stop("Your loci table contains duplicated genetic distances")
+      } else {
+        return(FALSE)
+      }
+   }
   }
-
   return(TRUE)
 }
 

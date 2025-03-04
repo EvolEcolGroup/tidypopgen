@@ -73,11 +73,17 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
   matrix <- rlang::arg_match(matrix, MATRIX)
 
   if (matrix %in% c("pcs", "d", "eigenvalues")) {
-    total_var <- sum(x$scale)
     ret <- tibble(PC = seq_len(length(x$d)),
-                  "std.dev" = sqrt(x$d^2/nrow(x$u)))  %>%
-    # mutate(percent =  (std.dev)^2/nrow(x$d),
-      mutate( cumulative = cumsum(.data$std.dev))
+                  "std.dev" = x$d/sqrt(nrow(x$u)-1))
+    if ("square_frobenious" %in% names(x)) {
+      rssq <- x$square_frobenious
+      var_exp <- x$d^2/rssq
+      percentage <- var_exp*100
+      cum_percentage <- cumsum(var_exp)*100
+      ret <- ret %>%
+        mutate(percent =  percentage) %>%
+        mutate(cumulative = cum_percentage)
+    }
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
     ret <- x$v %>%
       tibble::as_tibble(rownames = "column") %>%

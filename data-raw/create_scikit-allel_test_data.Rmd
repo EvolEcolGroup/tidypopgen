@@ -1,0 +1,101 @@
+---
+title: "create scikit-allel test data"
+output: html_document
+date: "2025-01-30"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(reticulate)
+```
+
+# Create the conda envrionment using commands below
+
+conda create -n scikit-env python=3.12
+conda activate scikit-env
+conda install -c conda-forge scikit-allel=1.3.13
+
+```{r}
+use_condaenv("scikit-env", required = TRUE)
+```
+
+# Hudson Fst
+
+```{python}
+import allel
+
+g = allel.GenotypeArray([
+    [[0, 1], [1, 1], [1, 1], [0, 1], [0, 1], [0, 0], [0, 0]],
+    [[0, 1], [0, 1], [-1, -1], [0, 0], [1, 1], [0, 0], [0, 1]],
+    [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0]],
+    [[0, 1], [-1, -1], [0, 0], [0, 1], [0, 1], [0, 0], [0, 0]],
+    [[0, 1], [0, 0], [0, 1], [0, 0], [1, 1], [-1, -1], [0, 1]],
+    [[0, 0], [0, 0], [0, 1], [0, 0], [0, 1], [0, 1], [-1, -1]]
+])
+
+```
+
+
+```{python}
+import numpy as np
+subpops = [[0,1,2],[3,4,5,6]]
+ac1 = g.count_alleles(subpop=subpops[0])
+ac2 = g.count_alleles(subpop=subpops[1])
+num, den = allel.hudson_fst(ac1, ac2)
+#Estimate Fst for each variant individually:
+fst_per_var = num / den
+#Estimate Fst averaging over variants:
+fst = np.sum(num) / np.sum(den)
+```
+
+
+# Weir and Cockerham Fst
+
+```{python}
+import numpy as np
+subpops = [[0,1,2],[3,4,5,6]]
+a, b, c = allel.weir_cockerham_fst(g, subpops, max_allele=None, blen=None)
+#Estimate Fst for each variant individually:
+fst_per_var = (np.sum(a, axis=1) /
+               (np.sum(a, axis=1) + np.sum(b, axis=1) + np.sum(c, axis=1)))
+# Estimate Fst averaging over all variants and alleles:
+fst = np.sum(a) / (np.sum(a) + np.sum(b) + np.sum(c))
+```
+
+
+# Hudson Fst monomorphic alleles
+
+```{python}
+import allel
+
+g = allel.GenotypeArray([
+    [[1, 1], [1, 1], [1, 1], [1, 1], [1, 1], [1, 1], [1, 1]], # variant 1 monomorphic
+    [[0, 1], [0, 1], [-1, -1], [0, 0], [1, 1], [0, 0], [0, 1]],
+    [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 0]],
+    [[0, 1], [-1, -1], [0, 0], [0, 1], [0, 1], [0, 0], [0, 0]],
+    [[0, 1], [0, 0], [0, 1], [0, 0], [1, 1], [-1, -1], [0, 1]],
+    [[0, 0], [0, 0], [0, 1], [0, 0], [0, 1], [0, 1], [-1, -1]]
+])
+
+```
+
+```{python}
+import numpy as np
+subpops = [[0,1,2],[3,4,5,6]]
+ac1 = g.count_alleles(subpop=subpops[0])
+ac2 = g.count_alleles(subpop=subpops[1])
+num, den = allel.hudson_fst(ac1, ac2)
+#Estimate Fst averaging over variants:
+fst = np.sum(num) / np.sum(den)
+```
+
+# Weir and Cockerham Fst monomorphic alleles
+
+```{python}
+import numpy as np
+subpops = [[0,1,2],[3,4,5,6]]
+a, b, c = allel.weir_cockerham_fst(g, subpops, max_allele=None, blen=None)
+# Estimate Fst averaging over all variants and alleles:
+fst = np.sum(a) / (np.sum(a) + np.sum(b) + np.sum(c))
+```
+

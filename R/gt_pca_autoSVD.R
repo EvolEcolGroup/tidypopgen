@@ -14,6 +14,9 @@
 #' [bigsnpr::snp_scaleBinom()], which is the appropriate function for biallelic SNPs.
 #' Alternatively it is possible to use  custom function
 #' (see [bigsnpr::snp_autoSVD()] for details.
+#' @param total_var a boolean indicating whether to compute the total variance of the matrix. Default is `TRUE`.
+#' Using `FALSE` will speed up computation, but the total variance will not be stored in the output (and thus it will
+#' not be possible to assign a proportion of variance explained to the components).
 #' @param roll_size Radius of rolling windows to smooth log-p-values.
 #'   Default is `50`.
 #' @param int_min_size Minimum number of consecutive outlier SNPs
@@ -47,6 +50,7 @@
 #' - `scale`, the scaling vector,
 #' - `method`, a string defining the method (in this case 'autoSVD'),
 #' - `call`, the call that generated the object.
+#' - `loci`, the loci used after long range LD removal.
 #'
 #' Note: rather than accessing these elements directly, it is better to use
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
@@ -71,7 +75,8 @@ gt_pca_autoSVD <- function(x, k = 10,
                            min_mac = 10,
                            max_iter = 5,
                            n_cores = 1,
-                           verbose = TRUE) {
+                           verbose = TRUE,
+                           total_var = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x)==FALSE){
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
@@ -129,5 +134,16 @@ gt_pca_autoSVD <- function(x, k = 10,
   # this_svd$loci <- show_loci(x)[.gt_bigsnp_cols %in% attr(x,"subset"),]
   this_svd$loci <- show_loci(x)[.gt_bigsnp_cols(x) %in% attr(this_svd,"subset"),]
   class(this_svd) <- c("gt_pca", class(this_svd))
+  if (total_var){
+    loci <- this_svd$loci
+    loci_after_ld <- which(show_loci(x)$name %in% loci$name)
+    x_autoSVD_subset <- x %>% select_loci(all_of(loci_after_ld))
+    X <- attr(x$genotypes,"bigsnp")
+    x_ind_col <- show_loci(x_autoSVD_subset)$big_index
+    x_ind_row <- vctrs::vec_data(x_autoSVD_subset$genotypes)
+    this_svd$square_frobenious <- square_frobenious(X$genotypes, x_ind_row, x_ind_col,
+                                                    center = this_svd$center,
+                                                    scale = this_svd$scale)
+  }
   this_svd
 }

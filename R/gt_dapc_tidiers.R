@@ -71,7 +71,7 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
   matrix <- rlang::arg_match(matrix, MATRIX)
 
   if (matrix %in% c("lds", "d", "eigenvalues")) {
-    # total_var <- sum(x$eig)
+    # square_frobenious <- sum(x$eig)
     ret <- tibble(LD = seq_len(length(x$eig)),
                   "eigenvalue" = x$eig)  %>%
     # mutate(percent =  (std.dev)^2/nrow(x$d),
