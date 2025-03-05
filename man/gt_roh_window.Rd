@@ -22,66 +22,74 @@ gt_roh_window(
 \arguments{
 \item{x}{a \link{gen_tibble}}
 
-\item{window_size}{the size of sliding window (number of SNP loci) (default = 15)}
+\item{window_size}{the size of sliding window (number of SNP loci) (default =
+15)}
 
 \item{threshold}{the threshold of overlapping windows of the same state
 (homozygous/heterozygous) to call a SNP in a RUN (default = 0.05)}
 
 \item{min_snp}{minimum n. of SNP in a RUN (default = 3)}
 
-\item{heterozygosity}{should we look for runs of heterozygosity (instead of homozygosity? (default = FALSE)}
+\item{heterozygosity}{should we look for runs of heterozygosity (instead of
+homozygosity? (default = FALSE)}
 
 \item{max_opp_window}{max n. of SNPs of the opposite type (e.g. heterozygous
-snps for runs of homozygosity) in the
-sliding window (default = 1)}
+snps for runs of homozygosity) in the sliding window (default = 1)}
 
-\item{max_miss_window}{max. n. of missing SNP in the sliding window (default = 1)}
+\item{max_miss_window}{max. n. of missing SNP in the sliding window (default
+= 1)}
 
 \item{max_gap}{max distance between consecutive SNP to be still considered a
 potential run (default = 10^6 bps)}
 
-\item{min_length_bps}{minimum length of run in bps (defaults to 1000 bps = 1 kbps)}
+\item{min_length_bps}{minimum length of run in bps (defaults to 1000 bps = 1
+kbps)}
 
-\item{min_density}{minimum n. of SNP per kbps (defaults to 0.1 = 1 SNP every 10 kbps)}
+\item{min_density}{minimum n. of SNP per kbps (defaults to 0.1 = 1 SNP every
+10 kbps)}
 
 \item{max_opp_run}{max n. of opposite genotype SNPs in the run (optional)}
 
 \item{max_miss_run}{max n. of missing SNPs in the run (optional)}
 }
 \value{
-A dataframe with RUNs of Homozygosity or Heterozygosity in the analysed dataset.
-The returned dataframe contains the following seven columns: "group", "id", "chrom",
-"nSNP", "from", "to", "lengthBps" (group: population, breed, case/control etc.;
-id: individual identifier; chrom: chromosome on which the run is located;
-nSNP: number of SNPs in the run; from: starting position of the run, in bps;
-to: end position of the run, in bps; lengthBps: size of the run)
+A dataframe with RUNs of Homozygosity or Heterozygosity in the
+analysed dataset. The returned dataframe contains the following seven
+columns: "group", "id", "chrom", "nSNP", "from", "to", "lengthBps" (group:
+population, breed, case/control etc.; id: individual identifier; chrom:
+chromosome on which the run is located; nSNP: number of SNPs in the run;
+from: starting position of the run, in bps; to: end position of the run, in
+bps; lengthBps: size of the run)
 }
 \description{
-This function uses a sliding-window approach to look for runs of homozygosity (or
-heterozygosity) in a diploid genome. This function uses the package \code{selectRUNS},
-which implements an approach equivalent to the one in PLINK.
+This function uses a sliding-window approach to look for runs of homozygosity
+(or heterozygosity) in a diploid genome. This function uses the package
+\code{selectRUNS}, which implements an approach equivalent to the one in PLINK.
 }
 \details{
-This function returns a data frame with all runs detected in the dataset.
-This data frame can then be written out to a csv file.
-The data frame is, in turn, the input for other functions of the detectRUNS package
-that create plots and produce statistics from the results
-(see plots and statistics functions in this manual,
-and/or refer to the detectRUNS vignette).
+This function returns a data frame with all runs detected in the
+dataset. This data frame can then be written out to a csv file. The data
+frame is, in turn, the input for other functions of the detectRUNS package
+that create plots and produce statistics from the results (see plots and
+statistics functions in this manual, and/or refer to the detectRUNS
+vignette).
 
-If the \code{\link{gen_tibble}} is grouped, then the grouping variable is used to fill in the
-group table. Otherwise, the group 'column' is filled with the same values as the 'id'
-column
+If the \code{\link{gen_tibble}} is grouped, then the grouping variable is used to fill
+in the group table. Otherwise, the group 'column' is filled with the same
+values as the 'id' column
 }
 \examples{
 # run the example only if we have the package installed
 if (requireNamespace("detectRUNS", quietly = TRUE)) {
-sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
-    package="detectRUNS")
-sheep_gt <- tidypopgen::gen_tibble(sheep_ped, backingfile = tempfile(),
-    quiet=TRUE)
-sheep_gt <- sheep_gt \%>\% group_by(population)
-sheep_roh <- gt_roh_window(sheep_gt)
-detectRUNS::plot_Runs(runs = sheep_roh)
+  sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
+    package = "detectRUNS"
+  )
+  sheep_gt <- tidypopgen::gen_tibble(sheep_ped,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  sheep_gt <- sheep_gt \%>\% group_by(population)
+  sheep_roh <- gt_roh_window(sheep_gt)
+  detectRUNS::plot_Runs(runs = sheep_roh)
 }
 }

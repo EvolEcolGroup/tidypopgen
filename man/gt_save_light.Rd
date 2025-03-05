@@ -2,9 +2,9 @@
 % Please edit documentation in R/gt_save.R
 \name{gt_save_light}
 \alias{gt_save_light}
-\title{a light version of gt_save that does not resave the bigSNP RDS or backing file, to be used internally
-when creating a gen_tibble (if we have just created it, there is not need
-to resave it)}
+\title{a light version of gt_save that does not resave the bigSNP RDS or backing
+file, to be used internally when creating a gen_tibble (if we have just
+created it, there is not need to resave it)}
 \usage{
 gt_save_light(x, file_name = NULL, quiet = FALSE)
 }
@@ -21,8 +21,8 @@ the file name and path of the \emph{.gt} file, together with the \emph{.rds}
 and \emph{.bk} files
 }
 \description{
-a light version of gt_save that does not resave the bigSNP RDS or backing file, to be used internally
-when creating a gen_tibble (if we have just created it, there is not need
-to resave it)
+a light version of gt_save that does not resave the bigSNP RDS or backing
+file, to be used internally when creating a gen_tibble (if we have just
+created it, there is not need to resave it)
 }
 \keyword{internal}

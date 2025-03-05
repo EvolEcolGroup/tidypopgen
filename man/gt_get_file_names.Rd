@@ -13,6 +13,6 @@ gt_get_file_names(x)
 a character vector with the names and paths of the two files
 }
 \description{
-A function to return the names of the files used to store data in a \code{gen_tibble}.
-Specifically, this returns the .rds file storing the big
+A function to return the names of the files used to store data in a
+\code{gen_tibble}. Specifically, this returns the .rds file storing the big
 }
