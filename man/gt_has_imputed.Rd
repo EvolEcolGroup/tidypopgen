@@ -10,9 +10,10 @@ gt_has_imputed(x)
 \item{x}{a \code{gen_tibble}}
 }
 \value{
-boolean TRUE or FALSE depending on whether the dataset has been imputed
+boolean TRUE or FALSE depending on whether the dataset has been
+imputed
 }
 \description{
-This function checks if a dataset has been imputed. Note that having imputation
-does not mean that the imputed values are used.
+This function checks if a dataset has been imputed. Note that having
+imputation does not mean that the imputed values are used.
 }

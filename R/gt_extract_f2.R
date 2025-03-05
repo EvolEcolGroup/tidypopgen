@@ -1,131 +1,144 @@
 #' Compute and store blocked f2 statistics for ADMIXTOOLS 2
 #'
 #' This function prepares data for various *ADMIXTOOLS 2* functions fro the
-#' package *ADMIXTOOLS 2*. It
-#' takes a [`gen_tibble`],
-#' computes allele frequencies and blocked f2-statistics,
-#' and writes the results to `outdir`. It is equivalent to
-#' `admixtools::extract_f2()`.
+#' package *ADMIXTOOLS 2*. It takes a [`gen_tibble`], computes allele
+#' frequencies and blocked f2-statistics, and writes the results to `outdir`. It
+#' is equivalent to `admixtools::extract_f2()`.
 #' @param .x a [`gen_tibble`]
 #' @param outdir Directory where data will be stored.
 #' @param blgsize SNP block size in Morgan. Default is 0.05 (5 cM). If `blgsize`
-#'  is 100 or greater, if will be interpreted as base pair distance rather than
-#'  centimorgan distance.
-#' @param maxmem Maximum amount of memory to be used. If the required amount
-#' of memory exceeds `maxmem`, allele frequency data will be split into blocks,
-#'  and the computation will be performed separately on each block pair.
-#'  This doesn't put a precise cap on the amount of memory used (it used to
-#'  at some point). Set this parameter to lower values if you run out of memory
-#'  while running this function. Set it to higher values if this function is
-#'  too slow and you have lots of memory.
+#'   is 100 or greater, if will be interpreted as base pair distance rather than
+#'   centimorgan distance.
+#' @param maxmem Maximum amount of memory to be used. If the required amount of
+#'   memory exceeds `maxmem`, allele frequency data will be split into blocks,
+#'   and the computation will be performed separately on each block pair. This
+#'   doesn't put a precise cap on the amount of memory used (it used to at some
+#'   point). Set this parameter to lower values if you run out of memory while
+#'   running this function. Set it to higher values if this function is too slow
+#'   and you have lots of memory.
 #' @param maxmiss Discard SNPs which are missing in a fraction of populations
-#' higher than `maxmiss`
+#'   higher than `maxmiss`
 #' @param minmaf Discard SNPs with minor allele frequency less than `minmaf`
-#' @param maxmaf Discard SNPs with minor allele frequency greater than
-#' than `maxmaf`
+#' @param maxmaf Discard SNPs with minor allele frequency greater than than
+#'   `maxmaf`
 #' @param minac2 Discard SNPs with allele count lower than 2 in any population
-#' (default `FALSE`). This option should be set to `TRUE` when computing
-#' f3-statistics where one population consists mostly of pseudohaploid samples.
-#' Otherwise heterozygosity estimates and thus f3-estimates can be biased.
-#' `minac2 == 2` will discard SNPs with allele count lower than 2 in any
-#' non-singleton population (this option is experimental and is based on the
-#' hypothesis that using SNPs with allele count lower than 2 only leads to
-#' biases in non-singleton populations). Note that, While the `minac2` option
-#' discards
-#' SNPs with allele count lower than 2 in any population, the \code{qp3pop}
-#' function will only discard SNPs with allele count lower than 2 in the
-#' first (target) population (when the first argument is the prefix of
-#' a genotype file; i.e. it is applied directly to a genotype file, not via
-#' precomputing f2 from a [`gen_tibble`]).
+#'   (default `FALSE`). This option should be set to `TRUE` when computing
+#'   f3-statistics where one population consists mostly of pseudohaploid
+#'   samples. Otherwise heterozygosity estimates and thus f3-estimates can be
+#'   biased. `minac2 == 2` will discard SNPs with allele count lower than 2 in
+#'   any non-singleton population (this option is experimental and is based on
+#'   the hypothesis that using SNPs with allele count lower than 2 only leads to
+#'   biases in non-singleton populations). Note that, While the `minac2` option
+#'   discards SNPs with allele count lower than 2 in any population, the
+#'   \code{qp3pop} function will only discard SNPs with allele count lower than
+#'   2 in the first (target) population (when the first argument is the prefix
+#'   of a genotype file; i.e. it is applied directly to a genotype file, not via
+#'   precomputing f2 from a [`gen_tibble`]).
 #' @param outpop Keep only SNPs which are heterozygous in this population
 #' @param outpop_scale Scale f2-statistics by the inverse `outpop`
-#' heterozygosity (`1/(p*(1-p))`). Providing `outpop` and setting
-#' `outpop_scale` to `TRUE` will give the same results as the original
+#'   heterozygosity (`1/(p*(1-p))`). Providing `outpop` and setting
+#'   `outpop_scale` to `TRUE` will give the same results as the original
 #' *qpGraph* when the `outpop` parameter has been set, but it has the
-#' disadvantage of treating one population different from the others. This
-#' may limit the use of these f2-statistics for other models.
+#'   disadvantage of treating one population different from the others. This may
+#'   limit the use of these f2-statistics for other models.
 #' @param transitions Set this to `FALSE` to exclude transition SNPs
 #' @param transversions Set this to `FALSE` to exclude transversion SNPs
 #' @param overwrite Overwrite existing files in `outdir`
-#' @param adjust_pseudohaploid Genotypes of pseudohaploid samples are
-#' usually coded as `0` or `2`, even though only one allele is observed.
-#' `adjust_pseudohaploid` ensures that the observed allele count increases
-#' only by `1` for each pseudohaploid sample. If `TRUE` (default), samples
-#' that don't have any genotypes coded as `1` among the first 1000 SNPs are
-#' automatically identified as pseudohaploid. This leads to slightly more
-#' accurate estimates of f-statistics. Setting this parameter to `FALSE`
-#' treats all samples as diploid and is equivalent to the *ADMIXTOOLS* `
-#' inbreed: NO` option. Setting `adjust_pseudohaploid` to an integer `n`
-#' will check the first `n` SNPs instead of the first 1000 SNPs.
-#' @param fst Write files with pairwise FST for every population pair.
-#' Setting this to FALSE can make `extract_f2` faster and will require less memory.
+#' @param adjust_pseudohaploid Genotypes of pseudohaploid samples are usually
+#'   coded as `0` or `2`, even though only one allele is observed.
+#'   `adjust_pseudohaploid` ensures that the observed allele count increases
+#'   only by `1` for each pseudohaploid sample. If `TRUE` (default), samples
+#'   that don't have any genotypes coded as `1` among the first 1000 SNPs are
+#'   automatically identified as pseudohaploid. This leads to slightly more
+#'   accurate estimates of f-statistics. Setting this parameter to `FALSE`
+#'   treats all samples as diploid and is equivalent to the *ADMIXTOOLS* `
+#'   inbreed: NO` option. Setting `adjust_pseudohaploid` to an integer `n` will
+#'   check the first `n` SNPs instead of the first 1000 SNPs.
+#' @param fst Write files with pairwise FST for every population pair. Setting
+#'   this to FALSE can make `extract_f2` faster and will require less memory.
 #' @param afprod  Write files with allele frequency products for every
-#' population pair. Setting this to FALSE can make `extract_f2` faster and
-#' will require less memory.
+#'   population pair. Setting this to FALSE can make `extract_f2` faster and
+#'   will require less memory.
 #' @param poly_only Specify whether SNPs with identical allele frequencies in
-#' every population should be discarded (`poly_only = TRUE`), or whether they
-#' should be used (`poly_only = FALSE`). By default (`poly_only = c("f2")`),
-#' these SNPs will be used to compute FST and allele frequency products, but
-#' not to compute f2 (this is the default option in the original ADMIXTOOLS).
+#'   every population should be discarded (`poly_only = TRUE`), or whether they
+#'   should be used (`poly_only = FALSE`). By default (`poly_only = c("f2")`),
+#'   these SNPs will be used to compute FST and allele frequency products, but
+#'   not to compute f2 (this is the default option in the original ADMIXTOOLS).
 #' @param apply_corr Apply small-sample-size correction when computing
-#' f2-statistics (default `TRUE`)
+#'   f2-statistics (default `TRUE`)
 #' @param n_cores Parallelize computation across `n_cores` cores.
 #' @param quiet Suppress printing of progress updates
 #' @return SNP metadata (invisibly)
 #' @export
 
-gt_extract_f2<- function(.x , outdir=NULL, blgsize = 0.05, maxmem = 8000,
-                         maxmiss = 0, minmaf = 0, maxmaf = 0.5, minac2 = FALSE, outpop = NULL, outpop_scale = TRUE,
-                         transitions = TRUE, transversions = TRUE,
+gt_extract_f2 <- function(.x, outdir = NULL, blgsize = 0.05, maxmem = 8000,
+                          maxmiss = 0, minmaf = 0, maxmaf = 0.5, minac2 = FALSE,
+                          outpop = NULL, outpop_scale = TRUE,
+                          transitions = TRUE, transversions = TRUE,
                           overwrite = FALSE,
-                         adjust_pseudohaploid = TRUE, fst = TRUE, afprod = TRUE,
-                         poly_only = c('f2'), apply_corr = TRUE, n_cores = 1, quiet = FALSE) {
+                          adjust_pseudohaploid = TRUE, fst = TRUE,
+                          afprod = TRUE, poly_only = c("f2"), apply_corr = TRUE,
+                          n_cores = 1, quiet = FALSE) {
   if (!requireNamespace("admixtools", quietly = TRUE)) {
     stop(
       "to use this function, first install package 'admixtools' with\n",
-      "devtools::install_github('uqrmaie1/admixtools')")
+      "devtools::install_github('uqrmaie1/admixtools')"
+    )
   }
 
   # parameters that don't make sense with a gen_tibble
-  inds = NULL
-  pops = NULL
-  pops2 = NULL
-  auto_only = FALSE
-  keepsnps = NULL
+  inds <- NULL
+  pops <- NULL
+  pops2 <- NULL
+  auto_only <- FALSE
+  keepsnps <- NULL
 
-  if (!inherits(.x,"grouped_df")){
-    stop (".x should be a grouped df")
+  if (!inherits(.x, "grouped_df")) {
+    stop(".x should be a grouped df")
   }
-  # if no outdir is given, create a subdirectory f2 in the path of the gen_tibble rds
-  if (is.null(outdir)){
-    outdir <- file.path(dirname(.gt_get_bigsnp(.x)$genotypes$rds),"f2")
+  # if no outdir is given, create a subdirectory f2 in the path of the
+  # gen_tibble rds
+  if (is.null(outdir)) {
+    outdir <- file.path(dirname(.gt_get_bigsnp(.x)$genotypes$rds), "f2")
   }
 
   verbose <- !quiet
-  afdat = gt_to_aftable(.x,
-                        adjust_pseudohaploid = adjust_pseudohaploid,
-                        n_cores = n_cores)
+  afdat <- gt_to_aftable(.x,
+    adjust_pseudohaploid = adjust_pseudohaploid,
+    n_cores = n_cores
+  )
 
-  if(is.null(inds)) pops = union(pops, pops2)
+  if (is.null(inds)) pops <- union(pops, pops2)
 
-  afdat %<>% discard_from_aftable(maxmiss = maxmiss, minmaf = minmaf, maxmaf = maxmaf, minac2 = minac2, outpop = outpop,
-                                               transitions = transitions, transversions = transversions,
-                                               keepsnps = keepsnps, auto_only = auto_only, poly_only = FALSE)
-  afdat$snpfile %<>% mutate(poly = as.logical(cpp_is_polymorphic(afdat$afs)))
-  if(sum(afdat$snpfile$poly) == 0) stop('There are no informative SNPs!')
+  afdat %<>% discard_from_aftable( #nolint
+    maxmiss = maxmiss, minmaf = minmaf, maxmaf = maxmaf, minac2 = minac2,
+    outpop = outpop, transitions = transitions, transversions = transversions,
+    keepsnps = keepsnps, auto_only = auto_only, poly_only = FALSE
+  )
+  afdat$snpfile %<>% mutate(poly = as.logical(cpp_is_polymorphic(afdat$afs))) #nolint
+  if (sum(afdat$snpfile$poly) == 0) stop("There are no informative SNPs!")
 
-  if(verbose) message(paste0(nrow(afdat$afs), ' SNPs remain after filtering. ',
-                             sum(afdat$snpfile$poly),' are polymorphic.\n'))
+  if (verbose) {
+    message(paste0(
+      nrow(afdat$afs), " SNPs remain after filtering. ",
+      sum(afdat$snpfile$poly), " are polymorphic.\n"
+    ))
+  }
 
-  if(isTRUE(poly_only)) poly_only = c('f2', 'ap', 'fst')
-  arrs = afs_to_f2_blocks(afdat, outdir = outdir, overwrite = overwrite, maxmem = maxmem, poly_only = poly_only,
-                                       pops1 = pops, pops2 = pops2, outpop = if(outpop_scale) outpop else NULL,
-                                       blgsize = blgsize, afprod = afprod, fst = fst, apply_corr = apply_corr,
-                                       n_cores = n_cores, verbose = verbose)
+  if (isTRUE(poly_only)) poly_only <- c("f2", "ap", "fst")
+  arrs <- afs_to_f2_blocks(afdat,
+    outdir = outdir, overwrite = overwrite, maxmem = maxmem,
+    poly_only = poly_only, pops1 = pops, pops2 = pops2,
+    outpop = if (outpop_scale) outpop else NULL, blgsize = blgsize,
+    afprod = afprod, fst = fst, apply_corr = apply_corr,
+    n_cores = n_cores, verbose = verbose
+  )
 
-  if(is.null(outdir)) return(arrs)
+  if (is.null(outdir)) {
+    return(arrs)
+  }
 
-  if(verbose) message(paste0('Data written to ', outdir, '/\n'))
+  if (verbose) message(paste0("Data written to ", outdir, "/\n"))
   invisible(afdat$snpfile)
 }
 
@@ -149,48 +162,57 @@ gt_extract_f2<- function(.x , outdir=NULL, blgsize = 0.05, maxmem = 8000,
 #' @returns a list of 3 elements: afs, counts, and snp
 #' @keywords internal
 
-gt_to_aftable <- function(.x, adjust_pseudohaploid= TRUE, n_cores = bigstatsr::nb_cores()){
-  if (!inherits(.x,"grouped_df")){
-    stop (".x should be a grouped df")
+gt_to_aftable <- function(.x, adjust_pseudohaploid = TRUE,
+                          n_cores = bigstatsr::nb_cores()) {
+  if (!inherits(.x, "grouped_df")) {
+    stop(".x should be a grouped df")
   }
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
 
-  # TODO we need a version with mixed ploidy that allows to account for haploids (or pseudohaploids)
-  if (adjust_pseudohaploid){
-    if (is.numeric(adjust_pseudohaploid)){
+  # TODO we need a version with mixed ploidy that allows to account for
+  # haploids (or pseudohaploids)
+  if (adjust_pseudohaploid) {
+    if (is.numeric(adjust_pseudohaploid)) {
       n_test <- adjust_pseudohaploid
     } else {
       n_test <- 1000
     }
     ploidy <- identify_pseudohaploids(.x, n_test)
-    aftable <- gt_grouped_alt_freq_pseudohap(BM = geno_fbm,rowInd = .gt_bigsnp_rows(.x),
-                                           colInd = .gt_bigsnp_cols(.x),
-                                           groupIds = dplyr::group_indices(.x)-1,
-                                           ngroups = max(dplyr::group_indices(.x)),
-                                           ploidy = ploidy,
-                                           ncores = n_cores)
-
+    aftable <- gt_grouped_alt_freq_pseudohap(
+      BM = geno_fbm, rowInd = .gt_bigsnp_rows(.x),
+      colInd = .gt_bigsnp_cols(.x),
+      groupIds = dplyr::group_indices(.x) - 1,
+      ngroups = max(dplyr::group_indices(.x)),
+      ploidy = ploidy,
+      ncores = n_cores
+    )
   } else {
-    aftable <- gt_grouped_alt_freq_diploid(BM = geno_fbm,rowInd = .gt_bigsnp_rows(.x),
-                                           colInd = .gt_bigsnp_cols(.x),
-                                           groupIds = dplyr::group_indices(.x)-1,
-                                           ngroups = max(dplyr::group_indices(.x)),
-                                           ncores = n_cores)
-
+    aftable <- gt_grouped_alt_freq_diploid(
+      BM = geno_fbm, rowInd = .gt_bigsnp_rows(.x),
+      colInd = .gt_bigsnp_cols(.x),
+      groupIds = dplyr::group_indices(.x) - 1,
+      ngroups = max(dplyr::group_indices(.x)),
+      ncores = n_cores
+    )
   }
-  names(aftable)<-c("afs","counts")
+  names(aftable) <- c("afs", "counts")
 
-  .group_levels = .x %>% group_keys() %>% pull(1)
-  dimnames(aftable$afs)<-list(loci_names(.x),.group_levels)
-  dimnames(aftable$counts)<-list(loci_names(.x),.group_levels)
+  .group_levels <- .x %>%
+    group_keys() %>%
+    pull(1)
+  dimnames(aftable$afs) <- list(loci_names(.x), .group_levels)
+  dimnames(aftable$counts) <- list(loci_names(.x), .group_levels)
 
-  loci_new_names <- c(SNP = "name", CHR = "chromosome", POS="position",cm="genetic_dist",
-                      A1 = "allele_alt",A2 = "allele_ref")
-  snp <- show_loci(.x) %>% select(-all_of("big_index")) %>%
+  loci_new_names <- c(
+    SNP = "name", CHR = "chromosome", POS = "position", cm = "genetic_dist",
+    A1 = "allele_alt", A2 = "allele_ref"
+  )
+  snp <- show_loci(.x) %>%
+    select(-all_of("big_index")) %>%
     rename(dplyr::all_of(loci_new_names)) %>%
     dplyr::relocate(all_of(c("CHR", "SNP", "cm", "POS", "A1", "A2")))
-  snp$A1[is.na(snp$A1)]<-"0"
-  class(snp)<-c("spec_tbl_df",class(snp))
+  snp$A1[is.na(snp$A1)] <- "0"
+  class(snp) <- c("spec_tbl_df", class(snp))
   # we are missing column specs, which are generated by readr::col_spec
   # do we need to make sure that CHR and SNP are character?
   snp$CHR <- as.character(snp$CHR)
@@ -204,14 +226,17 @@ gt_to_aftable <- function(.x, adjust_pseudohaploid= TRUE, n_cores = bigstatsr::n
 
 
 # import some functions that are not exported by admixtools
-discard_from_aftable <- function(...){
-  utils::getFromNamespace("discard_from_aftable", "admixtools")(...)}
+discard_from_aftable <- function(...) {
+  utils::getFromNamespace("discard_from_aftable", "admixtools")(...)
+}
 
-afs_to_f2_blocks <- function(...){
-  utils::getFromNamespace("afs_to_f2_blocks", "admixtools")(...)}
+afs_to_f2_blocks <- function(...) {
+  utils::getFromNamespace("afs_to_f2_blocks", "admixtools")(...)
+}
 
 cpp_is_polymorphic <- function(...) {
-  utils::getFromNamespace("cpp_is_polymorphic", "admixtools")(...)}
+  utils::getFromNamespace("cpp_is_polymorphic", "admixtools")(...)
+}
 
 #' Identify pseudohaploids
 #'
@@ -222,14 +247,14 @@ cpp_is_polymorphic <- function(...) {
 #' @param n_test the number of loci being tested
 #' @return a numeric vector of ploidy
 #' @keywords internal
-identify_pseudohaploids <- function (x, n_test = 1000){
-  if (n_test>count_loci(x)){
+identify_pseudohaploids <- function(x, n_test = 1000) {
+  if (n_test > count_loci(x)) {
     n_test <- count_loci(x)
   }
-  sub_x <- select_loci(x,.sel_arg = dplyr::all_of(c(1:n_test))) %>%
+  sub_x <- select_loci(x, .sel_arg = dplyr::all_of(c(1:n_test))) %>%
     dplyr::ungroup()
   het_obs <- indiv_het_obs(sub_x)
-  ploidy <-rep(2,nrow(x))
-  ploidy[het_obs==0]<-1
+  ploidy <- rep(2, nrow(x))
+  ploidy[het_obs == 0] <- 1
   return(ploidy)
 }

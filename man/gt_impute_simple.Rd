@@ -13,7 +13,8 @@ gt_impute_simple(x, method = c("mode", "mean0", "random"), n_cores = 1)
 \itemize{
 \item 'mode': the most frequent genotype
 \item 'mean0': the mean rounded to the nearest integer
-\item 'random': randomly sample a genotype based on the observed allele frequencies
+\item 'random': randomly sample a genotype based on the observed
+allele frequencies
 }}
 
 \item{n_cores}{the number of cores to be used}
@@ -23,8 +24,8 @@ a \link{gen_tibble} with imputed genotypes
 }
 \description{
 This function provides a very simple imputation algorithm for \code{gen_tibble}
-objects by using the mode, mean or sampling from the allele frequencies.
-Each locus is imputed independently (and thus linkage information is ignored).
+objects by using the mode, mean or sampling from the allele frequencies. Each
+locus is imputed independently (and thus linkage information is ignored).
 }
 \details{
 This function is a wrapper around \code{\link[bigsnpr:snp_fastImputeSimple]{bigsnpr::snp_fastImputeSimple()}}.

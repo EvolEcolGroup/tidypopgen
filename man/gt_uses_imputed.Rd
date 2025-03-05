@@ -10,9 +10,11 @@ gt_uses_imputed(x)
 \item{x}{a \code{gen_tibble}}
 }
 \value{
-boolean TRUE or FALSE depending on whether the dataset is using the imputed values
+boolean TRUE or FALSE depending on whether the dataset is using the
+imputed values
 }
 \description{
 This function checks if a dataset uses imputed data. Note that it is possible
-to have a dataset that has been imputed but it is currently not using imputation.
+to have a dataset that has been imputed but it is currently not using
+imputation.
 }
