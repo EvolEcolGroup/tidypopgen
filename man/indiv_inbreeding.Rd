@@ -17,16 +17,15 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object),
-or a \code{\link{gen_tibble}}.}
+a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
 \item{method}{currently only "WG17" (for Weir and Goudet 2017).}
 
-\item{allele_sharing_mat}{optional and only relevant for "WG17", the matrix of Allele Sharing returned by
-\code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with \code{as_matrix=TRUE}. As a number of statistics can be
-derived from the Allele Sharing matrix,
-it it sometimes more efficient to pre-compute this matrix. It is not possible to use this with
-grouped tibbles.}
+\item{allele_sharing_mat}{optional and only relevant for "WG17", the matrix
+of Allele Sharing returned by \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with
+\code{as_matrix=TRUE}. As a number of statistics can be derived from the Allele
+Sharing matrix, it it sometimes more efficient to pre-compute this matrix.
+It is not possible to use this with grouped tibbles.}
 
 \item{...}{currently unused.}
 }
@@ -34,6 +33,6 @@ grouped tibbles.}
 a numeric vector of inbreeding coefficients.
 }
 \description{
-This function calculates the inbreeding coefficient for each individual
-based on the beta estimate from Weir and Goudet (2017).
+This function calculates the inbreeding coefficient for each individual based
+on the beta estimate from Weir and Goudet (2017).
 }

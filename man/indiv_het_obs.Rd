@@ -14,15 +14,15 @@ indiv_het_obs(.x, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object),
-or a \code{\link{gen_tibble}}.}
+a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
 \item{...}{currently unused.}
 }
 \value{
-a vector of heterozygosities, one per individuals in the \code{\link{gen_tibble}}
+a vector of heterozygosities, one per individuals in the
+\code{\link{gen_tibble}}
 }
 \description{
-Estimate observed heterozygosity (H_obs) for each individual (i.e. the frequency of
-loci that are heterozygous in an individual).
+Estimate observed heterozygosity (H_obs) for each individual (i.e. the
+frequency of loci that are heterozygous in an individual).
 }
