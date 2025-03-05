@@ -12,12 +12,14 @@
 #' @param k Number of singular vectors/values to compute. Default is `10`.
 #'   **This algorithm should be used to compute a few singular vectors/values.**
 #' @param fun_scaling Usually this  can be left unset, as it defaults to
-#' [bigsnpr::snp_scaleBinom()], which is the appropriate function for biallelic SNPs.
-#' Alternatively it is possible to use  custom function
-#' (see [bigsnpr::snp_autoSVD()] for details.
-#' @param total_var a boolean indicating whether to compute the total variance of the matrix. Default is `TRUE`.
-#' Using `FALSE` will speed up computation, but the total variance will not be stored in the output (and thus it will
-#' not be possible to assign a proportion of variance explained to the components).
+#'   [bigsnpr::snp_scaleBinom()], which is the appropriate function for
+#'   biallelic SNPs. Alternatively it is possible to use  custom function (see
+#'   [bigsnpr::snp_autoSVD()] for details.
+#' @param total_var a boolean indicating whether to compute the total variance
+#'   of the matrix. Default is `TRUE`. Using `FALSE` will speed up computation,
+#'   but the total variance will not be stored in the output (and thus it will
+#'   not be possible to assign a proportion of variance explained to the
+#'   components).
 #' @param n_cores Number of cores used.
 #' @param tol Precision parameter of [svds][RSpectra::svds]. Default is `1e-4`.
 #' @param verbose Should some progress be printed? Default is `FALSE`.
@@ -28,14 +30,15 @@
 #'  - a vector of column indices `ind.col` of `X`,
 #'  - a vector of column centers (corresponding to `ind.col`),
 #'  - a vector of column scales (corresponding to `ind.col`),
-#'  and compute the product of `X` (subsetted and scaled) with `x`.
+#'   and compute the product of `X` (subsetted and scaled) with `x`.
 #' @param fun_cprod Same as `fun.prod`, but for the *transpose* of `X`.
 
 #' @returns a `gt_pca` object, which is a subclass of `bigSVD`; this is
 #' an S3 list with elements:
 #' A named list (an S3 class "big_SVD") of
 #' - `d`, the eigenvalues (singular values, i.e. as variances),
-#' - `u`, the scores for each sample on each component (the left singular vectors)
+#' - `u`, the scores for each sample on each component (the left singular
+#'    vectors)
 #' - `v`, the loadings (the right singular vectors)
 #' - `center`, the centering vector,
 #' - `scale`, the scaling vector,
@@ -47,45 +50,47 @@
 #' @export
 
 
-gt_pca_randomSVD <- function(x, k = 10,
-                              fun_scaling = bigsnpr::snp_scaleBinom(),
-                              tol = 1e-4,
-                              verbose = FALSE,
-                              n_cores = 1,
-                              fun_prod = bigstatsr::big_prodVec,
-                              fun_cprod = bigstatsr::big_cprodVec,
-                              total_var = TRUE) {
-  if (gt_has_imputed(x) && gt_uses_imputed(x)==FALSE){
+gt_pca_randomSVD <- function(x, k = 10, # nolint
+                             fun_scaling = bigsnpr::snp_scaleBinom(),
+                             tol = 1e-4,
+                             verbose = FALSE,
+                             n_cores = 1,
+                             fun_prod = bigstatsr::big_prodVec,
+                             fun_cprod = bigstatsr::big_cprodVec,
+                             total_var = TRUE) {
+  if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
   }
-  X <- attr(x$genotypes,"bigsnp") # convenient pointer
+  X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
 
-  infos_chr <- show_loci(x)$chr_int
-
-  this_svd  <- bigstatsr::big_randomSVD(X$genotypes,
-                                  k=k,
-                                    ind.row = .gt_bigsnp_rows(x),
-                                    ind.col = .gt_bigsnp_cols(x),
-                                    fun.scaling = fun_scaling,
-                                    tol = tol,
-                                  verbose = verbose,
-                                  ncores = n_cores,
-                                  fun.prod = fun_prod,
-                                  fun.cprod = fun_cprod) # TODO check that this is correct and expose it, maybe create convenience function to get the values
+  this_svd <- bigstatsr::big_randomSVD(X$genotypes,
+    k = k,
+    ind.row = .gt_bigsnp_rows(x),
+    ind.col = .gt_bigsnp_cols(x),
+    fun.scaling = fun_scaling,
+    tol = tol,
+    verbose = verbose,
+    ncores = n_cores,
+    fun.prod = fun_prod,
+    fun.cprod = fun_cprod
+  ) # TODO check that this is correct and expose it,
+  # maybe create convenience function to get the values
   # add names to the scores (to match them to data later)
-  rownames(this_svd$u)<-x$id
+  rownames(this_svd$u) <- x$id
   rownames(this_svd$v) <- loci_names(x)
   this_svd$method <- "randomSVD"
   this_svd$call <- match.call()
   this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
-  if (total_var){
-    this_svd$square_frobenious <- square_frobenious(X$genotypes, x_ind_row, x_ind_col,
-                                                    center = this_svd$center,
-                                                    scale = this_svd$scale)
+  if (total_var) {
+    this_svd$square_frobenious <- square_frobenious(X$genotypes,
+      x_ind_row, x_ind_col,
+      center = this_svd$center,
+      scale = this_svd$scale
+    )
   }
   this_svd
 }

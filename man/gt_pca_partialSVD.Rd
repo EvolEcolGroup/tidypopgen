@@ -18,36 +18,39 @@ gt_pca_partialSVD(
 \strong{This algorithm should be used to compute a few singular vectors/values.}}
 
 \item{fun_scaling}{Usually this  can be left unset, as it defaults to
-\code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}}, which is the appropriate function for biallelic SNPs.
-Alternatively it is possible to use  custom function
-(see \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}} for details.}
+\code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}}, which is the appropriate function for
+biallelic SNPs. Alternatively it is possible to use  custom function (see
+\code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}} for details.}
 
-\item{total_var}{a boolean indicating whether to compute the total variance of the matrix. Default is \code{TRUE}.
-Using \code{FALSE} will speed up computation, but the total variance will not be stored in the output (and thus it will
-not be possible to assign a proportion of variance explained to the components).}
+\item{total_var}{a boolean indicating whether to compute the total variance
+of the matrix. Default is \code{TRUE}. Using \code{FALSE} will speed up computation,
+but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the
+components).}
 }
 \value{
-a \code{gt_pca} object, which is a subclass of \code{bigSVD}; this is
-an S3 list with elements:
-A named list (an S3 class "big_SVD") of
+a \code{gt_pca} object, which is a subclass of \code{bigSVD}; this is an S3
+list with elements: A named list (an S3 class "big_SVD") of
 \itemize{
 \item \code{d}, the eigenvalues (singular values, i.e. as variances),
-\item \code{u}, the scores for each sample on each component (the left singular vectors)
+\item \code{u}, the scores for each sample on each component (the left singular
+vectors)
 \item \code{v}, the loadings (the right singular vectors)
 \item \code{center}, the centering vector,
 \item \code{scale}, the scaling vector,
 \item \code{method}, a string defining the method (in this case 'partialSVD'),
 \item \code{call}, the call that generated the object.
-\item \code{square_frobenious}, used to compute the proportion of variance explained by the components (optional)
-}
+\item \code{square_frobenious}, used to compute the proportion of variance explained
+by the components (optional)
 
 Note: rather than accessing these elements directly, it is better to use
 \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 }
+}
 \description{
-This function performs Principal Component Analysis on a \code{gen_tibble},
-by partial SVD through the eigen decomposition of the covariance. It works well
-if the number of individuals is much smaller than the number of loci; otherwise,
-\code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is a better option. This function is a wrapper
-for \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}}.
+This function performs Principal Component Analysis on a \code{gen_tibble}, by
+partial SVD through the eigen decomposition of the covariance. It works well
+if the number of individuals is much smaller than the number of loci;
+otherwise, \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is a better option. This function is a
+wrapper for \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}}.
 }

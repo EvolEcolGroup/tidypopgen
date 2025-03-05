@@ -23,9 +23,9 @@ gt_pca_randomSVD(
 \strong{This algorithm should be used to compute a few singular vectors/values.}}
 
 \item{fun_scaling}{Usually this  can be left unset, as it defaults to
-\code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}}, which is the appropriate function for biallelic SNPs.
-Alternatively it is possible to use  custom function
-(see \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}} for details.}
+\code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}}, which is the appropriate function for
+biallelic SNPs. Alternatively it is possible to use  custom function (see
+\code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}} for details.}
 
 \item{tol}{Precision parameter of \link[RSpectra:svds]{svds}. Default is \code{1e-4}.}
 
@@ -46,9 +46,11 @@ and compute the product of \code{X} (subsetted and scaled) with \code{x}.
 
 \item{fun_cprod}{Same as \code{fun.prod}, but for the \emph{transpose} of \code{X}.}
 
-\item{total_var}{a boolean indicating whether to compute the total variance of the matrix. Default is \code{TRUE}.
-Using \code{FALSE} will speed up computation, but the total variance will not be stored in the output (and thus it will
-not be possible to assign a proportion of variance explained to the components).}
+\item{total_var}{a boolean indicating whether to compute the total variance
+of the matrix. Default is \code{TRUE}. Using \code{FALSE} will speed up computation,
+but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the
+components).}
 }
 \value{
 a \code{gt_pca} object, which is a subclass of \code{bigSVD}; this is
@@ -56,7 +58,8 @@ an S3 list with elements:
 A named list (an S3 class "big_SVD") of
 \itemize{
 \item \code{d}, the eigenvalues (singular values, i.e. as variances),
-\item \code{u}, the scores for each sample on each component (the left singular vectors)
+\item \code{u}, the scores for each sample on each component (the left singular
+vectors)
 \item \code{v}, the loadings (the right singular vectors)
 \item \code{center}, the centering vector,
 \item \code{scale}, the scaling vector,
