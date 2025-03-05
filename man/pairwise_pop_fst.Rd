@@ -14,41 +14,44 @@ pairwise_pop_fst(
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
-\item{by_locus}{boolean, determining whether Fst should be returned by locus(TRUE),
-or as a single genome wide value obtained by taking the ratio of the mean numerator
-and denominator (FALSE, the default).}
+\item{by_locus}{boolean, determining whether Fst should be returned by
+locus(TRUE), or as a single genome wide value obtained by taking the ratio
+of the mean numerator and denominator (FALSE, the default).}
 
 \item{method}{one of 'Hudson', 'Nei87', and 'WC84'}
 
-\item{n_cores}{number of cores to be used, it defaults to \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
 \value{
-a tibble of genome-wide pairwise Fst values with each pairwise combination
-as a row if "by_locus=FALSE", else
-a list including the tibble of genome-wide values as well as a matrix with pairwise
-Fst by locus with loci as rows and and pairwise
-combinations as columns.
+a tibble of genome-wide pairwise Fst values with each pairwise
+combination as a row if "by_locus=FALSE", else a list including the tibble
+of genome-wide values as well as a matrix with pairwise Fst by locus with
+loci as rows and and pairwise combinations as columns.
 }
 \description{
 This function computes pairwise Fst. The following methods are implemented:
 \itemize{
-\item 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013) for diploids.
+\item 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
+for diploids.
 \item 'Nei87' : Fst according to Nei (1987) - includes the correction for
-heterozygosity when computing Ht, and is equivalent to \code{hierfstat::pairwise.neifst()},
+heterozygosity when computing Ht, and is equivalent to
+\code{hierfstat::pairwise.neifst()},
 \item 'WC84' : Weir and Cockerham (1984), correcting for missing data and is
 equivalent to \code{hierfstat::pairwise.WCfst()}.
 }
 }
 \details{
-For all formulae, the genome wide estimate is obtained by taking the ratio of the mean
-numerators and denominators over all relevant SNPs.
+For all formulae, the genome wide estimate is obtained by taking the ratio of
+the mean numerators and denominators over all relevant SNPs.
 }
 \references{
-Bhatia G, Patterson N, Sankararaman S, Price AL. (2013) Estimating and Interpreting
-FST: The Impact of Rare Variants. Genome Research, 23(9):1514–1521.
+Bhatia G, Patterson N, Sankararaman S, Price AL. (2013)
+Estimating and Interpreting FST: The Impact of Rare Variants. Genome
+Research, 23(9):1514–1521.
 
 Nei, M. (1987) Molecular Evolutionary Genetics. Columbia University Press
 
-Weir, B. S., & Cockerham, C. C. (1984). Estimating F-statistics for the analysis of
-population structure. Evolution, 38(6): 1358–1370.
+Weir, B. S., & Cockerham, C. C. (1984). Estimating F-statistics for the
+analysis of population structure. Evolution, 38(6): 1358–1370.
 }

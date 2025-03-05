@@ -14,24 +14,26 @@ pairwise_ibs(
 \arguments{
 \item{x}{a \code{gen_tibble} object.}
 
-\item{as_matrix}{boolean, determining whether the results should be a square symmetrical matrix (TRUE),
-or a tidied tibble (FALSE, the default)}
+\item{as_matrix}{boolean, determining whether the results should be a square
+symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 
-\item{type}{one of "proportion" (equivalent to "ibs" in PLINK), "adjusted_counts" ("distance" in PLINK),
-and "raw_counts" (the counts of identical alleles and non-missing alleles, from which the two other quantities are computed)}
+\item{type}{one of "proportion" (equivalent to "ibs" in PLINK),
+"adjusted_counts" ("distance" in PLINK), and "raw_counts" (the counts of
+identical alleles and non-missing alleles, from which the two other
+quantities are computed)}
 
-\item{block_size}{maximum number of loci read at once. More loci should improve speed,
-but will tax memory.}
+\item{block_size}{maximum number of loci read at once. More loci should
+improve speed, but will tax memory.}
 }
 \value{
 a \link[bigstatsr:FBM-class]{bigstatsr::FBM} of proportion or adjusted counts, or a list of
-two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles,
-and one of number of valid alleles (i.e. 2\emph{n_loci - 2}missing_loci)
+two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles, and one of
+number of valid alleles (i.e. 2\emph{n_loci - 2}missing_loci)
 }
 \description{
 This function computes the IBS matrix.
 }
 \details{
-Note that monomorphic sites are currently considered. Remove monomorphic sites
-before running pairwise_king if this is a concern.
+Note that monomorphic sites are currently considered. Remove monomorphic
+sites before running pairwise_king if this is a concern.
 }

@@ -13,16 +13,16 @@ pairwise_king(
 \arguments{
 \item{x}{a \code{gen_tibble} object.}
 
-\item{as_matrix}{boolean, determining whether the results should be a square symmetrical matrix (TRUE),
-or a tidied tibble (FALSE, the default)}
+\item{as_matrix}{boolean, determining whether the results should be a square
+symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 
-\item{block_size}{maximum number of loci read at once. More loci should improve speed,
-but will tax memory.}
+\item{block_size}{maximum number of loci read at once. More loci should
+improve speed, but will tax memory.}
 }
 \description{
 This function computes the KING-robust estimator of kinship.
 }
 \details{
-Note that monomorphic sites are currently considered. Remove monomorphic sites
-before running pairwise_king if this is a concern.
+Note that monomorphic sites are currently considered. Remove monomorphic
+sites before running pairwise_king if this is a concern.
 }

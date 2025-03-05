@@ -13,19 +13,19 @@ pairwise_allele_sharing(
 \arguments{
 \item{x}{a \code{gen_tibble} object.}
 
-\item{as_matrix}{boolean, determining whether the results should be a square symmetrical matrix (TRUE),
-or a tidied tibble (FALSE, the default)}
+\item{as_matrix}{boolean, determining whether the results should be a square
+symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 
-\item{block_size}{maximum number of loci read at once. More loci should improve speed,
-but will tax memory.}
+\item{block_size}{maximum number of loci read at once. More loci should
+improve speed, but will tax memory.}
 }
 \value{
 a matrix of allele sharing between all pairs of individuals
 }
 \description{
-This function computes the Allele Sharing matrix.
-Estimates Allele Sharing (\code{\link[hierfstat:matching]{hierfstat::matching()}})) between pairs of individuals
-(for each locus, gives 1 if the two individuals are homozygous
-for the same allele, 0 if they are homozygous for a different allele, and 1/2 if at least one individual
-is heterozygous. Matching is the average of these 0, 1/2 and 1s)
+This function computes the Allele Sharing matrix. Estimates Allele Sharing
+(\code{\link[hierfstat:matching]{hierfstat::matching()}})) between pairs of individuals (for each locus,
+gives 1 if the two individuals are homozygous for the same allele, 0 if they
+are homozygous for a different allele, and 1/2 if at least one individual is
+heterozygous. Matching is the average of these 0, 1/2 and 1s)
 }
