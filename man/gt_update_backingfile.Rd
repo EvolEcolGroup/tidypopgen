@@ -36,3 +36,8 @@ This functions forces a re-write of the file backing matrix to match the
 the current state of the \code{gen_tibble}. Tests for this function are in
 test_gt_order_loci.R
 }
+\details{
+This function does not check whether the positions of your genetic loci are
+sorted. To check this, and update the file backing matrix,
+use \code{gt_order_loci()}.
+}

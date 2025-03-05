@@ -4,6 +4,11 @@
 #' [`gen_tibble`]. Individuals and loci are subsetted and reordered according to
 #' the current state of the `gen_tibble`. Tests for this function are in
 #' test_gt_order_loci.R
+#'
+#' This function does not check whether the positions of your genetic loci are
+#' sorted. To check this, and update the file backing matrix,
+#' use `gt_order_loci()`.
+#'
 #' @param .x a `gen_tibble` object
 #' @param backingfile the path, including the file name without extension,
 #' for backing files used to store the data (they will be given a .bk
