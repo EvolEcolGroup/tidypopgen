@@ -36,7 +36,8 @@ PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for
 }
 \details{
 If the gen_tibble has been read in from vcf format, family.ID in the
-resulting plink files will be the same as sample.ID. NOTE that writing to bed
-has been optimised for speed, but writing to ped or raw is slower, especially
-for large datasets.
+resulting plink files will be the same as sample.ID. If the gen_tibble has a
+grouping variable, this will be used as the family.ID in the resulting plink
+files. NOTE that writing to bed has been optimised for speed, but writing to
+ped or raw is slower, especially for large datasets.
 }
