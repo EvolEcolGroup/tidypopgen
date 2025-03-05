@@ -29,13 +29,13 @@ is_loci_table_ordered(
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object),
-or a \code{\link{gen_tibble}}.}
+a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
-\item{error_on_false}{logical, if \code{TRUE} an error is thrown if the loci
-are not ordered.}
+\item{error_on_false}{logical, if \code{TRUE} an error is thrown if the loci are
+not ordered.}
 
-\item{ignore_genetic_dist}{logical, if \code{TRUE} the physical position is not checked.}
+\item{ignore_genetic_dist}{logical, if \code{TRUE} the physical position is not
+checked.}
 
 \item{...}{other arguments passed to specific methods.}
 }
@@ -43,6 +43,6 @@ are not ordered.}
 a logical vector defining which loci are transversions
 }
 \description{
-This functions checks that all SNPs in a chromosome are adjacent in the loci table,
-and that positions are sorted within chromosomes.
+This functions checks that all SNPs in a chromosome are adjacent in the loci
+table, and that positions are sorted within chromosomes.
 }

@@ -17,13 +17,12 @@ loci_hwe(.x, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
-a \code{\link{gen_tibble}} object),
-or a \code{\link{gen_tibble}}.}
+a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
 \item{...}{not used.}
 
-\item{mid_p}{boolean on whether the mid-p value should be computed.
-Default is TRUE, as in PLINK.}
+\item{mid_p}{boolean on whether the mid-p value should be computed. Default
+is TRUE, as in PLINK.}
 }
 \value{
 a vector of probabilities from HWE exact test, one per locus
@@ -32,12 +31,11 @@ a vector of probabilities from HWE exact test, one per locus
 Return the p-value from an exact test of HWE.
 }
 \details{
-This function uses the original C++ algorithm
-from PLINK 1.90.
+This function uses the original C++ algorithm from PLINK 1.90.
 
 NOTE There are no tests for this function yet! Unit tests are needed.
 }
 \author{
-the C++ algorithm was written by Christopher Chang for PLINK 1.90, based on
-original code by Jan Wigginton (the code was released under GPL3).
+the C++ algorithm was written by Christopher Chang for PLINK 1.90,
+based on original code by Jan Wigginton (the code was released under GPL3).
 }

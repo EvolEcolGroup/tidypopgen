@@ -59,10 +59,10 @@ loci_maf(.x, n_cores, block_size, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
-a \code{\link{gen_tibble}} object),
-or a \code{\link{gen_tibble}}.}
+a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
-\item{n_cores}{number of cores to be used, it defaults to \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
 
@@ -73,8 +73,8 @@ a vector of frequencies, one per locus
 }
 \description{
 Allele frequencies can be estimates as minimum allele frequencies (MAF) with
-\code{loci_maf()} or the frequency of the alternate allele (with \code{loci_alt_freq()}).
-The latter are in line with the genotypes matrix (e.g. as extracted by
-\code{\link[=show_loci]{show_loci()}}). Most users will be in interested in the MAF, but the
-raw frequencies might be useful when computing aggregated statistics.
+\code{loci_maf()} or the frequency of the alternate allele (with
+\code{loci_alt_freq()}). The latter are in line with the genotypes matrix (e.g. as
+extracted by \code{\link[=show_loci]{show_loci()}}). Most users will be in interested in the MAF,
+but the raw frequencies might be useful when computing aggregated statistics.
 }

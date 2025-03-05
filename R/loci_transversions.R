@@ -16,7 +16,8 @@ loci_transversions <- function(.x, ...) {
 #' @export
 #' @rdname loci_transversions
 loci_transversions.tbl_df <- function(.x, ...) {
-  #TODO this is a hack to deal with the class being dropped when going through group_map
+  # TODO this is a hack to deal with the class being dropped when going through
+  # group_map
   stopifnot_gen_tibble(.x)
   check_allele_alphabet(.x$genotypes)
   loci_transversions(.x$genotypes, ...)
@@ -27,12 +28,11 @@ loci_transversions.tbl_df <- function(.x, ...) {
 #' @rdname loci_transversions
 loci_transversions.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
-  transversions <- function(loci_df){
-    (((loci_df$allele_ref=="A") & (loci_df$allele_alt=="T")) |
-      ((loci_df$allele_ref=="T") & (loci_df$allele_alt=="A")) |
-       ((loci_df$allele_ref=="C") & (loci_df$allele_alt=="G")) |
-      ((loci_df$allele_ref=="G") & (loci_df$allele_alt=="C")))
-
+  transversions <- function(loci_df) {
+    (((loci_df$allele_ref == "A") & (loci_df$allele_alt == "T")) |
+      ((loci_df$allele_ref == "T") & (loci_df$allele_alt == "A")) | #nolint start
+      ((loci_df$allele_ref == "C") & (loci_df$allele_alt == "G")) |
+      ((loci_df$allele_ref == "G") & (loci_df$allele_alt == "C"))) #nolint end
   }
   transversions(show_loci(.x))
 }
@@ -40,6 +40,5 @@ loci_transversions.vctrs_bigSNP <- function(.x, ...) {
 #' @export
 #' @rdname loci_transversions
 loci_transversions.grouped_df <- function(.x, ...) {
-  group_map(.x, .f=~loci_transversions(.x))
+  group_map(.x, .f = ~ loci_transversions(.x))
 }
-

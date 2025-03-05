@@ -15,7 +15,7 @@ loci_names <- function(.x, ...) {
 
 #' @export
 #' @rdname loci_names
-loci_names.tbl_df <- function(.x, ...){
+loci_names.tbl_df <- function(.x, ...) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
   loci_names(.x$genotypes)
@@ -23,7 +23,7 @@ loci_names.tbl_df <- function(.x, ...){
 
 #' @export
 #' @rdname loci_names
-loci_names.vctrs_bigSNP <- function(.x, ...){
+loci_names.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
-  attr(.x,"loci")$name
+  attr(.x, "loci")$name
 }

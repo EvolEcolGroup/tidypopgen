@@ -13,8 +13,8 @@ loci_chromosomes(.x, ...)
 \method{loci_chromosomes}{vctrs_bigSNP}(.x, ...)
 }
 \arguments{
-\item{.x}{a \code{\link{gen_tibble}}, or a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object).}
+\item{.x}{a \code{\link{gen_tibble}}, or a vector of class \code{vctrs_bigSNP} (usually the
+\code{genotype} column of a \code{\link{gen_tibble}} object).}
 
 \item{...}{currently unused.}
 }
@@ -22,6 +22,6 @@ a \code{\link{gen_tibble}} object).}
 a character vector of chromosomes
 }
 \description{
-Extract the loci chromosomes from a \code{gen_tibble} (or directly from its \code{genotype}
-column).
+Extract the loci chromosomes from a \code{gen_tibble} (or directly from its
+\code{genotype} column).
 }
