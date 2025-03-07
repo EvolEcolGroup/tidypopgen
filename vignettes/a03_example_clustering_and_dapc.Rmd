@@ -312,37 +312,7 @@ anole_adm_original <- gt_admixture(
 ```{r, results="hide", echo=FALSE, eval=TRUE, warning=FALSE}
 anole_gt <- anole_gt %>% group_by(population)
 
-dir <- system.file("extdata/a03_admixture", package = "tidypopgen")
-anole_adm <- read_q_files(dir)
-
-# add attributes to the q matrices
-for (i in c(1:5)) {
-  attr(anole_adm$Q[[i]], "group") <- anole_gt$population
-}
-
-anole_adm$cv <- c(
-  0.61043, 0.44932, 0.49835,
-  0.47631, 0.52006
-)
-anole_adm$loglik <- c(
-  -82846.88, -58515.56,
-  -55713.79, -49499.16, -44040.47
-)
-anole_adm$algorithm <- "ADMIXTURE"
-anole_adm$id <- anole_gt$id
-
-files <- list.files(dir, pattern = "\\.P(?:\\.gz)?$", full.names = TRUE)
-
-matrix_list <-
-  lapply(
-    files,
-    function(file) q_matrix(utils::read.table(file, header = FALSE))
-  )
-anole_adm$P <- matrix_list
-files <- list.files(dir, pattern = "\\.log.gz$", full.names = TRUE)
-matrix_list <- lapply(files, function(file) readLines(file))
-anole_adm$log <- matrix_list
-anole_adm$group <- anole_gt$group
+anole_adm <- readRDS("a03_anole_adm.rds")
 ```
 
 Note that within this vignette we are not running the `gt_admixture` function, as it requires the ADMIXTURE software to be installed on your machine and available in your PATH. Instead, we load the results from a previous run of ADMIXTURE.
