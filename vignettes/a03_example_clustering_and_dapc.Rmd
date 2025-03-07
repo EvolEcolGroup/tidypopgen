@@ -1,5 +1,5 @@
 ---
-title: "Example workflow with tidypopgen"
+title: "Population genetic analysis with tidypopgen"
 output: rmarkdown::html_vignette
         #pdf_document
 vignette: >
@@ -25,10 +25,12 @@ from "https://github.com/ivanprates/2018_Anolis_EcolEvol/blob/master/data/VCFtoo
 We read in the data from the compressed vcf with:
 ```{r}
 library(tidypopgen)
-vcf_path <- system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
-                          package = "tidypopgen")
-anole_gt <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
-
+vcf_path <-
+  system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+    package = "tidypopgen"
+  )
+anole_gt <-
+  gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
 ```
 
 Now let's inspect our `gen_tibble`:
@@ -43,7 +45,8 @@ We will have add the population information manually. Let's start by reading the
 file:
 ```{r}
 pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
-                        package = "tidypopgen")
+  package = "tidypopgen"
+)
 pops <- readr::read_csv(pops_path)
 pops
 ```
@@ -54,13 +57,13 @@ to remove "punc_":
 
 Let us simplify the ids, which will have a "punc_" prefix
 ```{r}
-anole_gt <- anole_gt %>% mutate(id = gsub('punc_',"",.data$id,))
+anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
 anole_gt
 ```
 
 Now we can bring in the pop information:
 ```{r}
-anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID,.data$id)])
+anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID, .data$id)])
 anole_gt
 ```
 
@@ -69,7 +72,7 @@ anole_gt
 That was easy. The loci had already been filtered and cleaned, so we don't need 
 to do any QC. Let us jump straight into analysis and run a PCA:
 ```{r, error=TRUE}
-anole_pca <- anole_gt %>% gt_pca_partialSVD(k=30)
+anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
 ```
 OK, we jumped too quickly. There are missing data, and we need first 
 to impute them:
@@ -80,7 +83,7 @@ anole_gt <- gt_impute_simple(anole_gt, method = "mode")
 
 And now:
 ```{r}
-anole_pca <- anole_gt %>% gt_pca_partialSVD(k=30)
+anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
 ```
 
 Let us look at the object:
@@ -95,19 +98,18 @@ of the elements in which they are stored).
 We can extract those elements with the `tidy` function, which returns a tibble
 that can be easily used for further analysis, e.g.:
 ```{r}
-tidy(anole_pca, matrix="eigenvalues")
-
+tidy(anole_pca, matrix = "eigenvalues")
 ```
 We can return information on the *eigenvalues*, *scores* and *loadings* of the pca.
 There is also an `autoplot` method that allows to visualise those elements (type *screeplot* for
 *eigenvalues*, type *scores* for *scores*, and *loadings* for *loadings*:
 ```{r, fig.alt = "Scree Plot of eigenvalues for each Principal Component"}
-autoplot(anole_pca, type="screeplot")
+autoplot(anole_pca, type = "screeplot")
 ```
 
 To plot the sample in principal coordinates space, we can simply use:
 ```{r, fig.alt = "Score plot of individuals across the first and second Principal Components"}
-autoplot(anole_pca, type ="scores")
+autoplot(anole_pca, type = "scores")
 ```
 
 `autoplots` are deliberately kept simple: they are just a way to quickly inspect the results.
@@ -118,7 +120,6 @@ library(ggplot2)
 autoplot(anole_pca, type = "scores") +
   aes(color = anole_gt$population) +
   labs(color = "population")
-
 ```
 
 For more complex/publication ready plots, we will want to add the PC scores
@@ -126,13 +127,13 @@ to the tibble, so that we can create a custom plot with `ggplot2`. We can easily
 add the data with the `augment` method:
 
 ```{r}
-anole_gt <- augment(anole_pca , data = anole_gt)
+anole_gt <- augment(anole_pca, data = anole_gt)
 ```
 
 And now we can use `ggplot2` directly to generate our plot:
 
 ```{r, fig.alt = "Another score plot of individuals across the first and second Principal Components, with individual samples coloured by population, using ggplot2"}
-anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) + 
+anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) +
   geom_point()
 ```
 
@@ -151,8 +152,7 @@ colouring by chromosome or maf.
 For more complex plots, we can augment the loci table with the loadings using `augment_loci()`:
 
 ```{r}
-anole_gt_load <- augment_loci(anole_pca, data= anole_gt)
-
+anole_gt_load <- augment_loci(anole_pca, data = anole_gt)
 ```
 
 # Explore population structure with DAPC
@@ -174,10 +174,9 @@ Using `tidy` on the `gt_pca` object allows us easily obtain those quantities, an
 trivial to plot them:
 ```{r, fig.alt = "Plot of the cumulative loadings for each Principal Component"}
 library(ggplot2)
-tidy(anole_pca,matrix="eigenvalues") %>%
-  ggplot(mapping =aes(x=PC, y=cumulative)) +
+tidy(anole_pca, matrix = "eigenvalues") %>%
+  ggplot(mapping = aes(x = PC, y = cumulative)) +
   geom_point()
-
 ```
 
 Note that, as we were working with a truncated SVD algorithm for our PCA, we can not easily
@@ -234,26 +233,26 @@ anole_dapc
 Again, these elements can be obtained with tidiers (with `matrix` equal to `eigenvalues`,
 `scores`,`ld_loadings` and `loci_loadings`):
 ```{r}
-tidy(anole_dapc, matrix="eigenvalues")
+tidy(anole_dapc, matrix = "eigenvalues")
 ```
 
 And they can be visualised with `autoplot`:
 ```{r, fig.alt = "Scree plot of the eigenvalues on the two discriminant axes (defined by `ld`)"}
-autoplot(anole_dapc, type="screeplot")
+autoplot(anole_dapc, type = "screeplot")
 ```
 
 As for pca, there is a `tidy` method that can be used to extract information
 from `gt_dapc` objects. For example, if we want to create a bar plot of
 the eigenvalues (since we only have two), we could simply use:
 ```{r, fig.alt = "Bar plot of eigenvalues against the two discriminant axes"}
-tidy(anole_dapc, matrix="eigenvalues") %>%
-  ggplot(aes(x=LD,y=eigenvalue)) +
+tidy(anole_dapc, matrix = "eigenvalues") %>%
+  ggplot(aes(x = LD, y = eigenvalue)) +
   geom_col()
 ```
 
 We can plot the scores with:
 ```{r, fig.alt = "Scatterplot of the scores of each individual on the two discriminant axes (defined by `ld`)"}
-autoplot(anole_dapc, type="scores")
+autoplot(anole_dapc, type = "scores")
 ```
 
 We can inspect the assignment by DAPC with `autoplot` using the type
@@ -261,7 +260,7 @@ We can inspect the assignment by DAPC with `autoplot` using the type
 by the original population labels:
 
 ```{r, fig.alt = "Bar plot showing the probability of assignment to each cluster"}
-autoplot(anole_dapc, type="components", group = anole_gt$population)
+autoplot(anole_dapc, type = "components", group = anole_gt$population)
 ```
 
 Because of the very clear separation we observed when plotting the LD scores,
@@ -285,42 +284,76 @@ which does not work because the underlying pca object is different). For example
 we can obtain the standard dapc plot with:
 ```{r, fig.alt = "Scatterplot of individuals with ellipses surrounding each cluster of individuals identified by the DAPC analysis. Eigenvalues are displayed in an inset in the bottom right corner of the plot."}
 library(adegenet)
-scatter(anole_dapc, posi.da="bottomright")
+scatter(anole_dapc, posi.da = "bottomright")
 ```
 
-# Clustering with sNMF
+# Clustering with ADMIXTURE
 
-sNMF is a fast clustering algorithm which provides results similar to STRUCTURE 
-and ADMIXTURE. We can run it directly from tidypopgen using the `gt_snmf` function.
+ADMIXTURE is a fast clustering algorithm which provides results similar to STRUCTURE. 
+We can run it directly from tidypopgen using the `gt_admixture` function.
 
-The function `gt_snmf` creates a .geno file to be used by LEA. This is placed by
-default in the same directory as the backing file of the `gen_tibble`, and uses 
-the same name. 
+The output of `gt_admixture` is a `gt_admix` object. `gt_admix` objects are designed to make visualising data from different clustering algorithms swift and easy.
 
-The output of `gt_snmf` is a `gt_admix` object. `gt_admix` objects are designed to 
-make visualising data from different clustering algorithms swift and easy.
-
-Lets begin by running `gt_snmf`. We can run K clusters from k=1 to k=10. 
+Lets begin by running `gt_admixture`. We can run K clusters from k=2 to k=6. 
 We will use just one repeat, but ideally we should run multiple repetitions for each K:
 
-```{r results='hide'}
+```{r, results='hide', echo=TRUE, eval=FALSE}
 anole_gt <- anole_gt %>% group_by(population)
 
-anole_snmf <- gt_snmf(x = anole_gt,
-                         project = "new",
-                         k = 1:10,
-                         entropy = TRUE,
-                         n_runs = 1,
-                         alpha = 100,
-                         seed = 1
+anole_adm_original <- gt_admixture(
+  x = anole_gt,
+  k = 2:6,
+  n_runs = 1,
+  crossval = TRUE,
+  seed = 1
 )
 ```
+
+```{r, results="hide", echo=FALSE, eval=TRUE, warning=FALSE}
+anole_gt <- anole_gt %>% group_by(population)
+
+dir <- system.file("extdata/a03_admixture", package = "tidypopgen")
+anole_adm <- read_q_files(dir)
+
+# add attributes to the q matrices
+for (i in c(1:5)) {
+  attr(anole_adm$Q[[i]], "group") <- anole_gt$population
+}
+
+anole_adm$cv <- c(
+  0.61043, 0.44932, 0.49835,
+  0.47631, 0.52006
+)
+anole_adm$loglik <- c(
+  -82846.88, -58515.56,
+  -55713.79, -49499.16, -44040.47
+)
+anole_adm$algorithm <- "ADMIXTURE"
+anole_adm$id <- anole_gt$id
+
+files <- list.files(dir, pattern = "\\.P(?:\\.gz)?$", full.names = TRUE)
+
+matrix_list <-
+  lapply(
+    files,
+    function(file) q_matrix(utils::read.table(file, header = FALSE))
+  )
+anole_adm$P <- matrix_list
+files <- list.files(dir, pattern = "\\.log.gz$", full.names = TRUE)
+matrix_list <- lapply(files, function(file) readLines(file))
+anole_adm$log <- matrix_list
+anole_adm$group <- anole_gt$group
+```
+
+Note that within this vignette we are not running the `gt_admixture` function, as it requires the ADMIXTURE software to be installed on your machine and available in your PATH. Instead, we load the results from a previous run of ADMIXTURE.
+
+If you would prefer a native clustering algorithm, we recommend using the `gt_snmf` function, which is a wrapper for the `snmf` function from the `LEA` package. sNMF is a fast clustering algorithm which provides results similar to STRUCTURE and ADMIXTURE, and is available directly using the `tidypopgen` package.
 
 We can examine the suitability of our K values by plotting the cross-entropy values
 for each K value, which is contained in the `cv` element of the `gt_admix` object: 
 
 ```{r, fig.alt = "Plot of cross-entropy for each value of K, showing K = 3 has the lowest cross-entropy"}
-plot(anole_snmf$cv, cex = 1.2, pch = 19)
+plot(anole_adm$cv, cex = 1.2, pch = 19)
 ```
 
 Here we can see that K = 3 is a sensible choice, as K = 3 represents the 'elbow' 
@@ -330,7 +363,10 @@ We can quickly plot this data with `autoplot` by using the type `barplot` and se
 our chosen value of `k`:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
-autoplot(anole_snmf, k = 3, run = 1, data = anole_gt, annotate_group = FALSE, type = "barplot")
+autoplot(anole_adm,
+  k = 3, run = 1, data = anole_gt, annotate_group = FALSE,
+  type = "barplot"
+)
 ```
 
 This plot is fine, but it is messy, and not a very helpful visualisation if we 
@@ -340,7 +376,10 @@ To re-order this plot, grouping individuals by population, we can use the `annot
 and `arrange_by_group` arguments in autoplot:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
-autoplot(anole_snmf, type = "barplot", k = 3, run = 1, data = anole_gt, annotate_group = TRUE, arrange_by_group = TRUE)
+autoplot(anole_adm,
+  type = "barplot", k = 3, run = 1, data = anole_gt,
+  annotate_group = TRUE, arrange_by_group = TRUE
+)
 ```
 
 This plot is much better. Now the plot is labelled by population we can see that
@@ -351,7 +390,11 @@ However, for a more visually appealing plot, we can re-order the individuals wit
 each population as follows:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources, with individuals arranged according to their dominant ancestry propotion"}
-autoplot(anole_snmf, type = "barplot", k = 3, run = 1, data = anole_gt, annotate_group = TRUE, arrange_by_group = TRUE, arrange_by_indiv = TRUE, reorder_within_groups = TRUE)
+autoplot(anole_adm,
+  type = "barplot", k = 3, run = 1,
+  data = anole_gt, annotate_group = TRUE, arrange_by_group = TRUE,
+  arrange_by_indiv = TRUE, reorder_within_groups = TRUE
+)
 ```
 
 Now individuals are neatly ordered within each population.
@@ -363,14 +406,14 @@ gen_tibble object, so that we can create a custom plot with `ggplot2`.
 First we extract the q_matrix of interest using the `get_q_matrix` function:
 
 ```{r}
-q_mat <- get_q_matrix(anole_snmf, k = 3, run = 1)
+q_mat <- get_q_matrix(anole_adm, k = 3, run = 1)
 ```
 
 Then we can easily add the data with the `augment` method:
 
 ```{r}
-anole_gt_sNMF <- augment(q_mat, data = anole_gt)
-head(anole_gt_sNMF)
+anole_gt_adm <- augment(q_mat, data = anole_gt)
+head(anole_gt_adm)
 ```
 
 Alternatively, we can convert our q matrix into `tidy` format, which is more 
@@ -384,17 +427,25 @@ head(tidy_q)
 And now we can use `ggplot2` directly to generate our custom plot:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
-
 tidy_q <- tidy_q %>%
   dplyr::group_by(id) %>%
   dplyr::mutate(dominant_q = max(percentage)) %>%
   dplyr::ungroup() %>%
   dplyr::arrange(group, dplyr::desc(dominant_q)) %>%
-  dplyr::mutate(plot_order = dplyr::row_number(), id = factor(id, levels = unique(id)))
+  dplyr::mutate(
+    plot_order = dplyr::row_number(),
+    id = factor(id, levels = unique(id))
+  )
 
 plt <- ggplot2::ggplot(tidy_q, ggplot2::aes(x = id, y = percentage, fill = q)) +
-  ggplot2::geom_col(width = 1, position = ggplot2::position_stack(reverse = TRUE))+
-  ggplot2::labs(y = "Population Structure for K = 3", title = "Clustering at K = 3 for Anolis punctatus using sNMF algorithm") +
+  ggplot2::geom_col(
+    width = 1,
+    position = ggplot2::position_stack(reverse = TRUE)
+  ) +
+  ggplot2::labs(
+    y = "Population Structure for K = 3",
+    title = "Clustering at K = 3 for Anolis punctatus using ADMIXTURE algorithm"
+  ) +
   theme_distruct() +
   scale_fill_distruct()
 
@@ -410,19 +461,25 @@ Forest individuals differ from all Amazonian individuals. We can do this by addi
 a `forest` group to our gen_tibble:
 
 ```{r}
-anole_gt$forest <- ifelse(anole_gt$population == "AF", "Atlantic Forest", "Amazonian Forest")
+anole_gt$forest <- ifelse(anole_gt$population == "AF",
+  "Atlantic Forest", "Amazonian Forest"
+)
 ```
 
 Then we can change the grouping variable of our `gt_admix` object using `gt_admix_reorder_q`:
 
 ```{r}
-anole_snmf <- gt_admix_reorder_q(anole_snmf, group = anole_gt$forest)
+anole_adm <- gt_admix_reorder_q(anole_adm, group = anole_gt$forest)
 ```
 
 And replot the data:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources, labelled Atlantic forest or Amazonian forest"}
-autoplot(anole_snmf, type = "barplot", k = 3, run = 1, annotate_group = TRUE, arrange_by_group = TRUE, arrange_by_indiv = TRUE, reorder_within_groups = TRUE)
+autoplot(anole_adm,
+  type = "barplot", k = 3, run = 1,
+  annotate_group = TRUE, arrange_by_group = TRUE,
+  arrange_by_indiv = TRUE, reorder_within_groups = TRUE
+)
 ```
 
 And here we can see that the Atlantic Forest individuals clearly separate from
@@ -432,31 +489,32 @@ Western anolis lizards within the Amazonian forest.
 
 # Handling Q matrices
 
-For clustering algorithms that operate outside the R environment(such as ADMIXTURE), 
+For clustering algorithms that operate outside the R environment, 
 the function `q_matrix()` can take a path to a directory containing results from multiple runs 
 of a clustering algorithm for multiple values of K, read the .Q files, and summarise 
 them in a single `q_matrix_list` object.
 
-In the analysis above, through `gt_snmf()`, we ran 1 repetition for K values 1 to 10. 
+In the analysis above, through `gt_admxiture()`, we ran 1 repetition for K values 1 to 10. 
 
 To exemplify how `q_matrix()` can read directly from output folders, we can write 
 the outputs to a temporary file: 
 
 ```{r}
 runs <- c(1)
-k_values <- c(1:10)
+k_values <- c(2:6)
 q_matrices <- list()
 dir <- tempdir()
 
-for(x in k_values){
-  
+for (x in k_values) {
   q_matrices[[x]] <- list()
-  
-  for(i in runs){
-  q_matrices[[x]][[i]] <- get_q_matrix(anole_snmf, k = x, run = i)
-  
-  write.table(q_matrices[[x]][[i]], file = paste0(dir,"/K",x,"run",i,".Q"), col.names = FALSE, row.names = FALSE, quote = FALSE)
-  
+
+  for (i in runs) {
+    q_matrices[[x]][[i]] <- get_q_matrix(anole_adm, k = x, run = i)
+
+    write.table(q_matrices[[x]][[i]],
+      file = paste0(dir, "/K", x, "run", i, ".Q"),
+      col.names = FALSE, row.names = FALSE, quote = FALSE
+    )
   }
 }
 ```
@@ -478,16 +536,19 @@ For example, if we would like to view the second run of K = 3:
 get_q_matrix(q_list, k = 3, run = 1)
 ```
 
-And, again, we can then autoplot any matrix by selecting from the `q_matrix_list` object:
+And, again, we can then autoplot any matrix by selecting from the
+`q_matrix_list` object:
 
 ```{r, fig.alt = "Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources"}
-autoplot(get_q_matrix(q_list, k = 3, run = 1), data = anole_gt, annotate_group = TRUE, arrange_by_group = TRUE, arrange_by_indiv = TRUE, reorder_within_groups = TRUE)
+autoplot(get_q_matrix(q_list, k = 3, run = 1),
+  data = anole_gt,
+  annotate_group = TRUE, arrange_by_group = TRUE,
+  arrange_by_indiv = TRUE, reorder_within_groups = TRUE
+)
 ```
 
-In this way, `tidypopgen` integrates with external clustering software (such as 
-ADMIXTURE or STRUCTURE) seamlessly for quick, easy plotting. 
+In this way, `tidypopgen` integrates with external clustering software
+seamlessly for quick, easy plotting.
 
 ```{r}
-
 ```
-
