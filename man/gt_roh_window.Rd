@@ -74,12 +74,13 @@ that create plots and produce statistics from the results (see plots and
 statistics functions in this manual, and/or refer to the detectRUNS
 vignette).
 
-If the \code{\link{gen_tibble}} is grouped, then the grouping variable is used to fill
-in the group table. Otherwise, the group 'column' is filled with the same
-values as the 'id' column
+If the \code{\link{gen_tibble}} is grouped, then the grouping variable is used to
+fill in the group table. Otherwise, the group 'column' is filled with the
+same values as the 'id' column
 }
 \examples{
 # run the example only if we have the package installed
+\donttest{
 if (requireNamespace("detectRUNS", quietly = TRUE)) {
   sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
     package = "detectRUNS"
@@ -91,5 +92,6 @@ if (requireNamespace("detectRUNS", quietly = TRUE)) {
   sheep_gt <- sheep_gt \%>\% group_by(population)
   sheep_roh <- gt_roh_window(sheep_gt)
   detectRUNS::plot_Runs(runs = sheep_roh)
+}
 }
 }

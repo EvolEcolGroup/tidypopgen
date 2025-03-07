@@ -26,15 +26,15 @@
 #' @param max_miss_run max n. of missing SNPs in the run (optional)
 #'
 #' @details This function returns a data frame with all runs detected in the
-#' dataset. This data frame can then be written out to a csv file. The data
-#' frame is, in turn, the input for other functions of the detectRUNS package
-#' that create plots and produce statistics from the results (see plots and
-#' statistics functions in this manual, and/or refer to the detectRUNS
-#' vignette).
+#'   dataset. This data frame can then be written out to a csv file. The data
+#'   frame is, in turn, the input for other functions of the detectRUNS package
+#'   that create plots and produce statistics from the results (see plots and
+#'   statistics functions in this manual, and/or refer to the detectRUNS
+#'   vignette).
 #'
-#' If the [`gen_tibble`] is grouped, then the grouping variable is used to fill
-#' in the group table. Otherwise, the group 'column' is filled with the same
-#' values as the 'id' column
+#'   If the [`gen_tibble`] is grouped, then the grouping variable is used to
+#'   fill in the group table. Otherwise, the group 'column' is filled with the
+#'   same values as the 'id' column
 #'
 #' @return A dataframe with RUNs of Homozygosity or Heterozygosity in the
 #'   analysed dataset. The returned dataframe contains the following seven
@@ -47,6 +47,7 @@
 #'
 #' @examples
 #' # run the example only if we have the package installed
+#' \donttest{
 #' if (requireNamespace("detectRUNS", quietly = TRUE)) {
 #'   sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
 #'     package = "detectRUNS"
@@ -59,6 +60,8 @@
 #'   sheep_roh <- gt_roh_window(sheep_gt)
 #'   detectRUNS::plot_Runs(runs = sheep_roh)
 #' }
+#' }
+
 gt_roh_window <- function(x, window_size = 15, threshold = 0.05,
                           min_snp = 3, heterozygosity = FALSE,
                           max_opp_window = 1, max_miss_window = 1,

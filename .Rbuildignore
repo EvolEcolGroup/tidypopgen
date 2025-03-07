@@ -6,3 +6,4 @@
 pkgdown/
 _pkgdown.yml
 admixture/
+.lintr
