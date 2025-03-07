@@ -34,58 +34,6 @@ anole_adm <- gt_admixture(
   crossval = TRUE,
   seed = 1
 )
-```
 
-```{r}
-runs <- c(1)
-k_values <- c(2:6)
-q_matrices <- list()
-p_matrices <- list()
-logs <- list()
-dir <- system.file("/extdata/a03_admixture", package = "tidypopgen")
-
-for (x in k_values) {
-  q_matrices[[x]] <- list()
-
-  for (i in runs) {
-    q_matrices[[x]][[i]] <- get_q_matrix(anole_adm, k = x, run = i)
-
-    gz_file <- gzfile(paste0(dir, "/K", x, "run", i, ".Q.gz"), "wt")
-    write.table(q_matrices[[x]][[i]],
-      file = gz_file,
-      col.names = FALSE, row.names = FALSE, quote = FALSE
-    )
-    close(gz_file)
-  }
-}
-
-for (x in k_values) {
-  p_matrices[[x]] <- list()
-
-  for (i in runs) {
-    p_matrices[[x]][[i]] <- get_p_matrix(anole_adm, k = x, run = i)
-
-    gz_file <- gzfile(paste0(dir, "/K", x, "run", i, ".P.gz"), "wt")
-    write.table(p_matrices[[x]][[i]],
-      file = file,
-      col.names = FALSE, row.names = FALSE, quote = FALSE
-    )
-    close(gz_file)
-  }
-}
-
-k_values <- 1:5
-
-for (x in k_values) {
-  logs[[x]] <- list()
-
-  logs[[x]] <- anole_adm$log[[x]]
-
-  file <- gzfile(paste0(dir, "/K", x, "run", i, ".log.gz"), "wt")
-  write.table(logs[[x]],
-    file = file,
-    col.names = FALSE, row.names = FALSE, quote = FALSE
-  )
-  close(file)
-}
+saveRDS(anole_adm, "../vignettes/a03_anole_adm.rds")
 ```
