@@ -19,6 +19,11 @@ symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 \item{block_size}{maximum number of loci read at once. More loci should
 improve speed, but will tax memory.}
 }
+\value{
+a square symmetrical matrix of relationship coefficients between
+individuals if \code{as_matrix} is TRUE, or a tidied tibble of coefficients if
+\code{as_matrix} is FALSE.
+}
 \description{
 This function computes the KING-robust estimator of kinship.
 }

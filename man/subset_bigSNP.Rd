@@ -19,8 +19,8 @@ subset_bigSNP(
 
 \item{loci_indices}{the indices of the loci (columns) to keep}
 
-\item{swap_indices}{the indices of loci where the alleles should be swapped (both
-in the bim table and in the genotypes)}
+\item{swap_indices}{the indices of loci where the alleles should be swapped
+(both in the bim table and in the genotypes)}
 
 \item{backingfile}{the backing file (if null, a tempfile will be used)}
 }
@@ -28,7 +28,7 @@ in the bim table and in the genotypes)}
 a \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}} object
 }
 \description{
-This function subsets an \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}} object, creating a new backing file with the
-information subsetted and reorders as required.
+This function subsets an \code{\link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP}} object, creating a new backing
+file with the information subsetted and reorders as required.
 }
 \keyword{internal}

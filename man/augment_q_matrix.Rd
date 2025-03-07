@@ -15,15 +15,15 @@
 \item{...}{Not used. Needed to match generic signature only.}
 }
 \value{
-A  \link{gen_tibble} containing the original data along with
-additional columns containing each observation's Q values.
+A  \link{gen_tibble} containing the original data along with additional
+columns containing each observation's Q values.
 }
 \description{
-Augment for \code{q_matrix} accepts a model object and a dataset and adds
-Q values to each observation in the dataset.
-Q values  are stored in separate columns, which is given name with the
-pattern ".Q1",".Q2", etc. For consistency with \link[broom:augment.prcomp]{broom::augment.prcomp}, a column
-".rownames" is also returned; it is a copy of 'id', but it ensures that
-any scripts written for data augmented with \link[broom:augment.prcomp]{broom::augment.prcomp} will
-work out of the box (this is especially helpful when adapting plotting scripts).
+Augment for \code{q_matrix} accepts a model object and a dataset and adds Q values
+to each observation in the dataset. Q values  are stored in separate columns,
+which is given name with the pattern ".Q1",".Q2", etc. For consistency with
+\link[broom:augment.prcomp]{broom::augment.prcomp}, a column ".rownames" is also returned; it is a copy
+of 'id', but it ensures that any scripts written for data augmented with
+\link[broom:augment.prcomp]{broom::augment.prcomp} will work out of the box (this is especially helpful
+when adapting plotting scripts).
 }

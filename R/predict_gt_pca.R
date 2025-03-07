@@ -5,77 +5,85 @@
 #'
 #' @param object the [`gt_pca`] object
 #' @param new_data a gen_tibble if scores are requested for a new dataset
-#' @param project_method a string taking the value of either "simple",
-#' "OADP" (Online Augmentation, Decomposition, and Procrustes (OADP) projection),
-#' or "least_squares" (as done by SMARTPCA)
-#' @param lsq_pcs a vector of length two with the values of the two principal components
-#' to use for the least square fitting. Only relevant if`project_method = 'least_squares'`
-#' @param block_size number of loci read simultaneously (larger values will speed up
-#' computation, but require more memory)
+#' @param project_method a string taking the value of either "simple", "OADP"
+#'   (Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
+#'   "least_squares" (as done by SMARTPCA)
+#' @param lsq_pcs a vector of length two with the values of the two principal
+#'   components to use for the least square fitting. Only relevant
+#'   if`project_method = 'least_squares'`
+#' @param block_size number of loci read simultaneously (larger values will
+#'   speed up computation, but require more memory)
 #' @param n_cores number of cores
 #' @param ... no used
-#' @returns a matrix of predictions, with samples as rows and components as columns. The number
-#' of components depends on how many were estimated in the [`gt_pca`] object.
+#' @returns a matrix of predictions, with samples as rows and components as
+#'   columns. The number of components depends on how many were estimated in the
+#'   [`gt_pca`] object.
 #' @references Zhang et al (2020). Fast and robust ancestry prediction using
-#' principal component analysis  36(11): 3439–3446.
+#'   principal component analysis  36(11): 3439–3446.
 #' @rdname predict_gt_pca
 #' @importFrom foreach %do%
 #' @export
 
 # this is a modified version of bigstatsr::predict.big_SVD
-predict.gt_pca <- function(object, new_data=NULL,
-                           project_method = c("none", "simple", "OADP", "least_squares"),
-                           lsq_pcs = c(1,2),
+predict.gt_pca <- function(object, new_data = NULL,
+                           project_method = c(
+                             "none", "simple",
+                             "OADP", "least_squares"
+                           ),
+                           lsq_pcs = c(1, 2),
                            block_size = NULL,
-                           n_cores = 1, ...){
+                           n_cores = 1, ...) {
   rlang::check_dots_empty()
   project_method <- match.arg(project_method)
 
   if (is.null(new_data)) {
-    # U * D
-    UD <- sweep(object$u, 2, object$d, '*')
-    dimnames(UD)<-list(rownames(object$u),paste0(".PC",1:ncol(UD)))
+    # U * D #nolint start
+    UD <- sweep(object$u, 2, object$d, "*")
+    dimnames(UD) <- list(rownames(object$u), paste0(".PC", seq_len(ncol(UD)))) # nolint end
     return(UD)
   } else {
-    if (!inherits(new_data,"gen_tbl")){
-      stop ("new_data should be a gen_tibble")
+    if (!inherits(new_data, "gen_tbl")) {
+      stop("new_data should be a gen_tibble")
     }
     # check the new_data have the same loci as the dataset used to build the pca
-    if (!all(object$loci$name %in% show_loci(new_data)$name)){
+    if (!all(object$loci$name %in% show_loci(new_data)$name)) {
       stop("loci used in object are not present in new_data")
     }
     # get id of loci in new_data
     loci_subset <- match(object$loci$name, show_loci(new_data)$name)
-    if (!all(all(show_loci(new_data)$allele_ref[loci_subset]==object$loci$allele_ref),
-             all(show_loci(new_data)$allele_alt[loci_subset]==object$loci$allele_alt))){
-      stop("ref and alt alleles differ between new_data and the data used to create the pca object")
+    if (!all(
+      all(show_loci(new_data)$allele_ref[loci_subset] == object$loci$allele_ref), # nolint
+      all(show_loci(new_data)$allele_alt[loci_subset] == object$loci$allele_alt)
+    )) {
+      stop(paste(
+        "ref and alt alleles differ between new_data and the data",
+        "used to create the pca object"
+      ))
     }
 
-    if (project_method=="none"){
-      if (gt_has_imputed(new_data) && !gt_uses_imputed(new_data)){
+    if (project_method == "none") {
+      if (gt_has_imputed(new_data) && !gt_uses_imputed(new_data)) {
         gt_set_imputed(new_data, set = TRUE)
         on.exit(gt_set_imputed(new_data, set = FALSE))
       }
 
-      if (is.null(block_size)){
+      if (is.null(block_size)) {
         block_size <- bigstatsr::block_size(nrow(new_data))
       }
-      # X * V
-      XV <- bigstatsr::big_prodMat(.gt_get_bigsnp(new_data)$genotypes,
-                                   object$v,
-                                   ind.row = .gt_bigsnp_rows(new_data),
-                                   ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
-                                   block.size = block_size,
-                                   center = object$center,
-                                   scale  = object$scale)
-     dimnames(XV)<-list(new_data$id,paste0(".PC",1:ncol(XV)))
+      # X * V #nolint
+      XV <- bigstatsr::big_prodMat(.gt_get_bigsnp(new_data)$genotypes, # nolint
+        object$v,
+        ind.row = .gt_bigsnp_rows(new_data),
+        ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
+        block.size = block_size,
+        center = object$center,
+        scale = object$scale
+      )
+      dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
       return(XV)
-
-    } else if (any(c("simple","OADP") %in% project_method)){
-
-
-      X_norm <- bigstatsr::FBM(nrow(new_data), 1, init = 0)
-      XV     <- bigstatsr::FBM(nrow(new_data), ncol(object$u), init = 0)
+    } else if (any(c("simple", "OADP") %in% project_method)) {
+      X_norm <- bigstatsr::FBM(nrow(new_data), 1, init = 0) # nolint
+      XV <- bigstatsr::FBM(nrow(new_data), ncol(object$u), init = 0) # nolint
 
       bigstatsr::big_parallelize(
         .gt_get_bigsnp(new_data)$genotypes,
@@ -83,61 +91,69 @@ predict.gt_pca <- function(object, new_data=NULL,
         ind = seq_along(loci_subset),
         ncores = n_cores,
         ind.row = .gt_bigsnp_rows(new_data),
-        ind.col = .gt_bigsnp_cols(new_data)[loci_subset], #info_snp$`_NUM_ID_`[keep],
+        # info_snp$`_NUM_ID_`[keep], #nolint
+        ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
         center = object$center,
         scale = object$scale,
         V = object$v,
         XV = XV,
         X_norm = X_norm
       )
-      if (project_method=="simple"){
-        XV <- XV[,, drop = FALSE]
-        dimnames(XV)<-list(new_data$id, paste0(".PC",1:ncol(XV)))
+      if (project_method == "simple") {
+        XV <- XV[, , drop = FALSE] # nolint
+        dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
         return(XV)
       } else {
-        XV <- utils::getFromNamespace("OADP_proj", "bigsnpr")(XV, X_norm, object$d,
-                                                              ncores = n_cores)
-        dimnames(XV)<-list(new_data$id, paste0(".PC",1:ncol(XV)))
+        XV <- utils::getFromNamespace("OADP_proj", "bigsnpr")(XV, X_norm, object$d, ncores = n_cores) # nolint
+        dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
         return(XV)
       }
-      } else if (project_method == "least_squares"){
-       if (length(lsq_pcs)!=2 | any(lsq_pcs>ncol(object$v))){
-         stop("lsq_pcs should include two components that were computed for the object, e.g. c(1,2)")
-       }
-       X <- .gt_get_bigsnp(new_data)$genotypes # handy pointer for FBM
-       proj_i <- NULL # hack to define iterator
-       lsq_proj <- foreach::foreach(proj_i = 1:nrow(new_data),
-                                     .final = t,
-                                     .combine = cbind) %do% {
-       # scaled genotypes for this individual
-       genotypes <- X[.gt_bigsnp_rows(new_data)[proj_i], .gt_bigsnp_cols(new_data)[loci_subset]]
-       genotypes_scaled <- (genotypes - object$center) / object$scale
-       na_ids <- which(!is.na(genotypes_scaled))
-       genotypes_scaled <- genotypes_scaled[na_ids]
-       v_sub <- object$v[na_ids,lsq_pcs]
-       solve(crossprod(v_sub), crossprod(v_sub, genotypes_scaled))
-                                     }
-       dimnames(lsq_proj)<-list(new_data$id, paste0(".PC",1:ncol(lsq_proj)))
-       return(lsq_proj)
+    } else if (project_method == "least_squares") {
+      if (length(lsq_pcs) != 2 || any(lsq_pcs > ncol(object$v))) {
+        stop(
+          "lsq_pcs should include two components that were computed",
+          "for the object, e.g. c(1,2)"
+        )
       }
+      X <- .gt_get_bigsnp(new_data)$genotypes # pointer for FBM #nolint
+      proj_i <- NULL # hack to define iterator
+      lsq_proj <- foreach::foreach(
+        proj_i = seq_len(nrow(new_data)),
+        .final = t,
+        .combine = cbind
+      ) %do% {
+        # scaled genotypes for this individual
+        genotypes <- X[
+          .gt_bigsnp_rows(new_data)[proj_i],
+          .gt_bigsnp_cols(new_data)[loci_subset]
+        ]
+        genotypes_scaled <- (genotypes - object$center) / object$scale
+        na_ids <- which(!is.na(genotypes_scaled))
+        genotypes_scaled <- genotypes_scaled[na_ids]
+        v_sub <- object$v[na_ids, lsq_pcs]
+        solve(crossprod(v_sub), crossprod(v_sub, genotypes_scaled))
+      }
+      dimnames(lsq_proj) <-
+        list(new_data$id, paste0(".PC", seq_len(ncol(lsq_proj))))
+      return(lsq_proj)
+    }
   }
 }
 
-#######################################################################################
+###############################################################################
 # a port of bigsnpr::part_prod to work on standard fb256 matrices
 
-fbm256_part_prod <- function(X, ind, ind.row, ind.col, center, scale, V, XV, X_norm) {
-
+fbm256_part_prod <- function(X, ind, ind.row, ind.col, center, # nolint
+                             scale, V, XV, X_norm) { # nolint
   res <- fbm256_prod_and_rowSumsSq(
     BM = X,
     ind_row = ind.row,
     ind_col = ind.col[ind],
-    center  = center[ind],
-    scale   = scale[ind],
-    V       = V[ind, , drop = FALSE]
+    center = center[ind],
+    scale = scale[ind],
+    V = V[ind, , drop = FALSE]
   )
 
-  bigstatsr::big_increment(XV,     res[[1]], use_lock = TRUE)
+  bigstatsr::big_increment(XV, res[[1]], use_lock = TRUE)
   bigstatsr::big_increment(X_norm, res[[2]], use_lock = TRUE)
 }
-

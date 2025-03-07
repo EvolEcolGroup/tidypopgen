@@ -375,6 +375,7 @@ check_valid_loci <- function(loci_df) {
 #' @param genotypes a genotype matrix
 #' @param indiv_meta the individual meta information
 #' @param loci the loci table
+#' @returns a bigSNP object
 #' @keywords internal
 gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
                                      backingfile = NULL,

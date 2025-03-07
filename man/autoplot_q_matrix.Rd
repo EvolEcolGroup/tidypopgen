@@ -18,27 +18,29 @@
 \arguments{
 \item{object}{A Q matrix object (as returned by \code{\link[=q_matrix]{q_matrix()}}).}
 
-\item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the individuals in the same order as the data used to
-generate the Q matrix}
+\item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the
+individuals in the same order as the data used to generate the Q matrix}
 
-\item{annotate_group}{Boolean determining whether to annotate the plot with the
-group information}
+\item{annotate_group}{Boolean determining whether to annotate the plot with
+the group information}
 
-\item{arrange_by_group}{Boolean determining whether to arrange the individuals
-by group. If the grouping variable in the \code{gen_tibble} or the metadata of the
-\code{gt_admixt} object is a factor, the data will be ordered
-by the levels of the factor; else it will be ordered alphabetically.}
+\item{arrange_by_group}{Boolean determining whether to arrange the
+individuals by group. If the grouping variable in the \code{gen_tibble} or the
+metadata of the \code{gt_admixt} object is a factor, the data will be ordered by
+the levels of the factor; else it will be ordered alphabetically.}
 
-\item{arrange_by_indiv}{Boolean determining whether to arrange the individuals
-by their individual id (if arrange_by_group is TRUE, they will be arranged by group first
-and then by individual id, i.e. within each group). If \code{id} in the \code{get_tibble} or
-the metadata of the \code{gt_admix} object
-is a factor, it will be ordered by the levels of the factor; else it will be ordered
-alphabetically.}
+\item{arrange_by_indiv}{Boolean determining whether to arrange the
+individuals by their individual id (if arrange_by_group is TRUE, they will
+be arranged by group first and then by individual id, i.e. within each
+group). If \code{id} in the \code{get_tibble} or the metadata of the \code{gt_admix}
+object is a factor, it will be ordered by the levels of the factor; else it
+will be ordered alphabetically.}
 
-\item{reorder_within_groups}{Boolean determining whether to reorder the individuals within each group based
-on their ancestry proportion (note that this is not advised if you are making multiple plots, as you would get
-a different order for each plot!). If TRUE, \code{annotate_group} must also be TRUE.}
+\item{reorder_within_groups}{Boolean determining whether to reorder the
+individuals within each group based on their ancestry proportion (note that
+this is not advised if you are making multiple plots, as you would get a
+different order for each plot!). If TRUE, \code{annotate_group} must also be
+TRUE.}
 
 \item{...}{not currently used.}
 }
@@ -46,8 +48,8 @@ a different order for each plot!). If TRUE, \code{annotate_group} must also be T
 a barplot of individuals, coloured by ancestry proportion
 }
 \description{
-This autoplot will automatically rearrange individuals according to their id and
-any grouping variables if an associated 'data' gen_tibble is provided.
-To avoid any automatic re-sorting of individuals, set \code{arrange_by_group} and
+This autoplot will automatically rearrange individuals according to their id
+and any grouping variables if an associated 'data' gen_tibble is provided. To
+avoid any automatic re-sorting of individuals, set \code{arrange_by_group} and
 \code{arrange_by_indiv} to FALSE.
 }

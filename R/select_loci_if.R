@@ -11,25 +11,25 @@
 #' @param .sel_logical a logical vector of length equal to the number of loci,
 #' or an expression that will tidy evaluate to such a vector. Only loci
 #' for which .sel_logical is TRUE will be selected; NA will be treated as FALSE.
+#' @returns a subset of the list of loci in the `gen_tibble`
 #' @export
 #'
-select_loci_if <-function(.data, .sel_logical){
+select_loci_if <- function(.data, .sel_logical) {
   # defuse the boolean argument
   sel_defused <- rlang::enquo(.sel_logical)
 
   # and now evaluate it, allowing it to see the data
-  loci_sel <- rlang::eval_tidy(sel_defused,data=.data)
-  if (!inherits(loci_sel,"logical")){
+  loci_sel <- rlang::eval_tidy(sel_defused, data = .data)
+  if (!inherits(loci_sel, "logical")) {
     stop(".sel_logical should be a logical boolean vector")
   }
-  if (length(loci_sel) != ncol(show_genotypes(.data$genotypes))){
+  if (length(loci_sel) != ncol(show_genotypes(.data$genotypes))) {
     stop(".sel_logical should be the same length as the number of loci")
   }
   # set to FALSE any missing value
-  loci_sel[is.na(loci_sel)]<-FALSE
+  loci_sel[is.na(loci_sel)] <- FALSE
 
   # subset the loci table
-  attr(.data$genotypes,"loci") <- attr(.data$genotypes,"loci")[loci_sel,]
+  attr(.data$genotypes, "loci") <- attr(.data$genotypes, "loci")[loci_sel, ]
   .data
 }
-

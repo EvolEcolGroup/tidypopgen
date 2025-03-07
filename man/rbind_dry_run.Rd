@@ -14,41 +14,40 @@ rbind_dry_run(
 }
 \arguments{
 \item{ref}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim file;
-the alleles in this objects will
-be used as template to flip the ones in \code{target} and/or
-swap their order as necessary.}
+the alleles in this objects will be used as template to flip the ones in
+\code{target} and/or swap their order as necessary.}
 
-\item{target}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim file}
+\item{target}{either a \code{\link{gen_tibble}} object, or the path to the PLINK bim
+file}
 
-\item{use_position}{boolean of whether a combination of chromosome and position
-should be used for matching SNPs. By default, \code{rbind} uses the locus name,
-so this is set to FALSE. When using 'use_position=TRUE', make sure chromosomes
-are coded in the same way in both \code{gen_tibbles} (a mix of e.g. 'chr1', '1' or
-'chromosome1' can be the reasons if an unexpectedly large number variants
-are dropped when merging).}
+\item{use_position}{boolean of whether a combination of chromosome and
+position should be used for matching SNPs. By default, \code{rbind} uses the
+locus name, so this is set to FALSE. When using 'use_position=TRUE', make
+sure chromosomes are coded in the same way in both \code{gen_tibbles} (a mix of
+e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
+large number variants are dropped when merging).}
 
 \item{flip_strand}{boolean on whether strand flipping should be checked to
-match the two datasets. Ambiguous SNPs (i.e. A/T and C/G)
-will also be removed.  It defaults to FALSE}
+match the two datasets. Ambiguous SNPs (i.e. A/T and C/G) will also be
+removed.  It defaults to FALSE}
 
 \item{quiet}{boolean whether to omit reporting to screen}
 }
 \value{
 a list with two \code{data.frames}, named \code{target} and \code{ref}. Each
-data.frame has \code{nrow()} equal to the number of loci in the respective dataset,
-a column \code{id} with the locus name, and boolean columns \code{to_keep} (the valid loci
-that will be kept in the merge),
-\code{alleles_mismatched} (loci found in both datasets but with mismatched alleles,
-leading to those loci being dropped), \code{to_flip} (loci that need to be flipped
-to align the two datasets, only found in \code{target} data.frame)
-and \code{to_swap} (loci for which the order of alleles needs to be swapped
-to align the two datasets, \code{target} data.frame)
+data.frame has \code{nrow()} equal to the number of loci in the respective
+dataset, a column \code{id} with the locus name, and boolean columns \code{to_keep}
+(the valid loci that will be kept in the merge), \code{alleles_mismatched} (loci
+found in both datasets but with mismatched alleles, leading to those loci
+being dropped), \code{to_flip} (loci that need to be flipped to align the two
+datasets, only found in \code{target} data.frame) and \code{to_swap} (loci for which
+the order of alleles needs to be swapped to align the two datasets,
+\code{target} data.frame)
 }
 \description{
 This function provides an overview of the fate of each SNP in two
-\code{\link{gen_tibble}} objects in the case of a merge. Only SNPs found in
-both objects will be kept. One object is used as a \code{reference}, and SNPs
-in the other dataset will be flipped and/or alleles swapped
-as needed. SNPs that have different alleles in the two datasets will also be
-dropped.
+\code{\link{gen_tibble}} objects in the case of a merge. Only SNPs found in both
+objects will be kept. One object is used as a \code{reference}, and SNPs in the
+other dataset will be flipped and/or alleles swapped as needed. SNPs that
+have different alleles in the two datasets will also be dropped.
 }

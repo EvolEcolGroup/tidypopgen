@@ -15,7 +15,7 @@ show_loci <- function(.x, ...) {
 
 #' @export
 #' @rdname show_loci
-show_loci.tbl_df <- function(.x, ...){
+show_loci.tbl_df <- function(.x, ...) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
   show_loci(.x$genotypes, ...)
@@ -24,15 +24,16 @@ show_loci.tbl_df <- function(.x, ...){
 
 #' @export
 #' @rdname show_loci
-show_loci.vctrs_bigSNP <- function(.x, ...){
+show_loci.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
-  attr(.x,"loci")
+  attr(.x, "loci")
 }
 
 
 
 #' @export
-#' @param value a data.frame or tibble of loci information to replace the current one.
+#' @param value a data.frame or tibble of loci information to replace the
+#'   current one.
 #' @rdname show_loci
 "show_loci<-" <- function(.x, value) {
   UseMethod("show_loci<-", .x)
@@ -40,22 +41,24 @@ show_loci.vctrs_bigSNP <- function(.x, ...){
 
 #' @export
 #' @rdname show_loci
-"show_loci<-.tbl_df" <- function(.x, value){
+"show_loci<-.tbl_df" <- function(.x, value) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  show_loci(.x$genotypes)<-value
+  show_loci(.x$genotypes) <- value
   .x
 }
 
 #' @export
 #' @rdname show_loci
-"show_loci<-.vctrs_bigSNP" <- function(.x, value){
+"show_loci<-.vctrs_bigSNP" <- function(.x, value) {
   # test for validity of loci
   check_valid_loci(value)
-  if (nrow(show_loci(.x))!=nrow(value)){
-    stop("the replacement loci tibble does not have the same number of loci as the original one")
+  if (nrow(show_loci(.x)) != nrow(value)) {
+    stop(paste(
+      "the replacement loci tibble does not have the same number",
+      "of loci as the original one"
+    ))
   }
-  attr(.x,"loci") <- tibble::as_tibble(value)
+  attr(.x, "loci") <- tibble::as_tibble(value)
   .x
 }
-

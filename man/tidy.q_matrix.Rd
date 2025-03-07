@@ -9,8 +9,8 @@
 \arguments{
 \item{x}{A Q matrix object (as returned by \code{\link{q_matrix}}).}
 
-\item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the individuals in the same order as the data used to
-generate the Q matrix}
+\item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the
+individuals in the same order as the data used to generate the Q matrix}
 
 \item{...}{not currently used}
 }
@@ -18,8 +18,8 @@ generate the Q matrix}
 A tidied tibble containing columns:
 \item{\code{row}}{ID of the original observation (i.e. rowname from original
 data).}
-\item{\code{Q}}{Integer indicating a Q component.}
-\item{\code{value}}{The proportion for that particular Q value.}
+\item{\code{Q}}{Integer indicating a Q component.} \item{\code{value}}{The proportion
+for that particular Q value.}
 }
 \description{
 Takes a \code{q_matrix} object, which is a matrix, and returns a tidied tibble.

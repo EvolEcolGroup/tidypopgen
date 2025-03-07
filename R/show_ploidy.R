@@ -18,7 +18,7 @@ show_ploidy <- function(.x, ...) {
 
 #' @export
 #' @rdname show_ploidy
-show_ploidy.tbl_df <- function(.x, ...){
+show_ploidy.tbl_df <- function(.x, ...) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
   show_ploidy(.x$genotypes)
@@ -27,7 +27,7 @@ show_ploidy.tbl_df <- function(.x, ...){
 
 #' @export
 #' @rdname show_ploidy
-show_ploidy.vctrs_bigSNP <- function(.x, ...){
+show_ploidy.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
-  attr(.x,"ploidy")
+  attr(.x, "ploidy")
 }

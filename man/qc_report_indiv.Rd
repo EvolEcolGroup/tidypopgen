@@ -18,8 +18,8 @@ obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
 \item{...}{further arguments to pass}
 
-\item{kings_threshold}{an optional numeric, a threshold of relatedness for the
-sample}
+\item{kings_threshold}{an optional numeric, a threshold of relatedness for
+the sample}
 }
 \value{
 a tibble with 2 elements: het_obs and missingness

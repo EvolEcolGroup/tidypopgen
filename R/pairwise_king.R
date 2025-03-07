@@ -9,6 +9,9 @@
 #'   symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)
 #' @param block_size maximum number of loci read at once. More loci should
 #'   improve speed, but will tax memory.
+#' @returns a square symmetrical matrix of relationship coefficients between
+#'   individuals if `as_matrix` is TRUE, or a tidied tibble of coefficients if
+#'   `as_matrix` is FALSE.
 #' @export
 pairwise_king <- function(x, as_matrix = FALSE,
                           block_size = bigstatsr::block_size(length(loci_names(x)))) { #nolint
