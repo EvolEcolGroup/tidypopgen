@@ -14,7 +14,7 @@
 #'   `as_matrix` is FALSE.
 #' @export
 pairwise_king <- function(x, as_matrix = FALSE,
-                          block_size = bigstatsr::block_size(length(loci_names(x)))) { #nolint
+                          block_size = bigstatsr::block_size(length(loci_names(x)))) { # nolint
   X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)

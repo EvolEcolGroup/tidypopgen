@@ -61,7 +61,6 @@
 #'   detectRUNS::plot_Runs(runs = sheep_roh)
 #' }
 #' }
-
 gt_roh_window <- function(x, window_size = 15, threshold = 0.05,
                           min_snp = 3, heterozygosity = FALSE,
                           max_opp_window = 1, max_miss_window = 1,
@@ -117,7 +116,7 @@ gt_roh_window <- function(x, window_size = 15, threshold = 0.05,
     this_indiv <- list(FID = groups[i], IID = x$id[i])
     # find runs for this individual
     this_runs <-
-      utils::getFromNamespace("slidingRuns", "detectRUNS")(this_genotype, this_indiv, map, gaps, parameters) #nolint
+      utils::getFromNamespace("slidingRuns", "detectRUNS")(this_genotype, this_indiv, map, gaps, parameters) # nolint
     # bind this run (if has rows) to others RUNs (if any)
     runs_df <- rbind(runs_df, this_runs)
   }

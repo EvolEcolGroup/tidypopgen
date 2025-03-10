@@ -33,8 +33,8 @@ gt_uses_imputed <- function(x) {
   if (!gt_has_imputed(x)) {
     stop("this dataset does not have any imputed values to use!")
   }
-  if (identical(attr(x, "bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) || #nolint
-      identical(attr(x, "bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)) { #nolint
+  if (identical(attr(x, "bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) || # nolint
+    identical(attr(x, "bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)) { # nolint
     return(TRUE) # nolint
   } else {
     return(FALSE) # nolint

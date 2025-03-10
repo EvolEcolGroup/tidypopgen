@@ -42,7 +42,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(.x,
 
   # check that within each chromosome positions are sorted
   if (any(unlist(show_loci(.x) %>%
-    group_by(.data$chr_int) %>% #nolint
+    group_by(.data$chr_int) %>% # nolint
     group_map(~ is.unsorted(.x$position))))) {
     if (error_on_false) {
       stop("Your loci are not sorted within chromosomes")
@@ -53,7 +53,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(.x,
 
   # check that within each chromosome positions are unique
   if (any(unlist(show_loci(.x) %>%
-    group_by(.data$chr_int) %>% #nolint
+    group_by(.data$chr_int) %>% # nolint
     group_map(~ duplicated(.x$position))))) {
     if (error_on_false) {
       stop("Your loci table contains duplicates")
@@ -74,7 +74,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(.x,
   # check genetic distance
   if (!ignore_genetic_dist) {
     if (any(unlist(show_loci(.x) %>%
-      group_by(.data$chr_int) %>% #nolint
+      group_by(.data$chr_int) %>% # nolint
       group_map(~ is.unsorted(.x$genetic_dist))))) {
       if (error_on_false) {
         stop("Your genetic distances are not sorted within chromosomes")
@@ -83,7 +83,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(.x,
       }
     }
     if (any(unlist(show_loci(.x) %>%
-      group_by(.data$chr_int) %>% #nolint
+      group_by(.data$chr_int) %>% # nolint
       group_map(~ duplicated(.x$genetic_dist))))) {
       if (all(show_loci(.x)$genetic_dist == 0) && error_on_false) {
         message("Your genetic distances have been set to 0")

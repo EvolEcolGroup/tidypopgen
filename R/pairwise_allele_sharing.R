@@ -14,7 +14,7 @@
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
 pairwise_allele_sharing <- function(x, as_matrix = FALSE,
-                                    block_size = bigstatsr::block_size(count_loci(x))) { #nolint
+                                    block_size = bigstatsr::block_size(count_loci(x))) { # nolint
   X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
   x_ind_col <- .gt_bigsnp_cols(x)
   x_ind_row <- .gt_bigsnp_rows(x)

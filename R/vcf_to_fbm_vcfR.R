@@ -9,7 +9,8 @@
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 
-vcf_to_fbm_vcfR <- function( #nolint
+vcf_to_fbm_vcfR <- function(
+    # nolint
     vcf_path,
     chunk_size = NULL,
     backingfile = NULL,

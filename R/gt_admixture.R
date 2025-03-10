@@ -92,7 +92,7 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
         conda_env <- "none"
       }
       # check that the conda environment does exist
-      if ((conda_env != "none") && (!conda_env %in% reticulate::conda_list()[["name"]])) { #nolint
+      if ((conda_env != "none") && (!conda_env %in% reticulate::conda_list()[["name"]])) { # nolint
         stop("The conda environment ", conda_env, " does not exist.")
       }
     }
@@ -156,7 +156,7 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
 
       # check if no .Q files were written and if adm_out contains "Error:"
       # stop and print adm_out if both are true
-      if (length(grep(".Q", list.files(out))) == 0 && length(grep("Error:", adm_out)) > 0) { #nolint
+      if (length(grep(".Q", list.files(out))) == 0 && length(grep("Error:", adm_out)) > 0) { # nolint
         stop(adm_out)
       }
 
@@ -171,14 +171,14 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
           ),
           header = FALSE
         ))
-      adm_list$P[[index]] <- utils::read.table(paste(output_prefix, this_k, "P", sep = "."), header = FALSE) #nolint
-      adm_list$loglik[index] <- as.numeric(strsplit(grep("^Loglikelihood", adm_out, value = TRUE), ":")[[1]][2]) #nolint
+      adm_list$P[[index]] <- utils::read.table(paste(output_prefix, this_k, "P", sep = "."), header = FALSE) # nolint
+      adm_list$loglik[index] <- as.numeric(strsplit(grep("^Loglikelihood", adm_out, value = TRUE), ":")[[1]][2]) # nolint
       adm_list$log[[index]] <- adm_out
 
 
       if (crossval) {
         # extract value from line with CV error (number after :)
-        adm_list$cv[index] <- as.numeric(strsplit(grep("CV error", adm_out, value = TRUE), ":")[[1]][2]) #nolint
+        adm_list$cv[index] <- as.numeric(strsplit(grep("CV error", adm_out, value = TRUE), ":")[[1]][2]) # nolint
       }
       index <- index + 1
     }

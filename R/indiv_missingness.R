@@ -22,7 +22,7 @@ indiv_missingness <- function(.x, as_counts, block_size, ...) {
 #' @rdname indiv_missingness
 indiv_missingness.tbl_df <- function(.x,
                                      as_counts = FALSE,
-                                     block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), #nolint
+                                     block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
                                      ...) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
@@ -36,7 +36,7 @@ indiv_missingness.tbl_df <- function(.x,
 #' @rdname indiv_missingness
 indiv_missingness.vctrs_bigSNP <- function(.x,
                                            as_counts = FALSE,
-                                           block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), #nolint
+                                           block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
                                            ...) {
   rlang::check_dots_empty()
   # get the FBM
@@ -52,7 +52,7 @@ indiv_missingness.vctrs_bigSNP <- function(.x,
       ind.row = rows_to_keep,
       byrow = TRUE
     )
-    row_na <- row_counts[nrow(row_counts), ] #nolint
+    row_na <- row_counts[nrow(row_counts), ] # nolint
   }
 
   row_na <- bigstatsr::big_apply(X,

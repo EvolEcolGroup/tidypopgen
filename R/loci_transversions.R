@@ -30,9 +30,9 @@ loci_transversions.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
   transversions <- function(loci_df) {
     (((loci_df$allele_ref == "A") & (loci_df$allele_alt == "T")) |
-      ((loci_df$allele_ref == "T") & (loci_df$allele_alt == "A")) | #nolint start
+      ((loci_df$allele_ref == "T") & (loci_df$allele_alt == "A")) | # nolint start
       ((loci_df$allele_ref == "C") & (loci_df$allele_alt == "G")) |
-      ((loci_df$allele_ref == "G") & (loci_df$allele_alt == "C"))) #nolint end
+      ((loci_df$allele_ref == "G") & (loci_df$allele_alt == "C"))) # nolint end
   }
   transversions(show_loci(.x))
 }

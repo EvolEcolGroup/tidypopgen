@@ -19,5 +19,5 @@ flip <- function(bases) {
   bases[to_t] <- "T"
   bases[to_c] <- "C"
   bases[to_g] <- "G"
-  return(bases) #nolint
+  return(bases) # nolint
 }

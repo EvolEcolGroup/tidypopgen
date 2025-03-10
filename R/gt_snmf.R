@@ -33,7 +33,7 @@
 
 gt_snmf <- function(x, k, project = "continue", n_runs = 1, alpha,
                     tolerance = 0.00001, entropy = FALSE, percentage = 0.05,
-                    I, iterations = 200, ploidy = 2, seed = -1) { #nolint
+                    I, iterations = 200, ploidy = 2, seed = -1) { # nolint
   # add seed check again!!!
   if (!is.null(seed) && length(seed) != n_runs) {
     stop("'seed' should be a vector of length 'n_runs'")
@@ -175,7 +175,7 @@ extract_cross_entropy <- function(log_text) {
     if (grepl("sNMF K = \\d+  repetition \\d+", line)) {
       # Extract K and repetition
       matches <- regmatches(line, regexec("sNMF K = (\\d+)  repetition (\\d+)", line)) # nolint
-      K <- as.integer(matches[[1]][2]) #nolint
+      K <- as.integer(matches[[1]][2]) # nolint
       repetition <- as.integer(matches[[1]][3])
     }
 

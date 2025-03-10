@@ -61,63 +61,62 @@
 # with adegenet
 
 
-gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
-                      loadings_by_locus = TRUE, pca_info =FALSE){
-
-  if (!inherits(x,"gt_pca")){
+gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da = NULL,
+                    loadings_by_locus = TRUE, pca_info = FALSE) {
+  if (!inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }
-  if (is.null(x$center)){
+  if (is.null(x$center)) {
     stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
   }
 
-  if(is.null(pop)) { # if no pop was given, use best_k
-    if (any(!inherits(x,"gt_cluster_pca"),is.null(x$best_k))){
+  if (is.null(pop)) { # if no pop was given, use best_k
+    if (any(!inherits(x, "gt_cluster_pca"), is.null(x$best_k))) {
       stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca ")
     }
     pop.fac <- as.factor(x$clusters$groups[[x$best_k]])
   } else if (is.factor(pop)) { # if a factor with all assignments was given
     pop.fac <- pop
-  } else if (is.numeric(pop) & inherits(x,"gt_cluster_pca")) { # if pop is the k value
+  } else if (is.numeric(pop) & inherits(x, "gt_cluster_pca")) { # if pop is the k value
     pop.fac <- as.factor(x$clusters$groups[[pop]])
   }
 
-  if(is.null(pop.fac)) stop("x does not include pre-defined populations, and `pop' is not provided")
+  if (is.null(pop.fac)) stop("x does not include pre-defined populations, and `pop' is not provided")
   # FIXME: is this actually nlevels(pop)?
   n_pop <- nlevels(pop.fac)
 
 
-  if (is.null(n_pca) ){
-    if (inherits(x,"gt_cluster_pca")){ # if we generated clusters, use the same pca
-      n_pca   <- x$clusters$n_pca
+  if (is.null(n_pca)) {
+    if (inherits(x, "gt_cluster_pca")) { # if we generated clusters, use the same pca
+      n_pca <- x$clusters$n_pca
     } else { # use all principal components
-      n_pca   <- length(x$d)
+      n_pca <- length(x$d)
     }
     # by default, use number of clusters minus 1
-    if (n_pca>n_pop){
+    if (n_pca > n_pop) {
       n_pca <- n_pop - 1
     }
   } else { # if n_pca was given, check that it is not too large
-    if(n_pca > ncol(x$u)) {
+    if (n_pca > ncol(x$u)) {
       n_pca <- ncol(x$u)
     }
   }
 
-  XU <- sweep(x$u, 2, x$d, '*')[, 1:n_pca ,  drop=FALSE] # principal components
+  XU <- sweep(x$u, 2, x$d, "*")[, 1:n_pca, drop = FALSE] # principal components
   # note taht this is the proportion of variance out of the variance we started with (i.e. what we retained with the PCAs)
-  XU.lambda <- sum(x$d[1:n_pca ] )/sum(x$d) # sum of retained eigenvalues
-  names(XU) <- paste("PCA-pc", 1:ncol(XU), sep=".")
+  XU.lambda <- sum(x$d[1:n_pca]) / sum(x$d) # sum of retained eigenvalues
+  names(XU) <- paste("PCA-pc", 1:ncol(XU), sep = ".")
 
 
   ## PERFORM DA ##
-  ldaX <- MASS::lda(XU, pop.fac, tol=1e-30) # tol=1e-30 is a kludge, but a safe (?) one to avoid fancy rescaling by lda.default
+  ldaX <- MASS::lda(XU, pop.fac, tol = 1e-30) # tol=1e-30 is a kludge, but a safe (?) one to avoid fancy rescaling by lda.default
   lda.dim <- sum(ldaX$svd^2 > 1e-10)
   ldaX$svd <- ldaX$svd[1:lda.dim]
-  ldaX$scaling <- ldaX$scaling[,1:lda.dim,drop=FALSE]
+  ldaX$scaling <- ldaX$scaling[, 1:lda.dim, drop = FALSE]
 
-  n_da <- min(n_da, length(levels(pop.fac ))-1, n_pca ,  sum(ldaX$svd>1e-10)) # can't be more than K-1 disc. func., or more than n.pca
+  n_da <- min(n_da, length(levels(pop.fac)) - 1, n_pca, sum(ldaX$svd > 1e-10)) # can't be more than K-1 disc. func., or more than n.pca
   n_da <- round(n_da)
-  predX <- stats::predict(ldaX, dimen=n_da)
+  predX <- stats::predict(ldaX, dimen = n_da)
 
   ## BUILD RESULT
   res <- list()
@@ -127,9 +126,9 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   res$grp <- pop.fac
   res$var <- XU.lambda # note that this is the variance out fo the variance that was captured by the retained PCs
   res$eig <- ldaX$svd^2
-  res$loadings <- ldaX$scaling[, 1:n_da, drop=FALSE]
+  res$loadings <- ldaX$scaling[, 1:n_da, drop = FALSE]
   res$means <- ldaX$means
-  res$ind.coord <-predX$x
+  res$ind.coord <- predX$x
   res$grp.coord <- apply(res$ind.coord, 2, tapply, pop.fac, mean)
   res$prior <- ldaX$prior
   res$posterior <- predX$posterior
@@ -139,28 +138,30 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   # ## optional: store loadings of variables
   # @BUG we need to sort out the slots as these are not correct
   # @TODO our objects are missing several of these slots
-   if(pca_info){
-     warning("conversion of objects slots is inconmplete, don't use this option yet!")
+  if (pca_info) {
+    warning("conversion of objects slots is inconmplete, don't use this option yet!")
     res$pca.loadings <- as.matrix(V)
-     # res$pca.cent <- x$cent
-     # if(!is.null(x$norm)) {
-     #   res$pca.norm <- x$norm
-     # } else {
-     #   res$pca.norm <- rep(1, length(x$cent))
-     # }
-     res$pca.eig <- x$d^2 # TODO check, this should get back the eigen from glPCA
-     # note that the default allele.as.unit is FALSE for glPCA
+    # res$pca.cent <- x$cent
+    # if(!is.null(x$norm)) {
+    #   res$pca.norm <- x$norm
+    # } else {
+    #   res$pca.norm <- rep(1, length(x$cent))
+    # }
+    res$pca.eig <- x$d^2 # TODO check, this should get back the eigen from glPCA
+    # note that the default allele.as.unit is FALSE for glPCA
   }
 
   ## optional: get loadings of variables
-  if(loadings_by_locus){
-    V <- x$v[, 1:n_pca ,  drop=FALSE] # principal axes
-    names(V) <- paste("PCA-pa", 1:ncol(V), sep=".")
-    var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[,1:n_da,drop=FALSE])
-    f1 <- function(x){
-      temp <- sum(x*x)
-      if(temp < 1e-12) return(rep(0, length(x)))
-      return(x*x / temp)
+  if (loadings_by_locus) {
+    V <- x$v[, 1:n_pca, drop = FALSE] # principal axes
+    names(V) <- paste("PCA-pa", 1:ncol(V), sep = ".")
+    var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[, 1:n_da, drop = FALSE])
+    f1 <- function(x) {
+      temp <- sum(x * x)
+      if (temp < 1e-12) {
+        return(rep(0, length(x)))
+      }
+      return(x * x / temp)
     }
     res$var.contr <- apply(var.load, 2, f1)
     res$var.load <- var.load
@@ -169,5 +170,3 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   class(res) <- c("gt_dapc", "dapc")
   return(res)
 }
-
-

@@ -110,12 +110,12 @@ gt_extract_f2 <- function(.x, outdir = NULL, blgsize = 0.05, maxmem = 8000,
 
   if (is.null(inds)) pops <- union(pops, pops2)
 
-  afdat %<>% discard_from_aftable( #nolint
+  afdat %<>% discard_from_aftable( # nolint
     maxmiss = maxmiss, minmaf = minmaf, maxmaf = maxmaf, minac2 = minac2,
     outpop = outpop, transitions = transitions, transversions = transversions,
     keepsnps = keepsnps, auto_only = auto_only, poly_only = FALSE
   )
-  afdat$snpfile %<>% mutate(poly = as.logical(cpp_is_polymorphic(afdat$afs))) #nolint
+  afdat$snpfile %<>% mutate(poly = as.logical(cpp_is_polymorphic(afdat$afs))) # nolint
   if (sum(afdat$snpfile$poly) == 0) stop("There are no informative SNPs!")
 
   if (verbose) {

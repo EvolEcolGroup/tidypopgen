@@ -10,7 +10,7 @@ group_by.gen_tbl <- function(.data, ..., .add = FALSE,
 ungroup.grouped_gen_tbl <- function(x, ...) {
   out <- NextMethod(...)
   class(out) <- c("gen_tbl", class(out))
-  return(out) #nolint
+  return(out) # nolint
 }
 
 
@@ -79,7 +79,7 @@ dplyr_col_modify.grouped_gen_tbl <- function(data, cols) {
   x
 }
 
-#nolint start
+# nolint start
 # #' @export
 # dplyr_row_slice.gen_tbl<-function(data, i, ...){
 #   NextMethod()

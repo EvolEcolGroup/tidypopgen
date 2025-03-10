@@ -153,9 +153,9 @@ pairwise_pop_fst_nei87 <- function(.x,
 
     # sum of squared frequencies
     sp2 <- freq_alt^2 + freq_ref^2
-    Hs <- (1 - sp2 - sHo / 2 / n) #nolint
-    Hs <- n / (n - 1) * Hs #nolint
-    np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) #nolint
+    Hs <- (1 - sp2 - sHo / 2 / n) # nolint
+    Hs <- n / (n - 1) * Hs # nolint
+    np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint
     # mean sample size over the populations
     mn <- apply(n, 1, fun <- function(x) {
       sum(!is.na(x)) / sum(1 / x[!is.na(x)])
@@ -241,7 +241,7 @@ pairwise_pop_fst_wc84 <- function(.x,
     h_bar <- rowSums(pop_freqs_df$het_obs[, pops] * n_ind) / n_total
 
     a <- n_bar / n_c * (s2 - 1 / (n_bar - 1) *
-      (p_bar * (1 - p_bar) - (r - 1) / r * s2 - h_bar / 4)) #nolint
+      (p_bar * (1 - p_bar) - (r - 1) / r * s2 - h_bar / 4)) # nolint
     b <- n_bar / (n_bar - 1) *
       (p_bar * (1 - p_bar) - (r - 1) / r * s2 - (2 * n_bar - 1) / (4 * n_bar) * h_bar) # nolint
     c <- h_bar / 2

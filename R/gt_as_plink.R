@@ -259,7 +259,7 @@ pull_na <- function(.x, .col_name) {
 # recode dosage as letter genotypes
 recode_genotype <- function(x, allele_ref, allele_alt) {
   x <- as.character(x)
-  genotypes <- c( #nolint
+  genotypes <- c( # nolint
     paste(allele_ref, allele_ref),
     paste(allele_ref, allele_alt),
     paste(allele_alt, allele_alt)

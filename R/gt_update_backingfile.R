@@ -75,11 +75,11 @@ gt_update_backingfile <- function(.x, backingfile = NULL, chunk_size = NULL,
   # if we remove unsorted genetic distance, set it to zero if it is not sorted
   if (rm_unsorted_dist) {
     if (any(unlist(show_loci(.x) %>%
-      group_by(.data$chr_int) %>% #nolint start
+      group_by(.data$chr_int) %>% # nolint start
       group_map(~ is.unsorted(.x$genetic_dist)))) ||
       any(unlist(show_loci(.x) %>%
         group_by(.data$chr_int) %>%
-        group_map(~ duplicated(.x$genetic_dist))))) { #nolint end
+        group_map(~ duplicated(.x$genetic_dist))))) { # nolint end
       if (!quiet) {
         message("Genetic distances are not sorted, setting them to zero")
       }

@@ -70,8 +70,8 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
       )
     )
   }
-  vcf_header <- c(vcf_header, '##INFO=<ID=PR,Number=0,Type=Flag,Description="Provisional reference allele, may not be based on real reference genome">') #nolint
-  vcf_header <- c(vcf_header, '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">') #nolint
+  vcf_header <- c(vcf_header, '##INFO=<ID=PR,Number=0,Type=Flag,Description="Provisional reference allele, may not be based on real reference genome">') # nolint
+  vcf_header <- c(vcf_header, '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">') # nolint
   vcf_header <- c(vcf_header, paste0(
     "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t",
     paste(x$id, collapse = "\t")
@@ -92,7 +92,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
     genotypes_matrix[genotypes_matrix == 2] <- "1/1"
     genotypes_matrix[is.na(genotypes_matrix)] <- "./."
     # subset loci to this chunk
-    loci_sub <- show_loci(x)[(chunks_vec_index[chunk_i] + 1):chunks_vec_index[chunk_i + 1], ] #nolint
+    loci_sub <- show_loci(x)[(chunks_vec_index[chunk_i] + 1):chunks_vec_index[chunk_i + 1], ] # nolint
     # add the other columns needed for the
     loci_cols <- c("chromosome", "position", "name", "allele_ref", "allele_alt")
     loci_sub <- loci_sub %>%
