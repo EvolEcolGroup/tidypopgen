@@ -41,7 +41,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/a01_overview.html">Overview</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Example workflow with tidypopgen</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul>
 </li>
@@ -95,9 +95,13 @@ illustrate these methods of data cleaning.</p>
 <span><span class="co">##     intersect, setdiff, setequal, union</span></span></code></pre>
 <pre><code><span><span class="co">## Loading required package: tibble</span></span></code></pre>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/related/families.bed"</span>,</span>
-<span>  package<span class="op">=</span><span class="st">"tidypopgen"</span><span class="op">)</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  valid_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>,<span class="st">"2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/related/families.bed"</span>,</span>
+<span>    package <span class="op">=</span> <span class="st">"tidypopgen"</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  valid_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p>#Quality control for individuals</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">individual_report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span>
@@ -120,7 +124,7 @@ standard.</p>
 wanted to filter individuals to remove those with more than 4.5% of
 their genotypes missing, we can use <code>filter</code>.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="../reference/indiv_missingness.html">indiv_missingness</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span><span class="op">&lt;</span><span class="fl">0.045</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="../reference/indiv_missingness.html">indiv_missingness</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">0.045</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 10</span></span></code></pre>
 <p>And if we wanted to remove outliers with particularly high or low
@@ -131,8 +135,8 @@ deviations from the mean.</p>
 <code class="sourceCode R"><span><span class="va">mean_val</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">individual_report</span><span class="op">$</span><span class="va">het_obs</span><span class="op">)</span></span>
 <span><span class="va">sd_val</span> <span class="op">&lt;-</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/sd.html" class="external-link">sd</a></span><span class="op">(</span><span class="va">individual_report</span><span class="op">$</span><span class="va">het_obs</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">lower</span> <span class="op">&lt;-</span> <span class="va">mean_val</span> <span class="op">-</span> <span class="fl">3</span><span class="op">*</span><span class="op">(</span><span class="va">sd_val</span><span class="op">)</span></span>
-<span><span class="va">upper</span> <span class="op">&lt;-</span> <span class="va">mean_val</span> <span class="op">+</span> <span class="fl">3</span><span class="op">*</span><span class="op">(</span><span class="va">sd_val</span><span class="op">)</span></span>
+<span><span class="va">lower</span> <span class="op">&lt;-</span> <span class="va">mean_val</span> <span class="op">-</span> <span class="fl">3</span> <span class="op">*</span> <span class="op">(</span><span class="va">sd_val</span><span class="op">)</span></span>
+<span><span class="va">upper</span> <span class="op">&lt;-</span> <span class="va">mean_val</span> <span class="op">+</span> <span class="fl">3</span> <span class="op">*</span> <span class="op">(</span><span class="va">sd_val</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="../reference/indiv_het_obs.html">indiv_het_obs</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="va">lower</span><span class="op">)</span></span>
 <span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="fu"><a href="../reference/indiv_het_obs.html">indiv_het_obs</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&lt;</span> <span class="va">upper</span><span class="op">)</span></span>
@@ -158,7 +162,8 @@ to remove (FALSE) and to keep (TRUE) to achieve an unrelated sample.</p>
 <span><span class="co">##  Max.   :0.4015   Max.   :0.04266                   Max.   :12.00</span></span></code></pre>
 <p>We can remove the recommended individuals by using:</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">individual_report</span><span class="op">$</span><span class="va">id</span> <span class="op">&amp;</span> <span class="va">individual_report</span><span class="op">$</span><span class="va">to_keep</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">individual_report</span><span class="op">$</span><span class="va">id</span> <span class="op">&amp;</span> <span class="va">individual_report</span><span class="op">$</span><span class="va">to_keep</span> <span class="op">==</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>We can now view a summary of our cleaned data set again, showing that
 our data has reduced from 12 to 9 individuals.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
@@ -202,7 +207,12 @@ accepted, minor allele frequency cutoff, and Hardy-Weinberg equilibrium
 p-value) can be adjusted using the parameters provided in autoplot. For
 example:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"overview"</span>, miss_threshold <span class="op">=</span> <span class="fl">0.03</span>, maf_threshold <span class="op">=</span> <span class="fl">0.02</span>, hwe_p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"overview"</span>,</span>
+<span>  miss_threshold <span class="op">=</span> <span class="fl">0.03</span>,</span>
+<span>  maf_threshold <span class="op">=</span> <span class="fl">0.02</span>,</span>
+<span>  hwe_p <span class="op">=</span> <span class="fl">0.01</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="a02_qc_files/figure-html/unnamed-chunk-11-1.png" alt="Upset plot as above, with adjusted thresholds" width="700"></p>
 <p>The upset plot then visualises our 961 SNPs within their respective
 sets. The number above the second bar indicates that 262 SNPs occur in
@@ -212,7 +222,12 @@ pass our MAF and HWE thresholds, here 939 SNPs.</p>
 <p>To examine each QC measure in further detail, we can plot a different
 summary panel.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"all"</span>, miss_threshold <span class="op">=</span> <span class="fl">0.03</span>, maf_threshold <span class="op">=</span> <span class="fl">0.02</span>, hwe_p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>,</span>
+<span>  type <span class="op">=</span> <span class="st">"all"</span>,</span>
+<span>  miss_threshold <span class="op">=</span> <span class="fl">0.03</span>,</span>
+<span>  maf_threshold <span class="op">=</span> <span class="fl">0.02</span>,</span>
+<span>  hwe_p <span class="op">=</span> <span class="fl">0.01</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 <p><img src="a02_qc_files/figure-html/unnamed-chunk-12-1.png" alt="Four panel plot, containing: a histogram of the proportion of missing data for snps with minor allele freqency above the threshold, a histogram of the proportion of missing data for snps with minor allele freqency below the threshold, a histogram of HWE exact test p-values, and a histogram of significant HWE exact test p-values" width="700"></p>
 <p>We can then begin to consider how to quality control this raw data
 set. Let’s start by filtering SNPs according to their minor allele
@@ -225,7 +240,7 @@ Let’s filter out loci with a minor allele frequency lower than 2%, by
 using <code>select_loci_if</code>. Here, we select all SNPs with a MAF
 greater than 2%. This operation is equivalent to plink –maf 0.02.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span><span class="op">&gt;</span><span class="fl">0.02</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.02</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 941</span></span></code></pre>
 <p>Following this, we can remove SNPs with a high rate of missingness.
@@ -238,7 +253,7 @@ individuals, equivalent to using plink –geno 0.05</p>
 threshold, some do, however, have missingness over our threshold. To
 remove these SNPs, we can again use <code>select_loci_if</code>.</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span><span class="op">&lt;</span><span class="fl">0.05</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 679</span></span></code></pre>
 <p>Finally, we may want to remove SNPs that show significant deviation
@@ -246,13 +261,13 @@ from Hardy-Weinberg equilibrium, if our study design requires. To
 visualise SNPs with significant p-values in the Hardy-Weinberg exact
 test, we can again call autoplot:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>,type <span class="op">=</span> <span class="st">"significant hwe"</span>, hwe_p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"significant hwe"</span>, hwe_p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
 <p><img src="a02_qc_files/figure-html/unnamed-chunk-17-1.png" alt="Histogram of significant HWE exact test p-values" width="700"></p>
 <p>None of the SNPs in our data are significant, however there may be
 circumstances where we would want to cut out the most extreme cases, if
 these data were real, these cases could indicate genotyping errors.</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_hwe.html">loci_hwe</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span><span class="op">&gt;</span><span class="fl">0.01</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_hwe.html">loci_hwe</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.01</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 677</span></span></code></pre>
 </div>
@@ -273,14 +288,15 @@ quickly with <code>gt_impute_simple</code>.</p>
 than 0.2 in windows of 10 SNPs at a time, we can set these parameters
 with <code>thr_r2</code> and <code>size</code> respectively.</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">to_keep_LD</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">imputed_data</span>, thr_r2 <span class="op">=</span> <span class="fl">0.2</span>, size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">to_keep_LD</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">to_keep_ld</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">imputed_data</span>, thr_r2 <span class="op">=</span> <span class="fl">0.2</span>, size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">to_keep_ld</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] FALSE FALSE FALSE FALSE FALSE FALSE</span></span></code></pre>
 <p><code>loci_ld_clump</code> provides a boolean vector the same length
 as our list of SNPs, telling us which to keep in the data set. We can
 then use this list to create a pruned version of our data:</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ld_data</span> <span class="op">&lt;-</span> <span class="va">imputed_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">genotypes</span>, thr_r2 <span class="op">=</span> <span class="fl">0.2</span>, size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">ld_data</span> <span class="op">&lt;-</span> <span class="va">imputed_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">genotypes</span>, thr_r2 <span class="op">=</span> <span class="fl">0.2</span>, size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="save">Save<a class="anchor" aria-label="anchor" href="#save"></a>
@@ -294,14 +310,15 @@ using <code>gt_save</code>.</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/Rtmpdgkv8I/file25386169b802.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using bigSNP file: /tmp/Rtmpdgkv8I/file2538d56270a.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with backing file: /tmp/Rtmpdgkv8I/file2538d56270a.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/Rtmp3EZoqm/file24bc11fa1e1a.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using bigSNP file: /tmp/Rtmp3EZoqm/file24bc538423b3.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with backing file: /tmp/Rtmp3EZoqm/file24bc538423b3.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/Rtmpdgkv8I/file25386169b802.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/Rtmpdgkv8I/file25386169b802.gt" "/tmp/Rtmpdgkv8I/file2538d56270a.rds"</span></span>
-<span><span class="co">## [3] "/tmp/Rtmpdgkv8I/file2538d56270a.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/Rtmp3EZoqm/file24bc11fa1e1a.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/Rtmp3EZoqm/file24bc11fa1e1a.gt" </span></span>
+<span><span class="co">## [2] "/tmp/Rtmp3EZoqm/file24bc538423b3.rds"</span></span>
+<span><span class="co">## [3] "/tmp/Rtmp3EZoqm/file24bc538423b3.bk"</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="grouping-data">Grouping data<a class="anchor" aria-label="anchor" href="#grouping-data"></a>
@@ -316,7 +333,9 @@ running the quality control. This can be done using
 <p>We can then group by population and run quality control on each
 group:</p>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">grouped_loci_report</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">grouped_loci_report</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">grouped_loci_report</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">##   snp_id   maf missingness hwe_p</span></span>
@@ -333,7 +352,9 @@ Bonferroni corrected p-value for each SNP.</p>
 <p>Similarly, we can run a quality control report for individuals within
 each population:</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">grouped_individual_report</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span>kings_threshold <span class="op">=</span> <span class="fl">0.177</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">grouped_individual_report</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span>kings_threshold <span class="op">=</span> <span class="fl">0.177</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">grouped_individual_report</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
 <span><span class="co">##   het_obs missingness    id group to_keep</span></span>
@@ -355,7 +376,9 @@ functions on grouped data. This is useful when you want to run the same
 quality control on each group of data, but don’t want to split the data
 into separate gen_tibbles.</p>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">loci_maf_grouped</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">loci_maf_grouped</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>Grouped functions are built for efficiency and surpass the use of
 applying a function with <code>group_map</code>.</p>
 </div>

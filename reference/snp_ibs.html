@@ -20,7 +20,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">Overview</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Example workflow with tidypopgen</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -57,13 +57,13 @@
 
 
 <dl><dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>a <a href="https://privefl.github.io/bigstatsr/reference/FBM.code256-class.html" class="external-link">bigstatsr::FBM.code256</a> matrix (as found in the <code>genotypes</code>
-slot of a <a href="https://privefl.github.io/bigsnpr/reference/bigSNP-class.html" class="external-link">bigsnpr::bigSNP</a> object).</p></dd>
+<dd><p>a <a href="https://privefl.github.io/bigstatsr/reference/FBM.code256-class.html" class="external-link">bigstatsr::FBM.code256</a> matrix (as found in the <code>genotypes</code> slot
+of a <a href="https://privefl.github.io/bigsnpr/reference/bigSNP-class.html" class="external-link">bigsnpr::bigSNP</a> object).</p></dd>
 
 
 <dt id="arg-ind-row">ind.row<a class="anchor" aria-label="anchor" href="#arg-ind-row"></a></dt>
-<dd><p>An optional vector of the row indices that are used.
-If not specified, all rows are used. Don't use negative indices.</p></dd>
+<dd><p>An optional vector of the row indices that are used. If not
+specified, all rows are used. Don't use negative indices.</p></dd>
 
 
 <dt id="arg-ind-col">ind.col<a class="anchor" aria-label="anchor" href="#arg-ind-col"></a></dt>
@@ -72,24 +72,29 @@ specified, all columns are used. Don't use negative indices.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>one of "proportion" (equivalent to "ibs" in PLINK), "adjusted_counts" ("distance" in PLINK),
-and "raw_counts" (the counts of identical alleles and non-missing alleles, from which the two other quantities are computed)</p></dd>
+<dd><p>one of "proportion" (equivalent to "ibs" in PLINK),
+"adjusted_counts" ("distance" in PLINK), and "raw_counts" (the counts of
+identical alleles and non-missing alleles, from which the two other
+quantities are computed)</p></dd>
 
 
 <dt id="arg-block-size">block.size<a class="anchor" aria-label="anchor" href="#arg-block-size"></a></dt>
-<dd><p>maximum number of columns read at once. Note that, to optimise the
-speed of matrix operations, we have to store in memory 3 times the columns.</p></dd>
+<dd><p>maximum number of columns read at once. Note that, to
+optimise the speed of matrix operations, we have to store in memory 3 times
+the columns.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>if as.counts = TRUE function returns a list of two <a href="https://privefl.github.io/bigstatsr/reference/FBM-class.html" class="external-link">bigstatsr::FBM</a> matrices, one of counts of IBS by alleles (i.e. 2*n loci),
-and one of valid alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns a single matrix of IBS proportions.</p>
+    <p>if as.counts = TRUE function returns a list of two <a href="https://privefl.github.io/bigstatsr/reference/FBM-class.html" class="external-link">bigstatsr::FBM</a>
+matrices, one of counts of IBS by alleles (i.e. 2*n loci), and one of valid
+alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns
+a single matrix of IBS proportions.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Note that monomorphic sites are currently counted. Should we filter
-them beforehand? What does plink do?</p>
+    <p>Note that monomorphic sites are currently counted. Should we filter them
+beforehand? What does plink do?</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

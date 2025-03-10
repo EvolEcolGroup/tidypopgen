@@ -22,7 +22,7 @@ projecting new data."><meta property="og:image" content="https://evolecolgroup.g
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">Overview</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Example workflow with tidypopgen</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -71,19 +71,20 @@ projecting new data.</p>
 
 
 <dt id="arg-project-method">project_method<a class="anchor" aria-label="anchor" href="#arg-project-method"></a></dt>
-<dd><p>a string taking the value of either "simple",
-"OADP" (Online Augmentation, Decomposition, and Procrustes (OADP) projection),
-or "least_squares" (as done by SMARTPCA)</p></dd>
+<dd><p>a string taking the value of either "simple", "OADP"
+(Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
+"least_squares" (as done by SMARTPCA)</p></dd>
 
 
 <dt id="arg-lsq-pcs">lsq_pcs<a class="anchor" aria-label="anchor" href="#arg-lsq-pcs"></a></dt>
-<dd><p>a vector of length two with the values of the two principal components
-to use for the least square fitting. Only relevant if<code>project_method = 'least_squares'</code></p></dd>
+<dd><p>a vector of length two with the values of the two principal
+components to use for the least square fitting. Only relevant
+if<code>project_method = 'least_squares'</code></p></dd>
 
 
 <dt id="arg-block-size">block_size<a class="anchor" aria-label="anchor" href="#arg-block-size"></a></dt>
-<dd><p>number of loci read simultaneously (larger values will speed up
-computation, but require more memory)</p></dd>
+<dd><p>number of loci read simultaneously (larger values will
+speed up computation, but require more memory)</p></dd>
 
 
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
@@ -96,8 +97,9 @@ computation, but require more memory)</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a matrix of predictions, with samples as rows and components as columns. The number
-of components depends on how many were estimated in the <code><a href="gt_pca.html">gt_pca</a></code> object.</p>
+    <p>a matrix of predictions, with samples as rows and components as
+columns. The number of components depends on how many were estimated in the
+<code><a href="gt_pca.html">gt_pca</a></code> object.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

@@ -24,7 +24,7 @@ returned."><meta property="og:image" content="https://evolecolgroup.github.io/ti
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">Overview</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Example workflow with tidypopgen</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -66,10 +66,10 @@ returned.</p>
 tidied.</p><ul><li><p><code>"samples"</code>, <code>"scores"</code>, or <code>"x"</code>: returns information about
 the map from the original space into the least discriminant axes.</p></li>
 <li><p><code>"v"</code>, <code>"rotation"</code>, <code>"loadings"</code> or <code>"variables"</code>: returns information
-about the map from discriminant axes space back into the original
-space (i.e. the genotype frequencies). Note that this are different
-from the loadings linking to the PCA scores (which are available in the
-element $loadings of the dapc object).</p></li>
+about the map from discriminant axes space back into the original space
+(i.e. the genotype frequencies). Note that this are different from the
+loadings linking to the PCA scores (which are available in the element
+$loadings of the dapc object).</p></li>
 <li><p><code>"d"</code>, <code>"eigenvalues"</code> or <code>"lds"</code>: returns information about the
 eigenvalues.</p></li>
 </ul></dd>
@@ -81,11 +81,10 @@ eigenvalues.</p></li>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a> with columns depending on the component of
-DAPC being tidied.</p>
-<p>If <code>"scores"</code> each row in the
-tidied output corresponds to the original data in PCA space. The columns
-are:</p>
+    <p>A <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble</a> with columns depending on the component of DAPC
+being tidied.</p>
+<p>If <code>"scores"</code> each row in the tidied output corresponds to the original
+data in PCA space. The columns are:</p>
 <dl><dt><code>row</code></dt>
 <dd><p>ID of the original observation (i.e. rowname from original
 data).</p></dd>
@@ -98,9 +97,9 @@ data).</p></dd>
 component. That is, the location of the observation in PCA space.</p></dd>
 
 
-</dl><p>If <code>matrix</code> is  <code>"loadings"</code>, each
-row in the tidied output corresponds to information about the principle
-components in the original space. The columns are:</p>
+</dl><p>If <code>matrix</code> is  <code>"loadings"</code>, each row in the tidied output corresponds to
+information about the principle components in the original space. The
+columns are:</p>
 <dl><dt><code>row</code></dt>
 <dd><p>The variable labels (colnames) of the data set on
 which PCA was performed.</p></dd>

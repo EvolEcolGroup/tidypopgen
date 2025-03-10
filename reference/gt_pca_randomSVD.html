@@ -32,7 +32,7 @@ for bigstatsr::big_randomSVD()"><meta property="og:image" content="https://evole
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">Overview</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Example workflow with tidypopgen</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -89,9 +89,9 @@ for <code><a href="https://privefl.github.io/bigstatsr/reference/big_randomSVD.h
 
 <dt id="arg-fun-scaling">fun_scaling<a class="anchor" aria-label="anchor" href="#arg-fun-scaling"></a></dt>
 <dd><p>Usually this  can be left unset, as it defaults to
-<code><a href="https://privefl.github.io/bigsnpr/reference/snp_scaleBinom.html" class="external-link">bigsnpr::snp_scaleBinom()</a></code>, which is the appropriate function for biallelic SNPs.
-Alternatively it is possible to use  custom function
-(see <code><a href="https://privefl.github.io/bigsnpr/reference/snp_autoSVD.html" class="external-link">bigsnpr::snp_autoSVD()</a></code> for details.</p></dd>
+<code><a href="https://privefl.github.io/bigsnpr/reference/snp_scaleBinom.html" class="external-link">bigsnpr::snp_scaleBinom()</a></code>, which is the appropriate function for
+biallelic SNPs. Alternatively it is possible to use  custom function (see
+<code><a href="https://privefl.github.io/bigsnpr/reference/snp_autoSVD.html" class="external-link">bigsnpr::snp_autoSVD()</a></code> for details.</p></dd>
 
 
 <dt id="arg-tol">tol<a class="anchor" aria-label="anchor" href="#arg-tol"></a></dt>
@@ -122,9 +122,11 @@ and compute the product of <code>X</code> (subsetted and scaled) with <code>x</c
 
 
 <dt id="arg-total-var">total_var<a class="anchor" aria-label="anchor" href="#arg-total-var"></a></dt>
-<dd><p>a boolean indicating whether to compute the total variance of the matrix. Default is <code>TRUE</code>.
-Using <code>FALSE</code> will speed up computation, but the total variance will not be stored in the output (and thus it will
-not be possible to assign a proportion of variance explained to the components).</p></dd>
+<dd><p>a boolean indicating whether to compute the total variance
+of the matrix. Default is <code>TRUE</code>. Using <code>FALSE</code> will speed up computation,
+but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the
+components).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -132,7 +134,8 @@ not be possible to assign a proportion of variance explained to the components).
     <p>a <code>gt_pca</code> object, which is a subclass of <code>bigSVD</code>; this is
 an S3 list with elements:
 A named list (an S3 class "big_SVD") of</p><ul><li><p><code>d</code>, the eigenvalues (singular values, i.e. as variances),</p></li>
-<li><p><code>u</code>, the scores for each sample on each component (the left singular vectors)</p></li>
+<li><p><code>u</code>, the scores for each sample on each component (the left singular
+vectors)</p></li>
 <li><p><code>v</code>, the loadings (the right singular vectors)</p></li>
 <li><p><code>center</code>, the centering vector,</p></li>
 <li><p><code>scale</code>, the scaling vector,</p></li>

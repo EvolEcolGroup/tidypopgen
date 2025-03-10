@@ -22,7 +22,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/a01_overview.html">Overview</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Example workflow with tidypopgen</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -88,24 +88,24 @@ here the format</p>
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>can be:</p><ul><li><p>a string giving the path to a PLINK BED or PED file. The associated
-BIM and FAM files for the BED, or MAP for PED are expected to be in the same
-directory and have the same file name.</p></li>
+BIM and FAM files for the BED, or MAP for PED are expected to be in the
+same directory and have the same file name.</p></li>
 <li><p>a string giving the path to a RDS file storing a <code>bigSNP</code> object from
 the <code>bigsnpr</code> package (usually created with <code><a href="https://privefl.github.io/bigsnpr/reference/snp_readBed.html" class="external-link">bigsnpr::snp_readBed()</a></code>)</p></li>
-<li><p>a string giving the path to a vcf file. Note that we currently read the whole
-vcf in memory with <code>vcfR</code>, so only smallish <em>VCF</em> can be imported. Only biallelic
-SNPs will be considered.</p></li>
+<li><p>a string giving the path to a vcf file. Note that we currently read the
+whole vcf in memory with <code>vcfR</code>, so only smallish <em>VCF</em> can be imported.
+Only biallelic SNPs will be considered.</p></li>
 <li><p>a string giving the path to a <em>packedancestry</em> .geno file. The associated
 .ind and .snp files are expected to be in the same directory and share the
 same file name prefix.</p></li>
-<li><p>a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
-allele.</p></li>
+<li><p>a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
+alternate allele.</p></li>
 </ul></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>if <code>x</code> is the name of a vcf file, additional arguments
-passed to <code><a href="https://rdrr.io/pkg/vcfR/man/io_vcfR.html" class="external-link">vcfR::read.vcfR()</a></code>. Otherwise, unused.</p></dd>
+<dd><p>if <code>x</code> is the name of a vcf file, additional arguments passed to
+<code><a href="https://rdrr.io/pkg/vcfR/man/io_vcfR.html" class="external-link">vcfR::read.vcfR()</a></code>. Otherwise, unused.</p></dd>
 
 
 <dt id="arg-valid-alleles">valid_alleles<a class="anchor" aria-label="anchor" href="#arg-valid-alleles"></a></dt>
@@ -115,20 +115,20 @@ passed to <code><a href="https://rdrr.io/pkg/vcfR/man/io_vcfR.html" class="exter
 
 <dt id="arg-missing-alleles">missing_alleles<a class="anchor" aria-label="anchor" href="#arg-missing-alleles"></a></dt>
 <dd><p>a vector of values in the BIM file/loci dataframe that
-indicate a missing value for the allele value (e.g. when we have a monomorphic
-locus with only one allele). It defaults to '0' and '.' (the same as PLINK 1.9).</p></dd>
+indicate a missing value for the allele value (e.g. when we have a
+monomorphic locus with only one allele). It defaults to '0' and '.' (the
+same as PLINK 1.9).</p></dd>
 
 
 <dt id="arg-backingfile">backingfile<a class="anchor" aria-label="anchor" href="#arg-backingfile"></a></dt>
-<dd><p>the path, including the file name without extension,
-for backing files used to store the data (they will be given a .bk
-and .RDS automatically). This is not needed if <code>x</code> is already an .RDS file.
-If <code>x</code> is a .BED or a <em>VCF</em> file and <code>backingfile</code> is left NULL, the backing file will
-be saved in the same directory as the
-bed file, using the same file name but with a different file type (.bk rather
-than .bed). If <code>x</code> is a genotype matrix and <code>backingfile</code> is NULL, then a
-temporary file will be created (but note that R will delete it at the end of
-the session!)</p></dd>
+<dd><p>the path, including the file name without extension, for
+backing files used to store the data (they will be given a .bk and .RDS
+automatically). This is not needed if <code>x</code> is already an .RDS file. If <code>x</code>
+is a .BED or a <em>VCF</em> file and <code>backingfile</code> is left NULL, the backing file
+will be saved in the same directory as the bed file, using the same file
+name but with a different file type (.bk rather than .bed). If <code>x</code> is a
+genotype matrix and <code>backingfile</code> is NULL, then a temporary file will be
+created (but note that R will delete it at the end of the session!)</p></dd>
 
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
@@ -136,10 +136,10 @@ the session!)</p></dd>
 
 
 <dt id="arg-parser">parser<a class="anchor" aria-label="anchor" href="#arg-parser"></a></dt>
-<dd><p>the name of the parser used for <em>VCF</em>, either "cpp" to use
-a fast C++ parser, or "vcfR" to use the R package <code>vcfR</code>. The latter is slower
-but more robust; if "cpp" gives error, try using "vcfR" in case your <em>VCF</em> has
-an unusual structure.</p></dd>
+<dd><p>the name of the parser used for <em>VCF</em>, either "cpp" to use a
+fast C++ parser, or "vcfR" to use the R package <code>vcfR</code>. The latter is
+slower but more robust; if "cpp" gives error, try using "vcfR" in case your
+<em>VCF</em> has an unusual structure.</p></dd>
 
 
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
@@ -148,29 +148,28 @@ an unusual structure.</p></dd>
 
 <dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
 <dd><p>the number of loci or individuals (depending on the format)
-processed at a time (currently used
-if <code>x</code> is a vcf or packedancestry file)</p></dd>
+processed at a time (currently used if <code>x</code> is a vcf or packedancestry file)</p></dd>
 
 
 <dt id="arg-indiv-meta">indiv_meta<a class="anchor" aria-label="anchor" href="#arg-indiv-meta"></a></dt>
 <dd><p>a list, data.frame or tibble with compulsory columns 'id'
-and 'population', plus any additional metadata of interest. This is only used
-if <code>x</code> is a genotype matrix. Otherwise this information is extracted directly from
-the files.</p></dd>
+and 'population', plus any additional metadata of interest. This is only
+used if <code>x</code> is a genotype matrix. Otherwise this information is extracted
+directly from the files.</p></dd>
 
 
 <dt id="arg-loci">loci<a class="anchor" aria-label="anchor" href="#arg-loci"></a></dt>
-<dd><p>a data.frame or tibble, with compulsory columns 'name', 'chromosome',
-and 'position','genetic_dist', 'allele_ref' and 'allele_alt'. This is only used
-if <code>x</code> is a genotype matrix. Otherwise this information is extracted directly from
-the files.</p></dd>
+<dd><p>a data.frame or tibble, with compulsory columns 'name',
+'chromosome', and 'position','genetic_dist', 'allele_ref' and 'allele_alt'.
+This is only used if <code>x</code> is a genotype matrix. Otherwise this information
+is extracted directly from the files.</p></dd>
 
 
 <dt id="arg-ploidy">ploidy<a class="anchor" aria-label="anchor" href="#arg-ploidy"></a></dt>
 <dd><p>the ploidy of the samples (either a single value, or
 a vector of values for mixed ploidy). Only used if creating
-a gen_tibble from a matrix of data; otherwise, ploidy is determined automatically
-from the data as they are read.</p></dd>
+a gen_tibble from a matrix of data; otherwise, ploidy is determined
+automatically from the data as they are read.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -180,17 +179,17 @@ from the data as they are read.</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
 
-<ul><li><p><em>VCF</em> files: the fast <code>cpp</code> parser is used by default. Both <code>cpp</code> and <code>vcfR</code> parsers
-attempt to establish ploidy from the first variant; if that variant is found in a
-sex chromosome (or mtDNA), the parser will fail with 'Error: a genotype has more
-than max_ploidy alleles...'. To successful import such a <em>VCF</em>, change the order of variants
-so that the first chromosome is an autosome using a tool such as <code>vcftools</code>.
-Currently, only biallelic SNPs are supported. If haploid variants (e.g. sex
-chromosomes) are included in the <em>VCF</em>, they are not transformed into homozygous
-calls. Instead, reference alleles will be counted as 0 and alternative alleles
-will be counted as 1.</p></li>
-<li><p><em>packedancestry</em> files: When loading <em>packedancestry</em> files, missing alleles will be converted from
-'X' to NA</p></li>
+<ul><li><p><em>VCF</em> files: the fast <code>cpp</code> parser is used by default. Both <code>cpp</code> and
+<code>vcfR</code> parsers attempt to establish ploidy from the first variant; if that
+variant is found in a sex chromosome (or mtDNA), the parser will fail with
+'Error: a genotype has more than max_ploidy alleles...'. To successful import
+such a <em>VCF</em>, change the order of variants so that the first chromosome is an
+autosome using a tool such as <code>vcftools</code>. Currently, only biallelic SNPs are
+supported. If haploid variants (e.g. sex chromosomes) are included in the
+<em>VCF</em>, they are not transformed into homozygous calls. Instead, reference
+alleles will be counted as 0 and alternative alleles will be counted as 1.</p></li>
+<li><p><em>packedancestry</em> files: When loading <em>packedancestry</em> files,
+missing alleles will be converted from 'X' to NA</p></li>
 </ul></div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
