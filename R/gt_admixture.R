@@ -32,16 +32,21 @@
 #' - `group` the group column of the input `gen_tibble` (if applicable)
 #' @export
 
-
 # If the package `fastmixturer` is installed, and its conda environment has been
 # set up with `ADMIXTURE` in it (the default), it will automatically use that
 # version unless you change `conda_env` to "none". If set to "auto", the
 # default, a copy from `fastmixturer` will be preferred if available, otherwise
 # a local copy will be used.
 
-gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
-                         n_cores = 1, seed = NULL,
-                         conda_env = "none") {
+gt_admixture <- function(
+  x,
+  k,
+  n_runs = 1,
+  crossval = FALSE,
+  n_cores = 1,
+  seed = NULL,
+  conda_env = "none"
+) {
   # check that we have the right number of repeats
   if (length(seed) != n_runs) {
     stop("'seeds' should be a vector of length 'n_runs'")
@@ -53,7 +58,8 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
       stop("The file ", x, " does not exist")
     }
     input_file <- x
-  } else { # if x is a gen_tibble
+  } else {
+    # if x is a gen_tibble
     if (!inherits(x, "gen_tbl")) {
       stop("x must be a gen_tibble or a character")
     }
@@ -66,7 +72,6 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
 
   # cast k as an integer
   k <- as.integer(k)
-
 
   # set and check the conda environment
   # if there is no reticulate
@@ -83,7 +88,8 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
         ))
       }
     }
-  } else { # if reticulate is available
+  } else {
+    # if reticulate is available
     # if we have "auto" and the conda environment rfastmixture does not exist
     if (conda_env == "auto") {
       if (("rfastmixture" %in% reticulate::conda_list()[["name"]])) {
@@ -92,7 +98,11 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
         conda_env <- "none"
       }
       # check that the conda environment does exist
-      if ((conda_env != "none") && (!conda_env %in% reticulate::conda_list()[["name"]])) { # nolint
+      if (
+        (conda_env != "none") &&
+          (!conda_env %in% reticulate::conda_list()[["name"]])
+      ) {
+        # nolint
         stop("The conda environment ", conda_env, " does not exist.")
       }
     }
@@ -112,7 +122,6 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
   # change to the directory of the input file
   setwd(out)
   on.exit(setwd(wd))
-
 
   # initialise list to store results
   adm_list <- list(
@@ -148,7 +157,8 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
         adm_out <- system2("admixture", args = admixture_args, stdout = TRUE)
         # change back to the original working directory
       } else {
-        reticulate::conda_run2("admixture",
+        reticulate::conda_run2(
+          "admixture",
           args = admixture_args,
           conda = conda_env
         )
@@ -156,7 +166,11 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
 
       # check if no .Q files were written and if adm_out contains "Error:"
       # stop and print adm_out if both are true
-      if (length(grep(".Q", list.files(out))) == 0 && length(grep("Error:", adm_out)) > 0) { # nolint
+      if (
+        length(grep(".Q", list.files(out))) == 0 &&
+          length(grep("Error:", adm_out)) > 0
+      ) {
+        # nolint
         stop(adm_out)
       }
 
@@ -165,20 +179,25 @@ gt_admixture <- function(x, k, n_runs = 1, crossval = FALSE,
       adm_list$k[index] <- this_k
       adm_list$Q[[index]] <-
         q_matrix(utils::read.table(
-          paste(output_prefix,
-            this_k, "Q",
-            sep = "."
-          ),
+          paste(output_prefix, this_k, "Q", sep = "."),
           header = FALSE
         ))
-      adm_list$P[[index]] <- utils::read.table(paste(output_prefix, this_k, "P", sep = "."), header = FALSE) # nolint
-      adm_list$loglik[index] <- as.numeric(strsplit(grep("^Loglikelihood", adm_out, value = TRUE), ":")[[1]][2]) # nolint
+      adm_list$P[[index]] <- utils::read.table(
+        paste(output_prefix, this_k, "P", sep = "."),
+        header = FALSE
+      ) # nolint
+      adm_list$loglik[index] <- as.numeric(strsplit(
+        grep("^Loglikelihood", adm_out, value = TRUE),
+        ":"
+      )[[1]][2]) # nolint
       adm_list$log[[index]] <- adm_out
-
 
       if (crossval) {
         # extract value from line with CV error (number after :)
-        adm_list$cv[index] <- as.numeric(strsplit(grep("CV error", adm_out, value = TRUE), ":")[[1]][2]) # nolint
+        adm_list$cv[index] <- as.numeric(strsplit(
+          grep("CV error", adm_out, value = TRUE),
+          ":"
+        )[[1]][2]) # nolint
       }
       index <- index + 1
     }

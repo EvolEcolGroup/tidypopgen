@@ -17,11 +17,19 @@ test_that("show_loci gets and sets information", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
 
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
 
   # check that we retrieve the info we put in (as a tibble)
   # expect_identical(show_loci(test_gt) %>% select(-big_index),as_tibble(test_loci))
-  expect_identical(show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)), as_tibble(test_loci))
+  expect_identical(
+    show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)),
+    as_tibble(test_loci)
+  )
   # now change it directly on the genotype column
   test_loci2 <- test_loci %>% dplyr::mutate(chromosome = "new")
   show_loci(test_gt$genotypes) <- test_loci2

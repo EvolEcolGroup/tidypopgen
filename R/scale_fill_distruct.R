@@ -11,6 +11,7 @@
 scale_fill_distruct <- function(guide = "none", ...) {
   ggplot2::scale_fill_manual(
     values = tidypopgen::distruct_colours,
-    guide = guide, ...
+    guide = guide,
+    ...
   )
 }

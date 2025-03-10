@@ -2,7 +2,11 @@ options(mc_doScale_quiet = TRUE)
 
 test_that("fit_gt_pca_and_predict", {
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-  missing_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"), quiet = TRUE)
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
   expect_error(
     missing_gt %>% gt_pca_partialSVD(),
     "You can't have missing"
@@ -11,7 +15,8 @@ test_that("fit_gt_pca_and_predict", {
   missing_pca <- missing_gt %>% gt_pca_partialSVD()
   # check that predicting on the object is the same as predicting from the full dataset
   # without imputation to the center (the data are already imputed)
-  expect_true(all.equal(predict(missing_pca),
+  expect_true(all.equal(
+    predict(missing_pca),
     predict(missing_pca, new_data = missing_gt),
     check.attributes = FALSE
   ))
@@ -31,11 +36,9 @@ test_that("fit_gt_pca_and_predict", {
   # predict when new dataset has extra positions
   missing_gt_sub <- missing_gt %>% select_loci(100:450)
   missing_sub_pca <- missing_gt_sub %>% gt_pca_partialSVD()
-  expect_true(all.equal(predict(missing_sub_pca),
-    predict(missing_sub_pca,
-      new_data = missing_gt,
-      project_method = "none"
-    ),
+  expect_true(all.equal(
+    predict(missing_sub_pca),
+    predict(missing_sub_pca, new_data = missing_gt, project_method = "none"),
     check.attributes = FALSE
   ))
 })
@@ -45,8 +48,15 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
 
   # Generate example_indiv_meta data frame
   individual_ids <- paste0("indiv", 1:200)
-  populations <- sample(c("pop1", "pop2", "pop3", "pop4"), size = 200, replace = TRUE)
-  example_indiv_meta <- data.frame(id = individual_ids, population = populations)
+  populations <- sample(
+    c("pop1", "pop2", "pop3", "pop4"),
+    size = 200,
+    replace = TRUE
+  )
+  example_indiv_meta <- data.frame(
+    id = individual_ids,
+    population = populations
+  )
 
   # Generate example_genotypes matrix (no missingness)
   values <- c(0, 1, 2)
@@ -71,7 +81,12 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   )
 
   # create gen_tibble
-  test <- gen_tibble(x = example_genotypes, loci = example_loci, indiv_meta = example_indiv_meta, quiet = TRUE)
+  test <- gen_tibble(
+    x = example_genotypes,
+    loci = example_loci,
+    indiv_meta = example_indiv_meta,
+    quiet = TRUE
+  )
 
   # gen_tibble with no missingness runs
   test_pca <- test %>% gt_pca_autoSVD(verbose = FALSE)
@@ -79,7 +94,11 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   # Now try with imputed data
   library(bigsnpr)
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-  missing_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"), quiet = TRUE)
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
   expect_error(
     missing_gt %>% gt_pca_autoSVD(),
     "You can't have missing"
@@ -87,18 +106,31 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
 
   # we encounter roll_size error
-  expect_error(missing_pca <- missing_gt %>% gt_pca_autoSVD(verbose = FALSE), "Parameter 'size' is too large.")
+  expect_error(
+    missing_pca <- missing_gt %>% gt_pca_autoSVD(verbose = FALSE),
+    "Parameter 'size' is too large."
+  )
 
   # adjusting roll_size fixes the error
-  test_pca_roll0 <- missing_gt %>% gt_pca_autoSVD(roll_size = 0, verbose = FALSE)
+  test_pca_roll0 <- missing_gt %>%
+    gt_pca_autoSVD(roll_size = 0, verbose = FALSE)
   expect_s3_class(test_pca_roll0, "gt_pca")
-  test_pca_roll7 <- missing_gt %>% gt_pca_autoSVD(roll_size = 7, verbose = FALSE)
+  test_pca_roll7 <- missing_gt %>%
+    gt_pca_autoSVD(roll_size = 7, verbose = FALSE)
   expect_s3_class(test_pca_roll7, "gt_pca")
 
-
   # testing with the families dataset too
-  bed_file <- system.file("extdata/related", "families.bed", package = "tidypopgen")
-  families <- gen_tibble(bed_file, backingfile = tempfile("families"), quiet = TRUE, valid_alleles = c("2", "1"))
+  bed_file <- system.file(
+    "extdata/related",
+    "families.bed",
+    package = "tidypopgen"
+  )
+  families <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("families"),
+    quiet = TRUE,
+    valid_alleles = c("2", "1")
+  )
   expect_error(
     families %>% gt_pca_autoSVD(),
     "You can't have missing"
@@ -106,18 +138,25 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   families <- gt_impute_simple(families, method = "mode")
 
   # the same error occurs
-  expect_error(missing_pca <- families %>% gt_pca_autoSVD(verbose = FALSE), "Parameter 'size' is too large.")
+  expect_error(
+    missing_pca <- families %>% gt_pca_autoSVD(verbose = FALSE),
+    "Parameter 'size' is too large."
+  )
 
   # adjusting roll_size fixes the error
-  test_pca_families_roll7 <- families %>% gt_pca_autoSVD(roll_size = 7, verbose = FALSE)
+  test_pca_families_roll7 <- families %>%
+    gt_pca_autoSVD(roll_size = 7, verbose = FALSE)
   expect_s3_class(test_pca_families_roll7, "gt_pca")
 })
 
 
-
 test_that("fit_gt_pca_and_predict_splitted_data", {
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-  missing_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"), quiet = TRUE)
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
   # create a fake ancient set by subsetting
   ancient_gt <- missing_gt[1:20, ]
   # now extract the modern data (to be imputed)
@@ -126,7 +165,11 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
   modern_gt <- gt_impute_simple(modern_gt, method = "mode")
   modern_pca <- modern_gt %>% gt_pca_partialSVD()
   # if we just try to predict, we find that the new data have missing data
-  new_pred <- predict(modern_pca, new_data = ancient_gt, project_method = "simple")
+  new_pred <- predict(
+    modern_pca,
+    new_data = ancient_gt,
+    project_method = "simple"
+  )
   expect_true(all(dim(new_pred) == c(20, 10)))
   # now raise an error if we don't impute to the mean
   expect_error(
@@ -134,13 +177,21 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
     "You can't have missing values in 'X'"
   )
   # least squares prediction
-  lsq_pred <- predict(modern_pca, new_data = ancient_gt, project_method = "least_squares")
+  lsq_pred <- predict(
+    modern_pca,
+    new_data = ancient_gt,
+    project_method = "least_squares"
+  )
   expect_true(all(dim(lsq_pred) == c(20, 2)))
 })
 
 test_that("PCA functions work with loci out of order", {
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-  missing_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"), quiet = TRUE)
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
   missing_part_pca1 <- missing_gt %>% gt_pca_partialSVD()
   missing_rand_pca1 <- missing_gt %>% gt_pca_randomSVD()
@@ -160,7 +211,11 @@ test_that("PCA functions work with loci out of order", {
 
 test_that("PCA computes frobenious when needed", {
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-  missing_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"), quiet = TRUE)
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
   missing_part_pca1 <- missing_gt %>% gt_pca_partialSVD()
   expect_true("square_frobenious" %in% names(missing_part_pca1))
@@ -175,10 +230,20 @@ test_that("PCA computes frobenious when needed", {
 })
 
 test_that("our stdevs are comparable to prcomp", {
-  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) # bigsnpr::sub_bed(bed_path)
+  bed_path <- system.file(
+    "extdata/related/families.bed",
+    package = "tidypopgen"
+  )
+  families_bigsnp_path <- bigsnpr::snp_readBed(
+    bed_path,
+    backingfile = tempfile()
+  ) # bigsnpr::sub_bed(bed_path)
   # families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
-  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1", "2"))
+  families <- gen_tibble(
+    families_bigsnp_path,
+    quiet = TRUE,
+    valid_alleles = c("1", "2")
+  )
   count_loci(families) # 941
   families <- families %>% select_loci_if(loci_maf(genotypes) > 0.01)
   # remove NA values for prcomp
@@ -195,9 +260,9 @@ test_that("our stdevs are comparable to prcomp", {
   gt_pca_result <- families %>% gt_pca_partialSVD()
   tidy_pca <- tidy(gt_pca_result, matrix = "eigenvalues")
 
-
   # Perform PCA using prcomp
-  pca_result <- prcomp(show_genotypes(families),
+  pca_result <- prcomp(
+    show_genotypes(families),
     center = gt_pca_result$center,
     scale. = gt_pca_result$scale
   )
@@ -207,9 +272,17 @@ test_that("our stdevs are comparable to prcomp", {
   # Compare standard deviation
   expect_equal(tidy_pca$std.dev, pca_result$sdev[1:10], tolerance = TOL)
   # Compare percentage variance explained
-  expect_equal(tidy_pca$percent, as.vector((prcomp_summary$importance[2, c(1:10)]) * 100), tolerance = TOL)
+  expect_equal(
+    tidy_pca$percent,
+    as.vector((prcomp_summary$importance[2, c(1:10)]) * 100),
+    tolerance = TOL
+  )
   # Compare cumulative variance explained
-  expect_equal(tidy_pca$cumulative, as.vector((prcomp_summary$importance[3, c(1:10)]) * 100), tolerance = TOL)
+  expect_equal(
+    tidy_pca$cumulative,
+    as.vector((prcomp_summary$importance[3, c(1:10)]) * 100),
+    tolerance = TOL
+  )
 
   #########################
   # Perform PCA using gt_pca_autoSVD
@@ -225,7 +298,8 @@ test_that("our stdevs are comparable to prcomp", {
     show_genotypes()
 
   # Perform PCA using prcomp
-  pca_result <- prcomp(families_autoSVD_subset,
+  pca_result <- prcomp(
+    families_autoSVD_subset,
     center = gt_pca_auto_result$center,
     scale. = gt_pca_auto_result$scale
   )
@@ -234,7 +308,15 @@ test_that("our stdevs are comparable to prcomp", {
   # Compare standard deviation
   expect_equal(tidy_pca$std.dev, pca_result$sdev[1:10], tolerance = TOL)
   # Compare percentage variance explained
-  expect_equal(tidy_pca$percent, as.vector((prcomp_summary$importance[2, c(1:10)]) * 100), tolerance = TOL)
+  expect_equal(
+    tidy_pca$percent,
+    as.vector((prcomp_summary$importance[2, c(1:10)]) * 100),
+    tolerance = TOL
+  )
   # Compare cumulative variance explained
-  expect_equal(tidy_pca$cumulative, as.vector((prcomp_summary$importance[3, c(1:10)]) * 100), tolerance = TOL)
+  expect_equal(
+    tidy_pca$cumulative,
+    as.vector((prcomp_summary$importance[3, c(1:10)]) * 100),
+    tolerance = TOL
+  )
 })

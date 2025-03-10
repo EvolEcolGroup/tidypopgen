@@ -25,12 +25,19 @@
 #' @returns a `ggplot2` object
 #' @rdname autoplot_gt_dapc
 #' @export
-autoplot.gt_dapc <- function(object,
-                             type = c(
-                               "screeplot", "scores", "loadings",
-                               "components"
-                             ),
-                             ld = NULL, group = NULL, n_col = 1, ...) {
+autoplot.gt_dapc <- function(
+  object,
+  type = c(
+    "screeplot",
+    "scores",
+    "loadings",
+    "components"
+  ),
+  ld = NULL,
+  group = NULL,
+  n_col = 1,
+  ...
+) {
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (type == "screeplot") {
@@ -51,7 +58,8 @@ autoplot.gt_dapc <- function(object,
         LDb = object$ind.coord[, ld[2]]
       ) %>%
       ggplot2::ggplot(ggplot2::aes(
-        x = .data$LDa, y = .data$LDb,
+        x = .data$LDa,
+        y = .data$LDb,
         colour = .data$cluster
       )) +
       ggplot2::geom_point() +
@@ -78,19 +86,23 @@ autoplot.gt_dapc <- function(object,
 
       patchwork::wrap_plots(all.p, ncol = n_col)
     } else {
-      p <- ggplot2::ggplot(mapping = ggplot2::aes(
-        x = bigstatsr::rows_along(object$var.load),
-        y = object$var.load[, ld]
-      )) +
+      p <- ggplot2::ggplot(
+        mapping = ggplot2::aes(
+          x = bigstatsr::rows_along(object$var.load),
+          y = object$var.load[, ld]
+        )
+      ) +
         ggplot2::geom_point() +
         bigstatsr::theme_bigstatsr(size.rel = 1) +
         ggplot2::labs(
           title = paste0("Loadings of LD", ld),
-          x = "Locus", y = NULL
+          x = "Locus",
+          y = NULL
         )
       nval <- nrow(object$var.load)
       `if`(
-        nval > 12, p,
+        nval > 12,
+        p,
         p + ggplot2::scale_x_discrete(limits = factor(seq_len(nval)))
       )
     }
@@ -108,17 +120,24 @@ autoplot.gt_dapc <- function(object,
       ) %>%
       tidyr::pivot_longer(
         cols = starts_with("Q"),
-        names_to = "q", values_to = "prob"
+        names_to = "q",
+        values_to = "prob"
       )
 
-    ggplot2::ggplot(q_tbl, ggplot2::aes(
-      x = .data$name,
-      y = .data$prob, fill = .data$q
-    )) +
+    ggplot2::ggplot(
+      q_tbl,
+      ggplot2::aes(
+        x = .data$name,
+        y = .data$prob,
+        fill = .data$q
+      )
+    ) +
       ggplot2::geom_col(color = "gray", size = 0.1) +
-      ggplot2::facet_grid(~group,
+      ggplot2::facet_grid(
+        ~group,
         switch = "x",
-        scales = "free", space = "free"
+        scales = "free",
+        space = "free"
       ) +
       ggplot2::theme_minimal() +
       ggplot2::labs(x = "", y = "") +

@@ -1,15 +1,21 @@
 # skip if admixture is not installed
-skip_if((system2("which", args = "admixture", stdout = NULL) != 0) && !requireNamespace("fastmixturer", quietly = TRUE)) #nolint
+skip_if(
+  (system2("which", args = "admixture", stdout = NULL) != 0) &&
+    !requireNamespace("fastmixturer", quietly = TRUE)
+) #nolint
 # set the input file
 vcf_path <-
-  system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+  system.file(
+    "/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
     package = "tidypopgen"
   )
-anole_gt <- gen_tibble(vcf_path,
+anole_gt <- gen_tibble(
+  vcf_path,
   quiet = TRUE,
   backingfile = tempfile("anolis_")
 )
-pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
+pops_path <- system.file(
+  "/extdata/anolis/plot_order_punctatus_n46.csv",
   package = "tidypopgen"
 )
 pops <- readr::read_csv(pops_path, show_col_types = FALSE)
@@ -19,16 +25,30 @@ anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID, .data$id)])
 test_that("gt_admixture error messages", {
   # file that doesn't exist
   invalid_bed <- paste0(tempfile(), ".bed")
-  expect_error(gt_admixture(
-    x = invalid_bed, k = 3, crossval = FALSE,
-    n_cores = 1, seed = 123, conda_env = "none"
-  ), "does not exist")
+  expect_error(
+    gt_admixture(
+      x = invalid_bed,
+      k = 3,
+      crossval = FALSE,
+      n_cores = 1,
+      seed = 123,
+      conda_env = "none"
+    ),
+    "does not exist"
+  )
   # random object
   tibble <- tibble::tibble(a = 1:10, b = letters[1:10])
-  expect_error(gt_admixture(
-    x = tibble, k = 3, crossval = FALSE,
-    n_cores = 1, seed = 123, conda_env = "none"
-  ), "x must be a gen_tibble or a character")
+  expect_error(
+    gt_admixture(
+      x = tibble,
+      k = 3,
+      crossval = FALSE,
+      n_cores = 1,
+      seed = 123,
+      conda_env = "none"
+    ),
+    "x must be a gen_tibble or a character"
+  )
   # exisitng bed file, but all genotypes missing for one individual
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
@@ -48,40 +68,55 @@ test_that("gt_admixture error messages", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
   )
-  bed_file <- gt_as_plink(test_gt,
-    file = tempfile(),
-    chromosomes_as_int = TRUE
-  )
+  bed_file <- gt_as_plink(test_gt, file = tempfile(), chromosomes_as_int = TRUE)
   # suppress the warning that admixture has status 255
   # expect printing of error message
-  suppressWarnings(expect_error(gt_admixture(
-    x = bed_file, k = 3, crossval = FALSE,
-    n_cores = 1, seed = 123, conda_env = "none"
-  ), "detected that all genotypes are missing for an individual"))
+  suppressWarnings(expect_error(
+    gt_admixture(
+      x = bed_file,
+      k = 3,
+      crossval = FALSE,
+      n_cores = 1,
+      seed = 123,
+      conda_env = "none"
+    ),
+    "detected that all genotypes are missing for an individual"
+  ))
 })
 
 test_that("run admixture as single run", {
   # we create a plink file to test the function
-  anole_plink <- gt_as_plink(anole_gt,
+  anole_plink <- gt_as_plink(
+    anole_gt,
     file = tempfile(),
     chromosomes_as_int = TRUE
   )
   # run admixture
-  anole_adm <- gt_admixture(anole_plink,
-    k = 3, crossval = FALSE,
-    n_cores = 1, seed = 123, conda_env = "none"
+  anole_adm <- gt_admixture(
+    anole_plink,
+    k = 3,
+    crossval = FALSE,
+    n_cores = 1,
+    seed = 123,
+    conda_env = "none"
   )
   # check the output
   expect_true(nrow(anole_adm$Q[[1]]) == nrow(anole_gt))
   expect_true(ncol(anole_adm$Q[[1]]) == 3)
   expect_true(is.null(anole_adm$cv))
   # no create another run and combine them
-  anole_adm2 <- gt_admixture(anole_plink,
-    k = 2, crossval = FALSE,
-    n_cores = 1, seed = 345, conda_env = "none"
+  anole_adm2 <- gt_admixture(
+    anole_plink,
+    k = 2,
+    crossval = FALSE,
+    n_cores = 1,
+    seed = 345,
+    conda_env = "none"
   )
   anole_adm_comb <- c(anole_adm, anole_adm2)
   expect_true(nrow(anole_adm_comb$Q[[1]]) == nrow(anole_gt))
@@ -89,14 +124,22 @@ test_that("run admixture as single run", {
   expect_true(ncol(anole_adm_comb$Q[[2]]) == 2)
   expect_true(all(anole_adm_comb$k == c(3, 2)))
   # run admixture with crossval
-  anole_adm3 <- gt_admixture(anole_gt,
-    k = 3, crossval = TRUE,
-    n_cores = 2, seed = 345, conda_env = "none"
+  anole_adm3 <- gt_admixture(
+    anole_gt,
+    k = 3,
+    crossval = TRUE,
+    n_cores = 2,
+    seed = 345,
+    conda_env = "none"
   )
   expect_false(is.null(anole_adm3$cv))
-  anole_adm4 <- gt_admixture(anole_gt,
-    k = 3, crossval = TRUE,
-    n_cores = 2, seed = 123, conda_env = "none"
+  anole_adm4 <- gt_admixture(
+    anole_gt,
+    k = 3,
+    crossval = TRUE,
+    n_cores = 2,
+    seed = 123,
+    conda_env = "none"
   )
   anole_adm_comb2 <- c(anole_adm3, anole_adm4)
   expect_true(ncol(anole_adm_comb2$Q[[1]]) == ncol(anole_adm_comb2$Q[[2]]))
@@ -106,10 +149,14 @@ test_that("run admixture as single run", {
 
 test_that("run admixture as multiple runs", {
   anole_gt <- anole_gt %>% dplyr::group_by(population)
-  anole_adm_cv <- gt_admixture(anole_gt,
-    k = 2:4, n_runs = 2,
-    crossval = TRUE, n_cores = 2,
-    seed = c(123, 234), conda_env = "none"
+  anole_adm_cv <- gt_admixture(
+    anole_gt,
+    k = 2:4,
+    n_runs = 2,
+    crossval = TRUE,
+    n_cores = 2,
+    seed = c(123, 234),
+    conda_env = "none"
   )
   expect_true(length(anole_adm_cv$k) == 6)
   expect_true(length(anole_adm_cv$Q) == 6)
@@ -120,9 +167,14 @@ test_that("run admixture as multiple runs", {
   expect_true(length(anole_adm_cv$group) == nrow(anole_gt))
   # error if we have the wrong number of seeds
   expect_error(
-    gt_admixture(anole_gt,
-      k = 2:4, n_runs = 2, crossval = TRUE,
-      n_cores = 2, seed = c(123), conda_env = "none"
+    gt_admixture(
+      anole_gt,
+      k = 2:4,
+      n_runs = 2,
+      crossval = TRUE,
+      n_cores = 2,
+      seed = c(123),
+      conda_env = "none"
     ),
     "'seeds' should be a vector of "
   )
@@ -146,25 +198,38 @@ test_that("run admixture as multiple runs", {
   # test the reorder of q matrices
   anole_adm_cv_reorder <- gt_admix_reorder_q(anole_adm_cv)
   # check plot ordering
-  unord_plot <- autoplot(anole_adm_cv,
-    type = "barplot", k = 3,
-    run = 1, annotate_group = FALSE
-  )
-  ord_plot <- autoplot(anole_adm_cv,
-    type = "barplot", k = 3,
-    run = 1, annotate_group = TRUE
-  )
-  reord_plot <- autoplot(anole_adm_cv_reorder,
+  unord_plot <- autoplot(
+    anole_adm_cv,
     type = "barplot",
-    k = 3, run = 1, annotate_group = TRUE
+    k = 3,
+    run = 1,
+    annotate_group = FALSE
+  )
+  ord_plot <- autoplot(
+    anole_adm_cv,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE
+  )
+  reord_plot <- autoplot(
+    anole_adm_cv_reorder,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE
   )
 
   expect_identical(ord_plot$data, reord_plot$data)
   expect_false(identical(unord_plot, ord_plot))
   # reordering within plot changes the order further
-  ord_within_plot <- autoplot(anole_adm_cv_reorder,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = TRUE, reorder_within_groups = TRUE
+  ord_within_plot <- autoplot(
+    anole_adm_cv_reorder,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE,
+    reorder_within_groups = TRUE
   )
   expect_false(identical(ord_plot, ord_within_plot))
 
@@ -237,18 +302,27 @@ test_that("assigning factor levels reorders populations in autoplot", {
   anole_gt <- anole_gt %>%
     mutate(population = factor(population, levels = c("AF", "Wam", "Eam")))
   anole_gt <- anole_gt %>% group_by(population)
-  anole_adm <- gt_admixture(anole_gt,
-    k = 3, crossval = FALSE,
-    n_cores = 1, seed = 123, conda_env = "none"
+  anole_adm <- gt_admixture(
+    anole_gt,
+    k = 3,
+    crossval = FALSE,
+    n_cores = 1,
+    seed = 123,
+    conda_env = "none"
   )
   expect_error(
     autoplot(anole_adm, type = "cv"),
     "No cross validation error available"
   )
-  plt <- autoplot(anole_adm,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = TRUE, arrange_by_group = TRUE,
-    arrange_by_indiv = FALSE, reorder_within_groups = FALSE
+  plt <- autoplot(
+    anole_adm,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE,
+    arrange_by_group = TRUE,
+    arrange_by_indiv = FALSE,
+    reorder_within_groups = FALSE
   )
   # and the population order in the plot is changed
   expect_true(all(levels(plt$data$group) == c("AF", "Wam", "Eam")))
@@ -266,10 +340,15 @@ test_that("assigning factor levels reorders populations in autoplot", {
   # reorder the gt_admix object
   anole_adm_reordered1 <-
     gt_admix_reorder_q(anole_adm, group = anole_gt$population)
-  plt_b <- autoplot(anole_adm_reordered1,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = TRUE, arrange_by_group = TRUE,
-    arrange_by_indiv = FALSE, reorder_within_groups = FALSE
+  plt_b <- autoplot(
+    anole_adm_reordered1,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE,
+    arrange_by_group = TRUE,
+    arrange_by_indiv = FALSE,
+    reorder_within_groups = FALSE
   )
   # and the population order changes
   expect_true(all(levels(plt_b$data$group) == c("AF", "Eam", "Wam")))
@@ -284,14 +363,23 @@ test_that("assigning factor levels reorders populations in autoplot", {
   anole_gt <- anole_gt %>%
     mutate(population = factor(population, levels = c("AF", "Eam", "Wam")))
   anole_gt <- anole_gt %>% group_by(population)
-  anole_adm2 <- gt_admixture(anole_gt,
-    k = 3, crossval = FALSE,
-    n_cores = 1, seed = 123, conda_env = "none"
+  anole_adm2 <- gt_admixture(
+    anole_gt,
+    k = 3,
+    crossval = FALSE,
+    n_cores = 1,
+    seed = 123,
+    conda_env = "none"
   )
-  plt2 <- autoplot(anole_adm2,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = TRUE, arrange_by_group = TRUE,
-    arrange_by_indiv = FALSE, reorder_within_groups = FALSE
+  plt2 <- autoplot(
+    anole_adm2,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE,
+    arrange_by_group = TRUE,
+    arrange_by_indiv = FALSE,
+    reorder_within_groups = FALSE
   )
   # and the population order changes again
   expect_true(all(levels(plt2$data$group) == c("AF", "Eam", "Wam")))
@@ -311,33 +399,50 @@ test_that("checking autoplot arrange_ and annotate_ arguments work", {
   anole_gt$population <- as.factor(anole_gt$population)
   anole_gt <- anole_gt %>% group_by(population)
   # generate gt_admix object
-  anole_adm <- gt_admixture(anole_gt,
-    k = 3, crossval = FALSE,
-    n_cores = 1, seed = 123, conda_env = "none"
+  anole_adm <- gt_admixture(
+    anole_gt,
+    k = 3,
+    crossval = FALSE,
+    n_cores = 1,
+    seed = 123,
+    conda_env = "none"
   )
 
   # plot without reordering
-  plt1 <- autoplot(anole_adm,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = FALSE, arrange_by_group = FALSE
+  plt1 <- autoplot(
+    anole_adm,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = FALSE,
+    arrange_by_group = FALSE
   )
   expect_true("group" %in% names(plt1$data))
   # check plot data is in the same order as the original gt object
   expect_equal(plt1$data$group, as.factor(rep(anole_gt$population, each = 3)))
 
   # plot arranged by group
-  plt2 <- autoplot(anole_adm,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = TRUE, arrange_by_group = TRUE
+  plt2 <- autoplot(
+    anole_adm,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE,
+    arrange_by_group = TRUE
   )
   # check the plot has the group variable, arranged with the same levels
   expect_true("group" %in% names(plt2$data))
   expect_equal(levels(anole_gt$population), levels(plt2$data$group))
   # plot arranged by group and individual
-  plt3 <- autoplot(anole_adm,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = TRUE, arrange_by_group = TRUE,
-    arrange_by_indiv = TRUE, reorder_within_groups = TRUE
+  plt3 <- autoplot(
+    anole_adm,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE,
+    arrange_by_group = TRUE,
+    arrange_by_indiv = TRUE,
+    reorder_within_groups = TRUE
   )
   # check that the plot has the group variable, arranged with the same levels
   expect_true("group" %in% names(plt3$data))
@@ -351,55 +456,89 @@ test_that("grouping before running gt_admxiture vs reordering after
           running gt_admixture", {
   # Plots grouping BEFORE running admixture
   anole_gt <- anole_gt %>% group_by(population)
-  anole_adm_cv <- gt_admixture(anole_gt,
-    k = 2:4, n_runs = 2,
-    crossval = TRUE, n_cores = 2,
-    seed = c(123, 234), conda_env = "none"
+  anole_adm_cv <- gt_admixture(
+    anole_gt,
+    k = 2:4,
+    n_runs = 2,
+    crossval = TRUE,
+    n_cores = 2,
+    seed = c(123, 234),
+    conda_env = "none"
   )
-  basic_plot1 <- autoplot(anole_adm_cv,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = FALSE, arrange_by_group = FALSE,
-    arrange_by_indiv = FALSE, reorder_within_groups = FALSE
+  basic_plot1 <- autoplot(
+    anole_adm_cv,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = FALSE,
+    arrange_by_group = FALSE,
+    arrange_by_indiv = FALSE,
+    reorder_within_groups = FALSE
   )
-  labels <- autoplot(anole_adm_cv,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = TRUE, arrange_by_group = TRUE,
-    arrange_by_indiv = FALSE, reorder_within_groups = FALSE
+  labels <- autoplot(
+    anole_adm_cv,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE,
+    arrange_by_group = TRUE,
+    arrange_by_indiv = FALSE,
+    reorder_within_groups = FALSE
   )
 
   anole_gt <- anole_gt %>% ungroup()
 
   # Plots grouping and reordering AFTER running admixture
-  anole_adm_cv <- gt_admixture(anole_gt,
-    k = 2:4, n_runs = 2,
-    crossval = TRUE, n_cores = 2,
-    seed = c(123, 234), conda_env = "none"
+  anole_adm_cv <- gt_admixture(
+    anole_gt,
+    k = 2:4,
+    n_runs = 2,
+    crossval = TRUE,
+    n_cores = 2,
+    seed = c(123, 234),
+    conda_env = "none"
   )
-  basic_plot2 <- autoplot(anole_adm_cv,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = FALSE, arrange_by_group = FALSE,
-    arrange_by_indiv = FALSE, reorder_within_groups = FALSE
+  basic_plot2 <- autoplot(
+    anole_adm_cv,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = FALSE,
+    arrange_by_group = FALSE,
+    arrange_by_indiv = FALSE,
+    reorder_within_groups = FALSE
   )
   # Expect basic plots to be the same, no reordering has taken place
   expect_identical(basic_plot1$data$id, basic_plot2$data$id)
   expect_identical(basic_plot1$data$percentage, basic_plot2$data$percentage)
   # group and reorder gt_admix
   anole_gt <- anole_gt %>% group_by(population)
-  anole_adm_cv_reorder <- gt_admix_reorder_q(anole_adm_cv,
+  anole_adm_cv_reorder <- gt_admix_reorder_q(
+    anole_adm_cv,
     group = anole_gt$population
   )
   # autoplot should now be ordered by group
   # even when arrange_ and annotate_ are false
-  reord <- autoplot(anole_adm_cv_reorder,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = FALSE, arrange_by_group = FALSE,
-    arrange_by_indiv = FALSE, reorder_within_groups = FALSE
+  reord <- autoplot(
+    anole_adm_cv_reorder,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = FALSE,
+    arrange_by_group = FALSE,
+    arrange_by_indiv = FALSE,
+    reorder_within_groups = FALSE
   )
   # annotate and arranging by group should keep the same order
-  reord_labels <- autoplot(anole_adm_cv_reorder,
-    type = "barplot", k = 3, run = 1,
-    annotate_group = TRUE, arrange_by_group = TRUE,
-    arrange_by_indiv = FALSE, reorder_within_groups = FALSE
+  reord_labels <- autoplot(
+    anole_adm_cv_reorder,
+    type = "barplot",
+    k = 3,
+    run = 1,
+    annotate_group = TRUE,
+    arrange_by_group = TRUE,
+    arrange_by_indiv = FALSE,
+    reorder_within_groups = FALSE
   )
   expect_identical(reord$data, reord_labels$data)
 

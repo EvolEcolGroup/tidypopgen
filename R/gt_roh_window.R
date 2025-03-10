@@ -61,12 +61,20 @@
 #'   detectRUNS::plot_Runs(runs = sheep_roh)
 #' }
 #' }
-gt_roh_window <- function(x, window_size = 15, threshold = 0.05,
-                          min_snp = 3, heterozygosity = FALSE,
-                          max_opp_window = 1, max_miss_window = 1,
-                          max_gap = 10^6, min_length_bps = 1000,
-                          min_density = 1 / 1000,
-                          max_opp_run = NULL, max_miss_run = NULL) {
+gt_roh_window <- function(
+  x,
+  window_size = 15,
+  threshold = 0.05,
+  min_snp = 3,
+  heterozygosity = FALSE,
+  max_opp_window = 1,
+  max_miss_window = 1,
+  max_gap = 10^6,
+  min_length_bps = 1000,
+  min_density = 1 / 1000,
+  max_opp_run = NULL,
+  max_miss_run = NULL
+) {
   if (!requireNamespace("detectRUNS", quietly = TRUE)) {
     stop(
       "to use this function, first install package 'detectRUNS' with\n",
@@ -75,11 +83,17 @@ gt_roh_window <- function(x, window_size = 15, threshold = 0.05,
   }
   # collect all parameters in a variable
   parameters <- list(
-    windowSize = window_size, threshold = threshold, minSNP = min_snp,
-    ROHet = heterozygosity, maxOppWindow = max_opp_window,
-    maxMissWindow = max_miss_window, maxGap = max_gap,
-    minLengthBps = min_length_bps, minDensity = min_density,
-    maxOppRun = max_opp_run, maxMissRun = max_miss_run
+    windowSize = window_size,
+    threshold = threshold,
+    minSNP = min_snp,
+    ROHet = heterozygosity,
+    maxOppWindow = max_opp_window,
+    maxMissWindow = max_miss_window,
+    maxGap = max_gap,
+    minLengthBps = min_length_bps,
+    minDensity = min_density,
+    maxOppRun = max_opp_run,
+    maxMissRun = max_miss_run
   )
 
   # create a map object
@@ -87,7 +101,8 @@ gt_roh_window <- function(x, window_size = 15, threshold = 0.05,
     dplyr::select(dplyr::all_of(c("chromosome", "name", "position"))) %>%
     dplyr::rename(
       "Chrom" = "chromosome",
-      "SNP" = "name", "bps" = "position"
+      "SNP" = "name",
+      "bps" = "position"
     ) %>%
     as.data.frame()
 
@@ -103,8 +118,13 @@ gt_roh_window <- function(x, window_size = 15, threshold = 0.05,
   }
   # initialize data.frame of results
   runs_df <- data.frame(
-    group = character(), id = character(), chrom = character(),
-    nSNP = integer(), from = integer(), to = integer(), lengthBps = integer()
+    group = character(),
+    id = character(),
+    chrom = character(),
+    nSNP = integer(),
+    from = integer(),
+    to = integer(),
+    lengthBps = integer()
   )
   # naively process it by row (the parallelism is implemented within individual)
   # access time is horrible, but I don't think this is the bottleneck
@@ -116,7 +136,13 @@ gt_roh_window <- function(x, window_size = 15, threshold = 0.05,
     this_indiv <- list(FID = groups[i], IID = x$id[i])
     # find runs for this individual
     this_runs <-
-      utils::getFromNamespace("slidingRuns", "detectRUNS")(this_genotype, this_indiv, map, gaps, parameters) # nolint
+      utils::getFromNamespace("slidingRuns", "detectRUNS")(
+        this_genotype,
+        this_indiv,
+        map,
+        gaps,
+        parameters
+      ) # nolint
     # bind this run (if has rows) to others RUNs (if any)
     runs_df <- rbind(runs_df, this_runs)
   }

@@ -17,8 +17,12 @@ test_loci <- data.frame(
   allele_alt = c("T", "C", NA, "C", "G", "A")
 )
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
-
+test_gt <- gen_tibble(
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
+)
 
 
 test_that("snp_ibs and pairwise_ibs computes ibs correctly", {
@@ -33,7 +37,9 @@ test_that("snp_ibs and pairwise_ibs computes ibs correctly", {
 
   # now estimate it with gen_tibble
   test_ibs_gt <- pairwise_ibs(test_gt, type = "raw_counts")
-  expect_true(all.equal(test_ibs$ibs[], test_ibs_gt$ibs[],
+  expect_true(all.equal(
+    test_ibs$ibs[],
+    test_ibs_gt$ibs[],
     check.attributes = FALSE
   ))
   test_ibs_gt_prop <- pairwise_ibs(test_gt)
@@ -60,15 +66,29 @@ test_that("snp_ibs and pairwise_ibs computes ibs correctly", {
 
 
 test_that("snp_ibs as.counts = FALSE gives the same results as plink", {
-  # Read in results from plink --bfile families --distance square flat-missing ibs
-  plink_ibs <- read.table(system.file("extdata/related/test_plinkIBS.mibs", package = "tidypopgen"), header = FALSE)
+  # Read in results from:
+  # plink --bfile families --distance square flat-missing ibs
+  plink_ibs <- read.table(
+    system.file("extdata/related/test_plinkIBS.mibs", package = "tidypopgen"),
+    header = FALSE
+  )
   # Transform to matrix
   plink_matrix <- unname(as.matrix(plink_ibs))
 
   # Create gentibble for the same data
-  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
-  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1", "2"))
+  bed_path <- system.file(
+    "extdata/related/families.bed",
+    package = "tidypopgen"
+  )
+  families_bigsnp_path <- bigsnpr::snp_readBed(
+    bed_path,
+    backingfile = tempfile()
+  )
+  families <- gen_tibble(
+    families_bigsnp_path,
+    quiet = TRUE,
+    valid_alleles = c("1", "2")
+  )
 
   # Get snp_ibs results
   families_fbm <- tidypopgen:::.gt_get_bigsnp(families)$genotypes

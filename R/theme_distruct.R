@@ -7,7 +7,8 @@
 
 theme_distruct <- function() {
   ggplot2::theme_minimal() +
-    ggplot2::theme( # adjust title position and remove panel grid
+    ggplot2::theme(
+      # adjust title position and remove panel grid
       panel.grid = ggplot2::element_blank(),
       axis.text.y = ggplot2::element_blank(),
       axis.title.x = ggplot2::element_blank(),

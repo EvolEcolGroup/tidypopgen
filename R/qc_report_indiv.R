@@ -32,8 +32,10 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
     king <- pairwise_king(.x, as_matrix = TRUE)
 
     relatives <- filter_high_relatedness(
-      matrix = king, .x = .x,
-      kings_threshold = kings_threshold, ...
+      matrix = king,
+      .x = .x,
+      kings_threshold = kings_threshold,
+      ...
     )
 
     qc_report_indiv <- .x %>%
@@ -76,7 +78,8 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
     # remove individuals using filter_high_relatedness for each population
     indivs_to_keep <- function(relatives, king) {
       for (i in seq_along(king)) {
-        output <- filter_high_relatedness(king[[i]],
+        output <- filter_high_relatedness(
+          king[[i]],
           kings_threshold = kings_threshold
         )
         # add the output to the list
@@ -111,8 +114,6 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 }
 
 
-
-
 #' Autoplots for `qc_report_indiv` objects
 #'
 #' For `qc_report_indiv`, the following types of plots are available:
@@ -133,9 +134,13 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @export
-autoplot.qc_report_indiv <- function(object, type = c("scatter", "relatedness"),
-                                     miss_threshold = NULL,
-                                     kings_threshold = kings_threshold, ...) {
+autoplot.qc_report_indiv <- function(
+  object,
+  type = c("scatter", "relatedness"),
+  miss_threshold = NULL,
+  kings_threshold = kings_threshold,
+  ...
+) {
   rlang::check_dots_empty()
 
   miss_threshold <- if (is.null(miss_threshold)) {
@@ -147,11 +152,13 @@ autoplot.qc_report_indiv <- function(object, type = c("scatter", "relatedness"),
   type <- match.arg(type)
 
   if (type == "scatter") {
-    final_plot <- autoplot_qc_report_indiv(object,
+    final_plot <- autoplot_qc_report_indiv(
+      object,
       miss_threshold = miss_threshold
     )
   } else if (type == "relatedness") {
-    final_plot <- autoplot_qc_report_indiv_king(object,
+    final_plot <- autoplot_qc_report_indiv_king(
+      object,
       kings_threshold = kings_threshold
     )
   }
@@ -170,33 +177,46 @@ autoplot_qc_report_indiv <- function(object, miss_threshold = miss_threshold) {
   mid_upper <- mean_val + 2 * (sd_val)
   mid_lower <- mean_val - 2 * (sd_val)
 
-  final_plot <- ggplot2::ggplot(object, ggplot2::aes(
-    x = .data$missingness,
-    y = .data$het_obs
-  )) +
+  final_plot <- ggplot2::ggplot(
+    object,
+    ggplot2::aes(
+      x = .data$missingness,
+      y = .data$het_obs
+    )
+  ) +
     ggplot2::geom_point() +
     ggplot2::labs(
-      x = "Missingness", y = "Observed Heterozygosity",
+      x = "Missingness",
+      y = "Observed Heterozygosity",
       title = "Heterozygosity and missingness by individual"
     ) +
     ggplot2::geom_vline(xintercept = miss_threshold, lty = 2, col = "red") +
     ggplot2::geom_hline(
       yintercept = c(upper, lower, mid_upper, mid_lower),
-      lty = 2, col = "blue"
+      lty = 2,
+      col = "blue"
     )
   return(final_plot)
 }
 
-autoplot_qc_report_indiv_king <- function(object,
-                                          kings_threshold = kings_threshold) {
-  if (inherits(attr(object$to_keep, "king"), "matrix") || inherits(attr(object$to_keep, "king"), "array")) { # nolint
+autoplot_qc_report_indiv_king <- function(
+  object,
+  kings_threshold = kings_threshold
+) {
+  if (
+    inherits(attr(object$to_keep, "king"), "matrix") ||
+      inherits(attr(object$to_keep, "king"), "array")
+  ) {
+    # nolint
     king <- as.data.frame(attr(object$to_keep, "king"))
     num_samples <- nrow(king)
     king$row <- colnames(king)
 
     # format into 3 columns: ID1, ID2, and their relatedness coefficient
-    king <- tidyr::pivot_longer(king,
-      cols = !row, names_to = "Column",
+    king <- tidyr::pivot_longer(
+      king,
+      cols = !row,
+      names_to = "Column",
       values_to = "Value"
     )
     king <- dplyr::filter(king, king$row < king$Column)
@@ -225,19 +245,23 @@ autoplot_qc_report_indiv_king <- function(object,
     p <- ggplot2::ggplot(king_sorted, ggplot2::aes(x = .data$kinship)) +
       ggplot2::geom_histogram(bins = 40) +
       ggplot2::labs(
-        x = "KING robust kinship estimator", y = "Number of pairs",
+        x = "KING robust kinship estimator",
+        y = "Number of pairs",
         title = "Distribution of paired kinship coefficients"
       ) +
       ggplot2::geom_vline(xintercept = kings_threshold, lty = 2, col = "red")
-  } else if (inherits(attr(object$to_keep, "king"), "list")) { # by group
+  } else if (inherits(attr(object$to_keep, "king"), "list")) {
+    # by group
 
     # create a plotting function as above
     hist_plot <- function(object) {
       king <- as.data.frame(object)
       num_samples <- nrow(king)
       king$row <- colnames(king)
-      king <- tidyr::pivot_longer(king,
-        cols = !row, names_to = "Column",
+      king <- tidyr::pivot_longer(
+        king,
+        cols = !row,
+        names_to = "Column",
         values_to = "Value"
       )
       king <- dplyr::filter(king, king$row < king$Column)

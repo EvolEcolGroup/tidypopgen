@@ -36,9 +36,14 @@
 #'   backing file for the FBM)
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
-rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
-                          use_position = FALSE,
-                          quiet = FALSE, backingfile = NULL) {
+rbind.gen_tbl <- function(
+  ...,
+  as_is = FALSE,
+  flip_strand = FALSE,
+  use_position = FALSE,
+  quiet = FALSE,
+  backingfile = NULL
+) {
   dots <- list(...)
   if (length(dots) != 2) {
     stop("rbind for gen_tibble can only take two tibbles at a time")
@@ -71,27 +76,25 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   # if we use position, we update the names of the loci
   if (use_position) {
     show_loci(ref) <-
-      show_loci(ref) %>% mutate(
+      show_loci(ref) %>%
+      mutate(
         name_old = .data$name,
-        name = paste(.data$chromosome,
-          .data$position,
-          sep = "_"
-        )
+        name = paste(.data$chromosome, .data$position, sep = "_")
       )
     show_loci(target) <-
-      show_loci(target) %>% mutate(
+      show_loci(target) %>%
+      mutate(
         name_old = .data$name,
-        name = paste(.data$chromosome,
-          .data$position,
-          sep = "_"
-        )
+        name = paste(.data$chromosome, .data$position, sep = "_")
       )
   }
 
-
   report <- rbind_dry_run(
-    ref = ref, target = target, flip_strand = flip_strand,
-    quiet = quiet, use_position = use_position
+    ref = ref,
+    target = target,
+    flip_strand = flip_strand,
+    quiet = quiet,
+    use_position = use_position
   )
   # now edit the gen_tibble objects
   ###########
@@ -102,7 +105,10 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   attr(ref$genotypes, "loci")$allele_alt[id_missing] <-
     report$ref$missing_allele[id_missing]
   # and in  the bigSNP object
-  attr(ref$genotypes, "bigsnp")$map$allele1[attr(ref$genotypes, "loci")$big_index[id_missing]] <- # nolint
+  attr(ref$genotypes, "bigsnp")$map$allele1[attr(
+    ref$genotypes,
+    "loci"
+  )$big_index[id_missing]] <- # nolint
     report$ref$missing_allele[id_missing]
   # now create a new loci table (we'll use it later)
   new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id, na.last = NA), ]
@@ -111,7 +117,8 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   if (nrow(new_ref_loci_tbl) == 0) {
     stop("there are no loci in common between the two gen_tibbles")
   }
-  ref_snp <- subset_bigSNP(attr(ref$genotypes, "bigsnp"),
+  ref_snp <- subset_bigSNP(
+    attr(ref$genotypes, "bigsnp"),
     loci_indices = new_ref_loci_tbl$big_index,
     indiv_indices = vctrs::vec_data(ref$genotypes)
   )
@@ -123,7 +130,10 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
   attr(target$genotypes, "loci")$allele_alt[id_missing] <-
     report$target$missing_allele[id_missing]
   # and in  the bigSNP object
-  attr(target$genotypes, "bigsnp")$map$allele1[attr(target$genotypes, "loci")$big_index[id_missing]] <- # nolint
+  attr(target$genotypes, "bigsnp")$map$allele1[attr(
+    target$genotypes,
+    "loci"
+  )$big_index[id_missing]] <- # nolint
     report$target$missing_allele[id_missing]
   # now flip the strands
   ## in the gt_table
@@ -144,7 +154,8 @@ rbind.gen_tbl <- function(..., as_is = FALSE, flip_strand = FALSE,
     show_loci(target)[order(report$target$new_id, na.last = NA), ]
   # now we subset the SNP object
   ## in the snp object
-  target_snp <- subset_bigSNP(attr(target$genotypes, "bigsnp"),
+  target_snp <- subset_bigSNP(
+    attr(target$genotypes, "bigsnp"),
     loci_indices = new_target_loci_tbl$big_index,
     indiv_indices = vctrs::vec_data(target$genotypes),
     swap_indices = show_loci(target)$big_index[report$target$to_swap]

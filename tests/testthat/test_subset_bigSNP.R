@@ -1,5 +1,8 @@
 raw_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
-bigsnp_path_a <- bigsnpr::snp_readBed(raw_path_pop_a, backingfile = tempfile("test_a_"))
+bigsnp_path_a <- bigsnpr::snp_readBed(
+  raw_path_pop_a,
+  backingfile = tempfile("test_a_")
+)
 pop_a_snp <- bigsnpr::snp_attach(bigsnp_path_a)
 
 geno_start <- pop_a_snp$genotypes[]
@@ -16,7 +19,8 @@ test_that("subset_bigSNP correctly subsets the data", {
   indiv_indices <- c(2, 1, 4)
   loci_indices <- c(1:5, 6, 11, 10)
   swap_indices <- c(2, 5)
-  new_snp <- subset_bigSNP(pop_a_snp,
+  new_snp <- subset_bigSNP(
+    pop_a_snp,
     indiv_indices = indiv_indices,
     loci_indices = loci_indices,
     swap_indices = swap_indices
@@ -26,10 +30,14 @@ test_that("subset_bigSNP correctly subsets the data", {
   expect_identical(new_snp$genotypes[], geno_start[indiv_indices, loci_indices])
   # check the swapped locus map
   swapped_locus1 <- pop_a_snp$map$marker.ID[swap_indices[1]]
-  expect_true(pop_a_snp$map %>% dplyr::filter(marker.ID == swapped_locus1) %>% pull(allele1) ==
-    new_snp$map %>%
+  expect_true(
+    pop_a_snp$map %>%
       dplyr::filter(marker.ID == swapped_locus1) %>%
-      pull(allele2))
+      pull(allele1) ==
+      new_snp$map %>%
+        dplyr::filter(marker.ID == swapped_locus1) %>%
+        pull(allele2)
+  )
 
   ##############################################################################
   ## check missing data
@@ -38,7 +46,8 @@ test_that("subset_bigSNP correctly subsets the data", {
   # check that this was successful
   expect_true(is.na(pop_a_snp$genotypes[1, 5]))
   # now do the subset with swap
-  new_snp2 <- subset_bigSNP(pop_a_snp,
+  new_snp2 <- subset_bigSNP(
+    pop_a_snp,
     indiv_indices = indiv_indices,
     loci_indices = loci_indices,
     swap_indices = swap_indices
@@ -54,7 +63,8 @@ test_that("subset_bigSNP correctly subsets the data", {
   # check that it worked
   expect_false(is.na(pop_a_snp$genotypes[1, 5]))
   # now subset like before
-  new_snp3 <- subset_bigSNP(pop_a_snp,
+  new_snp3 <- subset_bigSNP(
+    pop_a_snp,
     indiv_indices = indiv_indices,
     loci_indices = loci_indices,
     swap_indices = swap_indices

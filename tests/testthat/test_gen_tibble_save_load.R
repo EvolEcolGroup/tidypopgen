@@ -18,8 +18,10 @@ test_loci <- data.frame(
 )
 
 test_gt <- gen_tibble(
-  x = test_genotypes, loci = test_loci,
-  indiv_meta = test_indiv_meta, quiet = TRUE
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
 )
 
 # this also tests show_genotypes and show_loci
@@ -34,8 +36,14 @@ test_that("save and load gt", {
   # check that we preserved the genotypes
   expect_true(all(show_genotypes(new_test_gt$genotypes) == test_genotypes))
   # check that we preserved the loci
-  expect_identical(show_loci(new_test_gt$genotypes) %>% select(-big_index, -chr_int), as_tibble(test_loci)) #nolint
-  expect_identical(show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)), as_tibble(test_loci)) #nolint
+  expect_identical(
+    show_loci(new_test_gt$genotypes) %>% select(-big_index, -chr_int),
+    as_tibble(test_loci)
+  ) #nolint
+  expect_identical(
+    show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)),
+    as_tibble(test_loci)
+  ) #nolint
 
   # now remove the tibble
   rm(new_test_gt)
@@ -56,7 +64,6 @@ test_that("save and load gt", {
   # TODO the above test fails on Windows,
   # needs a fix after response to bigstatsr issue
 
-
   # loading should fail
   expect_error(
     new_test_gt2 <- gt_load(all_file_names[1]),
@@ -64,13 +71,20 @@ test_that("save and load gt", {
   )
   # this should now work:
   new_test_gt2 <-
-    gt_load(all_file_names[1],
+    gt_load(
+      all_file_names[1],
       reattach_to = file.path(new_dir, basename(all_file_names[2]))
     )
   # verify that we have all the info
   # check that we preserved the genotypes
   expect_true(all(show_genotypes(new_test_gt2$genotypes) == test_genotypes))
   # check that we preserved the loci
-  expect_identical(show_loci(new_test_gt2$genotypes) %>% select(-big_index, -chr_int), as_tibble(test_loci)) #nolint
-  expect_identical(show_loci(test_gt$genotypes) %>% select(-big_index, -chr_int), as_tibble(test_loci)) #nolint
+  expect_identical(
+    show_loci(new_test_gt2$genotypes) %>% select(-big_index, -chr_int),
+    as_tibble(test_loci)
+  ) #nolint
+  expect_identical(
+    show_loci(test_gt$genotypes) %>% select(-big_index, -chr_int),
+    as_tibble(test_loci)
+  ) #nolint
 })

@@ -33,11 +33,15 @@
 #'    for a given k
 #' @export
 
-gt_cluster_pca <- function(x = NULL, n_pca = NULL,
-                           k_clusters = c(1, round(nrow(x$u) / 10)),
-                           method = c("kmeans", "ward"),
-                           n_iter = 1e5, n_start = 10,
-                           quiet = FALSE) {
+gt_cluster_pca <- function(
+  x = NULL,
+  n_pca = NULL,
+  k_clusters = c(1, round(nrow(x$u) / 10)),
+  method = c("kmeans", "ward"),
+  n_iter = 1e5,
+  n_start = 10,
+  quiet = FALSE
+) {
   if (is.null(x) || !inherits(x, "gt_pca")) {
     stop("a 'gt_pca' object is required")
   }
@@ -94,13 +98,18 @@ gt_cluster_pca <- function(x = NULL, n_pca = NULL,
   for (i in seq_along(nb_clust)) {
     if (method == "kmeans") {
       ## kmeans clustering (original method)
-      groups_assignments <- stats::kmeans(x_scores,
+      groups_assignments <- stats::kmeans(
+        x_scores,
         centers = nb_clust[i],
-        iter.max = n_iter, nstart = n_start
+        iter.max = n_iter,
+        nstart = n_start
       )$cluster
     } else {
       ## ward clustering
-      groups_assignments <- stats::cutree(stats::hclust(stats::dist(x_scores)^2, method = "ward.D2"), k = nb_clust[i]) # nolint
+      groups_assignments <- stats::cutree(
+        stats::hclust(stats::dist(x_scores)^2, method = "ward.D2"),
+        k = nb_clust[i]
+      ) # nolint
     }
     wss[i] <- compute_wss(x_scores, groups_assignments)
     cluster_list$groups[[i]] <- groups_assignments
@@ -110,7 +119,8 @@ gt_cluster_pca <- function(x = NULL, n_pca = NULL,
     wss_ori <- sum(apply(x_scores, 2, function(v) sum((v - mean(v))^2)))
     wss <- c(wss_ori, wss)
     # add the classification for 1 cluster (they are all 1!)
-    cluster_list$groups <- append(cluster_list$groups,
+    cluster_list$groups <- append(
+      cluster_list$groups,
       list(stats::setNames(rep(1, n), names(cluster_list$groups[[2]]))),
       after = 0
     )
@@ -157,9 +167,11 @@ compute_wss <- function(x, f) {
 #' @rdname autoplot_gt_cluster_pca
 #' @export
 
-autoplot.gt_cluster_pca <- function(object,
-                                    metric = c("BIC", "AIC", "WSS"),
-                                    ...) {
+autoplot.gt_cluster_pca <- function(
+  object,
+  metric = c("BIC", "AIC", "WSS"),
+  ...
+) {
   metric <- match.arg(metric)
   # create a small tibble with the data of interest
   metric_tbl <- tibble::tibble(

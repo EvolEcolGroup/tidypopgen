@@ -21,15 +21,21 @@
 #' - `cv` the cross validation error (if `crossval` is TRUE)
 #' @export
 
-
-gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto"){
+gt_admixture <- function(
+  x,
+  k,
+  crossval = FALSE,
+  n_cores = 1,
+  conda_env = "auto"
+) {
   # if x is a character, check that it is file that exists
   if (is.character(x)) {
     if (!file.exists(x)) {
       stop("The file ", x, " does not exist")
     }
     input_file <- x
-  } else { # if x is a gen_tibble
+  } else {
+    # if x is a gen_tibble
     if (!is(x, "gen_tibble")) {
       stop("x must be a gen_tibble or a character")
     }
@@ -55,7 +61,7 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto")
   }
   # if there is no reticulate
   if (!requireNamespace("reticulate", quietly = TRUE)) {
-    if (any(conda_env %in% c("auto", "none"))){
+    if (any(conda_env %in% c("auto", "none"))) {
       # use the system version of admixture (if it is installed)
       if (system2("which", args = "admixture") == 0) {
         system2("admixture", args = admixture_args)
@@ -66,11 +72,15 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto")
     } else {
       stop("The package reticulate is needed to use a conda environemnt in R.")
     }
-  } else { # if reticulate is available
+  } else {
+    # if reticulate is available
     # if we have "auto" and the conda environment rtidygenclust does not exist, or
     # if we have "none"
-    if (conda_env == "none" || (conda_env =="auto" &&
-                                !("rtidygenclust" %in% reticulate::conda_list()[["name"]]))) {
+    if (
+      conda_env == "none" ||
+        (conda_env == "auto" &&
+          !("rtidygenclust" %in% reticulate::conda_list()[["name"]]))
+    ) {
       # we use the system version of admixture
       # if admixture is installed
       if (system2("which", args = "admixture") == 0) {
@@ -79,15 +89,17 @@ gt_admixture <- function (x, k, crossval = FALSE, n_cores = 1, conda_env="auto")
         stop("admixture is not installed in this path")
       }
     } else {
-      if (conda_env =="auto" &&
-          ("rtidygenclust" %in% reticulate::conda_list()[["name"]])){
+      if (
+        conda_env == "auto" &&
+          ("rtidygenclust" %in% reticulate::conda_list()[["name"]])
+      ) {
         conda_env <- "rtidygenclust"
       }
-      reticulate::conda_run2("admixture", args = admixture_args,
-                             conda = conda_env)
+      reticulate::conda_run2(
+        "admixture",
+        args = admixture_args,
+        conda = conda_env
+      )
     }
   }
-
 }
-
-

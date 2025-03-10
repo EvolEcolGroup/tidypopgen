@@ -17,7 +17,12 @@ test_loci <- data.frame(
   allele_alt = c("T", "C", NA, "C", "G", "A")
 )
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+test_gt <- gen_tibble(
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
+)
 
 
 # function to compute robust king in R
@@ -28,11 +33,16 @@ king_r <- function(X_mat) {
   X_mat1[is.na(X_mat1)] <- 0
   X_mat2 <- X_mat == 2
   X_mat2[is.na(X_mat2)] <- 0
-  king_num <- (X_mat1 %*% t(X_mat1) - 2 * ((X_mat0) %*% t(X_mat2) + (X_mat2) %*% t(X_mat0)))
+  king_num <- (X_mat1 %*%
+    t(X_mat1) -
+    2 * ((X_mat0) %*% t(X_mat2) + (X_mat2) %*% t(X_mat0)))
   X_mat_valid <- !is.na(X_mat)
   N_mat_Aa_i <- X_mat1 %*% t(X_mat_valid)
   N_mat_Aa_j <- t(N_mat_Aa_i)
-  king_num / (2 * pmin(N_mat_Aa_i, N_mat_Aa_j)) + 0.5 - 0.25 * (N_mat_Aa_i + N_mat_Aa_j) / pmin(N_mat_Aa_i, N_mat_Aa_j)
+  king_num /
+    (2 * pmin(N_mat_Aa_i, N_mat_Aa_j)) +
+    0.5 -
+    0.25 * (N_mat_Aa_i + N_mat_Aa_j) / pmin(N_mat_Aa_i, N_mat_Aa_j)
 }
 
 
@@ -49,14 +59,14 @@ test_that("snp_king and pairwise_king compute king-robust correctly", {
 
   # now estimate it with gen_tibble
   test_king_gt <- pairwise_king(test_gt, as_matrix = TRUE)
-  expect_true(all.equal(test_king, test_king_gt,
-    check.attributes = FALSE
-  ))
+  expect_true(all.equal(test_king, test_king_gt, check.attributes = FALSE))
 
   # now test with missing data
-  test_na_gt <- gen_tibble(system.file("extdata/related/families.bed", package = "tidypopgen"),
+  test_na_gt <- gen_tibble(
+    system.file("extdata/related/families.bed", package = "tidypopgen"),
     quiet = TRUE,
-    backingfile = tempfile(), valid_alleles = c("1", "2")
+    backingfile = tempfile(),
+    valid_alleles = c("1", "2")
   )
   test_na_fbm <- tidypopgen:::.gt_get_bigsnp(test_na_gt)$genotypes
   test_na_king <- snp_king(test_na_fbm)
@@ -71,17 +81,30 @@ test_that("snp_king and pairwise_king compute king-robust correctly", {
 
 test_that("snp_king gives the same results as plink", {
   # Create gentibble for our data
-  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) # bigsnpr::sub_bed(bed_path)
+  bed_path <- system.file(
+    "extdata/related/families.bed",
+    package = "tidypopgen"
+  )
+  families_bigsnp_path <- bigsnpr::snp_readBed(
+    bed_path,
+    backingfile = tempfile()
+  ) # bigsnpr::sub_bed(bed_path)
   # families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
-  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1", "2"))
+  families <- gen_tibble(
+    families_bigsnp_path,
+    quiet = TRUE,
+    valid_alleles = c("1", "2")
+  )
 
   # Get snp_king results
   families_fbm <- tidypopgen:::.gt_get_bigsnp(families)$genotypes
   families_king <- snp_king(families_fbm)
 
   # Read in results from king -b families_k.bed --kinship
-  king <- read.table(system.file("extdata/related/test_king.kin0", package = "tidypopgen"), header = FALSE)
+  king <- read.table(
+    system.file("extdata/related/test_king.kin0", package = "tidypopgen"),
+    header = FALSE
+  )
 
   # Create empty matrix
   king_matrix <- matrix(nrow = 12, ncol = 12)

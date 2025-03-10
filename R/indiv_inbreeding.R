@@ -15,30 +15,44 @@
 #' @return a numeric vector of inbreeding coefficients.
 #' @export
 
-indiv_inbreeding <- function(.x, method = c("WG17"),
-                             allele_sharing_mat = NULL, ...) {
+indiv_inbreeding <- function(
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  ...
+) {
   UseMethod("indiv_inbreeding", .x)
 }
 
 #' @export
 #' @rdname indiv_inbreeding
-indiv_inbreeding.tbl_df <- function(.x, method = c("WG17"),
-                                    allele_sharing_mat = NULL, ...) {
+indiv_inbreeding.tbl_df <- function(
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  ...
+) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
   }
-  indiv_inbreeding(.x$genotypes,
+  indiv_inbreeding(
+    .x$genotypes,
     method = method,
-    allele_sharing_mat = allele_sharing_mat, ...
+    allele_sharing_mat = allele_sharing_mat,
+    ...
   )
 }
 
 #' @export
 #' @rdname indiv_inbreeding
-indiv_inbreeding.vctrs_bigSNP <- function(.x, method = c("WG17"),
-                                          allele_sharing_mat = NULL, ...) {
+indiv_inbreeding.vctrs_bigSNP <- function(
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  ...
+) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   if (is.null(allele_sharing_mat)) {
@@ -62,14 +76,19 @@ indiv_inbreeding.vctrs_bigSNP <- function(.x, method = c("WG17"),
 
 #' @export
 #' @rdname indiv_inbreeding
-indiv_inbreeding.grouped_df <- function(.x, method = c("WG17"),
-                                        allele_sharing_mat = NULL, ...) {
+indiv_inbreeding.grouped_df <- function(
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  ...
+) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   if (!is.null(allele_sharing_mat)) {
     stop("allele_sharing_mat can not be provided for grouped_df objects")
   }
-  group_map(.x,
+  group_map(
+    .x,
     .f = ~ indiv_inbreeding(.x, method = method, allele_sharing_mat = NULL)
   )
 }

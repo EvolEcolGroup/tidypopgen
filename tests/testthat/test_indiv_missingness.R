@@ -17,7 +17,12 @@ test_loci <- data.frame(
 )
 
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+test_gt <- gen_tibble(
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
+)
 
 
 test_that("indiv_missingness computes correctly", {
@@ -25,14 +30,20 @@ test_that("indiv_missingness computes correctly", {
     sum(is.na(x))
   }
   # feeding the genotypes directly
-  expect_true(all(indiv_missingness(test_gt$genotypes) ==
-    apply(test_genotypes, 1, sum_na) / ncol(test_genotypes)))
+  expect_true(all(
+    indiv_missingness(test_gt$genotypes) ==
+      apply(test_genotypes, 1, sum_na) / ncol(test_genotypes)
+  ))
   # passing tibble
-  expect_true(all(indiv_missingness(test_gt) ==
-    apply(test_genotypes, 1, sum_na) / ncol(test_genotypes)))
+  expect_true(all(
+    indiv_missingness(test_gt) ==
+      apply(test_genotypes, 1, sum_na) / ncol(test_genotypes)
+  ))
   # now using block_size to chunk the operation
-  expect_true(all(indiv_missingness(test_gt, block_size = 2) ==
-    apply(test_genotypes, 1, sum_na) / ncol(test_genotypes)))
+  expect_true(all(
+    indiv_missingness(test_gt, block_size = 2) ==
+      apply(test_genotypes, 1, sum_na) / ncol(test_genotypes)
+  ))
 })
 
 
@@ -56,7 +67,12 @@ test_genotypes_moreNA <- rbind(
   c(2, 2, 0, 0, 1, NA)
 )
 
-test_gt2 <- gen_tibble(x = test_genotypes_moreNA, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+test_gt2 <- gen_tibble(
+  x = test_genotypes_moreNA,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
+)
 
 
 test_that("indiv_missingness on a subset", {
@@ -68,6 +84,12 @@ test_that("indiv_missingness on a subset", {
     sum(is.na(x))
   }
   # feeding the genotypes directly
-  expect_true(all(indiv_missingness(test_gt2_subset$genotypes) ==
-    round(apply(test_genotypes_moreNA_subset, MARGIN = 1, sum_na) / ncol(test_genotypes_moreNA_subset), digits = 1)))
+  expect_true(all(
+    indiv_missingness(test_gt2_subset$genotypes) ==
+      round(
+        apply(test_genotypes_moreNA_subset, MARGIN = 1, sum_na) /
+          ncol(test_genotypes_moreNA_subset),
+        digits = 1
+      )
+  ))
 })

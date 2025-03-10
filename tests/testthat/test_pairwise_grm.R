@@ -20,7 +20,12 @@ test_loci <- data.frame(
   allele_alt = c("T", "C", NA, "C", "G", "A")
 )
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+test_gt <- gen_tibble(
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
+)
 
 
 test_that("pairwise_grm compute correctly", {

@@ -17,7 +17,12 @@ test_that("find transitions and transversions", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
 
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
   transv_bool <- c(TRUE, FALSE, NA, TRUE, TRUE, TRUE)
   expect_true(all.equal(loci_transversions(test_gt), transv_bool))
   expect_true(all.equal(loci_transitions(test_gt), !transv_bool))
@@ -43,8 +48,20 @@ test_that("check warning message for different alleles", {
   )
 
   # Create a gen_tibble with alleles that are not "A" "T" "C" "G" using valid_alleles
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE, valid_alleles = c("a", "t", "c", "g"))
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    valid_alleles = c("a", "t", "c", "g")
+  )
 
-  testthat::expect_error(loci_transversions(test_gt), "valid alleles are A T C G 0 . but ")
-  testthat::expect_error(loci_transitions(test_gt), "valid alleles are A T C G 0 . but ")
+  testthat::expect_error(
+    loci_transversions(test_gt),
+    "valid alleles are A T C G 0 . but "
+  )
+  testthat::expect_error(
+    loci_transitions(test_gt),
+    "valid alleles are A T C G 0 . but "
+  )
 })

@@ -57,7 +57,9 @@ count_vcf_variants <- function(file, chunk_size = 50e6) {
     idxs_carriage_return <- which(bfr == carriage_return)
     n_carriage_return <- length(idxs_carriage_return)
     if (n_carriage_return > 0L) {
-      idxs_cr_lf <- idxs_carriage_return[(bfr[idxs_carriage_return + 1L] == line_feed)] #nolint
+      idxs_cr_lf <- idxs_carriage_return[
+        (bfr[idxs_carriage_return + 1L] == line_feed)
+      ] #nolint
       if (length(idxs_cr_lf) > 0L) {
         bfr <- bfr[-idxs_cr_lf]
         n <- length(bfr)

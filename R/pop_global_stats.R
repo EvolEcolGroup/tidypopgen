@@ -91,23 +91,26 @@
 #'   statistics as columns
 #' @export
 
-
 # this code is adapted from hierfstat::basic.stats by Jerome Goudet
-pop_global_stats <- function(.x,
-                             by_locus = FALSE,
-                             n_cores = bigstatsr::nb_cores()) {
+pop_global_stats <- function(
+  .x,
+  by_locus = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
     .group_levels <- .x %>% group_keys()
     .group_ids <- dplyr::group_indices(.x) - 1
-  } else { # create a dummy pop
+  } else {
+    # create a dummy pop
     .group_levels <- tibble(population = "pop")
     .group_ids <- rep(0, nrow(.x))
   }
 
   # summarise population frequencies
-  pop_freqs_df <- gt_grouped_summaries(.gt_get_bigsnp(.x)$genotypes,
+  pop_freqs_df <- gt_grouped_summaries(
+    .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = .group_ids,
@@ -129,9 +132,13 @@ pop_global_stats <- function(.x,
 
   np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint
   # mean sample size over the populations
-  mn <- apply(n, 1, fun <- function(x) {
-    sum(!is.na(x)) / sum(1 / x[!is.na(x)])
-  })
+  mn <- apply(
+    n,
+    1,
+    fun <- function(x) {
+      sum(!is.na(x)) / sum(1 / x[!is.na(x)])
+    }
+  )
   # mean sum of square frequencies
   msp2 <- apply(sp2, 1, mean, na.rm = TRUE) # nolint start
   mp2 <- rowMeans(pop_freqs_df$freq_alt)^2 + rowMeans(pop_freqs_df$freq_ref)^2
@@ -146,12 +153,28 @@ pop_global_stats <- function(.x,
   Fstp <- Dstp / Htp
   Dest <- Dstp / (1 - mHs)
   res <- data.frame(cbind(
-    mHo, mHs, Ht, Dst, Htp, Dstp, Fst,
-    Fstp, mFis, Dest # nolint end
+    mHo,
+    mHs,
+    Ht,
+    Dst,
+    Htp,
+    Dstp,
+    Fst,
+    Fstp,
+    mFis,
+    Dest # nolint end
   ))
   names(res) <- c(
-    "Ho", "Hs", "Ht", "Dst", "Htp", "Dstp",
-    "Fst", "Fstp", "Fis", "Dest"
+    "Ho",
+    "Hs",
+    "Ht",
+    "Dst",
+    "Htp",
+    "Dstp",
+    "Fst",
+    "Fstp",
+    "Fis",
+    "Dest"
   )
 
   if (by_locus) {

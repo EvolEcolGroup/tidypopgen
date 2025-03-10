@@ -16,7 +16,12 @@ test_loci <- data.frame(
   allele_alt = c("T", "C", NA, "C", "G", "A")
 )
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+test_gt <- gen_tibble(
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
+)
 
 
 test_that("snp_allele_sharing and pairwise_allele_sharing computes allele sharing correctly", {
@@ -32,7 +37,5 @@ test_that("snp_allele_sharing and pairwise_allele_sharing computes allele sharin
 
   # now estimate it with gen_tibble
   test_as_gt <- pairwise_allele_sharing(test_gt, as_matrix = TRUE)
-  expect_true(all.equal(test_as, test_as_gt,
-    check.attributes = FALSE
-  ))
+  expect_true(all.equal(test_as, test_as_gt, check.attributes = FALSE))
 })

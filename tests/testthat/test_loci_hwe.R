@@ -1,12 +1,28 @@
 test_that("loci_hwe produces the same output as plink --hardy midp", {
   # Create gentibble for our data
-  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) # bigsnpr::sub_bed(bed_path)
+  bed_path <- system.file(
+    "extdata/related/families.bed",
+    package = "tidypopgen"
+  )
+  families_bigsnp_path <- bigsnpr::snp_readBed(
+    bed_path,
+    backingfile = tempfile()
+  ) # bigsnpr::sub_bed(bed_path)
   # families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
-  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1", "2"))
+  families <- gen_tibble(
+    families_bigsnp_path,
+    quiet = TRUE,
+    valid_alleles = c("1", "2")
+  )
 
   # Read in plink results (first 10 snps)
-  plink_hwe <- read.table(system.file("extdata/related/families_hwe_midp.hwe", package = "tidypopgen"), header = TRUE)
+  plink_hwe <- read.table(
+    system.file(
+      "extdata/related/families_hwe_midp.hwe",
+      package = "tidypopgen"
+    ),
+    header = TRUE
+  )
 
   # Calculate hwe in tidypopgen
   tidy_hwe <- families %>%
@@ -23,13 +39,26 @@ test_that("loci_hwe produces the same output as plink --hardy midp", {
 
 test_that("loci_hwe mid_p = FALSE produces the same output as plink --hardy ", {
   # Create gentibble for our data
-  bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
-  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile()) # bigsnpr::sub_bed(bed_path)
+  bed_path <- system.file(
+    "extdata/related/families.bed",
+    package = "tidypopgen"
+  )
+  families_bigsnp_path <- bigsnpr::snp_readBed(
+    bed_path,
+    backingfile = tempfile()
+  ) # bigsnpr::sub_bed(bed_path)
   # families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
-  families <- gen_tibble(families_bigsnp_path, quiet = TRUE, valid_alleles = c("1", "2"))
+  families <- gen_tibble(
+    families_bigsnp_path,
+    quiet = TRUE,
+    valid_alleles = c("1", "2")
+  )
 
   # Read in plink results (first 10 snps)
-  plink_hwe <- read.table(system.file("extdata/related/families_hwe.hwe", package = "tidypopgen"), header = TRUE)
+  plink_hwe <- read.table(
+    system.file("extdata/related/families_hwe.hwe", package = "tidypopgen"),
+    header = TRUE
+  )
 
   # Calculate hwe in tidypopgen
   tidy_hwe <- families %>%

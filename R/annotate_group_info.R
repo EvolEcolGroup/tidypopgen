@@ -48,9 +48,12 @@ annotate_group_info <- function(q_tbl, plt) {
       breaks = unique(q_tbl$id)[get_mid_points(c(0, group_x))],
       labels = names(group_x)
     ),
-    ggplot2::theme(axis.text.x = ggplot2::element_text(
-      angle = 45,
-      vjust = 1, hjust = 1
-    ))
+    ggplot2::theme(
+      axis.text.x = ggplot2::element_text(
+        angle = 45,
+        vjust = 1,
+        hjust = 1
+      )
+    )
   )
 }

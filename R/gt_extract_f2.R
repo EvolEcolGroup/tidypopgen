@@ -71,14 +71,28 @@
 #' @return SNP metadata (invisibly)
 #' @export
 
-gt_extract_f2 <- function(.x, outdir = NULL, blgsize = 0.05, maxmem = 8000,
-                          maxmiss = 0, minmaf = 0, maxmaf = 0.5, minac2 = FALSE,
-                          outpop = NULL, outpop_scale = TRUE,
-                          transitions = TRUE, transversions = TRUE,
-                          overwrite = FALSE,
-                          adjust_pseudohaploid = TRUE, fst = TRUE,
-                          afprod = TRUE, poly_only = c("f2"), apply_corr = TRUE,
-                          n_cores = 1, quiet = FALSE) {
+gt_extract_f2 <- function(
+  .x,
+  outdir = NULL,
+  blgsize = 0.05,
+  maxmem = 8000,
+  maxmiss = 0,
+  minmaf = 0,
+  maxmaf = 0.5,
+  minac2 = FALSE,
+  outpop = NULL,
+  outpop_scale = TRUE,
+  transitions = TRUE,
+  transversions = TRUE,
+  overwrite = FALSE,
+  adjust_pseudohaploid = TRUE,
+  fst = TRUE,
+  afprod = TRUE,
+  poly_only = c("f2"),
+  apply_corr = TRUE,
+  n_cores = 1,
+  quiet = FALSE
+) {
   if (!requireNamespace("admixtools", quietly = TRUE)) {
     stop(
       "to use this function, first install package 'admixtools' with\n",
@@ -103,35 +117,56 @@ gt_extract_f2 <- function(.x, outdir = NULL, blgsize = 0.05, maxmem = 8000,
   }
 
   verbose <- !quiet
-  afdat <- gt_to_aftable(.x,
+  afdat <- gt_to_aftable(
+    .x,
     adjust_pseudohaploid = adjust_pseudohaploid,
     n_cores = n_cores
   )
 
   if (is.null(inds)) pops <- union(pops, pops2)
 
-  afdat %<>% discard_from_aftable( # nolint
-    maxmiss = maxmiss, minmaf = minmaf, maxmaf = maxmaf, minac2 = minac2,
-    outpop = outpop, transitions = transitions, transversions = transversions,
-    keepsnps = keepsnps, auto_only = auto_only, poly_only = FALSE
-  )
+  afdat %<>%
+    discard_from_aftable(
+      # nolint
+      maxmiss = maxmiss,
+      minmaf = minmaf,
+      maxmaf = maxmaf,
+      minac2 = minac2,
+      outpop = outpop,
+      transitions = transitions,
+      transversions = transversions,
+      keepsnps = keepsnps,
+      auto_only = auto_only,
+      poly_only = FALSE
+    )
   afdat$snpfile %<>% mutate(poly = as.logical(cpp_is_polymorphic(afdat$afs))) # nolint
   if (sum(afdat$snpfile$poly) == 0) stop("There are no informative SNPs!")
 
   if (verbose) {
     message(paste0(
-      nrow(afdat$afs), " SNPs remain after filtering. ",
-      sum(afdat$snpfile$poly), " are polymorphic.\n"
+      nrow(afdat$afs),
+      " SNPs remain after filtering. ",
+      sum(afdat$snpfile$poly),
+      " are polymorphic.\n"
     ))
   }
 
   if (isTRUE(poly_only)) poly_only <- c("f2", "ap", "fst")
-  arrs <- afs_to_f2_blocks(afdat,
-    outdir = outdir, overwrite = overwrite, maxmem = maxmem,
-    poly_only = poly_only, pops1 = pops, pops2 = pops2,
-    outpop = if (outpop_scale) outpop else NULL, blgsize = blgsize,
-    afprod = afprod, fst = fst, apply_corr = apply_corr,
-    n_cores = n_cores, verbose = verbose
+  arrs <- afs_to_f2_blocks(
+    afdat,
+    outdir = outdir,
+    overwrite = overwrite,
+    maxmem = maxmem,
+    poly_only = poly_only,
+    pops1 = pops,
+    pops2 = pops2,
+    outpop = if (outpop_scale) outpop else NULL,
+    blgsize = blgsize,
+    afprod = afprod,
+    fst = fst,
+    apply_corr = apply_corr,
+    n_cores = n_cores,
+    verbose = verbose
   )
 
   if (is.null(outdir)) {
@@ -162,8 +197,11 @@ gt_extract_f2 <- function(.x, outdir = NULL, blgsize = 0.05, maxmem = 8000,
 #' @returns a list of 3 elements: afs, counts, and snp
 #' @keywords internal
 
-gt_to_aftable <- function(.x, adjust_pseudohaploid = TRUE,
-                          n_cores = bigstatsr::nb_cores()) {
+gt_to_aftable <- function(
+  .x,
+  adjust_pseudohaploid = TRUE,
+  n_cores = bigstatsr::nb_cores()
+) {
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }
@@ -179,7 +217,8 @@ gt_to_aftable <- function(.x, adjust_pseudohaploid = TRUE,
     }
     ploidy <- identify_pseudohaploids(.x, n_test)
     aftable <- gt_grouped_alt_freq_pseudohap(
-      BM = geno_fbm, rowInd = .gt_bigsnp_rows(.x),
+      BM = geno_fbm,
+      rowInd = .gt_bigsnp_rows(.x),
       colInd = .gt_bigsnp_cols(.x),
       groupIds = dplyr::group_indices(.x) - 1,
       ngroups = max(dplyr::group_indices(.x)),
@@ -188,7 +227,8 @@ gt_to_aftable <- function(.x, adjust_pseudohaploid = TRUE,
     )
   } else {
     aftable <- gt_grouped_alt_freq_diploid(
-      BM = geno_fbm, rowInd = .gt_bigsnp_rows(.x),
+      BM = geno_fbm,
+      rowInd = .gt_bigsnp_rows(.x),
       colInd = .gt_bigsnp_cols(.x),
       groupIds = dplyr::group_indices(.x) - 1,
       ngroups = max(dplyr::group_indices(.x)),
@@ -204,8 +244,12 @@ gt_to_aftable <- function(.x, adjust_pseudohaploid = TRUE,
   dimnames(aftable$counts) <- list(loci_names(.x), .group_levels)
 
   loci_new_names <- c(
-    SNP = "name", CHR = "chromosome", POS = "position", cm = "genetic_dist",
-    A1 = "allele_alt", A2 = "allele_ref"
+    SNP = "name",
+    CHR = "chromosome",
+    POS = "position",
+    cm = "genetic_dist",
+    A1 = "allele_alt",
+    A2 = "allele_ref"
   )
   snp <- show_loci(.x) %>%
     select(-all_of("big_index")) %>%
@@ -221,8 +265,6 @@ gt_to_aftable <- function(.x, adjust_pseudohaploid = TRUE,
   aftable$snpfile <- snp
   return(aftable)
 }
-
-
 
 
 # import some functions that are not exported by admixtools

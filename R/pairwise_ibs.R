@@ -17,18 +17,22 @@
 #'   two [bigstatsr::FBM] matrices, one of counts of IBS by alleles, and one of
 #'   number of valid alleles (i.e. 2*n_loci - 2*missing_loci)
 #' @export
-pairwise_ibs <- function(x, as_matrix = FALSE,
-                         type = c(
-                           "proportion",
-                           "adjusted_counts",
-                           "raw_counts"
-                         ),
-                         block_size = bigstatsr::block_size(count_loci(x))) {
+pairwise_ibs <- function(
+  x,
+  as_matrix = FALSE,
+  type = c(
+    "proportion",
+    "adjusted_counts",
+    "raw_counts"
+  ),
+  block_size = bigstatsr::block_size(count_loci(x))
+) {
   type <- match.arg(type)
   X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
-  ibs_matrix <- snp_ibs(X$genotypes,
+  ibs_matrix <- snp_ibs(
+    X$genotypes,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
     type = type,
@@ -36,7 +40,8 @@ pairwise_ibs <- function(x, as_matrix = FALSE,
   )
   if (inherits(ibs_matrix, "matrix")) {
     dimnames(ibs_matrix) <- list(x$id, x$id)
-  } else { # else if we have a list of two count matrices
+  } else {
+    # else if we have a list of two count matrices
     attr(ibs_matrix[[1]], "indiv_names") <- x$id
     attr(ibs_matrix[[2]], "indiv_names") <- x$id
   }

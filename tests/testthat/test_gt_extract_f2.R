@@ -36,43 +36,51 @@ test_that("extract f2 correctly", {
 
   # test af table
   # without adjusting pseudohaploids
-  adm_aftable <- admixtools:::anygeno_to_aftable(bigsnpr::sub_bed(bed_file),
+  adm_aftable <- admixtools:::anygeno_to_aftable(
+    bigsnpr::sub_bed(bed_file),
     adjust_pseudohaploid = FALSE,
     verbose = FALSE
   )
   gt_aftable <- gt_to_aftable(test_gt, adjust_pseudohaploid = FALSE)
   # expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE)) #nolint
 
-  expect_true(all.equal(adm_aftable$afs,
+  expect_true(all.equal(
+    adm_aftable$afs,
     gt_aftable$afs,
     check.attributes = FALSE
   ))
-  expect_true(all.equal(adm_aftable$counts,
+  expect_true(all.equal(
+    adm_aftable$counts,
     gt_aftable$counts,
     check.attributes = FALSE
   ))
-  expect_true(all.equal(adm_aftable$snpfile,
+  expect_true(all.equal(
+    adm_aftable$snpfile,
     gt_aftable$snpfile %>% select(-chr_int),
     check.attributes = FALSE
   ))
 
   # now adjusting the pseudohaploids
-  adm_aftable <- admixtools:::anygeno_to_aftable(bigsnpr::sub_bed(bed_file),
+  adm_aftable <- admixtools:::anygeno_to_aftable(
+    bigsnpr::sub_bed(bed_file),
     adjust_pseudohaploid = TRUE,
     verbose = FALSE
   )
   gt_aftable <- gt_to_aftable(test_gt)
   # expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE)) #nolint
 
-  expect_true(all.equal(adm_aftable$afs,
+  expect_true(all.equal(
+    adm_aftable$afs,
     gt_aftable$afs,
     check.attributes = FALSE
   ))
-  expect_true(all.equal(adm_aftable$counts,
+  expect_true(all.equal(
+    adm_aftable$counts,
     gt_aftable$counts,
     check.attributes = FALSE
   ))
-  expect_true(all.equal(adm_aftable$snpfile,
+  expect_true(all.equal(
+    adm_aftable$snpfile,
     gt_aftable$snpfile %>% select(-chr_int),
     check.attributes = FALSE
   ))
@@ -80,17 +88,22 @@ test_that("extract f2 correctly", {
   adm_outdir <- file.path(tempdir(), "adm_f2")
   unlink(file.path(adm_outdir, "*"), recursive = TRUE)
   # we get a few warnings due to the small sample size
-  suppressWarnings(admixtools::extract_f2(bigsnpr::sub_bed(bed_file),
+  suppressWarnings(admixtools::extract_f2(
+    bigsnpr::sub_bed(bed_file),
     outdir = adm_outdir,
     verbose = FALSE
   ))
-  expect_warning(adm_f2 <- admixtools::f2_from_precomp(adm_outdir, verbose = FALSE)) #nolint
+  expect_warning(
+    adm_f2 <- admixtools::f2_from_precomp(adm_outdir, verbose = FALSE)
+  ) #nolint
   # now try to do the same with gen_tibble
   gt_outdir <- file.path(tempdir(), "gt_f2")
   unlink(file.path(gt_outdir, "*"), recursive = TRUE)
   # we get same warning due to the small dataset
   # TODO can we capture the warnings above and then check that they are the same
   suppressWarnings(gt_extract_f2(test_gt, outdir = gt_outdir, quiet = TRUE))
-  expect_warning(gt_f2 <- admixtools::f2_from_precomp(adm_outdir, verbose = FALSE)) #nolint
+  expect_warning(
+    gt_f2 <- admixtools::f2_from_precomp(adm_outdir, verbose = FALSE)
+  ) #nolint
   expect_true(all.equal(adm_f2, gt_f2))
 })

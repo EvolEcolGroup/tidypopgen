@@ -67,7 +67,6 @@ filter_high_relatedness <-
     matrix2 <- matrix
     diag(matrix2) <- NA
 
-
     # loop through each individual
     # for pairs with higher than kings_threshold relatedness
     # the individual with higher average relatedness is removed
@@ -119,7 +118,6 @@ filter_high_relatedness <-
         }
       }
     }
-
 
     # return variable names
     passed_filter <- var_names[new_order][!col_to_delete]

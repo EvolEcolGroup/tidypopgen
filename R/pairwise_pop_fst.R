@@ -34,14 +34,15 @@
 #'   loci as rows and and pairwise combinations as columns.
 #' @export
 
-
 # #' @param tidy boolean whether to return a tidy tibble. Default is TRUE, FALSE
 # #' returns a matrix. THIS IS NOT IMPLEMENTED YET.
 
-
-pairwise_pop_fst <- function(.x, by_locus = FALSE,
-                             method = c("Hudson", "Nei87", "WC84"),
-                             n_cores = bigstatsr::nb_cores()) {
+pairwise_pop_fst <- function(
+  .x,
+  by_locus = FALSE,
+  method = c("Hudson", "Nei87", "WC84"),
+  n_cores = bigstatsr::nb_cores()
+) {
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }
@@ -55,9 +56,11 @@ pairwise_pop_fst <- function(.x, by_locus = FALSE,
   }
 }
 
-pairwise_pop_fst_hudson <- function(.x,
-                                    by_locus = FALSE,
-                                    n_cores = bigstatsr::nb_cores()) {
+pairwise_pop_fst_hudson <- function(
+  .x,
+  by_locus = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   # get the populations
   .group_levels <- .x %>% group_keys()
   # create all combinations
@@ -69,7 +72,8 @@ pairwise_pop_fst_hudson <- function(.x,
       matrix(NA_real_, nrow = count_loci(.x), ncol = ncol(pairwise_combn))
   }
   # summarise population frequencies
-  pop_freqs_df <- gt_grouped_summaries(.gt_get_bigsnp(.x)$genotypes,
+  pop_freqs_df <- gt_grouped_summaries(
+    .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
@@ -81,15 +85,20 @@ pairwise_pop_fst_hudson <- function(.x,
     pop1 <- pairwise_combn[1, i_col]
     pop2 <- pairwise_combn[2, i_col]
 
-    numerator <- (pop_freqs_df$freq_alt[, pop1] - pop_freqs_df$freq_alt[, pop2])^2 - # nolint start
-      (pop_freqs_df$freq_alt[, pop1] * pop_freqs_df$freq_ref[, pop1]) / (pop_freqs_df$n[, pop1] - 1) -
-      (pop_freqs_df$freq_alt[, pop2] * pop_freqs_df$freq_ref[, pop2]) / (pop_freqs_df$n[, pop2] - 1)
-    denominator <- pop_freqs_df$freq_alt[, pop1] * pop_freqs_df$freq_ref[, pop2] +
+    numerator <- (pop_freqs_df$freq_alt[, pop1] -
+      pop_freqs_df$freq_alt[, pop2])^2 - # nolint start
+      (pop_freqs_df$freq_alt[, pop1] * pop_freqs_df$freq_ref[, pop1]) /
+        (pop_freqs_df$n[, pop1] - 1) -
+      (pop_freqs_df$freq_alt[, pop2] * pop_freqs_df$freq_ref[, pop2]) /
+        (pop_freqs_df$n[, pop2] - 1)
+    denominator <- pop_freqs_df$freq_alt[, pop1] *
+      pop_freqs_df$freq_ref[, pop2] +
       pop_freqs_df$freq_alt[, pop2] * pop_freqs_df$freq_ref[, pop1] # nolint end
     if (by_locus) {
       fst_locus[, i_col] <- numerator / denominator
     }
-    fst_tot[i_col] <- mean(numerator, na.rm = TRUE) / mean(denominator, na.rm = TRUE) # nolint
+    fst_tot[i_col] <- mean(numerator, na.rm = TRUE) /
+      mean(denominator, na.rm = TRUE) # nolint
   }
   # format nicely the objects
   group_combinations <- cbind(
@@ -116,11 +125,12 @@ pairwise_pop_fst_hudson <- function(.x,
 
 ## use tidyr::pivot_wider to turn into a matrix if that's what is requested.
 
-
 # the implementation for Nei 87, adapted from hierfstat
-pairwise_pop_fst_nei87 <- function(.x,
-                                   by_locus = FALSE,
-                                   n_cores = bigstatsr::nb_cores()) {
+pairwise_pop_fst_nei87 <- function(
+  .x,
+  by_locus = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   # get the populations
   .group_levels <- .x %>% group_keys()
   # create all combinations
@@ -128,13 +138,15 @@ pairwise_pop_fst_nei87 <- function(.x,
   # vector and matrix to store Fst for total and by locus
   fst_tot <- rep(NA_real_, ncol(pairwise_combn))
   if (by_locus) {
-    fst_locus <- matrix(NA_real_,
+    fst_locus <- matrix(
+      NA_real_,
       nrow = count_loci(.x),
       ncol = ncol(pairwise_combn)
     )
   }
   # summarise population frequencies
-  pop_freqs_df <- gt_grouped_summaries(.gt_get_bigsnp(.x)$genotypes,
+  pop_freqs_df <- gt_grouped_summaries(
+    .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
@@ -157,9 +169,13 @@ pairwise_pop_fst_nei87 <- function(.x,
     Hs <- n / (n - 1) * Hs # nolint
     np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint
     # mean sample size over the populations
-    mn <- apply(n, 1, fun <- function(x) {
-      sum(!is.na(x)) / sum(1 / x[!is.na(x)])
-    })
+    mn <- apply(
+      n,
+      1,
+      fun <- function(x) {
+        sum(!is.na(x)) / sum(1 / x[!is.na(x)])
+      }
+    )
     # mean sum of square frequencies
     msp2 <- apply(sp2, 1, mean, na.rm = TRUE) # nolint start
     mp2 <- rowMeans(freq_alt)^2 + rowMeans(freq_ref)^2
@@ -199,9 +215,11 @@ pairwise_pop_fst_nei87 <- function(.x,
 
 
 # This should be equivalent to the hierfstat implementation
-pairwise_pop_fst_wc84 <- function(.x,
-                                  by_locus = FALSE,
-                                  n_cores = bigstatsr::nb_cores()) {
+pairwise_pop_fst_wc84 <- function(
+  .x,
+  by_locus = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   # get the populations
   .group_levels <- .x %>% group_keys()
   # create all combinations
@@ -209,13 +227,15 @@ pairwise_pop_fst_wc84 <- function(.x,
   # vector and matrix to store Fst for total and by locus
   fst_tot <- rep(NA_real_, ncol(pairwise_combn))
   if (by_locus) {
-    fst_locus <- matrix(NA_real_,
+    fst_locus <- matrix(
+      NA_real_,
       nrow = count_loci(.x),
       ncol = ncol(pairwise_combn)
     )
   }
   # summarise population frequencies
-  pop_freqs_df <- gt_grouped_summaries(.gt_get_bigsnp(.x)$genotypes,
+  pop_freqs_df <- gt_grouped_summaries(
+    .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
@@ -240,10 +260,16 @@ pairwise_pop_fst_wc84 <- function(.x,
     s2 <- rowSums((p - p_bar)^2 * n_ind) / n_bar / (r - 1)
     h_bar <- rowSums(pop_freqs_df$het_obs[, pops] * n_ind) / n_total
 
-    a <- n_bar / n_c * (s2 - 1 / (n_bar - 1) *
-      (p_bar * (1 - p_bar) - (r - 1) / r * s2 - h_bar / 4)) # nolint
-    b <- n_bar / (n_bar - 1) *
-      (p_bar * (1 - p_bar) - (r - 1) / r * s2 - (2 * n_bar - 1) / (4 * n_bar) * h_bar) # nolint
+    a <- n_bar /
+      n_c *
+      (s2 -
+        1 / (n_bar - 1) * (p_bar * (1 - p_bar) - (r - 1) / r * s2 - h_bar / 4)) # nolint
+    b <- n_bar /
+      (n_bar - 1) *
+      (p_bar *
+        (1 - p_bar) -
+        (r - 1) / r * s2 -
+        (2 * n_bar - 1) / (4 * n_bar) * h_bar) # nolint
     c <- h_bar / 2
 
     numerator <- a
@@ -268,7 +294,8 @@ pairwise_pop_fst_wc84 <- function(.x,
     rownames(fst_locus) <- loci_names(.x)
     colnames(fst_locus) <- apply(
       group_combinations,
-      1, function(x) paste(x, collapse = ".")
+      1,
+      function(x) paste(x, collapse = ".")
     )
     return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
   } else {

@@ -57,9 +57,14 @@
 # object to fully fit our purposes, and give up trying to be backcompatible
 # with adegenet
 
-
-gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da = NULL,
-                    loadings_by_locus = TRUE, pca_info = FALSE) {
+gt_dapc <- function(
+  x,
+  pop = NULL,
+  n_pca = NULL,
+  n_da = NULL,
+  loadings_by_locus = TRUE,
+  pca_info = FALSE
+) {
   if (!inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }
@@ -67,12 +72,14 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da = NULL,
     stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
   }
 
-  if (is.null(pop)) { # if no pop was given, use best_k
+  if (is.null(pop)) {
+    # if no pop was given, use best_k
     if (any(!inherits(x, "gt_cluster_pca"), is.null(x$best_k))) {
       stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca ")
     }
     pop.fac <- as.factor(x$clusters$groups[[x$best_k]])
-  } else if (is.factor(pop)) { # if a factor with all assignments was given
+  } else if (is.factor(pop)) {
+    # if a factor with all assignments was given
     pop.fac <- pop
   } else if (is.numeric(pop) && inherits(x, "gt_cluster_pca")) {
     # if pop is the k value
@@ -88,19 +95,20 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da = NULL,
   # FIXME: is this actually nlevels(pop)?
   n_pop <- nlevels(pop.fac)
 
-
   if (is.null(n_pca)) {
     # if we generated clusters, use the same pca
     if (inherits(x, "gt_cluster_pca")) {
       n_pca <- x$clusters$n_pca
-    } else { # use all principal components
+    } else {
+      # use all principal components
       n_pca <- length(x$d)
     }
     # by default, use number of clusters minus 1
     if (n_pca > n_pop) {
       n_pca <- n_pop - 1
     }
-  } else { # if n_pca was given, check that it is not too large
+  } else {
+    # if n_pca was given, check that it is not too large
     if (n_pca > ncol(x$u)) {
       n_pca <- ncol(x$u)
     }
@@ -111,7 +119,6 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da = NULL,
   # we started with (i.e. what we retained with the PCAs)
   XU.lambda <- sum(x$d[1:n_pca]) / sum(x$d) # sum of retained eigenvalues
   names(XU) <- paste("PCA-pc", 1:ncol(XU), sep = ".")
-
 
   ## PERFORM DA ##
   # tol=1e-30 is a kludge, but a safe (?) one to avoid fancy

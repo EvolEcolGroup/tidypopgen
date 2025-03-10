@@ -43,21 +43,25 @@ loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
     # col hwe for submatrix (some rows, and some columns)
-    col_hwe_sub <- function(X, ind, rows_to_keep) { # nolint
+    col_hwe_sub <- function(X, ind, rows_to_keep) {
+      # nolint
       # apply(X[rows_to_keep, ind], 2, HWExact_geno_vec) #nolint
-      geno_counts <- bigstatsr::big_counts(X,
+      geno_counts <- bigstatsr::big_counts(
+        X,
         ind.row = rows_to_keep,
         ind.col = ind
       )
       apply(geno_counts, 2, hwe_exact_geno_col, mid_p = mid_p)
     }
-    hwe_p <- bigstatsr::big_apply(geno_fbm,
+    hwe_p <- bigstatsr::big_apply(
+      geno_fbm,
       a.FUN = col_hwe_sub,
       rows_to_keep = rows_to_keep,
       ind = attr(.x, "loci")$big_index,
       a.combine = "c"
     )
-  } else { # if we have a single individual
+  } else {
+    # if we have a single individual
     stop("Not implemented for a single individual")
   }
   hwe_p
@@ -75,9 +79,5 @@ loci_hwe.grouped_df <- function(.x, ...) {
 hwe_exact_geno_col <- function(x, mid_p) {
   # it would be even better to use it direclty in a C function that does
   # the counting
-  SNPHWE2(x[2],
-    x[1],
-    x[3],
-    midp = mid_p
-  )
+  SNPHWE2(x[2], x[1], x[3], midp = mid_p)
 }

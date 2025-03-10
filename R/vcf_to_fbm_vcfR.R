@@ -10,11 +10,12 @@
 #' @keywords internal
 
 vcf_to_fbm_vcfR <- function(
-    # nolint
-    vcf_path,
-    chunk_size = NULL,
-    backingfile = NULL,
-    quiet = FALSE) {
+  # nolint
+  vcf_path,
+  chunk_size = NULL,
+  backingfile = NULL,
+  quiet = FALSE
+) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)
@@ -68,7 +69,6 @@ vcf_to_fbm_vcfR <- function(
     ploidy = unname(ploidy)
   )
 
-
   loci <- tibble(
     chromosome = NULL,
     marker.id = NULL,
@@ -100,9 +100,11 @@ vcf_to_fbm_vcfR <- function(
     if (nrow(gt) > 1) {
       # @TODO we could parallelise here
       gt <- t(apply(gt, 2, poly_indiv_dosage, max_ploidy = max_ploidy))
-    } else if (nrow(gt) == 1) { # if we only have one marker
+    } else if (nrow(gt) == 1) {
+      # if we only have one marker
       gt <-
-        matrix(apply(gt, 2, poly_indiv_dosage, max_ploidy = max_ploidy),
+        matrix(
+          apply(gt, 2, poly_indiv_dosage, max_ploidy = max_ploidy),
           ncol = 1
         )
     } else {
@@ -114,8 +116,7 @@ vcf_to_fbm_vcfR <- function(
     # add the new columns
     file_backed_matrix$add_columns(ncol(gt))
     # fill them in
-    file_backed_matrix[
-      ,
+    file_backed_matrix[,
       index_start:(index_start + ncol(gt) - 1)
     ] <- gt
 
@@ -124,24 +125,30 @@ vcf_to_fbm_vcfR <- function(
     temp_vcf <- vcfR::addID(temp_vcf)
 
     # create loci table
-    loci <- rbind(loci, tibble(
-      chromosome = unname(vcfR::getCHROM(temp_vcf)[bi]),
-      # remove names as it does have ID as a name
-      marker.ID = unname(vcfR::getID(temp_vcf)[bi]),
-      genetic.dist = 0,
-      physical.pos = vcfR::getPOS(temp_vcf)[bi],
-      allele1 = unname(vcfR::getALT(temp_vcf)[bi]),
-      allele2 = unname(vcfR::getREF(temp_vcf)[bi])
-    ))
+    loci <- rbind(
+      loci,
+      tibble(
+        chromosome = unname(vcfR::getCHROM(temp_vcf)[bi]),
+        # remove names as it does have ID as a name
+        marker.ID = unname(vcfR::getID(temp_vcf)[bi]),
+        genetic.dist = 0,
+        physical.pos = vcfR::getPOS(temp_vcf)[bi],
+        allele1 = unname(vcfR::getALT(temp_vcf)[bi]),
+        allele2 = unname(vcfR::getREF(temp_vcf)[bi])
+      )
+    )
   }
   # save it
   file_backed_matrix$save()
 
-  bigsnp_obj <- structure(list(
-    genotypes = file_backed_matrix,
-    fam = fam,
-    map = loci
-  ), class = "bigSNP")
+  bigsnp_obj <- structure(
+    list(
+      genotypes = file_backed_matrix,
+      fam = fam,
+      map = loci
+    ),
+    class = "bigSNP"
+  )
 
   bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
   # and return the path to the rds

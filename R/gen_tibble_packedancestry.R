@@ -1,9 +1,13 @@
 # A function to read geno packedancestrymap files
-gen_tibble_packedancestry <- function(x, ...,
-                                      valid_alleles = c("A", "T", "C", "G"),
-                                      missing_alleles = c("0", "."),
-                                      chunk_size = NULL,
-                                      backingfile = NULL, quiet = FALSE) {
+gen_tibble_packedancestry <- function(
+  x,
+  ...,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  chunk_size = NULL,
+  backingfile = NULL,
+  quiet = FALSE
+) {
   if (is.null(chunk_size)) {
     chunk_size <- 100
   }
@@ -34,8 +38,12 @@ gen_tibble_packedancestry <- function(x, ...,
   # count the loci
   loci_table <- utils::read.table(map_file, header = FALSE)
   names(loci_table) <- c(
-    "name", "chromosome", "genetic_dist", "position",
-    "allele_ref", "allele_alt"
+    "name",
+    "chromosome",
+    "genetic_dist",
+    "position",
+    "allele_ref",
+    "allele_alt"
   )
   loci_table$allele_alt[loci_table$allele_alt == "X"] <- NA
   no_variants <- nrow(loci_table)
@@ -48,7 +56,6 @@ gen_tibble_packedancestry <- function(x, ...,
     backingfile = backingfile
   )
 
-
   # set up chunks
   chunks <- split(
     1:no_individuals,
@@ -56,10 +63,12 @@ gen_tibble_packedancestry <- function(x, ...,
   )
 
   for (i in chunks) {
-    res <- admixtools::read_packedancestrymap(sub("\\.geno$", "", x),
+    res <- admixtools::read_packedancestrymap(
+      sub("\\.geno$", "", x),
       transpose = TRUE,
       inds = indiv_table$id[i],
-      ..., verbose = !quiet
+      ...,
+      verbose = !quiet
     )
     res$geno[is.na(res$geno)] <- 3
     # now insert the genotypes in the FBM
@@ -91,15 +100,19 @@ gen_tibble_packedancestry <- function(x, ...,
     allele2 = loci_table$allele_alt
   )
 
-  bigsnp_obj <- structure(list(
-    genotypes = file_backed_matrix,
-    fam = fam,
-    map = map
-  ), class = "bigSNP")
+  bigsnp_obj <- structure(
+    list(
+      genotypes = file_backed_matrix,
+      fam = fam,
+      map = map
+    ),
+    class = "bigSNP"
+  )
 
   bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
 
-  gen_tibble(bigsnp_obj$genotypes$rds,
+  gen_tibble(
+    bigsnp_obj$genotypes$rds,
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles,
     backingfile = backingfile,

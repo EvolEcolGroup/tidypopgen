@@ -31,9 +31,21 @@
 #' - `group` the group column of the input `gen_tibble` (if applicable)
 #' @export
 
-gt_snmf <- function(x, k, project = "continue", n_runs = 1, alpha,
-                    tolerance = 0.00001, entropy = FALSE, percentage = 0.05,
-                    I, iterations = 200, ploidy = 2, seed = -1) { # nolint
+gt_snmf <- function(
+  x,
+  k,
+  project = "continue",
+  n_runs = 1,
+  alpha,
+  tolerance = 0.00001,
+  entropy = FALSE,
+  percentage = 0.05,
+  I,
+  iterations = 200,
+  ploidy = 2,
+  seed = -1
+) {
+  # nolint
   # add seed check again!!!
   if (!is.null(seed) && length(seed) != n_runs) {
     stop("'seed' should be a vector of length 'n_runs'")
@@ -117,16 +129,40 @@ gt_snmf <- function(x, k, project = "continue", n_runs = 1, alpha,
   for (this_k in as.integer(k)) {
     for (this_rep in seq_len(n_runs)) {
       adm_list$k[index] <- this_k
-      adm_list$Q[[index]] <- q_matrix(utils::read.table(paste0(
-        out_file, ".snmf/K", this_k,
-        "/run", this_rep, "/", file_name,
-        "_r", this_rep, ".", this_k, ".Q"
-      ), header = FALSE))
-      adm_list$G[[index]] <- q_matrix(utils::read.table(paste0(
-        out_file, ".snmf/K", this_k,
-        "/run", this_rep, "/", file_name,
-        "_r", this_rep, ".", this_k, ".G"
-      ), header = FALSE))
+      adm_list$Q[[index]] <- q_matrix(utils::read.table(
+        paste0(
+          out_file,
+          ".snmf/K",
+          this_k,
+          "/run",
+          this_rep,
+          "/",
+          file_name,
+          "_r",
+          this_rep,
+          ".",
+          this_k,
+          ".Q"
+        ),
+        header = FALSE
+      ))
+      adm_list$G[[index]] <- q_matrix(utils::read.table(
+        paste0(
+          out_file,
+          ".snmf/K",
+          this_k,
+          "/run",
+          this_rep,
+          "/",
+          file_name,
+          "_r",
+          this_rep,
+          ".",
+          this_k,
+          ".G"
+        ),
+        header = FALSE
+      ))
       index <- index + 1
     }
   }
@@ -174,24 +210,34 @@ extract_cross_entropy <- function(log_text) {
     # Match the "sNMF K = x repetition y" line
     if (grepl("sNMF K = \\d+  repetition \\d+", line)) {
       # Extract K and repetition
-      matches <- regmatches(line, regexec("sNMF K = (\\d+)  repetition (\\d+)", line)) # nolint
+      matches <- regmatches(
+        line,
+        regexec("sNMF K = (\\d+)  repetition (\\d+)", line)
+      ) # nolint
       K <- as.integer(matches[[1]][2]) # nolint
       repetition <- as.integer(matches[[1]][3])
     }
 
     # Match the "Cross-Entropy (all data):" line
     if (grepl("Cross-Entropy \\(all data\\):", line)) {
-      matches <- regmatches(line, regexec("Cross-Entropy \\(all data\\):\\s+([0-9.]+)", line)) # nolint
+      matches <- regmatches(
+        line,
+        regexec("Cross-Entropy \\(all data\\):\\s+([0-9.]+)", line)
+      ) # nolint
       cross_entropy_all <- as.numeric(matches[[1]][2])
     }
 
     # Match the "Cross-Entropy (masked data):" line
     if (grepl("Cross-Entropy \\(masked data\\):", line)) {
-      matches <- regmatches(line, regexec("Cross-Entropy \\(masked data\\):\\s+([0-9.]+)", line)) # nolint
+      matches <- regmatches(
+        line,
+        regexec("Cross-Entropy \\(masked data\\):\\s+([0-9.]+)", line)
+      ) # nolint
       cross_entropy_masked <- as.numeric(matches[[1]][2])
 
       # Add the collected data to the tibble
-      results <- add_row(results,
+      results <- add_row(
+        results,
         K = K,
         repetition = repetition,
         cross_entropy_all = cross_entropy_all,

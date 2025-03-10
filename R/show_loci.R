@@ -30,7 +30,6 @@ show_loci.vctrs_bigSNP <- function(.x, ...) {
 }
 
 
-
 #' @export
 #' @param value a data.frame or tibble of loci information to replace the
 #'   current one.

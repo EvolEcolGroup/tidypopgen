@@ -25,8 +25,13 @@
 #'   `include_global=TRUE`)
 #' @export
 
-pop_fis <- function(.x, method = c("Nei87", "WG17"), by_locus = FALSE,
-                    include_global = FALSE, allele_sharing_mat = NULL) {
+pop_fis <- function(
+  .x,
+  method = c("Nei87", "WG17"),
+  by_locus = FALSE,
+  include_global = FALSE,
+  allele_sharing_mat = NULL
+) {
   method <- match.arg(method)
   if (method == "Nei87") {
     if (!is.null(allele_sharing_mat)) {
@@ -37,27 +42,34 @@ pop_fis <- function(.x, method = c("Nei87", "WG17"), by_locus = FALSE,
     if (by_locus) {
       stop("by_locus not implemented for WG17")
     }
-    pop_fis_wg17(.x,
+    pop_fis_wg17(
+      .x,
       include_global = include_global,
       allele_sharing_mat = allele_sharing_mat
     )
   }
 }
 
-pop_fis_nei87 <- function(.x, by_locus = FALSE, include_global = include_global,
-                          n_cores = bigstatsr::nb_cores()) {
+pop_fis_nei87 <- function(
+  .x,
+  by_locus = FALSE,
+  include_global = include_global,
+  n_cores = bigstatsr::nb_cores()
+) {
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
     .group_levels <- .x %>% group_keys()
     .group_ids <- dplyr::group_indices(.x) - 1
-  } else { # create a dummy pop
+  } else {
+    # create a dummy pop
     .group_levels <- tibble(population = "pop")
     .group_ids <- rep(0, nrow(.x))
   }
 
   # summarise population frequencies
-  pop_freqs_df <- gt_grouped_summaries(.gt_get_bigsnp(.x)$genotypes,
+  pop_freqs_df <- gt_grouped_summaries(
+    .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = .group_ids,
@@ -93,16 +105,19 @@ pop_fis_nei87 <- function(.x, by_locus = FALSE, include_global = include_global,
 }
 
 
-pop_fis_wg17 <- function(.x,
-                         include_global = FALSE,
-                         allele_sharing_mat = NULL) {
+pop_fis_wg17 <- function(
+  .x,
+  include_global = FALSE,
+  allele_sharing_mat = NULL
+) {
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
   }
-  fis_by_pop <- hierfstat::fis.dosage(allele_sharing_mat,
+  fis_by_pop <- hierfstat::fis.dosage(
+    allele_sharing_mat,
     matching = TRUE,
     pop = group_indices(.x)
   )

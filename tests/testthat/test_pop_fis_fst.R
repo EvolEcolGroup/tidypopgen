@@ -20,7 +20,12 @@ test_loci <- data.frame(
   allele_alt = c("T", "C", NA, "C", "G", "A")
 )
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+test_gt <- gen_tibble(
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
+)
 
 
 test_that("pop_fst and pop_fist WG17 compute correctly", {
@@ -40,7 +45,10 @@ test_that("pop_fst and pop_fist WG17 compute correctly", {
 
   # compare results against raw hierfstat code
   fis_by_pop <- test_gt %>% pop_fis(include_global = TRUE, method = "WG17")
-  fis_by_pop_hier <- hierfstat::fis.dosage(test_genotypes, pop = test_indiv_meta$population)
+  fis_by_pop_hier <- hierfstat::fis.dosage(
+    test_genotypes,
+    pop = test_indiv_meta$population
+  )
   expect_true(all.equal(fis_by_pop, fis_by_pop_hier, check.attributes = FALSE))
   # now check that we don't get the global
   fis_by_pop_sub <- test_gt %>% pop_fis(method = "WG17")
@@ -48,7 +56,10 @@ test_that("pop_fst and pop_fist WG17 compute correctly", {
 
   # compare results against raw hierfstat code
   fst_by_pop <- test_gt %>% pop_fst(include_global = TRUE)
-  fst_by_pop_hier <- hierfstat::fst.dosage(test_genotypes, pop = test_indiv_meta$population)
+  fst_by_pop_hier <- hierfstat::fst.dosage(
+    test_genotypes,
+    pop = test_indiv_meta$population
+  )
   expect_true(all.equal(fst_by_pop, fst_by_pop_hier, check.attributes = FALSE))
   # now check that we don't get the global
   fst_by_pop_sub <- test_gt %>% pop_fst()

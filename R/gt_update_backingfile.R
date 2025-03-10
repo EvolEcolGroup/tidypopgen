@@ -21,8 +21,13 @@
 #' @returns a [`gen_tibble`] with a backing file (i.e. a new File Backed Matrix)
 #' @export
 
-gt_update_backingfile <- function(.x, backingfile = NULL, chunk_size = NULL,
-                                  rm_unsorted_dist = TRUE, quiet = FALSE) {
+gt_update_backingfile <- function(
+  .x,
+  backingfile = NULL,
+  chunk_size = NULL,
+  rm_unsorted_dist = TRUE,
+  quiet = FALSE
+) {
   # if the backingfile is null, create a name based on the current backing file
   if (is.null(backingfile)) {
     backingfile <- change_duplicated_file_name(gt_get_file_names(.x)[2])
@@ -74,12 +79,19 @@ gt_update_backingfile <- function(.x, backingfile = NULL, chunk_size = NULL,
   map <- map[.gt_bigsnp_cols(.x), ]
   # if we remove unsorted genetic distance, set it to zero if it is not sorted
   if (rm_unsorted_dist) {
-    if (any(unlist(show_loci(.x) %>%
-      group_by(.data$chr_int) %>% # nolint start
-      group_map(~ is.unsorted(.x$genetic_dist)))) ||
-      any(unlist(show_loci(.x) %>%
-        group_by(.data$chr_int) %>%
-        group_map(~ duplicated(.x$genetic_dist))))) { # nolint end
+    if (
+      any(unlist(
+        show_loci(.x) %>%
+          group_by(.data$chr_int) %>% # nolint start
+          group_map(~ is.unsorted(.x$genetic_dist))
+      )) ||
+        any(unlist(
+          show_loci(.x) %>%
+            group_by(.data$chr_int) %>%
+            group_map(~ duplicated(.x$genetic_dist))
+        ))
+    ) {
+      # nolint end
       if (!quiet) {
         message("Genetic distances are not sorted, setting them to zero")
       }
@@ -87,9 +99,9 @@ gt_update_backingfile <- function(.x, backingfile = NULL, chunk_size = NULL,
     }
   }
 
-
   # Create the bigSNP object
-  bigsnp_obj <- structure(list(genotypes = new_bk_matrix, fam = fam, map = map),
+  bigsnp_obj <- structure(
+    list(genotypes = new_bk_matrix, fam = fam, map = map),
     class = "bigSNP"
   )
 
@@ -100,9 +112,9 @@ gt_update_backingfile <- function(.x, backingfile = NULL, chunk_size = NULL,
   # now return a gen_tibble based on the new backing file
   new_gen_tbl <- .x
 
-
   # now create a genotype column with this data
-  new_gen_tbl$genotypes <- vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
+  new_gen_tbl$genotypes <- vctrs::new_vctr(
+    seq_len(nrow(bigsnp_obj$fam)),
     bigsnp = bigsnp_obj,
     # TODO is this redundant with the info in the bigSNP object?
     bigsnp_file = bigsnp_file,

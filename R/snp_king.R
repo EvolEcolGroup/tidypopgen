@@ -12,10 +12,13 @@
 #' @returns a square symmetrical matrix of relationship coefficients between
 #'  individuals
 #' @export
-snp_king <- function(X, # nolint start
-                     ind.row = bigstatsr::rows_along(X),
-                     ind.col = bigstatsr::cols_along(X),
-                     block.size = bigstatsr::block_size(nrow(X)) * 4) { # nolint end
+snp_king <- function(
+  X, # nolint start
+  ind.row = bigstatsr::rows_along(X),
+  ind.col = bigstatsr::cols_along(X),
+  block.size = bigstatsr::block_size(nrow(X)) * 4
+) {
+  # nolint end
   if (!inherits(X, "FBM.code256")) {
     stop("X should be a FBM.code256 matrix")
   }
@@ -59,16 +62,20 @@ snp_king <- function(X, # nolint start
   N_Aa_j <- bigstatsr::big_transpose(N_Aa_i) # nolint
 
   # divide KING num by den for a set of col 'ind'
-  divide_king_sub <- function(K, ind, N_Aa_i, N_Aa_j) { # nolint start
+  divide_king_sub <- function(K, ind, N_Aa_i, N_Aa_j) {
+    # nolint start
     K_sub <- K[, ind]
     N_Aa_i_sub <- N_Aa_i[, ind]
     N_Aa_j_sub <- N_Aa_j[, ind] # nolint end
     # denominator of KING for these columns
-    K_sub / (2 * pmin(N_Aa_i_sub, N_Aa_j_sub)) + 0.5 -
+    K_sub /
+      (2 * pmin(N_Aa_i_sub, N_Aa_j_sub)) +
+      0.5 -
       0.25 * (N_Aa_i_sub + N_Aa_j_sub) / pmin(N_Aa_i_sub, N_Aa_j_sub)
   }
   # This works, but could be done with a FBM in c++ for added speed
-  ibs_counts_matrix <- bigstatsr::big_apply(k_numerator, # nolint
+  ibs_counts_matrix <- bigstatsr::big_apply(
+    k_numerator, # nolint
     a.FUN = divide_king_sub,
     ind = seq_len(ncol(k_numerator)),
     N_Aa_i = N_Aa_i,

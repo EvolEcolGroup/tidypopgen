@@ -30,21 +30,16 @@ loci_n.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
 
   tot_n <- length(.x)
-#  stopifnot_diploid(.x)
+  #  stopifnot_diploid(.x)
   loc_n <- tot_n - .x %>% loci_missingness(as_counts = TRUE)
   loc_n
 }
 
 #' @export
 #' @rdname loci_n
-loci_n.grouped_df <- function(.x,
-                                        n_cores = bigstatsr::nb_cores(), ...) {
-
-
+loci_n.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
   rlang::check_dots_empty()
 
-
-    # return a list to mimic a group_map
-    lapply(seq_len(ncol(na_mat)), function(i) na_mat[,i])
+  # return a list to mimic a group_map
+  lapply(seq_len(ncol(na_mat)), function(i) na_mat[, i])
 }
-

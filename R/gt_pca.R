@@ -40,10 +40,13 @@ NULL
 #' @return The square of the Frobenius norm of the matrix
 #' @keywords internal
 
-square_frobenious <- function(X, ind.row = bigstatsr::rows_along(X), # nolint
-                              ind.col = bigstatsr::cols_along(X), # nolint
-                              center = rep(0, length(ind.col)),
-                              scale = rep(1, length(ind.col))) {
+square_frobenious <- function(
+  X,
+  ind.row = bigstatsr::rows_along(X), # nolint
+  ind.col = bigstatsr::cols_along(X), # nolint
+  center = rep(0, length(ind.col)),
+  scale = rep(1, length(ind.col))
+) {
   if (length(center) != length(ind.col) || length(scale) != length(ind.col)) {
     stop(paste(
       "center and scale must be the same length as the number of",

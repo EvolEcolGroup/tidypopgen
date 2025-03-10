@@ -34,7 +34,8 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, ...) {
   # col means for submatrix (all rows, only some columns)
 
   # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
-  col_1_na <- function(X, ind, rows_to_keep) { # nolint
+  col_1_na <- function(X, ind, rows_to_keep) {
+    # nolint
     count_1 <- function(a) {
       sum(a == 1, na.rm = TRUE)
     }
@@ -46,10 +47,12 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, ...) {
   }
 
   # count heterozygotes and nas in one go
-  this_col_1_na <- bigstatsr::big_apply(X,
+  this_col_1_na <- bigstatsr::big_apply(
+    X,
     a.FUN = col_1_na,
     ind = attr(.x, "loci")$big_index,
-    a.combine = "plus", rows_to_keep = rows_to_keep
+    a.combine = "plus",
+    rows_to_keep = rows_to_keep
   )
   this_col_1_na[1, ] / (ncol(X) - this_col_1_na[2, ])
 }

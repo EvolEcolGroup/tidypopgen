@@ -18,8 +18,10 @@ test_loci <- data.frame(
 )
 
 test_gt <- gen_tibble(
-  x = test_genotypes, loci = test_loci,
-  indiv_meta = test_indiv_meta, quiet = TRUE
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
 )
 
 # this also tests show_genotypes and show_loci

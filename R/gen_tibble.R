@@ -67,12 +67,14 @@
 #' @export
 
 gen_tibble <-
-  function(x,
-           ...,
-           valid_alleles = c("A", "T", "C", "G"),
-           missing_alleles = c("0", "."),
-           backingfile = NULL,
-           quiet = FALSE) {
+  function(
+    x,
+    ...,
+    valid_alleles = c("A", "T", "C", "G"),
+    missing_alleles = c("0", "."),
+    backingfile = NULL,
+    quiet = FALSE
+  ) {
     UseMethod("gen_tibble", x)
   }
 
@@ -82,18 +84,19 @@ gen_tibble <-
 #' @export
 #' @rdname gen_tibble
 gen_tibble.character <-
-  function(x,
-           ...,
-           parser = c("vcfR", "cpp"),
-           n_cores = 1,
-           chunk_size = NULL,
-           valid_alleles = c("A", "T", "C", "G"),
-           missing_alleles = c("0", "."),
-           backingfile = NULL,
-           quiet = FALSE) {
+  function(
+    x,
+    ...,
+    parser = c("vcfR", "cpp"),
+    n_cores = 1,
+    chunk_size = NULL,
+    valid_alleles = c("A", "T", "C", "G"),
+    missing_alleles = c("0", "."),
+    backingfile = NULL,
+    quiet = FALSE
+  ) {
     # parser for vcf
     parser <- match.arg(parser)
-
 
     # check that valid alleles does not contain zero
     if ("0" %in% valid_alleles) {
@@ -109,27 +112,35 @@ gen_tibble.character <-
       backingfile <- change_duplicated_file_name(backingfile)
     }
 
-
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
       x_gt <- gen_tibble_bed_rds(
-        x = x, ...,
+        x = x,
+        ...,
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         quiet = quiet
       )
-    } else if ((tolower(file_ext(x)) == "vcf") || (tolower(file_ext(x)) == "gz")) { # nolint
+    } else if (
+      (tolower(file_ext(x)) == "vcf") || (tolower(file_ext(x)) == "gz")
+    ) {
+      # nolint
       return(gen_tibble_vcf(
-        x = x, ..., parser = parser, chunk_size = chunk_size,
+        x = x,
+        ...,
+        parser = parser,
+        chunk_size = chunk_size,
         n_cores = n_cores,
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
-        backingfile = backingfile, quiet = quiet
+        backingfile = backingfile,
+        quiet = quiet
       ))
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
-        x = x, ...,
+        x = x,
+        ...,
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
@@ -137,7 +148,8 @@ gen_tibble.character <-
       )
     } else if (tolower(file_ext(x)) == "geno") {
       x_gt <- gen_tibble_packedancestry(
-        x = x, ...,
+        x = x,
+        ...,
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
@@ -160,18 +172,20 @@ gen_tibble.character <-
   }
 
 
-gen_tibble_bed_rds <- function(x, ...,
-                               valid_alleles = c("A", "T", "C", "G"),
-                               missing_alleles = c("0", "."),
-                               backingfile = NULL, quiet = FALSE) {
+gen_tibble_bed_rds <- function(
+  x,
+  ...,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  backingfile = NULL,
+  quiet = FALSE
+) {
   # if it is a bed file, we convert it to a bigsnpr
   if (tolower(file_ext(x)) == "bed") {
     if (is.null(backingfile)) {
       backingfile <- bigsnpr::sub_bed(x)
     }
-    bigsnp_path <- bigsnpr::snp_readBed(x,
-      backingfile = backingfile
-    )
+    bigsnp_path <- bigsnpr::snp_readBed(x, backingfile = backingfile)
   } else if (tolower(file_ext(x)) == "rds") {
     bigsnp_path <- x
   }
@@ -194,7 +208,8 @@ gen_tibble_bed_rds <- function(x, ...,
     bigsnp_obj$fam$ploidy <- 2
   }
 
-  indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
+  indiv_meta$genotypes <- new_vctrs_bigsnp(
+    bigsnp_obj,
     bigsnp_file = bigsnp_path,
     indiv_id = bigsnp_obj$fam$sample.ID,
     ploidy = ploidy
@@ -241,14 +256,15 @@ gen_tibble_bed_rds <- function(x, ...,
     indiv_meta,
     class = "gen_tbl"
   )
-  check_allele_alphabet(new_gen_tbl,
+  check_allele_alphabet(
+    new_gen_tbl,
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles,
     remove_on_fail = TRUE
   )
-  show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl),
-    missing_alleles =
-      missing_alleles
+  show_loci(new_gen_tbl) <- harmonise_missing_values(
+    show_loci(new_gen_tbl),
+    missing_alleles = missing_alleles
   )
   return(new_gen_tbl)
 }
@@ -263,11 +279,17 @@ gen_tibble_bed_rds <- function(x, ...,
 #' automatically from the data as they are read.
 #' @export
 #' @rdname gen_tibble
-gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
-                              ploidy = 2,
-                              valid_alleles = c("A", "T", "C", "G"),
-                              missing_alleles = c("0", "."),
-                              backingfile = NULL, quiet = FALSE) {
+gen_tibble.matrix <- function(
+  x,
+  indiv_meta,
+  loci,
+  ...,
+  ploidy = 2,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  backingfile = NULL,
+  quiet = FALSE
+) {
   rlang::check_dots_empty()
 
   # check that valid alleles does not contain zero
@@ -309,7 +331,6 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
     ))
   }
 
-
   if (!is.null(backingfile)) {
     backingfile <- change_duplicated_file_name(backingfile)
   }
@@ -325,7 +346,8 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
   bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile, ".rds")
 
   indiv_meta <- as.list(indiv_meta)
-  indiv_meta$genotypes <- new_vctrs_bigsnp(bigsnp_obj,
+  indiv_meta$genotypes <- new_vctrs_bigsnp(
+    bigsnp_obj,
     bigsnp_file = bigsnp_path,
     indiv_id = bigsnp_obj$fam$sample.ID,
     ploidy = ploidy
@@ -335,13 +357,15 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
     indiv_meta,
     class = "gen_tbl"
   )
-  check_allele_alphabet(new_gen_tbl,
+  check_allele_alphabet(
+    new_gen_tbl,
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles,
     remove_on_fail = TRUE
   )
   show_loci(new_gen_tbl) <-
-    harmonise_missing_values(show_loci(new_gen_tbl),
+    harmonise_missing_values(
+      show_loci(new_gen_tbl),
       missing_alleles = missing_alleles
     )
 
@@ -356,10 +380,19 @@ gen_tibble.matrix <- function(x, indiv_meta, loci, ...,
 
 check_valid_loci <- function(loci_df) {
   loci_df <- as_tibble(loci_df)
-  if (!all(c(
-    "name", "chromosome", "position", "genetic_dist",
-    "allele_ref", "allele_alt"
-  ) %in% names(loci_df))) {
+  if (
+    !all(
+      c(
+        "name",
+        "chromosome",
+        "position",
+        "genetic_dist",
+        "allele_ref",
+        "allele_alt"
+      ) %in%
+        names(loci_df)
+    )
+  ) {
     stop(paste(
       "loci does not include the compulsory columns 'name',",
       "'chromosome', 'position','genetic_dist',",
@@ -377,9 +410,13 @@ check_valid_loci <- function(loci_df) {
 #' @param loci the loci table
 #' @returns a bigSNP object
 #' @keywords internal
-gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
-                                     backingfile = NULL,
-                                     ploidy = ploidy) {
+gt_write_bigsnp_from_dfs <- function(
+  genotypes,
+  indiv_meta,
+  loci,
+  backingfile = NULL,
+  ploidy = ploidy
+) {
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }
@@ -401,7 +438,8 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
   # ensure max_ploidy is appropriate for the data
   if (any(genotypes > max_ploidy, na.rm = TRUE)) {
     stop(
-      "max ploidy is set to ", max_ploidy,
+      "max ploidy is set to ",
+      max_ploidy,
       " but genotypes contains indviduals with greater ploidy"
     )
   }
@@ -435,7 +473,8 @@ gt_write_bigsnp_from_dfs <- function(genotypes, indiv_meta, loci,
     allele2 = loci$allele_ref
   )
   # Create the bigSNP object
-  snp_list <- structure(list(genotypes = big_geno, fam = fam, map = map),
+  snp_list <- structure(
+    list(genotypes = big_geno, fam = fam, map = map),
     class = "bigSNP"
   )
 
@@ -473,7 +512,8 @@ new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
   } else {
     max_ploidy <- max(ploidy)
   }
-  vctrs::new_vctr(seq_len(nrow(bigsnp_obj$fam)),
+  vctrs::new_vctr(
+    seq_len(nrow(bigsnp_obj$fam)),
     bigsnp = bigsnp_obj,
     # TODO is this redundant with the info in the bigSNP object?
     bigsnp_file = bigsnp_file,
@@ -490,10 +530,6 @@ new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
 summary.vctrs_bigSNP <- function(object, ...) {
   summary(rep("bigSNP-genotypes", length(object)))
 }
-
-
-
-
 
 
 ################################################################################
@@ -526,15 +562,20 @@ tbl_sum.gen_tbl <- function(x, ...) {
 
 
 # function to check the allele alphabet
-check_allele_alphabet <- function(x,
-                                  valid_alleles = c("A", "T", "C", "G"),
-                                  missing_alleles = c("0", "."),
-                                  remove_on_fail = FALSE) {
-  if (any(
-    !show_loci(x)$allele_ref %in% c(valid_alleles, missing_alleles, NA),
-    !show_loci(x)$allele_alt %in% c(valid_alleles, missing_alleles, NA)
-  )) {
-    if (remove_on_fail) { # remove files if they were generated
+check_allele_alphabet <- function(
+  x,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  remove_on_fail = FALSE
+) {
+  if (
+    any(
+      !show_loci(x)$allele_ref %in% c(valid_alleles, missing_alleles, NA),
+      !show_loci(x)$allele_alt %in% c(valid_alleles, missing_alleles, NA)
+    )
+  ) {
+    if (remove_on_fail) {
+      # remove files if they were generated
       if (file.exists(gt_get_file_names(x)[1])) {
         file.remove(gt_get_file_names(x)[1])
       }
@@ -544,11 +585,15 @@ check_allele_alphabet <- function(x,
     }
     stop(
       "valid alleles are ",
-      paste(c(valid_alleles, missing_alleles), collapse = " "), " but ",
-      paste(unique(c(
-        show_loci(x)$allele_ref,
-        show_loci(x)$allele_alt
-      )), collapse = " "),
+      paste(c(valid_alleles, missing_alleles), collapse = " "),
+      " but ",
+      paste(
+        unique(c(
+          show_loci(x)$allele_ref,
+          show_loci(x)$allele_alt
+        )),
+        collapse = " "
+      ),
       " were found."
     )
   }
@@ -596,10 +641,12 @@ change_duplicated_file_name <- function(file) {
 
     version_pattern <- paste0(base_name, "_v(\\d+)\\.bk$")
     # read files to check for existing versions
-    existing_files <- list.files(dirname(bk),
+    existing_files <- list.files(
+      dirname(bk),
       pattern = paste0(
         "^",
-        base_name, "_v\\d+\\.bk$"
+        base_name,
+        "_v\\d+\\.bk$"
       )
     )
 
@@ -627,7 +674,9 @@ cast_chromosome_to_int <- function(chromosome) {
   # if chromosome is a character, then cast it to integer
   if (is.character(chromosome)) {
     # attempt to strip chr from the chromosome
-    chromosome <- gsub("^(chromosome_|chr_|chromosome|chr)", "",
+    chromosome <- gsub(
+      "^(chromosome_|chr_|chromosome|chr)",
+      "",
       chromosome,
       ignore.case = TRUE
     )
