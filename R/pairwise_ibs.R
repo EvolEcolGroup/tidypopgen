@@ -18,15 +18,14 @@
 #'   number of valid alleles (i.e. 2*n_loci - 2*missing_loci)
 #' @export
 pairwise_ibs <- function(
-  x,
-  as_matrix = FALSE,
-  type = c(
-    "proportion",
-    "adjusted_counts",
-    "raw_counts"
-  ),
-  block_size = bigstatsr::block_size(count_loci(x))
-) {
+    x,
+    as_matrix = FALSE,
+    type = c(
+      "proportion",
+      "adjusted_counts",
+      "raw_counts"
+    ),
+    block_size = bigstatsr::block_size(count_loci(x))) {
   type <- match.arg(type)
   X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index

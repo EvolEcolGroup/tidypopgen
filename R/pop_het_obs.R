@@ -35,11 +35,10 @@
 
 # adapted from hierfstat
 pop_het_obs <- function(
-  .x,
-  by_locus = FALSE,
-  include_global = FALSE,
-  n_cores = bigstatsr::nb_cores()
-) {
+    .x,
+    by_locus = FALSE,
+    include_global = FALSE,
+    n_cores = bigstatsr::nb_cores()) {
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {

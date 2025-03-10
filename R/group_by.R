@@ -1,10 +1,9 @@
 #' @export
 group_by.gen_tbl <- function(
-  .data,
-  ...,
-  .add = FALSE,
-  .drop = group_by_drop_default(.data)
-) {
+    .data,
+    ...,
+    .add = FALSE,
+    .drop = group_by_drop_default(.data)) {
   out <- NextMethod()
   class(out) <- c("grouped_gen_tbl", "grouped_df", "gen_tbl", class(out)[-1])
   return(out)

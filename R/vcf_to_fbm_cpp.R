@@ -14,12 +14,11 @@
 #' @keywords internal
 
 vcf_to_fbm_cpp <- function(
-  vcf_path,
-  chunk_size = NULL,
-  backingfile = NULL,
-  n_cores = 1,
-  quiet = FALSE
-) {
+    vcf_path,
+    chunk_size = NULL,
+    backingfile = NULL,
+    n_cores = 1,
+    quiet = FALSE) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)

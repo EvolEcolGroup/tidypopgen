@@ -1,10 +1,10 @@
 # example script from
 # https://github.com/mbohutinska/PolyplChapter/blob/main/PartB/AdegenetPolyplChapter.R
 
-#set working directory - to your species folder (alternatively: RStudio -> Session -> Set Working Directory -> To Source File location)
+# set working directory - to your species folder (alternatively: RStudio -> Session -> Set Working Directory -> To Source File location)
 setwd("/home/aa/popgenPolypl/")
 
-#load libraries
+# load libraries
 library(adegenet)
 library(vcfR)
 library(gplots)
@@ -13,7 +13,7 @@ library(StAMPP)
 source("adegenet_functions.r")
 
 ############### SECTION 1 - GENETIC STRUCTURE ###############
-#Here, you will infer the genetic structure among your populations, calculating their genetic distances. You will use functions from the package vcfR to handle the data and package adegenet and StAMPP to calculate the genetic distances and visualize
+# Here, you will infer the genetic structure among your populations, calculating their genetic distances. You will use functions from the package vcfR to handle the data and package adegenet and StAMPP to calculate the genetic distances and visualize
 
 ### A. import SNP data from VCF - necessary to change path using setwd()
 vcf <- read.vcfR("arenosa_snp_raw.fourfold.filtered.PolyplChapter.vcf.gz")
@@ -22,7 +22,7 @@ locNames(aa.genlight) <- paste(vcf@fix[, 1], vcf@fix[, 2], sep = "_") # add real
 pop(aa.genlight) <- substr(indNames(aa.genlight), 1, 3) # add pop names
 
 
-#Check if everything fits
+# Check if everything fits
 indNames(aa.genlight)
 pop(aa.genlight)
 aa.genlight.noOut <- aa.genlight[pop = c(1, 3:5)]
@@ -31,7 +31,7 @@ popNames(aa.genlight.noOut)
 
 pca.1 <- glPcaFast(aa.genlight.noOut, nf = 300)
 
-#You can save it using the pdf function
+# You can save it using the pdf function
 pdf("PCA_PolyplChapter_ax12.pdf", width = 4, height = 4)
 plot(
   pca.1$scores,
@@ -55,7 +55,7 @@ dev.off()
 ### C. calculate genetic distances and visualize
 aa.D.pop <- stamppNeisD(aa.genlight, pop = TRUE) # Nei's 1972 genetic distance between pops
 
-#plot tree - neighbor joining tree
+# plot tree - neighbor joining tree
 pdf("njTree_PolyplChapter.pdf", width = 4, height = 4)
 plot(nj(aa.D.pop))
 dev.off()
@@ -67,4 +67,4 @@ pdf("stamppdist.heatmap.PolypChapter.pdf", width = 10, height = 10)
 heatmap.2(aa.D.pop, trace = "none", cexRow = 0.7, cexCol = 0.7)
 dev.off()
 
-#Does the analysis of genetic structure suggest a single or parallel origin of tetraploids in your dataset?
+# Does the analysis of genetic structure suggest a single or parallel origin of tetraploids in your dataset?

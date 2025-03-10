@@ -341,14 +341,13 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #' @name autoplot_q_matrix
 #' @export
 autoplot.q_matrix <- function(
-  object,
-  data = NULL,
-  annotate_group = TRUE,
-  arrange_by_group = TRUE,
-  arrange_by_indiv = TRUE,
-  reorder_within_groups = FALSE,
-  ...
-) {
+    object,
+    data = NULL,
+    annotate_group = TRUE,
+    arrange_by_group = TRUE,
+    arrange_by_indiv = TRUE,
+    reorder_within_groups = FALSE,
+    ...) {
   rlang::check_dots_empty()
   # test that if reorder_within_groups is TRUE, annotate_group is also TRUE
   if (reorder_within_groups && !annotate_group) {

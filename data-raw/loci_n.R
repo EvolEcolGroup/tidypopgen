@@ -18,7 +18,7 @@ loci_n <- function(.x, ...) {
 #' @export
 #' @rdname loci_n
 loci_n.tbl_df <- function(.x, ...) {
-  #TODO this is a hack to deal with the class being dropped when going through group_map
+  # TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
   loci_n(.x$genotypes, ...)
 }

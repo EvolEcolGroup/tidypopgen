@@ -68,13 +68,12 @@
 
 gen_tibble <-
   function(
-    x,
-    ...,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    backingfile = NULL,
-    quiet = FALSE
-  ) {
+      x,
+      ...,
+      valid_alleles = c("A", "T", "C", "G"),
+      missing_alleles = c("0", "."),
+      backingfile = NULL,
+      quiet = FALSE) {
     UseMethod("gen_tibble", x)
   }
 
@@ -85,16 +84,15 @@ gen_tibble <-
 #' @rdname gen_tibble
 gen_tibble.character <-
   function(
-    x,
-    ...,
-    parser = c("vcfR", "cpp"),
-    n_cores = 1,
-    chunk_size = NULL,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    backingfile = NULL,
-    quiet = FALSE
-  ) {
+      x,
+      ...,
+      parser = c("vcfR", "cpp"),
+      n_cores = 1,
+      chunk_size = NULL,
+      valid_alleles = c("A", "T", "C", "G"),
+      missing_alleles = c("0", "."),
+      backingfile = NULL,
+      quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
 
@@ -173,13 +171,12 @@ gen_tibble.character <-
 
 
 gen_tibble_bed_rds <- function(
-  x,
-  ...,
-  valid_alleles = c("A", "T", "C", "G"),
-  missing_alleles = c("0", "."),
-  backingfile = NULL,
-  quiet = FALSE
-) {
+    x,
+    ...,
+    valid_alleles = c("A", "T", "C", "G"),
+    missing_alleles = c("0", "."),
+    backingfile = NULL,
+    quiet = FALSE) {
   # if it is a bed file, we convert it to a bigsnpr
   if (tolower(file_ext(x)) == "bed") {
     if (is.null(backingfile)) {
@@ -280,16 +277,15 @@ gen_tibble_bed_rds <- function(
 #' @export
 #' @rdname gen_tibble
 gen_tibble.matrix <- function(
-  x,
-  indiv_meta,
-  loci,
-  ...,
-  ploidy = 2,
-  valid_alleles = c("A", "T", "C", "G"),
-  missing_alleles = c("0", "."),
-  backingfile = NULL,
-  quiet = FALSE
-) {
+    x,
+    indiv_meta,
+    loci,
+    ...,
+    ploidy = 2,
+    valid_alleles = c("A", "T", "C", "G"),
+    missing_alleles = c("0", "."),
+    backingfile = NULL,
+    quiet = FALSE) {
   rlang::check_dots_empty()
 
   # check that valid alleles does not contain zero
@@ -411,12 +407,11 @@ check_valid_loci <- function(loci_df) {
 #' @returns a bigSNP object
 #' @keywords internal
 gt_write_bigsnp_from_dfs <- function(
-  genotypes,
-  indiv_meta,
-  loci,
-  backingfile = NULL,
-  ploidy = ploidy
-) {
+    genotypes,
+    indiv_meta,
+    loci,
+    backingfile = NULL,
+    ploidy = ploidy) {
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }
@@ -563,11 +558,10 @@ tbl_sum.gen_tbl <- function(x, ...) {
 
 # function to check the allele alphabet
 check_allele_alphabet <- function(
-  x,
-  valid_alleles = c("A", "T", "C", "G"),
-  missing_alleles = c("0", "."),
-  remove_on_fail = FALSE
-) {
+    x,
+    valid_alleles = c("A", "T", "C", "G"),
+    missing_alleles = c("0", "."),
+    remove_on_fail = FALSE) {
   if (
     any(
       !show_loci(x)$allele_ref %in% c(valid_alleles, missing_alleles, NA),

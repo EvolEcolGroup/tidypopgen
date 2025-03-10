@@ -10,12 +10,11 @@
 #' @keywords internal
 
 vcf_to_fbm_vcfR <- function(
-  # nolint
-  vcf_path,
-  chunk_size = NULL,
-  backingfile = NULL,
-  quiet = FALSE
-) {
+    # nolint
+    vcf_path,
+    chunk_size = NULL,
+    backingfile = NULL,
+    quiet = FALSE) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)
@@ -116,7 +115,8 @@ vcf_to_fbm_vcfR <- function(
     # add the new columns
     file_backed_matrix$add_columns(ncol(gt))
     # fill them in
-    file_backed_matrix[,
+    file_backed_matrix[
+      ,
       index_start:(index_start + ncol(gt) - 1)
     ] <- gt
 

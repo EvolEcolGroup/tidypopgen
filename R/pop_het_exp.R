@@ -36,11 +36,10 @@
 
 # adapted from hierfstat
 pop_het_exp <- function(
-  .x,
-  by_locus = FALSE,
-  include_global = FALSE,
-  n_cores = bigstatsr::nb_cores()
-) {
+    .x,
+    by_locus = FALSE,
+    include_global = FALSE,
+    n_cores = bigstatsr::nb_cores()) {
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
@@ -87,11 +86,10 @@ pop_het_exp <- function(
 #' @export
 #' @rdname pop_het_exp
 pop_gene_div <- function(
-  .x,
-  by_locus = FALSE,
-  include_global = FALSE,
-  n_cores = bigstatsr::nb_cores()
-) {
+    .x,
+    by_locus = FALSE,
+    include_global = FALSE,
+    n_cores = bigstatsr::nb_cores()) {
   pop_het_exp(
     .x = .x,
     by_locus = by_locus,

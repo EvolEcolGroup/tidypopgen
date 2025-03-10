@@ -14,22 +14,20 @@
 #' @rdname is_loci_table_ordered
 #' @export
 is_loci_table_ordered <- function(
-  .x,
-  error_on_false = FALSE,
-  ignore_genetic_dist = TRUE,
-  ...
-) {
+    .x,
+    error_on_false = FALSE,
+    ignore_genetic_dist = TRUE,
+    ...) {
   UseMethod("is_loci_table_ordered", .x)
 }
 
 #' @export
 #' @rdname is_loci_table_ordered
 is_loci_table_ordered.tbl_df <- function(
-  .x,
-  error_on_false = FALSE,
-  ignore_genetic_dist = TRUE,
-  ...
-) {
+    .x,
+    error_on_false = FALSE,
+    ignore_genetic_dist = TRUE,
+    ...) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_gen_tibble(.x)
@@ -45,11 +43,10 @@ is_loci_table_ordered.tbl_df <- function(
 #' @export
 #' @rdname is_loci_table_ordered
 is_loci_table_ordered.vctrs_bigSNP <- function(
-  .x,
-  error_on_false = FALSE,
-  ignore_genetic_dist = TRUE,
-  ...
-) {
+    .x,
+    error_on_false = FALSE,
+    ignore_genetic_dist = TRUE,
+    ...) {
   rlang::check_dots_empty()
 
   # check that within each chromosome positions are sorted

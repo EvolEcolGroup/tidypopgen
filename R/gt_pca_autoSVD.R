@@ -67,21 +67,20 @@
 # https://stackoverflow.com/questions/60338114/updating-values-of-three-dot-ellipsis-in-r #nolint
 
 gt_pca_autoSVD <- function(
-  x,
-  k = 10, # nolint
-  fun_scaling = bigsnpr::snp_scaleBinom(),
-  thr_r2 = 0.2,
-  use_positions = TRUE,
-  size = 100 / thr_r2,
-  roll_size = 50,
-  int_min_size = 20,
-  alpha_tukey = 0.05,
-  min_mac = 10,
-  max_iter = 5,
-  n_cores = 1,
-  verbose = TRUE,
-  total_var = TRUE
-) {
+    x,
+    k = 10, # nolint
+    fun_scaling = bigsnpr::snp_scaleBinom(),
+    thr_r2 = 0.2,
+    use_positions = TRUE,
+    size = 100 / thr_r2,
+    roll_size = 50,
+    int_min_size = 20,
+    alpha_tukey = 0.05,
+    min_mac = 10,
+    max_iter = 5,
+    n_cores = 1,
+    verbose = TRUE,
+    total_var = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))

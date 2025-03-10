@@ -94,22 +94,21 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' @returns a `ggplot2` object
 #' @export
 autoplot.qc_report_loci <- function(
-  object,
-  type = c(
-    "overview",
-    "all",
-    "missing",
-    "missing low maf",
-    "missing high maf",
-    "maf",
-    "hwe",
-    "significant hwe"
-  ),
-  maf_threshold = NULL,
-  miss_threshold = NULL,
-  hwe_p = NULL,
-  ...
-) {
+    object,
+    type = c(
+      "overview",
+      "all",
+      "missing",
+      "missing low maf",
+      "missing high maf",
+      "maf",
+      "hwe",
+      "significant hwe"
+    ),
+    maf_threshold = NULL,
+    miss_threshold = NULL,
+    hwe_p = NULL,
+    ...) {
   type <- match.arg(type)
 
   rlang::check_dots_empty()
@@ -184,13 +183,12 @@ autoplot.qc_report_loci <- function(
 
 
 autoplot_l_qc_all <- function(
-  object,
-  maf_threshold = maf_threshold,
-  miss_threshold = miss_threshold,
-  hwe_p = hwe_p,
-  logp = logp,
-  ...
-) {
+    object,
+    maf_threshold = maf_threshold,
+    miss_threshold = miss_threshold,
+    hwe_p = hwe_p,
+    logp = logp,
+    ...) {
   qc_report <- object
 
   # Missingness (according to MAF thresholds)
@@ -263,12 +261,11 @@ autoplot_l_qc_all <- function(
 
 
 autoplot_l_qc_overview <- function(
-  object,
-  maf_threshold = maf_threshold,
-  miss_threshold = miss_threshold,
-  hwe_p = hwe_p,
-  ...
-) {
+    object,
+    maf_threshold = maf_threshold,
+    miss_threshold = miss_threshold,
+    hwe_p = hwe_p,
+    ...) {
   qc_report <- object
 
   qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p, ]
@@ -346,10 +343,9 @@ autoplot_l_qc_sig_hwe <- function(object, hwe_p = hwe_p, logp, ...) {
 }
 
 autoplot_l_qc_missing <- function(
-  object,
-  miss_threshold = miss_threshold,
-  ...
-) {
+    object,
+    miss_threshold = miss_threshold,
+    ...) {
   qc_report <- object
   missing <- ggplot2::ggplot(qc_report, ggplot2::aes(x = .data$missingness)) +
     ggplot2::geom_histogram(
@@ -369,11 +365,10 @@ autoplot_l_qc_missing <- function(
 
 
 autoplot_l_qc_missing_low_maf <- function(
-  object,
-  maf_threshold = maf_threshold,
-  miss_threshold = miss_threshold,
-  ...
-) {
+    object,
+    maf_threshold = maf_threshold,
+    miss_threshold = miss_threshold,
+    ...) {
   qc_report <- object
 
   qc_lowmaf <- subset(qc_report, qc_report$maf <= maf_threshold)
@@ -394,11 +389,10 @@ autoplot_l_qc_missing_low_maf <- function(
 }
 
 autoplot_l_qc_missing_high_maf <- function(
-  object,
-  maf_threshold = maf_threshold,
-  miss_threshold = miss_threshold,
-  ...
-) {
+    object,
+    maf_threshold = maf_threshold,
+    miss_threshold = miss_threshold,
+    ...) {
   qc_report <- object
 
   qc_highmaf <- subset(qc_report, qc_report$maf > maf_threshold)

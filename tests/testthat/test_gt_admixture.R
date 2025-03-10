@@ -2,7 +2,7 @@
 skip_if(
   (system2("which", args = "admixture", stdout = NULL) != 0) &&
     !requireNamespace("fastmixturer", quietly = TRUE)
-) #nolint
+) # nolint
 # set the input file
 vcf_path <-
   system.file(

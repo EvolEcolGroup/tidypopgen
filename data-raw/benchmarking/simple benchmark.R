@@ -13,7 +13,7 @@ toc()
 
 hdgp_sub <- hgdp_gt %>% select_loci(1:5000)
 tic()
-foo <- hgdp_gt %>% loci_hwe
+foo <- hgdp_gt %>% loci_hwe()
 toc()
 
 tic()

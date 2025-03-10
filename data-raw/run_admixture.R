@@ -22,12 +22,11 @@
 #' @export
 
 gt_admixture <- function(
-  x,
-  k,
-  crossval = FALSE,
-  n_cores = 1,
-  conda_env = "auto"
-) {
+    x,
+    k,
+    crossval = FALSE,
+    n_cores = 1,
+    conda_env = "auto") {
   # if x is a character, check that it is file that exists
   if (is.character(x)) {
     if (!file.exists(x)) {

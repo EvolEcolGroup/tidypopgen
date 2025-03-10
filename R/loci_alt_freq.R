@@ -22,16 +22,15 @@ loci_alt_freq <- function(.x, n_cores, block_size, ...) {
 #' @export
 #' @rdname loci_alt_freq
 loci_alt_freq.tbl_df <- function(
-  .x,
-  # multicore is used by openMP within the
-  # freq cpp function
-  n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
-  # the bigapply that splits in blocks is not
-  # multithreaded, as we use the multiple threads
-  # for openMP
-  ...
-) {
+    .x,
+    # multicore is used by openMP within the
+    # freq cpp function
+    n_cores = bigstatsr::nb_cores(),
+    block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
+    # the bigapply that splits in blocks is not
+    # multithreaded, as we use the multiple threads
+    # for openMP
+    ...) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_gen_tibble(.x)
@@ -42,11 +41,10 @@ loci_alt_freq.tbl_df <- function(
 #' @export
 #' @rdname loci_alt_freq
 loci_alt_freq.vctrs_bigSNP <- function(
-  .x,
-  n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
-  ...
-) {
+    .x,
+    n_cores = bigstatsr::nb_cores(),
+    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    ...) {
   rlang::check_dots_empty()
   # if we have diploid
   if (is_diploid_only(.x)) {
@@ -59,11 +57,10 @@ loci_alt_freq.vctrs_bigSNP <- function(
 #' @export
 #' @rdname loci_alt_freq
 loci_alt_freq.grouped_df <- function(
-  .x,
-  n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
-  ...
-) {
+    .x,
+    n_cores = bigstatsr::nb_cores(),
+    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    ...) {
   rlang::check_dots_empty()
   if (is_diploid_only(.x)) {
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
@@ -99,8 +96,7 @@ loci_alt_freq.grouped_df <- function(
     group_map(
       .x,
       .f = ~ loci_alt_freq(
-        .x,
-        ,
+        .x, ,
         n_cores = n_cores,
         block_size = block_size,
         ...
@@ -118,11 +114,10 @@ loci_maf <- function(.x, n_cores, block_size, ...) {
 #' @export
 #' @rdname loci_alt_freq
 loci_maf.tbl_df <- function(
-  .x,
-  n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
-  ...
-) {
+    .x,
+    n_cores = bigstatsr::nb_cores(),
+    block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
+    ...) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_gen_tibble(.x)
@@ -132,11 +127,10 @@ loci_maf.tbl_df <- function(
 #' @export
 #' @rdname loci_alt_freq
 loci_maf.vctrs_bigSNP <- function(
-  .x,
-  n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
-  ...
-) {
+    .x,
+    n_cores = bigstatsr::nb_cores(),
+    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    ...) {
   freq <- loci_alt_freq(.x, n_cores = n_cores, block_size = block_size, ...)
   freq[freq > 0.5 & !is.na(freq)] <- 1 - freq[freq > 0.5 & !is.na(freq)]
   freq
@@ -145,11 +139,10 @@ loci_maf.vctrs_bigSNP <- function(
 #' @export
 #' @rdname loci_alt_freq
 loci_maf.grouped_df <- function(
-  .x,
-  n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
-  ...
-) {
+    .x,
+    n_cores = bigstatsr::nb_cores(),
+    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    ...) {
   rlang::check_dots_empty()
   if (is_diploid_only(.x)) {
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes

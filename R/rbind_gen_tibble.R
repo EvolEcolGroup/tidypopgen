@@ -37,13 +37,12 @@
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
 rbind.gen_tbl <- function(
-  ...,
-  as_is = FALSE,
-  flip_strand = FALSE,
-  use_position = FALSE,
-  quiet = FALSE,
-  backingfile = NULL
-) {
+    ...,
+    as_is = FALSE,
+    flip_strand = FALSE,
+    use_position = FALSE,
+    quiet = FALSE,
+    backingfile = NULL) {
   dots <- list(...)
   if (length(dots) != 2) {
     stop("rbind for gen_tibble can only take two tibbles at a time")

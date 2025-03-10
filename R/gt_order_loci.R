@@ -21,12 +21,11 @@
 #' @export
 
 gt_order_loci <- function(
-  .x,
-  use_current_table = FALSE,
-  ignore_genetic_dist = TRUE,
-  quiet = FALSE,
-  ...
-) {
+    .x,
+    use_current_table = FALSE,
+    ignore_genetic_dist = TRUE,
+    quiet = FALSE,
+    ...) {
   if (use_current_table) {
     new_table <- show_loci(.x)
   } else {

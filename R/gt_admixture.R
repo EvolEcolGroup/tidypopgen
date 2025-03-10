@@ -39,14 +39,13 @@
 # a local copy will be used.
 
 gt_admixture <- function(
-  x,
-  k,
-  n_runs = 1,
-  crossval = FALSE,
-  n_cores = 1,
-  seed = NULL,
-  conda_env = "none"
-) {
+    x,
+    k,
+    n_runs = 1,
+    crossval = FALSE,
+    n_cores = 1,
+    seed = NULL,
+    conda_env = "none") {
   # check that we have the right number of repeats
   if (length(seed) != n_runs) {
     stop("'seeds' should be a vector of length 'n_runs'")

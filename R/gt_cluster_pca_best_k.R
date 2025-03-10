@@ -66,17 +66,16 @@
 #' @export
 
 gt_cluster_pca_best_k <- function(
-  x,
-  stat = c("BIC", "AIC", "WSS"),
-  criterion = c(
-    "diffNgroup",
-    "min",
-    "goesup",
-    "smoothNgoesup",
-    "goodfit"
-  ),
-  quiet = FALSE
-) {
+    x,
+    stat = c("BIC", "AIC", "WSS"),
+    criterion = c(
+      "diffNgroup",
+      "min",
+      "goesup",
+      "smoothNgoesup",
+      "goodfit"
+    ),
+    quiet = FALSE) {
   if (!inherits(x, "gt_cluster_pca")) {
     stop(paste(
       "'x' should be a 'gt_cluster_pcaers' object generated",

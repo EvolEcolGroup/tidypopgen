@@ -23,25 +23,25 @@
 # http://www.sthda.com/english/wiki/get-pca-extract-the-results-for-individuals-variables-in-principal-component-analysis-r-software-and-data-mining
 
 ## A tutorial for analysis of SNP with adegenet that we could try to repeat with our pipeline:
-#https://grunwaldlab.github.io/Population_Genetics_in_R/gbs_analysis.html
+# https://grunwaldlab.github.io/Population_Genetics_in_R/gbs_analysis.html
 
 # Pipeline with adegenet and hierfstat to test pop gen summaries:
-#https://popgen.nescent.org/DifferentiationSNP.html
+# https://popgen.nescent.org/DifferentiationSNP.html
 
 # additional notes on stats
 # https://www.uwyo.edu/dbmcd/popecol/maylects/fst.html
 
 # reading vcf in chunks
-#https://rdrr.io/bioc/genotypeeval/man/ReadVCFDataChunk.html
+# https://rdrr.io/bioc/genotypeeval/man/ReadVCFDataChunk.html
 
 # https://github.com/Zilong-Li/vcfpp
 
 ##################################
-#big SVD
+# big SVD
 # https://stackoverflow.com/questions/46253537/computing-the-null-space-of-a-bigmatrix-in-r/46380540#46380540
 
 # really good tutorial on the maths of gwas
-#https://www.mv.helsinki.fi/home/mjxpirin/GWAS_course/material/GWAS5.html
+# https://www.mv.helsinki.fi/home/mjxpirin/GWAS_course/material/GWAS5.html
 
 # Note  on running admixture and pca by John Novembre:
 # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8722024/

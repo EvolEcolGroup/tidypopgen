@@ -26,12 +26,11 @@
 #' @export
 
 pop_fis <- function(
-  .x,
-  method = c("Nei87", "WG17"),
-  by_locus = FALSE,
-  include_global = FALSE,
-  allele_sharing_mat = NULL
-) {
+    .x,
+    method = c("Nei87", "WG17"),
+    by_locus = FALSE,
+    include_global = FALSE,
+    allele_sharing_mat = NULL) {
   method <- match.arg(method)
   if (method == "Nei87") {
     if (!is.null(allele_sharing_mat)) {
@@ -51,11 +50,10 @@ pop_fis <- function(
 }
 
 pop_fis_nei87 <- function(
-  .x,
-  by_locus = FALSE,
-  include_global = include_global,
-  n_cores = bigstatsr::nb_cores()
-) {
+    .x,
+    by_locus = FALSE,
+    include_global = include_global,
+    n_cores = bigstatsr::nb_cores()) {
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
@@ -106,10 +104,9 @@ pop_fis_nei87 <- function(
 
 
 pop_fis_wg17 <- function(
-  .x,
-  include_global = FALSE,
-  allele_sharing_mat = NULL
-) {
+    .x,
+    include_global = FALSE,
+    allele_sharing_mat = NULL) {
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }

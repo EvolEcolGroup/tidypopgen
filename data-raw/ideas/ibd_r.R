@@ -21,32 +21,32 @@ compute_EPrIBS_IBD <- function(X, CorrectFactor = TRUE) {
   for (i in 1:ncol(X)) {
     p <- sum(X[, i], na.rm = TRUE) / (sum(!is.na(X[, i])) * 2)
     # Second, the expected probability of IBS i, given by IBD
-    q = 1 - p
+    q <- 1 - p
     this_geno <- c(
       sum(X[, i] == 0, na.rm = TRUE),
       sum(X[, i] == 1, na.rm = TRUE),
       sum(X[, i] == 2, na.rm = TRUE)
     )
-    Na = n = sum(this_geno)
-    x = 2 * this_geno[1] + this_geno[2] ## AA AB
-    y = 2 * this_geno[3] + this_geno[2] ## BB AB
-    a00 = a01 = a02 = a11 = a12 = 0
+    Na <- n <- sum(this_geno)
+    x <- 2 * this_geno[1] + this_geno[2] ## AA AB
+    y <- 2 * this_geno[3] + this_geno[2] ## BB AB
+    a00 <- a01 <- a02 <- a11 <- a12 <- 0
 
     if (CorrectFactor) {
-      a00 =
+      a00 <-
         2 *
-        p *
-        p *
-        q *
-        q *
-        ((x - 1) /
-          x *
-          (y - 1) /
-          y *
-          (Na / (Na - 1)) *
-          (Na / (Na - 2)) *
-          (Na / (Na - 3)))
-      a01 =
+          p *
+          p *
+          q *
+          q *
+          ((x - 1) /
+            x *
+            (y - 1) /
+            y *
+            (Na / (Na - 1)) *
+            (Na / (Na - 2)) *
+            (Na / (Na - 3)))
+      a01 <-
         4 *
         p *
         p *
@@ -71,7 +71,7 @@ compute_EPrIBS_IBD <- function(X, CorrectFactor = TRUE) {
             (Na / (Na - 1)) *
             (Na / (Na - 2)) *
             (Na / (Na - 3)))
-      a02 =
+      a02 <-
         q *
         q *
         q *
@@ -110,14 +110,14 @@ compute_EPrIBS_IBD <- function(X, CorrectFactor = TRUE) {
             (Na / (Na - 1)) *
             (Na / (Na - 2)) *
             (Na / (Na - 3)))
-      a11 =
+      a11 <-
         2 *
         p *
         p *
         q *
         ((x - 1) / x * Na / (Na - 1) * Na / (Na - 2)) +
         2 * p * q * q * ((y - 1) / y * Na / (Na - 1) * Na / (Na - 2))
-      a12 =
+      a12 <-
         p *
         p *
         p *
@@ -129,11 +129,11 @@ compute_EPrIBS_IBD <- function(X, CorrectFactor = TRUE) {
         p * p * q * ((x - 1) / x * Na / (Na - 1) * Na / (Na - 2)) +
         p * q * q * ((y - 1) / y * Na / (Na - 1) * Na / (Na - 2))
     } else {
-      a00 = 2 * p * p * q * q
-      a01 = 4 * p * p * p * q + 4 * p * q * q * q
-      a02 = q * q * q * q + p * p * p * p + 4 * p * p * q * q
-      a11 = 2 * p * p * q + 2 * p * q * q
-      a12 = p * p * p + q * q * q + p * p * q + p * q * q
+      a00 <- 2 * p * p * q * q
+      a01 <- 4 * p * p * p * q + 4 * p * q * q * q
+      a02 <- q * q * q * q + p * p * p * p + 4 * p * p * q * q
+      a11 <- 2 * p * p * q + 2 * p * q * q
+      a12 <- p * p * p + q * q * q + p * p * q + p * q * q
     }
 
     # now check that a00, a.. all finite, then add them
@@ -149,24 +149,24 @@ compute_EPrIBS_IBD <- function(X, CorrectFactor = TRUE) {
         !is.nan(a11) &&
         !is.nan(a12)
     ) {
-      EPrIBS_IBD[1, 1] = EPrIBS_IBD[1, 1] + a00
-      EPrIBS_IBD[1, 2] = EPrIBS_IBD[1, 2] + a01
-      EPrIBS_IBD[1, 3] = EPrIBS_IBD[1, 3] + a02
-      EPrIBS_IBD[2, 2] = EPrIBS_IBD[2, 2] + a11
-      EPrIBS_IBD[2, 3] = EPrIBS_IBD[2, 3] + a12
-      nValid = nValid + 1
+      EPrIBS_IBD[1, 1] <- EPrIBS_IBD[1, 1] + a00
+      EPrIBS_IBD[1, 2] <- EPrIBS_IBD[1, 2] + a01
+      EPrIBS_IBD[1, 3] <- EPrIBS_IBD[1, 3] + a02
+      EPrIBS_IBD[2, 2] <- EPrIBS_IBD[2, 2] + a11
+      EPrIBS_IBD[2, 3] <- EPrIBS_IBD[2, 3] + a12
+      nValid <- nValid + 1
     }
   }
 
-  EPrIBS_IBD[1, 1] = EPrIBS_IBD[1, 1] / nValid
-  EPrIBS_IBD[2, 1] = 0
-  EPrIBS_IBD[3, 1] = 0
-  EPrIBS_IBD[1, 2] = EPrIBS_IBD[1, 2] / nValid
-  EPrIBS_IBD[2, 2] = EPrIBS_IBD[2, 2] / nValid
-  EPrIBS_IBD[3, 2] = 0
-  EPrIBS_IBD[1, 3] = EPrIBS_IBD[1, 3] / nValid
-  EPrIBS_IBD[2, 3] = EPrIBS_IBD[2, 3] / nValid
-  EPrIBS_IBD[3, 3] = 1
+  EPrIBS_IBD[1, 1] <- EPrIBS_IBD[1, 1] / nValid
+  EPrIBS_IBD[2, 1] <- 0
+  EPrIBS_IBD[3, 1] <- 0
+  EPrIBS_IBD[1, 2] <- EPrIBS_IBD[1, 2] / nValid
+  EPrIBS_IBD[2, 2] <- EPrIBS_IBD[2, 2] / nValid
+  EPrIBS_IBD[3, 2] <- 0
+  EPrIBS_IBD[1, 3] <- EPrIBS_IBD[1, 3] / nValid
+  EPrIBS_IBD[2, 3] <- EPrIBS_IBD[2, 3] / nValid
+  EPrIBS_IBD[3, 3] <- 1
   return(EPrIBS_IBD)
 }
 
@@ -181,19 +181,18 @@ X_mat2 <- X_mat == 2
 X_mat2[is.na(X_mat2)] <- 0
 
 ibs0 <- (X_mat0) %*% t(X_mat2) + (X_mat2) %*% t(X_mat0)
-ibs1 = (X_mat1) %*% t(X_mat0 | X_mat2) + (X_mat0 | X_mat2) %*% t(X_mat1)
-ibs2 = (X_mat2) %*% t(X_mat2) + (X_mat1) %*% t(X_mat1) + (X_mat0) %*% t(X_mat0)
+ibs1 <- (X_mat1) %*% t(X_mat0 | X_mat2) + (X_mat0 | X_mat2) %*% t(X_mat1)
+ibs2 <- (X_mat2) %*% t(X_mat2) + (X_mat1) %*% t(X_mat1) + (X_mat0) %*% t(X_mat0)
 
 
 n_ind <- nrow(X_mat)
 # function to compute the quantities
 Est_PLINK_Kinship <- function(
-  IBS0,
-  IBS1,
-  IBS2,
-  EPrIBS_IBD,
-  constraint = FALSE
-) {
+    IBS0,
+    IBS1,
+    IBS2,
+    EPrIBS_IBD,
+    constraint = FALSE) {
   # AM expected counts (p of each genotype times the total number of overlapping alleles)
   nIBS012 <- IBS0 + IBS1 + IBS2
   e00 <- EPrIBS_IBD[1, 1] * nIBS012

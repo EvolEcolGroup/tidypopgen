@@ -74,7 +74,7 @@ hier_fst_nei <- hierfstat::pairwise.neifst(test_hier)
 pairwise_pop_fst_nei73 <- function(.x, by_locus = FALSE) {
   pop_counts_df <- group_map(.x, .f = ~ .gt_pop_counts(.x))
   # get the grouping column, and create all pairwise combination of indices
-  .group_levels = .x %>% group_keys()
+  .group_levels <- .x %>% group_keys()
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
   n_loci <- count_loci(.x)
   Hs_pair <- matrix(NA_real_, nrow = n_loci, ncol = ncol(pairwise_combn))
@@ -96,7 +96,7 @@ pairwise_pop_fst_nei73 <- function(.x, by_locus = FALSE) {
   if (by_locus) {
     1 - (Hs_pair / Ht_pair)
     # tidy it properly
-    #TODO
+    # TODO
   } else {
     1 - (colSums(Hs_pair, na.rm = TRUE) / colSums(Ht_pair, na.rm = TRUE))
     # TODO TIDY IT PROPERLY
@@ -106,7 +106,7 @@ pairwise_pop_fst_nei73 <- function(.x, by_locus = FALSE) {
 pairwise_pop_fst_nei83 <- function(.x, by_locus = FALSE) {
   pop_counts_df <- group_map(.x, .f = ~ .gt_pop_counts(.x))
   # get the grouping column, and create all pairwise combination of indices
-  .group_levels = .x %>% group_keys()
+  .group_levels <- .x %>% group_keys()
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
   n_loci <- count_loci(.x)
   #  Hs_pair <- matrix(NA_real_, nrow = n_loci, ncol = ncol(pairwise_combn))
@@ -127,13 +127,13 @@ pairwise_pop_fst_nei83 <- function(.x, by_locus = FALSE) {
     Nar <- n <- 2.0 /
       ((1.0 / (pop_counts_df[[pop1]]$n / 2.0)) +
         (1.0 / (pop_counts_df[[pop2]]$n / 2.0)))
-    Hs_pair_est = Hs_pair * ((2.0 * Nar) / (2.0 * Nar - 1))
-    Ht_pair_est = Ht_pair + (Hs_pair_est / (4.0 * Nar))
+    Hs_pair_est <- Hs_pair * ((2.0 * Nar) / (2.0 * Nar - 1))
+    Ht_pair_est <- Ht_pair + (Hs_pair_est / (4.0 * Nar))
   }
   if (by_locus) {
     1 - (Hs_pair_est / Ht_pair_est)
     # tidy it properly
-    #TODO
+    # TODO
   } else {
     1 -
       (colSums(Hs_pair_est, na.rm = TRUE) / colSums(Ht_pair_est, na.rm = TRUE))
@@ -154,7 +154,7 @@ hierfstat::basic.stats(test_hier) -> foo
 
 ########################################################
 data <- test_sub_hier
-diploid = TRUE
+diploid <- TRUE
 dum.pop <- FALSE
 if (length(table(data[, 1])) < 2) {
   data[dim(data)[1] + 1, 1] <- "DumPop"
@@ -166,7 +166,7 @@ p <- hierfstat:::pop.freq(data, diploid)
 n <- t(hierfstat:::ind.count(data))
 if (diploid) {
   dum <- hierfstat::getal.b(data[, -1])
-  Ho <- dum[,, 1] == dum[,, 2]
+  Ho <- dum[, , 1] == dum[, , 2]
   sHo <- (1 -
     t(apply(
       Ho,
@@ -183,7 +183,7 @@ sp2 <- matrix(unlist(sp2), nrow = dim(data[, -1])[2], byrow = TRUE)
 if (diploid) {
   Hs <- (1 - sp2 - sHo / 2 / n)
   Hs <- n / (n - 1) * Hs
-  Fis = 1 - sHo / Hs
+  Fis <- 1 - sHo / Hs
 } else {
   Hs <- n / (n - 1) * (1 - sp2)
   Fis <- NA
@@ -203,7 +203,7 @@ mp2 <- unlist(lapply(mp, fun1 <- function(x) sum(x^2)))
 if (diploid) {
   mHs <- mn / (mn - 1) * (1 - msp2 - mHo / 2 / mn)
   Ht <- 1 - mp2 + mHs / mn / np - mHo / 2 / mn / np
-  mFis = 1 - mHo / mHs
+  mFis <- 1 - mHo / mHs
 } else {
   mHs <- mn / (mn - 1) * (1 - msp2)
   Ht <- 1 - mp2 + mHs / mn / np
@@ -211,9 +211,9 @@ if (diploid) {
 }
 Dst <- Ht - mHs
 Dstp <- np / (np - 1) * Dst
-Htp = mHs + Dstp
-Fst = Dst / Ht
-Fstp = Dstp / Htp
+Htp <- mHs + Dstp
+Fst <- Dst / Ht
+Fstp <- Dstp / Htp
 Dest <- Dstp / (1 - mHs)
 res <- data.frame(cbind(mHo, mHs, Ht, Dst, Htp, Dstp, Fst, Fstp, mFis, Dest))
 names(res) <- c(
@@ -310,5 +310,5 @@ Ht <- 1 - mp2 + mHs / mn / np - mHo / 2 / mn / np
 
 Dst <- Ht - mHs
 Dstp <- np / (np - 1) * Dst
-Htp = mHs + Dstp
-Fst = Dst / Ht
+Htp <- mHs + Dstp
+Fst <- Dst / Ht

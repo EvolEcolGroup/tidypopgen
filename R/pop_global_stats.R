@@ -93,10 +93,9 @@
 
 # this code is adapted from hierfstat::basic.stats by Jerome Goudet
 pop_global_stats <- function(
-  .x,
-  by_locus = FALSE,
-  n_cores = bigstatsr::nb_cores()
-) {
+    .x,
+    by_locus = FALSE,
+    n_cores = bigstatsr::nb_cores()) {
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {

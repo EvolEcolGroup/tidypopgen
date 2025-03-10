@@ -13,11 +13,10 @@
 #'  individuals
 #' @export
 snp_king <- function(
-  X, # nolint start
-  ind.row = bigstatsr::rows_along(X),
-  ind.col = bigstatsr::cols_along(X),
-  block.size = bigstatsr::block_size(nrow(X)) * 4
-) {
+    X, # nolint start
+    ind.row = bigstatsr::rows_along(X),
+    ind.col = bigstatsr::cols_along(X),
+    block.size = bigstatsr::block_size(nrow(X)) * 4) {
   # nolint end
   if (!inherits(X, "FBM.code256")) {
     stop("X should be a FBM.code256 matrix")

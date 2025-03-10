@@ -62,19 +62,18 @@
 #' }
 #' }
 gt_roh_window <- function(
-  x,
-  window_size = 15,
-  threshold = 0.05,
-  min_snp = 3,
-  heterozygosity = FALSE,
-  max_opp_window = 1,
-  max_miss_window = 1,
-  max_gap = 10^6,
-  min_length_bps = 1000,
-  min_density = 1 / 1000,
-  max_opp_run = NULL,
-  max_miss_run = NULL
-) {
+    x,
+    window_size = 15,
+    threshold = 0.05,
+    min_snp = 3,
+    heterozygosity = FALSE,
+    max_opp_window = 1,
+    max_miss_window = 1,
+    max_gap = 10^6,
+    min_length_bps = 1000,
+    min_density = 1 / 1000,
+    max_opp_run = NULL,
+    max_miss_run = NULL) {
   if (!requireNamespace("detectRUNS", quietly = TRUE)) {
     stop(
       "to use this function, first install package 'detectRUNS' with\n",

@@ -33,12 +33,11 @@
 #' @export
 
 rbind_dry_run <- function(
-  ref,
-  target,
-  use_position = FALSE,
-  flip_strand = FALSE,
-  quiet = FALSE
-) {
+    ref,
+    target,
+    use_position = FALSE,
+    flip_strand = FALSE,
+    quiet = FALSE) {
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
   target_df <- target %>% show_loci()

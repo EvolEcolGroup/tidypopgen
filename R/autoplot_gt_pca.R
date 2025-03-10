@@ -21,11 +21,10 @@
 #' @name autoplot_gt_pca
 #' @export
 autoplot.gt_pca <- function(
-  object,
-  type = c("screeplot", "scores", "loadings"),
-  k = NULL,
-  ...
-) {
+    object,
+    type = c("screeplot", "scores", "loadings"),
+    k = NULL,
+    ...) {
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (type == "screeplot") {

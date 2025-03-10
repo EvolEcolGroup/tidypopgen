@@ -58,13 +58,12 @@
 # with adegenet
 
 gt_dapc <- function(
-  x,
-  pop = NULL,
-  n_pca = NULL,
-  n_da = NULL,
-  loadings_by_locus = TRUE,
-  pca_info = FALSE
-) {
+    x,
+    pop = NULL,
+    n_pca = NULL,
+    n_da = NULL,
+    loadings_by_locus = TRUE,
+    pca_info = FALSE) {
   if (!inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }

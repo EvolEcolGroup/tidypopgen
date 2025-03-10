@@ -19,12 +19,11 @@ loci_missingness <- function(.x, as_counts = FALSE, block_size, ...) {
 #' @export
 #' @rdname loci_missingness
 loci_missingness.tbl_df <- function(
-  .x,
-  as_counts = FALSE,
-  block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1), #the bigapply that splits in blocks is not multithreaded, as we use the multiple threads for openMP,
-  ...
-) {
-  #TODO this is a hack to deal with the class being dropped when going through group_map
+    .x,
+    as_counts = FALSE,
+    block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1), # the bigapply that splits in blocks is not multithreaded, as we use the multiple threads for openMP,
+    ...) {
+  # TODO this is a hack to deal with the class being dropped when going through group_map
   stopifnot_gen_tibble(.x)
   loci_missingness(
     .x$genotypes,
@@ -38,11 +37,10 @@ loci_missingness.tbl_df <- function(
 #' @export
 #' @rdname loci_missingness
 loci_missingness.vctrs_bigSNP <- function(
-  .x,
-  as_counts = FALSE,
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
-  ...
-) {
+    .x,
+    as_counts = FALSE,
+    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    ...) {
   rlang::check_dots_empty()
   #  stopifnot_diploid(.x)
   # get the FBM
@@ -64,7 +62,7 @@ loci_missingness.vctrs_bigSNP <- function(
       ind = attr(.x, "loci")$big_index,
       ncores = 1, # parallelisation is used within the function
       block.size = block_size,
-      a.combine = 'c'
+      a.combine = "c"
     )
     if (!as_counts) {
       n_na <- n_na / length(rows_to_keep)
@@ -79,12 +77,11 @@ loci_missingness.vctrs_bigSNP <- function(
 #' @export
 #' @rdname loci_missingness
 loci_missingness.grouped_df <- function(
-  .x,
-  as_counts = FALSE,
-  n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
-  ...
-) {
+    .x,
+    as_counts = FALSE,
+    n_cores = bigstatsr::nb_cores(),
+    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    ...) {
   rlang::check_dots_empty()
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
   rows_to_keep <- .gt_bigsnp_rows(.x)
@@ -106,7 +103,7 @@ loci_missingness.grouped_df <- function(
     ind = attr(.x$genotypes, "loci")$big_index,
     ncores = 1, # parallelisation is used within the function
     block.size = block_size,
-    a.combine = 'rbind'
+    a.combine = "rbind"
   )
 
   group_sizes <- tally(.x) %>% dplyr::pull(dplyr::all_of("n"))

@@ -56,16 +56,15 @@ loci_ld_clump.tbl_df <- function(.x, ...) {
 #' @export
 #' @rdname loci_ld_clump
 loci_ld_clump.vctrs_bigSNP <- function(
-  .x,
-  S = NULL, # nolint
-  thr_r2 = 0.2,
-  size = 100 / thr_r2,
-  exclude = NULL,
-  use_positions = TRUE,
-  n_cores = 1,
-  return_id = FALSE,
-  ...
-) {
+    .x,
+    S = NULL, # nolint
+    thr_r2 = 0.2,
+    size = 100 / thr_r2,
+    exclude = NULL,
+    use_positions = TRUE,
+    n_cores = 1,
+    return_id = FALSE,
+    ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   # check that the loci have not been resorted

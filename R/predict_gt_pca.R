@@ -26,19 +26,18 @@
 
 # this is a modified version of bigstatsr::predict.big_SVD
 predict.gt_pca <- function(
-  object,
-  new_data = NULL,
-  project_method = c(
-    "none",
-    "simple",
-    "OADP",
-    "least_squares"
-  ),
-  lsq_pcs = c(1, 2),
-  block_size = NULL,
-  n_cores = 1,
-  ...
-) {
+    object,
+    new_data = NULL,
+    project_method = c(
+      "none",
+      "simple",
+      "OADP",
+      "least_squares"
+    ),
+    lsq_pcs = c(1, 2),
+    block_size = NULL,
+    n_cores = 1,
+    ...) {
   rlang::check_dots_empty()
   project_method <- match.arg(project_method)
 
@@ -113,7 +112,7 @@ predict.gt_pca <- function(
         X_norm = X_norm
       )
       if (project_method == "simple") {
-        XV <- XV[,, drop = FALSE] # nolint
+        XV <- XV[, , drop = FALSE] # nolint
         dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
         return(XV)
       } else {
@@ -139,19 +138,18 @@ predict.gt_pca <- function(
         proj_i = seq_len(nrow(new_data)),
         .final = t,
         .combine = cbind
-      ) %do%
-        {
-          # scaled genotypes for this individual
-          genotypes <- X[
-            .gt_bigsnp_rows(new_data)[proj_i],
-            .gt_bigsnp_cols(new_data)[loci_subset]
-          ]
-          genotypes_scaled <- (genotypes - object$center) / object$scale
-          na_ids <- which(!is.na(genotypes_scaled))
-          genotypes_scaled <- genotypes_scaled[na_ids]
-          v_sub <- object$v[na_ids, lsq_pcs]
-          solve(crossprod(v_sub), crossprod(v_sub, genotypes_scaled))
-        }
+      ) %do% {
+        # scaled genotypes for this individual
+        genotypes <- X[
+          .gt_bigsnp_rows(new_data)[proj_i],
+          .gt_bigsnp_cols(new_data)[loci_subset]
+        ]
+        genotypes_scaled <- (genotypes - object$center) / object$scale
+        na_ids <- which(!is.na(genotypes_scaled))
+        genotypes_scaled <- genotypes_scaled[na_ids]
+        v_sub <- object$v[na_ids, lsq_pcs]
+        solve(crossprod(v_sub), crossprod(v_sub, genotypes_scaled))
+      }
       dimnames(lsq_proj) <-
         list(new_data$id, paste0(".PC", seq_len(ncol(lsq_proj))))
       return(lsq_proj)
@@ -163,16 +161,15 @@ predict.gt_pca <- function(
 # a port of bigsnpr::part_prod to work on standard fb256 matrices
 
 fbm256_part_prod <- function(
-  X,
-  ind,
-  ind.row,
-  ind.col,
-  center, # nolint
-  scale,
-  V,
-  XV,
-  X_norm
-) {
+    X,
+    ind,
+    ind.row,
+    ind.col,
+    center, # nolint
+    scale,
+    V,
+    XV,
+    X_norm) {
   # nolint
   res <- fbm256_prod_and_rowSumsSq(
     BM = X,

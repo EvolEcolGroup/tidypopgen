@@ -12,12 +12,11 @@
 #' @keywords internal
 
 subset_bigSNP <- function(
-  X,
-  indiv_indices = NULL, # nolint
-  loci_indices = NULL,
-  swap_indices = NULL,
-  backingfile = NULL
-) {
+    X,
+    indiv_indices = NULL, # nolint
+    loci_indices = NULL,
+    swap_indices = NULL,
+    backingfile = NULL) {
   if (is.null(indiv_indices)) {
     indiv_indices <- bigstatsr::rows_along(X)
   }

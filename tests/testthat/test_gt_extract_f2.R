@@ -95,7 +95,7 @@ test_that("extract f2 correctly", {
   ))
   expect_warning(
     adm_f2 <- admixtools::f2_from_precomp(adm_outdir, verbose = FALSE)
-  ) #nolint
+  ) # nolint
   # now try to do the same with gen_tibble
   gt_outdir <- file.path(tempdir(), "gt_f2")
   unlink(file.path(gt_outdir, "*"), recursive = TRUE)
@@ -104,6 +104,6 @@ test_that("extract f2 correctly", {
   suppressWarnings(gt_extract_f2(test_gt, outdir = gt_outdir, quiet = TRUE))
   expect_warning(
     gt_f2 <- admixtools::f2_from_precomp(adm_outdir, verbose = FALSE)
-  ) #nolint
+  ) # nolint
   expect_true(all.equal(adm_f2, gt_f2))
 })
