@@ -71,7 +71,8 @@ test_that("subset_bigSNP correctly subsets the data", {
   )
   # check that we don't have an NA
   expect_false(is.na(new_snp3$genotypes[2, 5]))
-  # and that we flipped it correctly (it should be identical to the original subset)
+  # and that we flipped it correctly
+  # (it should be identical to the original subset)
   expect_true(all.equal(new_snp3$genotypes[, 5], new_snp$genotypes[, 5]))
   # but if we change the code, it is an imputed genotype
   new_snp3$genotypes$code256 <- bigsnpr::CODE_012

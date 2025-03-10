@@ -66,9 +66,9 @@
 ## Look at to manipulate ellipses when passing arguments
 # https://stackoverflow.com/questions/60338114/updating-values-of-three-dot-ellipsis-in-r #nolint
 
-gt_pca_autoSVD <- function(
+gt_pca_autoSVD <- function( # nolint
     x,
-    k = 10, # nolint
+    k = 10,
     fun_scaling = bigsnpr::snp_scaleBinom(),
     thr_r2 = 0.2,
     use_positions = TRUE,

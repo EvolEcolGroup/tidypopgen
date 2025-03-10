@@ -47,7 +47,7 @@ test_that("pairwise_pop_fst Nei87", {
     round(nei_gt$value, 4)
   ))
 
-  # pair_fst_locus <- test_gt %>% pairwise_pop_fst(by_locus = TRUE)
+  # pair_fst_locus <- test_gt %>% pairwise_pop_fst(by_locus = TRUE) #nolint
 })
 
 
@@ -152,7 +152,8 @@ test_that("pairwise_pop_fst WC84", {
   )
   test_gt <- test_gt %>% dplyr::group_by(population)
   wc_tidypopgen_fixed_var1 <- test_gt %>% pairwise_pop_fst(method = "WC84")
-  # the variant should be ignored, so fst should be equal to fst without this variant
+  # the variant should be ignored
+  # so fst should be equal to fst without this variant
   test_genotypes <- rbind(
     c(1, 0, 1, 1, 0),
     c(1, 0, NA, 0, 0),
@@ -292,7 +293,8 @@ test_that("pairwise_pop_fst hudson", {
   test_gt <- test_gt %>% dplyr::group_by(population)
   hudson_tidypopgen_fixed_var1 <- test_gt %>%
     pairwise_pop_fst(method = "Hudson")
-  # the variant should be ignored, so fst should be equal to fst without that variant
+  # the variant should be ignored
+  # so fst should be equal to fst without that variant
   test_genotypes <- rbind(
     c(1, 0, 1, 1, 0),
     c(1, 0, NA, 0, 0),

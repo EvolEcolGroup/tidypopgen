@@ -40,11 +40,10 @@ gt_snmf <- function(
     tolerance = 0.00001,
     entropy = FALSE,
     percentage = 0.05,
-    I,
+    I, # nolint
     iterations = 200,
     ploidy = 2,
     seed = -1) {
-  # nolint
   # add seed check again!!!
   if (!is.null(seed) && length(seed) != n_runs) {
     stop("'seed' should be a vector of length 'n_runs'")

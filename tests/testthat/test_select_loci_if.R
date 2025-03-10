@@ -55,7 +55,7 @@ test_that("select_loci_if subsets correctly", {
   )
 
   # Test error warnings: selection criteria not boolean
-  rsID <- c("rs1", "rs2", "rs3", "rs4", "x1", "x2")
+  rsID <- c("rs1", "rs2", "rs3", "rs4", "x1", "x2") # nolint
   expect_error(
     test_gt %>% select_loci_if(rsID),
     ".sel_logical should be a logical boolean vector"

@@ -34,8 +34,7 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, ...) {
   # col means for submatrix (all rows, only some columns)
 
   # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
-  col_1_na <- function(X, ind, rows_to_keep) {
-    # nolint
+  col_1_na <- function(X, ind, rows_to_keep) { # nolint
     count_1 <- function(a) {
       sum(a == 1, na.rm = TRUE)
     }

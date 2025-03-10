@@ -61,14 +61,14 @@ test_that("as_counts switch", {
   expect_false(identical(qc_rates, qc_counts))
 })
 
-test_genotypes_moreNA <- rbind(
+test_genotypes_more_na <- rbind(
   c(1, 1, 0, 1, 1, 2),
   c(2, NA, NA, NA, NA, NA),
   c(2, 2, 0, 0, 1, NA)
 )
 
 test_gt2 <- gen_tibble(
-  x = test_genotypes_moreNA,
+  x = test_genotypes_more_na,
   loci = test_loci,
   indiv_meta = test_indiv_meta,
   quiet = TRUE
@@ -78,7 +78,7 @@ test_gt2 <- gen_tibble(
 test_that("indiv_missingness on a subset", {
   # create a subset gt
   test_gt2_subset <- test_gt2 %>% select_loci(c(2, 3, 4, 5, 6))
-  test_genotypes_moreNA_subset <- test_genotypes_moreNA[, c(2:6)]
+  test_genotypes_more_na_subset <- test_genotypes_more_na[, c(2:6)]
 
   sum_na <- function(x) {
     sum(is.na(x))
@@ -87,8 +87,8 @@ test_that("indiv_missingness on a subset", {
   expect_true(all(
     indiv_missingness(test_gt2_subset$genotypes) ==
       round(
-        apply(test_genotypes_moreNA_subset, MARGIN = 1, sum_na) /
-          ncol(test_genotypes_moreNA_subset),
+        apply(test_genotypes_more_na_subset, MARGIN = 1, sum_na) /
+          ncol(test_genotypes_more_na_subset),
         digits = 1
       )
   ))

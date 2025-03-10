@@ -15,7 +15,7 @@ gt_as_genlight <- function(x) {
     )
   }
   stopifnot_diploid(x) # currently we only support diploid data
-  test_genlight <- methods::new(
+  test_genlight <- methods::new( # nolint
     "genlight", # nolint
     gen = show_genotypes(x),
     ploidy = 2, # TODO update this when ploidy is implemented

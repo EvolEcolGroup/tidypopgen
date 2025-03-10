@@ -67,13 +67,12 @@
 #' @export
 
 gen_tibble <-
-  function(
-      x,
-      ...,
-      valid_alleles = c("A", "T", "C", "G"),
-      missing_alleles = c("0", "."),
-      backingfile = NULL,
-      quiet = FALSE) {
+  function(x,
+           ...,
+           valid_alleles = c("A", "T", "C", "G"),
+           missing_alleles = c("0", "."),
+           backingfile = NULL,
+           quiet = FALSE) {
     UseMethod("gen_tibble", x)
   }
 
@@ -83,16 +82,15 @@ gen_tibble <-
 #' @export
 #' @rdname gen_tibble
 gen_tibble.character <-
-  function(
-      x,
-      ...,
-      parser = c("vcfR", "cpp"),
-      n_cores = 1,
-      chunk_size = NULL,
-      valid_alleles = c("A", "T", "C", "G"),
-      missing_alleles = c("0", "."),
-      backingfile = NULL,
-      quiet = FALSE) {
+  function(x,
+           ...,
+           parser = c("vcfR", "cpp"),
+           n_cores = 1,
+           chunk_size = NULL,
+           valid_alleles = c("A", "T", "C", "G"),
+           missing_alleles = c("0", "."),
+           backingfile = NULL,
+           quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
 

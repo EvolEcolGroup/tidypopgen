@@ -1,12 +1,12 @@
 test_that("q_matrix reads q_files", {
   # read a single .Q
-  Q_path <- system.file(
+  q_path <- system.file(
     "/extdata/anolis/anolis_ld_run1.3.Q",
     package = "tidypopgen"
   )
 
   # read from df
-  q_mat <- read.table(Q_path)
+  q_mat <- read.table(q_path)
   anolis_q_k3_mat <- q_matrix(q_mat)
   expect_true(inherits(anolis_q_k3_mat, "q_matrix"))
 
@@ -22,10 +22,6 @@ test_that("q_matrix reads q_files", {
   expect_true(inherits(anolis_q$Q[[1]], "q_matrix"))
 
   # check errors
-  P_path <- system.file(
-    "/extdata/anolis/anolis_ld_run1.3.P",
-    package = "tidypopgen"
-  )
   non_path <- "an/invalid/path"
   expect_error(read_q_files(non_path), "Input is not a valid directory")
   path_no_q <- system.file("/extdata/", package = "tidypopgen")
@@ -143,11 +139,11 @@ test_that("get_p_matrix returns correct p-matrix", {
 
 test_that("tidying and augmenting a q_matrix", {
   # read a single .Q
-  Q_path <- system.file(
+  q_path <- system.file(
     "/extdata/anolis/anolis_ld_run1.3.Q",
     package = "tidypopgen"
   )
-  q_mat <- read.table(Q_path)
+  q_mat <- read.table(q_path)
   anolis_q_k3_mat <- q_matrix(q_mat)
 
   # create gt and metadata

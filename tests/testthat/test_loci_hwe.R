@@ -7,8 +7,7 @@ test_that("loci_hwe produces the same output as plink --hardy midp", {
   families_bigsnp_path <- bigsnpr::snp_readBed(
     bed_path,
     backingfile = tempfile()
-  ) # bigsnpr::sub_bed(bed_path)
-  # families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
+  )
   families <- gen_tibble(
     families_bigsnp_path,
     quiet = TRUE,
@@ -46,8 +45,7 @@ test_that("loci_hwe mid_p = FALSE produces the same output as plink --hardy ", {
   families_bigsnp_path <- bigsnpr::snp_readBed(
     bed_path,
     backingfile = tempfile()
-  ) # bigsnpr::sub_bed(bed_path)
-  # families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
+  )
   families <- gen_tibble(
     families_bigsnp_path,
     quiet = TRUE,

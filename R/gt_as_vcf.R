@@ -73,12 +73,12 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
   }
   vcf_header <- c(
     vcf_header,
-    '##INFO=<ID=PR,Number=0,Type=Flag,Description="Provisional reference allele, may not be based on real reference genome">'
-  ) # nolint
+    '##INFO=<ID=PR,Number=0,Type=Flag,Description="Provisional reference allele, may not be based on real reference genome">' # nolint
+  )
   vcf_header <- c(
     vcf_header,
     '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">'
-  ) # nolint
+  )
   vcf_header <- c(
     vcf_header,
     paste0(

@@ -13,8 +13,8 @@ test_that("fit_gt_pca_and_predict", {
   )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
   missing_pca <- missing_gt %>% gt_pca_partialSVD()
-  # check that predicting on the object is the same as predicting from the full dataset
-  # without imputation to the center (the data are already imputed)
+  # check that predicting on the object is the same as predicting from the
+  # full dataset without imputation to the center (the data are already imputed)
   expect_true(all.equal(
     predict(missing_pca),
     predict(missing_pca, new_data = missing_gt),
@@ -66,7 +66,6 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   # Generate example_loci data frame
   loci_names <- paste0("locus", 1:500)
   chromosomes <- c(rep(1, 255), rep(2, 245))
-  # positions <- rep(0, 500)
   positions <- seq(from = 1000, by = 1000, length.out = 500)
   allele_refs <- sample(c("A", "T", "C", "G"), size = 500, replace = TRUE)
   allele_alts <- sample(c("A", "T", "C", "G", NA), size = 500, replace = TRUE)
@@ -226,7 +225,8 @@ test_that("PCA computes frobenious when needed", {
   expect_false("square_frobenious" %in% names(missing_part_pca2))
   tidy_pca_out <- tidy(missing_part_pca2, matrix = "eigenvalues")
   expect_false("cumulative" %in% names(tidy_pca_out))
-  # TODO we should repeat the PCA on a toy dataset to check that it is equivalent to a full PCA done by hand
+  # TODO we should repeat the PCA on a toy dataset to check that it is
+  # equivalent to a full PCA done by hand
 })
 
 test_that("our stdevs are comparable to prcomp", {
@@ -237,8 +237,7 @@ test_that("our stdevs are comparable to prcomp", {
   families_bigsnp_path <- bigsnpr::snp_readBed(
     bed_path,
     backingfile = tempfile()
-  ) # bigsnpr::sub_bed(bed_path)
-  # families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
+  )
   families <- gen_tibble(
     families_bigsnp_path,
     quiet = TRUE,
@@ -255,7 +254,8 @@ test_that("our stdevs are comparable to prcomp", {
   #########################
   # Perform PCA using gt_pca_partialSVD
   #########################
-  # TODO there seems to be a bug in the gt_pca_partialSVD function where missing values are detected even when excluded
+  # TODO there seems to be a bug in the gt_pca_partialSVD function where
+  # missing values are detected even when excluded
   families <- gt_impute_simple(families, method = "mode")
   gt_pca_result <- families %>% gt_pca_partialSVD()
   tidy_pca <- tidy(gt_pca_result, matrix = "eigenvalues")
@@ -267,7 +267,7 @@ test_that("our stdevs are comparable to prcomp", {
     scale. = gt_pca_result$scale
   )
   prcomp_summary <- summary(pca_result)
-  TOL <- 1e-4
+  TOL <- 1e-4 # nolint
 
   # Compare standard deviation
   expect_equal(tidy_pca$std.dev, pca_result$sdev[1:10], tolerance = TOL)
@@ -293,7 +293,7 @@ test_that("our stdevs are comparable to prcomp", {
 
   loci <- gt_pca_auto_result$loci
   select <- which(show_loci(families)$name %in% loci$name)
-  families_autoSVD_subset <- families %>%
+  families_autoSVD_subset <- families %>% # nolint
     select_loci(all_of(select)) %>%
     show_genotypes()
 

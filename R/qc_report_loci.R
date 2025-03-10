@@ -397,8 +397,7 @@ autoplot_l_qc_missing_high_maf <- function(
 
   qc_highmaf <- subset(qc_report, qc_report$maf > maf_threshold)
 
-  p_highmaf <- ggplot2::ggplot(
-    # nolint
+  p_highmaf <- ggplot2::ggplot( # nolint
     qc_highmaf,
     ggplot2::aes(x = .data$missingness)
   ) +

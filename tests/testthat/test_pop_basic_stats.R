@@ -164,11 +164,15 @@ test_that("pop_* basic stats functions work correctly", {
 
 test_that("pop_* basic stats work on a single population", {
   test_het_obs <- test_gt %>% pop_het_obs(by_locus = TRUE)
-  expect_true(ncol(test_het_obs) == 1) # just one column, as we only have one population
+  # just one column, as we only have one population
+  expect_true(ncol(test_het_obs) == 1)
   test_fis <- test_gt %>% pop_fis(by_locus = TRUE)
-  expect_true(ncol(test_fis) == 1) # just one column, as we only have one population
+  # just one column, as we only have one population
+  expect_true(ncol(test_fis) == 1)
   test_het_exp <- test_gt %>% pop_het_exp(by_locus = TRUE)
-  expect_true(ncol(test_het_exp) == 1) # just one column, as we only have one population
+  # just one column, as we only have one population
+  expect_true(ncol(test_het_exp) == 1)
   test_global_stats <- test_gt %>% pop_global_stats(by_locus = TRUE)
-  expect_true(all(is.nan(test_global_stats$Fstp))) # Fstp is not defined for a single population
+  expect_true(all(is.nan(test_global_stats$Fstp)))
+  # Fstp is not defined for a single population
 })

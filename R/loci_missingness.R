@@ -55,8 +55,7 @@ loci_missingness.vctrs_bigSNP <- function(
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
     # internal function that can be used with a big_apply
-    count_na_sub <- function(BM, ind, rows_to_keep) {
-      # nolint
+    count_na_sub <- function(BM, ind, rows_to_keep) { # nolint
       n_na <- bigstatsr::big_counts(BM, ind.row = rows_to_keep, ind.col = ind)
       n_na <- n_na[nrow(n_na), ] # this should work also with polyploids
       n_na
@@ -92,8 +91,7 @@ loci_missingness.grouped_df <- function(
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
   rows_to_keep <- .gt_bigsnp_rows(.x)
   count_na_sub <- function(geno_fbm, ind, rows_to_keep) {
-    na_mat <- gt_grouped_missingness(
-      # nolint
+    na_mat <- gt_grouped_missingness( # nolint
       BM = geno_fbm,
       rowInd = rows_to_keep,
       colInd = ind,

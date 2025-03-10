@@ -117,7 +117,7 @@ gt_dapc <- function(
   # note that this is the proportion of variance out of the variance
   # we started with (i.e. what we retained with the PCAs)
   XU.lambda <- sum(x$d[1:n_pca]) / sum(x$d) # sum of retained eigenvalues
-  names(XU) <- paste("PCA-pc", 1:ncol(XU), sep = ".")
+  names(XU) <- paste("PCA-pc", seq_len(ncol(XU)), sep = ".")
 
   ## PERFORM DA ##
   # tol=1e-30 is a kludge, but a safe (?) one to avoid fancy
@@ -160,12 +160,12 @@ gt_dapc <- function(
       "this option yet!"
     ))
     res$pca.loadings <- as.matrix(V)
-    # res$pca.cent <- x$cent
+    # res$pca.cent <- x$cent #nolint start
     # if(!is.null(x$norm)) {
     #   res$pca.norm <- x$norm
     # } else {
     #   res$pca.norm <- rep(1, length(x$cent))
-    # }
+    # } #nolint end
     res$pca.eig <- x$d^2 # TODO check, this should get back the eigen from glPCA
     # note that the default allele.as.unit is FALSE for glPCA
   }

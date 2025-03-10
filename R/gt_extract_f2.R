@@ -124,9 +124,8 @@ gt_extract_f2 <- function(
 
   if (is.null(inds)) pops <- union(pops, pops2)
 
-  afdat %<>%
+  afdat %<>% # nolint
     discard_from_aftable(
-      # nolint
       maxmiss = maxmiss,
       minmaf = minmaf,
       maxmaf = maxmaf,

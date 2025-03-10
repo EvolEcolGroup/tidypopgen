@@ -25,7 +25,6 @@ test_that("show_loci gets and sets information", {
   )
 
   # check that we retrieve the info we put in (as a tibble)
-  # expect_identical(show_loci(test_gt) %>% select(-big_index),as_tibble(test_loci))
   expect_identical(
     show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)),
     as_tibble(test_loci)

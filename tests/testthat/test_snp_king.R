@@ -26,7 +26,7 @@ test_gt <- gen_tibble(
 
 
 # function to compute robust king in R
-king_r <- function(X_mat) {
+king_r <- function(X_mat) { # nolint start
   X_mat0 <- X_mat == 0
   X_mat0[is.na(X_mat0)] <- 0
   X_mat1 <- X_mat == 1
@@ -43,7 +43,7 @@ king_r <- function(X_mat) {
     (2 * pmin(N_mat_Aa_i, N_mat_Aa_j)) +
     0.5 -
     0.25 * (N_mat_Aa_i + N_mat_Aa_j) / pmin(N_mat_Aa_i, N_mat_Aa_j)
-}
+} # nolint end
 
 
 # this also tests show_genotypes and show_loci
@@ -88,8 +88,7 @@ test_that("snp_king gives the same results as plink", {
   families_bigsnp_path <- bigsnpr::snp_readBed(
     bed_path,
     backingfile = tempfile()
-  ) # bigsnpr::sub_bed(bed_path)
-  # families_bigsnp_path <- system.file("extdata/related/families.rds", package = "tidypopgen")
+  )
   families <- gen_tibble(
     families_bigsnp_path,
     quiet = TRUE,
@@ -110,7 +109,7 @@ test_that("snp_king gives the same results as plink", {
   king_matrix <- matrix(nrow = 12, ncol = 12)
 
   # Fill matrix
-  for (i in 1:nrow(king)) {
+  for (i in seq_len(nrow(king))) {
     x <- as.numeric(king[i, 2])
     y <- as.numeric(king[i, 3])
 

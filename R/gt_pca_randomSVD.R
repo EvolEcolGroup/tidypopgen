@@ -50,8 +50,9 @@
 #' @export
 
 gt_pca_randomSVD <- function(
+    # nolint
     x,
-    k = 10, # nolint
+    k = 10,
     fun_scaling = bigsnpr::snp_scaleBinom(),
     tol = 1e-4,
     verbose = FALSE,

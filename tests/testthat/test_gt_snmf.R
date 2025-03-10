@@ -62,7 +62,6 @@ test_that("gt_snmf error messages", {
     ),
     "x must be a gen_tibble or a character giving the path"
   )
-  # seed != n_runs
   expect_error(
     gt_snmf(
       x = anole_gt,

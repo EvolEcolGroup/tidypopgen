@@ -5,6 +5,6 @@ exclusions: list(
     "data-raw",
     "R/gt_dapc.R" = list( # it includes legacy code from adegenet
       object_name_linter = Inf
-    ),
+    )
   )
 encoding: "UTF-8"

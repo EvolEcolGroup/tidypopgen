@@ -50,8 +50,7 @@ indiv_missingness.vctrs_bigSNP <- function(
 
   # for polyploids, this can generate a very large matrix
   # it would be better to just write a C function that counts na
-  count_row_na_sub <- function(X, ind, rows_to_keep) {
-    # nolint
+  count_row_na_sub <- function(X, ind, rows_to_keep) { # nolint
     row_counts <- bigstatsr::big_counts(
       X, # nolint
       ind.col = ind,

@@ -47,7 +47,8 @@ test_that("check warning message for different alleles", {
     allele_alt = c("t", "c", NA, "c", "g", "a")
   )
 
-  # Create a gen_tibble with alleles that are not "A" "T" "C" "G" using valid_alleles
+  # Create a gen_tibble with alleles that are not "A" "T" "C" "G"
+  # using valid_alleles
   test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,

@@ -36,8 +36,9 @@
 #' @export
 
 gt_pca_partialSVD <- function(
+    # nolint
     x,
-    k = 10, # nolint
+    k = 10,
     fun_scaling = bigsnpr::snp_scaleBinom(),
     total_var = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {

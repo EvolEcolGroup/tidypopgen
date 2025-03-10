@@ -43,7 +43,8 @@ test_that("snp_ibs and pairwise_ibs computes ibs correctly", {
     check.attributes = FALSE
   ))
   test_ibs_gt_prop <- pairwise_ibs(test_gt)
-  # expect_true (all.equal(test_ibs_gt_prop, test_ibs$ibs[]/test_ibs$valid_n[], check.attributes = FALSE))
+  # expect_true (all.equal(test_ibs_gt_prop, test_ibs$ibs[]/test_ibs$valid_n[],
+  #                                          check.attributes = FALSE))
 
   # use raw_counts matrices to calculate proportion
   by_hand <- as.data.frame(test_ibs$ibs[] / test_ibs$valid_n[])

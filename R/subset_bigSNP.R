@@ -12,8 +12,9 @@
 #' @keywords internal
 
 subset_bigSNP <- function(
-    X,
-    indiv_indices = NULL, # nolint
+    # nolint
+    X, # nolint
+    indiv_indices = NULL,
     loci_indices = NULL,
     swap_indices = NULL,
     backingfile = NULL) {
