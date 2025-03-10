@@ -2,52 +2,49 @@
 #'
 #' This function implements the Discriminant Analysis of Principal Components
 #' (DAPC, Jombart et al. 2010). This method describes the diversity between
-#' pre-defined groups. When groups are unknown, use [gt_cluster_pca()] to
-#' infer genetic clusters. See 'details' section for a succinct
-#' description of the method, and the vignette in the package `adegenet`
-#' ("adegenet-dapc") for a
-#' tutorial. This function returns objects of class [`adegenet::dapc`] which are compatible
-#' with methods from `adegenet`; graphical methods for DAPC are documented in
-#' [adegenet::scatter.dapc]
-#' (see ?scatter.dapc).
+#' pre-defined groups. When groups are unknown, use [gt_cluster_pca()] to infer
+#' genetic clusters. See 'details' section for a succinct description of the
+#' method, and the vignette in the package `adegenet` ("adegenet-dapc") for a
+#' tutorial. This function returns objects of class [`adegenet::dapc`] which are
+#' compatible with methods from `adegenet`; graphical methods for DAPC are
+#' documented in [adegenet::scatter.dapc] (see ?scatter.dapc).
 #'
 #' The Discriminant Analysis of Principal Components (DAPC) is designed to
 #' investigate the genetic structure of biological populations. This
-#' multivariate method consists in a two-steps procedure. First, genetic
-#' data are transformed (centred, possibly scaled) and submitted to a
-#' Principal Component Analysis (PCA). Second, principal components of
-#' PCA are submitted to a Linear Discriminant Analysis (LDA). A trivial matrix
-#' operation allows to express discriminant functions as linear combination
-#' of alleles, therefore allowing one to compute allele contributions. More
-#' details about the computation of DAPC are to be found in the indicated reference.
+#' multivariate method consists in a two-steps procedure. First, genetic data
+#' are transformed (centred, possibly scaled) and submitted to a Principal
+#' Component Analysis (PCA). Second, principal components of PCA are submitted
+#' to a Linear Discriminant Analysis (LDA). A trivial matrix operation allows to
+#' express discriminant functions as linear combination of alleles, therefore
+#' allowing one to compute allele contributions. More details about the
+#' computation of DAPC are to be found in the indicated reference.
 #'
-#' @references Jombart T, Devillard S and Balloux F (2010) Discriminant analysis of
-#' principal components: a new method for the analysis of genetically
-#' structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
-#' Thia, J. A. (2023). Guidelines for standardizing the application of
-#' discriminant analysis of principal components to genotype data.
-#' Molecular Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
+#' @references Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
+#'   of principal components: a new method for the analysis of genetically
+#'   structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
+#'   Thia, J. A. (2023). Guidelines for standardizing the application of
+#'   discriminant analysis of principal components to genotype data. Molecular
+#'   Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
 #'
 #'
 #' @param x an object of class `gt_pca`, or its subclass `gt_cluster_pca`
-#' @param pop either a factor indicating the group membership of individuals;
-#' or an integer defining the desired *k* if x is a `gt_cluster_pca`; or NULL, if
-#' 'x' is a `gt_cluster_pca` and contain an element 'best_k',
-#' usually generated with [gt_cluster_pca_best_k()],
-#' which will be used to select the clustering level.
+#' @param pop either a factor indicating the group membership of individuals; or
+#'   an integer defining the desired *k* if x is a `gt_cluster_pca`; or NULL, if
+#'   'x' is a `gt_cluster_pca` and contain an element 'best_k', usually
+#'   generated with [gt_cluster_pca_best_k()], which will be used to select the
+#'   clustering level.
 #' @param n_pca number of principal components to be used in the Discriminant
-#' Analysis. If NULL, k-1 will be used.
+#'   Analysis. If NULL, k-1 will be used.
 #' @param n_da an integer indicating the number of axes retained in the
-#' Discriminant Analysis step.
+#'   Discriminant Analysis step.
 #' @param loadings_by_locus a logical indicating whether the loadings and
-#' contribution of each locus should
-#' be stored (TRUE, default) or
-#' not (FALSE). Such output can be useful, but can also create
-#' large matrices when there are a lot of loci and many dimensions.
-#' @param pca_info a logical indicating whether information about the prior
-#' PCA should be stored (TRUE, default) or not (FALSE). This information
-#' is required to predict group membership of new individuals using predict,
-#' but makes the object slightly bigger.
+#'   contribution of each locus should be stored (TRUE, default) or not (FALSE).
+#'   Such output can be useful, but can also create large matrices when there
+#'   are a lot of loci and many dimensions.
+#' @param pca_info a logical indicating whether information about the prior PCA
+#'   should be stored (TRUE, default) or not (FALSE). This information is
+#'   required to predict group membership of new individuals using predict, but
+#'   makes the object slightly bigger.
 #' @returns an object of class [adegenet::dapc]
 #' @export
 
@@ -61,63 +58,73 @@
 # with adegenet
 
 
-gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
-                      loadings_by_locus = TRUE, pca_info =FALSE){
-
-  if (!inherits(x,"gt_pca")){
+gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da = NULL,
+                    loadings_by_locus = TRUE, pca_info = FALSE) {
+  if (!inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }
-  if (is.null(x$center)){
+  if (is.null(x$center)) {
     stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
   }
 
-  if(is.null(pop)) { # if no pop was given, use best_k
-    if (any(!inherits(x,"gt_cluster_pca"),is.null(x$best_k))){
+  if (is.null(pop)) { # if no pop was given, use best_k
+    if (any(!inherits(x, "gt_cluster_pca"), is.null(x$best_k))) {
       stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca ")
     }
     pop.fac <- as.factor(x$clusters$groups[[x$best_k]])
   } else if (is.factor(pop)) { # if a factor with all assignments was given
     pop.fac <- pop
-  } else if (is.numeric(pop) & inherits(x,"gt_cluster_pca")) { # if pop is the k value
+  } else if (is.numeric(pop) && inherits(x, "gt_cluster_pca")) {
+    # if pop is the k value
     pop.fac <- as.factor(x$clusters$groups[[pop]])
   }
 
-  if(is.null(pop.fac)) stop("x does not include pre-defined populations, and `pop' is not provided")
+  if (is.null(pop.fac)) {
+    stop(paste(
+      "x does not include pre-defined",
+      "populations, and `pop' is not provided"
+    ))
+  }
   # FIXME: is this actually nlevels(pop)?
   n_pop <- nlevels(pop.fac)
 
 
-  if (is.null(n_pca) ){
-    if (inherits(x,"gt_cluster_pca")){ # if we generated clusters, use the same pca
-      n_pca   <- x$clusters$n_pca
+  if (is.null(n_pca)) {
+    # if we generated clusters, use the same pca
+    if (inherits(x, "gt_cluster_pca")) {
+      n_pca <- x$clusters$n_pca
     } else { # use all principal components
-      n_pca   <- length(x$d)
+      n_pca <- length(x$d)
     }
     # by default, use number of clusters minus 1
-    if (n_pca>n_pop){
+    if (n_pca > n_pop) {
       n_pca <- n_pop - 1
     }
   } else { # if n_pca was given, check that it is not too large
-    if(n_pca > ncol(x$u)) {
+    if (n_pca > ncol(x$u)) {
       n_pca <- ncol(x$u)
     }
   }
 
-  XU <- sweep(x$u, 2, x$d, '*')[, 1:n_pca ,  drop=FALSE] # principal components
-  # note taht this is the proportion of variance out of the variance we started with (i.e. what we retained with the PCAs)
-  XU.lambda <- sum(x$d[1:n_pca ] )/sum(x$d) # sum of retained eigenvalues
-  names(XU) <- paste("PCA-pc", 1:ncol(XU), sep=".")
+  XU <- sweep(x$u, 2, x$d, "*")[, 1:n_pca, drop = FALSE] # principal components
+  # note that this is the proportion of variance out of the variance
+  # we started with (i.e. what we retained with the PCAs)
+  XU.lambda <- sum(x$d[1:n_pca]) / sum(x$d) # sum of retained eigenvalues
+  names(XU) <- paste("PCA-pc", 1:ncol(XU), sep = ".")
 
 
   ## PERFORM DA ##
-  ldaX <- MASS::lda(XU, pop.fac, tol=1e-30) # tol=1e-30 is a kludge, but a safe (?) one to avoid fancy rescaling by lda.default
+  # tol=1e-30 is a kludge, but a safe (?) one to avoid fancy
+  # rescaling by lda.default
+  ldaX <- MASS::lda(XU, pop.fac, tol = 1e-30)
   lda.dim <- sum(ldaX$svd^2 > 1e-10)
   ldaX$svd <- ldaX$svd[1:lda.dim]
-  ldaX$scaling <- ldaX$scaling[,1:lda.dim,drop=FALSE]
+  ldaX$scaling <- ldaX$scaling[, 1:lda.dim, drop = FALSE]
 
-  n_da <- min(n_da, length(levels(pop.fac ))-1, n_pca ,  sum(ldaX$svd>1e-10)) # can't be more than K-1 disc. func., or more than n.pca
+  # can't be more than K-1 disc. func., or more than n.pca
+  n_da <- min(n_da, length(levels(pop.fac)) - 1, n_pca, sum(ldaX$svd > 1e-10))
   n_da <- round(n_da)
-  predX <- stats::predict(ldaX, dimen=n_da)
+  predX <- stats::predict(ldaX, dimen = n_da)
 
   ## BUILD RESULT
   res <- list()
@@ -125,11 +132,13 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   res$n.da <- n_da
   res$tab <- XU
   res$grp <- pop.fac
-  res$var <- XU.lambda # note that this is the variance out fo the variance that was captured by the retained PCs
+  # note that this (res$var) is the variance out fo the variance that was
+  # captured bythe retained PCs
+  res$var <- XU.lambda
   res$eig <- ldaX$svd^2
-  res$loadings <- ldaX$scaling[, 1:n_da, drop=FALSE]
+  res$loadings <- ldaX$scaling[, 1:n_da, drop = FALSE]
   res$means <- ldaX$means
-  res$ind.coord <-predX$x
+  res$ind.coord <- predX$x
   res$grp.coord <- apply(res$ind.coord, 2, tapply, pop.fac, mean)
   res$prior <- ldaX$prior
   res$posterior <- predX$posterior
@@ -139,28 +148,33 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   # ## optional: store loadings of variables
   # @BUG we need to sort out the slots as these are not correct
   # @TODO our objects are missing several of these slots
-   if(pca_info){
-     warning("conversion of objects slots is inconmplete, don't use this option yet!")
+  if (pca_info) {
+    warning(paste(
+      "conversion of objects slots is inconmplete, don't use",
+      "this option yet!"
+    ))
     res$pca.loadings <- as.matrix(V)
-     # res$pca.cent <- x$cent
-     # if(!is.null(x$norm)) {
-     #   res$pca.norm <- x$norm
-     # } else {
-     #   res$pca.norm <- rep(1, length(x$cent))
-     # }
-     res$pca.eig <- x$d^2 # TODO check, this should get back the eigen from glPCA
-     # note that the default allele.as.unit is FALSE for glPCA
+    # res$pca.cent <- x$cent
+    # if(!is.null(x$norm)) {
+    #   res$pca.norm <- x$norm
+    # } else {
+    #   res$pca.norm <- rep(1, length(x$cent))
+    # }
+    res$pca.eig <- x$d^2 # TODO check, this should get back the eigen from glPCA
+    # note that the default allele.as.unit is FALSE for glPCA
   }
 
   ## optional: get loadings of variables
-  if(loadings_by_locus){
-    V <- x$v[, 1:n_pca ,  drop=FALSE] # principal axes
-    names(V) <- paste("PCA-pa", 1:ncol(V), sep=".")
-    var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[,1:n_da,drop=FALSE])
-    f1 <- function(x){
-      temp <- sum(x*x)
-      if(temp < 1e-12) return(rep(0, length(x)))
-      return(x*x / temp)
+  if (loadings_by_locus) {
+    V <- x$v[, 1:n_pca, drop = FALSE] # principal axes
+    names(V) <- paste("PCA-pa", seq_len(ncol(V)), sep = ".")
+    var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[, 1:n_da, drop = FALSE])
+    f1 <- function(x) {
+      temp <- sum(x * x)
+      if (temp < 1e-12) {
+        return(rep(0, length(x)))
+      }
+      return(x * x / temp)
     }
     res$var.contr <- apply(var.load, 2, f1)
     res$var.load <- var.load
@@ -169,5 +183,3 @@ gt_dapc <- function(x, pop = NULL, n_pca = NULL, n_da=NULL,
   class(res) <- c("gt_dapc", "dapc")
   return(res)
 }
-
-

@@ -19,9 +19,11 @@ square_frobenious(
 
 \item{ind.col}{A vector of column indices}
 
-\item{center}{A vector of centering values (i.e the means of the genotype counts)}
+\item{center}{A vector of centering values (i.e the means of the genotype
+counts)}
 
-\item{scale}{A vector of scaling values (i.e the standard deviations of the genotype counts)}
+\item{scale}{A vector of scaling values (i.e the standard deviations of the
+genotype counts)}
 }
 \value{
 The square of the Frobenius norm of the matrix

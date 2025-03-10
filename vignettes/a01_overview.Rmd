@@ -61,29 +61,35 @@ computing anything incorrectly).
 Given information about the individuals, their genotypes, and the loci:
 ```{r}
 library(tidypopgen)
-example_indiv_meta <- data.frame (id=c("a","b","c","d","e"),
-                       population = c("pop1","pop1","pop2","pop2","pop2"))
-example_genotypes <- rbind(c(1, 1, 0, 1, 1, 0), 
-                        c(2, 0, 0, 0,NA, 0), 
-                        c(1, 2, 0, 0, 1, 1),
-                        c(0, 2, 0, 1, 2, 1),
-                        c(1, 1,NA, 2, 1, 0))
-example_loci <- data.frame(name=c("rs1","rs2","rs3","rs4","x1","x2"),
-                           chromosome=c(1,1,1,1,2,2),
-                           position=c(3,5,65,343,23,456),
-                           genetic_dist = c(0,0,0,0,0,0),
-                           allele_ref = c("A","T","C","G","C","T"),
-                           allele_alt = c("T","C", NA,"C","G","A"))
-
+example_indiv_meta <- data.frame(
+  id = c("a", "b", "c", "d", "e"),
+  population = c("pop1", "pop1", "pop2", "pop2", "pop2")
+)
+example_genotypes <- rbind(
+  c(1, 1, 0, 1, 1, 0),
+  c(2, 0, 0, 0, NA, 0),
+  c(1, 2, 0, 0, 1, 1),
+  c(0, 2, 0, 1, 2, 1),
+  c(1, 1, NA, 2, 1, 0)
+)
+example_loci <- data.frame(
+  name = c("rs1", "rs2", "rs3", "rs4", "x1", "x2"),
+  chromosome = c(1, 1, 1, 1, 2, 2),
+  position = c(3, 5, 65, 343, 23, 456),
+  genetic_dist = c(0, 0, 0, 0, 0, 0),
+  allele_ref = c("A", "T", "C", "G", "C", "T"),
+  allele_alt = c("T", "C", NA, "C", "G", "A")
+)
 ```
 
 
 We can create a simple `gen_tibble` object (of class `gen_tbl`) with:
 ```{r}
-example_gt <- gen_tibble(example_genotypes, 
-                         indiv_meta = example_indiv_meta,
-                         loci=example_loci,
-                         backingfile = tempfile())
+example_gt <- gen_tibble(example_genotypes,
+  indiv_meta = example_indiv_meta,
+  loci = example_loci,
+  backingfile = tempfile()
+)
 ```
 We are provided information on where the three files underlying the genotype information
 are stored. As we don't want to keep the files, we used the tmp directory; normally
@@ -121,11 +127,11 @@ However, if such a function is used within a `dplyr` verb such as `mutate`,
 we need to pass the `genotype` column to the function:
 
 ```{r}
-example_gt %>% mutate (het_obs = indiv_het_obs(.data$genotypes))
+example_gt %>% mutate(het_obs = indiv_het_obs(.data$genotypes))
 ```
 Or, more simply:
 ```{r}
-example_gt %>% mutate (het_obs = indiv_het_obs(genotypes))
+example_gt %>% mutate(het_obs = indiv_het_obs(genotypes))
 ```
 
 
@@ -135,7 +141,7 @@ example_gt %>% mutate (het_obs = indiv_het_obs(genotypes))
 The individual metadata can then be processed with the usual `tidyverse` grammar.
 So, we can filter individuals by population with
 ```{r}
-example_pop1 <- example_gt %>% filter (population=="pop2")
+example_pop1 <- example_gt %>% filter(population == "pop2")
 example_pop1
 ```
 
@@ -147,8 +153,9 @@ example_gt %>% indiv_het_obs()
 
 Or after filtering:
 ```{r}
-example_gt %>% filter (population=="pop2") %>% indiv_het_obs()
-
+example_gt %>%
+  filter(population == "pop2") %>%
+  indiv_het_obs()
 ```
 
 We can use `mutate` to add observed heterozygosity as a column to our
@@ -188,7 +195,7 @@ We can see that there are two categories of loci, one starting with "rs" and
 the other with "x". If we wanted to select only loci that have an "rs" code,
 we would use:
 ```{r}
-example_sub <- example_gt %>% select_loci (starts_with("rs"))
+example_sub <- example_gt %>% select_loci(starts_with("rs"))
 example_sub
 ```
 This gives us a `gen_tibble` with only 4 loci, as expected. We can confirm that
@@ -204,13 +211,17 @@ example_sub %>% indiv_het_obs()
 
 We can also subset and reorder by passing indices:
 ```{r}
-example_gt %>% select_loci (c(2,6,1)) %>% show_loci()
+example_gt %>%
+  select_loci(c(2, 6, 1)) %>%
+  show_loci()
 ```
 This operation could be helpful when merging datasets that do not fully
 overlap on their loci (more on that later).
 
 ```{r}
-example_gt %>% select_loci (c(2,6,1)) %>% show_genotypes()
+example_gt %>%
+  select_loci(c(2, 6, 1)) %>%
+  show_genotypes()
 ```
 
 
@@ -226,8 +237,10 @@ We can now create a vector of indices of loci with a minimum allele frequency
 (MAF) larger than 0.2, and use it to select:
 
 ```{r}
-sel_indices <- which((example_gt %>% loci_maf())>0.2)
-example_gt %>% select_loci (all_of(sel_indices)) %>% show_loci()
+sel_indices <- which((example_gt %>% loci_maf()) > 0.2)
+example_gt %>%
+  select_loci(all_of(sel_indices)) %>%
+  show_loci()
 ```
 
 Note that passing a variable directly to `select` is deprecated, and so we have
@@ -236,7 +249,7 @@ to use `all_of` to wrap it.
 `select_loci_if` allows us to avoid creating a temporary variable to store indices:
 
 ```{r}
-example_gt_sub <- example_gt %>% select_loci_if(loci_maf(genotypes)>0.2)
+example_gt_sub <- example_gt %>% select_loci_if(loci_maf(genotypes) > 0.2)
 example_gt_sub %>% show_genotypes()
 ```
 
@@ -250,8 +263,10 @@ greater than 0.2 that are also on chromosome 2.
 
 We can use a similar approach to select only alleles on a given chromosome:
 ```{r}
-example_gt %>% select_loci_if(loci_chromosomes(genotypes)==2 &
-                             loci_maf(genotypes)>0.2) %>% show_loci()
+example_gt %>%
+  select_loci_if(loci_chromosomes(genotypes) == 2 &
+    loci_maf(genotypes) > 0.2) %>%
+  show_loci()
 ```
 
 Incidentally, `loci_maf()` is one of several functions that compute quantities
@@ -266,7 +281,9 @@ number of ways.
 
 As a starting point, we can group by population and get pop sizes:
 ```{r}
-example_gt %>% group_by(population) %>% tally()
+example_gt %>%
+  group_by(population) %>%
+  tally()
 ```
 
 For functions that return one result per individual (such as
@@ -274,15 +291,18 @@ For functions that return one result per individual (such as
 new `tibble` with one line per population. For example, we can count the number of individuals 
 per population, as well as their mean heterozygosity with :
 ```{r}
-example_gt %>% group_by(population) %>% 
-  summarise(n= n(), mean_het = mean(indiv_het_obs(genotypes)))
+example_gt %>%
+  group_by(population) %>%
+  summarise(n = n(), mean_het = mean(indiv_het_obs(genotypes)))
 ```
 
 However, note that this is somewhat inefficient, as computing the pop averages
 requires multiple access to the data. A more efficient approach is to:
 ```{r}
-example_gt %>% mutate(het_obs = indiv_het_obs(genotypes)) %>% group_by(population) %>% 
-  summarise(n= n(), mean_het = mean(het_obs))
+example_gt %>%
+  mutate(het_obs = indiv_het_obs(genotypes)) %>%
+  group_by(population) %>%
+  summarise(n = n(), mean_het = mean(het_obs))
 ```
 
 In this way, we compute all individual heterozygosities in one go (optimising
@@ -291,7 +311,9 @@ our file access time), and then generate the population summaries.
 For functions that return a quantity per locus (e.g. `loci_maf`), we can use 
  `group_by` together with `group_map` to apply such functions over populations:
 ```{r}
-example_gt %>% group_by(population) %>% group_map(.f = ~loci_maf(.x))
+example_gt %>%
+  group_by(population) %>%
+  group_map(.f = ~ loci_maf(.x))
 ```
 
 For more details on the syntax of `group_map`, see its help page. Some 
@@ -299,7 +321,9 @@ functions, such as `loci_maf()`, also have a method for grouped tibbles that
 allows an even easier syntax:
 
 ```{r}
-example_gt %>% group_by(population) %>% loci_maf()
+example_gt %>%
+  group_by(population) %>%
+  loci_maf()
 ```
 
 In reality, such grouped methods are nothing more than a wrapper for the
@@ -311,7 +335,9 @@ distance metrics among populations. For example:
 
 ```{r}
 # not reimplemented yet!
-example_gt %>% group_by(population) %>% pairwise_pop_fst()
+example_gt %>%
+  group_by(population) %>%
+  pairwise_pop_fst()
 ```
 
 These type of functions are prefixed with `pop`.
@@ -370,7 +396,7 @@ write a file in the appropriate format, and return the name of that file on comp
 For example, to export to a PLINK .bed file, we simply use:
 
 ```{r}
-gt_as_plink(example_gt, file =  tempfile("new_bed_"))
+gt_as_plink(example_gt, file = tempfile("new_bed_"))
 ```
 
 This will also write a .bim and .fam file and save them together with the .bed file. 
@@ -397,10 +423,12 @@ a backingfile and let the function create backing files where the bed file is
 stored):
 ```{r}
 bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
-bigsnp_path_a <- bigsnpr::snp_readBed(bed_path_pop_a, backingfile = tempfile("pop_a_"))
+bigsnp_path_a <-
+  bigsnpr::snp_readBed(bed_path_pop_a, backingfile = tempfile("pop_a_"))
 pop_a_gt <- gen_tibble(bigsnp_path_a)
 bed_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
-bigsnp_path_b <- bigsnpr::snp_readBed(bed_path_pop_b, backingfile =  tempfile("pop_b_"))
+bigsnp_path_b <-
+  bigsnpr::snp_readBed(bed_path_pop_b, backingfile = tempfile("pop_b_"))
 pop_b_gt <- gen_tibble(bigsnp_path_b)
 ```
 
@@ -437,8 +465,10 @@ NOTE: In this vignette, we save to the temporary directory, but in real life you
 a directory where you will be able to retrieve the file at a later date!!!
 ```{r}
 # #create merge
-merged_gt <- rbind(pop_a_gt, pop_b_gt, flip_strand = TRUE,
-                           backingfile = file.path(tempdir(),"gt_merged"))
+merged_gt <- rbind(pop_a_gt, pop_b_gt,
+  flip_strand = TRUE,
+  backingfile = file.path(tempdir(), "gt_merged")
+)
 ```
 
 Let's check the resulting `gen_tibble`:
@@ -473,13 +503,15 @@ encourage taking this step explicitly, before running any analysis.
 Let us start with a dataset that has some missing genotypes:
 ```{r}
 bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-missing_gt <- gen_tibble(bed_file,  backingfile = tempfile("missing_"))
+missing_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"))
 missing_gt
 ```
 
 We can visualise the amount of missingness with:
 ```{r, fig.alt = "Histogram of loci missingness, showing that most loci have no missing data, while some have a small proportion of missing data"}
-missing_gt %>% loci_missingness() %>% hist()
+missing_gt %>%
+  loci_missingness() %>%
+  hist()
 ```
 
 If we attempt to run a PCA on this dataset, we get:
@@ -517,20 +549,26 @@ gt_uses_imputed(missing_gt)
 
 And indeed, if we summarise missingness, we still get:
 ```{r, fig.alt = "Histogram of loci missingness as above, showing that the use of imputed data is not automatic"}
-missing_gt %>% loci_missingness() %>% hist()
+missing_gt %>%
+  loci_missingness() %>%
+  hist()
 ```
 
 We can manually force a `gen_tibble` to use the imputed data:
 ```{r, fig.alt = "Histogram of loci missingness after setting use of imputed data to true, showing that there is no missingness"}
 gt_set_imputed(missing_gt, set = TRUE)
-missing_gt %>% loci_missingness() %>% hist()
+missing_gt %>%
+  loci_missingness() %>%
+  hist()
 ```
 
 However, this is generally not needed, we can keep our `gen_tibble` set to use
 the raw data:
 ```{r, fig.alt = "Histogram of loci missingness after setting use of imputed data to false again"}
 gt_set_imputed(missing_gt, set = FALSE)
-missing_gt %>% loci_missingness() %>% hist()
+missing_gt %>%
+  loci_missingness() %>%
+  hist()
 ```
 
 And let functions that need imputation use it automatically:
@@ -543,7 +581,9 @@ Note that, when the function is finished, the `gen_tibble` is back to using
 the raw genotypes:
 ```{r, fig.alt = "Histogram of loci missingness, showing that use of imputed data is not automatically set to true, after using a PCA function"}
 gt_uses_imputed(missing_gt)
-missing_gt %>% loci_missingness() %>% hist()
+missing_gt %>%
+  loci_missingness() %>%
+  hist()
 ```
 
 More details about PCA and other analysis is found in the vignette on population

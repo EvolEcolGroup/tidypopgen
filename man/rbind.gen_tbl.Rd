@@ -15,28 +15,29 @@
 }
 \arguments{
 \item{...}{two \code{\link{gen_tibble}} objects. Note that this function can not take
-more objects, \code{rbind} has to be done sequentially for large sets of objects.}
+more objects, \code{rbind} has to be done sequentially for large sets of
+objects.}
 
 \item{as_is}{boolean determining whether the loci should be left as they are
 before merging. If FALSE (the defaults), \code{rbind} will attempt to subset and
 swap alleles as needed.}
 
 \item{flip_strand}{boolean on whether strand flipping should be checked to
-match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T and C/G)
-will also be removed. It defaults to FALSE}
+match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T
+and C/G) will also be removed. It defaults to FALSE}
 
-\item{use_position}{boolean of whether a combination of chromosome and position
-should be used for matching SNPs. By default, \code{rbind} uses the locus name,
-so this is set to FALSE. When using 'use_position=TRUE', make sure chromosomes
-are coded in the same way in both \code{gen_tibbles} (a mix of e.g. 'chr1', '1' or
-'chromosome1' can be the reasons if an unexpectedly large number variants
-are dropped when merging).}
+\item{use_position}{boolean of whether a combination of chromosome and
+position should be used for matching SNPs. By default, \code{rbind} uses the
+locus name, so this is set to FALSE. When using 'use_position=TRUE', make
+sure chromosomes are coded in the same way in both \code{gen_tibbles} (a mix of
+e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
+large number variants are dropped when merging).}
 
 \item{quiet}{boolean whether to omit reporting to screen}
 
-\item{backingfile}{the path and prefix of the files used to store the
-merged data (it will be a .RDS to store the \code{bigSNP} object and a .bk file
-as its backing file for the FBM)}
+\item{backingfile}{the path and prefix of the files used to store the merged
+data (it will be a .RDS to store the \code{bigSNP} object and a .bk file as its
+backing file for the FBM)}
 }
 \value{
 a \code{\link{gen_tibble}} with the merged data.
@@ -44,15 +45,13 @@ a \code{\link{gen_tibble}} with the merged data.
 \description{
 This function combined two \link{gen_tibble}s. By defaults, it subsets the loci
 and swaps ref and alt alleles to make the two datasets compatible (this
-behaviour can be switched off with \code{as_is}).
-The first object is used as a "reference" , and SNPs
-in the other dataset will be flipped and/or alleles swapped
-as needed. SNPs that have different alleles in the two datasets
-(i.e. triallelic) will also be
-dropped. There are also options (NOT default) to attempt strand flipping to
-match alleles (often needed in human datasets from different SNP chips),
-and remove ambiguous alleles (C/G and A/T) where the correct strand can not
-be guessed.
+behaviour can be switched off with \code{as_is}). The first object is used as a
+"reference" , and SNPs in the other dataset will be flipped and/or alleles
+swapped as needed. SNPs that have different alleles in the two datasets (i.e.
+triallelic) will also be dropped. There are also options (NOT default) to
+attempt strand flipping to match alleles (often needed in human datasets from
+different SNP chips), and remove ambiguous alleles (C/G and A/T) where the
+correct strand can not be guessed.
 }
 \details{
 rbind differs from merging data with plink, which swaps the order of allele1

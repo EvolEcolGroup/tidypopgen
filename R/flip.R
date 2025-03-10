@@ -10,14 +10,14 @@
 #' @returns a vector of recoded bases
 #' @keywords internal
 
-flip <-function(bases){
-  to_a <- bases=="T"
-  to_t <- bases=="A"
-  to_c <- bases=="G"
-  to_g <- bases=="C"
+flip <- function(bases) {
+  to_a <- bases == "T"
+  to_t <- bases == "A"
+  to_c <- bases == "G"
+  to_g <- bases == "C"
   bases[to_a] <- "A"
   bases[to_t] <- "T"
   bases[to_c] <- "C"
   bases[to_g] <- "G"
-  return(bases)
+  return(bases) # nolint
 }

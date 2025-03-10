@@ -11,29 +11,34 @@
 #' extract information on the alleles for those loci from a [`gen_tibble`].
 #' @rdname show_genotypes
 #' @export
-show_genotypes <- function(.x, indiv_indices=NULL, loci_indices=NULL, ...) {
+show_genotypes <- function(.x, indiv_indices = NULL, loci_indices = NULL, ...) {
   UseMethod("show_genotypes", .x)
 }
 
 #' @export
 #' @rdname show_genotypes
-show_genotypes.tbl_df <- function(.x, indiv_indices=NULL, loci_indices=NULL, ...){
+show_genotypes.tbl_df <- function(.x, indiv_indices = NULL,
+                                  loci_indices = NULL, ...) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  show_genotypes(.x$genotypes, indiv_indices=indiv_indices, loci_indices=loci_indices, ...)
+  show_genotypes(.x$genotypes,
+    indiv_indices = indiv_indices,
+    loci_indices = loci_indices, ...
+  )
 }
 
 #' @export
 #' @rdname show_genotypes
-show_genotypes.vctrs_bigSNP <- function(.x, indiv_indices=NULL, loci_indices=NULL, ...){
+show_genotypes.vctrs_bigSNP <- function(.x, indiv_indices = NULL,
+                                        loci_indices = NULL, ...) {
   rlang::check_dots_empty()
   indiv_big_index <- vctrs::vec_data(.x)
-  if (!is.null(indiv_indices)){
-    indiv_big_index <-  indiv_big_index[indiv_indices]
+  if (!is.null(indiv_indices)) {
+    indiv_big_index <- indiv_big_index[indiv_indices]
   }
   loci_big_index <- show_loci(.x)$big_index
-  if (!is.null(loci_indices)){
-    loci_big_index <-  loci_big_index[loci_indices]
+  if (!is.null(loci_indices)) {
+    loci_big_index <- loci_big_index[loci_indices]
   }
-  attr(.x,"bigsnp")$genotypes[indiv_big_index, loci_big_index]
+  attr(.x, "bigsnp")$genotypes[indiv_big_index, loci_big_index]
 }

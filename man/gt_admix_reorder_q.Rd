@@ -9,12 +9,14 @@ gt_admix_reorder_q(x, group = NULL)
 \arguments{
 \item{x}{a \code{gt_admix} object, possibly with a grouping variable}
 
-\item{group}{a character vector with the grouping variable (if there is no grouping variable info in \code{x})}
+\item{group}{a character vector with the grouping variable (if there is no
+grouping variable info in \code{x})}
 }
 \value{
 a \code{gt_admix} object with the q matrices reordered
 }
 \description{
-This function reorders the q matrices in a \code{gt_admix} object based on the grouping variable. This is useful before plotting when the
-samples from each group are not adjacent to each other in the q matrix.
+This function reorders the q matrices in a \code{gt_admix} object based on the
+grouping variable. This is useful before plotting when the samples from each
+group are not adjacent to each other in the q matrix.
 }

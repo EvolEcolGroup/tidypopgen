@@ -9,7 +9,8 @@ gt_pcadapt(x, pca, k, n_cores = 1)
 \arguments{
 \item{x}{A \code{gen_tibble} object.}
 
-\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{gt_pca_partialSVD()} or \code{gt_pca_randomSVD()}.}
+\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{gt_pca_partialSVD()} or
+\code{gt_pca_randomSVD()}.}
 
 \item{k}{Number of principal components to use in the analysis.}
 
@@ -19,12 +20,12 @@ gt_pcadapt(x, pca, k, n_cores = 1)
 An object of subclass \code{gt_pcadapt}, a subclass of \code{mhtest}.
 }
 \description{
-pcadapt is an algorithm that detects genetic markers under selection. It is based on the
-principal component analysis (PCA) of the genotypes of the individuals.
-The method is described in \href{https://doi.org/10.1534/genetics.116.195214}{Luu et al. (2017)},
-See the R package \code{pcadapt}, which provides extensive
-documentation and examples.
+pcadapt is an algorithm that detects genetic markers under selection. It is
+based on the principal component analysis (PCA) of the genotypes of the
+individuals. The method is described in \href{https://doi.org/10.1534/genetics.116.195214}{Luu et al. (2017)}, See the R package
+\code{pcadapt}, which provides extensive documentation and examples.
 }
 \details{
-Internally, this function uses the \code{snp_pcadapt} function from the \code{bigsnpr} package.
+Internally, this function uses the \code{snp_pcadapt} function from the \code{bigsnpr}
+package.
 }

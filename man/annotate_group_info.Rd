@@ -4,7 +4,7 @@
 \alias{annotate_group_info}
 \title{Annotate an adxmiture barplot with information about the populations}
 \usage{
-annotate_group_info(q_tbl)
+annotate_group_info(q_tbl, plt)
 }
 \arguments{
 \item{q_tbl}{a tidied \code{q_matrix}

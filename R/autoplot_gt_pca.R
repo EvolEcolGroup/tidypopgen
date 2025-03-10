@@ -1,50 +1,55 @@
 #' Autoplots for `gt_pca` objects
 #'
 #' For `gt_pca`, the following types of plots are available:
-#' - `screeplot`: a plot of the eigenvalues of the principal components (currently
-#' it plots the singular value)
+#' - `screeplot`: a plot of the eigenvalues of the principal components
+#'    (currently it plots the singular value)
 #' - `scores` a scatterplot of the scores of each individual on two principal
 #' components (defined by `pc`)
-#' - `loadings` a plot of loadings of all loci for a given component (chosen with `pc`)
+#' - `loadings` a plot of loadings of all loci for a given component
+#'    (chosen with `pc`)
 #'
-#' `autoplot` produces simple plots to quickly inspect an object. They are
-#' not customisable; we recommend that you use `ggplot2` to produce publication
+#' `autoplot` produces simple plots to quickly inspect an object. They are not
+#' customisable; we recommend that you use `ggplot2` to produce publication
 #' ready plots.
 #'
 #' @param object an object of class `gt_pca`
 #' @param type the type of plot (one of "screeplot", "scores" and "loadings")
 #' @param k the principal components to be plotted: for scores, a pair of values
-#' e.g. c(1,2); for `loadings` either one or more values.
+#'   e.g. c(1,2); for `loadings` either one or more values.
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @name autoplot_gt_pca
 #' @export
 autoplot.gt_pca <- function(object,
-                            type=c("screeplot", "scores","loadings"),
-                            k = NULL, ...)
-{
+                            type = c("screeplot", "scores", "loadings"),
+                            k = NULL, ...) {
   rlang::check_dots_empty()
   type <- match.arg(type)
-  if (type== "screeplot") {
-    plot(object, type="screeplot")
-  } else if (type == "scores"){
-    if (is.null(k)){
-      k <- c(1,2)
+  if (type == "screeplot") {
+    plot(object, type = "screeplot")
+  } else if (type == "scores") {
+    if (is.null(k)) {
+      k <- c(1, 2)
     }
-    if (length(k)!=2){
+    if (length(k) != 2) {
       stop("for 'scores' plots, 'pc' should be a pair of values, e.g. c(1,2)")
     }
-    if("square_frobenious" %in% names(object)){
+    if ("square_frobenious" %in% names(object)) {
       tidy_pca <- tidy(object, "eigenvalues")
       k_percentage <- tidy_pca$percent[k]
-      plot(object, type = "scores", scores = k)+
-        ggplot2::labs(x = paste0("PC",k[1], " (", round(k_percentage[1],2), "%)"),
-             y = paste0("PC",k[2], " (", round(k_percentage[2],2), "%)"))
-    } else{
+      plot(object, type = "scores", scores = k) +
+        ggplot2::labs(
+          x = paste0(
+            "PC", k[1], " (",
+            round(k_percentage[1], 2), "%)"
+          ),
+          y = paste0("PC", k[2], " (", round(k_percentage[2], 2), "%)")
+        )
+    } else {
       plot(object, type = "scores", scores = k)
     }
-  } else if (type == "loadings"){
-    if (is.null(k)){
+  } else if (type == "loadings") {
+    if (is.null(k)) {
       k <- 1
     }
     plot(object, type = "loadings", loadings = k)

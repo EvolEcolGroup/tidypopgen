@@ -16,13 +16,14 @@ gt_order_loci(
 \item{.x}{a \code{\link{gen_tibble}}}
 
 \item{use_current_table}{boolean, if FALSE (the default), the table will be
-reordered; if TRUE, then the current loci table, which might have been reordered
-manually, will be used, but only if the positions within each chromosome are
-sequential}
+reordered; if TRUE, then the current loci table, which might have been
+reordered manually, will be used, but only if the positions within each
+chromosome are sequential}
 
-\item{ignore_genetic_dist}{boolean to ignore the genetic distance when checking. Note
-that, if \code{genetic_dist} are being ignored and they are not sorted, the function will
-set them to zero to avoid problems with other software.}
+\item{ignore_genetic_dist}{boolean to ignore the genetic distance when
+checking. Note that, if \code{genetic_dist} are being ignored and they are not
+sorted, the function will set them to zero to avoid problems with other
+software.}
 
 \item{quiet}{boolean to suppress information about the files}
 
@@ -34,7 +35,7 @@ A \link{gen_tibble}
 \description{
 This function reorders the loci table so that positions within a chromosome
 are sequential. It also re-saves the genotypes into a new file backed matrix
-with the new order, so that it can be used by functions such as \code{\link[=loci_ld_clump]{loci_ld_clump()}}
-and \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}}. If the loci table is already ordered, the original
-\code{gen_tibble} is returned.
+with the new order, so that it can be used by functions such as
+\code{\link[=loci_ld_clump]{loci_ld_clump()}} and \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}}. If the loci table is already
+ordered, the original \code{gen_tibble} is returned.
 }

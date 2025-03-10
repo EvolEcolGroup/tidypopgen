@@ -16,7 +16,8 @@ loci_transitions <- function(.x, ...) {
 #' @export
 #' @rdname loci_transitions
 loci_transitions.tbl_df <- function(.x, ...) {
-  #TODO this is a hack to deal with the class being dropped when going through group_map
+  # TODO this is a hack to deal with the class being dropped when going through
+  # group_map
   stopifnot_gen_tibble(.x)
   check_allele_alphabet(.x$genotypes)
   loci_transitions(.x$genotypes, ...)
@@ -34,6 +35,5 @@ loci_transitions.vctrs_bigSNP <- function(.x, ...) {
 #' @export
 #' @rdname loci_transitions
 loci_transitions.grouped_df <- function(.x, ...) {
-  group_map(.x, .f=~loci_transitions(.x))
+  group_map(.x, .f = ~ loci_transitions(.x))
 }
-

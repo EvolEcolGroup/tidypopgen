@@ -19,6 +19,9 @@ gt_write_bigsnp_from_dfs(
 
 \item{loci}{the loci table}
 }
+\value{
+a bigSNP object
+}
 \description{
 This function expects the indiv_meta and loci to have the correct columns
 }

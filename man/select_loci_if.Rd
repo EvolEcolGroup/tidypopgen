@@ -13,6 +13,9 @@ select_loci_if(.data, .sel_logical)
 or an expression that will tidy evaluate to such a vector. Only loci
 for which .sel_logical is TRUE will be selected; NA will be treated as FALSE.}
 }
+\value{
+a subset of the list of loci in the \code{gen_tibble}
+}
 \description{
 An equivalent to \code{\link[dplyr:select_all]{dplyr::select_if()}} that works on the \code{genotype} column
 of a \code{gen_tibble}. This function has access to the genotypes (and thus can

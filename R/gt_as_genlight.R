@@ -7,16 +7,19 @@
 #' @export
 #'
 
-gt_as_genlight <- function(x){
+gt_as_genlight <- function(x) {
   if (!requireNamespace("adegenet", quietly = TRUE)) {
     stop(
       "to use this function, first install package 'adegenet' with\n",
-      "install.packages('adegenet')")
+      "install.packages('adegenet')"
+    )
   }
-  test_genlight <- methods::new("genlight", gen = show_genotypes(x),
-                       ploidy=2, # TODO update this when ploidy is implemented
-                                     ind.names = x$id,
-                                     pop = x$population,
-                                     loc.names = loci_names(x))
+  stopifnot_diploid(x) # currently we only support diploid data
+  test_genlight <- methods::new("genlight", # nolint
+    gen = show_genotypes(x),
+    ploidy = 2, # TODO update this when ploidy is implemented
+    ind.names = x$id,
+    pop = x$population,
+    loc.names = loci_names(x)
+  )
 }
-

@@ -2,7 +2,8 @@
 % Please edit documentation in R/q_matrix.R
 \name{read_q_files}
 \alias{read_q_files}
-\title{Read and structure .Q files or existing matrices as \code{q_matrix} or \code{gt_admix} objects.}
+\title{Read and structure .Q files or existing matrices as \code{q_matrix} or \code{gt_admix}
+objects.}
 \usage{
 read_q_files(x)
 }

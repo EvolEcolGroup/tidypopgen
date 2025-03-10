@@ -15,15 +15,15 @@ gt_update_backingfile(
 \arguments{
 \item{.x}{a \code{gen_tibble} object}
 
-\item{backingfile}{the path, including the file name without extension,
-for backing files used to store the data (they will be given a .bk
-and .RDS automatically). If left to NULL (the default), the file name
-will be based on the name f the current backing file.}
+\item{backingfile}{the path, including the file name without extension, for
+backing files used to store the data (they will be given a .bk and .RDS
+automatically). If left to NULL (the default), the file name will be based
+on the name f the current backing file.}
 
 \item{chunk_size}{the number of loci to process at once}
 
-\item{rm_unsorted_dist}{boolean to set \code{genetic_dist} to zero (i.e. remove it)
-if it is unsorted within the chromosomes.}
+\item{rm_unsorted_dist}{boolean to set \code{genetic_dist} to zero (i.e. remove
+it) if it is unsorted within the chromosomes.}
 
 \item{quiet}{boolean to suppress information about the files}
 }
@@ -35,4 +35,9 @@ This functions forces a re-write of the file backing matrix to match the
 \code{\link{gen_tibble}}. Individuals and loci are subsetted and reordered according to
 the current state of the \code{gen_tibble}. Tests for this function are in
 test_gt_order_loci.R
+}
+\details{
+This function does not check whether the positions of your genetic loci are
+sorted. To check this, and update the file backing matrix, use
+\code{gt_order_loci()}.
 }

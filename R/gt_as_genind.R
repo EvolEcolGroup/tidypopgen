@@ -7,20 +7,22 @@
 #' @export
 #'
 
-gt_as_genind <- function(x){
+gt_as_genind <- function(x) {
   if (!requireNamespace("adegenet", quietly = TRUE)) {
     stop(
       "to use this function, first install package 'adegenet' with\n",
-      "install.packages('adegenet')")
+      "install.packages('adegenet')"
+    )
   }
   df_for_genind <- show_genotypes(x)
-  df_for_genind [df_for_genind ==0]<-"11"
-  df_for_genind [df_for_genind ==1]<-"12"
-  df_for_genind [df_for_genind ==2]<-"22"
-  adegenet::df2genind(X = df_for_genind,
-                                     ind.names = x$id,
-                                     pop = x$population,
-                                     ncode=1,
-                                     loc.names = loci_names(x))
+  df_for_genind[df_for_genind == 0] <- "11"
+  df_for_genind[df_for_genind == 1] <- "12"
+  df_for_genind[df_for_genind == 2] <- "22"
+  adegenet::df2genind(
+    X = df_for_genind,
+    ind.names = x$id,
+    pop = x$population,
+    ncode = 1,
+    loc.names = loci_names(x)
+  )
 }
-

@@ -8,7 +8,9 @@
 #' @returns a scale constructor to be used with ggplot
 #' @export
 
-scale_fill_distruct <- function(guide = "none", ...){
-  ggplot2::scale_fill_manual(values = tidypopgen::distruct_colours,
-                             guide = guide, ...)
+scale_fill_distruct <- function(guide = "none", ...) {
+  ggplot2::scale_fill_manual(
+    values = tidypopgen::distruct_colours,
+    guide = guide, ...
+  )
 }

@@ -12,7 +12,8 @@
 
 \item{...}{unused (necessary for compatibility with generic function)}
 
-\item{ref_label}{the label for the reference dataset (defaults to "reference")}
+\item{ref_label}{the label for the reference dataset (defaults to
+"reference")}
 
 \item{target_label}{the label for the target dataset (defaults to "target")}
 }

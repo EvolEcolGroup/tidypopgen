@@ -20,35 +20,44 @@ pop_gene_div(
 )
 }
 \arguments{
-\item{.x}{a \code{\link{gen_tibble}} (usually grouped, as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}}, otherwise the full tibble
-will be considered as belonging to a single population).}
+\item{.x}{a \code{\link{gen_tibble}} (usually grouped, as obtained by using
+\code{\link[dplyr:group_by]{dplyr::group_by()}}, otherwise the full tibble will be considered as
+belonging to a single population).}
 
-\item{by_locus}{boolean, determining whether Hs should be returned by locus(TRUE),
-or as a single genome wide value (FALSE, the default).}
+\item{by_locus}{boolean, determining whether Hs should be returned by
+locus(TRUE), or as a single genome wide value (FALSE, the default).}
 
-\item{include_global}{boolean determining whether, besides the population specific estiamtes, a global
-estimate should be appended. Note that this will return a vector of n populations plus 1 (the global value),
-or a matrix with n+1 columns if \code{by_locus=TRUE}.}
+\item{include_global}{boolean determining whether, besides the population
+specific estiamtes, a global estimate should be appended. Note that this
+will return a vector of n populations plus 1 (the global value), or a
+matrix with n+1 columns if \code{by_locus=TRUE}.}
 
-\item{n_cores}{number of cores to be used, it defaults to \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
 \value{
-a vector of mean population observed heterozygosities (if \code{by_locus=FALSE}), or a matrix of
-estimates by locus (rows are loci, columns are populations, \code{by_locus=TRUE})
+a vector of mean population observed heterozygosities (if
+\code{by_locus=FALSE}), or a matrix of estimates by locus (rows are loci,
+columns are populations, \code{by_locus=TRUE})
 }
 \description{
-This function computes expected population heterozygosity (also
-referred to as gene diversity, to avoid the potentially misleading use of the term "expected" in this context), using the formula of Nei (1987).
+This function computes expected population heterozygosity (also referred to
+as gene diversity, to avoid the potentially misleading use of the term
+"expected" in this context), using the formula of Nei (1987).
 }
 \details{
-Within population expected heterozygosity (gene diversity)  \eqn{\hat{h}_s} for a locus with \eqn{m} alleles is defined as:\cr
-\eqn{\hat{h}_s=\tilde{n}/(\tilde{n}-1)[1-\sum_{i}^{m}\bar{\hat{x}_i^2}-\hat{h}_o/2\tilde{n}]}\cr
+Within population expected heterozygosity (gene diversity)
+\eqn{\hat{h}_s} for a locus with \eqn{m} alleles is defined as:\cr
+\eqn{\hat{h}_s=\tilde{n}/(\tilde{n}-1)[1-\sum_{i}^{m}\bar{\hat{x}_i^2}-\hat{h}_o/2\tilde{n}]}\cr #nolint
 
-where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of \eqn{n_k}) and\cr
-\eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
-following equation 7.39 in Nei(1987) on pp.164. In our specific case, there are only two alleles, so \eqn{m=2}. \eqn{\hat{h}_s} at
-the genome level for each population is simply the mean of the locus estimates for each population.
+where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of
+\eqn{n_k}) and\cr \eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
+following equation 7.39 in Nei(1987) on pp.164. In our specific case, there
+are only two alleles, so \eqn{m=2}. \eqn{\hat{h}_s} at the genome level for
+each population is simply the mean of the locus estimates for each
+population.
 }
 \references{
-Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press
+Nei M. (1987) Molecular Evolutionary Genetics. Columbia
+University Press
 }

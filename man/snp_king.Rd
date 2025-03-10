@@ -23,6 +23,10 @@ specified, all columns are used. Don't use negative indices.}
 
 \item{block.size}{maximum number of columns read at once.}
 }
+\value{
+a square symmetrical matrix of relationship coefficients between
+individuals
+}
 \description{
 This function computes the KING-robust estimator of kinship.
 }

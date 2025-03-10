@@ -13,8 +13,8 @@ count_loci(.x, ...)
 \method{count_loci}{vctrs_bigSNP}(.x, ...)
 }
 \arguments{
-\item{.x}{a \code{\link{gen_tibble}}, or a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object).}
+\item{.x}{a \code{\link{gen_tibble}}, or a vector of class \code{vctrs_bigSNP} (usually the
+\code{genotype} column of a \code{\link{gen_tibble}} object).}
 
 \item{...}{currently unused.}
 }

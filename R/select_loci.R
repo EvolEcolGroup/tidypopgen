@@ -18,17 +18,18 @@
 
 #' @export
 #'
-select_loci <-function(.data, .sel_arg){
+select_loci <- function(.data, .sel_arg) {
   # defuse the selection criteria
   sel_defused <- rlang::enquo(.sel_arg)
 
   # create a named vector of all loci
   loci_names_vec <- stats::setNames(seq_len(nrow(show_loci(.data))),
-                             nm = loci_names(.data))
-  # and now evaluate the selection criteria, giving it the loci names to work with
-  loci_sel <- tidyselect::eval_select(expr=sel_defused, data = loci_names_vec)
+    nm = loci_names(.data)
+  )
+  # now evaluate the selection criteria, giving it the loci names to work with
+  loci_sel <- tidyselect::eval_select(expr = sel_defused, data = loci_names_vec)
 
   # modify the table
-  attr(.data$genotypes,"loci") <- attr(.data$genotypes,"loci")[loci_sel,]
+  attr(.data$genotypes, "loci") <- attr(.data$genotypes, "loci")[loci_sel, ]
   .data
 }

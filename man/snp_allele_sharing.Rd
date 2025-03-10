@@ -12,25 +12,26 @@ snp_allele_sharing(
 )
 }
 \arguments{
-\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes}
-slot of a \link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP} object).}
+\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes} slot
+of a \link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP} object).}
 
-\item{ind.row}{An optional vector of the row indices that are used.
-If not specified, all rows are used. Don't use negative indices.}
+\item{ind.row}{An optional vector of the row indices that are used. If not
+specified, all rows are used. Don't use negative indices.}
 
 \item{ind.col}{An optional vector of the column indices that are used. If not
 specified, all columns are used. Don't use negative indices.}
 
-\item{block.size}{maximum number of columns read at once. Note that, to optimise the
-speed of matrix operations, we have to store in memory 3 times the columns.}
+\item{block.size}{maximum number of columns read at once. Note that, to
+optimise the speed of matrix operations, we have to store in memory 3 times
+the columns.}
 }
 \value{
 a matrix of allele sharing between all pairs of individuals
 }
 \description{
-This function computes the Allele Sharing matrix.
-Estimates Allele Sharing (matching in \code{hierfstat})) between pairs of individuals
-(for each locus, gives 1 if the two individuals are homozygous
-for the same allele, 0 if they are homozygous for a different allele, and 1/2 if at least one individual
-is heterozygous. Matching is the average of these 0, 1/2 and 1s)
+This function computes the Allele Sharing matrix. Estimates Allele Sharing
+(matching in \code{hierfstat})) between pairs of individuals (for each locus,
+gives 1 if the two individuals are homozygous for the same allele, 0 if they
+are homozygous for a different allele, and 1/2 if at least one individual is
+heterozygous. Matching is the average of these 0, 1/2 and 1s)
 }

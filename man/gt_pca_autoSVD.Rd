@@ -28,16 +28,15 @@ gt_pca_autoSVD(
 \strong{This algorithm should be used to compute a few singular vectors/values.}}
 
 \item{fun_scaling}{Usually this  can be left unset, as it defaults to
-\code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}}, which is the appropriate function for biallelic SNPs.
-Alternatively it is possible to use  custom function
-(see \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}} for details.}
+\code{\link[bigsnpr:snp_scaleBinom]{bigsnpr::snp_scaleBinom()}}, which is the appropriate function for
+biallelic SNPs. Alternatively it is possible to use  custom function (see
+\code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}} for details.}
 
 \item{thr_r2}{Threshold over the squared correlation between two SNPs.
-Default is \code{0.2}. Use \code{NA} if you want to skip the clumping step.
-size}
+Default is \code{0.2}. Use \code{NA} if you want to skip the clumping step. size}
 
-\item{use_positions}{a boolean on whether the position is used to define \code{size},
-or whether the size should be in number of SNPs. Default is TRUE}
+\item{use_positions}{a boolean on whether the position is used to define
+\code{size}, or whether the size should be in number of SNPs. Default is TRUE}
 
 \item{size}{For one SNP, window size around this SNP to compute correlations.
 Default is 100 / thr_r2 for clumping (0.2 -> 500; 0.1 -> 1000; 0.5 -> 200).
@@ -45,11 +44,11 @@ If not providing infos.pos (NULL, the default), this is a window in number
 of SNPs, otherwise it is a window in kb (genetic distance). I recommend
 that you provide the positions if available.}
 
-\item{roll_size}{Radius of rolling windows to smooth log-p-values.
-Default is \code{50}.}
+\item{roll_size}{Radius of rolling windows to smooth log-p-values. Default is
+\code{50}.}
 
-\item{int_min_size}{Minimum number of consecutive outlier SNPs
-in order to be reported as long-range LD region. Default is \code{20}.}
+\item{int_min_size}{Minimum number of consecutive outlier SNPs in order to be
+reported as long-range LD region. Default is \code{20}.}
 
 \item{alpha_tukey}{Default is \code{0.1}. The type-I error rate in outlier
 detection (that is further corrected for multiple testing).}
@@ -57,25 +56,27 @@ detection (that is further corrected for multiple testing).}
 \item{min_mac}{Minimum minor allele count (MAC) for variants to be included.
 Default is \code{10}.}
 
-\item{max_iter}{Maximum number of iterations of outlier detection.
-Default is \code{5}.}
+\item{max_iter}{Maximum number of iterations of outlier detection. Default is
+\code{5}.}
 
-\item{n_cores}{Number of cores used. Default doesn't use parallelism.
-You may use \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}.}
+\item{n_cores}{Number of cores used. Default doesn't use parallelism. You may
+use \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}.}
 
 \item{verbose}{Output some information on the iterations? Default is \code{TRUE}.}
 
-\item{total_var}{a boolean indicating whether to compute the total variance of the matrix. Default is \code{TRUE}.
-Using \code{FALSE} will speed up computation, but the total variance will not be stored in the output (and thus it will
-not be possible to assign a proportion of variance explained to the components).}
+\item{total_var}{a boolean indicating whether to compute the total variance
+of the matrix. Default is \code{TRUE}. Using \code{FALSE} will speed up computation,
+but the total variance will not be stored in the output (and thus it will
+not be possible to assign a proportion of variance explained to the
+components).}
 }
 \value{
-a \code{gt_pca} object, which is a subclass of \code{bigSVD}; this is
-an S3 list with elements:
-A named list (an S3 class "big_SVD") of
+a \code{gt_pca} object, which is a subclass of \code{bigSVD}; this is an S3
+list with elements: A named list (an S3 class "big_SVD") of
 \itemize{
 \item \code{d}, the eigenvalues (singular values, i.e. as variances),
-\item \code{u}, the scores for each sample on each component (the left singular vectors)
+\item \code{u}, the scores for each sample on each component
+(the left singular vectors)
 \item \code{v}, the loadings (the right singular vectors)
 \item \code{center}, the centering vector,
 \item \code{scale}, the scaling vector,
@@ -85,16 +86,17 @@ A named list (an S3 class "big_SVD") of
 }
 
 Note: rather than accessing these elements directly, it is better to use
-\code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
-Note: If you encounter 'Error in rollmean(): Parameter 'size' is too large.'
-roll_size is exceeding the number of variants on at least one of your chromosomes.
-If you have pre-specified roll_size, you will need to reduce this parameter.
-If not, try specifying a reduced 'roll_size' to avoid this error.
+\code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}. Note: If you encounter 'Error
+in rollmean(): Parameter 'size' is too large.' roll_size is exceeding the
+number of variants on at least one of your chromosomes. If you have
+pre-specified roll_size, you will need to reduce this parameter. If not, try
+specifying a reduced 'roll_size' to avoid this error.
 }
 \description{
-This function performs Principal Component Analysis on a \code{gen_tibble},
-using a fast truncated SVD with initial pruning and then iterative removal
-of long-range LD regions. This function is a wrapper for \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}
+This function performs Principal Component Analysis on a \code{gen_tibble}, using
+a fast truncated SVD with initial pruning and then iterative removal of
+long-range LD regions. This function is a wrapper for
+\code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}
 }
 \details{
 Using gt_pca_autoSVD requires a reasonably large dataset, as the function

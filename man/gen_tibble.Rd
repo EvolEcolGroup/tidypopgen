@@ -43,67 +43,66 @@ gen_tibble(
 \item{x}{can be:
 \itemize{
 \item a string giving the path to a PLINK BED or PED file. The associated
-BIM and FAM files for the BED, or MAP for PED are expected to be in the same
-directory and have the same file name.
+BIM and FAM files for the BED, or MAP for PED are expected to be in the
+same directory and have the same file name.
 \item a string giving the path to a RDS file storing a \code{bigSNP} object from
 the \code{bigsnpr} package (usually created with \code{\link[bigsnpr:snp_readBed]{bigsnpr::snp_readBed()}})
-\item a string giving the path to a vcf file. Note that we currently read the whole
-vcf in memory with \code{vcfR}, so only smallish \emph{VCF} can be imported. Only biallelic
-SNPs will be considered.
+\item a string giving the path to a vcf file. Note that we currently read the
+whole vcf in memory with \code{vcfR}, so only smallish \emph{VCF} can be imported.
+Only biallelic SNPs will be considered.
 \item a string giving the path to a \emph{packedancestry} .geno file. The associated
 .ind and .snp files are expected to be in the same directory and share the
 same file name prefix.
-\item a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the alternate
-allele.
+\item a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
+alternate allele.
 }}
 
-\item{...}{if \code{x} is the name of a vcf file, additional arguments
-passed to \code{\link[vcfR:io_vcfR]{vcfR::read.vcfR()}}. Otherwise, unused.}
+\item{...}{if \code{x} is the name of a vcf file, additional arguments passed to
+\code{\link[vcfR:io_vcfR]{vcfR::read.vcfR()}}. Otherwise, unused.}
 
 \item{valid_alleles}{a vector of valid allele values; it defaults to 'A','T',
 'C' and 'G'.}
 
 \item{missing_alleles}{a vector of values in the BIM file/loci dataframe that
-indicate a missing value for the allele value (e.g. when we have a monomorphic
-locus with only one allele). It defaults to '0' and '.' (the same as PLINK 1.9).}
+indicate a missing value for the allele value (e.g. when we have a
+monomorphic locus with only one allele). It defaults to '0' and '.' (the
+same as PLINK 1.9).}
 
-\item{backingfile}{the path, including the file name without extension,
-for backing files used to store the data (they will be given a .bk
-and .RDS automatically). This is not needed if \code{x} is already an .RDS file.
-If \code{x} is a .BED or a \emph{VCF} file and \code{backingfile} is left NULL, the backing file will
-be saved in the same directory as the
-bed file, using the same file name but with a different file type (.bk rather
-than .bed). If \code{x} is a genotype matrix and \code{backingfile} is NULL, then a
-temporary file will be created (but note that R will delete it at the end of
-the session!)}
+\item{backingfile}{the path, including the file name without extension, for
+backing files used to store the data (they will be given a .bk and .RDS
+automatically). This is not needed if \code{x} is already an .RDS file. If \code{x}
+is a .BED or a \emph{VCF} file and \code{backingfile} is left NULL, the backing file
+will be saved in the same directory as the bed file, using the same file
+name but with a different file type (.bk rather than .bed). If \code{x} is a
+genotype matrix and \code{backingfile} is NULL, then a temporary file will be
+created (but note that R will delete it at the end of the session!)}
 
 \item{quiet}{provide information on the files used to store the data}
 
-\item{parser}{the name of the parser used for \emph{VCF}, either "cpp" to use
-a fast C++ parser, or "vcfR" to use the R package \code{vcfR}. The latter is slower
-but more robust; if "cpp" gives error, try using "vcfR" in case your \emph{VCF} has
-an unusual structure.}
+\item{parser}{the name of the parser used for \emph{VCF}, either "cpp" to use a
+fast C++ parser, or "vcfR" to use the R package \code{vcfR}. The latter is
+slower but more robust; if "cpp" gives error, try using "vcfR" in case your
+\emph{VCF} has an unusual structure.}
 
 \item{n_cores}{the number of cores to use for parallel processing}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
-processed at a time (currently used
-if \code{x} is a vcf or packedancestry file)}
+processed at a time (currently used if \code{x} is a vcf or packedancestry file)}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
-and 'population', plus any additional metadata of interest. This is only used
-if \code{x} is a genotype matrix. Otherwise this information is extracted directly from
-the files.}
+and 'population', plus any additional metadata of interest. This is only
+used if \code{x} is a genotype matrix. Otherwise this information is extracted
+directly from the files.}
 
-\item{loci}{a data.frame or tibble, with compulsory columns 'name', 'chromosome',
-and 'position','genetic_dist', 'allele_ref' and 'allele_alt'. This is only used
-if \code{x} is a genotype matrix. Otherwise this information is extracted directly from
-the files.}
+\item{loci}{a data.frame or tibble, with compulsory columns 'name',
+'chromosome', and 'position','genetic_dist', 'allele_ref' and 'allele_alt'.
+This is only used if \code{x} is a genotype matrix. Otherwise this information
+is extracted directly from the files.}
 
 \item{ploidy}{the ploidy of the samples (either a single value, or
 a vector of values for mixed ploidy). Only used if creating
-a gen_tibble from a matrix of data; otherwise, ploidy is determined automatically
-from the data as they are read.}
+a gen_tibble from a matrix of data; otherwise, ploidy is determined
+automatically from the data as they are read.}
 }
 \value{
 an object of the class \code{gen_tbl}.
@@ -114,16 +113,16 @@ here the format
 }
 \details{
 \itemize{
-\item \emph{VCF} files: the fast \code{cpp} parser is used by default. Both \code{cpp} and \code{vcfR} parsers
-attempt to establish ploidy from the first variant; if that variant is found in a
-sex chromosome (or mtDNA), the parser will fail with 'Error: a genotype has more
-than max_ploidy alleles...'. To successful import such a \emph{VCF}, change the order of variants
-so that the first chromosome is an autosome using a tool such as \code{vcftools}.
-Currently, only biallelic SNPs are supported. If haploid variants (e.g. sex
-chromosomes) are included in the \emph{VCF}, they are not transformed into homozygous
-calls. Instead, reference alleles will be counted as 0 and alternative alleles
-will be counted as 1.
-\item \emph{packedancestry} files: When loading \emph{packedancestry} files, missing alleles will be converted from
-'X' to NA
+\item \emph{VCF} files: the fast \code{cpp} parser is used by default. Both \code{cpp} and
+\code{vcfR} parsers attempt to establish ploidy from the first variant; if that
+variant is found in a sex chromosome (or mtDNA), the parser will fail with
+'Error: a genotype has more than max_ploidy alleles...'. To successful import
+such a \emph{VCF}, change the order of variants so that the first chromosome is an
+autosome using a tool such as \code{vcftools}. Currently, only biallelic SNPs are
+supported. If haploid variants (e.g. sex chromosomes) are included in the
+\emph{VCF}, they are not transformed into homozygous calls. Instead, reference
+alleles will be counted as 0 and alternative alleles will be counted as 1.
+\item \emph{packedancestry} files: When loading \emph{packedancestry} files,
+missing alleles will be converted from 'X' to NA
 }
 }

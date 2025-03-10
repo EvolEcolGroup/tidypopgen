@@ -7,26 +7,33 @@
 pop_global_stats(.x, by_locus = FALSE, n_cores = bigstatsr::nb_cores())
 }
 \arguments{
-\item{.x}{a \code{\link{gen_tibble}} (usually grouped, as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}}; use on
-a single population will return a number of quantities as NA/NaN)}
+\item{.x}{a \code{\link{gen_tibble}} (usually grouped, as obtained by using
+\code{\link[dplyr:group_by]{dplyr::group_by()}}; use on a single population will return a number of
+quantities as NA/NaN)}
 
-\item{by_locus}{boolean, determining whether the statistics should be returned by locus(TRUE),
-or as a single genome wide value (FALSE, the default).}
+\item{by_locus}{boolean, determining whether the statistics should be
+returned by locus(TRUE), or as a single genome wide value (FALSE, the
+default).}
 
-\item{n_cores}{number of cores to be used, it defaults to \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
 \value{
-a tibble of population statistics, with populations as rows and statistics as columns
+a tibble of population statistics, with populations as rows and
+statistics as columns
 }
 \description{
-This function computes basic population global statistics, following the notation in Nei 1987 (which in turn is based on Nei and Chesser 1983):
+This function computes basic population global statistics, following the
+notation in Nei 1987 (which in turn is based on Nei and Chesser 1983):
 \itemize{
 \item observed heterozygosity ( \eqn{\hat{h}_o}, column header \code{Ho})
-\item expected heterozygosity, also known as gene diversity ( \eqn{\hat{h}_s}, \code{Hs})
+\item expected heterozygosity, also known as gene diversity
+( \eqn{\hat{h}_s}, \code{Hs})
 \item total heterozygosity ( \eqn{\hat{h}_t}, \code{Ht})
 \item genetic differentiation between subpopulations (\eqn{D_{st}}, \code{Dst})
 \item corrected total population diversity (\eqn{h'_t}, \code{Htp})
-\item corrected genetic differentiation between subpopulations (\eqn{D'_{st}}, \code{Dstp})
+\item corrected genetic differentiation between subpopulations
+(\eqn{D'_{st}}, \code{Dstp})
 \item \eqn{\hat{F}_{ST}} (column header, \code{Fst})
 \item corrected \eqn{\hat{F'}_{ST}} (column header \code{Fstp})
 \item \eqn{\hat{F}_{IS}} (column header, \code{Fis})
@@ -34,53 +41,62 @@ This function computes basic population global statistics, following the notatio
 }
 }
 \details{
-We use the notation of Nei 1987. That notation was for loci with \eqn{m} alleles, but in our case we only have two alleles, so \code{m=2}.
+We use the notation of Nei 1987. That notation was for loci with
+\eqn{m} alleles, but in our case we only have two alleles, so \code{m=2}.
 \itemize{
-\item Within population observed heterozygosity \eqn{\hat{h}_o} for a locus with \eqn{m} alleles is defined as:\cr
+\item Within population observed heterozygosity \eqn{\hat{h}_o} for a locus with
+\eqn{m} alleles is defined as:\cr
 \eqn{\hat{h}_o= 1-\sum_{k=1}^{s} \sum_{i=1}^{m}  \hat{X}_{kii}/s}\cr
-where\cr
-\eqn{\hat{X}_{kii}} represents the proportion of homozygote \eqn{i} in the sample for the \eqn{k}th population and\cr
-\eqn{s} the number of populations,\cr
-following equation 7.38 in Nei(1987) on pp.164.\cr
-\item Within population expected heterozygosity (gene diversity)  \eqn{\hat{h}_s} for a locus with \eqn{m} alleles is defined as:\cr
-\eqn{\hat{h}_s=(\tilde{n}/(\tilde{n}-1))[1-\sum_{i=1}^{m}\bar{\hat{x}_i^2}-\hat{h}_o/2\tilde{n}]}\cr
-where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of \eqn{n_k}) and\cr
-\eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
+where\cr \eqn{\hat{X}_{kii}} represents the proportion of homozygote
+\eqn{i} in the sample for the \eqn{k}th population and\cr \eqn{s} the
+number of populations,\cr following equation 7.38 in Nei(1987) on
+pp.164.\cr
+\item Within population expected heterozygosity (gene diversity)
+\eqn{\hat{h}_s} for a locus with \eqn{m} alleles is defined as:\cr
+\eqn{\hat{h}_s=(\tilde{n}/(\tilde{n}-1))[1-\sum_{i=1}^{m}\bar{\hat{x}_i^2}-\hat{h}_o/2\tilde{n}]}\cr #nolint
+where \cr \eqn{\tilde{n}=s/\sum_k 1/n_k} (i.e the harmonic mean of
+\eqn{n_k}) and\cr \eqn{\bar{\hat{x}_i^2}=\sum_k \hat{x}_{ki}^2/s}\cr
 following equation 7.39 in Nei(1987) on pp.164.
-\item Total heterozygosity (total gene diversity) \eqn{\hat{h}_t} for a locus with \eqn{m} alleles is defined as:\cr
-\eqn{\hat{h}_t = 1-\sum_{i=1}^{m} \bar{\hat{x}_i^2} + \hat{h}_s/(\tilde{n}s) - \hat{h}_o/(2\tilde{n}s)}\cr
-where \cr
-\eqn{\hat{x}_i=\sum_k \hat{x}_{ki}/s}\cr
-following equation 7.40 in Nei(1987) on pp.164.\cr
+\item Total heterozygosity (total gene diversity)
+\eqn{\hat{h}_t} for a locus with \eqn{m} alleles is defined as:\cr
+\eqn{\hat{h}_t = 1-\sum_{i=1}^{m} \bar{\hat{x}_i^2} +
+  \hat{h}_s/(\tilde{n}s) - \hat{h}_o/(2\tilde{n}s)}\cr where \cr
+\eqn{\hat{x}_i=\sum_k \hat{x}_{ki}/s}\cr following equation 7.40 in
+Nei(1987) on pp.164.\cr
 \item The amount of gene diversity among samples \eqn{D_{ST}} is defined as:\cr
-\eqn{D_{ST} = \hat{h}_t - \hat{h}_s}\cr
-following the equation provided in the text at the top of page 165 in Nei(1987).
-\item The corrected amount of gene diversity among samples \eqn{D'_{ST}} is defined as:\cr
-\eqn{D'_{ST} = (s/(s-1))D'_{ST}}\cr
-following the equation provided in the text at the top of page 165 in Nei(1987).
-\item Total corrected heterozygosity (total gene diversity) \eqn{\hat{h}_t} is defined as:\cr
-\eqn{\hat{h'}_t = \hat{h}_s + D'_{ST}}\cr
-following the equation provided in the text at the top of page 165 in Nei(1987).
+\eqn{D_{ST} = \hat{h}_t - \hat{h}_s}\cr following the equation provided in
+the text at the top of page 165 in Nei(1987).
+\item The corrected amount of gene diversity among samples
+\eqn{D'_{ST}} is defined as:\cr
+\eqn{D'_{ST} = (s/(s-1))D'_{ST}}\cr following the equation provided in the
+text at the top of page 165 in Nei(1987).
+\item Total corrected heterozygosity (total gene diversity)
+\eqn{\hat{h}_t} is defined as:\cr
+\eqn{\hat{h'}_t = \hat{h}_s + D'_{ST}}\cr following the equation provided
+in the text at the top of page 165 in Nei(1987).
 \item \eqn{\hat{F}_{IS}} is defined as:\cr
-\eqn{\hat{F}_{IS} = 1 - \hat{h}_o/\hat{h}_s}\cr
-following equation 7.41 in Nei(1987) on pp.164.\cr
+\eqn{\hat{F}_{IS} = 1 - \hat{h}_o/\hat{h}_s}\cr following equation 7.41 in
+Nei(1987) on pp.164.\cr
 \item \eqn{\hat{F}_{ST}} is defined as:\cr
 \eqn{\hat{F}_{ST} = 1 - \hat{h}_s/\hat{h}_t = D_{ST}/\hat{h}_t}\cr
 following equation 7.43 in Nei(1987) on pp.165.\cr
 \item \eqn{\hat{F'}_{ST}} is defined as:\cr
-\eqn{\hat{F'}_{ST} = D'_{ST}/\hat{h'}_t}\cr
-following the explanation provided in the text at the top of page 165 in Nei(1987).
+\eqn{\hat{F'}_{ST} = D'_{ST}/\hat{h'}_t}\cr following the explanation
+provided in the text at the top of page 165 in Nei(1987).
 \item Jost's \eqn{\hat{D}} is defined as:\cr
-\eqn{\hat{D} = (s/(s-1))((\hat{h'}_t-\hat{h}_s)/(1-\hat{h}_s))}\cr
-as defined by Jost(2008)
-}
+\eqn{\hat{D} = (s/(s-1))((\hat{h'}_t-\hat{h}_s)/(1-\hat{h}_s))}\cr as
+defined by Jost(2008)
 
-All these statistics are first computed by locus, and then averaged across loci (including any
-monorphic locus) to obtain genome-wide values. The function uses the same algorithm as
-\code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}} but is optimized for speed and memory usage.
+All these statistics are first computed by locus, and then averaged across
+loci (including any monorphic locus) to obtain genome-wide values. The
+function uses the same algorithm as \code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}} but is
+optimized for speed and memory usage.
+}
 }
 \references{
-Nei M, Chesser R (1983) Estimation of fixation indexes and gene diversities. Annals of Human Genetics, 47, 253-259.
-Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press, pp. 164-165.
-Jost L (2008) GST and its relatives do not measure differentiation. Molecular Ecology, 17, 4015-4026.
+Nei M, Chesser R (1983) Estimation of fixation indexes and gene
+diversities. Annals of Human Genetics, 47, 253-259. Nei M. (1987) Molecular
+Evolutionary Genetics. Columbia University Press, pp. 164-165. Jost L
+(2008) GST and its relatives do not measure differentiation. Molecular
+Ecology, 17, 4015-4026.
 }

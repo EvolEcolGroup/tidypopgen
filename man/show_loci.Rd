@@ -28,7 +28,8 @@ or a \code{\link{gen_tibble}}.}
 
 \item{...}{currently unused.}
 
-\item{value}{a data.frame or tibble of loci information to replace the current one.}
+\item{value}{a data.frame or tibble of loci information to replace the
+current one.}
 }
 \value{
 a \code{\link[tibble:tibble]{tibble::tibble}} of information (see \code{\link{gen_tibble}} for details

@@ -19,22 +19,25 @@ gt_cluster_pca(
 
 \item{n_pca}{number of principal components to be fed to the LDA.}
 
-\item{k_clusters}{number of clusters to explore, either a single value, or
-a vector of length 2 giving the minimum and maximum (e.g. 1:5). If left NULL,
-it will use 1 to the number of pca components divided by 10 (a reasonable guess).}
+\item{k_clusters}{number of clusters to explore, either a single value, or a
+vector of length 2 giving the minimum and maximum (e.g. 1:5). If left NULL,
+it will use 1 to the number of pca components divided by 10 (a reasonable
+guess).}
 
 \item{method}{either 'kmeans' or 'ward'}
 
-\item{n_iter}{number of iterations for kmeans (only used if \code{method="kmeans"})}
+\item{n_iter}{number of iterations for kmeans (only used if
+\code{method="kmeans"})}
 
-\item{n_start}{number of starting points for kmeans (only used if \code{method="kmeans"})}
+\item{n_start}{number of starting points for kmeans (only used if
+\code{method="kmeans"})}
 
 \item{quiet}{boolean on whether to silence outputting information to the
 screen (defaults to FALSE)}
 }
 \value{
-a \code{gt_cluster_pca} object, which is a subclass of \code{gt_pca} with
-an additional element 'cluster', a list with elements:
+a \code{gt_cluster_pca} object, which is a subclass of \code{gt_pca} with an
+additional element 'cluster', a list with elements:
 \itemize{
 \item 'method' the clustering method (either kmeans or ward)
 \item 'n_pca' number of principal components used for clustering
@@ -42,18 +45,17 @@ an additional element 'cluster', a list with elements:
 \item 'WSS' within sum of squares for each k
 \item 'AIC' the AIC for each k
 \item 'BIC' the BIC for each k
-\item 'groups' a list, with each element giving the group assignments for a given k
+\item 'groups' a list, with each element giving the group assignments
+for a given k
 }
 }
 \description{
 This function implements the clustering procedure used in Discriminant
-Analysis of Principal Components (DAPC, Jombart et al. 2010).
-This procedure consists in running successive K-means with an
-increasing number of clusters (k), after transforming data using
-a principal component analysis (PCA). For each model,
-several statistical measures of goodness of fit
-are computed, which allows to choose the optimal k using the function
-\code{\link[=gt_cluster_pca_best_k]{gt_cluster_pca_best_k()}}.
-See details for a description of how to select the optimal k
-and vignette("adegenet-dapc") for a tutorial.
+Analysis of Principal Components (DAPC, Jombart et al. 2010). This procedure
+consists in running successive K-means with an increasing number of clusters
+(k), after transforming data using a principal component analysis (PCA). For
+each model, several statistical measures of goodness of fit are computed,
+which allows to choose the optimal k using the function
+\code{\link[=gt_cluster_pca_best_k]{gt_cluster_pca_best_k()}}. See details for a description of how to select the
+optimal k and vignette("adegenet-dapc") for a tutorial.
 }

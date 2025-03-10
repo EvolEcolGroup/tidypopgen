@@ -19,23 +19,25 @@
 
 \item{new_data}{a gen_tibble if scores are requested for a new dataset}
 
-\item{project_method}{a string taking the value of either "simple",
-"OADP" (Online Augmentation, Decomposition, and Procrustes (OADP) projection),
-or "least_squares" (as done by SMARTPCA)}
+\item{project_method}{a string taking the value of either "simple", "OADP"
+(Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
+"least_squares" (as done by SMARTPCA)}
 
-\item{lsq_pcs}{a vector of length two with the values of the two principal components
-to use for the least square fitting. Only relevant if\code{project_method = 'least_squares'}}
+\item{lsq_pcs}{a vector of length two with the values of the two principal
+components to use for the least square fitting. Only relevant
+if\code{project_method = 'least_squares'}}
 
-\item{block_size}{number of loci read simultaneously (larger values will speed up
-computation, but require more memory)}
+\item{block_size}{number of loci read simultaneously (larger values will
+speed up computation, but require more memory)}
 
 \item{n_cores}{number of cores}
 
 \item{...}{no used}
 }
 \value{
-a matrix of predictions, with samples as rows and components as columns. The number
-of components depends on how many were estimated in the \code{\link{gt_pca}} object.
+a matrix of predictions, with samples as rows and components as
+columns. The number of components depends on how many were estimated in the
+\code{\link{gt_pca}} object.
 }
 \description{
 Predict the PCA scores for a \code{\link{gt_pca}}, either for the original data or

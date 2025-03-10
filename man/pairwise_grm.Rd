@@ -14,20 +14,21 @@ pairwise_grm(
 \item{x}{a \code{gen_tibble} object.}
 
 \item{allele_sharing_mat}{optional, the matrix of Allele Sharing returned by
-\code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with \code{as_matrix=TRUE}. As a number of statistics can be
-derived from the Allele Sharing matrix,
-it it sometimes more efficient to pre-compute this matrix.}
+\code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with \code{as_matrix=TRUE}. As a number of
+statistics can be derived from the Allele Sharing matrix, it it sometimes
+more efficient to pre-compute this matrix.}
 
-\item{block_size}{the size of the blocks to use for the computation of the allele sharing matrix.}
+\item{block_size}{the size of the blocks to use for the computation of the
+allele sharing matrix.}
 }
 \value{
 a matrix of GR between all pairs of individuals
 }
 \description{
-This function computes the Genomic Relationship Matrix (GRM). This is estimated
-by computing the pairwise kinship coefficients (coancestries) between all pairs of individuals
-from a matrix of Allele Sharing follwng the approach of Weir and Goudet 2017 based
-on beta estimators).
+This function computes the Genomic Relationship Matrix (GRM). This is
+estimated by computing the pairwise kinship coefficients (coancestries)
+between all pairs of individuals from a matrix of Allele Sharing follwng the
+approach of Weir and Goudet 2017 based on beta estimators).
 }
 \details{
 The GRM is twice the coancestry matrix (e.g. as estimated by

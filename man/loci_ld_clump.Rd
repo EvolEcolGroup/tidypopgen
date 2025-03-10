@@ -30,46 +30,48 @@ loci_ld_clump(.x, ...)
 
 \item{...}{currently not used.}
 
-\item{S}{A vector of loci statistics which express the importance
-of each SNP (the more important is the SNP, the greater should be
-the corresponding statistic).\cr
-For example, if \code{S} follows the standard normal distribution, and "important"
-means significantly different from 0, you must use \code{abs(S)} instead.\cr
+\item{S}{A vector of loci statistics which express the importance of each SNP
+(the more important is the SNP, the greater should be the corresponding
+statistic).\cr For example, if \code{S} follows the standard normal
+distribution, and "important" means significantly different from 0, you
+must use \code{abs(S)} instead.\cr
 \strong{If not specified, MAFs are computed and used.}}
 
 \item{thr_r2}{Threshold over the squared correlation between two SNPs.
 Default is \code{0.2}.}
 
 \item{size}{For one SNP, window size around this SNP to compute correlations.
-Default is \code{100 / thr.r2} for clumping (0.2 -> 500; 0.1 -> 1000; 0.5 -> 200).
-If \code{use_positions = FALSE}, this is a window in
-number of SNPs, otherwise it is a window in kb (genetic distance).
-Ideally, use positions, as they provide a more sensible approach.}
+Default is \code{100 / thr.r2} for clumping (0.2 -> 500; 0.1 -> 1000; 0.5 ->
+200). If \code{use_positions = FALSE}, this is a window in number of SNPs,
+otherwise it is a window in kb (genetic distance). Ideally, use positions,
+as they provide a more sensible approach.}
 
-\item{exclude}{Vector of SNP indices to exclude anyway. For example,
-can be used to exclude long-range LD regions (see Price2008). Another use
-can be for thresholding with respect to p-values associated with \code{S}.}
+\item{exclude}{Vector of SNP indices to exclude anyway. For example, can be
+used to exclude long-range LD regions (see Price2008). Another use can be
+for thresholding with respect to p-values associated with \code{S}.}
 
-\item{use_positions}{boolean, if TRUE (the default), \code{size} is in kb, if FALSE
-size is the number of SNPs.}
+\item{use_positions}{boolean, if TRUE (the default), \code{size} is in kb, if
+FALSE size is the number of SNPs.}
 
 \item{n_cores}{number of cores to be used}
 
-\item{return_id}{boolean on whether the id of SNPs to keep should be returned.
-It defaults to FALSE, which returns a vector of booleans (TRUE or FALSE)}
+\item{return_id}{boolean on whether the id of SNPs to keep should be
+returned. It defaults to FALSE, which returns a vector of booleans (TRUE or
+FALSE)}
 }
 \value{
 a boolean vector indicating whether the SNP should be kept (if
-'return_id = FALSE', the default), else a vector of SNP indices to be kept (if
-'return_id = TRUE')
+'return_id = FALSE', the default), else a vector of SNP indices to be kept
+(if 'return_id = TRUE')
 }
 \description{
 This function uses clumping to remove SNPs at high LD. When used with its
-default options, clumping based on MAF is similar to standard pruning (as done by
-PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a better
-spread of SNPs over the chromosome.
+default options, clumping based on MAF is similar to standard pruning (as
+done by PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a
+better spread of SNPs over the chromosome.
 }
 \details{
-Any missing values in the genotypes of a \code{gen_tibble} passed to \code{loci_ld_clump}
-will cause an error. To deal with missingness, see \code{\link[=gt_impute_simple]{gt_impute_simple()}}.
+Any missing values in the genotypes of a \code{gen_tibble} passed to
+\code{loci_ld_clump} will cause an error. To deal with missingness, see
+\code{\link[=gt_impute_simple]{gt_impute_simple()}}.
 }

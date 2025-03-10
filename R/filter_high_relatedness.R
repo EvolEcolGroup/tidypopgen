@@ -5,27 +5,27 @@
 #' relationships above the given threshold.
 #'
 #'
-#' @param matrix a square symmetric matrix of individuals containing relationship coefficients
+#' @param matrix a square symmetric matrix of individuals containing
+#'   relationship coefficients
 #' @param .x a [`gen_tibble`] object
 #' @param kings_threshold a threshold over which
 #' @param verbose boolean whether to report to screen
-#' @return a list where '1' is individual ID's to retain, '2'
-#' is individual ID's to remove, and '3' is a boolean where individuals to keep
-#' are TRUE and individuals to remove are FALSE
+#' @return a list where '1' is individual ID's to retain, '2' is individual ID's
+#'   to remove, and '3' is a boolean where individuals to keep are TRUE and
+#'   individuals to remove are FALSE
 #' @rdname filter_high_relatedness
 #' @export
 #'
 filter_high_relatedness <-
   function(matrix, .x = NULL, kings_threshold = NULL, verbose = FALSE) {
-
     # get number of individuals
     var_num <- dim(matrix)[1]
 
     # append row and col names
-    if(is.null(dimnames(matrix))){
-      if(is.null(.x)){
-        colnames(matrix) <- 1:ncol(matrix)
-        rownames(matrix) <- 1:nrow(matrix)
+    if (is.null(dimnames(matrix))) {
+      if (is.null(.x)) {
+        colnames(matrix) <- seq_len(ncol(matrix))
+        rownames(matrix) <- seq_len(nrow(matrix))
       } else {
         colnames(matrix) <- (.x)$id
         rownames(matrix) <- (.x)$id
@@ -59,7 +59,7 @@ filter_high_relatedness <-
     matrix <- matrix[max_abs_cor_order, max_abs_cor_order]
 
     # record new order
-    newOrder <- original_order[max_abs_cor_order]
+    new_order <- original_order[max_abs_cor_order]
     rm(tmp)
 
     # initialize new variables
@@ -82,16 +82,16 @@ filter_high_relatedness <-
         next
       }
       for (j in (i + 1):var_num) {
-        if (!col_to_delete[i] & !col_to_delete[j]) {
+        if (!col_to_delete[i] && !col_to_delete[j]) {
           if (matrix[i, j] > kings_threshold) {
             mn1 <- mean(matrix2[i, ], na.rm = TRUE)
             mn2 <- mean(matrix2[-j, ], na.rm = TRUE)
             if (verbose) {
               message(
                 "Compare row",
-                newOrder[i],
+                new_order[i],
                 " and column ",
-                newOrder[j],
+                new_order[j],
                 "with corr ",
                 round(matrix[i, j], 3),
                 "\n"
@@ -105,14 +105,14 @@ filter_high_relatedness <-
               matrix2[i, ] <- NA
               matrix2[, i] <- NA
               if (verbose) {
-                message(" so flagging column", newOrder[i], "\n")
+                message(" so flagging column", new_order[i], "\n")
               }
             } else {
               col_to_delete[j] <- TRUE
               matrix2[j, ] <- NA
               matrix2[, j] <- NA
               if (verbose) {
-                message(" so flagging column", newOrder[j], "\n")
+                message(" so flagging column", new_order[j], "\n")
               }
             }
           }
@@ -122,11 +122,10 @@ filter_high_relatedness <-
 
 
     # return variable names
-    passed_filter <- var_names[newOrder][!col_to_delete]
-    #attr(passed_filter, "to_remove")
+    passed_filter <- var_names[new_order][!col_to_delete]
     to_remove <- var_names[!var_names %in% passed_filter]
 
     var_names <- var_names %in% passed_filter == TRUE
 
-    return(list(passed_filter,to_remove,var_names))
+    return(list(passed_filter, to_remove, var_names))
   }

@@ -2,32 +2,39 @@
 #'
 #' This function reorders the loci table so that positions within a chromosome
 #' are sequential. It also re-saves the genotypes into a new file backed matrix
-#' with the new order, so that it can be used by functions such as [loci_ld_clump()]
-#' and [gt_pca_autoSVD()]. If the loci table is already ordered, the original
-#' `gen_tibble` is returned.
+#' with the new order, so that it can be used by functions such as
+#' [loci_ld_clump()] and [gt_pca_autoSVD()]. If the loci table is already
+#' ordered, the original `gen_tibble` is returned.
 #'
 #' @param .x a [`gen_tibble`]
 #' @param use_current_table boolean, if FALSE (the default), the table will be
-#' reordered; if TRUE, then the current loci table, which might have been reordered
-#' manually, will be used, but only if the positions within each chromosome are
-#' sequential
-#' @param ignore_genetic_dist boolean to ignore the genetic distance when checking. Note
-#' that, if `genetic_dist` are being ignored and they are not sorted, the function will
-#' set them to zero to avoid problems with other software.
+#'   reordered; if TRUE, then the current loci table, which might have been
+#'   reordered manually, will be used, but only if the positions within each
+#'   chromosome are sequential
+#' @param ignore_genetic_dist boolean to ignore the genetic distance when
+#'   checking. Note that, if `genetic_dist` are being ignored and they are not
+#'   sorted, the function will set them to zero to avoid problems with other
+#'   software.
 #' @param quiet boolean to suppress information about the files
 #' @param ... other arguments
 #' @return A [gen_tibble]
 #' @export
 
-gt_order_loci <- function(.x, use_current_table = FALSE, ignore_genetic_dist = TRUE, quiet = FALSE, ...){
-  if (use_current_table){
+gt_order_loci <- function(.x, use_current_table = FALSE,
+                          ignore_genetic_dist = TRUE, quiet = FALSE, ...) {
+  if (use_current_table) {
     new_table <- show_loci(.x)
   } else {
     new_table <- show_loci(.x) %>% dplyr::arrange(.data$chr_int, .data$position)
     show_loci(.x) <- new_table
   }
   # if asked to use the current table, check that it is ordered
-  is_loci_table_ordered(.x, error_on_false = TRUE, ignore_genetic_dist = ignore_genetic_dist)
-  gt_update_backingfile(.x, quiet=quiet, rm_unsorted_dist = ignore_genetic_dist, ...)
-
+  is_loci_table_ordered(.x,
+    error_on_false = TRUE,
+    ignore_genetic_dist = ignore_genetic_dist
+  )
+  gt_update_backingfile(.x,
+    quiet = quiet,
+    rm_unsorted_dist = ignore_genetic_dist, ...
+  )
 }

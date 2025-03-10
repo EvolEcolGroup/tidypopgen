@@ -15,26 +15,29 @@ gt_as_plink(
 \arguments{
 \item{x}{a \code{\link{gen_tibble}} object}
 
-\item{file}{a character string giving the path to output file. If left to NULL,
-the output file will have the same path and prefix of the backingfile.}
+\item{file}{a character string giving the path to output file. If left to
+NULL, the output file will have the same path and prefix of the
+backingfile.}
 
 \item{type}{one of "bed", "ped" or "raw"}
 
 \item{overwrite}{boolean whether to overwrite the file.}
 
-\item{chromosomes_as_int}{boolean whether to use the integer representation of the chromosomes}
+\item{chromosomes_as_int}{boolean whether to use the integer representation
+of the chromosomes}
 }
 \value{
 the path of the saved file
 }
 \description{
-This function exports all the information of a \code{gen_tibble} object into
-a PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for .bed;
-.fam for .ped).
+This function exports all the information of a \code{gen_tibble} object into a
+PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for
+.bed; .fam for .ped).
 }
 \details{
-If the gen_tibble has been read in from vcf format, family.ID in the resulting
-plink files will be the same as sample.ID.
-NOTE that writing to bed has been optimised for speed, but writing to ped or raw
-is slower, especially for large datasets.
+If the gen_tibble has been read in from vcf format, family.ID in the
+resulting plink files will be the same as sample.ID. If the gen_tibble has a
+grouping variable, this will be used as the family.ID in the resulting plink
+files. NOTE that writing to bed has been optimised for speed, but writing to
+ped or raw is slower, especially for large datasets.
 }

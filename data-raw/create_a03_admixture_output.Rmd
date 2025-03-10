@@ -1,0 +1,39 @@
+---
+title: "Run gt_admixture for vignette"
+output: html_document
+date: "2025-03-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+vcf_path <-
+  system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+    package = "tidypopgen"
+  )
+anole_gt <-
+  gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
+  package = "tidypopgen"
+)
+pops <- readr::read_csv(pops_path, show_col_types = FALSE)
+anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
+anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID, .data$id)])
+```
+
+
+```{r}
+anole_gt <- anole_gt %>% group_by(population)
+
+anole_adm <- gt_admixture(
+  x = anole_gt,
+  k = 2:6,
+  n_runs = 1,
+  crossval = TRUE,
+  seed = 1
+)
+
+saveRDS(anole_adm, "../vignettes/a03_anole_adm.rds")
+```

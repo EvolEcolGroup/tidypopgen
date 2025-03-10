@@ -41,7 +41,7 @@ c.gt_admix <- function(...) {
   }
   # set the class of the object
   class(combined_obj) <- c("gt_admix", "list")
-  return(combined_obj)
+  return(combined_obj) # nolint
 }
 
 #' Summary method for gt_admix objects
@@ -57,7 +57,7 @@ summary.gt_admix <- function(object, ...) {
     cat(" for k = ", object$k, "\n")
   } else {
     tab_sum <- table(object$k)
-    tab_sum <- rbind(as.numeric(names(tab_sum)),tab_sum)
+    tab_sum <- rbind(as.numeric(names(tab_sum)), tab_sum)
     rownames(tab_sum) <- c("k", "n")
     colnames(tab_sum) <- rep("", ncol(tab_sum))
     cat(" for multiple runs:")
@@ -66,15 +66,15 @@ summary.gt_admix <- function(object, ...) {
   cat("with slots:\n")
   cat("$Q for Q matrices\n")
   # if there is a lot P in the object, print it
-  if ("P" %in% names(object)){
+  if ("P" %in% names(object)) {
     cat("$P for  matrices\n")
   }
   # if there is a slot log in the object, print it
-  if ("log" %in% names(object)){
+  if ("log" %in% names(object)) {
     cat("$log for logs from the algorithm\n")
   }
   # if there is a slot cv in the object, print it
-  if ("cv" %in% names(object)){
+  if ("cv" %in% names(object)) {
     cat("$cv for cross validation error\n")
   }
 }
@@ -82,11 +82,13 @@ summary.gt_admix <- function(object, ...) {
 
 #' Reorder the q matrices based on the grouping variable
 #'
-#' This function reorders the q matrices in a `gt_admix` object based on the grouping variable. This is useful before plotting when the
-#' samples from each group are not adjacent to each other in the q matrix.
+#' This function reorders the q matrices in a `gt_admix` object based on the
+#' grouping variable. This is useful before plotting when the samples from each
+#' group are not adjacent to each other in the q matrix.
 #'
 #' @param x a `gt_admix` object, possibly with a grouping variable
-#' @param group a character vector with the grouping variable (if there is no grouping variable info in `x`)
+#' @param group a character vector with the grouping variable (if there is no
+#'   grouping variable info in `x`)
 #' @return a `gt_admix` object with the q matrices reordered
 #' @export
 
@@ -96,10 +98,13 @@ gt_admix_reorder_q <- function(x, group = NULL) {
     stop("x must be a gt_admix object")
   }
   # if we have a gruop variable,
-  if (!is.null(group)){
+  if (!is.null(group)) {
     # check that it is the same length as the q matrix
     if (length(group) != nrow(x$Q[[1]])) {
-      stop("The length of the group variable must be the same as the number of rows in the Q matrix")
+      stop(paste(
+        "The length of the group variable must be the same as the",
+        "number of rows in the Q matrix"
+      ))
     }
     # and use it
     if (!is.null(group)) {
@@ -107,18 +112,21 @@ gt_admix_reorder_q <- function(x, group = NULL) {
     }
   }
   # if we have no group variable, check that we have one in the object
-  if (is.null(x$group) ) {
+  if (is.null(x$group)) {
     # if group is null
     if (is.null(group)) {
-      stop("You must provide a group variable if there is no grouping information in the gt_admix object")
+      stop(paste(
+        "You must provide a group variable if there is no grouping",
+        "information in the gt_admix object"
+      ))
     }
   }
 
-  group_meta<- tibble(id = seq(1, length(x$group)), group = x$group)
+  group_meta <- tibble(id = seq(1, length(x$group)), group = x$group)
   # sort group meta by group
   group_meta <- group_meta %>% arrange(.data$group)
   # reorder the q matrices
-  x$Q <- lapply(x$Q, function(y) y[group_meta$id,])
+  x$Q <- lapply(x$Q, function(y) y[group_meta$id, ])
   # if we have an id element, reorder it
   if (!is.null(x$id)) {
     x$id <- x$id[group_meta$id]

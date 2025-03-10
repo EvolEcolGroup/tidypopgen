@@ -18,17 +18,17 @@
 a \code{ggplot2} object
 }
 \description{
-For \code{gt_cluster_pca}, \code{autoplot} produces a plot of a metric of choice ('BIC',
-'AIC' or 'WSS') against the number of clusters (\emph{k}). This plot is can be
-used to infer the best value of \emph{k}, which corresponds to the smallest
+For \code{gt_cluster_pca}, \code{autoplot} produces a plot of a metric of choice
+('BIC', 'AIC' or 'WSS') against the number of clusters (\emph{k}). This plot is
+can be used to infer the best value of \emph{k}, which corresponds to the smallest
 value of the metric (the minimum in an 'elbow' shaped curve). In some cases,
-there is not 'elbow' and the metric keeps decreasing with increasing \emph{k};
-in such cases, it is customary to choose the value of \emph{k} at which the
-decrease in the metric reaches as plateau. For a programmatic way of choosing
+there is not 'elbow' and the metric keeps decreasing with increasing \emph{k}; in
+such cases, it is customary to choose the value of \emph{k} at which the decrease
+in the metric reaches as plateau. For a programmatic way of choosing
 \emph{k}, use \code{\link[=gt_cluster_pca_best_k]{gt_cluster_pca_best_k()}}.
 }
 \details{
-\code{autoplot} produces simple plots to quickly inspect an object. They are
-not customisable; we recommend that you use \code{ggplot2} to produce publication
+\code{autoplot} produces simple plots to quickly inspect an object. They are not
+customisable; we recommend that you use \code{ggplot2} to produce publication
 ready plots.
 }

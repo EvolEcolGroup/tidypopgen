@@ -9,25 +9,24 @@
 #'   tidied.
 #'
 #'   - `"samples"`, `"scores"`, or `"x"`: returns information about
-#'     the map from the original space into the least discriminant axes.
+#'   the map from the original space into the least discriminant axes.
 #'
 #'   - `"v"`, `"rotation"`, `"loadings"` or `"variables"`: returns information
-#'     about the map from discriminant axes space back into the original
-#'     space (i.e. the genotype frequencies). Note that this are different
-#'     from the loadings linking to the PCA scores (which are available in the
-#'     element $loadings of the dapc object).
+#'   about the map from discriminant axes space back into the original space
+#'   (i.e. the genotype frequencies). Note that this are different from the
+#'   loadings linking to the PCA scores (which are available in the element
+#'   $loadings of the dapc object).
 #'
 #'   - `"d"`, `"eigenvalues"` or `"lds"`: returns information about the
-#'     eigenvalues.
+#'   eigenvalues.
 #'
 #' @param ... Not used. Needed to match generic signature only.
 #'
-#' @return A [tibble::tibble] with columns depending on the component of
-#'   DAPC being tidied.
+#' @return A [tibble::tibble] with columns depending on the component of DAPC
+#'   being tidied.
 #'
-#'   If `"scores"` each row in the
-#'   tidied output corresponds to the original data in PCA space. The columns
-#'   are:
+#'   If `"scores"` each row in the tidied output corresponds to the original
+#'   data in PCA space. The columns are:
 #'
 #'   \item{`row`}{ID of the original observation (i.e. rowname from original
 #'     data).}
@@ -35,9 +34,9 @@
 #'   \item{`value`}{The score of the observation for that particular principal
 #'     component. That is, the location of the observation in PCA space.}
 #'
-#'   If `matrix` is  `"loadings"`, each
-#'   row in the tidied output corresponds to information about the principle
-#'   components in the original space. The columns are:
+#'   If `matrix` is  `"loadings"`, each row in the tidied output corresponds to
+#'   information about the principle components in the original space. The
+#'   columns are:
 #'
 #'   \item{`row`}{The variable labels (colnames) of the data set on
 #'   which PCA was performed.}
@@ -64,18 +63,20 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
     stop("Must select a single matrix to tidy.", call. = FALSE)
   }
 
-  MATRIX <- c(
+  matrix_args <- c(
     "rotation", "x", "variables", "samples", "v", "lds", "d",
     "scores", "loadings", "eigenvalues"
   )
-  matrix <- rlang::arg_match(matrix, MATRIX)
+  matrix <- rlang::arg_match(matrix, matrix_args)
 
   if (matrix %in% c("lds", "d", "eigenvalues")) {
-    # square_frobenious <- sum(x$eig)
-    ret <- tibble(LD = seq_len(length(x$eig)),
-                  "eigenvalue" = x$eig)  %>%
-    # mutate(percent =  (std.dev)^2/nrow(x$d),
-      mutate( cumulative = cumsum(.data$eigenvalue))
+    # square_frobenious <- sum(x$eig) #nolint
+    ret <- tibble(
+      LD = seq_len(length(x$eig)),
+      "eigenvalue" = x$eig
+    ) %>%
+      # mutate(percent =  (std.dev)^2/nrow(x$d),
+      mutate(cumulative = cumsum(.data$eigenvalue))
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
     ret <- x$var.load %>%
       tibble::as_tibble(rownames = "column") %>%
@@ -91,10 +92,12 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
       tidyr::pivot_longer(
         cols = -"row",
         names_to = "LD",
-        values_to = "value")
+        values_to = "value"
+      )
     # change the LD to a numeric
-    ret <- mutate(ret, LD = as.numeric(stringr::str_replace(.data$LD, "LD", "")))
-
+    ret <- mutate(ret,
+      LD = as.numeric(stringr::str_replace(.data$LD, "LD", ""))
+    )
   }
 
   as_tibble(ret)
@@ -103,60 +106,77 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
 
 #' Augment data with information from a gt_dapc object
 #'
-#' Augment for `gt_dapc` accepts a model object and a dataset and adds
-#' scores to each
-#' observation in the dataset. Scores for each component are stored in a
+#' Augment for `gt_dapc` accepts a model object and a dataset and adds scores to
+#' each observation in the dataset. Scores for each component are stored in a
 #' separate column, which is given name with the pattern ".fittedLD1",
 #' ".fittedLD2", etc. For consistency with [broom::augment.prcomp], a column
-#' ".rownames" is also returned; it is a copy of 'id', but it ensures that
-#' any scripts written for data augmented with [broom::augment.prcomp] will
-#' work out of the box (this is especially helpful when adapting plotting scripts).
+#' ".rownames" is also returned; it is a copy of 'id', but it ensures that any
+#' scripts written for data augmented with [broom::augment.prcomp] will work out
+#' of the box (this is especially helpful when adapting plotting scripts).
 #' @param x  A `gt_dapc` object returned by [gt_dapc()].
 #' @param data the `gen_tibble` used to run the PCA.
 #' @param k the number of components to add
 #' @param ... Not used. Needed to match generic signature only.
-#' @return A  [gen_tibble] containing the original data along with
-#'   additional columns containing each observation's projection into
-#'   PCA space.
+#' @return A  [gen_tibble] containing the original data along with additional
+#'   columns containing each observation's projection into PCA space.
 #' @export
 #' @seealso [gt_dapc()] [gt_dapc_tidiers]
 
-augment.gt_dapc <- function(x, data = NULL, k= NULL, ...) {
-  if (is.null(k)){
+augment.gt_dapc <- function(x, data = NULL, k = NULL, ...) {
+  if (is.null(k)) {
     k <- ncol(x$ind.coord)
   }
-    pred <- as.data.frame(x$ind.coord)[,1:k]
-    names(pred) <- paste0(".fittedLD", seq_len(ncol(pred)))
-    ret <- if (!missing(data) && !is.null(data)) {
-      #check that names of the two columns are in sync
-      if (!all.equal(data$id, rownames(pred))){
-        stop("the data id column does not correspond to the individuals in the gt_dapc object 'x'")
-      }
-      data %>% dplyr::mutate(.rownames = data$id) %>% tibble::add_column(pred)
-    } else {
-      tibble(.rownames = rownames(pred)) %>%
-        add_column(pred)
+  pred <- as.data.frame(x$ind.coord)[, 1:k]
+  names(pred) <- paste0(".fittedLD", seq_len(ncol(pred)))
+  ret <- if (!missing(data) && !is.null(data)) {
+    # check that names of the two columns are in sync
+    if (!all.equal(data$id, rownames(pred))) {
+      stop(paste(
+        "the data id column does not correspond to the individuals",
+        "in the gt_dapc object 'x'"
+      ))
     }
-    ret
+    data %>%
+      dplyr::mutate(.rownames = data$id) %>%
+      tibble::add_column(pred)
+  } else {
+    tibble(.rownames = rownames(pred)) %>%
+      add_column(pred)
+  }
+  ret
 }
 
 
 # a print method
 #' @method print gt_dapc
 #' @export
-print.gt_dapc <- function(x, ...){
+print.gt_dapc <- function(x, ...) {
   cat(" === DAPC of gen_tibble object ===")
   cat("\nCall ($call):")
   print(x$call)
-  cat("\nEigenvalues ($eig):\n", round(utils::head(x$eig,6),3), ifelse(length(x$eig)>6, "...\n", "\n") )
-  cat("\nLD scores ($ind.coord):\n matrix with", nrow(x$ind.coord), "rows (individuals) and", ncol(x$ind.coord), "columns (LD axes)", "\n")
-  cat("\nLoadings by PC ($loadings):\n matrix with", nrow(x$loadings), "rows (PC axes) and", ncol(x$loadings), "columns (LD axes)", "\n")
-  if(!is.null(x$var.contr)){
-    cat("\nLoadings by locus($var.load):\n matrix with", nrow(x$var.load), "rows (loci) and", ncol(x$var.load), "columns (LD axes)", "\n")
+  cat(
+    "\nEigenvalues ($eig):\n",
+    round(utils::head(x$eig, 6), 3),
+    ifelse(length(x$eig) > 6, "...\n", "\n")
+  )
+  cat(
+    "\nLD scores ($ind.coord):\n matrix with",
+    nrow(x$ind.coord), "rows (individuals) and", ncol(x$ind.coord),
+    "columns (LD axes)", "\n"
+  )
+  cat(
+    "\nLoadings by PC ($loadings):\n matrix with",
+    nrow(x$loadings), "rows (PC axes) and", ncol(x$loadings),
+    "columns (LD axes)", "\n"
+  )
+  if (!is.null(x$var.contr)) {
+    cat(
+      "\nLoadings by locus($var.load):\n matrix with",
+      nrow(x$var.load), "rows (loci) and", ncol(x$var.load),
+      "columns (LD axes)", "\n"
+    )
   }
-    cat("\n")
+  cat("\n")
 }
 
 #
-
-

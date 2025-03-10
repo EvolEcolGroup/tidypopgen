@@ -66,22 +66,24 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
     stop("Must select a single matrix to tidy.", call. = FALSE)
   }
 
-  MATRIX <- c(
+  matrix_args <- c(
     "rotation", "x", "variables", "samples", "v", "pcs", "d",
     "scores", "loadings", "eigenvalues"
   )
-  matrix <- rlang::arg_match(matrix, MATRIX)
+  matrix <- rlang::arg_match(matrix, matrix_args)
 
   if (matrix %in% c("pcs", "d", "eigenvalues")) {
-    ret <- tibble(PC = seq_len(length(x$d)),
-                  "std.dev" = x$d/sqrt(nrow(x$u)-1))
+    ret <- tibble(
+      PC = seq_len(length(x$d)),
+      "std.dev" = x$d / sqrt(nrow(x$u) - 1)
+    )
     if ("square_frobenious" %in% names(x)) {
       rssq <- x$square_frobenious
-      var_exp <- x$d^2/rssq
-      percentage <- var_exp*100
-      cum_percentage <- cumsum(var_exp)*100
+      var_exp <- x$d^2 / rssq
+      percentage <- var_exp * 100
+      cum_percentage <- cumsum(var_exp) * 100
       ret <- ret %>%
-        mutate(percent =  percentage) %>%
+        mutate(percent = percentage) %>%
         mutate(cumulative = cum_percentage)
     }
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
@@ -95,14 +97,15 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
     ret <- mutate(ret, PC = as.numeric(stringr::str_replace(.data$PC, "V", "")))
     if (is.null(rownames(x$v))) ret$column <- as.integer(ret$column)
   } else if (matrix %in% c("x", "samples", "scores")) {
-    ret <- sweep(x$u, 2, x$d, '*')
-    colnames(ret) <- paste0("PC",seq_len(ncol(ret)))
+    ret <- sweep(x$u, 2, x$d, "*")
+    colnames(ret) <- paste0("PC", seq_len(ncol(ret)))
     ret <- ret %>%
       tibble::as_tibble(rownames = "row") %>%
       tidyr::pivot_longer(
         cols = -"row",
         names_to = "PC",
-        values_to = "value")
+        values_to = "value"
+      )
     if (is.null(rownames(x$u))) ret$row <- as.integer(ret$row)
   }
 
@@ -114,73 +117,81 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
 
 #' Augment data with information from a gt_pca object
 #'
-#' Augment for `gt_pca` accepts a model object and a dataset and adds
-#' scores to each
-#' observation in the dataset. Scores for each component are stored in a
+#' Augment for `gt_pca` accepts a model object and a dataset and adds scores to
+#' each observation in the dataset. Scores for each component are stored in a
 #' separate column, which is given name with the pattern ".fittedPC1",
 #' ".fittedPC2", etc. For consistency with [broom::augment.prcomp], a column
-#' ".rownames" is also returned; it is a copy of 'id', but it ensures that
-#' any scripts written for data augmented with [broom::augment.prcomp] will
-#' work out of the box (this is especially helpful when adapting plotting scripts).
+#' ".rownames" is also returned; it is a copy of 'id', but it ensures that any
+#' scripts written for data augmented with [broom::augment.prcomp] will work out
+#' of the box (this is especially helpful when adapting plotting scripts).
 #' @param x  A `gt_pca` object returned by one of the `gt_pca_*` functions.
 #' @param data the `gen_tibble` used to run the PCA.
 #' @param k the number of components to add
 #' @param ... Not used. Needed to match generic signature only.
-#' @return A  [gen_tibble] containing the original data along with
-#'   additional columns containing each observation's projection into
-#'   PCA space.
+#' @return A  [gen_tibble] containing the original data along with additional
+#'   columns containing each observation's projection into PCA space.
 #' @export
 #' @name augment_gt_pca
 #' @seealso [gt_pca_autoSVD()] [gt_pca_tidiers]
 
-augment.gt_pca <- function(x, data = NULL, k= NULL, ...) {
-    if (any(is.null(k), (k > ncol(x$u)))){
-      k <- ncol(x$u)
+augment.gt_pca <- function(x, data = NULL, k = NULL, ...) {
+  if (any(is.null(k), (k > ncol(x$u)))) {
+    k <- ncol(x$u)
+  }
+  pred <- as.data.frame(sweep(x$u, 2, x$d, "*"))[, 1:k]
+  names(pred) <- paste0(".fittedPC", seq_len(ncol(pred)))
+  ret <- if (!missing(data) && !is.null(data)) {
+    # check that names of the two columns are in sync
+    if (!all.equal(data$id, rownames(as.data.frame(x$u)))) {
+      stop(paste(
+        "the data id column does not correspond to the individuals",
+        "in the pca object 'x'"
+      ))
     }
-    pred <- as.data.frame(sweep(x$u, 2, x$d, '*'))[,1:k]
-    names(pred) <- paste0(".fittedPC", seq_len(ncol(pred)))
-    ret <- if (!missing(data) && !is.null(data)) {
-      #check that names of the two columns are in sync
-      if (!all.equal(data$id, rownames(as.data.frame(x$u)))){
-        stop("the data id column does not correspond to the individuals in the pca object 'x'")
-      }
-      data %>% dplyr::mutate(.rownames = data$id) %>% tibble::add_column(pred)
-    } else {
-      tibble(.rownames = rownames(as.data.frame(x$u[,1:k]))) %>%
-        add_column(pred)
-    }
-    ret
+    data %>%
+      dplyr::mutate(.rownames = data$id) %>%
+      tibble::add_column(pred)
+  } else {
+    tibble(.rownames = rownames(as.data.frame(x$u[, 1:k]))) %>%
+      add_column(pred)
+  }
+  ret
 }
 
 
 #' Augment the loci table with information from a gt_pca object
 #'
 #' Augment for `gt_pca` accepts a model object and a `gen_tibble` and adds
-#' loadings for each locus to the loci table. Loadings for each component are stored in a
-#' separate column, which is given name with the pattern ".loadingPC1",
-#' ".loadingPC2", etc. If `data` is missing, then a tibble with the loadings is returned.
+#' loadings for each locus to the loci table. Loadings for each component are
+#' stored in a separate column, which is given name with the pattern
+#' ".loadingPC1", ".loadingPC2", etc. If `data` is missing, then a tibble with
+#' the loadings is returned.
 #' @param x  A `gt_pca` object returned by one of the `gt_pca_*` functions.
 #' @param data the `gen_tibble` used to run the PCA.
 #' @param k the number of components to add
 #' @param ... Not used. Needed to match generic signature only.
 #' @return A [gen_tibble] with a loadings added to the loci tibble (accessible
-#' with [show_loci()]. If `data` is missing, a tibble of loadings.
+#'   with [show_loci()]. If `data` is missing, a tibble of loadings.
 #' @export
 #' @name augment_loci_gt_pca
 #' @seealso [gt_pca_autoSVD()] [gt_pca_tidiers]
 
-augment_loci.gt_pca <- function(x, data = NULL, k= NULL, ...) {
-  if (any(is.null(k), (k > ncol(x$v)))){
+augment_loci.gt_pca <- function(x, data = NULL, k = NULL, ...) {
+  if (any(is.null(k), (k > ncol(x$v)))) {
     k <- ncol(x$v)
   }
-  loadings <- as.data.frame(x$v)[,1:k]
+  loadings <- as.data.frame(x$v)[, 1:k]
   names(loadings) <- paste0(".loadingPC", seq_len(ncol(loadings)))
   ret <- if (!missing(data) && !is.null(data)) {
-    #check that names of the two columns are in sync
-# @TODO reinstate this check once we have rownames in the pca object for loadings
-   if (!identical(loci_names(data), rownames(as.data.frame(x$v)))){
-     stop("the loci names in 'data' do not correspond to the loci in the pca object 'x'")
-   }
+    # check that names of the two columns are in sync
+    # @TODO reinstate this check once we have rownames in the pca object
+    # for loadings
+    if (!identical(loci_names(data), rownames(as.data.frame(x$v)))) {
+      stop(paste(
+        "the loci names in 'data' do not correspond to the loci in",
+        "the pca object 'x'"
+      ))
+    }
     show_loci(data) <- show_loci(data) %>% tibble::add_column(loadings)
   } else {
     # @TODO fir this once we have loci names in the pca object
@@ -195,15 +206,24 @@ augment_loci.gt_pca <- function(x, data = NULL, k= NULL, ...) {
 # a print method
 #' @method print gt_pca
 #' @export
-print.gt_pca <- function(x, ...){
+print.gt_pca <- function(x, ...) {
   cat(" === PCA of gen_tibble object ===")
   cat("\nMethod: ")
   print(x$method)
   cat("\nCall ($call):")
   print(x$call)
-  cat("\nEigenvalues ($d):\n", round(utils::head(x$d,6),3), ifelse(length(x$d)>6, "...\n", "\n") )
-  cat("\nPrincipal component scores ($u):\n matrix with", nrow(x$u), "rows (individuals) and", ncol(x$u), "columns (axes)", "\n")
-  cat("\nLoadings (Principal axes) ($v):\n matrix with", nrow(x$v), "rows (SNPs) and", ncol(x$v), "columns (axes)", "\n")
+  cat(
+    "\nEigenvalues ($d):\n",
+    round(utils::head(x$d, 6), 3),
+    ifelse(length(x$d) > 6, "...\n", "\n")
+  )
+  cat(
+    "\nPrincipal component scores ($u):\n matrix with",
+    nrow(x$u), "rows (individuals) and", ncol(x$u), "columns (axes)", "\n"
+  )
+  cat(
+    "\nLoadings (Principal axes) ($v):\n matrix with",
+    nrow(x$v), "rows (SNPs) and", ncol(x$v), "columns (axes)", "\n"
+  )
   cat("\n")
 }
-
