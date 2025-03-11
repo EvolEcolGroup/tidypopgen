@@ -49,8 +49,9 @@
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @export
 
+# nolint start
 gt_pca_randomSVD <- function(
-    # nolint
+    # nolint end
     x,
     k = 10,
     fun_scaling = bigsnpr::snp_scaleBinom(),

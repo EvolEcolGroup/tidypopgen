@@ -67,7 +67,7 @@ loci_alt_freq.grouped_df <- function(
     # rows (individuals) that we want to use
     rows_to_keep <- vctrs::vec_data(.x$genotypes)
 
-    # internal function that can be used with a big_apply
+    # internal function that can be used with a big_apply #nolint start
     gt_group_alt_freq_freq_sub <- function(BM, ind, rows_to_keep) {
       freq_mat <- gt_grouped_alt_freq_diploid(
         BM = BM,
@@ -77,7 +77,7 @@ loci_alt_freq.grouped_df <- function(
         ngroups = max(dplyr::group_indices(.x)),
         ncores = n_cores
       )$freq_alt
-    }
+    } # nolint end
     freq_mat <- bigstatsr::big_apply(
       geno_fbm,
       a.FUN = gt_group_alt_freq_freq_sub,
@@ -149,7 +149,7 @@ loci_maf.grouped_df <- function(
     # rows (individuals) that we want to use
     rows_to_keep <- vctrs::vec_data(.x$genotypes)
 
-    # internal function that can be used with a big_apply
+    # internal function that can be used with a big_apply #nolint start
     gt_group_alt_freq_freq_sub <- function(BM, ind, rows_to_keep) {
       freq_mat <- gt_grouped_alt_freq_diploid(
         BM = BM,
@@ -159,7 +159,7 @@ loci_maf.grouped_df <- function(
         ngroups = max(dplyr::group_indices(.x)),
         ncores = n_cores
       )$freq_alt
-    }
+    } # nolint end
     freq_mat <- bigstatsr::big_apply(
       geno_fbm,
       a.FUN = gt_group_alt_freq_freq_sub,
@@ -193,14 +193,13 @@ loci_alt_freq_diploid <- function(.x, n_cores, block_size) {
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
-    # create function to use in big_apply
+    # create function to use in big_apply #nolint start
     big_sub_counts <- function(X, ind, rows_to_keep) {
-      # nolint
       col_counts <- bigstatsr::big_counts(
         X,
         ind.row = rows_to_keep,
         ind.col = ind
-      )
+      ) # nolint end
       means_from_counts <- function(x) {
         (x[2] + x[3] * 2) / ((x[1] + x[2] + x[3]) * 2)
       }
@@ -235,9 +234,9 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
   # as long as we have more than one individual
   ploidy_by_indiv <- indiv_ploidy(.x)
   if (length(rows_to_keep) > 1) {
-    # col means for submatrix (all rows, only some columns)
+    # col means for submatrix (all rows, only some columns) #nolint start
     col_sums_na <- function(X, ind, rows_to_keep, ploidy_by_indiv) {
-      # nolint
+      # nolint end
       res <- colSums(X[rows_to_keep, ind], na.rm = TRUE)
       col_na <- function(a, ploidy_by_indiv) {
         sum(is.na(a) * ploidy_by_indiv)

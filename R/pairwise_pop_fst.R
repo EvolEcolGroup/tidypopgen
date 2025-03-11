@@ -255,11 +255,11 @@ pairwise_pop_fst_wc84 <- function(
     p_bar <- rowSums(p * n_ind) / n_total
     s2 <- rowSums((p - p_bar)^2 * n_ind) / n_bar / (r - 1)
     h_bar <- rowSums(pop_freqs_df$het_obs[, pops] * n_ind) / n_total
-
+    # nolint start
     a <- n_bar /
       n_c *
       (s2 -
-        1 / (n_bar - 1) * (p_bar * (1 - p_bar) - (r - 1) / r * s2 - h_bar / 4)) # nolint
+        1 / (n_bar - 1) * (p_bar * (1 - p_bar) - (r - 1) / r * s2 - h_bar / 4))
     b <- n_bar /
       (n_bar - 1) *
       (p_bar *
@@ -267,7 +267,7 @@ pairwise_pop_fst_wc84 <- function(
         (r - 1) / r * s2 -
         (2 * n_bar - 1) / (4 * n_bar) * h_bar) # nolint
     c <- h_bar / 2
-
+    # nolint end
     numerator <- a
     denominator <- a + b + c
     if (by_locus) {

@@ -178,9 +178,10 @@ test_that("gt_order_loci reorders and regenerates backingfiles", {
   gt_get_file_names(reorder_test_gt_reload)
 })
 
-test_that("gt_order_loci catches unsorted and duplicated positions
-          when use_current_table = TRUE, and duplicated positions when
-          use_current_table = FALSE", {
+test_that("gt_order_loci catches unsorted and duplicated positions", {
+  # gt_order_loci catches unsorted and duplicated positions when
+  # use_current_table = TRUE, and duplicated positions
+  # when use_current_table = FALSE
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")
@@ -285,8 +286,9 @@ test_that("gt_order_loci catches unsorted and duplicated positions
   )
 })
 
-test_that("gt_order_loci catches unsorted and duplicated genetic_dist when
-          use_current_table = TRUE", {
+test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
+  # gt_order_loci catches unsorted and duplicated genetic_dist
+  # when use_current_table = TRUE
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")
@@ -415,8 +417,9 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist when
   )
 })
 
-test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist
-          when rm_unsorted_dist = TRUE", {
+test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", { # nolint
+  # gt_update_backingfile catches unsorted and duplicated genetic_dist
+  # when rm_unsorted_dist = TRUE
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")
@@ -475,8 +478,9 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist
 })
 
 
-test_that("is_loci_table_ordered catches unsorted and duplicated genetic_dist
-          when ignore_genetic_dist = FALSE", {
+test_that("is_loci_table_ordered catches unsorted and duplicated genetic_dist", { # nolint
+  # is_loci_table_ordered catches unsorted and duplicated genetic_dist
+  # when ignore_genetic_dist = FALSE
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")
@@ -675,8 +679,7 @@ test_that("check updated positions/distances are inherited by the merged gt", {
 })
 
 
-test_that("gt_order_loci works respects chr_int, when original
-          chromosome is character", {
+test_that("gt_order_loci works respects chr_int, when original chromosome is character", { # nolint
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")
@@ -710,8 +713,7 @@ test_that("gt_order_loci works respects chr_int, when original
 })
 
 
-test_that("gt_order_loci works respects chr_int, when original
-          chromosome is factor", {
+test_that("gt_order_loci works respects chr_int, when original chromosome is factor", { # nolint
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")

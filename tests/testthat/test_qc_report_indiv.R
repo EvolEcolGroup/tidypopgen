@@ -68,14 +68,14 @@ test_that("qc_report_indiv$to_keep is correctly ordered", {
   families <- families %>% ungroup()
   # subset families to each population
   pop1 <- filter(families, population == "pop1")
-  GroupA <- filter(families, population == "GroupA")
+  group_a <- filter(families, population == "GroupA")
   # run separate qc reports
   pop1_report <- qc_report_indiv(pop1, kings_threshold = 0.2)
-  GroupA_report <- qc_report_indiv(GroupA, kings_threshold = 0.2)
+  group_a_report <- qc_report_indiv(group_a, kings_threshold = 0.2)
   # The correct individuals are removed
   expect_equal(
     as.vector(grouped$to_keep),
-    c(pop1_report$to_keep, GroupA_report$to_keep)
+    c(pop1_report$to_keep, group_a_report$to_keep)
   )
 })
 

@@ -24,8 +24,7 @@ test_gt <- gen_tibble(
 )
 
 
-test_that("snp_allele_sharing and pairwise_allele_sharing computes
-          allele sharing correctly", {
+test_that("snp_allele_sharing and pairwise_allele_sharing computes allele sharing correctly", { # nolint
   test_fbm <- tidypopgen:::.gt_get_bigsnp(test_gt)$genotypes
   test_as <- snp_allele_sharing(test_fbm)
   # use hierfstat to compute it

@@ -5,6 +5,12 @@ exclusions: list(
     "data-raw",
     "R/gt_dapc.R" = list( # it includes legacy code from adegenet
       object_name_linter = Inf
+    ),
+    "R/predict_gt_pca.R" = list( # it includes variable names from bigsnpr
+      object_name_linter = Inf
+    ),
+    "vignettes/a01_overview.Rmd" = list( # styler vs lintr conflict
+      indentation_linter = 268
     )
   )
 encoding: "UTF-8"

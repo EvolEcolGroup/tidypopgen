@@ -452,8 +452,7 @@ test_that("checking autoplot arrange_ and annotate_ arguments work", {
 })
 
 
-test_that("grouping before running gt_admxiture vs reordering after
-          running gt_admixture", {
+test_that("grouping before running gt_admxiture vs reordering after running gt_admixture", { # nolint
   # Plots grouping BEFORE running admixture
   anole_gt <- anole_gt %>% group_by(population)
   anole_adm_cv <- gt_admixture(

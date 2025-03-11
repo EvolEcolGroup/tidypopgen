@@ -60,9 +60,8 @@ snp_king <- function(
   # transpose the counts of heterozygous sites to confirm that this is valid
   N_Aa_j <- bigstatsr::big_transpose(N_Aa_i) # nolint
 
-  # divide KING num by den for a set of col 'ind'
+  # divide KING num by den for a set of col 'ind' #nolint start
   divide_king_sub <- function(K, ind, N_Aa_i, N_Aa_j) {
-    # nolint start
     K_sub <- K[, ind]
     N_Aa_i_sub <- N_Aa_i[, ind]
     N_Aa_j_sub <- N_Aa_j[, ind] # nolint end
@@ -82,4 +81,5 @@ snp_king <- function(
     a.combine = "cbind",
     block.size = bigstatsr::block_size(nrow(k_numerator))
   )
+  return(ibs_counts_matrix)
 }

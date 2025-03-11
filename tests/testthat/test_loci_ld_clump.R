@@ -57,11 +57,11 @@ test_that("loci_ld_clump returns the same as bigsnpr", {
   gt_set_imputed(gen_tbl_imputed, TRUE)
 
   # set up bigsnpr
-  G <- bigsnp_imputed$genotypes
+  G <- bigsnp_imputed$genotypes # nolint start
   POS <- bigsnp_imputed$map$physical.pos
   CHR <- bigsnp_imputed$map$chromosome
 
-  ind.keep <- bigsnpr::snp_clumping(
+  ind.keep <- bigsnpr::snp_clumping( # nolint end
     G,
     infos.chr = CHR,
     infos.pos = POS,
@@ -185,9 +185,9 @@ test_that("loci order", {
   # TODO we need to resave the genotypes to the backing file in the right order
 
   # calculate the expected result
-  #  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id=TRUE)
+  #  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id=TRUE) #nolint
   # compare
-  #  expect_equal(keep, keep_reordered)
+  #  expect_equal(keep, keep_reordered) #nolint
 })
 
 test_that("loci_ld_clump works on a grouped gt", {
@@ -203,22 +203,22 @@ test_that("loci_ld_clump works on a grouped gt", {
   )
 
   imputed_data <- gt_impute_simple(gen_tbl, method = "random")
-  to_keep_LD_ungrouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+  to_keep_ld_ungrouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
 
   gen_tbl$population <- rep(c("population_1", "population_2"), each = 6)
   gen_tbl <- gen_tbl %>% group_by(population)
 
   imputed_data <- gt_impute_simple(gen_tbl, method = "random")
-  to_keep_LD_grouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+  to_keep_ld_grouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
 
   # Removed loci are chosen at random, so we can't use expect equal
   # However, the same number of loci should be removed in both cases
   expect_equal(
-    length(to_keep_LD_ungrouped == FALSE),
-    length(to_keep_LD_grouped == FALSE)
+    length(to_keep_ld_ungrouped == FALSE),
+    length(to_keep_ld_grouped == FALSE)
   )
   expect_equal(
-    length(to_keep_LD_ungrouped == TRUE),
-    length(to_keep_LD_grouped == TRUE)
+    length(to_keep_ld_ungrouped == TRUE),
+    length(to_keep_ld_grouped == TRUE)
   )
 })
