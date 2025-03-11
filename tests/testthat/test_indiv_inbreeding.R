@@ -20,7 +20,12 @@ test_loci <- data.frame(
   allele_alt = c("T", "C", NA, "C", "G", "A")
 )
 
-test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+test_gt <- gen_tibble(
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
+)
 
 
 test_that("indiv_inbreeding compute correctly", {
@@ -36,9 +41,17 @@ test_that("indiv_inbreeding compute correctly", {
   # subset gentibble to a single population, pop 1
   pop1_gt <- test_gt %>% dplyr::filter(population == "pop1")
   inbreed_pop1_hier <- diag(hierfstat::beta.dosage(show_genotypes(pop1_gt)))
-  expect_true(all.equal(inbreed_pop1_hier, inbreed_group_gt[[1]], check.attributes = FALSE))
+  expect_true(all.equal(
+    inbreed_pop1_hier,
+    inbreed_group_gt[[1]],
+    check.attributes = FALSE
+  ))
   # subset gentibble to a single population, pop 2
   pop2_gt <- test_gt %>% dplyr::filter(population == "pop2")
   inbreed_pop2_hier <- diag(hierfstat::beta.dosage(show_genotypes(pop2_gt)))
-  expect_true(all.equal(inbreed_pop2_hier, inbreed_group_gt[[2]], check.attributes = FALSE))
+  expect_true(all.equal(
+    inbreed_pop2_hier,
+    inbreed_group_gt[[2]],
+    check.attributes = FALSE
+  ))
 })

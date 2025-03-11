@@ -22,7 +22,8 @@ snp_allele_sharing <- function(
     X, # nolint start
     ind.row = bigstatsr::rows_along(X),
     ind.col = bigstatsr::cols_along(X),
-    block.size = bigstatsr::block_size(nrow(X))) { # nolint end
+    block.size = bigstatsr::block_size(nrow(X))) {
+  # nolint end
 
   n <- length(ind.row)
   # FBM matrix to store the tcrossproduct of (dos-1)

@@ -55,15 +55,16 @@ loci_ld_clump.tbl_df <- function(.x, ...) {
 
 #' @export
 #' @rdname loci_ld_clump
-loci_ld_clump.vctrs_bigSNP <- function(.x,
-                                       S = NULL, # nolint
-                                       thr_r2 = 0.2,
-                                       size = 100 / thr_r2,
-                                       exclude = NULL,
-                                       use_positions = TRUE,
-                                       n_cores = 1,
-                                       return_id = FALSE,
-                                       ...) {
+loci_ld_clump.vctrs_bigSNP <- function(
+    .x,
+    S = NULL, # nolint
+    thr_r2 = 0.2,
+    size = 100 / thr_r2,
+    exclude = NULL,
+    use_positions = TRUE,
+    n_cores = 1,
+    return_id = FALSE,
+    ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   # check that the loci have not been resorted
@@ -75,8 +76,8 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
     ))
   }
 
-
-  if (gt_has_imputed(.x) && gt_uses_imputed(.x) == FALSE) { # not uses_imputed
+  if (gt_has_imputed(.x) && gt_uses_imputed(.x) == FALSE) {
+    # not uses_imputed
     gt_set_imputed(.x, set = TRUE)
     on.exit(gt_set_imputed(.x, set = FALSE))
   }
@@ -98,7 +99,9 @@ loci_ld_clump.vctrs_bigSNP <- function(.x,
   # now figure out if we have any snp which have already been removed
   # those will go into `exclude`
   loci_not_in_tibble <-
-    seq_len(nrow(attr(.x, "bigsnp")$map))[!seq_len(nrow(attr(.x, "bigsnp")$map)) %in% .gt_bigsnp_cols(.x)] # nolint
+    seq_len(nrow(attr(.x, "bigsnp")$map))[
+      !seq_len(nrow(attr(.x, "bigsnp")$map)) %in% .gt_bigsnp_cols(.x)
+    ] # nolint
   exclude <- c(loci_not_in_tibble, .gt_bigsnp_cols(.x)[exclude])
   if (length(exclude) == 0) {
     exclude <- NULL

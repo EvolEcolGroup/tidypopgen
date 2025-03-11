@@ -17,9 +17,12 @@ test_that("select_loci subsets correctly", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
 
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
-
-
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
 
   # select snps with an rs
   test_gt_sub <- test_gt %>% select_loci(starts_with("rs"))

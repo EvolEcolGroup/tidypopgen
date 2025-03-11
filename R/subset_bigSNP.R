@@ -11,10 +11,13 @@
 #' @returns a [`bigsnpr::bigSNP`] object
 #' @keywords internal
 
-subset_bigSNP <- function(X, indiv_indices = NULL, # nolint
-                          loci_indices = NULL,
-                          swap_indices = NULL,
-                          backingfile = NULL) {
+# nolint start
+subset_bigSNP <- function(
+    X, # nolint end
+    indiv_indices = NULL,
+    loci_indices = NULL,
+    swap_indices = NULL,
+    backingfile = NULL) {
   if (is.null(indiv_indices)) {
     indiv_indices <- bigstatsr::rows_along(X)
   }
@@ -28,9 +31,11 @@ subset_bigSNP <- function(X, indiv_indices = NULL, # nolint
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }
-  new_geno <- bigstatsr::big_copy(X$genotypes,
+  new_geno <- bigstatsr::big_copy(
+    X$genotypes,
     ind.row = indiv_indices,
-    ind.col = loci_indices, backingfile = backingfile
+    ind.col = loci_indices,
+    backingfile = backingfile
   )
 
   # now we swap the loci (if necessary)

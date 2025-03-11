@@ -40,7 +40,8 @@ vcf_to_fbm_cpp <- function(
   }
 
   # preassign a genotype matrix that we will then fill at each pass of the vcf
-  genotypes_matrix <- matrix(NA_integer_,
+  genotypes_matrix <- matrix(
+    NA_integer_,
     ncol = chunk_size,
     nrow = no_individuals
   )
@@ -86,9 +87,12 @@ vcf_to_fbm_cpp <- function(
     # (i.e. number of biallelic markers in this chunk), and a loci table
     chunk_info <- extractAltAlleleCountsFromVCF(
       vcf_path,
-      genotypes_matrix, ploidy,
-      no_individuals, max_ploidy + 1,
-      chunk_size, start_locus
+      genotypes_matrix,
+      ploidy,
+      no_individuals,
+      max_ploidy + 1,
+      chunk_size,
+      start_locus
     )
     # expand the file backed matrix according to the size of the gt matrix
     # get current size
@@ -96,7 +100,8 @@ vcf_to_fbm_cpp <- function(
     # add the new columns
     file_backed_matrix$add_columns(chunk_info$num_loci)
     # fill them in
-    write_to_FBM(file_backed_matrix,
+    write_to_FBM(
+      file_backed_matrix,
       allele_counts = genotypes_matrix,
       col_start = index_start - 1,
       n_loci = chunk_info$num_loci,
@@ -121,17 +126,21 @@ vcf_to_fbm_cpp <- function(
   # (same behaviour as vcfR)
   missing_loci_ids <- which(loci$marker.ID == ".")
   if (length(missing_loci_ids) > 0) {
-    loci$marker.ID[missing_loci_ids] <- paste(loci$chromosome[missing_loci_ids],
+    loci$marker.ID[missing_loci_ids] <- paste(
+      loci$chromosome[missing_loci_ids],
       loci$physical.pos,
       sep = "_"
     )
   }
 
-  bigsnp_obj <- structure(list(
-    genotypes = file_backed_matrix,
-    fam = fam,
-    map = loci
-  ), class = "bigSNP")
+  bigsnp_obj <- structure(
+    list(
+      genotypes = file_backed_matrix,
+      fam = fam,
+      map = loci
+    ),
+    class = "bigSNP"
+  )
 
   bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
   # and return the path to the rds

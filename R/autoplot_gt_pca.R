@@ -20,9 +20,11 @@
 #' @returns a `ggplot2` object
 #' @name autoplot_gt_pca
 #' @export
-autoplot.gt_pca <- function(object,
-                            type = c("screeplot", "scores", "loadings"),
-                            k = NULL, ...) {
+autoplot.gt_pca <- function(
+    object,
+    type = c("screeplot", "scores", "loadings"),
+    k = NULL,
+    ...) {
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (type == "screeplot") {
@@ -40,8 +42,11 @@ autoplot.gt_pca <- function(object,
       plot(object, type = "scores", scores = k) +
         ggplot2::labs(
           x = paste0(
-            "PC", k[1], " (",
-            round(k_percentage[1], 2), "%)"
+            "PC",
+            k[1],
+            " (",
+            round(k_percentage[1], 2),
+            "%)"
           ),
           y = paste0("PC", k[2], " (", round(k_percentage[2], 2), "%)")
         )

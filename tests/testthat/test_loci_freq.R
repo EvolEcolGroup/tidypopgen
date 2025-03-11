@@ -16,7 +16,12 @@ test_that("loci_alt_freq and loci_maf computes correctly", {
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
   # raw frequencies
   freq <- colSums(test_genotypes, na.rm = TRUE) / (c(3, 3, 3, 2, 3, 1) * 2)
   expect_true(all(loci_alt_freq(test_gt$genotypes) == freq))
@@ -58,7 +63,12 @@ test_that("loci_alt_freq and loci_maf computes correctly", {
     c(2, 2, 0, NA, 1, NA)
   )
 
-  test_gt2 <- gen_tibble(x = test_genotypes2, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  test_gt2 <- gen_tibble(
+    x = test_genotypes2,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
 
   # repeat the tests for a subset where for loci 6, all genotypes are missing
   # remove the 1st individual
@@ -66,9 +76,9 @@ test_that("loci_alt_freq and loci_maf computes correctly", {
   test_gt_subset3 <- test_gt2 %>% filter(id != "a") # %>% select_loci(c(-3,-4))
 
   # we expect NaN for loci 4 and 6 - as both genotypes are NA
-  freq2 <- colSums(test_genotypes_subset3, na.rm = TRUE) / (c(2, 2, 2, NA, 2, NA) * 2)
+  freq2 <- colSums(test_genotypes_subset3, na.rm = TRUE) /
+    (c(2, 2, 2, NA, 2, NA) * 2)
   expect_equal(loci_alt_freq(test_gt_subset3$genotypes), freq2)
-
 
   # convert to minor frequencies
   freq2[freq2 > 0.5 & !is.na(freq2)] <- 1 - freq2[freq2 > 0.5 & !is.na(freq2)]
@@ -102,7 +112,12 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
 
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
   test_gt <- test_gt %>% group_by(population)
   # compute by using group map
   loci_freq_map <- test_gt %>% group_map(.f = ~ loci_alt_freq(.x))
@@ -110,7 +125,8 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   loci_freq_grp <- test_gt %>% loci_alt_freq(n_cores = 2)
   all.equal(loci_freq_map, loci_freq_grp)
   # now repeat with multiple blocks of snps
-  loci_freq_grp_chunked <- test_gt %>% loci_alt_freq(n_cores = 2, block_size = 2)
+  loci_freq_grp_chunked <- test_gt %>%
+    loci_alt_freq(n_cores = 2, block_size = 2)
   expect_true(all.equal(loci_freq_grp, loci_freq_grp_chunked))
 
   # and now for maf

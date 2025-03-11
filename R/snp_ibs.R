@@ -28,7 +28,8 @@ snp_ibs <- function(
     ind.row = bigstatsr::rows_along(X),
     ind.col = bigstatsr::cols_along(X),
     type = c("proportion", "adjusted_counts", "raw_counts"),
-    block.size = bigstatsr::block_size(nrow(X))) { # nolint end
+    block.size = bigstatsr::block_size(nrow(X))) {
+  # nolint end
   type <- match.arg(type)
 
   n <- length(ind.row)
@@ -69,13 +70,16 @@ snp_ibs <- function(
     # IBS proportion
     # get the means of each column
     divide_sub <- function(X, ind, Y) (X[, ind] / Y[, ind]) # nolint
-    ibs_prop <- bigstatsr::big_apply(IBS,
+    ibs_prop <- bigstatsr::big_apply(
+      IBS,
       a.FUN = divide_sub,
-      Y = IBS_valid_loci, a.combine = "cbind"
+      Y = IBS_valid_loci,
+      a.combine = "cbind"
     )
     if (type == "proportion") {
       return(ibs_prop)
-    } else { # for adjusted counts
+    } else {
+      # for adjusted counts
       ibs_adj <- ibs_prop * m
       return(ibs_adj)
     }

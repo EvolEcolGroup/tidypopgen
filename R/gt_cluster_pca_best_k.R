@@ -65,12 +65,17 @@
 #' @returns a 'gt_cluster_pca' object with an added element 'best_k'
 #' @export
 
-gt_cluster_pca_best_k <- function(x, stat = c("BIC", "AIC", "WSS"),
-                                  criterion = c(
-                                    "diffNgroup", "min", "goesup",
-                                    "smoothNgoesup", "goodfit"
-                                  ),
-                                  quiet = FALSE) {
+gt_cluster_pca_best_k <- function(
+    x,
+    stat = c("BIC", "AIC", "WSS"),
+    criterion = c(
+      "diffNgroup",
+      "min",
+      "goesup",
+      "smoothNgoesup",
+      "goodfit"
+    ),
+    quiet = FALSE) {
   if (!inherits(x, "gt_cluster_pca")) {
     stop(paste(
       "'x' should be a 'gt_cluster_pcaers' object generated",
@@ -90,11 +95,15 @@ gt_cluster_pca_best_k <- function(x, stat = c("BIC", "AIC", "WSS"),
     n_clust <- min(which(diff(x$clusters[[stat]]) > 0))
   }
   if (criterion == "goodfit") {
-    temp <- min(x$clusters[[stat]]) + 0.1 * (max(x$clusters[[stat]]) - min(x$clusters[[stat]])) # nolint
+    temp <- min(x$clusters[[stat]]) +
+      0.1 * (max(x$clusters[[stat]]) - min(x$clusters[[stat]])) # nolint
     n_clust <- min(which(x$clusters[[stat]] < temp)) - 1
   }
   if (criterion == "diffNgroup") {
-    temp <- stats::cutree(stats::hclust(stats::dist(diff(x$clusters[[stat]])), method = "ward.D"), k = 2) # nolint
+    temp <- stats::cutree(
+      stats::hclust(stats::dist(diff(x$clusters[[stat]])), method = "ward.D"),
+      k = 2
+    ) # nolint
     goodgrp <- which.min(tapply(diff(x$clusters[[stat]]), temp, mean))
     n_clust <- max(which(temp == goodgrp)) + 1
   }
@@ -108,8 +117,13 @@ gt_cluster_pca_best_k <- function(x, stat = c("BIC", "AIC", "WSS"),
   }
   if (!quiet) {
     message(
-      "Using ", stat, " with criterion ",
-      criterion, ": ", n_clust, " clusters"
+      "Using ",
+      stat,
+      " with criterion ",
+      criterion,
+      ": ",
+      n_clust,
+      " clusters"
     )
   }
   x$best_k <- n_clust

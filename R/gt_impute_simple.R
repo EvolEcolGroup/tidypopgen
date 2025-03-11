@@ -16,14 +16,27 @@
 #' @returns a [gen_tibble] with imputed genotypes
 #' @export
 
-gt_impute_simple <- function(x,
-                             method = c("mode", "mean0", "random"),
-                             n_cores = 1) {
+gt_impute_simple <- function(
+    x,
+    method = c("mode", "mean0", "random"),
+    n_cores = 1) {
   method <- match.arg(method)
 
-  if (!all.equal(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)) { # nolint start
-    if (all.equal(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) ||
-      all.equal(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)) { # nolint end
+  if (
+    !all.equal(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
+  ) {
+    # nolint start
+    if (
+      all.equal(
+        attr(x$genotypes, "bigsnp")$genotypes$code256,
+        bigsnpr::CODE_IMPUTE_PRED
+      ) ||
+        all.equal(
+          attr(x$genotypes, "bigsnp")$genotypes$code256,
+          bigsnpr::CODE_DOSAGE
+        )
+    ) {
+      # nolint end
       stop("object x is already imputed")
     } else {
       stop("object x uses a code256 that is not compatible with imputation")

@@ -21,9 +21,12 @@
 #' @returns the path of the saved file
 #' @export
 
-
-gt_as_plink <- function(x, file = NULL, type = c("bed", "ped", "raw"),
-                        overwrite = TRUE, chromosomes_as_int = FALSE) {
+gt_as_plink <- function(
+    x,
+    file = NULL,
+    type = c("bed", "ped", "raw"),
+    overwrite = TRUE,
+    chromosomes_as_int = FALSE) {
   # check that x is a gen_tibble
   if (!methods::is(x, "gen_tbl")) {
     stop("x must be a gen_tibble")
@@ -68,7 +71,8 @@ gt_as_plink <- function(x, file = NULL, type = c("bed", "ped", "raw"),
       file.remove(all_files[file.exists(all_files)])
     } else {
       stop(
-        "at least one of", all_files,
+        "at least one of",
+        all_files,
         " already exists; remove if first or set 'overwrite' = TRUE"
       )
     }
@@ -83,7 +87,8 @@ gt_as_plink <- function(x, file = NULL, type = c("bed", "ped", "raw"),
 
 
 gt_write_bed <- function(x, file, chromosomes_as_int) {
-  bed_path <- bigsnpr::snp_writeBed(attr(x$genotypes, "bigsnp"),
+  bed_path <- bigsnpr::snp_writeBed(
+    attr(x$genotypes, "bigsnp"),
     bedfile = file,
     ind.row = vctrs::vec_data(x$genotypes),
     ind.col = show_loci(x)$big_index
@@ -95,37 +100,57 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
     bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
     bim_table <- show_loci(x) %>%
       dplyr::select(dplyr::all_of(c(
-        "chromosome", "name",
-        "genetic_dist", "position",
-        "allele_alt", "allele_ref"
+        "chromosome",
+        "name",
+        "genetic_dist",
+        "position",
+        "allele_alt",
+        "allele_ref"
       )))
     colnames(bim_table) <- c(
-      "chromosome", "name",
-      "genetic_dist", "position",
-      "allele_ref", "allele_alt"
+      "chromosome",
+      "name",
+      "genetic_dist",
+      "position",
+      "allele_ref",
+      "allele_alt"
     )
     bim_table$allele_alt[is.na(bim_table$allele_alt)] <- "0"
     bim_table$allele_ref[is.na(bim_table$allele_ref)] <- "0"
-    utils::write.table(bim_table, bim_path,
-      row.names = FALSE, col.names = FALSE, quote = FALSE
+    utils::write.table(
+      bim_table,
+      bim_path,
+      row.names = FALSE,
+      col.names = FALSE,
+      quote = FALSE
     )
   } else {
     bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
     bim_table <- show_loci(x) %>%
       dplyr::select(dplyr::all_of(c(
-        "chr_int", "name",
-        "genetic_dist", "position",
-        "allele_alt", "allele_ref"
+        "chr_int",
+        "name",
+        "genetic_dist",
+        "position",
+        "allele_alt",
+        "allele_ref"
       )))
     colnames(bim_table) <- c(
-      "chr_int", "name", "genetic_dist",
-      "position", "allele_ref", "allele_alt"
+      "chr_int",
+      "name",
+      "genetic_dist",
+      "position",
+      "allele_ref",
+      "allele_alt"
     )
     bim_table$allele_alt[is.na(bim_table$allele_alt)] <- "0"
     bim_table$allele_ref[is.na(bim_table$allele_ref)] <- "0"
-    utils::write.table(bim_table, bim_path,
+    utils::write.table(
+      bim_table,
+      bim_path,
       row.names = FALSE,
-      col.names = FALSE, quote = FALSE
+      col.names = FALSE,
+      quote = FALSE
     )
   }
   fam_path <- bigsnpr::sub_bed(bed_path, ".fam")
@@ -137,9 +162,12 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
       select(dplyr::group_vars(x)) %>%
       dplyr::pull(1)
   }
-  utils::write.table(fam_table, fam_path,
+  utils::write.table(
+    fam_table,
+    fam_path,
     row.names = FALSE,
-    col.names = FALSE, quote = FALSE
+    col.names = FALSE,
+    quote = FALSE
   )
 
   # return the path to the file
@@ -147,10 +175,11 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
 }
 
 
-
-gt_write_ped_raw <- function(x, file,
-                             plink_format = c("raw", "ped"),
-                             chunk_size = 10000) {
+gt_write_ped_raw <- function(
+    x,
+    file,
+    plink_format = c("raw", "ped"),
+    chunk_size = 10000) {
   # loci information
   loci <- show_loci(x)
   # replace missing value with zero
@@ -158,10 +187,19 @@ gt_write_ped_raw <- function(x, file,
 
   # create col names to use in the raw file
   raw_col_names <- c(
-    "FID", "IID", "PAT", "MAT", "SEX", "PHENOTYPE",
+    "FID",
+    "IID",
+    "PAT",
+    "MAT",
+    "SEX",
+    "PHENOTYPE",
     paste0(
-      loci$name, "_", toupper(loci$allele_alt),
-      "(/", toupper(loci$allele_ref), ")"
+      loci$name,
+      "_",
+      toupper(loci$allele_alt),
+      "(/",
+      toupper(loci$allele_ref),
+      ")"
     )
   )
 
@@ -175,15 +213,18 @@ gt_write_ped_raw <- function(x, file,
     phenotype = pull_na(x, "phenotype")
   )
   # recode some variables
-  indiv_meta$sex <- dplyr::case_match(as.character(indiv_meta$sex),
+  indiv_meta$sex <- dplyr::case_match(
+    as.character(indiv_meta$sex),
     "female" ~ "2",
     "male" ~ "1",
     .default = "0"
   )
   indiv_meta$pat[is.na(indiv_meta$pat)] <- 0
   indiv_meta$mat[is.na(indiv_meta$mat)] <- 0
-  indiv_meta$phenotype <- dplyr::case_match(as.character(indiv_meta$phenotype),
-    "control" ~ "1", "case" ~ "2",
+  indiv_meta$phenotype <- dplyr::case_match(
+    as.character(indiv_meta$phenotype),
+    "control" ~ "1",
+    "case" ~ "2",
     .default = indiv_meta$phenotype
   )
   indiv_meta$phenotype[is.na(indiv_meta$phenotype)] <- -9
@@ -214,7 +255,8 @@ gt_write_ped_raw <- function(x, file,
 
     colnames(raw_table) <- raw_col_names
     # append column names only the first time, when the file does not exist
-    utils::write.table(raw_table,
+    utils::write.table(
+      raw_table,
       file = file,
       sep = " ",
       row.names = FALSE,

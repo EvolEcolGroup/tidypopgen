@@ -20,24 +20,28 @@ indiv_missingness <- function(.x, as_counts, block_size, ...) {
 
 #' @export
 #' @rdname indiv_missingness
-indiv_missingness.tbl_df <- function(.x,
-                                     as_counts = FALSE,
-                                     block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
-                                     ...) {
+indiv_missingness.tbl_df <- function(
+    .x,
+    as_counts = FALSE,
+    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
+    ...) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  indiv_missingness(.x$genotypes,
+  indiv_missingness(
+    .x$genotypes,
     as_counts = as_counts,
-    block_size = block_size, ...
+    block_size = block_size,
+    ...
   )
 }
 
 #' @export
 #' @rdname indiv_missingness
-indiv_missingness.vctrs_bigSNP <- function(.x,
-                                           as_counts = FALSE,
-                                           block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
-                                           ...) {
+indiv_missingness.vctrs_bigSNP <- function(
+    .x,
+    as_counts = FALSE,
+    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
+    ...) {
   rlang::check_dots_empty()
   # get the FBM
   X <- attr(.x, "bigsnp")$genotypes # nolint
@@ -47,7 +51,8 @@ indiv_missingness.vctrs_bigSNP <- function(.x,
   # for polyploids, this can generate a very large matrix
   # it would be better to just write a C function that counts na
   count_row_na_sub <- function(X, ind, rows_to_keep) { # nolint
-    row_counts <- bigstatsr::big_counts(X, # nolint
+    row_counts <- bigstatsr::big_counts(
+      X, # nolint
       ind.col = ind,
       ind.row = rows_to_keep,
       byrow = TRUE
@@ -55,7 +60,8 @@ indiv_missingness.vctrs_bigSNP <- function(.x,
     row_na <- row_counts[nrow(row_counts), ] # nolint
   }
 
-  row_na <- bigstatsr::big_apply(X,
+  row_na <- bigstatsr::big_apply(
+    X,
     a.FUN = count_row_na_sub,
     rows_to_keep = rows_to_keep,
     ind = attr(.x, "loci")$big_index,

@@ -32,9 +32,12 @@
 #'   `target` data.frame)
 #' @export
 
-rbind_dry_run <- function(ref, target, use_position = FALSE,
-                          flip_strand = FALSE,
-                          quiet = FALSE) {
+rbind_dry_run <- function(
+    ref,
+    target,
+    use_position = FALSE,
+    flip_strand = FALSE,
+    quiet = FALSE) {
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
   target_df <- target %>% show_loci()
@@ -49,29 +52,26 @@ rbind_dry_run <- function(ref, target, use_position = FALSE,
   # replace the names with a combination of chromosome and position
   if (use_position) {
     target_df <-
-      target_df %>% mutate(
+      target_df %>%
+      mutate(
         name_old = .data$name,
-        name = paste(.data$chromosome,
-          .data$position,
-          sep = "_"
-        )
+        name = paste(.data$chromosome, .data$position, sep = "_")
       )
     ref_df <-
-      ref_df %>% mutate(
+      ref_df %>%
+      mutate(
         name_old = .data$name,
-        name = paste(.data$chromosome,
-          .data$position,
-          sep = "_"
-        )
+        name = paste(.data$chromosome, .data$position, sep = "_")
       )
   }
 
   # rename the alleles
   ref_df <- ref_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
-  target_df <- target_df %>% rename(
-    allele_1 = "allele_alt",
-    allele_2 = "allele_ref"
-  )
+  target_df <- target_df %>%
+    rename(
+      allele_1 = "allele_alt",
+      allele_2 = "allele_ref"
+    )
   rbind_dry_run_df(
     ref_df = ref_df,
     target_df = target_df,
@@ -123,7 +123,6 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
     target_sub$allele_2[!to_keep_orig] <-
       flip(target_sub$allele_2[!to_keep_orig])
   }
-
 
   # redefine alleles to keep (to include the ones we fixed with the flip)
   to_keep_flip <- (((target_sub$allele_1 == ref_sub$allele_1) & # nolint start

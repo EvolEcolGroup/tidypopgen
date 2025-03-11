@@ -19,10 +19,15 @@ test_that("gt_roh_window works without backingfile update", {
     allele_alt = c("T", "C", NA, "C", "G", "A", "A")
   )
 
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
 
-
-  test_roh1 <- gt_roh_window(test_gt,
+  test_roh1 <- gt_roh_window(
+    test_gt,
     window_size = 4,
     min_snp = 2,
     min_density = 1 / 500,
@@ -35,7 +40,8 @@ test_that("gt_roh_window works without backingfile update", {
   test_gt <- test_gt %>% select_loci(-7)
 
   # Check roh still works
-  test_roh2 <- gt_roh_window(test_gt,
+  test_roh2 <- gt_roh_window(
+    test_gt,
     window_size = 4,
     min_snp = 2,
     min_density = 1 / 500,

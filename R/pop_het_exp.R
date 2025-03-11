@@ -34,24 +34,26 @@
 #'   columns are populations, `by_locus=TRUE`)
 #' @export
 
-
 # adapted from hierfstat
-pop_het_exp <- function(.x,
-                        by_locus = FALSE,
-                        include_global = FALSE,
-                        n_cores = bigstatsr::nb_cores()) {
+pop_het_exp <- function(
+    .x,
+    by_locus = FALSE,
+    include_global = FALSE,
+    n_cores = bigstatsr::nb_cores()) {
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
     .group_levels <- .x %>% group_keys()
     .group_ids <- dplyr::group_indices(.x) - 1
-  } else { # create a dummy pop
+  } else {
+    # create a dummy pop
     .group_levels <- tibble(population = "pop")
     .group_ids <- rep(0, nrow(.x))
   }
 
   # summarise population frequencies
-  pop_freqs_df <- gt_grouped_summaries(.gt_get_bigsnp(.x)$genotypes,
+  pop_freqs_df <- gt_grouped_summaries(
+    .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = .group_ids,
@@ -83,10 +85,11 @@ pop_het_exp <- function(.x,
 # alias for gene diversity
 #' @export
 #' @rdname pop_het_exp
-pop_gene_div <- function(.x,
-                         by_locus = FALSE,
-                         include_global = FALSE,
-                         n_cores = bigstatsr::nb_cores()) {
+pop_gene_div <- function(
+    .x,
+    by_locus = FALSE,
+    include_global = FALSE,
+    n_cores = bigstatsr::nb_cores()) {
   pop_het_exp(
     .x = .x,
     by_locus = by_locus,

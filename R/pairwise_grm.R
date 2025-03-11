@@ -17,10 +17,13 @@
 #'   allele sharing matrix.
 #' @returns a matrix of GR between all pairs of individuals
 #' @export
-pairwise_grm <- function(x, allele_sharing_mat = NULL,
-                         block_size = bigstatsr::block_size(count_loci(x))) {
+pairwise_grm <- function(
+    x,
+    allele_sharing_mat = NULL,
+    block_size = bigstatsr::block_size(count_loci(x))) {
   if (is.null(allele_sharing_mat)) {
-    allele_sharing_mat <- pairwise_allele_sharing(x,
+    allele_sharing_mat <- pairwise_allele_sharing(
+      x,
       as_matrix = TRUE,
       block_size = block_size
     )

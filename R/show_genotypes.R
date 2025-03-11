@@ -17,20 +17,28 @@ show_genotypes <- function(.x, indiv_indices = NULL, loci_indices = NULL, ...) {
 
 #' @export
 #' @rdname show_genotypes
-show_genotypes.tbl_df <- function(.x, indiv_indices = NULL,
-                                  loci_indices = NULL, ...) {
+show_genotypes.tbl_df <- function(
+    .x,
+    indiv_indices = NULL,
+    loci_indices = NULL,
+    ...) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  show_genotypes(.x$genotypes,
+  show_genotypes(
+    .x$genotypes,
     indiv_indices = indiv_indices,
-    loci_indices = loci_indices, ...
+    loci_indices = loci_indices,
+    ...
   )
 }
 
 #' @export
 #' @rdname show_genotypes
-show_genotypes.vctrs_bigSNP <- function(.x, indiv_indices = NULL,
-                                        loci_indices = NULL, ...) {
+show_genotypes.vctrs_bigSNP <- function(
+    .x,
+    indiv_indices = NULL,
+    loci_indices = NULL,
+    ...) {
   rlang::check_dots_empty()
   indiv_big_index <- vctrs::vec_data(.x)
   if (!is.null(indiv_indices)) {

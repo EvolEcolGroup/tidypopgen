@@ -46,10 +46,12 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, ...) {
   }
 
   # count heterozygotes and nas in one go
-  this_col_1_na <- bigstatsr::big_apply(X,
+  this_col_1_na <- bigstatsr::big_apply(
+    X,
     a.FUN = col_1_na,
     ind = attr(.x, "loci")$big_index,
-    a.combine = "plus", rows_to_keep = rows_to_keep
+    a.combine = "plus",
+    rows_to_keep = rows_to_keep
   )
   this_col_1_na[1, ] / (ncol(X) - this_col_1_na[2, ])
 }

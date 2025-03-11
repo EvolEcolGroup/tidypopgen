@@ -20,8 +20,12 @@
 #' @return A [gen_tibble]
 #' @export
 
-gt_order_loci <- function(.x, use_current_table = FALSE,
-                          ignore_genetic_dist = TRUE, quiet = FALSE, ...) {
+gt_order_loci <- function(
+    .x,
+    use_current_table = FALSE,
+    ignore_genetic_dist = TRUE,
+    quiet = FALSE,
+    ...) {
   if (use_current_table) {
     new_table <- show_loci(.x)
   } else {
@@ -29,12 +33,15 @@ gt_order_loci <- function(.x, use_current_table = FALSE,
     show_loci(.x) <- new_table
   }
   # if asked to use the current table, check that it is ordered
-  is_loci_table_ordered(.x,
+  is_loci_table_ordered(
+    .x,
     error_on_false = TRUE,
     ignore_genetic_dist = ignore_genetic_dist
   )
-  gt_update_backingfile(.x,
+  gt_update_backingfile(
+    .x,
     quiet = quiet,
-    rm_unsorted_dist = ignore_genetic_dist, ...
+    rm_unsorted_dist = ignore_genetic_dist,
+    ...
   )
 }

@@ -80,10 +80,16 @@ sub_gt <- function(path, replacement = "", stop_if_not_ext = TRUE) {
   if (!grepl(pattern, path)) {
     stop("Path '%s' must have 'gt' extension.", path)
   }
-  if (stop_if_not_ext && (nchar(replacement) > 0) && (substr(
-    replacement,
-    1, 1
-  ) != ".")) {
+  if (
+    stop_if_not_ext &&
+      (nchar(replacement) > 0) &&
+      (substr(
+        replacement,
+        1,
+        1
+      ) !=
+        ".")
+  ) {
     stop("Replacement must be an extension starting with '.' if provided.")
   }
   sub(pattern, replacement, path)
@@ -97,7 +103,8 @@ sub_gt <- function(path, replacement = "", stop_if_not_ext = TRUE) {
 #' @returns a character vector with the names and paths of the two files
 #' @export
 gt_get_file_names <- function(x) {
-  return(c( # nolint
+  return(c(
+    # nolint
     attr(x$genotypes, "bigsnp")$genotypes$rds,
     attr(x$genotypes, "bigsnp")$genotypes$backingfile
   ))

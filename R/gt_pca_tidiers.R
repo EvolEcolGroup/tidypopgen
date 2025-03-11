@@ -67,8 +67,16 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
   }
 
   matrix_args <- c(
-    "rotation", "x", "variables", "samples", "v", "pcs", "d",
-    "scores", "loadings", "eigenvalues"
+    "rotation",
+    "x",
+    "variables",
+    "samples",
+    "v",
+    "pcs",
+    "d",
+    "scores",
+    "loadings",
+    "eigenvalues"
   )
   matrix <- rlang::arg_match(matrix, matrix_args)
 
@@ -202,7 +210,6 @@ augment_loci.gt_pca <- function(x, data = NULL, k = NULL, ...) {
 }
 
 
-
 # a print method
 #' @method print gt_pca
 #' @export
@@ -219,11 +226,19 @@ print.gt_pca <- function(x, ...) {
   )
   cat(
     "\nPrincipal component scores ($u):\n matrix with",
-    nrow(x$u), "rows (individuals) and", ncol(x$u), "columns (axes)", "\n"
+    nrow(x$u),
+    "rows (individuals) and",
+    ncol(x$u),
+    "columns (axes)",
+    "\n"
   )
   cat(
     "\nLoadings (Principal axes) ($v):\n matrix with",
-    nrow(x$v), "rows (SNPs) and", ncol(x$v), "columns (axes)", "\n"
+    nrow(x$v),
+    "rows (SNPs) and",
+    ncol(x$v),
+    "columns (axes)",
+    "\n"
   )
   cat("\n")
 }

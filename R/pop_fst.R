@@ -22,7 +22,8 @@ pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
   }
-  fst_by_pop <- hierfstat::fst.dosage(allele_sharing_mat,
+  fst_by_pop <- hierfstat::fst.dosage(
+    allele_sharing_mat,
     matching = TRUE,
     pop = group_indices(.x)
   )

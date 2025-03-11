@@ -13,12 +13,16 @@
 #'   individuals if `as_matrix` is TRUE, or a tidied tibble of coefficients if
 #'   `as_matrix` is FALSE.
 #' @export
-pairwise_king <- function(x, as_matrix = FALSE,
-                          block_size = bigstatsr::block_size(length(loci_names(x)))) { # nolint
+pairwise_king <- function(
+    x,
+    as_matrix = FALSE,
+    block_size = bigstatsr::block_size(length(loci_names(x)))) {
+  # nolint
   X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
-  king_matrix <- snp_king(X$genotypes,
+  king_matrix <- snp_king(
+    X$genotypes,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
     block.size = block_size

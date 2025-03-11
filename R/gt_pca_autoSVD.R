@@ -66,19 +66,23 @@
 ## Look at to manipulate ellipses when passing arguments
 # https://stackoverflow.com/questions/60338114/updating-values-of-three-dot-ellipsis-in-r #nolint
 
-gt_pca_autoSVD <- function(x, k = 10, # nolint
-                           fun_scaling = bigsnpr::snp_scaleBinom(),
-                           thr_r2 = 0.2,
-                           use_positions = TRUE,
-                           size = 100 / thr_r2,
-                           roll_size = 50,
-                           int_min_size = 20,
-                           alpha_tukey = 0.05,
-                           min_mac = 10,
-                           max_iter = 5,
-                           n_cores = 1,
-                           verbose = TRUE,
-                           total_var = TRUE) {
+# nolint start
+gt_pca_autoSVD <- function(
+    # nolint end
+    x,
+    k = 10,
+    fun_scaling = bigsnpr::snp_scaleBinom(),
+    thr_r2 = 0.2,
+    use_positions = TRUE,
+    size = 100 / thr_r2,
+    roll_size = 50,
+    int_min_size = 20,
+    alpha_tukey = 0.05,
+    min_mac = 10,
+    max_iter = 5,
+    n_cores = 1,
+    verbose = TRUE,
+    total_var = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
@@ -115,7 +119,8 @@ gt_pca_autoSVD <- function(x, k = 10, # nolint
   # Do we want to use the code from loci_clump to create chromosomes and
   # positions (it is a bit neater)
 
-  this_svd <- bigsnpr::snp_autoSVD(X$genotypes, # nolint
+  this_svd <- bigsnpr::snp_autoSVD(
+    X$genotypes, # nolint
     infos.chr = infos_chr,
     infos.pos = infos_pos,
     ind.row = .gt_bigsnp_rows(x),
@@ -147,8 +152,10 @@ gt_pca_autoSVD <- function(x, k = 10, # nolint
     X <- attr(x$genotypes, "bigsnp") # nolint
     x_ind_col <- show_loci(x_autoSVD_subset)$big_index
     x_ind_row <- vctrs::vec_data(x_autoSVD_subset$genotypes)
-    this_svd$square_frobenious <- square_frobenious(X$genotypes, # nolint
-      x_ind_row, x_ind_col,
+    this_svd$square_frobenious <- square_frobenious(
+      X$genotypes, # nolint
+      x_ind_row,
+      x_ind_col,
       center = this_svd$center,
       scale = this_svd$scale
     )

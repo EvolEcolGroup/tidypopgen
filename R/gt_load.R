@@ -51,10 +51,16 @@ sub_rds <- function(path, replacement = "", stop_if_not_ext = TRUE) {
   if (!grepl(pattern, path)) {
     stop("Path '%s' must have 'rds' extension.", path)
   }
-  if (stop_if_not_ext && (nchar(replacement) > 0) && (substr(
-    replacement,
-    1, 1
-  ) != ".")) {
+  if (
+    stop_if_not_ext &&
+      (nchar(replacement) > 0) &&
+      (substr(
+        replacement,
+        1,
+        1
+      ) !=
+        ".")
+  ) {
     stop("Replacement must be an extension starting with '.' if provided.")
   }
   sub(pattern, replacement, path)

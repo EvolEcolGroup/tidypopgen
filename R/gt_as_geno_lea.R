@@ -25,9 +25,11 @@ gt_as_geno_lea <- function(x, file = NULL) {
   # TODO this should be done in chunks for larger files
   geno_matrix <- t(x %>% show_genotypes())
   geno_matrix[is.na(geno_matrix)] <- 9
-  utils::write.table(geno_matrix,
+  utils::write.table(
+    geno_matrix,
     sep = "",
-    file = file, row.names = FALSE,
+    file = file,
+    row.names = FALSE,
     col.names = FALSE
   )
   # return the file name

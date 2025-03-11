@@ -1,6 +1,9 @@
 #' @export
-group_by.gen_tbl <- function(.data, ..., .add = FALSE,
-                             .drop = group_by_drop_default(.data)) {
+group_by.gen_tbl <- function(
+    .data,
+    ...,
+    .add = FALSE,
+    .drop = group_by_drop_default(.data)) {
   out <- NextMethod()
   class(out) <- c("grouped_gen_tbl", "grouped_df", "gen_tbl", class(out)[-1])
   return(out)
@@ -12,8 +15,6 @@ ungroup.grouped_gen_tbl <- function(x, ...) {
   class(out) <- c("gen_tbl", class(out))
   return(out) # nolint
 }
-
-
 
 
 #' @export
@@ -37,7 +38,6 @@ dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
   }
   out
 }
-
 
 
 # drop the `gen_tbl` class if the `genotype` column is subsetted out

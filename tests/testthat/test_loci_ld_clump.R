@@ -18,8 +18,11 @@ test_loci <- data.frame(
 
 
 test_gt <- gen_tibble(
-  x = test_genotypes, indiv_meta = test_indiv_meta, loci = test_loci,
-  backingfile = tempfile(), quiet = TRUE
+  x = test_genotypes,
+  indiv_meta = test_indiv_meta,
+  loci = test_loci,
+  backingfile = tempfile(),
+  quiet = TRUE
 )
 
 test_that("ld clumping runs", {
@@ -28,35 +31,42 @@ test_that("ld clumping runs", {
 })
 
 
-
 test_that("loci_ld_clump returns the same as bigsnpr", {
   bedfile <- system.file("extdata/related/families.bed", package = "tidypopgen")
   rds <- bigsnpr::snp_readBed(bedfile, backingfile = tempfile())
 
   bigsnp <- bigsnpr::snp_attach(rds)
 
-  gen_tbl <- gen_tibble(bedfile,
+  gen_tbl <- gen_tibble(
+    bedfile,
     quiet = TRUE,
-    backingfile = tempfile(), valid_alleles = c("1", "2")
+    backingfile = tempfile(),
+    valid_alleles = c("1", "2")
   )
 
   # also tests imputation
-  bigsnp_imputed <- bigsnpr::snp_fastImputeSimple(bigsnp$genotypes, method = "mode")
+  bigsnp_imputed <- bigsnpr::snp_fastImputeSimple(
+    bigsnp$genotypes,
+    method = "mode"
+  )
   bigsnp$genotypes <- bigsnp_imputed
   bigsnpr::snp_save(bigsnp)
   bigsnp_imputed <- bigsnpr::snp_attach(rds)
-
 
   gen_tbl_imputed <- gt_impute_simple(gen_tbl, method = "mode")
   gt_set_imputed(gen_tbl_imputed, TRUE)
 
   # set up bigsnpr
-  G <- bigsnp_imputed$genotypes
+  G <- bigsnp_imputed$genotypes # nolint start
   POS <- bigsnp_imputed$map$physical.pos
   CHR <- bigsnp_imputed$map$chromosome
 
-
-  ind.keep <- bigsnpr::snp_clumping(G, infos.chr = CHR, infos.pos = POS, thr.r2 = 0.2)
+  ind.keep <- bigsnpr::snp_clumping( # nolint end
+    G,
+    infos.chr = CHR,
+    infos.pos = POS,
+    thr.r2 = 0.2
+  )
   to_keep <- loci_ld_clump(gen_tbl_imputed, thr_r2 = 0.2)
 
   # convert our output to indices
@@ -68,7 +78,11 @@ test_that("loci_ld_clump returns the same as bigsnpr", {
 
 
 test_that("loci_ld_clump error unsorted loci", {
-  pop_b <- gen_tibble(system.file("extdata/pop_b.bed", package = "tidypopgen"), backingfile = tempfile(), quiet = TRUE)
+  pop_b <- gen_tibble(
+    system.file("extdata/pop_b.bed", package = "tidypopgen"),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
 
   # now scramble the loci
   set.seed(123)
@@ -81,8 +95,14 @@ test_that("loci_ld_clump error unsorted loci", {
   pop_b_imputed <- gt_impute_simple(pop_b, method = "mode")
 
   # ld
-  expect_error(loci_ld_clump(pop_b_imputed, thr_r2 = 0.2), "Your loci have been resorted")
-  expect_false(identical(show_loci(pop_b_imputed), pop_b_imputed %>% show_loci() %>% arrange(chr_int, position)))
+  expect_error(
+    loci_ld_clump(pop_b_imputed, thr_r2 = 0.2),
+    "Your loci have been resorted"
+  )
+  expect_false(identical(
+    show_loci(pop_b_imputed),
+    pop_b_imputed %>% show_loci() %>% arrange(chr_int, position)
+  ))
 
   # reorder the loci
   show_loci(pop_b_imputed) <- pop_b_imputed %>%
@@ -92,9 +112,30 @@ test_that("loci_ld_clump error unsorted loci", {
   # try again
   expect_equal(
     loci_ld_clump(pop_b_imputed, thr_r2 = 0.2),
-    c(FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+    c(
+      FALSE,
+      TRUE,
+      TRUE,
+      FALSE,
+      TRUE,
+      TRUE,
+      FALSE,
+      FALSE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE,
+      TRUE
+    )
   )
-  expect_true(identical(show_loci(pop_b_imputed), pop_b_imputed %>% show_loci() %>% arrange(chr_int, position)))
+  expect_true(identical(
+    show_loci(pop_b_imputed),
+    pop_b_imputed %>% show_loci() %>% arrange(chr_int, position)
+  ))
 })
 
 test_that("loci order", {
@@ -118,8 +159,11 @@ test_that("loci order", {
   )
 
   test_gt_new_order <- gen_tibble(
-    x = test_genotypes, indiv_meta = test_indiv_meta, loci = test_loci,
-    backingfile = tempfile(), quiet = TRUE
+    x = test_genotypes,
+    indiv_meta = test_indiv_meta,
+    loci = test_loci,
+    backingfile = tempfile(),
+    quiet = TRUE
   )
 
   # clumping generates erro
@@ -141,9 +185,9 @@ test_that("loci order", {
   # TODO we need to resave the genotypes to the backing file in the right order
 
   # calculate the expected result
-  #  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id=TRUE)
+  #  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id=TRUE) #nolint
   # compare
-  #  expect_equal(keep, keep_reordered)
+  #  expect_equal(keep, keep_reordered) #nolint
 })
 
 test_that("loci_ld_clump works on a grouped gt", {
@@ -151,22 +195,30 @@ test_that("loci_ld_clump works on a grouped gt", {
   rds <- bigsnpr::snp_readBed(bedfile, backingfile = tempfile())
   bigsnp <- bigsnpr::snp_attach(rds)
 
-  gen_tbl <- gen_tibble(bedfile,
+  gen_tbl <- gen_tibble(
+    bedfile,
     quiet = TRUE,
-    backingfile = tempfile(), valid_alleles = c("1", "2")
+    backingfile = tempfile(),
+    valid_alleles = c("1", "2")
   )
 
   imputed_data <- gt_impute_simple(gen_tbl, method = "random")
-  to_keep_LD_ungrouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+  to_keep_ld_ungrouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
 
   gen_tbl$population <- rep(c("population_1", "population_2"), each = 6)
   gen_tbl <- gen_tbl %>% group_by(population)
 
   imputed_data <- gt_impute_simple(gen_tbl, method = "random")
-  to_keep_LD_grouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
+  to_keep_ld_grouped <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
 
   # Removed loci are chosen at random, so we can't use expect equal
   # However, the same number of loci should be removed in both cases
-  expect_equal(length(to_keep_LD_ungrouped == FALSE), length(to_keep_LD_grouped == FALSE))
-  expect_equal(length(to_keep_LD_ungrouped == TRUE), length(to_keep_LD_grouped == TRUE))
+  expect_equal(
+    length(to_keep_ld_ungrouped == FALSE),
+    length(to_keep_ld_grouped == FALSE)
+  )
+  expect_equal(
+    length(to_keep_ld_ungrouped == TRUE),
+    length(to_keep_ld_grouped == TRUE)
+  )
 })

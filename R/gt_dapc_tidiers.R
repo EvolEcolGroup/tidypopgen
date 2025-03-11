@@ -64,8 +64,16 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
   }
 
   matrix_args <- c(
-    "rotation", "x", "variables", "samples", "v", "lds", "d",
-    "scores", "loadings", "eigenvalues"
+    "rotation",
+    "x",
+    "variables",
+    "samples",
+    "v",
+    "lds",
+    "d",
+    "scores",
+    "loadings",
+    "eigenvalues"
   )
   matrix <- rlang::arg_match(matrix, matrix_args)
 
@@ -95,7 +103,8 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
         values_to = "value"
       )
     # change the LD to a numeric
-    ret <- mutate(ret,
+    ret <- mutate(
+      ret,
       LD = as.numeric(stringr::str_replace(.data$LD, "LD", ""))
     )
   }
@@ -161,19 +170,28 @@ print.gt_dapc <- function(x, ...) {
   )
   cat(
     "\nLD scores ($ind.coord):\n matrix with",
-    nrow(x$ind.coord), "rows (individuals) and", ncol(x$ind.coord),
-    "columns (LD axes)", "\n"
+    nrow(x$ind.coord),
+    "rows (individuals) and",
+    ncol(x$ind.coord),
+    "columns (LD axes)",
+    "\n"
   )
   cat(
     "\nLoadings by PC ($loadings):\n matrix with",
-    nrow(x$loadings), "rows (PC axes) and", ncol(x$loadings),
-    "columns (LD axes)", "\n"
+    nrow(x$loadings),
+    "rows (PC axes) and",
+    ncol(x$loadings),
+    "columns (LD axes)",
+    "\n"
   )
   if (!is.null(x$var.contr)) {
     cat(
       "\nLoadings by locus($var.load):\n matrix with",
-      nrow(x$var.load), "rows (loci) and", ncol(x$var.load),
-      "columns (LD axes)", "\n"
+      nrow(x$var.load),
+      "rows (loci) and",
+      ncol(x$var.load),
+      "columns (LD axes)",
+      "\n"
     )
   }
   cat("\n")

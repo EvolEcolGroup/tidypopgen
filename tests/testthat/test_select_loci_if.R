@@ -17,9 +17,12 @@ test_that("select_loci_if subsets correctly", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
 
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
-
-
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
 
   # raw frequencies
   freq <- test_gt %>% loci_maf()
@@ -46,9 +49,15 @@ test_that("select_loci_if subsets correctly", {
 
   # Test error warnings: boolean criteria too short
   criterion_na <- c(TRUE, TRUE, NA, TRUE, TRUE)
-  expect_error(test_gt %>% select_loci_if(criterion_na), ".sel_logical should be the same length ")
+  expect_error(
+    test_gt %>% select_loci_if(criterion_na),
+    ".sel_logical should be the same length "
+  )
 
   # Test error warnings: selection criteria not boolean
-  rsID <- c("rs1", "rs2", "rs3", "rs4", "x1", "x2")
-  expect_error(test_gt %>% select_loci_if(rsID), ".sel_logical should be a logical boolean vector")
+  rsID <- c("rs1", "rs2", "rs3", "rs4", "x1", "x2") # nolint
+  expect_error(
+    test_gt %>% select_loci_if(rsID),
+    ".sel_logical should be a logical boolean vector"
+  )
 })

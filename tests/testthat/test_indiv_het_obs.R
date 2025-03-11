@@ -17,16 +17,22 @@ test_that("indiv_het_obs computes correctly", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
 
-
-  test_gt <- gen_tibble(x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
-
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
 
   # feeding the list of SNPbin directly
-  expect_true(all(indiv_het_obs(test_gt$genotypes) ==
-    rowMeans(test_genotypes == 1, na.rm = TRUE)))
+  expect_true(all(
+    indiv_het_obs(test_gt$genotypes) ==
+      rowMeans(test_genotypes == 1, na.rm = TRUE)
+  ))
   # passing tibble
-  expect_true(all(indiv_het_obs(test_gt) ==
-    rowMeans(test_genotypes == 1, na.rm = TRUE)))
+  expect_true(all(
+    indiv_het_obs(test_gt) == rowMeans(test_genotypes == 1, na.rm = TRUE)
+  ))
 })
 
 test_that("indiv_het_obs returns 0's when all genotypes are homozygous", {
@@ -48,13 +54,22 @@ test_that("indiv_het_obs returns 0's when all genotypes are homozygous", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
 
-  test_gt_homozyg <- gen_tibble(x = test_genotypes_homozyg, loci = test_loci, indiv_meta = test_indiv_meta, quiet = TRUE)
+  test_gt_homozyg <- gen_tibble(
+    x = test_genotypes_homozyg,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
 
   # feeding the list of SNPbin directly
-  expect_true(all(indiv_het_obs(test_gt_homozyg$genotypes) ==
-    rowMeans(test_genotypes_homozyg == 1, na.rm = TRUE)))
+  expect_true(all(
+    indiv_het_obs(test_gt_homozyg$genotypes) ==
+      rowMeans(test_genotypes_homozyg == 1, na.rm = TRUE)
+  ))
 
   # passing tibble
-  expect_true(all(indiv_het_obs(test_gt_homozyg) ==
-    rowMeans(test_genotypes_homozyg == 1, na.rm = TRUE)))
+  expect_true(all(
+    indiv_het_obs(test_gt_homozyg) ==
+      rowMeans(test_genotypes_homozyg == 1, na.rm = TRUE)
+  ))
 })

@@ -16,11 +16,11 @@ gt_dapc(
 \arguments{
 \item{x}{an object of class \code{gt_pca}, or its subclass \code{gt_cluster_pca}}
 
-\item{pop}{either a factor indicating the group membership of individuals;
-or an integer defining the desired \emph{k} if x is a \code{gt_cluster_pca}; or NULL, if
-'x' is a \code{gt_cluster_pca} and contain an element 'best_k',
-usually generated with \code{\link[=gt_cluster_pca_best_k]{gt_cluster_pca_best_k()}},
-which will be used to select the clustering level.}
+\item{pop}{either a factor indicating the group membership of individuals; or
+an integer defining the desired \emph{k} if x is a \code{gt_cluster_pca}; or NULL, if
+'x' is a \code{gt_cluster_pca} and contain an element 'best_k', usually
+generated with \code{\link[=gt_cluster_pca_best_k]{gt_cluster_pca_best_k()}}, which will be used to select the
+clustering level.}
 
 \item{n_pca}{number of principal components to be used in the Discriminant
 Analysis. If NULL, k-1 will be used.}
@@ -29,15 +29,14 @@ Analysis. If NULL, k-1 will be used.}
 Discriminant Analysis step.}
 
 \item{loadings_by_locus}{a logical indicating whether the loadings and
-contribution of each locus should
-be stored (TRUE, default) or
-not (FALSE). Such output can be useful, but can also create
-large matrices when there are a lot of loci and many dimensions.}
+contribution of each locus should be stored (TRUE, default) or not (FALSE).
+Such output can be useful, but can also create large matrices when there
+are a lot of loci and many dimensions.}
 
-\item{pca_info}{a logical indicating whether information about the prior
-PCA should be stored (TRUE, default) or not (FALSE). This information
-is required to predict group membership of new individuals using predict,
-but makes the object slightly bigger.}
+\item{pca_info}{a logical indicating whether information about the prior PCA
+should be stored (TRUE, default) or not (FALSE). This information is
+required to predict group membership of new individuals using predict, but
+makes the object slightly bigger.}
 }
 \value{
 an object of class \link[adegenet:dapc]{adegenet::dapc}
@@ -45,31 +44,29 @@ an object of class \link[adegenet:dapc]{adegenet::dapc}
 \description{
 This function implements the Discriminant Analysis of Principal Components
 (DAPC, Jombart et al. 2010). This method describes the diversity between
-pre-defined groups. When groups are unknown, use \code{\link[=gt_cluster_pca]{gt_cluster_pca()}} to
-infer genetic clusters. See 'details' section for a succinct
-description of the method, and the vignette in the package \code{adegenet}
-("adegenet-dapc") for a
-tutorial. This function returns objects of class \code{\link[adegenet:dapc]{adegenet::dapc}} which are compatible
-with methods from \code{adegenet}; graphical methods for DAPC are documented in
-\link[adegenet:dapcGraphics]{adegenet::scatter.dapc}
-(see ?scatter.dapc).
+pre-defined groups. When groups are unknown, use \code{\link[=gt_cluster_pca]{gt_cluster_pca()}} to infer
+genetic clusters. See 'details' section for a succinct description of the
+method, and the vignette in the package \code{adegenet} ("adegenet-dapc") for a
+tutorial. This function returns objects of class \code{\link[adegenet:dapc]{adegenet::dapc}} which are
+compatible with methods from \code{adegenet}; graphical methods for DAPC are
+documented in \link[adegenet:dapcGraphics]{adegenet::scatter.dapc} (see ?scatter.dapc).
 }
 \details{
 The Discriminant Analysis of Principal Components (DAPC) is designed to
 investigate the genetic structure of biological populations. This
-multivariate method consists in a two-steps procedure. First, genetic
-data are transformed (centred, possibly scaled) and submitted to a
-Principal Component Analysis (PCA). Second, principal components of
-PCA are submitted to a Linear Discriminant Analysis (LDA). A trivial matrix
-operation allows to express discriminant functions as linear combination
-of alleles, therefore allowing one to compute allele contributions. More
-details about the computation of DAPC are to be found in the indicated reference.
+multivariate method consists in a two-steps procedure. First, genetic data
+are transformed (centred, possibly scaled) and submitted to a Principal
+Component Analysis (PCA). Second, principal components of PCA are submitted
+to a Linear Discriminant Analysis (LDA). A trivial matrix operation allows to
+express discriminant functions as linear combination of alleles, therefore
+allowing one to compute allele contributions. More details about the
+computation of DAPC are to be found in the indicated reference.
 }
 \references{
-Jombart T, Devillard S and Balloux F (2010) Discriminant analysis of
-principal components: a new method for the analysis of genetically
+Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
+of principal components: a new method for the analysis of genetically
 structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
 Thia, J. A. (2023). Guidelines for standardizing the application of
-discriminant analysis of principal components to genotype data.
-Molecular Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
+discriminant analysis of principal components to genotype data. Molecular
+Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
 }

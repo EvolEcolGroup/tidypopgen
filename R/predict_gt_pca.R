@@ -25,14 +25,19 @@
 #' @export
 
 # this is a modified version of bigstatsr::predict.big_SVD
-predict.gt_pca <- function(object, new_data = NULL,
-                           project_method = c(
-                             "none", "simple",
-                             "OADP", "least_squares"
-                           ),
-                           lsq_pcs = c(1, 2),
-                           block_size = NULL,
-                           n_cores = 1, ...) {
+predict.gt_pca <- function(
+    object,
+    new_data = NULL,
+    project_method = c(
+      "none",
+      "simple",
+      "OADP",
+      "least_squares"
+    ),
+    lsq_pcs = c(1, 2),
+    block_size = NULL,
+    n_cores = 1,
+    ...) {
   rlang::check_dots_empty()
   project_method <- match.arg(project_method)
 
@@ -51,10 +56,16 @@ predict.gt_pca <- function(object, new_data = NULL,
     }
     # get id of loci in new_data
     loci_subset <- match(object$loci$name, show_loci(new_data)$name)
-    if (!all(
-      all(show_loci(new_data)$allele_ref[loci_subset] == object$loci$allele_ref), # nolint
-      all(show_loci(new_data)$allele_alt[loci_subset] == object$loci$allele_alt)
-    )) {
+    if (
+      !all(
+        all(
+          show_loci(new_data)$allele_ref[loci_subset] == object$loci$allele_ref
+        ), # nolint
+        all(
+          show_loci(new_data)$allele_alt[loci_subset] == object$loci$allele_alt
+        )
+      )
+    ) {
       stop(paste(
         "ref and alt alleles differ between new_data and the data",
         "used to create the pca object"
@@ -71,7 +82,8 @@ predict.gt_pca <- function(object, new_data = NULL,
         block_size <- bigstatsr::block_size(nrow(new_data))
       }
       # X * V #nolint
-      XV <- bigstatsr::big_prodMat(.gt_get_bigsnp(new_data)$genotypes, # nolint
+      XV <- bigstatsr::big_prodMat(
+        .gt_get_bigsnp(new_data)$genotypes, # nolint
         object$v,
         ind.row = .gt_bigsnp_rows(new_data),
         ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
@@ -104,7 +116,12 @@ predict.gt_pca <- function(object, new_data = NULL,
         dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
         return(XV)
       } else {
-        XV <- utils::getFromNamespace("OADP_proj", "bigsnpr")(XV, X_norm, object$d, ncores = n_cores) # nolint
+        XV <- utils::getFromNamespace("OADP_proj", "bigsnpr")(
+          XV,
+          X_norm,
+          object$d,
+          ncores = n_cores
+        ) # nolint
         dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
         return(XV)
       }
@@ -143,8 +160,17 @@ predict.gt_pca <- function(object, new_data = NULL,
 ###############################################################################
 # a port of bigsnpr::part_prod to work on standard fb256 matrices
 
-fbm256_part_prod <- function(X, ind, ind.row, ind.col, center, # nolint
-                             scale, V, XV, X_norm) { # nolint
+fbm256_part_prod <- function(
+    X,
+    ind,
+    ind.row,
+    ind.col,
+    center, # nolint
+    scale,
+    V,
+    XV,
+    X_norm) {
+  # nolint
   res <- fbm256_prod_and_rowSumsSq(
     BM = X,
     ind_row = ind.row,

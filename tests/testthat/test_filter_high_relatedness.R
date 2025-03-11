@@ -1,12 +1,15 @@
 test_that("filter_high_relatedness removes necessary individuals", {
   # Create gentibble
-  bed_path <- system.file("extdata/related/families.bed",
+  bed_path <- system.file(
+    "extdata/related/families.bed",
     package = "tidypopgen"
   )
-  families_bigsnp_path <- bigsnpr::snp_readBed(bed_path,
+  families_bigsnp_path <- bigsnpr::snp_readBed(
+    bed_path,
     backingfile = tempfile()
   )
-  families <- gen_tibble(families_bigsnp_path,
+  families <- gen_tibble(
+    families_bigsnp_path,
     quiet = TRUE,
     valid_alleles = c("1", "2")
   )
@@ -16,8 +19,10 @@ test_that("filter_high_relatedness removes necessary individuals", {
   king_matrix <- snp_king(families_fbm)
 
   # Find which individuals are over an arbitrary relateness threshold
-  res <- filter_high_relatedness(king_matrix,
-    kings_threshold = 0.2, verbose = FALSE
+  res <- filter_high_relatedness(
+    king_matrix,
+    kings_threshold = 0.2,
+    verbose = FALSE
   )
 
   # individuals 11 and 12 at 0.2294
@@ -35,8 +40,10 @@ test_that("filter_high_relatedness removes necessary individuals", {
 
   # If we rerun, all individuals should be retained
   # (all TRUE in res2 output [[3]])
-  res2 <- filter_high_relatedness(sub_matrix,
-    kings_threshold = 0.2, verbose = FALSE
+  res2 <- filter_high_relatedness(
+    sub_matrix,
+    kings_threshold = 0.2,
+    verbose = FALSE
   )
   expect_true(all(res2[[3]]))
 })

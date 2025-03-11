@@ -18,11 +18,13 @@ qc_report_loci <- function(.x, ...) {
 qc_report_loci.tbl_df <- function(.x, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x$genotypes)
-  qc_report <- .x %>% reframe(
-    snp_id = loci_names(.x), maf = loci_maf(.data$genotypes),
-    missingness = loci_missingness(.data$genotypes),
-    hwe_p = loci_hwe(.data$genotypes)
-  )
+  qc_report <- .x %>%
+    reframe(
+      snp_id = loci_names(.x),
+      maf = loci_maf(.data$genotypes),
+      missingness = loci_missingness(.data$genotypes),
+      hwe_p = loci_hwe(.data$genotypes)
+    )
   class(qc_report) <- c("qc_report_loci", class(qc_report))
   qc_report
 }
@@ -50,7 +52,8 @@ qc_report_loci.grouped_df <- function(.x, ...) {
   qc_report <- .x %>%
     ungroup() %>%
     reframe(
-      snp_id = loci_names(.x), maf = loci_maf(.data$genotypes),
+      snp_id = loci_names(.x),
+      maf = loci_maf(.data$genotypes),
       missingness = loci_missingness(.data$genotypes),
       hwe_p = hwe_res$p_corrected
     )
@@ -90,15 +93,22 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @export
-autoplot.qc_report_loci <- function(object,
-                                    type = c(
-                                      "overview", "all",
-                                      "missing", "missing low maf",
-                                      "missing high maf", "maf",
-                                      "hwe", "significant hwe"
-                                    ),
-                                    maf_threshold = NULL, miss_threshold = NULL,
-                                    hwe_p = NULL, ...) {
+autoplot.qc_report_loci <- function(
+    object,
+    type = c(
+      "overview",
+      "all",
+      "missing",
+      "missing low maf",
+      "missing high maf",
+      "maf",
+      "hwe",
+      "significant hwe"
+    ),
+    maf_threshold = NULL,
+    miss_threshold = NULL,
+    hwe_p = NULL,
+    ...) {
   type <- match.arg(type)
 
   rlang::check_dots_empty()
@@ -124,29 +134,34 @@ autoplot.qc_report_loci <- function(object,
   logp <- -log10(hwe_p)
 
   if (type == "overview") {
-    final_plot <- autoplot_l_qc_overview(object,
+    final_plot <- autoplot_l_qc_overview(
+      object,
       maf_threshold = maf_threshold,
       miss_threshold = miss_threshold,
       hwe_p = hwe_p
     )
   } else if (type == "all") {
     final_plot <-
-      autoplot_l_qc_all(object,
+      autoplot_l_qc_all(
+        object,
         maf_threshold = maf_threshold,
-        miss_threshold = miss_threshold, hwe_p = hwe_p,
+        miss_threshold = miss_threshold,
+        hwe_p = hwe_p,
         logp = logp
       )
   } else if (type == "missing") {
     final_plot <- autoplot_l_qc_missing(object, miss_threshold = miss_threshold)
   } else if (type == "missing low maf") {
     final_plot <-
-      autoplot_l_qc_missing_low_maf(object,
+      autoplot_l_qc_missing_low_maf(
+        object,
         maf_threshold = maf_threshold,
         miss_threshold = miss_threshold
       )
   } else if (type == "missing high maf") {
     final_plot <-
-      autoplot_l_qc_missing_high_maf(object,
+      autoplot_l_qc_missing_high_maf(
+        object,
         maf_threshold = maf_threshold,
         miss_threshold = miss_threshold
       )
@@ -167,9 +182,13 @@ autoplot.qc_report_loci <- function(object,
 }
 
 
-autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold,
-                              miss_threshold = miss_threshold,
-                              hwe_p = hwe_p, logp = logp, ...) {
+autoplot_l_qc_all <- function(
+    object,
+    maf_threshold = maf_threshold,
+    miss_threshold = miss_threshold,
+    hwe_p = hwe_p,
+    logp = logp,
+    ...) {
   qc_report <- object
 
   # Missingness (according to MAF thresholds)
@@ -182,10 +201,12 @@ autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold,
   ) +
     ggplot2::geom_histogram(
       position = "dodge",
-      binwidth = 0.005, fill = "#66C2A5"
+      binwidth = 0.005,
+      fill = "#66C2A5"
     ) +
     ggplot2::labs(
-      x = "Proportion of missing data", y = "Number of SNPs",
+      x = "Proportion of missing data",
+      y = "Number of SNPs",
       title = paste("SNPs with MAF > ", maf_threshold)
     ) +
     ggplot2::geom_vline(xintercept = miss_threshold, lty = 2, col = "red") +
@@ -194,10 +215,12 @@ autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold,
   p_lowmaf <- ggplot2::ggplot(qc_lowmaf, ggplot2::aes(x = .data$missingness)) +
     ggplot2::geom_histogram(
       position = "dodge",
-      binwidth = 0.005, fill = "#66C2A5"
+      binwidth = 0.005,
+      fill = "#66C2A5"
     ) +
     ggplot2::labs(
-      x = "Proportion of missing data", y = "Number of SNPs",
+      x = "Proportion of missing data",
+      y = "Number of SNPs",
       title = paste("SNPs with MAF < ", maf_threshold)
     ) +
     ggplot2::geom_vline(xintercept = miss_threshold, lty = 2, col = "red") +
@@ -213,7 +236,8 @@ autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold,
     ggplot2::geom_histogram(binwidth = 0.5, fill = "#66C2A5") +
     ggplot2::labs(
       x = expression("-log"[10] * " of HWE exact p-value"),
-      y = "Number of SNPs", title = "Hardy-Weinberg exact test"
+      y = "Number of SNPs",
+      title = "Hardy-Weinberg exact test"
     ) +
     ggplot2::geom_vline(xintercept = logp, lty = 2, col = "red")
 
@@ -221,7 +245,8 @@ autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold,
     ggplot2::geom_histogram(binwidth = 0.5, fill = "#66C2A5") +
     ggplot2::labs(
       x = expression("-log"[10] * " of HWE exact p-value"),
-      y = "Number of SNPs", title = paste(
+      y = "Number of SNPs",
+      title = paste(
         "HWE exact p-value <",
         hwe_p
       )
@@ -235,9 +260,12 @@ autoplot_l_qc_all <- function(object, maf_threshold = maf_threshold,
 }
 
 
-autoplot_l_qc_overview <- function(object, maf_threshold = maf_threshold,
-                                   miss_threshold = miss_threshold,
-                                   hwe_p = hwe_p, ...) {
+autoplot_l_qc_overview <- function(
+    object,
+    maf_threshold = maf_threshold,
+    miss_threshold = miss_threshold,
+    hwe_p = hwe_p,
+    ...) {
   qc_report <- object
 
   qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p, ]
@@ -255,8 +283,11 @@ autoplot_l_qc_overview <- function(object, maf_threshold = maf_threshold,
   pass_counts <- UpSetR::fromList(pass_list)
   rownames(pass_counts) <- unique_markers
 
-  final_plot_overview <- UpSetR::upset(pass_counts,
-    order.by = "freq", main.bar.color = "#66C2A5", matrix.color = "#66C2A5",
+  final_plot_overview <- UpSetR::upset(
+    pass_counts,
+    order.by = "freq",
+    main.bar.color = "#66C2A5",
+    matrix.color = "#66C2A5",
     sets.bar.color = "#FC8D62"
   )
   return(final_plot_overview)
@@ -269,7 +300,8 @@ autoplot_l_qc_maf <- function(object, maf_threshold = maf_threshold, ...) {
   maf <- ggplot2::ggplot(qc_report, ggplot2::aes(x = .data$maf)) +
     ggplot2::geom_histogram(binwidth = 0.01, fill = "#66C2A5") +
     ggplot2::labs(
-      x = "Minor allele frequency", y = "Number of SNPs",
+      x = "Minor allele frequency",
+      y = "Number of SNPs",
       title = "Minor allele frequency distribution"
     ) +
     ggplot2::geom_vline(xintercept = maf_threshold, lty = 2, col = "red")
@@ -284,7 +316,8 @@ autoplot_l_qc_hwe <- function(object, logp, ...) {
     ggplot2::geom_histogram(binwidth = 0.5, fill = "#66C2A5") +
     ggplot2::labs(
       x = expression("-log"[10] * " of HWE exact p-value"),
-      y = "Number of SNPs", title = "Hardy-Weinberg exact test"
+      y = "Number of SNPs",
+      title = "Hardy-Weinberg exact test"
     ) +
     ggplot2::geom_vline(xintercept = logp, lty = 2, col = "red")
   return(hwe_all) # nolint
@@ -299,7 +332,8 @@ autoplot_l_qc_sig_hwe <- function(object, hwe_p = hwe_p, logp, ...) {
     ggplot2::geom_histogram(binwidth = 0.5, fill = "#66C2A5") +
     ggplot2::labs(
       x = expression("-log"[10] * " of HWE exact p-value"),
-      y = "Number of SNPs", title = paste(
+      y = "Number of SNPs",
+      title = paste(
         "HWE exact p-value <",
         hwe_p
       )
@@ -308,17 +342,21 @@ autoplot_l_qc_sig_hwe <- function(object, hwe_p = hwe_p, logp, ...) {
   return(hwe_low)
 }
 
-autoplot_l_qc_missing <- function(object,
-                                  miss_threshold = miss_threshold, ...) {
+autoplot_l_qc_missing <- function(
+    object,
+    miss_threshold = miss_threshold,
+    ...) {
   qc_report <- object
   missing <- ggplot2::ggplot(qc_report, ggplot2::aes(x = .data$missingness)) +
     ggplot2::geom_histogram(
       position = "dodge",
-      binwidth = 0.005, fill = "#66C2A5"
+      binwidth = 0.005,
+      fill = "#66C2A5"
     ) +
     ggplot2::labs(
       x = "Proportion of missing data",
-      y = "Number of SNPs", title = "SNP missingness"
+      y = "Number of SNPs",
+      title = "SNP missingness"
     ) +
     ggplot2::geom_vline(xintercept = miss_threshold, lty = 2, col = "red") +
     ggplot2::scale_color_brewer(palette = "Dark2")
@@ -326,10 +364,11 @@ autoplot_l_qc_missing <- function(object,
 }
 
 
-autoplot_l_qc_missing_low_maf <- function(object,
-                                          maf_threshold = maf_threshold,
-                                          miss_threshold = miss_threshold,
-                                          ...) {
+autoplot_l_qc_missing_low_maf <- function(
+    object,
+    maf_threshold = maf_threshold,
+    miss_threshold = miss_threshold,
+    ...) {
   qc_report <- object
 
   qc_lowmaf <- subset(qc_report, qc_report$maf <= maf_threshold)
@@ -337,20 +376,23 @@ autoplot_l_qc_missing_low_maf <- function(object,
   p_highmaf <- ggplot2::ggplot(qc_lowmaf, ggplot2::aes(x = .data$missingness)) + # nolint
     ggplot2::geom_histogram(
       position = "dodge",
-      binwidth = 0.005, fill = "#66C2A5"
+      binwidth = 0.005,
+      fill = "#66C2A5"
     ) +
     ggplot2::labs(
-      x = "Proportion of missing data", y = "Number of SNPs",
+      x = "Proportion of missing data",
+      y = "Number of SNPs",
       title = paste("SNPs with MAF <", maf_threshold)
     ) +
     ggplot2::geom_vline(xintercept = miss_threshold, lty = 2, col = "red") +
     ggplot2::scale_color_brewer(palette = "Dark2")
 }
 
-autoplot_l_qc_missing_high_maf <- function(object,
-                                           maf_threshold = maf_threshold,
-                                           miss_threshold = miss_threshold,
-                                           ...) {
+autoplot_l_qc_missing_high_maf <- function(
+    object,
+    maf_threshold = maf_threshold,
+    miss_threshold = miss_threshold,
+    ...) {
   qc_report <- object
 
   qc_highmaf <- subset(qc_report, qc_report$maf > maf_threshold)
@@ -361,7 +403,8 @@ autoplot_l_qc_missing_high_maf <- function(object,
   ) +
     ggplot2::geom_histogram(
       position = "dodge",
-      binwidth = 0.005, fill = "#66C2A5"
+      binwidth = 0.005,
+      fill = "#66C2A5"
     ) +
     ggplot2::labs(
       x = "Proportion of missing data",

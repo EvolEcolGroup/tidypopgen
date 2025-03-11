@@ -1,6 +1,7 @@
 test_that("impute and use the imputation", {
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-  missing_gt <- gen_tibble(bed_file,
+  missing_gt <- gen_tibble(
+    bed_file,
     backingfile = tempfile("missing_"),
     quiet = TRUE
   )
@@ -36,16 +37,42 @@ test_that("gt_impute imputes properly", {
     population = c("pop1", "pop1", "pop2", "pop1", "pop1", "pop2")
   )
 
-  test_genotypes <- matrix(c(
-    0, 2, 1, 1, 0, #
-    0, 0, 2, 0, 1, #
-    2, 0, 0, 1, 1, #
-    1, 1, 2, 2, 2, #
-    0, 0, 2, 1, 1, #
-    NA, NA, NA, NA, NA
-  ), nrow = 6, byrow = TRUE)
-
-
+  test_genotypes <- matrix(
+    c(
+      0,
+      2,
+      1,
+      1,
+      0, #
+      0,
+      0,
+      2,
+      0,
+      1, #
+      2,
+      0,
+      0,
+      1,
+      1, #
+      1,
+      1,
+      2,
+      2,
+      2, #
+      0,
+      0,
+      2,
+      1,
+      1, #
+      NA,
+      NA,
+      NA,
+      NA,
+      NA
+    ),
+    nrow = 6,
+    byrow = TRUE
+  )
 
   test_loci <- data.frame(
     name = paste0("rs", 1:5),
@@ -57,8 +84,10 @@ test_that("gt_impute imputes properly", {
   )
 
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
   )
 
   # test errors on non-imputed set
@@ -70,7 +99,6 @@ test_that("gt_impute imputes properly", {
     gt_set_imputed(test_gt, TRUE),
     "this dataset does not have imputed values"
   )
-
 
   # impute method = 'mode'
   imputed_gt_mode <- gt_impute_simple(test_gt, method = "mode")
@@ -96,7 +124,6 @@ test_that("gt_impute imputes properly", {
   modes <- apply(test_genotypes, 2, mode_function)
   expect_true(all(show_genotypes(imputed_gt_mode)[6, ] == modes))
 
-
   # impute method = 'mean0'
   imputed_gt_mean0 <- gt_impute_simple(test_gt, method = "mean0")
 
@@ -107,7 +134,6 @@ test_that("gt_impute imputes properly", {
   # check imputed 'mean0' method
   means <- round(colMeans(test_genotypes, na.rm = TRUE), digit = 0)
   expect_true(all(means == show_genotypes(imputed_gt_mean0)[6, ]))
-
 
   # impute method = 'random'
   imputed_gt_random <- gt_impute_simple(test_gt, method = "random")
@@ -124,16 +150,42 @@ test_that("imputing subsets", {
     population = c("pop1", "pop1", "pop2", "pop1", "pop1", "pop2")
   )
 
-  test_genotypes <- matrix(c(
-    0, 2, 1, 1, 0, #
-    0, 0, 2, 0, 1, #
-    2, 0, 0, 1, 1, #
-    1, 1, 2, 2, 2, #
-    0, 0, 2, 1, 1, #
-    NA, NA, NA, NA, NA #
-  ), nrow = 6, byrow = TRUE)
-
-
+  test_genotypes <- matrix(
+    c(
+      0,
+      2,
+      1,
+      1,
+      0, #
+      0,
+      0,
+      2,
+      0,
+      1, #
+      2,
+      0,
+      0,
+      1,
+      1, #
+      1,
+      1,
+      2,
+      2,
+      2, #
+      0,
+      0,
+      2,
+      1,
+      1, #
+      NA,
+      NA,
+      NA,
+      NA,
+      NA #
+    ),
+    nrow = 6,
+    byrow = TRUE
+  )
 
   test_loci <- data.frame(
     name = paste0("rs", 1:5),
@@ -145,8 +197,10 @@ test_that("imputing subsets", {
   )
 
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
   )
 
   # create a subset of the original tibble
@@ -171,10 +225,8 @@ test_that("imputing subsets", {
   # but retains NA's in the full gen_tibble
   expect_true(any(is.na(show_genotypes(test_gt))))
 
-
   # But it is not possible to have two imputation methods on two subsets of
   # the same data
-
 
   # the rest of the individuals and SNPs: 1 and 2
   test_remaining <- test_gt[1:2, ]

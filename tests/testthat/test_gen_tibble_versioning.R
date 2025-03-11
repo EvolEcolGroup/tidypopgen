@@ -17,8 +17,10 @@ test_that("versioning updates correctly through gt_order_loci", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE,
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
     backingfile = tempfile()
   )
 
@@ -39,8 +41,10 @@ test_that("versioning updates correctly through gt_order_loci", {
 
   # create gt using the same backingfile name
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE,
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
     backingfile = file
   )
 
@@ -77,8 +81,10 @@ test_that("versioning if .bk already exists", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE,
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
     backingfile = tempfile()
   )
 
@@ -102,8 +108,10 @@ test_that("versioning if .bk already exists", {
 
   # create gt using the same backingfile name
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE,
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
     backingfile = file
   )
 
@@ -119,8 +127,10 @@ test_that("versioning if .bk already exists", {
   expect_true(file.exists(new_files[2]))
 
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE,
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
     backingfile = file
   )
 

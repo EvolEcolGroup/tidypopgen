@@ -23,7 +23,8 @@ select_loci <- function(.data, .sel_arg) {
   sel_defused <- rlang::enquo(.sel_arg)
 
   # create a named vector of all loci
-  loci_names_vec <- stats::setNames(seq_len(nrow(show_loci(.data))),
+  loci_names_vec <- stats::setNames(
+    seq_len(nrow(show_loci(.data))),
     nm = loci_names(.data)
   )
   # now evaluate the selection criteria, giving it the loci names to work with

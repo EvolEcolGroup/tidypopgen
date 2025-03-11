@@ -18,8 +18,10 @@ test_loci <- data.frame(
 )
 
 test_gt <- gen_tibble(
-  x = test_genotypes, loci = test_loci,
-  indiv_meta = test_indiv_meta, quiet = TRUE
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
 )
 
 
@@ -41,15 +43,17 @@ test_that("write a bed file", {
   # check gt_as_plink converts the NA missing allele to 0
   expect_true(is.na(show_loci(test_gt2)$allele_alt[3]))
 
-
   # now write it as a ped
-  ped_path <- gt_as_plink(test_gt,
+  ped_path <- gt_as_plink(
+    test_gt,
     file = paste0(tempfile(), ".ped"),
     type = "ped"
   )
   test_gt3 <- gen_tibble(ped_path, quiet = TRUE)
   # the gen tibble from the bed and ped should contain the same information
-  expect_true(all.equal(show_loci(test_gt3), show_loci(test_gt2),
+  expect_true(all.equal(
+    show_loci(test_gt3),
+    show_loci(test_gt2),
     check.attributes = FALSE
   ))
   expect_true(all.equal(show_genotypes(test_gt3), show_genotypes(test_gt2)))
@@ -136,7 +140,8 @@ test_that("gt_as_plink uses loci and indiv information from the gen_tibble", {
 
 test_that("gt_as_plink can use chr_int", {
   # save using gt_as_plink with chromosomes_as_int TRUE
-  bed_path <- gt_as_plink(test_gt,
+  bed_path <- gt_as_plink(
+    test_gt,
     file = paste0(tempfile(), ".bed"),
     chromosomes_as_int = TRUE
   )
@@ -157,8 +162,10 @@ test_that("family.ID equals sample.ID from vcf", {
 
   ####  With vcfr parser
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
-  pop_b_vcf_gt <- gen_tibble(vcf_path,
-    quiet = TRUE, backingfile = tempfile(),
+  pop_b_vcf_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    backingfile = tempfile(),
     parser = "vcfR"
   )
   # write vcf_path using gt_as_plink
@@ -173,8 +180,10 @@ test_that("family.ID equals sample.ID from vcf", {
 
   ####  With cpp parser
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
-  pop_b_vcf_gt <- gen_tibble(vcf_path,
-    quiet = TRUE, backingfile = tempfile(),
+  pop_b_vcf_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    backingfile = tempfile(),
     parser = "cpp"
   )
   # write vcf_path using gt_as_plink
@@ -208,13 +217,16 @@ test_that("handling of duplicated loci", {
     allele_alt = c(NA, "C", NA, "C", "G", "A")
   )
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
   )
   # duplicated positions are registered by is_loci_table_ordered
   expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
   expect_error(
-    is_loci_table_ordered(test_gt,
+    is_loci_table_ordered(
+      test_gt,
       ignore_genetic_dist = FALSE,
       error_on_false = TRUE
     ),
@@ -222,7 +234,8 @@ test_that("handling of duplicated loci", {
   )
   # but currently we can still write the plink fileset and read back
   # into a gt without a warning
-  file <- gt_as_plink(test_gt,
+  file <- gt_as_plink(
+    test_gt,
     file = paste0(tempfile(), ".bed"),
     chromosomes_as_int = TRUE
   )
@@ -238,14 +251,17 @@ test_that("handling of duplicated loci", {
     allele_alt = c("T", NA, NA, "C", "G", "A")
   )
   test_gt <- gen_tibble(
-    x = test_genotypes, loci = test_loci,
-    indiv_meta = test_indiv_meta, quiet = TRUE
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
   )
   # duplicated positions are registered by is_loci_table_ordered
   expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
   # but currently we can still write the plink fileset and read back
   # into a gt without a warning
-  file <- gt_as_plink(test_gt,
+  file <- gt_as_plink(
+    test_gt,
     file = paste0(tempfile(), ".bed"),
     chromosomes_as_int = TRUE
   )

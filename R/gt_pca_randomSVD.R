@@ -49,15 +49,18 @@
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @export
 
-
-gt_pca_randomSVD <- function(x, k = 10, # nolint
-                             fun_scaling = bigsnpr::snp_scaleBinom(),
-                             tol = 1e-4,
-                             verbose = FALSE,
-                             n_cores = 1,
-                             fun_prod = bigstatsr::big_prodVec,
-                             fun_cprod = bigstatsr::big_cprodVec,
-                             total_var = TRUE) {
+# nolint start
+gt_pca_randomSVD <- function(
+    # nolint end
+    x,
+    k = 10,
+    fun_scaling = bigsnpr::snp_scaleBinom(),
+    tol = 1e-4,
+    verbose = FALSE,
+    n_cores = 1,
+    fun_prod = bigstatsr::big_prodVec,
+    fun_cprod = bigstatsr::big_cprodVec,
+    total_var = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
@@ -66,7 +69,8 @@ gt_pca_randomSVD <- function(x, k = 10, # nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
 
-  this_svd <- bigstatsr::big_randomSVD(X$genotypes,
+  this_svd <- bigstatsr::big_randomSVD(
+    X$genotypes,
     k = k,
     ind.row = .gt_bigsnp_rows(x),
     ind.col = .gt_bigsnp_cols(x),
@@ -86,8 +90,10 @@ gt_pca_randomSVD <- function(x, k = 10, # nolint
   this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var) {
-    this_svd$square_frobenious <- square_frobenious(X$genotypes,
-      x_ind_row, x_ind_col,
+    this_svd$square_frobenious <- square_frobenious(
+      X$genotypes,
+      x_ind_row,
+      x_ind_col,
       center = this_svd$center,
       scale = this_svd$scale
     )

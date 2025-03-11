@@ -1,17 +1,20 @@
 # A function to read ped files
-gen_tibble_ped <- function(x, ...,
-                           valid_alleles = c("A", "T", "C", "G"),
-                           missing_alleles = c("0", "."),
-                           backingfile = NULL, quiet = FALSE) {
+gen_tibble_ped <- function(
+    x,
+    ...,
+    valid_alleles = c("A", "T", "C", "G"),
+    missing_alleles = c("0", "."),
+    backingfile = NULL,
+    quiet = FALSE) {
   # Substitute .ped with .map
   map_file <- sub("\\.ped$", ".map", x)
   if (!file.exists(map_file)) {
     stop("map file ", map_file, " does not exist")
   }
 
-
   res <- read_pedfile(
-    file = x, snps = map_file,
+    file = x,
+    snps = map_file,
     na_strings = missing_alleles,
     quiet = quiet
   )
@@ -20,27 +23,34 @@ gen_tibble_ped <- function(x, ...,
     x = res$genotypes,
     indiv_meta = res$fam,
     loci = res$map,
-    backingfile = backingfile, quiet = quiet
+    backingfile = backingfile,
+    quiet = quiet
   )
-  check_allele_alphabet(new_gen_tbl,
+  check_allele_alphabet(
+    new_gen_tbl,
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles,
     remove_on_fail = TRUE
   )
-  show_loci(new_gen_tbl) <- harmonise_missing_values(show_loci(new_gen_tbl),
+  show_loci(new_gen_tbl) <- harmonise_missing_values(
+    show_loci(new_gen_tbl),
     missing_alleles = missing_alleles
   )
   return(new_gen_tbl)
 }
 
 
-
-
-
 # modified from snpStats::read.pedfile
 
-read_pedfile <- function(file, n, snps, which, split = "\t| +", sep = ".",
-                         na_strings = "0", quiet = FALSE) {
+read_pedfile <- function(
+    file,
+    n,
+    snps,
+    which,
+    split = "\t| +",
+    sep = ".",
+    na_strings = "0",
+    quiet = FALSE) {
   ## Constants
   #  r0 <- as.raw(0) #nolint start
   #  r1 <- as.raw(1)
@@ -190,14 +200,21 @@ read_pedfile <- function(file, n, snps, which, split = "\t| +", sep = ".",
 
   ## Subject support file
   fam <- data.frame(
-    row.names = rnames, population = ped, id = mem,
-    father = pa, mother = ma, sex = sex, phenotype = aff
+    row.names = rnames,
+    population = ped,
+    id = mem,
+    father = pa,
+    mother = ma,
+    sex = sex,
+    phenotype = aff
   )
   ## map data frame
   if (is.null(map)) {
     map <- data.frame(
-      row.names = snps, snp.name = snps,
-      allele.1 = a1, allele.2 = a2
+      row.names = snps,
+      snp.name = snps,
+      allele.1 = a1,
+      allele.2 = a2
     )
   } else {
     # mapfile
