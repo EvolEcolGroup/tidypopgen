@@ -159,7 +159,6 @@ autoplot.qc_report_indiv <- function(
 }
 
 autoplot_qc_report_indiv <- function(object, miss_threshold) {
-
   mean_val <- mean(object$het_obs)
   sd_val <- stats::sd(object$het_obs)
 
@@ -203,8 +202,10 @@ autoplot_qc_report_indiv_king <- function(
     # by group
 
     # apply plotting function to each kings matrix in the list
-    p <- lapply(FUN = king_hist_plot, X = attr(object$to_keep, "king"),
-                kings_threshold = kings_threshold)
+    p <- lapply(
+      FUN = king_hist_plot, X = attr(object$to_keep, "king"),
+      kings_threshold = kings_threshold
+    )
   }
 
   return(p)

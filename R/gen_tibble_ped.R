@@ -51,7 +51,6 @@ read_pedfile <- function(
     sep = ".",
     na_strings = "0",
     quiet = FALSE) {
-
   # constants
   r0 <- NA_integer_
   r1 <- 0

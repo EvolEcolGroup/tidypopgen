@@ -189,10 +189,13 @@ autoplot_l_qc_all <- function(
 
   # Hardy Weinberg exact test p-val distribution
   hwe_all_plot <- autoplot_l_qc_hwe(object,
-                                    hwe_p_vertical_line = hwe_p_vertical_line)
-  hwe_low_plot <- autoplot_l_qc_hwe(object = object,
-                                    hwe_p_vertical_line = hwe_p_vertical_line,
-                                    hwe_p_low_thresh = hwe_p_low_thresh)
+    hwe_p_vertical_line = hwe_p_vertical_line
+  )
+  hwe_low_plot <- autoplot_l_qc_hwe(
+    object = object,
+    hwe_p_vertical_line = hwe_p_vertical_line,
+    hwe_p_low_thresh = hwe_p_low_thresh
+  )
 
   hwe_plots <- patchwork::wrap_plots(hwe_all_plot, hwe_low_plot)
 
