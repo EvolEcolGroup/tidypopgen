@@ -137,35 +137,28 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 autoplot.qc_report_indiv <- function(
     object,
     type = c("scatter", "relatedness"),
-    miss_threshold = NULL,
-    kings_threshold = kings_threshold,
+    miss_threshold = 0.05,
+    kings_threshold = NULL,
     ...) {
   rlang::check_dots_empty()
-
-  miss_threshold <- if (is.null(miss_threshold)) {
-    0.05
-  } else {
-    miss_threshold
-  }
 
   type <- match.arg(type)
 
   if (type == "scatter") {
-    final_plot <- autoplot_qc_report_indiv(
+    report_plot <- autoplot_qc_report_indiv(
       object,
       miss_threshold = miss_threshold
     )
   } else if (type == "relatedness") {
-    final_plot <- autoplot_qc_report_indiv_king(
+    report_plot <- autoplot_qc_report_indiv_king(
       object,
       kings_threshold = kings_threshold
     )
   }
-  return(final_plot)
+  return(report_plot)
 }
 
-autoplot_qc_report_indiv <- function(object, miss_threshold = miss_threshold) {
-  miss_threshold <- miss_threshold
+autoplot_qc_report_indiv <- function(object, miss_threshold) {
 
   mean_val <- mean(object$het_obs)
   sd_val <- stats::sd(object$het_obs)
@@ -176,7 +169,7 @@ autoplot_qc_report_indiv <- function(object, miss_threshold = miss_threshold) {
   mid_upper <- mean_val + 2 * (sd_val)
   mid_lower <- mean_val - 2 * (sd_val)
 
-  final_plot <- ggplot2::ggplot(
+  report_plot <- ggplot2::ggplot(
     object,
     ggplot2::aes(
       x = .data$missingness,
@@ -195,103 +188,70 @@ autoplot_qc_report_indiv <- function(object, miss_threshold = miss_threshold) {
       lty = 2,
       col = "blue"
     )
-  return(final_plot)
+  return(report_plot)
 }
 
 autoplot_qc_report_indiv_king <- function(
     object,
-    kings_threshold = kings_threshold) {
+    kings_threshold) {
   if (
     inherits(attr(object$to_keep, "king"), "matrix") ||
       inherits(attr(object$to_keep, "king"), "array")
   ) {
-    # nolint
-    king <- as.data.frame(attr(object$to_keep, "king"))
-    num_samples <- nrow(king)
-    king$row <- colnames(king)
-
-    # format into 3 columns: ID1, ID2, and their relatedness coefficient
-    king <- tidyr::pivot_longer(
-      king,
-      cols = !row,
-      names_to = "Column",
-      values_to = "Value"
-    )
-    king <- dplyr::filter(king, king$row < king$Column)
-    colnames(king) <- c("ID1", "ID2", "kinship")
-
-    # remove duplication from the new df
-    king_sorted <- king %>%
-      mutate(
-        row_min = pmin(.data$ID1, .data$ID2),
-        row_max = pmax(.data$ID1, .data$ID2)
-      ) %>%
-      dplyr::select(-dplyr::all_of(c("ID1", "ID2"))) %>%
-      distinct(.data$row_min, .data$row_max, .keep_all = TRUE) %>%
-      rename("ID1" = .data$row_min, "ID2" = .data$row_max)
-
-    # remove cases of individuals relatedness with themselves
-    king_sorted <- king_sorted %>% filter(.data$ID1 != .data$ID2)
-
-    # add a check for correct number of pairs
-    total_pairs <- num_samples * (num_samples - 1) / 2
-
-    if (total_pairs != nrow(king_sorted)) {
-      stop("Relatedness matrix must be symmetric ")
-    }
-
-    p <- ggplot2::ggplot(king_sorted, ggplot2::aes(x = .data$kinship)) +
-      ggplot2::geom_histogram(bins = 40) +
-      ggplot2::labs(
-        x = "KING robust kinship estimator",
-        y = "Number of pairs",
-        title = "Distribution of paired kinship coefficients"
-      ) +
-      ggplot2::geom_vline(xintercept = kings_threshold, lty = 2, col = "red")
+    p <- king_hist_plot(attr(object$to_keep, "king"), kings_threshold)
   } else if (inherits(attr(object$to_keep, "king"), "list")) {
     # by group
 
-    # create a plotting function as above
-    hist_plot <- function(object) {
-      king <- as.data.frame(object)
-      num_samples <- nrow(king)
-      king$row <- colnames(king)
-      king <- tidyr::pivot_longer(
-        king,
-        cols = !row,
-        names_to = "Column",
-        values_to = "Value"
-      )
-      king <- dplyr::filter(king, king$row < king$Column)
-      colnames(king) <- c("ID1", "ID2", "kinship")
-      king_sorted <- king %>%
-        mutate(
-          row_min = pmin(.data$ID1, .data$ID2),
-          row_max = pmax(.data$ID1, .data$ID2)
-        ) %>%
-        dplyr::select(-dplyr::all_of(c("ID1", "ID2"))) %>%
-        distinct(.data$row_min, .data$row_max, .keep_all = TRUE) %>%
-        rename("ID1" = .data$row_min, "ID2" = .data$row_max)
-      king_sorted <- king_sorted %>% filter(.data$ID1 != .data$ID2)
-      total_pairs <- num_samples * (num_samples - 1) / 2
-      if (total_pairs != nrow(king_sorted)) {
-        stop("Relatedness matrix must be symmetric ")
-      }
-      p <- ggplot2::ggplot(king_sorted, ggplot2::aes(x = .data$kinship)) +
-        ggplot2::geom_histogram(bins = 40) +
-        ggplot2::labs(
-          x = "KING robust kinship estimator",
-          y = "Number of pairs",
-          title = "Distribution of paired kinship coefficients"
-        ) +
-        ggplot2::geom_vline(xintercept = kings_threshold, lty = 2, col = "red")
-
-      return(p) # nolint
-    }
-
     # apply plotting function to each kings matrix in the list
-    p <- lapply(FUN = hist_plot, X = attr(object$to_keep, "king"))
+    p <- lapply(FUN = king_hist_plot, X = attr(object$to_keep, "king"),
+                kings_threshold = kings_threshold)
   }
 
+  return(p)
+}
+
+king_hist_plot <- function(object, kings_threshold) {
+  king <- as.data.frame(object)
+  num_samples <- nrow(king)
+  king$row <- colnames(king)
+
+  # format into 3 columns: ID1, ID2, and their relatedness coefficient
+  king <- tidyr::pivot_longer(
+    king,
+    cols = !row,
+    names_to = "Column",
+    values_to = "Value"
+  )
+  king <- dplyr::filter(king, king$row < king$Column)
+  colnames(king) <- c("ID1", "ID2", "kinship")
+
+  # remove duplication from the new df
+  king_sorted <- king %>%
+    mutate(
+      row_min = pmin(.data$ID1, .data$ID2),
+      row_max = pmax(.data$ID1, .data$ID2)
+    ) %>%
+    dplyr::select(-dplyr::all_of(c("ID1", "ID2"))) %>%
+    distinct(.data$row_min, .data$row_max, .keep_all = TRUE) %>%
+    rename("ID1" = .data$row_min, "ID2" = .data$row_max)
+
+  # remove cases of individuals relatedness with themselves
+  king_sorted <- king_sorted %>% filter(.data$ID1 != .data$ID2)
+
+  # add a check for correct number of pairs
+  total_pairs <- num_samples * (num_samples - 1) / 2
+
+  if (total_pairs != nrow(king_sorted)) {
+    stop("Relatedness matrix must be symmetric ")
+  }
+
+  p <- ggplot2::ggplot(king_sorted, ggplot2::aes(x = .data$kinship)) +
+    ggplot2::geom_histogram(bins = 40) +
+    ggplot2::labs(
+      x = "KING robust kinship estimator",
+      y = "Number of pairs",
+      title = "Distribution of paired kinship coefficients"
+    ) +
+    ggplot2::geom_vline(xintercept = kings_threshold, lty = 2, col = "red")
   return(p)
 }

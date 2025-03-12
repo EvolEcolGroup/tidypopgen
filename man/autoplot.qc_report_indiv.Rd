@@ -7,8 +7,8 @@
 \method{autoplot}{qc_report_indiv}(
   object,
   type = c("scatter", "relatedness"),
-  miss_threshold = NULL,
-  kings_threshold = kings_threshold,
+  miss_threshold = 0.05,
+  kings_threshold = NULL,
   ...
 )
 }
