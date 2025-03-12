@@ -78,18 +78,19 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' - `hwe`: a histogram of HWE exact test p-values
 #' - `significant hwe`: a histogram of significant HWE exact test p-values
 #'
-#' `autoplot` produces simple plots to quickly inspect an object. They are
-#' not customisable; we recommend that you use `ggplot2` to produce publication
+#' `autoplot` produces simple plots to quickly inspect an object. They are not
+#' customisable; we recommend that you use `ggplot2` to produce publication
 #' ready plots.
 #'
 #' @param object an object of class `qc_report_loci`
-#' @param type the type of plot (one of `overview`, `all`, `missing`,
-#' `missing low maf`, `missing high maf`, `maf`, `hwe`, and `significant hwe`)
-#' @param maf_threshold a threshold for the accepted rate of minor allele
-#' frequency of loci
-#' @param miss_threshold a threshold for the accepted rate of missingness per
-#' loci
-#' @param hwe_p a threshold of significance for Hardy-Weinberg exact p-values
+#' @param type the type of plot (one of `overview`, `all`, `missing`, `missing
+#'   low maf`, `missing high maf`, `maf`, `hwe`, and `significant hwe`)
+#' @param maf_threshold default 0.5, a threshold for the accepted rate of minor
+#'   allele frequency of loci
+#' @param miss_threshold default 0.01, a threshold for the accepted rate of
+#'   missingness per loci
+#' @param hwe_p default 0.01, a threshold of significance for Hardy-Weinberg
+#'   exact p-values
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @export
@@ -261,7 +262,7 @@ autoplot_l_qc_hwe <- function(object, logp, hwe_p_low_thresh = NULL, ...) {
 
   object$hwe_p_log <- -log10(object$hwe_p)
   # subset if necessary
-  if (is.null(hwe_p_low_thresh)) {
+  if (!is.null(hwe_p_low_thresh)) {
     object <- object[object$hwe_p < hwe_p_low_thresh, ]
     plot_title <- paste("HWE exact p-value <", hwe_p_low_thresh)
   } else {
