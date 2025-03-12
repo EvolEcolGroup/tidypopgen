@@ -44,8 +44,6 @@ test_that("fit_gt_pca_and_predict", {
 })
 
 test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
-  # @TODO remove this hack when the patch makes it through to cran
-
   # Generate example_indiv_meta data frame
   individual_ids <- paste0("indiv", 1:200)
   populations <- sample(
@@ -91,7 +89,6 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   test_pca <- test %>% gt_pca_autoSVD(verbose = FALSE)
 
   # Now try with imputed data
-  library(bigsnpr)
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,
@@ -288,7 +285,10 @@ test_that("our stdevs are comparable to prcomp", {
   # Perform PCA using gt_pca_autoSVD
   #########################
   families <- gt_impute_simple(families, method = "mode")
-  gt_pca_auto_result <- families %>% gt_pca_autoSVD(roll_size = 7)
+  gt_pca_auto_result <- families %>% gt_pca_autoSVD(
+    roll_size = 7,
+    verbose = FALSE
+  )
   tidy_pca <- tidy(gt_pca_auto_result, matrix = "eigenvalues")
 
   loci <- gt_pca_auto_result$loci

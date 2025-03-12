@@ -154,8 +154,10 @@ autoplot.qc_report_loci <- function(
   } else if (type == "hwe") {
     final_plot <- autoplot_l_qc_hwe(object, logp = log_p_threshold)
   } else if (type == "significant hwe") {
-    final_plot <- autoplot_l_qc_hwe(object, hwe_p = hwe_p,
-                                    logp = log_p_threshold)
+    final_plot <- autoplot_l_qc_hwe(object,
+      hwe_p = hwe_p,
+      logp = log_p_threshold
+    )
   }
 
   return(final_plot)
@@ -181,8 +183,10 @@ autoplot_l_qc_all <- function(
     maf_low_thresh = maf_threshold
   )
 
-  miss_maf_plots <- patchwork::wrap_plots(miss_high_maf_plot +
-                                            miss_low_maf_plot)
+  miss_maf_plots <- patchwork::wrap_plots(
+    miss_high_maf_plot +
+      miss_low_maf_plot
+  )
 
   # Hardy Weinberg exact test p-val distribution
   hwe_all_plot <- autoplot_l_qc_hwe(object, logp)
