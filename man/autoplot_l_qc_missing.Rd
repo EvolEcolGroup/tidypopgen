@@ -6,7 +6,7 @@
 \usage{
 autoplot_l_qc_missing(
   object,
-  miss_threshold = miss_threshold,
+  miss_threshold,
   maf_low_thresh = NULL,
   maf_high_thresh = NULL,
   ...

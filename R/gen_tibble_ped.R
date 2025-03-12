@@ -51,12 +51,8 @@ read_pedfile <- function(
     sep = ".",
     na_strings = "0",
     quiet = FALSE) {
-  ## Constants
-  #  r0 <- as.raw(0) #nolint start
-  #  r1 <- as.raw(1)
-  #  r2 <- as.raw(2)
-  #  r3 <- as.raw(3) #nolint end
 
+  # constants
   r0 <- NA_integer_
   r1 <- 0
   r2 <- 1
@@ -196,7 +192,6 @@ read_pedfile <- function(
     rnames <- ped
   }
   dimnames(result) <- list(rnames, snps)
-  #  result <- new("SnpMatrix", result) #nolint
 
   ## Subject support file
   fam <- data.frame(

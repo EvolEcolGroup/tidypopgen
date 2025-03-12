@@ -4,16 +4,16 @@
 \alias{autoplot_l_qc_hwe}
 \title{Internal plotting function for hwe}
 \usage{
-autoplot_l_qc_hwe(object, logp, hwe_p_low_thresh = NULL, ...)
+autoplot_l_qc_hwe(object, hwe_p_vertical_line, hwe_p_low_thresh = NULL, ...)
 }
 \arguments{
 \item{object}{an object of class \code{qc_report_loci}}
 
-\item{logp}{the -log10 of the p-value threshold for the vertical line}
+\item{hwe_p_vertical_line}{the p-value threshold for the vertical line}
+
+\item{hwe_p_low_thresh}{the p-value threshold to subset the loci}
 
 \item{...}{not currently used.}
-
-\item{hew_p_threshold}{the p-value threshold to subset the loci}
 }
 \value{
 a \code{ggplot2} object

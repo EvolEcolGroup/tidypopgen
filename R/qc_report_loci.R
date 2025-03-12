@@ -108,69 +108,67 @@ autoplot.qc_report_loci <- function(
     ),
     maf_threshold = 0.05,
     miss_threshold = 0.01,
-    hwe_p = 0.01, # SUGGESTION should this be hew_p_threshold for consistency?
+    hwe_p = 0.01, # SUGGESTION should this be hwe_p_threshold for consistency?
     ...) {
   type <- match.arg(type)
 
   rlang::check_dots_empty()
 
-  log_p_threshold <- -log10(hwe_p)
-
   if (type == "overview") {
-    final_plot <- autoplot_l_qc_overview(
+    report_plot <- autoplot_l_qc_overview(
       object,
       maf_threshold = maf_threshold,
       miss_threshold = miss_threshold,
-      hwe_p = hwe_p
+      hwe_p_low_thresh = hwe_p
     )
   } else if (type == "all") {
-    final_plot <-
+    report_plot <-
       autoplot_l_qc_all(
         object,
         maf_threshold = maf_threshold,
         miss_threshold = miss_threshold,
-        hwe_p = hwe_p,
-        logp = log_p_threshold
+        hwe_p_low_thresh = hwe_p,
+        hwe_p_vertical_line = hwe_p
       )
   } else if (type == "missing") {
-    final_plot <- autoplot_l_qc_missing(object,
+    report_plot <- autoplot_l_qc_missing(object,
       miss_threshold = miss_threshold
     )
   } else if (type == "missing low maf") {
-    final_plot <-
+    report_plot <-
       autoplot_l_qc_missing(
         object,
         maf_low_thresh = maf_threshold,
         miss_threshold = miss_threshold
       )
   } else if (type == "missing high maf") {
-    final_plot <-
+    report_plot <-
       autoplot_l_qc_missing(
         object,
         maf_high_thresh = maf_threshold,
         miss_threshold = miss_threshold
       )
   } else if (type == "maf") {
-    final_plot <- autoplot_l_qc_maf(object, maf_threshold = maf_threshold)
+    report_plot <- autoplot_l_qc_maf(object, maf_threshold = maf_threshold)
   } else if (type == "hwe") {
-    final_plot <- autoplot_l_qc_hwe(object, logp = log_p_threshold)
+    report_plot <- autoplot_l_qc_hwe(object, hwe_p_vertical_line = hwe_p)
   } else if (type == "significant hwe") {
-    final_plot <- autoplot_l_qc_hwe(object,
-      hwe_p = hwe_p,
-      logp = log_p_threshold
+    report_plot <- autoplot_l_qc_hwe(object,
+      hwe_p_low_thresh = hwe_p,
+      hwe_p_vertical_line = hwe_p
     )
   }
 
-  return(final_plot)
+  return(report_plot)
 }
 
 
 autoplot_l_qc_all <- function(
     object,
-    maf_threshold = maf_threshold,
-    miss_threshold = miss_threshold,
-    hwe_p = hwe_p,
-    logp = logp,
+    maf_threshold,
+    miss_threshold,
+    hwe_p_low_thresh,
+    hwe_p_vertical_line,
     ...) {
   # Missingness (according to MAF thresholds)
   miss_high_maf_plot <- autoplot_l_qc_missing(
@@ -190,8 +188,11 @@ autoplot_l_qc_all <- function(
   )
 
   # Hardy Weinberg exact test p-val distribution
-  hwe_all_plot <- autoplot_l_qc_hwe(object, logp)
-  hwe_low_plot <- autoplot_l_qc_hwe(object, logp, hwe_p_low_thresh = hwe_p)
+  hwe_all_plot <- autoplot_l_qc_hwe(object,
+                                    hwe_p_vertical_line = hwe_p_vertical_line)
+  hwe_low_plot <- autoplot_l_qc_hwe(object = object,
+                                    hwe_p_vertical_line = hwe_p_vertical_line,
+                                    hwe_p_low_thresh = hwe_p_low_thresh)
 
   hwe_plots <- patchwork::wrap_plots(hwe_all_plot, hwe_low_plot)
 
@@ -202,13 +203,13 @@ autoplot_l_qc_all <- function(
 
 autoplot_l_qc_overview <- function(
     object,
-    maf_threshold = maf_threshold,
-    miss_threshold = miss_threshold,
-    hwe_p = hwe_p,
+    maf_threshold,
+    miss_threshold,
+    hwe_p_low_thresh,
     ...) {
   qc_report <- object
 
-  qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p, ]
+  qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p_low_thresh, ]
   qc_maf <- qc_report[qc_report$maf >= maf_threshold, ]
 
   maf_pass <- c(qc_maf$snp_id)
@@ -234,7 +235,7 @@ autoplot_l_qc_overview <- function(
 }
 
 
-autoplot_l_qc_maf <- function(object, maf_threshold = maf_threshold, ...) {
+autoplot_l_qc_maf <- function(object, maf_threshold, ...) {
   # Minor allele frequency distribution
   maf <- ggplot2::ggplot(object, ggplot2::aes(x = .data$maf)) +
     ggplot2::geom_histogram(binwidth = 0.01, fill = "#66C2A5") +
@@ -250,15 +251,20 @@ autoplot_l_qc_maf <- function(object, maf_threshold = maf_threshold, ...) {
 #' Internal plotting function for hwe
 #'
 #' @param object an object of class `qc_report_loci`
-#' @param logp the -log10 of the p-value threshold for the vertical line
-#' @param hew_p_threshold the p-value threshold to subset the loci
+#' @param hwe_p_vertical_line the p-value threshold for the vertical line
+#' @param hwe_p_low_thresh the p-value threshold to subset the loci
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @keywords internal
 
-autoplot_l_qc_hwe <- function(object, logp, hwe_p_low_thresh = NULL, ...) {
+autoplot_l_qc_hwe <- function(object,
+                              hwe_p_vertical_line,
+                              hwe_p_low_thresh = NULL,
+                              ...) {
   # check ellipses are empty
   rlang::check_dots_empty()
+
+  hwe_p_vertical_line <- -log10(hwe_p_vertical_line)
 
   object$hwe_p_log <- -log10(object$hwe_p)
   # subset if necessary
@@ -268,7 +274,7 @@ autoplot_l_qc_hwe <- function(object, logp, hwe_p_low_thresh = NULL, ...) {
   } else {
     plot_title <- "Hardy-Weinberg exact test"
   }
-  # Hardy weinberg exact test p-val distribution
+  # Hardy Weinberg exact test p-val distribution
   hwe_plot <- ggplot2::ggplot(object, ggplot2::aes(x = .data$hwe_p_log)) +
     ggplot2::geom_histogram(binwidth = 0.5, fill = "#66C2A5") +
     ggplot2::labs(
@@ -276,8 +282,8 @@ autoplot_l_qc_hwe <- function(object, logp, hwe_p_low_thresh = NULL, ...) {
       y = "Number of SNPs",
       title = plot_title
     ) +
-    ggplot2::geom_vline(xintercept = logp, lty = 2, col = "red")
-  return(hwe_plot) # nolint
+    ggplot2::geom_vline(xintercept = hwe_p_vertical_line, lty = 2, col = "red")
+  return(hwe_plot)
 }
 
 #' Internal missingness plot function
@@ -295,7 +301,7 @@ autoplot_l_qc_hwe <- function(object, logp, hwe_p_low_thresh = NULL, ...) {
 
 autoplot_l_qc_missing <- function(
     object,
-    miss_threshold = miss_threshold,
+    miss_threshold,
     maf_low_thresh = NULL,
     maf_high_thresh = NULL,
     ...) {
