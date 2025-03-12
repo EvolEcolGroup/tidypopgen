@@ -338,7 +338,8 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
     gt_order_loci(
       test_gt,
       use_current_table = TRUE,
-      ignore_genetic_dist = FALSE
+      ignore_genetic_dist = FALSE,
+      quiet = TRUE
     ),
     "Your genetic distances are not sorted within chromosomes"
   )
@@ -346,7 +347,8 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
     gt_order_loci(
       test_gt,
       use_current_table = FALSE,
-      ignore_genetic_dist = FALSE
+      ignore_genetic_dist = FALSE,
+      quiet = TRUE
     ),
     "Your genetic distances are not sorted within chromosomes"
   )
@@ -403,7 +405,8 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
     gt_order_loci(
       test_gt,
       use_current_table = TRUE,
-      ignore_genetic_dist = FALSE
+      ignore_genetic_dist = FALSE,
+      quiet = TRUE
     ),
     "Your loci table contains duplicated genetic distances"
   )
@@ -411,7 +414,8 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
     gt_order_loci(
       test_gt,
       use_current_table = FALSE,
-      ignore_genetic_dist = FALSE
+      ignore_genetic_dist = FALSE,
+      quiet = TRUE
     ),
     "Your loci table contains duplicated genetic distances"
   )
