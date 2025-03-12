@@ -26,7 +26,7 @@ test_that("gt_roh_window works without backingfile update", {
     quiet = TRUE
   )
 
-  test_roh1 <- gt_roh_window(
+  suppressMessages(test_roh1 <- gt_roh_window(
     test_gt,
     window_size = 4,
     min_snp = 2,
@@ -34,13 +34,13 @@ test_that("gt_roh_window works without backingfile update", {
     max_gap = 5000,
     min_length_bps = 1000,
     threshold = 0.05
-  )
+  ))
 
   # remove one snp
   test_gt <- test_gt %>% select_loci(-7)
 
   # Check roh still works
-  test_roh2 <- gt_roh_window(
+  suppressMessages(test_roh2 <- gt_roh_window(
     test_gt,
     window_size = 4,
     min_snp = 2,
@@ -48,7 +48,7 @@ test_that("gt_roh_window works without backingfile update", {
     max_gap = 5000,
     min_length_bps = 1000,
     threshold = 0.05
-  )
+  ))
 
   expect_equal(test_roh1, test_roh2)
 })

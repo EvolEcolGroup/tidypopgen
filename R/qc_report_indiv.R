@@ -234,7 +234,7 @@ king_hist_plot <- function(object, kings_threshold) {
     ) %>%
     dplyr::select(-dplyr::all_of(c("ID1", "ID2"))) %>%
     distinct(.data$row_min, .data$row_max, .keep_all = TRUE) %>%
-    rename("ID1" = .data$row_min, "ID2" = .data$row_max)
+    rename("ID1" = "row_min", "ID2" = "row_max")
 
   # remove cases of individuals relatedness with themselves
   king_sorted <- king_sorted %>% filter(.data$ID1 != .data$ID2)
