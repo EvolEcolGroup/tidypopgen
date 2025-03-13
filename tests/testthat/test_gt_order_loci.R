@@ -76,10 +76,6 @@ test_that("gt_update_backingfile correctly updates", {
   ))
   subset_reorder_test_gt <- subset_reorder_test_gt[c(2, 1, 4, 5), ]
   # now save the updated backing matrix
-  expect_message(
-    gt_update_backingfile(subset_reorder_test_gt, quiet = FALSE),
-    "backing files updated, now"
-  )
   new_gt <- gt_update_backingfile(subset_reorder_test_gt, quiet = TRUE)
   # the new gt should be identical to the original one, minus the big indices
   expect_identical(
@@ -317,28 +313,19 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
   expect_true(is_loci_table_ordered(test_gt, ignore_genetic_dist = TRUE))
   expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
   # now order it
-  expect_message(
-    gt_order_loci(
-      test_gt,
-      use_current_table = TRUE,
-      ignore_genetic_dist = TRUE
-    ),
-    "Genetic distances are not sorted, setting them to zero"
-  )
-  expect_message(
-    ordered_test_gt <-
-      gt_order_loci(
-        test_gt,
-        use_current_table = FALSE,
-        ignore_genetic_dist = TRUE
-      ),
-    "Genetic distances are not sorted, setting them to zero"
-  )
+  ordered_test_gt <-
+    gt_order_loci(test_gt,
+      use_current_table = FALSE,
+      ignore_genetic_dist = TRUE,
+      quiet = TRUE
+    )
+
   expect_error(
     gt_order_loci(
       test_gt,
       use_current_table = TRUE,
-      ignore_genetic_dist = FALSE
+      ignore_genetic_dist = FALSE,
+      quiet = TRUE
     ),
     "Your genetic distances are not sorted within chromosomes"
   )
@@ -346,23 +333,17 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
     gt_order_loci(
       test_gt,
       use_current_table = FALSE,
-      ignore_genetic_dist = FALSE
+      ignore_genetic_dist = FALSE,
+      quiet = TRUE
     ),
     "Your genetic distances are not sorted within chromosomes"
   )
 
   # now we pass the test as we set genetic distances to zero
-  expect_message(
-    is_loci_table_ordered(
-      ordered_test_gt,
-      ignore_genetic_dist = FALSE,
-      error_on_false = TRUE
-    ),
-    "Your genetic distances have been set to 0"
-  )
   expect_true(is_loci_table_ordered(
     ordered_test_gt,
-    ignore_genetic_dist = FALSE
+    ignore_genetic_dist = FALSE,
+    error_on_false = FALSE
   ))
   # check that genetic_dist is all zero
   expect_equal(show_loci(ordered_test_gt)$genetic_dist, rep(0, 6))
@@ -383,27 +364,12 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
     quiet = TRUE,
     backingfile = path
   )
-  expect_message(
-    gt_order_loci(
-      test_gt,
-      use_current_table = TRUE,
-      ignore_genetic_dist = TRUE
-    ),
-    "Genetic distances are not sorted, setting them to zero"
-  )
-  expect_message(
-    gt_order_loci(
-      test_gt,
-      use_current_table = FALSE,
-      ignore_genetic_dist = TRUE
-    ),
-    "Genetic distances are not sorted, setting them to zero"
-  )
   expect_error(
     gt_order_loci(
       test_gt,
       use_current_table = TRUE,
-      ignore_genetic_dist = FALSE
+      ignore_genetic_dist = FALSE,
+      quiet = TRUE
     ),
     "Your loci table contains duplicated genetic distances"
   )
@@ -411,7 +377,8 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
     gt_order_loci(
       test_gt,
       use_current_table = FALSE,
-      ignore_genetic_dist = FALSE
+      ignore_genetic_dist = FALSE,
+      quiet = TRUE
     ),
     "Your loci table contains duplicated genetic distances"
   )
@@ -429,6 +396,7 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
     c(2, 1, 0, 0, 0, 0),
     c(2, 2, 0, 0, 1, 1)
   )
+  # Test dist out of order
   test_loci <- data.frame(
     name = paste0("rs", 1:6),
     chromosome = as.character(c(1, 1, 1, 1, 1, 1)),
@@ -444,14 +412,19 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
     quiet = TRUE,
     backingfile = tempfile()
   )
-  expect_message(
-    gt_update_backingfile(test_gt, rm_unsorted_dist = FALSE),
-    "gen_backing files updated, now"
+  test_gt <- gt_update_backingfile(test_gt,
+    rm_unsorted_dist = TRUE,
+    quiet = TRUE
   )
-  expect_message(
-    gt_update_backingfile(test_gt, rm_unsorted_dist = TRUE),
-    "Genetic distances are not sorted, setting them to zero"
-  )
+
+  rds <- readRDS(gt_get_file_names(test_gt)[1])
+  backingfile <- attr(test_gt$genotypes, "bigsnp")
+  expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
+  expect_equal(backingfile$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
+  expect_equal(rds$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
+
+
+  # Test duplicated dist
   test_loci <- data.frame(
     name = paste0("rs", 1:6),
     chromosome = as.character(c(1, 1, 1, 1, 1, 1)),
@@ -467,14 +440,16 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
     quiet = TRUE,
     backingfile = tempfile()
   )
-  expect_message(
-    gt_update_backingfile(test_gt, rm_unsorted_dist = FALSE),
-    "gen_backing files updated, now"
+  test_gt <- gt_update_backingfile(test_gt,
+    rm_unsorted_dist = TRUE,
+    quiet = TRUE
   )
-  expect_message(
-    gt_update_backingfile(test_gt, rm_unsorted_dist = TRUE),
-    "Genetic distances are not sorted, setting them to zero"
-  )
+
+  rds <- readRDS(gt_get_file_names(test_gt)[1])
+  backingfile <- attr(test_gt$genotypes, "bigsnp")
+  expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
+  expect_equal(backingfile$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
+  expect_equal(rds$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
 })
 
 
@@ -557,14 +532,6 @@ test_that("is_loci_table_ordered catches unsorted and duplicated genetic_dist", 
     backingfile = tempfile()
   )
   expect_true(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
-  expect_message(
-    is_loci_table_ordered(
-      test_gt,
-      ignore_genetic_dist = FALSE,
-      error_on_false = TRUE
-    ),
-    "Your genetic distances have been set to 0"
-  )
 })
 
 test_that("is_loci_table_ordered catches unsorted and duplicated positions", {

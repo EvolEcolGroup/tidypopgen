@@ -8,25 +8,25 @@
   object,
   type = c("overview", "all", "missing", "missing low maf", "missing high maf", "maf",
     "hwe", "significant hwe"),
-  maf_threshold = NULL,
-  miss_threshold = NULL,
-  hwe_p = NULL,
+  maf_threshold = 0.05,
+  miss_threshold = 0.01,
+  hwe_p = 0.01,
   ...
 )
 }
 \arguments{
 \item{object}{an object of class \code{qc_report_loci}}
 
-\item{type}{the type of plot (one of \code{overview}, \code{all}, \code{missing},
-\verb{missing low maf}, \verb{missing high maf}, \code{maf}, \code{hwe}, and \verb{significant hwe})}
+\item{type}{the type of plot (one of \code{overview}, \code{all}, \code{missing}, \verb{missing low maf}, \verb{missing high maf}, \code{maf}, \code{hwe}, and \verb{significant hwe})}
 
-\item{maf_threshold}{a threshold for the accepted rate of minor allele
-frequency of loci}
+\item{maf_threshold}{default 0.5, a threshold for the accepted rate of minor
+allele frequency of loci}
 
-\item{miss_threshold}{a threshold for the accepted rate of missingness per
-loci}
+\item{miss_threshold}{default 0.01, a threshold for the accepted rate of
+missingness per loci}
 
-\item{hwe_p}{a threshold of significance for Hardy-Weinberg exact p-values}
+\item{hwe_p}{default 0.01, a threshold of significance for Hardy-Weinberg
+exact p-values}
 
 \item{...}{not currently used.}
 }
@@ -52,7 +52,7 @@ snps with high minor allele freqency
 }
 }
 \details{
-\code{autoplot} produces simple plots to quickly inspect an object. They are
-not customisable; we recommend that you use \code{ggplot2} to produce publication
+\code{autoplot} produces simple plots to quickly inspect an object. They are not
+customisable; we recommend that you use \code{ggplot2} to produce publication
 ready plots.
 }

@@ -31,7 +31,6 @@ gt_update_backingfile <- function(
   if (is.null(backingfile)) {
     backingfile <- change_duplicated_file_name(gt_get_file_names(.x)[2])
   }
-
   # if the chunk size is null, set it to the block size
   if (is.null(chunk_size)) {
     chunk_size <- bigstatsr::block_size(nrow(.x))
@@ -95,6 +94,7 @@ gt_update_backingfile <- function(
         message("Genetic distances are not sorted, setting them to zero")
       }
       show_loci(.x)$genetic_dist <- 0
+      map$genetic.dist <- 0
     }
   }
 
