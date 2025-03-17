@@ -63,8 +63,15 @@ gt_pca_randomSVD <- function(
     total_var = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
-    on.exit(gt_set_imputed(x, set = FALSE))
+    on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
+
+  if (n_cores > 1) {
+    # Remove checking for two levels of parallelism
+    options(bigstatsr.check.parallel.blas = FALSE)
+    on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
+  }
+
   X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
@@ -98,5 +105,6 @@ gt_pca_randomSVD <- function(
       scale = this_svd$scale
     )
   }
+
   this_svd
 }

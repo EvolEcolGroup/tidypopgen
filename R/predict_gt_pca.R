@@ -38,6 +38,12 @@ predict.gt_pca <- function(
     block_size = NULL,
     n_cores = 1,
     ...) {
+  if (n_cores > 1) {
+    # Remove checking for two levels of parallelism
+    options(bigstatsr.check.parallel.blas = FALSE)
+    on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
+  }
+
   rlang::check_dots_empty()
   project_method <- match.arg(project_method)
 
@@ -75,7 +81,7 @@ predict.gt_pca <- function(
     if (project_method == "none") {
       if (gt_has_imputed(new_data) && !gt_uses_imputed(new_data)) {
         gt_set_imputed(new_data, set = TRUE)
-        on.exit(gt_set_imputed(new_data, set = FALSE))
+        on.exit(gt_set_imputed(new_data, set = FALSE), add = TRUE)
       }
 
       if (is.null(block_size)) {

@@ -190,7 +190,7 @@ test_that("PCA functions work with loci out of order", {
   )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
   missing_part_pca1 <- missing_gt %>% gt_pca_partialSVD()
-  missing_rand_pca1 <- missing_gt %>% gt_pca_randomSVD()
+  missing_rand_pca1 <- missing_gt %>% gt_pca_randomSVD(verbose = FALSE)
 
   # now shuffle the loci
   loci <- missing_gt %>% show_loci()
@@ -199,7 +199,7 @@ test_that("PCA functions work with loci out of order", {
 
   # Rerun PCA
   missing_part_pca2 <- missing_gt %>% gt_pca_partialSVD()
-  missing_rand_pca2 <- missing_gt %>% gt_pca_randomSVD()
+  missing_rand_pca2 <- missing_gt %>% gt_pca_randomSVD(verbose = FALSE)
 
   expect_equal(missing_part_pca1$loadings, missing_part_pca2$loadings)
   expect_equal(missing_rand_pca1$loadings, missing_rand_pca2$loadings)
@@ -319,4 +319,108 @@ test_that("our stdevs are comparable to prcomp", {
     as.vector((prcomp_summary$importance[3, c(1:10)]) * 100),
     tolerance = TOL
   )
+})
+
+skip_on_cran()
+
+test_that("n_cores can be set for pca functions", {
+  skip()
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  missing_gt <- gt_impute_simple(missing_gt, method = "mode")
+
+  ############
+  # Test gt_pca_randomSVD
+  ############
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+  one_core <- missing_gt %>%
+    gt_pca_randomSVD(n_cores = 1, verbose = FALSE)
+  two_core <- missing_gt %>%
+    gt_pca_randomSVD(n_cores = 2, verbose = FALSE)
+  # calls will differ, set to NULL
+  one_core$call <- NULL
+  two_core$call <- NULL
+  expect_equal(one_core, two_core)
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # test parallel blas is true on exit if function errors
+  expect_error(
+    gt_pca_autoSVD(one_core, n_cores = 2),
+    "no applicable method for 'show_loci'"
+  )
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+})
+
+test_that("n_cores can be set gt_pca_autoSVD", {
+  skip()
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  missing_gt <- gt_impute_simple(missing_gt, method = "mode")
+  ############
+  # Test gt_pca_autoSVD
+  ############
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+  one_core <- missing_gt %>%
+    gt_pca_autoSVD(n_cores = 1, roll_size = 7, verbose = FALSE)
+  two_core <- missing_gt %>%
+    gt_pca_autoSVD(n_cores = 2, roll_size = 7, verbose = FALSE)
+  # calls will differ, set to NULL
+  one_core$call <- NULL
+  two_core$call <- NULL
+  expect_equal(one_core, two_core)
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # test parallel blas is true on exit if function errors
+  expect_error(
+    gt_pca_autoSVD(one_core, n_cores = 2),
+    "no applicable method for 'show_loci'"
+  )
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+})
+
+
+test_that("n_cores can be set for predict_gt_pca", {
+  skip()
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  # create a fake ancient set by subsetting
+  ancient_gt <- missing_gt[1:20, ]
+  # now extract the modern data (to be imputed)
+  modern_gt <- missing_gt[-c(1:20), ]
+  modern_gt <- gt_impute_simple(modern_gt, method = "mode")
+  modern_pca <- modern_gt %>% gt_pca_partialSVD()
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+  one_core <- predict(
+    modern_pca,
+    new_data = ancient_gt,
+    project_method = "simple",
+    n_cores = 1
+  )
+  two_core <- predict(
+    modern_pca,
+    new_data = ancient_gt,
+    project_method = "simple",
+    n_cores = 2
+  )
+  expect_equal(one_core, two_core)
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # test parallel blas is true on exit if function errors
+  expect_error(
+    predict(modern_pca, new_data = ancient_gt, project_method = "none"),
+    "You can't have missing values in 'X'"
+  )
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
 })
