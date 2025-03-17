@@ -176,3 +176,18 @@ test_that("pop_* basic stats work on a single population", {
   expect_true(all(is.nan(test_global_stats$Fstp)))
   # Fstp is not defined for a single population
 })
+
+test_that("n_cores can be set",{
+  # pop_het_obs
+  one_core <- test_gt %>% pop_het_obs(by_locus = TRUE, n_cores = 1)
+  two_core <- test_gt %>% pop_het_obs(by_locus = TRUE, n_cores = 2)
+  expect_equal(one_core, two_core)
+  # pop_het_exp
+  one_core <- test_gt %>% pop_het_exp(by_locus = TRUE, n_cores = 1)
+  two_core <- test_gt %>% pop_het_exp(by_locus = TRUE, n_cores = 2)
+  expect_equal(one_core, two_core)
+  # pop_global_stats
+  one_core <- test_gt %>% pop_global_stats(by_locus = TRUE, n_cores = 1)
+  two_core <- test_gt %>% pop_global_stats(by_locus = TRUE, n_cores = 2)
+  expect_equal(one_core, two_core)
+})
