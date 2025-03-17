@@ -88,8 +88,8 @@ loci_missingness.vctrs_bigSNP <- function(
 loci_missingness.grouped_df <- function(
     .x,
     as_counts = FALSE,
-    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
     n_cores = bigstatsr::nb_cores(),
+    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
     ...) {
   rlang::check_dots_empty()
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes

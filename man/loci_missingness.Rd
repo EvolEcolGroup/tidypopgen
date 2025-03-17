@@ -34,8 +34,8 @@ loci_missingness(
 \method{loci_missingness}{grouped_df}(
   .x,
   as_counts = FALSE,
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
   n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
   ...
 )
 }
