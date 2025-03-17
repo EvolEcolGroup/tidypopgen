@@ -7,11 +7,18 @@
 \alias{loci_missingness.grouped_df}
 \title{Estimate missingness at each locus}
 \usage{
-loci_missingness(.x, as_counts = FALSE, block_size, ...)
+loci_missingness(
+  .x,
+  as_counts = FALSE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size,
+  ...
+)
 
 \method{loci_missingness}{tbl_df}(
   .x,
   as_counts = FALSE,
+  n_cores = n_cores,
   block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
   ...
 )
@@ -19,6 +26,7 @@ loci_missingness(.x, as_counts = FALSE, block_size, ...)
 \method{loci_missingness}{vctrs_bigSNP}(
   .x,
   as_counts = FALSE,
+  n_cores = n_cores,
   block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
   ...
 )
@@ -39,12 +47,12 @@ a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 rate) should be returned. It defaults to FALSE (i.e. rates are returned by
 default).}
 
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+
 \item{block_size}{maximum number of loci read at once.}
 
 \item{...}{other arguments passed to specific methods.}
-
-\item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
 \value{
 a vector of frequencies, one per locus

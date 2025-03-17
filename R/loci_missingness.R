@@ -14,7 +14,8 @@
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_missingness
 #' @export
-loci_missingness <- function(.x, as_counts = FALSE, block_size, ...) {
+loci_missingness <- function(.x, as_counts = FALSE,
+                             n_cores = bigstatsr::nb_cores(), block_size, ...) {
   UseMethod("loci_missingness", .x)
 }
 
@@ -23,6 +24,7 @@ loci_missingness <- function(.x, as_counts = FALSE, block_size, ...) {
 loci_missingness.tbl_df <- function(
     .x,
     as_counts = FALSE,
+    n_cores = n_cores,
     # the bigapply that splits in blocks is not
     # multithreaded, as we use the multiple
     # threads for openMP,
@@ -35,6 +37,7 @@ loci_missingness.tbl_df <- function(
     .x$genotypes,
     as_counts = as_counts,
     block_size = block_size,
+    n_cores = n_cores,
     ...
   )
 }
@@ -45,6 +48,7 @@ loci_missingness.tbl_df <- function(
 loci_missingness.vctrs_bigSNP <- function(
     .x,
     as_counts = FALSE,
+    n_cores = n_cores,
     block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
     ...) {
   rlang::check_dots_empty()
