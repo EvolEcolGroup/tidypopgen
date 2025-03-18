@@ -324,7 +324,10 @@ test_that("our stdevs are comparable to prcomp", {
 skip_on_cran()
 
 test_that("n_cores can be set for pca functions", {
-  skip()
+  skip_if(
+    Sys.getenv("_R_CHECK_LIMIT_CORES_", "") != "",
+    "Skipping due to core limitation in R CMD check"
+  )
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,
@@ -356,7 +359,10 @@ test_that("n_cores can be set for pca functions", {
 })
 
 test_that("n_cores can be set gt_pca_autoSVD", {
-  skip()
+  skip_if(
+    Sys.getenv("_R_CHECK_LIMIT_CORES_", "") != "",
+    "Skipping due to core limitation in R CMD check"
+  )
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,
@@ -388,7 +394,6 @@ test_that("n_cores can be set gt_pca_autoSVD", {
 
 
 test_that("n_cores can be set for predict_gt_pca", {
-  skip()
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(
     bed_file,
