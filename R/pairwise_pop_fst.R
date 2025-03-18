@@ -42,6 +42,12 @@ pairwise_pop_fst <- function(
     by_locus = FALSE,
     method = c("Hudson", "Nei87", "WC84"),
     n_cores = bigstatsr::nb_cores()) {
+  if (n_cores > 1) {
+    # Remove checking for two levels of parallelism
+    options(bigstatsr.check.parallel.blas = FALSE)
+    on.exit(options(bigstatsr.check.parallel.blas = TRUE))
+  }
+
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }

@@ -107,3 +107,24 @@ test_that("extract f2 correctly", {
   ) # nolint
   expect_true(all.equal(adm_f2, gt_f2))
 })
+
+test_that("n_cores can be set", {
+  temp1 <- tempfile()
+  temp2 <- tempfile()
+
+  suppressWarnings(gt_extract_f2(test_gt,
+    outdir = temp1,
+    quiet = TRUE,
+    n_cores = 1
+  ))
+  suppressWarnings(gt_extract_f2(test_gt,
+    outdir = temp2,
+    quiet = TRUE,
+    n_cores = 2
+  ))
+
+  expect_equal(
+    suppressWarnings(admixtools::f2_from_precomp(temp1, verbose = FALSE)),
+    suppressWarnings(admixtools::f2_from_precomp(temp2, verbose = FALSE))
+  )
+})

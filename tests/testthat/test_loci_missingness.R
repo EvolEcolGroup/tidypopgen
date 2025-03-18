@@ -110,3 +110,9 @@ test_that("loci_missingness on grouped tibble", {
   loci_miss_grp <- test_gt %>% loci_missingness(n_cores = 2)
   expect_true(all.equal(loci_miss_map, loci_miss_grp))
 })
+
+test_that("n_cores can be set", {
+  one_core <- loci_missingness(test_gt, n_cores = 1)
+  two_cores <- loci_missingness(test_gt, n_cores = 12)
+  expect_equal(one_core, two_cores)
+})

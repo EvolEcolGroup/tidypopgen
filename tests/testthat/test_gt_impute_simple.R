@@ -260,3 +260,23 @@ test_that("imputing subsets", {
   # we have only changed the other subset (impute_remaining),
   # but imputed_test_sub changes too
 })
+
+test_that("n_cores can be set", {
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  missing_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("missing_"),
+    quiet = TRUE
+  )
+  one_core <- gt_impute_simple(missing_gt, method = "mode", n_cores = 1)
+  two_core <- gt_impute_simple(missing_gt, method = "mode", n_cores = 2)
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # test parallel blas is true on exit if function errors
+  expect_error(
+    gt_impute_simple("blah", n_cores = 2),
+    "operator is invalid for atomic vectors"
+  )
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+})
