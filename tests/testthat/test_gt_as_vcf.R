@@ -182,5 +182,5 @@ test_that("integer chromosome becomes character", {
     as.character(test_loci$chromosome)
   )
   # therefore gt_as_vcf runs without error
-  expect_equal(gt_as_vcf(test_gt), paste0(file, ".vcf"))
+  expect_equal(gt_as_vcf(test_gt), file.path(file, ".vcf"))
 })
