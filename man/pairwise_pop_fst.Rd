@@ -6,6 +6,7 @@
 \usage{
 pairwise_pop_fst(
   .x,
+  tidy = TRUE,
   by_locus = FALSE,
   method = c("Hudson", "Nei87", "WC84"),
   n_cores = bigstatsr::nb_cores()
@@ -13,6 +14,9 @@ pairwise_pop_fst(
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
+
+\item{tidy}{boolean whether to return a tidy tibble. Default is TRUE, FALSE
+returns a matrix. THIS IS NOT IMPLEMENTED YET.}
 
 \item{by_locus}{boolean, determining whether Fst should be returned by
 locus(TRUE), or as a single genome wide value obtained by taking the ratio

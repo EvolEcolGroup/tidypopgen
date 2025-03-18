@@ -50,7 +50,6 @@ test_that("pairwise_pop_fst Nei87", {
   # pair_fst_locus <- test_gt %>% pairwise_pop_fst(by_locus = TRUE) #nolint
 })
 
-
 test_that("pairwise_pop_fst WC84", {
   test_genotypes <- rbind(
     c(1, 1, 0, 1, 1, 0),
@@ -372,4 +371,35 @@ test_that("n_cores can be set", {
   test_gt <- ungroup(test_gt)
   expect_error(test_gt %>% pairwise_pop_fst(method = "WC84", n_cores = 2))
   expect_true(getOption("bigstatsr.check.parallel.blas"))
+})
+
+test_that("tidy = FALSE",{
+  ############
+  # Test hudson
+  ############
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  hudson_matrix <- test_gt %>% pairwise_pop_fst(method = "Hudson", tidy = FALSE)
+  hudson_tidy <- test_gt %>% pairwise_pop_fst(method = "Hudson", tidy = TRUE)
+  expect_equal(hudson_matrix["pop1","pop2"],
+               subset(hudson_tidy,
+                      hudson_tidy$population_1 == "pop1" &
+                        hudson_tidy$population_2 == "pop2")$value)
+  ############
+  # Test nei87
+  ############
+  nei87_matrix <- test_gt %>% pairwise_pop_fst(method = "Nei87", tidy = FALSE)
+  nei87_tidy <- test_gt %>% pairwise_pop_fst(method = "Nei87", tidy = TRUE)
+  expect_equal(nei87_matrix["pop1","pop2"],
+               subset(nei87_tidy,
+                      nei87_tidy$population_1 == "pop1" &
+                        nei87_tidy$population_2 == "pop2")$value)
+  ############
+  # Test WC84
+  ############
+  wc84_matrix <- test_gt %>% pairwise_pop_fst(method = "WC84", tidy = FALSE)
+  wc84_tidy <- test_gt %>% pairwise_pop_fst(method = "WC84", tidy = TRUE)
+  expect_equal(wc84_matrix["pop1","pop2"],
+               subset(wc84_tidy,
+                      wc84_tidy$population_1 == "pop1" &
+                        wc84_tidy$population_2 == "pop2")$value)
 })

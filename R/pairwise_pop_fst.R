@@ -2,7 +2,7 @@
 #'
 #' This function computes pairwise Fst. The following methods are implemented:
 #' - 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
-#'    for diploids.
+#' for diploids.
 #' - 'Nei87' : Fst according to Nei (1987) - includes the correction for
 #' heterozygosity when computing Ht, and is equivalent to
 #' `hierfstat::pairwise.neifst()`,
@@ -22,6 +22,8 @@
 #'   analysis of population structure. Evolution, 38(6): 1358–1370.
 #'
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
+#' @param tidy boolean whether to return a tidy tibble. Default is TRUE, FALSE
+#'   returns a matrix. THIS IS NOT IMPLEMENTED YET.
 #' @param by_locus boolean, determining whether Fst should be returned by
 #'   locus(TRUE), or as a single genome wide value obtained by taking the ratio
 #'   of the mean numerator and denominator (FALSE, the default).
@@ -34,11 +36,9 @@
 #'   loci as rows and and pairwise combinations as columns.
 #' @export
 
-# #' @param tidy boolean whether to return a tidy tibble. Default is TRUE, FALSE
-# #' returns a matrix. THIS IS NOT IMPLEMENTED YET.
-
 pairwise_pop_fst <- function(
     .x,
+    tidy = TRUE,
     by_locus = FALSE,
     method = c("Hudson", "Nei87", "WC84"),
     n_cores = bigstatsr::nb_cores()) {
@@ -53,16 +53,17 @@ pairwise_pop_fst <- function(
   }
   method <- match.arg(method)
   if (method == "Hudson") {
-    pairwise_pop_fst_hudson(.x = .x, by_locus = by_locus)
+    pairwise_pop_fst_hudson(.x = .x, by_locus = by_locus, tidy = tidy)
   } else if (method == "Nei87") {
-    pairwise_pop_fst_nei87(.x = .x, by_locus = by_locus)
+    pairwise_pop_fst_nei87(.x = .x, by_locus = by_locus, tidy = tidy)
   } else if (method == "WC84") {
-    pairwise_pop_fst_wc84(.x = .x, by_locus = by_locus)
+    pairwise_pop_fst_wc84(.x = .x, by_locus = by_locus, tidy = tidy)
   }
 }
 
 pairwise_pop_fst_hudson <- function(
     .x,
+    tidy = TRUE,
     by_locus = FALSE,
     n_cores = bigstatsr::nb_cores()) {
   # get the populations
@@ -114,16 +115,37 @@ pairwise_pop_fst_hudson <- function(
     paste0(dplyr::group_vars(.x), "_2")
   )
   fst_tot <- tibble::tibble(group_combinations, value = fst_tot)
-  if (by_locus) {
-    rownames(fst_locus) <- loci_names(.x)
-    colnames(fst_locus) <- apply(
-      group_combinations,
-      1,
-      function(x) paste(x, collapse = ".")
+
+  if (!tidy) {
+    fst_tot_wide <- tidyr::spread(fst_tot,
+      key = .data$population_2,
+      value = .data$value
     )
-    return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
-  } else {
-    return(fst_tot)
+    matrix_rownames <- c(
+      as.vector(fst_tot_wide[1, 1])[[1]],
+      names(fst_tot_wide)[-1]
+    )
+    fst_tot_wide <- fst_tot_wide[, -1]
+    fst_tot_wide <- cbind(NA_real_, fst_tot_wide)
+    fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
+    fst_tot_matrix <- as.matrix(fst_tot_wide)
+    rownames(fst_tot_matrix) <- colnames(fst_tot_matrix) <- matrix_rownames
+    # make the matrix symmetrical
+    fst_tot_matrix[lower.tri(fst_tot_matrix)] <-
+      t(fst_tot_matrix)[lower.tri(fst_tot_matrix)]
+    return(fst_tot_matrix)
+  } else if (tidy) {
+    if (by_locus) {
+      rownames(fst_locus) <- loci_names(.x)
+      colnames(fst_locus) <- apply(
+        group_combinations,
+        1,
+        function(x) paste(x, collapse = ".")
+      )
+      return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
+    } else {
+      return(fst_tot)
+    }
   }
 }
 
@@ -132,6 +154,7 @@ pairwise_pop_fst_hudson <- function(
 # the implementation for Nei 87, adapted from hierfstat
 pairwise_pop_fst_nei87 <- function(
     .x,
+    tidy = TRUE,
     by_locus = FALSE,
     n_cores = bigstatsr::nb_cores()) {
   # get the populations
@@ -203,16 +226,36 @@ pairwise_pop_fst_nei87 <- function(
     paste0(dplyr::group_vars(.x), "_2")
   )
   fst_tot <- tibble::tibble(group_combinations, value = fst_tot)
-  if (by_locus) {
-    rownames(fst_locus) <- loci_names(.x)
-    colnames(fst_locus) <- apply(
-      group_combinations,
-      1,
-      function(x) paste(x, collapse = ".")
+  if (!tidy) {
+    fst_tot_wide <- tidyr::spread(fst_tot,
+      key = .data$population_2,
+      value = .data$value
     )
-    return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
-  } else {
-    return(fst_tot)
+    matrix_rownames <- c(
+      as.vector(fst_tot_wide[1, 1])[[1]],
+      names(fst_tot_wide)[-1]
+    )
+    fst_tot_wide <- fst_tot_wide[, -1]
+    fst_tot_wide <- cbind(NA_real_, fst_tot_wide)
+    fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
+    fst_tot_matrix <- as.matrix(fst_tot_wide)
+    rownames(fst_tot_matrix) <- colnames(fst_tot_matrix) <- matrix_rownames
+    # make the matrix symmetrical
+    fst_tot_matrix[lower.tri(fst_tot_matrix)] <-
+      t(fst_tot_matrix)[lower.tri(fst_tot_matrix)]
+    return(fst_tot_matrix)
+  } else if (tidy) {
+    if (by_locus) {
+      rownames(fst_locus) <- loci_names(.x)
+      colnames(fst_locus) <- apply(
+        group_combinations,
+        1,
+        function(x) paste(x, collapse = ".")
+      )
+      return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
+    } else {
+      return(fst_tot)
+    }
   }
 }
 
@@ -220,6 +263,7 @@ pairwise_pop_fst_nei87 <- function(
 # This should be equivalent to the hierfstat implementation
 pairwise_pop_fst_wc84 <- function(
     .x,
+    tidy = TRUE,
     by_locus = FALSE,
     n_cores = bigstatsr::nb_cores()) {
   # get the populations
@@ -292,15 +336,36 @@ pairwise_pop_fst_wc84 <- function(
     paste0(dplyr::group_vars(.x), "_2")
   )
   fst_tot <- tibble::tibble(group_combinations, value = fst_tot)
-  if (by_locus) {
-    rownames(fst_locus) <- loci_names(.x)
-    colnames(fst_locus) <- apply(
-      group_combinations,
-      1,
-      function(x) paste(x, collapse = ".")
+
+  if (!tidy) {
+    fst_tot_wide <- tidyr::spread(fst_tot,
+      key = .data$population_2,
+      value = .data$value
     )
-    return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
-  } else {
-    return(fst_tot)
+    matrix_rownames <- c(
+      as.vector(fst_tot_wide[1, 1])[[1]],
+      names(fst_tot_wide)[-1]
+    )
+    fst_tot_wide <- fst_tot_wide[, -1]
+    fst_tot_wide <- cbind(NA_real_, fst_tot_wide)
+    fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
+    fst_tot_matrix <- as.matrix(fst_tot_wide)
+    rownames(fst_tot_matrix) <- colnames(fst_tot_matrix) <- matrix_rownames
+    # make the matrix symmetrical
+    fst_tot_matrix[lower.tri(fst_tot_matrix)] <-
+      t(fst_tot_matrix)[lower.tri(fst_tot_matrix)]
+    return(fst_tot_matrix)
+  } else if (tidy) {
+    if (by_locus) {
+      rownames(fst_locus) <- loci_names(.x)
+      colnames(fst_locus) <- apply(
+        group_combinations,
+        1,
+        function(x) paste(x, collapse = ".")
+      )
+      return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
+    } else {
+      return(fst_tot)
+    }
   }
 }
