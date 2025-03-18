@@ -991,7 +991,10 @@ test_that("chr_int is correct", {
   pop_b_gt <- gen_tibble(bed_path, quiet = TRUE, backingfile = tempfile())
 
   # chr_int is correct for bed files
-  expect_equal(show_loci(pop_b_gt)$chr_int, show_loci(pop_b_gt)$chromosome)
+  expect_equal(
+    as.character(show_loci(pop_b_gt)$chr_int),
+    show_loci(pop_b_gt)$chromosome
+  )
 
   # read ped
   ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
@@ -999,7 +1002,7 @@ test_that("chr_int is correct", {
 
   # chr_int is correct for ped files
   expect_equal(
-    show_loci(pop_b_ped_gt)$chr_int,
+    as.character(show_loci(pop_b_ped_gt)$chr_int),
     show_loci(pop_b_ped_gt)$chromosome
   )
 

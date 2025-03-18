@@ -149,3 +149,38 @@ test_that("test reading and writing with chunking is equivalent rvcf", {
   expect_true(identical(show_loci(test_gt), show_loci(test_gt_chunked)))
   expect_equal(count_loci(test_gt_chunked), count_loci(test_gt))
 })
+
+test_that("integer chromosome becomes character", {
+  # create file
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 0),
+    c(2, 1, 0, 0, 0, 0),
+    c(2, 2, 0, 0, 1, 1)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = as.integer(c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  file <- tempfile()
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    backingfile = file
+  )
+  expect_equal(
+    show_loci(test_gt)$chromosome,
+    as.character(test_loci$chromosome)
+  )
+  # therefore gt_as_vcf runs without error
+  expect_equal(gt_as_vcf(test_gt), paste0(file, ".vcf"))
+})

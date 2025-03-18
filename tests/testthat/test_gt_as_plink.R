@@ -149,8 +149,8 @@ test_that("gt_as_plink can use chr_int", {
   # read the bed file
   test_gt_chr_int <- gen_tibble(bed_path, quiet = TRUE)
 
-  # take original bed, remove the chr and transform to an integer
-  result <- as.integer(sub("^chr", "", show_loci(test_gt)$chromosome))
+  # take original bed, remove the chr
+  result <- sub("^chr", "", show_loci(test_gt)$chromosome)
 
   # compare
   expect_equal(result, show_loci(test_gt_chr_int)$chromosome)
