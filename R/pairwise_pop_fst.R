@@ -51,8 +51,8 @@ pairwise_pop_fst <- function(
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }
-  if (by_locus) {
-    tidy <- TRUE
+  if (by_locus && !tidy) {
+    stop("For a tidy matrix of pairwise fst, by_locus must be FALSE")
   }
   method <- match.arg(method)
   if (method == "Hudson") {

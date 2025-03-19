@@ -441,11 +441,9 @@ test_that("tidy = FALSE", {
   )
 
   # if by_locus = TRUE and tidy = FALSE, tidy is reset to TRUE
-  hudson <- test_gt %>% pairwise_pop_fst(
+  expect_error(hudson <- test_gt %>% pairwise_pop_fst(
     method = "Hudson",
     tidy = FALSE,
     by_locus = TRUE
-  )
-  expect_true(is.list(hudson))
-  expect_equal(colnames(hudson$Fst), c("population_1", "population_2", "value"))
+  ), "by_locus must be FALSE")
 })
