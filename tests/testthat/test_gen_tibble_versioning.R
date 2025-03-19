@@ -35,7 +35,6 @@ test_that("versioning updates correctly through gt_order_loci", {
   file <- gsub(".bk", "", files[2])
 
   # does the directory still exist?
-  print(dirname(file))
   tempfile_dir <- dirname(file)
   expect_true(dir.exists(tempfile_dir))
 
@@ -102,7 +101,6 @@ test_that("versioning if .bk already exists", {
   file <- gsub(".bk", "", files[2])
 
   # does the directory still exist?
-  print(dirname(file))
   tempfile_dir <- dirname(file)
   expect_true(dir.exists(tempfile_dir))
 

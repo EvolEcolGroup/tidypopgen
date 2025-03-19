@@ -23,7 +23,6 @@ Imports:
     bigparallelr,
     bigsnpr,
     bigstatsr,
-    forcats,
     foreach,
     generics,
     ggplot2,
