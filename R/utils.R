@@ -37,3 +37,22 @@ is_diploid_only <- function(x) {
     (attr(x, "ploidy") == 2)
   }
 }
+
+# replace forcats::fct_inorder
+fct_inorder_base <- function(f, ordered = FALSE) {
+  if (!is.factor(f)) stop("Input must be a factor")
+  if (!is.logical(ordered) || length(ordered) != 1) {
+    stop("ordered must be a single logical value")
+  }
+
+  idx <- match(levels(f), f, nomatch = 0) # Find first occurrences of levels
+  idx <- unique(idx[idx > 0]) # Remove missing matches
+  idx <- union(idx, seq_along(levels(f))) # Ensure all levels are included
+
+  factor(f, levels = levels(f)[idx], ordered = ordered)
+}
+
+# replace stringr::str_replace
+str_replace_base <- function(string, pattern, replacement) {
+  sub(pattern, replacement, string)
+}

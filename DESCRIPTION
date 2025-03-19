@@ -33,7 +33,6 @@ Imports:
     patchwork,
     rlang,
     stats,
-    stringr,
     tidyselect,
     tidyr,
     utils,
