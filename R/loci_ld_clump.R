@@ -48,6 +48,7 @@ loci_ld_clump.tbl_df <- function(.x, ...) {
   # TODO this is a hack to deal with the class being dropped when going through
   # group_map
   stopifnot_gen_tibble(.x)
+  # check n_cores are available
 
   loci_ld_clump(.x$genotypes, ...)
 }
@@ -67,6 +68,13 @@ loci_ld_clump.vctrs_bigSNP <- function(
     ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
+
+  if (n_cores > 1) {
+    # Remove checking for two levels of parallelism
+    options(bigstatsr.check.parallel.blas = FALSE)
+    on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
+  }
+
   # check that the loci have not been resorted
   # check that big_index in the loci table is an increasing sequence of indeces
   if (is.unsorted(show_loci(.x)$big_index, strictly = TRUE)) {
@@ -79,7 +87,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
   if (gt_has_imputed(.x) && gt_uses_imputed(.x) == FALSE) {
     # not uses_imputed
     gt_set_imputed(.x, set = TRUE)
-    on.exit(gt_set_imputed(.x, set = FALSE))
+    on.exit(gt_set_imputed(.x, set = FALSE), add = TRUE)
   }
 
   is_loci_table_ordered(.x, error_on_false = TRUE)
@@ -123,6 +131,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
     ncores = n_cores
   )
   to_keep_id <- match(snp_clump_ids, show_loci(.x)$big_index)
+
   if (return_id) {
     to_keep_id
   } else {

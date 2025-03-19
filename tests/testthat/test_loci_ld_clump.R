@@ -222,3 +222,26 @@ test_that("loci_ld_clump works on a grouped gt", {
     length(to_keep_ld_grouped == TRUE)
   )
 })
+
+test_that("n_cores can be set", {
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+  one_core <- loci_ld_clump(test_gt, thr_r2 = 0.2, n_cores = 1)
+  two_core <- loci_ld_clump(test_gt, thr_r2 = 0.2, n_cores = 2)
+  expect_equal(one_core, two_core)
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # test parallel blas is true on exit if function errors
+  # scramble the loci
+  set.seed(123)
+  random_order <- sample(1:6)
+  show_loci(test_gt) <- test_gt %>%
+    select_loci(all_of(random_order)) %>%
+    show_loci()
+  # impute
+  test_gt_imputed <- gt_impute_simple(test_gt, method = "mode")
+  expect_error(
+    loci_ld_clump(test_gt_imputed, thr_r2 = 0.2, n_cores = 2),
+    "Your loci have been resorted"
+  )
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+})

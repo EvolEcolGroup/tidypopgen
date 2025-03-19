@@ -22,6 +22,12 @@ gt_impute_simple <- function(
     n_cores = 1) {
   method <- match.arg(method)
 
+  if (n_cores > 1) {
+    # Remove checking for two levels of parallelism
+    options(bigstatsr.check.parallel.blas = FALSE)
+    on.exit(options(bigstatsr.check.parallel.blas = TRUE))
+  }
+
   if (
     !all.equal(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
   ) {
@@ -48,6 +54,7 @@ gt_impute_simple <- function(
     method = method,
     ncores = n_cores
   )
+
   attr(x$genotypes, "imputed") <- "simple"
   gt_set_imputed(x, set = FALSE)
   x

@@ -24,8 +24,10 @@ test_that("show_loci gets and sets information", {
     quiet = TRUE
   )
 
+  # chromosome will be converted to character by gen_tibble
+  test_loci$chromosome <- as.character(test_loci$chromosome)
   # check that we retrieve the info we put in (as a tibble)
-  expect_identical(
+  expect_equal(
     show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)),
     as_tibble(test_loci)
   )
@@ -44,4 +46,16 @@ test_that("show_loci gets and sets information", {
     show_loci(test_gt) <- test_loci3,
     "the replacement loci tibble does"
   )
+
+  # try changing show_loci()$chromosome to integer
+  test_loci4 <- test_loci %>%
+    dplyr::mutate(chromosome = as.integer(c(1, 1, 2, 2, 3, 3)))
+  show_loci(test_gt$genotypes) <- test_loci4
+  # check method corrects it to a character
+  expect_true(is.character(show_loci(test_gt)$chromosome))
+  test_loci5 <- test_loci %>%
+    dplyr::mutate(chromosome = as.integer(c(1, 2, 3, 4, 5, 6)))
+  show_loci(test_gt) <- test_loci5
+  # check method corrects it to a character
+  expect_true(is.character(show_loci(test_gt)$chromosome))
 })

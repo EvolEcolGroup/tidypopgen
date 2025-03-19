@@ -85,16 +85,22 @@ gt_pca_autoSVD <- function(
     total_var = TRUE) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
-    on.exit(gt_set_imputed(x, set = FALSE))
+    on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
 
-  if (is.null(roll_size)) {
+  if (roll_size == 50) {
     message(paste(
       "If you encounter 'Error in rollmean(): Parameter 'size'",
       "is too large.' roll_size exceeds the number of variants on",
       "at least one of your chromosomes. Try reducing 'roll_size'",
       "to avoid this error."
     ))
+  }
+
+  if (n_cores > 1) {
+    # Remove checking for two levels of parallelism
+    options(bigstatsr.check.parallel.blas = FALSE)
+    on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
   }
 
   X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
@@ -160,5 +166,6 @@ gt_pca_autoSVD <- function(
       scale = this_svd$scale
     )
   }
+
   this_svd
 }

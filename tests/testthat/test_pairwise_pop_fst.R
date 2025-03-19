@@ -326,3 +326,50 @@ test_that("pairwise_pop_fst hudson", {
     hudson_tidypopgen_missing_var1$value
   )
 })
+
+test_that("n_cores can be set", {
+  ############
+  # Test hudson
+  ############
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  hudson_one <- test_gt %>% pairwise_pop_fst(method = "Hudson", n_cores = 1)
+  hudson_two <- test_gt %>% pairwise_pop_fst(method = "Hudson", n_cores = 2)
+  expect_equal(hudson_one$value, hudson_two$value)
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # test parallel blas is true on exit if function errors
+  test_gt <- ungroup(test_gt)
+  expect_error(test_gt %>% pairwise_pop_fst(method = "Hudson", n_cores = 2))
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  ############
+  # Test nei87
+  ############
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  nei87_one <- test_gt %>% pairwise_pop_fst(method = "Nei87", n_cores = 1)
+  nei87_two <- test_gt %>% pairwise_pop_fst(method = "Nei87", n_cores = 2)
+  expect_equal(nei87_one$value, nei87_two$value)
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # test parallel blas is true on exit if function errors
+  test_gt <- ungroup(test_gt)
+  expect_error(test_gt %>% pairwise_pop_fst(method = "Nei87", n_cores = 2))
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  ############
+  # Test WC84
+  ############
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  wc84_one <- test_gt %>% pairwise_pop_fst(method = "WC84", n_cores = 1)
+  wc84_two <- test_gt %>% pairwise_pop_fst(method = "WC84", n_cores = 2)
+  expect_equal(wc84_one$value, wc84_two$value)
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # test parallel blas is true on exit if function errors
+  test_gt <- ungroup(test_gt)
+  expect_error(test_gt %>% pairwise_pop_fst(method = "WC84", n_cores = 2))
+  expect_true(getOption("bigstatsr.check.parallel.blas"))
+})
