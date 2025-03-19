@@ -28,11 +28,12 @@ of the mean numerator and denominator (FALSE, the default).}
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
 \value{
-if \code{tidy=TRUE}, a tibble of genome-wide pairwise Fst values with each pairwise
-combination as a row if "by_locus=FALSE", else a list including the tibble
-of genome-wide values as well as a matrix with pairwise Fst by locus with
-loci as rows and and pairwise combinations as columns. If \code{tidy=FALSE}, a
-matrix of genome-wide pairwise Fst values is returned.
+if \code{tidy=TRUE}, a tibble of genome-wide pairwise Fst values with
+each pairwise combination as a row if "by_locus=FALSE", else a list
+including the tibble of genome-wide values as well as a matrix with
+pairwise Fst by locus with loci as rows and and pairwise combinations as
+columns. If \code{tidy=FALSE}, a matrix of genome-wide pairwise Fst values is
+returned.
 }
 \description{
 This function computes pairwise Fst. The following methods are implemented:
