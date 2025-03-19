@@ -23,7 +23,7 @@
 #'
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param tidy boolean whether to return a tidy tibble. Default is TRUE, FALSE
-#'   returns a matrix. Set to TRUE if by_locus is TRUE.
+#'   returns a matrix. Must be TRUE if by_locus is TRUE.
 #' @param by_locus boolean, determining whether Fst should be returned by
 #'   locus(TRUE), or as a single genome wide value obtained by taking the ratio
 #'   of the mean numerator and denominator (FALSE, the default).
@@ -52,7 +52,7 @@ pairwise_pop_fst <- function(
     stop(".x should be a grouped df")
   }
   if (by_locus && !tidy) {
-    stop("For a tidy matrix of pairwise fst, by_locus must be FALSE")
+    stop("For a matrix of pairwise fst, by_locus must be FALSE")
   }
   method <- match.arg(method)
   if (method == "Hudson") {
