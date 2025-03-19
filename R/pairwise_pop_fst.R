@@ -335,8 +335,8 @@ pairwise_pop_fst_wc84 <- function(
 tidy_to_matrix <- function(tidy_tbl) {
   fst_tot_wide <- tidyr::pivot_wider(
     tidy_tbl,
-    names_from = .data$population_2,
-    values_from = .data$value
+    names_from = "population_2",
+    values_from = "value"
   ) %>%
     tibble::column_to_rownames(var = "population_1") %>%
     as.matrix()

@@ -27,7 +27,6 @@ Imports:
     foreach,
     generics,
     ggplot2,
-    magrittr,
     methods,
     MASS,
     patchwork,
