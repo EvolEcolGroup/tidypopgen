@@ -30,11 +30,12 @@
 #' @param method one of 'Hudson', 'Nei87', and 'WC84'
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
-#' @returns if `tidy=TRUE`, a tibble of genome-wide pairwise Fst values with each pairwise
-#'   combination as a row if "by_locus=FALSE", else a list including the tibble
-#'   of genome-wide values as well as a matrix with pairwise Fst by locus with
-#'   loci as rows and and pairwise combinations as columns. If `tidy=FALSE`, a
-#'   matrix of genome-wide pairwise Fst values is returned.
+#' @returns if `tidy=TRUE`, a tibble of genome-wide pairwise Fst values with
+#'   each pairwise combination as a row if "by_locus=FALSE", else a list
+#'   including the tibble of genome-wide values as well as a matrix with
+#'   pairwise Fst by locus with loci as rows and and pairwise combinations as
+#'   columns. If `tidy=FALSE`, a matrix of genome-wide pairwise Fst values is
+#'   returned.
 #' @export
 
 pairwise_pop_fst <- function(
@@ -215,7 +216,7 @@ pairwise_pop_fst_nei87 <- function(
     paste0(dplyr::group_vars(.x), "_2")
   )
   fst_tot <- tibble::tibble(group_combinations, value = fst_tot)
-  
+
   if (!tidy) { # if we return a matrix
     fst_tot_matrix <- tidy_to_matrix(fst_tot)
     return(fst_tot_matrix)
@@ -332,25 +333,21 @@ pairwise_pop_fst_wc84 <- function(
 
 # This function is used to turn a tidy tibble into a matrix
 tidy_to_matrix <- function(tidy_tbl) {
-  fst_tot_wide <- tidyr::spread(tidy_tbl,
-    key = .data$population_2,
-    value = .data$value
-  )
-  matrix_rownames <- c(
-    as.vector(fst_tot_wide[1, 1])[[1]],
-    names(fst_tot_wide)[-1]
-  )
-  fst_tot_wide <- fst_tot_wide[, -1]
+  fst_tot_wide <- tidyr::pivot_wider(
+    tidy_tbl,
+    names_from = .data$population_2,
+    values_from = .data$value
+  ) %>%
+    tibble::column_to_rownames(var = "population_1") %>%
+    as.matrix()
+  # add missing row and col to make the matrix symmetrical
   fst_tot_wide <- cbind(NA_real_, fst_tot_wide)
   fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
-  fst_tot_matrix <- as.matrix(fst_tot_wide)
-  rownames(fst_tot_matrix) <- colnames(fst_tot_matrix) <- matrix_rownames
-  # if values are present only in lower half matrix, transpose them
-  missing_upper <- is.na(fst_tot_matrix) & upper.tri(fst_tot_matrix)
-  fst_tot_matrix[missing_upper] <- t(fst_tot_matrix)[missing_upper]
-  # then transpose to make the matrix symmetrical
-  fst_tot_matrix[lower.tri(fst_tot_matrix)] <-
-    t(fst_tot_matrix)[lower.tri(fst_tot_matrix)]
-  return(fst_tot_matrix)
+  # fix dim names
+  rownames(fst_tot_wide)[nrow(fst_tot_wide)] <- tail(colnames(fst_tot_wide), 1)
+  colnames(fst_tot_wide)[1] <- rownames(fst_tot_wide)[1]
+  # fill lower triangle
+  fst_tot_wide[lower.tri(fst_tot_wide)] <-
+    t(fst_tot_wide)[lower.tri(fst_tot_wide)]
+  return(fst_tot_wide)
 }
-
