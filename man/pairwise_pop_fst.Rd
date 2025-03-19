@@ -16,7 +16,7 @@ pairwise_pop_fst(
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
 \item{tidy}{boolean whether to return a tidy tibble. Default is TRUE, FALSE
-returns a matrix. THIS IS NOT IMPLEMENTED YET.}
+returns a matrix. Set to TRUE if by_locus is TRUE.}
 
 \item{by_locus}{boolean, determining whether Fst should be returned by
 locus(TRUE), or as a single genome wide value obtained by taking the ratio

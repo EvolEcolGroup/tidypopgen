@@ -23,7 +23,7 @@
 #'
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param tidy boolean whether to return a tidy tibble. Default is TRUE, FALSE
-#'   returns a matrix. THIS IS NOT IMPLEMENTED YET.
+#'   returns a matrix. Set to TRUE if by_locus is TRUE.
 #' @param by_locus boolean, determining whether Fst should be returned by
 #'   locus(TRUE), or as a single genome wide value obtained by taking the ratio
 #'   of the mean numerator and denominator (FALSE, the default).
@@ -50,6 +50,9 @@ pairwise_pop_fst <- function(
 
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
+  }
+  if (by_locus) {
+    tidy <- TRUE
   }
   method <- match.arg(method)
   if (method == "Hudson") {
@@ -130,7 +133,10 @@ pairwise_pop_fst_hudson <- function(
     fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
     fst_tot_matrix <- as.matrix(fst_tot_wide)
     rownames(fst_tot_matrix) <- colnames(fst_tot_matrix) <- matrix_rownames
-    # make the matrix symmetrical
+    # if values are present only in lower half matrix, transpose them
+    missing_upper <- is.na(fst_tot_matrix) & upper.tri(fst_tot_matrix)
+    fst_tot_matrix[missing_upper] <- t(fst_tot_matrix)[missing_upper]
+    # then transpose to make the matrix symmetrical
     fst_tot_matrix[lower.tri(fst_tot_matrix)] <-
       t(fst_tot_matrix)[lower.tri(fst_tot_matrix)]
     return(fst_tot_matrix)
@@ -240,7 +246,10 @@ pairwise_pop_fst_nei87 <- function(
     fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
     fst_tot_matrix <- as.matrix(fst_tot_wide)
     rownames(fst_tot_matrix) <- colnames(fst_tot_matrix) <- matrix_rownames
-    # make the matrix symmetrical
+    # if values are present only in lower half matrix, transpose them
+    missing_upper <- is.na(fst_tot_matrix) & upper.tri(fst_tot_matrix)
+    fst_tot_matrix[missing_upper] <- t(fst_tot_matrix)[missing_upper]
+    # then transpose to make the matrix symmetrical
     fst_tot_matrix[lower.tri(fst_tot_matrix)] <-
       t(fst_tot_matrix)[lower.tri(fst_tot_matrix)]
     return(fst_tot_matrix)
@@ -351,7 +360,10 @@ pairwise_pop_fst_wc84 <- function(
     fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
     fst_tot_matrix <- as.matrix(fst_tot_wide)
     rownames(fst_tot_matrix) <- colnames(fst_tot_matrix) <- matrix_rownames
-    # make the matrix symmetrical
+    # if values are present only in lower half matrix, transpose them
+    missing_upper <- is.na(fst_tot_matrix) & upper.tri(fst_tot_matrix)
+    fst_tot_matrix[missing_upper] <- t(fst_tot_matrix)[missing_upper]
+    # then transpose to make the matrix symmetrical
     fst_tot_matrix[lower.tri(fst_tot_matrix)] <-
       t(fst_tot_matrix)[lower.tri(fst_tot_matrix)]
     return(fst_tot_matrix)
