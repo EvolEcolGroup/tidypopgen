@@ -149,7 +149,8 @@ gen_tibble.character <-
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
-        quiet = quiet
+        quiet = quiet,
+        chunk_size = chunk_size
       )
     } else {
       stop(paste(
