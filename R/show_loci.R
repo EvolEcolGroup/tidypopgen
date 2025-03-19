@@ -51,7 +51,7 @@ show_loci.vctrs_bigSNP <- function(.x, ...) {
 #' @rdname show_loci
 "show_loci<-.vctrs_bigSNP" <- function(.x, value) {
   # test for validity of loci
-  check_valid_loci(value)
+  value <- check_valid_loci(value)
   if (nrow(show_loci(.x)) != nrow(value)) {
     stop(paste(
       "the replacement loci tibble does not have the same number",

@@ -162,6 +162,8 @@ gen_tibble.character <-
     # create a chr_int column
     show_loci(x_gt)$chr_int <-
       cast_chromosome_to_int(show_loci(x_gt)$chromosome)
+    # check chromosome is character
+    show_loci(x_gt) <- check_valid_loci(show_loci(x_gt))
 
     file_in_use <- gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
@@ -372,8 +374,8 @@ gen_tibble.matrix <- function(
 }
 
 
-check_valid_loci <- function(loci_df) {
-  loci_df <- as_tibble(loci_df)
+check_valid_loci <- function(loci) {
+  loci <- as_tibble(loci)
   if (
     !all(
       c(
@@ -384,7 +386,7 @@ check_valid_loci <- function(loci_df) {
         "allele_ref",
         "allele_alt"
       ) %in%
-        names(loci_df)
+        names(loci)
     )
   ) {
     stop(paste(
@@ -393,6 +395,10 @@ check_valid_loci <- function(loci_df) {
       "allele_ref','allele_alt'"
     ))
   }
+  if (!is.character(loci$chromosome)) {
+    loci$chromosome <- as.character(loci$chromosome)
+  }
+  return(loci)
 }
 
 
@@ -413,7 +419,7 @@ gt_write_bigsnp_from_dfs <- function(
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }
-  check_valid_loci(loci)
+  loci <- check_valid_loci(loci)
   # set up code (accounting for ploidy)
   code256 <- rep(NA_real_, 256)
   if (length(ploidy > 1)) {
