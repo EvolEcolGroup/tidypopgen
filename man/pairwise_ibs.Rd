@@ -8,7 +8,7 @@ pairwise_ibs(
   x,
   as_matrix = FALSE,
   type = c("proportion", "adjusted_counts", "raw_counts"),
-  block_size = bigstatsr::block_size(count_loci(x))
+  block_size = bigstatsr::block_size(nrow(x))
 )
 }
 \arguments{

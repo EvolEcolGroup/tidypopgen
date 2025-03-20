@@ -19,7 +19,7 @@ loci_missingness(
   .x,
   as_counts = FALSE,
   n_cores = n_cores,
-  block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 )
 
@@ -27,7 +27,7 @@ loci_missingness(
   .x,
   as_counts = FALSE,
   n_cores = n_cores,
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  block_size = bigstatsr::block_size(length(.x), 1),
   ...
 )
 
@@ -35,7 +35,7 @@ loci_missingness(
   .x,
   as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 )
 }
