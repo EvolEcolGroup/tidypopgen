@@ -124,7 +124,7 @@ gt_extract_f2 <- function(
 
   if (is.null(inds)) pops <- union(pops, pops2)
 
-  afdat %<>% # nolint
+  afdat <- afdat %>% # nolint
     discard_from_aftable(
       maxmiss = maxmiss,
       minmaf = minmaf,
@@ -137,7 +137,7 @@ gt_extract_f2 <- function(
       auto_only = auto_only,
       poly_only = FALSE
     )
-  afdat$snpfile %<>% mutate(poly = as.logical(cpp_is_polymorphic(afdat$afs))) # nolint
+  afdat$snpfile <- afdat$snpfile %>% mutate(poly = as.logical(cpp_is_polymorphic(afdat$afs))) # nolint
   if (sum(afdat$snpfile$poly) == 0) stop("There are no informative SNPs!")
 
   if (verbose) {
