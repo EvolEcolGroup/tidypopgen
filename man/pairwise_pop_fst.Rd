@@ -6,6 +6,7 @@
 \usage{
 pairwise_pop_fst(
   .x,
+  tidy = TRUE,
   by_locus = FALSE,
   method = c("Hudson", "Nei87", "WC84"),
   n_cores = bigstatsr::nb_cores()
@@ -13,6 +14,9 @@ pairwise_pop_fst(
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
+
+\item{tidy}{boolean whether to return a tidy tibble. Default is TRUE, FALSE
+returns a matrix. Must be TRUE if \code{by_locus} is TRUE.}
 
 \item{by_locus}{boolean, determining whether Fst should be returned by
 locus(TRUE), or as a single genome wide value obtained by taking the ratio
@@ -24,10 +28,12 @@ of the mean numerator and denominator (FALSE, the default).}
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
 \value{
-a tibble of genome-wide pairwise Fst values with each pairwise
-combination as a row if "by_locus=FALSE", else a list including the tibble
-of genome-wide values as well as a matrix with pairwise Fst by locus with
-loci as rows and and pairwise combinations as columns.
+if \code{tidy=TRUE}, a tibble of genome-wide pairwise Fst values with
+each pairwise combination as a row if "by_locus=FALSE", else a list
+including the tibble of genome-wide values as well as a matrix with
+pairwise Fst by locus with loci as rows and and pairwise combinations as
+columns. If \code{tidy=FALSE}, a matrix of genome-wide pairwise Fst values is
+returned.
 }
 \description{
 This function computes pairwise Fst. The following methods are implemented:
