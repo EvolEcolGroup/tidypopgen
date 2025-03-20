@@ -20,7 +20,7 @@
 pairwise_grm <- function(
     x,
     allele_sharing_mat = NULL,
-    block_size = bigstatsr::block_size(count_loci(x))) {
+    block_size = bigstatsr::block_size(nrow(x))) {
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(
       x,

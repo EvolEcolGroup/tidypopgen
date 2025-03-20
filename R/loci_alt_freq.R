@@ -26,7 +26,7 @@ loci_alt_freq.tbl_df <- function(
     # multicore is used by openMP within the
     # freq cpp function
     n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
+    block_size = bigstatsr::block_size(nrow(.x$genotypes), 1),
     # the bigapply that splits in blocks is not
     # multithreaded, as we use the multiple threads
     # for openMP
@@ -43,7 +43,7 @@ loci_alt_freq.tbl_df <- function(
 loci_alt_freq.vctrs_bigSNP <- function(
     .x,
     n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    block_size = bigstatsr::block_size(length(.x), 1),
     ...) {
   rlang::check_dots_empty()
   # if we have diploid
@@ -59,7 +59,7 @@ loci_alt_freq.vctrs_bigSNP <- function(
 loci_alt_freq.grouped_df <- function(
     .x,
     n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    block_size = bigstatsr::block_size(nrow(.x), 1),
     ...) {
   rlang::check_dots_empty()
   if (is_diploid_only(.x)) {
