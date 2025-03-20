@@ -23,7 +23,7 @@ indiv_missingness <- function(.x, as_counts, block_size, ...) {
 indiv_missingness.tbl_df <- function(
     .x,
     as_counts = FALSE,
-    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
+    block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
     ...) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
@@ -40,8 +40,10 @@ indiv_missingness.tbl_df <- function(
 indiv_missingness.vctrs_bigSNP <- function(
     .x,
     as_counts = FALSE,
-    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
+    block_size = bigstatsr::block_size(length(.x), 1), # nolint
     ...) {
+
+
   rlang::check_dots_empty()
   # get the FBM
   X <- attr(.x, "bigsnp")$genotypes # nolint
@@ -62,7 +64,8 @@ indiv_missingness.vctrs_bigSNP <- function(
     a.FUN = count_na_row,
     ind = attr(.x, "loci")$big_index,
     a.combine = "plus",
-    rows_to_keep = rows_to_keep
+    rows_to_keep = rows_to_keep,
+    block.size = block_size
   )
   if (!as_counts) {
     row_na <- row_na / count_loci(.x)
