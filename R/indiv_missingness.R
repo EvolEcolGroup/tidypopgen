@@ -48,26 +48,21 @@ indiv_missingness.vctrs_bigSNP <- function(
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
 
-  # for polyploids, this can generate a very large matrix
-  # it would be better to just write a C function that counts na
-  count_row_na_sub <- function(X, ind, rows_to_keep) { # nolint
-    row_counts <- bigstatsr::big_counts(
-      X, # nolint
-      ind.col = ind,
-      ind.row = rows_to_keep,
-      byrow = TRUE
-    )
-    row_na <- row_counts[nrow(row_counts), ] # nolint
+  # returns a vector of counts of na's per individual
+  count_na_row <- function(X, ind, rows_to_keep) { # nolint
+    count_na <- function(a) {
+      sum(is.na(a))
+    }
+    apply(X[rows_to_keep, ind], 1, count_na)
   }
 
+  # count nas
   row_na <- bigstatsr::big_apply(
     X,
-    a.FUN = count_row_na_sub,
-    rows_to_keep = rows_to_keep,
+    a.FUN = count_na_row,
     ind = attr(.x, "loci")$big_index,
-    ncores = 1, # parallelisation is used within the function
-    block.size = block_size,
-    a.combine = "plus"
+    a.combine = "plus",
+    rows_to_keep = rows_to_keep
   )
   if (!as_counts) {
     row_na <- row_na / count_loci(.x)
