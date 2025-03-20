@@ -7,9 +7,9 @@
 
 The goal of `tidypopgen` is to provide a tidy grammar of population genetics, facilitating 
 the manipulation and analysis of biallelic single nucleotide 
-polymorphisms (SNPs). `tidypopgen` scales to very large datasets by storing 
+polymorphisms (SNPs). `tidypopgen` scales to very large genetic datasets by storing 
 genotypes on disk, and performing operations on them in chunks, without
-every loading all data in memory.
+ever loading all data in memory.
 
 ## Installation
 
