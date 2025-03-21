@@ -26,7 +26,7 @@ loci_alt_freq.tbl_df <- function(
     # multicore is used by openMP within the
     # freq cpp function
     n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(.x$genotypes), 1),
+    block_size = bigstatsr::block_size(nrow(.x), 1),
     # the bigapply that splits in blocks is not
     # multithreaded, as we use the multiple threads
     # for openMP
@@ -116,7 +116,7 @@ loci_maf <- function(.x, n_cores, block_size, ...) {
 loci_maf.tbl_df <- function(
     .x,
     n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
+    block_size = bigstatsr::block_size(nrow(.x), 1),
     ...) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
@@ -129,7 +129,7 @@ loci_maf.tbl_df <- function(
 loci_maf.vctrs_bigSNP <- function(
     .x,
     n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    block_size = bigstatsr::block_size(length(.x), 1),
     ...) {
   freq <- loci_alt_freq(.x, n_cores = n_cores, block_size = block_size, ...)
   freq[freq > 0.5 & !is.na(freq)] <- 1 - freq[freq > 0.5 & !is.na(freq)]
@@ -141,7 +141,7 @@ loci_maf.vctrs_bigSNP <- function(
 loci_maf.grouped_df <- function(
     .x,
     n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+    block_size = bigstatsr::block_size(nrow(.x), 1),
     ...) {
   rlang::check_dots_empty()
   if (is_diploid_only(.x)) {

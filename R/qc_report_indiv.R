@@ -22,7 +22,7 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
   if (is.null(kings_threshold)) {
-    qc_report_indiv <- .x %>%
+    qc_report <- .x %>%
       reframe(
         het_obs = indiv_het_obs(.x),
         missingness = indiv_missingness(.x, as_counts = FALSE)
@@ -38,17 +38,17 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
       ...
     )
 
-    qc_report_indiv <- .x %>%
+    qc_report <- .x %>%
       reframe(
         het_obs = indiv_het_obs(.x),
         missingness = indiv_missingness(.x, as_counts = FALSE)
       )
-    qc_report_indiv$to_keep <- relatives[[3]]
-    qc_report_indiv$id <- .x$id
-    attr(qc_report_indiv$to_keep, "king") <- king
+    qc_report$to_keep <- relatives[[3]]
+    qc_report$id <- .x$id
+    attr(qc_report$to_keep, "king") <- king
   }
-  class(qc_report_indiv) <- c("qc_report_indiv", class(qc_report_indiv))
-  qc_report_indiv
+  class(qc_report) <- c("qc_report_indiv", class(qc_report))
+  qc_report
 }
 
 

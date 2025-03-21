@@ -5,26 +5,30 @@
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
+#' @param return_counts logical, if `TRUE`, return a matrix with two columns:
+#'  the number of heterozygotes and the number of missing values for each
+#'  individual. These quantities can be useful to compute more complex
+#'  quantities.
 #' @param ... currently unused.
 #' @returns a vector of heterozygosities, one per individuals in the
 #'   [`gen_tibble`]
 #' @rdname indiv_het_obs
 #' @export
-indiv_het_obs <- function(.x, ...) {
+indiv_het_obs <- function(.x, return_counts = FALSE, ...) {
   UseMethod("indiv_het_obs", .x)
 }
 
 #' @export
 #' @rdname indiv_het_obs
-indiv_het_obs.tbl_df <- function(.x, ...) {
+indiv_het_obs.tbl_df <- function(.x, return_counts = FALSE, ...) {
   stopifnot_gen_tibble(.x)
   # extract the column and hand it over to its method
-  indiv_het_obs(.x$genotypes, ...)
+  indiv_het_obs(.x$genotypes, return_counts = return_counts, ...)
 }
 
 #' @export
 #' @rdname indiv_het_obs
-indiv_het_obs.vctrs_bigSNP <- function(.x, ...) {
+indiv_het_obs.vctrs_bigSNP <- function(.x, return_counts = FALSE, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   # get the FBM
@@ -53,7 +57,13 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, ...) {
     a.combine = "plus",
     rows_to_keep = rows_to_keep
   )
-  this_col_1_na[1, ] / (ncol(X) - this_col_1_na[2, ])
+  if (!return_counts){
+    return(this_col_1_na[1, ] / (ncol(X) - this_col_1_na[2, ]))
+  } else {
+    this_col_1_na <- t(this_col_1_na)
+    colnames(this_col_1_na) <- c("het_n","na_n")
+    return(this_col_1_na)
+  }
 }
 
 # #' @export #nolint start

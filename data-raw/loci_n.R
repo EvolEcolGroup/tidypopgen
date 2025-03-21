@@ -1,7 +1,7 @@
 #' Count number of non-missing genotypes at each locus
 #'
 #' Count number of non-missing genotypes at each locus. Note that this function returns a count
-#' of genotypes, not a count of alleles (which is twice the number of genotypes).
+#' of genotypes, not a count of alleles (which is twice the number of genotypes for diploids).
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #' a [`gen_tibble`] object),
