@@ -42,7 +42,7 @@ gt_cluster_pca <- function(
     n_start = 10,
     quiet = FALSE) {
   if (is.null(x) || !inherits(x, "gt_pca")) {
-    stop("a 'gt_pca' object is required")
+    stop("'x' should be a 'gt_pca' object")
   }
 
   ## CHECKS ##
@@ -54,7 +54,7 @@ gt_cluster_pca <- function(
   if (is.null(n_pca)) {
     n_pca <- length(x$d)
     if (!quiet) {
-      message("'n.pca' was not set: all ", n_pca, " components were used")
+      message("'n_pca' was not set: all ", n_pca, " components were used")
     }
   }
 
