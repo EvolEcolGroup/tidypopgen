@@ -41,7 +41,7 @@ is_diploid_only <- function(x) {
 # replace forcats::fct_inorder
 fct_inorder_base <- function(f, ordered = FALSE) {
   if (is.character(f)) {
-    factor(f)
+    f <- factor(f)
   }
   if (!is.logical(ordered) || length(ordered) != 1) {
     stop("ordered must be a single logical value")
