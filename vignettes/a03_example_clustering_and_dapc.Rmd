@@ -414,7 +414,7 @@ plt <- ggplot2::ggplot(tidy_q, ggplot2::aes(x = id, y = percentage, fill = q)) +
   ) +
   ggplot2::labs(
     y = "Population Structure for K = 3",
-    title = "Clustering at K = 3 for Anolis punctatus using ADMIXTURE algorithm"
+    title = "ADMIXTURE algorithm on A. punctatus"
   ) +
   theme_distruct() +
   scale_fill_distruct()
@@ -469,6 +469,8 @@ now collate the results from a standard run of ADMIXTURE for which we stored the
 a directory:
 
 ```{r echo=FALSE, results='hide'}
+# reload the admxiture results (they were reordered above)
+anole_adm <- readRDS("a03_anole_adm.rds")
 runs <- c(1)
 k_values <- c(2:6)
 q_matrices <- list()
@@ -511,7 +513,7 @@ using `get_q_matrix` as before.
 For example, if we would like to view the second run of K = 3:
 
 ```{r}
-get_q_matrix(q_list, k = 3, run = 1)
+head(get_q_matrix(q_list, k = 3, run = 1))
 ```
 
 And, again, we can then autoplot any matrix by selecting from the
@@ -524,9 +526,6 @@ autoplot(get_q_matrix(q_list, k = 3, run = 1),
   arrange_by_indiv = TRUE, reorder_within_groups = TRUE
 )
 ```
-
-BUG THERE IS SOMETHING WRONG WITH THE LABELLING OF THE PLOT ABOVE!!!
-
 
 In this way, `tidypopgen` integrates with external clustering software
 seamlessly for quick, easy plotting.
