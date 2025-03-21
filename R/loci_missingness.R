@@ -28,7 +28,7 @@ loci_missingness.tbl_df <- function(
     # the bigapply that splits in blocks is not
     # multithreaded, as we use the multiple
     # threads for openMP,
-    block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1), # nolint
+    block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
     ...) {
   # TODO this is a hack to deal with the class being dropped when going through
   # group_map
@@ -49,7 +49,7 @@ loci_missingness.vctrs_bigSNP <- function(
     .x,
     as_counts = FALSE,
     n_cores = n_cores,
-    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
+    block_size = bigstatsr::block_size(length(.x), 1), # nolint
     ...) {
   rlang::check_dots_empty()
   # get the FBM
@@ -89,7 +89,7 @@ loci_missingness.grouped_df <- function(
     .x,
     as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1), # nolint
+    block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
     ...) {
   rlang::check_dots_empty()
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes

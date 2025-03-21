@@ -16,21 +16,21 @@ loci_alt_freq(.x, n_cores, block_size, ...)
 \method{loci_alt_freq}{tbl_df}(
   .x,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 )
 
 \method{loci_alt_freq}{vctrs_bigSNP}(
   .x,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  block_size = bigstatsr::block_size(length(.x), 1),
   ...
 )
 
 \method{loci_alt_freq}{grouped_df}(
   .x,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 )
 
@@ -39,21 +39,21 @@ loci_maf(.x, n_cores, block_size, ...)
 \method{loci_maf}{tbl_df}(
   .x,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x$genotypes, "loci")), 1),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 )
 
 \method{loci_maf}{vctrs_bigSNP}(
   .x,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  block_size = bigstatsr::block_size(length(.x), 1),
   ...
 )
 
 \method{loci_maf}{grouped_df}(
   .x,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 )
 }

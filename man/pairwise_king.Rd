@@ -7,7 +7,7 @@
 pairwise_king(
   x,
   as_matrix = FALSE,
-  block_size = bigstatsr::block_size(length(loci_names(x)))
+  block_size = bigstatsr::block_size(nrow(x))
 )
 }
 \arguments{

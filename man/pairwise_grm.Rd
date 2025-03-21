@@ -7,7 +7,7 @@
 pairwise_grm(
   x,
   allele_sharing_mat = NULL,
-  block_size = bigstatsr::block_size(count_loci(x))
+  block_size = bigstatsr::block_size(nrow(x))
 )
 }
 \arguments{

@@ -25,7 +25,7 @@ pairwise_ibs <- function(
       "adjusted_counts",
       "raw_counts"
     ),
-    block_size = bigstatsr::block_size(count_loci(x))) {
+    block_size = bigstatsr::block_size(nrow(x))) {
   type <- match.arg(type)
   X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index

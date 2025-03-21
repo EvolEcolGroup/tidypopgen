@@ -11,14 +11,14 @@ indiv_missingness(.x, as_counts, block_size, ...)
 \method{indiv_missingness}{tbl_df}(
   .x,
   as_counts = FALSE,
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 )
 
 \method{indiv_missingness}{vctrs_bigSNP}(
   .x,
   as_counts = FALSE,
-  block_size = bigstatsr::block_size(nrow(attr(.x, "loci")), 1),
+  block_size = bigstatsr::block_size(length(.x), 1),
   ...
 )
 }

@@ -344,7 +344,8 @@ tidy_to_matrix <- function(tidy_tbl) {
   fst_tot_wide <- cbind(NA_real_, fst_tot_wide)
   fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
   # fix dim names
-  rownames(fst_tot_wide)[nrow(fst_tot_wide)] <- tail(colnames(fst_tot_wide), 1)
+  rownames(fst_tot_wide)[nrow(fst_tot_wide)] <-
+    utils::tail(colnames(fst_tot_wide), 1)
   colnames(fst_tot_wide)[1] <- rownames(fst_tot_wide)[1]
   # fill lower triangle
   fst_tot_wide[lower.tri(fst_tot_wide)] <-
