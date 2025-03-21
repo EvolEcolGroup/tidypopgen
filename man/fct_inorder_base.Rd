@@ -15,14 +15,8 @@ fct_inorder_base(f, ordered = FALSE)
 A factor with levels in the order they first appear
 }
 \description{
-This function reorders the levels of a factor so that they appear in the order
-they first appear in the data.  This is a drop-in replacement
-for \code{forcats::fct_inorder()}
-}
-\examples{
-x <- factor(c("b", "a", "c", "a", "b", "c", "b", "a"))
-fct_inorder_base(x)
-fct_inorder_base(x, ordered = TRUE)
-
+This function reorders the levels of a factor so that they appear in the
+order they first appear in the data.  This is a drop-in replacement for
+\code{forcats::fct_inorder()}
 }
 \keyword{internal}

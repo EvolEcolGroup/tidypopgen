@@ -20,8 +20,4 @@ A character vector with the first match replaced
 This function is a drop-in replacement for \code{stringr::str_replace()}, which
 replaces the first match
 }
-\examples{
-x <- "I love cats and cats are cute"
-str_replace_base(x, "cats", "dogs")
-}
 \keyword{internal}

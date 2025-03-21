@@ -49,12 +49,12 @@ is_diploid_only <- function(x) {
 #' @param ordered Logical, should the resulting factor be ordered?
 #' @return A factor with levels in the order they first appear
 #' @keywords internal
-#' @examples
-#' \dontrun{
-#' x <- factor(c("b", "a", "c", "a", "b", "c", "b", "a"))
-#' fct_inorder_base(x)
-#' fct_inorder_base(x, ordered = TRUE)
-#' }
+
+# nolint start
+# x <- factor(c("b", "a", "c", "a", "b", "c", "b", "a"))
+# fct_inorder_base(x)
+# fct_inorder_base(x, ordered = TRUE)
+# nolint end
 
 fct_inorder_base <- function(f, ordered = FALSE) {
   if (is.character(f)) {
@@ -81,11 +81,12 @@ fct_inorder_base <- function(f, ordered = FALSE) {
 #' @param replacement A character vector
 #' @return A character vector with the first match replaced
 #' @keywords internal
-#' @examples
-#' \dontrun{
-#' x <- "I love cats and cats are cute"
-#' str_replace_base(x, "cats", "dogs")
-#' }
+
+# nolint start
+# x <- "I love cats and cats are cute"
+# str_replace_base(x, "cats", "dogs")
+# nolint end
+
 str_replace_base <- function(string, pattern, replacement) {
   sub(pattern, replacement, string)
 }
