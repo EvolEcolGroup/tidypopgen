@@ -95,6 +95,7 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
         mutate(cumulative = cum_percentage)
     }
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
+    colnames(x$v) <- seq_len(ncol(x$v))
     ret <- x$v %>%
       tibble::as_tibble(rownames = "column") %>%
       tidyr::pivot_longer(
@@ -102,7 +103,7 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
         names_to = "PC",
         values_to = "value"
       )
-    ret <- mutate(ret, PC = as.numeric(str_replace_base(.data$PC, "V", "")))
+    ret <- mutate(ret, PC = as.numeric(.data$PC))
     if (is.null(rownames(x$v))) ret$column <- as.integer(ret$column)
   } else if (matrix %in% c("x", "samples", "scores")) {
     ret <- sweep(x$u, 2, x$d, "*")
