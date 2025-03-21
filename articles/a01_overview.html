@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9022</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9023</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +50,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/EvolEcolGroup/tidypopgen/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -65,7 +66,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Overview</h1>
             
       
-
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/vignettes/a01_overview.Rmd" class="external-link"><code>vignettes/a01_overview.Rmd</code></a></small>
       <div class="d-none name"><code>a01_overview.Rmd</code></div>
     </div>
 
@@ -135,7 +136,7 @@ computing anything incorrectly).</p>
 <p>Given information about the individuals, their genotypes, and the
 loci:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://evolecolgroup.github.io/tidypopgen">tidypopgen</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/EvolEcolGroup/tidypopgen" class="external-link">tidypopgen</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; Loading required package: dplyr</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
@@ -174,12 +175,12 @@ loci:</p>
 <span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpOiqtSx/file246219316636.gt</span></span>
-<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpOiqtSx/file246219316636.rds</span></span>
-<span><span class="co">#&gt; with backing file: /tmp/RtmpOiqtSx/file246219316636.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpxmdUFr/file245d5acbf5ce.gt</span></span>
+<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpxmdUFr/file245d5acbf5ce.rds</span></span>
+<span><span class="co">#&gt; with backing file: /tmp/RtmpxmdUFr/file245d5acbf5ce.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpOiqtSx/file246219316636.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpxmdUFr/file245d5acbf5ce.gt')</span></span></code></pre></div>
 <p>We are provided information on where the three files underlying the
 genotype information are stored. As we don’t want to keep the files, we
 used the tmp directory; normally you will want to use your working
@@ -537,22 +538,22 @@ be named differently (but, by default, if no specific name is given,
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gt_file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpOiqtSx/file246219316636.gt</span></span>
-<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpOiqtSx/file246219316636.rds</span></span>
-<span><span class="co">#&gt; with backing file: /tmp/RtmpOiqtSx/file246219316636.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpxmdUFr/file245d5acbf5ce.gt</span></span>
+<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpxmdUFr/file245d5acbf5ce.rds</span></span>
+<span><span class="co">#&gt; with backing file: /tmp/RtmpxmdUFr/file245d5acbf5ce.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpOiqtSx/file246219316636.gt')</span></span>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpxmdUFr/file245d5acbf5ce.gt')</span></span>
 <span><span class="va">gt_file_name</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpOiqtSx/file246219316636.gt" </span></span>
-<span><span class="co">#&gt; [2] "/tmp/RtmpOiqtSx/file246219316636.rds"</span></span>
-<span><span class="co">#&gt; [3] "/tmp/RtmpOiqtSx/file246219316636.bk"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmpxmdUFr/file245d5acbf5ce.gt" </span></span>
+<span><span class="co">#&gt; [2] "/tmp/RtmpxmdUFr/file245d5acbf5ce.rds"</span></span>
+<span><span class="co">#&gt; [3] "/tmp/RtmpxmdUFr/file245d5acbf5ce.bk"</span></span></code></pre></div>
 <p>And if we ever need to retrieve the location of the <code>.bk</code>
 and <code>.rds</code> files for a gen_tibble, we can use:</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_get_file_names.html">gt_get_file_names</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpOiqtSx/file246219316636.rds"</span></span>
-<span><span class="co">#&gt; [2] "/tmp/RtmpOiqtSx/file246219316636.bk"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmpxmdUFr/file245d5acbf5ce.rds"</span></span>
+<span><span class="co">#&gt; [2] "/tmp/RtmpxmdUFr/file245d5acbf5ce.bk"</span></span></code></pre></div>
 <p>In a later session, we could reload the data with:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new_example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_load.html">gt_load</a></span><span class="op">(</span><span class="va">gt_file_name</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
@@ -576,12 +577,12 @@ read a PLINK bed file, we can simply use:</p>
 <code class="sourceCode R"><span><span class="va">bed_path_pop_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/pop_a.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span>
 <span><span class="va">pop_a_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_path_pop_a</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_a_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpOiqtSx/pop_a_2462232a0978.gt</span></span>
-<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpOiqtSx/pop_a_2462232a0978.rds</span></span>
-<span><span class="co">#&gt; with backing file: /tmp/RtmpOiqtSx/pop_a_2462232a0978.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpxmdUFr/pop_a_245d25595a45.gt</span></span>
+<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpxmdUFr/pop_a_245d25595a45.rds</span></span>
+<span><span class="co">#&gt; with backing file: /tmp/RtmpxmdUFr/pop_a_245d25595a45.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpOiqtSx/pop_a_2462232a0978.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpxmdUFr/pop_a_245d25595a45.gt')</span></span></code></pre></div>
 <p>For this vignette, we don’t want to keep files, so we are using again
 a temporary path for the backing files, but in normal instances, we can
 simply omit the <code>backingfile</code> parameter, and the
@@ -597,7 +598,7 @@ and return the name of that file on completion. For example, to export
 to a PLINK .bed file, we simply use:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_as_plink.html">gt_as_plink</a></span><span class="op">(</span><span class="va">example_gt</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"new_bed_"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpOiqtSx/new_bed_246221ad712d.bed"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmpxmdUFr/new_bed_245d53d03146.bed"</span></span></code></pre></div>
 <p>This will also write a .bim and .fam file and save them together with
 the .bed file. Note that, from the main tibble, only <code>id</code>,
 <code>population</code> and <code>sex</code> will be preserved in the
@@ -632,23 +633,23 @@ the bed file is stored):</p>
 <span>  <span class="fu">bigsnpr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigsnpr/reference/snp_readBed.html" class="external-link">snp_readBed</a></span><span class="op">(</span><span class="va">bed_path_pop_a</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_a_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pop_a_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bigsnp_path_a</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpOiqtSx/pop_a_246227b87a9e.gt</span></span>
-<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpOiqtSx/pop_a_246227b87a9e.rds</span></span>
-<span><span class="co">#&gt; with backing file: /tmp/RtmpOiqtSx/pop_a_246227b87a9e.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpxmdUFr/pop_a_245d464f474.gt</span></span>
+<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpxmdUFr/pop_a_245d464f474.rds</span></span>
+<span><span class="co">#&gt; with backing file: /tmp/RtmpxmdUFr/pop_a_245d464f474.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpOiqtSx/pop_a_246227b87a9e.gt')</span></span>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpxmdUFr/pop_a_245d464f474.gt')</span></span>
 <span><span class="va">bed_path_pop_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/pop_b.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span>
 <span><span class="va">bigsnp_path_b</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu">bigsnpr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigsnpr/reference/snp_readBed.html" class="external-link">snp_readBed</a></span><span class="op">(</span><span class="va">bed_path_pop_b</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_b_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pop_b_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bigsnp_path_b</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpOiqtSx/pop_b_246265743387.gt</span></span>
-<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpOiqtSx/pop_b_246265743387.rds</span></span>
-<span><span class="co">#&gt; with backing file: /tmp/RtmpOiqtSx/pop_b_246265743387.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpxmdUFr/pop_b_245de48319f.gt</span></span>
+<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpxmdUFr/pop_b_245de48319f.rds</span></span>
+<span><span class="co">#&gt; with backing file: /tmp/RtmpxmdUFr/pop_b_245de48319f.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpOiqtSx/pop_b_246265743387.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpxmdUFr/pop_b_245de48319f.gt')</span></span></code></pre></div>
 <p>And inspect them:</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_a_gt</span></span>
@@ -719,12 +720,12 @@ retrieve the file at a later date!!!</p>
 <span><span class="co">#&gt; ( 5 were flipped to match the reference set)</span></span>
 <span><span class="co">#&gt; ( 2 are ambiguous, of which 2 were removed)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpOiqtSx/gt_merged.gt</span></span>
-<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpOiqtSx/gt_merged.rds</span></span>
-<span><span class="co">#&gt; with backing file: /tmp/RtmpOiqtSx/gt_merged.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpxmdUFr/gt_merged.gt</span></span>
+<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpxmdUFr/gt_merged.rds</span></span>
+<span><span class="co">#&gt; with backing file: /tmp/RtmpxmdUFr/gt_merged.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpOiqtSx/gt_merged.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpxmdUFr/gt_merged.gt')</span></span></code></pre></div>
 <p>Let’s check the resulting <code>gen_tibble</code>:</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">merged_gt</span></span>
@@ -786,12 +787,12 @@ taking this step explicitly, before running any analysis.</p>
 <code class="sourceCode R"><span><span class="va">bed_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example-missing.bed"</span>, package <span class="op">=</span> <span class="st">"bigsnpr"</span><span class="op">)</span></span>
 <span><span class="va">missing_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"missing_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpOiqtSx/missing_24623cc311b3.gt</span></span>
-<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpOiqtSx/missing_24623cc311b3.rds</span></span>
-<span><span class="co">#&gt; with backing file: /tmp/RtmpOiqtSx/missing_24623cc311b3.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpxmdUFr/missing_245d7cf2a5af.gt</span></span>
+<span><span class="co">#&gt; using bigSNP file: /tmp/RtmpxmdUFr/missing_245d7cf2a5af.rds</span></span>
+<span><span class="co">#&gt; with backing file: /tmp/RtmpxmdUFr/missing_245d7cf2a5af.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpOiqtSx/missing_24623cc311b3.gt')</span></span>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpxmdUFr/missing_245d7cf2a5af.gt')</span></span>
 <span><span class="va">missing_gt</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A gen_tibble: 500 loci</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     200 × 3</span></span></span>

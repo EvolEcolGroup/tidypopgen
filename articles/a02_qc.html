@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9022</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9023</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,6 +50,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/EvolEcolGroup/tidypopgen/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -65,7 +66,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Quality Control</h1>
             
       
-
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/vignettes/a02_qc.Rmd" class="external-link"><code>vignettes/a02_qc.Rmd</code></a></small>
       <div class="d-none name"><code>a02_qc.Rmd</code></div>
     </div>
 
@@ -83,7 +84,7 @@ illustrate these methods of data cleaning.</p>
 <h2 id="read-data-into-gen_tibble-format">Read data into gen_tibble format<a class="anchor" aria-label="anchor" href="#read-data-into-gen_tibble-format"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://evolecolgroup.github.io/tidypopgen">tidypopgen</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/EvolEcolGroup/tidypopgen" class="external-link">tidypopgen</a></span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Loading required package: dplyr</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## Attaching package: 'dplyr'</span></span></code></pre>
@@ -310,15 +311,15 @@ using <code>gt_save</code>.</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/RtmpowoB20/file24b05b4fd38f.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using bigSNP file: /tmp/RtmpowoB20/file24b04c63be4f.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with backing file: /tmp/RtmpowoB20/file24b04c63be4f.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/Rtmp3Yt86F/file24ac5bfbe6b9.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using bigSNP file: /tmp/Rtmp3Yt86F/file24ac4ab6f4ee.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with backing file: /tmp/Rtmp3Yt86F/file24ac4ab6f4ee.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/RtmpowoB20/file24b05b4fd38f.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/RtmpowoB20/file24b05b4fd38f.gt" </span></span>
-<span><span class="co">## [2] "/tmp/RtmpowoB20/file24b04c63be4f.rds"</span></span>
-<span><span class="co">## [3] "/tmp/RtmpowoB20/file24b04c63be4f.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/Rtmp3Yt86F/file24ac5bfbe6b9.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/Rtmp3Yt86F/file24ac5bfbe6b9.gt" </span></span>
+<span><span class="co">## [2] "/tmp/Rtmp3Yt86F/file24ac4ab6f4ee.rds"</span></span>
+<span><span class="co">## [3] "/tmp/Rtmp3Yt86F/file24ac4ab6f4ee.bk"</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="grouping-data">Grouping data<a class="anchor" aria-label="anchor" href="#grouping-data"></a>
@@ -359,12 +360,12 @@ each population:</p>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
 <span><span class="co">##   het_obs missingness    id group to_keep</span></span>
 <span><span class="co">##     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>   0.262           0     1 A     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span>   0.251           0     2 A     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span>   0.258           0     4 A     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span>   0.270           0     5 A     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span>   0.262           0     6 B     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span>   0.285           0     7 B     TRUE</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>   0.372           0     1 A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>   0.356           0     2 A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>   0.366           0     4 A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>   0.383           0     5 A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>   0.372           0     6 B     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>   0.405           0     7 B     TRUE</span></span></code></pre>
 <p>This is important when we have related individuals, as background
 population structure can affect the filtering of relatives.</p>
 </div>
