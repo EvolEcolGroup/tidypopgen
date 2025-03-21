@@ -8,12 +8,14 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-We provide a tidy grammar of population genetics, facilitating the manipulation and analysis of data on biallelic single nucleotide polymorphisms (SNPs).
+We provide a tidy grammar of population genetics, facilitating the manipulation and analysis of data on biallelic single nucleotide polymorphisms (SNPs). `tidypopgen` scales to very large genetic datasets by storing genotypes on disk, and performing operations on them in chunks, without ever loading all data in memory.
 }
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://github.com/EvolEcolGroup/tidypopgen}
   \item \url{https://evolecolgroup.github.io/tidypopgen}
+  \item Report bugs at \url{https://github.com/EvolEcolGroup/tidypopgen/issues}
 }
 
 }

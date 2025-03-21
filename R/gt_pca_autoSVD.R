@@ -6,10 +6,13 @@
 #' [bigsnpr::snp_autoSVD()]
 #'
 #' Using gt_pca_autoSVD requires a reasonably large dataset, as the function
-#' iteratively removes regions of long range LD. If you encounter 'Error in
-#' rollmean(): Parameter 'size' is too large.' roll_size exceeds the number of
-#' variants on at least one of your chromosomes. Try reducing 'roll_size' to
+#' iteratively removes regions of long range LD. If you encounter: 'Error in
+#' rollmean(): Parameter 'size' is too large.', `roll_size` exceeds the number
+#' of variants on at least one of your chromosomes. Try reducing 'roll_size' to
 #' avoid this error.
+#'
+#' Note: rather than accessing these elements directly, it is better to use
+#' `tidy` and `augment`. See [`gt_pca_tidiers`].
 #'
 #' @param x a `gen_tbl` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
@@ -49,7 +52,7 @@
 #'   list with elements: A named list (an S3 class "big_SVD") of
 #' - `d`, the eigenvalues (singular values, i.e. as variances),
 #' - `u`, the scores for each sample on each component
-#'    (the left singular vectors)
+#'   (the left singular vectors)
 #' - `v`, the loadings (the right singular vectors)
 #' - `center`, the centering vector,
 #' - `scale`, the scaling vector,
@@ -57,17 +60,7 @@
 #' - `call`, the call that generated the object.
 #' - `loci`, the loci used after long range LD removal.
 #'
-#' Note: rather than accessing these elements directly, it is better to use
-#' `tidy` and `augment`. See [`gt_pca_tidiers`]. Note: If you encounter 'Error
-#' in rollmean(): Parameter 'size' is too large.' roll_size is exceeding the
-#' number of variants on at least one of your chromosomes. If you have
-#' pre-specified roll_size, you will need to reduce this parameter. If not, try
-#' specifying a reduced 'roll_size' to avoid this error.
-#'
 #' @export
-
-## Look at to manipulate ellipses when passing arguments
-# https://stackoverflow.com/questions/60338114/updating-values-of-three-dot-ellipsis-in-r #nolint
 
 # nolint start
 gt_pca_autoSVD <- function(

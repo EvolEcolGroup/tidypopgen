@@ -84,13 +84,6 @@ list with elements: A named list (an S3 class "big_SVD") of
 \item \code{call}, the call that generated the object.
 \item \code{loci}, the loci used after long range LD removal.
 }
-
-Note: rather than accessing these elements directly, it is better to use
-\code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}. Note: If you encounter 'Error
-in rollmean(): Parameter 'size' is too large.' roll_size is exceeding the
-number of variants on at least one of your chromosomes. If you have
-pre-specified roll_size, you will need to reduce this parameter. If not, try
-specifying a reduced 'roll_size' to avoid this error.
 }
 \description{
 This function performs Principal Component Analysis on a \code{gen_tibble}, using
@@ -100,5 +93,11 @@ long-range LD regions. This function is a wrapper for
 }
 \details{
 Using gt_pca_autoSVD requires a reasonably large dataset, as the function
-iteratively removes regions of long range LD.
+iteratively removes regions of long range LD. If you encounter: 'Error in
+rollmean(): Parameter 'size' is too large.', \code{roll_size} exceeds the number
+of variants on at least one of your chromosomes. Try reducing 'roll_size' to
+avoid this error.
+
+Note: rather than accessing these elements directly, it is better to use
+\code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 }
