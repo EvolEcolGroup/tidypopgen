@@ -26,9 +26,8 @@ to the large number of loci and the restricted values that each genotype can tak
 be very inefficient to store them as individual standard columns. 
 
 In `tidypopgen`, we represent data as a `gen_tbl`, a subclass of `tibble` which has
-three compulsory columns: `id` of the individual (as a `character`, which must 
-be unique for each individual), `population` giving the population the 
-individuals belong to (a `character`), and `genotypes` (stored in a compressed format
+two compulsory columns: `id` of the individual (as a `character`, which must 
+be unique for each individual), and `genotypes` (stored in a compressed format
 as a File-Backed Matrix, with the vector in the tibble providing the row indices of the matrix
 for each individual). The real data reside on disk, and an attribute `bigsnp` of
 the `genotype` column contains all the information to access it. There is also an
@@ -40,7 +39,8 @@ shapes the indices of the genotype matrix rather than the matrix itself.
 The `loci` tibble includes columns `big_index` for the index in the FBM,
 `name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (an `integer`, if known, 
 otherwise set to `NA`), `position` for the position on the chromosome (an `integer`, if known, 
-otherwise set to `NA`), `genetic_dist` for the genetic distance on the chromosome (`numeric`, if known, else set to 0) `allele_ref` for the the reference allele (a `character`),
+otherwise set to `NA`), `genetic_dist` for the genetic distance on the chromosome
+(`numeric`, if known, else set to 0), `allele_ref` for the the reference allele (a `character`),
 and `allele_alt` for the alternate allele (a `character`, which can be `0` for
 monomorphic loci, following the same convention as plink). Additional individual metadata can be stored as columns in
 the main `gen_tbl`, whilst additional loci information (such as the position in 

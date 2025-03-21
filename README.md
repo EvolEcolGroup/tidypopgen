@@ -28,17 +28,20 @@ devtools::install_github("EvolEcolGroup/tidypopgen")
 ## Examples
 
 There are a several vignettes designed to teach you how to use `tidypopgen`. 
-The
-'overview' vignette explains how the data structures are designed, and provides a illustration
+The ['overview' vignette](https://evolecolgroup.github.io/tidypopgen/articles/tidypopgen.html) 
+explains how the data structures are designed, and provides a illustration
 of the grammar used to manipulate individuals and loci. 
 
-The 'example workflow' vignette provides a fully annotated example of how to 
-run population genetics analysis with `tidypopgen`.
-
-The 'quality control' vignette illustrates the `tidypopgen` functions that help
+The ['quality control' vignette](https://evolecolgroup.github.io/tidypopgen/articles/a02_qc.html)
+illustrates the `tidypopgen` functions that help
 running a fully QC of a dataset before analysis.
 
-Finally, we provide a 'PLINK cheatsheet' aimed at translating common tasks
+The ['population genetic analysis' vignette](https://evolecolgroup.github.io/tidypopgen/articles/a03_example_clustering_and_dapc.html)
+provides a fully annotated example of how to 
+run population genetics analysis with `tidypopgen`.
+
+Finally, we provide a [PLINK cheatsheet'](https://evolecolgroup.github.io/tidypopgen/articles/a99_plink_cheatsheet.html)
+aimed at translating common tasks
 performed in PLINK into `tidypopgen` commands.
 
 ## When something does not work
