@@ -101,10 +101,10 @@ test_that("adjusting roll_size fixes gt_pca_autoSVD problem ", {
   )
   missing_gt <- gt_impute_simple(missing_gt, method = "mode")
 
-  # we encounter roll_size error
+  # we encounter our roll_size error
   expect_error(
     missing_pca <- missing_gt %>% gt_pca_autoSVD(verbose = FALSE),
-    "Parameter 'size' is too large."
+    "roll_size exceeds the number of variants"
   )
 
   # adjusting roll_size fixes the error

@@ -6,7 +6,10 @@
 #' [bigsnpr::snp_autoSVD()]
 #'
 #' Using gt_pca_autoSVD requires a reasonably large dataset, as the function
-#' iteratively removes regions of long range LD.
+#' iteratively removes regions of long range LD. If you encounter 'Error in
+#' rollmean(): Parameter 'size' is too large.' roll_size exceeds the number of
+#' variants on at least one of your chromosomes. Try reducing 'roll_size' to
+#' avoid this error.
 #'
 #' @param x a `gen_tbl` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
@@ -88,15 +91,6 @@ gt_pca_autoSVD <- function(
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
   }
 
-  if (roll_size == 50) {
-    message(paste(
-      "If you encounter 'Error in rollmean(): Parameter 'size'",
-      "is too large.' roll_size exceeds the number of variants on",
-      "at least one of your chromosomes. Try reducing 'roll_size'",
-      "to avoid this error."
-    ))
-  }
-
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     options(bigstatsr.check.parallel.blas = FALSE)
@@ -125,24 +119,43 @@ gt_pca_autoSVD <- function(
   # Do we want to use the code from loci_clump to create chromosomes and
   # positions (it is a bit neater)
 
-  this_svd <- bigsnpr::snp_autoSVD(
-    X$genotypes, # nolint
-    infos.chr = infos_chr,
-    infos.pos = infos_pos,
-    ind.row = .gt_bigsnp_rows(x),
-    ind.col = .gt_bigsnp_cols(x),
-    fun.scaling = fun_scaling,
-    thr.r2 = thr_r2,
-    size = size,
-    k = k,
-    roll.size = roll_size,
-    int.min.size = int_min_size,
-    alpha.tukey = alpha_tukey,
-    min.mac = min_mac,
-    max.iter = max_iter,
-    ncores = n_cores,
-    verbose = verbose
+  tryCatch(
+    expr = {
+      this_svd <- bigsnpr::snp_autoSVD(
+        X$genotypes, # nolint
+        infos.chr = infos_chr,
+        infos.pos = infos_pos,
+        ind.row = .gt_bigsnp_rows(x),
+        ind.col = .gt_bigsnp_cols(x),
+        fun.scaling = fun_scaling,
+        thr.r2 = thr_r2,
+        size = size,
+        k = k,
+        roll.size = roll_size,
+        int.min.size = int_min_size,
+        alpha.tukey = alpha_tukey,
+        min.mac = min_mac,
+        max.iter = max_iter,
+        ncores = n_cores,
+        verbose = verbose
+      )
+    },
+    error = function(e) {
+      if (grepl("Parameter 'size' is too large.",
+        e$message,
+        fixed = TRUE
+      )) {
+        stop(
+          "'Error in rollmean(): Parameter 'size' is too large.'
+          roll_size exceeds the number of variants on at least one of your
+          chromosomes. Try reducing 'roll_size' to avoid this error. "
+        )
+      } else {
+        stop(e)
+      }
+    }
   )
+
   # add names to the scores (to match them to data later)
   rownames(this_svd$u) <- x$id
   this_svd$method <- "autoSVD"
