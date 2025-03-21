@@ -61,7 +61,7 @@ test_that("gt_dapc_and_tidiers", {
   expect_true("loadings" %in% names(test_dapc))
   expect_true("ind.coord" %in% names(test_dapc))
   expect_equal(ncol(test_dapc$ind.coord), 5)
-  
+
   # Test with different n.da parameter
   test_dapc_custom <- test_cluster_best %>% gt_dapc(n_da = 3)
   expect_equal(ncol(test_dapc_custom$ind.coord), 3)
