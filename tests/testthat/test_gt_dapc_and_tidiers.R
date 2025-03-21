@@ -52,6 +52,23 @@ test_that("gt_dapc_and_tidiers", {
   # unit tests for gt_dapc
   test_dapc <- test_cluster_best %>% gt_dapc()
 
+  ############################
+  # unit tests for gt_dapc
+  test_dapc <- test_cluster_best %>% gt_dapc()
+  # Test that input validation works
+  expect_error(
+    gt_dapc("not_a_cluster_object"),
+    "'x' should be a 'gt_pca' object"
+  )
+  # Test that output has expected structure
+  expect_true("eig" %in% names(test_dapc))
+  expect_true("loadings" %in% names(test_dapc))
+  expect_true("ind.coord" %in% names(test_dapc))
+  expect_equal(ncol(test_dapc$ind.coord), 5)
+  
+  # Test with different n.da parameter
+  test_dapc_custom <- test_cluster_best %>% gt_dapc(n_da = 3)
+  expect_equal(ncol(test_dapc_custom$ind.coord), 3)
 
 
   ############################

@@ -152,7 +152,7 @@ gt_dapc <- function(
   res$tab <- XU
   res$grp <- pop.fac
   # note that this (res$var) is the variance out fo the variance that was
-  # captured bythe retained PCs
+  # captured by the retained PCs
   res$var <- XU.lambda
   res$eig <- ldaX$svd^2
   res$loadings <- ldaX$scaling[, 1:n_da, drop = FALSE]
