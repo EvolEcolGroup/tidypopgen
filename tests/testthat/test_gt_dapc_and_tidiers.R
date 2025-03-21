@@ -51,10 +51,6 @@ test_that("gt_dapc_and_tidiers", {
   ############################
   # unit tests for gt_dapc
   test_dapc <- test_cluster_best %>% gt_dapc()
-
-  ############################
-  # unit tests for gt_dapc
-  test_dapc <- test_cluster_best %>% gt_dapc()
   # Test that input validation works
   expect_error(
     gt_dapc("not_a_cluster_object"),
