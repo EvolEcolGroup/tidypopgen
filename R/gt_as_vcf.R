@@ -54,7 +54,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
   # create copy of loci table
   loci_tbl <- show_loci(x)
   # reorder chromosomes levels in the order in which they appear
-  loci_tbl$chromosome <- forcats::fct_inorder(loci_tbl$chromosome)
+  loci_tbl$chromosome <- fct_inorder_base(loci_tbl$chromosome)
   # get max position for each chromosome
   chromosome_summary <- loci_tbl %>%
     group_by(.data$chromosome) %>%

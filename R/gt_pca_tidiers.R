@@ -102,7 +102,7 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
         names_to = "PC",
         values_to = "value"
       )
-    ret <- mutate(ret, PC = as.numeric(stringr::str_replace(.data$PC, "V", "")))
+    ret <- mutate(ret, PC = as.numeric(str_replace_base(.data$PC, "V", "")))
     if (is.null(rownames(x$v))) ret$column <- as.integer(ret$column)
   } else if (matrix %in% c("x", "samples", "scores")) {
     ret <- sweep(x$u, 2, x$d, "*")
@@ -118,7 +118,7 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
   }
 
   # change the PC to a numeric
-  ret <- mutate(ret, PC = as.integer(stringr::str_replace(.data$PC, "PC", "")))
+  ret <- mutate(ret, PC = as.integer(str_replace_base(.data$PC, "PC", "")))
   as_tibble(ret)
 }
 

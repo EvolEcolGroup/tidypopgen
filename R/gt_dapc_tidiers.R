@@ -105,7 +105,7 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
     # change the LD to a numeric
     ret <- mutate(
       ret,
-      LD = as.numeric(stringr::str_replace(.data$LD, "LD", ""))
+      LD = as.numeric(str_replace_base(.data$LD, "LD", ""))
     )
   }
 
