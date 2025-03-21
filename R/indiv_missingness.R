@@ -42,8 +42,6 @@ indiv_missingness.vctrs_bigSNP <- function(
     as_counts = FALSE,
     block_size = bigstatsr::block_size(length(.x), 1), # nolint
     ...) {
-
-
   rlang::check_dots_empty()
   # get the FBM
   X <- attr(.x, "bigsnp")$genotypes # nolint

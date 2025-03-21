@@ -6,17 +6,17 @@
 \alias{indiv_het_obs.vctrs_bigSNP}
 \title{Estimate individual observed heterozygosity}
 \usage{
-indiv_het_obs(.x, return_counts = FALSE, ...)
+indiv_het_obs(.x, as_counts = FALSE, ...)
 
-\method{indiv_het_obs}{tbl_df}(.x, return_counts = FALSE, ...)
+\method{indiv_het_obs}{tbl_df}(.x, as_counts = FALSE, ...)
 
-\method{indiv_het_obs}{vctrs_bigSNP}(.x, return_counts = FALSE, ...)
+\method{indiv_het_obs}{vctrs_bigSNP}(.x, as_counts = FALSE, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
 a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
-\item{return_counts}{logical, if \code{TRUE}, return a matrix with two columns:
+\item{as_counts}{logical, if \code{TRUE}, return a matrix with two columns:
 the number of heterozygotes and the number of missing values for each
 individual. These quantities can be useful to compute more complex
 quantities.}

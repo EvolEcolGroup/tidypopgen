@@ -33,13 +33,16 @@ test_that("indiv_het_obs computes correctly", {
   expect_true(all(
     indiv_het_obs(test_gt) == rowMeans(test_genotypes == 1, na.rm = TRUE)
   ))
-  
+
   # get counts
   counts_mat <- as.matrix(
-    data.frame(het_n = apply(test_genotypes == 1, 1, sum, na.rm = TRUE),
-        na_n = apply(is.na(test_genotypes), 1, sum, na.rm = TRUE)))
+    data.frame(
+      het_n = apply(test_genotypes == 1, 1, sum, na.rm = TRUE),
+      na_n = apply(is.na(test_genotypes), 1, sum, na.rm = TRUE)
+    )
+  )
   expect_identical(
-    indiv_het_obs(test_gt$genotypes, return_counts = TRUE),
+    indiv_het_obs(test_gt$genotypes, as_counts = TRUE),
     counts_mat
   )
 })

@@ -21,13 +21,15 @@ qc_report_indiv <- function(.x, ...) {
 qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
-  if (is.null(kings_threshold)) {
-    qc_report <- .x %>%
-      reframe(
-        het_obs = indiv_het_obs(.x),
-        missingness = indiv_missingness(.x, as_counts = FALSE)
-      )
-  } else {
+  n_loci <- nrow(show_loci(.x))
+  qc_report <- .x %>%
+    indiv_het_obs(, as_counts = TRUE) %>%
+    as_tibble() %>%
+    reframe(
+      het_obs = .data$het_n / (n_loci - .data$na_n),
+      missingness = .data$na_n / n_loci
+    )
+  if (!is.null(kings_threshold)) {
     # calculate the kinship matrix
     king <- pairwise_king(.x, as_matrix = TRUE)
 
@@ -38,11 +40,6 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
       ...
     )
 
-    qc_report <- .x %>%
-      reframe(
-        het_obs = indiv_het_obs(.x),
-        missingness = indiv_missingness(.x, as_counts = FALSE)
-      )
     qc_report$to_keep <- relatives[[3]]
     qc_report$id <- .x$id
     attr(qc_report$to_keep, "king") <- king
@@ -57,14 +54,21 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
 qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
-  if (is.null(kings_threshold)) {
-    qc_report_indiv <- .x %>%
-      ungroup() %>%
-      reframe(
-        het_obs = indiv_het_obs(.x),
-        missingness = indiv_missingness(.x, as_counts = FALSE)
-      )
-  } else {
+  n_loci <- nrow(show_loci(.x))
+  qc_report <- .x %>%
+    # TODO do we need this???
+    ungroup() %>%
+    indiv_het_obs(, as_counts = TRUE) %>%
+    as_tibble() %>%
+    reframe(
+      het_obs = .data$het_n / (n_loci - .data$na_n),
+      missingness = .data$na_n / n_loci
+    ) %>%
+    mutate(id = .x$id)
+  # re-group according to original .x grouping
+  qc_report$group <- .x[[dplyr::group_vars(.x)]]
+
+  if (!is.null(kings_threshold)) {
     # find grouping levels
     grouping_order <- group_keys(.x)
 
@@ -91,26 +95,16 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 
     relatives <- indivs_to_keep(relatives, king)
 
-    # create qc_report_indiv
-    qc_report_indiv <- .x %>%
-      ungroup() %>%
-      reframe(
-        het_obs = indiv_het_obs(.x),
-        missingness = indiv_missingness(.x, as_counts = FALSE)
-      ) %>%
-      mutate(id = .x$id)
-    # re-group according to original .x grouping
-    qc_report_indiv$group <- .x[[dplyr::group_vars(.x)]]
     # reorder relatives
-    relatives <- relatives[unique(qc_report_indiv$group)]
+    relatives <- relatives[unique(qc_report$group)]
     all_flags <- unlist(relatives)
     # add to_remove
-    qc_report_indiv$to_keep <- as.vector(all_flags)
-    attr(qc_report_indiv$to_keep, "king") <- king
+    qc_report$to_keep <- as.vector(all_flags)
+    attr(qc_report$to_keep, "king") <- king
   }
 
-  class(qc_report_indiv) <- c("qc_report_indiv", class(qc_report_indiv))
-  return(qc_report_indiv)
+  class(qc_report) <- c("qc_report_indiv", class(qc_report))
+  return(qc_report)
 }
 
 
