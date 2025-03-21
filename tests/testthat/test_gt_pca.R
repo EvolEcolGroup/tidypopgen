@@ -321,6 +321,7 @@ test_that("our stdevs are comparable to prcomp", {
   )
 })
 
+# The tests below require more than 2 cores, so we skip on CRAN
 skip_on_cran()
 
 test_that("n_cores can be set for pca functions", {

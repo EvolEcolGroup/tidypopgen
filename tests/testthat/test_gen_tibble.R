@@ -159,7 +159,7 @@ test_that("gen_tibble wrong filetype error", {
         "extdata/related/test_king.kin0",
         package = "tidypopgen"
       )),
-    "file_path should be pointing "
+    "x should be a valid file path pointing"
   )
 })
 
@@ -259,7 +259,7 @@ test_that("gen_tibble identifies wrong loci table columns", {
 })
 
 
-test_that("PROBLEM TEST gentibble from VCF with missingness issue", {
+test_that("test gentibble from VCF with missingness issue", {
   ########################
   # PLINK BED files
   ########################
@@ -349,6 +349,17 @@ test_that("PROBLEM TEST gentibble from VCF with missingness issue", {
 })
 
 test_that("gen_tibble from files", {
+  # test invalid file names
+  expect_error(
+    gen_tibble("non_existent_file.blah", quiet = TRUE),
+    "x should be a valid file path pointing"
+  )
+  expect_error(
+    gen_tibble("", quiet = TRUE),
+    "x should not be an empty string"
+  ) 
+  
+  
   ########################
   # PLINK BED files
   ########################
