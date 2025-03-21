@@ -588,7 +588,7 @@ custom plot:</p>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
 <span>    y <span class="op">=</span> <span class="st">"Population Structure for K = 3"</span>,</span>
-<span>    title <span class="op">=</span> <span class="st">"Clustering at K = 3 for Anolis punctatus using ADMIXTURE algorithm"</span></span>
+<span>    title <span class="op">=</span> <span class="st">"ADMIXTURE algorithm on A. punctatus"</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/theme_distruct.html">theme_distruct</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="../reference/scale_fill_distruct.html">scale_fill_distruct</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -634,31 +634,17 @@ containing results from multiple runs of a clustering algorithm for
 multiple values of K, read the .Q files, and summarise them in a single
 <code>q_matrix_list</code> object.</p>
 <p>In the analysis above, through <code>gt_admxiture()</code>, we ran 1
-repetition for K values 1 to 10.</p>
-<p>To exemplify how <code><a href="../reference/q_matrix.html">q_matrix()</a></code> can read directly from
-output folders, we can write the outputs to a temporary file:</p>
+repetition for K values 2 to 6. Let us now collate the results from a
+standard run of ADMIXTURE for which we stored the files in a
+directory:</p>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">runs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">k_values</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span></span>
-<span><span class="va">q_matrices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span><span class="kw">for</span> <span class="op">(</span><span class="va">x</span> <span class="kw">in</span> <span class="va">k_values</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">q_matrices</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="va">runs</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">q_matrices</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">anole_adm</span>, k <span class="op">=</span> <span class="va">x</span>, run <span class="op">=</span> <span class="va">i</span><span class="op">)</span></span>
-<span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.table</a></span><span class="op">(</span><span class="va">q_matrices</span><span class="op">[[</span><span class="va">x</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span>,</span>
-<span>      file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dir</span>, <span class="st">"/K"</span>, <span class="va">x</span>, <span class="st">"run"</span>, <span class="va">i</span>, <span class="st">".Q"</span><span class="op">)</span>,</span>
-<span>      col.names <span class="op">=</span> <span class="cn">FALSE</span>, row.names <span class="op">=</span> <span class="cn">FALSE</span>, quote <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span>    <span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">adm_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"anolis_adm"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="va">adm_dir</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "K2run1.Q" "K3run1.Q" "K4run1.Q" "K5run1.Q" "K6run1.Q"</span></span></code></pre></div>
 <p>And read them back into our R environment using
 <code>q_matrix_list</code>:</p>
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">q_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_q_files.html">read_q_files</a></span><span class="op">(</span><span class="va">dir</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">q_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_q_files.html">read_q_files</a></span><span class="op">(</span><span class="va">adm_dir</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">q_list</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Admixture results for multiple runs:           </span></span>
 <span><span class="co">#&gt; k 2 3 4 5 6</span></span>
@@ -671,56 +657,14 @@ selecting the run number and K value of interest using
 <code>get_q_matrix</code> as before.</p>
 <p>For example, if we would like to view the second run of K = 3:</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">q_list</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
-<span><span class="co">#&gt;            .Q1      .Q2      .Q3</span></span>
-<span><span class="co">#&gt;  [1,] 0.000019 0.000010 0.999971</span></span>
-<span><span class="co">#&gt;  [2,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt;  [3,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt;  [4,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt;  [5,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt;  [6,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt;  [7,] 0.000010 0.954467 0.045523</span></span>
-<span><span class="co">#&gt;  [8,] 0.000010 0.221872 0.778118</span></span>
-<span><span class="co">#&gt;  [9,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt; [10,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt; [11,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt; [12,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt; [13,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt; [14,] 0.071329 0.000010 0.928661</span></span>
-<span><span class="co">#&gt; [15,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt; [16,] 0.340174 0.000010 0.659816</span></span>
-<span><span class="co">#&gt; [17,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt; [18,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt; [19,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt; [20,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt; [21,] 0.009467 0.000010 0.990523</span></span>
-<span><span class="co">#&gt; [22,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt; [23,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt; [24,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt; [25,] 0.000010 0.209003 0.790987</span></span>
-<span><span class="co">#&gt; [26,] 0.000010 0.251664 0.748326</span></span>
-<span><span class="co">#&gt; [27,] 0.000010 0.000010 0.999980</span></span>
-<span><span class="co">#&gt; [28,] 0.276084 0.000010 0.723906</span></span>
-<span><span class="co">#&gt; [29,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt; [30,] 0.000010 0.999980 0.000010</span></span>
-<span><span class="co">#&gt; [31,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [32,] 0.779321 0.000010 0.220669</span></span>
-<span><span class="co">#&gt; [33,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [34,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [35,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [36,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [37,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [38,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [39,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [40,] 0.999013 0.000010 0.000977</span></span>
-<span><span class="co">#&gt; [41,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [42,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [43,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [44,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [45,] 0.999980 0.000010 0.000010</span></span>
-<span><span class="co">#&gt; [46,] 0.775201 0.000010 0.224789</span></span>
-<span><span class="co">#&gt; attr(,"class")</span></span>
-<span><span class="co">#&gt; [1] "q_matrix" "q_matrix" "matrix"   "array"</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">q_list</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;           .Q1     .Q2      .Q3</span></span>
+<span><span class="co">#&gt; [1,] 0.000019 0.00001 0.999971</span></span>
+<span><span class="co">#&gt; [2,] 0.000010 0.00001 0.999980</span></span>
+<span><span class="co">#&gt; [3,] 0.000010 0.99998 0.000010</span></span>
+<span><span class="co">#&gt; [4,] 0.000010 0.99998 0.000010</span></span>
+<span><span class="co">#&gt; [5,] 0.000010 0.99998 0.000010</span></span>
+<span><span class="co">#&gt; [6,] 0.999980 0.00001 0.000010</span></span></code></pre></div>
 <p>And, again, we can then autoplot any matrix by selecting from the
 <code>q_matrix_list</code> object:</p>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
@@ -729,7 +673,7 @@ selecting the run number and K value of interest using
 <span>  annotate_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  arrange_by_indiv <span class="op">=</span> <span class="cn">TRUE</span>, reorder_within_groups <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-49-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-50-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
 <p>In this way, <code>tidypopgen</code> integrates with external
 clustering software seamlessly for quick, easy plotting.</p>
 </div>
