@@ -78,7 +78,7 @@ gt_cluster_pca_best_k <- function(
     quiet = FALSE) {
   if (!inherits(x, "gt_cluster_pca")) {
     stop(paste(
-      "'x' should be a 'gt_cluster_pcaers' object generated",
+      "'x' should be a 'gt_cluster_pca' object generated",
       "with 'gt_cluster_pca()'"
     ))
   }

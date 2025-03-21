@@ -3,7 +3,7 @@ title: "Population genetic analysis with tidypopgen"
 output: rmarkdown::html_vignette
         #pdf_document
 vignette: >
-  %\VignetteIndexEntry{Example workflow with tidypopgen}
+  %\VignetteIndexEntry{Population genetic analysis with tidypopgen}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

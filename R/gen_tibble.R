@@ -108,6 +108,12 @@ gen_tibble.character <-
       backingfile <- change_duplicated_file_name(backingfile)
     }
 
+
+    # test that the string is not empty (or it will break the code later on)
+    if (nchar(x) == 0) {
+      stop("x should not be an empty string")
+    }
+
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
       x_gt <- gen_tibble_bed_rds(
@@ -154,7 +160,7 @@ gen_tibble.character <-
       )
     } else {
       stop(paste(
-        "file_path should be pointing to a either a PLINK .bed",
+        "x should be a valid file path pointing to a either a PLINK .bed",
         "or .ped file, a bigSNP .rds file or a VCF .vcf or",
         ".vcf.gz file"
       ))

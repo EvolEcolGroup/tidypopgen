@@ -4,14 +4,7 @@
 \alias{gt_dapc}
 \title{Discriminant Analysis of Principal Components for gen_tibble}
 \usage{
-gt_dapc(
-  x,
-  pop = NULL,
-  n_pca = NULL,
-  n_da = NULL,
-  loadings_by_locus = TRUE,
-  pca_info = FALSE
-)
+gt_dapc(x, pop = NULL, n_pca = NULL, n_da = NULL, loadings_by_locus = TRUE)
 }
 \arguments{
 \item{x}{an object of class \code{gt_pca}, or its subclass \code{gt_cluster_pca}}
@@ -32,11 +25,6 @@ Discriminant Analysis step.}
 contribution of each locus should be stored (TRUE, default) or not (FALSE).
 Such output can be useful, but can also create large matrices when there
 are a lot of loci and many dimensions.}
-
-\item{pca_info}{a logical indicating whether information about the prior PCA
-should be stored (TRUE, default) or not (FALSE). This information is
-required to predict group membership of new individuals using predict, but
-makes the object slightly bigger.}
 }
 \value{
 an object of class \link[adegenet:dapc]{adegenet::dapc}
@@ -47,9 +35,7 @@ This function implements the Discriminant Analysis of Principal Components
 pre-defined groups. When groups are unknown, use \code{\link[=gt_cluster_pca]{gt_cluster_pca()}} to infer
 genetic clusters. See 'details' section for a succinct description of the
 method, and the vignette in the package \code{adegenet} ("adegenet-dapc") for a
-tutorial. This function returns objects of class \code{\link[adegenet:dapc]{adegenet::dapc}} which are
-compatible with methods from \code{adegenet}; graphical methods for DAPC are
-documented in \link[adegenet:dapcGraphics]{adegenet::scatter.dapc} (see ?scatter.dapc).
+tutorial.
 }
 \details{
 The Discriminant Analysis of Principal Components (DAPC) is designed to
@@ -61,6 +47,20 @@ to a Linear Discriminant Analysis (LDA). A trivial matrix operation allows to
 express discriminant functions as linear combination of alleles, therefore
 allowing one to compute allele contributions. More details about the
 computation of DAPC are to be found in the indicated reference.
+
+Results can be visualised with \code{\link[=autoplot.gt_dapc]{autoplot.gt_dapc()}}, see the help of that
+method for the availabl plots. There are also \link{gt_dapc_tidiers} for
+manipulating the results. For the moment, his function returns objects of
+class \code{\link[adegenet:dapc]{adegenet::dapc}} which are
+compatible with methods from \code{adegenet}; graphical methods for DAPC are
+documented in \link[adegenet:dapcGraphics]{adegenet::scatter.dapc} (see ?scatter.dapc). This is likely
+to change in the future, so make sure you do not rely on the objects
+remaining compatible.
+
+Note that there is no current method to predict scores for
+individuals not included in the original analysis. This is because we
+currently do not have  mechanism to store the pca information in the
+object, and that is needed for prediction.
 }
 \references{
 Jombart T, Devillard S and Balloux F (2010) Discriminant analysis

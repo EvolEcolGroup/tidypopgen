@@ -5,9 +5,7 @@
 #' pre-defined groups. When groups are unknown, use [gt_cluster_pca()] to infer
 #' genetic clusters. See 'details' section for a succinct description of the
 #' method, and the vignette in the package `adegenet` ("adegenet-dapc") for a
-#' tutorial. This function returns objects of class [`adegenet::dapc`] which are
-#' compatible with methods from `adegenet`; graphical methods for DAPC are
-#' documented in [adegenet::scatter.dapc] (see ?scatter.dapc).
+#' tutorial.
 #'
 #' The Discriminant Analysis of Principal Components (DAPC) is designed to
 #' investigate the genetic structure of biological populations. This
@@ -18,6 +16,20 @@
 #' express discriminant functions as linear combination of alleles, therefore
 #' allowing one to compute allele contributions. More details about the
 #' computation of DAPC are to be found in the indicated reference.
+#'
+#' Results can be visualised with [`autoplot.gt_dapc()`], see the help of that
+#' method for the availabl plots. There are also [gt_dapc_tidiers] for
+#' manipulating the results. For the moment, his function returns objects of
+#' class [`adegenet::dapc`] which are
+#' compatible with methods from `adegenet`; graphical methods for DAPC are
+#' documented in [adegenet::scatter.dapc] (see ?scatter.dapc). This is likely
+#' to change in the future, so make sure you do not rely on the objects
+#' remaining compatible.
+#'
+#' Note that there is no current method to predict scores for
+#' individuals not included in the original analysis. This is because we
+#' currently do not have  mechanism to store the pca information in the
+#' object, and that is needed for prediction.
 #'
 #' @references Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
 #'   of principal components: a new method for the analysis of genetically
@@ -41,12 +53,14 @@
 #'   contribution of each locus should be stored (TRUE, default) or not (FALSE).
 #'   Such output can be useful, but can also create large matrices when there
 #'   are a lot of loci and many dimensions.
-#' @param pca_info a logical indicating whether information about the prior PCA
-#'   should be stored (TRUE, default) or not (FALSE). This information is
-#'   required to predict group membership of new individuals using predict, but
-#'   makes the object slightly bigger.
 #' @returns an object of class [adegenet::dapc]
 #' @export
+
+
+# @param pca_info a logical indicating whether information about the prior PCA
+#   should be stored (TRUE, default) or not (FALSE). This information is
+#   required to predict group membership of new individuals using predict, but
+#   makes the object slightly bigger.
 
 # AM: Thoughts about data structures. The original DAPC blended pca info
 # within the object. For a cleaner job at predicting, it would be best to
@@ -62,8 +76,7 @@ gt_dapc <- function(
     pop = NULL,
     n_pca = NULL,
     n_da = NULL,
-    loadings_by_locus = TRUE,
-    pca_info = FALSE) {
+    loadings_by_locus = TRUE) {
   if (!inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }
@@ -139,7 +152,7 @@ gt_dapc <- function(
   res$tab <- XU
   res$grp <- pop.fac
   # note that this (res$var) is the variance out fo the variance that was
-  # captured bythe retained PCs
+  # captured by the retained PCs
   res$var <- XU.lambda
   res$eig <- ldaX$svd^2
   res$loadings <- ldaX$scaling[, 1:n_da, drop = FALSE]
@@ -151,24 +164,26 @@ gt_dapc <- function(
   res$assign <- predX$class
   res$call <- match.call()
 
+  # nolint start
   # ## optional: store loadings of variables
   # @BUG we need to sort out the slots as these are not correct
   # @TODO our objects are missing several of these slots
-  if (pca_info) {
-    warning(paste(
-      "conversion of objects slots is inconmplete, don't use",
-      "this option yet!"
-    ))
-    res$pca.loadings <- as.matrix(V)
-    # res$pca.cent <- x$cent #nolint start
-    # if(!is.null(x$norm)) {
-    #   res$pca.norm <- x$norm
-    # } else {
-    #   res$pca.norm <- rep(1, length(x$cent))
-    # } #nolint end
-    res$pca.eig <- x$d^2 # TODO check, this should get back the eigen from glPCA
-    # note that the default allele.as.unit is FALSE for glPCA
-  }
+  # if (pca_info) {
+  #   warning(paste(
+  #     "conversion of objects slots is inconmplete, don't use",
+  #     "this option yet!"
+  #   ))
+  #   res$pca.loadings <- as.matrix(V)
+  #   # res$pca.cent <- x$cent
+  #   # if(!is.null(x$norm)) {
+  #   #   res$pca.norm <- x$norm
+  #   # } else {
+  #   #   res$pca.norm <- rep(1, length(x$cent))
+  #   # }
+  #   res$pca.eig <- x$d^2 # TODO check, this should get back the eigen from glPCA
+  #   # note that the default allele.as.unit is FALSE for glPCA
+  # }
+  # nolint end
 
   ## optional: get loadings of variables
   if (loadings_by_locus) {
