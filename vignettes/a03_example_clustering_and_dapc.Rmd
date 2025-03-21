@@ -474,8 +474,8 @@ anole_adm <- readRDS("a03_anole_adm.rds")
 runs <- c(1)
 k_values <- c(2:6)
 q_matrices <- list()
-adm_dir <- file.path(tempdir(),"anolis_adm")
-if (!dir.exists(adm_dir)){
+adm_dir <- file.path(tempdir(), "anolis_adm")
+if (!dir.exists(adm_dir)) {
   dir.create(adm_dir)
 }
 
@@ -494,9 +494,8 @@ for (x in k_values) {
 ```
 
 ```{r}
-adm_dir <- file.path(tempdir(),"anolis_adm")
+adm_dir <- file.path(tempdir(), "anolis_adm")
 list.files(adm_dir)
-
 ```
 
 And read them back into our R environment using `q_matrix_list`:

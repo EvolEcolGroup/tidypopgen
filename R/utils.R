@@ -38,7 +38,22 @@ is_diploid_only <- function(x) {
   }
 }
 
-# replace forcats::fct_inorder
+
+#' Reorder factor levels by first appearance
+#'
+#' This function reorders the levels of a factor so that they appear in the
+#' order they first appear in the data.  This is a drop-in replacement for
+#' `forcats::fct_inorder()`
+#'
+#' @param f A factor or character vector
+#' @param ordered Logical, should the resulting factor be ordered?
+#' @return A factor with levels in the order they first appear
+#' @keywords internal
+#' @examples
+#' x <- factor(c("b", "a", "c", "a", "b", "c", "b", "a"))
+#' fct_inorder_base(x)
+#' fct_inorder_base(x, ordered = TRUE)
+
 fct_inorder_base <- function(f, ordered = FALSE) {
   if (is.character(f)) {
     f <- factor(f)
@@ -54,7 +69,19 @@ fct_inorder_base <- function(f, ordered = FALSE) {
   factor(f, levels = levels(f)[idx], ordered = ordered)
 }
 
-# replace stringr::str_replace
+#' Replace matches with new text
+#'
+#' This function is a drop-in replacement for `stringr::str_replace()`, which
+#' replaces the first match
+#'
+#' @param string A character input vector
+#' @param pattern A regular expression
+#' @param replacement A character vector
+#' @return A character vector with the first match replaced
+#' @keywords internal
+#' @examples
+#' x <- "I love cats and cats are cute"
+#' str_replace_base(x, "cats", "dogs")
 str_replace_base <- function(string, pattern, replacement) {
   sub(pattern, replacement, string)
 }

@@ -24,6 +24,7 @@ str_replace_base <- function(string, pattern, replacement) {
 
 # Example usage:
 x <- "I love cats and cats are cute"
-testthat::expect_identical(stringr::str_replace(x, "cats", "dogs"),
-                           str_replace_base(x, "cats", "dogs"))
-
+testthat::expect_identical(
+  stringr::str_replace(x, "cats", "dogs"),
+  str_replace_base(x, "cats", "dogs")
+)
