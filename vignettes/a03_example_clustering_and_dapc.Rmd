@@ -464,16 +464,18 @@ the function `q_matrix()` can take a path to a directory containing results from
 of a clustering algorithm for multiple values of K, read the .Q files, and summarise 
 them in a single `q_matrix_list` object.
 
-In the analysis above, through `gt_admxiture()`, we ran 1 repetition for K values 1 to 10. 
+In the analysis above, through `gt_admxiture()`, we ran 1 repetition for K values 2 to 6. Let us
+now collate the results from a standard run of ADMIXTURE for which we stored the files in
+a directory:
 
-To exemplify how `q_matrix()` can read directly from output folders, we can write 
-the outputs to a temporary file: 
-
-```{r}
+```{r echo=FALSE, results='hide'}
 runs <- c(1)
 k_values <- c(2:6)
 q_matrices <- list()
-dir <- tempdir()
+adm_dir <- file.path(tempdir(),"anolis_adm")
+if (!dir.exists(adm_dir)){
+  dir.create(adm_dir)
+}
 
 for (x in k_values) {
   q_matrices[[x]] <- list()
@@ -482,17 +484,23 @@ for (x in k_values) {
     q_matrices[[x]][[i]] <- get_q_matrix(anole_adm, k = x, run = i)
 
     write.table(q_matrices[[x]][[i]],
-      file = paste0(dir, "/K", x, "run", i, ".Q"),
+      file = paste0(adm_dir, "/K", x, "run", i, ".Q"),
       col.names = FALSE, row.names = FALSE, quote = FALSE
     )
   }
 }
 ```
 
+```{r}
+adm_dir <- file.path(tempdir(),"anolis_adm")
+list.files(adm_dir)
+
+```
+
 And read them back into our R environment using `q_matrix_list`:
 
 ```{r}
-q_list <- read_q_files(dir)
+q_list <- read_q_files(adm_dir)
 summary(q_list)
 ```
 
@@ -517,8 +525,8 @@ autoplot(get_q_matrix(q_list, k = 3, run = 1),
 )
 ```
 
+BUG THERE IS SOMETHING WRONG WITH THE LABELLING OF THE PLOT ABOVE!!!
+
+
 In this way, `tidypopgen` integrates with external clustering software
 seamlessly for quick, easy plotting.
-
-```{r}
-```
