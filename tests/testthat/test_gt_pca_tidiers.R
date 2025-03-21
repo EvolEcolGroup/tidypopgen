@@ -2,7 +2,8 @@ options(mc_doScale_quiet = TRUE)
 
 test_that("gt_pca_tidiers", {
   bed_file <- system.file("extdata", "example-missing.bed",
-                          package = "bigsnpr")
+    package = "bigsnpr"
+  )
   test_gt <- gen_tibble(
     bed_file,
     backingfile = tempfile("test_"),

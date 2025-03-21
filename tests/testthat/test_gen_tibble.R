@@ -357,9 +357,9 @@ test_that("gen_tibble from files", {
   expect_error(
     gen_tibble("", quiet = TRUE),
     "x should not be an empty string"
-  ) 
-  
-  
+  )
+
+
   ########################
   # PLINK BED files
   ########################

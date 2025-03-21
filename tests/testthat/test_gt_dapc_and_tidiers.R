@@ -2,7 +2,8 @@ options(mc_doScale_quiet = TRUE)
 
 test_that("gt_dapc_and_tidiers", {
   bed_file <- system.file("extdata", "example-missing.bed",
-                          package = "bigsnpr")
+    package = "bigsnpr"
+  )
   test_gt <- gen_tibble(
     bed_file,
     backingfile = tempfile("test_"),
@@ -19,37 +20,43 @@ test_that("gt_dapc_and_tidiers", {
     "'x' should be a 'gt_pca' object"
   )
   # use all pca
-  expect_message(test_cluster <- gt_cluster_pca(test_pca),
-                 "'n.pca' was not set: all 15 components were used")
+  expect_message(
+    test_cluster <- gt_cluster_pca(test_pca),
+    "'n.pca' was not set: all 15 components were used"
+  )
   # we have a clusters element in the object
   expect_true("clusters" %in% names(test_cluster))
   # TODO we should test that all the sub-element are what we expect
-  
+
   ############################
   # unit tests for gt_cluster_pca_best_k
-  
+
   # test error if not a gt_cluster_pca object
   expect_error(
     test_pca %>% gt_cluster_pca_best_k(stat = "X", criterion = "min"),
     "'x' should be a 'gt_cluster_pca' object"
   )
-  expect_message(test_cluster_best <-
-                   test_cluster %>%
-                   gt_cluster_pca_best_k(stat = "AIC",
-                                         criterion = "diffNgroup"),
-                 "Using AIC with criterion")
+  expect_message(
+    test_cluster_best <-
+      test_cluster %>%
+      gt_cluster_pca_best_k(
+        stat = "AIC",
+        criterion = "diffNgroup"
+      ),
+    "Using AIC with criterion"
+  )
   # we have a best_k element
   expect_true("best_k" %in% names(test_cluster_best))
-  
+
   ############################
   # unit tests for gt_dapc
   test_dapc <- test_cluster_best %>% gt_dapc()
-  
-  
-  
+
+
+
   ############################
   # test the tidiers
-  
+
   # get error if more than one matrix selected
   expect_error(
     test_dapc %>% tidy(matrix = c("X", "X")),
