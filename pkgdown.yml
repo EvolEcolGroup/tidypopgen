@@ -2,11 +2,11 @@ pandoc: 3.1.11
 pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
-  a01_overview: a01_overview.html
   a02_qc: a02_qc.html
   a03_example_clustering_and_dapc: a03_example_clustering_and_dapc.html
   a99_plink_cheatsheet: a99_plink_cheatsheet.html
-last_built: 2025-03-21T19:13Z
+  tidypopgen: tidypopgen.html
+last_built: 2025-03-21T19:29Z
 urls:
   reference: https://evolecolgroup.github.io/tidypopgen/reference
   article: https://evolecolgroup.github.io/tidypopgen/articles
