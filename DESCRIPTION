@@ -1,6 +1,6 @@
 Package: tidypopgen
 Title: Tidy Population Genetics
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: 
     c(person("Evie", "Carter", role = c("aut")),
     person("Andrea", "Manica", email = "am315@cam.ac.uk", 
