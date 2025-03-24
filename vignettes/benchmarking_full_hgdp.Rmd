@@ -1,0 +1,266 @@
+---
+title: "HGDP tidypopgen analysis"
+output:
+  pdf_document: default
+  html_document: default
+date: "2024-08-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# xgboost uses data.table
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+
+library(tidypopgen)
+library(ggplot2)
+
+n_cores <- 4
+```
+
+```{r}
+#load data
+bed_path <- "../data/raw/hgdp650.qc.hg19.bed"
+
+#load metadata
+meta_info <- readr::read_tsv("../data/raw/HGDPid_populations.txt")
+```
+
+#Create gen_tibble object
+
+```{r include = FALSE}
+tictoc::tic()
+```
+
+```{r}
+hgdp <- gen_tibble(bed_path, quiet = TRUE, backingfile = tempfile("test_"), n_cores = n_cores)
+```
+
+```{r include = FALSE}
+timing_gen_tibble <- tictoc::toc(quiet = TRUE)
+```
+
+#Add metadata
+
+```{r}
+hgdp <- hgdp %>% mutate(
+  population = meta_info$population[match(hgdp$id, meta_info$Id)],region = meta_info$Region[match(hgdp$id, meta_info$Id)]
+)
+```
+
+#Loci Report
+
+```{r include = FALSE}
+tictoc::tic()
+```
+
+```{r}
+loci_report <- qc_report_loci(hgdp)
+```
+
+```{r include = FALSE}
+timing_qc_report_loci <- tictoc::toc(quiet = TRUE)
+```
+
+#Loci Plot
+
+```{r}
+autoplot(loci_report, type = "all")
+
+# Save loci report: Figure 1
+ggsave(filename="../results/fig1_hgdp_loci_report.jpg", width=7, height=5, units="in",dpi=350)
+```
+
+#Filter Loci
+
+```{r include=FALSE}
+tictoc::tic()
+```
+
+```{r}
+to_keep_loci <- subset(loci_report,loci_report$maf > 0.05 & loci_report$missingness <0.05)
+hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
+```
+
+```{r include = FALSE}
+timing_filter_loci <- tictoc::toc()
+```
+
+#Individual Report
+
+```{r include=FALSE}
+tictoc::tic()
+```
+
+```{r}
+indiv_report <- qc_report_indiv(hgdp)
+```
+
+```{r include=FALSE}
+timing_qc_report_indiv <- tictoc::toc(quiet = TRUE)
+```
+
+#Filter individuals
+
+```{r include=FALSE}
+tictoc::tic()
+```
+
+```{r}
+to_keep_indiv <- which(indiv_report$missingness < 0.1)
+hgdp <- hgdp[to_keep_indiv,]
+```
+
+```{r include = FALSE}
+timing_filter_indiv <- tictoc::toc()
+```
+
+#Impute data
+
+```{r include=FALSE}
+tictoc::tic()
+```
+
+```{r}
+hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
+gt_set_imputed(hgdp, TRUE)
+```
+
+```{r include = FALSE}
+timing_impute <- tictoc::toc(quiet = TRUE)
+```
+
+#LD clumping
+
+```{r include=FALSE}
+tictoc::tic()
+```
+
+```{r}
+hgdp <- hgdp %>% select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
+```
+
+```{r include = FALSE}
+timing_ld_clumping <- tictoc::toc(quiet = TRUE)
+```
+
+#PCA
+
+```{r include=FALSE}
+tictoc::tic()
+```
+
+```{r}
+test_pca <- hgdp %>% gt_pca_partialSVD()
+```
+
+```{r include=FALSE}
+timing_pca <- tictoc::toc(quiet = TRUE)
+```
+
+#Plot PCA
+
+```{r}
+#plot pca
+autoplot(test_pca, type = "scores") +
+  aes(color = hgdp$population, shape = hgdp$region) +
+    labs(color = "Population", shape = "Region")
+```
+
+#DAPC
+
+```{r include=FALSE}
+tictoc::tic()
+```
+
+```{r}
+pop_factor <- as.factor(hgdp$population)
+test_dapc <- gt_dapc(test_pca, pop = pop_factor)
+```
+
+```{r include = FALSE}
+timing_dapc <- tictoc::toc(quiet = TRUE)
+```
+
+#Plot DAPC
+```{r}
+autoplot(test_dapc, type="screeplot")
+```
+
+#Calculate Fst
+
+```{r include=FALSE}
+tictoc::tic()
+```
+
+```{r}
+grouped_hgdp <- hgdp %>% group_by(population)
+pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
+```
+
+```{r}
+timing_pairwise_fst <- tictoc::toc()
+```
+
+
+#Save in plink bed format
+
+```{r include=FALSE}
+tictoc::tic()
+```
+
+```{r}
+gt_as_plink(hgdp,
+            file = "../data/intermediate/test_hgdp_ldprune", 
+            type = "bed",
+            overwrite = TRUE)
+```
+
+```{r include = FALSE}
+timing_plink_save <- tictoc::toc(quiet = TRUE)
+```
+
+```{r include = FALSE}
+# Create a table of timing results
+timing_results <- tibble::tibble(
+  Analysis_step = c("Read data and create gen_tibble", 
+           "QC Loci", 
+           "QC Individuals", 
+           "Impute Missing Values",
+           "LD Clumping (r2 = 0.2)",
+           "PCA (k = 10)", 
+           "DAPC (k = 9)",
+           "Calculate pairwise Fst",
+           "Save to PLINK Format"),
+  
+  Time_in_Seconds = c(
+    timing_gen_tibble$toc - timing_gen_tibble$tic,
+    (timing_qc_report_loci$toc - timing_qc_report_loci$tic)+
+    (timing_filter_loci$toc - timing_filter_loci$tic),
+    (timing_qc_report_indiv$toc - timing_qc_report_indiv$tic)+
+    (timing_filter_indiv$toc - timing_filter_indiv$tic),
+    timing_impute$toc - timing_impute$tic,
+    timing_ld_clumping$toc - timing_ld_clumping$tic,
+    timing_pca$toc - timing_pca$tic,
+    timing_dapc$toc - timing_dapc$tic,
+    timing_pairwise_fst$toc - timing_pairwise_fst$tic,
+    timing_plink_save$toc - timing_plink_save$tic
+  )
+)
+
+
+total_time <- sum(timing_results$Time_in_Seconds)
+
+# Add a row for the total time
+timing_results <- timing_results %>%
+  add_row(Analysis_step = "Total Time", Time_in_Seconds = total_time)
+
+```
+
+#Benchmarking
+
+```{r}
+print(timing_results)
+```
