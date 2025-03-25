@@ -64,3 +64,4 @@ LinkingTo:
     bigstatsr,
     rmio
 LazyData: true
+Config/Needs/website: rmarkdown

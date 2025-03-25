@@ -1,31 +1,37 @@
 ---
-title: "HGDP tidypopgen analysis"
-output:
-  pdf_document: default
-  html_document: default
-date: "2024-08-28"
+title: "Benchmark on the HGDP"
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+n_cores <- 20
 
 # xgboost uses data.table
-data.table::setDTthreads(2)
-RhpcBLASctl::blas_set_num_threads(2)
-RhpcBLASctl::omp_set_num_threads(2)
+data.table::setDTthreads(n_cores)
+RhpcBLASctl::blas_set_num_threads(n_cores)
+RhpcBLASctl::omp_set_num_threads(n_cores)
 
 library(tidypopgen)
 library(ggplot2)
 
-n_cores <- 4
+
 ```
+
+Before running this benchmakr, we need to download into the subdirectory `data`
+the bed file `hgdp650.qc.hg19.bed` and the metadata file `HGDPid_populations.txt` from the following link: [HGDP](https://missing_link)
+
+
 
 ```{r}
 #load data
-bed_path <- "../data/raw/hgdp650.qc.hg19.bed"
+bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 
 #load metadata
-meta_info <- readr::read_tsv("../data/raw/HGDPid_populations.txt")
+meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 ```
 
 #Create gen_tibble object
@@ -70,7 +76,7 @@ timing_qc_report_loci <- tictoc::toc(quiet = TRUE)
 autoplot(loci_report, type = "all")
 
 # Save loci report: Figure 1
-ggsave(filename="../results/fig1_hgdp_loci_report.jpg", width=7, height=5, units="in",dpi=350)
+# ggsave(filename="../results/fig1_hgdp_loci_report.jpg", width=7, height=5, units="in",dpi=350)
 ```
 
 #Filter Loci
@@ -213,7 +219,7 @@ tictoc::tic()
 
 ```{r}
 gt_as_plink(hgdp,
-            file = "../data/intermediate/test_hgdp_ldprune", 
+            file = tempfile(),
             type = "bed",
             overwrite = TRUE)
 ```
@@ -225,16 +231,16 @@ timing_plink_save <- tictoc::toc(quiet = TRUE)
 ```{r include = FALSE}
 # Create a table of timing results
 timing_results <- tibble::tibble(
-  Analysis_step = c("Read data and create gen_tibble", 
-           "QC Loci", 
-           "QC Individuals", 
+  Analysis_step = c("Read data and create gen_tibble",
+           "QC Loci",
+           "QC Individuals",
            "Impute Missing Values",
            "LD Clumping (r2 = 0.2)",
-           "PCA (k = 10)", 
+           "PCA (k = 10)",
            "DAPC (k = 9)",
            "Calculate pairwise Fst",
            "Save to PLINK Format"),
-  
+
   Time_in_Seconds = c(
     timing_gen_tibble$toc - timing_gen_tibble$tic,
     (timing_qc_report_loci$toc - timing_qc_report_loci$tic)+
