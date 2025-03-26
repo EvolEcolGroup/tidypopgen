@@ -323,7 +323,7 @@ We can examine the suitability of our K values by plotting the cross-entropy val
 for each K value, which is contained in the `cv` element of the `gt_admix` object: 
 
 ```{r, fig.alt = "Plot of cross-entropy for each value of K, showing K = 3 has the lowest cross-entropy"}
-plot(anole_adm$cv, cex = 1.2, pch = 19)
+autoplot(anole_adm, type = "cv")
 ```
 
 Here we can see that K = 3 is a sensible choice, as K = 3 represents the 'elbow' 
