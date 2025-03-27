@@ -99,3 +99,20 @@ test_that("autoplot list", {
   # expect plot2 is a list, one plot for each population
   expect_equal(names(plot2), c("pop1", "pop2"))
 })
+
+
+test_that("non-numeric kings_threshold arguments ", {
+  expect_error(
+    qc_report_indiv(families, kings_threshold = "blah"),
+    "arg' should be one of "
+  )
+
+  expect_equal(
+    qc_report_indiv(families, kings_threshold = "first")$to_keep,
+    qc_report_indiv(families, kings_threshold = 0.177)$to_keep
+  )
+  expect_equal(
+    qc_report_indiv(families, kings_threshold = "second")$to_keep,
+    qc_report_indiv(families, kings_threshold = 0.088)$to_keep
+  )
+})
