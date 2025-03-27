@@ -159,8 +159,8 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
   modern_gt <- missing_gt[-c(1:20), ]
 
   # update the backingfiles
-  ancient_gt <- suppressMessages(gt_update_backingfile(ancient_gt))
-  modern_gt <- suppressMessages(gt_update_backingfile(modern_gt))
+  ancient_gt <- gt_update_backingfile(ancient_gt, quiet = TRUE)
+  modern_gt <- gt_update_backingfile(modern_gt, quiet = TRUE)
 
   # impute the modern data
   modern_gt <- gt_impute_simple(modern_gt, method = "mode")
@@ -412,8 +412,8 @@ test_that("n_cores can be set for predict_gt_pca", {
   modern_gt <- missing_gt[-c(1:20), ]
 
   # update the backingfiles
-  ancient_gt <- suppressMessages(gt_update_backingfile(ancient_gt))
-  modern_gt <- suppressMessages(gt_update_backingfile(modern_gt))
+  ancient_gt <- gt_update_backingfile(ancient_gt, quiet = TRUE)
+  modern_gt <- gt_update_backingfile(modern_gt, quiet = TRUE)
 
   modern_gt <- gt_impute_simple(modern_gt, method = "mode")
   modern_pca <- modern_gt %>% gt_pca_partialSVD()
