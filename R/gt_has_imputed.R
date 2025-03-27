@@ -71,7 +71,7 @@ gt_set_imputed <- function(x, set = NULL) {
   if (set == FALSE) {
     attr(x, "bigsnp")$genotypes$code256 <- bigsnpr::CODE_012
   } else {
-    if (attr(x, "imputed") %in% c("simple", "xgboost")) {
+    if (attr(x, "imputed") %in% c("simple")) {
       attr(x, "bigsnp")$genotypes$code256 <- bigsnpr::CODE_IMPUTE_PRED
     }
   }

@@ -523,10 +523,9 @@ see manual page for details.
 
 It is possible to obviate to this problem by filtering loci with missing data,
 but that might lose a lot of loci. The alternative is to impute the missing
-the data. `tidypopgen` provides wrappers for two fast imputation approaches
-available in `bigsnpr`, a simple imputation (`gt_impute_simple`) based on the frequency of the alleles
-at each locus (by random sampling, or using the mean or mode), and more sophisticated
-approach (`gt_impute_xgboost`) that uses boosted trees to try and predict the most likely genotype.
+the data. `tidypopgen` provides a wrapper for fast imputation available in
+`bigsnpr`, a simple imputation (`gt_impute_simple`) based on the frequency of the alleles
+at each locus (by random sampling, or using the mean or mode).
 These methods are fine to impute a few missing genotypes, but they should not be used for any
 sophisticated imputation (e.g. of low coverage genomes).
 
