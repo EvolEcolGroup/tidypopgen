@@ -27,7 +27,6 @@ gt_impute_xgboost <- function(
     n_cor = nrow(x),
     seed = NA,
     n_cores = 1) {
-  method <- match.arg(method)
 
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
@@ -64,7 +63,7 @@ gt_impute_xgboost <- function(
     }
   }
 
-  attr(x$genotypes, "bigsnp")$genotypes <- bigsnpr::snp_fastImputeSimple(
+  attr(x$genotypes, "bigsnp")$genotypes <- bigsnpr::snp_fastImpute(
     attr(x$genotypes, "bigsnp")$genotypes, # this needs subsetting
     infos.chr = show_loci(x)$chr_int, # check this is correct
                                alpha = alpha,
@@ -73,8 +72,12 @@ gt_impute_xgboost <- function(
                                n.cor = n_cor,
                                seed = seed,
                                ncores = n_cores)
+  # returns an FBM, now we need to transform it to an FBM.code256
 
-  attr(x$genotypes, "imputed") <- "simple"
+  attr(x$genotypes, "bigsnp")$genotypes <-
+    bigstatsr::add_code256(attr(x$genotypes, "bigsnp")$genotypes, code)
+
+  attr(x$genotypes, "imputed") <- "xgboost"
   gt_set_imputed(x, set = FALSE)
   x
 }
