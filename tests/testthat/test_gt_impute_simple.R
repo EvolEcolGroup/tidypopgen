@@ -112,8 +112,10 @@ test_that("gt_impute imputes properly", {
   expect_false(any(is.na(show_genotypes(imputed_gt_mode))))
 
   # test error trying to impute an already imputed set
-  # expect_error(gt_impute_simple(imputed_gt_mode),
-  #                                 "object x is already imputed")
+  expect_error(
+    gt_impute_simple(imputed_gt_mode),
+    "object x is already imputed"
+  )
 
   # Check imputed 'mode' method
   mode_function <- function(x) {
@@ -208,6 +210,15 @@ test_that("imputing subsets", {
   test_sub <- test_sub %>% select_loci(c(3:5))
 
   # impute method = 'mode'
+  expect_error(
+    imputed_test_sub <- gt_impute_simple(test_sub, method = "mode"),
+    "The number of individuals in the gen_tibble does not match"
+  )
+
+  # update backingfile
+  suppressMessages(test_sub <- gt_update_backingfile(test_sub))
+
+  # try again
   imputed_test_sub <- gt_impute_simple(test_sub, method = "mode")
 
   # full gen_tibble does not have imputed
