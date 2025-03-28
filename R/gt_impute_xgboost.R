@@ -35,6 +35,14 @@ gt_impute_xgboost <- function(
     on.exit(options(bigstatsr.check.parallel.blas = TRUE))
   }
 
+  if (nrow(x) != nrow(attr(x$genotypes, "bigsnp")$genotypes)) {
+    stop(
+      "The number of individuals in the gen_tibble does not match the",
+      " number of rows in the file backing matrix. Before imputing, use",
+      " gt_update_backingfile to update your file backing matrix."
+    )
+  }
+
   if (
     !all.equal(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
   ) {
