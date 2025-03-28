@@ -25,18 +25,20 @@ qc_report_indiv <- function(.x, ...) {
 qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
-  if (is.numeric(kings_threshold)) {
-    kings_threshold <- kings_threshold
-  } else if (!is.numeric(kings_threshold)) {
-    kings_threshold <- match.arg(kings_threshold, c("first", "second"))
-  } else {
-    stop("kings_threshold must be a numeric or one of 'first' or 'second'")
-  }
+  if (!is.null(kings_threshold)) {
+    if (is.numeric(kings_threshold)) {
+      kings_threshold <- kings_threshold
+    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { #nolint
+      stop("kings_threshold must be a numeric or one of 'first' or 'second'")
+    } else if (!is.numeric(kings_threshold)) {
+      kings_threshold <- match.arg(kings_threshold, c("first", "second"))
+    }
 
-  if (kings_threshold == "first") {
-    kings_threshold <- 0.177
-  } else if (kings_threshold == "second") {
-    kings_threshold <- 0.088
+    if (kings_threshold == "first") {
+      kings_threshold <- 0.177
+    } else if (kings_threshold == "second") {
+      kings_threshold <- 0.088
+    }
   }
 
   n_loci <- nrow(show_loci(.x))
@@ -72,18 +74,20 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
 qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
-  if (is.numeric(kings_threshold)) {
-    kings_threshold <- kings_threshold
-  } else if (!is.numeric(kings_threshold)) {
-    kings_threshold <- match.arg(kings_threshold, c("first", "second"))
-  } else {
-    stop("kings_threshold must be a numeric or one of 'first' or 'second'")
-  }
+  if (!is.null(kings_threshold)) {
+    if (is.numeric(kings_threshold)) {
+      kings_threshold <- kings_threshold
+    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { #nolint
+      stop("kings_threshold must be a numeric or one of 'first' or 'second'")
+    } else if (!is.numeric(kings_threshold)) {
+      kings_threshold <- match.arg(kings_threshold, c("first", "second"))
+    }
 
-  if (kings_threshold == "first") {
-    kings_threshold <- 0.177
-  } else if (kings_threshold == "second") {
-    kings_threshold <- 0.088
+    if (kings_threshold == "first") {
+      kings_threshold <- 0.177
+    } else if (kings_threshold == "second") {
+      kings_threshold <- 0.088
+    }
   }
 
   n_loci <- nrow(show_loci(.x))
@@ -168,18 +172,20 @@ autoplot.qc_report_indiv <- function(
     ...) {
   rlang::check_dots_empty()
 
-  if (is.numeric(kings_threshold)) {
-    kings_threshold <- kings_threshold
-  } else if (!is.numeric(kings_threshold)) {
-    kings_threshold <- match.arg(kings_threshold, c("first", "second"))
-  } else {
-    stop("kings_threshold must be a numeric or one of 'first' or 'second'")
-  }
+  if (!is.null(kings_threshold)) {
+    if (is.numeric(kings_threshold)) {
+      kings_threshold <- kings_threshold
+    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { #nolint
+      stop("kings_threshold must be a numeric or one of 'first' or 'second'")
+    } else if (!is.numeric(kings_threshold)) {
+      kings_threshold <- match.arg(kings_threshold, c("first", "second"))
+    }
 
-  if (kings_threshold == "first") {
-    kings_threshold <- 0.177
-  } else if (kings_threshold == "second") {
-    kings_threshold <- 0.088
+    if (kings_threshold == "first") {
+      kings_threshold <- 0.177
+    } else if (kings_threshold == "second") {
+      kings_threshold <- 0.088
+    }
   }
 
   type <- match.arg(type)

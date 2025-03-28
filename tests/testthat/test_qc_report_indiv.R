@@ -104,7 +104,7 @@ test_that("autoplot list", {
 test_that("non-numeric kings_threshold arguments ", {
   expect_error(
     qc_report_indiv(families, kings_threshold = "blah"),
-    "arg' should be one of "
+    "kings_threshold must be a numeric or one of"
   )
 
   expect_equal(
@@ -130,7 +130,7 @@ test_that("non-numeric kings_threshold arguments ", {
   # test after grouping
   expect_error(
     qc_report_indiv(families, kings_threshold = "blah"),
-    "arg' should be one of "
+    "kings_threshold must be a numeric or one of"
   )
   expect_equal(
     qc_report_indiv(families, kings_threshold = "first")$to_keep,
