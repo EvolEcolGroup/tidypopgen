@@ -53,7 +53,8 @@ Suggests:
     readr,
     reticulate,
     testthat (>= 3.0.0),
-    vcfR
+    vcfR,
+    xgboost
 Remotes:
     uqrmaie1/admixtools
 VignetteBuilder: knitr

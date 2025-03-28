@@ -28,5 +28,11 @@ test_that("impute and use the imputation", {
     gt_set_imputed(missing_gt),
     "set should be either"
   )
+  # check that we have info on the imputation
+  expect_true(
+    ncol(
+      attr(missing_gt$genotypes, "imputed_errors")
+    ) ==
+      nrow(show_loci(missing_gt))
+  )
 })
-

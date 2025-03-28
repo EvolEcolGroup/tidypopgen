@@ -3,7 +3,9 @@
 #' This function provides a simple imputation algorithm for `gen_tibble`
 #' objects based on local XGBoost models.
 #'
-#' This function is a wrapper around [bigsnpr::snp_fastImpute()].
+#' This function is a wrapper around [bigsnpr::snp_fastImpute()]. The error
+#' rates from the xgboost, if appended, can be retrived with
+#' `attr(x$genotypes, "imputed_errors")` where `x` is the `gen_tibble`.
 #'
 #' @param x a [gen_tibble] with missing data
 #' @param alpha Type-I error for testing correlations. Default is `1e-4`.
@@ -16,6 +18,12 @@
 #'   Default uses them all.
 #' @param seed An integer, for reproducibility. Default doesn't use seeds.
 #' @param n_cores the number of cores to be used
+#' @param append_error boolean, should the xgboost error estimates be appended
+#' as an attribute to the genotype column of
+#' the gen_tibble. If TRUE (the default), a matrix of two rows (the number
+#' of missing values, and the error estimate) and as many columns as the number
+#' of loci will be appended to the gen_tibble.
+#' attr(missing_gt$genotypes, "imputed_errors")
 #' @returns a [gen_tibble] with imputed genotypes
 #' @export
 
@@ -26,8 +34,8 @@ gt_impute_xgboost <- function(
     p_train = 0.8,
     n_cor = nrow(x),
     seed = NA,
-    n_cores = 1) {
-
+    n_cores = 1,
+    quiet = TRUE) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     options(bigstatsr.check.parallel.blas = FALSE)
@@ -63,21 +71,19 @@ gt_impute_xgboost <- function(
     }
   }
 
-  attr(x$genotypes, "bigsnp")$genotypes <- bigsnpr::snp_fastImpute(
+  infos <- bigsnpr::snp_fastImpute(
     attr(x$genotypes, "bigsnp")$genotypes, # this needs subsetting
     infos.chr = show_loci(x)$chr_int, # check this is correct
-                               alpha = alpha,
-                               size = size,
-                               p.train = p_train,
-                               n.cor = n_cor,
-                               seed = seed,
-                               ncores = n_cores)
-  # returns an FBM, now we need to transform it to an FBM.code256
-
-  attr(x$genotypes, "bigsnp")$genotypes <-
-    bigstatsr::add_code256(attr(x$genotypes, "bigsnp")$genotypes, code)
+    alpha = alpha,
+    size = size,
+    p.train = p_train,
+    n.cor = n_cor,
+    seed = seed,
+    ncores = n_cores
+  )
 
   attr(x$genotypes, "imputed") <- "xgboost"
+  attr(x$genotypes, "imputed_errors") <- infos[]
   gt_set_imputed(x, set = FALSE)
   x
 }
