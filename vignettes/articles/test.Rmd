@@ -1,0 +1,99 @@
+---
+  title: "Benchmark on the HGDP"
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(benchmarkme)
+library(chunkhooks)
+hook_benchmark()
+```
+
+
+This vignette is a benchmark of a few key functions in the tidypopgen package.
+The Human Genome Diversity Project (HGDP) SNP dataset is used for this
+benchmark.
+
+We will run this benchmark on a machine with a `r benchmarkme::get_cpu()` CPU
+and `r print(get_ram(), unit_system = "iec")` of RAM. However, we will limit the number of
+cores used to 20. Parallelised functions within tidypopgen use an
+`n_cores` argument for the user to set. However, to prevent a behind-the-scenes
+inflation of the number of threads used (for example, in cases where dependency
+                                         functions may automatically use all available cores) we need to set up
+preferences at the beginning of the session. Specifically, we limit the
+number of cores used by the parallelised BLAS library with
+`bigparallelr::set_blas_ncores()`, and by the package data.table with
+`data.table::setDTthreads()`.
+
+```{r}
+n_cores <- 20
+
+data.table::setDTthreads(n_cores)
+bigparallelr::set_blas_ncores(n_cores)
+```
+
+We can now load the necessary libraries:
+
+```{r}
+library(tidypopgen)
+library(ggplot2)
+```
+
+Before running this benchmark, we need to download into the subdirectory
+`data/hgdp/` the bed file `hgdp650.qc.hg19.bed` and the metadata file
+`HGDPid_populations.txt` from the following link: [HGDP](https://missing_link)
+
+```{r set_paths}
+bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
+meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
+```
+
+#Create gen_tibble object
+
+Our first step is to load the HGDP data into a `gen_tibble` object, and add its
+associated metadata.
+
+
+```{r read_plink, benchmark = TRUE}
+hgdp <- gen_tibble(bed_path,
+                   quiet = TRUE,
+                   backingfile = tempfile("test_"),
+                   n_cores = n_cores)
+```
+
+# Add metadata
+
+```{r}
+hgdp <- hgdp %>% mutate(
+  population = meta_info$population[match(hgdp$id, meta_info$Id)],
+  region = meta_info$Region[match(hgdp$id, meta_info$Id)]
+)
+```
+
+# Loci Report
+
+We can then call `qc_report_loci`. This function supplies minor allele
+frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
+
+```{r loci_report, benchmark = TRUE}
+loci_report <- qc_report_loci(hgdp)
+```
+
+# Summary
+
+
+```{r echo=FALSE}
+benchmark_results <- data.frame(
+  step = names(chunkhooks::benchmarks),
+  time = NA_real_
+)
+for (i in seq_along(benchmark_results$step)){
+  this_step <- benchmark_results$step[i]
+  benchmark_results$time[i] <- chunkhooks::benchmarks[[this_step]]
+}
+benchmark_results
+```
+
