@@ -1,5 +1,6 @@
 ---
-  title: "Benchmark on the HGDP"
+title: "Benchmark on the HGDP"
+output: pdf_document
 ---
   
 ```{r setup, include=FALSE}
@@ -82,8 +83,126 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-# Summary
+#Loci Plot
 
+The resulting report can be observed using `autoplot`.
+
+
+```{r}
+autoplot(loci_report, type = "all")
+```
+
+#Filter Loci
+
+Following this, we filter the loci to only including those with a minor allele
+frequency over 0.05, and a missingness rate below 0.05.
+
+```{r filter_loci, benchmark = TRUE}
+to_keep_loci <-
+  subset(loci_report, loci_report$maf > 0.05 & loci_report$missingness < 0.05)
+hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
+```
+
+
+#Individual Report
+
+We can then call `qc_report_indiv` to supply observed heterozygosity per
+individual, and rate of missingness per individual.
+
+```{r indiv_report, benchmark = TRUE}
+indiv_report <- qc_report_indiv(hgdp)
+```
+
+#Filter individuals
+
+And we can filter individuals down to only include those with less than 10% of
+their genotypes missing.
+
+
+```{r filter_indiv, benchmark = TRUE}
+to_keep_indiv <- which(indiv_report$missingness < 0.1)
+hgdp <- hgdp[to_keep_indiv, ]
+```
+
+#Impute data
+
+Some functions, such as `loci_ld_clump` and the `gt_pca` functions, require that
+there is no missingness in the dataset, so we use `gt_impute_simple` to impute
+any remaining missing genotypes.
+
+
+```{r impute, benchmark = TRUE}
+hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
+gt_set_imputed(hgdp, TRUE)
+```
+
+#LD clumping
+
+LD clumping is then performed to control for linkage disequilibrium.
+
+```{r ld_clumping, benchmark = TRUE}
+hgdp <- hgdp %>%
+  select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
+```
+
+#PCA
+
+A principal components analysis can then be computed using the resulting cleaned
+and LD clumped dataset.
+
+
+```{r pca, benchmark = TRUE}
+test_pca <- hgdp %>% gt_pca_partialSVD()
+```
+
+#Plot PCA
+
+```{r PCA}
+autoplot(test_pca, type = "scores") +
+  aes(color = hgdp$population, shape = hgdp$region) +
+    labs(color = "Population", shape = "Region")
+```
+
+#DAPC
+
+We can continue with a discriminant analysis of principal
+components using `gt_dapc`.
+
+```{r dapc, benchmark = TRUE}
+pop_factor <- as.factor(hgdp$population)
+test_dapc <- gt_dapc(test_pca, pop = pop_factor)
+```
+
+#Plot DAPC
+
+```{r DAPC_screeplot}
+autoplot(test_dapc, type = "screeplot")
+```
+
+#Calculate Fst
+
+To examine the differentiation between populations in the global HGDP set, we
+calculate pairwise Fst.
+
+
+```{r pairwise_fst, benchmark = TRUE}
+grouped_hgdp <- hgdp %>% group_by(population)
+pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
+```
+
+#Save in plink bed format
+
+Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
+
+
+```{r plink_save, benchmark = TRUE}
+gt_as_plink(hgdp,
+            file = tempfile(),
+            type = "bed",
+            overwrite = TRUE)
+```
+
+# Summary
 
 ```{r echo=FALSE}
 benchmark_results <- data.frame(
@@ -95,5 +214,9 @@ for (i in seq_along(benchmark_results$step)){
   benchmark_results$time[i] <- chunkhooks::benchmarks[[this_step]]
 }
 benchmark_results
+```
+
+```{r}
+
 ```
 
