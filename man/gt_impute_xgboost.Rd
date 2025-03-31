@@ -12,7 +12,7 @@ gt_impute_xgboost(
   n_cor = nrow(x),
   seed = NA,
   n_cores = 1,
-  quiet = TRUE
+  append_error = TRUE
 )
 }
 \arguments{

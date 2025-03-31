@@ -35,7 +35,7 @@ gt_impute_xgboost <- function(
     n_cor = nrow(x),
     seed = NA,
     n_cores = 1,
-    quiet = TRUE) {
+    append_error = TRUE) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     options(bigstatsr.check.parallel.blas = FALSE)
@@ -50,22 +50,26 @@ gt_impute_xgboost <- function(
     )
   }
 
+  if (gt_has_imputed(x)) {
+    stop("object x is already imputed, use `gt_set_imputed(x, TRUE)`")
+  }
+
   if (
-    !all.equal(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
+    !identical(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
   ) {
     # nolint start
     if (
-      all.equal(
+      identical(
         attr(x$genotypes, "bigsnp")$genotypes$code256,
         bigsnpr::CODE_IMPUTE_PRED
       ) ||
-        all.equal(
+        identical(
           attr(x$genotypes, "bigsnp")$genotypes$code256,
           bigsnpr::CODE_DOSAGE
         )
     ) {
       # nolint end
-      stop("object x is already imputed")
+      stop("object x is already imputed, but attr(x, 'imputed') is null")
     } else {
       stop("object x uses a code256 that is not compatible with imputation")
     }
@@ -83,7 +87,9 @@ gt_impute_xgboost <- function(
   )
 
   attr(x$genotypes, "imputed") <- "xgboost"
-  attr(x$genotypes, "imputed_errors") <- infos[]
+  if (append_error) {
+    attr(x$genotypes, "imputed_errors") <- infos[]
+  }
   gt_set_imputed(x, set = FALSE)
   x
 }
