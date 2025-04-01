@@ -90,6 +90,9 @@ gt_impute_xgboost <- function(
   if (append_error) {
     attr(x$genotypes, "imputed_errors") <- infos[]
   }
+  # TODO add a message if append_error = FALSE - something like
+  # “an FBM has been generated in the temp directory,
+  # and this can be found here : ...”
   gt_set_imputed(x, set = FALSE)
   x
 }
