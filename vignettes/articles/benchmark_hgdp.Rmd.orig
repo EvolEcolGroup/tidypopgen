@@ -1,53 +1,53 @@
 ---
 title: "Benchmark on the HGDP"
+output: pdf_document
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(benchmarkme)
+library(chunkhooks)
+hook_benchmark()
+```
+
 
 This vignette is a benchmark of a few key functions in the tidypopgen package.
 The Human Genome Diversity Project (HGDP) SNP dataset is used for this
 benchmark.
 
-Before running the benchmark, we use the following to set the number of cores to
-use for parallel processing. Parallelised functions within tidypopgen use an
-n_cores argument for the user to set. However, to prevent a behind-the-scenes
+We will run this benchmark on a machine with a `r benchmarkme::get_cpu()` CPU
+and `r print(get_ram(), unit_system = "iec")` of RAM. However, we will limit the number of
+cores used to 20. Parallelised functions within tidypopgen use an
+`n_cores` argument for the user to set. However, to prevent a behind-the-scenes
 inflation of the number of threads used (for example, in cases where dependency
-functions may automatically use all available cores) we need to set up
-preferences at the beginning of the session.
-
-We set the number of cores used by the package data.table with `setDTthreads`,
-preventing data.table from its default of using all available cores, and use
-`blas_set_num_threads` to set the cores used for matrix algebra operations.
-
-Once we have set up the cores to be used in this session, we can begin
-benchmarking.
+                                         functions may automatically use all available cores) we need to set up
+preferences at the beginning of the session. Specifically, we limit the
+number of cores used by the parallelised BLAS library with
+`bigparallelr::set_blas_ncores()`, and by the package data.table with
+`data.table::setDTthreads()`.
 
 ```{r}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
-
 n_cores <- 20
 
 data.table::setDTthreads(n_cores)
 bigparallelr::set_blas_ncores(n_cores)
+```
 
+We can now load the necessary libraries:
+
+```{r}
 library(tidypopgen)
 library(ggplot2)
 ```
 
-To start with, we can use the package `benchmarkme` to record the available RAM
-and number of CPU's of the machine hosting this benchmark.
-
-```{r}
-benchmarkme::get_ram()
-benchmarkme::get_cpu()
-```
-
 Before running this benchmark, we need to download into the subdirectory
 `data/hgdp/` the bed file `hgdp650.qc.hg19.bed` and the metadata file
-`HGDPid_populations.txt` from the following link: [HGDP](https://missing_link)
+`HGDPid_populations.txt`.
 
-```{r}
+```{r set_paths}
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 ```
@@ -57,22 +57,15 @@ meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 Our first step is to load the HGDP data into a `gen_tibble` object, and add its
 associated metadata.
 
-```{r include = FALSE}
-tictoc::tic()
-```
 
-```{r}
+```{r read_plink, benchmark = TRUE}
 hgdp <- gen_tibble(bed_path,
                    quiet = TRUE,
                    backingfile = tempfile("test_"),
                    n_cores = n_cores)
 ```
 
-```{r include = FALSE}
-timing_gen_tibble <- tictoc::toc(quiet = TRUE)
-```
-
-#Add metadata
+# Add metadata
 
 ```{r}
 hgdp <- hgdp %>% mutate(
@@ -81,28 +74,21 @@ hgdp <- hgdp %>% mutate(
 )
 ```
 
-#Loci Report
+# Loci Report
 
 We can then call `qc_report_loci`. This function supplies minor allele
 frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 
-```{r include = FALSE}
-tictoc::tic()
-```
-
-```{r}
+```{r loci_report, benchmark = TRUE}
 loci_report <- qc_report_loci(hgdp)
-```
-
-```{r include = FALSE}
-timing_qc_report_loci <- tictoc::toc(quiet = TRUE)
 ```
 
 #Loci Plot
 
 The resulting report can be observed using `autoplot`.
 
-```{r loci_report}
+
+```{r autoplot_loci_report}
 autoplot(loci_report, type = "all")
 ```
 
@@ -111,35 +97,20 @@ autoplot(loci_report, type = "all")
 Following this, we filter the loci to only including those with a minor allele
 frequency over 0.05, and a missingness rate below 0.05.
 
-```{r include=FALSE}
-tictoc::tic()
-```
-
-```{r}
+```{r filter_loci, benchmark = TRUE}
 to_keep_loci <-
   subset(loci_report, loci_report$maf > 0.05 & loci_report$missingness < 0.05)
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-```{r include = FALSE}
-timing_filter_loci <- tictoc::toc()
-```
 
 #Individual Report
 
 We can then call `qc_report_indiv` to supply observed heterozygosity per
 individual, and rate of missingness per individual.
 
-```{r include=FALSE}
-tictoc::tic()
-```
-
-```{r}
+```{r indiv_report, benchmark = TRUE}
 indiv_report <- qc_report_indiv(hgdp)
-```
-
-```{r include=FALSE}
-timing_qc_report_indiv <- tictoc::toc(quiet = TRUE)
 ```
 
 #Filter individuals
@@ -147,17 +118,10 @@ timing_qc_report_indiv <- tictoc::toc(quiet = TRUE)
 And we can filter individuals down to only include those with less than 10% of
 their genotypes missing.
 
-```{r include=FALSE}
-tictoc::tic()
-```
 
-```{r}
+```{r filter_indiv, benchmark = TRUE}
 to_keep_indiv <- which(indiv_report$missingness < 0.1)
 hgdp <- hgdp[to_keep_indiv, ]
-```
-
-```{r include = FALSE}
-timing_filter_indiv <- tictoc::toc()
 ```
 
 #Impute data
@@ -166,34 +130,19 @@ Some functions, such as `loci_ld_clump` and the `gt_pca` functions, require that
 there is no missingness in the dataset, so we use `gt_impute_simple` to impute
 any remaining missing genotypes.
 
-```{r include=FALSE}
-tictoc::tic()
-```
 
-```{r}
+```{r impute, benchmark = TRUE}
 hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
-```
-
-```{r include = FALSE}
-timing_impute <- tictoc::toc(quiet = TRUE)
 ```
 
 #LD clumping
 
 LD clumping is then performed to control for linkage disequilibrium.
 
-```{r include=FALSE}
-tictoc::tic()
-```
-
-```{r}
+```{r ld_clumping, benchmark = TRUE}
 hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
-```
-
-```{r include = FALSE}
-timing_ld_clumping <- tictoc::toc(quiet = TRUE)
 ```
 
 #PCA
@@ -201,24 +150,16 @@ timing_ld_clumping <- tictoc::toc(quiet = TRUE)
 A principal components analysis can then be computed using the resulting cleaned
 and LD clumped dataset.
 
-```{r include=FALSE}
-tictoc::tic()
-```
 
-```{r}
+```{r pca, benchmark = TRUE}
 test_pca <- hgdp %>% gt_pca_partialSVD()
-```
-
-```{r include=FALSE}
-timing_pca <- tictoc::toc(quiet = TRUE)
 ```
 
 #Plot PCA
 
 ```{r PCA}
 autoplot(test_pca, type = "scores") +
-  aes(color = hgdp$population, shape = hgdp$region) +
-    labs(color = "Population", shape = "Region")
+  aes(color = hgdp$region, shape = hgdp$region)
 ```
 
 #DAPC
@@ -226,17 +167,9 @@ autoplot(test_pca, type = "scores") +
 We can continue with a discriminant analysis of principal
 components using `gt_dapc`.
 
-```{r include=FALSE}
-tictoc::tic()
-```
-
-```{r}
+```{r dapc, benchmark = TRUE}
 pop_factor <- as.factor(hgdp$population)
 test_dapc <- gt_dapc(test_pca, pop = pop_factor)
-```
-
-```{r include = FALSE}
-timing_dapc <- tictoc::toc(quiet = TRUE)
 ```
 
 #Plot DAPC
@@ -250,80 +183,35 @@ autoplot(test_dapc, type = "screeplot")
 To examine the differentiation between populations in the global HGDP set, we
 calculate pairwise Fst.
 
-```{r include=FALSE}
-tictoc::tic()
-```
 
-```{r}
+```{r pairwise_fst, benchmark = TRUE}
 grouped_hgdp <- hgdp %>% group_by(population)
 pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
-```
-
-```{r}
-timing_pairwise_fst <- tictoc::toc()
 ```
 
 #Save in plink bed format
 
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
 
-```{r include=FALSE}
-tictoc::tic()
-```
 
-```{r}
+```{r plink_save, benchmark = TRUE}
 gt_as_plink(hgdp,
             file = tempfile(),
             type = "bed",
             overwrite = TRUE)
 ```
 
-```{r include = FALSE}
-timing_plink_save <- tictoc::toc(quiet = TRUE)
-```
+# Summary
 
-```{r include = FALSE}
-# Create a table of timing results
-timing_results <- tibble::tibble(
-  Analysis_step = c("Read data and create gen_tibble",
-           "QC Loci",
-           "QC Individuals",
-           "Impute Missing Values",
-           "LD Clumping (r2 = 0.2)",
-           "PCA (k = 10)",
-           "DAPC (k = 9)",
-           "Calculate pairwise Fst",
-           "Save to PLINK Format"),
-
-  Time_in_Seconds = c(
-    timing_gen_tibble$toc - timing_gen_tibble$tic,
-    (timing_qc_report_loci$toc - timing_qc_report_loci$tic) +
-    (timing_filter_loci$toc - timing_filter_loci$tic),
-    (timing_qc_report_indiv$toc - timing_qc_report_indiv$tic) +
-    (timing_filter_indiv$toc - timing_filter_indiv$tic),
-    timing_impute$toc - timing_impute$tic,
-    timing_ld_clumping$toc - timing_ld_clumping$tic,
-    timing_pca$toc - timing_pca$tic,
-    timing_dapc$toc - timing_dapc$tic,
-    timing_pairwise_fst$toc - timing_pairwise_fst$tic,
-    timing_plink_save$toc - timing_plink_save$tic
-  )
+```{r echo=FALSE}
+benchmark_results <- data.frame(
+  step = names(chunkhooks::benchmarks),
+  time = NA_real_
 )
-
-
-total_time <- sum(timing_results$Time_in_Seconds)
-
-# Add a row for the total time
-timing_results <- timing_results %>%
-  add_row(Analysis_step = "Total Time", Time_in_Seconds = total_time)
-
+for (i in seq_along(benchmark_results$step)){
+  this_step <- benchmark_results$step[i]
+  benchmark_results$time[i] <- chunkhooks::benchmarks[[this_step]]
+}
+benchmark_results
 ```
 
-#Benchmarking
-
-The `timing_results` object, printed below, provides a table of the time taken
-for each step.
-
-```{r}
-print(timing_results)
-```
