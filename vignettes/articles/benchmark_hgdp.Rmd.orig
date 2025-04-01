@@ -204,14 +204,21 @@ gt_as_plink(hgdp,
 # Summary
 
 ```{r echo=FALSE}
+chunk_order <- knitr::all_labels()  # Get
+benchmarked_chunks <- names(chunkhooks::benchmarks)  # Chunks that have benchmarks
+
+ordered_benchmark_chunks <- chunk_order[chunk_order %in% benchmarked_chunks]
+
 benchmark_results <- data.frame(
-  step = names(chunkhooks::benchmarks),
+  step = ordered_benchmark_chunks,
   time = NA_real_
 )
 for (i in seq_along(benchmark_results$step)){
   this_step <- benchmark_results$step[i]
-  benchmark_results$time[i] <- chunkhooks::benchmarks[[this_step]]
+  benchmark_results$time[i] <- round(chunkhooks::benchmarks[[this_step]], 2)
 }
+total <- c("Total", sum(benchmark_results$time))
+benchmark_results <- rbind(benchmark_results, total)
 benchmark_results
 ```
 
