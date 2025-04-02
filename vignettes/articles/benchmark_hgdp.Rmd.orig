@@ -1,6 +1,5 @@
 ---
 title: "Benchmark on the HGDP"
-output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -11,6 +10,7 @@ knitr::opts_chunk$set(
 library(benchmarkme)
 library(chunkhooks)
 hook_benchmark()
+set.seed(123)
 ```
 
 

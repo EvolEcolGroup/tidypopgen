@@ -1,16 +1,12 @@
 ---
 title: "Benchmark on the HGDP"
-output: pdf_document
 ---
-
-
-
 
 This vignette is a benchmark of a few key functions in the tidypopgen package.
 The Human Genome Diversity Project (HGDP) SNP dataset is used for this
 benchmark.
 
-We will run this benchmark on a machine with a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU
+We will run this benchmark on a machine with a GenuineIntel, 13th Gen Intel(R) Core(TM) i9-13900, 24 CPU
 and  of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
@@ -46,7 +42,7 @@ Before running this benchmark, we need to download into the subdirectory
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 #> Rows: 1064 Columns: 6
-#> ── Column specification ─────────────────────────────────────────────────────────────────────────────────────────
+#> ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────
 #> Delimiter: "\t"
 #> chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups
 #> 
@@ -68,7 +64,7 @@ hgdp <- gen_tibble(bed_path,
                    n_cores = n_cores)
 ```
 
-read_plink: 3.8s
+read_plink: 2.7s
 
 # Add metadata
 
@@ -90,7 +86,7 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-loci_report: 21.1s
+loci_report: 11.5s
 
 #Loci Plot
 
@@ -116,7 +112,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 3.7s
+filter_loci: 1.4s
 
 
 #Individual Report
@@ -129,7 +125,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 28.7s
+indiv_report: 15.7s
 
 #Filter individuals
 
@@ -143,7 +139,7 @@ to_keep_indiv <- which(indiv_report$missingness < 0.1)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-filter_indiv: 10ms
+filter_indiv: 5ms
 
 #Impute data
 
@@ -158,7 +154,7 @@ hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 382ms
+impute: 167ms
 
 #LD clumping
 
@@ -170,7 +166,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 7.2s
+ld_clumping: 4.2s
 
 #PCA
 
@@ -183,7 +179,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 3.5s
+pca: 1.7s
 
 #Plot PCA
 
@@ -206,7 +202,7 @@ pop_factor <- as.factor(hgdp$population)
 test_dapc <- gt_dapc(test_pca, pop = pop_factor)
 ```
 
-dapc: 414ms
+dapc: 265ms
 
 #Plot DAPC
 
@@ -229,7 +225,7 @@ grouped_hgdp <- hgdp %>% group_by(population)
 pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
 ```
 
-pairwise_fst: 11.3s
+pairwise_fst: 7.2s
 
 #Save in plink bed format
 
@@ -242,27 +238,27 @@ gt_as_plink(hgdp,
             file = tempfile(),
             type = "bed",
             overwrite = TRUE)
-#> [1] "/tmp/Rtmpjhnujc/file5596d655a9f.bed"
+#> [1] "/tmp/RtmpkAiMML/file9707a21183425.bed"
 ```
 
-plink_save: 450ms
+plink_save: 259ms
 
 # Summary
 
 
 ```
 #>            step  time
-#> 1    read_plink  3.83
-#> 2   loci_report 21.13
-#> 3   filter_loci  3.75
-#> 4  indiv_report 28.66
-#> 5  filter_indiv  0.01
-#> 6        impute  0.38
-#> 7   ld_clumping   7.2
-#> 8           pca   3.5
-#> 9          dapc  0.41
-#> 10 pairwise_fst  11.3
-#> 11   plink_save  0.45
-#> 12        Total 80.62
+#> 1    read_plink  2.71
+#> 2   loci_report 11.53
+#> 3   filter_loci  1.41
+#> 4  indiv_report 15.74
+#> 5  filter_indiv     0
+#> 6        impute  0.17
+#> 7   ld_clumping  4.17
+#> 8           pca   1.7
+#> 9          dapc  0.26
+#> 10 pairwise_fst  7.19
+#> 11   plink_save  0.26
+#> 12        Total 45.14
 ```
 
