@@ -28,9 +28,9 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
   if (!is.null(kings_threshold)) {
     if (is.numeric(kings_threshold)) {
       kings_threshold <- kings_threshold
-    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { #nolint
+    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { # nolint
       stop("kings_threshold must be a numeric or one of 'first' or 'second'")
-    } else if (!is.numeric(kings_threshold)) {
+    } else {
       kings_threshold <- match.arg(kings_threshold, c("first", "second"))
     }
 
@@ -77,9 +77,9 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
   if (!is.null(kings_threshold)) {
     if (is.numeric(kings_threshold)) {
       kings_threshold <- kings_threshold
-    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { #nolint
+    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { # nolint
       stop("kings_threshold must be a numeric or one of 'first' or 'second'")
-    } else if (!is.numeric(kings_threshold)) {
+    } else {
       kings_threshold <- match.arg(kings_threshold, c("first", "second"))
     }
 
@@ -175,11 +175,12 @@ autoplot.qc_report_indiv <- function(
   if (!is.null(kings_threshold)) {
     if (is.numeric(kings_threshold)) {
       kings_threshold <- kings_threshold
-    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { #nolint
+    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { # nolint
       stop("kings_threshold must be a numeric or one of 'first' or 'second'")
-    } else if (!is.numeric(kings_threshold)) {
+    } else {
       kings_threshold <- match.arg(kings_threshold, c("first", "second"))
     }
+
 
     if (kings_threshold == "first") {
       kings_threshold <- 0.177
