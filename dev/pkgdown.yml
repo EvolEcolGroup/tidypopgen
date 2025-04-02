@@ -5,8 +5,9 @@ articles:
   a02_qc: a02_qc.html
   a03_example_clustering_and_dapc: a03_example_clustering_and_dapc.html
   a99_plink_cheatsheet: a99_plink_cheatsheet.html
+  articles/benchmark_hgdp: benchmark_hgdp.html
   tidypopgen: tidypopgen.html
-last_built: 2025-04-02T16:21Z
+last_built: 2025-04-02T16:40Z
 urls:
   reference: https://evolecolgroup.github.io/tidypopgen/reference
   article: https://evolecolgroup.github.io/tidypopgen/articles
