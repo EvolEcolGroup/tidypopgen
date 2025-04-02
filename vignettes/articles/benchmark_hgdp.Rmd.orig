@@ -16,7 +16,8 @@ set.seed(123)
 
 This vignette is a benchmark of a few key functions in the tidypopgen package.
 The Human Genome Diversity Project (HGDP) SNP dataset is used for this
-benchmark.
+benchmark. This dataset includes 1043 individuals from 51 populations, typed
+at ~650k loci.
 
 We will run this benchmark on a machine with a `r benchmarkme::get_cpu()` CPU
 and `r print(get_ram(), unit_system = "iec")` of RAM. However, we will limit the number of
@@ -65,13 +66,19 @@ hgdp <- gen_tibble(bed_path,
                    n_cores = n_cores)
 ```
 
-# Add metadata
+Add metadata
 
 ```{r}
 hgdp <- hgdp %>% mutate(
   population = meta_info$population[match(hgdp$id, meta_info$Id)],
   region = meta_info$Region[match(hgdp$id, meta_info$Id)]
 )
+```
+
+Let's confirm that we have read all the expected information:
+```{r}
+hgdp
+
 ```
 
 # Loci Report
