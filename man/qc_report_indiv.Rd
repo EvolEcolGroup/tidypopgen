@@ -18,8 +18,14 @@ obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
 \item{...}{further arguments to pass}
 
-\item{kings_threshold}{an optional numeric, a threshold of relatedness for
-the sample}
+\item{kings_threshold}{an optional numeric giving a KING kinship coefficient,
+or one of:
+\itemize{
+\item "first": removing first degree relatives, equivalent to a kinship
+coefficient of 0.177 or more
+\item "second": removing second degree relatives, equivalent to a kinship
+coefficient of 0.088 or more
+}}
 }
 \value{
 a tibble with 2 elements: het_obs and missingness
