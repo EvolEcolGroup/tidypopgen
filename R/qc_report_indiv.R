@@ -28,16 +28,14 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
   if (!is.null(kings_threshold)) {
     if (is.numeric(kings_threshold)) {
       kings_threshold <- kings_threshold
-    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { # nolint
-      stop("kings_threshold must be a numeric or one of 'first' or 'second'")
+    } else if (kings_threshold %in% c("first", "second")) {
+      if (kings_threshold == "first") {
+        kings_threshold <- 0.177
+      } else if (kings_threshold == "second") {
+        kings_threshold <- 0.088
+      }
     } else {
-      kings_threshold <- match.arg(kings_threshold, c("first", "second"))
-    }
-
-    if (kings_threshold == "first") {
-      kings_threshold <- 0.177
-    } else if (kings_threshold == "second") {
-      kings_threshold <- 0.088
+      stop("kings_threshold must be a numeric or one of 'first' or 'second'")
     }
   }
 
