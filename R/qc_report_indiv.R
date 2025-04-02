@@ -26,15 +26,13 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
   if (!is.null(kings_threshold)) {
-    if (is.numeric(kings_threshold)) {
-      kings_threshold <- kings_threshold
-    } else if (kings_threshold %in% c("first", "second")) {
+    if (kings_threshold %in% c("first", "second")) {
       if (kings_threshold == "first") {
         kings_threshold <- 0.177
       } else if (kings_threshold == "second") {
         kings_threshold <- 0.088
       }
-    } else {
+    } else if (!is.numeric(kings_threshold)) {
       stop("kings_threshold must be a numeric or one of 'first' or 'second'")
     }
   }
