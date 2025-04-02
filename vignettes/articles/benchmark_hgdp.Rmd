@@ -277,7 +277,7 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 #> 1    read_plink  2.69
 #> 2   loci_report 10.36
 #> 3   filter_loci  1.54
-#> 4  indiv_report  15.5
+#> 4  indiv_report 15.50
 #> 5  filter_indiv  0.01
 #> 6        impute  0.16
 #> 7   ld_clumping  4.02
