@@ -173,6 +173,14 @@ To explore why clumping is preferable to pruning, see <https://privefl.github.io
 
 LD clumping requires a data set with no missingness. This means we need to create an imputed data set before LD pruning, which we can do quickly with `gt_impute_simple`.
 
+Because we have removed individuals through our filtering, we first need to update the backingfiles with:
+
+```{r}
+data <- gt_update_backingfile(data)
+```
+
+And then we can impute using:
+
 ```{r}
 imputed_data <- gt_impute_simple(data, method = "random")
 ```

@@ -99,3 +99,70 @@ test_that("autoplot list", {
   # expect plot2 is a list, one plot for each population
   expect_equal(names(plot2), c("pop1", "pop2"))
 })
+
+
+test_that("non-numeric kings_threshold arguments ", {
+  expect_error(
+    qc_report_indiv(families, kings_threshold = "blah"),
+    "kings_threshold must be a numeric or one of"
+  )
+
+  expect_equal(
+    qc_report_indiv(families, kings_threshold = "first")$to_keep,
+    qc_report_indiv(families, kings_threshold = 0.177)$to_keep
+  )
+  expect_equal(
+    qc_report_indiv(families, kings_threshold = "second")$to_keep,
+    qc_report_indiv(families, kings_threshold = 0.088)$to_keep
+  )
+
+
+  # add population
+  families$population <- c(
+    rep("pop1", 5),
+    rep("pop2", 4),
+    "pop1",
+    "pop2",
+    "pop1"
+  )
+  # group
+  families <- families %>% group_by(population)
+  # test after grouping
+  expect_error(
+    qc_report_indiv(families, kings_threshold = "blah"),
+    "kings_threshold must be a numeric or one of"
+  )
+  expect_equal(
+    qc_report_indiv(families, kings_threshold = "first")$to_keep,
+    qc_report_indiv(families, kings_threshold = 0.177)$to_keep
+  )
+  expect_equal(
+    qc_report_indiv(families, kings_threshold = "second")$to_keep,
+    qc_report_indiv(families, kings_threshold = 0.088)$to_keep
+  )
+
+  # test autoplot
+  report1 <- qc_report_indiv(families, kings_threshold = "first")
+  expect_equal(
+    autoplot(report1,
+      type = "relatedness",
+      kings_threshold = "first"
+    ),
+    autoplot(report1,
+      type = "relatedness",
+      kings_threshold = 0.177
+    )
+  )
+
+  report2 <- qc_report_indiv(families, kings_threshold = "second")
+  expect_equal(
+    autoplot(report2,
+      type = "relatedness",
+      kings_threshold = "second"
+    ),
+    autoplot(report2,
+      type = "relatedness",
+      kings_threshold = 0.088
+    )
+  )
+})
