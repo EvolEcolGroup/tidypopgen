@@ -34,6 +34,7 @@ reference:
     desc: "Functions for imputing missing data in a `gen_tibble`."
     contents:
         - gt_impute_simple
+        - gt_impute_xgboost
         - gt_has_imputed
         - gt_uses_imputed
         - gt_set_imputed
