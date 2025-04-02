@@ -51,6 +51,16 @@ test_that("error imputing an already imputed set", {
     gt_impute_xgboost(missing_gt_imputed, seed = 1),
     "object x is already imputed"
   )
+  # corrupted file
+  gt_set_imputed(missing_gt_imputed, TRUE)
+  attr(missing_gt_imputed$genotypes, "imputed") <- NULL
+  expect_equal(attr(missing_gt_imputed$genotypes, "imputed", exact = TRUE),
+               NULL)
+  expect_false(gt_has_imputed(missing_gt_imputed))
+  expect_error(
+    gt_impute_xgboost(missing_gt_imputed, seed = 1),
+    "^object x is already imputed, but attr"
+  )
 })
 
 test_that("n_cores can be set", {

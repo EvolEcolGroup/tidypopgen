@@ -49,6 +49,15 @@ test_that("error imputing an already imputed set", {
     gt_impute_simple(missing_gt_imputed, method = "mode"),
     "object x is already imputed"
   )
+  # if the imputation information has been removed (i.e. a corrupted object)
+  gt_set_imputed(missing_gt_imputed, TRUE)
+  attr(missing_gt_imputed$genotypes, "imputed") <- NULL
+  expect_equal(attr(missing_gt_imputed$genotypes, "imputed"), NULL)
+  expect_false(gt_has_imputed(missing_gt_imputed))
+  expect_error(
+    gt_impute_simple(missing_gt_imputed, method = "mode"),
+    "^object x is already imputed, but attr"
+  )
 })
 
 test_that("gt_impute imputes properly", {

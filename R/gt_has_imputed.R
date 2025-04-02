@@ -12,7 +12,7 @@ gt_has_imputed <- function(x) {
   if (inherits(x, "gen_tbl")) {
     x <- x$genotypes
   }
-  !is.null(attr(x, "imputed"))
+  !is.null(attr(x, "imputed", exact = TRUE))
 }
 
 #' Checks if a `gen_tibble` uses imputed data
@@ -71,7 +71,7 @@ gt_set_imputed <- function(x, set = NULL) {
   if (set == FALSE) {
     attr(x, "bigsnp")$genotypes$code256 <- bigsnpr::CODE_012
   } else {
-    if (attr(x, "imputed") %in% c("simple", "xgboost")) {
+    if (attr(x, "imputed", exact = TRUE) %in% c("simple", "xgboost")) {
       attr(x, "bigsnp")$genotypes$code256 <- bigsnpr::CODE_IMPUTE_PRED
     }
   }
