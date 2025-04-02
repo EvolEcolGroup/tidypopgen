@@ -11,7 +11,7 @@ benchmark. This dataset includes 1043 individuals from 51 populations, typed
 at ~650k loci.
 
 We will run this benchmark on a machine with a GenuineIntel, 13th Gen Intel(R) Core(TM) i9-13900, 24 CPU
-and  of RAM. However, we will limit the number of
+and  128 GiB of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
 inflation of the number of threads used (for example, in cases where dependency
@@ -54,7 +54,7 @@ meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
 
-#Create gen_tibble object
+# Create gen_tibble object
 
 Our first step is to load the HGDP data into a `gen_tibble` object, and add its
 associated metadata.
@@ -113,7 +113,7 @@ loci_report <- qc_report_loci(hgdp)
 
 loci_report: 10.4s
 
-#Loci Plot
+# Loci Plot
 
 The resulting report can be observed using `autoplot`.
 
@@ -125,7 +125,7 @@ autoplot(loci_report, type = "all")
 
 ![plot of chunk autoplot_loci_report](figure/autoplot_loci_report-1.png)
 
-#Filter Loci
+# Filter Loci
 
 Following this, we filter the loci to only including those with a minor allele
 frequency over 0.05, and a missingness rate below 0.05.
@@ -140,7 +140,7 @@ hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 filter_loci: 1.5s
 
 
-#Individual Report
+# Individual Report
 
 We can then call `qc_report_indiv` to supply observed heterozygosity per
 individual, and rate of missingness per individual.
@@ -152,7 +152,7 @@ indiv_report <- qc_report_indiv(hgdp)
 
 indiv_report: 15.5s
 
-#Filter individuals
+# Filter individuals
 
 And we can filter individuals down to only include those with less than 10% of
 their genotypes missing.
@@ -166,7 +166,7 @@ hgdp <- hgdp[to_keep_indiv, ]
 
 filter_indiv: 6ms
 
-#Impute data
+# Impute data
 
 Some functions, such as `loci_ld_clump` and the `gt_pca` functions, require that
 there is no missingness in the dataset, so we use `gt_impute_simple` to impute
@@ -181,7 +181,7 @@ gt_set_imputed(hgdp, TRUE)
 
 impute: 165ms
 
-#LD clumping
+# LD clumping
 
 LD clumping is then performed to control for linkage disequilibrium.
 
@@ -193,7 +193,7 @@ hgdp <- hgdp %>%
 
 ld_clumping: 4s
 
-#PCA
+# PCA
 
 A principal components analysis can then be computed using the resulting cleaned
 and LD clumped dataset.
@@ -206,7 +206,7 @@ test_pca <- hgdp %>% gt_pca_partialSVD()
 
 pca: 1.7s
 
-#Plot PCA
+# Plot PCA
 
 
 ``` r
@@ -216,7 +216,7 @@ autoplot(test_pca, type = "scores") +
 
 ![plot of chunk PCA](figure/PCA-1.png)
 
-#DAPC
+# DAPC
 
 We can continue with a discriminant analysis of principal
 components using `gt_dapc`.
@@ -229,7 +229,7 @@ test_dapc <- gt_dapc(test_pca, pop = pop_factor)
 
 dapc: 276ms
 
-#Plot DAPC
+# Plot DAPC
 
 
 ``` r
@@ -238,7 +238,7 @@ autoplot(test_dapc, type = "screeplot")
 
 ![plot of chunk DAPC_screeplot](figure/DAPC_screeplot-1.png)
 
-#Calculate Fst
+# Calculate Fst
 
 To examine the differentiation between populations in the global HGDP set, we
 calculate pairwise Fst.
@@ -252,7 +252,7 @@ pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
 
 pairwise_fst: 7.1s
 
-#Save in plink bed format
+# Save in plink bed format
 
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
 
@@ -270,6 +270,7 @@ plink_save: 240ms
 
 # Summary
 
+Here is a summary of the time taken (in seconds) to perform each step of the analyses:
 
 ```
 #>            step  time
