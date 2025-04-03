@@ -134,6 +134,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// pairwise_fst_hudson_loop
+List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, List pop_freqs_df, bool by_locus);
+RcppExport SEXP _tidypopgen_pairwise_fst_hudson_loop(SEXP pairwise_combnSEXP, SEXP pop_freqs_dfSEXP, SEXP by_locusSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type pairwise_combn(pairwise_combnSEXP);
+    Rcpp::traits::input_parameter< List >::type pop_freqs_df(pop_freqs_dfSEXP);
+    Rcpp::traits::input_parameter< bool >::type by_locus(by_locusSEXP);
+    rcpp_result_gen = Rcpp::wrap(pairwise_fst_hudson_loop(pairwise_combn, pop_freqs_df, by_locus));
+    return rcpp_result_gen;
+END_RCPP
+}
 // increment_as_counts
 void increment_as_counts(Environment k, Environment k2, arma::mat& na_mat, arma::mat& dos_mat, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
 RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP na_matSEXP, SEXP dos_matSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
@@ -238,6 +251,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_summaries", (DL_FUNC) &_tidypopgen_gt_grouped_summaries, 6},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
     {"_tidypopgen_SNPHWE2", (DL_FUNC) &_tidypopgen_SNPHWE2, 4},
+    {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 3},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},

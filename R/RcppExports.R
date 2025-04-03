@@ -33,6 +33,10 @@ SNPHWE2 <- function(obs_hets, obs_hom1, obs_hom2, midp) {
     .Call(`_tidypopgen_SNPHWE2`, obs_hets, obs_hom1, obs_hom2, midp)
 }
 
+pairwise_fst_hudson_loop <- function(pairwise_combn, pop_freqs_df, by_locus) {
+    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, pop_freqs_df, by_locus)
+}
+
 increment_as_counts <- function(k, k2, na_mat, dos_mat, BM, rowInd, colInd) {
     invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, na_mat, dos_mat, BM, rowInd, colInd))
 }

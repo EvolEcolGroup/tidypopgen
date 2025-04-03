@@ -42,7 +42,7 @@ pairwise_pop_fst <- function(
     .x,
     tidy = TRUE,
     by_locus = FALSE,
-    method = c("Hudson", "Nei87", "WC84"),
+    method = c("Hudson", "Nei87", "WC84", "Hudson_cpp"),
     n_cores = bigstatsr::nb_cores()) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
@@ -66,7 +66,7 @@ pairwise_pop_fst <- function(
   }
 }
 
-pairwise_pop_fst_hudson <- function(
+pairwise_pop_fst_hudson_r <- function(
     .x,
     tidy = TRUE,
     by_locus = FALSE,
@@ -139,7 +139,66 @@ pairwise_pop_fst_hudson <- function(
   }
 }
 
-## use tidyr::pivot_wider to turn into a matrix if that's what is requested.
+
+pairwise_pop_fst_hudson <- function(
+    .x,
+    tidy = TRUE,
+    by_locus = FALSE,
+    n_cores = bigstatsr::nb_cores()) {
+  # get the populations
+  .group_levels <- .x %>% group_keys()
+  # create all combinations
+  pairwise_combn <- utils::combn(nrow(.group_levels), 2)
+  # vector and matrix to store Fst for total and by locus
+#  fst_tot <- rep(NA_real_, ncol(pairwise_combn))
+#  if (by_locus) {
+#    fst_locus <-
+#      matrix(NA_real_, nrow = count_loci(.x), ncol = ncol(pairwise_combn))
+#  }
+  # summarise population frequencies
+  pop_freqs_df <- gt_grouped_summaries(
+    .gt_get_bigsnp(.x)$genotypes,
+    rowInd = .gt_bigsnp_rows(.x),
+    colInd = .gt_bigsnp_cols(.x),
+    groupIds = dplyr::group_indices(.x) - 1,
+    ngroups = nrow(.group_levels),
+    ncores = n_cores
+  )
+  
+  fst_list <- pairwise_fst_hudson_loop(
+    pairwise_combn = pairwise_combn,
+    pop_freqs_df = pop_freqs_df,
+    by_locus = by_locus)
+
+  # format nicely the objects
+  group_combinations <- cbind(
+    .group_levels[pairwise_combn[1, ], ],
+    .group_levels[pairwise_combn[2, ], ]
+  )
+  names(group_combinations) <- c(
+    paste0(dplyr::group_vars(.x), "_1"),
+    paste0(dplyr::group_vars(.x), "_2")
+  )
+  fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
+  
+  if (!tidy) { # if we return a matrix
+    fst_tot_matrix <- tidy_to_matrix(fst_tot)
+    return(fst_tot_matrix)
+  } else {
+    if (by_locus) {
+      rownames(fst_list$fst_locus) <- loci_names(.x)
+      colnames(fst_list$fst_locus) <- apply(
+        group_combinations,
+        1,
+        function(x) paste(x, collapse = ".")
+      )
+      return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
+    } else {
+      return(fst_tot)
+    }
+  }
+}
+
 
 # the implementation for Nei 87, adapted from hierfstat
 pairwise_pop_fst_nei87 <- function(
