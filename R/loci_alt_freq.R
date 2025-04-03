@@ -193,22 +193,18 @@ loci_alt_freq_diploid <- function(.x, n_cores, block_size) {
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
-    # create function to use in big_apply #nolint start
-    big_sub_counts <- function(X, ind, rows_to_keep) {
-      col_counts <- bigstatsr::big_counts(
-        X,
-        ind.row = rows_to_keep,
-        ind.col = ind
-      ) # nolint end
-      means_from_counts <- function(x) {
-        (x[2] + x[3] * 2) / ((x[1] + x[2] + x[3]) * 2)
-      }
-      freq_sub <- apply(col_counts, 2, means_from_counts)
-      freq_sub
-    }
+    # internal function that can be used with a big_apply #nolint start
+    gt_group_alt_freq_freq_sub <- function(BM, ind, rows_to_keep) {
+      gt_alt_freq_diploid(
+        BM = BM,
+        rowInd = rows_to_keep,
+        colInd = ind,
+        ncores = n_cores
+      )
+    } # nolint end
     freq <- bigstatsr::big_apply(
       geno_fbm,
-      a.FUN = big_sub_counts,
+      a.FUN = gt_group_alt_freq_freq_sub,
       rows_to_keep = rows_to_keep,
       ind = attr(.x, "loci")$big_index,
       ncores = 1, # parallelisation is used within the function

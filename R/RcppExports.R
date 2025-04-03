@@ -5,6 +5,10 @@ fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V) {
     .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V)
 }
 
+gt_alt_freq_diploid <- function(BM, rowInd, colInd, ncores) {
+    .Call(`_tidypopgen_gt_alt_freq_diploid`, BM, rowInd, colInd, ncores)
+}
+
 gt_grouped_alt_freq_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
     .Call(`_tidypopgen_gt_grouped_alt_freq_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
