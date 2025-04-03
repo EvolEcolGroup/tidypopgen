@@ -29,7 +29,7 @@ NumericVector gt_alt_freq_diploid(Environment BM,
         this_valid_alleles +=2;
       }
     }
-    freq[j] = this_allele_count / this_valid_alleles;
+    freq[j] = (this_valid_alleles > 0) ? (this_allele_count / this_valid_alleles) : NA_REAL;
   }
 
   return freq;
