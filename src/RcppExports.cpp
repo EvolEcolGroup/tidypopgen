@@ -106,6 +106,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gt_ind_hetero
+IntegerMatrix gt_ind_hetero(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
+RcppExport SEXP _tidypopgen_gt_ind_hetero(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_ind_hetero(BM, rowInd, colInd, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // SNPHWE2
 double SNPHWE2(int32_t obs_hets, int32_t obs_hom1, int32_t obs_hom2, uint32_t midp);
 RcppExport SEXP _tidypopgen_SNPHWE2(SEXP obs_hetsSEXP, SEXP obs_hom1SEXP, SEXP obs_hom2SEXP, SEXP midpSEXP) {
@@ -222,6 +236,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_alt_freq_pseudohap", (DL_FUNC) &_tidypopgen_gt_grouped_alt_freq_pseudohap, 7},
     {"_tidypopgen_gt_grouped_missingness", (DL_FUNC) &_tidypopgen_gt_grouped_missingness, 6},
     {"_tidypopgen_gt_grouped_summaries", (DL_FUNC) &_tidypopgen_gt_grouped_summaries, 6},
+    {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
     {"_tidypopgen_SNPHWE2", (DL_FUNC) &_tidypopgen_SNPHWE2, 4},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},

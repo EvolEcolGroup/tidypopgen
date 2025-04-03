@@ -194,7 +194,7 @@ loci_alt_freq_diploid <- function(.x, n_cores, block_size) {
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
     # internal function that can be used with a big_apply #nolint start
-    gt_group_alt_freq_freq_sub <- function(BM, ind, rows_to_keep) {
+    gt_alt_freq_freq_sub <- function(BM, ind, rows_to_keep) {
       gt_alt_freq_diploid(
         BM = BM,
         rowInd = rows_to_keep,
@@ -204,7 +204,7 @@ loci_alt_freq_diploid <- function(.x, n_cores, block_size) {
     } # nolint end
     freq <- bigstatsr::big_apply(
       geno_fbm,
-      a.FUN = gt_group_alt_freq_freq_sub,
+      a.FUN = gt_alt_freq_freq_sub,
       rows_to_keep = rows_to_keep,
       ind = attr(.x, "loci")$big_index,
       ncores = 1, # parallelisation is used within the function
