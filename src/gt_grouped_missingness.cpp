@@ -24,7 +24,7 @@ NumericMatrix gt_grouped_missingness(Environment BM,
   for (size_t j = 0; j < m; j++) {
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
-      if (!(x>-1)){
+      if (!(x > -1)){
         na_counts(j, groupIds[i]) +=1;
       }
     }

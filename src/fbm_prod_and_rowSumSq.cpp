@@ -30,7 +30,7 @@ List fbm256_prod_and_rowSumsSq(Environment BM,
   for (j = 0; j < m; j++) {
     for (i = 0; i < n; i++) {
       double x = macc(i, j); // here we need to center and standardise
-      if (x>-1){
+      if (x > -1){
         x = (x-center[j])/scale[j];
       } else {
 //        Rcout<<"impute"<<std::endl;

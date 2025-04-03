@@ -24,7 +24,7 @@ NumericVector gt_alt_freq_diploid(Environment BM,
     double this_valid_alleles = 0; // count of valid alleles at this locus
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
-      if (x>-1){
+      if (x > -1){
         this_allele_count += x;
         this_valid_alleles +=2;
       }
