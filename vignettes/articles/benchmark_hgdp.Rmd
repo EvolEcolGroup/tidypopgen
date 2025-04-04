@@ -21,6 +21,7 @@ number of cores used by the parallelised BLAS library with
 `data.table::setDTthreads()`.
 
 
+
 ``` r
 n_cores <- 20
 
@@ -31,6 +32,7 @@ bigparallelr::set_blas_ncores(n_cores)
 We can now load the necessary libraries:
 
 
+
 ``` r
 library(tidypopgen)
 library(ggplot2)
@@ -39,6 +41,7 @@ library(ggplot2)
 Before running this benchmark, we need to download into the subdirectory
 `data/hgdp/` the bed file `hgdp650.qc.hg19.bed` and the metadata file
 `HGDPid_populations.txt`.
+
 
 
 ``` r
@@ -67,7 +70,7 @@ hgdp <- gen_tibble(bed_path,
                    n_cores = n_cores)
 ```
 
-read_plink: 4.6s
+read_plink: 4.1s
 
 Add metadata
 
@@ -79,7 +82,9 @@ hgdp <- hgdp %>% mutate(
 )
 ```
 
+
 Let's confirm that we have read all the expected information:
+
 
 ``` r
 hgdp
@@ -106,6 +111,7 @@ We can then call `qc_report_loci`. This function supplies minor allele
 frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 
 
+
 ``` r
 loci_report <- qc_report_loci(hgdp)
 ```
@@ -117,10 +123,11 @@ loci_report: 3.6s
 The resulting report can be observed using `autoplot`.
 
 
-
 ``` r
 autoplot(loci_report, type = "all")
 ```
+
+![plot of chunk autoplot_loci_report](figure/autoplot_loci_report-1.png)
 
 ![plot of chunk autoplot_loci_report](figure/autoplot_loci_report-1.png)
 
@@ -136,7 +143,8 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 3.6s
+filter_loci: 3.4s
+
 
 # Individual Report
 
@@ -144,17 +152,19 @@ We can then call `qc_report_indiv` to supply observed heterozygosity per
 individual, and rate of missingness per individual.
 
 
+
 ``` r
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 10.8s
-
+indiv_report: 10.4s
 
 
 ``` r
 autoplot(indiv_report, type = "scatter")
 ```
+
+![plot of chunk autoplot_indiv_report](figure/autoplot_indiv_report-1.png)
 
 ![plot of chunk autoplot_indiv_report](figure/autoplot_indiv_report-1.png)
 
@@ -165,13 +175,29 @@ And we can filter individuals down to only include those with less than 1% of
 their genotypes missing.
 
 
-
 ``` r
 to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-filter_indiv: 6ms
+filter_indiv: 8ms
+
+
+# Update backingfile
+
+After removing individuals from the dataset, and before imputing, we need to
+update the file backing matrix with `gt_update_backingfile`.
+
+
+``` r
+hgdp <- gt_update_backingfile(hgdp)
+#> Genetic distances are not sorted, setting them to zero
+#> 
+#> gen_backing files updated, now
+#> using bigSNP file: /tmp/Rtmp5CBsmX/test_121c21d027a47_v2.rds
+#> with backing file: /tmp/Rtmp5CBsmX/test_121c21d027a47_v2.bk
+#> make sure that you do NOT delete those files!
+```
 
 # Impute data
 
@@ -183,12 +209,10 @@ any remaining missing genotypes.
 
 ``` r
 hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
-#> Error in gt_impute_simple(hgdp, method = "mode", n_cores = n_cores): The number of individuals in the gen_tibble does not match the number of rows in the file backing matrix. Before imputing, use gt_update_backingfile to update your file backing matrix.
 gt_set_imputed(hgdp, TRUE)
-#> Error in gt_set_imputed(hgdp, TRUE): this dataset does not have imputed values to use!
 ```
 
-impute: 19ms
+impute: 316ms
 
 # LD clumping
 
@@ -200,7 +224,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 15.2s
+ld_clumping: 6.9s
 
 # PCA
 
@@ -208,13 +232,11 @@ A principal components analysis can then be computed using the resulting cleaned
 and LD clumped dataset.
 
 
-
 ``` r
 test_pca <- hgdp %>% gt_pca_partialSVD()
-#> Error in if (any_near0(ms$scale)) stop2(MSG_ZERO_SCALE): missing value where TRUE/FALSE needed
 ```
 
-pca: 865ms
+pca: 4s
 
 Plot PCA:
 
@@ -222,13 +244,9 @@ Plot PCA:
 ``` r
 autoplot(test_pca, type = "scores") +
   aes(color = hgdp$region, shape = hgdp$region)
-#> Error in `geom_point()`:
-#> ! Problem while computing aesthetics.
-#> ℹ Error occurred in the 1st layer.
-#> Caused by error in `check_aesthetics()`:
-#> ! Aesthetics must be either length 1 or the same as the data (1043).
-#> ✖ Fix the following mappings: `colour` and `shape`.
 ```
+
+![plot of chunk PCA](figure/PCA-1.png)
 
 # DAPC
 
@@ -239,17 +257,19 @@ components using `gt_dapc`.
 ``` r
 pop_factor <- as.factor(hgdp$population)
 test_dapc <- gt_dapc(test_pca, pop = pop_factor)
-#> Error in lda.default(x, grouping, ...): nrow(x) and length(grouping) are different
 ```
 
-dapc: 63ms
+dapc: 550ms
 
 Plot DAPC:
+
 
 
 ``` r
 autoplot(test_dapc, type = "screeplot")
 ```
+
+![plot of chunk DAPC_screeplot](figure/DAPC_screeplot-1.png)
 
 ![plot of chunk DAPC_screeplot](figure/DAPC_screeplot-1.png)
 
@@ -259,15 +279,15 @@ To examine the differentiation between populations in the global HGDP set, we
 calculate pairwise Fst.
 
 
-
 ``` r
 grouped_hgdp <- hgdp %>% group_by(population)
 pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores, tidy = FALSE)
 ```
 
-pairwise_fst: 29.8s
+pairwise_fst: 16.3s
 
 Plot pairwise Fst:
+
 
 
 ``` r
@@ -290,11 +310,12 @@ ggheatmap(pairwise_fsts) +
 
 ![plot of chunk pairwise_fst_plot](figure/pairwise_fst_plot-1.png)
 
+![plot of chunk pairwise_fst_plot](figure/pairwise_fst_plot-1.png)
+
 
 # Save in plink bed format
 
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
-
 
 
 ``` r
@@ -302,10 +323,10 @@ gt_as_plink(hgdp,
             file = tempfile(),
             type = "bed",
             overwrite = TRUE)
-#> [1] "/tmp/Rtmp5CBsmX/file121c217dc9069.bed"
+#> [1] "/tmp/Rtmp5CBsmX/file121c271c4bf04.bed"
 ```
 
-plink_save: 1s
+plink_save: 754ms
 
 # Summary
 
@@ -314,17 +335,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  4.55
-#> 2   loci_report  3.59
-#> 3   filter_loci  3.57
-#> 4  indiv_report 10.75
+#> 1    read_plink  4.05
+#> 2   loci_report  3.55
+#> 3   filter_loci  3.38
+#> 4  indiv_report 10.37
 #> 5  filter_indiv  0.01
-#> 6        impute  0.02
-#> 7   ld_clumping 15.25
-#> 8           pca  0.86
-#> 9          dapc  0.06
-#> 10 pairwise_fst 29.79
-#> 11   plink_save  1.01
-#> 12        Total 69.46
+#> 6        impute  0.32
+#> 7   ld_clumping  6.91
+#> 8           pca  3.98
+#> 9          dapc  0.55
+#> 10 pairwise_fst  16.3
+#> 11   plink_save  0.75
+#> 12        Total 50.17
 ```
 
