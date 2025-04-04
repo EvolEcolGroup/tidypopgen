@@ -120,9 +120,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// SNPHWE2
-double SNPHWE2(int32_t obs_hets, int32_t obs_hom1, int32_t obs_hom2, uint32_t midp);
-RcppExport SEXP _tidypopgen_SNPHWE2(SEXP obs_hetsSEXP, SEXP obs_hom1SEXP, SEXP obs_hom2SEXP, SEXP midpSEXP) {
+// SNPHWE2_R
+double SNPHWE2_R(int32_t obs_hets, int32_t obs_hom1, int32_t obs_hom2, uint32_t midp);
+RcppExport SEXP _tidypopgen_SNPHWE2_R(SEXP obs_hetsSEXP, SEXP obs_hom1SEXP, SEXP obs_hom2SEXP, SEXP midpSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -130,7 +130,19 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int32_t >::type obs_hom1(obs_hom1SEXP);
     Rcpp::traits::input_parameter< int32_t >::type obs_hom2(obs_hom2SEXP);
     Rcpp::traits::input_parameter< uint32_t >::type midp(midpSEXP);
-    rcpp_result_gen = Rcpp::wrap(SNPHWE2(obs_hets, obs_hom1, obs_hom2, midp));
+    rcpp_result_gen = Rcpp::wrap(SNPHWE2_R(obs_hets, obs_hom1, obs_hom2, midp));
+    return rcpp_result_gen;
+END_RCPP
+}
+// hwe_on_matrix
+NumericVector hwe_on_matrix(IntegerMatrix geno_counts, uint32_t midp);
+RcppExport SEXP _tidypopgen_hwe_on_matrix(SEXP geno_countsSEXP, SEXP midpSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type geno_counts(geno_countsSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type midp(midpSEXP);
+    rcpp_result_gen = Rcpp::wrap(hwe_on_matrix(geno_counts, midp));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -250,7 +262,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_missingness", (DL_FUNC) &_tidypopgen_gt_grouped_missingness, 6},
     {"_tidypopgen_gt_grouped_summaries", (DL_FUNC) &_tidypopgen_gt_grouped_summaries, 6},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
-    {"_tidypopgen_SNPHWE2", (DL_FUNC) &_tidypopgen_SNPHWE2, 4},
+    {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
+    {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 3},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
