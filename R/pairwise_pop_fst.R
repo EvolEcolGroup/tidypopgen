@@ -42,7 +42,7 @@ pairwise_pop_fst <- function(
     .x,
     tidy = TRUE,
     by_locus = FALSE,
-    method = c("Hudson", "Nei87", "WC84", "Hudson_cpp"),
+    method = c("Hudson", "Nei87", "WC84"),
     n_cores = bigstatsr::nb_cores()) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
@@ -164,7 +164,7 @@ pairwise_pop_fst_hudson <- function(
     ngroups = nrow(.group_levels),
     ncores = n_cores
   )
-  
+
   fst_list <- pairwise_fst_hudson_loop(
     pairwise_combn = pairwise_combn,
     pop_freqs_df = pop_freqs_df,
@@ -180,7 +180,7 @@ pairwise_pop_fst_hudson <- function(
     paste0(dplyr::group_vars(.x), "_2")
   )
   fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
-  
+
   if (!tidy) { # if we return a matrix
     fst_tot_matrix <- tidy_to_matrix(fst_tot)
     return(fst_tot_matrix)
