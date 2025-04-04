@@ -82,7 +82,22 @@ coefficient of 0.088 or more</p></li>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a tibble with 2 elements: het_obs and missingness</p>
+    <p>If no kings_threshold is provided, a tibble with 2 elements: het_obs
+and missingness. If kings_threshold is provided, a tibble with 4 elements:
+het_obs, missingness, id and to_keep.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Providing the parameter kings_threshold will return two additional columns,
+'id' containing the ID of individuals, and 'to_keep' a logical vector
+describing whether the individual should be removed to retain the largest
+possible set of individuals with no relationships above the threshold. The
+calculated pairwise KING relationship matrix is also returned as an attribute
+of 'to_keep'. The kings_threshold parameter can be either a numeric KING
+kinship coefficient or a string of either "first" or "second", to remove any
+first degree or second degree relationships from the dataset. This second
+option is similar to using  –unrelated –degree 1 or –unrelated –degree 2
+in KING.</p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
