@@ -365,7 +365,8 @@ tidy_to_matrix <- function(tidy_tbl) {
   return(fst_tot_wide)
 }
 
-
+# This function is used to create the column names for the pairwise
+# combinations
 col_names_combinations <- function(group_combinations) {
   apply(
     group_combinations,
