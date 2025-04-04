@@ -191,10 +191,10 @@ alternatively:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 variables: id &lt;chr&gt;, population &lt;chr&gt;, genotypes &lt;vctr_SNP&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="quality-control-for-linkage">Quality control for linkage<a class="anchor" aria-label="anchor" href="#quality-control-for-linkage"></a>
+<h2 id="handling-linkage">Handling linkage<a class="anchor" aria-label="anchor" href="#handling-linkage"></a>
 </h2>
-<p>Linkage is managed through clumping in <code>tidypopgen</code> with
-<code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code>.</p>
+<p>Linkage disequilibrium is managed through clumping in
+<code>tidypopgen</code> with <code><a href="../reference/loci_ld_clump.html">loci_ld_clump()</a></code>.</p>
 <p>This option is similar to the –indep-pairwise flag in PLINK, but
 results in a more even distribution of loci when compared to LD
 pruning.</p>
@@ -223,11 +223,25 @@ pruning.</p>
 </tr>
 </tbody>
 </table>
-<p>pairwise_king() implements the KING-robust estimator of kinship
-equivalent to –kinship in KING. To remove related individuals, instead
-of using –unrelated –degree, the user can pass the resulting kinship
-matrix and a relatedness threshold to filter_high_relatedness, which
-will return the largest possible set of unrelated individuals.</p>
+<p><code><a href="../reference/pairwise_king.html">pairwise_king()</a></code> implements the KING-robust estimator of
+kinship, equivalent to –kinship in KING. To remove related individuals,
+the user can pass the kinship matrix of <code><a href="../reference/pairwise_king.html">pairwise_king()</a></code> and
+a relatedness threshold (a numeric KING kinship coefficient) to
+<code><a href="../reference/filter_high_relatedness.html">filter_high_relatedness()</a></code>, which will return the largest
+possible set of individuals with no relationships above the
+threshold.</p>
+<p><code><a href="../reference/pairwise_king.html">pairwise_king()</a></code> also forms part of
+<code><a href="../reference/qc_report_indiv.html">qc_report_indiv()</a></code> through the parameter
+<code>kings_threshold</code>. To remove related individuals in
+<code><a href="../reference/qc_report_indiv.html">qc_report_indiv()</a></code>, the user can pass either a relatedness
+threshold, or a string of either “first” or “second” to remove any first
+degree or second degree relationships from the dataset. This second
+option is similar to using –unrelated –degree 1 or –unrelated –degree 2
+in KING. <code><a href="../reference/qc_report_indiv.html">qc_report_indiv()</a></code> returns a dataframe including
+columns ‘id’ and ‘to_keep’, showing the ID of individuals and a logical
+column of whether the individual should be removed to retain the largest
+possible set of individuals with no relationships above the
+threshold.</p>
 </div>
 <div class="section level2">
 <h2 id="merging-datasets">Merging datasets:<a class="anchor" aria-label="anchor" href="#merging-datasets"></a>
