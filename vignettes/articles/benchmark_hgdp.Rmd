@@ -4,13 +4,12 @@ title: "Benchmark on the HGDP"
 
 
 
-
 This vignette is a benchmark of a few key functions in the tidypopgen package.
 The Human Genome Diversity Project (HGDP) SNP dataset is used for this
 benchmark. This dataset includes 1043 individuals from 51 populations, typed
 at ~650k loci.
 
-We will run this benchmark on a machine with a GenuineIntel, 13th Gen Intel(R) Core(TM) i9-13900, 24 CPU
+We will run this benchmark on a machine with a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU
 and  of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
@@ -34,16 +33,6 @@ We can now load the necessary libraries:
 
 ``` r
 library(tidypopgen)
-#> Loading required package: dplyr
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-#> Loading required package: tibble
 library(ggplot2)
 ```
 
@@ -56,7 +45,7 @@ Before running this benchmark, we need to download into the subdirectory
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 #> Rows: 1064 Columns: 6
-#> ── Column specification ───────────────────────────────────────────────────────────────────
+#> ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────
 #> Delimiter: "\t"
 #> chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups
 #> 
@@ -78,7 +67,7 @@ hgdp <- gen_tibble(bed_path,
                    n_cores = n_cores)
 ```
 
-read_plink: 3.4s
+read_plink: 4.6s
 
 Add metadata
 
@@ -96,18 +85,18 @@ Let's confirm that we have read all the expected information:
 hgdp
 #> # A gen_tibble: 643733 loci
 #> # A tibble:     1,043 × 4
-#>    id         genotypes population region
-#>    <chr>     <vctr_SNP> <chr>      <chr> 
-#>  1 HGDP00448          1 Biaka_HG   Africa
-#>  2 HGDP00479          2 Biaka_HG   Africa
-#>  3 HGDP00985          3 Biaka_HG   Africa
-#>  4 HGDP01094          4 Biaka_HG   Africa
-#>  5 HGDP00982          5 Mbuti_HG   Africa
-#>  6 HGDP00911          6 Mandenka   Africa
-#>  7 HGDP01202          7 Mandenka   Africa
-#>  8 HGDP00927          8 Yoruba     Africa
-#>  9 HGDP00461          9 Biaka_HG   Africa
-#> 10 HGDP00451         10 Biaka_HG   Africa
+#>    id         genotypes population    region
+#>    <chr>     <vctr_SNP> <chr>         <chr> 
+#>  1 HGDP00448          1 Biaka_Pygmies Africa
+#>  2 HGDP00479          2 Biaka_Pygmies Africa
+#>  3 HGDP00985          3 Biaka_Pygmies Africa
+#>  4 HGDP01094          4 Biaka_Pygmies Africa
+#>  5 HGDP00982          5 Mbuti_Pygmies Africa
+#>  6 HGDP00911          6 Mandenka      Africa
+#>  7 HGDP01202          7 Mandenka      Africa
+#>  8 HGDP00927          8 Yoruba        Africa
+#>  9 HGDP00461          9 Biaka_Pygmies Africa
+#> 10 HGDP00451         10 Biaka_Pygmies Africa
 #> # ℹ 1,033 more rows
 ```
 
@@ -121,7 +110,7 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-loci_report: 2.2s
+loci_report: 3.6s
 
 # Loci Plot
 
@@ -147,8 +136,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 2.1s
-
+filter_loci: 3.6s
 
 # Individual Report
 
@@ -160,21 +148,30 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.6s
+indiv_report: 10.8s
+
+
+
+``` r
+autoplot(indiv_report, type = "scatter")
+```
+
+![plot of chunk autoplot_indiv_report](figure/autoplot_indiv_report-1.png)
+
 
 # Filter individuals
 
-And we can filter individuals down to only include those with less than 10% of
+And we can filter individuals down to only include those with less than 1% of
 their genotypes missing.
 
 
 
 ``` r
-to_keep_indiv <- which(indiv_report$missingness < 0.1)
+to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-filter_indiv: 4ms
+filter_indiv: 6ms
 
 # Impute data
 
@@ -186,10 +183,12 @@ any remaining missing genotypes.
 
 ``` r
 hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
+#> Error in gt_impute_simple(hgdp, method = "mode", n_cores = n_cores): The number of individuals in the gen_tibble does not match the number of rows in the file backing matrix. Before imputing, use gt_update_backingfile to update your file backing matrix.
 gt_set_imputed(hgdp, TRUE)
+#> Error in gt_set_imputed(hgdp, TRUE): this dataset does not have imputed values to use!
 ```
 
-impute: 164ms
+impute: 19ms
 
 # LD clumping
 
@@ -201,7 +200,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 4.1s
+ld_clumping: 15.2s
 
 # PCA
 
@@ -212,9 +211,10 @@ and LD clumped dataset.
 
 ``` r
 test_pca <- hgdp %>% gt_pca_partialSVD()
+#> Error in if (any_near0(ms$scale)) stop2(MSG_ZERO_SCALE): missing value where TRUE/FALSE needed
 ```
 
-pca: 2s
+pca: 865ms
 
 Plot PCA:
 
@@ -222,9 +222,13 @@ Plot PCA:
 ``` r
 autoplot(test_pca, type = "scores") +
   aes(color = hgdp$region, shape = hgdp$region)
+#> Error in `geom_point()`:
+#> ! Problem while computing aesthetics.
+#> ℹ Error occurred in the 1st layer.
+#> Caused by error in `check_aesthetics()`:
+#> ! Aesthetics must be either length 1 or the same as the data (1043).
+#> ✖ Fix the following mappings: `colour` and `shape`.
 ```
-
-![plot of chunk PCA](figure/PCA-1.png)
 
 # DAPC
 
@@ -235,11 +239,12 @@ components using `gt_dapc`.
 ``` r
 pop_factor <- as.factor(hgdp$population)
 test_dapc <- gt_dapc(test_pca, pop = pop_factor)
+#> Error in lda.default(x, grouping, ...): nrow(x) and length(grouping) are different
 ```
 
-dapc: 162ms
+dapc: 63ms
 
-Plot DAPC: 
+Plot DAPC:
 
 
 ``` r
@@ -257,10 +262,34 @@ calculate pairwise Fst.
 
 ``` r
 grouped_hgdp <- hgdp %>% group_by(population)
-pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
+pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores, tidy = FALSE)
 ```
 
-pairwise_fst: 3.8s
+pairwise_fst: 29.8s
+
+Plot pairwise Fst:
+
+
+``` r
+# Order by continents
+grouped_hgdp_order <- grouped_hgdp %>% arrange(region,population)
+regional_order <- unique(grouped_hgdp_order$population)
+pairwise_fsts <- pairwise_fsts[regional_order,regional_order]
+
+ggheatmap(pairwise_fsts) +
+  scale_fill_viridis_c()+
+    theme(axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
+          axis.text.y = element_text(angle = 0, hjust = 1, size = 6))+
+  labs(
+    x = element_blank(),
+    y = element_blank(),
+    fill = "Fst"
+  )
+#> → heatmap built with `geom_tile()`
+```
+
+![plot of chunk pairwise_fst_plot](figure/pairwise_fst_plot-1.png)
+
 
 # Save in plink bed format
 
@@ -273,10 +302,10 @@ gt_as_plink(hgdp,
             file = tempfile(),
             type = "bed",
             overwrite = TRUE)
-#> [1] "/tmp/RtmpHYCVcB/file27fd45c5795c.bed"
+#> [1] "/tmp/Rtmp5CBsmX/file121c217dc9069.bed"
 ```
 
-plink_save: 250ms
+plink_save: 1s
 
 # Summary
 
@@ -285,17 +314,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  3.44
-#> 2   loci_report  2.24
-#> 3   filter_loci  2.06
-#> 4  indiv_report  2.58
-#> 5  filter_indiv     0
-#> 6        impute  0.16
-#> 7   ld_clumping  4.07
-#> 8           pca  1.99
-#> 9          dapc  0.16
-#> 10 pairwise_fst  3.79
-#> 11   plink_save  0.25
-#> 12        Total 20.74
+#> 1    read_plink  4.55
+#> 2   loci_report  3.59
+#> 3   filter_loci  3.57
+#> 4  indiv_report 10.75
+#> 5  filter_indiv  0.01
+#> 6        impute  0.02
+#> 7   ld_clumping 15.25
+#> 8           pca  0.86
+#> 9          dapc  0.06
+#> 10 pairwise_fst 29.79
+#> 11   plink_save  1.01
+#> 12        Total 69.46
 ```
 

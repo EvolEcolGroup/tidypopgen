@@ -9,10 +9,10 @@ knitr::opts_chunk$set(
 )
 library(benchmarkme)
 library(chunkhooks)
+library(ggalign)
 hook_benchmark()
 set.seed(123)
 ```
-
 
 This vignette is a benchmark of a few key functions in the tidypopgen package.
 The Human Genome Diversity Project (HGDP) SNP dataset is used for this
@@ -110,7 +110,6 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-
 # Individual Report
 
 We can then call `qc_report_indiv` to supply observed heterozygosity per
@@ -120,14 +119,20 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
+
+```{r autoplot_indiv_report}
+autoplot(indiv_report, type = "scatter")
+```
+
+
 # Filter individuals
 
-And we can filter individuals down to only include those with less than 10% of
+And we can filter individuals down to only include those with less than 1% of
 their genotypes missing.
 
 
 ```{r filter_indiv, benchmark = TRUE}
-to_keep_indiv <- which(indiv_report$missingness < 0.1)
+to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
@@ -193,8 +198,28 @@ calculate pairwise Fst.
 
 ```{r pairwise_fst, benchmark = TRUE}
 grouped_hgdp <- hgdp %>% group_by(population)
-pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
+pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores, tidy = FALSE)
 ```
+
+Plot pairwise Fst:
+
+```{r pairwise_fst_plot}
+# Order by continents
+grouped_hgdp_order <- grouped_hgdp %>% arrange(region,population)
+regional_order <- unique(grouped_hgdp_order$population)
+pairwise_fsts <- pairwise_fsts[regional_order,regional_order]
+
+ggheatmap(pairwise_fsts) +
+  scale_fill_viridis_c()+
+    theme(axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
+          axis.text.y = element_text(angle = 0, hjust = 1, size = 6))+
+  labs(
+    x = element_blank(),
+    y = element_blank(),
+    fill = "Fst"
+  )
+```
+
 
 # Save in plink bed format
 
