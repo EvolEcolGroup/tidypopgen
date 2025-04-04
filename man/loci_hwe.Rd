@@ -32,8 +32,6 @@ Return the p-value from an exact test of HWE.
 }
 \details{
 This function uses the original C++ algorithm from PLINK 1.90.
-
-NOTE There are no tests for this function yet! Unit tests are needed.
 }
 \author{
 the C++ algorithm was written by Christopher Chang for PLINK 1.90,

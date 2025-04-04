@@ -179,7 +179,7 @@ pop_factor <- as.factor(hgdp$population)
 test_dapc <- gt_dapc(test_pca, pop = pop_factor)
 ```
 
-Plot DAPC: 
+Plot DAPC:
 
 ```{r DAPC_screeplot}
 autoplot(test_dapc, type = "screeplot")
@@ -213,8 +213,9 @@ gt_as_plink(hgdp,
 Here is a summary of the time taken (in seconds) to perform each step of the analyses:
 
 ```{r echo=FALSE}
-chunk_order <- knitr::all_labels()  # Get
-benchmarked_chunks <- names(chunkhooks::benchmarks)  # Chunks that have benchmarks
+chunk_order <- knitr::all_labels()  # Get order
+# Chunks that have benchmarks
+benchmarked_chunks <- names(chunkhooks::benchmarks)
 
 ordered_benchmark_chunks <- chunk_order[chunk_order %in% benchmarked_chunks]
 

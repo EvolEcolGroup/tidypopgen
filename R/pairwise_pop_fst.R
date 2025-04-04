@@ -66,6 +66,7 @@ pairwise_pop_fst <- function(
   }
 }
 
+
 pairwise_pop_fst_hudson <- function(
     .x,
     tidy = TRUE,
@@ -75,12 +76,7 @@ pairwise_pop_fst_hudson <- function(
   .group_levels <- .x %>% group_keys()
   # create all combinations
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
-  # vector and matrix to store Fst for total and by locus
-  fst_tot <- rep(NA_real_, ncol(pairwise_combn))
-  if (by_locus) {
-    fst_locus <-
-      matrix(NA_real_, nrow = count_loci(.x), ncol = ncol(pairwise_combn))
-  }
+
   # summarise population frequencies
   pop_freqs_df <- gt_grouped_summaries(
     .gt_get_bigsnp(.x)$genotypes,
@@ -91,25 +87,12 @@ pairwise_pop_fst_hudson <- function(
     ncores = n_cores
   )
 
-  for (i_col in seq_len(ncol(pairwise_combn))) {
-    pop1 <- pairwise_combn[1, i_col]
-    pop2 <- pairwise_combn[2, i_col]
+  fst_list <- pairwise_fst_hudson_loop(
+    pairwise_combn = pairwise_combn,
+    pop_freqs_df = pop_freqs_df,
+    by_locus = by_locus
+  )
 
-    numerator <- (pop_freqs_df$freq_alt[, pop1] -
-      pop_freqs_df$freq_alt[, pop2])^2 - # nolint start
-      (pop_freqs_df$freq_alt[, pop1] * pop_freqs_df$freq_ref[, pop1]) /
-        (pop_freqs_df$n[, pop1] - 1) -
-      (pop_freqs_df$freq_alt[, pop2] * pop_freqs_df$freq_ref[, pop2]) /
-        (pop_freqs_df$n[, pop2] - 1)
-    denominator <- pop_freqs_df$freq_alt[, pop1] *
-      pop_freqs_df$freq_ref[, pop2] +
-      pop_freqs_df$freq_alt[, pop2] * pop_freqs_df$freq_ref[, pop1] # nolint end
-    if (by_locus) {
-      fst_locus[, i_col] <- numerator / denominator
-    }
-    fst_tot[i_col] <- mean(numerator, na.rm = TRUE) /
-      mean(denominator, na.rm = TRUE) # nolint
-  }
   # format nicely the objects
   group_combinations <- cbind(
     .group_levels[pairwise_combn[1, ], ],
@@ -119,27 +102,26 @@ pairwise_pop_fst_hudson <- function(
     paste0(dplyr::group_vars(.x), "_1"),
     paste0(dplyr::group_vars(.x), "_2")
   )
-  fst_tot <- tibble::tibble(group_combinations, value = fst_tot)
+  fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
 
   if (!tidy) { # if we return a matrix
     fst_tot_matrix <- tidy_to_matrix(fst_tot)
     return(fst_tot_matrix)
   } else {
     if (by_locus) {
-      rownames(fst_locus) <- loci_names(.x)
-      colnames(fst_locus) <- apply(
+      rownames(fst_list$fst_locus) <- loci_names(.x)
+      colnames(fst_list$fst_locus) <- apply(
         group_combinations,
         1,
         function(x) paste(x, collapse = ".")
       )
-      return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
+      return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
     } else {
       return(fst_tot)
     }
   }
 }
 
-## use tidyr::pivot_wider to turn into a matrix if that's what is requested.
 
 # the implementation for Nei 87, adapted from hierfstat
 pairwise_pop_fst_nei87 <- function(

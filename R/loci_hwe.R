@@ -4,8 +4,6 @@
 #'
 #' This function uses the original C++ algorithm from PLINK 1.90.
 #'
-#' NOTE There are no tests for this function yet! Unit tests are needed.
-#'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param mid_p boolean on whether the mid-p value should be computed. Default
@@ -50,7 +48,7 @@ loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
         ind.row = rows_to_keep,
         ind.col = ind
       )
-      apply(geno_counts, 2, hwe_exact_geno_col, mid_p = mid_p)
+      hwe_on_matrix(geno_counts = geno_counts, midp = mid_p)
     }
     hwe_p <- bigstatsr::big_apply(
       geno_fbm,
@@ -73,10 +71,4 @@ loci_hwe.grouped_df <- function(.x, ...) {
   # problem
   # of maybe it isn't that bad...
   group_map(.x, .f = ~ loci_hwe(.x, mid_p = mid_p, ...))
-}
-
-hwe_exact_geno_col <- function(x, mid_p) {
-  # it would be even better to use it direclty in a C function that does
-  # the counting
-  SNPHWE2(x[2], x[1], x[3], midp = mid_p)
 }

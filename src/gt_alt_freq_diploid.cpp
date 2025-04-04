@@ -5,11 +5,9 @@
 /******************************************************************************/
 
 // [[Rcpp::export]]
-ListOf<NumericMatrix> gt_grouped_alt_freq_diploid(Environment BM,
+NumericVector gt_alt_freq_diploid(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
-                                   const IntegerVector& groupIds,
-                                   int ngroups,
                                    int ncores) {
 
   XPtr<FBM> xpBM = BM["address"];
@@ -18,26 +16,23 @@ ListOf<NumericMatrix> gt_grouped_alt_freq_diploid(Environment BM,
   size_t n = macc.nrow(); // number of individuals
   size_t m = macc.ncol(); // number of loci
 
-  NumericMatrix freq(m, ngroups);
-  NumericMatrix valid_alleles(m, ngroups);
+  NumericVector freq(m);
 
 #pragma omp parallel for num_threads(ncores)
   for (size_t j = 0; j < m; j++) {
+    double this_allele_count = 0; // count of alt alleles at this locus
+    double this_valid_alleles = 0; // count of valid alleles at this locus
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
       if (x > -1){
-        freq(j, groupIds[i]) += x;
-        valid_alleles(j, groupIds[i]) +=2;
+        this_allele_count += x;
+        this_valid_alleles +=2;
       }
     }
-    // now for each group, divide freq by valid_alleles
-    for (int group_i = 0; group_i < ngroups; group_i++) {
-      freq(j, group_i) = freq(j, group_i) / valid_alleles(j, group_i);
-    }
+    freq[j] = (this_valid_alleles > 0) ? (this_allele_count / this_valid_alleles) : NA_REAL;
   }
 
-  return List::create(_["freq_alt"]  = freq,
-                      _["n"] = valid_alleles);
+  return freq;
 }
 
 /******************************************************************************/

@@ -35,24 +35,21 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   X <- attr(.x, "bigsnp")$genotypes # nolint
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
-  # col means for submatrix (all rows, only some columns)
 
   # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
-  col_1_na <- function(X, ind, rows_to_keep) { # nolint
-    count_1 <- function(a) {
-      sum(a == 1, na.rm = TRUE)
-    }
-    res <- apply(X[rows_to_keep, ind], 1, count_1)
-    count_na <- function(a) {
-      sum(is.na(a))
-    }
-    res <- rbind(res, apply(X[rows_to_keep, ind], 1, count_na))
+  count_1_na <- function(BM, ind, rows_to_keep) { # nolint
+    gt_ind_hetero(
+      BM = BM,
+      rowInd = rows_to_keep,
+      colInd = ind,
+      ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
+    )
   }
 
   # count heterozygotes and nas in one go
   this_col_1_na <- bigstatsr::big_apply(
     X,
-    a.FUN = col_1_na,
+    a.FUN = count_1_na,
     ind = attr(.x, "loci")$big_index,
     a.combine = "plus",
     rows_to_keep = rows_to_keep
