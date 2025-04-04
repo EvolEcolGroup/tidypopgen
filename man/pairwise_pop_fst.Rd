@@ -9,6 +9,7 @@ pairwise_pop_fst(
   tidy = TRUE,
   by_locus = FALSE,
   method = c("Hudson", "Nei87", "WC84"),
+  return_num_dem = FALSE,
   n_cores = bigstatsr::nb_cores()
 )
 }
@@ -23,6 +24,12 @@ locus(TRUE), or as a single genome wide value obtained by taking the ratio
 of the mean numerator and denominator (FALSE, the default).}
 
 \item{method}{one of 'Hudson', 'Nei87', and 'WC84'}
+
+\item{return_num_dem}{returns a list of numerators and denominators for each
+locus. This is useful for creating windowed estimates of Fst (as
+we need to compute the mean numerator and denominator within
+each window). Default is
+FALSE. Currently only implemented for Hudson's method.}
 
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}

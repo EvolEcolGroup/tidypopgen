@@ -147,15 +147,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // pairwise_fst_hudson_loop
-List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, List pop_freqs_df, bool by_locus);
-RcppExport SEXP _tidypopgen_pairwise_fst_hudson_loop(SEXP pairwise_combnSEXP, SEXP pop_freqs_dfSEXP, SEXP by_locusSEXP) {
+List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, List pop_freqs_df, bool by_locus, bool return_num_dem);
+RcppExport SEXP _tidypopgen_pairwise_fst_hudson_loop(SEXP pairwise_combnSEXP, SEXP pop_freqs_dfSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type pairwise_combn(pairwise_combnSEXP);
     Rcpp::traits::input_parameter< List >::type pop_freqs_df(pop_freqs_dfSEXP);
     Rcpp::traits::input_parameter< bool >::type by_locus(by_locusSEXP);
-    rcpp_result_gen = Rcpp::wrap(pairwise_fst_hudson_loop(pairwise_combn, pop_freqs_df, by_locus));
+    Rcpp::traits::input_parameter< bool >::type return_num_dem(return_num_demSEXP);
+    rcpp_result_gen = Rcpp::wrap(pairwise_fst_hudson_loop(pairwise_combn, pop_freqs_df, by_locus, return_num_dem));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -264,7 +265,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
-    {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 3},
+    {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 4},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},

@@ -30,6 +30,11 @@
 #' @param method one of 'Hudson', 'Nei87', and 'WC84'
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
+#' @param return_num_dem returns a list of numerators and denominators for each
+#'  locus. This is useful for creating windowed estimates of Fst (as
+#'  we need to compute the mean numerator and denominator within
+#'  each window). Default is
+#'  FALSE. Currently only implemented for Hudson's method.
 #' @returns if `tidy=TRUE`, a tibble of genome-wide pairwise Fst values with
 #'   each pairwise combination as a row if "by_locus=FALSE", else a list
 #'   including the tibble of genome-wide values as well as a matrix with
@@ -43,6 +48,7 @@ pairwise_pop_fst <- function(
     tidy = TRUE,
     by_locus = FALSE,
     method = c("Hudson", "Nei87", "WC84"),
+    return_num_dem = FALSE,
     n_cores = bigstatsr::nb_cores()) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
@@ -57,8 +63,23 @@ pairwise_pop_fst <- function(
     stop("For a matrix of pairwise fst, by_locus must be FALSE")
   }
   method <- match.arg(method)
+
+  # given an error if requesting return_num_dem for a method that does not
+  # support it
+  if (return_num_dem && method != "Hudson") {
+    stop("return_num_dem is only available for Hudson's method")
+  }
+  # if we want to return the numerator and denominator, we need to
+  # compute the pairwise Fst for each locus
+  if (return_num_dem) {
+    by_locus <- TRUE
+  }
+
   if (method == "Hudson") {
-    pairwise_pop_fst_hudson(.x = .x, by_locus = by_locus, tidy = tidy)
+    pairwise_pop_fst_hudson(
+      .x = .x, by_locus = by_locus, tidy = tidy,
+      return_num_dem = return_num_dem, n_cores = n_cores
+    )
   } else if (method == "Nei87") {
     pairwise_pop_fst_nei87(.x = .x, by_locus = by_locus, tidy = tidy)
   } else if (method == "WC84") {
@@ -71,6 +92,7 @@ pairwise_pop_fst_hudson <- function(
     .x,
     tidy = TRUE,
     by_locus = FALSE,
+    return_num_dem = FALSE,
     n_cores = bigstatsr::nb_cores()) {
   # get the populations
   .group_levels <- .x %>% group_keys()
@@ -90,10 +112,12 @@ pairwise_pop_fst_hudson <- function(
   fst_list <- pairwise_fst_hudson_loop(
     pairwise_combn = pairwise_combn,
     pop_freqs_df = pop_freqs_df,
-    by_locus = by_locus
+    by_locus = by_locus,
+    return_num_dem = return_num_dem
   )
 
-  # format nicely the objects
+  # format nicely the group combinations object
+  # (we'll use it to create column names)
   group_combinations <- cbind(
     .group_levels[pairwise_combn[1, ], ],
     .group_levels[pairwise_combn[2, ], ]
@@ -102,6 +126,19 @@ pairwise_pop_fst_hudson <- function(
     paste0(dplyr::group_vars(.x), "_1"),
     paste0(dplyr::group_vars(.x), "_2")
   )
+  # if we want the numerator and denominator,
+  # we need to format them and return them
+  if (return_num_dem) {
+    rownames(fst_list$Fst_by_locus_num) <- loci_names(.x)
+    colnames(fst_list$Fst_by_locus_num) <-
+      col_names_combinations(group_combinations)
+    rownames(fst_list$Fst_by_locus_dem) <- loci_names(.x)
+    colnames(fst_list$Fst_by_locus_dem) <-
+      col_names_combinations(group_combinations)
+    return(fst_list)
+  }
+
+  # other wise we start formatting the other objects
   fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
 
   if (!tidy) { # if we return a matrix
@@ -110,11 +147,7 @@ pairwise_pop_fst_hudson <- function(
   } else {
     if (by_locus) {
       rownames(fst_list$fst_locus) <- loci_names(.x)
-      colnames(fst_list$fst_locus) <- apply(
-        group_combinations,
-        1,
-        function(x) paste(x, collapse = ".")
-      )
+      colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations)
       return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
     } else {
       return(fst_tot)
@@ -188,7 +221,8 @@ pairwise_pop_fst_nei87 <- function(
     }
     fst_tot[i_col] <- mean(Dstp) / mean(Htp) # nolint end
   }
-  # format nicely the objects
+
+  # format nicely the fst_tot objects
   group_combinations <- cbind(
     .group_levels[pairwise_combn[1, ], ],
     .group_levels[pairwise_combn[2, ], ]
@@ -205,11 +239,7 @@ pairwise_pop_fst_nei87 <- function(
   } else {
     if (by_locus) {
       rownames(fst_locus) <- loci_names(.x)
-      colnames(fst_locus) <- apply(
-        group_combinations,
-        1,
-        function(x) paste(x, collapse = ".")
-      )
+      colnames(fst_locus) <- col_names_combinations(group_combinations)
       return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
     } else {
       return(fst_tot)
@@ -333,4 +363,13 @@ tidy_to_matrix <- function(tidy_tbl) {
   fst_tot_wide[lower.tri(fst_tot_wide)] <-
     t(fst_tot_wide)[lower.tri(fst_tot_wide)]
   return(fst_tot_wide)
+}
+
+
+col_names_combinations <- function(group_combinations) {
+  apply(
+    group_combinations,
+    1,
+    function(x) paste(x, collapse = ".")
+  )
 }
