@@ -42,7 +42,7 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
       BM = BM,
       rowInd = rows_to_keep,
       colInd = ind,
-      ncores = 1 # n_cores
+      ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
     )
   }
 
