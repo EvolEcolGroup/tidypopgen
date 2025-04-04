@@ -48,7 +48,7 @@ loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
         ind.row = rows_to_keep,
         ind.col = ind
       )
-      hwe_on_matrix(geno_counts= geno_counts, midp = mid_p)
+      hwe_on_matrix(geno_counts = geno_counts, midp = mid_p)
     }
     hwe_p <- bigstatsr::big_apply(
       geno_fbm,

@@ -35,14 +35,14 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   X <- attr(.x, "bigsnp")$genotypes # nolint
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
-  
+
   # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
   count_1_na <- function(BM, ind, rows_to_keep) { # nolint
     gt_ind_hetero(
       BM = BM,
       rowInd = rows_to_keep,
       colInd = ind,
-      ncores = 1 #n_cores
+      ncores = 1 # n_cores
     )
   }
 

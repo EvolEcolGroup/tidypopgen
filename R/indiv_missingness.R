@@ -55,7 +55,7 @@ indiv_missingness.vctrs_bigSNP <- function(
       BM = BM,
       rowInd = rows_to_keep,
       colInd = ind,
-      ncores = 1 #n_cores
+      ncores = 1 # n_cores
     )
   }
 
