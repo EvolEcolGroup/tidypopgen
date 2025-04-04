@@ -103,8 +103,6 @@ The resulting report can be observed using `autoplot`.
 autoplot(loci_report, type = "all")
 ```
 
-![plot of chunk autoplot_loci_report](figure/autoplot_loci_report-1.png)
-
 # Filter Loci
 
 Following this, we filter the loci to only including those with a minor allele
@@ -130,9 +128,6 @@ indiv_report <- qc_report_indiv(hgdp)
 ```{r autoplot_indiv_report}
 autoplot(indiv_report, type = "scatter")
 ```
-
-![plot of chunk autoplot_indiv_report](figure/autoplot_indiv_report-1.png)
-
 
 # Filter individuals
 
@@ -197,18 +192,16 @@ We can continue with a discriminant analysis of principal
 components using `gt_dapc`.
 
 ```{r dapc, benchmark = TRUE}
-pop_factor <- as.factor(hgdp$population)
+pop_factor <- as.factor(hgdp$region)
 test_dapc <- gt_dapc(test_pca, pop = pop_factor)
 ```
 
 Plot DAPC:
 
 
-```{r DAPC_screeplot}
-autoplot(test_dapc, type = "screeplot")
+```{r DAPC_scores_plot}
+autoplot(test_dapc, type = "scores")
 ```
-
-![plot of chunk DAPC_screeplot](figure/DAPC_screeplot-1.png)
 
 # Calculate Fst
 
@@ -239,9 +232,6 @@ ggheatmap(pairwise_fsts) +
     fill = "Fst"
   )
 ```
-
-![plot of chunk pairwise_fst_plot](figure/pairwise_fst_plot-1.png)
-
 
 # Save in plink bed format
 

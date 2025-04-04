@@ -70,7 +70,7 @@ hgdp <- gen_tibble(bed_path,
                    n_cores = n_cores)
 ```
 
-read_plink: 4.1s
+read_plink: 4s
 
 Add metadata
 
@@ -116,7 +116,7 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-loci_report: 3.6s
+loci_report: 3.5s
 
 # Loci Plot
 
@@ -126,8 +126,6 @@ The resulting report can be observed using `autoplot`.
 ``` r
 autoplot(loci_report, type = "all")
 ```
-
-![plot of chunk autoplot_loci_report](figure/autoplot_loci_report-1.png)
 
 ![plot of chunk autoplot_loci_report](figure/autoplot_loci_report-1.png)
 
@@ -157,7 +155,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 10.4s
+indiv_report: 10.3s
 
 
 ``` r
@@ -165,9 +163,6 @@ autoplot(indiv_report, type = "scatter")
 ```
 
 ![plot of chunk autoplot_indiv_report](figure/autoplot_indiv_report-1.png)
-
-![plot of chunk autoplot_indiv_report](figure/autoplot_indiv_report-1.png)
-
 
 # Filter individuals
 
@@ -194,8 +189,8 @@ hgdp <- gt_update_backingfile(hgdp)
 #> Genetic distances are not sorted, setting them to zero
 #> 
 #> gen_backing files updated, now
-#> using bigSNP file: /tmp/Rtmp5CBsmX/test_121c21d027a47_v2.rds
-#> with backing file: /tmp/Rtmp5CBsmX/test_121c21d027a47_v2.bk
+#> using bigSNP file: /tmp/Rtmp5CBsmX/test_121c2632b8479_v2.rds
+#> with backing file: /tmp/Rtmp5CBsmX/test_121c2632b8479_v2.bk
 #> make sure that you do NOT delete those files!
 ```
 
@@ -212,7 +207,7 @@ hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 316ms
+impute: 278ms
 
 # LD clumping
 
@@ -236,7 +231,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 4s
+pca: 3.7s
 
 Plot PCA:
 
@@ -255,23 +250,21 @@ components using `gt_dapc`.
 
 
 ``` r
-pop_factor <- as.factor(hgdp$population)
+pop_factor <- as.factor(hgdp$region)
 test_dapc <- gt_dapc(test_pca, pop = pop_factor)
 ```
 
-dapc: 550ms
+dapc: 420ms
 
 Plot DAPC:
 
 
 
 ``` r
-autoplot(test_dapc, type = "screeplot")
+autoplot(test_dapc, type = "scores")
 ```
 
-![plot of chunk DAPC_screeplot](figure/DAPC_screeplot-1.png)
-
-![plot of chunk DAPC_screeplot](figure/DAPC_screeplot-1.png)
+![plot of chunk DAPC_scores_plot](figure/DAPC_scores_plot-1.png)
 
 # Calculate Fst
 
@@ -310,9 +303,6 @@ ggheatmap(pairwise_fsts) +
 
 ![plot of chunk pairwise_fst_plot](figure/pairwise_fst_plot-1.png)
 
-![plot of chunk pairwise_fst_plot](figure/pairwise_fst_plot-1.png)
-
-
 # Save in plink bed format
 
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
@@ -323,10 +313,10 @@ gt_as_plink(hgdp,
             file = tempfile(),
             type = "bed",
             overwrite = TRUE)
-#> [1] "/tmp/Rtmp5CBsmX/file121c271c4bf04.bed"
+#> [1] "/tmp/Rtmp5CBsmX/file121c2771b5bb5.bed"
 ```
 
-plink_save: 754ms
+plink_save: 661ms
 
 # Summary
 
@@ -335,17 +325,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  4.05
-#> 2   loci_report  3.55
-#> 3   filter_loci  3.38
-#> 4  indiv_report 10.37
+#> 1    read_plink  4.02
+#> 2   loci_report   3.5
+#> 3   filter_loci  3.41
+#> 4  indiv_report 10.33
 #> 5  filter_indiv  0.01
-#> 6        impute  0.32
-#> 7   ld_clumping  6.91
-#> 8           pca  3.98
-#> 9          dapc  0.55
-#> 10 pairwise_fst  16.3
-#> 11   plink_save  0.75
-#> 12        Total 50.17
+#> 6        impute  0.28
+#> 7   ld_clumping   6.9
+#> 8           pca   3.7
+#> 9          dapc  0.42
+#> 10 pairwise_fst 16.35
+#> 11   plink_save  0.66
+#> 12        Total 49.58
 ```
 
