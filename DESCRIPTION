@@ -34,6 +34,7 @@ Imports:
     MASS,
     patchwork,
     rlang,
+    slider,
     stats,
     tidyselect,
     tidyr,
