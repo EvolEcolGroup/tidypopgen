@@ -20,8 +20,10 @@ test_loci <- data.frame(
 )
 test_indiv_meta <- data.frame(
   id = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "l"),
-  population = c("pop1", "pop1", "pop2", "pop2", "pop1", "pop3", "pop3",
-                 "pop2", "pop3", "pop3")
+  population = c(
+    "pop1", "pop1", "pop2", "pop2", "pop1", "pop3", "pop3",
+    "pop2", "pop3", "pop3"
+  )
 )
 test_gt <- gen_tibble(
   x = test_genotypes,
@@ -63,7 +65,6 @@ test_that("window_stats_generic works correctly", {
       return_num_dem = TRUE
     )
 
-
   x <- hudson_gt_fst_nd$Fst_by_locus_dem[, 1]
 
   window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_dem[, 1],
@@ -76,14 +77,22 @@ test_that("window_stats_generic works correctly", {
 
   # TODO check that this works correctly!
 
-  expect_error(
-    window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_dem[, 1],
-      window_size = 200,
-      window_step = 100,
-      size_unit = "bp",
-      min_loci = 2,
-      loci_table = show_loci(test_gt)
-    ),
-    "windows with size unit bp have not been implemented yet"
+  window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_dem[, 1],
+    window_size = 200,
+    window_step = 100,
+    size_unit = "bp",
+    min_loci = 1,
+    loci_table = show_loci(test_gt)
   )
+
+
+  window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_dem[, 1],
+    window_size = 200,
+    window_step = 100,
+    size_unit = "bp",
+    min_loci = 2,
+    loci_table = show_loci(test_gt)
+  )
+
+  # TODO check that this works correctly
 })
