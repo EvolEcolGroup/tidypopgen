@@ -13,7 +13,7 @@ test_that("window_stats_generic is correct", {
     x = x,
     loci_table = loci_table,
     window_size = 4,
-    window_step = 3,
+    step_size = 3,
     size_unit = "snp",
     operator = "sum",
     min_loci = 1
@@ -27,7 +27,7 @@ test_that("window_stats_generic is correct", {
     x = x,
     loci_table = loci_table,
     window_size = 4,
-    window_step = 3,
+    step_size = 3,
     size_unit = "snp",
     operator = "sum",
     min_loci = 1,
@@ -40,7 +40,7 @@ test_that("window_stats_generic is correct", {
     x = x,
     loci_table = loci_table,
     window_size = 100,
-    window_step = 50,
+    step_size = 50,
     size_unit = "bp",
     operator = "sum",
     min_loci = 1

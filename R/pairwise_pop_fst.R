@@ -132,8 +132,8 @@ pairwise_pop_fst_hudson <- function(
     rownames(fst_list$Fst_by_locus_num) <- loci_names(.x)
     colnames(fst_list$Fst_by_locus_num) <-
       col_names_combinations(group_combinations)
-    rownames(fst_list$Fst_by_locus_dem) <- loci_names(.x)
-    colnames(fst_list$Fst_by_locus_dem) <-
+    rownames(fst_list$Fst_by_locus_den) <- loci_names(.x)
+    colnames(fst_list$Fst_by_locus_den) <-
       col_names_combinations(group_combinations)
     return(fst_list)
   }

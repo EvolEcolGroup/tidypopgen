@@ -62,7 +62,7 @@ List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, List pop_freqs_df, b
                         Named("fst_tot") = fst_tot);
   } else {
     return List::create(Named("Fst_by_locus_num") = fst_locus,
-                        Named("Fst_by_locus_dem") = fst_locus_dem);
+                        Named("Fst_by_locus_den") = fst_locus_dem);
   }
 
 }

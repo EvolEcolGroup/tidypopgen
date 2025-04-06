@@ -4,12 +4,12 @@
 #' estimates.
 #'
 #' @param x A vector containing the per locus estimates.
-#' @param loci_table a dataframe with columns: 'chromosome', 'position', and
-#'   'name'.
+#' @param loci_table a dataframe including at least a column 'chromosome',
+#' and additionally a column 'position' if `size_unit` is "bp".
 #' @param operator The operator to use for the window statistics. Either
 #'  "mean" or "sum".
 #' @param window_size The size of the window to use for the estimates.
-#' @param window_step The step size to use for the windows.
+#' @param step_size The step size to use for the windows.
 #' @param size_unit Either "snp" or "bp". If "snp", the window size and step
 #'   size are in number of SNPs. If "bp", the window size and step size are in
 #'   base pairs.
@@ -25,7 +25,7 @@
 #' @export
 
 window_stats_generic <- function(x, loci_table, operator = c("mean", "sum"),
-                                 window_size, window_step,
+                                 window_size, step_size,
                                  size_unit = c("snp", "bp"), min_loci = 1,
                                  complete = FALSE) {
   size_unit <- match.arg(size_unit)
@@ -58,12 +58,12 @@ window_stats_generic <- function(x, loci_table, operator = c("mean", "sum"),
     stop("loci_table must have the same number of rows as x.")
   }
 
-  # check that window_size and window_step are positive
+  # check that window_size and step_size are positive
   if (window_size <= 0) {
     stop("window_size must be positive.")
   }
-  if (window_step <= 0) {
-    stop("window_step must be positive.")
+  if (step_size <= 0) {
+    stop("step_size must be positive.")
   }
   # check that min_loci is positive
   if (min_loci <= 0) {
@@ -93,7 +93,7 @@ window_stats_generic <- function(x, loci_table, operator = c("mean", "sum"),
     window_at <- seq(
       from = window_range[1] * window_size,
       to = window_range[2] * window_size,
-      by = window_step
+      by = step_size
     )
 
     # note that runner measures the window from the end (not the front)

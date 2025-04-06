@@ -9,7 +9,7 @@ window_stats_generic(
   loci_table,
   operator = c("mean", "sum"),
   window_size,
-  window_step,
+  step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
   complete = FALSE
@@ -26,7 +26,7 @@ window_stats_generic(
 
 \item{window_size}{The size of the window to use for the estimates.}
 
-\item{window_step}{The step size to use for the windows.}
+\item{step_size}{The step size to use for the windows.}
 
 \item{size_unit}{Either "snp" or "bp". If "snp", the window size and step
 size are in number of SNPs. If "bp", the window size and step size are in

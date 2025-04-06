@@ -47,7 +47,7 @@ test_that("pairwise_pop_fst num and dem are returned correctly", {
   # generate the Fst for each locus
   expect_equal(
     hudson_gt_fst_nd$Fst_by_locus_num /
-      hudson_gt_fst_nd$Fst_by_locus_dem,
+      hudson_gt_fst_nd$Fst_by_locus_den,
     hudson_gt_fst$Fst_by_locus
   )
   # confirm error if trying to get num and dem with other methods
@@ -58,37 +58,29 @@ test_that("pairwise_pop_fst num and dem are returned correctly", {
 })
 
 
-test_that("window_stats_generic works correctly", {
-  hudson_gt_fst_nd <- test_gt %>%
-    pairwise_pop_fst(
-      method = "Hudson",
-      return_num_dem = TRUE
-    )
-
-  x <- hudson_gt_fst_nd$Fst_by_locus_dem[, 1]
-
-  window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_dem[, 1],
+test_that("window_pairwise_pop_fst works correctly", {
+  test_window <- test_gt %>%
+    window_pairwise_pop_fst(
     window_size = 3,
-    window_step = 2,
+    step_size = 2,
     size_unit = "snp",
-    min_loci = 2,
-    loci_table = show_loci(test_gt)
+    min_loci = 2
   )
 
   # TODO check that this works correctly!
 
-  window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_dem[, 1],
+  window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_den[, 1],
     window_size = 200,
-    window_step = 100,
+    step_size = 100,
     size_unit = "bp",
     min_loci = 1,
     loci_table = show_loci(test_gt)
   )
 
 
-  window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_dem[, 1],
+  window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_den[, 1],
     window_size = 200,
-    window_step = 100,
+    step_size = 100,
     size_unit = "bp",
     min_loci = 2,
     loci_table = show_loci(test_gt)

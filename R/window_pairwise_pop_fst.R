@@ -31,7 +31,7 @@ window_pairwise_pop_fst <- function(x,
                                     step_size,
                                     size_unit = c("snp", "bp"),
                                     min_loci = 1,
-                                    complete = FALSE, ){
+                                    complete = FALSE){
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(x)
   method <- match.arg(method)
@@ -45,9 +45,10 @@ window_pairwise_pop_fst <- function(x,
   for (i_col in seq_along(compn)) {
     # get the column name
     col_name <- compn[i_col]
-    # compute the winows for numerator
-    window_num <- window_stat(
+    # compute the windows for numerator
+    window_num <- window_stats_generic(
       x = pair_fst$Fst_by_locus_num[, i_col],
+      loci_table = show_loci(x),
       window_size = window_size,
       step_size = step_size,
       size_unit = size_unit,
@@ -55,8 +56,9 @@ window_pairwise_pop_fst <- function(x,
       complete = complete
     )
     # same for the denominator
-    window_dem <- window_stat(
+    window_dem <- window_stats_generic(
       x = pair_fst$Fst_by_locus_den[, i_col],
+      loci_table = show_loci(x),
       window_size = window_size,
       step_size = step_size,
       size_unit = size_unit,
@@ -64,7 +66,8 @@ window_pairwise_pop_fst <- function(x,
       complete = complete
     )
     # compute the Fst for the window
-    window_fst <- window_num$stat / window_dem$stat
+    window_fst <- data.frame(stat = window_num$stat / window_dem$stat)
+    names(window_fst) <- paste0("fst_", col_name)
     # if res is null
     if (is.null(res)) {
       # create the data frame
@@ -74,7 +77,5 @@ window_pairwise_pop_fst <- function(x,
       res <-dplyr::bind_cols(res, window_fst)
     }
   }
-  # set the names of the comparisons
-  names(res)[-c(1:3)] <- paste0("fst_", compn)
   return(res)
 }
