@@ -69,21 +69,11 @@ test_that("window_pairwise_pop_fst works correctly", {
 
   # TODO check that this works correctly!
 
-  window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_den[, 1],
+  bp_window <- window_pairwise_pop_fst(test_gt,
     window_size = 200,
     step_size = 100,
     size_unit = "bp",
-    min_loci = 1,
-    loci_table = show_loci(test_gt)
-  )
-
-
-  window_stats_generic(hudson_gt_fst_nd$Fst_by_locus_den[, 1],
-    window_size = 200,
-    step_size = 100,
-    size_unit = "bp",
-    min_loci = 2,
-    loci_table = show_loci(test_gt)
+    min_loci = 1
   )
 
   # TODO check that this works correctly

@@ -90,6 +90,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gt_grouped_pi_diploid
+ListOf<NumericMatrix> gt_grouped_pi_diploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, int ncores);
+RcppExport SEXP _tidypopgen_gt_grouped_pi_diploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_grouped_pi_diploid(BM, rowInd, colInd, groupIds, ngroups, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // gt_grouped_summaries
 ListOf<NumericMatrix> gt_grouped_summaries(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, int ncores);
 RcppExport SEXP _tidypopgen_gt_grouped_summaries(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP) {
@@ -117,6 +133,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     rcpp_result_gen = Rcpp::wrap(gt_ind_hetero(BM, rowInd, colInd, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gt_pi_diploid
+NumericVector gt_pi_diploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
+RcppExport SEXP _tidypopgen_gt_pi_diploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_pi_diploid(BM, rowInd, colInd, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -261,8 +291,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_alt_freq_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_alt_freq_diploid, 6},
     {"_tidypopgen_gt_grouped_alt_freq_pseudohap", (DL_FUNC) &_tidypopgen_gt_grouped_alt_freq_pseudohap, 7},
     {"_tidypopgen_gt_grouped_missingness", (DL_FUNC) &_tidypopgen_gt_grouped_missingness, 6},
+    {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 6},
     {"_tidypopgen_gt_grouped_summaries", (DL_FUNC) &_tidypopgen_gt_grouped_summaries, 6},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
+    {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 4},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 4},

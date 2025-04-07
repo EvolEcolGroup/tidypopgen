@@ -18,8 +18,8 @@ window_stats_generic(
 \arguments{
 \item{x}{A vector containing the per locus estimates.}
 
-\item{loci_table}{a dataframe with columns: 'chromosome', 'position', and
-'name'.}
+\item{loci_table}{a dataframe including at least a column 'chromosome',
+and additionally a column 'position' if \code{size_unit} is "bp".}
 
 \item{operator}{The operator to use for the window statistics. Either
 "mean" or "sum".}
