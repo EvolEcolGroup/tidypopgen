@@ -71,6 +71,10 @@ reference:
     desc: "Functions comparing individuals or populations."
     contents:
         - starts_with("pairwise_")
+  - title: "Windows"
+    desc: "Functions to compute statistics in sliding windows across loci."
+    contents:
+        - starts_with("window_")
   - title: "PCA"
     desc: "Functions for performing Principal Component Analysis."
     contents:

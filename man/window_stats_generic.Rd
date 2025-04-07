@@ -12,17 +12,19 @@ window_stats_generic(
   step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
-  complete = FALSE
+  complete = FALSE,
+  f = NULL,
+  ...
 )
 }
 \arguments{
 \item{x}{A vector containing the per locus estimates.}
 
-\item{loci_table}{a dataframe including at least a column 'chromosome',
-and additionally a column 'position' if \code{size_unit} is "bp".}
+\item{loci_table}{a dataframe including at least a column 'chromosome', and
+additionally a column 'position' if \code{size_unit} is "bp".}
 
-\item{operator}{The operator to use for the window statistics. Either
-"mean" or "sum".}
+\item{operator}{The operator to use for the window statistics. Either "mean",
+"sum" or "custom" to use a custom function \code{.f}.}
 
 \item{window_size}{The size of the window to use for the estimates.}
 
@@ -36,9 +38,14 @@ base pairs.}
 statistic. If the number of loci in a window is less than this, the window
 statistic will be NA.}
 
-\item{complete}{Should the function be evaluated on complete windows only?
-If FALSE, the default, then partial computations will be allowed at the end
-of the chromosome.}
+\item{complete}{Should the function be evaluated on complete windows only? If
+FALSE, the default, then partial computations will be allowed at the end of
+the chromosome.}
+
+\item{f}{a custom function to use for the window statistics. This function
+should take a vector of locus estimates and return a single value.}
+
+\item{...}{Additional arguments to be passed to the custom operator function.}
 }
 \value{
 A tibble with columns: 'chromosome', 'start', 'end', 'stats', and
@@ -46,6 +53,10 @@ A tibble with columns: 'chromosome', 'start', 'end', 'stats', and
 in the window, and 'n_snps' contains the number of loci in the window.
 }
 \description{
-This is a general function to estimate window statistics from per locus
-estimates.
+This function is mostly designed for developers: it is a general function to
+estimate window statistics from per locus estimates. This function takes a
+vector of per locus estimates, and aggregates them by sum or mean per window.
+To compute specific quantities directly from a \code{gen_tibble}, use the
+appropriate \verb{window_*} functions, e.g \code{\link[=window_pairwise_pop_fst]{window_pairwise_pop_fst()}} to compute
+pairwise Fst.
 }

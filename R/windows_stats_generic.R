@@ -1,13 +1,17 @@
 #' Estimate window statistics from per locus estimates
 #'
-#' This is a general function to estimate window statistics from per locus
-#' estimates.
+#' This function is mostly designed for developers: it is a general function to
+#' estimate window statistics from per locus estimates. This function takes a
+#' vector of per locus estimates, and aggregates them by sum or mean per window.
+#' To compute specific quantities directly from a `gen_tibble`, use the
+#' appropriate `window_*` functions, e.g [window_pairwise_pop_fst()] to compute
+#' pairwise Fst.
 #'
 #' @param x A vector containing the per locus estimates.
-#' @param loci_table a dataframe including at least a column 'chromosome',
-#' and additionally a column 'position' if `size_unit` is "bp".
-#' @param operator The operator to use for the window statistics. Either
-#'  "mean" or "sum".
+#' @param loci_table a dataframe including at least a column 'chromosome', and
+#'   additionally a column 'position' if `size_unit` is "bp".
+#' @param operator The operator to use for the window statistics. Either "mean",
+#'   "sum" or "custom" to use a custom function `.f`.
 #' @param window_size The size of the window to use for the estimates.
 #' @param step_size The step size to use for the windows.
 #' @param size_unit Either "snp" or "bp". If "snp", the window size and step
@@ -16,9 +20,12 @@
 #' @param min_loci The minimum number of loci required to calculate a window
 #'   statistic. If the number of loci in a window is less than this, the window
 #'   statistic will be NA.
-#' @param complete Should the function be evaluated on complete windows only?
-#' If FALSE, the default, then partial computations will be allowed at the end
-#' of the chromosome.
+#' @param complete Should the function be evaluated on complete windows only? If
+#'   FALSE, the default, then partial computations will be allowed at the end of
+#'   the chromosome.
+#' @param f a custom function to use for the window statistics. This function
+#'   should take a vector of locus estimates and return a single value.
+#' @param ... Additional arguments to be passed to the custom operator function.
 #' @returns A tibble with columns: 'chromosome', 'start', 'end', 'stats', and
 #'   'n_loci'. The 'stats' column contains the mean of the per locus estimates
 #'   in the window, and 'n_snps' contains the number of loci in the window.
@@ -27,13 +34,19 @@
 window_stats_generic <- function(x, loci_table, operator = c("mean", "sum"),
                                  window_size, step_size,
                                  size_unit = c("snp", "bp"), min_loci = 1,
-                                 complete = FALSE) {
+                                 complete = FALSE,
+                                 f = NULL, ...) {
   size_unit <- match.arg(size_unit)
   operator <- match.arg(operator)
   if (operator == "mean") {
     operator_func <- runner::mean_run
   } else if (operator == "sum") {
     operator_func <- runner::sum_run
+  } else if (operator == "custom") {
+    if (is.null(f)) {
+      stop("If operator is 'custom', f must be provided.")
+    }
+    operator_func <- runner::runner
   }
   # if size_unit is snp, check that loci_table has column chromosome
   # else we also need position
@@ -97,18 +110,33 @@ window_stats_generic <- function(x, loci_table, operator = c("mean", "sum"),
     )
 
     # note that runner measures the window from the end (not the front)
-    res <- tibble(
-      chromosome = i_chrom,
-      start = window_at - window_size + 1,
-      end = window_at,
-      stat = operator_func(
+    if (operator != "custom"){
+      stat <- operator_func(
         x = x_sub,
         k = window_size,
         at = window_at,
         idx = idx_pos,
         na_rm = TRUE,
         na_pad = complete
-      ),
+      )
+    } else {
+      stat <- operator_func(
+        x = x_sub,
+        k = window_size,
+        at = window_at,
+        idx = idx_pos,
+        na_pad = complete,
+        f = f,
+        ...
+      )
+    }
+
+
+    res <- tibble(
+      chromosome = i_chrom,
+      start = window_at - window_size + 1,
+      end = window_at,
+      stat = stat,
       n_loci = runner::sum_run(
         x = !is.na(x_sub),
         k = window_size,
