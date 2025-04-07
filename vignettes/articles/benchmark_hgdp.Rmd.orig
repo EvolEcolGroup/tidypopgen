@@ -19,7 +19,7 @@ benchmark. This dataset includes 1043 individuals from 51 populations, typed
 at ~650k loci.
 
 We will run this benchmark on a machine with a `r benchmarkme::get_cpu()` CPU
-and `r print(benchmarkme::get_ram(), unit_system = "iec")` of RAM. However, we will limit the number of
+and `r as.character(print(benchmarkme::get_ram(), unit_system = "iec"))` of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
 inflation of the number of threads used (for example, in cases where dependency

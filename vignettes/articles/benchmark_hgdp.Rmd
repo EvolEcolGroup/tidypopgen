@@ -10,7 +10,7 @@ benchmark. This dataset includes 1043 individuals from 51 populations, typed
 at ~650k loci.
 
 We will run this benchmark on a machine with a GenuineIntel, 13th Gen Intel(R) Core(TM) i9-13900, 24 CPU
-and  of RAM. However, we will limit the number of
+and 126 GiB of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
 inflation of the number of threads used (for example, in cases where dependency
@@ -33,6 +33,16 @@ We can now load the necessary libraries:
 
 ``` r
 library(tidypopgen)
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+#> Loading required package: tibble
 library(ggplot2)
 ```
 
@@ -66,7 +76,7 @@ hgdp <- gen_tibble(bed_path,
                    n_cores = n_cores)
 ```
 
-read_plink: 2.7s
+read_plink: 3.5s
 
 Add metadata
 
@@ -110,7 +120,7 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-loci_report: 2s
+loci_report: 2.2s
 The resulting report can be observed using `autoplot`.
 
 
@@ -132,7 +142,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 1.4s
+filter_loci: 2s
 
 
 # Individual Report
@@ -146,7 +156,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.5s
+indiv_report: 2.6s
 
 
 ``` r
@@ -166,7 +176,7 @@ to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-filter_indiv: 4ms
+filter_indiv: 2ms
 
 # Update backingfile
 
@@ -179,8 +189,8 @@ hgdp <- gt_update_backingfile(hgdp)
 #> Genetic distances are not sorted, setting them to zero
 #> 
 #> gen_backing files updated, now
-#> using bigSNP file: /tmp/Rtmpaf8hFG/test_39b72c7029ea_v2.rds
-#> with backing file: /tmp/Rtmpaf8hFG/test_39b72c7029ea_v2.bk
+#> using bigSNP file: /tmp/Rtmp0TRebe/test_110825e35914_v2.rds
+#> with backing file: /tmp/Rtmp0TRebe/test_110825e35914_v2.bk
 #> make sure that you do NOT delete those files!
 ```
 
@@ -196,7 +206,7 @@ hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 153ms
+impute: 154ms
 
 # LD clumping
 
@@ -208,7 +218,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 3.7s
+ld_clumping: 3.9s
 
 # PCA
 
@@ -220,7 +230,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 1.8s
+pca: 2.1s
 
 Plot PCA:
 
@@ -243,7 +253,7 @@ the main geographic regions covered by the dataset.
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
-dapc: 61ms
+dapc: 112ms
 
 Plot DAPC:
 
@@ -265,7 +275,7 @@ grouped_hgdp <- hgdp %>% group_by(population)
 pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
 ```
 
-pairwise_fst: 12.7s
+pairwise_fst: 3.8s
 
 Plot pairwise Fst:
 
@@ -297,10 +307,10 @@ gt_as_plink(hgdp,
             file = tempfile(),
             type = "bed",
             overwrite = TRUE)
-#> [1] "/tmp/Rtmpaf8hFG/file39b71342845a.bed"
+#> [1] "/tmp/Rtmp0TRebe/file1108162d9738.bed"
 ```
 
-plink_save: 277ms
+plink_save: 262ms
 
 # Summary
 
@@ -309,17 +319,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  2.71
-#> 2   loci_report  2.05
-#> 3   filter_loci  1.42
-#> 4  indiv_report  2.51
+#> 1    read_plink  3.48
+#> 2   loci_report  2.21
+#> 3   filter_loci  1.95
+#> 4  indiv_report  2.56
 #> 5  filter_indiv     0
 #> 6        impute  0.15
-#> 7   ld_clumping  3.66
-#> 8           pca  1.77
-#> 9          dapc  0.06
-#> 10 pairwise_fst 12.74
-#> 11   plink_save  0.28
-#> 12        Total 27.35
+#> 7   ld_clumping  3.93
+#> 8           pca  2.08
+#> 9          dapc  0.11
+#> 10 pairwise_fst  3.76
+#> 11   plink_save  0.26
+#> 12        Total 20.49
 ```
 
