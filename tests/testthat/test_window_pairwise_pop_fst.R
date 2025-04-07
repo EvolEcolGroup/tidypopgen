@@ -67,6 +67,11 @@ test_that("window_pairwise_pop_fst works correctly", {
       min_loci = 2
     )
 
+  hudson_gt_fst_nd <- test_gt %>%
+    pairwise_pop_fst(
+      method = "Hudson",
+      return_num_dem = TRUE
+    )
   # TODO check that this works correctly!
 
   bp_window <- window_pairwise_pop_fst(test_gt,
