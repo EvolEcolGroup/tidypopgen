@@ -80,14 +80,14 @@ package. The Human Genome Diversity Project (HGDP) SNP dataset is used
 for this benchmark. This dataset includes 1043 individuals from 51
 populations, typed at ~650k loci.</p>
 <p>We will run this benchmark on a machine with a GenuineIntel, 13th Gen
-Intel(R) Core(TM) i9-13900, 24 CPU and of RAM. However, we will limit
-the number of cores used to 20. Parallelised functions within tidypopgen
-use an <code>n_cores</code> argument for the user to set. However, to
-prevent a behind-the-scenes inflation of the number of threads used (for
-example, in cases where dependency functions may automatically use all
-available cores) we need to set up preferences at the beginning of the
-session. Specifically, we limit the number of cores used by the
-parallelised BLAS library with
+Intel(R) Core(TM) i9-13900, 24 CPU and 126 GiB of RAM. However, we will
+limit the number of cores used to 20. Parallelised functions within
+tidypopgen use an <code>n_cores</code> argument for the user to set.
+However, to prevent a behind-the-scenes inflation of the number of
+threads used (for example, in cases where dependency functions may
+automatically use all available cores) we need to set up preferences at
+the beginning of the session. Specifically, we limit the number of cores
+used by the parallelised BLAS library with
 <code><a href="https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html" class="external-link">bigparallelr::set_blas_ncores()</a></code>, and by the package
 data.table with <code><a href="https://rdatatable.gitlab.io/data.table/reference/openmp-utils.html" class="external-link">data.table::setDTthreads()</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
@@ -98,16 +98,6 @@ data.table with <code><a href="https://rdatatable.gitlab.io/data.table/reference
 <p>We can now load the necessary libraries:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/EvolEcolGroup/tidypopgen" class="external-link">tidypopgen</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loading required package: dplyr</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:stats':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     filter, lag</span></span>
-<span><span class="co">#&gt; The following objects are masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
-<span><span class="co">#&gt; Loading required package: tibble</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
 <p>Before running this benchmark, we need to download into the
 subdirectory <code>data/hgdp/</code> the bed file
@@ -117,7 +107,7 @@ subdirectory <code>data/hgdp/</code> the bed file
 <code class="sourceCode R"><span><span class="va">bed_path</span> <span class="op">&lt;-</span> <span class="st">"./data/hgdp/hgdp650.qc.hg19.bed"</span></span>
 <span><span class="va">meta_info</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_tsv</a></span><span class="op">(</span><span class="st">"./data/hgdp/HGDPid_populations.txt"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 1064 Columns: 6</span></span>
-<span><span class="co">#&gt; ── Column specification ───────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Column specification ─────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; Delimiter: "\t"</span></span>
 <span><span class="co">#&gt; chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -133,7 +123,7 @@ subdirectory <code>data/hgdp/</code> the bed file
 <span>                   quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>                   backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"test_"</span><span class="op">)</span>,</span>
 <span>                   n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span></code></pre></div>
-<p>read_plink: 3.4s</p>
+<p>read_plink: 2.7s</p>
 <p>Add metadata</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hgdp</span> <span class="op">&lt;-</span> <span class="va">hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
@@ -167,12 +157,8 @@ minor allele frequency, rate of missingness, and a Hardy-Weinberg exact
 p-value for each SNP.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">loci_report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="va">hgdp</span><span class="op">)</span></span></code></pre></div>
-<p>loci_report: 2.2s</p>
-</div>
-<div class="section level2">
-<h2 id="loci-plot">Loci Plot<a class="anchor" aria-label="anchor" href="#loci-plot"></a>
-</h2>
-<p>The resulting report can be observed using <code>autoplot</code>.</p>
+<p>loci_report: 2.1s The resulting report can be observed using
+<code>autoplot</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
@@ -188,7 +174,7 @@ minor allele frequency over 0.05, and a missingness rate below 0.05.</p>
 <code class="sourceCode R"><span><span class="va">to_keep_loci</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">loci_report</span>, <span class="va">loci_report</span><span class="op">$</span><span class="va">maf</span> <span class="op">&gt;</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="va">loci_report</span><span class="op">$</span><span class="va">missingness</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="va">hgdp</span> <span class="op">&lt;-</span> <span class="va">hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci.html">select_loci</a></span><span class="op">(</span><span class="va">to_keep_loci</span><span class="op">$</span><span class="va">snp_id</span><span class="op">)</span></span></code></pre></div>
-<p>filter_loci: 2.1s</p>
+<p>filter_loci: 1.4s</p>
 </div>
 <div class="section level2">
 <h2 id="individual-report">Individual Report<a class="anchor" aria-label="anchor" href="#individual-report"></a>
@@ -198,17 +184,37 @@ heterozygosity per individual, and rate of missingness per
 individual.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">indiv_report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span><span class="va">hgdp</span><span class="op">)</span></span></code></pre></div>
-<p>indiv_report: 2.6s</p>
+<p>indiv_report: 2.5s</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">indiv_report</span>, type <span class="op">=</span> <span class="st">"scatter"</span><span class="op">)</span></span></code></pre></div>
+<div class="float">
+<img src="figure%2Fautoplot_indiv_report-1.png" alt="plot of chunk autoplot_indiv_report"><div class="figcaption">plot of chunk autoplot_indiv_report</div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="filter-individuals">Filter individuals<a class="anchor" aria-label="anchor" href="#filter-individuals"></a>
 </h2>
 <p>And we can filter individuals down to only include those with less
-than 10% of their genotypes missing.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">to_keep_indiv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">indiv_report</span><span class="op">$</span><span class="va">missingness</span> <span class="op">&lt;</span> <span class="fl">0.1</span><span class="op">)</span></span>
+than 1% of their genotypes missing.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">to_keep_indiv</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">indiv_report</span><span class="op">$</span><span class="va">missingness</span> <span class="op">&lt;</span> <span class="fl">0.01</span><span class="op">)</span></span>
 <span><span class="va">hgdp</span> <span class="op">&lt;-</span> <span class="va">hgdp</span><span class="op">[</span><span class="va">to_keep_indiv</span>, <span class="op">]</span></span></code></pre></div>
-<p>filter_indiv: 4ms</p>
+<p>filter_indiv: 3ms</p>
+</div>
+<div class="section level2">
+<h2 id="update-backingfile">Update backingfile<a class="anchor" aria-label="anchor" href="#update-backingfile"></a>
+</h2>
+<p>After removing individuals from the dataset, and before imputing, we
+need to update the file backing matrix with
+<code>gt_update_backingfile</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hgdp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_update_backingfile.html">gt_update_backingfile</a></span><span class="op">(</span><span class="va">hgdp</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Genetic distances are not sorted, setting them to zero</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; gen_backing files updated, now</span></span>
+<span><span class="co">#&gt; using bigSNP file: /tmp/Rtmp0TRebe/test_11084c3cf37c_v2.rds</span></span>
+<span><span class="co">#&gt; with backing file: /tmp/Rtmp0TRebe/test_11084c3cf37c_v2.bk</span></span>
+<span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="impute-data">Impute data<a class="anchor" aria-label="anchor" href="#impute-data"></a>
@@ -217,31 +223,31 @@ than 10% of their genotypes missing.</p>
 <code>gt_pca</code> functions, require that there is no missingness in
 the dataset, so we use <code>gt_impute_simple</code> to impute any
 remaining missing genotypes.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hgdp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">hgdp</span>, method <span class="op">=</span> <span class="st">"mode"</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/gt_set_imputed.html">gt_set_imputed</a></span><span class="op">(</span><span class="va">hgdp</span>, <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>impute: 164ms</p>
+<p>impute: 149ms</p>
 </div>
 <div class="section level2">
 <h2 id="ld-clumping">LD clumping<a class="anchor" aria-label="anchor" href="#ld-clumping"></a>
 </h2>
 <p>LD clumping is then performed to control for linkage
 disequilibrium.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hgdp</span> <span class="op">&lt;-</span> <span class="va">hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">genotypes</span>, thr_r2 <span class="op">=</span> <span class="fl">0.2</span>, n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>ld_clumping: 4.1s</p>
+<p>ld_clumping: 3.5s</p>
 </div>
 <div class="section level2">
 <h2 id="pca">PCA<a class="anchor" aria-label="anchor" href="#pca"></a>
 </h2>
 <p>A principal components analysis can then be computed using the
 resulting cleaned and LD clumped dataset.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_pca</span> <span class="op">&lt;-</span> <span class="va">hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>pca: 2s</p>
+<p>pca: 1.8s</p>
 <p>Plot PCA:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">test_pca</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">hgdp</span><span class="op">$</span><span class="va">region</span>, shape <span class="op">=</span> <span class="va">hgdp</span><span class="op">$</span><span class="va">region</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
@@ -252,16 +258,16 @@ resulting cleaned and LD clumped dataset.</p>
 <h2 id="dapc">DAPC<a class="anchor" aria-label="anchor" href="#dapc"></a>
 </h2>
 <p>We can continue with a discriminant analysis of principal components
-using <code>gt_dapc</code>.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pop_factor</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">hgdp</span><span class="op">$</span><span class="va">population</span><span class="op">)</span></span>
-<span><span class="va">test_dapc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_dapc.html">gt_dapc</a></span><span class="op">(</span><span class="va">test_pca</span>, pop <span class="op">=</span> <span class="va">pop_factor</span><span class="op">)</span></span></code></pre></div>
-<p>dapc: 162ms</p>
+using <code>gt_dapc</code>, setting 6 groups corresponding to the main
+geographic regions covered by the dataset.</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">test_dapc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_dapc.html">gt_dapc</a></span><span class="op">(</span><span class="va">test_pca</span>, pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">hgdp</span><span class="op">$</span><span class="va">region</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>dapc: 32ms</p>
 <p>Plot DAPC:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">test_dapc</span>, type <span class="op">=</span> <span class="st">"screeplot"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">test_dapc</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
-<img src="figure%2FDAPC_screeplot-1.png" alt="plot of chunk DAPC_screeplot"><div class="figcaption">plot of chunk DAPC_screeplot</div>
+<img src="figure%2FDAPC_scores_plot-1.png" alt="plot of chunk DAPC_scores_plot"><div class="figcaption">plot of chunk DAPC_scores_plot</div>
 </div>
 </div>
 <div class="section level2">
@@ -269,23 +275,39 @@ using <code>gt_dapc</code>.</p>
 </h2>
 <p>To examine the differentiation between populations in the global HGDP
 set, we calculate pairwise Fst.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grouped_hgdp</span> <span class="op">&lt;-</span> <span class="va">hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span>
 <span><span class="va">pairwise_fsts</span> <span class="op">&lt;-</span> <span class="va">grouped_hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/pairwise_pop_fst.html">pairwise_pop_fst</a></span><span class="op">(</span>n_cores <span class="op">=</span> <span class="va">n_cores</span><span class="op">)</span></span></code></pre></div>
 <p>pairwise_fst: 3.8s</p>
+<p>Plot pairwise Fst:</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Order by continents</span></span>
+<span><span class="va">grouped_hgdp_order</span> <span class="op">&lt;-</span> <span class="va">grouped_hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">region</span>,<span class="va">population</span><span class="op">)</span></span>
+<span><span class="va">regional_order</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">grouped_hgdp_order</span><span class="op">$</span><span class="va">population</span><span class="op">)</span></span>
+<span><span class="va">pairwise_fsts</span> <span class="op">&lt;-</span> <span class="va">pairwise_fsts</span><span class="op">[</span><span class="va">regional_order</span>,<span class="va">regional_order</span><span class="op">]</span></span>
+<span></span>
+<span><span class="fu">ggheatmap</span><span class="op">(</span><span class="va">pairwise_fsts</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_c</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span></span>
+<span>    <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="op">-</span><span class="fl">60</span>, hjust <span class="op">=</span> <span class="fl">0</span>, size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>,</span>
+<span>          axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">0</span>, hjust <span class="op">=</span> <span class="fl">1</span>, size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span><span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
+<span>    x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    fill <span class="op">=</span> <span class="st">"Fst"</span></span>
+<span>  <span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="save-in-plink-bed-format">Save in plink bed format<a class="anchor" aria-label="anchor" href="#save-in-plink-bed-format"></a>
 </h2>
 <p>Finally, we can save the resulting cleaned dataset to a PLINK .bed
 file.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_as_plink.html">gt_as_plink</a></span><span class="op">(</span><span class="va">hgdp</span>,</span>
 <span>            file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>            type <span class="op">=</span> <span class="st">"bed"</span>,</span>
 <span>            overwrite <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpHYCVcB/file27fd45c5795c.bed"</span></span></code></pre></div>
-<p>plink_save: 250ms</p>
+<span><span class="co">#&gt; [1] "/tmp/Rtmp0TRebe/file11083a281642.bed"</span></span></code></pre></div>
+<p>plink_save: 256ms</p>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
@@ -293,18 +315,18 @@ file.</p>
 <p>Here is a summary of the time taken (in seconds) to perform each step
 of the analyses:</p>
 <pre><code><span><span class="co">#&gt;            step  time</span></span>
-<span><span class="co">#&gt; 1    read_plink  3.44</span></span>
-<span><span class="co">#&gt; 2   loci_report  2.24</span></span>
-<span><span class="co">#&gt; 3   filter_loci  2.06</span></span>
-<span><span class="co">#&gt; 4  indiv_report  2.58</span></span>
+<span><span class="co">#&gt; 1    read_plink  2.68</span></span>
+<span><span class="co">#&gt; 2   loci_report  2.06</span></span>
+<span><span class="co">#&gt; 3   filter_loci  1.44</span></span>
+<span><span class="co">#&gt; 4  indiv_report  2.48</span></span>
 <span><span class="co">#&gt; 5  filter_indiv     0</span></span>
-<span><span class="co">#&gt; 6        impute  0.16</span></span>
-<span><span class="co">#&gt; 7   ld_clumping  4.07</span></span>
-<span><span class="co">#&gt; 8           pca  1.99</span></span>
-<span><span class="co">#&gt; 9          dapc  0.16</span></span>
-<span><span class="co">#&gt; 10 pairwise_fst  3.79</span></span>
-<span><span class="co">#&gt; 11   plink_save  0.25</span></span>
-<span><span class="co">#&gt; 12        Total 20.74</span></span></code></pre>
+<span><span class="co">#&gt; 6        impute  0.15</span></span>
+<span><span class="co">#&gt; 7   ld_clumping  3.53</span></span>
+<span><span class="co">#&gt; 8           pca   1.8</span></span>
+<span><span class="co">#&gt; 9          dapc  0.03</span></span>
+<span><span class="co">#&gt; 10 pairwise_fst  3.85</span></span>
+<span><span class="co">#&gt; 11   plink_save  0.26</span></span>
+<span><span class="co">#&gt; 12        Total 18.28</span></span></code></pre>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
