@@ -22,16 +22,21 @@ test_that("loci_pi computes correctly", {
     indiv_meta = test_indiv_meta,
     quiet = TRUE
   )
-  pi <- function(x){
-    n <- colSums(!is.na(x))*2
+  pi <- function(x) {
+    n <- colSums(!is.na(x)) * 2
     c_0 <- colSums(x, na.rm = TRUE)
     c_1 <- n - c_0
-    pi_est <- c_0 * c_1 / (n*(n-1)/2)
+    pi_est <- c_0 * c_1 / (n * (n - 1) / 2)
     return(pi_est)
   }
   pi_by_hand <- pi(test_genotypes)
   pi_gt <- loci_pi(test_gt$genotypes)
   expect_true(all(pi_by_hand == pi_gt))
+
+  # compare to hierfstat (we don't give L, so it is just the sum of loci pi)
+  pi_hierfstat <- hierfstat::pi.dosage(test_genotypes)
+  expect_equal(sum(pi_gt), pi_hierfstat)
+
 
   # repeat the tests for a subset of the data
   # remove the 2nd individual and the 3rd and 5th snp
