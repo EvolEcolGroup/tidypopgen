@@ -4,8 +4,10 @@ test_that("window_stats_generic is correct", {
     name = paste0("locus", 1:13),
     chromosome = c(rep("chr1", 6), rep("chr2", 7)),
     genetic_dist = rep(0, 13),
-    position = c(50, 120, 150, 180, 230, 390, 110, 120, 150,
-                 180, 230, 280, 350),
+    position = c(
+      50, 120, 150, 180, 230, 390, 110, 120, 150,
+      180, 230, 280, 350
+    ),
     allele_ref = rep("A", 13),
     allele_alt = rep("T", 13)
   )
@@ -46,14 +48,36 @@ test_that("window_stats_generic is correct", {
     min_loci = 1
   )
   # window for chr1 between 251 and 350 is empty (i.e NA)
-  expect_true(all(is.na(window_res$stat[window_res$chromosome == "chr1" &
-                                          window_res$start == 250])))
+  expect_true(
+    all(
+      is.na(
+        window_res$stat[
+          window_res$chromosome == "chr1" &
+            window_res$start == 250
+        ]
+      )
+    )
+  )
   # window in chr2 starting at 100 should have n_loci = 4
-  expect_true(all(window_res$n_loci[window_res$chromosome == "chr2" &
-                                      window_res$start == 100] == 4))
+  expect_true(
+    all(
+      window_res$n_loci[
+        window_res$chromosome == "chr2" &
+          window_res$start == 100
+      ] == 4
+    )
+  )
   # the smallest start for chr2 is 100
-  expect_true(min(window_res$start[window_res$chromosome == "chr2"]) == 101)
+  expect_true(
+    min(
+      window_res$start[window_res$chromosome == "chr2"]
+    ) == 101
+  )
   # window for chr2 and start 251 should have sum 31 (15+16)
-  expect_true(window_res$stat[window_res$chromosome == "chr2" &
-                                window_res$start == 251] == 31)
+  expect_true(
+    window_res$stat[
+      window_res$chromosome == "chr2" &
+        window_res$start == 251
+    ] == 31
+  )
 })

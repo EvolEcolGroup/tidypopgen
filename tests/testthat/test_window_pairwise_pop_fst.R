@@ -61,11 +61,11 @@ test_that("pairwise_pop_fst num and dem are returned correctly", {
 test_that("window_pairwise_pop_fst works correctly", {
   test_window <- test_gt %>%
     window_pairwise_pop_fst(
-    window_size = 3,
-    step_size = 2,
-    size_unit = "snp",
-    min_loci = 2
-  )
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp",
+      min_loci = 2
+    )
 
   # TODO check that this works correctly!
 

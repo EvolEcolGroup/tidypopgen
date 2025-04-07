@@ -44,7 +44,7 @@ loci_pi.vctrs_bigSNP <- function(
     block_size = bigstatsr::block_size(length(.x), 1),
     ...) {
   rlang::check_dots_empty()
-  
+
   stopifnot_diploid(.x)
   # if we have diploid
   # get the FBM
@@ -76,7 +76,7 @@ loci_pi.vctrs_bigSNP <- function(
     # pi does not really make sense for a single individual
     pi <- NA
   }
-  pi 
+  pi
 }
 
 #' @export
@@ -88,32 +88,31 @@ loci_pi.grouped_df <- function(
     ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
-    geno_fbm <- .gt_get_bigsnp(.x)$genotypes
-    # rows (individuals) that we want to use
-    rows_to_keep <- vctrs::vec_data(.x$genotypes)
+  geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+  # rows (individuals) that we want to use
+  rows_to_keep <- vctrs::vec_data(.x$genotypes)
 
-    # internal function that can be used with a big_apply #nolint start
-    gt_group_pi_sub <- function(BM, ind, rows_to_keep) {
-      freq_mat <- gt_grouped_pi_diploid(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        groupIds = dplyr::group_indices(.x) - 1,
-        ngroups = max(dplyr::group_indices(.x)),
-        ncores = n_cores
-      )$pi
-    } # nolint end
-    pi_mat <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_group_pi_sub,
-      rows_to_keep = rows_to_keep,
-      ind = show_loci(.x)$big_index,
-      ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-      # in the cpp code
-      block.size = block_size,
-      a.combine = "rbind"
-    )
-    # return a list to mimic a group_map
-    lapply(seq_len(ncol(pi_mat)), function(i) pi_mat[, i])
-
+  # internal function that can be used with a big_apply #nolint start
+  gt_group_pi_sub <- function(BM, ind, rows_to_keep) {
+    freq_mat <- gt_grouped_pi_diploid(
+      BM = BM,
+      rowInd = rows_to_keep,
+      colInd = ind,
+      groupIds = dplyr::group_indices(.x) - 1,
+      ngroups = max(dplyr::group_indices(.x)),
+      ncores = n_cores
+    )$pi
+  } # nolint end
+  pi_mat <- bigstatsr::big_apply(
+    geno_fbm,
+    a.FUN = gt_group_pi_sub,
+    rows_to_keep = rows_to_keep,
+    ind = show_loci(.x)$big_index,
+    ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
+    # in the cpp code
+    block.size = block_size,
+    a.combine = "rbind"
+  )
+  # return a list to mimic a group_map
+  lapply(seq_len(ncol(pi_mat)), function(i) pi_mat[, i])
 }

@@ -31,14 +31,14 @@ window_pairwise_pop_fst <- function(x,
                                     step_size,
                                     size_unit = c("snp", "bp"),
                                     min_loci = 1,
-                                    complete = FALSE){
+                                    complete = FALSE) {
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(x)
   method <- match.arg(method)
 
   # create the pairwise Fst by locus, saving numerator and denominator
   pair_fst <- pairwise_pop_fst(x, method = "Hudson", return_num_dem = TRUE)
-  
+
   # for each column (i.e. each statistics), run the window analysis
   compn <- colnames(pair_fst$Fst_by_locus_num)
   res <- NULL
@@ -71,10 +71,12 @@ window_pairwise_pop_fst <- function(x,
     # if res is null
     if (is.null(res)) {
       # create the data frame
-      res <- dplyr::bind_cols(window_num[, 1:3],
-                              window_fst)
+      res <- dplyr::bind_cols(
+        window_num[, 1:3],
+        window_fst
+      )
     } else {
-      res <-dplyr::bind_cols(res, window_fst)
+      res <- dplyr::bind_cols(res, window_fst)
     }
   }
   return(res)

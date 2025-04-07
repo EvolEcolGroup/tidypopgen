@@ -23,8 +23,8 @@ test_that("loci_pi computes correctly", {
     quiet = TRUE
   )
   # TODO this needs doing
-  
-  
+
+
   # raw frequencies
   freq <- colSums(test_genotypes, na.rm = TRUE) / (c(3, 3, 3, 2, 3, 1) * 2)
   expect_true(all(loci_alt_freq(test_gt$genotypes) == freq))
