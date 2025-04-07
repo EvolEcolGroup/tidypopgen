@@ -6,7 +6,6 @@
 \usage{
 window_pop_tajimas_d(
   x,
-  method = "Hudson",
   window_size,
   step_size,
   size_unit = c("snp", "bp"),
@@ -34,7 +33,8 @@ FALSE, the default, then partial computations will be allowed at the end of
 the chromosome.}
 }
 \value{
-a data frame (or a list of data.frames if \code{x} is grouped) with the following columns:
+a data frame (or a list of data.frames if \code{x} is grouped) with the
+following columns:
 \itemize{
 \item \code{chromosome}: the chromosome for the window
 \item \code{start}: the starting locus of the window

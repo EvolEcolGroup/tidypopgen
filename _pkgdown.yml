@@ -120,7 +120,6 @@ reference:
     desc: "Functions for other analyses within `R`."
     contents:
         - gt_extract_f2
-        - gt_roh_window
         - gt_pcadapt
         - autoplot.gt_pcadapt
   - title: "`bigSNP`"

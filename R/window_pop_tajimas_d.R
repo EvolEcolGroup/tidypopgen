@@ -24,7 +24,6 @@
 #' @export
 
 window_pop_tajimas_d <- function(x,
-                                 method = "Hudson",
                                  window_size,
                                  step_size,
                                  size_unit = c("snp", "bp"),
