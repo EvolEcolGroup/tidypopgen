@@ -33,16 +33,6 @@ We can now load the necessary libraries:
 
 ``` r
 library(tidypopgen)
-#> Loading required package: dplyr
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-#> Loading required package: tibble
 library(ggplot2)
 ```
 
@@ -76,7 +66,7 @@ hgdp <- gen_tibble(bed_path,
                    n_cores = n_cores)
 ```
 
-read_plink: 3.5s
+read_plink: 2.7s
 
 Add metadata
 
@@ -120,7 +110,7 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-loci_report: 2.2s
+loci_report: 2.1s
 The resulting report can be observed using `autoplot`.
 
 
@@ -142,7 +132,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 2s
+filter_loci: 1.4s
 
 
 # Individual Report
@@ -156,7 +146,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.6s
+indiv_report: 2.5s
 
 
 ``` r
@@ -176,7 +166,7 @@ to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-filter_indiv: 2ms
+filter_indiv: 3ms
 
 # Update backingfile
 
@@ -189,8 +179,8 @@ hgdp <- gt_update_backingfile(hgdp)
 #> Genetic distances are not sorted, setting them to zero
 #> 
 #> gen_backing files updated, now
-#> using bigSNP file: /tmp/Rtmp0TRebe/test_110825e35914_v2.rds
-#> with backing file: /tmp/Rtmp0TRebe/test_110825e35914_v2.bk
+#> using bigSNP file: /tmp/Rtmp0TRebe/test_11084c3cf37c_v2.rds
+#> with backing file: /tmp/Rtmp0TRebe/test_11084c3cf37c_v2.bk
 #> make sure that you do NOT delete those files!
 ```
 
@@ -206,7 +196,7 @@ hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 154ms
+impute: 149ms
 
 # LD clumping
 
@@ -218,7 +208,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 3.9s
+ld_clumping: 3.5s
 
 # PCA
 
@@ -230,7 +220,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 2.1s
+pca: 1.8s
 
 Plot PCA:
 
@@ -253,7 +243,7 @@ the main geographic regions covered by the dataset.
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
-dapc: 112ms
+dapc: 32ms
 
 Plot DAPC:
 
@@ -307,10 +297,10 @@ gt_as_plink(hgdp,
             file = tempfile(),
             type = "bed",
             overwrite = TRUE)
-#> [1] "/tmp/Rtmp0TRebe/file1108162d9738.bed"
+#> [1] "/tmp/Rtmp0TRebe/file11083a281642.bed"
 ```
 
-plink_save: 262ms
+plink_save: 256ms
 
 # Summary
 
@@ -319,17 +309,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  3.48
-#> 2   loci_report  2.21
-#> 3   filter_loci  1.95
-#> 4  indiv_report  2.56
+#> 1    read_plink  2.68
+#> 2   loci_report  2.06
+#> 3   filter_loci  1.44
+#> 4  indiv_report  2.48
 #> 5  filter_indiv     0
 #> 6        impute  0.15
-#> 7   ld_clumping  3.93
-#> 8           pca  2.08
-#> 9          dapc  0.11
-#> 10 pairwise_fst  3.76
+#> 7   ld_clumping  3.53
+#> 8           pca   1.8
+#> 9          dapc  0.03
+#> 10 pairwise_fst  3.85
 #> 11   plink_save  0.26
-#> 12        Total 20.49
+#> 12        Total 18.28
 ```
 
