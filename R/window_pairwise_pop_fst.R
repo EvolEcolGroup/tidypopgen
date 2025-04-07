@@ -1,9 +1,9 @@
 #' Compute pairwise Fst for a sliding window
 #'
 #' @description This function computes pairwise Fst for a sliding window across
-#' a set of loci.
+#' each chromosome.
 #'
-#' @param x a `gen_tibble` object
+#' @param x a grouped `gen_tibble` object
 #' @param method the method to use for calculating Fst. Currently only "Hudson"
 #'   is supported.
 #' @param window_size The size of the window to use for the estimates.
