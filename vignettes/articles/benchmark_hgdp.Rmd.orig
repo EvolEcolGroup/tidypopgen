@@ -18,17 +18,16 @@ The Human Genome Diversity Project (HGDP) SNP dataset is used for this
 benchmark. This dataset includes 1043 individuals from 51 populations, typed
 at ~650k loci.
 
-We will run this benchmark on a machine with a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU
-and  of RAM. However, we will limit the number of
+We will run this benchmark on a machine with a `r benchmarkme::get_cpu()` CPU
+and `r as.character(print(benchmarkme::get_ram(), unit_system = "iec"))` of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
 inflation of the number of threads used (for example, in cases where dependency
-                                         functions may automatically use all available cores) we need to set up
+functions may automatically use all available cores) we need to set up
 preferences at the beginning of the session. Specifically, we limit the
 number of cores used by the parallelised BLAS library with
 `bigparallelr::set_blas_ncores()`, and by the package data.table with
 `data.table::setDTthreads()`.
-
 
 ```{r}
 n_cores <- 20
@@ -39,7 +38,6 @@ bigparallelr::set_blas_ncores(n_cores)
 
 We can now load the necessary libraries:
 
-
 ```{r}
 library(tidypopgen)
 library(ggplot2)
@@ -48,7 +46,6 @@ library(ggplot2)
 Before running this benchmark, we need to download into the subdirectory
 `data/hgdp/` the bed file `hgdp650.qc.hg19.bed` and the metadata file
 `HGDPid_populations.txt`.
-
 
 ```{r}
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
@@ -59,7 +56,6 @@ meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 
 Our first step is to load the HGDP data into a `gen_tibble` object, and add its
 associated metadata.
-
 
 ```{r read_plink, benchmark = TRUE}
 hgdp <- gen_tibble(bed_path,
@@ -77,7 +73,6 @@ hgdp <- hgdp %>% mutate(
 )
 ```
 
-
 Let's confirm that we have read all the expected information:
 
 ```{r}
@@ -90,13 +85,9 @@ hgdp
 We can then call `qc_report_loci`. This function supplies minor allele
 frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 
-
 ```{r loci_report, benchmark = TRUE}
 loci_report <- qc_report_loci(hgdp)
 ```
-
-# Loci Plot
-
 The resulting report can be observed using `autoplot`.
 
 ```{r autoplot_loci_report}
@@ -139,7 +130,6 @@ to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-
 # Update backingfile
 
 After removing individuals from the dataset, and before imputing, we need to
@@ -154,7 +144,6 @@ hgdp <- gt_update_backingfile(hgdp)
 Some functions, such as `loci_ld_clump` and the `gt_pca` functions, require that
 there is no missingness in the dataset, so we use `gt_impute_simple` to impute
 any remaining missing genotypes.
-
 
 ```{r impute, benchmark = TRUE}
 hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
@@ -189,15 +178,14 @@ autoplot(test_pca, type = "scores") +
 # DAPC
 
 We can continue with a discriminant analysis of principal
-components using `gt_dapc`.
+components using `gt_dapc`, setting 6 groups corresponding to
+the main geographic regions covered by the dataset.
 
 ```{r dapc, benchmark = TRUE}
-pop_factor <- as.factor(hgdp$region)
-test_dapc <- gt_dapc(test_pca, pop = pop_factor)
+test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
 Plot DAPC:
-
 
 ```{r DAPC_scores_plot}
 autoplot(test_dapc, type = "scores")
@@ -210,13 +198,12 @@ calculate pairwise Fst.
 
 ```{r pairwise_fst, benchmark = TRUE}
 grouped_hgdp <- hgdp %>% group_by(population)
-pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores, tidy = FALSE)
+pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
 ```
 
 Plot pairwise Fst:
 
-
-```{r pairwise_fst_plot}
+```{r pairwise_fst_plot, eval = FALSE}
 # Order by continents
 grouped_hgdp_order <- grouped_hgdp %>% arrange(region,population)
 regional_order <- unique(grouped_hgdp_order$population)
