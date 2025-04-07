@@ -117,7 +117,9 @@ pop_tajimas_d.grouped_df <- function(
     a.combine = "rbind"
   )
   # number of rows per group
-  n_by_grp <- .x %>% dplyr::summarise(n = n()) %>% dplyr::pull(.data$n)
+  n_by_grp <- .x %>%
+    dplyr::summarise(n = n()) %>%
+    dplyr::pull(.data$n)
   tajimas_d <- list()
   # TODO this should be done with an apply function or in cpp
   for (i_grp in seq_along(n_by_grp)) {

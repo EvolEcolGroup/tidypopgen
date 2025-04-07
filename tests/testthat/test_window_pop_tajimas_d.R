@@ -36,12 +36,32 @@ test_gt <- test_gt %>% dplyr::group_by(population)
 
 # testing the infrastructure for windowing
 test_that("window_pop_tajimas_d works correctly", {
-  # window_taj <- window_pop_tajimas_d(
-  #   test_gt,
-  #   window_size = 2,
-  #   step_size = 1,
-  #   min_loci = 1
-  # )
+  window_taj <- window_pop_tajimas_d(
+    test_gt,
+    window_size = 3,
+    step_size = 1,
+    min_loci = 1
+  )
+  # subset the tibble to the first population and chr1
+  test_gt_chr1 <- test_gt %>%
+    select_loci_if(loci_chromosomes(genotypes) == "chr1") %>%
+    dplyr::filter(population == "pop1")
+  pop_tajimas_d(test_gt_chr1)
+
+  expect_true(
+    window_taj[[1]]$stat[1] ==
+      pop_tajimas_d(test_gt_chr1)
+  )
+
+  # now test 2nd pop and chr2 from position 3 to 5
+  test_gt_chr2 <- test_gt %>%
+    select_loci_if(
+      (loci_chromosomes(genotypes) == "chr2") &
+        show_loci(genotypes)$position %in% c(138, 230, 456)
+    ) %>%
+    dplyr::filter(population == "pop2")
+  expect_true(
+    window_taj[[2]]$stat[4] ==
+      pop_tajimas_d(test_gt_chr2)
+  )
 })
-
-

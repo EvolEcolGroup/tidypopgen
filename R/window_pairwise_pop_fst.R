@@ -32,6 +32,7 @@ window_pairwise_pop_fst <- function(x,
                                     size_unit = c("snp", "bp"),
                                     min_loci = 1,
                                     complete = FALSE) {
+  message("This is a new function and not fully tested; use it with care")
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(x)
   method <- match.arg(method)

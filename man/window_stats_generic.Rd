@@ -7,7 +7,7 @@
 window_stats_generic(
   x,
   loci_table,
-  operator = c("mean", "sum"),
+  operator = c("mean", "sum", "custom"),
   window_size,
   step_size,
   size_unit = c("snp", "bp"),

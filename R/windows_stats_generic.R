@@ -31,7 +31,8 @@
 #'   in the window, and 'n_snps' contains the number of loci in the window.
 #' @export
 
-window_stats_generic <- function(x, loci_table, operator = c("mean", "sum"),
+window_stats_generic <- function(x, loci_table,
+                                 operator = c("mean", "sum", "custom"),
                                  window_size, step_size,
                                  size_unit = c("snp", "bp"), min_loci = 1,
                                  complete = FALSE,
@@ -110,7 +111,7 @@ window_stats_generic <- function(x, loci_table, operator = c("mean", "sum"),
     )
 
     # note that runner measures the window from the end (not the front)
-    if (operator != "custom"){
+    if (operator != "custom") {
       stat <- operator_func(
         x = x_sub,
         k = window_size,

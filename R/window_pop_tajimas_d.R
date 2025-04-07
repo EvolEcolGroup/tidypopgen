@@ -1,7 +1,7 @@
 #' Compute Tajima's D for a sliding window
 #'
 #' @description This function computes Tajimas's D for a sliding window across
-#' each chromosome.
+#'   each chromosome.
 #'
 #' @param x a (potentially grouped) `gen_tibble` object
 #' @param window_size The size of the window to use for the estimates.
@@ -15,7 +15,8 @@
 #' @param complete Should the function be evaluated on complete windows only? If
 #'   FALSE, the default, then partial computations will be allowed at the end of
 #'   the chromosome.
-#' @returns a data frame (or a list of data.frames if `x` is grouped) with the following columns:
+#' @returns a data frame (or a list of data.frames if `x` is grouped) with the
+#'   following columns:
 #' - `chromosome`: the chromosome for the window
 #' - `start`: the starting locus of the window
 #' - `end`: the ending locus of the window
@@ -23,20 +24,23 @@
 #' @export
 
 window_pop_tajimas_d <- function(x,
-                                    method = "Hudson",
-                                    window_size,
-                                    step_size,
-                                    size_unit = c("snp", "bp"),
-                                    min_loci = 1,
-                                    complete = FALSE) {
+                                 method = "Hudson",
+                                 window_size,
+                                 step_size,
+                                 size_unit = c("snp", "bp"),
+                                 min_loci = 1,
+                                 complete = FALSE) {
+  message("This is a new function and not fully tested; use it with care")
+
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(x)
 
   # if x is grouped, get the pop sizes for each group
-  if (inherits(x, "grouped_gen_tibble")) {
+  if (inherits(x, "grouped_gen_tbl")) {
     # get the population sizes
     n <- x %>%
-      dplyr::summarise(n = n()) %>% dplyr::pull(.data$n)
+      dplyr::summarise(n = n()) %>%
+      dplyr::pull(.data$n)
   } else {
     # if not grouped, just use the number of individuals
     n <- nrow(x)
@@ -51,7 +55,7 @@ window_pop_tajimas_d <- function(x,
 
   res <- list()
   # now we can loop around each population to compute the windows
-  for (i_grp in seq_len(length(pi_by_locus))){
+  for (i_grp in seq_len(length(pi_by_locus))) {
     window_taj <- window_stats_generic(
       x = pi_by_locus[[i_grp]],
       loci_table = show_loci(x),
@@ -61,12 +65,12 @@ window_pop_tajimas_d <- function(x,
       size_unit = size_unit,
       min_loci = min_loci,
       complete = complete,
-      f = tajimas_from_pi_vec,
-      n = nrow(x) # no, we need pop sizes from the tibble
+      f = tajimas_d_from_pi_vec,
+      n = n[i_grp] * 2 # because we need the number of alleles
     )
-    res[[i_grp]]<- window_taj
+    res[[i_grp]] <- window_taj
   }
-  if (length(res)==1){ # if we only have one pop, return a data.frame
+  if (length(res) == 1) { # if we only have one pop, return a data.frame
     res <- unlist(res)
   }
   return(res)
