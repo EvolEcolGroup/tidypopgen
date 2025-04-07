@@ -4,18 +4,17 @@ title: "Benchmark on the HGDP"
 
 
 
-
 This vignette is a benchmark of a few key functions in the tidypopgen package.
 The Human Genome Diversity Project (HGDP) SNP dataset is used for this
 benchmark. This dataset includes 1043 individuals from 51 populations, typed
 at ~650k loci.
 
 We will run this benchmark on a machine with a GenuineIntel, 13th Gen Intel(R) Core(TM) i9-13900, 24 CPU
-and  of RAM. However, we will limit the number of
+and 126 GiB of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
 inflation of the number of threads used (for example, in cases where dependency
-                                         functions may automatically use all available cores) we need to set up
+functions may automatically use all available cores) we need to set up
 preferences at the beginning of the session. Specifically, we limit the
 number of cores used by the parallelised BLAS library with
 `bigparallelr::set_blas_ncores()`, and by the package data.table with
@@ -34,16 +33,6 @@ We can now load the necessary libraries:
 
 ``` r
 library(tidypopgen)
-#> Loading required package: dplyr
-#> 
-#> Attaching package: 'dplyr'
-#> The following objects are masked from 'package:stats':
-#> 
-#>     filter, lag
-#> The following objects are masked from 'package:base':
-#> 
-#>     intersect, setdiff, setequal, union
-#> Loading required package: tibble
 library(ggplot2)
 ```
 
@@ -56,7 +45,7 @@ Before running this benchmark, we need to download into the subdirectory
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 #> Rows: 1064 Columns: 6
-#> ── Column specification ───────────────────────────────────────────────────────────────────
+#> ── Column specification ─────────────────────────────────────────────────────────────────────────
 #> Delimiter: "\t"
 #> chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups
 #> 
@@ -70,7 +59,6 @@ Our first step is to load the HGDP data into a `gen_tibble` object, and add its
 associated metadata.
 
 
-
 ``` r
 hgdp <- gen_tibble(bed_path,
                    quiet = TRUE,
@@ -78,7 +66,7 @@ hgdp <- gen_tibble(bed_path,
                    n_cores = n_cores)
 ```
 
-read_plink: 3.4s
+read_plink: 2.7s
 
 Add metadata
 
@@ -91,6 +79,7 @@ hgdp <- hgdp %>% mutate(
 ```
 
 Let's confirm that we have read all the expected information:
+
 
 ``` r
 hgdp
@@ -121,12 +110,8 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-loci_report: 2.2s
-
-# Loci Plot
-
+loci_report: 2.1s
 The resulting report can be observed using `autoplot`.
-
 
 
 ``` r
@@ -147,7 +132,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 2.1s
+filter_loci: 1.4s
 
 
 # Individual Report
@@ -156,25 +141,48 @@ We can then call `qc_report_indiv` to supply observed heterozygosity per
 individual, and rate of missingness per individual.
 
 
+
 ``` r
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.6s
-
-# Filter individuals
-
-And we can filter individuals down to only include those with less than 10% of
-their genotypes missing.
-
+indiv_report: 2.5s
 
 
 ``` r
-to_keep_indiv <- which(indiv_report$missingness < 0.1)
+autoplot(indiv_report, type = "scatter")
+```
+
+![plot of chunk autoplot_indiv_report](figure/autoplot_indiv_report-1.png)
+
+# Filter individuals
+
+And we can filter individuals down to only include those with less than 1% of
+their genotypes missing.
+
+
+``` r
+to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-filter_indiv: 4ms
+filter_indiv: 3ms
+
+# Update backingfile
+
+After removing individuals from the dataset, and before imputing, we need to
+update the file backing matrix with `gt_update_backingfile`.
+
+
+``` r
+hgdp <- gt_update_backingfile(hgdp)
+#> Genetic distances are not sorted, setting them to zero
+#> 
+#> gen_backing files updated, now
+#> using bigSNP file: /tmp/Rtmp0TRebe/test_11084c3cf37c_v2.rds
+#> with backing file: /tmp/Rtmp0TRebe/test_11084c3cf37c_v2.bk
+#> make sure that you do NOT delete those files!
+```
 
 # Impute data
 
@@ -183,13 +191,12 @@ there is no missingness in the dataset, so we use `gt_impute_simple` to impute
 any remaining missing genotypes.
 
 
-
 ``` r
 hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 164ms
+impute: 149ms
 
 # LD clumping
 
@@ -201,7 +208,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 4.1s
+ld_clumping: 3.5s
 
 # PCA
 
@@ -209,12 +216,11 @@ A principal components analysis can then be computed using the resulting cleaned
 and LD clumped dataset.
 
 
-
 ``` r
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 2s
+pca: 1.8s
 
 Plot PCA:
 
@@ -229,30 +235,29 @@ autoplot(test_pca, type = "scores") +
 # DAPC
 
 We can continue with a discriminant analysis of principal
-components using `gt_dapc`.
+components using `gt_dapc`, setting 6 groups corresponding to
+the main geographic regions covered by the dataset.
 
 
 ``` r
-pop_factor <- as.factor(hgdp$population)
-test_dapc <- gt_dapc(test_pca, pop = pop_factor)
+test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
-dapc: 162ms
+dapc: 32ms
 
-Plot DAPC: 
+Plot DAPC:
 
 
 ``` r
-autoplot(test_dapc, type = "screeplot")
+autoplot(test_dapc, type = "scores")
 ```
 
-![plot of chunk DAPC_screeplot](figure/DAPC_screeplot-1.png)
+![plot of chunk DAPC_scores_plot](figure/DAPC_scores_plot-1.png)
 
 # Calculate Fst
 
 To examine the differentiation between populations in the global HGDP set, we
 calculate pairwise Fst.
-
 
 
 ``` r
@@ -262,10 +267,29 @@ pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
 
 pairwise_fst: 3.8s
 
+Plot pairwise Fst:
+
+
+``` r
+# Order by continents
+grouped_hgdp_order <- grouped_hgdp %>% arrange(region,population)
+regional_order <- unique(grouped_hgdp_order$population)
+pairwise_fsts <- pairwise_fsts[regional_order,regional_order]
+
+ggheatmap(pairwise_fsts) +
+  scale_fill_viridis_c()+
+    theme(axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
+          axis.text.y = element_text(angle = 0, hjust = 1, size = 6))+
+  labs(
+    x = element_blank(),
+    y = element_blank(),
+    fill = "Fst"
+  )
+```
+
 # Save in plink bed format
 
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
-
 
 
 ``` r
@@ -273,10 +297,10 @@ gt_as_plink(hgdp,
             file = tempfile(),
             type = "bed",
             overwrite = TRUE)
-#> [1] "/tmp/RtmpHYCVcB/file27fd45c5795c.bed"
+#> [1] "/tmp/Rtmp0TRebe/file11083a281642.bed"
 ```
 
-plink_save: 250ms
+plink_save: 256ms
 
 # Summary
 
@@ -285,17 +309,17 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  3.44
-#> 2   loci_report  2.24
-#> 3   filter_loci  2.06
-#> 4  indiv_report  2.58
+#> 1    read_plink  2.68
+#> 2   loci_report  2.06
+#> 3   filter_loci  1.44
+#> 4  indiv_report  2.48
 #> 5  filter_indiv     0
-#> 6        impute  0.16
-#> 7   ld_clumping  4.07
-#> 8           pca  1.99
-#> 9          dapc  0.16
-#> 10 pairwise_fst  3.79
-#> 11   plink_save  0.25
-#> 12        Total 20.74
+#> 6        impute  0.15
+#> 7   ld_clumping  3.53
+#> 8           pca   1.8
+#> 9          dapc  0.03
+#> 10 pairwise_fst  3.85
+#> 11   plink_save  0.26
+#> 12        Total 18.28
 ```
 
