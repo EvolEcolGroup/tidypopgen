@@ -16,5 +16,9 @@ See \code{\link[base]{cbind}} for details.}
 a \code{gen_tibble}
 }
 \description{
-Combine a gen_tibble to a data.frame or tibble by column
+A \code{\link[=cbind]{cbind()}} method to merge \code{gen_tibble} objects with data.frames and
+normal tibbles. Whilst this works, it is not
+ideal, and we suggest that you use
+\code{\link[dplyr:bind_cols]{dplyr::bind_cols()}} instead. Note that \code{cbind} will not combine two
+\code{gen_tibbles} (i.e. it will NOT combine markers for the same individuals)
 }
