@@ -15,6 +15,7 @@ reference:
         - gt_get_file_names
         - gt_order_loci
         - gt_update_backingfile
+        - cbind
   - title: "Show"
     desc: "Functions to view loci and genotype information stored in a `gen_tibble`."
     contents:
