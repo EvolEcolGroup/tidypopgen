@@ -24,8 +24,9 @@ a \code{\link{gen_tibble}} object with an additional geometry column (and thus
 belonging also to \code{sf} class).
 }
 \description{
-\code{gt_add_sf} adds an active sf geometry column to a \code{gen_tibble} object.  The resulting \code{gen_tbl} inherits from \code{sf} and can be used
-with functions from the \code{sf} package. It is possible to either create
-a \code{\link[sf:sfc]{sf::sfc}} geometry column from coordinates, or to provide an existing geometry
-column (which will then become the active geometry for \code{sf}).
+\code{gt_add_sf} adds an active sf geometry column to a \code{gen_tibble} object.  The
+resulting \code{gen_tbl} inherits from \code{sf} and can be used with functions from
+the \code{sf} package. It is possible to either create a \code{\link[sf:sfc]{sf::sfc}} geometry
+column from coordinates, or to provide an existing geometry column (which
+will then become the active geometry for \code{sf}).
 }

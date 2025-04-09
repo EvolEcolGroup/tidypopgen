@@ -1,9 +1,10 @@
 #' Add an simple feature geometry to a `gen_tibble`
 #'
-#' `gt_add_sf` adds an active sf geometry column to a `gen_tibble` object.  The resulting `gen_tbl` inherits from `sf` and can be used
-#' with functions from the `sf` package. It is possible to either create
-#' a [`sf::sfc`] geometry column from coordinates, or to provide an existing geometry
-#' column (which will then become the active geometry for `sf`).
+#' `gt_add_sf` adds an active sf geometry column to a `gen_tibble` object.  The
+#' resulting `gen_tbl` inherits from `sf` and can be used with functions from
+#' the `sf` package. It is possible to either create a [`sf::sfc`] geometry
+#' column from coordinates, or to provide an existing geometry column (which
+#' will then become the active geometry for `sf`).
 #'
 #' @param x a [`gen_tibble`] object
 #' @param coords a vector of length 2, giving the names of the x and y columns
@@ -12,7 +13,7 @@
 #' @param crs the coordinate reference system of the coordinates. If this is not
 #'   set, it will be set to the default value of `sf::st_crs(4326)`.
 #' @param sfc_column the name fo an [`sf::sfc`] column to be used as the
-#' geometry
+#'   geometry
 #' @return a [`gen_tibble`] object with an additional geometry column (and thus
 #'   belonging also to `sf` class).
 #' @export
@@ -79,7 +80,6 @@ gt_add_sf <- function(x, coords = NULL, crs = NULL, sfc_column = NULL) {
   # add attribute sf_column
   attr(x, "sf_column") <- sfc_column
   # add sf class
-  class(x) <- c("gen_tbl","sf", "tbl_df", "tbl", "data.frame")
+  class(x) <- c("gen_tbl", "sf", "tbl_df", "tbl", "data.frame")
   return(x)
 }
-  

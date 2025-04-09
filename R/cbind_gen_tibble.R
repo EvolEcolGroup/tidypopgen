@@ -12,7 +12,7 @@
 #' @returns a `gen_tibble`
 #' @export
 
-cbind.gen_tbl <- function(..., deparse.level = 1) { #nolint
+cbind.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod(generic = "cbind", ..., deparse.level = deparse.level)
   # sort out the lost class information

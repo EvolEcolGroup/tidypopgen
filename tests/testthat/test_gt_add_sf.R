@@ -52,7 +52,7 @@ test_that("gt_add_sf() works with gen_tibble", {
   # check that we inherit from gen_tibble
   expect_true(inherits(test_gt_from_sf, "gen_tbl"))
   expect_true(inherits(test_gt_from_sf, "sf"))
-  
+
   # now check that the geometry column is sticky
   test_gt_from_sf <- test_gt_from_sf %>%
     dplyr::select(-geometry)
@@ -69,14 +69,13 @@ test_that("gt_add_sf() works with gen_tibble", {
   # check that we inherit from gen_tibble
   expect_true(inherits(test_gt_minus_sf, "gen_tbl"))
   expect_false(inherits(test_gt_minus_sf, "sf"))
-  
+
   # now add the geometry column manually and then set it as active
-  test_gt_geom <- test_gt %>% mutate(my_geometry = sf::st_geometry( sf::st_as_sf(
-        x = test_indiv_meta,
-        coords = c("longitude", "latitude"),
-        crs = 4326
-      )
-    ))
+  test_gt_geom <- test_gt %>% mutate(my_geometry = sf::st_geometry(sf::st_as_sf(
+    x = test_indiv_meta,
+    coords = c("longitude", "latitude"),
+    crs = 4326
+  )))
   # we now have a myt_geometry column
   expect_true("my_geometry" %in% names(test_gt_geom))
   # and it is an sfc column
@@ -92,7 +91,6 @@ test_that("gt_add_sf() works with gen_tibble", {
   expect_true(inherits(test_gt_geom, "sf"))
   # check that we have the correct crs
   expect_equal(sf::st_crs(test_gt_geom), sf::st_crs(4326))
-  
 })
 
 
@@ -143,5 +141,4 @@ test_that("gt_add_sf gives the correct errors", {
     ),
     "You must provide either coords or sfc_column"
   )
-}
-          )
+})
