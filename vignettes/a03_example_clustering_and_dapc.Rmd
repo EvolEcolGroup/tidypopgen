@@ -40,31 +40,28 @@ anole_gt
 
 We can see that we have 46 individuals, from 3249 loci. Note that we don't have any
 information on population from the vcf. That information can be found
-from another file on the github repository ("https://github.com/ivanprates/2018_Anolis_EcolEvol/raw/master/data/plot_order_punctatus_n46.csv).
-We will have add the population information manually. Let's start by reading the
+from another csv file. We will have add the population information manually. Let's start by reading the
 file:
 ```{r}
-pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
+pops_path <- system.file("/extdata/anolis/punctatus_n46_meta.csv",
   package = "tidypopgen"
 )
 pops <- readr::read_csv(pops_path)
 pops
 ```
 
-The ids from the VCF are in a different format than the ones we just got from
-the pop csv. We need a bit of string wrangling, but it looks easy, we just need
-to remove "punc_":
+We can now attempt to join the tables. We recommend using a `left_joint` to do
+so, rather than `cbind` or `bind_cols`, as the latter functions assume that
+the two tables are in the same order. In this case, we do not want to bring
+over the 
 
-Let us simplify the ids, which will have a "punc_" prefix
-```{r}
-anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
-anole_gt
+```{r, error=TRUE}
+anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
-Now we can bring in the pop information:
+Let us check what we have been successful:
 ```{r}
-anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID, .data$id)])
-anole_gt
+anole_gt %>% glimpse()
 ```
 
 ## PCA
