@@ -2,8 +2,8 @@
 #'
 #' A [cbind()] method to merge `gen_tibble` objects with data.frames and
 #' normal tibbles. Whilst this works, it is not
-#' ideal, and we suggest that you use
-#' [`dplyr::bind_cols()`] instead. Note that `cbind` will not combine two
+#' ideal as it does not check the order of the tables, and we suggest that you use
+#' [`dplyr::left_join()`] instead. Note that `cbind` will not combine two
 #' `gen_tibbles` (i.e. it will NOT combine markers for the same individuals)
 #'
 #' @param ... a gen_tibble and a data.frame or tibble
