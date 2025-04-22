@@ -50,16 +50,16 @@ pops <- readr::read_csv(pops_path)
 pops
 ```
 
-We can now attempt to join the tables. We recommend using a `left_joint` to do
+We can now attempt to join the tables. We recommend using a `left_join` to do
 so, rather than `cbind` or `bind_cols`, as the latter functions assume that
 the two tables are in the same order. In this case, we do not want to bring
-over the 
+over the wrong data due to mismatched ordering.
 
 ```{r, error=TRUE}
 anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
-Let us check what we have been successful:
+Let us check that we have been successful:
 ```{r}
 anole_gt %>% glimpse()
 ```
