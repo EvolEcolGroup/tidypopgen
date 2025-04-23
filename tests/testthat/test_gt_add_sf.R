@@ -142,3 +142,64 @@ test_that("gt_add_sf gives the correct errors", {
     "You must provide either coords or sfc_column"
   )
 })
+
+test_that("retain sf class after imputing and augmenting",{
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  # impute the gt and check class
+  test_gt_from_sf_impute <- gt_impute_simple(test_gt_from_sf, method = "mode", n_cores = 1)
+  expect_equal(class(test_gt_from_sf),class(test_gt_from_sf_impute))
+  # augment the gt and check class
+  pca <- test_gt_from_sf_impute %>% gt_pca_randomSVD(k = 3)
+  augmented_gt <- augment(x = pca, data = test_gt_from_sf_impute)
+  expect_equal(class(augmented_gt), class(test_gt_from_sf_impute))
+})
+
+test_that("retain sf class after being saved and reloaded",{
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  file <- tempfile()
+  file_names <- gt_save(test_gt_from_sf, file = file, quiet = TRUE)
+  reloaded_gt <- gt_load(file_names[1])
+  expect_equal(class(test_gt_from_sf),class(reloaded_gt))
+})
+
+test_that("retain sf class after reordering",{
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 2, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  reordered <- gt_order_loci(test_gt_from_sf, use_current_table = FALSE, quiet = TRUE)
+  expect_equal(class(reordered), class(test_gt_from_sf))
+})
+
