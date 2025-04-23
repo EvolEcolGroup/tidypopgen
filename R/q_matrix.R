@@ -349,6 +349,7 @@ autoplot.q_matrix <- function(
     reorder_within_groups = FALSE,
     ...) {
   rlang::check_dots_empty()
+
   # test that if reorder_within_groups is TRUE, annotate_group is also TRUE
   if (reorder_within_groups && !annotate_group) {
     stop("If reorder_within_groups is TRUE, annotate_group should also be TRUE")
@@ -374,6 +375,8 @@ autoplot.q_matrix <- function(
     }
   } else {
     # if we have the info from the gen_tibble
+    # if there is geometry, drop it
+    data <- sf::st_drop_geometry(data)
     q_tbl <- augment(object, data)
   }
   # if we have a grouping variable and we plan to use it, then reorder by it
