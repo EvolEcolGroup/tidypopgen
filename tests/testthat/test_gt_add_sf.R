@@ -143,7 +143,7 @@ test_that("gt_add_sf gives the correct errors", {
   )
 })
 
-test_that("retain sf class after imputing and augmenting",{
+test_that("retain sf class after imputing and augmenting pca", {
   test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
@@ -155,15 +155,16 @@ test_that("retain sf class after imputing and augmenting",{
     coords = c("longitude", "latitude"),
   )
   # impute the gt and check class
-  test_gt_from_sf_impute <- gt_impute_simple(test_gt_from_sf, method = "mode", n_cores = 1)
-  expect_equal(class(test_gt_from_sf),class(test_gt_from_sf_impute))
+  test_gt_from_sf_impute <-
+    gt_impute_simple(test_gt_from_sf, method = "mode", n_cores = 1)
+  expect_equal(class(test_gt_from_sf), class(test_gt_from_sf_impute))
   # augment the gt and check class
   pca <- test_gt_from_sf_impute %>% gt_pca_randomSVD(k = 3)
   augmented_gt <- augment(x = pca, data = test_gt_from_sf_impute)
   expect_equal(class(augmented_gt), class(test_gt_from_sf_impute))
 })
 
-test_that("retain sf class after being saved and reloaded",{
+test_that("retain sf class after being saved and reloaded", {
   test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
@@ -177,10 +178,10 @@ test_that("retain sf class after being saved and reloaded",{
   file <- tempfile()
   file_names <- gt_save(test_gt_from_sf, file = file, quiet = TRUE)
   reloaded_gt <- gt_load(file_names[1])
-  expect_equal(class(test_gt_from_sf),class(reloaded_gt))
+  expect_equal(class(test_gt_from_sf), class(reloaded_gt))
 })
 
-test_that("retain sf class after reordering",{
+test_that("retain sf class after reordering", {
   test_loci <- data.frame(
     name = paste0("rs", 1:6),
     chromosome = paste0("chr", c(1, 1, 2, 1, 2, 2)),
@@ -199,7 +200,7 @@ test_that("retain sf class after reordering",{
     x = test_gt,
     coords = c("longitude", "latitude"),
   )
-  reordered <- gt_order_loci(test_gt_from_sf, use_current_table = FALSE, quiet = TRUE)
+  reordered <-
+    gt_order_loci(test_gt_from_sf, use_current_table = FALSE, quiet = TRUE)
   expect_equal(class(reordered), class(test_gt_from_sf))
 })
-
