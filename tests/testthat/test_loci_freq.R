@@ -119,6 +119,15 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
     quiet = TRUE
   )
   test_gt <- test_gt %>% group_by(population)
+
+  # compute using .grouped_df method
+  list <- loci_alt_freq(test_gt, type = "list")
+  matrix <- loci_alt_freq(test_gt, type = "matrix")
+  tidy <-   loci_alt_freq(test_gt, type = "tidy")
+  expect_equal(list[1][[1]], matrix[,1])
+  tidy_pop1 <- tidy %>% filter(group == "pop1") %>% select(value)
+  expect_equal(list[1][[1]], tidy_pop1$value)
+
   # compute by using group map
   loci_freq_map <- test_gt %>% group_map(.f = ~ loci_alt_freq(.x))
   # use fast cpp code (limit cores to 2)
@@ -140,3 +149,6 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   loci_freq_grp_chunked <- test_gt %>% loci_maf(n_cores = 2, block_size = 2)
   expect_true(all.equal(loci_maf_grp, loci_freq_grp_chunked))
 })
+
+
+

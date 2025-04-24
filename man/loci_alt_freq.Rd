@@ -11,7 +11,7 @@
 \alias{loci_maf.grouped_df}
 \title{Estimate allele frequencies at each each locus}
 \usage{
-loci_alt_freq(.x, n_cores, block_size, ...)
+loci_alt_freq(.x, n_cores, block_size, type, ...)
 
 \method{loci_alt_freq}{tbl_df}(
   .x,
@@ -31,6 +31,7 @@ loci_alt_freq(.x, n_cores, block_size, ...)
   .x,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
+  type = "tidy",
   ...
 )
 
@@ -65,6 +66,9 @@ a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
+
+\item{type}{type of object to return, if using grouped method. One of "tidy",
+"list", or "matrix". Default is "tidy".}
 
 \item{...}{other arguments passed to specific methods, currently unused.}
 }

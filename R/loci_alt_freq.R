@@ -11,11 +11,13 @@
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
+#' @param type type of object to return, if using grouped method. One of "tidy",
+#' "list", or "matrix". Default is "tidy".
 #' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_alt_freq
 #' @export
-loci_alt_freq <- function(.x, n_cores, block_size, ...) {
+loci_alt_freq <- function(.x, n_cores, block_size, type, ...) {
   UseMethod("loci_alt_freq", .x)
 }
 
@@ -60,8 +62,10 @@ loci_alt_freq.grouped_df <- function(
     .x,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
+    type = "tidy",
     ...) {
   rlang::check_dots_empty()
+  type <- match.arg(type, c("tidy", "list", "matrix"))
   if (is_diploid_only(.x)) {
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
     # rows (individuals) that we want to use
@@ -88,8 +92,21 @@ loci_alt_freq.grouped_df <- function(
       block.size = block_size,
       a.combine = "rbind"
     )
-    # return a list to mimic a group_map
-    lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
+
+    if(type == "tidy"){
+      tibble <- as.data.frame(freq_mat)
+      colnames(tibble) <- dplyr::group_keys(.x) %>% pull(1)
+      tibble$loci <- loci_names(.x)
+      long_freq <- tibble %>% tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>% pull(1), names_to = "group")
+      long_freq
+    } else if(type == "list"){
+      # return a list to mimic a group_map
+      lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
+    } else if(type == "matrix"){
+      # return a matrix
+      freq_mat
+    }
+
   } else {
     # TODO this is seriously inefficient
     # we should replace it with a cpp function
