@@ -98,18 +98,26 @@ library(rnaturalearth)
 library(sf)
 library(ggplot2)
 
-sa_countries <- c("Brazil", "Peru", "Venezuela", "Chile", "Ecuador",
-                  "Bolivia", "Paraguay", "Uruguay", "Guyana", "Suriname",
-                  "French Guiana", "Falkland Islands", "Colombia", "Argentina",
-                  "Panama", "Costa Rica")
+sa_countries <- c(
+  "Brazil", "Peru", "Venezuela", "Chile", "Ecuador",
+  "Bolivia", "Paraguay", "Uruguay", "Guyana", "Suriname",
+  "French Guiana", "Falkland Islands", "Colombia", "Argentina",
+  "Panama", "Costa Rica"
+)
 
-continents_map_SA <- ne_countries(country = sa_countries, type = "map_units", scale = "medium") %>%
+map <-
+  ne_countries(country = sa_countries, type = "map_units", scale = "medium") %>%
   st_union()
 
 ggplot() +
-  geom_sf(data = continents_map_SA) +
+  geom_sf(data = map) +
   geom_sf(data = anole_gt$geometry) +
-  coord_sf(crs = st_crs(4326),xlim = c(-85,-30), ylim = c(-30,15),expand = FALSE) +
+  coord_sf(
+    crs = st_crs(4326),
+    xlim = c(-85, -30),
+    ylim = c(-30, 15),
+    expand = FALSE
+  ) +
   theme_minimal()
 ```
 
@@ -342,10 +350,15 @@ We can also plot these results onto the map we created earlier.
 anole_gt$dapc <- anole_dapc$grp
 
 ggplot() +
-  geom_sf(data = continents_map_SA)+
-  geom_sf(data = anole_gt$geometry, aes(color = anole_gt$dapc))+
-  coord_sf(crs = st_crs(4326),xlim = c(-85,-30), ylim = c(-30,15),expand = FALSE)  +
-  labs(color = "DAPC cluster")  +
+  geom_sf(data = map) +
+  geom_sf(data = anole_gt$geometry, aes(color = anole_gt$dapc)) +
+  coord_sf(
+    crs = st_crs(4326),
+    xlim = c(-85, -30),
+    ylim = c(-30, 15),
+    expand = FALSE
+  ) +
+  labs(color = "DAPC cluster") +
   theme_minimal()
 ```
 
