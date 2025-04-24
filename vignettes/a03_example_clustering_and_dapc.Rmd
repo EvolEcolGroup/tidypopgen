@@ -66,24 +66,12 @@ anole_gt %>% glimpse()
 
 ## Map
 
-Lets begin by visualising our samples geographically. First we need to load the
-coordinates of our samples:
+Lets begin by visualising our samples geographically. We have latitudes and
+longitudes in our tibble; we can transform them into an `sf` geometry with the 
+function `gt_add_sf()`. Once we have done that, our `gen_tibble` will act as
+an `sf` object, which can be plotted with `ggplot2`.
 
 ```{r}
-coord_path <- system.file("/extdata/anolis/anolis_coordinates.csv",
-  package = "tidypopgen"
-)
-coord <- readr::read_csv(coord_path)
-coord
-```
-
-We can add this information to our gentibble object by using a
-`left_join` followed by the function `gt_add_sf()`. The latter function will add
-an sf geometry column to the gen_tibble object, which can be used to plot the
-samples on a map.
-
-```{r}
-anole_gt <- anole_gt %>% left_join(coord, by = "id")
 anole_gt <- gt_add_sf(anole_gt, c("longitude", "latitude"))
 anole_gt
 ```
@@ -95,28 +83,17 @@ using the `geom_sf()` function from `ggplot2`.
 
 ```{r}
 library(rnaturalearth)
-library(sf)
 library(ggplot2)
 
-sa_countries <- c(
-  "Brazil", "Peru", "Venezuela", "Chile", "Ecuador",
-  "Bolivia", "Paraguay", "Uruguay", "Guyana", "Suriname",
-  "French Guiana", "Falkland Islands", "Colombia", "Argentina",
-  "Panama", "Costa Rica"
-)
-
-map <-
-  ne_countries(country = sa_countries, type = "map_units", scale = "medium") %>%
-  st_union()
+map <- ne_countries(continent = "South America",
+                    type = "map_units", scale = "medium")
 
 ggplot() +
   geom_sf(data = map) +
   geom_sf(data = anole_gt$geometry) +
   coord_sf(
-    crs = st_crs(4326),
     xlim = c(-85, -30),
-    ylim = c(-30, 15),
-    expand = FALSE
+    ylim = c(-30, 15)
   ) +
   theme_minimal()
 ```
@@ -353,10 +330,8 @@ ggplot() +
   geom_sf(data = map) +
   geom_sf(data = anole_gt$geometry, aes(color = anole_gt$dapc)) +
   coord_sf(
-    crs = st_crs(4326),
     xlim = c(-85, -30),
-    ylim = c(-30, 15),
-    expand = FALSE
+    ylim = c(-30, 15)
   ) +
   labs(color = "DAPC cluster") +
   theme_minimal()
