@@ -51,6 +51,8 @@ Suggests:
     detectRUNS,
     LEA,
     rmarkdown,
+    rnaturalearth,
+    rnaturalearthdata,
     readr,
     reticulate,
     testthat (>= 3.0.0),
