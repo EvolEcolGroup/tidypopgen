@@ -35,7 +35,7 @@ loci_alt_freq(.x, n_cores, block_size, type, ...)
   ...
 )
 
-loci_maf(.x, n_cores, block_size, ...)
+loci_maf(.x, n_cores, block_size, type, ...)
 
 \method{loci_maf}{tbl_df}(
   .x,
@@ -55,6 +55,7 @@ loci_maf(.x, n_cores, block_size, ...)
   .x,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
+  type = "tidy",
   ...
 )
 }

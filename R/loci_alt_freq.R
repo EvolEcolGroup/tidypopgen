@@ -124,7 +124,7 @@ loci_alt_freq.grouped_df <- function(
 
 #' @rdname loci_alt_freq
 #' @export
-loci_maf <- function(.x, n_cores, block_size, ...) {
+loci_maf <- function(.x, n_cores, block_size, type, ...) {
   UseMethod("loci_maf", .x)
 }
 
@@ -159,8 +159,10 @@ loci_maf.grouped_df <- function(
     .x,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
+    type = "tidy",
     ...) {
   rlang::check_dots_empty()
+  type <- match.arg(type, c("tidy", "list", "matrix"))
   if (is_diploid_only(.x)) {
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
     # rows (individuals) that we want to use
@@ -189,8 +191,21 @@ loci_maf.grouped_df <- function(
     )
     freq_mat[freq_mat > 0.5 & !is.na(freq_mat)] <-
       1 - freq_mat[freq_mat > 0.5 & !is.na(freq_mat)]
-    # return a list to mimic a group_map
-    lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
+
+    if(type == "tidy"){
+      tibble <- as.data.frame(freq_mat)
+      colnames(tibble) <- dplyr::group_keys(.x) %>% pull(1)
+      tibble$loci <- loci_names(.x)
+      long_freq <- tibble %>% tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>% pull(1), names_to = "group")
+      long_freq
+    } else if(type == "list"){
+      # return a list to mimic a group_map
+      lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
+    } else if(type == "matrix"){
+      # return a matrix
+      freq_mat
+    }
+
   } else {
     # the polyploid case
     # TODO this is seriously inefficient
