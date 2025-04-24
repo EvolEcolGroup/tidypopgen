@@ -12,6 +12,7 @@ loci_missingness(
   as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size,
+  type,
   ...
 )
 
@@ -36,6 +37,7 @@ loci_missingness(
   as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
+  type = "tidy",
   ...
 )
 }
@@ -51,6 +53,9 @@ default).}
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
+
+\item{type}{type of object to return, if using grouped method. One of "tidy",
+"list", or "matrix". Default is "tidy".}
 
 \item{...}{other arguments passed to specific methods.}
 }

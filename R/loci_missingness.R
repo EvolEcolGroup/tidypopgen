@@ -10,12 +10,15 @@
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
+#' @param type type of object to return, if using grouped method. One of "tidy",
+#' "list", or "matrix". Default is "tidy".
 #' @param ... other arguments passed to specific methods.
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_missingness
 #' @export
 loci_missingness <- function(.x, as_counts = FALSE,
-                             n_cores = bigstatsr::nb_cores(), block_size, ...) {
+                             n_cores = bigstatsr::nb_cores(),
+                             block_size, type, ...) {
   UseMethod("loci_missingness", .x)
 }
 
@@ -90,8 +93,10 @@ loci_missingness.grouped_df <- function(
     as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
+    type = "tidy",
     ...) {
   rlang::check_dots_empty()
+  type <- match.arg(type, c("tidy", "list", "matrix"))
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
   rows_to_keep <- .gt_bigsnp_rows(.x)
   count_na_sub <- function(geno_fbm, ind, rows_to_keep) {
@@ -120,6 +125,17 @@ loci_missingness.grouped_df <- function(
     na_mat <- sweep(na_mat, MARGIN = 2, STATS = group_sizes, FUN = "/")
   }
 
-  # return a list to mimic a group_map
-  lapply(seq_len(ncol(na_mat)), function(i) na_mat[, i])
+  if(type == "tidy"){
+    tibble <- as.data.frame(na_mat)
+    colnames(tibble) <- dplyr::group_keys(.x) %>% pull(1)
+    tibble$loci <- loci_names(.x)
+    long_missing <- tibble %>% tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>% pull(1), names_to = "group")
+    long_missing
+  } else if(type == "list"){
+    # return a list to mimic group_map
+    lapply(seq_len(ncol(na_mat)), function(i) na_mat[, i])
+  } else if(type == "matrix"){
+    # return a matrix
+    na_mat
+  }
 }

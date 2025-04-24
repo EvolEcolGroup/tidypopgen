@@ -104,11 +104,30 @@ test_that("loci_missingness on grouped tibble", {
     quiet = TRUE
   )
   test_gt <- test_gt %>% group_by(population)
+
+  # compute using .grouped_df method
+  list <- loci_missingness(test_gt, type = "list")
+  matrix <- loci_missingness(test_gt, type = "matrix")
+  tidy <-   loci_missingness(test_gt, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>% filter(group == "pop1") %>% select(value)
+  expect_equal(list[1][[1]], tidy_pop1$value)
+
+  # subset
+  test_gt_subset <- test_gt %>% select_loci(c(1, 2, 3, 4))
+  list <- loci_missingness(test_gt_subset, type = "list")
+  matrix <- loci_missingness(test_gt_subset, type = "matrix")
+  tidy <-   loci_missingness(test_gt_subset, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>% filter(group == "pop1") %>% select(value)
+  expect_equal(list[1][[1]], tidy_pop1$value)
+
   # compute by using group map
   loci_miss_map <- test_gt %>% group_map(.f = ~ loci_missingness(.x))
   # use fast cpp code (limit cores to 2)
   loci_miss_grp <- test_gt %>% loci_missingness(n_cores = 2)
-  expect_true(all.equal(loci_miss_map, loci_miss_grp))
+  loci_miss_grp_pop1 <- loci_miss_grp %>% filter(group == "pop1") %>% select(value)
+  expect_true(all.equal(loci_miss_map[1][[1]], loci_miss_grp_pop1$value))
 })
 
 test_that("n_cores can be set", {
