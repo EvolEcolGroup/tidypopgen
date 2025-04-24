@@ -69,3 +69,31 @@ test_that("loci_hwe mid_p = FALSE produces the same output as plink --hardy ", {
   # Check results are the same to 4 decimals
   expect_true(result)
 })
+
+test_that("hwe grouped",{
+  # Create gentibble for our data
+  bed_path <- system.file(
+    "extdata/related/families.bed",
+    package = "tidypopgen"
+  )
+  families_bigsnp_path <- bigsnpr::snp_readBed(
+    bed_path,
+    backingfile = tempfile()
+  )
+  families <- gen_tibble(
+    families_bigsnp_path,
+    quiet = TRUE,
+    valid_alleles = c("1", "2")
+  )
+  families$population <- c(rep("pop1", 6), rep("pop2", 6))
+
+  # Calculate hwe in tidypopgen
+  tidy_hwe <- families %>%
+    group_by(population) %>%
+    loci_hwe(mid_p = FALSE)
+
+  families <- families %>% group_by(population)
+
+  families %>% loci_hwe(mid_p = FALSE)
+
+})
