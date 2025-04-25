@@ -7,7 +7,12 @@ output:
 date: "2024-06-12"
 ---
 
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.path = "./figure/pca_aDNA_projection/")
+library(tidypopgen)
+library(ggplot2)
+library(ggrepel)
+```
 
 The following article shows how to project ancient DNA data onto modern data in a Principal Components Analysis using the `tidypopgen` package.
 
@@ -17,21 +22,15 @@ First, we can download the data from the Reich lab website.
 
 # Download the data
 
-
-``` r
+```{r}
 suppressWarnings(setwd("~/Downloads/"))
 system("wget --no-check-certificate https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/NearEastPublic.tar.gz",
        intern = TRUE)
 ```
 
-```
-## character(0)
-```
-
 We can then move and extract our data into a folder called `data/`.
 
-
-``` r
+```{r}
 system("mv ~/Downloads/NearEastPublic.tar.gz data/")
 system("mkdir data/NearEastPublic")
 system("tar -xzf data/NearEastPublic.tar.gz -C data/NearEastPublic/")
@@ -40,8 +39,7 @@ system("tar -xzf data/NearEastPublic.tar.gz -C data/NearEastPublic/")
 # Read in the data
 
 Now that our data are downloaded, we can use `tidypopgen` to read the data into `gen_tibble` objects, beginning with the modern data:
-
-``` r
+```{r}
 HO_modern <- gen_tibble("./data/NearEastPublic/HumanOriginsPublic2068.geno",
                         quiet = TRUE,
                         backingfile = tempfile("test_"),
@@ -49,8 +47,7 @@ HO_modern <- gen_tibble("./data/NearEastPublic/HumanOriginsPublic2068.geno",
 ```
 
 Followed by the ancient data:
-
-``` r
+```{r}
 ancient <- gen_tibble("./data/NearEastPublic/AncientLazaridis2016.geno",
                       quiet = TRUE,
                       backingfile = tempfile("test_"),
@@ -61,8 +58,7 @@ ancient <- gen_tibble("./data/NearEastPublic/AncientLazaridis2016.geno",
 # Subset modern data
 
 For our analysis, we will be projecting ancient European individuals, so we only need modern West Eurasian populations. We can select these populations by filtering the `gen_tibble` object using the `filter()` function from the `dplyr` package:
-
-``` r
+```{r}
 westEurasian_pops <- c(
   "Abkhasian", "Adygei", "Albanian", "Armenian", "Assyrian", "Balkar", "Basque", "BedouinA", "BedouinB", "Belarusian", "Bulgarian", "Canary_Islander",
   "Chechen", "Croatian", "Cypriot", "Czech", "Druze", "English", "Estonian", "Finnish", "French", "Georgian", "German", "Greek", "Hungarian", "Icelandic",
@@ -80,36 +76,31 @@ HO_modern <- HO_modern %>% filter(HO_modern$population %in% westEurasian_pops)
 Before we run a PCA on the modern Eurasian individuals, we need to impute any missing genotypes.
 
 As we have subset our `gen_tibble` object, first we need to update our backingfile to this subset:
-
-``` r
+```{r}
 HO_modern <- gt_update_backingfile(HO_modern,
                                    quiet = TRUE)
 ```
 
 And then we can impute, using:
-
-``` r
+```{r}
 HO_modern <- gt_impute_simple(HO_modern, method = "mean")
 ```
 
 We should also remove any monomorphic loci from our data, as these loci are uninformative. Monomorphic markers must always be removed before a PCA is computed using any of the `gt_pca` functions.
 
 To do this, we use the `select_loci_if` function together with `loci_maf` to select only genotypes where MAF is greater than 0:
-
-``` r
+```{r}
 HO_modern <- HO_modern %>% select_loci_if(loci_maf(genotypes)>0)
 ```
 
 Now we can create our PCA object from the modern data:
-
-``` r
+```{r}
 pca <- gt_pca_partialSVD(HO_modern, k = 2)
 ```
 
 We can then use `augment` to add the PCA coordinates for each individual to our `gen_tibble` object:
 
-
-``` r
+```{r}
 HO_modern_pca <- augment(x = pca, data = HO_modern, k = 10)
 ```
 
@@ -117,8 +108,7 @@ HO_modern_pca <- augment(x = pca, data = HO_modern, k = 10)
 
 Before projecting, we remove ancient individuals and outgroups that are not of interest:
 
-
-``` r
+```{r}
 # Samples to remove:
 sample.rem <- c("Mota", "Denisovan", "Chimp", "Mbuti.DG", "Altai",
                "Vi_merge", "Clovis", "Kennewick", "Chuvash", "Ust_Ishim",
@@ -128,16 +118,14 @@ ancient <- ancient %>% filter(!ancient$population %in% sample.rem)
 ```
 
 And now we can project our data using the `predict` function:
-
-``` r
+```{r}
 predicted <- predict(object = pca, new_data = ancient, project_method = "least_squares")
 ```
 
 Here, we use the "least_squares" argument to generate a least squares projection that will be comparable to the method of `smartsnp`.
 
 Finally, we can tidy up our data ready to plot by converting the `predicted` object to a data frame and adding the population names:
-
-``` r
+```{r}
 predicted <- as.data.frame(predicted)
 predicted$id <- ancient$id
 predicted$population <- ancient$population
@@ -147,8 +135,7 @@ predicted$population <- ancient$population
 
 The PCA and predicted individuals can then be visualized using `ggplot2` by layering a geom of ancient individuals over modern individuals, using the same syntax as `smartsnp`:
 
-
-``` r
+```{r pca_projected_aDNA}
 ggplot() +
   geom_point(data = HO_modern_pca, aes(x = .fittedPC1, y = .fittedPC2), alpha=0.5) +
   geom_point(data = predicted, aes(.PC1,.PC2, fill=population, shape=population), size=3) +
@@ -156,15 +143,12 @@ ggplot() +
   geom_label_repel(data = predicted, aes(.PC1,.PC2, label=population, col=population), alpha=0.7, segment.color="NA") +
   theme_bw() + theme(legend.position = "none")+
   labs(x = "PC1", y = "PC2")
-```
 
 ```
-## Warning: ggrepel: 247 unlabeled data points (too many overlaps). Consider increasing max.overlaps
+
+```{r}
+
 ```
-
-![plot of chunk pca_projected_aDNA](./figure/pca_aDNA_projection/pca_projected_aDNA-1.png)
-
-
 
 
 
