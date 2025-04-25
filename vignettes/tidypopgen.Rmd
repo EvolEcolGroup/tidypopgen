@@ -317,7 +317,7 @@ example_gt %>%
   reframe(loci_hwe = loci_hwe(genotypes))
 ```
 
-Some  functions, such as `loci_maf()`, also have a method for grouped tibbles that 
+Some functions, such as `loci_maf()`, also have a method for grouped tibbles that 
 allows an even easier syntax:
 ```{r}
 example_gt %>%
@@ -353,6 +353,18 @@ example_gt %>%
 ```
 
 These type of functions are prefixed with `pop`.
+
+# Functions applies to all pairwise combinations of individuals or populations
+
+The final group of verbs are prefixed by `pairwise_`, and they are
+designed to compute pairwise statistics between all individuals or populations 
+(the latter start with `pairwise_pop_`). For example, to get the Identity by State
+for all pairs of individuals, we use:
+```{r}
+example_gt %>%
+  pairwise_ibs()
+```
+
 
 # Saving and reading data
 
