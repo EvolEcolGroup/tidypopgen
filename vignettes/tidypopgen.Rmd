@@ -308,17 +308,14 @@ example_gt %>%
 In this way, we compute all individual heterozygosities in one go (optimising
 our file access time), and then generate the population summaries.
 
-We recommend using `reframe` to apply functions across groups. To use `reframe` correctly,
-be sure to invoke the `pick` function:
+When working with loci, you can use `reframe` to apply functions
+across groups. To use `reframe` correctly,
+be sure to select the `genotype` column within the loci verbs:
 ```{r}
 example_gt %>%
   group_by(population) %>%
-  reframe(loci_hwe = loci_hwe(pick(everything())))
+  reframe(loci_hwe = loci_hwe(genotypes))
 ```
-
-This is important because dplyr functions `reframe`and `summarise` may apply
-functions to all inidividuals unless the data in the current group are explicitly
-selected.
 
 Some  functions, such as `loci_maf()`, also have a method for grouped tibbles that 
 allows an even easier syntax:
@@ -330,7 +327,8 @@ example_gt %>%
 
 These methods are coded in C++ to be very efficient, and they should be
 preferred to the `reframe()` option. By default, their outputs will return a
-tidy tibble, with one row per locus per population. However, using the `type`
+tidy tibble, with one row per locus per population (i.e. the same as we
+would get with `reframe()`). However, using the `type`
 argument, it is also possible to return a list:
 ```{r}
 example_gt %>%

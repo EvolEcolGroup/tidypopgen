@@ -85,5 +85,10 @@ example_gt \%>\%
 example_gt \%>\%
   group_by(population) \%>\%
   loci_missingness(type = "matrix")
+# or within reframe (not recommended, as it much less efficient
+# than using it directly as shown above)
+example_gt \%>\%
+  group_by(population) \%>\%
+  reframe(missing = loci_missingness(genotypes))
 
 }

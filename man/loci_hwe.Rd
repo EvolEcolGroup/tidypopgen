@@ -39,7 +39,7 @@ example_gt \%>\% loci_hwe()
 # For loci_hwe per locus per population, use reframe
 example_gt \%>\%
   group_by(population) \%>\%
-  reframe(loci_hwe = loci_hwe(pick(everything())))
+  reframe(loci_hwe = loci_hwe(genotypes))
 
 }
 \author{

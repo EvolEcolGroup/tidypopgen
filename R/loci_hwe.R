@@ -23,7 +23,7 @@
 #' # For loci_hwe per locus per population, use reframe
 #' example_gt %>%
 #'   group_by(population) %>%
-#'   reframe(loci_hwe = loci_hwe(pick(everything())))
+#'   reframe(loci_hwe = loci_hwe(genotypes))
 #'
 loci_hwe <- function(.x, ...) {
   UseMethod("loci_hwe", .x)

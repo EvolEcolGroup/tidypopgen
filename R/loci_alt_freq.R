@@ -38,7 +38,13 @@
 #' example_gt %>%
 #'   group_by(population) %>%
 #'   loci_alt_freq(type = "matrix")
-#'
+#' # or within reframe (not recommended, as it much less efficient
+#' # than using it directly as shown above)
+#' library(dplyr)
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   reframe(alt_freq = loci_alt_freq(genotypes))
+
 #' # For MAF
 #' example_gt %>% loci_maf()
 #'

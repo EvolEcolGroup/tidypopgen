@@ -36,6 +36,11 @@
 #' example_gt %>%
 #'   group_by(population) %>%
 #'   loci_missingness(type = "matrix")
+#' # or within reframe (not recommended, as it much less efficient
+#' # than using it directly as shown above)
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   reframe(missing = loci_missingness(genotypes))
 #'
 loci_missingness <- function(.x, as_counts = FALSE,
                              n_cores = bigstatsr::nb_cores(),
