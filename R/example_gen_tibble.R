@@ -3,10 +3,10 @@
 #' This function creates a `gen_tibble` object for use in examples in
 #' documentation.
 #' @returns an example object of the class `gen_tbl`.
-#' @rdname example_gen_tibble
+#' @rdname example_gt
 #' @export
 
-example_gen_tibble <- function() {
+example_gt <- function() {
   test_genotypes <- rbind(
     c(1, 1, 0, 1, 1, 0),
     c(2, 1, 0, NA, 0, 0),

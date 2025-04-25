@@ -10,7 +10,7 @@
 #' @rdname loci_transitions
 #' @export
 #' @examples
-#' example_gt <- example_gen_tibble()
+#' example_gt <- example_gt()
 #' example_gt %>% loci_transitions()
 loci_transitions <- function(.x, ...) {
   UseMethod("loci_transitions", .x)

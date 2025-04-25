@@ -19,7 +19,7 @@
 #' @rdname loci_missingness
 #' @export
 #' @examples
-#' example_gt <- example_gen_tibble()
+#' example_gt <- example_gt()
 #'
 #' # For missingness
 #' example_gt %>% loci_missingness()

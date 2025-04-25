@@ -39,7 +39,7 @@
 #' @rdname loci_ld_clump
 #' @export
 #' @examples
-#' example_gt <- example_gen_tibble() %>% gt_impute_simple()
+#' example_gt <- example_gt() %>% gt_impute_simple()
 #'
 #' # To return a boolean vector indicating whether the SNP should be kept
 #' example_gt %>% loci_ld_clump()

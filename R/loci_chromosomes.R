@@ -9,7 +9,7 @@
 #' @rdname loci_chromosomes
 #' @export
 #' @examples
-#' example_gt <- example_gen_tibble()
+#' example_gt <- example_gt()
 #' example_gt %>% loci_chromosomes()
 loci_chromosomes <- function(.x, ...) {
   UseMethod("loci_chromosomes", .x)

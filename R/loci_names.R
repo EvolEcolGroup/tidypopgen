@@ -10,7 +10,7 @@
 #' @rdname loci_names
 #' @export
 #' @examples
-#' example_gt <- example_gen_tibble()
+#' example_gt <- example_gt()
 #' example_gt %>% loci_names()
 loci_names <- function(.x, ...) {
   UseMethod("loci_names", .x)

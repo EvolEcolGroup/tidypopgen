@@ -130,4 +130,4 @@ reference:
   - title: "Example data"
     desc: "Function for creating an example `gen_tibble`."
     contents:
-        - example_gen_tibble
+        - example_gt

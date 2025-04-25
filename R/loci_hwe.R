@@ -15,7 +15,7 @@
 #' @rdname loci_hwe
 #' @export
 #' @examples
-#' example_gt <- example_gen_tibble()
+#' example_gt <- example_gt()
 #'
 #' # For HWE
 #' example_gt %>% loci_hwe()

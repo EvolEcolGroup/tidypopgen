@@ -82,9 +82,12 @@ Allele frequencies can be estimates as minimum allele frequencies (MAF) with
 \code{loci_alt_freq()}). The latter are in line with the genotypes matrix (e.g. as
 extracted by \code{\link[=show_loci]{show_loci()}}). Most users will be in interested in the MAF,
 but the raw frequencies might be useful when computing aggregated statistics.
+Both \code{loci_maf()} and \code{loci_alt_freq()} have efficient methods to support
+grouped \code{gen_tibble} objects. These can return a tidied tibble, a list, or a
+matrix.
 }
 \examples{
-example_gt <- example_gen_tibble()
+example_gt <- example_gt()
 
 # For alternate allele frequency
 example_gt \%>\% loci_alt_freq()

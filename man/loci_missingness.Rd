@@ -63,10 +63,12 @@ default).}
 a vector of frequencies, one per locus
 }
 \description{
-Estimate the rate of missingness at each locus.
+Estimate the rate of missingness at each locus. This function has an
+efficient method to support grouped \code{gen_tibble} objects, which can return a
+tidied tibble, a list, or a matrix.
 }
 \examples{
-example_gt <- example_gen_tibble()
+example_gt <- example_gt()
 
 # For missingness
 example_gt \%>\% loci_missingness()
