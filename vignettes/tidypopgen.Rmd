@@ -308,18 +308,20 @@ example_gt %>%
 In this way, we compute all individual heterozygosities in one go (optimising
 our file access time), and then generate the population summaries.
 
-For functions that return a quantity per locus (e.g. `loci_maf`), we can use 
- `group_by` together with `group_map` to apply such functions over populations:
+We recommend using `reframe` to apply functions across groups. To use `reframe` correctly,
+be sure to invoke the `pick` function:
 ```{r}
 example_gt %>%
   group_by(population) %>%
-  group_map(.f = ~ loci_maf(.x))
+  reframe(loci_hwe = loci_hwe(pick(everything())))
 ```
 
-For more details on the syntax of `group_map`, see its help page. Some 
-functions, such as `loci_maf()`, also have a method for grouped tibbles that 
-allows an even easier syntax:
+This is important because dplyr functions `reframe`and `summarise` may apply
+functions to all inidividuals unless the data in the current group are explicitly
+selected.
 
+Some  functions, such as `loci_maf()`, also have a method for grouped tibbles that 
+allows an even easier syntax:
 ```{r}
 example_gt %>%
   group_by(population) %>%
@@ -327,12 +329,25 @@ example_gt %>%
 ```
 
 These methods are coded in C++ to be very efficient, and they should be
-preferred to the `group_map()` option.
+preferred to the `reframe()` option. By default, their outputs will return a
+tidy tibble, with one row per locus per population. However, using the `type`
+argument, it is also possible to return a list:
+```{r}
+example_gt %>%
+  group_by(population) %>%
+  loci_maf(type = "list")
+```
+
+Or a matrix:
+```{r}
+example_gt %>%
+  group_by(population) %>%
+  loci_maf(type = "matrix")
+```
 
 Certain metrics and analyses are naturally defined by a grouped tibble as they
 refer to populations, such as
 population-specific Fst. For example:
-
 ```{r}
 example_gt %>%
   group_by(population) %>%
