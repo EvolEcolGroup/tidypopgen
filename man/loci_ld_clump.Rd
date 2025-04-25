@@ -4,7 +4,6 @@
 \alias{loci_ld_clump}
 \alias{loci_ld_clump.tbl_df}
 \alias{loci_ld_clump.vctrs_bigSNP}
-\alias{loci_ld_clump.grouped_df}
 \title{Clump loci based on a Linkage Disequilibrium threshold}
 \usage{
 loci_ld_clump(.x, ...)
@@ -22,8 +21,6 @@ loci_ld_clump(.x, ...)
   return_id = FALSE,
   ...
 )
-
-\method{loci_ld_clump}{grouped_df}(.x, ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object}

@@ -36,9 +36,3 @@ loci_transversions.vctrs_bigSNP <- function(.x, ...) {
   }
   transversions(show_loci(.x))
 }
-
-#' @export
-#' @rdname loci_transversions
-loci_transversions.grouped_df <- function(.x, ...) {
-  group_map(.x, .f = ~ loci_transversions(.x))
-}

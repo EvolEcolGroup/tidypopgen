@@ -141,17 +141,3 @@ loci_ld_clump.vctrs_bigSNP <- function(
   }
 }
 
-#' @export
-#' @rdname loci_ld_clump
-loci_ld_clump.grouped_df <- function(.x, ...) {
-  # TODO this is seriously inefficient, we need to cast it into a
-  # big_apply problem
-  # of maybe it isn't that bad...
-  # group_map(.x, .f=~loci_ld_clump(.x, ...)) #nolint start
-
-  # ungroup .x #nolint end
-  .x <- ungroup(.x)
-
-  # pass to loci_ld_clump.tbl_df
-  loci_ld_clump(.x, ...)
-}

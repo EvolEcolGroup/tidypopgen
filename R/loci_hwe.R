@@ -63,12 +63,3 @@ loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
   }
   hwe_p
 }
-
-#' @export
-#' @rdname loci_hwe
-loci_hwe.grouped_df <- function(.x, ...) {
-  # TODO this is seriously inefficient, we need to cast it into a big_apply
-  # problem
-  # of maybe it isn't that bad...
-  group_map(.x, .f = ~ loci_hwe(.x, mid_p = mid_p, ...))
-}

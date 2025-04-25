@@ -4,7 +4,6 @@
 \alias{loci_transversions}
 \alias{loci_transversions.tbl_df}
 \alias{loci_transversions.vctrs_bigSNP}
-\alias{loci_transversions.grouped_df}
 \title{Find transversions}
 \usage{
 loci_transversions(.x, ...)
@@ -12,8 +11,6 @@ loci_transversions(.x, ...)
 \method{loci_transversions}{tbl_df}(.x, ...)
 
 \method{loci_transversions}{vctrs_bigSNP}(.x, ...)
-
-\method{loci_transversions}{grouped_df}(.x, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
