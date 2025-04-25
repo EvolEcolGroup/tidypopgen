@@ -159,9 +159,19 @@ test_that("retain sf class after imputing and augmenting pca", {
     gt_impute_simple(test_gt_from_sf, method = "mode", n_cores = 1)
   expect_equal(class(test_gt_from_sf), class(test_gt_from_sf_impute))
   # augment the gt and check class
-  pca <- test_gt_from_sf_impute %>% gt_pca_randomSVD(k = 3)
-  augmented_gt <- augment(x = pca, data = test_gt_from_sf_impute)
+  test_pca <- test_gt_from_sf_impute %>% gt_pca_randomSVD(k = 3)
+  augmented_gt <- augment(x = test_pca, data = test_gt_from_sf_impute)
   expect_equal(class(augmented_gt), class(test_gt_from_sf_impute))
+
+  # DAPC
+  clusters <- gt_cluster_pca(test_pca, k = 3, n_pca = 3)
+  test_cluster_best <- gt_cluster_pca_best_k(clusters,
+    stat = "BIC",
+    criterion = "min", quiet = TRUE
+  )
+  test_dapc <- test_cluster_best %>% gt_dapc()
+  augmented_gt_dapc <- augment(x = test_dapc, data = test_gt_from_sf_impute)
+  expect_equal(class(augmented_gt_dapc), class(test_gt_from_sf_impute))
 })
 
 test_that("retain sf class after being saved and reloaded", {
