@@ -147,10 +147,10 @@ loci_missingness.grouped_df <- function(
   }
 
   if (type == "tidy") {
-    tibble <- as.data.frame(na_mat)
-    colnames(tibble) <- dplyr::group_keys(.x) %>% pull(1)
-    tibble$loci <- loci_names(.x)
-    long_missing <- tibble %>% # nolint start
+    na_mat_tbl <- as.data.frame(na_mat)
+    colnames(na_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
+    na_mat_tbl$loci <- loci_names(.x)
+    long_missing <- na_mat_tbl %>% # nolint start
       tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
         pull(1), names_to = "group") # nolint end
     long_missing

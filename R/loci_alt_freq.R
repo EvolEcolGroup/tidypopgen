@@ -132,10 +132,10 @@ loci_alt_freq.grouped_df <- function(
     )
 
     if (type == "tidy") {
-      tibble <- as.data.frame(freq_mat)
-      colnames(tibble) <- dplyr::group_keys(.x) %>% pull(1)
-      tibble$loci <- loci_names(.x)
-      long_freq <- tibble %>% # nolint start
+      freq_mat_tbl <- as.data.frame(freq_mat)
+      colnames(freq_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
+      freq_mat_tbl$loci <- loci_names(.x)
+      long_freq <- freq_mat_tbl %>% # nolint start
         tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
           pull(1), names_to = "group") # nolint end
       long_freq
@@ -223,10 +223,10 @@ loci_maf.grouped_df <- function(
       1 - freq_mat[freq_mat > 0.5 & !is.na(freq_mat)]
 
     if (type == "tidy") {
-      tibble <- as.data.frame(freq_mat)
-      colnames(tibble) <- dplyr::group_keys(.x) %>% pull(1)
-      tibble$loci <- loci_names(.x)
-      long_freq <- tibble %>% # nolint start
+      freq_mat_tbl <- as.data.frame(freq_mat)
+      colnames(freq_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
+      freq_mat_tbl$loci <- loci_names(.x)
+      long_freq <- freq_mat_tbl %>% # nolint start
         tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
           pull(1), names_to = "group") # nolint end
       long_freq
