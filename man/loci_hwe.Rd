@@ -30,6 +30,18 @@ Return the p-value from an exact test of HWE.
 \details{
 This function uses the original C++ algorithm from PLINK 1.90.
 }
+\examples{
+example_gt <- example_gen_tibble()
+
+# For HWE
+example_gt \%>\% loci_hwe()
+
+# For loci_hwe per locus per population, use reframe
+example_gt \%>\%
+  group_by(population) \%>\%
+  reframe(loci_hwe = loci_hwe(pick(everything())))
+
+}
 \author{
 the C++ algorithm was written by Christopher Chang for PLINK 1.90,
 based on original code by Jan Wigginton (the code was released under GPL3).

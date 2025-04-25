@@ -5,6 +5,9 @@
 #' `loci_alt_freq()`). The latter are in line with the genotypes matrix (e.g. as
 #' extracted by [`show_loci()`]). Most users will be in interested in the MAF,
 #' but the raw frequencies might be useful when computing aggregated statistics.
+#' Both `loci_maf()` and `loci_alt_freq()` have efficient methods to support
+#' grouped `gen_tibble` objects. These can return a tidied tibble, a list, or a
+#' matrix.
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
@@ -17,6 +20,41 @@
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_alt_freq
 #' @export
+#' @examples
+#' example_gt <- example_gen_tibble()
+#'
+#' # For alternate allele frequency
+#' example_gt %>% loci_alt_freq()
+#'
+#' # For alternate allele frequency per locus per population
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_alt_freq()
+#' # alternatively, return a list of populations with their frequencies
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_alt_freq(type = "list")
+#' # or a matrix with populations in columns and loci in rows
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_alt_freq(type = "matrix")
+#'
+#' # For MAF
+#' example_gt %>% loci_maf()
+#'
+#' # For minor allele frequency per locus per population
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_maf()
+#' # alternatively, return a list of populations with their frequencies
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_maf(type = "list")
+#' # or a matrix with populations in columns and loci in rows
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_maf(type = "matrix")
+#'
 loci_alt_freq <- function(.x, n_cores, block_size, type, ...) {
   UseMethod("loci_alt_freq", .x)
 }
@@ -93,32 +131,24 @@ loci_alt_freq.grouped_df <- function(
       a.combine = "rbind"
     )
 
-    if(type == "tidy"){
+    if (type == "tidy") {
       tibble <- as.data.frame(freq_mat)
       colnames(tibble) <- dplyr::group_keys(.x) %>% pull(1)
       tibble$loci <- loci_names(.x)
-      long_freq <- tibble %>% tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>% pull(1), names_to = "group")
+      long_freq <- tibble %>% # nolint start
+        tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
+          pull(1), names_to = "group") # nolint end
       long_freq
-    } else if(type == "list"){
+    } else if (type == "list") {
       # return a list to mimic a group_map
       lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
-    } else if(type == "matrix"){
+    } else if (type == "matrix") {
       # return a matrix
       freq_mat
     }
-
   } else {
-    # TODO this is seriously inefficient
-    # we should replace it with a cpp function
-    group_map(
-      .x,
-      .f = ~ loci_alt_freq(
-        .x, ,
-        n_cores = n_cores,
-        block_size = block_size,
-        ...
-      )
-    )
+    # the polyploid case
+    stop("loci_alt_freq for polyploid is not implemented yet")
   }
 }
 
@@ -192,28 +222,24 @@ loci_maf.grouped_df <- function(
     freq_mat[freq_mat > 0.5 & !is.na(freq_mat)] <-
       1 - freq_mat[freq_mat > 0.5 & !is.na(freq_mat)]
 
-    if(type == "tidy"){
+    if (type == "tidy") {
       tibble <- as.data.frame(freq_mat)
       colnames(tibble) <- dplyr::group_keys(.x) %>% pull(1)
       tibble$loci <- loci_names(.x)
-      long_freq <- tibble %>% tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>% pull(1), names_to = "group")
+      long_freq <- tibble %>% # nolint start
+        tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
+          pull(1), names_to = "group") # nolint end
       long_freq
-    } else if(type == "list"){
+    } else if (type == "list") {
       # return a list to mimic a group_map
       lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
-    } else if(type == "matrix"){
+    } else if (type == "matrix") {
       # return a matrix
       freq_mat
     }
-
   } else {
     # the polyploid case
-    # TODO this is seriously inefficient
-    # we should replace it with a cpp function
-    group_map(
-      .x,
-      .f = ~ loci_maf(.x, n_cores = n_cores, block_size = block_size, ...)
-    )
+    stop("loci_maf for polyploid is not implemented yet")
   }
 }
 

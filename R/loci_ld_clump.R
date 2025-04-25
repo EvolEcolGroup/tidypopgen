@@ -38,6 +38,14 @@
 #'   (if 'return_id = TRUE')
 #' @rdname loci_ld_clump
 #' @export
+#' @examples
+#' example_gt <- example_gen_tibble() %>% gt_impute_simple()
+#'
+#' # To return a boolean vector indicating whether the SNP should be kept
+#' example_gt %>% loci_ld_clump()
+#' # To return a vector of SNP indices to be kept
+#' example_gt %>% loci_ld_clump(return_id = TRUE)
+#'
 loci_ld_clump <- function(.x, ...) {
   UseMethod("loci_ld_clump", .x)
 }
@@ -140,4 +148,3 @@ loci_ld_clump.vctrs_bigSNP <- function(
     keep_bool
   }
 }
-

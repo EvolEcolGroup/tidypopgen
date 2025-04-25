@@ -83,3 +83,39 @@ Allele frequencies can be estimates as minimum allele frequencies (MAF) with
 extracted by \code{\link[=show_loci]{show_loci()}}). Most users will be in interested in the MAF,
 but the raw frequencies might be useful when computing aggregated statistics.
 }
+\examples{
+example_gt <- example_gen_tibble()
+
+# For alternate allele frequency
+example_gt \%>\% loci_alt_freq()
+
+# For alternate allele frequency per locus per population
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_alt_freq()
+# alternatively, return a list of populations with their frequencies
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_alt_freq(type = "list")
+# or a matrix with populations in columns and loci in rows
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_alt_freq(type = "matrix")
+
+# For MAF
+example_gt \%>\% loci_maf()
+
+# For minor allele frequency per locus per population
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_maf()
+# alternatively, return a list of populations with their frequencies
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_maf(type = "list")
+# or a matrix with populations in columns and loci in rows
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_maf(type = "matrix")
+
+}

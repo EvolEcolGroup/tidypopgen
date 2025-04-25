@@ -25,3 +25,7 @@ a logical vector defining which loci are transitions
 \description{
 Use the loci table to define which loci are transitions
 }
+\examples{
+example_gt <- example_gen_tibble()
+example_gt \%>\% loci_transitions()
+}

@@ -14,6 +14,17 @@
 #'   based on original code by Jan Wigginton (the code was released under GPL3).
 #' @rdname loci_hwe
 #' @export
+#' @examples
+#' example_gt <- example_gen_tibble()
+#'
+#' # For HWE
+#' example_gt %>% loci_hwe()
+#'
+#' # For loci_hwe per locus per population, use reframe
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   reframe(loci_hwe = loci_hwe(pick(everything())))
+#'
 loci_hwe <- function(.x, ...) {
   UseMethod("loci_hwe", .x)
 }

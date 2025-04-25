@@ -72,3 +72,12 @@ Any missing values in the genotypes of a \code{gen_tibble} passed to
 \code{loci_ld_clump} will cause an error. To deal with missingness, see
 \code{\link[=gt_impute_simple]{gt_impute_simple()}}.
 }
+\examples{
+example_gt <- example_gen_tibble() \%>\% gt_impute_simple()
+
+# To return a boolean vector indicating whether the SNP should be kept
+example_gt \%>\% loci_ld_clump()
+# To return a vector of SNP indices to be kept
+example_gt \%>\% loci_ld_clump(return_id = TRUE)
+
+}

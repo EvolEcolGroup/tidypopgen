@@ -123,9 +123,11 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   # compute using .grouped_df method
   list <- loci_alt_freq(test_gt, type = "list")
   matrix <- loci_alt_freq(test_gt, type = "matrix")
-  tidy <-   loci_alt_freq(test_gt, type = "tidy")
-  expect_equal(list[1][[1]], matrix[,1])
-  tidy_pop1 <- tidy %>% filter(group == "pop1") %>% select(value)
+  tidy <- loci_alt_freq(test_gt, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
   expect_equal(list[1][[1]], tidy_pop1$value)
 
   # compute by using group map
@@ -142,9 +144,11 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   test_gt_subset <- test_gt %>% select_loci(c(1, 2, 3, 4))
   list <- loci_alt_freq(test_gt_subset, type = "list")
   matrix <- loci_alt_freq(test_gt_subset, type = "matrix")
-  tidy <-   loci_alt_freq(test_gt_subset, type = "tidy")
-  expect_equal(list[1][[1]], matrix[,1])
-  tidy_pop1 <- tidy %>% filter(group == "pop1") %>% select(value)
+  tidy <- loci_alt_freq(test_gt_subset, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
   expect_equal(list[1][[1]], tidy_pop1$value)
 
   # and now for maf
@@ -152,30 +156,33 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   # compute using .grouped_df method
   list <- loci_maf(test_gt, type = "list")
   matrix <- loci_maf(test_gt, type = "matrix")
-  tidy <-   loci_maf(test_gt, type = "tidy")
-  expect_equal(list[1][[1]], matrix[,1])
-  tidy_pop1 <- tidy %>% filter(group == "pop1") %>% select(value)
+  tidy <- loci_maf(test_gt, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
   expect_equal(list[1][[1]], tidy_pop1$value)
 
   # compute by using group map
   loci_maf_map <- test_gt %>% group_map(.f = ~ loci_maf(.x))
   # use fast cpp code (limit cores to 2)
   loci_maf_grp <- test_gt %>% loci_maf(n_cores = 2)
-  loci_maf_grp_pop1 <- loci_maf_grp %>% filter(group == "pop1") %>% select(value)
+  loci_maf_grp_pop1 <- loci_maf_grp %>%
+    filter(group == "pop1") %>%
+    select(value)
   expect_true(all.equal(loci_maf_map[1][[1]], loci_maf_grp_pop1$value))
 
   # subset
   list <- loci_maf(test_gt_subset, type = "list")
   matrix <- loci_maf(test_gt_subset, type = "matrix")
-  tidy <-   loci_maf(test_gt_subset, type = "tidy")
-  expect_equal(list[1][[1]], matrix[,1])
-  tidy_pop1 <- tidy %>% filter(group == "pop1") %>% select(value)
+  tidy <- loci_maf(test_gt_subset, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
   expect_equal(list[1][[1]], tidy_pop1$value)
 
   # now repeat with multiple blocks of snps
   loci_freq_grp_chunked <- test_gt %>% loci_maf(n_cores = 2, block_size = 2)
   expect_true(all.equal(loci_maf_grp, loci_freq_grp_chunked))
 })
-
-
-

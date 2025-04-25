@@ -1,6 +1,8 @@
 #' Estimate missingness at each locus
 #'
-#' Estimate the rate of missingness at each locus.
+#' Estimate the rate of missingness at each locus. This function has an
+#' efficient method to support grouped `gen_tibble` objects, which can return a
+#' tidied tibble, a list, or a matrix.
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
@@ -16,6 +18,25 @@
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_missingness
 #' @export
+#' @examples
+#' example_gt <- example_gen_tibble()
+#'
+#' # For missingness
+#' example_gt %>% loci_missingness()
+#'
+#' # For missingness per locus per population
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_missingness()
+#' # alternatively, return a list of populations with their missingness
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_missingness(type = "list")
+#' # or a matrix with populations in columns and loci in rows
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_missingness(type = "matrix")
+#'
 loci_missingness <- function(.x, as_counts = FALSE,
                              n_cores = bigstatsr::nb_cores(),
                              block_size, type, ...) {
@@ -125,16 +146,18 @@ loci_missingness.grouped_df <- function(
     na_mat <- sweep(na_mat, MARGIN = 2, STATS = group_sizes, FUN = "/")
   }
 
-  if(type == "tidy"){
+  if (type == "tidy") {
     tibble <- as.data.frame(na_mat)
     colnames(tibble) <- dplyr::group_keys(.x) %>% pull(1)
     tibble$loci <- loci_names(.x)
-    long_missing <- tibble %>% tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>% pull(1), names_to = "group")
+    long_missing <- tibble %>% # nolint start
+      tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
+        pull(1), names_to = "group") # nolint end
     long_missing
-  } else if(type == "list"){
+  } else if (type == "list") {
     # return a list to mimic group_map
     lapply(seq_len(ncol(na_mat)), function(i) na_mat[, i])
-  } else if(type == "matrix"){
+  } else if (type == "matrix") {
     # return a matrix
     na_mat
   }

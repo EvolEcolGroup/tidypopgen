@@ -26,3 +26,7 @@ a character vector of names
 Extract the loci names from a  \code{gen_tibble} (or directly from its \code{genotype}
 column).
 }
+\examples{
+example_gt <- example_gen_tibble()
+example_gt \%>\% loci_names()
+}

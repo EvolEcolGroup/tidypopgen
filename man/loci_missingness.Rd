@@ -65,3 +65,23 @@ a vector of frequencies, one per locus
 \description{
 Estimate the rate of missingness at each locus.
 }
+\examples{
+example_gt <- example_gen_tibble()
+
+# For missingness
+example_gt \%>\% loci_missingness()
+
+# For missingness per locus per population
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_missingness()
+# alternatively, return a list of populations with their missingness
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_missingness(type = "list")
+# or a matrix with populations in columns and loci in rows
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_missingness(type = "matrix")
+
+}
