@@ -1,0 +1,138 @@
+---
+title: "Replication of smartsnp aDNA projection"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+date: "2024-06-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidypopgen)
+library(ggplot2)
+library(ggrepel)
+```
+
+# Download the data
+
+```{r}
+suppressWarnings(setwd("~/Downloads/"))
+system("wget --no-check-certificate https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/NearEastPublic.tar.gz",
+       intern = TRUE)
+```
+
+```{r}
+system("mv ~/Downloads/NearEastPublic.tar.gz data/")
+system("mkdir data/NearEastPublic")
+system("tar -xzf data/NearEastPublic.tar.gz -C data/NearEastPublic/")
+```
+
+# Read in modern data
+
+```{r}
+HO_modern <- gen_tibble("./data/NearEastPublic/HumanOriginsPublic2068.geno",
+                        quiet = TRUE,
+                        backingfile = tempfile("test_"),
+                        n_cores = n_cores)
+```
+
+
+# Read in ancient data
+
+```{r}
+ancient <- gen_tibble("./data/NearEastPublic/AncientLazaridis2016.geno",
+                      quiet = TRUE,
+                      backingfile = tempfile("test_"),
+                      n_cores = n_cores)
+```
+
+# Subset modern data
+
+```{r}
+#West eurasian groups 
+westEurasian_pops <- c(
+  "Abkhasian", "Adygei", "Albanian", "Armenian", "Assyrian", "Balkar", "Basque", "BedouinA", "BedouinB", "Belarusian", "Bulgarian", "Canary_Islander", 
+  "Chechen", "Croatian", "Cypriot", "Czech", "Druze", "English", "Estonian", "Finnish", "French", "Georgian", "German", "Greek", "Hungarian", "Icelandic", 
+  "Iranian", "Irish", "Irish_Ulster", "Italian_North", "Italian_South", "Jew_Ashkenazi", "Jew_Georgian", "Jew_Iranian", "Jew_Iraqi", "Jew_Libyan", "Jew_Moroccan", 
+  "Jew_Tunisian", "Jew_Turkish", "Jew_Yemenite", "Jordanian", "Kumyk", "Lebanese_Christian", "Lebanese", "Lebanese_Muslim", "Lezgin", "Lithuanian", "Maltese", 
+  "Mordovian", "North_Ossetian", "Norwegian", "Orcadian", "Palestinian", "Polish", "Romanian", "Russian", "Sardinian", "Saudi", "Scottish", "Shetlandic", "Sicilian", 
+  "Sorb", "Spanish_North", "Spanish", "Syrian", "Turkish", "Ukrainian"
+)
+
+HO_modern <- HO_modern %>% filter(HO_modern$population %in% westEurasian_pops)
+```
+
+# Impute
+
+```{r}
+HO_modern <- gt_update_backingfile(HO_modern, 
+                                   quiet = TRUE)
+HO_modern <- gt_impute_simple(HO_modern, method = "mean")
+gt_set_imputed(HO_modern, TRUE)
+```
+
+# Remove monomorphics
+
+```{r}
+HO_modern <- HO_modern %>% select_loci_if(loci_maf(genotypes)>0)
+```
+
+# PCA
+
+```{r}
+pca <- gt_pca_partialSVD(HO_modern, k = 2)
+```
+
+# Subset ancient
+
+```{r}
+# Samples to remove:
+sample.rem <- c("Mota", "Denisovan", "Chimp", "Mbuti.DG", "Altai", 
+               "Vi_merge", "Clovis", "Kennewick", "Chuvash", "Ust_Ishim", 
+               "AG2", "MA1", "MezE", "hg19ref", "Kostenki14")
+
+ancient <- ancient %>% filter(!ancient$population %in% sample.rem)
+```
+
+
+# Project
+
+```{r}
+predicted <- predict(object = pca, new_data = ancient, project_method = "least_squares", lsq_pcs = c(1,2))
+```
+
+# Tidy pca
+
+```{r}
+HO_modern_pca <- augment(x = pca, data = HO_modern, k = 10)
+```
+
+# Tidy up predicted data
+
+```{r}
+predicted <- as.data.frame(predicted)
+predicted$id <- ancient$id
+predicted$population <- ancient$population
+```
+
+# Plot 
+
+```{r}
+ggplot() + 
+  geom_point(data = HO_modern_pca, aes(x = .fittedPC1, y = .fittedPC2), alpha=0.5) +
+  geom_point(data = predicted, aes(.PC1,.PC2, fill=population, shape=population), size=3) +
+  scale_shape_manual(values=rep(21:25, 100)) +
+  geom_label_repel(data = predicted, aes(.PC1,.PC2, label=population, col=population), alpha=0.7, segment.color="NA") +
+  theme_bw() + theme(legend.position = "none")+
+  labs(x = "PC1", y = "PC2")
+
+```
+
+```{r}
+
+```
+
+
+
+
