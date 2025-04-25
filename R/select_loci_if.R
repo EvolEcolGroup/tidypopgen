@@ -31,5 +31,12 @@ select_loci_if <- function(.data, .sel_logical) {
 
   # subset the loci table
   attr(.data$genotypes, "loci") <- attr(.data$genotypes, "loci")[loci_sel, ]
+  # prioritise "gen_tbl" class over "sf"
+  obj_class <- class(.data)
+  if ("sf" %in% obj_class) {
+    obj_class <-
+      c("gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
+    class(.data) <- obj_class
+  }
   .data
 }

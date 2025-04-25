@@ -214,3 +214,23 @@ test_that("retain sf class after reordering", {
     gt_order_loci(test_gt_from_sf, use_current_table = FALSE, quiet = TRUE)
   expect_equal(class(reordered), class(test_gt_from_sf))
 })
+
+test_that("select_loci and select_loci_if retain sf class", {
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  # select_loci
+  test_gt_subset <- test_gt_from_sf %>% select_loci(c("rs1", "rs2", "rs3"))
+  expect_equal(class(test_gt_from_sf), class(test_gt_subset))
+  # select_loci_if
+  test_gt_subset_chr2 <-
+    test_gt_from_sf %>% select_loci_if(loci_chromosomes(genotypes) == "chr2")
+  expect_equal(class(test_gt_from_sf), class(test_gt_subset_chr2))
+})
