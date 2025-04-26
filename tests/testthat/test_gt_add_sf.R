@@ -234,3 +234,46 @@ test_that("select_loci and select_loci_if retain sf class", {
     test_gt_from_sf %>% select_loci_if(loci_chromosomes(genotypes) == "chr2")
   expect_equal(class(test_gt_from_sf), class(test_gt_subset_chr2))
 })
+
+test_that("merging two gen_tibbles with sf", {
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+
+  # create a new gt to merge
+  test_indiv_meta <- data.frame(
+    id = c("A"),
+    population = c("pop1"),
+    longitude = c(6),
+    latitude = c(51)
+  )
+  test_genotypes <- rbind(c(2, 1, 0, NA, 0, 0))
+  test_gt2 <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  # add sf to the new gt
+  test_gt_from_sf2 <- gt_add_sf(
+    x = test_gt2,
+    coords = c("longitude", "latitude"),
+  )
+  # merge the two
+  sf_gt_merged <- rbind(test_gt_from_sf, test_gt_from_sf2, quiet = TRUE)
+  # geometry dropped after merging
+  expect_false(inherits(sf_gt_merged, "sf"))
+  # we can add it back
+  sf_gt_merged <- gt_add_sf(
+    x = sf_gt_merged,
+    coords = c("longitude", "latitude"),
+  )
+  expect_true(inherits(sf_gt_merged, "sf"))
+})
