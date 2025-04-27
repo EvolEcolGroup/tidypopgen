@@ -22,7 +22,7 @@ First, we can download the data from the Reich lab website.
 
 # Download the data
 
-```{r}
+```{r eval = FALSE}
 suppressWarnings(setwd("~/Downloads/"))
 system("wget --no-check-certificate https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/NearEastPublic.tar.gz",
        intern = TRUE)
@@ -30,7 +30,7 @@ system("wget --no-check-certificate https://reich.hms.harvard.edu/sites/reich.hm
 
 We can then move and extract our data into a folder called `data/`.
 
-```{r}
+```{r eval = FALSE}
 system("mv ~/Downloads/NearEastPublic.tar.gz data/")
 system("mkdir data/NearEastPublic")
 system("tar -xzf data/NearEastPublic.tar.gz -C data/NearEastPublic/")

@@ -24,10 +24,6 @@ system("wget --no-check-certificate https://reich.hms.harvard.edu/sites/reich.hm
        intern = TRUE)
 ```
 
-```
-## character(0)
-```
-
 We can then move and extract our data into a folder called `data/`.
 
 
