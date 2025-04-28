@@ -37,6 +37,7 @@ loci_missingness(
 
 \method{loci_missingness}{grouped_df}(
   .x,
+  .col = "genotypes",
   as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),

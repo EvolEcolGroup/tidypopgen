@@ -6,6 +6,10 @@
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
+#' @param .col the column to be used when a tibble (or grouped tibble is passed
+#' directly to the function). This defaults to "genotypes" and can only take
+#' that value. There is no need for the user to set it, but it is included to
+#' resolve certain tidyselect operations.
 #' @param mid_p boolean on whether the mid-p value should be computed. Default
 #'   is TRUE, as in PLINK.
 #' @param ... not used.
@@ -25,24 +29,31 @@
 #'   group_by(population) %>%
 #'   reframe(loci_hwe = loci_hwe(genotypes))
 #'
-loci_hwe <- function(.x, ...) {
+loci_hwe <- function(.x, .col = "genotypes", ...) {
   UseMethod("loci_hwe", .x)
 }
 
 
 #' @export
 #' @rdname loci_hwe
-loci_hwe.tbl_df <- function(.x, mid_p = TRUE, ...) {
+loci_hwe.tbl_df <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
   # TODO this is a hack to deal with the class being dropped when going through
   # group_map
   stopifnot_gen_tibble(.x)
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_hwe only works with the genotypes column")
+  }
   loci_hwe(.x$genotypes, mid_p = mid_p, ...)
 }
 
 
 #' @export
 #' @rdname loci_hwe
-loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
+loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   # get the FBM
