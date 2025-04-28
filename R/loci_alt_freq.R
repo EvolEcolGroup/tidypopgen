@@ -11,6 +11,10 @@
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
+#' @param .col the column to be used when a tibble (or grouped tibble is passed
+#' directly to the function). This defaults to "genotypes" and can only take
+#' that value. There is no need for the user to set it, but it is included to
+#' resolve certain tidyselect operations.
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
@@ -61,7 +65,9 @@
 #'   group_by(population) %>%
 #'   loci_maf(type = "matrix")
 #'
-loci_alt_freq <- function(.x, n_cores, block_size, type, ...) {
+loci_alt_freq <- function(.x,
+                          .col = "genotypes",
+                          n_cores, block_size, type, ...) {
   UseMethod("loci_alt_freq", .x)
 }
 
@@ -69,6 +75,7 @@ loci_alt_freq <- function(.x, n_cores, block_size, type, ...) {
 #' @rdname loci_alt_freq
 loci_alt_freq.tbl_df <- function(
     .x,
+    .col = "genotypes",
     # multicore is used by openMP within the
     # freq cpp function
     n_cores = bigstatsr::nb_cores(),
@@ -80,6 +87,14 @@ loci_alt_freq.tbl_df <- function(
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_gen_tibble(.x)
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_alt_freq only works with the genotypes column")
+  }
+
   loci_alt_freq(.x$genotypes)
 }
 
@@ -88,6 +103,7 @@ loci_alt_freq.tbl_df <- function(
 #' @rdname loci_alt_freq
 loci_alt_freq.vctrs_bigSNP <- function(
     .x,
+    .col = "genotypes",
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(length(.x), 1),
     ...) {
@@ -104,10 +120,24 @@ loci_alt_freq.vctrs_bigSNP <- function(
 #' @rdname loci_alt_freq
 loci_alt_freq.grouped_df <- function(
     .x,
+    .col = "genotypes",
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
     type = "tidy",
     ...) {
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_alt_freq only works with the genotypes column")
+  }
+
+  # check that we only have one grouping variable
+  if (length(.x %>%dplyr::group_vars())>1){
+    stop("loci_alt_freq only works with one grouping variable")
+  }
+
   rlang::check_dots_empty()
   type <- match.arg(type, c("tidy", "list", "matrix"))
   if (is_diploid_only(.x)) {
