@@ -140,6 +140,14 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
     loci_alt_freq(n_cores = 2, block_size = 2)
   expect_true(all.equal(loci_freq_grp, loci_freq_grp_chunked))
 
+  # and now with reframe
+  loci_freq_reframe <- test_gt %>% reframe(alt_freq = loci_alt_freq(genotypes))
+  loci_freq_direct <- test_gt %>% loci_alt_freq() %>% arrange(group)
+  expect_equal(loci_freq_reframe$alt_freq, loci_freq_direct$value)
+  # the less intuitive way of reframing
+  loci_freq_reframe2 <- test_gt %>% reframe(alt_freq = loci_alt_freq(pick(everything())))
+  expect_equal(loci_freq_reframe2$alt_freq, loci_freq_reframe$alt_freq)
+
   # subset
   test_gt_subset <- test_gt %>% select_loci(c(1, 2, 3, 4))
   list <- loci_alt_freq(test_gt_subset, type = "list")
