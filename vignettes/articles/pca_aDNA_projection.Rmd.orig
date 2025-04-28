@@ -23,17 +23,23 @@ First, we can download the data from the Reich lab website.
 # Download the data
 
 ```{r eval = FALSE}
-suppressWarnings(setwd("~/Downloads/"))
-system("wget --no-check-certificate https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/NearEastPublic.tar.gz",
-       intern = TRUE)
+temp_dir <- tempdir()
+# Download file using R's download.file function
+download_url <- "https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/NearEastPublic.tar.gz"
+download_path <- file.path(temp_dir, "NearEastPublic.tar.gz")
+download.file(download_url, download_path, mode = "wb")
 ```
 
 We can then move and extract our data into a folder called `data/`.
 
 ```{r eval = FALSE}
-system("mv ~/Downloads/NearEastPublic.tar.gz data/")
-system("mkdir data/NearEastPublic")
-system("tar -xzf data/NearEastPublic.tar.gz -C data/NearEastPublic/")
++# Create data directory
+if (!dir.exists("data")) dir.create("data")
+if (!dir.exists("data/NearEastPublic")) dir.create("data/NearEastPublic")
+# Copy downloaded file
+file.copy(download_path, "data/NearEastPublic.tar.gz")
+# Extract using R's untar function
+utils::untar("data/NearEastPublic.tar.gz", exdir = "data/NearEastPublic")
 ```
 
 # Read in the data
@@ -42,16 +48,14 @@ Now that our data are downloaded, we can use `tidypopgen` to read the data into 
 ```{r}
 HO_modern <- gen_tibble("./data/NearEastPublic/HumanOriginsPublic2068.geno",
                         quiet = TRUE,
-                        backingfile = tempfile("test_"),
-                        n_cores = n_cores)
+                        backingfile = tempfile("test_"))
 ```
 
 Followed by the ancient data:
 ```{r}
 ancient <- gen_tibble("./data/NearEastPublic/AncientLazaridis2016.geno",
                       quiet = TRUE,
-                      backingfile = tempfile("test_"),
-                      n_cores = n_cores)
+                      backingfile = tempfile("test_"))
 ```
 
 
@@ -145,11 +149,6 @@ ggplot() +
   labs(x = "PC1", y = "PC2")
 
 ```
-
-```{r}
-
-```
-
 
 
 
