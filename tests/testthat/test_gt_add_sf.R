@@ -277,3 +277,34 @@ test_that("merging two gen_tibbles with sf", {
   )
   expect_true(inherits(sf_gt_merged, "sf"))
 })
+
+test_that("cbind gen_tibble and extra data with sf",{
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  # new data.frame to cbind
+  new_df <- data.frame(
+    id2 = c("a", "b", "c", "d", "e", "f", "g"),
+    population = c(
+      "region1", "region1", "region2", "region2",
+      "region1", "region3", "region3"
+    ),
+    age = c(1, 2, 3, 4, 5, 6, 7)
+  )
+  # geometry dropped after merging
+  test_combined_gt <- cbind(test_gt, new_df)
+  expect_false(inherits(test_combined_gt, "sf"))
+  # we can add it back
+  sf_gt_merged <- gt_add_sf(
+    x = test_combined_gt,
+    coords = c("longitude", "latitude"),
+  )
+  expect_true(inherits(sf_gt_merged, "sf"))
+})
