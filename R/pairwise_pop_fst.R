@@ -138,7 +138,7 @@ pairwise_pop_fst_hudson <- function(
     return(fst_list)
   }
 
-  # other wise we start formatting the other objects
+  # otherwise we start formatting the other objects
   fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
 
   if (!tidy) { # if we return a matrix
@@ -147,7 +147,8 @@ pairwise_pop_fst_hudson <- function(
   } else {
     if (by_locus) {
       rownames(fst_list$fst_locus) <- loci_names(.x)
-      colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations)
+      colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
+                                                             prefix = "fst")
       return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
     } else {
       return(fst_tot)
@@ -239,7 +240,8 @@ pairwise_pop_fst_nei87 <- function(
   } else {
     if (by_locus) {
       rownames(fst_locus) <- loci_names(.x)
-      colnames(fst_locus) <- col_names_combinations(group_combinations)
+      colnames(fst_locus) <- col_names_combinations(group_combinations,
+                                                    prefix = "fst")
       return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
     } else {
       return(fst_tot)
@@ -331,11 +333,8 @@ pairwise_pop_fst_wc84 <- function(
   } else {
     if (by_locus) {
       rownames(fst_locus) <- loci_names(.x)
-      colnames(fst_locus) <- apply(
-        group_combinations,
-        1,
-        function(x) paste(x, collapse = ".")
-      )
+      colnames(fst_locus) <- col_names_combinations(group_combinations,
+                                                    prefix = "fst")
       return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
     } else {
       return(fst_tot)
@@ -367,10 +366,14 @@ tidy_to_matrix <- function(tidy_tbl) {
 
 # This function is used to create the column names for the pairwise
 # combinations
-col_names_combinations <- function(group_combinations) {
-  apply(
+col_names_combinations <- function(group_combinations, prefix = NULL) {
+  comb_labels <- apply(
     group_combinations,
     1,
     function(x) paste(x, collapse = ".")
   )
+  if (!is.null(prefix)){
+    comb_labels <- paste(prefix, comb_labels, sep = "_")
+  }
+  return(comb_labels)
 }
