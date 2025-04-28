@@ -148,7 +148,8 @@ pairwise_pop_fst_hudson <- function(
     if (by_locus) {
       rownames(fst_list$fst_locus) <- loci_names(.x)
       colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
-                                                             prefix = "fst")
+        prefix = "fst"
+      )
       return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
     } else {
       return(fst_tot)
@@ -241,7 +242,8 @@ pairwise_pop_fst_nei87 <- function(
     if (by_locus) {
       rownames(fst_locus) <- loci_names(.x)
       colnames(fst_locus) <- col_names_combinations(group_combinations,
-                                                    prefix = "fst")
+        prefix = "fst"
+      )
       return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
     } else {
       return(fst_tot)
@@ -334,7 +336,8 @@ pairwise_pop_fst_wc84 <- function(
     if (by_locus) {
       rownames(fst_locus) <- loci_names(.x)
       colnames(fst_locus) <- col_names_combinations(group_combinations,
-                                                    prefix = "fst")
+        prefix = "fst"
+      )
       return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
     } else {
       return(fst_tot)
@@ -372,7 +375,7 @@ col_names_combinations <- function(group_combinations, prefix = NULL) {
     1,
     function(x) paste(x, collapse = ".")
   )
-  if (!is.null(prefix)){
+  if (!is.null(prefix)) {
     comb_labels <- paste(prefix, comb_labels, sep = "_")
   }
   return(comb_labels)

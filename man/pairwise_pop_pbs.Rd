@@ -9,8 +9,8 @@ pairwise_pop_pbs(.x, fst_method = "Hudson", return_fst = FALSE)
 \arguments{
 \item{.x}{A grouped \code{gen_tibble}}
 
-\item{fst_method}{A character string specifying the method to use for computing
-Fst}
+\item{fst_method}{A character string specifying the method to use for
+computing Fst}
 
 \item{return_fst}{A logical value indicating whether to return the Fst values
 along with the PBS values. Default is \code{FALSE}.}
@@ -27,6 +27,5 @@ populations in the grouped \code{gen_tibble} object)
 The function computes the population branch statistics (PBS) for each
 combination of populations at each locus. The PBS is a measure of the genetic
 differentiation between one focal population and two reference populations,
-and is used to identify outlier
-loci that may be under selection.
+and is used to identify outlier loci that may be under selection.
 }

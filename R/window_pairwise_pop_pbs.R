@@ -1,10 +1,7 @@
 #' Compute the Population Branch Statistics over a sliding window
 #'
-#' @description The function computes the population branch statistics (PBS) for
-#'   a sligiding window for each combination of populations at each locus. The
-#'   PBS is a measure of the genetic differentiation between one focal
-#'   population and two reference populations, and is used to identify outlier
-#'   loci that may be under selection.
+#' @description This function computes pairwise Fst for a sliding window across
+#'   each chromosome.
 #'
 #' @param x a grouped `gen_tibble` object
 #' @param method the method to use for calculating Fst. Currently only "Hudson"

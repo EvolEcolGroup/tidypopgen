@@ -47,8 +47,10 @@ test_that("pairwise_pop_fst num and dem are returned correctly", {
   # generate the Fst for each locus
   hudson_gt_from_num_dem <- hudson_gt_fst_nd$Fst_by_locus_num /
     hudson_gt_fst_nd$Fst_by_locus_den
-  colnames(hudson_gt_from_num_dem) <- paste0("fst_",
-                                             colnames(hudson_gt_from_num_dem))
+  colnames(hudson_gt_from_num_dem) <- paste0(
+    "fst_",
+    colnames(hudson_gt_from_num_dem)
+  )
   expect_equal(hudson_gt_from_num_dem, hudson_gt_fst$Fst_by_locus)
   # confirm error if trying to get num and dem with other methods
   expect_error(

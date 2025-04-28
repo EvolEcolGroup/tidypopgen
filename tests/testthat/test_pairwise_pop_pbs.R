@@ -12,8 +12,10 @@ test_genotypes <- rbind(
 )
 test_indiv_meta <- data.frame(
   id = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "k"),
-  population = c("pop1", "pop1", "pop2", "pop2", "pop1", "pop3", "pop3",
-                 "pop4", "pop4", "pop4")
+  population = c(
+    "pop1", "pop1", "pop2", "pop2", "pop1", "pop3", "pop3",
+    "pop4", "pop4", "pop4"
+  )
 )
 test_loci <- data.frame(
   name = paste0("rs", 1:6),
@@ -37,7 +39,7 @@ test_that("requires a grouped gen_tibble", {
     ".x should be a grouped gen_tibble"
   )
 })
-test_that("pairwise_pop_pbs works correctly",{
+test_that("pairwise_pop_pbs works correctly", {
   test_pbs <- test_gt %>%
     group_by(population) %>%
     pairwise_pop_pbs(fst_method = "Hudson")
