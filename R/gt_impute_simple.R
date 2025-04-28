@@ -64,6 +64,13 @@ gt_impute_simple <- function(
   )
 
   attr(x$genotypes, "imputed") <- "simple"
+  # prioritise "gen_tbl" class over "sf"
+  obj_class <- class(x)
+  if ("sf" %in% obj_class) {
+    obj_class <-
+      c("gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
+    class(x) <- obj_class
+  }
   gt_set_imputed(x, set = FALSE)
   x
 }

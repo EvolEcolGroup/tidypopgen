@@ -142,3 +142,169 @@ test_that("gt_add_sf gives the correct errors", {
     "You must provide either coords or sfc_column"
   )
 })
+
+test_that("retain sf class after imputing and augmenting pca", {
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  # impute the gt and check class
+  test_gt_from_sf_impute <-
+    gt_impute_simple(test_gt_from_sf, method = "mode", n_cores = 1)
+  expect_equal(class(test_gt_from_sf), class(test_gt_from_sf_impute))
+  # augment the gt and check class
+  test_pca <- test_gt_from_sf_impute %>% gt_pca_randomSVD(k = 3)
+  augmented_gt <- augment(x = test_pca, data = test_gt_from_sf_impute)
+  expect_equal(class(augmented_gt), class(test_gt_from_sf_impute))
+
+  # DAPC
+  clusters <- gt_cluster_pca(test_pca, k = 3, n_pca = 3)
+  test_cluster_best <- gt_cluster_pca_best_k(clusters,
+    stat = "BIC",
+    criterion = "min", quiet = TRUE
+  )
+  test_dapc <- test_cluster_best %>% gt_dapc()
+  augmented_gt_dapc <- augment(x = test_dapc, data = test_gt_from_sf_impute)
+  expect_equal(class(augmented_gt_dapc), class(test_gt_from_sf_impute))
+})
+
+test_that("retain sf class after being saved and reloaded", {
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  file <- tempfile()
+  file_names <- gt_save(test_gt_from_sf, file = file, quiet = TRUE)
+  reloaded_gt <- gt_load(file_names[1])
+  expect_equal(class(test_gt_from_sf), class(reloaded_gt))
+})
+
+test_that("retain sf class after reordering", {
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 2, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  reordered <-
+    gt_order_loci(test_gt_from_sf, use_current_table = FALSE, quiet = TRUE)
+  expect_equal(class(reordered), class(test_gt_from_sf))
+})
+
+test_that("select_loci and select_loci_if retain sf class", {
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  # select_loci
+  test_gt_subset <- test_gt_from_sf %>% select_loci(c("rs1", "rs2", "rs3"))
+  expect_equal(class(test_gt_from_sf), class(test_gt_subset))
+  # select_loci_if
+  test_gt_subset_chr2 <-
+    test_gt_from_sf %>% select_loci_if(loci_chromosomes(genotypes) == "chr2")
+  expect_equal(class(test_gt_from_sf), class(test_gt_subset_chr2))
+})
+
+test_that("merging two gen_tibbles with sf", {
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+
+  # create a new gt to merge
+  test_indiv_meta <- data.frame(
+    id = c("A"),
+    population = c("pop1"),
+    longitude = c(6),
+    latitude = c(51)
+  )
+  test_genotypes <- rbind(c(2, 1, 0, NA, 0, 0))
+  test_gt2 <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  # add sf to the new gt
+  test_gt_from_sf2 <- gt_add_sf(
+    x = test_gt2,
+    coords = c("longitude", "latitude"),
+  )
+  # merge the two
+  sf_gt_merged <- rbind(test_gt_from_sf, test_gt_from_sf2, quiet = TRUE)
+  # geometry dropped after merging
+  expect_false(inherits(sf_gt_merged, "sf"))
+  # we can add it back
+  sf_gt_merged <- gt_add_sf(
+    x = sf_gt_merged,
+    coords = c("longitude", "latitude"),
+  )
+  expect_true(inherits(sf_gt_merged, "sf"))
+})
+
+test_that("cbind gen_tibble and extra data with sf", {
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  # new data.frame to cbind
+  new_df <- data.frame(
+    id2 = c("a", "b", "c", "d", "e", "f", "g"),
+    population = c(
+      "region1", "region1", "region2", "region2",
+      "region1", "region3", "region3"
+    ),
+    age = c(1, 2, 3, 4, 5, 6, 7)
+  )
+  # geometry dropped after merging
+  test_combined_gt <- cbind(test_gt, new_df)
+  expect_false(inherits(test_combined_gt, "sf"))
+  # we can add it back
+  sf_gt_merged <- gt_add_sf(
+    x = test_combined_gt,
+    coords = c("longitude", "latitude"),
+  )
+  expect_true(inherits(sf_gt_merged, "sf"))
+})
