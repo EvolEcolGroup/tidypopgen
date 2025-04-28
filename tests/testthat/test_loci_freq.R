@@ -167,7 +167,22 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
     select(value)
   expect_equal(list[1][[1]], tidy_pop1$value)
 
+  # test a second grouping variable
+  test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
+  test_gt <- test_gt %>% group_by(population, region)
+  expect_error(
+    test_gt %>% loci_alt_freq(),
+    "only works with one grouping variable"
+  )
+
   # and now for maf
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt <- test_gt %>% group_by(population)
 
   # compute using .grouped_df method
   list <- loci_maf(test_gt, type = "list")
@@ -213,4 +228,12 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   # now repeat with multiple blocks of snps
   loci_freq_grp_chunked <- test_gt %>% loci_maf(n_cores = 2, block_size = 2)
   expect_true(all.equal(loci_maf_grp, loci_freq_grp_chunked))
+
+  # test a second grouping variable
+  test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
+  test_gt <- test_gt %>% group_by(population, region)
+  expect_error(
+    test_gt %>% loci_maf(),
+    "only works with one grouping variable"
+  )
 })

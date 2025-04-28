@@ -10,6 +10,10 @@
 #' [gt_impute_simple()].
 #'
 #' @param .x a [`gen_tibble`] object
+#' @param .col the column to be used when a tibble (or grouped tibble is passed
+#' directly to the function). This defaults to "genotypes" and can only take
+#' that value. There is no need for the user to set it, but it is included to
+#' resolve certain tidyselect operations.
 #' @param thr_r2 Threshold over the squared correlation between two SNPs.
 #'   Default is `0.2`.
 #' @param S A vector of loci statistics which express the importance of each SNP
@@ -46,18 +50,24 @@
 #' # To return a vector of SNP indices to be kept
 #' example_gt %>% loci_ld_clump(return_id = TRUE)
 #'
-loci_ld_clump <- function(.x, ...) {
+loci_ld_clump <- function(.x, .col = "genotypes", ...) {
   UseMethod("loci_ld_clump", .x)
 }
 
 #' @export
 #' @rdname loci_ld_clump
-loci_ld_clump.tbl_df <- function(.x, ...) {
+loci_ld_clump.tbl_df <- function(.x, .col = "genotypes", ...) {
   # TODO this is a hack to deal with the class being dropped when going through
   # group_map
   stopifnot_gen_tibble(.x)
   # check n_cores are available
-
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_ld_clump only works with the genotypes column")
+  }
   loci_ld_clump(.x$genotypes, ...)
 }
 
@@ -66,6 +76,7 @@ loci_ld_clump.tbl_df <- function(.x, ...) {
 #' @rdname loci_ld_clump
 loci_ld_clump.vctrs_bigSNP <- function(
     .x,
+    .col = "genotypes",
     S = NULL, # nolint
     thr_r2 = 0.2,
     size = 100 / thr_r2,

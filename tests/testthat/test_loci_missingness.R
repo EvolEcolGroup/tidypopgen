@@ -147,6 +147,14 @@ test_that("loci_missingness on grouped tibble", {
     loci_missingness(genotypes) %>%
     arrange(group)
   expect_equal(loci_missingness_reframe$missing, loci_missingness_direct2$value)
+
+  # test a second grouping variable
+  test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
+  test_gt <- test_gt %>% group_by(population, region)
+  expect_error(
+    test_gt %>% loci_missingness(),
+    "only works with one grouping variable"
+  )
 })
 
 test_that("n_cores can be set", {

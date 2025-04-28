@@ -6,12 +6,13 @@
 \alias{loci_ld_clump.vctrs_bigSNP}
 \title{Clump loci based on a Linkage Disequilibrium threshold}
 \usage{
-loci_ld_clump(.x, ...)
+loci_ld_clump(.x, .col = "genotypes", ...)
 
-\method{loci_ld_clump}{tbl_df}(.x, ...)
+\method{loci_ld_clump}{tbl_df}(.x, .col = "genotypes", ...)
 
 \method{loci_ld_clump}{vctrs_bigSNP}(
   .x,
+  .col = "genotypes",
   S = NULL,
   thr_r2 = 0.2,
   size = 100/thr_r2,
@@ -24,6 +25,11 @@ loci_ld_clump(.x, ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object}
+
+\item{.col}{the column to be used when a tibble (or grouped tibble is passed
+directly to the function). This defaults to "genotypes" and can only take
+that value. There is no need for the user to set it, but it is included to
+resolve certain tidyselect operations.}
 
 \item{...}{currently not used.}
 

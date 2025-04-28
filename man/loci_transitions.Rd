@@ -6,16 +6,21 @@
 \alias{loci_transitions.vctrs_bigSNP}
 \title{Find transitions}
 \usage{
-loci_transitions(.x, ...)
+loci_transitions(.x, .col = "genotypes", ...)
 
-\method{loci_transitions}{tbl_df}(.x, ...)
+\method{loci_transitions}{tbl_df}(.x, .col = "genotypes", ...)
 
-\method{loci_transitions}{vctrs_bigSNP}(.x, ...)
+\method{loci_transitions}{vctrs_bigSNP}(.x, .col = "genotypes", ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
 a \code{\link{gen_tibble}} object),
 or a \code{\link{gen_tibble}}.}
+
+\item{.col}{the column to be used when a tibble (or grouped tibble is passed
+directly to the function). This defaults to "genotypes" and can only take
+that value. There is no need for the user to set it, but it is included to
+resolve certain tidyselect operations.}
 
 \item{...}{other arguments passed to specific methods.}
 }

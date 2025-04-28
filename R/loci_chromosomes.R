@@ -28,7 +28,7 @@ loci_chromosomes.tbl_df <- function(.x, .col = "genotypes", ...) {
     rlang::as_string()
   # confirm that .col is "genotypes"
   if (.col != "genotypes") {
-    stop("loci_hwe only works with the genotypes column")
+    stop("loci_chromosomes only works with the genotypes column")
   }
   # extract the column and hand it over to its method
   loci_chromosomes(.x$genotypes)
