@@ -94,7 +94,6 @@ loci_alt_freq.tbl_df <- function(
   if (.col != "genotypes") {
     stop("loci_alt_freq only works with the genotypes column")
   }
-
   loci_alt_freq(.x$genotypes)
 }
 
@@ -134,7 +133,7 @@ loci_alt_freq.grouped_df <- function(
   }
 
   # check that we only have one grouping variable
-  if (length(.x %>%dplyr::group_vars())>1){
+  if (length(.x %>% dplyr::group_vars()) > 1) {
     stop("loci_alt_freq only works with one grouping variable")
   }
 
@@ -190,7 +189,9 @@ loci_alt_freq.grouped_df <- function(
 
 #' @rdname loci_alt_freq
 #' @export
-loci_maf <- function(.x, n_cores, block_size, type, ...) {
+loci_maf <- function(.x,
+                     .col = "genotypes",
+                     n_cores, block_size, type, ...) {
   UseMethod("loci_maf", .x)
 }
 
@@ -198,12 +199,20 @@ loci_maf <- function(.x, n_cores, block_size, type, ...) {
 #' @rdname loci_alt_freq
 loci_maf.tbl_df <- function(
     .x,
+    .col = "genotypes",
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
     ...) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
-  stopifnot_gen_tibble(.x)
+  stopifnot_gen_tibble(.x) # confirm that .col is "genotypes"
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_maf only works with the genotypes column")
+  }
   loci_maf(.x$genotypes, n_cores = n_cores, block_size = block_size, ...)
 }
 
@@ -211,6 +220,7 @@ loci_maf.tbl_df <- function(
 #' @rdname loci_alt_freq
 loci_maf.vctrs_bigSNP <- function(
     .x,
+    .col = "genotypes",
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(length(.x), 1),
     ...) {
@@ -223,10 +233,24 @@ loci_maf.vctrs_bigSNP <- function(
 #' @rdname loci_alt_freq
 loci_maf.grouped_df <- function(
     .x,
+    .col = "genotypes",
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
     type = "tidy",
     ...) {
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_maf only works with the genotypes column")
+  }
+
+  # check that we only have one grouping variable
+  if (length(.x %>% dplyr::group_vars()) > 1) {
+    stop("loci_alt_freq only works with one grouping variable")
+  }
+
   rlang::check_dots_empty()
   type <- match.arg(type, c("tidy", "list", "matrix"))
   if (is_diploid_only(.x)) {

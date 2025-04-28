@@ -38,10 +38,11 @@ loci_alt_freq(.x, .col = "genotypes", n_cores, block_size, type, ...)
   ...
 )
 
-loci_maf(.x, n_cores, block_size, type, ...)
+loci_maf(.x, .col = "genotypes", n_cores, block_size, type, ...)
 
 \method{loci_maf}{tbl_df}(
   .x,
+  .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
@@ -49,6 +50,7 @@ loci_maf(.x, n_cores, block_size, type, ...)
 
 \method{loci_maf}{vctrs_bigSNP}(
   .x,
+  .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(length(.x), 1),
   ...
@@ -56,6 +58,7 @@ loci_maf(.x, n_cores, block_size, type, ...)
 
 \method{loci_maf}{grouped_df}(
   .x,
+  .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   type = "tidy",
