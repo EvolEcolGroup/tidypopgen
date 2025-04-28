@@ -278,7 +278,7 @@ test_that("merging two gen_tibbles with sf", {
   expect_true(inherits(sf_gt_merged, "sf"))
 })
 
-test_that("cbind gen_tibble and extra data with sf",{
+test_that("cbind gen_tibble and extra data with sf", {
   test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
