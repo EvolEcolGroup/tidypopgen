@@ -164,6 +164,14 @@ augment.gt_pca <- function(x, data = NULL, k = NULL, ...) {
     tibble(.rownames = rownames(as.data.frame(x$u[, 1:k]))) %>%
       add_column(pred)
   }
+
+  # prioritise "gen_tbl" class over "sf"
+  obj_class <- class(ret)
+  if ("sf" %in% obj_class) {
+    obj_class <-
+      c("gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
+    class(ret) <- obj_class
+  }
   ret
 }
 
