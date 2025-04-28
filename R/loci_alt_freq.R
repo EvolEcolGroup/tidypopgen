@@ -248,7 +248,7 @@ loci_maf.grouped_df <- function(
 
   # check that we only have one grouping variable
   if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("loci_alt_freq only works with one grouping variable")
+    stop("loci_maf only works with one grouping variable")
   }
 
   rlang::check_dots_empty()

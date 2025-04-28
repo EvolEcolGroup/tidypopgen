@@ -9,6 +9,7 @@
 \usage{
 loci_missingness(
   .x,
+  .col = "genotypes",
   as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size,
@@ -18,6 +19,7 @@ loci_missingness(
 
 \method{loci_missingness}{tbl_df}(
   .x,
+  .col = "genotypes",
   as_counts = FALSE,
   n_cores = n_cores,
   block_size = bigstatsr::block_size(nrow(.x), 1),
@@ -26,6 +28,7 @@ loci_missingness(
 
 \method{loci_missingness}{vctrs_bigSNP}(
   .x,
+  .col = "genotypes",
   as_counts = FALSE,
   n_cores = n_cores,
   block_size = bigstatsr::block_size(length(.x), 1),
@@ -44,6 +47,11 @@ loci_missingness(
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
 a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
+
+\item{.col}{the column to be used when a tibble (or grouped tibble is passed
+directly to the function). This defaults to "genotypes" and can only take
+that value. There is no need for the user to set it, but it is included to
+resolve certain tidyselect operations.}
 
 \item{as_counts}{boolean defining whether the count of NAs (rather than the
 rate) should be returned. It defaults to FALSE (i.e. rates are returned by

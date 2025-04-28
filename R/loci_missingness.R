@@ -6,6 +6,10 @@
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
+#' @param .col the column to be used when a tibble (or grouped tibble is passed
+#' directly to the function). This defaults to "genotypes" and can only take
+#' that value. There is no need for the user to set it, but it is included to
+#' resolve certain tidyselect operations.
 #' @param as_counts boolean defining whether the count of NAs (rather than the
 #'   rate) should be returned. It defaults to FALSE (i.e. rates are returned by
 #'   default).
@@ -42,7 +46,7 @@
 #'   group_by(population) %>%
 #'   reframe(missing = loci_missingness(genotypes))
 #'
-loci_missingness <- function(.x, as_counts = FALSE,
+loci_missingness <- function(.x, .col = "genotypes", as_counts = FALSE,
                              n_cores = bigstatsr::nb_cores(),
                              block_size, type, ...) {
   UseMethod("loci_missingness", .x)
@@ -52,6 +56,7 @@ loci_missingness <- function(.x, as_counts = FALSE,
 #' @rdname loci_missingness
 loci_missingness.tbl_df <- function(
     .x,
+    .col = "genotypes",
     as_counts = FALSE,
     n_cores = n_cores,
     # the bigapply that splits in blocks is not
@@ -62,6 +67,13 @@ loci_missingness.tbl_df <- function(
   # TODO this is a hack to deal with the class being dropped when going through
   # group_map
   stopifnot_gen_tibble(.x)
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_missingness only works with the genotypes column")
+  }
   loci_missingness(
     .x$genotypes,
     as_counts = as_counts,
@@ -76,6 +88,7 @@ loci_missingness.tbl_df <- function(
 #' @rdname loci_missingness
 loci_missingness.vctrs_bigSNP <- function(
     .x,
+    .col = "genotypes",
     as_counts = FALSE,
     n_cores = n_cores,
     block_size = bigstatsr::block_size(length(.x), 1), # nolint
@@ -116,11 +129,24 @@ loci_missingness.vctrs_bigSNP <- function(
 #' @rdname loci_missingness
 loci_missingness.grouped_df <- function(
     .x,
+    .col = "genotypes",
     as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
     type = "tidy",
     ...) {
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_missingness only works with the genotypes column")
+  }
+
+  # check that we only have one grouping variable
+  if (length(.x %>% dplyr::group_vars()) > 1) {
+    stop("loci_missingness only works with one grouping variable")
+  }
   rlang::check_dots_empty()
   type <- match.arg(type, c("tidy", "list", "matrix"))
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes

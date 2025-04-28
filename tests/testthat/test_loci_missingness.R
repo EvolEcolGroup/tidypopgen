@@ -134,6 +134,19 @@ test_that("loci_missingness on grouped tibble", {
     filter(group == "pop1") %>%
     select(value)
   expect_true(all.equal(loci_miss_map[1][[1]], loci_miss_grp_pop1$value))
+
+  # and now with reframe
+  loci_missingness_reframe <-
+    test_gt %>% reframe(missing = loci_missingness(genotypes))
+  loci_missingness_direct <- test_gt %>%
+    loci_missingness(n_cores = 2) %>%
+    arrange(group)
+  expect_equal(loci_missingness_reframe$missing, loci_missingness_direct$value)
+  # check that the direct method can take a column genotypes
+  loci_missingness_direct2 <- test_gt %>%
+    loci_missingness(genotypes) %>%
+    arrange(group)
+  expect_equal(loci_missingness_reframe$missing, loci_missingness_direct2$value)
 })
 
 test_that("n_cores can be set", {
