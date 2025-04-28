@@ -183,8 +183,10 @@ loci_alt_freq.grouped_df <- function(
     }
   } else {
     # the polyploid case
-    stop("loci_alt_freq for polyploid is not directly implemented yet,",
-         "use group_map(.x, .f = ~ loci_alt_freq(.x)) for polyploid cases")
+    stop(
+      "loci_alt_freq for polyploid is not directly implemented yet,",
+      "use group_map(.x, .f = ~ loci_alt_freq(.x)) for polyploid cases"
+    )
   }
 }
 
@@ -300,8 +302,10 @@ loci_maf.grouped_df <- function(
     }
   } else {
     # the polyploid case
-    stop("loci_maf for polyploid is not directly implemented yet, use",
-    "group_map(.x, .f = ~ loci_maf(.x))")
+    stop(
+      "loci_maf for polyploid is not directly implemented yet, use",
+      "group_map(.x, .f = ~ loci_maf(.x))"
+    )
   }
 }
 
