@@ -133,7 +133,7 @@ loci_missingness.grouped_df <- function(
     as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
-    type = "tidy",
+    type = c("tidy", "list", "matrix"),
     ...) {
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
@@ -148,7 +148,7 @@ loci_missingness.grouped_df <- function(
     stop("loci_missingness only works with one grouping variable")
   }
   rlang::check_dots_empty()
-  type <- match.arg(type, c("tidy", "list", "matrix"))
+  type <- match.arg(type)
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
   rows_to_keep <- .gt_bigsnp_rows(.x)
   count_na_sub <- function(geno_fbm, ind, rows_to_keep) {

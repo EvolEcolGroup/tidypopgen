@@ -41,7 +41,7 @@ loci_missingness(
   as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
-  type = "tidy",
+  type = c("tidy", "list", "matrix"),
   ...
 )
 }

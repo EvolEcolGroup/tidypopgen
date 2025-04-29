@@ -34,7 +34,7 @@ loci_alt_freq(.x, .col = "genotypes", n_cores, block_size, type, ...)
   .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
-  type = "tidy",
+  type = c("tidy", "list", "matrix"),
   ...
 )
 
@@ -61,7 +61,7 @@ loci_maf(.x, .col = "genotypes", n_cores, block_size, type, ...)
   .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
-  type = "tidy",
+  type = c("tidy", "list", "matrix"),
   ...
 )
 }

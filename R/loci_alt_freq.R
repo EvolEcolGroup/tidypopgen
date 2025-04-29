@@ -122,7 +122,7 @@ loci_alt_freq.grouped_df <- function(
     .col = "genotypes",
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
-    type = "tidy",
+    type = c("tidy", "list", "matrix"),
     ...) {
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
@@ -138,7 +138,7 @@ loci_alt_freq.grouped_df <- function(
   }
 
   rlang::check_dots_empty()
-  type <- match.arg(type, c("tidy", "list", "matrix"))
+  type <- match.arg(type)
   if (is_diploid_only(.x)) {
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
     # rows (individuals) that we want to use
@@ -239,7 +239,7 @@ loci_maf.grouped_df <- function(
     .col = "genotypes",
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
-    type = "tidy",
+    type = c("tidy", "list", "matrix"),
     ...) {
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
@@ -255,7 +255,7 @@ loci_maf.grouped_df <- function(
   }
 
   rlang::check_dots_empty()
-  type <- match.arg(type, c("tidy", "list", "matrix"))
+  type <- match.arg(type)
   if (is_diploid_only(.x)) {
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
     # rows (individuals) that we want to use
