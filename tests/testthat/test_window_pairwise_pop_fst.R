@@ -33,7 +33,6 @@ test_gt <- gen_tibble(
 )
 test_gt <- test_gt %>% dplyr::group_by(population)
 
-
 # testing the infrastructure for windowing
 test_that("pairwise_pop_fst num and dem are returned correctly", {
   hudson_gt_fst <- test_gt %>%
@@ -59,29 +58,340 @@ test_that("pairwise_pop_fst num and dem are returned correctly", {
   )
 })
 
-
 test_that("window_pairwise_pop_fst works correctly", {
-  test_window <- test_gt %>%
+  hudson_gt_fst_nd <- test_gt %>%
+    pairwise_pop_fst(
+      method = "Hudson",
+      return_num_dem = TRUE
+    )
+  # check that pop Fst by SNP is calculated correctly
+  snp_window <- test_gt %>%
     window_pairwise_pop_fst(
       window_size = 3,
       step_size = 2,
       size_unit = "snp",
       min_loci = 2
     )
-
-  hudson_gt_fst_nd <- test_gt %>%
+  # check step size
+  expect_equal(
+    snp_window$start[3] - snp_window$start[2],
+    2
+  )
+  # check chrm 1, window 1 Fst calculation
+  # find first 3 SNP loci
+  ch1_wind1_pos <- test_gt %>%
+    show_loci() %>%
+    filter(chromosome == "chr1") %>%
+    slice_head(n = 3)
+  # pairwise fst for first 3 SNPs
+  ch1_wind1_fst <- test_gt %>%
+    select_loci(ch1_wind1_pos$big_index) %>%
     pairwise_pop_fst(
       method = "Hudson",
-      return_num_dem = TRUE
+      by_locus = TRUE
     )
-  # TODO check that this works correctly!
-
+  # pop1 vs pop2
+  expect_equal(
+    snp_window$fst_pop1.pop2[1],
+    ch1_wind1_fst$Fst$value[1]
+  )
+  # pop1 vs pop3
+  expect_equal(
+    snp_window$fst_pop1.pop3[1],
+    ch1_wind1_fst$Fst$value[2]
+  )
+  # pop2 vs pop3
+  expect_equal(
+    snp_window$fst_pop2.pop3[1],
+    ch1_wind1_fst$Fst$value[3]
+  )
+  # manually calculate chrm 1, window 1 Fst
+  manual_pop1_pop2 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[1:3, 1]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[1:3, 1])
+  manual_pop1_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[1:3, 2]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[1:3, 2])
+  manual_pop2_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[1:3, 3]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[1:3, 3])
+  # pop1 vs pop2
+  expect_equal(
+    snp_window$fst_pop1.pop2[1],
+    manual_pop1_pop2
+  )
+  # pop1 vs pop3
+  expect_equal(
+    snp_window$fst_pop1.pop3[1],
+    manual_pop1_pop3
+  )
+  # pop2 vs pop3
+  expect_equal(
+    snp_window$fst_pop2.pop3[1],
+    manual_pop2_pop3
+  )
+  # check chrm 2, window 1 Fst calculation
+  # find first 3 SNP loci on chr 2
+  ch2_wind1_pos <- test_gt %>%
+    show_loci() %>%
+    filter(chromosome == "chr2") %>%
+    slice_head(n = 3)
+  # pairwise fst for first 3 SNPs chr 2
+  ch2_wind1_fst <- test_gt %>%
+    select_loci(ch2_wind1_pos$big_index) %>%
+    pairwise_pop_fst(
+      method = "Hudson",
+      by_locus = TRUE
+    )
+  # pop1 vs pop2
+  expect_equal(
+    snp_window$fst_pop1.pop2[2],
+    ch2_wind1_fst$Fst$value[1]
+  )
+  # pop1 vs pop3
+  expect_equal(
+    snp_window$fst_pop1.pop3[2],
+    ch2_wind1_fst$Fst$value[2]
+  )
+  # pop2 vs pop3
+  expect_equal(
+    snp_window$fst_pop2.pop3[2],
+    ch2_wind1_fst$Fst$value[3]
+  )
+  # manually calculate chrm 2, window 1 Fst
+  manual_pop1_pop2 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[4:6, 1]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[4:6, 1])
+  manual_pop1_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[4:6, 2]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[4:6, 2])
+  manual_pop2_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[4:6, 3]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[4:6, 3])
+  # pop1 vs pop2
+  expect_equal(
+    snp_window$fst_pop1.pop2[2],
+    manual_pop1_pop2
+  )
+  # pop1 vs pop3
+  expect_equal(
+    snp_window$fst_pop1.pop3[2],
+    manual_pop1_pop3
+  )
+  # pop2 vs pop3
+  expect_equal(
+    snp_window$fst_pop2.pop3[2],
+    manual_pop2_pop3
+  )
+  # check chrm 2, window 2 Fst calculation
+  # find 3-5 SNP loci on chr 2
+  ch2_wind2_pos <- test_gt %>%
+    show_loci() %>%
+    filter(chromosome == "chr2") %>%
+    slice_tail(n = 3)
+  # pairwise fst for 3-5 SNPs chr 2
+  ch2_wind2_fst <- test_gt %>%
+    select_loci(ch2_wind2_pos$big_index) %>%
+    pairwise_pop_fst(
+      method = "Hudson",
+      by_locus = TRUE
+    )
+  # pop1 vs pop2
+  expect_equal(
+    snp_window$fst_pop1.pop2[3],
+    ch2_wind2_fst$Fst$value[1]
+  )
+  # pop1 vs pop3
+  expect_equal(
+    snp_window$fst_pop1.pop3[3],
+    ch2_wind2_fst$Fst$value[2]
+  )
+  # pop2 vs pop3
+  expect_equal(
+    snp_window$fst_pop2.pop3[3],
+    ch2_wind2_fst$Fst$value[3]
+  )
+  # manually calculate chrm 2, window 2 Fst
+  manual_pop1_pop2 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[6:8, 1]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[6:8, 1])
+  manual_pop1_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[6:8, 2]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[6:8, 2])
+  manual_pop2_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[6:8, 3]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[6:8, 3])
+  # pop1 vs pop2
+  expect_equal(
+    snp_window$fst_pop1.pop2[3],
+    manual_pop1_pop2
+  )
+  # pop1 vs pop3
+  expect_equal(
+    snp_window$fst_pop1.pop3[3],
+    manual_pop1_pop3
+  )
+  # pop2 vs pop3
+  expect_equal(
+    snp_window$fst_pop2.pop3[3],
+    manual_pop2_pop3
+  )
+  # check that pop Fst by BP is calculated correctly
   bp_window <- window_pairwise_pop_fst(test_gt,
     window_size = 200,
     step_size = 100,
     size_unit = "bp",
     min_loci = 1
   )
+  # check step size
+  expect_equal(
+    bp_window$start[2] - bp_window$start[1],
+    100
+  )
+  # check chrm 1, window 1 Fst calculation
+  # find loci between positions 1-200
+  ch1_wind1_pos <- test_gt %>%
+    show_loci() %>%
+    filter(chromosome == "chr1" & position >= 1 & position <= 200) %>%
+    select(big_index)
+  # pairwise fst for 1-200 positions
+  ch1_wind1_fst <- test_gt %>%
+    select_loci(ch1_wind1_pos$big_index) %>%
+    pairwise_pop_fst(
+      method = "Hudson",
+      by_locus = TRUE
+    )
+  # pop1 vs pop2
+  expect_equal(
+    bp_window$fst_pop1.pop2[1],
+    ch1_wind1_fst$Fst$value[1]
+  )
+  # pop1 vs pop3
+  expect_equal(
+    bp_window$fst_pop1.pop3[1],
+    ch1_wind1_fst$Fst$value[2]
+  )
+  # pop2 vs pop3
+  expect_equal(
+    bp_window$fst_pop2.pop3[1],
+    ch1_wind1_fst$Fst$value[3]
+  )
+  # manually calculate chrm 1, window 1 Fst
+  manual_pop1_pop2 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[1:2, 1]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[1:2, 1])
+  manual_pop1_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[1:2, 2]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[1:2, 2])
+  manual_pop2_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[1:2, 3]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[1:2, 3])
+  # pop1 vs pop2
+  expect_equal(
+    bp_window$fst_pop1.pop2[1],
+    manual_pop1_pop2
+  )
+  # pop1 vs pop3
+  expect_equal(
+    bp_window$fst_pop1.pop3[1],
+    manual_pop1_pop3
+  )
+  # pop2 vs pop3
+  expect_equal(
+    bp_window$fst_pop2.pop3[1],
+    manual_pop2_pop3
+  )
+  # check chrm 1, window 2 (min_loci < 1) is NA
+  expect_true(is.na(bp_window$fst_pop1.pop2[2]))
+  expect_true(is.na(bp_window$fst_pop1.pop3[2]))
+  expect_true(is.na(bp_window$fst_pop2.pop3[2]))
 
-  # TODO check that this works correctly
+  # check chrm 2, window 1 Fst calculation
+  # find loci between positions 1-200 on chr 2
+  ch2_wind1_pos <- test_gt %>%
+    show_loci() %>%
+    filter(chromosome == "chr2" & position >= 1 & position <= 200) %>%
+    select(big_index)
+  # pairwise fst for 1-200 positions chr 2
+  ch2_wind1_fst <- test_gt %>%
+    select_loci(ch2_wind1_pos$big_index) %>%
+    pairwise_pop_fst(
+      method = "Hudson",
+      by_locus = TRUE
+    )
+  # pop1 vs pop2
+  expect_equal(
+    bp_window$fst_pop1.pop2[4],
+    ch2_wind1_fst$Fst$value[1]
+  )
+  # pop1 vs pop3
+  expect_equal(
+    bp_window$fst_pop1.pop3[4],
+    ch2_wind1_fst$Fst$value[2]
+  )
+  # pop2 vs pop3
+  expect_equal(
+    bp_window$fst_pop2.pop3[4],
+    ch2_wind1_fst$Fst$value[3]
+  )
+  # manually calculate chrm 2, window 1 Fst
+  manual_pop1_pop2 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[4:6, 1]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[4:6, 1])
+  manual_pop1_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[4:6, 2]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[4:6, 2])
+  manual_pop2_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[4:6, 3]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[4:6, 3])
+  # pop1 vs pop2
+  expect_equal(
+    bp_window$fst_pop1.pop2[4],
+    manual_pop1_pop2
+  )
+  # pop1 vs pop3
+  expect_equal(
+    bp_window$fst_pop1.pop3[4],
+    manual_pop1_pop3
+  )
+  # pop2 vs pop3
+  expect_equal(
+    bp_window$fst_pop2.pop3[4],
+    manual_pop2_pop3
+  )
+  # check chrm 2, window 5 Fst calculation
+  # find loci between positions 401-600 on chr 2
+  ch2_wind5_pos <- test_gt %>%
+    show_loci() %>%
+    filter(chromosome == "chr2" & position >= 401 & position <= 600) %>%
+    select(big_index)
+  # pairwise fst for 401-600 positions chr 2
+  ch2_wind5_fst <- test_gt %>%
+    select_loci(ch2_wind5_pos$big_index) %>%
+    pairwise_pop_fst(
+      method = "Hudson",
+      by_locus = TRUE
+    )
+  # pop1 vs pop2
+  expect_equal(
+    bp_window$fst_pop1.pop2[8],
+    ch2_wind5_fst$Fst$value[1]
+  )
+  # pop1 vs pop3
+  expect_equal(
+    bp_window$fst_pop1.pop3[8],
+    ch2_wind5_fst$Fst$value[2]
+  )
+  # pop2 vs pop3
+  expect_equal(
+    bp_window$fst_pop2.pop3[8],
+    ch2_wind5_fst$Fst$value[3]
+  )
+  # manually calculate chrm 2, window 5 Fst
+  manual_pop1_pop2 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[8, 1]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[8, 1])
+  manual_pop1_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[8, 2]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[8, 2])
+  manual_pop2_pop3 <- mean(hudson_gt_fst_nd$Fst_by_locus_num[8, 3]) /
+    mean(hudson_gt_fst_nd$Fst_by_locus_den[8, 3])
+  # pop1 vs pop2
+  expect_equal(
+    bp_window$fst_pop1.pop2[8],
+    manual_pop1_pop2
+  )
+  # pop1 vs pop3
+  expect_equal(
+    bp_window$fst_pop1.pop3[8],
+    manual_pop1_pop3
+  )
+  # pop2 vs pop3
+  expect_equal(
+    bp_window$fst_pop2.pop3[8],
+    manual_pop2_pop3
+  )
 })
