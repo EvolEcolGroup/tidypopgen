@@ -43,7 +43,7 @@
 #' @rdname loci_ld_clump
 #' @export
 #' @examples
-#' example_gt <- example_gt() %>% gt_impute_simple()
+#' example_gt <- example_gt("gen_tbl") %>% gt_impute_simple()
 #'
 #' # To return a boolean vector indicating whether the SNP should be kept
 #' example_gt %>% loci_ld_clump()
@@ -57,8 +57,6 @@ loci_ld_clump <- function(.x, .col = "genotypes", ...) {
 #' @export
 #' @rdname loci_ld_clump
 loci_ld_clump.tbl_df <- function(.x, .col = "genotypes", ...) {
-  # TODO this is a hack to deal with the class being dropped when going through
-  # group_map
   stopifnot_gen_tibble(.x)
   # check n_cores are available
   .col <- rlang::enquo(.col) %>%

@@ -14,7 +14,7 @@
 #' @rdname loci_transitions
 #' @export
 #' @examples
-#' example_gt <- example_gt()
+#' example_gt <- example_gt("gen_tbl")
 #' example_gt %>% loci_transitions()
 loci_transitions <- function(.x, .col = "genotypes", ...) {
   UseMethod("loci_transitions", .x)
@@ -23,8 +23,6 @@ loci_transitions <- function(.x, .col = "genotypes", ...) {
 #' @export
 #' @rdname loci_transitions
 loci_transitions.tbl_df <- function(.x, .col = "genotypes", ...) {
-  # TODO this is a hack to deal with the class being dropped when going through
-  # group_map
   stopifnot_gen_tibble(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%

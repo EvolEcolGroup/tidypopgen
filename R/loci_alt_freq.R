@@ -25,7 +25,7 @@
 #' @rdname loci_alt_freq
 #' @export
 #' @examples
-#' example_gt <- example_gt()
+#' example_gt <- example_gt("gen_tbl")
 #'
 #' # For alternate allele frequency
 #' example_gt %>% loci_alt_freq()
@@ -84,8 +84,6 @@ loci_alt_freq.tbl_df <- function(
     # multithreaded, as we use the multiple threads
     # for openMP
     ...) {
-  # TODO this is a hack to deal with the class being dropped when going
-  # through group_map
   stopifnot_gen_tibble(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
@@ -206,8 +204,6 @@ loci_maf.tbl_df <- function(
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
     ...) {
-  # TODO this is a hack to deal with the class being dropped when going
-  # through group_map
   stopifnot_gen_tibble(.x) # confirm that .col is "genotypes"
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%

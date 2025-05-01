@@ -23,7 +23,7 @@
 #' @rdname loci_missingness
 #' @export
 #' @examples
-#' example_gt <- example_gt()
+#' example_gt <- example_gt("gen_tbl")
 #'
 #' # For missingness
 #' example_gt %>% loci_missingness()
@@ -64,8 +64,6 @@ loci_missingness.tbl_df <- function(
     # threads for openMP,
     block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
     ...) {
-  # TODO this is a hack to deal with the class being dropped when going through
-  # group_map
   stopifnot_gen_tibble(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
