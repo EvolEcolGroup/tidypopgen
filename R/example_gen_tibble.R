@@ -2,7 +2,11 @@
 #'
 #' This function creates a `gen_tibble` object for use in examples in
 #' documentation.
-#' @param type a character string indicating the type of `gen_tibble` to create
+#' @param type a character string indicating the type of `gen_tibble` to create:
+#'   - "gen_tbl": a basic gen_tibble with genotype data and metadata
+#'   - "grouped_gen_tbl": same as "gen_tbl" but grouped by population
+#'   - "grouped_gen_tbl_sf": adds spatial features (longitude/latitude) and groups by population
+#'   - "gen_tbl_sf": adds spatial features without grouping
 #' @returns an example object of the class `gen_tbl`.
 #' @rdname example_gt
 #' @export
@@ -35,56 +39,31 @@ example_gt <- function(type = c(
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
-  if (type == "gen_tbl") {
-    test_gt <- gen_tibble(
-      x = test_genotypes,
-      loci = test_loci,
-      indiv_meta = test_indiv_meta,
-      quiet = TRUE
-    )
-  } else if (type == "grouped_gen_tbl") {
-    test_gt <- gen_tibble(
-      x = test_genotypes,
-      loci = test_loci,
-      indiv_meta = test_indiv_meta,
-      quiet = TRUE
-    )
-    test_gt <- test_gt %>% group_by(.data$population)
-  } else if (type == "grouped_gen_tbl_sf") {
-    test_indiv_meta <- data.frame(
-      id = c("a", "b", "c", "d", "e", "f", "g"),
-      population = c("pop1", "pop1", "pop2", "pop2", "pop1", "pop3", "pop3"),
-      longitude = c(0, 0, 2, 2, 0, 2, 2),
-      latitude = c(51, 51, 49, 49, 51, 41, 41)
-    )
-    test_gt <- gen_tibble(
-      x = test_genotypes,
-      loci = test_loci,
-      indiv_meta = test_indiv_meta,
-      quiet = TRUE
-    )
+  # Add spatial coordinates if needed
+  if (type %in% c("grouped_gen_tbl_sf", "gen_tbl_sf")) {
+    test_indiv_meta$longitude <- c(0, 0, 2, 2, 0, 2, 2)
+    test_indiv_meta$latitude <- c(51, 51, 49, 49, 51, 41, 41)
+  }
+
+  # Create the base gen_tibble
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+
+  # Add spatial features if needed
+  if (type %in% c("grouped_gen_tbl_sf", "gen_tbl_sf")) {
     test_gt <- gt_add_sf(
       x = test_gt,
-      coords = c("longitude", "latitude"),
+      coords = c("longitude", "latitude")
     )
+  }
+
+  # Add grouping if needed
+  if (type %in% c("grouped_gen_tbl", "grouped_gen_tbl_sf")) {
     test_gt <- test_gt %>% group_by(.data$population)
-  } else if (type == "gen_tbl_sf") {
-    test_indiv_meta <- data.frame(
-      id = c("a", "b", "c", "d", "e", "f", "g"),
-      population = c("pop1", "pop1", "pop2", "pop2", "pop1", "pop3", "pop3"),
-      longitude = c(0, 0, 2, 2, 0, 2, 2),
-      latitude = c(51, 51, 49, 49, 51, 41, 41)
-    )
-    test_gt <- gen_tibble(
-      x = test_genotypes,
-      loci = test_loci,
-      indiv_meta = test_indiv_meta,
-      quiet = TRUE
-    )
-    test_gt <- gt_add_sf(
-      x = test_gt,
-      coords = c("longitude", "latitude"),
-    )
   }
   return(test_gt)
 }

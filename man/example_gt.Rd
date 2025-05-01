@@ -9,7 +9,13 @@ example_gt(
 )
 }
 \arguments{
-\item{type}{a character string indicating the type of \code{gen_tibble} to create}
+\item{type}{a character string indicating the type of \code{gen_tibble} to create:
+\itemize{
+\item "gen_tbl": a basic gen_tibble with genotype data and metadata
+\item "grouped_gen_tbl": same as "gen_tbl" but grouped by population
+\item "grouped_gen_tbl_sf": adds spatial features (longitude/latitude) and groups by population
+\item "gen_tbl_sf": adds spatial features without grouping
+}}
 }
 \value{
 an example object of the class \code{gen_tbl}.
