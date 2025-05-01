@@ -131,3 +131,11 @@ reference:
     desc: "Function for creating an example `gen_tibble`."
     contents:
         - example_gt
+  - title: "tidyverse methods"
+    desc: "Methods for tidyverse verbs for `gen_tibble` objects"
+    contents:
+        - arrange.gen_tbl
+        - filter.gen_tbl
+        - mutate.gen_tbl
+        - dplyr_reconstruct.gen_tbl
+        - "$<-.gen_tbl"
