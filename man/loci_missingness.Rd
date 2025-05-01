@@ -9,14 +9,17 @@
 \usage{
 loci_missingness(
   .x,
+  .col = "genotypes",
   as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size,
+  type,
   ...
 )
 
 \method{loci_missingness}{tbl_df}(
   .x,
+  .col = "genotypes",
   as_counts = FALSE,
   n_cores = n_cores,
   block_size = bigstatsr::block_size(nrow(.x), 1),
@@ -25,6 +28,7 @@ loci_missingness(
 
 \method{loci_missingness}{vctrs_bigSNP}(
   .x,
+  .col = "genotypes",
   as_counts = FALSE,
   n_cores = n_cores,
   block_size = bigstatsr::block_size(length(.x), 1),
@@ -33,15 +37,22 @@ loci_missingness(
 
 \method{loci_missingness}{grouped_df}(
   .x,
+  .col = "genotypes",
   as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
+  type = c("tidy", "list", "matrix"),
   ...
 )
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
 a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
+
+\item{.col}{the column to be used when a tibble (or grouped tibble is passed
+directly to the function). This defaults to "genotypes" and can only take
+that value. There is no need for the user to set it, but it is included to
+resolve certain tidyselect operations.}
 
 \item{as_counts}{boolean defining whether the count of NAs (rather than the
 rate) should be returned. It defaults to FALSE (i.e. rates are returned by
@@ -52,11 +63,41 @@ default).}
 
 \item{block_size}{maximum number of loci read at once.}
 
+\item{type}{type of object to return, if using grouped method. One of "tidy",
+"list", or "matrix". Default is "tidy".}
+
 \item{...}{other arguments passed to specific methods.}
 }
 \value{
 a vector of frequencies, one per locus
 }
 \description{
-Estimate the rate of missingness at each locus.
+Estimate the rate of missingness at each locus. This function has an
+efficient method to support grouped \code{gen_tibble} objects, which can return a
+tidied tibble, a list, or a matrix.
+}
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# For missingness
+example_gt \%>\% loci_missingness()
+
+# For missingness per locus per population
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_missingness()
+# alternatively, return a list of populations with their missingness
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_missingness(type = "list")
+# or a matrix with populations in columns and loci in rows
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_missingness(type = "matrix")
+# or within reframe (not recommended, as it much less efficient
+# than using it directly as shown above)
+example_gt \%>\%
+  group_by(population) \%>\%
+  reframe(missing = loci_missingness(genotypes))
+
 }

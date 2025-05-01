@@ -134,5 +134,13 @@ gt_update_backingfile <- function(
     message("make sure that you do NOT delete those files!")
   }
 
+  # prioritise "gen_tbl" class over "sf"
+  obj_class <- class(new_gen_tbl)
+  if ("sf" %in% obj_class) {
+    obj_class <-
+      c("gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
+    class(new_gen_tbl) <- obj_class
+  }
+
   return(new_gen_tbl)
 }

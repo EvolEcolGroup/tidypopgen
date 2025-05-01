@@ -4,15 +4,15 @@
 \alias{loci_ld_clump}
 \alias{loci_ld_clump.tbl_df}
 \alias{loci_ld_clump.vctrs_bigSNP}
-\alias{loci_ld_clump.grouped_df}
 \title{Clump loci based on a Linkage Disequilibrium threshold}
 \usage{
-loci_ld_clump(.x, ...)
+loci_ld_clump(.x, .col = "genotypes", ...)
 
-\method{loci_ld_clump}{tbl_df}(.x, ...)
+\method{loci_ld_clump}{tbl_df}(.x, .col = "genotypes", ...)
 
 \method{loci_ld_clump}{vctrs_bigSNP}(
   .x,
+  .col = "genotypes",
   S = NULL,
   thr_r2 = 0.2,
   size = 100/thr_r2,
@@ -22,11 +22,14 @@ loci_ld_clump(.x, ...)
   return_id = FALSE,
   ...
 )
-
-\method{loci_ld_clump}{grouped_df}(.x, ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object}
+
+\item{.col}{the column to be used when a tibble (or grouped tibble is passed
+directly to the function). This defaults to "genotypes" and can only take
+that value. There is no need for the user to set it, but it is included to
+resolve certain tidyselect operations.}
 
 \item{...}{currently not used.}
 
@@ -74,4 +77,13 @@ better spread of SNPs over the chromosome.
 Any missing values in the genotypes of a \code{gen_tibble} passed to
 \code{loci_ld_clump} will cause an error. To deal with missingness, see
 \code{\link[=gt_impute_simple]{gt_impute_simple()}}.
+}
+\examples{
+example_gt <- example_gt("gen_tbl") \%>\% gt_impute_simple()
+
+# To return a boolean vector indicating whether the SNP should be kept
+example_gt \%>\% loci_ld_clump()
+# To return a vector of SNP indices to be kept
+example_gt \%>\% loci_ld_clump(return_id = TRUE)
+
 }

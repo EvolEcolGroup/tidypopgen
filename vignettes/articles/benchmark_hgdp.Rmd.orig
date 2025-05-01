@@ -5,7 +5,8 @@ title: "Benchmark on the HGDP"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.path = "./figure/hgdp_benchmark/"
 )
 library(benchmarkme)
 library(chunkhooks)
@@ -13,18 +14,17 @@ hook_benchmark()
 set.seed(123)
 ```
 
-
 This vignette is a benchmark of a few key functions in the tidypopgen package.
 The Human Genome Diversity Project (HGDP) SNP dataset is used for this
 benchmark. This dataset includes 1043 individuals from 51 populations, typed
 at ~650k loci.
 
 We will run this benchmark on a machine with a `r benchmarkme::get_cpu()` CPU
-and `r print(benchmarkme::get_ram(), unit_system = "iec")` of RAM. However, we will limit the number of
+and `r as.character(print(benchmarkme::get_ram(), unit_system = "iec"))` of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
 inflation of the number of threads used (for example, in cases where dependency
-                                         functions may automatically use all available cores) we need to set up
+functions may automatically use all available cores) we need to set up
 preferences at the beginning of the session. Specifically, we limit the
 number of cores used by the parallelised BLAS library with
 `bigparallelr::set_blas_ncores()`, and by the package data.table with
@@ -48,7 +48,7 @@ Before running this benchmark, we need to download into the subdirectory
 `data/hgdp/` the bed file `hgdp650.qc.hg19.bed` and the metadata file
 `HGDPid_populations.txt`.
 
-```{r set_paths}
+```{r}
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 ```
@@ -57,7 +57,6 @@ meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 
 Our first step is to load the HGDP data into a `gen_tibble` object, and add its
 associated metadata.
-
 
 ```{r read_plink, benchmark = TRUE}
 hgdp <- gen_tibble(bed_path,
@@ -76,6 +75,7 @@ hgdp <- hgdp %>% mutate(
 ```
 
 Let's confirm that we have read all the expected information:
+
 ```{r}
 hgdp
 
@@ -89,11 +89,7 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 ```{r loci_report, benchmark = TRUE}
 loci_report <- qc_report_loci(hgdp)
 ```
-
-# Loci Plot
-
 The resulting report can be observed using `autoplot`.
-
 
 ```{r autoplot_loci_report}
 autoplot(loci_report, type = "all")
@@ -116,19 +112,32 @@ hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 We can then call `qc_report_indiv` to supply observed heterozygosity per
 individual, and rate of missingness per individual.
 
+
 ```{r indiv_report, benchmark = TRUE}
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
+```{r autoplot_indiv_report}
+autoplot(indiv_report, type = "scatter")
+```
+
 # Filter individuals
 
-And we can filter individuals down to only include those with less than 10% of
+And we can filter individuals down to only include those with less than 1% of
 their genotypes missing.
 
-
 ```{r filter_indiv, benchmark = TRUE}
-to_keep_indiv <- which(indiv_report$missingness < 0.1)
+to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
+```
+
+# Update backingfile
+
+After removing individuals from the dataset, and before imputing, we need to
+update the file backing matrix with `gt_update_backingfile`.
+
+```{r update_backingfile}
+hgdp <- gt_update_backingfile(hgdp)
 ```
 
 # Impute data
@@ -136,7 +145,6 @@ hgdp <- hgdp[to_keep_indiv, ]
 Some functions, such as `loci_ld_clump` and the `gt_pca` functions, require that
 there is no missingness in the dataset, so we use `gt_impute_simple` to impute
 any remaining missing genotypes.
-
 
 ```{r impute, benchmark = TRUE}
 hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
@@ -157,7 +165,6 @@ hgdp <- hgdp %>%
 A principal components analysis can then be computed using the resulting cleaned
 and LD clumped dataset.
 
-
 ```{r pca, benchmark = TRUE}
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
@@ -172,17 +179,17 @@ autoplot(test_pca, type = "scores") +
 # DAPC
 
 We can continue with a discriminant analysis of principal
-components using `gt_dapc`.
+components using `gt_dapc`, setting 6 groups corresponding to
+the main geographic regions covered by the dataset.
 
 ```{r dapc, benchmark = TRUE}
-pop_factor <- as.factor(hgdp$population)
-test_dapc <- gt_dapc(test_pca, pop = pop_factor)
+test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
 Plot DAPC:
 
-```{r DAPC_screeplot}
-autoplot(test_dapc, type = "screeplot")
+```{r DAPC_scores_plot}
+autoplot(test_dapc, type = "scores")
 ```
 
 # Calculate Fst
@@ -190,16 +197,33 @@ autoplot(test_dapc, type = "screeplot")
 To examine the differentiation between populations in the global HGDP set, we
 calculate pairwise Fst.
 
-
 ```{r pairwise_fst, benchmark = TRUE}
 grouped_hgdp <- hgdp %>% group_by(population)
 pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
 ```
 
+Plot pairwise Fst:
+
+```{r pairwise_fst_plot, eval = FALSE}
+# Order by continents
+grouped_hgdp_order <- grouped_hgdp %>% arrange(region,population)
+regional_order <- unique(grouped_hgdp_order$population)
+pairwise_fsts <- pairwise_fsts[regional_order,regional_order]
+
+ggheatmap(pairwise_fsts) +
+  scale_fill_viridis_c()+
+    theme(axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
+          axis.text.y = element_text(angle = 0, hjust = 1, size = 6))+
+  labs(
+    x = element_blank(),
+    y = element_blank(),
+    fill = "Fst"
+  )
+```
+
 # Save in plink bed format
 
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
-
 
 ```{r plink_save, benchmark = TRUE}
 gt_as_plink(hgdp,

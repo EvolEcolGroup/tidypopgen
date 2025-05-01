@@ -289,7 +289,6 @@ test_that("our stdevs are comparable to prcomp", {
   #########################
   # Perform PCA using gt_pca_autoSVD
   #########################
-  families <- gt_impute_simple(families, method = "mode")
   gt_pca_auto_result <- families %>% gt_pca_autoSVD(
     roll_size = 7,
     verbose = FALSE

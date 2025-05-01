@@ -1,6 +1,6 @@
 Package: tidypopgen
 Title: Tidy Population Genetics
-Version: 0.1.0.9004
+Version: 0.1.0.9007
 Authors@R: 
     c(person("Evie", "Carter", role = c("aut")),
     person("Andrea", "Manica", email = "am315@cam.ac.uk", 
@@ -35,6 +35,7 @@ Imports:
     patchwork,
     runner,
     rlang,
+    sf,
     stats,
     tidyselect,
     tidyr,
@@ -51,10 +52,13 @@ Suggests:
     detectRUNS,
     LEA,
     rmarkdown,
+    rnaturalearth,
+    rnaturalearthdata,
     readr,
     reticulate,
     testthat (>= 3.0.0),
-    vcfR
+    vcfR,
+    xgboost
 Remotes:
     uqrmaie1/admixtools
 VignetteBuilder: knitr
