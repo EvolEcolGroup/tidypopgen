@@ -13,7 +13,8 @@ example_gt(
 \itemize{
 \item "gen_tbl": a basic gen_tibble with genotype data and metadata
 \item "grouped_gen_tbl": same as "gen_tbl" but grouped by population
-\item "grouped_gen_tbl_sf": adds spatial features (longitude/latitude) and groups by population
+\item "grouped_gen_tbl_sf": adds spatial features (longitude/latitude)
+and groups by population
 \item "gen_tbl_sf": adds spatial features without grouping
 }}
 }

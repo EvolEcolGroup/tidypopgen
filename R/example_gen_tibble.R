@@ -5,7 +5,8 @@
 #' @param type a character string indicating the type of `gen_tibble` to create:
 #'   - "gen_tbl": a basic gen_tibble with genotype data and metadata
 #'   - "grouped_gen_tbl": same as "gen_tbl" but grouped by population
-#'   - "grouped_gen_tbl_sf": adds spatial features (longitude/latitude) and groups by population
+#'   - "grouped_gen_tbl_sf": adds spatial features (longitude/latitude)
+#'      and groups by population
 #'   - "gen_tbl_sf": adds spatial features without grouping
 #' @returns an example object of the class `gen_tbl`.
 #' @rdname example_gt
