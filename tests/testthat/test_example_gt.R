@@ -1,4 +1,4 @@
-test_that("example_gt functions",{
+test_that("example_gt functions", {
   test <- example_gt("gen_tbl")
   expect_true(inherits(test, "gen_tbl"))
 
