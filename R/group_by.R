@@ -10,7 +10,7 @@ group_by.gen_tbl <- function(
   obj_class <- class(out)
   if ("sf" %in% obj_class) {
     obj_class <-
-      c("gen_tbl", "grouped_gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
+      c("gen_tbl", "grouped_gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")]) # nolint
     class(out) <- obj_class
   } else {
     class(out) <- c("grouped_gen_tbl", "grouped_df", "gen_tbl", class(out)[-1])

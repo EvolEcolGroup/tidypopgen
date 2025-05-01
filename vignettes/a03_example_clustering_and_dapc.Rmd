@@ -86,8 +86,10 @@ using the `geom_sf()` function from `ggplot2`.
 library(rnaturalearth)
 library(ggplot2)
 
-map <- ne_countries(continent = "South America",
-                    type = "map_units", scale = "medium")
+map <- ne_countries(
+  continent = "South America",
+  type = "map_units", scale = "medium"
+)
 
 ggplot() +
   geom_sf(data = map) +
@@ -169,7 +171,7 @@ And now we can use `ggplot2` directly to generate our plot:
 
 ```{r, fig.alt = "Another score plot of individuals across the first and second Principal Components, with individual samples coloured by population, using ggplot2"}
 anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) +
-  geom_point()+
+  geom_point() +
   labs(x = "PC1", y = "PC2", color = "Population")
 ```
 

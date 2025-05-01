@@ -8,10 +8,10 @@
 #' @export
 #' @examples
 #' test_gt <- example_gt("gen_tbl")
-#' test_gt %>% filter(id %in% c("a","c"))
+#' test_gt %>% filter(id %in% c("a", "c"))
 #' test_gt <- example_gt("grouped_gen_tbl_sf")
-#' test_gt %>% filter(id %in% c("a","c"))
-filter.gen_tbl <- function(..., deparse.level = 1) {
+#' test_gt %>% filter(id %in% c("a", "c"))
+filter.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod()
   # prioritise "gen_tbl" class over "sf"
@@ -35,7 +35,7 @@ filter.gen_tbl <- function(..., deparse.level = 1) {
 #' test_gt %>% arrange(id)
 #' test_gt <- example_gt("grouped_gen_tbl_sf")
 #' test_gt %>% arrange(id)
-arrange.gen_tbl <- function(..., deparse.level = 1){
+arrange.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod()
   # prioritise "gen_tbl" class over "sf"
@@ -55,7 +55,7 @@ arrange.gen_tbl <- function(..., deparse.level = 1){
 #' @param deparse.level an integer controlling the construction of column names.
 #' @returns a `gen_tibble`
 #' @export
-mutate.gen_tbl <- function(..., deparse.level = 1){
+mutate.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod()
   # prioritise "gen_tbl" class over "sf"
@@ -105,6 +105,3 @@ dplyr_reconstruct.gen_tbl <- function(data, template) {
   }
   return(out)
 }
-
-
-

@@ -8,11 +8,11 @@
 #' @export
 
 example_gt <- function(type = c(
-  "gen_tbl", #nolint
-  "grouped_gen_tbl",
-  "grouped_gen_tbl_sf",
-  "gen_tbl_sf"
-)) {
+                         "gen_tbl", # nolint
+                         "grouped_gen_tbl",
+                         "grouped_gen_tbl_sf",
+                         "gen_tbl_sf"
+                       )) {
   type <- match.arg(type)
   test_genotypes <- rbind(
     c(1, 1, 0, 1, 1, 0),
@@ -35,7 +35,7 @@ example_gt <- function(type = c(
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
-  if(type == "gen_tbl") {
+  if (type == "gen_tbl") {
     test_gt <- gen_tibble(
       x = test_genotypes,
       loci = test_loci,
