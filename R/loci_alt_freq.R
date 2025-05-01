@@ -25,7 +25,7 @@
 #' @rdname loci_alt_freq
 #' @export
 #' @examples
-#' example_gt <- example_gt()
+#' example_gt <- example_gt("gen_tbl")
 #'
 #' # For alternate allele frequency
 #' example_gt %>% loci_alt_freq()

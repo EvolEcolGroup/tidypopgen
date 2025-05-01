@@ -14,7 +14,7 @@
 #' @rdname loci_transversions
 #' @export
 #' @examples
-#' example_gt <- example_gt()
+#' example_gt <- example_gt("gen_tbl")
 #' example_gt %>% loci_transversions()
 loci_transversions <- function(.x, .col = "genotypes", ...) {
   UseMethod("loci_transversions", .x)

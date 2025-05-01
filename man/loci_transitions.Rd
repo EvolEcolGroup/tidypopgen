@@ -31,6 +31,6 @@ a logical vector defining which loci are transitions
 Use the loci table to define which loci are transitions
 }
 \examples{
-example_gt <- example_gt()
+example_gt <- example_gt("gen_tbl")
 example_gt \%>\% loci_transitions()
 }

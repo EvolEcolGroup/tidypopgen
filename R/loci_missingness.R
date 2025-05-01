@@ -23,7 +23,7 @@
 #' @rdname loci_missingness
 #' @export
 #' @examples
-#' example_gt <- example_gt()
+#' example_gt <- example_gt("gen_tbl")
 #'
 #' # For missingness
 #' example_gt %>% loci_missingness()

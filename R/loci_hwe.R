@@ -19,7 +19,7 @@
 #' @rdname loci_hwe
 #' @export
 #' @examples
-#' example_gt <- example_gt()
+#' example_gt <- example_gt("gen_tbl")
 #'
 #' # For HWE
 #' example_gt %>% loci_hwe()

@@ -98,7 +98,7 @@ grouped \code{gen_tibble} objects. These can return a tidied tibble, a list, or 
 matrix.
 }
 \examples{
-example_gt <- example_gt()
+example_gt <- example_gt("gen_tbl")
 
 # For alternate allele frequency
 example_gt \%>\% loci_alt_freq()

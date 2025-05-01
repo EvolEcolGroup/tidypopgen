@@ -35,14 +35,7 @@ example_gt <- function(type = c(
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
-  if(is.null(type)) {
-    test_gt <- gen_tibble(
-      x = test_genotypes,
-      loci = test_loci,
-      indiv_meta = test_indiv_meta,
-      quiet = TRUE
-    )
-  } else if(type == "gen_tbl") {
+  if(type == "gen_tbl") {
     test_gt <- gen_tibble(
       x = test_genotypes,
       loci = test_loci,

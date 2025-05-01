@@ -77,7 +77,7 @@ efficient method to support grouped \code{gen_tibble} objects, which can return 
 tidied tibble, a list, or a matrix.
 }
 \examples{
-example_gt <- example_gt()
+example_gt <- example_gt("gen_tbl")
 
 # For missingness
 example_gt \%>\% loci_missingness()
