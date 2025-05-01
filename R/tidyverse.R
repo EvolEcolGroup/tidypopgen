@@ -37,7 +37,7 @@ filter.gen_tbl <- function(..., deparse.level = 1) {
 #' test_gt %>% arrange(id)
 arrange.gen_tbl <- function(..., deparse.level = 1){
   # send it to the next (data.frame) method
-  out <- NextMethod(generic = "arrange", ..., deparse.level = deparse.level)
+  out <- NextMethod()
   # prioritise "gen_tbl" class over "sf"
   obj_class <- class(out)
   if ("sf" %in% obj_class) {
