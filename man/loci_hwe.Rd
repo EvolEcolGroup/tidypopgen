@@ -4,20 +4,22 @@
 \alias{loci_hwe}
 \alias{loci_hwe.tbl_df}
 \alias{loci_hwe.vctrs_bigSNP}
-\alias{loci_hwe.grouped_df}
 \title{Test Hardy-Weinberg equilibrium at each locus}
 \usage{
-loci_hwe(.x, ...)
+loci_hwe(.x, .col = "genotypes", ...)
 
-\method{loci_hwe}{tbl_df}(.x, mid_p = TRUE, ...)
+\method{loci_hwe}{tbl_df}(.x, .col = "genotypes", mid_p = TRUE, ...)
 
-\method{loci_hwe}{vctrs_bigSNP}(.x, mid_p = TRUE, ...)
-
-\method{loci_hwe}{grouped_df}(.x, ...)
+\method{loci_hwe}{vctrs_bigSNP}(.x, .col = "genotypes", mid_p = TRUE, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
 a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
+
+\item{.col}{the column to be used when a tibble (or grouped tibble is passed
+directly to the function). This defaults to "genotypes" and can only take
+that value. There is no need for the user to set it, but it is included to
+resolve certain tidyselect operations.}
 
 \item{...}{not used.}
 
@@ -32,6 +34,18 @@ Return the p-value from an exact test of HWE.
 }
 \details{
 This function uses the original C++ algorithm from PLINK 1.90.
+}
+\examples{
+example_gt <- example_gt()
+
+# For HWE
+example_gt \%>\% loci_hwe()
+
+# For loci_hwe per locus per population, use reframe
+example_gt \%>\%
+  group_by(population) \%>\%
+  reframe(loci_hwe = loci_hwe(genotypes))
+
 }
 \author{
 the C++ algorithm was written by Christopher Chang for PLINK 1.90,
