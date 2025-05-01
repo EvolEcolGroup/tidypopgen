@@ -12,6 +12,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/index.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/news/index.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/annotate_group_info.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/arrange.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment.gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment_loci.html</loc></url>
@@ -28,13 +29,16 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_l_qc_missing.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/c.gt_admix.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/cash-set-.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/cbind.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/count_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/count_vcf_individuals.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/count_vcf_variants.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/distruct_colours.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/dplyr_reconstruct.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/example_gt.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/fct_inorder_base.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/filter.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/filter_high_relatedness.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/flip.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.html</loc></url>
@@ -87,6 +91,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_names.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_transitions.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_transversions.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/mutate.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/new_vctrs_bigsnp.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_grm.html</loc></url>
