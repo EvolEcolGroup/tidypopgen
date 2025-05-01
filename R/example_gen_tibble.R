@@ -2,11 +2,18 @@
 #'
 #' This function creates a `gen_tibble` object for use in examples in
 #' documentation.
+#' @param type a character string indicating the type of `gen_tibble` to create
 #' @returns an example object of the class `gen_tbl`.
 #' @rdname example_gt
 #' @export
 
-example_gt <- function() {
+example_gt <- function(type = c(
+  "gen_tbl", #nolint
+  "grouped_gen_tbl",
+  "grouped_gen_tbl_sf",
+  "gen_tbl_sf"
+)) {
+  type <- match.arg(type)
   test_genotypes <- rbind(
     c(1, 1, 0, 1, 1, 0),
     c(2, 1, 0, NA, 0, 0),
@@ -28,11 +35,63 @@ example_gt <- function() {
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
-  test_gt <- gen_tibble(
-    x = test_genotypes,
-    loci = test_loci,
-    indiv_meta = test_indiv_meta,
-    quiet = TRUE
-  )
+  if(is.null(type)) {
+    test_gt <- gen_tibble(
+      x = test_genotypes,
+      loci = test_loci,
+      indiv_meta = test_indiv_meta,
+      quiet = TRUE
+    )
+  } else if(type == "gen_tbl") {
+    test_gt <- gen_tibble(
+      x = test_genotypes,
+      loci = test_loci,
+      indiv_meta = test_indiv_meta,
+      quiet = TRUE
+    )
+  } else if (type == "grouped_gen_tbl") {
+    test_gt <- gen_tibble(
+      x = test_genotypes,
+      loci = test_loci,
+      indiv_meta = test_indiv_meta,
+      quiet = TRUE
+    )
+    test_gt <- test_gt %>% group_by(.data$population)
+  } else if (type == "grouped_gen_tbl_sf") {
+    test_indiv_meta <- data.frame(
+      id = c("a", "b", "c", "d", "e", "f", "g"),
+      population = c("pop1", "pop1", "pop2", "pop2", "pop1", "pop3", "pop3"),
+      longitude = c(0, 0, 2, 2, 0, 2, 2),
+      latitude = c(51, 51, 49, 49, 51, 41, 41)
+    )
+    test_gt <- gen_tibble(
+      x = test_genotypes,
+      loci = test_loci,
+      indiv_meta = test_indiv_meta,
+      quiet = TRUE
+    )
+    test_gt <- gt_add_sf(
+      x = test_gt,
+      coords = c("longitude", "latitude"),
+    )
+    test_gt <- test_gt %>% group_by(.data$population)
+  } else if (type == "gen_tbl_sf") {
+    test_indiv_meta <- data.frame(
+      id = c("a", "b", "c", "d", "e", "f", "g"),
+      population = c("pop1", "pop1", "pop2", "pop2", "pop1", "pop3", "pop3"),
+      longitude = c(0, 0, 2, 2, 0, 2, 2),
+      latitude = c(51, 51, 49, 49, 51, 41, 41)
+    )
+    test_gt <- gen_tibble(
+      x = test_genotypes,
+      loci = test_loci,
+      indiv_meta = test_indiv_meta,
+      quiet = TRUE
+    )
+    test_gt <- gt_add_sf(
+      x = test_gt,
+      coords = c("longitude", "latitude"),
+    )
+  }
   return(test_gt)
 }

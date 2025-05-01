@@ -4,7 +4,12 @@
 \alias{example_gt}
 \title{Create example gen_tibble}
 \usage{
-example_gt()
+example_gt(
+  type = c("gen_tbl", "grouped_gen_tbl", "grouped_gen_tbl_sf", "gen_tbl_sf")
+)
+}
+\arguments{
+\item{type}{a character string indicating the type of \code{gen_tibble} to create}
 }
 \value{
 an example object of the class \code{gen_tbl}.

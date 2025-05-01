@@ -38,9 +38,10 @@ Now let's inspect our `gen_tibble`:
 anole_gt
 ```
 
-We can see that we have 46 individuals, from 3249 loci. Note that we don't have any
-information on population from the vcf. That information can be found
-from another csv file. We will have add the population information manually. Let's start by reading the
+We can see that we have 46 individuals, from 3249 loci. Note that we don't have
+any information on population from the vcf. That information can be found from
+another csv file. We will have add the population information manually. Let's
+start by reading the
 file:
 ```{r}
 pops_path <- system.file("/extdata/anolis/punctatus_n46_meta.csv",
@@ -168,11 +169,13 @@ And now we can use `ggplot2` directly to generate our plot:
 
 ```{r, fig.alt = "Another score plot of individuals across the first and second Principal Components, with individual samples coloured by population, using ggplot2"}
 anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) +
-  geom_point()
+  geom_point()+
+  labs(x = "PC1", y = "PC2", color = "Population")
 ```
 
-We can see that the three population do separate nicely on the PCA, with just one individual
-from Wam sitting in-between the other Wam individuals and those from Eam.
+We can see that the two population separate clearly in the PCA space, with individuals
+from the Atlantic Forest clustering closely together while Amazonian Forest individuals
+are spread across the first two principal components.
 
 It is also possible to inspect which loci contribute the most to a given component:
 
@@ -232,13 +235,15 @@ to be a very good metric under many scenarios:
 autoplot(anole_clusters)
 ```
 
-We are looking for the minimum value of BIC. There is no clear elbow (a minimum after which BIC increases
-with increasing k). However, we notice that there is a quick levelling
-off in the decrease in BIC at
-3 clusters. Arguably, these are sufficient to capture the main structure (and that makes
-sense given what we saw in the PCA). We can also use a number of algorithmic approaches (based on the original `find.clusters()` function in `adegenet`) to choose the best *k* value
-from this plot through `gt_cluster_pca_best_k()`. We will use the defaults (BIC with "diffNgroup",
-see the help page for `gt_cluster_pca_best_k()` for a description of the various options):
+We are looking for the minimum value of BIC. There is no clear elbow (a minimum
+after which BIC increases with increasing k). However, we notice that there is a
+quick levelling off in the decrease in BIC at 3 clusters. Arguably, these are
+sufficient to capture the main structure. We can also use a number of
+algorithmic approaches (based on the original `find.clusters()` function in
+`adegenet`) to choose the best *k* value from this plot through
+`gt_cluster_pca_best_k()`. We will use the defaults (BIC with "diffNgroup", see
+the help page for `gt_cluster_pca_best_k()` for a description of the various
+options):
 ```{r}
 anole_clusters <- gt_cluster_pca_best_k(anole_clusters)
 ```
@@ -289,14 +294,16 @@ We can plot the scores with:
 autoplot(anole_dapc, type = "scores")
 ```
 
-We can inspect the assignment by DAPC with `autoplot` using the type
-`components`, ordering the samples
-by the original population labels:
+The DAPC plot shows the separation of individuals into 3 clusters.
+
+We can inspect this assignment by DAPC with `autoplot` using the type
+`components`, ordering the samples by their original population labels:
 
 ```{r, fig.alt = "Bar plot showing the probability of assignment to each cluster"}
 autoplot(anole_dapc, type = "components", group = anole_gt$population)
 ```
 
+Here we can see that DAPC splits the Amazonian Forest individuals into two clusters.
 Because of the very clear separation we observed when plotting the LD scores,
 no individual is modelled as a mixture: all assignments are with 100% probability 
 to a single cluster.
@@ -324,7 +331,7 @@ scatter(anole_dapc, posi.da = "bottomright")
 We can also plot these results onto the map we created earlier.
 
 ```{r}
-anole_gt$dapc <- anole_dapc$grp
+anole_gt <- anole_gt %>% mutate(dapc = anole_dapc$grp)
 
 ggplot() +
   geom_sf(data = map) +
@@ -337,7 +344,7 @@ ggplot() +
   theme_minimal()
 ```
 
-Atlantic forest lizards appear to form distinct geographic cluster, separate from
+Atlantic forest lizards form distinct geographic cluster, separate from
 the Amazonian lizards.
 
 # Clustering with ADMIXTURE
@@ -368,12 +375,18 @@ anole_gt <- anole_gt %>% group_by(population)
 anole_adm <- readRDS("a03_anole_adm.rds")
 ```
 
-Note that within this vignette we are not running the `gt_admixture` function, as it requires the ADMIXTURE software to be installed on your machine and available in your PATH. Instead, we load the results from a previous run of ADMIXTURE.
-
-If you would prefer a native clustering algorithm, we recommend using the `gt_snmf` function, which is a wrapper for the `snmf` function from the `LEA` package. sNMF is a fast clustering algorithm which provides results similar to STRUCTURE and ADMIXTURE, and is available directly using the `tidypopgen` package.
-
-We can examine the suitability of our K values by plotting the cross-entropy values
-for each K value, which is contained in the `cv` element of the `gt_admix` object: 
+Note that within this vignette we are not running the `gt_admixture` function,
+as it requires the ADMIXTURE software to be installed on your machine and
+available in your PATH. Instead, we load the results from a previous run of
+ADMIXTURE.
+If you would prefer a native clustering algorithm, we recommend using the
+`gt_snmf` function, which is a wrapper for the `snmf` function from the `LEA`
+package. sNMF is a fast clustering algorithm which provides results similar to
+STRUCTURE and ADMIXTURE, and is available directly using the `tidypopgen`
+package.
+We can examine the suitability of our K values by plotting the cross-entropy
+values for each K value, which is contained in the `cv` element of the
+`gt_admix` object:
 
 ```{r, fig.alt = "Plot of cross-entropy for each value of K, showing K = 3 has the lowest cross-entropy"}
 autoplot(anole_adm, type = "cv")
@@ -475,24 +488,17 @@ plt <- ggplot2::ggplot(tidy_q, ggplot2::aes(x = id, y = percentage, fill = q)) +
 plt
 ```
 
-In the Prates et al 2018 data, anolis lizards were sampled from three regions, 
-described as Af, Eam, and Wam. These acronyms correspond to samples from the Atlantic 
-Forest, Eastern Amazonia, and Western Amazonia of Brazil. 
+In the Prates et al 2018 data, anolis lizards were assigned to three regions, 
+described as Af, Eam, and Wam, acronyms which correspond to the Atlantic 
+Forest, Eastern Amazonia, and Western Amazonia of Brazil. Our metadata also
+contains this assignment, in the column `pop`. 
 
-Lets say we wanted to change the grouping variable of our plot, to explore how Atlantic 
-Forest individuals differ from all Amazonian individuals. We can do this by adding 
-a `forest` group to our gen_tibble:
-
-```{r}
-anole_gt$forest <- ifelse(anole_gt$population == "AF",
-  "Atlantic Forest", "Amazonian Forest"
-)
-```
-
-Then we can change the grouping variable of our `gt_admix` object using `gt_admix_reorder_q`:
+Lets say we wanted to change the grouping variable of our plot to match these
+regions. We can use the `gt_admix_reorder_q` function to reorder the Q matrix by
+a different grouping variable:
 
 ```{r}
-anole_adm <- gt_admix_reorder_q(anole_adm, group = anole_gt$forest)
+anole_adm <- gt_admix_reorder_q(anole_adm, group = anole_gt$pop)
 ```
 
 And replot the data:
@@ -505,10 +511,7 @@ autoplot(anole_adm,
 )
 ```
 
-And here we can see that the Atlantic Forest individuals clearly separate from
-Amazonian individuals. However, there are two clear clusters among the Amazonian 
-individuals, showing that there is still a strong distinction between Eastern and
-Western anolis lizards within the Amazonian forest.
+And here we can see the clear distinction between the three regions, with a few individuals that have admixed ancestry.
 
 # Handling Q matrices
 
