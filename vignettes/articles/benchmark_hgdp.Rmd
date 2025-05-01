@@ -323,3 +323,27 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 #> 12        Total 18.07
 ```
 
+# Running the benchmark on a laptop
+We will now run this benchmark on a laptop 
+with a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU
+and 31 GiB
+of RAM, limiting the number of cores to 4.
+Here is a summary of the time taken (in seconds) to perform each step of the analyses:
+
+
+```
+#>            step  time
+#> 1    read_plink  4.95
+#> 2   loci_report  3.31
+#> 3   filter_loci  4.49
+#> 4  indiv_report  3.62
+#> 5  filter_indiv  0.01
+#> 6        impute  0.97
+#> 7   ld_clumping 11.93
+#> 8           pca     4
+#> 9          dapc  0.08
+#> 10 pairwise_fst  6.72
+#> 11   plink_save  0.53
+#> 12        Total 40.61
+```
+
