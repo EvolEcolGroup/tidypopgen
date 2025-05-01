@@ -64,8 +64,6 @@ loci_missingness.tbl_df <- function(
     # threads for openMP,
     block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
     ...) {
-  # TODO this is a hack to deal with the class being dropped when going through
-  # group_map
   stopifnot_gen_tibble(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
