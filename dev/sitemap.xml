@@ -61,6 +61,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_get_file_names.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_has_imputed.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_xgboost.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.html</loc></url>
