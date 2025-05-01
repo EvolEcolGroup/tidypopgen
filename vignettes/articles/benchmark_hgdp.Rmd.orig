@@ -5,7 +5,8 @@ title: "Benchmark on the HGDP"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.path = "./figure/hgdp_benchmark/"
 )
 library(benchmarkme)
 library(chunkhooks)

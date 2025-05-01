@@ -45,7 +45,7 @@ Before running this benchmark, we need to download into the subdirectory
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 #> Rows: 1064 Columns: 6
-#> ── Column specification ─────────────────────────────────────────────────────────────────────────
+#> ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────
 #> Delimiter: "\t"
 #> chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups
 #> 
@@ -66,7 +66,7 @@ hgdp <- gen_tibble(bed_path,
                    n_cores = n_cores)
 ```
 
-read_plink: 2.7s
+read_plink: 2.6s
 
 Add metadata
 
@@ -110,7 +110,7 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 loci_report <- qc_report_loci(hgdp)
 ```
 
-loci_report: 2.1s
+loci_report: 2s
 The resulting report can be observed using `autoplot`.
 
 
@@ -118,7 +118,7 @@ The resulting report can be observed using `autoplot`.
 autoplot(loci_report, type = "all")
 ```
 
-![plot of chunk autoplot_loci_report](figure/autoplot_loci_report-1.png)
+![plot of chunk autoplot_loci_report](./figure/hgdp_benchmark/autoplot_loci_report-1.png)
 
 # Filter Loci
 
@@ -132,7 +132,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 1.4s
+filter_loci: 1.5s
 
 
 # Individual Report
@@ -146,14 +146,14 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.5s
+indiv_report: 2.4s
 
 
 ``` r
 autoplot(indiv_report, type = "scatter")
 ```
 
-![plot of chunk autoplot_indiv_report](figure/autoplot_indiv_report-1.png)
+![plot of chunk autoplot_indiv_report](./figure/hgdp_benchmark/autoplot_indiv_report-1.png)
 
 # Filter individuals
 
@@ -166,7 +166,7 @@ to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-filter_indiv: 3ms
+filter_indiv: 4ms
 
 # Update backingfile
 
@@ -179,8 +179,8 @@ hgdp <- gt_update_backingfile(hgdp)
 #> Genetic distances are not sorted, setting them to zero
 #> 
 #> gen_backing files updated, now
-#> using bigSNP file: /tmp/Rtmp0TRebe/test_11084c3cf37c_v2.rds
-#> with backing file: /tmp/Rtmp0TRebe/test_11084c3cf37c_v2.bk
+#> using bigSNP file: /tmp/RtmpnEqdfS/test_462f24aa81351_v2.rds
+#> with backing file: /tmp/RtmpnEqdfS/test_462f24aa81351_v2.bk
 #> make sure that you do NOT delete those files!
 ```
 
@@ -196,7 +196,7 @@ hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 149ms
+impute: 147ms
 
 # LD clumping
 
@@ -208,7 +208,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 3.5s
+ld_clumping: 3.6s
 
 # PCA
 
@@ -220,7 +220,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 1.8s
+pca: 1.7s
 
 Plot PCA:
 
@@ -230,7 +230,7 @@ autoplot(test_pca, type = "scores") +
   aes(color = hgdp$region, shape = hgdp$region)
 ```
 
-![plot of chunk PCA](figure/PCA-1.png)
+![plot of chunk PCA](./figure/hgdp_benchmark/PCA-1.png)
 
 # DAPC
 
@@ -243,7 +243,7 @@ the main geographic regions covered by the dataset.
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
-dapc: 32ms
+dapc: 36ms
 
 Plot DAPC:
 
@@ -252,7 +252,7 @@ Plot DAPC:
 autoplot(test_dapc, type = "scores")
 ```
 
-![plot of chunk DAPC_scores_plot](figure/DAPC_scores_plot-1.png)
+![plot of chunk DAPC_scores_plot](./figure/hgdp_benchmark/DAPC_scores_plot-1.png)
 
 # Calculate Fst
 
@@ -265,7 +265,7 @@ grouped_hgdp <- hgdp %>% group_by(population)
 pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
 ```
 
-pairwise_fst: 3.8s
+pairwise_fst: 3.9s
 
 Plot pairwise Fst:
 
@@ -297,10 +297,10 @@ gt_as_plink(hgdp,
             file = tempfile(),
             type = "bed",
             overwrite = TRUE)
-#> [1] "/tmp/Rtmp0TRebe/file11083a281642.bed"
+#> [1] "/tmp/RtmpnEqdfS/file462f23e00cd4a.bed"
 ```
 
-plink_save: 256ms
+plink_save: 261ms
 
 # Summary
 
@@ -309,17 +309,41 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  2.68
-#> 2   loci_report  2.06
-#> 3   filter_loci  1.44
-#> 4  indiv_report  2.48
+#> 1    read_plink  2.57
+#> 2   loci_report  1.98
+#> 3   filter_loci  1.53
+#> 4  indiv_report  2.38
 #> 5  filter_indiv     0
 #> 6        impute  0.15
-#> 7   ld_clumping  3.53
-#> 8           pca   1.8
-#> 9          dapc  0.03
+#> 7   ld_clumping  3.62
+#> 8           pca  1.69
+#> 9          dapc  0.04
 #> 10 pairwise_fst  3.85
 #> 11   plink_save  0.26
-#> 12        Total 18.28
+#> 12        Total 18.07
+```
+
+# Running the benchmark on a laptop
+We will now run this benchmark on a laptop 
+with a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU
+and 31 GiB
+of RAM, limiting the number of cores to 4.
+Here is a summary of the time taken (in seconds) to perform each step of the analyses:
+
+
+```
+#>            step  time
+#> 1    read_plink  4.95
+#> 2   loci_report  3.31
+#> 3   filter_loci  4.49
+#> 4  indiv_report  3.62
+#> 5  filter_indiv  0.01
+#> 6        impute  0.97
+#> 7   ld_clumping 11.93
+#> 8           pca     4
+#> 9          dapc  0.08
+#> 10 pairwise_fst  6.72
+#> 11   plink_save  0.53
+#> 12        Total 40.61
 ```
 
