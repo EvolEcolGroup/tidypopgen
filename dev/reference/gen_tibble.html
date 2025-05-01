@@ -25,6 +25,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/pca_aDNA_projection.html">Replication of smartsnp aDNA projection</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -62,7 +63,7 @@ here the format</p>
 <span><span class="fu">gen_tibble</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  parser <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vcfR"</span>, <span class="st">"cpp"</span><span class="op">)</span>,</span>
+<span>  parser <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"cpp"</span>, <span class="st">"vcfR"</span><span class="op">)</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  chunk_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  valid_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"T"</span>, <span class="st">"C"</span>, <span class="st">"G"</span><span class="op">)</span>,</span>
@@ -140,8 +141,9 @@ created (but note that R will delete it at the end of the session!)</p></dd>
 
 <dt id="arg-parser">parser<a class="anchor" aria-label="anchor" href="#arg-parser"></a></dt>
 <dd><p>the name of the parser used for <em>VCF</em>, either "cpp" to use a
-fast C++ parser, or "vcfR" to use the R package <code>vcfR</code>. The latter is
-slower but more robust; if "cpp" gives error, try using "vcfR" in case your
+fast C++ parser (the default), or "vcfR" to use the R package <code>vcfR</code>. The
+latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
+in case your
 <em>VCF</em> has an unusual structure.</p></dd>
 
 
