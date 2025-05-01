@@ -119,6 +119,17 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
     quiet = TRUE
   )
   test_gt <- test_gt %>% group_by(population)
+
+  # compute using .grouped_df method
+  list <- loci_alt_freq(test_gt, type = "list")
+  matrix <- loci_alt_freq(test_gt, type = "matrix")
+  tidy <- loci_alt_freq(test_gt, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
+  expect_equal(list[1][[1]], tidy_pop1$value)
+
   # compute by using group map
   loci_freq_map <- test_gt %>% group_map(.f = ~ loci_alt_freq(.x))
   # use fast cpp code (limit cores to 2)
@@ -129,14 +140,100 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
     loci_alt_freq(n_cores = 2, block_size = 2)
   expect_true(all.equal(loci_freq_grp, loci_freq_grp_chunked))
 
+  # and now with reframe
+  loci_freq_reframe <- test_gt %>% reframe(alt_freq = loci_alt_freq(genotypes))
+  loci_freq_direct <- test_gt %>%
+    loci_alt_freq() %>%
+    arrange(group)
+  expect_equal(loci_freq_reframe$alt_freq, loci_freq_direct$value)
+  # check that the direct method can take a column genotypes
+  loci_freq_direct2 <- test_gt %>%
+    loci_alt_freq(genotypes) %>%
+    arrange(group)
+  expect_equal(loci_freq_reframe$alt_freq, loci_freq_direct2$value)
+  # the less intuitive way of reframing
+  loci_freq_reframe2 <-
+    test_gt %>% reframe(alt_freq = loci_alt_freq(pick(everything())))
+  expect_equal(loci_freq_reframe2$alt_freq, loci_freq_reframe$alt_freq)
+
+  # subset
+  test_gt_subset <- test_gt %>% select_loci(c(1, 2, 3, 4))
+  list <- loci_alt_freq(test_gt_subset, type = "list")
+  matrix <- loci_alt_freq(test_gt_subset, type = "matrix")
+  tidy <- loci_alt_freq(test_gt_subset, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
+  expect_equal(list[1][[1]], tidy_pop1$value)
+
+  # test a second grouping variable
+  test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
+  test_gt <- test_gt %>% group_by(population, region)
+  expect_error(
+    test_gt %>% loci_alt_freq(),
+    "only works with one grouping variable"
+  )
+
   # and now for maf
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt <- test_gt %>% group_by(population)
+
+  # compute using .grouped_df method
+  list <- loci_maf(test_gt, type = "list")
+  matrix <- loci_maf(test_gt, type = "matrix")
+  tidy <- loci_maf(test_gt, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
+  expect_equal(list[1][[1]], tidy_pop1$value)
+
   # compute by using group map
   loci_maf_map <- test_gt %>% group_map(.f = ~ loci_maf(.x))
   # use fast cpp code (limit cores to 2)
   loci_maf_grp <- test_gt %>% loci_maf(n_cores = 2)
-  expect_true(all.equal(loci_maf_map, loci_maf_grp))
+  loci_maf_grp_pop1 <- loci_maf_grp %>%
+    filter(group == "pop1") %>%
+    select(value)
+  expect_true(all.equal(loci_maf_map[1][[1]], loci_maf_grp_pop1$value))
+
+  # and now with reframe
+  loci_maf_reframe <- test_gt %>% reframe(maf = loci_maf(genotypes))
+  loci_maf_direct <- test_gt %>%
+    loci_maf() %>%
+    arrange(group)
+  expect_equal(loci_maf_reframe$maf, loci_maf_direct$value)
+  # check that the direct method can take a column genotypes
+  loci_maf_direct2 <- test_gt %>%
+    loci_maf(genotypes) %>%
+    arrange(group)
+  expect_equal(loci_maf_reframe$maf, loci_maf_direct2$value)
+
+  # subset
+  list <- loci_maf(test_gt_subset, type = "list")
+  matrix <- loci_maf(test_gt_subset, type = "matrix")
+  tidy <- loci_maf(test_gt_subset, type = "tidy")
+  expect_equal(list[1][[1]], matrix[, 1])
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
+  expect_equal(list[1][[1]], tidy_pop1$value)
 
   # now repeat with multiple blocks of snps
   loci_freq_grp_chunked <- test_gt %>% loci_maf(n_cores = 2, block_size = 2)
   expect_true(all.equal(loci_maf_grp, loci_freq_grp_chunked))
+
+  # test a second grouping variable
+  test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
+  test_gt <- test_gt %>% group_by(population, region)
+  expect_error(
+    test_gt %>% loci_maf(),
+    "only works with one grouping variable"
+  )
 })

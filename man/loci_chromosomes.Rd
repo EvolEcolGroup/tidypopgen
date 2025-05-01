@@ -6,15 +6,20 @@
 \alias{loci_chromosomes.vctrs_bigSNP}
 \title{Get the chromosomes of loci in a \code{gen_tibble}}
 \usage{
-loci_chromosomes(.x, ...)
+loci_chromosomes(.x, .col = "genotypes", ...)
 
-\method{loci_chromosomes}{tbl_df}(.x, ...)
+\method{loci_chromosomes}{tbl_df}(.x, .col = "genotypes", ...)
 
-\method{loci_chromosomes}{vctrs_bigSNP}(.x, ...)
+\method{loci_chromosomes}{vctrs_bigSNP}(.x, .col = "genotypes", ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}}, or a vector of class \code{vctrs_bigSNP} (usually the
 \code{genotype} column of a \code{\link{gen_tibble}} object).}
+
+\item{.col}{the column to be used when a tibble (or grouped tibble is passed
+directly to the function). This defaults to "genotypes" and can only take
+that value. There is no need for the user to set it, but it is included to
+resolve certain tidyselect operations.}
 
 \item{...}{currently unused.}
 }
@@ -24,4 +29,8 @@ a character vector of chromosomes
 \description{
 Extract the loci chromosomes from a \code{gen_tibble} (or directly from its
 \code{genotype} column).
+}
+\examples{
+example_gt <- example_gt()
+example_gt \%>\% loci_chromosomes()
 }
