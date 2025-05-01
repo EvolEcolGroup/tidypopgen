@@ -28,8 +28,6 @@ is_loci_table_ordered.tbl_df <- function(
     error_on_false = FALSE,
     ignore_genetic_dist = TRUE,
     ...) {
-  # TODO this is a hack to deal with the class being dropped when going
-  # through group_map
   stopifnot_gen_tibble(.x)
   is_loci_table_ordered(
     .x$genotypes,

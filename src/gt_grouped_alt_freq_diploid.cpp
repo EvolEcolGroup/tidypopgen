@@ -25,7 +25,7 @@ ListOf<NumericMatrix> gt_grouped_alt_freq_diploid(Environment BM,
   for (size_t j = 0; j < m; j++) {
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
-      if (x>-1){
+      if (x > -1){
         freq(j, groupIds[i]) += x;
         valid_alleles(j, groupIds[i]) +=2;
       }

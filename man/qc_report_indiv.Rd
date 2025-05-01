@@ -18,13 +18,33 @@ obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
 \item{...}{further arguments to pass}
 
-\item{kings_threshold}{an optional numeric, a threshold of relatedness for
-the sample}
+\item{kings_threshold}{an optional numeric giving a KING kinship coefficient,
+or one of:
+\itemize{
+\item "first": removing first degree relatives, equivalent to a kinship
+coefficient of 0.177 or more
+\item "second": removing second degree relatives, equivalent to a kinship
+coefficient of 0.088 or more
+}}
 }
 \value{
-a tibble with 2 elements: het_obs and missingness
+If no kings_threshold is provided, a tibble with 2 elements: het_obs
+and missingness. If kings_threshold is provided, a tibble with 4 elements:
+het_obs, missingness, id and to_keep.
 }
 \description{
 Return QC information to assess loci (Observed heterozygosity and
 missingness).
+}
+\details{
+Providing the parameter kings_threshold will return two additional columns,
+'id' containing the ID of individuals, and 'to_keep' a logical vector
+describing whether the individual should be removed to retain the largest
+possible set of individuals with no relationships above the threshold. The
+calculated pairwise KING relationship matrix is also returned as an attribute
+of 'to_keep'. The kings_threshold parameter can be either a numeric KING
+kinship coefficient or a string of either "first" or "second", to remove any
+first degree or second degree relationships from the dataset. This second
+option is similar to using  --unrelated --degree 1 or --unrelated --degree 2
+in KING.
 }

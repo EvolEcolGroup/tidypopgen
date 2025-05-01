@@ -5,6 +5,10 @@ fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V) {
     .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V)
 }
 
+gt_alt_freq_diploid <- function(BM, rowInd, colInd, ncores) {
+    .Call(`_tidypopgen_gt_alt_freq_diploid`, BM, rowInd, colInd, ncores)
+}
+
 gt_grouped_alt_freq_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
     .Call(`_tidypopgen_gt_grouped_alt_freq_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
@@ -21,8 +25,20 @@ gt_grouped_summaries <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) 
     .Call(`_tidypopgen_gt_grouped_summaries`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
-SNPHWE2 <- function(obs_hets, obs_hom1, obs_hom2, midp) {
-    .Call(`_tidypopgen_SNPHWE2`, obs_hets, obs_hom1, obs_hom2, midp)
+gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {
+    .Call(`_tidypopgen_gt_ind_hetero`, BM, rowInd, colInd, ncores)
+}
+
+SNPHWE2_R <- function(obs_hets, obs_hom1, obs_hom2, midp) {
+    .Call(`_tidypopgen_SNPHWE2_R`, obs_hets, obs_hom1, obs_hom2, midp)
+}
+
+hwe_on_matrix <- function(geno_counts, midp) {
+    .Call(`_tidypopgen_hwe_on_matrix`, geno_counts, midp)
+}
+
+pairwise_fst_hudson_loop <- function(pairwise_combn, pop_freqs_df, by_locus) {
+    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, pop_freqs_df, by_locus)
 }
 
 increment_as_counts <- function(k, k2, na_mat, dos_mat, BM, rowInd, colInd) {

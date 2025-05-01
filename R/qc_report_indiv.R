@@ -3,12 +3,29 @@
 #' Return QC information to assess loci (Observed heterozygosity and
 #' missingness).
 #'
+#' Providing the parameter kings_threshold will return two additional columns,
+#' 'id' containing the ID of individuals, and 'to_keep' a logical vector
+#' describing whether the individual should be removed to retain the largest
+#' possible set of individuals with no relationships above the threshold. The
+#' calculated pairwise KING relationship matrix is also returned as an attribute
+#' of 'to_keep'. The kings_threshold parameter can be either a numeric KING
+#' kinship coefficient or a string of either "first" or "second", to remove any
+#' first degree or second degree relationships from the dataset. This second
+#' option is similar to using  --unrelated --degree 1 or --unrelated --degree 2
+#' in KING.
+#'
 #' @param .x either a [`gen_tibble`] object or a grouped [`gen_tibble`] (as
 #'   obtained by using [dplyr::group_by()])
-#' @param kings_threshold an optional numeric, a threshold of relatedness for
-#'   the sample
+#' @param kings_threshold an optional numeric giving a KING kinship coefficient,
+#' or one of:
+#'   - "first": removing first degree relatives, equivalent to a kinship
+#'   coefficient of 0.177 or more
+#'   - "second": removing second degree relatives, equivalent to a kinship
+#'   coefficient of 0.088 or more
 #' @param ... further arguments to pass
-#' @returns a tibble with 2 elements: het_obs and missingness
+#' @returns If no kings_threshold is provided, a tibble with 2 elements: het_obs
+#'   and missingness. If kings_threshold is provided, a tibble with 4 elements:
+#'   het_obs, missingness, id and to_keep.
 #' @rdname qc_report_indiv
 #' @export
 qc_report_indiv <- function(.x, ...) {
@@ -20,6 +37,18 @@ qc_report_indiv <- function(.x, ...) {
 #' @rdname qc_report_indiv
 qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
+
+  if (!is.null(kings_threshold)) {
+    if (kings_threshold %in% c("first", "second")) {
+      if (kings_threshold == "first") {
+        kings_threshold <- 0.177
+      } else if (kings_threshold == "second") {
+        kings_threshold <- 0.088
+      }
+    } else if (!is.numeric(kings_threshold)) {
+      stop("kings_threshold must be a numeric or one of 'first' or 'second'")
+    }
+  }
 
   n_loci <- nrow(show_loci(.x))
   qc_report <- .x %>%
@@ -53,6 +82,22 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
 #' @rdname qc_report_indiv
 qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
+
+  if (!is.null(kings_threshold)) {
+    if (is.numeric(kings_threshold)) {
+      kings_threshold <- kings_threshold
+    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { # nolint
+      stop("kings_threshold must be a numeric or one of 'first' or 'second'")
+    } else {
+      kings_threshold <- match.arg(kings_threshold, c("first", "second"))
+    }
+
+    if (kings_threshold == "first") {
+      kings_threshold <- 0.177
+    } else if (kings_threshold == "second") {
+      kings_threshold <- 0.088
+    }
+  }
 
   n_loci <- nrow(show_loci(.x))
   qc_report <- .x %>%
@@ -135,6 +180,23 @@ autoplot.qc_report_indiv <- function(
     kings_threshold = NULL,
     ...) {
   rlang::check_dots_empty()
+
+  if (!is.null(kings_threshold)) {
+    if (is.numeric(kings_threshold)) {
+      kings_threshold <- kings_threshold
+    } else if (!is.numeric(kings_threshold) && !kings_threshold %in% c("first", "second")) { # nolint
+      stop("kings_threshold must be a numeric or one of 'first' or 'second'")
+    } else {
+      kings_threshold <- match.arg(kings_threshold, c("first", "second"))
+    }
+
+
+    if (kings_threshold == "first") {
+      kings_threshold <- 0.177
+    } else if (kings_threshold == "second") {
+      kings_threshold <- 0.088
+    }
+  }
 
   type <- match.arg(type)
 

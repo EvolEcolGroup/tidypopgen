@@ -15,12 +15,12 @@ vcf_path <-
   )
 anole_gt <-
   gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
-pops_path <- system.file("/extdata/anolis/plot_order_punctatus_n46.csv",
+
+pops_path <- system.file("/extdata/anolis/punctatus_n46_meta.csv",
   package = "tidypopgen"
 )
 pops <- readr::read_csv(pops_path, show_col_types = FALSE)
-anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
-anole_gt <- anole_gt %>% mutate(population = pops$pop[match(pops$ID, .data$id)])
+anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
 

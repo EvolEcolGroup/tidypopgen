@@ -4,10 +4,12 @@
 #'
 #' This function uses the original C++ algorithm from PLINK 1.90.
 #'
-#' NOTE There are no tests for this function yet! Unit tests are needed.
-#'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
+#' @param .col the column to be used when a tibble (or grouped tibble is passed
+#' directly to the function). This defaults to "genotypes" and can only take
+#' that value. There is no need for the user to set it, but it is included to
+#' resolve certain tidyselect operations.
 #' @param mid_p boolean on whether the mid-p value should be computed. Default
 #'   is TRUE, as in PLINK.
 #' @param ... not used.
@@ -16,24 +18,40 @@
 #'   based on original code by Jan Wigginton (the code was released under GPL3).
 #' @rdname loci_hwe
 #' @export
-loci_hwe <- function(.x, ...) {
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # For HWE
+#' example_gt %>% loci_hwe()
+#'
+#' # For loci_hwe per locus per population, use reframe
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   reframe(loci_hwe = loci_hwe(genotypes))
+#'
+loci_hwe <- function(.x, .col = "genotypes", ...) {
   UseMethod("loci_hwe", .x)
 }
 
 
 #' @export
 #' @rdname loci_hwe
-loci_hwe.tbl_df <- function(.x, mid_p = TRUE, ...) {
-  # TODO this is a hack to deal with the class being dropped when going through
-  # group_map
+loci_hwe.tbl_df <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
   stopifnot_gen_tibble(.x)
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_hwe only works with the genotypes column")
+  }
   loci_hwe(.x$genotypes, mid_p = mid_p, ...)
 }
 
 
 #' @export
 #' @rdname loci_hwe
-loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
+loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   # get the FBM
@@ -50,7 +68,7 @@ loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
         ind.row = rows_to_keep,
         ind.col = ind
       )
-      apply(geno_counts, 2, hwe_exact_geno_col, mid_p = mid_p)
+      hwe_on_matrix(geno_counts = geno_counts, midp = mid_p)
     }
     hwe_p <- bigstatsr::big_apply(
       geno_fbm,
@@ -64,19 +82,4 @@ loci_hwe.vctrs_bigSNP <- function(.x, mid_p = TRUE, ...) {
     stop("Not implemented for a single individual")
   }
   hwe_p
-}
-
-#' @export
-#' @rdname loci_hwe
-loci_hwe.grouped_df <- function(.x, ...) {
-  # TODO this is seriously inefficient, we need to cast it into a big_apply
-  # problem
-  # of maybe it isn't that bad...
-  group_map(.x, .f = ~ loci_hwe(.x, mid_p = mid_p, ...))
-}
-
-hwe_exact_geno_col <- function(x, mid_p) {
-  # it would be even better to use it direclty in a C function that does
-  # the counting
-  SNPHWE2(x[2], x[1], x[3], midp = mid_p)
 }
