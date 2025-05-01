@@ -36,22 +36,26 @@ gt_impute_simple <- function(
     )
   }
 
+  if (gt_has_imputed(x)) {
+    stop("object x is already imputed, use `gt_set_imputed(x, TRUE)`")
+  }
+
   if (
     !identical(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
   ) {
     # nolint start
     if (
-      all.equal(
+      identical(
         attr(x$genotypes, "bigsnp")$genotypes$code256,
         bigsnpr::CODE_IMPUTE_PRED
       ) ||
-        all.equal(
+        identical(
           attr(x$genotypes, "bigsnp")$genotypes$code256,
           bigsnpr::CODE_DOSAGE
         )
     ) {
       # nolint end
-      stop("object x is already imputed")
+      stop("object x is already imputed, but attr(x, 'imputed') is null")
     } else {
       stop("object x uses a code256 that is not compatible with imputation")
     }
