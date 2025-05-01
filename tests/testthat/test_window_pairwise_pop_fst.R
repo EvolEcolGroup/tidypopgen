@@ -58,7 +58,7 @@ test_that("pairwise_pop_fst num and dem are returned correctly", {
   )
 })
 
-test_that("window_pairwise_pop_fst works correctly", {
+test_that("windows_pairwise_pop_fst works correctly", {
   hudson_gt_fst_nd <- test_gt %>%
     pairwise_pop_fst(
       method = "Hudson",
@@ -66,7 +66,7 @@ test_that("window_pairwise_pop_fst works correctly", {
     )
   # check that pop Fst by SNP is calculated correctly
   snp_window <- test_gt %>%
-    window_pairwise_pop_fst(
+    windows_pairwise_pop_fst(
       window_size = 3,
       step_size = 2,
       size_unit = "snp",
@@ -228,7 +228,7 @@ test_that("window_pairwise_pop_fst works correctly", {
     manual_pop2_pop3
   )
   # check that pop Fst by BP is calculated correctly
-  bp_window <- window_pairwise_pop_fst(test_gt,
+  bp_window <- windows_pairwise_pop_fst(test_gt,
     window_size = 200,
     step_size = 100,
     size_unit = "bp",

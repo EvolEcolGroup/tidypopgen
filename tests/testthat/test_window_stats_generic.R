@@ -1,4 +1,4 @@
-test_that("window_stats_generic is correct", {
+test_that("windows_stats_generic is correct", {
   x <- c(1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 16)
   loci_table <- data.frame(
     name = paste0("locus", 1:13),
@@ -11,8 +11,8 @@ test_that("window_stats_generic is correct", {
     allele_ref = rep("A", 13),
     allele_alt = rep("T", 13)
   )
-  window_res <- window_stats_generic(
-    x = x,
+  window_res <- windows_stats_generic(
+    .x = x,
     loci_table = loci_table,
     window_size = 4,
     step_size = 3,
@@ -25,8 +25,8 @@ test_that("window_stats_generic is correct", {
   expect_true(window_res$stat[4] == sum(x[10:13]))
 
   # now set to NA incomplete windows
-  window_res <- window_stats_generic(
-    x = x,
+  window_res <- windows_stats_generic(
+    .x = x,
     loci_table = loci_table,
     window_size = 4,
     step_size = 3,
@@ -38,8 +38,8 @@ test_that("window_stats_generic is correct", {
   expect_true((is.na(window_res$stat[2])))
 
   # now set units to bp
-  window_res <- window_stats_generic(
-    x = x,
+  window_res <- windows_stats_generic(
+    .x = x,
     loci_table = loci_table,
     window_size = 100,
     step_size = 50,

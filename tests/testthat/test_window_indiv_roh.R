@@ -1,6 +1,6 @@
 skip_if(!requireNamespace("detectRUNS", quietly = TRUE))
 
-test_that("window_indiv_roh works without backingfile update", {
+test_that("windows_indiv_roh works without backingfile update", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")
@@ -26,7 +26,7 @@ test_that("window_indiv_roh works without backingfile update", {
     quiet = TRUE
   )
 
-  suppressMessages(test_roh1 <- window_indiv_roh(
+  suppressMessages(test_roh1 <- windows_indiv_roh(
     test_gt,
     window_size = 4,
     min_snp = 2,
@@ -40,7 +40,7 @@ test_that("window_indiv_roh works without backingfile update", {
   test_gt <- test_gt %>% select_loci(-7)
 
   # Check roh still works
-  suppressMessages(test_roh2 <- window_indiv_roh(
+  suppressMessages(test_roh2 <- windows_indiv_roh(
     test_gt,
     window_size = 4,
     min_snp = 2,

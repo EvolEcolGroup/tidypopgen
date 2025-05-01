@@ -74,7 +74,7 @@ reference:
   - title: "Windows"
     desc: "Functions to compute statistics in sliding windows across loci."
     contents:
-        - starts_with("window_")
+        - starts_with("windows_")
   - title: "PCA"
     desc: "Functions for performing Principal Component Analysis."
     contents:

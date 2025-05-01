@@ -20,6 +20,8 @@ pairwise_pop_pbs <- function(.x, fst_method = "Hudson", return_fst = FALSE) {
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
+  # @TODO check that we have only one grouping variable.
+
   # get the populations
   .group_levels <- .x %>% group_keys()
   # Check if there are at least 3 populations
@@ -29,13 +31,14 @@ pairwise_pop_pbs <- function(.x, fst_method = "Hudson", return_fst = FALSE) {
 
   # Compute pairwise Fst values
   fst_values <- pairwise_pop_fst(.x,
-                                 method = fst_method,
-                                 by_locus = TRUE)$Fst_by_locus
+    method = fst_method,
+    by_locus = TRUE
+  )$Fst_by_locus
 
   # create all 3 way combinations of populations
-  pop_combinations <- combn(.group_levels %>% dplyr::pull(1), 3,
-                            simplify = FALSE)
-  # @TODO the above will only work if we have one grouping level
+  pop_combinations <- utils::combn(.group_levels %>% dplyr::pull(1), 3,
+    simplify = FALSE
+  )
 
   # for each combination of populations, compute the pbs
   pbs_results <- lapply(pop_combinations,
@@ -60,6 +63,7 @@ pairwise_pop_pbs <- function(.x, fst_method = "Hudson", return_fst = FALSE) {
 #' @param fst_values A matrix of Fst values (rows are markers/windows, columns
 #' are named as fst_pop1.pop2, fst_pop1.pop3, fst_pop2.pop3)
 #' @return A tibble with the PBS values for the triplet of populations
+#' @keywords internal
 
 pbs_one_triplet <- function(pops, fst_values) {
   pop1 <- pops[1]
@@ -67,7 +71,7 @@ pbs_one_triplet <- function(pops, fst_values) {
   pop3 <- pops[3]
 
   # Extract Fst values for the current combination as vectors
-  # if we have a tibble (as obtained from window_pairwise_pop_fst), we need to
+  # if we have a tibble (as obtained from windows_pairwise_pop_fst), we need to
   # pull the columns with the fst values
   if (inherits(fst_values, "tbl_df")) {
     fst12 <- fst_values %>% dplyr::pull(paste0("fst_", pop1, ".", pop2))

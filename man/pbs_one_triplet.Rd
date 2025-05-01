@@ -18,3 +18,4 @@ A tibble with the PBS values for the triplet of populations
 \description{
 Internal function to compute pbs for a single triplet of populations
 }
+\keyword{internal}

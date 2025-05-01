@@ -37,9 +37,9 @@ test_gt <- test_gt %>% dplyr::group_by(population)
 
 
 
-test_that("window_pairwise_pop_pbs works correctly", {
+test_that("windows_pairwise_pop_pbs works correctly", {
   test_window <- test_gt %>%
-    window_pairwise_pop_pbs(
+    windows_pairwise_pop_pbs(
       window_size = 3,
       step_size = 2,
       size_unit = "snp",

@@ -3,7 +3,7 @@
 #' @description This function computes pairwise Fst for a sliding window across
 #' each chromosome.
 #'
-#' @param x a grouped `gen_tibble` object
+#' @param .x a grouped `gen_tibble` object
 #' @param method the method to use for calculating Fst. Currently only "Hudson"
 #'   is supported.
 #' @param window_size The size of the window to use for the estimates.
@@ -25,20 +25,19 @@
 #'   multiple such columns if there are more than two populations)
 #' @export
 
-window_pairwise_pop_fst <- function(x,
-                                    method = "Hudson",
-                                    window_size,
-                                    step_size,
-                                    size_unit = c("snp", "bp"),
-                                    min_loci = 1,
-                                    complete = FALSE) {
-  message("This is a new function and not fully tested; use it with care")
+windows_pairwise_pop_fst <- function(.x,
+                                     method = "Hudson",
+                                     window_size,
+                                     step_size,
+                                     size_unit = c("snp", "bp"),
+                                     min_loci = 1,
+                                     complete = FALSE) {
   # Check if the input is a gen_tibble
-  stopifnot_gen_tibble(x)
+  stopifnot_gen_tibble(.x)
   method <- match.arg(method)
 
   # create the pairwise Fst by locus, saving numerator and denominator
-  pair_fst <- pairwise_pop_fst(x, method = "Hudson", return_num_dem = TRUE)
+  pair_fst <- pairwise_pop_fst(.x, method = "Hudson", return_num_dem = TRUE)
 
   # for each column (i.e. each statistics), run the window analysis
   compn <- colnames(pair_fst$Fst_by_locus_num)
@@ -47,9 +46,9 @@ window_pairwise_pop_fst <- function(x,
     # get the column name
     col_name <- compn[i_col]
     # compute the windows for numerator
-    window_num <- window_stats_generic(
-      x = pair_fst$Fst_by_locus_num[, i_col],
-      loci_table = show_loci(x),
+    window_num <- windows_stats_generic(
+      .x = pair_fst$Fst_by_locus_num[, i_col],
+      loci_table = show_loci(.x),
       window_size = window_size,
       step_size = step_size,
       size_unit = size_unit,
@@ -57,9 +56,9 @@ window_pairwise_pop_fst <- function(x,
       complete = complete
     )
     # same for the denominator
-    window_dem <- window_stats_generic(
-      x = pair_fst$Fst_by_locus_den[, i_col],
-      loci_table = show_loci(x),
+    window_dem <- windows_stats_generic(
+      .x = pair_fst$Fst_by_locus_den[, i_col],
+      loci_table = show_loci(.x),
       window_size = window_size,
       step_size = step_size,
       size_unit = size_unit,

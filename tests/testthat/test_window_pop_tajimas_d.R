@@ -35,8 +35,8 @@ test_gt <- test_gt %>% dplyr::group_by(population)
 
 
 # testing the infrastructure for windowing
-test_that("window_pop_tajimas_d works correctly", {
-  window_taj <- window_pop_tajimas_d(
+test_that("windows_pop_tajimas_d works correctly", {
+  window_taj <- windows_pop_tajimas_d(
     test_gt,
     window_size = 3,
     step_size = 1,

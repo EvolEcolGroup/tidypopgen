@@ -1,9 +1,12 @@
 #' Compute the Population Branch Statistics over a sliding window
 #'
-#' @description This function computes pairwise Fst for a sliding window across
-#'   each chromosome.
+#' @description The function computes the population branch statistics (PBS) for
+#'   a sligiding window for each combination of populations at each locus. The
+#'   PBS is a measure of the genetic differentiation between one focal
+#'   population and two reference populations, and is used to identify outlier
+#'   loci that may be under selection.
 #'
-#' @param x a grouped `gen_tibble` object
+#' @param .x a grouped `gen_tibble` object
 #' @param method the method to use for calculating Fst. Currently only "Hudson"
 #'   is supported.
 #' @param return_fst a logical value indicating whether to return the Fst values
@@ -28,14 +31,14 @@
 #' - `fst_a.b`: the Fst value for population a and b, if `return_fst` is TRUE
 #' @export
 
-window_pairwise_pop_pbs <- function(.x,
-                                    method = "Hudson",
-                                    return_fst = FALSE,
-                                    window_size,
-                                    step_size,
-                                    size_unit = c("snp", "bp"),
-                                    min_loci = 1,
-                                    complete = FALSE) {
+windows_pairwise_pop_pbs <- function(.x,
+                                     method = "Hudson",
+                                     return_fst = FALSE,
+                                     window_size,
+                                     step_size,
+                                     size_unit = c("snp", "bp"),
+                                     min_loci = 1,
+                                     complete = FALSE) {
   message("This is a new function and not fully tested; use it with care")
   # Check if the input is a gen_tibble
   # Check if the input is a grouped gen_tibble
@@ -51,7 +54,7 @@ window_pairwise_pop_pbs <- function(.x,
   method <- match.arg(method)
 
   # create the pairwise Fst by locus, saving numerator and denominator
-  fst_values <- window_pairwise_pop_fst(.x,
+  fst_values <- windows_pairwise_pop_fst(.x,
     method = method,
     window_size = window_size,
     step_size = step_size,
@@ -61,8 +64,9 @@ window_pairwise_pop_pbs <- function(.x,
   )
 
   # create all 3 way combinations of populations
-  pop_combinations <- combn(.group_levels %>% dplyr::pull(1), 3,
-                            simplify = FALSE)
+  pop_combinations <- utils::combn(.group_levels %>% dplyr::pull(1), 3,
+    simplify = FALSE
+  )
   # @TODO the above will only work if we have one grouping level
 
   # for each combination of populations, compute the pbs

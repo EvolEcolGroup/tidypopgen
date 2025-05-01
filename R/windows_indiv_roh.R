@@ -4,7 +4,7 @@
 #' (or heterozygosity) in a diploid genome. It is based on the package
 #' `selectRUNS`, which implements an approach equivalent to the one in PLINK.
 #'
-#' @param x a [gen_tibble]
+#' @param .x a [gen_tibble]
 #' @param window_size the size of sliding window (number of SNP loci) (default =
 #'   15)
 #' @param threshold the threshold of overlapping windows of the same state
@@ -63,12 +63,12 @@
 #'     quiet = TRUE
 #'   )
 #'   sheep_gt <- sheep_gt %>% group_by(population)
-#'   sheep_roh <- window_indiv_roh(sheep_gt)
+#'   sheep_roh <- windows_indiv_roh(sheep_gt)
 #'   detectRUNS::plot_Runs(runs = sheep_roh)
 #' }
 #' }
-window_indiv_roh <- function(
-    x,
+windows_indiv_roh <- function(
+    .x,
     window_size = 15,
     threshold = 0.05,
     min_snp = 3,
@@ -102,7 +102,7 @@ window_indiv_roh <- function(
   )
 
   # create a map object
-  map <- show_loci(x) %>%
+  map <- show_loci(.x) %>%
     dplyr::select(dplyr::all_of(c("chromosome", "name", "position"))) %>%
     dplyr::rename(
       "Chrom" = "chromosome",
@@ -114,12 +114,12 @@ window_indiv_roh <- function(
   # compute the gaps between snps
   gaps <- diff(map$bps)
   # use groups (if defined)
-  if (dplyr::is_grouped_df(x)) {
-    groups <- x %>%
-      select(dplyr::group_vars(x)) %>%
+  if (dplyr::is_grouped_df(.x)) {
+    groups <- .x %>%
+      select(dplyr::group_vars(.x)) %>%
       dplyr::pull(1)
   } else {
-    groups <- x$id
+    groups <- .x$id
   }
   # initialize data.frame of results
   runs_df <- data.frame(
@@ -134,11 +134,11 @@ window_indiv_roh <- function(
   # naively process it by row (the parallelism is implemented within individual)
   # access time is horrible, but I don't think this is the bottleneck
   # it needs some profiling
-  X <- .gt_get_bigsnp(x)$genotypes # pointer for the FBM #nolint
-  col_ind <- .gt_bigsnp_cols(x) # column indeces for the snps to consider
-  for (i in seq_len(nrow(x))) {
+  X <- .gt_get_bigsnp(.x)$genotypes # pointer for the FBM #nolint
+  col_ind <- .gt_bigsnp_cols(.x) # column indeces for the snps to consider
+  for (i in seq_len(nrow(.x))) {
     this_genotype <- X[i, col_ind]
-    this_indiv <- list(FID = groups[i], IID = x$id[i])
+    this_indiv <- list(FID = groups[i], IID = .x$id[i])
     # find runs for this individual
     this_runs <-
       utils::getFromNamespace("slidingRuns", "detectRUNS")(
@@ -161,10 +161,10 @@ window_indiv_roh <- function(
 
 
 # Alias for old name
-#' @rdname window_indiv_roh
+#' @rdname windows_indiv_roh
 #' @export
 gt_roh_window <- function(
-    x,
+    .x,
     window_size = 15,
     threshold = 0.05,
     min_snp = 3,
@@ -179,12 +179,12 @@ gt_roh_window <- function(
   warning(
     "This is a soft-deprecated function, and will be removed in the ",
     "next version of tidypopgen. \n",
-    "Please update your code to use window_indiv_roh() instead. \n",
-    "See ?window_indiv_roh for more details. \n"
+    "Please update your code to use windows_indiv_roh() instead. \n",
+    "See ?windows_indiv_roh for more details. \n"
   )
   # call the new function
-  window_indiv_roh(
-    x = x,
+  windows_indiv_roh(
+    .x = .x,
     window_size = window_size,
     threshold = threshold,
     min_snp = min_snp,

@@ -3,7 +3,7 @@
 #' @description This function computes Tajimas's D for a sliding window across
 #'   each chromosome.
 #'
-#' @param x a (potentially grouped) `gen_tibble` object
+#' @param .x a (potentially grouped) `gen_tibble` object
 #' @param window_size The size of the window to use for the estimates.
 #' @param step_size The step size to use for the windows.
 #' @param size_unit Either "snp" or "bp". If "snp", the window size and step
@@ -23,29 +23,27 @@
 #' - `tajimas_d`: the Tajimas'D for the population
 #' @export
 
-window_pop_tajimas_d <- function(x,
-                                 window_size,
-                                 step_size,
-                                 size_unit = c("snp", "bp"),
-                                 min_loci = 1,
-                                 complete = FALSE) {
-  message("This is a new function and not fully tested; use it with care")
-
+windows_pop_tajimas_d <- function(.x,
+                                  window_size,
+                                  step_size,
+                                  size_unit = c("snp", "bp"),
+                                  min_loci = 1,
+                                  complete = FALSE) {
   # Check if the input is a gen_tibble
-  stopifnot_gen_tibble(x)
+  stopifnot_gen_tibble(.x)
 
   # if x is grouped, get the pop sizes for each group
-  if (inherits(x, "grouped_gen_tbl")) {
+  if (inherits(.x, "grouped_gen_tbl")) {
     # get the population sizes
-    n <- x %>%
+    n <- .x %>%
       dplyr::summarise(n = n()) %>%
       dplyr::pull(.data$n)
   } else {
     # if not grouped, just use the number of individuals
-    n <- nrow(x)
+    n <- nrow(.x)
   }
   # get the pi for each locus (if it x is grouped, it will be a list)
-  pi_by_locus <- loci_pi(x)
+  pi_by_locus <- loci_pi(.x)
 
   # recast pi_by_locus as a list of one for just a population
   if (!inherits(pi_by_locus, "list")) {
@@ -55,9 +53,9 @@ window_pop_tajimas_d <- function(x,
   res <- list()
   # now we can loop around each population to compute the windows
   for (i_grp in seq_len(length(pi_by_locus))) {
-    window_taj <- window_stats_generic(
-      x = pi_by_locus[[i_grp]],
-      loci_table = show_loci(x),
+    window_taj <- windows_stats_generic(
+      .x = pi_by_locus[[i_grp]],
+      loci_table = show_loci(.x),
       operator = "custom",
       window_size = window_size,
       step_size = step_size,

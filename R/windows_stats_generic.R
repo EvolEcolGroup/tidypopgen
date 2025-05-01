@@ -4,10 +4,10 @@
 #' estimate window statistics from per locus estimates. This function takes a
 #' vector of per locus estimates, and aggregates them by sum or mean per window.
 #' To compute specific quantities directly from a `gen_tibble`, use the
-#' appropriate `window_*` functions, e.g [window_pairwise_pop_fst()] to compute
+#' appropriate `window_*` functions, e.g [windows_pairwise_pop_fst()] to compute
 #' pairwise Fst.
 #'
-#' @param x A vector containing the per locus estimates.
+#' @param .x A vector containing the per locus estimates.
 #' @param loci_table a dataframe including at least a column 'chromosome', and
 #'   additionally a column 'position' if `size_unit` is "bp".
 #' @param operator The operator to use for the window statistics. Either "mean",
@@ -31,12 +31,12 @@
 #'   in the window, and 'n_snps' contains the number of loci in the window.
 #' @export
 
-window_stats_generic <- function(x, loci_table,
-                                 operator = c("mean", "sum", "custom"),
-                                 window_size, step_size,
-                                 size_unit = c("snp", "bp"), min_loci = 1,
-                                 complete = FALSE,
-                                 f = NULL, ...) {
+windows_stats_generic <- function(.x, loci_table,
+                                  operator = c("mean", "sum", "custom"),
+                                  window_size, step_size,
+                                  size_unit = c("snp", "bp"), min_loci = 1,
+                                  complete = FALSE,
+                                  f = NULL, ...) {
   size_unit <- match.arg(size_unit)
   operator <- match.arg(operator)
   if (operator == "mean") {
@@ -68,7 +68,7 @@ window_stats_generic <- function(x, loci_table,
   }
 
   # check the loci_table has same number of rows as x
-  if (nrow(loci_table) != length(x)) {
+  if (nrow(loci_table) != length(.x)) {
     stop("loci_table must have the same number of rows as x.")
   }
 
@@ -94,7 +94,7 @@ window_stats_generic <- function(x, loci_table,
   # loop over chromosomes
   for (i_chrom in chromosomes) {
     # get the stats for this chromosome
-    x_sub <- x[loci_table$chromosome == i_chrom]
+    x_sub <- .x[loci_table$chromosome == i_chrom]
     if (size_unit == "bp") {
       position_sub <- loci_table$position[loci_table$chromosome == i_chrom]
       idx_pos <- position_sub # use the positions as indices
