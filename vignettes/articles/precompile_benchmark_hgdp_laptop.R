@@ -3,7 +3,7 @@ setwd(getSrcDirectory(function(x) {
   x
 }))
 # move existing figures into a backup folder
-fs::dir_copy("./figure",
+fs::dir_copy("./figure/hgdp_benchmark",
   "./figure_backup",
   overwrite = TRUE
 )
@@ -26,9 +26,9 @@ writeLines(rmd_orig, "./laptop_benchmark_hgdp.Rmd.orig")
 # run the benchmark
 knitr::knit("laptop_benchmark_hgdp.Rmd.orig", "laptop_benchmark_hgdp.Rmd")
 # ditch the new figures and bring back to old ones
-unlink("./figure")
+unlink("./figure/hgdp_benchmark")
 fs::dir_copy("./figure_backup",
-  "./figure",
+  "./figure/hgdp_benchmark",
   overwrite = TRUE
 )
 unlink("./figure_backup", recursive = TRUE)

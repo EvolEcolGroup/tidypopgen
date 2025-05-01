@@ -110,7 +110,7 @@ We can then use `augment` to add the PCA coordinates for each individual to our 
 
 
 ``` r
-HO_modern_pca <- augment(x = pca, data = HO_modern, k = 10)
+HO_modern_pca <- augment(x = pca, data = HO_modern, k = 2)
 ```
 
 # Projection
