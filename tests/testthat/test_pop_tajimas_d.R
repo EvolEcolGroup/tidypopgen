@@ -78,7 +78,7 @@ test_that("pop_tajimas_d on grouped tibbles", {
   taj_map <- test_gt %>% group_map(.f = ~ pop_tajimas_d(.x))
   # use fast cpp code (limit cores to 2)
   taj_grp <- test_gt %>% pop_tajimas_d(n_cores = 2)
-  all.equal(taj_map, taj_grp)
+  expect_true(all.equal(taj_map, taj_grp))
   # now repeat with multiple blocks of snps
   taj_grp_chunked <- test_gt %>%
     pop_tajimas_d(n_cores = 2, block_size = 2)
