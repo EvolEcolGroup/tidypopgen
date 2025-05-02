@@ -58,7 +58,8 @@ Suggests:
     reticulate,
     testthat (>= 3.0.0),
     vcfR,
-    xgboost
+    xgboost,
+    spelling
 Remotes:
     uqrmaie1/admixtools
 VignetteBuilder: knitr

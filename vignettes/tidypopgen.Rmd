@@ -521,7 +521,7 @@ also make sure that the two datasets were aligned to the same reference genome a
 # Imputation
 
 Many genetic analysis (e.g. PCA) do not allow missing data. In many software implementations,
-missing gentoypes are imputed on the fly, often in a simplistic manner. In `tidypopgen`, we
+missing genotypes are imputed on the fly, often in a simplistic manner. In `tidypopgen`, we
 encourage taking this step explicitly, before running any analysis. 
 
 Let us start with a dataset that has some missing genotypes:

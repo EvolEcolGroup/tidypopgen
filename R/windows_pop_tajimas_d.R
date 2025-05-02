@@ -20,7 +20,7 @@
 #' - `chromosome`: the chromosome for the window
 #' - `start`: the starting locus of the window
 #' - `end`: the ending locus of the window
-#' - `tajimas_d`: the Tajimas'D for the population
+#' - `tajimas_d`: the Tajima's D for the population
 #' @export
 
 windows_pop_tajimas_d <- function(.x,

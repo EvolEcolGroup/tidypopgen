@@ -39,7 +39,7 @@ following columns:
 \item \code{chromosome}: the chromosome for the window
 \item \code{start}: the starting locus of the window
 \item \code{end}: the ending locus of the window
-\item \code{tajimas_d}: the Tajimas'D for the population
+\item \code{tajimas_d}: the Tajima's D for the population
 }
 }
 \description{

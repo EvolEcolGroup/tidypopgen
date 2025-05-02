@@ -55,7 +55,7 @@ dev.off()
 ### C. calculate genetic distances and visualize
 aa.D.pop <- stamppNeisD(aa.genlight, pop = TRUE) # Nei's 1972 genetic distance between pops
 
-# plot tree - neighbor joining tree
+# plot tree - neighbour joining tree
 pdf("njTree_PolyplChapter.pdf", width = 4, height = 4)
 plot(nj(aa.D.pop))
 dev.off()
