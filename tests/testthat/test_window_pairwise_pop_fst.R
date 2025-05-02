@@ -37,12 +37,14 @@ test_gt <- test_gt %>% dplyr::group_by(population)
 test_that("pairwise_pop_fst num and dem are returned correctly", {
   hudson_gt_fst <- test_gt %>%
     pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
-  expect_message(hudson_gt_fst_nd <- test_gt %>%
-    pairwise_pop_fst(
-      method = "Hudson",
-      return_num_dem = TRUE
-    ),
-    "`by_locus` set to TRUE because `return_num_dem = TRUE`")
+  expect_message(
+    hudson_gt_fst_nd <- test_gt %>%
+      pairwise_pop_fst(
+        method = "Hudson",
+        return_num_dem = TRUE
+      ),
+    "`by_locus` set to TRUE because `return_num_dem = TRUE`"
+  )
   # check that the nums and denominators are indeed the right ones to
   # generate the Fst for each locus
   hudson_gt_from_num_dem <- hudson_gt_fst_nd$Fst_by_locus_num /

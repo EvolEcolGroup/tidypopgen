@@ -4,7 +4,7 @@
 \alias{pairwise_pop_pbs}
 \title{Compute the Population Branch Statistics for each combination of populations}
 \usage{
-pairwise_pop_pbs(.x, fst_method = "Hudson", return_fst = FALSE)
+pairwise_pop_pbs(.x, fst_method = c("Hudson"), return_fst = FALSE)
 }
 \arguments{
 \item{.x}{A grouped \code{gen_tibble}}
@@ -28,4 +28,8 @@ The function computes the population branch statistics (PBS) for each
 combination of populations at each locus. The PBS is a measure of the genetic
 differentiation between one focal population and two reference populations,
 and is used to identify outlier loci that may be under selection.
+}
+\references{
+Yi X, et al. (2010) Sequencing of 50 human exomes reveals
+adaptation to high altitude. Science 329: 75-78.
 }

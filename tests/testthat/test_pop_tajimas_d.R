@@ -1,4 +1,4 @@
-test_that("loci_pi computes correctly", {
+test_that("pop_tajimas_d computes correctly", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")
@@ -44,7 +44,7 @@ test_that("loci_pi computes correctly", {
   expect_true(taj_gt == taj_chunked)
 })
 
-test_that("loci_pi on grouped tibbles", {
+test_that("pop_tajimas_d on grouped tibbles", {
   test_genotypes <- rbind(
     c(1, 1, 0, 1, 1, 0),
     c(2, 1, 0, NA, 0, 0),

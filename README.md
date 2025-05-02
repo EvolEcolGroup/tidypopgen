@@ -13,7 +13,7 @@ ever loading all data in memory.
 
 ## Installation
 
-You can install the latest version of `tidypopgen` directly from r-universe (reccomended):
+You can install the latest version of `tidypopgen` directly from r-universe (recommended):
 ``` r
 install.packages('tidypopgen', repos = "https://evolecolgroup.r-universe.dev")
 ```
@@ -29,7 +29,7 @@ devtools::install_github("EvolEcolGroup/tidypopgen")
 
 There are a several vignettes designed to teach you how to use `tidypopgen`. 
 The ['overview' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.html) 
-explains how the data structures are designed and provides a illustration
+explains how the data structures are designed and provides an illustration
 of the grammar used to manipulate individuals and loci. 
 
 The ['quality control' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/a02_qc.html)
@@ -40,12 +40,12 @@ The ['population genetic analysis' vignette](https://evolecolgroup.github.io/tid
 provides a fully annotated example of how to 
 run various population genetics analyses with `tidypopgen`.
 
-We also provide a [PLINK cheatsheet'](https://evolecolgroup.github.io/tidypopgen/dev/articles/a99_plink_cheatsheet.html)
+We also provide a ['PLINK cheatsheet'](https://evolecolgroup.github.io/tidypopgen/dev/articles/a99_plink_cheatsheet.html)
 aimed at translating common tasks
 performed in PLINK into `tidypopgen` commands.
 
-Finally, `tidypopgen` is fast and can handle large dataset easily. See a [benchmark]
-(https://evolecolgroup.github.io/tidypopgen/dev/articles/benchmark_hgdp.html) using the HGDP,
+Finally, `tidypopgen` is fast and can handle large dataset easily. See a 
+[benchmark](https://evolecolgroup.github.io/tidypopgen/dev/articles/benchmark_hgdp.html) using the HGDP,
 a dataset of over 1000 individuals typed for 650k SNPs. We can load the data, clean it,
 run imputation, PCA and pairwise Fst among 51 populations in less than 20 seconds on a
 powerful desktop.

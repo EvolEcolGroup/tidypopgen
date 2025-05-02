@@ -4,6 +4,8 @@
 #' combination of populations at each locus. The PBS is a measure of the genetic
 #' differentiation between one focal population and two reference populations,
 #' and is used to identify outlier loci that may be under selection.
+#' @references Yi X, et al. (2010) Sequencing of 50 human exomes reveals
+#' adaptation to high altitude. Science 329: 75-78.
 #' @param .x A grouped `gen_tibble`
 #' @param fst_method A character string specifying the method to use for
 #'   computing Fst
@@ -15,7 +17,7 @@
 #'   populations in the grouped `gen_tibble` object)
 #' @export
 
-pairwise_pop_pbs <- function(.x, fst_method = "Hudson", return_fst = FALSE) {
+pairwise_pop_pbs <- function(.x, fst_method = c("Hudson"), return_fst = FALSE) {
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")

@@ -67,6 +67,12 @@ windows_stats_generic <- function(.x, loci_table,
     }
   }
 
+  # check that complete is a boolean
+  if (!is.logical(complete)) {
+    stop("complete must be a boolean (logical).")
+  }
+  
+  
   # check the loci_table has same number of rows as x
   if (nrow(loci_table) != length(.x)) {
     stop("loci_table must have the same number of rows as x.")

@@ -45,7 +45,6 @@ a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 a vector of frequencies, one per locus
 }
 \description{
-Estimate nucleotide diversity (pi) at each locus, accounting for missing values. This uses the
-formula:
-c_0 * c_1 / (n * (n-1) / 2)
+Estimate nucleotide diversity (pi) at each locus, accounting for missing
+values. This uses the formula: c_0 * c_1 / (n * (n-1) / 2)
 }

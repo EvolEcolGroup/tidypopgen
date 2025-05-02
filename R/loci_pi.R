@@ -1,8 +1,7 @@
 #' Estimate nucleotide diversity (pi) at each locus
 #'
-#' Estimate nucleotide diversity (pi) at each locus, accounting for missing values. This uses the
-#' formula:
-#' c_0 * c_1 / (n * (n-1) / 2)
+#' Estimate nucleotide diversity (pi) at each locus, accounting for missing
+#' values. This uses the formula: c_0 * c_1 / (n * (n-1) / 2)
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
