@@ -34,7 +34,7 @@ pop_tajimas_d.tbl_df <- function(
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_gen_tibble(.x)
-  pop_tajimas_d(.x$genotypes)
+  pop_tajimas_d(.x$genotypes, n_cores = n_cores, block_size = block_size)
 }
 
 
