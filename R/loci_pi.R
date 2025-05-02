@@ -87,6 +87,11 @@ loci_pi.grouped_df <- function(
     ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
+  # if we only have one individual, return NA for all loci
+  if (nrow(.x) == 1) {
+    return(rep(NA_real_, nrow(show_loci(.x))))
+  }
+
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x$genotypes)

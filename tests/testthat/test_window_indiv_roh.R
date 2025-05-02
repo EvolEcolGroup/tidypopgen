@@ -51,4 +51,18 @@ test_that("windows_indiv_roh works without backingfile update", {
   ))
 
   expect_equal(test_roh1, test_roh2)
+
+  # check that we get deprecation error if we use gt_roh_window
+  suppressMessages(expect_warning(
+    gt_roh_window(
+      test_gt,
+      window_size = 4,
+      min_snp = 2,
+      min_density = 1 / 500,
+      max_gap = 5000,
+      min_length_bps = 1000,
+      threshold = 0.05
+    ),
+    "This is a soft-deprecated function,"
+  ))
 })

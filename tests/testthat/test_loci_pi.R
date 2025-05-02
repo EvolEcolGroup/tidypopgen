@@ -51,6 +51,13 @@ test_that("loci_pi computes correctly", {
   # now repeat with multiple blocks of snps
   pi_chunked <- loci_pi(test_gt_subset1, block_size = 2)
   expect_true(all(pi_gt == pi_chunked))
+
+  # return NA if we have a single individual
+  test_gt_single <- test_gt %>% filter(id == "a")
+  pi_single <- test_gt_single %>% loci_pi()
+  expect_true(all(is.na(pi_single)))
+  # length should be the same as the number of loci
+  expect_equal(length(pi_single), nrow(test_loci))
 })
 
 test_that("loci_pi on grouped tibbles", {
@@ -92,4 +99,11 @@ test_that("loci_pi on grouped tibbles", {
   pi_grp_chunked <- test_gt %>%
     loci_pi(n_cores = 2, block_size = 2)
   expect_true(all.equal(pi_grp, pi_grp_chunked))
+
+  # return NA if we have a single individual
+  test_gt_single <- test_gt %>% filter(id == "a")
+  pi_single <- test_gt_single %>% loci_pi()
+  expect_true(all(is.na(pi_single)))
+  # length should be the same as the number of loci
+  expect_equal(length(pi_single), nrow(test_loci))
 })

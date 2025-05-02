@@ -95,7 +95,7 @@ test_that("windows generic correctly catches errors", {
     allele_ref = rep("A", 13),
     allele_alt = rep("T", 13)
   )
-  
+
   expect_error(
     windows_stats_generic(
       .x = x,
@@ -106,8 +106,9 @@ test_that("windows generic correctly catches errors", {
       operator = "sum",
       min_loci = -1
     ),
-    "window_size must be positive")
-  
+    "window_size must be positive"
+  )
+
   expect_error(
     windows_stats_generic(
       .x = x,
@@ -118,8 +119,9 @@ test_that("windows generic correctly catches errors", {
       operator = "sum",
       min_loci = -1
     ),
-    "step_size must be positive")
-  
+    "step_size must be positive"
+  )
+
   expect_error(
     windows_stats_generic(
       .x = x,
@@ -130,7 +132,8 @@ test_that("windows generic correctly catches errors", {
       operator = "sum",
       min_loci = -1
     ),
-    "min_loci must be positive")
+    "min_loci must be positive"
+  )
   expect_error(
     windows_stats_generic(
       .x = x,
@@ -142,8 +145,9 @@ test_that("windows generic correctly catches errors", {
       min_loci = 1,
       complete = "blah"
     ),
-    "complete must be a boolean")
-  
+    "complete must be a boolean"
+  )
+
   # do not test for specific error message from match.arg
   expect_error(
     windows_stats_generic(
@@ -152,12 +156,12 @@ test_that("windows generic correctly catches errors", {
       window_size = 4,
       step_size = 1,
       size_unit = "snp",
-      operator = "sum",
       min_loci = 1,
       complete = TRUE,
       operator = "not_a_function"
-    ))
-  
+    )
+  )
+
   # now test if we give incorrectly formatted loci table
   expect_error(
     windows_stats_generic(
@@ -169,8 +173,9 @@ test_that("windows generic correctly catches errors", {
       operator = "sum",
       min_loci = 1
     ),
-    "loci_table must contain column 'chromosome' when size_unit is 'snp'")
-  
+    "loci_table must contain column 'chromosome' when size_unit is 'snp'"
+  )
+
   expect_no_error(
     windows_stats_generic(
       .x = x,
@@ -180,8 +185,9 @@ test_that("windows generic correctly catches errors", {
       size_unit = "snp",
       operator = "sum",
       min_loci = 1
-    ))
-  
+    )
+  )
+
   expect_error(
     windows_stats_generic(
       .x = x,
@@ -192,8 +198,9 @@ test_that("windows generic correctly catches errors", {
       operator = "sum",
       min_loci = 1
     ),
-    "loci_table must contain columns 'chromosome' and 'position' ")
-  
+    "loci_table must contain columns 'chromosome' and 'position' "
+  )
+
   expect_error(
     windows_stats_generic(
       .x = x,
@@ -204,9 +211,6 @@ test_that("windows generic correctly catches errors", {
       operator = "sum",
       min_loci = 3
     ),
-    "min_loci must be less than window_size.")
-
-}
-)
-
-  
+    "min_loci must be less than window_size."
+  )
+})

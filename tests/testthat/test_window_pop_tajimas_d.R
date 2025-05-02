@@ -93,7 +93,7 @@ test_that("windows_pop_tajimas_d works correctly", {
     # TODO a better test would check for specific windows
     expect_true(any(is.na(window_taj_high_min[[1]]$stat)))
   })
-  
+
   # now ungroupt the gen_tibble
   test_gt <- test_gt %>% ungroup()
   # test the function with no grouping
@@ -104,5 +104,4 @@ test_that("windows_pop_tajimas_d works correctly", {
     min_loci = 1
   )
   expect_true(inherits(window_taj_no_group, "data.frame"))
-  
 })

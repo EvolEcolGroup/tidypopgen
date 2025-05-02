@@ -46,5 +46,42 @@ test_that("windows_pairwise_pop_pbs works correctly", {
   # expect that we have 4 (combinations) * 6 (stats) columns +3 (window info)
   expect_equal(ncol(test_window), 4 * 6 + 3)
 
-  # TODO check that this works correctly
+  # TODO check that the numbers are correct
+
+  # if we ask to return fst, we expect more columns (6 pairwise fst extra)
+  test_window_fst <- test_gt %>%
+    windows_pairwise_pop_pbs(
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp",
+      min_loci = 2,
+      return_fst = TRUE
+    )
+  expect_true(ncol(test_window_fst) == ncol(test_window) + 6)
+
+  # expect error when using an ungrouped tibble
+  test_gt_ungrouped <- test_gt %>% ungroup()
+  expect_error(
+    test_gt_ungrouped %>%
+      windows_pairwise_pop_pbs(
+        window_size = 3,
+        step_size = 2,
+        size_unit = "snp",
+        min_loci = 2
+      ),
+    ".x should be a grouped gen_tibble"
+  )
+
+  # expect error if we only have two populations
+  test_gt_2pop <- test_gt %>% dplyr::filter(population %in% c("pop1", "pop2"))
+  expect_error(
+    test_gt_2pop %>%
+      windows_pairwise_pop_pbs(
+        window_size = 3,
+        step_size = 2,
+        size_unit = "snp",
+        min_loci = 2
+      ),
+    "At least 3 populations are required to compute PBS."
+  )
 })
