@@ -42,7 +42,9 @@ a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 \item{...}{other arguments passed to specific methods, currently unused.}
 }
 \value{
-a vector of frequencies, one per locus
+A single numeric value (Tajima’s D) for the whole data set, \code{NA}
+when the statistic is not defined. For grouped data a list of Tajima’s D
+values (one per group) is returned.
 }
 \description{
 Note that Tajima's D estimates from data that have been filtered or

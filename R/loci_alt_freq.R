@@ -1,4 +1,4 @@
-#' Estimate allele frequencies at each each locus
+#' Estimate allele frequencies at each locus
 #'
 #' Allele frequencies can be estimates as minimum allele frequencies (MAF) with
 #' `loci_maf()` or the frequency of the alternate allele (with

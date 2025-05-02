@@ -10,7 +10,9 @@
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
 #' @param ... other arguments passed to specific methods, currently unused.
-#' @returns a vector of frequencies, one per locus
+#' @returns A single numeric value (Tajima’s D) for the whole data set, `NA`
+#'   when the statistic is not defined. For grouped data a list of Tajima’s D
+#'   values (one per group) is returned.
 #' @rdname pop_tajimas_d
 #' @export
 pop_tajimas_d <- function(.x, n_cores, block_size, ...) {

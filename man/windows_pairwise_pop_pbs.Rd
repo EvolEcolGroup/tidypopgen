@@ -53,7 +53,7 @@ populations in the grouped \code{gen_tibble} object)
 }
 \description{
 The function computes the population branch statistics (PBS) for
-a sligiding window for each combination of populations at each locus. The
+a sliding window for each combination of populations at each locus. The
 PBS is a measure of the genetic differentiation between one focal
 population and two reference populations, and is used to identify outlier
 loci that may be under selection.

@@ -29,7 +29,7 @@ devtools::install_github("EvolEcolGroup/tidypopgen")
 
 There are a several vignettes designed to teach you how to use `tidypopgen`. 
 The ['overview' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.html) 
-explains how the data structures are designed, and provides a illustration
+explains how the data structures are designed and provides a illustration
 of the grammar used to manipulate individuals and loci. 
 
 The ['quality control' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/a02_qc.html)

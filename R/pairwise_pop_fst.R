@@ -71,7 +71,8 @@ pairwise_pop_fst <- function(
   }
   # if we want to return the numerator and denominator, we need to
   # compute the pairwise Fst for each locus
-  if (return_num_dem) {
+  if (return_num_dem && !by_locus) {
+    message("`by_locus` set to TRUE because `return_num_dem = TRUE`.")
     by_locus <- TRUE
   }
 

@@ -50,7 +50,7 @@ should take a vector of locus estimates and return a single value.}
 \value{
 A tibble with columns: 'chromosome', 'start', 'end', 'stats', and
 'n_loci'. The 'stats' column contains the mean of the per locus estimates
-in the window, and 'n_snps' contains the number of loci in the window.
+in the window, and 'n_loci' contains the number of loci in the window.
 }
 \description{
 This function is mostly designed for developers: it is a general function to

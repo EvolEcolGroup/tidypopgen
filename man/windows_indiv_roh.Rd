@@ -94,7 +94,7 @@ fill in the 'group' column. Otherwise, the 'group' column is filled with
 the same values as the 'id' column. Note that this behaviour is
 different from other windowed operations in \code{tidypopgen}, which
 return a list for grouped \code{gen_tibbles}; this different behaviour is
-degined to mantain compatibility with \code{detectRUNS}.
+designed to mantain compatibility with \code{detectRUNS}.
 
 The old name for this function, \code{gt_roh_window}, is still available, but
 it is soft deprecated and will be removed in future versions of

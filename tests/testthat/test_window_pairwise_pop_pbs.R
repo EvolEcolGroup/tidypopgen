@@ -35,8 +35,6 @@ test_gt <- gen_tibble(
 )
 test_gt <- test_gt %>% dplyr::group_by(population)
 
-
-
 test_that("windows_pairwise_pop_pbs works correctly", {
   test_window <- test_gt %>%
     windows_pairwise_pop_pbs(

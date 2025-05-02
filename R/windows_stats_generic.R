@@ -28,7 +28,7 @@
 #' @param ... Additional arguments to be passed to the custom operator function.
 #' @returns A tibble with columns: 'chromosome', 'start', 'end', 'stats', and
 #'   'n_loci'. The 'stats' column contains the mean of the per locus estimates
-#'   in the window, and 'n_snps' contains the number of loci in the window.
+#'   in the window, and 'n_loci' contains the number of loci in the window.
 #' @export
 
 windows_stats_generic <- function(.x, loci_table,
@@ -84,7 +84,7 @@ windows_stats_generic <- function(.x, loci_table,
     stop("min_loci must be positive.")
   }
   # check that min_loci is less than window_size
-  if (min_loci >= window_size) {
+  if (min_loci > window_size) {
     stop("min_loci must be less than window_size.")
   }
   # get unique chromosomes
@@ -151,7 +151,7 @@ windows_stats_generic <- function(.x, loci_table,
     if (is.null(results)) { # for the first chromosome
       results <- res
     } else {
-      results <- rbind(results, res)
+      results <- dplyr::bind_rows(results, res)
     }
   }
   # set values to NA if .n less then min_loci

@@ -1,7 +1,7 @@
 #' Compute the Population Branch Statistics over a sliding window
 #'
 #' @description The function computes the population branch statistics (PBS) for
-#'   a sligiding window for each combination of populations at each locus. The
+#'   a sliding window for each combination of populations at each locus. The
 #'   PBS is a measure of the genetic differentiation between one focal
 #'   population and two reference populations, and is used to identify outlier
 #'   loci that may be under selection.
@@ -39,8 +39,6 @@ windows_pairwise_pop_pbs <- function(.x,
                                      size_unit = c("snp", "bp"),
                                      min_loci = 1,
                                      complete = FALSE) {
-  message("This is a new function and not fully tested; use it with care")
-  # Check if the input is a gen_tibble
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")

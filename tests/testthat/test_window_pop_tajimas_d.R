@@ -64,4 +64,33 @@ test_that("windows_pop_tajimas_d works correctly", {
     window_taj[[2]]$stat[4] ==
       pop_tajimas_d(test_gt_chr2)
   )
+
+  # Additional test for bp-based windows
+  test_that("windows_pop_tajimas_d works with bp units", {
+    window_taj_bp <- windows_pop_tajimas_d(
+      test_gt,
+      window_size = 100,
+      step_size = 50,
+      size_unit = "bp",
+      min_loci = 1
+    )
+
+    # The first window should be non-NA
+    expect_true(!is.na(window_taj_bp[[1]]$stat[1]))
+  })
+
+  # Test for min_loci parameter
+  test_that("windows_pop_tajimas_d respects min_loci", {
+    # Set min_loci to a value that should produce NA for some windows
+    window_taj_high_min <- windows_pop_tajimas_d(
+      test_gt,
+      window_size = 2,
+      step_size = 1,
+      min_loci = 2
+    )
+
+    # Check if windows with fewer than min_loci SNPs have NA values
+    # TODO a better test would check for specific windows
+    expect_true(any(is.na(window_taj_high_min[[1]]$stat)))
+  })
 })

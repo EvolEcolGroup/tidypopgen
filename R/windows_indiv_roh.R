@@ -36,7 +36,7 @@
 #'   the same values as the 'id' column. Note that this behaviour is
 #'   different from other windowed operations in `tidypopgen`, which
 #'   return a list for grouped `gen_tibbles`; this different behaviour is
-#'   degined to mantain compatibility with `detectRUNS`.
+#'   designed to mantain compatibility with `detectRUNS`.
 #'
 #'   The old name for this function, `gt_roh_window`, is still available, but
 #'   it is soft deprecated and will be removed in future versions of

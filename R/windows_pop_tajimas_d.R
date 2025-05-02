@@ -15,7 +15,7 @@
 #' @param complete Should the function be evaluated on complete windows only? If
 #'   FALSE, the default, then partial computations will be allowed at the end of
 #'   the chromosome.
-#' @returns a data frame (or a list of data.frames if `x` is grouped) with the
+#' @returns a data frame (or a list of data.frames if `.x` is grouped) with the
 #'   following columns:
 #' - `chromosome`: the chromosome for the window
 #' - `start`: the starting locus of the window
@@ -68,7 +68,7 @@ windows_pop_tajimas_d <- function(.x,
     res[[i_grp]] <- window_taj
   }
   if (length(res) == 1) { # if we only have one pop, return a data.frame
-    res <- unlist(res)
+    res <- res[[1]]
   }
   return(res)
 }

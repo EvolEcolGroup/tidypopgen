@@ -1,6 +1,6 @@
-#' Estimate pi at each each locus
+#' Estimate nucleotide diversity (pi) at each locus
 #'
-#' Estimate pi at each locus, accounting for missing values. This uses the
+#' Estimate nucleotide diversity (pi) at each locus, accounting for missing values. This uses the
 #' formula:
 #' c_0 * c_1 / (n * (n-1) / 2)
 #'
@@ -24,10 +24,10 @@ loci_pi.tbl_df <- function(
     # multicore is used by openMP within the
     # freq cpp function
     n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(.x), 1),
     # the bigapply that splits in blocks is not
     # multithreaded, as we use the multiple threads
     # for openMP
+    block_size = bigstatsr::block_size(nrow(.x), 1),
     ...) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
@@ -74,7 +74,7 @@ loci_pi.vctrs_bigSNP <- function(
   } else {
     # if we have a single individual
     # pi does not really make sense for a single individual
-    pi <- NA
+    pi <- rep(NA_real_, length(attr(.x, "loci")$big_index))
   }
   pi
 }

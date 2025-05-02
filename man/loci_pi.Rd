@@ -5,7 +5,7 @@
 \alias{loci_pi.tbl_df}
 \alias{loci_pi.vctrs_bigSNP}
 \alias{loci_pi.grouped_df}
-\title{Estimate pi at each each locus}
+\title{Estimate nucleotide diversity (pi) at each locus}
 \usage{
 loci_pi(.x, n_cores, block_size, ...)
 
@@ -45,7 +45,7 @@ a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 a vector of frequencies, one per locus
 }
 \description{
-Estimate pi at each locus, accounting for missing values. This uses the
+Estimate nucleotide diversity (pi) at each locus, accounting for missing values. This uses the
 formula:
 c_0 * c_1 / (n * (n-1) / 2)
 }

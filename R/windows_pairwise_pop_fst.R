@@ -37,7 +37,8 @@ windows_pairwise_pop_fst <- function(.x,
   method <- match.arg(method)
 
   # create the pairwise Fst by locus, saving numerator and denominator
-  pair_fst <- pairwise_pop_fst(.x, method = "Hudson", return_num_dem = TRUE)
+  pair_fst <- pairwise_pop_fst(.x, method = "Hudson", return_num_dem = TRUE,
+                               by_locus = TRUE)
 
   # for each column (i.e. each statistics), run the window analysis
   compn <- colnames(pair_fst$Fst_by_locus_num)
