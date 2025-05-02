@@ -15,6 +15,7 @@
 #' - `pbs_a.b.c`: the PBS value for population a given b & c (there
 #'   will be multiple such columns covering all 3 way combinations of
 #'   populations in the grouped `gen_tibble` object)
+#' - `fst_a.b`: the Fst value for population a and b, if `return_fst` is TRUE
 #' @export
 
 pairwise_pop_pbs <- function(.x, fst_method = c("Hudson"), return_fst = FALSE) {

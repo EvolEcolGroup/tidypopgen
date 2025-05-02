@@ -6,7 +6,7 @@
 \usage{
 windows_pairwise_pop_fst(
   .x,
-  method = "Hudson",
+  method = c("Hudson"),
   window_size,
   step_size,
   size_unit = c("snp", "bp"),

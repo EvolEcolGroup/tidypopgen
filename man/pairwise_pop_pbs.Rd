@@ -21,6 +21,7 @@ A tibble with the following columns:
 \item \code{pbs_a.b.c}: the PBS value for population a given b & c (there
 will be multiple such columns covering all 3 way combinations of
 populations in the grouped \code{gen_tibble} object)
+\item \code{fst_a.b}: the Fst value for population a and b, if \code{return_fst} is TRUE
 }
 }
 \description{
