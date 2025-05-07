@@ -176,6 +176,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gt_grouped_hwe
+NumericMatrix gt_grouped_hwe(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, uint32_t midp);
+RcppExport SEXP _tidypopgen_gt_grouped_hwe(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP midpSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< size_t >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type midp(midpSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_grouped_hwe(BM, rowInd, colInd, groupIds, ngroups, midp));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pairwise_fst_hudson_loop
 List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, List pop_freqs_df, bool by_locus, bool return_num_dem);
 RcppExport SEXP _tidypopgen_pairwise_fst_hudson_loop(SEXP pairwise_combnSEXP, SEXP pop_freqs_dfSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP) {
@@ -297,7 +313,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 4},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
+<<<<<<< HEAD
     {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 4},
+=======
+    {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 6},
+    {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 3},
+>>>>>>> grouped_hwe
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},

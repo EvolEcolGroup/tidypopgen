@@ -69,3 +69,16 @@ test_that("loci_hwe mid_p = FALSE produces the same output as plink --hardy ", {
   # Check results are the same to 4 decimals
   expect_true(result)
 })
+
+
+test_that("loci_hwe for grouped tibble gives the correct result", {
+  example_gt <- example_gt("gen_tbl")
+  hwe_reframe <- example_gt %>%
+    group_by(population) %>%
+    reframe(loci_hwe = loci_hwe(genotypes))
+  hwe_group_mat <- example_gt %>%
+    group_by(population) %>%
+    loci_hwe.grouped_df(type = "matrix")
+  # this should all be equal
+  expect_true(all(hwe_reframe$loci_hwe == as.vector(hwe_group_mat)))
+})
