@@ -4,6 +4,7 @@
 \alias{loci_hwe}
 \alias{loci_hwe.tbl_df}
 \alias{loci_hwe.vctrs_bigSNP}
+\alias{loci_hwe.grouped_df}
 \title{Test Hardy-Weinberg equilibrium at each locus}
 \usage{
 loci_hwe(.x, .col = "genotypes", ...)
@@ -11,6 +12,16 @@ loci_hwe(.x, .col = "genotypes", ...)
 \method{loci_hwe}{tbl_df}(.x, .col = "genotypes", mid_p = TRUE, ...)
 
 \method{loci_hwe}{vctrs_bigSNP}(.x, .col = "genotypes", mid_p = TRUE, ...)
+
+\method{loci_hwe}{grouped_df}(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  type = c("tidy", "list", "matrix"),
+  ...
+)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of

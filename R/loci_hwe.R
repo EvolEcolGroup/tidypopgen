@@ -88,7 +88,7 @@ loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
 
 
 #' @export
-#' @rdname loci_missingness
+#' @rdname loci_hwe
 loci_hwe.grouped_df <- function(
     # TODO revert name to method
     .x,
