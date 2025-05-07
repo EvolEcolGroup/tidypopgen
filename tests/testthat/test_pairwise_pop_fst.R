@@ -378,7 +378,8 @@ test_that("type = pairwise", {
   # Test hudson
   ############
   test_gt <- test_gt %>% dplyr::group_by(population)
-  hudson_matrix <- test_gt %>% pairwise_pop_fst(method = "Hudson", type = "pairwise")
+  hudson_matrix <-
+    test_gt %>% pairwise_pop_fst(method = "Hudson", type = "pairwise")
   hudson_tidy <- test_gt %>% pairwise_pop_fst(method = "Hudson", type = "tidy")
   # check the values are correct
   expect_equal(
@@ -400,7 +401,8 @@ test_that("type = pairwise", {
   ############
   # Test nei87
   ############
-  nei87_matrix <- test_gt %>% pairwise_pop_fst(method = "Nei87", type = "pairwise")
+  nei87_matrix <-
+    test_gt %>% pairwise_pop_fst(method = "Nei87", type = "pairwise")
   nei87_tidy <- test_gt %>% pairwise_pop_fst(method = "Nei87", type = "tidy")
   expect_equal(
     nei87_matrix["pop1", "pop2"],
@@ -421,7 +423,8 @@ test_that("type = pairwise", {
   ############
   # Test WC84
   ############
-  wc84_matrix <- test_gt %>% pairwise_pop_fst(method = "WC84", type = "pairwise")
+  wc84_matrix <-
+    test_gt %>% pairwise_pop_fst(method = "WC84", type = "pairwise")
   wc84_tidy <- test_gt %>% pairwise_pop_fst(method = "WC84", type = "tidy")
   expect_equal(
     wc84_matrix["pop1", "pop2"],
@@ -439,13 +442,6 @@ test_that("type = pairwise", {
         wc84_tidy$population_2 == "pop3"
     )$value
   )
-
-  # if by_locus = TRUE and type = "pairwise", error
-  # expect_error(hudson <- test_gt %>% pairwise_pop_fst(
-  #   method = "Hudson",
-  #   type = "pairwise",
-  #   by_locus = TRUE
-  # ), "by_locus must be FALSE")
 })
 
 test_that("by_locus_type", {
@@ -453,28 +449,51 @@ test_that("by_locus_type", {
   ############
   # Test hudson
   ############
-  hudson_locus_matrix <- test_gt %>% pairwise_pop_fst(method = "Hudson", by_locus = TRUE, by_locus_type = "matrix")
+  hudson_locus_matrix <-
+    test_gt %>% pairwise_pop_fst(
+      method = "Hudson",
+      by_locus = TRUE, by_locus_type = "matrix"
+    )
   expect_true(is.matrix(hudson_locus_matrix$Fst_by_locus))
-  hudson_locus_matrix_pairwise <- test_gt %>% pairwise_pop_fst(method = "Hudson", by_locus = TRUE, type = "pairwise", by_locus_type = "matrix")
+  hudson_locus_matrix_pairwise <-
+    test_gt %>% pairwise_pop_fst(
+      method = "Hudson", by_locus = TRUE,
+      type = "pairwise", by_locus_type = "matrix"
+    )
   expect_true(is.matrix(hudson_locus_matrix_pairwise$Fst_by_locus))
   expect_true(is.matrix(hudson_locus_matrix_pairwise$Fst))
 
   ############
   # Test nei87
   ############
-  nei87_locus_matrix <- test_gt %>% pairwise_pop_fst(method = "Nei87", by_locus = TRUE, by_locus_type = "matrix")
+  nei87_locus_matrix <-
+    test_gt %>% pairwise_pop_fst(
+      method = "Nei87",
+      by_locus = TRUE, by_locus_type = "matrix"
+    )
   expect_true(is.matrix(nei87_locus_matrix$Fst_by_locus))
-  nei87_locus_matrix_pairwise <- test_gt %>% pairwise_pop_fst(method = "Nei87", by_locus = TRUE, type = "pairwise", by_locus_type = "matrix")
+  nei87_locus_matrix_pairwise <-
+    test_gt %>%
+    pairwise_pop_fst(
+      method = "Nei87", by_locus = TRUE,
+      type = "pairwise", by_locus_type = "matrix"
+    )
   expect_true(is.matrix(nei87_locus_matrix_pairwise$Fst_by_locus))
   expect_true(is.matrix(nei87_locus_matrix_pairwise$Fst))
 
   ############
   # Test WC84
   ############
-  wc84_locus_matrix <- test_gt %>% pairwise_pop_fst(method = "WC84", by_locus = TRUE, by_locus_type = "matrix")
+  wc84_locus_matrix <-
+    test_gt %>%
+    pairwise_pop_fst(method = "WC84", by_locus = TRUE, by_locus_type = "matrix")
   expect_true(is.matrix(wc84_locus_matrix$Fst_by_locus))
-  wc84_locus_matrix_pairwise <- test_gt %>% pairwise_pop_fst(method = "WC84", by_locus = TRUE, type = "pairwise", by_locus_type = "matrix")
+  wc84_locus_matrix_pairwise <-
+    test_gt %>%
+    pairwise_pop_fst(
+      method = "WC84", by_locus = TRUE,
+      type = "pairwise", by_locus_type = "matrix"
+    )
   expect_true(is.matrix(wc84_locus_matrix_pairwise$Fst_by_locus))
   expect_true(is.matrix(wc84_locus_matrix_pairwise$Fst))
-
 })

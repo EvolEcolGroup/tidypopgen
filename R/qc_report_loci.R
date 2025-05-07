@@ -12,6 +12,8 @@ qc_report_loci <- function(.x, ...) {
   UseMethod("qc_report_loci", .x)
 }
 
+# TODO add a message that the gen_tibble will be treated as one population
+# if not grouped explicitly
 
 #' @export
 #' @rdname qc_report_loci
@@ -161,6 +163,8 @@ autoplot.qc_report_loci <- function(
 
   return(report_plot)
 }
+
+# TODO BUG autoplot
 
 
 autoplot_l_qc_all <- function(

@@ -83,9 +83,6 @@ pairwise_pop_fst <- function(
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }
-  # if (by_locus && type == "pairwise") {
-  #   stop("For a matrix of pairwise fst, by_locus must be FALSE")
-  # }
   method <- match.arg(method)
 
   # given an error if requesting return_num_dem for a method that does not
@@ -182,12 +179,12 @@ pairwise_pop_fst_hudson <- function(
       prefix = "fst"
     )
     return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
-# } else if(by_locus && by_locus_type == "tidy"){
-#   stop("The tidy method is not yet implemented for by_locus.
-#        Please use by_locus_type = 'matrix'.")
-# } else if(by_locus && by_locus_type == "list"){
-#   stop("The list method is not yet implemented for by_locus.
-#        Please use by_locus_type = 'matrix'.")
+    # } else if(by_locus && by_locus_type == "tidy"){
+    #   stop("The tidy method is not yet implemented for by_locus.
+    #        Please use by_locus_type = 'matrix'.")
+    # } else if(by_locus && by_locus_type == "list"){
+    #   stop("The list method is not yet implemented for by_locus.
+    #        Please use by_locus_type = 'matrix'.")
   } else {
     return(fst_tot)
   }
@@ -281,12 +278,12 @@ pairwise_pop_fst_nei87 <- function(
       prefix = "fst"
     )
     return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
-# } else if(by_locus && by_locus_type == "tidy"){
-#   stop("The tidy method is not yet implemented for by_locus.
-#        Please use by_locus_type = 'matrix'.")
-# } else if(by_locus && by_locus_type == "list"){
-#   stop("The list method is not yet implemented for by_locus.
-#        Please use by_locus_type = 'matrix'.")
+    # } else if(by_locus && by_locus_type == "tidy"){
+    #   stop("The tidy method is not yet implemented for by_locus.
+    #        Please use by_locus_type = 'matrix'.")
+    # } else if(by_locus && by_locus_type == "list"){
+    #   stop("The list method is not yet implemented for by_locus.
+    #        Please use by_locus_type = 'matrix'.")
   } else {
     return(fst_tot)
   }
@@ -374,19 +371,19 @@ pairwise_pop_fst_wc84 <- function(
   if (type == "pairwise") { # if we return a matrix
     fst_tot <- tidy_to_matrix(fst_tot)
   }
-  if(by_locus && by_locus_type == "matrix"){
+  if (by_locus && by_locus_type == "matrix") {
     rownames(fst_locus) <- loci_names(.x)
     colnames(fst_locus) <- col_names_combinations(group_combinations,
       prefix = "fst"
     )
     return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
-  # } else if(by_locus && by_locus_type == "tidy"){
-  #   stop("The tidy method is not yet implemented for by_locus.
-  #        Please use by_locus_type = 'matrix'.")
-  # } else if(by_locus && by_locus_type == "list"){
-  #   stop("The list method is not yet implemented for by_locus.
-  #        Please use by_locus_type = 'matrix'.")
-  } else{
+    # } else if(by_locus && by_locus_type == "tidy"){
+    #   stop("The tidy method is not yet implemented for by_locus.
+    #        Please use by_locus_type = 'matrix'.")
+    # } else if(by_locus && by_locus_type == "list"){
+    #   stop("The list method is not yet implemented for by_locus.
+    #        Please use by_locus_type = 'matrix'.")
+  } else {
     return(fst_tot)
   }
 }
