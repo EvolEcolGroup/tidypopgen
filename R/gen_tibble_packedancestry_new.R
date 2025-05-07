@@ -1,5 +1,5 @@
 # A function to read geno packedancestrymap files
-gen_tibble_packedancestry <- function(
+gen_tibble_packedancestry_new <- function(
     x,
     ...,
     valid_alleles = c("A", "T", "C", "G"),
@@ -55,28 +55,9 @@ gen_tibble_packedancestry <- function(
     backingfile = backingfile
   )
 
-  # set up chunks
-  chunks <- split(
-    1:no_individuals,
-    ceiling(seq_along(1:no_individuals) / chunk_size)
-  )
-
-  
-  browser()
-  for (i in chunks) {
-    res <- admixtools::read_packedancestrymap(
-      sub("\\.geno$", "", x),
-      transpose = TRUE,
-      inds = indiv_table$id[i],
-      ...,
-      verbose = !quiet
-    )
-    res$geno[is.na(res$geno)] <- 3
-    # now insert the genotypes in the FBM
-    file_backed_matrix[
-      i,
-    ] <- res$geno
-  }
+  # Fill the FBM from bedfile
+  reach.eof <- read_packedancestry(x, file_backed_matrix, bigsnpr:::getCode())
+  if (!reach.eof) warning("EOF of bedfile has not been reached.")
 
   # save the fbm
   file_backed_matrix$save()
