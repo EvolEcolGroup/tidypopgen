@@ -19,11 +19,12 @@
 #'   Nei, M. (1987) Molecular Evolutionary Genetics. Columbia University Press
 #'
 #'   Weir, B. S., & Cockerham, C. C. (1984). Estimating F-statistics for the
-#'   analysis of population structure. Evolution, 38(6): 1358–1370.
+#' analysis of population structure. Evolution, 38(6): 1358–1370.
 #'
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
-#' @param tidy boolean whether to return a tidy tibble. Default is TRUE, FALSE
-#'   returns a matrix. Must be TRUE if `by_locus` is TRUE.
+#' @param type type of object to return. One of "tidy" or "pairwise" for a
+#'   pairwise matrix of populations. Default is "tidy".
+#' @param by_locus_type type of object to return. Default is "matrix".
 #' @param by_locus boolean, determining whether Fst should be returned by
 #'   locus(TRUE), or as a single genome wide value obtained by taking the ratio
 #'   of the mean numerator and denominator (FALSE, the default).
@@ -35,18 +36,36 @@
 #'  we need to compute the mean numerator and denominator within
 #'  each window). Default is
 #'  FALSE. Currently only implemented for Hudson's method.
-#' @returns if `tidy=TRUE`, a tibble of genome-wide pairwise Fst values with
+#' @returns if `type=tidy`, a tibble of genome-wide pairwise Fst values with
 #'   each pairwise combination as a row if "by_locus=FALSE", else a list
 #'   including the tibble of genome-wide values as well as a matrix with
 #'   pairwise Fst by locus with loci as rows and and pairwise combinations as
-#'   columns. If `tidy=FALSE`, a matrix of genome-wide pairwise Fst values is
+#'   columns. If `type=pairwise`, a matrix of genome-wide pairwise Fst values is
 #'   returned.
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # For a basic global pairwise Fst calculation:
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   pairwise_pop_fst(method = "Nei87")
+#'
+#' # With a pairwise matrix:
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   pairwise_pop_fst(method = "Nei87", type = "pairwise")
+#'
+#' # To calculate Fst by locus:
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
+#'
 pairwise_pop_fst <- function(
     .x,
-    tidy = TRUE,
+    type = c("tidy", "pairwise"),
     by_locus = FALSE,
+    by_locus_type = c("matrix"),
     method = c("Hudson", "Nei87", "WC84"),
     return_num_dem = FALSE,
     n_cores = bigstatsr::nb_cores()) {
@@ -56,12 +75,17 @@ pairwise_pop_fst <- function(
     on.exit(options(bigstatsr.check.parallel.blas = TRUE))
   }
 
+  type <- match.arg(type)
+  if (by_locus) {
+    by_locus_type <- match.arg(by_locus_type)
+  }
+
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }
-  if (by_locus && !tidy) {
-    stop("For a matrix of pairwise fst, by_locus must be FALSE")
-  }
+  # if (by_locus && type == "pairwise") {
+  #   stop("For a matrix of pairwise fst, by_locus must be FALSE")
+  # }
   method <- match.arg(method)
 
   # given an error if requesting return_num_dem for a method that does not
@@ -78,21 +102,28 @@ pairwise_pop_fst <- function(
 
   if (method == "Hudson") {
     pairwise_pop_fst_hudson(
-      .x = .x, by_locus = by_locus, tidy = tidy,
+      .x = .x, by_locus = by_locus, type = type, by_locus_type = by_locus_type,
       return_num_dem = return_num_dem, n_cores = n_cores
     )
   } else if (method == "Nei87") {
-    pairwise_pop_fst_nei87(.x = .x, by_locus = by_locus, tidy = tidy)
+    pairwise_pop_fst_nei87(
+      .x = .x, by_locus = by_locus,
+      type = type, by_locus_type = by_locus_type
+    )
   } else if (method == "WC84") {
-    pairwise_pop_fst_wc84(.x = .x, by_locus = by_locus, tidy = tidy)
+    pairwise_pop_fst_wc84(
+      .x = .x, by_locus = by_locus,
+      type = type, by_locus_type = by_locus_type
+    )
   }
 }
 
 
 pairwise_pop_fst_hudson <- function(
     .x,
-    tidy = TRUE,
+    type = type,
     by_locus = FALSE,
+    by_locus_type = by_locus_type,
     return_num_dem = FALSE,
     n_cores = bigstatsr::nb_cores()) {
   # get the populations
@@ -142,19 +173,23 @@ pairwise_pop_fst_hudson <- function(
   # otherwise we start formatting the other objects
   fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
 
-  if (!tidy) { # if we return a matrix
-    fst_tot_matrix <- tidy_to_matrix(fst_tot)
-    return(fst_tot_matrix)
+  if (type == "pairwise") { # if we return a matrix
+    fst_tot <- tidy_to_matrix(fst_tot)
+  }
+  if (by_locus && by_locus_type == "matrix") {
+    rownames(fst_list$fst_locus) <- loci_names(.x)
+    colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
+      prefix = "fst"
+    )
+    return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
+# } else if(by_locus && by_locus_type == "tidy"){
+#   stop("The tidy method is not yet implemented for by_locus.
+#        Please use by_locus_type = 'matrix'.")
+# } else if(by_locus && by_locus_type == "list"){
+#   stop("The list method is not yet implemented for by_locus.
+#        Please use by_locus_type = 'matrix'.")
   } else {
-    if (by_locus) {
-      rownames(fst_list$fst_locus) <- loci_names(.x)
-      colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
-        prefix = "fst"
-      )
-      return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
-    } else {
-      return(fst_tot)
-    }
+    return(fst_tot)
   }
 }
 
@@ -162,8 +197,9 @@ pairwise_pop_fst_hudson <- function(
 # the implementation for Nei 87, adapted from hierfstat
 pairwise_pop_fst_nei87 <- function(
     .x,
-    tidy = TRUE,
+    type = type,
     by_locus = FALSE,
+    by_locus_type = by_locus_type,
     n_cores = bigstatsr::nb_cores()) {
   # get the populations
   .group_levels <- .x %>% group_keys()
@@ -236,19 +272,23 @@ pairwise_pop_fst_nei87 <- function(
   )
   fst_tot <- tibble::tibble(group_combinations, value = fst_tot)
 
-  if (!tidy) { # if we return a matrix
-    fst_tot_matrix <- tidy_to_matrix(fst_tot)
-    return(fst_tot_matrix)
+  if (type == "pairwise") { # if we return a matrix
+    fst_tot <- tidy_to_matrix(fst_tot)
+  }
+  if (by_locus && by_locus_type == "matrix") {
+    rownames(fst_locus) <- loci_names(.x)
+    colnames(fst_locus) <- col_names_combinations(group_combinations,
+      prefix = "fst"
+    )
+    return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
+# } else if(by_locus && by_locus_type == "tidy"){
+#   stop("The tidy method is not yet implemented for by_locus.
+#        Please use by_locus_type = 'matrix'.")
+# } else if(by_locus && by_locus_type == "list"){
+#   stop("The list method is not yet implemented for by_locus.
+#        Please use by_locus_type = 'matrix'.")
   } else {
-    if (by_locus) {
-      rownames(fst_locus) <- loci_names(.x)
-      colnames(fst_locus) <- col_names_combinations(group_combinations,
-        prefix = "fst"
-      )
-      return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
-    } else {
-      return(fst_tot)
-    }
+    return(fst_tot)
   }
 }
 
@@ -256,8 +296,9 @@ pairwise_pop_fst_nei87 <- function(
 # This should be equivalent to the hierfstat implementation
 pairwise_pop_fst_wc84 <- function(
     .x,
-    tidy = TRUE,
+    type = type,
     by_locus = FALSE,
+    by_locus_type = by_locus_type,
     n_cores = bigstatsr::nb_cores()) {
   # get the populations
   .group_levels <- .x %>% group_keys()
@@ -330,19 +371,23 @@ pairwise_pop_fst_wc84 <- function(
   )
   fst_tot <- tibble::tibble(group_combinations, value = fst_tot)
 
-  if (!tidy) { # if we return a matrix
-    fst_tot_matrix <- tidy_to_matrix(fst_tot)
-    return(fst_tot_matrix)
-  } else {
-    if (by_locus) {
-      rownames(fst_locus) <- loci_names(.x)
-      colnames(fst_locus) <- col_names_combinations(group_combinations,
-        prefix = "fst"
-      )
-      return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
-    } else {
-      return(fst_tot)
-    }
+  if (type == "pairwise") { # if we return a matrix
+    fst_tot <- tidy_to_matrix(fst_tot)
+  }
+  if(by_locus && by_locus_type == "matrix"){
+    rownames(fst_locus) <- loci_names(.x)
+    colnames(fst_locus) <- col_names_combinations(group_combinations,
+      prefix = "fst"
+    )
+    return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
+  # } else if(by_locus && by_locus_type == "tidy"){
+  #   stop("The tidy method is not yet implemented for by_locus.
+  #        Please use by_locus_type = 'matrix'.")
+  # } else if(by_locus && by_locus_type == "list"){
+  #   stop("The list method is not yet implemented for by_locus.
+  #        Please use by_locus_type = 'matrix'.")
+  } else{
+    return(fst_tot)
   }
 }
 

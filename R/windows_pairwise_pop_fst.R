@@ -24,7 +24,16 @@
 #' - `fst_a.b`: the pairwise Fst value for the population a and b (there will be
 #'   multiple such columns if there are more than two populations)
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   windows_pairwise_pop_fst(
+#'     window_size = 3, step_size = 2,
+#'     size_unit = "snp", min_loci = 2
+#'   )
+#'
 windows_pairwise_pop_fst <- function(.x,
                                      method = c("Hudson"),
                                      window_size,

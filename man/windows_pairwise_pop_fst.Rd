@@ -50,3 +50,14 @@ multiple such columns if there are more than two populations)
 This function computes pairwise Fst for a sliding window across
 each chromosome.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+example_gt \%>\%
+  group_by(population) \%>\%
+  windows_pairwise_pop_fst(
+    window_size = 3, step_size = 2,
+    size_unit = "snp", min_loci = 2
+  )
+
+}
