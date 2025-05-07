@@ -177,6 +177,8 @@ loci_alt_freq.grouped_df <- function(
       lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
     } else if (type == "matrix") {
       # return a matrix
+      colnames(freq_mat) <- dplyr::group_keys(.x) %>% pull(1)
+      rownames(freq_mat) <- loci_names(.x)
       freq_mat
     }
   } else {
@@ -294,6 +296,8 @@ loci_maf.grouped_df <- function(
       lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
     } else if (type == "matrix") {
       # return a matrix
+      colnames(freq_mat) <- dplyr::group_keys(.x) %>% pull(1)
+      rownames(freq_mat) <- loci_names(.x)
       freq_mat
     }
   } else {
