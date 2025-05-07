@@ -1,5 +1,5 @@
 # A function to read geno packedancestrymap files
-gen_tibble_packedancestry <- function(
+gen_tibble_packedancestry_old <- function(
     x,
     ...,
     valid_alleles = c("A", "T", "C", "G"),
@@ -61,7 +61,7 @@ gen_tibble_packedancestry <- function(
     ceiling(seq_along(1:no_individuals) / chunk_size)
   )
 
-  
+
   browser()
   for (i in chunks) {
     res <- admixtools::read_packedancestrymap(

@@ -1,17 +1,12 @@
 # A function to read geno packedancestrymap files
-gen_tibble_packedancestry_new <- function(
+gen_tibble_packedancestry <- function(
     x,
     ...,
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
-    chunk_size = NULL,
     backingfile = NULL,
     quiet = FALSE) {
-  if (is.null(chunk_size)) {
-    chunk_size <- 100
-  }
-
-  # Substitute .ped with .map
+  # Substitute .geno with .snp
   map_file <- sub("\\.geno$", ".snp", x)
   if (!file.exists(map_file)) {
     stop("snp file ", map_file, " does not exist")
@@ -47,6 +42,24 @@ gen_tibble_packedancestry_new <- function(
   loci_table$allele_alt[loci_table$allele_alt == "X"] <- NA
   no_variants <- nrow(loci_table)
 
+  # verify that these numbers are compatible with the geno file
+  conn <- file(x, "rb")
+  hd <- strsplit(readBin(conn, "character", n = 1), " +")[[1]]
+  close(conn)
+  if (no_individuals != as.numeric(hd[2])) {
+    stop(
+      "Number of individuals in geno file does not match the number of ",
+      "individuals in the ind file"
+    )
+  }
+  if (no_variants != as.numeric(hd[3])) {
+    stop(
+      "Number of variants in geno file does not match the number of ",
+      "variants in the snp file"
+    )
+  }
+
+
   # create a matrix to store the data
   file_backed_matrix <- bigstatsr::FBM.code256(
     nrow = no_individuals,
@@ -56,8 +69,11 @@ gen_tibble_packedancestry_new <- function(
   )
 
   # Fill the FBM from bedfile
-  reach.eof <- read_packedancestry(x, file_backed_matrix, bigsnpr:::getCode())
-  if (!reach.eof) warning("EOF of bedfile has not been reached.")
+  reach_eof <- read_packedancestry(x, file_backed_matrix,
+    tab = get_packedancestry_code()
+  )
+
+  if (!reach_eof) warning("EOF of bedfile has not been reached.")
 
   # save the fbm
   file_backed_matrix$save()
