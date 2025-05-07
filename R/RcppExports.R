@@ -45,17 +45,12 @@ hwe_on_matrix <- function(geno_counts, midp) {
     .Call(`_tidypopgen_hwe_on_matrix`, geno_counts, midp)
 }
 
-<<<<<<< HEAD
-pairwise_fst_hudson_loop <- function(pairwise_combn, pop_freqs_df, by_locus, return_num_dem) {
-    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, pop_freqs_df, by_locus, return_num_dem)
-=======
 gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp) {
     .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp)
 }
 
-pairwise_fst_hudson_loop <- function(pairwise_combn, pop_freqs_df, by_locus) {
-    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, pop_freqs_df, by_locus)
->>>>>>> grouped_hwe
+pairwise_fst_hudson_loop <- function(pairwise_combn, pop_freqs_df, by_locus, return_num_dem) {
+    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, pop_freqs_df, by_locus, return_num_dem)
 }
 
 increment_as_counts <- function(k, k2, na_mat, dos_mat, BM, rowInd, colInd) {

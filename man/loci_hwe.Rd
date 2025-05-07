@@ -25,6 +25,9 @@ resolve certain tidyselect operations.}
 
 \item{mid_p}{boolean on whether the mid-p value should be computed. Default
 is TRUE, as in PLINK.}
+
+\item{type}{type of object to return, if using grouped method. One of "tidy",
+"list", or "matrix". Default is "tidy".}
 }
 \value{
 a vector of probabilities from HWE exact test, one per locus
