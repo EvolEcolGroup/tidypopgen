@@ -87,7 +87,7 @@ gen_tibble_packedancestry <- function(
     sex = dplyr::case_when(
       indiv_table$sex %in% c("M", "male", 1) ~ 1L,
       indiv_table$sex %in% c("F", "female", 2) ~ 2L,
-      TRUE                                    ~ 0L
+      TRUE ~ 0L
     ),
     affection = 0,
     ploidy = 2

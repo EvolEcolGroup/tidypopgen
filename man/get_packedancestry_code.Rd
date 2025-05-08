@@ -4,7 +4,12 @@
 \alias{get_packedancestry_code}
 \title{Generate a packed ancestry code}
 \usage{
-get_packedancestry_code()
+get_packedancestry_code(minor = FALSE)
+}
+\arguments{
+\item{minor}{A boolean indicating whether to use the minor allele or not.
+PackedAncestry uses the major allele, but by default we convert to minor
+alleles to be in line with PLINK and VCF.}
 }
 \value{
 a matrix of raw values
