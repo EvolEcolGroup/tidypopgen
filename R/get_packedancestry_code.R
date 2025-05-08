@@ -4,16 +4,29 @@
 #' backed matrix) that represent the packed ancestry code. The columns
 #' are the packed bytes from 0 to 255, and the rows are the genotypes for the
 #' four individuals represented by the byte. Each two bits give the number of
-#' alleles, with the combination 11 representing a missing value.
+#' alleles, with the combination 11 representing a missing value. 
+#' @param minor A boolean indicating whether to use the minor allele or not.
+#' PackedAncestry uses the major allele, but by default we convert to minor
+#' alleles to be in line with PLINK and VCF.
 #' @returns a matrix of raw values
+#' 
 #' @keywords internal
 #'
-get_packedancestry_code <- function() {
+get_packedancestry_code <- function(minor = FALSE) { # TODO temp switch
   raw_vals <- as.raw(0:255)
   parsed_vals <- lapply(raw_vals, parse_2bit_groups)
   parsed_matrix <- do.call(rbind, parsed_vals)
-  storage.mode(parsed_matrix) <- "raw"
   parsed_matrix <- t(parsed_matrix)
+  if (minor) {
+    # convert to minor alleles
+    two_positions <- parsed_matrix==2
+    zero_positions <- parsed_matrix==0
+    parsed_matrix[two_positions] <- 0
+    parsed_matrix[zero_positions] <- 2
+  }
+  storage.mode(parsed_matrix) <- "raw"
+  
+  return(parsed_matrix)
 }
 
 #' Parse a byte into 2-bit groups

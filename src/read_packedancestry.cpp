@@ -39,7 +39,7 @@ bool read_packedancestry(const char * filename,
   myFile.seekg(0, std::ifstream::end);
   // file size in bytes
   long long len = (long long)myFile.tellg();
-  // byets per snp (there are additional empty bytes at the end of lines)
+  // bytes per snp (there are additional empty bytes at the end of lines)
   long long bytespersnp = len/(m+1);
 
   // skip the first row (which is metadata on n_ind and n_snps)

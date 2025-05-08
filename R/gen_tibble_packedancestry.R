@@ -1,17 +1,12 @@
 # A function to read geno packedancestrymap files
-gen_tibble_packedancestry_old <- function(
+gen_tibble_packedancestry <- function(
     x,
     ...,
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
-    chunk_size = NULL,
     backingfile = NULL,
     quiet = FALSE) {
-  if (is.null(chunk_size)) {
-    chunk_size <- 100
-  }
-
-  # Substitute .ped with .map
+  # Substitute .geno with .snp
   map_file <- sub("\\.geno$", ".snp", x)
   if (!file.exists(map_file)) {
     stop("snp file ", map_file, " does not exist")
@@ -47,6 +42,24 @@ gen_tibble_packedancestry_old <- function(
   loci_table$allele_alt[loci_table$allele_alt == "X"] <- NA
   no_variants <- nrow(loci_table)
 
+  # verify that these numbers are compatible with the geno file
+  conn <- file(x, "rb")
+  hd <- strsplit(readBin(conn, "character", n = 1), " +")[[1]]
+  close(conn)
+  if (no_individuals != as.numeric(hd[2])) {
+    stop(
+      "Number of individuals in geno file does not match the number of ",
+      "individuals in the ind file"
+    )
+  }
+  if (no_variants != as.numeric(hd[3])) {
+    stop(
+      "Number of variants in geno file does not match the number of ",
+      "variants in the snp file"
+    )
+  }
+
+
   # create a matrix to store the data
   file_backed_matrix <- bigstatsr::FBM.code256(
     nrow = no_individuals,
@@ -55,28 +68,12 @@ gen_tibble_packedancestry_old <- function(
     backingfile = backingfile
   )
 
-  # set up chunks
-  chunks <- split(
-    1:no_individuals,
-    ceiling(seq_along(1:no_individuals) / chunk_size)
+  # Fill the FBM from bedfile
+  reach_eof <- read_packedancestry(x, file_backed_matrix,
+    tab = get_packedancestry_code()
   )
 
-
-  browser()
-  for (i in chunks) {
-    res <- admixtools::read_packedancestrymap(
-      sub("\\.geno$", "", x),
-      transpose = TRUE,
-      inds = indiv_table$id[i],
-      ...,
-      verbose = !quiet
-    )
-    res$geno[is.na(res$geno)] <- 3
-    # now insert the genotypes in the FBM
-    file_backed_matrix[
-      i,
-    ] <- res$geno
-  }
+  if (!reach_eof) warning("EOF of bedfile has not been reached.")
 
   # save the fbm
   file_backed_matrix$save()
@@ -87,7 +84,11 @@ gen_tibble_packedancestry_old <- function(
     sample.ID = indiv_table$id,
     paternal.ID = 0,
     maternal.ID = 0,
-    sex = 0, # this needs fixing!
+    sex = dplyr::case_when(
+      indiv_table$sex %in% c("M", "male", 1) ~ 1L,
+      indiv_table$sex %in% c("F", "female", 2) ~ 2L,
+      TRUE                                    ~ 0L
+    ),
     affection = 0,
     ploidy = 2
   )
