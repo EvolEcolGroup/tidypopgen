@@ -12,14 +12,19 @@ qc_report_loci <- function(.x, ...) {
   UseMethod("qc_report_loci", .x)
 }
 
-# TODO add a message that the gen_tibble will be treated as one population
-# if not grouped explicitly
-
 #' @export
 #' @rdname qc_report_loci
 qc_report_loci.tbl_df <- function(.x, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x$genotypes)
+  warning(paste(
+    "This gen_tibble is not grouped. For Hardy-Weinberg equilibrium,",
+    "`qc_report_loci()` will assume individuals are part of the same",
+    "population and HWE test p-values will be calculated across all",
+    "individuals. If you wish to calculate HWE p-values within",
+    "populations or groups, please use`group_by()` before calling",
+    "`qc_report_loci()`."
+  ))
   qc_report <- .x %>%
     reframe(
       snp_id = loci_names(.x),
