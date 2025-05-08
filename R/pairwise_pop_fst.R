@@ -24,7 +24,8 @@
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param type type of object to return. One of "tidy" or "pairwise" for a
 #'   pairwise matrix of populations. Default is "tidy".
-#' @param by_locus_type type of object to return. Default is "matrix".
+#' @param by_locus_type type of object to return. One of "tidy", "matrix" or
+#' "list". Default is "tidy".
 #' @param by_locus boolean, determining whether Fst should be returned by
 #'   locus(TRUE), or as a single genome wide value obtained by taking the ratio
 #'   of the mean numerator and denominator (FALSE, the default).
@@ -65,7 +66,7 @@ pairwise_pop_fst <- function(
     .x,
     type = c("tidy", "pairwise"),
     by_locus = FALSE,
-    by_locus_type = c("matrix"),
+    by_locus_type = c("tidy", "matrix", "list"),
     method = c("Hudson", "Nei87", "WC84"),
     return_num_dem = FALSE,
     n_cores = bigstatsr::nb_cores()) {
@@ -173,18 +174,30 @@ pairwise_pop_fst_hudson <- function(
   if (type == "pairwise") { # if we return a matrix
     fst_tot <- tidy_to_matrix(fst_tot)
   }
+
   if (by_locus && by_locus_type == "matrix") {
     rownames(fst_list$fst_locus) <- loci_names(.x)
     colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
       prefix = "fst"
     )
     return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
-    # } else if(by_locus && by_locus_type == "tidy"){
-    #   stop("The tidy method is not yet implemented for by_locus.
-    #        Please use by_locus_type = 'matrix'.")
-    # } else if(by_locus && by_locus_type == "list"){
-    #   stop("The list method is not yet implemented for by_locus.
-    #        Please use by_locus_type = 'matrix'.")
+  } else if (by_locus && by_locus_type == "tidy") {
+    fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
+    colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
+      prefix = "fst"
+    )
+    fst_mat_tbl$loci <- loci_names(.x)
+    cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
+    long_fst_loc <- fst_mat_tbl %>%
+      tidyr::pivot_longer(cols = all_of(cols), names_to = "group")
+    return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
+  } else if (by_locus && by_locus_type == "list") {
+    fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
+    colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
+      prefix = "fst"
+    )
+    fst_list$fst_locus <- as.list(fst_mat_tbl)
+    return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
   } else {
     return(fst_tot)
   }
@@ -278,12 +291,23 @@ pairwise_pop_fst_nei87 <- function(
       prefix = "fst"
     )
     return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
-    # } else if(by_locus && by_locus_type == "tidy"){
-    #   stop("The tidy method is not yet implemented for by_locus.
-    #        Please use by_locus_type = 'matrix'.")
-    # } else if(by_locus && by_locus_type == "list"){
-    #   stop("The list method is not yet implemented for by_locus.
-    #        Please use by_locus_type = 'matrix'.")
+  } else if (by_locus && by_locus_type == "tidy") {
+    fst_mat_tbl <- as.data.frame(fst_locus)
+    colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
+      prefix = "fst"
+    )
+    fst_mat_tbl$loci <- loci_names(.x)
+    cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
+    long_fst_loc <- fst_mat_tbl %>%
+      tidyr::pivot_longer(cols = all_of(cols), names_to = "group")
+    return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
+  } else if (by_locus && by_locus_type == "list") {
+    fst_mat_tbl <- as.data.frame(fst_locus)
+    colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
+      prefix = "fst"
+    )
+    fst_locus <- as.list(fst_mat_tbl)
+    return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
   } else {
     return(fst_tot)
   }
@@ -377,12 +401,23 @@ pairwise_pop_fst_wc84 <- function(
       prefix = "fst"
     )
     return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
-    # } else if(by_locus && by_locus_type == "tidy"){
-    #   stop("The tidy method is not yet implemented for by_locus.
-    #        Please use by_locus_type = 'matrix'.")
-    # } else if(by_locus && by_locus_type == "list"){
-    #   stop("The list method is not yet implemented for by_locus.
-    #        Please use by_locus_type = 'matrix'.")
+  } else if (by_locus && by_locus_type == "tidy") {
+    fst_mat_tbl <- as.data.frame(fst_locus)
+    colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
+      prefix = "fst"
+    )
+    fst_mat_tbl$loci <- loci_names(.x)
+    cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
+    long_fst_loc <- fst_mat_tbl %>%
+      tidyr::pivot_longer(cols = all_of(cols), names_to = "group")
+    return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
+  } else if (by_locus && by_locus_type == "list") {
+    fst_mat_tbl <- as.data.frame(fst_locus)
+    colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
+      prefix = "fst"
+    )
+    fst_locus <- as.list(fst_mat_tbl)
+    return(list(Fst_by_locus = fst_locus, Fst = fst_tot))
   } else {
     return(fst_tot)
   }

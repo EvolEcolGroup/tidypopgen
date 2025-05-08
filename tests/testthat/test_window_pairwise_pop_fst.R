@@ -36,7 +36,11 @@ test_gt <- test_gt %>% dplyr::group_by(population)
 # testing the infrastructure for windowing
 test_that("pairwise_pop_fst num and dem are returned correctly", {
   hudson_gt_fst <- test_gt %>%
-    pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
+    pairwise_pop_fst(
+      method = "Hudson",
+      by_locus = TRUE,
+      by_locus_type = "matrix"
+    )
   expect_message(
     hudson_gt_fst_nd <- test_gt %>%
       pairwise_pop_fst(

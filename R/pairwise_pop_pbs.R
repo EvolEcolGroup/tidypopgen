@@ -50,14 +50,14 @@ pairwise_pop_pbs <- function(.x,
   # Compute pairwise Fst values
   fst_values <- pairwise_pop_fst(.x,
     method = fst_method,
-    by_locus = TRUE
+    by_locus = TRUE,
+    by_locus_type = "matrix"
   )$Fst_by_locus
 
   # create all 3 way combinations of populations
   pop_combinations <- utils::combn(.group_levels %>% dplyr::pull(1), 3,
     simplify = FALSE
   )
-
   # for each combination of populations, compute the pbs
   pbs_results <- lapply(pop_combinations,
     pbs_one_triplet,

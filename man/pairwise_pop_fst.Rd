@@ -8,7 +8,7 @@ pairwise_pop_fst(
   .x,
   type = c("tidy", "pairwise"),
   by_locus = FALSE,
-  by_locus_type = c("matrix"),
+  by_locus_type = c("tidy", "matrix", "list"),
   method = c("Hudson", "Nei87", "WC84"),
   return_num_dem = FALSE,
   n_cores = bigstatsr::nb_cores()
@@ -24,7 +24,8 @@ pairwise matrix of populations. Default is "tidy".}
 locus(TRUE), or as a single genome wide value obtained by taking the ratio
 of the mean numerator and denominator (FALSE, the default).}
 
-\item{by_locus_type}{type of object to return. Default is "matrix".}
+\item{by_locus_type}{type of object to return. One of "tidy", "matrix" or
+"list". Default is "tidy".}
 
 \item{method}{one of 'Hudson', 'Nei87', and 'WC84'}
 
