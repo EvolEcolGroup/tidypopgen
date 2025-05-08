@@ -210,10 +210,20 @@ autoplot_l_qc_overview <- function(
     miss_threshold,
     hwe_p_low_thresh,
     ...) {
+  if (any(is.na(object))) {
+    message(paste(
+      "One or more loci are missing for every individual.",
+      "These will be removed from the QC report plot."
+    ))
+    # remove NA's from object
+    object <- object[!is.na(object$maf), ]
+  }
+
   qc_report <- object
 
   qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p_low_thresh, ]
   qc_maf <- qc_report[qc_report$maf >= maf_threshold, ]
+
 
   maf_pass <- c(qc_maf$snp_id)
   hwe_pass <- c(qc_hwe$snp_id)
