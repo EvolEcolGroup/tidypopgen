@@ -90,11 +90,51 @@ test_that("loci_pi on grouped tibbles", {
     quiet = TRUE
   )
   test_gt <- test_gt %>% group_by(population)
+
+  # compute using .grouped_df method
+  list <- loci_pi(test_gt, type = "list")
+  matrix <- loci_pi(test_gt, type = "matrix")
+  tidy <- loci_pi(test_gt, type = "tidy")
+  expect_equal(list[1][[1]], as.vector(matrix[, "pop1"]))
+  expect_equal(rownames(matrix), show_loci(test_gt)$name)
+  expect_equal(colnames(matrix), group_keys(test_gt)$population)
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
+  expect_equal(list[1][[1]], tidy_pop1$value)
+
+  # subset
+  test_gt_subset <- test_gt %>% select_loci(c(1, 2, 3, 4))
+  list <- loci_pi(test_gt_subset, type = "list")
+  matrix <- loci_pi(test_gt_subset, type = "matrix")
+  tidy <- loci_pi(test_gt_subset, type = "tidy")
+  expect_equal(list[1][[1]], as.vector(matrix[, "pop1"]))
+  expect_equal(rownames(matrix), show_loci(test_gt_subset)$name)
+  expect_equal(colnames(matrix), group_keys(test_gt_subset)$population)
+  tidy_pop1 <- tidy %>%
+    filter(group == "pop1") %>%
+    select(value)
+  expect_equal(list[1][[1]], tidy_pop1$value)
+
   # compute by using group map
   pi_map <- test_gt %>% group_map(.f = ~ loci_pi(.x))
   # use fast cpp code (limit cores to 2)
   pi_grp <- test_gt %>% loci_pi(n_cores = 2)
   all.equal(pi_map, pi_grp)
+
+  # and now with reframe
+  loci_pi_reframe <-
+    test_gt %>% reframe(missing = loci_pi(genotypes))
+  loci_pi_direct <- test_gt %>%
+    loci_pi(n_cores = 2) %>%
+    arrange(group)
+  expect_equal(loci_pi_reframe$missing, loci_pi_direct$value)
+  # check that the direct method can take a column genotypes
+  loci_pi_direct2 <- test_gt %>%
+    loci_pi(genotypes) %>%
+    arrange(group)
+  expect_equal(loci_pi_reframe$missing, loci_pi_direct2$value)
+
   # now repeat with multiple blocks of snps
   pi_grp_chunked <- test_gt %>%
     loci_pi(n_cores = 2, block_size = 2)
@@ -106,4 +146,12 @@ test_that("loci_pi on grouped tibbles", {
   expect_true(all(is.na(pi_single)))
   # length should be the same as the number of loci
   expect_equal(length(pi_single), nrow(test_loci))
+
+  # test a second grouping variable
+  test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
+  test_gt <- test_gt %>% group_by(population, region)
+  expect_error(
+    test_gt %>% loci_pi(),
+    "only works with one grouping variable"
+  )
 })

@@ -7,10 +7,11 @@
 \alias{loci_pi.grouped_df}
 \title{Estimate nucleotide diversity (pi) at each locus}
 \usage{
-loci_pi(.x, n_cores, block_size, ...)
+loci_pi(.x, .col = "genotypes", n_cores, block_size, type, ...)
 
 \method{loci_pi}{tbl_df}(
   .x,
+  .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
@@ -18,6 +19,7 @@ loci_pi(.x, n_cores, block_size, ...)
 
 \method{loci_pi}{vctrs_bigSNP}(
   .x,
+  .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(length(.x), 1),
   ...
@@ -25,8 +27,10 @@ loci_pi(.x, n_cores, block_size, ...)
 
 \method{loci_pi}{grouped_df}(
   .x,
+  .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
+  type = c("tidy", "list", "matrix"),
   ...
 )
 }
@@ -34,10 +38,18 @@ loci_pi(.x, n_cores, block_size, ...)
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
 a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
+\item{.col}{the column to be used when a tibble (or grouped tibble is passed
+directly to the function). This defaults to "genotypes" and can only take
+that value. There is no need for the user to set it, but it is included to
+resolve certain tidyselect operations.}
+
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
+
+\item{type}{type of object to return, if using grouped method. One of "tidy",
+"list", or "matrix". Default is "tidy".}
 
 \item{...}{other arguments passed to specific methods, currently unused.}
 }

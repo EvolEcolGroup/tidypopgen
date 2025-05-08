@@ -43,7 +43,7 @@ windows_pop_tajimas_d <- function(.x,
     n <- nrow(.x)
   }
   # get the pi for each locus (if it x is grouped, it will be a list)
-  pi_by_locus <- loci_pi(.x)
+  pi_by_locus <- loci_pi(.x, type = "list")
 
   # recast pi_by_locus as a list of one for just a population
   if (!inherits(pi_by_locus, "list")) {

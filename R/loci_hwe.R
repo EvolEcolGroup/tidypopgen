@@ -10,6 +10,9 @@
 #' directly to the function). This defaults to "genotypes" and can only take
 #' that value. There is no need for the user to set it, but it is included to
 #' resolve certain tidyselect operations.
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
+#' @param block_size maximum number of loci read at once.
 #' @param mid_p boolean on whether the mid-p value should be computed. Default
 #'   is TRUE, as in PLINK.
 #' @param type type of object to return, if using grouped method. One of "tidy",
@@ -103,12 +106,12 @@ loci_hwe.grouped_df <- function(
     rlang::as_string()
   # confirm that .col is "genotypes"
   if (.col != "genotypes") {
-    stop("loci_missingness only works with the genotypes column")
+    stop("loci_hwe only works with the genotypes column")
   }
 
   # check that we only have one grouping variable
   if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("loci_missingness only works with one grouping variable")
+    stop("loci_hwe only works with one grouping variable")
   }
   rlang::check_dots_empty()
   type <- match.arg(type)
@@ -125,6 +128,7 @@ loci_hwe.grouped_df <- function(
     )
   }
 
+
   hwe_mat <- bigstatsr::big_apply(
     geno_fbm,
     a.FUN = hwe_p_sub,
@@ -135,5 +139,21 @@ loci_hwe.grouped_df <- function(
     a.combine = "rbind"
   )
 
-  return(hwe_mat)
+  if (type == "tidy") {
+    hwe_mat_tbl <- as.data.frame(hwe_mat)
+    colnames(hwe_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
+    hwe_mat_tbl$loci <- loci_names(.x)
+    long_missing <- hwe_mat_tbl %>% # nolint start
+      tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
+        pull(1), names_to = "group") # nolint end
+    long_missing
+  } else if (type == "list") {
+    # return a list to mimic group_map
+    lapply(seq_len(ncol(hwe_mat)), function(i) hwe_mat[, i])
+  } else if (type == "matrix") {
+    # return a matrix
+    colnames(hwe_mat) <- dplyr::group_keys(.x) %>% pull(1)
+    rownames(hwe_mat) <- loci_names(.x)
+    hwe_mat
+  }
 }

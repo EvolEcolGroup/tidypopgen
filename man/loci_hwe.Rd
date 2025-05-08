@@ -37,6 +37,11 @@ resolve certain tidyselect operations.}
 \item{mid_p}{boolean on whether the mid-p value should be computed. Default
 is TRUE, as in PLINK.}
 
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+
+\item{block_size}{maximum number of loci read at once.}
+
 \item{type}{type of object to return, if using grouped method. One of "tidy",
 "list", or "matrix". Default is "tidy".}
 }

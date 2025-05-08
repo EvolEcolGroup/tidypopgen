@@ -5,14 +5,20 @@
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
+#' @param .col the column to be used when a tibble (or grouped tibble is passed
+#' directly to the function). This defaults to "genotypes" and can only take
+#' that value. There is no need for the user to set it, but it is included to
+#' resolve certain tidyselect operations.
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
+#' @param type type of object to return, if using grouped method. One of "tidy",
+#' "list", or "matrix". Default is "tidy".
 #' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_pi
 #' @export
-loci_pi <- function(.x, n_cores, block_size, ...) {
+loci_pi <- function(.x, .col = "genotypes", n_cores, block_size, type, ...) {
   UseMethod("loci_pi", .x)
 }
 
@@ -20,6 +26,7 @@ loci_pi <- function(.x, n_cores, block_size, ...) {
 #' @rdname loci_pi
 loci_pi.tbl_df <- function(
     .x,
+    .col = "genotypes",
     # multicore is used by openMP within the
     # freq cpp function
     n_cores = bigstatsr::nb_cores(),
@@ -31,6 +38,13 @@ loci_pi.tbl_df <- function(
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_gen_tibble(.x)
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_missingness only works with the genotypes column")
+  }
   loci_pi(.x$genotypes)
 }
 
@@ -39,6 +53,7 @@ loci_pi.tbl_df <- function(
 #' @rdname loci_pi
 loci_pi.vctrs_bigSNP <- function(
     .x,
+    .col = "genotypes",
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(length(.x), 1),
     ...) {
@@ -82,14 +97,29 @@ loci_pi.vctrs_bigSNP <- function(
 #' @rdname loci_pi
 loci_pi.grouped_df <- function(
     .x,
+    .col = "genotypes",
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
+    type = c("tidy", "list", "matrix"),
     ...) {
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_pi only works with the genotypes column")
+  }
   rlang::check_dots_empty()
+  type <- match.arg(type)
   stopifnot_diploid(.x)
   # if we only have one individual, return NA for all loci
   if (nrow(.x) == 1) {
     return(rep(NA_real_, nrow(show_loci(.x))))
+  }
+
+  # check that we only have one grouping variable
+  if (length(.x %>% dplyr::group_vars()) > 1) {
+    stop("loci_missingness only works with one grouping variable")
   }
 
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
@@ -117,6 +147,22 @@ loci_pi.grouped_df <- function(
     block.size = block_size,
     a.combine = "rbind"
   )
-  # return a list to mimic a group_map
-  lapply(seq_len(ncol(pi_mat)), function(i) pi_mat[, i])
+
+  if (type == "tidy") {
+    pi_mat_tbl <- as.data.frame(pi_mat)
+    colnames(pi_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
+    pi_mat_tbl$loci <- loci_names(.x)
+    long_missing <- pi_mat_tbl %>% # nolint start
+      tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
+        pull(1), names_to = "group") # nolint end
+    long_missing
+  } else if (type == "list") {
+    # return a list to mimic a group_map
+    lapply(seq_len(ncol(pi_mat)), function(i) pi_mat[, i])
+  } else if (type == "matrix") {
+    # return a matrix
+    colnames(pi_mat) <- dplyr::group_keys(.x) %>% pull(1)
+    rownames(pi_mat) <- loci_names(.x)
+    pi_mat
+  }
 }

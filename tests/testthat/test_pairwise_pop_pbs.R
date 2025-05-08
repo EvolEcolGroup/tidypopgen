@@ -39,6 +39,15 @@ test_that("requires a grouped gen_tibble", {
     ".x should be a grouped gen_tibble"
   )
 })
+test_that("error with multiple grouping variables", {
+  # test a second grouping variable
+  test_gt$region <- c("a", "a", "b", "b", "a", "b", "b", "a", "b", "a")
+  test_gt <- test_gt %>% group_by(population, region)
+  expect_error(
+    test_gt %>% pairwise_pop_pbs(fst_method = "Hudson"),
+    "only works with one grouping variable"
+  )
+})
 test_that("pairwise_pop_pbs works correctly", {
   test_pbs <- test_gt %>%
     group_by(population) %>%

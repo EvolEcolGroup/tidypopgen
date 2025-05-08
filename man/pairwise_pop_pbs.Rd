@@ -4,13 +4,20 @@
 \alias{pairwise_pop_pbs}
 \title{Compute the Population Branch Statistics for each combination of populations}
 \usage{
-pairwise_pop_pbs(.x, fst_method = c("Hudson"), return_fst = FALSE)
+pairwise_pop_pbs(
+  .x,
+  type = c("matrix"),
+  fst_method = c("Hudson"),
+  return_fst = FALSE
+)
 }
 \arguments{
 \item{.x}{A grouped \code{gen_tibble}}
 
+\item{type}{type of object to return. Currently defaults to "matrix".}
+
 \item{fst_method}{A character string specifying the method to use for
-computing Fst}
+computing Fst. Currently only "Hudson" is available.}
 
 \item{return_fst}{A logical value indicating whether to return the Fst values
 along with the PBS values. Default is \code{FALSE}.}
@@ -29,6 +36,14 @@ The function computes the population branch statistics (PBS) for each
 combination of populations at each locus. The PBS is a measure of the genetic
 differentiation between one focal population and two reference populations,
 and is used to identify outlier loci that may be under selection.
+}
+\examples{
+example_gt <- example_gt()
+
+# We can compute the PBS for all populations using "Hudson" method
+test_pbs <- test_gt \%>\%
+  group_by(population) \%>\%
+  pairwise_pop_pbs(fst_method = "Hudson")
 }
 \references{
 Yi X, et al. (2010) Sequencing of 50 human exomes reveals

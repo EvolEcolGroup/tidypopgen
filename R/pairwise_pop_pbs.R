@@ -7,8 +7,9 @@
 #' @references Yi X, et al. (2010) Sequencing of 50 human exomes reveals
 #' adaptation to high altitude. Science 329: 75-78.
 #' @param .x A grouped `gen_tibble`
+#' @param type type of object to return. Currently defaults to "matrix".
 #' @param fst_method A character string specifying the method to use for
-#'   computing Fst
+#'   computing Fst. Currently only "Hudson" is available.
 #' @param return_fst A logical value indicating whether to return the Fst values
 #'   along with the PBS values. Default is `FALSE`.
 #' @return A tibble with the following columns:
@@ -17,13 +18,27 @@
 #'   populations in the grouped `gen_tibble` object)
 #' - `fst_a.b`: the Fst value for population a and b, if `return_fst` is TRUE
 #' @export
-
-pairwise_pop_pbs <- function(.x, fst_method = c("Hudson"), return_fst = FALSE) {
+#' @examples
+#' example_gt <- example_gt()
+#'
+#' # We can compute the PBS for all populations using "Hudson" method
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   pairwise_pop_pbs(fst_method = "Hudson")
+pairwise_pop_pbs <- function(.x,
+                             type = c("matrix"),
+                             fst_method = c("Hudson"),
+                             return_fst = FALSE) {
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
-  # @TODO check that we have only one grouping variable.
+
+  # check that we only have one grouping variable
+  if (length(.x %>% dplyr::group_vars()) > 1) {
+    stop("pairwise_pop_pbs only works with one grouping variable")
+  }
+  type <- match.arg(type)
 
   # get the populations
   .group_levels <- .x %>% group_keys()
@@ -52,11 +67,14 @@ pairwise_pop_pbs <- function(.x, fst_method = c("Hudson"), return_fst = FALSE) {
   pbs_results <- do.call(cbind, pbs_results)
   # set row names same as the fst table
   rownames(pbs_results) <- rownames(fst_values)
-  # add fst values if requested
-  if (return_fst) {
-    pbs_results <- cbind(fst_values, pbs_results)
+
+  if (type == "matrix") {
+    # add fst values if requested
+    if (return_fst) {
+      pbs_results <- cbind(fst_values, pbs_results)
+    }
+    return(pbs_results)
   }
-  return(pbs_results)
 }
 
 
