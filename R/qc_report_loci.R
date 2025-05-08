@@ -51,8 +51,7 @@ qc_report_loci.grouped_df <- function(.x, ...) {
   pops <- length(unique(pops))
 
   # Calculate hwe across groups
-  hwe_res <- .x %>% group_map(.f = ~ loci_hwe(.x$genotypes))
-  hwe_res <- do.call("cbind", hwe_res)
+  hwe_res <- loci_hwe(.x, type = "matrix")
   hwe_res <- as.data.frame(hwe_res)
   hwe_res$p_corrected <- apply(hwe_res, 1, function(row) min(row) * pops)
 
