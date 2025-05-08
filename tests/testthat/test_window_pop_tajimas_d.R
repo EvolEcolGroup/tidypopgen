@@ -37,6 +37,7 @@ test_gt <- test_gt %>% dplyr::group_by(population)
 # testing the infrastructure for windowing
 test_that("windows_pop_tajimas_d works correctly", {
   window_taj <- windows_pop_tajimas_d(
+    type = "list",
     test_gt,
     window_size = 3,
     step_size = 1,
@@ -68,6 +69,7 @@ test_that("windows_pop_tajimas_d works correctly", {
   # Additional test for bp-based windows
   test_that("windows_pop_tajimas_d works with bp units", {
     window_taj_bp <- windows_pop_tajimas_d(
+      type = "list",
       test_gt,
       window_size = 100,
       step_size = 50,
@@ -83,6 +85,7 @@ test_that("windows_pop_tajimas_d works correctly", {
   test_that("windows_pop_tajimas_d respects min_loci", {
     # Set min_loci to a value that should produce NA for some windows
     window_taj_high_min <- windows_pop_tajimas_d(
+      type = "list",
       test_gt,
       window_size = 2,
       step_size = 1,
@@ -98,10 +101,44 @@ test_that("windows_pop_tajimas_d works correctly", {
   test_gt <- test_gt %>% ungroup()
   # test the function with no grouping
   window_taj_no_group <- windows_pop_tajimas_d(
+    type = "list",
     test_gt,
     window_size = 3,
     step_size = 1,
     min_loci = 1
   )
   expect_true(inherits(window_taj_no_group, "data.frame"))
+})
+
+test_that("windows type", {
+  window_taj_list <- windows_pop_tajimas_d(
+    type = "list",
+    test_gt,
+    window_size = 3,
+    step_size = 1,
+    min_loci = 1
+  )
+  expect_true(is.list(window_taj_list))
+  window_taj_tibble <- windows_pop_tajimas_d(
+    type = "tibble",
+    test_gt,
+    window_size = 3,
+    step_size = 1,
+    min_loci = 1
+  )
+  expect_true(inherits(window_taj_tibble, "data.frame"))
+  window_taj_tidy <- windows_pop_tajimas_d(
+    type = "tidy",
+    test_gt,
+    window_size = 3,
+    step_size = 1,
+    min_loci = 1
+  )
+  expect_true(inherits(window_taj_tidy, "data.frame"))
+  # Compare
+  pop1_pop2_tidy <-
+    subset(window_taj_tidy, window_taj_tidy$group == "pop3")
+  expect_equal(pop1_pop2_tidy$stat, window_taj_tibble$pop3)
+  expect_equal(pop1_pop2_tidy$stat, window_taj_list$pop3$stat)
+  expect_equal(window_taj_tibble$pop3, window_taj_list$pop3$stat)
 })

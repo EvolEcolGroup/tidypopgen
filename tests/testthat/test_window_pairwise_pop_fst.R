@@ -403,3 +403,28 @@ test_that("windows_pairwise_pop_fst works correctly", {
     manual_pop2_pop3
   )
 })
+
+test_that("windows type", {
+  fst_windows_tibble <- test_gt %>%
+    windows_pairwise_pop_fst(
+      type = "tibble",
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp",
+      min_loci = 2
+    )
+  expect_true(is.data.frame(fst_windows_tibble))
+  fst_windows_tidy <- test_gt %>%
+    windows_pairwise_pop_fst(
+      type = "tidy",
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp",
+      min_loci = 2
+    )
+  expect_true(is.data.frame(fst_windows_tidy))
+  # Compare
+  pop1_pop2_tidy <-
+    subset(fst_windows_tidy, fst_windows_tidy$stat_name == "fst_pop1.pop2")
+  expect_equal(pop1_pop2_tidy$value, fst_windows_tibble$fst_pop1.pop2)
+})

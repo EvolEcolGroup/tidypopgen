@@ -4,6 +4,7 @@
 #' each chromosome.
 #'
 #' @param .x a grouped `gen_tibble` object
+#' @param type type of object to return. One of "tibble" or "tidy".
 #' @param method the method to use for calculating Fst. Currently only "Hudson"
 #'   is supported.
 #' @param window_size The size of the window to use for the estimates.
@@ -35,6 +36,7 @@
 #'   )
 #'
 windows_pairwise_pop_fst <- function(.x,
+                                     type = c("tibble", "tidy"),
                                      method = c("Hudson"),
                                      window_size,
                                      step_size,
@@ -44,6 +46,7 @@ windows_pairwise_pop_fst <- function(.x,
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
   method <- match.arg(method)
+  type <- match.arg(type)
 
   # create the pairwise Fst by locus, saving numerator and denominator
   pair_fst <- pairwise_pop_fst(.x,
@@ -91,5 +94,12 @@ windows_pairwise_pop_fst <- function(.x,
       res <- dplyr::bind_cols(res, window_fst)
     }
   }
-  return(res)
+  if (type == "tibble") {
+    return(res)
+  } else if (type == "tidy") {
+    cols <- names(res)[names(res) != c("chromosome", "start", "end")]
+    res <-
+      res %>% tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
+    return(res)
+  }
 }

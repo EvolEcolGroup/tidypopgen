@@ -4,6 +4,8 @@
 #'   each chromosome.
 #'
 #' @param .x a (potentially grouped) `gen_tibble` object
+#' @param type type of object to return, if using grouped method. One of
+#'   "tibble", "tidy", or "list".
 #' @param window_size The size of the window to use for the estimates.
 #' @param step_size The step size to use for the windows.
 #' @param size_unit Either "snp" or "bp". If "snp", the window size and step
@@ -24,6 +26,7 @@
 #' @export
 
 windows_pop_tajimas_d <- function(.x,
+                                  type = c("tibble", "tidy", "list"),
                                   window_size,
                                   step_size,
                                   size_unit = c("snp", "bp"),
@@ -31,6 +34,7 @@ windows_pop_tajimas_d <- function(.x,
                                   complete = FALSE) {
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
+  type <- match.arg(type)
 
   # if x is grouped, get the pop sizes for each group
   if (inherits(.x, "grouped_gen_tbl")) {
@@ -69,6 +73,20 @@ windows_pop_tajimas_d <- function(.x,
   }
   if (length(res) == 1) { # if we only have one pop, return a data.frame
     res <- res[[1]]
+    return(res)
   }
-  return(res)
+
+  names(res) <- dplyr::group_keys(.x) %>% pull(1)
+
+  if (type == "tibble") {
+    res <- bind_rows(res, .id = "group")
+    res <-
+      res %>% tidyr::pivot_wider(names_from = "group", values_from = "stat")
+    return(res)
+  } else if (type == "tidy") {
+    res <- bind_rows(res, .id = "group")
+    return(res)
+  } else if (type == "list") {
+    return(res)
+  }
 }

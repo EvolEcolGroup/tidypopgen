@@ -6,6 +6,7 @@
 \usage{
 windows_pairwise_pop_pbs(
   .x,
+  type = c("tibble", "tidy"),
   method = "Hudson",
   return_fst = FALSE,
   window_size,
@@ -17,6 +18,8 @@ windows_pairwise_pop_pbs(
 }
 \arguments{
 \item{.x}{a grouped \code{gen_tibble} object}
+
+\item{type}{type of object to return. One of "tibble" or "tidy".}
 
 \item{method}{the method to use for calculating Fst. Currently only "Hudson"
 is supported.}

@@ -17,7 +17,7 @@ pairwise_pop_fst(
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
-\item{type}{type of object to return. One of "tidy" or "pairwise" for a
+\item{type}{type of object to return One of "tidy" or "pairwise" for a
 pairwise matrix of populations. Default is "tidy".}
 
 \item{by_locus}{boolean, determining whether Fst should be returned by

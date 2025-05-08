@@ -7,6 +7,7 @@
 #'   loci that may be under selection.
 #'
 #' @param .x a grouped `gen_tibble` object
+#' @param type type of object to return. One of "tibble" or "tidy".
 #' @param method the method to use for calculating Fst. Currently only "Hudson"
 #'   is supported.
 #' @param return_fst a logical value indicating whether to return the Fst values
@@ -32,6 +33,7 @@
 #' @export
 
 windows_pairwise_pop_pbs <- function(.x,
+                                     type = c("tibble", "tidy"),
                                      method = "Hudson",
                                      return_fst = FALSE,
                                      window_size,
@@ -43,6 +45,7 @@ windows_pairwise_pop_pbs <- function(.x,
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
+  type <- match.arg(type)
   # get the populations
   .group_levels <- .x %>% group_keys()
   # Check if there are at least 3 populations
@@ -61,11 +64,15 @@ windows_pairwise_pop_pbs <- function(.x,
     complete = complete
   )
 
+  # check that we only have one grouping variable
+  if (length(.x %>% dplyr::group_vars()) > 1) {
+    stop("windows_pairwise_pop_pbs only works with one grouping variable")
+  }
+
   # create all 3 way combinations of populations
   pop_combinations <- utils::combn(.group_levels %>% dplyr::pull(1), 3,
     simplify = FALSE
   )
-  # @TODO the above will only work if we have one grouping level
 
   # for each combination of populations, compute the pbs
   pbs_results <- lapply(pop_combinations,
@@ -85,5 +92,15 @@ windows_pairwise_pop_pbs <- function(.x,
       pbs_results
     )
   }
-  return(pbs_results)
+
+  if (type == "tibble") {
+    return(pbs_results)
+  } else if (type == "tidy") {
+    cols <-
+      names(pbs_results)[names(pbs_results) != c("chromosome", "start", "end")]
+    pbs_results <-
+      pbs_results %>%
+      tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
+    return(pbs_results)
+  }
 }

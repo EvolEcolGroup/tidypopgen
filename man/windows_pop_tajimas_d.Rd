@@ -6,6 +6,7 @@
 \usage{
 windows_pop_tajimas_d(
   .x,
+  type = c("tibble", "tidy", "list"),
   window_size,
   step_size,
   size_unit = c("snp", "bp"),
@@ -15,6 +16,9 @@ windows_pop_tajimas_d(
 }
 \arguments{
 \item{.x}{a (potentially grouped) \code{gen_tibble} object}
+
+\item{type}{type of object to return, if using grouped method. One of
+"tibble", "tidy", or "list".}
 
 \item{window_size}{The size of the window to use for the estimates.}
 

@@ -22,7 +22,7 @@
 #' analysis of population structure. Evolution, 38(6): 1358–1370.
 #'
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
-#' @param type type of object to return. One of "tidy" or "pairwise" for a
+#' @param type type of object to return One of "tidy" or "pairwise" for a
 #'   pairwise matrix of populations. Default is "tidy".
 #' @param by_locus_type type of object to return. One of "tidy", "matrix" or
 #' "list". Default is "tidy".
