@@ -41,7 +41,7 @@ and is used to identify outlier loci that may be under selection.
 example_gt <- example_gt()
 
 # We can compute the PBS for all populations using "Hudson" method
-test_pbs <- test_gt \%>\%
+example_gt \%>\%
   group_by(population) \%>\%
   pairwise_pop_pbs(fst_method = "Hudson")
 }
