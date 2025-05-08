@@ -19,16 +19,24 @@ test_that("autoplot bug with NA values", {
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
-  
+
   example_gt <- gen_tibble(example_genotypes,
-                           indiv_meta = example_indiv_meta,
-                           loci = example_loci,
-                           backingfile = tempfile()
+    indiv_meta = example_indiv_meta,
+    loci = example_loci,
+    backingfile = tempfile(),
+    quiet = TRUE
   )
-  
+
   ex_loci_report <- example_gt %>%
     qc_report_loci()
-  
-  autoplot(ex_loci_report, type = "overview") #this won't work because of the NAs in the MAF column
-  
+
+  expect_message(
+    {
+      pdf(NULL)
+      on.exit(dev.off())
+      plt <- autoplot(ex_loci_report, type = "overview")
+    },
+    "One or more loci are missing for every individual"
+  )
+  expect_false("rs2" %in% rownames(plt$New_data))
 })
