@@ -49,7 +49,7 @@ allowing one to compute allele contributions. More details about the
 computation of DAPC are to be found in the indicated reference.
 
 Results can be visualised with \code{\link[=autoplot.gt_dapc]{autoplot.gt_dapc()}}, see the help of that
-method for the availabl plots. There are also \link{gt_dapc_tidiers} for
+method for the available plots. There are also \link{gt_dapc_tidiers} for
 manipulating the results. For the moment, his function returns objects of
 class \code{\link[adegenet:dapc]{adegenet::dapc}} which are
 compatible with methods from \code{adegenet}; graphical methods for DAPC are

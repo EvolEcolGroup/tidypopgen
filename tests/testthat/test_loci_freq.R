@@ -124,7 +124,10 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   list <- loci_alt_freq(test_gt, type = "list")
   matrix <- loci_alt_freq(test_gt, type = "matrix")
   tidy <- loci_alt_freq(test_gt, type = "tidy")
-  expect_equal(list[1][[1]], matrix[, 1])
+
+  expect_equal(rownames(matrix), show_loci(test_gt)$name)
+  expect_equal(colnames(matrix), group_keys(test_gt)$population)
+  expect_equal(list[1][[1]], as.vector(matrix[, "pop1"]))
   tidy_pop1 <- tidy %>%
     filter(group == "pop1") %>%
     select(value)
@@ -161,7 +164,10 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   list <- loci_alt_freq(test_gt_subset, type = "list")
   matrix <- loci_alt_freq(test_gt_subset, type = "matrix")
   tidy <- loci_alt_freq(test_gt_subset, type = "tidy")
-  expect_equal(list[1][[1]], matrix[, 1])
+
+  expect_equal(rownames(matrix), show_loci(test_gt_subset)$name)
+  expect_equal(colnames(matrix), group_keys(test_gt_subset)$population)
+  expect_equal(list[1][[1]], as.vector(matrix[, 1]))
   tidy_pop1 <- tidy %>%
     filter(group == "pop1") %>%
     select(value)
@@ -188,7 +194,10 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   list <- loci_maf(test_gt, type = "list")
   matrix <- loci_maf(test_gt, type = "matrix")
   tidy <- loci_maf(test_gt, type = "tidy")
-  expect_equal(list[1][[1]], matrix[, 1])
+
+  expect_equal(list[1][[1]], as.vector(matrix[, 1]))
+  expect_equal(rownames(matrix), show_loci(test_gt)$name)
+  expect_equal(colnames(matrix), group_keys(test_gt)$population)
   tidy_pop1 <- tidy %>%
     filter(group == "pop1") %>%
     select(value)
@@ -219,7 +228,10 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   list <- loci_maf(test_gt_subset, type = "list")
   matrix <- loci_maf(test_gt_subset, type = "matrix")
   tidy <- loci_maf(test_gt_subset, type = "tidy")
-  expect_equal(list[1][[1]], matrix[, 1])
+
+  expect_equal(list[1][[1]], as.vector(matrix[, 1]))
+  expect_equal(rownames(matrix), show_loci(test_gt_subset)$name)
+  expect_equal(colnames(matrix), group_keys(test_gt_subset)$population)
   tidy_pop1 <- tidy %>%
     filter(group == "pop1") %>%
     select(value)

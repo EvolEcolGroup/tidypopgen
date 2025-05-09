@@ -159,7 +159,7 @@ compute_wss <- function(x, f) {
 #' ready plots.
 #'
 #' @param object an object of class `gt_dapc`
-#' @param metric the metric to plot on the y axies, one of 'BIC', 'AIC', or
+#' @param metric the metric to plot on the y axis, one of 'BIC', 'AIC', or
 #'   'WSS' (with sum of squares)
 #' @param ... not currently used.
 #' @returns a `ggplot2` object

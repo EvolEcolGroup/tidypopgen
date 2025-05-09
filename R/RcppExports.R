@@ -21,12 +21,20 @@ gt_grouped_missingness <- function(BM, rowInd, colInd, groupIds, ngroups, ncores
     .Call(`_tidypopgen_gt_grouped_missingness`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
+gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
+    .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
+}
+
 gt_grouped_summaries <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
     .Call(`_tidypopgen_gt_grouped_summaries`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
 gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {
     .Call(`_tidypopgen_gt_ind_hetero`, BM, rowInd, colInd, ncores)
+}
+
+gt_pi_diploid <- function(BM, rowInd, colInd, ncores) {
+    .Call(`_tidypopgen_gt_pi_diploid`, BM, rowInd, colInd, ncores)
 }
 
 SNPHWE2_R <- function(obs_hets, obs_hom1, obs_hom2, midp) {
@@ -37,8 +45,12 @@ hwe_on_matrix <- function(geno_counts, midp) {
     .Call(`_tidypopgen_hwe_on_matrix`, geno_counts, midp)
 }
 
-pairwise_fst_hudson_loop <- function(pairwise_combn, pop_freqs_df, by_locus) {
-    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, pop_freqs_df, by_locus)
+gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp) {
+    .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp)
+}
+
+pairwise_fst_hudson_loop <- function(pairwise_combn, pop_freqs_df, by_locus, return_num_dem) {
+    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, pop_freqs_df, by_locus, return_num_dem)
 }
 
 read_packedancestry <- function(filename, BM, tab) {

@@ -115,5 +115,5 @@ Data are only merged one set at a time, there is no equivalent to --merge-list.
 |-----------|----------------------------------------|
 | --pca     | See `gt_pca()` for pca options         |
 | --fst     | `pairwise_pop_fst()` with `group_by()` |
-| --homozyg | `gt_roh_window()`                      |
+| --homozyg | `windows_indiv_roh()`                      |
 

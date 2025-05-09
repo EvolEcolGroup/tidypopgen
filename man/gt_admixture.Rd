@@ -23,7 +23,7 @@ file}
 \item{n_runs}{the number of runs for each k value (defaults to 1)}
 
 \item{crossval}{boolean, should cross validation be used to assess the fit
-(defaults ot FALSE)}
+(defaults to FALSE)}
 
 \item{n_cores}{number of cores (defaults to 1)}
 

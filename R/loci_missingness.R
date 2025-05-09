@@ -188,6 +188,8 @@ loci_missingness.grouped_df <- function(
     lapply(seq_len(ncol(na_mat)), function(i) na_mat[, i])
   } else if (type == "matrix") {
     # return a matrix
+    colnames(na_mat) <- dplyr::group_keys(.x) %>% pull(1)
+    rownames(na_mat) <- loci_names(.x)
     na_mat
   }
 }

@@ -4,12 +4,12 @@
 #' objects based on local XGBoost models.
 #'
 #' This function is a wrapper around [bigsnpr::snp_fastImpute()]. The error
-#' rates from the xgboost, if appended, can be retrived with
+#' rates from the xgboost, if appended, can be retrieved with
 #' `attr(x$genotypes, "imputed_errors")` where `x` is the `gen_tibble`.
 #'
 #' @param x a [gen_tibble] with missing data
 #' @param alpha Type-I error for testing correlations. Default is `1e-4`.
-#' @param size Number of neighbor SNPs to be possibly included in the model
+#' @param size Number of neighbour SNPs to be possibly included in the model
 #'   imputing this particular SNP. Default is `200`.
 #' @param p_train Proportion of non missing genotypes that are used for training
 #'   the imputation model while the rest is used to assess the accuracy of
