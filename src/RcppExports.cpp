@@ -326,13 +326,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 4},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
-<<<<<<< HEAD
-    {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 3},
-    {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
-=======
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 6},
     {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 4},
->>>>>>> dev
+    {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},
