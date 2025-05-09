@@ -7,13 +7,13 @@
 #' @references Yi X, et al. (2010) Sequencing of 50 human exomes reveals
 #'   adaptation to high altitude. Science 329: 75-78.
 #' @param .x A grouped `gen_tibble`
-#' @param type type of object to return. One of "tidy", "tibble" or "matrix".
+#' @param type type of object to return. One of "tidy" or "matrix".
 #'   Default is "tidy".
 #' @param fst_method A character string specifying the method to use for
 #'   computing Fst. Currently only "Hudson" is available.
 #' @param return_fst A logical value indicating whether to return the Fst values
 #'   along with the PBS values. Default is `FALSE`.
-#' @return A tibble with the following columns:
+#' @return A matrix with the following columns:
 #' - `pbs_a.b.c`: the PBS value for population a given b & c (there
 #'   will be multiple such columns covering all 3 way combinations of
 #'   populations in the grouped `gen_tibble` object)
@@ -27,7 +27,7 @@
 #'   group_by(population) %>%
 #'   pairwise_pop_pbs(fst_method = "Hudson")
 pairwise_pop_pbs <- function(.x,
-                             type = c("tidy", "tibble", "matrix"),
+                             type = c("tidy", "matrix"),
                              fst_method = c("Hudson"),
                              return_fst = FALSE) {
   # Check if the input is a grouped gen_tibble
@@ -88,12 +88,6 @@ pairwise_pop_pbs <- function(.x,
         cols = all_of(colnames(pbs_results)),
         names_to = "stat_name"
       )
-    if (return_fst) {
-      pbs_results <- cbind(fst_values, pbs_results)
-    }
-    return(pbs_results)
-  } else if (type == "tibble") {
-    pbs_results <- as.data.frame(pbs_results)
     if (return_fst) {
       pbs_results <- cbind(fst_values, pbs_results)
     }

@@ -6,7 +6,7 @@
 \usage{
 windows_pop_tajimas_d(
   .x,
-  type = c("tibble", "tidy", "list"),
+  type = c("matrix", "tidy", "list"),
   window_size,
   step_size,
   size_unit = c("snp", "bp"),
@@ -18,7 +18,7 @@ windows_pop_tajimas_d(
 \item{.x}{a (potentially grouped) \code{gen_tibble} object}
 
 \item{type}{type of object to return, if using grouped method. One of
-"tibble", "tidy", or "list".}
+"matrix", "tidy", or "list". Default is "matrix".}
 
 \item{window_size}{The size of the window to use for the estimates.}
 
@@ -37,13 +37,34 @@ FALSE, the default, then partial computations will be allowed at the end of
 the chromosome.}
 }
 \value{
-a data frame (or a list of data.frames if \code{.x} is grouped) with the
-following columns:
+if data is not grouped, a data frame with the following columns:
 \itemize{
 \item \code{chromosome}: the chromosome for the window
 \item \code{start}: the starting locus of the window
 \item \code{end}: the ending locus of the window
 \item \code{tajimas_d}: the Tajima's D for the population
+if data are grouped, either:
+a data frame as above with the following columns:
+\item \code{chromosome}: the chromosome for the window
+\item \code{start}: the starting locus of the window
+\item \code{end}: the ending locus of the window
+\item \code{n_loci}: the number of loci in the window
+\item \code{group}: the Tajima's D for the group for the given window  (there will be
+as many of these columns as groups in the gen_tibble, and they will be
+named by the grouping levels)
+a tidy tibble with the following columns:
+\item \code{chromosome}: the chromosome for the window
+\item \code{start}: the starting locus of the window
+\item \code{end}: the ending locus of the window
+\item \code{n_loci}: the number of loci in the window
+\item \code{group}: the name of the group
+\item \code{stat}: the Tajima's D for the given group at the given window
+or a list of data frames, one per group, with the following columns:
+\item \code{chromosome}: the chromosome for the window
+\item \code{start}: the starting locus of the window
+\item \code{end}: the ending locus of the window
+\item \code{stat}: the Tajima's D for the given window
+\item \code{n_loci}: the number of loci in the window
 }
 }
 \description{

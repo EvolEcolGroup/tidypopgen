@@ -6,7 +6,7 @@
 \usage{
 pairwise_pop_pbs(
   .x,
-  type = c("tidy", "tibble", "matrix"),
+  type = c("tidy", "matrix"),
   fst_method = c("Hudson"),
   return_fst = FALSE
 )
@@ -14,7 +14,7 @@ pairwise_pop_pbs(
 \arguments{
 \item{.x}{A grouped \code{gen_tibble}}
 
-\item{type}{type of object to return. One of "tidy", "tibble" or "matrix".
+\item{type}{type of object to return. One of "tidy" or "matrix".
 Default is "tidy".}
 
 \item{fst_method}{A character string specifying the method to use for
@@ -24,7 +24,7 @@ computing Fst. Currently only "Hudson" is available.}
 along with the PBS values. Default is \code{FALSE}.}
 }
 \value{
-A tibble with the following columns:
+A matrix with the following columns:
 \itemize{
 \item \code{pbs_a.b.c}: the PBS value for population a given b & c (there
 will be multiple such columns covering all 3 way combinations of

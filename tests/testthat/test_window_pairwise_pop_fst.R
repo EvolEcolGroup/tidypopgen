@@ -405,15 +405,15 @@ test_that("windows_pairwise_pop_fst works correctly", {
 })
 
 test_that("windows type", {
-  fst_windows_tibble <- test_gt %>%
+  fst_windows_matrix <- test_gt %>%
     windows_pairwise_pop_fst(
-      type = "tibble",
+      type = "matrix",
       window_size = 3,
       step_size = 2,
       size_unit = "snp",
       min_loci = 2
     )
-  expect_true(is.data.frame(fst_windows_tibble))
+  expect_true(is.data.frame(fst_windows_matrix))
   fst_windows_tidy <- test_gt %>%
     windows_pairwise_pop_fst(
       type = "tidy",
@@ -426,5 +426,5 @@ test_that("windows type", {
   # Compare
   pop1_pop2_tidy <-
     subset(fst_windows_tidy, fst_windows_tidy$stat_name == "fst_pop1.pop2")
-  expect_equal(pop1_pop2_tidy$value, fst_windows_tibble$fst_pop1.pop2)
+  expect_equal(pop1_pop2_tidy$value, fst_windows_matrix$fst_pop1.pop2)
 })

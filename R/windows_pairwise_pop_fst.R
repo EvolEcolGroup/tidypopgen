@@ -4,7 +4,11 @@
 #' each chromosome.
 #'
 #' @param .x a grouped `gen_tibble` object
-#' @param type type of object to return. One of "tibble" or "tidy".
+#' @param type type of object to return. One of "matrix" or "tidy". Default is
+#'   "matrix". "matrix" returns a dataframe where each row is a window, followed
+#'   by columns of Fst values for each pairwise population a and b comparison.
+#'   "tidy" returns a tidy tibble of the same data in 'long' format, where each
+#'   row is one window for one pairwise population a and b comparison.
 #' @param method the method to use for calculating Fst. Currently only "Hudson"
 #'   is supported.
 #' @param window_size The size of the window to use for the estimates.
@@ -18,12 +22,19 @@
 #' @param complete Should the function be evaluated on complete windows only? If
 #'   FALSE, the default, then partial computations will be allowed at the end of
 #'   the chromosome.
-#' @returns a data frame with the following columns:
+#' @returns either a data frame with the following columns:
 #' - `chromosome`: the chromosome for the window
 #' - `start`: the starting locus of the window
 #' - `end`: the ending locus of the window
 #' - `fst_a.b`: the pairwise Fst value for the population a and b (there will be
 #'   multiple such columns if there are more than two populations)
+#'   or a tidy tibble with the following columns:
+#' - `chromosome`: the chromosome for the window
+#' - `start`: the starting locus of the window
+#' - `end`: the ending locus of the window
+#' - `stat_name`: the name of population a and b used in the pairwise Fst
+#'    calculation (e.g. "fst_pop1.pop2")
+#' - `value`: the pairwise Fst value for the population a and b
 #' @export
 #' @examples
 #' example_gt <- example_gt("gen_tbl")
@@ -36,7 +47,7 @@
 #'   )
 #'
 windows_pairwise_pop_fst <- function(.x,
-                                     type = c("tibble", "tidy"),
+                                     type = c("matrix", "tidy"),
                                      method = c("Hudson"),
                                      window_size,
                                      step_size,
@@ -94,7 +105,7 @@ windows_pairwise_pop_fst <- function(.x,
       res <- dplyr::bind_cols(res, window_fst)
     }
   }
-  if (type == "tibble") {
+  if (type == "matrix") {
     return(res)
   } else if (type == "tidy") {
     cols <- names(res)[names(res) != c("chromosome", "start", "end")]

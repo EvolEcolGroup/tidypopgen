@@ -6,7 +6,7 @@
 \usage{
 windows_pairwise_pop_pbs(
   .x,
-  type = c("tibble", "tidy"),
+  type = c("matrix", "tidy"),
   method = "Hudson",
   return_fst = FALSE,
   window_size,
@@ -19,7 +19,11 @@ windows_pairwise_pop_pbs(
 \arguments{
 \item{.x}{a grouped \code{gen_tibble} object}
 
-\item{type}{type of object to return. One of "tibble" or "tidy".}
+\item{type}{type of object to return. One of "matrix" or "tidy". Default is
+"matrix". "matrix" returns a dataframe where each row is a window, followed
+by columns of pbs values for each population comparison. "tidy" returns a
+tidy tibble of the same data in 'long' format, where each
+row is one window for one population comparison.}
 
 \item{method}{the method to use for calculating Fst. Currently only "Hudson"
 is supported.}
@@ -43,7 +47,7 @@ FALSE, the default, then partial computations will be allowed at the end of
 the chromosome.}
 }
 \value{
-a data frame with the following columns:
+either a data frame with the following columns:
 \itemize{
 \item \code{chromosome}: the chromosome for the window
 \item \code{start}: the starting locus of the window
@@ -52,6 +56,14 @@ a data frame with the following columns:
 will be multiple such columns covering all 3 way combinations of
 populations in the grouped \code{gen_tibble} object)
 \item \code{fst_a.b}: the Fst value for population a and b, if \code{return_fst} is TRUE
+or a tidy tibble with the following columns:
+\item \code{chromosome}: the chromosome for the window
+\item \code{start}: the starting locus of the window
+\item \code{end}: the ending locus of the window
+\item \code{stat_name}: the name of populations used in the pbs calculation
+(e.g. "pbs_pop1.pop2.pop3"). If return_fst is TRUE, stat_name will also
+include "fst" calculations in the same column (e.g. "fst_pop1.pop2").
+\item \code{value}: the pbs value for the populations
 }
 }
 \description{

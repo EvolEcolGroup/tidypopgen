@@ -69,14 +69,8 @@ test_that("type argument delivers correct objects", {
     pairwise_pop_pbs(fst_method = "Hudson", type = "tidy")
   expect_true(is.data.frame(test_pbs_tidy))
 
-  test_pbs_tibble <- test_gt %>%
-    group_by(population) %>%
-    pairwise_pop_pbs(fst_method = "Hudson", type = "tibble")
-  expect_true(is.data.frame(test_pbs_tibble))
-
   # Compare
-  expect_equal(as.data.frame(test_pbs_matrix), test_pbs_tibble)
   pop1_pop2_pop3_tidy <-
     subset(test_pbs_tidy, test_pbs_tidy$stat_name == "pbs_pop1.pop2.pop3")
-  expect_equal(pop1_pop2_pop3_tidy$value, test_pbs_tibble$pbs_pop1.pop2.pop3)
+  expect_equal(pop1_pop2_pop3_tidy$value, as.vector(test_pbs_matrix[, 1]))
 })

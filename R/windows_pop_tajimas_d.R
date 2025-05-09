@@ -5,7 +5,7 @@
 #'
 #' @param .x a (potentially grouped) `gen_tibble` object
 #' @param type type of object to return, if using grouped method. One of
-#'   "tibble", "tidy", or "list".
+#'   "matrix", "tidy", or "list". Default is "matrix".
 #' @param window_size The size of the window to use for the estimates.
 #' @param step_size The step size to use for the windows.
 #' @param size_unit Either "snp" or "bp". If "snp", the window size and step
@@ -17,16 +17,37 @@
 #' @param complete Should the function be evaluated on complete windows only? If
 #'   FALSE, the default, then partial computations will be allowed at the end of
 #'   the chromosome.
-#' @returns a data frame (or a list of data.frames if `.x` is grouped) with the
-#'   following columns:
+#' @returns if data is not grouped, a data frame with the following columns:
 #' - `chromosome`: the chromosome for the window
 #' - `start`: the starting locus of the window
 #' - `end`: the ending locus of the window
 #' - `tajimas_d`: the Tajima's D for the population
+#' if data are grouped, either:
+#' a data frame as above with the following columns:
+#' - `chromosome`: the chromosome for the window
+#' - `start`: the starting locus of the window
+#' - `end`: the ending locus of the window
+#' - `n_loci`: the number of loci in the window
+#' - `group`: the Tajima's D for the group for the given window  (there will be
+#'    as many of these columns as groups in the gen_tibble, and they will be
+#'    named by the grouping levels)
+#' a tidy tibble with the following columns:
+#' - `chromosome`: the chromosome for the window
+#' - `start`: the starting locus of the window
+#' - `end`: the ending locus of the window
+#' - `n_loci`: the number of loci in the window
+#' - `group`: the name of the group
+#' - `stat`: the Tajima's D for the given group at the given window
+#' or a list of data frames, one per group, with the following columns:
+#' - `chromosome`: the chromosome for the window
+#' - `start`: the starting locus of the window
+#' - `end`: the ending locus of the window
+#' - `stat`: the Tajima's D for the given window
+#' - `n_loci`: the number of loci in the window
 #' @export
 
 windows_pop_tajimas_d <- function(.x,
-                                  type = c("tibble", "tidy", "list"),
+                                  type = c("matrix", "tidy", "list"),
                                   window_size,
                                   step_size,
                                   size_unit = c("snp", "bp"),
@@ -78,7 +99,7 @@ windows_pop_tajimas_d <- function(.x,
 
   names(res) <- dplyr::group_keys(.x) %>% pull(1)
 
-  if (type == "tibble") {
+  if (type == "matrix") {
     res <- bind_rows(res, .id = "group")
     res <-
       res %>% tidyr::pivot_wider(names_from = "group", values_from = "stat")

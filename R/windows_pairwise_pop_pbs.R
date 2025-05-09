@@ -7,7 +7,11 @@
 #'   loci that may be under selection.
 #'
 #' @param .x a grouped `gen_tibble` object
-#' @param type type of object to return. One of "tibble" or "tidy".
+#' @param type type of object to return. One of "matrix" or "tidy". Default is
+#'   "matrix". "matrix" returns a dataframe where each row is a window, followed
+#'   by columns of pbs values for each population comparison. "tidy" returns a
+#'   tidy tibble of the same data in 'long' format, where each
+#'   row is one window for one population comparison.
 #' @param method the method to use for calculating Fst. Currently only "Hudson"
 #'   is supported.
 #' @param return_fst a logical value indicating whether to return the Fst values
@@ -22,7 +26,7 @@
 #' @param complete Should the function be evaluated on complete windows only? If
 #'   FALSE, the default, then partial computations will be allowed at the end of
 #'   the chromosome.
-#' @returns a data frame with the following columns:
+#' @returns either a data frame with the following columns:
 #' - `chromosome`: the chromosome for the window
 #' - `start`: the starting locus of the window
 #' - `end`: the ending locus of the window
@@ -30,10 +34,18 @@
 #'   will be multiple such columns covering all 3 way combinations of
 #'   populations in the grouped `gen_tibble` object)
 #' - `fst_a.b`: the Fst value for population a and b, if `return_fst` is TRUE
+#' or a tidy tibble with the following columns:
+#' - `chromosome`: the chromosome for the window
+#' - `start`: the starting locus of the window
+#' - `end`: the ending locus of the window
+#' - `stat_name`: the name of populations used in the pbs calculation
+#'    (e.g. "pbs_pop1.pop2.pop3"). If return_fst is TRUE, stat_name will also
+#'    include "fst" calculations in the same column (e.g. "fst_pop1.pop2").
+#' - `value`: the pbs value for the populations
 #' @export
 
 windows_pairwise_pop_pbs <- function(.x,
-                                     type = c("tibble", "tidy"),
+                                     type = c("matrix", "tidy"),
                                      method = "Hudson",
                                      return_fst = FALSE,
                                      window_size,
@@ -93,7 +105,7 @@ windows_pairwise_pop_pbs <- function(.x,
     )
   }
 
-  if (type == "tibble") {
+  if (type == "matrix") {
     return(pbs_results)
   } else if (type == "tidy") {
     cols <-

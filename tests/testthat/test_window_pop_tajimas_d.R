@@ -119,14 +119,14 @@ test_that("windows type", {
     min_loci = 1
   )
   expect_true(is.list(window_taj_list))
-  window_taj_tibble <- windows_pop_tajimas_d(
-    type = "tibble",
+  windows_taj_matrix <- windows_pop_tajimas_d(
+    type = "matrix",
     test_gt,
     window_size = 3,
     step_size = 1,
     min_loci = 1
   )
-  expect_true(inherits(window_taj_tibble, "data.frame"))
+  expect_true(inherits(windows_taj_matrix, "data.frame"))
   window_taj_tidy <- windows_pop_tajimas_d(
     type = "tidy",
     test_gt,
@@ -138,7 +138,7 @@ test_that("windows type", {
   # Compare
   pop1_pop2_tidy <-
     subset(window_taj_tidy, window_taj_tidy$group == "pop3")
-  expect_equal(pop1_pop2_tidy$stat, window_taj_tibble$pop3)
+  expect_equal(pop1_pop2_tidy$stat, windows_taj_matrix$pop3)
   expect_equal(pop1_pop2_tidy$stat, window_taj_list$pop3$stat)
-  expect_equal(window_taj_tibble$pop3, window_taj_list$pop3$stat)
+  expect_equal(windows_taj_matrix$pop3, window_taj_list$pop3$stat)
 })
