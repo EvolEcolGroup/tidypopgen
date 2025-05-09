@@ -65,6 +65,10 @@ vcf_loci_table <- function(filename) {
     .Call(`_tidypopgen_vcf_loci_table`, filename)
 }
 
+vcf_genotypes_to_fbm <- function(filename, BM, biallelic, missing_value, n_header_lines) {
+    .Call(`_tidypopgen_vcf_genotypes_to_fbm`, filename, BM, biallelic, missing_value, n_header_lines)
+}
+
 write_to_FBM <- function(BM, allele_counts, col_start, n_loci, ncores) {
     invisible(.Call(`_tidypopgen_write_to_FBM`, BM, allele_counts, col_start, n_loci, ncores))
 }

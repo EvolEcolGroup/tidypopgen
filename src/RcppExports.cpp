@@ -250,6 +250,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// vcf_genotypes_to_fbm
+bool vcf_genotypes_to_fbm(std::string filename, Environment BM, IntegerVector& biallelic, const int missing_value, const int n_header_lines);
+RcppExport SEXP _tidypopgen_vcf_genotypes_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP biallelicSEXP, SEXP missing_valueSEXP, SEXP n_header_linesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< IntegerVector& >::type biallelic(biallelicSEXP);
+    Rcpp::traits::input_parameter< const int >::type missing_value(missing_valueSEXP);
+    Rcpp::traits::input_parameter< const int >::type n_header_lines(n_header_linesSEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_genotypes_to_fbm(filename, BM, biallelic, missing_value, n_header_lines));
+    return rcpp_result_gen;
+END_RCPP
+}
 // write_to_FBM
 void write_to_FBM(Environment BM, IntegerMatrix& allele_counts, const int col_start, const int n_loci, int ncores);
 RcppExport SEXP _tidypopgen_write_to_FBM(SEXP BMSEXP, SEXP allele_countsSEXP, SEXP col_startSEXP, SEXP n_lociSEXP, SEXP ncoresSEXP) {
@@ -282,6 +297,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_extractAltAlleleCountsFromVCF", (DL_FUNC) &_tidypopgen_extractAltAlleleCountsFromVCF, 8},
     {"_tidypopgen_get_ploidy_from_VCF", (DL_FUNC) &_tidypopgen_get_ploidy_from_VCF, 1},
     {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 1},
+    {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}
 };

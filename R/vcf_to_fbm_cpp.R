@@ -146,8 +146,3 @@ vcf_to_fbm_cpp <- function(
   # and return the path to the rds
   bigsnp_obj$genotypes$rds
 }
-
-# get ploidy for a given individual
-get_ploidy <- function(x) {
-  max(sapply(strsplit(x, "[/|]"), function(x) length(x)))
-}

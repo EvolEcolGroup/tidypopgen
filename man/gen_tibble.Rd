@@ -88,7 +88,7 @@ in case your
 \item{n_cores}{the number of cores to use for parallel processing}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
-processed at a time (currently used if \code{x} is a vcf or packedancestry file)}
+processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only

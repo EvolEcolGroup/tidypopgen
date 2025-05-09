@@ -30,16 +30,12 @@ vcf_to_fbm_cpp_new <- function(
 
   # create a loci_table, and figure out no_individuals and ploidy from first
   # marker
-  
-  
   vcf_meta <- vcf_loci_table(vcf_path)
   # figure out no_individuals and ploidy
   ploidy <- vcf_meta$ploidy
   no_individuals <- length(ploidy)
   max_ploidy <- max(ploidy)
 
-
-  # set up codes for the appropriate ploidy level
   code256 <- rep(NA_real_, 256)
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
@@ -47,22 +43,18 @@ vcf_to_fbm_cpp_new <- function(
   # create the file backed matrix
   file_backed_matrix <- bigstatsr::FBM.code256(
     nrow = no_individuals,
-    ncol = nrow(vcf_meta$loci_table),
+    ncol = nrow(vcf_meta$loci_tbl),
     code = code256,
     backingfile = backingfile
   )
 
-  if (max_ploidy==2){
-    vcf_genotypes_diploid(vcf_path)
-  } else {
-    vcf_genotypes(vcf_path)
-  }
+    res <- vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
+      biallelic = vcf_meta$biallelic,
+      n_header_lines = vcf_meta$n_header_lines,
+      missing_value = max_ploidy + 1)
 
-  # save it
-  # file_backed_matrix$save() # unneeded if we write directly to fine in cpp
 
-  
-  # individual metadata
+  # individual metadata table
   fam <- tibble(
     family.ID = vcf_meta$sample_names,
     sample.ID = vcf_meta$sample_names,
@@ -72,11 +64,11 @@ vcf_to_fbm_cpp_new <- function(
     affection = -9,
     ploidy = ploidy
   )
-  
-  
-  # loci metadata
-  loci <- vcf_meta$loci_table
-  
+
+
+  # loci metadata table
+  loci <- vcf_meta$loci_tbl
+
   # add an empty genetic.pos column
   loci <- loci %>% mutate(genetic.dist = 0, .after = "physical.pos")
   loci$physical.pos <- as.integer(loci$physical.pos)

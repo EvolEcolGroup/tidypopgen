@@ -39,7 +39,7 @@
 #'   This is only used if `x` is a genotype matrix. Otherwise this information
 #'   is extracted directly from the files.
 #' @param chunk_size the number of loci or individuals (depending on the format)
-#'   processed at a time (currently used if `x` is a vcf or packedancestry file)
+#'   processed at a time (currently used if `x` is a vcf with parser "vcfR")
 #' @param ... if `x` is the name of a vcf file, additional arguments passed to
 #'   [vcfR::read.vcfR()]. Otherwise, unused.
 #' @param parser the name of the parser used for *VCF*, either "cpp" to use a
