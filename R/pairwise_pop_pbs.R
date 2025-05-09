@@ -13,11 +13,18 @@
 #'   computing Fst. Currently only "Hudson" is available.
 #' @param return_fst A logical value indicating whether to return the Fst values
 #'   along with the PBS values. Default is `FALSE`.
-#' @return A matrix with the following columns:
+#' @return Either a matrix with locus ID as rownames and the following columns:
 #' - `pbs_a.b.c`: the PBS value for population a given b & c (there
 #'   will be multiple such columns covering all 3 way combinations of
 #'   populations in the grouped `gen_tibble` object)
+#' - `pbsn1_a.b.c`: the normalized PBS value for population a given b & c.
 #' - `fst_a.b`: the Fst value for population a and b, if `return_fst` is TRUE
+#' or a tidy tibble with the following columns:
+#'  - `loci`: the locus ID
+#'  - `stat_name`: the name of populations used in the pbs calculation
+#'    (e.g. "pbs_pop1.pop2.pop3"). If return_fst is TRUE, stat_name will also
+#'    include "fst" calculations in the same column (e.g. "fst_pop1.pop2").
+#' - `value`: the pbs value for the populations
 #' @export
 #' @examples
 #' example_gt <- example_gt()
@@ -82,10 +89,12 @@ pairwise_pop_pbs <- function(.x,
     return(pbs_results)
   } else if (type == "tidy") {
     pbs_results <- as.data.frame(pbs_results)
+    pbs_results$loci <- rownames(pbs_results)
+    cols <- names(pbs_results)[names(pbs_results) != c("loci")]
     pbs_results <-
       pbs_results %>%
       tidyr::pivot_longer(
-        cols = all_of(colnames(pbs_results)),
+        cols = cols,
         names_to = "stat_name"
       )
     if (return_fst) {

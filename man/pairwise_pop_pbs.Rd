@@ -24,12 +24,19 @@ computing Fst. Currently only "Hudson" is available.}
 along with the PBS values. Default is \code{FALSE}.}
 }
 \value{
-A matrix with the following columns:
+Either a matrix with locus ID as rownames and the following columns:
 \itemize{
 \item \code{pbs_a.b.c}: the PBS value for population a given b & c (there
 will be multiple such columns covering all 3 way combinations of
 populations in the grouped \code{gen_tibble} object)
+\item \code{pbsn1_a.b.c}: the normalized PBS value for population a given b & c.
 \item \code{fst_a.b}: the Fst value for population a and b, if \code{return_fst} is TRUE
+or a tidy tibble with the following columns:
+\item \code{loci}: the locus ID
+\item \code{stat_name}: the name of populations used in the pbs calculation
+(e.g. "pbs_pop1.pop2.pop3"). If return_fst is TRUE, stat_name will also
+include "fst" calculations in the same column (e.g. "fst_pop1.pop2").
+\item \code{value}: the pbs value for the populations
 }
 }
 \description{
