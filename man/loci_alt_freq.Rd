@@ -9,7 +9,7 @@
 \alias{loci_maf.tbl_df}
 \alias{loci_maf.vctrs_bigSNP}
 \alias{loci_maf.grouped_df}
-\title{Estimate allele frequencies at each each locus}
+\title{Estimate allele frequencies at each locus}
 \usage{
 loci_alt_freq(.x, .col = "genotypes", n_cores, block_size, type, ...)
 

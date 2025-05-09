@@ -20,7 +20,7 @@ gt_impute_xgboost(
 
 \item{alpha}{Type-I error for testing correlations. Default is \code{1e-4}.}
 
-\item{size}{Number of neighbor SNPs to be possibly included in the model
+\item{size}{Number of neighbour SNPs to be possibly included in the model
 imputing this particular SNP. Default is \code{200}.}
 
 \item{p_train}{Proportion of non missing genotypes that are used for training
@@ -50,6 +50,6 @@ objects based on local XGBoost models.
 }
 \details{
 This function is a wrapper around \code{\link[bigsnpr:snp_fastImpute]{bigsnpr::snp_fastImpute()}}. The error
-rates from the xgboost, if appended, can be retrived with
+rates from the xgboost, if appended, can be retrieved with
 \code{attr(x$genotypes, "imputed_errors")} where \code{x} is the \code{gen_tibble}.
 }

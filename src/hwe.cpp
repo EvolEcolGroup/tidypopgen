@@ -1,7 +1,9 @@
 #define STRICT_R_HEADERS
 #include <Rcpp.h>
-
 using namespace Rcpp;
+
+#include <bigstatsr/BMCodeAcc.h>
+
 
 // The functions below are used for HWE. They come from PLINK 1.90 under GPL3, based on
 // #3848a39 on https://github.com/chrchang/plink-ng/1.9/plink_stats.c
@@ -209,3 +211,46 @@ NumericVector hwe_on_matrix(IntegerMatrix geno_counts, uint32_t midp) {
   }
   return p_values;
 }
+
+/******************************************************************************/
+// Estimate HWE p on a grouped gen_tibble
+// this only works for diploid data
+
+
+// [[Rcpp::export]]
+NumericMatrix gt_grouped_hwe(Environment BM,
+                                     const IntegerVector& rowInd,
+                                     const IntegerVector& colInd,
+                                     const IntegerVector& groupIds,
+                                     size_t ngroups,
+                                     uint32_t midp) {
+  // midp: if true, use mid-p method
+  
+  XPtr<FBM> xpBM = BM["address"];
+  SubBMCode256Acc macc(xpBM, rowInd, colInd, BM["code256"], 1);
+  
+  size_t n = macc.nrow(); // number of individuals
+  size_t m = macc.ncol(); // number of loci
+  
+  NumericMatrix hwe_p(m, ngroups);
+  IntegerMatrix genotypes(3, ngroups);
+  
+  for (size_t j = 0; j < m; j++) { // for each locus
+    genotypes.fill(0); // set all to zero
+    for (size_t i = 0; i < n; i++) { // for each individual
+      double x = macc(i, j);
+      if (x > -1){
+        genotypes(x, groupIds[i]) += 1;
+      }
+    }
+    // now for each group, estimate HWE p
+    for (size_t group_i = 0; group_i < ngroups; group_i++) {
+      hwe_p(j, group_i) = SNPHWE2(genotypes(1,group_i), genotypes(0,group_i), genotypes(2,group_i), midp);
+    }
+  }
+  
+  return hwe_p;
+}
+
+/******************************************************************************/
+

@@ -1,7 +1,7 @@
 #' Autoplots for `gt_pcadapt` objects
 #'
 #' For `gt_pcadapt`, the following types of plots are available:
-#' - `qq`: a qunatile-quantile plot of the p-values from `pcadapt`
+#' - `qq`: a quantile-quantile plot of the p-values from `pcadapt`
 #' (wrapping [bigsnpr::snp_qq()])
 #' - `manhattan` a manhattan plot of the p-values from `pcadapt`
 #' (wrapping [bigsnpr::snp_manhattan()])
@@ -11,7 +11,7 @@
 #' ready plots.
 #'
 #' @param object an object of class `gt_pcadapt`
-#' @param type the type of plot (one of "qq", and "mnahattan")
+#' @param type the type of plot (one of "qq", and "manhattan")
 #' @param ... further arguments to be passed to [bigsnpr::snp_qq()] or
 #' [bigsnpr::snp_manhattan()].
 #' @returns a `ggplot2` object

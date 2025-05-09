@@ -13,7 +13,7 @@
 #' @param k an integer giving the number of clusters
 #' @param n_runs the number of runs for each k value (defaults to 1)
 #' @param crossval boolean, should cross validation be used to assess the fit
-#'   (defaults ot FALSE)
+#'   (defaults to FALSE)
 #' @param n_cores number of cores (defaults to 1)
 #' @param seed the seed for the random number generator (defaults to NULL)
 #' @param conda_env the name of the conda environment to use. "none" forces the

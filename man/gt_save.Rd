@@ -20,7 +20,7 @@ and \emph{.bk} files
 }
 \description{
 Save the tibble (and update the backing files). The \code{gen_tibble} object is
-saved to a file with extension \emph{.gt}, togethe with update its \emph{.rds} and
+saved to a file with extension \emph{.gt}, together with update its \emph{.rds} and
 \emph{.bk} files. Note that multiple \emph{.gt} files can be linked to the same \emph{.rds}
 and \emph{.bk} files; generally, this occurs when we create multiple subsets of
 the data. The \emph{.gt} file then stores the information on what subset of the

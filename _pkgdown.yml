@@ -74,6 +74,10 @@ reference:
     desc: "Functions comparing individuals or populations."
     contents:
         - starts_with("pairwise_")
+  - title: "Windows"
+    desc: "Functions to compute statistics in sliding windows across loci."
+    contents:
+        - starts_with("windows_")
   - title: "PCA"
     desc: "Functions for performing Principal Component Analysis."
     contents:
@@ -119,7 +123,6 @@ reference:
     desc: "Functions for other analyses within `R`."
     contents:
         - gt_extract_f2
-        - gt_roh_window
         - gt_pcadapt
         - autoplot.gt_pcadapt
   - title: "`bigSNP`"
