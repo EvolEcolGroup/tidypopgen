@@ -210,35 +210,6 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
-// extractAltAlleleCountsFromVCF
-List extractAltAlleleCountsFromVCF(std::string filename, IntegerMatrix& allele_counts, IntegerVector& ploidy, int numIndividuals, int missingValue, int maxLoci, int skipLoci, bool diploid);
-RcppExport SEXP _tidypopgen_extractAltAlleleCountsFromVCF(SEXP filenameSEXP, SEXP allele_countsSEXP, SEXP ploidySEXP, SEXP numIndividualsSEXP, SEXP missingValueSEXP, SEXP maxLociSEXP, SEXP skipLociSEXP, SEXP diploidSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    Rcpp::traits::input_parameter< IntegerMatrix& >::type allele_counts(allele_countsSEXP);
-    Rcpp::traits::input_parameter< IntegerVector& >::type ploidy(ploidySEXP);
-    Rcpp::traits::input_parameter< int >::type numIndividuals(numIndividualsSEXP);
-    Rcpp::traits::input_parameter< int >::type missingValue(missingValueSEXP);
-    Rcpp::traits::input_parameter< int >::type maxLoci(maxLociSEXP);
-    Rcpp::traits::input_parameter< int >::type skipLoci(skipLociSEXP);
-    Rcpp::traits::input_parameter< bool >::type diploid(diploidSEXP);
-    rcpp_result_gen = Rcpp::wrap(extractAltAlleleCountsFromVCF(filename, allele_counts, ploidy, numIndividuals, missingValue, maxLoci, skipLoci, diploid));
-    return rcpp_result_gen;
-END_RCPP
-}
-// get_ploidy_from_VCF
-List get_ploidy_from_VCF(std::string filename);
-RcppExport SEXP _tidypopgen_get_ploidy_from_VCF(SEXP filenameSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    rcpp_result_gen = Rcpp::wrap(get_ploidy_from_VCF(filename));
-    return rcpp_result_gen;
-END_RCPP
-}
 // vcf_loci_table
 List vcf_loci_table(std::string filename);
 RcppExport SEXP _tidypopgen_vcf_loci_table(SEXP filenameSEXP) {
@@ -294,8 +265,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},
-    {"_tidypopgen_extractAltAlleleCountsFromVCF", (DL_FUNC) &_tidypopgen_extractAltAlleleCountsFromVCF, 8},
-    {"_tidypopgen_get_ploidy_from_VCF", (DL_FUNC) &_tidypopgen_get_ploidy_from_VCF, 1},
     {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 1},
     {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
