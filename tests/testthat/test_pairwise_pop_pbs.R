@@ -51,9 +51,32 @@ test_that("error with multiple grouping variables", {
 test_that("pairwise_pop_pbs works correctly", {
   test_pbs <- test_gt %>%
     group_by(population) %>%
-    pairwise_pop_pbs(fst_method = "Hudson")
+    pairwise_pop_pbs(fst_method = "Hudson", type = "matrix")
   # expect 24 columns
   expect_equal(ncol(test_pbs), 24)
   # @TODO we need some more meaningul tests here
   # maybe check sk.allele if it does pbs
+})
+
+test_that("type argument delivers correct objects", {
+  test_pbs_matrix <- test_gt %>%
+    group_by(population) %>%
+    pairwise_pop_pbs(fst_method = "Hudson", type = "matrix")
+  expect_true(is.matrix(test_pbs_matrix))
+
+  test_pbs_tidy <- test_gt %>%
+    group_by(population) %>%
+    pairwise_pop_pbs(fst_method = "Hudson", type = "tidy")
+  expect_true(is.data.frame(test_pbs_tidy))
+
+  test_pbs_tibble <- test_gt %>%
+    group_by(population) %>%
+    pairwise_pop_pbs(fst_method = "Hudson", type = "tibble")
+  expect_true(is.data.frame(test_pbs_tibble))
+
+  # Compare
+  expect_equal(as.data.frame(test_pbs_matrix), test_pbs_tibble)
+  pop1_pop2_pop3_tidy <-
+    subset(test_pbs_tidy, test_pbs_tidy$stat_name == "pbs_pop1.pop2.pop3")
+  expect_equal(pop1_pop2_pop3_tidy$value, test_pbs_tibble$pbs_pop1.pop2.pop3)
 })

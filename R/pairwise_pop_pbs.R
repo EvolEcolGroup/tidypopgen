@@ -5,9 +5,10 @@
 #' differentiation between one focal population and two reference populations,
 #' and is used to identify outlier loci that may be under selection.
 #' @references Yi X, et al. (2010) Sequencing of 50 human exomes reveals
-#' adaptation to high altitude. Science 329: 75-78.
+#'   adaptation to high altitude. Science 329: 75-78.
 #' @param .x A grouped `gen_tibble`
-#' @param type type of object to return. Currently defaults to "matrix".
+#' @param type type of object to return. One of "tidy", "tibble" or "matrix".
+#'   Default is "tidy".
 #' @param fst_method A character string specifying the method to use for
 #'   computing Fst. Currently only "Hudson" is available.
 #' @param return_fst A logical value indicating whether to return the Fst values
@@ -26,19 +27,23 @@
 #'   group_by(population) %>%
 #'   pairwise_pop_pbs(fst_method = "Hudson")
 pairwise_pop_pbs <- function(.x,
-                             type = c("matrix"),
+                             type = c("tidy", "tibble", "matrix"),
                              fst_method = c("Hudson"),
                              return_fst = FALSE) {
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
-
   # check that we only have one grouping variable
   if (length(.x %>% dplyr::group_vars()) > 1) {
     stop("pairwise_pop_pbs only works with one grouping variable")
   }
+  # Check if the return_fst is logical
+  if (!is.logical(return_fst)) {
+    stop("return_fst must be a logical value (TRUE or FALSE)")
+  }
   type <- match.arg(type)
+  fst_method <- match.arg(fst_method)
 
   # get the populations
   .group_levels <- .x %>% group_keys()
@@ -70,6 +75,25 @@ pairwise_pop_pbs <- function(.x,
 
   if (type == "matrix") {
     # add fst values if requested
+    pbs_results <- as.matrix(pbs_results)
+    if (return_fst) {
+      pbs_results <- cbind(fst_values, pbs_results)
+    }
+    return(pbs_results)
+  } else if (type == "tidy") {
+    pbs_results <- as.data.frame(pbs_results)
+    pbs_results <-
+      pbs_results %>%
+      tidyr::pivot_longer(
+        cols = all_of(colnames(pbs_results)),
+        names_to = "stat_name"
+      )
+    if (return_fst) {
+      pbs_results <- cbind(fst_values, pbs_results)
+    }
+    return(pbs_results)
+  } else if (type == "tibble") {
+    pbs_results <- as.data.frame(pbs_results)
     if (return_fst) {
       pbs_results <- cbind(fst_values, pbs_results)
     }

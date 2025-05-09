@@ -19,7 +19,7 @@
 #'   Nei, M. (1987) Molecular Evolutionary Genetics. Columbia University Press
 #'
 #'   Weir, B. S., & Cockerham, C. C. (1984). Estimating F-statistics for the
-#' analysis of population structure. Evolution, 38(6): 1358–1370.
+#'   analysis of population structure. Evolution, 38(6): 1358–1370.
 #'
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param type type of object to return One of "tidy" or "pairwise" for a
@@ -85,6 +85,10 @@ pairwise_pop_fst <- function(
     stop(".x should be a grouped df")
   }
   method <- match.arg(method)
+
+  if (!is.logical(return_num_dem)) {
+    stop("return_num_dem must be a logical value (TRUE or FALSE)")
+  }
 
   # given an error if requesting return_num_dem for a method that does not
   # support it
@@ -189,7 +193,7 @@ pairwise_pop_fst_hudson <- function(
     fst_mat_tbl$loci <- loci_names(.x)
     cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
     long_fst_loc <- fst_mat_tbl %>%
-      tidyr::pivot_longer(cols = all_of(cols), names_to = "group")
+      tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
   } else if (by_locus && by_locus_type == "list") {
     fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
@@ -299,7 +303,7 @@ pairwise_pop_fst_nei87 <- function(
     fst_mat_tbl$loci <- loci_names(.x)
     cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
     long_fst_loc <- fst_mat_tbl %>%
-      tidyr::pivot_longer(cols = all_of(cols), names_to = "group")
+      tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
   } else if (by_locus && by_locus_type == "list") {
     fst_mat_tbl <- as.data.frame(fst_locus)
@@ -409,7 +413,7 @@ pairwise_pop_fst_wc84 <- function(
     fst_mat_tbl$loci <- loci_names(.x)
     cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
     long_fst_loc <- fst_mat_tbl %>%
-      tidyr::pivot_longer(cols = all_of(cols), names_to = "group")
+      tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
   } else if (by_locus && by_locus_type == "list") {
     fst_mat_tbl <- as.data.frame(fst_locus)

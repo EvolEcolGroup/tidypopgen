@@ -6,7 +6,7 @@
 \usage{
 pairwise_pop_pbs(
   .x,
-  type = c("matrix"),
+  type = c("tidy", "tibble", "matrix"),
   fst_method = c("Hudson"),
   return_fst = FALSE
 )
@@ -14,7 +14,8 @@ pairwise_pop_pbs(
 \arguments{
 \item{.x}{A grouped \code{gen_tibble}}
 
-\item{type}{type of object to return. Currently defaults to "matrix".}
+\item{type}{type of object to return. One of "tidy", "tibble" or "matrix".
+Default is "tidy".}
 
 \item{fst_method}{A character string specifying the method to use for
 computing Fst. Currently only "Hudson" is available.}
