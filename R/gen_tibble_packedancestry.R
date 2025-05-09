@@ -98,8 +98,10 @@ gen_tibble_packedancestry <- function(
     marker.ID = loci_table$name,
     genetic.dist = loci_table$genetic_dist,
     physical.pos = loci_table$position,
-    allele1 = loci_table$allele_ref,
-    allele2 = loci_table$allele_alt
+    # note the swap below due to the different conventions in plink vs
+    # packed ancestry
+    allele1 = loci_table$allele_alt,
+    allele2 = loci_table$allele_ref
   )
 
   bigsnp_obj <- structure(

@@ -12,7 +12,7 @@
 #'
 #' @keywords internal
 #'
-get_packedancestry_code <- function(minor = FALSE) { # TODO temp switch
+get_packedancestry_code <- function(minor = TRUE) { # TODO temp switch
   raw_vals <- as.raw(0:255)
   parsed_vals <- lapply(raw_vals, parse_2bit_groups)
   parsed_matrix <- do.call(rbind, parsed_vals)
