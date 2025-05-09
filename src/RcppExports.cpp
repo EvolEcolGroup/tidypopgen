@@ -239,6 +239,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// vcf_loci_table
+List vcf_loci_table(std::string filename);
+RcppExport SEXP _tidypopgen_vcf_loci_table(SEXP filenameSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_loci_table(filename));
+    return rcpp_result_gen;
+END_RCPP
+}
 // write_to_FBM
 void write_to_FBM(Environment BM, IntegerMatrix& allele_counts, const int col_start, const int n_loci, int ncores);
 RcppExport SEXP _tidypopgen_write_to_FBM(SEXP BMSEXP, SEXP allele_countsSEXP, SEXP col_startSEXP, SEXP n_lociSEXP, SEXP ncoresSEXP) {
@@ -270,6 +281,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},
     {"_tidypopgen_extractAltAlleleCountsFromVCF", (DL_FUNC) &_tidypopgen_extractAltAlleleCountsFromVCF, 8},
     {"_tidypopgen_get_ploidy_from_VCF", (DL_FUNC) &_tidypopgen_get_ploidy_from_VCF, 1},
+    {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 1},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}
 };
