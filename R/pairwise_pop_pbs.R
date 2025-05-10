@@ -32,8 +32,8 @@
 #' # We can compute the PBS for all populations using "Hudson" method
 #' example_gt %>%
 #'   group_by(population) %>%
-#'   pairwise_pop_pbs(fst_method = "Hudson")
-pairwise_pop_pbs <- function(.x,
+#'   nwise_pop_pbs(fst_method = "Hudson")
+nwise_pop_pbs <- function(.x,
                              type = c("tidy", "matrix"),
                              fst_method = c("Hudson"),
                              return_fst = FALSE) {
@@ -43,7 +43,7 @@ pairwise_pop_pbs <- function(.x,
   }
   # check that we only have one grouping variable
   if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("pairwise_pop_pbs only works with one grouping variable")
+    stop("nwise_pop_pbs only works with one grouping variable")
   }
   # Check if the return_fst is logical
   if (!is.logical(return_fst)) {
