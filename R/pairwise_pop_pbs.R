@@ -34,9 +34,9 @@
 #'   group_by(population) %>%
 #'   nwise_pop_pbs(fst_method = "Hudson")
 nwise_pop_pbs <- function(.x,
-                             type = c("tidy", "matrix"),
-                             fst_method = c("Hudson"),
-                             return_fst = FALSE) {
+                          type = c("tidy", "matrix"),
+                          fst_method = c("Hudson"),
+                          return_fst = FALSE) {
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
