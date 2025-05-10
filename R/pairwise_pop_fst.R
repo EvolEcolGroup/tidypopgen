@@ -113,9 +113,10 @@ pairwise_pop_fst <- function(
       type = type, by_locus_type = by_locus_type
     )
   } else if (method == "WC84") {
-    pairwise_pop_fst_wc84(
+    pairwise_pop_fst_wc84_cpp(
       .x = .x, by_locus = by_locus,
-      type = type, by_locus_type = by_locus_type
+      type = type, by_locus_type = by_locus_type,
+      return_num_dem = return_num_dem
     )
   }
 }
@@ -150,61 +151,9 @@ pairwise_pop_fst_hudson <- function(
     return_num_dem = return_num_dem
   )
 
-  # format nicely the group combinations object
-  # (we'll use it to create column names)
-  group_combinations <- cbind(
-    .group_levels[pairwise_combn[1, ], ],
-    .group_levels[pairwise_combn[2, ], ]
-  )
-  names(group_combinations) <- c(
-    paste0(dplyr::group_vars(.x), "_1"),
-    paste0(dplyr::group_vars(.x), "_2")
-  )
-  # if we want the numerator and denominator,
-  # we need to format them and return them
-  if (return_num_dem) {
-    rownames(fst_list$Fst_by_locus_num) <- loci_names(.x)
-    colnames(fst_list$Fst_by_locus_num) <-
-      col_names_combinations(group_combinations)
-    rownames(fst_list$Fst_by_locus_den) <- loci_names(.x)
-    colnames(fst_list$Fst_by_locus_den) <-
-      col_names_combinations(group_combinations)
-    return(fst_list)
-  }
-
-  # otherwise we start formatting the other objects
-  fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
-
-  if (type == "pairwise") { # if we return a matrix
-    fst_tot <- tidy_to_matrix(fst_tot)
-  }
-
-  if (by_locus && by_locus_type == "matrix") {
-    rownames(fst_list$fst_locus) <- loci_names(.x)
-    colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
-      prefix = "fst"
-    )
-    return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
-  } else if (by_locus && by_locus_type == "tidy") {
-    fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
-    colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
-      prefix = "fst"
-    )
-    fst_mat_tbl$loci <- loci_names(.x)
-    cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
-    long_fst_loc <- fst_mat_tbl %>%
-      tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
-    return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
-  } else if (by_locus && by_locus_type == "list") {
-    fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
-    colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
-      prefix = "fst"
-    )
-    fst_list$fst_locus <- as.list(fst_mat_tbl)
-    return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
-  } else {
-    return(fst_tot)
-  }
+  format_fst_list (fst_list, .x, pairwise_combn, .group_levels,
+                   type, by_locus_type, by_locus)
+  
 }
 
 
@@ -427,6 +376,47 @@ pairwise_pop_fst_wc84 <- function(
   }
 }
 
+# This should be equivalent to the hierfstat implementation
+pairwise_pop_fst_wc84_cpp <- function(
+    .x,
+    type = type,
+    by_locus = FALSE,
+    by_locus_type,
+    return_num_dem = FALSE,
+    n_cores = bigstatsr::nb_cores()) {
+  # get the populations
+  .group_levels <- .x %>% group_keys()
+  # create all combinations
+  pairwise_combn <- utils::combn(nrow(.group_levels), 2)
+  # vector and matrix to store Fst for total and by locus
+  fst_tot <- rep(NA_real_, ncol(pairwise_combn))
+  if (by_locus) {
+    fst_locus <- matrix(
+      NA_real_,
+      nrow = count_loci(.x),
+      ncol = ncol(pairwise_combn)
+    )
+  }
+  # summarise population frequencies
+  pop_freqs_df <- gt_grouped_summaries(
+    .gt_get_bigsnp(.x)$genotypes,
+    rowInd = .gt_bigsnp_rows(.x),
+    colInd = .gt_bigsnp_cols(.x),
+    groupIds = dplyr::group_indices(.x) - 1,
+    ngroups = nrow(.group_levels),
+    ncores = n_cores
+  )
+  fst_list <- pairwise_fst_wc84_loop(pairwise_combn = pairwise_combn,
+                                     n = pop_freqs_df$n,
+                                     freq_alt = pop_freqs_df$freq_alt,
+                                     het_obs = pop_freqs_df$het_obs,
+                                     by_locus = by_locus,
+                                     return_num_dem = return_num_dem)
+  format_fst_list (fst_list, .x, pairwise_combn, .group_levels,
+                              type, by_locus_type, by_locus)
+}
+
+
 # This function is used to turn a tidy tibble into a matrix
 tidy_to_matrix <- function(tidy_tbl) {
   fst_tot_wide <- tidyr::pivot_wider(
@@ -462,3 +452,77 @@ col_names_combinations <- function(group_combinations, prefix = NULL) {
   }
   return(comb_labels)
 }
+
+#' Format output for pairwise_fst_ functions based on type
+#' 
+#' @param fst_list list of fst values
+#' @param type type of object to return One of "tidy" or "pairwise" for a
+#'  pairwise matrix of populations. Default is "tidy".
+#'  @param by_locus_type type of object to return. One of "tidy", "matrix" or
+#'  "list". Default is "tidy".
+#'  @param by_locus boolean, determining whether Fst should be returned by
+#'  loci(TRUE), or as a single genome wide value obtained by
+#'  taking the ratio
+#'  of the mean numerator and denominator (FALSE, the default).
+#'  @param group_combinations group combinations
+#'  @keywords internal
+
+format_fst_list <- function(fst_list,.x, pairwise_combn, .group_levels,
+                            type, by_locus_type, by_locus, return_num_dem = FALSE) {
+# format nicely the group combinations object
+# (we'll use it to create column names)
+group_combinations <- cbind(
+  .group_levels[pairwise_combn[1, ], ],
+  .group_levels[pairwise_combn[2, ], ]
+)
+names(group_combinations) <- c(
+  paste0(dplyr::group_vars(.x), "_1"),
+  paste0(dplyr::group_vars(.x), "_2")
+)
+# if we want the numerator and denominator,
+# we need to format them and return them
+if (return_num_dem) {
+  rownames(fst_list$Fst_by_locus_num) <- loci_names(.x)
+  colnames(fst_list$Fst_by_locus_num) <-
+    col_names_combinations(group_combinations)
+  rownames(fst_list$Fst_by_locus_den) <- loci_names(.x)
+  colnames(fst_list$Fst_by_locus_den) <-
+    col_names_combinations(group_combinations)
+  return(fst_list)
+}
+
+# otherwise we start formatting the other objects
+fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
+
+if (type == "pairwise") { # if we return a matrix
+  fst_tot <- tidy_to_matrix(fst_tot)
+}
+
+if (by_locus && by_locus_type == "matrix") {
+  rownames(fst_list$fst_locus) <- loci_names(.x)
+  colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
+                                                         prefix = "fst"
+  )
+  return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
+} else if (by_locus && by_locus_type == "tidy") {
+  fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
+  colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
+                                                  prefix = "fst"
+  )
+  fst_mat_tbl$loci <- loci_names(.x)
+  cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
+  long_fst_loc <- fst_mat_tbl %>%
+    tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
+  return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
+} else if (by_locus && by_locus_type == "list") {
+  fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
+  colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
+                                                  prefix = "fst"
+  )
+  fst_list$fst_locus <- as.list(fst_mat_tbl)
+  return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
+} else {
+  return(fst_tot)
+}
+}
+

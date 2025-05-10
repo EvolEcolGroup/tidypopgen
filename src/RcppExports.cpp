@@ -206,6 +206,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// pairwise_fst_wc84_loop
+List pairwise_fst_wc84_loop(NumericMatrix pairwise_combn, NumericMatrix n, NumericMatrix freq_alt, NumericMatrix het_obs, bool by_locus, bool return_num_dem);
+RcppExport SEXP _tidypopgen_pairwise_fst_wc84_loop(SEXP pairwise_combnSEXP, SEXP nSEXP, SEXP freq_altSEXP, SEXP het_obsSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type pairwise_combn(pairwise_combnSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type n(nSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type freq_alt(freq_altSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type het_obs(het_obsSEXP);
+    Rcpp::traits::input_parameter< bool >::type by_locus(by_locusSEXP);
+    Rcpp::traits::input_parameter< bool >::type return_num_dem(return_num_demSEXP);
+    rcpp_result_gen = Rcpp::wrap(pairwise_fst_wc84_loop(pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem));
+    return rcpp_result_gen;
+END_RCPP
+}
 // increment_as_counts
 void increment_as_counts(Environment k, Environment k2, arma::mat& na_mat, arma::mat& dos_mat, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
 RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP na_matSEXP, SEXP dos_matSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
@@ -315,6 +331,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 6},
     {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 4},
+    {"_tidypopgen_pairwise_fst_wc84_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_wc84_loop, 6},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},

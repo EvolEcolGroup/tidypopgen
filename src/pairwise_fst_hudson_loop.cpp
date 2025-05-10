@@ -1,20 +1,6 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-// Function to compute mean without using sugar to deal with na removal
-double mean_cpp(NumericVector x) {
-  int n = x.size();
-  double sum = 0.0;
-  int count = 0;
-  for (int i = 0; i < n; ++i) {
-    if (!NumericVector::is_na(x[i])) {
-      sum += x[i];
-      count++;
-    }
-  }
-  return count > 0 ? sum / count : NA_REAL;
-}
-
 // [[Rcpp::export]]
 List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, List pop_freqs_df, bool by_locus, bool return_num_dem) {
   int ncol_combn = pairwise_combn.ncol();
@@ -53,8 +39,17 @@ List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, List pop_freqs_df, b
         fst_locus_dem(_, i_col) = denominator;
       }
     }
-
-    fst_tot[i_col] = mean_cpp(numerator) / mean_cpp(denominator);
+    
+    double mean_num = 0.0, mean_denom = 0.0;
+    int count = 0;
+    for (int i = 0; i < n_loci; ++i) {
+      if (!NumericVector::is_na(numerator[i]) && !NumericVector::is_na(denominator[i])) {
+        mean_num += numerator[i];
+        mean_denom += denominator[i];
+        count++;
+      }
+    }
+    fst_tot[i_col] = mean_num / mean_denom;
   }
 
   if (!return_num_dem) {

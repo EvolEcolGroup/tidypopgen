@@ -53,6 +53,10 @@ pairwise_fst_hudson_loop <- function(pairwise_combn, pop_freqs_df, by_locus, ret
     .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, pop_freqs_df, by_locus, return_num_dem)
 }
 
+pairwise_fst_wc84_loop <- function(pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem) {
+    .Call(`_tidypopgen_pairwise_fst_wc84_loop`, pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem)
+}
+
 increment_as_counts <- function(k, k2, na_mat, dos_mat, BM, rowInd, colInd) {
     invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, na_mat, dos_mat, BM, rowInd, colInd))
 }
