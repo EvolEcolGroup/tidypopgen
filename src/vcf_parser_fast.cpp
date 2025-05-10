@@ -348,6 +348,7 @@ bool vcf_genotypes_to_fbm(std::string filename,
   }
   // delete the array
   delete[] alt_counts;
+  delete[] separator_pos;
   // return true if the file was read successfully
   return true;
   
