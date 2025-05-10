@@ -109,6 +109,12 @@ List pairwise_fst_wc84_loop(NumericMatrix pairwise_combn,
     fst_tot[i_col] = mean_num / mean_denom;
   }
   
-  return List::create(Named("fst_tot") = fst_tot,
-                      Named("fst_locus") = fst_locus);
+  if (!return_num_dem) {
+    return List::create(Named("fst_locus") = fst_locus,
+                        Named("fst_tot") = fst_tot);
+  } else {
+    return List::create(Named("Fst_by_locus_num") = fst_locus,
+                        Named("Fst_by_locus_den") = fst_locus_dem);
+  }
+
 }
