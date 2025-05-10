@@ -291,7 +291,10 @@ bool vcf_genotypes_to_fbm(std::string filename,
   unsigned char* ptr = static_cast<unsigned char*>(xpBM->matrix());
   //  const unsigned char* code_ptr;
   int n = xpBM->nrow(); // number of individuals
-  int n_loci = xpBM->ncol(); // number of loci
+  
+  
+  // total number of loci in the vcf
+  int n_loci = biallelic.size(); // number of loci
   
   // string to store the line read from the file
   std::string line;
