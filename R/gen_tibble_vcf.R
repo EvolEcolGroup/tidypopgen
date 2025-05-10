@@ -11,10 +11,9 @@ gen_tibble_vcf <- function(
   parser <- match.arg(parser)
 
   if (parser == "cpp") {
-    rds_path <- vcf_to_fbm_cpp_new(
+    rds_path <- vcf_to_fbm_cpp(
       x,
       backingfile = backingfile,
-      chunk_size = chunk_size,
       quiet = quiet
     )
   } else {

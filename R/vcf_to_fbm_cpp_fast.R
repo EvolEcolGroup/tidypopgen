@@ -4,20 +4,14 @@
 #' even for large vcf files that would not fit in memory.
 #'
 #' @param vcf_path the path to the vcf
-#' @param chunk_size the chunk size to use on the vcf when loading the file. If
-#'   NULL, a best guess will be made.
 #' @param backingfile the name of the file to use as the backing file for the
 #'   FBM. If NULL, the vcf path will be used.
-#' @param n_cores the number of cores to use when reading the vcf file. Default
-#'   is 1.
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 
-vcf_to_fbm_cpp_new <- function(
+vcf_to_fbm_cpp <- function(
     vcf_path,
-    chunk_size = NULL,
     backingfile = NULL,
-    n_cores = 1,
     quiet = FALSE) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
@@ -39,7 +33,6 @@ vcf_to_fbm_cpp_new <- function(
   code256 <- rep(NA_real_, 256)
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
-
   # create the file backed matrix
   file_backed_matrix <- bigstatsr::FBM.code256(
     nrow = no_individuals,
@@ -48,10 +41,11 @@ vcf_to_fbm_cpp_new <- function(
     backingfile = backingfile
   )
 
-    res <- vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
-      biallelic = vcf_meta$biallelic,
-      n_header_lines = vcf_meta$n_header_lines,
-      missing_value = max_ploidy + 1)
+  vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
+    biallelic = vcf_meta$biallelic,
+    n_header_lines = vcf_meta$n_header_lines,
+    missing_value = max_ploidy + 1
+  )
 
 
   # individual metadata table
@@ -96,4 +90,3 @@ vcf_to_fbm_cpp_new <- function(
   # and return the path to the rds
   bigsnp_obj$genotypes$rds
 }
-
