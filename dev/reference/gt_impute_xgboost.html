@@ -25,7 +25,7 @@ objects based on local XGBoost models."><meta property="og:image" content="https
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/pca_aDNA_projection.html">Replication of smartsnp aDNA projection</a></li>
+    <li><a class="dropdown-item" href="../articles/pca_aDNA_projection.html">Projection of aDNA samples onto modern PCA</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -75,7 +75,7 @@ objects based on local XGBoost models.</p>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>Number of neighbor SNPs to be possibly included in the model
+<dd><p>Number of neighbour SNPs to be possibly included in the model
 imputing this particular SNP. Default is <code>200</code>.</p></dd>
 
 
@@ -114,7 +114,7 @@ attr(missing_gt$genotypes, "imputed_errors")</p></dd>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>This function is a wrapper around <code><a href="https://privefl.github.io/bigsnpr/reference/snp_fastImpute.html" class="external-link">bigsnpr::snp_fastImpute()</a></code>. The error
-rates from the xgboost, if appended, can be retrived with
+rates from the xgboost, if appended, can be retrieved with
 <code>attr(x$genotypes, "imputed_errors")</code> where <code>x</code> is the <code>gen_tibble</code>.</p>
     </div>
 

@@ -8,7 +8,7 @@ articles:
   articles/benchmark_hgdp: benchmark_hgdp.html
   articles/pca_aDNA_projection: pca_aDNA_projection.html
   tidypopgen: tidypopgen.html
-last_built: 2025-05-08T10:03Z
+last_built: 2025-05-10T07:09Z
 urls:
   reference: https://evolecolgroup.github.io/tidypopgen/reference
   article: https://evolecolgroup.github.io/tidypopgen/articles

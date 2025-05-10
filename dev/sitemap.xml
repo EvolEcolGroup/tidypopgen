@@ -69,7 +69,6 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_randomSVD.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pcadapt.html</loc></url>
-<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_window.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save_light.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.html</loc></url>
@@ -91,21 +90,25 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_ld_clump.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_missingness.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_names.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_pi.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_transitions.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_transversions.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/mutate.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/new_vctrs_bigsnp.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/nwise_pop_pbs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_grm.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_pop_fst.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pbs_one_triplet.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pipe.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_fis.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_fst.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_global_stats.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_het_exp.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_het_obs.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_tajimas_d.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/predict_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/qc_report_indiv.html</loc></url>
@@ -136,5 +139,10 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/tidypopgen-package.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/vcf_to_fbm_cpp.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/vcf_to_fbm_vcfR.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_pairwise_pop_fst.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_pairwise_pop_pbs.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_pop_tajimas_d.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_stats_generic.html</loc></url>
 </urlset>
 

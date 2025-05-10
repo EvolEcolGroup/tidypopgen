@@ -27,7 +27,7 @@ tidied tibble, a list, or a matrix."><meta property="og:image" content="https://
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/pca_aDNA_projection.html">Replication of smartsnp aDNA projection</a></li>
+    <li><a class="dropdown-item" href="../articles/pca_aDNA_projection.html">Projection of aDNA samples onto modern PCA</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -190,13 +190,13 @@ default).</p></dd>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">loci_missingness</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           [,1] [,2] [,3]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.0000000  0.0  0.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.0000000  0.5  0.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.0000000  0.0  0.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.3333333  0.0  0.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.0000000  0.0  0.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.0000000  0.0  0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          pop1 pop2 pop3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rs1 0.0000000  0.0  0.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rs2 0.0000000  0.5  0.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rs3 0.0000000  0.0  0.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rs4 0.3333333  0.0  0.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rs5 0.0000000  0.0  0.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rs6 0.0000000  0.0  0.5</span>
 <span class="r-in"><span><span class="co"># or within reframe (not recommended, as it much less efficient</span></span></span>
 <span class="r-in"><span><span class="co"># than using it directly as shown above)</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
