@@ -1,5 +1,5 @@
 ---
-title: "Replication of smartsnp aDNA projection"
+title: "Projection of aDNA samples onto modern PCA"
 output:
   pdf_document: default
   html_document: default
@@ -16,7 +16,10 @@ library(ggrepel)
 
 The following article shows how to project ancient DNA data onto modern data in a Principal Components Analysis using the `tidypopgen` package.
 
-The example uses the data from Lazaridis et al. (2016), and replicates the method of the package `smartsnp`. This vignette follows a similar workflow, but in contrast to working directly from PACKEDANCESTRYMAP format files, we will load the same data into `gen_tibble` objects.
+The example uses the data from Lazaridis et al. (2016). After downloading the data
+in PACKEDANCESTRYMAP format files, we convert them into `gen_tibble` objects. This vignette
+replicates the workflow illustrated in the vignette for the R package `smartsnp`, but
+works directly on `gen_tibbles`.
 
 First, we can download the data from the Reich lab website.
 
@@ -126,7 +129,7 @@ And now we can project our data using the `predict` function:
 predicted <- predict(object = pca, new_data = ancient, project_method = "least_squares")
 ```
 
-Here, we use the "least_squares" argument to generate a least squares projection that will be comparable to the method of `smartsnp`.
+Here, we use the "least_squares" argument to generate a least squares projection that will be comparable to the approach used in `smartpca` (also implemented in the R package `smartsnp`).
 
 Finally, we can tidy up our data ready to plot by converting the `predicted` object to a data frame and adding the population names:
 ```{r}

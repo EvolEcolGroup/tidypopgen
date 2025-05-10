@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{an object of class \code{gt_dapc}}
 
-\item{metric}{the metric to plot on the y axies, one of 'BIC', 'AIC', or
+\item{metric}{the metric to plot on the y axis, one of 'BIC', 'AIC', or
 'WSS' (with sum of squares)}
 
 \item{...}{not currently used.}

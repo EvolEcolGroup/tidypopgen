@@ -354,11 +354,11 @@ example_gt %>%
 
 These type of functions are prefixed with `pop`.
 
-# Functions applies to all pairwise combinations of individuals or populations
+# Functions applies to all pairwise and nwise combinations of individuals or populations
 
-The final group of verbs are prefixed by `pairwise_`, and they are
-designed to compute pairwise statistics between all individuals or populations 
-(the latter start with `pairwise_pop_`). For example, to get the Identity by State
+The final group of verbs are prefixed by `pairwise_` and `nwise_`, and they are
+designed to compute pairwise statistics between all pairs or combinations of n individuals or populations 
+(when targeting populations, we start with `pairwise_pop_` and `nwise_pop_`). For example, to get the Identity by State
 for all pairs of individuals, we use:
 ```{r}
 example_gt %>%
@@ -521,7 +521,7 @@ also make sure that the two datasets were aligned to the same reference genome a
 # Imputation
 
 Many genetic analysis (e.g. PCA) do not allow missing data. In many software implementations,
-missing gentoypes are imputed on the fly, often in a simplistic manner. In `tidypopgen`, we
+missing genotypes are imputed on the fly, often in a simplistic manner. In `tidypopgen`, we
 encourage taking this step explicitly, before running any analysis. 
 
 Let us start with a dataset that has some missing genotypes:

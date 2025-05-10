@@ -4,6 +4,7 @@
 \alias{loci_hwe}
 \alias{loci_hwe.tbl_df}
 \alias{loci_hwe.vctrs_bigSNP}
+\alias{loci_hwe.grouped_df}
 \title{Test Hardy-Weinberg equilibrium at each locus}
 \usage{
 loci_hwe(.x, .col = "genotypes", ...)
@@ -11,6 +12,16 @@ loci_hwe(.x, .col = "genotypes", ...)
 \method{loci_hwe}{tbl_df}(.x, .col = "genotypes", mid_p = TRUE, ...)
 
 \method{loci_hwe}{vctrs_bigSNP}(.x, .col = "genotypes", mid_p = TRUE, ...)
+
+\method{loci_hwe}{grouped_df}(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  type = c("tidy", "list", "matrix"),
+  ...
+)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
@@ -25,6 +36,14 @@ resolve certain tidyselect operations.}
 
 \item{mid_p}{boolean on whether the mid-p value should be computed. Default
 is TRUE, as in PLINK.}
+
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+
+\item{block_size}{maximum number of loci read at once.}
+
+\item{type}{type of object to return, if using grouped method. One of "tidy",
+"list", or "matrix". Default is "tidy".}
 }
 \value{
 a vector of probabilities from HWE exact test, one per locus

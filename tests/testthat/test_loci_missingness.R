@@ -109,7 +109,9 @@ test_that("loci_missingness on grouped tibble", {
   list <- loci_missingness(test_gt, type = "list")
   matrix <- loci_missingness(test_gt, type = "matrix")
   tidy <- loci_missingness(test_gt, type = "tidy")
-  expect_equal(list[1][[1]], matrix[, 1])
+  expect_equal(list[1][[1]], as.vector(matrix[, "pop1"]))
+  expect_equal(rownames(matrix), show_loci(test_gt)$name)
+  expect_equal(colnames(matrix), group_keys(test_gt)$population)
   tidy_pop1 <- tidy %>%
     filter(group == "pop1") %>%
     select(value)
@@ -120,7 +122,9 @@ test_that("loci_missingness on grouped tibble", {
   list <- loci_missingness(test_gt_subset, type = "list")
   matrix <- loci_missingness(test_gt_subset, type = "matrix")
   tidy <- loci_missingness(test_gt_subset, type = "tidy")
-  expect_equal(list[1][[1]], matrix[, 1])
+  expect_equal(list[1][[1]], as.vector(matrix[, "pop1"]))
+  expect_equal(rownames(matrix), show_loci(test_gt_subset)$name)
+  expect_equal(colnames(matrix), group_keys(test_gt_subset)$population)
   tidy_pop1 <- tidy %>%
     filter(group == "pop1") %>%
     select(value)

@@ -10,8 +10,13 @@
 #' directly to the function). This defaults to "genotypes" and can only take
 #' that value. There is no need for the user to set it, but it is included to
 #' resolve certain tidyselect operations.
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
+#' @param block_size maximum number of loci read at once.
 #' @param mid_p boolean on whether the mid-p value should be computed. Default
 #'   is TRUE, as in PLINK.
+#' @param type type of object to return, if using grouped method. One of "tidy",
+#' "list", or "matrix". Default is "tidy".
 #' @param ... not used.
 #' @returns a vector of probabilities from HWE exact test, one per locus
 #' @author the C++ algorithm was written by Christopher Chang for PLINK 1.90,
@@ -82,4 +87,73 @@ loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
     stop("Not implemented for a single individual")
   }
   hwe_p
+}
+
+
+#' @export
+#' @rdname loci_hwe
+loci_hwe.grouped_df <- function(
+    # TODO revert name to method
+    .x,
+    .col = "genotypes",
+    mid_p = TRUE,
+    n_cores = bigstatsr::nb_cores(),
+    block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
+    type = c("tidy", "list", "matrix"),
+    ...) {
+  .col <- rlang::enquo(.col) %>%
+    rlang::quo_get_expr() %>%
+    rlang::as_string()
+  # confirm that .col is "genotypes"
+  if (.col != "genotypes") {
+    stop("loci_hwe only works with the genotypes column")
+  }
+
+  # check that we only have one grouping variable
+  if (length(.x %>% dplyr::group_vars()) > 1) {
+    stop("loci_hwe only works with one grouping variable")
+  }
+  rlang::check_dots_empty()
+  type <- match.arg(type)
+  geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+  rows_to_keep <- .gt_bigsnp_rows(.x)
+  hwe_p_sub <- function(geno_fbm, ind, rows_to_keep) {
+    gt_grouped_hwe( # nolint
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = ind,
+      groupIds = dplyr::group_indices(.x) - 1,
+      ngroups = max(dplyr::group_indices(.x)),
+      midp = mid_p
+    )
+  }
+
+
+  hwe_mat <- bigstatsr::big_apply(
+    geno_fbm,
+    a.FUN = hwe_p_sub,
+    rows_to_keep = rows_to_keep,
+    ind = attr(.x$genotypes, "loci")$big_index,
+    ncores = 1, # parallelisation is used within the function
+    block.size = block_size,
+    a.combine = "rbind"
+  )
+
+  if (type == "tidy") {
+    hwe_mat_tbl <- as.data.frame(hwe_mat)
+    colnames(hwe_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
+    hwe_mat_tbl$loci <- loci_names(.x)
+    long_missing <- hwe_mat_tbl %>% # nolint start
+      tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
+        pull(1), names_to = "group") # nolint end
+    long_missing
+  } else if (type == "list") {
+    # return a list to mimic group_map
+    lapply(seq_len(ncol(hwe_mat)), function(i) hwe_mat[, i])
+  } else if (type == "matrix") {
+    # return a matrix
+    colnames(hwe_mat) <- dplyr::group_keys(.x) %>% pull(1)
+    rownames(hwe_mat) <- loci_names(.x)
+    hwe_mat
+  }
 }

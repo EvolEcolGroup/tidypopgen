@@ -19,13 +19,13 @@ test_that("autoplot bug with NA values", {
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
-
   example_gt <- gen_tibble(example_genotypes,
     indiv_meta = example_indiv_meta,
     loci = example_loci,
     backingfile = tempfile(),
     quiet = TRUE
   )
+  example_gt <- example_gt %>% group_by(population)
 
   ex_loci_report <- example_gt %>%
     qc_report_loci()
