@@ -33,7 +33,7 @@ of the mean numerator and denominator (FALSE, the default).}
 locus. This is useful for creating windowed estimates of Fst (as
 we need to compute the mean numerator and denominator within
 each window). Default is
-FALSE. Currently only implemented for Hudson's method.}
+FALSE.}
 
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}

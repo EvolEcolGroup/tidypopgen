@@ -36,7 +36,7 @@
 #'  locus. This is useful for creating windowed estimates of Fst (as
 #'  we need to compute the mean numerator and denominator within
 #'  each window). Default is
-#'  FALSE. Currently only implemented for Hudson's method.
+#'  FALSE.
 #' @returns if `type=tidy`, a tibble of genome-wide pairwise Fst values with
 #'   each pairwise combination as a row if "by_locus=FALSE", else a list
 #'   including the tibble of genome-wide values as well as a matrix with
