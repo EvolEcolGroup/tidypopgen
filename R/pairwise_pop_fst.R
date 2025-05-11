@@ -152,8 +152,10 @@ pairwise_pop_fst_hudson <- function(
   )
 
   format_fst_list(
-    fst_list, .x, pairwise_combn, .group_levels,
-    type, by_locus_type, by_locus
+    fst_list = fst_list, .x = .x, pairwise_combn = pairwise_combn,
+    .group_levels = .group_levels,
+    type = type, by_locus_type = by_locus_type, by_locus = by_locus,
+    return_num_dem = return_num_dem
   )
 }
 
@@ -389,15 +391,7 @@ pairwise_pop_fst_wc84_cpp <- function(
   .group_levels <- .x %>% group_keys()
   # create all combinations
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
-  # vector and matrix to store Fst for total and by locus
-  fst_tot <- rep(NA_real_, ncol(pairwise_combn))
-  if (by_locus) {
-    fst_locus <- matrix(
-      NA_real_,
-      nrow = count_loci(.x),
-      ncol = ncol(pairwise_combn)
-    )
-  }
+
   # summarise population frequencies
   pop_freqs_df <- gt_grouped_summaries(
     .gt_get_bigsnp(.x)$genotypes,
@@ -458,19 +452,7 @@ col_names_combinations <- function(group_combinations, prefix = NULL) {
   return(comb_labels)
 }
 
-#' Format output for pairwise_fst_ functions based on type
-#'
-#' @param fst_list list of fst values
-#' @param type type of object to return One of "tidy" or "pairwise" for a
-#'  pairwise matrix of populations. Default is "tidy".
-#'  @param by_locus_type type of object to return. One of "tidy", "matrix" or
-#'  "list". Default is "tidy".
-#'  @param by_locus boolean, determining whether Fst should be returned by
-#'  loci(TRUE), or as a single genome wide value obtained by
-#'  taking the ratio
-#'  of the mean numerator and denominator (FALSE, the default).
-#'  @param group_combinations group combinations
-#'  @keywords internal
+# Format output for pairwise_fst_ functions based on type
 
 format_fst_list <- function(fst_list, .x, pairwise_combn, .group_levels,
                             type, by_locus_type, by_locus, return_num_dem = FALSE) {
