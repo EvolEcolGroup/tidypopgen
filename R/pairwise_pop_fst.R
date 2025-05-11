@@ -101,7 +101,7 @@ pairwise_pop_fst <- function(
   .group_levels <- .x %>% group_keys()
   # create all combinations
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
-  
+
   # summarise population frequencies
   pop_freqs_df <- gt_grouped_summaries(
     .gt_get_bigsnp(.x)$genotypes,
@@ -111,7 +111,7 @@ pairwise_pop_fst <- function(
     ngroups = nrow(.group_levels),
     ncores = n_cores
   )
-  
+
   if (method == "Hudson") {
     fst_list <- pairwise_fst_hudson_loop(
       pairwise_combn = pairwise_combn,
@@ -141,7 +141,7 @@ pairwise_pop_fst <- function(
       return_num_dem = return_num_dem
     )
   }
-  
+
   # format nicely the group combinations object
   # (we'll use it to create column names)
   group_combinations <- cbind(
@@ -163,24 +163,24 @@ pairwise_pop_fst <- function(
       col_names_combinations(group_combinations)
     return(fst_list)
   }
-  
+
   # otherwise we start formatting the other objects
   fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
-  
+
   if (type == "pairwise") { # if we return a matrix
     fst_tot <- tidy_to_matrix(fst_tot)
   }
-  
+
   if (by_locus && by_locus_type == "matrix") {
     rownames(fst_list$fst_locus) <- loci_names(.x)
     colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
-                                                           prefix = "fst"
+      prefix = "fst"
     )
     return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
   } else if (by_locus && by_locus_type == "tidy") {
     fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
     colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
-                                                    prefix = "fst"
+      prefix = "fst"
     )
     fst_mat_tbl$loci <- loci_names(.x)
     cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
@@ -190,7 +190,7 @@ pairwise_pop_fst <- function(
   } else if (by_locus && by_locus_type == "list") {
     fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
     colnames(fst_mat_tbl) <- col_names_combinations(group_combinations,
-                                                    prefix = "fst"
+      prefix = "fst"
     )
     fst_list$fst_locus <- as.list(fst_mat_tbl)
     return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))

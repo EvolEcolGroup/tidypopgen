@@ -45,7 +45,7 @@
 #'     window_size = 3, step_size = 2,
 #'     size_unit = "snp", min_loci = 2
 #'   )
-#' 
+#'
 windows_pairwise_pop_fst <- function(.x,
                                      type = c("matrix", "tidy"),
                                      method = c("Hudson", "Nei87", "WC84"),

@@ -45,14 +45,14 @@
 #' @export
 
 windows_nwise_pop_pbs <- function(.x,
-                                     type = c("matrix", "tidy"),
-                                     fst_method = c("Hudson", "Nei87", "WC84"),
-                                     return_fst = FALSE,
-                                     window_size,
-                                     step_size,
-                                     size_unit = c("snp", "bp"),
-                                     min_loci = 1,
-                                     complete = FALSE) {
+                                  type = c("matrix", "tidy"),
+                                  fst_method = c("Hudson", "Nei87", "WC84"),
+                                  return_fst = FALSE,
+                                  window_size,
+                                  step_size,
+                                  size_unit = c("snp", "bp"),
+                                  min_loci = 1,
+                                  complete = FALSE) {
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")

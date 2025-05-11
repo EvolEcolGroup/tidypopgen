@@ -83,7 +83,7 @@ test_that("pairwise_pop_fst num and dem are returned correctly", {
     colnames(wc_gt_from_num_dem)
   )
   expect_equal(wc_gt_from_num_dem, wc_gt_fst$Fst_by_locus)
-  
+
   # And for Nei
   nei_gt_fst <- test_gt %>%
     pairwise_pop_fst(
@@ -108,7 +108,6 @@ test_that("pairwise_pop_fst num and dem are returned correctly", {
     colnames(nei_gt_from_num_dem)
   )
   expect_equal(nei_gt_from_num_dem, nei_gt_fst$Fst_by_locus)
-  
 })
 
 test_that("windows_pairwise_pop_fst works correctly", {
