@@ -11,12 +11,13 @@ List pairwise_fst_wc84_loop(NumericMatrix pairwise_combn,
   
   int n_loci = n.nrow();
   int n_combn = pairwise_combn.ncol();
-  NumericMatrix fst_locus(n_loci, n_combn);
+  NumericVector fst_tot(n_combn); 
+  
+  // if we need to return fst by locus, we create the matrix, else make an empty one
+  NumericMatrix fst_locus(by_locus ? n_loci : 0, by_locus ? n_combn : 0);
   // if we need to return numerator and denominator, we use fst_locus for the
   // numerator and fst_locus_dem for the denominator
-  NumericMatrix fst_locus_dem(n_loci, n_combn);
-  
-  NumericVector fst_tot(n_combn);
+  NumericMatrix fst_locus_dem(return_num_dem ? n_loci: 0, return_num_dem ? n_combn : 0);
   
   for (int i_col = 0; i_col < n_combn; ++i_col) {
     IntegerVector pops(pairwise_combn.nrow());

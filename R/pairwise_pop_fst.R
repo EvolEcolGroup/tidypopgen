@@ -146,7 +146,9 @@ pairwise_pop_fst_hudson <- function(
 
   fst_list <- pairwise_fst_hudson_loop(
     pairwise_combn = pairwise_combn,
-    pop_freqs_df = pop_freqs_df,
+    n = pop_freqs_df$n,
+    freq_alt = pop_freqs_df$freq_alt,
+    freq_ref = pop_freqs_df$freq_ref,
     by_locus = by_locus,
     return_num_dem = return_num_dem
   )
@@ -159,6 +161,43 @@ pairwise_pop_fst_hudson <- function(
   )
 }
 
+# the implementation for Nei 87, adapted from hierfstat
+pairwise_pop_fst_nei87_cpp <- function(
+    .x,
+    type = type,
+    by_locus = FALSE,
+    by_locus_type = by_locus_type,
+    n_cores = bigstatsr::nb_cores()) {
+  # get the populations
+  .group_levels <- .x %>% group_keys()
+  # create all combinations
+  pairwise_combn <- utils::combn(nrow(.group_levels), 2)
+  # summarise population frequencies
+  pop_freqs_df <- gt_grouped_summaries(
+    .gt_get_bigsnp(.x)$genotypes,
+    rowInd = .gt_bigsnp_rows(.x),
+    colInd = .gt_bigsnp_cols(.x),
+    groupIds = dplyr::group_indices(.x) - 1,
+    ngroups = nrow(.group_levels),
+    ncores = n_cores
+  )
+  fst_list <- pairwise_fst_nei87_loop(
+    pairwise_combn = pairwise_combn,
+    n = pop_freqs_df$n,
+    het_obs = pop_freqs_df$het_obs,
+    freq_alt = pop_freqs_df$freq_alt,
+    freq_ref = pop_freqs_df$freq_ref,
+    by_locus = by_locus,
+    return_num_dem = return_num_dem
+  )
+  
+  format_fst_list(
+    fst_list = fst_list, .x = .x, pairwise_combn = pairwise_combn,
+    .group_levels = .group_levels,
+    type = type, by_locus_type = by_locus_type, by_locus = by_locus,
+    return_num_dem = return_num_dem
+  )
+}
 
 # the implementation for Nei 87, adapted from hierfstat
 pairwise_pop_fst_nei87 <- function(

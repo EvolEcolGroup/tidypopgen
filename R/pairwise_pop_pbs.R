@@ -94,7 +94,7 @@ nwise_pop_pbs <- function(.x,
     pbs_results <-
       pbs_results %>%
       tidyr::pivot_longer(
-        cols = cols,
+        cols = dplyr::all_of(cols),
         names_to = "stat_name"
       )
     if (return_fst) {

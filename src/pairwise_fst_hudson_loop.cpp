@@ -2,25 +2,25 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, List pop_freqs_df, bool by_locus, bool return_num_dem) {
-  int ncol_combn = pairwise_combn.ncol();
-  int n_loci = as<NumericMatrix>(pop_freqs_df["freq_alt"]).nrow();
-  // variable used to define size of fst_locus, dummy value of 1 if we don't use by locus
-  int n_loci_cols = 1;
-  if (by_locus){
-    n_loci_cols = n_loci;
-  }
-  NumericMatrix fst_locus(n_loci_cols, ncol_combn);
+List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn,
+                              NumericMatrix n,
+                              NumericMatrix freq_alt,
+                              NumericMatrix freq_ref,
+                              bool by_locus,
+                              bool return_num_dem) {
+  
+  int n_loci = n.nrow();
+  int n_combn = pairwise_combn.ncol();
+  NumericVector fst_tot(n_combn); 
+  
+  // if we need to return fst by locus, we create the matrix, else make an empty one
+  NumericMatrix fst_locus(by_locus ? n_loci : 0, by_locus ? n_combn : 0);
   // if we need to return numerator and denominator, we use fst_locus for the
   // numerator and fst_locus_dem for the denominator
-  NumericMatrix fst_locus_dem(n_loci_cols, ncol_combn);
-  NumericVector fst_tot(ncol_combn);
+  NumericMatrix fst_locus_dem(return_num_dem ? n_loci: 0, return_num_dem ? n_combn : 0);
 
-  NumericMatrix freq_alt = as<NumericMatrix>(pop_freqs_df["freq_alt"]);
-  NumericMatrix freq_ref = as<NumericMatrix>(pop_freqs_df["freq_ref"]);
-  NumericMatrix n = as<NumericMatrix>(pop_freqs_df["n"]);
 
-  for (int i_col = 0; i_col < ncol_combn; ++i_col) {
+  for (int i_col = 0; i_col < n_combn; ++i_col) {
     int pop1 = pairwise_combn(0, i_col) - 1; // Convert from R 1-based index to C++ 0-based index
     int pop2 = pairwise_combn(1, i_col) - 1;
 
