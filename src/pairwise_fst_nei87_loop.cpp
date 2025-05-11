@@ -21,9 +21,9 @@ List pairwise_fst_nei87_loop(NumericMatrix pairwise_combn,
   NumericMatrix fst_locus_dem(return_num_dem ? n_loci: 0, return_num_dem ? n_combn : 0);
   
   for (int i_col = 0; i_col < n_combn; ++i_col) {
-    int pop1 = pairwise_combn(0, i_col);
-    int pop2 = pairwise_combn(1, i_col);
-    
+    int pop1 = pairwise_combn(0, i_col) -1; // Convert from R 1-based index to C++ 0-based index
+    int pop2 = pairwise_combn(1, i_col) -1;
+
     NumericMatrix n_pair(n_loci, 2), sHo(n_loci, 2), freqA(n_loci, 2), freqR(n_loci, 2);
     
     for (int i = 0; i < n_loci; ++i) {

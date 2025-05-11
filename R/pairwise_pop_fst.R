@@ -90,11 +90,6 @@ pairwise_pop_fst <- function(
     stop("return_num_dem must be a logical value (TRUE or FALSE)")
   }
 
-  # given an error if requesting return_num_dem for a method that does not
-  # support it
-  if (return_num_dem && method != "Hudson") {
-    stop("return_num_dem is only available for Hudson's method")
-  }
   # if we want to return the numerator and denominator, we need to
   # compute the pairwise Fst for each locus
   if (return_num_dem && !by_locus) {
@@ -108,15 +103,16 @@ pairwise_pop_fst <- function(
       return_num_dem = return_num_dem, n_cores = n_cores
     )
   } else if (method == "Nei87") {
-    pairwise_pop_fst_nei87(
+    pairwise_pop_fst_nei87_cpp(
       .x = .x, by_locus = by_locus,
-      type = type, by_locus_type = by_locus_type
+      type = type, by_locus_type = by_locus_type,
+      return_num_dem = return_num_dem, n_cores = n_cores
     )
   } else if (method == "WC84") {
     pairwise_pop_fst_wc84_cpp(
       .x = .x, by_locus = by_locus,
       type = type, by_locus_type = by_locus_type,
-      return_num_dem = return_num_dem
+      return_num_dem = return_num_dem, n_cores = n_cores
     )
   }
 }
@@ -167,6 +163,7 @@ pairwise_pop_fst_nei87_cpp <- function(
     type = type,
     by_locus = FALSE,
     by_locus_type = by_locus_type,
+    return_num_dem = FALSE,
     n_cores = bigstatsr::nb_cores()) {
   # get the populations
   .group_levels <- .x %>% group_keys()
