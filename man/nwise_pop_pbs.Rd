@@ -7,7 +7,7 @@
 nwise_pop_pbs(
   .x,
   type = c("tidy", "matrix"),
-  fst_method = c("Hudson"),
+  fst_method = c("Hudson", "Nei87", "WC84"),
   return_fst = FALSE
 )
 }
@@ -17,8 +17,8 @@ nwise_pop_pbs(
 \item{type}{type of object to return. One of "tidy" or "matrix".
 Default is "tidy".}
 
-\item{fst_method}{A character string specifying the method to use for
-computing Fst. Currently only "Hudson" is available.}
+\item{fst_method}{the method to use for calculating Fst, one of 'Hudson',
+'Nei87', and 'WC84'. See \code{\link[=pairwise_pop_fst]{pairwise_pop_fst()}} for details.}
 
 \item{return_fst}{A logical value indicating whether to return the Fst values
 along with the PBS values. Default is \code{FALSE}.}

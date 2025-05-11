@@ -58,11 +58,57 @@ test_that("pairwise_pop_fst num and dem are returned correctly", {
     colnames(hudson_gt_from_num_dem)
   )
   expect_equal(hudson_gt_from_num_dem, hudson_gt_fst$Fst_by_locus)
-  # confirm error if trying to get num and dem with other methods
-  expect_error(
-    test_gt %>% pairwise_pop_fst(method = "Nei87", return_num_dem = TRUE),
-    "return_num_dem is only available for Hudson"
+
+  # repeat the same for WC84
+  wc_gt_fst <- test_gt %>%
+    pairwise_pop_fst(
+      method = "WC84",
+      by_locus = TRUE,
+      by_locus_type = "matrix"
+    )
+  expect_message(
+    wc_gt_fst_nd <- test_gt %>%
+      pairwise_pop_fst(
+        method = "WC84",
+        return_num_dem = TRUE
+      ),
+    "`by_locus` set to TRUE because `return_num_dem = TRUE`"
   )
+  # check that the nums and denominators are indeed the right ones to
+  # generate the Fst for each locus
+  wc_gt_from_num_dem <- wc_gt_fst_nd$Fst_by_locus_num /
+    wc_gt_fst_nd$Fst_by_locus_den
+  colnames(wc_gt_from_num_dem) <- paste0(
+    "fst_",
+    colnames(wc_gt_from_num_dem)
+  )
+  expect_equal(wc_gt_from_num_dem, wc_gt_fst$Fst_by_locus)
+  
+  # And for Nei
+  nei_gt_fst <- test_gt %>%
+    pairwise_pop_fst(
+      method = "Nei87",
+      by_locus = TRUE,
+      by_locus_type = "matrix"
+    )
+  expect_message(
+    nei_gt_fst_nd <- test_gt %>%
+      pairwise_pop_fst(
+        method = "Nei87",
+        return_num_dem = TRUE
+      ),
+    "`by_locus` set to TRUE because `return_num_dem = TRUE`"
+  )
+  # check that the nums and denominators are indeed the right ones to
+  # generate the Fst for each locus
+  nei_gt_from_num_dem <- nei_gt_fst_nd$Fst_by_locus_num /
+    nei_gt_fst_nd$Fst_by_locus_den
+  colnames(nei_gt_from_num_dem) <- paste0(
+    "fst_",
+    colnames(nei_gt_from_num_dem)
+  )
+  expect_equal(nei_gt_from_num_dem, nei_gt_fst$Fst_by_locus)
+  
 })
 
 test_that("windows_pairwise_pop_fst works correctly", {
