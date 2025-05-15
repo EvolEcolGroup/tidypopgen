@@ -1,6 +1,6 @@
-fs_stats_tg <- function (allele_sharing_matrix, pop) 
+fs_stats_tg <- function (allele_sharing_mat, pop) 
 {
-    Mij <- allele_sharing_matrix
+    Mij <- allele_sharing_mat
     Mii <- diag(Mij) * 2 - 1
     diag(Mij) <- NA
   pop <- factor(pop)
@@ -98,4 +98,36 @@ fis_stats_tg <- function (allele_sharing_matrix, pop)
 
 }
 
+
+
+fst_stats_tg <- function (allele_sharing_mat, pop) 
+{
+  Mij <- allele_sharing_mat
+  Mii <- diag(Mij) * 2 - 1
+  diag(Mij) <- NA
+  pop <- factor(pop)
+  x <- levels(pop)
+  npop <- length(x)
+  wil <- lapply(x, function(z) which(pop == z))
+  Fi <- lapply(wil, function(x) Mii[x])
+  Fsts <- unlist(lapply(wil, function(x) mean(Mij[x, x], na.rm = TRUE)))
+  Mb <- 0
+  mMij <- matrix(numeric(npop^2), ncol = npop)
+  for (i in 2:npop) {
+    p1 <- wil[[i]]
+    for (j in 1:(i - 1)) {
+      p2 <- wil[[j]]
+      mMij[i, j] <- mMij[j, i] <- mean(Mij[p1, p2], na.rm = TRUE)
+      Mb <- Mb + mMij[i, j]
+    }
+  }
+  diag(mMij) <- Fsts
+
+  Mb <- Mb * 2/(npop * (npop - 1))
+
+  # pop specific fsts
+  fst_by_pop <- c((Fsts - Mb)/(1 - Mb), mean((Fsts - Mb)/(1 - Mb), 
+                                       na.rm = TRUE))
+  return(fst_by_pop)
+}
 

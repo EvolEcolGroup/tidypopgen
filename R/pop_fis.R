@@ -149,9 +149,8 @@ pop_fis_wg17 <- function(
   if (include_global) {
     fis_by_pop <- c(fis_by_pop, mean(fis_by_pop, na.rm = TRUE))
     names(fis_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1), "global")
-    return(fis_by_pop)
   } else {
     names(fis_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1))
-    return(fis_by_pop)
   }
+  return(fis_by_pop)
 }
