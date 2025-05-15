@@ -47,8 +47,7 @@ List pairwise_fst_nei87_loop(NumericMatrix pairwise_combn,
       int valid = 0;
       double nsum = 0.0, inv_nsum = 0.0;
       double ho_sum = 0.0;
-//      double sp2_sum = 0.0;
-      
+
       for (int j = 0; j < 2; ++j) {
         if (!NumericVector::is_na(n_pair(i, j))) {
           valid++;
@@ -73,9 +72,7 @@ List pairwise_fst_nei87_loop(NumericMatrix pairwise_combn,
       
       double hs1 = 1.0 - sp2 - sHo(i, 0) / (2.0 * n_pair(i, 0));
       double hs2 = 1.0 - sp2 - sHo(i, 1) / (2.0 * n_pair(i, 1));
-//      double Hs = ((n_pair(i, 0) / (n_pair(i, 0) - 1.0)) * hs1 +
-//                   (n_pair(i, 1) / (n_pair(i, 1) - 1.0)) * hs2) / 2.0;
-      
+
       mHs[i] = mn[i] / (mn[i] - 1.0) * (1.0 - msp2[i] - mHo[i] / (2.0 * mn[i]));
       Ht[i] = 1.0 - mp2[i] + mHs[i] / (mn[i] * np[i]) - mHo[i] / (2.0 * mn[i] * np[i]);
       Dst[i] = Ht[i] - mHs[i];

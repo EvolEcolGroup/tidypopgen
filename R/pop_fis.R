@@ -3,7 +3,7 @@
 #' This function computes population specific FIS, using either the approach of
 #' Nei 1987 (with an algorithm equivalent to the one used by
 #' `hierfstat::basic.stats()`) or of Weir and Goudet 2017 (with an algorithm
-#' equivalen to the one used by `hierfstat::fis.dosage()`).
+#' equivalent to the one used by `hierfstat::fis.dosage()`).
 #' @references Nei M. (1987) Molecular Evolutionary Genetics. Columbia
 #'   University Press
 #' Weir, BS and Goudet J (2017) A Unified Characterization of
@@ -16,7 +16,7 @@
 #'   that this is only relevant for "Nei87", as "WG17" always returns a single
 #'   value.
 #' @param include_global boolean determining whether, besides the population
-#'   specific estiamtes, a global estimate should be appended. Note that this
+#'   specific estimates, a global estimate should be appended. Note that this
 #'   will return a vector of n populations plus 1 (the global value), or a
 #'   matrix with n+1 columns if `by_locus=TRUE`.
 #' @param allele_sharing_mat optional and only relevant for "WG17", the matrix
@@ -124,7 +124,12 @@ pop_fis_wg17 <- function(
   n_pop <- length(pop_levels)
   wil <- lapply(pop_levels, function(z) which(pop == z))
   Fi <- lapply(wil, function(pop_levels) Mii[pop_levels])
-  Fsts <- unlist(lapply(wil, function(pop_levels) mean(Mij[pop_levels, pop_levels], na.rm = TRUE)))
+  Fsts <- unlist(lapply(
+    wil,
+    function(pop_levels) {
+      mean(Mij[pop_levels, pop_levels], na.rm = TRUE)
+    }
+  ))
   Mb <- 0
   mMij <- matrix(numeric(n_pop^2), ncol = n_pop)
   for (i in 2:n_pop) {

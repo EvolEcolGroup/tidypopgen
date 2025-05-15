@@ -24,14 +24,18 @@ pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
   }
 
   Mij <- allele_sharing_mat
-  Mii <- diag(Mij) * 2 - 1
+  #  Mii <- diag(Mij) * 2 - 1
   diag(Mij) <- NA
-  pop <- factor(group_indices(.x))
+  pop <- factor(dplyr::group_indices(.x))
   pop_levels <- levels(pop)
   n_pop <- length(pop_levels)
   wil <- lapply(pop_levels, function(z) which(pop == z))
-  Fi <- lapply(wil, function(pop_levels) Mii[pop_levels])
-  Fsts <- unlist(lapply(wil, function(pop_levels) mean(Mij[pop_levels, pop_levels], na.rm = TRUE)))
+  Fsts <- unlist(lapply(
+    wil,
+    function(pop_levels) {
+      mean(Mij[pop_levels, pop_levels], na.rm = TRUE)
+    }
+  ))
   Mb <- 0
   mMij <- matrix(numeric(n_pop^2), ncol = n_pop)
   for (i in 2:n_pop) {

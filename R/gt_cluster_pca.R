@@ -211,4 +211,5 @@ print.gt_cluster_pca <- function(x, ...) {
   )
   cat("\nother slots are the same as in a gt_pca object used for clustering\n")
   cat("\n")
+  invisible(x)
 }

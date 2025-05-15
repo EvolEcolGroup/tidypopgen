@@ -24,7 +24,7 @@ that this is only relevant for "Nei87", as "WG17" always returns a single
 value.}
 
 \item{include_global}{boolean determining whether, besides the population
-specific estiamtes, a global estimate should be appended. Note that this
+specific estimates, a global estimate should be appended. Note that this
 will return a vector of n populations plus 1 (the global value), or a
 matrix with n+1 columns if \code{by_locus=TRUE}.}
 
@@ -41,7 +41,7 @@ a vector of population specific fis (plus the global value if
 This function computes population specific FIS, using either the approach of
 Nei 1987 (with an algorithm equivalent to the one used by
 \code{hierfstat::basic.stats()}) or of Weir and Goudet 2017 (with an algorithm
-equivalen to the one used by \code{hierfstat::fis.dosage()}).
+equivalent to the one used by \code{hierfstat::fis.dosage()}).
 }
 \references{
 Nei M. (1987) Molecular Evolutionary Genetics. Columbia
