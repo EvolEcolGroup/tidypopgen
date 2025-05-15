@@ -1,6 +1,6 @@
 #' Compute and store blocked f2 statistics for ADMIXTOOLS 2
 #'
-#' This function prepares data for various *ADMIXTOOLS 2* functions fro the
+#' This function prepares data for various *ADMIXTOOLS 2* functions from the
 #' package *ADMIXTOOLS 2*. It takes a [`gen_tibble`], computes allele
 #' frequencies and blocked f2-statistics, and writes the results to `outdir`. It
 #' is equivalent to `admixtools::extract_f2()`.

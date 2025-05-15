@@ -23,7 +23,7 @@
 #' @param by_locus boolean, determining whether Ho should be returned by
 #'   locus(TRUE), or as a single genome wide value (FALSE, the default).
 #' @param include_global boolean determining whether, besides the population
-#'   specific estiamtes, a global estimate should be appended. Note that this
+#'   specific estimates, a global estimate should be appended. Note that this
 #'   will return a vector of n populations plus 1 (the global value), or a
 #'   matrix with n+1 columns if `by_locus=TRUE`.
 #' @param n_cores number of cores to be used, it defaults to

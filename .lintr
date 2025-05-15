@@ -9,6 +9,12 @@ exclusions: list(
     "R/predict_gt_pca.R" = list( # it includes variable names from bigsnpr
       object_name_linter = Inf
     ),
+    "R/pop_fis.R" = list (# it includes variable names from hierfstat)
+      object_name_linter = Inf
+    ),
+    "R/pop_fst.R" = list (# it includes variable names from hierfstat)
+      object_name_linter = Inf
+    ),
     "vignettes/tidypopgen.Rmd" = list( # styler vs lintr conflict
       indentation_linter = 268
     )
