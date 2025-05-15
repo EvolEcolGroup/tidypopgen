@@ -6,7 +6,7 @@
 #' approach of Weir and Goudet 2017 based on beta estimators).
 #'
 #' The GRM is twice the coancestry matrix (e.g. as estimated by
-#' [hierfstat::beta.dosage()] with `inb=FALSE`).
+#' `hierfstat::beta.dosage()` with `inb=FALSE`).
 #'
 #' @param x a `gen_tibble` object.
 #' @param allele_sharing_mat optional, the matrix of Allele Sharing returned by

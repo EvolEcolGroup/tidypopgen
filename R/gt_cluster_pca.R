@@ -184,3 +184,31 @@ autoplot.gt_cluster_pca <- function(
     ggplot2::geom_line() +
     ggplot2::labs(y = metric)
 }
+
+
+# a print method
+#' @method print gt_cluster_pca
+#' @export
+print.gt_cluster_pca <- function(x, ...) {
+  cat(" === Clustering of PCs of gen_tibble object ===")
+  cat(
+    "\nMethod ($clusters$method): ",
+    x$clusters$method
+  )
+  cat("\n")
+  cat(
+    "\nN of PCs ($clusters$n_pca): ",
+    x$clusters$n_pca
+  )
+  cat("\n")
+  cat(
+    "\nK for clustering ($clusters$k):",
+    min(x$clusters$k), max(x$clusters$k)
+  )
+  cat("\n")
+  cat(
+    "\nThe clustering information is in the slot $clusters;"
+  )
+  cat("\nother slots are the same as in a gt_pca object used for clustering\n")
+  cat("\n")
+}

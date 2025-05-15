@@ -4,10 +4,10 @@
 #' - 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
 #' for diploids.
 #' - 'Nei87' : Fst according to Nei (1987) - includes the correction for
-#' heterozygosity when computing Ht, and is equivalent to
-#' `hierfstat::pairwise.neifst()`,
-#' - 'WC84' : Weir and Cockerham (1984), correcting for missing data and is
-#' equivalent to `hierfstat::pairwise.WCfst()`.
+#' heterozygosity when computing Ht (it uses the same formulation as in
+#' `hierfstat::pairwise.neifst()`),
+#' - 'WC84' : Weir and Cockerham (1984), correcting for missing data (it uses 
+#' the same formulation as in `hierfstat::pairwise.WCfst()`).
 #'
 #' For all formulae, the genome wide estimate is obtained by taking the ratio of
 #' the mean numerators and denominators over all relevant SNPs.
@@ -25,7 +25,7 @@
 #' @param type type of object to return One of "tidy" or "pairwise" for a
 #'   pairwise matrix of populations. Default is "tidy".
 #' @param by_locus_type type of object to return. One of "tidy", "matrix" or
-#' "list". Default is "tidy".
+#'   "list". Default is "tidy".
 #' @param by_locus boolean, determining whether Fst should be returned by
 #'   locus(TRUE), or as a single genome wide value obtained by taking the ratio
 #'   of the mean numerator and denominator (FALSE, the default).
@@ -33,10 +33,9 @@
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
 #' @param return_num_dem returns a list of numerators and denominators for each
-#'  locus. This is useful for creating windowed estimates of Fst (as
-#'  we need to compute the mean numerator and denominator within
-#'  each window). Default is
-#'  FALSE.
+#'   locus. This is useful for creating windowed estimates of Fst (as we need to
+#'   compute the mean numerator and denominator within each window). Default is
+#'   FALSE.
 #' @returns if `type=tidy`, a tibble of genome-wide pairwise Fst values with
 #'   each pairwise combination as a row if "by_locus=FALSE", else a list
 #'   including the tibble of genome-wide values as well as a matrix with
@@ -61,7 +60,7 @@
 #' example_gt %>%
 #'   group_by(population) %>%
 #'   pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
-#'
+#' 
 pairwise_pop_fst <- function(
     .x,
     type = c("tidy", "pairwise"),
