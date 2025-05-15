@@ -3,19 +3,19 @@
 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
 for diploids.
 'Nei87' : Fst according to Nei (1987) - includes the correction for
-heterozygosity when computing Ht, and is equivalent to
-hierfstat::pairwise.neifst(),
-'WC84' : Weir and Cockerham (1984), correcting for missing data and is
-equivalent to hierfstat::pairwise.WCfst().
+heterozygosity when computing Ht (it uses the same formulation as in
+hierfstat::pairwise.neifst()),
+'WC84' : Weir and Cockerham (1984), correcting for missing data (it uses
+the same formulation as in hierfstat::pairwise.WCfst()).
 
 "><meta property="og:description" content="This function computes pairwise Fst. The following methods are implemented:
 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
 for diploids.
 'Nei87' : Fst according to Nei (1987) - includes the correction for
-heterozygosity when computing Ht, and is equivalent to
-hierfstat::pairwise.neifst(),
-'WC84' : Weir and Cockerham (1984), correcting for missing data and is
-equivalent to hierfstat::pairwise.WCfst().
+heterozygosity when computing Ht (it uses the same formulation as in
+hierfstat::pairwise.neifst()),
+'WC84' : Weir and Cockerham (1984), correcting for missing data (it uses
+the same formulation as in hierfstat::pairwise.WCfst()).
 
 "><meta property="og:image" content="https://evolecolgroup.github.io/tidypopgen/logo.png"><meta name="robots" content="noindex"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -63,10 +63,10 @@ equivalent to hierfstat::pairwise.WCfst().
     <p>This function computes pairwise Fst. The following methods are implemented:</p><ul><li><p>'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
 for diploids.</p></li>
 <li><p>'Nei87' : Fst according to Nei (1987) - includes the correction for
-heterozygosity when computing Ht, and is equivalent to
-<code><a href="https://rdrr.io/pkg/hierfstat/man/pairwise.neifst.html" class="external-link">hierfstat::pairwise.neifst()</a></code>,</p></li>
-<li><p>'WC84' : Weir and Cockerham (1984), correcting for missing data and is
-equivalent to <code><a href="https://rdrr.io/pkg/hierfstat/man/pairwise.WCfst.html" class="external-link">hierfstat::pairwise.WCfst()</a></code>.</p></li>
+heterozygosity when computing Ht (it uses the same formulation as in
+<code><a href="https://rdrr.io/pkg/hierfstat/man/pairwise.neifst.html" class="external-link">hierfstat::pairwise.neifst()</a></code>),</p></li>
+<li><p>'WC84' : Weir and Cockerham (1984), correcting for missing data (it uses
+the same formulation as in <code><a href="https://rdrr.io/pkg/hierfstat/man/pairwise.WCfst.html" class="external-link">hierfstat::pairwise.WCfst()</a></code>).</p></li>
 </ul></div>
 
     <div class="section level2">
@@ -112,9 +112,8 @@ of the mean numerator and denominator (FALSE, the default).</p></dd>
 
 <dt id="arg-return-num-dem">return_num_dem<a class="anchor" aria-label="anchor" href="#arg-return-num-dem"></a></dt>
 <dd><p>returns a list of numerators and denominators for each
-locus. This is useful for creating windowed estimates of Fst (as
-we need to compute the mean numerator and denominator within
-each window). Default is
+locus. This is useful for creating windowed estimates of Fst (as we need to
+compute the mean numerator and denominator within each window). Default is
 FALSE.</p></dd>
 
 
