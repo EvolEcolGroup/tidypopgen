@@ -24,7 +24,6 @@ pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
   }
 
   Mij <- allele_sharing_mat
-  #  Mii <- diag(Mij) * 2 - 1
   diag(Mij) <- NA
   pop <- factor(dplyr::group_indices(.x))
   pop_levels <- levels(pop)
