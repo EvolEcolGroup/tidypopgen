@@ -115,7 +115,7 @@ pop_fis_wg17 <- function(
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
   }
-  
+
   Mij <- allele_sharing_mat
   Mii <- diag(Mij) * 2 - 1
   diag(Mij) <- NA
@@ -136,12 +136,12 @@ pop_fis_wg17 <- function(
     }
   }
   diag(mMij) <- Fsts
-  
-  Mb <- Mb * 2/(n_pop * (n_pop - 1))
-  
+
+  Mb <- Mb * 2 / (n_pop * (n_pop - 1))
+
   # estimate individual Fi (inbreeding)
   for (i in 1:n_pop) {
-    Fi[[i]] <- (Fi[[i]] - Fsts[[i]])/(1 - Fsts[[i]])
+    Fi[[i]] <- (Fi[[i]] - Fsts[[i]]) / (1 - Fsts[[i]])
   }
   names(Fi) <- as.character(pop_levels)
   fis_by_pop <- unlist(lapply(Fi, mean, na.rm = TRUE))

@@ -39,11 +39,13 @@ a vector of population specific fis (plus the global value if
 }
 \description{
 This function computes population specific FIS, using either the approach of
-Nei 1987 (as computed by \code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}}) or of Weir and Goudet
-2017 (as computed by \code{\link[hierfstat:fs.dosage]{hierfstat::fis.dosage()}}).
+Nei 1987 (with an algorithm equivalent to the one used by
+\code{hierfstat::basic.stats()}) or of Weir and Goudet 2017 (with an algorithm
+equivalen to the one used by \code{hierfstat::fis.dosage()}).
 }
 \references{
 Nei M. (1987) Molecular Evolutionary Genetics. Columbia
-University Press Weir, BS and Goudet J (2017) A Unified Characterization of
+University Press
+Weir, BS and Goudet J (2017) A Unified Characterization of
 Population Structure and Relatedness. Genetics (2017) 206:2085
 }

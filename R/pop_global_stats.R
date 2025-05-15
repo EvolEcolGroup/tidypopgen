@@ -75,10 +75,10 @@
 #'
 #' @references Nei M, Chesser R (1983) Estimation of fixation indexes and gene
 #'   diversities. Annals of Human Genetics, 47, 253-259.
-#'   
+#'
 #'   Nei M. (1987) Molecular
 #'   Evolutionary Genetics. Columbia University Press, pp. 164-165.
-#'   
+#'
 #'   Jost L
 #'   (2008) GST and its relatives do not measure differentiation. Molecular
 #'   Ecology, 17, 4015-4026.

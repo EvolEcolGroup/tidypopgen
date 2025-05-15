@@ -22,7 +22,7 @@ pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
   }
-  
+
   Mij <- allele_sharing_mat
   Mii <- diag(Mij) * 2 - 1
   diag(Mij) <- NA
@@ -43,14 +43,14 @@ pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
     }
   }
   diag(mMij) <- Fsts
-  
-  Mb <- Mb * 2/(n_pop * (n_pop - 1))
-  
+
+  Mb <- Mb * 2 / (n_pop * (n_pop - 1))
+
   # pop specific fsts
-  fst_by_pop <- c((Fsts - Mb)/(1 - Mb))
-  
+  fst_by_pop <- c((Fsts - Mb) / (1 - Mb))
+
   if (include_global) {
-    fst_by_pop <- c(fst_by_pop, mean((Fsts - Mb)/(1 - Mb), na.rm = TRUE))
+    fst_by_pop <- c(fst_by_pop, mean((Fsts - Mb) / (1 - Mb), na.rm = TRUE))
     names(fst_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1), "global")
   } else {
     names(fst_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1))

@@ -6,7 +6,7 @@
 #' - 'Nei87' : Fst according to Nei (1987) - includes the correction for
 #' heterozygosity when computing Ht (it uses the same formulation as in
 #' `hierfstat::pairwise.neifst()`),
-#' - 'WC84' : Weir and Cockerham (1984), correcting for missing data (it uses 
+#' - 'WC84' : Weir and Cockerham (1984), correcting for missing data (it uses
 #' the same formulation as in `hierfstat::pairwise.WCfst()`).
 #'
 #' For all formulae, the genome wide estimate is obtained by taking the ratio of
@@ -60,7 +60,7 @@
 #' example_gt %>%
 #'   group_by(population) %>%
 #'   pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
-#' 
+#'
 pairwise_pop_fst <- function(
     .x,
     type = c("tidy", "pairwise"),
