@@ -1,613 +1,261 @@
 ---
-title: "Overview"
+title: "tidypopgen"
 output: rmarkdown::html_vignette
         #pdf_document
 vignette: >
-  %\VignetteIndexEntry{Overview}
+  %\VignetteIndexEntry{tidypopgen}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## tidy data in population genetics
+This vignette gives a short introduction on how to use the `tidypopgen` package
+to perform basic data cleaning and a PCA on a dataset of European lobsters
+(Homarus gammarus). The original data are available at
+https://datadryad.org/dataset/doi:10.5061/dryad.2v1kr38, but for the purpose of
+this vignette we will use a subset of the data stored as a .bed file, available
+in the `inst/extdata/lobster` directory of the package. To install tidypopgen
+from github, use:
 
-The fundamental tenet of tidy data that is that each observation should have its
-own row and each variable its own column, such that each value has its own cell.
-Applying this logic to population genetic data means that each individual should
-have its own row, with individual metadata (such as its population, sex, phenotype, etc)
-as the variables. Genotypes for each locus can also be thought of as variables, however, due
-to the large number of loci and the restricted values that each genotype can take, it would
-be very inefficient to store them as individual standard columns. 
+```{r eval = FALSE}
+install.packages("devtools")
+devtools::install_github("EvolEcolGroup/tidypopgen")
+```
 
-In `tidypopgen`, we represent data as a `gen_tbl`, a subclass of `tibble` which has
-two compulsory columns: `id` of the individual (as a `character`, which must 
-be unique for each individual), and `genotypes` (stored in a compressed format
-as a File-Backed Matrix, with the vector in the tibble providing the row indices of the matrix
-for each individual). The real data reside on disk, and an attribute `bigsnp` of
-the `genotype` column contains all the information to access it. There is also an
-additional attribute , `loci` which provides all the information about the loci,
-including the column indices that represent each locus in the FBM.
-The vector of row indices and the table of loci can be subsetted and reordered without
-changing the data on disk; thus, any operation on the `gen_tibble` is fast as it
-shapes the indices of the genotype matrix rather than the matrix itself.  
-The `loci` tibble includes columns `big_index` for the index in the FBM,
-`name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (an `integer`, if known, 
-otherwise set to `NA`), `position` for the position on the chromosome (an `integer`, if known, 
-otherwise set to `NA`), `genetic_dist` for the genetic distance on the chromosome
-(`numeric`, if known, else set to 0), `allele_ref` for the the reference allele (a `character`),
-and `allele_alt` for the alternate allele (a `character`, which can be `0` for
-monomorphic loci, following the same convention as plink). Additional individual metadata can be stored as columns in
-the main `gen_tbl`, whilst additional loci information (such as the position in 
-centimorgans) can be added as columns in the `loci` attribute table.
+Next, load the `tidypopgen` package and the `ggplot2` package for plotting.
 
-In principle, it is possible to use use multiple ways to compress the genotypes.
-`tidypopgen` currently uses a `bigSNP` object from the package `bigsnpr`. It is very
-fast and well documented, but it is mostly geared towards diploid data. `tidypopgen`
-expands that object to deal with different levels of ploidy, including multiple ploidy
-within a single dataset; however, most functions are currently incompatible with
-ploidy levels other than 2 (but they will return a clear error message and avoid
-computing anything incorrectly).
-
-## The grammar of population genetics
-
-### The `gen_tibble`
-
-Given information about the individuals, their genotypes, and the loci:
 ```{r}
 library(tidypopgen)
-example_indiv_meta <- data.frame(
-  id = c("a", "b", "c", "d", "e"),
-  population = c("pop1", "pop1", "pop2", "pop2", "pop2")
+library(ggplot2)
+```
+
+# Creating a `gen_tibble`
+
+In `tidypopgen`, we represent data as a `gen_tibble`, a subclass of `tibble`
+containing the columns `id` and `genotypes` for each individual. Genotypes are
+stored in a compressed format as a File-Backed Matrix that can be easily
+accessed by functions in `tidypopgen`, therefore the `genotypes`
+column is simply a vector giving the row indices of each individual in the
+File-Backed Matrix. 
+
+Additionally, if data are loaded from a .bed file with information in the `FID`
+column, this is treated as population information and is automatically
+added to the `gen_tibble` as column `population`. As with a normal tibble, this
+information can be changed, updated, or removed from the `gen_tibble` if needed.
+
+Let's start by creating a `gen_tibble` from the `lobster.bed` file.
+
+```{r}
+lobsters <- gen_tibble(
+  x = "../inst/extdata/lobster/lobster.bed",
+  quiet = TRUE, backingfile = tempfile()
 )
-example_genotypes <- rbind(
-  c(1, 1, 0, 1, 1, 0),
-  c(2, 0, 0, 0, NA, 0),
-  c(1, 2, 0, 0, 1, 1),
-  c(0, 2, 0, 1, 2, 1),
-  c(1, 1, NA, 2, 1, 0)
+head(lobsters)
+```
+
+We can see the structure of the `gen_tibble` above, with the expected columns.
+In this case, our .bed file contains population information corresponding to the
+sampling site of each lobster in the dataset.
+
+If we want to take a look at the genotypes of our lobsters, we can use the
+`show_genotypes` function to return a matrix of genotypes, where rows are
+individuals and columns are loci:
+
+```{r}
+lobsters %>% show_genotypes()
+```
+
+And, similarly, if we want to see information about the loci we can use the
+`show_loci` function, which returns a tibble with information about each locus:
+
+```{r}
+lobsters %>% show_loci()
+```
+
+Now we have a `gen_tibble` to work with, we can start to clean the data. 
+
+# Quality control
+
+Let's start by checking the quality of the data for each individual lobster in
+our dataset. We can use the `qc_report_indiv` function to generate a report
+which contains information about missingness and heterozygosity for each
+individual.
+
+```{r}
+indiv_qc_lobsters <- lobsters %>% qc_report_indiv()
+```
+
+We can take a look at this data using the `autoplot` function:
+
+```{r, fig.alt = "Scatter plot of missingness proportion and observed heterozygosity for each individual"}
+autoplot(indiv_qc_lobsters, type = "scatter")
+```
+
+We can see that most individuals have low missingness and heterozygosity, but
+there are a few individuals missing >20% of their genotypes. We can remove
+these individuals using the `filter` function, specifying to keep only
+individuals with missingness under 20%.
+
+```{r}
+lobsters <- lobsters %>% filter(indiv_missingness(genotypes) < 0.2)
+```
+
+Now lets check our loci. We can use the `qc_report_loci` function to generate a
+report of the loci quality. This function will return another `qc_report`
+object, which contains information about missingness, minor allele frequency,
+and Hardy-Weinberg Equilibrium for each locus.
+
+```{r}
+loci_qc_lobsters <- lobsters %>% qc_report_loci()
+```
+
+Here, we get a message because the `qc_report_loci` function calculates
+Hardy-Weinberg equilibrium assuming that all individuals are part of a single
+population. As our dataset contains multiple lobster populations, we should 
+group our data by population first:
+
+```{r}
+lobsters <- lobsters %>% group_by(population)
+loci_qc_lobsters <- lobsters %>% qc_report_loci()
+```
+
+That's better. Now, lets take a look at minor allele frequency for all loci:
+
+```{r, fig.alt = "Histogram of minor allele frequency"}
+autoplot(loci_qc_lobsters, type = "maf")
+```
+
+And we can see that we don't have any monomorphic SNPs.
+
+Now let's look at missingness.
+
+```{r, fig.alt = "Histogram of the proportion of missing data"}
+autoplot(loci_qc_lobsters, type = "missing")
+```
+Our data mostly have low missingness, but we can see that some loci have > 5%
+missingness across individuals, and we want to remove these individuals.
+
+In tidypopgen, there are two functions to subset the loci in a `gen_tibble`
+object: `select_loci` and `select_loci_if`. The function `select_loci` operates
+on information about the loci (e.g filtering by chromosome or by rsID), while
+`select_loci_if` operates on the genotypes at those loci (e.g filtering by minor
+allele frequency or missingness). In this case, we want to remove loci with >5%
+missingness, so we can use `select_loci_if` with the `loci_missingness`
+function, operating on the `genotypes` column of our `gen_tibble`.
+
+```{r}
+lobsters <- lobsters %>% select_loci_if(loci_missingness(genotypes) < 0.05)
+```
+
+Through our filtering, we have removed a few individuals and loci. We should now
+update the file backing matrix to reflect these changes, using the function
+`gt_update_backingfile`: 
+
+```{r}
+lobsters <- gt_update_backingfile(lobsters, backingfile = tempfile())
+```
+
+Now our data are clean and the backingfile is updated,
+we are ready to create a PCA.
+
+# Impute
+
+First, we need to impute any remaining missing data using the `gt_impute_simple`
+function.
+
+```{r}
+lobsters <- gt_impute_simple(lobsters, method = "random")
+```
+
+# PCA
+
+Then we can run a PCA. Here, we will use the `gt_pca_partialSVD` function:
+
+```{r}
+partial_pca <- gt_pca_partialSVD(lobsters)
+```
+
+And we can create a simple plot using `autoplot`:
+
+```{r, fig.alt = "Score plot of individuals across the first and second Principal Components"}
+autoplot(partial_pca, type = "scores")
+```
+
+That was easy! The autoplot gives us a quick idea of the explained variance and
+rough distribution of the samples, but we need to see the different populations
+within our dataset. For this, we can use ggplot2.
+
+# Plot with ggplot2
+
+For a customised plot, we can extract the information on the scores of each
+individual using the `augment` method for `gt_pca`.
+
+```{r}
+pcs <- augment(x = partial_pca, data = lobsters)
+```
+
+Then we can extract the eigenvalues for each principal component with the `tidy`
+function, using the "eigenvalues" argument:
+
+```{r}
+eigenvalues <- tidy(partial_pca, "eigenvalues")
+
+xlab <- paste("Axis 1 (", round(eigenvalues[1, 3], 1), " %)",
+  sep = ""
 )
-example_loci <- data.frame(
-  name = c("rs1", "rs2", "rs3", "rs4", "x1", "x2"),
-  chromosome = c(1, 1, 1, 1, 2, 2),
-  position = c(3, 5, 65, 343, 23, 456),
-  genetic_dist = c(0, 0, 0, 0, 0, 0),
-  allele_ref = c("A", "T", "C", "G", "C", "T"),
-  allele_alt = c("T", "C", NA, "C", "G", "A")
-)
-```
-
-
-We can create a simple `gen_tibble` object (of class `gen_tbl`) with:
-```{r}
-example_gt <- gen_tibble(example_genotypes,
-  indiv_meta = example_indiv_meta,
-  loci = example_loci,
-  backingfile = tempfile()
-)
-```
-We are provided information on where the three files underlying the genotype information
-are stored. As we don't want to keep the files, we used the tmp directory; normally
-you will want to use your working directory so that the files will not be cleared
-by R at the end of the session. It is important that these
-files are not deleted or moved, as `gen_tibble` stores their paths for future use. 
-
-Now let's have a look at our `gen_tibble`:
-```{r}
-example_gt
-```
-
-As discussed above, in this tibble, `genotypes` contains the indices of the
-individuals in the FBM as values, and the FBM as an attribute.
-
-To retrieve the genotypes (which are compressed in the FBM), we use:
-```{r}
-example_gt %>% show_genotypes()
-```
-
-If we want to extract the information about the loci for which we have genotypes
-(which are stored as an attribute of that column),
-we say:
-```{r}
-example_gt %>% show_loci()
-```
-
-Note that, if we are passing a `gen_tibble` to a function that works on
-genotypes, it is generally not necessary to pass the column `genotypes` in the call:
-
-```{r}
-example_gt %>% indiv_het_obs()
-```
-However, if such a function is used within a `dplyr` verb such as `mutate`,
-we need to pass the `genotype` column to the function:
-
-```{r}
-example_gt %>% mutate(het_obs = indiv_het_obs(.data$genotypes))
-```
-Or, more simply:
-```{r}
-example_gt %>% mutate(het_obs = indiv_het_obs(genotypes))
-```
-
-
-
-## Standard `dplyr` verbs to manipulate the tibble
-
-The individual metadata can then be processed with the usual `tidyverse` grammar.
-So, we can filter individuals by population with
-```{r}
-example_pop1 <- example_gt %>% filter(population == "pop2")
-example_pop1
-```
-
-There are a number of functions that compute population genetics quantities for each
-individual, such as individual observed heterozygosity. We can compute them simply with:
-```{r}
-example_gt %>% indiv_het_obs()
-```
-
-Or after filtering:
-```{r}
-example_gt %>%
-  filter(population == "pop2") %>%
-  indiv_het_obs()
-```
-
-We can use `mutate` to add observed heterozygosity as a column to our
-`gen_tibble` (again, note that functions that work on genotypes don't need
-to be passed any arguments if the tibble is passed directly to them, but
-the column `genotypes` has to be provided when they are used within
-`dplyr` verbs such as `mutate`):
-```{r}
-example_gt %>% mutate(het_obs = indiv_het_obs(genotypes))
-```
-
-There are a number of functions that estimate quantities at the *individual* 
-level, and they are prefixed by `indiv_`. 
-
-
-# Using verbs on loci
-
-Since the genotypes of the loci are stored as a compressed list in one column,
-it is not possible to use standard `dplyr` verbs on them. However, `tidypopgen` provides
-a number of specialised verbs, postfixed by `_loci`, to manipulate loci. 
-
-A key operation on loci is their selection (and removal). The compressed nature
-of genotypes imposes some constraints on the possible grammar.
-For selection, there are two verbs: `select_loci` and `select_loci_if`. 
-`select_loci` understands the concise-minilanguage spoken by standard `dplyr::select`
-that allows to easily refer to variables by their names. However, `select_loci`
-criteria can not be based on the actual genotypes (e.g. on heterozygosity or 
-missingness). For that, we have to use `select_loci_if`, which can operate on the
-genotypes but is blind to the names of loci.
-
-Let us start by looking at the loci names in our simple dataset:
-```{r}
-loci_names(example_gt)
-```
-
-We can see that there are two categories of loci, one starting with "rs" and
-the other with "x". If we wanted to select only loci that have an "rs" code,
-we would use:
-```{r}
-example_sub <- example_gt %>% select_loci(starts_with("rs"))
-example_sub
-```
-This gives us a `gen_tibble` with only 4 loci, as expected. We can confirm that
-we have the correct loci with:
-```{r}
-loci_names(example_sub)
-```
-
-Let us check that this has indeed impacted the individual heterozygosity
-```{r}
-example_sub %>% indiv_het_obs()
-```
-
-We can also subset and reorder by passing indices:
-```{r}
-example_gt %>%
-  select_loci(c(2, 6, 1)) %>%
-  show_loci()
-```
-This operation could be helpful when merging datasets that do not fully
-overlap on their loci (more on that later).
-
-```{r}
-example_gt %>%
-  select_loci(c(2, 6, 1)) %>%
-  show_genotypes()
-```
-
-
-The limit of `select_loci` is that it can not directly summarise the genotypes.
-We can do that separately and then feed the result as a set of indices. For 
-example, we might want to impose a minimum minor allele frequency. 
-`loci_maf()` allows us to inspect the minimum allele frequencies in a `gen_tibble`: 
-```{r}
-example_gt %>% loci_maf()
-```
-
-We can now create a vector of indices of loci with a minimum allele frequency
-(MAF) larger than 0.2, and use it to select:
-
-```{r}
-sel_indices <- which((example_gt %>% loci_maf()) > 0.2)
-example_gt %>%
-  select_loci(all_of(sel_indices)) %>%
-  show_loci()
-```
-
-Note that passing a variable directly to `select` is deprecated, and so we have
-to use `all_of` to wrap it.
-
-`select_loci_if` allows us to avoid creating a temporary variable to store indices:
-
-```{r}
-example_gt_sub <- example_gt %>% select_loci_if(loci_maf(genotypes) > 0.2)
-example_gt_sub %>% show_genotypes()
-```
-
-Note that, as we need to tidy evaluate `loci_maf` within the `select_loci_if` verb,
-we need to provide it with the column that we want to use (even though it has
-to be `genotypes`). Also note that, with `select_loci_if`, we can not reorder
-the loci.
-
-`select_loci_if` is very flexible; for example, we could filter loci with a MAF
-greater than 0.2 that are also on chromosome 2.
-
-We can use a similar approach to select only alleles on a given chromosome:
-```{r}
-example_gt %>%
-  select_loci_if(loci_chromosomes(genotypes) == 2 &
-    loci_maf(genotypes) > 0.2) %>%
-  show_loci()
-```
-
-Incidentally, `loci_maf()` is one of several functions that compute quantities
-by locus; they can be identified as they start with `loci_`.
-
-
-# Grouping individuals in populations
-
-In population genetics, we are generally interested in computing quantities that
-describe groups of individuals (i.e. populations). Grouping can be used in a 
-number of ways.
-
-As a starting point, we can group by population and get pop sizes:
-```{r}
-example_gt %>%
-  group_by(population) %>%
-  tally()
-```
-
-For functions that return one result per individual (such as
-`indiv_het_obs` that we used before), we can use `summarise`, which returns a
-new `tibble` with one line per population. For example, we can count the number of individuals 
-per population, as well as their mean heterozygosity with :
-```{r}
-example_gt %>%
-  group_by(population) %>%
-  summarise(n = n(), mean_het = mean(indiv_het_obs(genotypes)))
-```
-
-However, note that this is somewhat inefficient, as computing the pop averages
-requires multiple access to the data. A more efficient approach is to:
-```{r}
-example_gt %>%
-  mutate(het_obs = indiv_het_obs(genotypes)) %>%
-  group_by(population) %>%
-  summarise(n = n(), mean_het = mean(het_obs))
-```
-
-In this way, we compute all individual heterozygosities in one go (optimising
-our file access time), and then generate the population summaries.
-
-When working with loci, you can use `reframe` to apply functions
-across groups. To use `reframe` correctly,
-be sure to select the `genotype` column within the loci verbs:
-```{r}
-example_gt %>%
-  group_by(population) %>%
-  reframe(loci_hwe = loci_hwe(genotypes))
-```
-
-Some functions, such as `loci_maf()`, also have a method for grouped tibbles that 
-allows an even easier syntax:
-```{r}
-example_gt %>%
-  group_by(population) %>%
-  loci_maf()
-```
-
-These methods are coded in C++ to be very efficient, and they should be
-preferred to the `reframe()` option. By default, their outputs will return a
-tidy tibble, with one row per locus per population (i.e. the same as we
-would get with `reframe()`). However, using the `type`
-argument, it is also possible to return a list:
-```{r}
-example_gt %>%
-  group_by(population) %>%
-  loci_maf(type = "list")
-```
-
-Or a matrix:
-```{r}
-example_gt %>%
-  group_by(population) %>%
-  loci_maf(type = "matrix")
-```
-
-Certain metrics and analyses are naturally defined by a grouped tibble as they
-refer to populations, such as
-population-specific Fst. For example:
-```{r}
-example_gt %>%
-  group_by(population) %>%
-  pop_fst()
-```
-
-These type of functions are prefixed with `pop`.
-
-# Functions applies to all pairwise and nwise combinations of individuals or populations
-
-The final group of verbs are prefixed by `pairwise_` and `nwise_`, and they are
-designed to compute pairwise statistics between all pairs or combinations of n individuals or populations 
-(when targeting populations, we start with `pairwise_pop_` and `nwise_pop_`). For example, to get the Identity by State
-for all pairs of individuals, we use:
-```{r}
-example_gt %>%
-  pairwise_ibs()
-```
-
-
-# Saving and reading data
-
-We can save a `gen_tibble` with `gt_save()`. This command will save a file with
-extension `.gt`. Together with the `.rds` and `.bk` files, the `.gt` file include
-all the information stored in the `gen_tibble`. Note that, whilst the `.rds` and `.bk`
-file have to share name, the `.gt` file can be named differently (but, by default, if
-no specific name is given, `gt_save` will use the same pattern as for the `.rds` 
-and `.bk` file).
-
-So, let us save our file:
-```{r}
-gt_file_name <- gt_save(example_gt)
-gt_file_name
-```
-
-And if we ever need to retrieve the location of the `.bk` and `.rds` files for a 
-gen_tibble, we can use:
-
-```{r}
-gt_get_file_names(example_gt)
-```
-
-In a later session, we could reload the data with:
-```{r}
-new_example_gt <- gt_load(gt_file_name[1])
-new_example_gt %>% show_genotypes()
-```
-
-We can see that our genotypes were recovered correctly.
-
-As we saw at the beginning of this vignette, it is possible to create a `gen_tibble` with data
-in data.frames and tibbles. We can use that function to wrangle small datasets 
-in custom formats, but more commonly SNP data are stored as PLINK bed files or VCF files.
-`gen_tibble` can directly read both types of files (including gzipped vcf files), we just need to provide the 
-path to file as the first argument of `gen_tibble`; for example, if we want to 
-read a PLINK bed file, we can simply use:
-
-```{r}
-bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
-pop_a_gt <- gen_tibble(bed_path_pop_a, backingfile = tempfile("pop_a_"))
-```
-
-For this vignette, we don't want to keep files, so we are using again a temporary
-path for the backing files, but in normal instances, we can simply
-omit the `backingfile` parameter, and the `.rds` and `.bk` file will be saved with the same name and
-path as the original `.bed` file.
-
-We can also export data into various formats with the family of functions `gt_as_*()`.
-Some functions, such as `gt_as_hierfstat()`, `gt_as_genind()` or `gt_as_genlight()` return
-an object of the appropriate type; other functions, such as `gt_as_plink()` or `gt_as_geno_lea()`
-write a file in the appropriate format, and return the name of that file on completion.
-For example, to export to a PLINK .bed file, we simply use:
-
-```{r}
-gt_as_plink(example_gt, file = tempfile("new_bed_"))
-```
-
-This will also write a .bim and .fam file and save them together with the .bed file. 
-Note that, from the main tibble, only `id`, `population` and `sex` will be preserved in the .fam file.
-It is also possible to write .ped and .raw files by specifying `type="ped"` or
-`type="raw"` in `gt_as_plink()` (see the help page for `gt_as_plink()` for details).
-
-# Merging data
-
-Merging data from different sources is a common problem, especially in human population
-genetics where there is a wealth of SNP chips available. In `tidypopgen`, merging is
-enacted with an `rbind` operation between `gen_tibbles`. If the datasets have the same
-loci, then the merge is trivial. If not, then it is necessary to subset to the same
-loci, and ensure that the data are coded with the same reference and alternate 
-alleles (or swap if needed). Additionally, if data come from SNP chips, there is
-the added complication that the strand is not always consistent, so it might also
-be necessary to flip strand (in that case, ambiguous SNPs have to be filtered).
-The `rbind` method for `gen_tibbles` has a number of parameters that allow us to
-control the behaviour of the merge.
-
-Let us start by bringing in two sample datasets (note that we use tempfiles
-to store the data; in real applications, we will usually avoid defining
-a backingfile and let the function create backing files where the bed file is
-stored):
-```{r}
-bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
-bigsnp_path_a <-
-  bigsnpr::snp_readBed(bed_path_pop_a, backingfile = tempfile("pop_a_"))
-pop_a_gt <- gen_tibble(bigsnp_path_a)
-bed_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
-bigsnp_path_b <-
-  bigsnpr::snp_readBed(bed_path_pop_b, backingfile = tempfile("pop_b_"))
-pop_b_gt <- gen_tibble(bigsnp_path_b)
-```
-
-And inspect them:
-```{r}
-pop_a_gt
-```
-
-And the other one:
-```{r}
-pop_b_gt
-```
-
-Here we are using very small datasets, but in real life, `rbind` operations
-are very demanding. Before performing such an operation, we can run
-`rbind_dry_run`:
-```{r}
-report <- rbind_dry_run(pop_a_gt, pop_b_gt, flip_strand = TRUE)
-```
-
-Note that, by default, `rbind` will NOT flip strand or remove ambiguous SNPs
-(as they are only relevant when merging different SNP chips),
-you need to set `flip_strand` to TRUE.
-
-The report object contains details about why each locus was either kept 
-or removed, but usually the report is sufficient to make decisions on whether
-we want to go ahead. If we are happy with the likely outcome, we can
-proceed with the `rbind`. Note that the data will be saved to disk.
-We can either provide a path and prefix, to which '.RDS' and '.bk' will be 
-appended for the `bigSNP` file and its backing file; or let the function
-save the files in the same path as the original backing file of the first object).
-
-NOTE: In this vignette, we save to the temporary directory, but in real life you want to save in
-a directory where you will be able to retrieve the file at a later date!!!
-```{r}
-# #create merge
-merged_gt <- rbind(pop_a_gt, pop_b_gt,
-  flip_strand = TRUE,
-  backingfile = file.path(tempdir(), "gt_merged")
+ylab <- paste("Axis 2 (", round(eigenvalues[2, 3], 1), " %)",
+  sep = ""
 )
 ```
 
-Let's check the resulting `gen_tibble`:
+And finally plot:
+
+```{r, fig.alt = "Score plot of individuals across the first and second Principal Components, with individual samples coloured by population"}
+ggplot(data = pcs, aes(x = .fittedPC1, y = .fittedPC2)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_point(aes(fill = population),
+    shape = 21, size = 3, show.legend = FALSE
+  ) +
+  scale_fill_distruct() +
+  labs(x = xlab, y = ylab) +
+  ggtitle("Lobster PCA")
+```
+
+Or we could create a labelled version of our PCA by determining the centre
+of each group to place the labels
+
 ```{r}
-merged_gt
-```
-Note that the values in the genotype column (which corresponds to the id in the
-FBM file) have changed to reflect that we have a new, larger FBM with both
-datasets.
+# Calculate centre for each population
+centroid <- aggregate(cbind(.fittedPC1, .fittedPC2, .fittedPC3) ~ population,
+  data = pcs, FUN = mean
+)
 
-We can look at the subsetted loci (note that we used the first population as reference to
-determine the strand and order of alleles):
-```{r}
-merged_gt %>% show_loci()
+# Add these coordinates to our augmented pca object
+pcs <- left_join(pcs, centroid, by = "population", suffix = c("", ".cen"))
 ```
 
-Again, note that the `big_index` values have changed compared to the original files,
-as we generated a new FBM with the merged data.
+And then adding labels to the plot:
 
-By default, `rbind` using the loci names to match the two datasets. The option
-'use_position = TRUE' forces matching by chromosome and position; note that a common
-source of problems when merging is the coding of chromosomes (e.g. a dataset has
-'chromosome1' and the other 'chr1'). If using 'use_position = TRUE', you should
-also make sure that the two datasets were aligned to the same reference genome assembly.
-
-# Imputation
-
-Many genetic analysis (e.g. PCA) do not allow missing data. In many software implementations,
-missing genotypes are imputed on the fly, often in a simplistic manner. In `tidypopgen`, we
-encourage taking this step explicitly, before running any analysis. 
-
-Let us start with a dataset that has some missing genotypes:
-```{r}
-bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-missing_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"))
-missing_gt
+```{r, fig.alt = "Score plot of individuals across the first and second Principal Components. Individual samples are coloured by population, the centroid of points for each group is labelled with the population name, and lines are drawn from the centroid to each point."}
+ggplot(data = pcs, aes(x = .fittedPC1, y = .fittedPC2)) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  geom_segment(aes(xend = .fittedPC1.cen, yend = .fittedPC2.cen),
+    show.legend = FALSE
+  ) +
+  geom_point(aes(fill = population),
+    shape = 21, size = 3, show.legend = FALSE
+  ) +
+  geom_label(
+    data = centroid,
+    aes(label = population, fill = population),
+    size = 4, show.legend = FALSE
+  ) +
+  scale_fill_distruct() +
+  labs(x = xlab, y = ylab) +
+  ggtitle("Lobster PCA")
 ```
-
-We can visualise the amount of missingness with:
-```{r, fig.alt = "Histogram of loci missingness, showing that most loci have no missing data, while some have a small proportion of missing data"}
-missing_gt %>%
-  loci_missingness() %>%
-  hist()
-```
-
-If we attempt to run a PCA on this dataset, we get:
-```{r, error = TRUE}
-missing_pca <- missing_gt %>% gt_pca_autoSVD()
-```
-
-Note that using gt_pca_autoSVD with a small dataset will likely cause an error, 
-see manual page for details.
-
-It is possible to obviate to this problem by filtering loci with missing data,
-but that might lose a lot of loci. The alternative is to impute the missing
-the data. `tidypopgen` provides a wrapper for fast imputation available in
-`bigsnpr`, a simple imputation (`gt_impute_simple`) based on the frequency of the alleles
-at each locus (by random sampling, or using the mean or mode).
-These methods are fine to impute a few missing genotypes, but they should not be used for any
-sophisticated imputation (e.g. of low coverage genomes).
-
-We use the simple approach to fix our dataset:
-```{r}
-missing_gt <- gt_impute_simple(missing_gt, method = "mode")
-```
-
-We can now check that our dataset has indeed been imputed:
-```{r}
-gt_has_imputed(missing_gt)
-```
-
-However, note that a `gen_tibble` stores both the raw data and the 
-imputed data. Even after imputation, the imputed data are not used by default:
-```{r}
-gt_uses_imputed(missing_gt)
-```
-
-And indeed, if we summarise missingness, we still get:
-```{r, fig.alt = "Histogram of loci missingness as above, showing that the use of imputed data is not automatic"}
-missing_gt %>%
-  loci_missingness() %>%
-  hist()
-```
-
-We can manually force a `gen_tibble` to use the imputed data:
-```{r, fig.alt = "Histogram of loci missingness after setting use of imputed data to true, showing that there is no missingness"}
-gt_set_imputed(missing_gt, set = TRUE)
-missing_gt %>%
-  loci_missingness() %>%
-  hist()
-```
-
-However, this is generally not needed, we can keep our `gen_tibble` set to use
-the raw data:
-```{r, fig.alt = "Histogram of loci missingness after setting use of imputed data to false again"}
-gt_set_imputed(missing_gt, set = FALSE)
-missing_gt %>%
-  loci_missingness() %>%
-  hist()
-```
-
-And let functions that need imputation use it automatically:
-```{r}
-missing_pca <- missing_gt %>% gt_pca_partialSVD()
-missing_pca
-```
-
-Note that, when the function is finished, the `gen_tibble` is back to using
-the raw genotypes:
-```{r, fig.alt = "Histogram of loci missingness, showing that use of imputed data is not automatically set to true, after using a PCA function"}
-gt_uses_imputed(missing_gt)
-missing_gt %>%
-  loci_missingness() %>%
-  hist()
-```
-
-More details about PCA and other analysis is found in the vignette on population
-genetic analysis.

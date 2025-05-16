@@ -15,8 +15,8 @@ exclusions: list(
     "R/pop_fst.R" = list (# it includes variable names from hierfstat)
       object_name_linter = Inf
     ),
-    "vignettes/tidypopgen.Rmd" = list( # styler vs lintr conflict
-      indentation_linter = 268
+    "vignettes/overview.Rmd" = list( # styler vs lintr conflict
+      indentation_linter = 267
     )
   )
 encoding: "UTF-8"
