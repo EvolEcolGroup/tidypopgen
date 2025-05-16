@@ -28,7 +28,7 @@ a 'gt_cluster_pca' object with an added element 'best_k'
 \description{
 This function selects the best k value based on a chosen metric and
 criterion. It is equivalent to plotting the metric against the \emph{k} values,
-and selecting the \emph{k} that fulfils a given criterion (see details for an
+and selecting the \emph{k} that fullfils a given criterion (see details for an
 explanation of each criterion). This function simply adds an element 'best_k'
 to the \code{gt_cluster_pca} returned by \code{\link[=gt_cluster_pca]{gt_cluster_pca()}}. The choice can be
 over-ridden simply by assigning a different value to that element (e.g. for
