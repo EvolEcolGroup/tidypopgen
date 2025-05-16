@@ -16,7 +16,7 @@ location of the backing files.}
 the path of the .geno file
 }
 \description{
-This function writes a .geno file fom a \code{\link{gen_tibble}}. Unless a file path is
+This function writes a .geno file from a \code{\link{gen_tibble}}. Unless a file path is
 given, a file with suffix .geno is written in the same location as the .rds
 and .bk files that underpin the \code{\link{gen_tibble}}.
 }

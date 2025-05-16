@@ -1,6 +1,6 @@
 #' Convert a `gentibble` to a .geno file for sNMF from the LEA package
 #'
-#' This function writes a .geno file fom a [`gen_tibble`]. Unless a file path is
+#' This function writes a .geno file from a [`gen_tibble`]. Unless a file path is
 #' given, a file with suffix .geno is written in the same location as the .rds
 #' and .bk files that underpin the [`gen_tibble`].
 #'
