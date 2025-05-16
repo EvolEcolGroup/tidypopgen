@@ -2,7 +2,7 @@
 #'
 #' This function selects the best k value based on a chosen metric and
 #' criterion. It is equivalent to plotting the metric against the *k* values,
-#' and selecting the *k* that fullfils a given criterion (see details for an
+#' and selecting the *k* that fulfills a given criterion (see details for an
 #' explanation of each criterion). This function simply adds an element 'best_k'
 #' to the `gt_cluster_pca` returned by [gt_cluster_pca()]. The choice can be
 #' over-ridden simply by assigning a different value to that element (e.g. for
