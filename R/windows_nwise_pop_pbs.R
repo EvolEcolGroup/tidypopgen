@@ -12,8 +12,8 @@
 #'   by columns of pbs values for each population comparison. "tidy" returns a
 #'   tidy tibble of the same data in 'long' format, where each
 #'   row is one window for one population comparison.
-#' @param method the method to use for calculating Fst. Currently only "Hudson"
-#'   is supported.
+#' @param fst_method the method to use for calculating Fst, one of 'Hudson',
+#'   'Nei87', and 'WC84'. See [pairwise_pop_fst()] for details.
 #' @param return_fst a logical value indicating whether to return the Fst values
 #' @param window_size The size of the window to use for the estimates.
 #' @param step_size The step size to use for the windows.
@@ -44,15 +44,15 @@
 #' - `value`: the pbs value for the populations
 #' @export
 
-windows_pairwise_pop_pbs <- function(.x,
-                                     type = c("matrix", "tidy"),
-                                     method = "Hudson",
-                                     return_fst = FALSE,
-                                     window_size,
-                                     step_size,
-                                     size_unit = c("snp", "bp"),
-                                     min_loci = 1,
-                                     complete = FALSE) {
+windows_nwise_pop_pbs <- function(.x,
+                                  type = c("matrix", "tidy"),
+                                  fst_method = c("Hudson", "Nei87", "WC84"),
+                                  return_fst = FALSE,
+                                  window_size,
+                                  step_size,
+                                  size_unit = c("snp", "bp"),
+                                  min_loci = 1,
+                                  complete = FALSE) {
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
@@ -64,11 +64,11 @@ windows_pairwise_pop_pbs <- function(.x,
   if (nrow(.group_levels) < 3) {
     stop("At least 3 populations are required to compute PBS.")
   }
-  method <- match.arg(method)
+  fst_method <- match.arg(fst_method)
 
   # create the pairwise Fst by locus, saving numerator and denominator
   fst_values <- windows_pairwise_pop_fst(.x,
-    method = method,
+    method = fst_method,
     window_size = window_size,
     step_size = step_size,
     size_unit = size_unit,
@@ -78,7 +78,7 @@ windows_pairwise_pop_pbs <- function(.x,
 
   # check that we only have one grouping variable
   if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("windows_pairwise_pop_pbs only works with one grouping variable")
+    stop("windows_nwise_pop_pbs only works with one grouping variable")
   }
 
   # create all 3 way combinations of populations

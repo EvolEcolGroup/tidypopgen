@@ -32,5 +32,5 @@ approach of Weir and Goudet 2017 based on beta estimators).
 }
 \details{
 The GRM is twice the coancestry matrix (e.g. as estimated by
-\code{\link[hierfstat:beta.dosage]{hierfstat::beta.dosage()}} with \code{inb=FALSE}).
+\code{hierfstat::beta.dosage()} with \code{inb=FALSE}).
 }

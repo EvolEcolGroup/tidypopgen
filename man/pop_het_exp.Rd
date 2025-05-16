@@ -28,7 +28,7 @@ belonging to a single population).}
 locus(TRUE), or as a single genome wide value (FALSE, the default).}
 
 \item{include_global}{boolean determining whether, besides the population
-specific estiamtes, a global estimate should be appended. Note that this
+specific estimates, a global estimate should be appended. Note that this
 will return a vector of n populations plus 1 (the global value), or a
 matrix with n+1 columns if \code{by_locus=TRUE}.}
 

@@ -9,8 +9,8 @@
 #' @param .x A grouped `gen_tibble`
 #' @param type type of object to return. One of "tidy" or "matrix".
 #'   Default is "tidy".
-#' @param fst_method A character string specifying the method to use for
-#'   computing Fst. Currently only "Hudson" is available.
+#' @param fst_method the method to use for calculating Fst, one of 'Hudson',
+#'   'Nei87', and 'WC84'. See [pairwise_pop_fst()] for details.
 #' @param return_fst A logical value indicating whether to return the Fst values
 #'   along with the PBS values. Default is `FALSE`.
 #' @return Either a matrix with locus ID as rownames and the following columns:
@@ -32,18 +32,18 @@
 #' # We can compute the PBS for all populations using "Hudson" method
 #' example_gt %>%
 #'   group_by(population) %>%
-#'   pairwise_pop_pbs(fst_method = "Hudson")
-pairwise_pop_pbs <- function(.x,
-                             type = c("tidy", "matrix"),
-                             fst_method = c("Hudson"),
-                             return_fst = FALSE) {
+#'   nwise_pop_pbs(fst_method = "Hudson")
+nwise_pop_pbs <- function(.x,
+                          type = c("tidy", "matrix"),
+                          fst_method = c("Hudson", "Nei87", "WC84"),
+                          return_fst = FALSE) {
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
   # check that we only have one grouping variable
   if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("pairwise_pop_pbs only works with one grouping variable")
+    stop("nwise_pop_pbs only works with one grouping variable")
   }
   # Check if the return_fst is logical
   if (!is.logical(return_fst)) {
@@ -94,7 +94,7 @@ pairwise_pop_pbs <- function(.x,
     pbs_results <-
       pbs_results %>%
       tidyr::pivot_longer(
-        cols = cols,
+        cols = dplyr::all_of(cols),
         names_to = "stat_name"
       )
     if (return_fst) {

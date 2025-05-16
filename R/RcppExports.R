@@ -49,8 +49,16 @@ gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp) {
     .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp)
 }
 
-pairwise_fst_hudson_loop <- function(pairwise_combn, pop_freqs_df, by_locus, return_num_dem) {
-    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, pop_freqs_df, by_locus, return_num_dem)
+pairwise_fst_hudson_loop <- function(pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem) {
+    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem)
+}
+
+pairwise_fst_nei87_loop <- function(pairwise_combn, n, het_obs, freq_alt, freq_ref, by_locus, return_num_dem) {
+    .Call(`_tidypopgen_pairwise_fst_nei87_loop`, pairwise_combn, n, het_obs, freq_alt, freq_ref, by_locus, return_num_dem)
+}
+
+pairwise_fst_wc84_loop <- function(pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem) {
+    .Call(`_tidypopgen_pairwise_fst_wc84_loop`, pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem)
 }
 
 read_packedancestry <- function(filename, BM, tab) {

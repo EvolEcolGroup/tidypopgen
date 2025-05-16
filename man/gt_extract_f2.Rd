@@ -115,7 +115,7 @@ f2-statistics (default \code{TRUE})}
 SNP metadata (invisibly)
 }
 \description{
-This function prepares data for various \emph{ADMIXTOOLS 2} functions fro the
+This function prepares data for various \emph{ADMIXTOOLS 2} functions from the
 package \emph{ADMIXTOOLS 2}. It takes a \code{\link{gen_tibble}}, computes allele
 frequencies and blocked f2-statistics, and writes the results to \code{outdir}. It
 is equivalent to \code{admixtools::extract_f2()}.

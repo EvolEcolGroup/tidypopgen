@@ -89,14 +89,18 @@ defined by Jost(2008)
 
 All these statistics are first computed by locus, and then averaged across
 loci (including any monorphic locus) to obtain genome-wide values. The
-function uses the same algorithm as \code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}} but is
+function uses the same algorithm as \code{hierfstat::basic.stats()} but is
 optimized for speed and memory usage.
 }
 }
 \references{
 Nei M, Chesser R (1983) Estimation of fixation indexes and gene
-diversities. Annals of Human Genetics, 47, 253-259. Nei M. (1987) Molecular
-Evolutionary Genetics. Columbia University Press, pp. 164-165. Jost L
+diversities. Annals of Human Genetics, 47, 253-259.
+
+Nei M. (1987) Molecular
+Evolutionary Genetics. Columbia University Press, pp. 164-165.
+
+Jost L
 (2008) GST and its relatives do not measure differentiation. Molecular
 Ecology, 17, 4015-4026.
 }

@@ -354,11 +354,11 @@ example_gt %>%
 
 These type of functions are prefixed with `pop`.
 
-# Functions applies to all pairwise combinations of individuals or populations
+# Functions applies to all pairwise and nwise combinations of individuals or populations
 
-The final group of verbs are prefixed by `pairwise_`, and they are
-designed to compute pairwise statistics between all individuals or populations 
-(the latter start with `pairwise_pop_`). For example, to get the Identity by State
+The final group of verbs are prefixed by `pairwise_` and `nwise_`, and they are
+designed to compute pairwise statistics between all pairs or combinations of n individuals or populations 
+(when targeting populations, we start with `pairwise_pop_` and `nwise_pop_`). For example, to get the Identity by State
 for all pairs of individuals, we use:
 ```{r}
 example_gt %>%

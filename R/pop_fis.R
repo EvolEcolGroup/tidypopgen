@@ -1,11 +1,13 @@
 #' Compute population specific FIS
 #'
 #' This function computes population specific FIS, using either the approach of
-#' Nei 1987 (as computed by [hierfstat::basic.stats()]) or of Weir and Goudet
-#' 2017 (as computed by [hierfstat::fis.dosage()]).
+#' Nei 1987 (with an algorithm equivalent to the one used by
+#' `hierfstat::basic.stats()`) or of Weir and Goudet 2017 (with an algorithm
+#' equivalent to the one used by `hierfstat::fis.dosage()`).
 #' @references Nei M. (1987) Molecular Evolutionary Genetics. Columbia
-#' University Press Weir, BS and Goudet J (2017) A Unified Characterization of
-#' Population Structure and Relatedness. Genetics (2017) 206:2085
+#'   University Press
+#' Weir, BS and Goudet J (2017) A Unified Characterization of
+#'   Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
 #' @param method one of "Nei87" (based on Nei 1987, eqn 7.41) or "WG17" (for
 #'   Weir and Goudet 2017) to compute FIS
@@ -14,7 +16,7 @@
 #'   that this is only relevant for "Nei87", as "WG17" always returns a single
 #'   value.
 #' @param include_global boolean determining whether, besides the population
-#'   specific estiamtes, a global estimate should be appended. Note that this
+#'   specific estimates, a global estimate should be appended. Note that this
 #'   will return a vector of n populations plus 1 (the global value), or a
 #'   matrix with n+1 columns if `by_locus=TRUE`.
 #' @param allele_sharing_mat optional and only relevant for "WG17", the matrix
@@ -113,15 +115,47 @@ pop_fis_wg17 <- function(
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
   }
-  fis_by_pop <- hierfstat::fis.dosage(
-    allele_sharing_mat,
-    matching = TRUE,
-    pop = group_indices(.x)
-  )
-  names(fis_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1), "global")
-  if (include_global) {
-    return(fis_by_pop)
-  } else {
-    return(fis_by_pop[-length(fis_by_pop)])
+
+  Mij <- allele_sharing_mat
+  Mii <- diag(Mij) * 2 - 1
+  diag(Mij) <- NA
+  pop <- factor(group_indices(.x))
+  pop_levels <- levels(pop)
+  n_pop <- length(pop_levels)
+  wil <- lapply(pop_levels, function(z) which(pop == z))
+  Fi <- lapply(wil, function(pop_levels) Mii[pop_levels])
+  Fsts <- unlist(lapply(
+    wil,
+    function(pop_levels) {
+      mean(Mij[pop_levels, pop_levels], na.rm = TRUE)
+    }
+  ))
+  Mb <- 0
+  mMij <- matrix(numeric(n_pop^2), ncol = n_pop)
+  for (i in 2:n_pop) {
+    p1 <- wil[[i]]
+    for (j in 1:(i - 1)) {
+      p2 <- wil[[j]]
+      mMij[i, j] <- mMij[j, i] <- mean(Mij[p1, p2], na.rm = TRUE)
+      Mb <- Mb + mMij[i, j]
+    }
   }
+  diag(mMij) <- Fsts
+
+  Mb <- Mb * 2 / (n_pop * (n_pop - 1))
+
+  # estimate individual Fi (inbreeding)
+  for (i in 1:n_pop) {
+    Fi[[i]] <- (Fi[[i]] - Fsts[[i]]) / (1 - Fsts[[i]])
+  }
+  names(Fi) <- as.character(pop_levels)
+  fis_by_pop <- unlist(lapply(Fi, mean, na.rm = TRUE))
+
+  if (include_global) {
+    fis_by_pop <- c(fis_by_pop, mean(fis_by_pop, na.rm = TRUE))
+    names(fis_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1), "global")
+  } else {
+    names(fis_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1))
+  }
+  return(fis_by_pop)
 }

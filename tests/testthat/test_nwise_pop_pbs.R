@@ -35,7 +35,7 @@ test_gt <- gen_tibble(
 
 test_that("requires a grouped gen_tibble", {
   expect_error(
-    test_gt %>% pairwise_pop_pbs(fst_method = "Hudson"),
+    test_gt %>% nwise_pop_pbs(fst_method = "Hudson"),
     ".x should be a grouped gen_tibble"
   )
 })
@@ -44,14 +44,14 @@ test_that("error with multiple grouping variables", {
   test_gt$region <- c("a", "a", "b", "b", "a", "b", "b", "a", "b", "a")
   test_gt <- test_gt %>% group_by(population, region)
   expect_error(
-    test_gt %>% pairwise_pop_pbs(fst_method = "Hudson"),
+    test_gt %>% nwise_pop_pbs(fst_method = "Hudson"),
     "only works with one grouping variable"
   )
 })
-test_that("pairwise_pop_pbs works correctly", {
+test_that("nwise_pop_pbs works correctly", {
   test_pbs <- test_gt %>%
     group_by(population) %>%
-    pairwise_pop_pbs(fst_method = "Hudson", type = "matrix")
+    nwise_pop_pbs(fst_method = "Hudson", type = "matrix")
   # expect 24 columns
   expect_equal(ncol(test_pbs), 24)
   # @TODO we need some more meaningul tests here
@@ -61,12 +61,12 @@ test_that("pairwise_pop_pbs works correctly", {
 test_that("type argument delivers correct objects", {
   test_pbs_matrix <- test_gt %>%
     group_by(population) %>%
-    pairwise_pop_pbs(fst_method = "Hudson", type = "matrix")
+    nwise_pop_pbs(fst_method = "Hudson", type = "matrix")
   expect_true(is.matrix(test_pbs_matrix))
 
   test_pbs_tidy <- test_gt %>%
     group_by(population) %>%
-    pairwise_pop_pbs(fst_method = "Hudson", type = "tidy")
+    nwise_pop_pbs(fst_method = "Hudson", type = "tidy")
   expect_true(is.data.frame(test_pbs_tidy))
 
   # Compare
