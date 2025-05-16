@@ -16,7 +16,7 @@ exclusions: list(
       object_name_linter = Inf
     ),
     "vignettes/overview.Rmd" = list( # styler vs lintr conflict
-      indentation_linter = 267
+      indentation_linter = 268
     )
   )
 encoding: "UTF-8"

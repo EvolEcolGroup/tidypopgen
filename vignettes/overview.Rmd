@@ -264,7 +264,8 @@ greater than 0.2 that are also on chromosome 2.
 We can use a similar approach to select only alleles on a given chromosome:
 ```{r}
 example_gt %>%
-  select_loci_if(loci_chromosomes(genotypes) == 2 & loci_maf(genotypes) > 0.2) %>%
+  select_loci_if(loci_chromosomes(genotypes) == 2 &
+    loci_maf(genotypes) > 0.2) %>%
   show_loci()
 ```
 
