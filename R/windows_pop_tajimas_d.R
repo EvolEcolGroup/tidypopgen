@@ -1,6 +1,6 @@
 #' Compute Tajima's D for a sliding window
 #'
-#' @description This function computes Tajimas's D for a sliding window across
+#' @description This function computes Tajima's D for a sliding window across
 #'   each chromosome.
 #'
 #' @param .x a (potentially grouped) `gen_tibble` object

@@ -68,6 +68,6 @@ or a list of data frames, one per group, with the following columns:
 }
 }
 \description{
-This function computes Tajimas's D for a sliding window across
+This function computes Tajima's D for a sliding window across
 each chromosome.
 }
