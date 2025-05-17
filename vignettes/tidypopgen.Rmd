@@ -44,6 +44,7 @@ Additionally, if data are loaded from a .bed file with information in the `FID`
 column, this is treated as population information and is automatically
 added to the `gen_tibble` as column `population`. As with a normal tibble, this
 information can be changed, updated, or removed from the `gen_tibble` if needed.
+`tidypopgen` can also read data form `packedancestry` files and `vcf`.
 
 Let's start by creating a `gen_tibble` from the `lobster.bed` file.
 
@@ -273,3 +274,9 @@ ggplot(data = pcs, aes(x = .fittedPC1, y = .fittedPC2)) +
   labs(x = xlab, y = ylab) +
   ggtitle("Lobster PCA")
 ```
+
+That's it! There are more functions to run different types of analyses (DAPC,
+ADMIXTURE, f statistics with admixtools2,  etc.); each resulting object has
+`autoplot`, `tidy`, and `augment`
+to explore the results and integrated into the information from the
+`gen_tibble`.
