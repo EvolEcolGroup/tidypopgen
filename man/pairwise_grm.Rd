@@ -27,8 +27,8 @@ a matrix of GR between all pairs of individuals
 \description{
 This function computes the Genomic Relationship Matrix (GRM). This is
 estimated by computing the pairwise kinship coefficients (coancestries)
-between all pairs of individuals from a matrix of Allele Sharing follwng the
-approach of Weir and Goudet 2017 based on beta estimators).
+between all pairs of individuals from a matrix of Allele Sharing following
+the approach of Weir and Goudet 2017 based on beta estimators).
 }
 \details{
 The GRM is twice the coancestry matrix (e.g. as estimated by

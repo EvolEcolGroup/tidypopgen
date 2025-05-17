@@ -77,9 +77,9 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' `hwe`, and `significant hwe` plots
 #' - `missing`: a histogram of proportion of missing data
 #' - `missing low maf`: a histogram of the proportion of missing data for
-#' snps with low minor allele freqency
+#' snps with low minor allele frequency
 #' - `missing high maf`:a histogram of the proportion of missing data for
-#' snps with high minor allele freqency
+#' snps with high minor allele frequency
 #' - `maf`: a histogram of minor allele frequency
 #' - `hwe`: a histogram of HWE exact test p-values
 #' - `significant hwe`: a histogram of significant HWE exact test p-values

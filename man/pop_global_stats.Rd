@@ -88,7 +88,7 @@ provided in the text at the top of page 165 in Nei(1987).
 defined by Jost(2008)
 
 All these statistics are first computed by locus, and then averaged across
-loci (including any monorphic locus) to obtain genome-wide values. The
+loci (including any monomorphic locus) to obtain genome-wide values. The
 function uses the same algorithm as \code{hierfstat::basic.stats()} but is
 optimized for speed and memory usage.
 }

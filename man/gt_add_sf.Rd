@@ -16,7 +16,7 @@ not provided, the geometry column must be provided.}
 \item{crs}{the coordinate reference system of the coordinates. If this is not
 set, it will be set to the default value of \code{sf::st_crs(4326)}.}
 
-\item{sfc_column}{the name fo an \code{\link[sf:sfc]{sf::sfc}} column to be used as the
+\item{sfc_column}{the name of an \code{\link[sf:sfc]{sf::sfc}} column to be used as the
 geometry}
 }
 \value{
