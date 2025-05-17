@@ -14,15 +14,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This vignette gives a short introduction on how to use the `tidypopgen` package
 to perform basic data cleaning and a PCA on a dataset of European lobsters
-(Homarus gammarus). The original data are available at
+(**Homarus gammarus**). The original data are available at
 https://datadryad.org/dataset/doi:10.5061/dryad.2v1kr38, but for the purpose of
 this vignette we will use a subset of the data stored as a .bed file, available
-in the `inst/extdata/lobster` directory of the package. To install tidypopgen
-from github, use:
+in the `inst/extdata/lobster` directory of the package. To install `tidypopgen`
+from r-universe, use:
 
 ```{r eval = FALSE}
-install.packages("devtools")
-devtools::install_github("EvolEcolGroup/tidypopgen")
+install.packages("tidypopgen", repos = "https://evolecolgroup.r-universe.dev")
 ```
 
 Next, load the `tidypopgen` package and the `ggplot2` package for plotting.
@@ -50,7 +49,7 @@ Let's start by creating a `gen_tibble` from the `lobster.bed` file.
 
 ```{r}
 lobsters <- gen_tibble(
-  x = "../inst/extdata/lobster/lobster.bed",
+  x = system.file("extdata/lobster/lobster.bed", package = "tidypopgen"),
   quiet = TRUE, backingfile = tempfile()
 )
 head(lobsters)
@@ -62,17 +61,20 @@ sampling site of each lobster in the dataset.
 
 If we want to take a look at the genotypes of our lobsters, we can use the
 `show_genotypes` function to return a matrix of genotypes, where rows are
-individuals and columns are loci:
+individuals and columns are loci. This is a big table, so we will just look
+at the first ten loci for the first 5 individuals:
 
 ```{r}
-lobsters %>% show_genotypes()
+lobsters %>% show_genotypes(indiv_indices = 1:5, loci_indices = 1:10)
 ```
 
 And, similarly, if we want to see information about the loci we can use the
-`show_loci` function, which returns a tibble with information about each locus:
+`show_loci` function, which returns a tibble with information about each locus.
+Again this is a big table, so we will use `head()` to only look at the first
+few:
 
 ```{r}
-lobsters %>% show_loci()
+head(lobsters %>% show_loci())
 ```
 
 Now we have a `gen_tibble` to work with, we can start to clean the data. 
@@ -172,7 +174,8 @@ lobsters <- gt_impute_simple(lobsters, method = "random")
 
 # PCA
 
-Then we can run a PCA. Here, we will use the `gt_pca_partialSVD` function:
+Then we can run a PCA. There are a number of PCA algorithms, here, we will use
+the `gt_pca_partialSVD` function:
 
 ```{r}
 partial_pca <- gt_pca_partialSVD(lobsters)
@@ -184,9 +187,20 @@ And we can create a simple plot using `autoplot`:
 autoplot(partial_pca, type = "scores")
 ```
 
-That was easy! The autoplot gives us a quick idea of the explained variance and
+That was easy! The `autoplot` gives us a quick idea of the explained variance and
 rough distribution of the samples, but we need to see the different populations
-within our dataset. For this, we can use ggplot2.
+within our dataset. 
+
+For a quick overview, we could add an aethetic to our plot:
+
+```{r, fig.alt = "Score plot of individuals across the first and second Principal Components, with individual samples coloured by population"}
+autoplot(partial_pca, type = "scores") +
+  aes(color = lobsters$population) +
+  labs(color = "population")
+```
+
+However, if we want to fully customise our plot, we can wrangle the data
+directly and use `ggplot2`.
 
 # Plot with ggplot2
 
@@ -238,7 +252,7 @@ centroid <- aggregate(cbind(.fittedPC1, .fittedPC2, .fittedPC3) ~ population,
 pcs <- left_join(pcs, centroid, by = "population", suffix = c("", ".cen"))
 ```
 
-And then adding labels to the plot:
+And then add labels to the plot:
 
 ```{r, fig.alt = "Score plot of individuals across the first and second Principal Components. Individual samples are coloured by population, the centroid of points for each group is labelled with the population name, and lines are drawn from the centroid to each point."}
 ggplot(data = pcs, aes(x = .fittedPC1, y = .fittedPC2)) +

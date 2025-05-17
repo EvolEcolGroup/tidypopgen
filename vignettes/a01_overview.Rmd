@@ -1,9 +1,9 @@
 ---
-title: "Overview"
+title: "The grammar of population genetics"
 output: rmarkdown::html_vignette
         #pdf_document
 vignette: >
-  %\VignetteIndexEntry{Overview}
+  %\VignetteIndexEntry{The grammar of population genetics}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-## tidy data in population genetics
+## Tidy data in population genetics
 
 The fundamental tenet of tidy data that is that each observation should have its
 own row and each variable its own column, such that each value has its own cell.
