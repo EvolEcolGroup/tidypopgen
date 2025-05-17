@@ -27,7 +27,7 @@ devtools::install_github("EvolEcolGroup/tidypopgen")
 
 ## Examples
 
-There are a several vignettes designed to teach you how to use `tidypopgen`.
+There are several vignettes designed to teach you how to use `tidypopgen`.
 A short introduction to the package is available in the
 ['introduction' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.html).
 A more detailed and technical description of the grammar of population genetics,
@@ -49,7 +49,7 @@ performed in PLINK into `tidypopgen` commands.
 There is also an article showing how to project ancient DNA data onto a PCA fitted
 to modern data: ['aDNA projection' article](https://evolecolgroup.github.io/tidypopgen/dev/articles/pca_aDNA_projection.html).
 
-Finally, `tidypopgen` is fast and can handle large dataset easily. See a 
+Finally, `tidypopgen` is fast and can handle large datasets easily. See a 
 ['benchmark' article](https://evolecolgroup.github.io/tidypopgen/dev/articles/benchmark_hgdp.html) using the HGDP,
 a dataset of over 1000 individuals typed for 650k SNPs. We can load the data, clean it,
 run imputation, PCA and pairwise Fst among 51 populations in less than 20 seconds on a
