@@ -141,8 +141,8 @@ example_gt %>% mutate(het_obs = indiv_het_obs(genotypes))
 The individual metadata can then be processed with the usual `tidyverse` grammar.
 So, we can filter individuals by population with
 ```{r}
-example_pop1 <- example_gt %>% filter(population == "pop2")
-example_pop1
+example_pop2 <- example_gt %>% filter(population == "pop2")
+example_pop2
 ```
 
 There are a number of functions that compute population genetics quantities for each
