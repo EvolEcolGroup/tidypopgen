@@ -30,10 +30,9 @@ of the mean numerator and denominator (FALSE, the default).}
 \item{method}{one of 'Hudson', 'Nei87', and 'WC84'}
 
 \item{return_num_dem}{returns a list of numerators and denominators for each
-locus. This is useful for creating windowed estimates of Fst (as
-we need to compute the mean numerator and denominator within
-each window). Default is
-FALSE. Currently only implemented for Hudson's method.}
+locus. This is useful for creating windowed estimates of Fst (as we need to
+compute the mean numerator and denominator within each window). Default is
+FALSE.}
 
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
@@ -52,10 +51,10 @@ This function computes pairwise Fst. The following methods are implemented:
 \item 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
 for diploids.
 \item 'Nei87' : Fst according to Nei (1987) - includes the correction for
-heterozygosity when computing Ht, and is equivalent to
-\code{hierfstat::pairwise.neifst()},
-\item 'WC84' : Weir and Cockerham (1984), correcting for missing data and is
-equivalent to \code{hierfstat::pairwise.WCfst()}.
+heterozygosity when computing Ht (it uses the same formulation as in
+\code{hierfstat::pairwise.neifst()}),
+\item 'WC84' : Weir and Cockerham (1984), correcting for missing data (it uses
+the same formulation as in \code{hierfstat::pairwise.WCfst()}).
 }
 }
 \details{

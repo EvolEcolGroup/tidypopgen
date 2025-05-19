@@ -35,9 +35,9 @@ test_gt <- gen_tibble(
 )
 test_gt <- test_gt %>% dplyr::group_by(population)
 
-test_that("windows_pairwise_pop_pbs works correctly", {
+test_that("windows_nwise_pop_pbs works correctly", {
   test_window <- test_gt %>%
-    windows_pairwise_pop_pbs(
+    windows_nwise_pop_pbs(
       window_size = 3,
       step_size = 2,
       size_unit = "snp",
@@ -50,7 +50,7 @@ test_that("windows_pairwise_pop_pbs works correctly", {
 
   # if we ask to return fst, we expect more columns (6 pairwise fst extra)
   test_window_fst <- test_gt %>%
-    windows_pairwise_pop_pbs(
+    windows_nwise_pop_pbs(
       window_size = 3,
       step_size = 2,
       size_unit = "snp",
@@ -63,7 +63,7 @@ test_that("windows_pairwise_pop_pbs works correctly", {
   test_gt_ungrouped <- test_gt %>% ungroup()
   expect_error(
     test_gt_ungrouped %>%
-      windows_pairwise_pop_pbs(
+      windows_nwise_pop_pbs(
         window_size = 3,
         step_size = 2,
         size_unit = "snp",
@@ -76,7 +76,7 @@ test_that("windows_pairwise_pop_pbs works correctly", {
   test_gt_2pop <- test_gt %>% dplyr::filter(population %in% c("pop1", "pop2"))
   expect_error(
     test_gt_2pop %>%
-      windows_pairwise_pop_pbs(
+      windows_nwise_pop_pbs(
         window_size = 3,
         step_size = 2,
         size_unit = "snp",
@@ -88,7 +88,7 @@ test_that("windows_pairwise_pop_pbs works correctly", {
 
 test_that("windows type", {
   pbs_windows_matrix <- test_gt %>%
-    windows_pairwise_pop_pbs(
+    windows_nwise_pop_pbs(
       type = "matrix",
       window_size = 3,
       step_size = 2,
@@ -97,7 +97,7 @@ test_that("windows type", {
     )
   expect_true(is.data.frame(pbs_windows_matrix))
   pbs_windows_tidy <- test_gt %>%
-    windows_pairwise_pop_pbs(
+    windows_nwise_pop_pbs(
       type = "tidy",
       window_size = 3,
       step_size = 2,
@@ -112,7 +112,7 @@ test_that("windows type", {
 
   # Now with return_fst
   pbs_windows_matrix_fst <- test_gt %>%
-    windows_pairwise_pop_pbs(
+    windows_nwise_pop_pbs(
       type = "matrix",
       window_size = 3,
       step_size = 2,
@@ -122,7 +122,7 @@ test_that("windows type", {
     )
   expect_true(is.data.frame(pbs_windows_matrix))
   pbs_windows_tidy_fst <- test_gt %>%
-    windows_pairwise_pop_pbs(
+    windows_nwise_pop_pbs(
       type = "tidy",
       window_size = 3,
       step_size = 2,

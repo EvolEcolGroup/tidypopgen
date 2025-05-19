@@ -135,7 +135,7 @@ pop_tajimas_d.grouped_df <- function(
 }
 
 
-# esimate tajimas d from a vector of pi per locus and the number of
+# estimate tajimas d from a vector of pi per locus and the number of
 # haploid genomes (i.e. 2 * N individuals)
 tajimas_d_from_pi_vec <- function(pi, n) {
   # count segregating sites from pi

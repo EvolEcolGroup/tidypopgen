@@ -12,7 +12,7 @@
 #'   not provided, the geometry column must be provided.
 #' @param crs the coordinate reference system of the coordinates. If this is not
 #'   set, it will be set to the default value of `sf::st_crs(4326)`.
-#' @param sfc_column the name fo an [`sf::sfc`] column to be used as the
+#' @param sfc_column the name of an [`sf::sfc`] column to be used as the
 #'   geometry
 #' @return a [`gen_tibble`] object with an additional geometry column (and thus
 #'   belonging also to `sf` class).
