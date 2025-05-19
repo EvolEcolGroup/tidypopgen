@@ -584,8 +584,8 @@ test_that("gentibble with packedancestry", {
   # individuals are homozygous ref. This is the case for snps rs9697457,
   # rs2862633, rs28569024.
   expect_true(all.equal(
-    show_loci(pop_a_bed_gt)[, (names(show_loci(pop_a_bed_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))], #nolint
-    show_loci(pop_a_gt)[, (names(show_loci(pop_a_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))] #nolint
+    show_loci(pop_a_bed_gt)[, (names(show_loci(pop_a_bed_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))], # nolint
+    show_loci(pop_a_gt)[, (names(show_loci(pop_a_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))] # nolint
   ))
 })
 
@@ -655,8 +655,8 @@ test_that("gentibble with packedancestry and missingness", {
   # individuals are homozygous ref. This is the case for snps rs9697457,
   # rs2862633, rs28569024.
   expect_true(all.equal(
-    show_loci(pop_b_bed_gt)[, (names(show_loci(pop_b_bed_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))], #nolint
-    show_loci(pop_b_gt)[, (names(show_loci(pop_b_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))] #nolint
+    show_loci(pop_b_bed_gt)[, (names(show_loci(pop_b_bed_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))], # nolint
+    show_loci(pop_b_gt)[, (names(show_loci(pop_b_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))] # nolint
   ))
 })
 
