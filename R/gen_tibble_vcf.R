@@ -10,6 +10,10 @@ gen_tibble_vcf <- function(
     quiet = FALSE) {
   parser <- match.arg(parser)
 
+  if (!file.exists(x)) {
+    stop("x should be a valid file path pointing to a vcf: ", x)
+  }
+
   if (parser == "cpp") {
     rds_path <- vcf_to_fbm_cpp(
       x,

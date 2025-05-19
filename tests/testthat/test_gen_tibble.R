@@ -354,6 +354,12 @@ test_that("gen_tibble from files", {
     gen_tibble("non_existent_file.blah", quiet = TRUE),
     "x should be a valid file path pointing"
   )
+
+  expect_error(
+    gen_tibble("non_existent_file.vcf", quiet = TRUE),
+    "x should be a valid file path pointing"
+  )
+
   expect_error(
     gen_tibble("", quiet = TRUE),
     "x should not be an empty string"

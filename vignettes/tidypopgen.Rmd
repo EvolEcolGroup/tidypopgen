@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This vignette gives a short introduction on how to use the `tidypopgen` package
 to perform basic data cleaning and a PCA on a dataset of European lobsters
-(**Homarus gammarus**). The original data are available at
+(*Homarus gammarus*). The original data are available at
 https://datadryad.org/dataset/doi:10.5061/dryad.2v1kr38, but for the purpose of
 this vignette we will use a subset of the data stored as a .bed file, available
 in the `inst/extdata/lobster` directory of the package. To install `tidypopgen`
