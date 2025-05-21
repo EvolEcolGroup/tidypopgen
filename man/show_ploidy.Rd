@@ -27,5 +27,8 @@ Extract the ploidy information from a  \code{gen_tibble}. NOTE that this functio
 does not return the ploidy level for each individual (that is obtained with
 \code{\link{indiv_ploidy}}); instead, it returns an integer which is either the ploidy
 level of all individuals (e.g. 2 indicates all individuals are diploid),
-or a 0 to indicate mixed ploidy.
+or a 0 to indicate mixed ploidy. The special case of -2 is used to indicate
+the presence of pseudo-haploids (i.e. individuals with a ploidy of 2 but
+for which we only have information for one allele; the dosages are 0 or 2
+for these individuals).
 }

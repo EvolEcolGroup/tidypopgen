@@ -93,7 +93,6 @@ loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
 #' @export
 #' @rdname loci_hwe
 loci_hwe.grouped_df <- function(
-    # TODO revert name to method
     .x,
     .col = "genotypes",
     mid_p = TRUE,
@@ -101,6 +100,9 @@ loci_hwe.grouped_df <- function(
     block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
     type = c("tidy", "list", "matrix"),
     ...) {
+  
+  stopifnot_diploid(.x)
+  
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()

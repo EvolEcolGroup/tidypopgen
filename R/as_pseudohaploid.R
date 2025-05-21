@@ -14,7 +14,7 @@
 #' ploidy values updated to 1 or 2.
 #' @export
 
-as_pseudohaploid <- function(x, test_n_loci = 10000) {
+gt_pseudohaploid <- function(x, test_n_loci = 10000) {
   # check that the input is a gen_tibble
   stopifnot_gen_tibble(x)
   
@@ -36,8 +36,8 @@ as_pseudohaploid <- function(x, test_n_loci = 10000) {
   if (!"ploidy" %in% names(attr(x, "bigsnp")$fam)){
     attr(x, "bigsnp")$fam$ploidy <- NA_integer_
   }
-  
-  attr(x, "bigsnp")$fam$ploidy[.gt_bigsnp_rows(x)] <-
+
+  attr(x$genotypes, "bigsnp")$fam$ploidy[.gt_bigsnp_rows(x)] <-
     identify_pseudohaploids (x, n_test = test_n_loci)
   
   # set ploidy to -2
