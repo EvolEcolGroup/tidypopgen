@@ -43,8 +43,15 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::rcmdcheck
+          extra-packages: |
+            any::rcmdcheck
+            admixtools=?ignore
           needs: check
+
+      - name: install admixtools
+        run: |
+          install.packages("admixtools", repos = c("https://evolecolgroup.r-universe.dev", "https://cloud.r-project.org"))
+        shell: Rscript {0}
 
       - name: Get ADMIXTURE for linux
         if: matrix.config.os == 'ubuntu-latest'

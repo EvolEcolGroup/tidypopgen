@@ -1,6 +1,6 @@
 Package: tidypopgen
 Title: Tidy Population Genetics
-Version: 0.1.0.9007
+Version: 0.2.0
 Authors@R: 
     c(person("Evie", "Carter", role = c("aut")),
     person("Andrea", "Manica", email = "am315@cam.ac.uk", 
@@ -60,9 +60,7 @@ Suggests:
     vcfR,
     xgboost,
     spelling
-Remotes:
-    uqrmaie1/admixtools
-Additional_repositories: https://evolecolgroup.r-universe.dev/admixtools
+Additional_repositories: https://evolecolgroup.r-universe.dev/
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LinkingTo: 
