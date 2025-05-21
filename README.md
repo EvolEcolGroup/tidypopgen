@@ -39,8 +39,8 @@ illustrates the `tidypopgen` functions that help
 running a full QC of a dataset before analysis.
 
 The ['population genetic analysis' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/a03_example_clustering_and_dapc.html)
-provides a fully annotated example of how to 
-run various population genetics analyses with `tidypopgen`.
+provides a fully annotated example of how to run various population genetics
+analyses with `tidypopgen`.
 
 We also provide a ['PLINK cheatsheet'](https://evolecolgroup.github.io/tidypopgen/dev/articles/a99_plink_cheatsheet.html)
 aimed at translating common tasks
