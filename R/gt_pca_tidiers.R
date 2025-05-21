@@ -85,8 +85,8 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
       PC = seq_len(length(x$d)),
       "std.dev" = x$d / sqrt(nrow(x$u) - 1)
     )
-    if ("square_frobenious" %in% names(x)) {
-      rssq <- x$square_frobenious
+    if ("square_frobenius" %in% names(x)) {
+      rssq <- x$square_frobenius
       var_exp <- x$d^2 / rssq
       percentage <- var_exp * 100
       cum_percentage <- cumsum(var_exp) * 100

@@ -6,7 +6,7 @@
 #' four individuals represented by the byte. Each two bits give the number of
 #' alleles, with the combination 11 representing a missing value.
 #' @param minor A boolean indicating whether to use the minor allele or not.
-#' PackedAncestry uses the major allele, but by default we convert to minor
+#' *packedancestry* uses the major allele, but by default we convert to minor
 #' alleles to be in line with PLINK and VCF.
 #' @returns a matrix of raw values
 #'
@@ -32,7 +32,7 @@ get_packedancestry_code <- function(minor = TRUE) { # TODO temp switch
 #' Parse a byte into 2-bit groups
 #'
 #' This function takes a byte (raw value) and extracts 4 groups of 2 bits each.
-#' Following the convention by PackedAncestry, we start from the left (i.e the
+#' Following the convention by *packedancestry*, we start from the left (i.e the
 #' higher value bits) and move to the right (i.e the lower value bits).
 #' @param byte A raw value representing a byte (0-255).
 #' @returns A vector of integers representing the 4 groups of 2 bits.

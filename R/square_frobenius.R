@@ -16,7 +16,7 @@
 #' @return The square of the Frobenius norm of the matrix
 #' @keywords internal
 
-square_frobenious <- function(
+square_frobenius <- function(
     X, # nolint start
     ind.row = bigstatsr::rows_along(X),
     ind.col = bigstatsr::cols_along(X), # nolint end
