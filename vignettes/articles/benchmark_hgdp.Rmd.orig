@@ -10,6 +10,7 @@ knitr::opts_chunk$set(
 )
 library(benchmarkme)
 library(chunkhooks)
+library(ggheatmap)
 hook_benchmark()
 set.seed(123)
 ```
@@ -60,9 +61,10 @@ associated metadata.
 
 ```{r read_plink, benchmark = TRUE}
 hgdp <- gen_tibble(bed_path,
-                   quiet = TRUE,
-                   backingfile = tempfile("test_"),
-                   n_cores = n_cores)
+  quiet = TRUE,
+  backingfile = tempfile("test_"),
+  n_cores = n_cores
+)
 ```
 
 Add metadata
@@ -78,7 +80,6 @@ Let's confirm that we have read all the expected information:
 
 ```{r}
 hgdp
-
 ```
 
 # Loci Report
@@ -199,21 +200,26 @@ calculate pairwise Fst.
 
 ```{r pairwise_fst, benchmark = TRUE}
 grouped_hgdp <- hgdp %>% group_by(population)
-pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
+pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
+  n_cores = n_cores,
+  type = "pairwise"
+)
 ```
 
 Plot pairwise Fst:
 
 ```{r pairwise_fst_plot, eval = FALSE}
 # Order by continents
-grouped_hgdp_order <- grouped_hgdp %>% arrange(region,population)
+grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
 regional_order <- unique(grouped_hgdp_order$population)
-pairwise_fsts <- pairwise_fsts[regional_order,regional_order]
+pairwise_fsts <- pairwise_fsts[regional_order, regional_order]
 
 ggheatmap(pairwise_fsts) +
-  scale_fill_viridis_c()+
-    theme(axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
-          axis.text.y = element_text(angle = 0, hjust = 1, size = 6))+
+  scale_fill_viridis_c() +
+  theme(
+    axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
+    axis.text.y = element_text(angle = 0, hjust = 1, size = 6)
+  ) +
   labs(
     x = element_blank(),
     y = element_blank(),
@@ -227,9 +233,10 @@ Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
 
 ```{r plink_save, benchmark = TRUE}
 gt_as_plink(hgdp,
-            file = tempfile(),
-            type = "bed",
-            overwrite = TRUE)
+  file = tempfile(),
+  type = "bed",
+  overwrite = TRUE
+)
 ```
 
 # Summary
@@ -237,7 +244,7 @@ gt_as_plink(hgdp,
 Here is a summary of the time taken (in seconds) to perform each step of the analyses:
 
 ```{r echo=FALSE}
-chunk_order <- knitr::all_labels()  # Get order
+chunk_order <- knitr::all_labels() # Get order
 # Chunks that have benchmarks
 benchmarked_chunks <- names(chunkhooks::benchmarks)
 
@@ -247,7 +254,7 @@ benchmark_results <- data.frame(
   step = ordered_benchmark_chunks,
   time = NA_real_
 )
-for (i in seq_along(benchmark_results$step)){
+for (i in seq_along(benchmark_results$step)) {
   this_step <- benchmark_results$step[i]
   benchmark_results$time[i] <- round(chunkhooks::benchmarks[[this_step]], 2)
 }
@@ -255,4 +262,3 @@ total <- c("Total", sum(benchmark_results$time))
 benchmark_results <- rbind(benchmark_results, total)
 benchmark_results
 ```
-

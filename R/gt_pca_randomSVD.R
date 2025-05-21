@@ -97,7 +97,7 @@ gt_pca_randomSVD <- function(
   this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var) {
-    this_svd$square_frobenious <- square_frobenious(
+    this_svd$square_frobenius <- square_frobenius(
       X$genotypes,
       x_ind_row,
       x_ind_col,

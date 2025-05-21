@@ -8,7 +8,7 @@ get_packedancestry_code(minor = TRUE)
 }
 \arguments{
 \item{minor}{A boolean indicating whether to use the minor allele or not.
-PackedAncestry uses the major allele, but by default we convert to minor
+\emph{packedancestry} uses the major allele, but by default we convert to minor
 alleles to be in line with PLINK and VCF.}
 }
 \value{

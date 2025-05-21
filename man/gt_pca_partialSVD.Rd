@@ -40,7 +40,7 @@ vectors)
 \item \code{scale}, the scaling vector,
 \item \code{method}, a string defining the method (in this case 'partialSVD'),
 \item \code{call}, the call that generated the object.
-\item \code{square_frobenious}, used to compute the proportion of variance explained
+\item \code{square_frobenius}, used to compute the proportion of variance explained
 by the components (optional)
 
 Note: rather than accessing these elements directly, it is better to use

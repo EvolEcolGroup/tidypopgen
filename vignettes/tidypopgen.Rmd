@@ -192,7 +192,7 @@ That was easy! The `autoplot` gives us a quick idea of the explained variance an
 rough distribution of the samples, but we need to see the different populations
 within our dataset. 
 
-For a quick overview, we could add an aethetic to our plot:
+For a quick overview, we could add an aesthetic to our plot:
 
 ```{r, fig.alt = "Score plot of individuals across the first and second Principal Components, with individual samples coloured by population"}
 autoplot(partial_pca, type = "scores") +

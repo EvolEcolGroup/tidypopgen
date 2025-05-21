@@ -14,7 +14,7 @@ A vector of integers representing the 4 groups of 2 bits.
 }
 \description{
 This function takes a byte (raw value) and extracts 4 groups of 2 bits each.
-Following the convention by PackedAncestry, we start from the left (i.e the
+Following the convention by \emph{packedancestry}, we start from the left (i.e the
 higher value bits) and move to the right (i.e the lower value bits).
 }
 \keyword{internal}
