@@ -43,8 +43,7 @@ provides a fully annotated example of how to
 run various population genetics analyses with `tidypopgen`.
 
 We also provide a ['PLINK cheatsheet'](https://evolecolgroup.github.io/tidypopgen/dev/articles/a99_plink_cheatsheet.html)
-aimed at translating common tasks
-performed in PLINK into `tidypopgen` commands.
+aimed at translating common tasks performed in PLINK into `tidypopgen` commands.
 
 There is also an article showing how to project ancient DNA data onto a PCA fitted
 to modern data: ['aDNA projection' article](https://evolecolgroup.github.io/tidypopgen/dev/articles/pca_aDNA_projection.html).
