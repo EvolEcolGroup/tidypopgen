@@ -28,7 +28,7 @@
 #' - `scale`, the scaling vector,
 #' - `method`, a string defining the method (in this case 'partialSVD'),
 #' - `call`, the call that generated the object.
-#' - `square_frobenious`, used to compute the proportion of variance explained
+#' - `square_frobenius`, used to compute the proportion of variance explained
 #'    by the components (optional)
 #'
 #'   Note: rather than accessing these elements directly, it is better to use
@@ -67,7 +67,7 @@ gt_pca_partialSVD <- function(
   this_svd$loci <- show_loci(x)
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var) {
-    this_svd$square_frobenious <- square_frobenious(
+    this_svd$square_frobenius <- square_frobenius(
       X$genotypes,
       x_ind_row,
       x_ind_col,

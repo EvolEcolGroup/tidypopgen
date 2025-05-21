@@ -36,7 +36,7 @@ autoplot.gt_pca <- function(
     if (length(k) != 2) {
       stop("for 'scores' plots, 'pc' should be a pair of values, e.g. c(1,2)")
     }
-    if ("square_frobenious" %in% names(object)) {
+    if ("square_frobenius" %in% names(object)) {
       tidy_pca <- tidy(object, "eigenvalues")
       k_percentage <- tidy_pca$percent[k]
       plot(object, type = "scores", scores = k) +
