@@ -45,7 +45,7 @@ Before running this benchmark, we need to download into the subdirectory
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
 #> Rows: 1064 Columns: 6
-#> ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────
+#> ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────
 #> Delimiter: "\t"
 #> chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups
 #> 
@@ -61,12 +61,13 @@ associated metadata.
 
 ``` r
 hgdp <- gen_tibble(bed_path,
-                   quiet = TRUE,
-                   backingfile = tempfile("test_"),
-                   n_cores = n_cores)
+  quiet = TRUE,
+  backingfile = tempfile("test_"),
+  n_cores = n_cores
+)
 ```
 
-read_plink: 2.6s
+read_plink: 2.7s
 
 Add metadata
 
@@ -108,9 +109,10 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 
 ``` r
 loci_report <- qc_report_loci(hgdp)
+#> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
 ```
 
-loci_report: 2s
+loci_report: 1.8s
 The resulting report can be observed using `autoplot`.
 
 
@@ -132,7 +134,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 1.5s
+filter_loci: 1.4s
 
 
 # Individual Report
@@ -146,7 +148,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.4s
+indiv_report: 2.5s
 
 
 ``` r
@@ -166,7 +168,7 @@ to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-filter_indiv: 4ms
+filter_indiv: 3ms
 
 # Update backingfile
 
@@ -179,8 +181,8 @@ hgdp <- gt_update_backingfile(hgdp)
 #> Genetic distances are not sorted, setting them to zero
 #> 
 #> gen_backing files updated, now
-#> using bigSNP file: /tmp/RtmpnEqdfS/test_462f24aa81351_v2.rds
-#> with backing file: /tmp/RtmpnEqdfS/test_462f24aa81351_v2.bk
+#> using bigSNP file: /tmp/RtmpCu0Grc/test_47fa53a8faf7d_v2.rds
+#> with backing file: /tmp/RtmpCu0Grc/test_47fa53a8faf7d_v2.bk
 #> make sure that you do NOT delete those files!
 ```
 
@@ -196,7 +198,7 @@ hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 147ms
+impute: 153ms
 
 # LD clumping
 
@@ -208,7 +210,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 3.6s
+ld_clumping: 3.9s
 
 # PCA
 
@@ -220,7 +222,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 1.7s
+pca: 1.8s
 
 Plot PCA:
 
@@ -243,7 +245,7 @@ the main geographic regions covered by the dataset.
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
-dapc: 36ms
+dapc: 37ms
 
 Plot DAPC:
 
@@ -262,24 +264,29 @@ calculate pairwise Fst.
 
 ``` r
 grouped_hgdp <- hgdp %>% group_by(population)
-pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(n_cores = n_cores)
+pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
+  n_cores = n_cores,
+  type = "pairwise"
+)
 ```
 
-pairwise_fst: 3.9s
+pairwise_fst: 3s
 
 Plot pairwise Fst:
 
 
 ``` r
 # Order by continents
-grouped_hgdp_order <- grouped_hgdp %>% arrange(region,population)
+grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
 regional_order <- unique(grouped_hgdp_order$population)
-pairwise_fsts <- pairwise_fsts[regional_order,regional_order]
+pairwise_fsts <- pairwise_fsts[regional_order, regional_order]
 
 ggheatmap(pairwise_fsts) +
-  scale_fill_viridis_c()+
-    theme(axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
-          axis.text.y = element_text(angle = 0, hjust = 1, size = 6))+
+  scale_fill_viridis_c() +
+  theme(
+    axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
+    axis.text.y = element_text(angle = 0, hjust = 1, size = 6)
+  ) +
   labs(
     x = element_blank(),
     y = element_blank(),
@@ -294,13 +301,14 @@ Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
 
 ``` r
 gt_as_plink(hgdp,
-            file = tempfile(),
-            type = "bed",
-            overwrite = TRUE)
-#> [1] "/tmp/RtmpnEqdfS/file462f23e00cd4a.bed"
+  file = tempfile(),
+  type = "bed",
+  overwrite = TRUE
+)
+#> [1] "/tmp/RtmpCu0Grc/file47fa51ed66b65.bed"
 ```
 
-plink_save: 261ms
+plink_save: 250ms
 
 # Summary
 
@@ -309,20 +317,19 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  2.57
-#> 2   loci_report  1.98
-#> 3   filter_loci  1.53
-#> 4  indiv_report  2.38
+#> 1    read_plink  2.73
+#> 2   loci_report   1.8
+#> 3   filter_loci  1.35
+#> 4  indiv_report  2.52
 #> 5  filter_indiv     0
 #> 6        impute  0.15
-#> 7   ld_clumping  3.62
-#> 8           pca  1.69
+#> 7   ld_clumping  3.87
+#> 8           pca  1.76
 #> 9          dapc  0.04
-#> 10 pairwise_fst  3.85
-#> 11   plink_save  0.26
-#> 12        Total 18.07
+#> 10 pairwise_fst  2.99
+#> 11   plink_save  0.25
+#> 12        Total 17.46
 ```
-
 # Running the benchmark on a laptop
 We will now run this benchmark on a laptop 
 with a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU
@@ -333,17 +340,16 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  4.95
-#> 2   loci_report  3.31
-#> 3   filter_loci  4.49
-#> 4  indiv_report  3.62
+#> 1    read_plink  5.31
+#> 2   loci_report  3.46
+#> 3   filter_loci  4.39
+#> 4  indiv_report   3.3
 #> 5  filter_indiv  0.01
-#> 6        impute  0.97
-#> 7   ld_clumping 11.93
-#> 8           pca     4
-#> 9          dapc  0.08
-#> 10 pairwise_fst  6.72
-#> 11   plink_save  0.53
-#> 12        Total 40.61
+#> 6        impute  0.96
+#> 7   ld_clumping 10.09
+#> 8           pca  3.94
+#> 9          dapc  0.25
+#> 10 pairwise_fst  5.35
+#> 11   plink_save  0.47
+#> 12        Total 37.53
 ```
-
