@@ -1,10 +1,10 @@
+bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+missing_gt <- gen_tibble(
+  bed_file,
+  backingfile = tempfile("missing_"),
+  quiet = TRUE
+)
 test_that("impute and use the imputation", {
-  bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
-  missing_gt <- gen_tibble(
-    bed_file,
-    backingfile = tempfile("missing_"),
-    quiet = TRUE
-  )
   # we get errors because of missing values
   expect_error(
     missing_gt %>% gt_pca_partialSVD(),
@@ -30,6 +30,35 @@ test_that("impute and use the imputation", {
   )
 })
 
+test_that("backingfile error", {
+  # remove an individual from missing_gt
+  missing_gt <- missing_gt[-1, ]
+  # try to impute
+  expect_error(
+    missing_gt <- gt_impute_simple(missing_gt, method = "mode"),
+    "The number of individuals in the gen_tibble does not match "
+  )
+})
+
+test_that("error imputing an already imputed set", {
+  # impute
+  missing_gt_imputed <- gt_impute_simple(missing_gt, method = "mode")
+  expect_equal(attr(missing_gt_imputed$genotypes, "imputed"), "simple")
+  # try to impute again
+  expect_error(
+    gt_impute_simple(missing_gt_imputed, method = "mode"),
+    "object x is already imputed"
+  )
+  # if the imputation information has been removed (i.e. a corrupted object)
+  gt_set_imputed(missing_gt_imputed, TRUE)
+  attr(missing_gt_imputed$genotypes, "imputed") <- NULL
+  expect_equal(attr(missing_gt_imputed$genotypes, "imputed"), NULL)
+  expect_false(gt_has_imputed(missing_gt_imputed))
+  expect_error(
+    gt_impute_simple(missing_gt_imputed, method = "mode"),
+    "^object x is already imputed, but attr"
+  )
+})
 
 test_that("gt_impute imputes properly", {
   test_indiv_meta <- data.frame(
@@ -112,8 +141,10 @@ test_that("gt_impute imputes properly", {
   expect_false(any(is.na(show_genotypes(imputed_gt_mode))))
 
   # test error trying to impute an already imputed set
-  # expect_error(gt_impute_simple(imputed_gt_mode),
-  #                                 "object x is already imputed")
+  expect_error(
+    gt_impute_simple(imputed_gt_mode),
+    "object x is already imputed"
+  )
 
   # Check imputed 'mode' method
   mode_function <- function(x) {
@@ -208,6 +239,15 @@ test_that("imputing subsets", {
   test_sub <- test_sub %>% select_loci(c(3:5))
 
   # impute method = 'mode'
+  expect_error(
+    imputed_test_sub <- gt_impute_simple(test_sub, method = "mode"),
+    "The number of individuals in the gen_tibble does not match"
+  )
+
+  # update backingfile
+  suppressMessages(test_sub <- gt_update_backingfile(test_sub))
+
+  # try again
   imputed_test_sub <- gt_impute_simple(test_sub, method = "mode")
 
   # full gen_tibble does not have imputed

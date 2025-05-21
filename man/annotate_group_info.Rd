@@ -2,7 +2,7 @@
 % Please edit documentation in R/annotate_group_info.R
 \name{annotate_group_info}
 \alias{annotate_group_info}
-\title{Annotate an adxmiture barplot with information about the populations}
+\title{Annotate an admixture barplot with information about the populations}
 \usage{
 annotate_group_info(q_tbl, plt)
 }

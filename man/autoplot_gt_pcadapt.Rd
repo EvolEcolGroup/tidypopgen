@@ -10,7 +10,7 @@
 \arguments{
 \item{object}{an object of class \code{gt_pcadapt}}
 
-\item{type}{the type of plot (one of "qq", and "mnahattan")}
+\item{type}{the type of plot (one of "qq", and "manhattan")}
 
 \item{...}{further arguments to be passed to \code{\link[bigsnpr:snp_qq]{bigsnpr::snp_qq()}} or
 \code{\link[bigsnpr:snp_manhattan]{bigsnpr::snp_manhattan()}}.}
@@ -21,7 +21,7 @@ a \code{ggplot2} object
 \description{
 For \code{gt_pcadapt}, the following types of plots are available:
 \itemize{
-\item \code{qq}: a qunatile-quantile plot of the p-values from \code{pcadapt}
+\item \code{qq}: a quantile-quantile plot of the p-values from \code{pcadapt}
 (wrapping \code{\link[bigsnpr:snp_qq]{bigsnpr::snp_qq()}})
 \item \code{manhattan} a manhattan plot of the p-values from \code{pcadapt}
 (wrapping \code{\link[bigsnpr:snp_manhattan]{bigsnpr::snp_manhattan()}})

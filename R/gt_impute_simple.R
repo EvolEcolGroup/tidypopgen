@@ -28,22 +28,34 @@ gt_impute_simple <- function(
     on.exit(options(bigstatsr.check.parallel.blas = TRUE))
   }
 
+  if (nrow(x) != nrow(attr(x$genotypes, "bigsnp")$genotypes)) {
+    stop(
+      "The number of individuals in the gen_tibble does not match the",
+      " number of rows in the file backing matrix. Before imputing, use",
+      " gt_update_backingfile to update your file backing matrix."
+    )
+  }
+
+  if (gt_has_imputed(x)) {
+    stop("object x is already imputed, use `gt_set_imputed(x, TRUE)`")
+  }
+
   if (
-    !all.equal(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
+    !identical(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
   ) {
     # nolint start
     if (
-      all.equal(
+      identical(
         attr(x$genotypes, "bigsnp")$genotypes$code256,
         bigsnpr::CODE_IMPUTE_PRED
       ) ||
-        all.equal(
+        identical(
           attr(x$genotypes, "bigsnp")$genotypes$code256,
           bigsnpr::CODE_DOSAGE
         )
     ) {
       # nolint end
-      stop("object x is already imputed")
+      stop("object x is already imputed, but attr(x, 'imputed') is null")
     } else {
       stop("object x uses a code256 that is not compatible with imputation")
     }
@@ -56,6 +68,13 @@ gt_impute_simple <- function(
   )
 
   attr(x$genotypes, "imputed") <- "simple"
+  # prioritise "gen_tbl" class over "sf"
+  obj_class <- class(x)
+  if ("sf" %in% obj_class) {
+    obj_class <-
+      c("gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
+    class(x) <- obj_class
+  }
   gt_set_imputed(x, set = FALSE)
   x
 }

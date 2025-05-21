@@ -48,23 +48,25 @@ indiv_missingness.vctrs_bigSNP <- function(
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
 
-  # returns a vector of counts of na's per individual
-  count_na_row <- function(X, ind, rows_to_keep) { # nolint
-    count_na <- function(a) {
-      sum(is.na(a))
-    }
-    apply(X[rows_to_keep, ind], 1, count_na)
+
+  # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
+  count_1_na <- function(BM, ind, rows_to_keep) { # nolint
+    gt_ind_hetero(
+      BM = BM,
+      rowInd = rows_to_keep,
+      colInd = ind,
+      ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
+    )
   }
 
-  # count nas
+  # count heterozygotes and nas in one go
   row_na <- bigstatsr::big_apply(
     X,
-    a.FUN = count_na_row,
+    a.FUN = count_1_na,
     ind = attr(.x, "loci")$big_index,
     a.combine = "plus",
-    rows_to_keep = rows_to_keep,
-    block.size = block_size
-  )
+    rows_to_keep = rows_to_keep
+  )[2, ] # get the second row (count_na)
   if (!as_counts) {
     row_na <- row_na / count_loci(.x)
   }

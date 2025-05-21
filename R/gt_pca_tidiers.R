@@ -157,12 +157,29 @@ augment.gt_pca <- function(x, data = NULL, k = NULL, ...) {
         "in the pca object 'x'"
       ))
     }
-    data %>%
-      dplyr::mutate(.rownames = data$id) %>%
-      tibble::add_column(pred)
+    if (inherits(data, "grouped_df")) {
+      group_vars <- group_vars(data)
+      data <- data %>% dplyr::ungroup()
+      data <- data %>%
+        dplyr::mutate(.rownames = data$id) %>%
+        tibble::add_column(pred)
+      data <- data %>% dplyr::group_by(across(all_of(group_vars)))
+    } else {
+      data %>%
+        dplyr::mutate(.rownames = data$id) %>%
+        tibble::add_column(pred)
+    }
   } else {
     tibble(.rownames = rownames(as.data.frame(x$u[, 1:k]))) %>%
       add_column(pred)
+  }
+
+  # prioritise "gen_tbl" class over "sf"
+  obj_class <- class(ret)
+  if ("sf" %in% obj_class) {
+    obj_class <-
+      c("gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
+    class(ret) <- obj_class
   }
   ret
 }

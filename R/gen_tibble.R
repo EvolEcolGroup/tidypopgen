@@ -39,12 +39,13 @@
 #'   This is only used if `x` is a genotype matrix. Otherwise this information
 #'   is extracted directly from the files.
 #' @param chunk_size the number of loci or individuals (depending on the format)
-#'   processed at a time (currently used if `x` is a vcf or packedancestry file)
+#'   processed at a time (currently used if `x` is a vcf with parser "vcfR")
 #' @param ... if `x` is the name of a vcf file, additional arguments passed to
 #'   [vcfR::read.vcfR()]. Otherwise, unused.
 #' @param parser the name of the parser used for *VCF*, either "cpp" to use a
-#'   fast C++ parser, or "vcfR" to use the R package `vcfR`. The latter is
-#'   slower but more robust; if "cpp" gives error, try using "vcfR" in case your
+#'   fast C++ parser (the default), or "vcfR" to use the R package `vcfR`. The
+#'   latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
+#'   in case your
 #'   *VCF* has an unusual structure.
 #' @param n_cores the number of cores to use for parallel processing
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
@@ -84,7 +85,7 @@ gen_tibble <-
 gen_tibble.character <-
   function(x,
            ...,
-           parser = c("vcfR", "cpp"),
+           parser = c("cpp", "vcfR"),
            n_cores = 1,
            chunk_size = NULL,
            valid_alleles = c("A", "T", "C", "G"),

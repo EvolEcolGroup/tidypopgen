@@ -158,6 +158,11 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
   # now extract the modern data (to be imputed)
   modern_gt <- missing_gt[-c(1:20), ]
 
+  # update the backingfiles
+  ancient_gt <- gt_update_backingfile(ancient_gt, quiet = TRUE)
+  modern_gt <- gt_update_backingfile(modern_gt, quiet = TRUE)
+
+  # impute the modern data
   modern_gt <- gt_impute_simple(modern_gt, method = "mode")
   modern_pca <- modern_gt %>% gt_pca_partialSVD()
   # if we just try to predict, we find that the new data have missing data
@@ -284,7 +289,6 @@ test_that("our stdevs are comparable to prcomp", {
   #########################
   # Perform PCA using gt_pca_autoSVD
   #########################
-  families <- gt_impute_simple(families, method = "mode")
   gt_pca_auto_result <- families %>% gt_pca_autoSVD(
     roll_size = 7,
     verbose = FALSE
@@ -405,6 +409,11 @@ test_that("n_cores can be set for predict_gt_pca", {
   ancient_gt <- missing_gt[1:20, ]
   # now extract the modern data (to be imputed)
   modern_gt <- missing_gt[-c(1:20), ]
+
+  # update the backingfiles
+  ancient_gt <- gt_update_backingfile(ancient_gt, quiet = TRUE)
+  modern_gt <- gt_update_backingfile(modern_gt, quiet = TRUE)
+
   modern_gt <- gt_impute_simple(modern_gt, method = "mode")
   modern_pca <- modern_gt %>% gt_pca_partialSVD()
   expect_true(getOption("bigstatsr.check.parallel.blas"))

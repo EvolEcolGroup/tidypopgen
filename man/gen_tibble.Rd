@@ -18,7 +18,7 @@ gen_tibble(
 \method{gen_tibble}{character}(
   x,
   ...,
-  parser = c("vcfR", "cpp"),
+  parser = c("cpp", "vcfR"),
   n_cores = 1,
   chunk_size = NULL,
   valid_alleles = c("A", "T", "C", "G"),
@@ -80,14 +80,15 @@ created (but note that R will delete it at the end of the session!)}
 \item{quiet}{provide information on the files used to store the data}
 
 \item{parser}{the name of the parser used for \emph{VCF}, either "cpp" to use a
-fast C++ parser, or "vcfR" to use the R package \code{vcfR}. The latter is
-slower but more robust; if "cpp" gives error, try using "vcfR" in case your
+fast C++ parser (the default), or "vcfR" to use the R package \code{vcfR}. The
+latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
+in case your
 \emph{VCF} has an unusual structure.}
 
 \item{n_cores}{the number of cores to use for parallel processing}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
-processed at a time (currently used if \code{x} is a vcf or packedancestry file)}
+processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only

@@ -28,7 +28,7 @@ a 'gt_cluster_pca' object with an added element 'best_k'
 \description{
 This function selects the best k value based on a chosen metric and
 criterion. It is equivalent to plotting the metric against the \emph{k} values,
-and selecting the \emph{k} that fulfils a given criterion (see details for an
+and selecting the \emph{k} that fulfills a given criterion (see details for an
 explanation of each criterion). This function simply adds an element 'best_k'
 to the \code{gt_cluster_pca} returned by \code{\link[=gt_cluster_pca]{gt_cluster_pca()}}. The choice can be
 over-ridden simply by assigning a different value to that element (e.g. for
@@ -57,7 +57,7 @@ statistics (by default, BIC) are split into two groups using a Ward's
 clustering method (see ?hclust), to differentiate sharp decrease from mild
 decreases or increases. The retained K is the one before the first group
 switch. This criterion appears to work well for island/hierarchical models,
-and decently for isolation by distance models, albeit with some unstability.
+and decently for isolation by distance models, albeit with some instability.
 It can be confounded by an initial, very sharp decrease of the test
 statistics. IF UNSURE ABOUT THE CRITERION TO USE, USE THIS ONE.
 \item "min": the model with the minimum summary statistics (as specified by

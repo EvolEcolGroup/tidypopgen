@@ -74,9 +74,9 @@ my_individuals <- c("GRC14300079", "GRC14300142", "GRC14300159")
 data %>% filter(id %in% my_individuals)
 ```
 
-## Quality control for linkage
+## Handling linkage
 
-Linkage is managed through clumping in `tidypopgen` with `loci_ld_clump()`.
+Linkage disequilibrium is managed through clumping in `tidypopgen` with `loci_ld_clump()`.
 
 This option is similar to the --indep-pairwise flag in PLINK, but results in a more even distribution of loci when compared to LD pruning.
 
@@ -90,7 +90,10 @@ To explore why clumping is preferable to pruning, see <https://privefl.github.io
 | --distance  | `pairwise_ibs()`            |
 | --unrelated | `filter_high_relatedness()` |
 
-pairwise_king() implements the KING-robust estimator of kinship equivalent to --kinship in KING. To remove related individuals, instead of using --unrelated --degree, the user can pass the resulting kinship matrix and a relatedness threshold to filter_high_relatedness, which will return the largest possible set of unrelated individuals.
+`pairwise_king()` implements the KING-robust estimator of kinship, equivalent to --kinship in KING. To remove related individuals, the user can pass the kinship matrix of `pairwise_king()` and a relatedness threshold (a numeric KING kinship coefficient) to `filter_high_relatedness()`, which will return the largest possible set of individuals with no relationships above the threshold.
+
+`pairwise_king()` also forms part of `qc_report_indiv()` through the parameter `kings_threshold`. To remove related individuals in `qc_report_indiv()`, the user can pass either a relatedness threshold, or a string of either "first" or "second" to remove any first degree or second degree relationships from the dataset. This second option is similar to using  --unrelated --degree 1 or  --unrelated --degree 2 in KING. `qc_report_indiv()` returns a dataframe including columns 'id' and 'to_keep', showing the ID of individuals and a logical column of whether the individual should be removed to retain the largest possible set of individuals with no relationships above the threshold.
+
 
 ## Merging datasets:
 
@@ -112,5 +115,5 @@ Data are only merged one set at a time, there is no equivalent to --merge-list.
 |-----------|----------------------------------------|
 | --pca     | See `gt_pca()` for pca options         |
 | --fst     | `pairwise_pop_fst()` with `group_by()` |
-| --homozyg | `gt_roh_window()`                      |
+| --homozyg | `windows_indiv_roh()`                      |
 

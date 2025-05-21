@@ -43,9 +43,9 @@ and visualising the interaction between these
 \code{hwe}, and \verb{significant hwe} plots
 \item \code{missing}: a histogram of proportion of missing data
 \item \verb{missing low maf}: a histogram of the proportion of missing data for
-snps with low minor allele freqency
+snps with low minor allele frequency
 \item \verb{missing high maf}:a histogram of the proportion of missing data for
-snps with high minor allele freqency
+snps with high minor allele frequency
 \item \code{maf}: a histogram of minor allele frequency
 \item \code{hwe}: a histogram of HWE exact test p-values
 \item \verb{significant hwe}: a histogram of significant HWE exact test p-values

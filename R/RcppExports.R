@@ -5,6 +5,10 @@ fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V) {
     .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V)
 }
 
+gt_alt_freq_diploid <- function(BM, rowInd, colInd, ncores) {
+    .Call(`_tidypopgen_gt_alt_freq_diploid`, BM, rowInd, colInd, ncores)
+}
+
 gt_grouped_alt_freq_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
     .Call(`_tidypopgen_gt_grouped_alt_freq_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
@@ -17,12 +21,48 @@ gt_grouped_missingness <- function(BM, rowInd, colInd, groupIds, ngroups, ncores
     .Call(`_tidypopgen_gt_grouped_missingness`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
+gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
+    .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
+}
+
 gt_grouped_summaries <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
     .Call(`_tidypopgen_gt_grouped_summaries`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
-SNPHWE2 <- function(obs_hets, obs_hom1, obs_hom2, midp) {
-    .Call(`_tidypopgen_SNPHWE2`, obs_hets, obs_hom1, obs_hom2, midp)
+gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {
+    .Call(`_tidypopgen_gt_ind_hetero`, BM, rowInd, colInd, ncores)
+}
+
+gt_pi_diploid <- function(BM, rowInd, colInd, ncores) {
+    .Call(`_tidypopgen_gt_pi_diploid`, BM, rowInd, colInd, ncores)
+}
+
+SNPHWE2_R <- function(obs_hets, obs_hom1, obs_hom2, midp) {
+    .Call(`_tidypopgen_SNPHWE2_R`, obs_hets, obs_hom1, obs_hom2, midp)
+}
+
+hwe_on_matrix <- function(geno_counts, midp) {
+    .Call(`_tidypopgen_hwe_on_matrix`, geno_counts, midp)
+}
+
+gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp) {
+    .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp)
+}
+
+pairwise_fst_hudson_loop <- function(pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem) {
+    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem)
+}
+
+pairwise_fst_nei87_loop <- function(pairwise_combn, n, het_obs, freq_alt, freq_ref, by_locus, return_num_dem) {
+    .Call(`_tidypopgen_pairwise_fst_nei87_loop`, pairwise_combn, n, het_obs, freq_alt, freq_ref, by_locus, return_num_dem)
+}
+
+pairwise_fst_wc84_loop <- function(pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem) {
+    .Call(`_tidypopgen_pairwise_fst_wc84_loop`, pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem)
+}
+
+read_packedancestry <- function(filename, BM, tab) {
+    .Call(`_tidypopgen_read_packedancestry`, filename, BM, tab)
 }
 
 increment_as_counts <- function(k, k2, na_mat, dos_mat, BM, rowInd, colInd) {
@@ -37,12 +77,12 @@ increment_king_numerator <- function(k, n_Aa_i, genotype0, genotype1, genotype2,
     invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, genotype0, genotype1, genotype2, genotype_valid, BM, rowInd, colInd))
 }
 
-extractAltAlleleCountsFromVCF <- function(filename, allele_counts, ploidy, numIndividuals, missingValue, maxLoci = 1000L, skipLoci = 100L, diploid = FALSE) {
-    .Call(`_tidypopgen_extractAltAlleleCountsFromVCF`, filename, allele_counts, ploidy, numIndividuals, missingValue, maxLoci, skipLoci, diploid)
+vcf_loci_table <- function(filename) {
+    .Call(`_tidypopgen_vcf_loci_table`, filename)
 }
 
-get_ploidy_from_VCF <- function(filename) {
-    .Call(`_tidypopgen_get_ploidy_from_VCF`, filename)
+vcf_genotypes_to_fbm <- function(filename, BM, biallelic, missing_value, n_header_lines) {
+    .Call(`_tidypopgen_vcf_genotypes_to_fbm`, filename, BM, biallelic, missing_value, n_header_lines)
 }
 
 write_to_FBM <- function(BM, allele_counts, col_start, n_loci, ncores) {

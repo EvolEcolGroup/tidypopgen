@@ -12,12 +12,19 @@ qc_report_loci <- function(.x, ...) {
   UseMethod("qc_report_loci", .x)
 }
 
-
 #' @export
 #' @rdname qc_report_loci
 qc_report_loci.tbl_df <- function(.x, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x$genotypes)
+  message(paste(
+    "This gen_tibble is not grouped. For Hardy-Weinberg equilibrium,",
+    "`qc_report_loci()` will assume individuals are part of the same",
+    "population and HWE test p-values will be calculated across all",
+    "individuals. If you wish to calculate HWE p-values within",
+    "populations or groups, please use`group_by()` before calling",
+    "`qc_report_loci()`."
+  ))
   qc_report <- .x %>%
     reframe(
       snp_id = loci_names(.x),
@@ -44,8 +51,7 @@ qc_report_loci.grouped_df <- function(.x, ...) {
   pops <- length(unique(pops))
 
   # Calculate hwe across groups
-  hwe_res <- .x %>% group_map(.f = ~ loci_hwe(.x$genotypes))
-  hwe_res <- do.call("cbind", hwe_res)
+  hwe_res <- loci_hwe(.x, type = "matrix")
   hwe_res <- as.data.frame(hwe_res)
   hwe_res$p_corrected <- apply(hwe_res, 1, function(row) min(row) * pops)
 
@@ -71,9 +77,9 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' `hwe`, and `significant hwe` plots
 #' - `missing`: a histogram of proportion of missing data
 #' - `missing low maf`: a histogram of the proportion of missing data for
-#' snps with low minor allele freqency
+#' snps with low minor allele frequency
 #' - `missing high maf`:a histogram of the proportion of missing data for
-#' snps with high minor allele freqency
+#' snps with high minor allele frequency
 #' - `maf`: a histogram of minor allele frequency
 #' - `hwe`: a histogram of HWE exact test p-values
 #' - `significant hwe`: a histogram of significant HWE exact test p-values
@@ -162,6 +168,8 @@ autoplot.qc_report_loci <- function(
   return(report_plot)
 }
 
+# TODO BUG autoplot
+
 
 autoplot_l_qc_all <- function(
     object,
@@ -210,10 +218,20 @@ autoplot_l_qc_overview <- function(
     miss_threshold,
     hwe_p_low_thresh,
     ...) {
+  if (any(is.na(object))) {
+    message(paste(
+      "One or more loci are missing for every individual.",
+      "These will be removed from the QC report plot."
+    ))
+    # remove NA's from object
+    object <- object[!is.na(object$maf), ]
+  }
+
   qc_report <- object
 
   qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p_low_thresh, ]
   qc_maf <- qc_report[qc_report$maf >= maf_threshold, ]
+
 
   maf_pass <- c(qc_maf$snp_id)
   hwe_pass <- c(qc_hwe$snp_id)

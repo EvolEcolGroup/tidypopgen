@@ -18,7 +18,7 @@
 #' computation of DAPC are to be found in the indicated reference.
 #'
 #' Results can be visualised with [`autoplot.gt_dapc()`], see the help of that
-#' method for the availabl plots. There are also [gt_dapc_tidiers] for
+#' method for the available plots. There are also [gt_dapc_tidiers] for
 #' manipulating the results. For the moment, his function returns objects of
 #' class [`adegenet::dapc`] which are
 #' compatible with methods from `adegenet`; graphical methods for DAPC are
@@ -151,7 +151,7 @@ gt_dapc <- function(
   res$n.da <- n_da
   res$tab <- XU
   res$grp <- pop.fac
-  # note that this (res$var) is the variance out fo the variance that was
+  # note that this (res$var) is the variance out of the variance that was
   # captured by the retained PCs
   res$var <- XU.lambda
   res$eig <- ldaX$svd^2

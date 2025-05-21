@@ -1,4 +1,4 @@
-#' Annotate an adxmiture barplot with information about the populations
+#' Annotate an admixture barplot with information about the populations
 #'
 #' Add vertical lines to separate individuals from different populations,
 #' and add optional x labels with their names

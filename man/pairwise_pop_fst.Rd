@@ -6,33 +6,43 @@
 \usage{
 pairwise_pop_fst(
   .x,
-  tidy = TRUE,
+  type = c("tidy", "pairwise"),
   by_locus = FALSE,
+  by_locus_type = c("tidy", "matrix", "list"),
   method = c("Hudson", "Nei87", "WC84"),
+  return_num_dem = FALSE,
   n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
-\item{tidy}{boolean whether to return a tidy tibble. Default is TRUE, FALSE
-returns a matrix. Must be TRUE if \code{by_locus} is TRUE.}
+\item{type}{type of object to return One of "tidy" or "pairwise" for a
+pairwise matrix of populations. Default is "tidy".}
 
 \item{by_locus}{boolean, determining whether Fst should be returned by
 locus(TRUE), or as a single genome wide value obtained by taking the ratio
 of the mean numerator and denominator (FALSE, the default).}
 
+\item{by_locus_type}{type of object to return. One of "tidy", "matrix" or
+"list". Default is "tidy".}
+
 \item{method}{one of 'Hudson', 'Nei87', and 'WC84'}
+
+\item{return_num_dem}{returns a list of numerators and denominators for each
+locus. This is useful for creating windowed estimates of Fst (as we need to
+compute the mean numerator and denominator within each window). Default is
+FALSE.}
 
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 }
 \value{
-if \code{tidy=TRUE}, a tibble of genome-wide pairwise Fst values with
+if \code{type=tidy}, a tibble of genome-wide pairwise Fst values with
 each pairwise combination as a row if "by_locus=FALSE", else a list
 including the tibble of genome-wide values as well as a matrix with
 pairwise Fst by locus with loci as rows and and pairwise combinations as
-columns. If \code{tidy=FALSE}, a matrix of genome-wide pairwise Fst values is
+columns. If \code{type=pairwise}, a matrix of genome-wide pairwise Fst values is
 returned.
 }
 \description{
@@ -41,15 +51,34 @@ This function computes pairwise Fst. The following methods are implemented:
 \item 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
 for diploids.
 \item 'Nei87' : Fst according to Nei (1987) - includes the correction for
-heterozygosity when computing Ht, and is equivalent to
-\code{hierfstat::pairwise.neifst()},
-\item 'WC84' : Weir and Cockerham (1984), correcting for missing data and is
-equivalent to \code{hierfstat::pairwise.WCfst()}.
+heterozygosity when computing Ht (it uses the same formulation as in
+\code{hierfstat::pairwise.neifst()}),
+\item 'WC84' : Weir and Cockerham (1984), correcting for missing data (it uses
+the same formulation as in \code{hierfstat::pairwise.WCfst()}).
 }
 }
 \details{
 For all formulae, the genome wide estimate is obtained by taking the ratio of
 the mean numerators and denominators over all relevant SNPs.
+}
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# For a basic global pairwise Fst calculation:
+example_gt \%>\%
+  group_by(population) \%>\%
+  pairwise_pop_fst(method = "Nei87")
+
+# With a pairwise matrix:
+example_gt \%>\%
+  group_by(population) \%>\%
+  pairwise_pop_fst(method = "Nei87", type = "pairwise")
+
+# To calculate Fst by locus:
+example_gt \%>\%
+  group_by(population) \%>\%
+  pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
+
 }
 \references{
 Bhatia G, Patterson N, Sankararaman S, Price AL. (2013)

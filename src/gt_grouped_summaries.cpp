@@ -30,7 +30,7 @@ ListOf<NumericMatrix> gt_grouped_summaries(Environment BM,
   for (size_t j = 0; j < m; j++) {
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
-      if (x>-1){
+      if (x > -1){
         freq(j, groupIds[i]) += x;
         valid_alleles(j, groupIds[i]) +=2;
         if (x==1){
@@ -39,7 +39,7 @@ ListOf<NumericMatrix> gt_grouped_summaries(Environment BM,
       }
     }
     // now for each group, divide freq by valid_alleles
-    for (int group_i = 0; group_i < ngroups; group_i++) {
+    for (size_t group_i = 0; group_i < ngroups; group_i++) {
       freq(j, group_i) = freq(j, group_i) / valid_alleles(j, group_i);
       ref_freq(j, group_i) = 1-freq(j, group_i);
       heterozygotes(j, group_i) = heterozygotes(j, group_i) / valid_alleles(j, group_i);

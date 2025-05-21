@@ -15,6 +15,7 @@ reference:
         - gt_get_file_names
         - gt_order_loci
         - gt_update_backingfile
+        - gt_add_sf
   - title: "Show"
     desc: "Functions to view loci and genotype information stored in a `gen_tibble`."
     contents:
@@ -34,6 +35,7 @@ reference:
     desc: "Functions for imputing missing data in a `gen_tibble`."
     contents:
         - gt_impute_simple
+        - gt_impute_xgboost
         - gt_has_imputed
         - gt_uses_imputed
         - gt_set_imputed
@@ -43,6 +45,7 @@ reference:
         - rbind_dry_run
         - rbind.gen_tbl
         - summary.rbind_report
+        - cbind.gen_tbl
   - title: "Exporting"
     desc: "Functions for exporting a `gen_tibble` to another format."
     contents:
@@ -71,6 +74,11 @@ reference:
     desc: "Functions comparing individuals or populations."
     contents:
         - starts_with("pairwise_")
+        - starts_with("nwise_")
+  - title: "Windows"
+    desc: "Functions to compute statistics in sliding windows across loci."
+    contents:
+        - starts_with("windows_")
   - title: "PCA"
     desc: "Functions for performing Principal Component Analysis."
     contents:
@@ -116,7 +124,6 @@ reference:
     desc: "Functions for other analyses within `R`."
     contents:
         - gt_extract_f2
-        - gt_roh_window
         - gt_pcadapt
         - autoplot.gt_pcadapt
   - title: "`bigSNP`"
@@ -125,3 +132,15 @@ reference:
         - snp_allele_sharing
         - snp_ibs
         - snp_king
+  - title: "Example data"
+    desc: "Function for creating an example `gen_tibble`."
+    contents:
+        - example_gt
+  - title: "tidyverse methods"
+    desc: "Methods for tidyverse verbs for `gen_tibble` objects"
+    contents:
+        - arrange.gen_tbl
+        - filter.gen_tbl
+        - mutate.gen_tbl
+        - dplyr_reconstruct.gen_tbl
+        - "$<-.gen_tbl"

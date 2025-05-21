@@ -22,15 +22,41 @@ pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
   }
-  fst_by_pop <- hierfstat::fst.dosage(
-    allele_sharing_mat,
-    matching = TRUE,
-    pop = group_indices(.x)
-  )
-  names(fst_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1), "global")
-  if (include_global) {
-    return(fst_by_pop)
-  } else {
-    return(fst_by_pop[-length(fst_by_pop)])
+
+  Mij <- allele_sharing_mat
+  diag(Mij) <- NA
+  pop <- factor(dplyr::group_indices(.x))
+  pop_levels <- levels(pop)
+  n_pop <- length(pop_levels)
+  wil <- lapply(pop_levels, function(z) which(pop == z))
+  Fsts <- unlist(lapply(
+    wil,
+    function(pop_levels) {
+      mean(Mij[pop_levels, pop_levels], na.rm = TRUE)
+    }
+  ))
+  Mb <- 0
+  mMij <- matrix(numeric(n_pop^2), ncol = n_pop)
+  for (i in 2:n_pop) {
+    p1 <- wil[[i]]
+    for (j in 1:(i - 1)) {
+      p2 <- wil[[j]]
+      mMij[i, j] <- mMij[j, i] <- mean(Mij[p1, p2], na.rm = TRUE)
+      Mb <- Mb + mMij[i, j]
+    }
   }
+  diag(mMij) <- Fsts
+
+  Mb <- Mb * 2 / (n_pop * (n_pop - 1))
+
+  # pop specific fsts
+  fst_by_pop <- c((Fsts - Mb) / (1 - Mb))
+
+  if (include_global) {
+    fst_by_pop <- c(fst_by_pop, mean((Fsts - Mb) / (1 - Mb), na.rm = TRUE))
+    names(fst_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1), "global")
+  } else {
+    names(fst_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1))
+  }
+  return(fst_by_pop)
 }

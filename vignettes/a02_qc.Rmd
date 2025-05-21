@@ -117,7 +117,7 @@ The upset plot then visualises our 961 SNPs within their respective sets. The nu
 
 To examine each QC measure in further detail, we can plot a different summary panel.
 
-```{r, fig.alt = "Four panel plot, containing: a histogram of the proportion of missing data for snps with minor allele freqency above the threshold, a histogram of the proportion of missing data for snps with minor allele freqency below the threshold, a histogram of HWE exact test p-values, and a histogram of significant HWE exact test p-values"}
+```{r, fig.alt = "Four panel plot, containing: a histogram of the proportion of missing data for snps with minor allele frequency above the threshold, a histogram of the proportion of missing data for snps with minor allele freqency below the threshold, a histogram of HWE exact test p-values, and a histogram of significant HWE exact test p-values"}
 autoplot(loci_report,
   type = "all",
   miss_threshold = 0.03,
@@ -172,6 +172,14 @@ For further analyses, it may be necessary to control for linkage in the data set
 To explore why clumping is preferable to pruning, see <https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html>
 
 LD clumping requires a data set with no missingness. This means we need to create an imputed data set before LD pruning, which we can do quickly with `gt_impute_simple`.
+
+Because we have removed individuals through our filtering, we first need to update the backingfiles with:
+
+```{r}
+data <- gt_update_backingfile(data)
+```
+
+And then we can impute using:
 
 ```{r}
 imputed_data <- gt_impute_simple(data, method = "random")
