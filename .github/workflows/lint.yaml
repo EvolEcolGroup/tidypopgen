@@ -25,7 +25,6 @@ jobs:
         with:
           extra-packages: |
             any::lintr
-            local::.
             admixtools=?ignore
           needs: lint
 
