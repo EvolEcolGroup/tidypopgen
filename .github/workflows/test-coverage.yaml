@@ -37,8 +37,6 @@ jobs:
           install.packages("admixtools", repos = c("https://evolecolgroup.r-universe.dev", "https://cloud.r-project.org"))
         shell: Rscript {0}
 
-
-
       - name: Get ADMIXTURE for linux
         run: |
              mkdir admixture
