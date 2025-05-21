@@ -60,7 +60,7 @@ Suggests:
     vcfR,
     xgboost,
     spelling
-Additional_repositories: https://evolecolgroup.r-universe.dev
+Additional_repositories: https://evolecolgroup.r-universe.dev/admixtools
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LinkingTo: 
