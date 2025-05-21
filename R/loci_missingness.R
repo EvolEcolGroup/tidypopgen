@@ -174,6 +174,8 @@ loci_missingness.grouped_df <- function(
   if (!as_counts) {
     na_mat <- sweep(na_mat, MARGIN = 2, STATS = group_sizes, FUN = "/")
   }
+  
+  ## TODO replace with format_grouped_output
 
   if (type == "tidy") {
     na_mat_tbl <- as.data.frame(na_mat)

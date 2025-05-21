@@ -108,6 +108,8 @@ loci_alt_freq.vctrs_bigSNP <- function(
   # if we have diploid
   if (is_diploid_only(.x)) {
     loci_alt_freq_diploid(.x, n_cores = n_cores, block_size = block_size)
+  } else if (is_pseudohaploid(.x)) {
+    stop("not yet implemented for pseudohaploids")
   } else {
     loci_alt_freq_polyploid(.x, n_cores = n_cores, block_size = block_size, ...)
   }
@@ -143,7 +145,7 @@ loci_alt_freq.grouped_df <- function(
     rows_to_keep <- vctrs::vec_data(.x$genotypes)
 
     # internal function that can be used with a big_apply #nolint start
-    gt_group_alt_freq_freq_sub <- function(BM, ind, rows_to_keep) {
+    gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
       freq_mat <- gt_grouped_alt_freq_diploid(
         BM = BM,
         rowInd = rows_to_keep,
@@ -155,7 +157,7 @@ loci_alt_freq.grouped_df <- function(
     } # nolint end
     freq_mat <- bigstatsr::big_apply(
       geno_fbm,
-      a.FUN = gt_group_alt_freq_freq_sub,
+      a.FUN = gt_group_alt_freq_sub,
       rows_to_keep = rows_to_keep,
       ind = show_loci(.x)$big_index,
       ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
@@ -164,23 +166,30 @@ loci_alt_freq.grouped_df <- function(
       a.combine = "rbind"
     )
 
-    if (type == "tidy") {
-      freq_mat_tbl <- as.data.frame(freq_mat)
-      colnames(freq_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
-      freq_mat_tbl$loci <- loci_names(.x)
-      long_freq <- freq_mat_tbl %>% # nolint start
-        tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
-          pull(1), names_to = "group") # nolint end
-      long_freq
-    } else if (type == "list") {
-      # return a list to mimic a group_map
-      lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
-    } else if (type == "matrix") {
-      # return a matrix
-      colnames(freq_mat) <- dplyr::group_keys(.x) %>% pull(1)
-      rownames(freq_mat) <- loci_names(.x)
-      freq_mat
-    }
+    freq_mat <- format_grouped_output(out_mat = freq_mat,
+                                      group_ids = dplyr::group_keys(.x) %>% pull(1),
+                                      loci_names = loci_names(.x),
+                                      type = type)
+
+    # if (type == "tidy") {
+    #   freq_mat_tbl <- as.data.frame(freq_mat)
+    #   colnames(freq_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
+    #   freq_mat_tbl$loci <- loci_names(.x)
+    #   long_freq <- freq_mat_tbl %>% # nolint start
+    #     tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
+    #       pull(1), names_to = "group") # nolint end
+    #   long_freq
+    # } else if (type == "list") {
+    #   # return a list to mimic a group_map
+    #   lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
+    # } else if (type == "matrix") {
+    #   # return a matrix
+    #   colnames(freq_mat) <- dplyr::group_keys(.x) %>% pull(1)
+    #   rownames(freq_mat) <- loci_names(.x)
+    #   freq_mat
+    # }
+  } else if (is_pseudohaploid(.x)) {
+    stop("not yet implemented for pseudohaploids")
   } else {
     # the polyploid case
     stop(
@@ -255,51 +264,69 @@ loci_maf.grouped_df <- function(
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (is_diploid_only(.x)) {
-    geno_fbm <- .gt_get_bigsnp(.x)$genotypes
-    # rows (individuals) that we want to use
-    rows_to_keep <- vctrs::vec_data(.x$genotypes)
-
-    # internal function that can be used with a big_apply #nolint start
-    gt_group_alt_freq_freq_sub <- function(BM, ind, rows_to_keep) {
-      freq_mat <- gt_grouped_alt_freq_diploid(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        groupIds = dplyr::group_indices(.x) - 1,
-        ngroups = max(dplyr::group_indices(.x)),
-        ncores = n_cores
-      )$freq_alt
-    } # nolint end
-    freq_mat <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_group_alt_freq_freq_sub,
-      rows_to_keep = rows_to_keep,
-      ind = show_loci(.x)$big_index,
-      ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-      # in the cpp code
-      block.size = block_size,
-      a.combine = "rbind"
+    # geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+    # # rows (individuals) that we want to use
+    # rows_to_keep <- vctrs::vec_data(.x$genotypes)
+    # 
+    # # internal function that can be used with a big_apply #nolint start
+    # gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
+    #   freq_mat <- gt_grouped_alt_freq_diploid(
+    #     BM = BM,
+    #     rowInd = rows_to_keep,
+    #     colInd = ind,
+    #     groupIds = dplyr::group_indices(.x) - 1,
+    #     ngroups = max(dplyr::group_indices(.x)),
+    #     ncores = n_cores
+    #   )$freq_alt
+    # } # nolint end
+    # freq_mat <- bigstatsr::big_apply(
+    #   geno_fbm,
+    #   a.FUN = gt_group_alt_freq_sub,
+    #   rows_to_keep = rows_to_keep,
+    #   ind = show_loci(.x)$big_index,
+    #   ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
+    #   # in the cpp code
+    #   block.size = block_size,
+    #   a.combine = "rbind"
+    # )
+    
+    freq_mat <- loci_alt_freq(
+      .x,
+      n_cores = n_cores,
+      block_size = block_size,
+      type = "matrix"
     )
+    # remove dimnames to then process this
+    dimnames(freq_mat) <- NULL
+    #browser()
     freq_mat[freq_mat > 0.5 & !is.na(freq_mat)] <-
       1 - freq_mat[freq_mat > 0.5 & !is.na(freq_mat)]
 
-    if (type == "tidy") {
-      freq_mat_tbl <- as.data.frame(freq_mat)
-      colnames(freq_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
-      freq_mat_tbl$loci <- loci_names(.x)
-      long_freq <- freq_mat_tbl %>% # nolint start
-        tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
-          pull(1), names_to = "group") # nolint end
-      long_freq
-    } else if (type == "list") {
-      # return a list to mimic a group_map
-      lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
-    } else if (type == "matrix") {
-      # return a matrix
-      colnames(freq_mat) <- dplyr::group_keys(.x) %>% pull(1)
-      rownames(freq_mat) <- loci_names(.x)
-      freq_mat
-    }
+    freq_mat <- format_grouped_output(out_mat = freq_mat,
+                                      group_ids = dplyr::group_keys(.x) %>% pull(1),
+                                      loci_names = loci_names(.x),
+                                      type = type)
+    
+    # if (type == "tidy") {
+    #   freq_mat_tbl <- as.data.frame(freq_mat)
+    #   colnames(freq_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
+    #   freq_mat_tbl$loci <- loci_names(.x)
+    #   long_freq <- freq_mat_tbl %>% # nolint start
+    #     tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
+    #       pull(1), names_to = "group") # nolint end
+    #   long_freq
+    # } else if (type == "list") {
+    #   # return a list to mimic a group_map
+    #   lapply(seq_len(ncol(freq_mat)), function(i) freq_mat[, i])
+    # } else if (type == "matrix") {
+    #   # return a matrix
+    #   colnames(freq_mat) <- dplyr::group_keys(.x) %>% pull(1)
+    #   rownames(freq_mat) <- loci_names(.x)
+    #   freq_mat
+    # }
+  } else if (show_ploidy(.x)==-2){
+    stop("loci_maf for pseudohaploid not implemented yet")
+  
   } else {
     # the polyploid case
     stop(
@@ -387,5 +414,35 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
   } else {
     # if we have a single individual
     geno_fbm[rows_to_keep, attr(.x, "loci")$big_index] / ploidy_by_indiv
+  }
+}
+
+#' Function to format the matrix for grouped operations
+#' 
+#' This function is used to format the matrix for grouped operations
+#' 
+#' @param out_mat a matrix of the output
+#' @param group_ids a vector of group ids
+#' @param loci_names a vector of loci names
+#' @param type a string indicating the type of output
+#' @returns the data formatted as a tibble, list, or matrix
+#' @keywords internal
+
+format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
+  if (type == "tidy") {
+    out_mat_tbl <- as.data.frame(out_mat)
+    colnames(out_mat_tbl) <- group_ids
+    out_mat_tbl$loci <- loci_names
+    long_freq <- out_mat_tbl %>% # nolint start
+      tidyr::pivot_longer(cols = dplyr::all_of(group_ids), names_to = "group") # nolint end
+    long_freq
+  } else if (type == "list") {
+    # return a list to mimic a group_map
+    lapply(seq_len(ncol(out_mat)), function(i) out_mat[, i])
+  } else if (type == "matrix") {
+    # return a matrix
+    colnames(out_mat) <- group_ids
+    rownames(out_mat) <- loci_names
+    out_mat
   }
 }

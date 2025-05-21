@@ -59,7 +59,7 @@ test_that("gt_pseudohaploid correctly deals with ploidy",{
                "this function only works on diploid data")
   expect_error(pop_fst(test_gt_pseudo),
                "this function only works on diploid data")
-  
+  #loci_alt_freq(test_gt_pseudo)
   
 })
 

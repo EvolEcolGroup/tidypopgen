@@ -7,7 +7,7 @@
 #' 
 #' @param x a `gen_tibble` object
 #' @param test_n_loci the number of loci to test to determine if an individual
-#' is pseudohaploid. If there are no heterozygoes in the first `test_n_loci`
+#' is pseudohaploid. If there are no heterozygotes in the first `test_n_loci`
 #' loci, the individual is considered a pseudohaploid. If `NULL`, all loci are
 #' tested.
 #' @return a `gen_tibble` object with the ploidy set to -2 and the individual

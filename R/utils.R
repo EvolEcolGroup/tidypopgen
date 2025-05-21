@@ -38,6 +38,14 @@ is_diploid_only <- function(x) {
   }
 }
 
+is_pseudohaploid <- function(x) {
+  if (inherits(x, "gen_tbl")) {
+    (attr(x$genotypes, "ploidy") == -2)
+  } else {
+    (attr(x, "ploidy") == -2)
+  }
+}
+
 
 #' Reorder factor levels by first appearance
 #'
