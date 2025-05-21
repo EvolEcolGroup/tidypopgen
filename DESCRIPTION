@@ -60,9 +60,7 @@ Suggests:
     vcfR,
     xgboost,
     spelling
-Remotes:
-    uqrmaie1/admixtools
-Additional_repositories: https://evolecolgroup.r-universe.dev/admixtools
+Additional_repositories: https://evolecolgroup.r-universe.dev/
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 LinkingTo: 
