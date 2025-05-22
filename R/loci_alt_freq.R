@@ -139,22 +139,38 @@ loci_alt_freq.grouped_df <- function(
 
   rlang::check_dots_empty()
   type <- match.arg(type)
-  if (is_diploid_only(.x)) {
+  if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
     # rows (individuals) that we want to use
     rows_to_keep <- vctrs::vec_data(.x$genotypes)
 
-    # internal function that can be used with a big_apply #nolint start
-    gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-      freq_mat <- gt_grouped_alt_freq_diploid(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        groupIds = dplyr::group_indices(.x) - 1,
-        ngroups = max(dplyr::group_indices(.x)),
-        ncores = n_cores
-      )$freq_alt
-    } # nolint end
+    if (is_diploid_only(.x)){
+      # internal function that can be used with a big_apply #nolint start
+      gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
+        freq_mat <- gt_grouped_alt_freq_diploid(
+          BM = BM,
+          rowInd = rows_to_keep,
+          colInd = ind,
+          groupIds = dplyr::group_indices(.x) - 1,
+          ngroups = max(dplyr::group_indices(.x)),
+          ncores = n_cores
+        )$freq_alt
+      } # nolint end
+    } else if (is_pseudohaploid(.x)){
+      # internal function that can be used with a big_apply #nolint start
+      gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
+        freq_mat <- gt_grouped_alt_freq_pseudohap(
+          BM = BM,
+          rowInd = rows_to_keep,
+          colInd = ind,
+          groupIds = dplyr::group_indices(.x) - 1,
+          ngroups = max(dplyr::group_indices(.x)),
+          ploidy = indiv_ploidy(.x),
+          ncores = n_cores
+        )$freq_alt
+      } # nolint end
+    }
+
     freq_mat <- bigstatsr::big_apply(
       geno_fbm,
       a.FUN = gt_group_alt_freq_sub,
@@ -172,8 +188,6 @@ loci_alt_freq.grouped_df <- function(
       loci_names = loci_names(.x),
       type = type
     )
-  } else if (is_pseudohaploid(.x)) {
-    stop("not yet implemented for pseudohaploids")
   } else {
     # the polyploid case
     stop(
@@ -181,6 +195,7 @@ loci_alt_freq.grouped_df <- function(
       "use group_map(.x, .f = ~ loci_alt_freq(.x)) for polyploid cases"
     )
   }
+  return(freq_mat)
 }
 
 #' @rdname loci_alt_freq
