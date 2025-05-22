@@ -7,7 +7,7 @@
 #' or a 0 to indicate mixed ploidy. The special case of -2 is used to indicate
 #' the presence of pseudo-haploids (i.e. individuals with a ploidy of 2 but
 #' for which we only have information for one allele; the dosages are 0 or 2
-#' for these individuals). 
+#' for these individuals).
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #' a [`gen_tibble`] object),
 #' or a [`gen_tibble`].

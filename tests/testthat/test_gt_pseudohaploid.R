@@ -28,7 +28,7 @@ test_gt <- gen_tibble(
 )
 test_gt <- test_gt %>% group_by(population)
 
-test_that("gt_pseudohaploid correctly deals with ploidy",{
+test_that("gt_pseudohaploid correctly deals with ploidy", {
   # confirm that the gen_tibble is diploid for the moment
   expect_equal(show_ploidy(test_gt), 2)
   # now use gt_pseudohaploid
@@ -36,31 +36,40 @@ test_that("gt_pseudohaploid correctly deals with ploidy",{
   # now check that ploidy is -2
   expect_equal(show_ploidy(test_gt_pseudo), -2)
   ## check the individual ploidies
-  expect_equal(indiv_ploidy(test_gt_pseudo),
+  expect_equal(
+    indiv_ploidy(test_gt_pseudo),
     c(2L, 1L, 2L, 1L, 2L, 1L, 2L)
   )
-  
+
   # check that we can reprocess it (use a different number of loci to get different result)
   test_gt_pseudo2 <- gt_pseudohaploid(test_gt_pseudo, test_n_loci = 4)
-  expect_equal(indiv_ploidy(test_gt_pseudo2),
-               c(2L, 1L, 1L, 1L, 2L, 1L, 2L)
+  expect_equal(
+    indiv_ploidy(test_gt_pseudo2),
+    c(2L, 1L, 1L, 1L, 2L, 1L, 2L)
   )
-  
+
   ## TODO now test which functions work and which fail with pseudohaploid data (we should get the right frequencies (grouped and ungrouped, and pairwise pop fst))
   # missingness shoudl also work
   # but most other indiv stats will fail, and so will pop estimates that requires heterozygote counts
-  expect_error(indiv_het_obs(test_gt_pseudo),
-               "this function only works on diploid data")
-  expect_error(indiv_inbreeding(test_gt_pseudo),
-               "this function only works on diploid data")
-  expect_error(loci_hwe(test_gt_pseudo),
-               "this function only works on diploid data")
-  expect_error(pop_fis(test_gt_pseudo),
-               "this function only works on diploid data")
-  expect_error(pop_fst(test_gt_pseudo),
-               "this function only works on diploid data")
-  #loci_alt_freq(test_gt_pseudo)
-  
+  expect_error(
+    indiv_het_obs(test_gt_pseudo),
+    "this function only works on diploid data"
+  )
+  expect_error(
+    indiv_inbreeding(test_gt_pseudo),
+    "this function only works on diploid data"
+  )
+  expect_error(
+    loci_hwe(test_gt_pseudo),
+    "this function only works on diploid data"
+  )
+  expect_error(
+    pop_fis(test_gt_pseudo),
+    "this function only works on diploid data"
+  )
+  expect_error(
+    pop_fst(test_gt_pseudo),
+    "this function only works on diploid data"
+  )
+  # loci_alt_freq(test_gt_pseudo)
 })
-
-
