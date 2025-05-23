@@ -107,7 +107,11 @@ loci_alt_freq.vctrs_bigSNP <- function(
   rlang::check_dots_empty()
   # if we have diploid
   if (is_diploid_only(.x)) {
-    loci_alt_freq_diploid(.x, n_cores = n_cores, block_size = block_size)
+    ploidy = rep(2, length(.x))
+    is_pseudohaploid = FALSE
+    loci_alt_freq_dip_pseudo(.x, n_cores = n_cores, block_size = block_size,
+                          ploidy = ploidy,
+                          is_pseudohaploid = is_pseudohaploid)
   } else if (is_pseudohaploid(.x)) {
     stop("not yet implemented for pseudohaploids")
   } else {
@@ -293,7 +297,11 @@ loci_maf.grouped_df <- function(
 }
 
 # function to estimate frequencies for diploid
-loci_alt_freq_diploid <- function(.x, n_cores, block_size) {
+loci_alt_freq_dip_pseudo <- function(.x,
+                                  ploidy,
+                                  is_pseudohaploid,
+                                  n_cores,
+                                  block_size) {
   # get the FBM
   geno_fbm <- attr(.x, "bigsnp")$genotypes
   # rows (individuals) that we want to use
@@ -301,17 +309,19 @@ loci_alt_freq_diploid <- function(.x, n_cores, block_size) {
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
     # internal function that can be used with a big_apply #nolint start
-    gt_alt_freq_freq_sub <- function(BM, ind, rows_to_keep) {
-      gt_alt_freq_diploid(
+    gt_alt_freq_sub <- function(BM, ind, rows_to_keep) {
+      cpp_alt_freq_dip_pseudo(
         BM = BM,
         rowInd = rows_to_keep,
         colInd = ind,
+        ploidy = ploidy,
+        is_pseudohap = is_pseudohaploid,
         ncores = n_cores
       )
     } # nolint end
     freq <- bigstatsr::big_apply(
       geno_fbm,
-      a.FUN = gt_alt_freq_freq_sub,
+      a.FUN = gt_alt_freq_sub,
       rows_to_keep = rows_to_keep,
       ind = attr(.x, "loci")$big_index,
       ncores = 1, # parallelisation is used within the function
