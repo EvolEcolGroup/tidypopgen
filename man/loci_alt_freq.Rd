@@ -11,11 +11,20 @@
 \alias{loci_maf.grouped_df}
 \title{Estimate allele frequencies at each locus}
 \usage{
-loci_alt_freq(.x, .col = "genotypes", n_cores, block_size, type, ...)
+loci_alt_freq(
+  .x,
+  .col = "genotypes",
+  as_counts = FALSE,
+  n_cores,
+  block_size,
+  type,
+  ...
+)
 
 \method{loci_alt_freq}{tbl_df}(
   .x,
   .col = "genotypes",
+  as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
@@ -24,6 +33,7 @@ loci_alt_freq(.x, .col = "genotypes", n_cores, block_size, type, ...)
 \method{loci_alt_freq}{vctrs_bigSNP}(
   .x,
   .col = "genotypes",
+  as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(length(.x), 1),
   ...
@@ -32,17 +42,27 @@ loci_alt_freq(.x, .col = "genotypes", n_cores, block_size, type, ...)
 \method{loci_alt_freq}{grouped_df}(
   .x,
   .col = "genotypes",
+  as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   type = c("tidy", "list", "matrix"),
   ...
 )
 
-loci_maf(.x, .col = "genotypes", n_cores, block_size, type, ...)
+loci_maf(
+  .x,
+  .col = "genotypes",
+  as_counts = FALSE,
+  n_cores,
+  block_size,
+  type,
+  ...
+)
 
 \method{loci_maf}{tbl_df}(
   .x,
   .col = "genotypes",
+  as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
@@ -51,6 +71,7 @@ loci_maf(.x, .col = "genotypes", n_cores, block_size, type, ...)
 \method{loci_maf}{vctrs_bigSNP}(
   .x,
   .col = "genotypes",
+  as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(length(.x), 1),
   ...
@@ -59,6 +80,7 @@ loci_maf(.x, .col = "genotypes", n_cores, block_size, type, ...)
 \method{loci_maf}{grouped_df}(
   .x,
   .col = "genotypes",
+  as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   type = c("tidy", "list", "matrix"),

@@ -5,12 +5,13 @@
 /******************************************************************************/
 
 // [[Rcpp::export]]
-NumericVector cpp_alt_freq_dip_pseudo(Environment BM,
+NumericMatrix cpp_alt_freq_dip_pseudo(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
                                    const NumericVector& ploidy,
                                    const bool is_pseudohap,
-                                   int ncores) {
+                                   int ncores,
+                                   bool as_counts) {
 
   XPtr<FBM> xpBM = BM["address"];
   SubBMCode256Acc macc(xpBM, rowInd, colInd, BM["code256"], 1);
@@ -28,23 +29,37 @@ NumericVector cpp_alt_freq_dip_pseudo(Environment BM,
     }
   }
 
-  NumericVector freq(m);
+  // Matrix to store frequency and valid alleles in two columns
+  // the first column initially stores counts of alternate alleles and
+  // can be returned if return_counts = TRUE
+  NumericMatrix freq_mat(m,2);
 
 #pragma omp parallel for num_threads(ncores)
   for (size_t j = 0; j < m; j++) { // loop over loci
-    double this_allele_count = 0; // count of alt alleles at this locus
-    double this_valid_alleles = 0; // count of valid alleles at this locus
     for (size_t i = 0; i < n; i++) { // loop over individuals
       double x = macc(i, j);
       if (x > -1){
-        this_allele_count += x * pseudo_multiplier[i];
-        this_valid_alleles += ploidy(i);
+        freq_mat(j,0) += x * pseudo_multiplier[i];
+        freq_mat(j,1)  += ploidy(i);
       }
     }
-    freq[j] = (this_valid_alleles > 0) ? (this_allele_count / this_valid_alleles) : NA_REAL;
   }
-
-  return freq;
+  
+  if (as_counts){
+    colnames(freq_mat) = CharacterVector::create("n_alt", "n_valid");
+    return freq_mat;
+  }
+  
+  for (size_t j = 0; j < m; j++) { // loop over loci
+    if (freq_mat(j,1)>0){
+      freq_mat(j,0) = freq_mat(j,0) / freq_mat(j,1);
+    } else {
+      freq_mat(j,0) = NA_REAL;
+    }
+  }
+  
+  colnames(freq_mat) = CharacterVector::create("freq", "n_valid");
+  return freq_mat;
 }
 
 /******************************************************************************/

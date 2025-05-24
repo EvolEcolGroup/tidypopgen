@@ -102,6 +102,7 @@ pairwise_pop_fst <- function(
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
 
   # summarise population frequencies
+  # TODO this should be done in chunks!!!!
   pop_freqs_df <- gt_grouped_summaries(
     .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),

@@ -67,6 +67,7 @@
 #'
 loci_alt_freq <- function(.x,
                           .col = "genotypes",
+                          as_counts = FALSE,
                           n_cores, block_size, type, ...) {
   UseMethod("loci_alt_freq", .x)
 }
@@ -76,6 +77,7 @@ loci_alt_freq <- function(.x,
 loci_alt_freq.tbl_df <- function(
     .x,
     .col = "genotypes",
+    as_counts = FALSE,
     # multicore is used by openMP within the
     # freq cpp function
     n_cores = bigstatsr::nb_cores(),
@@ -92,7 +94,8 @@ loci_alt_freq.tbl_df <- function(
   if (.col != "genotypes") {
     stop("loci_alt_freq only works with the genotypes column")
   }
-  loci_alt_freq(.x$genotypes)
+  loci_alt_freq(.x$genotypes, as_counts = as_counts,
+                n_cores = n_cores, block_size = block_size)
 }
 
 
@@ -101,6 +104,7 @@ loci_alt_freq.tbl_df <- function(
 loci_alt_freq.vctrs_bigSNP <- function(
     .x,
     .col = "genotypes",
+    as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(length(.x), 1),
     ...) {
@@ -111,7 +115,8 @@ loci_alt_freq.vctrs_bigSNP <- function(
     is_pseudohaploid = FALSE
     loci_alt_freq_dip_pseudo(.x, n_cores = n_cores, block_size = block_size,
                           ploidy = ploidy,
-                          is_pseudohaploid = is_pseudohaploid)
+                          is_pseudohaploid = is_pseudohaploid,
+                          as_counts = as_counts)
   } else if (is_pseudohaploid(.x)) {
     stop("not yet implemented for pseudohaploids")
   } else {
@@ -124,6 +129,7 @@ loci_alt_freq.vctrs_bigSNP <- function(
 loci_alt_freq.grouped_df <- function(
     .x,
     .col = "genotypes",
+    as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
     type = c("tidy", "list", "matrix"),
@@ -206,6 +212,7 @@ loci_alt_freq.grouped_df <- function(
 #' @export
 loci_maf <- function(.x,
                      .col = "genotypes",
+                     as_counts = FALSE,
                      n_cores, block_size, type, ...) {
   UseMethod("loci_maf", .x)
 }
@@ -215,6 +222,7 @@ loci_maf <- function(.x,
 loci_maf.tbl_df <- function(
     .x,
     .col = "genotypes",
+    as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
     ...) {
@@ -234,6 +242,7 @@ loci_maf.tbl_df <- function(
 loci_maf.vctrs_bigSNP <- function(
     .x,
     .col = "genotypes",
+    as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(length(.x), 1),
     ...) {
@@ -247,6 +256,7 @@ loci_maf.vctrs_bigSNP <- function(
 loci_maf.grouped_df <- function(
     .x,
     .col = "genotypes",
+    as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
     type = c("tidy", "list", "matrix"),
@@ -298,6 +308,7 @@ loci_maf.grouped_df <- function(
 
 # function to estimate frequencies for diploid
 loci_alt_freq_dip_pseudo <- function(.x,
+                                     as_counts = FALSE,
                                   ploidy,
                                   is_pseudohaploid,
                                   n_cores,
@@ -316,6 +327,7 @@ loci_alt_freq_dip_pseudo <- function(.x,
         colInd = ind,
         ploidy = ploidy,
         is_pseudohap = is_pseudohaploid,
+        as_counts = as_counts,
         ncores = n_cores
       )
     } # nolint end
@@ -326,13 +338,22 @@ loci_alt_freq_dip_pseudo <- function(.x,
       ind = attr(.x, "loci")$big_index,
       ncores = 1, # parallelisation is used within the function
       block.size = block_size,
-      a.combine = "c"
-    )
+      a.combine = "rbind"
+    ) # get teh first colum that contains the frequencies
   } else {
     # if we have a single individual
-    freq <- geno_fbm[rows_to_keep, attr(.x, "loci")$big_index] / 2
+    freq <- matrix(geno_fbm[rows_to_keep, attr(.x, "loci")$big_index], ploidy,
+                   ncol = 2)
+    if (!as_counts){
+      freq[,1] = freq[,1] / freq[,2]
+    }
   }
-  freq
+  if (!as_counts){
+    # just return the first column with the frequency
+    return(freq[,1])
+  } else {
+    return(freq)
+  }
 }
 
 loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {

@@ -25,6 +25,11 @@ test_that("loci_alt_freq and loci_maf computes correctly", {
   # raw frequencies
   freq <- colSums(test_genotypes, na.rm = TRUE) / (c(3, 3, 3, 2, 3, 1) * 2)
   expect_true(all(loci_alt_freq(test_gt$genotypes) == freq))
+  
+  # get the counts
+  counts <- loci_alt_freq(test_gt, as_counts = TRUE)
+  expect_true(all(counts[,1]/counts[,2] == freq))
+  
   # convert to minor frequencies
   freq[freq > 0.5] <- 1 - freq[freq > 0.5]
   expect_true(all(loci_maf(test_gt$genotypes) == freq))
@@ -37,6 +42,7 @@ test_that("loci_alt_freq and loci_maf computes correctly", {
     select_loci(c(-3, -5))
   freq <- colSums(test_genotypes_subset1, na.rm = TRUE) / (c(2, 2, 2, 1) * 2)
   expect_true(all(loci_alt_freq(test_gt_subset1$genotypes) == freq))
+  
   # convert to minor frequencies
   freq[freq > 0.5] <- 1 - freq[freq > 0.5]
   expect_true(all(loci_maf(test_gt_subset1$genotypes) == freq))
