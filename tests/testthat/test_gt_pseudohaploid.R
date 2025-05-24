@@ -71,16 +71,26 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
     "this function only works on diploid data"
   )
   # now check frequencies
-  expect_error(pseudo_freq <- loci_alt_freq(test_gt_pseudo),
-               "not yet implemented for pseudohaploids")
+  pseudo_freq <- loci_alt_freq(test_gt_pseudo)
+  ploidy_hap <- c(2L, 1L, 2L, 1L, 2L, 1L, 2L)
   # convert genotypes to alt counts by ploidy
-#  3-c(2L, 1L, 2L, 1L, 2L, 1L, 2L)
-
-
-#  expect_equal(
-#    pseudo_freq$value[1:3],
-#    c(0.4285714, 0.2857143, 0.2857143, 0.2857143, 0.4285714, 0.2857143)
-#  )
+  test_genotypes_hap <- sweep(test_genotypes, 1,
+                              3-ploidy_hap, FUN = "/")
+  test_valid_alleles <- matrix(ploidy_hap,
+                               ncol = ncol(test_genotypes_hap),
+                               nrow = nrow (test_genotypes_hap))
+  test_valid_alleles[is.na(test_genotypes_hap)] <- NA
+  test_valid_alleles <- colSums(test_valid_alleles, na.rm = TRUE)
+  expect_identical(pseudo_freq,
+                   colSums(test_genotypes_hap, na.rm = TRUE) /
+                     test_valid_alleles)
+  counts <- loci_alt_freq(test_gt_pseudo, as_counts = TRUE)
+  expect_true(
+    all(
+      cbind(
+        colSums(test_genotypes_hap, na.rm = TRUE),
+            test_valid_alleles) ==
+        loci_alt_freq(test_gt_pseudo, as_counts = TRUE)))
 })
 
 

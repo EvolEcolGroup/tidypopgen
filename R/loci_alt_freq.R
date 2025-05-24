@@ -12,16 +12,21 @@
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param .col the column to be used when a tibble (or grouped tibble is passed
-#' directly to the function). This defaults to "genotypes" and can only take
-#' that value. There is no need for the user to set it, but it is included to
-#' resolve certain tidyselect operations.
+#'   directly to the function). This defaults to "genotypes" and can only take
+#'   that value. There is no need for the user to set it, but it is included to
+#'   resolve certain tidyselect operations.
+#' @param as_counts boolean defining whether the count of alternate and valid
+#'   (i.e. total number) alleles (rather than the frquencies) should be
+#'   returned. It defaults to FALSE (i.e. frequencies are returned by default).
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
 #' @param type type of object to return, if using grouped method. One of "tidy",
-#' "list", or "matrix". Default is "tidy".
+#'   "list", or "matrix". Default is "tidy".
 #' @param ... other arguments passed to specific methods, currently unused.
-#' @returns a vector of frequencies, one per locus
+#' @returns a vector of frequencies, one per locus, if `as_counts = FALSE`;
+#' else a matrix of two columns, the count of altenate alleles and the count
+#' valid alleles (i.e. the sum of alternate and reference)
 #' @rdname loci_alt_freq
 #' @export
 #' @examples
@@ -110,9 +115,13 @@ loci_alt_freq.vctrs_bigSNP <- function(
     ...) {
   rlang::check_dots_empty()
   # if we have diploid
-  if (is_diploid_only(.x)) {
-    ploidy = rep(2, length(.x))
-    is_pseudohaploid = FALSE
+  if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+    is_pseudohaploid = is_pseudohaploid(.x)
+    if (is_pseudohaploid){
+      ploidy = indiv_ploidy(.x)
+    } else {
+      ploidy = rep(2, length(.x))
+    }
     loci_alt_freq_dip_pseudo(.x, n_cores = n_cores, block_size = block_size,
                           ploidy = ploidy,
                           is_pseudohaploid = is_pseudohaploid,
