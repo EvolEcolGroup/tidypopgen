@@ -99,8 +99,10 @@ loci_alt_freq.tbl_df <- function(
   if (.col != "genotypes") {
     stop("loci_alt_freq only works with the genotypes column")
   }
-  loci_alt_freq(.x$genotypes, as_counts = as_counts,
-                n_cores = n_cores, block_size = block_size)
+  loci_alt_freq(.x$genotypes,
+    as_counts = as_counts,
+    n_cores = n_cores, block_size = block_size
+  )
 }
 
 
@@ -116,16 +118,18 @@ loci_alt_freq.vctrs_bigSNP <- function(
   rlang::check_dots_empty()
   # if we have diploid
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-    is_pseudohaploid = is_pseudohaploid(.x)
-    if (is_pseudohaploid){
-      ploidy = indiv_ploidy(.x)
+    is_pseudohaploid <- is_pseudohaploid(.x)
+    if (is_pseudohaploid) {
+      ploidy <- indiv_ploidy(.x)
     } else {
-      ploidy = rep(2, length(.x))
+      ploidy <- rep(2, length(.x))
     }
-    loci_alt_freq_dip_pseudo(.x, n_cores = n_cores, block_size = block_size,
-                          ploidy = ploidy,
-                          is_pseudohaploid = is_pseudohaploid,
-                          as_counts = as_counts)
+    loci_alt_freq_dip_pseudo(.x,
+      n_cores = n_cores, block_size = block_size,
+      ploidy = ploidy,
+      is_pseudohaploid = is_pseudohaploid,
+      as_counts = as_counts
+    )
   } else if (is_pseudohaploid(.x)) {
     stop("not yet implemented for pseudohaploids")
   } else {
@@ -163,7 +167,7 @@ loci_alt_freq.grouped_df <- function(
     # rows (individuals) that we want to use
     rows_to_keep <- vctrs::vec_data(.x$genotypes)
 
-    if (is_diploid_only(.x)){
+    if (is_diploid_only(.x)) {
       # internal function that can be used with a big_apply #nolint start
       gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
         freq_mat <- gt_grouped_alt_freq_diploid(
@@ -175,7 +179,7 @@ loci_alt_freq.grouped_df <- function(
           ncores = n_cores
         )$freq_alt
       } # nolint end
-    } else if (is_pseudohaploid(.x)){
+    } else if (is_pseudohaploid(.x)) {
       # internal function that can be used with a big_apply #nolint start
       gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
         freq_mat <- gt_grouped_alt_freq_pseudohap(
@@ -318,10 +322,10 @@ loci_maf.grouped_df <- function(
 # function to estimate frequencies for diploid
 loci_alt_freq_dip_pseudo <- function(.x,
                                      as_counts = FALSE,
-                                  ploidy,
-                                  is_pseudohaploid,
-                                  n_cores,
-                                  block_size) {
+                                     ploidy,
+                                     is_pseudohaploid,
+                                     n_cores,
+                                     block_size) {
   # get the FBM
   geno_fbm <- attr(.x, "bigsnp")$genotypes
   # rows (individuals) that we want to use
@@ -335,7 +339,6 @@ loci_alt_freq_dip_pseudo <- function(.x,
         rowInd = rows_to_keep,
         colInd = ind,
         ploidy = ploidy,
-        is_pseudohap = is_pseudohaploid,
         as_counts = as_counts,
         ncores = n_cores
       )
@@ -348,18 +351,24 @@ loci_alt_freq_dip_pseudo <- function(.x,
       ncores = 1, # parallelisation is used within the function
       block.size = block_size,
       a.combine = "rbind"
-    ) # get teh first colum that contains the frequencies
+    )
   } else {
     # if we have a single individual
     freq <- matrix(geno_fbm[rows_to_keep, attr(.x, "loci")$big_index], ploidy,
-                   ncol = 2)
-    if (!as_counts){
-      freq[,1] = freq[,1] / freq[,2]
+      ncol = 2
+    )
+    # if this individual is pseudohaploid
+    if (ploidy == 1){
+      freq[,1] <- freq[,1] / 2
+    }
+    # if we are returning frequency, compute it for this individual
+    if (!as_counts) {
+      freq[, 1] <- freq[, 1] / freq[, 2]
     }
   }
-  if (!as_counts){
+  if (!as_counts) {
     # just return the first column with the frequency
-    return(freq[,1])
+    return(freq[, 1])
   } else {
     return(freq)
   }

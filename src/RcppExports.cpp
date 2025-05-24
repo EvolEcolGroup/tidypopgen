@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // cpp_alt_freq_dip_pseudo
-NumericMatrix cpp_alt_freq_dip_pseudo(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& ploidy, const bool is_pseudohap, int ncores, bool as_counts);
-RcppExport SEXP _tidypopgen_cpp_alt_freq_dip_pseudo(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ploidySEXP, SEXP is_pseudohapSEXP, SEXP ncoresSEXP, SEXP as_countsSEXP) {
+NumericMatrix cpp_alt_freq_dip_pseudo(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& ploidy, int ncores, bool as_counts);
+RcppExport SEXP _tidypopgen_cpp_alt_freq_dip_pseudo(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ploidySEXP, SEXP ncoresSEXP, SEXP as_countsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,10 +21,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
-    Rcpp::traits::input_parameter< const bool >::type is_pseudohap(is_pseudohapSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     Rcpp::traits::input_parameter< bool >::type as_counts(as_countsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_alt_freq_dip_pseudo(BM, rowInd, colInd, ploidy, is_pseudohap, ncores, as_counts));
+    rcpp_result_gen = Rcpp::wrap(cpp_alt_freq_dip_pseudo(BM, rowInd, colInd, ploidy, ncores, as_counts));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -350,7 +349,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_tidypopgen_cpp_alt_freq_dip_pseudo", (DL_FUNC) &_tidypopgen_cpp_alt_freq_dip_pseudo, 7},
+    {"_tidypopgen_cpp_alt_freq_dip_pseudo", (DL_FUNC) &_tidypopgen_cpp_alt_freq_dip_pseudo, 6},
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 6},
     {"_tidypopgen_gt_grouped_alt_freq_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_alt_freq_diploid, 6},
     {"_tidypopgen_gt_grouped_alt_freq_pseudohap", (DL_FUNC) &_tidypopgen_gt_grouped_alt_freq_pseudohap, 7},

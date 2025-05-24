@@ -24,8 +24,7 @@ indiv_ploidy.tbl_df <- function(.x, ...) {
 #' @rdname indiv_ploidy
 indiv_ploidy.vctrs_bigSNP <- function(.x, ...) {
   rlang::check_dots_empty()
-  if (show_ploidy(.x) != 0 &&
-    show_ploidy(.x) != -2) {
+  if ((show_ploidy(.x) != 0) && (show_ploidy(.x) != -2)) {
     rep(show_ploidy(.x), length(.x))
   } else {
     attr(.x, "bigsnp")$fam$ploidy[vctrs::vec_data(.x)]

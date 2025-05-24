@@ -9,7 +9,6 @@ NumericMatrix cpp_alt_freq_dip_pseudo(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
                                    const NumericVector& ploidy,
-                                   const bool is_pseudohap,
                                    int ncores,
                                    bool as_counts) {
 
@@ -22,11 +21,7 @@ NumericMatrix cpp_alt_freq_dip_pseudo(Environment BM,
   // multiplier to convert dosages for pseudohaploid data
   NumericVector pseudo_multiplier (n);
   for (size_t i = 0; i < n; i++) {
-    if (is_pseudohap) {
-      pseudo_multiplier[i] = 1 / (3 - ploidy[i]);
-    } else {
-      pseudo_multiplier[i] = 1;
-    }
+    pseudo_multiplier[i] = 1 / (3 - ploidy[i]);
   }
 
   // Matrix to store frequency and valid alleles in two columns

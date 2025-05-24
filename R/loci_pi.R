@@ -45,7 +45,7 @@ loci_pi.tbl_df <- function(
   if (.col != "genotypes") {
     stop("loci_missingness only works with the genotypes column")
   }
-  loci_pi(.x$genotypes)
+  loci_pi(.x$genotypes, n_cores = n_cores, block_size = block_size)
 }
 
 
