@@ -16,7 +16,7 @@
 #'   that value. There is no need for the user to set it, but it is included to
 #'   resolve certain tidyselect operations.
 #' @param as_counts boolean defining whether the count of alternate and valid
-#'   (i.e. total number) alleles (rather than the frquencies) should be
+#'   (i.e. total number) alleles (rather than the frequencies) should be
 #'   returned. It defaults to FALSE (i.e. frequencies are returned by default).
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
@@ -25,7 +25,7 @@
 #'   "list", or "matrix". Default is "tidy".
 #' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a vector of frequencies, one per locus, if `as_counts = FALSE`;
-#' else a matrix of two columns, the count of altenate alleles and the count
+#' else a matrix of two columns, the count of alternate alleles and the count
 #' valid alleles (i.e. the sum of alternate and reference)
 #' @rdname loci_alt_freq
 #' @export
@@ -130,8 +130,6 @@ loci_alt_freq.vctrs_bigSNP <- function(
       is_pseudohaploid = is_pseudohaploid,
       as_counts = as_counts
     )
-  } else if (is_pseudohaploid(.x)) {
-    stop("not yet implemented for pseudohaploids")
   } else {
     loci_alt_freq_polyploid(.x, n_cores = n_cores, block_size = block_size, ...)
   }
@@ -166,33 +164,22 @@ loci_alt_freq.grouped_df <- function(
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
     # rows (individuals) that we want to use
     rows_to_keep <- vctrs::vec_data(.x$genotypes)
+    # number of groups (used to define dimensions of objcts)
+    n_groups <- max(dplyr::group_indices(.x))
+    ploidy <- indiv_ploidy(.x)
 
-    if (is_diploid_only(.x)) {
-      # internal function that can be used with a big_apply #nolint start
       gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-        freq_mat <- gt_grouped_alt_freq_diploid(
+        freq_mat <- cpp_grouped_alt_freq_dip_pseudo(
           BM = BM,
           rowInd = rows_to_keep,
           colInd = ind,
           groupIds = dplyr::group_indices(.x) - 1,
-          ngroups = max(dplyr::group_indices(.x)),
-          ncores = n_cores
-        )$freq_alt
+          ngroups = n_groups,
+          ncores = n_cores,
+          ploidy = ploidy,
+          as_counts = as_counts
+        )
       } # nolint end
-    } else if (is_pseudohaploid(.x)) {
-      # internal function that can be used with a big_apply #nolint start
-      gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-        freq_mat <- gt_grouped_alt_freq_pseudohap(
-          BM = BM,
-          rowInd = rows_to_keep,
-          colInd = ind,
-          groupIds = dplyr::group_indices(.x) - 1,
-          ngroups = max(dplyr::group_indices(.x)),
-          ploidy = indiv_ploidy(.x),
-          ncores = n_cores
-        )$freq_alt
-      } # nolint end
-    }
 
     freq_mat <- bigstatsr::big_apply(
       geno_fbm,
@@ -205,6 +192,20 @@ loci_alt_freq.grouped_df <- function(
       a.combine = "rbind"
     )
 
+    if (!as_counts){
+      # only keep the frequencies
+      freq_mat <- freq_mat[,1:n_groups]
+    } else {
+      # split into two matrices (alt counts and valid allele counts, and return
+      # as a list)
+      counts_list <- list(n_alt = freq_mat[,1:n_groups],
+                          n_valid = freq_mat[,(n_groups+1):(n_groups*2)])
+      # add col names
+      
+      return(counts_list)
+      
+    }
+    
     freq_mat <- format_grouped_output(
       out_mat = freq_mat,
       group_ids = dplyr::group_keys(.x) %>% pull(1),

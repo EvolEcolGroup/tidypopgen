@@ -97,7 +97,7 @@ that value. There is no need for the user to set it, but it is included to
 resolve certain tidyselect operations.}
 
 \item{as_counts}{boolean defining whether the count of alternate and valid
-(i.e. total number) alleles (rather than the frquencies) should be
+(i.e. total number) alleles (rather than the frequencies) should be
 returned. It defaults to FALSE (i.e. frequencies are returned by default).}
 
 \item{n_cores}{number of cores to be used, it defaults to
@@ -112,7 +112,7 @@ returned. It defaults to FALSE (i.e. frequencies are returned by default).}
 }
 \value{
 a vector of frequencies, one per locus, if \code{as_counts = FALSE};
-else a matrix of two columns, the count of altenate alleles and the count
+else a matrix of two columns, the count of alternate alleles and the count
 valid alleles (i.e. the sum of alternate and reference)
 }
 \description{

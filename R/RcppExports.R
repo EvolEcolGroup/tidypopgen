@@ -5,16 +5,12 @@ cpp_alt_freq_dip_pseudo <- function(BM, rowInd, colInd, ploidy, ncores, as_count
     .Call(`_tidypopgen_cpp_alt_freq_dip_pseudo`, BM, rowInd, colInd, ploidy, ncores, as_counts)
 }
 
+cpp_grouped_alt_freq_dip_pseudo <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, as_counts) {
+    .Call(`_tidypopgen_cpp_grouped_alt_freq_dip_pseudo`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, as_counts)
+}
+
 fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V) {
     .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V)
-}
-
-gt_grouped_alt_freq_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
-    .Call(`_tidypopgen_gt_grouped_alt_freq_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
-}
-
-gt_grouped_alt_freq_pseudohap <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores) {
-    .Call(`_tidypopgen_gt_grouped_alt_freq_pseudohap`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores)
 }
 
 gt_grouped_missingness <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {

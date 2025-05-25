@@ -110,10 +110,10 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
 })
 
 
-## now group it
-test_gt <- test_gt %>% group_by(population)
 
 test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
+  ## now group it
+  test_gt <- test_gt %>% group_by(population)
   # confirm that the gen_tibble is diploid for the moment
   expect_equal(show_ploidy(test_gt), 2)
   # now use gt_pseudohaploid
@@ -156,14 +156,11 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
     pop_fst(test_gt_pseudo),
     "this function only works on diploid data"
   )
-  # now check frequencies
-  pseudo_freq <- loci_alt_freq(test_gt_pseudo, type = "matrix")
-  # # convert genotypes to alt counts by ploidy
-  # 3-c(2L, 1L, 2L, 1L, 2L, 1L, 2L)
-  #
-  #
-  # expect_equal(
-  #   pseudo_freq$value[1:3],
-  #   c(0.4285714, 0.2857143, 0.2857143, 0.2857143, 0.4285714, 0.2857143)
-  # )
+  # now check frequencies with reframe
+  loci_freq_reframe <- test_gt %>% reframe(alt_freq = loci_alt_freq(genotypes))
+  loci_freq_direct <- test_gt %>%
+    loci_alt_freq() %>%
+    arrange(group)
+  expect_equal(loci_freq_reframe$alt_freq, loci_freq_direct$value)
+
 })
