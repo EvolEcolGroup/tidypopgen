@@ -100,9 +100,11 @@ gt_extract_f2 <- function(
     )
   }
   # deprecation of adjust_pseudohaploid
-  if (!is.null(adjust_pseudohaploid)){
-    stop("adjust_pseuodhaploid is deprecated. Set the ploidy of the ",
-         "`gen_tibble` with `gt_pseudohaploid()`")
+  if (!is.null(adjust_pseudohaploid)) {
+    stop(
+      "adjust_pseuodhaploid is deprecated. Set the ploidy of the ",
+      "`gen_tibble` with `gt_pseudohaploid()`"
+    )
   }
 
   # parameters that don't make sense with a gen_tibble
@@ -210,8 +212,8 @@ gt_to_aftable <- function(
   }
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
 
-  
-  
+
+
   aftable <- grouped_alt_freq_dip_pseudo_cpp(
     BM = geno_fbm,
     rowInd = .gt_bigsnp_rows(.x),
@@ -223,10 +225,12 @@ gt_to_aftable <- function(
     as_counts = FALSE
   )
 
-  aftable = list(afs = aftable[, 1:((ncol(aftable) / 2))], 
-                 counts = aftable[, ((ncol(aftable) / 2) + 1):(ncol(aftable))])
-  
-  .group_levels <- .x %>% 
+  aftable <- list(
+    afs = aftable[, 1:((ncol(aftable) / 2))],
+    counts = aftable[, ((ncol(aftable) / 2) + 1):(ncol(aftable))]
+  )
+
+  .group_levels <- .x %>%
     group_keys() %>%
     pull(1)
   dimnames(aftable$afs) <- list(loci_names(.x), .group_levels)
@@ -268,4 +272,3 @@ afs_to_f2_blocks <- function(...) {
 cpp_is_polymorphic <- function(...) {
   utils::getFromNamespace("cpp_is_polymorphic", "admixtools")(...)
 }
-

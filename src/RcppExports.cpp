@@ -77,6 +77,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// grouped_summaries_dip_pseudo_cpp
+ListOf<NumericMatrix> grouped_summaries_dip_pseudo_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, int ncores);
+RcppExport SEXP _tidypopgen_grouped_summaries_dip_pseudo_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< size_t >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(grouped_summaries_dip_pseudo_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // gt_grouped_pi_diploid
 ListOf<NumericMatrix> gt_grouped_pi_diploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, int ncores);
 RcppExport SEXP _tidypopgen_gt_grouped_pi_diploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP) {
@@ -90,22 +107,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     rcpp_result_gen = Rcpp::wrap(gt_grouped_pi_diploid(BM, rowInd, colInd, groupIds, ngroups, ncores));
-    return rcpp_result_gen;
-END_RCPP
-}
-// gt_grouped_summaries
-ListOf<NumericMatrix> gt_grouped_summaries(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, int ncores);
-RcppExport SEXP _tidypopgen_gt_grouped_summaries(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
-    Rcpp::traits::input_parameter< size_t >::type ngroups(ngroupsSEXP);
-    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    rcpp_result_gen = Rcpp::wrap(gt_grouped_summaries(BM, rowInd, colInd, groupIds, ngroups, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -338,8 +339,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 6},
     {"_tidypopgen_grouped_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_alt_freq_dip_pseudo_cpp, 8},
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 6},
+    {"_tidypopgen_grouped_summaries_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_summaries_dip_pseudo_cpp, 7},
     {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 6},
-    {"_tidypopgen_gt_grouped_summaries", (DL_FUNC) &_tidypopgen_gt_grouped_summaries, 6},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 4},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},

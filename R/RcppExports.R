@@ -17,12 +17,12 @@ grouped_missingness_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ncore
     .Call(`_tidypopgen_grouped_missingness_cpp`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
-gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
-    .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
+grouped_summaries_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores) {
+    .Call(`_tidypopgen_grouped_summaries_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores)
 }
 
-gt_grouped_summaries <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
-    .Call(`_tidypopgen_gt_grouped_summaries`, BM, rowInd, colInd, groupIds, ngroups, ncores)
+gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
+    .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
 gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {

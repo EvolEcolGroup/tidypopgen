@@ -52,12 +52,13 @@ pop_het_exp <- function(
   }
 
   # summarise population frequencies
-  pop_freqs_df <- gt_grouped_summaries(
+  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
     .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = .group_ids,
     ngroups = nrow(.group_levels),
+    ploidy = indiv_ploidy(.x),
     ncores = n_cores
   )
   sHo <- pop_freqs_df$het_obs # nolint start

@@ -82,6 +82,7 @@ pairwise_pop_fst_hudson <- function(
       matrix(NA_real_, nrow = count_loci(.x), ncol = ncol(pairwise_combn))
   }
   # summarise population frequencies
+  # @TODO we now use grouped_summaries_dip_psuedo_cpp for THIS
   pop_freqs_df <- gt_grouped_summaries(
     .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),

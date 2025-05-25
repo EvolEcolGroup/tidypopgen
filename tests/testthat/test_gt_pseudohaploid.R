@@ -40,16 +40,18 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
     c(2L, 1L, 2L, 1L, 2L, 1L, 2L)
   )
 
-  # check that we can reprocess it (use a different number of loci to get different result)
+  # check that we can reprocess it (use a different number of loci to get
+  # different result)
   test_gt_pseudo2 <- gt_pseudohaploid(test_gt_pseudo, test_n_loci = 4)
   expect_equal(
     indiv_ploidy(test_gt_pseudo2),
     c(2L, 1L, 1L, 1L, 2L, 1L, 2L)
   )
 
-  ## TODO now test which functions work and which fail with pseudohaploid data (we should get the right frequencies (grouped and ungrouped, and pairwise pop fst))
-  # missingness shoudl also work
-  # but most other indiv stats will fail, and so will pop estimates that requires heterozygote counts
+  ## now test which functions work and which fail with pseudohaploid data
+  #(we should get the right frequencies (grouped and ungrouped, and pairwise pop
+  #fst)) missingness should also work but most other indiv stats will fail, and
+  #so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
     "this function only works on diploid data"
@@ -126,16 +128,18 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
     c(2L, 1L, 2L, 1L, 2L, 1L, 2L)
   )
 
-  # check that we can reprocess it (use a different number of loci to get different result)
+  # check that we can reprocess it (use a different number of loci to get
+  # different result)
   test_gt_pseudo2 <- gt_pseudohaploid(test_gt_pseudo, test_n_loci = 4)
   expect_equal(
     indiv_ploidy(test_gt_pseudo2),
     c(2L, 1L, 1L, 1L, 2L, 1L, 2L)
   )
 
-  ## TODO now test which functions work and which fail with pseudohaploid data (we should get the right frequencies (grouped and ungrouped, and pairwise pop fst))
-  # missingness shoudl also work
-  # but most other indiv stats will fail, and so will pop estimates that requires heterozygote counts
+  ## now test which functions work and which fail with pseudohaploid data
+  #(we should get the right frequencies (grouped and ungrouped, and pairwise pop
+  #fst)) missingness should also work but most other indiv stats will fail, and
+  #so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
     "this function only works on diploid data"
@@ -163,4 +167,27 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
     arrange(group)
   expect_equal(loci_freq_reframe$alt_freq, loci_freq_direct$value)
 
+  # apply Fst on the pseudohap gen_tibble
+  pseudo_fst <- pairwise_pop_fst(test_gt_pseudo)
+  # confirm the results change
+  expect_false(all(pseudo_fst$value == pairwise_pop_fst(test_gt)$value))
+  # TODO we should test the values are correct
+
+  # only Hudson works on pseudohaploids
+  expect_error(pairwise_pop_fst(test_gt_pseudo, method = "Nei87"),
+    "only `method = Hudson` is valid",
+    fixed = TRUE
+  )
+
+  # PBS also works if we use Hudson
+  pseudo_pbs <- nwise_pop_pbs(test_gt_pseudo)
+  expect_false(identical(
+    pseudo_pbs,
+    nwise_pop_pbs(test_gt)
+  ))
+  # only Hudson works on pseudohaploids
+  expect_error(nwise_pop_pbs(test_gt_pseudo, fst_method = "Nei87"),
+    "only `method = Hudson` is valid",
+    fixed = TRUE
+  )
 })

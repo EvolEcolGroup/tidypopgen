@@ -168,18 +168,19 @@ loci_alt_freq.grouped_df <- function(
     n_groups <- max(dplyr::group_indices(.x))
     ploidy <- indiv_ploidy(.x)
 
-      gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-        freq_mat <- grouped_alt_freq_dip_pseudo_cpp(
-          BM = BM,
-          rowInd = rows_to_keep,
-          colInd = ind,
-          groupIds = dplyr::group_indices(.x) - 1,
-          ngroups = n_groups,
-          ncores = n_cores,
-          ploidy = ploidy,
-          as_counts = as_counts
-        )
-      } # nolint end
+    gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
+      freq_mat <- grouped_alt_freq_dip_pseudo_cpp(
+        BM = BM,
+        rowInd = rows_to_keep,
+        colInd = ind,
+        groupIds = dplyr::group_indices(.x) - 1,
+        ngroups = n_groups,
+        ncores = n_cores,
+        ploidy = ploidy,
+        as_counts = as_counts
+      )
+      return(freq_mat)
+    }
 
     freq_mat <- bigstatsr::big_apply(
       geno_fbm,
@@ -192,20 +193,21 @@ loci_alt_freq.grouped_df <- function(
       a.combine = "rbind"
     )
 
-    if (!as_counts){
+    if (!as_counts) {
       # only keep the frequencies
-      freq_mat <- freq_mat[,1:n_groups]
+      freq_mat <- freq_mat[, 1:n_groups]
     } else {
       # split into two matrices (alt counts and valid allele counts, and return
       # as a list)
-      counts_list <- list(n_alt = freq_mat[,1:n_groups],
-                          n_valid = freq_mat[,(n_groups+1):(n_groups*2)])
+      counts_list <- list(
+        n_alt = freq_mat[, 1:n_groups],
+        n_valid = freq_mat[, (n_groups + 1):(n_groups * 2)]
+      )
       # add col names
-      
+
       return(counts_list)
-      
     }
-    
+
     freq_mat <- format_grouped_output(
       out_mat = freq_mat,
       group_ids = dplyr::group_keys(.x) %>% pull(1),
@@ -359,8 +361,8 @@ loci_alt_freq_dip_pseudo <- function(.x,
       ncol = 2
     )
     # if this individual is pseudohaploid
-    if (ploidy == 1){
-      freq[,1] <- freq[,1] / 2
+    if (ploidy == 1) {
+      freq[, 1] <- freq[, 1] / 2
     }
     # if we are returning frequency, compute it for this individual
     if (!as_counts) {
@@ -387,9 +389,8 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
   # as long as we have more than one individual
   ploidy_by_indiv <- indiv_ploidy(.x)
   if (length(rows_to_keep) > 1) {
-    # col means for submatrix (all rows, only some columns) #nolint start
+    # col means for submatrix (all rows, only some columns)
     col_sums_na <- function(X, ind, rows_to_keep, ploidy_by_indiv) {
-      # nolint end
       res <- colSums(X[rows_to_keep, ind], na.rm = TRUE)
       col_na <- function(a, ploidy_by_indiv) {
         sum(is.na(a) * ploidy_by_indiv)
