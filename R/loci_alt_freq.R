@@ -118,16 +118,11 @@ loci_alt_freq.vctrs_bigSNP <- function(
   rlang::check_dots_empty()
   # if we have diploid
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-    is_pseudohaploid <- is_pseudohaploid(.x)
-    if (is_pseudohaploid) {
-      ploidy <- indiv_ploidy(.x)
-    } else {
-      ploidy <- rep(2, length(.x))
-    }
+    ploidy <- indiv_ploidy(.x)
     loci_alt_freq_dip_pseudo(.x,
       n_cores = n_cores, block_size = block_size,
       ploidy = ploidy,
-      is_pseudohaploid = is_pseudohaploid,
+      is_pseudohaploid = is_pseudohaploid(.x),
       as_counts = as_counts
     )
   } else {
