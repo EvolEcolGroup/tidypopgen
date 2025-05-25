@@ -102,7 +102,7 @@ gt_extract_f2 <- function(
   # deprecation of adjust_pseudohaploid
   if (!is.null(adjust_pseudohaploid)) {
     stop(
-      "adjust_pseuodhaploid is deprecated. Set the ploidy of the ",
+      "adjust_pseudohaploid is deprecated. Set the ploidy of the ",
       "`gen_tibble` with `gt_pseudohaploid()`"
     )
   }
