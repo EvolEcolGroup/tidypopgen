@@ -150,7 +150,7 @@ loci_missingness.grouped_df <- function(
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
   rows_to_keep <- .gt_bigsnp_rows(.x)
   count_na_sub <- function(geno_fbm, ind, rows_to_keep) {
-    na_mat <- gt_grouped_missingness( # nolint
+    na_mat <- grouped_missingness_cpp( # nolint
       BM = geno_fbm,
       rowInd = rows_to_keep,
       colInd = ind,

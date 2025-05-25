@@ -5,11 +5,9 @@
 /******************************************************************************/
 
 // [[Rcpp::export]]
-NumericMatrix cpp_grouped_alt_freq_dip_pseudo(Environment BM,
+NumericMatrix alt_freq_dip_pseudo_cpp(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
-                                   const IntegerVector& groupIds,
-                                   int ngroups,
                                    const NumericVector& ploidy,
                                    int ncores,
                                    bool as_counts) {
@@ -25,35 +23,37 @@ NumericMatrix cpp_grouped_alt_freq_dip_pseudo(Environment BM,
   for (size_t i = 0; i < n; i++) {
     pseudo_multiplier[i] = 1 / (3 - ploidy[i]);
   }
-  
-  // We use a single large matric, the first ngroup columns are frequencies
-  // and the next ngroups columns are valid alleles. If as_counts = TRUE, then
-  // we return the counts before we compute the frequencies
-  
-  NumericMatrix freq_mat(m, ngroups*2);
+
+  // Matrix to store frequency and valid alleles in two columns
+  // the first column initially stores counts of alternate alleles and
+  // can be returned if return_counts = TRUE
+  NumericMatrix freq_mat(m,2);
 
 #pragma omp parallel for num_threads(ncores)
   for (size_t j = 0; j < m; j++) { // loop over loci
-    for (size_t i = 0; i < n; i++) { //loop over individuals
+    for (size_t i = 0; i < n; i++) { // loop over individuals
       double x = macc(i, j);
       if (x > -1){
-        freq_mat(j, groupIds[i]) += x * pseudo_multiplier[i];
-        freq_mat(j, ngroups+groupIds[i]) += ploidy[i];
+        freq_mat(j,0) += x * pseudo_multiplier[i];
+        freq_mat(j,1)  += ploidy(i);
       }
     }
   }
   
   if (as_counts){
+    colnames(freq_mat) = CharacterVector::create("n_alt", "n_valid");
     return freq_mat;
   }
-  // compute frequencies
+  
   for (size_t j = 0; j < m; j++) { // loop over loci
-    for (int group_i = 0; group_i < ngroups; group_i++) {
-      freq_mat(j, group_i) = freq_mat(j, group_i) / 
-        freq_mat(j, ngroups + group_i); // divide alt count by valid count
+    if (freq_mat(j,1)>0){
+      freq_mat(j,0) = freq_mat(j,0) / freq_mat(j,1);
+    } else {
+      freq_mat(j,0) = NA_REAL;
     }
   }
   
+  colnames(freq_mat) = CharacterVector::create("freq", "n_valid");
   return freq_mat;
 }
 

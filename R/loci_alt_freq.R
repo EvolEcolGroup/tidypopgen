@@ -169,7 +169,7 @@ loci_alt_freq.grouped_df <- function(
     ploidy <- indiv_ploidy(.x)
 
       gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-        freq_mat <- cpp_grouped_alt_freq_dip_pseudo(
+        freq_mat <- grouped_alt_freq_dip_pseudo_cpp(
           BM = BM,
           rowInd = rows_to_keep,
           colInd = ind,
@@ -335,7 +335,7 @@ loci_alt_freq_dip_pseudo <- function(.x,
   if (length(rows_to_keep) > 1) {
     # internal function that can be used with a big_apply #nolint start
     gt_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-      cpp_alt_freq_dip_pseudo(
+      alt_freq_dip_pseudo_cpp(
         BM = BM,
         rowInd = rows_to_keep,
         colInd = ind,

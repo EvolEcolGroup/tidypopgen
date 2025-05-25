@@ -18,7 +18,7 @@ gt_extract_f2(
   transitions = TRUE,
   transversions = TRUE,
   overwrite = FALSE,
-  adjust_pseudohaploid = TRUE,
+  adjust_pseudohaploid = NULL,
   fst = TRUE,
   afprod = TRUE,
   poly_only = c("f2"),
@@ -89,7 +89,8 @@ that don't have any genotypes coded as \code{1} among the first 1000 SNPs are
 automatically identified as pseudohaploid. This leads to slightly more
 accurate estimates of f-statistics. Setting this parameter to \code{FALSE}
 treats all samples as diploid and is equivalent to the \emph{ADMIXTOOLS} \code{ inbreed: NO} option. Setting \code{adjust_pseudohaploid} to an integer \code{n} will
-check the first \code{n} SNPs instead of the first 1000 SNPs.}
+check the first \code{n} SNPs instead of the first 1000 SNPs. NOW DEPRECATED,
+set the ploidy of the \code{gen_tibble} with \code{\link[=gt_pseudohaploid]{gt_pseudohaploid()}}.}
 
 \item{fst}{Write files with pairwise FST for every population pair. Setting
 this to FALSE can make \code{extract_f2} faster and will require less memory.}

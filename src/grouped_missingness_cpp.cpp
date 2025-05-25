@@ -5,7 +5,7 @@
 /******************************************************************************/
 
 // [[Rcpp::export]]
-NumericMatrix gt_grouped_missingness(Environment BM,
+NumericMatrix grouped_missingness_cpp(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
                                    const IntegerVector& groupIds,

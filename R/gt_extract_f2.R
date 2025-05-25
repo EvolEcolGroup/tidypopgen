@@ -212,7 +212,7 @@ gt_to_aftable <- function(
 
   
   
-  aftable <- cpp_grouped_alt_freq_dip_pseudo(
+  aftable <- grouped_alt_freq_dip_pseudo_cpp(
     BM = geno_fbm,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
