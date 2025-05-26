@@ -48,8 +48,8 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
     c(2L, 1L, 1L, 1L, 2L, 1L, 2L)
   )
 
-  ## now test which functions work and which fail with pseudohaploid data
-  #(we should get the right frequencies (grouped and ungrouped, and pairwise pop
+  ## now test which functions work and which fail with pseudohaploid data (we
+  #should get the right frequencies (grouped and ungrouped, and pairwise pop
   #fst)) missingness should also work but most other indiv stats will fail, and
   #so will pop estimates that requires heterozygote counts
   expect_error(
@@ -109,6 +109,11 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
         colSums(is.na(test_genotypes_hap)) / nrow(test_genotypes_hap)
     )
   )
+
+  # and maf
+  pseudo_maf <- loci_maf(test_gt_pseudo)
+  pseudo_freq[pseudo_freq > 0.5] <- 1 - pseudo_freq[pseudo_freq > 0.5]
+  expect_identical(pseudo_maf, pseudo_freq)
 })
 
 
@@ -137,9 +142,9 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
   )
 
   ## now test which functions work and which fail with pseudohaploid data
-  #(we should get the right frequencies (grouped and ungrouped, and pairwise pop
-  #fst)) missingness should also work but most other indiv stats will fail, and
-  #so will pop estimates that requires heterozygote counts
+  # (we should get the right frequencies (grouped and ungrouped, and pairwise pop
+  # fst)) missingness should also work but most other indiv stats will fail, and
+  # so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
     "this function only works on diploid data"
@@ -166,6 +171,13 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
     loci_alt_freq() %>%
     arrange(group)
   expect_equal(loci_freq_reframe$alt_freq, loci_freq_direct$value)
+
+  # maf
+  pseudo_maf <- test_gt %>% reframe(maf = loci_maf(genotypes))
+  pseudo_maf_direct <- test_gt %>%
+    loci_maf() %>%
+    arrange(group)
+  expect_equal(pseudo_maf$maf, pseudo_maf_direct$value)
 
   # apply Fst on the pseudohap gen_tibble
   pseudo_fst <- pairwise_pop_fst(test_gt_pseudo)

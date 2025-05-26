@@ -287,7 +287,7 @@ loci_maf.grouped_df <- function(
 
   rlang::check_dots_empty()
   type <- match.arg(type)
-  if (is_diploid_only(.x)) {
+  if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
     freq_mat <- loci_alt_freq(
       .x,
       n_cores = n_cores,
@@ -306,8 +306,6 @@ loci_maf.grouped_df <- function(
       loci_names = loci_names(.x),
       type = type
     )
-  } else if (show_ploidy(.x) == -2) {
-    stop("loci_maf for pseudohaploid not implemented yet")
   } else {
     # the polyploid case
     stop(
