@@ -159,7 +159,7 @@ loci_alt_freq.grouped_df <- function(
     geno_fbm <- .gt_get_bigsnp(.x)$genotypes
     # rows (individuals) that we want to use
     rows_to_keep <- vctrs::vec_data(.x$genotypes)
-    # number of groups (used to define dimensions of objcts)
+    # number of groups (used to define dimensions of objects)
     n_groups <- max(dplyr::group_indices(.x))
     ploidy <- indiv_ploidy(.x)
 
@@ -288,7 +288,8 @@ loci_maf.grouped_df <- function(
       .x,
       n_cores = n_cores,
       block_size = block_size,
-      type = "matrix"
+      type = "matrix",
+      as_counts = FALSE
     )
     # remove dimnames to then process this
     dimnames(freq_mat) <- NULL
