@@ -141,10 +141,10 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
     c(2L, 1L, 1L, 1L, 2L, 1L, 2L)
   )
 
-  ## now test which functions work and which fail with pseudohaploid data
-  # (we should get the right frequencies (grouped and ungrouped, and pairwise pop
-  # fst)) missingness should also work but most other indiv stats will fail, and
-  # so will pop estimates that requires heterozygote counts
+  ## now test which functions work and which fail with pseudohaploid data (we
+  #should get the right frequencies (grouped and ungrouped, and pairwise pop
+  #fst)) missingness should also work but most other indiv stats will fail, and
+  #so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
     "this function only works on diploid data"

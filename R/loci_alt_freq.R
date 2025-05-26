@@ -223,7 +223,6 @@ loci_alt_freq.grouped_df <- function(
 #' @export
 loci_maf <- function(.x,
                      .col = "genotypes",
-                     as_counts = FALSE,
                      n_cores, block_size, type, ...) {
   UseMethod("loci_maf", .x)
 }
@@ -233,7 +232,6 @@ loci_maf <- function(.x,
 loci_maf.tbl_df <- function(
     .x,
     .col = "genotypes",
-    as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
     ...) {
@@ -253,7 +251,6 @@ loci_maf.tbl_df <- function(
 loci_maf.vctrs_bigSNP <- function(
     .x,
     .col = "genotypes",
-    as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(length(.x), 1),
     ...) {
@@ -267,7 +264,6 @@ loci_maf.vctrs_bigSNP <- function(
 loci_maf.grouped_df <- function(
     .x,
     .col = "genotypes",
-    as_counts = FALSE,
     n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(nrow(.x), 1),
     type = c("tidy", "list", "matrix"),
