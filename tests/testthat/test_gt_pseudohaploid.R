@@ -49,9 +49,9 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
   )
 
   ## now test which functions work and which fail with pseudohaploid data (we
-  #should get the right frequencies (grouped and ungrouped, and pairwise pop
-  #fst)) missingness should also work but most other indiv stats will fail, and
-  #so will pop estimates that requires heterozygote counts
+  # should get the right frequencies (grouped and ungrouped, and pairwise pop
+  # fst)) missingness should also work but most other indiv stats will fail, and
+  # so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
     "this function only works on diploid data"
@@ -142,9 +142,9 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
   )
 
   ## now test which functions work and which fail with pseudohaploid data (we
-  #should get the right frequencies (grouped and ungrouped, and pairwise pop
-  #fst)) missingness should also work but most other indiv stats will fail, and
-  #so will pop estimates that requires heterozygote counts
+  # should get the right frequencies (grouped and ungrouped, and pairwise pop
+  # fst)) missingness should also work but most other indiv stats will fail, and
+  # so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
     "this function only works on diploid data"
@@ -202,4 +202,36 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
     "only `method = Hudson` is valid",
     fixed = TRUE
   )
+})
+
+test_that("we can rbind pseudohaploids and diploids", {
+  # create a small diploid gen_tibble
+  test_genotypes_dip <- rbind(
+    c(1, 1, 0, 1, NA, 0),
+    c(2, 1, 0, 0, 0, 0),
+    c(1, NA, 0, 0, 2, 1)
+  )
+  test_indiv_meta_dip <- data.frame(
+    id = c("m", "n", "o"),
+    population = c("pop4", "pop4", "pop5")
+  )
+
+  test_gt_dip <- gen_tibble(
+    x = test_genotypes_dip,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta_dip,
+    quiet = TRUE
+  )
+
+  test_gt_pseudo <- gt_pseudohaploid(test_gt)
+
+  merged_gt <- rbind(test_gt_pseudo, test_gt_dip,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_true(show_ploidy(merged_gt) == -2)
+  expect_true(all(indiv_ploidy(merged_gt) == c(
+    indiv_ploidy(test_gt_pseudo),
+    indiv_ploidy(test_gt_dip)
+  )))
 })

@@ -30,6 +30,16 @@ stopifnot_diploid <- function(x) {
   }
 }
 
+stopifnot_dip_pseudo <- function(x) {
+  if (inherits(x, "gen_tbl")) {
+    x <- x$genotypes
+  }
+  if (abs(attr(x, "ploidy")) != 2) {
+    stop("this function only works on diploid data")
+  }
+}
+
+
 is_diploid_only <- function(x) {
   if (inherits(x, "gen_tbl")) {
     (attr(x$genotypes, "ploidy") == 2)
