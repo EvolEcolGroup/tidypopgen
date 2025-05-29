@@ -126,7 +126,7 @@ pop_global_stats <- function(
   n <- pop_freqs_df$n / 2
   # is this correct?
   sHo <- pop_freqs_df$het_obs # nolint
-  mHo <- rowMeans(sHo, na.rm = TRUE) #nolint
+  mHo <- rowMeans(sHo, na.rm = TRUE) # nolint
   # sum of squared frequencies
   sp2 <- pop_freqs_df$freq_alt^2 + pop_freqs_df$freq_ref^2
   #  Hs <- (1 - sp2 - sHo/2/n) #nolint start
@@ -143,7 +143,7 @@ pop_global_stats <- function(
     }
   )
   # mean sum of square frequencies
-  msp2 <- rowMeans(sp2, na.rm = TRUE)
+  msp2 <- rowMeans(sp2, na.rm = TRUE) # nolint start
   mp2 <- rowMeans(pop_freqs_df$freq_alt)^2 + rowMeans(pop_freqs_df$freq_ref)^2
   mHs <- mn / (mn - 1) * (1 - msp2 - mHo / 2 / mn)
   Ht <- 1 - mp2 + mHs / mn / np - mHo / 2 / mn / np
