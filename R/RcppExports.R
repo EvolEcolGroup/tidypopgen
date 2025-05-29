@@ -5,6 +5,10 @@ alt_freq_dip_pseudo_cpp <- function(BM, rowInd, colInd, ploidy, ncores, as_count
     .Call(`_tidypopgen_alt_freq_dip_pseudo_cpp`, BM, rowInd, colInd, ploidy, ncores, as_counts)
 }
 
+compute_np_mn <- function(n) {
+    .Call(`_tidypopgen_compute_np_mn`, n)
+}
+
 fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V) {
     .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V)
 }

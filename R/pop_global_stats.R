@@ -134,15 +134,19 @@ pop_global_stats <- function(
   #  Hs <- n/(n - 1) * Hs
   #  Fis = 1 - sHo/Hs #nolint end
 
-  np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint
-  # mean sample size over the populations
-  mn <- apply(
-    n,
-    1,
-    fun <- function(x) {
-      sum(!is.na(x)) / sum(1 / x[!is.na(x)])
-    }
-  )
+  # np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint
+  # # mean sample size over the populations
+  # mn <- apply(
+  #   n,
+  #   1,
+  #   fun <- function(x) {
+  #     sum(!is.na(x)) / sum(1 / x[!is.na(x)])
+  #   }
+  # )
+  
+  np_mn <- compute_np_mn(n)
+  np <- np_mn$np
+  mn <- np_mn$mn
   # mean sum of square frequencies
   msp2 <- apply(sp2, 1, mean, na.rm = TRUE) # nolint start
   mp2 <- rowMeans(pop_freqs_df$freq_alt)^2 + rowMeans(pop_freqs_df$freq_ref)^2
