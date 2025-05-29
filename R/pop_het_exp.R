@@ -62,7 +62,7 @@ pop_het_exp <- function(
     ncores = n_cores
   )
   sHo <- pop_freqs_df$het_obs # nolint start
-  mHo <- apply(sHo, 1, mean, na.rm = TRUE)
+  mHo <- rowMeans(sHo, na.rm = TRUE)
   n <- pop_freqs_df$n / 2
   # sum of squared frequencies
   sp2 <- pop_freqs_df$freq_alt^2 + pop_freqs_df$freq_ref^2
