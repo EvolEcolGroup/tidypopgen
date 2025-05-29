@@ -3,8 +3,10 @@ test_that("import a vcf with multiple ploidy", {
     "/extdata/ploidy/ploidy_test.vcf.gz",
     package = "tidypopgen"
   )
-  test_gt <- gen_tibble(vcf_path, backingfile = tempfile(), quiet = TRUE,
-                        parser = "vcfR")
+  test_gt <- gen_tibble(vcf_path,
+    backingfile = tempfile(), quiet = TRUE,
+    parser = "vcfR"
+  )
   # it's mixed ploidy
   expect_true(show_ploidy(test_gt) == 0)
   # individuals are either 2 or 4
