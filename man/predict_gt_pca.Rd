@@ -11,6 +11,7 @@
   lsq_pcs = c(1, 2),
   block_size = NULL,
   n_cores = 1,
+  as_matrix = TRUE,
   ...
 )
 }
@@ -32,12 +33,16 @@ speed up computation, but require more memory)}
 
 \item{n_cores}{number of cores}
 
+\item{as_matrix}{logical, whether to return the result as a matrix (default)
+or a tibble.}
+
 \item{...}{no used}
 }
 \value{
-a matrix of predictions, with samples as rows and components as
-columns. The number of components depends on how many were estimated in the
-\code{\link{gt_pca}} object.
+a matrix of predictions (in line with predict using a prcomp
+object) or a tibble, with samples as rows and components as columns. The
+number of components depends on how many were estimated in the \code{\link{gt_pca}}
+object.
 }
 \description{
 Predict the PCA scores for a \code{\link{gt_pca}}, either for the original data or

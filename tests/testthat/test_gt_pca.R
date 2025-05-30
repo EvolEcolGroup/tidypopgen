@@ -169,7 +169,8 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
   new_pred <- predict(
     modern_pca,
     new_data = ancient_gt,
-    project_method = "simple"
+    project_method = "simple",
+    as_matrix = TRUE
   )
   expect_true(all(dim(new_pred) == c(20, 10)))
   # now raise an error if we don't impute to the mean
@@ -177,13 +178,31 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
     predict(modern_pca, new_data = ancient_gt, project_method = "none"),
     "You can't have missing values in 'X'"
   )
+  # check the same with a tibble
+  new_pred_tbl <- predict(
+    modern_pca,
+    new_data = ancient_gt,
+    project_method = "simple",
+    as_matrix = FALSE
+  )
+  expect_true(all(dim(new_pred_tbl) == c(20, 11)))
+  expect_true(inherits(new_pred_tbl, "tbl_df"))
   # least squares prediction
   lsq_pred <- predict(
     modern_pca,
     new_data = ancient_gt,
-    project_method = "least_squares"
+    project_method = "least_squares",
+    as_matrix = TRUE
   )
   expect_true(all(dim(lsq_pred) == c(20, 2)))
+  lsq_pred_tbl <- predict(
+    modern_pca,
+    new_data = ancient_gt,
+    project_method = "least_squares",
+    as_matrix = FALSE
+  )
+  expect_true(all(dim(lsq_pred_tbl) == c(20, 3)))
+  expect_true(inherits(lsq_pred_tbl, "tbl_df"))
 })
 
 test_that("PCA functions work with loci out of order", {

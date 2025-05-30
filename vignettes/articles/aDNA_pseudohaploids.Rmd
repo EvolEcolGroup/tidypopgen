@@ -80,10 +80,7 @@ tell us that this function only works on diploid data:
 
 ``` r
 indiv_inbreeding(ancient)
-```
-
-```
-## Error in stopifnot_diploid(.x): this function only works on diploid data
+#> Error in stopifnot_diploid(.x): this function only works on diploid data
 ```
 
 # PCA
@@ -181,7 +178,8 @@ And now we can project our data using the `predict` function:
 predicted <- predict(
   object = modern_pca,
   new_data = ancient,
-  project_method = "least_squares"
+  project_method = "least_squares",
+  as_matrix = FALSE
 )
 ```
 
@@ -193,7 +191,6 @@ Finally, we can tidy up our data ready to plot by converting the `predicted`
 object to a data frame and adding the population names:
 
 ``` r
-predicted <- as_tibble(predicted)
 predicted <- predicted %>% mutate(
   id = ancient$id,
   population = ancient$population
@@ -226,10 +223,7 @@ ggplot() +
     x = paste0("PC 1 (", round(pca_variance$percent[1], 2), "%)"),
     y = paste0("PC 2 (", round(pca_variance$percent[2], 2), "%)")
   )
-```
-
-```
-## Warning: ggrepel: 247 unlabeled data points (too many overlaps). Consider increasing max.overlaps
+#> Warning: ggrepel: 247 unlabeled data points (too many overlaps). Consider increasing max.overlaps
 ```
 
 ![plot of chunk pca_projected_aDNA](./figure/aDNA_pseudohaploids/pca_projected_aDNA-1.png)
@@ -242,45 +236,24 @@ First we need to merge the ancient and modern data:
 
 ``` r
 ancient_modern <- rbind(ho_modern, ancient)
-```
-
-```
-## harmonising loci between two datasets
-## flip_strand =  FALSE  ; remove_ambiguous =  FALSE 
-## -----------------------------
-## dataset: reference 
-## number of SNPs: 548749 reduced to 548749 
-## ( 0 are ambiguous, of which 0  were removed)
-## -----------------------------
-## dataset: target 
-## number of SNPs: 1233553 reduced to 548749 
-## ( 0 were flipped to match the reference set)
-## ( 36301 are ambiguous, of which 36301 were removed)
-```
-
-```
-## 
-## gen_tibble saved to /tmp/RtmpptKMxO/gt_merged_42bc4afc4570.gt
-```
-
-```
-## using bigSNP file: /tmp/RtmpptKMxO/gt_merged_42bc4afc4570.rds
-```
-
-```
-## with backing file: /tmp/RtmpptKMxO/gt_merged_42bc4afc4570.bk
-```
-
-```
-## make sure that you do NOT delete those files!
-```
-
-```
-## to reload the gen_tibble in another session, use:
-```
-
-```
-## gt_load('/tmp/RtmpptKMxO/gt_merged_42bc4afc4570.gt')
+#> harmonising loci between two datasets
+#> flip_strand =  FALSE  ; remove_ambiguous =  FALSE 
+#> -----------------------------
+#> dataset: reference 
+#> number of SNPs: 548749 reduced to 548749 
+#> ( 0 are ambiguous, of which 0  were removed)
+#> -----------------------------
+#> dataset: target 
+#> number of SNPs: 1233553 reduced to 548749 
+#> ( 0 were flipped to match the reference set)
+#> ( 36301 are ambiguous, of which 36301 were removed)
+#> 
+#> gen_tibble saved to /tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.gt
+#> using bigSNP file: /tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.rds
+#> with backing file: /tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.bk
+#> make sure that you do NOT delete those files!
+#> to reload the gen_tibble in another session, use:
+#> gt_load('/tmp/RtmpptKMxO/gt_merged_42bc4e3e7eb.gt')
 ```
 
 Then, we group the ancient and modern data by population:

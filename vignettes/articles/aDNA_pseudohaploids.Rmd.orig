@@ -171,7 +171,8 @@ And now we can project our data using the `predict` function:
 predicted <- predict(
   object = modern_pca,
   new_data = ancient,
-  project_method = "least_squares"
+  project_method = "least_squares",
+  as_matrix = FALSE
 )
 ```
 
@@ -182,7 +183,6 @@ implemented in the R package `smartsnp`).
 Finally, we can tidy up our data ready to plot by converting the `predicted`
 object to a data frame and adding the population names:
 ```{r}
-predicted <- as_tibble(predicted)
 predicted <- predicted %>% mutate(
   id = ancient$id,
   population = ancient$population
