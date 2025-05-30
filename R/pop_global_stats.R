@@ -133,7 +133,7 @@ pop_global_stats <- function(
   #  Hs <- n/(n - 1) * Hs
   #  Fis = 1 - sHo/Hs #nolint end
 
-  # np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint
+  # np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint start
   # # mean sample size over the populations
   # mn <- apply(
   #   n,
@@ -141,8 +141,8 @@ pop_global_stats <- function(
   #   fun <- function(x) {
   #     sum(!is.na(x)) / sum(1 / x[!is.na(x)])
   #   }
-  # )
-  
+  # ) #nolint end
+
   np_mn <- compute_np_mn(n)
   np <- np_mn$np
   mn <- np_mn$mn
