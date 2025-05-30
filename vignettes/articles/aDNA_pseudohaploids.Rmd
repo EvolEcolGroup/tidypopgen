@@ -1,10 +1,9 @@
 ---
-title: "Projection of aDNA samples onto modern PCA"
+title: "Working with aDNA pseuodhaploid samples"
 output:
   pdf_document: default
   html_document: default
   word_document: default
-date: "2024-06-12"
 ---
 
 
