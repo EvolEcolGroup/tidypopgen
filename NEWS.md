@@ -1,4 +1,4 @@
-# tidypopgen devel
+# tidypopgen 0.3.0
 * add `gt_pseudohaploid()` and adapt appropriate functions to work with
   pseudohaploids
 
