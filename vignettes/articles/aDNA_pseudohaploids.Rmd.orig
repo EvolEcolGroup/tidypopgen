@@ -233,7 +233,6 @@ ancient_modern <- ancient_modern %>% group_by(population)
 As we are calculating Fst between populations, we will remove any populations that contain only one individual.
 ```{r}
 ancient_modern <- ancient_modern %>%
-  group_by(population) %>%
   filter(n() > 1)
 ```
 
