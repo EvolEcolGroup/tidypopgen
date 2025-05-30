@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,8 +43,8 @@
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Projection of aDNA samples onto modern PCA</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/pca_aDNA_projection.html">Projection of aDNA samples onto modern PCA</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -295,8 +295,8 @@ need to update the backingfiles with:</p>
 <pre><code><span><span class="co">## Genetic distances are not sorted, setting them to zero</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## gen_backing files updated, now</span></span></code></pre>
-<pre><code><span><span class="co">## using bigSNP file: /tmp/RtmpSal71g/file2b4e7612f5bc_v2.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with backing file: /tmp/RtmpSal71g/file2b4e7612f5bc_v2.bk</span></span></code></pre>
+<pre><code><span><span class="co">## using bigSNP file: /tmp/RtmpuLuVez/file323d42ba60b7_v2.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with backing file: /tmp/RtmpuLuVez/file323d42ba60b7_v2.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <p>And then we can impute using:</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
@@ -327,15 +327,15 @@ using <code>gt_save</code>.</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/RtmpSal71g/file2b4e26ff69a.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using bigSNP file: /tmp/RtmpSal71g/file2b4e7612f5bc_v2.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with backing file: /tmp/RtmpSal71g/file2b4e7612f5bc_v2.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/RtmpuLuVez/file323d7fa6a1d.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using bigSNP file: /tmp/RtmpuLuVez/file323d42ba60b7_v2.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with backing file: /tmp/RtmpuLuVez/file323d42ba60b7_v2.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/RtmpSal71g/file2b4e26ff69a.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/RtmpSal71g/file2b4e26ff69a.gt"     </span></span>
-<span><span class="co">## [2] "/tmp/RtmpSal71g/file2b4e7612f5bc_v2.rds"</span></span>
-<span><span class="co">## [3] "/tmp/RtmpSal71g/file2b4e7612f5bc_v2.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/RtmpuLuVez/file323d7fa6a1d.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/RtmpuLuVez/file323d7fa6a1d.gt"     </span></span>
+<span><span class="co">## [2] "/tmp/RtmpuLuVez/file323d42ba60b7_v2.rds"</span></span>
+<span><span class="co">## [3] "/tmp/RtmpuLuVez/file323d42ba60b7_v2.bk"</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="grouping-data">Grouping data<a class="anchor" aria-label="anchor" href="#grouping-data"></a>
@@ -410,7 +410,7 @@ applying a function with <code>group_map</code>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>

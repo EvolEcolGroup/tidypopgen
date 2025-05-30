@@ -7,9 +7,9 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/a02_qc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/a03_example_clustering_and_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/a99_plink_cheatsheet.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/articles/aDNA_pseudohaploids.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/benchmark_hgdp.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/index.html</loc></url>
-<url><loc>https://evolecolgroup.github.io/tidypopgen/articles/pca_aDNA_projection.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/tidypopgen.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/authors.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/index.html</loc></url>
@@ -44,6 +44,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/filter.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/filter_high_relatedness.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/flip.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/format_grouped_output.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/get_p_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/get_packedancestry_code.html</loc></url>
@@ -72,6 +73,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_partialSVD.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_pcadapt.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_pseudohaploid.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_save.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_save_light.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_set_imputed.html</loc></url>
