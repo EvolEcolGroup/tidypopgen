@@ -142,7 +142,7 @@ modern_pca <- gt_pca_partialSVD(ho_modern, k = 2)
 We can then use `augment` to add the PCA coordinates for each individual to
 our `gen_tibble` object:
 ```{r}
-modern_pca_scores <- augment(x = pca, data = ho_modern, k = 2)
+modern_pca_scores <- augment(x = modern_pca, data = ho_modern, k = 2)
 ```
 
 And `tidy` to extract the proportion of explained variance:
@@ -169,7 +169,7 @@ ancient <- ancient %>% filter(!population %in% sample_remove)
 And now we can project our data using the `predict` function:
 ```{r}
 predicted <- predict(
-  object = pca,
+  object = modern_pca,
   new_data = ancient,
   project_method = "least_squares"
 )
@@ -195,7 +195,7 @@ syntax as `smartsnp`:
 ```{r pca_projected_aDNA}
 ggplot() +
   geom_point(
-    data = ho_modern_pca,
+    data = modern_pca_scores,
     aes(x = .fittedPC1, y = .fittedPC2), alpha = 0.5
   ) +
   geom_point(
@@ -244,7 +244,7 @@ pairwise_fst_tidy <- pairwise_pop_fst(ancient_modern,
 )
 ```
 
-We can then assign time ranges to the populations based on their names. This will allow us to group populations by time period when creating our plott:
+We can then assign time ranges to the populations based on their names. This will allow us to group populations by time period when creating our plot:
 ```{r}
 pairwise_fst_tidy <- pairwise_fst_tidy %>%
   mutate(time_range_pop1 = case_when(

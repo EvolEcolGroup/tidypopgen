@@ -9,9 +9,15 @@ date: "2024-06-12"
 
 
 
-The following article shows how to handle ancient DNA in tidypopgen, using example data from Lazaridis et al. (2016). First, we will demonstrate how to handle pseudohaploid data. Then, we will show how to project ancient DNA data onto modern data in a Principal Components Analysis, replicating the workflow illustrated in the vignette for the R package `smartsnp`. Finally, we will replicate the pairwise Fst analysis from Lazaridis et al. (2016).
+The following article shows how to handle ancient DNA in tidypopgen, using
+example data from Lazaridis et al. (2016). First, we will demonstrate how to
+handle pseudohaploid data. Then, we will show how to project ancient DNA data
+onto modern data in a Principal Components Analysis, replicating the workflow
+illustrated in the vignette for the R package `smartsnp`. Finally, we will
+replicate the pairwise Fst analysis from Lazaridis et al. (2016).
 
-First, we can download the data from the Reich lab website into a temporary directory, and unzip the file.
+First, we can download the data from the Reich lab website into a temporary
+directory, and unzip the file.
 
 # Download the data
 
@@ -26,7 +32,8 @@ utils::untar(download_path, exdir = temp_dir)
 
 # Read in the data
 
-Now that our data are downloaded, we can use `tidypopgen` to read the data into `gen_tibble` objects, beginning with the modern data:
+Now that our data are downloaded, we can use `tidypopgen` to read the data
+into `gen_tibble` objects, beginning with the modern data:
 
 ``` r
 ho_modern <- gen_tibble("./data/NearEastPublic/HumanOriginsPublic2068.geno",
@@ -46,17 +53,30 @@ ancient <- gen_tibble("./data/NearEastPublic/AncientLazaridis2016.geno",
 
 # Assigning Pseudohaploid data
 
-Due to the damage associated with ancient DNA samples, genotype datasets of ancient individuals often include pseudohaploid data. Instead of diploid genotypes, low coverage samples are represented by a sampling one allele per site. tidypopgen handles gen_tibbles containing pseudohaploid data by assigning them a specific genotype code (-2) to denote that some individuals are pseudohaplodified. The ploidy of each individual is then stored as 1 (denoting pseudohaploid) or 2 (a diploid individual).
+Due to the damage associated with ancient DNA samples, genotype datasets of
+ancient individuals often include pseudohaploid data. Instead of diploid
+genotypes, low coverage samples are represented by a sampling one allele
+per site. tidypopgen handles gen_tibbles containing pseudohaploid data by
+assigning them a specific genotype code (-2) to denote that some individuals
+are pseudohaplodified. The ploidy of each individual is then stored as 1
+(denoting pseudohaploid) or 2 (a diploid individual).
 
-Before we proceed with any analysis, we can therefore use the function `gt_pseudohaploid` to assign the ploidy of each individual in our `gen_tibble` object:
+Before we proceed with any analysis, we can therefore use the function
+`gt_pseudohaploid` to assign the ploidy of each individual in our
+`gen_tibble` object (based on whether the first `test_n_loci` are all
+homozygote):
 
 ``` r
-ancient <- gt_pseudohaploid(ancient, test_n_loci = 1000)
+ancient <- gt_pseudohaploid(ancient, test_n_loci = 100000)
 ```
 
-Once the ploidy has been assigned, pseudohaploid data is handled automatically by functions that are designed to work with pseudohaploid data. Some functions are meaningless to use on pseudohaplodified data, and these functions will return an error.
+Once the ploidy has been assigned, pseudohaploid data is handled automatically
+by functions that are designed to work with pseudohaploid data. Some functions
+are meaningless to use on pseudohaplodified data, and these functions will
+return an error.
 
-For example, attempting to run `indiv_inbreeding` on pseudohaploid data will tell us that this function only works on diploid data:
+For example, attempting to run `indiv_inbreeding` on pseudohaploid data will
+tell us that this function only works on diploid data:
 
 ``` r
 indiv_inbreeding(ancient)
@@ -68,7 +88,10 @@ indiv_inbreeding(ancient)
 
 # PCA
 
-For our PCA analysis, we will be projecting ancient European individuals. Therefore, we need to subset the modern data to only modern West Eurasian populations. We can select these populations by filtering the `gen_tibble` object using the `filter()` function from the `dplyr` package:
+For our PCA analysis, we will be projecting ancient European individuals.
+Therefore, we need to subset the modern data to only modern West Eurasian
+populations. We can select these populations by filtering the `gen_tibble`
+object using the `filter()` function from the `dplyr` package:
 
 ``` r
 west_eurasian_pops <- c(
@@ -89,7 +112,9 @@ west_eurasian_pops <- c(
 ho_modern <- ho_modern %>% filter(population %in% west_eurasian_pops)
 ```
 
-To run a PCA on the modern Eurasian individuals, we need to impute any missing genotypes. But as we have subset our `gen_tibble` object, first we need to update our backingfile:
+To run a PCA on the modern Eurasian individuals, we need to impute any missing
+genotypes. But as we have subset our `gen_tibble` object, first we need to
+update our backingfile:
 
 ``` r
 ho_modern <- gt_update_backingfile(ho_modern,
@@ -103,9 +128,12 @@ And then we can impute, using:
 ho_modern <- gt_impute_simple(ho_modern, method = "mean")
 ```
 
-We should also remove any monomorphic loci from our data, as these loci are uninformative. Monomorphic markers must always be removed before a PCA is computed using any of the `gt_pca` functions.
+We should also remove any monomorphic loci from our data, as these loci are
+uninformative. Monomorphic markers must always be removed before a PCA is
+computed using any of the `gt_pca` functions.
 
-To do this, we use the `select_loci_if` function together with `loci_maf` to select only genotypes where MAF is greater than 0:
+To do this, we use the `select_loci_if` function together with `loci_maf` to
+select only genotypes where MAF is greater than 0:
 
 ``` r
 ho_modern <- ho_modern %>% select_loci_if(loci_maf(genotypes) > 0)
@@ -114,40 +142,27 @@ ho_modern <- ho_modern %>% select_loci_if(loci_maf(genotypes) > 0)
 Now we can create our PCA object from the modern data:
 
 ``` r
-pca <- gt_pca_partialSVD(ho_modern, k = 2)
+modern_pca <- gt_pca_partialSVD(ho_modern, k = 2)
 ```
 
-We can then use `augment` to add the PCA coordinates for each individual to our `gen_tibble` object:
+We can then use `augment` to add the PCA coordinates for each individual to
+our `gen_tibble` object:
 
 ``` r
-ho_modern_pca <- augment(x = pca, data = ho_modern, k = 2)
+modern_pca_scores <- augment(x = modern_pca, data = ho_modern, k = 2)
 ```
 
 And `tidy` to extract the proportion of explained variance:
 
 
 ``` r
-variance <- tidy(ho_modern_pca)
-```
-
-```
-## Warning in tidy.data.frame(ho_modern_pca): Data frame tidiers are deprecated and will be removed in an upcoming
-## release of broom.
-```
-
-```
-## Warning in mean.default(X[[i]], ...): argument is not numeric or logical: returning NA
-## Warning in mean.default(X[[i]], ...): argument is not numeric or logical: returning NA
-```
-
-```
-## Error in `vec_math()`:
-## ! `vec_math.vctrs_bigSNP()` not implemented.
+pca_variance <- tidy(modern_pca)
 ```
 
 # Projection
 
-Before projecting the ancient samples, we remove ancient individuals and outgroups that are not of interest:
+Before projecting the ancient samples, we remove ancient individuals and
+outgroups that are not of interest:
 
 ``` r
 # Samples to remove:
@@ -164,15 +179,18 @@ And now we can project our data using the `predict` function:
 
 ``` r
 predicted <- predict(
-  object = pca,
+  object = modern_pca,
   new_data = ancient,
   project_method = "least_squares"
 )
 ```
 
-Here, we use the "least_squares" argument to generate a least squares projection that will be comparable to the approach used in `smartpca` (also implemented in the R package `smartsnp`).
+Here, we use the "least_squares" argument to generate a least squares
+projection that will be comparable to the approach used in `smartpca` (also
+implemented in the R package `smartsnp`).
 
-Finally, we can tidy up our data ready to plot by converting the `predicted` object to a data frame and adding the population names:
+Finally, we can tidy up our data ready to plot by converting the `predicted`
+object to a data frame and adding the population names:
 
 ``` r
 predicted <- as_tibble(predicted)
@@ -182,12 +200,14 @@ predicted <- predicted %>% mutate(
 )
 ```
 
-The PCA and predicted individuals can then be visualized using `ggplot2` by layering a geom of ancient individuals over modern individuals, using the same syntax as `smartsnp`:
+The PCA and predicted individuals can then be visualized using `ggplot2` by
+layering a geom of ancient individuals over modern individuals, using the same
+syntax as `smartsnp`:
 
 ``` r
 ggplot() +
   geom_point(
-    data = ho_modern_pca,
+    data = modern_pca_scores,
     aes(x = .fittedPC1, y = .fittedPC2), alpha = 0.5
   ) +
   geom_point(
@@ -203,14 +223,16 @@ ggplot() +
   theme_bw() +
   theme(legend.position = "none") +
   labs(
-    x = paste0("PC 1 (", round(variance$percent[1], 2), "%)"),
-    y = paste0("PC 2 (", round(variance$percent[2], 2), "%)")
+    x = paste0("PC 1 (", round(pca_variance$percent[1], 2), "%)"),
+    y = paste0("PC 2 (", round(pca_variance$percent[2], 2), "%)")
   )
 ```
 
 ```
-## Error: object 'variance' not found
+## Warning: ggrepel: 247 unlabeled data points (too many overlaps). Consider increasing max.overlaps
 ```
+
+![plot of chunk pca_projected_aDNA](./figure/aDNA_pseudohaploids/pca_projected_aDNA-1.png)
 
 # Pairwise Fst
 
@@ -238,15 +260,15 @@ ancient_modern <- rbind(ho_modern, ancient)
 
 ```
 ## 
-## gen_tibble saved to /tmp/Rtmp8nCm7A/gt_merged_fdbf3ed5f9.gt
+## gen_tibble saved to /tmp/RtmpptKMxO/gt_merged_42bc4afc4570.gt
 ```
 
 ```
-## using bigSNP file: /tmp/Rtmp8nCm7A/gt_merged_fdbf3ed5f9.rds
+## using bigSNP file: /tmp/RtmpptKMxO/gt_merged_42bc4afc4570.rds
 ```
 
 ```
-## with backing file: /tmp/Rtmp8nCm7A/gt_merged_fdbf3ed5f9.bk
+## with backing file: /tmp/RtmpptKMxO/gt_merged_42bc4afc4570.bk
 ```
 
 ```
@@ -258,7 +280,7 @@ ancient_modern <- rbind(ho_modern, ancient)
 ```
 
 ```
-## gt_load('/tmp/Rtmp8nCm7A/gt_merged_fdbf3ed5f9.gt')
+## gt_load('/tmp/RtmpptKMxO/gt_merged_42bc4afc4570.gt')
 ```
 
 Then, we group the ancient and modern data by population:
@@ -271,7 +293,6 @@ As we are calculating Fst between populations, we will remove any populations th
 
 ``` r
 ancient_modern <- ancient_modern %>%
-  group_by(population) %>%
   filter(n() > 1)
 ```
 
@@ -284,7 +305,7 @@ pairwise_fst_tidy <- pairwise_pop_fst(ancient_modern,
 )
 ```
 
-We can then assign time ranges to the populations based on their names. This will allow us to group populations by time period when creating our plott:
+We can then assign time ranges to the populations based on their names. This will allow us to group populations by time period when creating our plot:
 
 ``` r
 pairwise_fst_tidy <- pairwise_fst_tidy %>%
@@ -364,7 +385,10 @@ ggplot(pairwise_fst_tidy, aes(x = value, y = time_range_pop1)) +
 
 # F statistics
 
-To calculate F statistics, tidypopgen integrates with the ADMIXTOOLS 2 package. The function `gt_extract_f2` allows users to calculate blocked f2 statistics from a `gen_tibble` object, operating in the same way as the `extract_f2` function of ADMIXTOOLS 2.
+To calculate F statistics, `tidypopgen` integrates with the R `admixtools`
+package (a.k.a. ADMIXTOOLS 2). The function `gt_extract_f2` allows users to
+calculate blocked f2 statistics from a `gen_tibble` object, operating in the
+same way as the `extract_f2` function of `admixtools`.
 
 `gt_extract_f2` can be used as follows:
 
@@ -373,3 +397,5 @@ f2s <- gt_extract_f2(ancient_modern,
   outdir = "./data/NearEastPublic/f2"
 )
 ```
+We could now use any of the functions from `admixtools` giving the `outdir`
+with the f2 values.
