@@ -45,7 +45,7 @@ loci_pi.tbl_df <- function(
   if (.col != "genotypes") {
     stop("loci_missingness only works with the genotypes column")
   }
-  loci_pi(.x$genotypes)
+  loci_pi(.x$genotypes, n_cores = n_cores, block_size = block_size)
 }
 
 
@@ -148,21 +148,11 @@ loci_pi.grouped_df <- function(
     a.combine = "rbind"
   )
 
-  if (type == "tidy") {
-    pi_mat_tbl <- as.data.frame(pi_mat)
-    colnames(pi_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
-    pi_mat_tbl$loci <- loci_names(.x)
-    long_missing <- pi_mat_tbl %>% # nolint start
-      tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
-        pull(1), names_to = "group") # nolint end
-    long_missing
-  } else if (type == "list") {
-    # return a list to mimic a group_map
-    lapply(seq_len(ncol(pi_mat)), function(i) pi_mat[, i])
-  } else if (type == "matrix") {
-    # return a matrix
-    colnames(pi_mat) <- dplyr::group_keys(.x) %>% pull(1)
-    rownames(pi_mat) <- loci_names(.x)
-    pi_mat
-  }
+  pi_mat <- format_grouped_output(
+    out_mat = pi_mat,
+    group_ids = dplyr::group_keys(.x) %>% pull(1),
+    loci_names = loci_names(.x),
+    type = type
+  )
+  return(pi_mat)
 }

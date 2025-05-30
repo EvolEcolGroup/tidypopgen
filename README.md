@@ -46,7 +46,7 @@ We also provide a ['PLINK cheatsheet'](https://evolecolgroup.github.io/tidypopge
 aimed at translating common tasks performed in PLINK into `tidypopgen` commands.
 
 There is also an article showing how to project ancient DNA data onto a PCA fitted
-to modern data: ['aDNA projection' article](https://evolecolgroup.github.io/tidypopgen/dev/articles/pca_aDNA_projection.html).
+to modern data: ['aDNA projection' article](https://evolecolgroup.github.io/tidypopgen/dev/articles/aDNA_pseudohaploids.html).
 
 Finally, `tidypopgen` is fast and can handle large datasets easily. See a 
 ['benchmark' article](https://evolecolgroup.github.io/tidypopgen/dev/articles/benchmark_hgdp.html) using the HGDP,

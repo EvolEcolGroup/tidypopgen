@@ -53,7 +53,8 @@
 #'   accurate estimates of f-statistics. Setting this parameter to `FALSE`
 #'   treats all samples as diploid and is equivalent to the *ADMIXTOOLS* `
 #'   inbreed: NO` option. Setting `adjust_pseudohaploid` to an integer `n` will
-#'   check the first `n` SNPs instead of the first 1000 SNPs.
+#'   check the first `n` SNPs instead of the first 1000 SNPs. NOW DEPRECATED,
+#'   set the ploidy of the `gen_tibble` with [gt_pseudohaploid()].
 #' @param fst Write files with pairwise FST for every population pair. Setting
 #'   this to FALSE can make `extract_f2` faster and will require less memory.
 #' @param afprod  Write files with allele frequency products for every
@@ -85,7 +86,7 @@ gt_extract_f2 <- function(
     transitions = TRUE,
     transversions = TRUE,
     overwrite = FALSE,
-    adjust_pseudohaploid = TRUE,
+    adjust_pseudohaploid = NULL,
     fst = TRUE,
     afprod = TRUE,
     poly_only = c("f2"),
@@ -96,6 +97,13 @@ gt_extract_f2 <- function(
     stop(
       "to use this function, first install package 'admixtools' with\n",
       "devtools::install_github('uqrmaie1/admixtools')"
+    )
+  }
+  # deprecation of adjust_pseudohaploid
+  if (!is.null(adjust_pseudohaploid)) {
+    stop(
+      "adjust_pseudohaploid is deprecated. Set the ploidy of the ",
+      "`gen_tibble` with `gt_pseudohaploid()`"
     )
   }
 
@@ -204,35 +212,23 @@ gt_to_aftable <- function(
   }
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
 
-  # TODO we need a version with mixed ploidy that allows to account for
-  # haploids (or pseudohaploids)
-  if (adjust_pseudohaploid) {
-    if (is.numeric(adjust_pseudohaploid)) {
-      n_test <- adjust_pseudohaploid
-    } else {
-      n_test <- 1000
-    }
-    ploidy <- identify_pseudohaploids(.x, n_test)
-    aftable <- gt_grouped_alt_freq_pseudohap(
-      BM = geno_fbm,
-      rowInd = .gt_bigsnp_rows(.x),
-      colInd = .gt_bigsnp_cols(.x),
-      groupIds = dplyr::group_indices(.x) - 1,
-      ngroups = max(dplyr::group_indices(.x)),
-      ploidy = ploidy,
-      ncores = n_cores
-    )
-  } else {
-    aftable <- gt_grouped_alt_freq_diploid(
-      BM = geno_fbm,
-      rowInd = .gt_bigsnp_rows(.x),
-      colInd = .gt_bigsnp_cols(.x),
-      groupIds = dplyr::group_indices(.x) - 1,
-      ngroups = max(dplyr::group_indices(.x)),
-      ncores = n_cores
-    )
-  }
-  names(aftable) <- c("afs", "counts")
+
+
+  aftable <- grouped_alt_freq_dip_pseudo_cpp(
+    BM = geno_fbm,
+    rowInd = .gt_bigsnp_rows(.x),
+    colInd = .gt_bigsnp_cols(.x),
+    groupIds = dplyr::group_indices(.x) - 1,
+    ngroups = max(dplyr::group_indices(.x)),
+    ncores = n_cores,
+    ploidy = indiv_ploidy(.x),
+    as_counts = FALSE
+  )
+
+  aftable <- list(
+    afs = aftable[, 1:((ncol(aftable) / 2))],
+    counts = aftable[, ((ncol(aftable) / 2) + 1):(ncol(aftable))]
+  )
 
   .group_levels <- .x %>%
     group_keys() %>%
@@ -275,25 +271,4 @@ afs_to_f2_blocks <- function(...) {
 
 cpp_is_polymorphic <- function(...) {
   utils::getFromNamespace("cpp_is_polymorphic", "admixtools")(...)
-}
-
-#' Identify pseudohaploids
-#'
-#' Pseudohaploids are coded as all homozygotes; we find them by checking the
-#' first 'n_test' loci and call a pseudohaploid if they have zero heterozygosity
-#' (this is the same strategy employed in admixtools)
-#' @param x the gen_tibble
-#' @param n_test the number of loci being tested
-#' @return a numeric vector of ploidy
-#' @keywords internal
-identify_pseudohaploids <- function(x, n_test = 1000) {
-  if (n_test > count_loci(x)) {
-    n_test <- count_loci(x)
-  }
-  sub_x <- select_loci(x, .sel_arg = dplyr::all_of(c(1:n_test))) %>%
-    dplyr::ungroup()
-  het_obs <- indiv_het_obs(sub_x)
-  ploidy <- rep(2, nrow(x))
-  ploidy[het_obs == 0] <- 1
-  return(ploidy)
 }

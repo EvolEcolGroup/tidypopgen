@@ -38,6 +38,13 @@ rbind_dry_run <- function(
     use_position = FALSE,
     flip_strand = FALSE,
     quiet = FALSE) {
+  # check there are no ID's in common
+  if (any(ref$id %in% target$id)) {
+    stop(
+      "The two gen_tibbles contain at least one individual with the",
+      " same ID."
+    )
+  }
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
   target_df <- target %>% show_loci()

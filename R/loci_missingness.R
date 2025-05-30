@@ -150,7 +150,7 @@ loci_missingness.grouped_df <- function(
   geno_fbm <- .gt_get_bigsnp(.x)$genotypes
   rows_to_keep <- .gt_bigsnp_rows(.x)
   count_na_sub <- function(geno_fbm, ind, rows_to_keep) {
-    na_mat <- gt_grouped_missingness( # nolint
+    na_mat <- grouped_missingness_cpp( # nolint
       BM = geno_fbm,
       rowInd = rows_to_keep,
       colInd = ind,
@@ -175,21 +175,12 @@ loci_missingness.grouped_df <- function(
     na_mat <- sweep(na_mat, MARGIN = 2, STATS = group_sizes, FUN = "/")
   }
 
-  if (type == "tidy") {
-    na_mat_tbl <- as.data.frame(na_mat)
-    colnames(na_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
-    na_mat_tbl$loci <- loci_names(.x)
-    long_missing <- na_mat_tbl %>% # nolint start
-      tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
-        pull(1), names_to = "group") # nolint end
-    long_missing
-  } else if (type == "list") {
-    # return a list to mimic group_map
-    lapply(seq_len(ncol(na_mat)), function(i) na_mat[, i])
-  } else if (type == "matrix") {
-    # return a matrix
-    colnames(na_mat) <- dplyr::group_keys(.x) %>% pull(1)
-    rownames(na_mat) <- loci_names(.x)
-    na_mat
-  }
+  na_mat <- format_grouped_output(
+    out_mat = na_mat,
+    group_ids = dplyr::group_keys(.x) %>% pull(1),
+    loci_names = loci_names(.x),
+    type = type
+  )
+
+  return(na_mat)
 }

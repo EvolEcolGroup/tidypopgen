@@ -11,11 +11,20 @@
 \alias{loci_maf.grouped_df}
 \title{Estimate allele frequencies at each locus}
 \usage{
-loci_alt_freq(.x, .col = "genotypes", n_cores, block_size, type, ...)
+loci_alt_freq(
+  .x,
+  .col = "genotypes",
+  as_counts = FALSE,
+  n_cores,
+  block_size,
+  type,
+  ...
+)
 
 \method{loci_alt_freq}{tbl_df}(
   .x,
   .col = "genotypes",
+  as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
@@ -24,6 +33,7 @@ loci_alt_freq(.x, .col = "genotypes", n_cores, block_size, type, ...)
 \method{loci_alt_freq}{vctrs_bigSNP}(
   .x,
   .col = "genotypes",
+  as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(length(.x), 1),
   ...
@@ -32,6 +42,7 @@ loci_alt_freq(.x, .col = "genotypes", n_cores, block_size, type, ...)
 \method{loci_alt_freq}{grouped_df}(
   .x,
   .col = "genotypes",
+  as_counts = FALSE,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   type = c("tidy", "list", "matrix"),
@@ -74,6 +85,10 @@ directly to the function). This defaults to "genotypes" and can only take
 that value. There is no need for the user to set it, but it is included to
 resolve certain tidyselect operations.}
 
+\item{as_counts}{boolean defining whether the count of alternate and valid
+(i.e. total number) alleles (rather than the frequencies) should be
+returned. It defaults to FALSE (i.e. frequencies are returned by default).}
+
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
 
@@ -85,7 +100,9 @@ resolve certain tidyselect operations.}
 \item{...}{other arguments passed to specific methods, currently unused.}
 }
 \value{
-a vector of frequencies, one per locus
+a vector of frequencies, one per locus, if \code{as_counts = FALSE};
+else a matrix of two columns, the count of alternate alleles and the count
+valid alleles (i.e. the sum of alternate and reference)
 }
 \description{
 Allele frequencies can be estimates as minimum allele frequencies (MAF) with

@@ -2,7 +2,8 @@
 #'
 #' This function computes pairwise Fst. The following methods are implemented:
 #' - 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
-#' for diploids.
+#' for diploids. This is the only method that can also be used with
+#' pseudohaploid data.
 #' - 'Nei87' : Fst according to Nei (1987) - includes the correction for
 #' heterozygosity when computing Ht (it uses the same formulation as in
 #' `hierfstat::pairwise.neifst()`),
@@ -96,18 +97,28 @@ pairwise_pop_fst <- function(
     by_locus <- TRUE
   }
 
+  # only operate on diploids or, if pseudohaploids, Hudson
+  if (!is_diploid_only(.x) && !is_pseudohaploid(.x)) {
+    stop("fst can be currently computed on on diploid data")
+  }
+  if (is_pseudohaploid(.x) && method != "Hudson") {
+    stop("only `method = Hudson` is valid when the data include pseudohaploids")
+  }
+
   # get the populations
   .group_levels <- .x %>% group_keys()
   # create all combinations
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
 
   # summarise population frequencies
-  pop_freqs_df <- gt_grouped_summaries(
+  # TODO this should be done in chunks!!!!
+  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
     .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = nrow(.group_levels),
+    ploidy = indiv_ploidy(.x),
     ncores = n_cores
   )
 
