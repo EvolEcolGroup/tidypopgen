@@ -27,6 +27,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// compute_np_mn
+List compute_np_mn(NumericMatrix n);
+RcppExport SEXP _tidypopgen_compute_np_mn(SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(compute_np_mn(n));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fbm256_prod_and_rowSumsSq
 List fbm256_prod_and_rowSumsSq(Environment BM, const IntegerVector& ind_row, const IntegerVector& ind_col, const NumericVector& center, const NumericVector& scale, const NumericMatrix& V);
 RcppExport SEXP _tidypopgen_fbm256_prod_and_rowSumsSq(SEXP BMSEXP, SEXP ind_rowSEXP, SEXP ind_colSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP VSEXP) {
@@ -336,6 +347,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_alt_freq_dip_pseudo_cpp, 6},
+    {"_tidypopgen_compute_np_mn", (DL_FUNC) &_tidypopgen_compute_np_mn, 1},
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 6},
     {"_tidypopgen_grouped_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_alt_freq_dip_pseudo_cpp, 8},
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 6},
