@@ -172,6 +172,9 @@ predict.gt_pca <- function(
   }
 }
 
+
+# function to format the matrix into a tibble (if requested with
+# as_matrix = FALSE)
 output_type <- function(object, as_matrix, id) {
   if (!as_matrix) {
     object <- as_tibble(object)
@@ -179,7 +182,7 @@ output_type <- function(object, as_matrix, id) {
       dplyr::mutate(object, id = id) %>%
       dplyr::relocate(id)
     return(object)
-  } else if (as_matrix) {
+  } else {
     return(object)
   }
 }
