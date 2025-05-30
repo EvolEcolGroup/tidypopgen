@@ -93,7 +93,6 @@ loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
 #' @export
 #' @rdname loci_hwe
 loci_hwe.grouped_df <- function(
-    # TODO revert name to method
     .x,
     .col = "genotypes",
     mid_p = TRUE,
@@ -101,6 +100,8 @@ loci_hwe.grouped_df <- function(
     block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
     type = c("tidy", "list", "matrix"),
     ...) {
+  stopifnot_diploid(.x)
+
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()
@@ -128,7 +129,6 @@ loci_hwe.grouped_df <- function(
     )
   }
 
-
   hwe_mat <- bigstatsr::big_apply(
     geno_fbm,
     a.FUN = hwe_p_sub,
@@ -139,21 +139,11 @@ loci_hwe.grouped_df <- function(
     a.combine = "rbind"
   )
 
-  if (type == "tidy") {
-    hwe_mat_tbl <- as.data.frame(hwe_mat)
-    colnames(hwe_mat_tbl) <- dplyr::group_keys(.x) %>% pull(1)
-    hwe_mat_tbl$loci <- loci_names(.x)
-    long_missing <- hwe_mat_tbl %>% # nolint start
-      tidyr::pivot_longer(cols = dplyr::group_keys(.x) %>%
-        pull(1), names_to = "group") # nolint end
-    long_missing
-  } else if (type == "list") {
-    # return a list to mimic group_map
-    lapply(seq_len(ncol(hwe_mat)), function(i) hwe_mat[, i])
-  } else if (type == "matrix") {
-    # return a matrix
-    colnames(hwe_mat) <- dplyr::group_keys(.x) %>% pull(1)
-    rownames(hwe_mat) <- loci_names(.x)
-    hwe_mat
-  }
+  hwe_mat <- format_grouped_output(
+    out_mat = hwe_mat,
+    group_ids = dplyr::group_keys(.x) %>% pull(1),
+    loci_names = loci_names(.x),
+    type = type
+  )
+  return(hwe_mat)
 }

@@ -49,7 +49,8 @@ returned.
 This function computes pairwise Fst. The following methods are implemented:
 \itemize{
 \item 'Hudson': Hudson's formulation, as derived in Bhatia et al (2013)
-for diploids.
+for diploids. This is the only method that can also be used with
+pseudohaploid data.
 \item 'Nei87' : Fst according to Nei (1987) - includes the correction for
 heterozygosity when computing Ht (it uses the same formulation as in
 \code{hierfstat::pairwise.neifst()}),

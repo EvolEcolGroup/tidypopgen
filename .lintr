@@ -17,6 +17,12 @@ exclusions: list(
     ),
     "vignettes/overview.Rmd" = list( # styler vs lintr conflict
       indentation_linter = 268
+    ),
+    "R/loci_alt_freq.R" = list( # we use variable names from bigsnpr
+      object_name_linter = Inf
+    ),
+    "vignettes/articles/aDNA_pseudohaploids.Rmd" = list( # url
+      line_length_linter = 28
     )
   )
 encoding: "UTF-8"

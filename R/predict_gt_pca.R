@@ -9,15 +9,18 @@
 #'   (Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
 #'   "least_squares" (as done by SMARTPCA)
 #' @param lsq_pcs a vector of length two with the values of the two principal
-#'   components to use for the least square fitting. Only relevant
-#'   if`project_method = 'least_squares'`
+#' components to use for the least square fitting. Only relevant
+#' if`project_method = 'least_squares'`
 #' @param block_size number of loci read simultaneously (larger values will
-#'   speed up computation, but require more memory)
+#' speed up computation, but require more memory)
 #' @param n_cores number of cores
+#' @param as_matrix logical, whether to return the result as a matrix (default)
+#'   or a tibble.
 #' @param ... no used
-#' @returns a matrix of predictions, with samples as rows and components as
-#'   columns. The number of components depends on how many were estimated in the
-#'   [`gt_pca`] object.
+#' @returns a matrix of predictions (in line with predict using a prcomp
+#'   object) or a tibble, with samples as rows and components as columns. The
+#'   number of components depends on how many were estimated in the [`gt_pca`]
+#'   object.
 #' @references Zhang et al (2020). Fast and robust ancestry prediction using
 #'   principal component analysis  36(11): 3439–3446.
 #' @rdname predict_gt_pca
@@ -37,6 +40,7 @@ predict.gt_pca <- function(
     lsq_pcs = c(1, 2),
     block_size = NULL,
     n_cores = 1,
+    as_matrix = TRUE,
     ...) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
@@ -51,7 +55,8 @@ predict.gt_pca <- function(
     # U * D #nolint start
     UD <- sweep(object$u, 2, object$d, "*")
     dimnames(UD) <- list(rownames(object$u), paste0(".PC", seq_len(ncol(UD)))) # nolint end
-    return(UD)
+    output <- output_type(object = UD, as_matrix, id = rownames(object$u))
+    return(output)
   } else {
     if (!inherits(new_data, "gen_tbl")) {
       stop("new_data should be a gen_tibble")
@@ -98,7 +103,8 @@ predict.gt_pca <- function(
         scale = object$scale
       )
       dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
-      return(XV)
+      output <- output_type(object = XV, as_matrix, id = new_data$id)
+      return(output)
     } else if (any(c("simple", "OADP") %in% project_method)) {
       X_norm <- bigstatsr::FBM(nrow(new_data), 1, init = 0) # nolint
       XV <- bigstatsr::FBM(nrow(new_data), ncol(object$u), init = 0) # nolint
@@ -120,7 +126,8 @@ predict.gt_pca <- function(
       if (project_method == "simple") {
         XV <- XV[, , drop = FALSE] # nolint
         dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
-        return(XV)
+        output <- output_type(object = XV, as_matrix, id = new_data$id)
+        return(output)
       } else {
         XV <- utils::getFromNamespace("OADP_proj", "bigsnpr")(
           XV,
@@ -129,7 +136,8 @@ predict.gt_pca <- function(
           ncores = n_cores
         ) # nolint
         dimnames(XV) <- list(new_data$id, paste0(".PC", seq_len(ncol(XV)))) # nolint
-        return(XV)
+        output <- output_type(object = XV, as_matrix, id = new_data$id)
+        return(output)
       }
     } else if (project_method == "least_squares") {
       if (length(lsq_pcs) != 2 || any(lsq_pcs > ncol(object$v))) {
@@ -158,8 +166,24 @@ predict.gt_pca <- function(
       }
       dimnames(lsq_proj) <-
         list(new_data$id, paste0(".PC", seq_len(ncol(lsq_proj))))
-      return(lsq_proj)
+      output <- output_type(object = lsq_proj, as_matrix, id = new_data$id)
+      return(output)
     }
+  }
+}
+
+
+# function to format the matrix into a tibble (if requested with
+# as_matrix = FALSE)
+output_type <- function(object, as_matrix, id) {
+  if (!as_matrix) {
+    object <- as_tibble(object)
+    object <- object %>%
+      dplyr::mutate(object, id = id) %>%
+      dplyr::relocate(id)
+    return(object)
+  } else {
+    return(object)
   }
 }
 

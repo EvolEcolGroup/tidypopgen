@@ -8,11 +8,12 @@
 
 
 // [[Rcpp::export]]
-ListOf<NumericMatrix> gt_grouped_summaries(Environment BM,
+ListOf<NumericMatrix> grouped_summaries_dip_pseudo_cpp(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
                                    const IntegerVector& groupIds,
                                    size_t ngroups,
+                                   const NumericVector& ploidy,
                                    int ncores) {
 
   XPtr<FBM> xpBM = BM["address"];
@@ -25,16 +26,25 @@ ListOf<NumericMatrix> gt_grouped_summaries(Environment BM,
   NumericMatrix ref_freq(m, ngroups);
   NumericMatrix valid_alleles(m, ngroups);
   NumericMatrix heterozygotes(m, ngroups);
+  
+  // multiplier to convert dosages for pseudohaploid data
+  NumericVector pseudo_multiplier (n);
+  for (size_t i = 0; i < n; i++) {
+    pseudo_multiplier[i] = 1 / (3 - ploidy[i]);
+  }
 
 #pragma omp parallel for num_threads(ncores)
   for (size_t j = 0; j < m; j++) {
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
       if (x > -1){
-        freq(j, groupIds[i]) += x;
-        valid_alleles(j, groupIds[i]) +=2;
+        freq(j, groupIds[i]) += x * pseudo_multiplier[i];
+        valid_alleles(j, groupIds[i]) += ploidy[i];
         if (x==1){
-          heterozygotes(j, groupIds[i]) +=2; // we add 2 so that we can then divide by valid alleles
+          // we add 2 so that we can then divide by valid alleles
+          // we don't have to worry about pseudohaploids, as heterozygote
+          // counts are meaningless for them
+          heterozygotes(j, groupIds[i]) +=2;
         }
       }
     }

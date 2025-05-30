@@ -112,12 +112,13 @@ pop_global_stats <- function(
   }
 
   # summarise population frequencies
-  pop_freqs_df <- gt_grouped_summaries(
+  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
     .gt_get_bigsnp(.x)$genotypes,
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = .group_ids,
     ngroups = nrow(.group_levels),
+    ploidy = indiv_ploidy(.x),
     ncores = n_cores
   )
 
@@ -125,25 +126,28 @@ pop_global_stats <- function(
   n <- pop_freqs_df$n / 2
   # is this correct?
   sHo <- pop_freqs_df$het_obs # nolint
-  mHo <- apply(sHo, 1, mean, na.rm = TRUE) # nolint
-
+  mHo <- rowMeans(sHo, na.rm = TRUE) # nolint
   # sum of squared frequencies
   sp2 <- pop_freqs_df$freq_alt^2 + pop_freqs_df$freq_ref^2
   #  Hs <- (1 - sp2 - sHo/2/n) #nolint start
   #  Hs <- n/(n - 1) * Hs
   #  Fis = 1 - sHo/Hs #nolint end
 
-  np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint
-  # mean sample size over the populations
-  mn <- apply(
-    n,
-    1,
-    fun <- function(x) {
-      sum(!is.na(x)) / sum(1 / x[!is.na(x)])
-    }
-  )
+  # np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint start
+  # # mean sample size over the populations
+  # mn <- apply(
+  #   n,
+  #   1,
+  #   fun <- function(x) {
+  #     sum(!is.na(x)) / sum(1 / x[!is.na(x)])
+  #   }
+  # ) #nolint end
+
+  np_mn <- compute_np_mn(n)
+  np <- np_mn$np
+  mn <- np_mn$mn
   # mean sum of square frequencies
-  msp2 <- apply(sp2, 1, mean, na.rm = TRUE) # nolint start
+  msp2 <- rowMeans(sp2, na.rm = TRUE) # nolint start
   mp2 <- rowMeans(pop_freqs_df$freq_alt)^2 + rowMeans(pop_freqs_df$freq_ref)^2
   mHs <- mn / (mn - 1) * (1 - msp2 - mHo / 2 / mn)
   Ht <- 1 - mp2 + mHs / mn / np - mHo / 2 / mn / np
@@ -185,7 +189,7 @@ pop_global_stats <- function(
   } else {
     # overall summaries
     is.na(res) <- do.call(cbind, lapply(res, is.infinite))
-    overall <- apply(res, 2, mean, na.rm = TRUE)
+    overall <- colMeans(res, na.rm = TRUE)
     overall[7] <- overall[4] / overall[3]
     overall[8] <- overall[6] / overall[5]
     overall[9] <- 1 - overall[1] / overall[2]

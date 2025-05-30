@@ -43,8 +43,7 @@ test_that("extract f2 correctly", {
     adjust_pseudohaploid = FALSE,
     verbose = FALSE
   )
-  gt_aftable <- gt_to_aftable(test_gt, adjust_pseudohaploid = FALSE)
-  # expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE)) #nolint
+  gt_aftable <- gt_to_aftable(test_gt)
 
   expect_true(all.equal(
     adm_aftable$afs,
@@ -68,6 +67,7 @@ test_that("extract f2 correctly", {
     adjust_pseudohaploid = TRUE,
     verbose = FALSE
   )
+  test_gt <- gt_pseudohaploid(test_gt)
   gt_aftable <- gt_to_aftable(test_gt)
   # expect_true(all.equal(adm_aftable, gt_aftable, check.attributes= FALSE)) #nolint
 

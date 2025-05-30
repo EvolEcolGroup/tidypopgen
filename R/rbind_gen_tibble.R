@@ -50,8 +50,12 @@ rbind.gen_tbl <- function(
   ref <- dots[[1]]
   target <- dots[[2]]
   # only bind diploid tibbles
-  stopifnot_diploid(ref$genotypes)
-  stopifnot_diploid(target$genotypes)
+  stopifnot_dip_pseudo(ref$genotypes)
+  stopifnot_dip_pseudo(target$genotypes)
+  any_pseudohaploid <- FALSE
+  if (is_pseudohaploid(ref) || is_pseudohaploid(target)) {
+    any_pseudohaploid <- TRUE
+  }
   if (!quiet) {
     if (as_is) {
       if (flip_strand) {
@@ -178,9 +182,11 @@ rbind.gen_tbl <- function(
   # now flip the file around
   merged_fbm <- bigstatsr::big_transpose(t_ref_fbm, backingfile = backingfile)
   # TODO this should be written in the directory of interest
+
   # Make sure that the two fam tibbles have the same columns
   ref_snp$fam <- add_missing_cols(ref_snp$fam, target_snp$fam)
   target_snp$fam <- add_missing_cols(target_snp$fam, ref_snp$fam)
+
   # now create a bigsnp object
   merged_snp <- structure(
     list(
@@ -221,7 +227,8 @@ rbind.gen_tbl <- function(
     bigsnp_md5sum = tools::md5sum(merged_rds),
     loci = new_ref_loci_tbl,
     names = indivs_with_big_names,
-    ploidy = 2, # TODO hardcoded as we currently only work for diploid
+    # TODO currently set to only work for diploids or pseudohaploids
+    ploidy = ifelse(any_pseudohaploid, -2L, 2L),
     class = "vctrs_bigSNP"
   )
 

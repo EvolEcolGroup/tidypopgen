@@ -16,6 +16,7 @@ reference:
         - gt_order_loci
         - gt_update_backingfile
         - gt_add_sf
+        - gt_pseudohaploid
   - title: "Show"
     desc: "Functions to view loci and genotype information stored in a `gen_tibble`."
     contents:

@@ -84,7 +84,7 @@ test_that("warning when no snps overlap", {
   )
 
   test_indiv_meta2 <- data.frame(
-    id = c("a", "b", "c"),
+    id = c("A", "B", "C"),
     population = c("pop1", "pop1", "pop2")
   )
   test_genotypes2 <- rbind(
@@ -126,7 +126,7 @@ test_that("warning when no snps overlap", {
   # These should merge, with CHR and POS in merged GT being equal to test_gt2
 
   test_indiv_meta2 <- data.frame(
-    id = c("a", "b", "c"),
+    id = c("A", "B", "C"),
     population = c("pop1", "pop1", "pop2")
   )
   test_genotypes2 <- rbind(
@@ -260,4 +260,17 @@ test_that("original gen_tibble objects remain the same after merge", {
 
   expect_equal(md5_before_a_bk, md5_after_a_bk)
   expect_equal(md5_before_b_bk, md5_after_b_bk)
+})
+
+test_that("rbind fails if gen_tibbles contain same ID", {
+  pop_a_gt$id[1] <- "A"
+  pop_b_gt$id[1] <- "A"
+
+  expect_error(merged_gen <- rbind.gen_tbl(
+    pop_b_gt,
+    pop_a_gt,
+    flip_strand = TRUE,
+    quiet = TRUE,
+    backingfile = tempfile()
+  ), "at least one individual with the same ID")
 })
