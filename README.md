@@ -29,27 +29,29 @@ devtools::install_github("EvolEcolGroup/tidypopgen")
 
 There are several vignettes designed to teach you how to use `tidypopgen`.
 A short introduction to the package is available in the
-['introduction' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.html).
+['introduction' vignette](https://evolecolgroup.github.io/tidypopgen/articles/tidypopgen.html).
 A more detailed and technical description of the grammar of population genetics,
 explaining how to manipulate individuals and loci, is available in the
-['grammar' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/a01_overview.html).
+['grammar' vignette](https://evolecolgroup.github.io/tidypopgen/articles/a01_overview.html).
 
-The ['quality control' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/a02_qc.html)
+The ['quality control' vignette](https://evolecolgroup.github.io/tidypopgen/articles/a02_qc.html)
 illustrates the `tidypopgen` functions that help
 running a full QC of a dataset before analysis.
 
-The ['population genetic analysis' vignette](https://evolecolgroup.github.io/tidypopgen/dev/articles/a03_example_clustering_and_dapc.html)
+The ['population genetic analysis' vignette](https://evolecolgroup.github.io/tidypopgen/articles/a03_example_clustering_and_dapc.html)
 provides a fully annotated example of how to 
 run various population genetics analyses with `tidypopgen`.
 
-We also provide a ['PLINK cheatsheet'](https://evolecolgroup.github.io/tidypopgen/dev/articles/a99_plink_cheatsheet.html)
+We also provide a ['PLINK cheatsheet'](https://evolecolgroup.github.io/tidypopgen/articles/a99_plink_cheatsheet.html)
 aimed at translating common tasks performed in PLINK into `tidypopgen` commands.
 
-There is also an article showing how to project ancient DNA data onto a PCA fitted
-to modern data: ['aDNA projection' article](https://evolecolgroup.github.io/tidypopgen/dev/articles/aDNA_pseudohaploids.html).
+There is also an article showing how manage aDNA sample that have been coded
+as pseudohaploids, including how to project ancient DNA data onto a PCA fitted
+to modern data and prepare data for admixtools:
+['aDNA pseudohaploids' article](https://evolecolgroup.github.io/tidypopgen/articles/aDNA_pseudohaploids.html).
 
 Finally, `tidypopgen` is fast and can handle large datasets easily. See a 
-['benchmark' article](https://evolecolgroup.github.io/tidypopgen/dev/articles/benchmark_hgdp.html) using the HGDP,
+['benchmark' article](https://evolecolgroup.github.io/tidypopgen/articles/benchmark_hgdp.html) using the HGDP,
 a dataset of over 1000 individuals typed for 650k SNPs. We can load the data, clean it,
 run imputation, PCA and pairwise Fst among 51 populations in less than 20 seconds on a
 powerful desktop (and less than a minute on a laptop).
