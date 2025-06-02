@@ -6,9 +6,9 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/a02_qc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/a03_example_clustering_and_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/a99_plink_cheatsheet.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/aDNA_pseudohaploids.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/benchmark_hgdp.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/index.html</loc></url>
-<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/pca_aDNA_projection.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/authors.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/index.html</loc></url>
@@ -43,6 +43,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/filter.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/filter_high_relatedness.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/flip.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/format_grouped_output.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/get_p_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/get_packedancestry_code.html</loc></url>
@@ -71,6 +72,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_randomSVD.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pcadapt.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pseudohaploid.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save_light.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.html</loc></url>
@@ -129,7 +131,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_allele_sharing.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_ibs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_king.html</loc></url>
-<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/square_frobenious.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/square_frobenius.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/stopifnot_gen_tibble.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/str_replace_base.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/subset_bigSNP.html</loc></url>

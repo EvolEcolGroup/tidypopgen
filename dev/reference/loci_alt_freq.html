@@ -21,7 +21,7 @@ matrix."><meta property="og:image" content="https://evolecolgroup.github.io/tidy
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.0.9007</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,8 +37,8 @@ matrix."><meta property="og:image" content="https://evolecolgroup.github.io/tidy
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/pca_aDNA_projection.html">Projection of aDNA samples onto modern PCA</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -69,12 +69,21 @@ matrix.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loci_alt_freq</span><span class="op">(</span><span class="va">.x</span>, .col <span class="op">=</span> <span class="st">"genotypes"</span>, <span class="va">n_cores</span>, <span class="va">block_size</span>, <span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">loci_alt_freq</span><span class="op">(</span></span>
+<span>  <span class="va">.x</span>,</span>
+<span>  .col <span class="op">=</span> <span class="st">"genotypes"</span>,</span>
+<span>  as_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">n_cores</span>,</span>
+<span>  <span class="va">block_size</span>,</span>
+<span>  <span class="va">type</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'tbl_df'</span></span>
 <span><span class="fu">loci_alt_freq</span><span class="op">(</span></span>
 <span>  <span class="va">.x</span>,</span>
 <span>  .col <span class="op">=</span> <span class="st">"genotypes"</span>,</span>
+<span>  as_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -84,6 +93,7 @@ matrix.</p>
 <span><span class="fu">loci_alt_freq</span><span class="op">(</span></span>
 <span>  <span class="va">.x</span>,</span>
 <span>  .col <span class="op">=</span> <span class="st">"genotypes"</span>,</span>
+<span>  as_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -93,6 +103,7 @@ matrix.</p>
 <span><span class="fu">loci_alt_freq</span><span class="op">(</span></span>
 <span>  <span class="va">.x</span>,</span>
 <span>  .col <span class="op">=</span> <span class="st">"genotypes"</span>,</span>
+<span>  as_counts <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span>, <span class="fl">1</span><span class="op">)</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tidy"</span>, <span class="st">"list"</span>, <span class="st">"matrix"</span><span class="op">)</span>,</span>
@@ -146,6 +157,12 @@ that value. There is no need for the user to set it, but it is included to
 resolve certain tidyselect operations.</p></dd>
 
 
+<dt id="arg-as-counts">as_counts<a class="anchor" aria-label="anchor" href="#arg-as-counts"></a></dt>
+<dd><p>boolean defining whether the count of alternate and valid
+(i.e. total number) alleles (rather than the frequencies) should be
+returned. It defaults to FALSE (i.e. frequencies are returned by default).</p></dd>
+
+
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
 <dd><p>number of cores to be used, it defaults to
 <code><a href="https://privefl.github.io/bigstatsr/reference/reexports.html" class="external-link">bigstatsr::nb_cores()</a></code></p></dd>
@@ -166,7 +183,9 @@ resolve certain tidyselect operations.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a vector of frequencies, one per locus</p>
+    <p>a vector of frequencies, one per locus, if <code>as_counts = FALSE</code>;
+else a matrix of two columns, the count of alternate alleles and the count
+valid alleles (i.e. the sum of alternate and reference)</p>
     </div>
 
     <div class="section level2">
@@ -261,51 +280,14 @@ resolve certain tidyselect operations.</p></dd>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">loci_maf</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 18 × 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    loci  group value</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> rs1   pop1  0.333</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> rs1   pop2  0.25 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> rs1   pop3  0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> rs2   pop1  0.333</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> rs2   pop2  0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> rs2   pop3  0.25 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> rs3   pop1  0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> rs3   pop2  0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> rs3   pop3  0.25 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> rs4   pop1  0.5  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> rs4   pop2  0.25 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> rs4   pop3  0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> rs5   pop1  0.5  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> rs5   pop2  0.25 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">15</span> rs5   pop3  0.5  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">16</span> rs6   pop1  0.167</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">17</span> rs6   pop2  0.25 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">18</span> rs6   pop3  0.5  </span>
 <span class="r-in"><span><span class="co"># alternatively, return a list of populations with their frequencies</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">loci_maf</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"list"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.3333333 0.3333333 0.0000000 0.5000000 0.5000000 0.1666667</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.25 0.00 0.00 0.25 0.25 0.25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.00 0.25 0.25 0.00 0.50 0.50</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="co"># or a matrix with populations in columns and loci in rows</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">loci_maf</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          pop1 pop2 pop3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rs1 0.3333333 0.25 0.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rs2 0.3333333 0.00 0.25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rs3 0.0000000 0.00 0.25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rs4 0.5000000 0.25 0.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rs5 0.5000000 0.25 0.50</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rs6 0.1666667 0.25 0.50</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
@@ -314,11 +296,11 @@ resolve certain tidyselect operations.</p></dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Evie Carter, Andrea Manica.</p>
+  <p>Developed by Evie Carter, Andrea Manica, Eirlys Tysall.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>

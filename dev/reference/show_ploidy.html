@@ -3,11 +3,17 @@
 does not return the ploidy level for each individual (that is obtained with
 indiv_ploidy); instead, it returns an integer which is either the ploidy
 level of all individuals (e.g. 2 indicates all individuals are diploid),
-or a 0 to indicate mixed ploidy."><meta property="og:description" content="Extract the ploidy information from a  gen_tibble. NOTE that this function
+or a 0 to indicate mixed ploidy. The special case of -2 is used to indicate
+the presence of pseudo-haploids (i.e. individuals with a ploidy of 2 but
+for which we only have information for one allele; the dosages are 0 or 2
+for these individuals)."><meta property="og:description" content="Extract the ploidy information from a  gen_tibble. NOTE that this function
 does not return the ploidy level for each individual (that is obtained with
 indiv_ploidy); instead, it returns an integer which is either the ploidy
 level of all individuals (e.g. 2 indicates all individuals are diploid),
-or a 0 to indicate mixed ploidy."><meta property="og:image" content="https://evolecolgroup.github.io/tidypopgen/logo.png"><meta name="robots" content="noindex"></head><body>
+or a 0 to indicate mixed ploidy. The special case of -2 is used to indicate
+the presence of pseudo-haploids (i.e. individuals with a ploidy of 2 but
+for which we only have information for one allele; the dosages are 0 or 2
+for these individuals)."><meta property="og:image" content="https://evolecolgroup.github.io/tidypopgen/logo.png"><meta name="robots" content="noindex"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -15,7 +21,7 @@ or a 0 to indicate mixed ploidy."><meta property="og:image" content="https://evo
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.0.9007</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,8 +37,8 @@ or a 0 to indicate mixed ploidy."><meta property="og:image" content="https://evo
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
     <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/pca_aDNA_projection.html">Projection of aDNA samples onto modern PCA</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -55,7 +61,10 @@ or a 0 to indicate mixed ploidy."><meta property="og:image" content="https://evo
 does not return the ploidy level for each individual (that is obtained with
 <code><a href="indiv_ploidy.html">indiv_ploidy</a></code>); instead, it returns an integer which is either the ploidy
 level of all individuals (e.g. 2 indicates all individuals are diploid),
-or a 0 to indicate mixed ploidy.</p>
+or a 0 to indicate mixed ploidy. The special case of -2 is used to indicate
+the presence of pseudo-haploids (i.e. individuals with a ploidy of 2 but
+for which we only have information for one allele; the dosages are 0 or 2
+for these individuals).</p>
     </div>
 
     <div class="section level2">
@@ -93,11 +102,11 @@ or a <code><a href="gen_tibble.html">gen_tibble</a></code>.</p></dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Evie Carter, Andrea Manica.</p>
+  <p>Developed by Evie Carter, Andrea Manica, Eirlys Tysall.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer></div>
