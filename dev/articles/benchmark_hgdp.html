@@ -103,10 +103,10 @@ data.table with <code><a href="https://rdatatable.gitlab.io/data.table/reference
 <p>Before running this benchmark, we need to download into the
 subdirectory <code>data/hgdp/</code> the bed file
 <code>hgdp650.qc.hg19.bed</code> and the metadata file
-<code>HGDPid_populations.txt</code>.</p>
+<code>hgdp650_id_pop.txt</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bed_path</span> <span class="op">&lt;-</span> <span class="st">"./data/hgdp/hgdp650.qc.hg19.bed"</span></span>
-<span><span class="va">meta_info</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_tsv</a></span><span class="op">(</span><span class="st">"./data/hgdp/HGDPid_populations.txt"</span><span class="op">)</span></span>
+<span><span class="va">meta_info</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_tsv</a></span><span class="op">(</span><span class="st">"./data/hgdp/hgdp650_id_pop.txt"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 1064 Columns: 6</span></span>
 <span><span class="co">#&gt; ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; Delimiter: "\t"</span></span>
