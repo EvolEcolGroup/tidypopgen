@@ -47,11 +47,11 @@ library(ggplot2)
 
 Before running this benchmark, we need to download into the subdirectory
 `data/hgdp/` the bed file `hgdp650.qc.hg19.bed` and the metadata file
-`HGDPid_populations.txt`.
+`hgdp650_id_pop.txt`.
 
 ```{r}
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
-meta_info <- readr::read_tsv("./data/hgdp/HGDPid_populations.txt")
+meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
 ```
 
 # Create gen_tibble object
