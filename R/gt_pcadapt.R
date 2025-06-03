@@ -2,12 +2,15 @@
 #'
 #' pcadapt is an algorithm that detects genetic markers under selection. It is
 #' based on the principal component analysis (PCA) of the genotypes of the
-#' individuals. The method is described in [Luu et al.
-#' (2017)](https://doi.org/10.1534/genetics.116.195214), See the R package
+#' individuals. The method is described in Luu et al.
+#' (2017). See the R package
 #' `pcadapt`, which provides extensive documentation and examples.
 #'
 #' Internally, this function uses the `snp_pcadapt` function from the `bigsnpr`
 #' package.
+#' @references Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017). pcadapt: an R
+#' package for genome scans for selection based on principal component analysis.
+#' Molecular Ecology Resources, 17(1), 67–77.
 #' @param x A `gen_tibble` object.
 #' @param pca a [`gt_pca`] object, as returned by `gt_pca_partialSVD()` or
 #'   `gt_pca_randomSVD()`.

@@ -14,7 +14,7 @@ We provide a tidy grammar of population genetics, facilitating the manipulation 
 Useful links:
 \itemize{
   \item \url{https://github.com/EvolEcolGroup/tidypopgen}
-  \item \url{https://evolecolgroup.github.io/tidypopgen}
+  \item \url{https://evolecolgroup.github.io/tidypopgen/}
   \item Report bugs at \url{https://github.com/EvolEcolGroup/tidypopgen/issues}
 }
 
@@ -25,6 +25,7 @@ Useful links:
 Authors:
 \itemize{
   \item Evie Carter
+  \item Eirlys Tysall
 }
 
 }

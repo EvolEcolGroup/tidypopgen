@@ -43,10 +43,10 @@ MAFs
 Mei
 OADP
 ORCID
-PACKEDANCESTRYMAP
 PBS
 PED
 Procrustes
+Pseudohaploid
 Pseudohaploids
 Qiu
 RSpectra
@@ -164,10 +164,13 @@ pca
 pcadapt
 ped
 pos
+prcomp
 precomputing
 privefl
+pseudohaplodified
 pseudohaploid
 pseudohaploids
+pseuodhaploid
 punctatus
 qpGraph
 qq
