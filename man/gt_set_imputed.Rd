@@ -11,6 +11,9 @@ gt_set_imputed(x, set = NULL)
 
 \item{set}{a boolean defining whether imputed data should be used}
 }
+\value{
+the gen_tibble, invisibly
+}
 \description{
 This function sets or unsets the use of imputed data. For some analysis,
 such as PCA, that does not allow for missing data, we have to use imputation,

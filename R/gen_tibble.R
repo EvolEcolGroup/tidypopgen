@@ -546,7 +546,7 @@ summary.vctrs_bigSNP <- function(object, ...) {
 #' Some `dplyr` operations strip the subclass from the tibble. This function
 #' is used to check if the tibble is, in reality, still of class `gen_tbl`
 #' @param .x the tibble
-#' @returns NULL
+#' @returns the gen_tibble, invisibly
 #' @keywords internal
 
 stopifnot_gen_tibble <- function(.x) {
@@ -556,6 +556,7 @@ stopifnot_gen_tibble <- function(.x) {
   if (!inherits(.x$genotypes, "vctrs_bigSNP")) {
     stop("not a gen_tibble, the genotype column is not of class vctrs_bigSNP")
   }
+  return(invisible(.x))
 }
 
 # print method
