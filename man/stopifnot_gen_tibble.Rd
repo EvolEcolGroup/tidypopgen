@@ -9,6 +9,9 @@ stopifnot_gen_tibble(.x)
 \arguments{
 \item{.x}{the tibble}
 }
+\value{
+the gen_tibble, invisibly
+}
 \description{
 Some \code{dplyr} operations strip the subclass from the tibble. This function
 is used to check if the tibble is, in reality, still of class \code{gen_tbl}
