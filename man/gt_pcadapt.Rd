@@ -22,8 +22,7 @@ An object of subclass \code{gt_pcadapt}, a subclass of \code{mhtest}.
 \description{
 pcadapt is an algorithm that detects genetic markers under selection. It is
 based on the principal component analysis (PCA) of the genotypes of the
-individuals. The method is described in Luu et al.
-(2017). See the R package
+individuals. The method is described in Luu et al. (2017). See the R package
 \code{pcadapt}, which provides extensive documentation and examples.
 }
 \details{
@@ -31,7 +30,7 @@ Internally, this function uses the \code{snp_pcadapt} function from the \code{bi
 package.
 }
 \references{
-Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017). pcadapt: an R
-package for genome scans for selection based on principal component analysis.
-Molecular Ecology Resources, 17(1), 67–77.
+Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
+pcadapt: an R package for genome scans for selection based on principal
+component analysis. Molecular Ecology Resources, 17(1), 67–77.
 }

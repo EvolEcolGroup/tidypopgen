@@ -33,7 +33,7 @@ usethis::create_github_token()
 gitcreds::gitcreds_set()
 
 rhub::rhub_doctor()
-rhub::rhub_check()
+rhub::rhub_check(platforms = c("linux","m1-san","macos","macos-arm64", "windows", "valgrind"))
 
 # answer 1,2,3,4,5
 
