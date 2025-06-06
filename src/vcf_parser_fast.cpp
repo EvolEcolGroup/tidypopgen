@@ -264,7 +264,19 @@ inline void count_alt_alleles(const std::string &line,
  * @param filename The name of the VCF file to parse
  */
 
-// [[Rcpp::export]]
+/**
+ * @brief Reads genotype data from a VCF file and stores alternate allele counts in a file-backed matrix.
+ *
+ * For each biallelic locus in the VCF file, counts the number of alternate alleles per individual and writes these counts to the provided file-backed matrix (FBM). Supports both plain text and gzipped VCF files. Skips the specified number of header lines and processes only loci marked as biallelic. Verifies that no genotype exceeds the maximum ploidy inferred from the first variant line.
+ *
+ * @param filename Path to the VCF file (plain or gzipped).
+ * @param biallelic Logical vector indicating which loci are biallelic and should be processed.
+ * @param missing_value Value to assign for missing genotypes.
+ * @param n_header_lines Number of header lines to skip in the VCF file.
+ * @return true if all genotypes are successfully read and stored.
+ *
+ * @throws Rcpp::exception if the file cannot be opened, if the end of file is reached prematurely, or if a genotype exceeds the maximum allowed ploidy.
+ */
 bool vcf_genotypes_to_fbm(std::string filename,
                           Environment BM,
                           IntegerVector& biallelic,
