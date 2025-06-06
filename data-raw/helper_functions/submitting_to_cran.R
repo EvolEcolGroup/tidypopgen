@@ -35,7 +35,7 @@ gitcreds::gitcreds_set()
 rhub::rhub_doctor()
 rhub::rhub_check()
 
-# answer 1,2,3,4
+# answer 1,2,3,4,5
 
 
 
