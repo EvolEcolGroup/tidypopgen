@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <memory>
 #include <zlib.h>
 #include <bigstatsr/BMCodeAcc.h>
 
@@ -309,9 +310,11 @@ bool vcf_genotypes_to_fbm(std::string filename,
     }
   }
   // array to store the genotypes
-  unsigned char* alt_counts = new unsigned char[n];
+//  unsigned char* alt_counts = new unsigned char[n];
+  std::unique_ptr<unsigned char[]> alt_counts(new unsigned char[n]);
   // position of the separator, the last value is the end of the string
-  size_t* separator_pos = new size_t[n+9];
+//  size_t* separator_pos = new size_t[n+9];
+  std::unique_ptr<size_t[]> separator_pos(new size_t[n+9]);
   
   // Read the genotypes line by line until the end of file
   for (int i_geno = 0; i_geno < n_loci; i_geno++) {
@@ -347,8 +350,8 @@ bool vcf_genotypes_to_fbm(std::string filename,
     vcfFile.close();
   }
   // delete the array
-  delete[] alt_counts;
-  delete[] separator_pos;
+//  delete[] alt_counts;
+//  delete[] separator_pos;
   // return true if the file was read successfully
   return true;
   
