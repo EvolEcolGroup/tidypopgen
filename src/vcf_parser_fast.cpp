@@ -252,18 +252,6 @@ inline void count_alt_alleles(const std::string &line,
   }
 }
 
-
-
-
-
-/******************************************************************************
- * Read the genotypes into a File Backed Matrix from a vcf
- *
- * This function parses the VCF, using information gathered from vcf_loci_table.
- *
- * @param filename The name of the VCF file to parse
- */
-
 /**
  * @brief Reads genotype data from a VCF file and stores alternate allele counts in a file-backed matrix.
  *
@@ -277,6 +265,8 @@ inline void count_alt_alleles(const std::string &line,
  *
  * @throws Rcpp::exception if the file cannot be opened, if the end of file is reached prematurely, or if a genotype exceeds the maximum allowed ploidy.
  */
+
+// [[Rcpp::export]]
 bool vcf_genotypes_to_fbm(std::string filename,
                           Environment BM,
                           IntegerVector& biallelic,
