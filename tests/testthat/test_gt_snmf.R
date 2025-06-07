@@ -1,3 +1,5 @@
+skip_if_not_installed("LEA")
+
 # set the input file
 vcf_path <- system.file(
   "/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
