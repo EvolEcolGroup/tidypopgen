@@ -1,0 +1,1 @@
+R -d valgrind --vanilla -e "devtools::load_all(); testthat::test_file('tests/testthat/test_pairwise_pop_fst.R')"
