@@ -15,6 +15,8 @@ devtools::check(remote = TRUE, manual = TRUE)
 
 source("./data-raw/helper_functions/check_returns_in_documentation.R")
 
+source("./data-raw/helper_functions/check_examples_in_documentation.R")
+
 # now create a cran_submission branch for the final remote tests
 
 # TO DO MANUALLY: update cran-comments.md accordingly

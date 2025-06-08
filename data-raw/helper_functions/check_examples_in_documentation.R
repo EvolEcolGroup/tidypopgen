@@ -1,10 +1,8 @@
 # with wd set to the root of the package, source this script
-# it will return a list of the man pages missing returns
+# it will return a list of the man pages missing examples
 # note that map pages for datasets don't need returns.
 
-## running: grep -Ril -F "\value" ./man/
-
-check_returns_in_documentation <- function() {
+check_examples_in_documentation <- function() {
   # get a list of all files in the man directory
   all_files <- dir("./man")
 
@@ -41,7 +39,7 @@ check_returns_in_documentation <- function() {
   # note the additional \ to run through system 2
   files_with_value <- basename(system2(
     command = "grep",
-    args = c("-Ril -F ", shQuote("\\value"), " ./man/"),
+    args = c("-Ril -F ", shQuote("\\examples"), " ./man/"),
     stdout = TRUE
   ))
   # and finally check if there is any stray file left
@@ -49,11 +47,11 @@ check_returns_in_documentation <- function() {
 
   if (length(files_missing_returns) != 0) {
     stop(paste(
-      "There are some files that miss @return:\n",
+      "There are some files that miss @examples:\n",
       paste(files_missing_returns, collapse = ", ")
     ))
   } else {
     return("Success")
   }
 }
-check_returns_in_documentation()
+check_examples_in_documentation()
