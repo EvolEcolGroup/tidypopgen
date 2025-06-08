@@ -14,6 +14,14 @@
 #'   [`gen_tibble`]
 #' @rdname indiv_missingness
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' example_gt %>% indiv_missingness()
+#'
+#' # For missingness as counts:
+#' example_gt %>% indiv_missingness(as_counts = TRUE)
+#'
 indiv_missingness <- function(.x, as_counts, block_size, ...) {
   UseMethod("indiv_missingness", .x)
 }

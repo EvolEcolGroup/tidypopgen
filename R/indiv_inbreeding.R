@@ -14,7 +14,11 @@
 #' @param ... currently unused.
 #' @return a numeric vector of inbreeding coefficients.
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' example_gt %>% indiv_inbreeding(method = "WG17")
+#'
 indiv_inbreeding <- function(
     .x,
     method = c("WG17"),
