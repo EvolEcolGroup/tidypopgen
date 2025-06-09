@@ -67,7 +67,7 @@ is_pseudohaploid <- function(x) {
 #' @param ordered Logical, should the resulting factor be ordered?
 #' @return A factor with levels in the order they first appear
 #' @keywords internal
-
+#' @noRd
 # nolint start
 # x <- factor(c("b", "a", "c", "a", "b", "c", "b", "a"))
 # fct_inorder_base(x)
@@ -99,7 +99,7 @@ fct_inorder_base <- function(f, ordered = FALSE) {
 #' @param replacement A character vector
 #' @return A character vector with the first match replaced
 #' @keywords internal
-
+#' @noRd
 # nolint start
 # x <- "I love cats and cats are cute"
 # str_replace_base(x, "cats", "dogs")

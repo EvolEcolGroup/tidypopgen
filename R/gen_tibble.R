@@ -446,6 +446,7 @@ check_valid_loci <- function(loci) {
 #' @param loci the loci table
 #' @returns a bigSNP object
 #' @keywords internal
+#' @noRd
 gt_write_bigsnp_from_dfs <- function(
     genotypes,
     indiv_meta,
@@ -531,6 +532,7 @@ gt_write_bigsnp_from_dfs <- function(
 #' a vector of values for mixed ploidy).
 #' @returns a vctrs_bigSNP object
 #' @keywords internal
+#' @noRd
 new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
   loci <- tibble::tibble(
     big_index = seq_len(nrow(bigsnp_obj$map)),
@@ -576,7 +578,7 @@ summary.vctrs_bigSNP <- function(object, ...) {
 #' @param .x the tibble
 #' @returns the gen_tibble, invisibly
 #' @keywords internal
-
+#' @noRd
 stopifnot_gen_tibble <- function(.x) {
   if (!"genotypes" %in% names(.x)) {
     stop("not a gen_tibble, 'genotype' column is missing")

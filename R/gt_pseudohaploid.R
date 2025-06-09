@@ -67,6 +67,7 @@ gt_pseudohaploid <- function(x, test_n_loci = 10000) {
 #' @param n_test the number of loci being tested
 #' @return a numeric vector of ploidy
 #' @keywords internal
+#' @noRd
 identify_pseudohaploids <- function(x, n_test = 1000) {
   if (n_test > count_loci(x)) {
     n_test <- count_loci(x)

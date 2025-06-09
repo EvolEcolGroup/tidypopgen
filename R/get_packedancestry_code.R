@@ -11,7 +11,7 @@
 #' @returns a matrix of raw values
 #'
 #' @keywords internal
-#'
+#' @noRd
 get_packedancestry_code <- function(minor = TRUE) { # TODO temp switch
   raw_vals <- as.raw(0:255)
   parsed_vals <- lapply(raw_vals, parse_2bit_groups)
@@ -37,7 +37,7 @@ get_packedancestry_code <- function(minor = TRUE) { # TODO temp switch
 #' @param byte A raw value representing a byte (0-255).
 #' @returns A vector of integers representing the 4 groups of 2 bits.
 #' @keywords internal
-
+#' @noRd
 parse_2bit_groups <- function(byte) {
   if (!inherits(byte, "raw") || length(byte) != 1) {
     stop("Input must be a single raw value.")

@@ -281,7 +281,7 @@ autoplot_l_qc_maf <- function(object, maf_threshold, ...) {
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @keywords internal
-
+#' @noRd
 autoplot_l_qc_hwe <- function(object,
                               hwe_p_vertical_line,
                               hwe_p_low_thresh = NULL,
@@ -323,7 +323,7 @@ autoplot_l_qc_hwe <- function(object,
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @keywords internal
-
+#' @noRd
 autoplot_l_qc_missing <- function(
     object,
     miss_threshold,

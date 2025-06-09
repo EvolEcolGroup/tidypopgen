@@ -8,7 +8,7 @@
 #' @param backingfile the name of the file to use as the backing file
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
-
+#' @noRd
 # nolint start
 vcf_to_fbm_vcfR <- function(
     # nolint end

@@ -8,7 +8,7 @@
 #'   FBM. If NULL, the vcf path will be used.
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
-
+#' @noRd
 vcf_to_fbm_cpp <- function(
     vcf_path,
     backingfile = NULL,

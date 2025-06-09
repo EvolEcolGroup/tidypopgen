@@ -11,6 +11,7 @@
 #' @param chunk_size The number of bytes read in each chunk.
 #' @returns the number of variants (an integer)
 #' @keywords internal
+#' @noRd
 
 count_vcf_variants <- function(file, chunk_size = 50e6) {
   if (!is.character(file)) {
@@ -105,7 +106,7 @@ count_vcf_variants <- function(file, chunk_size = 50e6) {
 #' @param file name and path of vcf file (it can be compressed)
 #' @returns the number of individuals (an integer)
 #' @keywords internal
-
+#' @noRd
 count_vcf_individuals <- function(file) {
   if (!is.character(file)) {
     stop("file should be a character giving the path of the vcf")

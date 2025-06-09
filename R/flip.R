@@ -9,7 +9,7 @@
 #' "C" and "G".
 #' @returns a vector of recoded bases
 #' @keywords internal
-
+#' @noRd
 flip <- function(bases) {
   to_a <- bases == "T"
   to_t <- bases == "A"

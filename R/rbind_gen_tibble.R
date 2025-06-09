@@ -37,6 +37,9 @@
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
 #' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Create a second gen_tibble to merge
 #' test_indiv_meta <- data.frame(id = c("x", "y", "z"),
 #'                               population = c("pop1", "pop1", "pop2"))
 #' test_genotypes <- rbind(
@@ -62,7 +65,7 @@
 #' )
 #'
 #' # Merge the datasets using rbind
-#' merged_gt <- rbind(example_gt, test_gt, flip_strand = TRUE)
+#' merged_gt <- rbind(ref = example_gt, target = test_gt, flip_strand = TRUE)
 #'
 #' merged_gt
 rbind.gen_tbl <- function(
