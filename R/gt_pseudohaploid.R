@@ -13,6 +13,14 @@
 #' @return a `gen_tibble` object with the ploidy set to -2 and the individual
 #' ploidy values updated to 1 or 2.
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Detect pseudohaploids and set ploidy for the whole gt
+#' example_gt<- example_gt %>% gt_pseudohaploid()
+#'
+#' # Ploidy is now set to -2
+#' show_ploidy(example_gt)
 
 gt_pseudohaploid <- function(x, test_n_loci = 10000) {
   # check that the input is a gen_tibble
