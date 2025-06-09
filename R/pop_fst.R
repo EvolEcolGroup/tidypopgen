@@ -14,7 +14,19 @@
 #' @returns a vector of population specific Fst (plus the global value if
 #'   `include_global=TRUE`)
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("grouped_gen_tbl")
+#'
+#' # Compute FIS using Nei87
+#' example_gt %>% pop_fst()
+#'
+#' # To include the global Fst, set include_global = TRUE
+#' example_gt %>% pop_fst(include_global = TRUE)
+#'
+#' # To calculate from a pre-computed allele sharing matrix:
+#' allele_sharing_mat <- pairwise_allele_sharing(example_gt, as_matrix = TRUE)
+#' example_gt %>% pop_fst(allele_sharing_mat = allele_sharing_mat)
+#'
 pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
   stopifnot_diploid(.x)
   if (!inherits(.x, "grouped_df")) {

@@ -26,7 +26,27 @@
 #' @returns a vector of population specific fis (plus the global value if
 #'   `include_global=TRUE`)
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("grouped_gen_tbl")
+#'
+#' # Compute FIS using Nei87
+#' example_gt %>% pop_fis(method = "Nei87")
+#'
+#' # Compute FIS using WG17
+#' example_gt %>% pop_fis(method = "WG17")
+#'
+#' # To include the global FIS, set include_global = TRUE
+#' example_gt %>% pop_fis(method = "Nei87", include_global = TRUE)
+#'
+#' # To return FIS by locus, set by_locus = TRUE
+#' example_gt %>% pop_fis(method = "Nei87", by_locus = TRUE)
+#'
+#' # To calculate from a pre-computed allele sharing matrix:
+#' allele_sharing_mat <- pairwise_allele_sharing(example_gt, as_matrix = TRUE)
+#' example_gt %>% pop_fis(
+#'   method = "WG17",
+#'   allele_sharing_mat = allele_sharing_mat
+#' )
 pop_fis <- function(
     .x,
     method = c("Nei87", "WG17"),

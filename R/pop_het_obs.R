@@ -32,7 +32,17 @@
 #'   `by_locus=FALSE`), or a matrix of estimates by locus (rows are loci,
 #'   columns are populations, `by_locus=TRUE`)
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("grouped_gen_tbl")
+#'
+#' # Compute expected heterozygosity
+#' example_gt %>% pop_het_obs()
+#'
+#' # To include the global expected heterozygosity, set include_global = TRUE
+#' example_gt %>% pop_het_obs(include_global = TRUE)
+#'
+#' # To return by locus, set by_locus = TRUE
+#' example_gt %>% pop_het_obs(by_locus = TRUE)
 # adapted from hierfstat
 pop_het_obs <- function(
     .x,

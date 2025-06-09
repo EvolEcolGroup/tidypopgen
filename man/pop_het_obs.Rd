@@ -48,6 +48,18 @@ specific estimates, the sum is done over a single value of \eqn{k}.
 \eqn{\hat{h}_o} at the genome level is simply the mean of the locus
 estimates.
 }
+\examples{
+example_gt <- example_gt("grouped_gen_tbl")
+
+# Compute expected heterozygosity
+example_gt \%>\% pop_het_obs()
+
+# To include the global expected heterozygosity, set include_global = TRUE
+example_gt \%>\% pop_het_obs(include_global = TRUE)
+
+# To return by locus, set by_locus = TRUE
+example_gt \%>\% pop_het_obs(by_locus = TRUE)
+}
 \references{
 Nei M. (1987) Molecular Evolutionary Genetics. Columbia
 University Press

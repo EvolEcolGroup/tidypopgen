@@ -15,6 +15,11 @@
 #'   values (one per group) is returned.
 #' @rdname pop_tajimas_d
 #' @export
+#' @examples
+#' example_gt <- example_gt("grouped_gen_tbl")
+#'
+#' # Compute Tajima's D
+#' example_gt %>% pop_tajimas_d()
 pop_tajimas_d <- function(.x, n_cores, block_size, ...) {
   UseMethod("pop_tajimas_d", .x)
 }

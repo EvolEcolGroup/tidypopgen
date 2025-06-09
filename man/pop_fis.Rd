@@ -43,6 +43,28 @@ Nei 1987 (with an algorithm equivalent to the one used by
 \code{hierfstat::basic.stats()}) or of Weir and Goudet 2017 (with an algorithm
 equivalent to the one used by \code{hierfstat::fis.dosage()}).
 }
+\examples{
+example_gt <- example_gt("grouped_gen_tbl")
+
+# Compute FIS using Nei87
+example_gt \%>\% pop_fis(method = "Nei87")
+
+# Compute FIS using WG17
+example_gt \%>\% pop_fis(method = "WG17")
+
+# To include the global FIS, set include_global = TRUE
+example_gt \%>\% pop_fis(method = "Nei87", include_global = TRUE)
+
+# To return FIS by locus, set by_locus = TRUE
+example_gt \%>\% pop_fis(method = "Nei87", by_locus = TRUE)
+
+# To calculate from a pre-computed allele sharing matrix:
+allele_sharing_mat <- pairwise_allele_sharing(example_gt, as_matrix = TRUE)
+example_gt \%>\% pop_fis(
+  method = "WG17",
+  allele_sharing_mat = allele_sharing_mat
+)
+}
 \references{
 Nei M. (1987) Molecular Evolutionary Genetics. Columbia
 University Press
