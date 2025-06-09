@@ -24,6 +24,26 @@ been moved, they should be found automatically. If they were moved, use
 \code{reattach_to} to point to the \emph{.rds} file (the \emph{.bk} file needs to be in the
 same directory as the \emph{.rds} file).
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# remove some individuals
+example_gt_filtered <- example_gt \%>\% filter(id != "a")
+
+# save the filtered gen_tibble object
+backing_files <- gt_save(example_gt_filtered,
+  file_name = paste0(tempfile(), "_example_filtered")
+)
+
+# backing_files[1] contains the name of the saved .gt file
+backing_files[1]
+
+# To load the saved gen_tibble object, use the path to the saved .gt file
+reloaded_gt <- gt_load(backing_files[1])
+
+# And we have loaded the gt without individual "a"
+reloaded_gt
+}
 \seealso{
 \code{\link[=gt_save]{gt_save()}}
 }

@@ -110,6 +110,12 @@ sub_gt <- function(path, replacement = "", stop_if_not_ext = TRUE) {
 #' @param x a [`gen_tibble`]
 #' @returns a character vector with the names and paths of the two files
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # To retrieve the names of and paths to the .bk and .rds files use:
+#' gt_get_file_names(example_gt)
+#'
 gt_get_file_names <- function(x) {
   return(c(
     # nolint

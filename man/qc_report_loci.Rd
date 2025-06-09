@@ -24,3 +24,8 @@ a tibble with 3 elements: maf, missingness and hwe_p
 \description{
 Return QC information to assess loci (MAF, missingness and HWE test).
 }
+\examples{
+example_gt <- example_gt("grouped_gen_tbl")
+
+example_gt \%>\% qc_report_loci()
+}

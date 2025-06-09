@@ -28,6 +28,14 @@
 #'   het_obs, missingness, id and to_keep.
 #' @rdname qc_report_indiv
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Get QC report for individuals
+#' example_gt %>% qc_report_indiv()
+#'
+#' # Get QC report with kinship filtering
+#' example_gt %>% qc_report_indiv(kings_threshold = "first")
 qc_report_indiv <- function(.x, ...) {
   UseMethod("qc_report_indiv", .x)
 }

@@ -14,7 +14,25 @@
 #' @returns a [`gen_tibble`]
 #' @seealso [gt_save()]
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # remove some individuals
+#' example_gt_filtered <- example_gt %>% filter(id != "a")
+#'
+#' # save the filtered gen_tibble object
+#' backing_files <- gt_save(example_gt_filtered,
+#'   file_name = paste0(tempfile(), "_example_filtered")
+#' )
+#'
+#' # backing_files[1] contains the name of the saved .gt file
+#' backing_files[1]
+#'
+#' # To load the saved gen_tibble object, use the path to the saved .gt file
+#' reloaded_gt <- gt_load(backing_files[1])
+#'
+#' # And we have loaded the gt without individual "a"
+#' reloaded_gt
 gt_load <- function(file = NULL, reattach_to = NULL) {
   if (file_ext(file) != "gt") {
     file <- paste0(file, ".gt")
