@@ -24,3 +24,9 @@ the path of the .vcf file
 \description{
 This function write a VCF from a \code{gen_tibble}.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Write a vcf file
+example_gt \%>\% gt_as_vcf()
+}
