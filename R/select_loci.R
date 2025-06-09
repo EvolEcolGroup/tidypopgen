@@ -17,6 +17,16 @@
 #'
 
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Select loci by name
+#' example_gt_subset <- example_gt %>% select_loci(c("rs1", "rs2", "rs3"))
+#' show_loci(example_gt_subset)
+#'
+#' # Select loci by index
+#' example_gt_subset <- example_gt %>% select_loci(c(4, 2, 1))
+#' show_loci(example_gt_subset)
 #'
 select_loci <- function(.data, .sel_arg) {
   # defuse the selection criteria

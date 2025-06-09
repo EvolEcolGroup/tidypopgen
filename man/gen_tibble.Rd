@@ -130,8 +130,10 @@ missing alleles will be converted from 'X' to NA
 \examples{
 
 # Create a gen_tibble from a matrix of genotypes:
-test_indiv_meta <- data.frame(id = c("a", "b", "c"),
-                              population = c("pop1", "pop1", "pop2"))
+test_indiv_meta <- data.frame(
+  id = c("a", "b", "c"),
+  population = c("pop1", "pop1", "pop2")
+)
 test_genotypes <- rbind(
   c(1, 1, 0, 1, 1, 0),
   c(2, 1, 0, 0, 0, 0),

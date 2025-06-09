@@ -40,3 +40,16 @@ and any grouping variables if an associated 'data' gen_tibble is provided. To
 avoid any automatic re-sorting of individuals, set \code{arrange_by_group} and
 \code{arrange_by_indiv} to FALSE. See \code{autoplot.q_matrix} for further details.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Create a gt_admix object
+admix_obj <- example_gt \%>\% gt_snmf(k = 1:3,
+                                    project = "force", entropy = TRUE)
+
+# Plot the cross-validation error
+autoplot(admix_obj, type = "cv")
+
+# Barplot of individuals admixture proportions
+autoplot(admix_obj, type = "barplot", k = 3, run = 1)
+}

@@ -13,6 +13,18 @@
 #' for which .sel_logical is TRUE will be selected; NA will be treated as FALSE.
 #' @returns a subset of the list of loci in the `gen_tibble`
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Select loci by chromosome
+#' example_gt_subset <- example_gt %>%
+#'   select_loci_if(loci_chromosomes(genotypes) == "chr2")
+#' show_loci(example_gt_subset)
+#'
+#' # Select loci by a summary statistic
+#' example_gt_subset <- example_gt %>%
+#'   select_loci_if(loci_maf(genotypes) > 0.2)
+#' show_loci(example_gt_subset)
 #'
 select_loci_if <- function(.data, .sel_logical) {
   # defuse the boolean argument

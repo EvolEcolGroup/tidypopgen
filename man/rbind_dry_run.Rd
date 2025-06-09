@@ -55,8 +55,10 @@ have different alleles in the two datasets will also be dropped.
 example_gt <- example_gt("gen_tbl")
 
 # Create a second gen_tibble to merge
-test_indiv_meta <- data.frame(id = c("x", "y", "z"),
-                              population = c("pop1", "pop1", "pop2"))
+test_indiv_meta <- data.frame(
+  id = c("x", "y", "z"),
+  population = c("pop1", "pop1", "pop2")
+)
 test_genotypes <- rbind(
   c(1, 1, 2, 1, 1),
   c(2, 1, 2, 0, 0),

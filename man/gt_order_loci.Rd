@@ -39,3 +39,15 @@ with the new order, so that it can be used by functions such as
 \code{\link[=loci_ld_clump]{loci_ld_clump()}} and \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}}. If the loci table is already
 ordered, the original \code{gen_tibble} is returned.
 }
+\examples{
+example_gt <- example_gt("gen_tbl") \%>\% select_loci(c(1, 5, 2, 6, 4, 3))
+
+# Loci are in the wrong order
+show_loci(example_gt)
+
+# Reorder the loci, ignoring genetic distance
+example_gt_ordered <- gt_order_loci(example_gt, ignore_genetic_dist = TRUE)
+
+# Loci are now in the correct order
+show_loci(example_gt_ordered)
+}

@@ -19,7 +19,17 @@
 #' @param ... other arguments
 #' @return A [gen_tibble]
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl") %>% select_loci(c(1, 5, 2, 6, 4, 3))
+#'
+#' # Loci are in the wrong order
+#' show_loci(example_gt)
+#'
+#' # Reorder the loci, ignoring genetic distance
+#' example_gt_ordered <- gt_order_loci(example_gt, ignore_genetic_dist = TRUE)
+#'
+#' # Loci are now in the correct order
+#' show_loci(example_gt_ordered)
 gt_order_loci <- function(
     .x,
     use_current_table = FALSE,

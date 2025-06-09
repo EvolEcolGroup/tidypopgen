@@ -71,6 +71,14 @@ q_matrix <- function(x) {
 #' @param run The run number of the desired Q matrix
 #' @return A single Q matrix from the `gt_admix` object
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Create a gt_admix object
+#' admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
+#'
+#' # Extract a Q matrix
+#' get_q_matrix(admix_obj, k = 3, run = 1)
 get_q_matrix <- function(x, ..., k, run) {
   # Check if 'x' is a valid gt_admix object
   if (!inherits(x, "gt_admix")) {
@@ -174,7 +182,16 @@ get_p_matrix <- function(x, ..., k, run) {
 #'   for that particular Q value.}
 #'
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Create a gt_admix object
+#' admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
+#'
+#' # Extract a Q matrix
+#' q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+#'
+#' tidy(q_mat_k3, data = example_gt)
 tidy.q_matrix <- function(x, data, ...) {
   rlang::check_dots_empty()
 
@@ -244,6 +261,17 @@ tidy.q_matrix <- function(x, data, ...) {
 #'   columns containing each observation's Q values.
 #' @export
 #' @name augment_q_matrix
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Create a gt_admix object
+#' admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
+#'
+#' # Extract a Q matrix
+#' q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+#'
+#' # Augment the gen_tibble with Q values
+#' augment(q_mat_k3, data = example_gt)
 augment.q_matrix <- function(x, data = NULL, ...) {
   if (inherits(data, "grouped_df")) {
     if (!".rownames" %in% names(data)) {

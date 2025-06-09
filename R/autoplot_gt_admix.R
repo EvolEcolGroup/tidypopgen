@@ -23,6 +23,18 @@
 #' @returns a `ggplot2` object
 #' @name autoplot_gt_admix
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Create a gt_admix object
+#' admix_obj <- example_gt %>% gt_snmf(k = 1:3,
+#'                                     project = "force", entropy = TRUE)
+#'
+#' # Plot the cross-validation error
+#' autoplot(admix_obj, type = "cv")
+#'
+#' # Barplot of individuals admixture proportions
+#' autoplot(admix_obj, type = "barplot", k = 3, run = 1)
 autoplot.gt_admix <- function(
     object,
     type = c("cv", "barplot"),

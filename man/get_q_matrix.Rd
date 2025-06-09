@@ -22,3 +22,12 @@ A single Q matrix from the \code{gt_admix} object
 This function retrieves a single Q matrix from a \code{gt_admix} object
 based on the specified k value and run number.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Create a gt_admix object
+admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
+
+# Extract a Q matrix
+get_q_matrix(admix_obj, k = 3, run = 1)
+}
