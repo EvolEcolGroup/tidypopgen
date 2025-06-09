@@ -37,7 +37,7 @@
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
 #' @examples
-#' test_indiv_meta <- data.frame(id = c("a", "b", "c"),
+#' test_indiv_meta <- data.frame(id = c("x", "y", "z"),
 #'                               population = c("pop1", "pop1", "pop2"))
 #' test_genotypes <- rbind(
 #'   c(1, 1, 0, 1, 1, 0),
