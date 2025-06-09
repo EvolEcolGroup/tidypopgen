@@ -53,3 +53,12 @@ This function is a wrapper around \code{\link[bigsnpr:snp_fastImpute]{bigsnpr::s
 rates from the xgboost, if appended, can be retrieved with
 \code{attr(x$genotypes, "imputed_errors")} where \code{x} is the \code{gen_tibble}.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Impute the gen_tibble
+example_gt <- example_gt \%>\% gt_impute_xgboost()
+
+# And we can check it has been imputed
+example_gt \%>\% gt_has_imputed()
+}

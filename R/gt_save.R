@@ -17,7 +17,15 @@
 #'   and *.bk* files
 #' @seealso [gt_load()]
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # remove some individuals
+#' example_gt <- example_gt %>% filter(id != "a")
+#'
+#' # save filtered gen_tibble object
+#' gt_save(example_gt, file_name = paste0(tempfile(), "_example_filtered"))
+#'
 gt_save <- function(x, file_name = NULL, quiet = FALSE) {
   if (!inherits(x, "gen_tbl")) {
     stop("x should be a gen_tibble")

@@ -41,3 +41,9 @@ This function does not check whether the positions of your genetic loci are
 sorted. To check this, and update the file backing matrix, use
 \code{gt_order_loci()}.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+example_gt \%>\% gt_update_backingfile()
+
+}

@@ -26,7 +26,14 @@
 #' attr(missing_gt$genotypes, "imputed_errors")
 #' @returns a [gen_tibble] with imputed genotypes
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Impute the gen_tibble
+#' example_gt <- example_gt %>% gt_impute_xgboost()
+#'
+#' # And we can check it has been imputed
+#' example_gt %>% gt_has_imputed()
 gt_impute_xgboost <- function(
     x,
     alpha = 1e-4,

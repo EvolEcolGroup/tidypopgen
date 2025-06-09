@@ -18,3 +18,12 @@ This function checks if a dataset uses imputed data. Note that it is possible
 to have a dataset that has been imputed but it is currently not using
 imputation.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Impute the gen_tibble
+example_gt <- example_gt \%>\% gt_impute_simple()
+
+# Check whether the gen_tibble uses imputed values
+example_gt \%>\% gt_uses_imputed()
+}
