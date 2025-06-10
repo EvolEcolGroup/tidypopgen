@@ -2,15 +2,26 @@
 title: "Benchmark on the HGDP"
 ---
 
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "./figure/hgdp_benchmark/"
+)
+library(benchmarkme)
+library(chunkhooks)
+library(ggheatmap)
+hook_benchmark()
+set.seed(123)
+```
 
 This vignette is a benchmark of a few key functions in the tidypopgen package.
 The Human Genome Diversity Project (HGDP) SNP dataset is used for this
 benchmark. This dataset includes 1043 individuals from 51 populations, typed
 at ~650k loci.
 
-We will run this benchmark on a machine with a GenuineIntel, 13th Gen Intel(R) Core(TM) i9-13900, 24 CPU
-and 126 GiB of RAM. However, we will limit the number of
+We will run this benchmark on a machine with a `r benchmarkme::get_cpu()` CPU
+and `r as.character(print(benchmarkme::get_ram(), unit_system = "iec"))` of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
 inflation of the number of threads used (for example, in cases where dependency
@@ -20,8 +31,7 @@ number of cores used by the parallelised BLAS library with
 `bigparallelr::set_blas_ncores()`, and by the package data.table with
 `data.table::setDTthreads()`.
 
-
-``` r
+```{r}
 n_cores <- 20
 
 data.table::setDTthreads(n_cores)
@@ -30,27 +40,37 @@ bigparallelr::set_blas_ncores(n_cores)
 
 We can now load the necessary libraries:
 
-
-``` r
+```{r}
 library(tidypopgen)
 library(ggplot2)
 ```
 
-Before running this benchmark, we need to download into the subdirectory
-`data/hgdp/` the bed file `hgdp650.qc.hg19.bed` and the metadata file
-`hgdp650_id_pop.txt`.
+And before running the benchmark, we need to download the relevant files. We 
+can use the following to download the HGDOP files into a temporary directory:
 
+```{r eval = FALSE}
+temp_dir <- tempdir()
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650_id_pop.txt"
+download_path <- file.path(temp_dir, "hgdp650_id_pop.txt")
+download.file(download_url, download_path, mode = "wb")
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.bed"
+download_path <- file.path(temp_dir, "hgdp650.qc.hg19.bed")
+download.file(download_url, download_path, method = "wget")
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.bim"
+download_path <- file.path(temp_dir, "hgdp650.qc.hg19.bim")
+download.file(download_url, download_path, method = "wget")
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.fam"
+download_path <- file.path(temp_dir, "hgdp650.qc.hg19.fam")
+download.file(download_url, download_path, method = "wget")
+```
 
-``` r
+In the following vignette, we place these files into the subdirectory
+`data/hgdp/`, and we will use the paths to the bed file `hgdp650.qc.hg19.bed` 
+and the metadata file `hgdp650_id_pop.txt` to read in our data.
+
+```{r}
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
-#> Rows: 1064 Columns: 6
-#> ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────
-#> Delimiter: "\t"
-#> chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
 
 # Create gen_tibble object
@@ -58,8 +78,7 @@ meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
 Our first step is to load the HGDP data into a `gen_tibble` object, and add its
 associated metadata.
 
-
-``` r
+```{r read_plink, benchmark = TRUE}
 hgdp <- gen_tibble(bed_path,
   quiet = TRUE,
   backingfile = tempfile("test_"),
@@ -67,12 +86,9 @@ hgdp <- gen_tibble(bed_path,
 )
 ```
 
-read_plink: 2.7s
-
 Add metadata
 
-
-``` r
+```{r}
 hgdp <- hgdp %>% mutate(
   population = meta_info$population[match(hgdp$id, meta_info$Id)],
   region = meta_info$Region[match(hgdp$id, meta_info$Id)]
@@ -81,24 +97,8 @@ hgdp <- hgdp %>% mutate(
 
 Let's confirm that we have read all the expected information:
 
-
-``` r
+```{r}
 hgdp
-#> # A gen_tibble: 643733 loci
-#> # A tibble:     1,043 × 4
-#>    id         genotypes population region
-#>    <chr>     <vctr_SNP> <chr>      <chr> 
-#>  1 HGDP00448          1 Biaka_HG   Africa
-#>  2 HGDP00479          2 Biaka_HG   Africa
-#>  3 HGDP00985          3 Biaka_HG   Africa
-#>  4 HGDP01094          4 Biaka_HG   Africa
-#>  5 HGDP00982          5 Mbuti_HG   Africa
-#>  6 HGDP00911          6 Mandenka   Africa
-#>  7 HGDP01202          7 Mandenka   Africa
-#>  8 HGDP00927          8 Yoruba     Africa
-#>  9 HGDP00461          9 Biaka_HG   Africa
-#> 10 HGDP00451         10 Biaka_HG   Africa
-#> # ℹ 1,033 more rows
 ```
 
 # Loci Report
@@ -106,35 +106,25 @@ hgdp
 We can then call `qc_report_loci`. This function supplies minor allele
 frequency, rate of missingness, and a Hardy-Weinberg exact p-value for each SNP.
 
-
-``` r
+```{r loci_report, benchmark = TRUE}
 loci_report <- qc_report_loci(hgdp)
-#> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
 ```
-
-loci_report: 1.8s
 The resulting report can be observed using `autoplot`.
 
-
-``` r
+```{r autoplot_loci_report}
 autoplot(loci_report, type = "all")
 ```
-
-![plot of chunk autoplot_loci_report](./figure/hgdp_benchmark/autoplot_loci_report-1.png)
 
 # Filter Loci
 
 Following this, we filter the loci to only including those with a minor allele
 frequency over 0.05, and a missingness rate below 0.05.
 
-
-``` r
+```{r filter_loci, benchmark = TRUE}
 to_keep_loci <-
   subset(loci_report, loci_report$maf > 0.05 & loci_report$missingness < 0.05)
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
-
-filter_loci: 1.4s
 
 
 # Individual Report
@@ -143,47 +133,31 @@ We can then call `qc_report_indiv` to supply observed heterozygosity per
 individual, and rate of missingness per individual.
 
 
-
-``` r
+```{r indiv_report, benchmark = TRUE}
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.5s
-
-
-``` r
+```{r autoplot_indiv_report}
 autoplot(indiv_report, type = "scatter")
 ```
-
-![plot of chunk autoplot_indiv_report](./figure/hgdp_benchmark/autoplot_indiv_report-1.png)
 
 # Filter individuals
 
 And we can filter individuals down to only include those with less than 1% of
 their genotypes missing.
 
-
-``` r
+```{r filter_indiv, benchmark = TRUE}
 to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
-
-filter_indiv: 3ms
 
 # Update backingfile
 
 After removing individuals from the dataset, and before imputing, we need to
 update the file backing matrix with `gt_update_backingfile`.
 
-
-``` r
+```{r update_backingfile}
 hgdp <- gt_update_backingfile(hgdp)
-#> Genetic distances are not sorted, setting them to zero
-#> 
-#> gen_backing files updated, now
-#> using bigSNP file: /tmp/RtmpCu0Grc/test_47fa53a8faf7d_v2.rds
-#> with backing file: /tmp/RtmpCu0Grc/test_47fa53a8faf7d_v2.bk
-#> make sure that you do NOT delete those files!
 ```
 
 # Impute data
@@ -192,47 +166,35 @@ Some functions, such as `loci_ld_clump` and the `gt_pca` functions, require that
 there is no missingness in the dataset, so we use `gt_impute_simple` to impute
 any remaining missing genotypes.
 
-
-``` r
+```{r impute, benchmark = TRUE}
 hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
-
-impute: 153ms
 
 # LD clumping
 
 LD clumping is then performed to control for linkage disequilibrium.
 
-
-``` r
+```{r ld_clumping, benchmark = TRUE}
 hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
-
-ld_clumping: 3.9s
 
 # PCA
 
 A principal components analysis can then be computed using the resulting cleaned
 and LD clumped dataset.
 
-
-``` r
+```{r pca, benchmark = TRUE}
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 1.8s
-
 Plot PCA:
 
-
-``` r
+```{r PCA}
 autoplot(test_pca, type = "scores") +
   aes(color = hgdp$region, shape = hgdp$region)
 ```
-
-![plot of chunk PCA](./figure/hgdp_benchmark/PCA-1.png)
 
 # DAPC
 
@@ -240,29 +202,22 @@ We can continue with a discriminant analysis of principal
 components using `gt_dapc`, setting 6 groups corresponding to
 the main geographic regions covered by the dataset.
 
-
-``` r
+```{r dapc, benchmark = TRUE}
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
-dapc: 37ms
-
 Plot DAPC:
 
-
-``` r
+```{r DAPC_scores_plot}
 autoplot(test_dapc, type = "scores")
 ```
-
-![plot of chunk DAPC_scores_plot](./figure/hgdp_benchmark/DAPC_scores_plot-1.png)
 
 # Calculate Fst
 
 To examine the differentiation between populations in the global HGDP set, we
 calculate pairwise Fst.
 
-
-``` r
+```{r pairwise_fst, benchmark = TRUE}
 grouped_hgdp <- hgdp %>% group_by(population)
 pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
@@ -270,12 +225,9 @@ pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
 )
 ```
 
-pairwise_fst: 3s
-
 Plot pairwise Fst:
 
-
-``` r
+```{r pairwise_fst_plot, eval = FALSE}
 # Order by continents
 grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
 regional_order <- unique(grouped_hgdp_order$population)
@@ -298,58 +250,34 @@ ggheatmap(pairwise_fsts) +
 
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
 
-
-``` r
+```{r plink_save, benchmark = TRUE}
 gt_as_plink(hgdp,
   file = tempfile(),
   type = "bed",
   overwrite = TRUE
 )
-#> [1] "/tmp/RtmpCu0Grc/file47fa51ed66b65.bed"
 ```
-
-plink_save: 250ms
 
 # Summary
 
 Here is a summary of the time taken (in seconds) to perform each step of the analyses:
 
+```{r echo=FALSE}
+chunk_order <- knitr::all_labels() # Get order
+# Chunks that have benchmarks
+benchmarked_chunks <- names(chunkhooks::benchmarks)
 
-```
-#>            step  time
-#> 1    read_plink  2.73
-#> 2   loci_report   1.8
-#> 3   filter_loci  1.35
-#> 4  indiv_report  2.52
-#> 5  filter_indiv     0
-#> 6        impute  0.15
-#> 7   ld_clumping  3.87
-#> 8           pca  1.76
-#> 9          dapc  0.04
-#> 10 pairwise_fst  2.99
-#> 11   plink_save  0.25
-#> 12        Total 17.46
-```
-# Running the benchmark on a laptop
-We will now run this benchmark on a laptop 
-with a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU
-and 31 GiB
-of RAM, limiting the number of cores to 4.
-Here is a summary of the time taken (in seconds) to perform each step of the analyses:
+ordered_benchmark_chunks <- chunk_order[chunk_order %in% benchmarked_chunks]
 
-
-```
-#>            step  time
-#> 1    read_plink  5.31
-#> 2   loci_report  3.46
-#> 3   filter_loci  4.39
-#> 4  indiv_report   3.3
-#> 5  filter_indiv  0.01
-#> 6        impute  0.96
-#> 7   ld_clumping 10.09
-#> 8           pca  3.94
-#> 9          dapc  0.25
-#> 10 pairwise_fst  5.35
-#> 11   plink_save  0.47
-#> 12        Total 37.53
+benchmark_results <- data.frame(
+  step = ordered_benchmark_chunks,
+  time = NA_real_
+)
+for (i in seq_along(benchmark_results$step)) {
+  this_step <- benchmark_results$step[i]
+  benchmark_results$time[i] <- round(chunkhooks::benchmarks[[this_step]], 2)
+}
+total <- c("Total", sum(benchmark_results$time))
+benchmark_results <- rbind(benchmark_results, total)
+benchmark_results
 ```
