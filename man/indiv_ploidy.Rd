@@ -24,3 +24,9 @@ a vector of ploidy, one per individuals in the \code{\link{gen_tibble}}
 \description{
 Returns the ploidy for each individual.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+example_gt \%>\% indiv_ploidy()
+
+}

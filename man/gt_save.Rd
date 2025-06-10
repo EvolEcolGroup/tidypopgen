@@ -28,6 +28,16 @@ full dataset we are interested in, whilst the \emph{.rds} and \emph{.bk} file st
 full dataset. To reload a \code{gen_tibble}, you can pass the name of the \emph{.gt}
 file with \code{\link[=gt_load]{gt_load()}}.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# remove some individuals
+example_gt <- example_gt \%>\% filter(id != "a")
+
+# save filtered gen_tibble object
+gt_save(example_gt, file_name = paste0(tempfile(), "_example_filtered"))
+
+}
 \seealso{
 \code{\link[=gt_load]{gt_load()}}
 }

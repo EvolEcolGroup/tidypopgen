@@ -9,6 +9,10 @@
 #' on compulsory columns that will always be present)
 #' @rdname show_loci
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' example_gt %>% show_loci()
 show_loci <- function(.x, ...) {
   UseMethod("show_loci", .x)
 }

@@ -30,7 +30,14 @@
 #' - `id` the id column of the input `gen_tibble` (if applicable)
 #' - `group` the group column of the input `gen_tibble` (if applicable)
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # To run SNMF on a gen_tibble:
+#' example_gt %>% gt_snmf(
+#'   k = 1:3, project = "force", entropy = TRUE,
+#'   percentage = 0.5, n_runs = 1, seed = 1, alpha = 100
+#' )
 gt_snmf <- function(
     x,
     k,

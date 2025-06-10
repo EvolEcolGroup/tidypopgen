@@ -8,6 +8,10 @@
 #' @returns a tibble with 3 elements: maf, missingness and hwe_p
 #' @rdname qc_report_loci
 #' @export
+#' @examples
+#' example_gt <- example_gt("grouped_gen_tbl")
+#'
+#' example_gt %>% qc_report_loci()
 qc_report_loci <- function(.x, ...) {
   UseMethod("qc_report_loci", .x)
 }
@@ -277,7 +281,7 @@ autoplot_l_qc_maf <- function(object, maf_threshold, ...) {
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @keywords internal
-
+#' @noRd
 autoplot_l_qc_hwe <- function(object,
                               hwe_p_vertical_line,
                               hwe_p_low_thresh = NULL,
@@ -319,7 +323,7 @@ autoplot_l_qc_hwe <- function(object,
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @keywords internal
-
+#' @noRd
 autoplot_l_qc_missing <- function(
     object,
     miss_threshold,

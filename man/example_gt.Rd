@@ -25,3 +25,8 @@ an example object of the class \code{gen_tbl}.
 This function creates a \code{gen_tibble} object for use in examples in
 documentation.
 }
+\examples{
+
+# This function creates an example gen_tibble object
+example_gt <- example_gt("gen_tbl")
+}

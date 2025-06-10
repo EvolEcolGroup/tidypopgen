@@ -7,6 +7,7 @@
 #' be in a block, all adjacent to each other
 #' @returns modifier for a ggplot, added with the usual '+'
 #' @keywords internal
+#' @noRd
 
 annotate_group_info <- function(q_tbl, plt) {
   group <- q_tbl %>%

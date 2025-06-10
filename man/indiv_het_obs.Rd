@@ -24,10 +24,24 @@ quantities.}
 \item{...}{currently unused.}
 }
 \value{
-a vector of heterozygosities, one per individuals in the
-\code{\link{gen_tibble}}
+either:
+\itemize{
+\item a vector of heterozygosities, one per individuals in the \code{\link{gen_tibble}}
+\item a matrix with two columns, where the first is the number of heterozygous
+loci for each individual and the second is the number of missing values
+for each individual
+}
 }
 \description{
 Estimate observed heterozygosity (H_obs) for each individual (i.e. the
 frequency of loci that are heterozygous in an individual).
+}
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+example_gt \%>\% indiv_het_obs()
+
+# For observed heterozygosity as counts:
+example_gt \%>\% indiv_het_obs(as_counts = TRUE)
+
 }

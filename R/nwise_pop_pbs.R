@@ -112,7 +112,7 @@ nwise_pop_pbs <- function(.x,
 #' are named as fst_pop1.pop2, fst_pop1.pop3, fst_pop2.pop3)
 #' @return A tibble with the PBS values for the triplet of populations
 #' @keywords internal
-
+#' @noRd
 pbs_one_triplet <- function(pops, fst_values) {
   pop1 <- pops[1]
   pop2 <- pops[2]

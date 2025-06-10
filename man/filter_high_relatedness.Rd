@@ -31,3 +31,12 @@ This function takes a matrix of x by y individuals containing relatedness
 coefficients and returns the maximum set of individuals that contains no
 relationships above the given threshold.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Calculate relationship matrix
+king_matrix <- example_gt \%>\% pairwise_king(as_matrix = TRUE)
+
+# Filter individuals with threshold above 0.2
+filter_high_relatedness(king_matrix, example_gt, kings_threshold = 0.2)
+}

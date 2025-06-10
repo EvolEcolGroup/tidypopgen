@@ -48,3 +48,12 @@ first degree or second degree relationships from the dataset. This second
 option is similar to using  --unrelated --degree 1 or --unrelated --degree 2
 in KING.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Get QC report for individuals
+example_gt \%>\% qc_report_indiv()
+
+# Get QC report with kinship filtering
+example_gt \%>\% qc_report_indiv(kings_threshold = "first")
+}

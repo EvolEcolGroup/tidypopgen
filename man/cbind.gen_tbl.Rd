@@ -22,3 +22,12 @@ the tables, and we suggest that you use \code{\link[dplyr:mutate-joins]{dplyr::l
 that \code{cbind} will not combine two \code{gen_tibbles} (i.e. it will NOT combine
 markers for the same individuals)
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Create a dataframe to combine with the gen_tibble
+df <- data.frame(region = c("A", "A", "B", "B", "A", "B", "B"))
+
+# Combine the gen_tibble with the dataframe
+example_gt <- cbind(example_gt, df)
+}

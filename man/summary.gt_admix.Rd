@@ -17,3 +17,13 @@ A summary of the \code{gt_admix} object
 \description{
 Summary method for gt_admix objects
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Create a gt_admix object
+admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
+
+# Print a summary
+summary(admix_obj)
+
+}

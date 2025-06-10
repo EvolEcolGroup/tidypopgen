@@ -11,7 +11,14 @@
 #'   See \code{\link[base]{cbind}} for details.
 #' @returns a `gen_tibble`
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Create a dataframe to combine with the gen_tibble
+#' df <- data.frame(region = c("A", "A", "B", "B", "A", "B", "B"))
+#'
+#' # Combine the gen_tibble with the dataframe
+#' example_gt <- cbind(example_gt, df)
 cbind.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod(generic = "cbind", ..., deparse.level = deparse.level)

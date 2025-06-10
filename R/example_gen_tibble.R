@@ -11,7 +11,10 @@
 #' @returns an example object of the class `gen_tbl`.
 #' @rdname example_gt
 #' @export
-
+#' @examples
+#'
+#' # This function creates an example gen_tibble object
+#' example_gt <- example_gt("gen_tbl")
 example_gt <- function(type = c(
                          "gen_tbl", # nolint
                          "grouped_gen_tbl",

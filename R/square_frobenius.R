@@ -15,7 +15,7 @@
 #'   genotype counts)
 #' @return The square of the Frobenius norm of the matrix
 #' @keywords internal
-
+#' @noRd
 square_frobenius <- function(
     X, # nolint start
     ind.row = bigstatsr::rows_along(X),

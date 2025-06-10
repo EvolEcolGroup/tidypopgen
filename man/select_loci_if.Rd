@@ -26,3 +26,17 @@ at \code{\link[=select_loci]{select_loci()}} for that feature.
 #' Note that the \code{select_loci_if} verb does not modify the backing FBM files,
 but rather it subsets the list of loci to be used stored in the \code{gen_tibble}.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Select loci by chromosome
+example_gt_subset <- example_gt \%>\%
+  select_loci_if(loci_chromosomes(genotypes) == "chr2")
+show_loci(example_gt_subset)
+
+# Select loci by a summary statistic
+example_gt_subset <- example_gt \%>\%
+  select_loci_if(loci_maf(genotypes) > 0.2)
+show_loci(example_gt_subset)
+
+}

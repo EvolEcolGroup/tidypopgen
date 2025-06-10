@@ -17,7 +17,15 @@
 #'   and *.bk* files
 #' @seealso [gt_load()]
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # remove some individuals
+#' example_gt <- example_gt %>% filter(id != "a")
+#'
+#' # save filtered gen_tibble object
+#' gt_save(example_gt, file_name = paste0(tempfile(), "_example_filtered"))
+#'
 gt_save <- function(x, file_name = NULL, quiet = FALSE) {
   if (!inherits(x, "gen_tbl")) {
     stop("x should be a gen_tibble")
@@ -54,6 +62,7 @@ gt_save <- function(x, file_name = NULL, quiet = FALSE) {
 #' @returns the file name and path of the *.gt* file, together with the *.rds*
 #'   and *.bk* files
 #' @keywords internal
+#' @noRd
 gt_save_light <- function(x, file_name = NULL, quiet = FALSE) {
   if (is.null(file_name)) {
     file_name <- bigstatsr::sub_bk(gt_get_file_names(x)[2], ".gt")
@@ -102,6 +111,12 @@ sub_gt <- function(path, replacement = "", stop_if_not_ext = TRUE) {
 #' @param x a [`gen_tibble`]
 #' @returns a character vector with the names and paths of the two files
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # To retrieve the names of and paths to the .bk and .rds files use:
+#' gt_get_file_names(example_gt)
+#'
 gt_get_file_names <- function(x) {
   return(c(
     # nolint

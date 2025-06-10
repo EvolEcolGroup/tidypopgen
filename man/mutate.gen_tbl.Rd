@@ -17,3 +17,9 @@ a \code{gen_tibble}
 \description{
 A mutate method for \code{gen_tibble} objects
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Add a new column
+example_gt \%>\% mutate(region = "East")
+}

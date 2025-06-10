@@ -8,6 +8,10 @@
 #' @returns the number of loci
 #' @rdname count_loci
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' example_gt %>% count_loci()
 count_loci <- function(.x, ...) {
   UseMethod("count_loci", .x)
 }
