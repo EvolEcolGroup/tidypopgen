@@ -81,6 +81,22 @@ tested.</p></dd>
 ploidy values updated to 1 or 2.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_gt.html">example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Detect pseudohaploids and set ploidy for the whole gen_tibble</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">gt_pseudohaploid</span><span class="op">(</span>test_n_loci <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Ploidy is now set to -2</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="show_ploidy.html">show_ploidy</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -2</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Individual ploidy now varies between 1 (pseudohaploid) and 2 (diploid)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="indiv_ploidy.html">indiv_ploidy</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 2 1 2 2 1 2</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

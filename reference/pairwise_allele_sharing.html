@@ -93,6 +93,39 @@ improve speed, but will tax memory.</p></dd>
     <p>a matrix of allele sharing between all pairs of individuals</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_gt.html">example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Compute allele sharing between individuals</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">pairwise_allele_sharing</span><span class="op">(</span>as_matrix <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 21 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    item1 item2 value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> a     b     0.7  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> a     c     0.6  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> a     d     0.667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> a     e     0.583</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> a     f     0.6  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> a     g     0.5  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> b     c     0.75 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> b     d     0.8  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> b     e     0.5  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> b     f     0.5  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 11 more rows</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Alternatively, return as a tibble</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">pairwise_allele_sharing</span><span class="op">(</span>as_matrix <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           a     b     c         d         e     f     g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a 0.6666667 0.700 0.600 0.6666667 0.5833333 0.600 0.500</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b 0.7000000 0.900 0.750 0.8000000 0.5000000 0.500 0.375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> c 0.6000000 0.750 0.800 0.6000000 0.6000000 0.625 0.500</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> d 0.6666667 0.800 0.600 0.8333333 0.4166667 0.700 0.500</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> e 0.5833333 0.500 0.600 0.4166667 0.7500000 0.500 0.500</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f 0.6000000 0.500 0.625 0.7000000 0.5000000 0.900 0.750</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> g 0.5000000 0.375 0.500 0.5000000 0.5000000 0.750 0.700</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
