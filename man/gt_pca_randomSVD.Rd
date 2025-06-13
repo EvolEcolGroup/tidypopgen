@@ -79,3 +79,20 @@ memory-efficient. Thus, it can be used on very large big.matrices.
 This function is a wrapper
 for \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}}
 }
+\examples{
+vcf_path <-
+  system.file("extdata", "anolis",
+    "punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+    package = "tidypopgen"
+  )
+anole_gt <-
+  gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+
+# Remove monomorphic loci and impute
+anole_gt <- anole_gt \%>\% select_loci_if(loci_maf(genotypes) > 0)
+anole_gt <- gt_impute_simple(anole_gt, method = "mode")
+
+# Create PCA obejct, including total variance
+gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
+
+}
