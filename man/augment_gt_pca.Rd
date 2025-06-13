@@ -29,6 +29,28 @@ separate column, which is given name with the pattern ".fittedPC1",
 scripts written for data augmented with \link[broom:augment.prcomp]{broom::augment.prcomp} will work out
 of the box (this is especially helpful when adapting plotting scripts).
 }
+\examples{
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata/lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+# Create PCA object
+pca <- gt_pca_partialSVD(lobsters)
+
+# Augment the gen_tibble with PCA scores
+augment(pca, data = lobsters)
+
+# Adjust the number of components to add
+augment(pca, data = lobsters, k = 2)
+}
 \seealso{
 \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \link{gt_pca_tidiers}
 }

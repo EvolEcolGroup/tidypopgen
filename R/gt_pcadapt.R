@@ -17,7 +17,24 @@
 #' @param n_cores Number of cores to use.
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.
 #' @export
-
+#' @examples
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata/lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Remove monomorphic loci and impute
+#' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
+#' lobsters <- gt_impute_simple(lobsters, method = "mode")
+#'
+#' # Create PCA object
+#' pca <- gt_pca_partialSVD(lobsters)
+#'
+#' # Create a gt_pcadapt object
+#' gt_pcadapt(lobsters, pca, k = 2)
 gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   stopifnot_gen_tibble(x)
   if (n_cores > 1) {

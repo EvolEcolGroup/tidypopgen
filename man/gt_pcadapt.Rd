@@ -29,6 +29,25 @@ individuals. The method is described in Luu et al. (2017). See the R package
 Internally, this function uses the \code{snp_pcadapt} function from the \code{bigsnpr}
 package.
 }
+\examples{
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata/lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+# Create PCA object
+pca <- gt_pca_partialSVD(lobsters)
+
+# Create a gt_pcadapt object
+gt_pcadapt(lobsters, pca, k = 2)
+}
 \references{
 Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
 pcadapt: an R package for genome scans for selection based on principal

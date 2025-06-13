@@ -20,6 +20,34 @@
 #' @returns a `ggplot2` object
 #' @name autoplot_gt_pca
 #' @export
+#' @examples
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata/lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Remove monomorphic loci and impute
+#' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
+#' lobsters <- gt_impute_simple(lobsters, method = "mode")
+#'
+#' # Create PCA object
+#' pca <- gt_pca_partialSVD(lobsters)
+#'
+#' # Screeplot
+#' autoplot(pca, type = "screeplot")
+#'
+#' # Scores plot
+#' autoplot(pca, type = "scores")
+#'
+#' # Colour by population
+#' autoplot(pca, type = "scores") + aes(colour = lobsters$population)
+#'
+#' # Scores plot of different components
+#' autoplot(pca, type = "scores", k = c(1, 3)) +
+#'   aes(colour = lobsters$population)
 autoplot.gt_pca <- function(
     object,
     type = c("screeplot", "scores", "loadings"),
