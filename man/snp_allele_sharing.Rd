@@ -35,3 +35,16 @@ gives 1 if the two individuals are homozygous for the same allele, 0 if they
 are homozygous for a different allele, and 1/2 if at least one individual is
 heterozygous. Matching is the average of these 0, 1/2 and 1s)
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+X <- attr(example_gt$genotypes, "bigsnp")
+snp_allele_sharing(X$genotypes)
+
+# Compute for individuals 1 to 5
+snp_allele_sharing(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+
+# Adjust block size
+snp_allele_sharing(X$genotypes, block.size = 2)
+
+}

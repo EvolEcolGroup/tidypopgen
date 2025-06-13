@@ -30,3 +30,16 @@ individuals
 \description{
 This function computes the KING-robust estimator of kinship.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+X <- attr(example_gt$genotypes, "bigsnp")
+snp_king(X$genotypes)
+
+# Compute for individuals 1 to 5
+snp_king(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+
+# Adjust block size
+snp_king(X$genotypes, block.size = 2)
+
+}
