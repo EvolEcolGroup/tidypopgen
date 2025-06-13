@@ -49,7 +49,13 @@ option is similar to using  --unrelated --degree 1 or --unrelated --degree 2
 in KING.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+example_gt <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
 
 # Get QC report for individuals
 example_gt \%>\% qc_report_indiv()

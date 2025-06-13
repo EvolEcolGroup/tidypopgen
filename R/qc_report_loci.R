@@ -9,9 +9,21 @@
 #' @rdname qc_report_loci
 #' @export
 #' @examples
-#' example_gt <- example_gt("grouped_gen_tbl")
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' example_gt <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
 #'
+#' # Get a QC report for the loci
 #' example_gt %>% qc_report_loci()
+#'
+#' # Group by population to calculate HWE within populations
+#' example_gt <- example_gt %>% group_by(population)
+#' example_gt %>% qc_report_loci()
+#'
 qc_report_loci <- function(.x, ...) {
   UseMethod("qc_report_loci", .x)
 }
@@ -93,8 +105,8 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' ready plots.
 #'
 #' @param object an object of class `qc_report_loci`
-#' @param type the type of plot (one of `overview`, `all`, `missing`, `missing
-#'   low maf`, `missing high maf`, `maf`, `hwe`, and `significant hwe`)
+#' @param type the type of plot (one of `overview`, `all`, `missing`,
+#' `missing low maf`, `missing high maf`, `maf`, `hwe`, and `significant hwe`)
 #' @param maf_threshold default 0.5, a threshold for the accepted rate of minor
 #'   allele frequency of loci
 #' @param miss_threshold default 0.01, a threshold for the accepted rate of
@@ -104,6 +116,42 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @export
+#' @examples
+#' # Create a gen_tibble
+#' bed_file <-
+#'   system.file("extdata", "related", "families.bed", package = "tidypopgen")
+#' example_gt <- gen_tibble(bed_file,
+#'   backingfile = tempfile("families"),
+#'   quiet = TRUE,
+#'   valid_alleles = c("1", "2")
+#' )
+#'
+#' loci_report <- example_gt %>% qc_report_loci()
+#'
+#' # Plot the QC report overview
+#' autoplot(loci_report, type = "overview")
+#'
+#' # Plot the QC report all
+#' autoplot(loci_report, type = "all")
+#'
+#' # Plot missing data
+#' autoplot(loci_report, type = "missing")
+#'
+#' # Plot missing with low maf
+#' autoplot(loci_report, type = "missing low maf", maf_threshold = 0.05)
+#'
+#' # Plot missing with high maf
+#' autoplot(loci_report, type = "missing high maf", maf_threshold = 0.05)
+#'
+#' # Plot maf
+#' autoplot(loci_report, type = "maf", maf_threshold = 0.05)
+#'
+#' # Plot hwe
+#' autoplot(loci_report, type = "hwe", hwe_p = 0.01)
+#'
+#' # Plot significant hwe
+#' autoplot(loci_report, type = "significant hwe", hwe_p = 0.01)
+#'
 autoplot.qc_report_loci <- function(
     object,
     type = c(

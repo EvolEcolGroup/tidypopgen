@@ -29,7 +29,13 @@
 #' @rdname qc_report_indiv
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' example_gt <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
 #'
 #' # Get QC report for individuals
 #' example_gt %>% qc_report_indiv()
@@ -181,6 +187,28 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @export
+#' @examples
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' example_gt <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Create QC report for individuals
+#' indiv_report <- example_gt %>% qc_report_indiv()
+#'
+#' # Autoplot missingness and observed heterozygosity
+#' autoplot(indiv_report, type = "scatter", miss_threshold = 0.1)
+#'
+#' # Create QC report with kinship filtering
+#' indiv_report_rel <-
+#'   example_gt %>% qc_report_indiv(kings_threshold = "second")
+#'
+#' # Autoplot relatedness
+#' autoplot(indiv_report_rel, type = "relatedness", kings_threshold = "second")
+#'
 autoplot.qc_report_indiv <- function(
     object,
     type = c("scatter", "relatedness"),
