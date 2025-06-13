@@ -27,8 +27,10 @@
 #' example_gt <- example_gt("gen_tbl")
 #'
 #' # Create a gt_admix object
-#' admix_obj <- example_gt %>% gt_snmf(k = 1:3,
-#'                                     project = "force", entropy = TRUE)
+#' admix_obj <- example_gt %>% gt_snmf(
+#'   k = 1:3,
+#'   project = "force", entropy = TRUE
+#' )
 #'
 #' # Plot the cross-validation error
 #' autoplot(admix_obj, type = "cv")

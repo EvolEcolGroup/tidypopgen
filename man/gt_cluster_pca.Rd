@@ -59,3 +59,36 @@ which allows to choose the optimal k using the function
 \code{\link[=gt_cluster_pca_best_k]{gt_cluster_pca_best_k()}}. See details for a description of how to select the
 optimal k and vignette("adegenet-dapc") for a tutorial.
 }
+\examples{
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata","lobster","lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+# Create PCA object
+pca <- gt_pca_partialSVD(lobsters)
+
+# Run clustering on the first 10 PCs
+ gt_cluster_pca(x = pca,
+                n_pca = 10,
+                k_clusters = c(1, 5),
+                method = "kmeans",
+                n_iter = 1e5,
+                n_start = 10,
+                quiet = FALSE)
+
+# Alternatively, use method "ward"
+gt_cluster_pca(x = pca,
+               n_pca = 10,
+               k_clusters = c(1, 5),
+               method = "ward",
+               quiet = FALSE)
+
+}
