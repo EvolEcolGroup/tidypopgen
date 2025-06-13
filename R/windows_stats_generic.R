@@ -30,7 +30,17 @@
 #'   'n_loci'. The 'stats' column contains the mean of the per locus estimates
 #'   in the window, and 'n_loci' contains the number of loci in the window.
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' miss_by_locus <- loci_missingness(example_gt)
+#'
+#' # Calculate mean missingness across windows
+#' windows_stats_generic(miss_by_locus, loci_table = show_loci(example_gt),
+#'                                      operator = "mean", window_size = 1000,
+#'                                      step_size = 1000, size_unit = "bp",
+#'                                      min_loci = 1, complete = FALSE)
+#'
 windows_stats_generic <- function(.x, loci_table,
                                   operator = c("mean", "sum", "custom"),
                                   window_size, step_size,
