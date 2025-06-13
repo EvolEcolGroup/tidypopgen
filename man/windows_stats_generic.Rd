@@ -66,9 +66,11 @@ example_gt <- example_gt("gen_tbl")
 miss_by_locus <- loci_missingness(example_gt)
 
 # Calculate mean missingness across windows
-windows_stats_generic(miss_by_locus, loci_table = show_loci(example_gt),
-                                     operator = "mean", window_size = 1000,
-                                     step_size = 1000, size_unit = "bp",
-                                     min_loci = 1, complete = FALSE)
+windows_stats_generic(miss_by_locus,
+  loci_table = show_loci(example_gt),
+  operator = "mean", window_size = 1000,
+  step_size = 1000, size_unit = "bp",
+  min_loci = 1, complete = FALSE
+)
 
 }
