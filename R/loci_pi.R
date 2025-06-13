@@ -18,6 +18,29 @@
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_pi
 #' @export
+#' @examples
+#' example_gt <- example_gt("grouped_gen_tbl")
+#'
+#' # For pi
+#' example_gt %>% loci_pi()
+#'
+#' # For pi per locus per population
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_pi()
+#' # alternatively, return a list of populations with their pi
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_pi(type = "list")
+#' # or a matrix with populations in columns and loci in rows
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   loci_pi(type = "matrix")
+#' # or within reframe (not recommended, as it much less efficient
+#' # than using it directly as shown above)
+#' example_gt %>%
+#'   group_by(population) %>%
+#'   reframe(pi = loci_pi(genotypes))
 loci_pi <- function(.x, .col = "genotypes", n_cores, block_size, type, ...) {
   UseMethod("loci_pi", .x)
 }

@@ -17,4 +17,8 @@ The result of calling \code{rhs(lhs)}.
 \description{
 See `magrittr::pipe \\%>\\% for details.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+example_gt \%>\% count_loci()
+}
 \keyword{internal}

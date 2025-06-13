@@ -54,3 +54,27 @@ if the number of individuals is much smaller than the number of loci;
 otherwise, \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is a better option. This function is a
 wrapper for \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}}.
 }
+\examples{
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+# Create PCA object, including total variance
+gt_pca_partialSVD(lobsters,
+  k = 10,
+  total_var = TRUE
+)
+# Change number of components and exclude total variance
+gt_pca_partialSVD(lobsters,
+  k = 5,
+  total_var = FALSE
+)
+}
