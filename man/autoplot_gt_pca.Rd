@@ -37,9 +37,10 @@ customisable; we recommend that you use \code{ggplot2} to produce publication
 ready plots.
 }
 \examples{
+library(ggplot2)
 # Create a gen_tibble of lobster genotypes
 bed_file <-
-  system.file("extdata/lobster", "lobster.bed", package = "tidypopgen")
+  system.file("extdata","lobster","lobster.bed", package = "tidypopgen")
 lobsters <- gen_tibble(bed_file,
   backingfile = tempfile("lobsters"),
   quiet = TRUE
