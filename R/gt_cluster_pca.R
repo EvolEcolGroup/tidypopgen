@@ -200,7 +200,41 @@ compute_wss <- function(x, f) {
 #' @returns a `ggplot2` object
 #' @rdname autoplot_gt_cluster_pca
 #' @export
-
+#' @examples
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Remove monomorphic loci and impute
+#' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
+#' lobsters <- gt_impute_simple(lobsters, method = "mode")
+#'
+#' # Create PCA object
+#' pca <- gt_pca_partialSVD(lobsters)
+#'
+#' # Run clustering on the first 10 PCs
+#' cluster_pca <- gt_cluster_pca(
+#'   x = pca,
+#'   n_pca = 10,
+#'   k_clusters = c(1, 5),
+#'   method = "kmeans",
+#'   n_iter = 1e5,
+#'   n_start = 10,
+#'   quiet = FALSE
+#' )
+#'
+#' # Autoplot BIC
+#' autoplot(cluster_pca, metric = "BIC")
+#'
+#' # # Autoplot AIC
+#' autoplot(cluster_pca, metric = "AIC")
+#'
+#' # # Autoplot WSS
+#' autoplot(cluster_pca, metric = "WSS")
 autoplot.gt_cluster_pca <- function(
     object,
     metric = c("BIC", "AIC", "WSS"),

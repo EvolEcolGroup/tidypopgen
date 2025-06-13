@@ -84,7 +84,7 @@ that the overall fit is above a given threshold.
 \examples{
 # Create a gen_tibble of lobster genotypes
 bed_file <-
-  system.file("extdata","lobster","lobster.bed", package = "tidypopgen")
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
 lobsters <- gen_tibble(bed_file,
   backingfile = tempfile("lobsters"),
   quiet = TRUE
@@ -98,21 +98,24 @@ lobsters <- gt_impute_simple(lobsters, method = "mode")
 pca <- gt_pca_partialSVD(lobsters)
 
 # Run clustering on the first 10 PCs
-cluster_pca <- gt_cluster_pca(x = pca,
-                              n_pca = 10,
-                              k_clusters = c(1, 5),
-                              method = "kmeans",
-                              n_iter = 1e5,
-                              n_start = 10,
-                              quiet = FALSE)
+cluster_pca <- gt_cluster_pca(
+  x = pca,
+  n_pca = 10,
+  k_clusters = c(1, 5),
+  method = "kmeans",
+  n_iter = 1e5,
+  n_start = 10,
+  quiet = FALSE
+)
 
- # Find best K through minimum BIC
- cluster_pca <- gt_cluster_pca_best_k(cluster_pca,
-                                      stat = "BIC",
-                                      criterion = "min",
-                                      quiet = FALSE)
- # Best K is stored in the object
- cluster_pca$best_k
+# Find best K through minimum BIC
+cluster_pca <- gt_cluster_pca_best_k(cluster_pca,
+  stat = "BIC",
+  criterion = "min",
+  quiet = FALSE
+)
+# Best K is stored in the object
+cluster_pca$best_k
 }
 \references{
 Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
