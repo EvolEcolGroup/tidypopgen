@@ -120,9 +120,9 @@ test_that("run admixture as single run", {
   )
   anole_adm_comb <- c(anole_adm, anole_adm2)
   expect_true(nrow(anole_adm_comb$Q[[1]]) == nrow(anole_gt))
-  expect_true(ncol(anole_adm_comb$Q[[1]]) == 3)
-  expect_true(ncol(anole_adm_comb$Q[[2]]) == 2)
-  expect_true(all(anole_adm_comb$k == c(3, 2)))
+  expect_true(ncol(anole_adm_comb$Q[[1]]) == 2)
+  expect_true(ncol(anole_adm_comb$Q[[2]]) == 3)
+  expect_true(all(anole_adm_comb$k == c(2, 3)))
   # run admixture with crossval
   anole_adm3 <- gt_admixture(
     anole_gt,

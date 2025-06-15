@@ -4,10 +4,15 @@
 \alias{c.gt_admix}
 \title{Combine method for gt_admix objects}
 \usage{
-\method{c}{gt_admix}(...)
+\method{c}{gt_admix}(..., match_attributes = TRUE)
 }
 \arguments{
 \item{...}{A list of \code{gt_admix} objects}
+
+\item{match_attributes}{boolean, determining whether all attributes (id,
+group and algorithm) of the \code{gt_admix} objects to be combined must be an
+exact match (TRUE, the default), or whether non-matching attributes should
+be ignored (FALSE)}
 }
 \value{
 A \code{gt_admix} object with the combined data
