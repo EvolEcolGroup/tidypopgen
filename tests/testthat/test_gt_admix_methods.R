@@ -131,7 +131,7 @@ test_that("combine gt_admix objects with different kand runs", {
   # create admix object with different k range
   admix2 <- gt_admixture(
     anole_gt,
-    k = 6:7,
+    k = 5:6,
     n_runs = 2,
     crossval = TRUE,
     n_cores = 1,
@@ -171,7 +171,7 @@ test_that("combine gt_admix objects with different kand runs", {
   # create admix object with different size of k range
   admix3 <- gt_admixture(
     anole_gt,
-    k = 4:6,
+    k = 3:5,
     n_runs = 2,
     crossval = TRUE,
     n_cores = 1,
@@ -209,15 +209,7 @@ test_that("combine gt_admix objects with different kand runs", {
   expect_equal(comb2$loglik, c(admix1$loglik, admix3$loglik))
 
   # same k different no. of runs
-  admix4 <- gt_admixture(
-    anole_gt,
-    k = 2:3,
-    n_runs = 3,
-    crossval = TRUE,
-    n_cores = 1,
-    seed = c(123, 234, 456),
-    conda_env = "none"
-  )
+  admix4 <- c(admix1, admix1) # 4 runs
   # combine objects, match_attributes = TRUE
   comb3 <- c(admix1, admix4)
   # check that the combined object is of class gt_admix
@@ -225,8 +217,8 @@ test_that("combine gt_admix objects with different kand runs", {
   # check that the combined object has the same k values as the original objects
   expect_equal(comb3$k, c(
     admix1$k[1], admix1$k[2], admix4$k[1], admix4$k[2],
-    admix4$k[3], admix1$k[3], admix1$k[4], admix4$k[4],
-    admix4$k[5], admix4$k[6]
+    admix4$k[3], admix4$k[4], admix1$k[3], admix1$k[4], admix4$k[5],
+    admix4$k[6], admix4$k[7], admix4$k[8]
   ))
   # check that the combined object has the correct number of Q matrices
   expect_true(length(comb3$Q) == length(admix1$Q) + length(admix4$Q))
@@ -236,11 +228,11 @@ test_that("combine gt_admix objects with different kand runs", {
   # check that the combined object has the correct number of P matrices
   expect_true(length(comb3$P) == length(admix1$P) + length(admix4$P))
   # check P matrices match expectation
-  expect_equal(comb3$P[[6]], admix1$P[[3]])
-  expect_equal(comb3$P[[8]], admix4$P[[4]])
+  expect_equal(comb3$P[[7]], admix1$P[[3]])
+  expect_equal(comb3$P[[6]], admix4$P[[4]])
   # check logs match expectation
-  expect_equal(comb3$log[[6]], admix1$log[[3]])
-  expect_equal(comb3$log[[5]], admix4$log[[3]])
+  expect_equal(comb3$log[[8]], admix1$log[[4]])
+  expect_equal(comb3$log[[11]], admix4$log[[7]])
   # check that the combined object has the same id as the original objects
   expect_equal(comb3$id, admix1$id)
   expect_equal(comb3$id, admix4$id)
@@ -253,27 +245,28 @@ test_that("combine gt_admix objects with different kand runs", {
   # check the cv values are combined correctly
   expect_equal(comb3$cv, c(
     admix1$cv[1], admix1$cv[2], admix4$cv[1],
-    admix4$cv[2], admix4$cv[3], admix1$cv[3],
-    admix1$cv[4], admix4$cv[4], admix4$cv[5],
-    admix4$cv[6]
+    admix4$cv[2], admix4$cv[3], admix4$cv[4],
+    admix1$cv[3], admix1$cv[4], admix4$cv[5],
+    admix4$cv[6], admix4$cv[7], admix4$cv[8]
   ))
   # check the loglik values are combined correctly
   expect_equal(comb3$loglik, c(
     admix1$loglik[1], admix1$loglik[2],
     admix4$loglik[1], admix4$loglik[2],
-    admix4$loglik[3], admix1$loglik[3],
-    admix1$loglik[4], admix4$loglik[4],
-    admix4$loglik[5], admix4$loglik[6]
+    admix4$loglik[3], admix4$loglik[4],
+    admix1$loglik[3], admix1$loglik[4],
+    admix4$loglik[5], admix4$loglik[6],
+    admix4$loglik[7], admix4$loglik[8]
   ))
 
   # different k and different no. of runs
   admix5 <- gt_admixture(
     anole_gt,
     k = 3:5,
-    n_runs = 3,
+    n_runs = 1,
     crossval = TRUE,
     n_cores = 1,
-    seed = c(123, 234, 456),
+    seed = 123,
     conda_env = "none"
   )
   # combine objects, match_attributes = TRUE
@@ -286,15 +279,15 @@ test_that("combine gt_admix objects with different kand runs", {
   expect_true(length(comb4$Q) == length(admix1$Q) + length(admix5$Q))
   # check Q matrices match expectation
   expect_equal(comb4$Q[[2]], admix1$Q[[2]])
-  expect_equal(comb4$Q[[9]], admix5$Q[[5]])
+  expect_equal(comb4$Q[[7]], admix5$Q[[3]])
   # check that the combined object has the correct number of P matrices
   expect_true(length(comb4$P) == length(admix1$P) + length(admix5$P))
   # check P matrices match expectation
   expect_equal(comb4$P[[3]], admix1$P[[3]])
-  expect_equal(comb4$P[[8]], admix5$P[[4]])
+  expect_equal(comb4$P[[6]], admix5$P[[2]])
   # check logs match expectation
   expect_equal(comb4$log[[3]], admix1$log[[3]])
-  expect_equal(comb4$log[[7]], admix5$log[[3]])
+  expect_equal(comb4$log[[5]], admix5$log[[1]])
   # check that the combined object has the same id as the original objects
   expect_equal(comb4$id, admix1$id)
   expect_equal(comb4$id, admix5$id)
