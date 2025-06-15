@@ -1,3 +1,8 @@
+# skip if admixture is not installed
+skip_if(
+  (system2("which", args = "admixture", stdout = NULL) != 0) &&
+    !requireNamespace("fastmixturer", quietly = TRUE)
+)
 # create gentibble
 vcf_path <-
   system.file(
