@@ -164,7 +164,10 @@ gt_admixture <- function(
       }
 
       # build expected .Q filename
-      q_file <- file.path(out, paste0(gsub(".bed$", "", basename(input_file)), ".", this_k, ".Q"))
+      q_file <- file.path(out, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".Q"
+      ))
       # check if no .Q files were written and if adm_out contains "Error:"
       # stop and print adm_out if both are true
       if (
