@@ -217,10 +217,18 @@ c.gt_admix <- function(..., match_attributes = TRUE) {
 
   # reorder all list elements by the new order
   combined_obj$Q <- combined_obj$Q[order_index]
-  combined_obj$P <- combined_obj$P[order_index]
-  combined_obj$log <- combined_obj$log[order_index]
-  combined_obj$cv <- combined_obj$cv[order_index]
-  combined_obj$loglik <- combined_obj$loglik[order_index]
+  if (!is.null(combined_obj$P)) {
+    combined_obj$P <- combined_obj$P[order_index]
+  }
+  if (!is.null(combined_obj$log)) {
+    combined_obj$log <- combined_obj$log[order_index]
+  }
+  if (!is.null(combined_obj$cv)) {
+    combined_obj$cv <- combined_obj$cv[order_index]
+  }
+  if (!is.null(combined_obj$loglik)) {
+    combined_obj$loglik <- combined_obj$loglik[order_index]
+  }
 
   # reorder k vector to match
   combined_obj$k <- combined_obj$k[order_index]
