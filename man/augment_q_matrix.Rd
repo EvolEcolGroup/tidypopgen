@@ -27,3 +27,15 @@ of 'id', but it ensures that any scripts written for data augmented with
 \link[broom:augment.prcomp]{broom::augment.prcomp} will work out of the box (this is especially helpful
 when adapting plotting scripts).
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Create a gt_admix object
+admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
+
+# Extract a Q matrix
+q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+
+# Augment the gen_tibble with Q values
+augment(q_mat_k3, data = example_gt)
+}

@@ -55,6 +55,11 @@ arrange.gen_tbl <- function(..., deparse.level = 1) { # nolint
 #' @param deparse.level an integer controlling the construction of column names.
 #' @returns a `gen_tibble`
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Add a new column
+#' example_gt %>% mutate(region = "East")
 mutate.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod()
@@ -93,6 +98,13 @@ dplyr_reconstruct.gen_tbl <- function(data, template) {
 #' @param value a value to assign
 #' @returns a `gen_tibble`
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Add a new column
+#' example_gt$region <- "East"
+#'
+#' example_gt
 "$<-.gen_tbl" <- function(data, i, value) {
   # send it to the next (data.frame) method
   out <- NextMethod()

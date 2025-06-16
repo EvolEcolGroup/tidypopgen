@@ -9,8 +9,8 @@ The Human Genome Diversity Project (HGDP) SNP dataset is used for this
 benchmark. This dataset includes 1043 individuals from 51 populations, typed
 at ~650k loci.
 
-We will run this benchmark on a machine with a GenuineIntel, 13th Gen Intel(R) Core(TM) i9-13900, 24 CPU
-and 126 GiB of RAM. However, we will limit the number of
+We will run this benchmark on a machine with a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU
+and 31 GiB of RAM. However, we will limit the number of
 cores used to 20. Parallelised functions within tidypopgen use an
 `n_cores` argument for the user to set. However, to prevent a behind-the-scenes
 inflation of the number of threads used (for example, in cases where dependency
@@ -33,24 +33,48 @@ We can now load the necessary libraries:
 
 ``` r
 library(tidypopgen)
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+#> Loading required package: tibble
 library(ggplot2)
 ```
 
-Before running this benchmark, we need to download into the subdirectory
-`data/hgdp/` the bed file `hgdp650.qc.hg19.bed` and the metadata file
-`hgdp650_id_pop.txt`.
+And before running the benchmark, we need to download the relevant files. We
+can use the following to download the HGDOP files into a temporary directory:
+
+
+``` r
+temp_dir <- tempdir()
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650_id_pop.txt"
+download_path <- file.path(temp_dir, "hgdp650_id_pop.txt")
+download.file(download_url, download_path, mode = "wb")
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.bed"
+download_path <- file.path(temp_dir, "hgdp650.qc.hg19.bed")
+download.file(download_url, download_path, method = "wget")
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.bim"
+download_path <- file.path(temp_dir, "hgdp650.qc.hg19.bim")
+download.file(download_url, download_path, method = "wget")
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.fam"
+download_path <- file.path(temp_dir, "hgdp650.qc.hg19.fam")
+download.file(download_url, download_path, method = "wget")
+```
+
+In the following vignette, we place these files into the subdirectory
+`data/hgdp/`, and we will use the paths to the bed file `hgdp650.qc.hg19.bed`
+and the metadata file `hgdp650_id_pop.txt` to read in our data.
 
 
 ``` r
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
-#> Rows: 1064 Columns: 6
-#> ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────
-#> Delimiter: "\t"
-#> chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+#> Error: './data/hgdp/hgdp650_id_pop.txt' does not exist in current working directory ('/home/EJC199/Git/tidypopgen/vignettes/articles').
 ```
 
 # Create gen_tibble object
@@ -67,7 +91,7 @@ hgdp <- gen_tibble(bed_path,
 )
 ```
 
-read_plink: 2.7s
+read_plink: 5.3s
 
 Add metadata
 
@@ -77,6 +101,10 @@ hgdp <- hgdp %>% mutate(
   population = meta_info$population[match(hgdp$id, meta_info$Id)],
   region = meta_info$Region[match(hgdp$id, meta_info$Id)]
 )
+#> Error in `mutate()`:
+#> ℹ In argument: `population = meta_info$population[match(hgdp$id, meta_info$Id)]`.
+#> Caused by error:
+#> ! object 'meta_info' not found
 ```
 
 Let's confirm that we have read all the expected information:
@@ -85,19 +113,19 @@ Let's confirm that we have read all the expected information:
 ``` r
 hgdp
 #> # A gen_tibble: 643733 loci
-#> # A tibble:     1,043 × 4
-#>    id         genotypes population region
-#>    <chr>     <vctr_SNP> <chr>      <chr> 
-#>  1 HGDP00448          1 Biaka_HG   Africa
-#>  2 HGDP00479          2 Biaka_HG   Africa
-#>  3 HGDP00985          3 Biaka_HG   Africa
-#>  4 HGDP01094          4 Biaka_HG   Africa
-#>  5 HGDP00982          5 Mbuti_HG   Africa
-#>  6 HGDP00911          6 Mandenka   Africa
-#>  7 HGDP01202          7 Mandenka   Africa
-#>  8 HGDP00927          8 Yoruba     Africa
-#>  9 HGDP00461          9 Biaka_HG   Africa
-#> 10 HGDP00451         10 Biaka_HG   Africa
+#> # A tibble:     1,043 × 2
+#>    id         genotypes
+#>    <chr>     <vctr_SNP>
+#>  1 HGDP00448          1
+#>  2 HGDP00479          2
+#>  3 HGDP00985          3
+#>  4 HGDP01094          4
+#>  5 HGDP00982          5
+#>  6 HGDP00911          6
+#>  7 HGDP01202          7
+#>  8 HGDP00927          8
+#>  9 HGDP00461          9
+#> 10 HGDP00451         10
 #> # ℹ 1,033 more rows
 ```
 
@@ -112,7 +140,7 @@ loci_report <- qc_report_loci(hgdp)
 #> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
 ```
 
-loci_report: 1.8s
+loci_report: 3.3s
 The resulting report can be observed using `autoplot`.
 
 
@@ -134,7 +162,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 1.4s
+filter_loci: 5.3s
 
 
 # Individual Report
@@ -148,7 +176,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.5s
+indiv_report: 3.4s
 
 
 ``` r
@@ -168,7 +196,7 @@ to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
 
-filter_indiv: 3ms
+filter_indiv: 7ms
 
 # Update backingfile
 
@@ -181,8 +209,8 @@ hgdp <- gt_update_backingfile(hgdp)
 #> Genetic distances are not sorted, setting them to zero
 #> 
 #> gen_backing files updated, now
-#> using bigSNP file: /tmp/RtmpCu0Grc/test_47fa53a8faf7d_v2.rds
-#> with backing file: /tmp/RtmpCu0Grc/test_47fa53a8faf7d_v2.bk
+#> using bigSNP file: /tmp/RtmpY30jCS/test_163872732cbd_v2.rds
+#> with backing file: /tmp/RtmpY30jCS/test_163872732cbd_v2.bk
 #> make sure that you do NOT delete those files!
 ```
 
@@ -198,7 +226,7 @@ hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 153ms
+impute: 365ms
 
 # LD clumping
 
@@ -210,7 +238,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 3.9s
+ld_clumping: 7.5s
 
 # PCA
 
@@ -222,7 +250,7 @@ and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 1.8s
+pca: 4s
 
 Plot PCA:
 
@@ -230,6 +258,8 @@ Plot PCA:
 ``` r
 autoplot(test_pca, type = "scores") +
   aes(color = hgdp$region, shape = hgdp$region)
+#> Warning: Unknown or uninitialised column: `region`.
+#> Unknown or uninitialised column: `region`.
 ```
 
 ![plot of chunk PCA](./figure/hgdp_benchmark/PCA-1.png)
@@ -243,18 +273,19 @@ the main geographic regions covered by the dataset.
 
 ``` r
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
+#> Warning: Unknown or uninitialised column: `region`.
+#> Error in sweep(x$u, 2, x$d, "*")[, 1:n_pca, drop = FALSE]: only 0's may be mixed with negative subscripts
 ```
 
-dapc: 37ms
+dapc: 24ms
 
 Plot DAPC:
 
 
 ``` r
 autoplot(test_dapc, type = "scores")
+#> Error: object 'test_dapc' not found
 ```
-
-![plot of chunk DAPC_scores_plot](./figure/hgdp_benchmark/DAPC_scores_plot-1.png)
 
 # Calculate Fst
 
@@ -264,13 +295,17 @@ calculate pairwise Fst.
 
 ``` r
 grouped_hgdp <- hgdp %>% group_by(population)
+#> Error in `group_by()`:
+#> ! Must group by variables found in `.data`.
+#> ✖ Column `population` is not found.
 pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
 )
+#> Error: object 'grouped_hgdp' not found
 ```
 
-pairwise_fst: 3s
+pairwise_fst: 129ms
 
 Plot pairwise Fst:
 
@@ -305,10 +340,10 @@ gt_as_plink(hgdp,
   type = "bed",
   overwrite = TRUE
 )
-#> [1] "/tmp/RtmpCu0Grc/file47fa51ed66b65.bed"
+#> [1] "/tmp/RtmpY30jCS/file1638575879aa.bed"
 ```
 
-plink_save: 250ms
+plink_save: 485ms
 
 # Summary
 
@@ -317,39 +352,16 @@ Here is a summary of the time taken (in seconds) to perform each step of the ana
 
 ```
 #>            step  time
-#> 1    read_plink  2.73
-#> 2   loci_report   1.8
-#> 3   filter_loci  1.35
-#> 4  indiv_report  2.52
-#> 5  filter_indiv     0
-#> 6        impute  0.15
-#> 7   ld_clumping  3.87
-#> 8           pca  1.76
-#> 9          dapc  0.04
-#> 10 pairwise_fst  2.99
-#> 11   plink_save  0.25
-#> 12        Total 17.46
-```
-# Running the benchmark on a laptop
-We will now run this benchmark on a laptop 
-with a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU
-and 31 GiB
-of RAM, limiting the number of cores to 4.
-Here is a summary of the time taken (in seconds) to perform each step of the analyses:
-
-
-```
-#>            step  time
-#> 1    read_plink  5.31
-#> 2   loci_report  3.46
-#> 3   filter_loci  4.39
-#> 4  indiv_report   3.3
+#> 1    read_plink  5.29
+#> 2   loci_report  3.29
+#> 3   filter_loci  5.29
+#> 4  indiv_report  3.44
 #> 5  filter_indiv  0.01
-#> 6        impute  0.96
-#> 7   ld_clumping 10.09
-#> 8           pca  3.94
-#> 9          dapc  0.25
-#> 10 pairwise_fst  5.35
-#> 11   plink_save  0.47
-#> 12        Total 37.53
+#> 6        impute  0.36
+#> 7   ld_clumping  7.54
+#> 8           pca  3.99
+#> 9          dapc  0.02
+#> 10 pairwise_fst  0.13
+#> 11   plink_save  0.48
+#> 12        Total 29.84
 ```

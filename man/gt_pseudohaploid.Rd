@@ -24,3 +24,15 @@ are coded as pseudohaploids. The ploidy of the individuals is updated, with
 pseudohaploids set to 1 and diploids set to 2. However, the dosages are not
 changed, meaning that pseudohaploids are still coded as 0 or 2.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Detect pseudohaploids and set ploidy for the whole gen_tibble
+example_gt <- example_gt \%>\% gt_pseudohaploid(test_n_loci = 3)
+
+# Ploidy is now set to -2
+show_ploidy(example_gt)
+
+# Individual ploidy now varies between 1 (pseudohaploid) and 2 (diploid)
+indiv_ploidy(example_gt)
+}

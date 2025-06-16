@@ -11,8 +11,11 @@
 #'   exists?
 #' @returns the path of the .vcf file
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
 #'
-
+#' # Write a vcf file
+#' example_gt %>% gt_as_vcf()
 gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
   # check that x is a gen_tibble
   stopifnot_gen_tibble(x)

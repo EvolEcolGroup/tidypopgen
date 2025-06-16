@@ -15,3 +15,13 @@ a \code{genlight} object
 \description{
 This function converts a \code{gen_tibble} to a \code{genlight} object from \code{adegenet}
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Convert to genind
+gt_genlight <- example_gt \%>\% gt_as_genlight()
+
+# Check object class
+class(gt_genlight)
+
+}

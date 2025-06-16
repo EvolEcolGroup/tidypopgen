@@ -10,7 +10,7 @@
 #' @param backingfile the backing file (if null, a tempfile will be used)
 #' @returns a [`bigsnpr::bigSNP`] object
 #' @keywords internal
-
+#' @noRd
 # nolint start
 subset_bigSNP <- function(
     X, # nolint end

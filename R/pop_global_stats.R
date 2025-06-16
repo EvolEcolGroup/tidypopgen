@@ -94,7 +94,14 @@
 #' @returns a tibble of population statistics, with populations as rows and
 #'   statistics as columns
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("grouped_gen_tbl")
+#'
+#' # Compute population global statistics
+#' example_gt %>% pop_global_stats()
+#'
+#' # To return by locus, set by_locus = TRUE
+#' example_gt %>% pop_global_stats(by_locus = TRUE)
 # this code is adapted from hierfstat::basic.stats by Jerome Goudet
 pop_global_stats <- function(
     .x,

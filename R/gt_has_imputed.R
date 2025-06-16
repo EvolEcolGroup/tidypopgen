@@ -7,7 +7,17 @@
 #' @returns boolean TRUE or FALSE depending on whether the dataset has been
 #'   imputed
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # The initial gen_tibble contains no imputed values
+#' example_gt %>% gt_has_imputed()
+#'
+#' # Now impute the gen_tibble
+#' example_gt <- example_gt %>% gt_impute_simple()
+#'
+#' # And we can check it has been imputed
+#' example_gt %>% gt_has_imputed()
 gt_has_imputed <- function(x) {
   if (inherits(x, "gen_tbl")) {
     x <- x$genotypes
@@ -25,7 +35,14 @@ gt_has_imputed <- function(x) {
 #' @returns boolean TRUE or FALSE depending on whether the dataset is using the
 #'   imputed values
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Impute the gen_tibble
+#' example_gt <- example_gt %>% gt_impute_simple()
+#'
+#' # Check whether the gen_tibble uses imputed values
+#' example_gt %>% gt_uses_imputed()
 gt_uses_imputed <- function(x) {
   if (inherits(x, "gen_tbl")) {
     x <- x$genotypes
@@ -54,7 +71,20 @@ gt_uses_imputed <- function(x) {
 #' @param set a boolean defining whether imputed data should be used
 #' @returns the gen_tibble, invisibly
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Impute the gen_tibble
+#' example_gt <- example_gt %>% gt_impute_simple()
+#'
+#' # Check whether the gen_tibble uses imputed values
+#' example_gt %>% gt_uses_imputed()
+#'
+#' # Set the gen_tibble to use imputed values
+#' example_gt %>% gt_set_imputed(TRUE)
+#'
+#' # And check that the gen_tibble uses imputed values again
+#' example_gt %>% gt_uses_imputed()
 gt_set_imputed <- function(x, set = NULL) {
   if (inherits(x, "gen_tbl")) {
     x <- x$genotypes

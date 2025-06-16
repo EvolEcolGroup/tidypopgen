@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <string>
+#include <memory>
 #include <zlib.h>
 #include <bigstatsr/BMCodeAcc.h>
 
@@ -251,16 +252,18 @@ inline void count_alt_alleles(const std::string &line,
   }
 }
 
-
-
-
-
-/******************************************************************************
- * Read the genotypes into a File Backed Matrix from a vcf
+/**
+ * @brief Reads genotype data from a VCF file and stores alternate allele counts in a file-backed matrix.
  *
- * This function parses the VCF, using information gathered from vcf_loci_table.
+ * For each biallelic locus in the VCF file, counts the number of alternate alleles per individual and writes these counts to the provided file-backed matrix (FBM). Supports both plain text and gzipped VCF files. Skips the specified number of header lines and processes only loci marked as biallelic. Verifies that no genotype exceeds the maximum ploidy inferred from the first variant line.
  *
- * @param filename The name of the VCF file to parse
+ * @param filename Path to the VCF file (plain or gzipped).
+ * @param biallelic Logical vector indicating which loci are biallelic and should be processed.
+ * @param missing_value Value to assign for missing genotypes.
+ * @param n_header_lines Number of header lines to skip in the VCF file.
+ * @return true if all genotypes are successfully read and stored.
+ *
+ * @throws Rcpp::exception if the file cannot be opened, if the end of file is reached prematurely, or if a genotype exceeds the maximum allowed ploidy.
  */
 
 // [[Rcpp::export]]
@@ -309,9 +312,11 @@ bool vcf_genotypes_to_fbm(std::string filename,
     }
   }
   // array to store the genotypes
-  unsigned char* alt_counts = new unsigned char[n];
+//  unsigned char* alt_counts = new unsigned char[n];
+  std::unique_ptr<unsigned char[]> alt_counts(new unsigned char[n]);
   // position of the separator, the last value is the end of the string
-  size_t* separator_pos = new size_t[n+9];
+//  size_t* separator_pos = new size_t[n+9];
+  std::unique_ptr<size_t[]> separator_pos(new size_t[n+9]);
   
   // Read the genotypes line by line until the end of file
   for (int i_geno = 0; i_geno < n_loci; i_geno++) {
@@ -347,8 +352,8 @@ bool vcf_genotypes_to_fbm(std::string filename,
     vcfFile.close();
   }
   // delete the array
-  delete[] alt_counts;
-  delete[] separator_pos;
+//  delete[] alt_counts;
+//  delete[] separator_pos;
   // return true if the file was read successfully
   return true;
   

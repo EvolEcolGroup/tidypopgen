@@ -20,7 +20,17 @@
 #'   of the chromosomes
 #' @returns the path of the saved file
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Write a bed file
+#' example_gt %>% gt_as_plink(type = "bed", file = paste0(tempfile(), "_plink"))
+#'
+#' # Write a ped file
+#' example_gt %>% gt_as_plink(type = "ped", file = paste0(tempfile(), "_plink"))
+#'
+#' # Write a raw file
+#' example_gt %>% gt_as_plink(type = "raw", file = paste0(tempfile(), "_plink"))
 gt_as_plink <- function(
     x,
     file = NULL,

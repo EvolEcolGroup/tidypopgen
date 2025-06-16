@@ -8,6 +8,11 @@
 #' @returns a vector of ploidy, one per individuals in the [`gen_tibble`]
 #' @rdname indiv_ploidy
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' example_gt %>% indiv_ploidy()
+#'
 indiv_ploidy <- function(.x, ...) {
   UseMethod("indiv_ploidy", .x)
 }

@@ -45,9 +45,28 @@ library(tidypopgen)
 library(ggplot2)
 ```
 
-Before running this benchmark, we need to download into the subdirectory
-`data/hgdp/` the bed file `hgdp650.qc.hg19.bed` and the metadata file
-`hgdp650_id_pop.txt`.
+And before running the benchmark, we need to download the relevant files. We
+can use the following to download the HGDOP files into a temporary directory:
+
+```{r eval = FALSE}
+temp_dir <- tempdir()
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650_id_pop.txt"
+download_path <- file.path(temp_dir, "hgdp650_id_pop.txt")
+download.file(download_url, download_path, mode = "wb")
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.bed"
+download_path <- file.path(temp_dir, "hgdp650.qc.hg19.bed")
+download.file(download_url, download_path, method = "wget")
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.bim"
+download_path <- file.path(temp_dir, "hgdp650.qc.hg19.bim")
+download.file(download_url, download_path, method = "wget")
+download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.fam"
+download_path <- file.path(temp_dir, "hgdp650.qc.hg19.fam")
+download.file(download_url, download_path, method = "wget")
+```
+
+In the following vignette, we place these files into the subdirectory
+`data/hgdp/`, and we will use the paths to the bed file `hgdp650.qc.hg19.bed`
+and the metadata file `hgdp650_id_pop.txt` to read in our data.
 
 ```{r}
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"

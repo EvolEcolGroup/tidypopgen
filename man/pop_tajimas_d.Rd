@@ -51,3 +51,9 @@ Note that Tajima's D estimates from data that have been filtered or
 ascertained can be difficult to interpret. This function should ideally
 be used on sequence data prior to filtering.
 }
+\examples{
+example_gt <- example_gt("grouped_gen_tbl")
+
+# Compute Tajima's D
+example_gt \%>\% pop_tajimas_d()
+}

@@ -8,3 +8,4 @@ _pkgdown.yml
 admixture/
 .lintr
 ^vignettes/articles$
+^cran-comments\.md$

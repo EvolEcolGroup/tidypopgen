@@ -17,7 +17,20 @@
 #' @return a [`gen_tibble`] object with an additional geometry column (and thus
 #'   belonging also to `sf` class).
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Add some coordinates
+#' example_gt <- example_gt %>% mutate(
+#'   longitude = c(0, 0, 2, 2, 0, 2, 2),
+#'   latitude = c(51, 51, 49, 49, 51, 41, 41)
+#' )
+#'
+#' # Convert lat and long to sf:
+#' example_gt <- gt_add_sf(x = example_gt, coords = c("longitude", "latitude"))
+#'
+#' # Check class
+#' class(example_gt)
 gt_add_sf <- function(x, coords = NULL, crs = NULL, sfc_column = NULL) {
   # check that x is a gen_tibble
   if (!inherits(x, "gen_tbl")) {

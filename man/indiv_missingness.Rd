@@ -42,3 +42,12 @@ a vector of heterozygosities, one per individuals in the
 Estimate missingness for each individual (i.e. the frequency of missing
 genotypes in an individual).
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+example_gt \%>\% indiv_missingness()
+
+# For missingness as counts:
+example_gt \%>\% indiv_missingness(as_counts = TRUE)
+
+}

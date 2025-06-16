@@ -5,8 +5,15 @@
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @returns a `genlight` object
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
 #'
-
+#' # Convert to genind
+#' gt_genlight <- example_gt %>% gt_as_genlight()
+#'
+#' # Check object class
+#' class(gt_genlight)
+#'
 gt_as_genlight <- function(x) {
   if (!requireNamespace("adegenet", quietly = TRUE)) {
     stop(

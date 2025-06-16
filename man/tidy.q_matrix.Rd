@@ -24,3 +24,14 @@ for that particular Q value.}
 \description{
 Takes a \code{q_matrix} object, which is a matrix, and returns a tidied tibble.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Create a gt_admix object
+admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
+
+# Extract a Q matrix
+q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+
+tidy(q_mat_k3, data = example_gt)
+}

@@ -202,7 +202,7 @@ gt_extract_f2 <- function(
 #' @param n_cores Parallelize computation across `n_cores` cores.
 #' @returns a list of 3 elements: afs, counts, and snp
 #' @keywords internal
-
+#' @noRd
 gt_to_aftable <- function(
     .x,
     adjust_pseudohaploid = TRUE,

@@ -20,3 +20,20 @@ This function reorders the q matrices in a \code{gt_admix} object based on the
 grouping variable. This is useful before plotting when the samples from each
 group are not adjacent to each other in the q matrix.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Create a gt_admix object
+admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
+
+# The $id in admix_obj is the same as in the gen_tibble
+admix_obj$id
+
+# Reorder the q matrices based on the grouping variable
+admix_obj <- gt_admix_reorder_q(admix_obj,
+  group = example_gt$population
+)
+
+# The $id in admix_obj is now reordered according to the population
+admix_obj$id
+}

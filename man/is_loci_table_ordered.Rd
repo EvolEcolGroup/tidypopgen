@@ -46,3 +46,9 @@ a logical vector defining which loci are transversions
 This functions checks that all SNPs in a chromosome are adjacent in the loci
 table, and that positions are sorted within chromosomes.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+example_gt \%>\% is_loci_table_ordered()
+
+}

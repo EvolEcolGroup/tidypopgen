@@ -12,8 +12,11 @@
 #'   location of the backing files.
 #' @returns the path of the .geno file
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
 #'
-
+#' # Write a geno file
+#' gt_as_geno_lea(example_gt, file = paste0(tempfile(), "_example.geno"))
 # Write a geno file (as used by LEA)
 gt_as_geno_lea <- function(x, file = NULL) {
   if (is.null(file)) {

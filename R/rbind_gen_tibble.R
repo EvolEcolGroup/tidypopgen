@@ -36,6 +36,40 @@
 #'   backing file for the FBM)
 #' @returns a [`gen_tibble`] with the merged data.
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Create a second gen_tibble to merge
+#' test_indiv_meta <- data.frame(
+#'   id = c("x", "y", "z"),
+#'   population = c("pop1", "pop1", "pop2")
+#' )
+#' test_genotypes <- rbind(
+#'   c(1, 1, 0, 1, 1, 0),
+#'   c(2, 1, 0, 0, 0, 0),
+#'   c(2, 2, 0, 0, 1, 1)
+#' )
+#' test_loci <- data.frame(
+#'   name = paste0("rs", 1:6),
+#'   chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+#'   position = as.integer(c(3, 5, 65, 343, 23, 456)),
+#'   genetic_dist = as.double(rep(0, 6)),
+#'   allele_ref = c("A", "T", "C", "G", "C", "T"),
+#'   allele_alt = c("T", "C", NA, "C", "G", "A")
+#' )
+#'
+#' test_gt <- gen_tibble(
+#'   x = test_genotypes,
+#'   loci = test_loci,
+#'   indiv_meta = test_indiv_meta,
+#'   valid_alleles = c("A", "T", "C", "G"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Merge the datasets using rbind
+#' merged_gt <- rbind(ref = example_gt, target = test_gt, flip_strand = TRUE)
+#'
+#' merged_gt
 rbind.gen_tbl <- function(
     ...,
     as_is = FALSE,

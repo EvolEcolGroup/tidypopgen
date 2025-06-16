@@ -15,6 +15,10 @@
 #' @returns the ploidy (0 indicates mixed ploidy)
 #' @rdname show_ploidy
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' example_gt %>% show_ploidy()
 show_ploidy <- function(.x, ...) {
   UseMethod("show_ploidy", .x)
 }

@@ -19,3 +19,18 @@ This function sets or unsets the use of imputed data. For some analysis,
 such as PCA, that does not allow for missing data, we have to use imputation,
 but for other analysis it might be preferable to allow for missing data.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Impute the gen_tibble
+example_gt <- example_gt \%>\% gt_impute_simple()
+
+# Check whether the gen_tibble uses imputed values
+example_gt \%>\% gt_uses_imputed()
+
+# Set the gen_tibble to use imputed values
+example_gt \%>\% gt_set_imputed(TRUE)
+
+# And check that the gen_tibble uses imputed values again
+example_gt \%>\% gt_uses_imputed()
+}

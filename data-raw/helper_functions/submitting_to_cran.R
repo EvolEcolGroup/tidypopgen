@@ -15,6 +15,8 @@ devtools::check(remote = TRUE, manual = TRUE)
 
 source("./data-raw/helper_functions/check_returns_in_documentation.R")
 
+source("./data-raw/helper_functions/check_examples_in_documentation.R")
+
 # now create a cran_submission branch for the final remote tests
 
 # TO DO MANUALLY: update cran-comments.md accordingly
@@ -33,9 +35,9 @@ usethis::create_github_token()
 gitcreds::gitcreds_set()
 
 rhub::rhub_doctor()
-rhub::rhub_check()
+rhub::rhub_check(platforms = c("linux","m1-san","macos","macos-arm64", "windows", "valgrind"))
 
-# answer 1,2,3,4
+# answer 1,2,3,4,5
 
 
 

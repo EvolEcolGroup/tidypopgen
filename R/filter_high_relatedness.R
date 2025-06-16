@@ -15,7 +15,14 @@
 #'   individuals to remove are FALSE
 #' @rdname filter_high_relatedness
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
 #'
+#' # Calculate relationship matrix
+#' king_matrix <- example_gt %>% pairwise_king(as_matrix = TRUE)
+#'
+#' # Filter individuals with threshold above 0.2
+#' filter_high_relatedness(king_matrix, example_gt, kings_threshold = 0.2)
 filter_high_relatedness <-
   function(matrix, .x = NULL, kings_threshold = NULL, verbose = FALSE) {
     # get number of individuals

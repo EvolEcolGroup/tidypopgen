@@ -13,6 +13,11 @@
 #' @returns a logical vector defining which loci are transversions
 #' @rdname is_loci_table_ordered
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' example_gt %>% is_loci_table_ordered()
+#'
 is_loci_table_ordered <- function(
     .x,
     error_on_false = FALSE,

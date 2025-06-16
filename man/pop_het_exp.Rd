@@ -57,6 +57,18 @@ are only two alleles, so \eqn{m=2}. \eqn{\hat{h}_s} at the genome level for
 each population is simply the mean of the locus estimates for each
 population.
 }
+\examples{
+example_gt <- example_gt("grouped_gen_tbl")
+
+# Compute expected heterozygosity
+example_gt \%>\% pop_het_exp()
+
+# To include the global expected heterozygosity, set include_global = TRUE
+example_gt \%>\% pop_het_exp(include_global = TRUE)
+
+# To return by locus, set by_locus = TRUE
+example_gt \%>\% pop_het_exp(by_locus = TRUE)
+}
 \references{
 Nei M. (1987) Molecular Evolutionary Genetics. Columbia
 University Press

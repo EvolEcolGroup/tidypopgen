@@ -73,3 +73,13 @@ PBS is a measure of the genetic differentiation between one focal
 population and two reference populations, and is used to identify outlier
 loci that may be under selection.
 }
+\examples{
+example_gt <- example_gt("grouped_gen_tbl")
+
+# Calculate nwise pbs across a window of 3 SNPs, with a step size of 2 SNPs
+example_gt \%>\%
+  windows_nwise_pop_pbs(
+    window_size = 3, step_size = 2,
+    size_unit = "snp", min_loci = 2
+  )
+}

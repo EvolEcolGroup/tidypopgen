@@ -66,7 +66,36 @@
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
 #' @export
-
+#' @examples
+#'
+#' # Create a gen_tibble from a matrix of genotypes:
+#' test_indiv_meta <- data.frame(
+#'   id = c("a", "b", "c"),
+#'   population = c("pop1", "pop1", "pop2")
+#' )
+#' test_genotypes <- rbind(
+#'   c(1, 1, 0, 1, 1, 0),
+#'   c(2, 1, 0, 0, 0, 0),
+#'   c(2, 2, 0, 0, 1, 1)
+#' )
+#' test_loci <- data.frame(
+#'   name = paste0("rs", 1:6),
+#'   chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+#'   position = as.integer(c(3, 5, 65, 343, 23, 456)),
+#'   genetic_dist = as.double(rep(0, 6)),
+#'   allele_ref = c("A", "T", "C", "G", "C", "T"),
+#'   allele_alt = c("T", "C", NA, "C", "G", "A")
+#' )
+#'
+#' test_gt <- gen_tibble(
+#'   x = test_genotypes,
+#'   loci = test_loci,
+#'   indiv_meta = test_indiv_meta,
+#'   valid_alleles = c("A", "T", "C", "G"),
+#'   quiet = TRUE
+#' )
+#'
+#' test_gt
 gen_tibble <-
   function(x,
            ...,
@@ -418,6 +447,7 @@ check_valid_loci <- function(loci) {
 #' @param loci the loci table
 #' @returns a bigSNP object
 #' @keywords internal
+#' @noRd
 gt_write_bigsnp_from_dfs <- function(
     genotypes,
     indiv_meta,
@@ -503,6 +533,7 @@ gt_write_bigsnp_from_dfs <- function(
 #' a vector of values for mixed ploidy).
 #' @returns a vctrs_bigSNP object
 #' @keywords internal
+#' @noRd
 new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
   loci <- tibble::tibble(
     big_index = seq_len(nrow(bigsnp_obj$map)),
@@ -548,7 +579,7 @@ summary.vctrs_bigSNP <- function(object, ...) {
 #' @param .x the tibble
 #' @returns the gen_tibble, invisibly
 #' @keywords internal
-
+#' @noRd
 stopifnot_gen_tibble <- function(.x) {
   if (!"genotypes" %in% names(.x)) {
     stop("not a gen_tibble, 'genotype' column is missing")

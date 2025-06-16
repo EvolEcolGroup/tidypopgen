@@ -43,7 +43,15 @@
 #'    include "fst" calculations in the same column (e.g. "fst_pop1.pop2").
 #' - `value`: the pbs value for the populations
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("grouped_gen_tbl")
+#'
+#' # Calculate nwise pbs across a window of 3 SNPs, with a step size of 2 SNPs
+#' example_gt %>%
+#'   windows_nwise_pop_pbs(
+#'     window_size = 3, step_size = 2,
+#'     size_unit = "snp", min_loci = 2
+#'   )
 windows_nwise_pop_pbs <- function(.x,
                                   type = c("matrix", "tidy"),
                                   fst_method = c("Hudson", "Nei87", "WC84"),

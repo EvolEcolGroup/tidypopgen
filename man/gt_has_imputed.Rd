@@ -17,3 +17,15 @@ imputed
 This function checks if a dataset has been imputed. Note that having
 imputation does not mean that the imputed values are used.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# The initial gen_tibble contains no imputed values
+example_gt \%>\% gt_has_imputed()
+
+# Now impute the gen_tibble
+example_gt <- example_gt \%>\% gt_impute_simple()
+
+# And we can check it has been imputed
+example_gt \%>\% gt_has_imputed()
+}

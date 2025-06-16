@@ -30,3 +30,12 @@ locus is imputed independently (and thus linkage information is ignored).
 \details{
 This function is a wrapper around \code{\link[bigsnpr:snp_fastImputeSimple]{bigsnpr::snp_fastImputeSimple()}}.
 }
+\examples{
+example_gt <- example_gt("gen_tbl")
+
+# Impute the gen_tibble
+example_gt <- example_gt \%>\% gt_impute_simple()
+
+# And we can check it has been imputed
+example_gt \%>\% gt_has_imputed()
+}

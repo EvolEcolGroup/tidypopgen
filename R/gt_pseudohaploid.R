@@ -13,7 +13,17 @@
 #' @return a `gen_tibble` object with the ploidy set to -2 and the individual
 #' ploidy values updated to 1 or 2.
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Detect pseudohaploids and set ploidy for the whole gen_tibble
+#' example_gt <- example_gt %>% gt_pseudohaploid(test_n_loci = 3)
+#'
+#' # Ploidy is now set to -2
+#' show_ploidy(example_gt)
+#'
+#' # Individual ploidy now varies between 1 (pseudohaploid) and 2 (diploid)
+#' indiv_ploidy(example_gt)
 gt_pseudohaploid <- function(x, test_n_loci = 10000) {
   # check that the input is a gen_tibble
   stopifnot_gen_tibble(x)
@@ -57,6 +67,7 @@ gt_pseudohaploid <- function(x, test_n_loci = 10000) {
 #' @param n_test the number of loci being tested
 #' @return a numeric vector of ploidy
 #' @keywords internal
+#' @noRd
 identify_pseudohaploids <- function(x, n_test = 1000) {
   if (n_test > count_loci(x)) {
     n_test <- count_loci(x)

@@ -93,6 +93,15 @@ function uses the same algorithm as \code{hierfstat::basic.stats()} but is
 optimized for speed and memory usage.
 }
 }
+\examples{
+example_gt <- example_gt("grouped_gen_tbl")
+
+# Compute population global statistics
+example_gt \%>\% pop_global_stats()
+
+# To return by locus, set by_locus = TRUE
+example_gt \%>\% pop_global_stats(by_locus = TRUE)
+}
 \references{
 Nei M, Chesser R (1983) Estimation of fixation indexes and gene
 diversities. Annals of Human Genetics, 47, 253-259.

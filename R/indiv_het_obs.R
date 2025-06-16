@@ -10,10 +10,21 @@
 #'  individual. These quantities can be useful to compute more complex
 #'  quantities.
 #' @param ... currently unused.
-#' @returns a vector of heterozygosities, one per individuals in the
-#'   [`gen_tibble`]
+#' @returns either:
+#'  - a vector of heterozygosities, one per individuals in the [`gen_tibble`]
+#'  - a matrix with two columns, where the first is the number of heterozygous
+#'    loci for each individual and the second is the number of missing values
+#'    for each individual
 #' @rdname indiv_het_obs
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' example_gt %>% indiv_het_obs()
+#'
+#' # For observed heterozygosity as counts:
+#' example_gt %>% indiv_het_obs(as_counts = TRUE)
+#'
 indiv_het_obs <- function(.x, as_counts = FALSE, ...) {
   UseMethod("indiv_het_obs", .x)
 }

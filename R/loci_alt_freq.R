@@ -424,7 +424,7 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
 #' @param type a string indicating the type of output
 #' @returns the data formatted as a tibble, list, or matrix
 #' @keywords internal
-
+#' @noRd
 format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
   if (type == "tidy") {
     out_mat_tbl <- as.data.frame(out_mat)
