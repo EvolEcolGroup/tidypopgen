@@ -42,7 +42,7 @@ PLINK bed, ped or raw file (and associated files, i.e. .bim and .fam for
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Export a <code>gen_tibble</code> object to PLINK bed format</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/gt_as_plink.R" class="external-link"><code>R/gt_as_plink.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/gt_as_plink.R" class="external-link"><code>R/gt_as_plink.R</code></a></small>
       <div class="d-none name"><code>gt_as_plink.Rd</code></div>
     </div>
 
@@ -109,15 +109,15 @@ ped or raw is slower, especially for large datasets.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Write a bed file</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">gt_as_plink</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"bed"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_plink"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpyN1xne/file22a249a2cded_plink.bed"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmpj8YvAt/file29087f00a2b0_plink.bed"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Write a ped file</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">gt_as_plink</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"ped"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_plink"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpyN1xne/file22a21e2df7d1_plink.ped"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmpj8YvAt/file2908602edd74_plink.ped"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Write a raw file</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">gt_as_plink</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"raw"</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_plink"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpyN1xne/file22a22e43cd79_plink.raw"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmpj8YvAt/file29086c7a592d_plink.raw"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
