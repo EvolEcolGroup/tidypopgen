@@ -62,6 +62,50 @@ individuals not included in the original analysis. This is because we
 currently do not have  mechanism to store the pca information in the
 object, and that is needed for prediction.
 }
+\examples{
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+# Create PCA object
+pca <- gt_pca_partialSVD(lobsters)
+
+# Run DAPC on the `gt_pca` object, providing `pop` as factor
+populations <- as.factor(lobsters$population)
+gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+
+# Run clustering on the first 10 PCs
+cluster_pca <- gt_cluster_pca(
+  x = pca,
+  n_pca = 10,
+  k_clusters = c(1, 5),
+  method = "kmeans",
+  n_iter = 1e5,
+  n_start = 10,
+  quiet = FALSE
+)
+
+# Find best k
+cluster_pca <- gt_cluster_pca_best_k(cluster_pca,
+  stat = "BIC",
+  criterion = "min"
+)
+
+# Run DAPC on the `gt_cluster_pca` object
+gt_dapc(cluster_pca, n_pca = 10, n_da = 2)
+
+#  should be stored (TRUE, default) or not (FALSE). This information is
+#  required to predict group membership of new individuals using predict, but
+#  makes the object slightly bigger.
+}
 \references{
 Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
 of principal components: a new method for the analysis of genetically

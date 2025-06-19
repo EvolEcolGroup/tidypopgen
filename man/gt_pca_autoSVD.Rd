@@ -101,3 +101,33 @@ avoid this error.
 Note: rather than accessing these elements directly, it is better to use
 \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 }
+\examples{
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+show_loci(lobsters)$chromosome <- "1"
+show_loci(lobsters)$chr_int <- 1
+
+# Create PCA object, including total variance
+gt_pca_autoSVD(lobsters,
+  k = 10,
+  roll_size = 20,
+  total_var = TRUE
+)
+# Change number of components and exclude total variance
+gt_pca_autoSVD(lobsters,
+  k = 5,
+  roll_size = 20,
+  total_var = FALSE
+)
+
+}

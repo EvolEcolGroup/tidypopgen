@@ -64,6 +64,34 @@ This summarizes information about the components of a \code{gt_dapc} from the
 \code{tidypopgen} package. The parameter \code{matrix} determines which element is
 returned.
 }
+\examples{
+#' # Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+# Create PCA and run DAPC
+pca <- gt_pca_partialSVD(lobsters)
+populations <- as.factor(lobsters$population)
+dapc_res <- gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+
+# Tidy scores
+tidy(dapc_res, matrix = "scores")
+
+# Tidy eigenvalues
+tidy(dapc_res, matrix = "eigenvalues")
+
+# Tidy loadings
+tidy(dapc_res, matrix = "loadings")
+
+}
 \seealso{
 \code{\link[=gt_dapc]{gt_dapc()}} \code{\link[=augment.gt_dapc]{augment.gt_dapc()}}
 }
