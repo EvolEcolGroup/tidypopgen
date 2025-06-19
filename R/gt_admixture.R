@@ -91,19 +91,23 @@ gt_admixture <- function(
     # if reticulate is available
     # if we have "auto"
     if (conda_env == "auto") {
-      # if the conda environment citidygenclust does exist
-      # if we have tidygenclust installed and initialised
-      if (("ctidygenclust" %in% reticulate::conda_list()[["name"]])) {
-        if (Sys.info()["sysname"] == "Linux") {
-        # if it is Linux, then use ctidygenclust
-          conda_env <- "ctidygenclust"
-        } else if (Sys.info()["sysname"] == "Darwin") {
+      conda_envs <- reticulate::conda_list()[["name"]]
+      # if we are on Linux and have ctidygenclust installed
+      if (
+        (Sys.info()["sysname"] == "Linux") &&
+          ("ctidygenclust" %in% conda_envs)
+      ) {
+        conda_env <- "ctidygenclust"
+      } else if (
+        (Sys.info()["sysname"] == "Darwin") &&
+          ("cadmixture86" %in% conda_envs)
+      ) {
         # else on osx use cadmixture86
-          conda_env <- "cadmixture86"
-        }
-      } else { # if it does not exist
+        conda_env <- "cadmixture86"
+      } else { # if we have no conda environment
         conda_env <- "none"
       }
+
       # check that the conda environment does exist
       if (
         (conda_env != "none") &&
