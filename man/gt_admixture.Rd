@@ -61,7 +61,7 @@ installed in a conda environment.
 }
 \examples{
 # run the example only if we have the package installed
-\donttest{
+\dontrun{
 bed_file <-
   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
 lobsters <- gen_tibble(bed_file,

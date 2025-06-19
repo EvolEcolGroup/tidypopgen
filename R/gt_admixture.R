@@ -33,7 +33,7 @@
 #' @export
 #' @examples
 #' # run the example only if we have the package installed
-#' \donttest{
+#' \dontrun{
 #' bed_file <-
 #'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
 #' lobsters <- gen_tibble(bed_file,
@@ -46,6 +46,7 @@
 #'   n_runs = 2, crossval = TRUE
 #' )
 #' }
+
 # If the package `fastmixturer` is installed, and its conda environment has been
 # set up with `ADMIXTURE` in it (the default), it will automatically use that
 # version unless you change `conda_env` to "none". If set to "auto", the
