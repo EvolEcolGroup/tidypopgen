@@ -176,7 +176,7 @@ test_that("run admixture as multiple runs", {
       seed = c(123),
       conda_env = "none"
     ),
-    "'seeds' should be a vector of "
+    "'seed' should be a vector of "
   )
   # plot the crossval
   cross_plot <- autoplot(anole_adm_cv)

@@ -67,6 +67,21 @@
 #' @rdname gen_tibble
 #' @export
 #' @examples
+#' # Create a gen_tibble from a .bed file
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Create a gen_tibble from a .vcf file
+#' vcf_path <-
+#'   system.file("extdata", "anolis",
+#'     "punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+#'     package = "tidypopgen"
+#'   )
+#' gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
 #'
 #' # Create a gen_tibble from a matrix of genotypes:
 #' test_indiv_meta <- data.frame(
@@ -87,7 +102,7 @@
 #'   allele_alt = c("T", "C", NA, "C", "G", "A")
 #' )
 #'
-#' test_gt <- gen_tibble(
+#' gen_tibble(
 #'   x = test_genotypes,
 #'   loci = test_loci,
 #'   indiv_meta = test_indiv_meta,
@@ -95,7 +110,6 @@
 #'   quiet = TRUE
 #' )
 #'
-#' test_gt
 gen_tibble <-
   function(x,
            ...,

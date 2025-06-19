@@ -17,6 +17,20 @@
 #'   two [bigstatsr::FBM] matrices, one of counts of IBS by alleles, and one of
 #'   number of valid alleles (i.e. 2*n_loci - 2*missing_loci)
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' pairwise_ibs(example_gt, type = "proportion")
+#'
+#' # Alternatively, return a matrix
+#' pairwise_ibs(example_gt, type = "proportion", as_matrix = TRUE)
+#'
+#' # Adjust block_size
+#' pairwise_ibs(example_gt, block_size = 2)
+#'
+#' # Change type
+#' pairwise_ibs(example_gt, type = "adjusted_counts")
+#' pairwise_ibs(example_gt, type = "raw_counts")
 pairwise_ibs <- function(
     x,
     as_matrix = FALSE,

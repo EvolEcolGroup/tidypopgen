@@ -31,13 +31,26 @@
 #' - `id` the id column of the input `gen_tibble` (if applicable)
 #' - `group` the group column of the input `gen_tibble` (if applicable)
 #' @export
-
+#' @examples
+#' # run the example only if we have the package installed
+#' \donttest{
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#' lobsters <- lobsters %>% group_by(population)
+#' gt_admixture(lobsters,
+#'   k = 2:3, seed = c(1, 2),
+#'   n_runs = 2, crossval = TRUE
+#' )
+#' }
 # If the package `fastmixturer` is installed, and its conda environment has been
 # set up with `ADMIXTURE` in it (the default), it will automatically use that
 # version unless you change `conda_env` to "none". If set to "auto", the
 # default, a copy from `fastmixturer` will be preferred if available, otherwise
 # a local copy will be used.
-
 gt_admixture <- function(
     x,
     k,
@@ -48,7 +61,7 @@ gt_admixture <- function(
     conda_env = "none") {
   # check that we have the right number of repeats
   if (length(seed) != n_runs) {
-    stop("'seeds' should be a vector of length 'n_runs'")
+    stop("'seed' should be a vector of length 'n_runs'")
   }
 
   # if x is a character, check that it is file that exists

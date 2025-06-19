@@ -13,6 +13,18 @@
 #'   individuals if `as_matrix` is TRUE, or a tidied tibble of coefficients if
 #'   `as_matrix` is FALSE.
 #' @export
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' # Compute the KING-robust matrix
+#' pairwise_king(example_gt, as_matrix = TRUE)
+#'
+#' # Or return a tidy tibble
+#' pairwise_king(example_gt, as_matrix = FALSE)
+#'
+#' # Adjust block_size
+#' pairwise_king(example_gt, block_size = 2)
+#'
 pairwise_king <- function(
     x,
     as_matrix = FALSE,

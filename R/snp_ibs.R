@@ -22,7 +22,23 @@
 #'   alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns
 #'   a single matrix of IBS proportions.
 #' @export
-
+#' @examples
+#' example_gt <- example_gt("gen_tbl")
+#'
+#' X <- attr(example_gt$genotypes, "bigsnp")
+#' snp_ibs(X$genotypes)
+#'
+#' # Compute for individuals 1 to 5
+#' snp_ibs(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+#'
+#' # Adjust block.size
+#' snp_ibs(X$genotypes, block.size = 2)
+#'
+#' # Change type
+#' snp_ibs(X$genotypes, type = "proportion")
+#' snp_ibs(X$genotypes, type = "adjusted_counts")
+#' snp_ibs(X$genotypes, type = "raw_counts")
+#'
 snp_ibs <- function(
     X, # nolint start
     ind.row = bigstatsr::rows_along(X),
