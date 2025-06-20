@@ -85,6 +85,43 @@ specified, all columns are used. Don't use negative indices.</p></dd>
 individuals</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="load_example_gt.html">load_example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">$</span><span class="va">genotypes</span>, <span class="st">"bigsnp"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">snp_king</span><span class="op">(</span><span class="va">X</span><span class="op">$</span><span class="va">genotypes</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        [,1]  [,2]   [,3]   [,4]   [,5]  [,6]   [,7]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.500  0.00  0.125  0.250  0.250 -0.50  0.250</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  0.000  0.50    NaN  0.000 -1.250 -1.00 -1.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  0.125   NaN  0.500  0.000  0.125 -0.50 -0.750</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  0.250  0.00  0.000  0.500 -0.625 -0.25 -0.125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  0.250 -1.25  0.125 -0.625  0.500 -1.00 -0.125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] -0.500 -1.00 -0.500 -0.250 -1.000  0.50    NaN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,]  0.250 -1.00 -0.750 -0.125 -0.125   NaN  0.500</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Compute for individuals 1 to 5</span></span></span>
+<span class="r-in"><span><span class="fu">snp_king</span><span class="op">(</span><span class="va">X</span><span class="op">$</span><span class="va">genotypes</span>, ind.row <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, ind.col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2]  [,3]  [,4]  [,5]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.50  0.0  0.00  0.25  0.25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.00  0.5   NaN  0.00 -1.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.00  NaN  0.50 -0.25 -0.25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.25  0.0 -0.25  0.50 -0.50</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.25 -1.0 -0.25 -0.50  0.50</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Adjust block size</span></span></span>
+<span class="r-in"><span><span class="fu">snp_king</span><span class="op">(</span><span class="va">X</span><span class="op">$</span><span class="va">genotypes</span>, block.size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        [,1]  [,2]   [,3]   [,4]   [,5]  [,6]   [,7]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.500  0.00  0.125  0.250  0.250 -0.50  0.250</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  0.000  0.50    NaN  0.000 -1.250 -1.00 -1.000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  0.125   NaN  0.500  0.000  0.125 -0.50 -0.750</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  0.250  0.00  0.000  0.500 -0.625 -0.25 -0.125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  0.250 -1.25  0.125 -0.625  0.500 -1.00 -0.125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] -0.500 -1.00 -0.500 -0.250 -1.000  0.50    NaN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,]  0.250 -1.00 -0.750 -0.125 -0.125   NaN  0.500</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

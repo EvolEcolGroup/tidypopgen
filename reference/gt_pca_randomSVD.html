@@ -150,6 +150,39 @@ vectors)</p></li>
 <code>tidy</code> and <code>augment</code>. See <code><a href="tidy_gt_pca.html">gt_pca_tidiers</a></code>.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">vcf_path</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"anolis"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"punctatus_t70_s10_n46_filtered.recode.vcf.gz"</span>,</span></span>
+<span class="r-in"><span>    package <span class="op">=</span> <span class="st">"tidypopgen"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">vcf_path</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"anolis_"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Remove monomorphic loci and impute</span></span></span>
+<span class="r-in"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">anole_gt</span>, method <span class="op">=</span> <span class="st">"mode"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create PCA obejct, including total variance</span></span></span>
+<span class="r-in"><span><span class="fu">gt_pca_randomSVD</span><span class="op">(</span><span class="va">anole_gt</span>, k <span class="op">=</span> <span class="fl">10</span>, total_var <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  === PCA of gen_tibble object ===</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Method: [1] "randomSVD"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call ($call):gt_pca_randomSVD(x = anole_gt, k = 10, total_var = TRUE)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Eigenvalues ($d):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  351.891 192.527 113.562 104.427 87.615 83.476 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Principal component scores ($u):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 46 rows (individuals) and 10 columns (axes) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Loadings (Principal axes) ($v):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 3249 rows (SNPs) and 10 columns (axes) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
