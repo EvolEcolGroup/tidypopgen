@@ -36,7 +36,7 @@ are homozygous for a different allele, and 1/2 if at least one individual is
 heterozygous. Matching is the average of these 0, 1/2 and 1s)
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 X <- attr(example_gt$genotypes, "bigsnp")
 snp_allele_sharing(X$genotypes)

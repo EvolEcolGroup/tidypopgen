@@ -13,7 +13,7 @@
 #' @rdname loci_chromosomes
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #' example_gt %>% loci_chromosomes()
 loci_chromosomes <- function(.x, .col = "genotypes", ...) {
   UseMethod("loci_chromosomes", .x)

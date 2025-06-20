@@ -31,7 +31,7 @@
 #'   in the window, and 'n_loci' contains the number of loci in the window.
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' miss_by_locus <- loci_missingness(example_gt)
 #'

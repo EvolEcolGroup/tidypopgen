@@ -25,7 +25,7 @@ been moved, they should be found automatically. If they were moved, use
 same directory as the \emph{.rds} file).
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # remove some individuals
 example_gt_filtered <- example_gt \%>\% filter(id != "a")

@@ -32,7 +32,7 @@ coefficients and returns the maximum set of individuals that contains no
 relationships above the given threshold.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Calculate relationship matrix
 king_matrix <- example_gt \%>\% pairwise_king(as_matrix = TRUE)

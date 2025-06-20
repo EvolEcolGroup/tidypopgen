@@ -100,7 +100,7 @@
 #' RhpcBLASctl::blas_set_num_threads(2)
 #' RhpcBLASctl::omp_set_num_threads(2)
 #' }
-#' example_gt <- example_gt("grouped_gen_tbl")
+#' example_gt <- load_example_gt("grouped_gen_tbl")
 #'
 #' # Compute population global statistics
 #' example_gt %>% pop_global_stats()

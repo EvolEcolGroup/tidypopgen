@@ -39,7 +39,7 @@ on compulsory columns that will always be present)
 Extract and set the information on loci from a  \code{gen_tibble}.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 example_gt \%>\% show_loci()
 }

@@ -72,7 +72,7 @@ test_that("loci_hwe mid_p = FALSE produces the same output as plink --hardy ", {
 
 
 test_that("loci_hwe for grouped tibble gives the correct result", {
-  test_gt <- example_gt("grouped_gen_tbl")
+  test_gt <- load_example_gt("grouped_gen_tbl")
 
   # compute using .grouped_df method
   list <- loci_hwe(test_gt, type = "list")

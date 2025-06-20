@@ -61,7 +61,7 @@ appropriate \verb{window_*} functions, e.g \code{\link[=windows_pairwise_pop_fst
 pairwise Fst.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 miss_by_locus <- loci_missingness(example_gt)
 

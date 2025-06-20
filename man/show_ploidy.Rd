@@ -33,7 +33,7 @@ for which we only have information for one allele; the dosages are 0 or 2
 for these individuals).
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 example_gt \%>\% show_ploidy()
 }

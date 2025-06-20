@@ -37,7 +37,7 @@ Estimate observed heterozygosity (H_obs) for each individual (i.e. the
 frequency of loci that are heterozygous in an individual).
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 example_gt \%>\% indiv_het_obs()
 

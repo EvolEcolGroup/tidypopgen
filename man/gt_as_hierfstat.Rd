@@ -18,7 +18,7 @@ This function converts a \code{gen_tibble} to a data.frame formatted
 to be used by \code{hierfstat} functions.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Convert to genind
 gt_hierfstat <- example_gt \%>\% gt_as_hierfstat()

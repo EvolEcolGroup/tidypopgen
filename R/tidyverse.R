@@ -7,9 +7,9 @@
 #' @returns a `gen_tibble`
 #' @export
 #' @examples
-#' test_gt <- example_gt("gen_tbl")
+#' test_gt <- load_example_gt("gen_tbl")
 #' test_gt %>% filter(id %in% c("a", "c"))
-#' test_gt <- example_gt("grouped_gen_tbl_sf")
+#' test_gt <- load_example_gt("grouped_gen_tbl_sf")
 #' test_gt %>% filter(id %in% c("a", "c"))
 filter.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
@@ -31,9 +31,9 @@ filter.gen_tbl <- function(..., deparse.level = 1) { # nolint
 #' @returns a `gen_tibble`
 #' @export
 #' @examples
-#' test_gt <- example_gt("gen_tbl")
+#' test_gt <- load_example_gt("gen_tbl")
 #' test_gt %>% arrange(id)
-#' test_gt <- example_gt("grouped_gen_tbl_sf")
+#' test_gt <- load_example_gt("grouped_gen_tbl_sf")
 #' test_gt %>% arrange(id)
 arrange.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
@@ -56,7 +56,7 @@ arrange.gen_tbl <- function(..., deparse.level = 1) { # nolint
 #' @returns a `gen_tibble`
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Add a new column
 #' example_gt %>% mutate(region = "East")
@@ -99,7 +99,7 @@ dplyr_reconstruct.gen_tbl <- function(data, template) {
 #' @returns a `gen_tibble`
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Add a new column
 #' example_gt$region <- "East"

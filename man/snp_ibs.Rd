@@ -45,7 +45,7 @@ Note that monomorphic sites are currently counted. Should we filter them
 beforehand? What does plink do?
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 X <- attr(example_gt$genotypes, "bigsnp")
 snp_ibs(X$genotypes)

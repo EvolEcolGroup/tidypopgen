@@ -46,7 +46,7 @@ differentiation between one focal population and two reference populations,
 and is used to identify outlier loci that may be under selection.
 }
 \examples{
-example_gt <- example_gt()
+example_gt <- load_example_gt()
 
 # We can compute the PBS for all populations using "Hudson" method
 example_gt \%>\%

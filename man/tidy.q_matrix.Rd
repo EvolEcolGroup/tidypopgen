@@ -27,7 +27,7 @@ Takes a \code{q_matrix} object, which is a matrix, and returns a tidied tibble.
 \examples{
 # run the example only if we have the package installed
 if (requireNamespace("LEA", quietly = TRUE)) {
-  example_gt <- example_gt("gen_tbl")
+  example_gt <- load_example_gt("gen_tbl")
 
   # Create a gt_admix object
   admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")

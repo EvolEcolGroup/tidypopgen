@@ -14,7 +14,7 @@
 #'   `as_matrix` is FALSE.
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Compute the KING-robust matrix
 #' pairwise_king(example_gt, as_matrix = TRUE)

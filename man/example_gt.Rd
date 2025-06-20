@@ -4,7 +4,7 @@
 \alias{example_gt}
 \title{Create example gen_tibble}
 \usage{
-example_gt(
+load_example_gt(
   type = c("gen_tbl", "grouped_gen_tbl", "grouped_gen_tbl_sf", "gen_tbl_sf")
 )
 }
@@ -28,5 +28,5 @@ documentation.
 \examples{
 
 # This function creates an example gen_tibble object
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 }

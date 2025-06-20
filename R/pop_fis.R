@@ -32,7 +32,7 @@
 #' RhpcBLASctl::blas_set_num_threads(2)
 #' RhpcBLASctl::omp_set_num_threads(2)
 #' }
-#' example_gt <- example_gt("grouped_gen_tbl")
+#' example_gt <- load_example_gt("grouped_gen_tbl")
 #'
 #' # Compute FIS using Nei87
 #' example_gt %>% pop_fis(method = "Nei87")

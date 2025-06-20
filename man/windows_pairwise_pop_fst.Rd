@@ -65,7 +65,7 @@ This function computes pairwise Fst for a sliding window across
 each chromosome.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 example_gt \%>\%
   group_by(population) \%>\%

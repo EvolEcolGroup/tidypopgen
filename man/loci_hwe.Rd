@@ -60,7 +60,7 @@ data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
 RhpcBLASctl::omp_set_num_threads(2)
 }
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # For HWE
 example_gt \%>\% loci_hwe()

@@ -17,7 +17,7 @@ A function to return the names of the files used to store data in a
 \code{gen_tibble}. Specifically, this returns the .rds file storing the big
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # To retrieve the names of and paths to the .bk and .rds files use:
 gt_get_file_names(example_gt)

@@ -9,7 +9,7 @@
 #' @rdname count_loci
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' example_gt %>% count_loci()
 count_loci <- function(.x, ...) {

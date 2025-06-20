@@ -23,7 +23,7 @@ that \code{cbind} will not combine two \code{gen_tibbles} (i.e. it will NOT comb
 markers for the same individuals)
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Create a dataframe to combine with the gen_tibble
 df <- data.frame(region = c("A", "A", "B", "B", "A", "B", "B"))

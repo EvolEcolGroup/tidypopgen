@@ -74,7 +74,7 @@ population and two reference populations, and is used to identify outlier
 loci that may be under selection.
 }
 \examples{
-example_gt <- example_gt("grouped_gen_tbl")
+example_gt <- load_example_gt("grouped_gen_tbl")
 
 # Calculate nwise pbs across a window of 3 SNPs, with a step size of 2 SNPs
 example_gt \%>\%

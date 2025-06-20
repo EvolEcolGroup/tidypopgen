@@ -33,7 +33,7 @@
 #' @examples
 #' # run the example only if we have the package installed
 #' if (requireNamespace("LEA", quietly = TRUE)) {
-#'   example_gt <- example_gt("gen_tbl")
+#'   example_gt <- load_example_gt("gen_tbl")
 #'
 #'   # To run SNMF on a gen_tibble:
 #'   example_gt %>% gt_snmf(

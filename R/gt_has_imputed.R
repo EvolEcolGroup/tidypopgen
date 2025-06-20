@@ -8,7 +8,7 @@
 #'   imputed
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # The initial gen_tibble contains no imputed values
 #' example_gt %>% gt_has_imputed()
@@ -36,7 +36,7 @@ gt_has_imputed <- function(x) {
 #'   imputed values
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Impute the gen_tibble
 #' example_gt <- example_gt %>% gt_impute_simple()
@@ -72,7 +72,7 @@ gt_uses_imputed <- function(x) {
 #' @returns the gen_tibble, invisibly
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Impute the gen_tibble
 #' example_gt <- example_gt %>% gt_impute_simple()

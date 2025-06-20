@@ -35,7 +35,7 @@ The GRM is twice the coancestry matrix (e.g. as estimated by
 \code{hierfstat::beta.dosage()} with \code{inb=FALSE}).
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Compute the GRM from the allele sharing matrix
 example_gt \%>\% pairwise_grm()

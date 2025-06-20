@@ -38,7 +38,7 @@ Note that monomorphic sites are currently considered. Remove monomorphic
 sites before running pairwise_king if this is a concern.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 pairwise_ibs(example_gt, type = "proportion")
 

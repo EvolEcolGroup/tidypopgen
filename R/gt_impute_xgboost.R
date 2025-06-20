@@ -32,7 +32,7 @@
 #' RhpcBLASctl::blas_set_num_threads(2)
 #' RhpcBLASctl::omp_set_num_threads(2)
 #' }
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Impute the gen_tibble
 #' example_gt <- example_gt %>% gt_impute_xgboost()

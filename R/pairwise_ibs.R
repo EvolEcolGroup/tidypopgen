@@ -18,7 +18,7 @@
 #'   number of valid alleles (i.e. 2*n_loci - 2*missing_loci)
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' pairwise_ibs(example_gt, type = "proportion")
 #'

@@ -31,6 +31,6 @@ a logical vector defining which loci are transversions
 Use the loci table to define which loci are transversions
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 example_gt \%>\% loci_transversions()
 }
