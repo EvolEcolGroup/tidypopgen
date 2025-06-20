@@ -57,7 +57,7 @@ read_q_files <- function(x) {
 #' @export
 #' @examples
 #' # Read in a single .Q file
-#' q_mat <- read.table(system.file("/extdata/anolis/anolis_ld_run1.3.Q",
+#' q_mat <- read.table(system.file("extdata","anolis","anolis_ld_run1.3.Q",
 #'   package = "tidypopgen"
 #' ))
 #' class(q_mat)
@@ -209,15 +209,18 @@ get_p_matrix <- function(x, ..., k, run) {
 #'
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' # run the example only if we have the package installed
+#' if (requireNamespace("LEA", quietly = TRUE)) {
+#'   example_gt <- example_gt("gen_tbl")
 #'
-#' # Create a gt_admix object
-#' admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
+#'   # Create a gt_admix object
+#'   admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
 #'
-#' # Extract a Q matrix
-#' q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+#'   # Extract a Q matrix
+#'   q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
 #'
-#' tidy(q_mat_k3, data = example_gt)
+#'   tidy(q_mat_k3, data = example_gt)
+#' }
 tidy.q_matrix <- function(x, data, ...) {
   rlang::check_dots_empty()
 
@@ -288,16 +291,19 @@ tidy.q_matrix <- function(x, data, ...) {
 #' @export
 #' @name augment_q_matrix
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' # run the example only if we have the package installed
+#' if (requireNamespace("LEA", quietly = TRUE)) {
+#'   example_gt <- example_gt("gen_tbl")
 #'
-#' # Create a gt_admix object
-#' admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
+#'   # Create a gt_admix object
+#'   admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
 #'
-#' # Extract a Q matrix
-#' q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+#'   # Extract a Q matrix
+#'   q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
 #'
-#' # Augment the gen_tibble with Q values
-#' augment(q_mat_k3, data = example_gt)
+#'   # Augment the gen_tibble with Q values
+#'   augment(q_mat_k3, data = example_gt)
+#' }
 augment.q_matrix <- function(x, data = NULL, ...) {
   if (inherits(data, "grouped_df")) {
     if (!".rownames" %in% names(data)) {

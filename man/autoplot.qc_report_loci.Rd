@@ -20,7 +20,7 @@
 \item{type}{the type of plot (one of \code{overview}, \code{all}, \code{missing},
 \verb{missing low maf}, \verb{missing high maf}, \code{maf}, \code{hwe}, and \verb{significant hwe})}
 
-\item{maf_threshold}{default 0.5, a threshold for the accepted rate of minor
+\item{maf_threshold}{default 0.05, a threshold for the accepted rate of minor
 allele frequency of loci}
 
 \item{miss_threshold}{default 0.01, a threshold for the accepted rate of

@@ -54,6 +54,11 @@ rates from the xgboost, if appended, can be retrieved with
 \code{attr(x$genotypes, "imputed_errors")} where \code{x} is the \code{gen_tibble}.
 }
 \examples{
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
 example_gt <- example_gt("gen_tbl")
 
 # Impute the gen_tibble

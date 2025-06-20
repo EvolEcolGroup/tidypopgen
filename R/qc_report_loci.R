@@ -107,7 +107,7 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' @param object an object of class `qc_report_loci`
 #' @param type the type of plot (one of `overview`, `all`, `missing`,
 #' `missing low maf`, `missing high maf`, `maf`, `hwe`, and `significant hwe`)
-#' @param maf_threshold default 0.5, a threshold for the accepted rate of minor
+#' @param maf_threshold default 0.05, a threshold for the accepted rate of minor
 #'   allele frequency of loci
 #' @param miss_threshold default 0.01, a threshold for the accepted rate of
 #'   missingness per loci

@@ -16,6 +16,11 @@
 #' @rdname pop_tajimas_d
 #' @export
 #' @examples
+#' \dontshow{
+#' data.table::setDTthreads(2)
+#' RhpcBLASctl::blas_set_num_threads(2)
+#' RhpcBLASctl::omp_set_num_threads(2)
+#' }
 #' example_gt <- example_gt("grouped_gen_tbl")
 #'
 #' # Compute Tajima's D

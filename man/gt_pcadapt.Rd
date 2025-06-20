@@ -30,6 +30,11 @@ Internally, this function uses the \code{snp_pcadapt} function from the \code{bi
 package.
 }
 \examples{
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
 # Create a gen_tibble of lobster genotypes
 bed_file <-
   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")

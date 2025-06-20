@@ -80,6 +80,11 @@ This function is a wrapper
 for \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}}
 }
 \examples{
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
 vcf_path <-
   system.file("extdata", "anolis",
     "punctatus_t70_s10_n46_filtered.recode.vcf.gz",

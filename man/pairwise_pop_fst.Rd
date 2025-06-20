@@ -63,6 +63,11 @@ For all formulae, the genome wide estimate is obtained by taking the ratio of
 the mean numerators and denominators over all relevant SNPs.
 }
 \examples{
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
 example_gt <- example_gt("gen_tbl")
 
 # For a basic global pairwise Fst calculation:

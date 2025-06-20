@@ -67,6 +67,11 @@
 #' @rdname gen_tibble
 #' @export
 #' @examples
+#' \dontshow{
+#' data.table::setDTthreads(2)
+#' RhpcBLASctl::blas_set_num_threads(2)
+#' RhpcBLASctl::omp_set_num_threads(2)
+#' }
 #' # Create a gen_tibble from a .bed file
 #' bed_file <-
 #'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")

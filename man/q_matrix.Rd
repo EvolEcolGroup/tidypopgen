@@ -18,7 +18,7 @@ returns a \code{q_matrix} object.
 }
 \examples{
 # Read in a single .Q file
-q_mat <- read.table(system.file("/extdata/anolis/anolis_ld_run1.3.Q",
+q_mat <- read.table(system.file("extdata","anolis","anolis_ld_run1.3.Q",
   package = "tidypopgen"
 ))
 class(q_mat)

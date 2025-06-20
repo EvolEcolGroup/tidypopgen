@@ -61,6 +61,11 @@ Estimate nucleotide diversity (pi) at each locus, accounting for missing
 values. This uses the formula: c_0 * c_1 / (n * (n-1) / 2)
 }
 \examples{
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
 example_gt <- example_gt("grouped_gen_tbl")
 
 # For pi

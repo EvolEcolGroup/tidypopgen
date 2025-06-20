@@ -43,6 +43,11 @@
 #' @rdname loci_ld_clump
 #' @export
 #' @examples
+#' \dontshow{
+#' data.table::setDTthreads(2)
+#' RhpcBLASctl::blas_set_num_threads(2)
+#' RhpcBLASctl::omp_set_num_threads(2)
+#' }
 #' example_gt <- example_gt("gen_tbl") %>% gt_impute_simple()
 #'
 #' # To return a boolean vector indicating whether the SNP should be kept
