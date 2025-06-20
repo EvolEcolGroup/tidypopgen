@@ -20,7 +20,7 @@ such as PCA, that does not allow for missing data, we have to use imputation,
 but for other analysis it might be preferable to allow for missing data.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Impute the gen_tibble
 example_gt <- example_gt \%>\% gt_impute_simple()

@@ -18,7 +18,7 @@
 
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Select loci by name
 #' example_gt_subset <- example_gt %>% select_loci(c("rs1", "rs2", "rs3"))

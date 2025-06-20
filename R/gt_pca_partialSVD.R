@@ -34,7 +34,29 @@
 #'   Note: rather than accessing these elements directly, it is better to use
 #'   `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @export
-
+#' @examples
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Remove monomorphic loci and impute
+#' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
+#' lobsters <- gt_impute_simple(lobsters, method = "mode")
+#'
+#' # Create PCA object, including total variance
+#' gt_pca_partialSVD(lobsters,
+#'   k = 10,
+#'   total_var = TRUE
+#' )
+#' # Change number of components and exclude total variance
+#' gt_pca_partialSVD(lobsters,
+#'   k = 5,
+#'   total_var = FALSE
+#' )
 # nolint start
 gt_pca_partialSVD <- function(
     # nolint end

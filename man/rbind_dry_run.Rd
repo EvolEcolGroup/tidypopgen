@@ -52,7 +52,7 @@ other dataset will be flipped and/or alleles swapped as needed. SNPs that
 have different alleles in the two datasets will also be dropped.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Create a second gen_tibble to merge
 test_indiv_meta <- data.frame(

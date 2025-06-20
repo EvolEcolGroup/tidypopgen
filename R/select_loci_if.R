@@ -14,7 +14,7 @@
 #' @returns a subset of the list of loci in the `gen_tibble`
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Select loci by chromosome
 #' example_gt_subset <- example_gt %>%

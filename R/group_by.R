@@ -1,4 +1,5 @@
 #' @export
+#' @noRd
 group_by.gen_tbl <- function(
     .data,
     ...,
@@ -19,6 +20,7 @@ group_by.gen_tbl <- function(
 }
 
 #' @export
+#' @noRd
 ungroup.grouped_gen_tbl <- function(x, ...) {
   out <- NextMethod(...)
   class(out) <- c("gen_tbl", class(out))
@@ -27,6 +29,7 @@ ungroup.grouped_gen_tbl <- function(x, ...) {
 
 
 #' @export
+#' @noRd
 dplyr_reconstruct.gen_tbl <- function(data, template) {
   out <- NextMethod()
   # if the genotypes are gone, drop the tbl_df class
@@ -38,6 +41,7 @@ dplyr_reconstruct.gen_tbl <- function(data, template) {
 }
 
 #' @export
+#' @noRd
 dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
   out <- NextMethod()
   # if the genotypes are gone, drop the tbl_df class
@@ -51,6 +55,7 @@ dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
 
 # drop the `gen_tbl` class if the `genotype` column is subsetted out
 #' @export
+#' @noRd
 "[.gen_tbl" <- function(x, i, j, ...) {
   x <- NextMethod()
   if (!"genotypes" %in% names(x)) {
@@ -61,6 +66,7 @@ dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
 
 # drop the `gen_tbl` class if the `genotype` column is subsetted out
 #' @export
+#' @noRd
 "[.grouped_gen_tbl" <- function(x, i, j, ...) {
   original_class <- class(x)
   x <- NextMethod()
@@ -73,6 +79,7 @@ dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
 
 
 #' @export
+#' @noRd
 dplyr_row_slice.grouped_gen_tbl <- function(data, i, ...) {
   original_class <- class(data)
   x <- NextMethod()
@@ -81,6 +88,7 @@ dplyr_row_slice.grouped_gen_tbl <- function(data, i, ...) {
 }
 
 #' @export
+#' @noRd
 dplyr_col_modify.grouped_gen_tbl <- function(data, cols) {
   original_class <- class(data)
   x <- NextMethod()

@@ -1,4 +1,4 @@
-#' Create example gen_tibble
+#' Load example gen_tibble
 #'
 #' This function creates a `gen_tibble` object for use in examples in
 #' documentation.
@@ -9,13 +9,12 @@
 #'      and groups by population
 #'   - "gen_tbl_sf": adds spatial features without grouping
 #' @returns an example object of the class `gen_tbl`.
-#' @rdname example_gt
+#' @rdname load_example_gt
 #' @export
 #' @examples
-#'
 #' # This function creates an example gen_tibble object
-#' example_gt <- example_gt("gen_tbl")
-example_gt <- function(type = c(
+#' example_gt <- load_example_gt("gen_tbl")
+load_example_gt <- function(type = c(
                          "gen_tbl", # nolint
                          "grouped_gen_tbl",
                          "grouped_gen_tbl_sf",

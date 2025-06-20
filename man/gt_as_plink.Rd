@@ -42,7 +42,7 @@ files. NOTE that writing to bed has been optimised for speed, but writing to
 ped or raw is slower, especially for large datasets.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Write a bed file
 example_gt \%>\% gt_as_plink(type = "bed", file = paste0(tempfile(), "_plink"))

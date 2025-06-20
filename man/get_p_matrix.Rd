@@ -22,3 +22,13 @@ A single P matrix from the \code{gt_admix} object
 This function retrieves a single P matrix from a \code{gt_admix} object
 based on the specified k value and run number.
 }
+\examples{
+# Read example gt_admix object
+admix_obj <-
+  readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+    package = "tidypopgen"
+  ))
+
+# Extract a P matrix
+get_p_matrix(admix_obj, k = 3, run = 1)
+}

@@ -12,7 +12,7 @@
 #' @returns a `gen_tibble`
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Create a dataframe to combine with the gen_tibble
 #' df <- data.frame(region = c("A", "A", "B", "B", "A", "B", "B"))

@@ -8,7 +8,7 @@
 #' the genotypes (with alleles recoded as 1 and 2)
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Convert to genind
 #' gt_hierfstat <- example_gt %>% gt_as_hierfstat()

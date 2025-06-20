@@ -18,8 +18,8 @@ a \code{gen_tibble}
 An arrange method for \code{gen_tibble} objects
 }
 \examples{
-test_gt <- example_gt("gen_tbl")
+test_gt <- load_example_gt("gen_tbl")
 test_gt \%>\% arrange(id)
-test_gt <- example_gt("grouped_gen_tbl_sf")
+test_gt <- load_example_gt("grouped_gen_tbl_sf")
 test_gt \%>\% arrange(id)
 }

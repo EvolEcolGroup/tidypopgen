@@ -26,7 +26,49 @@
 #' @rdname predict_gt_pca
 #' @importFrom foreach %do%
 #' @export
-
+#' @examples
+#' \dontshow{
+#' data.table::setDTthreads(2)
+#' RhpcBLASctl::blas_set_num_threads(2)
+#' RhpcBLASctl::omp_set_num_threads(2)
+#' }
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Remove monomorphic loci and impute
+#' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
+#' lobsters <- gt_impute_simple(lobsters, method = "mode")
+#'
+#' # Subset into two datasets: one original and one to predict
+#' original_lobsters <- lobsters[c(1:150), ]
+#' new_lobsters <- lobsters[c(151:176), ]
+#'
+#' # Create PCA object
+#' pca <- gt_pca_partialSVD(original_lobsters)
+#'
+#' # Predict
+#' predict(pca, new_data = new_lobsters, project_method = "simple")
+#'
+#' # Predict with OADP
+#' predict(pca, new_data = new_lobsters, project_method = "OADP")
+#'
+#' # Predict with least squares
+#' predict(pca,
+#'   new_data = new_lobsters,
+#'   project_method = "least_squares", lsq_pcs = c(1, 2)
+#' )
+#'
+#' # Return a tibble
+#' predict(pca, new_data = new_lobsters, as_matrix = FALSE)
+#'
+#' # Adjust block.size
+#' predict(pca, new_data = new_lobsters, block_size = 10)
+#'
 # this is a modified version of bigstatsr::predict.big_SVD
 predict.gt_pca <- function(
     object,

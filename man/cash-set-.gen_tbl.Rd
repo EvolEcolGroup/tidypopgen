@@ -20,7 +20,7 @@ a \code{gen_tibble}
 A $ method for \code{gen_tibble} objects
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Add a new column
 example_gt$region <- "East"

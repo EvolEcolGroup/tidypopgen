@@ -48,7 +48,27 @@
 #' Note: rather than accessing these elements directly, it is better to use
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @export
-
+#' @examples
+#' \dontshow{
+#' data.table::setDTthreads(2)
+#' RhpcBLASctl::blas_set_num_threads(2)
+#' RhpcBLASctl::omp_set_num_threads(2)
+#' }
+#' vcf_path <-
+#'   system.file("extdata", "anolis",
+#'     "punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+#'     package = "tidypopgen"
+#'   )
+#' anole_gt <-
+#'   gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+#'
+#' # Remove monomorphic loci and impute
+#' anole_gt <- anole_gt %>% select_loci_if(loci_maf(genotypes) > 0)
+#' anole_gt <- gt_impute_simple(anole_gt, method = "mode")
+#'
+#' # Create PCA obejct, including total variance
+#' gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
+#'
 # nolint start
 gt_pca_randomSVD <- function(
     # nolint end

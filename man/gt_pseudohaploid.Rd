@@ -25,7 +25,7 @@ pseudohaploids set to 1 and diploids set to 2. However, the dosages are not
 changed, meaning that pseudohaploids are still coded as 0 or 2.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Detect pseudohaploids and set ploidy for the whole gen_tibble
 example_gt <- example_gt \%>\% gt_pseudohaploid(test_n_loci = 3)

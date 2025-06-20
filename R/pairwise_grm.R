@@ -18,7 +18,7 @@
 #' @returns a matrix of GR between all pairs of individuals
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Compute the GRM from the allele sharing matrix
 #' example_gt %>% pairwise_grm()

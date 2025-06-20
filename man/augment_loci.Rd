@@ -21,3 +21,23 @@ of the information, with a column \code{.rownames} giving the loci names.
 \code{augment_loci} add columns to the loci table of a \code{gen_tibble} related to
 information from a given analysis.
 }
+\examples{
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+# Create PCA
+pca <- gt_pca_partialSVD(lobsters)
+
+# Augment the gen_tibble with the PCA scores
+augment_loci(pca, data = lobsters)
+
+}

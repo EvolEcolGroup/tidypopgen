@@ -128,6 +128,26 @@ missing alleles will be converted from 'X' to NA
 }
 }
 \examples{
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
+# Create a gen_tibble from a .bed file
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Create a gen_tibble from a .vcf file
+vcf_path <-
+  system.file("extdata", "anolis",
+    "punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+    package = "tidypopgen"
+  )
+gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
 
 # Create a gen_tibble from a matrix of genotypes:
 test_indiv_meta <- data.frame(
@@ -148,7 +168,7 @@ test_loci <- data.frame(
   allele_alt = c("T", "C", NA, "C", "G", "A")
 )
 
-test_gt <- gen_tibble(
+gen_tibble(
   x = test_genotypes,
   loci = test_loci,
   indiv_meta = test_indiv_meta,
@@ -156,5 +176,4 @@ test_gt <- gen_tibble(
   quiet = TRUE
 )
 
-test_gt
 }

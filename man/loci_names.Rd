@@ -32,6 +32,6 @@ Extract the loci names from a  \code{gen_tibble} (or directly from its \code{gen
 column).
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 example_gt \%>\% loci_names()
 }

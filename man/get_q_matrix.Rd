@@ -23,10 +23,11 @@ This function retrieves a single Q matrix from a \code{gt_admix} object
 based on the specified k value and run number.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
-
-# Create a gt_admix object
-admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
+# Read example gt_admix obejct
+admix_obj <-
+  readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+    package = "tidypopgen"
+  ))
 
 # Extract a Q matrix
 get_q_matrix(admix_obj, k = 3, run = 1)

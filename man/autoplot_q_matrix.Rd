@@ -53,3 +53,23 @@ and any grouping variables if an associated 'data' gen_tibble is provided. To
 avoid any automatic re-sorting of individuals, set \code{arrange_by_group} and
 \code{arrange_by_indiv} to FALSE.
 }
+\examples{
+# Read example gt_admix obejct
+admix_obj <-
+  readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+    package = "tidypopgen"
+  ))
+
+# Extract a Q matrix
+q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+
+# Basic autoplot
+autoplot(q_mat_k3, annotate_group = FALSE, arrange_by_group = FALSE)
+
+# To arrange individuals by group and by Q proportion
+autoplot(q_mat_k3,
+  annotate_group = TRUE, arrange_by_group = TRUE,
+  arrange_by_indiv = TRUE, reorder_within_groups = TRUE
+)
+
+}

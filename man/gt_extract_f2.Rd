@@ -121,3 +121,20 @@ package \emph{ADMIXTOOLS 2}. It takes a \code{\link{gen_tibble}}, computes allel
 frequencies and blocked f2-statistics, and writes the results to \code{outdir}. It
 is equivalent to \code{admixtools::extract_f2()}.
 }
+\examples{
+# run the example only if we have the package installed
+\donttest{
+if (requireNamespace("admixtools", quietly = TRUE)) {
+  bed_file <-
+    system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+  lobsters <- gen_tibble(bed_file,
+    backingfile = tempfile("lobsters"),
+    quiet = TRUE
+  )
+  lobsters <- lobsters \%>\% group_by(population)
+  f2_path <- tempfile()
+  gt_extract_f2(lobsters, outdir = f2_path, quiet = TRUE)
+  admixtools::f2_from_precomp(f2_path, verbose = FALSE)
+}
+}
+}

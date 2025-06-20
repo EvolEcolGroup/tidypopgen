@@ -14,7 +14,8 @@
 #' ready plots.
 #'
 #' @param object an object of class `gt_dapc`
-#' @param type the type of plot (one of "screeplot", "scores" and "loadings")
+#' @param type the type of plot (one of "screeplot", "scores", "loadings", and
+#'  "components")
 #' @param ld the principal components to be plotted: for scores, a pair of
 #'   values e.g. c(1,2); for `loadings` either one or more values.
 #' @param group a vector of group memberships to order the individuals in
@@ -25,6 +26,36 @@
 #' @returns a `ggplot2` object
 #' @rdname autoplot_gt_dapc
 #' @export
+#' @examples
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Remove monomorphic loci and impute
+#' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
+#' lobsters <- gt_impute_simple(lobsters, method = "mode")
+#'
+#' # Create PCA and run DAPC
+#' pca <- gt_pca_partialSVD(lobsters)
+#' populations <- as.factor(lobsters$population)
+#' dapc_res <- gt_dapc(pca, n_pca = 6, n_da = 2, pop = populations)
+#'
+#' # Screeplot
+#' autoplot(dapc_res, type = "screeplot")
+#'
+#' # Scores plot
+#' autoplot(dapc_res, type = "scores", ld = c(1, 2))
+#'
+#' # Loadings plot
+#' autoplot(dapc_res, type = "loadings", ld = 1)
+#'
+#' # Components plot
+#' autoplot(dapc_res, type = "components", group = populations)
+#'
 autoplot.gt_dapc <- function(
     object,
     type = c(

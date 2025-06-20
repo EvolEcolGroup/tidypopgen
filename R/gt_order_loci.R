@@ -20,7 +20,7 @@
 #' @return A [gen_tibble]
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl") %>% select_loci(c(1, 5, 2, 6, 4, 3))
+#' example_gt <- load_example_gt("gen_tbl") %>% select_loci(c(1, 5, 2, 6, 4, 3))
 #'
 #' # Loci are in the wrong order
 #' show_loci(example_gt)

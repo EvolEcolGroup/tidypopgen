@@ -6,7 +6,7 @@
 #' @returns a `genlight` object
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Convert to genind
 #' gt_genlight <- example_gt %>% gt_as_genlight()

@@ -27,7 +27,7 @@ at \code{\link[=select_loci]{select_loci()}} for that feature.
 but rather it subsets the list of loci to be used stored in the \code{gen_tibble}.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Select loci by chromosome
 example_gt_subset <- example_gt \%>\%

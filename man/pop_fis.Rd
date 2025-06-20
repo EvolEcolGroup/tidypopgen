@@ -44,7 +44,12 @@ Nei 1987 (with an algorithm equivalent to the one used by
 equivalent to the one used by \code{hierfstat::fis.dosage()}).
 }
 \examples{
-example_gt <- example_gt("grouped_gen_tbl")
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
+example_gt <- load_example_gt("grouped_gen_tbl")
 
 # Compute FIS using Nei87
 example_gt \%>\% pop_fis(method = "Nei87")

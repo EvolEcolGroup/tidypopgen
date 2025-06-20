@@ -16,7 +16,7 @@ a \code{genind} object
 This function converts a \code{gen_tibble} to a \code{genind} object from \code{adegenet}
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Convert to genind
 gt_genind <- example_gt \%>\% gt_as_genind()

@@ -31,7 +31,12 @@ locus is imputed independently (and thus linkage information is ignored).
 This function is a wrapper around \code{\link[bigsnpr:snp_fastImputeSimple]{bigsnpr::snp_fastImputeSimple()}}.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
+example_gt <- load_example_gt("gen_tbl")
 
 # Impute the gen_tibble
 example_gt <- example_gt \%>\% gt_impute_simple()

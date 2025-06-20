@@ -6,7 +6,7 @@
 #' @returns a `genind` object
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Convert to genind
 #' gt_genind <- example_gt %>% gt_as_genind()

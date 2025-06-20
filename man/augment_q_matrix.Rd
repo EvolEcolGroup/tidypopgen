@@ -28,14 +28,17 @@ of 'id', but it ensures that any scripts written for data augmented with
 when adapting plotting scripts).
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+# run the example only if we have the package installed
+if (requireNamespace("LEA", quietly = TRUE)) {
+  example_gt <- load_example_gt("gen_tbl")
 
-# Create a gt_admix object
-admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
+  # Create a gt_admix object
+  admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
 
-# Extract a Q matrix
-q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+  # Extract a Q matrix
+  q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
 
-# Augment the gen_tibble with Q values
-augment(q_mat_k3, data = example_gt)
+  # Augment the gen_tibble with Q values
+  augment(q_mat_k3, data = example_gt)
+}
 }

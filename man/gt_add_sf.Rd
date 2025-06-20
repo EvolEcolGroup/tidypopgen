@@ -31,7 +31,7 @@ column from coordinates, or to provide an existing geometry column (which
 will then become the active geometry for \code{sf}).
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Add some coordinates
 example_gt <- example_gt \%>\% mutate(

@@ -66,6 +66,34 @@ returned. Column names of the tidied output match those returned by
 \link[broom:tidy.prcomp]{broom::tidy.prcomp}, the tidier for the standard PCA objects returned
 by \link[stats:prcomp]{stats::prcomp}.
 }
+\examples{
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+# Create PCA object
+pca <- gt_pca_partialSVD(lobsters)
+
+# Tidy the PCA object
+tidy(pca)
+
+# Tidy the PCA object for eigenvalues
+tidy(pca, matrix = "eigenvalues")
+
+# Tidy the PCA object for loadings
+tidy(pca, matrix = "loadings")
+
+# Tidy the PCA object for scores
+tidy(pca, matrix = "scores")
+}
 \seealso{
 \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \link{augment_gt_pca}
 }

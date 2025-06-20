@@ -19,7 +19,7 @@ to have a dataset that has been imputed but it is currently not using
 imputation.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Impute the gen_tibble
 example_gt <- example_gt \%>\% gt_impute_simple()

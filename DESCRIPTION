@@ -11,7 +11,9 @@ Description: We provide a tidy grammar of population genetics, facilitating
     the manipulation and analysis of data on biallelic single nucleotide
     polymorphisms (SNPs). `tidypopgen` scales to very large genetic datasets
     by storing genotypes on disk, and performing operations on them in 
-    chunks, without ever loading all data in memory.
+    chunks, without ever loading all data in memory. The full
+    functionalities of the package are described in
+    <doi:10.1101/2025.06.06.658325>.
 License: GPL (>= 3)
 Encoding: UTF-8
 Language: en-GB
@@ -48,10 +50,12 @@ Suggests:
     adegenet,
     admixtools,
     broom,
+    data.table,
     hierfstat,
     knitr,
     detectRUNS,
     LEA,
+    RhpcBLASctl,
     rmarkdown,
     rnaturalearth,
     rnaturalearthdata,

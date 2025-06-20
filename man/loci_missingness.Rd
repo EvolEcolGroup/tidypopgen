@@ -77,7 +77,12 @@ efficient method to support grouped \code{gen_tibble} objects, which can return 
 tidied tibble, a list, or a matrix.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
+example_gt <- load_example_gt("gen_tbl")
 
 # For missingness
 example_gt \%>\% loci_missingness()

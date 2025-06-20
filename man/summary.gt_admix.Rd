@@ -18,12 +18,15 @@ A summary of the \code{gt_admix} object
 Summary method for gt_admix objects
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+# run the example only if we have the package installed
+if (requireNamespace("LEA", quietly = TRUE)) {
+  example_gt <- load_example_gt("gen_tbl")
 
-# Create a gt_admix object
-admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
+  # Create a gt_admix object
+  admix_obj <- example_gt \%>\% gt_snmf(k = 1:3, project = "force")
 
-# Print a summary
-summary(admix_obj)
+  # Print a summary
+  summary(admix_obj)
+}
 
 }

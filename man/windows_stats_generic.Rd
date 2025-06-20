@@ -60,3 +60,17 @@ To compute specific quantities directly from a \code{gen_tibble}, use the
 appropriate \verb{window_*} functions, e.g \code{\link[=windows_pairwise_pop_fst]{windows_pairwise_pop_fst()}} to compute
 pairwise Fst.
 }
+\examples{
+example_gt <- load_example_gt("gen_tbl")
+
+miss_by_locus <- loci_missingness(example_gt)
+
+# Calculate mean missingness across windows
+windows_stats_generic(miss_by_locus,
+  loci_table = show_loci(example_gt),
+  operator = "mean", window_size = 1000,
+  step_size = 1000, size_unit = "bp",
+  min_loci = 1, complete = FALSE
+)
+
+}

@@ -12,7 +12,7 @@
 #' @returns the path of the .vcf file
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Write a vcf file
 #' example_gt %>% gt_as_vcf()

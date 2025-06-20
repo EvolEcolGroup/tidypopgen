@@ -14,7 +14,7 @@
 #' ploidy values updated to 1 or 2.
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Detect pseudohaploids and set ploidy for the whole gen_tibble
 #' example_gt <- example_gt %>% gt_pseudohaploid(test_n_loci = 3)

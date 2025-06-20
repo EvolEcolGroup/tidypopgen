@@ -15,7 +15,7 @@
 #' @seealso [gt_save()]
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # remove some individuals
 #' example_gt_filtered <- example_gt %>% filter(id != "a")

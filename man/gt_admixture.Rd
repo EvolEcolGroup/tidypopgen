@@ -59,3 +59,19 @@ This is a wrapper for the command line program ADMIXTURE. It can
 either use a binary present in the main environment, or use a copy
 installed in a conda environment.
 }
+\examples{
+# run the example only if we have the package installed
+\dontrun{
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+lobsters <- lobsters \%>\% group_by(population)
+gt_admixture(lobsters,
+  k = 2:3, seed = c(1, 2),
+  n_runs = 2, crossval = TRUE
+)
+}
+}

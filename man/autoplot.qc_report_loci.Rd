@@ -17,9 +17,10 @@
 \arguments{
 \item{object}{an object of class \code{qc_report_loci}}
 
-\item{type}{the type of plot (one of \code{overview}, \code{all}, \code{missing}, \verb{missing low maf}, \verb{missing high maf}, \code{maf}, \code{hwe}, and \verb{significant hwe})}
+\item{type}{the type of plot (one of \code{overview}, \code{all}, \code{missing},
+\verb{missing low maf}, \verb{missing high maf}, \code{maf}, \code{hwe}, and \verb{significant hwe})}
 
-\item{maf_threshold}{default 0.5, a threshold for the accepted rate of minor
+\item{maf_threshold}{default 0.05, a threshold for the accepted rate of minor
 allele frequency of loci}
 
 \item{miss_threshold}{default 0.01, a threshold for the accepted rate of
@@ -55,4 +56,41 @@ snps with high minor allele frequency
 \code{autoplot} produces simple plots to quickly inspect an object. They are not
 customisable; we recommend that you use \code{ggplot2} to produce publication
 ready plots.
+}
+\examples{
+# Create a gen_tibble
+bed_file <-
+  system.file("extdata", "related", "families.bed", package = "tidypopgen")
+example_gt <- gen_tibble(bed_file,
+  backingfile = tempfile("families"),
+  quiet = TRUE,
+  valid_alleles = c("1", "2")
+)
+
+loci_report <- example_gt \%>\% qc_report_loci()
+
+# Plot the QC report overview
+autoplot(loci_report, type = "overview")
+
+# Plot the QC report all
+autoplot(loci_report, type = "all")
+
+# Plot missing data
+autoplot(loci_report, type = "missing")
+
+# Plot missing with low maf
+autoplot(loci_report, type = "missing low maf", maf_threshold = 0.05)
+
+# Plot missing with high maf
+autoplot(loci_report, type = "missing high maf", maf_threshold = 0.05)
+
+# Plot maf
+autoplot(loci_report, type = "maf", maf_threshold = 0.05)
+
+# Plot hwe
+autoplot(loci_report, type = "hwe", hwe_p = 0.01)
+
+# Plot significant hwe
+autoplot(loci_report, type = "significant hwe", hwe_p = 0.01)
+
 }

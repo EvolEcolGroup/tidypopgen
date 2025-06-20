@@ -14,7 +14,7 @@
 #' @method summary rbind_report
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Create a second gen_tibble to merge
 #' test_indiv_meta <- data.frame(

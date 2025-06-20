@@ -14,7 +14,7 @@
 #' @rdname is_loci_table_ordered
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' example_gt %>% is_loci_table_ordered()
 #'
