@@ -21,6 +21,7 @@
 #' # Combine the two gt_admix objects
 #' new_admix_obj <- c(admix_obj, admix_obj2)
 #' summary(new_admix_obj)
+#' }
 c.gt_admix <- function(..., match_attributes = TRUE) {
   admix_list <- list(...)
   # check that all the objects are of class gt_admix
