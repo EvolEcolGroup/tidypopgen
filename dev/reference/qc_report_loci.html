@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,12 +75,60 @@ the HWE test.</p></dd>
     <p>a tibble with 3 elements: maf, missingness and hwe_p</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a gen_tibble of lobster genotypes</span></span></span>
+<span class="r-in"><span><span class="va">bed_file</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"lobster"</span>, <span class="st">"lobster.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>,</span></span>
+<span class="r-in"><span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"lobsters"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Get a QC report for the loci</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">qc_report_loci</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 79 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    snp_id    maf missingness       hwe_p</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> rs3441  0.328      0.022<span style="text-decoration: underline;">7</span> 0.440      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> rs4173  0.424      0.034<span style="text-decoration: underline;">1</span> 0.584      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> rs6157  0.278      0.028<span style="text-decoration: underline;">4</span> 0.002<span style="text-decoration: underline;">93</span>    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> rs7502  0.423      0.045<span style="text-decoration: underline;">5</span> 0.479      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> rs7892  0.101      0.017<span style="text-decoration: underline;">0</span> 0.305      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> rs9441  0.307      0.073<span style="text-decoration: underline;">9</span> 0.784      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> rs11071 0.123      0.028<span style="text-decoration: underline;">4</span> 0.002<span style="text-decoration: underline;">99</span>    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> rs11183 0.458      0.056<span style="text-decoration: underline;">8</span> 0.102      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> rs11291 0.244      0.045<span style="text-decoration: underline;">5</span> 0.000<span style="text-decoration: underline;">000</span>944</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> rs12971 0.312      0.062<span style="text-decoration: underline;">5</span> 0.024<span style="text-decoration: underline;">2</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 69 more rows</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Group by population to calculate HWE within populations</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">qc_report_loci</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 79 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    snp_id    maf missingness  hwe_p</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> rs3441  0.328      0.022<span style="text-decoration: underline;">7</span> 0.850 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> rs4173  0.424      0.034<span style="text-decoration: underline;">1</span> 0.546 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> rs6157  0.278      0.028<span style="text-decoration: underline;">4</span> 0.083<span style="text-decoration: underline;">4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> rs7502  0.423      0.045<span style="text-decoration: underline;">5</span> 1.17  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> rs7892  0.101      0.017<span style="text-decoration: underline;">0</span> 0.298 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> rs9441  0.307      0.073<span style="text-decoration: underline;">9</span> 1.83  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> rs11071 0.123      0.028<span style="text-decoration: underline;">4</span> 0.014<span style="text-decoration: underline;">3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> rs11183 0.458      0.056<span style="text-decoration: underline;">8</span> 1.15  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> rs11291 0.244      0.045<span style="text-decoration: underline;">5</span> 0.391 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> rs12971 0.312      0.062<span style="text-decoration: underline;">5</span> 0.112 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 69 more rows</span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Evie Carter, Andrea Manica, Eirlys Tysall.</p>
+  <p>Developed by Evie Carter, Eirlys Tysall, Andrea Manica.</p>
 </div>
 
 <div class="pkgdown-footer-right">

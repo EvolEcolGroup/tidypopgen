@@ -13,7 +13,7 @@ the approach of Weir and Goudet 2017 based on beta estimators)."><meta property=
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,12 +94,56 @@ allele sharing matrix.</p></dd>
 <code><a href="https://rdrr.io/pkg/hierfstat/man/beta.dosage.html" class="external-link">hierfstat::beta.dosage()</a></code> with <code>inb=FALSE</code>).</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="load_example_gt.html">load_example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Compute the GRM from the allele sharing matrix</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">pairwise_grm</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              a          b           c           d            e           f</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a  0.396946565  0.5572519  0.07633588  0.39694656 -0.003816794  0.07633588</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b  0.557251908  1.5190840  0.79770992  1.03816794 -0.404580153 -0.40458015</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> c  0.076335878  0.7977099  1.03816794  0.07633588  0.076335878  0.19656489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> d  0.396946565  1.0381679  0.07633588  1.19847328 -0.805343511  0.55725191</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> e -0.003816794 -0.4045802  0.07633588 -0.80534351  0.797709924 -0.40458015</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f  0.076335878 -0.4045802  0.19656489  0.55725191 -0.404580153  1.51908397</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> g -0.404580153 -1.0057252 -0.40458015 -0.40458015 -0.404580153  0.79770992</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a -0.4045802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b -1.0057252</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> c -0.4045802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> d -0.4045802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> e -0.4045802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f  0.7977099</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> g  0.5572519</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To calculate using a precomputed allele sharing matrix, use:</span></span></span>
+<span class="r-in"><span><span class="va">allele_sharing</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="pairwise_allele_sharing.html">pairwise_allele_sharing</a></span><span class="op">(</span>as_matrix <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">pairwise_grm</span><span class="op">(</span>allele_sharing_mat <span class="op">=</span> <span class="va">allele_sharing</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              a          b           c           d            e           f</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a  0.396946565  0.5572519  0.07633588  0.39694656 -0.003816794  0.07633588</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b  0.557251908  1.5190840  0.79770992  1.03816794 -0.404580153 -0.40458015</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> c  0.076335878  0.7977099  1.03816794  0.07633588  0.076335878  0.19656489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> d  0.396946565  1.0381679  0.07633588  1.19847328 -0.805343511  0.55725191</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> e -0.003816794 -0.4045802  0.07633588 -0.80534351  0.797709924 -0.40458015</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f  0.076335878 -0.4045802  0.19656489  0.55725191 -0.404580153  1.51908397</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> g -0.404580153 -1.0057252 -0.40458015 -0.40458015 -0.404580153  0.79770992</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            g</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> a -0.4045802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> b -1.0057252</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> c -0.4045802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> d -0.4045802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> e -0.4045802</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> f  0.7977099</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> g  0.5572519</span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Evie Carter, Andrea Manica, Eirlys Tysall.</p>
+  <p>Developed by Evie Carter, Eirlys Tysall, Andrea Manica.</p>
 </div>
 
 <div class="pkgdown-footer-right">

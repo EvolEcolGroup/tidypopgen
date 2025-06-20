@@ -13,7 +13,7 @@ is equivalent to admixtools::extract_f2()."><meta property="og:image" content="h
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -214,12 +214,742 @@ f2-statistics (default <code>TRUE</code>)</p></dd>
     <p>SNP metadata (invisibly)</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># run the example only if we have the package installed</span></span></span>
+<span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"admixtools"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">bed_file</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"lobster"</span>, <span class="st">"lobster.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>,</span></span>
+<span class="r-in"><span>    backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"lobsters"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    quiet <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">group_by</span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">f2_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">gt_extract_f2</span><span class="op">(</span><span class="va">lobsters</span>, outdir <span class="op">=</span> <span class="va">f2_path</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">admixtools</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/admixtools/man/f2_from_precomp.html" class="external-link">f2_from_precomp</a></span><span class="op">(</span><span class="va">f2_path</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale          Ber          Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.004676132 -0.003174486  0.0006209184 -0.0002105745</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0046761319  0.000000000 -0.006029964 -0.0046855398  0.0095602103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0031744859 -0.006029964  0.000000000 -0.0050879612  0.0129270996</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.0006209184 -0.004685540 -0.005087961  0.0000000000  0.0211478853</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0002105745  0.009560210  0.012927100  0.0211478853  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale           Ber          Brd          Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.0079886215 -0.005352975 -0.007641707 -0.0014050602</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.007988622  0.0000000000 -0.004522473 -0.007189993 -0.0002895655</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.005352975 -0.0045224728  0.000000000 -0.005129543 -0.0057888393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.007641707 -0.0071899931 -0.005129543  0.000000000 -0.0015299527</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.001405060 -0.0002895655 -0.005788839 -0.001529953  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale         Ber         Brd         Pad         Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000 0.104258242 0.048815994 0.006130533 0.004561335</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.104258242 0.000000000 0.006523911 0.043462067 0.188567954</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.048815994 0.006523911 0.000000000 0.009807638 0.112008282</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.006130533 0.043462067 0.009807638 0.000000000 0.042933932</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.004561335 0.188567954 0.112008282 0.042933932 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.0000000  0.208291708  0.159413679  0.194855497  0.207715576</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.2082917  0.000000000 -0.004110991 -0.007134180 -0.007462103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.1594137 -0.004110991  0.000000000 -0.005281690 -0.003986236</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.1948555 -0.007134180 -0.005281690  0.000000000 -0.006937276</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.2077156 -0.007462103 -0.003986236 -0.006937276  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  0.001335123  0.006072896 -0.001109958  0.006072896</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.001335123  0.000000000 -0.002065436 -0.001028067 -0.002065436</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.006072896 -0.002065436  0.000000000  0.002227873 -0.003368979</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.001109958 -0.001028067  0.002227873  0.000000000  0.002227873</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.006072896 -0.002065436 -0.003368979  0.002227873  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale           Ber          Brd          Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  0.0034965035 -0.007250221 -0.006896552 -0.0065107306</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.003496503  0.0000000000  0.005128205  0.007392607 -0.0002119093</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.007250221  0.0051282051  0.000000000 -0.006593407 -0.0057498057</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.006896552  0.0073926074 -0.006593407  0.000000000 -0.0049284049</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.006510731 -0.0002119093 -0.005749806 -0.004928405  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale           Ber           Brd          Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.0011503562 -0.0032177528 -0.003106903  0.0002512091</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0011503562  0.0000000000 -0.0001928822 -0.001218396  0.0078215342</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0032177528 -0.0001928822  0.0000000000 -0.002738654 -0.0005379499</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.0031069026 -0.0012183956 -0.0027386541  0.000000000  0.0013475917</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.0002512091  0.0078215342 -0.0005379499  0.001347592  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale         Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000 0.008158508  0.073100999  0.098674311  0.066778149</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.008158508 0.000000000  0.017351193  0.032289307  0.013864396</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.073100999 0.017351193  0.000000000 -0.004803512 -0.006702048</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.098674311 0.032289307 -0.004803512  0.000000000 -0.003885147</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.066778149 0.013864396 -0.006702048 -0.003885147  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           Ale           Ber           Brd          Pad        Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.0000000  0.4537462537  0.4063718890  0.373710653 0.17071829</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.4537463  0.0000000000 -0.0003119034  0.001920869 0.06197564</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.4063719 -0.0003119034  0.0000000000 -0.001532140 0.04463374</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.3737107  0.0019208686 -0.0015321397  0.000000000 0.03366262</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.1707183  0.0619756417  0.0446337445  0.033662624 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber           Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.006348582 -0.0061061298  0.0017442692  0.006471393</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.006348582  0.000000000 -0.0060222446 -0.0014776433  0.002279301</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.006106130 -0.006022245  0.0000000000 -0.0005846218  0.003325509</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.001744269 -0.001477643 -0.0005846218  0.0000000000 -0.006223027</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.006471393  0.002279301  0.0033255086 -0.0062230274  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale         Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000 0.084731935  0.028144938  0.019324338  0.023539020</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.08473193 0.000000000  0.008753912  0.016505282  0.012433979</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.02814494 0.008753912  0.000000000 -0.003868892 -0.004564424</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.01932434 0.016505282 -0.003868892  0.000000000 -0.004336202</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.02353902 0.012433979 -0.004564424 -0.004336202  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale          Ber           Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000  0.016009930 -0.0003485006  0.017285209 -0.001283177</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.0160099296  0.000000000  0.0037957212 -0.005134977  0.005959784</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0003485006  0.003795721  0.0000000000  0.004712332 -0.003053785</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.0172852095 -0.005134977  0.0047123320  0.000000000  0.006952259</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0012831769  0.005959784 -0.0030537848  0.006952259  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale          Ber          Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.003335553  0.001902102 -0.0003326877 -0.005638089</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0033355533  0.000000000 -0.005396965 -0.0061060809 -0.003783115</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.0019021015 -0.005396965  0.000000000 -0.0061293688  0.001016128</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.0003326877 -0.006106081 -0.006129369  0.0000000000 -0.001043297</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0056380891 -0.003783115  0.001016128 -0.0010432968  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale          Ber          Brd         Pad         Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000  0.086035177  0.061632030 0.001666174 0.002911017</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.086035177  0.000000000 -0.002341034 0.038703211 0.157793172</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.061632030 -0.002341034  0.000000000 0.022322205 0.124717440</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.001666174  0.038703211  0.022322205 0.000000000 0.031081551</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.002911017  0.157793172  0.124717440 0.031081551 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale           Ber          Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.0490279218  0.019249394  0.0467033903  0.0290572838</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.04902792  0.0000000000  0.002606787 -0.0021919713 -0.0004864255</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.01924939  0.0026067866  0.000000000  0.0019235785 -0.0025919405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.04670339 -0.0021919713  0.001923579  0.0000000000 -0.0008802817</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.02905728 -0.0004864255 -0.002591941 -0.0008802817  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           Ale          Ber           Brd          Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.0000000  0.359340659  0.3901212659  0.378202549  0.3137401229</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.3593407  0.000000000 -0.0035992993 -0.004015234 -0.0033516089</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.3901213 -0.003599299  0.0000000000 -0.003785029 -0.0004603399</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.3782025 -0.004015234 -0.0037850290  0.000000000 -0.0016147514</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.3137401 -0.003351609 -0.0004603399 -0.001614751  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale           Ber          Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000  0.0079708410 -0.002432174 -0.0007176387 -0.001770525</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.0079708410  0.0000000000  0.003478446 -0.0008725755  0.001107317</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0024321743  0.0034784464  0.000000000 -0.0025919405 -0.003032081</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.0007176387 -0.0008725755 -0.002591941  0.0000000000 -0.003314641</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0017705246  0.0011073173 -0.003032081 -0.0033146409  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber           Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  0.015199737  9.762703e-03 -4.943180e-03 -0.001606164</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.015199737  0.000000000 -6.968897e-03  3.447770e-03 -0.001589397</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.009762703 -0.006968897  0.000000e+00 -4.890454e-05 -0.003928665</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.004943180  0.003447770 -4.890454e-05  0.000000e+00 -0.006243479</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.001606164 -0.001589397 -3.928665e-03 -6.243479e-03  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000  0.005268393  0.010899830  0.001141936  0.018126194</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.005268393  0.000000000 -0.003908533 -0.003268328 -0.001881217</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.010899830 -0.003908533  0.000000000 -0.001059598 -0.004091680</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.001141936 -0.003268328 -0.001059598  0.000000000  0.002581073</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.018126194 -0.001881217 -0.004091680  0.002581073  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber           Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.003904429  4.173335e-02  1.151035e-02  0.020019740</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.003904429  0.000000000  1.773212e-02 -1.758557e-03  0.003173392</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.041733355  0.017732124  0.000000e+00  3.803686e-05 -0.003798252</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.011510350 -0.001758557  3.803686e-05  0.000000e+00 -0.006243479</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.020019740  0.003173392 -3.798252e-03 -6.243479e-03  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.054662005  0.013759324  0.042305601  0.019440859</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.05466200  0.000000000  0.006492516 -0.005635809  0.002102246</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.01375932  0.006492516  0.000000000  0.001521475 -0.004673451</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.04230560 -0.005635809  0.001521475  0.000000000 -0.001722412</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.01944086  0.002102246 -0.004673451 -0.001722412  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.002997003 -0.005791052 -0.005765528 -0.004563604</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.002997003  0.000000000 -0.001227758 -0.001881217  0.002875385</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.005791052 -0.001227758  0.000000000 -0.005159702 -0.004714581</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.005765528 -0.001881217 -0.005159702  0.000000000 -0.004159012</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.004563604  0.002875385 -0.004714581 -0.004159012  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.000925545  0.011628216 -0.006436368 -0.001041822</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.000925545  0.000000000 -0.004443131 -0.005397511 -0.007335909</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.011628216 -0.004443131  0.000000000  0.002510433 -0.003847157</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.006436368 -0.005397511  0.002510433  0.000000000 -0.005292558</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.001041822 -0.007335909 -0.003847157 -0.005292558  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.0000000000  0.036508419  0.006152859  0.0003681509  0.044633744</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.0365084191  0.000000000  0.006241177  0.0172313602 -0.005602613</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.0061528592  0.006241177  0.000000000 -0.0017605634  0.010758998</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.0003681509  0.017231360 -0.001760563  0.0000000000  0.023327465</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.0446337445 -0.005602613  0.010758998  0.0233274648  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000  0.002454533  0.009977591  0.018234026  0.009977591</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.002454533  0.000000000 -0.005771693 -0.003175307 -0.005771693</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.009977591 -0.005771693  0.000000000 -0.005346896 -0.006259781</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.018234026 -0.003175307 -0.005346896  0.000000000 -0.005346896</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.009977591 -0.005771693 -0.006259781 -0.005346896  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale           Ber          Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.0007221053 -0.001155916 -0.0002093766  0.001128399</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0007221053  0.0000000000 -0.002616723 -0.0028241972 -0.002640435</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0011559160 -0.0026167234  0.000000000 -0.0024343592 -0.002005086</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.0002093766 -0.0028241972 -0.002434359  0.0000000000 -0.002738654</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.0011283992 -0.0026404347 -0.002005086 -0.0027386541  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.012344723  0.038994378  0.019438244  0.029230659</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.01234472  0.000000000  0.001365166 -0.004143786 -0.001857499</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.03899438  0.001365166  0.000000000 -0.001005307 -0.002860885</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.01943824 -0.004143786 -0.001005307  0.000000000 -0.003135324</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.02923066 -0.001857499 -0.002860885 -0.003135324  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale           Ber          Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  2.711713e-02  0.011244523  0.0760516665  5.368216e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.02711713  0.000000e+00 -0.002158786  0.0073225813  4.191818e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.01124452 -2.158786e-03  0.000000000  0.0199965223  8.520257e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.07605167  7.322581e-03  0.019996522  0.0000000000 -5.651191e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.05368216  4.191818e-05  0.008520257 -0.0005651191  0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale           Ber           Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.0037727548  0.0006464985  0.0129502058  0.0060158795</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0037727548  0.0000000000 -0.0036586523  0.0034784464 -0.0008725755</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.0006464985 -0.0036586523  0.0000000000 -0.0005379499 -0.0031353243</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.0129502058  0.0034784464 -0.0005379499  0.0000000000 -0.0025919405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.0060158795 -0.0008725755 -0.0031353243 -0.0025919405  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  0.003658967 -0.005855230  0.013872565 -0.006092343</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.003658967  0.000000000  0.012818689 -0.005753180 -0.002149064</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.005855230  0.012818689  0.000000000  0.025799861 -0.002021388</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.013872565 -0.005753180  0.025799861  0.000000000  0.005395801</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.006092343 -0.002149064 -0.002021388  0.005395801  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.007872071  0.017964709  0.013680672  0.022639983</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.007872071  0.000000000  0.015123882  0.011134458  0.019504543</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.017964709  0.015123882  0.000000000 -0.005705529 -0.005542514</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.013680672  0.011134458 -0.005705529  0.000000000 -0.005042601</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.022639983  0.019504543 -0.005542514 -0.005042601  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale           Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.0002119093  0.003395275  0.017503493 -0.006041819</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0002119093  0.0000000000 -0.004666109  0.001024601  0.002731814</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.0033952745 -0.0046661085  0.000000000 -0.001059598  0.006960746</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.0175034929  0.0010246014 -0.001059598  0.000000000  0.022892758</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0060418194  0.0027318144  0.006960746  0.022892758  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber          Brd          Pad         Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.142627054  0.096404198  0.205144878 0.037580669</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.14262705  0.000000000 -0.002786989 -0.001245755 0.024149038</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.09640420 -0.002786989  0.000000000  0.012823857 0.005390367</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.20514488 -0.001245755  0.012823857  0.000000000 0.056033733</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.03758067  0.024149038  0.005390367  0.056033733 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.041114058  0.012816362  0.024290378  0.024290378</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.04111406  0.000000000  0.003425370 -0.002603226 -0.002603226</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.01281636  0.003425370  0.000000000 -0.002032255 -0.002032255</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.02429038 -0.002603226 -0.002032255  0.000000000 -0.004167753</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.02429038 -0.002603226 -0.002032255 -0.004167753  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           Ale          Ber          Brd          Pad        Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.0000000  0.442445424  0.535193406  0.555877149 0.25746166</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.4424454  0.000000000 -0.001277491  0.000850597 0.01788123</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.5351934 -0.001277491  0.000000000 -0.004564424 0.04347070</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.5558771  0.000850597 -0.004564424  0.000000000 0.04994784</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.2574617  0.017881232  0.043470701  0.049947835 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale          Ber          Brd         Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.004973288 -0.003386260 0.017628719 -0.0004799327</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0049732876  0.000000000 -0.002603226 0.021297755  0.0010246014</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0033862596 -0.002603226  0.000000000 0.009351634 -0.0031353243</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.0176287192  0.021297755  0.009351634 0.000000000  0.0042112241</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0004799327  0.001024601 -0.003135324 0.004211224  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale           Ber          Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.0050595238  0.012488737 -0.0010859771  0.0008464931</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0050595238  0.0000000000  0.015002340  0.0001781522  0.0023605173</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.0124887371  0.0150023404  0.000000000 -0.0011954443 -0.0030157799</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.0010859771  0.0001781522 -0.001195444  0.0000000000 -0.0055425143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.0008464931  0.0023605173 -0.003015780 -0.0055425143  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.003364808  0.013390228  0.025968476  0.030943697</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.003364808  0.000000000  0.012306707  0.024506167  0.029355126</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.013390228  0.012306707  0.000000000 -0.003814554 -0.002543036</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.025968476  0.024506167 -0.003814554  0.000000000 -0.005705529</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.030943697  0.029355126 -0.002543036 -0.005705529  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale           Ber           Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.0803363303  0.0659837815  0.0813973811  0.0737386440</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.08033633  0.0000000000 -0.0005533851 -0.0008513226 -0.0008853431</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.06598378 -0.0005533851  0.0000000000 -0.0004131067 -0.0011085029</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.08139738 -0.0008513226 -0.0004131067  0.0000000000 -0.0007931648</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.07373864 -0.0008853431 -0.0011085029 -0.0007931648  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale           Ber           Brd          Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000  0.0084745763  3.913570e-02  0.017070058  2.352391e-02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.008474576  0.0000000000  5.632874e-03 -0.002413159 -5.344686e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.039135698  0.0056328736  0.000000e+00  0.001637319 -3.207652e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.017070058 -0.0024131585  1.637319e-03  0.000000000 -2.069705e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.023523912 -0.0005344686 -3.207652e-05 -0.002069705  0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.004962370 -0.006793737 -0.007427809 -0.006793737</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.004962370  0.000000000 -0.006671993 -0.005753180 -0.006671993</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.006793737 -0.006671993  0.000000000 -0.006737959 -0.006955312</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.007427809 -0.005753180 -0.006737959  0.000000000 -0.006737959</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.006793737 -0.006671993 -0.006955312 -0.006737959  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  0.059940060  0.062227532 -0.001054941 -0.001054941</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.059940060  0.000000000 -0.007296694  0.029799621  0.029799621</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.062227532 -0.007296694  0.000000000  0.031576030  0.031576030</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.001054941  0.029799621  0.031576030  0.000000000 -0.005471874</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.001054941  0.029799621  0.031576030 -0.005471874  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad         Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.0000000000 0.0004367161  0.013488046  0.021276094 0.075688506</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.0004367161 0.0000000000  0.001044847  0.005597415 0.045450168</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.0134880463 0.0010448472  0.000000000 -0.004091680 0.017768649</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.0212760941 0.0055974151 -0.004091680  0.000000000 0.009835246</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.0756885060 0.0454501680  0.017768649  0.009835246 0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber          Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.071090762 0.1330835466  0.0784370402  0.070698616</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.07109076  0.000000000 0.0022376163 -0.0065829840 -0.006683757</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.13308355  0.002237616 0.0000000000  0.0002173535  0.002782125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.07843704 -0.006582984 0.0002173535  0.0000000000 -0.006248913</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.07069862 -0.006683757 0.0027821248 -0.0062489132  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale         Ber          Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000 0.068881777  0.017549932  0.0028916121  0.0272265103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.068881777 0.000000000  0.007545389  0.0235267992  0.0019021015</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.017549932 0.007545389  0.000000000 -0.0036678404 -0.0057218310</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.002891612 0.023526799 -0.003667840  0.0000000000  0.0002988611</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.027226510 0.001902102 -0.005721831  0.0002988611  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale           Ber           Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  1.119556e-03 -1.996542e-03 -0.001691608  0.005701608</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.001119556  0.000000e+00 -7.551134e-05 -0.001515972 -0.002849732</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.001996542 -7.551134e-05  0.000000e+00 -0.002119197  0.003912363</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.001691608 -1.515972e-03 -2.119197e-03  0.000000000  0.001630151</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.005701608 -2.849732e-03  3.912363e-03  0.001630151  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale         Ber         Brd         Pad        Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000 0.001631702 0.015406886 0.043763693 0.13233177</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.001631702 0.000000000 0.003031853 0.022095732 0.09362677</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.015406886 0.003031853 0.000000000 0.002581073 0.05057816</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.043763693 0.022095732 0.002581073 0.000000000 0.01745349</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.132331768 0.093626770 0.050578160 0.017453486 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           Ale        Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.0000000 0.17410714  0.441314554  0.559859155  0.479264476</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.1741071 0.00000000  0.052921697  0.101153798  0.067434119</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.4413146 0.05292170  0.000000000  0.001173709 -0.005346896</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.5598592 0.10115380  0.001173709  0.000000000 -0.002543036</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.4792645 0.06743412 -0.005346896 -0.002543036  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale           Ber           Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.0157203907  0.0159009613  0.0389472250  0.033555500</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.01572039  0.0000000000 -0.0040929337  0.0001454597 -0.001484692</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.01590096 -0.0040929337  0.0000000000  0.0003260303 -0.001304121</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.03894723  0.0001454597  0.0003260303  0.0000000000 -0.004781777</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.03355550 -0.0014846916 -0.0013041210 -0.0047817771  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale           Ber         Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.0010829114 0.014629776  0.0003938225 -0.0012720870</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0010829114  0.0000000000 0.007821534 -0.0018526726 -0.0004774177</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.0146297758  0.0078215342 0.000000000  0.0036243697  0.0166438445</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.0003938225 -0.0018526726 0.003624370  0.0000000000  0.0012878195</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0012720870 -0.0004774177 0.016643845  0.0012878195  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber         Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.028471528 0.058620155  0.013795653  0.012261031</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.02847153  0.000000000 0.001756186 -0.001942776 -0.001567997</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.05862016  0.001756186 0.000000000  0.009351634  0.010416849</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.01379565 -0.001942776 0.009351634  0.000000000 -0.004248923</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.01226103 -0.001567997 0.010416849 -0.004248923  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber           Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.0000000000  0.016487860  0.0001387552  0.034494892  0.005034798</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.0164878600  0.000000000 -0.0011855646 -0.004599991 -0.004682980</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.0001387552 -0.001185565  0.0000000000  0.009085376 -0.005482742</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.0344948921 -0.004599991  0.0090853765  0.000000000  0.002782125</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.0050347982 -0.004682980 -0.0054827421  0.002782125  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd         Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.001615052 -0.004453806 0.002906327 -0.003940309</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.001615052  0.000000000 -0.001942776 0.015360539 -0.002849732</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.004453806 -0.001942776  0.000000000 0.004542688 -0.003847157</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.002906327  0.015360539  0.004542688 0.000000000  0.007563902</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.003940309 -0.002849732 -0.003847157 0.007563902  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale          Ber          Brd           Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000  0.003359564 -0.003948171  0.0005119228 -0.004887138</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.0033595642  0.000000000 -0.002161406 -0.0057742287  0.004972544</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0039481711 -0.002161406  0.000000000 -0.0036298035 -0.003010346</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.0005119228 -0.005774229 -0.003629804  0.0000000000  0.001912711</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0048871383  0.004972544 -0.003010346  0.0019127108  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale           Ber           Brd        Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  0.1087513891  0.0850926086 0.01979067 -0.004281874</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.108751389  0.0000000000 -0.0007713465 0.02738581  0.078080553</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.085092609 -0.0007713465  0.0000000000 0.01551361  0.058071422</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.019790666  0.0273858119  0.0155136063 0.00000000  0.006612980</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.004281874  0.0780805527  0.0580714224 0.00661298  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.003363303  0.036259222  0.005107031  0.020859213</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.003363303  0.000000000  0.013505587 -0.005125560  0.003318421</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.036259222  0.013505587  0.000000000  0.002510433 -0.005381565</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.005107031 -0.005125560  0.002510433  0.000000000 -0.003894867</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.020859213  0.003318421 -0.005381565 -0.003894867  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale        Ber        Brd        Pad        Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000 0.04513889 0.20538302 0.64671362 0.97222222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.04513889 0.00000000 0.05052191 0.33942195 0.58593750</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.20538302 0.05052191 0.00000000 0.11558870 0.27601794</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.64671362 0.33942195 0.11558870 0.00000000 0.03020127</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.97222222 0.58593750 0.27601794 0.03020127 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale        Ber          Brd          Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 0.03606567 -0.001465478 -0.004347004 -0.0005484788</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.0360656706 0.00000000  0.012391422  0.017421603  0.0106780358</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0014654784 0.01239142  0.000000000 -0.005774229 -0.0056512991</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.0043470036 0.01742160 -0.005774229  0.000000000 -0.0055318323</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0005484788 0.01067804 -0.005651299 -0.005531832  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale          Ber          Brd          Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000  0.008668415  0.003539466 -0.003616718  0.0009169601</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.0086684149  0.000000000 -0.006692056 -0.002510533 -0.0058028826</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.0035394660 -0.006692056  0.000000000 -0.004876360 -0.0066836202</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.0036167184 -0.002510533 -0.004876360  0.000000000 -0.0058991631</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.0009169601 -0.005802883 -0.006683620 -0.005899163  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber          Brd         Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.102732439  0.078417210 0.178483419  0.086663268</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.10273244  0.000000000 -0.005847586 0.002405055 -0.006782885</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.07841721 -0.005847586  0.000000000 0.012389150 -0.006781429</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.17848342  0.002405055  0.012389150 0.000000000  0.008705008</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.08666327 -0.006782885 -0.006781429 0.008705008  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale           Ber          Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  0.0012409201 -0.005199575  0.0016601019  0.0236867059</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.001240920  0.0000000000 -0.003695786 -0.0070212944 -0.0002724681</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.005199575 -0.0036957858  0.000000000 -0.0032766041  0.0127314815</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.001660102 -0.0070212944 -0.003276604  0.0000000000  0.0001467136</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.023686706 -0.0002724681  0.012731481  0.0001467136  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000  0.027945649  0.058196557  0.025908078  0.008668439</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.027945649  0.000000000 -0.002582924 -0.007171206 -0.003448534</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.058196557 -0.002582924  0.000000000 -0.001391197  0.009786983</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.025908078 -0.007171206 -0.001391197  0.000000000 -0.003885194</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.008668439 -0.003448534  0.009786983 -0.003885194  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber          Brd         Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.039868936  0.039593470 0.120304071  0.059698669</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.03986894  0.000000000 -0.006397945 0.013519540 -0.004530681</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.03959347 -0.006397945  0.000000000 0.014144279 -0.004151452</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.12030407  0.013519540  0.014144279 0.000000000  0.004542688</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.05969867 -0.004530681 -0.004151452 0.004542688  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale           Ber           Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.0092858402  0.0398725865  0.018821549  0.067183405</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.00928584  0.0000000000  0.0001047954 -0.006497317  0.012966689</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.03987259  0.0001047954  0.0000000000 -0.003912363 -0.003738480</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.01882155 -0.0064973172 -0.0039123631  0.000000000  0.005477308</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.06718340  0.0129666890 -0.0037384803  0.005477308  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.007402122 -0.006892147 -0.006892147 -0.007084295</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.007402122  0.000000000 -0.004488730 -0.004488730 -0.006283572</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.006892147 -0.004488730  0.000000000 -0.006384759 -0.004005920</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.006892147 -0.004488730 -0.006384759  0.000000000 -0.004005920</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.007084295 -0.006283572 -0.004005920 -0.004005920  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd         Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.005218479 -0.007205226 0.013963452 -0.007205226</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.005218479  0.000000000 -0.005086945 0.001820821 -0.005086945</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.007205226 -0.005086945  0.000000000 0.012579334 -0.006384759</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.013963452  0.001820821  0.012579334 0.000000000  0.012579334</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.007205226 -0.005086945 -0.006384759 0.012579334  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           Ale         Ber         Brd         Pad        Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.0000000 0.527950311 0.527950311 0.449345347 0.24457853</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.5279503 0.000000000 0.000000000 0.002347418 0.04968944</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.5279503 0.000000000 0.000000000 0.002347418 0.04968944</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.4493453 0.002347418 0.002347418 0.000000000 0.02664003</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.2445785 0.049689441 0.049689441 0.026640033 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale           Ber           Brd          Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000  0.0327624781  0.0340940407  0.018741171  0.0071949181</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.032762478  0.0000000000 -0.0068031343 -0.005416024 -0.0008600096</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.034094041 -0.0068031343  0.0000000000 -0.004901322 -0.0001428863</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.018741171 -0.0054160237 -0.0049013215  0.000000000 -0.0053575074</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.007194918 -0.0008600096 -0.0001428863 -0.005357507  0.0000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad        Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  0.008507260  0.018939103 -0.003407319 0.01924939</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.008507260  0.000000000 -0.006210876 -0.002924431 0.07533744</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.018939103 -0.006210876  0.000000000  0.003265487 0.09671144</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.003407319 -0.002924431  0.003265487  0.000000000 0.04260150</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.019249394  0.075337441  0.096711441  0.042601503 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000  0.002797203 -0.001648528 -0.005463082  0.006961849</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.002797203  0.000000000 -0.005711594 -0.001319077 -0.006595672</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.001648528 -0.005711594  0.000000000 -0.004151452 -0.004208366</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.005463082 -0.001319077 -0.004151452  0.000000000  0.001781001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.006961849 -0.006595672 -0.004208366  0.001781001  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale           Ber          Brd           Pad           Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.0074168256 -0.007316871 -7.199569e-03 -2.149064e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.007416826  0.0000000000 -0.006597003 -7.296694e-03  2.790637e-04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.007316871 -0.0065970026  0.000000000 -6.497906e-03 -4.046926e-03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.007199569 -0.0072966939 -0.006497906  0.000000e+00 -4.890454e-05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.002149064  0.0002790637 -0.004046926 -4.890454e-05  0.000000e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.020979021  0.086956522  0.066901408  0.017605634</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.02097902  0.000000000  0.017026452  0.007914099 -0.003502887</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.08695652  0.017026452  0.000000000 -0.004475403  0.021228822</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.06690141  0.007914099 -0.004475403  0.000000000  0.011204573</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.01760563 -0.003502887  0.021228822  0.011204573  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.000000000  0.021207959  0.014067041  0.007403798  0.007403798</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.021207959  0.000000000 -0.005437181 -0.003077908 -0.003077908</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.014067041 -0.005437181  0.000000000 -0.004694836 -0.004694836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.007403798 -0.003077908 -0.004694836  0.000000000 -0.005281690</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.007403798 -0.003077908 -0.004694836 -0.005281690  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 0.0003463203 -0.003428571 -0.006449810 -0.002787838</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber  0.0003463203 0.0000000000  0.015584416  0.006368853  0.016950017</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0034285714 0.0155844156  0.000000000 -0.004862508 -0.006438632</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.0064498100 0.0063688528 -0.004862508  0.000000000 -0.004444879</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig -0.0027878381 0.0169500166 -0.006438632 -0.004444879  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.004695305  0.031354795 -0.004149899  0.036929913</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.004695305  0.000000000  0.017881232 -0.006049389  0.022404161</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.031354795  0.017881232  0.000000000  0.016953573 -0.006781429</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad -0.004149899 -0.006049389  0.016953573  0.000000000  0.021371283</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.036929913  0.022404161 -0.006781429  0.021371283  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000  0.041385887  0.095722118  0.071340983  0.063996410</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.04138589  0.000000000  0.004528127 -0.002176241 -0.003628557</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.09572212  0.004528127  0.000000000 -0.004575291 -0.003151626</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.07134098 -0.002176241 -0.004575291  0.000000000 -0.005857677</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.06399641 -0.003628557 -0.003151626 -0.005857677  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              Ale          Ber          Brd          Pad          Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.000000000 -0.007925245  0.005512440  0.012844498  0.005512440</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.007925245  0.000000000  0.001513601  0.007536269  0.001513601</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd  0.005512440  0.001513601  0.000000000 -0.005482742 -0.006384759</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.012844498  0.007536269 -0.005482742  0.000000000 -0.005482742</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.005512440  0.001513601 -0.006384759 -0.005482742  0.000000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            Ale         Ber         Brd         Pad        Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale 0.00000000 0.131082555 0.076538565 0.024435095 0.04545829</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber 0.13108256 0.000000000 0.005269834 0.034766681 0.35159103</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd 0.07653857 0.005269834 0.000000000 0.008786515 0.25949835</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad 0.02443509 0.034766681 0.008786515 0.000000000 0.15655973</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig 0.04545829 0.351591028 0.259498348 0.156559729 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> , , l1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               Ale           Ber           Brd         Pad        Vig</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ale  0.0000000000 -0.0008866134 -0.0004558602 0.018861432 0.12256962</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Ber -0.0008866134  0.0000000000  0.0012842400 0.024284193 0.13489737</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Brd -0.0004558602  0.0012842400  0.0000000000 0.009063641 0.09758086</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pad  0.0188614325  0.0242841926  0.0090636411 0.000000000 0.03780864</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig  0.1225696191  0.1348973666  0.0975808555 0.037808642 0.00000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Evie Carter, Andrea Manica, Eirlys Tysall.</p>
+  <p>Developed by Evie Carter, Eirlys Tysall, Andrea Manica.</p>
 </div>
 
 <div class="pkgdown-footer-right">

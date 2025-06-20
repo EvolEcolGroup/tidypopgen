@@ -9,7 +9,7 @@ frequency of loci that are heterozygous in an individual)."><meta property="og:i
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,16 +82,38 @@ quantities.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a vector of heterozygosities, one per individuals in the
-<code><a href="gen_tibble.html">gen_tibble</a></code></p>
-    </div>
+    <p>either:</p><ul><li><p>a vector of heterozygosities, one per individuals in the <code><a href="gen_tibble.html">gen_tibble</a></code></p></li>
+<li><p>a matrix with two columns, where the first is the number of heterozygous
+loci for each individual and the second is the number of missing values
+for each individual</p></li>
+</ul></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="load_example_gt.html">load_example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">indiv_het_obs</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.6666667 0.2000000 0.4000000 0.3333333 0.5000000 0.2000000 0.6000000</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># For observed heterozygosity as counts:</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">indiv_het_obs</span><span class="op">(</span>as_counts <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      het_n na_n</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]     4    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]     1    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]     2    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]     2    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]     3    0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]     1    1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,]     3    1</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Evie Carter, Andrea Manica, Eirlys Tysall.</p>
+  <p>Developed by Evie Carter, Eirlys Tysall, Andrea Manica.</p>
 </div>
 
 <div class="pkgdown-footer-right">

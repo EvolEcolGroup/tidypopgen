@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -138,12 +138,404 @@ on the screen when running from the command line)</p></li>
     <p>This is a wrapper for the function snmf from R package LEA.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># run the example only if we have the package installed</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"LEA"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="load_example_gt.html">load_example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="co"># To run SNMF on a gen_tibble:</span></span></span>
+<span class="r-in"><span>  <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">gt_snmf</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    k <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, project <span class="op">=</span> <span class="st">"force"</span>, entropy <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>    percentage <span class="op">=</span> <span class="fl">0.5</span>, n_runs <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">1</span>, alpha <span class="op">=</span> <span class="fl">100</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $k</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1 2 3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Q</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Q[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      .Q1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,]   1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "q_matrix" "matrix"   "array"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Q[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              .Q1         .Q2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.000274926 0.999725000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.000100000 0.999900000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.000100000 0.999900000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.999900000 0.000100000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.999742000 0.000257853</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.999719000 0.000281284</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] 0.000317214 0.999683000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "q_matrix" "matrix"   "array"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $Q[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              .Q1         .Q2         .Q3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.000240022 0.999520000 0.000240022</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.000222869 0.999554000 0.000222869</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.000222869 0.999554000 0.000222869</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 0.999538000 0.000231010 0.000231010</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.999800000 0.000099990 0.000099990</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.000275505 0.000275505 0.999449000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] 0.000275525 0.000275525 0.999449000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "q_matrix" "matrix"   "array"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $P</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $log</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [1] "The project is saved into :"                                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [2] "  "                                                                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [3] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [4] "To load the project, use:"                                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [5] " project = load.snmfProject(\"\")"                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [6] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [7] "To remove the project, use:"                                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [8] " remove.snmfProject(\"\")"                                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   [9] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [10] "[1] 1"                                                                                                                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [11] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [12] "[1] \"*          create.dataset            *\""                                                                               </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [13] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [14] "summary of the options:"                                                                                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [15] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [16] "        -n (number of individuals)                 7"                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [17] "        -L (number of loci)                        6"                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [18] "        -s (seed random init)                      1"                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [19] "        -r (percentage of masked data)             0.5"                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [20] "        -x (genotype file in .geno format)         /tmp/RtmpsIJyjp/file22b847cd7d16.geno"                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [21] "        -o (output file in .geno format)           /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno"      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [22] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [23] " Write genotype file with masked data, /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno:\t\tOK."          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [24] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [25] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [26] "[1] \"* sNMF K = 1  repetition 1      *\""                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [27] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [28] "summary of the options:"                                                                                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [29] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [30] "        -n (number of individuals)             7"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [31] "        -L (number of loci)                    6"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [32] "        -K (number of ancestral pops)          1"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [33] "        -x (input file)                        /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno"          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [34] "        -q (individual admixture file)         /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K1/run1/file22b847cd7d16_r1.1.Q"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [35] "        -g (ancestral frequencies file)        /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K1/run1/file22b847cd7d16_r1.1.G"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [36] "        -i (number max of iterations)          200"                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [37] "        -a (regularization parameter)          100"                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [38] "        -s (seed random init)                  4294967297"                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [39] "        -e (tolerance error)                   1E-05"                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [40] "        -p (number of processes)               1"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [41] "        - diploid"                                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [42] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [43] "Read genotype file /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno:\t\tOK."                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [44] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [45] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [46] "Main algorithm:"                                                                                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [47] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [48] "Least-square error: 13.714286"                                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [49] "Write individual ancestry coefficient file /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K1/run1/file22b847cd7d16_r1.1.Q:\t\tOK."     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [50] "Write ancestral allele frequency coefficient file /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K1/run1/file22b847cd7d16_r1.1.G:\tOK."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [51] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [52] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [53] "[1] \"*    cross-entropy estimation       *\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [54] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [55] "summary of the options:"                                                                                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [56] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [57] "        -n (number of individuals)         7"                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [58] "        -L (number of loci)                6"                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [59] "        -K (number of ancestral pops)      1"                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [60] "        -x (genotype file)                 /tmp/RtmpsIJyjp/file22b847cd7d16.geno"                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [61] "        -q (individual admixture)          /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K1/run1/file22b847cd7d16_r1.1.Q"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [62] "        -g (ancestral frequencies)         /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K1/run1/file22b847cd7d16_r1.1.G"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [63] "        -i (with masked genotypes)         /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno"              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [64] "        - diploid"                                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [65] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [66] "Cross-Entropy (all data):\t 0.706731"                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [67] "Cross-Entropy (masked data):\t 4.42151"                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [68] "The project is saved into :"                                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [69] "  "                                                                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [70] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [71] "To load the project, use:"                                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [72] " project = load.snmfProject(\"\")"                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [73] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [74] "To remove the project, use:"                                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [75] " remove.snmfProject(\"\")"                                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [76] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [77] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [78] "[1] \"* sNMF K = 2  repetition 1      *\""                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [79] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [80] "summary of the options:"                                                                                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [81] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [82] "        -n (number of individuals)             7"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [83] "        -L (number of loci)                    6"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [84] "        -K (number of ancestral pops)          2"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [85] "        -x (input file)                        /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno"          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [86] "        -q (individual admixture file)         /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K2/run1/file22b847cd7d16_r1.2.Q"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [87] "        -g (ancestral frequencies file)        /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K2/run1/file22b847cd7d16_r1.2.G"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [88] "        -i (number max of iterations)          200"                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [89] "        -a (regularization parameter)          100"                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [90] "        -s (seed random init)                  93922344828929"                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [91] "        -e (tolerance error)                   1E-05"                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [92] "        -p (number of processes)               1"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [93] "        - diploid"                                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [94] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [95] "Read genotype file /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno:\t\tOK."                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [96] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [97] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [98] "Main algorithm:"                                                                                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [99] "\t[                                                                           ]"                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [100] "\t[======]"                                                                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [101] "Number of iterations: 16"                                                                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [102] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [103] "Least-square error: 14.000528"                                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [104] "Write individual ancestry coefficient file /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K2/run1/file22b847cd7d16_r1.2.Q:\t\tOK."     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [105] "Write ancestral allele frequency coefficient file /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K2/run1/file22b847cd7d16_r1.2.G:\tOK."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [106] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [107] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [108] "[1] \"*    cross-entropy estimation       *\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [109] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [110] "summary of the options:"                                                                                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [111] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [112] "        -n (number of individuals)         7"                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [113] "        -L (number of loci)                6"                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [114] "        -K (number of ancestral pops)      2"                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [115] "        -x (genotype file)                 /tmp/RtmpsIJyjp/file22b847cd7d16.geno"                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [116] "        -q (individual admixture)          /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K2/run1/file22b847cd7d16_r1.2.Q"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [117] "        -g (ancestral frequencies)         /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K2/run1/file22b847cd7d16_r1.2.G"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [118] "        -i (with masked genotypes)         /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno"              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [119] "        - diploid"                                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [120] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [121] "Cross-Entropy (all data):\t 0.69943"                                                                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [122] "Cross-Entropy (masked data):\t 4.79389"                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [123] "The project is saved into :"                                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [124] "  "                                                                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [125] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [126] "To load the project, use:"                                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [127] " project = load.snmfProject(\"\")"                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [128] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [129] "To remove the project, use:"                                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [130] " remove.snmfProject(\"\")"                                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [131] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [132] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [133] "[1] \"* sNMF K = 3  repetition 1      *\""                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [134] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [135] "summary of the options:"                                                                                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [136] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [137] "        -n (number of individuals)             7"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [138] "        -L (number of loci)                    6"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [139] "        -K (number of ancestral pops)          3"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [140] "        -x (input file)                        /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno"          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [141] "        -q (individual admixture file)         /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K3/run1/file22b847cd7d16_r1.3.Q"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [142] "        -g (ancestral frequencies file)        /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K3/run1/file22b847cd7d16_r1.3.G"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [143] "        -i (number max of iterations)          200"                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [144] "        -a (regularization parameter)          100"                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [145] "        -s (seed random init)                  93922344828929"                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [146] "        -e (tolerance error)                   1E-05"                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [147] "        -p (number of processes)               1"                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [148] "        - diploid"                                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [149] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [150] "Read genotype file /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno:\t\tOK."                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [151] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [152] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [153] "Main algorithm:"                                                                                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [154] "\t[                                                                           ]"                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [155] "\t[======]"                                                                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [156] "Number of iterations: 16"                                                                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [157] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [158] "Least-square error: 8.583557"                                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [159] "Write individual ancestry coefficient file /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K3/run1/file22b847cd7d16_r1.3.Q:\t\tOK."     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [160] "Write ancestral allele frequency coefficient file /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K3/run1/file22b847cd7d16_r1.3.G:\tOK."</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [161] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [162] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [163] "[1] \"*    cross-entropy estimation       *\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [164] "[1] \"*************************************\""                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [165] "summary of the options:"                                                                                                      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [166] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [167] "        -n (number of individuals)         7"                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [168] "        -L (number of loci)                6"                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [169] "        -K (number of ancestral pops)      3"                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [170] "        -x (genotype file)                 /tmp/RtmpsIJyjp/file22b847cd7d16.geno"                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [171] "        -q (individual admixture)          /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K3/run1/file22b847cd7d16_r1.3.Q"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [172] "        -g (ancestral frequencies)         /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/K3/run1/file22b847cd7d16_r1.3.G"             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [173] "        -i (with masked genotypes)         /tmp/RtmpsIJyjp/file22b847cd7d16.snmf/masked/file22b847cd7d16_I.geno"              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [174] "        - diploid"                                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [175] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [176] "Cross-Entropy (all data):\t 0.349945"                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [177] "Cross-Entropy (masked data):\t 5.78159"                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [178] "The project is saved into :"                                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [179] "  "                                                                                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [180] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [181] "To load the project, use:"                                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [182] " project = load.snmfProject(\"\")"                                                                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [183] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [184] "To remove the project, use:"                                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [185] " remove.snmfProject(\"\")"                                                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [186] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [187] "snmf Project"                                                                                                                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [188] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [189] "snmfProject file:                 file22b847cd7d16.snmfProject "                                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [190] "project directory:                /tmp/RtmpsIJyjp/ "                                                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [191] "snmf results directory:           file22b847cd7d16.snmf/ "                                                                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [192] "date of creation:                 1750443923 "                                                                                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [193] "input file:                       file22b847cd7d16.geno "                                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [194] "number of individuals:            7 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [195] "number of loci:                   6 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [196] "number of ancestral populations:  1 2 3 "                                                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [197] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [198] "***** run *****"                                                                                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [199] "snmf class"                                                                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [200] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [201] "file directory:                   K1/run1/ "                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [202] "Q output file:                    file22b847cd7d16_r1.1.Q "                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [203] "G output file:                    file22b847cd7d16_r1.1.G "                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [204] "snmfClass file:                   file22b847cd7d16_r1.1.snmfClass "                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [205] "number of ancestral populations:  1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [206] "run number:                       1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [207] "regularization parameter:         100 "                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [208] "number of CPUs:                   1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [209] "seed:                             1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [210] "maximal number of iterations:     200 "                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [211] "tolerance error:                  1e-05 "                                                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [212] "Q input file:                      "                                                                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [213] "cross-Entropy:                    4.421509 "                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [214] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [215] "***** run *****"                                                                                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [216] "snmf class"                                                                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [217] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [218] "file directory:                   K2/run1/ "                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [219] "Q output file:                    file22b847cd7d16_r1.2.Q "                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [220] "G output file:                    file22b847cd7d16_r1.2.G "                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [221] "snmfClass file:                   file22b847cd7d16_r1.2.snmfClass "                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [222] "number of ancestral populations:  2 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [223] "run number:                       1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [224] "regularization parameter:         100 "                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [225] "number of CPUs:                   1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [226] "seed:                             1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [227] "maximal number of iterations:     200 "                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [228] "tolerance error:                  1e-05 "                                                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [229] "Q input file:                      "                                                                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [230] "cross-Entropy:                    4.793895 "                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [231] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [232] "***** run *****"                                                                                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [233] "snmf class"                                                                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [234] ""                                                                                                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [235] "file directory:                   K3/run1/ "                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [236] "Q output file:                    file22b847cd7d16_r1.3.Q "                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [237] "G output file:                    file22b847cd7d16_r1.3.G "                                                                   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [238] "snmfClass file:                   file22b847cd7d16_r1.3.snmfClass "                                                           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [239] "number of ancestral populations:  3 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [240] "run number:                       1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [241] "regularization parameter:         100 "                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [242] "number of CPUs:                   1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [243] "seed:                             1 "                                                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [244] "maximal number of iterations:     200 "                                                                                       </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [245] "tolerance error:                  1e-05 "                                                                                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [246] "Q input file:                      "                                                                                          </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [247] "cross-Entropy:                    5.781592 "                                                                                  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $loglik</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> numeric(0)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $G</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $G[[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            .Q1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.285714</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.428571</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.285714</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.285714</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.714286</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.857143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.142857</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.999900</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] 0.285714</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] 0.714286</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] 0.857143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] 0.142857</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "q_matrix" "matrix"   "array"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $G[[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            .Q1      .Q2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.666578 0.749950</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.333422 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.000100 0.250050</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.333359 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.666641 0.999900</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.500021 0.249966</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.000100 0.250034</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.499979 0.500000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] 0.999900 0.500000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] 0.000100 0.500000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] 0.333262 0.750059</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] 0.666738 0.249941</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "q_matrix" "matrix"   "array"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $G[[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            .Q1      .Q2      .Q3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1,] 0.000100 0.000100 0.999900</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [2,] 0.999900 0.333173 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [3,] 0.000100 0.666827 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [4,] 0.500116 0.000100 0.999900</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [5,] 0.499884 0.999900 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [6,] 0.000100 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [7,] 0.500014 0.500029 0.249862</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [8,] 0.000100 0.000100 0.250138</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [9,] 0.499986 0.499971 0.500000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [10,] 0.000100 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [11,] 0.000100 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [12,] 0.000100 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13,] 0.999900 0.000100 0.500000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [14,] 0.000100 0.999900 0.500000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [15,] 0.000100 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [16,] 0.999900 0.999900 0.499724</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [17,] 0.000100 0.000100 0.500276</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [18,] 0.000100 0.000100 0.000100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "q_matrix" "matrix"   "array"   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $cv</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4.42151 4.79389 5.78159</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $id</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "b" "c" "d" "e" "f" "g"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $algorithm</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "SNMF"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gt_admix" "list"    </span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Evie Carter, Andrea Manica, Eirlys Tysall.</p>
+  <p>Developed by Evie Carter, Eirlys Tysall, Andrea Manica.</p>
 </div>
 
 <div class="pkgdown-footer-right">

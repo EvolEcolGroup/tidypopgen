@@ -15,7 +15,7 @@ loci that may be under selection."><meta property="og:image" content="https://ev
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -143,12 +143,32 @@ include "fst" calculations in the same column (e.g. "fst_pop1.pop2").</p></li>
 <li><p><code>value</code>: the pbs value for the populations</p></li>
 </ul></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="load_example_gt.html">load_example_gt</a></span><span class="op">(</span><span class="st">"grouped_gen_tbl"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Calculate nwise pbs across a window of 3 SNPs, with a step size of 2 SNPs</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">windows_nwise_pop_pbs</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    window_size <span class="op">=</span> <span class="fl">3</span>, step_size <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>    size_unit <span class="op">=</span> <span class="st">"snp"</span>, min_loci <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 9</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chromosome start   end pbs_pop1.pop2.pop3 pbs_pop2.pop1.pop3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> chr1           1     3             0.093<span style="text-decoration: underline;">0</span>             0.231 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> chr1           3     5             0.048<span style="text-decoration: underline;">6</span>            -<span style="color: #BB0000;">0.203</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> chr2           1     3            -<span style="color: #BB0000;">0.063</span><span style="color: #BB0000; text-decoration: underline;">0</span>            -<span style="color: #BB0000;">0.085</span><span style="color: #BB0000; text-decoration: underline;">4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 4 more variables: pbs_pop3.pop1.pop2 &lt;dbl&gt;, pbsn1_pop1.pop2.pop3 &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   pbsn1_pop2.pop1.pop3 &lt;dbl&gt;, pbsn1_pop3.pop1.pop2 &lt;dbl&gt;</span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Evie Carter, Andrea Manica, Eirlys Tysall.</p>
+  <p>Developed by Evie Carter, Eirlys Tysall, Andrea Manica.</p>
 </div>
 
 <div class="pkgdown-footer-right">

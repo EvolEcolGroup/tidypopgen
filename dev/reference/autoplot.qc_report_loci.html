@@ -37,7 +37,7 @@ significant hwe: a histogram of significant HWE exact test p-values
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,11 +111,12 @@ snps with high minor allele frequency</p></li>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>the type of plot (one of <code>overview</code>, <code>all</code>, <code>missing</code>, <code>missing low maf</code>, <code>missing high maf</code>, <code>maf</code>, <code>hwe</code>, and <code>significant hwe</code>)</p></dd>
+<dd><p>the type of plot (one of <code>overview</code>, <code>all</code>, <code>missing</code>,
+<code>missing low maf</code>, <code>missing high maf</code>, <code>maf</code>, <code>hwe</code>, and <code>significant hwe</code>)</p></dd>
 
 
 <dt id="arg-maf-threshold">maf_threshold<a class="anchor" aria-label="anchor" href="#arg-maf-threshold"></a></dt>
-<dd><p>default 0.5, a threshold for the accepted rate of minor
+<dd><p>default 0.05, a threshold for the accepted rate of minor
 allele frequency of loci</p></dd>
 
 
@@ -144,12 +145,60 @@ customisable; we recommend that you use <code>ggplot2</code> to produce publicat
 ready plots.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a gen_tibble</span></span></span>
+<span class="r-in"><span><span class="va">bed_file</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"related"</span>, <span class="st">"families.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>,</span></span>
+<span class="r-in"><span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"families"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  valid_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">loci_report</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot the QC report overview</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"overview"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="autoplot.qc_report_loci-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot the QC report all</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="autoplot.qc_report_loci-2.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot missing data</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"missing"</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="autoplot.qc_report_loci-3.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot missing with low maf</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"missing low maf"</span>, maf_threshold <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="autoplot.qc_report_loci-4.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot missing with high maf</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"missing high maf"</span>, maf_threshold <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="autoplot.qc_report_loci-5.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot maf</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"maf"</span>, maf_threshold <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="autoplot.qc_report_loci-6.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot hwe</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"hwe"</span>, hwe_p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="autoplot.qc_report_loci-7.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot significant hwe</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">loci_report</span>, type <span class="op">=</span> <span class="st">"significant hwe"</span>, hwe_p <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="autoplot.qc_report_loci-8.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Evie Carter, Andrea Manica, Eirlys Tysall.</p>
+  <p>Developed by Evie Carter, Eirlys Tysall, Andrea Manica.</p>
 </div>
 
 <div class="pkgdown-footer-right">
