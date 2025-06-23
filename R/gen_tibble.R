@@ -113,7 +113,7 @@
 #'   valid_alleles = c("A", "T", "C", "G"),
 #'   quiet = TRUE
 #' )
-#' 
+#'
 gen_tibble <-
   function(x,
            ...,
