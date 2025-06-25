@@ -40,7 +40,7 @@ algorithms (such as ADMIXTURE) and transforms them into gt_admix objects."><meta
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Read and structure .Q files or existing matrices as <code>q_matrix</code> or <code>gt_admix</code> objects.</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/q_matrix.R" class="external-link"><code>R/q_matrix.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/q_matrix.R" class="external-link"><code>R/q_matrix.R</code></a></small>
       <div class="d-none name"><code>read_q_files.Rd</code></div>
     </div>
 
@@ -70,19 +70,6 @@ algorithms (such as ADMIXTURE) and transforms them into <code>gt_admix</code> ob
 indices for each Q matrix separated by K</p></li>
 </ul></div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">q_files_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"anolis"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">admix_obj</span> <span class="op">&lt;-</span> <span class="fu">read_q_files</span><span class="op">(</span><span class="va">q_files_path</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">admix_obj</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Admixture results for multiple runs:     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> k 3 4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> n 1 1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> with slots:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $Q for Q matrices</span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

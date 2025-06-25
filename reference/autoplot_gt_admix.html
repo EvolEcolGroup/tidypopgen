@@ -46,7 +46,7 @@ barplot a standard barplot of the admixture proportions
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Autoplots for <code>gt_admix</code> objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/autoplot_gt_admix.R" class="external-link"><code>R/autoplot_gt_admix.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/autoplot_gt_admix.R" class="external-link"><code>R/autoplot_gt_admix.R</code></a></small>
       <div class="d-none name"><code>autoplot_gt_admix.Rd</code></div>
     </div>
 
@@ -104,28 +104,20 @@ avoid any automatic re-sorting of individuals, set <code>arrange_by_group</code>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Read example gt_admix object</span></span></span>
-<span class="r-in"><span><span class="va">admix_obj</span> <span class="op">&lt;-</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"anolis"</span>, <span class="st">"anole_adm_k3.rds"</span>,</span></span>
-<span class="r-in"><span>    package <span class="op">=</span> <span class="st">"tidypopgen"</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># Cross-validation plot</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_gt.html">example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create a gt_admix object</span></span></span>
+<span class="r-in"><span><span class="va">admix_obj</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="gt_snmf.html">gt_snmf</a></span><span class="op">(</span>k <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>,</span></span>
+<span class="r-in"><span>                                    project <span class="op">=</span> <span class="st">"force"</span>, entropy <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Plot the cross-validation error</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">admix_obj</span>, type <span class="op">=</span> <span class="st">"cv"</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="autoplot_gt_admix-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Basic barplot</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">admix_obj</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span>, type <span class="op">=</span> <span class="st">"barplot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Barplot of individuals admixture proportions</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">admix_obj</span>, type <span class="op">=</span> <span class="st">"barplot"</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>no annotation possible if 'gen_tbl' is NULL and q_matrix does not contain group information</span>
 <span class="r-plt img"><img src="autoplot_gt_admix-2.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Barplot with individuals arranged by Q proportion</span></span></span>
-<span class="r-in"><span><span class="co"># (using additional arguments, see `autoplot.q_matrix` for details)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">admix_obj</span>,</span></span>
-<span class="r-in"><span>  k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span>, type <span class="op">=</span> <span class="st">"barplot"</span>, annotate_group <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_indiv <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>  reorder_within_groups <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-plt img"><img src="autoplot_gt_admix-3.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

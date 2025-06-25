@@ -48,7 +48,7 @@ tutorial."><meta property="og:image" content="https://evolecolgroup.github.io/ti
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Discriminant Analysis of Principal Components for gen_tibble</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/gt_dapc.R" class="external-link"><code>R/gt_dapc.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/gt_dapc.R" class="external-link"><code>R/gt_dapc.R</code></a></small>
       <div class="d-none name"><code>gt_dapc.Rd</code></div>
     </div>
 
@@ -137,83 +137,6 @@ discriminant analysis of principal components to genotype data. Molecular
 Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a gen_tibble of lobster genotypes</span></span></span>
-<span class="r-in"><span><span class="va">bed_file</span> <span class="op">&lt;-</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"lobster"</span>, <span class="st">"lobster.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>,</span></span>
-<span class="r-in"><span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"lobsters"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Remove monomorphic loci and impute</span></span></span>
-<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">lobsters</span>, method <span class="op">=</span> <span class="st">"mode"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Create PCA object</span></span></span>
-<span class="r-in"><span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_pca_partialSVD.html">gt_pca_partialSVD</a></span><span class="op">(</span><span class="va">lobsters</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Run DAPC on the `gt_pca` object, providing `pop` as factor</span></span></span>
-<span class="r-in"><span><span class="va">populations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">lobsters</span><span class="op">$</span><span class="va">population</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">gt_dapc</span><span class="op">(</span><span class="va">pca</span>, n_pca <span class="op">=</span> <span class="fl">6</span>, n_da <span class="op">=</span> <span class="fl">2</span>, pop <span class="op">=</span> <span class="va">populations</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  === DAPC of gen_tibble object ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call ($call):gt_dapc(x = pca, pop = populations, n_pca = 6, n_da = 2)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Eigenvalues ($eig):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  225.2 33.397 2.285 0.283 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> LD scores ($ind.coord):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 176 rows (individuals) and 2 columns (LD axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Loadings by PC ($loadings):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 6 rows (PC axes) and 2 columns (LD axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Loadings by locus($var.load):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 79 rows (loci) and 2 columns (LD axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Run clustering on the first 10 PCs</span></span></span>
-<span class="r-in"><span><span class="va">cluster_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_cluster_pca.html">gt_cluster_pca</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  x <span class="op">=</span> <span class="va">pca</span>,</span></span>
-<span class="r-in"><span>  n_pca <span class="op">=</span> <span class="fl">10</span>,</span></span>
-<span class="r-in"><span>  k_clusters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  method <span class="op">=</span> <span class="st">"kmeans"</span>,</span></span>
-<span class="r-in"><span>  n_iter <span class="op">=</span> <span class="fl">1e5</span>,</span></span>
-<span class="r-in"><span>  n_start <span class="op">=</span> <span class="fl">10</span>,</span></span>
-<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Find best k</span></span></span>
-<span class="r-in"><span><span class="va">cluster_pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_cluster_pca_best_k.html">gt_cluster_pca_best_k</a></span><span class="op">(</span><span class="va">cluster_pca</span>,</span></span>
-<span class="r-in"><span>  stat <span class="op">=</span> <span class="st">"BIC"</span>,</span></span>
-<span class="r-in"><span>  criterion <span class="op">=</span> <span class="st">"min"</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Using BIC with criterion min: 5 clusters</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Run DAPC on the `gt_cluster_pca` object</span></span></span>
-<span class="r-in"><span><span class="fu">gt_dapc</span><span class="op">(</span><span class="va">cluster_pca</span>, n_pca <span class="op">=</span> <span class="fl">10</span>, n_da <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  === DAPC of gen_tibble object ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call ($call):gt_dapc(x = cluster_pca, n_pca = 10, n_da = 2)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Eigenvalues ($eig):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  193.764 77.308 49.957 43.352 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> LD scores ($ind.coord):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 176 rows (individuals) and 2 columns (LD axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Loadings by PC ($loadings):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 10 rows (PC axes) and 2 columns (LD axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Loadings by locus($var.load):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 79 rows (loci) and 2 columns (LD axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co">#  should be stored (TRUE, default) or not (FALSE). This information is</span></span></span>
-<span class="r-in"><span><span class="co">#  required to predict group membership of new individuals using predict, but</span></span></span>
-<span class="r-in"><span><span class="co">#  makes the object slightly bigger.</span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

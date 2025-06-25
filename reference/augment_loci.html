@@ -40,7 +40,7 @@ information from a given analysis."><meta property="og:image" content="https://e
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Augment the loci table with information from a analysis object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/augment_loci.R" class="external-link"><code>R/augment_loci.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/augment_loci.R" class="external-link"><code>R/augment_loci.R</code></a></small>
       <div class="d-none name"><code>augment_loci.Rd</code></div>
     </div>
 
@@ -76,45 +76,6 @@ information from a given analysis.</p>
 of the information, with a column <code>.rownames</code> giving the loci names.</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a gen_tibble of lobster genotypes</span></span></span>
-<span class="r-in"><span><span class="va">bed_file</span> <span class="op">&lt;-</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"lobster"</span>, <span class="st">"lobster.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>,</span></span>
-<span class="r-in"><span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"lobsters"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Remove monomorphic loci and impute</span></span></span>
-<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">lobsters</span>, method <span class="op">=</span> <span class="st">"mode"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Create PCA</span></span></span>
-<span class="r-in"><span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_pca_partialSVD.html">gt_pca_partialSVD</a></span><span class="op">(</span><span class="va">lobsters</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Augment the gen_tibble with the PCA scores</span></span></span>
-<span class="r-in"><span><span class="fu">augment_loci</span><span class="op">(</span><span class="va">pca</span>, data <span class="op">=</span> <span class="va">lobsters</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 79 × 18</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    big_index name    chromosome position genetic_dist allele_ref allele_alt</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>         1 rs3441  1                 1            1 G          A         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>         2 rs4173  2                 2            2 C          T         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>         3 rs6157  3                 3            3 G          C         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>         4 rs7502  4                 4            4 C          T         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>         5 rs7892  5                 5            5 A          T         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>         6 rs9441  7                 7            7 A          G         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>         7 rs11071 8                 8            8 G          A         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>         8 rs11183 9                 9            9 A          G         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>         9 rs11291 10               10           10 T          G         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>        10 rs12971 11               11           11 A          G         </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 69 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 11 more variables: chr_int &lt;int&gt;, .loadingPC1 &lt;dbl&gt;, .loadingPC2 &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC3 &lt;dbl&gt;, .loadingPC4 &lt;dbl&gt;, .loadingPC5 &lt;dbl&gt;, .loadingPC6 &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC7 &lt;dbl&gt;, .loadingPC8 &lt;dbl&gt;, .loadingPC9 &lt;dbl&gt;, .loadingPC10 &lt;dbl&gt;</span></span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

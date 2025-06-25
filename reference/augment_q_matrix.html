@@ -50,7 +50,7 @@ when adapting plotting scripts)."><meta property="og:image" content="https://evo
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Augment data with information from a q_matrix object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/q_matrix.R" class="external-link"><code>R/q_matrix.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/q_matrix.R" class="external-link"><code>R/q_matrix.R</code></a></small>
       <div class="d-none name"><code>augment_q_matrix.Rd</code></div>
     </div>
 
@@ -94,30 +94,27 @@ columns containing each observation's Q values.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># run the example only if we have the package installed</span></span></span>
-<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"LEA"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="load_example_gt.html">load_example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_gt.html">example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="co"># Create a gt_admix object</span></span></span>
-<span class="r-in"><span>  <span class="va">admix_obj</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="gt_snmf.html">gt_snmf</a></span><span class="op">(</span>k <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, project <span class="op">=</span> <span class="st">"force"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Create a gt_admix object</span></span></span>
+<span class="r-in"><span><span class="va">admix_obj</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="gt_snmf.html">gt_snmf</a></span><span class="op">(</span>k <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, project <span class="op">=</span> <span class="st">"force"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="co"># Extract a Q matrix</span></span></span>
-<span class="r-in"><span>  <span class="va">q_mat_k3</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">admix_obj</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Extract a Q matrix</span></span></span>
+<span class="r-in"><span><span class="va">q_mat_k3</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_q_matrix.html">get_q_matrix</a></span><span class="op">(</span><span class="va">admix_obj</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>  <span class="co"># Augment the gen_tibble with Q values</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">q_mat_k3</span>, data <span class="op">=</span> <span class="va">example_gt</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="co"># Augment the gen_tibble with Q values</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment</a></span><span class="op">(</span><span class="va">q_mat_k3</span>, data <span class="op">=</span> <span class="va">example_gt</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 6 loci</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble:     7 × 7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   id    population  genotypes .rownames .Q1        .Q2        .Q3       </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;q_matrix&gt;</span> <span style="color: #949494; font-style: italic;">&lt;q_matrix&gt;</span> <span style="color: #949494; font-style: italic;">&lt;q_matrix&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> a     pop1                1 a         9.999e-05  9.998e-01  9.999e-05 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> b     pop1                2 b         9.999e-05  9.998e-01  9.999e-05 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> c     pop2                3 c         9.998e-01  9.999e-05  9.999e-05 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> b     pop1                2 b         9.999e-05  9.999e-05  9.998e-01 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> c     pop2                3 c         9.999e-05  9.999e-05  9.998e-01 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> d     pop2                4 d         9.999e-05  9.998e-01  9.999e-05 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> e     pop1                5 e         9.999e-05  9.999e-05  9.998e-01 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> e     pop1                5 e         9.998e-01  9.999e-05  9.999e-05 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> f     pop3                6 f         9.998e-01  9.999e-05  9.999e-05 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> g     pop3                7 g         9.998e-01  9.999e-05  9.999e-05 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> g     pop3                7 g         9.999e-05  9.999e-05  9.998e-01 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

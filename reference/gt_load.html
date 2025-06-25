@@ -46,7 +46,7 @@ same directory as the .rds file)."><meta property="og:image" content="https://ev
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Load a gen_tibble</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/gt_load.R" class="external-link"><code>R/gt_load.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/gt_load.R" class="external-link"><code>R/gt_load.R</code></a></small>
       <div class="d-none name"><code>gt_load.Rd</code></div>
     </div>
 
@@ -89,7 +89,7 @@ You should be able to leave this to NULL unless you have moved the files.</p></d
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="load_example_gt.html">load_example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_gt.html">example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># remove some individuals</span></span></span>
 <span class="r-in"><span><span class="va">example_gt_filtered</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op">!=</span> <span class="st">"a"</span><span class="op">)</span></span></span>
@@ -99,16 +99,16 @@ You should be able to leave this to NULL unless you have moved the files.</p></d
 <span class="r-in"><span>  file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_example_filtered"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpOCQ5oS/file22dd7406045f_example_filtered.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using bigSNP file: /tmp/RtmpOCQ5oS/file22dd18a87615.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with backing file: /tmp/RtmpOCQ5oS/file22dd18a87615.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpoB2Ume/file230b2481586b_example_filtered.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using bigSNP file: /tmp/RtmpoB2Ume/file230b35e35dfe.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with backing file: /tmp/RtmpoB2Ume/file230b35e35dfe.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpOCQ5oS/file22dd7406045f_example_filtered.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpoB2Ume/file230b2481586b_example_filtered.gt')</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># backing_files[1] contains the name of the saved .gt file</span></span></span>
 <span class="r-in"><span><span class="va">backing_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpOCQ5oS/file22dd7406045f_example_filtered.gt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpoB2Ume/file230b2481586b_example_filtered.gt"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># To load the saved gen_tibble object, use the path to the saved .gt file</span></span></span>
 <span class="r-in"><span><span class="va">reloaded_gt</span> <span class="op">&lt;-</span> <span class="fu">gt_load</span><span class="op">(</span><span class="va">backing_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>

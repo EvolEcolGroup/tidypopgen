@@ -40,7 +40,7 @@ returns a q_matrix object."><meta property="og:image" content="https://evolecolg
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Convert a standard matrix to a <code>q_matrix</code> object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/q_matrix.R" class="external-link"><code>R/q_matrix.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/q_matrix.R" class="external-link"><code>R/q_matrix.R</code></a></small>
       <div class="d-none name"><code>q_matrix.Rd</code></div>
     </div>
 
@@ -67,22 +67,6 @@ returns a <code>q_matrix</code> object.</p>
     <p>A <code>q_matrix</code> object</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Read in a single .Q file</span></span></span>
-<span class="r-in"><span><span class="va">q_mat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>,<span class="st">"anolis"</span>,<span class="st">"anolis_ld_run1.3.Q"</span>,</span></span>
-<span class="r-in"><span>  package <span class="op">=</span> <span class="st">"tidypopgen"</span></span></span>
-<span class="r-in"><span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">q_mat</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "data.frame"</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Convert to a Q matrix object</span></span></span>
-<span class="r-in"><span><span class="va">q_mat</span> <span class="op">&lt;-</span> <span class="fu">q_matrix</span><span class="op">(</span><span class="va">q_mat</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">q_mat</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "q_matrix" "matrix"   "array"   </span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
