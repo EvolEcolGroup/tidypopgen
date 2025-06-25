@@ -15,7 +15,8 @@ ever loading all data in memory.
 
 You can install the latest version of `tidypopgen` directly from r-universe (recommended):
 ``` r
-install.packages('tidypopgen', repos = "https://evolecolgroup.r-universe.dev")
+install.packages('tidypopgen', repos = c('https://evolecolgroup.r-universe.dev',
+                 'https://cloud.r-project.org'))
 ```
 
 Alternatively, you can install `tidypopgen`using `devtools` (but you might need to set up your development environment, 
