@@ -9,7 +9,7 @@ articles:
   articles/aDNA_pseudohaploids: aDNA_pseudohaploids.html
   articles/benchmark_hgdp: benchmark_hgdp.html
   tidypopgen: tidypopgen.html
-last_built: 2025-06-25T13:21Z
+last_built: 2025-06-26T13:34Z
 urls:
   reference: https://evolecolgroup.github.io/tidypopgen/reference
   article: https://evolecolgroup.github.io/tidypopgen/articles
