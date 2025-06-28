@@ -58,7 +58,7 @@ gt_admixture <- function(
     crossval = FALSE,
     n_cores = 1,
     seed = NULL,
-    conda_env = "none") {
+    conda_env = "auto") {
   # check that we have the right number of repeats
   if (length(seed) != n_runs) {
     stop("'seed' should be a vector of length 'n_runs'")
@@ -184,7 +184,7 @@ gt_admixture <- function(
         reticulate::conda_run2(
           "admixture",
           args = admixture_args,
-          conda = conda_env
+          envname = conda_env
         )
       }
 

@@ -11,7 +11,7 @@ gt_admixture(
   crossval = FALSE,
   n_cores = 1,
   seed = NULL,
-  conda_env = "none"
+  conda_env = "auto"
 )
 }
 \arguments{
