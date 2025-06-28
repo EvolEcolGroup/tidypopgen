@@ -49,7 +49,7 @@
 # If the package `fastmixturer` is installed, and its conda environment has been
 # set up with `ADMIXTURE` in it (the default), it will automatically use that
 # version unless you change `conda_env` to "none". If set to "auto", the
-# default, a copy from `fastmixturer` will be preferred if available, otherwise
+# default, a copy from `tidygenclust` will be preferred if available, otherwise
 # a local copy will be used.
 gt_admixture <- function(
     x,
@@ -181,10 +181,11 @@ gt_admixture <- function(
         adm_out <- system2("admixture", args = admixture_args, stdout = TRUE)
         # change back to the original working directory
       } else {
-        reticulate::conda_run2(
+        adm_out <- reticulate::conda_run2(
           "admixture",
           args = admixture_args,
-          envname = conda_env
+          envname = conda_env,
+          intern = TRUE
         )
       }
 
