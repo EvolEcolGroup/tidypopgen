@@ -84,9 +84,9 @@ be ignored (FALSE)</p></dd>
 <span class="r-in"><span>  <span class="co"># Create a second gt_admix object</span></span></span>
 <span class="r-in"><span>  <span class="va">admix_obj2</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="gt_snmf.html">gt_snmf</a></span><span class="op">(</span>k <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">4</span>, project <span class="op">=</span> <span class="st">"force"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Combine the two gt_admix objects</span></span></span>
-<span class="r-in"><span><span class="va">new_admix_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">admix_obj</span>, <span class="va">admix_obj2</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">new_admix_obj</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="co"># Combine the two gt_admix objects</span></span></span>
+<span class="r-in"><span>  <span class="va">new_admix_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">admix_obj</span>, <span class="va">admix_obj2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">new_admix_obj</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Admixture results for multiple runs:         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> k 1 2 3 4</span>
