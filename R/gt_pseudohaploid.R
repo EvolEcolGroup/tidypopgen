@@ -1,9 +1,12 @@
 #' Set the ploidy of a `gen_tibble` to include pseudohaploids
 #'
-#' The ploidy of a `gen_tibble` is set to -2, to indicate that some individuals
-#' are coded as pseudohaploids. The ploidy of the individuals is updated, with
-#' pseudohaploids set to 1 and diploids set to 2. However, the dosages are not
-#' changed, meaning that pseudohaploids are still coded as 0 or 2.
+#' If a `gen_tibble` includes pseudohaploid data, its ploidy is set to -2 to
+#' indicate that some individuals are coded as pseudohaploids. The ploidy of the
+#' individuals is updated, with pseudohaploids set to 1 and diploids set to 2.
+#' However, the dosages are not changed, meaning that pseudohaploids are still
+#' coded as 0 or 2. If the `gen_tibble` is already set to pseudohaploid, running
+#' gt_pseudohaploid will update the ploidy values again, if pseudohaploid
+#' individuals have been removed then ploidy is reset to 2.
 #'
 #' @param x a `gen_tibble` object
 #' @param test_n_loci the number of loci to test to determine if an individual
