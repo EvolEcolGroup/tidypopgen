@@ -26,7 +26,7 @@ stopifnot_diploid <- function(x) {
     x <- x$genotypes
   }
   if (attr(x, "ploidy") == -2) {
-    if (min(attr(x, "bigsnp")$fam$ploidy) != 2) {
+    if (min(attr(x, "bigsnp")$fam$ploidy[vctrs::vec_data(x)]) != 2) {
       stop("this function only works on diploid data")
     }
   }
