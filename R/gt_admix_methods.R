@@ -18,9 +18,9 @@
 #'   # Create a second gt_admix object
 #'   admix_obj2 <- example_gt %>% gt_snmf(k = 2:4, project = "force")
 #'
-#' # Combine the two gt_admix objects
-#' new_admix_obj <- c(admix_obj, admix_obj2)
-#' summary(new_admix_obj)
+#'   # Combine the two gt_admix objects
+#'   new_admix_obj <- c(admix_obj, admix_obj2)
+#'   summary(new_admix_obj)
 #' }
 c.gt_admix <- function(..., match_attributes = TRUE) {
   admix_list <- list(...)

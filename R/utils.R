@@ -25,8 +25,10 @@ stopifnot_diploid <- function(x) {
   if (inherits(x, "gen_tbl")) {
     x <- x$genotypes
   }
-  if (attr(x, "ploidy") != 2) {
-    stop("this function only works on diploid data")
+  if (attr(x, "ploidy") == -2) {
+    if (min(attr(x, "bigsnp")$fam$ploidy) != 2) {
+      stop("this function only works on diploid data")
+    }
   }
 }
 

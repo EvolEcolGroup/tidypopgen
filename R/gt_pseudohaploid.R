@@ -50,10 +50,13 @@ gt_pseudohaploid <- function(x, test_n_loci = 10000) {
   attr(x$genotypes, "bigsnp")$fam$ploidy[.gt_bigsnp_rows(x)] <-
     identify_pseudohaploids(x, n_test = test_n_loci)
 
-  # set ploidy to -2
-  attr(x$genotypes, "ploidy") <- -2
-
-
+  if (min(attr(x$genotypes, "bigsnp")$fam$ploidy[.gt_bigsnp_rows(x)]) == 2) {
+    # if all individuals are diploid, set ploidy to 2
+    attr(x$genotypes, "ploidy") <- 2
+  } else {
+    # otherwise, set ploidy to -2
+    attr(x$genotypes, "ploidy") <- -2
+  }
   return(x)
 }
 
