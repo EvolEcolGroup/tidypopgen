@@ -1,7 +1,7 @@
 # skip if admixture is not installed
 skip_if(
   (system2("which", args = "admixture", stdout = NULL) != 0) &&
-    !requireNamespace("fastmixturer", quietly = TRUE)
+    !requireNamespace("tidygenclust", quietly = TRUE)
 ) # nolint
 # set the input file
 vcf_path <-
