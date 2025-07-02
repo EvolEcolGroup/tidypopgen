@@ -38,7 +38,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Compute the KING-robust Matrix for a bigSNP object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/snp_king.R" class="external-link"><code>R/snp_king.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/snp_king.R" class="external-link"><code>R/snp_king.R</code></a></small>
       <div class="d-none name"><code>snp_king.Rd</code></div>
     </div>
 
@@ -52,7 +52,7 @@
 <span>  <span class="va">X</span>,</span>
 <span>  ind.row <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/seq-dim.html" class="external-link">rows_along</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,</span>
 <span>  ind.col <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/seq-dim.html" class="external-link">cols_along</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,</span>
-<span>  block.size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigstatsr/man/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">4</span></span>
+<span>  block.size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="fl">4</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -61,7 +61,7 @@
 
 
 <dl><dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>a <a href="https://rdrr.io/pkg/bigstatsr/man/FBM.code256-class.html" class="external-link">bigstatsr::FBM.code256</a> matrix (as found in the <code>genotypes</code>
+<dd><p>a <a href="https://privefl.github.io/bigstatsr/reference/FBM.code256-class.html" class="external-link">bigstatsr::FBM.code256</a> matrix (as found in the <code>genotypes</code>
 slot of a <a href="https://privefl.github.io/bigsnpr/reference/bigSNP-class.html" class="external-link">bigsnpr::bigSNP</a> object).</p></dd>
 
 

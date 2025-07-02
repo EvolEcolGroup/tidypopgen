@@ -38,7 +38,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Compute the Identity by State Matrix for a <code>gen_tibble</code> object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/pairwise_ibs.R" class="external-link"><code>R/pairwise_ibs.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/pairwise_ibs.R" class="external-link"><code>R/pairwise_ibs.R</code></a></small>
       <div class="d-none name"><code>pairwise_ibs.Rd</code></div>
     </div>
 
@@ -52,7 +52,7 @@
 <span>  <span class="va">x</span>,</span>
 <span>  as_matrix <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"proportion"</span>, <span class="st">"adjusted_counts"</span>, <span class="st">"raw_counts"</span><span class="op">)</span>,</span>
-<span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigstatsr/man/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
+<span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -83,8 +83,8 @@ improve speed, but will tax memory.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a <a href="https://rdrr.io/pkg/bigstatsr/man/FBM-class.html" class="external-link">bigstatsr::FBM</a> of proportion or adjusted counts, or a list of
-two <a href="https://rdrr.io/pkg/bigstatsr/man/FBM-class.html" class="external-link">bigstatsr::FBM</a> matrices, one of counts of IBS by alleles, and one of
+    <p>a <a href="https://privefl.github.io/bigstatsr/reference/FBM-class.html" class="external-link">bigstatsr::FBM</a> of proportion or adjusted counts, or a list of
+two <a href="https://privefl.github.io/bigstatsr/reference/FBM-class.html" class="external-link">bigstatsr::FBM</a> matrices, one of counts of IBS by alleles, and one of
 number of valid alleles (i.e. 2<em>n_loci - 2</em>missing_loci)</p>
     </div>
     <div class="section level2">

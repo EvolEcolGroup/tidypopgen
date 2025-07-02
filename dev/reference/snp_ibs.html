@@ -38,7 +38,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Compute the Identity by State Matrix for a bigSNP object</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/snp_ibs.R" class="external-link"><code>R/snp_ibs.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/snp_ibs.R" class="external-link"><code>R/snp_ibs.R</code></a></small>
       <div class="d-none name"><code>snp_ibs.Rd</code></div>
     </div>
 
@@ -53,7 +53,7 @@
 <span>  ind.row <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/seq-dim.html" class="external-link">rows_along</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,</span>
 <span>  ind.col <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/seq-dim.html" class="external-link">cols_along</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"proportion"</span>, <span class="st">"adjusted_counts"</span>, <span class="st">"raw_counts"</span><span class="op">)</span>,</span>
-<span>  block.size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigstatsr/man/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
+<span>  block.size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -62,7 +62,7 @@
 
 
 <dl><dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>a <a href="https://rdrr.io/pkg/bigstatsr/man/FBM.code256-class.html" class="external-link">bigstatsr::FBM.code256</a> matrix (as found in the <code>genotypes</code> slot
+<dd><p>a <a href="https://privefl.github.io/bigstatsr/reference/FBM.code256-class.html" class="external-link">bigstatsr::FBM.code256</a> matrix (as found in the <code>genotypes</code> slot
 of a <a href="https://privefl.github.io/bigsnpr/reference/bigSNP-class.html" class="external-link">bigsnpr::bigSNP</a> object).</p></dd>
 
 
@@ -91,7 +91,7 @@ the columns.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>if as.counts = TRUE function returns a list of two <a href="https://rdrr.io/pkg/bigstatsr/man/FBM-class.html" class="external-link">bigstatsr::FBM</a>
+    <p>if as.counts = TRUE function returns a list of two <a href="https://privefl.github.io/bigstatsr/reference/FBM-class.html" class="external-link">bigstatsr::FBM</a>
 matrices, one of counts of IBS by alleles (i.e. 2*n loci), and one of valid
 alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns
 a single matrix of IBS proportions.</p>
