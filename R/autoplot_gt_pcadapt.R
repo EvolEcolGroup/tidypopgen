@@ -17,6 +17,31 @@
 #' @returns a `ggplot2` object
 #' @name autoplot_gt_pcadapt
 #' @export
+#' @examples
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Remove monomorphic loci and impute
+#' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
+#' lobsters <- gt_impute_simple(lobsters, method = "mode")
+#'
+#' # Create PCA object
+#' pca <- gt_pca_partialSVD(lobsters)
+#'
+#' # Create a gt_pcadapt object
+#' pcadapt_obj <- gt_pcadapt(lobsters, pca, k = 2)
+#'
+#' # Plot the p-values from pcadapt
+#' autoplot(pcadapt_obj, type = "qq")
+#'
+#' # Plot the manhattan plot of the p-values from pcadapt
+#' autoplot(pcadapt_obj, type = "manhattan")
+#'
 autoplot.gt_pcadapt <- function(object, type = c("qq", "manhattan"), ...) {
   type <- match.arg(type)
   if (type == "qq") {

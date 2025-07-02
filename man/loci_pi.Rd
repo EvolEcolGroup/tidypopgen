@@ -60,3 +60,32 @@ a vector of frequencies, one per locus
 Estimate nucleotide diversity (pi) at each locus, accounting for missing
 values. This uses the formula: c_0 * c_1 / (n * (n-1) / 2)
 }
+\examples{
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
+example_gt <- load_example_gt("grouped_gen_tbl")
+
+# For pi
+example_gt \%>\% loci_pi()
+
+# For pi per locus per population
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_pi()
+# alternatively, return a list of populations with their pi
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_pi(type = "list")
+# or a matrix with populations in columns and loci in rows
+example_gt \%>\%
+  group_by(population) \%>\%
+  loci_pi(type = "matrix")
+# or within reframe (not recommended, as it much less efficient
+# than using it directly as shown above)
+example_gt \%>\%
+  group_by(population) \%>\%
+  reframe(pi = loci_pi(genotypes))
+}

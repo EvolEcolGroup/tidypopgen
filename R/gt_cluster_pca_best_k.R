@@ -64,7 +64,41 @@
 #'   screen (defaults to FALSE)
 #' @returns a 'gt_cluster_pca' object with an added element 'best_k'
 #' @export
-
+#' @examples
+#' # Create a gen_tibble of lobster genotypes
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Remove monomorphic loci and impute
+#' lobsters <- lobsters %>% select_loci_if(loci_maf(genotypes) > 0)
+#' lobsters <- gt_impute_simple(lobsters, method = "mode")
+#'
+#' # Create PCA object
+#' pca <- gt_pca_partialSVD(lobsters)
+#'
+#' # Run clustering on the first 10 PCs
+#' cluster_pca <- gt_cluster_pca(
+#'   x = pca,
+#'   n_pca = 10,
+#'   k_clusters = c(1, 5),
+#'   method = "kmeans",
+#'   n_iter = 1e5,
+#'   n_start = 10,
+#'   quiet = FALSE
+#' )
+#'
+#' # Find best K through minimum BIC
+#' cluster_pca <- gt_cluster_pca_best_k(cluster_pca,
+#'   stat = "BIC",
+#'   criterion = "min",
+#'   quiet = FALSE
+#' )
+#' # Best K is stored in the object
+#' cluster_pca$best_k
 gt_cluster_pca_best_k <- function(
     x,
     stat = c("BIC", "AIC", "WSS"),

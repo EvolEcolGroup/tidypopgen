@@ -29,7 +29,7 @@ full dataset. To reload a \code{gen_tibble}, you can pass the name of the \emph{
 file with \code{\link[=gt_load]{gt_load()}}.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # remove some individuals
 example_gt <- example_gt \%>\% filter(id != "a")

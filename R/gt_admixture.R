@@ -31,13 +31,26 @@
 #' - `id` the id column of the input `gen_tibble` (if applicable)
 #' - `group` the group column of the input `gen_tibble` (if applicable)
 #' @export
-
-# If the package `fastmixturer` is installed, and its conda environment has been
+#' @examples
+#' # run the example only if we have the package installed
+#' \dontrun{
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' lobsters <- gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#' lobsters <- lobsters %>% group_by(population)
+#' gt_admixture(lobsters,
+#'   k = 2:3, seed = c(1, 2),
+#'   n_runs = 2, crossval = TRUE
+#' )
+#' }
+# If the package `tidygenclust` is installed, and its conda environment has been
 # set up with `ADMIXTURE` in it (the default), it will automatically use that
 # version unless you change `conda_env` to "none". If set to "auto", the
-# default, a copy from `fastmixturer` will be preferred if available, otherwise
+# default, a copy from `tidygenclust` will be preferred if available, otherwise
 # a local copy will be used.
-
 gt_admixture <- function(
     x,
     k,
@@ -45,10 +58,10 @@ gt_admixture <- function(
     crossval = FALSE,
     n_cores = 1,
     seed = NULL,
-    conda_env = "none") {
+    conda_env = "auto") {
   # check that we have the right number of repeats
   if (length(seed) != n_runs) {
-    stop("'seeds' should be a vector of length 'n_runs'")
+    stop("'seed' should be a vector of length 'n_runs'")
   }
 
   # if x is a character, check that it is file that exists
@@ -89,13 +102,25 @@ gt_admixture <- function(
     }
   } else {
     # if reticulate is available
-    # if we have "auto" and the conda environment rfastmixture does not exist
+    # if we have "auto"
     if (conda_env == "auto") {
-      if (("rfastmixture" %in% reticulate::conda_list()[["name"]])) {
-        conda_env <- "rfastmixture"
-      } else {
+      conda_envs <- reticulate::conda_list()[["name"]]
+      # if we are on Linux and have ctidygenclust installed
+      if (
+        (Sys.info()["sysname"] == "Linux") &&
+          ("ctidygenclust" %in% conda_envs)
+      ) {
+        conda_env <- "ctidygenclust"
+      } else if (
+        (Sys.info()["sysname"] == "Darwin") &&
+          ("cadmixture86" %in% conda_envs)
+      ) {
+        # else on osx use cadmixture86
+        conda_env <- "cadmixture86"
+      } else { # if we have no conda environment
         conda_env <- "none"
       }
+
       # check that the conda environment does exist
       if (
         (conda_env != "none") &&
@@ -156,17 +181,23 @@ gt_admixture <- function(
         adm_out <- system2("admixture", args = admixture_args, stdout = TRUE)
         # change back to the original working directory
       } else {
-        reticulate::conda_run2(
+        adm_out <- reticulate::conda_run2(
           "admixture",
           args = admixture_args,
-          conda = conda_env
+          envname = conda_env,
+          intern = TRUE
         )
       }
 
+      # build expected .Q filename
+      q_file <- file.path(out, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".Q"
+      ))
       # check if no .Q files were written and if adm_out contains "Error:"
       # stop and print adm_out if both are true
       if (
-        length(grep(".Q", list.files(out))) == 0 &&
+        !file.exists(q_file) &&
           length(grep("Error:", adm_out)) > 0
       ) {
         # nolint

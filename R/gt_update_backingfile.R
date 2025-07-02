@@ -21,7 +21,7 @@
 #' @returns a [`gen_tibble`] with a backing file (i.e. a new File Backed Matrix)
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' example_gt %>% gt_update_backingfile()
 #'

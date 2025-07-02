@@ -18,7 +18,7 @@
 #' @seealso [gt_load()]
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # remove some individuals
 #' example_gt <- example_gt %>% filter(id != "a")
@@ -112,7 +112,7 @@ sub_gt <- function(path, replacement = "", stop_if_not_ext = TRUE) {
 #' @returns a character vector with the names and paths of the two files
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # To retrieve the names of and paths to the .bk and .rds files use:
 #' gt_get_file_names(example_gt)

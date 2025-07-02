@@ -29,7 +29,7 @@ Note that the \code{select_loci} verb does not modify the backing FBM files,
 but rather it subsets the list of loci to be used stored in the \code{gen_tibble}.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Select loci by name
 example_gt_subset <- example_gt \%>\% select_loci(c("rs1", "rs2", "rs3"))

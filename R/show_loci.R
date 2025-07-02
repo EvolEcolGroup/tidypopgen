@@ -10,7 +10,7 @@
 #' @rdname show_loci
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' example_gt %>% show_loci()
 show_loci <- function(.x, ...) {

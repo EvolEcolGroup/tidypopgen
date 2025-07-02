@@ -31,3 +31,16 @@ This function computes the KING-robust estimator of kinship.
 Note that monomorphic sites are currently considered. Remove monomorphic
 sites before running pairwise_king if this is a concern.
 }
+\examples{
+example_gt <- load_example_gt("gen_tbl")
+
+# Compute the KING-robust matrix
+pairwise_king(example_gt, as_matrix = TRUE)
+
+# Or return a tidy tibble
+pairwise_king(example_gt, as_matrix = FALSE)
+
+# Adjust block_size
+pairwise_king(example_gt, block_size = 2)
+
+}

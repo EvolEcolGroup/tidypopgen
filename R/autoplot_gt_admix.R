@@ -24,17 +24,25 @@
 #' @name autoplot_gt_admix
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
-#'
-#' # Create a gt_admix object
-#' admix_obj <- example_gt %>% gt_snmf(k = 1:3,
-#'                                     project = "force", entropy = TRUE)
-#'
-#' # Plot the cross-validation error
+#' # Read example gt_admix object
+#' admix_obj <-
+#'   readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+#'     package = "tidypopgen"
+#'   ))
+#' # Cross-validation plot
 #' autoplot(admix_obj, type = "cv")
 #'
-#' # Barplot of individuals admixture proportions
-#' autoplot(admix_obj, type = "barplot", k = 3, run = 1)
+#' # Basic barplot
+#' autoplot(admix_obj, k = 3, run = 1, type = "barplot")
+#'
+#' # Barplot with individuals arranged by Q proportion
+#' # (using additional arguments, see `autoplot.q_matrix` for details)
+#' autoplot(admix_obj,
+#'   k = 3, run = 1, type = "barplot", annotate_group = TRUE,
+#'   arrange_by_group = TRUE, arrange_by_indiv = TRUE,
+#'   reorder_within_groups = TRUE
+#' )
+#'
 autoplot.gt_admix <- function(
     object,
     type = c("cv", "barplot"),

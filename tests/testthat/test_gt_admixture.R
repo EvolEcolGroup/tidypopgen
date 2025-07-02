@@ -1,7 +1,7 @@
 # skip if admixture is not installed
 skip_if(
   (system2("which", args = "admixture", stdout = NULL) != 0) &&
-    !requireNamespace("fastmixturer", quietly = TRUE)
+    !requireNamespace("tidygenclust", quietly = TRUE)
 ) # nolint
 # set the input file
 vcf_path <-
@@ -120,9 +120,9 @@ test_that("run admixture as single run", {
   )
   anole_adm_comb <- c(anole_adm, anole_adm2)
   expect_true(nrow(anole_adm_comb$Q[[1]]) == nrow(anole_gt))
-  expect_true(ncol(anole_adm_comb$Q[[1]]) == 3)
-  expect_true(ncol(anole_adm_comb$Q[[2]]) == 2)
-  expect_true(all(anole_adm_comb$k == c(3, 2)))
+  expect_true(ncol(anole_adm_comb$Q[[1]]) == 2)
+  expect_true(ncol(anole_adm_comb$Q[[2]]) == 3)
+  expect_true(all(anole_adm_comb$k == c(2, 3)))
   # run admixture with crossval
   anole_adm3 <- gt_admixture(
     anole_gt,
@@ -176,7 +176,7 @@ test_that("run admixture as multiple runs", {
       seed = c(123),
       conda_env = "none"
     ),
-    "'seeds' should be a vector of "
+    "'seed' should be a vector of "
   )
   # plot the crossval
   cross_plot <- autoplot(anole_adm_cv)

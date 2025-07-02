@@ -31,7 +31,7 @@ extract information on the alleles for those loci from a \code{\link{gen_tibble}
 Extract the genotypes (as a matrix) from a  \code{gen_tibble}.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 example_gt \%>\% show_genotypes()
 }

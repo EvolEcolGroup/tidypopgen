@@ -44,3 +44,21 @@ This function computes the IBS matrix.
 Note that monomorphic sites are currently counted. Should we filter them
 beforehand? What does plink do?
 }
+\examples{
+example_gt <- load_example_gt("gen_tbl")
+
+X <- attr(example_gt$genotypes, "bigsnp")
+snp_ibs(X$genotypes)
+
+# Compute for individuals 1 to 5
+snp_ibs(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+
+# Adjust block.size
+snp_ibs(X$genotypes, block.size = 2)
+
+# Change type
+snp_ibs(X$genotypes, type = "proportion")
+snp_ibs(X$genotypes, type = "adjusted_counts")
+snp_ibs(X$genotypes, type = "raw_counts")
+
+}

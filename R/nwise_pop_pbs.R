@@ -27,7 +27,7 @@
 #' - `value`: the pbs value for the populations
 #' @export
 #' @examples
-#' example_gt <- example_gt()
+#' example_gt <- load_example_gt()
 #'
 #' # We can compute the PBS for all populations using "Hudson" method
 #' example_gt %>%

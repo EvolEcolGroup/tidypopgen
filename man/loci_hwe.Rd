@@ -55,7 +55,12 @@ Return the p-value from an exact test of HWE.
 This function uses the original C++ algorithm from PLINK 1.90.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
+example_gt <- load_example_gt("gen_tbl")
 
 # For HWE
 example_gt \%>\% loci_hwe()

@@ -10,6 +10,11 @@
 #' - a `gt_admix` object containing a list of Q matrices and a list of
 #' indices for each Q matrix separated by K
 #' @export
+#' @examples
+#' q_files_path <- system.file("extdata", "anolis", package = "tidypopgen")
+#'
+#' admix_obj <- read_q_files(q_files_path)
+#' summary(admix_obj)
 read_q_files <- function(x) {
   if (!dir.exists(x)) {
     stop("Input is not a valid directory")
@@ -50,6 +55,17 @@ read_q_files <- function(x) {
 #' @param x A matrix or a data frame
 #' @return A `q_matrix` object
 #' @export
+#' @examples
+#' # Read in a single .Q file
+#' q_mat <- read.table(system.file("extdata", "anolis", "anolis_ld_run1.3.Q",
+#'   package = "tidypopgen"
+#' ))
+#' class(q_mat)
+#'
+#' # Convert to a Q matrix object
+#' q_mat <- q_matrix(q_mat)
+#' class(q_mat)
+#'
 q_matrix <- function(x) {
   if (inherits(x, "data.frame")) {
     x <- as.matrix(x)
@@ -72,10 +88,11 @@ q_matrix <- function(x) {
 #' @return A single Q matrix from the `gt_admix` object
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
-#'
-#' # Create a gt_admix object
-#' admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
+#' # Read example gt_admix obejct
+#' admix_obj <-
+#'   readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+#'     package = "tidypopgen"
+#'   ))
 #'
 #' # Extract a Q matrix
 #' get_q_matrix(admix_obj, k = 3, run = 1)
@@ -130,6 +147,15 @@ get_q_matrix <- function(x, ..., k, run) {
 #' @param run The run number of the desired P matrix
 #' @return A single P matrix from the `gt_admix` object
 #' @export
+#' @examples
+#' # Read example gt_admix object
+#' admix_obj <-
+#'   readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+#'     package = "tidypopgen"
+#'   ))
+#'
+#' # Extract a P matrix
+#' get_p_matrix(admix_obj, k = 3, run = 1)
 get_p_matrix <- function(x, ..., k, run) {
   # Check if 'x' is a valid gt_admix object
   if (!inherits(x, "gt_admix")) {
@@ -183,15 +209,18 @@ get_p_matrix <- function(x, ..., k, run) {
 #'
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' # run the example only if we have the package installed
+#' if (requireNamespace("LEA", quietly = TRUE)) {
+#'   example_gt <- load_example_gt("gen_tbl")
 #'
-#' # Create a gt_admix object
-#' admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
+#'   # Create a gt_admix object
+#'   admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
 #'
-#' # Extract a Q matrix
-#' q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+#'   # Extract a Q matrix
+#'   q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
 #'
-#' tidy(q_mat_k3, data = example_gt)
+#'   tidy(q_mat_k3, data = example_gt)
+#' }
 tidy.q_matrix <- function(x, data, ...) {
   rlang::check_dots_empty()
 
@@ -262,16 +291,19 @@ tidy.q_matrix <- function(x, data, ...) {
 #' @export
 #' @name augment_q_matrix
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' # run the example only if we have the package installed
+#' if (requireNamespace("LEA", quietly = TRUE)) {
+#'   example_gt <- load_example_gt("gen_tbl")
 #'
-#' # Create a gt_admix object
-#' admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
+#'   # Create a gt_admix object
+#'   admix_obj <- example_gt %>% gt_snmf(k = 1:3, project = "force")
 #'
-#' # Extract a Q matrix
-#' q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+#'   # Extract a Q matrix
+#'   q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
 #'
-#' # Augment the gen_tibble with Q values
-#' augment(q_mat_k3, data = example_gt)
+#'   # Augment the gen_tibble with Q values
+#'   augment(q_mat_k3, data = example_gt)
+#' }
 augment.q_matrix <- function(x, data = NULL, ...) {
   if (inherits(data, "grouped_df")) {
     if (!".rownames" %in% names(data)) {
@@ -368,6 +400,25 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #' @returns a barplot of individuals, coloured by ancestry proportion
 #' @name autoplot_q_matrix
 #' @export
+#' @examples
+#' # Read example gt_admix obejct
+#' admix_obj <-
+#'   readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+#'     package = "tidypopgen"
+#'   ))
+#'
+#' # Extract a Q matrix
+#' q_mat_k3 <- get_q_matrix(admix_obj, k = 3, run = 1)
+#'
+#' # Basic autoplot
+#' autoplot(q_mat_k3, annotate_group = FALSE, arrange_by_group = FALSE)
+#'
+#' # To arrange individuals by group and by Q proportion
+#' autoplot(q_mat_k3,
+#'   annotate_group = TRUE, arrange_by_group = TRUE,
+#'   arrange_by_indiv = TRUE, reorder_within_groups = TRUE
+#' )
+#'
 autoplot.q_matrix <- function(
     object,
     data = NULL,

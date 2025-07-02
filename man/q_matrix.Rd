@@ -16,3 +16,15 @@ A \code{q_matrix} object
 Takes a single Q matrix that exists as either a matrix or a data frame and
 returns a \code{q_matrix} object.
 }
+\examples{
+# Read in a single .Q file
+q_mat <- read.table(system.file("extdata", "anolis", "anolis_ld_run1.3.Q",
+  package = "tidypopgen"
+))
+class(q_mat)
+
+# Convert to a Q matrix object
+q_mat <- q_matrix(q_mat)
+class(q_mat)
+
+}

@@ -21,7 +21,7 @@
 #' @returns the path of the saved file
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Write a bed file
 #' example_gt %>% gt_as_plink(type = "bed", file = paste0(tempfile(), "_plink"))

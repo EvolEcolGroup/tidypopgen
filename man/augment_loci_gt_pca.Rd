@@ -27,6 +27,26 @@ stored in a separate column, which is given name with the pattern
 ".loadingPC1", ".loadingPC2", etc. If \code{data} is missing, then a tibble with
 the loadings is returned.
 }
+\examples{
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+lobsters <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
+
+# Remove monomorphic loci and impute
+lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
+lobsters <- gt_impute_simple(lobsters, method = "mode")
+
+# Create PCA
+pca <- gt_pca_partialSVD(lobsters)
+
+# Augment the gen_tibble with the PCA scores
+augment_loci(pca, data = lobsters)
+
+}
 \seealso{
 \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}} \link{gt_pca_tidiers}
 }

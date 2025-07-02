@@ -11,7 +11,7 @@
 #' autosome using a tool such as `vcftools`. Currently, only biallelic SNPs are
 #' supported. If haploid variants (e.g. sex chromosomes) are included in the
 #' *VCF*, they are not transformed into homozygous calls. Instead, reference
-#' alleles will be counted as 0 and alternative alleles will be counted as 1.
+#' alleles will be coded as 0 and alternative alleles will be coded as 1.
 #'
 #' - *packedancestry* files: When loading *packedancestry* files,
 #' missing alleles will be converted from 'X' to NA
@@ -22,9 +22,8 @@
 #'   same directory and have the same file name.
 #' - a string giving the path to a RDS file storing a `bigSNP` object from
 #'   the `bigsnpr` package (usually created with [bigsnpr::snp_readBed()])
-#' - a string giving the path to a vcf file. Note that we currently read the
-#'   whole vcf in memory with `vcfR`, so only smallish *VCF* can be imported.
-#'   Only biallelic SNPs will be considered.
+#' - a string giving the path to a vcf file. Only biallelic SNPs will be
+#'   considered.
 #' - a string giving the path to a *packedancestry* .geno file. The associated
 #'   .ind and .snp files are expected to be in the same directory and share the
 #'   same file name prefix.
@@ -58,15 +57,35 @@
 #'   backing files used to store the data (they will be given a .bk and .RDS
 #'   automatically). This is not needed if `x` is already an .RDS file. If `x`
 #'   is a .BED or a *VCF* file and `backingfile` is left NULL, the backing file
-#'   will be saved in the same directory as the bed file, using the same file
-#'   name but with a different file type (.bk rather than .bed). If `x` is a
-#'   genotype matrix and `backingfile` is NULL, then a temporary file will be
-#'   created (but note that R will delete it at the end of the session!)
+#'   will be saved in the same directory as the bed or vcf file, using the same
+#'   file name but with a different file type (.bk rather than .bed or .vcf). If
+#'   `x` is a genotype matrix and `backingfile` is NULL, then a temporary file
+#'   will be created (but note that R will delete it at the end of the session!)
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
 #' @export
 #' @examples
+#' \dontshow{
+#' data.table::setDTthreads(2)
+#' RhpcBLASctl::blas_set_num_threads(2)
+#' RhpcBLASctl::omp_set_num_threads(2)
+#' }
+#' # Create a gen_tibble from a .bed file
+#' bed_file <-
+#'   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+#' gen_tibble(bed_file,
+#'   backingfile = tempfile("lobsters"),
+#'   quiet = TRUE
+#' )
+#'
+#' # Create a gen_tibble from a .vcf file
+#' vcf_path <-
+#'   system.file("extdata", "anolis",
+#'     "punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+#'     package = "tidypopgen"
+#'   )
+#' gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
 #'
 #' # Create a gen_tibble from a matrix of genotypes:
 #' test_indiv_meta <- data.frame(
@@ -87,7 +106,7 @@
 #'   allele_alt = c("T", "C", NA, "C", "G", "A")
 #' )
 #'
-#' test_gt <- gen_tibble(
+#' gen_tibble(
 #'   x = test_genotypes,
 #'   loci = test_loci,
 #'   indiv_meta = test_indiv_meta,
@@ -95,7 +114,6 @@
 #'   quiet = TRUE
 #' )
 #'
-#' test_gt
 gen_tibble <-
   function(x,
            ...,

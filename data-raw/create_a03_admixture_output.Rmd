@@ -37,3 +37,16 @@ anole_adm <- gt_admixture(
 
 saveRDS(anole_adm, "../vignettes/a03_anole_adm.rds")
 ```
+
+```{r}
+anole_gt <- anole_gt %>% select_loci(1:1500)
+
+anole_adm <- gt_admixture(
+  x = anole_gt,
+  k = 3:4,
+  n_runs = 1,
+  crossval = TRUE,
+  seed = 1
+)
+saveRDS(anole_adm, "../inst/extdata/anolis/anole_adm_k3.rds")
+```

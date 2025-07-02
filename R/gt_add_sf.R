@@ -18,7 +18,7 @@
 #'   belonging also to `sf` class).
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Add some coordinates
 #' example_gt <- example_gt %>% mutate(

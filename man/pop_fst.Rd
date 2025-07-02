@@ -26,7 +26,7 @@ This function computes population specific Fst, using the approach in Weir
 and Goudet 2017 (as computed by \code{\link[hierfstat:fs.dosage]{hierfstat::fst.dosage()}}).
 }
 \examples{
-example_gt <- example_gt("grouped_gen_tbl")
+example_gt <- load_example_gt("grouped_gen_tbl")
 
 # Compute FIS using Nei87
 example_gt \%>\% pop_fst()

@@ -17,7 +17,18 @@
 #'   the columns.
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
-
+#' @examples
+#' example_gt <- load_example_gt("gen_tbl")
+#'
+#' X <- attr(example_gt$genotypes, "bigsnp")
+#' snp_allele_sharing(X$genotypes)
+#'
+#' # Compute for individuals 1 to 5
+#' snp_allele_sharing(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+#'
+#' # Adjust block size
+#' snp_allele_sharing(X$genotypes, block.size = 2)
+#'
 snp_allele_sharing <- function(
     X, # nolint start
     ind.row = bigstatsr::rows_along(X),

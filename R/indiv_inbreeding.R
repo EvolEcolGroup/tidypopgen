@@ -15,7 +15,7 @@
 #' @return a numeric vector of inbreeding coefficients.
 #' @export
 #' @examples
-#' example_gt <- example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #' example_gt %>% indiv_inbreeding(method = "WG17")
 #'

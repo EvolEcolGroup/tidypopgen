@@ -31,6 +31,6 @@ Extract the loci chromosomes from a \code{gen_tibble} (or directly from its
 \code{genotype} column).
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 example_gt \%>\% loci_chromosomes()
 }

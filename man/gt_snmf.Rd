@@ -70,11 +70,14 @@ Run SNMF from R in tidypopgen
 This is a wrapper for the function snmf from R package LEA.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+# run the example only if we have the package installed
+if (requireNamespace("LEA", quietly = TRUE)) {
+  example_gt <- load_example_gt("gen_tbl")
 
-# To run SNMF on a gen_tibble:
-example_gt \%>\% gt_snmf(
-  k = 1:3, project = "force", entropy = TRUE,
-  percentage = 0.5, n_runs = 1, seed = 1, alpha = 100
-)
+  # To run SNMF on a gen_tibble:
+  example_gt \%>\% gt_snmf(
+    k = 1:3, project = "force", entropy = TRUE,
+    percentage = 0.5, n_runs = 1, seed = 1, alpha = 100
+  )
+}
 }

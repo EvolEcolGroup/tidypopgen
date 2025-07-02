@@ -134,9 +134,9 @@ reference:
         - snp_ibs
         - snp_king
   - title: "Example data"
-    desc: "Function for creating an example `gen_tibble`."
+    desc: "Function for loading an example `gen_tibble`."
     contents:
-        - example_gt
+        - load_example_gt
   - title: "tidyverse methods"
     desc: "Methods for tidyverse verbs for `gen_tibble` objects"
     contents:

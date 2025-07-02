@@ -19,13 +19,16 @@ a \code{gen_tibble} object with the ploidy set to -2 and the individual
 ploidy values updated to 1 or 2.
 }
 \description{
-The ploidy of a \code{gen_tibble} is set to -2, to indicate that some individuals
-are coded as pseudohaploids. The ploidy of the individuals is updated, with
-pseudohaploids set to 1 and diploids set to 2. However, the dosages are not
-changed, meaning that pseudohaploids are still coded as 0 or 2.
+If a \code{gen_tibble} includes pseudohaploid data, its ploidy is set to -2 to
+indicate that some individuals are coded as pseudohaploids. The ploidy of the
+individuals is updated, with pseudohaploids set to 1 and diploids set to 2.
+However, the dosages are not changed, meaning that pseudohaploids are still
+coded as 0 or 2. If the \code{gen_tibble} is already set to pseudohaploid, running
+gt_pseudohaploid will update the ploidy values again, if pseudohaploid
+individuals have been removed then ploidy is reset to 2.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # Detect pseudohaploids and set ploidy for the whole gen_tibble
 example_gt <- example_gt \%>\% gt_pseudohaploid(test_n_loci = 3)

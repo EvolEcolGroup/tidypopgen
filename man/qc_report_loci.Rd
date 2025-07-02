@@ -25,7 +25,19 @@ a tibble with 3 elements: maf, missingness and hwe_p
 Return QC information to assess loci (MAF, missingness and HWE test).
 }
 \examples{
-example_gt <- example_gt("grouped_gen_tbl")
+# Create a gen_tibble of lobster genotypes
+bed_file <-
+  system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+example_gt <- gen_tibble(bed_file,
+  backingfile = tempfile("lobsters"),
+  quiet = TRUE
+)
 
+# Get a QC report for the loci
 example_gt \%>\% qc_report_loci()
+
+# Group by population to calculate HWE within populations
+example_gt <- example_gt \%>\% group_by(population)
+example_gt \%>\% qc_report_loci()
+
 }

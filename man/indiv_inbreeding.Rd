@@ -37,7 +37,7 @@ This function calculates the inbreeding coefficient for each individual based
 on the beta estimate from Weir and Goudet (2017).
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 example_gt \%>\% indiv_inbreeding(method = "WG17")
 

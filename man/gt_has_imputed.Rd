@@ -18,7 +18,7 @@ This function checks if a dataset has been imputed. Note that having
 imputation does not mean that the imputed values are used.
 }
 \examples{
-example_gt <- example_gt("gen_tbl")
+example_gt <- load_example_gt("gen_tbl")
 
 # The initial gen_tibble contains no imputed values
 example_gt \%>\% gt_has_imputed()
