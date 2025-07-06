@@ -123,7 +123,7 @@ gt_get_file_names <- function(x) {
   } else if (!inherits(x, "vctrs_bigSNP")) {
     stop("x should be a vctrs_bigSNP object")
   }
-  
+
   return(c(
     # nolint
     attr(x, "bigsnp")$genotypes$rds,

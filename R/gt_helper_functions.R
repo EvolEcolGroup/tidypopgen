@@ -9,10 +9,9 @@
 
 .gt_get_bigsnp <- function(.x) {
   # if this is a gen_tibble
-  if (inherits(.x, "gen_tbl")){
+  if (inherits(.x, "gen_tbl")) {
     attr(.x$genotypes, "bigsnp")
   } else {
     attr(.x, "bigsnp")
   }
-  
 }
