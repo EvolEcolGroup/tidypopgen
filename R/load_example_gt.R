@@ -15,11 +15,11 @@
 #' # This function creates an example gen_tibble object
 #' example_gt <- load_example_gt("gen_tbl")
 load_example_gt <- function(type = c(
-                         "gen_tbl", # nolint
-                         "grouped_gen_tbl",
-                         "grouped_gen_tbl_sf",
-                         "gen_tbl_sf"
-                       )) {
+                              "gen_tbl", # nolint
+                              "grouped_gen_tbl",
+                              "grouped_gen_tbl_sf",
+                              "gen_tbl_sf"
+                            )) {
   type <- match.arg(type)
   test_genotypes <- rbind(
     c(1, 1, 0, 1, 1, 0),

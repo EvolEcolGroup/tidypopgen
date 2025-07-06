@@ -22,8 +22,11 @@ from r-universe, use:
 
 ```{r eval = FALSE}
 install.packages("tidypopgen",
-                 repos = c("https://evolecolgroup.r-universe.dev",
-                           "https://cloud.r-project.org"))
+  repos = c(
+    "https://evolecolgroup.r-universe.dev",
+    "https://cloud.r-project.org"
+  )
+)
 ```
 
 Next, load the `tidypopgen` package and the `ggplot2` package for plotting.
