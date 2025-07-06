@@ -20,8 +20,8 @@
 #' # Combine the gen_tibble with the dataframe
 #' example_gt <- cbind(example_gt, df)
 cbind.gen_tbl <- function(..., deparse.level = 1) { # nolint
-  # send it to the next (data.frame) method
-  out <- NextMethod(generic = "cbind", ..., deparse.level = deparse.level)
+  # send it to the data.frame method
+  out <- cbind.data.frame(..., deparse.level = deparse.level)
   # sort out the lost class information
   class(out) <- c("gen_tbl", "tbl_df", "tbl", "data.frame")
   return(out)
