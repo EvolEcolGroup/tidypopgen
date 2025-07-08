@@ -20,6 +20,4 @@ A filter method for \code{gen_tibble} objects
 \examples{
 test_gt <- load_example_gt("gen_tbl")
 test_gt \%>\% filter(id \%in\% c("a", "c"))
-test_gt <- load_example_gt("grouped_gen_tbl_sf")
-test_gt \%>\% filter(id \%in\% c("a", "c"))
 }
