@@ -43,6 +43,12 @@ load_example_gt <- function(type = c(
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
 
+  # Add spatial coordinates if needed
+  if (type %in% c("grouped_gen_tbl_sf", "gen_tbl_sf")) {
+    test_indiv_meta$longitude <- c(0, 0, 2, 2, 0, 2, 2)
+    test_indiv_meta$latitude <- c(51, 51, 49, 49, 51, 41, 41)
+  }
+
   # Create the base gen_tibble
   test_gt <- gen_tibble(
     x = test_genotypes,
@@ -53,8 +59,6 @@ load_example_gt <- function(type = c(
 
   # Add spatial features if needed
   if (type %in% c("grouped_gen_tbl_sf", "gen_tbl_sf")) {
-    test_indiv_meta$longitude <- c(0, 0, 2, 2, 0, 2, 2)
-    test_indiv_meta$latitude <- c(51, 51, 49, 49, 51, 41, 41)
     test_gt <- gt_add_sf(
       x = test_gt,
       coords = c("longitude", "latitude")
