@@ -308,3 +308,20 @@ test_that("cbind gen_tibble and extra data with sf", {
   )
   expect_true(inherits(sf_gt_merged, "sf"))
 })
+
+test_that("gt_add_sf works with groupby",{
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt <- test_gt %>%
+    dplyr::group_by(population)
+  test_gt_from_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+
+
+})

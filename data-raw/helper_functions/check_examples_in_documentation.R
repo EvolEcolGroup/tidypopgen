@@ -3,7 +3,6 @@
 # note that map pages for datasets don't need returns.
 
 check_examples_in_documentation <- function() {
-  browser()
   # get a list of all files in the man directory
   all_files <- dir("./man")
 

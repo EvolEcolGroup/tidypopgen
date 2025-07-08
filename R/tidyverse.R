@@ -1,3 +1,6 @@
+# Note that we need to make sure that we deal with sf objects correctly, so
+# that the sf methods don't override the gen_tbl
+
 #' Tidyverse methods for gt objects
 #'
 #' A filter method for `gen_tibble` objects
@@ -14,6 +17,7 @@
 filter.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod()
+
   # prioritise "gen_tbl" class over "sf"
   obj_class <- class(out)
   if ("sf" %in% obj_class) {

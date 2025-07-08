@@ -28,17 +28,17 @@ ungroup.grouped_gen_tbl <- function(x, ...) {
 }
 
 
-#' @export
-#' @noRd
-dplyr_reconstruct.gen_tbl <- function(data, template) {
-  out <- NextMethod()
-  # if the genotypes are gone, drop the tbl_df class
-  if (!"genotypes" %in% names(data)) {
-    message("as genotypes were dropped, this is not longer a 'gen_tbl'")
-    class(out) <- class(out)[-1]
-  }
-  out
-}
+#' #' @export
+#' #' @noRd
+#' dplyr_reconstruct.gen_tbl <- function(data, template) {
+#'   out <- NextMethod()
+#'   # if the genotypes are gone, drop the tbl_df class
+#'   if (!"genotypes" %in% names(data)) {
+#'     message("as genotypes were dropped, this is not longer a 'gen_tbl'")
+#'     class(out) <- class(out)[-1]
+#'   }
+#'   out
+#' }
 
 #' @export
 #' @noRd
