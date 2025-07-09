@@ -93,6 +93,11 @@ test_that("sf and grouped methods work", {
   mutated_sf <- gen_tbl_sf %>% mutate(region = "East")
   expect_equal(class(gen_tbl_sf), class(mutated_sf))
 
+  # Cbind
+  df <- data.frame(region = c("A", "A", "B", "B", "A", "B", "B"))
+  gen_tbl_sf_cbind <- cbind(gen_tbl_sf, df)
+  expect_equal(class(gen_tbl_sf), class(gen_tbl_sf_cbind))
+
   # Cash "$<-"
   class_before <- class(grouped_gen_tbl)
   grouped_gen_tbl$region <- "East"

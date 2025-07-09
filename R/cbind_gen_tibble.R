@@ -20,9 +20,19 @@
 #' # Combine the gen_tibble with the dataframe
 #' example_gt <- cbind(example_gt, df)
 cbind.gen_tbl <- function(..., deparse.level = 1) { # nolint
+  args <- list(...)
+  which_gen_tbl <- which(sapply(args, inherits, "gen_tbl"))
+  class_orig <- class(args[[which_gen_tbl]])
+
   # send it to the data.frame method
   out <- cbind.data.frame(..., deparse.level = deparse.level)
   # sort out the lost class information
-  class(out) <- c("gen_tbl", "tbl_df", "tbl", "data.frame")
+  class(out) <- class_orig
+  # prioritise "gen_tbl" class over "sf"
+  if ("sf" %in% class_orig) {
+    class_orig <-
+      c("gen_tbl", "sf", class_orig[!class_orig %in% c("gen_tbl", "sf")])
+    class(out) <- class_orig
+  }
   return(out)
 }
