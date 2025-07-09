@@ -111,6 +111,12 @@ arrange.grouped_gen_tbl <- function(..., deparse.level = 1) { # nolint
 mutate.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod()
+  # if the genotypes are gone, drop the tbl_df class
+  if (!"genotypes" %in% names(out)) {
+    message("as genotypes were dropped, this is not longer a 'gen_tbl'")
+    class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
+    return(out)
+  }
   # prioritise "gen_tbl" class over "sf"
   obj_class <- class(out)
   if ("sf" %in% obj_class) {
@@ -135,6 +141,12 @@ mutate.gen_tbl <- function(..., deparse.level = 1) { # nolint
 mutate.grouped_gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod()
+  # if the genotypes are gone, drop the tbl_df class
+  if (!"genotypes" %in% names(out)) {
+    message("as genotypes were dropped, this is not longer a 'gen_tbl'")
+    class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
+    return(out)
+  }
   # prioritise "grouped_gen_tbl" class over "sf"
   obj_class <- class(out)
   if ("sf" %in% obj_class) {
@@ -151,13 +163,14 @@ mutate.grouped_gen_tbl <- function(..., deparse.level = 1) { # nolint
 #' @param template a data.frame or tibble
 #' @returns a `gen_tibble`
 #' @export
+#' @noRd
 dplyr_reconstruct.gen_tbl <- function(data, template) {
   # send it to the next (data.frame) method
   out <- NextMethod()
   # if the genotypes are gone, drop the tbl_df class
   if (!"genotypes" %in% names(data)) {
     message("as genotypes were dropped, this is not longer a 'gen_tbl'")
-    class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
+    class(out) <- c("tbl_df", "tbl", "data.frame")
     return(out)
   }
   # prioritise "gen_tbl" class over "sf"
@@ -176,6 +189,7 @@ dplyr_reconstruct.gen_tbl <- function(data, template) {
 #' @param template a data.frame or tibble
 #' @returns a grouped `gen_tibble`
 #' @export
+#' @noRd
 dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
   out <- NextMethod()
   # if the genotypes are gone, drop the tbl_df class
