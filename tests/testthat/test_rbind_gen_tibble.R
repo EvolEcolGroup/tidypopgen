@@ -274,3 +274,54 @@ test_that("rbind fails if gen_tibbles contain same ID", {
     backingfile = tempfile()
   ), "at least one individual with the same ID")
 })
+
+test_that("rbind warning when id is duplicated in bigsnp object", {
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c")
+  )
+  test_genotypes <- rbind(
+    c(2, 2, 2, 2, 2, 2),
+    c(2, 2, 2, 2, 2, 2),
+    c(2, 2, 2, 2, 2, 2)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = c(1, 1, 1, 1, 2, 2),
+    position = c(3, 5, 65, 343, 23, 456),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  test_gt1 <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+
+  # change genotypes
+  test_genotypes2 <- rbind(
+    c(0, 0, 0, 0, 0, 0),
+    c(0, 0, 0, 0, 0, 0),
+    c(0, 0, 0, 0, 0, 0)
+  )
+  # create a second test gt with identical id
+  test_gt2 <- gen_tibble(
+    x = test_genotypes2,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+
+  # add population to both tests_gt1 and test_gt2
+  test_gt1 <- test_gt1 %>% dplyr::mutate(population = "pop1")
+  test_gt2 <- test_gt2 %>% dplyr::mutate(population = "pop2")
+  # update id according to population
+  test_gt1$id <- paste(test_gt1$id, test_gt1$population, sep = "_")
+  test_gt2$id <- paste(test_gt2$id, test_gt2$population, sep = "_")
+  # merge
+  expect_error(
+    rbind(test_gt1, test_gt2),
+    "The two bigsnp objects contain at least one individual "
+  )
+})
