@@ -90,6 +90,21 @@ rbind.gen_tbl <- function(
   if (is_pseudohaploid(ref) || is_pseudohaploid(target)) {
     any_pseudohaploid <- TRUE
   }
+  if (any(!is.na(match(ref$id, target$id)))) {
+    stop(
+      "The two gen_tibbles contain at least one individual with the",
+      " same ID."
+    )
+  }
+  if (any(!is.na(match(
+    attr(ref$genotypes, "bigsnp")$fam$sample.ID,
+    attr(target$genotypes, "bigsnp")$fam$sample.ID
+  )))) {
+    stop(
+      "The two bigsnp objects contain at least one individual with the",
+      " same ID."
+    )
+  }
   if (!quiet) {
     if (as_is) {
       if (flip_strand) {
