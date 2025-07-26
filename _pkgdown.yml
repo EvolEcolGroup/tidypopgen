@@ -143,5 +143,4 @@ reference:
         - arrange.gen_tbl
         - filter.gen_tbl
         - mutate.gen_tbl
-        - dplyr_reconstruct.gen_tbl
         - "$<-.gen_tbl"
