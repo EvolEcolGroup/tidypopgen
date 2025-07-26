@@ -41,9 +41,10 @@ library(ggplot2)
 In `tidypopgen`, we represent data as a `gen_tibble`, a subclass of `tibble`
 containing the columns `id` and `genotypes` for each individual. Genotypes are
 stored in a compressed format as a File-Backed Matrix that can be easily
-accessed by functions in `tidypopgen`, therefore the `genotypes`
-column is simply a vector giving the row indices of each individual in the
-File-Backed Matrix. 
+accessed by functions in `tidypopgen`. The `genotypes` column contains a vector
+of the row indices of each individual in the File-Backed Matrix,
+and when printed, the `genotypes` column shows the first two genotypes for each
+individual.
 
 Additionally, if data are loaded from a .bed file with information in the `FID`
 column, this is treated as population information and is automatically

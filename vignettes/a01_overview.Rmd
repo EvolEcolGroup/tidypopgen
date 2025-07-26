@@ -28,8 +28,10 @@ be very inefficient to store them as individual standard columns.
 In `tidypopgen`, we represent data as a `gen_tbl`, a subclass of `tibble` which has
 two compulsory columns: `id` of the individual (as a `character`, which must 
 be unique for each individual), and `genotypes` (stored in a compressed format
-as a File-Backed Matrix, with the vector in the tibble providing the row indices of the matrix
-for each individual). The real data reside on disk, and an attribute `bigsnp` of
+as a File-Backed Matrix. The `genotypes` column stores a vector of the row indices of the matrix
+for each individual and, when printed, shows the first two genotypes for the individual). 
+
+The real data reside on disk, and an attribute `bigsnp` of
 the `genotype` column contains all the information to access it. There is also an
 additional attribute , `loci` which provides all the information about the loci,
 including the column indices that represent each locus in the FBM.
@@ -102,10 +104,11 @@ Now let's have a look at our `gen_tibble`:
 example_gt
 ```
 
-As discussed above, in this tibble, `genotypes` contains the indices of the
-individuals in the FBM as values, and the FBM as an attribute.
+As discussed above, when this tibble is called, the `genotypes` column prints
+the first two genotypes of the individual. The `genotypes` column itself
+contains the indices of the individuals in the FBM as values, and the FBM as an attribute.
 
-To retrieve the genotypes (which are compressed in the FBM), we use:
+To retrieve the rest of the genotypes (which are compressed in the FBM), we use:
 ```{r}
 example_gt %>% show_genotypes()
 ```
@@ -255,7 +258,7 @@ example_gt_sub %>% show_genotypes()
 
 Note that, as we need to tidy evaluate `loci_maf` within the `select_loci_if` verb,
 we need to provide it with the column that we want to use (even though it has
-to be `genotypes`). Also note that, with `select_loci_if`, we can not reorder
+to be `genotypes`). Also note that, with `select_loci_if`, we cannot reorder
 the loci.
 
 `select_loci_if` is very flexible; for example, we could filter loci with a MAF
@@ -501,9 +504,6 @@ Let's check the resulting `gen_tibble`:
 ```{r}
 merged_gt
 ```
-Note that the values in the genotype column (which corresponds to the id in the
-FBM file) have changed to reflect that we have a new, larger FBM with both
-datasets.
 
 We can look at the subsetted loci (note that we used the first population as reference to
 determine the strand and order of alleles):
@@ -511,7 +511,7 @@ determine the strand and order of alleles):
 merged_gt %>% show_loci()
 ```
 
-Again, note that the `big_index` values have changed compared to the original files,
+Note that the `big_index` values have changed compared to the original files,
 as we generated a new FBM with the merged data.
 
 By default, `rbind` using the loci names to match the two datasets. The option

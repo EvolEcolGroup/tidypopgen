@@ -308,3 +308,44 @@ test_that("cbind gen_tibble and extra data with sf", {
   )
   expect_true(inherits(sf_gt_merged, "sf"))
 })
+
+test_that("gt_add_sf works with group_by", {
+  # Check class if we group, then add sf
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt <- test_gt %>%
+    dplyr::group_by(population)
+  test_gt_group_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  expect_equal(
+    class(test_gt_group_sf),
+    c(
+      "grouped_gen_tbl", "grouped_df", "gen_tbl",
+      "sf", "tbl_df", "tbl", "data.frame"
+    )
+  )
+
+  # Check class if we add sf, then group
+  test_gt <- test_gt %>% ungroup()
+  test_gt_sf <- gt_add_sf(
+    x = test_gt,
+    coords = c("longitude", "latitude"),
+  )
+  test_gt_sf_group <- test_gt_sf %>% group_by(population)
+  expect_equal(
+    class(test_gt_sf_group),
+    c(
+      "grouped_gen_tbl", "grouped_df", "gen_tbl",
+      "sf", "tbl_df", "tbl", "data.frame"
+    )
+  )
+
+  # The two should end up as the same class
+  expect_equal(class(test_gt_group_sf), class(test_gt_sf_group))
+})
