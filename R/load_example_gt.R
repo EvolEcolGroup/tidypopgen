@@ -42,6 +42,7 @@ load_example_gt <- function(type = c(
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
+
   # Add spatial coordinates if needed
   if (type %in% c("grouped_gen_tbl_sf", "gen_tbl_sf")) {
     test_indiv_meta$longitude <- c(0, 0, 2, 2, 0, 2, 2)

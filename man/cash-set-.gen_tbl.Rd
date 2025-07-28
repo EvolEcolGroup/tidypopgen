@@ -4,10 +4,10 @@
 \alias{$<-.gen_tbl}
 \title{A $ method for \code{gen_tibble} objects}
 \usage{
-\method{$}{gen_tbl}(data, i) <- value
+\method{$}{gen_tbl}(x, i) <- value
 }
 \arguments{
-\item{data}{a gen_tibble}
+\item{x}{a gen_tibble}
 
 \item{i}{column name}
 
