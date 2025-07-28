@@ -113,7 +113,7 @@ mutate.gen_tbl <- function(..., deparse.level = 1) { # nolint
   out <- NextMethod()
   # if the genotypes are gone, drop the tbl_df class
   if (!"genotypes" %in% names(out)) {
-    message("as genotypes were dropped, this is not longer a 'gen_tbl'")
+    message("as genotypes were dropped, this is no longer a 'gen_tbl'")
     class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
     return(out)
   }
@@ -143,7 +143,7 @@ mutate.grouped_gen_tbl <- function(..., deparse.level = 1) { # nolint
   out <- NextMethod()
   # if the genotypes are gone, drop the tbl_df class
   if (!"genotypes" %in% names(out)) {
-    message("as genotypes were dropped, this is not longer a 'gen_tbl'")
+    message("as genotypes were dropped, this is no longer a 'gen_tbl'")
     class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
     return(out)
   }
@@ -169,7 +169,7 @@ dplyr_reconstruct.gen_tbl <- function(data, template) {
   out <- NextMethod()
   # if the genotypes are gone, drop the tbl_df class
   if (!"genotypes" %in% names(data)) {
-    message("as genotypes were dropped, this is not longer a 'gen_tbl'")
+    message("as genotypes were dropped, this is no longer a 'gen_tbl'")
     class(out) <- c("tbl_df", "tbl", "data.frame")
     return(out)
   }
@@ -194,7 +194,7 @@ dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
   out <- NextMethod()
   # if the genotypes are gone, drop the tbl_df class
   if (!"genotypes" %in% names(data)) {
-    message("as genotypes were dropped, this is not longer a 'gen_tbl'")
+    message("as genotypes were dropped, this is no longer a 'gen_tbl'")
     class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
     return(out)
   }

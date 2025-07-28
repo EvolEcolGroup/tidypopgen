@@ -98,7 +98,7 @@ test_that("sf and grouped methods work", {
   gen_tbl_sf_cbind <- cbind(gen_tbl_sf, df)
   expect_equal(class(gen_tbl_sf), class(gen_tbl_sf_cbind))
 
-  # Cash "$<-"
+  # Assignment "$<-"
   class_before <- class(grouped_gen_tbl)
   grouped_gen_tbl$region <- "East"
   expect_equal(class(grouped_gen_tbl), class_before)
