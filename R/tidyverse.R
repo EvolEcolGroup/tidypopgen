@@ -111,7 +111,8 @@ arrange.grouped_gen_tbl <- function(..., deparse.level = 1) { # nolint
 mutate.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod()
-  # if the genotypes are gone, drop the tbl_df class
+  # the following check is a precaution, the message should not be triggered,
+  # do not remove
   if (!"genotypes" %in% names(out)) {
     message("as genotypes were dropped, this is no longer a 'gen_tbl'")
     class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
@@ -141,7 +142,8 @@ mutate.gen_tbl <- function(..., deparse.level = 1) { # nolint
 mutate.grouped_gen_tbl <- function(..., deparse.level = 1) { # nolint
   # send it to the next (data.frame) method
   out <- NextMethod()
-  # if the genotypes are gone, drop the tbl_df class
+  # the following check is a precaution, the message should not be triggered,
+  # do not remove
   if (!"genotypes" %in% names(out)) {
     message("as genotypes were dropped, this is no longer a 'gen_tbl'")
     class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
@@ -167,7 +169,8 @@ mutate.grouped_gen_tbl <- function(..., deparse.level = 1) { # nolint
 dplyr_reconstruct.gen_tbl <- function(data, template) {
   # send it to the next (data.frame) method
   out <- NextMethod()
-  # if the genotypes are gone, drop the tbl_df class
+  # the following check is a precaution, the message should not be triggered,
+  # do not remove
   if (!"genotypes" %in% names(data)) {
     message("as genotypes were dropped, this is no longer a 'gen_tbl'")
     class(out) <- c("tbl_df", "tbl", "data.frame")
@@ -192,7 +195,8 @@ dplyr_reconstruct.gen_tbl <- function(data, template) {
 #' @noRd
 dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
   out <- NextMethod()
-  # if the genotypes are gone, drop the tbl_df class
+  # the following check is a precaution, the message should not be triggered,
+  # do not remove
   if (!"genotypes" %in% names(data)) {
     message("as genotypes were dropped, this is no longer a 'gen_tbl'")
     class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
