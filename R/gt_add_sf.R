@@ -93,6 +93,11 @@ gt_add_sf <- function(x, coords = NULL, crs = NULL, sfc_column = NULL) {
   # add attribute sf_column
   attr(x, "sf_column") <- sfc_column
   # add sf class
-  class(x) <- c("gen_tbl", "sf", "tbl_df", "tbl", "data.frame")
+  new_class_def <- c("gen_tbl", "sf", "tbl_df", "tbl", "data.frame")
+  if (inherits(x, "grouped_gen_tbl")) {
+    # if x is a grouped gen_tbl, we need to add the group classes in front
+    new_class_def <- c("grouped_gen_tbl", "grouped_df", new_class_def)
+  }
+  class(x) <- new_class_def
   return(x)
 }
