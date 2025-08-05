@@ -47,7 +47,7 @@ file:
 pops_path <- system.file("/extdata/anolis/punctatus_n46_meta.csv",
   package = "tidypopgen"
 )
-pops <- readr::read_csv(pops_path)
+pops <- read.csv(pops_path)
 pops
 ```
 
