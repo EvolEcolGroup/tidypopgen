@@ -1,3 +1,5 @@
+skip_if_not_installed("adegenet")
+
 test_that("show_loci gets and sets information", {
   test_genotypes <- rbind(
     c(1, 1, 0, 1, 1, 0),
