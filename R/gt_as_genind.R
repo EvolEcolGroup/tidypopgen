@@ -5,7 +5,7 @@
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @returns a `genind` object
 #' @export
-#' @examples
+#' @examplesIf rlang::is_installed("adegenet")
 #' example_gt <- load_example_gt("gen_tbl")
 #'
 #' # Convert to genind
