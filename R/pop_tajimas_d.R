@@ -15,7 +15,7 @@
 #'   values (one per group) is returned.
 #' @rdname pop_tajimas_d
 #' @export
-#' @examples
+#' @examplesIf rlang::is_installed(c("RhpcBLASctl", "data.table"))
 #' \dontshow{
 #' data.table::setDTthreads(2)
 #' RhpcBLASctl::blas_set_num_threads(2)

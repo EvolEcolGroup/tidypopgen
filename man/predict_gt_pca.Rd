@@ -49,6 +49,7 @@ Predict the PCA scores for a \code{\link{gt_pca}}, either for the original data 
 projecting new data.
 }
 \examples{
+\dontshow{if (rlang::is_installed(c("RhpcBLASctl", "data.table"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -90,7 +91,7 @@ predict(pca, new_data = new_lobsters, as_matrix = FALSE)
 
 # Adjust block.size
 predict(pca, new_data = new_lobsters, block_size = 10)
-
+\dontshow{\}) # examplesIf}
 }
 \references{
 Zhang et al (2020). Fast and robust ancestry prediction using

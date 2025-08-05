@@ -26,7 +26,7 @@
 #' attr(missing_gt$genotypes, "imputed_errors")
 #' @returns a [gen_tibble] with imputed genotypes
 #' @export
-#' @examplesIf rlang::is_installed(c("xgboost","RhpcBLASctl","data.table"))
+#' @examplesIf rlang::is_installed(c("xgboost", "RhpcBLASctl", "data.table"))
 #' \dontshow{
 #' data.table::setDTthreads(2)
 #' RhpcBLASctl::blas_set_num_threads(2)

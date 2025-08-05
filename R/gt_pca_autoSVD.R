@@ -61,7 +61,7 @@
 #' - `loci`, the loci used after long range LD removal.
 #'
 #' @export
-#' @examplesIf rlang::is_installed(c("RhpcBLASctl","data.table"))
+#' @examplesIf rlang::is_installed(c("RhpcBLASctl", "data.table"))
 #' \dontshow{
 #' data.table::setDTthreads(2)
 #' RhpcBLASctl::blas_set_num_threads(2)

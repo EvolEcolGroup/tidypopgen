@@ -1,3 +1,5 @@
+skip_if_not_installed("vcfR")
+
 test_that("count_vcf_individuals with gzfile", {
   vcf_path <- system.file(
     "/extdata/ploidy/ploidy_test.vcf.gz",

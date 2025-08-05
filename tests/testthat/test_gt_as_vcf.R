@@ -1,3 +1,5 @@
+skip_if_not_installed("vcfR")
+
 # unit test for gt_as_vcf
 # create file
 test_indiv_meta <- data.frame(

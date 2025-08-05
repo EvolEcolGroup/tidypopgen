@@ -63,6 +63,7 @@ For all formulae, the genome wide estimate is obtained by taking the ratio of
 the mean numerators and denominators over all relevant SNPs.
 }
 \examples{
+\dontshow{if (rlang::is_installed(c("RhpcBLASctl", "data.table"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -84,7 +85,7 @@ example_gt \%>\%
 example_gt \%>\%
   group_by(population) \%>\%
   pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
-
+\dontshow{\}) # examplesIf}
 }
 \references{
 Bhatia G, Patterson N, Sankararaman S, Price AL. (2013)

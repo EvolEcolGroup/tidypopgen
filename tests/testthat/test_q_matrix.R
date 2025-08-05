@@ -137,57 +137,59 @@ test_that("get_p_matrix returns correct p-matrix", {
   )
 })
 
-test_that("tidying and augmenting a q_matrix", {
-  # read a single .Q
-  q_path <- system.file(
-    "/extdata/anolis/anolis_ld_run1.3.Q",
-    package = "tidypopgen"
-  )
-  q_mat <- read.table(q_path)
-  anolis_q_k3_mat <- q_matrix(q_mat)
+if (rlang::is_installed("readr")) {
+  test_that("tidying and augmenting a q_matrix", {
+    # read a single .Q
+    q_path <- system.file(
+      "/extdata/anolis/anolis_ld_run1.3.Q",
+      package = "tidypopgen"
+    )
+    q_mat <- read.table(q_path)
+    anolis_q_k3_mat <- q_matrix(q_mat)
 
-  # create gt and metadata
-  vcf_path <- system.file(
-    "/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
-    package = "tidypopgen"
-  )
-  anole_gt <- gen_tibble(
-    vcf_path,
-    quiet = TRUE,
-    backingfile = tempfile("anolis_")
-  )
-  pops_path <- system.file(
-    "/extdata/anolis/plot_order_punctatus_n46.csv",
-    package = "tidypopgen"
-  )
-  pops <- readr::read_csv(pops_path, show_col_types = FALSE)
-  anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
-  anole_gt <- anole_gt %>%
-    mutate(population = pops$pop[match(pops$ID, .data$id)])
+    # create gt and metadata
+    vcf_path <- system.file(
+      "/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+      package = "tidypopgen"
+    )
+    anole_gt <- gen_tibble(
+      vcf_path,
+      quiet = TRUE,
+      backingfile = tempfile("anolis_")
+    )
+    pops_path <- system.file(
+      "/extdata/anolis/plot_order_punctatus_n46.csv",
+      package = "tidypopgen"
+    )
+    pops <- readr::read_csv(pops_path, show_col_types = FALSE)
+    anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
+    anole_gt <- anole_gt %>%
+      mutate(population = pops$pop[match(pops$ID, .data$id)])
 
-  # tidy without group info
-  tidy_q <- tidy(anolis_q_k3_mat, anole_gt)
-  expect_false("group" %in% colnames(tidy_q))
-  expect_equal(tidy_q$id, rep(anole_gt$id, each = 3))
+    # tidy without group info
+    tidy_q <- tidy(anolis_q_k3_mat, anole_gt)
+    expect_false("group" %in% colnames(tidy_q))
+    expect_equal(tidy_q$id, rep(anole_gt$id, each = 3))
 
-  # augment without group info
-  augment_q <- augment(anolis_q_k3_mat, anole_gt)
-  expect_false("group" %in% colnames(anolis_q_k3_mat))
-  expect_equal(augment_q$id, anole_gt$id)
-  expect_true(inherits(augment_q, "gen_tbl"))
+    # augment without group info
+    augment_q <- augment(anolis_q_k3_mat, anole_gt)
+    expect_false("group" %in% colnames(anolis_q_k3_mat))
+    expect_equal(augment_q$id, anole_gt$id)
+    expect_true(inherits(augment_q, "gen_tbl"))
 
-  anole_gt <- anole_gt %>% group_by(population)
+    anole_gt <- anole_gt %>% group_by(population)
 
-  # tidy using group from gen_tibble
-  tidy_q <- tidy(anolis_q_k3_mat, anole_gt)
-  expect_true("group" %in% colnames(tidy_q))
-  expect_equal(tidy_q$group, rep(anole_gt$population, each = 3))
-  expect_equal(tidy_q$id, rep(anole_gt$id, each = 3))
+    # tidy using group from gen_tibble
+    tidy_q <- tidy(anolis_q_k3_mat, anole_gt)
+    expect_true("group" %in% colnames(tidy_q))
+    expect_equal(tidy_q$group, rep(anole_gt$population, each = 3))
+    expect_equal(tidy_q$id, rep(anole_gt$id, each = 3))
 
-  # augment using group from gen_tibble
-  augment_q <- augment(anolis_q_k3_mat, anole_gt)
-  expect_true(inherits(augment_q, "gen_tbl"))
-  expect_true("group" %in% colnames(augment_q))
-  expect_equal(augment_q$group, anole_gt$population)
-  expect_equal(augment_q$id, anole_gt$id)
-})
+    # augment using group from gen_tibble
+    augment_q <- augment(anolis_q_k3_mat, anole_gt)
+    expect_true(inherits(augment_q, "gen_tbl"))
+    expect_true("group" %in% colnames(augment_q))
+    expect_equal(augment_q$group, anole_gt$population)
+    expect_equal(augment_q$id, anole_gt$id)
+  })
+}
