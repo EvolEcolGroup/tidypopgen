@@ -15,7 +15,7 @@
 #' @param n_cores the number of cores to be used
 #' @returns a [gen_tibble] with imputed genotypes
 #' @export
-#' @examplesIf rlang::is_installed(c("RhpcBLASctl", "data.table"))
+#' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
 #' RhpcBLASctl::blas_set_num_threads(2)

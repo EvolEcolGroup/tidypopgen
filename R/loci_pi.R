@@ -18,7 +18,7 @@
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_pi
 #' @export
-#' @examplesIf rlang::is_installed(c("RhpcBLASctl", "data.table"))
+#' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
 #' RhpcBLASctl::blas_set_num_threads(2)

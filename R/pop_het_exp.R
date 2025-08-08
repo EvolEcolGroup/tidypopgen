@@ -33,7 +33,7 @@
 #'   `by_locus=FALSE`), or a matrix of estimates by locus (rows are loci,
 #'   columns are populations, `by_locus=TRUE`)
 #' @export
-#' @examplesIf rlang::is_installed(c("RhpcBLASctl", "data.table"))
+#' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
 #' RhpcBLASctl::blas_set_num_threads(2)
