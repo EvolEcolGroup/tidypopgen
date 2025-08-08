@@ -94,7 +94,7 @@
 #' @returns a tibble of population statistics, with populations as rows and
 #'   statistics as columns
 #' @export
-#' @examples
+#' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
 #' RhpcBLASctl::blas_set_num_threads(2)

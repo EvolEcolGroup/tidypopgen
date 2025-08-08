@@ -1,4 +1,4 @@
-skip_if(!requireNamespace("detectRUNS", quietly = TRUE))
+skip_if_not_installed("detectRUNS")
 
 test_that("windows_indiv_roh works without backingfile update", {
   test_indiv_meta <- data.frame(

@@ -79,6 +79,7 @@ Any missing values in the genotypes of a \code{gen_tibble} passed to
 \code{\link[=gt_impute_simple]{gt_impute_simple()}}.
 }
 \examples{
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -90,5 +91,5 @@ example_gt <- load_example_gt("gen_tbl") \%>\% gt_impute_simple()
 example_gt \%>\% loci_ld_clump()
 # To return a vector of SNP indices to be kept
 example_gt \%>\% loci_ld_clump(return_id = TRUE)
-
+\dontshow{\}) # examplesIf}
 }

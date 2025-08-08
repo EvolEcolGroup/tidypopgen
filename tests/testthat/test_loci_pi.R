@@ -1,3 +1,5 @@
+skip_if_not_installed("hierfstat")
+
 test_that("loci_pi computes correctly", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),

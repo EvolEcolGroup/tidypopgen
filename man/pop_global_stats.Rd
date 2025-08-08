@@ -94,6 +94,7 @@ optimized for speed and memory usage.
 }
 }
 \examples{
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -106,6 +107,7 @@ example_gt \%>\% pop_global_stats()
 
 # To return by locus, set by_locus = TRUE
 example_gt \%>\% pop_global_stats(by_locus = TRUE)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Nei M, Chesser R (1983) Estimation of fixation indexes and gene

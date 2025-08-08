@@ -16,12 +16,13 @@ a \code{genlight} object
 This function converts a \code{gen_tibble} to a \code{genlight} object from \code{adegenet}
 }
 \examples{
+\dontshow{if (rlang::is_installed("adegenet")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 example_gt <- load_example_gt("gen_tbl")
 
-# Convert to genind
+# Convert to genlight
 gt_genlight <- example_gt \%>\% gt_as_genlight()
 
 # Check object class
 class(gt_genlight)
-
+\dontshow{\}) # examplesIf}
 }

@@ -16,6 +16,7 @@ a \code{genind} object
 This function converts a \code{gen_tibble} to a \code{genind} object from \code{adegenet}
 }
 \examples{
+\dontshow{if (rlang::is_installed("adegenet")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 example_gt <- load_example_gt("gen_tbl")
 
 # Convert to genind
@@ -23,4 +24,5 @@ gt_genind <- example_gt \%>\% gt_as_genind()
 
 # Check object class
 class(gt_genind)
+\dontshow{\}) # examplesIf}
 }

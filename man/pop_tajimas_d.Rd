@@ -52,6 +52,7 @@ ascertained can be difficult to interpret. This function should ideally
 be used on sequence data prior to filtering.
 }
 \examples{
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -61,4 +62,5 @@ example_gt <- load_example_gt("grouped_gen_tbl")
 
 # Compute Tajima's D
 example_gt \%>\% pop_tajimas_d()
+\dontshow{\}) # examplesIf}
 }
