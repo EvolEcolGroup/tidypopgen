@@ -272,7 +272,7 @@ test_that("gt_order_loci catches unsorted and duplicated positions", {
     "Your loci table contains duplicates"
   )
 
-  expect_equal(
+  expect_setequal(
     find_duplicated_loci(test_gt$genotypes,
       error_on_false = FALSE,
       list_duplicates = TRUE

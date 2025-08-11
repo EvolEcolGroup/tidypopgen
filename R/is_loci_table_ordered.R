@@ -68,11 +68,11 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
   }
 
   # check that within each chromosome positions are unique
-  if (find_duplicated_loci(
+  if (isFALSE(find_duplicated_loci(
     .x,
     error_on_false = error_on_false,
     list_duplicates = FALSE
-  ) == FALSE) {
+  ))) {
     return(FALSE)
   }
 
@@ -130,10 +130,10 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
 #' indicating whether there are any duplicated loci.
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
-#' a [`gen_tibble`] object), or a [`gen_tibble`].
-#' @param error_on_false logical, if `TRUE` an error is thrown if the loci are
-#'   not ordered.
-#' @param list_duplicates logical, if `TRUE` returns list of duplicated SNPs
+#'   a [`gen_tibble`] object), or a [`gen_tibble`].
+#' @param error_on_false logical, if `TRUE` an error is thrown if duplicated
+#'   loci are found.
+#' @param list_duplicates logical, if `TRUE` returns duplicated SNP names.
 #' @param ... other arguments passed to specific methods.
 #' @returns if `list_duplicates` is TRUE, returns a vector of duplicated loci.
 #'   If `list_duplicates` is FALSE, returns a logical value indicating whether
