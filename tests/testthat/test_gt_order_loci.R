@@ -271,6 +271,15 @@ test_that("gt_order_loci catches unsorted and duplicated positions", {
     is_loci_table_ordered(test_gt, error_on_false = TRUE),
     "Your loci table contains duplicates"
   )
+
+  expect_setequal(
+    find_duplicated_loci(test_gt$genotypes,
+      error_on_false = FALSE,
+      list_duplicates = TRUE
+    ),
+    c("rs1", "rs2")
+  )
+
   expect_error(
     gt_order_loci(test_gt, use_current_table = TRUE, quiet = TRUE),
     "Your loci table contains duplicates"

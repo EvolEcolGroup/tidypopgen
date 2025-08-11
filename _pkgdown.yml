@@ -27,6 +27,7 @@ reference:
         - count_loci
         - augment_loci
         - is_loci_table_ordered
+        - find_duplicated_loci
   - title: "Selecting loci"
     desc: "Functions to select loci from a `gen_tibble`, either based on loci information, or genotype information."
     contents:
