@@ -10,10 +10,10 @@ find_duplicated_loci(.x, error_on_false = FALSE, list_duplicates = TRUE, ...)
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
 a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
-\item{error_on_false}{logical, if \code{TRUE} an error is thrown if the loci are
-not ordered.}
+\item{error_on_false}{logical, if \code{TRUE} an error is thrown if duplicated
+loci are found.}
 
-\item{list_duplicates}{logical, if \code{TRUE} returns list of duplicated SNPs}
+\item{list_duplicates}{logical, if \code{TRUE} returns duplicated SNP names.}
 
 \item{...}{other arguments passed to specific methods.}
 }
