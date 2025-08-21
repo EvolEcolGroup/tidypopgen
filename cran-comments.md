@@ -7,7 +7,7 @@
 
 # Results
 
-NOTE: This is a new release.
+NOTE: This is a RESUBMISSION of a new release.
 
 * Possibly misspelled words in DESCRIPTION are false positives; everything
 is spelled correctly.
@@ -18,4 +18,21 @@ is spelled correctly.
 INFO: Large installed size is due to C++ libraries being compiled with RCpp, 
 the package without the compiled C++ libraries is only ~3 Mb.
 
+# Resquested changes
 
+* Use unidirected quotation in DESCRIPTION: Implemented
+
+* Use of `dontrun{}` in example of gt_admixture.Rd: this is appropriate as
+the example can not be run unless additional sofware, external of R, is installed.
+
+* Do not install packages in examples or functions (related to R/gt_snmf.R):
+  Implemented.
+  
+  * There was a false positive of usage of install.packages() in a few functions
+  (e.g. R/gt_as_genind.R; R/gt_as_genlight.R; R/gt_extract_f2.R;R/windows_indiv_roh.R):
+    The error message we give includes the suggestion of using `install.packages()` to
+    install the packages required to run the function, but no package is installed
+    automatically.
+
+* Include copyright holders mentioned in function documentations in the
+  DESCRIPTION file: Implemented

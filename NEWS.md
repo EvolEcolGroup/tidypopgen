@@ -1,4 +1,4 @@
-# tidypopgen 0.3.1
+# tidypopgen 0.3.2
 * tidy up for CRAN submission
 
 # tidypopgen 0.3.0
