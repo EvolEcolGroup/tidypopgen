@@ -101,19 +101,16 @@ it is soft deprecated and will be removed in future versions of
 \code{tidypopgen}.
 }
 \examples{
-# run the example only if we have the package installed
-\donttest{
-if (requireNamespace("detectRUNS", quietly = TRUE)) {
-  sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
-    package = "detectRUNS"
-  )
-  sheep_gt <- tidypopgen::gen_tibble(sheep_ped,
-    backingfile = tempfile(),
-    quiet = TRUE
-  )
-  sheep_gt <- sheep_gt \%>\% group_by(population)
-  sheep_roh <- windows_indiv_roh(sheep_gt)
-  detectRUNS::plot_Runs(runs = sheep_roh)
-}
-}
+\dontshow{if (rlang::is_installed("detectRUNS")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
+  package = "detectRUNS"
+)
+sheep_gt <- tidypopgen::gen_tibble(sheep_ped,
+  backingfile = tempfile(),
+  quiet = TRUE
+)
+sheep_gt <- sheep_gt \%>\% group_by(population)
+sheep_roh <- windows_indiv_roh(sheep_gt)
+detectRUNS::plot_Runs(runs = sheep_roh)
+\dontshow{\}) # examplesIf}
 }

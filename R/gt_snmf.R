@@ -59,7 +59,10 @@ gt_snmf <- function(
 
   # if required install LEA
   if (!requireNamespace("LEA", quietly = TRUE)) {
-    utils::install.packages("LEA")
+    stop(
+      "to use this function, first install package 'adegenet' with\n",
+      "utils::install.packages('LEA'')"
+    )
   }
 
   if (inherits(x, "gen_tbl")) {
