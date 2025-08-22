@@ -30,8 +30,9 @@ Authors:
 
 Other contributors:
 \itemize{
-  \item Chang Christopher (Copyright holder of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()) [copyright holder]
-  \item Bengtsson Henrik (Copyright holder of countLines in R.utils, modified for .vcf in count_vcf_variants()) [copyright holder]
+  \item Chang Christopher (Author of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()) [contributor]
+  \item Shaun Purcell (Author of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()) [contributor]
+  \item Bengtsson Henrik (Author of countLines in R.utils, modified for .vcf in count_vcf_variants()) [contributor]
 }
 
 }

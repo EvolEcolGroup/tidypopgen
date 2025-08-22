@@ -18,12 +18,12 @@ is spelled correctly.
 INFO: Large installed size is due to C++ libraries being compiled with RCpp, 
 the package without the compiled C++ libraries is only ~3 Mb.
 
-# Resquested changes
+# Requested changes
 
 * Use unidirected quotation in DESCRIPTION: Implemented
 
 * Use of `dontrun{}` in example of gt_admixture.Rd: this is appropriate as
-the example can not be run unless additional sofware, external of R, is installed.
+the example can not be run unless additional software, external of R, is installed.
 
 * Do not install packages in examples or functions (related to R/gt_snmf.R):
   Implemented.

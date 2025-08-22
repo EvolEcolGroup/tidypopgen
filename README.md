@@ -13,7 +13,7 @@ ever loading all data in memory.
 
 ## Installation
 
-You can install the relase version of `tidypopgen` from CRAN:
+You can install the release version of `tidypopgen` from CRAN:
 ``` r
 install.packages("tidypopgen")
 ```
