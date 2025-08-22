@@ -7,12 +7,12 @@ Authors@R:
     person("Andrea", "Manica", email = "am315@cam.ac.uk", 
            role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0003-1895-450X")),
-    person("Chang", "Christopher", role = c("cph"),
-           comment = "Copyright holder of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()"),
-    person("Shaun", "Purcell", role = c("cph"),
-           comment = "Copyright holder of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()"),
-    person("Bengtsson", "Henrik", role = c("cph"),
-           comment = "Copyright holder of countLines in R.utils, modified for .vcf in count_vcf_variants()"))
+    person("Chang", "Christopher", role = c("ctb"),
+           comment = "Author of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()"),
+    person("Shaun", "Purcell", role = c("ctb"),
+           comment = "Author of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()"),
+    person("Bengtsson", "Henrik", role = c("ctb"),
+           comment = "Author of countLines in R.utils, modified for .vcf in count_vcf_variants()"))
 Description: We provide a tidy grammar of population genetics, facilitating 
     the manipulation and analysis of data on biallelic single nucleotide
     polymorphisms (SNPs). 'tidypopgen' scales to very large genetic datasets

@@ -28,11 +28,12 @@ the example can not be run unless additional sofware, external of R, is installe
 * Do not install packages in examples or functions (related to R/gt_snmf.R):
   Implemented.
   
-  * There was a false positive of usage of install.packages() in a few functions
+* There was a false positive of usage of install.packages() in a few functions
   (e.g. R/gt_as_genind.R; R/gt_as_genlight.R; R/gt_extract_f2.R;R/windows_indiv_roh.R):
-    The error message we give includes the suggestion of using `install.packages()` to
-    install the packages required to run the function, but no package is installed
-    automatically.
+  The error message we give includes the suggestion of using `install.packages()` to
+  install the packages required to run the function, but no package is installed
+  automatically.
 
-* Include copyright holders mentioned in function documentations in the
-  DESCRIPTION file: Implemented
+* Include original authors of code modified and used in our package in the
+  DESCRIPTION file (they were only named in the author field of the function
+  documentations): Implemented
