@@ -28,5 +28,11 @@ Authors:
   \item Eirlys Tysall
 }
 
+Other contributors:
+\itemize{
+  \item Chang Christopher (Copyright holder of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()) [copyright holder]
+  \item Bengtsson Henrik (Copyright holder of countLines in R.utils, modified for .vcf in count_vcf_variants()) [copyright holder]
+}
+
 }
 \keyword{internal}
