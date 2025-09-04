@@ -70,7 +70,7 @@ Run SNMF from R in tidypopgen
 This is a wrapper for the function snmf from R package LEA.
 }
 \examples{
-\dontshow{if (rlang::is_installed("LEA")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (rlang::is_installed("LEA")) withAutoprint(\{ # examplesIf}
 # run the example only if we have the package installed
 example_gt <- load_example_gt("gen_tbl")
 
