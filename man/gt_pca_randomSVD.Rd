@@ -80,6 +80,10 @@ This function is a wrapper
 for \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}}
 }
 \examples{
+<<<<<<< HEAD
+=======
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+>>>>>>> cran_submission
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -99,5 +103,9 @@ anole_gt <- gt_impute_simple(anole_gt, method = "mode")
 
 # Create PCA obejct, including total variance
 gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
+<<<<<<< HEAD
 
+=======
+\dontshow{\}) # examplesIf}
+>>>>>>> cran_submission
 }

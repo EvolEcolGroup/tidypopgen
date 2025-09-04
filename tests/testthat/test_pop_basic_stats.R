@@ -1,3 +1,5 @@
+skip_if_not_installed("hierfstat")
+
 test_genotypes <- rbind(
   c(1, 1, 0, 1, 1, 0),
   c(2, 1, 0, NA, 0, 0),

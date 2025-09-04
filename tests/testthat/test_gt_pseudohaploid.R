@@ -273,8 +273,10 @@ test_that("gt_pseudohaploid updates ploidy after dropping pseudohploids", {
   # now check that ploidy is -2
   expect_equal(test_gt %>% show_ploidy(), -2)
   # and functions requiring diploid data throw errors
-  expect_error(round(indiv_het_obs(test_gt), 1),
-               "this function only works on diploid data")
+  expect_error(
+    round(indiv_het_obs(test_gt), 1),
+    "this function only works on diploid data"
+  )
 
   # Now try filtering out pseudohaploid individuals
   test_gt <- test_gt %>% filter(indiv_missingness(genotypes) < 0.15)

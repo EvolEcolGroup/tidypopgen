@@ -25,8 +25,13 @@ NOTE that we currently read all the data into memory to write the file, so
 this function is not suitable for very large datasets.
 }
 \examples{
+<<<<<<< HEAD
+=======
+\dontshow{if (rlang::is_installed("LEA")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+>>>>>>> cran_submission
 example_gt <- load_example_gt("gen_tbl")
 
 # Write a geno file
 gt_as_geno_lea(example_gt, file = paste0(tempfile(), "_example.geno"))
+\dontshow{\}) # examplesIf}
 }

@@ -1,3 +1,5 @@
+skip_if_not_installed("vcfR")
+
 test_that("gen_tibble_vcf filters non-biallelic SNPs", {
   # get path for non-biallelic SNPs
   vcf_path <- test_path("testdata/vcf", "pop_a_non_biallelic.vcf")

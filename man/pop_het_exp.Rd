@@ -58,6 +58,10 @@ each population is simply the mean of the locus estimates for each
 population.
 }
 \examples{
+<<<<<<< HEAD
+=======
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+>>>>>>> cran_submission
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -73,6 +77,7 @@ example_gt \%>\% pop_het_exp(include_global = TRUE)
 
 # To return by locus, set by_locus = TRUE
 example_gt \%>\% pop_het_exp(by_locus = TRUE)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Nei M. (1987) Molecular Evolutionary Genetics. Columbia

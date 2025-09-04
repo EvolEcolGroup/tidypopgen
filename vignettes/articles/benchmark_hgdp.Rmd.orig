@@ -46,7 +46,7 @@ library(ggplot2)
 ```
 
 And before running the benchmark, we need to download the relevant files. We
-can use the following to download the HGDOP files into a temporary directory:
+can use the following to download the HGDP files into a temporary directory:
 
 ```{r eval = FALSE}
 temp_dir <- tempdir()

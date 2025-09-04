@@ -30,6 +30,10 @@ Internally, this function uses the \code{snp_pcadapt} function from the \code{bi
 package.
 }
 \examples{
+<<<<<<< HEAD
+=======
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+>>>>>>> cran_submission
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -52,6 +56,10 @@ pca <- gt_pca_partialSVD(lobsters)
 
 # Create a gt_pcadapt object
 gt_pcadapt(lobsters, pca, k = 2)
+<<<<<<< HEAD
+=======
+\dontshow{\}) # examplesIf}
+>>>>>>> cran_submission
 }
 \references{
 Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).

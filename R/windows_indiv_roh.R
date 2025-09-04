@@ -50,23 +50,17 @@
 #'   from: starting position of the run, in bps; to: end position of the run, in
 #'   bps; lengthBps: size of the run)
 #' @export
-#'
-#' @examples
-#' # run the example only if we have the package installed
-#' \donttest{
-#' if (requireNamespace("detectRUNS", quietly = TRUE)) {
-#'   sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
-#'     package = "detectRUNS"
-#'   )
-#'   sheep_gt <- tidypopgen::gen_tibble(sheep_ped,
-#'     backingfile = tempfile(),
-#'     quiet = TRUE
-#'   )
-#'   sheep_gt <- sheep_gt %>% group_by(population)
-#'   sheep_roh <- windows_indiv_roh(sheep_gt)
-#'   detectRUNS::plot_Runs(runs = sheep_roh)
-#' }
-#' }
+#' @examplesIf rlang::is_installed("detectRUNS")
+#' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
+#'   package = "detectRUNS"
+#' )
+#' sheep_gt <- tidypopgen::gen_tibble(sheep_ped,
+#'   backingfile = tempfile(),
+#'   quiet = TRUE
+#' )
+#' sheep_gt <- sheep_gt %>% group_by(population)
+#' sheep_roh <- windows_indiv_roh(sheep_gt)
+#' detectRUNS::plot_Runs(runs = sheep_roh)
 windows_indiv_roh <- function(
     .x,
     window_size = 15,

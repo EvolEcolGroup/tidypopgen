@@ -44,7 +44,7 @@
 #'   columns. If `type=pairwise`, a matrix of genome-wide pairwise Fst values is
 #'   returned.
 #' @export
-#' @examples
+#' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
 #' RhpcBLASctl::blas_set_num_threads(2)

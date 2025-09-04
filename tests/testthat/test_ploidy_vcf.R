@@ -1,3 +1,5 @@
+skip_if_not_installed("vcfR")
+
 test_that("import a vcf with multiple ploidy", {
   vcf_path <- system.file(
     "/extdata/ploidy/ploidy_test.vcf.gz",

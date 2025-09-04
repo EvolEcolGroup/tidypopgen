@@ -118,9 +118,15 @@ sub_gt <- function(path, replacement = "", stop_if_not_ext = TRUE) {
 #' gt_get_file_names(example_gt)
 #'
 gt_get_file_names <- function(x) {
+  if (inherits(x, "gen_tbl")) {
+    x <- x$genotypes
+  } else if (!inherits(x, "vctrs_bigSNP")) {
+    stop("x should be a vctrs_bigSNP object")
+  }
+
   return(c(
     # nolint
-    attr(x$genotypes, "bigsnp")$genotypes$rds,
-    attr(x$genotypes, "bigsnp")$genotypes$backingfile
+    attr(x, "bigsnp")$genotypes$rds,
+    attr(x, "bigsnp")$genotypes$backingfile
   ))
 }

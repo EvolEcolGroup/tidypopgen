@@ -61,3 +61,51 @@ test_that("inheritance of group tibbles", {
   test_ungroup_gt <- ungroup(test_group_gt)
   expect_true(inherits(test_ungroup_gt, "gen_tbl"))
 })
+
+
+test_that("sf and grouped methods work", {
+  # Load tibbles
+  grouped_gen_tbl <- load_example_gt("grouped_gen_tbl")
+  grouped_gen_tbl_sf <- load_example_gt("grouped_gen_tbl_sf")
+  gen_tbl_sf <- load_example_gt("gen_tbl_sf")
+
+  # Filter
+  filtered_group <- grouped_gen_tbl %>% filter(id %in% c("a", "c"))
+  expect_equal(class(grouped_gen_tbl), class(filtered_group))
+  filtered_group_sf <- grouped_gen_tbl_sf %>% filter(id %in% c("a", "c"))
+  expect_equal(class(grouped_gen_tbl_sf), class(filtered_group_sf))
+  filtered_sf <- gen_tbl_sf %>% filter(id %in% c("a", "c"))
+  expect_equal(class(gen_tbl_sf), class(filtered_sf))
+
+  # Arrange
+  arranged_group <- grouped_gen_tbl %>% arrange(id)
+  expect_equal(class(grouped_gen_tbl), class(arranged_group))
+  arranged_group_sf <- grouped_gen_tbl_sf %>% arrange(id)
+  expect_equal(class(grouped_gen_tbl_sf), class(arranged_group_sf))
+  arranged_sf <- gen_tbl_sf %>% arrange(id)
+  expect_equal(class(gen_tbl_sf), class(arranged_sf))
+
+  # Mutate
+  mutated_group <- grouped_gen_tbl %>% mutate(region = "East")
+  expect_equal(class(grouped_gen_tbl), class(mutated_group))
+  mutated_group_sf <- grouped_gen_tbl_sf %>% mutate(region = "East")
+  expect_equal(class(grouped_gen_tbl_sf), class(mutated_group_sf))
+  mutated_sf <- gen_tbl_sf %>% mutate(region = "East")
+  expect_equal(class(gen_tbl_sf), class(mutated_sf))
+
+  # Cbind
+  df <- data.frame(region = c("A", "A", "B", "B", "A", "B", "B"))
+  gen_tbl_sf_cbind <- cbind(gen_tbl_sf, df)
+  expect_equal(class(gen_tbl_sf), class(gen_tbl_sf_cbind))
+
+  # Assignment "$<-"
+  class_before <- class(grouped_gen_tbl)
+  grouped_gen_tbl$region <- "East"
+  expect_equal(class(grouped_gen_tbl), class_before)
+  class_before_sf <- class(grouped_gen_tbl_sf)
+  grouped_gen_tbl_sf$region <- "East"
+  expect_equal(class(grouped_gen_tbl_sf), class_before_sf)
+  class_before_sf_un <- class(gen_tbl_sf)
+  gen_tbl_sf$region <- "East"
+  expect_equal(class(gen_tbl_sf), class_before_sf_un)
+})

@@ -54,6 +54,10 @@ rates from the xgboost, if appended, can be retrieved with
 \code{attr(x$genotypes, "imputed_errors")} where \code{x} is the \code{gen_tibble}.
 }
 \examples{
+<<<<<<< HEAD
+=======
+\dontshow{if (rlang::is_installed(c("xgboost", "RhpcBLASctl", "data.table"))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+>>>>>>> cran_submission
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -66,4 +70,5 @@ example_gt <- example_gt \%>\% gt_impute_xgboost()
 
 # And we can check it has been imputed
 example_gt \%>\% gt_has_imputed()
+\dontshow{\}) # examplesIf}
 }

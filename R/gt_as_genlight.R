@@ -5,10 +5,10 @@
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @returns a `genlight` object
 #' @export
-#' @examples
+#' @examplesIf rlang::is_installed("adegenet")
 #' example_gt <- load_example_gt("gen_tbl")
 #'
-#' # Convert to genind
+#' # Convert to genlight
 #' gt_genlight <- example_gt %>% gt_as_genlight()
 #'
 #' # Check object class

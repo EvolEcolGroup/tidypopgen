@@ -30,10 +30,9 @@
 #' - `id` the id column of the input `gen_tibble` (if applicable)
 #' - `group` the group column of the input `gen_tibble` (if applicable)
 #' @export
-#' @examples
+#' @examplesIf rlang::is_installed("LEA")
 #' # run the example only if we have the package installed
-#' if (requireNamespace("LEA", quietly = TRUE)) {
-#'   example_gt <- load_example_gt("gen_tbl")
+#' example_gt <- load_example_gt("gen_tbl")
 #'
 #'   # To run SNMF on a gen_tibble:
 #'   example_gt %>% gt_snmf(
@@ -61,7 +60,10 @@ gt_snmf <- function(
 
   # if required install LEA
   if (!requireNamespace("LEA", quietly = TRUE)) {
-    utils::install.packages("LEA")
+    stop(
+      "to use this function, first install package 'adegenet' with\n",
+      "utils::install.packages('LEA'')"
+    )
   }
 
   if (inherits(x, "gen_tbl")) {

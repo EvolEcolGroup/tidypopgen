@@ -32,7 +32,6 @@
 #'  - a vector of column scales (corresponding to `ind.col`),
 #'   and compute the product of `X` (subsetted and scaled) with `x`.
 #' @param fun_cprod Same as `fun.prod`, but for the *transpose* of `X`.
-
 #' @returns a `gt_pca` object, which is a subclass of `bigSVD`; this is
 #' an S3 list with elements:
 #' A named list (an S3 class "big_SVD") of
@@ -48,7 +47,7 @@
 #' Note: rather than accessing these elements directly, it is better to use
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @export
-#' @examples
+#' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
 #' RhpcBLASctl::blas_set_num_threads(2)

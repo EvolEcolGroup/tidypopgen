@@ -27,6 +27,7 @@ reference:
         - count_loci
         - augment_loci
         - is_loci_table_ordered
+        - find_duplicated_loci
   - title: "Selecting loci"
     desc: "Functions to select loci from a `gen_tibble`, either based on loci information, or genotype information."
     contents:
@@ -141,7 +142,9 @@ reference:
     desc: "Methods for tidyverse verbs for `gen_tibble` objects"
     contents:
         - arrange.gen_tbl
+        - arrange.grouped_gen_tbl
         - filter.gen_tbl
+        - filter.grouped_gen_tbl
         - mutate.gen_tbl
-        - dplyr_reconstruct.gen_tbl
+        - mutate.grouped_gen_tbl
         - "$<-.gen_tbl"

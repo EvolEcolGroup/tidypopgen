@@ -8,7 +8,11 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
+<<<<<<< HEAD
 We provide a tidy grammar of population genetics, facilitating the manipulation and analysis of data on biallelic single nucleotide polymorphisms (SNPs). `tidypopgen` scales to very large genetic datasets by storing genotypes on disk, and performing operations on them in chunks, without ever loading all data in memory. The full functionalities of the package are described in \doi{10.1101/2025.06.06.658325}.
+=======
+We provide a tidy grammar of population genetics, facilitating the manipulation and analysis of data on biallelic single nucleotide polymorphisms (SNPs). 'tidypopgen' scales to very large genetic datasets by storing genotypes on disk, and performing operations on them in chunks, without ever loading all data in memory. The full functionalities of the package are described in Carter et al. (2025) \doi{10.1101/2025.06.06.658325}.
+>>>>>>> cran_submission
 }
 \seealso{
 Useful links:
@@ -26,6 +30,13 @@ Authors:
 \itemize{
   \item Evie Carter
   \item Eirlys Tysall
+}
+
+Other contributors:
+\itemize{
+  \item Chang Christopher (Author of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()) [contributor]
+  \item Shaun Purcell (Author of Hardy-Weinberg Equilibrium algorithm in PLINK 1.90, used in loci_hwe()) [contributor]
+  \item Bengtsson Henrik (Author of countLines in R.utils, modified for .vcf in count_vcf_variants()) [contributor]
 }
 
 }

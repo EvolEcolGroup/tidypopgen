@@ -102,6 +102,10 @@ Note: rather than accessing these elements directly, it is better to use
 \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 }
 \examples{
+<<<<<<< HEAD
+=======
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+>>>>>>> cran_submission
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -134,5 +138,9 @@ gt_pca_autoSVD(lobsters,
   roll_size = 20,
   total_var = FALSE
 )
+<<<<<<< HEAD
 
+=======
+\dontshow{\}) # examplesIf}
+>>>>>>> cran_submission
 }

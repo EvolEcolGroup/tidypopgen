@@ -7,7 +7,6 @@ BMC
 BS
 Balloux
 Bazin
-Bengtsson
 Bhatia
 Bonferroni
 CMD
@@ -18,7 +17,6 @@ Eam
 FAM
 FBM
 FST
-Filebacked
 Fst
 GRM
 GST
@@ -48,7 +46,6 @@ PBS
 PED
 Procrustes
 Pseudohaploid
-Pseudohaploids
 Qiu
 RSpectra
 RUNs
@@ -69,8 +66,6 @@ Yixuan
 aDNA
 adegenet
 admixtools
-afs
-aftable
 alleleACGT
 alt
 anole
@@ -82,8 +77,6 @@ backingfile
 backingfiles
 biallelic
 bigSNP
-bigsnp
-bigstatsr
 bim
 bmerge
 booleans
@@ -99,8 +92,8 @@ chrom
 coancestries
 coancestry
 codecov
-com
 conda
+countLines
 cpp
 csv
 cutoff
@@ -110,7 +103,6 @@ diffNgroup
 dist
 distruct
 doi
-dplyr
 eig
 eigen
 eqn
@@ -125,7 +117,6 @@ fulfills
 gammarus
 geno
 ggplot
-github
 goesup
 goodfit
 gt
@@ -138,7 +129,6 @@ heterozygotes
 homozyg
 homozygosity
 homozygote
-homozygotes
 hwe
 ibs
 ind
@@ -167,7 +157,6 @@ ped
 pos
 prcomp
 precomputing
-privefl
 pseudohaplodified
 pseudohaploid
 pseudohaploids
@@ -189,7 +178,6 @@ snp
 snps
 stat
 tbl
-tempfile
 tempfiles
 th
 thr
@@ -206,5 +194,4 @@ unflip
 unsets
 vcf
 vcfR
-vctrs
 xgboost

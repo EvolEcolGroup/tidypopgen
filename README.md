@@ -13,7 +13,12 @@ ever loading all data in memory.
 
 ## Installation
 
-You can install the latest version of `tidypopgen` directly from r-universe (recommended):
+You can install the release version of `tidypopgen` from CRAN:
+``` r
+install.packages("tidypopgen")
+```
+
+You can install the latest development version directly from r-universe (recommended):
 ``` r
 install.packages('tidypopgen', repos = c('https://evolecolgroup.r-universe.dev',
                  'https://cloud.r-project.org'))

@@ -31,6 +31,10 @@ locus is imputed independently (and thus linkage information is ignored).
 This function is a wrapper around \code{\link[bigsnpr:snp_fastImputeSimple]{bigsnpr::snp_fastImputeSimple()}}.
 }
 \examples{
+<<<<<<< HEAD
+=======
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+>>>>>>> cran_submission
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -43,4 +47,5 @@ example_gt <- example_gt \%>\% gt_impute_simple()
 
 # And we can check it has been imputed
 example_gt \%>\% gt_has_imputed()
+\dontshow{\}) # examplesIf}
 }
