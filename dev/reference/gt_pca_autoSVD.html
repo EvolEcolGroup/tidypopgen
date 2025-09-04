@@ -13,7 +13,7 @@ bigsnpr::snp_autoSVD()"><meta property="og:image" content="https://evolecolgroup
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.0.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -181,80 +181,7 @@ avoid this error.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a gen_tibble of lobster genotypes</span></span></span>
-<span class="r-in"><span><span class="va">bed_file</span> <span class="op">&lt;-</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"lobster"</span>, <span class="st">"lobster.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>,</span></span>
-<span class="r-in"><span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"lobsters"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Remove monomorphic loci and impute</span></span></span>
-<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">lobsters</span>, method <span class="op">=</span> <span class="st">"mode"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="show_loci.html">show_loci</a></span><span class="op">(</span><span class="va">lobsters</span><span class="op">)</span><span class="op">$</span><span class="va">chromosome</span> <span class="op">&lt;-</span> <span class="st">"1"</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="show_loci.html">show_loci</a></span><span class="op">(</span><span class="va">lobsters</span><span class="op">)</span><span class="op">$</span><span class="va">chr_int</span> <span class="op">&lt;-</span> <span class="fl">1</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Create PCA object, including total variance</span></span></span>
-<span class="r-in"><span><span class="fu">gt_pca_autoSVD</span><span class="op">(</span><span class="va">lobsters</span>,</span></span>
-<span class="r-in"><span>  k <span class="op">=</span> <span class="fl">10</span>,</span></span>
-<span class="r-in"><span>  roll_size <span class="op">=</span> <span class="fl">20</span>,</span></span>
-<span class="r-in"><span>  total_var <span class="op">=</span> <span class="cn">TRUE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Discarding 0 variant with MAC &lt; 10 or MAF &lt; 0.02.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Phase of clumping (on MAF) at r^2 &gt; 0.2.. keep 73 variants.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Iteration 1:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Computing SVD..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0 outlier variant detected..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Converged!</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  === PCA of gen_tibble object ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Method: [1] "autoSVD"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call ($call):gt_pca_autoSVD(x = lobsters, k = 10, roll_size = 20, total_var = TRUE)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Eigenvalues ($d):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  29.58 23.699 21.738 20.31 20.118 20.016 ...</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Principal component scores ($u):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 176 rows (individuals) and 10 columns (axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Loadings (Principal axes) ($v):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 73 rows (SNPs) and 10 columns (axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="co"># Change number of components and exclude total variance</span></span></span>
-<span class="r-in"><span><span class="fu">gt_pca_autoSVD</span><span class="op">(</span><span class="va">lobsters</span>,</span></span>
-<span class="r-in"><span>  k <span class="op">=</span> <span class="fl">5</span>,</span></span>
-<span class="r-in"><span>  roll_size <span class="op">=</span> <span class="fl">20</span>,</span></span>
-<span class="r-in"><span>  total_var <span class="op">=</span> <span class="cn">FALSE</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Discarding 0 variant with MAC &lt; 10 or MAF &lt; 0.02.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Phase of clumping (on MAF) at r^2 &gt; 0.2.. keep 73 variants.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Iteration 1:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Computing SVD..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0 outlier variant detected..</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Converged!</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  === PCA of gen_tibble object ===</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Method: [1] "autoSVD"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Call ($call):gt_pca_autoSVD(x = lobsters, k = 5, roll_size = 20, total_var = FALSE)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Eigenvalues ($d):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  29.58 23.699 21.738 20.31 20.118 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Principal component scores ($u):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 176 rows (individuals) and 5 columns (axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Loadings (Principal axes) ($v):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 73 rows (SNPs) and 5 columns (axes) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-</code></pre></div>
+
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
