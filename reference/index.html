@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -146,6 +146,12 @@
 
         </dt>
         <dd>Test if the loci table is ordered</dd>
+      </dl><dl><dt>
+
+          <code><a href="find_duplicated_loci.html">find_duplicated_loci()</a></code>
+
+        </dt>
+        <dd>Find duplicates in the loci table</dd>
       </dl></div><div class="section level2">
       <h2 id="selecting-loci">Selecting loci<a class="anchor" aria-label="anchor" href="#selecting-loci"></a></h2>
 
@@ -854,7 +860,7 @@
       </dl></div><div class="section level2">
       <h2 id="example-data">Example data<a class="anchor" aria-label="anchor" href="#example-data"></a></h2>
 
-      <div class="section-desc"><p>Function for creating an example <code>gen_tibble</code>.</p></div>
+      <div class="section-desc"><p>Function for loading an example <code>gen_tibble</code>.</p></div>
 
 
     </div><div class="section level2">
@@ -864,10 +870,10 @@
 
       <dl><dt>
 
-          <code><a href="example_gt.html">example_gt()</a></code>
+          <code><a href="load_example_gt.html">load_example_gt()</a></code>
 
         </dt>
-        <dd>Create example gen_tibble</dd>
+        <dd>Load example gen_tibble</dd>
       </dl></div><div class="section level2">
       <h2 id="tidyverse-methods">tidyverse methods<a class="anchor" aria-label="anchor" href="#tidyverse-methods"></a></h2>
 
@@ -887,10 +893,22 @@
         <dd>An arrange method for <code>gen_tibble</code> objects</dd>
       </dl><dl><dt>
 
+          <code><a href="arrange.grouped_gen_tbl.html">arrange(<i>&lt;grouped_gen_tbl&gt;</i>)</a></code>
+
+        </dt>
+        <dd>An arrange method for grouped <code>gen_tibble</code> objects</dd>
+      </dl><dl><dt>
+
           <code><a href="filter.gen_tbl.html">filter(<i>&lt;gen_tbl&gt;</i>)</a></code>
 
         </dt>
         <dd>Tidyverse methods for gt objects</dd>
+      </dl><dl><dt>
+
+          <code><a href="filter.grouped_gen_tbl.html">filter(<i>&lt;grouped_gen_tbl&gt;</i>)</a></code>
+
+        </dt>
+        <dd>A filter method for grouped <code>gen_tibble</code> objects</dd>
       </dl><dl><dt>
 
           <code><a href="mutate.gen_tbl.html">mutate(<i>&lt;gen_tbl&gt;</i>)</a></code>
@@ -899,10 +917,10 @@
         <dd>A mutate method for <code>gen_tibble</code> objects</dd>
       </dl><dl><dt>
 
-          <code><a href="dplyr_reconstruct.gen_tbl.html">dplyr_reconstruct(<i>&lt;gen_tbl&gt;</i>)</a></code>
+          <code><a href="mutate.grouped_gen_tbl.html">mutate(<i>&lt;grouped_gen_tbl&gt;</i>)</a></code>
 
         </dt>
-        <dd>A dplyr_reconstruct method for <code>gen_tibble</code> objects</dd>
+        <dd>A mutate method for grouped <code>gen_tibble</code> objects</dd>
       </dl><dl><dt>
 
           <code><a href="cash-set-.gen_tbl.html">`$&lt;-`(<i>&lt;gen_tbl&gt;</i>)</a></code>

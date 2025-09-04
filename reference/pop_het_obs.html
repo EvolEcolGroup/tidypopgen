@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,28 +113,7 @@ University Press</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_gt.html">example_gt</a></span><span class="op">(</span><span class="st">"grouped_gen_tbl"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Compute expected heterozygosity</span></span></span>
-<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">pop_het_obs</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      pop1      pop2      pop3 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.5000000 0.3333333 0.5000000 </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># To include the global expected heterozygosity, set include_global = TRUE</span></span></span>
-<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">pop_het_obs</span><span class="op">(</span>include_global <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      pop1      pop2      pop3    global </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.5000000 0.3333333 0.5000000 0.4444444 </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># To return by locus, set by_locus = TRUE</span></span></span>
-<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">pop_het_obs</span><span class="op">(</span>by_locus <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           pop1 pop2 pop3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.6666667  0.5  0.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.6666667  0.0  0.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 0.0000000  0.0  0.5</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 1.0000000  0.5  0.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.3333333  0.5  1.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 0.3333333  0.5  1.0</span>
-</code></pre></div>
+
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

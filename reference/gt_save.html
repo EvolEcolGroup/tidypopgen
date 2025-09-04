@@ -21,7 +21,7 @@ file with gt_load()."><meta property="og:image" content="https://evolecolgroup.g
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,7 +101,7 @@ and <em>.bk</em> files</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="example_gt.html">example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="load_example_gt.html">load_example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># remove some individuals</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op">!=</span> <span class="st">"a"</span><span class="op">)</span></span></span>
@@ -109,15 +109,15 @@ and <em>.bk</em> files</p>
 <span class="r-in"><span><span class="co"># save filtered gen_tibble object</span></span></span>
 <span class="r-in"><span><span class="fu">gt_save</span><span class="op">(</span><span class="va">example_gt</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_example_filtered"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmptsKxZZ/file22c64d1a4f32_example_filtered.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using bigSNP file: /tmp/RtmptsKxZZ/file22c642369390.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with backing file: /tmp/RtmptsKxZZ/file22c642369390.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpGSPMHN/file28fe3374fa6c_example_filtered.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using bigSNP file: /tmp/RtmpGSPMHN/file28fe70db7b31.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with backing file: /tmp/RtmpGSPMHN/file28fe70db7b31.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmptsKxZZ/file22c64d1a4f32_example_filtered.gt')</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmptsKxZZ/file22c64d1a4f32_example_filtered.gt"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/tmp/RtmptsKxZZ/file22c642369390.rds"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "/tmp/RtmptsKxZZ/file22c642369390.bk"                 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpGSPMHN/file28fe3374fa6c_example_filtered.gt')</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpGSPMHN/file28fe3374fa6c_example_filtered.gt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/tmp/RtmpGSPMHN/file28fe70db7b31.rds"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "/tmp/RtmpGSPMHN/file28fe70db7b31.bk"                 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -9,7 +9,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,9 +97,8 @@ BIM and FAM files for the BED, or MAP for PED are expected to be in the
 same directory and have the same file name.</p></li>
 <li><p>a string giving the path to a RDS file storing a <code>bigSNP</code> object from
 the <code>bigsnpr</code> package (usually created with <code><a href="https://privefl.github.io/bigsnpr/reference/snp_readBed.html" class="external-link">bigsnpr::snp_readBed()</a></code>)</p></li>
-<li><p>a string giving the path to a vcf file. Note that we currently read the
-whole vcf in memory with <code>vcfR</code>, so only smallish <em>VCF</em> can be imported.
-Only biallelic SNPs will be considered.</p></li>
+<li><p>a string giving the path to a vcf file. Only biallelic SNPs will be
+considered.</p></li>
 <li><p>a string giving the path to a <em>packedancestry</em> .geno file. The associated
 .ind and .snp files are expected to be in the same directory and share the
 same file name prefix.</p></li>
@@ -130,10 +129,10 @@ same as PLINK 1.9).</p></dd>
 backing files used to store the data (they will be given a .bk and .RDS
 automatically). This is not needed if <code>x</code> is already an .RDS file. If <code>x</code>
 is a .BED or a <em>VCF</em> file and <code>backingfile</code> is left NULL, the backing file
-will be saved in the same directory as the bed file, using the same file
-name but with a different file type (.bk rather than .bed). If <code>x</code> is a
-genotype matrix and <code>backingfile</code> is NULL, then a temporary file will be
-created (but note that R will delete it at the end of the session!)</p></dd>
+will be saved in the same directory as the bed or vcf file, using the same
+file name but with a different file type (.bk rather than .bed or .vcf). If
+<code>x</code> is a genotype matrix and <code>backingfile</code> is NULL, then a temporary file
+will be created (but note that R will delete it at the end of the session!)</p></dd>
 
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
@@ -193,14 +192,59 @@ such a <em>VCF</em>, change the order of variants so that the first chromosome i
 autosome using a tool such as <code>vcftools</code>. Currently, only biallelic SNPs are
 supported. If haploid variants (e.g. sex chromosomes) are included in the
 <em>VCF</em>, they are not transformed into homozygous calls. Instead, reference
-alleles will be counted as 0 and alternative alleles will be counted as 1.</p></li>
+alleles will be coded as 0 and alternative alleles will be coded as 1.</p></li>
 <li><p><em>packedancestry</em> files: When loading <em>packedancestry</em> files,
 missing alleles will be converted from 'X' to NA</p></li>
 </ul></div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a gen_tibble from a .bed file</span></span></span>
+<span class="r-in"><span><span class="va">bed_file</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"lobster"</span>, <span class="st">"lobster.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">gen_tibble</span><span class="op">(</span><span class="va">bed_file</span>,</span></span>
+<span class="r-in"><span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"lobsters"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 79 loci</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble:     176 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    id    population  genotypes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Ale04 Ale         [0,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Ale05 Ale         [1,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Ale06 Ale         [.,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Ale08 Ale         [.,2,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Ale13 Ale         [0,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Ale15 Ale         [1,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Ale16 Ale         [0,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Ale17 Ale         [1,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Ale18 Ale         [0,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Ale19 Ale         [2,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 166 more rows</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create a gen_tibble from a .vcf file</span></span></span>
+<span class="r-in"><span><span class="va">vcf_path</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"anolis"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"punctatus_t70_s10_n46_filtered.recode.vcf.gz"</span>,</span></span>
+<span class="r-in"><span>    package <span class="op">=</span> <span class="st">"tidypopgen"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">gen_tibble</span><span class="op">(</span><span class="va">vcf_path</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"anolis_"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 3249 loci</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble:     46 × 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    id                 genotypes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> punc_BM288         [0,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> punc_GN71          [2,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> punc_H1907         [0,2,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> punc_H1911         [0,2,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> punc_H2546         [0,1,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> punc_IBSPCRIB0361  [0,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> punc_ICST764       [0,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> punc_JFT459        [0,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> punc_JFT773        [0,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> punc_LG1299        [0,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 36 more rows</span></span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Create a gen_tibble from a matrix of genotypes:</span></span></span>
 <span class="r-in"><span><span class="va">test_indiv_meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span><span class="op">)</span>,</span></span>
@@ -220,22 +264,21 @@ missing alleles will be converted from 'X' to NA</p></li>
 <span class="r-in"><span>  allele_alt <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T"</span>, <span class="st">"C"</span>, <span class="cn">NA</span>, <span class="st">"C"</span>, <span class="st">"G"</span>, <span class="st">"A"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">test_gt</span> <span class="op">&lt;-</span> <span class="fu">gen_tibble</span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="fu">gen_tibble</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  x <span class="op">=</span> <span class="va">test_genotypes</span>,</span></span>
 <span class="r-in"><span>  loci <span class="op">=</span> <span class="va">test_loci</span>,</span></span>
 <span class="r-in"><span>  indiv_meta <span class="op">=</span> <span class="va">test_indiv_meta</span>,</span></span>
 <span class="r-in"><span>  valid_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"T"</span>, <span class="st">"C"</span>, <span class="st">"G"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">test_gt</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 6 loci</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble:     3 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   id    population  genotypes</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> a     pop1                1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> b     pop1                2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> c     pop2                3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> a     pop1        [1,1,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> b     pop1        [2,1,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> c     pop2        [2,2,...]</span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

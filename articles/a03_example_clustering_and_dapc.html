@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,16 +108,16 @@ and compressed it to a vcf.gz file.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     46 × 2</span></span></span>
 <span><span class="co">#&gt;    id                 genotypes</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> punc_BM288                 1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> punc_GN71                  2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> punc_H1907                 3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> punc_H1911                 4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> punc_H2546                 5</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> punc_IBSPCRIB0361          6</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> punc_ICST764               7</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> punc_JFT459                8</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> punc_JFT773                9</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> punc_LG1299               10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> punc_BM288         [0,0,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> punc_GN71          [2,0,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> punc_H1907         [0,2,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> punc_H1911         [0,2,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> punc_H2546         [0,1,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> punc_IBSPCRIB0361  [0,0,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> punc_ICST764       [0,0,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> punc_JFT459        [0,0,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> punc_JFT773        [0,0,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> punc_LG1299        [0,0,...]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 36 more rows</span></span></span></code></pre></div>
 <p>We can see that we have 46 individuals, from 3249 loci. Note that we
 don’t have any information on population from the vcf. That information
@@ -127,30 +127,55 @@ information manually. Let’s start by reading the file:</p>
 <code class="sourceCode R"><span><span class="va">pops_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"/extdata/anolis/punctatus_n46_meta.csv"</span>,</span>
 <span>  package <span class="op">=</span> <span class="st">"tidypopgen"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">pops</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="va">pops_path</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Rows: </span><span style="color: #0000BB;">46</span> <span style="font-weight: bold;">Columns: </span><span style="color: #0000BB;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Column specification</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; <span style="font-weight: bold;">Delimiter:</span> ","</span></span>
-<span><span class="co">#&gt; <span style="color: #BB0000;">chr</span> (3): id, population, pop</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">dbl</span> (2): longitude, latitude</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `spec()` to retrieve the full column specification for this data.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Specify the column types or set `show_col_types = FALSE` to quiet this message.</span></span>
+<span><span class="va">pops</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">pops_path</span><span class="op">)</span></span>
 <span><span class="va">pops</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 46 × 5</span></span></span>
-<span><span class="co">#&gt;    id                population       longitude latitude pop  </span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> punc_BM288        Amazonian_Forest     -<span style="color: #BB0000;">51.8</span>    -<span style="color: #BB0000;">3.32</span> Eam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> punc_GN71         Amazonian_Forest     -<span style="color: #BB0000;">54.6</span>    -<span style="color: #BB0000;">9.73</span> Eam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> punc_H1907        Amazonian_Forest     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.45</span> Wam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> punc_H1911        Amazonian_Forest     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.44</span> Wam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> punc_H2546        Amazonian_Forest     -<span style="color: #BB0000;">65.4</span>    -<span style="color: #BB0000;">9.60</span> Wam  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> punc_IBSPCRIB0361 Atlantic_Forest      -<span style="color: #BB0000;">46.0</span>   -<span style="color: #BB0000;">23.8</span>  AF   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> punc_ICST764      Atlantic_Forest      -<span style="color: #BB0000;">36.3</span>    -<span style="color: #BB0000;">9.81</span> AF   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> punc_JFT459       Atlantic_Forest      -<span style="color: #BB0000;">40.5</span>   -<span style="color: #BB0000;">20.3</span>  AF   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> punc_JFT773       Atlantic_Forest      -<span style="color: #BB0000;">40.5</span>   -<span style="color: #BB0000;">20.0</span>  AF   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> punc_LG1299       Atlantic_Forest      -<span style="color: #BB0000;">39.1</span>   -<span style="color: #BB0000;">15.3</span>  AF   </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 36 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt;                   id       population longitude latitude pop</span></span>
+<span><span class="co">#&gt; 1         punc_BM288 Amazonian_Forest  -51.8448  -3.3228 Eam</span></span>
+<span><span class="co">#&gt; 2          punc_GN71 Amazonian_Forest  -54.6064  -9.7307 Eam</span></span>
+<span><span class="co">#&gt; 3         punc_H1907 Amazonian_Forest  -64.8247  -9.4459 Wam</span></span>
+<span><span class="co">#&gt; 4         punc_H1911 Amazonian_Forest  -64.8203  -9.4358 Wam</span></span>
+<span><span class="co">#&gt; 5         punc_H2546 Amazonian_Forest  -65.3576  -9.5979 Wam</span></span>
+<span><span class="co">#&gt; 6  punc_IBSPCRIB0361  Atlantic_Forest  -46.0247 -23.7564  AF</span></span>
+<span><span class="co">#&gt; 7       punc_ICST764  Atlantic_Forest  -36.2838  -9.8092  AF</span></span>
+<span><span class="co">#&gt; 8        punc_JFT459  Atlantic_Forest  -40.5219 -20.2811  AF</span></span>
+<span><span class="co">#&gt; 9        punc_JFT773  Atlantic_Forest  -40.5200 -19.9600  AF</span></span>
+<span><span class="co">#&gt; 10       punc_LG1299  Atlantic_Forest  -39.0694 -15.2696  AF</span></span>
+<span><span class="co">#&gt; 11  punc_LSUMZH12577 Amazonian_Forest  -75.8069  -0.2172 Wam</span></span>
+<span><span class="co">#&gt; 12  punc_LSUMZH12751 Amazonian_Forest  -75.8069  -0.2172 Wam</span></span>
+<span><span class="co">#&gt; 13  punc_LSUMZH13910 Amazonian_Forest  -72.7677  -8.2509 Eam</span></span>
+<span><span class="co">#&gt; 14  punc_LSUMZH14100 Amazonian_Forest  -65.7161  -8.3464 Wam</span></span>
+<span><span class="co">#&gt; 15  punc_LSUMZH14336 Amazonian_Forest  -54.8416  -3.1354 Eam</span></span>
+<span><span class="co">#&gt; 16  punc_LSUMZH15476 Amazonian_Forest  -64.5500 -10.3167 Wam</span></span>
+<span><span class="co">#&gt; 17    punc_MPEG20846 Amazonian_Forest  -56.1842  -2.6096 Eam</span></span>
+<span><span class="co">#&gt; 18    punc_MPEG21348 Amazonian_Forest  -64.3915 -11.6996 Wam</span></span>
+<span><span class="co">#&gt; 19    punc_MPEG22415 Amazonian_Forest  -48.2948  -1.2169 Eam</span></span>
+<span><span class="co">#&gt; 20    punc_MPEG24758 Amazonian_Forest  -56.3706  -1.7731 Eam</span></span>
+<span><span class="co">#&gt; 21    punc_MPEG26102 Amazonian_Forest  -51.6418  -1.9969 Eam</span></span>
+<span><span class="co">#&gt; 22    punc_MPEG28489 Amazonian_Forest  -56.2256  -2.5475 Eam</span></span>
+<span><span class="co">#&gt; 23    punc_MPEG29314 Amazonian_Forest  -59.0495  -2.9096 Eam</span></span>
+<span><span class="co">#&gt; 24    punc_MPEG29943 Amazonian_Forest  -55.6771  -4.1144 Eam</span></span>
+<span><span class="co">#&gt; 25     punc_MTR05978  Atlantic_Forest  -39.5233 -15.1547  AF</span></span>
+<span><span class="co">#&gt; 26     punc_MTR12338  Atlantic_Forest  -40.0804 -19.4483  AF</span></span>
+<span><span class="co">#&gt; 27     punc_MTR12511  Atlantic_Forest  -39.8942 -19.0564  AF</span></span>
+<span><span class="co">#&gt; 28     punc_MTR15267  Atlantic_Forest  -42.6216 -22.4354  AF</span></span>
+<span><span class="co">#&gt; 29     punc_MTR17744  Atlantic_Forest  -42.5333 -19.6411  AF</span></span>
+<span><span class="co">#&gt; 30     punc_MTR18550 Amazonian_Forest  -61.8135  -4.3074 Wam</span></span>
+<span><span class="co">#&gt; 31     punc_MTR20798 Amazonian_Forest  -61.1451   4.4621 Eam</span></span>
+<span><span class="co">#&gt; 32     punc_MTR21474 Amazonian_Forest  -59.9494  -2.9979 Eam</span></span>
+<span><span class="co">#&gt; 33     punc_MTR21545  Atlantic_Forest  -40.1473 -19.0556  AF</span></span>
+<span><span class="co">#&gt; 34     punc_MTR25584 Amazonian_Forest  -63.6281 -10.7868 Wam</span></span>
+<span><span class="co">#&gt; 35     punc_MTR28048 Amazonian_Forest  -73.6575  -7.4424 Eam</span></span>
+<span><span class="co">#&gt; 36     punc_MTR28401 Amazonian_Forest  -73.7214  -7.5016 Eam</span></span>
+<span><span class="co">#&gt; 37     punc_MTR28593 Amazonian_Forest  -67.6063 -10.0679 Eam</span></span>
+<span><span class="co">#&gt; 38     punc_MTR34227  Atlantic_Forest  -39.6611 -15.8958  AF</span></span>
+<span><span class="co">#&gt; 39     punc_MTR34414  Atlantic_Forest  -39.0700 -16.4420  AF</span></span>
+<span><span class="co">#&gt; 40    punc_MTR976723 Amazonian_Forest  -53.2564 -13.1833 Eam</span></span>
+<span><span class="co">#&gt; 41    punc_MTR978312 Amazonian_Forest  -51.2000  -9.9000 Eam</span></span>
+<span><span class="co">#&gt; 42     punc_MTRX1468  Atlantic_Forest  -41.7192 -20.9031  AF</span></span>
+<span><span class="co">#&gt; 43     punc_MTRX1478  Atlantic_Forest  -43.2547 -22.9712  AF</span></span>
+<span><span class="co">#&gt; 44    punc_MUFAL9635  Atlantic_Forest  -35.7099  -9.5073  AF</span></span>
+<span><span class="co">#&gt; 45       punc_PJD409 Amazonian_Forest  -57.3956  -5.8174 Wam</span></span>
+<span><span class="co">#&gt; 46   punc_UNIBAN1670 Amazonian_Forest  -63.2375 -10.2987 Wam</span></span></code></pre></div>
 <p>We can now attempt to join the tables. We recommend using a
 <code>left_join</code> to do so, rather than <code>cbind</code> or
 <code>bind_cols</code>, as the latter functions assume that the two
@@ -165,7 +190,7 @@ the wrong data due to mismatched ordering.</p>
 <span><span class="co">#&gt; Columns: 6</span></span>
 <span><span class="co">#&gt; A tibble: 46 × 6</span></span>
 <span><span class="co">#&gt; $ id         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "punc_BM288"<span style="color: #949494;">, </span>"punc_GN71"<span style="color: #949494;">, </span>"punc_H1907"<span style="color: #949494;">, </span>"punc_H1911"<span style="color: #949494;">, </span>"pun…</span></span>
-<span><span class="co">#&gt; $ genotypes  <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span> 1<span style="color: #949494;">, </span>2<span style="color: #949494;">, </span>3<span style="color: #949494;">, </span>4<span style="color: #949494;">, </span>5<span style="color: #949494;">, </span>6<span style="color: #949494;">, </span>7<span style="color: #949494;">, </span>8<span style="color: #949494;">, </span>9<span style="color: #949494;">, </span>10<span style="color: #949494;">, </span>11<span style="color: #949494;">, </span>12<span style="color: #949494;">, </span>13<span style="color: #949494;">, </span>14<span style="color: #949494;">, </span>15<span style="color: #949494;">, </span>16<span style="color: #949494;">,</span>…</span></span>
+<span><span class="co">#&gt; $ genotypes  <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span> [0,0,...]<span style="color: #949494;">, </span>[2,0,...]<span style="color: #949494;">, </span>[0,2,...]<span style="color: #949494;">, </span>[0,2,...]<span style="color: #949494;">, </span>[0,1,...]<span style="color: #949494;">,</span>…</span></span>
 <span><span class="co">#&gt; $ population <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "Amazonian_Forest"<span style="color: #949494;">, </span>"Amazonian_Forest"<span style="color: #949494;">, </span>"Amazonian_Forest"<span style="color: #949494;">,</span>…</span></span>
 <span><span class="co">#&gt; $ longitude  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -51.8448<span style="color: #949494;">, </span>-54.6064<span style="color: #949494;">, </span>-64.8247<span style="color: #949494;">, </span>-64.8203<span style="color: #949494;">, </span>-65.3576<span style="color: #949494;">, </span>-46.0247<span style="color: #949494;">,</span>…</span></span>
 <span><span class="co">#&gt; $ latitude   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -3.3228<span style="color: #949494;">, </span>-9.7307<span style="color: #949494;">, </span>-9.4459<span style="color: #949494;">, </span>-9.4358<span style="color: #949494;">, </span>-9.5979<span style="color: #949494;">, </span>-23.7564<span style="color: #949494;">, </span>-9.8…</span></span>
@@ -192,16 +217,16 @@ Once we have done that, our <code>gen_tibble</code> will act as an
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     46 × 7</span></span></span>
 <span><span class="co">#&gt;    id    genotypes population longitude latitude pop              geometry</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;vctr_SN&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;POINT [°]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> punc…         1 Amazonian…     -<span style="color: #BB0000;">51.8</span>    -<span style="color: #BB0000;">3.32</span> Eam    (-51.8448 -3.3228)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> punc…         2 Amazonian…     -<span style="color: #BB0000;">54.6</span>    -<span style="color: #BB0000;">9.73</span> Eam    (-54.6064 -9.7307)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> punc…         3 Amazonian…     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.45</span> Wam    (-64.8247 -9.4459)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> punc…         4 Amazonian…     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.44</span> Wam    (-64.8203 -9.4358)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> punc…         5 Amazonian…     -<span style="color: #BB0000;">65.4</span>    -<span style="color: #BB0000;">9.60</span> Wam    (-65.3576 -9.5979)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> punc…         6 Atlantic_…     -<span style="color: #BB0000;">46.0</span>   -<span style="color: #BB0000;">23.8</span>  AF    (-46.0247 -23.7564)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> punc…         7 Atlantic_…     -<span style="color: #BB0000;">36.3</span>    -<span style="color: #BB0000;">9.81</span> AF     (-36.2838 -9.8092)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> punc…         8 Atlantic_…     -<span style="color: #BB0000;">40.5</span>   -<span style="color: #BB0000;">20.3</span>  AF    (-40.5219 -20.2811)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> punc…         9 Atlantic_…     -<span style="color: #BB0000;">40.5</span>   -<span style="color: #BB0000;">20.0</span>  AF        (-40.52 -19.96)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> punc…        10 Atlantic_…     -<span style="color: #BB0000;">39.1</span>   -<span style="color: #BB0000;">15.3</span>  AF    (-39.0694 -15.2696)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> punc… [0,0,...] Amazonian…     -<span style="color: #BB0000;">51.8</span>    -<span style="color: #BB0000;">3.32</span> Eam    (-51.8448 -3.3228)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> punc… [2,0,...] Amazonian…     -<span style="color: #BB0000;">54.6</span>    -<span style="color: #BB0000;">9.73</span> Eam    (-54.6064 -9.7307)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> punc… [0,2,...] Amazonian…     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.45</span> Wam    (-64.8247 -9.4459)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> punc… [0,2,...] Amazonian…     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.44</span> Wam    (-64.8203 -9.4358)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> punc… [0,1,...] Amazonian…     -<span style="color: #BB0000;">65.4</span>    -<span style="color: #BB0000;">9.60</span> Wam    (-65.3576 -9.5979)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> punc… [0,0,...] Atlantic_…     -<span style="color: #BB0000;">46.0</span>   -<span style="color: #BB0000;">23.8</span>  AF    (-46.0247 -23.7564)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> punc… [0,0,...] Atlantic_…     -<span style="color: #BB0000;">36.3</span>    -<span style="color: #BB0000;">9.81</span> AF     (-36.2838 -9.8092)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> punc… [0,0,...] Atlantic_…     -<span style="color: #BB0000;">40.5</span>   -<span style="color: #BB0000;">20.3</span>  AF    (-40.5219 -20.2811)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> punc… [0,0,...] Atlantic_…     -<span style="color: #BB0000;">40.5</span>   -<span style="color: #BB0000;">20.0</span>  AF        (-40.52 -19.96)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> punc… [0,0,...] Atlantic_…     -<span style="color: #BB0000;">39.1</span>   -<span style="color: #BB0000;">15.3</span>  AF    (-39.0694 -15.2696)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 36 more rows</span></span></span></code></pre></div>
 <p>To visualise our samples, we can create a map of South America using
 the <code>rnaturalearth</code> package. We will use the
@@ -604,12 +629,12 @@ method:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># Groups:   population [2]</span></span></span>
 <span><span class="co">#&gt;   id     genotypes population longitude latitude pop              geometry</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;vctr_SN&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;POINT [°]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> punc_…         1 Amazonian…     -<span style="color: #BB0000;">51.8</span>    -<span style="color: #BB0000;">3.32</span> Eam    (-51.8448 -3.3228)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> punc_…         2 Amazonian…     -<span style="color: #BB0000;">54.6</span>    -<span style="color: #BB0000;">9.73</span> Eam    (-54.6064 -9.7307)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> punc_…         3 Amazonian…     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.45</span> Wam    (-64.8247 -9.4459)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> punc_…         4 Amazonian…     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.44</span> Wam    (-64.8203 -9.4358)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> punc_…         5 Amazonian…     -<span style="color: #BB0000;">65.4</span>    -<span style="color: #BB0000;">9.60</span> Wam    (-65.3576 -9.5979)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> punc_…         6 Atlantic_…     -<span style="color: #BB0000;">46.0</span>   -<span style="color: #BB0000;">23.8</span>  AF    (-46.0247 -23.7564)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> punc_… [0,0,...] Amazonian…     -<span style="color: #BB0000;">51.8</span>    -<span style="color: #BB0000;">3.32</span> Eam    (-51.8448 -3.3228)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> punc_… [2,0,...] Amazonian…     -<span style="color: #BB0000;">54.6</span>    -<span style="color: #BB0000;">9.73</span> Eam    (-54.6064 -9.7307)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> punc_… [0,2,...] Amazonian…     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.45</span> Wam    (-64.8247 -9.4459)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> punc_… [0,2,...] Amazonian…     -<span style="color: #BB0000;">64.8</span>    -<span style="color: #BB0000;">9.44</span> Wam    (-64.8203 -9.4358)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> punc_… [0,1,...] Amazonian…     -<span style="color: #BB0000;">65.4</span>    -<span style="color: #BB0000;">9.60</span> Wam    (-65.3576 -9.5979)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> punc_… [0,0,...] Atlantic_…     -<span style="color: #BB0000;">46.0</span>   -<span style="color: #BB0000;">23.8</span>  AF    (-46.0247 -23.7564)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 36 more variables: .rownames &lt;chr&gt;, .fittedPC1 &lt;dbl&gt;, .fittedPC2 &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .fittedPC3 &lt;dbl&gt;, .fittedPC4 &lt;dbl&gt;, .fittedPC5 &lt;dbl&gt;, .fittedPC6 &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   .fittedPC7 &lt;dbl&gt;, .fittedPC8 &lt;dbl&gt;, .fittedPC9 &lt;dbl&gt;, .fittedPC10 &lt;dbl&gt;,</span></span></span>
@@ -627,10 +652,10 @@ format, which is more suitable for plotting:</p>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> punc_BM288 Amazonian_Forest .Q1     0.000<span style="text-decoration: underline;">019</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> punc_BM288 Amazonian_Forest .Q2     0.000<span style="text-decoration: underline;">01</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> punc_BM288 Amazonian_Forest .Q3     1.00    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> punc_BM288 Amazonian_Forest .Q3     1.000   </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> punc_GN71  Amazonian_Forest .Q1     0.000<span style="text-decoration: underline;">01</span> </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> punc_GN71  Amazonian_Forest .Q2     0.000<span style="text-decoration: underline;">01</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> punc_GN71  Amazonian_Forest .Q3     1.00</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> punc_GN71  Amazonian_Forest .Q3     1.000</span></span></code></pre></div>
 <p>And now we can use <code>ggplot2</code> directly to generate our
 custom plot:</p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
