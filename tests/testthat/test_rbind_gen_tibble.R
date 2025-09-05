@@ -379,7 +379,7 @@ test_that("Duplicated position does not crash rbind", {
 
   # When position is duplicated, we get an error
   expect_error(rbind_dry_run(test_gt, test_gt2,
-    use_position = TRUE, #nolint
+    use_position = TRUE, # nolint
     flip_strand = TRUE, quiet = TRUE
   ), "The reference gen_tibble contains duplicated loci")
 
@@ -424,7 +424,7 @@ test_that("Duplicated position does not crash rbind", {
   )
 
   expect_error(rbind_dry_run(test_gt, test_gt2,
-    use_position = FALSE, #nolint
+    use_position = FALSE, # nolint
     flip_strand = TRUE, quiet = TRUE
   ), "The reference gen_tibble contains duplicated loci")
   expect_error(
