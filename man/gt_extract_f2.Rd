@@ -116,10 +116,7 @@ f2-statistics (default \code{TRUE})}
 SNP metadata (invisibly)
 }
 \description{
-This function prepares data for various \emph{ADMIXTOOLS 2} functions from the
-package \emph{ADMIXTOOLS 2}. It takes a \code{\link{gen_tibble}}, computes allele
-frequencies and blocked f2-statistics, and writes the results to \code{outdir}. It
-is equivalent to \code{admixtools::extract_f2()}.
+Compute and store blocked f2 statistics for ADMIXTOOLS 2
 }
 \examples{
 \dontshow{if (rlang::is_installed("admixtools")) withAutoprint(\{ # examplesIf}
@@ -134,4 +131,14 @@ f2_path <- tempfile()
 gt_extract_f2(lobsters, outdir = f2_path, quiet = TRUE)
 admixtools::f2_from_precomp(f2_path, verbose = FALSE)
 \dontshow{\}) # examplesIf}
+}
+\references{
+Maier R, Patterson N (2024). admixtools: Inferring demographic
+history from genetic data. R package version 2.0.4,
+https://github.com/uqrmaie1/admixtools.
+
+This function prepares data for various \emph{ADMIXTOOLS 2} functions from the
+package \emph{ADMIXTOOLS 2}. It takes a \code{\link{gen_tibble}}, computes allele
+frequencies and blocked f2-statistics, and writes the results to \code{outdir}. It
+is equivalent to \code{admixtools::extract_f2()}.
 }
