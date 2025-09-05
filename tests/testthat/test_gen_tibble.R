@@ -1092,6 +1092,7 @@ test_that("new infrastructure for double NA", {
   # Test with gt from file
   file <- tempfile()
   plink_files <- gt_as_plink(test_tibble, file = file)
+  on.exit(unlink(plink_files), add = TRUE)
 
   expect_warning(
     gen_tibble(

@@ -326,7 +326,7 @@ test_that("rbind warning when id is duplicated in bigsnp object", {
   )
 })
 
-test_that("Duplicated position does not crash rbind", {
+test_that("Duplicated loci trigger clear errors (position and name)", {
   # Create two datasets
 
   test_indiv_meta <- data.frame(
@@ -382,7 +382,6 @@ test_that("Duplicated position does not crash rbind", {
     use_position = TRUE, # nolint
     flip_strand = TRUE, quiet = TRUE
   ), "The reference gen_tibble contains duplicated loci")
-
   expect_error(rbind(test_gt, test_gt2,
     use_position = TRUE, # nolint
     flip_strand = TRUE,
@@ -390,6 +389,18 @@ test_that("Duplicated position does not crash rbind", {
     backingfile = tempfile()
   ), "The reference gen_tibble contains duplicated loci")
 
+  # When target position is duplicated, we get an error
+  expect_error(rbind_dry_run(test_gt2, test_gt,
+    use_position = TRUE, # nolint
+    flip_strand = TRUE, quiet = TRUE
+  ), "The target gen_tibble contains duplicated loci")
+
+  expect_error(rbind(test_gt2, test_gt,
+    use_position = TRUE, # nolint
+    flip_strand = TRUE,
+    quiet = TRUE,
+    backingfile = tempfile()
+  ), "The target gen_tibble contains duplicated loci")
 
   # test duplicated name
 
@@ -423,6 +434,7 @@ test_that("Duplicated position does not crash rbind", {
     quiet = TRUE
   )
 
+  # When reference name is duplicated, we get an error
   expect_error(rbind_dry_run(test_gt, test_gt2,
     use_position = FALSE, # nolint
     flip_strand = TRUE, quiet = TRUE
@@ -433,5 +445,17 @@ test_that("Duplicated position does not crash rbind", {
       flip_strand = TRUE, quiet = TRUE, backingfile = tempfile()
     ),
     "The reference gen_tibble contains duplicated loci"
+  )
+  # When target name is duplicated, we get an error
+  expect_error(rbind_dry_run(test_gt2, test_gt,
+    use_position = FALSE, # nolint
+    flip_strand = TRUE, quiet = TRUE
+  ), "The target gen_tibble contains duplicated loci")
+  expect_error(
+    rbind(test_gt2, test_gt,
+      use_position = FALSE,
+      flip_strand = TRUE, quiet = TRUE, backingfile = tempfile()
+    ),
+    "The target gen_tibble contains duplicated loci"
   )
 })

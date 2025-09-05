@@ -142,13 +142,13 @@ rbind.gen_tbl <- function(
   }
 
   # check for duplicates within each dataset
-  if (any(duplicated(loci_names(target)))) {
+  if (anyDuplicated(loci_names(target)) > 0) {
     stop(
       "The target gen_tibble contains duplicated loci. ",
       "Use 'find_duplicated_loci()' to identify and remove them."
     )
   }
-  if (any(duplicated(loci_names(ref)))) {
+  if (anyDuplicated(loci_names(ref)) > 0) {
     stop(
       "The reference gen_tibble contains duplicated loci. ",
       "Use 'find_duplicated_loci()' to identify and remove them."
