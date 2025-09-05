@@ -220,6 +220,30 @@ gen_tibble.character <-
     # check chromosome is character
     show_loci(x_gt) <- check_valid_loci(show_loci(x_gt))
 
+    # check alleles
+    loci <- show_loci(x_gt)
+    double_na <- apply(loci, 1, function(x) is.na(x[6]) && is.na(x[7]))
+
+    if (any(double_na)) {
+      doubles <- which(double_na)
+      check_missing <- x_gt %>%
+        select_loci(all_of(doubles)) %>%
+        loci_missingness()
+      if (any(check_missing < 1)) {
+        stop(paste(
+          "Some loci are missing both reference and alternate alleles.",
+          "Genotypes are not missing at these loci.",
+          "Please check the loci and genotype data."
+        ))
+      } else {
+        warning(
+          "Your data contain loci with no genotypes or allele ",
+          "information. Use loci_missingness() to identify them ",
+          "and select_loci() to remove them."
+        )
+      }
+    }
+
     file_in_use <- gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
   }
@@ -423,6 +447,31 @@ gen_tibble.matrix <- function(
   # create a chr_int column
   show_loci(new_gen_tbl)$chr_int <-
     cast_chromosome_to_int(show_loci(new_gen_tbl)$chromosome)
+
+  # check alleles
+  loci <- show_loci(new_gen_tbl)
+  double_na <- apply(loci, 1, function(x) is.na(x[6]) && is.na(x[7]))
+
+  if (any(double_na)) {
+    doubles <- which(double_na)
+    check_missing <- new_gen_tbl %>%
+      select_loci(all_of(doubles)) %>%
+      loci_missingness()
+    if (any(check_missing < 1)) {
+      stop(paste(
+        "Some loci are missing both reference and alternate alleles.",
+        "Genotypes are not missing at these loci.",
+        "Please check the loci and genotype data."
+      ))
+    } else {
+      warning(
+        "Your data contain loci with no genotypes or allele ",
+        "information. Use loci_missingness() to identify them ",
+        "and select_loci() to remove them."
+      )
+    }
+  }
+
 
   files_in_use <- gt_save(new_gen_tbl, quiet = quiet) # nolint
   return(new_gen_tbl)

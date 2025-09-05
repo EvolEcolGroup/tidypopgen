@@ -103,6 +103,20 @@ rbind_dry_run <- function(
       )
   }
 
+  # check for duplicates within each dataset
+  if (any(duplicated(target_df$name))) {
+    stop(
+      "The target gen_tibble contains duplicated loci. ",
+      "Use 'find_duplicated_loci()' to identify and remove them."
+    )
+  }
+  if (any(duplicated(ref_df$name))) {
+    stop(
+      "The reference gen_tibble contains duplicated loci. ",
+      "Use 'find_duplicated_loci()' to identify and remove them."
+    )
+  }
+
   # rename the alleles
   ref_df <- ref_df %>% rename(allele_1 = "allele_alt", allele_2 = "allele_ref")
   target_df <- target_df %>%
