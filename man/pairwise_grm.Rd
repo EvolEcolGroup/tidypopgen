@@ -44,3 +44,6 @@ example_gt \%>\% pairwise_grm()
 allele_sharing <- example_gt \%>\% pairwise_allele_sharing(as_matrix = TRUE)
 example_gt \%>\% pairwise_grm(allele_sharing_mat = allele_sharing)
 }
+\seealso{
+\code{\link[hierfstat:beta.dosage]{hierfstat::beta.dosage()}}
+}

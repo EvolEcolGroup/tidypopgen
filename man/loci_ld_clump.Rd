@@ -71,7 +71,10 @@ a boolean vector indicating whether the SNP should be kept (if
 This function uses clumping to remove SNPs at high LD. When used with its
 default options, clumping based on MAF is similar to standard pruning (as
 done by PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a
-better spread of SNPs over the chromosome.
+better spread of SNPs over the chromosome. This function is a wrapper around
+\code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}}. See
+https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html for more
+information on the differences between pruning and clumping.
 }
 \details{
 Any missing values in the genotypes of a \code{gen_tibble} passed to
@@ -92,4 +95,7 @@ example_gt \%>\% loci_ld_clump()
 # To return a vector of SNP indices to be kept
 example_gt \%>\% loci_ld_clump(return_id = TRUE)
 \dontshow{\}) # examplesIf}
+}
+\seealso{
+\code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}} which this function wraps.
 }

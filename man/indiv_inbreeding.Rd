@@ -42,3 +42,7 @@ example_gt <- load_example_gt("gen_tbl")
 example_gt \%>\% indiv_inbreeding(method = "WG17")
 
 }
+\references{
+Weir, BS and Goudet J (2017) A Unified Characterization of
+Population Structure and Relatedness. Genetics (2017) 206:2085
+}

@@ -48,3 +48,6 @@ snp_allele_sharing(X$genotypes, ind.row = 1:5, ind.col = 1:5)
 snp_allele_sharing(X$genotypes, block.size = 2)
 
 }
+\seealso{
+\code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} \code{\link[hierfstat:matching]{hierfstat::matching()}}
+}

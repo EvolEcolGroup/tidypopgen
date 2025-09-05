@@ -114,3 +114,6 @@ Thia, J. A. (2023). Guidelines for standardizing the application of
 discriminant analysis of principal components to genotype data. Molecular
 Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
 }
+\seealso{
+\code{\link[=gt_cluster_pca]{gt_cluster_pca()}} \code{\link[=gt_cluster_pca_best_k]{gt_cluster_pca_best_k()}} \code{\link[adegenet:dapc]{adegenet::dapc()}}
+}

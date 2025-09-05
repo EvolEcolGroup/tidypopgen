@@ -55,6 +55,7 @@
 #'   are a lot of loci and many dimensions.
 #' @returns an object of class [adegenet::dapc]
 #' @export
+#' @seealso [gt_cluster_pca()] [gt_cluster_pca_best_k()] [adegenet::dapc()]
 #' @examples
 #' # Create a gen_tibble of lobster genotypes
 #' bed_file <-

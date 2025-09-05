@@ -43,3 +43,6 @@ example_gt \%>\% pop_fst(allele_sharing_mat = allele_sharing_mat)
 Weir, BS and Goudet J (2017) A Unified Characterization of
 Population Structure and Relatedness. Genetics (2017) 206:2085
 }
+\seealso{
+\code{\link[hierfstat:fs.dosage]{hierfstat::fst.dosage()}}
+}

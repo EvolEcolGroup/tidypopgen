@@ -13,6 +13,7 @@
 #' for which .sel_logical is TRUE will be selected; NA will be treated as FALSE.
 #' @returns a subset of the list of loci in the `gen_tibble`
 #' @export
+#' @seealso [dplyr::select_if()]
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'

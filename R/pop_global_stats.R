@@ -94,6 +94,7 @@
 #' @returns a tibble of population statistics, with populations as rows and
 #'   statistics as columns
 #' @export
+#' @seealso [hierfstat::basic.stats()]
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)

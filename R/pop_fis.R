@@ -26,6 +26,7 @@
 #' @returns a vector of population specific fis (plus the global value if
 #'   `include_global=TRUE`)
 #' @export
+#' @seealso [hierfstat::basic.stats()] [hierfstat::fis.dosage()]
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)

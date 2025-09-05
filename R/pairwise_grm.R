@@ -17,6 +17,7 @@
 #'   allele sharing matrix.
 #' @returns a matrix of GR between all pairs of individuals
 #' @export
+#' @seealso [hierfstat::beta.dosage()]
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'

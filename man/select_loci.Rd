@@ -40,3 +40,6 @@ example_gt_subset <- example_gt \%>\% select_loci(c(4, 2, 1))
 show_loci(example_gt_subset)
 
 }
+\seealso{
+\code{\link[dplyr:select]{dplyr::select()}}
+}

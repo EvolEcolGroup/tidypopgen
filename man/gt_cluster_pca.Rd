@@ -96,3 +96,8 @@ gt_cluster_pca(
 )
 
 }
+\references{
+Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
+of principal components: a new method for the analysis of genetically
+structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
+}

@@ -14,6 +14,7 @@
 #' @returns a vector of population specific Fst (plus the global value if
 #'   `include_global=TRUE`)
 #' @export
+#' @seealso [hierfstat::fst.dosage()]
 #' @examples
 #' example_gt <- load_example_gt("grouped_gen_tbl")
 #'

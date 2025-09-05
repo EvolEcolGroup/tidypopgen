@@ -1,6 +1,6 @@
 #' Run SNMF from R in tidypopgen
 #'
-#' @details This is a wrapper for the function snmf from R package LEA.
+#' @details This is a wrapper for [LEA::snmf()].
 #'
 #' @param x a `gen_tibble` or a character giving the path to the input geno file
 #' @param k an integer giving the number of clusters
@@ -30,6 +30,7 @@
 #' - `id` the id column of the input `gen_tibble` (if applicable)
 #' - `group` the group column of the input `gen_tibble` (if applicable)
 #' @export
+#' @seealso [LEA::snmf()]
 #' @examplesIf rlang::is_installed("LEA")
 #' # run the example only if we have the package installed
 #' example_gt <- load_example_gt("gen_tbl")

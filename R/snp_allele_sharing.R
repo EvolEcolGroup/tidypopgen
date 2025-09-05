@@ -17,6 +17,7 @@
 #'   the columns.
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
+#' @seealso [pairwise_allele_sharing()] [hierfstat::matching()]
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'
