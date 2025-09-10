@@ -179,6 +179,10 @@ find_duplicated_loci <- function(.x,
       return(FALSE)
     }
   } else {
-    return(TRUE)
+    if (list_duplicates) {
+      return(character(0))
+    } else {
+      return(TRUE)
+    }
   }
 }

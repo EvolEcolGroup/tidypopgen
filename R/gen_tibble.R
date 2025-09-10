@@ -255,7 +255,7 @@ gen_tibble.character <-
     duplicated_names <- anyDuplicated(loci_names(x_gt))
 
     if (!allow_duplicates) {
-      if (is.character(duplicated_pos)) {
+      if (length(duplicated_pos) > 0) {
         stop(paste0(
           "Your data contain duplicated loci. ",
           "Remove them or set allow_duplicates = TRUE."
@@ -268,7 +268,7 @@ gen_tibble.character <-
         ))
       }
     } else if (allow_duplicates) {
-      if (is.character(duplicated_pos)) {
+      if (length(duplicated_pos) > 0) {
         warning(paste0(
           "You have allowed duplicated loci in your data. ",
           "Your data contain duplicated loci. ",
@@ -518,7 +518,7 @@ gen_tibble.matrix <- function(
   duplicated_names <- anyDuplicated(loci_names(new_gen_tbl))
 
   if (!allow_duplicates) {
-    if (is.character(duplicated_pos)) {
+    if (length(duplicated_pos) > 0) {
       stop(paste0(
         "Your data contain duplicated loci. ",
         "Remove them or set allow_duplicates = TRUE."
@@ -531,7 +531,7 @@ gen_tibble.matrix <- function(
       ))
     }
   } else if (allow_duplicates) {
-    if (is.character(duplicated_pos)) {
+    if (length(duplicated_pos) > 0) {
       warning(paste0(
         "You have allowed duplicated loci in your data. ",
         "Your data contain duplicated loci. ",
