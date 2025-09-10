@@ -12,6 +12,7 @@ gen_tibble(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
+  allow_duplicates = FALSE,
   quiet = FALSE
 )
 
@@ -24,6 +25,7 @@ gen_tibble(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
+  allow_duplicates = FALSE,
   quiet = FALSE
 )
 
@@ -36,6 +38,7 @@ gen_tibble(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
+  allow_duplicates = FALSE,
   quiet = FALSE
 )
 }
@@ -75,6 +78,10 @@ will be saved in the same directory as the bed or vcf file, using the same
 file name but with a different file type (.bk rather than .bed or .vcf). If
 \code{x} is a genotype matrix and \code{backingfile} is NULL, then a temporary file
 will be created (but note that R will delete it at the end of the session!)}
+
+\item{allow_duplicates}{logical. If TRUE, the tibble will
+allow duplicated loci (either in position or name). If FALSE, an error
+will be thrown if duplicated loci are found. Default is FALSE.}
 
 \item{quiet}{provide information on the files used to store the data}
 

@@ -346,12 +346,13 @@ test_that("Duplicated loci trigger clear errors (position and name)", {
     allele_ref = c("C", "T", "C", "T", "C", "G"),
     allele_alt = c("T", "C", NA, "C", "T", "A")
   )
-  test_gt <- gen_tibble(
+  expect_warning(test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
     indiv_meta = test_indiv_meta,
+    allow_duplicates = TRUE,
     quiet = TRUE
-  )
+  ), "You have allowed duplicated loci")
 
   test_indiv_meta2 <- data.frame(
     id = c("A", "B", "C"),
@@ -412,12 +413,13 @@ test_that("Duplicated loci trigger clear errors (position and name)", {
     allele_ref = c("C", "T", "C", "T", "C", "G"),
     allele_alt = c("T", "C", NA, "C", "T", "A")
   )
-  test_gt <- gen_tibble(
+  expect_warning(test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
     indiv_meta = test_indiv_meta,
+    allow_duplicates = TRUE,
     quiet = TRUE
-  )
+  ), "You have allowed duplicated loci")
 
   test_loci2 <- data.frame(
     name = paste0("rs", c(1:6)),

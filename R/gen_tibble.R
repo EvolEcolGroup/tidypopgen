@@ -61,6 +61,9 @@
 #'   file name but with a different file type (.bk rather than .bed or .vcf). If
 #'   `x` is a genotype matrix and `backingfile` is NULL, then a temporary file
 #'   will be created (but note that R will delete it at the end of the session!)
+#' @param allow_duplicates logical. If TRUE, the tibble will
+#' allow duplicated loci (either in position or name). If FALSE, an error
+#' will be thrown if duplicated loci are found. Default is FALSE.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -120,6 +123,7 @@ gen_tibble <-
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0", "."),
            backingfile = NULL,
+           allow_duplicates = FALSE,
            quiet = FALSE) {
     UseMethod("gen_tibble", x)
   }
@@ -138,6 +142,7 @@ gen_tibble.character <-
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0", "."),
            backingfile = NULL,
+           allow_duplicates = FALSE,
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
@@ -241,6 +246,40 @@ gen_tibble.character <-
           "information. Use loci_missingness() to identify them ",
           "and select_loci() to remove them."
         )
+      }
+    }
+
+    # check for duplicates
+    duplicated_pos <- find_duplicated_loci(x_gt, list_duplicates = TRUE)
+    duplicated_names <- anyDuplicated(loci_names(x_gt))
+
+    if (!allow_duplicates) {
+      if (is.character(duplicated_pos)) {
+        stop(paste0(
+          "Your data contain duplicated loci. ",
+          "Remove them or set allow_duplicates = TRUE."
+        ))
+      }
+      if (duplicated_names > 0) {
+        stop(paste0(
+          "Your data contain duplicated locus names. ",
+          "Remove them or set allow_duplicates = TRUE."
+        ))
+      }
+    } else if (allow_duplicates) {
+      if (is.character(duplicated_pos)) {
+        warning(paste0(
+          "You have allowed duplicated loci in your data. ",
+          "Your data contain duplicated loci. ",
+          "Use find_duplicated_loci(my_tibble) to select and remove them."
+        ))
+      }
+      if (duplicated_names > 0) {
+        warning(paste0(
+          "You have allowed duplicated loci in your data. ",
+          "Your data contain duplicated locus names. ",
+          "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
+        ))
       }
     }
 
@@ -364,6 +403,7 @@ gen_tibble.matrix <- function(
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
     backingfile = NULL,
+    allow_duplicates = FALSE,
     quiet = FALSE) {
   rlang::check_dots_empty()
 
@@ -472,6 +512,39 @@ gen_tibble.matrix <- function(
     }
   }
 
+  # check for duplicates
+  duplicated_pos <- find_duplicated_loci(new_gen_tbl, list_duplicates = TRUE)
+  duplicated_names <- anyDuplicated(loci_names(new_gen_tbl))
+
+  if (!allow_duplicates) {
+    if (is.character(duplicated_pos)) {
+      stop(paste0(
+        "Your data contain duplicated loci. ",
+        "Remove them or set allow_duplicates = TRUE."
+      ))
+    }
+    if (duplicated_names > 0) {
+      stop(paste0(
+        "Your data contain duplicated locus names. ",
+        "Remove them or set allow_duplicates = TRUE."
+      ))
+    }
+  } else if (allow_duplicates) {
+    if (is.character(duplicated_pos)) {
+      warning(paste0(
+        "You have allowed duplicated loci in your data. ",
+        "Your data contain duplicated loci. ",
+        "Use find_duplicated_loci(my_tibble) to select and remove them."
+      ))
+    }
+    if (duplicated_names > 0) {
+      warning(paste0(
+        "You have allowed duplicated loci in your data. ",
+        "Your data contain duplicated locus names. ",
+        "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
+      ))
+    }
+  }
 
   files_in_use <- gt_save(new_gen_tbl, quiet = quiet) # nolint
   return(new_gen_tbl)
