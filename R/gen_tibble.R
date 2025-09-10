@@ -252,30 +252,36 @@ gen_tibble.character <-
 
     # check for duplicates
     duplicated_pos <- find_duplicated_loci(x_gt, list_duplicates = TRUE)
-    duplicated_names <- anyDuplicated(loci_names(x_gt))
+    has_dup_pos <- length(duplicated_pos) > 0
+    has_dup_names <- anyDuplicated(loci_names(x_gt)) > 0
 
     if (!allow_duplicates) {
-      if (length(duplicated_pos) > 0) {
+      if (has_dup_pos || has_dup_names) {
+        files <- gt_get_file_names(x_gt)
+        if (file.exists(files[1])) file.remove(files[1])
+        if (file.exists(files[2])) file.remove(files[2])
+      }
+      if (has_dup_pos) {
         stop(paste0(
           "Your data contain duplicated loci. ",
           "Remove them or set allow_duplicates = TRUE."
         ))
       }
-      if (duplicated_names > 0) {
+      if (has_dup_names) {
         stop(paste0(
           "Your data contain duplicated locus names. ",
           "Remove them or set allow_duplicates = TRUE."
         ))
       }
-    } else if (allow_duplicates) {
-      if (length(duplicated_pos) > 0) {
+    } else {
+      if (has_dup_pos) {
         warning(paste0(
           "You have allowed duplicated loci in your data. ",
           "Your data contain duplicated loci. ",
           "Use find_duplicated_loci(my_tibble) to select and remove them."
         ))
       }
-      if (duplicated_names > 0) {
+      if (has_dup_names) {
         warning(paste0(
           "You have allowed duplicated loci in your data. ",
           "Your data contain duplicated locus names. ",
@@ -515,30 +521,36 @@ gen_tibble.matrix <- function(
 
   # check for duplicates
   duplicated_pos <- find_duplicated_loci(new_gen_tbl, list_duplicates = TRUE)
-  duplicated_names <- anyDuplicated(loci_names(new_gen_tbl))
+  has_dup_pos <- length(duplicated_pos) > 0
+  has_dup_names <- anyDuplicated(loci_names(new_gen_tbl)) > 0
 
   if (!allow_duplicates) {
-    if (length(duplicated_pos) > 0) {
+    if (has_dup_pos || has_dup_names) {
+      files <- gt_get_file_names(new_gen_tbl)
+      if (file.exists(files[1])) file.remove(files[1])
+      if (file.exists(files[2])) file.remove(files[2])
+    }
+    if (has_dup_pos) {
       stop(paste0(
         "Your data contain duplicated loci. ",
         "Remove them or set allow_duplicates = TRUE."
       ))
     }
-    if (duplicated_names > 0) {
+    if (has_dup_names) {
       stop(paste0(
         "Your data contain duplicated locus names. ",
         "Remove them or set allow_duplicates = TRUE."
       ))
     }
-  } else if (allow_duplicates) {
-    if (length(duplicated_pos) > 0) {
+  } else {
+    if (has_dup_pos) {
       warning(paste0(
         "You have allowed duplicated loci in your data. ",
         "Your data contain duplicated loci. ",
         "Use find_duplicated_loci(my_tibble) to select and remove them."
       ))
     }
-    if (duplicated_names > 0) {
+    if (has_dup_names) {
       warning(paste0(
         "You have allowed duplicated loci in your data. ",
         "Your data contain duplicated locus names. ",

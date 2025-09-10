@@ -18,10 +18,10 @@ loci are found.}
 \item{...}{other arguments passed to specific methods.}
 }
 \value{
-if \code{list_duplicates} is TRUE, returns a vector of duplicated loci.
-If \code{list_duplicates} is FALSE, returns a logical value indicating whether
-there are any duplicated loci. If \code{error_on_false} is TRUE and there are
-duplicates, an error is thrown.
+If \code{list_duplicates} is TRUE, returns a character vector of duplicated
+loci names (character(0) when none). If \code{list_duplicates} is FALSE, returns
+TRUE when no duplicates exist and FALSE when duplicates are present. If
+\code{error_on_false} is TRUE and duplicates exist, an error is thrown.
 }
 \description{
 This function finds duplicated SNPs by checking the positions within each

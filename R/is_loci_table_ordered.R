@@ -135,10 +135,10 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
 #'   loci are found.
 #' @param list_duplicates logical, if `TRUE` returns duplicated SNP names.
 #' @param ... other arguments passed to specific methods.
-#' @returns if `list_duplicates` is TRUE, returns a vector of duplicated loci.
-#'   If `list_duplicates` is FALSE, returns a logical value indicating whether
-#'   there are any duplicated loci. If `error_on_false` is TRUE and there are
-#'   duplicates, an error is thrown.
+#' @returns If `list_duplicates` is TRUE, returns a character vector of duplicated
+#'   loci names (character(0) when none). If `list_duplicates` is FALSE, returns
+#'   TRUE when no duplicates exist and FALSE when duplicates are present. If
+#'   `error_on_false` is TRUE and duplicates exist, an error is thrown.
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
