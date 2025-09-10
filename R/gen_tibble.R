@@ -60,10 +60,12 @@
 #'   will be saved in the same directory as the bed or vcf file, using the same
 #'   file name but with a different file type (.bk rather than .bed or .vcf). If
 #'   `x` is a genotype matrix and `backingfile` is NULL, then a temporary file
-#'   will be created (but note that R will delete it at the end of the session!)
-#' @param allow_duplicates logical. If TRUE, the tibble will
-#' allow duplicated loci (either in position or name). If FALSE, an error
-#' will be thrown if duplicated loci are found. Default is FALSE.
+#' will be created (but note that R will delete it at the end of the session!)
+#' @param allow_duplicates logical. If TRUE, the tibble will allow duplicated
+#'   loci (those with genomic coordinate (chromosome + position) or locus name
+#'   appearing more than once). If FALSE, an error will be thrown if duplicated
+#'   loci are found. Default is FALSE. These validations run before backing
+#'   files are saved. Default is FALSE.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -180,8 +182,7 @@ gen_tibble.character <-
     } else if (
       (tolower(file_ext(x)) == "vcf") || (tolower(file_ext(x)) == "gz")
     ) {
-      # nolint
-      return(gen_tibble_vcf(
+      x_gt <- gen_tibble_vcf(
         x = x,
         ...,
         parser = parser,
@@ -191,7 +192,7 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         quiet = quiet
-      ))
+      )
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,
@@ -283,7 +284,7 @@ gen_tibble.character <-
       }
     }
 
-    file_in_use <- gt_save_light(x_gt, quiet = quiet) # nolint
+    gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
   }
 

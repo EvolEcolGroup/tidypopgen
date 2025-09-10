@@ -37,6 +37,7 @@ gen_tibble_vcf <- function(
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles,
     backingfile = backingfile,
-    quiet = quiet
+    quiet = quiet,
+    ...
   )
 }

@@ -79,9 +79,11 @@ file name but with a different file type (.bk rather than .bed or .vcf). If
 \code{x} is a genotype matrix and \code{backingfile} is NULL, then a temporary file
 will be created (but note that R will delete it at the end of the session!)}
 
-\item{allow_duplicates}{logical. If TRUE, the tibble will
-allow duplicated loci (either in position or name). If FALSE, an error
-will be thrown if duplicated loci are found. Default is FALSE.}
+\item{allow_duplicates}{logical. If TRUE, the tibble will allow duplicated
+loci (those with genomic coordinate (chromosome + position) or locus name
+appearing more than once). If FALSE, an error will be thrown if duplicated
+loci are found. Default is FALSE. These validations run before backing
+files are saved. Default is FALSE.}
 
 \item{quiet}{provide information on the files used to store the data}
 
