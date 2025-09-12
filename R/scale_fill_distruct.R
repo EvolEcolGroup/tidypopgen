@@ -7,6 +7,7 @@
 #' @param ... further parameters to be passed to [ggplot2::scale_fill_manual()]
 #' @returns a scale constructor to be used with ggplot
 #' @export
+#' @seealso [ggplot2::scale_fill_manual()] which this function wraps.
 #' @examples
 #' library(ggplot2)
 #' # Create a gen_tibble of lobster genotypes

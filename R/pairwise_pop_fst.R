@@ -44,6 +44,7 @@
 #'   columns. If `type=pairwise`, a matrix of genome-wide pairwise Fst values is
 #'   returned.
 #' @export
+#' @seealso [hierfstat::pairwise.neifst()] [hierfstat::pairwise.neifst()]
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)

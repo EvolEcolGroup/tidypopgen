@@ -37,3 +37,6 @@ example_gt <- load_example_gt("gen_tbl")
 
 example_gt \%>\% show_ploidy()
 }
+\seealso{
+\code{\link[=indiv_ploidy]{indiv_ploidy()}}
+}

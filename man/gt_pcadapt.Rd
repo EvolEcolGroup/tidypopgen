@@ -60,3 +60,6 @@ Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
 pcadapt: an R package for genome scans for selection based on principal
 component analysis. Molecular Ecology Resources, 17(1), 67–77.
 }
+\seealso{
+\code{\link[bigsnpr:snp_pcadapt]{bigsnpr::snp_pcadapt()}} which this function wraps.
+}

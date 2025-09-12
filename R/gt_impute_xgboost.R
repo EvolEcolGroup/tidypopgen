@@ -26,6 +26,7 @@
 #' attr(missing_gt$genotypes, "imputed_errors")
 #' @returns a [gen_tibble] with imputed genotypes
 #' @export
+#' @seealso [bigsnpr::snp_fastImpute()] which this function wraps.
 #' @examplesIf rlang::is_installed(c("xgboost", "RhpcBLASctl", "data.table"))
 #' \dontshow{
 #' data.table::setDTthreads(2)

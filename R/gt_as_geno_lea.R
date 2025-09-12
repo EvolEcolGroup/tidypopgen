@@ -12,6 +12,7 @@
 #'   location of the backing files.
 #' @returns the path of the .geno file
 #' @export
+#' @seealso [LEA::geno()]
 #' @examplesIf rlang::is_installed("LEA")
 #' example_gt <- load_example_gt("gen_tbl")
 #'

@@ -40,3 +40,6 @@ example_gt_subset <- example_gt \%>\%
 show_loci(example_gt_subset)
 
 }
+\seealso{
+\code{\link[dplyr:select_all]{dplyr::select_if()}}
+}

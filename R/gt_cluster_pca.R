@@ -8,6 +8,10 @@
 #' which allows to choose the optimal k using the function
 #' [gt_cluster_pca_best_k()]. See details for a description of how to select the
 #' optimal k and vignette("adegenet-dapc") for a tutorial.
+#'
+#' @references Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
+#'   of principal components: a new method for the analysis of genetically
+#'   structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
 #' @param  x a `gt_pca` object returned by one of the `gt_pca_*` functions.
 #' @param n_pca number of principal components to be fed to the LDA.
 #' @param k_clusters number of clusters to explore, either a single value, or a

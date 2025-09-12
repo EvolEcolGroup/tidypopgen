@@ -75,3 +75,9 @@ gt_admixture(lobsters,
 )
 }
 }
+\references{
+Alexander, D.H., Novembre, J. and Lange, K. (2009) ‘Fast
+model-based estimation of ancestry in unrelated individuals’, Genome
+Research, 19(9), pp. 1655–1664. Available at:
+https://doi.org/10.1101/gr.094052.109.
+}

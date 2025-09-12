@@ -3,6 +3,8 @@
 #' This function calculates the inbreeding coefficient for each individual based
 #' on the beta estimate from Weir and Goudet (2017).
 #'
+#' @references Weir, BS and Goudet J (2017) A Unified Characterization of
+#'   Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param method currently only "WG17" (for Weir and Goudet 2017).

@@ -69,3 +69,6 @@ example_gt <- example_gt \%>\% gt_impute_xgboost()
 example_gt \%>\% gt_has_imputed()
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+\code{\link[bigsnpr:snp_fastImpute]{bigsnpr::snp_fastImpute()}} which this function wraps.
+}

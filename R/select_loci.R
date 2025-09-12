@@ -14,8 +14,7 @@
 #' can be used as if they were positions in the data frame, so expressions
 #' like x:y can be used to select a range of variables.
 #' @returns a `gen_tibble` with a subset of the loci.
-#'
-
+#' @seealso [dplyr::select()]
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")

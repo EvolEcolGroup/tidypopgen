@@ -52,6 +52,10 @@ reference:
     desc: "Functions for exporting a `gen_tibble` to another format."
     contents:
         - starts_with("gt_as_")
+  - title: "Importing"
+    desc: "Functions for importing another format into a `gen_tibble`."
+    contents:
+        - starts_with("gt_from_")
   - title: "Quality control"
     desc: "Functions reporting summary statistics for a `gen_tibble`."
     contents:

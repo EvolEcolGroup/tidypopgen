@@ -34,6 +34,7 @@
 #'   Note: rather than accessing these elements directly, it is better to use
 #'   `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @export
+#' @seealso [bigstatsr::big_SVD()] which this function wraps.
 #' @examples
 #' # Create a gen_tibble of lobster genotypes
 #' bed_file <-

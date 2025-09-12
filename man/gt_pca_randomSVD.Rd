@@ -102,3 +102,6 @@ anole_gt <- gt_impute_simple(anole_gt, method = "mode")
 gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+\code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}} which this function wraps.
+}

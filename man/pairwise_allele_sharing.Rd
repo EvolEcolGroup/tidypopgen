@@ -39,3 +39,6 @@ example_gt \%>\% pairwise_allele_sharing(as_matrix = FALSE)
 # Alternatively, return as a tibble
 example_gt \%>\% pairwise_allele_sharing(as_matrix = TRUE)
 }
+\seealso{
+\code{\link[hierfstat:matching]{hierfstat::matching()}}
+}

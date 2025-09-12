@@ -14,6 +14,7 @@
 #'   improve speed, but will tax memory.
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
+#' @seealso [hierfstat::matching()]
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'

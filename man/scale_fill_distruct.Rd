@@ -40,3 +40,6 @@ pca <- gt_pca_partialSVD(lobsters)
 autoplot(pca, type = "scores") +
   aes(colour = lobsters$population) + scale_fill_distruct()
 }
+\seealso{
+\code{\link[ggplot2:scale_manual]{ggplot2::scale_fill_manual()}} which this function wraps.
+}

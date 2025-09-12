@@ -3,7 +3,10 @@
 #' This function uses clumping to remove SNPs at high LD. When used with its
 #' default options, clumping based on MAF is similar to standard pruning (as
 #' done by PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a
-#' better spread of SNPs over the chromosome.
+#' better spread of SNPs over the chromosome. This function is a wrapper around
+#' [bigsnpr::snp_clumping()]. See
+#' https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html for more
+#' information on the differences between pruning and clumping.
 #'
 #' Any missing values in the genotypes of a `gen_tibble` passed to
 #' `loci_ld_clump` will cause an error. To deal with missingness, see
@@ -42,6 +45,7 @@
 #'   (if 'return_id = TRUE')
 #' @rdname loci_ld_clump
 #' @export
+#' @seealso [bigsnpr::snp_clumping()] which this function wraps.
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)

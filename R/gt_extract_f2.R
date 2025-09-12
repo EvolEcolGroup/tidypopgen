@@ -1,5 +1,9 @@
 #' Compute and store blocked f2 statistics for ADMIXTOOLS 2
 #'
+#' @references Maier R, Patterson N (2024). admixtools: Inferring demographic
+#'   history from genetic data. R package version 2.0.4,
+#'   https://github.com/uqrmaie1/admixtools.
+#'
 #' This function prepares data for various *ADMIXTOOLS 2* functions from the
 #' package *ADMIXTOOLS 2*. It takes a [`gen_tibble`], computes allele
 #' frequencies and blocked f2-statistics, and writes the results to `outdir`. It

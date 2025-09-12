@@ -46,3 +46,6 @@ example_gt <- example_gt \%>\% gt_impute_simple()
 example_gt \%>\% gt_has_imputed()
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+\code{\link[bigsnpr:snp_fastImputeSimple]{bigsnpr::snp_fastImputeSimple()}} which this function wraps.
+}

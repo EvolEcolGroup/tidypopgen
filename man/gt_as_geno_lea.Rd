@@ -32,3 +32,6 @@ example_gt <- load_example_gt("gen_tbl")
 gt_as_geno_lea(example_gt, file = paste0(tempfile(), "_example.geno"))
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+\code{\link[LEA:geno]{LEA::geno()}}
+}

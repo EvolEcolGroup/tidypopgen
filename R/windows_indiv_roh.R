@@ -2,7 +2,7 @@
 #'
 #' This function uses a sliding-window approach to look for runs of homozygosity
 #' (or heterozygosity) in a diploid genome. It is based on the package
-#' `selectRUNS`, which implements an approach equivalent to the one in PLINK.
+#' `detectRUNS`, which implements an approach equivalent to the one in PLINK.
 #'
 #' @param .x a [gen_tibble]
 #' @param window_size the size of sliding window (number of SNP loci) (default =
@@ -50,6 +50,7 @@
 #'   from: starting position of the run, in bps; to: end position of the run, in
 #'   bps; lengthBps: size of the run)
 #' @export
+#' @seealso [detectRUNS::slidingRUNS.run()] which this function wraps.
 #' @examplesIf rlang::is_installed("detectRUNS")
 #' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
 #'   package = "detectRUNS"

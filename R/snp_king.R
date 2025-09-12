@@ -1,6 +1,11 @@
 #' Compute the KING-robust Matrix for a bigSNP object
 #'
-#' This function computes the KING-robust estimator of kinship.
+#' This function computes the KING-robust estimator of kinship, reimplementing
+#' the KING algorithm of Manichaikul et al. (2010).
+#'
+#' @references Manichaikul, A. et al. (2010) Robust relationship inference in
+#'   genome-wide association studies. Bioinformatics, 26(22), 2867–2873.
+#'   https://doi.org/10.1093/bioinformatics/btq559.
 #'
 #' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
 #' slot of a [bigsnpr::bigSNP] object).
