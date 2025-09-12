@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9001</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -486,7 +486,9 @@ clusters.</p>
 using the type <code>components</code>, ordering the samples by their
 original population labels:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_dapc</span>, type <span class="op">=</span> <span class="st">"components"</span>, group <span class="op">=</span> <span class="va">anole_gt</span><span class="op">$</span><span class="va">population</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_dapc</span>, type <span class="op">=</span> <span class="st">"components"</span>, group <span class="op">=</span> <span class="va">anole_gt</span><span class="op">$</span><span class="va">population</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in ggplot2::geom_col(color = "gray", size = 0.1): Ignoring</span></span>
+<span><span class="co">#&gt; unknown parameters: `size`</span></span></code></pre></div>
 <p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-32-1.png" alt="Bar plot showing the probability of assignment to each cluster" width="700"></p>
 <p>Here we can see that DAPC splits the Amazonian Forest individuals
 into two clusters. Because of the very clear separation we observed when
