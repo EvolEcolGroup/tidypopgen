@@ -7,7 +7,8 @@
 #' @param chunk_size the chunk size to use on the vcf when loading the file
 #' @param backingfile the name of the file to use as the backing file
 #' @param quiet whether to print messages
-#' @param ... further arguments to be passed to [vcfR::read.vcfR()]
+#' @param ... further arguments to be passed to [vcfR::read.vcfR()]. Do not pass
+#' nrows, skip, verbose, or convertNA; these are controlled internally.
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 #' @noRd
@@ -19,6 +20,17 @@ vcf_to_fbm_vcfR <- function(
     backingfile = NULL,
     quiet = FALSE,
     ...) {
+  dots <- list(...)
+  forbidden <- intersect(
+    names(dots),
+    c("nrows", "skip", "verbose", "convertNA")
+  )
+  if (length(forbidden)) {
+    stop("Unsupported via ...: ", paste(forbidden, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)
@@ -102,7 +114,7 @@ vcf_to_fbm_vcfR <- function(
     )
     # filter any marker that is not biallelic
     bi <- vcfR::is.biallelic(temp_vcf)
-    gt <- vcfR::extract.gt(temp_vcf)
+    gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
     gt <- gt[bi, , drop = FALSE]
     if (nrow(gt) > 1) {
       # @TODO we could parallelise here
