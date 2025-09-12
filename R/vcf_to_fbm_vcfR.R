@@ -48,7 +48,7 @@ vcf_to_fbm_vcfR <- function(
   # figure out ploidy from the first marker
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
-    nrow = 1,
+    nrows = 1,
     verbose = !quiet,
     convertNA = FALSE,
     ...
@@ -95,7 +95,7 @@ vcf_to_fbm_vcfR <- function(
   for (i in seq_along(chunks_vec)) {
     temp_vcf <- vcfR::read.vcfR(
       vcf_path,
-      nrow = chunks_vec[i],
+      nrows = chunks_vec[i],
       skip = sum(chunks_vec[seq_len(i - 1)]),
       verbose = !quiet,
       ...
