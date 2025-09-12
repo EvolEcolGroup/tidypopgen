@@ -195,6 +195,7 @@ gen_tibble.character <-
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
+        allow_duplicates = allow_duplicates,
         quiet = quiet
       ))
     } else if (tolower(file_ext(x)) == "ped") {
@@ -238,7 +239,11 @@ gen_tibble.character <-
       check_missing <- x_gt %>%
         select_loci(all_of(doubles)) %>%
         loci_missingness()
-      if (any(check_missing < 1)) {
+      if (any(check_missing < 1, na.rm = TRUE)) {
+        # clean up files if we are stopping
+        files <- gt_get_file_names(x_gt)
+        if (file.exists(files[1])) file.remove(files[1])
+        if (file.exists(files[2])) file.remove(files[2])
         stop(paste(
           "Some loci are missing both reference and alternate alleles.",
           "Genotypes are not missing at these loci.",
@@ -432,7 +437,7 @@ gen_tibble.matrix <- function(
     stop("indiv_meta must be a data.frame or a tibble")
   }
   if (!all(c("id") %in% names(indiv_meta))) {
-    stop("ind_meta does not include the compulsory column 'id")
+    stop("indiv_meta does not include the compulsory column 'id'")
   }
   # check that x (the genotypes) is numeric matrix
   if (inherits(x, "data.frame")) {
@@ -506,7 +511,10 @@ gen_tibble.matrix <- function(
     check_missing <- new_gen_tbl %>%
       select_loci(all_of(doubles)) %>%
       loci_missingness()
-    if (any(check_missing < 1)) {
+    if (any(check_missing < 1, na.rm = TRUE)) {
+      files <- gt_get_file_names(new_gen_tbl)
+      if (file.exists(files[1])) file.remove(files[1])
+      if (file.exists(files[2])) file.remove(files[2])
       stop(paste(
         "Some loci are missing both reference and alternate alleles.",
         "Genotypes are not missing at these loci.",
@@ -621,7 +629,7 @@ gt_write_bigsnp_from_dfs <- function(
   loci <- check_valid_loci(loci)
   # set up code (accounting for ploidy)
   code256 <- rep(NA_real_, 256)
-  if (length(ploidy > 1)) {
+  if (length(ploidy) > 1) {
     # check that there are no missing values in ploidy vector
     if (any(is.na(ploidy))) {
       stop("'ploidy' can not contain NAs")
@@ -747,7 +755,7 @@ summary.vctrs_bigSNP <- function(object, ...) {
 #' @noRd
 stopifnot_gen_tibble <- function(.x) {
   if (!"genotypes" %in% names(.x)) {
-    stop("not a gen_tibble, 'genotype' column is missing")
+    stop("not a gen_tibble, 'genotypes' column is missing")
   }
   if (!inherits(.x$genotypes, "vctrs_bigSNP")) {
     stop("not a gen_tibble, the genotypes column is not of class vctrs_bigSNP")

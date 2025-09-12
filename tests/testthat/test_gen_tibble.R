@@ -197,7 +197,7 @@ test_that("gen_tibble required id and population", {
       loci = test_loci,
       quiet = TRUE
     ),
-    "ind_meta does not include the compulsory column 'id"
+    "indiv_meta does not include the compulsory column 'id'"
   )
 })
 
