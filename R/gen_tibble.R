@@ -422,11 +422,11 @@ gen_tibble.matrix <- function(
     ))
   }
 
-  if (!inherits(loci, "data.frame") || inherits(x, "tbl")) {
-    stop("loci must be one of data.frame or tbl")
+  if (!inherits(loci, "data.frame")) {
+    stop("loci must be a data.frame or a tibble")
   }
-  if (!inherits(indiv_meta, "data.frame") || inherits(x, "tbl") || is.list(x)) {
-    stop("indiv_meta must be one of data.frame, tbl, or list")
+  if (!inherits(indiv_meta, "data.frame")) {
+    stop("indiv_meta must be a data.frame or a tibble")
   }
   if (!all(c("id") %in% names(indiv_meta))) {
     stop("ind_meta does not include the compulsory column 'id")
@@ -436,7 +436,7 @@ gen_tibble.matrix <- function(
     x <- as.matrix(x)
   }
   if (any(!inherits(x, "matrix"), !is.numeric(x))) {
-    stop("'x' is not a matrix of integers")
+    stop("'x' is not a numeric matrix of integers")
   }
 
   # check dimensions
@@ -448,8 +448,8 @@ gen_tibble.matrix <- function(
   }
   if (nrow(x) != nrow(indiv_meta)) {
     stop(paste(
-      "there is a mismatch between the number of loci in the",
-      "genotype table x and in the loci table"
+      "there is a mismatch between the number of individuals in the",
+      "genotype table x and in the indiv_meta table"
     ))
   }
 
@@ -598,6 +598,12 @@ check_valid_loci <- function(loci) {
 #' @param genotypes a genotype matrix
 #' @param indiv_meta the individual meta information
 #' @param loci the loci table
+#' @param backingfile the path, including the file name without extension, for
+#'  backing files used to store the data (they will be given a .bk and .RDS
+#'  automatically). If NULL, a temporary file will be created (but note that R
+#'  will delete it at the end of the session!)
+#' @param ploidy the ploidy of the samples (either a single value, or
+#'  a vector of values for mixed ploidy).
 #' @returns a bigSNP object
 #' @keywords internal
 #' @noRd
@@ -606,7 +612,7 @@ gt_write_bigsnp_from_dfs <- function(
     indiv_meta,
     loci,
     backingfile = NULL,
-    ploidy = ploidy) {
+    ploidy = 2) {
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }
@@ -614,6 +620,10 @@ gt_write_bigsnp_from_dfs <- function(
   # set up code (accounting for ploidy)
   code256 <- rep(NA_real_, 256)
   if (length(ploidy > 1)) {
+    # check that there are no missing values in ploidy vector
+    if (any(is.na(ploidy))) {
+      stop("'ploidy' can not contain NAs")
+    }
     max_ploidy <- max(ploidy)
   } else {
     max_ploidy <- ploidy

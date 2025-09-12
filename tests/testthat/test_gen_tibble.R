@@ -148,7 +148,7 @@ test_that("gen_tibble does not accept character matrix", {
       loci = test_loci,
       quiet = TRUE
     ),
-    "'x' is not a matrix of integers"
+    "'x' is not a numeric matrix of integers"
   )
 })
 
@@ -181,7 +181,7 @@ test_that("gen_tibble loci is dataframe or tbl", {
       loci = wrong_loci_matrix,
       quiet = TRUE
     ),
-    "loci must be one of data.frame or tbl"
+    "must be a data.frame or a tibble"
   )
 })
 
@@ -215,7 +215,7 @@ test_that("gen_tibble indiv_meta is list, dataframe, or tbl", {
       loci = test_loci,
       quiet = TRUE
     ),
-    "indiv_meta must be one of data.frame, tbl, or list"
+    "indiv_meta must be a data.frame or a tibble"
   )
 })
 
@@ -232,8 +232,8 @@ test_that("gen_tibble identifies wrong dimensions in genotypes", {
       quiet = TRUE
     ),
     paste(
-      "there is a mismatch between the number of loci in the genotype",
-      "table x and in the loci table"
+      "there is a mismatch between the number of individuals in the genotype",
+      "table x and in the indiv_meta table"
     )
   )
 })
