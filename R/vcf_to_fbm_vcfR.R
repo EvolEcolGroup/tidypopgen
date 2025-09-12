@@ -6,6 +6,9 @@
 #' @param vcf_path the path to the vcf
 #' @param chunk_size the chunk size to use on the vcf when loading the file
 #' @param backingfile the name of the file to use as the backing file
+#' @param quiet whether to print messages
+#' @param ... further arguments to be passed to [vcfR::read.vcfR()]. Do not pass
+#' nrows, skip, verbose, or convertNA; these are controlled internally.
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 #' @noRd
@@ -15,7 +18,19 @@ vcf_to_fbm_vcfR <- function(
     vcf_path,
     chunk_size = NULL,
     backingfile = NULL,
-    quiet = FALSE) {
+    quiet = FALSE,
+    ...) {
+  dots <- list(...)
+  forbidden <- intersect(
+    names(dots),
+    c("nrows", "skip", "verbose", "convertNA")
+  )
+  if (length(forbidden)) {
+    stop("Unsupported via ...: ", paste(forbidden, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)
@@ -39,13 +54,16 @@ vcf_to_fbm_vcfR <- function(
     rep(chunk_size, floor(no_variants / chunk_size)),
     no_variants %% chunk_size
   )
+  # remove any 0 length chunks (there could be one at the end)
+  chunks_vec <- chunks_vec[chunks_vec > 0L]
 
   # figure out ploidy from the first marker
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
-    nrow = 1,
+    nrows = 1,
     verbose = !quiet,
-    convertNA = FALSE
+    convertNA = FALSE,
+    ...
   )
   temp_gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
   ploidy <- apply(temp_gt, 2, get_ploidy)
@@ -71,7 +89,7 @@ vcf_to_fbm_vcfR <- function(
 
   loci <- tibble(
     chromosome = NULL,
-    marker.id = NULL,
+    marker.ID = NULL,
     genetic.dist = NULL,
     physical.pos = NULL,
     allele1 = NULL,
@@ -89,13 +107,14 @@ vcf_to_fbm_vcfR <- function(
   for (i in seq_along(chunks_vec)) {
     temp_vcf <- vcfR::read.vcfR(
       vcf_path,
-      nrow = chunks_vec[i],
+      nrows = chunks_vec[i],
       skip = sum(chunks_vec[seq_len(i - 1)]),
-      verbose = !quiet
+      verbose = !quiet,
+      ...
     )
     # filter any marker that is not biallelic
     bi <- vcfR::is.biallelic(temp_vcf)
-    gt <- vcfR::extract.gt(temp_vcf)
+    gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
     gt <- gt[bi, , drop = FALSE]
     if (nrow(gt) > 1) {
       # @TODO we could parallelise here

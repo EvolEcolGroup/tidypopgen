@@ -257,13 +257,14 @@ test_that("gt_order_loci catches unsorted and duplicated positions", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
   path <- tempfile()
-  test_gt <- gen_tibble(
+  expect_warning(test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
     indiv_meta = test_indiv_meta,
     quiet = TRUE,
+    allow_duplicates = TRUE,
     backingfile = path
-  )
+  ), "You have allowed duplicated loci")
   new_order <- c(1, 2, 3, 6, 4, 5)
   # manually reorder so loci are ordered, but have duplicates
   show_loci(test_gt) <- show_loci(test_gt)[new_order, ]
@@ -562,13 +563,14 @@ test_that("is_loci_table_ordered catches unsorted and duplicated positions", {
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
-  test_gt <- gen_tibble(
+  expect_warning(test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
     indiv_meta = test_indiv_meta,
     quiet = TRUE,
+    allow_duplicates = TRUE,
     backingfile = tempfile()
-  )
+  ), "You have allowed duplicated loci")
   expect_false(is_loci_table_ordered(test_gt))
   expect_error(
     is_loci_table_ordered(test_gt, error_on_false = TRUE),

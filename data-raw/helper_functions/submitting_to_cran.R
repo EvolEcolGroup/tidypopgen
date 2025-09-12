@@ -56,28 +56,3 @@ devtools::release()
 # https://hub.docker.com/r/rhub/debian-gcc-release
 # and then run with:
 # docker run -ti rhub/fedora-clang-devel bash
-
-
-
-Notes for version 0.3.0:
-
-  ❯ checking CRAN incoming feasibility ... [2s/12s] NOTE
-Maintainer: ‘Andrea Manica <am315@cam.ac.uk>’
-
-New submission
-
-Version contains large components (0.3.0.9000)
-
-Possibly misspelled words in DESCRIPTION:
-  biallelic (11:46)
-polymorphisms (12:5)
-tidypopgen (12:28)
-
-Suggests or Enhances not in mainstream repositories:
-  admixtools
-Availability using Additional_repositories specification:
-  admixtools   yes   https://evolecolgroup.r-universe.dev/
-
-  ❯ checking compilation flags used ... NOTE
-Compilation used the following non-portable flag(s):
-  ‘-mno-omit-leaf-frame-pointer’
