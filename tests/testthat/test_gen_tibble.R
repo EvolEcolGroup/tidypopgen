@@ -148,7 +148,7 @@ test_that("gen_tibble does not accept character matrix", {
       loci = test_loci,
       quiet = TRUE
     ),
-    "'x' is not a matrix of integers"
+    "'x' is not a numeric matrix of integers"
   )
 })
 
@@ -181,7 +181,7 @@ test_that("gen_tibble loci is dataframe or tbl", {
       loci = wrong_loci_matrix,
       quiet = TRUE
     ),
-    "loci must be one of data.frame or tbl"
+    "must be a data.frame or a tibble"
   )
 })
 
@@ -197,7 +197,7 @@ test_that("gen_tibble required id and population", {
       loci = test_loci,
       quiet = TRUE
     ),
-    "ind_meta does not include the compulsory column 'id"
+    "indiv_meta does not include the compulsory column 'id'"
   )
 })
 
@@ -215,7 +215,7 @@ test_that("gen_tibble indiv_meta is list, dataframe, or tbl", {
       loci = test_loci,
       quiet = TRUE
     ),
-    "indiv_meta must be one of data.frame, tbl, or list"
+    "indiv_meta must be a data.frame or a tibble"
   )
 })
 
@@ -232,8 +232,8 @@ test_that("gen_tibble identifies wrong dimensions in genotypes", {
       quiet = TRUE
     ),
     paste(
-      "there is a mismatch between the number of loci in the genotype",
-      "table x and in the loci table"
+      "there is a mismatch between the number of individuals in the genotype",
+      "table x and in the indiv_meta table"
     )
   )
 })
@@ -1036,6 +1036,133 @@ if (rlang::is_installed("vcfR")) {
     )
   })
 }
+
+test_that("new infrastructure for double NA", {
+  # First, the case where alleles are missing
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 2),
+    c(2, 1, 0, NA, 0, NA),
+    c(2, 2, 0, 0, 1, NA)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = c(1, 1, 1, 1, 2, 2),
+    position = c(3, 5, 65, 343, 23, 456),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", NA, "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  expect_error(gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ), paste(
+    "Some loci are missing both reference and alternate alleles.",
+    "Genotypes are not missing"
+  ))
+
+  # Test with a gt from file
+  expect_error(gen_tibble(
+    x = test_path("testdata/plink_doubleNA", "plink_doubleNA.bed"),
+    quiet = TRUE,
+    backingfile = tempfile()
+  ), paste(
+    "Some loci are missing both reference and alternate alleles.",
+    "Genotypes are not missing"
+  ))
+
+
+  test_genotypes <- rbind(
+    c(1, 1, NA, 1, 1, 2),
+    c(2, 1, NA, NA, 0, NA),
+    c(2, 2, NA, 0, 1, NA)
+  )
+  expect_warning(test_tibble <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ), "Your data contain loci with no genotypes or allele information")
+
+  # Test with gt from file
+  file <- tempfile()
+  plink_files <- gt_as_plink(test_tibble, file = file)
+
+  expect_warning(
+    gen_tibble(
+      x = plink_files, quiet = TRUE,
+      backingfile = tempfile()
+    ),
+    "Your data contain loci with no genotypes or allele information"
+  )
+})
+
+test_that("gen_tibble allow_duplicates finds duplicates", {
+  # First, the case where alleles are missing
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 2),
+    c(2, 1, 0, NA, 0, NA),
+    c(2, 2, 0, 0, 1, NA)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", rep(1, 6)),
+    chromosome = c(1, 1, 1, 1, 2, 2),
+    position = c(3, 5, 65, 343, 23, 456),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "G", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  expect_error(test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ), "Your data contain duplicated locus names.")
+
+  # But no error if allow_duplicates = TRUE
+  expect_warning(test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    allow_duplicates = TRUE
+  ), "Your data contain duplicated locus names.")
+
+
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = c(1, 1, 1, 1, 2, 2),
+    position = c(3, 3, 65, 343, 23, 456),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "G", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  expect_error(test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ), "Your data contain duplicated loci.")
+
+  # But no error if allow_duplicates = TRUE
+  expect_warning(test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    allow_duplicates = TRUE
+  ), "Your data contain duplicated loci.")
+})
+
 
 # Windows prevents the deletion of the backing file. #nolint start
 # It's something to do with the memory mapping

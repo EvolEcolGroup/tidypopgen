@@ -60,7 +60,12 @@
 #'   will be saved in the same directory as the bed or vcf file, using the same
 #'   file name but with a different file type (.bk rather than .bed or .vcf). If
 #'   `x` is a genotype matrix and `backingfile` is NULL, then a temporary file
-#'   will be created (but note that R will delete it at the end of the session!)
+#' will be created (but note that R will delete it at the end of the session!)
+#' @param allow_duplicates logical. If TRUE, the tibble will allow duplicated
+#'   loci (those with genomic coordinate (chromosome + position) or locus name
+#'   appearing more than once). If FALSE, an error will be thrown if duplicated
+#'   loci are found. These validations run before backing
+#'   files are saved. Default is FALSE.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -120,6 +125,7 @@ gen_tibble <-
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0", "."),
            backingfile = NULL,
+           allow_duplicates = FALSE,
            quiet = FALSE) {
     UseMethod("gen_tibble", x)
   }
@@ -138,6 +144,7 @@ gen_tibble.character <-
            valid_alleles = c("A", "T", "C", "G"),
            missing_alleles = c("0", "."),
            backingfile = NULL,
+           allow_duplicates = FALSE,
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
@@ -175,7 +182,10 @@ gen_tibble.character <-
     } else if (
       (tolower(file_ext(x)) == "vcf") || (tolower(file_ext(x)) == "gz")
     ) {
-      # nolint
+      # note that gen_tibble_vcf generates the files for a bigSNP object, which
+      # is then passed back to gen_tibble_bed_rds to create the gen_tibble
+      # so, the object returned by gen_tibble_vcf is already the
+      # final gen_tibble
       return(gen_tibble_vcf(
         x = x,
         ...,
@@ -185,6 +195,7 @@ gen_tibble.character <-
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
+        allow_duplicates = allow_duplicates,
         quiet = quiet
       ))
     } else if (tolower(file_ext(x)) == "ped") {
@@ -220,7 +231,74 @@ gen_tibble.character <-
     # check chromosome is character
     show_loci(x_gt) <- check_valid_loci(show_loci(x_gt))
 
-    file_in_use <- gt_save_light(x_gt, quiet = quiet) # nolint
+    # check alleles
+    loci <- show_loci(x_gt)
+    doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
+
+    if (length(doubles) > 0) {
+      check_missing <- x_gt %>%
+        select_loci(all_of(doubles)) %>%
+        loci_missingness()
+      if (any(check_missing < 1, na.rm = TRUE)) {
+        # clean up files if we are stopping
+        files <- gt_get_file_names(x_gt)
+        if (file.exists(files[1])) file.remove(files[1])
+        if (file.exists(files[2])) file.remove(files[2])
+        stop(paste(
+          "Some loci are missing both reference and alternate alleles.",
+          "Genotypes are not missing at these loci.",
+          "Please check the loci and genotype data."
+        ))
+      } else {
+        warning(
+          "Your data contain loci with no genotypes or allele ",
+          "information. Use loci_missingness() to identify them ",
+          "and select_loci() to remove them."
+        )
+      }
+    }
+
+    # check for duplicates
+    duplicated_pos <- find_duplicated_loci(x_gt, list_duplicates = TRUE)
+    has_dup_pos <- length(duplicated_pos) > 0
+    has_dup_names <- anyDuplicated(loci_names(x_gt)) > 0
+
+    if (!allow_duplicates) {
+      if (has_dup_pos || has_dup_names) {
+        files <- gt_get_file_names(x_gt)
+        if (file.exists(files[1])) file.remove(files[1])
+        if (file.exists(files[2])) file.remove(files[2])
+      }
+      if (has_dup_pos) {
+        stop(paste0(
+          "Your data contain duplicated loci. ",
+          "Remove them or set allow_duplicates = TRUE."
+        ))
+      }
+      if (has_dup_names) {
+        stop(paste0(
+          "Your data contain duplicated locus names. ",
+          "Remove them or set allow_duplicates = TRUE."
+        ))
+      }
+    } else {
+      if (has_dup_pos) {
+        warning(paste0(
+          "You have allowed duplicated loci in your data. ",
+          "Your data contain duplicated loci. ",
+          "Use find_duplicated_loci(my_tibble) to select and remove them."
+        ))
+      }
+      if (has_dup_names) {
+        warning(paste0(
+          "You have allowed duplicated loci in your data. ",
+          "Your data contain duplicated locus names. ",
+          "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
+        ))
+      }
+    }
+
+    gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
   }
 
@@ -340,6 +418,7 @@ gen_tibble.matrix <- function(
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
     backingfile = NULL,
+    allow_duplicates = FALSE,
     quiet = FALSE) {
   rlang::check_dots_empty()
 
@@ -351,21 +430,21 @@ gen_tibble.matrix <- function(
     ))
   }
 
-  if (!inherits(loci, "data.frame") || inherits(x, "tbl")) {
-    stop("loci must be one of data.frame or tbl")
+  if (!inherits(loci, "data.frame")) {
+    stop("loci must be a data.frame or a tibble")
   }
-  if (!inherits(indiv_meta, "data.frame") || inherits(x, "tbl") || is.list(x)) {
-    stop("indiv_meta must be one of data.frame, tbl, or list")
+  if (!inherits(indiv_meta, "data.frame")) {
+    stop("indiv_meta must be a data.frame or a tibble")
   }
   if (!all(c("id") %in% names(indiv_meta))) {
-    stop("ind_meta does not include the compulsory column 'id")
+    stop("indiv_meta does not include the compulsory column 'id'")
   }
   # check that x (the genotypes) is numeric matrix
   if (inherits(x, "data.frame")) {
     x <- as.matrix(x)
   }
-  if (any(!inherits(x, "matrix"), !is.numeric(x))) {
-    stop("'x' is not a matrix of integers")
+  if (!(is.matrix(x) && is.numeric(x))) {
+    stop("'x' is not a numeric matrix of integers")
   }
 
   # check dimensions
@@ -377,8 +456,8 @@ gen_tibble.matrix <- function(
   }
   if (nrow(x) != nrow(indiv_meta)) {
     stop(paste(
-      "there is a mismatch between the number of loci in the",
-      "genotype table x and in the loci table"
+      "there is a mismatch between the number of individuals in the",
+      "genotype table x and in the indiv_meta table"
     ))
   }
 
@@ -424,7 +503,73 @@ gen_tibble.matrix <- function(
   show_loci(new_gen_tbl)$chr_int <-
     cast_chromosome_to_int(show_loci(new_gen_tbl)$chromosome)
 
-  files_in_use <- gt_save(new_gen_tbl, quiet = quiet) # nolint
+  # check alleles
+  loci <- show_loci(new_gen_tbl)
+  doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
+
+  if (length(doubles) > 0) {
+    check_missing <- new_gen_tbl %>%
+      select_loci(all_of(doubles)) %>%
+      loci_missingness()
+    if (any(check_missing < 1, na.rm = TRUE)) {
+      files <- gt_get_file_names(new_gen_tbl)
+      if (file.exists(files[1])) file.remove(files[1])
+      if (file.exists(files[2])) file.remove(files[2])
+      stop(paste(
+        "Some loci are missing both reference and alternate alleles.",
+        "Genotypes are not missing at these loci.",
+        "Please check the loci and genotype data."
+      ))
+    } else {
+      warning(
+        "Your data contain loci with no genotypes or allele ",
+        "information. Use loci_missingness() to identify them ",
+        "and select_loci() to remove them."
+      )
+    }
+  }
+
+  # check for duplicates
+  duplicated_pos <- find_duplicated_loci(new_gen_tbl, list_duplicates = TRUE)
+  has_dup_pos <- length(duplicated_pos) > 0
+  has_dup_names <- anyDuplicated(loci_names(new_gen_tbl)) > 0
+
+  if (!allow_duplicates) {
+    if (has_dup_pos || has_dup_names) {
+      files <- gt_get_file_names(new_gen_tbl)
+      if (file.exists(files[1])) file.remove(files[1])
+      if (file.exists(files[2])) file.remove(files[2])
+    }
+    if (has_dup_pos) {
+      stop(paste0(
+        "Your data contain duplicated loci. ",
+        "Remove them or set allow_duplicates = TRUE."
+      ))
+    }
+    if (has_dup_names) {
+      stop(paste0(
+        "Your data contain duplicated locus names. ",
+        "Remove them or set allow_duplicates = TRUE."
+      ))
+    }
+  } else {
+    if (has_dup_pos) {
+      warning(paste0(
+        "You have allowed duplicated loci in your data. ",
+        "Your data contain duplicated loci. ",
+        "Use find_duplicated_loci(my_tibble) to select and remove them."
+      ))
+    }
+    if (has_dup_names) {
+      warning(paste0(
+        "You have allowed duplicated loci in your data. ",
+        "Your data contain duplicated locus names. ",
+        "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
+      ))
+    }
+  }
+
+  gt_save(new_gen_tbl, quiet = quiet) # nolint
   return(new_gen_tbl)
 }
 
@@ -463,6 +608,12 @@ check_valid_loci <- function(loci) {
 #' @param genotypes a genotype matrix
 #' @param indiv_meta the individual meta information
 #' @param loci the loci table
+#' @param backingfile the path, including the file name without extension, for
+#'  backing files used to store the data (they will be given a .bk and .RDS
+#'  automatically). If NULL, a temporary file will be created (but note that R
+#'  will delete it at the end of the session!)
+#' @param ploidy the ploidy of the samples (either a single value, or
+#'  a vector of values for mixed ploidy).
 #' @returns a bigSNP object
 #' @keywords internal
 #' @noRd
@@ -471,14 +622,18 @@ gt_write_bigsnp_from_dfs <- function(
     indiv_meta,
     loci,
     backingfile = NULL,
-    ploidy = ploidy) {
+    ploidy = 2) {
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }
   loci <- check_valid_loci(loci)
   # set up code (accounting for ploidy)
   code256 <- rep(NA_real_, 256)
-  if (length(ploidy > 1)) {
+  if (length(ploidy) > 1) {
+    # check that there are no missing values in ploidy vector
+    if (any(is.na(ploidy))) {
+      stop("'ploidy' can not contain NAs")
+    }
     max_ploidy <- max(ploidy)
   } else {
     max_ploidy <- ploidy
@@ -600,10 +755,10 @@ summary.vctrs_bigSNP <- function(object, ...) {
 #' @noRd
 stopifnot_gen_tibble <- function(.x) {
   if (!"genotypes" %in% names(.x)) {
-    stop("not a gen_tibble, 'genotype' column is missing")
+    stop("not a gen_tibble, 'genotypes' column is missing")
   }
   if (!inherits(.x$genotypes, "vctrs_bigSNP")) {
-    stop("not a gen_tibble, the genotype column is not of class vctrs_bigSNP")
+    stop("not a gen_tibble, the genotypes column is not of class vctrs_bigSNP")
   }
   return(invisible(.x))
 }
