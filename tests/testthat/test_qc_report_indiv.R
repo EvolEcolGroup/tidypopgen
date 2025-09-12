@@ -83,7 +83,8 @@ test_that("autoplot list", {
   ungrouped <- qc_report_indiv(families, kings_threshold = 0.2)
   expect_error(autoplot(ungrouped, type = "blah"), "'arg' should be one of")
   plot1 <- autoplot(ungrouped, type = "relatedness", kings_threshold = 0.2)
-  expect_equal(as.vector(class(plot1)), c("gg", "ggplot"))
+  expect_true(inherits(plot1, "gg"))
+  expect_true(inherits(plot1, "ggplot"))
 
   families$population <- c(
     rep("pop1", 5),
