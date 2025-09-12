@@ -3,6 +3,7 @@ gen_tibble_vcf <- function(
     x,
     ...,
     parser = c("cpp", "vcfR"),
+    n_cores = 1, # ignored by this function, there is no multithreading
     chunk_size = NULL,
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
@@ -16,6 +17,10 @@ gen_tibble_vcf <- function(
   }
 
   if (parser == "cpp") {
+    # check that the ellipses are empty (these are extra params for vcfR)
+    if (length(list(...)) > 0) {
+      stop("extra parameters can only be used with parser = 'vcfR'")
+    }
     rds_path <- vcf_to_fbm_cpp(
       x,
       backingfile = backingfile,
@@ -26,7 +31,8 @@ gen_tibble_vcf <- function(
       x,
       backingfile = backingfile,
       chunk_size = chunk_size,
-      quiet = quiet
+      quiet = quiet,
+      ...
     )
   }
 
@@ -40,6 +46,6 @@ gen_tibble_vcf <- function(
     backingfile = backingfile,
     allow_duplicates = allow_duplicates,
     quiet = quiet,
-    ...
+    n_cores = n_cores
   )
 }

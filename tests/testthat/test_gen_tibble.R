@@ -1151,7 +1151,7 @@ test_that("gen_tibble allow_duplicates finds duplicates", {
     loci = test_loci,
     indiv_meta = test_indiv_meta,
     quiet = TRUE
-  ), "Your data contain duplicated loci. ")
+  ), "Your data contain duplicated loci.")
 
   # But no error if allow_duplicates = TRUE
   expect_warning(test_gt <- gen_tibble(
@@ -1160,7 +1160,7 @@ test_that("gen_tibble allow_duplicates finds duplicates", {
     indiv_meta = test_indiv_meta,
     quiet = TRUE,
     allow_duplicates = TRUE
-  ), "Your data contain duplicated loci. ")
+  ), "Your data contain duplicated loci.")
 })
 
 

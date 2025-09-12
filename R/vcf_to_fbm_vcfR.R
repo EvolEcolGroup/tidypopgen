@@ -6,6 +6,8 @@
 #' @param vcf_path the path to the vcf
 #' @param chunk_size the chunk size to use on the vcf when loading the file
 #' @param backingfile the name of the file to use as the backing file
+#' @param quiet whether to print messages
+#' @param ... further arguments to be passed to [vcfR::read.vcfR()]
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 #' @noRd
@@ -15,7 +17,8 @@ vcf_to_fbm_vcfR <- function(
     vcf_path,
     chunk_size = NULL,
     backingfile = NULL,
-    quiet = FALSE) {
+    quiet = FALSE,
+    ...) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)
@@ -91,7 +94,8 @@ vcf_to_fbm_vcfR <- function(
       vcf_path,
       nrow = chunks_vec[i],
       skip = sum(chunks_vec[seq_len(i - 1)]),
-      verbose = !quiet
+      verbose = !quiet,
+      ...
     )
     # filter any marker that is not biallelic
     bi <- vcfR::is.biallelic(temp_vcf)
