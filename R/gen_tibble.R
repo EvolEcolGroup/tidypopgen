@@ -182,7 +182,11 @@ gen_tibble.character <-
     } else if (
       (tolower(file_ext(x)) == "vcf") || (tolower(file_ext(x)) == "gz")
     ) {
-      x_gt <- gen_tibble_vcf(
+      # note that gen_tibble_vcf generates the files for a bigSNP object, which
+      # is then passed back to gen_tibble_bed_rds to create the gen_tibble
+      # so, the object returned by gen_tibble_vcf is already the
+      # final gen_tibble
+      return(gen_tibble_vcf(
         x = x,
         ...,
         parser = parser,
@@ -192,7 +196,7 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         quiet = quiet
-      )
+      ))
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,
@@ -434,7 +438,7 @@ gen_tibble.matrix <- function(
   if (inherits(x, "data.frame")) {
     x <- as.matrix(x)
   }
-  if (!(is.matrix(x) & is.numeric(x))) {
+  if (!(is.matrix(x) && is.numeric(x))) {
     stop("'x' is not a numeric matrix of integers")
   }
 
