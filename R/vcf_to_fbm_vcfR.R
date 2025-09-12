@@ -42,13 +42,16 @@ vcf_to_fbm_vcfR <- function(
     rep(chunk_size, floor(no_variants / chunk_size)),
     no_variants %% chunk_size
   )
+  # remove any 0 length chunks (there could be one at the end)
+  chunks_vec <- chunks_vec[chunks_vec > 0L]
 
   # figure out ploidy from the first marker
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
     nrow = 1,
     verbose = !quiet,
-    convertNA = FALSE
+    convertNA = FALSE,
+    ...
   )
   temp_gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
   ploidy <- apply(temp_gt, 2, get_ploidy)
@@ -74,7 +77,7 @@ vcf_to_fbm_vcfR <- function(
 
   loci <- tibble(
     chromosome = NULL,
-    marker.id = NULL,
+    marker.ID = NULL,
     genetic.dist = NULL,
     physical.pos = NULL,
     allele1 = NULL,
