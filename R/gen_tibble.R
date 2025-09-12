@@ -64,7 +64,7 @@
 #' @param allow_duplicates logical. If TRUE, the tibble will allow duplicated
 #'   loci (those with genomic coordinate (chromosome + position) or locus name
 #'   appearing more than once). If FALSE, an error will be thrown if duplicated
-#'   loci are found. Default is FALSE. These validations run before backing
+#'   loci are found. These validations run before backing
 #'   files are saved. Default is FALSE.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
@@ -228,10 +228,9 @@ gen_tibble.character <-
 
     # check alleles
     loci <- show_loci(x_gt)
-    double_na <- apply(loci, 1, function(x) is.na(x[6]) && is.na(x[7]))
+    doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
 
-    if (any(double_na)) {
-      doubles <- which(double_na)
+    if (length(doubles) > 0) {
       check_missing <- x_gt %>%
         select_loci(all_of(doubles)) %>%
         loci_missingness()
@@ -435,7 +434,7 @@ gen_tibble.matrix <- function(
   if (inherits(x, "data.frame")) {
     x <- as.matrix(x)
   }
-  if (any(!inherits(x, "matrix"), !is.numeric(x))) {
+  if (!(is.matrix(x) & is.numeric(x))) {
     stop("'x' is not a numeric matrix of integers")
   }
 
@@ -497,10 +496,9 @@ gen_tibble.matrix <- function(
 
   # check alleles
   loci <- show_loci(new_gen_tbl)
-  double_na <- apply(loci, 1, function(x) is.na(x[6]) && is.na(x[7]))
+  doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
 
-  if (any(double_na)) {
-    doubles <- which(double_na)
+  if (length(doubles) > 0) {
     check_missing <- new_gen_tbl %>%
       select_loci(all_of(doubles)) %>%
       loci_missingness()
@@ -559,7 +557,7 @@ gen_tibble.matrix <- function(
     }
   }
 
-  files_in_use <- gt_save(new_gen_tbl, quiet = quiet) # nolint
+  gt_save(new_gen_tbl, quiet = quiet) # nolint
   return(new_gen_tbl)
 }
 
@@ -748,7 +746,7 @@ stopifnot_gen_tibble <- function(.x) {
     stop("not a gen_tibble, 'genotype' column is missing")
   }
   if (!inherits(.x$genotypes, "vctrs_bigSNP")) {
-    stop("not a gen_tibble, the genotype column is not of class vctrs_bigSNP")
+    stop("not a gen_tibble, the genotypes column is not of class vctrs_bigSNP")
   }
   return(invisible(.x))
 }
