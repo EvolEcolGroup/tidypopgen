@@ -14,13 +14,14 @@ test_that("gt can convert from genlight", {
     pop = c("pop1", "pop2")
   )
 
-  file <- normalizePath(tempfile(), mustWork = FALSE)
-  new_gt <- gt_from_genlight(x, backingfile = paste0(file, "gt_from_genlight_"))
+  file <- paste0(tempfile(), "gt_from_genlight")
+
+  new_gt <- gt_from_genlight(x, backingfile = file)
   expect_true(inherits(new_gt, "gen_tbl"))
-  new_gt_names <- gt_get_file_names(new_gt)
-  expect_true(all(file.exists(new_gt_names)))
-  expect_equal(new_gt_names[1], paste0(file, "gt_from_genlight_.rds"))
-  expect_equal(new_gt_names[2], paste0(file, "gt_from_genlight_.bk"))
+
+  expect_true(all(file.exists(gt_get_file_names(new_gt))))
+  expect_equal(gt_get_file_names(new_gt)[1], paste0(file, ".rds"))
+  expect_equal(gt_get_file_names(new_gt)[2], paste0(file, ".bk"))
 })
 
 test_that("error with non-diploid genlight", {
