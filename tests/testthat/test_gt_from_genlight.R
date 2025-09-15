@@ -14,7 +14,7 @@ test_that("gt can convert from genlight", {
     pop = c("pop1", "pop2")
   )
 
-  file <- tempfile()
+  file <- normalizePath(tempfile(), mustWork = FALSE)
   new_gt <- gt_from_genlight(x, backingfile = paste0(file, "gt_from_genlight_"))
   expect_true(inherits(new_gt, "gen_tbl"))
   new_gt_names <- gt_get_file_names(new_gt)
