@@ -53,10 +53,8 @@ gt_from_genlight <- function(x, backingfile = NULL, ...) {
 
   # create loci data.frame
   alleles <- x@loc.all
-  if (any(!grepl("/", alleles, fixed = TRUE))) {
-    stop("All loci must be biallelic and encoded like 'A/T'.")
-  }
   # remove allele before / in every entry of alleles
+  # adegenet checks that loc.all is in the form "A/T" or "G/C" etc
   allele_ref <- gsub("/.*", "", alleles)
   allele_alt <- gsub(".*?/", "", alleles)
   loci <- data.frame(
