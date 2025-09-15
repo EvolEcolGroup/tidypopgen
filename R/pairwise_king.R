@@ -1,4 +1,4 @@
-#' Compute the KING-robust Matrix for a a `gen_tibble` object
+#' Compute the KING-robust Matrix for a `gen_tibble` object
 #'
 #' This function computes the KING-robust estimator of kinship, reimplementing
 #' the KING algorithm of Manichaikul et al. (2010).

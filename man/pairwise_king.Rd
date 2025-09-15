@@ -2,7 +2,7 @@
 % Please edit documentation in R/pairwise_king.R
 \name{pairwise_king}
 \alias{pairwise_king}
-\title{Compute the KING-robust Matrix for a a \code{gen_tibble} object}
+\title{Compute the KING-robust Matrix for a \code{gen_tibble} object}
 \usage{
 pairwise_king(
   x,

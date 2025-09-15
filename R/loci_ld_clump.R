@@ -26,7 +26,7 @@
 #'   must use `abs(S)` instead.\cr
 #' **If not specified, MAFs are computed and used.**
 #' @param size For one SNP, window size around this SNP to compute correlations.
-#'   Default is `100 / thr.r2` for clumping (0.2 -> 500; 0.1 -> 1000; 0.5 ->
+#'   Default is `100 / thr_r2` for clumping (0.2 -> 500; 0.1 -> 1000; 0.5 ->
 #'   200). If `use_positions = FALSE`, this is a window in number of SNPs,
 #'   otherwise it is a window in kb (genetic distance). Ideally, use positions,
 #'   as they provide a more sensible approach.

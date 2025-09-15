@@ -64,7 +64,7 @@ gt_impute_xgboost <- function(
   }
 
   if (gt_has_imputed(x)) {
-    stop("object x is already imputed, use `gt_set_imputed(x, TRUE)`")
+    stop("object x is already imputed; use `gt_set_imputed(x, set = TRUE)`")
   }
 
   if (

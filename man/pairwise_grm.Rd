@@ -15,7 +15,7 @@ pairwise_grm(
 
 \item{allele_sharing_mat}{optional, the matrix of Allele Sharing returned by
 \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with \code{as_matrix=TRUE}. As a number of
-statistics can be derived from the Allele Sharing matrix, it it sometimes
+statistics can be derived from the Allele Sharing matrix, it is sometimes
 more efficient to pre-compute this matrix.}
 
 \item{block_size}{the size of the blocks to use for the computation of the

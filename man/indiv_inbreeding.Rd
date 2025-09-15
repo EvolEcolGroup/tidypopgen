@@ -24,7 +24,7 @@ a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 \item{allele_sharing_mat}{optional and only relevant for "WG17", the matrix
 of Allele Sharing returned by \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with
 \code{as_matrix=TRUE}. As a number of statistics can be derived from the Allele
-Sharing matrix, it it sometimes more efficient to pre-compute this matrix.
+Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
 It is not possible to use this with grouped tibbles.}
 
 \item{...}{currently unused.}

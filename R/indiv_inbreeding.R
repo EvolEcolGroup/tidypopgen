@@ -11,7 +11,7 @@
 #' @param allele_sharing_mat optional and only relevant for "WG17", the matrix
 #'   of Allele Sharing returned by [pairwise_allele_sharing()] with
 #'   `as_matrix=TRUE`. As a number of statistics can be derived from the Allele
-#'   Sharing matrix, it it sometimes more efficient to pre-compute this matrix.
+#'   Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
 #'   It is not possible to use this with grouped tibbles.
 #' @param ... currently unused.
 #' @return a numeric vector of inbreeding coefficients.

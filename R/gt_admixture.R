@@ -101,7 +101,7 @@ gt_admixture <- function(
       } else {
         stop(paste(
           "The package reticulate is needed to use",
-          "a conda environemnt in R."
+          "a conda environment in R."
         ))
       }
     }
