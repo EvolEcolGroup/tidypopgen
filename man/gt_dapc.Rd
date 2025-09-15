@@ -50,7 +50,7 @@ computation of DAPC are to be found in the indicated reference.
 
 Results can be visualised with \code{\link[=autoplot.gt_dapc]{autoplot.gt_dapc()}}, see the help of that
 method for the available plots. There are also \link{gt_dapc_tidiers} for
-manipulating the results. For the moment, his function returns objects of
+manipulating the results. For the moment, this function returns objects of
 class \code{\link[adegenet:dapc]{adegenet::dapc}} which are
 compatible with methods from \code{adegenet}; graphical methods for DAPC are
 documented in \link[adegenet:dapcGraphics]{adegenet::scatter.dapc} (see ?scatter.dapc). This is likely
@@ -59,7 +59,7 @@ remaining compatible.
 
 Note that there is no current method to predict scores for
 individuals not included in the original analysis. This is because we
-currently do not have  mechanism to store the pca information in the
+currently do not have a mechanism to store the pca information in the
 object, and that is needed for prediction.
 }
 \examples{

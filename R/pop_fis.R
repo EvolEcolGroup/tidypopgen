@@ -22,7 +22,7 @@
 #' @param allele_sharing_mat optional and only relevant for "WG17", the matrix
 #'   of Allele Sharing returned by [pairwise_allele_sharing()] with
 #'   `as_matrix=TRUE`. As a number of statistics can be derived from the Allele
-#'   Sharing matrix, it it sometimes more efficient to pre-compute this matrix.
+#'   Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
 #' @returns a vector of population specific fis (plus the global value if
 #'   `include_global=TRUE`)
 #' @export
@@ -80,7 +80,7 @@ pop_fis <- function(
 pop_fis_nei87 <- function(
     .x,
     by_locus = FALSE,
-    include_global = include_global,
+    include_global = FALSE,
     n_cores = bigstatsr::nb_cores()) {
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble

@@ -61,7 +61,7 @@ gt_snmf <- function(
   # if required install LEA
   if (!requireNamespace("LEA", quietly = TRUE)) {
     stop(
-      "to use this function, first install package 'adegenet' with\n",
+      "to use this function, first install package 'LEA' with\n",
       "utils::install.packages('LEA'')"
     )
   }
@@ -72,18 +72,18 @@ gt_snmf <- function(
     input_file <- normalizePath(input_file)
     out_file <- sub(".geno", "", input_file)
     file_name <- sub(".geno", "", basename(input_file))
-  } else if (inherits(x, "character")) {
+  } else if (is.character(x) && length(x) == 1L) {
     if (!file.exists(x)) {
       stop("The file ", x, " does not exist")
     }
     # check whether the file ends in .geno
-    if (!grepl(".geno$", x)) {
+    if (!grepl("\\.geno$", x)) {
       stop("The input file must be a .geno file")
     }
     input_file <- x
     out_file <- sub(".geno", "", input_file)
     file_name <- sub(".geno", "", basename(input_file))
-  } else if (!inherits(x, "character")) {
+  } else {
     stop(paste(
       "x must be a gen_tibble or a character giving the path to the",
       "input geno file"

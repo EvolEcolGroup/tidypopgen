@@ -5,7 +5,7 @@
 #' work on summary statistics to select), but not the names of the loci (look
 #' at [select_loci()] for that feature.
 #'
-#' #' Note that the `select_loci_if` verb does not modify the backing FBM files,
+#' Note that the `select_loci_if` verb does not modify the backing FBM files,
 #' but rather it subsets the list of loci to be used stored in the `gen_tibble`.
 #' @param .data a `gen_tibble`
 #' @param .sel_logical a logical vector of length equal to the number of loci,

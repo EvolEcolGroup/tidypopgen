@@ -106,7 +106,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
   if (is.unsorted(show_loci(.x)$big_index, strictly = TRUE)) {
     stop(paste(
       "Your loci have been resorted; first save the new file backed",
-      "matrix with `gt_update_baking_file()"
+      "matrix with `gt_update_backing_file()"
     ))
   }
 

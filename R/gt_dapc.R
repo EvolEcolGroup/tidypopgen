@@ -19,7 +19,7 @@
 #'
 #' Results can be visualised with [`autoplot.gt_dapc()`], see the help of that
 #' method for the available plots. There are also [gt_dapc_tidiers] for
-#' manipulating the results. For the moment, his function returns objects of
+#' manipulating the results. For the moment, this function returns objects of
 #' class [`adegenet::dapc`] which are
 #' compatible with methods from `adegenet`; graphical methods for DAPC are
 #' documented in [adegenet::scatter.dapc] (see ?scatter.dapc). This is likely
@@ -28,7 +28,7 @@
 #'
 #' Note that there is no current method to predict scores for
 #' individuals not included in the original analysis. This is because we
-#' currently do not have  mechanism to store the pca information in the
+#' currently do not have a mechanism to store the pca information in the
 #' object, and that is needed for prediction.
 #'
 #' @references Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
@@ -178,7 +178,11 @@ gt_dapc <- function(
   ldaX$scaling <- ldaX$scaling[, 1:lda.dim, drop = FALSE]
 
   # can't be more than K-1 disc. func., or more than n.pca
-  n_da <- min(n_da, length(levels(pop.fac)) - 1, n_pca, sum(ldaX$svd > 1e-10))
+  if (is.null(n_da)) {
+    n_da <- min(length(levels(pop.fac)) - 1, n_pca, sum(ldaX$svd > 1e-10))
+  } else {
+    n_da <- min(n_da, length(levels(pop.fac)) - 1, n_pca, sum(ldaX$svd > 1e-10))
+  }
   n_da <- round(n_da)
   predX <- stats::predict(ldaX, dimen = n_da)
 
