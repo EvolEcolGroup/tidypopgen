@@ -98,5 +98,5 @@ Weir, B. S., & Cockerham, C. C. (1984). Estimating F-statistics for the
 analysis of population structure. Evolution, 38(6): 1358–1370.
 }
 \seealso{
-\code{\link[hierfstat:pairwise.neifst]{hierfstat::pairwise.neifst()}} \code{\link[hierfstat:pairwise.neifst]{hierfstat::pairwise.neifst()}}
+\code{\link[hierfstat:pairwise.neifst]{hierfstat::pairwise.neifst()}}
 }

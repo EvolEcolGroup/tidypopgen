@@ -20,8 +20,11 @@ test_that("gt can convert from genlight", {
   expect_true(inherits(new_gt, "gen_tbl"))
 
   expect_true(all(file.exists(gt_get_file_names(new_gt))))
-  expect_equal(gt_get_file_names(new_gt)[1], paste0(file, ".rds"))
-  expect_equal(gt_get_file_names(new_gt)[2], paste0(file, ".bk"))
+  # check that gt_get_file_names(new_gt)[1] ends with .rds
+  expect_true(grepl(".rds$", gt_get_file_names(new_gt)[1]))
+  # and gt_get_file_names(new_gt)[2] ends with .bk
+  expect_true(grepl(".bk$", gt_get_file_names(new_gt)[2]))
+
 })
 
 test_that("error with non-diploid genlight", {

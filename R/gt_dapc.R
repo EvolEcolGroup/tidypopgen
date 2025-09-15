@@ -124,7 +124,7 @@ gt_dapc <- function(
   if (is.null(pop)) {
     # if no pop was given, use best_k
     if (any(!inherits(x, "gt_cluster_pca"), is.null(x$best_k))) {
-      stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca ")
+      stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca'")
     }
     pop.fac <- as.factor(x$clusters$groups[[x$best_k]])
   } else if (is.factor(pop)) {
@@ -167,7 +167,7 @@ gt_dapc <- function(
   # note that this is the proportion of variance out of the variance
   # we started with (i.e. what we retained with the PCAs)
   XU.lambda <- sum(x$d[1:n_pca]) / sum(x$d) # sum of retained eigenvalues
-  names(XU) <- paste("PCA-pc", seq_len(ncol(XU)), sep = ".")
+  colnames(XU) <- paste("PCA-pc", seq_len(ncol(XU)), sep = ".")
 
   ## PERFORM DA ##
   # tol=1e-30 is a kludge, but a safe (?) one to avoid fancy
@@ -229,7 +229,7 @@ gt_dapc <- function(
   ## optional: get loadings of variables
   if (loadings_by_locus) {
     V <- x$v[, 1:n_pca, drop = FALSE] # principal axes
-    names(V) <- paste("PCA-pa", seq_len(ncol(V)), sep = ".")
+    colnames(V) <- paste("PCA-pa", seq_len(ncol(V)), sep = ".")
     var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[, 1:n_da, drop = FALSE])
     f1 <- function(x) {
       temp <- sum(x * x)

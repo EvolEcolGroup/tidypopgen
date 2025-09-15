@@ -33,7 +33,7 @@ gt_extract_f2(
 \item{outdir}{Directory where data will be stored.}
 
 \item{blgsize}{SNP block size in Morgan. Default is 0.05 (5 cM). If \code{blgsize}
-is 100 or greater, if will be interpreted as base pair distance rather than
+is 100 or greater, it will be interpreted as base pair distance rather than
 centimorgan distance.}
 
 \item{maxmem}{Maximum amount of memory to be used. If the required amount of
@@ -49,8 +49,7 @@ higher than \code{maxmiss}}
 
 \item{minmaf}{Discard SNPs with minor allele frequency less than \code{minmaf}}
 
-\item{maxmaf}{Discard SNPs with minor allele frequency greater than than
-\code{maxmaf}}
+\item{maxmaf}{Discard SNPs with minor allele frequency greater than \code{maxmaf}}
 
 \item{minac2}{Discard SNPs with allele count lower than 2 in any population
 (default \code{FALSE}). This option should be set to \code{TRUE} when computing
@@ -59,7 +58,7 @@ samples. Otherwise heterozygosity estimates and thus f3-estimates can be
 biased. \code{minac2 == 2} will discard SNPs with allele count lower than 2 in
 any non-singleton population (this option is experimental and is based on
 the hypothesis that using SNPs with allele count lower than 2 only leads to
-biases in non-singleton populations). Note that, While the \code{minac2} option
+biases in non-singleton populations). Note that while the \code{minac2} option
 discards SNPs with allele count lower than 2 in any population, the
 \code{qp3pop} function will only discard SNPs with allele count lower than
 2 in the first (target) population (when the first argument is the prefix

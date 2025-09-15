@@ -5,11 +5,17 @@
 #'
 #' @param x A `genlight` object
 #' @param backingfile the path, including the file name without extension, for
-#'   backing files used to store the data (they will be given a .bk and .RDS
+#'   backing files used to store the data (they will be given a .bk and .rds
 #'   automatically). If `NULL` (default), backing files are placed in the
 #'   temporary directory.
-#' @param ... Additional arguments
+#' @param ... Additional arguments passed to gen_tibble().
 #' @return A `gen_tibble` object
+#' @details
+#' - Currently supports diploid `genlight` objects only (all values in
+#' `@ploidy` must be 2).
+#' - Requires non-missing slots: `loc.names`, `n.loc`, `loc.all`, `chromosome`,
+#' `position`, `ploidy`, `ind.names`, `pop`.
+#' @export
 #'
 gt_from_genlight <- function(x, backingfile = NULL, ...) {
   if (is.null(backingfile)) {
@@ -47,6 +53,9 @@ gt_from_genlight <- function(x, backingfile = NULL, ...) {
 
   # create loci data.frame
   alleles <- x@loc.all
+  if (any(!grepl("/", alleles, fixed = TRUE))) {
+    stop("All loci must be biallelic and encoded like 'A/T'.")
+  }
   # remove allele before / in every entry of alleles
   allele_ref <- gsub("/.*", "", alleles)
   allele_alt <- gsub(".*?/", "", alleles)
@@ -59,12 +68,13 @@ gt_from_genlight <- function(x, backingfile = NULL, ...) {
     allele_alt = allele_alt
   )
 
-  test_gen_tbl <- gen_tibble(
+  gt <- gen_tibble(
     x = genotypes,
     loci = loci,
     indiv_meta = indiv_meta,
     backingfile = backingfile,
-    quiet = TRUE
+    quiet = TRUE,
+    ...
   )
-  return(test_gen_tbl)
+  return(gt)
 }

@@ -10,11 +10,11 @@ gt_from_genlight(x, backingfile = NULL, ...)
 \item{x}{A \code{genlight} object}
 
 \item{backingfile}{the path, including the file name without extension, for
-backing files used to store the data (they will be given a .bk and .RDS
+backing files used to store the data (they will be given a .bk and .rds
 automatically). If \code{NULL} (default), backing files are placed in the
 temporary directory.}
 
-\item{...}{Additional arguments}
+\item{...}{Additional arguments passed to gen_tibble().}
 }
 \value{
 A \code{gen_tibble} object
@@ -22,4 +22,12 @@ A \code{gen_tibble} object
 \description{
 This function converts a \code{genlight} object from the \code{adegenet} package to a
 \code{gen_tibble} object
+}
+\details{
+\itemize{
+\item Currently supports diploid \code{genlight} objects only (all values in
+\verb{@ploidy} must be 2).
+\item Requires non-missing slots: \code{loc.names}, \code{n.loc}, \code{loc.all}, \code{chromosome},
+\code{position}, \code{ploidy}, \code{ind.names}, \code{pop}.
+}
 }
