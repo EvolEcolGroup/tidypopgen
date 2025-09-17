@@ -14,7 +14,8 @@
 #' - Currently supports diploid `genlight` objects only (all values in
 #' `@ploidy` must be 2).
 #' - Requires non-missing slots: `loc.names`, `n.loc`, `loc.all`, `chromosome`,
-#' `position`, `ploidy`, `ind.names`, `pop`.
+#' `position`, `ploidy`, `ind.names`. The `pop` slot is optional; if absent, the
+#' returned gen_tibble will omit the population column.
 #' @export
 #'
 gt_from_genlight <- function(x, backingfile = NULL, ...) {
@@ -43,10 +44,10 @@ gt_from_genlight <- function(x, backingfile = NULL, ...) {
   }
 
   # create indiv_meta data.frame
-  indiv_meta <- data.frame(
-    id = x@ind.names,
-    population = x@pop
-  )
+  indiv_meta <- data.frame(id = x@ind.names, stringsAsFactors = FALSE)
+  if (!is.null(x@pop) && length(x@pop) == length(x@ind.names)) {
+    indiv_meta$population <- x@pop
+  }
   # extract genotypes as a matrix
   genotypes <- as.matrix(x)
   rownames(genotypes) <- NULL
@@ -71,8 +72,8 @@ gt_from_genlight <- function(x, backingfile = NULL, ...) {
     loci = loci,
     indiv_meta = indiv_meta,
     backingfile = backingfile,
-    quiet = TRUE,
-    ...
+    ...,
+    quiet = TRUE
   )
   return(gt)
 }
