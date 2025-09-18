@@ -370,12 +370,15 @@ gen_tibble.matrix <- function(
   )
 
   fbm_path <- bigstatsr::sub_bk(fbm_obj$backingfile, ".rds")
+  
+  indiv_id <- indiv_meta$id
 
   indiv_meta <- as.list(indiv_meta)
   indiv_meta$genotypes <- new_vctrs_bigsnp(
-    bigsnp_obj,
-    bigsnp_file = bigsnp_path,
-    indiv_id = bigsnp_obj$fam$sample.ID,
+    fbm_obj,
+    fbm_file = fbm_path,
+    loci = loci,
+    indiv_id = indiv_id,
     ploidy = ploidy
   )
 
@@ -618,8 +621,12 @@ new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2) {
   } else {
     max_ploidy <- max(ploidy)
   }
+  
+  # add the big_index column
+  loci <- loci %>% dplyr::mutate(big_index = dplyr::row_number(), .before = 1)
+  
   vctrs::new_vctr(
-    seq_len(indiv_id),
+    seq_along(indiv_id),
     fbm = fbm_obj,
     # TODO is this redundant with the info in the bigSNP object?
     fbm_file = fbm_file,

@@ -30,9 +30,12 @@ gt_save <- function(x, file_name = NULL, quiet = FALSE) {
   if (!inherits(x, "gen_tbl")) {
     stop("x should be a gen_tibble")
   }
-  # we update the bigsnp object
-  bigsnpr::snp_save(attr(x$genotypes, "bigsnp"))
-
+  
+  # TODO we need to replace this
+  
+  # we update the fbm object
+  .gt_get_fbm(x)$save()
+  
   if (is.null(file_name)) {
     file_name <- bigstatsr::sub_bk(gt_get_file_names(x)[2], ".gt")
   }
@@ -126,7 +129,7 @@ gt_get_file_names <- function(x) {
 
   return(c(
     # nolint
-    attr(x, "bigsnp")$genotypes$rds,
-    attr(x, "bigsnp")$genotypes$backingfile
+    attr(x, "fbm")$rds,
+    attr(x, "fbm")$backingfile
   ))
 }
