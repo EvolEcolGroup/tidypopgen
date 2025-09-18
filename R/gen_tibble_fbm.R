@@ -3,7 +3,7 @@
 #' This function checks that a loci tibble has the required columns and that they
 #' are of the correct type.
 #' @param loci A tibble of loci
-#' @returns TRUE if the loci tibble is valid, otherwise an error is thrown
+#' @returns the validated loci table
 #' @keywords internal
 #' @noRd
 
@@ -13,7 +13,7 @@ validate_loci <- function(loci) {
     "genetic_dist", "allele_ref", "allele_alt"
   )
   if (!is.data.frame(loci)) {
-    stop("loci must be a data.frame or tibble")
+    stop("loci must be a data.frame or a tibble")
   }
   if (!all(required_cols %in% colnames(loci))) {
     stop(paste0(
@@ -39,7 +39,7 @@ validate_loci <- function(loci) {
   if (!is.character(loci$allele_alt)) {
     stop("loci$allele_alt must be a character")
   }
-  return(TRUE)
+  return(loci)
 }
 
 
@@ -48,7 +48,7 @@ validate_loci <- function(loci) {
 #' This function checks that an indiv_meta tibble has the required columns and that they
 #' are of the correct type (just the id column).
 #' @param indiv_meta A tibble of individual metadata
-#' @returns TRUE if the indiv_meta tibble is valid, otherwise an error is thrown
+#' @returns the validated indiv_meta tibble
 #' @keywords internal
 #' @noRd
 
@@ -71,7 +71,7 @@ validate_indiv_meta <- function(indiv_meta) {
   if (any(duplicated(indiv_meta$id))) {
     stop("indiv_meta$id must be unique")
   }
-  return(TRUE)
+  return(indiv_meta)
 }
 
 #' Create an FBM object from data.frames

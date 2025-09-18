@@ -181,11 +181,11 @@ test_that("gen_tibble loci is dataframe or tbl", {
       loci = wrong_loci_matrix,
       quiet = TRUE
     ),
-    "must be a data.frame or a tibble"
+    "loci must be a data.frame or a tibble"
   )
 })
 
-test_that("gen_tibble required id and population", {
+test_that("gen_tibble requires id column", {
   wrong_indiv_meta <- data.frame(
     x = c("a", "b", "c"),
     y = c("pop1", "pop1", "pop2")
@@ -197,7 +197,7 @@ test_that("gen_tibble required id and population", {
       loci = test_loci,
       quiet = TRUE
     ),
-    "indiv_meta does not include the compulsory column 'id'"
+    "indiv_meta must have the following columns: id"
   )
 })
 
@@ -254,7 +254,7 @@ test_that("gen_tibble identifies wrong loci table columns", {
       loci = wrong_loci,
       quiet = TRUE
     ),
-    "loci does not include the compulsory columns"
+    "loci must have the following columns:"
   )
 })
 

@@ -333,10 +333,10 @@ gen_tibble.matrix <- function(
     ))
   }
 
-  validate_loci(loci)
-  validate_indiv_meta(indiv_meta)
+  loci <- validate_loci(loci)
+  indiv_meta <- validate_indiv_meta(indiv_meta)
   
-  # validate x
+  # validate x (the genotypes)
   # check that x (the genotypes) is numeric matrix
   if (inherits(x, "data.frame")) {
     x <- as.matrix(x)
