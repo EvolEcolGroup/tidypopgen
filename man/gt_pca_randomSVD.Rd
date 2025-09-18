@@ -17,7 +17,7 @@ gt_pca_randomSVD(
 )
 }
 \arguments{
-\item{x}{a \code{gen_tbl} object}
+\item{x}{a \code{gen_tibble} object}
 
 \item{k}{Number of singular vectors/values to compute. Default is \code{10}.
 \strong{This algorithm should be used to compute a few singular vectors/values.}}
@@ -98,7 +98,10 @@ anole_gt <-
 anole_gt <- anole_gt \%>\% select_loci_if(loci_maf(genotypes) > 0)
 anole_gt <- gt_impute_simple(anole_gt, method = "mode")
 
-# Create PCA obejct, including total variance
+# Create PCA object, including total variance
 gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
 \dontshow{\}) # examplesIf}
+}
+\seealso{
+\code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}} which this function wraps.
 }

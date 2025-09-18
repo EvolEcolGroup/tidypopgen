@@ -120,3 +120,6 @@ Jost L
 (2008) GST and its relatives do not measure differentiation. Molecular
 Ecology, 17, 4015-4026.
 }
+\seealso{
+\code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}}
+}

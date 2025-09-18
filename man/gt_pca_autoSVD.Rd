@@ -137,3 +137,6 @@ gt_pca_autoSVD(lobsters,
 )
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+\code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}  which this function wraps.
+}

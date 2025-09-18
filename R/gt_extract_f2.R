@@ -1,5 +1,9 @@
 #' Compute and store blocked f2 statistics for ADMIXTOOLS 2
 #'
+#' @references Maier R, Patterson N (2024). admixtools: Inferring demographic
+#'   history from genetic data. R package version 2.0.4,
+#'   https://github.com/uqrmaie1/admixtools.
+#'
 #' This function prepares data for various *ADMIXTOOLS 2* functions from the
 #' package *ADMIXTOOLS 2*. It takes a [`gen_tibble`], computes allele
 #' frequencies and blocked f2-statistics, and writes the results to `outdir`. It
@@ -7,7 +11,7 @@
 #' @param .x a [`gen_tibble`]
 #' @param outdir Directory where data will be stored.
 #' @param blgsize SNP block size in Morgan. Default is 0.05 (5 cM). If `blgsize`
-#'   is 100 or greater, if will be interpreted as base pair distance rather than
+#'   is 100 or greater, it will be interpreted as base pair distance rather than
 #'   centimorgan distance.
 #' @param maxmem Maximum amount of memory to be used. If the required amount of
 #'   memory exceeds `maxmem`, allele frequency data will be split into blocks,
@@ -19,8 +23,7 @@
 #' @param maxmiss Discard SNPs which are missing in a fraction of populations
 #'   higher than `maxmiss`
 #' @param minmaf Discard SNPs with minor allele frequency less than `minmaf`
-#' @param maxmaf Discard SNPs with minor allele frequency greater than than
-#'   `maxmaf`
+#' @param maxmaf Discard SNPs with minor allele frequency greater than `maxmaf`
 #' @param minac2 Discard SNPs with allele count lower than 2 in any population
 #'   (default `FALSE`). This option should be set to `TRUE` when computing
 #'   f3-statistics where one population consists mostly of pseudohaploid
@@ -28,7 +31,7 @@
 #'   biased. `minac2 == 2` will discard SNPs with allele count lower than 2 in
 #'   any non-singleton population (this option is experimental and is based on
 #'   the hypothesis that using SNPs with allele count lower than 2 only leads to
-#'   biases in non-singleton populations). Note that, While the `minac2` option
+#'   biases in non-singleton populations). Note that while the `minac2` option
 #'   discards SNPs with allele count lower than 2 in any population, the
 #'   \code{qp3pop} function will only discard SNPs with allele count lower than
 #'   2 in the first (target) population (when the first argument is the prefix

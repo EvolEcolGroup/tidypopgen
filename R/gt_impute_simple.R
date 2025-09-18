@@ -15,6 +15,7 @@
 #' @param n_cores the number of cores to be used
 #' @returns a [gen_tibble] with imputed genotypes
 #' @export
+#' @seealso [bigsnpr::snp_fastImputeSimple()] which this function wraps.
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
@@ -49,7 +50,7 @@ gt_impute_simple <- function(
   }
 
   if (gt_has_imputed(x)) {
-    stop("object x is already imputed, use `gt_set_imputed(x, TRUE)`")
+    stop("object x is already imputed; use `gt_set_imputed(x, set = TRUE)`")
   }
 
   if (

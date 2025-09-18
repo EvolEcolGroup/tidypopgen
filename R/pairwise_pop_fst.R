@@ -44,6 +44,7 @@
 #'   columns. If `type=pairwise`, a matrix of genome-wide pairwise Fst values is
 #'   returned.
 #' @export
+#' @seealso [hierfstat::pairwise.neifst()]
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
@@ -104,7 +105,7 @@ pairwise_pop_fst <- function(
 
   # only operate on diploids or, if pseudohaploids, Hudson
   if (!is_diploid_only(.x) && !is_pseudohaploid(.x)) {
-    stop("fst can be currently computed on on diploid data")
+    stop("fst can be currently computed on diploid data")
   }
   if (is_pseudohaploid(.x) && method != "Hudson") {
     stop("only `method = Hudson` is valid when the data include pseudohaploids")

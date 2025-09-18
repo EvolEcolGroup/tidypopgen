@@ -44,7 +44,7 @@ must use \code{abs(S)} instead.\cr
 Default is \code{0.2}.}
 
 \item{size}{For one SNP, window size around this SNP to compute correlations.
-Default is \code{100 / thr.r2} for clumping (0.2 -> 500; 0.1 -> 1000; 0.5 ->
+Default is \code{100 / thr_r2} for clumping (0.2 -> 500; 0.1 -> 1000; 0.5 ->
 200). If \code{use_positions = FALSE}, this is a window in number of SNPs,
 otherwise it is a window in kb (genetic distance). Ideally, use positions,
 as they provide a more sensible approach.}
@@ -71,7 +71,10 @@ a boolean vector indicating whether the SNP should be kept (if
 This function uses clumping to remove SNPs at high LD. When used with its
 default options, clumping based on MAF is similar to standard pruning (as
 done by PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a
-better spread of SNPs over the chromosome.
+better spread of SNPs over the chromosome. This function is a wrapper around
+\code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}}. See
+https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html for more
+information on the differences between pruning and clumping.
 }
 \details{
 Any missing values in the genotypes of a \code{gen_tibble} passed to
@@ -92,4 +95,7 @@ example_gt \%>\% loci_ld_clump()
 # To return a vector of SNP indices to be kept
 example_gt \%>\% loci_ld_clump(return_id = TRUE)
 \dontshow{\}) # examplesIf}
+}
+\seealso{
+\code{\link[bigsnpr:snp_clumping]{bigsnpr::snp_clumping()}} which this function wraps.
 }

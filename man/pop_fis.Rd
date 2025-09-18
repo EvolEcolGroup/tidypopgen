@@ -31,7 +31,7 @@ matrix with n+1 columns if \code{by_locus=TRUE}.}
 \item{allele_sharing_mat}{optional and only relevant for "WG17", the matrix
 of Allele Sharing returned by \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with
 \code{as_matrix=TRUE}. As a number of statistics can be derived from the Allele
-Sharing matrix, it it sometimes more efficient to pre-compute this matrix.}
+Sharing matrix, it is sometimes more efficient to pre-compute this matrix.}
 }
 \value{
 a vector of population specific fis (plus the global value if
@@ -77,4 +77,7 @@ Nei M. (1987) Molecular Evolutionary Genetics. Columbia
 University Press
 Weir, BS and Goudet J (2017) A Unified Characterization of
 Population Structure and Relatedness. Genetics (2017) 206:2085
+}
+\seealso{
+\code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}} \code{\link[hierfstat:fs.dosage]{hierfstat::fis.dosage()}}
 }

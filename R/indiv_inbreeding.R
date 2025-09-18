@@ -3,13 +3,15 @@
 #' This function calculates the inbreeding coefficient for each individual based
 #' on the beta estimate from Weir and Goudet (2017).
 #'
+#' @references Weir, BS and Goudet J (2017) A Unified Characterization of
+#'   Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param method currently only "WG17" (for Weir and Goudet 2017).
 #' @param allele_sharing_mat optional and only relevant for "WG17", the matrix
 #'   of Allele Sharing returned by [pairwise_allele_sharing()] with
 #'   `as_matrix=TRUE`. As a number of statistics can be derived from the Allele
-#'   Sharing matrix, it it sometimes more efficient to pre-compute this matrix.
+#'   Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
 #'   It is not possible to use this with grouped tibbles.
 #' @param ... currently unused.
 #' @return a numeric vector of inbreeding coefficients.

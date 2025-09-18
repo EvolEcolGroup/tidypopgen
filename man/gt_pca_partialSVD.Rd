@@ -78,3 +78,6 @@ gt_pca_partialSVD(lobsters,
   total_var = FALSE
 )
 }
+\seealso{
+\code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}} which this function wraps.
+}
