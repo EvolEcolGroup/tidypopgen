@@ -24,6 +24,11 @@ validate_loci <- function(loci) {
   if (!is.character(loci$name)) {
     stop("loci$name must be a character")
   }
+  # if chromosome is numeric, turn it into character
+  if (is.numeric(loci$chromosome)) {
+    loci$chromosome <- as.character(loci$chromosome)
+  }
+  # check that chromosome is a factor or character
   if (!is.factor(loci$chromosome) && !is.character(loci$chromosome)) {
     stop("loci$chromosome must be a factor or character")
   }
@@ -55,7 +60,7 @@ validate_loci <- function(loci) {
 validate_indiv_meta <- function(indiv_meta) {
   required_cols <- c("id")
   if (!is.data.frame(indiv_meta)) {
-    stop("indiv_meta must be a data.frame or tibble")
+    stop("indiv_meta must be a data.frame or a tibble")
   }
   if (!all(required_cols %in% colnames(indiv_meta))) {
     stop(paste0(
