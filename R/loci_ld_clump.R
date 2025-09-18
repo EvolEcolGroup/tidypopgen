@@ -3,7 +3,10 @@
 #' This function uses clumping to remove SNPs at high LD. When used with its
 #' default options, clumping based on MAF is similar to standard pruning (as
 #' done by PLINK with "--indep-pairwise (size+1) 1 thr.r2", but it results in a
-#' better spread of SNPs over the chromosome.
+#' better spread of SNPs over the chromosome. This function is a wrapper around
+#' [bigsnpr::snp_clumping()]. See
+#' https://privefl.github.io/bigsnpr/articles/pruning-vs-clumping.html for more
+#' information on the differences between pruning and clumping.
 #'
 #' Any missing values in the genotypes of a `gen_tibble` passed to
 #' `loci_ld_clump` will cause an error. To deal with missingness, see
@@ -23,7 +26,7 @@
 #'   must use `abs(S)` instead.\cr
 #' **If not specified, MAFs are computed and used.**
 #' @param size For one SNP, window size around this SNP to compute correlations.
-#'   Default is `100 / thr.r2` for clumping (0.2 -> 500; 0.1 -> 1000; 0.5 ->
+#'   Default is `100 / thr_r2` for clumping (0.2 -> 500; 0.1 -> 1000; 0.5 ->
 #'   200). If `use_positions = FALSE`, this is a window in number of SNPs,
 #'   otherwise it is a window in kb (genetic distance). Ideally, use positions,
 #'   as they provide a more sensible approach.
@@ -42,6 +45,7 @@
 #'   (if 'return_id = TRUE')
 #' @rdname loci_ld_clump
 #' @export
+#' @seealso [bigsnpr::snp_clumping()] which this function wraps.
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
@@ -102,7 +106,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
   if (is.unsorted(show_loci(.x)$big_index, strictly = TRUE)) {
     stop(paste(
       "Your loci have been resorted; first save the new file backed",
-      "matrix with `gt_update_baking_file()"
+      "matrix with `gt_update_backing_file()"
     ))
   }
 

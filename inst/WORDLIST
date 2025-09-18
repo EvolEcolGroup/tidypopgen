@@ -39,7 +39,9 @@ Lazaridis
 Luu
 MAF
 MAFs
+Manichaikul
 Mei
+Novembre
 OADP
 ORCID
 PBS
@@ -77,10 +79,12 @@ backingfile
 backingfiles
 biallelic
 bigSNP
+bigsnpr
 bim
 bmerge
 booleans
 bp
+btq
 cM
 centering
 centers
@@ -92,6 +96,7 @@ chrom
 coancestries
 coancestry
 codecov
+com
 conda
 countLines
 cpp
@@ -117,6 +122,7 @@ fulfills
 gammarus
 geno
 ggplot
+github
 goesup
 goodfit
 gt
@@ -134,6 +140,8 @@ ibs
 ind
 indep
 indiv
+individuals’
+io
 kmeans
 ld
 lengthBps
@@ -157,6 +165,7 @@ ped
 pos
 prcomp
 precomputing
+privefl
 pseudohaplodified
 pseudohaploid
 pseudohaploids
@@ -192,6 +201,7 @@ triallelic
 u
 unflip
 unsets
+uqrmaie
 vcf
 vcfR
 xgboost

@@ -2,7 +2,7 @@
 #'
 #' This function uses a sliding-window approach to look for runs of homozygosity
 #' (or heterozygosity) in a diploid genome. It is based on the package
-#' `selectRUNS`, which implements an approach equivalent to the one in PLINK.
+#' `detectRUNS`, which implements an approach equivalent to the one in PLINK.
 #'
 #' @param .x a [gen_tibble]
 #' @param window_size the size of sliding window (number of SNP loci) (default =
@@ -50,6 +50,7 @@
 #'   from: starting position of the run, in bps; to: end position of the run, in
 #'   bps; lengthBps: size of the run)
 #' @export
+#' @seealso [detectRUNS::slidingRUNS.run()] which this function wraps.
 #' @examplesIf rlang::is_installed("detectRUNS")
 #' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
 #'   package = "detectRUNS"
@@ -129,7 +130,7 @@ windows_indiv_roh <- function(
   # access time is horrible, but I don't think this is the bottleneck
   # it needs some profiling
   X <- .gt_get_bigsnp(.x)$genotypes # pointer for the FBM #nolint
-  col_ind <- .gt_bigsnp_cols(.x) # column indeces for the snps to consider
+  col_ind <- .gt_bigsnp_cols(.x) # column indices for the snps to consider
   for (i in seq_len(nrow(.x))) {
     this_genotype <- X[i, col_ind]
     this_indiv <- list(FID = groups[i], IID = .x$id[i])

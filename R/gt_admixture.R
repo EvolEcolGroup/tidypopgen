@@ -5,6 +5,11 @@
 #' the output into R. It can run multiple values of `k` and multiple repeats for
 #' each `k`.
 #'
+#' @references Alexander, D.H., Novembre, J. and Lange, K. (2009) ‘Fast
+#'   model-based estimation of ancestry in unrelated individuals’, Genome
+#'   Research, 19(9), pp. 1655–1664. Available at:
+#'   https://doi.org/10.1101/gr.094052.109.
+#'
 #' @details This is a wrapper for the command line program ADMIXTURE. It can
 #'   either use a binary present in the main environment, or use a copy
 #'   installed in a conda environment.
@@ -96,7 +101,7 @@ gt_admixture <- function(
       } else {
         stop(paste(
           "The package reticulate is needed to use",
-          "a conda environemnt in R."
+          "a conda environment in R."
         ))
       }
     }

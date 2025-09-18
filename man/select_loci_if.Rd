@@ -23,7 +23,7 @@ work on summary statistics to select), but not the names of the loci (look
 at \code{\link[=select_loci]{select_loci()}} for that feature.
 }
 \details{
-#' Note that the \code{select_loci_if} verb does not modify the backing FBM files,
+Note that the \code{select_loci_if} verb does not modify the backing FBM files,
 but rather it subsets the list of loci to be used stored in the \code{gen_tibble}.
 }
 \examples{
@@ -39,4 +39,7 @@ example_gt_subset <- example_gt \%>\%
   select_loci_if(loci_maf(genotypes) > 0.2)
 show_loci(example_gt_subset)
 
+}
+\seealso{
+\code{\link[dplyr:select_all]{dplyr::select_if()}}
 }

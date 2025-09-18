@@ -8,7 +8,7 @@
 #' This function is a wrapper
 #' for [bigstatsr::big_randomSVD()]
 #'
-#' @param x a `gen_tbl` object
+#' @param x a `gen_tibble` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
 #'   **This algorithm should be used to compute a few singular vectors/values.**
 #' @param fun_scaling Usually this  can be left unset, as it defaults to
@@ -47,6 +47,7 @@
 #' Note: rather than accessing these elements directly, it is better to use
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
 #' @export
+#' @seealso [bigstatsr::big_randomSVD()] which this function wraps.
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
@@ -65,7 +66,7 @@
 #' anole_gt <- anole_gt %>% select_loci_if(loci_maf(genotypes) > 0)
 #' anole_gt <- gt_impute_simple(anole_gt, method = "mode")
 #'
-#' # Create PCA obejct, including total variance
+#' # Create PCA object, including total variance
 #' gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
 #'
 # nolint start

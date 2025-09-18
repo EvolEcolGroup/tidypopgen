@@ -288,6 +288,17 @@ if (rlang::is_installed("vcfR")) {
       chunk_size = 2,
       parser = "vcfR"
     )
+
+    expect_error(gen_tibble(
+      vcf_path,
+      quiet = TRUE,
+      backingfile = tempfile(),
+      chunk_size = 2,
+      verbose = TRUE,
+      convertNA = FALSE,
+      parser = "vcfR"
+    ), "Unsupported via ...")
+
     expect_true(all.equal(
       show_genotypes(pop_b_vcf_gt2),
       show_genotypes(pop_b_vcf_gt)
@@ -302,6 +313,15 @@ if (rlang::is_installed("vcfR")) {
         backingfile = tempfile(),
         parser = "cpp"
       )
+
+    expect_error(
+      gen_tibble(vcf_path,
+        quiet = TRUE,
+        backingfile = tempfile(),
+        parser = "cpp",
+        verbose = TRUE
+      ), "extra parameters can only be used with parser = 'vcfR'"
+    )
 
     # debug
     # if (!identical(show_genotypes(pop_b_gt),
