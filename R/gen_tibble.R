@@ -336,9 +336,7 @@ gen_tibble.matrix <- function(
   validate_loci(loci)
   validate_indiv_meta(indiv_meta)
   
-  if (!all(c("id") %in% names(indiv_meta))) {
-    stop("indiv_meta does not include the compulsory column 'id'")
-  }
+  # validate x
   # check that x (the genotypes) is numeric matrix
   if (inherits(x, "data.frame")) {
     x <- as.matrix(x)
@@ -365,15 +363,13 @@ gen_tibble.matrix <- function(
     backingfile <- change_duplicated_file_name(backingfile)
   }
 
-  bigsnp_obj <- gt_write_bigsnp_from_dfs(
+  fbm_obj <- gt_write_fbm_from_dfs(
     genotypes = x,
-    indiv_meta = indiv_meta,
-    loci = loci,
     backingfile = backingfile,
     ploidy = ploidy
   )
 
-  bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile, ".rds")
+  fbm_path <- bigstatsr::sub_bk(fbm_obj$backingfile, ".rds")
 
   indiv_meta <- as.list(indiv_meta)
   indiv_meta$genotypes <- new_vctrs_bigsnp(
@@ -603,35 +599,32 @@ gt_write_bigsnp_from_dfs <- function(
 #' create a vctrs_bigSNP
 #' @param bigsnp_obj the bigsnp object
 #' @param bigsnp_file the file to which the bigsnp object was saved
-#' @param indiv_id ids of individuals
+#' @loci a tibble of loci (needs to be validated first with `validate_loci`)
+#' @indiv_id a vector of individual ids (from indiv_meta)
 #' @param ploidy the ploidy of the samples (either a single value, or
 #' a vector of values for mixed ploidy).
 #' @returns a vctrs_bigSNP object
 #' @keywords internal
 #' @noRd
-new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
-  loci <- tibble::tibble(
-    big_index = seq_len(nrow(bigsnp_obj$map)),
-    name = bigsnp_obj$map$marker.ID,
-    chromosome = bigsnp_obj$map$chromosome,
-    position = bigsnp_obj$map$physical.pos,
-    genetic_dist = bigsnp_obj$map$genetic.dist,
-    allele_ref = bigsnp_obj$map$allele2,
-    allele_alt = bigsnp_obj$map$allele1
-  )
+new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2) {
 
+  #check that indiv_id is the same length as the nrow of fmb_obj
+  # TODO
+  # check that nrow(loci) is ncol(fbm_obj)
+  #TODO
+  
   if (length(unique(ploidy)) > 1) {
     max_ploidy <- 0
   } else {
     max_ploidy <- max(ploidy)
   }
   vctrs::new_vctr(
-    seq_len(nrow(bigsnp_obj$fam)),
-    bigsnp = bigsnp_obj,
+    seq_len(indiv_id),
+    fbm = fbm_obj,
     # TODO is this redundant with the info in the bigSNP object?
-    bigsnp_file = bigsnp_file,
+    fbm_file = fbm_file,
     # TODO make sure this does not take too long
-    bigsnp_md5sum = tools::md5sum(bigsnp_file),
+    fbm_md5sum = tools::md5sum(fbm_file),
     loci = loci,
     names = indiv_id,
     ploidy = max_ploidy,

@@ -7,11 +7,21 @@
   vctrs::vec_data(.x$genotypes)
 }
 
+# TODO this is deprecated and will be removed
 .gt_get_bigsnp <- function(.x) {
   # if this is a gen_tibble
   if (inherits(.x, "gen_tbl")) {
     attr(.x$genotypes, "bigsnp")
   } else {
     attr(.x, "bigsnp")
+  }
+}
+
+.gt_get_fbm <- function(.x) {
+  # if this is a gen_tibble
+  if (inherits(.x, "gen_tbl")) {
+    attr(.x$genotypes, "fbm")
+  } else {
+    attr(.x, "fbm")
   }
 }
