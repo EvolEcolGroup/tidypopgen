@@ -122,7 +122,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
   geno_fbm <- attr(.x,"fbm") # nolint
   # rows (individuals) that we want to use
   if (use_positions) {
-    .positions <- rep(NA, nrow(attr(.x, "bigsnp")$map))
+    .positions <- rep(NA, ncol(attr(.x, "fbm")))
     .positions[show_loci(.x)$big_index] <- show_loci(.x)$position
   } else {
     .positions <- NULL
@@ -133,8 +133,8 @@ loci_ld_clump.vctrs_bigSNP <- function(
   # now figure out if we have any snp which have already been removed
   # those will go into `exclude`
   loci_not_in_tibble <-
-    seq_len(nrow(attr(.x, "bigsnp")$map))[
-      !seq_len(nrow(attr(.x, "bigsnp")$map)) %in% .gt_bigsnp_cols(.x)
+    seq_len(ncol(attr(.x, "fbm")))[
+      !seq_len(ncol(attr(.x, "fbm"))) %in% .gt_bigsnp_cols(.x)
     ] # nolint
   exclude <- c(loci_not_in_tibble, .gt_bigsnp_cols(.x)[exclude])
   if (length(exclude) == 0) {

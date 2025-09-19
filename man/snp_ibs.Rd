@@ -47,18 +47,18 @@ beforehand? What does plink do?
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 
-X <- attr(example_gt$genotypes, "bigsnp")
-snp_ibs(X$genotypes)
+X <- attr(example_gt$genotypes, "fbm")
+snp_ibs(X)
 
 # Compute for individuals 1 to 5
-snp_ibs(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+snp_ibs(X, ind.row = 1:5, ind.col = 1:5)
 
 # Adjust block.size
-snp_ibs(X$genotypes, block.size = 2)
+snp_ibs(X, block.size = 2)
 
 # Change type
-snp_ibs(X$genotypes, type = "proportion")
-snp_ibs(X$genotypes, type = "adjusted_counts")
-snp_ibs(X$genotypes, type = "raw_counts")
+snp_ibs(X, type = "proportion")
+snp_ibs(X, type = "adjusted_counts")
+snp_ibs(X, type = "raw_counts")
 
 }

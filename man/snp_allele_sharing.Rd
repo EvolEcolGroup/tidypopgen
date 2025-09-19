@@ -38,14 +38,14 @@ heterozygous. Matching is the average of these 0, 1/2 and 1s)
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 
-X <- attr(example_gt$genotypes, "bigsnp")
-snp_allele_sharing(X$genotypes)
+X <- attr(example_gt$genotypes, "fbm")
+snp_allele_sharing(X)
 
 # Compute for individuals 1 to 5
-snp_allele_sharing(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+snp_allele_sharing(X, ind.row = 1:5, ind.col = 1:5)
 
 # Adjust block size
-snp_allele_sharing(X$genotypes, block.size = 2)
+snp_allele_sharing(X, block.size = 2)
 
 }
 \seealso{

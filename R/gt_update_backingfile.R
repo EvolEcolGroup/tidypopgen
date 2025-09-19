@@ -49,9 +49,9 @@ gt_update_backingfile <- function(
   chunks_vec <- c(0, cumsum(chunks_vec))
 
   # get the 256 code
-  original_256code <- attr(.x$genotypes, "bigsnp")$genotypes$code256
+  original_256code <- attr(.x$genotypes, "fbm")$code256
   on.exit(
-    attr(.x$genotypes, "bigsnp")$genotypes$code256 <- original_256code
+    attr(.x$genotypes, "fbm")$code256 <- original_256code
   )
 
   # initialise a FBM with the dimensions of the data used in the gen_tibble
