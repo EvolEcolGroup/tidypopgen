@@ -84,7 +84,7 @@ pairwise_pop_fst_hudson <- function(
   # summarise population frequencies
   # @TODO we now use grouped_summaries_dip_psuedo_cpp for THIS
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_bigsnp(.x)$genotypes,
+    .gt_get_fbm(.x),
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
@@ -164,7 +164,7 @@ pairwise_pop_fst_nei87 <- function(
   }
   # summarise population frequencies
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_bigsnp(.x)$genotypes,
+    .gt_get_fbm(.x),
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
@@ -260,7 +260,7 @@ pairwise_pop_fst_wc84 <- function(
   }
   # summarise population frequencies
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_bigsnp(.x)$genotypes,
+    .gt_get_fbm(.x),
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,

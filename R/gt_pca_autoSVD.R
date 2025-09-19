@@ -123,12 +123,12 @@ gt_pca_autoSVD <- function(
     on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
   }
 
-  X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
+  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
   # we need to create a chromosome vector that is as long as
   # the complete bigsnp object
-  infos_chr <- rep(1, nrow(.gt_get_bigsnp(x)$map))
+  infos_chr <- rep(1, ncol(X))
 
   infos_chr[.gt_bigsnp_cols(x)] <- show_loci(x)$chr_int
   # chromosomes have to be positive numbers
@@ -138,7 +138,7 @@ gt_pca_autoSVD <- function(
   infos_pos <- NULL
   if (use_positions) {
     is_loci_table_ordered(x, error_on_false = TRUE)
-    infos_pos <- rep(0, nrow(.gt_get_bigsnp(x)$map))
+    infos_pos <- rep(0, ncol(X))
     infos_pos[.gt_bigsnp_cols(x)] <- show_loci(x)$position
   }
   # TODO
@@ -148,7 +148,7 @@ gt_pca_autoSVD <- function(
   tryCatch(
     expr = {
       this_svd <- bigsnpr::snp_autoSVD(
-        X$genotypes, # nolint
+        X, # nolint
         infos.chr = infos_chr,
         infos.pos = infos_pos,
         ind.row = .gt_bigsnp_rows(x),
@@ -194,7 +194,7 @@ gt_pca_autoSVD <- function(
     loci <- this_svd$loci
     loci_after_ld <- which(show_loci(x)$name %in% loci$name)
     x_autoSVD_subset <- x %>% select_loci(all_of(loci_after_ld)) # nolint
-    X <- attr(x$genotypes, "bigsnp") # nolint
+#    X <- attr(x$genotypes, "bigsnp") # nolint
     x_ind_col <- show_loci(x_autoSVD_subset)$big_index
     x_ind_row <- vctrs::vec_data(x_autoSVD_subset$genotypes)
     this_svd$square_frobenius <- square_frobenius(

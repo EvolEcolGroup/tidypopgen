@@ -133,7 +133,7 @@ gt_extract_f2 <- function(
   # if no outdir is given, create a subdirectory f2 in the path of the
   # gen_tibble rds
   if (is.null(outdir)) {
-    outdir <- file.path(dirname(.gt_get_bigsnp(.x)$genotypes$rds), "f2")
+    outdir <- file.path(dirname(.gt_get_fbm(.x)$rds), "f2")
   }
 
   verbose <- !quiet
@@ -223,7 +223,7 @@ gt_to_aftable <- function(
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }
-  geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+  geno_fbm <- .gt_get_fbm(.x)
 
 
 

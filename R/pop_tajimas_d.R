@@ -60,7 +60,7 @@ pop_tajimas_d.vctrs_bigSNP <- function(
   stopifnot_diploid(.x)
   # if we have diploid
   # get the FBM
-  geno_fbm <- attr(.x, "bigsnp")$genotypes
+  geno_fbm <- attr(.x,"fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
@@ -103,7 +103,7 @@ pop_tajimas_d.grouped_df <- function(
     ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
-  geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+  geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x$genotypes)
 

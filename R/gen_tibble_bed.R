@@ -7,34 +7,45 @@ gen_tibble_bed_rds <- function(
     backingfile = NULL,
     quiet = FALSE) {
   
-  # check that the bim and fam files exist
-  if (!file.exists(bigsnpr::sub_bed(x, ".bim"))){
-    stop("bim file ", bigsnpr::sub_bed(x, ".bim"), " does not exist")
-  }
-  if (!file.exists(bigsnpr::sub_bed(x, ".fam"))){
-    stop("fam file ", bigsnpr::sub_bed(x, ".fam"), " does not exist")
-  }
-  # read in the loci and indiv_meta from the bim and fam files
-  loci <- loci_from_bim(bigsnpr::sub_bed(x, ".bim"))
-  indiv_meta <- indiv_meta_from_fam(bigsnpr::sub_bed(x, ".fam"))
-
-  
-  # if it is a bed file, we convert it to a bigsnpr
-
-    if (is.null(backingfile)) {
-      backingfile <- bigsnpr::sub_bed(x)
+  # if file ends in bed
+  if (grepl("\\.bed$", x)) {
+    # check that the bim and fam files exist
+    if (!file.exists(bigsnpr::sub_bed(x, ".bim"))){
+      stop("bim file ", bigsnpr::sub_bed(x, ".bim"), " does not exist")
     }
-    fbm_path <- fbm_read_bed(x,
-                             n_indiv = nrow(indiv_meta),
-                             n_snp = nrow(loci),
-                             backingfile = backingfile)
-
+    if (!file.exists(bigsnpr::sub_bed(x, ".fam"))){
+      stop("fam file ", bigsnpr::sub_bed(x, ".fam"), " does not exist")
+    }
+    # read in the loci and indiv_meta from the bim and fam files
+    loci <- loci_from_bim(bigsnpr::sub_bed(x, ".bim"))
+    indiv_meta <- indiv_meta_from_fam(bigsnpr::sub_bed(x, ".fam"))
   
-  fbm_obj <- readRDS(fbm_path)
+      if (is.null(backingfile)) {
+        backingfile <- bigsnpr::sub_bed(x)
+      }
+      fbm_path <- fbm_read_bed(x,
+                               n_indiv = nrow(indiv_meta),
+                               n_snp = nrow(loci),
+                               backingfile = backingfile)
   
-  # TODO we need to find an equivalen tot snp_attach but for FBM objects
-##  bigsnp_obj <- bigsnpr::snp_attach(fbm_path)
-  
+    
+    fbm_obj <- readRDS(fbm_path)
+  } else {
+    # read the bigsnp object from the rds file
+    bigsnp_obj <- bigsnpr::snp_attach(x)
+    fbm_obj <- bigsnp_obj$genotypes
+    loci <- loci_from_bim(bigsnp_obj$map)
+    indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
+    # create a copy of the bignsp object
+    # new file name for the bignsp ends in "_bignsp.rds"
+    file.copy(x, sub(x, "\\.rds$", "_bigsnp.rds"))
+    fbm_path <- x
+    # replace the bigsnp rds with the fbm rds
+    saveRDS(fbm_obj, fbm_path)
+    # remove the bisnp object from memory
+    rm(bigsnp_obj)
+    
+  }
 
   indiv_meta$genotypes <- new_vctrs_bigsnp(
     fbm_obj,

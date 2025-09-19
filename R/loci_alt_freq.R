@@ -161,7 +161,7 @@ loci_alt_freq.grouped_df <- function(
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-    geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+    geno_fbm <- .gt_get_fbm(.x)
     # rows (individuals) that we want to use
     rows_to_keep <- vctrs::vec_data(.x$genotypes)
     # number of groups (used to define dimensions of objects)
@@ -325,7 +325,7 @@ loci_alt_freq_dip_pseudo <- function(.x,
                                      n_cores,
                                      block_size) {
   # get the FBM
-  geno_fbm <- attr(.x, "bigsnp")$genotypes
+  geno_fbm <- attr(.x,"fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
@@ -378,7 +378,7 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
     "It assumes alleles are the unit of observation"
   ))
   # get the FBM
-  geno_fbm <- attr(.x, "bigsnp")$genotypes
+  geno_fbm <- attr(.x,"fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual

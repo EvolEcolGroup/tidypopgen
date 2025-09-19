@@ -129,7 +129,7 @@ windows_indiv_roh <- function(
   # naively process it by row (the parallelism is implemented within individual)
   # access time is horrible, but I don't think this is the bottleneck
   # it needs some profiling
-  X <- .gt_get_bigsnp(.x)$genotypes # pointer for the FBM #nolint
+  X <- .gt_get_fbm(.x) # pointer for the FBM #nolint
   col_ind <- .gt_bigsnp_cols(.x) # column indices for the snps to consider
   for (i in seq_len(nrow(.x))) {
     this_genotype <- X[i, col_ind]

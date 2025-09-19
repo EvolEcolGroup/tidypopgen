@@ -126,7 +126,7 @@ pop_global_stats <- function(
 
   # summarise population frequencies
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_bigsnp(.x)$genotypes,
+    .gt_get_fbm(.x),
     rowInd = .gt_bigsnp_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = .group_ids,
