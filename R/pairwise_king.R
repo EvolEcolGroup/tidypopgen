@@ -35,11 +35,11 @@ pairwise_king <- function(
     as_matrix = FALSE,
     block_size = bigstatsr::block_size(nrow(x))) {
   # nolint
-  X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
+  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
   king_matrix <- snp_king(
-    X$genotypes,
+    X,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
     block.size = block_size

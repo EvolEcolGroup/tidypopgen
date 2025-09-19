@@ -136,7 +136,7 @@ predict.gt_pca <- function(
       }
       # X * V #nolint
       XV <- bigstatsr::big_prodMat(
-        .gt_get_bigsnp(new_data)$genotypes, # nolint
+        .gt_get_fbm(new_data), # nolint
         object$v,
         ind.row = .gt_bigsnp_rows(new_data),
         ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
@@ -152,7 +152,7 @@ predict.gt_pca <- function(
       XV <- bigstatsr::FBM(nrow(new_data), ncol(object$u), init = 0) # nolint
 
       bigstatsr::big_parallelize(
-        .gt_get_bigsnp(new_data)$genotypes,
+        .gt_get_fbm(new_data),
         p.FUN = fbm256_part_prod,
         ind = seq_along(loci_subset),
         ncores = n_cores,
@@ -188,7 +188,7 @@ predict.gt_pca <- function(
           "for the object, e.g. c(1,2)"
         )
       }
-      X <- .gt_get_bigsnp(new_data)$genotypes # pointer for FBM #nolint
+      X <- .gt_get_fbm(new_data) # pointer for FBM #nolint
       proj_i <- NULL # hack to define iterator
       lsq_proj <- foreach::foreach(
         proj_i = seq_len(nrow(new_data)),

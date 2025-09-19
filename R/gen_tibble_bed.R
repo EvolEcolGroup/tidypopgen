@@ -27,24 +27,23 @@ gen_tibble_bed_rds <- function(
                                n_indiv = nrow(indiv_meta),
                                n_snp = nrow(loci),
                                backingfile = backingfile)
-  
     
     fbm_obj <- readRDS(fbm_path)
   } else {
     # read the bigsnp object from the rds file
     bigsnp_obj <- bigsnpr::snp_attach(x)
     fbm_obj <- bigsnp_obj$genotypes
+    # note that position and genetic dist are already flipped in the bigsnpr obj
     loci <- loci_from_bim(bigsnp_obj$map)
     indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
     # create a copy of the bignsp object
     # new file name for the bignsp ends in "_bignsp.rds"
-    file.copy(x, sub(x, "\\.rds$", "_bigsnp.rds"))
-    fbm_path <- x
+    file.copy(x, sub(fbm_obj$backingfile, "\\.bk$", "_bigsnp.rds"))
+    fbm_path <- sub(fbm_obj$backingfile, "\\.bk$", ".rds")
     # replace the bigsnp rds with the fbm rds
     saveRDS(fbm_obj, fbm_path)
     # remove the bisnp object from memory
     rm(bigsnp_obj)
-    
   }
 
   indiv_meta$genotypes <- new_vctrs_bigsnp(
@@ -55,7 +54,6 @@ gen_tibble_bed_rds <- function(
     ploidy = 2
   )
   
-
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
     class = "gen_tbl"
@@ -136,6 +134,7 @@ loci_from_bim <- function(bim) {
   
   return(loci)
 }
+
 
 #' Generate a tibble of indiv_meta from a fam file
 #' 

@@ -28,6 +28,7 @@ This function converts a \code{genlight} object from the \code{adegenet} package
 \item Currently supports diploid \code{genlight} objects only (all values in
 \verb{@ploidy} must be 2).
 \item Requires non-missing slots: \code{loc.names}, \code{n.loc}, \code{loc.all}, \code{chromosome},
-\code{position}, \code{ploidy}, \code{ind.names}, \code{pop}.
+\code{position}, \code{ploidy}, \code{ind.names}. The \code{pop} slot is optional; if absent, the
+returned gen_tibble will omit the population column.
 }
 }

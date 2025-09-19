@@ -101,7 +101,7 @@ it is soft deprecated and will be removed in future versions of
 \code{tidypopgen}.
 }
 \examples{
-\dontshow{if (rlang::is_installed("detectRUNS")) withAutoprint(\{ # examplesIf}
+\dontshow{if (rlang::is_installed("detectRUNS")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
   package = "detectRUNS"
 )

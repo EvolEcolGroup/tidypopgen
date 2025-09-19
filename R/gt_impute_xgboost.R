@@ -55,7 +55,7 @@ gt_impute_xgboost <- function(
     on.exit(options(bigstatsr.check.parallel.blas = TRUE))
   }
 
-  if (nrow(x) != nrow(attr(x$genotypes, "bigsnp")$genotypes)) {
+  if (nrow(x) != nrow(attr(x$genotypes, "fbm"))) {
     stop(
       "The number of individuals in the gen_tibble does not match the",
       " number of rows in the file backing matrix. Before imputing, use",
@@ -89,7 +89,7 @@ gt_impute_xgboost <- function(
   }
 
   infos <- bigsnpr::snp_fastImpute(
-    attr(x$genotypes, "bigsnp")$genotypes, # this needs subsetting
+    attr(x$genotypes, "fbm"), # this needs subsetting
     infos.chr = show_loci(x)$chr_int, # check this is correct
     alpha = alpha,
     size = size,

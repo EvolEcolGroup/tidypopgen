@@ -67,7 +67,7 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
 
   # Run the analysis
   res <- bigsnpr::snp_pcadapt(
-    G = .gt_get_bigsnp(x)$genotypes,
+    G = .gt_get_fbm(x),
     U.row = pca$u[, 1:k, drop = FALSE],
     ind.row = .gt_bigsnp_rows(x),
     ind.col = .gt_bigsnp_cols(x),
