@@ -128,7 +128,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
     .positions <- NULL
   }
   # create a chromosome vector (fill gaps between bigsnpr and show_loci)
-  .chromosome <- rep(2147483647L, nrow(attr(.x, "bigsnp")$map))
+  .chromosome <- rep(2147483647L, ncol(attr(.x, "fbm")))
   .chromosome[show_loci(.x)$big_index] <- show_loci(.x)$chr_int
   # now figure out if we have any snp which have already been removed
   # those will go into `exclude`
