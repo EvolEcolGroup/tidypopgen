@@ -335,7 +335,7 @@ gen_tibble.matrix <- function(
 
   loci <- validate_loci(loci)
   indiv_meta <- validate_indiv_meta(indiv_meta)
-  
+
   # validate x (the genotypes)
   # check that x (the genotypes) is numeric matrix
   if (inherits(x, "data.frame")) {
@@ -370,7 +370,7 @@ gen_tibble.matrix <- function(
   )
 
   fbm_path <- bigstatsr::sub_bk(fbm_obj$backingfile, ".rds")
-  
+
   indiv_id <- indiv_meta$id
 
   indiv_meta <- as.list(indiv_meta)
@@ -606,26 +606,29 @@ gt_write_bigsnp_from_dfs <- function(
 #' @param indiv_id a vector of individual ids (from indiv_meta)
 #' @param ploidy the ploidy of the samples (either a single value, or
 #' a vector of values for mixed ploidy).
+#' @param fbm_ploidy a vector of ploidies for each individual in the fbm object
+#' (note that this is for the full FBM, not just the tibble)
 #' @returns a vctrs_bigSNP object
 #' @keywords internal
 #' @noRd
-new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2) {
+new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2,
+                             fbm_ploidy = NULL) {
 
   #check that indiv_id is the same length as the nrow of fmb_obj
   # TODO
   # check that nrow(loci) is ncol(fbm_obj)
   #TODO
-  
+
   if (length(unique(ploidy)) > 1) {
     max_ploidy <- 0
   } else {
     max_ploidy <- max(ploidy)
   }
-  
+
   # add the big_index column
   loci <- loci %>% dplyr::mutate(big_index = dplyr::row_number(), .before = 1)
-  
-  vctrs::new_vctr(
+
+  new_vectr <- vctrs::new_vctr(
     seq_along(indiv_id),
     fbm = fbm_obj,
     # TODO is this redundant with the info in the bigSNP object?
@@ -637,6 +640,8 @@ new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2) {
     ploidy = max_ploidy,
     class = "vctrs_bigSNP"
   )
+  attr(new_vectr, "fbm_ploidy") <- fbm_ploidy
+  new_vectr
 }
 
 #' @export
