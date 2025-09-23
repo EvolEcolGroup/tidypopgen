@@ -43,7 +43,7 @@ gt_load <- function(file = NULL, reattach_to = NULL) {
   x <- readRDS(file)
   #update if we have old objects
   x <- update_old_bigsnp(x)
-  
+
   # now deal with the backing files
   if (is.null(reattach_to)) {
     # we expect the backing files to exist
@@ -103,7 +103,7 @@ update_old_bigsnp <- function(x){
     # now remove the old bignsp objects
     attr(x$genotypes, "bigsnp") <- NULL
     attr(x$genotypes, "bigsnp_file") <- NULL
-    attr(x$genotypes, "bignsp_md5sum")
+    attr(x$genotypes, "bigsnp_md5sum") <- NULL
     message("your gen_tibble was in an old format, and it has now",
             "been updated\n",
             "note that hte old RDS was overwritten")

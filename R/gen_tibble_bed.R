@@ -38,8 +38,8 @@ gen_tibble_bed_rds <- function(
     indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
     # create a copy of the bignsp object
     # new file name for the bignsp ends in "_bignsp.rds"
-    file.copy(x, sub(fbm_obj$backingfile, "\\.bk$", "_bigsnp.rds"))
-    fbm_path <- sub(fbm_obj$backingfile, "\\.bk$", ".rds")
+    file.copy(x, sub("\\.bk$",  "_bigsnp.rds", fbm_obj$backingfile))
+    fbm_path <- sub("\\.bk$", ".rds", fbm_obj$backingfile)
     # replace the bigsnp rds with the fbm rds
     saveRDS(fbm_obj, fbm_path)
     # remove the bisnp object from memory
@@ -117,6 +117,8 @@ fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = sub_bed(bedfile
 loci_from_bim <- function(bim) {
   if (is.character(bim)) {
     bim <- read.table(bim, stringsAsFactors = FALSE)
+    names(bim)[1:6] <- c("chromosome", "marker.ID", "genetic.dist",
+                    "physical.pos", "allele1", "allele2")
   }
   if (!is.data.frame(bim) || ncol(bim) < 6) {
     stop("bim must be a data.frame with at least 6 columns or a path to a .bim file")
