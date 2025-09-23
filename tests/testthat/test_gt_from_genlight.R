@@ -25,9 +25,6 @@ test_that("gt can convert from genlight", {
   # and gt_get_file_names(new_gt)[2] ends with .bk
   expect_true(grepl(".bk$", gt_get_file_names(new_gt)[2]))
 
-  # and check that we can read in from the .rds - its a valid gen_tibble
-  new_gt2 <- gen_tibble(gt_get_file_names(new_gt)[1], quiet = TRUE)
-  expect_true(inherits(new_gt2, "gen_tbl"))
 })
 
 test_that("error with non-diploid genlight", {

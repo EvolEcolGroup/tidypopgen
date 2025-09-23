@@ -60,8 +60,7 @@ gt_load <- function(file = NULL, reattach_to = NULL) {
       reattach_to <- paste0(reattach_to, ".rds")
     }
     # attach the new files
-    stop ("this neds to be fixed") # use a bigstats function to reattach
-    attr(x$genotypes, "bigsnp") <- bigsnpr::snp_attach(reattach_to) ## TODO bigsnp_drop
+    attr(x$genotypes, "fbm") <- bigstatsr::big_attach(reattach_to)
   }
 
   return(x)
@@ -112,3 +111,4 @@ update_old_bigsnp <- function(x){
   }
   return(x)
 }
+
