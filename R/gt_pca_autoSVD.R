@@ -198,7 +198,7 @@ gt_pca_autoSVD <- function(
     x_ind_col <- show_loci(x_autoSVD_subset)$big_index
     x_ind_row <- vctrs::vec_data(x_autoSVD_subset$genotypes)
     this_svd$square_frobenius <- square_frobenius(
-      X$genotypes, # nolint
+      X, # nolint
       x_ind_row,
       x_ind_col,
       center = this_svd$center,
