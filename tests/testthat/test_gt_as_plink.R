@@ -27,6 +27,8 @@ test_gt <- gen_tibble(
 
 # this also tests show_genotypes and show_loci
 test_that("write a bed file", {
+  # group
+  test_gt <- test_gt %>% group_by(population)
   bed_path <- gt_as_plink(test_gt, file = paste0(tempfile(), ".bed"))
   # now read the file back in
   test_gt2 <- gen_tibble(bed_path, quiet = TRUE)
@@ -35,6 +37,7 @@ test_that("write a bed file", {
   # because of the different backing file info
   # we cannot use identical on the whole object
   expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt2)))
+  test_gt <- test_gt %>% ungroup()
   expect_true(identical(
     test_gt %>% select(-genotypes),
     test_gt2 %>% select(-genotypes)
