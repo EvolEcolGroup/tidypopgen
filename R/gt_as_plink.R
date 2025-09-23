@@ -216,7 +216,7 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
     } else {
       ind.row = bigstatsr::rows_along(G)
     }
-    if(all(bigstatsr::cols_along(G) != seq_len(ncol(new_bim)))){
+    if(all(bigstatsr::cols_along(G) != seq_len(nrow(new_bim)))){
       G <- G[, ind.col]
       ind.col = bigstatsr::cols_along(G)
     } else {
