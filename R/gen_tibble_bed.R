@@ -38,8 +38,8 @@ gen_tibble_bed_rds <- function(
     indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
     # create a copy of the bignsp object
     # new file name for the bignsp ends in "_bignsp.rds"
-    file.copy(x, sub(fbm_obj$backingfile, "\\.bk$", "_bigsnp.rds"))
-    fbm_path <- sub(fbm_obj$backingfile, "\\.bk$", ".rds")
+    file.copy(x, sub("\\.bk$",  "_bigsnp.rds", fbm_obj$backingfile))
+    fbm_path <- sub("\\.bk$", ".rds", fbm_obj$backingfile)
     # replace the bigsnp rds with the fbm rds
     saveRDS(fbm_obj, fbm_path)
     # remove the bisnp object from memory
