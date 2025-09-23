@@ -117,6 +117,8 @@ fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = sub_bed(bedfile
 loci_from_bim <- function(bim) {
   if (is.character(bim)) {
     bim <- read.table(bim, stringsAsFactors = FALSE)
+    names(bim)[1:6] <- c("chromosome", "marker.ID", "genetic.dist",
+                    "physical.pos", "allele1", "allele2")
   }
   if (!is.data.frame(bim) || ncol(bim) < 6) {
     stop("bim must be a data.frame with at least 6 columns or a path to a .bim file")
