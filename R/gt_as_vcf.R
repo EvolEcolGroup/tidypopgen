@@ -25,7 +25,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
 
   if (is.null(file)) {
     file <- bigstatsr::sub_bk(
-      attr(x, "fbm")$backingfile,
+      attr(x$genotypes, "fbm")$backingfile,
       paste0(".vcf")
     )
   }

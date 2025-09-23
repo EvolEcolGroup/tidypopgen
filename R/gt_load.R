@@ -100,6 +100,8 @@ update_old_bigsnp <- function(x){
     saveRDS(attr(x$genotypes,"fbm"), file = gt_get_file_names(x)[1])
     # add the file to the object
     attr(x$genotypes, "fbm_file") <- gt_get_file_names(x)[1]
+    # add the md5 sum of this file
+    attr(x$genotypes, "fbm_md5sum") <- tools::md5sum(gt_get_file_names(x)[1])
     # now remove the old bignsp objects
     attr(x$genotypes, "bigsnp") <- NULL
     attr(x$genotypes, "bigsnp_file") <- NULL

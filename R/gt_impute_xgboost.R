@@ -68,16 +68,16 @@ gt_impute_xgboost <- function(
   }
 
   if (
-    !identical(attr(x, "fbm")$code256, bigsnpr::CODE_012)
+    !identical(attr(x$genotypes, "fbm")$code256, bigsnpr::CODE_012)
   ) {
     # nolint start
     if (
       identical(
-        attr(x, "fbm")$code256,
+        attr(x$genotypes, "fbm")$code256,
         bigsnpr::CODE_IMPUTE_PRED
       ) ||
         identical(
-          attr(x, "fbm")$code256,
+          attr(x$genotypes, "fbm")$code256,
           bigsnpr::CODE_DOSAGE
         )
     ) {

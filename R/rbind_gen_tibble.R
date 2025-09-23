@@ -306,12 +306,32 @@ rbind.gen_tbl <- function(
 
   fbm_path <- merged_fbm$backingfile
 
+  if(is.null(attr(ref$genotypes, "fbm_ploidy"))) {
+    if(!is_pseudohaploid(ref)){
+      attr(ref$genotypes, "fbm_ploidy") <- rep(2L, nrow(ref))
+    } else{
+      stop("Your reference gen_tibble may contain pseudohaploid data.",
+           "Please run 'gt_pseudohaploid()' to set ploidy before merging.")
+    }
+  }
+  if(is.null(attr(target$genotypes, "fbm_ploidy"))) {
+    if(!is_pseudohaploid(target)){
+      attr(target$genotypes, "fbm_ploidy") <- rep(2L, nrow(ref))
+    } else {
+      stop("Your reference gen_tibble may contain pseudohaploid data.",
+           "Please run 'gt_pseudohaploid()' to set ploidy before merging.")
+    }
+  }
+
+  indivs_ploidy <- c(attr(ref$genotypes, "fbm_ploidy"),
+                     attr(target$genotypes, "fbm_ploidy"))
   merged_tbl$genotypes <- new_vctrs_bigsnp(
     fbm_obj = merged_fbm,
     fbm_file = fbm_path,
     loci = new_ref_loci_tbl,
     indiv_id = indivs_with_big_names,
-    ploidy = ifelse(any_pseudohaploid, -2L, 2L)
+    ploidy = ifelse(any_pseudohaploid, -2L, 2L),
+    fbm_ploidy = indivs_ploidy
   )
 
   merged_tibble <- tibble::new_tibble(
