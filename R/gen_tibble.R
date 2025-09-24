@@ -148,7 +148,6 @@ gen_tibble.character <-
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
-
     # check that valid alleles does not contain zero
     if ("0" %in% valid_alleles) {
       stop(paste(
@@ -186,7 +185,8 @@ gen_tibble.character <-
       # is then passed back to gen_tibble_bed_rds to create the gen_tibble
       # so, the object returned by gen_tibble_vcf is already the
       # final gen_tibble
-      return(gen_tibble_vcf(
+      #return(
+      x_gt <- gen_tibble_vcf(
         x = x,
         ...,
         parser = parser,
@@ -197,7 +197,7 @@ gen_tibble.character <-
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
         quiet = quiet
-      ))
+      )#)
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,

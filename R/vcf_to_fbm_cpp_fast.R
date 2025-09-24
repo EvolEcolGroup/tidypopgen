@@ -49,14 +49,19 @@ vcf_to_fbm_cpp <- function(
 
 
   # individual metadata table
-  fam <- tibble(
-    family.ID = vcf_meta$sample_names,
-    sample.ID = vcf_meta$sample_names,
-    paternal.ID = 0,
-    maternal.ID = 0,
-    sex = 0,
-    affection = -9,
-    ploidy = ploidy
+  # fam <- tibble(
+  #   family.ID = vcf_meta$sample_names,
+  #   sample.ID = vcf_meta$sample_names,
+  #   paternal.ID = 0,
+  #   maternal.ID = 0,
+  #   sex = 0,
+  #   affection = -9,
+  #   ploidy = ploidy
+  # )
+
+  indiv_meta <- list(
+    id = vcf_meta$sample_names,
+    population = vcf_meta$sample_names
   )
 
 
@@ -77,16 +82,47 @@ vcf_to_fbm_cpp <- function(
     )
   }
 
-  bigsnp_obj <- structure(
-    list(
-      genotypes = file_backed_matrix,
-      fam = fam,
-      map = loci
-    ),
-    class = "bigSNP"
+  loci <- tibble::tibble(
+    name = loci$marker.ID,
+    chromosome = as.factor(loci$chromosome),
+    position = loci$physical.pos,
+    genetic_dist = loci$genetic.dist,
+    allele_ref = loci$allele1,
+    allele_alt = loci$allele2
   )
 
-  bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
-  # and return the path to the rds
-  bigsnp_obj$genotypes$rds
+  # validate the loci
+  loci <- validate_loci(loci)
+  # validate individuals
+  indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
+  # construct path
+  fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
+
+  # create genotypes column
+  indiv_meta$genotypes <- new_vctrs_bigsnp(
+    fbm_obj = file_backed_matrix,
+    fbm_file = fbm_path,
+    loci = loci,
+    indiv_id = indiv_meta$id,
+    ploidy = ploidy
+  )
+
+  new_gen_tbl <- tibble::new_tibble(
+    indiv_meta,
+    class = "gen_tbl"
+  )
+  return(new_gen_tbl)
+
+  # bigsnp_obj <- structure(
+  #   list(
+  #     genotypes = file_backed_matrix,
+  #     fam = fam,
+  #     map = loci
+  #   ),
+  #   class = "bigSNP"
+  # )
+
+  # bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
+  # # and return the path to the rds
+  # bigsnp_obj$genotypes$rds
 }

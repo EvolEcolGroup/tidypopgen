@@ -266,7 +266,6 @@ rbind.gen_tbl <- function(
   #saveRDS(merged_snp, merged_rds)
   # Now we need to create the gen_tibble
   # Make sure that the two tibbles have the same columns
-  #browser()
 
   ref <- add_missing_cols(ref, target)
   names(ref$genotypes) <- ref$id

@@ -77,23 +77,37 @@ vcf_to_fbm_vcfR <- function(
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
   # metadata
-  fam <- tibble(
-    family.ID = colnames(temp_gt),
-    sample.ID = colnames(temp_gt),
-    paternal.ID = 0,
-    maternal.ID = 0,
-    sex = 0,
-    affection = -9,
-    ploidy = unname(ploidy)
+  # fam <- tibble(
+  #   family.ID = colnames(temp_gt),
+  #   sample.ID = colnames(temp_gt),
+  #   # paternal.ID = 0,
+  #   # maternal.ID = 0,
+  #   # sex = 0,
+  #   # affection = -9,
+  #   ploidy = unname(ploidy)
+  # )
+
+  indiv_meta <- list(
+    id = colnames(temp_gt),
+    population = colnames(temp_gt)
   )
 
-  loci <- tibble(
+  # loci <- tibble(
+  #   chromosome = NULL,
+  #   marker.ID = NULL,
+  #   genetic.dist = NULL,
+  #   physical.pos = NULL,
+  #   allele1 = NULL,
+  #   allele2 = NULL
+  # )
+
+  loci <- tibble::tibble(
+    name = NULL,
     chromosome = NULL,
-    marker.ID = NULL,
-    genetic.dist = NULL,
-    physical.pos = NULL,
-    allele1 = NULL,
-    allele2 = NULL
+    position = NULL,
+    genetic_dist = NULL,
+    allele_ref = NULL,
+    allele_alt = NULL
   )
 
   # create the file backed matrix
@@ -148,31 +162,55 @@ vcf_to_fbm_vcfR <- function(
     loci <- rbind(
       loci,
       tibble(
-        chromosome = unname(vcfR::getCHROM(temp_vcf)[bi]),
         # remove names as it does have ID as a name
-        marker.ID = unname(vcfR::getID(temp_vcf)[bi]),
-        genetic.dist = 0,
-        physical.pos = vcfR::getPOS(temp_vcf)[bi],
-        allele1 = unname(vcfR::getALT(temp_vcf)[bi]),
-        allele2 = unname(vcfR::getREF(temp_vcf)[bi])
+        name = unname(vcfR::getID(temp_vcf)[bi]),
+        chromosome = unname(vcfR::getCHROM(temp_vcf)[bi]),
+        position = vcfR::getPOS(temp_vcf)[bi],
+        genetic_dist = 0,
+        allele_ref = unname(vcfR::getALT(temp_vcf)[bi]),
+        allele_alt = unname(vcfR::getREF(temp_vcf)[bi])
       )
     )
   }
-  # save it
-  file_backed_matrix$save()
+  # validate the loci
+  loci <- validate_loci(loci)
+  # validate individuals
+  indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
+  # construct path
+  fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
 
-  bigsnp_obj <- structure(
-    list(
-      genotypes = file_backed_matrix,
-      fam = fam,
-      map = loci
-    ),
-    class = "bigSNP"
+  # create genotypes column
+  indiv_meta$genotypes <- new_vctrs_bigsnp(
+    fbm_obj = file_backed_matrix,
+    fbm_file = fbm_path,
+    loci = loci,
+    indiv_id = indiv_meta$id,
+    ploidy = ploidy
   )
 
-  bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
+  new_gen_tbl <- tibble::new_tibble(
+    indiv_meta,
+    class = "gen_tbl"
+  )
+  return(new_gen_tbl)
+
+  # save it
+  # file_backed_matrix$save()
+  #
+  # bigsnp_obj <- structure(
+  #   list(
+  #     genotypes = file_backed_matrix,
+  #     fam = fam,
+  #     map = loci
+  #   ),
+  #   class = "bigSNP"
+  # )
+
+  #bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
   # and return the path to the rds
-  bigsnp_obj$genotypes$rds
+  #bigsnp_obj$genotypes$rds
+
+
 }
 
 # get ploidy for a given individual
