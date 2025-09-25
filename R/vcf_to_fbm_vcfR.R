@@ -88,8 +88,7 @@ vcf_to_fbm_vcfR <- function(
   # )
 
   indiv_meta <- list(
-    id = colnames(temp_gt),
-    population = colnames(temp_gt)
+    id = colnames(temp_gt)
   )
 
   # loci <- tibble(

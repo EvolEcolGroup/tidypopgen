@@ -60,10 +60,8 @@ vcf_to_fbm_cpp <- function(
   # )
 
   indiv_meta <- list(
-    id = vcf_meta$sample_names,
-    population = vcf_meta$sample_names
+    id = vcf_meta$sample_names
   )
-
 
   # loci metadata table
   loci <- vcf_meta$loci_tbl

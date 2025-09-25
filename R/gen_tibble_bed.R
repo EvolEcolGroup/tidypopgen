@@ -73,7 +73,7 @@ gen_tibble_bed_rds <- function(
 
 # this is a stripped down version of bigsnpr::snp_readBed
 # it only creates the fbm of the genotypes
-fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = sub_bed(bedfile))
+fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = bigsnpr::sub_bed(bedfile))
 {
   backingfile <- path.expand(backingfile)
   bigassertr::assert_noexist(paste0(backingfile, ".bk"))
@@ -116,7 +116,7 @@ fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = sub_bed(bedfile
 
 loci_from_bim <- function(bim) {
   if (is.character(bim)) {
-    bim <- read.table(bim, stringsAsFactors = FALSE)
+    bim <- utils::read.table(bim, stringsAsFactors = FALSE)
     names(bim)[1:6] <- c("chromosome", "marker.ID", "genetic.dist",
                     "physical.pos", "allele1", "allele2")
   }
@@ -151,7 +151,7 @@ loci_from_bim <- function(bim) {
 
 indiv_meta_from_fam <- function(fam) {
   if (is.character(fam)) {
-    fam <- read.table(fam, stringsAsFactors = FALSE)
+    fam <- utils::read.table(fam, stringsAsFactors = FALSE)
   }
 
   if (!is.data.frame(fam) || ncol(fam) < 6) {
