@@ -97,7 +97,6 @@ gt_as_plink <- function(
 
 
 gt_write_bed <- function(x, file, chromosomes_as_int) {
-
   # bed_path <- bigsnpr::snp_writeBed(
   #   attr(x$genotypes, "bigsnp"),
   #   bedfile = file,
@@ -110,7 +109,7 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
 
   # create a bim table
   if (!chromosomes_as_int) {
-    #bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
+    # bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
     bim_table <- show_loci(x) %>%
       dplyr::select(dplyr::all_of(c(
         "chromosome",
@@ -139,7 +138,7 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
     # )
     bim_table
   } else {
-    #bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
+    # bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
     bim_table <- show_loci(x) %>%
       dplyr::select(dplyr::all_of(c(
         "chr_int",
@@ -170,8 +169,8 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
   }
 
   # create a fam table
-  #fam_path <- bigsnpr::sub_bed(bed_path, ".fam")
-  #fam_table <- utils::read.table(fam_path)
+  # fam_path <- bigsnpr::sub_bed(bed_path, ".fam")
+  # fam_table <- utils::read.table(fam_path)
   fam_table <- data.frame(matrix(NA, nrow = nrow(x), ncol = 6))
   colnames(fam_table) <- c(
     "FID",
@@ -187,7 +186,7 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
     fam_table$FID <- x %>%
       select(dplyr::group_vars(x)) %>%
       dplyr::pull(1)
-  } else{
+  } else {
     fam_table$FID <- x$id
   }
   # utils::write.table(
@@ -200,34 +199,37 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
 
   list <- c(x, bim_table, fam_table)
 
-  # pass to expanded version of bigsnpr::snp_writeBed
-  write_bed <- function(G, bedfile, new_fam, new_bim)
-  {
-    bigsnpr:::check_args(G = "assert_class(G, 'FBM.code256')")
+  # code adapted from bigsnpr::snp_writeBed
+  write_bed <- function(G, bedfile, new_fam, new_bim) {
+    if (!inherits(G, "FBM.code256")) {
+      stop("G is not of class FBM.code256")
+    }
     bimfile <- bigsnpr::sub_bed(bedfile, ".bim")
     famfile <- bigsnpr::sub_bed(bedfile, ".fam")
-    #sapply(c(bedfile, bimfile, famfile), assert_noexist)
-    #bigassertr::assert_dir(dirname(bedfile))
 
     # subset G if needed
-    if(all(bigstatsr::rows_along(G) != seq_len(nrow(new_fam)))){
+    if (all(bigstatsr::rows_along(G) != seq_len(nrow(new_fam)))) {
       G <- G[ind.row, ]
-      ind.row = bigstatsr::rows_along(G)
+      ind.row <- bigstatsr::rows_along(G)
     } else {
-      ind.row = bigstatsr::rows_along(G)
+      ind.row <- bigstatsr::rows_along(G)
     }
-    if(all(bigstatsr::cols_along(G) != seq_len(nrow(new_bim)))){
+    if (all(bigstatsr::cols_along(G) != seq_len(nrow(new_bim)))) {
       G <- G[, ind.col]
-      ind.col = bigstatsr::cols_along(G)
+      ind.col <- bigstatsr::cols_along(G)
     } else {
-      ind.col = bigstatsr::cols_along(G)
+      ind.col <- bigstatsr::cols_along(G)
     }
 
-    G.round <- G$copy(code = replace(round(G$code256), is.na(G$code256),
-                                     3))
+    G.round <- G$copy(code = replace(
+      round(G$code256), is.na(G$code256),
+      3
+    ))
     stopifnot(all(G.round$code256 %in% 0:3))
-    bigsnpr:::writebina(path.expand(bedfile), G.round, bigsnpr:::getInverseCode(),
-              ind.row, ind.col)
+    bigsnpr:::writebina(
+      path.expand(bedfile), G.round, bigsnpr:::getInverseCode(),
+      ind.row, ind.col
+    )
     bigsnpr:::write.table2(new_fam, file = famfile, na = 0)
     bigsnpr:::write.table2(new_bim, file = bimfile, na = 0)
     bedfile
