@@ -24,24 +24,28 @@ gen_tibble_vcf <- function(
     new_gen_tbl <- vcf_to_fbm_cpp(
       x,
       backingfile = backingfile,
+      valid_alleles = c("A", "T", "C", "G"),
+      missing_alleles = c("0", "."),
       quiet = quiet
     )
   } else {
     new_gen_tbl <- vcf_to_fbm_vcfR(
       x,
       backingfile = backingfile,
+      valid_alleles = c("A", "T", "C", "G"),
+      missing_alleles = c("0", "."),
       chunk_size = chunk_size,
       quiet = quiet,
       ...
     )
   }
 
-  check_allele_alphabet(
-    new_gen_tbl,
-    valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles,
-    remove_on_fail = TRUE
-  )
+  # check_allele_alphabet(
+  #   new_gen_tbl,
+  #   valid_alleles = valid_alleles,
+  #   missing_alleles = missing_alleles,
+  #   remove_on_fail = TRUE
+  # )
   show_loci(new_gen_tbl) <- harmonise_missing_values(
     show_loci(new_gen_tbl),
     missing_alleles = missing_alleles

@@ -17,7 +17,9 @@ gen_tibble_bed_rds <- function(
       stop("fam file ", bigsnpr::sub_bed(x, ".fam"), " does not exist")
     }
     # read in the loci and indiv_meta from the bim and fam files
-    loci <- loci_from_bim(bigsnpr::sub_bed(x, ".bim"))
+    loci <- loci_from_bim(bigsnpr::sub_bed(x, ".bim"),
+                          valid_alleles = valid_alleles,
+                          missing_alleles = missing_alleles)
     indiv_meta <- indiv_meta_from_fam(bigsnpr::sub_bed(x, ".fam"))
 
       if (is.null(backingfile)) {
@@ -34,7 +36,9 @@ gen_tibble_bed_rds <- function(
     bigsnp_obj <- bigsnpr::snp_attach(x)
     fbm_obj <- bigsnp_obj$genotypes
     # note that position and genetic dist are already flipped in the bigsnpr obj
-    loci <- loci_from_bim(bigsnp_obj$map)
+    loci <- loci_from_bim(bigsnp_obj$map,
+                          valid_alleles = valid_alleles,
+                          missing_alleles = missing_alleles)
     indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
     # create a copy of the bignsp object
     # new file name for the bignsp ends in "_bignsp.rds"
@@ -58,12 +62,12 @@ gen_tibble_bed_rds <- function(
     indiv_meta,
     class = "gen_tbl"
   )
-  check_allele_alphabet(
-    new_gen_tbl,
-    valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles,
-    remove_on_fail = TRUE
-  )
+  # check_allele_alphabet(
+  #   new_gen_tbl,
+  #   valid_alleles = valid_alleles,
+  #   missing_alleles = missing_alleles,
+  #   remove_on_fail = TRUE
+  # )
   show_loci(new_gen_tbl) <- harmonise_missing_values(
     show_loci(new_gen_tbl),
     missing_alleles = missing_alleles
@@ -114,7 +118,9 @@ fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = bigsnpr::sub_be
 #' @keywords internal
 #' @noRd
 
-loci_from_bim <- function(bim) {
+loci_from_bim <- function(bim,
+                          valid_alleles = c("A", "T", "C", "G"),
+                          missing_alleles = c("0", ".")) {
   if (is.character(bim)) {
     bim <- utils::read.table(bim, stringsAsFactors = FALSE)
     names(bim)[1:6] <- c("chromosome", "marker.ID", "genetic.dist",
@@ -132,7 +138,11 @@ loci_from_bim <- function(bim) {
     allele_alt = as.character(bim$allele1)
   )
 
-  loci <- validate_loci(loci)
+  loci <- validate_loci(loci,
+                        check_alphabet = TRUE,
+                        valid_alleles = valid_alleles,
+                        missing_alleles = missing_alleles#, remove_on_fail = remove_on_fail
+                        )
 
   return(loci)
 }

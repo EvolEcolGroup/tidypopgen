@@ -109,7 +109,11 @@ gen_tibble_packedancestry <- function(
   #   allele2 = loci_table$allele_ref
   # )
 
-  loci <- validate_loci(loci_table)
+  loci <- validate_loci(loci_table,
+                        check_alphabet = TRUE,
+                        valid_alleles = valid_alleles,
+                        missing_alleles = missing_alleles #, remove_on_fail = remove_on_fail
+                        )
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
 
   # construct path

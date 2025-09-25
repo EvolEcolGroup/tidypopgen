@@ -331,7 +331,11 @@ gen_tibble.matrix <- function(
     ))
   }
 
-  loci <- validate_loci(loci)
+  loci <- validate_loci(loci,
+    check_alphabet = TRUE,
+    valid_alleles = valid_alleles,
+    missing_alleles = missing_alleles #, remove_on_fail = remove_on_fail
+  )
   indiv_meta <- validate_indiv_meta(indiv_meta)
 
   # validate x (the genotypes)
@@ -384,12 +388,12 @@ gen_tibble.matrix <- function(
     indiv_meta,
     class = "gen_tbl"
   )
-  check_allele_alphabet(
-    new_gen_tbl,
-    valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles,
-    remove_on_fail = TRUE
-  )
+  # check_allele_alphabet(
+  #   show_loci(new_gen_tbl),
+  #   valid_alleles = valid_alleles,
+  #   missing_alleles = missing_alleles,
+  #   remove_on_fail = TRUE
+  # )
   show_loci(new_gen_tbl) <-
     harmonise_missing_values(
       show_loci(new_gen_tbl),
@@ -653,31 +657,31 @@ tbl_sum.gen_tbl <- function(x, ...) {
 check_allele_alphabet <- function(
     x,
     valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    remove_on_fail = FALSE) {
+    missing_alleles = c("0", ".")#, remove_on_fail = FALSE
+    ) {
   if (
     any(
-      !show_loci(x)$allele_ref %in% c(valid_alleles, missing_alleles, NA),
-      !show_loci(x)$allele_alt %in% c(valid_alleles, missing_alleles, NA)
+      !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),
+      !x$allele_alt %in% c(valid_alleles, missing_alleles, NA)
     )
   ) {
-    if (remove_on_fail) {
-      # remove files if they were generated
-      if (file.exists(gt_get_file_names(x)[1])) {
-        file.remove(gt_get_file_names(x)[1])
-      }
-      if (file.exists(gt_get_file_names(x)[2])) {
-        file.remove(gt_get_file_names(x)[2])
-      }
-    }
+    # if (remove_on_fail) {
+    #   # remove files if they were generated
+    #   if (file.exists(gt_get_file_names(x)[1])) {
+    #     file.remove(gt_get_file_names(x)[1])
+    #   }
+    #   if (file.exists(gt_get_file_names(x)[2])) {
+    #     file.remove(gt_get_file_names(x)[2])
+    #   }
+    # }
     stop(
       "valid alleles are ",
       paste(c(valid_alleles, missing_alleles), collapse = " "),
       " but ",
       paste(
         unique(c(
-          show_loci(x)$allele_ref,
-          show_loci(x)$allele_alt
+          x$allele_ref,
+          x$allele_alt
         )),
         collapse = " "
       ),

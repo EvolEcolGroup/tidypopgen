@@ -12,6 +12,8 @@
 vcf_to_fbm_cpp <- function(
     vcf_path,
     backingfile = NULL,
+    valid_alleles = c("A", "T", "C", "G"),
+    missing_alleles = c("0", "."),
     quiet = FALSE) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
@@ -90,7 +92,11 @@ vcf_to_fbm_cpp <- function(
   )
 
   # validate the loci
-  loci <- validate_loci(loci)
+  loci <- validate_loci(loci,
+                        check_alphabet = TRUE,
+                        valid_alleles = valid_alleles,
+                        missing_alleles = missing_alleles #, remove_on_fail = remove_on_fail
+                        )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
   # construct path

@@ -7,7 +7,10 @@
 #' @keywords internal
 #' @noRd
 
-validate_loci <- function(loci) {
+validate_loci <- function(loci,
+                          check_alphabet = FALSE,
+                          valid_alleles = valid_alleles,
+                          missing_alleles = missing_alleles) {
   required_cols <- c(
     "name", "chromosome", "position",
     "genetic_dist", "allele_ref", "allele_alt"
@@ -47,6 +50,11 @@ validate_loci <- function(loci) {
   }
   if (!is.character(loci$allele_alt)) {
     stop("loci$allele_alt must be a character")
+  }
+  if(check_alphabet == TRUE){
+    check_allele_alphabet(loci,
+                          valid_alleles = valid_alleles,
+                          missing_alleles = missing_alleles)
   }
   return(loci)
 }
