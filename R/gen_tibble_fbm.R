@@ -9,6 +9,7 @@
 
 validate_loci <- function(loci,
                           check_alphabet = FALSE,
+                          harmonise_loci = FALSE,
                           valid_alleles = valid_alleles,
                           missing_alleles = missing_alleles) {
   required_cols <- c(
@@ -55,6 +56,12 @@ validate_loci <- function(loci,
     check_allele_alphabet(loci,
                           valid_alleles = valid_alleles,
                           missing_alleles = missing_alleles)
+  }
+  if(harmonise_loci == TRUE){
+    loci <- harmonise_missing_values(
+      loci,
+      missing_alleles
+    )
   }
   return(loci)
 }

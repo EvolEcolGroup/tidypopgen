@@ -46,10 +46,10 @@ gen_tibble_vcf <- function(
   #   missing_alleles = missing_alleles,
   #   remove_on_fail = TRUE
   # )
-  show_loci(new_gen_tbl) <- harmonise_missing_values(
-    show_loci(new_gen_tbl),
-    missing_alleles = missing_alleles
-  )
+  # show_loci(new_gen_tbl) <- harmonise_missing_values(
+  #   show_loci(new_gen_tbl),
+  #   missing_alleles = missing_alleles
+  # )
 
   if (!quiet) {
     message("converting to a gen_tibble...")

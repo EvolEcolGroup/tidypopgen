@@ -94,6 +94,7 @@ vcf_to_fbm_cpp <- function(
   # validate the loci
   loci <- validate_loci(loci,
                         check_alphabet = TRUE,
+                        harmonise_loci = TRUE,
                         valid_alleles = valid_alleles,
                         missing_alleles = missing_alleles #, remove_on_fail = remove_on_fail
                         )

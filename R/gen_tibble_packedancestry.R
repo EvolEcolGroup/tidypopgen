@@ -111,6 +111,7 @@ gen_tibble_packedancestry <- function(
 
   loci <- validate_loci(loci_table,
                         check_alphabet = TRUE,
+                        harmonise_loci = TRUE,
                         valid_alleles = valid_alleles,
                         missing_alleles = missing_alleles #, remove_on_fail = remove_on_fail
                         )

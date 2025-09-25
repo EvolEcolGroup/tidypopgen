@@ -333,6 +333,7 @@ gen_tibble.matrix <- function(
 
   loci <- validate_loci(loci,
     check_alphabet = TRUE,
+    harmonise_loci = TRUE,
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles #, remove_on_fail = remove_on_fail
   )
@@ -394,11 +395,11 @@ gen_tibble.matrix <- function(
   #   missing_alleles = missing_alleles,
   #   remove_on_fail = TRUE
   # )
-  show_loci(new_gen_tbl) <-
-    harmonise_missing_values(
-      show_loci(new_gen_tbl),
-      missing_alleles = missing_alleles
-    )
+  # show_loci(new_gen_tbl) <-
+  #   harmonise_missing_values(
+  #     show_loci(new_gen_tbl),
+  #     missing_alleles = missing_alleles
+  #   )
 
   # create a chr_int column
   show_loci(new_gen_tbl)$chr_int <-

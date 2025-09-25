@@ -68,10 +68,10 @@ gen_tibble_bed_rds <- function(
   #   missing_alleles = missing_alleles,
   #   remove_on_fail = TRUE
   # )
-  show_loci(new_gen_tbl) <- harmonise_missing_values(
-    show_loci(new_gen_tbl),
-    missing_alleles = missing_alleles
-  )
+  # show_loci(new_gen_tbl) <- harmonise_missing_values(
+  #   show_loci(new_gen_tbl),
+  #   missing_alleles = missing_alleles
+  # )
   return(new_gen_tbl)
 }
 
@@ -140,6 +140,7 @@ loci_from_bim <- function(bim,
 
   loci <- validate_loci(loci,
                         check_alphabet = TRUE,
+                        harmonise_loci = TRUE,
                         valid_alleles = valid_alleles,
                         missing_alleles = missing_alleles#, remove_on_fail = remove_on_fail
                         )
