@@ -1,5 +1,5 @@
 #' Test that a loci table is valid
-#' 
+#'
 #' This function checks that a loci tibble has the required columns and that they
 #' are of the correct type.
 #' @param loci A tibble of loci
@@ -25,7 +25,11 @@ validate_loci <- function(loci) {
     stop("loci$name must be a character")
   }
   # if chromosome is numeric, turn it into character
-  if (is.numeric(loci$chromosome)) {
+  #if (is.numeric(loci$chromosome)) {
+  #  loci$chromosome <- as.character(loci$chromosome)
+  #}
+  ### alternative from check_valid_loci
+  if (!is.character(loci$chromosome)) {
     loci$chromosome <- as.character(loci$chromosome)
   }
   # check that chromosome is a factor or character
@@ -49,7 +53,7 @@ validate_loci <- function(loci) {
 
 
 #' Validate indiv_meta
-#' 
+#'
 #' This function checks that an indiv_meta tibble has the required columns and that they
 #' are of the correct type (just the id column).
 #' @param indiv_meta A tibble of individual metadata
@@ -110,13 +114,13 @@ gt_write_fbm_from_dfs <- function(
   } else {
     max_ploidy <- ploidy
   }
-  
+
   if (is.na(max_ploidy)) {
     stop("'ploidy' can not contain NAs")
   }
-  
+
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
-  
+
   # ensure max_ploidy is appropriate for the data
   if (any(genotypes > max_ploidy, na.rm = TRUE)) {
     stop(
@@ -125,7 +129,7 @@ gt_write_fbm_from_dfs <- function(
       " but genotypes contains indviduals with greater ploidy"
     )
   }
-  
+
   # equivalent to bigGeno in bigstatsr
   big_geno <- bigstatsr::FBM.code256(
     nrow = nrow(genotypes),

@@ -228,8 +228,6 @@ gen_tibble.character <-
     # create a chr_int column
     show_loci(x_gt)$chr_int <-
       cast_chromosome_to_int(show_loci(x_gt)$chromosome)
-    # check chromosome is character
-    show_loci(x_gt) <- check_valid_loci(show_loci(x_gt))
 
     # check alleles
     loci <- show_loci(x_gt)
@@ -472,34 +470,6 @@ gen_tibble.matrix <- function(
   return(new_gen_tbl)
 }
 
-# TODO bignsp_remove this is replaced by a more sophisticated validate_loci
-check_valid_loci <- function(loci) {
-  loci <- as_tibble(loci)
-  if (
-    !all(
-      c(
-        "name",
-        "chromosome",
-        "position",
-        "genetic_dist",
-        "allele_ref",
-        "allele_alt"
-      ) %in%
-        names(loci)
-    )
-  ) {
-    stop(paste(
-      "loci does not include the compulsory columns 'name',",
-      "'chromosome', 'position','genetic_dist',",
-      "allele_ref','allele_alt'"
-    ))
-  }
-  if (!is.character(loci$chromosome)) {
-    loci$chromosome <- as.character(loci$chromosome)
-  }
-  return(loci)
-}
-
 
 #' Create a bigSNP object from data.frames
 #'
@@ -527,7 +497,6 @@ gt_write_bigsnp_from_dfs <- function(
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }
-  loci <- check_valid_loci(loci)
   # set up code (accounting for ploidy)
   code256 <- rep(NA_real_, 256)
   if (length(ploidy) > 1) {
