@@ -167,8 +167,8 @@ vcf_to_fbm_vcfR <- function(
         chromosome = unname(vcfR::getCHROM(temp_vcf)[bi]),
         position = vcfR::getPOS(temp_vcf)[bi],
         genetic_dist = 0,
-        allele_ref = unname(vcfR::getALT(temp_vcf)[bi]),
-        allele_alt = unname(vcfR::getREF(temp_vcf)[bi])
+        allele_ref = unname(vcfR::getREF(temp_vcf)[bi]),
+        allele_alt = unname(vcfR::getALT(temp_vcf)[bi])
       )
     )
   }

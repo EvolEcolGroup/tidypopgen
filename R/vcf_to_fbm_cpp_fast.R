@@ -87,8 +87,8 @@ vcf_to_fbm_cpp <- function(
     chromosome = as.factor(loci$chromosome),
     position = loci$physical.pos,
     genetic_dist = loci$genetic.dist,
-    allele_ref = loci$allele1,
-    allele_alt = loci$allele2
+    allele_ref = loci$allele2,
+    allele_alt = loci$allele1
   )
 
   # validate the loci
