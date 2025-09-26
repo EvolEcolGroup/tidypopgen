@@ -7,11 +7,11 @@
 #' @param backingfile the name of the file to use as the backing file for the
 #'   FBM. If NULL, the vcf path will be used.
 #' @param valid_alleles a character vector of valid alleles. Default is c("A",
-#' "T", "C", "G").
-#' @param missing_alleles a character vector of alleles to be treated as missing.
-#' Default is c("0", ".").
+#'   "T", "C", "G").
+#' @param missing_alleles a character vector of alleles to be treated as
+#'   missing. Default is c("0", ".").
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
-#' position) or duplicated locus names. Default is FALSE.
+#'   position) or duplicated locus names. Default is FALSE.
 #' @param quiet whether to print messages.
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
@@ -101,13 +101,13 @@ vcf_to_fbm_cpp <- function(
 
   # validate the loci
   loci <- validate_loci(loci,
-                        check_alphabet = TRUE,
-                        harmonise_loci = TRUE,
-                        check_duplicates = TRUE,
-                        allow_duplicates = allow_duplicates,
-                        valid_alleles = valid_alleles,
-                        missing_alleles = missing_alleles
-                        )
+    check_alphabet = TRUE,
+    harmonise_loci = TRUE,
+    check_duplicates = TRUE,
+    allow_duplicates = allow_duplicates,
+    valid_alleles = valid_alleles,
+    missing_alleles = missing_alleles
+  )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
   # construct path

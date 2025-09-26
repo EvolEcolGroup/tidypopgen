@@ -206,7 +206,7 @@ read_pedfile <- function(
   } else {
     # mapfile
     names(map) <- c("chromosome", "name", "genetic_dist", "position")
-    map <- map[,c("name", "chromosome", "position", "genetic_dist")]
+    map <- map[, c("name", "chromosome", "position", "genetic_dist")]
     map$allele_ref <- a1
     map$allele_alt <- a2
     map

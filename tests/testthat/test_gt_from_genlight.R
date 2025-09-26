@@ -24,7 +24,6 @@ test_that("gt can convert from genlight", {
   expect_true(grepl(".rds$", gt_get_file_names(new_gt)[1]))
   # and gt_get_file_names(new_gt)[2] ends with .bk
   expect_true(grepl(".bk$", gt_get_file_names(new_gt)[2]))
-
 })
 
 test_that("error with non-diploid genlight", {

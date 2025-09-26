@@ -98,7 +98,7 @@ loci_missingness.vctrs_bigSNP <- function(
     ...) {
   rlang::check_dots_empty()
   # get the FBM
-  geno_fbm <- attr(.x,"fbm")
+  geno_fbm <- attr(.x, "fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual

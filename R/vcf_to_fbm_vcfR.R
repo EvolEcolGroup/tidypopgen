@@ -182,13 +182,13 @@ vcf_to_fbm_vcfR <- function(
   }
   # validate the loci
   loci <- validate_loci(loci,
-                        check_alphabet = TRUE,
-                        harmonise_loci = TRUE,
-                        check_duplicates = TRUE,
-                        allow_duplicates = allow_duplicates,
-                        valid_alleles = valid_alleles,
-                        missing_alleles = missing_alleles
-                        )
+    check_alphabet = TRUE,
+    harmonise_loci = TRUE,
+    check_duplicates = TRUE,
+    allow_duplicates = allow_duplicates,
+    valid_alleles = valid_alleles,
+    missing_alleles = missing_alleles
+  )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
   # construct path
@@ -221,11 +221,9 @@ vcf_to_fbm_vcfR <- function(
   #   class = "bigSNP"
   # )
 
-  #bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
+  # bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
   # and return the path to the rds
-  #bigsnp_obj$genotypes$rds
-
-
+  # bigsnp_obj$genotypes$rds
 }
 
 # get ploidy for a given individual

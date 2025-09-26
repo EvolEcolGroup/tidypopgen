@@ -52,7 +52,7 @@ indiv_missingness.vctrs_bigSNP <- function(
     ...) {
   rlang::check_dots_empty()
   # get the FBM
-  X <- attr(.x,"fbm") # nolint
+  X <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
 

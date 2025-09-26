@@ -24,9 +24,7 @@
 #' example_gt <- load_example_gt("gen_tbl")
 #'
 #' example_gt %>% gt_update_backingfile()
-
 # Note that this is tested through gt_order_loci()
-
 gt_update_backingfile <- function(
     .x,
     backingfile = NULL,
@@ -141,12 +139,14 @@ gt_update_backingfile <- function(
   # )
 
 
-  new_gen_tbl$genotypes <- new_vctrs_bigsnp(fbm_obj  = new_bk_matrix,
-                                            fbm_file = fbm_file,
-                                            loci = show_loci(.x),
-                                            indiv_id = .x$id,
-                                            ploidy = attr(.x$genotypes, "ploidy"),
-                               fbm_ploidy = fbm_ploidy)
+  new_gen_tbl$genotypes <- new_vctrs_bigsnp(
+    fbm_obj = new_bk_matrix,
+    fbm_file = fbm_file,
+    loci = show_loci(.x),
+    indiv_id = .x$id,
+    ploidy = attr(.x$genotypes, "ploidy"),
+    fbm_ploidy = fbm_ploidy
+  )
 
   # reorder the bignsp column in the loci table
   show_loci(new_gen_tbl)$big_index <- 1:count_loci(new_gen_tbl)

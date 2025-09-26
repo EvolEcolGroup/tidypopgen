@@ -325,7 +325,7 @@ loci_alt_freq_dip_pseudo <- function(.x,
                                      n_cores,
                                      block_size) {
   # get the FBM
-  geno_fbm <- attr(.x,"fbm")
+  geno_fbm <- attr(.x, "fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
@@ -378,7 +378,7 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
     "It assumes alleles are the unit of observation"
   ))
   # get the FBM
-  geno_fbm <- attr(.x,"fbm")
+  geno_fbm <- attr(.x, "fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual

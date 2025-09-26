@@ -51,12 +51,12 @@ gen_tibble_packedancestry <- function(
   no_variants <- nrow(loci_table)
 
   loci <- validate_loci(loci_table,
-                        check_alphabet = TRUE,
-                        harmonise_loci = TRUE,
-                        check_duplicates = TRUE,
-                        allow_duplicates = allow_duplicates,
-                        valid_alleles = valid_alleles,
-                        missing_alleles = missing_alleles
+    check_alphabet = TRUE,
+    harmonise_loci = TRUE,
+    check_duplicates = TRUE,
+    allow_duplicates = allow_duplicates,
+    valid_alleles = valid_alleles,
+    missing_alleles = missing_alleles
   )
 
   # verify that these numbers are compatible with the geno file

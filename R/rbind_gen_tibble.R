@@ -179,11 +179,11 @@ rbind.gen_tbl <- function(
   #   loci_indices = new_ref_loci_tbl$big_index,
   #   indiv_indices = vctrs::vec_data(ref$genotypes)
   # )
-   ref_snp <- subset_FBM(
-     attr(ref$genotypes, "fbm"),
-     loci_indices = new_ref_loci_tbl$big_index,
-     indiv_indices = vctrs::vec_data(ref$genotypes)
-   )
+  ref_snp <- subset_FBM(
+    attr(ref$genotypes, "fbm"),
+    loci_indices = new_ref_loci_tbl$big_index,
+    indiv_indices = vctrs::vec_data(ref$genotypes)
+  )
   ###########
   # now we move to the target object
   # we fix the missing alleles
@@ -250,8 +250,8 @@ rbind.gen_tbl <- function(
   # TODO this should be written in the directory of interest
 
   # Make sure that the two fam tibbles have the same columns
-  #ref_snp$fam <- add_missing_cols(ref_snp$fam, target_snp$fam)
-  #target_snp$fam <- add_missing_cols(target_snp$fam, ref_snp$fam)
+  # ref_snp$fam <- add_missing_cols(ref_snp$fam, target_snp$fam)
+  # target_snp$fam <- add_missing_cols(target_snp$fam, ref_snp$fam)
 
   # now create a bigsnp object
   # merged_snp <- structure(
@@ -262,8 +262,8 @@ rbind.gen_tbl <- function(
   #   ),
   #   class = "bigSNP"
   # )
-  #merged_rds <- paste0(backingfile, ".rds")
-  #saveRDS(merged_snp, merged_rds)
+  # merged_rds <- paste0(backingfile, ".rds")
+  # saveRDS(merged_snp, merged_rds)
   # Now we need to create the gen_tibble
   # Make sure that the two tibbles have the same columns
 
@@ -305,25 +305,31 @@ rbind.gen_tbl <- function(
 
   fbm_path <- merged_fbm$backingfile
 
-  if(is.null(attr(ref$genotypes, "fbm_ploidy"))) {
-    if(!is_pseudohaploid(ref)){
+  if (is.null(attr(ref$genotypes, "fbm_ploidy"))) {
+    if (!is_pseudohaploid(ref)) {
       attr(ref$genotypes, "fbm_ploidy") <- rep(2L, nrow(ref))
-    } else{
-      stop("Your reference gen_tibble may contain pseudohaploid data.",
-           "Please run 'gt_pseudohaploid()' to set ploidy before merging.")
+    } else {
+      stop(
+        "Your reference gen_tibble may contain pseudohaploid data.",
+        "Please run 'gt_pseudohaploid()' to set ploidy before merging."
+      )
     }
   }
-  if(is.null(attr(target$genotypes, "fbm_ploidy"))) {
-    if(!is_pseudohaploid(target)){
+  if (is.null(attr(target$genotypes, "fbm_ploidy"))) {
+    if (!is_pseudohaploid(target)) {
       attr(target$genotypes, "fbm_ploidy") <- rep(2L, nrow(ref))
     } else {
-      stop("Your reference gen_tibble may contain pseudohaploid data.",
-           "Please run 'gt_pseudohaploid()' to set ploidy before merging.")
+      stop(
+        "Your reference gen_tibble may contain pseudohaploid data.",
+        "Please run 'gt_pseudohaploid()' to set ploidy before merging."
+      )
     }
   }
 
-  indivs_ploidy <- c(attr(ref$genotypes, "fbm_ploidy"),
-                     attr(target$genotypes, "fbm_ploidy"))
+  indivs_ploidy <- c(
+    attr(ref$genotypes, "fbm_ploidy"),
+    attr(target$genotypes, "fbm_ploidy")
+  )
   merged_tbl$genotypes <- new_vctrs_bigsnp(
     fbm_obj = merged_fbm,
     fbm_file = fbm_path,

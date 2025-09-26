@@ -65,7 +65,7 @@ loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   # get the FBM
-  geno_fbm <- attr(.x,"fbm")
+  geno_fbm <- attr(.x, "fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual

@@ -12,8 +12,8 @@
 #' @keywords internal
 #' @noRd
 
-subset_bigSNP <- function( # nolint
-    X, # nolint end
+subset_bigSNP <- function(
+    X, # nolint
     indiv_indices = NULL,
     loci_indices = NULL,
     swap_indices = NULL,
@@ -101,8 +101,7 @@ subset_FBM <- function(X, # nolint
                        indiv_indices = NULL,
                        loci_indices = NULL,
                        swap_indices = NULL,
-                       backingfile = NULL){
-
+                       backingfile = NULL) {
   if (is.null(indiv_indices)) {
     indiv_indices <- bigstatsr::rows_along(X)
   }

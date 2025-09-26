@@ -1,20 +1,20 @@
 #' Test that a loci table is valid
 #'
-#' This function checks that a loci tibble has the required columns and that they
-#' are of the correct type.
+#' This function checks that a loci tibble has the required columns and that
+#' they are of the correct type.
 #' @param loci A tibble of loci
 #' @param check_alphabet whether to check that alleles are in the valid_alleles
-#' list. Default is FALSE.
+#'   list. Default is FALSE.
 #' @param harmonise_loci whether to harmonise missing alleles in the loci table
-#' using the missing_alleles list. Default is FALSE.
+#'   using the missing_alleles list. Default is FALSE.
 #' @param check_duplicates whether to check for duplicated loci (same chromosome
-#' and position) or duplicated locus names. Default is FALSE.
+#'   and position) or duplicated locus names. Default is FALSE.
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
-#' position) or duplicated locus names. Default is FALSE.
+#'   position) or duplicated locus names. Default is FALSE.
 #' @param valid_alleles a character vector of valid alleles. Default is c("A",
-#' "T", "C", "G").
-#' @param missing_alleles a character vector of alleles to be treated as missing.
-#' Default is c("0", ".").
+#'   "T", "C", "G").
+#' @param missing_alleles a character vector of alleles to be treated as
+#'   missing. Default is c("0", ".").
 #' @returns the validated loci table
 #' @keywords internal
 #' @noRd
@@ -124,8 +124,8 @@ validate_loci <- function(loci,
 
 #' Validate indiv_meta
 #'
-#' This function checks that an indiv_meta tibble has the required columns and that they
-#' are of the correct type (just the id column).
+#' This function checks that an indiv_meta tibble has the required columns and
+#' that they are of the correct type (just the id column).
 #' @param indiv_meta A tibble of individual metadata
 #' @returns the validated indiv_meta tibble
 #' @keywords internal

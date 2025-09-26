@@ -30,12 +30,12 @@ gt_save <- function(x, file_name = NULL, quiet = FALSE) {
   if (!inherits(x, "gen_tbl")) {
     stop("x should be a gen_tibble")
   }
-  
+
   # TODO we need to replace this
-  
+
   # we update the fbm object
   .gt_get_fbm(x)$save()
-  
+
   if (is.null(file_name)) {
     file_name <- bigstatsr::sub_bk(gt_get_file_names(x)[2], ".gt")
   }

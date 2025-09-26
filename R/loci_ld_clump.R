@@ -119,7 +119,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
   is_loci_table_ordered(.x, error_on_false = TRUE)
 
   # get the FBM
-  geno_fbm <- attr(.x,"fbm") # nolint
+  geno_fbm <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   if (use_positions) {
     .positions <- rep(NA, ncol(attr(.x, "fbm")))
@@ -143,7 +143,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
 
   # as long as we have more than one individual
   snp_clump_ids <- bigsnpr::snp_clumping(
-    G = attr(.x,"fbm"),
+    G = attr(.x, "fbm"),
     # infos.chr = show_loci(.x)$chr_int, #nolint start
     # TEMP HACK using the info from the bigsnpr object
     # infos.chr = cast_chromosome_to_int(attr(.x,"bigsnp")$map$chromosome), #nolint end

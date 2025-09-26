@@ -194,7 +194,7 @@ gt_pca_autoSVD <- function(
     loci <- this_svd$loci
     loci_after_ld <- which(show_loci(x)$name %in% loci$name)
     x_autoSVD_subset <- x %>% select_loci(all_of(loci_after_ld)) # nolint
-#    X <- attr(x$genotypes, "bigsnp") # nolint
+    #    X <- attr(x$genotypes, "bigsnp") # nolint
     x_ind_col <- show_loci(x_autoSVD_subset)$big_index
     x_ind_row <- vctrs::vec_data(x_autoSVD_subset$genotypes)
     this_svd$square_frobenius <- square_frobenius(

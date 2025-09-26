@@ -75,17 +75,17 @@ if (rlang::is_installed("vcfR")) {
     # check our cpp parser
     pop_b_vcf_fast_gt <-
       gen_tibble(vcf_path,
-                 quiet = TRUE,
-                 backingfile = tempfile(),
-                 parser = "cpp"
+        quiet = TRUE,
+        backingfile = tempfile(),
+        parser = "cpp"
       )
 
     expect_error(
       gen_tibble(vcf_path,
-                 quiet = TRUE,
-                 backingfile = tempfile(),
-                 parser = "cpp",
-                 verbose = TRUE
+        quiet = TRUE,
+        backingfile = tempfile(),
+        parser = "cpp",
+        verbose = TRUE
       ), "extra parameters can only be used with parser = 'vcfR'"
     )
 
@@ -233,9 +233,9 @@ if (rlang::is_installed("vcfR")) {
     # check our cpp parser
     pop_a_vcf_fast_gt <-
       gen_tibble(vcf_path,
-                 quiet = TRUE,
-                 backingfile = tempfile(),
-                 parser = "cpp"
+        quiet = TRUE,
+        backingfile = tempfile(),
+        parser = "cpp"
       )
     expect_true(all.equal(
       show_genotypes(pop_a_gt),
@@ -579,9 +579,9 @@ if (rlang::is_installed("vcfR")) {
     expect_true(is.integer(show_loci(pop_a_vcf_gt)$chr_int))
     pop_a_vcf_fast_gt <-
       gen_tibble(vcf_path,
-                 quiet = TRUE,
-                 backingfile = tempfile(),
-                 parser = "cpp"
+        quiet = TRUE,
+        backingfile = tempfile(),
+        parser = "cpp"
       )
     expect_true(is.integer(show_loci(pop_a_vcf_fast_gt)$chr_int))
 
@@ -648,7 +648,7 @@ test_that("gt without population is valid", {
   # gen_tbl from vcf does not have population automatically
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
   pop_b_vcf_gt <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile())
-  #expect_true(!("population" %in% names(pop_b_vcf_gt)))
+  # expect_true(!("population" %in% names(pop_b_vcf_gt)))
 })
 
 if (rlang::is_installed("vcfR")) {
@@ -807,9 +807,9 @@ if (rlang::is_installed("vcfR")) {
       )
     pop_a_cpp_gt <-
       gen_tibble(vcf_path,
-                 quiet = TRUE,
-                 backingfile = tempfile(),
-                 parser = "cpp"
+        quiet = TRUE,
+        backingfile = tempfile(),
+        parser = "cpp"
       )
 
     # chr_int is correct for vcf
