@@ -11,7 +11,6 @@ gen_tibble_vcf <- function(
     allow_duplicates = FALSE,
     quiet = FALSE) {
   parser <- match.arg(parser)
-
   if (!file.exists(x)) {
     stop("x should be a valid file path pointing to a vcf: ", x)
   }
@@ -26,6 +25,7 @@ gen_tibble_vcf <- function(
       backingfile = backingfile,
       valid_alleles = c("A", "T", "C", "G"),
       missing_alleles = c("0", "."),
+      allow_duplicates = allow_duplicates,
       quiet = quiet
     )
   } else {
@@ -35,6 +35,7 @@ gen_tibble_vcf <- function(
       valid_alleles = c("A", "T", "C", "G"),
       missing_alleles = c("0", "."),
       chunk_size = chunk_size,
+      allow_duplicates = allow_duplicates,
       quiet = quiet,
       ...
     )

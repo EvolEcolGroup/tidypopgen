@@ -3,6 +3,17 @@
 #' This function checks that a loci tibble has the required columns and that they
 #' are of the correct type.
 #' @param loci A tibble of loci
+#' @param check_alphabet whether to check that alleles are in the valid_alleles
+#' list. Default is FALSE.
+#' @param harmonise_loci whether to harmonise missing alleles in the loci table
+#' using the missing_alleles list. Default is FALSE.
+#' @param check_duplicates whether to check for duplicated loci (same chromosome
+#' and position) or duplicated locus names. Default is FALSE.
+#' @param allow_duplicates whether to allow duplicated loci (same chromosome and
+#' position) or duplicated locus names. Default is FALSE.
+#' @param valid_alleles a character vector of valid alleles.
+#' @param missing_alleles a character vector of alleles to be considered as
+#' missing.
 #' @returns the validated loci table
 #' @keywords internal
 #' @noRd
@@ -10,8 +21,10 @@
 validate_loci <- function(loci,
                           check_alphabet = FALSE,
                           harmonise_loci = FALSE,
-                          valid_alleles = valid_alleles,
-                          missing_alleles = missing_alleles) {
+                          check_duplicates = FALSE,
+                          allow_duplicates = FALSE,
+                          valid_alleles = c("A", "T", "C", "G"),
+                          missing_alleles = c("0", ".")) {
   required_cols <- c(
     "name", "chromosome", "position",
     "genetic_dist", "allele_ref", "allele_alt"
@@ -29,9 +42,9 @@ validate_loci <- function(loci,
     stop("loci$name must be a character")
   }
   # if chromosome is numeric, turn it into character
-  #if (is.numeric(loci$chromosome)) {
+  # if (is.numeric(loci$chromosome)) {
   #  loci$chromosome <- as.character(loci$chromosome)
-  #}
+  # }
   ### alternative from check_valid_loci
   if (!is.character(loci$chromosome)) {
     loci$chromosome <- as.character(loci$chromosome)
@@ -52,16 +65,57 @@ validate_loci <- function(loci,
   if (!is.character(loci$allele_alt)) {
     stop("loci$allele_alt must be a character")
   }
-  if(check_alphabet == TRUE){
+  if (check_alphabet == TRUE) {
     check_allele_alphabet(loci,
-                          valid_alleles = valid_alleles,
-                          missing_alleles = missing_alleles)
+      valid_alleles = valid_alleles,
+      missing_alleles = missing_alleles
+    )
   }
-  if(harmonise_loci == TRUE){
+  if (harmonise_loci == TRUE) {
     loci <- harmonise_missing_values(
       loci,
       missing_alleles
     )
+  }
+  if (check_duplicates == TRUE) {
+    # check for duplicates
+    duplicated_pos <- loci %>%
+      group_by(.data$chromosome) %>% # nolint
+      group_map(~ .x[duplicated(.x$position) | duplicated(.x$position, fromLast = TRUE), ]$name) %>% # nolint
+      unlist(use.names = FALSE)
+
+    has_dup_pos <- length(duplicated_pos) > 0
+    has_dup_names <- anyDuplicated(loci$name) > 0
+
+    if (!allow_duplicates) {
+      if (has_dup_pos) {
+        stop(paste0(
+          "Your data contain duplicated loci. ",
+          "Remove them or set allow_duplicates = TRUE."
+        ))
+      }
+      if (has_dup_names) {
+        stop(paste0(
+          "Your data contain duplicated locus names. ",
+          "Remove them or set allow_duplicates = TRUE."
+        ))
+      }
+    } else {
+      if (has_dup_pos) {
+        warning(paste0(
+          "You have allowed duplicated loci in your data. ",
+          "Your data contain duplicated loci. ",
+          "Use find_duplicated_loci(my_tibble) to select and remove them."
+        ))
+      }
+      if (has_dup_names) {
+        warning(paste0(
+          "You have allowed duplicated loci in your data. ",
+          "Your data contain duplicated locus names. ",
+          "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
+        ))
+      }
+    }
   }
   return(loci)
 }

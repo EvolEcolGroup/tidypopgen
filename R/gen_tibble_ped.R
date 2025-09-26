@@ -4,6 +4,7 @@ gen_tibble_ped <- function(
     ...,
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
+    allow_duplicates = FALSE,
     backingfile = NULL,
     quiet = FALSE) {
   # Substitute .ped with .map

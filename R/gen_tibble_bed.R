@@ -4,6 +4,7 @@ gen_tibble_bed_rds <- function(
     ...,
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
+    allow_duplicates = FALSE,
     backingfile = NULL,
     quiet = FALSE) {
 
@@ -19,7 +20,8 @@ gen_tibble_bed_rds <- function(
     # read in the loci and indiv_meta from the bim and fam files
     loci <- loci_from_bim(bigsnpr::sub_bed(x, ".bim"),
                           valid_alleles = valid_alleles,
-                          missing_alleles = missing_alleles)
+                          missing_alleles = missing_alleles,
+                          allow_duplicates = allow_duplicates)
     indiv_meta <- indiv_meta_from_fam(bigsnpr::sub_bed(x, ".fam"))
 
       if (is.null(backingfile)) {
@@ -113,6 +115,13 @@ fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = bigsnpr::sub_be
 #' to create a loci tibble compatible with a `gen_tibble` object.
 #' @param bim the path to a bim file or a data.frame containing the contents of a
 #'  bim file.
+#' @param valid_alleles a character vector of valid alleles. Default is c("A",
+#' "T", "C", "G").
+#' @param missing_alleles a character vector of alleles to be treated as missing.
+#' Default is c("0", ".").
+#' @param allow_duplicates logical, if FALSE (default) an error is raised if
+#' there are duplicate locus names. If TRUE, duplicate locus names are
+#' allowed, but a warning is issued.
 #' @returns A tibble with columns: `big_index`, `name`, `chromosome`,
 #' `position`, `gentic_dist`, `allele_ref`, `allele_alt`
 #' @keywords internal
@@ -120,7 +129,8 @@ fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = bigsnpr::sub_be
 
 loci_from_bim <- function(bim,
                           valid_alleles = c("A", "T", "C", "G"),
-                          missing_alleles = c("0", ".")) {
+                          missing_alleles = c("0", "."),
+                          allow_duplicates = FALSE) {
   if (is.character(bim)) {
     bim <- utils::read.table(bim, stringsAsFactors = FALSE)
     names(bim)[1:6] <- c("chromosome", "marker.ID", "genetic.dist",
@@ -140,9 +150,11 @@ loci_from_bim <- function(bim,
 
   loci <- validate_loci(loci,
                         check_alphabet = TRUE,
+                        check_duplicates = TRUE,
+                        allow_duplicates = allow_duplicates,
                         harmonise_loci = TRUE,
                         valid_alleles = valid_alleles,
-                        missing_alleles = missing_alleles#, remove_on_fail = remove_on_fail
+                        missing_alleles = missing_alleles
                         )
 
   return(loci)

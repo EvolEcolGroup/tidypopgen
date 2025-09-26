@@ -4,6 +4,7 @@ gen_tibble_packedancestry <- function(
     ...,
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
+    allow_duplicates = FALSE,
     backingfile = NULL,
     quiet = FALSE) {
   # Substitute .geno with .snp
@@ -112,8 +113,10 @@ gen_tibble_packedancestry <- function(
   loci <- validate_loci(loci_table,
                         check_alphabet = TRUE,
                         harmonise_loci = TRUE,
+                        check_duplicates = TRUE,
+                        allow_duplicates = allow_duplicates,
                         valid_alleles = valid_alleles,
-                        missing_alleles = missing_alleles #, remove_on_fail = remove_on_fail
+                        missing_alleles = missing_alleles
                         )
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
 

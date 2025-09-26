@@ -6,6 +6,12 @@
 #' @param vcf_path the path to the vcf
 #' @param chunk_size the chunk size to use on the vcf when loading the file
 #' @param backingfile the name of the file to use as the backing file
+#' @param valid_alleles a character vector of valid alleles. Default is c("A",
+#' "T", "C", "G").
+#' @param missing_alleles a character vector of alleles to be treated as missing.
+#' Default is c("0", ".").
+#' @param allow_duplicates whether to allow duplicated loci (same chromosome and
+#' position) or duplicated locus names. Default is FALSE.
 #' @param quiet whether to print messages
 #' @param ... further arguments to be passed to [vcfR::read.vcfR()]. Do not pass
 #' nrows, skip, verbose, or convertNA; these are controlled internally.
@@ -20,6 +26,7 @@ vcf_to_fbm_vcfR <- function(
     backingfile = NULL,
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
+    allow_duplicates = FALSE,
     quiet = FALSE,
     ...) {
   dots <- list(...)
@@ -177,8 +184,10 @@ vcf_to_fbm_vcfR <- function(
   loci <- validate_loci(loci,
                         check_alphabet = TRUE,
                         harmonise_loci = TRUE,
+                        check_duplicates = TRUE,
+                        allow_duplicates = allow_duplicates,
                         valid_alleles = valid_alleles,
-                        missing_alleles = missing_alleles #, remove_on_fail = remove_on_fail
+                        missing_alleles = missing_alleles
                         )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))

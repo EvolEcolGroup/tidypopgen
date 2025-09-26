@@ -176,6 +176,7 @@ gen_tibble.character <-
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
+        allow_duplicates = allow_duplicates,
         quiet = quiet
       )
     } else if (
@@ -205,6 +206,7 @@ gen_tibble.character <-
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
+        allow_duplicates = allow_duplicates,
         quiet = quiet
       )
     } else if (tolower(file_ext(x)) == "geno") {
@@ -214,6 +216,7 @@ gen_tibble.character <-
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
+        allow_duplicates = allow_duplicates,
         quiet = quiet,
         chunk_size = chunk_size
       )
@@ -256,45 +259,45 @@ gen_tibble.character <-
       }
     }
 
-    # check for duplicates
-    duplicated_pos <- find_duplicated_loci(x_gt, list_duplicates = TRUE)
-    has_dup_pos <- length(duplicated_pos) > 0
-    has_dup_names <- anyDuplicated(loci_names(x_gt)) > 0
-
-    if (!allow_duplicates) {
-      if (has_dup_pos || has_dup_names) {
-        files <- gt_get_file_names(x_gt)
-        if (file.exists(files[1])) file.remove(files[1])
-        if (file.exists(files[2])) file.remove(files[2])
-      }
-      if (has_dup_pos) {
-        stop(paste0(
-          "Your data contain duplicated loci. ",
-          "Remove them or set allow_duplicates = TRUE."
-        ))
-      }
-      if (has_dup_names) {
-        stop(paste0(
-          "Your data contain duplicated locus names. ",
-          "Remove them or set allow_duplicates = TRUE."
-        ))
-      }
-    } else {
-      if (has_dup_pos) {
-        warning(paste0(
-          "You have allowed duplicated loci in your data. ",
-          "Your data contain duplicated loci. ",
-          "Use find_duplicated_loci(my_tibble) to select and remove them."
-        ))
-      }
-      if (has_dup_names) {
-        warning(paste0(
-          "You have allowed duplicated loci in your data. ",
-          "Your data contain duplicated locus names. ",
-          "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
-        ))
-      }
-    }
+    # # check for duplicates
+    # duplicated_pos <- find_duplicated_loci(show_loci(x_gt), list_duplicates = TRUE)
+    # has_dup_pos <- length(duplicated_pos) > 0
+    # has_dup_names <- anyDuplicated(loci_names(x_gt)) > 0
+    #
+    # if (!allow_duplicates) {
+    #   if (has_dup_pos || has_dup_names) {
+    #     files <- gt_get_file_names(x_gt)
+    #     if (file.exists(files[1])) file.remove(files[1])
+    #     if (file.exists(files[2])) file.remove(files[2])
+    #   }
+    #   if (has_dup_pos) {
+    #     stop(paste0(
+    #       "Your data contain duplicated loci. ",
+    #       "Remove them or set allow_duplicates = TRUE."
+    #     ))
+    #   }
+    #   if (has_dup_names) {
+    #     stop(paste0(
+    #       "Your data contain duplicated locus names. ",
+    #       "Remove them or set allow_duplicates = TRUE."
+    #     ))
+    #   }
+    # } else {
+    #   if (has_dup_pos) {
+    #     warning(paste0(
+    #       "You have allowed duplicated loci in your data. ",
+    #       "Your data contain duplicated loci. ",
+    #       "Use find_duplicated_loci(my_tibble) to select and remove them."
+    #     ))
+    #   }
+    #   if (has_dup_names) {
+    #     warning(paste0(
+    #       "You have allowed duplicated loci in your data. ",
+    #       "Your data contain duplicated locus names. ",
+    #       "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
+    #     ))
+    #   }
+    # }
 
     gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
@@ -333,9 +336,11 @@ gen_tibble.matrix <- function(
 
   loci <- validate_loci(loci,
     check_alphabet = TRUE,
+    check_duplicates = TRUE,
+    allow_duplicates = allow_duplicates,
     harmonise_loci = TRUE,
     valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles #, remove_on_fail = remove_on_fail
+    missing_alleles = missing_alleles
   )
   indiv_meta <- validate_indiv_meta(indiv_meta)
 
@@ -431,45 +436,45 @@ gen_tibble.matrix <- function(
     }
   }
 
-  # check for duplicates
-  duplicated_pos <- find_duplicated_loci(new_gen_tbl, list_duplicates = TRUE)
-  has_dup_pos <- length(duplicated_pos) > 0
-  has_dup_names <- anyDuplicated(loci_names(new_gen_tbl)) > 0
-
-  if (!allow_duplicates) {
-    if (has_dup_pos || has_dup_names) {
-      files <- gt_get_file_names(new_gen_tbl)
-      if (file.exists(files[1])) file.remove(files[1])
-      if (file.exists(files[2])) file.remove(files[2])
-    }
-    if (has_dup_pos) {
-      stop(paste0(
-        "Your data contain duplicated loci. ",
-        "Remove them or set allow_duplicates = TRUE."
-      ))
-    }
-    if (has_dup_names) {
-      stop(paste0(
-        "Your data contain duplicated locus names. ",
-        "Remove them or set allow_duplicates = TRUE."
-      ))
-    }
-  } else {
-    if (has_dup_pos) {
-      warning(paste0(
-        "You have allowed duplicated loci in your data. ",
-        "Your data contain duplicated loci. ",
-        "Use find_duplicated_loci(my_tibble) to select and remove them."
-      ))
-    }
-    if (has_dup_names) {
-      warning(paste0(
-        "You have allowed duplicated loci in your data. ",
-        "Your data contain duplicated locus names. ",
-        "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
-      ))
-    }
-  }
+  # # check for duplicates
+  # duplicated_pos <- find_duplicated_loci(show_loci(new_gen_tbl), list_duplicates = TRUE)
+  # has_dup_pos <- length(duplicated_pos) > 0
+  # has_dup_names <- anyDuplicated(loci_names(new_gen_tbl)) > 0
+  #
+  # if (!allow_duplicates) {
+  #   if (has_dup_pos || has_dup_names) {
+  #     files <- gt_get_file_names(new_gen_tbl)
+  #     if (file.exists(files[1])) file.remove(files[1])
+  #     if (file.exists(files[2])) file.remove(files[2])
+  #   }
+  #   if (has_dup_pos) {
+  #     stop(paste0(
+  #       "Your data contain duplicated loci. ",
+  #       "Remove them or set allow_duplicates = TRUE."
+  #     ))
+  #   }
+  #   if (has_dup_names) {
+  #     stop(paste0(
+  #       "Your data contain duplicated locus names. ",
+  #       "Remove them or set allow_duplicates = TRUE."
+  #     ))
+  #   }
+  # } else {
+  #   if (has_dup_pos) {
+  #     warning(paste0(
+  #       "You have allowed duplicated loci in your data. ",
+  #       "Your data contain duplicated loci. ",
+  #       "Use find_duplicated_loci(my_tibble) to select and remove them."
+  #     ))
+  #   }
+  #   if (has_dup_names) {
+  #     warning(paste0(
+  #       "You have allowed duplicated loci in your data. ",
+  #       "Your data contain duplicated locus names. ",
+  #       "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
+  #     ))
+  #   }
+  # }
 
   gt_save(new_gen_tbl, quiet = quiet) # nolint
   return(new_gen_tbl)
@@ -658,7 +663,7 @@ tbl_sum.gen_tbl <- function(x, ...) {
 check_allele_alphabet <- function(
     x,
     valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", ".")#, remove_on_fail = FALSE
+    missing_alleles = c("0", ".")
     ) {
   if (
     any(
