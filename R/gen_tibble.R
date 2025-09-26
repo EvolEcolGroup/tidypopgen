@@ -186,7 +186,7 @@ gen_tibble.character <-
       # is then passed back to gen_tibble_bed_rds to create the gen_tibble
       # so, the object returned by gen_tibble_vcf is already the
       # final gen_tibble
-      #return(
+      # return(
       x_gt <- gen_tibble_vcf(
         x = x,
         ...,
@@ -198,7 +198,7 @@ gen_tibble.character <-
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
         quiet = quiet
-      )#)
+      ) # )
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,
@@ -258,46 +258,6 @@ gen_tibble.character <-
         )
       }
     }
-
-    # # check for duplicates
-    # duplicated_pos <- find_duplicated_loci(show_loci(x_gt), list_duplicates = TRUE)
-    # has_dup_pos <- length(duplicated_pos) > 0
-    # has_dup_names <- anyDuplicated(loci_names(x_gt)) > 0
-    #
-    # if (!allow_duplicates) {
-    #   if (has_dup_pos || has_dup_names) {
-    #     files <- gt_get_file_names(x_gt)
-    #     if (file.exists(files[1])) file.remove(files[1])
-    #     if (file.exists(files[2])) file.remove(files[2])
-    #   }
-    #   if (has_dup_pos) {
-    #     stop(paste0(
-    #       "Your data contain duplicated loci. ",
-    #       "Remove them or set allow_duplicates = TRUE."
-    #     ))
-    #   }
-    #   if (has_dup_names) {
-    #     stop(paste0(
-    #       "Your data contain duplicated locus names. ",
-    #       "Remove them or set allow_duplicates = TRUE."
-    #     ))
-    #   }
-    # } else {
-    #   if (has_dup_pos) {
-    #     warning(paste0(
-    #       "You have allowed duplicated loci in your data. ",
-    #       "Your data contain duplicated loci. ",
-    #       "Use find_duplicated_loci(my_tibble) to select and remove them."
-    #     ))
-    #   }
-    #   if (has_dup_names) {
-    #     warning(paste0(
-    #       "You have allowed duplicated loci in your data. ",
-    #       "Your data contain duplicated locus names. ",
-    #       "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
-    #     ))
-    #   }
-    # }
 
     gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
@@ -394,17 +354,6 @@ gen_tibble.matrix <- function(
     indiv_meta,
     class = "gen_tbl"
   )
-  # check_allele_alphabet(
-  #   show_loci(new_gen_tbl),
-  #   valid_alleles = valid_alleles,
-  #   missing_alleles = missing_alleles,
-  #   remove_on_fail = TRUE
-  # )
-  # show_loci(new_gen_tbl) <-
-  #   harmonise_missing_values(
-  #     show_loci(new_gen_tbl),
-  #     missing_alleles = missing_alleles
-  #   )
 
   # create a chr_int column
   show_loci(new_gen_tbl)$chr_int <-
@@ -435,46 +384,6 @@ gen_tibble.matrix <- function(
       )
     }
   }
-
-  # # check for duplicates
-  # duplicated_pos <- find_duplicated_loci(show_loci(new_gen_tbl), list_duplicates = TRUE)
-  # has_dup_pos <- length(duplicated_pos) > 0
-  # has_dup_names <- anyDuplicated(loci_names(new_gen_tbl)) > 0
-  #
-  # if (!allow_duplicates) {
-  #   if (has_dup_pos || has_dup_names) {
-  #     files <- gt_get_file_names(new_gen_tbl)
-  #     if (file.exists(files[1])) file.remove(files[1])
-  #     if (file.exists(files[2])) file.remove(files[2])
-  #   }
-  #   if (has_dup_pos) {
-  #     stop(paste0(
-  #       "Your data contain duplicated loci. ",
-  #       "Remove them or set allow_duplicates = TRUE."
-  #     ))
-  #   }
-  #   if (has_dup_names) {
-  #     stop(paste0(
-  #       "Your data contain duplicated locus names. ",
-  #       "Remove them or set allow_duplicates = TRUE."
-  #     ))
-  #   }
-  # } else {
-  #   if (has_dup_pos) {
-  #     warning(paste0(
-  #       "You have allowed duplicated loci in your data. ",
-  #       "Your data contain duplicated loci. ",
-  #       "Use find_duplicated_loci(my_tibble) to select and remove them."
-  #     ))
-  #   }
-  #   if (has_dup_names) {
-  #     warning(paste0(
-  #       "You have allowed duplicated loci in your data. ",
-  #       "Your data contain duplicated locus names. ",
-  #       "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
-  #     ))
-  #   }
-  # }
 
   gt_save(new_gen_tbl, quiet = quiet) # nolint
   return(new_gen_tbl)
@@ -581,22 +490,32 @@ gt_write_bigsnp_from_dfs <- function(
 #' create a vctrs_bigSNP
 #' @param fbm_obj the bigsnp object
 #' @param fbm_file the file to which the bigsnp object was saved
-#' @param loci a tibble of loci (needs to be validated first with `validate_loci`)
+#' @param loci a tibble of loci (needs to be validated first with
+#'   `validate_loci`)
 #' @param indiv_id a vector of individual ids (from indiv_meta)
-#' @param ploidy the ploidy of the samples (either a single value, or
-#' a vector of values for mixed ploidy).
+#' @param ploidy the ploidy of the samples (either a single value, or a vector
+#'   of values for mixed ploidy).
 #' @param fbm_ploidy a vector of ploidies for each individual in the fbm object
-#' (note that this is for the full FBM, not just the tibble)
+#'   (note that this is for the full FBM, not just the tibble)
 #' @returns a vctrs_bigSNP object
 #' @keywords internal
 #' @noRd
 new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2,
                              fbm_ploidy = NULL) {
-
-  #check that indiv_id is the same length as the nrow of fmb_obj
-  # TODO
+  # check that indiv_id is the same length as the nrow of fmb_obj
+  if (length(indiv_id) != nrow(fbm_obj)) {
+    stop(paste(
+      "'indiv_id' should be the same length as the number of rows",
+      "in the fbm_obj"
+    ))
+  }
   # check that nrow(loci) is ncol(fbm_obj)
-  #TODO
+  if (nrow(loci) != ncol(fbm_obj)) {
+    stop(paste(
+      "'loci' should have the same number of rows as the number of",
+      "columns in the fbm_obj"
+    ))
+  }
 
   if (length(unique(ploidy)) > 1) {
     max_ploidy <- 0
@@ -663,23 +582,13 @@ tbl_sum.gen_tbl <- function(x, ...) {
 check_allele_alphabet <- function(
     x,
     valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", ".")
-    ) {
+    missing_alleles = c("0", ".")) {
   if (
     any(
       !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),
       !x$allele_alt %in% c(valid_alleles, missing_alleles, NA)
     )
   ) {
-    # if (remove_on_fail) {
-    #   # remove files if they were generated
-    #   if (file.exists(gt_get_file_names(x)[1])) {
-    #     file.remove(gt_get_file_names(x)[1])
-    #   }
-    #   if (file.exists(gt_get_file_names(x)[2])) {
-    #     file.remove(gt_get_file_names(x)[2])
-    #   }
-    # }
     stop(
       "valid alleles are ",
       paste(c(valid_alleles, missing_alleles), collapse = " "),

@@ -30,6 +30,13 @@ gen_tibble_packedancestry <- function(
   names(indiv_table) <- c("id", "sex", "population")
   no_individuals <- nrow(indiv_table)
 
+  indiv_meta <- list(
+    id = indiv_table$id,
+    population = indiv_table$population
+  )
+
+  indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
+
   # count the loci
   loci_table <- utils::read.table(map_file, header = FALSE)
   names(loci_table) <- c(
@@ -42,6 +49,15 @@ gen_tibble_packedancestry <- function(
   )
   loci_table$allele_alt[loci_table$allele_alt == "X"] <- NA
   no_variants <- nrow(loci_table)
+
+  loci <- validate_loci(loci_table,
+                        check_alphabet = TRUE,
+                        harmonise_loci = TRUE,
+                        check_duplicates = TRUE,
+                        allow_duplicates = allow_duplicates,
+                        valid_alleles = valid_alleles,
+                        missing_alleles = missing_alleles
+  )
 
   # verify that these numbers are compatible with the geno file
   conn <- file(x, "rb")
@@ -59,7 +75,6 @@ gen_tibble_packedancestry <- function(
       "variants in the snp file"
     )
   }
-
 
   # create a matrix to store the data
   file_backed_matrix <- bigstatsr::FBM.code256(
@@ -79,47 +94,6 @@ gen_tibble_packedancestry <- function(
   # save the fbm
   # file_backed_matrix$save()
 
-  # convert the info from the indiv and loci table
-  # fam <- tibble(
-  #   family.ID = indiv_table$population,
-  #   sample.ID = indiv_table$id,
-  #   paternal.ID = 0,
-  #   maternal.ID = 0,
-  #   sex = dplyr::case_when(
-  #     indiv_table$sex %in% c("M", "male", 1) ~ 1L,
-  #     indiv_table$sex %in% c("F", "female", 2) ~ 2L,
-  #     TRUE ~ 0L
-  #   ),
-  #   affection = 0,
-  #   ploidy = 2
-  # )
-
-  indiv_meta <- list(
-    id = indiv_table$id,
-    population = indiv_table$population
-  )
-
-  # map <- tibble(
-  #   chromosome = loci_table$chromosome,
-  #   marker.ID = loci_table$name,
-  #   genetic.dist = loci_table$genetic_dist,
-  #   physical.pos = loci_table$position,
-  #   # note the swap below due to the different conventions in plink vs
-  #   # packed ancestry
-  #   allele1 = loci_table$allele_alt,
-  #   allele2 = loci_table$allele_ref
-  # )
-
-  loci <- validate_loci(loci_table,
-                        check_alphabet = TRUE,
-                        harmonise_loci = TRUE,
-                        check_duplicates = TRUE,
-                        allow_duplicates = allow_duplicates,
-                        valid_alleles = valid_alleles,
-                        missing_alleles = missing_alleles
-                        )
-  indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
-
   # construct path
   fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
 
@@ -137,8 +111,6 @@ gen_tibble_packedancestry <- function(
     class = "gen_tbl"
   )
   return(new_gen_tbl)
-
-
 
   # bigsnp_obj <- structure(
   #   list(

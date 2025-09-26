@@ -41,17 +41,6 @@ gen_tibble_vcf <- function(
     )
   }
 
-  # check_allele_alphabet(
-  #   new_gen_tbl,
-  #   valid_alleles = valid_alleles,
-  #   missing_alleles = missing_alleles,
-  #   remove_on_fail = TRUE
-  # )
-  # show_loci(new_gen_tbl) <- harmonise_missing_values(
-  #   show_loci(new_gen_tbl),
-  #   missing_alleles = missing_alleles
-  # )
-
   if (!quiet) {
     message("converting to a gen_tibble...")
   }

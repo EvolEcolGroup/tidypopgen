@@ -64,16 +64,6 @@ gen_tibble_bed_rds <- function(
     indiv_meta,
     class = "gen_tbl"
   )
-  # check_allele_alphabet(
-  #   new_gen_tbl,
-  #   valid_alleles = valid_alleles,
-  #   missing_alleles = missing_alleles,
-  #   remove_on_fail = TRUE
-  # )
-  # show_loci(new_gen_tbl) <- harmonise_missing_values(
-  #   show_loci(new_gen_tbl),
-  #   missing_alleles = missing_alleles
-  # )
   return(new_gen_tbl)
 }
 
