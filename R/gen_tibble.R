@@ -579,8 +579,8 @@ gt_write_bigsnp_from_dfs <- function(
 ################################################################################
 
 #' create a vctrs_bigSNP
-#' @param bigsnp_obj the bigsnp object
-#' @param bigsnp_file the file to which the bigsnp object was saved
+#' @param fbm_obj the bigsnp object
+#' @param fbm_file the file to which the bigsnp object was saved
 #' @param loci a tibble of loci (needs to be validated first with `validate_loci`)
 #' @param indiv_id a vector of individual ids (from indiv_meta)
 #' @param ploidy the ploidy of the samples (either a single value, or

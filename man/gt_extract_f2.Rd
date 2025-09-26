@@ -118,7 +118,7 @@ SNP metadata (invisibly)
 Compute and store blocked f2 statistics for ADMIXTOOLS 2
 }
 \examples{
-\dontshow{if (rlang::is_installed("admixtools")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (rlang::is_installed("admixtools")) withAutoprint(\{ # examplesIf}
 bed_file <-
   system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
 lobsters <- gen_tibble(bed_file,

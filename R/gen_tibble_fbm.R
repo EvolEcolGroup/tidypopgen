@@ -11,9 +11,10 @@
 #' and position) or duplicated locus names. Default is FALSE.
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
 #' position) or duplicated locus names. Default is FALSE.
-#' @param valid_alleles a character vector of valid alleles.
-#' @param missing_alleles a character vector of alleles to be considered as
-#' missing.
+#' @param valid_alleles a character vector of valid alleles. Default is c("A",
+#' "T", "C", "G").
+#' @param missing_alleles a character vector of alleles to be treated as missing.
+#' Default is c("0", ".").
 #' @returns the validated loci table
 #' @keywords internal
 #' @noRd
