@@ -226,12 +226,12 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
       3
     ))
     stopifnot(all(G.round$code256 %in% 0:3))
-    bigsnpr:::writebina(
-      path.expand(bedfile), G.round, bigsnpr:::getInverseCode(),
+    writebina(
+      path.expand(bedfile), G.round, getInverseCode(),
       ind.row, ind.col
     )
-    bigsnpr:::write.table2(new_fam, file = famfile, na = 0)
-    bigsnpr:::write.table2(new_bim, file = bimfile, na = 0)
+    write.table2(new_fam, file = famfile, na = 0)
+    write.table2(new_bim, file = bimfile, na = 0)
     bedfile
   }
 

@@ -11,8 +11,8 @@
 #' @returns a [`bigsnpr::bigSNP`] object
 #' @keywords internal
 #' @noRd
-# nolint start
-subset_bigSNP <- function(
+
+subset_bigSNP <- function( # nolint
     X, # nolint end
     indiv_indices = NULL,
     loci_indices = NULL,
@@ -97,7 +97,7 @@ subset_bigSNP <- function(
 #' @returns an FBM object
 #' @keywords internal
 #' @noRd
-subset_FBM <- function(X, # nolint end
+subset_FBM <- function(X, # nolint
                        indiv_indices = NULL,
                        loci_indices = NULL,
                        swap_indices = NULL,

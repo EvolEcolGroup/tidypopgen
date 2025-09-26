@@ -72,7 +72,12 @@ gen_tibble_bed_rds <- function(
 fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = bigsnpr::sub_bed(bedfile))
 {
   backingfile <- path.expand(backingfile)
-  bigassertr::assert_noexist(paste0(backingfile, ".bk"))
+  # check that file exists
+  if (file.exists(paste0(backingfile, ".bk"))) {
+    stop("the backing file ", paste0(backingfile, ".bk"), " already exists")
+  }
+
+  # bigassertr::assert_noexist(paste0(backingfile, ".bk"))
   # bimfile <- sub_bed(bedfile, ".bim")
   # famfile <- sub_bed(bedfile, ".fam")
   # sapply(c(bedfile, bimfile, famfile), assert_exist)
@@ -81,7 +86,7 @@ fbm_read_bed <- function (bedfile, n_indiv, n_snp, backingfile = bigsnpr::sub_be
   bigGeno <- bigstatsr::FBM.code256(nrow = n_indiv, ncol = n_snp,
                          code = bigsnpr::CODE_012, backingfile = backingfile, init = NULL,
                          create_bk = TRUE)
-  reach.eof <- bigsnpr:::readbina(path.expand(bedfile), bigGeno, bigsnpr:::getCode())
+  reach.eof <- readbina(path.expand(bedfile), bigGeno, getCode())
   if (!reach.eof)
     warning("EOF of bedfile has not been reached.")
 
