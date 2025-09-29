@@ -31,8 +31,6 @@ gt_save <- function(x, file_name = NULL, quiet = FALSE) {
     stop("x should be a gen_tibble")
   }
 
-  # TODO we need to replace this
-
   # we update the fbm object
   .gt_get_fbm(x)$save()
 
@@ -125,6 +123,8 @@ gt_get_file_names <- function(x) {
     x <- x$genotypes
   } else if (!inherits(x, "vctrs_bigSNP")) {
     stop("x should be a vctrs_bigSNP object")
+  } else if (is.null(attr(x, "fbm"))) {
+    stop("x must be a genotype vector with attr(., 'fbm') present")
   }
 
   return(c(

@@ -122,19 +122,19 @@ loci_ld_clump.vctrs_bigSNP <- function(
   geno_fbm <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   if (use_positions) {
-    .positions <- rep(NA, ncol(attr(.x, "fbm")))
+    .positions <- rep(NA, ncol(geno_fbm))
     .positions[show_loci(.x)$big_index] <- show_loci(.x)$position
   } else {
     .positions <- NULL
   }
   # create a chromosome vector (fill gaps between bigsnpr and show_loci)
-  .chromosome <- rep(2147483647L, ncol(attr(.x, "fbm")))
+  .chromosome <- rep(2147483647L, ncol(geno_fbm))
   .chromosome[show_loci(.x)$big_index] <- show_loci(.x)$chr_int
   # now figure out if we have any snp which have already been removed
   # those will go into `exclude`
   loci_not_in_tibble <-
-    seq_len(ncol(attr(.x, "fbm")))[
-      !seq_len(ncol(attr(.x, "fbm"))) %in% .gt_fbm_cols(.x)
+    seq_len(ncol(geno_fbm))[
+      !seq_len(ncol(geno_fbm)) %in% .gt_fbm_cols(.x)
     ] # nolint
   exclude <- c(loci_not_in_tibble, .gt_fbm_cols(.x)[exclude])
   if (length(exclude) == 0) {
@@ -145,11 +145,11 @@ loci_ld_clump.vctrs_bigSNP <- function(
   if (!is.null(S)) {
     fbm_n <- ncol(geno_fbm)
     visible_n <- length(.gt_fbm_cols(.x))
-    if (length(S) == visible_n) { #nolint start
+    if (length(S) == visible_n) { # nolint start
       S_full <- rep(NA_real_, fbm_n)
       S_full[.gt_fbm_cols(.x)] <- S
       S <- S_full
-    } else if (length(S) != fbm_n) { #nolint end
+    } else if (length(S) != fbm_n) { # nolint end
       stop("Length of 'S' must equal length(.gt_fbm_cols(.x)) or ncol(FBM).")
     }
   }

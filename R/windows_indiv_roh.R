@@ -131,8 +131,9 @@ windows_indiv_roh <- function(
   # it needs some profiling
   X <- .gt_get_fbm(.x) # pointer for the FBM #nolint
   col_ind <- .gt_fbm_cols(.x) # column indices for the snps to consider
+  rows_to_keep <- vctrs::vec_data(.x$genotypes)
   for (i in seq_len(nrow(.x))) {
-    this_genotype <- X[i, col_ind]
+    this_genotype <- X[rows_to_keep[i], col_ind]
     this_indiv <- list(FID = groups[i], IID = .x$id[i])
     # find runs for this individual
     this_runs <-

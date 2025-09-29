@@ -40,7 +40,8 @@ gen_tibble_bed_rds <- function(
     # note that position and genetic dist are already flipped in the bigsnpr obj
     loci <- loci_from_bim(bigsnp_obj$map,
       valid_alleles = valid_alleles,
-      missing_alleles = missing_alleles
+      missing_alleles = missing_alleles,
+      allow_duplicates = allow_duplicates
     )
     indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
     # create a copy of the bigsnp object

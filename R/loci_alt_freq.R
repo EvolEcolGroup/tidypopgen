@@ -415,7 +415,7 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
     col_sums_na_mat[, 1] / (sum(ploidy_by_indiv) - col_sums_na_mat[, 2])
   } else {
     # if we have a single individual
-    geno_fbm[rows_to_keep, attr(.x, "loci")$big_index] / ploidy_by_indiv[rows_to_keep] #nolint
+    geno_fbm[rows_to_keep, attr(.x, "loci")$big_index] / ploidy_by_indiv[rows_to_keep] # nolint
   }
 }
 

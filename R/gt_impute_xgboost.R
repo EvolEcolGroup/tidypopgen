@@ -63,6 +63,14 @@ gt_impute_xgboost <- function(
     )
   }
 
+  if (count_loci(x) != ncol(attr(x$genotypes, "fbm"))) {
+    stop(
+      "The number of loci in the gen_tibble does not match the number of ",
+      "columns in the file backing matrix. Before imputing, use ",
+      "gt_update_backingfile to update your file backing matrix."
+    )
+  }
+
   if (gt_has_imputed(x)) {
     stop("object x is already imputed; use `gt_set_imputed(x, set = TRUE)`")
   }

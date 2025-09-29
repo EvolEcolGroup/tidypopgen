@@ -42,10 +42,6 @@ gt_as_plink <- function(
     stop("x must be a gen_tibble")
   }
 
-  if (is.null(chromosomes_as_int)) {
-    chromosomes_as_int <- FALSE
-  }
-
   type <- match.arg(type)
 
   if (is.null(file)) {
