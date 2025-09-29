@@ -186,7 +186,6 @@ gen_tibble.character <-
       # is then passed back to gen_tibble_bed_rds to create the gen_tibble
       # so, the object returned by gen_tibble_vcf is already the
       # final gen_tibble
-      # return(
       x_gt <- gen_tibble_vcf(
         x = x,
         ...,
@@ -198,7 +197,7 @@ gen_tibble.character <-
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
         quiet = quiet
-      ) # )
+      )
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,
@@ -488,8 +487,8 @@ gt_write_bigsnp_from_dfs <- function(
 ################################################################################
 
 #' create a vctrs_bigSNP
-#' @param fbm_obj the bigsnp object
-#' @param fbm_file the file to which the bigsnp object was saved
+#' @param fbm_obj the FBM object (bigstatsr::FBM.code256)
+#' @param fbm_file the rds file associated with the FBM object
 #' @param loci a tibble of loci (needs to be validated first with
 #'   `validate_loci`)
 #' @param indiv_id a vector of individual ids (from indiv_meta)

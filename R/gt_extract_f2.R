@@ -139,7 +139,6 @@ gt_extract_f2 <- function(
   verbose <- !quiet
   afdat <- gt_to_aftable(
     .x,
-    adjust_pseudohaploid = adjust_pseudohaploid,
     n_cores = n_cores
   )
 
@@ -229,8 +228,8 @@ gt_to_aftable <- function(
 
   aftable <- grouped_alt_freq_dip_pseudo_cpp(
     BM = geno_fbm,
-    rowInd = .gt_bigsnp_rows(.x),
-    colInd = .gt_bigsnp_cols(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = max(dplyr::group_indices(.x)),
     ncores = n_cores,

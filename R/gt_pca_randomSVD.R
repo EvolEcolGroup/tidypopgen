@@ -99,8 +99,8 @@ gt_pca_randomSVD <- function(
   this_svd <- bigstatsr::big_randomSVD(
     X,
     k = k,
-    ind.row = .gt_bigsnp_rows(x),
-    ind.col = .gt_bigsnp_cols(x),
+    ind.row = .gt_fbm_rows(x),
+    ind.col = .gt_fbm_cols(x),
     fun.scaling = fun_scaling,
     tol = tol,
     verbose = verbose,

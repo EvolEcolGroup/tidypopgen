@@ -130,7 +130,7 @@ windows_indiv_roh <- function(
   # access time is horrible, but I don't think this is the bottleneck
   # it needs some profiling
   X <- .gt_get_fbm(.x) # pointer for the FBM #nolint
-  col_ind <- .gt_bigsnp_cols(.x) # column indices for the snps to consider
+  col_ind <- .gt_fbm_cols(.x) # column indices for the snps to consider
   for (i in seq_len(nrow(.x))) {
     this_genotype <- X[i, col_ind]
     this_indiv <- list(FID = groups[i], IID = .x$id[i])

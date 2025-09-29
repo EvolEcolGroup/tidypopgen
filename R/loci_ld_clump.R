@@ -134,9 +134,9 @@ loci_ld_clump.vctrs_bigSNP <- function(
   # those will go into `exclude`
   loci_not_in_tibble <-
     seq_len(ncol(attr(.x, "fbm")))[
-      !seq_len(ncol(attr(.x, "fbm"))) %in% .gt_bigsnp_cols(.x)
+      !seq_len(ncol(attr(.x, "fbm"))) %in% .gt_fbm_cols(.x)
     ] # nolint
-  exclude <- c(loci_not_in_tibble, .gt_bigsnp_cols(.x)[exclude])
+  exclude <- c(loci_not_in_tibble, .gt_fbm_cols(.x)[exclude])
   if (length(exclude) == 0) {
     exclude <- NULL
   }

@@ -50,7 +50,7 @@ validate_loci <- function(loci,
     stop("loci$chromosome must be a factor or character")
   }
   if (!is.integer(loci$position) && !is.numeric(loci$position)) {
-    stop("loci$position must be an integer")
+    stop("loci$position must be integer-like (integer or numeric)")
   }
   if (!is.numeric(loci$genetic_dist)) {
     stop("loci$genetic_dist must be numeric")

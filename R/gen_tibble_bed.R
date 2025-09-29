@@ -43,8 +43,8 @@ gen_tibble_bed_rds <- function(
       missing_alleles = missing_alleles
     )
     indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
-    # create a copy of the bignsp object
-    # new file name for the bignsp ends in "_bignsp.rds"
+    # create a copy of the bigsnp object
+    # new file name for the bigsnp ends in "_bigsnp.rds"
     file.copy(x, sub("\\.bk$", "_bigsnp.rds", fbm_obj$backingfile))
     fbm_path <- sub("\\.bk$", ".rds", fbm_obj$backingfile)
     # replace the bigsnp rds with the fbm rds
@@ -54,7 +54,7 @@ gen_tibble_bed_rds <- function(
   }
 
   indiv_meta$genotypes <- new_vctrs_bigsnp(
-    fbm_obj,
+    fbm_obj = fbm_obj,
     fbm_file = fbm_path,
     loci = loci,
     indiv_id = indiv_meta$id,

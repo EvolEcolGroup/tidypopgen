@@ -29,8 +29,8 @@ pairwise_allele_sharing <- function(
     block_size = bigstatsr::block_size(nrow(x))) {
   # nolint
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
-  x_ind_col <- .gt_bigsnp_cols(x)
-  x_ind_row <- .gt_bigsnp_rows(x)
+  x_ind_col <- .gt_fbm_cols(x)
+  x_ind_row <- .gt_fbm_rows(x)
   ashare_matrix <- snp_allele_sharing(
     X,
     ind.row = x_ind_row,

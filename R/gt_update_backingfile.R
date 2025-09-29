@@ -56,8 +56,8 @@ gt_update_backingfile <- function(
 
   # initialise a FBM with the dimensions of the data used in the gen_tibble
   new_bk_matrix <- bigstatsr::FBM.code256(
-    nrow = length(.gt_bigsnp_rows(.x)),
-    ncol = length(.gt_bigsnp_cols(.x)),
+    nrow = length(.gt_fbm_rows(.x)),
+    ncol = length(.gt_fbm_cols(.x)),
     code = original_256code,
     backingfile = backingfile,
     init = NULL,
@@ -76,7 +76,7 @@ gt_update_backingfile <- function(
   fbm_ploidy <- attr(.x$genotypes, "fbm_ploidy")
   # if it is not null, then subset it to the new individuals
   if (!is.null(fbm_ploidy)) {
-    fbm_ploidy <- fbm_ploidy[.gt_bigsnp_rows(.x)]
+    fbm_ploidy <- fbm_ploidy[.gt_fbm_rows(.x)]
   }
 
   # if we remove unsorted genetic distance, set it to zero if it is not sorted
@@ -122,8 +122,8 @@ gt_update_backingfile <- function(
 
   if (!quiet) {
     message("\ngen_backing files updated, now")
-    message("using bigSNP file: ", gt_get_file_names(new_gen_tbl)[1])
-    message("with backing file: ", gt_get_file_names(new_gen_tbl)[2])
+    message("using FBM RDS: ", gt_get_file_names(new_gen_tbl)[1])
+    message("with FBM backing file: ", gt_get_file_names(new_gen_tbl)[2])
     message("make sure that you do NOT delete those files!")
   }
 

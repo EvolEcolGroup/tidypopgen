@@ -2,7 +2,7 @@
 % Please edit documentation in R/snp_allele_sharing.R
 \name{snp_allele_sharing}
 \alias{snp_allele_sharing}
-\title{Compute the Pairwise Allele Sharing Matrix for a bigSNP object}
+\title{Compute the Pairwise Allele Sharing Matrix (FBM input)}
 \usage{
 snp_allele_sharing(
   X,
@@ -12,8 +12,8 @@ snp_allele_sharing(
 )
 }
 \arguments{
-\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes} slot
-of a \link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP} object).}
+\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the "fbm" attribute
+of the gen_tibble \code{genotypes} column).}
 
 \item{ind.row}{An optional vector of the row indices that are used. If not
 specified, all rows are used. Don't use negative indices.}

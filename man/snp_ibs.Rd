@@ -2,7 +2,7 @@
 % Please edit documentation in R/snp_ibs.R
 \name{snp_ibs}
 \alias{snp_ibs}
-\title{Compute the Identity by State Matrix for a bigSNP object}
+\title{Compute the Identity by State Matrix (FBM input)}
 \usage{
 snp_ibs(
   X,
@@ -13,8 +13,8 @@ snp_ibs(
 )
 }
 \arguments{
-\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes} slot
-of a \link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP} object).}
+\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the "fbm" attribute
+of the gen_tibble \code{genotypes} column).}
 
 \item{ind.row}{An optional vector of the row indices that are used. If not
 specified, all rows are used. Don't use negative indices.}

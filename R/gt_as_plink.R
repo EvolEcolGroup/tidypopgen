@@ -167,7 +167,7 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
   }
 
   # code adapted from bigsnpr::snp_writeBed
-  write_bed <- function(G, bedfile, new_fam, new_bim) { #nolint start
+  write_bed <- function(G, bedfile, new_fam, new_bim) { # nolint start
     if (!inherits(G, "FBM.code256")) {
       stop("G is not of class FBM.code256")
     }

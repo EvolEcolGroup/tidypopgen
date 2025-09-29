@@ -68,8 +68,8 @@ pop_het_obs <- function(
   # summarise population frequencies
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
     .gt_get_fbm(.x),
-    rowInd = .gt_bigsnp_rows(.x),
-    colInd = .gt_bigsnp_cols(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
     groupIds = .group_ids,
     ngroups = nrow(.group_levels),
     ploidy = indiv_ploidy(.x),

@@ -46,8 +46,8 @@ gt_save <- function(x, file_name = NULL, quiet = FALSE) {
   saveRDS(x, file_name)
   if (!quiet) {
     message("\ngen_tibble saved to ", file_name)
-    message("using bigSNP file: ", gt_get_file_names(x)[1])
-    message("with backing file: ", gt_get_file_names(x)[2])
+    message("using FBM RDS: ", gt_get_file_names(x)[1])
+    message("with FBM backing file: ", gt_get_file_names(x)[2])
     message("make sure that you do NOT delete those files!")
     message("to reload the gen_tibble in another session, use:")
     message("gt_load('", file_name, "')")
@@ -77,8 +77,8 @@ gt_save_light <- function(x, file_name = NULL, quiet = FALSE) {
   saveRDS(x, file_name)
   if (!quiet) {
     message("\ngen_tibble saved to ", file_name)
-    message("using bigSNP file: ", gt_get_file_names(x)[1])
-    message("with backing file: ", gt_get_file_names(x)[2])
+    message("using FBM RDS: ", gt_get_file_names(x)[1])
+    message("with FBM backing file: ", gt_get_file_names(x)[2])
     message("make sure that you do NOT delete those files!")
     message("to reload the gen_tibble in another session, use:")
     message("gt_load('", file_name, "')")

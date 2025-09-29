@@ -55,7 +55,7 @@ data <- data %>% filter(indiv_missingness(genotypes) < 0.045)
 nrow(data)
 ```
 
-And if we wanted to remove outliers with particularly high or low heterozygosity, we can again do so by using `filter`. As an example, here we remove observations that lie more than 3 standard deviations from the mean.
+And if we wanted to remove outliers with particularly high or low heterozygosity, we can again do so by using `filter`. As an example, here we remove observations that lie more than 2 standard deviations from the mean.
 
 ```{r}
 mean_val <- mean(individual_report$het_obs)

@@ -138,8 +138,8 @@ predict.gt_pca <- function(
       XV <- bigstatsr::big_prodMat(
         .gt_get_fbm(new_data), # nolint
         object$v,
-        ind.row = .gt_bigsnp_rows(new_data),
-        ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
+        ind.row = .gt_fbm_rows(new_data),
+        ind.col = .gt_fbm_cols(new_data)[loci_subset],
         block.size = block_size,
         center = object$center,
         scale = object$scale
@@ -156,9 +156,9 @@ predict.gt_pca <- function(
         p.FUN = fbm256_part_prod,
         ind = seq_along(loci_subset),
         ncores = n_cores,
-        ind.row = .gt_bigsnp_rows(new_data),
+        ind.row = .gt_fbm_rows(new_data),
         # info_snp$`_NUM_ID_`[keep], #nolint
-        ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
+        ind.col = .gt_fbm_cols(new_data)[loci_subset],
         center = object$center,
         scale = object$scale,
         V = object$v,
@@ -197,8 +197,8 @@ predict.gt_pca <- function(
       ) %do% {
         # scaled genotypes for this individual
         genotypes <- X[
-          .gt_bigsnp_rows(new_data)[proj_i],
-          .gt_bigsnp_cols(new_data)[loci_subset]
+          .gt_fbm_rows(new_data)[proj_i],
+          .gt_fbm_cols(new_data)[loci_subset]
         ]
         genotypes_scaled <- (genotypes - object$center) / object$scale
         na_ids <- which(!is.na(genotypes_scaled))

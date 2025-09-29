@@ -73,6 +73,7 @@ indiv_missingness.vctrs_bigSNP <- function(
     a.FUN = count_1_na,
     ind = attr(.x, "loci")$big_index,
     a.combine = "plus",
+    block.size = block_size,
     rows_to_keep = rows_to_keep
   )[2, ] # get the second row (count_na)
   if (!as_counts) {
