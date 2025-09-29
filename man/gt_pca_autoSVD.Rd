@@ -50,7 +50,7 @@ that you provide the positions if available.}
 \item{int_min_size}{Minimum number of consecutive outlier SNPs in order to be
 reported as long-range LD region. Default is \code{20}.}
 
-\item{alpha_tukey}{Default is \code{0.1}. The type-I error rate in outlier
+\item{alpha_tukey}{Default is \code{0.05}. The type-I error rate in outlier
 detection (that is further corrected for multiple testing).}
 
 \item{min_mac}{Minimum minor allele count (MAC) for variants to be included.

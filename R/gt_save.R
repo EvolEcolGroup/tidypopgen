@@ -90,7 +90,7 @@ gt_save_light <- function(x, file_name = NULL, quiet = FALSE) {
 sub_gt <- function(path, replacement = "", stop_if_not_ext = TRUE) {
   pattern <- "\\.gt$"
   if (!grepl(pattern, path)) {
-    stop("Path '%s' must have 'gt' extension.", path)
+    stop(sprintf("Path '%s' must have 'gt' extension.", path))
   }
   if (
     stop_if_not_ext &&

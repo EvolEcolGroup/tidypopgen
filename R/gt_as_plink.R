@@ -219,6 +219,7 @@ gt_write_ped_raw <- function(
     file,
     plink_format = c("raw", "ped"),
     chunk_size = 10000) {
+  plink_format <- match.arg(plink_format)
   # loci information
   loci <- show_loci(x)
   # replace missing value with zero

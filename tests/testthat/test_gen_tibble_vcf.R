@@ -655,7 +655,7 @@ if (rlang::is_installed("vcfR")) {
   test_that("additional vcf tests with larger file", {
     vcf_path <-
       system.file(
-        "/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+        "extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
         package = "tidypopgen"
       )
     anole_gt <- gen_tibble(

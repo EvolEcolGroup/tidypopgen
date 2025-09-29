@@ -13,7 +13,7 @@
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
 #'   position) or duplicated locus names. Default is FALSE.
 #' @param quiet whether to print messages.
-#' @return path to the resulting rds file as class bigSNP.
+#' @returns an object of the class `gen_tbl`.
 #' @keywords internal
 #' @noRd
 vcf_to_fbm_cpp <- function(

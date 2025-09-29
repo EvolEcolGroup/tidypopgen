@@ -15,7 +15,7 @@
 #' @param quiet whether to print messages
 #' @param ... further arguments to be passed to [vcfR::read.vcfR()]. Do not pass
 #'   nrows, skip, verbose, or convertNA; these are controlled internally.
-#' @return path to the resulting rds file as class bigSNP.
+#' @returns an object of the class `gen_tbl`.
 #' @keywords internal
 #' @noRd
 # nolint start

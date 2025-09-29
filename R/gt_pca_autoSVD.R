@@ -40,7 +40,7 @@
 #'   If not providing infos.pos (NULL, the default), this is a window in number
 #'   of SNPs, otherwise it is a window in kb (genetic distance). I recommend
 #'   that you provide the positions if available.
-#' @param alpha_tukey Default is `0.1`. The type-I error rate in outlier
+#' @param alpha_tukey Default is `0.05`. The type-I error rate in outlier
 #'   detection (that is further corrected for multiple testing).
 #' @param min_mac Minimum minor allele count (MAC) for variants to be included.
 #'   Default is `10`.

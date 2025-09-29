@@ -108,7 +108,7 @@ update_old_bigsnp <- function(x) {
     message(
       "your gen_tibble was in an old format, and it has now",
       "been updated\n",
-      "note that hte old RDS was overwritten"
+      "note that the old RDS was overwritten"
     )
   }
   return(x)

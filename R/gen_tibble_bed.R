@@ -79,6 +79,9 @@ fbm_read_bed <- function(bedfile,
   if (file.exists(paste0(backingfile, ".bk"))) {
     stop("the backing file ", paste0(backingfile, ".bk"), " already exists")
   }
+  if (file.exists(paste0(backingfile, ".rds"))) {
+    stop("the backing file ", paste0(backingfile, ".rds"), " already exists")
+  }
   big_geno <- bigstatsr::FBM.code256(
     nrow = n_indiv, ncol = n_snp,
     code = bigsnpr::CODE_012, backingfile = backingfile, init = NULL,
@@ -207,7 +210,7 @@ indiv_meta_from_fam <- function(fam) {
   # if maternal_id is not 0, add maternal_ID
   if (!all(fam$maternal_id == 0)) {
     indiv_meta$maternal_ID <- as.character(fam$maternal_id)
-    indiv_meta$maternal_ID[indiv_meta$maternal_ID == "0"] <
+    indiv_meta$maternal_ID[indiv_meta$maternal_ID == "0"] <-
       NA
   }
 

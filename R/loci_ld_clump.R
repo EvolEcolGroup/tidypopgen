@@ -141,9 +141,22 @@ loci_ld_clump.vctrs_bigSNP <- function(
     exclude <- NULL
   }
 
+  # Normalize S to FBM-wide vector if needed
+  if (!is.null(S)) {
+    fbm_n <- ncol(geno_fbm)
+    visible_n <- length(.gt_fbm_cols(.x))
+    if (length(S) == visible_n) { #nolint start
+      S_full <- rep(NA_real_, fbm_n)
+      S_full[.gt_fbm_cols(.x)] <- S
+      S <- S_full
+    } else if (length(S) != fbm_n) { #nolint end
+      stop("Length of 'S' must equal length(.gt_fbm_cols(.x)) or ncol(FBM).")
+    }
+  }
+
   # as long as we have more than one individual
   snp_clump_ids <- bigsnpr::snp_clumping(
-    G = attr(.x, "fbm"),
+    G = geno_fbm,
     # infos.chr = show_loci(.x)$chr_int, #nolint start
     # TEMP HACK using the info from the bigsnpr object
     # infos.chr = cast_chromosome_to_int(attr(.x,"bigsnp")$map$chromosome), #nolint end
