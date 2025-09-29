@@ -422,19 +422,14 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
     quiet = TRUE,
     backingfile = tempfile()
   )
+  expect_equal(show_loci(test_gt)$genetic_dist, c(0.1, 0.3, 0.2, 0.4, 0.5, 0.6))
+
   test_gt <- gt_update_backingfile(test_gt,
     rm_unsorted_dist = TRUE,
     quiet = TRUE
   )
-
-  # TODO rewrite this test
-
-  # rds <- readRDS(gt_get_file_names(test_gt)[1])
-  # backingfile <- attr(test_gt$genotypes, "bigsnp")
-  # expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
-  # expect_equal(backingfile$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
-  # #expect_equal(rds$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
-
+  # after updating backingfile, genetic_dist should all be zero
+  expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
 
   # Test duplicated dist
   test_loci <- data.frame(
@@ -445,6 +440,7 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
+
   test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
@@ -452,18 +448,14 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
     quiet = TRUE,
     backingfile = tempfile()
   )
+  expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0.2, 0.4, 0.5, 0.6))
+
   test_gt <- gt_update_backingfile(test_gt,
     rm_unsorted_dist = TRUE,
     quiet = TRUE
   )
-
-  # TODO rewrite this test
-
-  # rds <- readRDS(gt_get_file_names(test_gt)[1])
-  # backingfile <- attr(test_gt$genotypes, "bigsnp")
-  # expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
-  # expect_equal(backingfile$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
-  # #expect_equal(rds$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
+  # after updating backingfile, genetic_dist should all be zero
+  expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
 })
 
 

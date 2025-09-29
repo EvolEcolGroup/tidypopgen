@@ -57,18 +57,6 @@ vcf_to_fbm_cpp <- function(
     missing_value = max_ploidy + 1
   )
 
-
-  # individual metadata table
-  # fam <- tibble(
-  #   family.ID = vcf_meta$sample_names,
-  #   sample.ID = vcf_meta$sample_names,
-  #   paternal.ID = 0,
-  #   maternal.ID = 0,
-  #   sex = 0,
-  #   affection = -9,
-  #   ploidy = ploidy
-  # )
-
   indiv_meta <- list(
     id = vcf_meta$sample_names
   )
@@ -127,17 +115,4 @@ vcf_to_fbm_cpp <- function(
     class = "gen_tbl"
   )
   return(new_gen_tbl)
-
-  # bigsnp_obj <- structure(
-  #   list(
-  #     genotypes = file_backed_matrix,
-  #     fam = fam,
-  #     map = loci
-  #   ),
-  #   class = "bigSNP"
-  # )
-
-  # bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
-  # # and return the path to the rds
-  # bigsnp_obj$genotypes$rds
 }

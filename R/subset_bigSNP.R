@@ -11,9 +11,9 @@
 #' @returns a [`bigsnpr::bigSNP`] object
 #' @keywords internal
 #' @noRd
-
+# nolint start
 subset_bigSNP <- function(
-    X, # nolint
+    X, # nolint end
     indiv_indices = NULL,
     loci_indices = NULL,
     swap_indices = NULL,

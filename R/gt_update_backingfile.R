@@ -79,14 +79,6 @@ gt_update_backingfile <- function(
     fbm_ploidy <- fbm_ploidy[.gt_bigsnp_rows(.x)]
   }
 
-
-  # # get the fam and map tables from the bigsnpr object
-  # fam <- attr(.x$genotypes, "bigsnp")$fam
-  # # reorder according to the gen_tibble
-  # fam <- fam[.gt_bigsnp_rows(.x), ]
-  # # same for map
-  # map <- attr(.x$genotypes, "bigsnp")$map
-  # map <- map[.gt_bigsnp_cols(.x), ]
   # if we remove unsorted genetic distance, set it to zero if it is not sorted
   if (rm_unsorted_dist) {
     if (
@@ -106,15 +98,8 @@ gt_update_backingfile <- function(
         message("Genetic distances are not sorted, setting them to zero")
       }
       show_loci(.x)$genetic_dist <- 0
-      # map$genetic.dist <- 0
     }
   }
-
-  # # Create the bigSNP object
-  # bigsnp_obj <- structure(
-  #   list(genotypes = new_bk_matrix, fam = fam, map = map),
-  #   class = "bigSNP"
-  # )
 
   # save it
   fbm_file <- bigstatsr::sub_bk(new_bk_matrix$backingfile, ".rds")
@@ -122,22 +107,6 @@ gt_update_backingfile <- function(
 
   # now return a gen_tibble based on the new backing file
   new_gen_tbl <- .x
-
-  # now create a genotype column with this data
-  # new_gen_tbl$genotypes <- vctrs::new_vctr(
-  #   seq_len(nrow(fbm_obj)),
-  #   fbm = fbm_obj,
-  #   # TODO is this redundant with the info in the bigSNP object?
-  #   fbm_file = fbm_file,
-  #   # TODO make sure this does not take too long
-  #   fbm_md5sum = tools::md5sum(fbm_file),
-  #   loci = show_loci(.x),
-  #   names = .x$id,
-  #   ploidy = attr(.x$genotypes, "ploidy"),
-  #   fbm_ploidy = fbm_ploidy, # TODO does this create a problem if it is NULL???
-  #   class = "vctrs_bigSNP"
-  # )
-
 
   new_gen_tbl$genotypes <- new_vctrs_bigsnp(
     fbm_obj = new_bk_matrix,

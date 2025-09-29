@@ -97,19 +97,12 @@ gt_as_plink <- function(
 
 
 gt_write_bed <- function(x, file, chromosomes_as_int) {
-  # bed_path <- bigsnpr::snp_writeBed(
-  #   attr(x$genotypes, "bigsnp"),
-  #   bedfile = file,
-  #   ind.row = vctrs::vec_data(x$genotypes),
-  #   ind.col = show_loci(x)$big_index
-  # )
   # the bim and fam files written by bigsnpr contain the information of the
   # original bigsnpr object. We now update that information with the info
   # from the gen_tibble
 
   # create a bim table
   if (!chromosomes_as_int) {
-    # bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
     bim_table <- show_loci(x) %>%
       dplyr::select(dplyr::all_of(c(
         "chromosome",
@@ -129,16 +122,8 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
     )
     bim_table$allele_alt[is.na(bim_table$allele_alt)] <- "0"
     bim_table$allele_ref[is.na(bim_table$allele_ref)] <- "0"
-    # utils::write.table(
-    #   bim_table,
-    #   bim_path,
-    #   row.names = FALSE,
-    #   col.names = FALSE,
-    #   quote = FALSE
-    # )
     bim_table
   } else {
-    # bim_path <- bigsnpr::sub_bed(bed_path, ".bim")
     bim_table <- show_loci(x) %>%
       dplyr::select(dplyr::all_of(c(
         "chr_int",
@@ -158,19 +143,10 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
     )
     bim_table$allele_alt[is.na(bim_table$allele_alt)] <- "0"
     bim_table$allele_ref[is.na(bim_table$allele_ref)] <- "0"
-    # utils::write.table(
-    #   bim_table,
-    #   bim_path,
-    #   row.names = FALSE,
-    #   col.names = FALSE,
-    #   quote = FALSE
-    # )
     bim_table
   }
 
   # create a fam table
-  # fam_path <- bigsnpr::sub_bed(bed_path, ".fam")
-  # fam_table <- utils::read.table(fam_path)
   fam_table <- data.frame(matrix(NA, nrow = nrow(x), ncol = 6))
   colnames(fam_table) <- c(
     "FID",
@@ -189,18 +165,9 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
   } else {
     fam_table$FID <- x$id
   }
-  # utils::write.table(
-  #   fam_table,
-  #   fam_path,
-  #   row.names = FALSE,
-  #   col.names = FALSE,
-  #   quote = FALSE
-  # )
-
-  list <- c(x, bim_table, fam_table)
 
   # code adapted from bigsnpr::snp_writeBed
-  write_bed <- function(G, bedfile, new_fam, new_bim) {
+  write_bed <- function(G, bedfile, new_fam, new_bim) { #nolint start
     if (!inherits(G, "FBM.code256")) {
       stop("G is not of class FBM.code256")
     }
@@ -224,7 +191,7 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
     G.round <- G$copy(code = replace(
       round(G$code256), is.na(G$code256),
       3
-    ))
+    )) # nolint end
     stopifnot(all(G.round$code256 %in% 0:3))
     writebina(
       path.expand(bedfile), G.round, getInverseCode(),

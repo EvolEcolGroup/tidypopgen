@@ -44,14 +44,5 @@ gen_tibble_vcf <- function(
   if (!quiet) {
     message("converting to a gen_tibble...")
   }
-  # gen_tibble(
-  #   rds_path,
-  #   valid_alleles = valid_alleles,
-  #   missing_alleles = missing_alleles,
-  #   backingfile = backingfile,
-  #   allow_duplicates = allow_duplicates,
-  #   quiet = quiet,
-  #   n_cores = n_cores
-  # )
   return(new_gen_tbl)
 }

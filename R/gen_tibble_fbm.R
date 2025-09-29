@@ -42,11 +42,6 @@ validate_loci <- function(loci,
   if (!is.character(loci$name)) {
     stop("loci$name must be a character")
   }
-  # if chromosome is numeric, turn it into character
-  # if (is.numeric(loci$chromosome)) {
-  #  loci$chromosome <- as.character(loci$chromosome)
-  # }
-  ### alternative from check_valid_loci
   if (!is.character(loci$chromosome)) {
     loci$chromosome <- as.character(loci$chromosome)
   }

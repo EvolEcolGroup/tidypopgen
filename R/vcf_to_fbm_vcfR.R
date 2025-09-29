@@ -1,20 +1,20 @@
 #' Convert vcf to FBM using vcfR as a parser.
 #'
-#' Convert a vcf file to a Filebacked Big Matrix (FBM) object.
-#' This should work even for large vcf files that would not fit in memory.
+#' Convert a vcf file to a Filebacked Big Matrix (FBM) object. This should work
+#' even for large vcf files that would not fit in memory.
 #'
 #' @param vcf_path the path to the vcf
 #' @param chunk_size the chunk size to use on the vcf when loading the file
 #' @param backingfile the name of the file to use as the backing file
 #' @param valid_alleles a character vector of valid alleles. Default is c("A",
-#' "T", "C", "G").
-#' @param missing_alleles a character vector of alleles to be treated as missing.
-#' Default is c("0", ".").
+#'   "T", "C", "G").
+#' @param missing_alleles a character vector of alleles to be treated as
+#'   missing. Default is c("0", ".").
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
-#' position) or duplicated locus names. Default is FALSE.
+#'   position) or duplicated locus names. Default is FALSE.
 #' @param quiet whether to print messages
 #' @param ... further arguments to be passed to [vcfR::read.vcfR()]. Do not pass
-#' nrows, skip, verbose, or convertNA; these are controlled internally.
+#'   nrows, skip, verbose, or convertNA; these are controlled internally.
 #' @return path to the resulting rds file as class bigSNP.
 #' @keywords internal
 #' @noRd
@@ -85,29 +85,9 @@ vcf_to_fbm_vcfR <- function(
   code256 <- rep(NA_real_, 256)
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
-  # metadata
-  # fam <- tibble(
-  #   family.ID = colnames(temp_gt),
-  #   sample.ID = colnames(temp_gt),
-  #   # paternal.ID = 0,
-  #   # maternal.ID = 0,
-  #   # sex = 0,
-  #   # affection = -9,
-  #   ploidy = unname(ploidy)
-  # )
-
   indiv_meta <- list(
     id = colnames(temp_gt)
   )
-
-  # loci <- tibble(
-  #   chromosome = NULL,
-  #   marker.ID = NULL,
-  #   genetic.dist = NULL,
-  #   physical.pos = NULL,
-  #   allele1 = NULL,
-  #   allele2 = NULL
-  # )
 
   loci <- tibble::tibble(
     name = NULL,
@@ -208,22 +188,6 @@ vcf_to_fbm_vcfR <- function(
     class = "gen_tbl"
   )
   return(new_gen_tbl)
-
-  # save it
-  # file_backed_matrix$save()
-  #
-  # bigsnp_obj <- structure(
-  #   list(
-  #     genotypes = file_backed_matrix,
-  #     fam = fam,
-  #     map = loci
-  #   ),
-  #   class = "bigSNP"
-  # )
-
-  # bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
-  # and return the path to the rds
-  # bigsnp_obj$genotypes$rds
 }
 
 # get ploidy for a given individual
