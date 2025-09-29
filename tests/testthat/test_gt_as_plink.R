@@ -385,7 +385,7 @@ test_that("handling of duplicated loci", {
   )
 })
 
-test_that("plink files location when 'file' is NULL",{
+test_that("plink files location when 'file' is NULL", {
   # create file
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),

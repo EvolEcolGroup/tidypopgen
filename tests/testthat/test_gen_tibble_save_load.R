@@ -88,3 +88,23 @@ test_that("save and load gt", {
     as_tibble(test_loci)
   ) # nolint
 })
+
+test_that("old bigsnp gen_tibbles can be loaded", {
+  # check we can still load an old gen_tibble object based on bigsnp
+  expect_message(
+    test_gt <-
+      gt_load(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
+        package = "tidypopgen"
+      )), "your gen_tibble was in an old format"
+  )
+  example_gt <- load_example_gt("gen_tbl")
+  expect_true(all.equal(test_gt, example_gt, check.attributes = FALSE))
+
+  # check it works for basic calculations
+  global_stats <- test_gt %>% pop_global_stats()
+  global_stats_example <- example_gt %>% pop_global_stats()
+  expect_true(all.equal(global_stats,
+    global_stats_example,
+    check.attributes = FALSE
+  ))
+})

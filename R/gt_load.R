@@ -106,7 +106,7 @@ update_old_bigsnp <- function(x) {
     attr(x$genotypes, "bigsnp_file") <- NULL
     attr(x$genotypes, "bigsnp_md5sum") <- NULL
     message(
-      "your gen_tibble was in an old format, and it has now",
+      "your gen_tibble was in an old format, and it has now ",
       "been updated\n",
       "note that the old RDS was overwritten"
     )
