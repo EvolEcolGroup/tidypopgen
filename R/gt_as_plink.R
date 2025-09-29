@@ -45,11 +45,15 @@ gt_as_plink <- function(
   type <- match.arg(type)
 
   if (is.null(file)) {
+    fbm_obj <- attr(x$genotypes, "fbm")
+    if (is.null(fbm_obj) || is.null(fbm_obj$backingfile)) {
+      stop(
+        "No FBM backingfile found on x$genotypes; run ",
+        "gt_update_backingfile() or supply `file`."
+      )
+    }
     file <- bigstatsr::sub_bk(
-      attr(
-        x$genotypes,
-        "fbm"
-      )$backingfile,
+      fbm_obj$backingfile,
       paste0(".", type)
     )
   }
@@ -163,25 +167,22 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
   }
 
   # code adapted from bigsnpr::snp_writeBed
-  write_bed <- function(G, bedfile, new_fam, new_bim) { # nolint start
+  write_bed <- function(G, bedfile, new_fam, new_bim, ind.row = NULL, ind.col = NULL) { # nolint start
     if (!inherits(G, "FBM.code256")) {
       stop("G is not of class FBM.code256")
     }
     bimfile <- bigsnpr::sub_bed(bedfile, ".bim")
     famfile <- bigsnpr::sub_bed(bedfile, ".fam")
 
-    # subset G if needed
-    if (all(bigstatsr::rows_along(G) != seq_len(nrow(new_fam)))) {
-      G <- G[ind.row, ]
-      ind.row <- bigstatsr::rows_along(G)
-    } else {
-      ind.row <- bigstatsr::rows_along(G)
+    # indices default to the full matrix
+    if (is.null(ind.row)) ind.row <- bigstatsr::rows_along(G)
+    if (is.null(ind.col)) ind.col <- bigstatsr::cols_along(G)
+    # sanity checks
+    if (length(ind.row) != nrow(new_fam)) {
+      stop("Row mismatch: length(ind.row) must equal nrow(new_fam)")
     }
-    if (all(bigstatsr::cols_along(G) != seq_len(nrow(new_bim)))) {
-      G <- G[, ind.col]
-      ind.col <- bigstatsr::cols_along(G)
-    } else {
-      ind.col <- bigstatsr::cols_along(G)
+    if (length(ind.col) != nrow(new_bim)) {
+      stop("Column mismatch: length(ind.col) must equal nrow(new_bim)")
     }
 
     G.round <- G$copy(code = replace(

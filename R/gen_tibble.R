@@ -151,7 +151,7 @@ gen_tibble.character <-
     # check that valid alleles does not contain zero
     if ("0" %in% valid_alleles) {
       stop(paste(
-        "'0' can not be a valid allele",
+        "'0' cannot be a valid allele",
         "(it is the default missing allele value!)"
       ))
     }
@@ -288,7 +288,7 @@ gen_tibble.matrix <- function(
   # check that valid alleles does not contain zero
   if ("0" %in% valid_alleles) {
     stop(paste(
-      "'0' can not be a valid allele",
+      "'0' cannot be a valid allele",
       "(it is the default missing allele value!)"
     ))
   }

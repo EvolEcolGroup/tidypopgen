@@ -106,7 +106,51 @@ test_that("gen_tibble catches invalid alleles", {
       valid_alleles = c("A", "C", "T", "G", "0"),
       quiet = TRUE
     ),
-    "can not be a valid allele"
+    "cannot be a valid allele"
+  )
+})
+
+test_that("valid alleles check for .character method", {
+  expect_error(
+    pop_b <-
+      gen_tibble(
+        system.file("extdata/pop_b.bed", package = "tidypopgen"),
+        backingfile = tempfile(),
+        valid_alleles = c("A", "C", "T", "G", "0"),
+        quiet = TRUE
+      ),
+    "cannot be a valid allele"
+  )
+})
+
+test_that("error if genotypes and loci tables differ in length", {
+  test_loci_short <- test_loci[1:5, ]
+  expect_error(
+    test_dfs_gt <- gen_tibble(
+      test_genotypes,
+      indiv_meta = test_indiv_meta,
+      loci = test_loci_short,
+      quiet = TRUE
+    ),
+    paste(
+      "there is a mismatch between the number of loci in the genotype",
+      "table x and in the loci table"
+    )
+  )
+})
+
+test_that("stopifnot_gen_tibble catches invalid tibbles", {
+  test_gt_wrong_genotypes <- test_gt %>%
+    mutate(genotypes = c(1:3))
+  expect_error(
+    stopifnot_gen_tibble(test_gt_wrong_genotypes),
+    "the genotypes column is not of class vctrs_bigSNP"
+  )
+
+  test_gt <- test_gt %>% select(-genotypes)
+  expect_error(
+    indiv_missingness(test_gt),
+    "'genotypes' column is missing"
   )
 })
 
