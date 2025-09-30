@@ -170,7 +170,7 @@ gt_extract_f2 <- function(
   }
 
   if (isTRUE(poly_only)) poly_only <- c("f2", "ap", "fst")
-  arrs <- afs_to_f2_blocks(
+  arrs <- afs_to_f2_blocks( # nolint
     afdat,
     outdir = outdir,
     overwrite = overwrite,
@@ -186,10 +186,6 @@ gt_extract_f2 <- function(
     n_cores = n_cores,
     verbose = verbose
   )
-
-  if (is.null(outdir)) {
-    return(arrs)
-  }
 
   if (verbose) message(paste0("Data written to ", outdir, "/\n"))
   invisible(afdat$snpfile)

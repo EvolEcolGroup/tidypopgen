@@ -10,8 +10,12 @@
 .gt_get_fbm <- function(.x) {
   # if this is a gen_tibble
   if (inherits(.x, "gen_tbl")) {
-    attr(.x$genotypes, "fbm")
+    fbm <- attr(.x$genotypes, "fbm")
   } else {
-    attr(.x, "fbm")
+    fbm <- attr(.x, "fbm")
   }
+  if (is.null(fbm)) {
+    stop("Missing FBM backing for genotypes; ensure `.x` has attr 'fbm'.")
+  }
+  fbm
 }

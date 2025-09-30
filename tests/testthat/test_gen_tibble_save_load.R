@@ -90,7 +90,6 @@ test_that("save and load gt", {
 })
 
 test_that("old bigsnp gen_tibbles can be loaded", {
-
   # TODO find a way to run this test on CI
 
   # expect_message(

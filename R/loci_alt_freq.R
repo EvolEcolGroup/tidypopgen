@@ -163,7 +163,7 @@ loci_alt_freq.grouped_df <- function(
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
     geno_fbm <- .gt_get_fbm(.x)
     # rows (individuals) that we want to use
-    rows_to_keep <- vctrs::vec_data(.x$genotypes)
+    rows_to_keep <- .gt_fbm_rows(.x)
     # number of groups (used to define dimensions of objects)
     n_groups <- max(dplyr::group_indices(.x))
     ploidy <- indiv_ploidy(.x)
@@ -351,11 +351,11 @@ loci_alt_freq_dip_pseudo <- function(.x,
       a.combine = "rbind"
     )
   } else {
-    # if we have a single individual
-    freq <- matrix(geno_fbm[rows_to_keep, attr(.x, "loci")$big_index], ploidy,
-      ncol = 2
-    )
-    # if this individual is pseudohaploid
+    # if we have a single individual, create a matrix with two columns
+    # counts and ploidy (i.e. number of copies)
+    # TODO add a test here
+    freq <- cbind(geno_fbm[rows_to_keep, attr(.x, "loci")$big_index], ploidy)
+    # if this individual is pseudohaploid, get the right counts by dividing by 2
     if (ploidy == 1) {
       freq[, 1] <- freq[, 1] / 2
     }

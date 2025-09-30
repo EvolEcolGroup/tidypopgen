@@ -63,7 +63,7 @@ loci_missingness.tbl_df <- function(
     .x,
     .col = "genotypes",
     as_counts = FALSE,
-    n_cores = n_cores,
+    n_cores = bigstatsr::nb_cores(),
     # the bigapply that splits in blocks is not
     # multithreaded, as we use the multiple
     # threads for openMP,
@@ -93,7 +93,7 @@ loci_missingness.vctrs_bigSNP <- function(
     .x,
     .col = "genotypes",
     as_counts = FALSE,
-    n_cores = n_cores,
+    n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(length(.x), 1), # nolint
     ...) {
   rlang::check_dots_empty()
@@ -123,7 +123,9 @@ loci_missingness.vctrs_bigSNP <- function(
     }
   } else {
     # if we have a single individual
+    # TODO add test here
     n_na <- geno_fbm[rows_to_keep, attr(.x, "loci")$big_index]
+    n_na <- sum(is.na(n_na))
   }
   n_na
 }

@@ -152,7 +152,7 @@ loci_pi.grouped_df <- function(
 
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
-  rows_to_keep <- vctrs::vec_data(.x$genotypes)
+  rows_to_keep <- .gt_fbm_rows(.x)
 
   # internal function that can be used with a big_apply #nolint start
   gt_group_pi_sub <- function(BM, ind, rows_to_keep) {

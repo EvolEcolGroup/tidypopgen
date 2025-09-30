@@ -35,10 +35,3 @@ indiv_ploidy.vctrs_bigSNP <- function(.x, ...) {
     attr(.x, "fbm_ploidy")[vctrs::vec_data(.x)]
   }
 }
-
-#' #' @export
-#' #' @rdname indiv_ploidy
-#' indiv_ploidy.grouped_df <- function(.x, ...){
-#'   .x %>% mutate(indiv_ploidy = indiv_ploidy(.data$genotypes)) %>%
-#'     summarise(ploidy = mean(indiv_ploidy))
-#' }

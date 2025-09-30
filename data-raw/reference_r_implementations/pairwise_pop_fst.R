@@ -46,8 +46,9 @@ pairwise_pop_fst <- function(
     n_cores = bigstatsr::nb_cores()) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
+    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = TRUE))
+    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
 
   if (!inherits(.x, "grouped_df")) {
@@ -85,7 +86,7 @@ pairwise_pop_fst_hudson <- function(
   # @TODO we now use grouped_summaries_dip_psuedo_cpp for THIS
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
     .gt_get_fbm(.x),
-    rowInd = .gt_bigsnp_rows(.x),
+    rowInd = .gt_fbm_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = nrow(.group_levels),
@@ -165,7 +166,7 @@ pairwise_pop_fst_nei87 <- function(
   # summarise population frequencies
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
     .gt_get_fbm(.x),
-    rowInd = .gt_bigsnp_rows(.x),
+    rowInd = .gt_fbm_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = nrow(.group_levels),
@@ -261,7 +262,7 @@ pairwise_pop_fst_wc84 <- function(
   # summarise population frequencies
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
     .gt_get_fbm(.x),
-    rowInd = .gt_bigsnp_rows(.x),
+    rowInd = .gt_fbm_rows(.x),
     colInd = .gt_bigsnp_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = nrow(.group_levels),

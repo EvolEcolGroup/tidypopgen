@@ -10,7 +10,7 @@
 #'   default).
 #' @param block_size maximum number of loci read at once.
 #' @param ... currently unused.
-#' @returns a vector of heterozygosities, one per individuals in the
+#' @returns a vector of missingness, one per individuals in the
 #'   [`gen_tibble`]
 #' @rdname indiv_missingness
 #' @export
