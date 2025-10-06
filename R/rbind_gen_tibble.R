@@ -241,7 +241,8 @@ rbind.gen_tbl <- function(
   fbm_path <- merged_fbm$backingfile
 
   if (is.null(attr(ref$genotypes, "fbm_ploidy"))) {
-    if (!is_pseudohaploid(ref)) {
+    test_pseudo_ref <- gt_pseudohaploid(ref)
+    if (!is_pseudohaploid(test_pseudo_ref)) {
       attr(ref$genotypes, "fbm_ploidy") <- rep(2L, nrow(ref))
     } else {
       stop(
@@ -251,7 +252,8 @@ rbind.gen_tbl <- function(
     }
   }
   if (is.null(attr(target$genotypes, "fbm_ploidy"))) {
-    if (!is_pseudohaploid(target)) {
+    test_pseudo_target <- gt_pseudohaploid(target)
+    if (!is_pseudohaploid(test_pseudo_target)) {
       attr(target$genotypes, "fbm_ploidy") <- rep(2L, nrow(ref))
     } else {
       stop(

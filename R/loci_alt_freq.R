@@ -353,7 +353,6 @@ loci_alt_freq_dip_pseudo <- function(.x,
   } else {
     # if we have a single individual, create a matrix with two columns
     # counts and ploidy (i.e. number of copies)
-    # TODO add a test here
     freq <- cbind(geno_fbm[rows_to_keep, attr(.x, "loci")$big_index], ploidy)
     # if this individual is pseudohaploid, get the right counts by dividing by 2
     if (ploidy == 1) {

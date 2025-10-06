@@ -101,4 +101,3 @@ snp_ibs <- function(
     }
   }
 }
-

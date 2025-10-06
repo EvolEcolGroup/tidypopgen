@@ -123,9 +123,8 @@ loci_missingness.vctrs_bigSNP <- function(
     }
   } else {
     # if we have a single individual
-    # TODO add test here
     n_na <- geno_fbm[rows_to_keep, attr(.x, "loci")$big_index]
-    n_na <- sum(is.na(n_na))
+    n_na <- as.integer(is.na(n_na))
   }
   n_na
 }

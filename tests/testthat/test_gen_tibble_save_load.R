@@ -89,14 +89,43 @@ test_that("save and load gt", {
   ) # nolint
 })
 
+test_that("error if saving a non gen_tibble object", {
+  expect_error(
+    gt_save(
+      indiv_meta,
+      "x should be a gen_tibble"
+    )
+  )
+})
+
 test_that("old bigsnp gen_tibbles can be loaded", {
   # TODO find a way to run this test on CI
-
+  # copy the old gen_tibble to a temp location
+  # temp_dir <- tempdir()
+  # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
+  #   package = "tidypopgen"
+  # ), to = file.path(temp_dir, "old_gen_tibble.gt"))
+  # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.bk",
+  #                       package = "tidypopgen"
+  # ), to = file.path(temp_dir, "old_gen_tibble.gt"))
+  # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
+  #                       package = "tidypopgen"
+  # ), to = file.path(temp_dir, "old_gen_tibble.rds"))
+  #
+  # gt_path <- paste0(temp_dir, "/old_gen_tibble.gt")
+  # rds_path <- paste0(temp_dir, "/old_gen_tibble.rds")
+  # bk_path <- paste0(temp_dir, "/old_gen_tibble.bk")
+  #
+  #
+  #
+  # rds <- readRDS(rds_path)
+  # attributes(rds$genotypes)$bigsnp_file <- rds_path
+  # attributes(rds$genotypes)$bigsnp$genotypes
+  # saveRDS(rds, rds_path)
+  #
   # expect_message(
   #   test_gt <-
-  #     gt_load(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
-  #       package = "tidypopgen"
-  #     )), "your gen_tibble was in an old format"
+  #     gt_load(gt_path), "your gen_tibble was in an old format"
   # )
   # example_gt <- load_example_gt("gen_tbl")
   # expect_true(all.equal(test_gt, example_gt, check.attributes = FALSE))

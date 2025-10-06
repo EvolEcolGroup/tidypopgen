@@ -84,27 +84,6 @@ gt_save_light <- function(x, file_name = NULL, quiet = FALSE) {
   return(c(file_name, gt_get_file_names(x)))
 }
 
-
-sub_gt <- function(path, replacement = "", stop_if_not_ext = TRUE) {
-  pattern <- "\\.gt$"
-  if (!grepl(pattern, path)) {
-    stop(sprintf("Path '%s' must have 'gt' extension.", path))
-  }
-  if (
-    stop_if_not_ext &&
-      (nchar(replacement) > 0) &&
-      (substr(
-        replacement,
-        1,
-        1
-      ) !=
-        ".")
-  ) {
-    stop("Replacement must be an extension starting with '.' if provided.")
-  }
-  sub(pattern, replacement, path)
-}
-
 #' Get the names of files storing the genotypes of a `gen_tibble`
 #'
 #' A function to return the names of the files used to store data in a
