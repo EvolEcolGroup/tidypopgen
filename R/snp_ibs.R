@@ -102,12 +102,3 @@ snp_ibs <- function(
   }
 }
 
-
-## convenience functions that are not exported by `bigstatsr`
-CutBySize <- function(m, block.size, nb = ceiling(m / block.size)) { # nolint
-  bigparallelr::split_len(m, nb_split = nb)
-}
-
-seq2 <- function(lims) {
-  seq(lims[1], lims[2])
-}

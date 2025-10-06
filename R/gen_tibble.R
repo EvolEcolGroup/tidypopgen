@@ -16,6 +16,9 @@
 #' - *packedancestry* files: When loading *packedancestry* files,
 #' missing alleles will be converted from 'X' to NA
 #'
+#' @note Helper functions for accessing `gen_tibble` object attributes and
+#' checking gen_tibble ploidy can be found in gt_helper_functions.R
+#'
 #' @param x can be:
 #' - a string giving the path to a PLINK BED or PED file. The associated
 #'   BIM and FAM files for the BED, or MAP for PED are expected to be in the

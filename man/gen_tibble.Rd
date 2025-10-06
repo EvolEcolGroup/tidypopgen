@@ -135,6 +135,10 @@ alleles will be coded as 0 and alternative alleles will be coded as 1.
 missing alleles will be converted from 'X' to NA
 }
 }
+\note{
+Helper functions for accessing \code{gen_tibble} object attributes and
+checking gen_tibble ploidy can be found in gt_helper_functions.R
+}
 \examples{
 \dontshow{
 data.table::setDTthreads(2)
