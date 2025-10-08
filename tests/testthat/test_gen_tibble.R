@@ -154,6 +154,19 @@ test_that("stopifnot_gen_tibble catches invalid tibbles", {
   )
 })
 
+test_that("sex is stored in gen_tibble if not missing",{
+  # load a gt from .bed file containing sex info
+  pop_b <-
+    gen_tibble(
+      system.file("extdata/pop_b.bed", package = "tidypopgen"),
+      backingfile = tempfile(),
+      quiet = TRUE
+    )
+  fam <- read.table(system.file("extdata/pop_b.fam", package = "tidypopgen"),
+                    stringsAsFactors = FALSE)
+  fam$V5 <- ifelse(fam$V5 == 1, "male", ifelse(fam$V5 == 2, "female", NA))
+  expect_equal(as.character(pop_b$sex), as.character(fam$V5))
+})
 
 test_that("if order of loci is changed, order of genotypes also changes", {
   pop_b <-

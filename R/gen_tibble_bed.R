@@ -241,8 +241,8 @@ indiv_meta_from_fam <- function(fam) {
       NA
   }
 
-  # if sex is numeric
-  if (inherits(fam$sex, "numeric")) {
+  # if sex is numeric or integer
+  if (inherits(fam$sex, "numeric") || inherits(fam$sex, "integer")) {
     if (!all(fam$sex == 0)) {
       indiv_meta$sex <- dplyr::case_match(
         fam$sex,
@@ -254,7 +254,7 @@ indiv_meta_from_fam <- function(fam) {
     }
   }
 
-  if (inherits(fam$affection, "numeric")) {
+  if (inherits(fam$affection, "numeric") || inherits(fam$sex, "integer")) {
     if (!all(fam$affection %in% c(0, -9))) {
       indiv_meta$phenotype <- dplyr::case_match(
         fam$affection,
