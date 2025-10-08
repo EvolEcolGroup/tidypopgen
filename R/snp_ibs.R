@@ -1,11 +1,11 @@
-#' Compute the Identity by State Matrix (FBM input)
+#' Compute the Identity by State Matrix for a bigSNP object
 #'
 #' This function computes the IBS matrix.
 #'
 #' Note that monomorphic sites are currently counted. Should we filter them
 #' beforehand? What does plink do?
-#' @param X a [bigstatsr::FBM.code256] matrix (as found in the "fbm" attribute
-#' of the gen_tibble `genotypes` column).
+#' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
+#' slot of a [bigsnpr::bigSNP] object).
 #' @param ind.row An optional vector of the row indices that are used. If not
 #'   specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not

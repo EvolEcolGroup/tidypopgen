@@ -1,4 +1,4 @@
-#' Compute the Pairwise Allele Sharing Matrix (FBM input)
+#' Compute the Pairwise Allele Sharing Matrix for a bigSNP object
 #'
 #' This function computes the Allele Sharing matrix. Estimates Allele Sharing
 #' (matching in `hierfstat`)) between pairs of individuals (for each locus,
@@ -6,8 +6,8 @@
 #' are homozygous for a different allele, and 1/2 if at least one individual is
 #' heterozygous. Matching is the average of these 0, 1/2 and 1s)
 #'
-#' @param X a [bigstatsr::FBM.code256] matrix (as found in the "fbm" attribute
-#' of the gen_tibble `genotypes` column).
+#' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
+#' slot of a [bigsnpr::bigSNP] object).
 #' @param ind.row An optional vector of the row indices that are used. If not
 #'   specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not

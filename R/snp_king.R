@@ -1,4 +1,4 @@
-#' Compute the KING-robust Matrix (FBM input)
+#' Compute the KING-robust Matrix for a bigSNP object
 #'
 #' This function computes the KING-robust estimator of kinship, reimplementing
 #' the KING algorithm of Manichaikul et al. (2010).
@@ -7,8 +7,8 @@
 #'   genome-wide association studies. Bioinformatics, 26(22), 2867–2873.
 #'   https://doi.org/10.1093/bioinformatics/btq559.
 #'
-#' @param X a [bigstatsr::FBM.code256] matrix (as found in the "fbm" attribute
-#' of the gen_tibble `genotypes` column).
+#' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
+#' slot of a [bigsnpr::bigSNP] object).
 #' @param ind.row An optional vector of the row indices that are used.
 #' If not specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not

@@ -2,7 +2,7 @@
 % Please edit documentation in R/snp_king.R
 \name{snp_king}
 \alias{snp_king}
-\title{Compute the KING-robust Matrix (FBM input)}
+\title{Compute the KING-robust Matrix for a bigSNP object}
 \usage{
 snp_king(
   X,
@@ -12,8 +12,8 @@ snp_king(
 )
 }
 \arguments{
-\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the "fbm" attribute
-of the gen_tibble \code{genotypes} column).}
+\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes}
+slot of a \link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP} object).}
 
 \item{ind.row}{An optional vector of the row indices that are used.
 If not specified, all rows are used. Don't use negative indices.}
