@@ -99,56 +99,54 @@ test_that("error if saving a non gen_tibble object", {
 })
 
 test_that("old bigsnp gen_tibbles can be loaded", {
-  # TODO find a way to run this test on CI #nolint start
-  # copy the old gen_tibble to a temp location
-  # temp_dir <- tempdir()
-  # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
-  #   package = "tidypopgen"
-  # ), to = file.path(temp_dir, "old_gen_tibble.gt"))
-  # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.bk",
-  #                       package = "tidypopgen"
-  # ), to = file.path(temp_dir, "old_gen_tibble.bk"))
-  # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.rds",
-  #                       package = "tidypopgen"
-  # ), to = file.path(temp_dir, "old_gen_tibble.rds"))
-  #
-  #  gt_path <- paste0(temp_dir, "/old_gen_tibble.gt")
-  #  rds_path <- paste0(temp_dir, "/old_gen_tibble.rds")
-  #  bk_path <- paste0(temp_dir, "/old_gen_tibble.bk")
-  #
-  #  rds <- readRDS(rds_path)
-  #  #attributes(rds$genotypes)$bigsnp_file <- rds_path
-  #
-  #  #attributes(rds$genotypes)$bigsnp$genotypes$rds <- rds_path
-  #  #attributes(rds$genotypes)$bigsnp$genotypes$backingfile <- bk_path
-  #
-  #  # attributes(rds$genotypes)$fbm$rds <- rds_path
-  #  # attributes(rds$genotypes)$fbm$backingfile <- bk_path
-  #  # new_rds <- saveRDS(rds, rds_path)
-  #
-  #  # load gt using readRDS
-  #  gt <- readRDS(gt_path)
-  #  # change paths in gt attributes as well
-  #  attributes(gt$genotypes)$bigsnp_file <- rds_path
-  #  #attributes(gt$genotypes)$bigsnp$genotypes$rds <- bigsnpr::snp_attach(rds_path)
-  #
-  #  attributes(gt$genotypes)$bigsnp$genotypes$backingfile <- bk_path
-  #  # save
-  #  new_rds <- saveRDS(gt, gt_path)
-  #  # reload with gt_load
-  #
-  # expect_message(
-  #   test_gt <-
-  #     gt_load(gt_path), "your gen_tibble was in an old format"
-  # )
-  # example_gt <- load_example_gt("gen_tbl")
-  # expect_true(all.equal(test_gt, example_gt, check.attributes = FALSE))
-  #
-  # # check it works for basic calculations
-  # global_stats <- test_gt %>% pop_global_stats()
-  # global_stats_example <- example_gt %>% pop_global_stats()
-  # expect_true(all.equal(global_stats,
-  #   global_stats_example,
-  #   check.attributes = FALSE
-  # )) #nolint end
+  # TODO find a way to run this test on CI
+  # copy the old gen_tibble to a temp location  #nolint start
+  temp_dir <- tempdir()
+  file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
+    package = "tidypopgen"
+  ), to = file.path(temp_dir, "old_gen_tibble.gt"))
+  file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.bk",
+                        package = "tidypopgen"
+  ), to = file.path(temp_dir, "old_gen_tibble.bk"))
+  file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.rds",
+                        package = "tidypopgen"
+  ), to = file.path(temp_dir, "old_gen_tibble.rds"))
+
+   gt_path <- paste0(temp_dir, "/old_gen_tibble.gt")
+   rds_path <- paste0(temp_dir, "/old_gen_tibble.rds")
+   bk_path <- paste0(temp_dir, "/old_gen_tibble.bk")
+
+   # The test works without editing attributes, but it updates the .rds in
+   # extdata each time
+
+   # To fix, we want to update attributes
+
+   # load gt using readRDS
+   #gt <- readRDS(gt_path)
+
+   # change paths in gt attributes
+   #attributes(gt$genotypes)$bigsnp_file <- rds_path
+
+   # assigning attributes here fails
+   #attributes(gt$genotypes)$bigsnp$genotypes$rds <- bigsnpr::snp_attach(rds_path)
+   #attributes(gt$genotypes)$bigsnp$genotypes$backingfile <- bk_path
+
+   # save
+   #new_rds <- saveRDS(gt, gt_path)
+
+   # reload with gt_load
+  expect_message(
+    test_gt <-
+      gt_load(gt_path), "your gen_tibble was in an old format"
+  )
+  example_gt <- load_example_gt("gen_tbl")
+  expect_true(all.equal(test_gt, example_gt, check.attributes = FALSE))
+
+  # check it works for basic calculations
+  global_stats <- test_gt %>% pop_global_stats()
+  global_stats_example <- example_gt %>% pop_global_stats()
+  expect_true(all.equal(global_stats,
+    global_stats_example,
+    check.attributes = FALSE
+  )) #nolint end
 })
