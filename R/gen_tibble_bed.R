@@ -1,6 +1,7 @@
 gen_tibble_bed_rds <- function(
     x,
     ...,
+    ploidy = 2,
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
     allow_duplicates = FALSE,
@@ -53,13 +54,38 @@ gen_tibble_bed_rds <- function(
     # remove the bisnp object from memory
     rm(bigsnp_obj)
   }
+  # add ploidy check and fbm_ploidy
+  if (length(ploidy) > 1) {
+    # check that there are no missing values in ploidy vector
+    if (any(is.na(ploidy))) {
+      stop("'ploidy' can not contain NAs")
+    }
+    # check all values > 0
+    if (any(ploidy <= 0)) {
+      stop(
+        "the vector of individual ploidies ('ploidy') must contain ",
+        "positive integers"
+      )
+    }
+    fbm_ploidy <- ploidy
+  } else {
+    if ((ploidy != 0) && (ploidy != -2)) {
+      fbm_ploidy <- rep(ploidy, nrow(indiv_meta))
+    } else {
+      stop(
+        "'ploidy' 0 (mixed ploidy) or -2 (haplodiploids) ",
+        "require a vector of individual ploidies"
+      )
+    }
+  }
 
   indiv_meta$genotypes <- new_vctrs_bigsnp(
     fbm_obj = fbm_obj,
     fbm_file = fbm_path,
     loci = loci,
     indiv_id = indiv_meta$id,
-    ploidy = 2
+    ploidy = ploidy,
+    fbm_ploidy = fbm_ploidy
   )
 
   new_gen_tbl <- tibble::new_tibble(

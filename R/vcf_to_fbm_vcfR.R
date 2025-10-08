@@ -75,11 +75,23 @@ vcf_to_fbm_vcfR <- function(
     ...
   )
   temp_gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
-  ploidy <- apply(temp_gt, 2, get_ploidy)
+  ploidy <- unname(apply(temp_gt, 2, get_ploidy))
+
+
+  # check that there are no missing values in ploidy vector
   if (any(is.na(ploidy))) {
-    stop("error whilst determining ploidy")
+    stop("'ploidy' can not contain NAs")
   }
+  # check all values > 0
+  if (any(ploidy <= 0)) {
+    stop(
+      "the vector of individual ploidies ('ploidy') must contain ",
+      "positive integers"
+    )
+  }
+  fbm_ploidy <- ploidy
   max_ploidy <- max(ploidy)
+
 
   # set up codes for the appropriate ploidy level
   code256 <- rep(NA_real_, 256)
@@ -180,7 +192,8 @@ vcf_to_fbm_vcfR <- function(
     fbm_file = fbm_path,
     loci = loci,
     indiv_id = indiv_meta$id,
-    ploidy = ploidy
+    ploidy = max_ploidy,
+    fbm_ploidy = fbm_ploidy
   )
 
   new_gen_tbl <- tibble::new_tibble(

@@ -38,6 +38,19 @@ vcf_to_fbm_cpp <- function(
   # figure out no_individuals and ploidy
   ploidy <- vcf_meta$ploidy
   no_individuals <- length(ploidy)
+
+  # check that there are no missing values in ploidy vector
+  if (any(is.na(ploidy))) {
+    stop("'ploidy' can not contain NAs")
+  }
+  # check all values > 0
+  if (any(ploidy <= 0)) {
+    stop(
+      "the vector of individual ploidies ('ploidy') must contain ",
+      "positive integers"
+    )
+  }
+  fbm_ploidy <- ploidy
   max_ploidy <- max(ploidy)
 
   code256 <- rep(NA_real_, 256)
@@ -107,7 +120,8 @@ vcf_to_fbm_cpp <- function(
     fbm_file = fbm_path,
     loci = loci,
     indiv_id = indiv_meta$id,
-    ploidy = ploidy
+    ploidy = max_ploidy,
+    fbm_ploidy = fbm_ploidy
   )
 
   new_gen_tbl <- tibble::new_tibble(

@@ -100,7 +100,8 @@ gen_tibble_packedancestry <- function(
     fbm_file = fbm_path,
     loci = loci,
     indiv_id = indiv_meta$id,
-    ploidy = 2
+    ploidy = 2,
+    fbm_ploidy = rep(2, nrow(indiv_meta))
   )
 
   new_gen_tbl <- tibble::new_tibble(

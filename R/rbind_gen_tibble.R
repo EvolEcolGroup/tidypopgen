@@ -240,29 +240,6 @@ rbind.gen_tbl <- function(
 
   fbm_path <- merged_fbm$backingfile
 
-  if (is.null(attr(ref$genotypes, "fbm_ploidy"))) {
-    test_pseudo_ref <- gt_pseudohaploid(ref)
-    if (!is_pseudohaploid(test_pseudo_ref)) {
-      attr(ref$genotypes, "fbm_ploidy") <- rep(2L, nrow(ref))
-    } else {
-      stop(
-        "Your reference gen_tibble may contain pseudohaploid data.",
-        "Please run 'gt_pseudohaploid()' to set ploidy before merging."
-      )
-    }
-  }
-  if (is.null(attr(target$genotypes, "fbm_ploidy"))) {
-    test_pseudo_target <- gt_pseudohaploid(target)
-    if (!is_pseudohaploid(test_pseudo_target)) {
-      attr(target$genotypes, "fbm_ploidy") <- rep(2L, nrow(ref))
-    } else {
-      stop(
-        "Your reference gen_tibble may contain pseudohaploid data.",
-        "Please run 'gt_pseudohaploid()' to set ploidy before merging."
-      )
-    }
-  }
-
   indivs_ploidy <- c(
     attr(ref$genotypes, "fbm_ploidy"),
     attr(target$genotypes, "fbm_ploidy")

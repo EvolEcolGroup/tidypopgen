@@ -296,6 +296,32 @@ gen_tibble.matrix <- function(
     ))
   }
 
+  if (length(ploidy) > 1) {
+    # check that there are no missing values in ploidy vector
+    if (any(is.na(ploidy))) {
+      stop("'ploidy' can not contain NAs")
+    }
+    # check all values > 0
+    if (any(ploidy <= 0)) {
+      stop(
+        "the vector of individual ploidies ('ploidy') must contain ",
+        "positive integers"
+      )
+    }
+    fbm_ploidy <- ploidy
+    max_ploidy <- max(ploidy)
+  } else {
+    if ((ploidy != 0) && (ploidy != -2)) {
+      fbm_ploidy <- rep(ploidy, nrow(x))
+    } else {
+      stop(
+        "'ploidy' 0 (mixed ploidy) or -2 (haplodiploids) ",
+        "require a vector of individual ploidies"
+      )
+    }
+    max_ploidy <- ploidy
+  }
+
   loci <- validate_loci(loci,
     check_alphabet = TRUE,
     check_duplicates = TRUE,
@@ -336,7 +362,7 @@ gen_tibble.matrix <- function(
   fbm_obj <- gt_write_fbm_from_dfs(
     genotypes = x,
     backingfile = backingfile,
-    ploidy = ploidy
+    max_ploidy = max_ploidy
   )
 
   fbm_path <- bigstatsr::sub_bk(fbm_obj$backingfile, ".rds")
@@ -344,12 +370,14 @@ gen_tibble.matrix <- function(
   indiv_id <- indiv_meta$id
 
   indiv_meta <- as.list(indiv_meta)
+
   indiv_meta$genotypes <- new_vctrs_bigsnp(
     fbm_obj,
     fbm_file = fbm_path,
     loci = loci,
     indiv_id = indiv_id,
-    ploidy = ploidy
+    ploidy = max_ploidy,
+    fbm_ploidy = fbm_ploidy
   )
 
   new_gen_tbl <- tibble::new_tibble(
@@ -463,7 +491,7 @@ gt_write_bigsnp_from_dfs <- function(
     maternal.ID = 0,
     sex = 0,
     affection = 0,
-    ploidy = ploidy
+    ploidy = max_ploidy
   )
   map <- tibble(
     chromosome = loci$chromosome,
@@ -495,8 +523,7 @@ gt_write_bigsnp_from_dfs <- function(
 #' @param loci a tibble of loci (needs to be validated first with
 #'   `validate_loci`)
 #' @param indiv_id a vector of individual ids (from indiv_meta)
-#' @param ploidy the ploidy of the samples (either a single value, or a vector
-#'   of values for mixed ploidy).
+#' @param ploidy the ploidy of the samples, a single value.
 #' @param fbm_ploidy a vector of ploidies for each individual in the fbm object
 #'   (note that this is for the full FBM, not just the tibble)
 #' @returns a vctrs_bigSNP object
@@ -519,10 +546,14 @@ new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2,
     ))
   }
 
-  if (length(unique(ploidy)) > 1) {
-    max_ploidy <- 0
+  if (!ploidy == -2) {
+    if (length(unique(fbm_ploidy)) > 1) {
+      max_ploidy <- 0
+    } else {
+      max_ploidy <- max(fbm_ploidy)
+    }
   } else {
-    max_ploidy <- max(ploidy)
+    max_ploidy <- -2
   }
 
   # add the big_index column

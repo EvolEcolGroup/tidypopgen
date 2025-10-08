@@ -99,7 +99,7 @@ test_that("error if saving a non gen_tibble object", {
 })
 
 test_that("old bigsnp gen_tibbles can be loaded", {
-  # TODO find a way to run this test on CI
+  # TODO find a way to run this test on CI #nolint start
   # copy the old gen_tibble to a temp location
   # temp_dir <- tempdir()
   # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
@@ -107,21 +107,35 @@ test_that("old bigsnp gen_tibbles can be loaded", {
   # ), to = file.path(temp_dir, "old_gen_tibble.gt"))
   # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.bk",
   #                       package = "tidypopgen"
-  # ), to = file.path(temp_dir, "old_gen_tibble.gt"))
-  # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
+  # ), to = file.path(temp_dir, "old_gen_tibble.bk"))
+  # file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.rds",
   #                       package = "tidypopgen"
   # ), to = file.path(temp_dir, "old_gen_tibble.rds"))
   #
-  # gt_path <- paste0(temp_dir, "/old_gen_tibble.gt")
-  # rds_path <- paste0(temp_dir, "/old_gen_tibble.rds")
-  # bk_path <- paste0(temp_dir, "/old_gen_tibble.bk")
+  #  gt_path <- paste0(temp_dir, "/old_gen_tibble.gt")
+  #  rds_path <- paste0(temp_dir, "/old_gen_tibble.rds")
+  #  bk_path <- paste0(temp_dir, "/old_gen_tibble.bk")
   #
+  #  rds <- readRDS(rds_path)
+  #  #attributes(rds$genotypes)$bigsnp_file <- rds_path
   #
+  #  #attributes(rds$genotypes)$bigsnp$genotypes$rds <- rds_path
+  #  #attributes(rds$genotypes)$bigsnp$genotypes$backingfile <- bk_path
   #
-  # rds <- readRDS(rds_path)
-  # attributes(rds$genotypes)$bigsnp_file <- rds_path
-  # attributes(rds$genotypes)$bigsnp$genotypes
-  # saveRDS(rds, rds_path)
+  #  # attributes(rds$genotypes)$fbm$rds <- rds_path
+  #  # attributes(rds$genotypes)$fbm$backingfile <- bk_path
+  #  # new_rds <- saveRDS(rds, rds_path)
+  #
+  #  # load gt using readRDS
+  #  gt <- readRDS(gt_path)
+  #  # change paths in gt attributes as well
+  #  attributes(gt$genotypes)$bigsnp_file <- rds_path
+  #  #attributes(gt$genotypes)$bigsnp$genotypes$rds <- bigsnpr::snp_attach(rds_path)
+  #
+  #  attributes(gt$genotypes)$bigsnp$genotypes$backingfile <- bk_path
+  #  # save
+  #  new_rds <- saveRDS(gt, gt_path)
+  #  # reload with gt_load
   #
   # expect_message(
   #   test_gt <-
@@ -136,5 +150,5 @@ test_that("old bigsnp gen_tibbles can be loaded", {
   # expect_true(all.equal(global_stats,
   #   global_stats_example,
   #   check.attributes = FALSE
-  # ))
+  # )) #nolint end
 })

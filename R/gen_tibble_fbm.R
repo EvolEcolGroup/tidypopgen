@@ -164,26 +164,13 @@ validate_indiv_meta <- function(indiv_meta) {
 gt_write_fbm_from_dfs <- function(
     genotypes,
     backingfile = NULL,
-    ploidy = 2) {
+    max_ploidy = 2) {
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }
+
   # set up code (accounting for ploidy)
   code256 <- rep(NA_real_, 256)
-  if (length(ploidy) > 1) {
-    # check that there are no missing values in ploidy vector
-    if (any(is.na(ploidy))) {
-      stop("'ploidy' can not contain NAs")
-    }
-    max_ploidy <- max(ploidy)
-  } else {
-    max_ploidy <- ploidy
-  }
-
-  if (is.na(max_ploidy)) {
-    stop("'ploidy' can not contain NAs")
-  }
-
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
   # ensure max_ploidy is appropriate for the data
