@@ -23,8 +23,8 @@ gen_tibble_vcf <- function(
     new_gen_tbl <- vcf_to_fbm_cpp(
       x,
       backingfile = backingfile,
-      valid_alleles = c("A", "T", "C", "G"),
-      missing_alleles = c("0", "."),
+      valid_alleles = valid_alleles,
+      missing_alleles = missing_alleles,
       allow_duplicates = allow_duplicates,
       quiet = quiet
     )
@@ -32,8 +32,8 @@ gen_tibble_vcf <- function(
     new_gen_tbl <- vcf_to_fbm_vcfR(
       x,
       backingfile = backingfile,
-      valid_alleles = c("A", "T", "C", "G"),
-      missing_alleles = c("0", "."),
+      valid_alleles = valid_alleles,
+      missing_alleles = missing_alleles,
       chunk_size = chunk_size,
       allow_duplicates = allow_duplicates,
       quiet = quiet,
