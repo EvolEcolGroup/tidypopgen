@@ -106,35 +106,35 @@ test_that("old bigsnp gen_tibbles can be loaded", {
     package = "tidypopgen"
   ), to = file.path(temp_dir, "old_gen_tibble.gt"))
   file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.bk",
-                        package = "tidypopgen"
+    package = "tidypopgen"
   ), to = file.path(temp_dir, "old_gen_tibble.bk"))
   file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.rds",
-                        package = "tidypopgen"
+    package = "tidypopgen"
   ), to = file.path(temp_dir, "old_gen_tibble.rds"))
 
-   gt_path <- paste0(temp_dir, "/old_gen_tibble.gt")
-   rds_path <- paste0(temp_dir, "/old_gen_tibble.rds")
-   bk_path <- paste0(temp_dir, "/old_gen_tibble.bk")
+  gt_path <- paste0(temp_dir, "/old_gen_tibble.gt")
+  rds_path <- paste0(temp_dir, "/old_gen_tibble.rds")
+  bk_path <- paste0(temp_dir, "/old_gen_tibble.bk")
 
-   # The test works without editing attributes, but it updates the .rds in
-   # extdata each time
+  # The test works without editing attributes, but it updates the .rds in
+  # extdata each time
 
-   # To fix, we want to update attributes
+  # To fix, we want to update attributes
 
-   # load gt using readRDS
-   #gt <- readRDS(gt_path)
+  # load gt using readRDS
+  # gt <- readRDS(gt_path)
 
-   # change paths in gt attributes
-   #attributes(gt$genotypes)$bigsnp_file <- rds_path
+  # change paths in gt attributes
+  # attributes(gt$genotypes)$bigsnp_file <- rds_path
 
-   # assigning attributes here fails
-   #attributes(gt$genotypes)$bigsnp$genotypes$rds <- bigsnpr::snp_attach(rds_path)
-   #attributes(gt$genotypes)$bigsnp$genotypes$backingfile <- bk_path
+  # assigning attributes here fails
+  # attributes(gt$genotypes)$bigsnp$genotypes$rds <- bigsnpr::snp_attach(rds_path)
+  # attributes(gt$genotypes)$bigsnp$genotypes$backingfile <- bk_path
 
-   # save
-   #new_rds <- saveRDS(gt, gt_path)
+  # save
+  # new_rds <- saveRDS(gt, gt_path)
 
-   # reload with gt_load
+  # reload with gt_load
   expect_message(
     test_gt <-
       gt_load(gt_path), "your gen_tibble was in an old format"
@@ -148,5 +148,5 @@ test_that("old bigsnp gen_tibbles can be loaded", {
   expect_true(all.equal(global_stats,
     global_stats_example,
     check.attributes = FALSE
-  )) #nolint end
+  )) # nolint end
 })

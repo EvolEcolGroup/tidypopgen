@@ -546,7 +546,7 @@ new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2,
     ))
   }
 
-  if (!ploidy == -2) {
+  if (ploidy != -2) {
     if (length(unique(fbm_ploidy)) > 1) {
       max_ploidy <- 0
     } else {

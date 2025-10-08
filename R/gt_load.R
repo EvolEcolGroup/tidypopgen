@@ -61,6 +61,7 @@ gt_load <- function(file = NULL, reattach_to = NULL) {
     }
     # attach the new files
     attr(x$genotypes, "fbm") <- bigstatsr::big_attach(reattach_to)
+    attr(x$genotypes, "fbm_md5sum") <- tools::md5sum(reattach_to)
   }
 
   return(x)
