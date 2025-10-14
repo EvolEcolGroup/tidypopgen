@@ -122,17 +122,15 @@ test_that("old bigsnp gen_tibbles can be loaded", {
   # To fix, we want to update attributes
 
   # load gt using readRDS
-  # gt <- readRDS(gt_path)
+  gt <- readRDS(gt_path)
 
   # change paths in gt attributes
-  # attributes(gt$genotypes)$bigsnp_file <- rds_path
+  attributes(gt$genotypes)$bigsnp_file <- rds_path
+  attributes(gt$genotypes)$bigsnp <- bigsnpr::snp_attach(rds_path)
 
-  # assigning attributes here fails
-  # attributes(gt$genotypes)$bigsnp$genotypes$rds <- bigsnpr::snp_attach(rds_path)
-  # attributes(gt$genotypes)$bigsnp$genotypes$backingfile <- bk_path
 
   # save
-  # new_rds <- saveRDS(gt, gt_path)
+  new_rds <- saveRDS(gt, gt_path)
 
   # reload with gt_load
   expect_message(
