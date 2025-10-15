@@ -41,11 +41,11 @@ pairwise_ibs <- function(
     ),
     block_size = bigstatsr::block_size(nrow(x))) {
   type <- match.arg(type)
-  X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
+  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
   ibs_matrix <- snp_ibs(
-    X$genotypes,
+    X,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
     type = type,

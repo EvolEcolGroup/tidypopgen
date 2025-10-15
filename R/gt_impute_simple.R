@@ -41,7 +41,7 @@ gt_impute_simple <- function(
     on.exit(options(bigstatsr.check.parallel.blas = TRUE))
   }
 
-  if (nrow(x) != nrow(attr(x$genotypes, "bigsnp")$genotypes)) {
+  if (nrow(x) != nrow(attr(x$genotypes, "fbm"))) {
     stop(
       "The number of individuals in the gen_tibble does not match the",
       " number of rows in the file backing matrix. Before imputing, use",
@@ -54,16 +54,16 @@ gt_impute_simple <- function(
   }
 
   if (
-    !identical(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
+    !identical(attr(x$genotypes, "fbm")$code256, bigsnpr::CODE_012)
   ) {
     # nolint start
     if (
       identical(
-        attr(x$genotypes, "bigsnp")$genotypes$code256,
+        attr(x$genotypes, "fbm")$code256,
         bigsnpr::CODE_IMPUTE_PRED
       ) ||
         identical(
-          attr(x$genotypes, "bigsnp")$genotypes$code256,
+          attr(x$genotypes, "fbm")$code256,
           bigsnpr::CODE_DOSAGE
         )
     ) {
@@ -74,8 +74,8 @@ gt_impute_simple <- function(
     }
   }
 
-  attr(x$genotypes, "bigsnp")$genotypes <- bigsnpr::snp_fastImputeSimple(
-    attr(x$genotypes, "bigsnp")$genotypes,
+  attr(x$genotypes, "fbm") <- bigsnpr::snp_fastImputeSimple(
+    attr(x$genotypes, "fbm"),
     method = method,
     ncores = n_cores
   )

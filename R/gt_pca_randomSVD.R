@@ -88,19 +88,20 @@ gt_pca_randomSVD <- function(
 
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
+    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
+    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
 
-  X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
+  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
 
   this_svd <- bigstatsr::big_randomSVD(
-    X$genotypes,
+    X,
     k = k,
-    ind.row = .gt_bigsnp_rows(x),
-    ind.col = .gt_bigsnp_cols(x),
+    ind.row = .gt_fbm_rows(x),
+    ind.col = .gt_fbm_cols(x),
     fun.scaling = fun_scaling,
     tol = tol,
     verbose = verbose,
@@ -118,7 +119,7 @@ gt_pca_randomSVD <- function(
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var) {
     this_svd$square_frobenius <- square_frobenius(
-      X$genotypes,
+      X,
       x_ind_row,
       x_ind_col,
       center = this_svd$center,

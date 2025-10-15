@@ -78,8 +78,9 @@ pairwise_pop_fst <- function(
     n_cores = bigstatsr::nb_cores()) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
+    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = TRUE))
+    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
 
   type <- match.arg(type)
@@ -119,9 +120,9 @@ pairwise_pop_fst <- function(
   # summarise population frequencies
   # TODO this should be done in chunks!!!!
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_bigsnp(.x)$genotypes,
-    rowInd = .gt_bigsnp_rows(.x),
-    colInd = .gt_bigsnp_cols(.x),
+    .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = nrow(.group_levels),
     ploidy = indiv_ploidy(.x),

@@ -34,13 +34,20 @@ test_that("impute and use the imputation", {
   )
 })
 
-test_that("backingfile error if gt and bk have uneven number of indivs", {
+test_that("backingfile error if gt and bk have uneven number of loci/indivs", {
   # remove an individual from missing_gt
-  missing_gt <- missing_gt[-1, ]
+  missing_indiv_gt <- missing_gt[-1, ]
   # try to impute
   expect_error(
-    missing_gt <- gt_impute_xgboost(missing_gt, seed = 1),
+    missing_indiv_gt <- gt_impute_xgboost(missing_indiv_gt, seed = 1),
     "The number of individuals in the gen_tibble does not match "
+  )
+
+  # remove loci from missing_gt
+  missing_loci_gt <- missing_gt %>% select_loci(1:5)
+  expect_error(
+    missing_gt <- gt_impute_xgboost(missing_loci_gt, seed = 1),
+    "The number of loci in the gen_tibble does not match "
   )
 })
 

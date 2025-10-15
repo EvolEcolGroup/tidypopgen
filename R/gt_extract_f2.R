@@ -133,13 +133,12 @@ gt_extract_f2 <- function(
   # if no outdir is given, create a subdirectory f2 in the path of the
   # gen_tibble rds
   if (is.null(outdir)) {
-    outdir <- file.path(dirname(.gt_get_bigsnp(.x)$genotypes$rds), "f2")
+    outdir <- file.path(dirname(.gt_get_fbm(.x)$rds), "f2")
   }
 
   verbose <- !quiet
   afdat <- gt_to_aftable(
     .x,
-    adjust_pseudohaploid = adjust_pseudohaploid,
     n_cores = n_cores
   )
 
@@ -171,7 +170,7 @@ gt_extract_f2 <- function(
   }
 
   if (isTRUE(poly_only)) poly_only <- c("f2", "ap", "fst")
-  arrs <- afs_to_f2_blocks(
+  arrs <- afs_to_f2_blocks( # nolint
     afdat,
     outdir = outdir,
     overwrite = overwrite,
@@ -187,10 +186,6 @@ gt_extract_f2 <- function(
     n_cores = n_cores,
     verbose = verbose
   )
-
-  if (is.null(outdir)) {
-    return(arrs)
-  }
 
   if (verbose) message(paste0("Data written to ", outdir, "/\n"))
   invisible(afdat$snpfile)
@@ -223,14 +218,14 @@ gt_to_aftable <- function(
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }
-  geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+  geno_fbm <- .gt_get_fbm(.x)
 
 
 
   aftable <- grouped_alt_freq_dip_pseudo_cpp(
     BM = geno_fbm,
-    rowInd = .gt_bigsnp_rows(.x),
-    colInd = .gt_bigsnp_cols(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = max(dplyr::group_indices(.x)),
     ncores = n_cores,

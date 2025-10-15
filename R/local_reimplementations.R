@@ -1,62 +1,23 @@
 # utility internal functions
 
+
 # simple function to extract the extension of a file
-# this avoids having to import tools just for tools::file_ext
+# see tools::file_ext
 file_ext <- function(x) {
   utils::tail(unlist(strsplit(x, ".", fixed = TRUE)), n = 1)
 }
 
-# a simple tidier for dist matrices
-# tidy.dist is deprecated, and often we have a full matrix rather
-# than a dist object
-tidy_dist_matrix <- function(mat) {
-  if (!inherits(mat, "matrix")) {
-    stop("mat should be a matrix")
-  }
-  xy <- t(utils::combn(colnames(mat), 2))
-  colnames(xy) <- c("item1", "item2")
-  xy %>%
-    tibble::as_tibble() %>%
-    dplyr::mutate(value = mat[xy])
+
+#######
+# Convenience functions that are not exported by `bigstatsr`
+CutBySize <- function(m, block.size, nb = ceiling(m / block.size)) { # nolint
+  bigparallelr::split_len(m, nb_split = nb)
 }
 
-# stop if not diploid
-stopifnot_diploid <- function(x) {
-  if (inherits(x, "gen_tbl")) {
-    x <- x$genotypes
-  }
-  if (attr(x, "ploidy") == -2) {
-    if (min(attr(x, "bigsnp")$fam$ploidy[vctrs::vec_data(x)]) != 2) {
-      stop("this function only works on diploid data")
-    }
-  }
+seq2 <- function(lims) {
+  seq(lims[1], lims[2])
 }
-
-stopifnot_dip_pseudo <- function(x) {
-  if (inherits(x, "gen_tbl")) {
-    x <- x$genotypes
-  }
-  if (abs(attr(x, "ploidy")) != 2) {
-    stop("this function only works on diploid data")
-  }
-}
-
-
-is_diploid_only <- function(x) {
-  if (inherits(x, "gen_tbl")) {
-    (attr(x$genotypes, "ploidy") == 2)
-  } else {
-    (attr(x, "ploidy") == 2)
-  }
-}
-
-is_pseudohaploid <- function(x) {
-  if (inherits(x, "gen_tbl")) {
-    (attr(x$genotypes, "ploidy") == -2)
-  } else {
-    (attr(x, "ploidy") == -2)
-  }
-}
+#######
 
 
 #' Reorder factor levels by first appearance

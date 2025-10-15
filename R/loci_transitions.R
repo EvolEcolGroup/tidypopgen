@@ -31,7 +31,7 @@ loci_transitions.tbl_df <- function(.x, .col = "genotypes", ...) {
   if (.col != "genotypes") {
     stop("loci_transitions only works with the genotypes column")
   }
-  check_allele_alphabet(.x$genotypes)
+  check_allele_alphabet(show_loci(.x$genotypes))
   loci_transitions(.x$genotypes, ...)
 }
 

@@ -30,8 +30,9 @@ gt_save <- function(x, file_name = NULL, quiet = FALSE) {
   if (!inherits(x, "gen_tbl")) {
     stop("x should be a gen_tibble")
   }
-  # we update the bigsnp object
-  bigsnpr::snp_save(attr(x$genotypes, "bigsnp"))
+
+  # we update the fbm object
+  .gt_get_fbm(x)$save()
 
   if (is.null(file_name)) {
     file_name <- bigstatsr::sub_bk(gt_get_file_names(x)[2], ".gt")
@@ -43,8 +44,8 @@ gt_save <- function(x, file_name = NULL, quiet = FALSE) {
   saveRDS(x, file_name)
   if (!quiet) {
     message("\ngen_tibble saved to ", file_name)
-    message("using bigSNP file: ", gt_get_file_names(x)[1])
-    message("with backing file: ", gt_get_file_names(x)[2])
+    message("using FBM RDS: ", gt_get_file_names(x)[1])
+    message("with FBM backing file: ", gt_get_file_names(x)[2])
     message("make sure that you do NOT delete those files!")
     message("to reload the gen_tibble in another session, use:")
     message("gt_load('", file_name, "')")
@@ -74,34 +75,13 @@ gt_save_light <- function(x, file_name = NULL, quiet = FALSE) {
   saveRDS(x, file_name)
   if (!quiet) {
     message("\ngen_tibble saved to ", file_name)
-    message("using bigSNP file: ", gt_get_file_names(x)[1])
-    message("with backing file: ", gt_get_file_names(x)[2])
+    message("using FBM RDS: ", gt_get_file_names(x)[1])
+    message("with FBM backing file: ", gt_get_file_names(x)[2])
     message("make sure that you do NOT delete those files!")
     message("to reload the gen_tibble in another session, use:")
     message("gt_load('", file_name, "')")
   }
   return(c(file_name, gt_get_file_names(x)))
-}
-
-
-sub_gt <- function(path, replacement = "", stop_if_not_ext = TRUE) {
-  pattern <- "\\.gt$"
-  if (!grepl(pattern, path)) {
-    stop("Path '%s' must have 'gt' extension.", path)
-  }
-  if (
-    stop_if_not_ext &&
-      (nchar(replacement) > 0) &&
-      (substr(
-        replacement,
-        1,
-        1
-      ) !=
-        ".")
-  ) {
-    stop("Replacement must be an extension starting with '.' if provided.")
-  }
-  sub(pattern, replacement, path)
 }
 
 #' Get the names of files storing the genotypes of a `gen_tibble`
@@ -122,11 +102,13 @@ gt_get_file_names <- function(x) {
     x <- x$genotypes
   } else if (!inherits(x, "vctrs_bigSNP")) {
     stop("x should be a vctrs_bigSNP object")
+  } else if (is.null(attr(x, "fbm"))) {
+    stop("x must be a genotype vector with attr(., 'fbm') present")
   }
 
   return(c(
     # nolint
-    attr(x, "bigsnp")$genotypes$rds,
-    attr(x, "bigsnp")$genotypes$backingfile
+    attr(x, "fbm")$rds,
+    attr(x, "fbm")$backingfile
   ))
 }

@@ -11,7 +11,6 @@ gen_tibble_vcf <- function(
     allow_duplicates = FALSE,
     quiet = FALSE) {
   parser <- match.arg(parser)
-
   if (!file.exists(x)) {
     stop("x should be a valid file path pointing to a vcf: ", x)
   }
@@ -21,16 +20,22 @@ gen_tibble_vcf <- function(
     if (length(list(...)) > 0) {
       stop("extra parameters can only be used with parser = 'vcfR'")
     }
-    rds_path <- vcf_to_fbm_cpp(
+    new_gen_tbl <- vcf_to_fbm_cpp(
       x,
       backingfile = backingfile,
+      valid_alleles = valid_alleles,
+      missing_alleles = missing_alleles,
+      allow_duplicates = allow_duplicates,
       quiet = quiet
     )
   } else {
-    rds_path <- vcf_to_fbm_vcfR(
+    new_gen_tbl <- vcf_to_fbm_vcfR(
       x,
       backingfile = backingfile,
+      valid_alleles = valid_alleles,
+      missing_alleles = missing_alleles,
       chunk_size = chunk_size,
+      allow_duplicates = allow_duplicates,
       quiet = quiet,
       ...
     )
@@ -39,13 +44,5 @@ gen_tibble_vcf <- function(
   if (!quiet) {
     message("converting to a gen_tibble...")
   }
-  gen_tibble(
-    rds_path,
-    valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles,
-    backingfile = backingfile,
-    allow_duplicates = allow_duplicates,
-    quiet = quiet,
-    n_cores = n_cores
-  )
+  return(new_gen_tbl)
 }

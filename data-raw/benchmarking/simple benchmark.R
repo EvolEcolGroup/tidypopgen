@@ -3,7 +3,7 @@ bed_file <- "./data-raw/benchmarking/hgdp_100k.bed"
 hgdp_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"))
 hgdp_gt <- gt_impute_simple(hgdp_gt)
 tic()
-test_ibs <- snp_ibs(.gt_get_bigsnp(hgdp_gt)$genotypes, block.size = 10000)
+test_ibs <- snp_ibs(.gt_get_fbm(hgdp_gt), block.size = 10000)
 toc()
 
 tic()

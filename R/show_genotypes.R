@@ -52,5 +52,5 @@ show_genotypes.vctrs_bigSNP <- function(
   if (!is.null(loci_indices)) {
     loci_big_index <- loci_big_index[loci_indices]
   }
-  attr(.x, "bigsnp")$genotypes[indiv_big_index, loci_big_index]
+  attr(.x, "fbm")[indiv_big_index, loci_big_index, drop = FALSE]
 }

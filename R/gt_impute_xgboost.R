@@ -51,15 +51,24 @@ gt_impute_xgboost <- function(
     append_error = TRUE) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
+    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = TRUE))
+    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
 
-  if (nrow(x) != nrow(attr(x$genotypes, "bigsnp")$genotypes)) {
+  if (nrow(x) != nrow(attr(x$genotypes, "fbm"))) {
     stop(
       "The number of individuals in the gen_tibble does not match the",
       " number of rows in the file backing matrix. Before imputing, use",
       " gt_update_backingfile to update your file backing matrix."
+    )
+  }
+
+  if (count_loci(x) != ncol(attr(x$genotypes, "fbm"))) {
+    stop(
+      "The number of loci in the gen_tibble does not match the number of ",
+      "columns in the file backing matrix. Before imputing, use ",
+      "gt_update_backingfile to update your file backing matrix."
     )
   }
 
@@ -68,16 +77,16 @@ gt_impute_xgboost <- function(
   }
 
   if (
-    !identical(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
+    !identical(attr(x$genotypes, "fbm")$code256, bigsnpr::CODE_012)
   ) {
     # nolint start
     if (
       identical(
-        attr(x$genotypes, "bigsnp")$genotypes$code256,
+        attr(x$genotypes, "fbm")$code256,
         bigsnpr::CODE_IMPUTE_PRED
       ) ||
         identical(
-          attr(x$genotypes, "bigsnp")$genotypes$code256,
+          attr(x$genotypes, "fbm")$code256,
           bigsnpr::CODE_DOSAGE
         )
     ) {
@@ -89,7 +98,7 @@ gt_impute_xgboost <- function(
   }
 
   infos <- bigsnpr::snp_fastImpute(
-    attr(x$genotypes, "bigsnp")$genotypes, # this needs subsetting
+    attr(x$genotypes, "fbm"), # this needs subsetting
     infos.chr = show_loci(x)$chr_int, # check this is correct
     alpha = alpha,
     size = size,

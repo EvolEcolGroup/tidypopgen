@@ -27,6 +27,8 @@ test_gt <- gen_tibble(
 
 # this also tests show_genotypes and show_loci
 test_that("write a bed file", {
+  # group
+  test_gt <- test_gt %>% group_by(population)
   bed_path <- gt_as_plink(test_gt, file = paste0(tempfile(), ".bed"))
   # now read the file back in
   test_gt2 <- gen_tibble(bed_path, quiet = TRUE)
@@ -35,6 +37,7 @@ test_that("write a bed file", {
   # because of the different backing file info
   # we cannot use identical on the whole object
   expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt2)))
+  test_gt <- test_gt %>% ungroup()
   expect_true(identical(
     test_gt %>% select(-genotypes),
     test_gt2 %>% select(-genotypes)
@@ -380,4 +383,40 @@ test_that("handling of duplicated loci", {
       "Remove them or set allow_duplicates = TRUE."
     )
   )
+})
+
+test_that("plink files location when 'file' is NULL", {
+  # create file
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 0),
+    c(2, 1, 0, 0, 0, 0),
+    c(2, 2, 0, 0, NA, 1)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+
+  bed_path <- gt_as_plink(test_gt, type = "bed")
+
+  expected_bed_file <-
+    tools::file_path_sans_ext(attr(test_gt$genotypes, "fbm")$backingfile)
+  expected_bed_file <- paste0(expected_bed_file, ".bed")
+
+  expect_equal(bed_path, expected_bed_file)
 })

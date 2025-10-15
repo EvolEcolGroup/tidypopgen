@@ -45,5 +45,4 @@ sorted. To check this, and update the file backing matrix, use
 example_gt <- load_example_gt("gen_tbl")
 
 example_gt \%>\% gt_update_backingfile()
-
 }

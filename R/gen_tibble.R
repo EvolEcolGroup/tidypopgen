@@ -16,6 +16,9 @@
 #' - *packedancestry* files: When loading *packedancestry* files,
 #' missing alleles will be converted from 'X' to NA
 #'
+#' @note Helper functions for accessing `gen_tibble` object attributes and
+#' checking gen_tibble ploidy can be found in gt_helper_functions.R
+#'
 #' @param x can be:
 #' - a string giving the path to a PLINK BED or PED file. The associated
 #'   BIM and FAM files for the BED, or MAP for PED are expected to be in the
@@ -148,11 +151,10 @@ gen_tibble.character <-
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
-
     # check that valid alleles does not contain zero
     if ("0" %in% valid_alleles) {
       stop(paste(
-        "'0' can not be a valid allele",
+        "'0' cannot be a valid allele",
         "(it is the default missing allele value!)"
       ))
     }
@@ -177,6 +179,7 @@ gen_tibble.character <-
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
+        allow_duplicates = allow_duplicates,
         quiet = quiet
       )
     } else if (
@@ -186,7 +189,7 @@ gen_tibble.character <-
       # is then passed back to gen_tibble_bed_rds to create the gen_tibble
       # so, the object returned by gen_tibble_vcf is already the
       # final gen_tibble
-      return(gen_tibble_vcf(
+      x_gt <- gen_tibble_vcf(
         x = x,
         ...,
         parser = parser,
@@ -197,7 +200,7 @@ gen_tibble.character <-
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
         quiet = quiet
-      ))
+      )
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,
@@ -205,6 +208,7 @@ gen_tibble.character <-
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
+        allow_duplicates = allow_duplicates,
         quiet = quiet
       )
     } else if (tolower(file_ext(x)) == "geno") {
@@ -214,6 +218,7 @@ gen_tibble.character <-
         valid_alleles = valid_alleles,
         missing_alleles = missing_alleles,
         backingfile = backingfile,
+        allow_duplicates = allow_duplicates,
         quiet = quiet,
         chunk_size = chunk_size
       )
@@ -228,8 +233,6 @@ gen_tibble.character <-
     # create a chr_int column
     show_loci(x_gt)$chr_int <-
       cast_chromosome_to_int(show_loci(x_gt)$chromosome)
-    # check chromosome is character
-    show_loci(x_gt) <- check_valid_loci(show_loci(x_gt))
 
     # check alleles
     loci <- show_loci(x_gt)
@@ -258,146 +261,9 @@ gen_tibble.character <-
       }
     }
 
-    # check for duplicates
-    duplicated_pos <- find_duplicated_loci(x_gt, list_duplicates = TRUE)
-    has_dup_pos <- length(duplicated_pos) > 0
-    has_dup_names <- anyDuplicated(loci_names(x_gt)) > 0
-
-    if (!allow_duplicates) {
-      if (has_dup_pos || has_dup_names) {
-        files <- gt_get_file_names(x_gt)
-        if (file.exists(files[1])) file.remove(files[1])
-        if (file.exists(files[2])) file.remove(files[2])
-      }
-      if (has_dup_pos) {
-        stop(paste0(
-          "Your data contain duplicated loci. ",
-          "Remove them or set allow_duplicates = TRUE."
-        ))
-      }
-      if (has_dup_names) {
-        stop(paste0(
-          "Your data contain duplicated locus names. ",
-          "Remove them or set allow_duplicates = TRUE."
-        ))
-      }
-    } else {
-      if (has_dup_pos) {
-        warning(paste0(
-          "You have allowed duplicated loci in your data. ",
-          "Your data contain duplicated loci. ",
-          "Use find_duplicated_loci(my_tibble) to select and remove them."
-        ))
-      }
-      if (has_dup_names) {
-        warning(paste0(
-          "You have allowed duplicated loci in your data. ",
-          "Your data contain duplicated locus names. ",
-          "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
-        ))
-      }
-    }
-
     gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
   }
-
-
-gen_tibble_bed_rds <- function(
-    x,
-    ...,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    backingfile = NULL,
-    quiet = FALSE) {
-  # if it is a bed file, we convert it to a bigsnpr
-  if (tolower(file_ext(x)) == "bed") {
-    if (is.null(backingfile)) {
-      backingfile <- bigsnpr::sub_bed(x)
-    }
-    bigsnp_path <- bigsnpr::snp_readBed(x, backingfile = backingfile)
-  } else if (tolower(file_ext(x)) == "rds") {
-    bigsnp_path <- x
-  }
-
-  bigsnp_obj <- bigsnpr::snp_attach(bigsnp_path)
-
-  if (all(bigsnp_obj$fam$family.ID == bigsnp_obj$fam$sample.ID)) {
-    indiv_meta <- list(id = bigsnp_obj$fam$sample.ID)
-  } else {
-    indiv_meta <- list(
-      id = bigsnp_obj$fam$sample.ID,
-      population = bigsnp_obj$fam$family.ID
-    )
-  }
-  # check if the bignsp_obj$fam table has ploidy column, if not, set ploidy to 2
-  if ("ploidy" %in% names(bigsnp_obj$fam)) {
-    ploidy <- bigsnp_obj$fam$ploidy
-  } else {
-    ploidy <- 2
-    bigsnp_obj$fam$ploidy <- 2
-  }
-
-  indiv_meta$genotypes <- new_vctrs_bigsnp(
-    bigsnp_obj,
-    bigsnp_file = bigsnp_path,
-    indiv_id = bigsnp_obj$fam$sample.ID,
-    ploidy = ploidy
-  )
-
-  # transfer some of the fam info to the metadata table if it is not missing
-  # (0 is the default missing value)
-  fam_info <- .gt_get_bigsnp(indiv_meta)$fam
-  if (!all(fam_info$paternal.ID == 0)) {
-    indiv_meta$paternal_ID <- fam_info$paternal.ID
-    indiv_meta$paternal_ID[indiv_meta$paternal_ID == 0] <- NA
-  }
-  if (!all(fam_info$maternal.ID == 0)) {
-    indiv_meta$maternal_ID <- fam_info$maternal.ID
-    indiv_meta$maternal_ID[indiv_meta$maternal_ID == 0] <- NA
-  }
-  # if sex is numeric
-  if (inherits(fam_info$sex, "numeric")) {
-    if (!all(fam_info$sex == 0)) {
-      indiv_meta$sex <- dplyr::case_match(
-        fam_info$sex,
-        1 ~ "male",
-        2 ~ "female",
-        .default = NA,
-        .ptype = factor(levels = c("female", "male"))
-      )
-    }
-  }
-
-  if (inherits(fam_info$affection, "numeric")) {
-    if (!all(fam_info$affection %in% c(0, -9))) {
-      indiv_meta$phenotype <- dplyr::case_match(
-        fam_info$affection,
-        1 ~ "control",
-        2 ~ "case",
-        -9 ~ NA,
-        .default = NA,
-        .ptype = factor(levels = c("control", "case"))
-      )
-    }
-  }
-
-  new_gen_tbl <- tibble::new_tibble(
-    indiv_meta,
-    class = "gen_tbl"
-  )
-  check_allele_alphabet(
-    new_gen_tbl,
-    valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles,
-    remove_on_fail = TRUE
-  )
-  show_loci(new_gen_tbl) <- harmonise_missing_values(
-    show_loci(new_gen_tbl),
-    missing_alleles = missing_alleles
-  )
-  return(new_gen_tbl)
-}
 
 
 ###############################################################################
@@ -425,20 +291,48 @@ gen_tibble.matrix <- function(
   # check that valid alleles does not contain zero
   if ("0" %in% valid_alleles) {
     stop(paste(
-      "'0' can not be a valid allele",
+      "'0' cannot be a valid allele",
       "(it is the default missing allele value!)"
     ))
   }
 
-  if (!inherits(loci, "data.frame")) {
-    stop("loci must be a data.frame or a tibble")
+  if (length(ploidy) > 1) {
+    # check that there are no missing values in ploidy vector
+    if (any(is.na(ploidy))) {
+      stop("'ploidy' can not contain NAs")
+    }
+    # check all values > 0
+    if (any(ploidy <= 0)) {
+      stop(
+        "the vector of individual ploidies ('ploidy') must contain ",
+        "positive integers"
+      )
+    }
+    fbm_ploidy <- ploidy
+    max_ploidy <- max(ploidy)
+  } else {
+    if ((ploidy != 0) && (ploidy != -2)) {
+      fbm_ploidy <- rep(ploidy, nrow(x))
+    } else {
+      stop(
+        "'ploidy' 0 (mixed ploidy) or -2 (haplodiploids) ",
+        "require a vector of individual ploidies"
+      )
+    }
+    max_ploidy <- ploidy
   }
-  if (!inherits(indiv_meta, "data.frame")) {
-    stop("indiv_meta must be a data.frame or a tibble")
-  }
-  if (!all(c("id") %in% names(indiv_meta))) {
-    stop("indiv_meta does not include the compulsory column 'id'")
-  }
+
+  loci <- validate_loci(loci,
+    check_alphabet = TRUE,
+    check_duplicates = TRUE,
+    allow_duplicates = allow_duplicates,
+    harmonise_loci = TRUE,
+    valid_alleles = valid_alleles,
+    missing_alleles = missing_alleles
+  )
+  indiv_meta <- validate_indiv_meta(indiv_meta)
+
+  # validate x (the genotypes)
   # check that x (the genotypes) is numeric matrix
   if (inherits(x, "data.frame")) {
     x <- as.matrix(x)
@@ -465,39 +359,31 @@ gen_tibble.matrix <- function(
     backingfile <- change_duplicated_file_name(backingfile)
   }
 
-  bigsnp_obj <- gt_write_bigsnp_from_dfs(
+  fbm_obj <- gt_write_fbm_from_dfs(
     genotypes = x,
-    indiv_meta = indiv_meta,
-    loci = loci,
     backingfile = backingfile,
-    ploidy = ploidy
+    max_ploidy = max_ploidy
   )
 
-  bigsnp_path <- bigstatsr::sub_bk(bigsnp_obj$genotypes$backingfile, ".rds")
+  fbm_path <- bigstatsr::sub_bk(fbm_obj$backingfile, ".rds")
+
+  indiv_id <- indiv_meta$id
 
   indiv_meta <- as.list(indiv_meta)
+
   indiv_meta$genotypes <- new_vctrs_bigsnp(
-    bigsnp_obj,
-    bigsnp_file = bigsnp_path,
-    indiv_id = bigsnp_obj$fam$sample.ID,
-    ploidy = ploidy
+    fbm_obj,
+    fbm_file = fbm_path,
+    loci = loci,
+    indiv_id = indiv_id,
+    ploidy = max_ploidy,
+    fbm_ploidy = fbm_ploidy
   )
 
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
     class = "gen_tbl"
   )
-  check_allele_alphabet(
-    new_gen_tbl,
-    valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles,
-    remove_on_fail = TRUE
-  )
-  show_loci(new_gen_tbl) <-
-    harmonise_missing_values(
-      show_loci(new_gen_tbl),
-      missing_alleles = missing_alleles
-    )
 
   # create a chr_int column
   show_loci(new_gen_tbl)$chr_int <-
@@ -529,212 +415,71 @@ gen_tibble.matrix <- function(
     }
   }
 
-  # check for duplicates
-  duplicated_pos <- find_duplicated_loci(new_gen_tbl, list_duplicates = TRUE)
-  has_dup_pos <- length(duplicated_pos) > 0
-  has_dup_names <- anyDuplicated(loci_names(new_gen_tbl)) > 0
-
-  if (!allow_duplicates) {
-    if (has_dup_pos || has_dup_names) {
-      files <- gt_get_file_names(new_gen_tbl)
-      if (file.exists(files[1])) file.remove(files[1])
-      if (file.exists(files[2])) file.remove(files[2])
-    }
-    if (has_dup_pos) {
-      stop(paste0(
-        "Your data contain duplicated loci. ",
-        "Remove them or set allow_duplicates = TRUE."
-      ))
-    }
-    if (has_dup_names) {
-      stop(paste0(
-        "Your data contain duplicated locus names. ",
-        "Remove them or set allow_duplicates = TRUE."
-      ))
-    }
-  } else {
-    if (has_dup_pos) {
-      warning(paste0(
-        "You have allowed duplicated loci in your data. ",
-        "Your data contain duplicated loci. ",
-        "Use find_duplicated_loci(my_tibble) to select and remove them."
-      ))
-    }
-    if (has_dup_names) {
-      warning(paste0(
-        "You have allowed duplicated loci in your data. ",
-        "Your data contain duplicated locus names. ",
-        "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
-      ))
-    }
-  }
-
   gt_save(new_gen_tbl, quiet = quiet) # nolint
   return(new_gen_tbl)
 }
 
-
-check_valid_loci <- function(loci) {
-  loci <- as_tibble(loci)
-  if (
-    !all(
-      c(
-        "name",
-        "chromosome",
-        "position",
-        "genetic_dist",
-        "allele_ref",
-        "allele_alt"
-      ) %in%
-        names(loci)
-    )
-  ) {
-    stop(paste(
-      "loci does not include the compulsory columns 'name',",
-      "'chromosome', 'position','genetic_dist',",
-      "allele_ref','allele_alt'"
-    ))
-  }
-  if (!is.character(loci$chromosome)) {
-    loci$chromosome <- as.character(loci$chromosome)
-  }
-  return(loci)
-}
-
-
-#' Create a bigSNP object from data.frames
-#'
-#' This function expects the indiv_meta and loci to have the correct columns
-#' @param genotypes a genotype matrix
-#' @param indiv_meta the individual meta information
-#' @param loci the loci table
-#' @param backingfile the path, including the file name without extension, for
-#'  backing files used to store the data (they will be given a .bk and .RDS
-#'  automatically). If NULL, a temporary file will be created (but note that R
-#'  will delete it at the end of the session!)
-#' @param ploidy the ploidy of the samples (either a single value, or
-#'  a vector of values for mixed ploidy).
-#' @returns a bigSNP object
-#' @keywords internal
-#' @noRd
-gt_write_bigsnp_from_dfs <- function(
-    genotypes,
-    indiv_meta,
-    loci,
-    backingfile = NULL,
-    ploidy = 2) {
-  if (is.null(backingfile)) {
-    backingfile <- tempfile()
-  }
-  loci <- check_valid_loci(loci)
-  # set up code (accounting for ploidy)
-  code256 <- rep(NA_real_, 256)
-  if (length(ploidy) > 1) {
-    # check that there are no missing values in ploidy vector
-    if (any(is.na(ploidy))) {
-      stop("'ploidy' can not contain NAs")
-    }
-    max_ploidy <- max(ploidy)
-  } else {
-    max_ploidy <- ploidy
-  }
-
-  if (is.na(max_ploidy)) {
-    stop("'ploidy' can not contain NAs")
-  }
-
-  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
-
-  # ensure max_ploidy is appropriate for the data
-  if (any(genotypes > max_ploidy, na.rm = TRUE)) {
-    stop(
-      "max ploidy is set to ",
-      max_ploidy,
-      " but genotypes contains indviduals with greater ploidy"
-    )
-  }
-
-  # equivalent to bigGeno in bigstatsr
-  big_geno <- bigstatsr::FBM.code256(
-    nrow = nrow(genotypes),
-    ncol = ncol(genotypes),
-    code = code256,
-    backingfile = backingfile,
-    init = NULL,
-    create_bk = TRUE
-  )
-  genotypes[is.na(genotypes)] <- max_ploidy + 1
-  big_geno[] <- as.raw(genotypes)
-  fam <- tibble(
-    family.ID = indiv_meta$population,
-    sample.ID = indiv_meta$id,
-    paternal.ID = 0,
-    maternal.ID = 0,
-    sex = 0,
-    affection = 0,
-    ploidy = ploidy
-  )
-  map <- tibble(
-    chromosome = loci$chromosome,
-    marker.ID = loci$name,
-    genetic.dist = as.double(loci$genetic_dist), # ensure genetic.dist is double
-    physical.pos = loci$position,
-    allele1 = loci$allele_alt,
-    allele2 = loci$allele_ref
-  )
-  # Create the bigSNP object
-  snp_list <- structure(
-    list(genotypes = big_geno, fam = fam, map = map),
-    class = "bigSNP"
-  )
-
-  # save it and return the path of the saved object
-  rds <- bigstatsr::sub_bk(big_geno$backingfile, ".rds")
-  saveRDS(snp_list, rds)
-  return(snp_list)
-}
 
 ################################################################################
 ## vctrs_bigSNP class to store the genotype info in a gen_tibble
 ################################################################################
 
 #' create a vctrs_bigSNP
-#' @param bigsnp_obj the bigsnp object
-#' @param bigsnp_file the file to which the bigsnp object was saved
-#' @param indiv_id ids of individuals
-#' @param ploidy the ploidy of the samples (either a single value, or
-#' a vector of values for mixed ploidy).
+#' @param fbm_obj the FBM object (bigstatsr::FBM.code256)
+#' @param fbm_file the rds file associated with the FBM object
+#' @param loci a tibble of loci (needs to be validated first with
+#'   `validate_loci`)
+#' @param indiv_id a vector of individual ids (from indiv_meta)
+#' @param ploidy the ploidy of the samples, a single value.
+#' @param fbm_ploidy a vector of ploidies for each individual in the fbm object
+#'   (note that this is for the full FBM, not just the tibble)
 #' @returns a vctrs_bigSNP object
 #' @keywords internal
 #' @noRd
-new_vctrs_bigsnp <- function(bigsnp_obj, bigsnp_file, indiv_id, ploidy = 2) {
-  loci <- tibble::tibble(
-    big_index = seq_len(nrow(bigsnp_obj$map)),
-    name = bigsnp_obj$map$marker.ID,
-    chromosome = bigsnp_obj$map$chromosome,
-    position = bigsnp_obj$map$physical.pos,
-    genetic_dist = bigsnp_obj$map$genetic.dist,
-    allele_ref = bigsnp_obj$map$allele2,
-    allele_alt = bigsnp_obj$map$allele1
-  )
-
-  if (length(unique(ploidy)) > 1) {
-    max_ploidy <- 0
-  } else {
-    max_ploidy <- max(ploidy)
+new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2,
+                             fbm_ploidy = NULL) {
+  # check that indiv_id is the same length as the nrow of fmb_obj
+  if (length(indiv_id) != nrow(fbm_obj)) {
+    stop(paste(
+      "'indiv_id' should be the same length as the number of rows",
+      "in the fbm_obj"
+    ))
   }
-  vctrs::new_vctr(
-    seq_len(nrow(bigsnp_obj$fam)),
-    bigsnp = bigsnp_obj,
+  # check that nrow(loci) is ncol(fbm_obj)
+  if (nrow(loci) != ncol(fbm_obj)) {
+    stop(paste(
+      "'loci' should have the same number of rows as the number of",
+      "columns in the fbm_obj"
+    ))
+  }
+
+  if (ploidy != -2) {
+    if (length(unique(fbm_ploidy)) > 1) {
+      max_ploidy <- 0
+    } else {
+      max_ploidy <- max(fbm_ploidy)
+    }
+  } else {
+    max_ploidy <- -2
+  }
+
+  # add the big_index column
+  loci <- loci %>% dplyr::mutate(big_index = dplyr::row_number(), .before = 1)
+
+  new_vectr <- vctrs::new_vctr(
+    seq_along(indiv_id),
+    fbm = fbm_obj,
     # TODO is this redundant with the info in the bigSNP object?
-    bigsnp_file = bigsnp_file,
+    fbm_file = fbm_file,
     # TODO make sure this does not take too long
-    bigsnp_md5sum = tools::md5sum(bigsnp_file),
+    fbm_md5sum = tools::md5sum(fbm_file),
     loci = loci,
     names = indiv_id,
     ploidy = max_ploidy,
     class = "vctrs_bigSNP"
   )
+  attr(new_vectr, "fbm_ploidy") <- fbm_ploidy
+  new_vectr
 }
 
 #' @export
@@ -777,31 +522,21 @@ tbl_sum.gen_tbl <- function(x, ...) {
 check_allele_alphabet <- function(
     x,
     valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    remove_on_fail = FALSE) {
+    missing_alleles = c("0", ".")) {
   if (
     any(
-      !show_loci(x)$allele_ref %in% c(valid_alleles, missing_alleles, NA),
-      !show_loci(x)$allele_alt %in% c(valid_alleles, missing_alleles, NA)
+      !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),
+      !x$allele_alt %in% c(valid_alleles, missing_alleles, NA)
     )
   ) {
-    if (remove_on_fail) {
-      # remove files if they were generated
-      if (file.exists(gt_get_file_names(x)[1])) {
-        file.remove(gt_get_file_names(x)[1])
-      }
-      if (file.exists(gt_get_file_names(x)[2])) {
-        file.remove(gt_get_file_names(x)[2])
-      }
-    }
     stop(
       "valid alleles are ",
       paste(c(valid_alleles, missing_alleles), collapse = " "),
       " but ",
       paste(
         unique(c(
-          show_loci(x)$allele_ref,
-          show_loci(x)$allele_alt
+          x$allele_ref,
+          x$allele_alt
         )),
         collapse = " "
       ),

@@ -51,8 +51,8 @@ gt_uses_imputed <- function(x) {
     stop("this dataset does not have any imputed values to use!")
   }
   if (
-    identical(attr(x, "bigsnp")$genotypes$code256, bigsnpr::CODE_IMPUTE_PRED) || # nolint
-      identical(attr(x, "bigsnp")$genotypes$code256, bigsnpr::CODE_DOSAGE)
+    identical(attr(x, "fbm")$code256, bigsnpr::CODE_IMPUTE_PRED) || # nolint
+      identical(attr(x, "fbm")$code256, bigsnpr::CODE_DOSAGE)
   ) {
     # nolint
     return(TRUE) # nolint
@@ -99,10 +99,10 @@ gt_set_imputed <- function(x, set = NULL) {
     stop("this dataset does not have imputed values to use!")
   }
   if (set == FALSE) {
-    attr(x, "bigsnp")$genotypes$code256 <- bigsnpr::CODE_012
+    attr(x, "fbm")$code256 <- bigsnpr::CODE_012
   } else {
     if (attr(x, "imputed", exact = TRUE) %in% c("simple", "xgboost")) {
-      attr(x, "bigsnp")$genotypes$code256 <- bigsnpr::CODE_IMPUTE_PRED
+      attr(x, "fbm")$code256 <- bigsnpr::CODE_IMPUTE_PRED
     }
   }
   return(invisible(x))

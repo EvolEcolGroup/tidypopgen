@@ -30,6 +30,21 @@ test_that("ld clumping runs", {
   expect_true(all.equal(keep, c(1, 2, 3, 4, 6)) == TRUE)
 })
 
+test_that("S statistic is the correct length", {
+  s_stat <- loci_maf(test_gt)
+  s_stat_subset <- s_stat[1:5]
+  expect_error(
+    loci_ld_clump(test_gt,
+      thr_r2 = 0.2,
+      return_id = TRUE,
+      S = s_stat_subset
+    ),
+    "Length of 'S' must equal "
+  )
+  # but it works when using a full length S
+  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id = TRUE, S = s_stat)
+  expect_true(all.equal(keep, c(1, 2, 3, 4, 6)) == TRUE)
+})
 
 test_that("loci_ld_clump returns the same as bigsnpr", {
   bedfile <- system.file("extdata/related/families.bed", package = "tidypopgen")

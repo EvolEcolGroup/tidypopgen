@@ -20,14 +20,14 @@
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'
-#' X <- attr(example_gt$genotypes, "bigsnp")
-#' snp_king(X$genotypes)
+#' X <- attr(example_gt$genotypes, "fbm")
+#' snp_king(X)
 #'
 #' # Compute for individuals 1 to 5
-#' snp_king(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+#' snp_king(X, ind.row = 1:5, ind.col = 1:5)
 #'
 #' # Adjust block size
-#' snp_king(X$genotypes, block.size = 2)
+#' snp_king(X, block.size = 2)
 #'
 snp_king <- function(
     X, # nolint start
@@ -56,7 +56,7 @@ snp_king <- function(
   X_0_part <- matrix(0, n, max(intervals[, "size"])) # nolint start
   X_1_part <- matrix(0, n, max(intervals[, "size"]))
   X_2_part <- matrix(0, n, max(intervals[, "size"]))
-  # valid loci (i.e. wiht genotype 0, 1 or 2)
+  # valid loci (i.e. with genotype 0, 1 or 2)
   X_valid_part <- matrix(0, n, max(intervals[, "size"])) # nolint end
 
   for (j in bigstatsr::rows_along(intervals)) {

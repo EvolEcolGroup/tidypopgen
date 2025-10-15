@@ -97,8 +97,9 @@ loci_ld_clump.vctrs_bigSNP <- function(
 
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
+    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
+    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
 
   # check that the loci have not been resorted
@@ -119,31 +120,44 @@ loci_ld_clump.vctrs_bigSNP <- function(
   is_loci_table_ordered(.x, error_on_false = TRUE)
 
   # get the FBM
-  geno_fbm <- attr(.x, "bigsnp")$genotypes # nolint
+  geno_fbm <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   if (use_positions) {
-    .positions <- rep(NA, nrow(attr(.x, "bigsnp")$map))
+    .positions <- rep(NA, ncol(geno_fbm))
     .positions[show_loci(.x)$big_index] <- show_loci(.x)$position
   } else {
     .positions <- NULL
   }
   # create a chromosome vector (fill gaps between bigsnpr and show_loci)
-  .chromosome <- rep(2147483647L, nrow(attr(.x, "bigsnp")$map))
+  .chromosome <- rep(2147483647L, ncol(geno_fbm))
   .chromosome[show_loci(.x)$big_index] <- show_loci(.x)$chr_int
   # now figure out if we have any snp which have already been removed
   # those will go into `exclude`
   loci_not_in_tibble <-
-    seq_len(nrow(attr(.x, "bigsnp")$map))[
-      !seq_len(nrow(attr(.x, "bigsnp")$map)) %in% .gt_bigsnp_cols(.x)
+    seq_len(ncol(geno_fbm))[
+      !seq_len(ncol(geno_fbm)) %in% .gt_fbm_cols(.x)
     ] # nolint
-  exclude <- c(loci_not_in_tibble, .gt_bigsnp_cols(.x)[exclude])
+  exclude <- c(loci_not_in_tibble, .gt_fbm_cols(.x)[exclude])
   if (length(exclude) == 0) {
     exclude <- NULL
   }
 
+  # Normalize S to FBM-wide vector if needed
+  if (!is.null(S)) {
+    fbm_n <- ncol(geno_fbm)
+    visible_n <- length(.gt_fbm_cols(.x))
+    if (length(S) == visible_n) { # nolint start
+      S_full <- rep(NA_real_, fbm_n)
+      S_full[.gt_fbm_cols(.x)] <- S
+      S <- S_full
+    } else if (length(S) != fbm_n) { # nolint end
+      stop("Length of 'S' must equal length(.gt_fbm_cols(.x)) or ncol(FBM).")
+    }
+  }
+
   # as long as we have more than one individual
   snp_clump_ids <- bigsnpr::snp_clumping(
-    G = attr(.x, "bigsnp")$genotypes,
+    G = geno_fbm,
     # infos.chr = show_loci(.x)$chr_int, #nolint start
     # TEMP HACK using the info from the bigsnpr object
     # infos.chr = cast_chromosome_to_int(attr(.x,"bigsnp")$map$chromosome), #nolint end

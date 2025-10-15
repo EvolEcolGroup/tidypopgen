@@ -31,7 +31,7 @@ loci_transversions.tbl_df <- function(.x, .col = "genotypes", ...) {
   if (.col != "genotypes") {
     stop("loci_transversions only works with the genotypes column")
   }
-  check_allele_alphabet(.x$genotypes)
+  check_allele_alphabet(show_loci(.x$genotypes))
   loci_transversions(.x$genotypes, ...)
 }
 

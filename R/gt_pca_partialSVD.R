@@ -69,17 +69,17 @@ gt_pca_partialSVD <- function(
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
   }
-  X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
+  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
 
   this_svd <- bigstatsr::big_SVD(
-    X$genotypes, # nolint
+    X, # nolint
     k = k,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
     fun.scaling = fun_scaling,
-    block.size = bigstatsr::block_size(nrow(X$genotypes))
+    block.size = bigstatsr::block_size(nrow(X))
   ) # TODO check that this is correct and expose it, maybe create convenience
   # function to get the values
   # add names to the scores (to match them to data later)
@@ -91,7 +91,7 @@ gt_pca_partialSVD <- function(
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var) {
     this_svd$square_frobenius <- square_frobenius(
-      X$genotypes,
+      X,
       x_ind_row,
       x_ind_col,
       center = this_svd$center,

@@ -10,7 +10,7 @@
 #'   default).
 #' @param block_size maximum number of loci read at once.
 #' @param ... currently unused.
-#' @returns a vector of heterozygosities, one per individuals in the
+#' @returns a vector of missingness, one per individuals in the
 #'   [`gen_tibble`]
 #' @rdname indiv_missingness
 #' @export
@@ -52,7 +52,7 @@ indiv_missingness.vctrs_bigSNP <- function(
     ...) {
   rlang::check_dots_empty()
   # get the FBM
-  X <- attr(.x, "bigsnp")$genotypes # nolint
+  X <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
 
@@ -73,6 +73,7 @@ indiv_missingness.vctrs_bigSNP <- function(
     a.FUN = count_1_na,
     ind = attr(.x, "loci")$big_index,
     a.combine = "plus",
+    block.size = block_size,
     rows_to_keep = rows_to_keep
   )[2, ] # get the second row (count_na)
   if (!as_counts) {

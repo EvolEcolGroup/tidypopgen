@@ -149,8 +149,13 @@ To plot the sample in principal coordinates space, we can simply use:
 autoplot(anole_pca, type = "scores")
 ```
 
-`autoplots` are deliberately kept simple: they are just a way to quickly inspect the results.
-They generate `ggplot2` objects, and so they can be further embellished with the usual
+`autoplots` are deliberately kept simple: they are just a way to quickly inspect the results. To explore additional dimensions, we can use the `k` argument:
+
+```{r, fig.alt = "Score plot of individuals across the first and third Principal Components"}
+autoplot(anole_pca, type = "scores", k = c(1, 3))
+```
+
+The autoplots generate `ggplot2` objects, and so they can be further embellished with the usual
 `ggplot2` grammar:
 ```{r, fig.alt = "Score plot of individuals across the first and second Principal Components, with individual samples coloured by population"}
 library(ggplot2)

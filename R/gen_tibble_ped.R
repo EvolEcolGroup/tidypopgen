@@ -4,6 +4,7 @@ gen_tibble_ped <- function(
     ...,
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
+    allow_duplicates = FALSE,
     backingfile = NULL,
     quiet = FALSE) {
   # Substitute .ped with .map
@@ -11,7 +12,6 @@ gen_tibble_ped <- function(
   if (!file.exists(map_file)) {
     stop("map file ", map_file, " does not exist")
   }
-
   res <- read_pedfile(
     file = x,
     snps = map_file,
@@ -23,18 +23,11 @@ gen_tibble_ped <- function(
     x = res$genotypes,
     indiv_meta = res$fam,
     loci = res$map,
-    backingfile = backingfile,
-    quiet = quiet
-  )
-  check_allele_alphabet(
-    new_gen_tbl,
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles,
-    remove_on_fail = TRUE
-  )
-  show_loci(new_gen_tbl) <- harmonise_missing_values(
-    show_loci(new_gen_tbl),
-    missing_alleles = missing_alleles
+    allow_duplicates = allow_duplicates,
+    backingfile = backingfile,
+    quiet = quiet
   )
   return(new_gen_tbl)
 }
@@ -213,6 +206,7 @@ read_pedfile <- function(
   } else {
     # mapfile
     names(map) <- c("chromosome", "name", "genetic_dist", "position")
+    map <- map[, c("name", "chromosome", "position", "genetic_dist")]
     map$allele_ref <- a1
     map$allele_alt <- a2
     map
