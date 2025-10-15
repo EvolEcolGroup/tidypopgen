@@ -57,6 +57,17 @@ documented in \link[adegenet:dapcGraphics]{adegenet::scatter.dapc} (see ?scatter
 to change in the future, so make sure you do not rely on the objects
 remaining compatible.
 
+This function aligns with the guidelines proposed by Thia (2023) for the
+standardized application of DAPC to genotype data. Our default settings are
+designed to follow these recommendations, so that the number of principal
+components (\code{n_pca}) is set to \emph{k}-1 (where \emph{k} is the number of populations
+or clusters), and the number of discriminant functions (\code{n_da}) is set to the
+minimum of \emph{k}-1 and \code{n_pca}. The user can override these defaults by
+specifying the \code{n_pca} and \code{n_da} arguments, but caution is advised when
+adjusting \code{n_pca} to avoid potential overfitting. We recommend users consult
+these guidelines and consider their individual dataset to ensure best
+practices.
+
 Note that there is no current method to predict scores for
 individuals not included in the original analysis. This is because we
 currently do not have a mechanism to store the pca information in the

@@ -26,6 +26,17 @@
 #' to change in the future, so make sure you do not rely on the objects
 #' remaining compatible.
 #'
+#' This function aligns with the guidelines proposed by Thia (2023) for the
+#' standardized application of DAPC to genotype data. Our default settings are
+#' designed to follow these recommendations, so that the number of principal
+#' components (`n_pca`) is set to *k*-1 (where *k* is the number of populations
+#' or clusters), and the number of discriminant functions (`n_da`) is set to the
+#' minimum of *k*-1 and `n_pca`. The user can override these defaults by
+#' specifying the `n_pca` and `n_da` arguments, but caution is advised when
+#' adjusting `n_pca` to avoid potential overfitting. We recommend users consult
+#' these guidelines and consider their individual dataset to ensure best
+#' practices.
+#'
 #' Note that there is no current method to predict scores for
 #' individuals not included in the original analysis. This is because we
 #' currently do not have a mechanism to store the pca information in the
