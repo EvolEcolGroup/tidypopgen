@@ -17,7 +17,7 @@ tutorial."><meta property="og:image" content="https://evolecolgroup.github.io/ti
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -116,7 +116,7 @@ allowing one to compute allele contributions. More details about the
 computation of DAPC are to be found in the indicated reference.</p>
 <p>Results can be visualised with <code><a href="autoplot_gt_dapc.html">autoplot.gt_dapc()</a></code>, see the help of that
 method for the available plots. There are also <a href="tidy.gt_dapc.html">gt_dapc_tidiers</a> for
-manipulating the results. For the moment, his function returns objects of
+manipulating the results. For the moment, this function returns objects of
 class <code><a href="https://rdrr.io/pkg/adegenet/man/dapc.html" class="external-link">adegenet::dapc</a></code> which are
 compatible with methods from <code>adegenet</code>; graphical methods for DAPC are
 documented in adegenet::scatter.dapc (see ?scatter.dapc). This is likely
@@ -124,7 +124,7 @@ to change in the future, so make sure you do not rely on the objects
 remaining compatible.</p>
 <p>Note that there is no current method to predict scores for
 individuals not included in the original analysis. This is because we
-currently do not have  mechanism to store the pca information in the
+currently do not have a mechanism to store the pca information in the
 object, and that is needed for prediction.</p>
     </div>
     <div class="section level2">
@@ -135,6 +135,10 @@ structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
 Thia, J. A. (2023). Guidelines for standardizing the application of
 discriminant analysis of principal components to genotype data. Molecular
 Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="gt_cluster_pca.html">gt_cluster_pca()</a></code> <code><a href="gt_cluster_pca_best_k.html">gt_cluster_pca_best_k()</a></code> <code><a href="https://rdrr.io/pkg/adegenet/man/dapc.html" class="external-link">adegenet::dapc()</a></code></p></div>
     </div>
 
     <div class="section level2">

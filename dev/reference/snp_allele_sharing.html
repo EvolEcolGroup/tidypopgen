@@ -15,7 +15,7 @@ heterozygous. Matching is the average of these 0, 1/2 and 1s)"><meta property="o
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,8 +73,8 @@ heterozygous. Matching is the average of these 0, 1/2 and 1s)</p>
 
 
 <dl><dt id="arg-x">X<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>a <a href="https://privefl.github.io/bigstatsr/reference/FBM.code256-class.html" class="external-link">bigstatsr::FBM.code256</a> matrix (as found in the <code>genotypes</code> slot
-of a <a href="https://privefl.github.io/bigsnpr/reference/bigSNP-class.html" class="external-link">bigsnpr::bigSNP</a> object).</p></dd>
+<dd><p>a <a href="https://privefl.github.io/bigstatsr/reference/FBM.code256-class.html" class="external-link">bigstatsr::FBM.code256</a> matrix (as found in the <code>genotypes</code>
+slot of a <a href="https://privefl.github.io/bigsnpr/reference/bigSNP-class.html" class="external-link">bigsnpr::bigSNP</a> object).</p></dd>
 
 
 <dt id="arg-ind-row">ind.row<a class="anchor" aria-label="anchor" href="#arg-ind-row"></a></dt>
@@ -97,13 +97,17 @@ the columns.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a matrix of allele sharing between all pairs of individuals</p>
     </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="pairwise_allele_sharing.html">pairwise_allele_sharing()</a></code> <code><a href="https://rdrr.io/pkg/hierfstat/man/matching.html" class="external-link">hierfstat::matching()</a></code></p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="load_example_gt.html">load_example_gt</a></span><span class="op">(</span><span class="st">"gen_tbl"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">$</span><span class="va">genotypes</span>, <span class="st">"bigsnp"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">snp_allele_sharing</span><span class="op">(</span><span class="va">X</span><span class="op">$</span><span class="va">genotypes</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">$</span><span class="va">genotypes</span>, <span class="st">"fbm"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">snp_allele_sharing</span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           [,1]  [,2]  [,3]      [,4]      [,5]  [,6]  [,7]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.6666667 0.700 0.600 0.6666667 0.5833333 0.600 0.500</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.7000000 0.900 0.750 0.8000000 0.5000000 0.500 0.375</span>
@@ -114,7 +118,7 @@ the columns.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [7,] 0.5000000 0.375 0.500 0.5000000 0.5000000 0.750 0.700</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Compute for individuals 1 to 5</span></span></span>
-<span class="r-in"><span><span class="fu">snp_allele_sharing</span><span class="op">(</span><span class="va">X</span><span class="op">$</span><span class="va">genotypes</span>, ind.row <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, ind.col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">snp_allele_sharing</span><span class="op">(</span><span class="va">X</span>, ind.row <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, ind.col <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       [,1]      [,2]      [,3]  [,4]  [,5]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.600 0.6250000 0.6250000 0.600 0.600</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.625 0.8750000 0.8333333 0.750 0.500</span>
@@ -123,7 +127,7 @@ the columns.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 0.600 0.5000000 0.6250000 0.400 0.800</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Adjust block size</span></span></span>
-<span class="r-in"><span><span class="fu">snp_allele_sharing</span><span class="op">(</span><span class="va">X</span><span class="op">$</span><span class="va">genotypes</span>, block.size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">snp_allele_sharing</span><span class="op">(</span><span class="va">X</span>, block.size <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           [,1]  [,2]  [,3]      [,4]      [,5]  [,6]  [,7]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.6666667 0.700 0.600 0.6666667 0.5833333 0.600 0.500</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 0.7000000 0.900 0.750 0.8000000 0.5000000 0.500 0.375</span>

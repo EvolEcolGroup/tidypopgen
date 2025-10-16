@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -155,14 +155,14 @@ example:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_chromosomes.html">loci_chromosomes</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">22</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A gen_tibble: 15 loci</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     5 × 3</span></span></span>
-<span><span class="co">#&gt;   id    population  genotypes</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> GRC24 pop_a       [0,0,...]</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> GRC25 pop_a       [0,0,...]</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> GRC26 pop_a       [0,1,...]</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> GRC27 pop_a       [0,0,...]</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> GRC28 pop_a       [0,0,...]</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     5 × 4</span></span></span>
+<span><span class="co">#&gt;   id    population sex    genotypes</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> GRC24 pop_a      male   [0,0,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> GRC25 pop_a      male   [0,0,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> GRC26 pop_a      male   [0,1,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> GRC27 pop_a      male   [0,0,...]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> GRC28 pop_a      male   [0,0,...]</span></span></code></pre></div>
 <p>will select autosomal loci in the same way as –autosome. Or
 alternatively:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -173,7 +173,7 @@ alternatively:</p>
 <span>  <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 8</span></span></span>
 <span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt chr_int</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         1 rs44… 1             <span style="text-decoration: underline;">82</span>154            0 A          <span style="color: #BB0000;">NA</span>               1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         2 rs30… 1            <span style="text-decoration: underline;">752</span>566            0 A          G                1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         3 rs31… 1            <span style="text-decoration: underline;">752</span>721            0 G          A                1</span></span>
@@ -188,8 +188,8 @@ alternatively:</p>
 <span></span>
 <span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">my_individuals</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A gen_tibble: 16 loci</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     0 × 3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 variables: id &lt;chr&gt;, population &lt;chr&gt;, genotypes &lt;vctr_SNP&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     0 × 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 variables: id &lt;chr&gt;, population &lt;chr&gt;, sex &lt;fct&gt;, genotypes &lt;vctr_SNP&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="handling-linkage">Handling linkage<a class="anchor" aria-label="anchor" href="#handling-linkage"></a>
