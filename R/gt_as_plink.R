@@ -203,7 +203,9 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
     attr(x$genotypes, "fbm"),
     bedfile = file,
     new_fam = fam_table,
-    new_bim = bim_table
+    new_bim = bim_table,
+    ind.row = vctrs::vec_data(x$genotypes),
+    ind.col = show_loci(x)$big_index
   )
 
   # return the path to the file
