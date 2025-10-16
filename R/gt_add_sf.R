@@ -72,8 +72,13 @@ gt_add_sf <- function(x, coords = NULL, crs = NULL, sfc_column = NULL) {
       crs = crs,
       remove = TRUE
     )
-    # TODO should we warn as this will overwrite an old geometry column?
     # add geometry to x
+    if ("geometry" %in% colnames(x)) {
+      warning(
+        "x already has a column named 'geometry'; this will ",
+        "be overwritten"
+      )
+    }
     x$geometry <- sf::st_geometry(geometry_sf)
     sfc_column <- "geometry"
   }

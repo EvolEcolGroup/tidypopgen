@@ -95,6 +95,15 @@ update_old_bigsnp <- function(x) {
   if (!is.null(attr(x$genotypes, "bigsnp"))) {
     # move the fbm into its own slot
     attr(x$genotypes, "fbm") <- attr(x$genotypes, "bigsnp")$genotypes
+
+    # fix ploidy
+    if ((attr(x$genotypes, "ploidy") != 0) && (attr(x$genotypes, "ploidy") != -2)) { # nolint
+      fbm_ploidy <- rep(attr(x$genotypes, "ploidy"), length(x))
+    } else {
+      fbm_ploidy <- attr(x, "bigsnp")$fam$ploidy[vctrs::vec_data(x)]
+    }
+    attr(x$genotypes, "fbm_ploidy") <- fbm_ploidy
+
     # save it (we have to overwrite the old file, as rds and bk have to have
     # the same name)
     saveRDS(attr(x$genotypes, "fbm"), file = gt_get_file_names(x)[1])
