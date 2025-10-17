@@ -11,10 +11,8 @@ knitr::opts_chunk$set(
   fig.path = "./figure/interpolating_hgdp/")
 library(tidypopgen)
 library(ggplot2)
-library(adegenet)
 library(dplyr)
 library(tidyr)
-library(stringr)
 library(readr)
 ```
 
@@ -90,11 +88,8 @@ hgdp
 # Interpolating heterozygosity
 
 ```{r}
-library(spData)
 library(sf)
 library(terra)
-library(tmap)
-library(viridis)
 ```
 
 Calculating heterozygosity is simple in `tidypopgen`. First, lets run some basic filtering to remove SNPs in linkage:
@@ -108,10 +103,15 @@ to_keep <- hgdp %>% loci_ld_clump(
 hgdp <- hgdp %>% select_loci(all_of(to_keep))
 ```
 
-We can store heterozygosity for each individual in our gen_tibble object by creating a column with `mutate()` and using the function `indiv_het_obs()` to calculate observed heterozygosity for each individual. Then we can create a new column with the mean heterozygosity for each population
+We can store heterozygosity for each individual in our gen_tibble object by creating a column with `mutate()` and using the function `indiv_het_obs()` to calculate observed heterozygosity for each individual. 
 
 ```{r}
 hgdp <- hgdp %>% mutate(heterozygosity = indiv_het_obs(genotypes))
+```
+
+Then we can create a new dataframe with the mean heterozygosity for each population
+
+```{r}
 mean_het <- hgdp %>%
   group_by(population) %>%
   summarise(mean_het = mean(heterozygosity))
@@ -163,12 +163,6 @@ coop <- st_as_sf(as.data.frame(xy),
 coop <- st_filter(coop, map)
 ```
 
-And we can quickly visualise this grid using the `qtm` autoplotting function from the `tmap` package:
-
-```{r global_grid_map}
-qtm(coop)
-```
-
 Now we can use the `gstat` package to perform spatial interpolation of heterozygosity.
 
 `gstat` implements several methods for spatial interpolation, including inverse distance weighting (IDW) and kriging. Here, we will use IDW to interpolate heterozygosity across our grid of points.
@@ -181,7 +175,7 @@ hgdp_sf_obj <- hgdp %>% select(-"genotypes")
 library(gstat)
 res <- gstat(
   formula = mean_het ~ 1, locations = hgdp_sf_obj,
-  nmax = nrow(hgdp_sf_obj),
+  nmax = nrow(hgdp),
   set = list(idp = 1)
 )
 
@@ -190,26 +184,21 @@ resp$x <- st_coordinates(resp)[, 1]
 resp$y <- st_coordinates(resp)[, 2]
 ```
 
-We can visualise the interpolated values using `tmap`:
+We can rasterize the interpolated values:
 
 ```{r interpolated_map}
 pred <- rasterize(resp, grid, field = "var1.pred", fun = "mean")
-tm_shape(pred) + tm_raster(alpha = 0.6, palette = "viridis")
 ```
 
-Or, for a more publication-ready figure, we can use `ggplot2` and the `tidyterra` package:
+And for a publication-ready figure, we can use `ggplot2` and the `tidyterra` package to plot:
 
 ```{r interpolated_ggplot_map}
 library(tidyterra)
 
 ggplot() +
-  geom_sf(data = hgdp, aes(colour = mean_het)) +
-  geom_spatraster(data = pred, aes(fill = var1.pred)) +
-  scale_fill_viridis_c(
-    name = "Interpolated Heterozygosity",
-    alpha = 0.8,
-    na.value = NA
-  ) +
+  geom_sf(data = hgdp$geometry, aes(colour = hgdp$mean_het)) +
+  geom_spatraster(data = pred, aes(fill = mean)) +
+  scale_fill_viridis_c( name = "Interpolated Heterozygosity", alpha = 0.8, na.value = NA ) +
   scale_color_viridis_c(name = "Observed", alpha = 0.8) +
   theme_minimal()
 ```
