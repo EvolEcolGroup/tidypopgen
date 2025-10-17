@@ -141,6 +141,8 @@ test_that("old bigsnp gen_tibbles can be loaded", {
   expect_true(all.equal(test_gt, example_gt, check.attributes = FALSE))
   # check we have fbm_ploidy
   expect_equal(indiv_ploidy(example_gt), indiv_ploidy(test_gt))
+  expect_true(length(indiv_ploidy(test_gt)) == nrow(test_gt))
+  expect_true(length(attr(test_gt$genotypes, "fbm_ploidy")) == nrow(test_gt))
   # check it works for basic calculations
   global_stats <- test_gt %>% pop_global_stats()
   global_stats_example <- example_gt %>% pop_global_stats()
