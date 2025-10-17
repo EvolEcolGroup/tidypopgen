@@ -12,6 +12,7 @@ knitr::opts_chunk$set(
 library(tidypopgen)
 library(ggplot2)
 library(adegenet)
+library(dplyr)
 library(tidyr)
 library(stringr)
 library(readr)
@@ -50,8 +51,7 @@ bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 
 hgdp <- gen_tibble(bed_path,
   quiet = TRUE,
-  backingfile = tempfile("test_"),
-  n_cores = n_cores
+  backingfile = tempfile("test_")
 )
 ```
 
@@ -203,8 +203,8 @@ Or, for a more publication-ready figure, we can use `ggplot2` and the `tidyterra
 library(tidyterra)
 
 ggplot() +
-  geom_sf(data = hgdp$geometry, aes(colour = hgdp$mean_het)) +
-  geom_spatraster(data = pred, aes(fill = mean)) +
+  geom_sf(data = hgdp, aes(colour = mean_het)) +
+  geom_spatraster(data = pred, aes(fill = var1.pred)) +
   scale_fill_viridis_c(
     name = "Interpolated Heterozygosity",
     alpha = 0.8,
