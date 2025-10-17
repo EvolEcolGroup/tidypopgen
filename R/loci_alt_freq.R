@@ -308,6 +308,7 @@ loci_maf.grouped_df <- function(
       loci_names = loci_names(.x),
       type = type
     )
+    return(freq_mat)
   } else {
     # the polyploid case
     stop(

@@ -469,7 +469,6 @@ new_vctrs_bigsnp <- function(fbm_obj, fbm_file, loci, indiv_id, ploidy = 2,
   new_vectr <- vctrs::new_vctr(
     seq_along(indiv_id),
     fbm = fbm_obj,
-    # TODO is this redundant with the info in the bigSNP object?
     fbm_file = fbm_file,
     # TODO make sure this does not take too long
     fbm_md5sum = tools::md5sum(fbm_file),

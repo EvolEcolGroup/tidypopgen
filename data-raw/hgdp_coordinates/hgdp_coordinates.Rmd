@@ -1,0 +1,219 @@
+---
+title: "Script to format HGDP coordinates file"
+output: html_document
+date: "2025-10-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr)
+library(tidyverse)
+library(tidypopgen)
+```
+
+
+We will be using coordinates provided in the original Cann et al., 2002 publication,
+found in the supplementary material: 
+https://www.science.org/doi/10.1126/science.296.5566.261b 
+
+```{r}
+coordinates <- readxl::read_xls("./data/hgdp/cannwebtable.xls", skip = 1)
+coordinates <- coordinates[, -c(4:6)]
+coordinates <- na.omit(coordinates)
+names(coordinates) <- c("Geographic_origin", "coords", "population")
+coordinates <- coordinates %>%
+  tidyr::separate(coords, into = c("latitude", "longitude"), sep = ",") %>%
+  mutate(longitude = trimws(longitude))
+coordinates <- coordinates %>%
+  separate_wider_delim(latitude, delim = "-", names = c("lat_a", "lat_b"), too_few = "align_start", too_many = "drop", cols_remove = FALSE) %>%
+  mutate(lat_b = gsub("[^0-9.]", "", lat_b)) %>%
+  mutate(latitude_mean = ifelse(is.na(lat_b), as.numeric(lat_a), (as.numeric(lat_a) + as.numeric(lat_b)) / 2)) %>%
+  separate_wider_regex(
+    latitude,
+    patterns = c(
+      coord = "\\d+(?:-\\d+)?",
+      letter = "[A-Z]"
+    ),
+    too_few = "align_start", cols_remove = FALSE
+  ) %>%
+  mutate(latitude = ifelse(grepl("-", latitude), paste0(latitude_mean, letter), latitude)) %>%
+  select(-c(lat_a, lat_b, latitude_mean, coord, letter))
+
+coordinates <- coordinates %>%
+  separate_wider_delim(longitude, delim = "-", names = c("long_a", "long_b"), too_few = "align_start", too_many = "drop", cols_remove = FALSE) %>%
+  mutate(long_b = gsub("[^0-9.]", "", long_b)) %>%
+  mutate(longitude_mean = ifelse(is.na(long_b), as.numeric(long_a), (as.numeric(long_a) + as.numeric(long_b)) / 2)) %>%
+  separate_wider_regex(
+    longitude,
+    patterns = c(
+      coord = "\\d+(?:-\\d+)?",
+      letter = "[A-Z]"
+    ),
+    too_few = "align_start", cols_remove = FALSE
+  ) %>%
+  mutate(longitude = ifelse(grepl("-", longitude), paste0(longitude_mean, letter), longitude)) %>%
+  select(-c(long_a, long_b, longitude_mean, coord, letter))
+
+coordinates <- coordinates %>%
+  mutate(
+    latitude = ifelse(grepl("S", latitude),
+      paste0("-", latitude),
+      latitude
+    ),
+    longitude = ifelse(grepl("W", longitude),
+      paste0("-", longitude),
+      longitude
+    )
+  ) %>%
+  mutate(
+    latitude = gsub("[^0-9.-]", "", latitude),
+    longitude = gsub("[^0-9.-]", "", longitude)
+  )
+```
+
+```{r}
+# remove * from population
+coordinates$population <- gsub("\\*", "", coordinates$population)
+# remove anything in () in population
+coordinates$population <- gsub("\\s*\\([^\\)]+\\)", "", coordinates$population)
+# remove inappropiate suffixes
+coordinates$population <- gsub(" Pygmy", "", coordinates$population)
+# remove "from"
+coordinates$population <- gsub("from ", "", coordinates$population)
+# replace Cambodian with Cambodians
+coordinates$population <- gsub("Cambodian", "Cambodians", coordinates$population)
+# replace Piapoco and Curripaco with Colombians
+coordinates$population <- gsub("Piapoco and Curripaco", "Colombians", coordinates$population)
+# replace Bantu  NE with Bantu Kenya
+coordinates$population <- gsub("Bantu  NE", "Bantu Kenya", coordinates$population)
+# replace Bergamo with North_Italian
+coordinates$population <- gsub("Bergamo", "North_Italian", coordinates$population)
+```
+
+```{r}
+bantu <- coordinates %>% filter(grepl("Bantu", population))
+# remove Kenya
+bantu <- bantu %>% filter(!grepl("Bantu Kenya", population))
+# find mean lat and long
+mean_lat <- mean(as.numeric(bantu$latitude))
+mean_long <- mean(as.numeric(bantu$longitude))
+# add Bantu South Africa row as an average
+bantu_sa <- data.frame(
+  Geographic_origin = "Southern Africa",
+  latitude = mean_lat,
+  longitude = mean_long,
+  population = "Bantu South_Africa"
+)
+coordinates <- rbind(coordinates, bantu_sa)
+```
+
+# Load the HGDP data into a `gen_tibble` object.
+
+```{r}
+bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
+
+hgdp <- gen_tibble(bed_path,
+  quiet = TRUE,
+  backingfile = tempfile("test_")
+)
+```
+
+And add its associated metadata
+
+```{r}
+meta_info <- read_tsv("./data/hgdp/hgdp650_id_pop.txt")
+
+hgdp <- hgdp %>% mutate(
+  population = meta_info$population[match(hgdp$id, meta_info$Id)],
+  geographic_origin = meta_info$Geographic_origin[match(hgdp$id, meta_info$Id)],
+  region = meta_info$Region[match(hgdp$id, meta_info$Id)]
+)
+```
+
+```{r}
+
+coordinates <- coordinates %>%
+  separate_wider_delim(population,
+    delim = " ",
+    names = c("pop_a", "pop_b", "pop_c", "pop_d"),
+    too_few = "align_start",
+    too_many = "drop", cols_remove = FALSE
+  )
+
+hgdp <- hgdp %>%
+  mutate(
+    pop_a = str_split_fixed(population, "_", 2)[, 1],
+    pop_b = str_split_fixed(population, "_", 2)[, 2]
+  )
+```
+
+```{r}
+hgdp <- hgdp %>% mutate(
+  latitude = NA,
+  longitude = NA
+)
+
+fill <- function(x) {
+  if (x["population"] %in% coordinates$population) {
+    x["latitude"] <-
+      coordinates$latitude[which(coordinates$population == x["population"])]
+  } else {
+    if (x["pop_a"] %in% coordinates$pop_a) {
+      if (length(which(coordinates$pop_a == x["pop_a"])) == 1) {
+        x["latitude"] <-
+          coordinates$latitude[which(coordinates$pop_a == x["pop_a"])]
+      } else if (length(which(coordinates$pop_a == x["pop_a"])) > 1) {
+        x_pop <- paste(x["pop_a"], x["geographic_origin"], sep = " ")
+        if (x_pop %in% coordinates$population) {
+          x["latitude"] <-
+            coordinates$latitude[which(coordinates$population == x_pop)]
+        } else {
+          x["latitude"] <- NA
+        }
+      }
+    } else {
+      x["latitude"] <- NA
+    }
+  }
+}
+
+hgdp$latitude <- apply(hgdp, 1, FUN = fill)
+
+fill_long <- function(x) {
+  if (x["population"] %in% coordinates$population) {
+    x["longitude"] <-
+      coordinates$longitude[which(coordinates$population == x["population"])]
+  } else {
+    if (x["pop_a"] %in% coordinates$pop_a) {
+      if (length(which(coordinates$pop_a == x["pop_a"])) == 1) {
+        x["longitude"] <-
+          coordinates$longitude[which(coordinates$pop_a == x["pop_a"])]
+      } else if (length(which(coordinates$pop_a == x["pop_a"])) > 1) {
+        x_pop <- paste(x["pop_a"], x["geographic_origin"], sep = " ")
+        if (x_pop %in% coordinates$population) {
+          x["longitude"] <-
+            coordinates$longitude[which(coordinates$population == x_pop)]
+        } else {
+          x["longitude"] <- NA
+        }
+      }
+    } else {
+      x["longitude"] <- NA
+    }
+  }
+}
+
+hgdp$longitude <- apply(hgdp, 1, FUN = fill_long)
+
+hgdp <- hgdp %>% select(-c("pop_a", "pop_b"))
+```
+
+```{r}
+# write a new metadata file
+new_metadata <- hgdp %>%
+  as_tibble() %>%
+  select(id, population, geographic_origin, region, latitude, longitude)
+
+write_tsv(new_metadata, "./data/hgdp/hgdp650_id_pop_coords.txt")
+```
+

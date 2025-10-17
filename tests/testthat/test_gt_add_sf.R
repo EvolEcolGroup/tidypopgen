@@ -271,10 +271,10 @@ test_that("merging two gen_tibbles with sf", {
   # geometry dropped after merging
   expect_false(inherits(sf_gt_merged, "sf"))
   # we can add it back
-  sf_gt_merged <- gt_add_sf(
+  expect_warning(sf_gt_merged <- gt_add_sf(
     x = sf_gt_merged,
     coords = c("longitude", "latitude"),
-  )
+  ), "will be overwritten")
   expect_true(inherits(sf_gt_merged, "sf"))
 })
 
