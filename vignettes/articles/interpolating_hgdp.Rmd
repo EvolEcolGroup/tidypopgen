@@ -24,16 +24,16 @@ The data files can be downloaded using the following code:
 ```{r eval = FALSE}
 temp_dir <- tempdir()
 download_url <-
-  "https://zenodo.org/records/15582364/files/hgdp650_id_pop_coords.txt"
+  "https://zenodo.org/records/17375732/files/hgdp650_id_pop_coords.txt"
 download_path <- file.path(temp_dir, "hgdp650_id_pop.txt")
 download.file(download_url, download_path, mode = "wb")
-download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.bed"
+download_url <- "https://zenodo.org/records/17375732/files/hgdp650.qc.hg19.bed"
 download_path <- file.path(temp_dir, "hgdp650.qc.hg19.bed")
 download.file(download_url, download_path, method = "wget")
-download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.bim"
+download_url <- "https://zenodo.org/records/17375732/files/hgdp650.qc.hg19.bim"
 download_path <- file.path(temp_dir, "hgdp650.qc.hg19.bim")
 download.file(download_url, download_path, method = "wget")
-download_url <- "https://zenodo.org/records/15582364/files/hgdp650.qc.hg19.fam"
+download_url <- "https://zenodo.org/records/17375732/files/hgdp650.qc.hg19.fam"
 download_path <- file.path(temp_dir, "hgdp650.qc.hg19.fam")
 download.file(download_url, download_path, method = "wget")
 ```
