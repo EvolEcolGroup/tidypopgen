@@ -22,3 +22,10 @@ generics::augment
 #' @importFrom ggplot2 autoplot
 #' @export
 ggplot2::autoplot
+
+# Unexported functions from bigsnpr
+getCode <- utils::getFromNamespace("getCode", "bigsnpr")
+getInverseCode <- utils::getFromNamespace("getInverseCode", "bigsnpr")
+readbina <- utils::getFromNamespace("readbina", "bigsnpr")
+write.table2 <- utils::getFromNamespace("write.table2", "bigsnpr")
+writebina <- utils::getFromNamespace("writebina", "bigsnpr")

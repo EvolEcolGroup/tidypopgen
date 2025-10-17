@@ -88,3 +88,66 @@ test_that("save and load gt", {
     as_tibble(test_loci)
   ) # nolint
 })
+
+test_that("error if saving a non gen_tibble object", {
+  expect_error(
+    gt_save(
+      indiv_meta,
+      "x should be a gen_tibble"
+    )
+  )
+})
+
+test_that("old bigsnp gen_tibbles can be loaded", {
+  # TODO find a way to run this test on CI
+  # copy the old gen_tibble to a temp location  #nolint start
+  temp_dir <- tempdir()
+  file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
+    package = "tidypopgen"
+  ), to = file.path(temp_dir, "old_gen_tibble.gt"))
+  file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.bk",
+    package = "tidypopgen"
+  ), to = file.path(temp_dir, "old_gen_tibble.bk"))
+  file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.rds",
+    package = "tidypopgen"
+  ), to = file.path(temp_dir, "old_gen_tibble.rds"))
+
+  gt_path <- paste0(temp_dir, "/old_gen_tibble.gt")
+  rds_path <- paste0(temp_dir, "/old_gen_tibble.rds")
+  bk_path <- paste0(temp_dir, "/old_gen_tibble.bk")
+
+  # The test works without editing attributes, but it updates the .rds in
+  # extdata each time
+
+  # To fix, we want to update attributes
+
+  # load gt using readRDS
+  gt <- readRDS(gt_path)
+
+  # change paths in gt attributes
+  attributes(gt$genotypes)$bigsnp_file <- rds_path
+  attributes(gt$genotypes)$bigsnp <- bigsnpr::snp_attach(rds_path)
+
+
+  # save
+  new_rds <- saveRDS(gt, gt_path)
+
+  # reload with gt_load
+  expect_message(
+    test_gt <-
+      gt_load(gt_path), "your gen_tibble was in an old format"
+  )
+  example_gt <- load_example_gt("gen_tbl")
+  expect_true(all.equal(test_gt, example_gt, check.attributes = FALSE))
+  # check we have fbm_ploidy
+  expect_equal(indiv_ploidy(example_gt), indiv_ploidy(test_gt))
+  expect_true(length(indiv_ploidy(test_gt)) == nrow(test_gt))
+  expect_true(length(attr(test_gt$genotypes, "fbm_ploidy")) == nrow(test_gt))
+  # check it works for basic calculations
+  global_stats <- test_gt %>% pop_global_stats()
+  global_stats_example <- example_gt %>% pop_global_stats()
+  expect_true(all.equal(global_stats,
+    global_stats_example,
+    check.attributes = FALSE
+  )) # nolint end
+})

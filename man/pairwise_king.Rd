@@ -2,7 +2,7 @@
 % Please edit documentation in R/pairwise_king.R
 \name{pairwise_king}
 \alias{pairwise_king}
-\title{Compute the KING-robust Matrix for a a \code{gen_tibble} object}
+\title{Compute the KING-robust Matrix for a \code{gen_tibble} object}
 \usage{
 pairwise_king(
   x,
@@ -25,11 +25,8 @@ individuals if \code{as_matrix} is TRUE, or a tidied tibble of coefficients if
 \code{as_matrix} is FALSE.
 }
 \description{
-This function computes the KING-robust estimator of kinship.
-}
-\details{
-Note that monomorphic sites are currently considered. Remove monomorphic
-sites before running pairwise_king if this is a concern.
+This function computes the KING-robust estimator of kinship, reimplementing
+the KING algorithm of Manichaikul et al. (2010).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
@@ -43,4 +40,12 @@ pairwise_king(example_gt, as_matrix = FALSE)
 # Adjust block_size
 pairwise_king(example_gt, block_size = 2)
 
+}
+\references{
+Manichaikul, A. et al. (2010) Robust relationship inference in
+genome-wide association studies. Bioinformatics, 26(22), 2867–2873.
+https://doi.org/10.1093/bioinformatics/btq559.
+
+Note that monomorphic sites are currently considered. Remove monomorphic
+sites before running pairwise_king if this is a concern.
 }

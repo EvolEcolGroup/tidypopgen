@@ -6,8 +6,8 @@
 #' are homozygous for a different allele, and 1/2 if at least one individual is
 #' heterozygous. Matching is the average of these 0, 1/2 and 1s)
 #'
-#' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes` slot
-#'   of a [bigsnpr::bigSNP] object).
+#' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
+#' slot of a [bigsnpr::bigSNP] object).
 #' @param ind.row An optional vector of the row indices that are used. If not
 #'   specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not
@@ -17,17 +17,18 @@
 #'   the columns.
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
+#' @seealso [pairwise_allele_sharing()] [hierfstat::matching()]
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'
-#' X <- attr(example_gt$genotypes, "bigsnp")
-#' snp_allele_sharing(X$genotypes)
+#' X <- attr(example_gt$genotypes, "fbm")
+#' snp_allele_sharing(X)
 #'
 #' # Compute for individuals 1 to 5
-#' snp_allele_sharing(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+#' snp_allele_sharing(X, ind.row = 1:5, ind.col = 1:5)
 #'
 #' # Adjust block size
-#' snp_allele_sharing(X$genotypes, block.size = 2)
+#' snp_allele_sharing(X, block.size = 2)
 #'
 snp_allele_sharing <- function(
     X, # nolint start
@@ -72,5 +73,9 @@ snp_allele_sharing <- function(
   # na is a matrix with 0 for NAs and 1 for valid values
   # TODO this could be done in chunks to avoid bringing
   # everything to memory at once
-  return(1 / 2 * (1 + 1 / na_tcross[] * dos_tcross[]))
+  denom <- na_tcross[]
+  num <- dos_tcross[]
+  res <- 0.5 * (1 + num / denom)
+  res[denom == 0] <- NA_real_
+  return(res)
 }

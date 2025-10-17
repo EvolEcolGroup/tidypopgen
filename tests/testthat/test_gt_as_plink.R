@@ -27,6 +27,8 @@ test_gt <- gen_tibble(
 
 # this also tests show_genotypes and show_loci
 test_that("write a bed file", {
+  # group
+  test_gt <- test_gt %>% group_by(population)
   bed_path <- gt_as_plink(test_gt, file = paste0(tempfile(), ".bed"))
   # now read the file back in
   test_gt2 <- gen_tibble(bed_path, quiet = TRUE)
@@ -35,6 +37,7 @@ test_that("write a bed file", {
   # because of the different backing file info
   # we cannot use identical on the whole object
   expect_true(identical(show_genotypes(test_gt), show_genotypes(test_gt2)))
+  test_gt <- test_gt %>% ungroup()
   expect_true(identical(
     test_gt %>% select(-genotypes),
     test_gt2 %>% select(-genotypes)
@@ -209,21 +212,66 @@ test_that("handling of duplicated loci", {
     c(2, 1, 0, 0, 0, 0),
     c(2, 2, 0, 0, NA, 1)
   )
-  # create a gt with duplicated positions
+  # create a loci table with duplicated positions
   test_loci <- data.frame(
     name = paste0("rs", c(1, 2, 1, 3:5)),
     chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
-    position = as.integer(c(65, 5, 65, 343, 23, 456)),
+    position = as.integer(c(5, 7, 65, 343, 23, 456)),
     genetic_dist = as.double(rep(0, 6)),
     allele_ref = c("C", "T", "C", "G", "C", "T"),
     allele_alt = c(NA, "C", NA, "C", "G", "A")
   )
-  test_gt <- gen_tibble(
+  # an error if we try to load without allow_duplicates
+  expect_error(gen_tibble(
     x = test_genotypes,
     loci = test_loci,
     indiv_meta = test_indiv_meta,
     quiet = TRUE
+  ), paste0(
+    "Your data contain duplicated locus names. ",
+    "Remove them or set allow_duplicates = TRUE."
+  ))
+  test_loci <- data.frame(
+    name = paste0("rs", c(1, 2, 1, 3:5)),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(65, 7, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("C", "T", "C", "G", "C", "T"),
+    allele_alt = c(NA, "C", NA, "C", "G", "A")
   )
+  expect_error(gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ), paste0(
+    "Your data contain duplicated loci. ",
+    "Remove them or set allow_duplicates = TRUE."
+  ))
+
+  # gen_tibble works when using allow_duplicates
+  warnings <- capture_warnings(test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    allow_duplicates = TRUE,
+    quiet = TRUE
+  ))
+
+  loci_names_warning <- paste0(
+    "You have allowed duplicated loci in your data. ",
+    "Your data contain duplicated locus names. ",
+    "Use anyDuplicated(loci_names(my_tibble)) to select and remove them."
+  )
+  loci_position_warning <- paste0(
+    "You have allowed duplicated loci in your data. ",
+    "Your data contain duplicated loci. ",
+    "Use find_duplicated_loci(my_tibble) to select and remove them."
+  )
+
+  expect_equal(warnings[1], loci_position_warning)
+  expect_equal(warnings[2], loci_names_warning)
+
   # duplicated positions are registered by is_loci_table_ordered
   expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
   expect_error(
@@ -234,14 +282,24 @@ test_that("handling of duplicated loci", {
     ),
     "Your loci are not sorted within chromosomes"
   )
-  # but currently we can still write the plink fileset and read back
-  # into a gt without a warning
+  # we can still write the plink fileset
   file <- gt_as_plink(
     test_gt,
     file = paste0(tempfile(), ".bed"),
     chromosomes_as_int = TRUE
   )
-  test_gt_reload <- gen_tibble(file, backingfile = tempfile(), quiet = TRUE)
+  # and we have to allow_duplicates again when reading back in
+  warnings <- capture_warnings(
+    test_gt_reload <-
+      gen_tibble(file,
+        backingfile = tempfile(),
+        allow_duplicates = TRUE,
+        quiet = TRUE
+      )
+  )
+
+  expect_equal(warnings[1], loci_position_warning)
+  expect_equal(warnings[2], loci_names_warning)
 
   # create a gt with adjacent duplicated positions
   test_loci <- data.frame(
@@ -252,20 +310,113 @@ test_that("handling of duplicated loci", {
     allele_ref = c("A", "C", "C", "G", "C", "T"),
     allele_alt = c("T", NA, NA, "C", "G", "A")
   )
+  warnings <- capture_warnings(test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    allow_duplicates = TRUE,
+    quiet = TRUE
+  ))
+
+  expect_equal(warnings[1], loci_position_warning)
+  expect_equal(warnings[2], loci_names_warning)
+
+
+  # duplicated positions are registered by is_loci_table_ordered
+  expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
+  # we can still write the plink fileset
+  file <- gt_as_plink(
+    test_gt,
+    file = paste0(tempfile(), ".bed"),
+    chromosomes_as_int = TRUE
+  )
+  # and we have to allow_duplicates again when reading back in
+  warnings <- capture_warnings(
+    test_gt_reload <- gen_tibble(file,
+      backingfile = tempfile(),
+      allow_duplicates = TRUE, quiet = TRUE
+    )
+  )
+
+  expect_equal(warnings[1], loci_position_warning)
+  expect_equal(warnings[2], loci_names_warning)
+
+  # otherwise error
+  expect_error(
+    gen_tibble(file,
+      backingfile = tempfile(),
+      quiet = TRUE
+    ), paste0(
+      "Your data contain duplicated loci. ",
+      "Remove them or set allow_duplicates = TRUE."
+    )
+  )
+
+
+  # create a gt with only duplicated names
+  test_loci <- data.frame(
+    name = paste0("rs", c(1, 2, 2, 3:5)),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 7, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "C", "C", "G", "C", "T"),
+    allele_alt = c("T", NA, NA, "C", "G", "A")
+  )
+  capture_warnings(test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    allow_duplicates = TRUE,
+    quiet = TRUE
+  ))
+  file <- gt_as_plink(
+    test_gt,
+    file = paste0(tempfile(), ".bed"),
+    chromosomes_as_int = TRUE
+  )
+  expect_error(
+    gen_tibble(file,
+      backingfile = tempfile(),
+      quiet = TRUE
+    ), paste0(
+      "Your data contain duplicated locus names. ",
+      "Remove them or set allow_duplicates = TRUE."
+    )
+  )
+})
+
+test_that("plink files location when 'file' is NULL", {
+  # create file
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 0),
+    c(2, 1, 0, 0, 0, 0),
+    c(2, 2, 0, 0, NA, 1)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+
   test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
     indiv_meta = test_indiv_meta,
     quiet = TRUE
   )
-  # duplicated positions are registered by is_loci_table_ordered
-  expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
-  # but currently we can still write the plink fileset and read back
-  # into a gt without a warning
-  file <- gt_as_plink(
-    test_gt,
-    file = paste0(tempfile(), ".bed"),
-    chromosomes_as_int = TRUE
-  )
-  test_gt_reload <- gen_tibble(file, backingfile = tempfile(), quiet = TRUE)
+
+  bed_path <- gt_as_plink(test_gt, type = "bed")
+
+  expected_bed_file <-
+    tools::file_path_sans_ext(attr(test_gt$genotypes, "fbm")$backingfile)
+  expected_bed_file <- paste0(expected_bed_file, ".bed")
+
+  expect_equal(bed_path, expected_bed_file)
 })

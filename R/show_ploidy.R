@@ -15,6 +15,7 @@
 #' @returns the ploidy (0 indicates mixed ploidy)
 #' @rdname show_ploidy
 #' @export
+#' @seealso [indiv_ploidy()]
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'

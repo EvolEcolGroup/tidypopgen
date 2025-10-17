@@ -40,7 +40,7 @@
 #'   If not providing infos.pos (NULL, the default), this is a window in number
 #'   of SNPs, otherwise it is a window in kb (genetic distance). I recommend
 #'   that you provide the positions if available.
-#' @param alpha_tukey Default is `0.1`. The type-I error rate in outlier
+#' @param alpha_tukey Default is `0.05`. The type-I error rate in outlier
 #'   detection (that is further corrected for multiple testing).
 #' @param min_mac Minimum minor allele count (MAC) for variants to be included.
 #'   Default is `10`.
@@ -59,7 +59,7 @@
 #' - `method`, a string defining the method (in this case 'autoSVD'),
 #' - `call`, the call that generated the object.
 #' - `loci`, the loci used after long range LD removal.
-#'
+#' @seealso [bigsnpr::snp_autoSVD()]  which this function wraps.
 #' @export
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
@@ -119,18 +119,19 @@ gt_pca_autoSVD <- function(
 
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
+    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
+    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
 
-  X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
+  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
   # we need to create a chromosome vector that is as long as
   # the complete bigsnp object
-  infos_chr <- rep(1, nrow(.gt_get_bigsnp(x)$map))
+  infos_chr <- rep(1, ncol(X))
 
-  infos_chr[.gt_bigsnp_cols(x)] <- show_loci(x)$chr_int
+  infos_chr[.gt_fbm_cols(x)] <- show_loci(x)$chr_int
   # chromosomes have to be positive numbers
   if (min(infos_chr) < 1) {
     infos_chr <- infos_chr + abs(min(infos_chr) + 1)
@@ -138,8 +139,8 @@ gt_pca_autoSVD <- function(
   infos_pos <- NULL
   if (use_positions) {
     is_loci_table_ordered(x, error_on_false = TRUE)
-    infos_pos <- rep(0, nrow(.gt_get_bigsnp(x)$map))
-    infos_pos[.gt_bigsnp_cols(x)] <- show_loci(x)$position
+    infos_pos <- rep(0, ncol(X))
+    infos_pos[.gt_fbm_cols(x)] <- show_loci(x)$position
   }
   # TODO
   # Do we want to use the code from loci_clump to create chromosomes and
@@ -148,11 +149,11 @@ gt_pca_autoSVD <- function(
   tryCatch(
     expr = {
       this_svd <- bigsnpr::snp_autoSVD(
-        X$genotypes, # nolint
+        X, # nolint
         infos.chr = infos_chr,
         infos.pos = infos_pos,
-        ind.row = .gt_bigsnp_rows(x),
-        ind.col = .gt_bigsnp_cols(x),
+        ind.row = .gt_fbm_rows(x),
+        ind.col = .gt_fbm_cols(x),
         fun.scaling = fun_scaling,
         thr.r2 = thr_r2,
         size = size,
@@ -188,17 +189,16 @@ gt_pca_autoSVD <- function(
   this_svd$call <- match.call()
   # subset the loci table to have only the snps of interest
   this_svd$loci <-
-    show_loci(x)[.gt_bigsnp_cols(x) %in% attr(this_svd, "subset"), ]
+    show_loci(x)[.gt_fbm_cols(x) %in% attr(this_svd, "subset"), ]
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var) {
     loci <- this_svd$loci
     loci_after_ld <- which(show_loci(x)$name %in% loci$name)
     x_autoSVD_subset <- x %>% select_loci(all_of(loci_after_ld)) # nolint
-    X <- attr(x$genotypes, "bigsnp") # nolint
     x_ind_col <- show_loci(x_autoSVD_subset)$big_index
     x_ind_row <- vctrs::vec_data(x_autoSVD_subset$genotypes)
     this_svd$square_frobenius <- square_frobenius(
-      X$genotypes, # nolint
+      X, # nolint
       x_ind_row,
       x_ind_col,
       center = this_svd$center,

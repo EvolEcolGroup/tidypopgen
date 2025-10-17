@@ -12,8 +12,8 @@ snp_allele_sharing(
 )
 }
 \arguments{
-\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes} slot
-of a \link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP} object).}
+\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes}
+slot of a \link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP} object).}
 
 \item{ind.row}{An optional vector of the row indices that are used. If not
 specified, all rows are used. Don't use negative indices.}
@@ -38,13 +38,16 @@ heterozygous. Matching is the average of these 0, 1/2 and 1s)
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 
-X <- attr(example_gt$genotypes, "bigsnp")
-snp_allele_sharing(X$genotypes)
+X <- attr(example_gt$genotypes, "fbm")
+snp_allele_sharing(X)
 
 # Compute for individuals 1 to 5
-snp_allele_sharing(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+snp_allele_sharing(X, ind.row = 1:5, ind.col = 1:5)
 
 # Adjust block size
-snp_allele_sharing(X$genotypes, block.size = 2)
+snp_allele_sharing(X, block.size = 2)
 
+}
+\seealso{
+\code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} \code{\link[hierfstat:matching]{hierfstat::matching()}}
 }

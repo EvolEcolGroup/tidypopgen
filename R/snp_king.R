@@ -1,6 +1,11 @@
 #' Compute the KING-robust Matrix for a bigSNP object
 #'
-#' This function computes the KING-robust estimator of kinship.
+#' This function computes the KING-robust estimator of kinship, reimplementing
+#' the KING algorithm of Manichaikul et al. (2010).
+#'
+#' @references Manichaikul, A. et al. (2010) Robust relationship inference in
+#'   genome-wide association studies. Bioinformatics, 26(22), 2867–2873.
+#'   https://doi.org/10.1093/bioinformatics/btq559.
 #'
 #' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
 #' slot of a [bigsnpr::bigSNP] object).
@@ -15,14 +20,14 @@
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'
-#' X <- attr(example_gt$genotypes, "bigsnp")
-#' snp_king(X$genotypes)
+#' X <- attr(example_gt$genotypes, "fbm")
+#' snp_king(X)
 #'
 #' # Compute for individuals 1 to 5
-#' snp_king(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+#' snp_king(X, ind.row = 1:5, ind.col = 1:5)
 #'
 #' # Adjust block size
-#' snp_king(X$genotypes, block.size = 2)
+#' snp_king(X, block.size = 2)
 #'
 snp_king <- function(
     X, # nolint start
@@ -46,17 +51,17 @@ snp_king <- function(
 
   # Preassign memory where we will store the slices of genotypes.
   # For efficiency, when we read in the slice,
-  # we will immediately recode it into these3 matrices,
+  # we will immediately recode it into these 3 matrices,
   # one per genotype, equivalent to X==0, X==1, and X==2 respectively
   X_0_part <- matrix(0, n, max(intervals[, "size"])) # nolint start
   X_1_part <- matrix(0, n, max(intervals[, "size"]))
   X_2_part <- matrix(0, n, max(intervals[, "size"]))
-  # valid loci (i.e. wiht genotype 0,1 or 2)
+  # valid loci (i.e. with genotype 0, 1 or 2)
   X_valid_part <- matrix(0, n, max(intervals[, "size"])) # nolint end
 
   for (j in bigstatsr::rows_along(intervals)) {
     ind <- seq2(intervals[j, ]) # this iteration indices
-    ind.col.ind <- ind.col[ind] # subset given indices by the iteration indeces #nolint
+    ind.col.ind <- ind.col[ind] # subset given indices by the iteration indices #nolint
     increment_king_numerator(
       k_numerator,
       N_Aa_i,

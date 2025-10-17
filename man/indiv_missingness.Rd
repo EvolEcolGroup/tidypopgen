@@ -35,7 +35,7 @@ default).}
 \item{...}{currently unused.}
 }
 \value{
-a vector of heterozygosities, one per individuals in the
+a vector of missingness, one per individuals in the
 \code{\link{gen_tibble}}
 }
 \description{

@@ -1,12 +1,21 @@
 #' Convert vcf to FBM using vcfR as a parser.
 #'
-#' Convert a vcf file to a Filebacked Big Matrix (FBM) object.
-#' This should work even for large vcf files that would not fit in memory.
+#' Convert a vcf file to a Filebacked Big Matrix (FBM) object. This should work
+#' even for large vcf files that would not fit in memory.
 #'
 #' @param vcf_path the path to the vcf
 #' @param chunk_size the chunk size to use on the vcf when loading the file
 #' @param backingfile the name of the file to use as the backing file
-#' @return path to the resulting rds file as class bigSNP.
+#' @param valid_alleles a character vector of valid alleles. Default is c("A",
+#'   "T", "C", "G").
+#' @param missing_alleles a character vector of alleles to be treated as
+#'   missing. Default is c("0", ".").
+#' @param allow_duplicates whether to allow duplicated loci (same chromosome and
+#'   position) or duplicated locus names. Default is FALSE.
+#' @param quiet whether to print messages
+#' @param ... further arguments to be passed to [vcfR::read.vcfR()]. Do not pass
+#'   nrows, skip, verbose, or convertNA; these are controlled internally.
+#' @returns an object of the class `gen_tbl`.
 #' @keywords internal
 #' @noRd
 # nolint start
@@ -15,7 +24,22 @@ vcf_to_fbm_vcfR <- function(
     vcf_path,
     chunk_size = NULL,
     backingfile = NULL,
-    quiet = FALSE) {
+    valid_alleles = c("A", "T", "C", "G"),
+    missing_alleles = c("0", "."),
+    allow_duplicates = FALSE,
+    quiet = FALSE,
+    ...) {
+  dots <- list(...)
+  forbidden <- intersect(
+    names(dots),
+    c("nrows", "skip", "verbose", "convertNA")
+  )
+  if (length(forbidden)) {
+    stop("Unsupported via ...: ", paste(forbidden, collapse = ", "),
+      call. = FALSE
+    )
+  }
+
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)
@@ -39,43 +63,51 @@ vcf_to_fbm_vcfR <- function(
     rep(chunk_size, floor(no_variants / chunk_size)),
     no_variants %% chunk_size
   )
+  # remove any 0 length chunks (there could be one at the end)
+  chunks_vec <- chunks_vec[chunks_vec > 0L]
 
   # figure out ploidy from the first marker
   temp_vcf <- vcfR::read.vcfR(
     vcf_path,
-    nrow = 1,
+    nrows = 1,
     verbose = !quiet,
-    convertNA = FALSE
+    convertNA = FALSE,
+    ...
   )
   temp_gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
-  ploidy <- apply(temp_gt, 2, get_ploidy)
+  ploidy <- unname(apply(temp_gt, 2, get_ploidy))
+
+
+  # check that there are no missing values in ploidy vector
   if (any(is.na(ploidy))) {
-    stop("error whilst determining ploidy")
+    stop("'ploidy' can not contain NAs")
   }
+  # check all values > 0
+  if (any(ploidy <= 0)) {
+    stop(
+      "the vector of individual ploidies ('ploidy') must contain ",
+      "positive integers"
+    )
+  }
+  fbm_ploidy <- ploidy
   max_ploidy <- max(ploidy)
+
 
   # set up codes for the appropriate ploidy level
   code256 <- rep(NA_real_, 256)
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
-  # metadata
-  fam <- tibble(
-    family.ID = colnames(temp_gt),
-    sample.ID = colnames(temp_gt),
-    paternal.ID = 0,
-    maternal.ID = 0,
-    sex = 0,
-    affection = -9,
-    ploidy = unname(ploidy)
+  indiv_meta <- list(
+    id = colnames(temp_gt)
   )
 
-  loci <- tibble(
+  loci <- tibble::tibble(
+    name = NULL,
     chromosome = NULL,
-    marker.id = NULL,
-    genetic.dist = NULL,
-    physical.pos = NULL,
-    allele1 = NULL,
-    allele2 = NULL
+    position = NULL,
+    genetic_dist = NULL,
+    allele_ref = NULL,
+    allele_alt = NULL
   )
 
   # create the file backed matrix
@@ -89,13 +121,14 @@ vcf_to_fbm_vcfR <- function(
   for (i in seq_along(chunks_vec)) {
     temp_vcf <- vcfR::read.vcfR(
       vcf_path,
-      nrow = chunks_vec[i],
+      nrows = chunks_vec[i],
       skip = sum(chunks_vec[seq_len(i - 1)]),
-      verbose = !quiet
+      verbose = !quiet,
+      ...
     )
     # filter any marker that is not biallelic
     bi <- vcfR::is.biallelic(temp_vcf)
-    gt <- vcfR::extract.gt(temp_vcf)
+    gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
     gt <- gt[bi, , drop = FALSE]
     if (nrow(gt) > 1) {
       # @TODO we could parallelise here
@@ -129,31 +162,45 @@ vcf_to_fbm_vcfR <- function(
     loci <- rbind(
       loci,
       tibble(
-        chromosome = unname(vcfR::getCHROM(temp_vcf)[bi]),
         # remove names as it does have ID as a name
-        marker.ID = unname(vcfR::getID(temp_vcf)[bi]),
-        genetic.dist = 0,
-        physical.pos = vcfR::getPOS(temp_vcf)[bi],
-        allele1 = unname(vcfR::getALT(temp_vcf)[bi]),
-        allele2 = unname(vcfR::getREF(temp_vcf)[bi])
+        name = unname(vcfR::getID(temp_vcf)[bi]),
+        chromosome = unname(vcfR::getCHROM(temp_vcf)[bi]),
+        position = vcfR::getPOS(temp_vcf)[bi],
+        genetic_dist = 0,
+        allele_ref = unname(vcfR::getREF(temp_vcf)[bi]),
+        allele_alt = unname(vcfR::getALT(temp_vcf)[bi])
       )
     )
   }
-  # save it
-  file_backed_matrix$save()
+  # validate the loci
+  loci <- validate_loci(loci,
+    check_alphabet = TRUE,
+    harmonise_loci = TRUE,
+    check_duplicates = TRUE,
+    allow_duplicates = allow_duplicates,
+    valid_alleles = valid_alleles,
+    missing_alleles = missing_alleles
+  )
+  # validate individuals
+  indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
+  # construct path
+  fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
 
-  bigsnp_obj <- structure(
-    list(
-      genotypes = file_backed_matrix,
-      fam = fam,
-      map = loci
-    ),
-    class = "bigSNP"
+  # create genotypes column
+  indiv_meta$genotypes <- new_vctrs_bigsnp(
+    fbm_obj = file_backed_matrix,
+    fbm_file = fbm_path,
+    loci = loci,
+    indiv_id = indiv_meta$id,
+    ploidy = max_ploidy,
+    fbm_ploidy = fbm_ploidy
   )
 
-  bigsnp_obj <- bigsnpr::snp_save(bigsnp_obj)
-  # and return the path to the rds
-  bigsnp_obj$genotypes$rds
+  new_gen_tbl <- tibble::new_tibble(
+    indiv_meta,
+    class = "gen_tbl"
+  )
+  return(new_gen_tbl)
 }
 
 # get ploidy for a given individual

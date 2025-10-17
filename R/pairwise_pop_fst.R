@@ -44,6 +44,7 @@
 #'   columns. If `type=pairwise`, a matrix of genome-wide pairwise Fst values is
 #'   returned.
 #' @export
+#' @seealso [hierfstat::pairwise.neifst()]
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
@@ -77,8 +78,9 @@ pairwise_pop_fst <- function(
     n_cores = bigstatsr::nb_cores()) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
+    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = TRUE))
+    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
 
   type <- match.arg(type)
@@ -104,7 +106,7 @@ pairwise_pop_fst <- function(
 
   # only operate on diploids or, if pseudohaploids, Hudson
   if (!is_diploid_only(.x) && !is_pseudohaploid(.x)) {
-    stop("fst can be currently computed on on diploid data")
+    stop("fst can be currently computed on diploid data")
   }
   if (is_pseudohaploid(.x) && method != "Hudson") {
     stop("only `method = Hudson` is valid when the data include pseudohaploids")
@@ -118,9 +120,9 @@ pairwise_pop_fst <- function(
   # summarise population frequencies
   # TODO this should be done in chunks!!!!
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_bigsnp(.x)$genotypes,
-    rowInd = .gt_bigsnp_rows(.x),
-    colInd = .gt_bigsnp_cols(.x),
+    .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = nrow(.group_levels),
     ploidy = indiv_ploidy(.x),

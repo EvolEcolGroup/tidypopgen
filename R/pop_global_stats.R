@@ -94,6 +94,7 @@
 #' @returns a tibble of population statistics, with populations as rows and
 #'   statistics as columns
 #' @export
+#' @seealso [hierfstat::basic.stats()]
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
@@ -125,9 +126,9 @@ pop_global_stats <- function(
 
   # summarise population frequencies
   pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_bigsnp(.x)$genotypes,
-    rowInd = .gt_bigsnp_rows(.x),
-    colInd = .gt_bigsnp_cols(.x),
+    .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
     groupIds = .group_ids,
     ngroups = nrow(.group_levels),
     ploidy = indiv_ploidy(.x),

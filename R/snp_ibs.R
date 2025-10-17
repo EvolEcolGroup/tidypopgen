@@ -4,8 +4,8 @@
 #'
 #' Note that monomorphic sites are currently counted. Should we filter them
 #' beforehand? What does plink do?
-#' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes` slot
-#'   of a [bigsnpr::bigSNP] object).
+#' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
+#' slot of a [bigsnpr::bigSNP] object).
 #' @param ind.row An optional vector of the row indices that are used. If not
 #'   specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not
@@ -25,19 +25,19 @@
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'
-#' X <- attr(example_gt$genotypes, "bigsnp")
-#' snp_ibs(X$genotypes)
+#' X <- attr(example_gt$genotypes, "fbm")
+#' snp_ibs(X)
 #'
 #' # Compute for individuals 1 to 5
-#' snp_ibs(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+#' snp_ibs(X, ind.row = 1:5, ind.col = 1:5)
 #'
 #' # Adjust block.size
-#' snp_ibs(X$genotypes, block.size = 2)
+#' snp_ibs(X, block.size = 2)
 #'
 #' # Change type
-#' snp_ibs(X$genotypes, type = "proportion")
-#' snp_ibs(X$genotypes, type = "adjusted_counts")
-#' snp_ibs(X$genotypes, type = "raw_counts")
+#' snp_ibs(X, type = "proportion")
+#' snp_ibs(X, type = "adjusted_counts")
+#' snp_ibs(X, type = "raw_counts")
 #'
 snp_ibs <- function(
     X, # nolint start
@@ -100,14 +100,4 @@ snp_ibs <- function(
       return(ibs_adj)
     }
   }
-}
-
-
-## convenience functions that are not exported by `bigstatsr`
-CutBySize <- function(m, block.size, nb = ceiling(m / block.size)) { # nolint
-  bigparallelr::split_len(m, nb_split = nb)
-}
-
-seq2 <- function(lims) {
-  seq(lims[1], lims[2])
 }

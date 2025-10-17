@@ -11,12 +11,13 @@
 #' @param x a `gen_tibble` object.
 #' @param allele_sharing_mat optional, the matrix of Allele Sharing returned by
 #'   [pairwise_allele_sharing()] with `as_matrix=TRUE`. As a number of
-#'   statistics can be derived from the Allele Sharing matrix, it it sometimes
+#'   statistics can be derived from the Allele Sharing matrix, it is sometimes
 #'   more efficient to pre-compute this matrix.
 #' @param block_size the size of the blocks to use for the computation of the
 #'   allele sharing matrix.
 #' @returns a matrix of GR between all pairs of individuals
 #' @export
+#' @seealso [hierfstat::beta.dosage()]
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'

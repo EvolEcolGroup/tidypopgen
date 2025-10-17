@@ -46,21 +46,23 @@ These data can also be visualised using autoplot:
 autoplot(individual_report)
 ```
 
-Here we can see that most individuals have low missingness. If we wanted to filter individuals to remove those with more than 4.5% of their genotypes missing, we can use `filter`.
+Here, the red line indicates a threshold for proportion of missing loci, which is set as 5% by default, and can be altered using the `miss_threshold` argument. Similarly, the blue lines are drawn at 2 (inner) and 3 (outer) standard deviations from the mean observed heterozygosity. These thresholds can be used to visualise outliers and consider how to filter datasets.
+
+We can see above that most individuals have low missingness, none are above the default 5% threshold. However, if we wanted to filter individuals to remove those with more than 4.5% of their genotypes missing, we can use `filter`.
 
 ```{r}
 data <- data %>% filter(indiv_missingness(genotypes) < 0.045)
 nrow(data)
 ```
 
-And if we wanted to remove outliers with particularly high or low heterozygosity, we can again do so by using `filter`. As an example, here we remove observations that lie more than 3 standard deviations from the mean.
+And if we wanted to remove outliers with particularly high or low heterozygosity, we can again do so by using `filter`. As an example, here we remove observations that lie more than 2 standard deviations from the mean.
 
 ```{r}
 mean_val <- mean(individual_report$het_obs)
 sd_val <- stats::sd(individual_report$het_obs)
 
-lower <- mean_val - 3 * (sd_val)
-upper <- mean_val + 3 * (sd_val)
+lower <- mean_val - 2 * (sd_val)
+upper <- mean_val + 2 * (sd_val)
 
 data <- data %>% filter(indiv_het_obs(genotypes) > lower)
 data <- data %>% filter(indiv_het_obs(genotypes) < upper)
@@ -81,7 +83,7 @@ data <- data %>%
   filter(id %in% individual_report$id & individual_report$to_keep == TRUE)
 ```
 
-We can now view a summary of our cleaned data set again, showing that our data has reduced from 12 to 9 individuals.
+We can now view a summary of our cleaned data set again, showing that our data has reduced from 12 to 8 individuals.
 
 ```{r}
 summary(data)
@@ -217,7 +219,7 @@ For some quality control measures, if you have a gen_tibble that includes multip
 First, lets add some imaginary population data to our gen_tibble:
 
 ```{r}
-data <- data %>% mutate(population = c(rep("A", 4), rep("B", 5)))
+data <- data %>% mutate(population = c(rep("A", 4), rep("B", 4)))
 ```
 
 We can then group by population and run quality control on each group:

@@ -19,16 +19,28 @@
 #'
 #' Results can be visualised with [`autoplot.gt_dapc()`], see the help of that
 #' method for the available plots. There are also [gt_dapc_tidiers] for
-#' manipulating the results. For the moment, his function returns objects of
+#' manipulating the results. For the moment, this function returns objects of
 #' class [`adegenet::dapc`] which are
 #' compatible with methods from `adegenet`; graphical methods for DAPC are
 #' documented in [adegenet::scatter.dapc] (see ?scatter.dapc). This is likely
 #' to change in the future, so make sure you do not rely on the objects
 #' remaining compatible.
 #'
+#' This function aligns with the guidelines proposed by Thia (2023) for the
+#' standardized application of DAPC to genotype data. Our default settings are
+#' designed to follow these recommendations, so that the number of principal
+#' components (`n_pca`) defaults to the smaller of *k*-1 and the number of
+#' available principal components (where *k* is the number of populations or
+#' clusters), and the number of discriminant functions (`n_da`) is set to the
+#' minimum of *k*-1 and `n_pca`. The user can override these defaults by
+#' specifying the `n_pca` and `n_da` arguments, but caution is advised when
+#' adjusting `n_pca` to avoid potential overfitting. We recommend users consult
+#' these guidelines and consider their individual dataset to ensure best
+#' practices.
+#'
 #' Note that there is no current method to predict scores for
 #' individuals not included in the original analysis. This is because we
-#' currently do not have  mechanism to store the pca information in the
+#' currently do not have a mechanism to store the pca information in the
 #' object, and that is needed for prediction.
 #'
 #' @references Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
@@ -55,6 +67,7 @@
 #'   are a lot of loci and many dimensions.
 #' @returns an object of class [adegenet::dapc]
 #' @export
+#' @seealso [gt_cluster_pca()] [gt_cluster_pca_best_k()] [adegenet::dapc()]
 #' @examples
 #' # Create a gen_tibble of lobster genotypes
 #' bed_file <-
@@ -123,7 +136,7 @@ gt_dapc <- function(
   if (is.null(pop)) {
     # if no pop was given, use best_k
     if (any(!inherits(x, "gt_cluster_pca"), is.null(x$best_k))) {
-      stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca ")
+      stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca'")
     }
     pop.fac <- as.factor(x$clusters$groups[[x$best_k]])
   } else if (is.factor(pop)) {
@@ -166,7 +179,7 @@ gt_dapc <- function(
   # note that this is the proportion of variance out of the variance
   # we started with (i.e. what we retained with the PCAs)
   XU.lambda <- sum(x$d[1:n_pca]) / sum(x$d) # sum of retained eigenvalues
-  names(XU) <- paste("PCA-pc", seq_len(ncol(XU)), sep = ".")
+  colnames(XU) <- paste("PCA-pc", seq_len(ncol(XU)), sep = ".")
 
   ## PERFORM DA ##
   # tol=1e-30 is a kludge, but a safe (?) one to avoid fancy
@@ -177,7 +190,11 @@ gt_dapc <- function(
   ldaX$scaling <- ldaX$scaling[, 1:lda.dim, drop = FALSE]
 
   # can't be more than K-1 disc. func., or more than n.pca
-  n_da <- min(n_da, length(levels(pop.fac)) - 1, n_pca, sum(ldaX$svd > 1e-10))
+  if (is.null(n_da)) {
+    n_da <- min(length(levels(pop.fac)) - 1, n_pca, sum(ldaX$svd > 1e-10))
+  } else {
+    n_da <- min(n_da, length(levels(pop.fac)) - 1, n_pca, sum(ldaX$svd > 1e-10))
+  }
   n_da <- round(n_da)
   predX <- stats::predict(ldaX, dimen = n_da)
 
@@ -224,7 +241,7 @@ gt_dapc <- function(
   ## optional: get loadings of variables
   if (loadings_by_locus) {
     V <- x$v[, 1:n_pca, drop = FALSE] # principal axes
-    names(V) <- paste("PCA-pa", seq_len(ncol(V)), sep = ".")
+    colnames(V) <- paste("PCA-pa", seq_len(ncol(V)), sep = ".")
     var.load <- as.matrix(V) %*% as.matrix(ldaX$scaling[, 1:n_da, drop = FALSE])
     f1 <- function(x) {
       temp <- sum(x * x)

@@ -12,6 +12,7 @@ gen_tibble(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
+  allow_duplicates = FALSE,
   quiet = FALSE
 )
 
@@ -24,6 +25,7 @@ gen_tibble(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
+  allow_duplicates = FALSE,
   quiet = FALSE
 )
 
@@ -36,6 +38,7 @@ gen_tibble(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
+  allow_duplicates = FALSE,
   quiet = FALSE
 )
 }
@@ -75,6 +78,12 @@ will be saved in the same directory as the bed or vcf file, using the same
 file name but with a different file type (.bk rather than .bed or .vcf). If
 \code{x} is a genotype matrix and \code{backingfile} is NULL, then a temporary file
 will be created (but note that R will delete it at the end of the session!)}
+
+\item{allow_duplicates}{logical. If TRUE, the tibble will allow duplicated
+loci (those with genomic coordinate (chromosome + position) or locus name
+appearing more than once). If FALSE, an error will be thrown if duplicated
+loci are found. These validations run before backing
+files are saved. Default is FALSE.}
 
 \item{quiet}{provide information on the files used to store the data}
 
@@ -125,6 +134,10 @@ alleles will be coded as 0 and alternative alleles will be coded as 1.
 \item \emph{packedancestry} files: When loading \emph{packedancestry} files,
 missing alleles will be converted from 'X' to NA
 }
+}
+\note{
+Helper functions for accessing \code{gen_tibble} object attributes and
+checking gen_tibble ploidy can be found in gt_helper_functions.R
 }
 \examples{
 \dontshow{

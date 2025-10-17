@@ -80,7 +80,7 @@ bps; lengthBps: size of the run)
 \description{
 This function uses a sliding-window approach to look for runs of homozygosity
 (or heterozygosity) in a diploid genome. It is based on the package
-\code{selectRUNS}, which implements an approach equivalent to the one in PLINK.
+\code{detectRUNS}, which implements an approach equivalent to the one in PLINK.
 }
 \details{
 This function returns a data frame with all runs detected in the
@@ -101,7 +101,7 @@ it is soft deprecated and will be removed in future versions of
 \code{tidypopgen}.
 }
 \examples{
-\dontshow{if (rlang::is_installed("detectRUNS")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (rlang::is_installed("detectRUNS")) withAutoprint(\{ # examplesIf}
 sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
   package = "detectRUNS"
 )
@@ -113,4 +113,7 @@ sheep_gt <- sheep_gt \%>\% group_by(population)
 sheep_roh <- windows_indiv_roh(sheep_gt)
 detectRUNS::plot_Runs(runs = sheep_roh)
 \dontshow{\}) # examplesIf}
+}
+\seealso{
+\code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}} which this function wraps.
 }

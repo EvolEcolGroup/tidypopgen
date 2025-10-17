@@ -275,53 +275,138 @@ test_that("rbind fails if gen_tibbles contain same ID", {
   ), "at least one individual with the same ID")
 })
 
-test_that("rbind warning when id is duplicated in bigsnp object", {
+test_that("Duplicated loci trigger clear errors (position and name)", {
+  # Create two datasets
+
   test_indiv_meta <- data.frame(
-    id = c("a", "b", "c")
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
   )
   test_genotypes <- rbind(
-    c(2, 2, 2, 2, 2, 2),
-    c(2, 2, 2, 2, 2, 2),
-    c(2, 2, 2, 2, 2, 2)
+    c(1, 1, 0, 1, 1, 2),
+    c(2, 1, 0, NA, 0, NA),
+    c(2, 2, 0, 0, 1, NA)
   )
   test_loci <- data.frame(
     name = paste0("rs", 1:6),
     chromosome = c(1, 1, 1, 1, 2, 2),
-    position = c(3, 5, 65, 343, 23, 456),
+    position = c(3, 3, 65, 343, 23, 456),
     genetic_dist = as.double(rep(0, 6)),
-    allele_ref = c("A", "T", "C", "G", "C", "T"),
-    allele_alt = c("T", "C", NA, "C", "G", "A")
+    allele_ref = c("C", "T", "C", "T", "C", "G"),
+    allele_alt = c("T", "C", NA, "C", "T", "A")
   )
-  test_gt1 <- gen_tibble(
+  expect_warning(test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
     indiv_meta = test_indiv_meta,
+    allow_duplicates = TRUE,
     quiet = TRUE
-  )
+  ), "You have allowed duplicated loci")
 
-  # change genotypes
-  test_genotypes2 <- rbind(
-    c(0, 0, 0, 0, 0, 0),
-    c(0, 0, 0, 0, 0, 0),
-    c(0, 0, 0, 0, 0, 0)
+  test_indiv_meta2 <- data.frame(
+    id = c("A", "B", "C"),
+    population = c("pop1", "pop1", "pop2")
   )
-  # create a second test gt with identical id
+  test_genotypes2 <- rbind(
+    c(1, 1, 0, 1, 1, 2),
+    c(2, 1, 0, NA, 0, NA),
+    c(2, 2, 0, 0, 1, NA)
+  )
+  test_loci2 <- data.frame(
+    name = paste0("rs", 7:12),
+    chromosome = c(1, 1, 1, 1, 2, 2),
+    position = c(3, 5, 65, 343, 23, 456),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("C", "T", "C", "T", "C", "G"),
+    allele_alt = c("T", "C", NA, "C", "T", "A")
+  )
   test_gt2 <- gen_tibble(
     x = test_genotypes2,
-    loci = test_loci,
-    indiv_meta = test_indiv_meta,
+    loci = test_loci2,
+    indiv_meta = test_indiv_meta2,
     quiet = TRUE
   )
 
-  # add population to both tests_gt1 and test_gt2
-  test_gt1 <- test_gt1 %>% dplyr::mutate(population = "pop1")
-  test_gt2 <- test_gt2 %>% dplyr::mutate(population = "pop2")
-  # update id according to population
-  test_gt1$id <- paste(test_gt1$id, test_gt1$population, sep = "_")
-  test_gt2$id <- paste(test_gt2$id, test_gt2$population, sep = "_")
-  # merge
+  # When position is duplicated, we get an error
+  expect_error(rbind_dry_run(test_gt, test_gt2,
+    use_position = TRUE, # nolint
+    flip_strand = TRUE, quiet = TRUE
+  ), "The reference gen_tibble contains duplicated loci")
+  expect_error(rbind(test_gt, test_gt2,
+    use_position = TRUE, # nolint
+    flip_strand = TRUE,
+    quiet = TRUE,
+    backingfile = tempfile()
+  ), "The reference gen_tibble contains duplicated loci")
+
+  # When target position is duplicated, we get an error
+  expect_error(rbind_dry_run(test_gt2, test_gt,
+    use_position = TRUE, # nolint
+    flip_strand = TRUE, quiet = TRUE
+  ), "The target gen_tibble contains duplicated loci")
+
+  expect_error(rbind(test_gt2, test_gt,
+    use_position = TRUE, # nolint
+    flip_strand = TRUE,
+    quiet = TRUE,
+    backingfile = tempfile()
+  ), "The target gen_tibble contains duplicated loci")
+
+  # test duplicated name
+
+  test_loci <- data.frame(
+    name = paste0("rs", c(1, 1:5)),
+    chromosome = c(1, 1, 1, 1, 2, 2),
+    position = c(3, 5, 65, 343, 23, 456),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("C", "T", "C", "T", "C", "G"),
+    allele_alt = c("T", "C", NA, "C", "T", "A")
+  )
+  expect_warning(test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    allow_duplicates = TRUE,
+    quiet = TRUE
+  ), "You have allowed duplicated loci")
+
+  test_loci2 <- data.frame(
+    name = paste0("rs", c(1:6)),
+    chromosome = c(1, 1, 1, 1, 2, 2),
+    position = c(3, 5, 65, 343, 23, 456),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("C", "T", "C", "T", "C", "G"),
+    allele_alt = c("T", "C", NA, "C", "T", "A")
+  )
+  test_gt2 <- gen_tibble(
+    x = test_genotypes2,
+    loci = test_loci2,
+    indiv_meta = test_indiv_meta2,
+    quiet = TRUE
+  )
+
+  # When reference name is duplicated, we get an error
+  expect_error(rbind_dry_run(test_gt, test_gt2,
+    use_position = FALSE, # nolint
+    flip_strand = TRUE, quiet = TRUE
+  ), "The reference gen_tibble contains duplicated loci")
   expect_error(
-    rbind(test_gt1, test_gt2),
-    "The two bigsnp objects contain at least one individual "
+    rbind(test_gt, test_gt2,
+      use_position = FALSE,
+      flip_strand = TRUE, quiet = TRUE, backingfile = tempfile()
+    ),
+    "The reference gen_tibble contains duplicated loci"
+  )
+  # When target name is duplicated, we get an error
+  expect_error(rbind_dry_run(test_gt2, test_gt,
+    use_position = FALSE, # nolint
+    flip_strand = TRUE, quiet = TRUE
+  ), "The target gen_tibble contains duplicated loci")
+  expect_error(
+    rbind(test_gt2, test_gt,
+      use_position = FALSE,
+      flip_strand = TRUE, quiet = TRUE, backingfile = tempfile()
+    ),
+    "The target gen_tibble contains duplicated loci"
   )
 })

@@ -65,7 +65,7 @@ loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   # get the FBM
-  geno_fbm <- attr(.x, "bigsnp")$genotypes
+  geno_fbm <- attr(.x, "fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
@@ -121,8 +121,8 @@ loci_hwe.grouped_df <- function(
   }
   rlang::check_dots_empty()
   type <- match.arg(type)
-  geno_fbm <- .gt_get_bigsnp(.x)$genotypes
-  rows_to_keep <- .gt_bigsnp_rows(.x)
+  geno_fbm <- .gt_get_fbm(.x)
+  rows_to_keep <- .gt_fbm_rows(.x)
   hwe_p_sub <- function(geno_fbm, ind, rows_to_keep) {
     gt_grouped_hwe( # nolint
       BM = geno_fbm,

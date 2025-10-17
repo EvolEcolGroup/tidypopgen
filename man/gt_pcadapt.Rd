@@ -30,7 +30,7 @@ Internally, this function uses the \code{snp_pcadapt} function from the \code{bi
 package.
 }
 \examples{
-\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -59,4 +59,7 @@ gt_pcadapt(lobsters, pca, k = 2)
 Luu, K., Bazin, E., Blum, M. G. B., & François, O. (2017).
 pcadapt: an R package for genome scans for selection based on principal
 component analysis. Molecular Ecology Resources, 17(1), 67–77.
+}
+\seealso{
+\code{\link[bigsnpr:snp_pcadapt]{bigsnpr::snp_pcadapt()}} which this function wraps.
 }

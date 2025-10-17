@@ -20,7 +20,7 @@ to be used by \code{hierfstat} functions.
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 
-# Convert to genind
+# Convert to hierfstat format
 gt_hierfstat <- example_gt \%>\% gt_as_hierfstat()
 
 # Check object class

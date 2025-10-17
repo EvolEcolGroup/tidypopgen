@@ -1,6 +1,11 @@
-#' Compute the KING-robust Matrix for a a `gen_tibble` object
+#' Compute the KING-robust Matrix for a `gen_tibble` object
 #'
-#' This function computes the KING-robust estimator of kinship.
+#' This function computes the KING-robust estimator of kinship, reimplementing
+#' the KING algorithm of Manichaikul et al. (2010).
+#'
+#' @references Manichaikul, A. et al. (2010) Robust relationship inference in
+#'   genome-wide association studies. Bioinformatics, 26(22), 2867–2873.
+#'   https://doi.org/10.1093/bioinformatics/btq559.
 #'
 #' Note that monomorphic sites are currently considered. Remove monomorphic
 #' sites before running pairwise_king if this is a concern.
@@ -30,11 +35,11 @@ pairwise_king <- function(
     as_matrix = FALSE,
     block_size = bigstatsr::block_size(nrow(x))) {
   # nolint
-  X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
+  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
   king_matrix <- snp_king(
-    X$genotypes,
+    X,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
     block.size = block_size

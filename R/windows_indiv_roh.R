@@ -2,7 +2,7 @@
 #'
 #' This function uses a sliding-window approach to look for runs of homozygosity
 #' (or heterozygosity) in a diploid genome. It is based on the package
-#' `selectRUNS`, which implements an approach equivalent to the one in PLINK.
+#' `detectRUNS`, which implements an approach equivalent to the one in PLINK.
 #'
 #' @param .x a [gen_tibble]
 #' @param window_size the size of sliding window (number of SNP loci) (default =
@@ -50,6 +50,7 @@
 #'   from: starting position of the run, in bps; to: end position of the run, in
 #'   bps; lengthBps: size of the run)
 #' @export
+#' @seealso [detectRUNS::slidingRUNS.run()] which this function wraps.
 #' @examplesIf rlang::is_installed("detectRUNS")
 #' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
 #'   package = "detectRUNS"
@@ -115,23 +116,17 @@ windows_indiv_roh <- function(
   } else {
     groups <- .x$id
   }
-  # initialize data.frame of results
-  runs_df <- data.frame(
-    group = character(),
-    id = character(),
-    chrom = character(),
-    nSNP = integer(),
-    from = integer(),
-    to = integer(),
-    lengthBps = integer()
-  )
+
+  runs_list <- vector("list", nrow(.x))
+
   # naively process it by row (the parallelism is implemented within individual)
   # access time is horrible, but I don't think this is the bottleneck
   # it needs some profiling
-  X <- .gt_get_bigsnp(.x)$genotypes # pointer for the FBM #nolint
-  col_ind <- .gt_bigsnp_cols(.x) # column indeces for the snps to consider
+  X <- .gt_get_fbm(.x) # pointer for the FBM #nolint
+  col_ind <- .gt_fbm_cols(.x) # column indices for the snps to consider
+  rows_to_keep <- .gt_fbm_rows(.x)
   for (i in seq_len(nrow(.x))) {
-    this_genotype <- X[i, col_ind]
+    this_genotype <- X[rows_to_keep[i], col_ind]
     this_indiv <- list(FID = groups[i], IID = .x$id[i])
     # find runs for this individual
     this_runs <-
@@ -143,13 +138,13 @@ windows_indiv_roh <- function(
         parameters
       ) # nolint
     # bind this run (if has rows) to others RUNs (if any)
-    runs_df <- rbind(runs_df, this_runs)
+    runs_list[[i]] <- this_runs
   }
 
+  # return calculated runs (data.frame)
+  runs_df <- dplyr::bind_rows(runs_list)
   # fix row names
   row.names(runs_df) <- NULL
-
-  # return calculated runs (data.frame)
   return(runs_df)
 }
 

@@ -15,7 +15,7 @@ test_that("filter_high_relatedness removes necessary individuals", {
   )
 
   # Create an example relatedness matrix
-  families_fbm <- tidypopgen:::.gt_get_bigsnp(families)$genotypes
+  families_fbm <- tidypopgen:::.gt_get_fbm(families)
   king_matrix <- snp_king(families_fbm)
 
   # Find which individuals are over an arbitrary relateness threshold

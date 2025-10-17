@@ -50,16 +50,28 @@ computation of DAPC are to be found in the indicated reference.
 
 Results can be visualised with \code{\link[=autoplot.gt_dapc]{autoplot.gt_dapc()}}, see the help of that
 method for the available plots. There are also \link{gt_dapc_tidiers} for
-manipulating the results. For the moment, his function returns objects of
+manipulating the results. For the moment, this function returns objects of
 class \code{\link[adegenet:dapc]{adegenet::dapc}} which are
 compatible with methods from \code{adegenet}; graphical methods for DAPC are
 documented in \link[adegenet:dapcGraphics]{adegenet::scatter.dapc} (see ?scatter.dapc). This is likely
 to change in the future, so make sure you do not rely on the objects
 remaining compatible.
 
+This function aligns with the guidelines proposed by Thia (2023) for the
+standardized application of DAPC to genotype data. Our default settings are
+designed to follow these recommendations, so that the number of principal
+components (\code{n_pca}) defaults to the smaller of \emph{k}-1 and the number of
+available principal components (where \emph{k} is the number of populations or
+clusters), and the number of discriminant functions (\code{n_da}) is set to the
+minimum of \emph{k}-1 and \code{n_pca}. The user can override these defaults by
+specifying the \code{n_pca} and \code{n_da} arguments, but caution is advised when
+adjusting \code{n_pca} to avoid potential overfitting. We recommend users consult
+these guidelines and consider their individual dataset to ensure best
+practices.
+
 Note that there is no current method to predict scores for
 individuals not included in the original analysis. This is because we
-currently do not have  mechanism to store the pca information in the
+currently do not have a mechanism to store the pca information in the
 object, and that is needed for prediction.
 }
 \examples{
@@ -113,4 +125,7 @@ structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94
 Thia, J. A. (2023). Guidelines for standardizing the application of
 discriminant analysis of principal components to genotype data. Molecular
 Ecology Resources, 23, 523–538. https://doi.org/10.1111/1755-0998.13706
+}
+\seealso{
+\code{\link[=gt_cluster_pca]{gt_cluster_pca()}} \code{\link[=gt_cluster_pca_best_k]{gt_cluster_pca_best_k()}} \code{\link[adegenet:dapc]{adegenet::dapc()}}
 }

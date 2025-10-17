@@ -3,6 +3,9 @@
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/EvolEcolGroup/tidypopgen/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/EvolEcolGroup/tidypopgen/actions/workflows/R-CMD-check.yaml)
 [![codecov](https://codecov.io/gh/EvolEcolGroup/tidypopgen/branch/main/graph/badge.svg?token=KLOzxJoLBO)](https://app.codecov.io/gh/EvolEcolGroup/tidypopgen)
+[![CRAN status](https://www.r-pkg.org/badges/version/tidypopgen)](https://CRAN.R-project.org/package=tidypopgen)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/grand-total/tidypopgen)](https://github.com/r-hub/cranlogs.app)
+
 <!-- badges: end -->
 
 The goal of `tidypopgen` is to provide a tidy grammar of population genetics, facilitating 

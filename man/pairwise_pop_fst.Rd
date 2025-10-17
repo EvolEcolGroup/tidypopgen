@@ -63,7 +63,7 @@ For all formulae, the genome wide estimate is obtained by taking the ratio of
 the mean numerators and denominators over all relevant SNPs.
 }
 \examples{
-\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -96,4 +96,7 @@ Nei, M. (1987) Molecular Evolutionary Genetics. Columbia University Press
 
 Weir, B. S., & Cockerham, C. C. (1984). Estimating F-statistics for the
 analysis of population structure. Evolution, 38(6): 1358–1370.
+}
+\seealso{
+\code{\link[hierfstat:pairwise.neifst]{hierfstat::pairwise.neifst()}}
 }

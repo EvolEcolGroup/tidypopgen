@@ -15,6 +15,7 @@
 #' @param n_cores the number of cores to be used
 #' @returns a [gen_tibble] with imputed genotypes
 #' @export
+#' @seealso [bigsnpr::snp_fastImputeSimple()] which this function wraps.
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
@@ -40,7 +41,7 @@ gt_impute_simple <- function(
     on.exit(options(bigstatsr.check.parallel.blas = TRUE))
   }
 
-  if (nrow(x) != nrow(attr(x$genotypes, "bigsnp")$genotypes)) {
+  if (nrow(x) != nrow(attr(x$genotypes, "fbm"))) {
     stop(
       "The number of individuals in the gen_tibble does not match the",
       " number of rows in the file backing matrix. Before imputing, use",
@@ -49,20 +50,20 @@ gt_impute_simple <- function(
   }
 
   if (gt_has_imputed(x)) {
-    stop("object x is already imputed, use `gt_set_imputed(x, TRUE)`")
+    stop("object x is already imputed; use `gt_set_imputed(x, set = TRUE)`")
   }
 
   if (
-    !identical(attr(x$genotypes, "bigsnp")$genotypes$code256, bigsnpr::CODE_012)
+    !identical(attr(x$genotypes, "fbm")$code256, bigsnpr::CODE_012)
   ) {
     # nolint start
     if (
       identical(
-        attr(x$genotypes, "bigsnp")$genotypes$code256,
+        attr(x$genotypes, "fbm")$code256,
         bigsnpr::CODE_IMPUTE_PRED
       ) ||
         identical(
-          attr(x$genotypes, "bigsnp")$genotypes$code256,
+          attr(x$genotypes, "fbm")$code256,
           bigsnpr::CODE_DOSAGE
         )
     ) {
@@ -73,8 +74,8 @@ gt_impute_simple <- function(
     }
   }
 
-  attr(x$genotypes, "bigsnp")$genotypes <- bigsnpr::snp_fastImputeSimple(
-    attr(x$genotypes, "bigsnp")$genotypes,
+  attr(x$genotypes, "fbm") <- bigsnpr::snp_fastImputeSimple(
+    attr(x$genotypes, "fbm"),
     method = method,
     ncores = n_cores
   )

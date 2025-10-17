@@ -28,18 +28,24 @@ a square symmetrical matrix of relationship coefficients between
 individuals
 }
 \description{
-This function computes the KING-robust estimator of kinship.
+This function computes the KING-robust estimator of kinship, reimplementing
+the KING algorithm of Manichaikul et al. (2010).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 
-X <- attr(example_gt$genotypes, "bigsnp")
-snp_king(X$genotypes)
+X <- attr(example_gt$genotypes, "fbm")
+snp_king(X)
 
 # Compute for individuals 1 to 5
-snp_king(X$genotypes, ind.row = 1:5, ind.col = 1:5)
+snp_king(X, ind.row = 1:5, ind.col = 1:5)
 
 # Adjust block size
-snp_king(X$genotypes, block.size = 2)
+snp_king(X, block.size = 2)
 
+}
+\references{
+Manichaikul, A. et al. (2010) Robust relationship inference in
+genome-wide association studies. Bioinformatics, 26(22), 2867–2873.
+https://doi.org/10.1093/bioinformatics/btq559.
 }

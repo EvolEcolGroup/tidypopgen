@@ -94,7 +94,7 @@ optimized for speed and memory usage.
 }
 }
 \examples{
-\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
@@ -119,4 +119,7 @@ Evolutionary Genetics. Columbia University Press, pp. 164-165.
 Jost L
 (2008) GST and its relatives do not measure differentiation. Molecular
 Ecology, 17, 4015-4026.
+}
+\seealso{
+\code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}}
 }

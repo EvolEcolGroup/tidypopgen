@@ -32,13 +32,6 @@ indiv_ploidy.vctrs_bigSNP <- function(.x, ...) {
   if ((show_ploidy(.x) != 0) && (show_ploidy(.x) != -2)) {
     rep(show_ploidy(.x), length(.x))
   } else {
-    attr(.x, "bigsnp")$fam$ploidy[vctrs::vec_data(.x)]
+    attr(.x, "fbm_ploidy")[vctrs::vec_data(.x)]
   }
 }
-
-#' #' @export
-#' #' @rdname indiv_ploidy
-#' indiv_ploidy.grouped_df <- function(.x, ...){
-#'   .x %>% mutate(indiv_ploidy = indiv_ploidy(.data$genotypes)) %>%
-#'     summarise(ploidy = mean(indiv_ploidy))
-#' }

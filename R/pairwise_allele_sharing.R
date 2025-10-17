@@ -14,6 +14,7 @@
 #'   improve speed, but will tax memory.
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
+#' @seealso [hierfstat::matching()]
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'
@@ -27,11 +28,11 @@ pairwise_allele_sharing <- function(
     as_matrix = FALSE,
     block_size = bigstatsr::block_size(nrow(x))) {
   # nolint
-  X <- attr(x$genotypes, "bigsnp") # convenient pointer #nolint
-  x_ind_col <- .gt_bigsnp_cols(x)
-  x_ind_row <- .gt_bigsnp_rows(x)
+  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
+  x_ind_col <- .gt_fbm_cols(x)
+  x_ind_row <- .gt_fbm_rows(x)
   ashare_matrix <- snp_allele_sharing(
-    X$genotypes,
+    X,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
     block.size = block_size

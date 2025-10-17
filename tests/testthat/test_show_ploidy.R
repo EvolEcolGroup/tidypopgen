@@ -45,7 +45,7 @@ test_that("ploidy works correctly", {
       ploidy = 0,
       quiet = TRUE
     ),
-    "max ploidy "
+    "require a vector of individual ploidies"
   )
   # add ploidy info for each individual
   test_gt <- gen_tibble(

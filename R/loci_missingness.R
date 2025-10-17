@@ -63,7 +63,7 @@ loci_missingness.tbl_df <- function(
     .x,
     .col = "genotypes",
     as_counts = FALSE,
-    n_cores = n_cores,
+    n_cores = bigstatsr::nb_cores(),
     # the bigapply that splits in blocks is not
     # multithreaded, as we use the multiple
     # threads for openMP,
@@ -93,12 +93,12 @@ loci_missingness.vctrs_bigSNP <- function(
     .x,
     .col = "genotypes",
     as_counts = FALSE,
-    n_cores = n_cores,
+    n_cores = bigstatsr::nb_cores(),
     block_size = bigstatsr::block_size(length(.x), 1), # nolint
     ...) {
   rlang::check_dots_empty()
   # get the FBM
-  geno_fbm <- attr(.x, "bigsnp")$genotypes
+  geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
@@ -124,6 +124,7 @@ loci_missingness.vctrs_bigSNP <- function(
   } else {
     # if we have a single individual
     n_na <- geno_fbm[rows_to_keep, attr(.x, "loci")$big_index]
+    n_na <- as.integer(is.na(n_na))
   }
   n_na
 }
@@ -152,8 +153,8 @@ loci_missingness.grouped_df <- function(
   }
   rlang::check_dots_empty()
   type <- match.arg(type)
-  geno_fbm <- .gt_get_bigsnp(.x)$genotypes
-  rows_to_keep <- .gt_bigsnp_rows(.x)
+  geno_fbm <- .gt_get_fbm(.x)
+  rows_to_keep <- .gt_fbm_rows(.x)
   count_na_sub <- function(geno_fbm, ind, rows_to_keep) {
     na_mat <- grouped_missingness_cpp( # nolint
       BM = geno_fbm,

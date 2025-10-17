@@ -21,7 +21,7 @@ loci_missingness(
   .x,
   .col = "genotypes",
   as_counts = FALSE,
-  n_cores = n_cores,
+  n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 )
@@ -30,7 +30,7 @@ loci_missingness(
   .x,
   .col = "genotypes",
   as_counts = FALSE,
-  n_cores = n_cores,
+  n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(length(.x), 1),
   ...
 )
@@ -77,7 +77,7 @@ efficient method to support grouped \code{gen_tibble} objects, which can return 
 tidied tibble, a list, or a matrix.
 }
 \examples{
-\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
 \dontshow{
 data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)

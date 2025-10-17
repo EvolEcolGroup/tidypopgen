@@ -22,6 +22,9 @@ exclusions: list(
     "R/loci_alt_freq.R" = list( # we use variable names from bigsnpr
       object_name_linter = Inf
     ),
+    "R/tidypopgen-package.R" = list( # we use function names from bigsnpr
+      object_name_linter = Inf
+    ),
     "vignettes/articles/aDNA_pseudohaploids.Rmd" = list( # url
       line_length_linter = 28
     )

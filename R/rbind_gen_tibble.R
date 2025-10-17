@@ -96,15 +96,6 @@ rbind.gen_tbl <- function(
       " same ID."
     )
   }
-  if (any(!is.na(match(
-    attr(ref$genotypes, "bigsnp")$fam$sample.ID,
-    attr(target$genotypes, "bigsnp")$fam$sample.ID
-  )))) {
-    stop(
-      "The two bigsnp objects contain at least one individual with the",
-      " same ID."
-    )
-  }
   if (!quiet) {
     if (as_is) {
       if (flip_strand) {
@@ -121,7 +112,7 @@ rbind.gen_tbl <- function(
   }
   # sort out paths
   if (is.null(backingfile)) {
-    save_path <- dirname(attr(ref$genotypes, "bigsnp")$genotypes$backingfile)
+    save_path <- dirname(attr(ref$genotypes, "fbm")$backingfile)
     backingfile <- tempfile("gt_merged_", tmpdir = save_path, fileext = "")
   }
 
@@ -141,6 +132,20 @@ rbind.gen_tbl <- function(
       )
   }
 
+  # check for duplicates within each dataset
+  if (anyDuplicated(loci_names(target)) > 0) {
+    stop(
+      "The target gen_tibble contains duplicated loci. ",
+      "Use 'find_duplicated_loci()' to identify and remove them."
+    )
+  }
+  if (anyDuplicated(loci_names(ref)) > 0) {
+    stop(
+      "The reference gen_tibble contains duplicated loci. ",
+      "Use 'find_duplicated_loci()' to identify and remove them."
+    )
+  }
+
   report <- rbind_dry_run(
     ref = ref,
     target = target,
@@ -156,12 +161,6 @@ rbind.gen_tbl <- function(
   id_missing <- which(!is.na(report$ref$missing_allele))
   attr(ref$genotypes, "loci")$allele_alt[id_missing] <-
     report$ref$missing_allele[id_missing]
-  # and in  the bigSNP object
-  attr(ref$genotypes, "bigsnp")$map$allele1[attr(
-    ref$genotypes,
-    "loci"
-  )$big_index[id_missing]] <- # nolint
-    report$ref$missing_allele[id_missing]
   # now create a new loci table (we'll use it later)
   new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id, na.last = NA), ]
   # now we subset the SNP object
@@ -169,8 +168,8 @@ rbind.gen_tbl <- function(
   if (nrow(new_ref_loci_tbl) == 0) {
     stop("there are no loci in common between the two gen_tibbles")
   }
-  ref_snp <- subset_bigSNP(
-    attr(ref$genotypes, "bigsnp"),
+  ref_snp <- subset_FBM(
+    attr(ref$genotypes, "fbm"),
     loci_indices = new_ref_loci_tbl$big_index,
     indiv_indices = vctrs::vec_data(ref$genotypes)
   )
@@ -181,33 +180,20 @@ rbind.gen_tbl <- function(
   id_missing <- which(!is.na(report$target$missing_allele))
   attr(target$genotypes, "loci")$allele_alt[id_missing] <-
     report$target$missing_allele[id_missing]
-  # and in  the bigSNP object
-  attr(target$genotypes, "bigsnp")$map$allele1[attr(
-    target$genotypes,
-    "loci"
-  )$big_index[id_missing]] <- # nolint
-    report$target$missing_allele[id_missing]
   # now flip the strands
   ## in the gt_table
-
   to_flip <- report$target$to_flip
   attr(target$genotypes, "loci")$allele_alt[to_flip] <-
     flip(attr(target$genotypes, "loci")$allele_alt[to_flip])
   attr(target$genotypes, "loci")$allele_ref[to_flip] <-
     flip(attr(target$genotypes, "loci")$allele_ref[to_flip])
-  to_flip_big_index <- show_loci(target)$big_index[to_flip]
-  attr(target$genotypes, "bigsnp")$map$allele1[to_flip_big_index] <-
-    flip(attr(target$genotypes, "bigsnp")$map$allele1[to_flip_big_index])
-  attr(target$genotypes, "bigsnp")$map$allele2[to_flip_big_index] <-
-    flip(attr(target$genotypes, "bigsnp")$map$allele2[to_flip_big_index])
 
   # now create a new loci table (we'll use it later)
   new_target_loci_tbl <-
     show_loci(target)[order(report$target$new_id, na.last = NA), ]
-  # now we subset the SNP object
-  ## in the snp object
-  target_snp <- subset_bigSNP(
-    attr(target$genotypes, "bigsnp"),
+
+  target_snp <- subset_FBM(
+    attr(target$genotypes, "fbm"),
     loci_indices = new_target_loci_tbl$big_index,
     indiv_indices = vctrs::vec_data(target$genotypes),
     swap_indices = show_loci(target)$big_index[report$target$to_swap]
@@ -222,8 +208,8 @@ rbind.gen_tbl <- function(
 
   # now we need to merge the two FBMs
   # we start by transposing them, so that they just need to be appended
-  t_ref_fbm <- bigstatsr::big_transpose(ref_snp$genotypes)
-  t_target_fbm <- bigstatsr::big_transpose(target_snp$genotypes)
+  t_ref_fbm <- bigstatsr::big_transpose(ref_snp)
+  t_target_fbm <- bigstatsr::big_transpose(target_snp)
   # append the two files
   append_success <- file.append(t_ref_fbm$backingfile, t_target_fbm$backingfile) # nolint
   # and amend the new number of columns
@@ -232,25 +218,13 @@ rbind.gen_tbl <- function(
   merged_fbm <- bigstatsr::big_transpose(t_ref_fbm, backingfile = backingfile)
   # TODO this should be written in the directory of interest
 
-  # Make sure that the two fam tibbles have the same columns
-  ref_snp$fam <- add_missing_cols(ref_snp$fam, target_snp$fam)
-  target_snp$fam <- add_missing_cols(target_snp$fam, ref_snp$fam)
-
-  # now create a bigsnp object
-  merged_snp <- structure(
-    list(
-      genotypes = merged_fbm,
-      fam = rbind(ref_snp$fam, target_snp$fam),
-      map = ref_snp$map
-    ),
-    class = "bigSNP"
-  )
-  merged_rds <- paste0(backingfile, ".rds")
-  saveRDS(merged_snp, merged_rds)
   # Now we need to create the gen_tibble
   # Make sure that the two tibbles have the same columns
+
   ref <- add_missing_cols(ref, target)
+  names(ref$genotypes) <- ref$id
   target <- add_missing_cols(target, ref)
+  names(target$genotypes) <- target$id
   merged_tbl <- rbind(
     ref %>% select(-dplyr::any_of("genotypes")),
     target %>% select(-dplyr::any_of("genotypes"))
@@ -259,26 +233,24 @@ rbind.gen_tbl <- function(
   vctrs::vec_data(ref$genotypes)
   # and finally append the loci table
   indivs_with_big_names <- c(names(ref$genotypes), names(target$genotypes))
-  # new_ref_loci_tbl$big_index<-
-  #               match(new_ref_loci_tbl$name,merged_snp$map$marker.ID) #nolint
   # TODO check that this is the correct order!!!!
   new_ref_loci_tbl$big_index <- seq_len(nrow(new_ref_loci_tbl))
   # by default, this should just be a subset in the same order as the reference
   # TODO check that all individuals in tibble and bigsnp object are the same
-  merged_tbl$genotypes <- vctrs::new_vctr(
-    match(
-      indivs_with_big_names,
-      merged_snp$fam$sample.ID
-    ),
-    # TODO check that this is the correct order!!!!
-    bigsnp = merged_snp,
-    bigsnp_file = merged_rds,
-    bigsnp_md5sum = tools::md5sum(merged_rds),
+
+  fbm_path <- merged_fbm$backingfile
+
+  indivs_ploidy <- c(
+    attr(ref$genotypes, "fbm_ploidy"),
+    attr(target$genotypes, "fbm_ploidy")
+  )
+  merged_tbl$genotypes <- new_vctrs_bigsnp(
+    fbm_obj = merged_fbm,
+    fbm_file = fbm_path,
     loci = new_ref_loci_tbl,
-    names = indivs_with_big_names,
-    # TODO currently set to only work for diploids or pseudohaploids
+    indiv_id = indivs_with_big_names,
     ploidy = ifelse(any_pseudohaploid, -2L, 2L),
-    class = "vctrs_bigSNP"
+    fbm_ploidy = indivs_ploidy
   )
 
   merged_tibble <- tibble::new_tibble(

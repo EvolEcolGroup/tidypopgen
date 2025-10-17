@@ -161,9 +161,9 @@ loci_alt_freq.grouped_df <- function(
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-    geno_fbm <- .gt_get_bigsnp(.x)$genotypes
+    geno_fbm <- .gt_get_fbm(.x)
     # rows (individuals) that we want to use
-    rows_to_keep <- vctrs::vec_data(.x$genotypes)
+    rows_to_keep <- .gt_fbm_rows(.x)
     # number of groups (used to define dimensions of objects)
     n_groups <- max(dplyr::group_indices(.x))
     ploidy <- indiv_ploidy(.x)
@@ -204,7 +204,7 @@ loci_alt_freq.grouped_df <- function(
         n_valid = freq_mat[, (n_groups + 1):(n_groups * 2)]
       )
       # add col names
-
+      names(counts_list) <- c("n_alt", "n_valid")
       return(counts_list)
     }
 
@@ -308,6 +308,7 @@ loci_maf.grouped_df <- function(
       loci_names = loci_names(.x),
       type = type
     )
+    return(freq_mat)
   } else {
     # the polyploid case
     stop(
@@ -325,7 +326,7 @@ loci_alt_freq_dip_pseudo <- function(.x,
                                      n_cores,
                                      block_size) {
   # get the FBM
-  geno_fbm <- attr(.x, "bigsnp")$genotypes
+  geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
@@ -351,11 +352,10 @@ loci_alt_freq_dip_pseudo <- function(.x,
       a.combine = "rbind"
     )
   } else {
-    # if we have a single individual
-    freq <- matrix(geno_fbm[rows_to_keep, attr(.x, "loci")$big_index], ploidy,
-      ncol = 2
-    )
-    # if this individual is pseudohaploid
+    # if we have a single individual, create a matrix with two columns
+    # counts and ploidy (i.e. number of copies)
+    freq <- cbind(geno_fbm[rows_to_keep, attr(.x, "loci")$big_index], ploidy)
+    # if this individual is pseudohaploid, get the right counts by dividing by 2
     if (ploidy == 1) {
       freq[, 1] <- freq[, 1] / 2
     }
@@ -378,7 +378,7 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
     "It assumes alleles are the unit of observation"
   ))
   # get the FBM
-  geno_fbm <- attr(.x, "bigsnp")$genotypes
+  geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
@@ -415,7 +415,7 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
     col_sums_na_mat[, 1] / (sum(ploidy_by_indiv) - col_sums_na_mat[, 2])
   } else {
     # if we have a single individual
-    geno_fbm[rows_to_keep, attr(.x, "loci")$big_index] / ploidy_by_indiv
+    geno_fbm[rows_to_keep, attr(.x, "loci")$big_index] / ploidy_by_indiv[rows_to_keep] # nolint
   }
 }
 

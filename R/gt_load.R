@@ -41,6 +41,9 @@ gt_load <- function(file = NULL, reattach_to = NULL) {
     stop(file, " does not exist")
   }
   x <- readRDS(file)
+  # update if we have old objects
+  x <- update_old_bigsnp(x)
+
   # now deal with the backing files
   if (is.null(reattach_to)) {
     # we expect the backing files to exist
@@ -57,7 +60,8 @@ gt_load <- function(file = NULL, reattach_to = NULL) {
       reattach_to <- paste0(reattach_to, ".rds")
     }
     # attach the new files
-    attr(x$genotypes, "bigsnp") <- bigsnpr::snp_attach(reattach_to)
+    attr(x$genotypes, "fbm") <- bigstatsr::big_attach(reattach_to)
+    attr(x$genotypes, "fbm_md5sum") <- tools::md5sum(reattach_to)
   }
 
   return(x)
@@ -67,7 +71,7 @@ gt_load <- function(file = NULL, reattach_to = NULL) {
 sub_rds <- function(path, replacement = "", stop_if_not_ext = TRUE) {
   pattern <- "\\.rds$"
   if (!grepl(pattern, path)) {
-    stop("Path '%s' must have 'rds' extension.", path)
+    stop(sprintf("Path '%s' must have '.rds' extension.", path))
   }
   if (
     stop_if_not_ext &&
@@ -82,4 +86,39 @@ sub_rds <- function(path, replacement = "", stop_if_not_ext = TRUE) {
     stop("Replacement must be an extension starting with '.' if provided.")
   }
   sub(pattern, replacement, path)
+}
+
+
+# Update old objects to use FBM directly instead of a bigsnp_obj
+update_old_bigsnp <- function(x) {
+  # if we have a bignsp attribute, we need to upgrade
+  if (!is.null(attr(x$genotypes, "bigsnp"))) {
+    # move the fbm into its own slot
+    attr(x$genotypes, "fbm") <- attr(x$genotypes, "bigsnp")$genotypes
+    # fix ploidy
+    if ((attr(x$genotypes, "ploidy") != 0) && (attr(x$genotypes, "ploidy") != -2)) { # nolint
+      fbm_ploidy <- rep(attr(x$genotypes, "ploidy"), nrow(x))
+    } else {
+      fbm_ploidy <- attr(x, "bigsnp")$fam$ploidy[vctrs::vec_data(x)]
+    }
+    attr(x$genotypes, "fbm_ploidy") <- fbm_ploidy
+
+    # save it (we have to overwrite the old file, as rds and bk have to have
+    # the same name)
+    saveRDS(attr(x$genotypes, "fbm"), file = gt_get_file_names(x)[1])
+    # add the file to the object
+    attr(x$genotypes, "fbm_file") <- gt_get_file_names(x)[1]
+    # add the md5 sum of this file
+    attr(x$genotypes, "fbm_md5sum") <- tools::md5sum(gt_get_file_names(x)[1])
+    # now remove the old bignsp objects
+    attr(x$genotypes, "bigsnp") <- NULL
+    attr(x$genotypes, "bigsnp_file") <- NULL
+    attr(x$genotypes, "bigsnp_md5sum") <- NULL
+    message(
+      "your gen_tibble was in an old format, and it has now ",
+      "been updated\n",
+      "note that the old RDS was overwritten"
+    )
+  }
+  return(x)
 }

@@ -17,6 +17,7 @@
 #' @param n_cores Number of cores to use.
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.
 #' @export
+#' @seealso [bigsnpr::snp_pcadapt()] which this function wraps.
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
 #' data.table::setDTthreads(2)
@@ -44,8 +45,9 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   stopifnot_gen_tibble(x)
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
+    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
+    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
   if (!inherits(pca, "gt_pca")) {
     stop("pca must be a gt_pca object")
@@ -66,10 +68,10 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
 
   # Run the analysis
   res <- bigsnpr::snp_pcadapt(
-    G = .gt_get_bigsnp(x)$genotypes,
+    G = .gt_get_fbm(x),
     U.row = pca$u[, 1:k, drop = FALSE],
-    ind.row = .gt_bigsnp_rows(x),
-    ind.col = .gt_bigsnp_cols(x),
+    ind.row = .gt_fbm_rows(x),
+    ind.col = .gt_fbm_cols(x),
     ncores = n_cores
   )
 

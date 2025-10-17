@@ -85,3 +85,69 @@ subset_bigSNP <- function(
   # we return the object
   snp_list
 }
+
+#' Subset an FBM object
+#'
+#' @param X the FBM object to subset
+#' @param indiv_indices the indices of the individuals (rows) to keep
+#' @param loci_indices the indices of the loci (columns) to keep
+#' @param swap_indices the indices of loci where the alleles should be swapped
+#'   (both in the bim table and in the genotypes)
+#' @param backingfile the backing file (if null, a tempfile will be used)
+#' @returns an FBM object
+#' @keywords internal
+#' @noRd
+subset_FBM <- function(X, # nolint
+                       indiv_indices = NULL,
+                       loci_indices = NULL,
+                       swap_indices = NULL,
+                       backingfile = NULL) {
+  if (is.null(indiv_indices)) {
+    indiv_indices <- bigstatsr::rows_along(X)
+  }
+  if (is.null(loci_indices)) {
+    loci_indices <- bigstatsr::cols_along(X)
+  }
+
+  if (is.null(backingfile)) {
+    backingfile <- tempfile()
+  }
+
+  # save a copy of the FBM with only the columns and rows needed, in order
+  new_geno <- bigstatsr::big_copy(
+    X,
+    ind.row = indiv_indices,
+    ind.col = loci_indices,
+    backingfile = backingfile
+  )
+
+  # now we swap the loci (if necessary)
+  if (!is.null(swap_indices)) {
+    # convert swap indices to the new order
+    swap_indices <- match(swap_indices, loci_indices)
+    swap_indices <- swap_indices[!is.na(swap_indices)]
+
+    # store the old code
+    code_ref <- new_geno$code256
+    # set a code that allows us to see both raw data and imputed data
+    new_geno$code256 <- 1:256
+    swap_locus <- function(x) {
+      # note that we work on the raw bytes valus
+      x_new <- x
+      x_new[x == 3] <- 1
+      x_new[x == 1] <- 3
+      x_new[x == 5] <- 7
+      x_new[x == 7] <- 5
+      as.raw(x_new - 1)
+    }
+    # change the genotypes
+    for (i in swap_indices) {
+      new_geno[, i] <- swap_locus(new_geno[, i])
+    }
+    # now reset the code
+    new_geno$code256 <- code_ref
+  }
+
+  # return
+  new_geno
+}

@@ -67,10 +67,10 @@ on the screen when running from the command line)
 Run SNMF from R in tidypopgen
 }
 \details{
-This is a wrapper for the function snmf from R package LEA.
+This is a wrapper for \code{\link[LEA:main_sNMF]{LEA::snmf()}}.
 }
 \examples{
-\dontshow{if (rlang::is_installed("LEA")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (rlang::is_installed("LEA")) withAutoprint(\{ # examplesIf}
 # run the example only if we have the package installed
 example_gt <- load_example_gt("gen_tbl")
 
@@ -80,4 +80,7 @@ example_gt \%>\% gt_snmf(
   percentage = 0.5, n_runs = 1, seed = 1, alpha = 100
 )
 \dontshow{\}) # examplesIf}
+}
+\seealso{
+\code{\link[LEA:main_sNMF]{LEA::snmf()}}
 }

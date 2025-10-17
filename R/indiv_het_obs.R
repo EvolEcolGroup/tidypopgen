@@ -43,7 +43,7 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   # get the FBM
-  X <- attr(.x, "bigsnp")$genotypes # nolint
+  X <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
 

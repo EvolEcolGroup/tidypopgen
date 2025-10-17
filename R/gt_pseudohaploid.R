@@ -46,14 +46,14 @@ gt_pseudohaploid <- function(x, test_n_loci = 10000) {
   # if test_n_loci greater than n_loci, set it to n_loci
   test_n_loci <- min(test_n_loci, n_loci)
 
-  if (!"ploidy" %in% names(attr(x, "bigsnp")$fam)) {
-    attr(x, "bigsnp")$fam$ploidy <- NA_integer_
+  if (!"ploidy" %in% names(attr(x, "fbm_ploidy"))) {
+    attr(x$genotypes, "fbm_ploidy") <- NA_integer_
   }
 
-  attr(x$genotypes, "bigsnp")$fam$ploidy[.gt_bigsnp_rows(x)] <-
+  attr(x$genotypes, "fbm_ploidy")[.gt_fbm_rows(x)] <-
     identify_pseudohaploids(x, n_test = test_n_loci)
 
-  if (min(attr(x$genotypes, "bigsnp")$fam$ploidy[.gt_bigsnp_rows(x)]) == 2) {
+  if (min(attr(x$genotypes, "fbm_ploidy")[.gt_fbm_rows(x)]) == 2) {
     # if all individuals are diploid, set ploidy to 2
     attr(x$genotypes, "ploidy") <- 2
   } else {

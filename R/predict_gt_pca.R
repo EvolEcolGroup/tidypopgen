@@ -86,8 +86,9 @@ predict.gt_pca <- function(
     ...) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
+    .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
     options(bigstatsr.check.parallel.blas = FALSE)
-    on.exit(options(bigstatsr.check.parallel.blas = TRUE), add = TRUE)
+    on.exit(options(bigstatsr.check.parallel.blas = .old_opt), add = TRUE)
   }
 
   rlang::check_dots_empty()
@@ -136,10 +137,10 @@ predict.gt_pca <- function(
       }
       # X * V #nolint
       XV <- bigstatsr::big_prodMat(
-        .gt_get_bigsnp(new_data)$genotypes, # nolint
+        .gt_get_fbm(new_data), # nolint
         object$v,
-        ind.row = .gt_bigsnp_rows(new_data),
-        ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
+        ind.row = .gt_fbm_rows(new_data),
+        ind.col = .gt_fbm_cols(new_data)[loci_subset],
         block.size = block_size,
         center = object$center,
         scale = object$scale
@@ -152,13 +153,13 @@ predict.gt_pca <- function(
       XV <- bigstatsr::FBM(nrow(new_data), ncol(object$u), init = 0) # nolint
 
       bigstatsr::big_parallelize(
-        .gt_get_bigsnp(new_data)$genotypes,
+        .gt_get_fbm(new_data),
         p.FUN = fbm256_part_prod,
         ind = seq_along(loci_subset),
         ncores = n_cores,
-        ind.row = .gt_bigsnp_rows(new_data),
+        ind.row = .gt_fbm_rows(new_data),
         # info_snp$`_NUM_ID_`[keep], #nolint
-        ind.col = .gt_bigsnp_cols(new_data)[loci_subset],
+        ind.col = .gt_fbm_cols(new_data)[loci_subset],
         center = object$center,
         scale = object$scale,
         V = object$v,
@@ -188,7 +189,7 @@ predict.gt_pca <- function(
           "for the object, e.g. c(1,2)"
         )
       }
-      X <- .gt_get_bigsnp(new_data)$genotypes # pointer for FBM #nolint
+      X <- .gt_get_fbm(new_data) # pointer for FBM #nolint
       proj_i <- NULL # hack to define iterator
       lsq_proj <- foreach::foreach(
         proj_i = seq_len(nrow(new_data)),
@@ -197,8 +198,8 @@ predict.gt_pca <- function(
       ) %do% {
         # scaled genotypes for this individual
         genotypes <- X[
-          .gt_bigsnp_rows(new_data)[proj_i],
-          .gt_bigsnp_cols(new_data)[loci_subset]
+          .gt_fbm_rows(new_data)[proj_i],
+          .gt_fbm_cols(new_data)[loci_subset]
         ]
         genotypes_scaled <- (genotypes - object$center) / object$scale
         na_ids <- which(!is.na(genotypes_scaled))

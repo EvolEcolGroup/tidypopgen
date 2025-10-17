@@ -257,13 +257,14 @@ test_that("gt_order_loci catches unsorted and duplicated positions", {
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
   path <- tempfile()
-  test_gt <- gen_tibble(
+  expect_warning(test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
     indiv_meta = test_indiv_meta,
     quiet = TRUE,
+    allow_duplicates = TRUE,
     backingfile = path
-  )
+  ), "You have allowed duplicated loci")
   new_order <- c(1, 2, 3, 6, 4, 5)
   # manually reorder so loci are ordered, but have duplicates
   show_loci(test_gt) <- show_loci(test_gt)[new_order, ]
@@ -421,17 +422,14 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
     quiet = TRUE,
     backingfile = tempfile()
   )
+  expect_equal(show_loci(test_gt)$genetic_dist, c(0.1, 0.3, 0.2, 0.4, 0.5, 0.6))
+
   test_gt <- gt_update_backingfile(test_gt,
     rm_unsorted_dist = TRUE,
     quiet = TRUE
   )
-
-  rds <- readRDS(gt_get_file_names(test_gt)[1])
-  backingfile <- attr(test_gt$genotypes, "bigsnp")
+  # after updating backingfile, genetic_dist should all be zero
   expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
-  expect_equal(backingfile$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
-  expect_equal(rds$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
-
 
   # Test duplicated dist
   test_loci <- data.frame(
@@ -442,6 +440,7 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
+
   test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
@@ -449,16 +448,14 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
     quiet = TRUE,
     backingfile = tempfile()
   )
+  expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0.2, 0.4, 0.5, 0.6))
+
   test_gt <- gt_update_backingfile(test_gt,
     rm_unsorted_dist = TRUE,
     quiet = TRUE
   )
-
-  rds <- readRDS(gt_get_file_names(test_gt)[1])
-  backingfile <- attr(test_gt$genotypes, "bigsnp")
+  # after updating backingfile, genetic_dist should all be zero
   expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
-  expect_equal(backingfile$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
-  expect_equal(rds$map$genetic.dist, c(0, 0, 0, 0, 0, 0))
 })
 
 
@@ -562,13 +559,14 @@ test_that("is_loci_table_ordered catches unsorted and duplicated positions", {
     allele_ref = c("A", "T", "C", "G", "C", "T"),
     allele_alt = c("T", "C", NA, "C", "G", "A")
   )
-  test_gt <- gen_tibble(
+  expect_warning(test_gt <- gen_tibble(
     x = test_genotypes,
     loci = test_loci,
     indiv_meta = test_indiv_meta,
     quiet = TRUE,
+    allow_duplicates = TRUE,
     backingfile = tempfile()
-  )
+  ), "You have allowed duplicated loci")
   expect_false(is_loci_table_ordered(test_gt))
   expect_error(
     is_loci_table_ordered(test_gt, error_on_false = TRUE),
