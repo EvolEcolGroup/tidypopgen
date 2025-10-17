@@ -1,3 +1,7 @@
+# tidypopgen 0.3.3
+* only use the FBM backend (rather than a complete bignspr object)
+* fix a few minor bugs
+
 # tidypopgen 0.3.2
 * tidy up for CRAN submission
 
