@@ -21,7 +21,7 @@ optimal k and vignette("adegenet-dapc") for a tutorial.'><meta property="og:imag
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,7 @@ optimal k and vignette("adegenet-dapc") for a tutorial.'><meta property="og:imag
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/interpolating_hgdp.html">Interpolating Heterozygosity</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -52,7 +53,7 @@ optimal k and vignette("adegenet-dapc") for a tutorial.'><meta property="og:imag
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Run K-clustering on principal components</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/gt_cluster_pca.R" class="external-link"><code>R/gt_cluster_pca.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/gt_cluster_pca.R" class="external-link"><code>R/gt_cluster_pca.R</code></a></small>
       <div class="d-none name"><code>gt_cluster_pca.Rd</code></div>
     </div>
 
@@ -130,6 +131,12 @@ additional element 'cluster', a list with elements:</p><ul><li><p>'method' the c
 <li><p>'groups' a list, with each element giving the group assignments
 for a given k</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Jombart T, Devillard S and Balloux F (2010) Discriminant analysis
+of principal components: a new method for the analysis of genetically
+structured populations. BMC Genetics 11:94. doi:10.1186/1471-2156-11-94</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>

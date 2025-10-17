@@ -19,7 +19,7 @@ for bigstatsr::big_randomSVD()"><meta property="og:image" content="https://evole
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,7 @@ for bigstatsr::big_randomSVD()"><meta property="og:image" content="https://evole
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/interpolating_hgdp.html">Interpolating Heterozygosity</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -50,7 +51,7 @@ for bigstatsr::big_randomSVD()"><meta property="og:image" content="https://evole
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>PCA for <code>gen_tibble</code> objects by randomized partial SVD</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/gt_pca_randomSVD.R" class="external-link"><code>R/gt_pca_randomSVD.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/gt_pca_randomSVD.R" class="external-link"><code>R/gt_pca_randomSVD.R</code></a></small>
       <div class="d-none name"><code>gt_pca_randomSVD.Rd</code></div>
     </div>
 
@@ -84,7 +85,7 @@ for <code><a href="https://privefl.github.io/bigstatsr/reference/big_randomSVD.h
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>a <code>gen_tbl</code> object</p></dd>
+<dd><p>a <code>gen_tibble</code> object</p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
@@ -149,10 +150,42 @@ vectors)</p></li>
 </ul><p>Note: rather than accessing these elements directly, it is better to use
 <code>tidy</code> and <code>augment</code>. See <code><a href="tidy_gt_pca.html">gt_pca_tidiers</a></code>.</p>
     </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="https://privefl.github.io/bigstatsr/reference/big_randomSVD.html" class="external-link">bigstatsr::big_randomSVD()</a></code> which this function wraps.</p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">vcf_path</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"anolis"</span>,</span></span>
+<span class="r-in"><span>    <span class="st">"punctatus_t70_s10_n46_filtered.recode.vcf.gz"</span>,</span></span>
+<span class="r-in"><span>    package <span class="op">=</span> <span class="st">"tidypopgen"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">vcf_path</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"anolis_"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Remove monomorphic loci and impute</span></span></span>
+<span class="r-in"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">anole_gt</span>, method <span class="op">=</span> <span class="st">"mode"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create PCA object, including total variance</span></span></span>
+<span class="r-in"><span><span class="fu">gt_pca_randomSVD</span><span class="op">(</span><span class="va">anole_gt</span>, k <span class="op">=</span> <span class="fl">10</span>, total_var <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  === PCA of gen_tibble object ===</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Method: [1] "randomSVD"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call ($call):gt_pca_randomSVD(x = anole_gt, k = 10, total_var = TRUE)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Eigenvalues ($d):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  351.891 192.527 113.562 104.427 87.615 83.476 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Principal component scores ($u):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 46 rows (individuals) and 10 columns (axes) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Loadings (Principal axes) ($v):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  matrix with 3249 rows (SNPs) and 10 columns (axes) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

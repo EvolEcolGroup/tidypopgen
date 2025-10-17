@@ -9,7 +9,7 @@ projecting new data."><meta property="og:image" content="https://evolecolgroup.g
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,6 +27,7 @@ projecting new data."><meta property="og:image" content="https://evolecolgroup.g
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/interpolating_hgdp.html">Interpolating Heterozygosity</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -40,7 +41,7 @@ projecting new data."><meta property="og:image" content="https://evolecolgroup.g
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Predict scores of a PCA</h1>
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/R/predict_gt_pca.R" class="external-link"><code>R/predict_gt_pca.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/R/predict_gt_pca.R" class="external-link"><code>R/predict_gt_pca.R</code></a></small>
       <div class="d-none name"><code>predict_gt_pca.Rd</code></div>
     </div>
 
@@ -121,7 +122,247 @@ principal component analysis  36(11): 3439–3446.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Create a gen_tibble of lobster genotypes</span></span></span>
+<span class="r-in"><span><span class="va">bed_file</span> <span class="op">&lt;-</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"lobster"</span>, <span class="st">"lobster.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>,</span></span>
+<span class="r-in"><span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"lobsters"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Remove monomorphic loci and impute</span></span></span>
+<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">lobsters</span>, method <span class="op">=</span> <span class="st">"mode"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Subset into two datasets: one original and one to predict</span></span></span>
+<span class="r-in"><span><span class="va">original_lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">150</span><span class="op">)</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">new_lobsters</span> <span class="op">&lt;-</span> <span class="va">lobsters</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">151</span><span class="op">:</span><span class="fl">176</span><span class="op">)</span>, <span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Create PCA object</span></span></span>
+<span class="r-in"><span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="gt_pca_partialSVD.html">gt_pca_partialSVD</a></span><span class="op">(</span><span class="va">original_lobsters</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Predict</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">pca</span>, new_data <span class="op">=</span> <span class="va">new_lobsters</span>, project_method <span class="op">=</span> <span class="st">"simple"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              .PC1        .PC2        .PC3        .PC4        .PC5        .PC6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig11  0.84495324 -1.32057095  0.95199040  1.94839846  0.80850195 -2.48726987</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig12 -0.07065694 -1.50166991  1.47821253 -0.65881868 -0.32228405  0.50084850</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig13  0.58238791  0.39219100  0.99630978 -0.63288948 -1.20847141  1.38919001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig14 -1.99602145 -2.72731004  2.62251475 -1.98680500 -0.34075528 -0.12146277</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig15  2.26512567 -0.95914412  0.02818837 -0.50138973  0.62787179 -0.64795356</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig16 -1.61997544  0.15563731 -0.40919334  0.11173586  0.50622350  1.11854701</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig17 -0.89287211 -3.18719723 -1.20601118  2.34870824 -2.33942914 -1.56549736</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig18  1.05375670 -6.10652671 -0.82400057 -0.09187650  0.69699406 -1.40561403</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig19 -1.17999551 -2.76944741  1.15010211 -1.20380960  0.24458605 -0.33721468</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig20 -1.13094344 -2.51297661  1.29598913 -1.95585394 -1.40074692 -1.72114107</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig21  1.45168737 -3.78272355 -0.65105851  1.25919966 -0.05981051 -0.72402871</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig22  3.21701452 -4.81619496  1.41010615 -0.35000653  1.17661661 -2.28860783</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig23 -1.90947818 -2.65470446 -0.37492036 -0.29023475 -2.52320183 -0.30582156</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig24  1.28030055 -0.07325206  1.09767261  0.03358915 -1.70200452  0.14763356</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig25 -2.52427515  0.39525228  0.57686195 -1.08051656 -0.36361029  0.71910092</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig26 -0.75644140 -4.01534680  1.22994589  1.73545488 -1.08699849  0.77562836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig27  1.70410788 -0.05110208  1.16705289  1.26292192 -0.14261284 -0.59887368</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig28 -0.21966527 -1.09228344  1.82206389 -0.11802565 -0.81543990 -1.93059542</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig29 -1.80466347 -1.03162891  2.07763585 -0.30734296  1.41805841 -1.44704073</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig30  0.69482871 -0.79526772  0.91429649 -0.73744265  0.63946822 -0.00832335</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig31  0.28195945 -6.36122988  0.56220908  0.58385324  0.78660638 -2.00252223</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig32 -0.93086395 -2.42914291  0.98211553 -0.10126105  0.17805143  0.96874494</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig33 -0.37248494 -3.62456011  0.65785222  0.40916552 -0.56166707  0.26276509</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig34 -0.30753874 -6.81517053 -1.18709724 -0.09927797 -1.72030191 -1.27847587</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig35 -2.43398848  0.60635980 -1.25686251  0.32353264 -0.15047601  1.41621901</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig36  1.46467362 -4.46678967  2.53264029 -1.12870891 -0.20734613 -1.62905258</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              .PC7        .PC8        .PC9       .PC10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig11  1.52777096 -1.51131063  0.74038292  0.01516207</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig12 -0.12498898 -1.68443455  0.56254200 -0.48023226</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig13 -0.02183661  1.28402899 -0.53105701  0.39991004</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig14 -1.09481998 -1.78278611  0.72962139  0.74706789</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig15  2.52704695 -0.81028103  1.56008567  1.21557644</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig16  2.00582704  0.54789136 -0.95219207  0.20802815</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig17  1.66238380  0.50856597 -0.03069758  1.13355924</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig18 -0.36586879 -1.80176553  1.02610432 -1.85184381</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig19 -0.31767420 -0.73445721 -0.22502040 -0.21155048</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig20  2.10001332 -0.18007731 -0.76794917  0.02148115</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig21  2.14159315 -2.00469523 -1.51150345  0.26520736</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig22  0.35367486 -0.92968102  1.07611369 -2.00758176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig23  1.66242946  0.01520255  1.36135538  0.81743107</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig24  1.11196915  0.56990781  0.16502708  1.12759456</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig25  0.79085512  1.63079533  0.33625704  1.32880574</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig26 -0.80559424  0.35422467 -0.02250144 -3.08140603</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig27  1.93681287 -1.54261398  1.95076197  1.56666492</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig28  0.70739380 -0.95388559  1.45470073  0.38913439</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig29  0.12506807  0.88350450  0.31998914  0.27068806</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig30  0.42978594 -0.75662056  0.38966104  0.22344619</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig31  0.72805753  0.71855592  0.24921606  0.42971234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig32 -0.35527173 -1.01854014 -0.55387443  1.04468276</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig33  0.02694817 -1.19006766  0.27706970 -2.34531402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig34  0.53566592  1.62395351  0.75212462 -0.61787774</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig35  0.65649555 -1.25456935 -0.63035895 -0.19707490</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig36  2.06423654 -1.37240744  1.98663932 -0.75062139</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Predict with OADP</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">pca</span>, new_data <span class="op">=</span> <span class="va">new_lobsters</span>, project_method <span class="op">=</span> <span class="st">"OADP"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              .PC1        .PC2        .PC3       .PC4        .PC5       .PC6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig11  0.89730930 -1.46636303  1.14351172  2.4359043  1.01915444 -3.1448299</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig12 -0.07420107 -1.63420957  1.71061677 -0.7861686 -0.38700249  0.6028120</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig13  0.62705559  0.44619604  1.25001301 -0.8350496 -1.61118140  1.8592399</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig14 -2.08080051 -2.93066453  2.96913603 -2.3086783 -0.39806609 -0.1421679</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig15  2.41022742 -1.06868561  0.03406264 -0.6314546  0.79751036 -0.8256000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig16 -1.72395889  0.17340689 -0.49408163  0.1405351  0.64206631  1.4230896</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig17 -0.95308173 -3.57268268 -1.47493051  3.0038994 -3.01982148 -2.0276899</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig18  1.11663168 -6.75697692 -0.98416390 -0.1140875  0.87244710 -1.7646337</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig19 -1.24474568 -3.03780815  1.34981119 -1.4616112  0.29903569 -0.4133387</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig20 -1.18708181 -2.73309619  1.49915896 -2.3335754 -1.68188082 -2.0713907</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig21  1.53291181 -4.15843943 -0.76801709  1.5393596 -0.07365531 -0.8940289</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig22  3.33481205 -5.12508629  1.56964673 -0.3984072  1.34543129 -2.6213354</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig23 -2.01596603 -2.91707173 -0.44175403 -0.3542353 -3.10193978 -0.3769667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig24  1.37208979 -0.08264588  1.35614475  0.0434720 -2.22400661  0.1935946</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig25 -2.64033034  0.42714612  0.65939444 -1.2701136 -0.42985734  0.8518972</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig26 -0.79477312 -4.37544584  1.42836887  2.0811726 -1.31214200  0.9385453</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig27  1.77091305 -0.05460700  1.30822356  1.4497249 -0.16450152 -0.6920186</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig28 -0.23248841 -1.20534202  2.16272138 -0.1453498 -1.01184624 -2.4022659</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig29 -1.91695225 -1.14571184  2.49432338 -0.3838393  1.78543395 -1.8273672</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig30  0.73195749 -0.87012898  1.06793256 -0.8899979  0.77693514 -0.0101375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig31  0.29032128 -6.68971489  0.61286540  0.6477985  0.87589060 -2.2327502</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig32 -0.97131000 -2.61395894  1.11403133 -0.1179058  0.20842652  1.1362299</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig33 -0.39104264 -3.94297198  0.76113873  0.4882581 -0.67448688  0.3162787</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig34 -0.32650580 -7.56719576 -1.42692375 -0.1242634 -2.17127575 -1.6185803</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig35 -2.58340808  0.67242234 -1.50457785  0.4025691 -0.18872917  1.7814357</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig36  1.53813454 -4.86368857  2.93793415 -1.3518221 -0.24996330 -1.9686106</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              .PC7       .PC8        .PC9       .PC10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig11  1.95234868 -1.9642099  0.98197318  0.02028417</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig12 -0.15165556 -2.0700794  0.70196060 -0.60314481</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig13 -0.02962272  1.7797042 -0.75539295  0.57518975</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig14 -1.29022953 -2.1237486  0.88040369  0.90637989</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig15  3.25554347 -1.0622741  2.08867165  1.64207875</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig16  2.57978692  0.7168963 -1.27191013  0.28033492</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig17  2.17912415  0.6794603 -0.04196384  1.56483356</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig18 -0.46409685 -2.3233174  1.34945373 -2.45593814</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig19 -0.39289152 -0.9213192 -0.28709492 -0.27186024</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig20  2.54807945 -0.2213368 -0.95857439  0.02698959</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig21  2.66956533 -2.5366278 -1.94721012  0.34427612</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig22  0.40746993 -1.0810077  1.26508571 -2.37112079</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig23  2.06837911  0.0191963  1.74966644  1.05853075</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig24  1.47636775  0.7717487  0.22884625  1.57960635</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig25  0.94380702  1.9688776  0.41161891  1.63618425</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig26 -0.98311420  0.4381242 -0.02828174 -3.89951777</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig27  2.25202988 -1.8113689  2.31756977  1.87049387</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig28  0.88885861 -1.2172637  1.89109084  0.50987644</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig29  0.15960429  1.1463640  0.42355155  0.36135013</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig30  0.52799439 -0.9422649  0.49323663  0.28480387</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig31  0.81550363  0.8107047  0.28360218  0.49078167</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig32 -0.41956110 -1.2159306 -0.66979029  1.27023446</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig33  0.03270156 -1.4628520  0.34585806 -2.94677444</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig34  0.68551631  2.1140967  0.99945645 -0.82828812</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig35  0.83430956 -1.6204983 -0.83024434 -0.26173005</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig36  2.51565901 -1.6950287  2.49319130 -0.94843772</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Predict with least squares</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">pca</span>,</span></span>
+<span class="r-in"><span>  new_data <span class="op">=</span> <span class="va">new_lobsters</span>,</span></span>
+<span class="r-in"><span>  project_method <span class="op">=</span> <span class="st">"least_squares"</span>, lsq_pcs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             .PC1        .PC2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig11  0.8449532 -1.32057095</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig12 -0.1088606 -1.79996190</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig13  0.5823879  0.39219100</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig14 -1.9960214 -2.72731004</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig15  2.2651257 -0.95914412</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig16 -1.6199754  0.15563731</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig17 -1.0314321 -3.23991878</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig18  1.0537567 -6.10652671</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig19 -1.1799955 -2.76944741</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig20 -1.1309434 -2.51297661</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig21  1.4516874 -3.78272355</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig22  3.2170145 -4.81619496</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig23 -1.9094782 -2.65470446</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig24  1.2803005 -0.07325206</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig25 -2.5242751  0.39525228</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig26 -0.7564414 -4.01534680</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig27  1.7041079 -0.05110208</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig28 -0.2233053 -1.09747960</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig29 -1.8046635 -1.03162891</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig30  0.6934134 -0.79727293</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig31  0.2819594 -6.36122988</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig32 -0.9308639 -2.42914291</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig33 -0.3724849 -3.62456011</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig34 -0.2919582 -6.89773149</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig35 -2.4364457  0.61938077</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig36  1.4646736 -4.46678967</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Return a tibble</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">pca</span>, new_data <span class="op">=</span> <span class="va">new_lobsters</span>, as_matrix <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 26 × 11</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    id      .PC1   .PC2    .PC3    .PC4   .PC5   .PC6    .PC7   .PC8   .PC9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Vig11  0.845 -<span style="color: #BB0000;">1.32</span>   0.952   1.95    0.809 -<span style="color: #BB0000;">2.49</span>   1.53   -<span style="color: #BB0000;">1.51</span>   0.740</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Vig12 -<span style="color: #BB0000;">0.746</span> -<span style="color: #BB0000;">1.19</span>   1.34   -<span style="color: #BB0000;">0.726</span>  -<span style="color: #BB0000;">0.481</span>  0.306 -<span style="color: #BB0000;">0.180</span>  -<span style="color: #BB0000;">1.88</span>   0.511</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Vig13  0.582  0.392  0.996  -<span style="color: #BB0000;">0.633</span>  -<span style="color: #BB0000;">1.21</span>   1.39  -<span style="color: #BB0000;">0.021</span><span style="color: #BB0000; text-decoration: underline;">8</span>  1.28  -<span style="color: #BB0000;">0.531</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Vig14 -<span style="color: #BB0000;">2.00</span>  -<span style="color: #BB0000;">2.73</span>   2.62   -<span style="color: #BB0000;">1.99</span>   -<span style="color: #BB0000;">0.341</span> -<span style="color: #BB0000;">0.121</span> -<span style="color: #BB0000;">1.09</span>   -<span style="color: #BB0000;">1.78</span>   0.730</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Vig15  2.27  -<span style="color: #BB0000;">0.959</span>  0.028<span style="text-decoration: underline;">2</span> -<span style="color: #BB0000;">0.501</span>   0.628 -<span style="color: #BB0000;">0.648</span>  2.53   -<span style="color: #BB0000;">0.810</span>  1.56 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Vig16 -<span style="color: #BB0000;">1.62</span>   0.156 -<span style="color: #BB0000;">0.409</span>   0.112   0.506  1.12   2.01    0.548 -<span style="color: #BB0000;">0.952</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Vig17 -<span style="color: #BB0000;">1.11</span>  -<span style="color: #BB0000;">3.27</span>  -<span style="color: #BB0000;">1.24</span>    2.28   -<span style="color: #BB0000;">2.37</span>  -<span style="color: #BB0000;">1.54</span>   1.67    0.428 -<span style="color: #BB0000;">0.176</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Vig18  1.05  -<span style="color: #BB0000;">6.11</span>  -<span style="color: #BB0000;">0.824</span>  -<span style="color: #BB0000;">0.091</span><span style="color: #BB0000; text-decoration: underline;">9</span>  0.697 -<span style="color: #BB0000;">1.41</span>  -<span style="color: #BB0000;">0.366</span>  -<span style="color: #BB0000;">1.80</span>   1.03 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Vig19 -<span style="color: #BB0000;">1.18</span>  -<span style="color: #BB0000;">2.77</span>   1.15   -<span style="color: #BB0000;">1.20</span>    0.245 -<span style="color: #BB0000;">0.337</span> -<span style="color: #BB0000;">0.318</span>  -<span style="color: #BB0000;">0.734</span> -<span style="color: #BB0000;">0.225</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Vig20 -<span style="color: #BB0000;">1.13</span>  -<span style="color: #BB0000;">2.51</span>   1.30   -<span style="color: #BB0000;">1.96</span>   -<span style="color: #BB0000;">1.40</span>  -<span style="color: #BB0000;">1.72</span>   2.10   -<span style="color: #BB0000;">0.180</span> -<span style="color: #BB0000;">0.768</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 16 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 1 more variable: .PC10 &lt;dbl&gt;</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Adjust block.size</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">pca</span>, new_data <span class="op">=</span> <span class="va">new_lobsters</span>, block_size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             .PC1        .PC2        .PC3        .PC4        .PC5        .PC6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig11  0.8449532 -1.32057095  0.95199040  1.94839846  0.80850195 -2.48726987</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig12 -0.7461382 -1.18627774  1.34460570 -0.72604859 -0.48069122  0.30572175</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig13  0.5823879  0.39219100  0.99630978 -0.63288948 -1.20847141  1.38919001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig14 -1.9960214 -2.72731004  2.62251475 -1.98680500 -0.34075528 -0.12146277</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig15  2.2651257 -0.95914412  0.02818837 -0.50138973  0.62787179 -0.64795356</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig16 -1.6199754  0.15563731 -0.40919334  0.11173586  0.50622350  1.11854701</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig17 -1.1110388 -3.27020882 -1.23906625  2.28063954 -2.37335730 -1.54383228</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig18  1.0537567 -6.10652671 -0.82400057 -0.09187650  0.69699406 -1.40561403</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig19 -1.1799955 -2.76944741  1.15010211 -1.20380960  0.24458605 -0.33721468</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig20 -1.1309434 -2.51297661  1.29598913 -1.95585394 -1.40074692 -1.72114107</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig21  1.4516874 -3.78272355 -0.65105851  1.25919966 -0.05981051 -0.72402871</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig22  3.2170145 -4.81619496  1.41010615 -0.35000653  1.17661661 -2.28860783</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig23 -1.9094782 -2.65470446 -0.37492036 -0.29023475 -2.52320183 -0.30582156</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig24  1.2803005 -0.07325206  1.09767261  0.03358915 -1.70200452  0.14763356</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig25 -2.5242751  0.39525228  0.57686195 -1.08051656 -0.36361029  0.71910092</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig26 -0.7564414 -4.01534680  1.22994589  1.73545488 -1.08699849  0.77562836</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig27  1.7041079 -0.05110208  1.16705289  1.26292192 -0.14261284 -0.59887368</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig28 -0.1765855 -1.03078650  1.97855185 -0.22492693 -0.96831542 -2.02312805</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig29 -1.8046635 -1.03162891  2.07763585 -0.30734296  1.41805841 -1.44704073</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig30  0.7479859 -0.71995438  1.08461798 -0.80963486  0.63013991 -0.05207368</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig31  0.2819594 -6.36122988  0.56220908  0.58385324  0.78660638 -2.00252223</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig32 -0.9308639 -2.42914291  0.98211553 -0.10126105  0.17805143  0.96874494</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig33 -0.3724849 -3.62456011  0.65785222  0.40916552 -0.56166707  0.26276509</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig34 -0.3262743 -6.71589081 -1.14051137 -0.12775555 -1.68695822 -1.41827318</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig35 -2.4527241  0.70563952 -1.21027664  0.29505506 -0.11713232  1.27642171</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig36  1.4646736 -4.46678967  2.53264029 -1.12870891 -0.20734613 -1.62905258</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              .PC7        .PC8        .PC9       .PC10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig11  1.52777096 -1.51131063  0.74038292  0.01516207</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig12 -0.17965094 -1.88387628  0.51083352 -0.33320105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig13 -0.02183661  1.28402899 -0.53105701  0.39991004</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig14 -1.09481998 -1.78278611  0.72962139  0.74706789</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig15  2.52704695 -0.81028103  1.56008567  1.21557644</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig16  2.00582704  0.54789136 -0.95219207  0.20802815</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig17  1.67054359  0.42798506 -0.17562231  1.20681868</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig18 -0.36586879 -1.80176553  1.02610432 -1.85184381</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig19 -0.31767420 -0.73445721 -0.22502040 -0.21155048</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig20  2.10001332 -0.18007731 -0.76794917  0.02148115</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig21  2.14159315 -2.00469523 -1.51150345  0.26520736</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig22  0.35367486 -0.92968102  1.07611369 -2.00758176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig23  1.66242946  0.01520255  1.36135538  0.81743107</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig24  1.11196915  0.56990781  0.16502708  1.12759456</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig25  0.79085512  1.63079533  0.33625704  1.32880574</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig26 -0.80559424  0.35422467 -0.02250144 -3.08140603</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig27  1.93681287 -1.54261398  1.95076197  1.56666492</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig28  0.56401377 -0.97511516  1.32664358  0.44977954</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig29  0.12506807  0.88350450  0.31998914  0.27068806</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig30  0.41996665 -0.90250715  0.30991115  0.25806489</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig31  0.72805753  0.71855592  0.24921606  0.42971234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig32 -0.35527173 -1.01854014 -0.55387443  1.04468276</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig33  0.02694817 -1.19006766  0.27706970 -2.34531402</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig34  0.51631535  1.67658793  0.68897116 -0.66022471</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig35  0.63714498 -1.20193493 -0.69351240 -0.23942188</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig36  2.06423654 -1.37240744  1.98663932 -0.75062139</span>
+</code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

@@ -10,6 +10,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/aDNA_pseudohaploids.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/benchmark_hgdp.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/index.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/articles/interpolating_hgdp.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/articles/tidypopgen.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/authors.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/index.html</loc></url>
@@ -54,6 +55,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_cluster_pca_best_k.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_extract_f2.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_from_genlight.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_get_file_names.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_has_imputed.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/reference/gt_impute_simple.html</loc></url>
