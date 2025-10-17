@@ -4,7 +4,18 @@ output: html_document
 date: "2025-10-14"
 ---
 
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "./figure/interpolating_hgdp/")
+library(tidypopgen)
+library(ggplot2)
+library(adegenet)
+library(tidyr)
+library(stringr)
+library(readr)
+```
 
 In this vignette, we will demonstrate how to interpolate measures of genetic diversity
 across geographic space using the tidypopgen integration with the `sf` package.
@@ -13,8 +24,7 @@ To do so, we will use the Human Genome Diversity Project (HGDP) dataset.
 
 The data files can be downloaded using the following code:
 
-
-``` r
+```{r eval = FALSE}
 temp_dir <- tempdir()
 download_url <-
   "https://zenodo.org/records/17375732/files/hgdp650_id_pop_coords.txt"
@@ -35,8 +45,7 @@ download.file(download_url, download_path, method = "wget")
 
 Our first step is to load the HGDP data into a `gen_tibble` object.
 
-
-``` r
+```{r}
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 
 hgdp <- gen_tibble(bed_path,
@@ -48,17 +57,8 @@ hgdp <- gen_tibble(bed_path,
 
 And add its associated metadata
 
-
-``` r
+```{r}
 meta_info <- read_tsv("./data/hgdp/hgdp650_id_pop_coords.txt", col_names = TRUE)
-#> Rows: 1043 Columns: 6
-#> ── Column specification ───────────────────────────────────────────────────────────────────────────────────
-#> Delimiter: "\t"
-#> chr (4): id, population, geographic_origin, region
-#> dbl (2): latitude, longitude
-#> 
-#> ℹ Use `spec()` to retrieve the full column specification for this data.
-#> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 hgdp <- hgdp %>% mutate(
   population = meta_info$population[match(hgdp$id, meta_info$id)],
@@ -71,24 +71,8 @@ hgdp <- hgdp %>% mutate(
 
 Let's confirm that we have all the expected information:
 
-
-``` r
+```{r}
 hgdp
-#> # A gen_tibble: 643733 loci
-#> # A tibble:     1,043 × 8
-#>    id        phenotype  genotypes population geographic_origin            region latitude longitude
-#>    <chr>     <fct>     <vctr_SNP> <chr>      <chr>                        <chr>     <dbl>     <dbl>
-#>  1 HGDP00448 control    [2,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#>  2 HGDP00479 control    [1,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#>  3 HGDP00985 control    [0,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#>  4 HGDP01094 control    [1,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#>  5 HGDP00982 control    [2,0,...] Mbuti_HG   Democratic_Republic_of_Congo Africa        1        29
-#>  6 HGDP00911 control    [1,0,...] Mandenka   Senegal                      Africa       12       -12
-#>  7 HGDP01202 control    [2,0,...] Mandenka   Senegal                      Africa       12       -12
-#>  8 HGDP00927 control    [2,0,...] Yoruba     Nigeria                      Africa        8         5
-#>  9 HGDP00461 control    [2,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#> 10 HGDP00451 control    [2,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#> # ℹ 1,033 more rows
 ```
 
 # Gen_tibble with sf
@@ -98,37 +82,14 @@ longitudes in our tibble; we can transform them into an `sf` geometry with the
 function `gt_add_sf()`. Once we have done that, our `gen_tibble` will act as
 an `sf` object, which can be plotted with `ggplot2`.
 
-
-``` r
+```{r}
 hgdp <- gt_add_sf(hgdp, c("longitude", "latitude"))
 hgdp
-#> Simple feature collection with 1043 features and 8 fields
-#> Geometry type: POINT
-#> Dimension:     XY
-#> Bounding box:  xmin: -108 ymin: -25.83333 xmax: 155 ymax: 63
-#> Geodetic CRS:  WGS 84
-#> # A gen_tibble: 643733 loci
-#> # A tibble:     1,043 × 9
-#>    id        phenotype  genotypes population geographic_origin            region latitude longitude
-#>    <chr>     <fct>     <vctr_SNP> <chr>      <chr>                        <chr>     <dbl>     <dbl>
-#>  1 HGDP00448 control    [2,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#>  2 HGDP00479 control    [1,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#>  3 HGDP00985 control    [0,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#>  4 HGDP01094 control    [1,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#>  5 HGDP00982 control    [2,0,...] Mbuti_HG   Democratic_Republic_of_Congo Africa        1        29
-#>  6 HGDP00911 control    [1,0,...] Mandenka   Senegal                      Africa       12       -12
-#>  7 HGDP01202 control    [2,0,...] Mandenka   Senegal                      Africa       12       -12
-#>  8 HGDP00927 control    [2,0,...] Yoruba     Nigeria                      Africa        8         5
-#>  9 HGDP00461 control    [2,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#> 10 HGDP00451 control    [2,0,...] Biaka_HG   Central_African_Republic     Africa        4        17
-#> # ℹ 1,033 more rows
-#> # ℹ 1 more variable: geometry <POINT [°]>
 ```
 
 # Interpolating heterozygosity
 
-
-``` r
+```{r}
 library(spData)
 library(sf)
 library(terra)
@@ -138,8 +99,7 @@ library(viridis)
 
 Calculating heterozygosity is simple in `tidypopgen`. First, lets run some basic filtering to remove SNPs in linkage:
 
-
-``` r
+```{r}
 hgdp <- gt_impute_simple(hgdp)
 to_keep <- hgdp %>% loci_ld_clump(
   thr_r2 = 0.2, size = 100,
@@ -150,8 +110,7 @@ hgdp <- hgdp %>% select_loci(all_of(to_keep))
 
 We can store heterozygosity for each individual in our gen_tibble object by creating a column with `mutate()` and using the function `indiv_het_obs()` to calculate observed heterozygosity for each individual. Then we can create a new column with the mean heterozygosity for each population
 
-
-``` r
+```{r}
 hgdp <- hgdp %>% mutate(heterozygosity = indiv_het_obs(genotypes))
 mean_het <- hgdp %>%
   group_by(population) %>%
@@ -166,8 +125,7 @@ hgdp <-
 
 We can then begin by creating a global map using `rnaturalearth`.
 
-
-``` r
+```{r}
 library(rnaturalearth)
 
 map <- ne_countries(scale = "medium") %>%
@@ -179,30 +137,25 @@ map <- st_wrap_dateline(map, options = c("WRAPDATELINE=YES"))
 
 We can check the distribution of our samples across the map using our `gen_tibble` with `sf` geometry:
 
-
-``` r
+```{r hgdp_map}
 ggplot() +
   geom_sf(data = hgdp$geometry) +
   geom_sf(data = map, fill = NA) +
   theme_minimal()
 ```
 
-![plot of chunk hgdp_map](./figure/interpolating_hgdp/hgdp_map-1.png)
-
 Our map shows the distribution of the HGDP data, but we can see that there are gaps in the sampling. We know that heterozygosity decreases with distance from Africa, so we can use spatial interpolation to estimate heterozygosity in unsampled areas.
 
 To begin, we will create a grid of points covering the map.
 
-
-``` r
+```{r}
 grid <- rast(map, nrows = 200, ncols = 200)
 xy <- xyFromCell(grid, 1:ncell(grid))
 ```
 
 By converting this grid to an `sf` object, we can then use `st_filter()` to keep only the points that fall within the landmasses.
 
-
-``` r
+```{r}
 coop <- st_as_sf(as.data.frame(xy),
   coords = c("x", "y"),
   crs = st_crs(map)
@@ -212,12 +165,9 @@ coop <- st_filter(coop, map)
 
 And we can quickly visualise this grid using the `qtm` autoplotting function from the `tmap` package:
 
-
-``` r
+```{r global_grid_map}
 qtm(coop)
 ```
-
-![plot of chunk global_grid_map](./figure/interpolating_hgdp/global_grid_map-1.png)
 
 Now we can use the `gstat` package to perform spatial interpolation of heterozygosity.
 
@@ -225,8 +175,7 @@ Now we can use the `gstat` package to perform spatial interpolation of heterozyg
 
 We remove the genotypes from our `gen_tibble`, as `gstat` does not accept a `gen_tibble` object, and then run the interpolation:
 
-
-``` r
+```{r}
 hgdp_sf_obj <- hgdp %>% select(-"genotypes")
 
 library(gstat)
@@ -237,30 +186,20 @@ res <- gstat(
 )
 
 resp <- predict(res, coop)
-#> [inverse distance weighted interpolation]
 resp$x <- st_coordinates(resp)[, 1]
 resp$y <- st_coordinates(resp)[, 2]
 ```
 
 We can visualise the interpolated values using `tmap`:
 
-
-``` r
+```{r interpolated_map}
 pred <- rasterize(resp, grid, field = "var1.pred", fun = "mean")
 tm_shape(pred) + tm_raster(alpha = 0.6, palette = "viridis")
-#> 
-#> ── tmap v3 code detected ──────────────────────────────────────────────────────────────────────────────────
-#> [v3->v4] `tm_tm_raster()`: migrate the argument(s) related to the scale of the visual variable `col`
-#> namely 'palette' (rename to 'values') to col.scale = tm_scale(<HERE>).
-#> [v3->v4] `tm_raster()`: use `col_alpha` instead of `alpha`.
 ```
-
-![plot of chunk interpolated_map](./figure/interpolating_hgdp/interpolated_map-1.png)
 
 Or, for a more publication-ready figure, we can use `ggplot2` and the `tidyterra` package:
 
-
-``` r
+```{r interpolated_ggplot_map}
 library(tidyterra)
 
 ggplot() +
@@ -274,5 +213,3 @@ ggplot() +
   scale_color_viridis_c(name = "Observed", alpha = 0.8) +
   theme_minimal()
 ```
-
-![plot of chunk interpolated_ggplot_map](./figure/interpolating_hgdp/interpolated_ggplot_map-1.png)
