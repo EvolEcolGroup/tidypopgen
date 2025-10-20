@@ -187,9 +187,10 @@ And for a publication-ready figure, we can use `ggplot2` and the `tidyterra` pac
 
 ``` r
 ggplot()  +
-  geom_sf(data = map, fill = "grey95") +
-  geom_sf(data = anole_gt$geometry, aes(colour = anole_gt$.fittedPC1)) +
-  geom_spatraster(data = pred, aes(fill = mean)) +
+  geom_sf(data = map, fill = "grey95")  +
+  geom_spatraster(data = pred, aes(fill = mean))+
+  geom_sf(data = anole_gt$geometry, aes(fill = anole_gt$.fittedPC1), 
+          shape = 21, colour = "black", size = 2, stroke = 0.3) +
   coord_sf(
     xlim = c(-85, -30),
     ylim = c(-30, 15)
