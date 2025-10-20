@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
   fig.path = "./figure/interpolating/")
 ```
 
-In this vignette, we will demonstrate how to interpolate measures of genetic diversity
+In this vignette, we will demonstrate how to interpolate principal component scores
 across geographic space using the tidypopgen integration with the `sf` package.
 
 To do so, we will use a dataset of *Anolis punctatus* lizards from South America,
@@ -35,7 +35,7 @@ pops <- read.csv(pops_path)
 anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
-Let us check that we have been successful:
+And we can check our data using:
 
 ```{r}
 anole_gt %>% glimpse()
@@ -43,15 +43,15 @@ anole_gt %>% glimpse()
 
 ## Map
 
-To begin, we can add `sf` geometry to our `gen_tibble` using `gt_add_sf()`.
+`tidypopgen` integrates with the `sf` package to allow swift and easy spatial analyses and mapping of genetic data. To begin, we can add `sf` geometry to our `gen_tibble` using `gt_add_sf()`. We need to specify the names of the columns containing the longitude and latitude coordinates.
 
 ```{r}
 anole_gt <- gt_add_sf(anole_gt, c("longitude", "latitude"))
 anole_gt
 ```
 
-We can then begin by creating a map of South America using the
-`rnaturalearth` package.
+We can then create a map of South America using the
+`rnaturalearth` package. This will be the base map onto which we will plot our samples and interpolate our PC scores.
 
 ```{r anolis_map}
 library(rnaturalearth)
@@ -75,7 +75,7 @@ ggplot() +
 
 # PCA
 
-Our previous vignette used PCA, DAPC, and ADMIXTRUE to show that this sample of *Anolis punctatus* lizards contains three main genetic clusters across the range of the species. Suppose that, knowing this, we wanted to interpolate the first principal component across the range of the species to observe the change in genetic variation across space.
+Our previous vignette used PCA, DAPC, and ADMIXTRUE to show that this sample of *Anolis punctatus* lizards contains three main genetic clusters across the range of the species. Suppose that we wanted to interpolate the first principal component across the range of the species to observe the change in genetic variation across space.
 
 Let's run a PCA and augment the gen_tibble with the principal component scores.
 
