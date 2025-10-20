@@ -105,7 +105,7 @@ ggplot() +
 
 # PCA
 
-Our previous vignette used PCA, DAPC, and ADMIXTRUE to show that this sample of *Anolis punctatus* lizards contains three main genetic clusters across the range of the species. Suppose that we wanted to interpolate the first principal component across the range of the species to observe the change in genetic variation across space.
+Our previous vignette used PCA, DAPC, and ADMIXTURE to show that this sample of *Anolis punctatus* lizards contains three main genetic clusters across the range of the species. Suppose that we wanted to interpolate the first principal component across the range of the species to observe the change in genetic variation across space.
 
 Let's run a PCA and augment the gen_tibble with the principal component scores.
 
