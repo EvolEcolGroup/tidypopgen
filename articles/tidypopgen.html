@@ -45,7 +45,7 @@
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/interpolating_hgdp.html">Interpolating Heterozygosity</a></li>
+    <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -70,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>tidypopgen</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/dev/vignettes/tidypopgen.Rmd" class="external-link"><code>vignettes/tidypopgen.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/vignettes/tidypopgen.Rmd" class="external-link"><code>vignettes/tidypopgen.Rmd</code></a></small>
       <div class="d-none name"><code>tidypopgen.Rmd</code></div>
     </div>
 
@@ -251,8 +251,8 @@ using the function <code>gt_update_backingfile</code>:</p>
 <code class="sourceCode R"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_update_backingfile.html">gt_update_backingfile</a></span><span class="op">(</span><span class="va">lobsters</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## gen_backing files updated, now</span></span></code></pre>
-<pre><code><span><span class="co">## using FBM RDS: /tmp/RtmpF59FSG/file2cd625d8e33f.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with FBM backing file: /tmp/RtmpF59FSG/file2cd625d8e33f.bk</span></span></code></pre>
+<pre><code><span><span class="co">## using FBM RDS: /tmp/Rtmp2Q3AQB/file2ce081c481.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with FBM backing file: /tmp/Rtmp2Q3AQB/file2ce081c481.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <p>Now our data are clean and the backingfile is updated, we are ready
 to create a PCA.</p>
