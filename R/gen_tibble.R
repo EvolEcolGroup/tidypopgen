@@ -230,10 +230,6 @@ gen_tibble.character <-
       ))
     }
 
-    # cast chromosome to factor
-    show_loci(x_gt)$chromosome <-
-      cast_chromosome_to_factor(show_loci(x_gt)$chromosome)
-
     # create a chr_int column
     show_loci(x_gt)$chr_int <-
       cast_chromosome_to_int(show_loci(x_gt)$chromosome)
@@ -388,9 +384,6 @@ gen_tibble.matrix <- function(
     indiv_meta,
     class = "gen_tbl"
   )
-  # cast chromosome to factor
-  show_loci(new_gen_tbl)$chromosome <-
-    cast_chromosome_to_factor(show_loci(new_gen_tbl)$chromosome)
 
   # create a chr_int column
   show_loci(new_gen_tbl)$chr_int <-

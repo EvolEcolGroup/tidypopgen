@@ -42,13 +42,13 @@ validate_loci <- function(loci,
   if (!is.character(loci$name)) {
     stop("loci$name must be a character")
   }
-  #if (!is.character(loci$chromosome)) {
-  #  loci$chromosome <- as.character(loci$chromosome)
-  #}
+  if (!is.factor(loci$chromosome)) {
+    loci$chromosome <- cast_chromosome_to_factor(loci$chromosome)
+  }
   # check that chromosome is a factor or character
-  #if (!is.factor(loci$chromosome) && !is.character(loci$chromosome)) {
-  #  stop("loci$chromosome must be a factor or character")
-  #}
+  if (!is.factor(loci$chromosome) && !is.character(loci$chromosome)) {
+    stop("loci$chromosome must be a factor or character")
+  }
   if (!is.integer(loci$position) && !is.numeric(loci$position)) {
     stop("loci$position must be integer-like (integer or numeric)")
   }
