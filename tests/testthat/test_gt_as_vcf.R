@@ -181,7 +181,7 @@ test_that("integer chromosome becomes character", {
   )
   expect_equal(
     show_loci(test_gt)$chromosome,
-    as.character(test_loci$chromosome)
+    as.factor(test_loci$chromosome)
   )
   # therefore gt_as_vcf runs without error
   vcf_file <- gt_as_vcf(test_gt)
@@ -189,6 +189,6 @@ test_that("integer chromosome becomes character", {
   gt <- gen_tibble(vcf_file, quiet = TRUE, backingfile = tempfile())
   expect_equal(
     show_loci(gt)$chromosome,
-    as.character(test_loci$chromosome)
+    as.factor(test_loci$chromosome)
   )
 })

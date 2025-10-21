@@ -156,7 +156,7 @@ test_that("gt_as_plink can use chr_int", {
   result <- sub("^chr", "", show_loci(test_gt)$chromosome)
 
   # compare
-  expect_equal(result, show_loci(test_gt_chr_int)$chromosome)
+  expect_equal(as.factor(result), show_loci(test_gt_chr_int)$chromosome)
 })
 
 if (rlang::is_installed("vcfR")) {

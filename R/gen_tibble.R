@@ -230,6 +230,10 @@ gen_tibble.character <-
       ))
     }
 
+    # cast chromosome to factor
+    show_loci(x_gt)$chromosome <-
+      cast_chromosome_to_factor(show_loci(x_gt)$chromosome)
+
     # create a chr_int column
     show_loci(x_gt)$chr_int <-
       cast_chromosome_to_int(show_loci(x_gt)$chromosome)
@@ -384,6 +388,9 @@ gen_tibble.matrix <- function(
     indiv_meta,
     class = "gen_tbl"
   )
+  # cast chromosome to factor
+  show_loci(new_gen_tbl)$chromosome <-
+    cast_chromosome_to_factor(show_loci(new_gen_tbl)$chromosome)
 
   # create a chr_int column
   show_loci(new_gen_tbl)$chr_int <-
@@ -611,30 +618,30 @@ change_duplicated_file_name <- function(file) {
 }
 
 # adding a chr_int column
-cast_chromosome_to_int <- function(chromosome) {
-  # if chromosome is an factor, then cast it to character
-  if (is.factor(chromosome)) {
-    chromosome <- as.character(chromosome)
-  }
-  # if chromosome is a character, then cast it to integer
-  if (is.character(chromosome)) {
-    # attempt to strip chr from the chromosome
-    chromosome <- gsub(
-      "^(chromosome_|chr_|chromosome|chr)",
-      "",
-      chromosome,
-      ignore.case = TRUE
-    )
-    chromosome <- tryCatch(as.integer(chromosome), warning = function(e) {
-      as.integer(as.factor(chromosome))
-    })
-  }
-  if (is.numeric(chromosome)) {
-    chromosome <- as.integer(chromosome)
-  }
-  if (is.integer(chromosome)) {
-    return(chromosome) # nolint
-  } else {
-    stop("Chromosome column should be integer, character, or factor")
-  }
-}
+# cast_chromosome_to_int <- function(chromosome) {
+#   # if chromosome is an factor, then cast it to character
+#   if (is.factor(chromosome)) {
+#     chromosome <- as.character(chromosome)
+#   }
+#   # if chromosome is a character, then cast it to integer
+#   if (is.character(chromosome)) {
+#     # attempt to strip chr from the chromosome
+#     chromosome <- gsub(
+#       "^(chromosome_|chr_|chromosome|chr)",
+#       "",
+#       chromosome,
+#       ignore.case = TRUE
+#     )
+#     chromosome <- tryCatch(as.integer(chromosome), warning = function(e) {
+#       as.integer(as.factor(chromosome))
+#     })
+#   }
+#   if (is.numeric(chromosome)) {
+#     chromosome <- as.integer(chromosome)
+#   }
+#   if (is.integer(chromosome)) {
+#     return(chromosome) # nolint
+#   } else {
+#     stop("Chromosome column should be integer, character, or factor")
+#   }
+# }

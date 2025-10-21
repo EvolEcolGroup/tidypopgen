@@ -93,7 +93,7 @@ vcf_to_fbm_cpp <- function(
 
   loci <- tibble::tibble(
     name = loci$marker.ID,
-    chromosome = as.factor(loci$chromosome),
+    chromosome = loci$chromosome, #as.factor(loci$chromosome),
     position = loci$physical.pos,
     genetic_dist = loci$genetic.dist,
     allele_ref = loci$allele2,

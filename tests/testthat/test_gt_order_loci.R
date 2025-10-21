@@ -683,7 +683,7 @@ test_that("gt_order_loci works respects chr_int, when original chromosome is cha
   # use gt_order_loci to reorder
   test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
   expect_equal(show_loci(test_gt)$chr_int, c(1, 2, 2, 3, 8, 13))
-  expect_equal(show_loci(test_gt)$chromosome, c("1", "2", "2", "3", "8", "13"))
+  expect_equal(show_loci(test_gt)$chromosome, as.factor(c(1, 2, 2, 3, 8, 13)))
 })
 
 
