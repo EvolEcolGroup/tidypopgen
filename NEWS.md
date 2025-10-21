@@ -1,5 +1,5 @@
 # tidypopgen 0.3.3
-* only use the FBM backend (rather than a complete bignspr object)
+* only use the FBM backend (rather than a complete bigsnpr object)
 * fix a few minor bugs
 
 # tidypopgen 0.3.2
