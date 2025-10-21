@@ -8,9 +8,10 @@ articles:
   a99_plink_cheatsheet: a99_plink_cheatsheet.html
   articles/aDNA_pseudohaploids: aDNA_pseudohaploids.html
   articles/benchmark_hgdp: benchmark_hgdp.html
+  articles/interpolating_hgdp: interpolating_hgdp.html
   articles/interpolating: interpolating.html
   tidypopgen: tidypopgen.html
-last_built: 2025-10-20T19:41Z
+last_built: 2025-10-21T12:46Z
 urls:
   reference: https://evolecolgroup.github.io/tidypopgen/reference
   article: https://evolecolgroup.github.io/tidypopgen/articles
