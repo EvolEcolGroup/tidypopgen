@@ -14,9 +14,9 @@ cast_chromosome_to_factor <- function(x) {
   } else if (is.character(x)) {
     # prepare for transforming to a factor
     digits <- x %>%
-      stringr::str_match_all("\\d+") %>%
+      base_str_match_all("\\d+") %>%
       sapply(toString)
-    non_digits <- x[!stringr::str_detect(x, "^[0-9]+$")]
+    non_digits <- x[!grepl("^[0-9]+$", x)]
 
     # transform digits to numeric first (so as.factor orders them correctly)
     digits <- as.numeric(digits)
@@ -54,11 +54,11 @@ cast_chromosome_to_factor <- function(x) {
 #' @keywords internal
 #' @noRd
 cast_chromosome_to_int <- function(chromosome) {
-  if (any(!stringr::str_detect(chromosome, "^[0-9]+$"))) {
+  if (any(!grepl("^[0-9]+$", chromosome))) {
     digits <- chromosome %>%
-      stringr::str_match_all("\\d+") %>%
+      base_str_match_all("\\d+") %>%
       sapply(toString)
-    non_digits <- chromosome[!stringr::str_detect(chromosome, "^[0-9]+$")]
+    non_digits <- chromosome[!grepl("^[0-9]+$", chromosome)]
     non_digits <- droplevels(non_digits)
 
     # transform digits to integer first (so orders them with correct value,
