@@ -1,16 +1,16 @@
-test_that("cast_chromosome_to_fac handles diverse cases", {
+test_that("cast_chromosome_to_factor handles diverse cases", {
   #######
   # Basic numeric input
   chr <- c(1, 23, 2, 34, 4, 3)
   fac_chr <- cast_chromosome_to_factor(chr)
   expect_true(is.factor(fac_chr))
   expect_equal(levels(fac_chr), as.character(c(1, 2, 3, 4, 23, 34)))
-  expect_true(all(fac_chr == chr))
+  expect_equal(as.character(fac_chr), as.character(chr))
 
   # Back to integer
   casted_chr <- cast_chromosome_to_int(fac_chr)
   expect_true(is.integer(casted_chr))
-  expect_true(all(casted_chr == chr))
+  expect_equal(casted_chr, chr)
   #######
 
   #######
@@ -59,7 +59,7 @@ test_that("cast_chromosome_to_fac handles diverse cases", {
   # Back to integer
   casted_chr <- cast_chromosome_to_int(fac_chr)
   expect_true(is.integer(casted_chr))
-  casted_chr
+  expect_equal(casted_chr, c(1, 23, 2, 34, 4, 3, 35, 36))
   #######
 
   #######
@@ -95,5 +95,28 @@ test_that("cast_chromosome_to_fac handles diverse cases", {
   casted_chr <- cast_chromosome_to_int(fac_chr)
   expect_true(is.integer(casted_chr))
   expect_equal(casted_chr, c(3, 36, 36, 1, 23, 2, 2, 34, 4, 35))
+  #######
+
+  #######
+  # Inputs with NA values
+  chr <- c(3, NA, "Y", 1, 23, NA, 2, 34, 4, "X")
+  expect_error(
+    cast_chromosome_to_factor(chr),
+    "NA values are not allowed in chromosome names"
+  )
+  #######
+
+  #######
+  # Only non-digits
+  chr <- c("X", "Y", "MT")
+  fac_chr <- cast_chromosome_to_factor(chr)
+  expect_true(is.factor(fac_chr))
+  expect_equal(levels(fac_chr), as.character(c("MT", "X", "Y")))
+  expect_true(all(fac_chr == chr))
+
+  # Back to integer
+  casted_chr <- cast_chromosome_to_int(fac_chr)
+  expect_true(is.integer(casted_chr))
+  expect_equal(casted_chr, c(2, 3, 1))
   #######
 })

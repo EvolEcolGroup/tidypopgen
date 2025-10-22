@@ -26,7 +26,7 @@ test_that("show_loci gets and sets information", {
 
   # change the chromosome names to a character with "chr" prefix
   show_loci(test_gt)$chromosome <- paste0("chr", rep(1:2, each = 3))
-  # `show_loci()<-` will reset chromosome to factor and strip the "chr" prefix
+  # `show_loci()<-` will reset chromosome to factor; prefix "chr" is preserved
   expect_true(is.factor(show_loci(test_gt)$chromosome))
   expect_equal(levels(show_loci(test_gt)$chromosome), c("chr1", "chr2"))
   expect_equal(

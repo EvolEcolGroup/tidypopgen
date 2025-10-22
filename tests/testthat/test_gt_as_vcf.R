@@ -152,7 +152,7 @@ test_that("test reading and writing with chunking is equivalent rvcf", {
   expect_equal(count_loci(test_gt_chunked), count_loci(test_gt))
 })
 
-test_that("integer chromosome becomes character", {
+test_that("integer chromosome becomes factor", {
   # create file
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),

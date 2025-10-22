@@ -9,6 +9,9 @@
 #' @keywords internal
 #' @noRd
 cast_chromosome_to_factor <- function(x) {
+  if (any(is.na(x))) {
+    stop("NA values are not allowed in chromosome names")
+  }
   if (is.numeric(x) || is.integer(x)) {
     x <- as.factor(x)
   } else if (is.character(x)) {
@@ -101,8 +104,14 @@ cast_chromosome_to_int <- function(chromosome) {
     no_digits <- chromosome[!grepl("[0-9]", chromosome)]
     no_digits <- droplevels(no_digits)
 
-    # find highest value of digits
-    max_digit <- max(digits, na.rm = TRUE)
+    # if there are no numeric values in chromosome
+    if (all(is.na(digits))) {
+      max_digit <- 0
+    } else {
+      # find highest value of digits
+      max_digit <- max(digits, na.rm = TRUE)
+    }
+
     # give non_digits a number higher than max_digit
     non_digit_values <- seq(max_digit + 1, max_digit + length(no_digits))
 
@@ -156,6 +165,8 @@ extract_parts <- function(x) {
   })
 
   df <- do.call(rbind, df_list)
+  # keep rows with at least one non-NA part
+  df <- df[!(is.na(df$digits) & is.na(df$prefix) & is.na(df$suffix)), , drop = FALSE] #nolint
   rownames(df) <- NULL
   df
 }

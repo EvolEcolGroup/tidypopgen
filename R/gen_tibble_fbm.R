@@ -45,10 +45,6 @@ validate_loci <- function(loci,
   if (!is.factor(loci$chromosome)) {
     loci$chromosome <- cast_chromosome_to_factor(loci$chromosome)
   }
-  # check that chromosome is a factor or character
-  if (!is.factor(loci$chromosome) && !is.character(loci$chromosome)) {
-    stop("loci$chromosome must be a factor or character")
-  }
   if (!is.integer(loci$position) && !is.numeric(loci$position)) {
     stop("loci$position must be integer-like (integer or numeric)")
   }
