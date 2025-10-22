@@ -79,19 +79,21 @@ str_replace_base <- function(string, pattern, replacement) {
 #'
 #' @param string A character input vector
 #' @param pattern A regular expression
-#' @param ignore.case Logical, should case be ignored?
+#' @param ignore_case Logical, should case be ignored?
 #' @return A list of matrices, each matrix containing the full matches and
 #' capture groups for each element of the input vector
 #' @keywords internal
 #' @noRd
-base_str_match_all <- function(string, pattern, ignore.case = FALSE) {
+base_str_match_all <- function(string, pattern, ignore_case = FALSE) {
   # ensure pattern uses perl regex for full regex features
-  matches <- gregexpr(pattern, string, perl = TRUE, ignore.case = ignore.case)
+  matches <- gregexpr(pattern, string, perl = TRUE, ignore.case = ignore_case)
 
   # extract full matches and capture groups
   lapply(seq_along(matches), function(i) {
     m <- matches[[i]]
-    if (m[1] == -1) return(matrix(NA_character_, 0, 1))  # no matches
+    if (m[1] == -1) {
+      return(matrix(NA_character_, 0, 1))
+    } # no matches
 
     # extract substring positions
     starts <- as.vector(m)
@@ -102,7 +104,7 @@ base_str_match_all <- function(string, pattern, ignore.case = FALSE) {
 
     # use regexec on each full match to get capture groups
     group_list <- lapply(full_matches, function(x) {
-      m2 <- regexec(pattern, x, perl = TRUE, ignore.case = ignore.case)
+      m2 <- regexec(pattern, x, perl = TRUE, ignore.case = ignore_case)
       regmatches(x, m2)[[1]]
     })
 
@@ -110,4 +112,3 @@ base_str_match_all <- function(string, pattern, ignore.case = FALSE) {
     do.call(rbind, group_list)
   })
 }
-

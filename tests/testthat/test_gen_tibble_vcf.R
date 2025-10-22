@@ -756,70 +756,53 @@ if (rlang::is_installed("vcfR")) {
 }
 
 if (rlang::is_installed("vcfR")) {
-  # test_that("chr_int is correct", {
-  #   # unit tests for the casting function
-  #   chromosome_names <- c("1", "2", NA, "4")
-  #   expect_true(identical(
-  #     c(1L, 2L, NA, 4L),
-  #     cast_chromosome_to_int(chromosome_names)
-  #   ))
-  #   chromosome_names <- c("chr1", "chr2", NA, "chr4")
-  #   expect_true(identical(
-  #     c(1L, 2L, NA, 4L),
-  #     cast_chromosome_to_int(chromosome_names)
-  #   ))
-  #   chromosome_names <- c("a", "b", NA, "c")
-  #   expect_true(identical(
-  #     c(1L, 2L, NA, 3L),
-  #     cast_chromosome_to_int(chromosome_names)
-  #   ))
-  #
-  #   # a real life example
-  #
-  #   # read bed
-  #   bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
-  #   pop_b_gt <- gen_tibble(bed_path, quiet = TRUE, backingfile = tempfile())
-  #
-  #   # chr_int is correct for bed files
-  #   expect_equal(
-  #     as.character(show_loci(pop_b_gt)$chr_int),
-  #     show_loci(pop_b_gt)$chromosome
-  #   )
-  #
-  #   # read ped
-  #   ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
-  #   pop_b_ped_gt <- gen_tibble(ped_path, quiet = TRUE, backingfile = tempfile())
-  #
-  #   # chr_int is correct for ped files
-  #   expect_equal(
-  #     as.character(show_loci(pop_b_ped_gt)$chr_int),
-  #     show_loci(pop_b_ped_gt)$chromosome
-  #   )
-  #
-  #   # read vcf
-  #   vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
-  #   pop_a_vcfr_gt <-
-  #     gen_tibble(
-  #       vcf_path,
-  #       quiet = TRUE,
-  #       backingfile = tempfile(),
-  #       parser = "vcfR"
-  #     )
-  #   pop_a_cpp_gt <-
-  #     gen_tibble(vcf_path,
-  #       quiet = TRUE,
-  #       backingfile = tempfile(),
-  #       parser = "cpp"
-  #     )
-  #
-  #   # chr_int is correct for vcf
-  #   expect_equal(
-  #     show_loci(pop_a_vcfr_gt)$chr_int,
-  #     as.integer(show_loci(pop_a_vcfr_gt)$chromosome)
-  #   )
-  #   expect_equal(
-  #     show_loci(pop_a_cpp_gt)$chr_int,
-  #     as.integer(show_loci(pop_a_cpp_gt)$chromosome)
-  #   )
-  # })
+  test_that("chr_int is correct", {
+    # a real life example
+
+    # read bed
+    bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
+    pop_b_gt <- gen_tibble(bed_path, quiet = TRUE, backingfile = tempfile())
+
+    # chr_int is correct for bed files
+    expect_equal(
+      as.factor(show_loci(pop_b_gt)$chr_int),
+      show_loci(pop_b_gt)$chromosome
+    )
+
+    # read ped
+    ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
+    pop_b_ped_gt <- gen_tibble(ped_path, quiet = TRUE, backingfile = tempfile())
+
+    # chr_int is correct for ped files
+    expect_equal(
+      as.factor(show_loci(pop_b_ped_gt)$chr_int),
+      show_loci(pop_b_ped_gt)$chromosome
+    )
+
+    # read vcf
+    vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+    pop_a_vcfr_gt <-
+      gen_tibble(
+        vcf_path,
+        quiet = TRUE,
+        backingfile = tempfile(),
+        parser = "vcfR"
+      )
+    pop_a_cpp_gt <-
+      gen_tibble(vcf_path,
+        quiet = TRUE,
+        backingfile = tempfile(),
+        parser = "cpp"
+      )
+
+    # chr_int is correct for vcf
+    expect_equal(
+      as.factor(show_loci(pop_a_vcfr_gt)$chr_int),
+      show_loci(pop_a_vcfr_gt)$chromosome
+    )
+    expect_equal(
+      as.factor(show_loci(pop_a_cpp_gt)$chr_int),
+      show_loci(pop_a_cpp_gt)$chromosome
+    )
+  })
 }

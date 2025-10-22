@@ -609,32 +609,3 @@ change_duplicated_file_name <- function(file) {
   }
   return(file) # nolint
 }
-
-# adding a chr_int column
-# cast_chromosome_to_int <- function(chromosome) {
-#   # if chromosome is an factor, then cast it to character
-#   if (is.factor(chromosome)) {
-#     chromosome <- as.character(chromosome)
-#   }
-#   # if chromosome is a character, then cast it to integer
-#   if (is.character(chromosome)) {
-#     # attempt to strip chr from the chromosome
-#     chromosome <- gsub(
-#       "^(chromosome_|chr_|chromosome|chr)",
-#       "",
-#       chromosome,
-#       ignore.case = TRUE
-#     )
-#     chromosome <- tryCatch(as.integer(chromosome), warning = function(e) {
-#       as.integer(as.factor(chromosome))
-#     })
-#   }
-#   if (is.numeric(chromosome)) {
-#     chromosome <- as.integer(chromosome)
-#   }
-#   if (is.integer(chromosome)) {
-#     return(chromosome) # nolint
-#   } else {
-#     stop("Chromosome column should be integer, character, or factor")
-#   }
-# }

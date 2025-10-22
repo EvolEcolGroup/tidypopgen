@@ -25,12 +25,14 @@ test_that("show_loci gets and sets information", {
   )
 
   # change the chromosome names to a character with "chr" prefix
-  show_loci(test_gt)$chromosome <-  paste0("chr",rep(1:2, each=3))
+  show_loci(test_gt)$chromosome <- paste0("chr", rep(1:2, each = 3))
   # `show_loci()<-` will reset chromosome to factor and strip the "chr" prefix
   expect_true(is.factor(show_loci(test_gt)$chromosome))
-  expect_equal(levels(show_loci(test_gt)$chromosome), c("1", "2"))
-  expect_equal(show_loci(test_gt)$chromosome,
-               as.factor(c("1", "1", "1", "2", "2", "2")))
+  expect_equal(levels(show_loci(test_gt)$chromosome), c("chr1", "chr2"))
+  expect_equal(
+    show_loci(test_gt)$chromosome,
+    as.factor(c("chr1", "chr1", "chr1", "chr2", "chr2", "chr2"))
+  )
 
   # `show_loci()<-` fails if replacement tibble has too few rows
   test_loci2 <- test_loci[-1, ]
@@ -40,7 +42,7 @@ test_that("show_loci gets and sets information", {
   )
 
   # `show_loci()<-` fails if replacement tibble has incomplete columns
-  test_loci3 <- test_loci[,-1]
+  test_loci3 <- test_loci[, -1]
   expect_error(
     show_loci(test_gt) <- test_loci3,
     "loci must have the following columns"
@@ -51,6 +53,8 @@ test_that("show_loci gets and sets information", {
   # check method corrects it to a factor
   expect_true(is.factor(show_loci(test_gt)$chromosome))
   expect_equal(levels(show_loci(test_gt)$chromosome), c("1", "2", "3"))
-  expect_equal(show_loci(test_gt)$chromosome,
-               as.factor(c("1", "1", "2", "2", "3", "3")))
+  expect_equal(
+    show_loci(test_gt)$chromosome,
+    as.factor(c("1", "1", "2", "2", "3", "3"))
+  )
 })

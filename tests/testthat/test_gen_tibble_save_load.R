@@ -37,12 +37,26 @@ test_that("save and load gt", {
   expect_true(all(show_genotypes(new_test_gt$genotypes) == test_genotypes))
   # check that we preserved the loci
   expect_identical(
-    show_loci(new_test_gt$genotypes) %>% select(-big_index, -chr_int, -chromosome),
-    as_tibble(test_loci[,c("name", "position", "genetic_dist", "allele_ref", "allele_alt")])
+    show_loci(new_test_gt$genotypes) %>%
+      select(-big_index, -chr_int, -chromosome),
+    as_tibble(test_loci[, c(
+      "name",
+      "position",
+      "genetic_dist",
+      "allele_ref",
+      "allele_alt"
+    )])
   ) # nolint
   expect_identical(
-    show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int, -chromosome)),
-    as_tibble(test_loci[,c("name", "position", "genetic_dist", "allele_ref", "allele_alt")])
+    show_loci(test_gt$genotypes) %>%
+      select(c(-big_index, -chr_int, -chromosome)),
+    as_tibble(test_loci[, c(
+      "name",
+      "position",
+      "genetic_dist",
+      "allele_ref",
+      "allele_alt"
+    )])
   ) # nolint
 
   # now remove the tibble
@@ -80,12 +94,25 @@ test_that("save and load gt", {
   expect_true(all(show_genotypes(new_test_gt2$genotypes) == test_genotypes))
   # check that we preserved the loci
   expect_identical(
-    show_loci(new_test_gt2$genotypes) %>% select(-big_index, -chr_int, -chromosome),
-    as_tibble(test_loci[,c("name", "position", "genetic_dist", "allele_ref", "allele_alt")])
+    show_loci(new_test_gt2$genotypes) %>%
+      select(-big_index, -chr_int, -chromosome),
+    as_tibble(test_loci[, c(
+      "name",
+      "position",
+      "genetic_dist",
+      "allele_ref",
+      "allele_alt"
+    )])
   ) # nolint
   expect_identical(
     show_loci(test_gt$genotypes) %>% select(-big_index, -chr_int, -chromosome),
-    as_tibble(test_loci[,c("name", "position", "genetic_dist", "allele_ref", "allele_alt")])
+    as_tibble(test_loci[, c(
+      "name",
+      "position",
+      "genetic_dist",
+      "allele_ref",
+      "allele_alt"
+    )])
   ) # nolint
 })
 

@@ -45,7 +45,7 @@ test_that("windows_pop_tajimas_d works correctly", {
   )
   # subset the tibble to the first population and chr1
   test_gt_chr1 <- test_gt %>%
-    select_loci_if(loci_chromosomes(genotypes) == 1) %>%
+    select_loci_if(loci_chromosomes(genotypes) == "chr1") %>%
     dplyr::filter(population == "pop1")
   pop_tajimas_d(test_gt_chr1)
 
@@ -57,7 +57,7 @@ test_that("windows_pop_tajimas_d works correctly", {
   # now test 2nd pop and chr2 from position 3 to 5
   test_gt_chr2 <- test_gt %>%
     select_loci_if(
-      (loci_chromosomes(genotypes) == 2) &
+      (loci_chromosomes(genotypes) == "chr2") &
         show_loci(genotypes)$position %in% c(138, 230, 456)
     ) %>%
     dplyr::filter(population == "pop2")

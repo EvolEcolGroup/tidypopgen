@@ -134,7 +134,7 @@ test_that("windows_pairwise_pop_fst works correctly", {
   # find first 3 SNP loci
   ch1_wind1_pos <- test_gt %>%
     show_loci() %>%
-    filter(chromosome == 1) %>%
+    filter(chromosome == "chr1") %>%
     slice_head(n = 3)
   # pairwise fst for first 3 SNPs
   ch1_wind1_fst <- test_gt %>%
@@ -184,7 +184,7 @@ test_that("windows_pairwise_pop_fst works correctly", {
   # find first 3 SNP loci on chr 2
   ch2_wind1_pos <- test_gt %>%
     show_loci() %>%
-    filter(chromosome == 2) %>%
+    filter(chromosome == "chr2") %>%
     slice_head(n = 3)
   # pairwise fst for first 3 SNPs chr 2
   ch2_wind1_fst <- test_gt %>%
@@ -234,7 +234,7 @@ test_that("windows_pairwise_pop_fst works correctly", {
   # find 3-5 SNP loci on chr 2
   ch2_wind2_pos <- test_gt %>%
     show_loci() %>%
-    filter(chromosome == 2) %>%
+    filter(chromosome == "chr2") %>%
     slice_tail(n = 3)
   # pairwise fst for 3-5 SNPs chr 2
   ch2_wind2_fst <- test_gt %>%
@@ -296,7 +296,7 @@ test_that("windows_pairwise_pop_fst works correctly", {
   # find loci between positions 1-200
   ch1_wind1_pos <- test_gt %>%
     show_loci() %>%
-    filter(chromosome == 1 & position >= 1 & position <= 200) %>%
+    filter(chromosome == "chr1" & position >= 1 & position <= 200) %>%
     select(big_index)
   # pairwise fst for 1-200 positions
   ch1_wind1_fst <- test_gt %>%
@@ -351,7 +351,7 @@ test_that("windows_pairwise_pop_fst works correctly", {
   # find loci between positions 1-200 on chr 2
   ch2_wind1_pos <- test_gt %>%
     show_loci() %>%
-    filter(chromosome == 2 & position >= 1 & position <= 200) %>%
+    filter(chromosome == "chr2" & position >= 1 & position <= 200) %>%
     select(big_index)
   # pairwise fst for 1-200 positions chr 2
   ch2_wind1_fst <- test_gt %>%
@@ -401,7 +401,7 @@ test_that("windows_pairwise_pop_fst works correctly", {
   # find loci between positions 401-600 on chr 2
   ch2_wind5_pos <- test_gt %>%
     show_loci() %>%
-    filter(chromosome == 2 & position >= 401 & position <= 600) %>%
+    filter(chromosome == "chr2" & position >= 401 & position <= 600) %>%
     select(big_index)
   # pairwise fst for 401-600 positions chr 2
   ch2_wind5_fst <- test_gt %>%

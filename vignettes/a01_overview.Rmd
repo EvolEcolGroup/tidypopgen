@@ -45,8 +45,7 @@ This is illustrated in the diagram below. Here, we can see the gen_tibble object
 ![Figure 1: Visual representation of subsetting a gen_tibble object](./img/subset_gen_tibble.jpg){width=500px}
 
 The `loci` tibble includes columns `big_index` for the index in the File-Backed Matrix (or FBM),
-`name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (an `integer`, if known, 
-otherwise set to `NA`), `position` for the position on the chromosome (an `integer`, if known, 
+`name` for the locus name (a `character`, which must be unique), `chromosome` for the chromosome (a factor), `position` for the position on the chromosome (an `integer`, if known, 
 otherwise set to `NA`), `genetic_dist` for the genetic distance on the chromosome
 (`numeric`, if known, else set to 0), `allele_ref` for the the reference allele (a `character`),
 and `allele_alt` for the alternate allele (a `character`, which can be `0` for
