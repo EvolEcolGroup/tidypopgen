@@ -16,7 +16,7 @@ test_that("cast_chromosome_to_fac handles diverse cases",{
   #######
   # Basic character input
   char_chr <- paste0("chr", (chr))
-  fac_chr <- cast_chromosome_to_factor(chr)
+  fac_chr <- cast_chromosome_to_factor(char_chr)
   expect_true(is.factor(fac_chr))
   expect_equal(levels(fac_chr), as.character(c(1,2,3,4,23,34)))
   # remove chr prefix for comparison
