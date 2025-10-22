@@ -9,7 +9,6 @@
 #' @keywords internal
 #' @noRd
 cast_chromosome_to_factor <- function(x) {
-  browser()
   if (is.numeric(x) || is.integer(x)) {
     x <- as.factor(x)
   } else if (is.character(x)) {
