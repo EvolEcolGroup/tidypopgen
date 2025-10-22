@@ -77,6 +77,7 @@ attr
 autoSVD
 autoplot
 autoplots
+autoplotting
 backingfile
 backingfiles
 biallelic
@@ -134,6 +135,7 @@ het
 heterozygosities
 heterozygosity
 heterozygotes
+hgdp
 homozyg
 homozygosity
 homozygote
@@ -203,6 +205,7 @@ transversions
 triallelic
 u
 unflip
+unsampled
 unsets
 uqrmaie
 vcf

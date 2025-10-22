@@ -32,3 +32,26 @@ This function converts a \code{genlight} object from the \code{adegenet} package
 returned gen_tibble will omit the population column.
 }
 }
+\examples{
+\dontshow{if (rlang::is_installed("adegenet")) withAutoprint(\{ # examplesIf}
+
+# Create a simple genlight object
+x <- new("genlight",
+  list(
+    indiv1 = c(1, 1, 0, 1, 1, 0),
+    indiv2 = c(2, 1, 1, 0, 0, 0)
+  ),
+  ploidy = c(2, 2),
+  loc.names = paste0("locus", 1:6),
+  chromosome = c("chr1", "chr1", "chr2", "chr2", "chr3", "chr3"),
+  position = c(100, 200, 150, 250, 300, 400),
+  loc.all = c("A/T", "C/G", "G/C", "A/T", "T/C", "G/A"),
+  pop = c("pop1", "pop2")
+)
+
+
+file <- paste0(tempfile(), "gt_from_genlight")
+# Convert to gen_tibble
+new_gt <- gt_from_genlight(x, backingfile = file)
+\dontshow{\}) # examplesIf}
+}
