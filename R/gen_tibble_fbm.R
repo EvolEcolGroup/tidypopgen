@@ -109,6 +109,9 @@ validate_loci <- function(loci,
       }
     }
   }
+  # Update chr_int column in case chromosome factor levels have changed
+  loci <- loci %>% mutate(chr_int = cast_chromosome_to_int(loci$chromosome))
+  loci <- tibble::as_tibble(loci)
   return(loci)
 }
 
