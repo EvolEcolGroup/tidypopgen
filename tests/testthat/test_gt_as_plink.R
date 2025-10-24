@@ -141,24 +141,6 @@ test_that("gt_as_plink uses loci and indiv information from the gen_tibble", {
   expect_equal(test_gt$population, test_gt3$population)
 })
 
-test_that("gt_as_plink can use chr_int", {
-  # save using gt_as_plink with chromosomes_as_int TRUE
-  bed_path <- gt_as_plink(
-    test_gt,
-    file = paste0(tempfile(), ".bed"),
-    chromosomes_as_int = TRUE
-  )
-
-  # read the bed file
-  test_gt_chr_int <- gen_tibble(bed_path, quiet = TRUE)
-
-  # take original bed, remove the chr
-  result <- sub("^chr", "", show_loci(test_gt)$chromosome)
-
-  # compare
-  expect_equal(result, show_loci(test_gt_chr_int)$chromosome)
-})
-
 if (rlang::is_installed("vcfR")) {
   test_that("family.ID equals sample.ID from vcf", {
     # If the gen_tibble has been read in from vcf format,

@@ -130,7 +130,8 @@ loci_ld_clump.vctrs_bigSNP <- function(
   }
   # create a chromosome vector (fill gaps between bigsnpr and show_loci)
   .chromosome <- rep(2147483647L, ncol(geno_fbm))
-  .chromosome[show_loci(.x)$big_index] <- show_loci(.x)$chr_int
+  .chromosome[show_loci(.x)$big_index] <-
+    cast_chromosome_to_int(show_loci(.x)$chromosome)
   # now figure out if we have any snp which have already been removed
   # those will go into `exclude`
   loci_not_in_tibble <-

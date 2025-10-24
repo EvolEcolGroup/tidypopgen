@@ -99,7 +99,7 @@ gt_impute_xgboost <- function(
 
   infos <- bigsnpr::snp_fastImpute(
     attr(x$genotypes, "fbm"), # this needs subsetting
-    infos.chr = show_loci(x)$chr_int, # check this is correct
+    infos.chr = cast_chromosome_to_int(show_loci(x)$chromosome),
     alpha = alpha,
     size = size,
     p.train = p_train,

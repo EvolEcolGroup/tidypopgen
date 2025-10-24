@@ -57,7 +57,7 @@ test_that("extract f2 correctly", {
   ))
   expect_true(all.equal(
     adm_aftable$snpfile,
-    gt_aftable$snpfile %>% select(-chr_int),
+    gt_aftable$snpfile,
     check.attributes = FALSE
   ))
 
@@ -83,7 +83,7 @@ test_that("extract f2 correctly", {
   ))
   expect_true(all.equal(
     adm_aftable$snpfile,
-    gt_aftable$snpfile %>% select(-chr_int),
+    gt_aftable$snpfile,
     check.attributes = FALSE
   ))
 

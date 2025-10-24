@@ -39,7 +39,8 @@ gt_order_loci <- function(
   if (use_current_table) {
     new_table <- show_loci(.x)
   } else {
-    new_table <- show_loci(.x) %>% dplyr::arrange(.data$chr_int, .data$position)
+    new_table <- show_loci(.x) %>%
+      dplyr::arrange(cast_chromosome_to_int(.data$chromosome), .data$position)
     show_loci(.x) <- new_table
   }
   # if asked to use the current table, check that it is ordered

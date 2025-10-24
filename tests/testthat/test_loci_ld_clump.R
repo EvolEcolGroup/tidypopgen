@@ -116,13 +116,13 @@ test_that("loci_ld_clump error unsorted loci", {
   )
   expect_false(identical(
     show_loci(pop_b_imputed),
-    pop_b_imputed %>% show_loci() %>% arrange(chr_int, position)
+    pop_b_imputed %>% show_loci() %>% arrange(chromosome, position)
   ))
 
   # reorder the loci
   show_loci(pop_b_imputed) <- pop_b_imputed %>%
     show_loci() %>%
-    arrange(chr_int, position)
+    arrange(chromosome, position)
 
   # try again
   expect_equal(
@@ -149,7 +149,7 @@ test_that("loci_ld_clump error unsorted loci", {
   )
   expect_true(identical(
     show_loci(pop_b_imputed),
-    pop_b_imputed %>% show_loci() %>% arrange(chr_int, position)
+    pop_b_imputed %>% show_loci() %>% arrange(chromosome, position)
   ))
 })
 
@@ -189,7 +189,7 @@ test_that("loci order", {
   # reorder the loci
   show_loci(test_gt_new_order) <- test_gt_new_order %>%
     show_loci() %>%
-    arrange(chr_int, position)
+    arrange(chromosome, position)
 
   # try again
   expect_error(

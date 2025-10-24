@@ -121,7 +121,6 @@ lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
 lobsters <- gt_impute_simple(lobsters, method = "mode")
 
 show_loci(lobsters)$chromosome <- "1"
-show_loci(lobsters)$chr_int <- 1
 
 # Create PCA object, including total variance
 gt_pca_autoSVD(lobsters,

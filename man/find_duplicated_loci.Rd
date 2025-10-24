@@ -38,8 +38,7 @@ show_loci(example_gt) <- test_loci <- data.frame(
   position = as.integer(c(3, 3, 5, 65, 343, 46)),
   genetic_dist = as.double(rep(0, 6)),
   allele_ref = c("A", "T", "C", "G", "C", "T"),
-  allele_alt = c("T", "C", NA, "C", "G", "A"),
-  chr_int = rep(1, 6)
+  allele_alt = c("T", "C", NA, "C", "G", "A")
 )
 
 show_loci(example_gt)

@@ -80,7 +80,6 @@
 #' lobsters <- gt_impute_simple(lobsters, method = "mode")
 #'
 #' show_loci(lobsters)$chromosome <- "1"
-#' show_loci(lobsters)$chr_int <- 1
 #'
 #' # Create PCA object, including total variance
 #' gt_pca_autoSVD(lobsters,
@@ -131,7 +130,7 @@ gt_pca_autoSVD <- function(
   # the complete bigsnp object
   infos_chr <- rep(1, ncol(X))
 
-  infos_chr[.gt_fbm_cols(x)] <- show_loci(x)$chr_int
+  infos_chr[.gt_fbm_cols(x)] <- cast_chromosome_to_int(show_loci(x)$chromosome)
   # chromosomes have to be positive numbers
   if (min(infos_chr) < 1) {
     infos_chr <- infos_chr + abs(min(infos_chr) + 1)

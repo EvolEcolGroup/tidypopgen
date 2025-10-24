@@ -230,10 +230,6 @@ gen_tibble.character <-
       ))
     }
 
-    # create a chr_int column
-    show_loci(x_gt)$chr_int <-
-      cast_chromosome_to_int(show_loci(x_gt)$chromosome)
-
     # check alleles
     loci <- show_loci(x_gt)
     doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
@@ -384,10 +380,6 @@ gen_tibble.matrix <- function(
     indiv_meta,
     class = "gen_tbl"
   )
-
-  # create a chr_int column
-  show_loci(new_gen_tbl)$chr_int <-
-    cast_chromosome_to_int(show_loci(new_gen_tbl)$chromosome)
 
   # check alleles
   loci <- show_loci(new_gen_tbl)

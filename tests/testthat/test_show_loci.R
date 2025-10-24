@@ -24,38 +24,37 @@ test_that("show_loci gets and sets information", {
     quiet = TRUE
   )
 
-  # chromosome will be converted to character by gen_tibble
-  test_loci$chromosome <- as.character(test_loci$chromosome)
-  # check that we retrieve the info we put in (as a tibble)
+  # change the chromosome names to a character with "chr" prefix
+  show_loci(test_gt)$chromosome <- paste0("chr", rep(1:2, each = 3))
+  # `show_loci()<-` will reset chromosome to factor; prefix "chr" is preserved
+  expect_true(is.factor(show_loci(test_gt)$chromosome))
+  expect_equal(levels(show_loci(test_gt)$chromosome), c("chr1", "chr2"))
   expect_equal(
-    show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)),
-    as_tibble(test_loci)
+    show_loci(test_gt)$chromosome,
+    as.factor(c("chr1", "chr1", "chr1", "chr2", "chr2", "chr2"))
   )
-  # now change it directly on the genotype column
-  test_loci2 <- test_loci %>% dplyr::mutate(chromosome = "new")
-  show_loci(test_gt$genotypes) <- test_loci2
-  expect_identical(show_loci(test_gt), as_tibble(test_loci2))
-  test_loci3 <- test_loci %>% dplyr::mutate(chromosome = "newer")
-  show_loci(test_gt) <- test_loci3
-  expect_identical(show_loci(test_gt), as_tibble(test_loci3))
-  # with some proper dplyr
-  show_loci(test_gt) <- show_loci(test_gt) %>% mutate(chromosome = "old")
-  expect_true(all(show_loci(test_gt)$chromosome == "old"))
-  test_loci3 <- test_loci3[-1, ]
+
+  # `show_loci()<-` fails if replacement tibble has too few rows
+  test_loci2 <- test_loci[-1, ]
   expect_error(
-    show_loci(test_gt) <- test_loci3,
+    show_loci(test_gt) <- test_loci2,
     "the replacement loci tibble does"
   )
 
-  # try changing show_loci()$chromosome to integer
-  test_loci4 <- test_loci %>%
-    dplyr::mutate(chromosome = as.integer(c(1, 1, 2, 2, 3, 3)))
-  show_loci(test_gt$genotypes) <- test_loci4
-  # check method corrects it to a character
-  expect_true(is.character(show_loci(test_gt)$chromosome))
-  test_loci5 <- test_loci %>%
-    dplyr::mutate(chromosome = as.integer(c(1, 2, 3, 4, 5, 6)))
-  show_loci(test_gt) <- test_loci5
-  # check method corrects it to a character
-  expect_true(is.character(show_loci(test_gt)$chromosome))
+  # `show_loci()<-` fails if replacement tibble has incomplete columns
+  test_loci3 <- test_loci[, -1]
+  expect_error(
+    show_loci(test_gt) <- test_loci3,
+    "loci must have the following columns"
+  )
+
+  # try changing show_loci()$chromosome to an integer
+  show_loci(test_gt)$chromosome <- as.integer(c(1, 1, 2, 2, 3, 3))
+  # check method corrects it to a factor
+  expect_true(is.factor(show_loci(test_gt)$chromosome))
+  expect_equal(levels(show_loci(test_gt)$chromosome), c("1", "2", "3"))
+  expect_equal(
+    show_loci(test_gt)$chromosome,
+    as.factor(c("1", "1", "2", "2", "3", "3"))
+  )
 })
