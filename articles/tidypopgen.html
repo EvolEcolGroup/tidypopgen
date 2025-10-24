@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -171,15 +171,15 @@ information about each locus. Again this is a big table, so we will use
 <code><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head()</a></code> to only look at the first few:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">lobsters</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">##   big_index name  chromosome position genetic_dist allele_ref allele_alt chr_int</span></span>
-<span><span class="co">##       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>         1 rs34… 1                 1            1 G          A                1</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span>         2 rs41… 2                 2            2 C          T                2</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span>         3 rs61… 3                 3            3 G          C                3</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span>         4 rs75… 4                 4            4 C          T                4</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span>         5 rs78… 5                 5            5 A          T                5</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span>         6 rs94… 7                 7            7 A          G                7</span></span></code></pre>
+<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
+<span><span class="co">##   big_index name   chromosome position genetic_dist allele_ref allele_alt</span></span>
+<span><span class="co">##       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>         1 rs3441 1                 1            1 G          A         </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>         2 rs4173 2                 2            2 C          T         </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>         3 rs6157 3                 3            3 G          C         </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>         4 rs7502 4                 4            4 C          T         </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>         5 rs7892 5                 5            5 A          T         </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>         6 rs9441 7                 7            7 A          G</span></span></code></pre>
 <p>Now we have a <code>gen_tibble</code> to work with, we can start to
 clean the data.</p>
 </div>
@@ -252,8 +252,8 @@ using the function <code>gt_update_backingfile</code>:</p>
 <code class="sourceCode R"><span><span class="va">lobsters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_update_backingfile.html">gt_update_backingfile</a></span><span class="op">(</span><span class="va">lobsters</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## gen_backing files updated, now</span></span></code></pre>
-<pre><code><span><span class="co">## using FBM RDS: /tmp/Rtmp08KLRg/file2e1560c1fedc.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with FBM backing file: /tmp/Rtmp08KLRg/file2e1560c1fedc.bk</span></span></code></pre>
+<pre><code><span><span class="co">## using FBM RDS: /tmp/RtmpLHM5lz/file2e886b875efd.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with FBM backing file: /tmp/RtmpLHM5lz/file2e886b875efd.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <p>Now our data are clean and the backingfile is updated, we are ready
 to create a PCA.</p>

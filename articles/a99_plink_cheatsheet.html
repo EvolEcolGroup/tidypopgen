@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -172,14 +172,14 @@ alternatively:</p>
 <span><span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_names.html">loci_names</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">my_snps</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 8</span></span></span>
-<span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt chr_int</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         1 rs44… 1             <span style="text-decoration: underline;">82</span>154            0 A          <span style="color: #BB0000;">NA</span>               1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         2 rs30… 1            <span style="text-decoration: underline;">752</span>566            0 A          G                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         3 rs31… 1            <span style="text-decoration: underline;">752</span>721            0 G          A                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         4 rs12… 1            <span style="text-decoration: underline;">776</span>546            0 A          <span style="color: #BB0000;">NA</span>               1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         5 rs11… 1            <span style="text-decoration: underline;">798</span>959            0 G          A                1</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 7</span></span></span>
+<span><span class="co">#&gt;   big_index name       chromosome position genetic_dist allele_ref allele_alt</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         1 rs4477212  1             <span style="text-decoration: underline;">82</span>154            0 A          <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         2 rs3094315  1            <span style="text-decoration: underline;">752</span>566            0 A          G         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         3 rs3131972  1            <span style="text-decoration: underline;">752</span>721            0 G          A         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         4 rs12124819 1            <span style="text-decoration: underline;">776</span>546            0 A          <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         5 rs11240777 1            <span style="text-decoration: underline;">798</span>959            0 G          A</span></span></code></pre></div>
 <p>will select loci from a previously defined set in the same way as
 –extract.</p>
 <p>Similarly, to filter out individuals, as might be performed with

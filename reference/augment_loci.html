@@ -9,7 +9,7 @@ information from a given analysis."><meta property="og:image" content="https://e
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -97,9 +97,9 @@ of the information, with a column <code>.rownames</code> giving the loci names.<
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Augment the gen_tibble with the PCA scores</span></span></span>
 <span class="r-in"><span><span class="fu">augment_loci</span><span class="op">(</span><span class="va">pca</span>, data <span class="op">=</span> <span class="va">lobsters</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 79 × 18</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 79 × 17</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    big_index name    chromosome position genetic_dist allele_ref allele_alt</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>         1 rs3441  1                 1            1 G          A         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>         2 rs4173  2                 2            2 C          T         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>         3 rs6157  3                 3            3 G          C         </span>
@@ -111,9 +111,9 @@ of the information, with a column <code>.rownames</code> giving the loci names.<
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>         9 rs11291 10               10           10 T          G         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>        10 rs12971 11               11           11 A          G         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 69 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 11 more variables: chr_int &lt;int&gt;, .loadingPC1 &lt;dbl&gt;, .loadingPC2 &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC3 &lt;dbl&gt;, .loadingPC4 &lt;dbl&gt;, .loadingPC5 &lt;dbl&gt;, .loadingPC6 &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC7 &lt;dbl&gt;, .loadingPC8 &lt;dbl&gt;, .loadingPC9 &lt;dbl&gt;, .loadingPC10 &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 10 more variables: .loadingPC1 &lt;dbl&gt;, .loadingPC2 &lt;dbl&gt;, .loadingPC3 &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC4 &lt;dbl&gt;, .loadingPC5 &lt;dbl&gt;, .loadingPC6 &lt;dbl&gt;, .loadingPC7 &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC8 &lt;dbl&gt;, .loadingPC9 &lt;dbl&gt;, .loadingPC10 &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
