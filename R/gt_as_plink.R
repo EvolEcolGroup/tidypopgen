@@ -126,7 +126,7 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
   } else {
     bim_table <- show_loci(x) %>%
       dplyr::select(dplyr::all_of(c(
-        "chr_int",
+        "chromosome",
         "name",
         "genetic_dist",
         "position",
@@ -134,13 +134,14 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
         "allele_ref"
       )))
     colnames(bim_table) <- c(
-      "chr_int",
+      "chromosome",
       "name",
       "genetic_dist",
       "position",
       "allele_ref",
       "allele_alt"
     )
+    bim_table$chromosome <- cast_chromosome_to_int(bim_table$chromosome)
     bim_table$allele_alt[is.na(bim_table$allele_alt)] <- "0"
     bim_table$allele_ref[is.na(bim_table$allele_ref)] <- "0"
     bim_table

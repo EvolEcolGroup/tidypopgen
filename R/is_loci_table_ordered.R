@@ -56,7 +56,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
   if (
     any(unlist(
       show_loci(.x) %>%
-        group_by(.data$chr_int) %>% # nolint
+        group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
         group_map(~ is.unsorted(.x$position))
     ))
   ) {
@@ -77,7 +77,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
   }
 
   # check that all positions in a chromosome are adjacent
-  if (any(duplicated(rle(show_loci(.x)$chr_int)$values))) {
+  if (any(duplicated(rle(as.integer(show_loci(.x)$chromosome))$values))) {
     if (error_on_false) {
       stop("All SNPs in a chromosome should be adjacent in the loci table")
     } else {
@@ -90,7 +90,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
     if (
       any(unlist(
         show_loci(.x) %>%
-          group_by(.data$chr_int) %>% # nolint
+          group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
           group_map(~ is.unsorted(.x$genetic_dist))
       ))
     ) {
@@ -103,7 +103,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
     if (
       any(unlist(
         show_loci(.x) %>%
-          group_by(.data$chr_int) %>% # nolint
+          group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
           group_map(~ duplicated(.x$genetic_dist))
       ))
     ) {
@@ -150,8 +150,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
 #'   position = as.integer(c(3, 3, 5, 65, 343, 46)),
 #'   genetic_dist = as.double(rep(0, 6)),
 #'   allele_ref = c("A", "T", "C", "G", "C", "T"),
-#'   allele_alt = c("T", "C", NA, "C", "G", "A"),
-#'   chr_int = rep(1, 6)
+#'   allele_alt = c("T", "C", NA, "C", "G", "A")
 #' )
 #'
 #' show_loci(example_gt)
@@ -165,13 +164,13 @@ find_duplicated_loci <- function(.x,
   if (
     any(unlist(
       show_loci(.x) %>%
-        group_by(.data$chr_int) %>% # nolint
+        group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
         group_map(~ duplicated(.x$position))
     ))
   ) {
     if (list_duplicates) {
       show_loci(.x) %>%
-        group_by(.data$chr_int) %>% # nolint
+        group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
         group_map(~ .x[duplicated(.x$position) | duplicated(.x$position, fromLast = TRUE), ]$name) %>% # nolint
         unlist(use.names = FALSE)
     } else if (error_on_false) {

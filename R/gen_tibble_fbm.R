@@ -42,12 +42,8 @@ validate_loci <- function(loci,
   if (!is.character(loci$name)) {
     stop("loci$name must be a character")
   }
-  if (!is.character(loci$chromosome)) {
-    loci$chromosome <- as.character(loci$chromosome)
-  }
-  # check that chromosome is a factor or character
-  if (!is.factor(loci$chromosome) && !is.character(loci$chromosome)) {
-    stop("loci$chromosome must be a factor or character")
+  if (!is.factor(loci$chromosome)) {
+    loci$chromosome <- as.factor(loci$chromosome)
   }
   if (!is.integer(loci$position) && !is.numeric(loci$position)) {
     stop("loci$position must be integer-like (integer or numeric)")
@@ -113,6 +109,8 @@ validate_loci <- function(loci,
       }
     }
   }
+  # Update chr_int column in case chromosome factor levels have changed
+  loci <- tibble::as_tibble(loci)
   return(loci)
 }
 

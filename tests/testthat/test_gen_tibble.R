@@ -38,8 +38,15 @@ test_that("create gen_tibble from dfs", {
   # expect_identical(show_loci(test_gt$genotypes) %>% select(-big_index),
   #                                                     as_tibble(test_loci))
   expect_identical(
-    show_loci(test_gt$genotypes) %>% select(c(-big_index, -chr_int)),
-    as_tibble(test_loci)
+    show_loci(test_gt$genotypes) %>%
+      select(c(-big_index, -chromosome)),
+    as_tibble(test_loci[, c(
+      "name",
+      "position",
+      "genetic_dist",
+      "allele_ref",
+      "allele_alt"
+    )])
   )
   # example of dropping the genotypes, leading to a change in class
   test_drop <- test_gt %>% select(-genotypes)

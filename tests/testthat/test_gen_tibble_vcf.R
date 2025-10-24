@@ -70,7 +70,6 @@ if (rlang::is_installed("vcfR")) {
       show_genotypes(pop_b_vcf_gt)
     ))
     expect_true(all.equal(show_loci(pop_b_vcf_gt2), show_loci(pop_b_vcf_gt)))
-    expect_true(is.integer(show_loci(pop_b_vcf_gt2)$chr_int))
 
     # check our cpp parser
     pop_b_vcf_fast_gt <-
@@ -141,7 +140,6 @@ if (rlang::is_installed("vcfR")) {
       show_loci(pop_b_vcf_fast_gt2),
       show_loci(pop_b_vcf_fast_gt)
     ))
-    expect_true(is.integer(show_loci(pop_b_vcf_fast_gt2)$chr_int))
   })
 }
 
@@ -228,7 +226,6 @@ if (rlang::is_installed("vcfR")) {
       show_genotypes(pop_a_vcf_gt)
     ))
     expect_true(all.equal(show_loci(pop_a_vcf_gt2), show_loci(pop_a_vcf_gt)))
-    expect_true(is.integer(show_loci(pop_a_vcf_gt)$chr_int))
 
     # check our cpp parser
     pop_a_vcf_fast_gt <-
@@ -262,7 +259,6 @@ if (rlang::is_installed("vcfR")) {
       show_loci(pop_a_vcf_gt),
       show_loci(pop_a_vcf_fast_gt)
     ))
-    expect_true(is.integer(show_loci(pop_a_vcf_fast_gt)$chr_int))
   })
 }
 
@@ -331,7 +327,6 @@ if (rlang::is_installed("vcfR")) {
       show_genotypes(pop_b_vcf_gt)
     ))
     expect_true(all.equal(show_loci(pop_b_vcf_gt2), show_loci(pop_b_vcf_gt)))
-    expect_true(is.integer(show_loci(pop_b_vcf_gt2)$chr_int))
   })
 }
 
@@ -401,8 +396,8 @@ test_that("gentibble with packedancestry", {
   # individuals are homozygous ref. This is the case for snps rs9697457,
   # rs2862633, rs28569024.
   expect_true(all.equal(
-    show_loci(pop_a_bed_gt)[, (names(show_loci(pop_a_bed_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))], # nolint
-    show_loci(pop_a_gt)[, (names(show_loci(pop_a_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))] # nolint
+    show_loci(pop_a_bed_gt)[, (names(show_loci(pop_a_bed_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref"))], # nolint
+    show_loci(pop_a_gt)[, (names(show_loci(pop_a_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref"))] # nolint
   ))
 })
 
@@ -472,8 +467,8 @@ test_that("gentibble with packedancestry and missingness", {
   # individuals are homozygous ref. This is the case for snps rs9697457,
   # rs2862633, rs28569024.
   expect_true(all.equal(
-    show_loci(pop_b_bed_gt)[, (names(show_loci(pop_b_bed_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))], # nolint
-    show_loci(pop_b_gt)[, (names(show_loci(pop_b_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref", "chr_int"))] # nolint
+    show_loci(pop_b_bed_gt)[, (names(show_loci(pop_b_bed_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref"))], # nolint
+    show_loci(pop_b_gt)[, (names(show_loci(pop_b_gt)) %in% c("big_index", "name", "chromosome", "position", "allele_ref"))] # nolint
   ))
 })
 
@@ -531,81 +526,6 @@ test_that("check summary stats for gen_tibbles read in different ways", {
   expect_equal(bed_miss, geno_miss)
   expect_equal(ped_miss, geno_miss)
 })
-
-if (rlang::is_installed("vcfR")) {
-  test_that("chr_int is always an integer", {
-    # matrix method
-    test_gt <- gen_tibble(
-      x = test_genotypes,
-      loci = test_loci,
-      indiv_meta = test_indiv_meta,
-      quiet = TRUE
-    )
-    expect_true(is.integer(show_loci(test_gt)$chr_int))
-
-    test_loci_fac <- data.frame(
-      name = paste0("rs", 1:6),
-      chromosome = as.factor(paste0("chr", c(1, 1, 1, 1, 2, 2))),
-      position = as.integer(c(3, 5, 65, 343, 23, 456)),
-      genetic_dist = as.double(rep(0, 6)),
-      allele_ref = c("A", "T", "C", "G", "C", "T"),
-      allele_alt = c("T", "C", NA, "C", "G", "A")
-    )
-    test_gt <- gen_tibble(
-      x = test_genotypes,
-      loci = test_loci_fac,
-      indiv_meta = test_indiv_meta,
-      quiet = TRUE
-    )
-    expect_true(is.integer(show_loci(test_gt)$chr_int))
-
-    # character methods
-    bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
-    pop_a_gt <- gen_tibble(bed_path, quiet = TRUE, backingfile = tempfile())
-    expect_true(is.integer(show_loci(pop_a_gt)$chr_int))
-
-    ped_path <- system.file("extdata/pop_a.ped", package = "tidypopgen")
-    pop_a_ped_gt <- gen_tibble(ped_path, quiet = TRUE, backingfile = tempfile())
-    expect_true(is.integer(show_loci(pop_a_ped_gt)$chr_int))
-
-    vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
-    pop_a_vcf_gt <-
-      gen_tibble(
-        vcf_path,
-        quiet = TRUE,
-        backingfile = tempfile(),
-        parser = "vcfR"
-      )
-    expect_true(is.integer(show_loci(pop_a_vcf_gt)$chr_int))
-    pop_a_vcf_fast_gt <-
-      gen_tibble(vcf_path,
-        quiet = TRUE,
-        backingfile = tempfile(),
-        parser = "cpp"
-      )
-    expect_true(is.integer(show_loci(pop_a_vcf_fast_gt)$chr_int))
-
-    geno_path <- system.file("extdata/pop_a.geno", package = "tidypopgen")
-    pop_a_gt <-
-      gen_tibble(
-        geno_path,
-        quiet = TRUE,
-        backingfile = tempfile(),
-        valid_alleles = c("A", "G", "C", "T")
-      )
-    expect_true(is.integer(show_loci(pop_a_gt)$chr_int))
-    geno_path <- system.file("extdata/pop_b.geno", package = "tidypopgen")
-    pop_b_gt <-
-      gen_tibble(
-        geno_path,
-        quiet = TRUE,
-        backingfile = tempfile(),
-        valid_alleles = c("A", "G", "C", "T")
-      )
-    expect_true(is.integer(show_loci(pop_b_gt)$chr_int))
-  })
-}
-
 
 test_that("gt without population is valid", {
   test_indiv_meta <- data.frame(id = c("a", "b", "c"))
@@ -751,75 +671,6 @@ if (rlang::is_installed("vcfR")) {
         show_loci(pop_a_vcf_gt_hapmid_cpp)$chromosome == 23
       ],
       c(1, 0, 0, 0, 0)
-    )
-  })
-}
-
-if (rlang::is_installed("vcfR")) {
-  test_that("chr_int is correct", {
-    # unit tests for the casting function
-    chromosome_names <- c("1", "2", NA, "4")
-    expect_true(identical(
-      c(1L, 2L, NA, 4L),
-      cast_chromosome_to_int(chromosome_names)
-    ))
-    chromosome_names <- c("chr1", "chr2", NA, "chr4")
-    expect_true(identical(
-      c(1L, 2L, NA, 4L),
-      cast_chromosome_to_int(chromosome_names)
-    ))
-    chromosome_names <- c("a", "b", NA, "c")
-    expect_true(identical(
-      c(1L, 2L, NA, 3L),
-      cast_chromosome_to_int(chromosome_names)
-    ))
-
-    # a real life example
-
-    # read bed
-    bed_path <- system.file("extdata/pop_b.bed", package = "tidypopgen")
-    pop_b_gt <- gen_tibble(bed_path, quiet = TRUE, backingfile = tempfile())
-
-    # chr_int is correct for bed files
-    expect_equal(
-      as.character(show_loci(pop_b_gt)$chr_int),
-      show_loci(pop_b_gt)$chromosome
-    )
-
-    # read ped
-    ped_path <- system.file("extdata/pop_b.ped", package = "tidypopgen")
-    pop_b_ped_gt <- gen_tibble(ped_path, quiet = TRUE, backingfile = tempfile())
-
-    # chr_int is correct for ped files
-    expect_equal(
-      as.character(show_loci(pop_b_ped_gt)$chr_int),
-      show_loci(pop_b_ped_gt)$chromosome
-    )
-
-    # read vcf
-    vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
-    pop_a_vcfr_gt <-
-      gen_tibble(
-        vcf_path,
-        quiet = TRUE,
-        backingfile = tempfile(),
-        parser = "vcfR"
-      )
-    pop_a_cpp_gt <-
-      gen_tibble(vcf_path,
-        quiet = TRUE,
-        backingfile = tempfile(),
-        parser = "cpp"
-      )
-
-    # chr_int is correct for vcf
-    expect_equal(
-      show_loci(pop_a_vcfr_gt)$chr_int,
-      as.integer(show_loci(pop_a_vcfr_gt)$chromosome)
-    )
-    expect_equal(
-      show_loci(pop_a_cpp_gt)$chr_int,
-      as.integer(show_loci(pop_a_cpp_gt)$chromosome)
     )
   })
 }
