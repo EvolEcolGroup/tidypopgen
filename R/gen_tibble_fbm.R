@@ -43,7 +43,7 @@ validate_loci <- function(loci,
     stop("loci$name must be a character")
   }
   if (!is.factor(loci$chromosome)) {
-    loci$chromosome <- cast_chromosome_to_factor(loci$chromosome)
+    loci$chromosome <- as.factor(loci$chromosome)
   }
   if (!is.integer(loci$position) && !is.numeric(loci$position)) {
     stop("loci$position must be integer-like (integer or numeric)")
@@ -110,7 +110,6 @@ validate_loci <- function(loci,
     }
   }
   # Update chr_int column in case chromosome factor levels have changed
-  loci <- loci %>% mutate(chr_int = cast_chromosome_to_int(loci$chromosome))
   loci <- tibble::as_tibble(loci)
   return(loci)
 }

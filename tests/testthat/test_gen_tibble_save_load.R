@@ -38,7 +38,7 @@ test_that("save and load gt", {
   # check that we preserved the loci
   expect_identical(
     show_loci(new_test_gt$genotypes) %>%
-      select(-big_index, -chr_int, -chromosome),
+      select(-big_index, -chromosome),
     as_tibble(test_loci[, c(
       "name",
       "position",
@@ -49,7 +49,7 @@ test_that("save and load gt", {
   ) # nolint
   expect_identical(
     show_loci(test_gt$genotypes) %>%
-      select(c(-big_index, -chr_int, -chromosome)),
+      select(c(-big_index, -chromosome)),
     as_tibble(test_loci[, c(
       "name",
       "position",
@@ -95,7 +95,7 @@ test_that("save and load gt", {
   # check that we preserved the loci
   expect_identical(
     show_loci(new_test_gt2$genotypes) %>%
-      select(-big_index, -chr_int, -chromosome),
+      select(-big_index, -chromosome),
     as_tibble(test_loci[, c(
       "name",
       "position",
@@ -105,7 +105,7 @@ test_that("save and load gt", {
     )])
   ) # nolint
   expect_identical(
-    show_loci(test_gt$genotypes) %>% select(-big_index, -chr_int, -chromosome),
+    show_loci(test_gt$genotypes) %>% select(-big_index, -chromosome),
     as_tibble(test_loci[, c(
       "name",
       "position",

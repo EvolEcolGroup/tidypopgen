@@ -141,7 +141,6 @@ test_that("gt_order_loci reorders and regenerates backingfiles", {
 
   # read back in
   reorder_test_gt <- gen_tibble(path_bed, quiet = TRUE)
-  expect_true(is.integer(show_loci(reorder_test_gt)$chr_int))
   expect_true(is.integer(show_loci(reorder_test_gt)$position))
 
   # loci are out of order
@@ -653,7 +652,7 @@ test_that("check updated positions/distances are inherited by the merged gt", {
 })
 
 
-test_that("gt_order_loci works respects chr_int, when original chromosome is character", { # nolint
+test_that("cast_chromosome_to_int transforms correctly from character", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")
@@ -678,16 +677,20 @@ test_that("gt_order_loci works respects chr_int, when original chromosome is cha
     quiet = TRUE,
     backingfile = tempfile()
   )
-  # check chr_int makes sense
-  expect_equal(show_loci(test_gt)$chr_int, c(2, 13, 8, 1, 2, 3))
+  expect_equal(
+    cast_chromosome_to_int(show_loci(test_gt)$chromosome),
+    c(2, 13, 8, 1, 2, 3)
+  )
   # use gt_order_loci to reorder
   test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
-  expect_equal(show_loci(test_gt)$chr_int, c(1, 2, 2, 3, 8, 13))
-  expect_equal(show_loci(test_gt)$chromosome, as.factor(c(1, 2, 2, 3, 8, 13)))
+  expect_equal(
+    cast_chromosome_to_int(show_loci(test_gt)$chromosome),
+    c(1, 2, 2, 3, 8, 13)
+  )
 })
 
 
-test_that("gt_order_loci works respects chr_int, when original chromosome is factor", { # nolint
+test_that("cast_chromosome_to_int transforms correctly from factor", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
     population = c("pop1", "pop1", "pop2")
@@ -713,10 +716,16 @@ test_that("gt_order_loci works respects chr_int, when original chromosome is fac
     backingfile = tempfile()
   )
   # check chr_int makes sense
-  expect_equal(show_loci(test_gt)$chr_int, c(2, 13, 8, 1, 2, 3))
+  expect_equal(
+    cast_chromosome_to_int(show_loci(test_gt)$chromosome),
+    c(2, 13, 8, 1, 2, 3)
+  )
   # use gt_order_loci to reorder
   test_gt <- gt_order_loci(test_gt, use_current_table = FALSE, quiet = TRUE)
-  expect_equal(show_loci(test_gt)$chr_int, c(1, 2, 2, 3, 8, 13))
+  expect_equal(
+    cast_chromosome_to_int(show_loci(test_gt)$chromosome),
+    c(1, 2, 2, 3, 8, 13)
+  )
   expect_equal(
     as.character(show_loci(test_gt)$chromosome),
     as.character(c(1, 2, 2, 3, 8, 13))

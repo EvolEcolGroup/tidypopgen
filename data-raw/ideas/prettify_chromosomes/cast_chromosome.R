@@ -166,7 +166,7 @@ extract_parts <- function(x) {
 
   df <- do.call(rbind, df_list)
   # keep rows with at least one non-NA part
-  df <- df[!(is.na(df$digits) & is.na(df$prefix) & is.na(df$suffix)), , drop = FALSE] #nolint
+  df <- df[!(is.na(df$digits) & is.na(df$prefix) & is.na(df$suffix)), , drop = FALSE] # nolint
   rownames(df) <- NULL
   df
 }

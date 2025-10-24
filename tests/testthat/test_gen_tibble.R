@@ -39,7 +39,7 @@ test_that("create gen_tibble from dfs", {
   #                                                     as_tibble(test_loci))
   expect_identical(
     show_loci(test_gt$genotypes) %>%
-      select(c(-big_index, -chr_int, -chromosome)),
+      select(c(-big_index, -chromosome)),
     as_tibble(test_loci[, c(
       "name",
       "position",
