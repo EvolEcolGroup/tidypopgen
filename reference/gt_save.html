@@ -39,7 +39,6 @@ file with gt_load()."><meta property="og:image" content="https://evolecolgroup.g
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/interpolating_hgdp.html">Interpolating Heterozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -111,15 +110,15 @@ and <em>.bk</em> files</p>
 <span class="r-in"><span><span class="co"># save filtered gen_tibble object</span></span></span>
 <span class="r-in"><span><span class="fu">gt_save</span><span class="op">(</span><span class="va">example_gt</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_example_filtered"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpblzTyA/file239729dfcc23_example_filtered.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpblzTyA/file2397302da395.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpblzTyA/file2397302da395.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpQybbtr/file23ae1810ecc3_example_filtered.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpQybbtr/file23ae750c05c2.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpQybbtr/file23ae750c05c2.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpblzTyA/file239729dfcc23_example_filtered.gt')</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpblzTyA/file239729dfcc23_example_filtered.gt"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/tmp/RtmpblzTyA/file2397302da395.rds"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "/tmp/RtmpblzTyA/file2397302da395.bk"                 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpQybbtr/file23ae1810ecc3_example_filtered.gt')</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpQybbtr/file23ae1810ecc3_example_filtered.gt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/tmp/RtmpQybbtr/file23ae750c05c2.rds"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "/tmp/RtmpQybbtr/file23ae750c05c2.bk"                 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

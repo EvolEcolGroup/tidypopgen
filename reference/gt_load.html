@@ -33,7 +33,6 @@ same directory as the .rds file)."><meta property="og:image" content="https://ev
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/interpolating_hgdp.html">Interpolating Heterozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -101,16 +100,16 @@ You should be able to leave this to NULL unless you have moved the files.</p></d
 <span class="r-in"><span>  file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_example_filtered"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpblzTyA/file23971e01c23a_example_filtered.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpblzTyA/file23972ba4f1c7.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpblzTyA/file23972ba4f1c7.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpQybbtr/file23ae14525394_example_filtered.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpQybbtr/file23ae94da73b.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpQybbtr/file23ae94da73b.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpblzTyA/file23971e01c23a_example_filtered.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpQybbtr/file23ae14525394_example_filtered.gt')</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># backing_files[1] contains the name of the saved .gt file</span></span></span>
 <span class="r-in"><span><span class="va">backing_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpblzTyA/file23971e01c23a_example_filtered.gt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpQybbtr/file23ae14525394_example_filtered.gt"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># To load the saved gen_tibble object, use the path to the saved .gt file</span></span></span>
 <span class="r-in"><span><span class="va">reloaded_gt</span> <span class="op">&lt;-</span> <span class="fu">gt_load</span><span class="op">(</span><span class="va">backing_files</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
