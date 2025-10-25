@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -93,36 +94,48 @@ individual standard columns.</p>
 compulsory columns: <code>id</code> of the individual (as a
 <code>character</code>, which must be unique for each individual), and
 <code>genotypes</code> (stored in a compressed format as a File-Backed
-Matrix. The <code>genotypes</code> column stores a vector of the row
+Matrix). The <code>genotypes</code> column stores a vector of the row
 indices of the matrix for each individual and, when printed, shows the
-first two genotypes for the individual).</p>
-<p>The real data reside on disk, and an attribute <code>bigsnp</code> of
+first two genotypes for the individual.</p>
+<p>The real data reside on disk, and an attribute <code>fbm</code> of
 the <code>genotype</code> column contains all the information to access
-it. There is also an additional attribute , <code>loci</code> which
+it. There is also an additional attribute, <code>loci</code> which
 provides all the information about the loci, including the column
-indices that represent each locus in the FBM. The vector of row indices
-and the table of loci can be subsetted and reordered without changing
-the data on disk; thus, any operation on the <code>gen_tibble</code> is
-fast as it shapes the indices of the genotype matrix rather than the
-matrix itself.<br>
-The <code>loci</code> tibble includes columns <code>big_index</code> for
-the index in the FBM, <code>name</code> for the locus name (a
-<code>character</code>, which must be unique), <code>chromosome</code>
-for the chromosome (an <code>integer</code>, if known, otherwise set to
-<code>NA</code>), <code>position</code> for the position on the
-chromosome (an <code>integer</code>, if known, otherwise set to
-<code>NA</code>), <code>genetic_dist</code> for the genetic distance on
-the chromosome (<code>numeric</code>, if known, else set to 0),
-<code>allele_ref</code> for the the reference allele (a
-<code>character</code>), and <code>allele_alt</code> for the alternate
-allele (a <code>character</code>, which can be <code>0</code> for
-monomorphic loci, following the same convention as plink). Additional
-individual metadata can be stored as columns in the main
-<code>gen_tbl</code>, whilst additional loci information (such as the
-position in centimorgans) can be added as columns in the
-<code>loci</code> attribute table.</p>
+indices that represent each locus in the FBM.</p>
+<p>The vector of row indices and the table of loci can be subsetted and
+reordered without changing the data on disk; thus, any operation on the
+<code>gen_tibble</code> is fast as it shapes the indices of the genotype
+matrix rather than the matrix itself.</p>
+<p>This is illustrated in the diagram below. Here, we can see the
+gen_tibble object, the loci table, and the File-Backed Matrix. In the
+File-Backed Matrix, each row is an individual and each column is a
+locus. When a function operates on a subset of individuals or loci, the
+indices of the subset are used to access the relevant rows or columns in
+the File-Backed Matrix, without needing to load the entire matrix into
+memory. This makes operations efficient and scalable to large
+datasets.</p>
+<div class="float">
+<img src="img/subset_gen_tibble.jpg" width="500" alt="Figure 1: Visual representation of subsetting a gen_tibble object"><div class="figcaption">Figure 1: Visual representation of subsetting a
+gen_tibble object</div>
+</div>
+<p>The <code>loci</code> tibble includes columns <code>big_index</code>
+for the index in the File-Backed Matrix (or FBM), <code>name</code> for
+the locus name (a <code>character</code>, which must be unique),
+<code>chromosome</code> for the chromosome (a factor),
+<code>position</code> for the position on the chromosome (an
+<code>integer</code>, if known, otherwise set to <code>NA</code>),
+<code>genetic_dist</code> for the genetic distance on the chromosome
+(<code>numeric</code>, if known, else set to 0), <code>allele_ref</code>
+for the the reference allele (a <code>character</code>), and
+<code>allele_alt</code> for the alternate allele (a
+<code>character</code>, which can be <code>0</code> for monomorphic
+loci, following the same convention as plink). Additional individual
+metadata can be stored as columns in the main <code>gen_tbl</code>,
+whilst additional loci information (such as the position in
+centimorgans) can be added as columns in the <code>loci</code> attribute
+table.</p>
 <p>In principle, it is possible to use use multiple ways to compress the
-genotypes. <code>tidypopgen</code> currently uses a <code>bigSNP</code>
+genotypes. <code>tidypopgen</code> currently uses a File-Backed Matrix
 object from the package <code>bigsnpr</code>. It is very fast and well
 documented, but it is mostly geared towards diploid data.
 <code>tidypopgen</code> expands that object to deal with different
@@ -179,12 +192,12 @@ loci:</p>
 <span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpI070Zk/file32541f4cfd00.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpI070Zk/file32541f4cfd00.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpI070Zk/file32541f4cfd00.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/Rtmpir2K4j/file2c0f11f8f526.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/Rtmpir2K4j/file2c0f11f8f526.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/Rtmpir2K4j/file2c0f11f8f526.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpI070Zk/file32541f4cfd00.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/Rtmpir2K4j/file2c0f11f8f526.gt')</span></span></code></pre></div>
 <p>We are provided information on where the three files underlying the
 genotype information are stored. As we don’t want to keep the files, we
 used the tmp directory; normally you will want to use your working
@@ -223,15 +236,15 @@ have genotypes (which are stored as an attribute of that column), we
 say:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
-<span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt chr_int</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         1 rs1   1                 3            0 A          T                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         2 rs2   1                 5            0 T          C                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         3 rs3   1                65            0 C          <span style="color: #BB0000;">NA</span>               1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         4 rs4   1               343            0 G          C                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         5 x1    2                23            0 C          G                2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>         6 x2    2               456            0 T          A                2</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
+<span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         1 rs1   1                 3            0 A          T         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         2 rs2   1                 5            0 T          C         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         3 rs3   1                65            0 C          <span style="color: #BB0000;">NA</span>        </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         4 rs4   1               343            0 G          C         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         5 x1    2                23            0 C          G         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>         6 x2    2               456            0 T          A</span></span></code></pre></div>
 <p>Note that, if we are passing a <code>gen_tibble</code> to a function
 that works on genotypes, it is generally not necessary to pass the
 column <code>genotypes</code> in the call:</p>
@@ -367,12 +380,12 @@ heterozygosity</p>
 <code class="sourceCode R"><span><span class="va">example_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci.html">select_loci</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">6</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 8</span></span></span>
-<span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt chr_int</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         2 rs2   1                 5            0 T          C                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         6 x2    2               456            0 T          A                2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         1 rs1   1                 3            0 A          T                1</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 7</span></span></span>
+<span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         2 rs2   1                 5            0 T          C         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         6 x2    2               456            0 T          A         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         1 rs1   1                 3            0 A          T</span></span></code></pre></div>
 <p>This operation could be helpful when merging datasets that do not
 fully overlap on their loci (more on that later).</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
@@ -400,13 +413,13 @@ frequency (MAF) larger than 0.2, and use it to select:</p>
 <span><span class="va">example_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci.html">select_loci</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="va">sel_indices</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 8</span></span></span>
-<span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt chr_int</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         1 rs1   1                 3            0 A          T                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         2 rs2   1                 5            0 T          C                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         4 rs4   1               343            0 G          C                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         5 x1    2                23            0 C          G                2</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 7</span></span></span>
+<span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         1 rs1   1                 3            0 A          T         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         2 rs2   1                 5            0 T          C         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         4 rs4   1               343            0 G          C         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         5 x1    2                23            0 C          G</span></span></code></pre></div>
 <p>Note that passing a variable directly to <code>select</code> is
 deprecated, and so we have to use <code>all_of</code> to wrap it.</p>
 <p><code>select_loci_if</code> allows us to avoid creating a temporary
@@ -437,10 +450,10 @@ chromosome:</p>
 <span>      <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.2</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 8</span></span></span>
-<span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt chr_int</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         5 x1    2                23            0 C          G                2</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 7</span></span></span>
+<span><span class="co">#&gt;   big_index name  chromosome position genetic_dist allele_ref allele_alt</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         5 x1    2                23            0 C          G</span></span></code></pre></div>
 <p>Incidentally, <code><a href="../reference/loci_alt_freq.html">loci_maf()</a></code> is one of several functions
 that compute quantities by locus; they can be identified as they start
 with <code>loci_</code>.</p>
@@ -519,7 +532,22 @@ for grouped tibbles that allows an even easier syntax:</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 3</span></span></span>
+<span><span class="co">#&gt;    loci  group value</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> rs1   pop1  0.25 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> rs1   pop2  0.333</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> rs2   pop1  0.25 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> rs2   pop2  0.167</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> rs3   pop1  0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> rs3   pop2  0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> rs4   pop1  0.25 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> rs4   pop2  0.5  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> x1    pop1  0.5  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> x1    pop2  0.333</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> x2    pop1  0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> x2    pop2  0.333</span></span></code></pre></div>
 <p>These methods are coded in C++ to be very efficient, and they should
 be preferred to the <code><a href="https://dplyr.tidyverse.org/reference/reframe.html" class="external-link">reframe()</a></code> option. By default, their
 outputs will return a tidy tibble, with one row per locus per population
@@ -529,12 +557,24 @@ list:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"list"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"list"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [1] 0.25 0.25 0.00 0.25 0.50 0.00</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [1] 0.3333333 0.1666667 0.0000000 0.5000000 0.3333333 0.3333333</span></span></code></pre></div>
 <p>Or a matrix:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">example_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span>type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     pop1      pop2</span></span>
+<span><span class="co">#&gt; rs1 0.25 0.3333333</span></span>
+<span><span class="co">#&gt; rs2 0.25 0.1666667</span></span>
+<span><span class="co">#&gt; rs3 0.00 0.0000000</span></span>
+<span><span class="co">#&gt; rs4 0.25 0.5000000</span></span>
+<span><span class="co">#&gt; x1  0.50 0.3333333</span></span>
+<span><span class="co">#&gt; x2  0.00 0.3333333</span></span></code></pre></div>
 <p>Certain metrics and analyses are naturally defined by a grouped
 tibble as they refer to populations, such as population-specific Fst.
 For example:</p>
@@ -589,22 +629,22 @@ be named differently (but, by default, if no specific name is given,
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gt_file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpI070Zk/file32541f4cfd00.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpI070Zk/file32541f4cfd00.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpI070Zk/file32541f4cfd00.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/Rtmpir2K4j/file2c0f11f8f526.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/Rtmpir2K4j/file2c0f11f8f526.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/Rtmpir2K4j/file2c0f11f8f526.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpI070Zk/file32541f4cfd00.gt')</span></span>
+<span><span class="co">#&gt; gt_load('/tmp/Rtmpir2K4j/file2c0f11f8f526.gt')</span></span>
 <span><span class="va">gt_file_name</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpI070Zk/file32541f4cfd00.gt" </span></span>
-<span><span class="co">#&gt; [2] "/tmp/RtmpI070Zk/file32541f4cfd00.rds"</span></span>
-<span><span class="co">#&gt; [3] "/tmp/RtmpI070Zk/file32541f4cfd00.bk"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/Rtmpir2K4j/file2c0f11f8f526.gt" </span></span>
+<span><span class="co">#&gt; [2] "/tmp/Rtmpir2K4j/file2c0f11f8f526.rds"</span></span>
+<span><span class="co">#&gt; [3] "/tmp/Rtmpir2K4j/file2c0f11f8f526.bk"</span></span></code></pre></div>
 <p>And if we ever need to retrieve the location of the <code>.bk</code>
 and <code>.rds</code> files for a gen_tibble, we can use:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_get_file_names.html">gt_get_file_names</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpI070Zk/file32541f4cfd00.rds"</span></span>
-<span><span class="co">#&gt; [2] "/tmp/RtmpI070Zk/file32541f4cfd00.bk"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/Rtmpir2K4j/file2c0f11f8f526.rds"</span></span>
+<span><span class="co">#&gt; [2] "/tmp/Rtmpir2K4j/file2c0f11f8f526.bk"</span></span></code></pre></div>
 <p>In a later session, we could reload the data with:</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new_example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_load.html">gt_load</a></span><span class="op">(</span><span class="va">gt_file_name</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
@@ -628,12 +668,12 @@ read a PLINK bed file, we can simply use:</p>
 <code class="sourceCode R"><span><span class="va">bed_path_pop_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/pop_a.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span>
 <span><span class="va">pop_a_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_path_pop_a</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_a_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpI070Zk/pop_a_32544db889cb.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpI070Zk/pop_a_32544db889cb.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpI070Zk/pop_a_32544db889cb.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/Rtmpir2K4j/pop_a_2c0f20d65789.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/Rtmpir2K4j/pop_a_2c0f20d65789.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/Rtmpir2K4j/pop_a_2c0f20d65789.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpI070Zk/pop_a_32544db889cb.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/Rtmpir2K4j/pop_a_2c0f20d65789.gt')</span></span></code></pre></div>
 <p>For this vignette, we don’t want to keep files, so we are using again
 a temporary path for the backing files, but in normal instances, we can
 simply omit the <code>backingfile</code> parameter, and the
@@ -649,7 +689,7 @@ and return the name of that file on completion. For example, to export
 to a PLINK .bed file, we simply use:</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_as_plink.html">gt_as_plink</a></span><span class="op">(</span><span class="va">example_gt</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"new_bed_"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpI070Zk/new_bed_3254d4efa11.bed"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/Rtmpir2K4j/new_bed_2c0f73b860e8.bed"</span></span></code></pre></div>
 <p>This will also write a .bim and .fam file and save them together with
 the .bed file. Note that, from the main tibble, only <code>id</code>,
 <code>population</code> and <code>sex</code> will be preserved in the
@@ -680,27 +720,23 @@ defining a backingfile and let the function create backing files where
 the bed file is stored):</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bed_path_pop_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/pop_a.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span>
-<span><span class="va">bigsnp_path_a</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">bigsnpr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigsnpr/reference/snp_readBed.html" class="external-link">snp_readBed</a></span><span class="op">(</span><span class="va">bed_path_pop_a</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_a_"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">pop_a_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bigsnp_path_a</span><span class="op">)</span></span>
+<span><span class="va">pop_a_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_path_pop_a</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_a_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpI070Zk/pop_a_32542ab78dfd.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpI070Zk/pop_a_32542ab78dfd.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpI070Zk/pop_a_32542ab78dfd.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/Rtmpir2K4j/pop_a_2c0f7e606d7a.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/Rtmpir2K4j/pop_a_2c0f7e606d7a.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/Rtmpir2K4j/pop_a_2c0f7e606d7a.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpI070Zk/pop_a_32542ab78dfd.gt')</span></span>
+<span><span class="co">#&gt; gt_load('/tmp/Rtmpir2K4j/pop_a_2c0f7e606d7a.gt')</span></span>
 <span><span class="va">bed_path_pop_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/pop_b.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span>
-<span><span class="va">bigsnp_path_b</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu">bigsnpr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigsnpr/reference/snp_readBed.html" class="external-link">snp_readBed</a></span><span class="op">(</span><span class="va">bed_path_pop_b</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_b_"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">pop_b_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bigsnp_path_b</span><span class="op">)</span></span>
+<span><span class="va">pop_b_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_path_pop_b</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_b_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpI070Zk/pop_b_32541d669eac.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpI070Zk/pop_b_32541d669eac.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpI070Zk/pop_b_32541d669eac.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/Rtmpir2K4j/pop_b_2c0f326befc3.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/Rtmpir2K4j/pop_b_2c0f326befc3.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/Rtmpir2K4j/pop_b_2c0f326befc3.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpI070Zk/pop_b_32541d669eac.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/Rtmpir2K4j/pop_b_2c0f326befc3.gt')</span></span></code></pre></div>
 <p>And inspect them:</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_a_gt</span></span>
@@ -747,8 +783,8 @@ kept or removed, but usually the report is sufficient to make decisions
 on whether we want to go ahead. If we are happy with the likely outcome,
 we can proceed with the <code>rbind</code>. Note that the data will be
 saved to disk. We can either provide a path and prefix, to which ‘.RDS’
-and ‘.bk’ will be appended for the <code>bigSNP</code> file and its
-backing file; or let the function save the files in the same path as the
+and ‘.bk’ will be appended for the R object and associated File-Backed
+Matrix; or let the function save the files in the same path as the
 original backing file of the first object).</p>
 <p>NOTE: In this vignette, we save to the temporary directory, but in
 real life you want to save in a directory where you will be able to
@@ -771,12 +807,12 @@ retrieve the file at a later date!!!</p>
 <span><span class="co">#&gt; ( 5 were flipped to match the reference set)</span></span>
 <span><span class="co">#&gt; ( 2 are ambiguous, of which 2 were removed)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpI070Zk/gt_merged.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpI070Zk/gt_merged.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpI070Zk/gt_merged.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/Rtmpir2K4j/gt_merged.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/Rtmpir2K4j/gt_merged.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/Rtmpir2K4j/gt_merged.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpI070Zk/gt_merged.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/Rtmpir2K4j/gt_merged.gt')</span></span></code></pre></div>
 <p>Let’s check the resulting <code>gen_tibble</code>:</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">merged_gt</span></span>
@@ -797,9 +833,9 @@ population as reference to determine the strand and order of
 alleles):</p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">merged_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 12 × 7</span></span></span>
 <span><span class="co">#&gt;    big_index name       chromosome  position genetic_dist allele_ref allele_alt</span></span>
-<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt;        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>         1 rs3094315  1             <span style="text-decoration: underline;">752</span>566            0 A          G         </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>         2 rs3131972  1             <span style="text-decoration: underline;">752</span>721            0 G          A         </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>         3 rs12124819 1             <span style="text-decoration: underline;">776</span>546            0 A          G         </span></span>
@@ -811,8 +847,7 @@ alleles):</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>         9 rs28569024 2          139<span style="text-decoration: underline;">008</span>811            0 T          C         </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        10 rs10106770 2          235<span style="text-decoration: underline;">832</span>763            0 G          A         </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>        11 rs11942835 3          155<span style="text-decoration: underline;">913</span>651            0 T          C         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>        12 rs5945676  23          51<span style="text-decoration: underline;">433</span>071            0 T          G         </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: chr_int &lt;int&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>        12 rs5945676  23          51<span style="text-decoration: underline;">433</span>071            0 T          G</span></span></code></pre></div>
 <p>Note that the <code>big_index</code> values have changed compared to
 the original files, as we generated a new FBM with the merged data.</p>
 <p>By default, <code>rbind</code> using the loci names to match the two
@@ -834,12 +869,12 @@ taking this step explicitly, before running any analysis.</p>
 <code class="sourceCode R"><span><span class="va">bed_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example-missing.bed"</span>, package <span class="op">=</span> <span class="st">"bigsnpr"</span><span class="op">)</span></span>
 <span><span class="va">missing_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"missing_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpI070Zk/missing_32546d128aea.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpI070Zk/missing_32546d128aea.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpI070Zk/missing_32546d128aea.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/Rtmpir2K4j/missing_2c0f37edd7.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/Rtmpir2K4j/missing_2c0f37edd7.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/Rtmpir2K4j/missing_2c0f37edd7.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpI070Zk/missing_32546d128aea.gt')</span></span>
+<span><span class="co">#&gt; gt_load('/tmp/Rtmpir2K4j/missing_2c0f37edd7.gt')</span></span>
 <span><span class="va">missing_gt</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A gen_tibble: 500 loci</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     200 × 3</span></span></span>

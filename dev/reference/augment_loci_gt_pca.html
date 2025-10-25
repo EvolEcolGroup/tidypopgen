@@ -15,7 +15,7 @@ the loadings is returned.'><meta property="og:image" content="https://evolecolgr
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.3.2.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,7 @@ the loadings is returned.'><meta property="og:image" content="https://evolecolgr
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -113,9 +114,9 @@ with <code><a href="show_loci.html">show_loci()</a></code>. If <code>data</code>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Augment the gen_tibble with the PCA scores</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="augment_loci.html">augment_loci</a></span><span class="op">(</span><span class="va">pca</span>, data <span class="op">=</span> <span class="va">lobsters</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 79 × 18</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 79 × 17</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    big_index name    chromosome position genetic_dist allele_ref allele_alt</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>         1 rs3441  1                 1            1 G          A         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>         2 rs4173  2                 2            2 C          T         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>         3 rs6157  3                 3            3 G          C         </span>
@@ -127,9 +128,9 @@ with <code><a href="show_loci.html">show_loci()</a></code>. If <code>data</code>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>         9 rs11291 10               10           10 T          G         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>        10 rs12971 11               11           11 A          G         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 69 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 11 more variables: chr_int &lt;int&gt;, .loadingPC1 &lt;dbl&gt;, .loadingPC2 &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC3 &lt;dbl&gt;, .loadingPC4 &lt;dbl&gt;, .loadingPC5 &lt;dbl&gt;, .loadingPC6 &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC7 &lt;dbl&gt;, .loadingPC8 &lt;dbl&gt;, .loadingPC9 &lt;dbl&gt;, .loadingPC10 &lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 10 more variables: .loadingPC1 &lt;dbl&gt;, .loadingPC2 &lt;dbl&gt;, .loadingPC3 &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC4 &lt;dbl&gt;, .loadingPC5 &lt;dbl&gt;, .loadingPC6 &lt;dbl&gt;, .loadingPC7 &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   .loadingPC8 &lt;dbl&gt;, .loadingPC9 &lt;dbl&gt;, .loadingPC10 &lt;dbl&gt;</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
