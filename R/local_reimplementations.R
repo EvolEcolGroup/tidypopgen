@@ -48,6 +48,9 @@ fct_inorder_base <- function(f, ordered = FALSE) {
   idx <- match(levels(f), f, nomatch = 0) # Find first occurrences of levels
   idx <- unique(idx[idx > 0]) # Remove missing matches
   idx <- union(idx, seq_along(levels(f))) # Ensure all levels are included
+  # idx <- match(levels(f), f, nomatch = 0) # Find first occurrences of levels #nolint start
+  # idx <- unique(idx[idx > 0]) # Remove missing matches
+  # idx <- union(idx, seq_along(levels(f))) # Ensure all levels are included #nolint end
 
   factor(f, levels = levels(f)[idx], ordered = ordered)
 }
