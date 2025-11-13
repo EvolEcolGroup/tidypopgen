@@ -86,12 +86,7 @@ gt_update_backingfile <- function(
         show_loci(.x) %>%
           group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint start
           group_map(~ is.unsorted(.x$genetic_dist))
-      )) ||
-        any(unlist(
-          show_loci(.x) %>%
-            group_by(cast_chromosome_to_int(.data$chromosome)) %>%
-            group_map(~ duplicated(.x$genetic_dist))
-        ))
+      ))
     ) {
       # nolint end
       if (!quiet) {
