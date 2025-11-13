@@ -252,7 +252,7 @@ America. We will then plot the map and add our samples using the
 <span>    ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">30</span>, <span class="fl">15</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" width="700"></p>
 <p>From our map we can see that we have samples from the coastal
 Atlantic Forest and the Amazonian Forest.</p>
 </div>
@@ -318,18 +318,18 @@ e.g.:</p>
 for <em>scores</em>, and <em>loadings</em> for <em>loadings</em>:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_pca</span>, type <span class="op">=</span> <span class="st">"screeplot"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-14-1.png" alt="Scree Plot of eigenvalues for each Principal Component" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="Scree Plot of eigenvalues for each Principal Component" width="700"></p>
 <p>To plot the sample in principal coordinates space, we can simply
 use:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_pca</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-15-1.png" alt="Score plot of individuals across the first and second Principal Components" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-15-1.png" class="r-plt" alt="Score plot of individuals across the first and second Principal Components" width="700"></p>
 <p><code>autoplots</code> are deliberately kept simple: they are just a
 way to quickly inspect the results. To explore additional dimensions, we
 can use the <code>k</code> argument:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_pca</span>, type <span class="op">=</span> <span class="st">"scores"</span>, k <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-16-1.png" alt="Score plot of individuals across the first and third Principal Components" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-16-1.png" class="r-plt" alt="Score plot of individuals across the first and third Principal Components" width="700"></p>
 <p>The autoplots generate <code>ggplot2</code> objects, and so they can
 be further embellished with the usual <code>ggplot2</code> grammar:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -337,7 +337,7 @@ be further embellished with the usual <code>ggplot2</code> grammar:</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_pca</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">anole_gt</span><span class="op">$</span><span class="va">population</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"population"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-17-1.png" alt="Score plot of individuals across the first and second Principal Components, with individual samples coloured by population" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-17-1.png" class="r-plt" alt="Score plot of individuals across the first and second Principal Components, with individual samples coloured by population" width="700"></p>
 <p>For more complex/publication ready plots, we will want to add the PC
 scores to the tibble, so that we can create a custom plot with
 <code>ggplot2</code>. We can easily add the data with the
@@ -350,7 +350,7 @@ plot:</p>
 <code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">.fittedPC1</span>, <span class="va">.fittedPC2</span>, color <span class="op">=</span> <span class="va">population</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"PC1"</span>, y <span class="op">=</span> <span class="st">"PC2"</span>, color <span class="op">=</span> <span class="st">"Population"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-19-1.png" alt="Another score plot of individuals across the first and second Principal Components, with individual samples coloured by population, using ggplot2" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-19-1.png" class="r-plt" alt="Another score plot of individuals across the first and second Principal Components, with individual samples coloured by population, using ggplot2" width="700"></p>
 <p>We can see that the two population separate clearly in the PCA space,
 with individuals from the Atlantic Forest clustering closely together
 while Amazonian Forest individuals are spread across the first two
@@ -359,7 +359,7 @@ principal components.</p>
 given component:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_pca</span>, type <span class="op">=</span> <span class="st">"loadings"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-20-1.png" alt="Plot of the loadings of Principal Component 1 for each loci" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-20-1.png" class="r-plt" alt="Plot of the loadings of Principal Component 1 for each loci" width="700"></p>
 <p>By using information from the loci table, we could easily embellish
 the plot, for example colouring by chromosome or maf.</p>
 <p>For more complex plots, we can augment the loci table with the
@@ -391,7 +391,7 @@ it is then trivial to plot them:</p>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">anole_pca</span>, matrix <span class="op">=</span> <span class="st">"eigenvalues"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span>mapping <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">PC</span>, y <span class="op">=</span> <span class="va">cumulative</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-22-1.png" alt="Plot of the cumulative loadings for each Principal Component" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-22-1.png" class="r-plt" alt="Plot of the cumulative loadings for each Principal Component" width="700"></p>
 <p>Note that, as we were working with a truncated SVD algorithm for our
 PCA, we can not easily phrase the eigenvalues in terms of proportion of
 total variance, so the cumulative y axis simply shows the cumulative sum
@@ -408,7 +408,7 @@ plot the number of clusters against a measure of fit. BIC has been shown
 to be a very good metric under many scenarios:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_clusters</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-24-1.png" alt="Plot of BIC (Bayesian Information Criteria) for each value of k" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-24-1.png" class="r-plt" alt="Plot of BIC (Bayesian Information Criteria) for each value of k" width="700"></p>
 <p>We are looking for the minimum value of BIC. There is no clear elbow
 (a minimum after which BIC increases with increasing k). However, we
 notice that there is a quick levelling off in the decrease in BIC at 3
@@ -471,7 +471,7 @@ find them (as we saw for <code>gt_pca</code>):</p>
 <p>And they can be visualised with <code>autoplot</code>:</p>
 <div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_dapc</span>, type <span class="op">=</span> <span class="st">"screeplot"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-30-1.png" alt="Scree plot of the eigenvalues on the two discriminant axes (defined by `ld`)" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-30-1.png" class="r-plt" alt="Scree plot of the eigenvalues on the two discriminant axes (defined by `ld`)" width="700"></p>
 <p>As for pca, there is a <code>tidy</code> method that can be used to
 extract information from <code>gt_dapc</code> objects. For example, if
 we want to create a bar plot of the eigenvalues (since we only have
@@ -480,11 +480,11 @@ two), we could simply use:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">anole_dapc</span>, matrix <span class="op">=</span> <span class="st">"eigenvalues"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">LD</span>, y <span class="op">=</span> <span class="va">eigenvalue</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_col</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-31-1.png" alt="Bar plot of eigenvalues against the two discriminant axes" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-31-1.png" class="r-plt" alt="Bar plot of eigenvalues against the two discriminant axes" width="700"></p>
 <p>We can plot the scores with:</p>
 <div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_dapc</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-32-1.png" alt="Scatterplot of the scores of each individual on the two discriminant axes (defined by `ld`)" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-32-1.png" class="r-plt" alt="Scatterplot of the scores of each individual on the two discriminant axes (defined by `ld`)" width="700"></p>
 <p>The DAPC plot shows the separation of individuals into 3
 clusters.</p>
 <p>We can inspect this assignment by DAPC with <code>autoplot</code>
@@ -494,7 +494,7 @@ original population labels:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_dapc</span>, type <span class="op">=</span> <span class="st">"components"</span>, group <span class="op">=</span> <span class="va">anole_gt</span><span class="op">$</span><span class="va">population</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Warning in ggplot2::geom_col(color = "gray", size = 0.1): Ignoring</span></span>
 <span><span class="co">#&gt; unknown parameters: `size`</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-33-1.png" alt="Bar plot showing the probability of assignment to each cluster" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-33-1.png" class="r-plt" alt="Bar plot showing the probability of assignment to each cluster" width="700"></p>
 <p>Here we can see that DAPC splits the Amazonian Forest individuals
 into two clusters. Because of the very clear separation we observed when
 plotting the LD scores, no individual is modelled as a mixture: all
@@ -503,7 +503,7 @@ assignments are with 100% probability to a single cluster.</p>
 separating the clusters (either because of drift or selection):</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_dapc</span>, <span class="st">"loadings"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-34-1.png" alt="Plot of the loadings of Principal Component 1 for each loci" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-34-1.png" class="r-plt" alt="Plot of the loadings of Principal Component 1 for each loci" width="700"></p>
 <p>There is no strong outlier, suggesting drift across many loci has
 created the signal picked up by DAPC.</p>
 <p>Note that <code>anole_dapc</code> is of class <code>gt_dapc</code>,
@@ -523,7 +523,7 @@ standard dapc plot with:</p>
 <span><span class="co">#&gt;    &gt; tutorials/doc/questions: 'adegenetWeb()' </span></span>
 <span><span class="co">#&gt;    &gt; bug reports/feature requests: adegenetIssues()</span></span>
 <span><span class="fu"><a href="https://adeverse.github.io/ade4/reference/scatter.html" class="external-link">scatter</a></span><span class="op">(</span><span class="va">anole_dapc</span>, posi.da <span class="op">=</span> <span class="st">"bottomright"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-35-1.png" alt="Scatterplot of individuals with ellipses surrounding each cluster of individuals identified by the DAPC analysis. Eigenvalues are displayed in an inset in the bottom right corner of the plot." width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-35-1.png" class="r-plt" alt="Scatterplot of individuals with ellipses surrounding each cluster of individuals identified by the DAPC analysis. Eigenvalues are displayed in an inset in the bottom right corner of the plot." width="700"></p>
 <p>We can also plot these results onto the map we created earlier.</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anole_gt</span> <span class="op">&lt;-</span> <span class="va">anole_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>dapc <span class="op">=</span> <span class="va">anole_dapc</span><span class="op">$</span><span class="va">grp</span><span class="op">)</span></span>
@@ -537,7 +537,7 @@ standard dapc plot with:</p>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"DAPC cluster"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_minimal</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-36-1.png" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-36-1.png" class="r-plt" width="700"></p>
 <p>Atlantic forest lizards form distinct geographic cluster, separate
 from the Amazonian lizards.</p>
 </div>
@@ -578,7 +578,7 @@ contained in the <code>cv</code> element of the <code>gt_admix</code>
 object:</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">anole_adm</span>, type <span class="op">=</span> <span class="st">"cv"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-39-1.png" alt="Plot of cross-entropy for each value of K, showing K = 3 has the lowest cross-entropy" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-39-1.png" class="r-plt" alt="Plot of cross-entropy for each value of K, showing K = 3 has the lowest cross-entropy" width="700"></p>
 <p>Here we can see that K = 3 is a sensible choice, as K = 3 represents
 the ‘elbow’ in the plot, where cross-entropy is at it’s lowest.</p>
 <p>We can quickly plot this data with <code>autoplot</code> by using the
@@ -589,7 +589,7 @@ type <code>barplot</code> and selecting our chosen value of
 <span>  k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">anole_gt</span>, annotate_group <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  type <span class="op">=</span> <span class="st">"barplot"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-40-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-40-1.png" class="r-plt" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
 <p>This plot is fine, but it is messy, and not a very helpful
 visualisation if we want to understand how our populations are
 structured.</p>
@@ -601,7 +601,7 @@ arguments in autoplot:</p>
 <span>  type <span class="op">=</span> <span class="st">"barplot"</span>, k <span class="op">=</span> <span class="fl">3</span>, run <span class="op">=</span> <span class="fl">1</span>, data <span class="op">=</span> <span class="va">anole_gt</span>,</span>
 <span>  annotate_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-41-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-41-1.png" class="r-plt" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
 <p>This plot is much better. Now the plot is labelled by population we
 can see that the individuals from each population are grouped together,
 with a few individuals showing mixed ancestry between populations.</p>
@@ -613,7 +613,7 @@ individuals within each population as follows:</p>
 <span>  data <span class="op">=</span> <span class="va">anole_gt</span>, annotate_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  arrange_by_indiv <span class="op">=</span> <span class="cn">TRUE</span>, reorder_within_groups <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-42-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources, with individuals arranged according to their dominant ancestry propotion" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-42-1.png" class="r-plt" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources, with individuals arranged according to their dominant ancestry propotion" width="700"></p>
 <p>Now individuals are neatly ordered within each population.</p>
 <p>For more complex/publication ready plots, we can extract the specific
 K value and run that we are interested in plotting, and add this .Q
@@ -690,7 +690,7 @@ custom plot:</p>
 <span>  <span class="fu"><a href="../reference/scale_fill_distruct.html">scale_fill_distruct</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">plt</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-46-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-46-1.png" class="r-plt" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
 <p>In the Prates et al 2018 data, anolis lizards were assigned to three
 regions, described as Af, Eam, and Wam, acronyms which correspond to the
 Atlantic Forest, Eastern Amazonia, and Western Amazonia of Brazil. Our
@@ -708,7 +708,7 @@ function to reorder the Q matrix by a different grouping variable:</p>
 <span>  annotate_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  arrange_by_indiv <span class="op">=</span> <span class="cn">TRUE</span>, reorder_within_groups <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-48-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources, labelled Atlantic forest or Amazonian forest" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-48-1.png" class="r-plt" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources, labelled Atlantic forest or Amazonian forest" width="700"></p>
 <p>And here we can see the clear distinction between the three regions,
 with a few individuals that have admixed ancestry.</p>
 </div>
@@ -760,7 +760,7 @@ selecting the run number and K value of interest using
 <span>  annotate_group <span class="op">=</span> <span class="cn">TRUE</span>, arrange_by_group <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  arrange_by_indiv <span class="op">=</span> <span class="cn">TRUE</span>, reorder_within_groups <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-53-1.png" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
+<p><img src="a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-53-1.png" class="r-plt" alt="Barplot of individuals coloured by predicted ancestry proportion (Q) from each of K ancestral sources" width="700"></p>
 <p>In this way, <code>tidypopgen</code> integrates with external
 clustering software seamlessly for quick, easy plotting.</p>
 </div>
@@ -775,7 +775,7 @@ clustering software seamlessly for quick, easy plotting.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
