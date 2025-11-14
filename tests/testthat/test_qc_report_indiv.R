@@ -50,6 +50,26 @@ test_that("qc_report_indiv filters relatives within groups", {
     as.vector(grouped$to_keep),
     c(pop1_report$to_keep, pop2_report$to_keep, pop3_report$to_keep)
   )
+
+  # check if there is only one individual in a population
+  families[families$id == "12", "population"] <- "pop4"
+  res <- qc_report_indiv(families, kings_threshold = 0.2)
+
+  families <- families %>% ungroup()
+  pop3 <- filter(families, population == "pop3")
+  pop3_report <- qc_report_indiv(pop3, kings_threshold = 0.2)
+  pop4 <- filter(families, population == "pop4")
+  pop4_report <- qc_report_indiv(pop4, kings_threshold = 0.2)
+
+  expect_equal(
+    as.vector(res$to_keep),
+    c(
+      pop1_report$to_keep,
+      pop2_report$to_keep,
+      pop3_report$to_keep,
+      pop4_report$to_keep
+    )
+  )
 })
 
 test_that("qc_report_indiv$to_keep is correctly ordered", {

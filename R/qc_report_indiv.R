@@ -115,7 +115,6 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 
   n_loci <- nrow(show_loci(.x))
   qc_report <- .x %>%
-    # TODO do we need this???
     ungroup() %>%
     indiv_het_obs(, as_counts = TRUE) %>%
     as_tibble() %>%
