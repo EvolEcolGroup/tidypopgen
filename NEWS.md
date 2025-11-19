@@ -1,3 +1,6 @@
+# tidypopgen 0.4.0.9001
+* duplicate-distance checks removed in `is_loci_table_ordered()`
+
 # tidypopgen 0.4.0
 * store chromosomes as factors, and remove redundant column storing
   chromosome as integer
