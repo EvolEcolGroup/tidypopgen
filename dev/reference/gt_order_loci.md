@@ -74,11 +74,10 @@ show_loci(example_gt)
 
 # Reorder the loci, ignoring genetic distance
 example_gt_ordered <- gt_order_loci(example_gt, ignore_genetic_dist = TRUE)
-#> Genetic distances are not sorted, setting them to zero
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpyU1EbF/file2966bf18bf0_v2.rds
-#> with FBM backing file: /tmp/RtmpyU1EbF/file2966bf18bf0_v2.bk
+#> using FBM RDS: /tmp/Rtmpyikrxm/file1f101e98fc50_v2.rds
+#> with FBM backing file: /tmp/Rtmpyikrxm/file1f101e98fc50_v2.bk
 #> make sure that you do NOT delete those files!
 
 # Loci are now in the correct order

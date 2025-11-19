@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.0.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.1.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -320,26 +320,25 @@ quickly with <code>gt_impute_simple</code>.</p>
 need to update the backingfiles with:</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_update_backingfile.html">gt_update_backingfile</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Genetic distances are not sorted, setting them to zero</span></span></code></pre>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## gen_backing files updated, now</span></span></code></pre>
-<pre><code><span><span class="co">## using FBM RDS: /tmp/Rtmpk9DO1C/file31d824fe28a1_v2.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with FBM backing file: /tmp/Rtmpk9DO1C/file31d824fe28a1_v2.bk</span></span></code></pre>
+<pre><code><span><span class="co">## using FBM RDS: /tmp/RtmpnOz3XM/file278857cdbaf3_v2.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with FBM backing file: /tmp/RtmpnOz3XM/file278857cdbaf3_v2.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <p>And then we can impute using:</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">imputed_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">data</span>, method <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span></code></pre></div>
 <p>In this example, if we want to remove SNPs with a correlation greater
 than 0.2 in windows of 10 SNPs at a time, we can set these parameters
 with <code>thr_r2</code> and <code>size</code> respectively.</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">to_keep_ld</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">imputed_data</span>, thr_r2 <span class="op">=</span> <span class="fl">0.2</span>, size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">to_keep_ld</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] FALSE FALSE FALSE FALSE FALSE FALSE</span></span></code></pre>
 <p><code>loci_ld_clump</code> provides a boolean vector the same length
 as our list of SNPs, telling us which to keep in the data set. We can
 then use this list to create a pruned version of our data:</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ld_data</span> <span class="op">&lt;-</span> <span class="va">imputed_data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">genotypes</span>, thr_r2 <span class="op">=</span> <span class="fl">0.2</span>, size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -352,18 +351,18 @@ necessary.</p>
 <p>When we are happy with the quality of our data, we can create and
 save a final quality controlled version of our <code>gen_tibble</code>
 using <code>gt_save</code>.</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/Rtmpk9DO1C/file31d872122b62.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using FBM RDS: /tmp/Rtmpk9DO1C/file31d824fe28a1_v2.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with FBM backing file: /tmp/Rtmpk9DO1C/file31d824fe28a1_v2.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/RtmpnOz3XM/file27887afccb6c.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using FBM RDS: /tmp/RtmpnOz3XM/file278857cdbaf3_v2.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with FBM backing file: /tmp/RtmpnOz3XM/file278857cdbaf3_v2.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/Rtmpk9DO1C/file31d872122b62.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/Rtmpk9DO1C/file31d872122b62.gt"    </span></span>
-<span><span class="co">## [2] "/tmp/Rtmpk9DO1C/file31d824fe28a1_v2.rds"</span></span>
-<span><span class="co">## [3] "/tmp/Rtmpk9DO1C/file31d824fe28a1_v2.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/RtmpnOz3XM/file27887afccb6c.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/RtmpnOz3XM/file27887afccb6c.gt"    </span></span>
+<span><span class="co">## [2] "/tmp/RtmpnOz3XM/file278857cdbaf3_v2.rds"</span></span>
+<span><span class="co">## [3] "/tmp/RtmpnOz3XM/file278857cdbaf3_v2.bk"</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="grouping-data">Grouping data<a class="anchor" aria-label="anchor" href="#grouping-data"></a>
@@ -373,11 +372,11 @@ includes multiple datasets you may want to group by population before
 running the quality control. This can be done using
 <code>group_by</code>.</p>
 <p>First, lets add some imaginary population data to our gen_tibble:</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>population <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">"B"</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>We can then group by population and run quality control on each
 group:</p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grouped_loci_report</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -396,7 +395,7 @@ equilibrium for each SNP within each population separately, providing a
 Bonferroni corrected p-value for each SNP.</p>
 <p>Similarly, we can run a quality control report for individuals within
 each population:</p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grouped_individual_report</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span>kings_threshold <span class="op">=</span> <span class="fl">0.177</span><span class="op">)</span></span>
@@ -420,7 +419,7 @@ population structure can affect the filtering of relatives.</p>
 functions on grouped data. This is useful when you want to run the same
 quality control on each group of data, but don’t want to split the data
 into separate gen_tibbles.</p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">loci_maf_grouped</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>

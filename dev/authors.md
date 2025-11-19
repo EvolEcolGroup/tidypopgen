@@ -27,13 +27,13 @@ Source:
 [`DESCRIPTION`](https://github.com/EvolEcolGroup/tidypopgen/blob/dev/DESCRIPTION)
 
 Carter E, Tysall E, Manica A (2025). *tidypopgen: Tidy Population
-Genetics*. R package version 0.4.0.9000,
+Genetics*. R package version 0.4.1.9001,
 <https://github.com/EvolEcolGroup/tidypopgen>.
 
     @Manual{,
       title = {tidypopgen: Tidy Population Genetics},
       author = {Evie Carter and Eirlys Tysall and Andrea Manica},
       year = {2025},
-      note = {R package version 0.4.0.9000},
+      note = {R package version 0.4.1.9001},
       url = {https://github.com/EvolEcolGroup/tidypopgen},
     }

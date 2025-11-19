@@ -1,5 +1,10 @@
 # Changelog
 
+## tidypopgen 0.4.0.9001
+
+- duplicate-distance checks removed in
+  [`is_loci_table_ordered()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/is_loci_table_ordered.md)
+
 ## tidypopgen 0.4.0
 
 CRAN release: 2025-10-24

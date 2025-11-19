@@ -62,11 +62,10 @@ are sorted. To check this, and update the file backing matrix, use
 example_gt <- load_example_gt("gen_tbl")
 
 example_gt %>% gt_update_backingfile()
-#> Genetic distances are not sorted, setting them to zero
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpyU1EbF/file296655edd87_v2.rds
-#> with FBM backing file: /tmp/RtmpyU1EbF/file296655edd87_v2.bk
+#> using FBM RDS: /tmp/Rtmpyikrxm/file1f10132bcfeb_v2.rds
+#> with FBM backing file: /tmp/Rtmpyikrxm/file1f10132bcfeb_v2.bk
 #> make sure that you do NOT delete those files!
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 3
