@@ -45,6 +45,11 @@ jobs:
           install.packages("admixtools", repos = c("https://evolecolgroup.r-universe.dev", "https://cloud.r-project.org"))
         shell: Rscript {0}
 
+      - name: Clean old site
+        run: |
+          pkgdown::clean_cache(pkg = ".", quiet = FALSE);
+          pkgdown::clean_site(pkg = ".", quiet = FALSE, force = FALSE)
+        shell: Rscript {0}
 
       - name: Build site
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
