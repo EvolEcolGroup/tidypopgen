@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,7 +45,6 @@
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/interpolating_hgdp.html">Interpolating Heterozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul>
 </li>
@@ -71,7 +70,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>The grammar of population genetics</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/v0.4.0/vignettes/a01_overview.Rmd" class="external-link"><code>vignettes/a01_overview.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/EvolEcolGroup/tidypopgen/blob/main/vignettes/a01_overview.Rmd" class="external-link"><code>vignettes/a01_overview.Rmd</code></a></small>
       <div class="d-none name"><code>a01_overview.Rmd</code></div>
     </div>
 
@@ -192,12 +191,12 @@ loci:</p>
 <span>  backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpsskRfa/file2bf14daaaa9e.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpsskRfa/file2bf14daaaa9e.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpsskRfa/file2bf14daaaa9e.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpV8dFVv/file275366a96ead.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpV8dFVv/file275366a96ead.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpV8dFVv/file275366a96ead.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpsskRfa/file2bf14daaaa9e.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpV8dFVv/file275366a96ead.gt')</span></span></code></pre></div>
 <p>We are provided information on where the three files underlying the
 genotype information are stored. As we don’t want to keep the files, we
 used the tmp directory; normally you will want to use your working
@@ -629,22 +628,22 @@ be named differently (but, by default, if no specific name is given,
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gt_file_name</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpsskRfa/file2bf14daaaa9e.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpsskRfa/file2bf14daaaa9e.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpsskRfa/file2bf14daaaa9e.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpV8dFVv/file275366a96ead.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpV8dFVv/file275366a96ead.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpV8dFVv/file275366a96ead.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpsskRfa/file2bf14daaaa9e.gt')</span></span>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpV8dFVv/file275366a96ead.gt')</span></span>
 <span><span class="va">gt_file_name</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpsskRfa/file2bf14daaaa9e.gt" </span></span>
-<span><span class="co">#&gt; [2] "/tmp/RtmpsskRfa/file2bf14daaaa9e.rds"</span></span>
-<span><span class="co">#&gt; [3] "/tmp/RtmpsskRfa/file2bf14daaaa9e.bk"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmpV8dFVv/file275366a96ead.gt" </span></span>
+<span><span class="co">#&gt; [2] "/tmp/RtmpV8dFVv/file275366a96ead.rds"</span></span>
+<span><span class="co">#&gt; [3] "/tmp/RtmpV8dFVv/file275366a96ead.bk"</span></span></code></pre></div>
 <p>And if we ever need to retrieve the location of the <code>.bk</code>
 and <code>.rds</code> files for a gen_tibble, we can use:</p>
 <div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_get_file_names.html">gt_get_file_names</a></span><span class="op">(</span><span class="va">example_gt</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpsskRfa/file2bf14daaaa9e.rds"</span></span>
-<span><span class="co">#&gt; [2] "/tmp/RtmpsskRfa/file2bf14daaaa9e.bk"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmpV8dFVv/file275366a96ead.rds"</span></span>
+<span><span class="co">#&gt; [2] "/tmp/RtmpV8dFVv/file275366a96ead.bk"</span></span></code></pre></div>
 <p>In a later session, we could reload the data with:</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new_example_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_load.html">gt_load</a></span><span class="op">(</span><span class="va">gt_file_name</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span>
@@ -668,12 +667,12 @@ read a PLINK bed file, we can simply use:</p>
 <code class="sourceCode R"><span><span class="va">bed_path_pop_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/pop_a.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span>
 <span><span class="va">pop_a_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_path_pop_a</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_a_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpsskRfa/pop_a_2bf151c1829f.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpsskRfa/pop_a_2bf151c1829f.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpsskRfa/pop_a_2bf151c1829f.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpV8dFVv/pop_a_2753c7442bb.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpV8dFVv/pop_a_2753c7442bb.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpV8dFVv/pop_a_2753c7442bb.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpsskRfa/pop_a_2bf151c1829f.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpV8dFVv/pop_a_2753c7442bb.gt')</span></span></code></pre></div>
 <p>For this vignette, we don’t want to keep files, so we are using again
 a temporary path for the backing files, but in normal instances, we can
 simply omit the <code>backingfile</code> parameter, and the
@@ -689,7 +688,7 @@ and return the name of that file on completion. For example, to export
 to a PLINK .bed file, we simply use:</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_as_plink.html">gt_as_plink</a></span><span class="op">(</span><span class="va">example_gt</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"new_bed_"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "/tmp/RtmpsskRfa/new_bed_2bf13ba07b38.bed"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "/tmp/RtmpV8dFVv/new_bed_27531de01224.bed"</span></span></code></pre></div>
 <p>This will also write a .bim and .fam file and save them together with
 the .bed file. Note that, from the main tibble, only <code>id</code>,
 <code>population</code> and <code>sex</code> will be preserved in the
@@ -722,21 +721,21 @@ the bed file is stored):</p>
 <code class="sourceCode R"><span><span class="va">bed_path_pop_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/pop_a.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span>
 <span><span class="va">pop_a_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_path_pop_a</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_a_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpsskRfa/pop_a_2bf16f0bc6ae.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpsskRfa/pop_a_2bf16f0bc6ae.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpsskRfa/pop_a_2bf16f0bc6ae.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpV8dFVv/pop_a_275374fc82d9.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpV8dFVv/pop_a_275374fc82d9.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpV8dFVv/pop_a_275374fc82d9.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpsskRfa/pop_a_2bf16f0bc6ae.gt')</span></span>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpV8dFVv/pop_a_275374fc82d9.gt')</span></span>
 <span><span class="va">bed_path_pop_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/pop_b.bed"</span>, package <span class="op">=</span> <span class="st">"tidypopgen"</span><span class="op">)</span></span>
 <span><span class="va">pop_b_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_path_pop_b</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"pop_b_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpsskRfa/pop_b_2bf157d1d65c.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpsskRfa/pop_b_2bf157d1d65c.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpsskRfa/pop_b_2bf157d1d65c.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpV8dFVv/pop_b_275317ec3444.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpV8dFVv/pop_b_275317ec3444.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpV8dFVv/pop_b_275317ec3444.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpsskRfa/pop_b_2bf157d1d65c.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpV8dFVv/pop_b_275317ec3444.gt')</span></span></code></pre></div>
 <p>And inspect them:</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pop_a_gt</span></span>
@@ -807,12 +806,12 @@ retrieve the file at a later date!!!</p>
 <span><span class="co">#&gt; ( 5 were flipped to match the reference set)</span></span>
 <span><span class="co">#&gt; ( 2 are ambiguous, of which 2 were removed)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpsskRfa/gt_merged.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpsskRfa/gt_merged.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpsskRfa/gt_merged.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpV8dFVv/gt_merged.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpV8dFVv/gt_merged.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpV8dFVv/gt_merged.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpsskRfa/gt_merged.gt')</span></span></code></pre></div>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpV8dFVv/gt_merged.gt')</span></span></code></pre></div>
 <p>Let’s check the resulting <code>gen_tibble</code>:</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">merged_gt</span></span>
@@ -869,12 +868,12 @@ taking this step explicitly, before running any analysis.</p>
 <code class="sourceCode R"><span><span class="va">bed_file</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"example-missing.bed"</span>, package <span class="op">=</span> <span class="st">"bigsnpr"</span><span class="op">)</span></span>
 <span><span class="va">missing_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="va">bed_file</span>, backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="st">"missing_"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpsskRfa/missing_2bf145ff176f.gt</span></span>
-<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpsskRfa/missing_2bf145ff176f.rds</span></span>
-<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpsskRfa/missing_2bf145ff176f.bk</span></span>
+<span><span class="co">#&gt; gen_tibble saved to /tmp/RtmpV8dFVv/missing_27536baeab3c.gt</span></span>
+<span><span class="co">#&gt; using FBM RDS: /tmp/RtmpV8dFVv/missing_27536baeab3c.rds</span></span>
+<span><span class="co">#&gt; with FBM backing file: /tmp/RtmpV8dFVv/missing_27536baeab3c.bk</span></span>
 <span><span class="co">#&gt; make sure that you do NOT delete those files!</span></span>
 <span><span class="co">#&gt; to reload the gen_tibble in another session, use:</span></span>
-<span><span class="co">#&gt; gt_load('/tmp/RtmpsskRfa/missing_2bf145ff176f.gt')</span></span>
+<span><span class="co">#&gt; gt_load('/tmp/RtmpV8dFVv/missing_27536baeab3c.gt')</span></span>
 <span><span class="va">missing_gt</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A gen_tibble: 500 loci</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble:     200 × 3</span></span></span>
@@ -896,7 +895,7 @@ taking this step explicitly, before running any analysis.</p>
 <code class="sourceCode R"><span><span class="va">missing_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a01_overview_files/figure-html/unnamed-chunk-46-1.png" alt="Histogram of loci missingness, showing that most loci have no missing data, while some have a small proportion of missing data" width="700"></p>
+<p><img src="a01_overview_files/figure-html/unnamed-chunk-46-1.png" class="r-plt" alt="Histogram of loci missingness, showing that most loci have no missing data, while some have a small proportion of missing data" width="700"></p>
 <p>If we attempt to run a PCA on this dataset, we get:</p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">missing_pca</span> <span class="op">&lt;-</span> <span class="va">missing_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/gt_pca_autoSVD.html">gt_pca_autoSVD</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -930,7 +929,7 @@ used by default:</p>
 <code class="sourceCode R"><span><span class="va">missing_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a01_overview_files/figure-html/unnamed-chunk-51-1.png" alt="Histogram of loci missingness as above, showing that the use of imputed data is not automatic" width="700"></p>
+<p><img src="a01_overview_files/figure-html/unnamed-chunk-51-1.png" class="r-plt" alt="Histogram of loci missingness as above, showing that the use of imputed data is not automatic" width="700"></p>
 <p>We can manually force a <code>gen_tibble</code> to use the imputed
 data:</p>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
@@ -938,7 +937,7 @@ data:</p>
 <span><span class="va">missing_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a01_overview_files/figure-html/unnamed-chunk-52-1.png" alt="Histogram of loci missingness after setting use of imputed data to true, showing that there is no missingness" width="700"></p>
+<p><img src="a01_overview_files/figure-html/unnamed-chunk-52-1.png" class="r-plt" alt="Histogram of loci missingness after setting use of imputed data to true, showing that there is no missingness" width="700"></p>
 <p>However, this is generally not needed, we can keep our
 <code>gen_tibble</code> set to use the raw data:</p>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
@@ -946,7 +945,7 @@ data:</p>
 <span><span class="va">missing_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a01_overview_files/figure-html/unnamed-chunk-53-1.png" alt="Histogram of loci missingness after setting use of imputed data to false again" width="700"></p>
+<p><img src="a01_overview_files/figure-html/unnamed-chunk-53-1.png" class="r-plt" alt="Histogram of loci missingness after setting use of imputed data to false again" width="700"></p>
 <p>And let functions that need imputation use it automatically:</p>
 <div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">missing_pca</span> <span class="op">&lt;-</span> <span class="va">missing_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -972,7 +971,7 @@ is back to using the raw genotypes:</p>
 <span><span class="va">missing_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="a01_overview_files/figure-html/unnamed-chunk-55-1.png" alt="Histogram of loci missingness, showing that use of imputed data is not automatically set to true, after using a PCA function" width="700"></p>
+<p><img src="a01_overview_files/figure-html/unnamed-chunk-55-1.png" class="r-plt" alt="Histogram of loci missingness, showing that use of imputed data is not automatically set to true, after using a PCA function" width="700"></p>
 <p>More details about PCA and other analysis is found in the vignette on
 population genetic analysis.</p>
 </div>
@@ -987,7 +986,7 @@ population genetic analysis.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
