@@ -37,7 +37,10 @@ This function reorders the loci table so that positions within a chromosome
 are sequential. It also re-saves the genotypes into a new file backed matrix
 with the new order, so that it can be used by functions such as
 \code{\link[=loci_ld_clump]{loci_ld_clump()}} and \code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}}. If the loci table is already
-ordered, the original \code{gen_tibble} is returned.
+ordered, the original \code{gen_tibble} is returned. This function will update the
+backingfiles of the \code{gen_tibble} and return the \code{gen_tibble} object, use \verb{<-}
+as per the example provided to ensure that the names of the newly updated
+backingfiles are stored in the \code{gen_tibble} object.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl") \%>\% select_loci(c(1, 5, 2, 6, 4, 3))

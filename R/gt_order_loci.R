@@ -4,7 +4,10 @@
 #' are sequential. It also re-saves the genotypes into a new file backed matrix
 #' with the new order, so that it can be used by functions such as
 #' [loci_ld_clump()] and [gt_pca_autoSVD()]. If the loci table is already
-#' ordered, the original `gen_tibble` is returned.
+#' ordered, the original `gen_tibble` is returned. This function will update the
+#' backingfiles of the `gen_tibble` and return the `gen_tibble` object, use `<-`
+#' as per the example provided to ensure that the names of the newly updated
+#' backingfiles are stored in the `gen_tibble` object.
 #'
 #' @param .x a [`gen_tibble`]
 #' @param use_current_table boolean, if FALSE (the default), the table will be
