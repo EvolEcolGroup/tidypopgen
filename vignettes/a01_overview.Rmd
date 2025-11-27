@@ -384,10 +384,11 @@ metadata to our `gen_tibble`, or if we have subset the individuals in our `gen_t
 then we can reload the same object in the next R session.
 
 The `.gt` file works together with the `.rds` and `.bk` files to include
-all the information stored in the `gen_tibble`. Note that, whilst the `.rds` and `.bk`
-file have to share name, the `.gt` file can be named differently (but, by default, if
+all the information stored in the `gen_tibble`. However, several `gen_tibble` can work with the same `.rds` and `.bk` files (for example, if we subset individuals or loci).
+
+Because of that, whilst the `.rds` and `.bk` file have to share name, the `.gt` file can be named differently (but, by default, if
 no specific name is given, `gt_save` will use the same pattern as for the `.rds` 
-and `.bk` file).
+and `.bk` file). If that pattern is already used, a number will be appended to the name.
 
 So, let us save our file:
 ```{r}
@@ -424,7 +425,7 @@ But now when we try to impute using the function `gt_impute_simple`, we get the 
 gt_impute_simple(new_example_gt)
 ```
 
-To fix this, we need to update the backing files to reflect the new set of individuals. It is important that we use `<-` to ensure that the names of the newly updated backingfiles are stored in the `gen_tibble` object:
+To fix this, we need to update the backing files to reflect the new set of individuals. This will create a new set of backing files on disk that match the individuals in our `gen_tibble` object. It is important that we use `<-` to ensure that the names of the newly updated backingfiles are stored in the `gen_tibble` object:
 ```{r}
 new_example_gt <- gt_update_backingfile(new_example_gt, backingfile = tempfile())
 ```
