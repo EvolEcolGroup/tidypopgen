@@ -639,7 +639,9 @@ gt_impute_simple(new_example_gt)
 
 To fix this, we need to update the backing files to reflect the new set of individuals. This will create a new set of backing files on disk that match the individuals in our `gen_tibble` object. It is important that we use `<-` to ensure that the names of the newly updated backingfiles are stored in the `gen_tibble` object:
 ```{r}
-new_example_gt <- gt_update_backingfile(new_example_gt, backingfile = tempfile())
+new_example_gt <- gt_update_backingfile(new_example_gt,
+  backingfile = tempfile()
+)
 ```
 
 And now we can impute without any problems:
@@ -705,13 +707,13 @@ is_loci_table_ordered(reorder_test_gt)
 By default, `gt_order_loci()` orders loci by chromosome and position only. If we want to order by genetic distance, as well as chromosome and position, we can set the parameter `ignore_genetic_dist` to FALSE:
 
 ```{r}
-reorder_test_gt_again <- gt_order_loci(reorder_test_gt, ignore_genetic_dist = FALSE)
+reorder_test_gt_again <- gt_order_loci(reorder_test_gt,
+  ignore_genetic_dist = FALSE
+)
 ```
 
 And, again, we can check that the loci are ordered with respect to genetic distance:
 
 ```{r}
-is_loci_table_ordered(new_example_gt, ignore_genetic_dist = FALSE)
+is_loci_table_ordered(reorder_test_gt_again, ignore_genetic_dist = FALSE)
 ```
-
-
