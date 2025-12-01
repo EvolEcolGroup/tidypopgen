@@ -623,7 +623,7 @@ We can see that our genotypes were recovered correctly.
 
 Occasionally, we may need to update the backing files of a `gen_tibble` (the `.rds` and `.bk` files), as some functions require that the number of individuals in the `gen_tibble` object loaded in the R session matches the number of individuals in the backing files that are stored on disk. The schematic below illustrates this.
 
-![Figure 1: Visual representation of subsetting a gen_tibble object](./img/update_backingfile.jpg){width=630px}
+![Figure 2: Visual representation of updating backingfiles for a gen_tibble object](./img/update_backingfile.jpg){width=630px}
 
 For example, lets assume we want to impute missing values in our data. In our QC step we may have filtered out some individuals, like so: 
 
@@ -657,7 +657,7 @@ For certain types of analysis, it may be necessary to reorder loci in a `gen_tib
 is_loci_table_ordered(new_example_gt)
 ```
 
-Lets create another `gen`_tibble`, where loci are not ordered:
+Let's create another `gen`_tibble`, where loci are not ordered:
 
 ```{r}
 test_indiv_meta <- data.frame(
