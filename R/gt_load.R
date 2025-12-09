@@ -40,6 +40,16 @@ gt_load <- function(file = NULL, reattach_to = NULL) {
   if (!file.exists(file)) {
     stop(file, " does not exist")
   }
+
+  if (!is.null(reattach_to)) {
+    if (file_ext(reattach_to) != "rds") {
+      reattach_to <- paste0(reattach_to, ".rds")
+    }
+    if (!file.exists(reattach_to)) {
+      stop(reattach_to, " does not exist")
+    }
+  }
+
   x <- readRDS(file)
   # update if we have old objects
   x <- update_old_bigsnp(x)

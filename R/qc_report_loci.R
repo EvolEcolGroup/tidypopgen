@@ -5,8 +5,8 @@
 #'
 #' @param .x a [`gen_tibble`] object.
 #' @param ... currently unused
-#' the HWE test.
-#' @returns a tibble with 3 elements: maf, missingness and hwe_p
+#' @returns either a tibble with 3 elements (maf, missingness and hwe_p) or a
+#'   tibble with 2 elements (maf and missingness) for pseudohaploid data.
 #' @rdname qc_report_loci
 #' @export
 #' @examples

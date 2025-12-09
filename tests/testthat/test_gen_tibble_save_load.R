@@ -83,6 +83,18 @@ test_that("save and load gt", {
     new_test_gt2 <- gt_load(all_file_names[1]),
     ".rds does not exist"
   )
+
+  # remove .rds extension from all_file_names[2]
+  rds <- gsub(".rds$", "", all_file_names[2])
+
+  # loading should fail
+  expect_error(
+    new_test_gt2 <- gt_load(all_file_names[1],
+      reattach_to = rds
+    ),
+    ".rds does not exist"
+  )
+
   # this should now work:
   new_test_gt2 <-
     gt_load(
@@ -126,7 +138,6 @@ test_that("error if saving a non gen_tibble object", {
 })
 
 test_that("old bigsnp gen_tibbles can be loaded", {
-  # TODO find a way to run this test on CI
   # copy the old gen_tibble to a temp location  #nolint start
   temp_dir <- tempdir()
   file.copy(system.file("extdata/bigsnp_obj_gt/old_gen_tibble.gt",
