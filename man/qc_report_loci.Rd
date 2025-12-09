@@ -22,7 +22,8 @@ the HWE test.}
 a tibble with 3 elements: maf, missingness and hwe_p
 }
 \description{
-Return QC information to assess loci (MAF, missingness and HWE test).
+Return QC information to assess loci (MAF, missingness and HWE test). For
+pseudohaploid data, HWE test is not calculated.
 }
 \examples{
 # Create a gen_tibble of lobster genotypes
