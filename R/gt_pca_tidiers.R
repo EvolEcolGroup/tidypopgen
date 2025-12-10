@@ -108,7 +108,7 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
 
   if (matrix %in% c("pcs", "d", "eigenvalues")) {
     ret <- tibble(
-      PC = seq_len(length(x$d)),
+      PC = seq_along(x$d),
       "std.dev" = x$d / sqrt(nrow(x$u) - 1)
     )
     if ("square_frobenius" %in% names(x)) {

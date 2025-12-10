@@ -93,6 +93,7 @@ gen_tibble_packedancestry <- function(
 
   # construct path
   fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
+  saveRDS(file_backed_matrix, fbm_path)
 
   # create genotypes column
   indiv_meta$genotypes <- new_vctrs_bigsnp(

@@ -86,7 +86,7 @@ windows_pop_tajimas_d <- function(.x,
 
   res <- list()
   # now we can loop around each population to compute the windows
-  for (i_grp in seq_len(length(pi_by_locus))) {
+  for (i_grp in seq_along(pi_by_locus)) {
     window_taj <- windows_stats_generic(
       .x = pi_by_locus[[i_grp]],
       loci_table = show_loci(.x),
