@@ -250,4 +250,11 @@ test_that("qc_report_indiv for pseudohaploid data", {
     ),
     "ggplot"
   )
+
+  # autoplot for only pseudohaploid samples
+  test_gt_pseudo <- test_gt_pseudo %>% filter(indiv_ploidy(test_gt_pseudo) == 1)
+  indiv_report <- qc_report_indiv(test_gt_pseudo)
+  expect_s3_class(autoplot(indiv_report,
+    type = "histogram"
+  ))
 })
