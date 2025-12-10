@@ -12,7 +12,7 @@
 #' kinship coefficient or a string of either "first" or "second", to remove any
 #' first degree or second degree relationships from the dataset. This second
 #' option is similar to using  --unrelated --degree 1 or --unrelated --degree 2
-#' in KING.
+#' in KING. For pseudohaploid data, only missingness and ploidy are reported.
 #'
 #' @param .x either a [`gen_tibble`] object or a grouped [`gen_tibble`] (as
 #'   obtained by using [dplyr::group_by()])
@@ -52,6 +52,12 @@ qc_report_indiv <- function(.x, ...) {
 qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
+  if (show_ploidy(.x) == -2) {
+    qc_report <- qc_report_indiv_pseudohaploid(.x)
+    return(qc_report)
+  }
+
+
   if (!is.null(kings_threshold)) {
     if (kings_threshold %in% c("first", "second")) {
       if (kings_threshold == "first") {
@@ -88,7 +94,26 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
     attr(qc_report$to_keep, "king") <- king
   }
   class(qc_report) <- c("qc_report_indiv", class(qc_report))
-  qc_report
+  return(qc_report)
+}
+
+qc_report_indiv_pseudohaploid <- function(.x, ...) {
+  if (length(dplyr::group_vars(.x)) == 0) {
+    qc_report <- .x %>%
+      reframe(
+        missingness = indiv_missingness(.x),
+        ploidy = indiv_ploidy(.x)
+      )
+  } else {
+    qc_report <- .x %>%
+      ungroup() %>%
+      reframe(
+        missingness = indiv_missingness(.x),
+        ploidy = indiv_ploidy(.x)
+      )
+  }
+  class(qc_report) <- c("qc_report_indiv", class(qc_report))
+  return(qc_report)
 }
 
 
@@ -96,6 +121,11 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
 #' @rdname qc_report_indiv
 qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
+
+  if (show_ploidy(.x) == -2) {
+    qc_report <- qc_report_indiv_pseudohaploid(.x)
+    return(qc_report)
+  }
 
   if (!is.null(kings_threshold)) {
     if (is.numeric(kings_threshold)) {
@@ -172,13 +202,15 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 #' - `scatter`: a plot of missingness and observed heterozygosity within
 #' individuals.
 #' - `relatedness`: a histogram of paired kinship coefficients
+#' - `histogram`: for gen_tibbles containing pseudohaploid data, a histogram
+#' of missingness, split by ploidy.
 #'
 #' `autoplot` produces simple plots to quickly inspect an object. They are not
 #' customisable; we recommend that you use `ggplot2` to produce publication
 #' ready plots.
 #'
 #' @param object an object of class `qc_report_indiv`
-#' @param type the type of plot (`scatter`,`relatedness`)
+#' @param type the type of plot (`scatter`,`relatedness`,`histogram`)
 #' @param miss_threshold a threshold for the accepted rate of missingness within
 #'   individuals
 #' @param kings_threshold an optional numeric, a threshold of relatedness for
@@ -210,7 +242,7 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 #'
 autoplot.qc_report_indiv <- function(
     object,
-    type = c("scatter", "relatedness"),
+    type = c("scatter", "relatedness", "histogram"),
     miss_threshold = 0.05,
     kings_threshold = NULL,
     ...) {
@@ -236,14 +268,24 @@ autoplot.qc_report_indiv <- function(
   type <- match.arg(type)
 
   if (type == "scatter") {
+    if ("ploidy" %in% colnames(object)) {
+      stop("Scatter plot is not available for pseudohaploid data")
+    }
     report_plot <- autoplot_qc_report_indiv(
       object,
       miss_threshold = miss_threshold
     )
   } else if (type == "relatedness") {
+    if ("ploidy" %in% colnames(object)) {
+      stop("Relatedness plot is not available for pseudohaploid data")
+    }
     report_plot <- autoplot_qc_report_indiv_king(
       object,
       kings_threshold = kings_threshold
+    )
+  } else if (type == "histogram") {
+    report_plot <- autoplot_qc_report_indiv_box(
+      object
     )
   }
   return(report_plot)
@@ -345,5 +387,39 @@ king_hist_plot <- function(object, kings_threshold) {
       title = "Distribution of paired kinship coefficients"
     ) +
     ggplot2::geom_vline(xintercept = kings_threshold, lty = 2, col = "red")
+  return(p)
+}
+
+autoplot_qc_report_indiv_box <- function(object) {
+  object$ploidy <- as.factor(object$ploidy)
+
+  # split by ploidy
+  pseudo <- object %>% filter(.data$ploidy == 1)
+  dip <- object %>% filter(.data$ploidy == 2)
+
+  pseudo_plot <- ggplot2::ggplot(
+    pseudo,
+    ggplot2::aes(x = .data$missingness)
+  ) +
+    ggplot2::geom_histogram() +
+    ggplot2::labs(
+      x = "Missingness",
+      y = "Number of individuals",
+      title = "Pseudohaploid data"
+    )
+
+  dip_plot <- ggplot2::ggplot(
+    dip,
+    ggplot2::aes(x = .data$missingness)
+  ) +
+    ggplot2::geom_histogram() +
+    ggplot2::labs(
+      x = "Missingness",
+      y = "Number of individuals",
+      title = "Diploid data"
+    )
+
+  p <- patchwork::wrap_plots(pseudo_plot, dip_plot, ncol = 2)
+
   return(p)
 }

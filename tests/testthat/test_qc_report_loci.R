@@ -98,4 +98,6 @@ test_that("qc_report_loci for pseudohaploid data", {
   # all plot
   expect_s3_class(autoplot(loci_report, type = "all"), "ggplot")
   expect_s3_class(autoplot(loci_report_grouped, type = "all"), "ggplot")
+
+  # test other plots individually
 })

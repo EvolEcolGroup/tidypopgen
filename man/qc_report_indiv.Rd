@@ -46,7 +46,7 @@ of 'to_keep'. The kings_threshold parameter can be either a numeric KING
 kinship coefficient or a string of either "first" or "second", to remove any
 first degree or second degree relationships from the dataset. This second
 option is similar to using  --unrelated --degree 1 or --unrelated --degree 2
-in KING.
+in KING. For pseudohaploid data, only missingness and ploidy are reported.
 }
 \examples{
 # Create a gen_tibble of lobster genotypes
