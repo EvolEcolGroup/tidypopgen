@@ -5,8 +5,8 @@
 #'
 #' @param .x a [`gen_tibble`] object.
 #' @param ... currently unused
-#' @returns either a tibble with 3 elements (maf, missingness and hwe_p) or a
-#'   tibble with 2 elements (maf and missingness) for pseudohaploid data.
+#' @returns either a tibble with 3 elements (maf, missingness and hwe_p). For
+#'   pseudohaploid data, a tibble with 2 elements (maf and missingness).
 #' @rdname qc_report_loci
 #' @export
 #' @examples
@@ -61,29 +61,16 @@ qc_report_loci.tbl_df <- function(.x, ...) {
 
 qc_report_loci_pseudohaploid <- function(.x, ...) {
   rlang::check_dots_empty()
-
-  if (length(dplyr::group_vars(.x)) == 0) {
-    # use the ungrouped method
-    qc_report <- .x %>%
-      reframe(
-        snp_id = loci_names(.x),
-        maf = loci_maf(.data$genotypes),
-        missingness = loci_missingness(.data$genotypes)
-      )
-    class(qc_report) <- c("qc_report_loci", class(qc_report))
-    return(qc_report)
-  } else {
-    # use the grouped method
-    qc_report <- .x %>%
-      ungroup() %>%
-      reframe(
-        snp_id = loci_names(.x),
-        maf = loci_maf(.data$genotypes),
-        missingness = loci_missingness(.data$genotypes)
-      )
-    class(qc_report) <- c("qc_report_loci", class(qc_report))
-    return(qc_report)
-  }
+  # use the grouped method
+  qc_report <- .x %>%
+    ungroup() %>%
+    reframe(
+      snp_id = loci_names(.x),
+      maf = loci_maf(.data$genotypes),
+      missingness = loci_missingness(.data$genotypes)
+    )
+  class(qc_report) <- c("qc_report_loci", class(qc_report))
+  return(qc_report)
 }
 
 #' @export

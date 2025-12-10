@@ -30,7 +30,8 @@ coefficient of 0.088 or more
 \value{
 If no kings_threshold is provided, a tibble with 2 elements: het_obs
 and missingness. If kings_threshold is provided, a tibble with 4 elements:
-het_obs, missingness, id and to_keep.
+het_obs, missingness, id and to_keep. For pseudohaploid data, a tibble with
+ploidy and missingness.
 }
 \description{
 Return QC information to assess loci (Observed heterozygosity and

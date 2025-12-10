@@ -99,7 +99,7 @@ test_that("qc_report_indiv$to_keep is correctly ordered", {
   )
 })
 
-test_that("autoplot list", {
+test_that("autoplot qc_report_indiv list for each population", {
   ungrouped <- qc_report_indiv(families, kings_threshold = 0.2)
   expect_error(autoplot(ungrouped, type = "blah"), "'arg' should be one of")
   plot1 <- autoplot(ungrouped, type = "relatedness", kings_threshold = 0.2)
@@ -120,7 +120,6 @@ test_that("autoplot list", {
   # expect plot2 is a list, one plot for each population
   expect_equal(names(plot2), c("pop1", "pop2"))
 })
-
 
 test_that("non-numeric kings_threshold arguments ", {
   expect_error(
@@ -219,12 +218,12 @@ test_that("qc_report_indiv for pseudohaploid data", {
   )
 
   test_gt_pseudo <- gt_pseudohaploid(test_gt)
-
   indiv_report <- qc_report_indiv(test_gt_pseudo)
 
   test_gt_pseudo <- test_gt_pseudo %>% group_by(population)
-
   indiv_report_grouped <- qc_report_indiv(test_gt_pseudo)
+
+  expect_equal(indiv_report, indiv_report_grouped)
 
   # autoplot relatedness
   expect_error(
@@ -244,6 +243,12 @@ test_that("qc_report_indiv for pseudohaploid data", {
     "not available for pseudohaploid"
   )
 
+  # autoplot with kings threshold only
+  expect_error(
+    autoplot(indiv_report, kings_threshold = 0.177),
+    "not available for pseudohaploid data"
+  )
+
   expect_s3_class(
     autoplot(indiv_report,
       type = "histogram"
@@ -251,7 +256,7 @@ test_that("qc_report_indiv for pseudohaploid data", {
     "ggplot"
   )
 
-  # autoplot for only pseudohaploid samples
+  # autoplot for only pseudohaploid samples should be one pane
   test_gt_pseudo <- test_gt_pseudo %>% filter(indiv_ploidy(genotypes) == 1)
   indiv_report <- qc_report_indiv(test_gt_pseudo)
   expect_s3_class(
@@ -259,5 +264,13 @@ test_that("qc_report_indiv for pseudohaploid data", {
       type = "histogram"
     ),
     "ggplot"
+  )
+})
+
+test_that("histogram autoplot fails for non-pseudohaploid", {
+  report <- qc_report_indiv(families, kings_threshold = 0.2)
+  expect_error(
+    autoplot(report, type = "histogram"),
+    "only available for pseudohaploid data"
   )
 })

@@ -18,8 +18,8 @@ qc_report_loci(.x, ...)
 \item{...}{currently unused}
 }
 \value{
-either a tibble with 3 elements (maf, missingness and hwe_p) or a
-tibble with 2 elements (maf and missingness) for pseudohaploid data.
+either a tibble with 3 elements (maf, missingness and hwe_p). For
+pseudohaploid data, a tibble with 2 elements (maf and missingness).
 }
 \description{
 Return QC information to assess loci (MAF, missingness and HWE test). For

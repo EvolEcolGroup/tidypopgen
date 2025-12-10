@@ -25,7 +25,8 @@
 #' @param ... further arguments to pass
 #' @returns If no kings_threshold is provided, a tibble with 2 elements: het_obs
 #'   and missingness. If kings_threshold is provided, a tibble with 4 elements:
-#'   het_obs, missingness, id and to_keep.
+#'   het_obs, missingness, id and to_keep. For pseudohaploid data, a tibble with
+#'   ploidy and missingness.
 #' @rdname qc_report_indiv
 #' @export
 #' @examples
@@ -53,6 +54,9 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
+    if (!is.null(kings_threshold)) {
+      stop("KING kinship estimates are not supported for pseudohaploid data.")
+    }
     qc_report <- qc_report_indiv_pseudohaploid(.x)
     return(qc_report)
   }
@@ -98,20 +102,13 @@ qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
 }
 
 qc_report_indiv_pseudohaploid <- function(.x, ...) {
-  if (length(dplyr::group_vars(.x)) == 0) {
-    qc_report <- .x %>%
-      reframe(
-        missingness = indiv_missingness(.x),
-        ploidy = indiv_ploidy(.x)
-      )
-  } else {
-    qc_report <- .x %>%
-      ungroup() %>%
-      reframe(
-        missingness = indiv_missingness(.x),
-        ploidy = indiv_ploidy(.x)
-      )
-  }
+  qc_report <- .x %>%
+    ungroup() %>%
+    reframe(
+      missingness = indiv_missingness(.x),
+      ploidy = indiv_ploidy(.x),
+      id = .x$id
+    )
   class(qc_report) <- c("qc_report_indiv", class(qc_report))
   return(qc_report)
 }
@@ -284,6 +281,9 @@ autoplot.qc_report_indiv <- function(
       kings_threshold = kings_threshold
     )
   } else if (type == "histogram") {
+    if (!"ploidy" %in% colnames(object)) {
+      stop("Histogram plot is only available for pseudohaploid data.")
+    }
     report_plot <- autoplot_qc_report_indiv_box(
       object
     )
