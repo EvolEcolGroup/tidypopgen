@@ -223,9 +223,9 @@ lobsters <- gt_update_backingfile(lobsters, backingfile = tempfile())
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/RtmpC4y430/file291c2d7e84b.rds
+    ## using FBM RDS: /tmp/RtmpBr9AdH/file34ae5780f77c.rds
 
-    ## with FBM backing file: /tmp/RtmpC4y430/file291c2d7e84b.bk
+    ## with FBM backing file: /tmp/RtmpBr9AdH/file34ae5780f77c.bk
 
     ## make sure that you do NOT delete those files!
 

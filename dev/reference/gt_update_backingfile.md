@@ -64,8 +64,8 @@ example_gt <- load_example_gt("gen_tbl")
 example_gt %>% gt_update_backingfile()
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/Rtmpyikrxm/file1f10132bcfeb_v2.rds
-#> with FBM backing file: /tmp/Rtmpyikrxm/file1f10132bcfeb_v2.bk
+#> using FBM RDS: /tmp/Rtmp7A6Hoh/file2ab334cad133_v2.rds
+#> with FBM backing file: /tmp/Rtmp7A6Hoh/file2ab334cad133_v2.bk
 #> make sure that you do NOT delete those files!
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 3
