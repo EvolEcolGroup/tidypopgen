@@ -408,6 +408,12 @@ autoplot_qc_report_indiv_box <- function(object) {
       title = "Pseudohaploid data"
     )
 
+  # if there is no diploid data, return only the pseudohaploid plot
+  if (nrow(dip) == 0) {
+    p <- pseudo_plot
+    return(p)
+  }
+
   dip_plot <- ggplot2::ggplot(
     dip,
     ggplot2::aes(x = .data$missingness)
