@@ -79,7 +79,10 @@ test_that("gt_update_backingfile correctly updates", {
   new_gt <- gt_update_backingfile(subset_reorder_test_gt, quiet = TRUE)
 
   # check a new .gt is saved
-  expect_true(file.exists(bigstatsr::sub_bk(gt_get_file_names(new_gt)[2], ".gt")))
+  expect_true(file.exists(bigstatsr::sub_bk(
+    gt_get_file_names(new_gt)[2],
+    ".gt"
+  )))
 
   # the new gt should be identical to the original one, minus the big indices
   expect_identical(

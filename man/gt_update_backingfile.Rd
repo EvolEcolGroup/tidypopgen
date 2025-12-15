@@ -34,7 +34,7 @@ a \code{\link{gen_tibble}} with updated \code{.gt}, \code{.bk}, and \code{.rds} 
 \description{
 This functions forces a re-write of the file backing matrix to match the
 \code{\link{gen_tibble}}. Individuals and loci are subsetted and reordered according to
-the current state of the \code{gen_tibble}. A \code{gt}, \code{.bk} and \code{.rds} file will be
+the current state of the \code{gen_tibble}. A \code{.gt}, \code{.bk} and \code{.rds} file will be
 created.
 }
 \details{

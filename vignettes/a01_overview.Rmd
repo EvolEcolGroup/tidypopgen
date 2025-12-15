@@ -594,13 +594,15 @@ metadata to our `gen_tibble`, or if we have subset the individuals in our `gen_t
 then we can reload the same object in the next R session.
 
 The `.gt` file works together with the `.rds` and `.bk` files to include
-all the information stored in the `gen_tibble`. However, several `gen_tibble` objects can work with the same `.rds` and `.bk` files (for example, if we create different subsets of individuals or loci). The schematic below illustrates this.
+all the information stored in the `gen_tibble`. However, several `gen_tibble` objects can work with the same `.rds` and `.bk` files (for example, if we create different subsets of individuals or loci). 
 
-![Figure 2: Visual representation of updating backingfiles for a gen_tibble object](./img/gt_save.jpg)
-
-The `.rds` and `.bk` file have to share name, but the `.gt` file can be named differently. By default, if
+The `.rds` and `.bk` file must share a name, but the `.gt` file can be named differently. By default, if
 no specific name is given `gt_save` will use the same pattern as the `.rds` 
-and `.bk` file, and if that pattern is already in use by another `.gt` object, a version number will be appended.
+and `.bk` file, and if that pattern is already in use by another `.gt` object, a version number will be appended. You may want to name your `.gt` files according to the content of the `gen_tibble` object (for example, indicating which individuals and loci are included).
+
+The schematic below illustrates this, where mutliple `gen_tibble` objects use the same backingfiles.
+
+![Figure 2: Visual representation of saving multiple gen_tibble objects to the same backingfile set](./img/gt_save.jpg)
 
 So, let us save our file:
 ```{r}
@@ -625,7 +627,7 @@ We can see that our genotypes were recovered correctly.
 
 Occasionally, we may need to update the backing files of a `gen_tibble` (the `.rds` and `.bk` files), as some functions require that the number of individuals in the `gen_tibble` object loaded in the R session matches the number of individuals in the backing files that are stored on disk. The schematic below illustrates this.
 
-![Figure 2: Visual representation of updating backingfiles for a gen_tibble object](./img/update_backingfile.jpg){width=630px}
+![Figure 3: Visual representation of updating backingfiles for a gen_tibble object](./img/update_backingfile.jpg){width=630px}
 
 For example, lets assume we want to impute missing values in our data. In our QC step we may have filtered out some individuals, like so: 
 
@@ -659,7 +661,7 @@ For certain types of analysis, it may be necessary to reorder loci in a `gen_tib
 is_loci_table_ordered(new_example_gt)
 ```
 
-Let's create another `gen`_tibble`, where loci are not ordered:
+Let's create another `gen_tibble`, where loci are not ordered:
 
 ```{r}
 test_indiv_meta <- data.frame(

@@ -2,7 +2,7 @@
 #'
 #' This functions forces a re-write of the file backing matrix to match the
 #' [`gen_tibble`]. Individuals and loci are subsetted and reordered according to
-#' the current state of the `gen_tibble`. A `gt`, `.bk` and `.rds` file will be
+#' the current state of the `gen_tibble`. A `.gt`, `.bk` and `.rds` file will be
 #' created.
 #'
 #' This function does not check whether the positions of your genetic loci are
