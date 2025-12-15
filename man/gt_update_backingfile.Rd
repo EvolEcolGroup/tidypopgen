@@ -28,18 +28,20 @@ it) if it is unsorted within the chromosomes.}
 \item{quiet}{boolean to suppress information about the files}
 }
 \value{
-a \code{\link{gen_tibble}} with a backing file (i.e. a new File Backed Matrix)
+a \code{\link{gen_tibble}} with updated \code{.gt}, \code{.bk}, and \code{.rds} files
+(i.e. a new File Backed Matrix)
 }
 \description{
 This functions forces a re-write of the file backing matrix to match the
 \code{\link{gen_tibble}}. Individuals and loci are subsetted and reordered according to
-the current state of the \code{gen_tibble}. Tests for this function are in
-test_gt_order_loci.R
+the current state of the \code{gen_tibble}. A \code{gt}, \code{.bk} and \code{.rds} file will be
+created.
 }
 \details{
 This function does not check whether the positions of your genetic loci are
 sorted. To check this, and update the file backing matrix, use
-\code{gt_order_loci()}.
+\code{gt_order_loci()}. Tests for this function are in
+test_gt_order_loci.R
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

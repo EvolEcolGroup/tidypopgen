@@ -77,6 +77,10 @@ test_that("gt_update_backingfile correctly updates", {
   subset_reorder_test_gt <- subset_reorder_test_gt[c(2, 1, 4, 5), ]
   # now save the updated backing matrix
   new_gt <- gt_update_backingfile(subset_reorder_test_gt, quiet = TRUE)
+
+  # check a new .gt is saved
+  expect_true(file.exists(bigstatsr::sub_bk(gt_get_file_names(new_gt)[2], ".gt")))
+
   # the new gt should be identical to the original one, minus the big indices
   expect_identical(
     show_genotypes(new_gt),
@@ -88,6 +92,11 @@ test_that("gt_update_backingfile correctly updates", {
   )
   # loci big index should now be sequential
   expect_identical(show_loci(new_gt)$big_index, 1:count_loci(new_gt))
+
+  # and if we reload the .gt it is the same
+  path_gt <- bigstatsr::sub_bk(gt_get_file_names(new_gt)[2], ".gt")
+  reload_gt <- gt_load(path_gt)
+  expect_true(all.equal(new_gt, reload_gt, check.attributes = FALSE))
 
   # if loci are out of order, gt_update_backingfile proceeds, and does not error
   show_loci(subset_reorder_test_gt) <-
