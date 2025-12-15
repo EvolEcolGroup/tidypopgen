@@ -1,11 +1,12 @@
 #' Create a Quality Control report for loci
 #'
-#' Return QC information to assess loci (MAF, missingness and HWE test).
+#' Return QC information to assess loci (MAF, missingness and HWE test). For
+#' pseudohaploid data, HWE test is not calculated.
 #'
 #' @param .x a [`gen_tibble`] object.
 #' @param ... currently unused
-#' the HWE test.
-#' @returns a tibble with 3 elements: maf, missingness and hwe_p
+#' @returns either a tibble with 3 elements (maf, missingness and hwe_p). For
+#'   pseudohaploid data, a tibble with 2 elements (maf and missingness).
 #' @rdname qc_report_loci
 #' @export
 #' @examples
@@ -32,6 +33,12 @@ qc_report_loci <- function(.x, ...) {
 #' @rdname qc_report_loci
 qc_report_loci.tbl_df <- function(.x, ...) {
   rlang::check_dots_empty()
+
+  if (show_ploidy(.x) == -2) {
+    qc_report <- qc_report_loci_pseudohaploid(.x)
+    return(qc_report)
+  }
+
   stopifnot_diploid(.x$genotypes)
   message(paste(
     "This gen_tibble is not grouped. For Hardy-Weinberg equilibrium,",
@@ -49,13 +56,33 @@ qc_report_loci.tbl_df <- function(.x, ...) {
       hwe_p = loci_hwe(.data$genotypes)
     )
   class(qc_report) <- c("qc_report_loci", class(qc_report))
-  qc_report
+  return(qc_report)
+}
+
+qc_report_loci_pseudohaploid <- function(.x, ...) {
+  rlang::check_dots_empty()
+  # use the grouped method
+  qc_report <- .x %>%
+    ungroup() %>%
+    reframe(
+      snp_id = loci_names(.x),
+      maf = loci_maf(.data$genotypes),
+      missingness = loci_missingness(.data$genotypes)
+    )
+  class(qc_report) <- c("qc_report_loci", class(qc_report))
+  return(qc_report)
 }
 
 #' @export
 #' @rdname qc_report_loci
 qc_report_loci.grouped_df <- function(.x, ...) {
   rlang::check_dots_empty()
+
+  if (show_ploidy(.x) == -2) {
+    qc_report <- qc_report_loci_pseudohaploid(.x)
+    return(qc_report)
+  }
+
   stopifnot_diploid(.x$genotypes)
 
   # Find number of groups
@@ -80,7 +107,7 @@ qc_report_loci.grouped_df <- function(.x, ...) {
       hwe_p = hwe_res$p_corrected
     )
   class(qc_report) <- c("qc_report_loci", class(qc_report))
-  qc_report
+  return(qc_report)
 }
 
 #' Autoplots for `qc_report_loci` objects
@@ -220,9 +247,6 @@ autoplot.qc_report_loci <- function(
   return(report_plot)
 }
 
-# TODO BUG autoplot
-
-
 autoplot_l_qc_all <- function(
     object,
     maf_threshold,
@@ -247,19 +271,24 @@ autoplot_l_qc_all <- function(
       miss_low_maf_plot
   )
 
-  # Hardy Weinberg exact test p-val distribution
-  hwe_all_plot <- autoplot_l_qc_hwe(object,
-    hwe_p_vertical_line = hwe_p_vertical_line
-  )
-  hwe_low_plot <- autoplot_l_qc_hwe(
-    object = object,
-    hwe_p_vertical_line = hwe_p_vertical_line,
-    hwe_p_low_thresh = hwe_p_low_thresh
-  )
 
-  hwe_plots <- patchwork::wrap_plots(hwe_all_plot, hwe_low_plot)
+  if ("hwe_p" %in% colnames(object)) {
+    # Hardy Weinberg exact test p-val distribution
+    hwe_all_plot <- autoplot_l_qc_hwe(object,
+      hwe_p_vertical_line = hwe_p_vertical_line
+    )
+    hwe_low_plot <- autoplot_l_qc_hwe(
+      object = object,
+      hwe_p_vertical_line = hwe_p_vertical_line,
+      hwe_p_low_thresh = hwe_p_low_thresh
+    )
 
-  combined_plots <- miss_maf_plots / hwe_plots
+    hwe_plots <- patchwork::wrap_plots(hwe_all_plot, hwe_low_plot)
+
+    combined_plots <- miss_maf_plots / hwe_plots
+  } else {
+    combined_plots <- miss_maf_plots
+  }
   return(combined_plots)
 }
 
@@ -281,29 +310,45 @@ autoplot_l_qc_overview <- function(
 
   qc_report <- object
 
-  qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p_low_thresh, ]
   qc_maf <- qc_report[qc_report$maf >= maf_threshold, ]
-
-
   maf_pass <- c(qc_maf$snp_id)
-  hwe_pass <- c(qc_hwe$snp_id)
 
   qc_missing <- qc_report[qc_report$missingness >= miss_threshold, ]
   missing_pass <- c(qc_missing$snp_id)
 
-  pass_list <- list(MAF = maf_pass, HWE = hwe_pass, Missing = missing_pass)
+  # if including HWE
+  if ("hwe_p" %in% colnames(qc_report)) {
+    qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p_low_thresh, ]
+    hwe_pass <- c(qc_hwe$snp_id)
 
-  unique_markers <- unique(unlist(pass_list))
-  pass_counts <- UpSetR::fromList(pass_list)
-  rownames(pass_counts) <- unique_markers
+    pass_list <- list(MAF = maf_pass, HWE = hwe_pass, Missing = missing_pass)
 
-  final_plot_overview <- UpSetR::upset(
-    pass_counts,
-    order.by = "freq",
-    main.bar.color = "#66C2A5",
-    matrix.color = "#66C2A5",
-    sets.bar.color = "#FC8D62"
-  )
+    unique_markers <- unique(unlist(pass_list))
+    pass_counts <- UpSetR::fromList(pass_list)
+    rownames(pass_counts) <- unique_markers
+
+    final_plot_overview <- UpSetR::upset(
+      pass_counts,
+      order.by = "freq",
+      main.bar.color = "#66C2A5",
+      matrix.color = "#66C2A5",
+      sets.bar.color = "#FC8D62"
+    )
+  } else {
+    pass_list <- list(MAF = maf_pass, Missing = missing_pass)
+
+    unique_markers <- unique(unlist(pass_list))
+    pass_counts <- UpSetR::fromList(pass_list)
+    rownames(pass_counts) <- unique_markers
+
+    final_plot_overview <- UpSetR::upset(
+      pass_counts,
+      order.by = "freq",
+      main.bar.color = "#66C2A5",
+      matrix.color = "#66C2A5",
+      sets.bar.color = "#FC8D62"
+    )
+  }
   return(final_plot_overview)
 }
 
@@ -336,6 +381,13 @@ autoplot_l_qc_hwe <- function(object,
                               ...) {
   # check ellipses are empty
   rlang::check_dots_empty()
+
+  if (!"hwe_p" %in% colnames(object)) {
+    stop(
+      "Hardy-Weinberg equilibrium test not available for",
+      "pseudohaploid data."
+    )
+  }
 
   hwe_p_vertical_line <- -log10(hwe_p_vertical_line)
 

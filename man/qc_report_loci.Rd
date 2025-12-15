@@ -15,14 +15,15 @@ qc_report_loci(.x, ...)
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object.}
 
-\item{...}{currently unused
-the HWE test.}
+\item{...}{currently unused}
 }
 \value{
-a tibble with 3 elements: maf, missingness and hwe_p
+either a tibble with 3 elements (maf, missingness and hwe_p). For
+pseudohaploid data, a tibble with 2 elements (maf and missingness).
 }
 \description{
-Return QC information to assess loci (MAF, missingness and HWE test).
+Return QC information to assess loci (MAF, missingness and HWE test). For
+pseudohaploid data, HWE test is not calculated.
 }
 \examples{
 # Create a gen_tibble of lobster genotypes
