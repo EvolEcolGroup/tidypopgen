@@ -12,7 +12,7 @@
 #'
 #' @param .x a `gen_tibble` object
 #' @param backingfile the path, including the file name without extension, for
-#'   backing files used to store the data (they will be given a .bk and .RDS
+#'   backing files used to store the data (they will be given a .bk and .rds
 #'   automatically). If left to NULL (the default), the file name will be based
 #'   on the name f the current backing file.
 #' @param rm_unsorted_dist boolean to set `genetic_dist` to zero (i.e. remove
@@ -117,7 +117,7 @@ gt_update_backingfile <- function(
   # reorder the bignsp column in the loci table
   show_loci(new_gen_tbl)$big_index <- 1:count_loci(new_gen_tbl)
 
-  # remove .rds extension
+  # derive .gt filename from .bk backing file path
   file_name <- bigstatsr::sub_bk(gt_get_file_names(new_gen_tbl)[2], ".gt")
 
   gt_save_light(new_gen_tbl, file_name = file_name, quiet = TRUE)

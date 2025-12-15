@@ -16,7 +16,7 @@ gt_update_backingfile(
 \item{.x}{a \code{gen_tibble} object}
 
 \item{backingfile}{the path, including the file name without extension, for
-backing files used to store the data (they will be given a .bk and .RDS
+backing files used to store the data (they will be given a .bk and .rds
 automatically). If left to NULL (the default), the file name will be based
 on the name f the current backing file.}
 
