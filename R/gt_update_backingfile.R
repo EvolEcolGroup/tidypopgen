@@ -25,7 +25,14 @@
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'
-#' example_gt %>% gt_update_backingfile()
+#' # Here, new backingfiles are created, but without using `<-` the object
+#' # loaded in the R session is not updated
+#' gt_update_backingfile(example_gt)
+#'
+#' # Make sure to use `<-` to update the file names associated with the
+#' # gen_tibble object loaded in the R session
+#' example_gt <- example_gt %>% gt_update_backingfile()
+#'
 # Note that this is tested through gt_order_loci()
 gt_update_backingfile <- function(
     .x,
