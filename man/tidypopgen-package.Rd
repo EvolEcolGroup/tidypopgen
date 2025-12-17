@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-We provide a tidy grammar of population genetics, facilitating the manipulation and analysis of data on biallelic single nucleotide polymorphisms (SNPs). 'tidypopgen' scales to very large genetic datasets by storing genotypes on disk, and performing operations on them in chunks, without ever loading all data in memory. The full functionalities of the package are described in Carter et al. (2025) \doi{10.1101/2025.06.06.658325}.
+We provide a tidy grammar of population genetics, facilitating the manipulation and analysis of data on biallelic single nucleotide polymorphisms (SNPs). 'tidypopgen' scales to very large genetic datasets by storing genotypes on disk, and performing operations on them in chunks, without ever loading all data in memory. The full functionalities of the package are described in Carter et al. (2025) \doi{10.1111/2041-210x.70204}.
 }
 \seealso{
 Useful links:
