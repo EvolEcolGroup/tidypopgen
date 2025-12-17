@@ -697,10 +697,7 @@ Now we can see that the loci are not ordered:
 is_loci_table_ordered(test_gt)
 ```
 
-We can order the loci by chromosome and position using the function `gt_order_loci()`. This function will rearrange the loci in the `gen_tibble`, return a `gen_tibble` with the loci in order, and update the `.bk` and `.rds` backing files on disk accordingly. Again, the function returns an updated `gen_tibble` with the new backingfile paths, so we must assign the result back (with `<-` ) to ensure that the names of the new paths are stored in the `gen_tibble` object:
-
-
-Again, it is important to use `<-` to store the reordered `gen_tibble`:
+We can order the loci by chromosome and position using the function `gt_order_loci()`. This function will rearrange the loci in the `gen_tibble`, return a `gen_tibble` with the loci in order, and update the `.bk` and `.rds` backing files on disk accordingly. Again, the function returns an updated `gen_tibble` with the new backingfile paths, so we must assign the result back (with `<-` ) to ensure that the new paths are stored in the `gen_tibble` object:
 
 ```{r}
 reorder_test_gt <- gt_order_loci(test_gt)
