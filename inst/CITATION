@@ -6,7 +6,7 @@ bibentry(
   author = c(
     person("Evie", "Carter", role = c("aut")),
     person("Eirlys", "Tysall", role = c("aut")),
-    person("Hodgson", "Jason", role = c("aut")),
+    person("Jason", "Hodgson", role = c("aut")),
     person("Andrea", "Manica", email = "am315@cam.ac.uk", 
            role = c("aut", "cre", "cph"))),
   journal = "Methods in Ecology and Evolution",

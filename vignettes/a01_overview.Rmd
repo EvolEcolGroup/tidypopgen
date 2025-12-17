@@ -602,7 +602,7 @@ and `.bk` file, and if that pattern is already in use by another `.gt` object, a
 
 The schematic below illustrates this, where multiple `gen_tibble` objects use the same backingfiles.
 
-![Figure 2: Visual representation of saving multiple gen_tibble objects to the same backingfile set](./img/gt_save.jpg)
+![Figure 2: Visual representation of saving multiple gen_tibble objects to the same backingfile set](./img/gt_save.jpg){width=630px}
 
 So, let us save our file:
 ```{r}
@@ -641,7 +641,8 @@ But now when we try to impute using the function `gt_impute_simple`, we get the 
 gt_impute_simple(new_example_gt)
 ```
 
-To fix this, we need to update the backing files to reflect the new set of individuals. This will create a new set of backing files on disk (`.rds` and `.bk`) that match the individuals in our `gen_tibble` object and save the `gen_tibble` object (`.gt`) using the same file extension. It is important that we use `<-` to ensure that the names of the newly updated backingfiles are stored in the `gen_tibble` object:
+To fix this, we need to update the backing files to reflect the new set of individuals. This will create a new set of backing files on disk (`.rds` and `.bk`) that match the individuals in our `gen_tibble` object and save the `gen_tibble` object (`.gt`) using the same file extension. The function returns an updated `gen_tibble` with the new backingfile paths, so we must assign the result back (with `<-` ) to ensure that the new paths are stored in the `gen_tibble` object:
+
 ```{r}
 new_example_gt <- gt_update_backingfile(new_example_gt,
   backingfile = tempfile()
@@ -696,7 +697,10 @@ Now we can see that the loci are not ordered:
 is_loci_table_ordered(test_gt)
 ```
 
-We can order the loci by chromosome and position using the function `gt_order_loci()`. This function will rearrange the loci in the `gen_tibble`, return a `gen_tibble` with the loci in order, and update the `.bk` and `.rds` backing files on disk accordingly. Again, it is important to use `<-` to store the reordered `gen_tibble`:
+We can order the loci by chromosome and position using the function `gt_order_loci()`. This function will rearrange the loci in the `gen_tibble`, return a `gen_tibble` with the loci in order, and update the `.bk` and `.rds` backing files on disk accordingly. Again, the function returns an updated `gen_tibble` with the new backingfile paths, so we must assign the result back (with `<-` ) to ensure that the names of the new paths are stored in the `gen_tibble` object:
+
+
+Again, it is important to use `<-` to store the reordered `gen_tibble`:
 
 ```{r}
 reorder_test_gt <- gt_order_loci(test_gt)
