@@ -600,7 +600,7 @@ The `.rds` and `.bk` file must share a name, but the `.gt` file can be named dif
 no specific name is given `gt_save` will use the same pattern as the `.rds` 
 and `.bk` file, and if that pattern is already in use by another `.gt` object, a version number will be appended. You may want to name your `.gt` files according to the content of the `gen_tibble` object (for example, indicating which individuals and loci are included).
 
-The schematic below illustrates this, where mutliple `gen_tibble` objects use the same backingfiles.
+The schematic below illustrates this, where multiple `gen_tibble` objects use the same backingfiles.
 
 ![Figure 2: Visual representation of saving multiple gen_tibble objects to the same backingfile set](./img/gt_save.jpg)
 
