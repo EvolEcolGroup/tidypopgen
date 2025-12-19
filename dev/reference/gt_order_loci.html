@@ -3,11 +3,17 @@
 are sequential. It also re-saves the genotypes into a new file backed matrix
 with the new order, so that it can be used by functions such as
 loci_ld_clump() and gt_pca_autoSVD(). If the loci table is already
-ordered, the original gen_tibble is returned."><meta property="og:description" content="This function reorders the loci table so that positions within a chromosome
+ordered, the original gen_tibble is returned. This function will update the
+backingfiles of the gen_tibble and return the gen_tibble object, use &amp;lt;-
+as per the example provided to ensure that the names of the newly updated
+backingfiles are stored in the gen_tibble object."><meta property="og:description" content="This function reorders the loci table so that positions within a chromosome
 are sequential. It also re-saves the genotypes into a new file backed matrix
 with the new order, so that it can be used by functions such as
 loci_ld_clump() and gt_pca_autoSVD(). If the loci table is already
-ordered, the original gen_tibble is returned."><meta property="og:image" content="https://evolecolgroup.github.io/tidypopgen/logo.png"><meta name="robots" content="noindex"></head><body>
+ordered, the original gen_tibble is returned. This function will update the
+backingfiles of the gen_tibble and return the gen_tibble object, use &amp;lt;-
+as per the example provided to ensure that the names of the newly updated
+backingfiles are stored in the gen_tibble object."><meta property="og:image" content="https://evolecolgroup.github.io/tidypopgen/logo.png"><meta name="robots" content="noindex"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -15,7 +21,7 @@ ordered, the original gen_tibble is returned."><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.1.9001</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.1.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +62,10 @@ ordered, the original gen_tibble is returned."><meta property="og:image" content
 are sequential. It also re-saves the genotypes into a new file backed matrix
 with the new order, so that it can be used by functions such as
 <code><a href="loci_ld_clump.html">loci_ld_clump()</a></code> and <code><a href="gt_pca_autoSVD.html">gt_pca_autoSVD()</a></code>. If the loci table is already
-ordered, the original <code>gen_tibble</code> is returned.</p>
+ordered, the original <code>gen_tibble</code> is returned. This function will update the
+backingfiles of the <code>gen_tibble</code> and return the <code>gen_tibble</code> object, use <code>&lt;-</code>
+as per the example provided to ensure that the names of the newly updated
+backingfiles are stored in the <code>gen_tibble</code> object.</p>
     </div>
 
     <div class="section level2">
@@ -125,9 +134,11 @@ software.</p></dd>
 <span class="r-in"><span><span class="va">example_gt_ordered</span> <span class="op">&lt;-</span> <span class="fu">gt_order_loci</span><span class="op">(</span><span class="va">example_gt</span>, ignore_genetic_dist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> gen_backing files updated, now</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/Rtmp7A6Hoh/file2ab3b479a7f_v2.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/Rtmp7A6Hoh/file2ab3b479a7f_v2.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/Rtmp75alhy/file26d22e4bd876_v2.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/Rtmp75alhy/file26d22e4bd876_v2.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/Rtmp75alhy/file26d22e4bd876_v2.gt')</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Loci are now in the correct order</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="show_loci.html">show_loci</a></span><span class="op">(</span><span class="va">example_gt_ordered</span><span class="op">)</span></span></span>

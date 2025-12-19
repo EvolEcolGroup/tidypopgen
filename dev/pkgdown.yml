@@ -10,7 +10,7 @@ articles:
   articles/benchmark_hgdp: benchmark_hgdp.html
   articles/interpolating: interpolating.html
   tidypopgen: tidypopgen.html
-last_built: 2025-12-10T11:51Z
+last_built: 2025-12-19T20:06Z
 urls:
   reference: https://evolecolgroup.github.io/tidypopgen/reference
   article: https://evolecolgroup.github.io/tidypopgen/articles

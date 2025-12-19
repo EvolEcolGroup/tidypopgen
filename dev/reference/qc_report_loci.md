@@ -1,6 +1,7 @@
 # Create a Quality Control report for loci
 
 Return QC information to assess loci (MAF, missingness and HWE test).
+For pseudohaploid data, HWE test is not calculated.
 
 ## Usage
 
@@ -24,11 +25,12 @@ qc_report_loci(.x, ...)
 
 - ...:
 
-  currently unused the HWE test.
+  currently unused
 
 ## Value
 
-a tibble with 3 elements: maf, missingness and hwe_p
+either a tibble with 3 elements (maf, missingness and hwe_p). For
+pseudohaploid data, a tibble with 2 elements (maf and missingness).
 
 ## Examples
 

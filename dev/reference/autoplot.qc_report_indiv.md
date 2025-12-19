@@ -7,13 +7,16 @@ For `qc_report_indiv`, the following types of plots are available:
 
 - `relatedness`: a histogram of paired kinship coefficients
 
+- `histogram`: for gen_tibbles containing pseudohaploid data, a
+  histogram of missingness, split by ploidy.
+
 ## Usage
 
 ``` r
 # S3 method for class 'qc_report_indiv'
 autoplot(
   object,
-  type = c("scatter", "relatedness"),
+  type = c("scatter", "relatedness", "histogram"),
   miss_threshold = 0.05,
   kings_threshold = NULL,
   ...
@@ -28,7 +31,7 @@ autoplot(
 
 - type:
 
-  the type of plot (`scatter`,`relatedness`)
+  the type of plot (`scatter`,`relatedness`,`histogram`)
 
 - miss_threshold:
 

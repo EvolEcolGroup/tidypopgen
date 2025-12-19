@@ -24,16 +24,17 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/EvolEcolGroup/tidypopgen/blob/dev/DESCRIPTION)
+[`inst/CITATION`](https://github.com/EvolEcolGroup/tidypopgen/blob/dev/inst/CITATION)
 
-Carter E, Tysall E, Manica A (2025). *tidypopgen: Tidy Population
-Genetics*. R package version 0.4.1.9001,
-<https://github.com/EvolEcolGroup/tidypopgen>.
+Carter E, Tysall E, Hodgson J, Manica A (2025). “tidypopgen: Tidy
+population genetics in R.” *Methods in Ecology and Evolution*.
+[doi:10.1111/2041-210x.70204](https://doi.org/10.1111/2041-210x.70204).
 
-    @Manual{,
-      title = {tidypopgen: Tidy Population Genetics},
-      author = {Evie Carter and Eirlys Tysall and Andrea Manica},
+    @Article{,
+      title = {tidypopgen: Tidy population genetics in R},
+      author = {Evie Carter and Eirlys Tysall and Jason Hodgson and Andrea Manica},
+      journal = {Methods in Ecology and Evolution},
       year = {2025},
-      note = {R package version 0.4.1.9001},
-      url = {https://github.com/EvolEcolGroup/tidypopgen},
+      publisher = {Wiley},
+      doi = {10.1111/2041-210x.70204},
     }
