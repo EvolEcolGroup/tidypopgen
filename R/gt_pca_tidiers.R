@@ -284,7 +284,7 @@ augment_loci.gt_pca <- function(x, data = NULL, k = NULL, ...) {
     }
     show_loci(data) <- show_loci(data) %>% tibble::add_column(loadings)
   } else {
-    # @TODO fir this once we have loci names in the pca object
+    # @TODO fix this once we have loci names in the pca object
     tibble(.rownames = rownames(x$v)) %>%
       add_column(loadings)
   }
