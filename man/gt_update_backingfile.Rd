@@ -16,7 +16,7 @@ gt_update_backingfile(
 \item{.x}{a \code{gen_tibble} object}
 
 \item{backingfile}{the path, including the file name without extension, for
-backing files used to store the data (they will be given a .bk and .RDS
+backing files used to store the data (they will be given a .bk and .rds
 automatically). If left to NULL (the default), the file name will be based
 on the name f the current backing file.}
 
@@ -28,21 +28,30 @@ it) if it is unsorted within the chromosomes.}
 \item{quiet}{boolean to suppress information about the files}
 }
 \value{
-a \code{\link{gen_tibble}} with a backing file (i.e. a new File Backed Matrix)
+a \code{\link{gen_tibble}} with updated \code{.gt}, \code{.bk}, and \code{.rds} files
+(i.e. a new File Backed Matrix)
 }
 \description{
 This functions forces a re-write of the file backing matrix to match the
 \code{\link{gen_tibble}}. Individuals and loci are subsetted and reordered according to
-the current state of the \code{gen_tibble}. Tests for this function are in
-test_gt_order_loci.R
+the current state of the \code{gen_tibble}. A \code{.gt}, \code{.bk} and \code{.rds} file will be
+created.
 }
 \details{
 This function does not check whether the positions of your genetic loci are
 sorted. To check this, and update the file backing matrix, use
-\code{gt_order_loci()}.
+\code{gt_order_loci()}. Tests for this function are in
+test_gt_order_loci.R
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 
-example_gt \%>\% gt_update_backingfile()
+# Here, new backingfiles are created, but without using `<-` the object
+# loaded in the R session is not updated
+gt_update_backingfile(example_gt)
+
+# Make sure to use `<-` to update the file names associated with the
+# gen_tibble object loaded in the R session
+example_gt <- example_gt \%>\% gt_update_backingfile()
+
 }

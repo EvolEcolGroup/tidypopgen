@@ -274,7 +274,7 @@ gt_write_ped_raw <- function(
   chunks <- split(1:n_ind, ceiling(seq_along(1:n_ind) / chunk_size))
 
   # loop over to write
-  for (i_chunk in seq_len(length(chunks))) {
+  for (i_chunk in seq_along(chunks)) {
     chunk <- chunks[[i_chunk]]
     raw_table <- cbind(
       indiv_meta[chunk, ],

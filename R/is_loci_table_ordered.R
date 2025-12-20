@@ -100,24 +100,6 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
         return(FALSE)
       }
     }
-    if (
-      any(unlist(
-        show_loci(.x) %>%
-          group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
-          group_map(~ duplicated(.x$genetic_dist))
-      ))
-    ) {
-      if (all(show_loci(.x)$genetic_dist == 0) && error_on_false) {
-        message("Your genetic distances have been set to 0")
-        return(TRUE)
-      } else if (all(show_loci(.x)$genetic_dist == 0) && !error_on_false) {
-        return(TRUE)
-      } else if (!all(show_loci(.x)$genetic_dist == 0) && error_on_false) {
-        stop("Your loci table contains duplicated genetic distances")
-      } else {
-        return(FALSE)
-      }
-    }
   }
   return(TRUE)
 }

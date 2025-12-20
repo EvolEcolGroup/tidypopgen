@@ -30,7 +30,8 @@ coefficient of 0.088 or more
 \value{
 If no kings_threshold is provided, a tibble with 2 elements: het_obs
 and missingness. If kings_threshold is provided, a tibble with 4 elements:
-het_obs, missingness, id and to_keep.
+het_obs, missingness, id and to_keep. For pseudohaploid data, a tibble with
+ploidy and missingness.
 }
 \description{
 Return QC information to assess loci (Observed heterozygosity and
@@ -46,7 +47,7 @@ of 'to_keep'. The kings_threshold parameter can be either a numeric KING
 kinship coefficient or a string of either "first" or "second", to remove any
 first degree or second degree relationships from the dataset. This second
 option is similar to using  --unrelated --degree 1 or --unrelated --degree 2
-in KING.
+in KING. For pseudohaploid data, only missingness and ploidy are reported.
 }
 \examples{
 # Create a gen_tibble of lobster genotypes

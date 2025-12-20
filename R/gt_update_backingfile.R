@@ -2,28 +2,37 @@
 #'
 #' This functions forces a re-write of the file backing matrix to match the
 #' [`gen_tibble`]. Individuals and loci are subsetted and reordered according to
-#' the current state of the `gen_tibble`. Tests for this function are in
-#' test_gt_order_loci.R
+#' the current state of the `gen_tibble`. A `.gt`, `.bk` and `.rds` file will be
+#' created.
 #'
 #' This function does not check whether the positions of your genetic loci are
 #' sorted. To check this, and update the file backing matrix, use
-#' `gt_order_loci()`.
+#' `gt_order_loci()`. Tests for this function are in
+#' test_gt_order_loci.R
 #'
 #' @param .x a `gen_tibble` object
 #' @param backingfile the path, including the file name without extension, for
-#'   backing files used to store the data (they will be given a .bk and .RDS
+#'   backing files used to store the data (they will be given a .bk and .rds
 #'   automatically). If left to NULL (the default), the file name will be based
 #'   on the name f the current backing file.
 #' @param rm_unsorted_dist boolean to set `genetic_dist` to zero (i.e. remove
 #'   it) if it is unsorted within the chromosomes.
 #' @param chunk_size the number of loci to process at once
 #' @param quiet boolean to suppress information about the files
-#' @returns a [`gen_tibble`] with a backing file (i.e. a new File Backed Matrix)
+#' @returns a [`gen_tibble`] with updated `.gt`, `.bk`, and `.rds` files
+#' (i.e. a new File Backed Matrix)
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
 #'
-#' example_gt %>% gt_update_backingfile()
+#' # Here, new backingfiles are created, but without using `<-` the object
+#' # loaded in the R session is not updated
+#' gt_update_backingfile(example_gt)
+#'
+#' # Make sure to use `<-` to update the file names associated with the
+#' # gen_tibble object loaded in the R session
+#' example_gt <- example_gt %>% gt_update_backingfile()
+#'
 # Note that this is tested through gt_order_loci()
 gt_update_backingfile <- function(
     .x,
@@ -86,12 +95,7 @@ gt_update_backingfile <- function(
         show_loci(.x) %>%
           group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint start
           group_map(~ is.unsorted(.x$genetic_dist))
-      )) ||
-        any(unlist(
-          show_loci(.x) %>%
-            group_by(cast_chromosome_to_int(.data$chromosome)) %>%
-            group_map(~ duplicated(.x$genetic_dist))
-        ))
+      ))
     ) {
       # nolint end
       if (!quiet) {
@@ -120,11 +124,18 @@ gt_update_backingfile <- function(
   # reorder the bignsp column in the loci table
   show_loci(new_gen_tbl)$big_index <- 1:count_loci(new_gen_tbl)
 
+  # derive .gt filename from .bk backing file path
+  file_name <- bigstatsr::sub_bk(gt_get_file_names(new_gen_tbl)[2], ".gt")
+
+  gt_save_light(new_gen_tbl, file_name = file_name, quiet = TRUE)
+
   if (!quiet) {
     message("\ngen_backing files updated, now")
     message("using FBM RDS: ", gt_get_file_names(new_gen_tbl)[1])
     message("with FBM backing file: ", gt_get_file_names(new_gen_tbl)[2])
     message("make sure that you do NOT delete those files!")
+    message("to reload the gen_tibble in another session, use:")
+    message("gt_load('", file_name, "')")
   }
 
   # prioritise "gen_tbl" class over "sf"

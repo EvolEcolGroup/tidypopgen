@@ -1,0 +1,19 @@
+citHeader("To cite tidypopgen in publications use:")
+
+bibentry(
+  bibtype = "Article",
+  title = "tidypopgen: Tidy population genetics in R",
+  author = c(
+    person("Evie", "Carter", role = c("aut")),
+    person("Eirlys", "Tysall", role = c("aut")),
+    person("Jason", "Hodgson", role = c("aut")),
+    person("Andrea", "Manica", email = "am315@cam.ac.uk", 
+           role = c("aut", "cre", "cph"))),
+  journal = "Methods in Ecology and Evolution",
+  year = 2025,
+  volume = "",
+  number = "",
+  pages = "",
+  publisher = "Wiley",
+  doi = "10.1111/2041-210x.70204"
+)

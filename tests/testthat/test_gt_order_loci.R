@@ -77,6 +77,13 @@ test_that("gt_update_backingfile correctly updates", {
   subset_reorder_test_gt <- subset_reorder_test_gt[c(2, 1, 4, 5), ]
   # now save the updated backing matrix
   new_gt <- gt_update_backingfile(subset_reorder_test_gt, quiet = TRUE)
+
+  # check a new .gt is saved
+  expect_true(file.exists(bigstatsr::sub_bk(
+    gt_get_file_names(new_gt)[2],
+    ".gt"
+  )))
+
   # the new gt should be identical to the original one, minus the big indices
   expect_identical(
     show_genotypes(new_gt),
@@ -88,6 +95,11 @@ test_that("gt_update_backingfile correctly updates", {
   )
   # loci big index should now be sequential
   expect_identical(show_loci(new_gt)$big_index, 1:count_loci(new_gt))
+
+  # and if we reload the .gt it is the same
+  path_gt <- bigstatsr::sub_bk(gt_get_file_names(new_gt)[2], ".gt")
+  reload_gt <- gt_load(path_gt)
+  expect_true(all.equal(new_gt, reload_gt, check.attributes = FALSE))
 
   # if loci are out of order, gt_update_backingfile proceeds, and does not error
   show_loci(subset_reorder_test_gt) <-
@@ -356,41 +368,6 @@ test_that("gt_order_loci catches unsorted and duplicated genetic_dist", {
   ))
   # check that genetic_dist is all zero
   expect_equal(show_loci(ordered_test_gt)$genetic_dist, rep(0, 6))
-  # check the same for duplicated genetic_dist
-  test_loci <- data.frame(
-    name = paste0("rs", 1:6),
-    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
-    position = as.integer(c(3, 5, 65, 343, 27, 83)),
-    genetic_dist = as.double(c(0, 0, 0, 0.2, 0.3, 0.4)),
-    allele_ref = c("A", "T", "C", "G", "C", "T"),
-    allele_alt = c("T", "C", NA, "C", "G", "A")
-  )
-  path <- tempfile()
-  test_gt <- gen_tibble(
-    x = test_genotypes,
-    loci = test_loci,
-    indiv_meta = test_indiv_meta,
-    quiet = TRUE,
-    backingfile = path
-  )
-  expect_error(
-    gt_order_loci(
-      test_gt,
-      use_current_table = TRUE,
-      ignore_genetic_dist = FALSE,
-      quiet = TRUE
-    ),
-    "Your loci table contains duplicated genetic distances"
-  )
-  expect_error(
-    gt_order_loci(
-      test_gt,
-      use_current_table = FALSE,
-      ignore_genetic_dist = FALSE,
-      quiet = TRUE
-    ),
-    "Your loci table contains duplicated genetic distances"
-  )
 })
 
 test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", { # nolint
@@ -429,37 +406,11 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
   )
   # after updating backingfile, genetic_dist should all be zero
   expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
-
-  # Test duplicated dist
-  test_loci <- data.frame(
-    name = paste0("rs", 1:6),
-    chromosome = as.character(c(1, 1, 1, 1, 1, 1)),
-    position = as.integer(c(3, 5, 25, 46, 65, 343)),
-    genetic_dist = c(0, 0, 0.2, 0.4, 0.5, 0.6),
-    allele_ref = c("A", "T", "C", "G", "C", "T"),
-    allele_alt = c("T", "C", NA, "C", "G", "A")
-  )
-
-  test_gt <- gen_tibble(
-    x = test_genotypes,
-    loci = test_loci,
-    indiv_meta = test_indiv_meta,
-    quiet = TRUE,
-    backingfile = tempfile()
-  )
-  expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0.2, 0.4, 0.5, 0.6))
-
-  test_gt <- gt_update_backingfile(test_gt,
-    rm_unsorted_dist = TRUE,
-    quiet = TRUE
-  )
-  # after updating backingfile, genetic_dist should all be zero
-  expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
 })
 
 
-test_that("is_loci_table_ordered catches unsorted and duplicated genetic_dist", { # nolint
-  # is_loci_table_ordered catches unsorted and duplicated genetic_dist
+test_that("is_loci_table_ordered catches unsorted genetic_dist", { # nolint
+  # is_loci_table_ordered catches unsorted genetic_dist
   # when ignore_genetic_dist = FALSE
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
@@ -493,31 +444,6 @@ test_that("is_loci_table_ordered catches unsorted and duplicated genetic_dist", 
       ignore_genetic_dist = FALSE
     ),
     "Your genetic distances are not sorted within chromosomes"
-  )
-  # is_loci_table_ordered catches duplicated genetic_dist
-  test_loci <- data.frame(
-    name = paste0("rs", 1:6),
-    chromosome = as.character(c(1, 1, 1, 1, 1, 1)),
-    position = as.integer(c(3, 4, 25, 46, 65, 343)),
-    genetic_dist = as.double(c(0.01, seq(0.01, 0.05, 0.01))),
-    allele_ref = c("A", "T", "C", "G", "C", "T"),
-    allele_alt = c("T", "C", NA, "C", "G", "A")
-  )
-  test_gt <- gen_tibble(
-    x = test_genotypes,
-    loci = test_loci,
-    indiv_meta = test_indiv_meta,
-    quiet = TRUE,
-    backingfile = tempfile()
-  )
-  expect_false(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
-  expect_error(
-    is_loci_table_ordered(
-      test_gt,
-      ignore_genetic_dist = FALSE,
-      error_on_false = TRUE
-    ),
-    "Your loci table contains duplicated genetic distances"
   )
   # is_loci_table_ordered ignores duplication and returns TRUE warning
   # when all genetic_dist is set to 0

@@ -364,7 +364,7 @@ example_gt %>%
 
 These type of functions are prefixed with `pop`.
 
-# Functions applies to all pairwise and nwise combinations of individuals or populations
+# Functions applying to all pairwise and nwise combinations of individuals or populations
 
 The final group of verbs are prefixed by `pairwise_` and `nwise_`, and they are
 designed to compute pairwise statistics between all pairs or combinations of n individuals or populations 
@@ -375,36 +375,7 @@ example_gt %>%
   pairwise_ibs()
 ```
 
-
-# Saving and reading data
-
-We can save a `gen_tibble` with `gt_save()`. This command will save a file with
-extension `.gt`. Together with the `.rds` and `.bk` files, the `.gt` file include
-all the information stored in the `gen_tibble`. Note that, whilst the `.rds` and `.bk`
-file have to share name, the `.gt` file can be named differently (but, by default, if
-no specific name is given, `gt_save` will use the same pattern as for the `.rds` 
-and `.bk` file).
-
-So, let us save our file:
-```{r}
-gt_file_name <- gt_save(example_gt)
-gt_file_name
-```
-
-And if we ever need to retrieve the location of the `.bk` and `.rds` files for a 
-gen_tibble, we can use:
-
-```{r}
-gt_get_file_names(example_gt)
-```
-
-In a later session, we could reload the data with:
-```{r}
-new_example_gt <- gt_load(gt_file_name[1])
-new_example_gt %>% show_genotypes()
-```
-
-We can see that our genotypes were recovered correctly.
+# Reading data
 
 As we saw at the beginning of this vignette, it is possible to create a `gen_tibble` with data
 in data.frames and tibbles. We can use that function to wrangle small datasets 
@@ -614,3 +585,140 @@ missing_gt %>%
 
 More details about PCA and other analysis is found in the vignette on population
 genetic analysis.
+
+# Saving data and updating backingfiles
+
+We can save a `gen_tibble` with `gt_save()`. This command will save a file with
+extension `.gt`. We may want to use `gt_save()` if we have added any columns of
+metadata to our `gen_tibble`, or if we have subset the individuals in our `gen_tibble`, 
+then we can reload the same object in the next R session.
+
+The `.gt` file works together with the `.rds` and `.bk` files to include
+all the information stored in the `gen_tibble`. However, several `gen_tibble` objects can work with the same `.rds` and `.bk` files (for example, if we create different subsets of individuals or loci). 
+
+The `.rds` and `.bk` file must share a name, but the `.gt` file can be named differently. By default, if
+no specific name is given `gt_save` will use the same pattern as the `.rds` 
+and `.bk` file, and if that pattern is already in use by another `.gt` object, a version number will be appended. You may want to name your `.gt` files according to the content of the `gen_tibble` object (for example, indicating which individuals and loci are included).
+
+The schematic below illustrates this, where multiple `gen_tibble` objects use the same backingfiles.
+
+![Figure 2: Visual representation of saving multiple gen_tibble objects to the same backingfile set](./img/gt_save.jpg){width=630px}
+
+So, let us save our file:
+```{r}
+gt_file_name <- gt_save(example_gt)
+gt_file_name
+```
+
+And if we ever need to retrieve the location of the `.bk` and `.rds` files for a 
+gen_tibble, we can use:
+
+```{r}
+gt_get_file_names(example_gt)
+```
+
+In a later session, we could reload the data with:
+```{r}
+new_example_gt <- gt_load(gt_file_name[1])
+new_example_gt %>% show_genotypes()
+```
+
+We can see that our genotypes were recovered correctly.
+
+Occasionally, we may need to update the backing files of a `gen_tibble` (the `.rds` and `.bk` files), as some functions require that the number of individuals in the `gen_tibble` object loaded in the R session matches the number of individuals in the backing files that are stored on disk. The schematic below illustrates this.
+
+![Figure 3: Visual representation of updating backingfiles for a gen_tibble object](./img/update_backingfile.jpg){width=630px}
+
+For example, lets assume we want to impute missing values in our data. In our QC step we may have filtered out some individuals, like so: 
+
+```{r}
+new_example_gt <- new_example_gt %>% filter(!population == "pop1")
+```
+
+But now when we try to impute using the function `gt_impute_simple`, we get the following error:
+
+```{r, error = TRUE}
+gt_impute_simple(new_example_gt)
+```
+
+To fix this, we need to update the backing files to reflect the new set of individuals. This will create a new set of backing files on disk (`.rds` and `.bk`) that match the individuals in our `gen_tibble` object and save the `gen_tibble` object (`.gt`) using the same file extension. The function returns an updated `gen_tibble` with the new backingfile paths, so we must assign the result back (with `<-` ) to ensure that the new paths are stored in the `gen_tibble` object:
+
+```{r}
+new_example_gt <- gt_update_backingfile(new_example_gt,
+  backingfile = tempfile()
+)
+```
+
+And now we can impute without any problems:
+```{r}
+gt_impute_simple(new_example_gt)
+```
+
+# Ordering loci
+
+For certain types of analysis, it may be necessary to reorder loci in a `gen_tibble` either by position, or by genetic distance. To check whether loci are already ordered, we can use the function `is_loci_table_ordered()`:
+
+```{r}
+is_loci_table_ordered(new_example_gt)
+```
+
+Let's create another `gen_tibble`, where loci are not ordered:
+
+```{r}
+test_indiv_meta <- data.frame(
+  id = c("a", "b", "c"),
+  population = c("pop1", "pop1", "pop2")
+)
+test_genotypes <- rbind(
+  c(1, 1, 0, 1, 1, 0),
+  c(2, 1, 0, 0, 0, 0),
+  c(2, 2, 0, 0, 1, 1)
+)
+test_loci <- data.frame(
+  name = paste0("rs", 1:6),
+  chromosome = paste0("chr", c(1, 2, 1, 1, 1, 2)),
+  position = as.integer(c(3, 5, 65, 343, 23, 456)),
+  genetic_dist = as.double(c(0.01, 0.01, 0.03, 0.03, 0.02, 0.015)),
+  allele_ref = c("A", "T", "C", "G", "C", "T"),
+  allele_alt = c("T", "C", NA, "C", "G", "A")
+)
+
+test_gt <- gen_tibble(
+  x = test_genotypes,
+  loci = test_loci,
+  indiv_meta = test_indiv_meta,
+  quiet = TRUE
+)
+```
+
+Now we can see that the loci are not ordered:
+
+```{r}
+is_loci_table_ordered(test_gt)
+```
+
+We can order the loci by chromosome and position using the function `gt_order_loci()`. This function will rearrange the loci in the `gen_tibble`, return a `gen_tibble` with the loci in order, and update the `.bk` and `.rds` backing files on disk accordingly. Again, the function returns an updated `gen_tibble` with the new backingfile paths, so we must assign the result back (with `<-` ) to ensure that the new paths are stored in the `gen_tibble` object:
+
+```{r}
+reorder_test_gt <- gt_order_loci(test_gt)
+```
+
+And we can check that the loci are now ordered:
+
+```{r}
+is_loci_table_ordered(reorder_test_gt)
+```
+
+By default, `gt_order_loci()` orders loci by chromosome and position only. If we want to order by genetic distance, as well as chromosome and position, we can set the parameter `ignore_genetic_dist` to FALSE:
+
+```{r}
+reorder_test_gt_again <- gt_order_loci(reorder_test_gt,
+  ignore_genetic_dist = FALSE
+)
+```
+
+And, again, we can check that the loci are ordered with respect to genetic distance:
+
+```{r}
+is_loci_table_ordered(reorder_test_gt_again, ignore_genetic_dist = FALSE)
+```

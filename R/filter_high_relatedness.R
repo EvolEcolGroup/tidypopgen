@@ -42,6 +42,15 @@ filter_high_relatedness <-
     # get individual names
     var_names <- dimnames(matrix)[[1]]
 
+    # if there is only 1 individual
+    if (var_num == 1) {
+      # return variable names
+      passed_filter <- var_names
+      to_remove <- character(0)
+      var_names <- var_names %in% passed_filter == TRUE
+      return(list(passed_filter, to_remove, var_names))
+    }
+
     # take absolute value of each relationship
     matrix <- abs(matrix)
 
