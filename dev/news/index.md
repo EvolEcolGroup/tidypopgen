@@ -1,9 +1,12 @@
 # Changelog
 
-## tidypopgen 0.4.0.9001
+## tidypopgen 0.4.1
+
+CRAN release: 2025-12-20
 
 - duplicate-distance checks removed in
   [`is_loci_table_ordered()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/is_loci_table_ordered.md)
+- make `qc_report_*` functions work with pseudohaploids
 
 ## tidypopgen 0.4.0
 
