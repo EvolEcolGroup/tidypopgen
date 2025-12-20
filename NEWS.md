@@ -1,5 +1,6 @@
-# tidypopgen 0.4.0.9001
+# tidypopgen 0.4.1
 * duplicate-distance checks removed in `is_loci_table_ordered()`
+* make `qc_report_*` functions work with pseudohaploids
 
 # tidypopgen 0.4.0
 * store chromosomes as factors, and remove redundant column storing
