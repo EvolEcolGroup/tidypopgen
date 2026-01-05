@@ -208,7 +208,7 @@ predict.gt_pca <- function(
         solve(crossprod(v_sub), crossprod(v_sub, genotypes_scaled))
       }
       dimnames(lsq_proj) <-
-        list(new_data$id, paste0(".PC", seq_len(ncol(lsq_proj))))
+        list(new_data$id, paste0(".PC", lsq_pcs))
       output <- output_type(object = lsq_proj, as_matrix, id = new_data$id)
       return(output)
     }
