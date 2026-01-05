@@ -27,6 +27,56 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// encode_pair_cpp
+std::string encode_pair_cpp(uint64_t a, uint64_t b, int width);
+RcppExport SEXP _tidypopgen_encode_pair_cpp(SEXP aSEXP, SEXP bSEXP, SEXP widthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< uint64_t >::type a(aSEXP);
+    Rcpp::traits::input_parameter< uint64_t >::type b(bSEXP);
+    Rcpp::traits::input_parameter< int >::type width(widthSEXP);
+    rcpp_result_gen = Rcpp::wrap(encode_pair_cpp(a, b, width));
+    return rcpp_result_gen;
+END_RCPP
+}
+// decode_pair_cpp
+NumericVector decode_pair_cpp(const std::string& s, int width);
+RcppExport SEXP _tidypopgen_decode_pair_cpp(SEXP sSEXP, SEXP widthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type width(widthSEXP);
+    rcpp_result_gen = Rcpp::wrap(decode_pair_cpp(s, width));
+    return rcpp_result_gen;
+END_RCPP
+}
+// encode_pair_vec_cpp
+CharacterVector encode_pair_vec_cpp(NumericVector a, NumericVector b, int width);
+RcppExport SEXP _tidypopgen_encode_pair_vec_cpp(SEXP aSEXP, SEXP bSEXP, SEXP widthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type a(aSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< int >::type width(widthSEXP);
+    rcpp_result_gen = Rcpp::wrap(encode_pair_vec_cpp(a, b, width));
+    return rcpp_result_gen;
+END_RCPP
+}
+// decode_pair_vec_cpp
+NumericMatrix decode_pair_vec_cpp(CharacterVector s, int width);
+RcppExport SEXP _tidypopgen_decode_pair_vec_cpp(SEXP sSEXP, SEXP widthSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type s(sSEXP);
+    Rcpp::traits::input_parameter< int >::type width(widthSEXP);
+    rcpp_result_gen = Rcpp::wrap(decode_pair_vec_cpp(s, width));
+    return rcpp_result_gen;
+END_RCPP
+}
 // compute_np_mn
 List compute_np_mn(NumericMatrix n);
 RcppExport SEXP _tidypopgen_compute_np_mn(SEXP nSEXP) {
@@ -347,6 +397,10 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_alt_freq_dip_pseudo_cpp, 6},
+    {"_tidypopgen_encode_pair_cpp", (DL_FUNC) &_tidypopgen_encode_pair_cpp, 3},
+    {"_tidypopgen_decode_pair_cpp", (DL_FUNC) &_tidypopgen_decode_pair_cpp, 2},
+    {"_tidypopgen_encode_pair_vec_cpp", (DL_FUNC) &_tidypopgen_encode_pair_vec_cpp, 3},
+    {"_tidypopgen_decode_pair_vec_cpp", (DL_FUNC) &_tidypopgen_decode_pair_vec_cpp, 2},
     {"_tidypopgen_compute_np_mn", (DL_FUNC) &_tidypopgen_compute_np_mn, 1},
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 6},
     {"_tidypopgen_grouped_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_alt_freq_dip_pseudo_cpp, 8},

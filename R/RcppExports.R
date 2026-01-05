@@ -5,6 +5,22 @@ alt_freq_dip_pseudo_cpp <- function(BM, rowInd, colInd, ploidy, ncores, as_count
     .Call(`_tidypopgen_alt_freq_dip_pseudo_cpp`, BM, rowInd, colInd, ploidy, ncores, as_counts)
 }
 
+encode_pair_cpp <- function(a, b, width = 2L) {
+    .Call(`_tidypopgen_encode_pair_cpp`, a, b, width)
+}
+
+decode_pair_cpp <- function(s, width = 2L) {
+    .Call(`_tidypopgen_decode_pair_cpp`, s, width)
+}
+
+encode_pair_vec_cpp <- function(a, b, width = 2L) {
+    .Call(`_tidypopgen_encode_pair_vec_cpp`, a, b, width)
+}
+
+decode_pair_vec_cpp <- function(s, width = 2L) {
+    .Call(`_tidypopgen_decode_pair_vec_cpp`, s, width)
+}
+
 compute_np_mn <- function(n) {
     .Call(`_tidypopgen_compute_np_mn`, n)
 }
