@@ -15,9 +15,9 @@ This is used to determine the fixed width for decoding the chromosome
 number. If left NULL, an error will be raised as this information is needed
 for decoding.}
 
-\item{num_digits_chr}{(Optional) Integer representing the number of characters
-used to encode the chromosome number. If provided, this will override the
-calculation based on \code{max_chr}.}
+\item{num_digits_chr}{(Optional) Integer representing the number of
+characters used to encode the chromosome number. If provided, this will
+override the calculation based on \code{max_chr}.}
 }
 \value{
 A data.frame with two columns: \code{chr} and \code{pos}, representing the
@@ -25,12 +25,12 @@ decoded chromosome numbers and positions.
 }
 \description{
 This function reverses the encoding performed by \code{encode_62}, taking a base62
-encoded string and extracting the original chromosome number and position.
-It uses the fixed width determined by the maximum chromosome number to
-correctly separate the two components of the encoding.
+encoded string and extracting the original chromosome number and position. It
+uses the fixed width determined by the maximum chromosome number to correctly
+separate the two components of the encoding.
 }
 \examples{
-encoded_coords <- encode62(c(1,10,260),c(1,1000,1000000))
+encoded_coords <- encode62(c(1, 10, 260), c(1, 1000, 1000000))
 print(encoded_coords)
 decoded_coords <- decode62(encoded_coords, max_chr = 260)
 print(decoded_coords)

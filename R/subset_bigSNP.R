@@ -13,11 +13,12 @@
 #' @noRd
 # nolint start
 subset_bigSNP <- function(
-    X, # nolint end
-    indiv_indices = NULL,
-    loci_indices = NULL,
-    swap_indices = NULL,
-    backingfile = NULL) {
+  X, # nolint end
+  indiv_indices = NULL,
+  loci_indices = NULL,
+  swap_indices = NULL,
+  backingfile = NULL
+) {
   if (is.null(indiv_indices)) {
     indiv_indices <- bigstatsr::rows_along(X)
   }

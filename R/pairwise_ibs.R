@@ -32,14 +32,15 @@
 #' pairwise_ibs(example_gt, type = "adjusted_counts")
 #' pairwise_ibs(example_gt, type = "raw_counts")
 pairwise_ibs <- function(
-    x,
-    as_matrix = FALSE,
-    type = c(
-      "proportion",
-      "adjusted_counts",
-      "raw_counts"
-    ),
-    block_size = bigstatsr::block_size(nrow(x))) {
+  x,
+  as_matrix = FALSE,
+  type = c(
+    "proportion",
+    "adjusted_counts",
+    "raw_counts"
+  ),
+  block_size = bigstatsr::block_size(nrow(x))
+) {
   type <- match.arg(type)
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index

@@ -122,6 +122,6 @@ NumericMatrix decode_pair_vec_cpp(CharacterVector s,
     out(i, 1) = tmp[1]; // b
   }
   
-  colnames(out) = CharacterVector::create("chr", "pos");
+  colnames(out) = CharacterVector::create("chromosome", "position");
   return out;
 }

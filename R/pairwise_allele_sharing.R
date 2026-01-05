@@ -24,9 +24,10 @@
 #' # Alternatively, return as a tibble
 #' example_gt %>% pairwise_allele_sharing(as_matrix = TRUE)
 pairwise_allele_sharing <- function(
-    x,
-    as_matrix = FALSE,
-    block_size = bigstatsr::block_size(nrow(x))) {
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(nrow(x))
+) {
   # nolint
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- .gt_fbm_cols(x)

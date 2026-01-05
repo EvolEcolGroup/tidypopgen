@@ -16,7 +16,7 @@
 #' @param n_cores number of cores
 #' @param as_matrix logical, whether to return the result as a matrix (default)
 #'   or a tibble.
-#' @param ... no used
+#' @param ... not used
 #' @returns a matrix of predictions (in line with predict using a prcomp
 #'   object) or a tibble, with samples as rows and components as columns. The
 #'   number of components depends on how many were estimated in the [`gt_pca`]
@@ -71,19 +71,20 @@
 #'
 # this is a modified version of bigstatsr::predict.big_SVD
 predict.gt_pca <- function(
-    object,
-    new_data = NULL,
-    project_method = c(
-      "none",
-      "simple",
-      "OADP",
-      "least_squares"
-    ),
-    lsq_pcs = c(1, 2),
-    block_size = NULL,
-    n_cores = 1,
-    as_matrix = TRUE,
-    ...) {
+  object,
+  new_data = NULL,
+  project_method = c(
+    "none",
+    "simple",
+    "OADP",
+    "least_squares"
+  ),
+  lsq_pcs = c(1, 2),
+  block_size = NULL,
+  n_cores = 1,
+  as_matrix = TRUE,
+  ...
+) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
@@ -234,15 +235,16 @@ output_type <- function(object, as_matrix, id) {
 # a port of bigsnpr::part_prod to work on standard fb256 matrices
 
 fbm256_part_prod <- function(
-    X,
-    ind,
-    ind.row,
-    ind.col,
-    center, # nolint
-    scale,
-    V,
-    XV,
-    X_norm) {
+  X,
+  ind,
+  ind.row,
+  ind.col,
+  center, # nolint
+  scale,
+  V,
+  XV,
+  X_norm
+) {
   # nolint
   res <- fbm256_prod_and_rowSumsSq(
     BM = X,

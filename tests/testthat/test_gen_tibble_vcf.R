@@ -674,3 +674,27 @@ if (rlang::is_installed("vcfR")) {
     )
   })
 }
+
+# test encoding
+test_that("encoding of loci names for vcfs", {
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  # read it with encoding
+  pop_b_vcf_gt_enc <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    backingfile = tempfile(),
+    parser = "cpp",
+    recode62 = TRUE
+  )
+  # now decode the names
+  decoded_names <- decode62(show_loci(pop_b_vcf_gt_enc)$name,
+    max_chr = attr(pop_b_vcf_gt_enc$genotypes, "recode62_n")
+  )
+  # check that we recovered the original chromosome and position
+  expect_equal(
+    tibble::as_tibble(decoded_names),
+    show_loci(pop_b_vcf_gt_enc) %>%
+      dplyr::select(dplyr::all_of(c("chromosome", "position"))) %>%
+      mutate(chromosome = cast_chromosome_to_int(chromosome))
+  )
+})

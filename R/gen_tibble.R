@@ -69,6 +69,12 @@
 #'   appearing more than once). If FALSE, an error will be thrown if duplicated
 #'   loci are found. These validations run before backing
 #'   files are saved. Default is FALSE.
+#' @param recode62 whether to recode the names of loci as chromosome+position
+#' in base62 (see [encode62()] for details). This is useful when reading very
+#' large numbers of variants, as the name column in the loci table can take
+#' up a lot of memory/disk space. Default is FALSE. If TRUE, the number of
+#' chromosomes, necessary to decode the names later on, is stored in the
+#' attribute `recode62_n` of the `genotypes` column.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -148,6 +154,7 @@ gen_tibble.character <-
            missing_alleles = c("0", "."),
            backingfile = NULL,
            allow_duplicates = FALSE,
+           recode62 = FALSE,
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
@@ -199,6 +206,7 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
+        recode62 = recode62,
         quiet = quiet
       )
     } else if (tolower(file_ext(x)) == "ped") {
@@ -272,16 +280,17 @@ gen_tibble.character <-
 #' @export
 #' @rdname gen_tibble
 gen_tibble.matrix <- function(
-    x,
-    indiv_meta,
-    loci,
-    ...,
-    ploidy = 2,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    backingfile = NULL,
-    allow_duplicates = FALSE,
-    quiet = FALSE) {
+  x,
+  indiv_meta,
+  loci,
+  ...,
+  ploidy = 2,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  backingfile = NULL,
+  allow_duplicates = FALSE,
+  quiet = FALSE
+) {
   rlang::check_dots_empty()
 
   # check that valid alleles does not contain zero
@@ -511,9 +520,10 @@ tbl_sum.gen_tbl <- function(x, ...) {
 
 # function to check the allele alphabet
 check_allele_alphabet <- function(
-    x,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", ".")) {
+  x,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", ".")
+) {
   if (
     any(
       !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),

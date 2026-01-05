@@ -188,11 +188,12 @@ ibs2 <- (X_mat2) %*% t(X_mat2) + (X_mat1) %*% t(X_mat1) + (X_mat0) %*% t(X_mat0)
 n_ind <- nrow(X_mat)
 # function to compute the quantities
 Est_PLINK_Kinship <- function(
-    IBS0,
-    IBS1,
-    IBS2,
-    EPrIBS_IBD,
-    constraint = FALSE) {
+  IBS0,
+  IBS1,
+  IBS2,
+  EPrIBS_IBD,
+  constraint = FALSE
+) {
   # AM expected counts (p of each genotype times the total number of overlapping alleles)
   nIBS012 <- IBS0 + IBS1 + IBS2
   e00 <- EPrIBS_IBD[1, 1] * nIBS012

@@ -7,7 +7,8 @@
 encode62(chr, pos, max_chr = NULL)
 }
 \arguments{
-\item{chr}{Integer representing the chromosome number.}
+\item{chr}{Chromosomes, either character/factor, which will be cast to
+integer, or integer representing the chromosome number.}
 
 \item{pos}{Integer representing the position on the chromosome.}
 
@@ -44,7 +45,7 @@ allowing the original pair to be recovered unambiguously without any
 separator characters.
 }
 \examples{
-encoded_coords <- encode62(c(1,10,260),c(1,1000,1000000))
+encoded_coords <- encode62(c(1, 10, 260), c(1, 1000, 1000000))
 print(encoded_coords)
 decoded_coords <- decode62(encoded_coords, max_chr = 260)
 print(decoded_coords)

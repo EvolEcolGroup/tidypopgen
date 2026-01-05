@@ -36,7 +36,7 @@ speed up computation, but require more memory)}
 \item{as_matrix}{logical, whether to return the result as a matrix (default)
 or a tibble.}
 
-\item{...}{no used}
+\item{...}{not used}
 }
 \value{
 a matrix of predictions (in line with predict using a prcomp

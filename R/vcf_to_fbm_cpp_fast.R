@@ -12,17 +12,23 @@
 #'   missing. Default is c("0", ".").
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
 #'   position) or duplicated locus names. Default is FALSE.
+#' @param recode62 whether to recode the names of loci as chromosome+position
+#' in base62 (see [encode62()] for details). This is useful when reading very
+#' large numbers of variants, as the name column in the loci table can take
+#' up a lot of memory/disk space. Default is FALSE.
 #' @param quiet whether to print messages.
 #' @returns an object of the class `gen_tbl`.
 #' @keywords internal
 #' @noRd
 vcf_to_fbm_cpp <- function(
-    vcf_path,
-    backingfile = NULL,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    quiet = FALSE) {
+  vcf_path,
+  backingfile = NULL,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  recode62 = FALSE,
+  quiet = FALSE
+) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)
@@ -80,14 +86,27 @@ vcf_to_fbm_cpp <- function(
   # add an empty genetic.pos column
   loci <- loci %>% mutate(genetic.dist = 0, .before = "physical.pos")
   loci$physical.pos <- as.integer(loci$physical.pos)
-  # if loci names are missing, create a name with scaffold and position
-  # (same behaviour as vcfR)
-  missing_loci_ids <- which(loci$marker.ID == ".")
-  if (length(missing_loci_ids) > 0) {
-    loci$marker.ID[missing_loci_ids] <- paste(
-      loci$chromosome[missing_loci_ids],
+
+  # TODO put recoding in base62 here
+  if (!recode62) {
+    # if loci names are missing, create a name with scaffold and position
+    # (same behaviour as vcfR)
+    missing_loci_ids <- which(loci$marker.ID == ".")
+    if (length(missing_loci_ids) > 0) {
+      loci$marker.ID[missing_loci_ids] <- paste(
+        loci$chromosome[missing_loci_ids],
+        loci$physical.pos,
+        sep = "_"
+      )
+    }
+  } else {
+    # encode the combination of chr_pos into base 62
+    chrom_int <- cast_chromosome_to_int(loci$chromosome)
+    n_chromosome <- max(chrom_int)
+    loci$marker.ID <- encode62(
+      chrom_int,
       loci$physical.pos,
-      sep = "_"
+      n_chromosome
     )
   }
 
@@ -109,6 +128,7 @@ vcf_to_fbm_cpp <- function(
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles
   )
+
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
   # construct path
@@ -123,6 +143,11 @@ vcf_to_fbm_cpp <- function(
     ploidy = max_ploidy,
     fbm_ploidy = fbm_ploidy
   )
+
+  # if recode62, store n_chromosome as attribute (needed to decode later)
+  if (recode62) {
+    attr(indiv_meta$genotypes, "recode62_n") <- n_chromosome
+  }
 
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,

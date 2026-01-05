@@ -22,7 +22,8 @@
 #' allowing the original pair to be recovered unambiguously without any
 #' separator characters.
 #'
-#' @param chr Integer representing the chromosome number.
+#' @param chr Chromosomes, either character/factor, which will be cast to
+#' integer, or integer representing the chromosome number.
 #' @param pos Integer representing the position on the chromosome.
 #' @param max_chr Integer representing the maximum chromosome number expected.
 #'   This is used to determine the fixed width for encoding the chromosome
@@ -31,12 +32,24 @@
 #'   position.
 #' @export
 #' @examples
-#' encoded_coords <- encode62(c(1,10,260),c(1,1000,1000000))
+#' encoded_coords <- encode62(c(1, 10, 260), c(1, 1000, 1000000))
 #' print(encoded_coords)
 #' decoded_coords <- decode62(encoded_coords, max_chr = 260)
 #' print(decoded_coords)
-
 encode62 <- function(chr, pos, max_chr = NULL) {
+  # check that chromosome and position are integer vectors of the same length
+  if (length(chr) != length(pos)) {
+    stop("chr and pos must be integer vectors of the same length")
+  }
+  # if chr is a string, turn it into a factor
+  if (is.character(chr)) {
+    chr <- as.factor(chr)
+  }
+  # convert chr to integer
+  chr <- as.integer(chr)
+  # convert pos to integer
+  pos <- as.integer(pos)
+
   if (is.null(max_chr)) {
     max_chr <- max(chr)
   }
@@ -47,25 +60,25 @@ encode62 <- function(chr, pos, max_chr = NULL) {
 }
 
 #' Function to decode a base62 encoded string back into a pair of integers.
-#' 
+#'
 #' This function reverses the encoding performed by `encode_62`, taking a base62
-#' encoded string and extracting the original chromosome number and position.
-#' It uses the fixed width determined by the maximum chromosome number to
-#' correctly separate the two components of the encoding.
+#' encoded string and extracting the original chromosome number and position. It
+#' uses the fixed width determined by the maximum chromosome number to correctly
+#' separate the two components of the encoding.
 #' @param encoded_str A base62 encoded string representing the combined
 #'   chromosome and position
 #' @param max_chr Integer representing the maximum chromosome number expected.
 #'   This is used to determine the fixed width for decoding the chromosome
 #'   number. If left NULL, an error will be raised as this information is needed
 #'   for decoding.
-#' @param num_digits_chr (Optional) Integer representing the number of characters
-#'   used to encode the chromosome number. If provided, this will override the
-#'   calculation based on `max_chr`.
+#' @param num_digits_chr (Optional) Integer representing the number of
+#'   characters used to encode the chromosome number. If provided, this will
+#'   override the calculation based on `max_chr`.
 #' @returns A data.frame with two columns: `chr` and `pos`, representing the
 #'   decoded chromosome numbers and positions.
 #' @export
 #' @examples
-#' encoded_coords <- encode62(c(1,10,260),c(1,1000,1000000))
+#' encoded_coords <- encode62(c(1, 10, 260), c(1, 1000, 1000000))
 #' print(encoded_coords)
 #' decoded_coords <- decode62(encoded_coords, max_chr = 260)
 #' print(decoded_coords)
@@ -76,8 +89,10 @@ decode62 <- function(encoded_str, max_chr = NULL, num_digits_chr = NULL) {
   }
   # check that they are not both defined
   if (!is.null(max_chr) && !is.null(num_digits_chr)) {
-    stop("Both max_chr and num_digits_chr are provided; ",
-    "only one can be given at a time")
+    stop(
+      "Both max_chr and num_digits_chr are provided; ",
+      "only one can be given at a time"
+    )
   }
   if (!is.null(num_digits_chr)) {
     # use the provided num_digits_chr

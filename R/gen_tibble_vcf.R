@@ -1,15 +1,17 @@
 # read in a vcf
 gen_tibble_vcf <- function(
-    x,
-    ...,
-    parser = c("cpp", "vcfR"),
-    n_cores = 1, # ignored by this function, there is no multithreading
-    chunk_size = NULL,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    backingfile = NULL,
-    allow_duplicates = FALSE,
-    quiet = FALSE) {
+  x,
+  ...,
+  parser = c("cpp", "vcfR"),
+  n_cores = 1, # ignored by this function, there is no multithreading
+  chunk_size = NULL,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  backingfile = NULL,
+  allow_duplicates = FALSE,
+  recode62 = FALSE,
+  quiet = FALSE
+) {
   parser <- match.arg(parser)
   if (!file.exists(x)) {
     stop("x should be a valid file path pointing to a vcf: ", x)
@@ -26,6 +28,7 @@ gen_tibble_vcf <- function(
       valid_alleles = valid_alleles,
       missing_alleles = missing_alleles,
       allow_duplicates = allow_duplicates,
+      recode62 = recode62,
       quiet = quiet
     )
   } else {

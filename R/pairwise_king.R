@@ -31,9 +31,10 @@
 #' pairwise_king(example_gt, block_size = 2)
 #'
 pairwise_king <- function(
-    x,
-    as_matrix = FALSE,
-    block_size = bigstatsr::block_size(nrow(x))) {
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(nrow(x))
+) {
   # nolint
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index

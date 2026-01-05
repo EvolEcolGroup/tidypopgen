@@ -26,6 +26,7 @@ gen_tibble(
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
+  recode62 = FALSE,
   quiet = FALSE
 )
 
@@ -97,6 +98,13 @@ in case your
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
+
+\item{recode62}{whether to recode the names of loci as chromosome+position
+in base62 (see \code{\link[=encode62]{encode62()}} for details). This is useful when reading very
+large numbers of variants, as the name column in the loci table can take
+up a lot of memory/disk space. Default is FALSE. If TRUE, the number of
+chromosomes, necessary to decode the names later on, is stored in the
+attribute \code{recode62_n} of the \code{genotypes} column.}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only

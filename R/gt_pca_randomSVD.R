@@ -71,16 +71,17 @@
 #'
 # nolint start
 gt_pca_randomSVD <- function(
-    # nolint end
-    x,
-    k = 10,
-    fun_scaling = bigsnpr::snp_scaleBinom(),
-    tol = 1e-4,
-    verbose = FALSE,
-    n_cores = 1,
-    fun_prod = bigstatsr::big_prodVec,
-    fun_cprod = bigstatsr::big_cprodVec,
-    total_var = TRUE) {
+  # nolint end
+  x,
+  k = 10,
+  fun_scaling = bigsnpr::snp_scaleBinom(),
+  tol = 1e-4,
+  verbose = FALSE,
+  n_cores = 1,
+  fun_prod = bigstatsr::big_prodVec,
+  fun_cprod = bigstatsr::big_cprodVec,
+  total_var = TRUE
+) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)

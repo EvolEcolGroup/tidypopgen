@@ -117,7 +117,6 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
 })
 
 
-
 test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
   ## now group it
   test_gt <- test_gt %>% group_by(population)

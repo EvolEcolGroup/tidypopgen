@@ -53,16 +53,17 @@ loci_pi <- function(.x, .col = "genotypes", n_cores, block_size, type, ...) {
 #' @export
 #' @rdname loci_pi
 loci_pi.tbl_df <- function(
-    .x,
-    .col = "genotypes",
-    # multicore is used by openMP within the
-    # freq cpp function
-    n_cores = bigstatsr::nb_cores(),
-    # the bigapply that splits in blocks is not
-    # multithreaded, as we use the multiple threads
-    # for openMP
-    block_size = bigstatsr::block_size(nrow(.x), 1),
-    ...) {
+  .x,
+  .col = "genotypes",
+  # multicore is used by openMP within the
+  # freq cpp function
+  n_cores = bigstatsr::nb_cores(),
+  # the bigapply that splits in blocks is not
+  # multithreaded, as we use the multiple threads
+  # for openMP
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_gen_tibble(.x)
@@ -80,11 +81,12 @@ loci_pi.tbl_df <- function(
 #' @export
 #' @rdname loci_pi
 loci_pi.vctrs_bigSNP <- function(
-    .x,
-    .col = "genotypes",
-    n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(length(.x), 1),
-    ...) {
+  .x,
+  .col = "genotypes",
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1),
+  ...
+) {
   rlang::check_dots_empty()
 
   stopifnot_diploid(.x)
@@ -124,12 +126,13 @@ loci_pi.vctrs_bigSNP <- function(
 #' @export
 #' @rdname loci_pi
 loci_pi.grouped_df <- function(
-    .x,
-    .col = "genotypes",
-    n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(.x), 1),
-    type = c("tidy", "list", "matrix"),
-    ...) {
+  .x,
+  .col = "genotypes",
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  type = c("tidy", "list", "matrix"),
+  ...
+) {
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()

@@ -60,15 +60,16 @@ loci_missingness <- function(.x, .col = "genotypes", as_counts = FALSE,
 #' @export
 #' @rdname loci_missingness
 loci_missingness.tbl_df <- function(
-    .x,
-    .col = "genotypes",
-    as_counts = FALSE,
-    n_cores = bigstatsr::nb_cores(),
-    # the bigapply that splits in blocks is not
-    # multithreaded, as we use the multiple
-    # threads for openMP,
-    block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
-    ...) {
+  .x,
+  .col = "genotypes",
+  as_counts = FALSE,
+  n_cores = bigstatsr::nb_cores(),
+  # the bigapply that splits in blocks is not
+  # multithreaded, as we use the multiple
+  # threads for openMP,
+  block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
+  ...
+) {
   stopifnot_gen_tibble(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
@@ -90,12 +91,13 @@ loci_missingness.tbl_df <- function(
 #' @export
 #' @rdname loci_missingness
 loci_missingness.vctrs_bigSNP <- function(
-    .x,
-    .col = "genotypes",
-    as_counts = FALSE,
-    n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(length(.x), 1), # nolint
-    ...) {
+  .x,
+  .col = "genotypes",
+  as_counts = FALSE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1), # nolint
+  ...
+) {
   rlang::check_dots_empty()
   # get the FBM
   geno_fbm <- .gt_get_fbm(.x)
@@ -132,13 +134,14 @@ loci_missingness.vctrs_bigSNP <- function(
 #' @export
 #' @rdname loci_missingness
 loci_missingness.grouped_df <- function(
-    .x,
-    .col = "genotypes",
-    as_counts = FALSE,
-    n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
-    type = c("tidy", "list", "matrix"),
-    ...) {
+  .x,
+  .col = "genotypes",
+  as_counts = FALSE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
+  type = c("tidy", "list", "matrix"),
+  ...
+) {
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()
