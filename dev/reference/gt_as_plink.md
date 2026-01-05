@@ -61,13 +61,13 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a bed file
 example_gt %>% gt_as_plink(type = "bed", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/RtmpLyC4ZJ/file21366de838cb_plink.bed"
+#> [1] "/tmp/Rtmpk522TY/file23fc12876a00_plink.bed"
 
 # Write a ped file
 example_gt %>% gt_as_plink(type = "ped", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/RtmpLyC4ZJ/file21366305956c_plink.ped"
+#> [1] "/tmp/Rtmpk522TY/file23fc338484b9_plink.ped"
 
 # Write a raw file
 example_gt %>% gt_as_plink(type = "raw", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/RtmpLyC4ZJ/file2136333f815e_plink.raw"
+#> [1] "/tmp/Rtmpk522TY/file23fc79059c6e_plink.raw"
 ```
