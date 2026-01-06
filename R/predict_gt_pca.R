@@ -8,7 +8,7 @@
 #' @param project_method a string taking the value of either "simple", "OADP"
 #'   (Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
 #'   "least_squares" (as done by SMARTPCA)
-#' @param lsq_pcs a vector of length two with the values of the two principal
+#' @param lsq_pcs a vector of the values of the two principal
 #' components to use for the least square fitting. Only relevant
 #' if`project_method = 'least_squares'`
 #' @param block_size number of loci read simultaneously (larger values will
@@ -60,7 +60,7 @@
 #' # Predict with least squares
 #' predict(pca,
 #'   new_data = new_lobsters,
-#'   project_method = "least_squares", lsq_pcs = c(1, 2)
+#'   project_method = "least_squares", lsq_pcs = c(1, 2, 3)
 #' )
 #'
 #' # Return a tibble
@@ -183,7 +183,7 @@ predict.gt_pca <- function(
         return(output)
       }
     } else if (project_method == "least_squares") {
-      if (length(lsq_pcs) != 2 || any(lsq_pcs > ncol(object$v))) {
+      if (any(lsq_pcs > ncol(object$v))) {
         stop(
           "lsq_pcs should include two components that were computed",
           "for the object, e.g. c(1,2)"
