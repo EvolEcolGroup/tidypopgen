@@ -8,7 +8,7 @@
 #' @param project_method a string taking the value of either "simple", "OADP"
 #'   (Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
 #'   "least_squares" (as done by SMARTPCA)
-#' @param lsq_pcs a vector of the values of the principal
+#' @param lsq_pcs a vector of the indices of the principal
 #' components to use for the least square fitting. Only relevant
 #' if `project_method = 'least_squares'`. It defaults to the first two
 #' components.
@@ -187,6 +187,7 @@ predict.gt_pca <- function(
     } else if (project_method == "least_squares") {
       if (
           length(lsq_pcs) == 0 ||
+            anyNA(lsq_pcs) ||
             any(lsq_pcs < 1) ||
             any(lsq_pcs > ncol(object$v)) ||
             !all(lsq_pcs == as.integer(lsq_pcs))) {
