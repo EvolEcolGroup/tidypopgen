@@ -687,9 +687,7 @@ test_that("encoding of loci names for vcfs", {
     recode62 = TRUE
   )
   # now decode the names
-  decoded_names <- decode62(show_loci(pop_b_vcf_gt_enc)$name,
-    max_chr = attr(pop_b_vcf_gt_enc$genotypes, "recode62_n")
-  )
+  decoded_names <- decode62(show_loci(pop_b_vcf_gt_enc)$name)
   # check that we recovered the original chromosome and position
   expect_equal(
     tibble::as_tibble(decoded_names),

@@ -144,11 +144,6 @@ vcf_to_fbm_cpp <- function(
     fbm_ploidy = fbm_ploidy
   )
 
-  # if recode62, store n_chromosome as attribute (needed to decode later)
-  if (recode62) {
-    attr(indiv_meta$genotypes, "recode62_n") <- n_chromosome
-  }
-
   new_gen_tbl <- tibble::new_tibble(
     indiv_meta,
     class = "gen_tbl"
