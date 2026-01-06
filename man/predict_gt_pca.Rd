@@ -24,9 +24,10 @@
 (Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
 "least_squares" (as done by SMARTPCA)}
 
-\item{lsq_pcs}{a vector of length two with the values of the two principal
+\item{lsq_pcs}{a vector of the indices of the principal
 components to use for the least square fitting. Only relevant
-if\code{project_method = 'least_squares'}}
+if \code{project_method = 'least_squares'}. It defaults to the first two
+components.}
 
 \item{block_size}{number of loci read simultaneously (larger values will
 speed up computation, but require more memory)}
@@ -83,7 +84,7 @@ predict(pca, new_data = new_lobsters, project_method = "OADP")
 # Predict with least squares
 predict(pca,
   new_data = new_lobsters,
-  project_method = "least_squares", lsq_pcs = c(1, 2)
+  project_method = "least_squares", lsq_pcs = c(1, 2, 3)
 )
 
 # Return a tibble
