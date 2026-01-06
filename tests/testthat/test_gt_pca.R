@@ -231,6 +231,45 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
       lsq_pcs = c(1, 20)
     ), "lsq_pcs should be a vector of valid"
   )
+
+  # Test empty vector
+  expect_error(
+    predict(
+      modern_pca,
+      new_data = ancient_gt,
+      project_method = "least_squares",
+      lsq_pcs = c()
+    ), "lsq_pcs should be a vector of valid"
+  )
+
+  # Test duplicate components
+  expect_error(multi_comp_dup <- predict(
+    modern_pca,
+    new_data = ancient_gt,
+    project_method = "least_squares",
+    lsq_pcs = c(1, 1, 2),
+    as_matrix = TRUE
+  ), "lsq_pcs should not contain duplicate values")
+
+  # Test single component
+  single_comp <- predict(
+    modern_pca,
+    new_data = ancient_gt,
+    project_method = "least_squares",
+    lsq_pcs = 1,
+    as_matrix = TRUE
+  )
+  expect_true(all(dim(single_comp) == c(20, 1)))
+
+  # Test all components
+  all_comp <- predict(
+    modern_pca,
+    new_data = ancient_gt,
+    project_method = "least_squares",
+    lsq_pcs = 1:10,
+    as_matrix = TRUE
+  )
+  expect_true(all(dim(all_comp) == c(20, 10)))
 })
 
 test_that("PCA functions work with loci out of order", {

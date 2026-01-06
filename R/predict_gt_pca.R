@@ -196,6 +196,10 @@ predict.gt_pca <- function(
           "e.g., c(1, 2) or c(1, 2, 3)"
         )
       }
+      # test that components are unique (i.e. no duplicates)
+      if (any(duplicated(lsq_pcs))) {
+        stop("lsq_pcs should not contain duplicate values")
+      }
       X <- .gt_get_fbm(new_data) # pointer for FBM #nolint
       proj_i <- NULL # hack to define iterator
       lsq_proj <- foreach::foreach(
