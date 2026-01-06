@@ -9,7 +9,7 @@ projecting new data."><meta property="og:image" content="https://evolecolgroup.g
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.1.9002</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.1.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,9 +84,10 @@ projecting new data.</p>
 
 
 <dt id="arg-lsq-pcs">lsq_pcs<a class="anchor" aria-label="anchor" href="#arg-lsq-pcs"></a></dt>
-<dd><p>a vector of length two with the values of the two principal
+<dd><p>a vector of the indices of the principal
 components to use for the least square fitting. Only relevant
-if<code>project_method = 'least_squares'</code></p></dd>
+if <code>project_method = 'least_squares'</code>. It defaults to the first two
+components.</p></dd>
 
 
 <dt id="arg-block-size">block_size<a class="anchor" aria-label="anchor" href="#arg-block-size"></a></dt>
@@ -258,35 +259,35 @@ principal component analysis  36(11): 3439–3446.</p>
 <span class="r-in"><span><span class="co"># Predict with least squares</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">pca</span>,</span></span>
 <span class="r-in"><span>  new_data <span class="op">=</span> <span class="va">new_lobsters</span>,</span></span>
-<span class="r-in"><span>  project_method <span class="op">=</span> <span class="st">"least_squares"</span>, lsq_pcs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  project_method <span class="op">=</span> <span class="st">"least_squares"</span>, lsq_pcs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             .PC1        .PC2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig11  0.8449532 -1.32057095</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig12 -0.1088606 -1.79996190</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig13  0.5823879  0.39219100</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig14 -1.9960214 -2.72731004</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig15  2.2651257 -0.95914412</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig16 -1.6199754  0.15563731</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig17 -1.0314321 -3.23991878</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig18  1.0537567 -6.10652671</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig19 -1.1799955 -2.76944741</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig20 -1.1309434 -2.51297661</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig21  1.4516874 -3.78272355</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig22  3.2170145 -4.81619496</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig23 -1.9094782 -2.65470446</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig24  1.2803005 -0.07325206</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig25 -2.5242751  0.39525228</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig26 -0.7564414 -4.01534680</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig27  1.7041079 -0.05110208</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig28 -0.2233053 -1.09747960</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig29 -1.8046635 -1.03162891</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig30  0.6934134 -0.79727293</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig31  0.2819594 -6.36122988</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig32 -0.9308639 -2.42914291</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig33 -0.3724849 -3.62456011</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig34 -0.2919582 -6.89773149</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig35 -2.4364457  0.61938077</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Vig36  1.4646736 -4.46678967</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              .PC1        .PC2        .PC3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig11  0.84495324 -1.32057095  0.95199040</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig12 -0.05315945 -1.71602943  1.61835210</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig13  0.58238791  0.39219100  0.99630978</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig14 -1.99602145 -2.72731004  2.62251475</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig15  2.26512567 -0.95914412  0.02818837</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig16 -1.61997544  0.15563731 -0.40919334</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig17 -1.04368440 -3.24458072 -1.22886118</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig18  1.05375670 -6.10652671 -0.82400057</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig19 -1.17999551 -2.76944741  1.15010211</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig20 -1.13094344 -2.51297661  1.29598913</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig21  1.45168737 -3.78272355 -0.65105851</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig22  3.21701452 -4.81619496  1.41010615</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig23 -1.90947818 -2.65470446 -0.37492036</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig24  1.28030055 -0.07325206  1.09767261</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig25 -2.52427515  0.39525228  0.57686195</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig26 -0.75644140 -4.01534680  1.22994589</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig27  1.70410788 -0.05110208  1.16705289</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig28 -0.20948736 -1.07775435  1.85903530</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig29 -1.80466347 -1.03162891  2.07763585</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig30  0.70329790 -0.78326853  0.94143270</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig31  0.28195945 -6.36122988  0.56220908</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig32 -0.93086395 -2.42914291  0.98211553</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig33 -0.37248494 -3.62456011  0.65785222</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig34 -0.29062835 -6.90477857 -1.22914478</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig35 -2.43508881  0.61219047 -1.25412654</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vig36  1.46467362 -4.46678967  2.53264029</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Return a tibble</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">pca</span>, new_data <span class="op">=</span> <span class="va">new_lobsters</span>, as_matrix <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
