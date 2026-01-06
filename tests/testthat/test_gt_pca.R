@@ -203,6 +203,25 @@ test_that("fit_gt_pca_and_predict_splitted_data", {
   )
   expect_true(all(dim(lsq_pred_tbl) == c(20, 3)))
   expect_true(inherits(lsq_pred_tbl, "tbl_df"))
+
+  # test errors from incorrect lsq_pcs
+  expect_error(
+    predict(
+      modern_pca,
+      new_data = ancient_gt,
+      project_method = "least_squares",
+      lsq_pcs = c(0, 2)
+    ),    "lsq_pcs should be a vector of valid"
+  )
+  expect_error(
+    predict(
+      modern_pca,
+      new_data = ancient_gt,
+      project_method = "least_squares",
+      lsq_pcs = c(1, 20)
+    ),    "lsq_pcs should be a vector of valid"
+  )
+
 })
 
 test_that("PCA functions work with loci out of order", {

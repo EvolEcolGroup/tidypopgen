@@ -24,7 +24,7 @@
 (Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
 "least_squares" (as done by SMARTPCA)}
 
-\item{lsq_pcs}{a vector of the values of the two principal
+\item{lsq_pcs}{a vector of the values of the principal
 components to use for the least square fitting. Only relevant
 if\code{project_method = 'least_squares'}}
 
