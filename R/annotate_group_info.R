@@ -11,8 +11,8 @@
 
 annotate_group_info <- function(q_tbl, plt) {
   group <- q_tbl %>%
-    dplyr::distinct(id, group) %>%
-    dplyr::pull(group)
+    dplyr::distinct(.data$id, .data$group) %>%
+    dplyr::pull(dplyr::all_of("group"))
   if (length(rle(as.character(group))$values) != length(unique(group))) {
     stop(paste(
       "values in 'group' are not ordered",
