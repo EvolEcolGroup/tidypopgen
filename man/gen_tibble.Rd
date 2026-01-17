@@ -99,7 +99,7 @@ in case your
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
 
-\item{names_as_int}{logical. If TRUE, individual and locus names will be
+\item{names_as_int}{logical. If TRUE, locus names will be
 converted to integers. Only used when \code{x} is a \emph{VCF} file with parser
 "cpp". Default is FALSE. This can be useful when working with very large
 datasets where storing the names as string can use a large amount of

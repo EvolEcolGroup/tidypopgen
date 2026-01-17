@@ -50,10 +50,11 @@
 #' autoplot(pca, type = "scores", k = c(1, 3)) +
 #'   aes(colour = lobsters$population)
 autoplot.gt_pca <- function(
-    object,
-    type = c("screeplot", "scores", "loadings"),
-    k = NULL,
-    ...) {
+  object,
+  type = c("screeplot", "scores", "loadings"),
+  k = NULL,
+  ...
+) {
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (type == "screeplot") {

@@ -1,12 +1,13 @@
 # A function to read ped files
 gen_tibble_ped <- function(
-    x,
-    ...,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    backingfile = NULL,
-    quiet = FALSE) {
+  x,
+  ...,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  backingfile = NULL,
+  quiet = FALSE
+) {
   # Substitute .ped with .map
   map_file <- sub("\\.ped$", ".map", x)
   if (!file.exists(map_file)) {
@@ -36,14 +37,15 @@ gen_tibble_ped <- function(
 # modified from snpStats::read.pedfile
 
 read_pedfile <- function(
-    file,
-    n,
-    snps,
-    which,
-    split = "\t| +",
-    sep = ".",
-    na_strings = "0",
-    quiet = FALSE) {
+  file,
+  n,
+  snps,
+  which,
+  split = "\t| +",
+  sep = ".",
+  na_strings = "0",
+  quiet = FALSE
+) {
   # constants
   r0 <- NA_integer_
   r1 <- 0

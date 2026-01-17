@@ -685,7 +685,7 @@ test_that("vcf tests storing names as integers", {
     parser = "cpp",
     backingfile = tempfile("pop_a_"),
     names_as_int = TRUE
-  )  
+  )
   expect_true(is.integer(show_loci(pop_a_gt)$name))
   vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
   pop_b_gt <- gen_tibble(
@@ -696,13 +696,18 @@ test_that("vcf tests storing names as integers", {
     names_as_int = TRUE
   )
   # check that we can not rbind by name if names are integers
-  expect_error(rbind_dry_run(pop_a_gt, pop_b_gt, use_position = FALSE),
-               "When 'use_position' is FALSE, loci names must be characters.")
-  expect_error(rbind(pop_a_gt, pop_b_gt, use_position = FALSE),
-               "When 'use_position' is FALSE, loci names must be characters.")
+  expect_error(
+    rbind_dry_run(pop_a_gt, pop_b_gt, use_position = FALSE),
+    "When 'use_position' is FALSE, loci names must be characters."
+  )
+  expect_error(
+    rbind(pop_a_gt, pop_b_gt, use_position = FALSE),
+    "When 'use_position' is FALSE, loci names must be characters."
+  )
   # but not error if we use positions
-  combined_gt <- rbind(pop_a_gt, pop_b_gt, use_position = TRUE,
-                       quiet = TRUE)
+  combined_gt <- rbind(pop_a_gt, pop_b_gt,
+    use_position = TRUE,
+    quiet = TRUE
+  )
   expect_true(inherits(combined_gt, "gen_tbl"))
-
 })

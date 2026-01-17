@@ -69,7 +69,7 @@
 #'   appearing more than once). If FALSE, an error will be thrown if duplicated
 #'   loci are found. These validations run before backing files are saved.
 #'   Default is FALSE.
-#' @param names_as_int logical. If TRUE, individual and locus names will be
+#' @param names_as_int logical. If TRUE, locus names will be
 #'   converted to integers. Only used when `x` is a *VCF* file with parser
 #'   "cpp". Default is FALSE. This can be useful when working with very large
 #'   datasets where storing the names as string can use a large amount of
@@ -126,7 +126,7 @@
 #'   valid_alleles = c("A", "T", "C", "G"),
 #'   quiet = TRUE
 #' )
-#' 
+#'
 gen_tibble <-
   function(x,
            ...,
@@ -279,16 +279,17 @@ gen_tibble.character <-
 #' @export
 #' @rdname gen_tibble
 gen_tibble.matrix <- function(
-    x,
-    indiv_meta,
-    loci,
-    ...,
-    ploidy = 2,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    backingfile = NULL,
-    allow_duplicates = FALSE,
-    quiet = FALSE) {
+  x,
+  indiv_meta,
+  loci,
+  ...,
+  ploidy = 2,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  backingfile = NULL,
+  allow_duplicates = FALSE,
+  quiet = FALSE
+) {
   rlang::check_dots_empty()
 
   # check that valid alleles does not contain zero
@@ -518,9 +519,10 @@ tbl_sum.gen_tbl <- function(x, ...) {
 
 # function to check the allele alphabet
 check_allele_alphabet <- function(
-    x,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", ".")) {
+  x,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", ".")
+) {
   if (
     any(
       !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),

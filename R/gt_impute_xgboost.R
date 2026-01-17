@@ -41,14 +41,15 @@
 #' # And we can check it has been imputed
 #' example_gt %>% gt_has_imputed()
 gt_impute_xgboost <- function(
-    x,
-    alpha = 1e-4,
-    size = 200,
-    p_train = 0.8,
-    n_cor = nrow(x),
-    seed = NA,
-    n_cores = 1,
-    append_error = TRUE) {
+  x,
+  alpha = 1e-4,
+  size = 200,
+  p_train = 0.8,
+  n_cor = nrow(x),
+  seed = NA,
+  n_cores = 1,
+  append_error = TRUE
+) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)

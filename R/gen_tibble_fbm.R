@@ -161,9 +161,10 @@ validate_indiv_meta <- function(indiv_meta) {
 #' @keywords internal
 #' @noRd
 gt_write_fbm_from_dfs <- function(
-    genotypes,
-    backingfile = NULL,
-    max_ploidy = 2) {
+  genotypes,
+  backingfile = NULL,
+  max_ploidy = 2
+) {
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }

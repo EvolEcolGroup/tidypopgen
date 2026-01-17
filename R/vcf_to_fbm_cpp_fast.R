@@ -12,20 +12,21 @@
 #'   missing. Default is c("0", ".").
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
 #'   position) or duplicated locus names. Default is FALSE.
-#' @param names_as_int whether to convert individual and locus names to
+#' @param names_as_int whether to convert locus names to
 #'   integers. Default is FALSE.
 #' @param quiet whether to print messages.
 #' @returns an object of the class `gen_tbl`.
 #' @keywords internal
 #' @noRd
 vcf_to_fbm_cpp <- function(
-    vcf_path,
-    backingfile = NULL,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    names_as_int = FALSE,
-    quiet = FALSE) {
+  vcf_path,
+  backingfile = NULL,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  names_as_int = FALSE,
+  quiet = FALSE
+) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)
@@ -98,7 +99,7 @@ vcf_to_fbm_cpp <- function(
   } else { # if we store them as integers
     loci$marker.ID <- seq_len(nrow(loci))
   }
-  
+
   loci <- tibble::tibble(
     name = loci$marker.ID,
     chromosome = loci$chromosome,

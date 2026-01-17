@@ -57,17 +57,18 @@
 #' autoplot(dapc_res, type = "components", group = populations)
 #'
 autoplot.gt_dapc <- function(
-    object,
-    type = c(
-      "screeplot",
-      "scores",
-      "loadings",
-      "components"
-    ),
-    ld = NULL,
-    group = NULL,
-    n_col = 1,
-    ...) {
+  object,
+  type = c(
+    "screeplot",
+    "scores",
+    "loadings",
+    "components"
+  ),
+  ld = NULL,
+  group = NULL,
+  n_col = 1,
+  ...
+) {
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (type == "screeplot") {

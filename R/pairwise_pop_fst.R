@@ -69,13 +69,14 @@
 #'   pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
 #'
 pairwise_pop_fst <- function(
-    .x,
-    type = c("tidy", "pairwise"),
-    by_locus = FALSE,
-    by_locus_type = c("tidy", "matrix", "list"),
-    method = c("Hudson", "Nei87", "WC84"),
-    return_num_dem = FALSE,
-    n_cores = bigstatsr::nb_cores()) {
+  .x,
+  type = c("tidy", "pairwise"),
+  by_locus = FALSE,
+  by_locus_type = c("tidy", "matrix", "list"),
+  method = c("Hudson", "Nei87", "WC84"),
+  return_num_dem = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)

@@ -30,9 +30,10 @@
 #' # And we can check it has been imputed
 #' example_gt %>% gt_has_imputed()
 gt_impute_simple <- function(
-    x,
-    method = c("mode", "mean0", "random"),
-    n_cores = 1) {
+  x,
+  method = c("mode", "mean0", "random"),
+  n_cores = 1
+) {
   method <- match.arg(method)
 
   if (n_cores > 1) {

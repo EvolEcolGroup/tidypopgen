@@ -64,11 +64,12 @@
 #' # Create an rbind report using rbind_dry_run
 #' rbind_dry_run(example_gt, test_gt, flip_strand = TRUE)
 rbind_dry_run <- function(
-    ref,
-    target,
-    use_position = FALSE,
-    flip_strand = FALSE,
-    quiet = FALSE) {
+  ref,
+  target,
+  use_position = FALSE,
+  flip_strand = FALSE,
+  quiet = FALSE
+) {
   # check there are no ID's in common
   if (any(ref$id %in% target$id)) {
     stop(
@@ -76,18 +77,18 @@ rbind_dry_run <- function(
       " same ID."
     )
   }
-  
+
   # if use_position is FALSE, then the names can not be integers
   if (!use_position) {
     if (!is.character(show_loci(ref)$name) ||
-        !is.character(show_loci(target)$name)) {
+          !is.character(show_loci(target)$name)) {
       stop(
         "When 'use_position' is FALSE, loci names must be characters.",
         " Please set 'use_position' to TRUE if you use integers as loci names."
       )
     }
   }
-  
+
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
   target_df <- target %>% show_loci()
