@@ -12,6 +12,8 @@
 #'   missing. Default is c("0", ".").
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
 #'   position) or duplicated locus names. Default is FALSE.
+#' @param names_as_int whether to convert individual and locus names to
+#'   integers. Default is FALSE.
 #' @param quiet whether to print messages.
 #' @returns an object of the class `gen_tbl`.
 #' @keywords internal
@@ -22,6 +24,7 @@ vcf_to_fbm_cpp <- function(
     valid_alleles = c("A", "T", "C", "G"),
     missing_alleles = c("0", "."),
     allow_duplicates = FALSE,
+    names_as_int = FALSE,
     quiet = FALSE) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
@@ -80,17 +83,22 @@ vcf_to_fbm_cpp <- function(
   # add an empty genetic.pos column
   loci <- loci %>% mutate(genetic.dist = 0, .before = "physical.pos")
   loci$physical.pos <- as.integer(loci$physical.pos)
-  # if loci names are missing, create a name with scaffold and position
-  # (same behaviour as vcfR)
-  missing_loci_ids <- which(loci$marker.ID == ".")
-  if (length(missing_loci_ids) > 0) {
-    loci$marker.ID[missing_loci_ids] <- paste(
-      loci$chromosome[missing_loci_ids],
-      loci$physical.pos,
-      sep = "_"
-    )
+  # if we store loci names as characters
+  if (!names_as_int) {
+    # if loci names are missing, create a name with scaffold and position
+    # (same behaviour as vcfR)
+    missing_loci_ids <- which(loci$marker.ID == ".")
+    if (length(missing_loci_ids) > 0) {
+      loci$marker.ID[missing_loci_ids] <- paste(
+        loci$chromosome[missing_loci_ids],
+        loci$physical.pos,
+        sep = "_"
+      )
+    }
+  } else { # if we store them as integers
+    loci$marker.ID <- seq_len(nrow(loci))
   }
-
+  
   loci <- tibble::tibble(
     name = loci$marker.ID,
     chromosome = loci$chromosome,

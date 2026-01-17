@@ -17,7 +17,7 @@
 #' missing alleles will be converted from 'X' to NA
 #'
 #' @note Helper functions for accessing `gen_tibble` object attributes and
-#' checking gen_tibble ploidy can be found in gt_helper_functions.R
+#'   checking gen_tibble ploidy can be found in gt_helper_functions.R
 #'
 #' @param x can be:
 #' - a string giving the path to a PLINK BED or PED file. The associated
@@ -63,12 +63,17 @@
 #'   will be saved in the same directory as the bed or vcf file, using the same
 #'   file name but with a different file type (.bk rather than .bed or .vcf). If
 #'   `x` is a genotype matrix and `backingfile` is NULL, then a temporary file
-#' will be created (but note that R will delete it at the end of the session!)
+#'   will be created (but note that R will delete it at the end of the session!)
 #' @param allow_duplicates logical. If TRUE, the tibble will allow duplicated
 #'   loci (those with genomic coordinate (chromosome + position) or locus name
 #'   appearing more than once). If FALSE, an error will be thrown if duplicated
-#'   loci are found. These validations run before backing
-#'   files are saved. Default is FALSE.
+#'   loci are found. These validations run before backing files are saved.
+#'   Default is FALSE.
+#' @param names_as_int logical. If TRUE, individual and locus names will be
+#'   converted to integers. Only used when `x` is a *VCF* file with parser
+#'   "cpp". Default is FALSE. This can be useful when working with very large
+#'   datasets where storing the names as string can use a large amount of
+#'   memory.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -121,7 +126,7 @@
 #'   valid_alleles = c("A", "T", "C", "G"),
 #'   quiet = TRUE
 #' )
-#'
+#' 
 gen_tibble <-
   function(x,
            ...,
@@ -148,6 +153,7 @@ gen_tibble.character <-
            missing_alleles = c("0", "."),
            backingfile = NULL,
            allow_duplicates = FALSE,
+           names_as_int = FALSE,
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
@@ -199,6 +205,7 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
+        names_as_int = names_as_int,
         quiet = quiet
       )
     } else if (tolower(file_ext(x)) == "ped") {
