@@ -92,7 +92,7 @@ vcf_to_fbm_cpp <- function(
     if (length(missing_loci_ids) > 0) {
       loci$marker.ID[missing_loci_ids] <- paste(
         loci$chromosome[missing_loci_ids],
-        loci$physical.pos,
+        loci$physical.pos[missing_loci_ids],
         sep = "_"
       )
     }
