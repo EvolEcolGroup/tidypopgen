@@ -6,8 +6,7 @@
 #' equivalent to the one used by `hierfstat::fis.dosage()`).
 #' @references Nei M. (1987) Molecular Evolutionary Genetics. Columbia
 #'   University Press.
-#'   
-#'   Weir, BS and Goudet J (2017) A Unified Characterization of
+#' @references Weir, BS and Goudet J (2017) A Unified Characterization of
 #'   Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a grouped [`gen_tibble`] (as obtained by using
 #'   [dplyr::group_by()]); if method == "Nei87", it is also possible to use
