@@ -1,3 +1,7 @@
+# tidypopgen 0.4.3
+* fix occasional test failure whentemporary file names contained
+  certain patterns
+
 # tidypopgen 0.4.2
 * allow least squares projection of multiple components at once in
   `gt_project_pca()`

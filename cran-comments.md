@@ -1,4 +1,5 @@
-New minor version, fixing an incompatibility with the new version of dplyr.
+New minor version, fixing a test that occasionally failed if name of temp file
+contained the certain pattern.
 
 ## Test environments
 - Github Actions R-CMD-check (ubuntu-20.04): r-devel, r-release, r-oldrel
