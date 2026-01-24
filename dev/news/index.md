@@ -1,5 +1,19 @@
 # Changelog
 
+## tidypopgen 0.4.3
+
+CRAN release: 2026-01-23
+
+- fix occasional test failure when temporary file names contained
+  certain patterns
+
+## tidypopgen 0.4.2
+
+CRAN release: 2026-01-22
+
+- allow least squares projection of multiple components at once in
+  `gt_project_pca()`
+
 ## tidypopgen 0.4.1
 
 CRAN release: 2025-12-20
