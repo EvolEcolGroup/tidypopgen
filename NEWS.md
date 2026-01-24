@@ -1,5 +1,5 @@
 # tidypopgen 0.4.3
-* fix occasional test failure whentemporary file names contained
+* fix occasional test failure when temporary file names contained
   certain patterns
 
 # tidypopgen 0.4.2
