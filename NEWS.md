@@ -1,3 +1,11 @@
+# tidypopgen 0.4.3
+* fix occasional test failure whentemporary file names contained
+  certain patterns
+
+# tidypopgen 0.4.2
+* allow least squares projection of multiple components at once in
+  `gt_project_pca()`
+
 # tidypopgen 0.4.1
 * duplicate-distance checks removed in `is_loci_table_ordered()`
 * make `qc_report_*` functions work with pseudohaploids

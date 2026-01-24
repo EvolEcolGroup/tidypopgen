@@ -70,7 +70,7 @@ gt_as_plink <- function(
   } else if (type == "ped") {
     all_files <- c(
       file,
-      gsub(".ped", ".map", file)
+      gsub(".ped", ".map", file, fixed = TRUE)
     )
   } else if (type == "raw") {
     all_files <- file

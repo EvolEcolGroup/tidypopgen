@@ -8,9 +8,10 @@
 #' @param project_method a string taking the value of either "simple", "OADP"
 #'   (Online Augmentation, Decomposition, and Procrustes (OADP) projection), or
 #'   "least_squares" (as done by SMARTPCA)
-#' @param lsq_pcs a vector of length two with the values of the two principal
+#' @param lsq_pcs a vector of the indices of the principal
 #' components to use for the least square fitting. Only relevant
-#' if`project_method = 'least_squares'`
+#' if `project_method = 'least_squares'`. It defaults to the first two
+#' components.
 #' @param block_size number of loci read simultaneously (larger values will
 #' speed up computation, but require more memory)
 #' @param n_cores number of cores
@@ -60,7 +61,7 @@
 #' # Predict with least squares
 #' predict(pca,
 #'   new_data = new_lobsters,
-#'   project_method = "least_squares", lsq_pcs = c(1, 2)
+#'   project_method = "least_squares", lsq_pcs = c(1, 2, 3)
 #' )
 #'
 #' # Return a tibble
@@ -71,19 +72,20 @@
 #'
 # this is a modified version of bigstatsr::predict.big_SVD
 predict.gt_pca <- function(
-    object,
-    new_data = NULL,
-    project_method = c(
-      "none",
-      "simple",
-      "OADP",
-      "least_squares"
-    ),
-    lsq_pcs = c(1, 2),
-    block_size = NULL,
-    n_cores = 1,
-    as_matrix = TRUE,
-    ...) {
+  object,
+  new_data = NULL,
+  project_method = c(
+    "none",
+    "simple",
+    "OADP",
+    "least_squares"
+  ),
+  lsq_pcs = c(1, 2),
+  block_size = NULL,
+  n_cores = 1,
+  as_matrix = TRUE,
+  ...
+) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
@@ -183,11 +185,21 @@ predict.gt_pca <- function(
         return(output)
       }
     } else if (project_method == "least_squares") {
-      if (length(lsq_pcs) != 2 || any(lsq_pcs > ncol(object$v))) {
+      if (
+          length(lsq_pcs) == 0 ||
+            anyNA(lsq_pcs) ||
+            any(lsq_pcs < 1) ||
+            any(lsq_pcs > ncol(object$v)) ||
+            !all(lsq_pcs == as.integer(lsq_pcs))) {
         stop(
-          "lsq_pcs should include two components that were computed",
-          "for the object, e.g. c(1,2)"
+          "lsq_pcs should be a vector of valid component indices ",
+          "(positive integers between 1 and ", ncol(object$v), "), ",
+          "e.g., c(1, 2) or c(1, 2, 3)"
         )
+      }
+      # test that components are unique (i.e. no duplicates)
+      if (any(duplicated(lsq_pcs))) {
+        stop("lsq_pcs should not contain duplicate values")
       }
       X <- .gt_get_fbm(new_data) # pointer for FBM #nolint
       proj_i <- NULL # hack to define iterator
@@ -208,7 +220,7 @@ predict.gt_pca <- function(
         solve(crossprod(v_sub), crossprod(v_sub, genotypes_scaled))
       }
       dimnames(lsq_proj) <-
-        list(new_data$id, paste0(".PC", seq_len(ncol(lsq_proj))))
+        list(new_data$id, paste0(".PC", lsq_pcs))
       output <- output_type(object = lsq_proj, as_matrix, id = new_data$id)
       return(output)
     }
@@ -234,15 +246,16 @@ output_type <- function(object, as_matrix, id) {
 # a port of bigsnpr::part_prod to work on standard fb256 matrices
 
 fbm256_part_prod <- function(
-    X,
-    ind,
-    ind.row,
-    ind.col,
-    center, # nolint
-    scale,
-    V,
-    XV,
-    X_norm) {
+  X,
+  ind,
+  ind.row,
+  ind.col,
+  center, # nolint
+  scale,
+  V,
+  XV,
+  X_norm
+) {
   # nolint
   res <- fbm256_prod_and_rowSumsSq(
     BM = X,
