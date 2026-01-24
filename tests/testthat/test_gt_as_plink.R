@@ -157,7 +157,7 @@ if (rlang::is_installed("vcfR")) {
     # write vcf_path using gt_as_plink
     pop_b_bed <- gt_as_plink(pop_b_vcf_gt, tempfile())
     # substitute ".bed" for ".fam"
-    fam_path <- gsub(".bed", ".fam", pop_b_bed)
+    fam_path <- gsub(".bed", ".fam", pop_b_bed, fixed = TRUE)
     # read in the .fam file
     fam <- read.table(fam_path, header = FALSE, stringsAsFactors = FALSE)
     # check that family.ID is the same as sample.ID
@@ -175,7 +175,7 @@ if (rlang::is_installed("vcfR")) {
     # write vcf_path using gt_as_plink
     pop_b_bed <- gt_as_plink(pop_b_vcf_gt, tempfile())
     # substitute ".bed" for ".fam"
-    fam_path <- gsub(".bed", ".fam", pop_b_bed)
+    fam_path <- gsub(".bed", ".fam", pop_b_bed, fixed = TRUE)
     # read in the .fam file
     fam <- read.table(fam_path, header = FALSE, stringsAsFactors = FALSE)
     # check that family.ID is the same as sample.ID

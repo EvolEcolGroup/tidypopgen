@@ -210,7 +210,9 @@ gt_admixture <- function(
       }
 
       # read the output
-      output_prefix <- file.path(out, gsub(".bed", "", basename(input_file)))
+      output_prefix <- file.path(out,
+                                 gsub(".bed", "", basename(input_file),
+                                      fixed = TRUE))
       adm_list$k[index] <- this_k
       adm_list$Q[[index]] <-
         q_matrix(utils::read.table(
