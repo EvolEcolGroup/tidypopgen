@@ -177,7 +177,7 @@ autoplot(loci_report, type = "overview")
     ## ℹ See also `vignette("ggplot2-in-packages")` for more information.
     ## ℹ The deprecated feature was likely used in the UpSetR package.
     ##   Please report the issue to the authors.
-    ## This warning is displayed once every 8 hours.
+    ## This warning is displayed once per session.
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
@@ -185,7 +185,7 @@ autoplot(loci_report, type = "overview")
     ## ℹ Please use `linewidth` instead.
     ## ℹ The deprecated feature was likely used in the UpSetR package.
     ##   Please report the issue to the authors.
-    ## This warning is displayed once every 8 hours.
+    ## This warning is displayed once per session.
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
@@ -193,7 +193,7 @@ autoplot(loci_report, type = "overview")
     ## ℹ Please use the `linewidth` argument instead.
     ## ℹ The deprecated feature was likely used in the UpSetR package.
     ##   Please report the issue to the authors.
-    ## This warning is displayed once every 8 hours.
+    ## This warning is displayed once per session.
     ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
     ## generated.
 
@@ -340,16 +340,18 @@ to update the backingfiles with:
 data <- gt_update_backingfile(data)
 ```
 
-    ## Genetic distances are not sorted, setting them to zero
-
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/Rtmpm7aCGs/file279a10265a34_v2.rds
+    ## using FBM RDS: /tmp/RtmpTLyxrj/file29ff2a8b9474_v2.rds
 
-    ## with FBM backing file: /tmp/Rtmpm7aCGs/file279a10265a34_v2.bk
+    ## with FBM backing file: /tmp/RtmpTLyxrj/file29ff2a8b9474_v2.bk
 
     ## make sure that you do NOT delete those files!
+
+    ## to reload the gen_tibble in another session, use:
+
+    ## gt_load('/tmp/RtmpTLyxrj/file29ff2a8b9474_v2.gt')
 
 And then we can impute using:
 
@@ -390,21 +392,21 @@ gt_save(ld_data, file_name = tempfile())
 ```
 
     ## 
-    ## gen_tibble saved to /tmp/Rtmpm7aCGs/file279a2e426ed8.gt
+    ## gen_tibble saved to /tmp/RtmpTLyxrj/file29ff34dad028.gt
 
-    ## using FBM RDS: /tmp/Rtmpm7aCGs/file279a10265a34_v2.rds
+    ## using FBM RDS: /tmp/RtmpTLyxrj/file29ff2a8b9474_v2.rds
 
-    ## with FBM backing file: /tmp/Rtmpm7aCGs/file279a10265a34_v2.bk
+    ## with FBM backing file: /tmp/RtmpTLyxrj/file29ff2a8b9474_v2.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/Rtmpm7aCGs/file279a2e426ed8.gt')
+    ## gt_load('/tmp/RtmpTLyxrj/file29ff34dad028.gt')
 
-    ## [1] "/tmp/Rtmpm7aCGs/file279a2e426ed8.gt"    
-    ## [2] "/tmp/Rtmpm7aCGs/file279a10265a34_v2.rds"
-    ## [3] "/tmp/Rtmpm7aCGs/file279a10265a34_v2.bk"
+    ## [1] "/tmp/RtmpTLyxrj/file29ff34dad028.gt"    
+    ## [2] "/tmp/RtmpTLyxrj/file29ff2a8b9474_v2.rds"
+    ## [3] "/tmp/RtmpTLyxrj/file29ff2a8b9474_v2.bk"
 
 ## Grouping data
 

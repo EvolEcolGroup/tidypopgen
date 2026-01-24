@@ -9,7 +9,7 @@ missingness)."><meta property="og:image" content="https://evolecolgroup.github.i
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,7 +87,8 @@ coefficient of 0.088 or more</p></li>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>If no kings_threshold is provided, a tibble with 2 elements: het_obs
 and missingness. If kings_threshold is provided, a tibble with 4 elements:
-het_obs, missingness, id and to_keep.</p>
+het_obs, missingness, id and to_keep. For pseudohaploid data, a tibble with
+ploidy and missingness.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -100,7 +101,7 @@ of 'to_keep'. The kings_threshold parameter can be either a numeric KING
 kinship coefficient or a string of either "first" or "second", to remove any
 first degree or second degree relationships from the dataset. This second
 option is similar to using  –unrelated –degree 1 or –unrelated –degree 2
-in KING.</p>
+in KING. For pseudohaploid data, only missingness and ploidy are reported.</p>
     </div>
 
     <div class="section level2">

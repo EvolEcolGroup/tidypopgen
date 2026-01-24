@@ -209,7 +209,8 @@ PCA:
 
 ``` r
 anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
-#> Error: You can't have missing values in 'X'.
+#> Error:
+#> ! You can't have missing values in 'X'.
 ```
 
 OK, we jumped too quickly. There are missing data, and we need first to

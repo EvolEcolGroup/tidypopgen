@@ -1,5 +1,27 @@
 # Changelog
 
+## tidypopgen 0.4.3
+
+CRAN release: 2026-01-23
+
+- fix occasional test failure whentemporary file names contained certain
+  patterns
+
+## tidypopgen 0.4.2
+
+CRAN release: 2026-01-22
+
+- allow least squares projection of multiple components at once in
+  `gt_project_pca()`
+
+## tidypopgen 0.4.1
+
+CRAN release: 2025-12-20
+
+- duplicate-distance checks removed in
+  [`is_loci_table_ordered()`](https://evolecolgroup.github.io/tidypopgen/reference/is_loci_table_ordered.md)
+- make `qc_report_*` functions work with pseudohaploids
+
 ## tidypopgen 0.4.0
 
 CRAN release: 2025-10-24
