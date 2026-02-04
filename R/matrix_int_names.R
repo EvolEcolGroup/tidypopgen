@@ -65,8 +65,8 @@ col.names.matrix_int_names <- function(x) {
 }
 
 #' @export
-#' @param value a data.frame or tibble of loci information to replace the
-#'   current one.
+#' @param value a vector of integer or character column names to set, replacing
+#'   the current one.
 #' @rdname col.names
 "col.names<-" <- function(x, value) {
   UseMethod("col.names<-", x)
@@ -87,7 +87,7 @@ col.names.matrix_int_names <- function(x) {
     attr(x, "int_colnames") <- NULL
     class(x) <- c("matrix", "array")
     colnames(x) <- NULL
-    class(x) <- c("int_matrix", "matrix", "array")
+    class(x) <- c("matrix_int_names", "matrix", "array")
   } else if (is.integer(value)) {
     # Set as integer names
     if (length(value) != ncol(x)) {

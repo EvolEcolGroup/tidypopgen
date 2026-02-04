@@ -12,13 +12,13 @@ col.names(x) <- value
 \arguments{
 \item{x}{A matrix_int_names object}
 
-\item{value}{a data.frame or tibble of loci information to replace the
-current one.}
+\item{value}{a vector of integer or character column names to set, replacing
+the current one.}
 }
 \value{
 Integer or character vector of column names, or NULL
 }
 \description{
-This function reliably returns integer names if present, otherwise character dimnames.
-Use this instead of colnames() if you need guaranteed dispatch.
+This function reliably returns integer names if present, otherwise character
+dimnames. Use this instead of colnames() if you need guaranteed dispatch.
 }

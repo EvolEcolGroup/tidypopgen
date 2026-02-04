@@ -9,9 +9,11 @@ matrix_int_names(data, row.names = NULL, col.names = NULL)
 \arguments{
 \item{data}{Matrix data or object coercible to matrix}
 
-\item{row.names}{Integer vector (stored as int_rownames) or character vector (stored as dimnames)}
+\item{row.names}{Integer vector (stored as int_rownames) or character vector
+(stored as dimnames)}
 
-\item{col.names}{Integer vector (stored as int_colnames) or character vector (stored as dimnames)}
+\item{col.names}{Integer vector (stored as int_colnames) or character vector
+(stored as dimnames)}
 }
 \value{
 A matrix_int_names object
