@@ -328,7 +328,7 @@ autoplot_l_qc_overview <- function(
 
     unique_markers <- unique(unlist(pass_list))
     pass_counts <- UpSetR::fromList(pass_list)
-    rownames(pass_counts) <- unique_markers
+    row.names(pass_counts) <- unique_markers
 
     final_plot_overview <- UpSetR::upset(
       pass_counts,
@@ -342,7 +342,7 @@ autoplot_l_qc_overview <- function(
 
     unique_markers <- unique(unlist(pass_list))
     pass_counts <- UpSetR::fromList(pass_list)
-    rownames(pass_counts) <- unique_markers
+    row.names(pass_counts) <- unique_markers
 
     final_plot_overview <- UpSetR::upset(
       pass_counts,

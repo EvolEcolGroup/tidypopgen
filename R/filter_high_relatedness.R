@@ -31,11 +31,11 @@ filter_high_relatedness <-
     # append row and col names
     if (is.null(dimnames(matrix))) {
       if (is.null(.x)) {
-        colnames(matrix) <- seq_len(ncol(matrix))
-        rownames(matrix) <- seq_len(nrow(matrix))
+        col.names(matrix) <- seq_len(ncol(matrix))
+        row.names(matrix) <- seq_len(nrow(matrix))
       } else {
-        colnames(matrix) <- (.x)$id
-        rownames(matrix) <- (.x)$id
+        col.names(matrix) <- (.x)$id
+        row.names(matrix) <- (.x)$id
       }
     }
 
