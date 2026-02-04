@@ -4,15 +4,15 @@
 \alias{matrix_int_names}
 \title{Create a matrix with integer or character names}
 \usage{
-matrix_int_names(data, row.names = NULL, col.names = NULL)
+matrix_int_names(data, row_names = NULL, col_names = NULL)
 }
 \arguments{
 \item{data}{Matrix data or object coercible to matrix}
 
-\item{row.names}{Integer vector (stored as int_rownames) or character vector
+\item{row_names}{Integer vector (stored as int_rownames) or character vector
 (stored as dimnames)}
 
-\item{col.names}{Integer vector (stored as int_colnames) or character vector
+\item{col_names}{Integer vector (stored as int_colnames) or character vector
 (stored as dimnames)}
 }
 \value{

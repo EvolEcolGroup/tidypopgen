@@ -268,7 +268,7 @@ summary.gt_admix <- function(object, ...) {
     tab_sum <- table(object$k)
     tab_sum <- rbind(as.numeric(names(tab_sum)), tab_sum)
     row.names(tab_sum) <- c("k", "n")
-    col.names(tab_sum) <- rep("", ncol(tab_sum))
+    colnames(tab_sum) <- rep("", ncol(tab_sum))
     cat(" for multiple runs:")
     print(tab_sum)
   }

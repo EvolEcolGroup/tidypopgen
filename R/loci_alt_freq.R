@@ -439,7 +439,7 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
 format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
   if (type == "tidy") {
     out_mat_tbl <- as.data.frame(out_mat)
-    col.names(out_mat_tbl) <- group_ids
+    colnames(out_mat_tbl) <- group_ids
     out_mat_tbl$loci <- loci_names
     long_freq <- out_mat_tbl %>% # nolint start
       tidyr::pivot_longer(cols = dplyr::all_of(group_ids), names_to = "group") # nolint end
@@ -449,7 +449,7 @@ format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
     lapply(seq_len(ncol(out_mat)), function(i) out_mat[, i])
   } else if (type == "matrix") {
     # return a matrix
-    col.names(out_mat) <- group_ids
+    colnames(out_mat) <- group_ids
     row.names(out_mat) <- loci_names
     out_mat
   }

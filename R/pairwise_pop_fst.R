@@ -174,10 +174,10 @@ pairwise_pop_fst <- function(
   # we need to format them and return them
   if (return_num_dem) {
     row.names(fst_list$Fst_by_locus_num) <- loci_names(.x)
-    col.names(fst_list$Fst_by_locus_num) <-
+    colnames(fst_list$Fst_by_locus_num) <-
       col_names_combinations(group_combinations)
     row.names(fst_list$Fst_by_locus_den) <- loci_names(.x)
-    col.names(fst_list$Fst_by_locus_den) <-
+    colnames(fst_list$Fst_by_locus_den) <-
       col_names_combinations(group_combinations)
     return(fst_list)
   }
@@ -232,7 +232,7 @@ tidy_to_matrix <- function(tidy_tbl) {
   # fix dim names
   row.names(fst_tot_wide)[nrow(fst_tot_wide)] <-
     utils::tail(colnames(fst_tot_wide), 1)
-  col.names(fst_tot_wide)[1] <- row.names(fst_tot_wide)[1]
+  colnames(fst_tot_wide)[1] <- row.names(fst_tot_wide)[1]
   # fill lower triangle
   fst_tot_wide[lower.tri(fst_tot_wide)] <-
     t(fst_tot_wide)[lower.tri(fst_tot_wide)]

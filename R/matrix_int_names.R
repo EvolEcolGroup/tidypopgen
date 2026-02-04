@@ -4,13 +4,13 @@
 #' Create a matrix with integer or character names
 #'
 #' @param data Matrix data or object coercible to matrix
-#' @param row.names Integer vector (stored as int_rownames) or character vector
+#' @param row_names Integer vector (stored as int_rownames) or character vector
 #'   (stored as dimnames)
-#' @param col.names Integer vector (stored as int_colnames) or character vector
+#' @param col_names Integer vector (stored as int_colnames) or character vector
 #'   (stored as dimnames)
 #' @return A matrix_int_names object
 #' @export
-matrix_int_names <- function(data, row.names = NULL, col.names = NULL) {
+matrix_int_names <- function(data, row_names = NULL, col_names = NULL) {
   # Convert to matrix if needed
   if (!is.matrix(data)) {
     data <- as.matrix(data)
@@ -20,13 +20,13 @@ matrix_int_names <- function(data, row.names = NULL, col.names = NULL) {
   class(data) <- c("matrix_int_names", "matrix", "array")
 
   # Handle row names
-  if (!is.null(row.names)) {
-    row.names(data) <- row.names
+  if (!is.null(row_names)) {
+    row_names(data) <- row_names
   }
 
   # Handle column names
-  if (!is.null(col.names)) {
-    col.names(data) <- col.names
+  if (!is.null(col_names)) {
+    col_names(data) <- col_names
   }
 
   return(data)
@@ -41,18 +41,18 @@ matrix_int_names <- function(data, row.names = NULL, col.names = NULL) {
 #' @param x A matrix_int_names object
 #' @return Integer or character vector of column names, or NULL
 #' @export
-col.names <- function(x) {
-  UseMethod("col.names")
+col_names <- function(x) {
+  UseMethod("col_names")
 }
 
 #' @export
-col.names.default <- function(x) {
+col_names.default <- function(x) {
   base::colnames(x)
 }
 
 #' Get column names (both integer and character)
 #' @export
-col.names.matrix_int_names <- function(x) {
+col_names.matrix_int_names <- function(x) {
   int_cnames <- attr(x, "int_colnames")
   char_cnames <- colnames(x)
 
@@ -67,21 +67,21 @@ col.names.matrix_int_names <- function(x) {
 #' @export
 #' @param value a vector of integer or character column names to set, replacing
 #'   the current one.
-#' @rdname col.names
-"col.names<-" <- function(x, value) {
-  UseMethod("col.names<-", x)
+#' @rdname col_names
+"col_names<-" <- function(x, value) {
+  UseMethod("col_names<-", x)
 }
 
 #' default method
 #' @export
-`col.names<-.default` <- function(x, value) {
+`col_names<-.default` <- function(x, value) {
   base::colnames(x) <- value
   x
 }
 
 #' Set column names (integer or character)
 #' @export
-`col.names<-.matrix_int_names` <- function(x, value) {
+`col_names<-.matrix_int_names` <- function(x, value) {
   if (is.null(value)) {
     # Clear both types of names
     attr(x, "int_colnames") <- NULL
@@ -91,7 +91,7 @@ col.names.matrix_int_names <- function(x) {
   } else if (is.integer(value)) {
     # Set as integer names
     if (length(value) != ncol(x)) {
-      stop("Length of col.names must match number of columns")
+      stop("Length of col_names must match number of columns")
     }
     attr(x, "int_colnames") <- value
     # Clear character dimnames for columns
@@ -103,14 +103,14 @@ col.names.matrix_int_names <- function(x) {
   } else if (is.character(value)) {
     # Set as character names
     if (length(value) != ncol(x)) {
-      stop("Length of col.names must match number of columns")
+      stop("Length of col_names must match number of columns")
     }
     # Clear integer colnames
     attr(x, "int_colnames") <- NULL
     # Set character dimnames
     colnames(x) <- value
   } else {
-    stop("col.names must be integer or character vector")
+    stop("col_names must be integer or character vector")
   }
   x
 }
@@ -122,8 +122,21 @@ col.names.matrix_int_names <- function(x) {
 #'
 #' @param x A matrix_int_names object
 #' @return Integer or character vector of row names, or NULL
+
 #' @export
-row.names.matrix_int_names <- function(x) {
+row_names <- function(x) {
+  UseMethod("row_names")
+}
+
+#' @export
+row_names.default <- function(x) {
+  base::rownames(x)
+}
+
+
+#' 
+#' @export
+row_names.matrix_int_names <- function(x) {
   int_rnames <- attr(x, "int_rownames")
 
   # Return integer names if present
@@ -140,8 +153,22 @@ row.names.matrix_int_names <- function(x) {
 #' @param x A matrix_int_names object
 #' @param value Integer or character vector of row names, or NULL
 #' @return The modified matrix_int_names object
+
 #' @export
-`row.names<-.matrix_int_names` <- function(x, value) {
+#' @rdname row_names
+"row_names<-" <- function(x, value) {
+  UseMethod("row_names<-", x)
+} 
+ 
+#' default method
+#' @export
+`row_names<-.default` <- function(x, value) {
+  base::rownames(x) <- value
+  x
+}
+
+#' @export
+`row_names<-.matrix_int_names` <- function(x, value) {
   if (is.null(value)) {
     # Clear both types of names
     attr(x, "int_rownames") <- NULL
@@ -153,7 +180,7 @@ row.names.matrix_int_names <- function(x) {
   } else if (is.integer(value)) {
     # Set as integer names
     if (length(value) != nrow(x)) {
-      stop("Length of row.names must match number of rows")
+      stop("Length of row_names must match number of rows")
     }
     attr(x, "int_rownames") <- value
     # Clear character dimnames for rows
@@ -165,7 +192,7 @@ row.names.matrix_int_names <- function(x) {
   } else if (is.character(value)) {
     # Set as character names
     if (length(value) != nrow(x)) {
-      stop("Length of row.names must match number of rows")
+      stop("Length of row_names must match number of rows")
     }
     # Clear integer rownames
     attr(x, "int_rownames") <- NULL
@@ -177,7 +204,7 @@ row.names.matrix_int_names <- function(x) {
     dn[[1]] <- value
     dimnames(x) <- dn
   } else {
-    stop("row.names must be integer or character vector")
+    stop("row_names must be integer or character vector")
   }
   x
 }
