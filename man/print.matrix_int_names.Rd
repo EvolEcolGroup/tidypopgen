@@ -6,6 +6,14 @@
 \usage{
 \method{print}{matrix_int_names}(x, ...)
 }
+\arguments{
+\item{x}{A matrix_int_names object}
+
+\item{...}{Additional arguments passed to print}
+}
+\value{
+Invisibly returns the original object
+}
 \description{
 Print method for matrix_int_names
 }

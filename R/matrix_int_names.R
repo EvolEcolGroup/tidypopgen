@@ -64,10 +64,10 @@ col_names.matrix_int_names <- function(x) {
   }
 }
 
-#' @export
 #' @param value a vector of integer or character column names to set, replacing
 #'   the current one.
 #' @rdname col_names
+#' @export
 "col_names<-" <- function(x, value) {
   UseMethod("col_names<-", x)
 }
@@ -134,7 +134,7 @@ row_names.default <- function(x) {
 }
 
 
-#' 
+#'
 #' @export
 row_names.matrix_int_names <- function(x) {
   int_rnames <- attr(x, "int_rownames")
@@ -158,8 +158,8 @@ row_names.matrix_int_names <- function(x) {
 #' @rdname row_names
 "row_names<-" <- function(x, value) {
   UseMethod("row_names<-", x)
-} 
- 
+}
+
 #' default method
 #' @export
 `row_names<-.default` <- function(x, value) {
@@ -211,8 +211,25 @@ row_names.matrix_int_names <- function(x) {
 
 
 #' Subsetting method for matrix_int_names
+#' @param x A matrix_int_names object
+#' @param i Row indices (numeric), row names (character), or missing)
+#' @param j Column indices (numeric), column names (character), or missing)
+#' @param i_names Optional integer row names to subset by
+#' @param j_names Optional integer column names to subset by
+#' @param drop Logical indicating whether to drop dimensions
+#' @return A subsetted matrix_int_names object
 #' @export
-`[.matrix_int_names` <- function(x, i, j, drop = TRUE) {
+`[.matrix_int_names` <- function(x, i, j, i_names = NULL,
+                                 j_names = NULL, drop = TRUE) {
+  # check that we don't have i and i_names both provided
+  if (!missing(i) && !is.null(i_names)) {
+    stop("Provide either i or i_names, not both")
+  }
+  # same for j
+  if (!missing(j) && !is.null(j_names)) {
+    stop("Provide either j or j_names, not both")
+  }
+
   # Get the integer names and character dimnames
   rnames <- attr(x, "int_rownames")
   cnames <- attr(x, "int_colnames")
@@ -221,24 +238,45 @@ row_names.matrix_int_names <- function(x) {
   char_rnames <- dimnames(x)[[1]]
   char_cnames <- dimnames(x)[[2]]
 
-  # Handle missing indices
-  if (missing(i)) i <- seq_len(nrow(x))
-  if (missing(j)) j <- seq_len(ncol(x))
-
-  # Convert integer names to indices if needed
-  if (!missing(i) && is.integer(i) && !is.null(rnames)) {
-    # Check if these are position indices or name indices
-    if (all(i %in% rnames)) {
-      i <- match(i, rnames)
+  # if i is missing, set to all rows or use i_names
+  if (missing(i)) {
+    # if we have i_names, use them
+    if (!is.null(i_names)) {
+      # if i_names are characters, convert to indices
+      if (is.character(i_names)) {
+        i <- i_names # we will convert later
+      } else {
+        # Check if these are position indices or name indices
+        if (all(i_names %in% rnames)) {
+          i <- match(i_names, rnames)
+        } else {
+          stop("some i_names do not match any integer row names")
+        }
+      }
+    } else {
+      i <- seq_len(nrow(x))
     }
   }
 
-  if (!missing(j) && is.integer(j) && !is.null(cnames)) {
-    # Check if these are position indices or name indices
-    if (all(j %in% cnames)) {
-      j <- match(j, cnames)
+  # do the same for j
+  if (missing(j)) {
+    # if we have j_names, use them
+    if (!is.null(j_names)) {
+      if (is.character(j_names)) {
+        j <- j_names # we will convert later
+      } else {
+        # Check if these are position indices or name indices
+        if (all(j_names %in% cnames)) {
+          j <- match(j_names, cnames)
+        } else {
+          stop("some j_names do not match any integer column names")
+        }
+      }
+    } else {
+      j <- seq_len(ncol(x))
     }
   }
+
 
   # Convert character names to indices if needed
   if (!missing(i) && is.character(i) && !is.null(char_rnames)) {
@@ -249,8 +287,9 @@ row_names.matrix_int_names <- function(x) {
     j <- match(j, char_cnames)
   }
 
+  class(x) <- c("matrix", "array") # Temporarily remove class
   # Perform subsetting on the underlying matrix
-  result <- NextMethod("[")
+  result <- x[i, j, drop = drop]
 
   # Preserve matrix_int_names class and update attributes if not dropped to
   # vector
@@ -262,9 +301,6 @@ row_names.matrix_int_names <- function(x) {
     # Update character names if present
     new_char_rnames <- if (!is.null(char_rnames)) char_rnames[i] else NULL
     new_char_cnames <- if (!is.null(char_cnames)) char_cnames[j] else NULL
-
-    # Create new matrix_int_names
-    class(result) <- c("matrix", "array")  # Temporarily remove class
 
     # Set integer names
     if (!is.null(new_rnames)) {
@@ -288,7 +324,8 @@ row_names.matrix_int_names <- function(x) {
 
 #' Assignment method for matrix_int_names
 #' @export
-`[<-.matrix_int_names` <- function(x, i, j, value) {
+`[<-.matrix_int_names` <- function(x, i, j, i_names = NULL,
+                                   j_names = NULL, value) {
   # Get the integer names and character dimnames
   rnames <- attr(x, "int_rownames")
   cnames <- attr(x, "int_colnames")
@@ -297,20 +334,42 @@ row_names.matrix_int_names <- function(x) {
   char_rnames <- dimnames(x)[[1]]
   char_cnames <- dimnames(x)[[2]]
 
-  # Handle missing indices
-  if (missing(i)) i <- seq_len(nrow(x))
-  if (missing(j)) j <- seq_len(ncol(x))
-
-  # Convert integer names to indices if needed
-  if (!missing(i) && is.integer(i) && !is.null(rnames)) {
-    if (all(i %in% rnames)) {
-      i <- match(i, rnames)
+  # if i is missing, set to all rows or use i_names
+  if (missing(i)) {
+    # if we have i_names, use them
+    if (!is.null(i_names)) {
+      # if i_names are characters, convert to indices
+      if (is.character(i_names)) {
+        i <- i_names # we will convert later
+      } else {
+        # Check if these are position indices or name indices
+        if (all(i_names %in% rnames)) {
+          i <- match(i_names, rnames)
+        } else {
+          stop("some i_names do not match any integer row names")
+        }
+      }
+    } else {
+      i <- seq_len(nrow(x))
     }
   }
 
-  if (!missing(j) && is.integer(j) && !is.null(cnames)) {
-    if (all(j %in% cnames)) {
-      j <- match(j, cnames)
+  # do the same for j
+  if (missing(j)) {
+    # if we have j_names, use them
+    if (!is.null(j_names)) {
+      if (is.character(j_names)) {
+        j <- j_names # we will convert later
+      } else {
+        # Check if these are position indices or name indices
+        if (all(j_names %in% cnames)) {
+          j <- match(j_names, cnames)
+        } else {
+          stop("some j_names do not match any integer column names")
+        }
+      }
+    } else {
+      j <- seq_len(ncol(x))
     }
   }
 
@@ -324,11 +383,13 @@ row_names.matrix_int_names <- function(x) {
   }
 
   # Perform assignment
-  class(x) <- c("matrix", "array")  # Temporarily remove matrix_int_names class
+  class(x) <- c("matrix", "array") # Temporarily remove matrix_int_names class
   x[i, j] <- value
 
   # Restore class and attributes
   class(x) <- c("matrix_int_names", "matrix", "array")
+
+  # DEBUG this is probably not needed
   attr(x, "int_rownames") <- rnames
   attr(x, "int_colnames") <- cnames
   if (!is.null(char_rnames) || !is.null(char_cnames)) {
@@ -339,6 +400,10 @@ row_names.matrix_int_names <- function(x) {
 }
 
 #' Print method for matrix_int_names
+#'
+#' @param x A matrix_int_names object
+#' @param ... Additional arguments passed to print
+#' @return Invisibly returns the original object
 #' @export
 print.matrix_int_names <- function(x, ...) {
   cat("Matrix with integer/character names\n")

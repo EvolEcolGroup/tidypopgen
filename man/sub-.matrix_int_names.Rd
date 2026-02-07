@@ -4,7 +4,23 @@
 \alias{[.matrix_int_names}
 \title{Subsetting method for matrix_int_names}
 \usage{
-\method{[}{matrix_int_names}(x, i, j, drop = TRUE)
+\method{[}{matrix_int_names}(x, i, j, i_names = NULL, j_names = NULL, drop = TRUE)
+}
+\arguments{
+\item{x}{A matrix_int_names object}
+
+\item{i}{Row indices (numeric), row names (character), or missing)}
+
+\item{j}{Column indices (numeric), column names (character), or missing)}
+
+\item{i_names}{Optional integer row names to subset by}
+
+\item{j_names}{Optional integer column names to subset by}
+
+\item{drop}{Logical indicating whether to drop dimensions}
+}
+\value{
+A subsetted matrix_int_names object
 }
 \description{
 Subsetting method for matrix_int_names

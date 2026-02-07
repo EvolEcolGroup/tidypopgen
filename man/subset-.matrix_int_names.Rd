@@ -4,7 +4,7 @@
 \alias{[<-.matrix_int_names}
 \title{Assignment method for matrix_int_names}
 \usage{
-\method{[}{matrix_int_names}(x, i, j) <- value
+\method{[}{matrix_int_names}(x, i, j, i_names = NULL, j_names = NULL) <- value
 }
 \description{
 Assignment method for matrix_int_names

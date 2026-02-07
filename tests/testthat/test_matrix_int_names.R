@@ -1,7 +1,9 @@
 test_that("matrix_int_names creation works", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
 
   expect_s3_class(im, "matrix_int_names")
   expect_s3_class(im, "matrix")
@@ -49,8 +51,10 @@ test_that("matrix_int_names works without names", {
 
 test_that("subsetting by position works", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
 
   # Single element
   expect_equal(im[1, 1], 1)
@@ -73,11 +77,13 @@ test_that("subsetting by position works", {
 
 test_that("subsetting by integer names works", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
 
   # Subset by row names
-  result <- im[c(10L, 30L), ]
+  result <- im[, , i_names = c(10L, 30L)]
   expect_s3_class(result, "matrix_int_names")
   expect_equal(dim(result), c(2, 4))
   expect_equal(row_names(result), c(10L, 30L))
@@ -85,7 +91,7 @@ test_that("subsetting by integer names works", {
   expect_equal(as.vector(result[2, ]), c(3, 6, 9, 12))
 
   # Subset by column names
-  result <- im[, c(200L, 400L)]
+  result <- im[, , j_names = c(200L, 400L)]
   expect_s3_class(result, "matrix_int_names")
   expect_equal(dim(result), c(3, 2))
   expect_equal(col_names(result), c(200L, 400L))
@@ -93,7 +99,7 @@ test_that("subsetting by integer names works", {
   expect_equal(as.vector(result[, 2]), c(10, 11, 12))
 
   # Subset by both
-  result <- im[c(20L, 30L), c(100L, 300L)]
+  result <- im[, , i_names = c(20L, 30L), j_names = c(100L, 300L)]
   expect_s3_class(result, "matrix_int_names")
   expect_equal(dim(result), c(2, 2))
   expect_equal(row_names(result), c(20L, 30L))
@@ -102,8 +108,10 @@ test_that("subsetting by integer names works", {
 
 test_that("subsetting with drop works", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
 
   # Single row drops to vector by default
   result <- im[1, ]
@@ -123,8 +131,10 @@ test_that("subsetting with drop works", {
 
 test_that("assignment to matrix_int_names works", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
 
   # Assign single element
   im[1, 1] <- 99
@@ -135,7 +145,7 @@ test_that("assignment to matrix_int_names works", {
   expect_equal(as.vector(im[2, ]), c(88, 77, 66, 55))
 
   # Assign using integer names
-  im[30L, 100L] <- 100
+  im[, , i_names = 30L, j_names = 100L] <- 100
   expect_equal(im[3, 1], 100)
 
   # Check that attributes are preserved
@@ -242,14 +252,16 @@ test_that("can mix integer and character names", {
   expect_true(is.character(col_names(im)))
 
   # Can subset by both types
-  result <- im[10L, "X"]
+  result <- im[, , i_names = 10L, j_names = "X"]
   expect_equal(unname(result), 4)
 })
 
 test_that("row_names and col_names methods work with integer names", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
 
   # row_names() and col_names() should return integer names
   expect_equal(row_names(im), c(10L, 20L, 30L))
@@ -260,8 +272,10 @@ test_that("row_names and col_names methods work with integer names", {
 
 test_that("row_names and col_names methods work with character names", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c("A", "B", "C"),
-                         col_names = c("W", "X", "Y", "Z"))
+  im <- matrix_int_names(m,
+    row_names = c("A", "B", "C"),
+    col_names = c("W", "X", "Y", "Z")
+  )
 
   # row_names() and col_names() should return character names
   expect_equal(row_names(im), c("A", "B", "C"))
@@ -297,8 +311,10 @@ test_that("row_names<- and col_names<- setters work", {
 
 test_that("row_names and col_names setters clear names when set to NULL", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
 
   # Clear row names
   row_names(im) <- NULL
@@ -311,8 +327,10 @@ test_that("row_names and col_names setters clear names when set to NULL", {
 
 test_that("row_names and col_names work with mixed name types", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c("W", "X", "Y", "Z"))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c("W", "X", "Y", "Z")
+  )
 
   # Integer row names, character column names
   expect_equal(row_names(im), c(10L, 20L, 30L))
@@ -342,8 +360,10 @@ test_that("switching between integer and character names works", {
 
 test_that("logical subsetting works", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
 
   # Logical row subsetting
   result <- im[c(TRUE, FALSE, TRUE), ]
@@ -360,8 +380,10 @@ test_that("logical subsetting works", {
 
 test_that("negative indexing works", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
 
   # Exclude rows
   result <- im[-2, ]
@@ -380,16 +402,20 @@ test_that("print method works", {
   m <- matrix(1:12, nrow = 3, ncol = 4)
 
   # With integer names
-  im <- matrix_int_names(m, row_names = c(10L, 20L, 30L),
-                         col_names = c(100L, 200L, 300L, 400L))
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
   expect_output(print(im), "Matrix with integer")
   expect_output(print(im), "3 x 4")
   expect_output(print(im), "10, 20, 30")
   expect_output(print(im), "100, 200, 300, 400")
 
   # With character names
-  im2 <- matrix_int_names(m, row_names = c("A", "B", "C"),
-                          col_names = c("W", "X", "Y", "Z"))
+  im2 <- matrix_int_names(m,
+    row_names = c("A", "B", "C"),
+    col_names = c("W", "X", "Y", "Z")
+  )
   expect_output(print(im2), "Matrix with integer")
   expect_output(print(im2), "Character row names: A, B, C")
   expect_output(print(im2), "Character column names: W, X, Y, Z")
@@ -406,5 +432,5 @@ test_that("edge cases are handled", {
   m <- matrix(42, nrow = 1, ncol = 1)
   im <- matrix_int_names(m, row_names = 5L, col_names = 10L)
   expect_s3_class(im, "matrix_int_names")
-  expect_equal(im[5L, 10L], 42)
+  expect_equal(im[, , i_names = 5L, j_names = 10L], 42)
 })
