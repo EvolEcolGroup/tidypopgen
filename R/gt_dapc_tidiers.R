@@ -195,7 +195,7 @@ augment.gt_dapc <- function(x, data = NULL, k = NULL, ...) {
       dplyr::mutate(.rownames = data$id) %>%
       tibble::add_column(pred)
   } else {
-    tibble(.rownames = rownames(pred)) %>%
+    tibble(.rownames = row_names(pred)) %>%
       add_column(pred)
   }
   # prioritise "gen_tbl" class over "sf"

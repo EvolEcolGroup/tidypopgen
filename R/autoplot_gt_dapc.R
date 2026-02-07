@@ -146,7 +146,7 @@ autoplot.gt_dapc <- function(
       dplyr::rename_with(~ paste0("Q", .x)) %>%
       # add the pops data for plotting
       dplyr::mutate(
-        name = row.names(object$posterior),
+        name = row_names(object$posterior),
         group = group
       ) %>%
       tidyr::pivot_longer(
