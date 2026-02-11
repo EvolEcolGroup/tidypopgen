@@ -121,6 +121,9 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
         mutate(cumulative = cum_percentage)
     }
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
+    # TODO a solution for this is probably to use as.data.frame first and
+    # then convert to tibble, as the automatic conversion to tibble seems to fail
+    
     colnames(x$v) <- seq_len(ncol(x$v))
     ret <- x$v %>%
       tibble::as_tibble(rownames = "column") %>%
@@ -324,3 +327,4 @@ print.gt_pca <- function(x, ...) {
   )
   cat("\n")
 }
+
