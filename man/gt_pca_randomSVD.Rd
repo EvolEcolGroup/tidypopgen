@@ -79,6 +79,11 @@ memory-efficient. Thus, it can be used on very large big.matrices.
 This function is a wrapper
 for \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}}
 }
+\details{
+NOTE: monomorphic markers must be removed before PCA is computed. The error
+message 'Error: some variables have zero scaling; remove them before
+attempting to scale.' indicates that monomorphic markers are present.
+}
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
 \dontshow{

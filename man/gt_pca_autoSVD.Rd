@@ -100,6 +100,10 @@ avoid this error.
 
 Note: rather than accessing these elements directly, it is better to use
 \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
+
+NOTE: monomorphic markers must be removed before PCA is computed. The error
+message 'Error: some variables have zero scaling; remove them before
+attempting to scale.' indicates that monomorphic markers are present.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

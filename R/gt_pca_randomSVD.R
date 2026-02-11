@@ -8,6 +8,10 @@
 #' This function is a wrapper
 #' for [bigstatsr::big_randomSVD()]
 #'
+#' NOTE: monomorphic markers must be removed before PCA is computed. The error
+#' message 'Error: some variables have zero scaling; remove them before
+#' attempting to scale.' indicates that monomorphic markers are present.
+#'
 #' @param x a `gen_tibble` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
 #'   **This algorithm should be used to compute a few singular vectors/values.**
