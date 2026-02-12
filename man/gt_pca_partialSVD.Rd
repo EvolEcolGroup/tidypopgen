@@ -54,6 +54,11 @@ if the number of individuals is much smaller than the number of loci;
 otherwise, \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is a better option. This function is a
 wrapper for \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}}.
 }
+\details{
+NOTE: monomorphic markers must be removed before PCA is computed. The error
+message 'Error: some variables have zero scaling; remove them before
+attempting to scale.' indicates that monomorphic markers are present.
+}
 \examples{
 # Create a gen_tibble of lobster genotypes
 bed_file <-

@@ -6,6 +6,10 @@
 #' otherwise, [gt_pca_randomSVD()] is a better option. This function is a
 #' wrapper for [bigstatsr::big_SVD()].
 #'
+#' NOTE: monomorphic markers must be removed before PCA is computed. The error
+#' message 'Error: some variables have zero scaling; remove them before
+#' attempting to scale.' indicates that monomorphic markers are present.
+#'
 #' @param x a `gen_tbl` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
 #'   **This algorithm should be used to compute a few singular vectors/values.**
