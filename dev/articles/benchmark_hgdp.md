@@ -16,7 +16,7 @@ session. Specifically, we limit the number of cores used by the
 parallelised BLAS library with
 [`bigparallelr::set_blas_ncores()`](https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html),
 and by the package data.table with
-[`data.table::setDTthreads()`](https://rdatatable.gitlab.io/data.table/reference/openmp-utils.html).
+[`data.table::setDTthreads()`](https://rdrr.io/pkg/data.table/man/openmp-utils.html).
 
 ``` r
 n_cores <- 20

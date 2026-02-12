@@ -91,11 +91,11 @@ automatically use all available cores) we need to set up preferences at
 the beginning of the session. Specifically, we limit the number of cores
 used by the parallelised BLAS library with
 <code><a href="https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html" class="external-link">bigparallelr::set_blas_ncores()</a></code>, and by the package
-data.table with <code><a href="https://rdatatable.gitlab.io/data.table/reference/openmp-utils.html" class="external-link">data.table::setDTthreads()</a></code>.</p>
+data.table with <code><a href="https://rdrr.io/pkg/data.table/man/openmp-utils.html" class="external-link">data.table::setDTthreads()</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">n_cores</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
 <span></span>
-<span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdatatable.gitlab.io/data.table/reference/openmp-utils.html" class="external-link">setDTthreads</a></span><span class="op">(</span><span class="va">n_cores</span><span class="op">)</span></span>
+<span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/openmp-utils.html" class="external-link">setDTthreads</a></span><span class="op">(</span><span class="va">n_cores</span><span class="op">)</span></span>
 <span><span class="fu">bigparallelr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html" class="external-link">set_blas_ncores</a></span><span class="op">(</span><span class="va">n_cores</span><span class="op">)</span></span></code></pre></div>
 <p>We can now load the necessary libraries:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">

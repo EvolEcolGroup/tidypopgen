@@ -138,6 +138,11 @@ Note: rather than accessing these elements directly, it is better to use
 `tidy` and `augment`. See
 [`gt_pca_tidiers`](https://evolecolgroup.github.io/tidypopgen/dev/reference/tidy_gt_pca.md).
 
+NOTE: monomorphic markers must be removed before PCA is computed. The
+error message 'Error: some variables have zero scaling; remove them
+before attempting to scale.' indicates that monomorphic markers are
+present.
+
 ## See also
 
 [`bigsnpr::snp_autoSVD()`](https://privefl.github.io/bigsnpr/reference/snp_autoSVD.html)
