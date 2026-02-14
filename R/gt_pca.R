@@ -15,7 +15,7 @@
 #'   message 'Error: some variables have zero scaling; remove them before
 #'   attempting to scale.' indicates that monomorphic markers are present.
 #'
-#' @note using gt_pca_autoSVD with a small dataset will likely cause an error,
+#' @note Using gt_pca_autoSVD with a small dataset will likely cause an error,
 #'   see man page for details.
 #'
 #' @note Rather than accessing elements of a `gt_pca` object directly, it is
