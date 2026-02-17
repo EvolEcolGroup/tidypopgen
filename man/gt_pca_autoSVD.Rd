@@ -97,11 +97,12 @@ iteratively removes regions of long range LD. If you encounter: 'Error in
 rollmean(): Parameter 'size' is too large.', \code{roll_size} exceeds the number
 of variants on at least one of your chromosomes. Try reducing 'roll_size' to
 avoid this error.
-
-Note: rather than accessing these elements directly, it is better to use
+}
+\note{
+rather than accessing these elements directly, it is better to use
 \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 
-NOTE: monomorphic markers must be removed before PCA is computed. The error
+Monomorphic markers must be removed before PCA is computed. The error
 message 'Error: some variables have zero scaling; remove them before
 attempting to scale.' indicates that monomorphic markers are present.
 }
@@ -142,4 +143,10 @@ gt_pca_autoSVD(lobsters,
 }
 \seealso{
 \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}  which this function wraps.
+
+Other gt_pca_functions: 
+\code{\link{gt_pca}},
+\code{\link{gt_pca_partialSVD}()},
+\code{\link{gt_pca_randomSVD}()}
 }
+\concept{gt_pca_functions}
