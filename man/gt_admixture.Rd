@@ -11,7 +11,8 @@ gt_admixture(
   crossval = FALSE,
   n_cores = 1,
   seed = NULL,
-  conda_env = "auto"
+  conda_env = "auto",
+  outdir = NULL
 )
 }
 \arguments{
@@ -32,6 +33,10 @@ file}
 \item{conda_env}{the name of the conda environment to use. "none" forces the
 use of a local copy, whilst any other string will direct the function to
 use a custom conda environment.}
+
+\item{outdir}{optional path to write intermediate admixture output files.
+If not specified, defaults to a temporary file. Use this argument to store
+intermediate files.}
 }
 \value{
 an object of class \code{gt_admix} consisting of a list with the following
