@@ -563,10 +563,10 @@ test_that("set output dir for admixture Q files", {
     crossval = FALSE,
     n_cores = 1,
     seed = 123,
-    out = test_dir,
+    outdir = test_dir,
   )
 
-  # check we get 6 files, 3 * .Q and 3 * .P
+  # check we get 2 files, a .Q and a .P
   expect_equal(length(list.files(test_dir)), 2)
   expect_true(all(grepl("\\.Q$|\\.P$", list.files(test_dir))))
 
@@ -577,6 +577,6 @@ test_that("set output dir for admixture Q files", {
     crossval = FALSE,
     n_cores = 1,
     seed = 123,
-    out = "blah",
+    outdir = "blah",
   ), "does not exist")
 })
