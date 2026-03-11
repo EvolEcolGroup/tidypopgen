@@ -285,3 +285,36 @@ test_that("test loci_ with only one individual", {
   expect_equal(loci_alt_freq(one_indiv), c(0.5, 0.5, 0, 0.5, 0.5, 1))
   expect_equal(loci_maf(one_indiv), c(0.5, 0.5, 0, 0.5, 0.5, 0))
 })
+
+
+test_that("loci_alt_freq grouped with one allele", {
+  test_gt <- load_example_gt("grouped_gen_tbl")
+  test_gt <- test_gt %>% select_loci(1)
+  out_tbl <- loci_alt_freq(test_gt)
+  expect_true(all(out_tbl$group == unique(test_gt$population)))
+
+  out_list <- loci_alt_freq(test_gt, type = "list")
+  expect_equal(length(out_list), length(unique(test_gt$population)))
+
+  out_mat <- loci_alt_freq(test_gt, type = "matrix")
+  expect_true(all(colnames(out_mat) == unique(test_gt$population)))
+})
+
+test_that("loci_alt_freq grouped with one group", {
+  test_gt <- load_example_gt("grouped_gen_tbl") %>%
+    dplyr::filter(population == "pop1") %>%
+    dplyr::group_by(population)
+
+  out_mat <- loci_alt_freq(test_gt, type = "matrix")
+  expect_equal(colnames(out_mat), dplyr::group_keys(test_gt)$population)
+  expect_equal(rownames(out_mat), show_loci(test_gt)$name)
+
+  out_list <- loci_alt_freq(test_gt, type = "list")
+  expect_equal(length(out_list), length(unique(test_gt$population)))
+
+  out_tbl <- loci_alt_freq(test_gt, type = "tidy")
+  expect_equal(
+    out_tbl$group,
+    rep(unique(test_gt$population), count_loci(test_gt))
+  )
+})

@@ -24,6 +24,9 @@
 #' @param conda_env the name of the conda environment to use. "none" forces the
 #'   use of a local copy, whilst any other string will direct the function to
 #'   use a custom conda environment.
+#' @param outdir optional path to write intermediate admixture output files.
+#' If not specified, defaults to a temporary file. Use this argument to store
+#' intermediate files.
 #' @return an object of class `gt_admix` consisting of a list with the following
 #'   elements:
 #' - `k` the number of clusters
@@ -63,7 +66,8 @@ gt_admixture <- function(
     crossval = FALSE,
     n_cores = 1,
     seed = NULL,
-    conda_env = "auto") {
+    conda_env = "auto",
+    outdir = NULL) {
   # check that we have the right number of repeats
   if (length(seed) != n_runs) {
     stop("'seed' should be a vector of length 'n_runs'")
@@ -145,11 +149,18 @@ gt_admixture <- function(
   }
 
   # set the working path to the tempdir, where admixture will dump text files
-  out <- tempdir()
+  if (is.null(outdir)) {
+    outdir <- tempdir()
+  } else {
+    # check outdir is a valid path
+    if (!dir.exists(outdir)) {
+      stop("The directory ", outdir, " does not exist.")
+    }
+  }
   # store working directory
   wd <- getwd()
   # change to the directory of the input file
-  setwd(out)
+  setwd(outdir)
   on.exit(setwd(wd))
 
   # initialise list to store results
@@ -195,7 +206,7 @@ gt_admixture <- function(
       }
 
       # build expected .Q filename
-      q_file <- file.path(out, paste0(
+      q_file <- file.path(outdir, paste0(
         gsub(".bed$", "", basename(input_file)),
         ".", this_k, ".Q"
       ))
@@ -210,9 +221,12 @@ gt_admixture <- function(
       }
 
       # read the output
-      output_prefix <- file.path(out,
-                                 gsub(".bed", "", basename(input_file),
-                                      fixed = TRUE))
+      output_prefix <- file.path(
+        outdir,
+        gsub(".bed", "", basename(input_file),
+          fixed = TRUE
+        )
+      )
       adm_list$k[index] <- this_k
       adm_list$Q[[index]] <-
         q_matrix(utils::read.table(

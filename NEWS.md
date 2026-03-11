@@ -1,3 +1,7 @@
+# tidypopgen 0.4.4
+* fix `loci_` functions output when calculating across groups for a single loci
+* add outdir argument to `gt_admixture()`
+
 # tidypopgen 0.4.3
 * fix occasional test failure when temporary file names contained
   certain patterns
