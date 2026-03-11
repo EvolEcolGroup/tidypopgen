@@ -13,7 +13,7 @@ each k."><meta property="og:image" content="https://evolecolgroup.github.io/tidy
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.3.9000</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -65,7 +65,8 @@ each <code>k</code>.</p>
 <span>  crossval <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  conda_env <span class="op">=</span> <span class="st">"auto"</span></span>
+<span>  conda_env <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  outdir <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -103,6 +104,12 @@ file</p></dd>
 <dd><p>the name of the conda environment to use. "none" forces the
 use of a local copy, whilst any other string will direct the function to
 use a custom conda environment.</p></dd>
+
+
+<dt id="arg-outdir">outdir<a class="anchor" aria-label="anchor" href="#arg-outdir"></a></dt>
+<dd><p>optional path to write intermediate admixture output files.
+If not specified, defaults to a temporary file. Use this argument to store
+intermediate files.</p></dd>
 
 </dl></div>
     <div class="section level2">

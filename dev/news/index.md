@@ -1,5 +1,12 @@
 # Changelog
 
+## tidypopgen 0.4.4
+
+- fix `loci_` functions output when calculating across groups for a
+  single loci
+- add outdir argument to
+  [`gt_admixture()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_admixture.md)
+
 ## tidypopgen 0.4.3
 
 CRAN release: 2026-01-23

@@ -170,7 +170,7 @@ gt_dapc(cluster_pca, n_pca = 10, n_da = 2)
 #> Call ($call):gt_dapc(x = cluster_pca, n_pca = 10, n_da = 2)
 #> 
 #> Eigenvalues ($eig):
-#>  223.924 153.292 52.397 1.574 
+#>  193.764 77.308 49.957 43.352 
 #> 
 #> LD scores ($ind.coord):
 #>  matrix with 176 rows (individuals) and 2 columns (LD axes) 
