@@ -1,12 +1,13 @@
 gen_tibble_bed_rds <- function(
-    x,
-    ...,
-    ploidy = 2,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    backingfile = NULL,
-    quiet = FALSE) {
+  x,
+  ...,
+  ploidy = 2,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  backingfile = NULL,
+  quiet = FALSE
+) {
   # if file ends in bed
   if (grepl("\\.bed$", x)) {
     # check that the bim and fam files exist
@@ -122,12 +123,6 @@ fbm_read_bed <- function(bedfile,
   saveRDS(big_geno, rds)
   rds
 }
-
-
-
-
-
-
 
 
 #' Generate a tibble of loci from a PLINK .bim file
@@ -254,7 +249,14 @@ indiv_meta_from_fam <- function(fam) {
     }
   }
 
-  if (inherits(fam$affection, "numeric") || inherits(fam$sex, "integer")) {
+  if (inherits(
+    fam$affection,
+    "numeric"
+  ) ||
+    inherits(
+      fam$affection,
+      "integer"
+    )) {
     if (!all(fam$affection %in% c(0, -9))) {
       indiv_meta$phenotype <- dplyr::recode_values(
         fam$affection,
