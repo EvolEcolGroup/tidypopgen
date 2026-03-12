@@ -106,16 +106,9 @@ with elements: A named list (an S3 class "big_SVD") of
 
 - `call`, the call that generated the object.
 
-## Details
-
-NOTE: monomorphic markers must be removed before PCA is computed. The
-error message 'Error: some variables have zero scaling; remove them
-before attempting to scale.' indicates that monomorphic markers are
-present.
-
 ## Note
 
-rather than accessing these elements directly, it is better to use
+Rather than accessing these elements directly, it is better to use
 `tidy` and `augment`. See
 [`gt_pca_tidiers`](https://evolecolgroup.github.io/tidypopgen/dev/reference/tidy_gt_pca.md).
 
