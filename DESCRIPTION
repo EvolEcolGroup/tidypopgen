@@ -30,7 +30,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Depends:
     R (>= 3.5.0),
-    dplyr (>=1.2.0),
+    dplyr (>= 1.2.0),
     tibble
 Imports:
     bigparallelr,
