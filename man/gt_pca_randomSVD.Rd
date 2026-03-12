@@ -77,7 +77,7 @@ This function is a wrapper
 for \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}}
 }
 \note{
-rather than accessing these elements directly, it is better to use
+Rather than accessing these elements directly, it is better to use
 \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 
 Monomorphic markers must be removed before PCA is computed. The error
