@@ -2,7 +2,7 @@
 * fix reading of VCFs when genotype separator symbol is present in the
   sample information
 * fix `loci_` functions output when calculating across groups for a single loci
-* add outdir argument to `gt_admixture()`
+* add `outdir` argument to `gt_admixture()`
 
 # tidypopgen 0.4.3
 * fix occasional test failure when temporary file names contained
