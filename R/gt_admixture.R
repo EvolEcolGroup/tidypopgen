@@ -157,6 +157,7 @@ gt_admixture <- function(
       stop("The directory ", outdir, " does not exist.")
     }
   }
+  outdir <- normalizePath(outdir)
   # store working directory
   wd <- getwd()
   # change to the directory of the input file
@@ -227,6 +228,7 @@ gt_admixture <- function(
           fixed = TRUE
         )
       )
+
       adm_list$k[index] <- this_k
       adm_list$Q[[index]] <-
         q_matrix(utils::read.table(
