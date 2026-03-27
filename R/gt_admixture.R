@@ -222,25 +222,34 @@ gt_admixture <- function(
       }
 
       # rename the file to include the repeat number
-      file.rename(
-        q_file,
-        file.path(outdir, paste0(
-          gsub(".bed$", "", basename(input_file)),
-          ".", this_k, ".rep", this_rep, ".Q"
-        ))
-      )
+      q_file_renamed <- file.path(outdir, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".rep", this_rep, ".Q"
+      ))
+      if (!file.rename(q_file, q_file_renamed)) {
+        stop(
+          "Failed to rename ADMIXTURE Q file from '", q_file,
+          "' to '", q_file_renamed,
+          "'. Check that ADMIXTURE completed successfully and that you have ",
+          "write permissions for the output directory '", outdir, "'."
+        )
+      }
       p_file <- file.path(outdir, paste0(
         gsub(".bed$", "", basename(input_file)),
         ".", this_k, ".P"
       ))
-      file.rename(
-        p_file,
-        file.path(outdir, paste0(
-          gsub(".bed$", "", basename(input_file)),
-          ".", this_k, ".rep", this_rep, ".P"
-        ))
-      )
-
+      p_file_renamed <- file.path(outdir, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".rep", this_rep, ".P"
+      ))
+      if (!file.rename(p_file, p_file_renamed)) {
+        stop(
+          "Failed to rename ADMIXTURE P file from '", p_file,
+          "' to '", p_file_renamed,
+          "'. Check that ADMIXTURE completed successfully and that you have ",
+          "write permissions for the output directory '", outdir, "'."
+        )
+      }
 
       # read the output
       output_prefix <- file.path(

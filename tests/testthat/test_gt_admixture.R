@@ -557,7 +557,7 @@ test_that("set output dir for admixture Q files", {
   )
 
   # create a tempdir
-  test_dir <- paste0(tempdir(), "adm_qmat")
+  test_dir <- file.path(tempdir(), "adm_qmat")
   dir.create(test_dir)
 
   adm_res <- gt_admixture(
@@ -584,14 +584,16 @@ test_that("set output dir for admixture Q files", {
   ), "does not exist")
 
   # create a second temporary directory
-  test_dir2 <- paste0(tempdir(), "adm_qmat2")
+  test_dir2 <- file.path(tempdir(), "adm_qmat2")
   # create two folders inside this directory
   dir.create(test_dir2)
-  dir.create(paste0(test_dir2, "/folder1"))
-  dir.create(paste0(test_dir2, "/folder2"))
+  dir.create(file.path(test_dir2, "/folder1"))
+  dir.create(file.path(test_dir2, "/folder2"))
   # set wd to folder1
   old_wd <- getwd()
-  setwd(paste0(test_dir2, "/folder1"))
+  on.exit(setwd(old_wd), add = TRUE)
+  on.exit(unlink(test_dir2, recursive = TRUE), add = TRUE)
+  setwd(file.path(test_dir2, "/folder1"))
   # create a relative path string to folder2
   relative_path <- "../folder2"
 
@@ -606,7 +608,7 @@ test_that("set output dir for admixture Q files", {
     outdir = relative_path,
   )
 
-  # check we get 2 files, a .Q and a .P in the relative path
+  # check we get 8 files, a .Q and a .P in the relative path
   expect_equal(length(list.files(relative_path)), 8)
   expect_true(all(grepl("\\.Q$|\\.P$", list.files(relative_path))))
 })
