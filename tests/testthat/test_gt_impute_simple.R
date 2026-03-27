@@ -320,3 +320,21 @@ test_that("n_cores can be set", {
   )
   expect_true(getOption("bigstatsr.check.parallel.blas"))
 })
+
+test_that("imputed gt retains status after gt_update_backingfile", {
+  missing_gt_imputed <- gt_impute_simple(missing_gt, method = "mode")
+  # check imputed
+  gt_has_imputed(missing_gt_imputed)
+  # subset by loci
+  missing_gt_imputed <- missing_gt_imputed %>%
+    select_loci(c(1:100))
+  # update backingfile
+  missing_gt_imputed <- gt_update_backingfile(
+    missing_gt_imputed,
+    tempfile("missing_imputed_")
+  )
+  # check if still imputed
+  gt_has_imputed(missing_gt_imputed)
+  # test we can use a function that requires imputation
+  expect_true(inherits(missing_gt_imputed %>% gt_pca_partialSVD(), "gt_pca"))
+})
