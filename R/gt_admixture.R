@@ -221,6 +221,27 @@ gt_admixture <- function(
         stop(adm_out)
       }
 
+      # rename the file to include the repeat number
+      file.rename(
+        q_file,
+        file.path(outdir, paste0(
+          gsub(".bed$", "", basename(input_file)),
+          ".", this_k, ".rep", this_rep, ".Q"
+        ))
+      )
+      p_file <- file.path(outdir, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".P"
+      ))
+      file.rename(
+        p_file,
+        file.path(outdir, paste0(
+          gsub(".bed$", "", basename(input_file)),
+          ".", this_k, ".rep", this_rep, ".P"
+        ))
+      )
+
+
       # read the output
       output_prefix <- file.path(
         outdir,
@@ -232,11 +253,11 @@ gt_admixture <- function(
       adm_list$k[index] <- this_k
       adm_list$Q[[index]] <-
         q_matrix(utils::read.table(
-          paste(output_prefix, this_k, "Q", sep = "."),
+          paste(output_prefix, this_k, paste0("rep", this_rep), "Q", sep = "."),
           header = FALSE
         ))
       adm_list$P[[index]] <- utils::read.table(
-        paste(output_prefix, this_k, "P", sep = "."),
+        paste(output_prefix, this_k, paste0("rep", this_rep), "P", sep = "."),
         header = FALSE
       ) # nolint
       adm_list$loglik[index] <- as.numeric(strsplit(

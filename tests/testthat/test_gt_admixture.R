@@ -547,6 +547,9 @@ test_that("grouping before running gt_admxiture vs reordering after running gt_a
 })
 
 test_that("set output dir for admixture Q files", {
+  directory <- getwd()
+  on.exit(setwd(directory))
+
   anole_plink <- gt_as_plink(
     anole_gt,
     file = tempfile(),
@@ -579,4 +582,31 @@ test_that("set output dir for admixture Q files", {
     seed = 123,
     outdir = "blah",
   ), "does not exist")
+
+  # create a second temporary directory
+  test_dir2 <- paste0(tempdir(), "adm_qmat2")
+  # create two folders inside this directory
+  dir.create(test_dir2)
+  dir.create(paste0(test_dir2, "/folder1"))
+  dir.create(paste0(test_dir2, "/folder2"))
+  # set wd to folder1
+  old_wd <- getwd()
+  setwd(paste0(test_dir2, "/folder1"))
+  # create a relative path string to folder2
+  relative_path <- "../folder2"
+
+  # now check with a relative path and multiple runs
+  adm_res2 <- gt_admixture(
+    x = anole_plink,
+    n_runs = 2,
+    k = c(3:4),
+    crossval = FALSE,
+    n_cores = 1,
+    seed = c(123, 456),
+    outdir = relative_path,
+  )
+
+  # check we get 2 files, a .Q and a .P in the relative path
+  expect_equal(length(list.files(relative_path)), 8)
+  expect_true(all(grepl("\\.Q$|\\.P$", list.files(relative_path))))
 })
