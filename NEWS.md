@@ -3,6 +3,8 @@
   sample information
 * fix `loci_` functions output when calculating across groups for a single loci
 * add `outdir` argument to `gt_admixture()`
+* fix `outdir` argument in `gt_admixture()` to use relative paths
+* fix `gt_admixture()` output file names when n_runs > 1
 
 # tidypopgen 0.4.3
 * fix occasional test failure when temporary file names contained
