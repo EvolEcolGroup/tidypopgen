@@ -68,13 +68,13 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
 
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
-  
+
   # Run the analysis
   res <- bigsnpr::snp_pcadapt(
     G = .gt_get_fbm(x),
     U.row = pca$u[, 1:k, drop = FALSE],
-    ind.row = x_ind_row, #.gt_fbm_rows(x) 
-    ind.col = x_ind_col, #.gt_fbm_cols(x),
+    ind.row = x_ind_row,
+    ind.col = x_ind_col,
     ncores = n_cores
   )
 
