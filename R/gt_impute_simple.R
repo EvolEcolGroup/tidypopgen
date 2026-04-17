@@ -52,7 +52,7 @@ gt_impute_simple <- function(
   if (count_loci(x) != ncol(attr(x$genotypes, "fbm"))) {
     stop(
       "The number of SNPs in the gen_tibble does not match the",
-      " number of rows in the file backing matrix. Before imputing, use",
+      " number of columns in the file backing matrix. Before imputing, use",
       " gt_update_backingfile to update your file backing matrix."
     )
   }

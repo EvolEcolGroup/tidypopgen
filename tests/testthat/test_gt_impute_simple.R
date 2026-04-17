@@ -208,7 +208,7 @@ test_that("n_cores can be set", {
 test_that("imputed gt retains status after gt_update_backingfile", {
   missing_gt_imputed <- gt_impute_simple(missing_gt, method = "mode")
   # check imputed
-  gt_has_imputed(missing_gt_imputed)
+  expect_true(gt_has_imputed(missing_gt_imputed))
   # subset by loci
   missing_gt_imputed <- missing_gt_imputed %>%
     select_loci(c(1:100))
