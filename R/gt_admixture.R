@@ -157,6 +157,7 @@ gt_admixture <- function(
       stop("The directory ", outdir, " does not exist.")
     }
   }
+  outdir <- normalizePath(outdir)
   # store working directory
   wd <- getwd()
   # change to the directory of the input file
@@ -220,6 +221,36 @@ gt_admixture <- function(
         stop(adm_out)
       }
 
+      # rename the file to include the repeat number
+      q_file_renamed <- file.path(outdir, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".rep", this_rep, ".Q"
+      ))
+      if (!file.rename(q_file, q_file_renamed)) {
+        stop(
+          "Failed to rename ADMIXTURE Q file from '", q_file,
+          "' to '", q_file_renamed,
+          "'. Check that ADMIXTURE completed successfully and that you have ",
+          "write permissions for the output directory '", outdir, "'."
+        )
+      }
+      p_file <- file.path(outdir, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".P"
+      ))
+      p_file_renamed <- file.path(outdir, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".rep", this_rep, ".P"
+      ))
+      if (!file.rename(p_file, p_file_renamed)) {
+        stop(
+          "Failed to rename ADMIXTURE P file from '", p_file,
+          "' to '", p_file_renamed,
+          "'. Check that ADMIXTURE completed successfully and that you have ",
+          "write permissions for the output directory '", outdir, "'."
+        )
+      }
+
       # read the output
       output_prefix <- file.path(
         outdir,
@@ -227,14 +258,15 @@ gt_admixture <- function(
           fixed = TRUE
         )
       )
+
       adm_list$k[index] <- this_k
       adm_list$Q[[index]] <-
         q_matrix(utils::read.table(
-          paste(output_prefix, this_k, "Q", sep = "."),
+          paste(output_prefix, this_k, paste0("rep", this_rep), "Q", sep = "."),
           header = FALSE
         ))
       adm_list$P[[index]] <- utils::read.table(
-        paste(output_prefix, this_k, "P", sep = "."),
+        paste(output_prefix, this_k, paste0("rep", this_rep), "P", sep = "."),
         header = FALSE
       ) # nolint
       adm_list$loglik[index] <- as.numeric(strsplit(
