@@ -1,5 +1,8 @@
 skip_if_not_installed("admixtools")
 
+# hack to make read_table2 available in this test file
+read_table2 <- readr::read_table
+
 test_genotypes <- rbind(
   c(1, 1, 0, 1, 1, 0),
   c(2, 1, 0, NA, 0, 0),
