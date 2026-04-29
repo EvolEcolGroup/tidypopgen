@@ -171,6 +171,9 @@ gen_tibble.character <-
       stop("x should not be an empty string")
     }
 
+    # normalise path
+    x <- normalizePath(x, mustWork = FALSE)
+
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
       x_gt <- gen_tibble_bed_rds(
