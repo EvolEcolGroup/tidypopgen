@@ -117,12 +117,12 @@ individual_report <- qc_report_indiv(data, kings_threshold = 0.177)
 summary(individual_report)
 ```
 
-    ##     het_obs        missingness       to_keep             id           
-    ##  Min.   :0.3688   Min.   :0.03018   Mode :logical   Length:9          
-    ##  1st Qu.:0.3774   1st Qu.:0.03642   FALSE:1         Class :character  
-    ##  Median :0.3795   Median :0.03746   TRUE :8         Mode  :character  
-    ##  Mean   :0.3851   Mean   :0.03735                                     
-    ##  3rd Qu.:0.3985   3rd Qu.:0.04058                                     
+    ##     het_obs        missingness       to_keep                id   
+    ##  Min.   :0.3688   Min.   :0.03018   Mode :logical   Length   :9  
+    ##  1st Qu.:0.3774   1st Qu.:0.03642   FALSE:1         N.unique :9  
+    ##  Median :0.3795   Median :0.03746   TRUE :8         N.blank  :0  
+    ##  Mean   :0.3851   Mean   :0.03735                   Min.nchar:1  
+    ##  3rd Qu.:0.3985   3rd Qu.:0.04058                   Max.nchar:2  
     ##  Max.   :0.4015   Max.   :0.04266
 
 We can remove the recommended individuals by using:
@@ -139,10 +139,12 @@ our data has reduced from 12 to 8 individuals.
 summary(data)
 ```
 
-    ##       id             genotypes        
-    ##  Length:8           Length:8          
-    ##  Class :character   Class :character  
-    ##  Mode  :character   Mode  :character
+    ##          id        genotypes 
+    ##  Length   :8   Length   : 8  
+    ##  N.unique :8   N.unique : 1  
+    ##  N.blank  :0   N.blank  : 0  
+    ##  Min.nchar:1   Min.nchar:16  
+    ##  Max.nchar:2   Max.nchar:16
 
 ## Quality control for loci
 
@@ -156,13 +158,13 @@ loci_report <- qc_report_loci(data)
 summary(loci_report)
 ```
 
-    ##     snp_id               maf          missingness          hwe_p        
-    ##  Length:961         Min.   :0.0000   Min.   :0.00000   Min.   :0.00272  
-    ##  Class :character   1st Qu.:0.1667   1st Qu.:0.00000   1st Qu.:0.32867  
-    ##  Mode  :character   Median :0.2500   Median :0.00000   Median :0.53333  
-    ##                     Mean   :0.2661   Mean   :0.03733   Mean   :0.50321  
-    ##                     3rd Qu.:0.3750   3rd Qu.:0.12500   3rd Qu.:0.69231  
-    ##                     Max.   :0.5000   Max.   :0.37500   Max.   :0.76503
+    ##        snp_id         maf          missingness          hwe_p        
+    ##  Length   :961   Min.   :0.0000   Min.   :0.00000   Min.   :0.00272  
+    ##  N.unique :961   1st Qu.:0.1667   1st Qu.:0.00000   1st Qu.:0.32867  
+    ##  N.blank  :  0   Median :0.2500   Median :0.00000   Median :0.53333  
+    ##  Min.nchar:  1   Mean   :0.2661   Mean   :0.03733   Mean   :0.50321  
+    ##  Max.nchar:  3   3rd Qu.:0.3750   3rd Qu.:0.12500   3rd Qu.:0.69231  
+    ##                  Max.   :0.5000   Max.   :0.37500   Max.   :0.76503
 
 The output of `qc_report_loci` supplies minor allele frequency, rate of
 missingness, and a Hardy-Weinberg exact p-value for each SNP. These data
@@ -343,15 +345,15 @@ data <- gt_update_backingfile(data)
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/Rtmpdv0tBo/file2e4478283262_v2.rds
+    ## using FBM RDS: /tmp/RtmpUcQ6Be/file2e861746c5b8_v2.rds
 
-    ## with FBM backing file: /tmp/Rtmpdv0tBo/file2e4478283262_v2.bk
+    ## with FBM backing file: /tmp/RtmpUcQ6Be/file2e861746c5b8_v2.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/Rtmpdv0tBo/file2e4478283262_v2.gt')
+    ## gt_load('/tmp/RtmpUcQ6Be/file2e861746c5b8_v2.gt')
 
 And then we can impute using:
 
@@ -392,21 +394,21 @@ gt_save(ld_data, file_name = tempfile())
 ```
 
     ## 
-    ## gen_tibble saved to /tmp/Rtmpdv0tBo/file2e4463738890.gt
+    ## gen_tibble saved to /tmp/RtmpUcQ6Be/file2e8628cbd667.gt
 
-    ## using FBM RDS: /tmp/Rtmpdv0tBo/file2e4478283262_v2.rds
+    ## using FBM RDS: /tmp/RtmpUcQ6Be/file2e861746c5b8_v2.rds
 
-    ## with FBM backing file: /tmp/Rtmpdv0tBo/file2e4478283262_v2.bk
+    ## with FBM backing file: /tmp/RtmpUcQ6Be/file2e861746c5b8_v2.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/Rtmpdv0tBo/file2e4463738890.gt')
+    ## gt_load('/tmp/RtmpUcQ6Be/file2e8628cbd667.gt')
 
-    ## [1] "/tmp/Rtmpdv0tBo/file2e4463738890.gt"    
-    ## [2] "/tmp/Rtmpdv0tBo/file2e4478283262_v2.rds"
-    ## [3] "/tmp/Rtmpdv0tBo/file2e4478283262_v2.bk"
+    ## [1] "/tmp/RtmpUcQ6Be/file2e8628cbd667.gt"    
+    ## [2] "/tmp/RtmpUcQ6Be/file2e861746c5b8_v2.rds"
+    ## [3] "/tmp/RtmpUcQ6Be/file2e861746c5b8_v2.bk"
 
 ## Grouping data
 
