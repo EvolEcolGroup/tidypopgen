@@ -204,6 +204,7 @@ gen_tibble.character <-
         allow_duplicates = allow_duplicates,
         quiet = quiet
       )
+      gt_save(x_gt, quiet = quiet) # nolint
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,
