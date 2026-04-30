@@ -19,3 +19,21 @@ test_that("n_cores can be set", {
   two_core <- gt_pcadapt(missing_gt, missing_pca, k = 3, n_cores = 2)
   expect_true(getOption("bigstatsr.check.parallel.blas"))
 })
+
+test_that("gt_pcadapt on gen_tbl vcf",{
+  vcf_path <-
+    system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+                package = "tidypopgen"
+    )
+  anolis <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    backingfile = tempfile(),
+    parser = "vcfR"
+  )
+  anolis <- gt_impute_simple(anolis, method = "mode")
+  anolis <- anolis %>% select_loci_if(loci_maf(genotypes) > 0)
+  anolis <- gt_update_backingfile(anolis)
+  pop_b_vcf_pca <- gt_pca_randomSVD(anolis)
+  pop_b_vcf_pcadapt <- gt_pcadapt(anolis, pop_b_vcf_pca, k = 2)
+})
