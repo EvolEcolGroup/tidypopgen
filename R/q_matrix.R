@@ -503,8 +503,41 @@ autoplot.q_matrix <- function(
       dplyr::left_join(dominant_q, by = "id")
 
     q_tbl <- q_tbl %>%
+      dplyr::mutate(dominant_q_id = q[match(.data$dominant_q, .data$percentage)])
+
+    # check what is the dominant q for each group
+    check_q <- q_tbl %>%
       dplyr::group_by(.data$group) %>%
-      dplyr::arrange(desc(.data$dominant_q), .by_group = TRUE)
+      dplyr::select(.data$group, .data$dominant_q_id) %>%
+      unique()
+
+    if (nrow(check_q) != length(unique(q_tbl$group))) {
+      # choose the .Q that appears most frequently
+      q_counts <- as.data.frame(table(check_q$dominant_q_id))
+      q_choice <- q_counts[which.max(q_counts$Freq), ]$Var1
+
+      q_tbl <- q_tbl %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(q_choice_id = rep(q_choice, nrow(q_tbl)))
+
+      # for each individual, get the percentage value for q_choice
+      q_choice_percentage <- q_tbl %>%
+        dplyr::filter(.data$q == .data$q_choice_id) %>%
+        dplyr::mutate(q_choice_percentage = .data$percentage)
+
+      # add q_choice_percentage to q_tbl
+      q_tbl <- q_tbl %>%
+        dplyr::left_join(q_choice_percentage %>%
+          dplyr::select(.data$id, .data$q_choice_percentage), by = "id")
+
+      q_tbl <- q_tbl %>%
+        dplyr::group_by(.data$group) %>%
+        dplyr::arrange(desc(.data$q_choice_percentage), .by_group = TRUE)
+    } else {
+      q_tbl <- q_tbl %>%
+        dplyr::group_by(.data$group, .data$dominant_q_id) %>%
+        dplyr::arrange(desc(.data$dominant_q), .by_group = TRUE)
+    }
   }
 
   levels_q <- unique(q_tbl$id)
