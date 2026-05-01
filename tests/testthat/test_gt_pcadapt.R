@@ -20,6 +20,8 @@ test_that("n_cores can be set", {
   expect_true(getOption("bigstatsr.check.parallel.blas"))
 })
 
+skip_if_not_installed("pcadapt")
+
 test_that("gt_pcadapt 'U' error with heavily imputed SNPs", {
   vcf_path <-
     system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
