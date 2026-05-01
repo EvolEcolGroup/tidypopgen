@@ -33,8 +33,8 @@ install.packages('tidypopgen', repos = c('https://evolecolgroup.r-universe.dev',
 Alternatively, you can install `tidypopgen`using `devtools` (but you might need to set up your development environment, 
 which can be a bit more complex):
 ``` r
-install.packages("devtools")
-devtools::install_github("EvolEcolGroup/tidypopgen")
+install.packages("pak")
+pak::pak("EvolEcolGroup/tidypopgen@dev")
 ```
 
 ## Examples
