@@ -33,8 +33,8 @@ more complex):
 
 ``` r
 
-install.packages("devtools")
-devtools::install_github("EvolEcolGroup/tidypopgen")
+install.packages("pak")
+pak::pak("EvolEcolGroup/tidypopgen@dev")
 ```
 
 ## Examples
