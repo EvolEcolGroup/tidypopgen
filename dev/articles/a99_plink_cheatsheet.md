@@ -5,11 +5,11 @@ plink version 1.9.
 
 ## File management and reading data:
 
-| PLINK 1.9                   | `tidypopgen`                                                                                                           |
-|-----------------------------|------------------------------------------------------------------------------------------------------------------------|
-| –make-bed –out              | `gt_as_plink(data, file = my_file, type = "bed")`                                                                      |
-| –recode                     | `gt_as_plink(data, file = my_file, type = "ped")`                                                                      |
-| –recode vcf                 | `gt_as_vcf(data, file = my_file)`                                                                                      |
+| PLINK 1.9 | `tidypopgen` |
+|----|----|
+| –make-bed –out | `gt_as_plink(data, file = my_file, type = "bed")` |
+| –recode | `gt_as_plink(data, file = my_file, type = "ped")` |
+| –recode vcf | `gt_as_vcf(data, file = my_file)` |
 | –allele1234 and –alleleACGT | See [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md) parameter ‘valid_alleles’ |
 
 PLINK flags –update-alleles, –allele1234, and –alleleACGT, all alter the
@@ -34,6 +34,7 @@ with
 For example:
 
 ``` r
+
 data %>% select_loci_if(loci_chromosomes(genotypes) %in% c(1:22))
 #> # A gen_tibble: 15 loci
 #> # A tibble:     5 × 4
@@ -50,6 +51,7 @@ will select autosomal loci in the same way as –autosome. Or
 alternatively:
 
 ``` r
+
 my_snps <- c("rs4477212", "rs3094315", "rs3131972", "rs12124819", "rs11240777")
 
 data %>%
@@ -72,6 +74,7 @@ Similarly, to filter out individuals, as might be performed with –keep
 in PLINK, requires using filter:
 
 ``` r
+
 my_individuals <- c("GRC14300079", "GRC14300142", "GRC14300159")
 
 data %>% filter(id %in% my_individuals)
@@ -93,10 +96,10 @@ To explore why clumping is preferable to pruning, see
 
 ## Quality control for relatedness (KING)
 
-| KING       | `tidypopgen`                                                                                                       |
-|------------|--------------------------------------------------------------------------------------------------------------------|
-| –kinship   | [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md)                     |
-| –distance  | [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md)                       |
+| KING | `tidypopgen` |
+|----|----|
+| –kinship | [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md) |
+| –distance | [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md) |
 | –unrelated | [`filter_high_relatedness()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/filter_high_relatedness.md) |
 
 [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md)
@@ -127,11 +130,11 @@ relationships above the threshold.
 
 ## Merging datasets:
 
-| PLINK      | `tidypopgen`                                                                                   |
-|------------|------------------------------------------------------------------------------------------------|
-| –bmerge    | [`rbind()`](https://rdrr.io/r/base/cbind.html)                                                 |
+| PLINK | `tidypopgen` |
+|----|----|
+| –bmerge | [`rbind()`](https://rdrr.io/r/base/cbind.html) |
 | –flip-scan | [`rbind_dry_run()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind_dry_run.md) |
-| –flip      | use ‘flip_strand = TRUE’ in [`rbind()`](https://rdrr.io/r/base/cbind.html)                     |
+| –flip | use ‘flip_strand = TRUE’ in [`rbind()`](https://rdrr.io/r/base/cbind.html) |
 
 In PLINK, data merging can fail due to strand inconsistencies that are
 not addressed prior to merging. PLINK documentation suggests to users to
@@ -151,8 +154,8 @@ Data are only merged one set at a time, there is no equivalent to
 
 ## Analysis:
 
-| PLINK    | `tidypopgen`                                                                                                                                                                  |
-|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| –pca     | See [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md) for pca options                                                                          |
-| –fst     | [`pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_pop_fst.md) with [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) |
-| –homozyg | [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)                                                                        |
+| PLINK | `tidypopgen` |
+|----|----|
+| –pca | See [`gt_pca()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.md) for pca options |
+| –fst | [`pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_pop_fst.md) with [`group_by()`](https://dplyr.tidyverse.org/reference/group_by.html) |
+| –homozyg | [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md) |

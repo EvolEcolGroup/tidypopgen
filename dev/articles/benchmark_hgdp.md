@@ -19,6 +19,7 @@ and by the package data.table with
 [`data.table::setDTthreads()`](https://rdrr.io/pkg/data.table/man/openmp-utils.html).
 
 ``` r
+
 n_cores <- 20
 
 data.table::setDTthreads(n_cores)
@@ -28,6 +29,7 @@ bigparallelr::set_blas_ncores(n_cores)
 We can now load the necessary libraries:
 
 ``` r
+
 library(tidypopgen)
 library(ggplot2)
 ```
@@ -37,6 +39,7 @@ files. We can use the following to download the HGDP files into a
 temporary directory:
 
 ``` r
+
 temp_dir <- tempdir()
 download_url <- "https://zenodo.org/records/15582364/files/hgdp650_id_pop.txt"
 download_path <- file.path(temp_dir, "hgdp650_id_pop.txt")
@@ -58,6 +61,7 @@ In the following vignette, we place these files into the subdirectory
 in our data.
 
 ``` r
+
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
 #> Rows: 1064 Columns: 6
@@ -75,6 +79,7 @@ Our first step is to load the HGDP data into a `gen_tibble` object, and
 add its associated metadata.
 
 ``` r
+
 hgdp <- gen_tibble(bed_path,
   quiet = TRUE,
   backingfile = tempfile("test_"),
@@ -87,6 +92,7 @@ read_plink: 2.6s
 Add metadata
 
 ``` r
+
 hgdp <- hgdp %>% mutate(
   population = meta_info$population[match(hgdp$id, meta_info$Id)],
   region = meta_info$Region[match(hgdp$id, meta_info$Id)]
@@ -96,6 +102,7 @@ hgdp <- hgdp %>% mutate(
 Let’s confirm that we have read all the expected information:
 
 ``` r
+
 hgdp
 #> # A gen_tibble: 643733 loci
 #> # A tibble:     1,043 × 4
@@ -121,6 +128,7 @@ frequency, rate of missingness, and a Hardy-Weinberg exact p-value for
 each SNP.
 
 ``` r
+
 loci_report <- qc_report_loci(hgdp)
 #> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
 ```
@@ -128,6 +136,7 @@ loci_report <- qc_report_loci(hgdp)
 loci_report: 1.8s The resulting report can be observed using `autoplot`.
 
 ``` r
+
 autoplot(loci_report, type = "all")
 ```
 
@@ -142,6 +151,7 @@ Following this, we filter the loci to only including those with a minor
 allele frequency over 0.05, and a missingness rate below 0.05.
 
 ``` r
+
 to_keep_loci <-
   subset(loci_report, loci_report$maf > 0.05 & loci_report$missingness < 0.05)
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
@@ -155,12 +165,14 @@ We can then call `qc_report_indiv` to supply observed heterozygosity per
 individual, and rate of missingness per individual.
 
 ``` r
+
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
 indiv_report: 2.4s
 
 ``` r
+
 autoplot(indiv_report, type = "scatter")
 ```
 
@@ -175,6 +187,7 @@ And we can filter individuals down to only include those with less than
 1% of their genotypes missing.
 
 ``` r
+
 to_keep_indiv <- which(indiv_report$missingness < 0.01)
 hgdp <- hgdp[to_keep_indiv, ]
 ```
@@ -187,6 +200,7 @@ After removing individuals from the dataset, and before imputing, we
 need to update the file backing matrix with `gt_update_backingfile`.
 
 ``` r
+
 hgdp <- gt_update_backingfile(hgdp)
 #> Genetic distances are not sorted, setting them to zero
 #>
@@ -203,6 +217,7 @@ require that there is no missingness in the dataset, so we use
 `gt_impute_simple` to impute any remaining missing genotypes.
 
 ``` r
+
 hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
@@ -214,6 +229,7 @@ impute: 134ms
 LD clumping is then performed to control for linkage disequilibrium.
 
 ``` r
+
 hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
@@ -226,6 +242,7 @@ A principal components analysis can then be computed using the resulting
 cleaned and LD clumped dataset.
 
 ``` r
+
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
@@ -234,6 +251,7 @@ pca: 1.7s
 Plot PCA:
 
 ``` r
+
 autoplot(test_pca, type = "scores") +
   aes(color = hgdp$region, shape = hgdp$region)
 ```
@@ -249,6 +267,7 @@ using `gt_dapc`, setting 6 groups corresponding to the main geographic
 regions covered by the dataset.
 
 ``` r
+
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
@@ -257,6 +276,7 @@ dapc: 35ms
 Plot DAPC:
 
 ``` r
+
 autoplot(test_dapc, type = "scores")
 ```
 
@@ -271,6 +291,7 @@ To examine the differentiation between populations in the global HGDP
 set, we calculate pairwise Fst.
 
 ``` r
+
 grouped_hgdp <- hgdp %>% group_by(population)
 pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
@@ -283,6 +304,7 @@ pairwise_fst: 3.5s
 Plot pairwise Fst:
 
 ``` r
+
 # Order by continents
 grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
 regional_order <- unique(grouped_hgdp_order$population)
@@ -311,6 +333,7 @@ plot of chunk pairwise_fst_plot
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
 
 ``` r
+
 gt_as_plink(hgdp,
   file = tempfile(),
   type = "bed",

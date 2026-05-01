@@ -9,6 +9,7 @@ a .bed file, available in the `inst/extdata/lobster` directory of the
 package. To install `tidypopgen` from r-universe, use:
 
 ``` r
+
 install.packages("tidypopgen",
   repos = c(
     "https://evolecolgroup.r-universe.dev",
@@ -21,6 +22,7 @@ Next, load the `tidypopgen` package and the `ggplot2` package for
 plotting.
 
 ``` r
+
 library(tidypopgen)
 ```
 
@@ -40,6 +42,7 @@ library(tidypopgen)
     ## Loading required package: tibble
 
 ``` r
+
 library(ggplot2)
 ```
 
@@ -66,6 +69,7 @@ from the `gen_tibble` if needed. `tidypopgen` can also read data form
 Let’s start by creating a `gen_tibble` from the `lobster.bed` file.
 
 ``` r
+
 lobsters <- gen_tibble(
   x = system.file("extdata/lobster/lobster.bed", package = "tidypopgen"),
   quiet = TRUE, backingfile = tempfile()
@@ -94,6 +98,7 @@ rows are individuals and columns are loci. This is a big table, so we
 will just look at the first ten loci for the first 5 individuals:
 
 ``` r
+
 lobsters %>% show_genotypes(indiv_indices = 1:5, loci_indices = 1:10)
 ```
 
@@ -111,6 +116,7 @@ each locus. Again this is a big table, so we will use
 only look at the first few:
 
 ``` r
+
 head(lobsters %>% show_loci())
 ```
 
@@ -134,12 +140,14 @@ generate a report which contains information about missingness and
 heterozygosity for each individual.
 
 ``` r
+
 indiv_qc_lobsters <- lobsters %>% qc_report_indiv()
 ```
 
 We can take a look at this data using the `autoplot` function:
 
 ``` r
+
 autoplot(indiv_qc_lobsters, type = "scatter")
 ```
 
@@ -152,6 +160,7 @@ genotypes. We can remove these individuals using the `filter` function,
 specifying to keep only individuals with missingness under 20%.
 
 ``` r
+
 lobsters <- lobsters %>% filter(indiv_missingness(genotypes) < 0.2)
 ```
 
@@ -161,6 +170,7 @@ generate a report of the loci quality. This function will return another
 allele frequency, and Hardy-Weinberg Equilibrium for each locus.
 
 ``` r
+
 loci_qc_lobsters <- lobsters %>% qc_report_loci()
 ```
 
@@ -172,6 +182,7 @@ single population. As our dataset contains multiple lobster populations,
 we should group our data by population first:
 
 ``` r
+
 lobsters <- lobsters %>% group_by(population)
 loci_qc_lobsters <- lobsters %>% qc_report_loci()
 ```
@@ -180,6 +191,7 @@ That’s better. Now, lets take a look at minor allele frequency for all
 loci:
 
 ``` r
+
 autoplot(loci_qc_lobsters, type = "maf")
 ```
 
@@ -191,6 +203,7 @@ And we can see that we don’t have any monomorphic SNPs.
 Now let’s look at missingness.
 
 ``` r
+
 autoplot(loci_qc_lobsters, type = "missing")
 ```
 
@@ -209,6 +222,7 @@ use `select_loci_if` with the `loci_missingness` function, operating on
 the `genotypes` column of our `gen_tibble`.
 
 ``` r
+
 lobsters <- lobsters %>% select_loci_if(loci_missingness(genotypes) < 0.05)
 ```
 
@@ -217,21 +231,22 @@ should now update the file backing matrix to reflect these changes,
 using the function `gt_update_backingfile`:
 
 ``` r
+
 lobsters <- gt_update_backingfile(lobsters, backingfile = tempfile())
 ```
 
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/RtmpYA6BbN/file301257cdad9f.rds
+    ## using FBM RDS: /tmp/RtmppAPhka/file2fa76c7b9715.rds
 
-    ## with FBM backing file: /tmp/RtmpYA6BbN/file301257cdad9f.bk
+    ## with FBM backing file: /tmp/RtmppAPhka/file2fa76c7b9715.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpYA6BbN/file301257cdad9f.gt')
+    ## gt_load('/tmp/RtmppAPhka/file2fa76c7b9715.gt')
 
 Now our data are clean and the backingfile is updated, we are ready to
 create a PCA.
@@ -242,6 +257,7 @@ First, we need to impute any remaining missing data using the
 `gt_impute_simple` function.
 
 ``` r
+
 lobsters <- gt_impute_simple(lobsters, method = "random")
 ```
 
@@ -251,12 +267,14 @@ Then we can run a PCA. There are a number of PCA algorithms, here, we
 will use the `gt_pca_partialSVD` function:
 
 ``` r
+
 partial_pca <- gt_pca_partialSVD(lobsters)
 ```
 
 And we can create a simple plot using `autoplot`:
 
 ``` r
+
 autoplot(partial_pca, type = "scores")
 ```
 
@@ -270,6 +288,7 @@ different populations within our dataset.
 For a quick overview, we could add an aesthetic to our plot:
 
 ``` r
+
 autoplot(partial_pca, type = "scores") +
   aes(color = lobsters$population) +
   labs(color = "population")
@@ -288,6 +307,7 @@ For a customised plot, we can extract the information on the scores of
 each individual using the `augment` method for `gt_pca`.
 
 ``` r
+
 pcs <- augment(x = partial_pca, data = lobsters)
 ```
 
@@ -295,6 +315,7 @@ Then we can extract the eigenvalues for each principal component with
 the `tidy` function, using the “eigenvalues” argument:
 
 ``` r
+
 eigenvalues <- tidy(partial_pca, "eigenvalues")
 
 xlab <- paste("Axis 1 (", round(eigenvalues[1, 3], 1), " %)",
@@ -308,6 +329,7 @@ ylab <- paste("Axis 2 (", round(eigenvalues[2, 3], 1), " %)",
 And finally plot:
 
 ``` r
+
 ggplot(data = pcs, aes(x = .fittedPC1, y = .fittedPC2)) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0) +
@@ -327,6 +349,7 @@ Or we could create a labelled version of our PCA by determining the
 centre of each group to place the labels
 
 ``` r
+
 # Calculate centre for each population
 centroid <- aggregate(cbind(.fittedPC1, .fittedPC2, .fittedPC3) ~ population,
   data = pcs, FUN = mean
@@ -339,6 +362,7 @@ pcs <- left_join(pcs, centroid, by = "population", suffix = c("", ".cen"))
 And then add labels to the plot:
 
 ``` r
+
 ggplot(data = pcs, aes(x = .fittedPC1, y = .fittedPC2)) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0) +

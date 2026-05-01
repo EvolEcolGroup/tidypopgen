@@ -14,6 +14,7 @@ temporary directory, and unzip the file.
 ## Download the data
 
 ``` r
+
 temp_dir <- tempdir()
 download_url <- "https://reich.hms.harvard.edu/sites/reich.hms.harvard.edu/files/inline-files/NearEastPublic.tar.gz"
 download_path <- file.path(temp_dir, "NearEastPublic.tar.gz")
@@ -27,6 +28,7 @@ Now that our data are downloaded, we can use `tidypopgen` to read the
 data into `gen_tibble` objects, beginning with the modern data:
 
 ``` r
+
 ho_modern <- gen_tibble("./data/NearEastPublic/HumanOriginsPublic2068.geno",
   quiet = TRUE,
   backingfile = tempfile("test_")
@@ -36,6 +38,7 @@ ho_modern <- gen_tibble("./data/NearEastPublic/HumanOriginsPublic2068.geno",
 Followed by the ancient data:
 
 ``` r
+
 ancient <- gen_tibble("./data/NearEastPublic/AncientLazaridis2016.geno",
   quiet = TRUE,
   backingfile = tempfile("test_")
@@ -59,6 +62,7 @@ Before we proceed with any analysis, we can therefore use the function
 homozygote):
 
 ``` r
+
 ancient <- gt_pseudohaploid(ancient, test_n_loci = 100000)
 ```
 
@@ -71,6 +75,7 @@ For example, attempting to run `indiv_inbreeding` on pseudohaploid data
 will tell us that this function only works on diploid data:
 
 ``` r
+
 indiv_inbreeding(ancient)
 #> Error in stopifnot_diploid(.x): this function only works on diploid data
 ```
@@ -85,6 +90,7 @@ the `gen_tibble` object using the
 from the `dplyr` package:
 
 ``` r
+
 west_eurasian_pops <- c(
   "Abkhasian", "Adygei", "Albanian", "Armenian", "Assyrian", "Balkar", "Basque",
   "BedouinA", "BedouinB", "Belarusian", "Bulgarian", "Canary_Islander",
@@ -108,6 +114,7 @@ missing genotypes. But as we have subset our `gen_tibble` object, first
 we need to update our backingfile:
 
 ``` r
+
 ho_modern <- gt_update_backingfile(ho_modern,
   quiet = TRUE
 )
@@ -116,6 +123,7 @@ ho_modern <- gt_update_backingfile(ho_modern,
 And then we can impute, using:
 
 ``` r
+
 ho_modern <- gt_impute_simple(ho_modern, method = "mean")
 ```
 
@@ -127,12 +135,14 @@ To do this, we use the `select_loci_if` function together with
 `loci_maf` to select only genotypes where MAF is greater than 0:
 
 ``` r
+
 ho_modern <- ho_modern %>% select_loci_if(loci_maf(genotypes) > 0)
 ```
 
 Now we can create our PCA object from the modern data:
 
 ``` r
+
 modern_pca <- gt_pca_partialSVD(ho_modern, k = 2)
 ```
 
@@ -140,12 +150,14 @@ We can then use `augment` to add the PCA coordinates for each individual
 to our `gen_tibble` object:
 
 ``` r
+
 modern_pca_scores <- augment(x = modern_pca, data = ho_modern, k = 2)
 ```
 
 And `tidy` to extract the proportion of explained variance:
 
 ``` r
+
 pca_variance <- tidy(modern_pca)
 ```
 
@@ -155,6 +167,7 @@ Before projecting the ancient samples, we remove ancient individuals and
 outgroups that are not of interest:
 
 ``` r
+
 # Samples to remove:
 sample_remove <- c(
   "Mota", "Denisovan", "Chimp", "Mbuti.DG", "Altai",
@@ -168,6 +181,7 @@ ancient <- ancient %>% filter(!population %in% sample_remove)
 And now we can project our data using the `predict` function:
 
 ``` r
+
 predicted <- predict(
   object = modern_pca,
   new_data = ancient,
@@ -184,6 +198,7 @@ Finally, we can tidy up our data ready to plot by converting the
 `predicted` object to a data frame and adding the population names:
 
 ``` r
+
 predicted <- predicted %>% mutate(
   id = ancient$id,
   population = ancient$population
@@ -195,6 +210,7 @@ by layering a geom of ancient individuals over modern individuals, using
 the same syntax as `smartsnp`:
 
 ``` r
+
 ggplot() +
   geom_point(
     data = modern_pca_scores,
@@ -232,6 +248,7 @@ al. (2016).
 First we need to merge the ancient and modern data:
 
 ``` r
+
 ancient_modern <- rbind(ho_modern, ancient)
 #> harmonising loci between two datasets
 #> flip_strand =  FALSE  ; remove_ambiguous =  FALSE 
@@ -256,6 +273,7 @@ ancient_modern <- rbind(ho_modern, ancient)
 Then, we group the ancient and modern data by population:
 
 ``` r
+
 ancient_modern <- ancient_modern %>% group_by(population)
 ```
 
@@ -263,6 +281,7 @@ As we are calculating Fst between populations, we will remove any
 populations that contain only one individual.
 
 ``` r
+
 ancient_modern <- ancient_modern %>%
   filter(n() > 1)
 ```
@@ -270,6 +289,7 @@ ancient_modern <- ancient_modern %>%
 And then we can calculate Fst:
 
 ``` r
+
 pairwise_fst_tidy <- pairwise_pop_fst(ancient_modern,
   method = "Hudson",
   type = "tidy"
@@ -281,6 +301,7 @@ This will allow us to group populations by time period when creating our
 plot:
 
 ``` r
+
 pairwise_fst_tidy <- pairwise_fst_tidy %>%
   mutate(time_range_pop1 = case_when(
     str_detect(population_1, "BA") ~ "Bronze Age",
@@ -307,6 +328,7 @@ only include comparisons between populations from the same time range,
 and set these ranges as factor levels to order the plot:
 
 ``` r
+
 pairwise_fst_tidy <- pairwise_fst_tidy %>%
   filter(time_range_pop1 == time_range_pop2) %>%
   mutate(time_range_pop1 = factor(time_range_pop1, levels = c(
@@ -321,6 +343,7 @@ Finally, we will calculate the median, minimum, and maximum values for
 each time range, so that these can be added to the plot:
 
 ``` r
+
 medians <- pairwise_fst_tidy %>%
   group_by(time_range_pop1) %>%
   summarise(median_value = median(value, na.rm = TRUE)) %>%
@@ -341,6 +364,7 @@ We can create our plot using ggplot2, adding the median, minimum, and
 maximum values as lines and text labels:
 
 ``` r
+
 ggplot(pairwise_fst_tidy, aes(x = value, y = time_range_pop1)) +
   geom_point() +
   geom_line(
@@ -374,6 +398,7 @@ object, operating in the same way as the `extract_f2` function of
 `gt_extract_f2` can be used as follows:
 
 ``` r
+
 f2s <- gt_extract_f2(ancient_modern,
   outdir = "./data/NearEastPublic/f2"
 )

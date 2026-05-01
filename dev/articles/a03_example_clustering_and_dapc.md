@@ -11,6 +11,7 @@ and compressed it to a vcf.gz file.
 We read in the data from the compressed vcf with:
 
 ``` r
+
 library(tidypopgen)
 #> Loading required package: dplyr
 #> 
@@ -33,6 +34,7 @@ anole_gt <-
 Now let’s inspect our `gen_tibble`:
 
 ``` r
+
 anole_gt
 #> # A gen_tibble: 3249 loci
 #> # A tibble:     46 × 2
@@ -57,6 +59,7 @@ can be found from another csv file. We will have add the population
 information manually. Let’s start by reading the file:
 
 ``` r
+
 pops_path <- system.file("/extdata/anolis/punctatus_n46_meta.csv",
   package = "tidypopgen"
 )
@@ -117,12 +120,14 @@ assume that the two tables are in the same order. In this case, we do
 not want to bring over the wrong data due to mismatched ordering.
 
 ``` r
+
 anole_gt <- anole_gt %>% left_join(pops, by = "id")
 ```
 
 Let us check that we have been successful:
 
 ``` r
+
 anole_gt %>% glimpse()
 #> Rows: 46
 #> Columns: 6
@@ -145,6 +150,7 @@ Once we have done that, our `gen_tibble` will act as an `sf` object,
 which can be plotted with `ggplot2`.
 
 ``` r
+
 anole_gt <- gt_add_sf(anole_gt, c("longitude", "latitude"))
 anole_gt
 #> Simple feature collection with 46 features and 6 fields
@@ -178,6 +184,7 @@ map and add our samples using the
 function from `ggplot2`.
 
 ``` r
+
 library(rnaturalearth)
 library(ggplot2)
 
@@ -208,6 +215,7 @@ don’t need to do any QC. Let us jump straight into analysis and run a
 PCA:
 
 ``` r
+
 anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
 #> Error:
 #> ! You can't have missing values in 'X'.
@@ -217,18 +225,21 @@ OK, we jumped too quickly. There are missing data, and we need first to
 impute them:
 
 ``` r
+
 anole_gt <- gt_impute_simple(anole_gt, method = "mode")
 ```
 
 And now:
 
 ``` r
+
 anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
 ```
 
 Let us look at the object:
 
 ``` r
+
 anole_pca
 #>  === PCA of gen_tibble object ===
 #> Method: [1] "partialSVD"
@@ -253,6 +264,7 @@ We can extract those elements with the `tidy` function, which returns a
 tibble that can be easily used for further analysis, e.g.:
 
 ``` r
+
 tidy(anole_pca, matrix = "eigenvalues")
 #> # A tibble: 30 × 4
 #>       PC std.dev percent cumulative
@@ -276,6 +288,7 @@ those elements (type *screeplot* for *eigenvalues*, type *scores* for
 *scores*, and *loadings* for *loadings*:
 
 ``` r
+
 autoplot(anole_pca, type = "screeplot")
 ```
 
@@ -285,6 +298,7 @@ Component](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-14-1.
 To plot the sample in principal coordinates space, we can simply use:
 
 ``` r
+
 autoplot(anole_pca, type = "scores")
 ```
 
@@ -296,6 +310,7 @@ inspect the results. To explore additional dimensions, we can use the
 `k` argument:
 
 ``` r
+
 autoplot(anole_pca, type = "scores", k = c(1, 3))
 ```
 
@@ -306,6 +321,7 @@ The autoplots generate `ggplot2` objects, and so they can be further
 embellished with the usual `ggplot2` grammar:
 
 ``` r
+
 library(ggplot2)
 autoplot(anole_pca, type = "scores") +
   aes(color = anole_gt$population) +
@@ -321,12 +337,14 @@ scores to the tibble, so that we can create a custom plot with
 `ggplot2`. We can easily add the data with the `augment` method:
 
 ``` r
+
 anole_gt <- augment(anole_pca, data = anole_gt)
 ```
 
 And now we can use `ggplot2` directly to generate our plot:
 
 ``` r
+
 anole_gt %>% ggplot(aes(.fittedPC1, .fittedPC2, color = population)) +
   geom_point() +
   labs(x = "PC1", y = "PC2", color = "Population")
@@ -346,6 +364,7 @@ It is also possible to inspect which loci contribute the most to a given
 component:
 
 ``` r
+
 autoplot(anole_pca, type = "loadings")
 ```
 
@@ -360,6 +379,7 @@ using
 [`augment_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/augment_loci.md):
 
 ``` r
+
 anole_gt_load <- augment_loci(anole_pca, data = anole_gt)
 ```
 
@@ -382,6 +402,7 @@ variance of the components. Using `tidy` on the `gt_pca` object allows
 us easily obtain those quantities, and it is then trivial to plot them:
 
 ``` r
+
 library(ggplot2)
 tidy(anole_pca, matrix = "eigenvalues") %>%
   ggplot(mapping = aes(x = PC, y = cumulative)) +
@@ -400,6 +421,7 @@ flattening, but by PC 10 the increase in explained variance has markedly
 decelerated. We can now find clusters based on those 10 PCs:
 
 ``` r
+
 anole_clusters <- gt_cluster_pca(anole_pca, n_pca = 10)
 ```
 
@@ -410,6 +432,7 @@ against a measure of fit. BIC has been shown to be a very good metric
 under many scenarios:
 
 ``` r
+
 autoplot(anole_clusters)
 ```
 
@@ -431,6 +454,7 @@ We will use the defaults (BIC with “diffNgroup”, see the help page for
 for a description of the various options):
 
 ``` r
+
 anole_clusters <- gt_cluster_pca_best_k(anole_clusters)
 #> Using BIC with criterion diffNgroup: 3 clusters
 ```
@@ -439,6 +463,7 @@ The algorithm confirms our choice. Note that this function simply adds
 an element `$best_k` to the `gt_cluster_pca` object:
 
 ``` r
+
 anole_clusters$best_k
 #> [1] 3
 ```
@@ -450,6 +475,7 @@ In this case, we are happy with the option of 3 clusters, and we can run
 a DAPC:
 
 ``` r
+
 anole_dapc <- gt_dapc(anole_clusters)
 ```
 
@@ -464,6 +490,7 @@ important elements of the object and where to find them (as we saw for
 `gt_pca`):
 
 ``` r
+
 anole_dapc
 #>  === DAPC of gen_tibble object ===
 #> Call ($call):gt_dapc(x = anole_clusters)
@@ -485,6 +512,7 @@ Again, these elements can be obtained with tidiers (with `matrix` equal
 to `eigenvalues`, `scores`,`ld_loadings` and `loci_loadings`):
 
 ``` r
+
 tidy(anole_dapc, matrix = "eigenvalues")
 #> # A tibble: 2 × 3
 #>      LD eigenvalue cumulative
@@ -496,6 +524,7 @@ tidy(anole_dapc, matrix = "eigenvalues")
 And they can be visualised with `autoplot`:
 
 ``` r
+
 autoplot(anole_dapc, type = "screeplot")
 ```
 
@@ -508,6 +537,7 @@ bar plot of the eigenvalues (since we only have two), we could simply
 use:
 
 ``` r
+
 tidy(anole_dapc, matrix = "eigenvalues") %>%
   ggplot(aes(x = LD, y = eigenvalue)) +
   geom_col()
@@ -519,6 +549,7 @@ axes](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-31-1.png)
 We can plot the scores with:
 
 ``` r
+
 autoplot(anole_dapc, type = "scores")
 ```
 
@@ -532,6 +563,7 @@ We can inspect this assignment by DAPC with `autoplot` using the type
 `components`, ordering the samples by their original population labels:
 
 ``` r
+
 autoplot(anole_dapc, type = "components", group = anole_gt$population)
 #> Warning in ggplot2::geom_col(color = "gray", size = 0.1): Ignoring
 #> unknown parameters: `size`
@@ -549,6 +581,7 @@ Finally, we can explore which loci have the biggest impact on separating
 the clusters (either because of drift or selection):
 
 ``` r
+
 autoplot(anole_dapc, "loadings")
 ```
 
@@ -566,6 +599,7 @@ which does not work because the underlying pca object is different). For
 example, we can obtain the standard dapc plot with:
 
 ``` r
+
 library(adegenet)
 #> Loading required package: ade4
 #> 
@@ -585,6 +619,7 @@ plot.](a03_example_clustering_and_dapc_files/figure-html/unnamed-chunk-35-1.png)
 We can also plot these results onto the map we created earlier.
 
 ``` r
+
 anole_gt <- anole_gt %>% mutate(dapc = anole_dapc$grp)
 
 ggplot() +
@@ -618,6 +653,7 @@ k=6. We will use just one repeat, but ideally we should run multiple
 repetitions for each K:
 
 ``` r
+
 anole_gt <- anole_gt %>% group_by(population)
 
 anole_adm_original <- gt_admixture(
@@ -642,6 +678,7 @@ cross-entropy values for each K value, which is contained in the `cv`
 element of the `gt_admix` object:
 
 ``` r
+
 autoplot(anole_adm, type = "cv")
 ```
 
@@ -656,6 +693,7 @@ We can quickly plot this data with `autoplot` by using the type
 `barplot` and selecting our chosen value of `k`:
 
 ``` r
+
 autoplot(anole_adm,
   k = 3, run = 1, data = anole_gt, annotate_group = FALSE,
   type = "barplot"
@@ -673,6 +711,7 @@ To re-order this plot, grouping individuals by population, we can use
 the `annotate_group` and `arrange_by_group` arguments in autoplot:
 
 ``` r
+
 autoplot(anole_adm,
   type = "barplot", k = 3, run = 1, data = anole_gt,
   annotate_group = TRUE, arrange_by_group = TRUE
@@ -691,6 +730,7 @@ However, for a more visually appealing plot, we can re-order the
 individuals within each population as follows:
 
 ``` r
+
 autoplot(anole_adm,
   type = "barplot", k = 3, run = 1,
   data = anole_gt, annotate_group = TRUE, arrange_by_group = TRUE,
@@ -714,12 +754,14 @@ First we extract the q_matrix of interest using the `get_q_matrix`
 function:
 
 ``` r
+
 q_mat <- get_q_matrix(anole_adm, k = 3, run = 1)
 ```
 
 Then we can easily add the data with the `augment` method:
 
 ``` r
+
 anole_gt_adm <- augment(q_mat, data = anole_gt)
 head(anole_gt_adm)
 #> Simple feature collection with 6 features and 42 fields
@@ -750,6 +792,7 @@ Alternatively, we can convert our q matrix into `tidy` format, which is
 more suitable for plotting:
 
 ``` r
+
 tidy_q <- tidy(q_mat, anole_gt)
 head(tidy_q)
 #> # A tibble: 6 × 4
@@ -766,6 +809,7 @@ head(tidy_q)
 And now we can use `ggplot2` directly to generate our custom plot:
 
 ``` r
+
 tidy_q <- tidy_q %>%
   dplyr::group_by(id) %>%
   dplyr::mutate(dominant_q = max(percentage)) %>%
@@ -805,12 +849,14 @@ these regions. We can use the `gt_admix_reorder_q` function to reorder
 the Q matrix by a different grouping variable:
 
 ``` r
+
 anole_adm <- gt_admix_reorder_q(anole_adm, group = anole_gt$pop)
 ```
 
 And replot the data:
 
 ``` r
+
 autoplot(anole_adm,
   type = "barplot", k = 3, run = 1,
   annotate_group = TRUE, arrange_by_group = TRUE,
@@ -839,6 +885,7 @@ K values 2 to 6. Let us now collate the results from a standard run of
 ADMIXTURE for which we stored the files in a directory:
 
 ``` r
+
 adm_dir <- file.path(tempdir(), "anolis_adm")
 list.files(adm_dir)
 #> [1] "K2run1.Q" "K3run1.Q" "K4run1.Q" "K5run1.Q" "K6run1.Q"
@@ -847,6 +894,7 @@ list.files(adm_dir)
 And read them back into our R environment using `q_matrix_list`:
 
 ``` r
+
 q_list <- read_q_files(adm_dir)
 summary(q_list)
 #> Admixture results for multiple runs:           
@@ -863,6 +911,7 @@ number and K value of interest using `get_q_matrix` as before.
 For example, if we would like to view the second run of K = 3:
 
 ``` r
+
 head(get_q_matrix(q_list, k = 3, run = 1))
 #>           .Q1     .Q2      .Q3
 #> [1,] 0.000019 0.00001 0.999971
@@ -877,6 +926,7 @@ And, again, we can then autoplot any matrix by selecting from the
 `q_matrix_list` object:
 
 ``` r
+
 autoplot(get_q_matrix(q_list, k = 3, run = 1),
   data = anole_gt,
   annotate_group = TRUE, arrange_by_group = TRUE,

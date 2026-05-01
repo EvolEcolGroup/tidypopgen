@@ -13,6 +13,7 @@ vignette.
 Let’s begin by reading in the data and attaching the metadata:
 
 ``` r
+
 library(tidypopgen)
 vcf_path <-
   system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
@@ -31,6 +32,7 @@ anole_gt <- anole_gt %>% left_join(pops, by = "id")
 And we can check our data using:
 
 ``` r
+
 anole_gt %>% glimpse()
 #> Rows: 46
 #> Columns: 6
@@ -53,6 +55,7 @@ We need to specify the names of the columns containing the longitude and
 latitude coordinates.
 
 ``` r
+
 anole_gt <- gt_add_sf(anole_gt, c("longitude", "latitude"))
 anole_gt
 #> Simple feature collection with 46 features and 6 fields
@@ -82,6 +85,7 @@ package. This will be the base map onto which we will plot our samples
 and interpolate our PC scores.
 
 ``` r
+
 library(rnaturalearth)
 library(ggplot2)
 
@@ -117,6 +121,7 @@ Let’s run a PCA and augment the gen_tibble with the principal component
 scores.
 
 ``` r
+
 anole_gt <- gt_impute_simple(anole_gt, method = "mode")
 anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
 anole_gt <- augment(anole_pca, data = anole_gt)
@@ -132,6 +137,7 @@ To begin with, we will need to load the `sf`, `terra`, and `tidyterra`
 packages.
 
 ``` r
+
 library(sf)
 library(terra)
 library(tidyterra)
@@ -141,6 +147,7 @@ We will first prepare the map by unifying all geometries into a single
 polygon and casting it to “POLYGON” type.
 
 ``` r
+
 map <- st_union(map) %>% st_sf()
 map <- st_cast(map, "POLYGON")
 ```
@@ -148,6 +155,7 @@ map <- st_cast(map, "POLYGON")
 The, we need to create a grid of points covering the area of the map.
 
 ``` r
+
 grid <- rast(map, nrows = 100, ncols = 100)
 xy <- xyFromCell(grid, 1:ncell(grid))
 ```
@@ -157,6 +165,7 @@ By converting this grid to an `sf` object, we can then use
 to keep only the points that fall within the landmass.
 
 ``` r
+
 coop <- st_as_sf(as.data.frame(xy), coords = c("x", "y"),
                  crs = st_crs(map))
 coop <- st_filter(coop, map)
@@ -173,6 +182,7 @@ We remove the genotypes from our `gen_tibble`, as `gstat` does not
 accept a `gen_tibble` object, and then run the interpolation:
 
 ``` r
+
 anole_sf_obj <- anole_gt %>% select(-"genotypes")
 
 library(gstat)
@@ -189,6 +199,7 @@ resp$y <- st_coordinates(resp)[,2]
 We can rasterize the interpolated values:
 
 ``` r
+
 pred <- rasterize(resp, grid, field = "var1.pred", fun = "mean")
 ```
 
@@ -196,6 +207,7 @@ And for a publication-ready figure, we can use `ggplot2` and the
 `tidyterra` package to plot:
 
 ``` r
+
 ggplot()  +
   geom_sf(data = map, fill = "grey95")  +
   geom_spatraster(data = pred, aes(fill = mean))+
