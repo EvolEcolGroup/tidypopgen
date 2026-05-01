@@ -61,6 +61,7 @@ Suggests:
     knitr,
     detectRUNS,
     LEA,
+    pcadapt,
     RhpcBLASctl,
     rmarkdown,
     rnaturalearth,
