@@ -227,7 +227,7 @@ row_names.matrix_int_names <- function(x) {
         stop("row_names must be integer or character vector")
       }
     }
-    
+
     # Set as integer names
     if (length(value) != nrow(x)) {
       stop("Length of row_names must match number of rows")
@@ -259,8 +259,8 @@ row_names.matrix_int_names <- function(x) {
   x
 }
 
-# a small internal function to check if a vector is integer-valued (i.e. all values are close
-# to integers within a tolerance)
+# a small internal function to check if a vector is integer-valued (i.e. all
+# values are close to integers within a tolerance)
 is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
   is.numeric(x) && all(abs(x - round(x)) < tol, na.rm = TRUE)
 }

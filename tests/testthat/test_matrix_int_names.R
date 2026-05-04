@@ -23,7 +23,7 @@ test_that("matrix_int_names requires integer or character names", {
   # but numbers that are integers (even if declared as numeric) should work)
   im <- matrix_int_names(m, row_names = c(1, 2, 3))
   expect_equal(row_names(im), c(1L, 2L, 3L))
-  
+
   expect_error(
     matrix_int_names(m, col_names = list(1, 2, 3, 4)),
     "col_names must be integer or character vector"
@@ -174,12 +174,12 @@ test_that("getter and setter functions work", {
     row_names(im) <- c(1.2, 2, 3),
     "row_names must be integer or character vector"
   )
-  
+
   # but it works if we have numbers that are integers (even if declared as
   # numeric)
   row_names(im) <- c(1, 2, 3)
   expect_equal(row_names(im), c(1L, 2L, 3L))
-  
+
   expect_error(
     row_names(im) <- c(1L, 2L),
     "Length of row_names must match number of rows"
