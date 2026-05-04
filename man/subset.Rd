@@ -2,9 +2,12 @@
 % Please edit documentation in R/matrix_int_names.R
 \name{[.matrix_int_names}
 \alias{[.matrix_int_names}
+\alias{[<-.matrix_int_names}
 \title{Subsetting method for matrix_int_names}
 \usage{
 \method{[}{matrix_int_names}(x, i, j, i_names = NULL, j_names = NULL, drop = TRUE)
+
+\method{[}{matrix_int_names}(x, i, j, i_names = NULL, j_names = NULL) <- value
 }
 \arguments{
 \item{x}{A matrix_int_names object}
@@ -18,10 +21,14 @@
 \item{j_names}{Optional integer column names to subset by}
 
 \item{drop}{Logical indicating whether to drop dimensions}
+
+\item{value}{A value to assign to the subsetted matrix}
 }
 \value{
 A subsetted matrix_int_names object
 }
 \description{
 Subsetting method for matrix_int_names
+
+Assignment method for matrix_int_names
 }

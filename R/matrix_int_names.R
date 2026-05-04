@@ -46,34 +46,35 @@ col_names <- function(x) {
 }
 
 #' @export
+#' @rdname col_names
 col_names.default <- function(x) {
   base::colnames(x)
 }
 
 #' Get column names (both integer and character)
 #' @export
+#' @rdname col_names
 col_names.matrix_int_names <- function(x) {
-  int_cnames <- attr(x, "int_colnames")
-  char_cnames <- colnames(x)
-
-  # Return integer names if present, otherwise character names
-  if (!is.null(int_cnames)) {
-    return(int_cnames)
+  # if we have the attribute for integer column names, return that, otherwise
+  # return character column names
+  if (!is.null(attr(x, "int_colnames"))) {
+    return(attr(x, "int_colnames"))
   } else {
-    return(char_cnames)
+    return(colnames(x))
   }
 }
 
 #' @param value a vector of integer or character column names to set, replacing
 #'   the current one.
-#' @rdname col_names
 #' @export
+#' @rdname col_names
 "col_names<-" <- function(x, value) {
   UseMethod("col_names<-", x)
 }
 
 #' default method
 #' @export
+#' @rdname col_names
 `col_names<-.default` <- function(x, value) {
   base::colnames(x) <- value
   x
@@ -81,6 +82,7 @@ col_names.matrix_int_names <- function(x) {
 
 #' Set column names (integer or character)
 #' @export
+#' @rdname col_names
 `col_names<-.matrix_int_names` <- function(x, value) {
   if (is.null(value)) {
     # Clear both types of names
@@ -153,20 +155,21 @@ row_names.matrix_int_names <- function(x) {
 #' @param x A matrix_int_names object
 #' @param value Integer or character vector of row names, or NULL
 #' @return The modified matrix_int_names object
-
 #' @export
 #' @rdname row_names
 "row_names<-" <- function(x, value) {
   UseMethod("row_names<-", x)
 }
 
-#' default method
+# default method
+#' @rdname row_names
 #' @export
 `row_names<-.default` <- function(x, value) {
   base::rownames(x) <- value
   x
 }
 
+#' @rdname row_names
 #' @export
 `row_names<-.matrix_int_names` <- function(x, value) {
   if (is.null(value)) {
@@ -219,6 +222,7 @@ row_names.matrix_int_names <- function(x) {
 #' @param drop Logical indicating whether to drop dimensions
 #' @return A subsetted matrix_int_names object
 #' @export
+#' @rdname subset
 `[.matrix_int_names` <- function(x, i, j, i_names = NULL,
                                  j_names = NULL, drop = TRUE) {
   # check that we don't have i and i_names both provided
@@ -323,6 +327,8 @@ row_names.matrix_int_names <- function(x) {
 }
 
 #' Assignment method for matrix_int_names
+#' @param value A value to assign to the subsetted matrix
+#' @rdname subset
 #' @export
 `[<-.matrix_int_names` <- function(x, i, j, i_names = NULL,
                                    j_names = NULL, value) {

@@ -2,12 +2,24 @@
 % Please edit documentation in R/matrix_int_names.R
 \name{col_names}
 \alias{col_names}
+\alias{col_names.default}
+\alias{col_names.matrix_int_names}
 \alias{col_names<-}
+\alias{col_names<-.default}
+\alias{col_names<-.matrix_int_names}
 \title{Get or set column names for matrix_int_names}
 \usage{
 col_names(x)
 
+\method{col_names}{default}(x)
+
+\method{col_names}{matrix_int_names}(x)
+
 col_names(x) <- value
+
+\method{col_names}{default}(x) <- value
+
+\method{col_names}{matrix_int_names}(x) <- value
 }
 \arguments{
 \item{x}{A matrix_int_names object}

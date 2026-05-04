@@ -27,7 +27,7 @@ test_that("using integers as names works", {
   loadings_pca <- tidy(anole_pca, matrix = "loadings")
   # check that we have a an integer column for "column"
   expect_true(is.integer(loadings_pca$column))
-  # TODO check what happens if we have snps not in perfect order 1 to X (i.e. some missing numbers)
-  # we might need to implement a method for as.data.frame that transfers row_names
-  # and the same for as_tibble()
+  # TODO check what happens if we have snps not in perfect order 1 to X (i.e.
+  # some missing numbers) we might need to implement a method for as.data.frame
+  # that transfers row_names and the same for as_tibble()
 })

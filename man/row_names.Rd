@@ -3,11 +3,17 @@
 \name{row_names}
 \alias{row_names}
 \alias{row_names<-}
+\alias{row_names<-.default}
+\alias{row_names<-.matrix_int_names}
 \title{Get or set row names for matrix_int_names}
 \usage{
 row_names(x)
 
 row_names(x) <- value
+
+\method{row_names}{default}(x) <- value
+
+\method{row_names}{matrix_int_names}(x) <- value
 }
 \arguments{
 \item{x}{A matrix_int_names object}

@@ -124,7 +124,8 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
     colnames(x$v) <- seq_len(ncol(x$v))
     # as_tibble.matrix uses matrixToDataFrame, which fails on our custom matrix
     # so, we first cast the matrix to a data.frame and then pass it to as_tibble
-    ret <- x$v %>% as.data.frame() %>%
+    ret <- x$v %>%
+      as.data.frame() %>%
       tibble::as_tibble(rownames = "column") %>%
       tidyr::pivot_longer(
         cols = -"column",
@@ -326,4 +327,3 @@ print.gt_pca <- function(x, ...) {
   )
   cat("\n")
 }
-
