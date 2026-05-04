@@ -34,6 +34,7 @@ Assignment method for matrix_int_names
 }
 \seealso{
 Other matrix_int_names_functions: 
+\code{\link{as.data.frame.matrix_int_names}()},
 \code{\link{col_names}()},
 \code{\link{matrix_int_names}()},
 \code{\link{print.matrix_int_names}()},

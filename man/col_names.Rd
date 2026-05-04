@@ -37,6 +37,7 @@ dimnames. Use this instead of colnames() if you need guaranteed dispatch.
 \seealso{
 Other matrix_int_names_functions: 
 \code{\link{[.matrix_int_names}()},
+\code{\link{as.data.frame.matrix_int_names}()},
 \code{\link{matrix_int_names}()},
 \code{\link{print.matrix_int_names}()},
 \code{\link{row_names}()}

@@ -443,3 +443,17 @@ test_that("edge cases are handled", {
   expect_s3_class(im, "matrix_int_names")
   expect_equal(im[, , i_names = 5L, j_names = 10L], 42)
 })
+
+
+test_that("as.data.frame preserves numeric row names", {
+  m <- matrix(1:12, nrow = 3, ncol = 4)
+  im <- matrix_int_names(m,
+    row_names = c(10L, 20L, 30L),
+    col_names = c(100L, 200L, 300L, 400L)
+  )
+
+  df <- as.data.frame(im)
+  expect_equal(attr(df, "row.names"), c(10L, 20L, 30L))
+  # but the column names have been turned into character
+  expect_equal(colnames(df), c("100", "200", "300", "400"))
+})

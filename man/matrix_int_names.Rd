@@ -54,6 +54,7 @@ col_names(my_mat) # returns integer column names
 \seealso{
 Other matrix_int_names_functions: 
 \code{\link{[.matrix_int_names}()},
+\code{\link{as.data.frame.matrix_int_names}()},
 \code{\link{col_names}()},
 \code{\link{print.matrix_int_names}()},
 \code{\link{row_names}()}
