@@ -34,3 +34,11 @@ Integer or character vector of column names, or NULL
 This function reliably returns integer names if present, otherwise character
 dimnames. Use this instead of colnames() if you need guaranteed dispatch.
 }
+\seealso{
+Other matrix_int_names_functions: 
+\code{\link{[.matrix_int_names}()},
+\code{\link{matrix_int_names}()},
+\code{\link{print.matrix_int_names}()},
+\code{\link{row_names}()}
+}
+\concept{matrix_int_names_functions}

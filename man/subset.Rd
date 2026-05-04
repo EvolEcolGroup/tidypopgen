@@ -32,3 +32,11 @@ Subsetting method for matrix_int_names
 
 Assignment method for matrix_int_names
 }
+\seealso{
+Other matrix_int_names_functions: 
+\code{\link{col_names}()},
+\code{\link{matrix_int_names}()},
+\code{\link{print.matrix_int_names}()},
+\code{\link{row_names}()}
+}
+\concept{matrix_int_names_functions}

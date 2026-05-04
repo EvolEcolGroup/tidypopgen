@@ -17,3 +17,11 @@ Invisibly returns the original object
 \description{
 Print method for matrix_int_names
 }
+\seealso{
+Other matrix_int_names_functions: 
+\code{\link{[.matrix_int_names}()},
+\code{\link{col_names}()},
+\code{\link{matrix_int_names}()},
+\code{\link{row_names}()}
+}
+\concept{matrix_int_names_functions}

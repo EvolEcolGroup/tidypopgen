@@ -29,3 +29,17 @@ The modified matrix_int_names object
 Returns integer names if present, otherwise character dimnames. Use instead
 of \code{rownames()} for guaranteed dispatch.
 }
+\seealso{
+Other matrix_int_names_functions: 
+\code{\link{[.matrix_int_names}()},
+\code{\link{col_names}()},
+\code{\link{matrix_int_names}()},
+\code{\link{print.matrix_int_names}()}
+
+Other matrix_int_names_functions: 
+\code{\link{[.matrix_int_names}()},
+\code{\link{col_names}()},
+\code{\link{matrix_int_names}()},
+\code{\link{print.matrix_int_names}()}
+}
+\concept{matrix_int_names_functions}

@@ -1,15 +1,43 @@
-# Matrix with Integer Names Class A matrix subclass that stores row/column names
-# as integers instead of characters
-
-#' Create a matrix with integer or character names
+#' Matrix with integer row/column names class
+#'
+#' Create a matrix with integer or character names for rows and columns. Integer
+#' names are useful when dealing with very large numbers of rows or columns, as
+#' the integer names can be stored more efficiently than character names. Whilst
+#' this is possible for `data.frames`, the native `matrix` class only allows for
+#' character row and column names via the `dimnames` attribute. Use
+#' [row_names()] and [col_names()] to get or set the integer names, which are
+#' stored in special attributes (`int_rownames` and `int_colnames`) on the
+#' matrix.
+#'
+#' This class allows you to have integer names as attributes while still being a
+#' matrix, and provides methods for getting and setting these names. When you
+#' create a `matrix_int_names` object, you can provide integer or character
+#' vectors for row and column names. If you provide integer vectors, they will
+#' be stored in special attributes (`int_rownames` and `int_colnames`) instead
+#' of the standard `dimnames`. If you provide character vectors, they will be
+#' stored in the standard `dimnames` as usual. You can also mix and match,
+#' having integer names for rows and character names for columns, or vice versa.
+#' Note that, since the row and column names are stored in special attributes,
+#' you have to use [row_names()] and [col_names()] to get or set them, rather
+#' than `rownames()` and `colnames()`, which will only return character names if
+#' present.
 #'
 #' @param data Matrix data or object coercible to matrix
 #' @param row_names Integer vector (stored as int_rownames) or character vector
 #'   (stored as dimnames)
 #' @param col_names Integer vector (stored as int_colnames) or character vector
 #'   (stored as dimnames)
-#' @return A matrix_int_names object
+#' @return A `matrix_int_names` object
+#' @family matrix_int_names_functions
 #' @export
+#' @examples
+#' # Create a matrix with integer row and column names
+#' my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+#'  row_names = c(10L, 20L),
+#'  col_names = c(100L, 200L, 300L)
+#' )
+#' row_names(my_mat) # returns integer row names
+#' col_names(my_mat) # returns integer column names
 matrix_int_names <- function(data, row_names = NULL, col_names = NULL) {
   # Convert to matrix if needed
   if (!is.matrix(data)) {
@@ -40,6 +68,7 @@ matrix_int_names <- function(data, row_names = NULL, col_names = NULL) {
 #'
 #' @param x A matrix_int_names object
 #' @return Integer or character vector of column names, or NULL
+#' @family matrix_int_names_functions
 #' @export
 col_names <- function(x) {
   UseMethod("col_names")
@@ -90,8 +119,15 @@ col_names.matrix_int_names <- function(x) {
     class(x) <- c("matrix", "array")
     colnames(x) <- NULL
     class(x) <- c("matrix_int_names", "matrix", "array")
-  } else if (is.integer(value)) {
-    # Set as integer names
+  } else if (is.numeric(value)) {
+    if (!is.integer(value)) {
+      # test if these are integer-valued, and thus can be coerced to integer
+      if (is_integer_valued(value)) {
+        value <- as.integer(round(value))
+      } else {
+        stop("col_names must be integer or character vector")
+      }
+    }    # Set as integer names
     if (length(value) != ncol(x)) {
       stop("Length of col_names must match number of columns")
     }
@@ -123,6 +159,7 @@ col_names.matrix_int_names <- function(x) {
 #' of `rownames()` for guaranteed dispatch.
 #'
 #' @param x A matrix_int_names object
+#' @family matrix_int_names_functions
 #' @return Integer or character vector of row names, or NULL
 
 #' @export
@@ -156,6 +193,7 @@ row_names.matrix_int_names <- function(x) {
 #' @param value Integer or character vector of row names, or NULL
 #' @return The modified matrix_int_names object
 #' @export
+#' @family matrix_int_names_functions
 #' @rdname row_names
 "row_names<-" <- function(x, value) {
   UseMethod("row_names<-", x)
@@ -180,7 +218,16 @@ row_names.matrix_int_names <- function(x) {
       dn[[1]] <- NULL
       dimnames(x) <- dn
     }
-  } else if (is.integer(value)) {
+  } else if (is.numeric(value)) {
+    if (!is.integer(value)) {
+      # test if these are integer-valued, and thus can be coerced to integer
+      if (is_integer_valued(value)) {
+        value <- as.integer(round(value))
+      } else {
+        stop("row_names must be integer or character vector")
+      }
+    }
+    
     # Set as integer names
     if (length(value) != nrow(x)) {
       stop("Length of row_names must match number of rows")
@@ -212,6 +259,13 @@ row_names.matrix_int_names <- function(x) {
   x
 }
 
+# a small internal function to check if a vector is integer-valued (i.e. all values are close
+# to integers within a tolerance)
+is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
+  is.numeric(x) && all(abs(x - round(x)) < tol, na.rm = TRUE)
+}
+
+
 
 #' Subsetting method for matrix_int_names
 #' @param x A matrix_int_names object
@@ -222,6 +276,7 @@ row_names.matrix_int_names <- function(x) {
 #' @param drop Logical indicating whether to drop dimensions
 #' @return A subsetted matrix_int_names object
 #' @export
+#' @family matrix_int_names_functions
 #' @rdname subset
 `[.matrix_int_names` <- function(x, i, j, i_names = NULL,
                                  j_names = NULL, drop = TRUE) {
@@ -410,6 +465,7 @@ row_names.matrix_int_names <- function(x) {
 #' @param x A matrix_int_names object
 #' @param ... Additional arguments passed to print
 #' @return Invisibly returns the original object
+#' @family matrix_int_names_functions
 #' @export
 print.matrix_int_names <- function(x, ...) {
   cat("Matrix with integer/character names\n")

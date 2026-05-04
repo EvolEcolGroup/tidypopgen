@@ -132,12 +132,6 @@ reference:
         - gt_extract_f2
         - gt_pcadapt
         - autoplot.gt_pcadapt
-  - title: "`bigSNP`"
-    desc: "Mostly for developers: Functions for operating directly on `bigSNP` objects."
-    contents:
-        - snp_allele_sharing
-        - snp_ibs
-        - snp_king
   - title: "Example data"
     desc: "Function for loading an example `gen_tibble`."
     contents:
@@ -152,3 +146,13 @@ reference:
         - mutate.gen_tbl
         - mutate.grouped_gen_tbl
         - "$<-.gen_tbl"
+    title: "`matrix_int_names`"
+    desc: "Matrix class to store names as integers for big data, and associated functions"
+    contents:
+        - has_concept("matrix_int_names")
+  - title: "`bigSNP`"
+    desc: "Mostly for developers: Functions for operating directly on `bigSNP` objects."
+    contents:
+        - snp_allele_sharing
+        - snp_ibs
+        - snp_king
