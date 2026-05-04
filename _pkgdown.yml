@@ -149,7 +149,7 @@ reference:
   - title: "`matrix_int_names`"
     desc: "Matrix class to store names as integers for big data, and associated functions"
     contents:
-        - has_concept("matrix_int_names")
+        - has_concept("matrix_int_names_functions")
   - title: "`bigSNP`"
     desc: "Mostly for developers: Functions for operating directly on `bigSNP` objects."
     contents:
