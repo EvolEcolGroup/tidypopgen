@@ -23,6 +23,8 @@ test_that("using integers as names works", {
   expect_true(is.integer(row_names(anole_pca$v)))
   anole_pca <- anole_gt %>% gt_pca_partialSVD(k = 30)
   expect_true(is.integer(row_names(anole_pca$v)))
-  # TODO this raises an error
-  tidy(anole_pca, matrix = "loadings")
+  # tidy the pca
+  loadings_pca <- tidy(anole_pca, matrix = "loadings")
+  # check that we have a an integer column for "column"
+  expect_true(is.integer(loadings_pca$column))
 })
