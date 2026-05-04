@@ -24,6 +24,9 @@
 #' @param conda_env the name of the conda environment to use. "none" forces the
 #'   use of a local copy, whilst any other string will direct the function to
 #'   use a custom conda environment.
+#' @param outdir optional path to write intermediate admixture output files.
+#' If not specified, defaults to a temporary file. Use this argument to store
+#' intermediate files.
 #' @return an object of class `gt_admix` consisting of a list with the following
 #'   elements:
 #' - `k` the number of clusters
@@ -57,14 +60,14 @@
 # default, a copy from `tidygenclust` will be preferred if available, otherwise
 # a local copy will be used.
 gt_admixture <- function(
-  x,
-  k,
-  n_runs = 1,
-  crossval = FALSE,
-  n_cores = 1,
-  seed = NULL,
-  conda_env = "auto"
-) {
+    x,
+    k,
+    n_runs = 1,
+    crossval = FALSE,
+    n_cores = 1,
+    seed = NULL,
+    conda_env = "auto",
+    outdir = NULL) {
   # check that we have the right number of repeats
   if (length(seed) != n_runs) {
     stop("'seed' should be a vector of length 'n_runs'")
@@ -146,11 +149,19 @@ gt_admixture <- function(
   }
 
   # set the working path to the tempdir, where admixture will dump text files
-  out <- tempdir()
+  if (is.null(outdir)) {
+    outdir <- tempdir()
+  } else {
+    # check outdir is a valid path
+    if (!dir.exists(outdir)) {
+      stop("The directory ", outdir, " does not exist.")
+    }
+  }
+  outdir <- normalizePath(outdir)
   # store working directory
   wd <- getwd()
   # change to the directory of the input file
-  setwd(out)
+  setwd(outdir)
   on.exit(setwd(wd))
 
   # initialise list to store results
@@ -196,7 +207,7 @@ gt_admixture <- function(
       }
 
       # build expected .Q filename
-      q_file <- file.path(out, paste0(
+      q_file <- file.path(outdir, paste0(
         gsub(".bed$", "", basename(input_file)),
         ".", this_k, ".Q"
       ))
@@ -210,16 +221,52 @@ gt_admixture <- function(
         stop(adm_out)
       }
 
+      # rename the file to include the repeat number
+      q_file_renamed <- file.path(outdir, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".rep", this_rep, ".Q"
+      ))
+      if (!file.rename(q_file, q_file_renamed)) {
+        stop(
+          "Failed to rename ADMIXTURE Q file from '", q_file,
+          "' to '", q_file_renamed,
+          "'. Check that ADMIXTURE completed successfully and that you have ",
+          "write permissions for the output directory '", outdir, "'."
+        )
+      }
+      p_file <- file.path(outdir, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".P"
+      ))
+      p_file_renamed <- file.path(outdir, paste0(
+        gsub(".bed$", "", basename(input_file)),
+        ".", this_k, ".rep", this_rep, ".P"
+      ))
+      if (!file.rename(p_file, p_file_renamed)) {
+        stop(
+          "Failed to rename ADMIXTURE P file from '", p_file,
+          "' to '", p_file_renamed,
+          "'. Check that ADMIXTURE completed successfully and that you have ",
+          "write permissions for the output directory '", outdir, "'."
+        )
+      }
+
       # read the output
-      output_prefix <- file.path(out, gsub(".bed", "", basename(input_file)))
+      output_prefix <- file.path(
+        outdir,
+        gsub(".bed", "", basename(input_file),
+          fixed = TRUE
+        )
+      )
+
       adm_list$k[index] <- this_k
       adm_list$Q[[index]] <-
         q_matrix(utils::read.table(
-          paste(output_prefix, this_k, "Q", sep = "."),
+          paste(output_prefix, this_k, paste0("rep", this_rep), "Q", sep = "."),
           header = FALSE
         ))
       adm_list$P[[index]] <- utils::read.table(
-        paste(output_prefix, this_k, "P", sep = "."),
+        paste(output_prefix, this_k, paste0("rep", this_rep), "P", sep = "."),
         header = FALSE
       ) # nolint
       adm_list$loglik[index] <- as.numeric(strsplit(

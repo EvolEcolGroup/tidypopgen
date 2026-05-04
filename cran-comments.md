@@ -1,5 +1,5 @@
-New minor version, fixing a few bugs and aligning with an associated
-peer reviewed publication.
+New minor version, fixing a test that occasionally failed if name of temp file
+contained the certain pattern.
 
 ## Test environments
 - Github Actions R-CMD-check (ubuntu-20.04): r-devel, r-release, r-oldrel

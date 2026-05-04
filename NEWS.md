@@ -1,4 +1,19 @@
 # tidypopgen dev
+* fix reading of VCFs when genotype separator symbol is present in the
+  sample information
+* fix `loci_` functions output when calculating across groups for a single loci
+* fix `gt_update_backingfile()` to preserve imputation metadata when backing
+  files are updated
+* add validation in `gt_impute_simple()` to detect and report SNP dimension
+  mismatches caused by excluded SNPs
+* add `outdir` argument in `gt_admixture()` to store partial outputs for large jobs
+* fix `gt_admixture()` output file names when n_runs > 1
+
+# tidypopgen 0.4.3
+* fix occasional test failure when temporary file names contained
+  certain patterns
+
+# tidypopgen 0.4.2
 * allow least squares projection of multiple components at once in
   `gt_project_pca()`
 

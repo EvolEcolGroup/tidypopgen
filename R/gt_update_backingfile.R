@@ -14,7 +14,7 @@
 #' @param backingfile the path, including the file name without extension, for
 #'   backing files used to store the data (they will be given a .bk and .rds
 #'   automatically). If left to NULL (the default), the file name will be based
-#'   on the name f the current backing file.
+#'   on the name of the current backing file.
 #' @param rm_unsorted_dist boolean to set `genetic_dist` to zero (i.e. remove
 #'   it) if it is unsorted within the chromosomes.
 #' @param chunk_size the number of loci to process at once
@@ -63,6 +63,7 @@ gt_update_backingfile <- function(
   on.exit(
     attr(.x$genotypes, "fbm")$code256 <- original_256code
   )
+  original_imputation_code <- attr(.x$genotypes, "imputed")
 
   # initialise a FBM with the dimensions of the data used in the gen_tibble
   new_bk_matrix <- bigstatsr::FBM.code256(
@@ -127,6 +128,11 @@ gt_update_backingfile <- function(
 
   # derive .gt filename from .bk backing file path
   file_name <- bigstatsr::sub_bk(gt_get_file_names(new_gen_tbl)[2], ".gt")
+
+  # add imputation code
+  if (!is.null(original_imputation_code)) {
+    attr(new_gen_tbl$genotypes, "imputed") <- original_imputation_code
+  }
 
   gt_save_light(new_gen_tbl, file_name = file_name, quiet = TRUE)
 
