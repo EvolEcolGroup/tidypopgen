@@ -464,39 +464,31 @@ is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
 #'
 #' @param x A matrix_int_names object
 #' @param ... Additional arguments passed to print
+#' @param n Optional number of rows/columns to print (default 10)
 #' @return Invisibly returns the original object
 #' @family matrix_int_names_functions
 #' @export
-print.matrix_int_names <- function(x, ...) {
-  cat("Matrix with integer/character names\n")
+print.matrix_int_names <- function(x, n = 10L,  ...) {
+  # get the types of row and column names
+  row_type <- if (!is.null(attr(x, "int_rownames"))) "integer" else
+    if (!is.null(dimnames(x)[[1]]))         "character" else
+      "no"
+  col_type <- if (!is.null(attr(x, "int_colnames"))) "integer" else
+    if (!is.null(dimnames(x)[[2]]))         "character" else
+      "no"
+  
+  cat("Matrix with", row_type, "rownames and", col_type, "colnames\n")
   cat("Dimensions:", nrow(x), "x", ncol(x), "\n")
 
-  rnames <- attr(x, "int_rownames")
-  cnames <- attr(x, "int_colnames")
-
+  
+  # subset a display version with n rows and column
+  display <- x[seq_len(min(n, nrow(x))), seq_len(min(n, ncol(x)))]
+  rnames <- attr(display, "int_rownames")
+  cnames <- attr(display, "int_colnames")
   # Get character dimnames directly
-  char_rnames <- dimnames(x)[[1]]
-  char_cnames <- dimnames(x)[[2]]
-
-  if (!is.null(rnames)) {
-    cat("Integer row names:", paste(rnames, collapse = ", "), "\n")
-  }
-  if (!is.null(cnames)) {
-    cat("Integer column names:", paste(cnames, collapse = ", "), "\n")
-  }
-  if (!is.null(char_rnames)) {
-    cat("Character row names:", paste(char_rnames, collapse = ", "), "\n")
-  }
-  if (!is.null(char_cnames)) {
-    cat("Character column names:", paste(char_cnames, collapse = ", "), "\n")
-  }
-
-  cat("\n")
-
-  # Create a display version
-  display <- as.matrix(x)
-  class(display) <- c("matrix", "array")
-
+  char_rnames <- dimnames(display)[[1]]
+  char_cnames <- dimnames(display)[[2]]
+  
   # Prefer integer names for display, fallback to character
   if (!is.null(rnames)) {
     dn <- dimnames(display)
@@ -521,10 +513,20 @@ print.matrix_int_names <- function(x, ...) {
     dn[[2]] <- char_cnames
     dimnames(display) <- dn
   }
-
+  
+  # set attributes to NULL for display to avoid printing them
+  attr(display, "int_rownames") <- NULL
+  attr(display, "int_colnames") <- NULL
+  attr(display, "class") <- NULL
+  
   print(display, ...)
+  if (nrow(x) > n) cat("#", nrow(x) - n, "more rows. Use `print(n = ...)` to see more\n")
+  if (ncol(x) > n) cat("#", ncol(x) - n, "more columns. Use `print(n = ...)` to see more\n")
+  
   invisible(x)
 }
+
+
 
 
 #' Coercion method to data.frame for matrix_int_names
