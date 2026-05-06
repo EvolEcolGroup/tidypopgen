@@ -417,17 +417,17 @@ test_that("print method works", {
   )
   expect_output(print(im), "Matrix with integer")
   expect_output(print(im), "3 x 4")
-  expect_output(print(im), "10, 20, 30")
-  expect_output(print(im), "100, 200, 300, 400")
+  expect_output(print(im), "10   1   4")
+  expect_output(print(im), "100 200 300 400")
 
   # With character names
   im2 <- matrix_int_names(m,
     row_names = c("A", "B", "C"),
     col_names = c("W", "X", "Y", "Z")
   )
-  expect_output(print(im2), "Matrix with integer")
-  expect_output(print(im2), "Character row names: A, B, C")
-  expect_output(print(im2), "Character column names: W, X, Y, Z")
+  expect_output(print(im2), "Matrix with character")
+  expect_output(print(im2), "  W X Y  Z")
+  expect_output(print(im2), "C 3 6 9")
 })
 
 test_that("edge cases are handled", {

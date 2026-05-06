@@ -45,8 +45,8 @@ present.
 \examples{
 # Create a matrix with integer row and column names
 my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
- row_names = c(10L, 20L),
- col_names = c(100L, 200L, 300L)
+  row_names = c(10L, 20L),
+  col_names = c(100L, 200L, 300L)
 )
 row_names(my_mat) # returns integer row names
 col_names(my_mat) # returns integer column names

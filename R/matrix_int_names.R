@@ -33,8 +33,8 @@
 #' @examples
 #' # Create a matrix with integer row and column names
 #' my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
-#'  row_names = c(10L, 20L),
-#'  col_names = c(100L, 200L, 300L)
+#'   row_names = c(10L, 20L),
+#'   col_names = c(100L, 200L, 300L)
 #' )
 #' row_names(my_mat) # returns integer row names
 #' col_names(my_mat) # returns integer column names
@@ -127,7 +127,7 @@ col_names.matrix_int_names <- function(x) {
       } else {
         stop("col_names must be integer or character vector")
       }
-    }    # Set as integer names
+    } # Set as integer names
     if (length(value) != ncol(x)) {
       stop("Length of col_names must match number of columns")
     }
@@ -135,7 +135,7 @@ col_names.matrix_int_names <- function(x) {
     # Clear character dimnames for columns
     dn <- dimnames(x)
     if (!is.null(dn)) {
-      dn[[2]] <- NULL
+      dn[2] <- list(NULL)
       dimnames(x) <- dn
     }
   } else if (is.character(value)) {
@@ -215,7 +215,7 @@ row_names.matrix_int_names <- function(x) {
     attr(x, "int_rownames") <- NULL
     dn <- dimnames(x)
     if (!is.null(dn)) {
-      dn[[1]] <- NULL
+      dn[1] <- list(NULL)
       dimnames(x) <- dn
     }
   } else if (is.numeric(value)) {
@@ -236,7 +236,7 @@ row_names.matrix_int_names <- function(x) {
     # Clear character dimnames for rows
     dn <- dimnames(x)
     if (!is.null(dn)) {
-      dn[[1]] <- NULL
+      dn[1] <- list(NULL)
       dimnames(x) <- dn
     }
   } else if (is.character(value)) {
@@ -264,7 +264,6 @@ row_names.matrix_int_names <- function(x) {
 is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
   is.numeric(x) && all(abs(x - round(x)) < tol, na.rm = TRUE)
 }
-
 
 
 #' Subsetting method for matrix_int_names
@@ -306,7 +305,7 @@ is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
         i <- i_names # we will convert later
       } else {
         # Check if these are position indices or name indices
-        if (all(i_names %in% rnames)) {
+        if (!is.null(rnames) && all(i_names %in% rnames)) {
           i <- match(i_names, rnames)
         } else {
           stop("some i_names do not match any integer row names")
@@ -325,7 +324,7 @@ is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
         j <- j_names # we will convert later
       } else {
         # Check if these are position indices or name indices
-        if (all(j_names %in% cnames)) {
+        if (!is.null(cnames) && all(j_names %in% cnames)) {
           j <- match(j_names, cnames)
         } else {
           stop("some j_names do not match any integer column names")
@@ -468,19 +467,32 @@ is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
 #' @return Invisibly returns the original object
 #' @family matrix_int_names_functions
 #' @export
-print.matrix_int_names <- function(x, n = 10L,  ...) {
+print.matrix_int_names <- function(x, ..., n = 10L) {
   # get the types of row and column names
-  row_type <- if (!is.null(attr(x, "int_rownames"))) "integer" else
-    if (!is.null(dimnames(x)[[1]]))         "character" else
+  row_type <- if (!is.null(attr(x, "int_rownames"))) {
+    "integer"
+  } else {
+    if (!is.null(dimnames(x)[[1]])) {
+      "character"
+    } else {
       "no"
-  col_type <- if (!is.null(attr(x, "int_colnames"))) "integer" else
-    if (!is.null(dimnames(x)[[2]]))         "character" else
+    }
+  }
+  col_type <- if (!is.null(attr(x, "int_colnames"))) {
+    "integer"
+  } else {
+    if (!is.null(dimnames(x)[[2]])) {
+      "character"
+    } else {
       "no"
-  
+    }
+  }
+
+
   cat("Matrix with", row_type, "rownames and", col_type, "colnames\n")
   cat("Dimensions:", nrow(x), "x", ncol(x), "\n")
 
-  
+
   # subset a display version with n rows and column
   display <- x[seq_len(min(n, nrow(x))), seq_len(min(n, ncol(x)))]
   rnames <- attr(display, "int_rownames")
@@ -488,7 +500,7 @@ print.matrix_int_names <- function(x, n = 10L,  ...) {
   # Get character dimnames directly
   char_rnames <- dimnames(display)[[1]]
   char_cnames <- dimnames(display)[[2]]
-  
+
   # Prefer integer names for display, fallback to character
   if (!is.null(rnames)) {
     dn <- dimnames(display)
@@ -513,20 +525,22 @@ print.matrix_int_names <- function(x, n = 10L,  ...) {
     dn[[2]] <- char_cnames
     dimnames(display) <- dn
   }
-  
+
   # set attributes to NULL for display to avoid printing them
   attr(display, "int_rownames") <- NULL
   attr(display, "int_colnames") <- NULL
   attr(display, "class") <- NULL
-  
+
   print(display, ...)
-  if (nrow(x) > n) cat("#", nrow(x) - n, "more rows. Use `print(n = ...)` to see more\n")
-  if (ncol(x) > n) cat("#", ncol(x) - n, "more columns. Use `print(n = ...)` to see more\n")
-  
+  if (nrow(x) > n) {
+    cat("#", nrow(x) - n, "more rows. Use `print(n = ...)` to see more\n")
+  }
+  if (ncol(x) > n) {
+    cat("#", ncol(x) - n, "more columns. Use `print(n = ...)` to see more\n")
+  }
+
   invisible(x)
 }
-
-
 
 
 #' Coercion method to data.frame for matrix_int_names
@@ -551,7 +565,7 @@ print.matrix_int_names <- function(x, n = 10L,  ...) {
 #' # Convert to data.frame
 #' my_df <- as.data.frame(my_mat)
 #' my_df
-as.data.frame.matrix_int_names <- function(x, row.names = NULL, #nolint
+as.data.frame.matrix_int_names <- function(x, row.names = NULL, # nolint
                                            optional = FALSE,
                                            ...) {
   df <- as.data.frame.matrix(x, row.names = row.names, optional = optional, ...)

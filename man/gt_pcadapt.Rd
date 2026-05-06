@@ -9,8 +9,8 @@ gt_pcadapt(x, pca, k, n_cores = 1)
 \arguments{
 \item{x}{A \code{gen_tibble} object.}
 
-\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{gt_pca_partialSVD()} or
-\code{gt_pca_randomSVD()}.}
+\item{pca}{a \code{\link{gt_pca}} object, as returned by \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}} or
+\code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}}.}
 
 \item{k}{Number of principal components to use in the analysis.}
 

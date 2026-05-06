@@ -4,12 +4,14 @@
 \alias{print.matrix_int_names}
 \title{Print method for matrix_int_names}
 \usage{
-\method{print}{matrix_int_names}(x, ...)
+\method{print}{matrix_int_names}(x, ..., n = 10L)
 }
 \arguments{
 \item{x}{A matrix_int_names object}
 
 \item{...}{Additional arguments passed to print}
+
+\item{n}{Optional number of rows/columns to print (default 10)}
 }
 \value{
 Invisibly returns the original object

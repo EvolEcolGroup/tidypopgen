@@ -9,7 +9,8 @@
 \arguments{
 \item{x}{A matrix_int_names object}
 
-\item{row.names}{Ignored, as row names are preserved from the matrix_int_names}
+\item{row.names}{Ignored, as row names are preserved from the
+matrix_int_names}
 
 \item{optional}{Ignored, included for compatibility with generic signature}
 
@@ -29,7 +30,6 @@ my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
 # Convert to data.frame
 my_df <- as.data.frame(my_mat)
 my_df
-
 }
 \seealso{
 Other matrix_int_names_functions: 
