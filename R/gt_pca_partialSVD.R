@@ -65,11 +65,12 @@
 #' @family gt_pca_functions
 # nolint start
 gt_pca_partialSVD <- function(
-    # nolint end
-    x,
-    k = 10,
-    fun_scaling = bigsnpr::snp_scaleBinom(),
-    total_var = TRUE) {
+  # nolint end
+  x,
+  k = 10,
+  fun_scaling = bigsnpr::snp_scaleBinom(),
+  total_var = TRUE
+) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE))
@@ -88,8 +89,9 @@ gt_pca_partialSVD <- function(
   ) # TODO check that this is correct and expose it, maybe create convenience
   # function to get the values
   # add names to the scores (to match them to data later)
-  rownames(this_svd$u) <- x$id
-  rownames(this_svd$v) <- loci_names(x)
+  row.names(this_svd$u) <- x$id
+  this_svd$v <- matrix_int_names(this_svd$v)
+  row_names(this_svd$v) <- loci_names(x)
   this_svd$method <- "partialSVD"
   this_svd$call <- match.call()
   this_svd$loci <- show_loci(x)

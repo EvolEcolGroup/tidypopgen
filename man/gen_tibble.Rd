@@ -26,6 +26,7 @@ gen_tibble(
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
+  names_as_int = FALSE,
   quiet = FALSE
 )
 
@@ -82,8 +83,8 @@ will be created (but note that R will delete it at the end of the session!)}
 \item{allow_duplicates}{logical. If TRUE, the tibble will allow duplicated
 loci (those with genomic coordinate (chromosome + position) or locus name
 appearing more than once). If FALSE, an error will be thrown if duplicated
-loci are found. These validations run before backing
-files are saved. Default is FALSE.}
+loci are found. These validations run before backing files are saved.
+Default is FALSE.}
 
 \item{quiet}{provide information on the files used to store the data}
 
@@ -97,6 +98,12 @@ in case your
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
+
+\item{names_as_int}{logical. If TRUE, locus names will be
+converted to integers. Only used when \code{x} is a \emph{VCF} file with parser
+"cpp". Default is FALSE. This can be useful when working with very large
+datasets where storing the names as string can use a large amount of
+memory.}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only

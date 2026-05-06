@@ -28,9 +28,10 @@
 #' allele_sharing <- example_gt %>% pairwise_allele_sharing(as_matrix = TRUE)
 #' example_gt %>% pairwise_grm(allele_sharing_mat = allele_sharing)
 pairwise_grm <- function(
-    x,
-    allele_sharing_mat = NULL,
-    block_size = bigstatsr::block_size(nrow(x))) {
+  x,
+  allele_sharing_mat = NULL,
+  block_size = bigstatsr::block_size(nrow(x))
+) {
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(
       x,

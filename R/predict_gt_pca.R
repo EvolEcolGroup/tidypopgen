@@ -184,12 +184,13 @@ predict.gt_pca <- function(
         return(output)
       }
     } else if (project_method == "least_squares") {
-      if (
-        length(lsq_pcs) == 0 || # nolint
-          anyNA(lsq_pcs) ||
-          any(lsq_pcs < 1) ||
-          any(lsq_pcs > ncol(object$v)) ||
-          !all(lsq_pcs == as.integer(lsq_pcs))) {
+      if
+      (
+       length(lsq_pcs) == 0 ||
+         anyNA(lsq_pcs) ||
+         any(lsq_pcs < 1) ||
+         any(lsq_pcs > ncol(object$v)) ||
+         !all(lsq_pcs == as.integer(lsq_pcs))) {
         stop(
           "lsq_pcs should be a vector of valid component indices ",
           "(positive integers between 1 and ", ncol(object$v), "), ",

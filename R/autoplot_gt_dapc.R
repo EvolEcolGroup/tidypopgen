@@ -57,17 +57,18 @@
 #' autoplot(dapc_res, type = "components", group = populations)
 #'
 autoplot.gt_dapc <- function(
-    object,
-    type = c(
-      "screeplot",
-      "scores",
-      "loadings",
-      "components"
-    ),
-    ld = NULL,
-    group = NULL,
-    n_col = 1,
-    ...) {
+  object,
+  type = c(
+    "screeplot",
+    "scores",
+    "loadings",
+    "components"
+  ),
+  ld = NULL,
+  group = NULL,
+  n_col = 1,
+  ...
+) {
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (type == "screeplot") {
@@ -145,7 +146,7 @@ autoplot.gt_dapc <- function(
       dplyr::rename_with(~ paste0("Q", .x)) %>%
       # add the pops data for plotting
       dplyr::mutate(
-        name = rownames(object$posterior),
+        name = row_names(object$posterior),
         group = group
       ) %>%
       tidyr::pivot_longer(

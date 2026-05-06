@@ -98,13 +98,14 @@ loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
 #' @export
 #' @rdname loci_hwe
 loci_hwe.grouped_df <- function(
-    .x,
-    .col = "genotypes",
-    mid_p = TRUE,
-    n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
-    type = c("tidy", "list", "matrix"),
-    ...) {
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
+  type = c("tidy", "list", "matrix"),
+  ...
+) {
   stopifnot_diploid(.x)
 
   .col <- rlang::enquo(.col) %>%

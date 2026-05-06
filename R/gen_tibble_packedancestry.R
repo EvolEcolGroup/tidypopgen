@@ -1,12 +1,13 @@
 # A function to read geno packedancestrymap files
 gen_tibble_packedancestry <- function(
-    x,
-    ...,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    backingfile = NULL,
-    quiet = FALSE) {
+  x,
+  ...,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  backingfile = NULL,
+  quiet = FALSE
+) {
   # Substitute .geno with .snp
   map_file <- sub("\\.geno$", ".snp", x)
   if (!file.exists(map_file)) {

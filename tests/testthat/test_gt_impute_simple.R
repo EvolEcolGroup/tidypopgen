@@ -215,7 +215,8 @@ test_that("imputed gt retains status after gt_update_backingfile", {
   # update backingfile
   missing_gt_imputed <- gt_update_backingfile(
     missing_gt_imputed,
-    tempfile("missing_imputed_")
+    tempfile("missing_imputed_"),
+    quiet = TRUE
   )
   # check if still imputed
   gt_has_imputed(missing_gt_imputed)
@@ -232,7 +233,8 @@ test_that("imputed gt retains status after gt_update_backingfile", {
   # update backingfile
   missing_gt_imputed <- gt_update_backingfile(
     missing_gt_imputed,
-    tempfile("missing_imputed_")
+    tempfile("missing_imputed_"),
+    quiet = TRUE
   )
   # check if still imputed
   gt_has_imputed(missing_gt_imputed)

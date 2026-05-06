@@ -39,8 +39,9 @@ validate_loci <- function(loci,
       paste(required_cols, collapse = ", ")
     ))
   }
-  if (!is.character(loci$name)) {
-    stop("loci$name must be a character")
+  # loci names should be a character or an integer
+  if (!is.character(loci$name) && !is.integer(loci$name)) {
+    stop("loci$name must be a character or an integer")
   }
   if (!is.factor(loci$chromosome)) {
     loci$chromosome <- as.factor(loci$chromosome)
@@ -160,9 +161,10 @@ validate_indiv_meta <- function(indiv_meta) {
 #' @keywords internal
 #' @noRd
 gt_write_fbm_from_dfs <- function(
-    genotypes,
-    backingfile = NULL,
-    max_ploidy = 2) {
+  genotypes,
+  backingfile = NULL,
+  max_ploidy = 2
+) {
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }

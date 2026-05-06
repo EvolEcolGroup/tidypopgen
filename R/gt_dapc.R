@@ -121,11 +121,12 @@
 # object to fully fit our purposes, and give up trying to be backcompatible
 # with adegenet
 gt_dapc <- function(
-    x,
-    pop = NULL,
-    n_pca = NULL,
-    n_da = NULL,
-    loadings_by_locus = TRUE) {
+  x,
+  pop = NULL,
+  n_pca = NULL,
+  n_da = NULL,
+  loadings_by_locus = TRUE
+) {
   if (!inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }

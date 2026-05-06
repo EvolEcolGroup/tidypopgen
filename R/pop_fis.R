@@ -5,10 +5,13 @@
 #' `hierfstat::basic.stats()`) or of Weir and Goudet 2017 (with an algorithm
 #' equivalent to the one used by `hierfstat::fis.dosage()`).
 #' @references Nei M. (1987) Molecular Evolutionary Genetics. Columbia
-#'   University Press
-#' Weir, BS and Goudet J (2017) A Unified Characterization of
+#'   University Press.
+#' @references Weir, BS and Goudet J (2017) A Unified Characterization of
 #'   Population Structure and Relatedness. Genetics (2017) 206:2085
-#' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
+#' @param .x a grouped [`gen_tibble`] (as obtained by using
+#'   [dplyr::group_by()]); if method == "Nei87", it is also possible to use
+#'   a regular `gen_tibble`, in which case all individuals are considered to
+#'   belong to a single population.
 #' @param method one of "Nei87" (based on Nei 1987, eqn 7.41) or "WG17" (for
 #'   Weir and Goudet 2017) to compute FIS
 #' @param by_locus boolean, determining whether FIS should be returned by
@@ -33,32 +36,31 @@
 #' RhpcBLASctl::blas_set_num_threads(2)
 #' RhpcBLASctl::omp_set_num_threads(2)
 #' }
-#' example_gt <- load_example_gt("grouped_gen_tbl")
+#'   example_gt <- load_example_gt("grouped_gen_tbl")
 #'
-#' # Compute FIS using Nei87
-#' example_gt %>% pop_fis(method = "Nei87")
+#'   # Compute FIS using Nei87:
+#'   example_gt %>% pop_fis(method = "Nei87")
 #'
-#' # Compute FIS using WG17
-#' example_gt %>% pop_fis(method = "WG17")
+#'   # Compute FIS using WG17:
+#'   example_gt %>% pop_fis(method = "WG17")
 #'
-#' # To include the global FIS, set include_global = TRUE
-#' example_gt %>% pop_fis(method = "Nei87", include_global = TRUE)
+#'   # To include the global FIS, set include_global = TRUE:
+#'   example_gt %>% pop_fis(method = "Nei87", include_global = TRUE)
 #'
-#' # To return FIS by locus, set by_locus = TRUE
-#' example_gt %>% pop_fis(method = "Nei87", by_locus = TRUE)
+#'   # To return FIS by locus, set by_locus = TRUE:
+#'   example_gt %>% pop_fis(method = "Nei87", by_locus = TRUE)
 #'
-#' # To calculate from a pre-computed allele sharing matrix:
-#' allele_sharing_mat <- pairwise_allele_sharing(example_gt, as_matrix = TRUE)
-#' example_gt %>% pop_fis(
-#'   method = "WG17",
-#'   allele_sharing_mat = allele_sharing_mat
-#' )
+#'   # To calculate from a pre-computed allele sharing matrix:
+#'   allele_sharing_mat <- pairwise_allele_sharing(example_gt, as_matrix = TRUE)
+#'   example_gt %>% pop_fis( method = "WG17", allele_sharing_mat =
+#'   allele_sharing_mat )
 pop_fis <- function(
-    .x,
-    method = c("Nei87", "WG17"),
-    by_locus = FALSE,
-    include_global = FALSE,
-    allele_sharing_mat = NULL) {
+  .x,
+  method = c("Nei87", "WG17"),
+  by_locus = FALSE,
+  include_global = FALSE,
+  allele_sharing_mat = NULL
+) {
   method <- match.arg(method)
   if (method == "Nei87") {
     if (!is.null(allele_sharing_mat)) {
@@ -78,10 +80,11 @@ pop_fis <- function(
 }
 
 pop_fis_nei87 <- function(
-    .x,
-    by_locus = FALSE,
-    include_global = FALSE,
-    n_cores = bigstatsr::nb_cores()) {
+  .x,
+  by_locus = FALSE,
+  include_global = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   stopifnot_diploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
@@ -133,9 +136,10 @@ pop_fis_nei87 <- function(
 
 
 pop_fis_wg17 <- function(
-    .x,
-    include_global = FALSE,
-    allele_sharing_mat = NULL) {
+  .x,
+  include_global = FALSE,
+  allele_sharing_mat = NULL
+) {
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }

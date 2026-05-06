@@ -11,8 +11,8 @@
 #'   pcadapt: an R package for genome scans for selection based on principal
 #'   component analysis. Molecular Ecology Resources, 17(1), 67–77.
 #' @param x A `gen_tibble` object.
-#' @param pca a [`gt_pca`] object, as returned by `gt_pca_partialSVD()` or
-#'   `gt_pca_randomSVD()`.
+#' @param pca a [`gt_pca`] object, as returned by [gt_pca_partialSVD()] or
+#'   [gt_pca_randomSVD()].
 #' @param k Number of principal components to use in the analysis.
 #' @param n_cores Number of cores to use.
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.

@@ -69,13 +69,14 @@
 #'   pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
 #'
 pairwise_pop_fst <- function(
-    .x,
-    type = c("tidy", "pairwise"),
-    by_locus = FALSE,
-    by_locus_type = c("tidy", "matrix", "list"),
-    method = c("Hudson", "Nei87", "WC84"),
-    return_num_dem = FALSE,
-    n_cores = bigstatsr::nb_cores()) {
+  .x,
+  type = c("tidy", "pairwise"),
+  by_locus = FALSE,
+  by_locus_type = c("tidy", "matrix", "list"),
+  method = c("Hudson", "Nei87", "WC84"),
+  return_num_dem = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
@@ -172,10 +173,10 @@ pairwise_pop_fst <- function(
   # if we want the numerator and denominator,
   # we need to format them and return them
   if (return_num_dem) {
-    rownames(fst_list$Fst_by_locus_num) <- loci_names(.x)
+    row.names(fst_list$Fst_by_locus_num) <- loci_names(.x)
     colnames(fst_list$Fst_by_locus_num) <-
       col_names_combinations(group_combinations)
-    rownames(fst_list$Fst_by_locus_den) <- loci_names(.x)
+    row.names(fst_list$Fst_by_locus_den) <- loci_names(.x)
     colnames(fst_list$Fst_by_locus_den) <-
       col_names_combinations(group_combinations)
     return(fst_list)
@@ -229,9 +230,9 @@ tidy_to_matrix <- function(tidy_tbl) {
   fst_tot_wide <- cbind(NA_real_, fst_tot_wide)
   fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
   # fix dim names
-  rownames(fst_tot_wide)[nrow(fst_tot_wide)] <-
+  row.names(fst_tot_wide)[nrow(fst_tot_wide)] <-
     utils::tail(colnames(fst_tot_wide), 1)
-  colnames(fst_tot_wide)[1] <- rownames(fst_tot_wide)[1]
+  colnames(fst_tot_wide)[1] <- row.names(fst_tot_wide)[1]
   # fill lower triangle
   fst_tot_wide[lower.tri(fst_tot_wide)] <-
     t(fst_tot_wide)[lower.tri(fst_tot_wide)]

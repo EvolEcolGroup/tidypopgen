@@ -180,21 +180,22 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' autoplot(loci_report, type = "significant hwe", hwe_p = 0.01)
 #'
 autoplot.qc_report_loci <- function(
-    object,
-    type = c(
-      "overview",
-      "all",
-      "missing",
-      "missing low maf",
-      "missing high maf",
-      "maf",
-      "hwe",
-      "significant hwe"
-    ),
-    maf_threshold = 0.05,
-    miss_threshold = 0.01,
-    hwe_p = 0.01, # SUGGESTION should this be hwe_p_threshold for consistency?
-    ...) {
+  object,
+  type = c(
+    "overview",
+    "all",
+    "missing",
+    "missing low maf",
+    "missing high maf",
+    "maf",
+    "hwe",
+    "significant hwe"
+  ),
+  maf_threshold = 0.05,
+  miss_threshold = 0.01,
+  hwe_p = 0.01, # SUGGESTION should this be hwe_p_threshold for consistency?
+  ...
+) {
   type <- match.arg(type)
 
   rlang::check_dots_empty()
@@ -248,12 +249,13 @@ autoplot.qc_report_loci <- function(
 }
 
 autoplot_l_qc_all <- function(
-    object,
-    maf_threshold,
-    miss_threshold,
-    hwe_p_low_thresh,
-    hwe_p_vertical_line,
-    ...) {
+  object,
+  maf_threshold,
+  miss_threshold,
+  hwe_p_low_thresh,
+  hwe_p_vertical_line,
+  ...
+) {
   # Missingness (according to MAF thresholds)
   miss_high_maf_plot <- autoplot_l_qc_missing(
     object,
@@ -294,11 +296,12 @@ autoplot_l_qc_all <- function(
 
 
 autoplot_l_qc_overview <- function(
-    object,
-    maf_threshold,
-    miss_threshold,
-    hwe_p_low_thresh,
-    ...) {
+  object,
+  maf_threshold,
+  miss_threshold,
+  hwe_p_low_thresh,
+  ...
+) {
   if (any(is.na(object))) {
     message(paste(
       "One or more loci are missing for every individual.",
@@ -325,7 +328,7 @@ autoplot_l_qc_overview <- function(
 
     unique_markers <- unique(unlist(pass_list))
     pass_counts <- UpSetR::fromList(pass_list)
-    rownames(pass_counts) <- unique_markers
+    row.names(pass_counts) <- unique_markers
 
     final_plot_overview <- UpSetR::upset(
       pass_counts,
@@ -339,7 +342,7 @@ autoplot_l_qc_overview <- function(
 
     unique_markers <- unique(unlist(pass_list))
     pass_counts <- UpSetR::fromList(pass_list)
-    rownames(pass_counts) <- unique_markers
+    row.names(pass_counts) <- unique_markers
 
     final_plot_overview <- UpSetR::upset(
       pass_counts,
@@ -425,11 +428,12 @@ autoplot_l_qc_hwe <- function(object,
 #' @keywords internal
 #' @noRd
 autoplot_l_qc_missing <- function(
-    object,
-    miss_threshold,
-    maf_low_thresh = NULL,
-    maf_high_thresh = NULL,
-    ...) {
+  object,
+  miss_threshold,
+  maf_low_thresh = NULL,
+  maf_high_thresh = NULL,
+  ...
+) {
   # check ellipses are empty
   rlang::check_dots_empty()
 
