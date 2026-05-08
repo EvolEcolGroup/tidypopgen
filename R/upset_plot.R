@@ -1,10 +1,9 @@
 #' Draw an UpSet plot from a data frame of logical columns
 #'
 #' This is a minimalistic implementation of upset plots, as used to visualise
-#' our qc_loci_reports.  It is not intended to be a general-purpose upset
+#' our `qc_loci_report`.  It is not intended to be a general-purpose upset
 #' plotting function, and it does not attempt to replicate all the features of
 #' specialised packages. It produces a three-panel UpSet plot assembled with
-#' Produces a three-panel UpSet plot assembled with
 #' \code{\link[patchwork]{patchwork}}:
 #' \itemize{
 #'   \item \strong{Top panel} - bar chart of intersection sizes, labelled.
@@ -78,47 +77,48 @@ upset_plot <- function(
   # ── 1. intersection table ──────────────────────────────────────────────────
   inter <- compute_intersections(df, sets)
 
-  inter <- inter |>
-    dplyr::filter(count >= min_size) |>
-    dplyr::slice_head(n = n_intersections) |>
+  inter <- inter %>%
+    dplyr::filter(count >= min_size) %>%
+    dplyr::slice_head(n = n_intersections) %>%
     dplyr::mutate(intersection_id = dplyr::row_number())
 
   n_inter <- nrow(inter)
   if (n_inter == 0L) stop("No intersections remain after filtering.")
 
   # ── 2. set sizes (total membership) ────────────────────────────────────────
-  set_sizes <- df |>
-    dplyr::select(dplyr::all_of(sets)) |>
+  set_sizes <- df %>%
+    dplyr::select(dplyr::all_of(sets)) %>%
     dplyr::summarise(
       dplyr::across(dplyr::everything(), ~ sum(as.logical(.x), na.rm = TRUE))
-    ) |>
+    ) %>%
     tidyr::pivot_longer(
       dplyr::everything(),
       names_to  = "set",
       values_to = "size"
-    ) |>
-    dplyr::mutate(set = factor(set, levels = set_levels))
+    ) %>%
+    dplyr::mutate(set = factor(.data$set, levels = set_levels))
 
   # ── 3. long matrix table for dots & lines ──────────────────────────────────
-  matrix_long <- inter |>
-    dplyr::select(intersection_id, count, dplyr::all_of(sets)) |>
+  matrix_long <- inter %>%
+    dplyr::select(dplyr::all_of("intersection_id"), dplyr::all_of("count"),
+                  dplyr::all_of(sets)) %>%
     tidyr::pivot_longer(
       dplyr::all_of(sets),
       names_to  = "set",
       values_to = "member"
-    ) |>
-    dplyr::mutate(set = factor(set, levels = set_levels))
+    ) %>%
+    dplyr::mutate(set = factor(.data$set, levels = set_levels))
 
   # Segment endpoints derived from the named position lookup, not from
   # factor integer codes, so they are correct regardless of `sets` order.
-  segs <- matrix_long |>
-    dplyr::filter(member) |>
-    dplyr::mutate(y_pos = set_pos[as.character(set)]) |>
-    dplyr::group_by(intersection_id) |>
-    dplyr::filter(dplyr::n() > 1L) |>
+  segs <- matrix_long %>%
+    dplyr::filter(.data$member) %>%
+    dplyr::mutate(y_pos = set_pos[as.character(.data$set)]) %>%
+    dplyr::group_by(.data$intersection_id) %>%
+    dplyr::filter(dplyr::n() > 1L) %>%
     dplyr::summarise(
-      ymin = min(y_pos),
-      ymax = max(y_pos),
+      ymin = min(.data$y_pos),
+      ymax = max(.data$y_pos),
       .groups = "drop"
     )
 
@@ -126,10 +126,12 @@ upset_plot <- function(
   x_limits <- c(0.5, n_inter + 0.5)
 
   # ── 5. TOP panel: intersection size bar chart ──────────────────────────────
-  p_top <- ggplot2::ggplot(inter, ggplot2::aes(x = intersection_id, y = count)) +
+  p_top <- ggplot2::ggplot(inter,
+                           ggplot2::aes(x = .data$intersection_id,
+                                        y = .data$count)) +
     ggplot2::geom_col(fill = bar_colour, width = 0.6) +
     ggplot2::geom_text(
-      ggplot2::aes(label = count),
+      ggplot2::aes(label = .data$count),
       vjust = -0.4,
       size  = text_size * 0.25
     ) +
@@ -156,21 +158,21 @@ upset_plot <- function(
 
   p_matrix <- ggplot2::ggplot(
     matrix_long,
-    ggplot2::aes(x = intersection_id, y = set)
+    ggplot2::aes(x = .data$intersection_id, y = .data$set)
   ) +
     # alternating row stripes
     ggplot2::geom_rect(
       data = row_bands,
       ggplot2::aes(
-        ymin = y_int - 0.5, ymax = y_int + 0.5,
+        ymin = .data$y_int - 0.5, ymax = .data$y_int + 0.5,
         xmin = x_limits[1], xmax = x_limits[2],
-        fill = I(fill)
+        fill = I(.data$fill)
       ),
       inherit.aes = FALSE
     ) +
     # absent-set dots
     ggplot2::geom_point(
-      data   = dplyr::filter(matrix_long, !member),
+      data   = dplyr::filter(matrix_long, !.data$member),
       colour = empty_colour,
       size   = 3
     ) +
@@ -178,8 +180,8 @@ upset_plot <- function(
     ggplot2::geom_segment(
       data = segs,
       ggplot2::aes(
-        x    = intersection_id, xend = intersection_id,
-        y    = ymin,            yend = ymax
+        x    = .data$intersection_id, xend = .data$intersection_id,
+        y    = .data$ymin,            yend = .data$ymax
       ),
       colour      = dot_colour,
       linewidth   = 1.2,
@@ -187,7 +189,7 @@ upset_plot <- function(
     ) +
     # present-set dots
     ggplot2::geom_point(
-      data   = dplyr::filter(matrix_long, member),
+      data   = dplyr::filter(matrix_long, .data$member),
       colour = dot_colour,
       size   = 3
     ) +
@@ -205,11 +207,11 @@ upset_plot <- function(
   # ── 7. LEFT panel: set size bar chart ──────────────────────────────────────
   p_sets <- ggplot2::ggplot(
     set_sizes,
-    ggplot2::aes(x = size, y = set)
+    ggplot2::aes(x = .data$size, y = .data$set)
   ) +
     ggplot2::geom_col(fill = set_bar_colour, width = 0.6) +
     ggplot2::geom_text(
-      ggplot2::aes(label = size),
+      ggplot2::aes(label = .data$size),
       hjust = -0.2,
       size  = text_size * 0.25
     ) +
@@ -259,12 +261,12 @@ upset_plot <- function(
 #'   (1 = largest intersection).
 #' @keywords internal
 compute_intersections <- function(df, sets) {
-  df |>
-    dplyr::select(dplyr::all_of(sets)) |>
-    dplyr::mutate(dplyr::across(dplyr::everything(), as.logical)) |>
-    dplyr::group_by(dplyr::across(dplyr::everything())) |>
-    dplyr::summarise(count = dplyr::n(), .groups = "drop") |>
-    dplyr::arrange(dplyr::desc(count)) |>
+  df %>%
+    dplyr::select(dplyr::all_of(sets)) %>%
+    dplyr::mutate(dplyr::across(dplyr::everything(), as.logical)) %>%
+    dplyr::group_by(dplyr::across(dplyr::everything())) %>%
+    dplyr::summarise(count = dplyr::n(), .groups = "drop") %>%
+    dplyr::arrange(dplyr::desc(count)) %>%
     dplyr::mutate(intersection_id = dplyr::row_number())
 }
 

@@ -51,10 +51,9 @@ A \code{\link[patchwork]{patchwork}} object.  Print it or pass it to
 }
 \description{
 This is a minimalistic implementation of upset plots, as used to visualise
-our qc_loci_reports.  It is not intended to be a general-purpose upset
+our \code{qc_loci_report}.  It is not intended to be a general-purpose upset
 plotting function, and it does not attempt to replicate all the features of
 specialised packages. It produces a three-panel UpSet plot assembled with
-Produces a three-panel UpSet plot assembled with
 \code{\link[patchwork]{patchwork}}:
 \itemize{
 \item \strong{Top panel} - bar chart of intersection sizes, labelled.
