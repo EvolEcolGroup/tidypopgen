@@ -35,7 +35,7 @@
 #'
 #' @return A \code{\link[patchwork]{patchwork}} object.  Print it or pass it to
 #'   \code{\link[ggplot2]{ggsave}}.
-#'
+#' @importFrom patchwork plot_layout
 #' @examples
 #' set.seed(1)
 #' df <- data.frame(
