@@ -308,47 +308,17 @@ autoplot_l_qc_overview <- function(
     object <- object[!is.na(object$maf), ]
   }
 
-  qc_report <- object
-
-  qc_maf <- qc_report[qc_report$maf >= maf_threshold, ]
-  maf_pass <- c(qc_maf$snp_id)
-
-  qc_missing <- qc_report[qc_report$missingness >= miss_threshold, ]
-  missing_pass <- c(qc_missing$snp_id)
-
+  qc_report <- data.frame(MAF = object$maf >= maf_threshold,
+                          Missing = object$missingness >= miss_threshold)
   # if including HWE
-  if ("hwe_p" %in% colnames(qc_report)) {
-    qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p_low_thresh, ]
-    hwe_pass <- c(qc_hwe$snp_id)
-
-    pass_list <- list(MAF = maf_pass, HWE = hwe_pass, Missing = missing_pass)
-
-    unique_markers <- unique(unlist(pass_list))
-    pass_counts <- UpSetR::fromList(pass_list)
-    rownames(pass_counts) <- unique_markers
-
-    final_plot_overview <- UpSetR::upset(
-      pass_counts,
-      order.by = "freq",
-      main.bar.color = "#66C2A5",
-      matrix.color = "#66C2A5",
-      sets.bar.color = "#FC8D62"
-    )
-  } else {
-    pass_list <- list(MAF = maf_pass, Missing = missing_pass)
-
-    unique_markers <- unique(unlist(pass_list))
-    pass_counts <- UpSetR::fromList(pass_list)
-    rownames(pass_counts) <- unique_markers
-
-    final_plot_overview <- UpSetR::upset(
-      pass_counts,
-      order.by = "freq",
-      main.bar.color = "#66C2A5",
-      matrix.color = "#66C2A5",
-      sets.bar.color = "#FC8D62"
-    )
+  if ("hwe_p" %in% colnames(object)) {
+    qc_report$HWE <- object$hwe_p >= hwe_p_low_thresh
   }
+  final_plot_overview <- upset_plot(qc_report,
+    bar_colour = "#66C2A5",
+    dot_colour = "#66C2A5",
+    set_bar_colour = "#FC8D62"
+  )
   return(final_plot_overview)
 }
 
