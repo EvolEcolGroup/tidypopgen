@@ -14,7 +14,7 @@ compute_intersections(df, sets)
 indicators.  Each column must be coercible to \code{logical}.}
 }
 \value{
-A \code{\link[tibble:tibble]{tibble::tibble}} with one column per set
+A \code{\link[tibble]{tibble}} with one column per set
 (\code{TRUE}/\code{FALSE}), a \code{count} column (number of rows in that
 intersection), and an \code{intersection_id} integer giving the rank order
 (1 = largest intersection).

@@ -21,7 +21,8 @@ upset_plot(
 
 \item{sets}{Character vector of column names to use as sets.
 Defaults to \code{NULL}, in which case all \code{logical} columns are
-used automatically.}
+used automatically.  The order of \code{sets} controls the top-to-bottom
+row order in the matrix (first element appears at the top).}
 
 \item{min_size}{Integer.  Intersections with fewer than this many rows
 are dropped.  Default \code{1L}.}
@@ -49,6 +50,10 @@ A \code{\link[patchwork]{patchwork}} object.  Print it or pass it to
 \code{\link[ggplot2]{ggsave}}.
 }
 \description{
+This is a minimalistic implementation of upset plots, as used to visualise
+our qc_loci_reports.  It is not intended to be a general-purpose upset
+plotting function, and it does not attempt to replicate all the features of
+specialised packages. It produces a three-panel UpSet plot assembled with
 Produces a three-panel UpSet plot assembled with
 \code{\link[patchwork]{patchwork}}:
 \itemize{

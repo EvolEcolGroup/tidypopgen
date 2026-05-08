@@ -312,7 +312,7 @@ autoplot_l_qc_overview <- function(
     object <- object[!is.na(object$maf), ]
   }
 
-  qc_report <- data.frame(Missing = object$missingness >= miss_threshold,
+  qc_report <- data.frame(Missing = object$missingness < miss_threshold,
                           MAF = object$maf >= maf_threshold)
   # if including HWE
   if ("hwe_p" %in% colnames(object)) {
