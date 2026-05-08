@@ -1,6 +1,9 @@
 #' Draw an UpSet plot from a data frame of logical columns
 #'
-#' Produces a three-panel UpSet plot assembled with
+#' This is a minimalistic implementation of upset plots, as used to visualise
+#' our qc_loci_reports.  It is not intended to be a general-purpose upset
+#' plotting function, and it does not attempt to replicate all the features of
+#' specialised packages. It produces a three-panel UpSet plot assembled with
 #' \code{\link[patchwork]{patchwork}}:
 #' \itemize{
 #'   \item \strong{Top panel} - bar chart of intersection sizes, labelled.
@@ -11,20 +14,20 @@
 #'
 #' @param df             A data frame with logical set-membership columns.
 #' @param sets           Character vector of column names to use as sets.
-#'   Defaults to \code{NULL}, in which case all \code{logical} columns are
-#'   used automatically.
+#'   Defaults to \code{NULL}, in which case all \code{logical} columns are used
+#'   automatically.
 #' @param min_size       Integer.  Intersections with fewer than this many rows
 #'   are dropped.  Default \code{1L}.
 #' @param n_intersections Integer.  Maximum number of intersections to display
 #'   (top-n by count).  Default \code{40L}.
-#' @param bar_colour     Fill colour for the intersection size bars.
-#'   Default \code{"#2166ac"}.
+#' @param bar_colour     Fill colour for the intersection size bars. Default
+#'   \code{"#2166ac"}.
 #' @param dot_colour     Colour for filled dots and connecting lines in the
 #'   membership matrix.  Default \code{"#2166ac"}.
-#' @param empty_colour   Colour for absent-set dots in the matrix.
-#'   Default \code{"#d9d9d9"}.
-#' @param set_bar_colour Fill colour for the set-size bars.
-#'   Default \code{"#4dac26"}.
+#' @param empty_colour   Colour for absent-set dots in the matrix. Default
+#'   \code{"#d9d9d9"}.
+#' @param set_bar_colour Fill colour for the set-size bars. Default
+#'   \code{"#4dac26"}.
 #' @param text_size      Base font size (pts) passed to all
 #'   \code{\link[ggplot2]{theme}} calls.  Default \code{11}.
 #'

@@ -299,6 +299,10 @@ autoplot_l_qc_overview <- function(
     miss_threshold,
     hwe_p_low_thresh,
     ...) {
+  # check that the ellipses are empty
+  if (length(list(...)) > 0) {
+    stop("no additional arguments should be provided for this plot")
+  }
   if (any(is.na(object))) {
     message(paste(
       "One or more loci are missing for every individual.",
@@ -308,8 +312,8 @@ autoplot_l_qc_overview <- function(
     object <- object[!is.na(object$maf), ]
   }
 
-  qc_report <- data.frame(MAF = object$maf >= maf_threshold,
-                          Missing = object$missingness >= miss_threshold)
+  qc_report <- data.frame(Missing = object$missingness >= miss_threshold,
+                          MAF = object$maf >= maf_threshold)
   # if including HWE
   if ("hwe_p" %in% colnames(object)) {
     qc_report$HWE <- object$hwe_p >= hwe_p_low_thresh

@@ -32,8 +32,8 @@ test_that("autoplot bug with NA values", {
 
   expect_message(
     {
-      pdf(NULL)
-      on.exit(dev.off())
+#      pdf(NULL)
+#      on.exit(dev.off())
       plt <- autoplot(ex_loci_report, type = "overview")
     },
     "One or more loci are missing for every individual"
