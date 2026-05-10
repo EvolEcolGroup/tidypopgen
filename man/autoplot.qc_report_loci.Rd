@@ -39,7 +39,7 @@ For \code{qc_report_loci}, the following types of plots are available:
 \itemize{
 \item \code{overview}: an UpSet plot, giving counts of snps over the threshold for
 missingness, minor allele frequency, and Hardy-Weinberg equilibrium P-value,
-and visualising the interaction between these
+and visualising the interaction between these.
 \item \code{all}: a four panel plot, containing \verb{missing high maf}, \verb{missing low maf},
 \code{hwe}, and \verb{significant hwe} plots
 \item \code{missing}: a histogram of proportion of missing data

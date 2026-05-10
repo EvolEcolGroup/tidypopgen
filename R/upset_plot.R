@@ -46,22 +46,22 @@
 #'
 #' @export
 upset_plot <- function(
-    df,
-    sets             = NULL,
-    min_size         = 1L,
-    n_intersections  = 40L,
-    bar_colour       = "#2166ac",
-    dot_colour       = "#2166ac",
-    empty_colour     = "#d9d9d9",
-    set_bar_colour   = "#4dac26",
-    text_size        = 11
+  df,
+  sets = NULL,
+  min_size = 1L,
+  n_intersections = 40L,
+  bar_colour = "#2166ac",
+  dot_colour = "#2166ac",
+  empty_colour = "#d9d9d9",
+  set_bar_colour = "#4dac26",
+  text_size = 11
 ) {
-
   # ── 0. resolve set columns ─────────────────────────────────────────────────
   if (is.null(sets)) {
     sets <- names(df)[vapply(df, is.logical, logical(1L))]
-    if (length(sets) == 0L)
+    if (length(sets) == 0L) {
       stop("No logical columns found in `df`. Supply `sets` explicitly.")
+    }
   }
 
   # Single authoritative factor level definition used by every panel.
@@ -100,8 +100,10 @@ upset_plot <- function(
 
   # ── 3. long matrix table for dots & lines ──────────────────────────────────
   matrix_long <- inter %>%
-    dplyr::select(dplyr::all_of("intersection_id"), dplyr::all_of("count"),
-                  dplyr::all_of(sets)) %>%
+    dplyr::select(
+      dplyr::all_of("intersection_id"), dplyr::all_of("count"),
+      dplyr::all_of(sets)
+    ) %>%
     tidyr::pivot_longer(
       dplyr::all_of(sets),
       names_to  = "set",
@@ -126,14 +128,18 @@ upset_plot <- function(
   x_limits <- c(0.5, n_inter + 0.5)
 
   # ── 5. TOP panel: intersection size bar chart ──────────────────────────────
-  p_top <- ggplot2::ggplot(inter,
-                           ggplot2::aes(x = .data$intersection_id,
-                                        y = .data$count)) +
+  p_top <- ggplot2::ggplot(
+    inter,
+    ggplot2::aes(
+      x = .data$intersection_id,
+      y = .data$count
+    )
+  ) +
     ggplot2::geom_col(fill = bar_colour, width = 0.6) +
     ggplot2::geom_text(
       ggplot2::aes(label = .data$count),
       vjust = -0.4,
-      size  = text_size * 0.25
+      size = text_size * 0.25
     ) +
     ggplot2::scale_x_continuous(limits = x_limits, expand = c(0, 0)) +
     ggplot2::scale_y_continuous(
@@ -183,8 +189,8 @@ upset_plot <- function(
         x    = .data$intersection_id, xend = .data$intersection_id,
         y    = .data$ymin,            yend = .data$ymax
       ),
-      colour      = dot_colour,
-      linewidth   = 1.2,
+      colour = dot_colour,
+      linewidth = 1.2,
       inherit.aes = FALSE
     ) +
     # present-set dots
@@ -213,7 +219,7 @@ upset_plot <- function(
     ggplot2::geom_text(
       ggplot2::aes(label = .data$size),
       hjust = -0.2,
-      size  = text_size * 0.25
+      size = text_size * 0.25
     ) +
     ggplot2::scale_x_reverse(
       expand = ggplot2::expansion(mult = c(0.15, 0))
@@ -229,7 +235,8 @@ upset_plot <- function(
     )
 
   # ── 8. blank spacer (top-left corner) ──────────────────────────────────────
-  p_empty <- ggplot2::ggplot() + ggplot2::theme_void()
+  p_empty <- ggplot2::ggplot() +
+    ggplot2::theme_void()
 
   # ── 9. assemble with patchwork ─────────────────────────────────────────────
   # Layout:
@@ -238,8 +245,8 @@ upset_plot <- function(
   (p_empty | p_top) /
     (p_sets | p_matrix) +
     patchwork::plot_layout(
-      widths  = c(1, 3),   # set-size bars narrower than main panels
-      heights = c(2, 1.2)  # bar chart taller than matrix
+      widths  = c(1, 3), # set-size bars narrower than main panels
+      heights = c(2, 1.2) # bar chart taller than matrix
     )
 }
 
@@ -269,4 +276,3 @@ compute_intersections <- function(df, sets) {
     dplyr::arrange(dplyr::desc(count)) %>%
     dplyr::mutate(intersection_id = dplyr::row_number())
 }
-

@@ -115,7 +115,7 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' For `qc_report_loci`, the following types of plots are available:
 #' - `overview`: an UpSet plot, giving counts of snps over the threshold for
 #' missingness, minor allele frequency, and Hardy-Weinberg equilibrium P-value,
-#' and visualising the interaction between these
+#' and visualising the interaction between these.
 #' - `all`: a four panel plot, containing `missing high maf`, `missing low maf`,
 #' `hwe`, and `significant hwe` plots
 #' - `missing`: a histogram of proportion of missing data
@@ -180,21 +180,22 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' autoplot(loci_report, type = "significant hwe", hwe_p = 0.01)
 #'
 autoplot.qc_report_loci <- function(
-    object,
-    type = c(
-      "overview",
-      "all",
-      "missing",
-      "missing low maf",
-      "missing high maf",
-      "maf",
-      "hwe",
-      "significant hwe"
-    ),
-    maf_threshold = 0.05,
-    miss_threshold = 0.01,
-    hwe_p = 0.01, # SUGGESTION should this be hwe_p_threshold for consistency?
-    ...) {
+  object,
+  type = c(
+    "overview",
+    "all",
+    "missing",
+    "missing low maf",
+    "missing high maf",
+    "maf",
+    "hwe",
+    "significant hwe"
+  ),
+  maf_threshold = 0.05,
+  miss_threshold = 0.01,
+  hwe_p = 0.01, # SUGGESTION should this be hwe_p_threshold for consistency?
+  ...
+) {
   type <- match.arg(type)
 
   rlang::check_dots_empty()
@@ -248,12 +249,13 @@ autoplot.qc_report_loci <- function(
 }
 
 autoplot_l_qc_all <- function(
-    object,
-    maf_threshold,
-    miss_threshold,
-    hwe_p_low_thresh,
-    hwe_p_vertical_line,
-    ...) {
+  object,
+  maf_threshold,
+  miss_threshold,
+  hwe_p_low_thresh,
+  hwe_p_vertical_line,
+  ...
+) {
   # Missingness (according to MAF thresholds)
   miss_high_maf_plot <- autoplot_l_qc_missing(
     object,
@@ -294,11 +296,12 @@ autoplot_l_qc_all <- function(
 
 
 autoplot_l_qc_overview <- function(
-    object,
-    maf_threshold,
-    miss_threshold,
-    hwe_p_low_thresh,
-    ...) {
+  object,
+  maf_threshold,
+  miss_threshold,
+  hwe_p_low_thresh,
+  ...
+) {
   # check that the ellipses are empty
   if (length(list(...)) > 0) {
     stop("no additional arguments should be provided for this plot")
@@ -312,8 +315,10 @@ autoplot_l_qc_overview <- function(
     object <- object[!is.na(object$maf), ]
   }
 
-  qc_report <- data.frame(Missing = object$missingness < miss_threshold,
-                          MAF = object$maf >= maf_threshold)
+  qc_report <- data.frame(
+    Missing = object$missingness < miss_threshold,
+    MAF = object$maf > maf_threshold
+  )
   # if including HWE
   if ("hwe_p" %in% colnames(object)) {
     qc_report$HWE <- object$hwe_p >= hwe_p_low_thresh
@@ -399,11 +404,12 @@ autoplot_l_qc_hwe <- function(object,
 #' @keywords internal
 #' @noRd
 autoplot_l_qc_missing <- function(
-    object,
-    miss_threshold,
-    maf_low_thresh = NULL,
-    maf_high_thresh = NULL,
-    ...) {
+  object,
+  miss_threshold,
+  maf_low_thresh = NULL,
+  maf_high_thresh = NULL,
+  ...
+) {
   # check ellipses are empty
   rlang::check_dots_empty()
 
