@@ -65,9 +65,8 @@ upset_plot <- function(
   }
 
   # Single authoritative factor level definition used by every panel.
-  # Bottom of the y-axis = sets[1], top = sets[length(sets)].
-  # scale_y_discrete() places level 1 at the bottom, so reversing `sets`
-  # puts the first element at the top visually.
+  # set_levels is rev(sets) so that when used with scale_y_discrete(limits = set_levels),
+  # the first element of sets appears at the top of the y-axis.
   set_levels <- rev(sets)
 
   # Named integer lookup: set name -> y-axis position (integer).

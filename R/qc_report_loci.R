@@ -193,7 +193,7 @@ autoplot.qc_report_loci <- function(
   ),
   maf_threshold = 0.05,
   miss_threshold = 0.01,
-  hwe_p = 0.01, # SUGGESTION should this be hwe_p_threshold for consistency?
+  hwe_p = 0.01,
   ...
 ) {
   type <- match.arg(type)
