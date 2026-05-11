@@ -64,8 +64,8 @@ upset_plot <- function(
     }
   }
 
-  # Single authoritative factor level definition used by every panel.
-  # set_levels is rev(sets) so that when used with scale_y_discrete(limits = set_levels),
+  # Single authoritative factor level definition used by every panel. set_levels
+  # is rev(sets) so that when used with scale_y_discrete(limits = set_levels),
   # the first element of sets appears at the top of the y-axis.
   set_levels <- rev(sets)
 

@@ -92,7 +92,7 @@ data <- data %>%
   filter(id %in% individual_report$id & individual_report$to_keep == TRUE)
 ```
 
-We can now view a summary of our cleaned data set again, showing that our data has reduced from the origina; 12 individuals, to 8.
+We can now view a summary of our cleaned data set again, showing that our data has reduced from the original; 12 individuals, to 8.
 
 ```{r}
 summary(data)
