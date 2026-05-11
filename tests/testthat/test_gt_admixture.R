@@ -612,3 +612,57 @@ test_that("set output dir for admixture Q files", {
   expect_equal(length(list.files(relative_path)), 8)
   expect_true(all(grepl("\\.Q$|\\.P$", list.files(relative_path))))
 })
+
+test_that("seed length", {
+  vcf_path <-
+    system.file(
+      "/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+      package = "tidypopgen"
+    )
+  anole_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    backingfile = tempfile("anolis_")
+  )
+  pops_path <- system.file(
+    "/extdata/anolis/plot_order_punctatus_n46.csv",
+    package = "tidypopgen"
+  )
+  pops <- readr::read_csv(pops_path, show_col_types = FALSE)
+  anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
+  anole_gt <- anole_gt %>%
+    mutate(population = pops$pop[match(pops$ID, .data$id)])
+
+  # seed should be the length of n_runs * K OR the length of n_runs
+  # and the whole vector is repeated for each k
+
+  res <- gt_admixture(
+    x = anole_gt,
+    k = c(3, 4),
+    crossval = FALSE,
+    n_cores = 1,
+    n_runs = 2,
+    seed = c(1, 2),
+    conda_env = "none"
+  )
+
+  # find the number after "Random seed:" in the log
+  seeds <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res$log)
+  expect_equal(as.numeric(seeds), c(1, 2, 1, 2))
+
+  # the log shows this uses seed 1, 2 and then 0, 0
+
+  res2 <- gt_admixture(
+    x = anole_gt,
+    k = c(3, 4),
+    crossval = FALSE,
+    n_cores = 1,
+    n_runs = 2,
+    seed = c(1, 2, 3, 4),
+    conda_env = "none"
+  )
+
+  # find the number after "Random seed:" in the log
+  seeds2 <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res2$log)
+  expect_equal(as.numeric(seeds2), c(1, 2, 3, 4))
+})
