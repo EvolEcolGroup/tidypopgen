@@ -1,4 +1,5 @@
 # tidypopgen dev
+* fix seed argument of `gt_admixture()`
 * implement our own upset plot function to avoid dependency on `UpSetR`
   package, which is no longer maintained
 * fix reading of VCFs when genotype separator symbol is present in the
