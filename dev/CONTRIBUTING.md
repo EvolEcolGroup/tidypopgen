@@ -37,7 +37,7 @@ builds the vignette and runs the tests.:
     devtools::check()
 
 Make sure that you have resolved all warnings and notes raised by
-`devtools::check()`!
+[`devtools::check()`](https://devtools.r-lib.org/reference/check.html)!
 
 Once you have followed **those 3 steps**, you are ready to make your
 Pull Request. Your changes will go through automatic continuous

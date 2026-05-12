@@ -32,6 +32,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/c.gt_admix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/cash-set-.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/cbind.gen_tbl.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/compute_intersections.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/count_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/distruct_colours.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/filter.gen_tbl.html</loc></url>
@@ -127,6 +128,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/tidy.q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/tidy_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/tidypopgen-package.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/upset_plot.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_nwise_pop_pbs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_pairwise_pop_fst.html</loc></url>

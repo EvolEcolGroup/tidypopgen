@@ -40,7 +40,25 @@ data <- gen_tibble(
 )
 ```
 
-\#Quality control for individuals
+First, lets take a look at the data we have.
+
+``` r
+
+count_loci(data)
+```
+
+    ## [1] 961
+
+``` r
+
+nrow(data)
+```
+
+    ## [1] 12
+
+We can see that there are 961 SNPs and 12 individuals in this dataset.
+
+## Quality control for individuals
 
 ``` r
 
@@ -67,7 +85,7 @@ autoplot(individual_report)
 ```
 
 ![Scatter plot of missingness proportion and observed heterozygosity for
-each individual](a02_qc_files/figure-html/unnamed-chunk-3-1.png)
+each individual](a02_qc_files/figure-html/unnamed-chunk-4-1.png)
 
 Here, the red line indicates a threshold for proportion of missing loci,
 which is set as 5% by default, and can be altered using the
@@ -118,9 +136,12 @@ the largest possible group with no related individuals in the third
 column `to_keep`. This boolean column recommends which individuals to
 remove (FALSE) and to keep (TRUE) to achieve an unrelated sample.
 
+For example, we can use `kings_threshold = "first"` to specify that we
+want to remove first degree relatives.
+
 ``` r
 
-individual_report <- qc_report_indiv(data, kings_threshold = 0.177)
+individual_report <- qc_report_indiv(data, kings_threshold = "first")
 summary(individual_report)
 ```
 
@@ -132,7 +153,7 @@ summary(individual_report)
     ##  3rd Qu.:0.3985   3rd Qu.:0.04058                   Max.nchar:2  
     ##  Max.   :0.4015   Max.   :0.04266
 
-We can remove the recommended individuals by using:
+We can then remove the recommended individuals by using:
 
 ``` r
 
@@ -141,7 +162,7 @@ data <- data %>%
 ```
 
 We can now view a summary of our cleaned data set again, showing that
-our data has reduced from 12 to 8 individuals.
+our data has reduced from the original; 12 individuals, to 8.
 
 ``` r
 
@@ -186,66 +207,42 @@ can be visualised in autoplot :
 autoplot(loci_report, type = "overview")
 ```
 
-    ## Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
-    ## ℹ Please use tidy evaluation idioms with `aes()`.
-    ## ℹ See also `vignette("ggplot2-in-packages")` for more information.
-    ## ℹ The deprecated feature was likely used in the UpSetR package.
-    ##   Please report the issue to the authors.
-    ## This warning is displayed once per session.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-    ## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-    ## ℹ Please use `linewidth` instead.
-    ## ℹ The deprecated feature was likely used in the UpSetR package.
-    ##   Please report the issue to the authors.
-    ## This warning is displayed once per session.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
-    ## Warning: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
-    ## ℹ Please use the `linewidth` argument instead.
-    ## ℹ The deprecated feature was likely used in the UpSetR package.
-    ##   Please report the issue to the authors.
-    ## This warning is displayed once per session.
-    ## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-    ## generated.
-
 ![UpSet plot giving counts of snps over the threshold for: missingness,
 minor allele frequency, and Hardy-Weinberg equilibrium
-P-value](a02_qc_files/figure-html/unnamed-chunk-10-1.png)
+P-value](a02_qc_files/figure-html/unnamed-chunk-11-1.png)
 
-Using ‘overview’ provides an Upset plot, which is designed to show the
-intersection of different sets in the same way as a Venn diagram. SNPs
-can be divided into ‘sets’ that each pass predefined quality control
-threshold; a set of SNPs with missingness under a given threshold, a set
-of SNPs with MAF above a given threshold, and a set of SNPs with a
-Hardy-Weinberg exact p-value that falls above a given significance
-level.
+Using ‘overview’ provides an Upset plot. Upset plots are designed to
+show the intersection of different sets in the same way as a Venn
+diagram. SNPs can be divided into ‘sets’ that each pass predefined
+quality control threshold; a set of SNPs with missingness under a given
+threshold, a set of SNPs with MAF above a given threshold, and a set of
+SNPs with a Hardy-Weinberg exact p-value that falls above a given
+significance level.
 
 The thresholds for each parameter, (percentage of missingness that is
 accepted, minor allele frequency cutoff, and Hardy-Weinberg equilibrium
 p-value) can be adjusted using the parameters provided in autoplot. For
-example:
+example, lets adjust the thresholds to 5% missingness, 10% minor allele
+frequency, and a Hardy-Weinberg p-value of 0.05.
 
 ``` r
 
 autoplot(loci_report,
   type = "overview",
-  miss_threshold = 0.03,
-  maf_threshold = 0.02,
-  hwe_p = 0.01
+  miss_threshold = 0.05,
+  maf_threshold = 0.1,
+  hwe_p = 0.05
 )
 ```
 
 ![Upset plot as above, with adjusted
-thresholds](a02_qc_files/figure-html/unnamed-chunk-11-1.png)
+thresholds](a02_qc_files/figure-html/unnamed-chunk-12-1.png)
 
 The upset plot then visualises our 961 SNPs within their respective
-sets. The number above the second bar indicates that 262 SNPs occur in
-all 3 sets, meaning 262 SNPs pass all of our QC thresholds. The combined
+sets. The number above the second bar indicates that 607 SNPs occur in
+all 3 sets, meaning 607 SNPs pass all of our QC thresholds. The combined
 total of the first and second bars represents the number of SNPs that
-pass our MAF and HWE thresholds, here 939 SNPs.
+pass our MAF and HWE thresholds, here 806 SNPs.
 
 To examine each QC measure in further detail, we can plot a different
 summary panel.
@@ -265,7 +262,7 @@ data for snps with minor allele frequency above the threshold, a
 histogram of the proportion of missing data for snps with minor allele
 freqency below the threshold, a histogram of HWE exact test p-values,
 and a histogram of significant HWE exact test
-p-values](a02_qc_files/figure-html/unnamed-chunk-12-1.png)
+p-values](a02_qc_files/figure-html/unnamed-chunk-13-1.png)
 
 We can then begin to consider how to quality control this raw data set.
 Let’s start by filtering SNPs according to their minor allele frequency.
@@ -277,7 +274,7 @@ autoplot(loci_report, type = "maf")
 ```
 
 ![Histogram of minor allele
-frequency](a02_qc_files/figure-html/unnamed-chunk-13-1.png)
+frequency](a02_qc_files/figure-html/unnamed-chunk-14-1.png)
 
 Here we can see there are some monomorphic SNPs in the data set. Let’s
 filter out loci with a minor allele frequency lower than 2%, by using
@@ -302,7 +299,7 @@ autoplot(loci_report, type = "missing", miss_threshold = 0.05)
 ```
 
 ![Histogram of the proportion of missing
-data](a02_qc_files/figure-html/unnamed-chunk-15-1.png)
+data](a02_qc_files/figure-html/unnamed-chunk-16-1.png)
 
 We can see here that most SNPs have low missingness, under our 5%
 threshold, some do, however, have missingness over our threshold. To
@@ -327,7 +324,7 @@ autoplot(loci_report, type = "significant hwe", hwe_p = 0.01)
 ```
 
 ![Histogram of significant HWE exact test
-p-values](a02_qc_files/figure-html/unnamed-chunk-17-1.png)
+p-values](a02_qc_files/figure-html/unnamed-chunk-18-1.png)
 
 None of the SNPs in our data are significant, however there may be
 circumstances where we would want to cut out the most extreme cases, if
@@ -366,15 +363,15 @@ data <- gt_update_backingfile(data)
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/RtmpGNRJXk/file27e84eb5b8a5_v2.rds
+    ## using FBM RDS: /tmp/RtmpklNOm0/file29121185bf02_v2.rds
 
-    ## with FBM backing file: /tmp/RtmpGNRJXk/file27e84eb5b8a5_v2.bk
+    ## with FBM backing file: /tmp/RtmpklNOm0/file29121185bf02_v2.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpGNRJXk/file27e84eb5b8a5_v2.gt')
+    ## gt_load('/tmp/RtmpklNOm0/file29121185bf02_v2.gt')
 
 And then we can impute using:
 
@@ -419,21 +416,21 @@ gt_save(ld_data, file_name = tempfile())
 ```
 
     ## 
-    ## gen_tibble saved to /tmp/RtmpGNRJXk/file27e81192148f.gt
+    ## gen_tibble saved to /tmp/RtmpklNOm0/file29127419237e.gt
 
-    ## using FBM RDS: /tmp/RtmpGNRJXk/file27e84eb5b8a5_v2.rds
+    ## using FBM RDS: /tmp/RtmpklNOm0/file29121185bf02_v2.rds
 
-    ## with FBM backing file: /tmp/RtmpGNRJXk/file27e84eb5b8a5_v2.bk
+    ## with FBM backing file: /tmp/RtmpklNOm0/file29121185bf02_v2.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpGNRJXk/file27e81192148f.gt')
+    ## gt_load('/tmp/RtmpklNOm0/file29127419237e.gt')
 
-    ## [1] "/tmp/RtmpGNRJXk/file27e81192148f.gt"    
-    ## [2] "/tmp/RtmpGNRJXk/file27e84eb5b8a5_v2.rds"
-    ## [3] "/tmp/RtmpGNRJXk/file27e84eb5b8a5_v2.bk"
+    ## [1] "/tmp/RtmpklNOm0/file29127419237e.gt"    
+    ## [2] "/tmp/RtmpklNOm0/file29121185bf02_v2.rds"
+    ## [3] "/tmp/RtmpklNOm0/file29121185bf02_v2.bk"
 
 ## Grouping data
 

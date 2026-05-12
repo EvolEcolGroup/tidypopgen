@@ -282,6 +282,9 @@ Functions reporting summary statistics for a `gen_tibble`.
 - [`filter_high_relatedness()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/filter_high_relatedness.md)
   : Filter individuals based on a relationship threshold
 
+- [`upset_plot()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/upset_plot.md)
+  : Draw an UpSet plot from a data frame of logical columns
+
 ## Loci
 
 Functions operating across loci.

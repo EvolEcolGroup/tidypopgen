@@ -4,7 +4,7 @@ For `qc_report_loci`, the following types of plots are available:
 
 - `overview`: an UpSet plot, giving counts of snps over the threshold
   for missingness, minor allele frequency, and Hardy-Weinberg
-  equilibrium P-value, and visualising the interaction between these
+  equilibrium P-value, and visualising the interaction between these.
 
 - `all`: a four panel plot, containing `missing high maf`,
   `missing low maf`, `hwe`, and `significant hwe` plots
@@ -96,19 +96,6 @@ loci_report <- example_gt %>% qc_report_loci()
 
 # Plot the QC report overview
 autoplot(loci_report, type = "overview")
-#> Warning: `aes_string()` was deprecated in ggplot2 3.0.0.
-#> ℹ Please use tidy evaluation idioms with `aes()`.
-#> ℹ See also `vignette("ggplot2-in-packages")` for more information.
-#> ℹ The deprecated feature was likely used in the UpSetR package.
-#>   Please report the issue to the authors.
-#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-#> ℹ Please use `linewidth` instead.
-#> ℹ The deprecated feature was likely used in the UpSetR package.
-#>   Please report the issue to the authors.
-#> Warning: The `size` argument of `element_line()` is deprecated as of ggplot2 3.4.0.
-#> ℹ Please use the `linewidth` argument instead.
-#> ℹ The deprecated feature was likely used in the UpSetR package.
-#>   Please report the issue to the authors.
 
 
 # Plot the QC report all
