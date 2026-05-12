@@ -60,17 +60,26 @@
 # default, a copy from `tidygenclust` will be preferred if available, otherwise
 # a local copy will be used.
 gt_admixture <- function(
-    x,
-    k,
-    n_runs = 1,
-    crossval = FALSE,
-    n_cores = 1,
-    seed = NULL,
-    conda_env = "auto",
-    outdir = NULL) {
+  x,
+  k,
+  n_runs = 1,
+  crossval = FALSE,
+  n_cores = 1,
+  seed = NULL,
+  conda_env = "auto",
+  outdir = NULL
+) {
   # check that we have the right number of repeats
-  if (length(seed) != n_runs) {
-    stop("'seed' should be a vector of length 'n_runs'")
+  if (!is.null(seed) && length(seed) != n_runs && length(seed) != (n_runs * length(k))) { #nolint
+    stop(
+      "'seed' should be a vector of length 'n_runs' OR 'n_runs' * ",
+      "length(k)"
+    )
+  }
+
+  if (!is.null(seed) && length(seed) == n_runs) {
+    # if seed is the same for each k, repeat it for each k value
+    seed <- rep(seed, length(k))
   }
 
   # if x is a character, check that it is file that exists
@@ -282,6 +291,7 @@ gt_admixture <- function(
           ":"
         )[[1]][2]) # nolint
       }
+
       index <- index + 1
     }
   }
