@@ -1,6 +1,6 @@
 test_that("using integers as names works", {
   vcf_path <-
-    system.file("/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+    system.file("extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
       package = "tidypopgen"
     )
   anole_gt <-
@@ -8,7 +8,7 @@ test_that("using integers as names works", {
       quiet = TRUE, backingfile = tempfile("anolis_"),
       names_as_int = TRUE
     )
-  pops_path <- system.file("/extdata/anolis/punctatus_n46_meta.csv",
+  pops_path <- system.file("extdata/anolis/punctatus_n46_meta.csv",
     package = "tidypopgen"
   )
   pops <- read.csv(pops_path)
