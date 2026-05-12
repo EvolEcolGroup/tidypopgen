@@ -633,6 +633,19 @@ test_that("seed length", {
   anole_gt <- anole_gt %>%
     mutate(population = pops$pop[match(pops$ID, .data$id)])
 
+  res_null <- gt_admixture(
+    x = anole_gt,
+    k = c(3, 4),
+    crossval = FALSE,
+    n_cores = 1,
+    n_runs = 2,
+    seed = NULL,
+    conda_env = "none"
+  )
+  null_seeds <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res_null$log)
+  # this should be the default seed of 43
+  expect_equal(as.numeric(null_seeds), rep(43, 4))
+
   # seed should be the length of n_runs * K OR the length of n_runs
   # and the whole vector is repeated for each k
 
@@ -649,8 +662,6 @@ test_that("seed length", {
   # find the number after "Random seed:" in the log
   seeds <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res$log)
   expect_equal(as.numeric(seeds), c(1, 2, 1, 2))
-
-  # the log shows this uses seed 1, 2 and then 0, 0
 
   res2 <- gt_admixture(
     x = anole_gt,

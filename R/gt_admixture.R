@@ -70,14 +70,14 @@ gt_admixture <- function(
   outdir = NULL
 ) {
   # check that we have the right number of repeats
-  if (length(seed) != n_runs && length(seed) != (n_runs * length(k))) {
+  if (!is.null(seed) && length(seed) != n_runs && length(seed) != (n_runs * length(k))) { #nolint
     stop(
       "'seed' should be a vector of length 'n_runs' OR 'n_runs' * ",
       "length(k)"
     )
   }
 
-  if (length(seed) == n_runs) {
+  if (!is.null(seed) && length(seed) == n_runs) {
     # if seed is the same for each k, repeat it for each k value
     seed <- rep(seed, length(k))
   }
