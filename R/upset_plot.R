@@ -266,6 +266,8 @@ upset_plot <- function(
 #'   intersection), and an \code{intersection_id} integer giving the rank order
 #'   (1 = largest intersection).
 #' @keywords internal
+#' @noRd
+
 compute_intersections <- function(df, sets) {
   df %>%
     dplyr::select(dplyr::all_of(sets)) %>%
