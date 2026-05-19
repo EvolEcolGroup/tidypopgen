@@ -1,3 +1,5 @@
+This is a resubmission as the original submission failed due to multithreading
+from data.table in some tests, which is now fixed.
 New minor version, fixing a few bugs and removing a dependency on UpSetR, which is 
 no longer maintained (removed as requested by CRAN). 
 
