@@ -1,3 +1,10 @@
+# limit number of threads for tests
+data.table::setDTthreads(2)
+if (rlang::is_installed("RhpcBLASctl")) {
+  RhpcBLASctl::blas_set_num_threads(2)
+  RhpcBLASctl::omp_set_num_threads(2)
+}
+
 bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
 missing_gt <- gen_tibble(
   bed_file,
@@ -62,7 +69,7 @@ test_that("gt_pcadapt 'U' error with heavily imputed SNPs", {
   filename <- read.pcadapt(paste0(path, ".bed"), type = "bed")
   # and pcadapt works on this bed file
   # (although, this uses pcadapt, while our function uses snp_pcadapt)
-  x <- pcadapt(input = filename, K = 2)
+  x <- pcadapt::pcadapt(input = filename, K = 2)
   expect_true(inherits(x, "pcadapt"))
 
   # next, we used bigsnpr:::multiLinReg directly to generate the tscores object

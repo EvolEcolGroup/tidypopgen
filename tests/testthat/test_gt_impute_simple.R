@@ -1,3 +1,10 @@
+# limit number of threads for tests
+data.table::setDTthreads(2)
+if (rlang::is_installed("RhpcBLASctl")) {
+  RhpcBLASctl::blas_set_num_threads(2)
+  RhpcBLASctl::omp_set_num_threads(2)
+}
+
 bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
 missing_gt <- gen_tibble(
   bed_file,
