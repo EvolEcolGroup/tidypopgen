@@ -1,5 +1,30 @@
 # Changelog
 
+## tidypopgen 0.4.4
+
+CRAN release: 2026-05-19
+
+- fix seed argument of
+  [`gt_admixture()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_admixture.md)
+- implement our own upset plot function to avoid dependency on `UpSetR`
+  package, which is no longer maintained
+- fix reading of VCFs when genotype separator symbol is present in the
+  sample information
+- fix `loci_` functions output when calculating across groups for a
+  single loci
+- fix
+  [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md)
+  to preserve imputation metadata when backing files are updated
+- add validation in
+  [`gt_impute_simple()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.md)
+  to detect and report SNP dimension mismatches caused by excluded SNPs
+- add `outdir` argument in
+  [`gt_admixture()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_admixture.md)
+  to store partial outputs for large jobs
+- fix
+  [`gt_admixture()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_admixture.md)
+  output file names when n_runs \> 1
+
 ## tidypopgen 0.4.3
 
 CRAN release: 2026-01-23
