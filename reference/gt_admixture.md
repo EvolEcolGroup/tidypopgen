@@ -15,7 +15,8 @@ gt_admixture(
   crossval = FALSE,
   n_cores = 1,
   seed = NULL,
-  conda_env = "auto"
+  conda_env = "auto",
+  outdir = NULL
 )
 ```
 
@@ -52,6 +53,12 @@ gt_admixture(
   the name of the conda environment to use. "none" forces the use of a
   local copy, whilst any other string will direct the function to use a
   custom conda environment.
+
+- outdir:
+
+  optional path to write intermediate admixture output files. If not
+  specified, defaults to a temporary file. Use this argument to store
+  intermediate files.
 
 ## Value
 

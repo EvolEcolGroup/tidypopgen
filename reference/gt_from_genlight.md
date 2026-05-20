@@ -43,6 +43,7 @@ A `gen_tibble` object
 ## Examples
 
 ``` r
+
 # Create a simple genlight object
 x <- new("genlight",
   list(

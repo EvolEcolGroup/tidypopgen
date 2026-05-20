@@ -243,5 +243,10 @@ sheep_roh <- windows_indiv_roh(sheep_gt)
 #> N. of RUNS for individual H154 is: 31
 #> N. of RUNS for individual H155 is: 32
 detectRUNS::plot_Runs(runs = sheep_roh)
+#> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+#> ℹ Please use `linewidth` instead.
+#> ℹ The deprecated feature was likely used in the detectRUNS package.
+#>   Please report the issue at
+#>   <https://github.com/bioinformatics-ptp/detectRUNS/issues>.
 
 ```

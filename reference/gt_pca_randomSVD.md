@@ -106,14 +106,25 @@ with elements: A named list (an S3 class "big_SVD") of
 
 - `call`, the call that generated the object.
 
-Note: rather than accessing these elements directly, it is better to use
+## Note
+
+Rather than accessing these elements directly, it is better to use
 `tidy` and `augment`. See
 [`gt_pca_tidiers`](https://evolecolgroup.github.io/tidypopgen/reference/tidy_gt_pca.md).
+
+Monomorphic markers must be removed before PCA is computed. The error
+message 'Error: some variables have zero scaling; remove them before
+attempting to scale.' indicates that monomorphic markers are present.
 
 ## See also
 
 [`bigstatsr::big_randomSVD()`](https://privefl.github.io/bigstatsr/reference/big_randomSVD.html)
 which this function wraps.
+
+Other gt_pca_functions:
+[`gt_pca`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md),
+[`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_autoSVD.md),
+[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_partialSVD.md)
 
 ## Examples
 

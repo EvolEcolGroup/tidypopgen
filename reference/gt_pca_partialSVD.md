@@ -70,14 +70,25 @@ with elements: A named list (an S3 class "big_SVD") of
 - `square_frobenius`, used to compute the proportion of variance
   explained by the components (optional)
 
-  Note: rather than accessing these elements directly, it is better to
-  use `tidy` and `augment`. See
-  [`gt_pca_tidiers`](https://evolecolgroup.github.io/tidypopgen/reference/tidy_gt_pca.md).
+## Note
+
+Rather than accessing these elements directly, it is better to use
+`tidy` and `augment`. See
+[`gt_pca_tidiers`](https://evolecolgroup.github.io/tidypopgen/reference/tidy_gt_pca.md).
+
+Monomorphic markers must be removed before PCA is computed. The error
+message 'Error: some variables have zero scaling; remove them before
+attempting to scale.' indicates that monomorphic markers are present.
 
 ## See also
 
 [`bigstatsr::big_SVD()`](https://privefl.github.io/bigstatsr/reference/big_SVD.html)
 which this function wraps.
+
+Other gt_pca_functions:
+[`gt_pca`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md),
+[`gt_pca_autoSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_autoSVD.md),
+[`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
 
 ## Examples
 

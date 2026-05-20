@@ -14,6 +14,7 @@ paper if you use `tidypopgen` in your research.
 You can install the release version of `tidypopgen` from CRAN:
 
 ``` r
+
 install.packages("tidypopgen")
 ```
 
@@ -21,6 +22,7 @@ You can install the latest development version directly from r-universe
 (recommended):
 
 ``` r
+
 install.packages('tidypopgen', repos = c('https://evolecolgroup.r-universe.dev',
                  'https://cloud.r-project.org'))
 ```
@@ -30,8 +32,9 @@ might need to set up your development environment, which can be a bit
 more complex):
 
 ``` r
-install.packages("devtools")
-devtools::install_github("EvolEcolGroup/tidypopgen")
+
+install.packages("pak")
+pak::pak("EvolEcolGroup/tidypopgen@dev")
 ```
 
 ## Examples

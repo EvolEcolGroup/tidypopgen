@@ -29,7 +29,7 @@ gt_update_backingfile(
   the path, including the file name without extension, for backing files
   used to store the data (they will be given a .bk and .rds
   automatically). If left to NULL (the default), the file name will be
-  based on the name f the current backing file.
+  based on the name of the current backing file.
 
 - chunk_size:
 
@@ -68,11 +68,11 @@ example_gt <- load_example_gt("gen_tbl")
 gt_update_backingfile(example_gt)
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpKZXfxT/file21802c0f09ee_v2.rds
-#> with FBM backing file: /tmp/RtmpKZXfxT/file21802c0f09ee_v2.bk
+#> using FBM RDS: /tmp/RtmpZnAKr6/file22af2db59853_v2.rds
+#> with FBM backing file: /tmp/RtmpZnAKr6/file22af2db59853_v2.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpKZXfxT/file21802c0f09ee_v2.gt')
+#> gt_load('/tmp/RtmpZnAKr6/file22af2db59853_v2.gt')
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 3
 #>   id    population  genotypes
@@ -90,9 +90,9 @@ gt_update_backingfile(example_gt)
 example_gt <- example_gt %>% gt_update_backingfile()
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpKZXfxT/file21802c0f09ee_v3.rds
-#> with FBM backing file: /tmp/RtmpKZXfxT/file21802c0f09ee_v3.bk
+#> using FBM RDS: /tmp/RtmpZnAKr6/file22af2db59853_v3.rds
+#> with FBM backing file: /tmp/RtmpZnAKr6/file22af2db59853_v3.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpKZXfxT/file21802c0f09ee_v3.gt')
+#> gt_load('/tmp/RtmpZnAKr6/file22af2db59853_v3.gt')
 ```

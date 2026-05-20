@@ -134,14 +134,25 @@ function iteratively removes regions of long range LD. If you encounter:
 exceeds the number of variants on at least one of your chromosomes. Try
 reducing 'roll_size' to avoid this error.
 
-Note: rather than accessing these elements directly, it is better to use
+## Note
+
+rather than accessing these elements directly, it is better to use
 `tidy` and `augment`. See
 [`gt_pca_tidiers`](https://evolecolgroup.github.io/tidypopgen/reference/tidy_gt_pca.md).
+
+Monomorphic markers must be removed before PCA is computed. The error
+message 'Error: some variables have zero scaling; remove them before
+attempting to scale.' indicates that monomorphic markers are present.
 
 ## See also
 
 [`bigsnpr::snp_autoSVD()`](https://privefl.github.io/bigsnpr/reference/snp_autoSVD.html)
 which this function wraps.
+
+Other gt_pca_functions:
+[`gt_pca`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca.md),
+[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_partialSVD.md),
+[`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
 
 ## Examples
 
