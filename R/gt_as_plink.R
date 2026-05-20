@@ -253,19 +253,19 @@ gt_write_ped_raw <- function(
     phenotype = pull_na(x, "phenotype")
   )
   # recode some variables
-  indiv_meta$sex <- dplyr::case_match(
+  indiv_meta$sex <- dplyr::recode_values(
     as.character(indiv_meta$sex),
     "female" ~ "2",
     "male" ~ "1",
-    .default = "0"
+    default = "0"
   )
   indiv_meta$pat[is.na(indiv_meta$pat)] <- 0
   indiv_meta$mat[is.na(indiv_meta$mat)] <- 0
-  indiv_meta$phenotype <- dplyr::case_match(
+  indiv_meta$phenotype <- dplyr::recode_values(
     as.character(indiv_meta$phenotype),
     "control" ~ "1",
     "case" ~ "2",
-    .default = indiv_meta$phenotype
+    default = indiv_meta$phenotype
   )
   indiv_meta$phenotype[is.na(indiv_meta$phenotype)] <- -9
 
@@ -346,7 +346,7 @@ recode_genotype <- function(x, allele_ref, allele_alt) {
     paste(allele_ref, allele_alt),
     paste(allele_alt, allele_alt)
   )
-  x <- dplyr::case_match(
+  x <- dplyr::recode_values(
     x,
     "0" ~ genotypes[1],
     "1" ~ genotypes[2],

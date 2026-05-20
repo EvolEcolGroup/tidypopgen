@@ -344,6 +344,7 @@ test_that("our stdevs are comparable to prcomp", {
   #########################
   # TODO there seems to be a bug in the gt_pca_partialSVD function where
   # missing values are detected even when excluded
+  families <- gt_update_backingfile(families)
   families <- gt_impute_simple(families, method = "mode")
   gt_pca_result <- families %>% gt_pca_partialSVD()
   tidy_pca <- tidy(gt_pca_result, matrix = "eigenvalues")

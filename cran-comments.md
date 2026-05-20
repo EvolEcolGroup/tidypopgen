@@ -1,8 +1,10 @@
-New minor version, fixing a test that occasionally failed if name of temp file
-contained the certain pattern.
+This is a resubmission as the original submission failed due to multithreading
+from data.table in some tests, which is now fixed.
+New minor version, fixing a few bugs and removing a dependency on UpSetR, which is 
+no longer maintained (removed as requested by CRAN). 
 
 ## Test environments
-- Github Actions R-CMD-check (ubuntu-20.04): r-devel, r-release, r-oldrel
+- Github Actions R-CMD-check (ubuntu-24.04): r-devel, r-release, r-oldrel
 - Github Actions R-CMD-check (windows): r-release
 - Github Actions R-CMD-check (macOS): r-release
 - R-hub r-devel: linux, m1-san, macos-arm64, windows

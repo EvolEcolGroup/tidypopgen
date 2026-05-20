@@ -66,9 +66,6 @@ vectors)
 \item \code{method}, a string defining the method (in this case 'randomSVD'),
 \item \code{call}, the call that generated the object.
 }
-
-Note: rather than accessing these elements directly, it is better to use
-\code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 }
 \description{
 This function performs Principal Component Analysis on a \code{gen_tibble},
@@ -78,6 +75,14 @@ This algorithm is linear in time in all dimensions and is very
 memory-efficient. Thus, it can be used on very large big.matrices.
 This function is a wrapper
 for \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}}
+}
+\note{
+Rather than accessing these elements directly, it is better to use
+\code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
+
+Monomorphic markers must be removed before PCA is computed. The error
+message 'Error: some variables have zero scaling; remove them before
+attempting to scale.' indicates that monomorphic markers are present.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
@@ -104,4 +109,10 @@ gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
 }
 \seealso{
 \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}} which this function wraps.
+
+Other gt_pca_functions: 
+\code{\link{gt_pca}},
+\code{\link{gt_pca_autoSVD}()},
+\code{\link{gt_pca_partialSVD}()}
 }
+\concept{gt_pca_functions}

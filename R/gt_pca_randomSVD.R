@@ -44,8 +44,12 @@
 #' - `method`, a string defining the method (in this case 'randomSVD'),
 #' - `call`, the call that generated the object.
 #'
-#' Note: rather than accessing these elements directly, it is better to use
+#' @note Rather than accessing these elements directly, it is better to use
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
+#'
+#' @note Monomorphic markers must be removed before PCA is computed. The error
+#' message 'Error: some variables have zero scaling; remove them before
+#' attempting to scale.' indicates that monomorphic markers are present.
 #' @export
 #' @seealso [bigstatsr::big_randomSVD()] which this function wraps.
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
@@ -68,7 +72,7 @@
 #'
 #' # Create PCA object, including total variance
 #' gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
-#'
+#' @family gt_pca_functions
 # nolint start
 gt_pca_randomSVD <- function(
     # nolint end

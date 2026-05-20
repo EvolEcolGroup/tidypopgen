@@ -1,3 +1,10 @@
+# limit number of threads for tests
+data.table::setDTthreads(2)
+if (rlang::is_installed("RhpcBLASctl")) {
+  RhpcBLASctl::blas_set_num_threads(2)
+  RhpcBLASctl::omp_set_num_threads(2)
+}
+
 bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
 missing_gt <- gen_tibble(
   bed_file,
@@ -32,13 +39,24 @@ test_that("impute and use the imputation", {
 
 test_that("backingfile error", {
   # remove an individual from missing_gt
-  missing_gt <- missing_gt[-1, ]
+  missing_gt_indiv <- missing_gt[-1, ]
   # try to impute
   expect_error(
-    missing_gt <- gt_impute_simple(missing_gt, method = "mode"),
+    missing_gt <- gt_impute_simple(missing_gt_indiv, method = "mode"),
     "The number of individuals in the gen_tibble does not match "
   )
+
+  # remove SNPs from missing_gt
+  missing_gt_snps <- missing_gt %>%
+    select_loci(c(1:100))
+  # try to impute
+  expect_error(
+    missing_gt_imputed <- gt_impute_simple(missing_gt_snps, method = "mode"),
+    "The number of SNPs in the gen_tibble does not match "
+  )
 })
+
+
 
 test_that("error imputing an already imputed set", {
   # impute
@@ -174,133 +192,6 @@ test_that("gt_impute imputes properly", {
   expect_false(any(is.na(show_genotypes(imputed_gt_random))))
 })
 
-
-test_that("imputing subsets", {
-  test_indiv_meta <- data.frame(
-    id = c("a", "b", "c", "d", "e", "f"),
-    population = c("pop1", "pop1", "pop2", "pop1", "pop1", "pop2")
-  )
-
-  test_genotypes <- matrix(
-    c(
-      0,
-      2,
-      1,
-      1,
-      0, #
-      0,
-      0,
-      2,
-      0,
-      1, #
-      2,
-      0,
-      0,
-      1,
-      1, #
-      1,
-      1,
-      2,
-      2,
-      2, #
-      0,
-      0,
-      2,
-      1,
-      1, #
-      NA,
-      NA,
-      NA,
-      NA,
-      NA #
-    ),
-    nrow = 6,
-    byrow = TRUE
-  )
-
-  test_loci <- data.frame(
-    name = paste0("rs", 1:5),
-    chromosome = c(1, 1, 1, 2, 2),
-    position = c(3, 65, 343, 23, 456),
-    genetic_dist = as.integer(rep(0, 5)),
-    allele_ref = c("A", "T", "C", "G", "C"),
-    allele_alt = c("T", "C", NA, "C", "G")
-  )
-
-  test_gt <- gen_tibble(
-    x = test_genotypes,
-    loci = test_loci,
-    indiv_meta = test_indiv_meta,
-    quiet = TRUE
-  )
-
-  # create a subset of the original tibble
-  test_sub <- test_gt[3:6, ]
-  test_sub <- test_sub %>% select_loci(c(3:5))
-
-  # impute method = 'mode'
-  expect_error(
-    imputed_test_sub <- gt_impute_simple(test_sub, method = "mode"),
-    "The number of individuals in the gen_tibble does not match"
-  )
-
-  # update backingfile
-  suppressMessages(test_sub <- gt_update_backingfile(test_sub))
-
-  # try again
-  imputed_test_sub <- gt_impute_simple(test_sub, method = "mode")
-
-  # full gen_tibble does not have imputed
-  expect_false(gt_has_imputed(test_gt))
-
-  # but the subset does
-  expect_true(gt_has_imputed(imputed_test_sub))
-
-  # set imputation
-  gt_set_imputed(imputed_test_sub, TRUE)
-
-  # no NA's in the subset
-  expect_false(any(is.na(show_genotypes(imputed_test_sub))))
-
-  # but retains NA's in the full gen_tibble
-  expect_true(any(is.na(show_genotypes(test_gt))))
-
-  # But it is not possible to have two imputation methods on two subsets of
-  # the same data
-
-  # the rest of the individuals and SNPs: 1 and 2
-  test_remaining <- test_gt[1:2, ]
-  test_remaining <- test_sub %>% select_loci(c(1, 2))
-
-  # impute method = 'mean0'
-  impute_remaining <- gt_impute_simple(test_remaining, method = "mean0")
-  expect_true(gt_has_imputed(impute_remaining))
-  gt_set_imputed(impute_remaining, TRUE)
-
-  # imputes correctly
-  expect_false(any(is.na(show_genotypes(impute_remaining))))
-
-  # if we return to our first subset: ind 3:6 and loci 3:5
-  expect_false(any(is.na(show_genotypes(imputed_test_sub))))
-
-  mode_function <- function(x) {
-    unique_x <- unique(x)
-    return(unique_x[which.max(tabulate(match(x, unique_x)))])
-  }
-  test_sub_genotypes <- test_genotypes[3:6, 3:5]
-
-  modes <- apply(test_sub_genotypes, 2, mode_function)
-  means <- round(colMeans(test_sub_genotypes, na.rm = TRUE), digit = 0)
-
-  # expect that the method is overwritten
-  expect_false(all(show_genotypes(imputed_test_sub)[4, ] == modes))
-
-  # the original subset now contains imputed means rather than imputed modes
-  expect_true(all(show_genotypes(imputed_test_sub)[4, ] == means))
-  # we have only changed the other subset (impute_remaining),
-  # but imputed_test_sub changes too
-})
-
 test_that("n_cores can be set", {
   expect_true(getOption("bigstatsr.check.parallel.blas"))
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
@@ -319,4 +210,39 @@ test_that("n_cores can be set", {
     "operator is invalid for atomic vectors"
   )
   expect_true(getOption("bigstatsr.check.parallel.blas"))
+})
+
+test_that("imputed gt retains status after gt_update_backingfile", {
+  missing_gt_imputed <- gt_impute_simple(missing_gt, method = "mode")
+  # check imputed
+  expect_true(gt_has_imputed(missing_gt_imputed))
+  # subset by loci
+  missing_gt_imputed <- missing_gt_imputed %>%
+    select_loci(c(1:100))
+  # update backingfile
+  missing_gt_imputed <- gt_update_backingfile(
+    missing_gt_imputed,
+    tempfile("missing_imputed_")
+  )
+  # check if still imputed
+  gt_has_imputed(missing_gt_imputed)
+  # test we can use a function that requires imputation
+  expect_true(inherits(missing_gt_imputed %>% gt_pca_partialSVD(), "gt_pca"))
+
+
+  missing_gt_imputed <- gt_impute_simple(missing_gt, method = "mode")
+  # check imputed
+  gt_has_imputed(missing_gt_imputed)
+  # subset by loci
+  missing_gt_imputed <- missing_gt_imputed %>%
+    filter(id %in% paste0("ind_", 1:100))
+  # update backingfile
+  missing_gt_imputed <- gt_update_backingfile(
+    missing_gt_imputed,
+    tempfile("missing_imputed_")
+  )
+  # check if still imputed
+  gt_has_imputed(missing_gt_imputed)
+  # test we can use a function that requires imputation
+  expect_true(inherits(missing_gt_imputed %>% gt_pca_partialSVD(), "gt_pca"))
 })

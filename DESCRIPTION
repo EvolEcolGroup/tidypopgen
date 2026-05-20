@@ -1,6 +1,6 @@
 Package: tidypopgen
 Title: Tidy Population Genetics
-Version: 0.4.3
+Version: 0.4.4
 Authors@R: 
     c(person("Evie", "Carter", role = c("aut")),
     person("Eirlys", "Tysall", role = c("aut")),
@@ -30,7 +30,7 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Depends:
     R (>= 3.5.0),
-    dplyr,
+    dplyr (>= 1.2.0),
     tibble
 Imports:
     bigparallelr,
@@ -50,7 +50,6 @@ Imports:
     tidyr,
     utils,
     Rcpp,
-    UpSetR,
     vctrs
 Suggests:
     adegenet,
@@ -61,6 +60,7 @@ Suggests:
     knitr,
     detectRUNS,
     LEA,
+    pcadapt,
     RhpcBLASctl,
     rmarkdown,
     rnaturalearth,

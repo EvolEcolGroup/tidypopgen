@@ -545,3 +545,135 @@ test_that("grouping before running gt_admxiture vs reordering after running gt_a
   # the plot from a reordered gt_admix object
   expect_identical(labels$data, reord_labels$data)
 })
+
+test_that("set output dir for admixture Q files", {
+  directory <- getwd()
+  on.exit(setwd(directory))
+
+  anole_plink <- gt_as_plink(
+    anole_gt,
+    file = tempfile(),
+    chromosomes_as_int = TRUE
+  )
+
+  # create a tempdir
+  test_dir <- file.path(tempdir(), "adm_qmat")
+  dir.create(test_dir)
+
+  adm_res <- gt_admixture(
+    x = anole_plink,
+    k = 3,
+    crossval = FALSE,
+    n_cores = 1,
+    seed = 123,
+    outdir = test_dir,
+  )
+
+  # check we get 2 files, a .Q and a .P
+  expect_equal(length(list.files(test_dir)), 2)
+  expect_true(all(grepl("\\.Q$|\\.P$", list.files(test_dir))))
+
+  # check error when providing invalid path
+  expect_error(gt_admixture(
+    x = anole_plink,
+    k = 3,
+    crossval = FALSE,
+    n_cores = 1,
+    seed = 123,
+    outdir = "blah",
+  ), "does not exist")
+
+  # create a second temporary directory
+  test_dir2 <- file.path(tempdir(), "adm_qmat2")
+  # create two folders inside this directory
+  dir.create(test_dir2)
+  dir.create(file.path(test_dir2, "/folder1"))
+  dir.create(file.path(test_dir2, "/folder2"))
+  # set wd to folder1
+  old_wd <- getwd()
+  on.exit(setwd(old_wd), add = TRUE)
+  on.exit(unlink(test_dir2, recursive = TRUE), add = TRUE)
+  setwd(file.path(test_dir2, "/folder1"))
+  # create a relative path string to folder2
+  relative_path <- "../folder2"
+
+  # now check with a relative path and multiple runs
+  adm_res2 <- gt_admixture(
+    x = anole_plink,
+    n_runs = 2,
+    k = c(3:4),
+    crossval = FALSE,
+    n_cores = 1,
+    seed = c(123, 456),
+    outdir = relative_path,
+  )
+
+  # check we get 8 files, a .Q and a .P in the relative path
+  expect_equal(length(list.files(relative_path)), 8)
+  expect_true(all(grepl("\\.Q$|\\.P$", list.files(relative_path))))
+})
+
+test_that("seed length", {
+  vcf_path <-
+    system.file(
+      "/extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+      package = "tidypopgen"
+    )
+  anole_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    backingfile = tempfile("anolis_")
+  )
+  pops_path <- system.file(
+    "/extdata/anolis/plot_order_punctatus_n46.csv",
+    package = "tidypopgen"
+  )
+  pops <- readr::read_csv(pops_path, show_col_types = FALSE)
+  anole_gt <- anole_gt %>% mutate(id = gsub("punc_", "", .data$id, ))
+  anole_gt <- anole_gt %>%
+    mutate(population = pops$pop[match(pops$ID, .data$id)])
+
+  res_null <- gt_admixture(
+    x = anole_gt,
+    k = c(3, 4),
+    crossval = FALSE,
+    n_cores = 1,
+    n_runs = 2,
+    seed = NULL,
+    conda_env = "none"
+  )
+  null_seeds <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res_null$log)
+  # this should be the default seed of 43
+  expect_equal(as.numeric(null_seeds), rep(43, 4))
+
+  # seed should be the length of n_runs * K OR the length of n_runs
+  # and the whole vector is repeated for each k
+
+  res <- gt_admixture(
+    x = anole_gt,
+    k = c(3, 4),
+    crossval = FALSE,
+    n_cores = 1,
+    n_runs = 2,
+    seed = c(1, 2),
+    conda_env = "none"
+  )
+
+  # find the number after "Random seed:" in the log
+  seeds <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res$log)
+  expect_equal(as.numeric(seeds), c(1, 2, 1, 2))
+
+  res2 <- gt_admixture(
+    x = anole_gt,
+    k = c(3, 4),
+    crossval = FALSE,
+    n_cores = 1,
+    n_runs = 2,
+    seed = c(1, 2, 3, 4),
+    conda_env = "none"
+  )
+
+  # find the number after "Random seed:" in the log
+  seeds2 <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res2$log)
+  expect_equal(as.numeric(seeds2), c(1, 2, 3, 4))
+})

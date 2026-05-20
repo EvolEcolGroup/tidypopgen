@@ -92,8 +92,8 @@ test_that("qc_report_loci for pseudohaploid data", {
   expect_error(autoplot(loci_report_grouped, type = "hwe"), "not available")
 
   # overview plot
-  expect_s3_class(autoplot(loci_report, type = "overview"), "upset")
-  expect_s3_class(autoplot(loci_report_grouped, type = "overview"), "upset")
+  expect_s3_class(autoplot(loci_report, type = "overview"), "patchwork")
+  expect_s3_class(autoplot(loci_report_grouped, type = "overview"), "patchwork")
 
   # all plot
   expect_s3_class(autoplot(loci_report, type = "all"), "ggplot")

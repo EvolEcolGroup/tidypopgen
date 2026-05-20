@@ -1,3 +1,10 @@
+# limit number of threads for tests
+data.table::setDTthreads(2)
+if (rlang::is_installed("RhpcBLASctl")) {
+  RhpcBLASctl::blas_set_num_threads(2)
+  RhpcBLASctl::omp_set_num_threads(2)
+}
+
 # Create gentibble
 bed_path <- system.file("extdata/related/families.bed", package = "tidypopgen")
 families_bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())

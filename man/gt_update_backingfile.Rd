@@ -18,7 +18,7 @@ gt_update_backingfile(
 \item{backingfile}{the path, including the file name without extension, for
 backing files used to store the data (they will be given a .bk and .rds
 automatically). If left to NULL (the default), the file name will be based
-on the name f the current backing file.}
+on the name of the current backing file.}
 
 \item{chunk_size}{the number of loci to process at once}
 

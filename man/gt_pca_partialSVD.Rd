@@ -42,9 +42,6 @@ vectors)
 \item \code{call}, the call that generated the object.
 \item \code{square_frobenius}, used to compute the proportion of variance explained
 by the components (optional)
-
-Note: rather than accessing these elements directly, it is better to use
-\code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 }
 }
 \description{
@@ -53,6 +50,14 @@ partial SVD through the eigen decomposition of the covariance. It works well
 if the number of individuals is much smaller than the number of loci;
 otherwise, \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is a better option. This function is a
 wrapper for \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}}.
+}
+\note{
+Rather than accessing these elements directly, it is better to use
+\code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
+
+Monomorphic markers must be removed before PCA is computed. The error
+message 'Error: some variables have zero scaling; remove them before
+attempting to scale.' indicates that monomorphic markers are present.
 }
 \examples{
 # Create a gen_tibble of lobster genotypes
@@ -80,4 +85,10 @@ gt_pca_partialSVD(lobsters,
 }
 \seealso{
 \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}} which this function wraps.
+
+Other gt_pca_functions: 
+\code{\link{gt_pca}},
+\code{\link{gt_pca_autoSVD}()},
+\code{\link{gt_pca_randomSVD}()}
 }
+\concept{gt_pca_functions}

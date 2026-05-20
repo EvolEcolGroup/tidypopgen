@@ -1,3 +1,10 @@
+# limit number of threads for tests
+data.table::setDTthreads(2)
+if (rlang::is_installed("RhpcBLASctl")) {
+  RhpcBLASctl::blas_set_num_threads(2)
+  RhpcBLASctl::omp_set_num_threads(2)
+}
+
 # create file
 test_indiv_meta <- data.frame(
   id = c("a", "b", "c"),
@@ -42,6 +49,9 @@ if (rlang::is_installed("vcfR")) {
       backingfile = tempfile(),
       parser = "vcfR"
     )
+    expect_true(file.exists(gt_get_file_names(pop_b_vcf_gt)[1]))
+    expect_true(file.exists(gt_get_file_names(pop_b_vcf_gt)[2]))
+
     expect_true(all.equal(
       show_genotypes(pop_b_gt),
       show_genotypes(pop_b_vcf_gt)
@@ -78,6 +88,9 @@ if (rlang::is_installed("vcfR")) {
         backingfile = tempfile(),
         parser = "cpp"
       )
+
+    expect_true(file.exists(gt_get_file_names(pop_b_vcf_fast_gt)[1]))
+    expect_true(file.exists(gt_get_file_names(pop_b_vcf_fast_gt)[2]))
 
     expect_error(
       gen_tibble(vcf_path,

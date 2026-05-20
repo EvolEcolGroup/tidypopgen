@@ -11,8 +11,12 @@
 #' of variants on at least one of your chromosomes. Try reducing 'roll_size' to
 #' avoid this error.
 #'
-#' Note: rather than accessing these elements directly, it is better to use
+#' @note rather than accessing these elements directly, it is better to use
 #' `tidy` and `augment`. See [`gt_pca_tidiers`].
+#'
+#' @note Monomorphic markers must be removed before PCA is computed. The error
+#' message 'Error: some variables have zero scaling; remove them before
+#' attempting to scale.' indicates that monomorphic markers are present.
 #'
 #' @param x a `gen_tbl` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
@@ -93,7 +97,7 @@
 #'   roll_size = 20,
 #'   total_var = FALSE
 #' )
-#'
+#' @family gt_pca_functions
 # nolint start
 gt_pca_autoSVD <- function(
     # nolint end

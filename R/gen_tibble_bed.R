@@ -124,12 +124,6 @@ fbm_read_bed <- function(bedfile,
 }
 
 
-
-
-
-
-
-
 #' Generate a tibble of loci from a PLINK .bim file
 #'
 #' This function reads a PLINK .bim file and extracts the relevant information
@@ -244,25 +238,32 @@ indiv_meta_from_fam <- function(fam) {
   # if sex is numeric or integer
   if (inherits(fam$sex, "numeric") || inherits(fam$sex, "integer")) {
     if (!all(fam$sex == 0)) {
-      indiv_meta$sex <- dplyr::case_match(
+      indiv_meta$sex <- dplyr::recode_values(
         fam$sex,
         1 ~ "male",
         2 ~ "female",
-        .default = NA,
-        .ptype = factor(levels = c("female", "male"))
+        default = NA,
+        ptype = factor(levels = c("female", "male"))
       )
     }
   }
 
-  if (inherits(fam$affection, "numeric") || inherits(fam$sex, "integer")) {
+  if (inherits(
+    fam$affection,
+    "numeric"
+  ) ||
+    inherits(
+      fam$affection,
+      "integer"
+    )) {
     if (!all(fam$affection %in% c(0, -9))) {
-      indiv_meta$phenotype <- dplyr::case_match(
+      indiv_meta$phenotype <- dplyr::recode_values(
         fam$affection,
         1 ~ "control",
         2 ~ "case",
         -9 ~ NA,
-        .default = NA,
-        .ptype = factor(levels = c("control", "case"))
+        default = NA,
+        ptype = factor(levels = c("control", "case"))
       )
     }
   }
