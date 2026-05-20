@@ -1,4 +1,4 @@
-# tidypopgen dev
+# tidypopgen 0.4.4
 * fix seed argument of `gt_admixture()`
 * implement our own upset plot function to avoid dependency on `UpSetR`
   package, which is no longer maintained
