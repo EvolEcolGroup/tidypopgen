@@ -57,7 +57,6 @@ test_that("backingfile error", {
 })
 
 
-
 test_that("error imputing an already imputed set", {
   # impute
   missing_gt_imputed <- gt_impute_simple(missing_gt, method = "mode")

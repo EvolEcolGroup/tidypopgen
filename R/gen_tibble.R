@@ -282,16 +282,17 @@ gen_tibble.character <-
 #' @export
 #' @rdname gen_tibble
 gen_tibble.matrix <- function(
-    x,
-    indiv_meta,
-    loci,
-    ...,
-    ploidy = 2,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    backingfile = NULL,
-    allow_duplicates = FALSE,
-    quiet = FALSE) {
+  x,
+  indiv_meta,
+  loci,
+  ...,
+  ploidy = 2,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  backingfile = NULL,
+  allow_duplicates = FALSE,
+  quiet = FALSE
+) {
   rlang::check_dots_empty()
 
   # check that valid alleles does not contain zero
@@ -521,9 +522,10 @@ tbl_sum.gen_tbl <- function(x, ...) {
 
 # function to check the allele alphabet
 check_allele_alphabet <- function(
-    x,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", ".")) {
+  x,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", ".")
+) {
   if (
     any(
       !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),

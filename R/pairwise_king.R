@@ -31,9 +31,10 @@
 #' pairwise_king(example_gt, block_size = 2)
 #'
 pairwise_king <- function(
-    x,
-    as_matrix = FALSE,
-    block_size = bigstatsr::block_size(nrow(x))) {
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(nrow(x))
+) {
   # nolint
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index
@@ -46,6 +47,8 @@ pairwise_king <- function(
   )
   dimnames(king_matrix) <- list(x$id, x$id)
   if (as_matrix) {
+    # add a class to indicate this is a pairwise matrix
+    class(king_matrix) <- c("pairwise_matrix", class(king_matrix))
     return(king_matrix)
   } else {
     return(tidy_dist_matrix(king_matrix))

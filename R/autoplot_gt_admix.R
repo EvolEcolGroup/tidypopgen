@@ -44,11 +44,12 @@
 #' )
 #'
 autoplot.gt_admix <- function(
-    object,
-    type = c("cv", "barplot"),
-    k = NULL,
-    run = NULL,
-    ...) {
+  object,
+  type = c("cv", "barplot"),
+  k = NULL,
+  run = NULL,
+  ...
+) {
   type <- match.arg(type)
   if (type == "cv") {
     if (is.null(object$cv)) {
