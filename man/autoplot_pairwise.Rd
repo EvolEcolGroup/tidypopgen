@@ -8,19 +8,26 @@
 \alias{autoplot.pairwise_tbl}
 \title{Autoplot for pairwise distance matrices}
 \usage{
-\method{autoplot}{pairwise_matrix}(object, cluster = FALSE, hclust_method = "complete", ...)
+\method{autoplot}{pairwise_matrix}(object, order = NULL, ...)
 
-\method{autoplot}{pairwise_tbl}(object, cluster = FALSE, hclust_method = "complete", ...)
+\method{autoplot}{pairwise_tbl}(object, order = NULL, ...)
 }
 \arguments{
 \item{object}{A square numeric matrix OR a data.frame/tibble with 3 columns:
 names1, names2, value (half-matrix representation).}
 
-\item{cluster}{Logical. If TRUE, reorder using hierarchical clustering
-(based on \code{\link[stats:hclust]{stats::hclust()}}).}
-
-\item{hclust_method}{Character. The agglomeration method for
-\code{\link[stats:hclust]{stats::hclust()}}. It defaults to "complete".}
+\item{order}{Optional ordering specification. Can be:
+\itemize{
+\item \code{NULL} (default): preserve the existing order.
+\item A character vector containing all row/column names in the desired
+order.
+\item A function taking the matrix as input and returning either:
+\itemize{
+\item an ordering vector of indices, or
+\item an object with an \code{order} component (e.g. from
+\code{\link[stats:hclust]{stats::hclust()}}).
+}
+}}
 
 \item{...}{Additional arguments (not currently used). Included for
 compatibility with autoplot generic.}
@@ -31,21 +38,45 @@ A ggplot object.
 \description{
 This function provides a convenient way to visualize pairwise distance
 matrices (e.g., Fst, IBS) as heatmaps using ggplot2. It supports both matrix
-and tidy tibble formats, and can optionally perform hierarchical clustering
-for better visualization (no missing values are allowed if clustering).
+and tidy tibble formats, and can optionally reorder rows/columns using either
+an explicit ordering vector or a function (e.g. hierarchical clustering).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
-#'  # With a pairwise matrix:
+
+# With a pairwise matrix:
 fst_dist <- example_gt \%>\%
   group_by(population) \%>\%
   pairwise_pop_fst(method = "Nei87", type = "pairwise")
-autoplot(fst_dist, cluster = FALSE)
-autoplot(fst_dist, cluster = TRUE)
-#'  # With a tidy tibble of distances:
+
+autoplot(fst_dist)
+
+# Explicit ordering
+autoplot(
+  fst_dist,
+  order = rev(rownames(fst_dist))
+)
+
+# Hierarchical clustering
+autoplot(
+  fst_dist,
+  order = function(x) {
+    stats::hclust(stats::as.dist(x), method = "complete")
+  }
+)
+
+# With a tidy tibble of distances:
 fst_tidy <- example_gt \%>\%
   group_by(population) \%>\%
   pairwise_pop_fst(method = "Nei87", type = "tidy")
-autoplot(fst_tidy, cluster = FALSE)
-autoplot(fst_tidy, cluster = TRUE)
+
+autoplot(fst_tidy)
+
+autoplot(
+  fst_tidy,
+  order = function(x) {
+    stats::hclust(stats::as.dist(x))
+  }
+)
+
 }
