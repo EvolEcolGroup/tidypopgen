@@ -30,7 +30,11 @@ A ggplot object.
 Plot a square heatmap from either a full symmetric distance matrix or a tidy
 tibble of distances. Rows and columns can optionally be reordered using
 either an explicit ordering vector or a function that computes an ordering
-(e.g. hierarchical clustering).
+(e.g. hierarchical clustering). Dendrograms can be added to the heatmap with
+\code{\link[=heatmap_add_dendro]{heatmap_add_dendro()}}. Note that any decoration (e.g. axis labels, fill
+scale) should be added to the heatmap before adding dendrograms, as the
+latter will modify the plot structure and make it difficult to add further
+customization afterwards.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
@@ -46,7 +50,8 @@ heatmap_pairwise(fst_dist)
 heatmap_pairwise(
   fst_dist,
   order = rev(rownames(fst_dist))
-)
+) +
+ggplot2::scale_fill_viridis_c()
 
 # Hierarchical clustering
 heatmap_pairwise(
@@ -70,4 +75,7 @@ heatmap_pairwise(
   }
 )
 
+}
+\seealso{
+\code{\link[=heatmap_add_dendro]{heatmap_add_dendro()}}
 }

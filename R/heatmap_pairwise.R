@@ -3,7 +3,11 @@
 #' Plot a square heatmap from either a full symmetric distance matrix or a tidy
 #' tibble of distances. Rows and columns can optionally be reordered using
 #' either an explicit ordering vector or a function that computes an ordering
-#' (e.g. hierarchical clustering).
+#' (e.g. hierarchical clustering). Dendrograms can be added to the heatmap with
+#' [heatmap_add_dendro()]. Note that any decoration (e.g. axis labels, fill
+#' scale) should be added to the heatmap before adding dendrograms, as the
+#' latter will modify the plot structure and make it difficult to add further
+#' customization afterwards.
 #'
 #' @param x A square numeric matrix OR a data.frame/tibble with 3 columns:
 #'   names1, names2, value (half-matrix representation).
@@ -20,7 +24,7 @@
 #'         [stats::hclust()]).
 #'     }
 #' }
-#'
+#' @seealso [heatmap_add_dendro()]
 #' @return A ggplot object.
 #'
 #' @export
@@ -39,7 +43,8 @@
 #' heatmap_pairwise(
 #'   fst_dist,
 #'   order = rev(rownames(fst_dist))
-#' )
+#' ) +
+#' ggplot2::scale_fill_viridis_c()
 #'
 #' # Hierarchical clustering
 #' heatmap_pairwise(
@@ -62,7 +67,7 @@
 #'     stats::hclust(stats::as.dist(x))
 #'   }
 #' )
-#'
+#' 
 heatmap_pairwise <- function(x,
                              order = NULL) {
   # ============================================================
@@ -223,8 +228,7 @@ heatmap_pairwise <- function(x,
   # ============================================================
   # Plot
   # ============================================================
-  
-  ggplot2::ggplot(
+  p <- ggplot2::ggplot(
     df_plot,
     ggplot2::aes(
       x = .data$col,
@@ -253,4 +257,6 @@ heatmap_pairwise <- function(x,
         hjust = 1
       )
     )
+  attr(p, "order_fun") <- order
+  return(p)
 }

@@ -1,6 +1,7 @@
 ADMIXTOOLS
 Af
 Anolis
+Autoplot
 Autoplots
 BIM
 BMC
@@ -124,6 +125,7 @@ fst
 fulfills
 gammarus
 geno
+gg
 ggplot
 github
 goesup
@@ -148,6 +150,7 @@ io
 kmeans
 ld
 lengthBps
+linewidth
 loadingPC
 maf
 magrittr
