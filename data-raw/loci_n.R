@@ -39,7 +39,8 @@ loci_n.vctrs_bigSNP <- function(.x, ...) {
 #' @rdname loci_n
 loci_n.grouped_df <- function(.x, n_cores = bigstatsr::nb_cores(), ...) {
   rlang::check_dots_empty()
-
+  #STOP HERE MISSING IMPLEMENTATION
+  
   # return a list to mimic a group_map
   lapply(seq_len(ncol(na_mat)), function(i) na_mat[, i])
 }
