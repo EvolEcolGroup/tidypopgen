@@ -1,21 +1,28 @@
 #' Add dendrograms to a heatmap of pairwise distances
 #'
 #' This function adds dendrograms to a heatmap of pairwise distances, generated
-#' with `heatmap_pairwise()`. The heatmap needs to have been generated with an
-#' order function based on `hclust()`, and the dendrograms will be based on the
-#' same clustering. Dendrograms can be added to the left (row) and/or top
-#' (column) of the heatmap, and will be perfectly aligned with the heatmap cells
-#' regardless of axis label width. Note that the heatmap needs to be formatted
-#' first, as it can not be modified easily once the dendrogram panels have been
-#' added.
+#' with `heatmap_pairwise()`. The heatmap must have been created with an `order`
+#' function based on `hclust()`, and the dendrograms will be based on the same
+#' clustering. Dendrograms can be added to the left (row) and/or top (column) of
+#' the heatmap. Note that the heatmap needs to be formatted first, as it can not
+#' be modified easily once the dendrogram panels have been added.
+#'
+#' To correctly align the dendrogram with the labels of the heatmap, we use a
+#' `gtable` to insert the dendrogram panel directly adjacent to the heatmap
+#' panel. This means that the dendrogram will be perfectly aligned with the
+#' heatmap cells regardless of axis label width. However, manipulating
+#' individual plots in a gtable is not easy, so the heatmap should be formatted
+#' fully before the dendrograms are added.
+#'
 #' @param plot A ggplot from `heatmap_pairwise()`, with an order function based
 #'   on `hclust()`.
 #' @param side "left" (row dendrogram), "top" (column dendrogram), or "both".
 #' @param rel_size Size of the dendrogram relative to the panel (null unit).
 #' @param line_color Segment colour.
 #' @param line_size Segment linewidth.
-#' @return A `heatmap_figure` object, which auto-draws on `print()` and is
-#'   accepted by `ggsave()`, just like a ggplot or patchwork object.
+#' @return A `heatmap_dendro` object (a subclass of `gtable`), which auto-draws
+#'   on `print()` and is accepted by `plot()` and `ggsave()`, just like a
+#'   `ggplot` or `patchwork` object.
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
@@ -37,7 +44,7 @@ heatmap_add_dendro <- function(plot,
                                line_size  = 0.5) {
   # check that plot is a ggplot
   if (!inherits(plot, "ggplot")) {
-    stop("plot must be a ggplot or heatmap_figure")
+    stop("plot must be a ggplot or heatmap_dendro")
   }
   # check that the plot has an "order_fun" attribute, and that it is a function
   if (!is.function(attr(plot, "order_fun"))) {
@@ -81,26 +88,27 @@ heatmap_add_dendro <- function(plot,
 
 
 #############################################
-# <heatmap_figure> S3 class
+# <heatmap_dendro> S3 class
 #     A thin wrapper around a gtable that auto-draws on bare evaluation and
 #     is accepted by ggsave(), just like a ggplot or patchwork object.
 #############################################
 
-new_heatmap_figure <- function(gt) {
-  structure(list(gt = gt), class = "heatmap_figure")
+new_heatmap_dendro <- function(gt) {
+  structure(list(gt = gt), class = c("heatmap_dendro", "gtable"))
 }
 
 #' @export
-print.heatmap_figure <- function(x, ...) {
+print.heatmap_dendro <- function(x, ...) {
   grid::grid.newpage()
   grid::grid.draw(x$gt)
   invisible(x)
 }
 
-# grid.draw.heatmap_figure <- function(x, recording = TRUE) {
-#   browser()
-#   grid::grid.draw(x$gt, recording = recording)
-# }
+#' @importFrom grid grid.draw
+#' @export
+grid.draw.heatmap_dendro <- function(x, recording = TRUE) {
+   grid::grid.draw(x$gt, recording = recording)
+}
 
 
 #############################################
@@ -109,19 +117,19 @@ print.heatmap_figure <- function(x, ...) {
 
 #' Attach a dendrogram panel to a heatmap
 #'
-#' Designed for use with |>. Accepts a ggplot or <heatmap_figure> and returns
-#' a <heatmap_figure> with the dendrogram panel inserted directly adjacent to
+#' Designed for use with |>. Accepts a ggplot or <heatmap_dendro> and returns
+#' a <heatmap_dendro> with the dendrogram panel inserted directly adjacent to
 #' the heatmap panel — pixel-perfect alignment regardless of axis label width.
 #' Can be chained to add dendrograms on both sides.
 #'
-#' @param plot       A ggplot (from gg_heatmap()) or <heatmap_figure> from a
+#' @param plot       A ggplot (from gg_heatmap()) or <heatmap_dendro> from a
 #'                   prior annotate_dendrogram() call.
 #' @param hc         hclust object (from cluster_order()).
 #' @param side       "left" (row dendrogram) or "top" (column dendrogram).
 #' @param rel_size   Size of the dendrogram relative to the panel (null unit).
 #' @param line_color Segment colour.
 #' @param line_size  Segment linewidth.
-#' @return A <heatmap_figure> object.
+#' @return A <heatmap_dendro> object.
 #' @keywords internal
 annotate_dendrogram <- function(plot,
                                 hc,
@@ -131,8 +139,8 @@ annotate_dendrogram <- function(plot,
                                 line_size  = 0.5) {
   side <- match.arg(side)
   gt   <- if (inherits(plot, "ggplot"))         ggplot2::ggplotGrob(plot) else
-    if (inherits(plot, "heatmap_figure"))  plot$gt          else
-      stop("plot must be a ggplot or heatmap_figure")
+    if (inherits(plot, "heatmap_dendro"))  plot$gt          else
+      stop("plot must be a ggplot or heatmap_dendro")
   pp   <- .panel_pos(gt)
   grob <- .dend_grob(hc, side, line_color, line_size)
   
@@ -148,7 +156,7 @@ annotate_dendrogram <- function(plot,
                           name = "dend-top")
   }
   
-  new_heatmap_figure(gt)
+  new_heatmap_dendro(gt)
 }
 
 

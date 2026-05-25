@@ -25,18 +25,25 @@ on \code{hclust()}.}
 \item{line_size}{Segment linewidth.}
 }
 \value{
-A \code{heatmap_figure} object, which auto-draws on \code{print()} and is
-accepted by \code{ggsave()}, just like a ggplot or patchwork object.
+A \code{heatmap_dendro} object (a subclass of \code{gtable}), which auto-draws
+on \code{print()} and is accepted by \code{plot()} and \code{ggsave()}, just like a
+\code{ggplot} or \code{patchwork} object.
 }
 \description{
 This function adds dendrograms to a heatmap of pairwise distances, generated
-with \code{heatmap_pairwise()}. The heatmap needs to have been generated with an
-order function based on \code{hclust()}, and the dendrograms will be based on the
-same clustering. Dendrograms can be added to the left (row) and/or top
-(column) of the heatmap, and will be perfectly aligned with the heatmap cells
-regardless of axis label width. Note that the heatmap needs to be formatted
-first, as it can not be modified easily once the dendrogram panels have been
-added.
+with \code{heatmap_pairwise()}. The heatmap must have been created with an \code{order}
+function based on \code{hclust()}, and the dendrograms will be based on the same
+clustering. Dendrograms can be added to the left (row) and/or top (column) of
+the heatmap. Note that the heatmap needs to be formatted first, as it can not
+be modified easily once the dendrogram panels have been added.
+}
+\details{
+To correctly align the dendrogram with the labels of the heatmap, we use a
+\code{gtable} to insert the dendrogram panel directly adjacent to the heatmap
+panel. This means that the dendrogram will be perfectly aligned with the
+heatmap cells regardless of axis label width. However, manipulating
+individual plots in a gtable is not easy, so the heatmap should be formatted
+fully before the dendrograms are added.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

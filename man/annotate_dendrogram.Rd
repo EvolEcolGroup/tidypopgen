@@ -14,7 +14,7 @@ annotate_dendrogram(
 )
 }
 \arguments{
-\item{plot}{A ggplot (from gg_heatmap()) or <heatmap_figure> from a
+\item{plot}{A ggplot (from gg_heatmap()) or <heatmap_dendro> from a
 prior annotate_dendrogram() call.}
 
 \item{hc}{hclust object (from cluster_order()).}
@@ -28,11 +28,11 @@ prior annotate_dendrogram() call.}
 \item{line_size}{Segment linewidth.}
 }
 \value{
-A <heatmap_figure> object.
+A <heatmap_dendro> object.
 }
 \description{
-Designed for use with |>. Accepts a ggplot or <heatmap_figure> and returns
-a <heatmap_figure> with the dendrogram panel inserted directly adjacent to
+Designed for use with |>. Accepts a ggplot or <heatmap_dendro> and returns
+a <heatmap_dendro> with the dendrogram panel inserted directly adjacent to
 the heatmap panel — pixel-perfect alignment regardless of axis label width.
 Can be chained to add dendrograms on both sides.
 }

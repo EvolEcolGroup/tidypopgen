@@ -108,6 +108,7 @@ csv
 cutoff
 cv
 dapc
+dendro
 diffNgroup
 dist
 distruct
@@ -131,6 +132,7 @@ github
 goesup
 goodfit
 gt
+gtable
 gz
 hclust
 het
