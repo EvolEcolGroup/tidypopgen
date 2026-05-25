@@ -68,14 +68,17 @@ heatmap_add_dendro <- function(plot,
   )
   # fill matrix
   mat[cbind(df$row, df$col)] <- df$value
-  # convert to dist object
-  d <- stats::as.dist(mat)
-  
+
   #############################################
   # cluster the data
   #############################################
   cluster_fun <- attr(plot, "order_fun")
-  hc <- cluster_fun(d)
+  hc <- cluster_fun(mat)
+
+  # validate that the clustering function returned an hclust object
+  if (!inherits(hc, "hclust")) {
+    stop("The order function must return an hclust object for heatmap_add_dendro().")
+  }
   
   if (side == "left" || side == "both") {
     plot <- annotate_dendrogram(plot, hc, "left", rel_size, line_color, line_size)
@@ -122,9 +125,9 @@ grid.draw.heatmap_dendro <- function(x, recording = TRUE) {
 #' the heatmap panel — pixel-perfect alignment regardless of axis label width.
 #' Can be chained to add dendrograms on both sides.
 #'
-#' @param plot       A ggplot (from gg_heatmap()) or <heatmap_dendro> from a
+#' @param plot       A ggplot (from heatmap_pairwise()) or <heatmap_dendro> from a
 #'                   prior annotate_dendrogram() call.
-#' @param hc         hclust object (from cluster_order()).
+#' @param hc         hclust object (from order functions that return hclust).
 #' @param side       "left" (row dendrogram) or "top" (column dendrogram).
 #' @param rel_size   Size of the dendrogram relative to the panel (null unit).
 #' @param line_color Segment colour.

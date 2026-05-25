@@ -102,6 +102,12 @@ heatmap_pairwise <- function(x,
       stop("Expected n*(n-1)/2 rows for half-matrix representation.")
     }
 
+    # Check for duplicate pairs
+    pairs_key <- paste(pmin(df$from, df$to), pmax(df$from, df$to), sep = "_")
+    if (any(duplicated(pairs_key))) {
+      stop("Duplicate pairs found in input data. Each unordered pair must appear only once.")
+    }
+
     mat <- matrix(
       0,
       n,
@@ -116,6 +122,11 @@ heatmap_pairwise <- function(x,
     mat[cbind(j, i)] <- df$value
 
     diag(mat) <- NA
+
+    # Validate all off-diagonal cells were assigned
+    if (any(mat[lower.tri(mat)] == 0 | mat[upper.tri(mat)] == 0, na.rm = TRUE)) {
+      stop("Incomplete distance matrix: some pairs are missing from the input data.")
+    }
 
     x <- mat
   }
