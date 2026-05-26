@@ -44,7 +44,7 @@ heatmap_add_dendro <- function(plot,
                                line_size = 0.5) {
   # check that plot is a ggplot
   if (!inherits(plot, "ggplot")) {
-    stop("plot must be a ggplot or heatmap_dendro")
+    stop("plot must be a ggplot")
   }
   # check that the plot has an "order_fun" attribute, and that it is a function
   if (!is.function(attr(plot, "order_fun"))) {
