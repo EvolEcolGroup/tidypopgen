@@ -216,15 +216,17 @@ test_that("heatmap_pairwise error messages", {
 })
 
 test_that("autoplot covers remaining matrix validation and ordering branches", {
+  s3_method_name <- "$.test_raw_order_vector"
+
   assign(
-    "$.raw_order_vector",
+    s3_method_name,
     function(x, name) {
       NULL
     },
     envir = .GlobalEnv
   )
   withr::defer(
-    rm("$.raw_order_vector", envir = .GlobalEnv),
+    rm(list = s3_method_name, envir = .GlobalEnv),
     envir = environment()
   )
 
@@ -248,7 +250,7 @@ test_that("autoplot covers remaining matrix validation and ordering branches", {
       autoplot(
         toy_mat,
         order = function(x) {
-          structure(c(2, 3, 1), class = "raw_order_vector")
+          structure(c(2, 3, 1), class = "test_raw_order_vector")
         }
       ),
       "ggplot"
