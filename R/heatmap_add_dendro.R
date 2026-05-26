@@ -37,23 +37,25 @@
 #' ggplot2::scale_fill_viridis_c()
 #' heatmap_add_dendro(mat_plot)
 
-heatmap_add_dendro <- function(plot, 
-                               side       = c("both", "left", "top"),
-                               rel_size   = 0.15,
+heatmap_add_dendro <- function(plot,
+                               side = c("both", "left", "top"),
+                               rel_size = 0.15,
                                line_color = "grey30",
-                               line_size  = 0.5) {
+                               line_size = 0.5) {
   # check that plot is a ggplot
   if (!inherits(plot, "ggplot")) {
     stop("plot must be a ggplot or heatmap_dendro")
   }
   # check that the plot has an "order_fun" attribute, and that it is a function
   if (!is.function(attr(plot, "order_fun"))) {
-    stop("Dendrograms can only be added to a plot generated with ",
-    "`heatmap_pairwise()` and an order function based on hclust .")
+    stop(
+      "Dendrograms can only be added to a plot generated with ",
+      "`heatmap_pairwise()` and an order function based on hclust ."
+    )
   }
-  
+
   side <- match.arg(side)
-  
+
   #############################################
   # get data
   #############################################
@@ -68,20 +70,30 @@ heatmap_add_dendro <- function(plot,
   )
   # fill matrix
   mat[cbind(df$row, df$col)] <- df$value
-  # convert to dist object
-  d <- stats::as.dist(mat)
-  
+
   #############################################
   # cluster the data
   #############################################
   cluster_fun <- attr(plot, "order_fun")
-  hc <- cluster_fun(d)
-  
+  hc <- cluster_fun(mat)
+
+  # validate that the clustering function returned an hclust object
+  if (!inherits(hc, "hclust")) {
+    stop(
+      "The order function must return an hclust object for ",
+      "heatmap_add_dendro()."
+    )
+  }
+
   if (side == "left" || side == "both") {
-    plot <- annotate_dendrogram(plot, hc, "left", rel_size, line_color, line_size)
+    plot <- annotate_dendrogram(
+      plot, hc, "left", rel_size, line_color, line_size
+    )
   }
   if (side == "top" || side == "both") {
-    plot <- annotate_dendrogram(plot, hc, "top", rel_size, line_color, line_size)
+    plot <- annotate_dendrogram(
+      plot, hc, "top", rel_size, line_color, line_size
+    )
   }
   return(plot)
 }
@@ -107,7 +119,7 @@ print.heatmap_dendro <- function(x, ...) {
 #' @importFrom grid grid.draw
 #' @export
 grid.draw.heatmap_dendro <- function(x, recording = TRUE) {
-   grid::grid.draw(x$gt, recording = recording)
+  grid::grid.draw(x$gt, recording = recording)
 }
 
 
@@ -122,40 +134,52 @@ grid.draw.heatmap_dendro <- function(x, recording = TRUE) {
 #' the heatmap panel — pixel-perfect alignment regardless of axis label width.
 #' Can be chained to add dendrograms on both sides.
 #'
-#' @param plot       A ggplot (from gg_heatmap()) or <heatmap_dendro> from a
-#'                   prior annotate_dendrogram() call.
-#' @param hc         hclust object (from cluster_order()).
-#' @param side       "left" (row dendrogram) or "top" (column dendrogram).
-#' @param rel_size   Size of the dendrogram relative to the panel (null unit).
+#' @param plot A ggplot (from heatmap_pairwise()) or <heatmap_dendro> from a
+#'   prior annotate_dendrogram() call.
+#' @param hc hclust object (from order functions that return hclust).
+#' @param side "left" (row dendrogram) or "top" (column dendrogram).
+#' @param rel_size Size of the dendrogram relative to the panel (null unit).
 #' @param line_color Segment colour.
-#' @param line_size  Segment linewidth.
+#' @param line_size Segment linewidth.
 #' @return A <heatmap_dendro> object.
 #' @keywords internal
 annotate_dendrogram <- function(plot,
                                 hc,
-                                side       = c("left", "top"),
-                                rel_size   = 0.15,
+                                side = c("left", "top"),
+                                rel_size = 0.15,
                                 line_color = "grey30",
-                                line_size  = 0.5) {
+                                line_size = 0.5) {
   side <- match.arg(side)
-  gt   <- if (inherits(plot, "ggplot"))         ggplot2::ggplotGrob(plot) else
-    if (inherits(plot, "heatmap_dendro"))  plot$gt          else
-      stop("plot must be a ggplot or heatmap_dendro")
-  pp   <- .panel_pos(gt)
-  grob <- .dend_grob(hc, side, line_color, line_size)
-  
-  if (side == "left") {
-    gt <- gtable::gtable_add_cols(gt, ggplot2::unit(rel_size, "null"), pos = pp$l - 1)
-    gt <- gtable::gtable_add_grob(gt, grob,
-                          t = pp$t, l = pp$l, b = pp$b, r = pp$l,
-                          name = "dend-left")
+  if (inherits(plot, "ggplot")) {
+    gt <- ggplot2::ggplotGrob(plot)
+  } else if (inherits(plot, "heatmap_dendro")) {
+    gt <- plot$gt
   } else {
-    gt <- gtable::gtable_add_rows(gt, ggplot2::unit(rel_size, "null"), pos = pp$t - 1)
-    gt <- gtable::gtable_add_grob(gt, grob,
-                          t = pp$t, l = pp$l, b = pp$t, r = pp$r,
-                          name = "dend-top")
+    stop("plot must be a ggplot or heatmap_dendro")
   }
-  
+  pp <- .panel_pos(gt)
+  grob <- .dend_grob(hc, side, line_color, line_size)
+
+  if (side == "left") {
+    gt <- gtable::gtable_add_cols(
+      gt, ggplot2::unit(rel_size, "null"), pos = pp$l - 1
+    )
+    gt <- gtable::gtable_add_grob(
+      gt, grob,
+      t = pp$t, l = pp$l, b = pp$b, r = pp$l,
+      name = "dend-left"
+    )
+  } else {
+    gt <- gtable::gtable_add_rows(
+      gt, ggplot2::unit(rel_size, "null"), pos = pp$t - 1
+    )
+    gt <- gtable::gtable_add_grob(
+      gt, grob,
+      t = pp$t, l = pp$l, b = pp$t, r = pp$r,
+      name = "dend-top"
+    )
+  }
+
   new_heatmap_dendro(gt)
 }
 
@@ -174,28 +198,46 @@ annotate_dendrogram <- function(plot,
 # factor axis exactly.
 .dend_grob <- function(hc, side, line_color, line_size) {
   seg_df <- .hclust_segments(hc)
-  n      <- length(hc$order)
-  
+  n <- length(hc$order)
+
   if (side == "left") {
-    p <- ggplot2::ggplot(seg_df, ggplot2::aes(x = -.data$y,
-                                              xend = -.data$yend,
-                                              y = .data$x,
-                                              yend = .data$xend)) +
+    p <- ggplot2::ggplot(
+      seg_df,
+      ggplot2::aes(
+        x = -.data$y,
+        xend = -.data$yend,
+        y = .data$x,
+        yend = .data$xend
+      )
+    ) +
       ggplot2::geom_segment(color = line_color, linewidth = line_size) +
-      ggplot2::scale_y_continuous(limits = c(0.5, n + 0.5), expand = c(0, 0)) +
-      ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.02, 0.1))) +
+      ggplot2::scale_y_continuous(
+        limits = c(0.5, n + 0.5), expand = c(0, 0)
+      ) +
+      ggplot2::scale_x_continuous(
+        expand = ggplot2::expansion(mult = c(0.02, 0.1))
+      ) +
       ggplot2::theme_void()
   } else {
-    p <- ggplot2::ggplot(seg_df, ggplot2::aes(x = .data$x,
-                                              xend = .data$xend,
-                                              y = .data$y,
-                                              yend = .data$yend)) +
+    p <- ggplot2::ggplot(
+      seg_df,
+      ggplot2::aes(
+        x = .data$x,
+        xend = .data$xend,
+        y = .data$y,
+        yend = .data$yend
+      )
+    ) +
       ggplot2::geom_segment(color = line_color, linewidth = line_size) +
-      ggplot2::scale_x_continuous(limits = c(0.5, n + 0.5), expand = c(0, 0)) +
-      ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = c(0, 0.1))) +
+      ggplot2::scale_x_continuous(
+        limits = c(0.5, n + 0.5), expand = c(0, 0)
+      ) +
+      ggplot2::scale_y_continuous(
+        expand = ggplot2::expansion(mult = c(0, 0.1))
+      ) +
       ggplot2::theme_void()
   }
-  
+
   gt <- ggplot2::ggplotGrob(p)
   gt$grobs[[which(gt$layout$name == "panel")]]
 }
@@ -204,28 +246,29 @@ annotate_dendrogram <- function(plot,
 # Leaf k is placed at position rank(k, hc$order): position 1 = first
 # displayed label, n = last — matching the heatmap factor axis exactly.
 .hclust_segments <- function(hc) {
-  n      <- length(hc$order)
+  n <- length(hc$order)
   n_node <- nrow(hc$merge)
   height <- hc$height
-  
-  leaf_pos           <- integer(n)
+
+  leaf_pos <- integer(n)
   leaf_pos[hc$order] <- seq_len(n)
-  
+
   pos <- numeric(n + n_node)
   pos[seq_len(n)] <- leaf_pos
-  
+
   segs <- vector("list", n_node)
   for (i in seq_len(n_node)) {
-    l  <- hc$merge[i, 1];  r  <- hc$merge[i, 2]
+    l <- hc$merge[i, 1]
+    r <- hc$merge[i, 2]
     lx <- if (l < 0) pos[-l] else pos[n + l]
     rx <- if (r < 0) pos[-r] else pos[n + r]
-    lh <- if (l < 0) 0       else height[l]
-    rh <- if (r < 0) 0       else height[r]
+    lh <- if (l < 0) 0 else height[l]
+    rh <- if (r < 0) 0 else height[r]
     ch <- height[i]
     pos[n + i] <- (lx + rx) / 2
-    segs[[i]]  <- data.frame(
-      x    = c(lx, lx, rx), xend = c(lx, rx, rx),
-      y    = c(lh, ch, rh), yend = c(ch, ch, ch)
+    segs[[i]] <- data.frame(
+      x = c(lx, lx, rx), xend = c(lx, rx, rx),
+      y = c(lh, ch, rh), yend = c(ch, ch, ch)
     )
   }
   do.call(rbind, segs)

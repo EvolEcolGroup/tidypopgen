@@ -14,10 +14,10 @@ annotate_dendrogram(
 )
 }
 \arguments{
-\item{plot}{A ggplot (from gg_heatmap()) or <heatmap_dendro> from a
+\item{plot}{A ggplot (from heatmap_pairwise()) or <heatmap_dendro> from a
 prior annotate_dendrogram() call.}
 
-\item{hc}{hclust object (from cluster_order()).}
+\item{hc}{hclust object (from order functions that return hclust).}
 
 \item{side}{"left" (row dendrogram) or "top" (column dendrogram).}
 
