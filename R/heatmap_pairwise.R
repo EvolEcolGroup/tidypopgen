@@ -44,7 +44,7 @@
 #'   fst_dist,
 #'   order = rev(rownames(fst_dist))
 #' ) +
-#' ggplot2::scale_fill_viridis_c()
+#'   ggplot2::scale_fill_viridis_c()
 #'
 #' # Hierarchical clustering
 #' heatmap_pairwise(
@@ -87,8 +87,7 @@ heatmap_pairwise <- function(x,
       stop("Data frame must have 3 columns: names_1, names_2, value.")
     }
 
-    if (!grepl("1$", colnames(x)[1]) ||
-        !grepl("2$", colnames(x)[2])) {
+    if (!(grepl("1$", colnames(x)[1])) || !(grepl("2$", colnames(x)[2]))) {
       stop("First two columns must end in '1' and '2'.")
     }
 
@@ -111,8 +110,13 @@ heatmap_pairwise <- function(x,
       )
     }
 
+    # Check that no entry is a diagonal (i.e. from and to are never the same)
+    if (any(df$from==df$to)){
+      stop("the data.frame should not include values for the diagonal")
+    }
+
     mat <- matrix(
-      0,
+      NA_real_,
       n,
       n,
       dimnames = list(ids, ids)
@@ -124,18 +128,7 @@ heatmap_pairwise <- function(x,
     mat[cbind(i, j)] <- df$value
     mat[cbind(j, i)] <- df$value
 
-    diag(mat) <- NA
-
-    # Validate all off-diagonal cells were assigned
-    if (any(
-      mat[lower.tri(mat)] == 0 | mat[upper.tri(mat)] == 0,
-      na.rm = TRUE
-    )) {
-      stop(
-        "Incomplete distance matrix: some pairs are missing from the input ",
-        "data."
-      )
-    }
+    diag(mat) <- NA_real_
 
     x <- mat
   }
@@ -170,13 +163,11 @@ heatmap_pairwise <- function(x,
   # ============================================================
 
   if (!is.null(order)) {
-
     # ------------------------------------------------------------
     # Explicit ordering vector
     # ------------------------------------------------------------
 
     if (is.vector(order) && !is.function(order)) {
-
       if (length(order) != n) {
         stop("order vector must have length equal to nrow(x).")
       }
@@ -190,9 +181,7 @@ heatmap_pairwise <- function(x,
       # ------------------------------------------------------------
       # Ordering function
       # ------------------------------------------------------------
-
     } else if (is.function(order)) {
-
       # make sure there are no NA/NaN values
       d <- stats::as.dist(x)
 
@@ -204,12 +193,10 @@ heatmap_pairwise <- function(x,
 
       # object with $order component
       if (!is.null(ord_obj$order)) {
-
         ord <- ord_obj$order
 
         # raw ordering vector
       } else {
-
         ord <- ord_obj
       }
 
@@ -224,9 +211,7 @@ heatmap_pairwise <- function(x,
       if (!setequal(ord, seq_len(n))) {
         stop("Ordering vector must contain indices 1:n exactly once.")
       }
-
     } else {
-
       stop("order must be NULL, a vector, or a function.")
     }
 

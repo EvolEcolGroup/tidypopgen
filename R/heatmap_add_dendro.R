@@ -33,10 +33,10 @@
 #' mat_plot <- heatmap_pairwise(fst_dist,
 #'   order = function(x) {
 #'     stats::hclust(stats::as.dist(x))
-#'   }) +
-#' ggplot2::scale_fill_viridis_c()
+#'   }
+#' ) +
+#'   ggplot2::scale_fill_viridis_c()
 #' heatmap_add_dendro(mat_plot)
-
 heatmap_add_dendro <- function(plot,
                                side = c("both", "left", "top"),
                                rel_size = 0.15,
@@ -162,7 +162,8 @@ annotate_dendrogram <- function(plot,
 
   if (side == "left") {
     gt <- gtable::gtable_add_cols(
-      gt, ggplot2::unit(rel_size, "null"), pos = pp$l - 1
+      gt, ggplot2::unit(rel_size, "null"),
+      pos = pp$l - 1
     )
     gt <- gtable::gtable_add_grob(
       gt, grob,
@@ -171,7 +172,8 @@ annotate_dendrogram <- function(plot,
     )
   } else {
     gt <- gtable::gtable_add_rows(
-      gt, ggplot2::unit(rel_size, "null"), pos = pp$t - 1
+      gt, ggplot2::unit(rel_size, "null"),
+      pos = pp$t - 1
     )
     gt <- gtable::gtable_add_grob(
       gt, grob,

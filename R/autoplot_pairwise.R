@@ -70,14 +70,13 @@
 autoplot.pairwise_matrix <- function(object,
                                      order = NULL,
                                      ...) {
-  
   if (!missing(...)) {
     stop(
       "Additional arguments are not allowed in ",
       "autoplot.pairwise_matrix()."
     )
   }
-  
+
   heatmap_pairwise(object, order = order)
 }
 
@@ -86,13 +85,12 @@ autoplot.pairwise_matrix <- function(object,
 autoplot.pairwise_tbl <- function(object,
                                   order = NULL,
                                   ...) {
-  
   if (!missing(...)) {
     stop(
       "Additional arguments are not allowed in ",
       "autoplot.pairwise_tbl()."
     )
   }
-  
+
   heatmap_pairwise(object, order = order)
 }

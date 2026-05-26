@@ -1,5 +1,4 @@
 test_that("autoplot works for pairwise matrices and tibbles", {
-
   # load the example dataset
   example_gt <- load_example_gt("gen_tbl")
 
@@ -162,7 +161,7 @@ test_that("heatmap_pairwise detects duplicate pairs in tidy input", {
     pairwise_pop_fst(method = "Nei87")
 
   # introduce a duplicate pair by rbinding a copy of the first row
-  dup_tbl <- rbind(fst_tbl, fst_tbl[1, ])
+  dup_tbl <- rbind(fst_tbl[-nrow(fst_tbl),], fst_tbl[1, ])
 
   expect_error(
     heatmap_pairwise(dup_tbl),
