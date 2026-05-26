@@ -216,9 +216,17 @@ test_that("heatmap_pairwise error messages", {
 })
 
 test_that("autoplot covers remaining matrix validation and ordering branches", {
-  `$.raw_order_vector` <- function(x, name) {
-    NULL
-  }
+  assign(
+    "$.raw_order_vector",
+    function(x, name) {
+      NULL
+    },
+    envir = .GlobalEnv
+  )
+  withr::defer(
+    rm("$.raw_order_vector", envir = .GlobalEnv),
+    envir = environment()
+  )
 
   toy_mat <- matrix(
     c(
