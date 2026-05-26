@@ -84,6 +84,7 @@ reference:
         - starts_with("nwise_")
         - autoplot_pairwise
         - heatmap_pairwise
+        - heatmap_add_dendro
   - title: "Windows"
     desc: "Functions to compute statistics in sliding windows across loci."
     contents:

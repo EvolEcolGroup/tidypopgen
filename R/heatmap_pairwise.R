@@ -111,7 +111,7 @@ heatmap_pairwise <- function(x,
     }
 
     # Check that no entry is a diagonal (i.e. from and to are never the same)
-    if (any(df$from==df$to)){
+    if (any(df$from == df$to)) {
       stop("the data.frame should not include values for the diagonal")
     }
 

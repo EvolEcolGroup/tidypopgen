@@ -161,10 +161,56 @@ test_that("heatmap_pairwise detects duplicate pairs in tidy input", {
     pairwise_pop_fst(method = "Nei87")
 
   # introduce a duplicate pair by rbinding a copy of the first row
-  dup_tbl <- rbind(fst_tbl[-nrow(fst_tbl),], fst_tbl[1, ])
+  dup_tbl <- rbind(fst_tbl[-nrow(fst_tbl), ], fst_tbl[1, ])
 
   expect_error(
     heatmap_pairwise(dup_tbl),
     "Duplicate pairs found"
+  )
+})
+
+
+test_that("heatmap_pairwise error messages", {
+  # load the example dataset
+  example_gt <- load_example_gt("gen_tbl")
+  # tidy tibble
+  fst_tbl <- example_gt %>%
+    dplyr::group_by(population) %>%
+    pairwise_pop_fst(method = "Nei87")
+  # error for additional parameters
+  expect_error(
+    autoplot(fst_tbl, blah = "blah"),
+    "Additional arguments are not allowed"
+  )
+  # now with a matrix
+  # matrix form
+  fst_mat <- example_gt %>%
+    dplyr::group_by(population) %>%
+    pairwise_pop_fst(
+      method = "Nei87",
+      type = "pairwise"
+    )
+  expect_error(
+    autoplot(fst_mat, blah = "blah"),
+    "Additional arguments are not allowed"
+  )
+  # wrong number of columsn for the tibble
+  fst_tbl_2col <- fst_tbl[, 1:2]
+  expect_error(
+    autoplot(fst_tbl_2col),
+    "Data frame must have 3 columns"
+  )
+  # remove one row
+  fst_tbl_missing_row <- fst_tbl[-1, ]
+  expect_error(
+    autoplot(fst_tbl_missing_row),
+    "Expected"
+  )
+  # create a diagonal entry
+  fst_tbl_diag <- fst_tbl
+  fst_tbl_diag[1, 1] <- fst_tbl_diag[1, 2]
+  expect_error(
+    autoplot(fst_tbl_diag),
+    "the data.frame should not include values for the diagonal"
   )
 })
