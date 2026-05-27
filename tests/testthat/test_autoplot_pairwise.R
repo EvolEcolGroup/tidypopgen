@@ -214,3 +214,120 @@ test_that("heatmap_pairwise error messages", {
     "the data.frame should not include values for the diagonal"
   )
 })
+
+test_that("autoplot covers remaining matrix validation and ordering branches", {
+  toy_mat <- matrix(
+    c(
+      NA, 1, 2,
+      1, NA, 3,
+      2, 3, NA
+    ),
+    nrow = 3,
+    byrow = TRUE,
+    dimnames = list(
+      c("pop_c", "pop_a", "pop_b"),
+      c("pop_c", "pop_a", "pop_b")
+    )
+  )
+  class(toy_mat) <- c("pairwise_matrix", class(toy_mat))
+
+  # a simple function that returns a valid ordering vector, but is not a
+  # standard class should work
+  expect_true(
+    inherits(
+      autoplot(
+        toy_mat,
+        order = function(x) {
+          list(order = c(2, 3, 1))
+        }
+      ),
+      "ggplot"
+    )
+  )
+
+  # but a function that retunrs a list without an "order" element should fail
+  expect_error(
+    autoplot(
+      toy_mat,
+      order = function(x) {
+        list(blah = c(2, 3, 1))
+      }
+    ),
+    "Ordering function returned a list without"
+  )
+
+
+  # a similar function that returns a plain vector
+  expect_true(
+    inherits(
+      autoplot(
+        toy_mat,
+        order = function(x) {
+          c(2, 3, 1)
+        }
+      ),
+      "ggplot"
+    )
+  )
+
+  # pairwise matrix without row or column names
+  unnamed_mat <- unname(toy_mat)
+  dimnames(unnamed_mat) <- list(NULL, NULL)
+  class(unnamed_mat) <- c("pairwise_matrix", class(unnamed_mat))
+
+  expect_true(inherits(autoplot(unnamed_mat), "ggplot"))
+
+  # error for a non square matrix, even if it has the right class
+  nonsquare_mat <- matrix(1:6, nrow = 2)
+  class(nonsquare_mat) <- c("pairwise_matrix", class(nonsquare_mat))
+
+  expect_error(
+    autoplot(nonsquare_mat),
+    "Matrix must be square."
+  )
+
+  # mismatched col and row names
+  mismatched_names <- toy_mat
+  colnames(mismatched_names) <- rev(colnames(mismatched_names))
+
+  expect_error(
+    autoplot(mismatched_names),
+    "Row and column names must match."
+  )
+
+  # ordering function not returning indices
+  expect_error(
+    autoplot(
+      toy_mat,
+      order = function(x) {
+        letters[seq_len(nrow(x))]
+      }
+    ),
+    "Ordering function must return numeric indices."
+  )
+
+  expect_error(
+    autoplot(
+      toy_mat,
+      order = function(x) {
+        seq_len(nrow(x) - 1)
+      }
+    ),
+    "Ordering vector has incorrect length."
+  )
+
+  expect_error(
+    autoplot(
+      toy_mat,
+      order = function(x) {
+        c(1, 1, 2)
+      }
+    ),
+    "Ordering vector must contain indices 1:n exactly once."
+  )
+
+  expect_error(
+    autoplot(toy_mat, order = new.env()),
+    "order must be NULL, a vector, or a function."
+  )
+})
