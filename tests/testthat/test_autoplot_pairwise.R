@@ -216,20 +216,6 @@ test_that("heatmap_pairwise error messages", {
 })
 
 test_that("autoplot covers remaining matrix validation and ordering branches", {
-  s3_method_name <- "$.test_raw_order_vector"
-
-  assign(
-    s3_method_name,
-    function(x, name) {
-      NULL
-    },
-    envir = .GlobalEnv
-  )
-  withr::defer(
-    rm(list = s3_method_name, envir = .GlobalEnv),
-    envir = environment()
-  )
-
   toy_mat <- matrix(
     c(
       NA, 1, 2,
@@ -245,24 +231,53 @@ test_that("autoplot covers remaining matrix validation and ordering branches", {
   )
   class(toy_mat) <- c("pairwise_matrix", class(toy_mat))
 
+  # a simple function that returns a valid ordering vector, but is not a
+  # standard class should work
   expect_true(
     inherits(
       autoplot(
         toy_mat,
         order = function(x) {
-          structure(c(2, 3, 1), class = "test_raw_order_vector")
+          list(order = c(2, 3, 1))
         }
       ),
       "ggplot"
     )
   )
 
+  # but a function that retunrs a list without an "order" element should fail
+  expect_error(
+    autoplot(
+      toy_mat,
+      order = function(x) {
+        list(blah = c(2, 3, 1))
+      }
+    ),
+    "Ordering function returned a list without"
+  )
+
+
+  # a similar function that returns a plain vector
+  expect_true(
+    inherits(
+      autoplot(
+        toy_mat,
+        order = function(x) {
+          c(2, 3, 1)
+        }
+      ),
+      "ggplot"
+    )
+  )
+
+  # pairwise matrix without row or column names
   unnamed_mat <- unname(toy_mat)
   dimnames(unnamed_mat) <- list(NULL, NULL)
   class(unnamed_mat) <- c("pairwise_matrix", class(unnamed_mat))
 
   expect_true(inherits(autoplot(unnamed_mat), "ggplot"))
 
+  # error for a non square matrix, even if it has the right class
   nonsquare_mat <- matrix(1:6, nrow = 2)
   class(nonsquare_mat) <- c("pairwise_matrix", class(nonsquare_mat))
 
@@ -271,6 +286,7 @@ test_that("autoplot covers remaining matrix validation and ordering branches", {
     "Matrix must be square."
   )
 
+  # mismatched col and row names
   mismatched_names <- toy_mat
   colnames(mismatched_names) <- rev(colnames(mismatched_names))
 
@@ -279,6 +295,7 @@ test_that("autoplot covers remaining matrix validation and ordering branches", {
     "Row and column names must match."
   )
 
+  # ordering function not returning indices
   expect_error(
     autoplot(
       toy_mat,

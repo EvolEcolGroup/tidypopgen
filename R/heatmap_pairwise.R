@@ -192,7 +192,13 @@ heatmap_pairwise <- function(x,
       ord_obj <- order(x)
 
       # object with $order component
-      if (!is.null(ord_obj$order)) {
+      if (is.list(ord_obj)) {
+        # check that the list has a component named "order"
+        if (!"order" %in% names(ord_obj)) {
+          stop(
+            "Ordering function returned a list without an 'order' component."
+          )
+        }
         ord <- ord_obj$order
 
         # raw ordering vector

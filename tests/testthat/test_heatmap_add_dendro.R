@@ -1,6 +1,4 @@
-make_ordered_pairwise_heatmap <- function(order = function(x) {
-  stats::hclust(stats::as.dist(x))
-}) {
+test_that("heatmap_add_dendro adds requested dendrogram panels", {
   toy_mat <- matrix(
     c(
       NA, 1, 2,
@@ -16,14 +14,12 @@ make_ordered_pairwise_heatmap <- function(order = function(x) {
   )
   class(toy_mat) <- c("pairwise_matrix", class(toy_mat))
 
-  autoplot(toy_mat, order = order) +
+  base_plot <- autoplot(toy_mat,
+    order = function(x) {
+      stats::hclust(stats::as.dist(x))
+    }
+  ) +
     ggplot2::scale_fill_viridis_c()
-}
-
-test_that("heatmap_add_dendro adds requested dendrogram panels", {
-  skip_if_not_installed("ggplot2", minimum_version = "4.0.0")
-
-  base_plot <- make_ordered_pairwise_heatmap()
 
   left_plot <- heatmap_add_dendro(
     base_plot,
@@ -50,9 +46,29 @@ test_that("heatmap_add_dendro adds requested dendrogram panels", {
 })
 
 test_that("heatmap_add_dendro objects can be drawn and saved", {
-  skip_if_not_installed("ggplot2", minimum_version = "4.0.0")
+  toy_mat <- matrix(
+    c(
+      NA, 1, 2,
+      1, NA, 3,
+      2, 3, NA
+    ),
+    nrow = 3,
+    byrow = TRUE,
+    dimnames = list(
+      c("pop_a", "pop_b", "pop_c"),
+      c("pop_a", "pop_b", "pop_c")
+    )
+  )
+  class(toy_mat) <- c("pairwise_matrix", class(toy_mat))
 
-  dendro_plot <- heatmap_add_dendro(make_ordered_pairwise_heatmap())
+  base_plot <- autoplot(toy_mat,
+    order = function(x) {
+      stats::hclust(stats::as.dist(x))
+    }
+  ) +
+    ggplot2::scale_fill_viridis_c()
+
+  dendro_plot <- heatmap_add_dendro(base_plot)
 
   expect_invisible(print(dendro_plot))
   expect_no_error(grid::grid.draw(dendro_plot))
@@ -100,13 +116,31 @@ test_that("heatmap_add_dendro validates input plots", {
 })
 
 test_that("heatmap_add_dendro requires an hclust order function", {
-  skip_if_not_installed("ggplot2", minimum_version = "4.0.0")
+  toy_mat <- matrix(
+    c(
+      NA, 1, 2,
+      1, NA, 3,
+      2, 3, NA
+    ),
+    nrow = 3,
+    byrow = TRUE,
+    dimnames = list(
+      c("pop_a", "pop_b", "pop_c"),
+      c("pop_a", "pop_b", "pop_c")
+    )
+  )
+  class(toy_mat) <- c("pairwise_matrix", class(toy_mat))
+
+  base_plot <- autoplot(toy_mat,
+    order = function(x) {
+      return(list(order = c(2, 1, 3)))
+    }
+  ) +
+    ggplot2::scale_fill_viridis_c()
 
   expect_error(
     heatmap_add_dendro(
-      make_ordered_pairwise_heatmap(order = function(x) {
-        rev(seq_len(nrow(x)))
-      })
+      base_plot
     ),
     "The order function must return an hclust object"
   )
