@@ -245,7 +245,7 @@ test_that("autoplot covers remaining matrix validation and ordering branches", {
     )
   )
 
-  # but a function that retunrs a list without an "order" element should fail
+  # but a function that returns a list without an "order" element should fail
   expect_error(
     autoplot(
       toy_mat,
