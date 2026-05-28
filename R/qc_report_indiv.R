@@ -238,11 +238,12 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 #' autoplot(indiv_report_rel, type = "relatedness", kings_threshold = "second")
 #'
 autoplot.qc_report_indiv <- function(
-    object,
-    type = c("scatter", "relatedness", "histogram"),
-    miss_threshold = 0.05,
-    kings_threshold = NULL,
-    ...) {
+  object,
+  type = c("scatter", "relatedness", "histogram"),
+  miss_threshold = 0.05,
+  kings_threshold = NULL,
+  ...
+) {
   rlang::check_dots_empty()
 
   if (!is.null(kings_threshold)) {
@@ -324,8 +325,9 @@ autoplot_qc_report_indiv <- function(object, miss_threshold) {
 }
 
 autoplot_qc_report_indiv_king <- function(
-    object,
-    kings_threshold) {
+  object,
+  kings_threshold
+) {
   if (
     inherits(attr(object$to_keep, "king"), "matrix") ||
       inherits(attr(object$to_keep, "king"), "array")

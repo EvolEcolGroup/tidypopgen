@@ -240,10 +240,11 @@ dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
 #' @export
 #' @noRd
 group_by.gen_tbl <- function(
-    .data,
-    ...,
-    .add = FALSE,
-    .drop = group_by_drop_default(.data)) {
+  .data,
+  ...,
+  .add = FALSE,
+  .drop = group_by_drop_default(.data)
+) {
   out <- NextMethod()
 
   # prioritise "gen_tbl" class over "sf"

@@ -17,12 +17,13 @@
 #' @keywords internal
 #' @noRd
 vcf_to_fbm_cpp <- function(
-    vcf_path,
-    backingfile = NULL,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    quiet = FALSE) {
+  vcf_path,
+  backingfile = NULL,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  quiet = FALSE
+) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
     backingfile <- sub("\\.vcf.gz$", "", backingfile)

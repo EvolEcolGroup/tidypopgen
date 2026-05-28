@@ -64,11 +64,12 @@
 #' # Create an rbind report using rbind_dry_run
 #' rbind_dry_run(example_gt, test_gt, flip_strand = TRUE)
 rbind_dry_run <- function(
-    ref,
-    target,
-    use_position = FALSE,
-    flip_strand = FALSE,
-    quiet = FALSE) {
+  ref,
+  target,
+  use_position = FALSE,
+  flip_strand = FALSE,
+  quiet = FALSE
+) {
   # check there are no ID's in common
   if (any(ref$id %in% target$id)) {
     stop(

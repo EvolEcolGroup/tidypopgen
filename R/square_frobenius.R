@@ -17,11 +17,12 @@
 #' @keywords internal
 #' @noRd
 square_frobenius <- function(
-    X, # nolint start
-    ind.row = bigstatsr::rows_along(X),
-    ind.col = bigstatsr::cols_along(X), # nolint end
-    center = rep(0, length(ind.col)),
-    scale = rep(1, length(ind.col))) {
+  X, # nolint start
+  ind.row = bigstatsr::rows_along(X),
+  ind.col = bigstatsr::cols_along(X), # nolint end
+  center = rep(0, length(ind.col)),
+  scale = rep(1, length(ind.col))
+) {
   if (length(center) != length(ind.col) || length(scale) != length(ind.col)) {
     stop(paste(
       "center and scale must be the same length as the number of",

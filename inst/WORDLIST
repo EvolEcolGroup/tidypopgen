@@ -1,6 +1,7 @@
 ADMIXTOOLS
 Af
 Anolis
+Autoplot
 Autoplots
 BIM
 BMC
@@ -107,6 +108,7 @@ csv
 cutoff
 cv
 dapc
+dendro
 diffNgroup
 dist
 distruct
@@ -124,11 +126,13 @@ fst
 fulfills
 gammarus
 geno
+gg
 ggplot
 github
 goesup
 goodfit
 gt
+gtable
 gz
 hclust
 het
@@ -148,6 +152,7 @@ io
 kmeans
 ld
 lengthBps
+linewidth
 loadingPC
 maf
 magrittr
