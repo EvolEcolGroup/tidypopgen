@@ -72,6 +72,8 @@ example_gt %>% pairwise_grm()
 #> e -0.4045802
 #> f  0.7977099
 #> g  0.5572519
+#> attr(,"class")
+#> [1] "pairwise_matrix" "pairwise_matrix" "matrix"          "array"          
 
 # To calculate using a precomputed allele sharing matrix, use:
 allele_sharing <- example_gt %>% pairwise_allele_sharing(as_matrix = TRUE)
@@ -92,4 +94,6 @@ example_gt %>% pairwise_grm(allele_sharing_mat = allele_sharing)
 #> e -0.4045802
 #> f  0.7977099
 #> g  0.5572519
+#> attr(,"class")
+#> [1] "pairwise_matrix" "pairwise_matrix" "matrix"          "array"          
 ```

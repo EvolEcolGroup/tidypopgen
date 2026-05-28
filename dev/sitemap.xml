@@ -14,6 +14,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/authors.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/index.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/news/index.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/annotate_dendrogram.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/arrange.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/arrange.grouped_gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment.gt_dapc.html</loc></url>
@@ -28,6 +29,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_gt_pcadapt.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_pairwise.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/c.gt_admix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/cash-set-.gen_tbl.html</loc></url>
@@ -72,6 +74,8 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_snmf.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_uses_imputed.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/heatmap_add_dendro.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/heatmap_pairwise.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/index.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_het_obs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_inbreeding.html</loc></url>

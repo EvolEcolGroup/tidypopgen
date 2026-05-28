@@ -81,6 +81,8 @@ pairwise_ibs(example_gt, type = "proportion", as_matrix = TRUE)
 #> e 0.7500000 0.50 0.700 0.5833333 1.0000000 0.60 0.500
 #> f 0.6000000 0.50 0.750 0.7000000 0.6000000 1.00 0.750
 #> g 0.7000000 0.50 0.625 0.5000000 0.5000000 0.75 1.000
+#> attr(,"class")
+#> [1] "pairwise_matrix" "matrix"          "array"          
 
 # Adjust block_size
 pairwise_ibs(example_gt, block_size = 2)

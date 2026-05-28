@@ -68,11 +68,11 @@ example_gt <- load_example_gt("gen_tbl")
 gt_update_backingfile(example_gt)
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpCheXHJ/file1f4316e96d15_v2.rds
-#> with FBM backing file: /tmp/RtmpCheXHJ/file1f4316e96d15_v2.bk
+#> using FBM RDS: /tmp/RtmpCYfTJU/file1f913f0f3d68_v2.rds
+#> with FBM backing file: /tmp/RtmpCYfTJU/file1f913f0f3d68_v2.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpCheXHJ/file1f4316e96d15_v2.gt')
+#> gt_load('/tmp/RtmpCYfTJU/file1f913f0f3d68_v2.gt')
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 3
 #>   id    population  genotypes
@@ -90,9 +90,9 @@ gt_update_backingfile(example_gt)
 example_gt <- example_gt %>% gt_update_backingfile()
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpCheXHJ/file1f4316e96d15_v3.rds
-#> with FBM backing file: /tmp/RtmpCheXHJ/file1f4316e96d15_v3.bk
+#> using FBM RDS: /tmp/RtmpCYfTJU/file1f913f0f3d68_v3.rds
+#> with FBM backing file: /tmp/RtmpCYfTJU/file1f913f0f3d68_v3.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpCheXHJ/file1f4316e96d15_v3.gt')
+#> gt_load('/tmp/RtmpCYfTJU/file1f913f0f3d68_v3.gt')
 ```

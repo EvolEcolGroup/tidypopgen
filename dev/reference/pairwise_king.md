@@ -59,6 +59,8 @@ pairwise_king(example_gt, as_matrix = TRUE)
 #> e  0.250 -1.25  0.125 -0.625  0.500 -1.00 -0.125
 #> f -0.500 -1.00 -0.500 -0.250 -1.000  0.50    NaN
 #> g  0.250 -1.00 -0.750 -0.125 -0.125   NaN  0.500
+#> attr(,"class")
+#> [1] "pairwise_matrix" "matrix"          "array"          
 
 # Or return a tidy tibble
 pairwise_king(example_gt, as_matrix = FALSE)

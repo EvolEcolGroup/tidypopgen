@@ -383,6 +383,16 @@ Functions comparing individuals or populations.
   : Compute the Population Branch Statistics for each combination of
   populations
 
+- [`autoplot(`*`<pairwise_matrix>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_pairwise.md)
+  [`autoplot(`*`<pairwise_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_pairwise.md)
+  : Autoplot for pairwise distance matrices
+
+- [`heatmap_pairwise()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/heatmap_pairwise.md)
+  : Pairwise distance heatmap
+
+- [`heatmap_add_dendro()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/heatmap_add_dendro.md)
+  : Add dendrograms to a heatmap of pairwise distances
+
 ## Windows
 
 Functions to compute statistics in sliding windows across loci.

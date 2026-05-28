@@ -124,6 +124,8 @@ example_gt %>%
 #> pop1        NA 0.0320197 0.1428571
 #> pop2 0.0320197        NA 0.0500000
 #> pop3 0.1428571 0.0500000        NA
+#> attr(,"class")
+#> [1] "pairwise_matrix" "matrix"          "array"          
 
 # To calculate Fst by locus:
 example_gt %>%
