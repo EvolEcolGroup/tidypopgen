@@ -1,3 +1,10 @@
+# limit number of threads for tests
+data.table::setDTthreads(2)
+if (rlang::is_installed("RhpcBLASctl")) {
+  RhpcBLASctl::blas_set_num_threads(2)
+  RhpcBLASctl::omp_set_num_threads(2)
+}
+
 test_that("versioning updates correctly through gt_order_loci", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),

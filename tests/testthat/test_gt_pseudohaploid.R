@@ -1,3 +1,10 @@
+# limit number of threads for tests
+data.table::setDTthreads(2)
+if (rlang::is_installed("RhpcBLASctl")) {
+  RhpcBLASctl::blas_set_num_threads(2)
+  RhpcBLASctl::omp_set_num_threads(2)
+}
+
 test_genotypes <- rbind(
   c(1, 1, 0, 1, 1, 0),
   c(2, 2, 0, NA, 0, 0),

@@ -1,4 +1,7 @@
-# tidypopgen dev
+# tidypopgen 0.4.4
+* fix seed argument of `gt_admixture()`
+* implement our own upset plot function to avoid dependency on `UpSetR`
+  package, which is no longer maintained
 * fix reading of VCFs when genotype separator symbol is present in the
   sample information
 * fix `loci_` functions output when calculating across groups for a single loci

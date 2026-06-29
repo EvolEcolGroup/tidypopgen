@@ -1,5 +1,12 @@
 skip_if_not_installed("vcfR")
 
+# limit number of threads for tests
+data.table::setDTthreads(2)
+if (rlang::is_installed("RhpcBLASctl")) {
+  RhpcBLASctl::blas_set_num_threads(2)
+  RhpcBLASctl::omp_set_num_threads(2)
+}
+
 test_that("count_vcf_individuals with gzfile", {
   vcf_path <- system.file(
     "extdata/ploidy/ploidy_test.vcf.gz",

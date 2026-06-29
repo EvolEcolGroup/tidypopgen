@@ -64,6 +64,7 @@ reference:
         - autoplot.qc_report_loci
         - autoplot.qc_report_indiv
         - filter_high_relatedness
+        - upset_plot
   - title: "Loci"
     desc: "Functions operating across loci."
     contents:

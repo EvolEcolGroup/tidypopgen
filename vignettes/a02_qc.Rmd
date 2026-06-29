@@ -30,8 +30,15 @@ data <- gen_tibble(
 )
 ```
 
+First, lets take a look at the data we have. 
+```{r}
+count_loci(data)
+nrow(data)
+```
 
-#Quality control for individuals
+We can see that there are 961 SNPs and 12 individuals in this dataset.
+
+# Quality control for individuals
 
 ```{r}
 individual_report <- qc_report_indiv(data)
@@ -71,19 +78,21 @@ nrow(data)
 
 Next, we can look at relatedness within our sample. If the parameter `kings_threshold` is provided to `qc_report_indiv()`, then the report also calculates a KING coefficient of relatedness matrix using the sample. The `kings_threshold` is used to provide an output of the largest possible group with no related individuals in the third column `to_keep`. This boolean column recommends which individuals to remove (FALSE) and to keep (TRUE) to achieve an unrelated sample. 
 
+For example, we can use `kings_threshold = "first"` to specify that we want to remove first degree relatives.
+
 ```{r}
-individual_report <- qc_report_indiv(data, kings_threshold = 0.177)
+individual_report <- qc_report_indiv(data, kings_threshold = "first")
 summary(individual_report)
 ```
 
-We can remove the recommended individuals by using:
+We can then remove the recommended individuals by using:
 
 ```{r}
 data <- data %>%
   filter(id %in% individual_report$id & individual_report$to_keep == TRUE)
 ```
 
-We can now view a summary of our cleaned data set again, showing that our data has reduced from 12 to 8 individuals.
+We can now view a summary of our cleaned data set again, showing that our data has reduced from the original; 12 individuals, to 8.
 
 ```{r}
 summary(data)
@@ -102,20 +111,20 @@ The output of `qc_report_loci` supplies minor allele frequency, rate of missingn
 autoplot(loci_report, type = "overview")
 ```
 
-Using 'overview' provides an Upset plot, which is designed to show the intersection of different sets in the same way as a Venn diagram. SNPs can be divided into 'sets' that each pass predefined quality control threshold; a set of SNPs with missingness under a given threshold, a set of SNPs with MAF above a given threshold, and a set of SNPs with a Hardy-Weinberg exact p-value that falls above a given significance level.
+Using 'overview' provides an Upset plot. Upset plots are designed to show the intersection of different sets in the same way as a Venn diagram. SNPs can be divided into 'sets' that each pass predefined quality control threshold; a set of SNPs with missingness under a given threshold, a set of SNPs with MAF above a given threshold, and a set of SNPs with a Hardy-Weinberg exact p-value that falls above a given significance level.
 
-The thresholds for each parameter, (percentage of missingness that is accepted, minor allele frequency cutoff, and Hardy-Weinberg equilibrium p-value) can be adjusted using the parameters provided in autoplot. For example:
+The thresholds for each parameter, (percentage of missingness that is accepted, minor allele frequency cutoff, and Hardy-Weinberg equilibrium p-value) can be adjusted using the parameters provided in autoplot. For example, lets adjust the thresholds to 5% missingness, 10% minor allele frequency, and a Hardy-Weinberg p-value of 0.05.
 
 ```{r, fig.alt = "Upset plot as above, with adjusted thresholds"}
 autoplot(loci_report,
   type = "overview",
-  miss_threshold = 0.03,
-  maf_threshold = 0.02,
-  hwe_p = 0.01
+  miss_threshold = 0.05,
+  maf_threshold = 0.1,
+  hwe_p = 0.05
 )
 ```
 
-The upset plot then visualises our 961 SNPs within their respective sets. The number above the second bar indicates that 262 SNPs occur in all 3 sets, meaning 262 SNPs pass all of our QC thresholds. The combined total of the first and second bars represents the number of SNPs that pass our MAF and HWE thresholds, here 939 SNPs.
+The upset plot then visualises our 961 SNPs within their respective sets. The number above the second bar indicates that 607 SNPs occur in all 3 sets, meaning 607 SNPs pass all of our QC thresholds. The combined total of the first and second bars represents the number of SNPs that pass our MAF and HWE thresholds, here 806 SNPs.
 
 To examine each QC measure in further detail, we can plot a different summary panel.
 

@@ -115,7 +115,7 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 #' For `qc_report_loci`, the following types of plots are available:
 #' - `overview`: an UpSet plot, giving counts of snps over the threshold for
 #' missingness, minor allele frequency, and Hardy-Weinberg equilibrium P-value,
-#' and visualising the interaction between these
+#' and visualising the interaction between these.
 #' - `all`: a four panel plot, containing `missing high maf`, `missing low maf`,
 #' `hwe`, and `significant hwe` plots
 #' - `missing`: a histogram of proportion of missing data
@@ -193,7 +193,7 @@ autoplot.qc_report_loci <- function(
   ),
   maf_threshold = 0.05,
   miss_threshold = 0.01,
-  hwe_p = 0.01, # SUGGESTION should this be hwe_p_threshold for consistency?
+  hwe_p = 0.01,
   ...
 ) {
   type <- match.arg(type)
@@ -302,6 +302,10 @@ autoplot_l_qc_overview <- function(
   hwe_p_low_thresh,
   ...
 ) {
+  # check that the ellipses are empty
+  if (length(list(...)) > 0) {
+    stop("no additional arguments should be provided for this plot")
+  }
   if (any(is.na(object))) {
     message(paste(
       "One or more loci are missing for every individual.",
@@ -311,47 +315,19 @@ autoplot_l_qc_overview <- function(
     object <- object[!is.na(object$maf), ]
   }
 
-  qc_report <- object
-
-  qc_maf <- qc_report[qc_report$maf >= maf_threshold, ]
-  maf_pass <- c(qc_maf$snp_id)
-
-  qc_missing <- qc_report[qc_report$missingness >= miss_threshold, ]
-  missing_pass <- c(qc_missing$snp_id)
-
+  qc_report <- data.frame(
+    Missing = object$missingness < miss_threshold,
+    MAF = object$maf > maf_threshold
+  )
   # if including HWE
-  if ("hwe_p" %in% colnames(qc_report)) {
-    qc_hwe <- qc_report[qc_report$hwe_p >= hwe_p_low_thresh, ]
-    hwe_pass <- c(qc_hwe$snp_id)
-
-    pass_list <- list(MAF = maf_pass, HWE = hwe_pass, Missing = missing_pass)
-
-    unique_markers <- unique(unlist(pass_list))
-    pass_counts <- UpSetR::fromList(pass_list)
-    row.names(pass_counts) <- unique_markers
-
-    final_plot_overview <- UpSetR::upset(
-      pass_counts,
-      order.by = "freq",
-      main.bar.color = "#66C2A5",
-      matrix.color = "#66C2A5",
-      sets.bar.color = "#FC8D62"
-    )
-  } else {
-    pass_list <- list(MAF = maf_pass, Missing = missing_pass)
-
-    unique_markers <- unique(unlist(pass_list))
-    pass_counts <- UpSetR::fromList(pass_list)
-    row.names(pass_counts) <- unique_markers
-
-    final_plot_overview <- UpSetR::upset(
-      pass_counts,
-      order.by = "freq",
-      main.bar.color = "#66C2A5",
-      matrix.color = "#66C2A5",
-      sets.bar.color = "#FC8D62"
-    )
+  if ("hwe_p" %in% colnames(object)) {
+    qc_report$HWE <- object$hwe_p >= hwe_p_low_thresh
   }
+  final_plot_overview <- upset_plot(qc_report,
+    bar_colour = "#66C2A5",
+    dot_colour = "#66C2A5",
+    set_bar_colour = "#FC8D62"
+  )
   return(final_plot_overview)
 }
 
