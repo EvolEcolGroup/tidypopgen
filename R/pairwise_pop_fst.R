@@ -184,6 +184,8 @@ pairwise_pop_fst <- function(
 
   # otherwise we start formatting the other objects
   fst_tot <- tibble::tibble(group_combinations, value = fst_list$fst_tot)
+  # now add a class
+  class(fst_tot) <- c("pairwise_tbl", class(fst_tot))
 
   if (type == "pairwise") { # if we return a matrix
     fst_tot <- tidy_to_matrix(fst_tot)
@@ -238,6 +240,8 @@ tidy_to_matrix <- function(tidy_tbl) {
   # fill lower triangle
   fst_tot_wide[lower.tri(fst_tot_wide)] <-
     t(fst_tot_wide)[lower.tri(fst_tot_wide)]
+  # add class
+  class(fst_tot_wide) <- c("pairwise_matrix", class(fst_tot_wide))
   return(fst_tot_wide)
 }
 

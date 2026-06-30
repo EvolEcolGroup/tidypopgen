@@ -29,9 +29,12 @@ tidy_dist_matrix <- function(mat) {
   }
   xy <- t(utils::combn(colnames(mat), 2))
   colnames(xy) <- c("item1", "item2")
-  xy %>%
+  xy <- xy %>%
     tibble::as_tibble() %>%
     dplyr::mutate(value = mat[xy])
+  # add a class to indicate this is a pairwise tibble
+  class(xy) <- c("pairwise_tbl", class(xy))
+  return(xy)
 }
 
 # stop if not diploid

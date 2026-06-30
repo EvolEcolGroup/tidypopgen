@@ -47,6 +47,8 @@ pairwise_king <- function(
   )
   dimnames(king_matrix) <- list(x$id, x$id)
   if (as_matrix) {
+    # add a class to indicate this is a pairwise matrix
+    class(king_matrix) <- c("pairwise_matrix", class(king_matrix))
     return(king_matrix)
   } else {
     return(tidy_dist_matrix(king_matrix))

@@ -62,6 +62,8 @@ pairwise_ibs <- function(
 
   if (type == "proportion" || type == "adjusted_counts") {
     if (as_matrix) {
+      # add a class to indicate this is a pairwise matrix
+      class(ibs_matrix) <- c("pairwise_matrix", class(ibs_matrix))
       return(ibs_matrix)
     } else {
       return(tidy_dist_matrix(ibs_matrix))

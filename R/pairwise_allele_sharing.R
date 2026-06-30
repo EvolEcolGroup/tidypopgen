@@ -40,6 +40,8 @@ pairwise_allele_sharing <- function(
   )
   dimnames(ashare_matrix) <- list(x$id, x$id)
   if (as_matrix) {
+    # add a class to indicate this is a pairwise matrix
+    class(ashare_matrix) <- c("pairwise_matrix", class(ashare_matrix))
     return(ashare_matrix)
   } else {
     return(tidy_dist_matrix(ashare_matrix))
