@@ -219,12 +219,14 @@ pairwise_pop_fst <- function(
 
 # This function is used to turn a tidy tibble into a matrix
 tidy_to_matrix <- function(tidy_tbl) {
+  pop1 <- colnames(tidy_tbl[1])
+  pop2 <- colnames(tidy_tbl[2])
   fst_tot_wide <- tidyr::pivot_wider(
     tidy_tbl,
-    names_from = "population_2",
+    names_from = .data[[pop2]],
     values_from = "value"
   ) %>%
-    tibble::column_to_rownames(var = "population_1") %>%
+    tibble::column_to_rownames(var = pop1) %>%
     as.matrix()
   # add missing row and col to make the matrix symmetrical
   fst_tot_wide <- cbind(NA_real_, fst_tot_wide)

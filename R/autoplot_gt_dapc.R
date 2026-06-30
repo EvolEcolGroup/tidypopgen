@@ -77,6 +77,13 @@ autoplot.gt_dapc <- function(
       ggplot2::geom_point() +
       ggplot2::geom_line()
   } else if (type == "scores") {
+    if (ncol(object$ind.coord) == 1) {
+      stop(
+        "gt_dapc object has only one discriminant axis, cannot plot",
+        " scores. Check the number of axes and pops used",
+        " in gt_dapc()"
+      )
+    }
     if (is.null(ld)) {
       ld <- c(1, 2)
     }
@@ -163,7 +170,7 @@ autoplot.gt_dapc <- function(
         fill = .data$q
       )
     ) +
-      ggplot2::geom_col(color = "gray", size = 0.1) +
+      ggplot2::geom_col(color = "gray") +
       ggplot2::facet_grid(
         ~group,
         switch = "x",
