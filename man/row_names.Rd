@@ -30,18 +30,11 @@ Returns integer names if present, otherwise character dimnames. Use instead
 of \code{rownames()} for guaranteed dispatch.
 }
 \seealso{
-Other matrix_int_names_functions: 
-\code{\link{[.matrix_int_names}()},
-\code{\link{as.data.frame.matrix_int_names}()},
-\code{\link{col_names}()},
-\code{\link{matrix_int_names}()},
-\code{\link{print.matrix_int_names}()}
-
-Other matrix_int_names_functions: 
-\code{\link{[.matrix_int_names}()},
-\code{\link{as.data.frame.matrix_int_names}()},
-\code{\link{col_names}()},
-\code{\link{matrix_int_names}()},
-\code{\link{print.matrix_int_names}()}
+Other matrix_int_names_functions:
+\code{\link[=[.matrix_int_names]{[.matrix_int_names()}},
+\code{\link[=as.data.frame.matrix_int_names]{as.data.frame.matrix_int_names()}},
+\code{\link[=col_names]{col_names()}},
+\code{\link[=matrix_int_names]{matrix_int_names()}},
+\code{\link[=print.matrix_int_names]{print.matrix_int_names()}}
 }
 \concept{matrix_int_names_functions}

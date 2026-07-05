@@ -81,5 +81,5 @@ Weir, BS and Goudet J (2017) A Unified Characterization of
 Population Structure and Relatedness. Genetics (2017) 206:2085
 }
 \seealso{
-\code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}} \code{\link[hierfstat:fs.dosage]{hierfstat::fis.dosage()}}
+\code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}} \code{\link[hierfstat:fis.dosage]{hierfstat::fis.dosage()}}
 }

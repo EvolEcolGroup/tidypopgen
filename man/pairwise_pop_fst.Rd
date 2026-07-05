@@ -35,7 +35,7 @@ compute the mean numerator and denominator within each window). Default is
 FALSE.}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 if \code{type=tidy}, a tibble of genome-wide pairwise Fst values with

@@ -12,8 +12,8 @@ snp_king(
 )
 }
 \arguments{
-\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes}
-slot of a \link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP} object).}
+\item{X}{a \link[bigstatsr:FBM.code256]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes}
+slot of a \link[bigsnpr:bigSNP]{bigsnpr::bigSNP} object).}
 
 \item{ind.row}{An optional vector of the row indices that are used.
 If not specified, all rows are used. Don't use negative indices.}

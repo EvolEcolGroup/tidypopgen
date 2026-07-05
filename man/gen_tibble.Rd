@@ -61,7 +61,7 @@ alternate allele.
 }}
 
 \item{...}{if \code{x} is the name of a vcf file, additional arguments passed to
-\code{\link[vcfR:io_vcfR]{vcfR::read.vcfR()}}. Otherwise, unused.}
+\code{\link[vcfR:read.vcfR]{vcfR::read.vcfR()}}. Otherwise, unused.}
 
 \item{valid_alleles}{a vector of valid allele values; it defaults to 'A','T',
 'C' and 'G'.}

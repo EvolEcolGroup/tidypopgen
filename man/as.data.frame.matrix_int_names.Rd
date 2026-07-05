@@ -9,8 +9,9 @@
 \arguments{
 \item{x}{A matrix_int_names object}
 
-\item{row.names}{Ignored, as row names are preserved from the
-matrix_int_names}
+\item{row.names}{Either a character or integer (as both are valid for data.frame).
+If NULL, row names are inherited from the
+\code{matrix_int_names}}
 
 \item{optional}{Ignored, included for compatibility with generic signature}
 
@@ -32,11 +33,11 @@ my_df <- as.data.frame(my_mat)
 my_df
 }
 \seealso{
-Other matrix_int_names_functions: 
-\code{\link{[.matrix_int_names}()},
-\code{\link{col_names}()},
-\code{\link{matrix_int_names}()},
-\code{\link{print.matrix_int_names}()},
-\code{\link{row_names}()}
+Other matrix_int_names_functions:
+\code{\link[=[.matrix_int_names]{[.matrix_int_names()}},
+\code{\link[=col_names]{col_names()}},
+\code{\link[=matrix_int_names]{matrix_int_names()}},
+\code{\link[=print.matrix_int_names]{print.matrix_int_names()}},
+\code{\link[=row_names]{row_names()}}
 }
 \concept{matrix_int_names_functions}

@@ -27,7 +27,6 @@ URL: https://github.com/EvolEcolGroup/tidypopgen,
     https://evolecolgroup.github.io/tidypopgen/
 BugReports: https://github.com/EvolEcolGroup/tidypopgen/issues
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends:
     R (>= 3.5.0),
     dplyr (>= 1.2.0),
@@ -82,3 +81,4 @@ LinkingTo:
     rmio
 LazyData: true
 Config/Needs/website: rmarkdown
+Config/roxygen2/version: 8.0.0

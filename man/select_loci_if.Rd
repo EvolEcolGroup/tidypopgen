@@ -17,7 +17,7 @@ for which .sel_logical is TRUE will be selected; NA will be treated as FALSE.}
 a subset of the list of loci in the \code{gen_tibble}
 }
 \description{
-An equivalent to \code{\link[dplyr:select_all]{dplyr::select_if()}} that works on the \code{genotype} column
+An equivalent to \code{\link[dplyr:select_if]{dplyr::select_if()}} that works on the \code{genotype} column
 of a \code{gen_tibble}. This function has access to the genotypes (and thus can
 work on summary statistics to select), but not the names of the loci (look
 at \code{\link[=select_loci]{select_loci()}} for that feature.
@@ -41,5 +41,5 @@ show_loci(example_gt_subset)
 
 }
 \seealso{
-\code{\link[dplyr:select_all]{dplyr::select_if()}}
+\code{\link[dplyr:select_if]{dplyr::select_if()}}
 }

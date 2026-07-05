@@ -494,7 +494,7 @@ print.matrix_int_names <- function(x, ..., n = 10L) {
 
 
   # subset a display version with n rows and column
-  display <- x[seq_len(min(n, nrow(x))), seq_len(min(n, ncol(x)))]
+  display <- x[seq_len(min(n, nrow(x))), seq_len(min(n, ncol(x))), drop = FALSE]
   rnames <- attr(display, "int_rownames")
   cnames <- attr(display, "int_colnames")
   # Get character dimnames directly
@@ -550,8 +550,8 @@ print.matrix_int_names <- function(x, ..., n = 10L) {
 #' as.data.frame.matrix method.
 #'
 #' @param x A matrix_int_names object
-#' @param row.names Ignored, as row names are preserved from the
-#'   matrix_int_names
+#' @param row.names Either a character or integer (as both are valid for
+#'   data.frame). If NULL, row names are inherited from the `matrix_int_names`
 #' @param optional Ignored, included for compatibility with generic signature
 #' @param ... Additional arguments passed to as.data.frame.matrix
 #' @export
