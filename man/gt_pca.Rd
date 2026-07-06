@@ -27,9 +27,9 @@ Rather than accessing elements of a \code{gt_pca} object directly, it is
 better to use \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
 }
 \seealso{
-Other gt_pca_functions: 
-\code{\link{gt_pca_autoSVD}()},
-\code{\link{gt_pca_partialSVD}()},
-\code{\link{gt_pca_randomSVD}()}
+Other gt_pca_functions:
+\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}},
+\code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}},
+\code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}}
 }
 \concept{gt_pca_functions}

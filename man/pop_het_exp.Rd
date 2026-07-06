@@ -33,7 +33,7 @@ will return a vector of n populations plus 1 (the global value), or a
 matrix with n+1 columns if \code{by_locus=TRUE}.}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 a vector of mean population observed heterozygosities (if

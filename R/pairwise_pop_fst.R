@@ -173,10 +173,10 @@ pairwise_pop_fst <- function(
   # if we want the numerator and denominator,
   # we need to format them and return them
   if (return_num_dem) {
-    rownames(fst_list$Fst_by_locus_num) <- loci_names(.x)
+    row.names(fst_list$Fst_by_locus_num) <- loci_names(.x)
     colnames(fst_list$Fst_by_locus_num) <-
       col_names_combinations(group_combinations)
-    rownames(fst_list$Fst_by_locus_den) <- loci_names(.x)
+    row.names(fst_list$Fst_by_locus_den) <- loci_names(.x)
     colnames(fst_list$Fst_by_locus_den) <-
       col_names_combinations(group_combinations)
     return(fst_list)
@@ -221,20 +221,22 @@ pairwise_pop_fst <- function(
 
 # This function is used to turn a tidy tibble into a matrix
 tidy_to_matrix <- function(tidy_tbl) {
+  pop1 <- colnames(tidy_tbl[1])
+  pop2 <- colnames(tidy_tbl[2])
   fst_tot_wide <- tidyr::pivot_wider(
     tidy_tbl,
-    names_from = "population_2",
+    names_from = .data[[pop2]],
     values_from = "value"
   ) %>%
-    tibble::column_to_rownames(var = "population_1") %>%
+    tibble::column_to_rownames(var = pop1) %>%
     as.matrix()
   # add missing row and col to make the matrix symmetrical
   fst_tot_wide <- cbind(NA_real_, fst_tot_wide)
   fst_tot_wide <- rbind(fst_tot_wide, NA_real_)
   # fix dim names
-  rownames(fst_tot_wide)[nrow(fst_tot_wide)] <-
+  row.names(fst_tot_wide)[nrow(fst_tot_wide)] <-
     utils::tail(colnames(fst_tot_wide), 1)
-  colnames(fst_tot_wide)[1] <- rownames(fst_tot_wide)[1]
+  colnames(fst_tot_wide)[1] <- row.names(fst_tot_wide)[1]
   # fill lower triangle
   fst_tot_wide[lower.tri(fst_tot_wide)] <-
     t(fst_tot_wide)[lower.tri(fst_tot_wide)]

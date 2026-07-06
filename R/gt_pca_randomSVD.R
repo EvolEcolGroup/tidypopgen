@@ -116,8 +116,9 @@ gt_pca_randomSVD <- function(
   ) # TODO check that this is correct and expose it,
   # maybe create convenience function to get the values
   # add names to the scores (to match them to data later)
-  rownames(this_svd$u) <- x$id
-  rownames(this_svd$v) <- loci_names(x)
+  row.names(this_svd$u) <- x$id
+  this_svd$v <- matrix_int_names(this_svd$v)
+  row_names(this_svd$v) <- loci_names(x)
   this_svd$method <- "randomSVD"
   this_svd$call <- match.call()
   this_svd$loci <- show_loci(x)

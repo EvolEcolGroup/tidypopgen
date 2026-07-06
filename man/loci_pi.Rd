@@ -44,7 +44,7 @@ that value. There is no need for the user to set it, but it is included to
 resolve certain tidyselect operations.}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
 

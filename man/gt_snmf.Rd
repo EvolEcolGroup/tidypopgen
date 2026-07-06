@@ -67,7 +67,7 @@ on the screen when running from the command line)
 Run SNMF from R in tidypopgen
 }
 \details{
-This is a wrapper for \code{\link[LEA:main_sNMF]{LEA::snmf()}}.
+This is a wrapper for \code{\link[LEA:snmf]{LEA::snmf()}}.
 }
 \examples{
 \dontshow{if (rlang::is_installed("LEA")) withAutoprint(\{ # examplesIf}
@@ -82,5 +82,5 @@ example_gt \%>\% gt_snmf(
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[LEA:main_sNMF]{LEA::snmf()}}
+\code{\link[LEA:snmf]{LEA::snmf()}}
 }

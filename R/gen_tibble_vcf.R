@@ -9,6 +9,7 @@ gen_tibble_vcf <- function(
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
+  names_as_int = FALSE,
   quiet = FALSE
 ) {
   parser <- match.arg(parser)
@@ -27,6 +28,7 @@ gen_tibble_vcf <- function(
       valid_alleles = valid_alleles,
       missing_alleles = missing_alleles,
       allow_duplicates = allow_duplicates,
+      names_as_int = names_as_int,
       quiet = quiet
     )
   } else {

@@ -38,7 +38,7 @@ resolve certain tidyselect operations.}
 is TRUE, as in PLINK.}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
 

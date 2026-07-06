@@ -459,7 +459,7 @@ format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
   } else if (type == "matrix") {
     # return a matrix
     colnames(out_mat) <- group_ids
-    rownames(out_mat) <- loci_names
+    row_names(out_mat) <- loci_names
     out_mat
   }
 }
