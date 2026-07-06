@@ -27,6 +27,7 @@ gen_tibble(
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
+  names_as_int = FALSE,
   quiet = FALSE
 )
 
@@ -125,6 +126,13 @@ gen_tibble(
 
   the number of loci or individuals (depending on the format) processed
   at a time (currently used if `x` is a vcf with parser "vcfR")
+
+- names_as_int:
+
+  logical. If TRUE, locus names will be converted to integers. Only used
+  when `x` is a *VCF* file with parser "cpp". Default is FALSE. This can
+  be useful when working with very large datasets where storing the
+  names as string can use a large amount of memory.
 
 - indiv_meta:
 

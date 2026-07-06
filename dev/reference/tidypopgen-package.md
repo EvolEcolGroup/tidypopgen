@@ -25,6 +25,9 @@ Useful links:
 
 Authors:
 
+- Andrea Manica <am315@cam.ac.uk>
+  ([ORCID](https://orcid.org/0000-0003-1895-450X)) \[copyright holder\]
+
 - Evie Carter
 
 - Eirlys Tysall

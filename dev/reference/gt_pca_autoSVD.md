@@ -90,7 +90,7 @@ gt_pca_autoSVD(
 - n_cores:
 
   Number of cores used. Default doesn't use parallelism. You may use
-  [`bigstatsr::nb_cores()`](https://privefl.github.io/bigstatsr/reference/reexports.html).
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html).
 
 - verbose:
 

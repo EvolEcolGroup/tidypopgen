@@ -9,7 +9,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9001</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,6 +73,7 @@ here the format</p>
 <span>  missing_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0"</span>, <span class="st">"."</span><span class="op">)</span>,</span>
 <span>  backingfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  allow_duplicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  names_as_int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -143,8 +144,8 @@ will be created (but note that R will delete it at the end of the session!)</p><
 <dd><p>logical. If TRUE, the tibble will allow duplicated
 loci (those with genomic coordinate (chromosome + position) or locus name
 appearing more than once). If FALSE, an error will be thrown if duplicated
-loci are found. These validations run before backing
-files are saved. Default is FALSE.</p></dd>
+loci are found. These validations run before backing files are saved.
+Default is FALSE.</p></dd>
 
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
@@ -166,6 +167,14 @@ in case your
 <dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
 <dd><p>the number of loci or individuals (depending on the format)
 processed at a time (currently used if <code>x</code> is a vcf with parser "vcfR")</p></dd>
+
+
+<dt id="arg-names-as-int">names_as_int<a class="anchor" aria-label="anchor" href="#arg-names-as-int"></a></dt>
+<dd><p>logical. If TRUE, locus names will be
+converted to integers. Only used when <code>x</code> is a <em>VCF</em> file with parser
+"cpp". Default is FALSE. This can be useful when working with very large
+datasets where storing the names as string can use a large amount of
+memory.</p></dd>
 
 
 <dt id="arg-indiv-meta">indiv_meta<a class="anchor" aria-label="anchor" href="#arg-indiv-meta"></a></dt>

@@ -75,7 +75,8 @@ fst_dist <- example_gt %>%
 mat_plot <- heatmap_pairwise(fst_dist,
   order = function(x) {
     stats::hclust(stats::as.dist(x))
-  }) +
-ggplot2::scale_fill_viridis_c()
+  }
+) +
+  ggplot2::scale_fill_viridis_c()
 heatmap_add_dendro(mat_plot)
 ```

@@ -565,8 +565,6 @@ We can inspect this assignment by DAPC with `autoplot` using the type
 ``` r
 
 autoplot(anole_dapc, type = "components", group = anole_gt$population)
-#> Warning in ggplot2::geom_col(color = "gray", size = 0.1): Ignoring
-#> unknown parameters: `size`
 ```
 
 ![Bar plot showing the probability of assignment to each

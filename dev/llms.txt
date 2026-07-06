@@ -566,18 +566,6 @@ Functions for other analyses within `R`.
 
   Autoplots for `gt_pcadapt` objects
 
-## `bigSNP`
-
-Mostly for developers: Functions for operating directly on `bigSNP`
-objects.
-
-- [`snp_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_allele_sharing.md)
-  : Compute the Pairwise Allele Sharing Matrix for a bigSNP object
-- [`snp_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_ibs.md)
-  : Compute the Identity by State Matrix for a bigSNP object
-- [`snp_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_king.md)
-  : Compute the KING-robust Matrix for a bigSNP object
-
 ## Example data
 
 Function for loading an example `gen_tibble`.
@@ -621,6 +609,39 @@ Methods for tidyverse verbs for `gen_tibble` objects
   :
 
   A \$ method for `gen_tibble` objects
+
+## `matrix_int_names`
+
+Matrix class to store names as integers for big data, and associated
+functions
+
+- [`as.data.frame(`*`<matrix_int_names>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/as.data.frame.matrix_int_names.md)
+  : Coercion method to data.frame for matrix_int_names
+- [`col_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/col_names.md)
+  [`` `col_names<-`() ``](https://evolecolgroup.github.io/tidypopgen/dev/reference/col_names.md)
+  : Get or set column names for matrix_int_names
+- [`matrix_int_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/matrix_int_names.md)
+  : Matrix with integer row/column names class
+- [`print(`*`<matrix_int_names>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/print.matrix_int_names.md)
+  : Print method for matrix_int_names
+- [`row_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/row_names.md)
+  [`` `row_names<-`() ``](https://evolecolgroup.github.io/tidypopgen/dev/reference/row_names.md)
+  : Get or set row names for matrix_int_names
+- [`` `[`( ``*`<matrix_int_names>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/subset.md)
+  [`` `[<-`( ``*`<matrix_int_names>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/subset.md)
+  : Subsetting method for matrix_int_names
+
+## `bigSNP`
+
+Mostly for developers: Functions for operating directly on `bigSNP`
+objects.
+
+- [`snp_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_allele_sharing.md)
+  : Compute the Pairwise Allele Sharing Matrix for a bigSNP object
+- [`snp_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_ibs.md)
+  : Compute the Identity by State Matrix for a bigSNP object
+- [`snp_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_king.md)
+  : Compute the KING-robust Matrix for a bigSNP object
 
 # Articles
 

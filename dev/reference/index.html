@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9001</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -944,36 +944,6 @@
         </dt>
         <dd>Autoplots for <code>gt_pcadapt</code> objects</dd>
       </dl></div><div class="section level2">
-      <h2 id="-bigsnp-"><code>bigSNP</code><a class="anchor" aria-label="anchor" href="#-bigsnp-"></a></h2>
-
-      <div class="section-desc"><p>Mostly for developers: Functions for operating directly on <code>bigSNP</code> objects.</p></div>
-
-      <dl></dl></div><div class="section level2">
-
-
-
-
-      <dl><dt>
-
-          <code><a href="snp_allele_sharing.html">snp_allele_sharing()</a></code>
-
-        </dt>
-        <dd>Compute the Pairwise Allele Sharing Matrix for a bigSNP object</dd>
-
-        <dt>
-
-          <code><a href="snp_ibs.html">snp_ibs()</a></code>
-
-        </dt>
-        <dd>Compute the Identity by State Matrix for a bigSNP object</dd>
-
-        <dt>
-
-          <code><a href="snp_king.html">snp_king()</a></code>
-
-        </dt>
-        <dd>Compute the KING-robust Matrix for a bigSNP object</dd>
-      </dl></div><div class="section level2">
       <h2 id="example-data">Example data<a class="anchor" aria-label="anchor" href="#example-data"></a></h2>
 
       <div class="section-desc"><p>Function for loading an example <code>gen_tibble</code>.</p></div>
@@ -1047,6 +1017,87 @@
 
         </dt>
         <dd>A $ method for <code>gen_tibble</code> objects</dd>
+      </dl></div><div class="section level2">
+      <h2 id="-matrix-int-names-"><code>matrix_int_names</code><a class="anchor" aria-label="anchor" href="#-matrix-int-names-"></a></h2>
+
+      <div class="section-desc"><p>Matrix class to store names as integers for big data, and associated functions</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="as.data.frame.matrix_int_names.html">as.data.frame(<i>&lt;matrix_int_names&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Coercion method to data.frame for matrix_int_names</dd>
+
+        <dt>
+
+          <code><a href="col_names.html">col_names()</a></code> <code><a href="col_names.html">`col_names&lt;-`()</a></code>
+
+        </dt>
+        <dd>Get or set column names for matrix_int_names</dd>
+
+        <dt>
+
+          <code><a href="matrix_int_names.html">matrix_int_names()</a></code>
+
+        </dt>
+        <dd>Matrix with integer row/column names class</dd>
+
+        <dt>
+
+          <code><a href="print.matrix_int_names.html">print(<i>&lt;matrix_int_names&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Print method for matrix_int_names</dd>
+
+        <dt>
+
+          <code><a href="row_names.html">row_names()</a></code> <code><a href="row_names.html">`row_names&lt;-`()</a></code>
+
+        </dt>
+        <dd>Get or set row names for matrix_int_names</dd>
+
+        <dt>
+
+          <code><a href="subset.html">`[`(<i>&lt;matrix_int_names&gt;</i>)</a></code> <code><a href="subset.html">`[&lt;-`(<i>&lt;matrix_int_names&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Subsetting method for matrix_int_names</dd>
+      </dl></div><div class="section level2">
+      <h2 id="-bigsnp-"><code>bigSNP</code><a class="anchor" aria-label="anchor" href="#-bigsnp-"></a></h2>
+
+      <div class="section-desc"><p>Mostly for developers: Functions for operating directly on <code>bigSNP</code> objects.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="snp_allele_sharing.html">snp_allele_sharing()</a></code>
+
+        </dt>
+        <dd>Compute the Pairwise Allele Sharing Matrix for a bigSNP object</dd>
+
+        <dt>
+
+          <code><a href="snp_ibs.html">snp_ibs()</a></code>
+
+        </dt>
+        <dd>Compute the Identity by State Matrix for a bigSNP object</dd>
+
+        <dt>
+
+          <code><a href="snp_king.html">snp_king()</a></code>
+
+        </dt>
+        <dd>Compute the KING-robust Matrix for a bigSNP object</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

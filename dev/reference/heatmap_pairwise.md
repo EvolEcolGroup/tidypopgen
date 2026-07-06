@@ -66,7 +66,7 @@ heatmap_pairwise(
   fst_dist,
   order = rev(rownames(fst_dist))
 ) +
-ggplot2::scale_fill_viridis_c()
+  ggplot2::scale_fill_viridis_c()
 
 
 # Hierarchical clustering

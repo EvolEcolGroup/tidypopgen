@@ -5,9 +5,9 @@ to see their documentation.
 
 - generics:
 
-  [`augment`](https://generics.r-lib.org/reference/augment.html),
-  [`tidy`](https://generics.r-lib.org/reference/tidy.html)
+  [`augment()`](https://generics.r-lib.org/reference/augment.html),
+  [`tidy()`](https://generics.r-lib.org/reference/tidy.html)
 
 - ggplot2:
 
-  [`autoplot`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)

@@ -17,6 +17,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/annotate_dendrogram.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/arrange.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/arrange.grouped_gen_tbl.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/as.data.frame.matrix_int_names.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment.gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment_loci.html</loc></url>
@@ -34,6 +35,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/c.gt_admix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/cash-set-.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/cbind.gen_tbl.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/col_names.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/count_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/distruct_colours.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/filter.gen_tbl.html</loc></url>
@@ -92,6 +94,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_pi.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_transitions.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_transversions.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/matrix_int_names.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/mutate.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/mutate.grouped_gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/nwise_pop_pbs.html</loc></url>
@@ -108,6 +111,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_het_obs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_tajimas_d.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/predict_gt_pca.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/print.matrix_int_names.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/q_matrix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/qc_report_indiv.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/qc_report_loci.html</loc></url>
@@ -115,6 +119,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind_dry_run.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/read_q_files.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/reexports.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/row_names.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/scale_fill_distruct.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci_if.html</loc></url>
@@ -124,6 +129,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_allele_sharing.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_ibs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_king.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/subset.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/summary.gt_admix.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/summary_rbind_dry_run.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/theme_distruct.html</loc></url>

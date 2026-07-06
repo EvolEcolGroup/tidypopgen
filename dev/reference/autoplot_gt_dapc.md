@@ -101,6 +101,5 @@ autoplot(dapc_res, type = "loadings", ld = 1)
 
 # Components plot
 autoplot(dapc_res, type = "components", group = populations)
-#> Warning: Ignoring unknown parameters: `size`
 
 ```

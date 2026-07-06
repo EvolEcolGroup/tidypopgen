@@ -53,7 +53,7 @@ loci_hwe(
 - n_cores:
 
   number of cores to be used, it defaults to
-  [`bigstatsr::nb_cores()`](https://privefl.github.io/bigstatsr/reference/reexports.html)
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 - block_size:
 
