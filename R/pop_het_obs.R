@@ -14,6 +14,15 @@
 #'   \eqn{\hat{h}_o} at the genome level is simply the mean of the locus
 #'   estimates.
 #'
+#'   This statistic is ploidy-agnostic: an individual is heterozygous at a
+#'   locus whenever its dosage is neither zero nor its own ploidy, so
+#'   `pop_het_obs()` works for diploid, polyploid, and populations that mix
+#'   individuals of different ploidy. The genome-wide estimate when
+#'   `include_global = TRUE` is the unweighted mean of the population
+#'   estimates for polyploid/mixed-ploidy data; for diploid and pseudohaploid
+#'   data it is computed via [pop_global_stats()], for consistency with
+#'   previous releases.
+#'
 #' @references Nei M. (1987) Molecular Evolutionary Genetics. Columbia
 #'   University Press
 #'
@@ -55,7 +64,8 @@ pop_het_obs <- function(
   include_global = FALSE,
   n_cores = bigstatsr::nb_cores()
 ) {
-  stopifnot_diploid(.x)
+  stopifnot_gen_tibble(.x)
+  stopifnot_no_pseudohaploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
     .group_levels <- .x %>% group_keys()
@@ -66,8 +76,8 @@ pop_het_obs <- function(
     .group_ids <- rep(0, nrow(.x))
   }
 
-  # summarise population frequencies
-  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
+  # summarise population heterozygosity (ploidy-agnostic)
+  het_obs_df <- grouped_het_obs_cpp(
     .gt_get_fbm(.x),
     rowInd = .gt_fbm_rows(.x),
     colInd = .gt_fbm_cols(.x),
@@ -77,10 +87,19 @@ pop_het_obs <- function(
     ncores = n_cores
   )
 
-  Ho <- pop_freqs_df$het_obs # nolint
+  Ho <- het_obs_df$het_obs # nolint
   colnames(Ho) <- .group_levels %>% dplyr::pull(1) # nolint
   if (include_global) {
-    global <- (.x %>% pop_global_stats(by_locus = TRUE, n_cores = n_cores))$Ho
+    if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+      global <-
+        (.x %>% pop_global_stats(by_locus = TRUE, n_cores = n_cores))$Ho
+    } else {
+      # Hs, Fst, Fis etc. in pop_global_stats() rely on allele-frequency
+      # formulae not yet generalised beyond diploid/pseudohaploid data, but
+      # the global Ho (Nei 1987 eqn 7.38) is simply the unweighted mean of
+      # the population estimates, which holds regardless of ploidy.
+      global <- rowMeans(Ho, na.rm = TRUE)
+    }
     Ho <- cbind(Ho, global) # nolint
   }
 
