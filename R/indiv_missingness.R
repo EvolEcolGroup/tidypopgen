@@ -57,14 +57,18 @@ indiv_missingness.vctrs_bigSNP <- function(
   X <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
-
+  # gt_ind_hetero also needs ploidy to define heterozygosity, but we only
+  # use the missingness row of its output here, so the value does not
+  # affect the result
+  ploidy <- indiv_ploidy(.x)
 
   # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
-  count_1_na <- function(BM, ind, rows_to_keep) { # nolint
+  count_1_na <- function(BM, ind, rows_to_keep, ploidy) { # nolint
     gt_ind_hetero(
       BM = BM,
       rowInd = rows_to_keep,
       colInd = ind,
+      ploidy = ploidy,
       ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
     )
   }
@@ -76,7 +80,8 @@ indiv_missingness.vctrs_bigSNP <- function(
     ind = attr(.x, "loci")$big_index,
     a.combine = "plus",
     block.size = block_size,
-    rows_to_keep = rows_to_keep
+    rows_to_keep = rows_to_keep,
+    ploidy = ploidy
   )[2, ] # get the second row (count_na)
   if (!as_counts) {
     row_na <- row_na / count_loci(.x)

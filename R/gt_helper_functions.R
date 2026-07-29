@@ -77,3 +77,25 @@ is_pseudohaploid <- function(x) {
     (attr(x, "ploidy") == -2)
   }
 }
+
+# stop if any of the individuals currently selected are pseudohaploid
+# (i.e. only one allele was observed, so heterozygosity is undefined for
+# them). Unlike is_pseudohaploid(), this looks at the per-individual
+# fbm_ploidy of the individuals actually present, so it correctly stops
+# blocking a gen_tibble once the pseudohaploid individuals have been
+# filtered out, even though the top-level ploidy attribute (set when
+# gt_pseudohaploid() was called) remains -2.
+stopifnot_no_pseudohaploid <- function(x) {
+  if (inherits(x, "gen_tbl")) {
+    x <- x$genotypes
+  }
+  if (attr(x, "ploidy") == -2) {
+    if (min(attr(x, "fbm_ploidy")[vctrs::vec_data(x)]) == 1) {
+      stop(
+        "this function does not support pseudohaploid data ",
+        "(heterozygosity is undefined when only one allele is ",
+        "observed per individual)"
+      )
+    }
+  }
+}

@@ -1,7 +1,12 @@
 #' Estimate individual observed heterozygosity
 #'
 #' Estimate observed heterozygosity (H_obs) for each individual (i.e. the
-#' frequency of loci that are heterozygous in an individual).
+#' frequency of loci that are heterozygous in an individual). A locus is
+#' heterozygous whenever the dosage of the alternate allele is neither zero
+#' nor the individual's own ploidy, so this works for diploid, polyploid, and
+#' mixed-ploidy [`gen_tibble`] objects alike (each individual is evaluated
+#' against its own ploidy, so individuals of differing ploidy can be mixed
+#' freely).
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
@@ -41,18 +46,22 @@ indiv_het_obs.tbl_df <- function(.x, as_counts = FALSE, ...) {
 #' @rdname indiv_het_obs
 indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   rlang::check_dots_empty()
-  stopifnot_diploid(.x)
+  stopifnot_no_pseudohaploid(.x)
   # get the FBM
   X <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
+  # heterozygosity is an individual-level property, so ploidy is looked up
+  # per individual; this works even for mixed-ploidy gen_tibbles
+  ploidy <- indiv_ploidy(.x)
 
   # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
-  count_1_na <- function(BM, ind, rows_to_keep) { # nolint
+  count_1_na <- function(BM, ind, rows_to_keep, ploidy) { # nolint
     gt_ind_hetero(
       BM = BM,
       rowInd = rows_to_keep,
       colInd = ind,
+      ploidy = ploidy,
       ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
     )
   }
@@ -63,7 +72,8 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
     a.FUN = count_1_na,
     ind = attr(.x, "loci")$big_index,
     a.combine = "plus",
-    rows_to_keep = rows_to_keep
+    rows_to_keep = rows_to_keep,
+    ploidy = ploidy
   )
   if (!as_counts) {
     return(this_col_1_na[1, ] / (ncol(X) - this_col_1_na[2, ]))

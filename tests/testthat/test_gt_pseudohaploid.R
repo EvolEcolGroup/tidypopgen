@@ -61,7 +61,7 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
   # so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
-    "this function only works on diploid data"
+    "this function does not support pseudohaploid data"
   )
   expect_error(
     indiv_inbreeding(test_gt_pseudo),
@@ -153,7 +153,7 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
   # so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
-    "this function only works on diploid data"
+    "this function does not support pseudohaploid data"
   )
   expect_error(
     indiv_inbreeding(test_gt_pseudo),
@@ -281,7 +281,7 @@ test_that("gt_pseudohaploid updates ploidy after dropping pseudohploids", {
   # and functions requiring diploid data throw errors
   expect_error(
     round(indiv_het_obs(test_gt), 1),
-    "this function only works on diploid data"
+    "this function does not support pseudohaploid data"
   )
 
   # Now try filtering out pseudohaploid individuals
