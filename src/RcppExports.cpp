@@ -139,8 +139,22 @@ BEGIN_RCPP
 END_RCPP
 }
 // gt_ind_hetero
-IntegerMatrix gt_ind_hetero(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& ploidy, int ncores);
-RcppExport SEXP _tidypopgen_gt_ind_hetero(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ploidySEXP, SEXP ncoresSEXP) {
+IntegerMatrix gt_ind_hetero(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
+RcppExport SEXP _tidypopgen_gt_ind_hetero(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_ind_hetero(BM, rowInd, colInd, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// gt_ind_hetero_polyploid
+IntegerMatrix gt_ind_hetero_polyploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& ploidy, int ncores);
+RcppExport SEXP _tidypopgen_gt_ind_hetero_polyploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ploidySEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -149,7 +163,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    rcpp_result_gen = Rcpp::wrap(gt_ind_hetero(BM, rowInd, colInd, ploidy, ncores));
+    rcpp_result_gen = Rcpp::wrap(gt_ind_hetero_polyploid(BM, rowInd, colInd, ploidy, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -372,7 +386,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 6},
     {"_tidypopgen_grouped_summaries_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_summaries_dip_pseudo_cpp, 7},
     {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 6},
-    {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 5},
+    {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
+    {"_tidypopgen_gt_ind_hetero_polyploid", (DL_FUNC) &_tidypopgen_gt_ind_hetero_polyploid, 5},
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 4},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},

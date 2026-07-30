@@ -33,8 +33,12 @@ gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores)
     .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
 
-gt_ind_hetero <- function(BM, rowInd, colInd, ploidy, ncores) {
-    .Call(`_tidypopgen_gt_ind_hetero`, BM, rowInd, colInd, ploidy, ncores)
+gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {
+    .Call(`_tidypopgen_gt_ind_hetero`, BM, rowInd, colInd, ncores)
+}
+
+gt_ind_hetero_polyploid <- function(BM, rowInd, colInd, ploidy, ncores) {
+    .Call(`_tidypopgen_gt_ind_hetero_polyploid`, BM, rowInd, colInd, ploidy, ncores)
 }
 
 gt_pi_diploid <- function(BM, rowInd, colInd, ncores) {

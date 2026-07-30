@@ -51,30 +51,50 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   X <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
-  # heterozygosity is an individual-level property, so ploidy is looked up
-  # per individual; this works even for mixed-ploidy gen_tibbles
-  ploidy <- indiv_ploidy(.x)
 
-  # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
-  count_1_na <- function(BM, ind, rows_to_keep, ploidy) { # nolint
-    gt_ind_hetero(
-      BM = BM,
-      rowInd = rows_to_keep,
-      colInd = ind,
-      ploidy = ploidy,
-      ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
+  # keep the diploid/pseudohaploid path on the original, ploidy-free kernel
+  # (no per-individual lookup or comparison against ploidy), and only pay
+  # for the more general, ploidy-aware kernel when the data actually need
+  # it, so the common diploid case is not slowed down.
+  if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+    # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
+    count_1_na <- function(BM, ind, rows_to_keep) { # nolint
+      gt_ind_hetero(
+        BM = BM,
+        rowInd = rows_to_keep,
+        colInd = ind,
+        ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
+      )
+    }
+    this_col_1_na <- bigstatsr::big_apply(
+      X,
+      a.FUN = count_1_na,
+      ind = attr(.x, "loci")$big_index,
+      a.combine = "plus",
+      rows_to_keep = rows_to_keep
+    )
+  } else {
+    # heterozygosity is an individual-level property, so ploidy is looked
+    # up per individual; this works even for mixed-ploidy gen_tibbles
+    ploidy <- indiv_ploidy(.x)
+    count_1_na <- function(BM, ind, rows_to_keep, ploidy) { # nolint
+      gt_ind_hetero_polyploid(
+        BM = BM,
+        rowInd = rows_to_keep,
+        colInd = ind,
+        ploidy = ploidy,
+        ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
+      )
+    }
+    this_col_1_na <- bigstatsr::big_apply(
+      X,
+      a.FUN = count_1_na,
+      ind = attr(.x, "loci")$big_index,
+      a.combine = "plus",
+      rows_to_keep = rows_to_keep,
+      ploidy = ploidy
     )
   }
-
-  # count heterozygotes and nas in one go
-  this_col_1_na <- bigstatsr::big_apply(
-    X,
-    a.FUN = count_1_na,
-    ind = attr(.x, "loci")$big_index,
-    a.combine = "plus",
-    rows_to_keep = rows_to_keep,
-    ploidy = ploidy
-  )
   if (!as_counts) {
     return(this_col_1_na[1, ] / (ncol(X) - this_col_1_na[2, ]))
   } else {

@@ -5,17 +5,19 @@
 /******************************************************************************/
 
 // Function to count heterozygotes and na alleles in a matrix of genotypes
-// by individual
-// this only works for diploid data; see gt_ind_hetero_polyploid() for the
-// generalised, ploidy-aware version used for polyploid/mixed-ploidy data.
-// Kept separate (rather than folded into a single ploidy-aware function) so
-// that the diploid hot path stays branch- and lookup-free.
+// by individual, generalised to arbitrary and mixed ploidy: a genotype is
+// heterozygous whenever its dosage is neither 0 nor the individual's own
+// ploidy (pseudohaploid dosages, which only ever take values 0 or 2, are
+// correctly never counted as heterozygous under this same rule). Kept as a
+// separate function from gt_ind_hetero() so the diploid fast path stays
+// free of the extra ploidy lookup and comparison this requires.
 
 
 // [[Rcpp::export]]
-IntegerMatrix gt_ind_hetero(Environment BM,
+IntegerMatrix gt_ind_hetero_polyploid(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
+                                   const NumericVector& ploidy,
                                    int ncores) {
 
   XPtr<FBM> xpBM = BM["address"];
@@ -31,7 +33,7 @@ IntegerMatrix gt_ind_hetero(Environment BM,
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
       if (x > -1){
-        if (x == 1){ // count heterozygote
+        if (x > 0 && x < ploidy[i]){ // count heterozygote
           het_counts(0, i) += 1;
         }
       } else {
