@@ -76,18 +76,34 @@ pop_het_obs <- function(
     .group_ids <- rep(0, nrow(.x))
   }
 
-  # summarise population heterozygosity (ploidy-agnostic)
-  het_obs_df <- grouped_het_obs_cpp(
-    .gt_get_fbm(.x),
-    rowInd = .gt_fbm_rows(.x),
-    colInd = .gt_fbm_cols(.x),
-    groupIds = .group_ids,
-    ngroups = nrow(.group_levels),
-    ploidy = indiv_ploidy(.x),
-    ncores = n_cores
-  )
-
-  Ho <- het_obs_df$het_obs # nolint
+  # keep the diploid/pseudohaploid path on the original allele-frequency
+  # kernel shared with pop_het_exp()/pop_fis()/pop_global_stats() (so
+  # nothing changes, in behaviour or speed, for the common diploid case),
+  # and only use the more general, ploidy-aware kernel when the data
+  # actually contain polyploid or mixed-ploidy individuals.
+  if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+    pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
+      .gt_get_fbm(.x),
+      rowInd = .gt_fbm_rows(.x),
+      colInd = .gt_fbm_cols(.x),
+      groupIds = .group_ids,
+      ngroups = nrow(.group_levels),
+      ploidy = indiv_ploidy(.x),
+      ncores = n_cores
+    )
+    Ho <- pop_freqs_df$het_obs # nolint
+  } else {
+    het_obs_df <- grouped_het_obs_cpp(
+      .gt_get_fbm(.x),
+      rowInd = .gt_fbm_rows(.x),
+      colInd = .gt_fbm_cols(.x),
+      groupIds = .group_ids,
+      ngroups = nrow(.group_levels),
+      ploidy = indiv_ploidy(.x),
+      ncores = n_cores
+    )
+    Ho <- het_obs_df$het_obs # nolint
+  }
   colnames(Ho) <- .group_levels %>% dplyr::pull(1) # nolint
   if (include_global) {
     if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
