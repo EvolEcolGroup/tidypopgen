@@ -329,7 +329,7 @@ gen_tibble.matrix <- function(
       fbm_ploidy <- rep(ploidy, nrow(x))
     } else {
       stop(
-        "'ploidy' 0 (mixed ploidy) or -2 (haplodiploids) ",
+        "'ploidy' 0 (mixed ploidy) or -2 (pseudohaploids) ",
         "require a vector of individual ploidies"
       )
     }

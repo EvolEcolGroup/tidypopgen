@@ -23,16 +23,9 @@ filter.gen_tbl <- function(..., deparse.level = 1) { # nolint
       c("gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
     class(out) <- obj_class
   }
-  # if we had pseudohaploid, check if they are still there, if not, update
-  # to diploid
-  if (is_pseudohaploid(out)) {
-    if (
-        min(
-          attr(out$genotypes, "fbm_ploidy")[vctrs::vec_data(out$genotypes)]
-        ) == 2) {
-      attr(out$genotypes, "ploidy") <- 2
-    }
-  }
+  # refresh the ploidy label where it can be safely inferred from the
+  # individuals that remain (see .gt_refresh_ploidy())
+  out <- .gt_refresh_ploidy(out)
   return(out)
 }
 
@@ -58,6 +51,11 @@ filter.grouped_gen_tbl <- function(..., deparse.level = 1) { # nolint
       c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf", obj_class[!obj_class %in% c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf")]) # nolint
     class(out) <- obj_class
   }
+  # refresh the ploidy label where it can be safely inferred from the
+  # individuals that remain (see .gt_refresh_ploidy()); filter.gen_tbl()'s
+  # own refresh is not reached here, since S3 dispatch on the more specific
+  # "grouped_gen_tbl" class picks this method instead
+  out <- .gt_refresh_ploidy(out)
   return(out)
 }
 

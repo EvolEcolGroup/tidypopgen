@@ -74,7 +74,7 @@ gen_tibble_bed_rds <- function(
       fbm_ploidy <- rep(ploidy, nrow(indiv_meta))
     } else {
       stop(
-        "'ploidy' 0 (mixed ploidy) or -2 (haplodiploids) ",
+        "'ploidy' 0 (mixed ploidy) or -2 (pseudohaploids) ",
         "require a vector of individual ploidies"
       )
     }

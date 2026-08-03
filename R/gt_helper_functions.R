@@ -79,12 +79,44 @@ is_pseudohaploid <- function(x) {
   }
 }
 
+# refresh a gen_tibble's top-level ploidy label after some individuals have
+# been dropped (e.g. by filter()), which does not update it automatically.
+# Only two cases can safely be inferred purely from which individuals
+# remain:
+# - pseudohaploid (-2): reset to diploid (2) if no pseudohaploid
+#   individuals remain (pseudohaploid is a data-quality flag, not a
+#   ploidy value, so it is only ever reset to 2, never to whatever
+#   fbm_ploidy the remaining individuals happen to have)
+# - mixed ploidy (0): reset to that single ploidy if the remaining
+#   individuals now all happen to share the same one
+# any other ploidy value is a definite single ploidy (diploid or
+# polyploid) that dropping individuals cannot make stale, so it is left
+# untouched.
+.gt_refresh_ploidy <- function(out) {
+  remaining_ploidy <-
+    attr(out$genotypes, "fbm_ploidy")[vctrs::vec_data(out$genotypes)]
+  if (length(remaining_ploidy) == 0) {
+    return(out)
+  }
+  if (is_pseudohaploid(out)) {
+    if (min(remaining_ploidy) == 2) {
+      attr(out$genotypes, "ploidy") <- 2
+    }
+  } else if (attr(out$genotypes, "ploidy") == 0) {
+    if (length(unique(remaining_ploidy)) == 1) {
+      attr(out$genotypes, "ploidy") <- remaining_ploidy[1]
+    }
+  }
+  out
+}
+
 # stop if the gen_tibble is flagged as containing pseudohaploid data
 # (heterozygosity is undefined when only one allele was observed). Trusts
 # the ploidy label rather than inspecting which individuals are currently
-# selected: dropping pseudohaploid individuals via filter() does not
-# refresh the label, so gt_pseudohaploid() must be rerun for this check to
-# stop blocking a gen_tibble that no longer actually contains any.
+# selected: filter() refreshes the label where it safely can (see
+# .gt_refresh_ploidy()), but e.g. dropping only some pseudohaploid
+# individuals, or subsetting some other way, will not, so rerun
+# gt_pseudohaploid() if this keeps erroring unexpectedly.
 stopifnot_no_pseudohaploid <- function(x) {
   if (is_pseudohaploid(x)) {
     stop(
