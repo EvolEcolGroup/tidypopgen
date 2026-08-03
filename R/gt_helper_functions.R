@@ -52,6 +52,7 @@ stopifnot_diploid <- function(x) {
   }
 }
 
+# stop if not diploid or pseudohaploid
 stopifnot_dip_pseudo <- function(x) {
   if (inherits(x, "gen_tbl")) {
     x <- x$genotypes

@@ -52,7 +52,7 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
 
-  # keep the diploid/pseudohaploid path on the original, ploidy-free kernel
+  # use a fast (and simpler) diploid/pseudohaploid version
   # (no per-individual lookup or comparison against ploidy), and only pay
   # for the more general, ploidy-aware kernel when the data actually need
   # it, so the common diploid case is not slowed down.
@@ -74,6 +74,7 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
       rows_to_keep = rows_to_keep
     )
   } else {
+    # ploidy aware version
     # heterozygosity is an individual-level property, so ploidy is looked
     # up per individual; this works even for mixed-ploidy gen_tibbles
     ploidy <- indiv_ploidy(.x)
@@ -103,9 +104,3 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
     return(this_col_1_na)
   }
 }
-
-# #' @export #nolint start
-# #' @rdname indiv_het_obs
-# indiv_het_obs.grouped_df <- function(.x, ...){
-#   .x %>% mutate(indiv_het_obs = indiv_het_obs(.data$genotypes)) %>% summarise(het_obs = mean(indiv_het_obs))
-# } #nolint end
