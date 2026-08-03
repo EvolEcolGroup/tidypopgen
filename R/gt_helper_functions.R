@@ -37,23 +37,6 @@ tidy_dist_matrix <- function(mat) {
   return(xy)
 }
 
-# TRUE if any of the individuals currently selected are pseudohaploid (i.e.
-# only one allele was observed for them, encoded as fbm_ploidy 1 even
-# though their dosages are stored on the diploid 0/2 scale). Looks at the
-# per-individual fbm_ploidy of the individuals actually present, rather
-# than just the top-level ploidy attribute (set when gt_pseudohaploid() was
-# called), which stays -2 even after the pseudohaploid individuals
-# themselves have been filtered out.
-has_pseudohaploid <- function(x) {
-  if (inherits(x, "gen_tbl")) {
-    x <- x$genotypes
-  }
-  if (attr(x, "ploidy") != -2) {
-    return(FALSE)
-  }
-  min(attr(x, "fbm_ploidy")[vctrs::vec_data(x)]) == 1
-}
-
 # stop if not diploid
 stopifnot_diploid <- function(x) {
   if (inherits(x, "gen_tbl")) {
@@ -62,8 +45,10 @@ stopifnot_diploid <- function(x) {
   if (abs(attr(x, "ploidy")) != 2) {
     stop("this function only works on diploid data")
   }
-  if (has_pseudohaploid(x)) {
-    stop("this function only works on diploid data")
+  if (attr(x, "ploidy") == -2) {
+    if (min(attr(x, "fbm_ploidy")[vctrs::vec_data(x)]) != 2) {
+      stop("this function only works on diploid data")
+    }
   }
 }
 
@@ -94,14 +79,19 @@ is_pseudohaploid <- function(x) {
   }
 }
 
-# stop if any of the individuals currently selected are pseudohaploid
-# (heterozygosity is undefined when only one allele was observed)
+# stop if the gen_tibble is flagged as containing pseudohaploid data
+# (heterozygosity is undefined when only one allele was observed). Trusts
+# the ploidy label rather than inspecting which individuals are currently
+# selected: dropping pseudohaploid individuals via filter() does not
+# refresh the label, so gt_pseudohaploid() must be rerun for this check to
+# stop blocking a gen_tibble that no longer actually contains any.
 stopifnot_no_pseudohaploid <- function(x) {
-  if (has_pseudohaploid(x)) {
+  if (is_pseudohaploid(x)) {
     stop(
       "this function does not support pseudohaploid data ",
       "(heterozygosity is undefined when only one allele is ",
-      "observed per individual)"
+      "observed per individual); rerun gt_pseudohaploid() if you have ",
+      "filtered out the pseudohaploid individuals"
     )
   }
 }

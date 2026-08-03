@@ -287,10 +287,14 @@ test_that("gt_pseudohaploid updates ploidy after dropping pseudohploids", {
   # Now try filtering out pseudohaploid individuals
   test_gt <- test_gt %>% filter(indiv_missingness(genotypes) < 0.15)
 
-  # Functions using stopifnot_diploid should now work
-  # becasue data no longer contain pseudohaploids
-  expect_equal(length(indiv_het_obs(test_gt)), 4)
-  expect_equal(round(indiv_het_obs(test_gt), 1), c(0.2, 0.5, 0.3, 0.5))
+  # filter() does not refresh the ploidy label, so it is still -2 even
+  # though no pseudohaploid individuals remain, and indiv_het_obs() keeps
+  # erroring until gt_pseudohaploid() is rerun
+  expect_equal(test_gt %>% show_ploidy(), -2)
+  expect_error(
+    indiv_het_obs(test_gt),
+    "this function does not support pseudohaploid data"
+  )
 
   # Rerun gt_pseudohaploid to update gen_tibble
   test_gt <- gt_pseudohaploid(test_gt)
@@ -298,4 +302,10 @@ test_that("gt_pseudohaploid updates ploidy after dropping pseudohploids", {
   expect_equal(test_gt %>% indiv_ploidy(), rep(2, 4))
   # check ploidy
   expect_equal(test_gt %>% show_ploidy(), 2)
+
+  # now that the label has been refreshed, indiv_het_obs() works again
+  # (genotypes are unchanged by the rerun, since none of these individuals
+  # actually qualify as pseudohaploid any more)
+  expect_equal(length(indiv_het_obs(test_gt)), 4)
+  expect_equal(round(indiv_het_obs(test_gt), 1), c(0.2, 0.5, 0.3, 0.5))
 })
