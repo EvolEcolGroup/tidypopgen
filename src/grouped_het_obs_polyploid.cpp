@@ -13,7 +13,7 @@
 // different ploidy.
 
 // [[Rcpp::export]]
-ListOf<NumericMatrix> grouped_het_obs_cpp(Environment BM,
+ListOf<NumericMatrix> grouped_het_obs_polyploid(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
                                    const IntegerVector& groupIds,

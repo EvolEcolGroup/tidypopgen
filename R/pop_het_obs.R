@@ -93,7 +93,7 @@ pop_het_obs <- function(
     )
     Ho <- pop_freqs_df$het_obs # nolint
   } else {
-    het_obs_df <- grouped_het_obs_cpp(
+    het_obs_df <- grouped_het_obs_polyploid(
       .gt_get_fbm(.x),
       rowInd = .gt_fbm_rows(.x),
       colInd = .gt_fbm_cols(.x),
