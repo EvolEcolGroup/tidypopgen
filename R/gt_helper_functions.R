@@ -88,10 +88,9 @@ is_pseudohaploid <- function(x) {
 stopifnot_no_pseudohaploid <- function(x) {
   if (is_pseudohaploid(x)) {
     stop(
-      "this function does not support pseudohaploid data ",
-      "(heterozygosity is undefined when only one allele is ",
-      "observed per individual); rerun gt_pseudohaploid() if you have ",
-      "filtered out the pseudohaploid individuals"
+      "this function does not support pseudohaploid data; ",
+      "if you think all pseudohaploid individuals have been ",
+      "already removed, rerun gt_pseudohaploid() on your tibble"
     )
   }
 }

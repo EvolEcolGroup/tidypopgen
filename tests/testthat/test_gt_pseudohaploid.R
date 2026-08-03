@@ -291,8 +291,7 @@ test_that("gt_pseudohaploid updates ploidy after dropping pseudohploids", {
   expect_equal(test_gt %>% show_ploidy(), 2)
   # check individuals
   expect_equal(test_gt %>% indiv_ploidy(), rep(2, 4))
-  
-  
+
   # Functions using stopifnot_diploid should now work
   # becasue data no longer contain pseudohaploids
   expect_equal(length(indiv_het_obs(test_gt)), 4)
