@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9002</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -105,6 +105,14 @@ specific case, there are only two alleles, so \(m=2\). For population
 specific estimates, the sum is done over a single value of \(k\).
 \(\hat{h}_o\) at the genome level is simply the mean of the locus
 estimates.</p>
+<p>This statistic is ploidy-agnostic: an individual is heterozygous at a
+locus whenever its dosage is neither zero nor its own ploidy, so
+<code>pop_het_obs()</code> works for diploid, polyploid, and populations that mix
+individuals of different ploidy. The genome-wide estimate when
+<code>include_global = TRUE</code> is the unweighted mean of the population
+estimates for polyploid/mixed-ploidy data; for diploid and pseudohaploid
+data it is computed via <code><a href="pop_global_stats.html">pop_global_stats()</a></code>, for consistency with
+previous releases.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -146,7 +154,7 @@ University Press</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

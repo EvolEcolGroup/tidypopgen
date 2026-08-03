@@ -62,6 +62,16 @@ there are only two alleles, so \\m=2\\. For population specific
 estimates, the sum is done over a single value of \\k\\. \\\hat{h}\_o\\
 at the genome level is simply the mean of the locus estimates.
 
+This statistic is ploidy-agnostic: an individual is heterozygous at a
+locus whenever its dosage is neither zero nor its own ploidy, so
+`pop_het_obs()` works for diploid, polyploid, and populations that mix
+individuals of different ploidy. The genome-wide estimate when
+`include_global = TRUE` is the unweighted mean of the population
+estimates for polyploid/mixed-ploidy data; for diploid and pseudohaploid
+data it is computed via
+[`pop_global_stats()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_global_stats.md),
+for consistency with previous releases.
+
 ## References
 
 Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press
