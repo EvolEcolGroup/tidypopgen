@@ -23,6 +23,16 @@ filter.gen_tbl <- function(..., deparse.level = 1) { # nolint
       c("gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
     class(out) <- obj_class
   }
+  # if we had pseudohaploid, check if they are still there, if not, update
+  # to diploid
+  if (is_pseudohaploid(out)) {
+    if (
+        min(
+          attr(out$genotypes, "fbm_ploidy")[vctrs::vec_data(out$genotypes)]
+        ) == 2) {
+      attr(out$genotypes, "ploidy") <- 2
+    }
+  }
   return(out)
 }
 

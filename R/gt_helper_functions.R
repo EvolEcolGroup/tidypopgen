@@ -52,6 +52,7 @@ stopifnot_diploid <- function(x) {
   }
 }
 
+# stop if not diploid or pseudohaploid
 stopifnot_dip_pseudo <- function(x) {
   if (inherits(x, "gen_tbl")) {
     x <- x$genotypes
@@ -75,5 +76,21 @@ is_pseudohaploid <- function(x) {
     (attr(x$genotypes, "ploidy") == -2)
   } else {
     (attr(x, "ploidy") == -2)
+  }
+}
+
+# stop if the gen_tibble is flagged as containing pseudohaploid data
+# (heterozygosity is undefined when only one allele was observed). Trusts
+# the ploidy label rather than inspecting which individuals are currently
+# selected: dropping pseudohaploid individuals via filter() does not
+# refresh the label, so gt_pseudohaploid() must be rerun for this check to
+# stop blocking a gen_tibble that no longer actually contains any.
+stopifnot_no_pseudohaploid <- function(x) {
+  if (is_pseudohaploid(x)) {
+    stop(
+      "this function does not support pseudohaploid data; ",
+      "if you think all pseudohaploid individuals have been ",
+      "already removed, rerun gt_pseudohaploid() on your tibble"
+    )
   }
 }

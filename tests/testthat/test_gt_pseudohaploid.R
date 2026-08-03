@@ -61,7 +61,7 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
   # so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
-    "this function only works on diploid data"
+    "this function does not support pseudohaploid data"
   )
   expect_error(
     indiv_inbreeding(test_gt_pseudo),
@@ -153,7 +153,7 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
   # so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
-    "this function only works on diploid data"
+    "this function does not support pseudohaploid data"
   )
   expect_error(
     indiv_inbreeding(test_gt_pseudo),
@@ -281,21 +281,20 @@ test_that("gt_pseudohaploid updates ploidy after dropping pseudohploids", {
   # and functions requiring diploid data throw errors
   expect_error(
     round(indiv_het_obs(test_gt), 1),
-    "this function only works on diploid data"
+    "this function does not support pseudohaploid data"
   )
 
   # Now try filtering out pseudohaploid individuals
   test_gt <- test_gt %>% filter(indiv_missingness(genotypes) < 0.15)
+
+  # check ploidy
+  expect_equal(test_gt %>% show_ploidy(), 2)
+  # check individuals
+  expect_equal(test_gt %>% indiv_ploidy(), rep(2, 4))
 
   # Functions using stopifnot_diploid should now work
   # becasue data no longer contain pseudohaploids
   expect_equal(length(indiv_het_obs(test_gt)), 4)
   expect_equal(round(indiv_het_obs(test_gt), 1), c(0.2, 0.5, 0.3, 0.5))
 
-  # Rerun gt_pseudohaploid to update gen_tibble
-  test_gt <- gt_pseudohaploid(test_gt)
-  # check individuals
-  expect_equal(test_gt %>% indiv_ploidy(), rep(2, 4))
-  # check ploidy
-  expect_equal(test_gt %>% show_ploidy(), 2)
 })

@@ -1,7 +1,12 @@
 #' Estimate individual observed heterozygosity
 #'
 #' Estimate observed heterozygosity (H_obs) for each individual (i.e. the
-#' frequency of loci that are heterozygous in an individual).
+#' frequency of loci that are heterozygous in an individual). A locus is
+#' heterozygous whenever the dosage of the alternate allele is neither zero
+#' nor the individual's own ploidy, so this works for diploid, polyploid, and
+#' mixed-ploidy [`gen_tibble`] objects alike (each individual is evaluated
+#' against its own ploidy, so individuals of differing ploidy can be mixed
+#' freely).
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
@@ -41,30 +46,56 @@ indiv_het_obs.tbl_df <- function(.x, as_counts = FALSE, ...) {
 #' @rdname indiv_het_obs
 indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
   rlang::check_dots_empty()
-  stopifnot_diploid(.x)
+  stopifnot_no_pseudohaploid(.x)
   # get the FBM
   X <- attr(.x, "fbm") # nolint
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
 
-  # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
-  count_1_na <- function(BM, ind, rows_to_keep) { # nolint
-    gt_ind_hetero(
-      BM = BM,
-      rowInd = rows_to_keep,
-      colInd = ind,
-      ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
+  # use a fast (and simpler) diploid/pseudohaploid version
+  # (no per-individual lookup or comparison against ploidy), and only pay
+  # for the more general, ploidy-aware kernel when the data actually need
+  # it, so the common diploid case is not slowed down.
+  if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+    # returns a matrix of 2 rows (count_1,count_na) and n_individuals columns
+    count_1_na <- function(BM, ind, rows_to_keep) { # nolint
+      gt_ind_hetero(
+        BM = BM,
+        rowInd = rows_to_keep,
+        colInd = ind,
+        ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
+      )
+    }
+    this_col_1_na <- bigstatsr::big_apply(
+      X,
+      a.FUN = count_1_na,
+      ind = attr(.x, "loci")$big_index,
+      a.combine = "plus",
+      rows_to_keep = rows_to_keep
+    )
+  } else {
+    # ploidy aware version
+    # heterozygosity is an individual-level property, so ploidy is looked
+    # up per individual; this works even for mixed-ploidy gen_tibbles
+    ploidy <- indiv_ploidy(.x)
+    count_1_na <- function(BM, ind, rows_to_keep, ploidy) { # nolint
+      gt_ind_hetero_polyploid(
+        BM = BM,
+        rowInd = rows_to_keep,
+        colInd = ind,
+        ploidy = ploidy,
+        ncores = 1 # n_cores, I have not seen any improvement with n_cores > 1
+      )
+    }
+    this_col_1_na <- bigstatsr::big_apply(
+      X,
+      a.FUN = count_1_na,
+      ind = attr(.x, "loci")$big_index,
+      a.combine = "plus",
+      rows_to_keep = rows_to_keep,
+      ploidy = ploidy
     )
   }
-
-  # count heterozygotes and nas in one go
-  this_col_1_na <- bigstatsr::big_apply(
-    X,
-    a.FUN = count_1_na,
-    ind = attr(.x, "loci")$big_index,
-    a.combine = "plus",
-    rows_to_keep = rows_to_keep
-  )
   if (!as_counts) {
     return(this_col_1_na[1, ] / (ncol(X) - this_col_1_na[2, ]))
   } else {
@@ -73,9 +104,3 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
     return(this_col_1_na)
   }
 }
-
-# #' @export #nolint start
-# #' @rdname indiv_het_obs
-# indiv_het_obs.grouped_df <- function(.x, ...){
-#   .x %>% mutate(indiv_het_obs = indiv_het_obs(.data$genotypes)) %>% summarise(het_obs = mean(indiv_het_obs))
-# } #nolint end

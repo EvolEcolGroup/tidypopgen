@@ -17,6 +17,10 @@ grouped_alt_freq_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroup
     .Call(`_tidypopgen_grouped_alt_freq_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, as_counts)
 }
 
+grouped_het_obs_polyploid <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores) {
+    .Call(`_tidypopgen_grouped_het_obs_polyploid`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores)
+}
+
 grouped_missingness_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
     .Call(`_tidypopgen_grouped_missingness_cpp`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }
@@ -31,6 +35,10 @@ gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores)
 
 gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {
     .Call(`_tidypopgen_gt_ind_hetero`, BM, rowInd, colInd, ncores)
+}
+
+gt_ind_hetero_polyploid <- function(BM, rowInd, colInd, ploidy, ncores) {
+    .Call(`_tidypopgen_gt_ind_hetero_polyploid`, BM, rowInd, colInd, ploidy, ncores)
 }
 
 gt_pi_diploid <- function(BM, rowInd, colInd, ncores) {
