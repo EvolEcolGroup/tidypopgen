@@ -157,3 +157,35 @@ test_that("loci_pi on grouped tibbles", {
     "only works with one grouping variable"
   )
 })
+
+test_that("loci_pi is NA, not NaN, when a group has 0 valid individuals at a locus", { # nolint
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  # popB (pop2) is entirely missing at locus rs1
+  test_genotypes <- rbind(
+    c(1, 1),
+    c(2, 0),
+    c(NA, 1)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:2),
+    chromosome = c(1, 1),
+    position = c(3, 5),
+    genetic_dist = as.double(rep(0, 2)),
+    allele_ref = c("A", "T"),
+    allele_alt = c("T", "C")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ) %>% dplyr::group_by(population)
+
+  test_pi <- test_gt %>% loci_pi(type = "matrix")
+  expect_true(is.na(test_pi["rs1", "pop2"]))
+  # confirm it is NA, not merely NaN masquerading as such
+  expect_false(is.nan(test_pi["rs1", "pop2"]))
+})
