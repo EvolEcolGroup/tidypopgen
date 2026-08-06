@@ -24,6 +24,10 @@ ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM,
   size_t n = macc.nrow(); // number of individuals
   size_t m = macc.ncol(); // number of loci
 
+  if (static_cast<size_t>(ploidy.size()) != n) {
+    stop("ploidy must have one entry per individual (rowInd)");
+  }
+
   NumericMatrix pi(m, ngroups);
   NumericMatrix valid_alleles(m, ngroups);
 
