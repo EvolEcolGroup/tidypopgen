@@ -643,3 +643,26 @@ test_that("by_locus_type", {
   )
   expect_true(is.matrix(wc84_locus_tidy_pairwise$Fst))
 })
+
+# test with loci coded as integers
+# test coding names as integers to reduce storage
+test_that("pairwise_pop_fst when names stored as integers", {
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  test_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    parser = "cpp",
+    backingfile = tempfile("pop_a_"),
+    names_as_int = TRUE
+  )
+  test_gt$pop <- c("pop1", "pop1", "pop1", "pop2", "pop2")
+  test_gt <- test_gt %>% dplyr::group_by(pop)
+  test_fst <- test_gt %>% pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
+  # check that the row names of the Fst_by_locus matrix are integers
+  expect_true(is.integer(row_names(test_fst$Fst_by_locus)))
+  
+  # now return numerators and denominators as integers
+  
+})
+
+  
