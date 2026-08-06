@@ -226,7 +226,7 @@ tidy_to_matrix <- function(tidy_tbl) {
   pop2 <- colnames(tidy_tbl[2])
   fst_tot_wide <- tidyr::pivot_wider(
     tidy_tbl,
-    names_from = .data[[pop2]],
+    names_from = dplyr::all_of(pop2),
     values_from = "value"
   ) %>%
     tibble::column_to_rownames(var = pop1) %>%
