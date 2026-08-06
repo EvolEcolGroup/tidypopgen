@@ -20,12 +20,11 @@
 #' `is.nan()`.
 #'
 #' @export
-vec_math.vctrs_bigSNP <- function(.fn, .x, ...) {
-  
+vec_math.vctrs_bigSNP <- function(.fn, .x, ...) { # nolint
+
   # Only allow the three predicate functions that RStudio
   # commonly uses when inspecting objects.
   if (!.fn %in% c("is.finite", "is.infinite", "is.nan")) {
-    
     stop(
       sprintf(
         "`%s()` is not implemented for <vctrs_bigSNP>.",
@@ -34,13 +33,12 @@ vec_math.vctrs_bigSNP <- function(.fn, .x, ...) {
       call. = FALSE
     )
   }
-  
+
   # Extract the underlying numeric data.
   data <- vctrs::vec_data(.x)
-  
+
   # Dispatch to the corresponding base R function.
-  switch(
-    .fn,
+  switch(.fn,
     "is.finite"   = is.finite(data),
     "is.infinite" = is.infinite(data),
     "is.nan"      = is.nan(data)
