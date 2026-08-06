@@ -202,7 +202,8 @@ pairwise_pop_fst <- function(
     fst_list$fst_locus <- matrix_int_names(
       data = fst_list$fst_locus,
       row_names = loci_names(.x),
-      col_names = col_names_combinations(group_combinations, prefix = "fst"))
+      col_names = col_names_combinations(group_combinations, prefix = "fst")
+    )
 
     return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
   } else if (by_locus && by_locus_type == "tidy") {
@@ -213,8 +214,10 @@ pairwise_pop_fst <- function(
     fst_mat_tbl$loci <- loci_names(.x)
     cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
     long_fst_loc <- fst_mat_tbl %>%
-      tidyr::pivot_longer(cols = dplyr::all_of(cols),
-                          names_to = "stat_name")
+      tidyr::pivot_longer(
+        cols = dplyr::all_of(cols),
+        names_to = "stat_name"
+      )
     return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
   } else if (by_locus && by_locus_type == "list") {
     fst_mat_tbl <- as.data.frame(fst_list$fst_locus)

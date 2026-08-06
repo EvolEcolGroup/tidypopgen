@@ -661,24 +661,29 @@ test_that("pairwise_pop_fst when names stored as integers", {
   # check that the loci names of the Fst_by_locus tibble are integers
   expect_true(is.integer(test_fst$Fst_by_locus$loci))
   # now get a matrix
-  test_fst <- test_gt %>% pairwise_pop_fst(method = "Hudson",
-                                           by_locus = TRUE,
-                                           by_locus_type = "matrix")
+  test_fst <- test_gt %>% pairwise_pop_fst(
+    method = "Hudson",
+    by_locus = TRUE,
+    by_locus_type = "matrix"
+  )
   expect_true(is.integer(row_names(test_fst$Fst_by_locus)))
   # check that it is the correct length
-  expect_equal(length(row_names(test_fst$Fst_by_locus)), 
-               nrow(show_loci(test_gt)))
+  expect_equal(
+    length(row_names(test_fst$Fst_by_locus)),
+    nrow(show_loci(test_gt))
+  )
   # and now return numerator and denominator
-  test_fst <- test_gt %>% pairwise_pop_fst(method = "Hudson",
-                                           by_locus = TRUE,
-                                           by_locus_type = "matrix",
-                                           return_num_dem= TRUE)
+  test_fst <- test_gt %>% pairwise_pop_fst(
+    method = "Hudson",
+    by_locus = TRUE,
+    by_locus_type = "matrix",
+    return_num_dem = TRUE
+  )
   expect_true(is.integer(row_names(test_fst$Fst_by_locus_num)))
   # check that simple rownames returns NULL
   expect_null(rownames(test_fst$Fst_by_locus_num))
-  
-  
-  
+
+
   # and now repeat it if we don't use names_as_int
   vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
   test_gt <- gen_tibble(
@@ -694,26 +699,33 @@ test_that("pairwise_pop_fst when names stored as integers", {
   # check that the loci names of the Fst_by_locus tibble are integers
   expect_false(is.integer(test_fst$Fst_by_locus$loci))
   # now get a matrix
-  test_fst <- test_gt %>% pairwise_pop_fst(method = "Hudson",
-                                           by_locus = TRUE,
-                                           by_locus_type = "matrix")
+  test_fst <- test_gt %>% pairwise_pop_fst(
+    method = "Hudson",
+    by_locus = TRUE,
+    by_locus_type = "matrix"
+  )
   expect_false(is.integer(row_names(test_fst$Fst_by_locus)))
   # check that it is the correct length
-  expect_equal(length(row_names(test_fst$Fst_by_locus)), 
-               nrow(show_loci(test_gt)))
+  expect_equal(
+    length(row_names(test_fst$Fst_by_locus)),
+    nrow(show_loci(test_gt))
+  )
   # check that it is the correct length with simple rownames
-  expect_equal(length(rownames(test_fst$Fst_by_locus)), 
-               nrow(show_loci(test_gt)))
+  expect_equal(
+    length(rownames(test_fst$Fst_by_locus)),
+    nrow(show_loci(test_gt))
+  )
   # and now return numerator and denominator
-  test_fst <- test_gt %>% pairwise_pop_fst(method = "Hudson",
-                                           by_locus = TRUE,
-                                           by_locus_type = "matrix",
-                                           return_num_dem= TRUE)
+  test_fst <- test_gt %>% pairwise_pop_fst(
+    method = "Hudson",
+    by_locus = TRUE,
+    by_locus_type = "matrix",
+    return_num_dem = TRUE
+  )
   expect_false(is.integer(row_names(test_fst$Fst_by_locus_num)))
   # check that it is the correct length with simple rownames
-  expect_equal(length(rownames(test_fst$Fst_by_locus_num)), 
-               nrow(show_loci(test_gt)))
-  
+  expect_equal(
+    length(rownames(test_fst$Fst_by_locus_num)),
+    nrow(show_loci(test_gt))
+  )
 })
-
-  

@@ -296,5 +296,4 @@ test_that("gt_pseudohaploid updates ploidy after dropping pseudohploids", {
   # becasue data no longer contain pseudohaploids
   expect_equal(length(indiv_het_obs(test_gt)), 4)
   expect_equal(round(indiv_het_obs(test_gt), 1), c(0.2, 0.5, 0.3, 0.5))
-
 })
