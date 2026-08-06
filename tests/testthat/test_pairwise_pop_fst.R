@@ -668,7 +668,14 @@ test_that("pairwise_pop_fst when names stored as integers", {
   # check that it is the correct length
   expect_equal(length(row_names(test_fst$Fst_by_locus)), 
                nrow(show_loci(test_gt)))
-  
+  # and now return numerator and denominator
+  test_fst <- test_gt %>% pairwise_pop_fst(method = "Hudson",
+                                           by_locus = TRUE,
+                                           by_locus_type = "matrix",
+                                           return_num_dem= TRUE)
+  expect_true(is.integer(row_names(test_fst$Fst_by_locus_num)))
+  # check that simple rownames returns NULL
+  expect_null(rownames(test_fst$Fst_by_locus_num))
   
   
   
@@ -697,6 +704,16 @@ test_that("pairwise_pop_fst when names stored as integers", {
   # check that it is the correct length with simple rownames
   expect_equal(length(rownames(test_fst$Fst_by_locus)), 
                nrow(show_loci(test_gt)))
+  # and now return numerator and denominator
+  test_fst <- test_gt %>% pairwise_pop_fst(method = "Hudson",
+                                           by_locus = TRUE,
+                                           by_locus_type = "matrix",
+                                           return_num_dem= TRUE)
+  expect_false(is.integer(row_names(test_fst$Fst_by_locus_num)))
+  # check that it is the correct length with simple rownames
+  expect_equal(length(rownames(test_fst$Fst_by_locus_num)), 
+               nrow(show_loci(test_gt)))
+  
 })
 
   

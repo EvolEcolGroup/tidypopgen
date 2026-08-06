@@ -173,12 +173,18 @@ pairwise_pop_fst <- function(
   # if we want the numerator and denominator,
   # we need to format them and return them
   if (return_num_dem) {
-    row.names(fst_list$Fst_by_locus_num) <- loci_names(.x)
-    colnames(fst_list$Fst_by_locus_num) <-
-      col_names_combinations(group_combinations)
-    row.names(fst_list$Fst_by_locus_den) <- loci_names(.x)
-    colnames(fst_list$Fst_by_locus_den) <-
-      col_names_combinations(group_combinations)
+    # TODO turn this into matrices with numerical row names
+    fst_list$Fst_by_locus_num <- matrix_int_names(
+      data = fst_list$Fst_by_locus_num,
+      row_names = loci_names(.x),
+      col_names = col_names_combinations(group_combinations)
+    )
+    fst_list$Fst_by_locus_den <- matrix_int_names(
+      data = fst_list$Fst_by_locus_den,
+      row_names = loci_names(.x),
+      col_names = col_names_combinations(group_combinations)
+    )
+
     return(fst_list)
   }
 
