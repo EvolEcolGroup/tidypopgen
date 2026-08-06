@@ -9,9 +9,8 @@
 \arguments{
 \item{x}{A matrix_int_names object}
 
-\item{row.names}{Either a character or integer (as both are valid for data.frame).
-If NULL, row names are inherited from the
-\code{matrix_int_names}}
+\item{row.names}{Either a character or integer (as both are valid for
+data.frame). If NULL, row names are inherited from the \code{matrix_int_names}}
 
 \item{optional}{Ignored, included for compatibility with generic signature}
 

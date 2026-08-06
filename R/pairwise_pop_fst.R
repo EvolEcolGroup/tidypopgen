@@ -192,10 +192,12 @@ pairwise_pop_fst <- function(
   }
 
   if (by_locus && by_locus_type == "matrix") {
-    rownames(fst_list$fst_locus) <- loci_names(.x)
-    colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
-      prefix = "fst"
-    )
+    # turn matrix into matrix_int
+    fst_list$fst_locus <- matrix_int_names(
+      data = fst_list$fst_locus,
+      row_names = loci_names(.x),
+      col_names = col_names_combinations(group_combinations, prefix = "fst"))
+
     return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
   } else if (by_locus && by_locus_type == "tidy") {
     fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
