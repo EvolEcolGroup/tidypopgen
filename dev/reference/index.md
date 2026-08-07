@@ -518,6 +518,9 @@ Methods for tidyverse verbs for `gen_tibble` objects
 
   A \$ method for `gen_tibble` objects
 
+- [`vec_math.vctrs_bigSNP()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/vec_math.vctrs_bigSNP.md)
+  : Mathematical predicates for vctrs_bigSNP vectors
+
 ## `matrix_int_names`
 
 Matrix class to store names as integers for big data, and associated
