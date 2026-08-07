@@ -41,5 +41,5 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a vcf file
 example_gt %>% gt_as_vcf()
-#> [1] "/tmp/Rtmpn6PB6T/file1f5747263da9.vcf"
+#> [1] "/tmp/Rtmpy6IKRT/file1f3a1d86de13.vcf"
 ```
