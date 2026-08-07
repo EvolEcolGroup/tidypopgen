@@ -53,24 +53,26 @@ data.table::setDTthreads(2)
 RhpcBLASctl::blas_set_num_threads(2)
 RhpcBLASctl::omp_set_num_threads(2)
 }
-  example_gt <- load_example_gt("grouped_gen_tbl")
+example_gt <- load_example_gt("grouped_gen_tbl")
 
-  # Compute FIS using Nei87:
-  example_gt \%>\% pop_fis(method = "Nei87")
+# Compute FIS using Nei87:
+example_gt \%>\% pop_fis(method = "Nei87")
 
-  # Compute FIS using WG17:
-  example_gt \%>\% pop_fis(method = "WG17")
+# Compute FIS using WG17:
+example_gt \%>\% pop_fis(method = "WG17")
 
-  # To include the global FIS, set include_global = TRUE:
-  example_gt \%>\% pop_fis(method = "Nei87", include_global = TRUE)
+# To include the global FIS, set include_global = TRUE:
+example_gt \%>\% pop_fis(method = "Nei87", include_global = TRUE)
 
-  # To return FIS by locus, set by_locus = TRUE:
-  example_gt \%>\% pop_fis(method = "Nei87", by_locus = TRUE)
+# To return FIS by locus, set by_locus = TRUE:
+example_gt \%>\% pop_fis(method = "Nei87", by_locus = TRUE)
 
-  # To calculate from a pre-computed allele sharing matrix:
-  allele_sharing_mat <- pairwise_allele_sharing(example_gt, as_matrix = TRUE)
-  example_gt \%>\% pop_fis( method = "WG17", allele_sharing_mat =
-  allele_sharing_mat )
+# To calculate from a pre-computed allele sharing matrix:
+allele_sharing_mat <- pairwise_allele_sharing(example_gt, as_matrix = TRUE)
+example_gt \%>\% pop_fis(
+  method = "WG17", allele_sharing_mat =
+    allele_sharing_mat
+)
 \dontshow{\}) # examplesIf}
 }
 \references{

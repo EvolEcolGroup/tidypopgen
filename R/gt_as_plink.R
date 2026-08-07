@@ -103,50 +103,30 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
   # from the gen_tibble
 
   # create a bim table
-  if (!chromosomes_as_int) {
-    bim_table <- show_loci(x) %>%
-      dplyr::select(dplyr::all_of(c(
-        "chromosome",
-        "name",
-        "genetic_dist",
-        "position",
-        "allele_alt",
-        "allele_ref"
-      )))
-    colnames(bim_table) <- c(
+  bim_table <- show_loci(x) %>%
+    dplyr::select(dplyr::all_of(c(
       "chromosome",
       "name",
       "genetic_dist",
       "position",
-      "allele_ref",
-      "allele_alt"
-    )
-    bim_table$allele_alt[is.na(bim_table$allele_alt)] <- "0"
-    bim_table$allele_ref[is.na(bim_table$allele_ref)] <- "0"
-    bim_table
-  } else {
-    bim_table <- show_loci(x) %>%
-      dplyr::select(dplyr::all_of(c(
-        "chromosome",
-        "name",
-        "genetic_dist",
-        "position",
-        "allele_alt",
-        "allele_ref"
-      )))
-    colnames(bim_table) <- c(
-      "chromosome",
-      "name",
-      "genetic_dist",
-      "position",
-      "allele_ref",
-      "allele_alt"
-    )
+      "allele_alt",
+      "allele_ref"
+    )))
+  colnames(bim_table) <- c(
+    "chromosome",
+    "name",
+    "genetic_dist",
+    "position",
+    "allele_ref",
+    "allele_alt"
+  )
+  if (chromosomes_as_int) {
     bim_table$chromosome <- cast_chromosome_to_int(bim_table$chromosome)
-    bim_table$allele_alt[is.na(bim_table$allele_alt)] <- "0"
-    bim_table$allele_ref[is.na(bim_table$allele_ref)] <- "0"
-    bim_table
   }
+
+  bim_table$allele_alt[is.na(bim_table$allele_alt)] <- "0"
+  bim_table$allele_ref[is.na(bim_table$allele_ref)] <- "0"
+  #bim_table
 
   # create a fam table
   fam_table <- data.frame(matrix(NA, nrow = nrow(x), ncol = 6))
