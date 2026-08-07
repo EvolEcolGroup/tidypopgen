@@ -173,12 +173,18 @@ pairwise_pop_fst <- function(
   # if we want the numerator and denominator,
   # we need to format them and return them
   if (return_num_dem) {
-    row.names(fst_list$Fst_by_locus_num) <- loci_names(.x)
-    colnames(fst_list$Fst_by_locus_num) <-
-      col_names_combinations(group_combinations)
-    row.names(fst_list$Fst_by_locus_den) <- loci_names(.x)
-    colnames(fst_list$Fst_by_locus_den) <-
-      col_names_combinations(group_combinations)
+    # TODO turn this into matrices with numerical row names
+    fst_list$Fst_by_locus_num <- matrix_int_names(
+      data = fst_list$Fst_by_locus_num,
+      row_names = loci_names(.x),
+      col_names = col_names_combinations(group_combinations)
+    )
+    fst_list$Fst_by_locus_den <- matrix_int_names(
+      data = fst_list$Fst_by_locus_den,
+      row_names = loci_names(.x),
+      col_names = col_names_combinations(group_combinations)
+    )
+
     return(fst_list)
   }
 
@@ -192,10 +198,13 @@ pairwise_pop_fst <- function(
   }
 
   if (by_locus && by_locus_type == "matrix") {
-    rownames(fst_list$fst_locus) <- loci_names(.x)
-    colnames(fst_list$fst_locus) <- col_names_combinations(group_combinations,
-      prefix = "fst"
+    # turn matrix into matrix_int
+    fst_list$fst_locus <- matrix_int_names(
+      data = fst_list$fst_locus,
+      row_names = loci_names(.x),
+      col_names = col_names_combinations(group_combinations, prefix = "fst")
     )
+
     return(list(Fst_by_locus = fst_list$fst_locus, Fst = fst_tot))
   } else if (by_locus && by_locus_type == "tidy") {
     fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
@@ -205,7 +214,10 @@ pairwise_pop_fst <- function(
     fst_mat_tbl$loci <- loci_names(.x)
     cols <- names(fst_mat_tbl)[names(fst_mat_tbl) != "loci"]
     long_fst_loc <- fst_mat_tbl %>%
-      tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
+      tidyr::pivot_longer(
+        cols = dplyr::all_of(cols),
+        names_to = "stat_name"
+      )
     return(list(Fst_by_locus = long_fst_loc, Fst = fst_tot))
   } else if (by_locus && by_locus_type == "list") {
     fst_mat_tbl <- as.data.frame(fst_list$fst_locus)
@@ -225,7 +237,7 @@ tidy_to_matrix <- function(tidy_tbl) {
   pop2 <- colnames(tidy_tbl[2])
   fst_tot_wide <- tidyr::pivot_wider(
     tidy_tbl,
-    names_from = .data[[pop2]],
+    names_from = dplyr::all_of(pop2),
     values_from = "value"
   ) %>%
     tibble::column_to_rownames(var = pop1) %>%
