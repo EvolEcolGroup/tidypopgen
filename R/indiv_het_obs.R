@@ -78,7 +78,7 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
     # heterozygosity is an individual-level property, so ploidy is looked
     # up per individual; this works even for mixed-ploidy gen_tibbles
     ploidy <- indiv_ploidy(.x)
-    count_1_na <- function(BM, ind, rows_to_keep, ploidy) { # nolint
+    count_1_na_poly <- function(BM, ind, rows_to_keep, ploidy) { # nolint
       gt_ind_hetero_polyploid(
         BM = BM,
         rowInd = rows_to_keep,
@@ -89,7 +89,7 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
     }
     this_col_1_na <- bigstatsr::big_apply(
       X,
-      a.FUN = count_1_na,
+      a.FUN = count_1_na_poly,
       ind = attr(.x, "loci")$big_index,
       a.combine = "plus",
       rows_to_keep = rows_to_keep,
