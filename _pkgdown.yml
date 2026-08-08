@@ -150,6 +150,7 @@ reference:
         - mutate.gen_tbl
         - mutate.grouped_gen_tbl
         - "$<-.gen_tbl"
+        - vec_math.vctrs_bigSNP
   - title: "`matrix_int_names`"
     desc: "Matrix class to store names as integers for big data, and associated functions"
     contents:

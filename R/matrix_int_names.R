@@ -187,6 +187,14 @@ row_names.matrix_int_names <- function(x) {
   }
 }
 
+#'
+#' @export
+row_names.data.frame <- function(x) {
+  # Return row names for data.frame, which can be a character or an int
+  attr(x, "row.names")
+}
+
+
 #' Set row names for matrix_int_names
 #'
 #' @param x A matrix_int_names object
