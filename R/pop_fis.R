@@ -142,6 +142,7 @@ pop_fis_wg17 <- function(
   include_global = FALSE,
   allele_sharing_mat = NULL
 ) {
+  stopifnot_diploid(.x)
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }

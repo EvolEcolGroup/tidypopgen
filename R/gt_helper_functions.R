@@ -39,7 +39,8 @@ tidy_dist_matrix <- function(mat) {
 
 # stop if not diploid
 stopifnot_diploid <- function(x) {
-  if (inherits(x, "gen_tbl")) {
+  if (inherits(x, "tbl_df")) {
+    stopifnot_gen_tibble(x)
     x <- x$genotypes
   }
   if (abs(attr(x, "ploidy")) != 2) {
@@ -54,7 +55,8 @@ stopifnot_diploid <- function(x) {
 
 # stop if not diploid or pseudohaploid
 stopifnot_dip_pseudo <- function(x) {
-  if (inherits(x, "gen_tbl")) {
+  if (inherits(x, "tbl_df")) {
+    stopifnot_gen_tibble(x)
     x <- x$genotypes
   }
   if (abs(attr(x, "ploidy")) != 2) {
@@ -64,7 +66,8 @@ stopifnot_dip_pseudo <- function(x) {
 
 
 is_diploid_only <- function(x) {
-  if (inherits(x, "gen_tbl")) {
+  if (inherits(x, "tbl_df")) {
+    stopifnot_gen_tibble(x)
     (attr(x$genotypes, "ploidy") == 2)
   } else {
     (attr(x, "ploidy") == 2)

@@ -58,7 +58,11 @@ a vector of frequencies, one per locus
 }
 \description{
 Estimate nucleotide diversity (pi) at each locus, accounting for missing
-values. This uses the formula: c_0 * c_1 / (n * (n-1) / 2)
+values. This uses the formula: c_0 * c_1 / (n * (n-1) / 2), where \code{n} is
+the number of valid allele copies (i.e. the sum of ploidy over the
+non-missing individuals). This is the unbiased gene diversity estimator
+of Nei & Roychoudhury (1974), and works for diploid, polyploid, and
+mixed-ploidy \code{gen_tibble} objects alike.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

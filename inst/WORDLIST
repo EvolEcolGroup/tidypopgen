@@ -42,6 +42,7 @@ Luu
 MAF
 MAFs
 Manichaikul
+Math
 Mei
 Novembre
 OADP
@@ -52,7 +53,9 @@ Procrustes
 Pseudohaploid
 Qiu
 RSpectra
+RStudio's
 RUNs
+Roychoudhury
 SMARTPCA
 SNMF
 Sankararaman
@@ -126,7 +129,6 @@ fst
 fulfills
 gammarus
 geno
-gg
 ggplot
 github
 goesup
@@ -215,4 +217,5 @@ unsets
 uqrmaie
 vcf
 vcfR
+vctrs
 xgboost

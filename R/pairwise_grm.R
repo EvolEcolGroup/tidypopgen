@@ -32,6 +32,7 @@ pairwise_grm <- function(
   allele_sharing_mat = NULL,
   block_size = bigstatsr::block_size(nrow(x))
 ) {
+  stopifnot_diploid(x)
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(
       x,
