@@ -126,7 +126,7 @@ loci_pi.vctrs_bigSNP <- function(
     } else {
       ploidy <- indiv_ploidy(.x)
       # internal function that can be used with a big_apply #nolint start
-      gt_pi_sub <- function(BM, ind, rows_to_keep, ploidy) {
+      gt_pi_sub_poly <- function(BM, ind, rows_to_keep, ploidy) {
         gt_pi_polyploid(
           BM = BM,
           rowInd = rows_to_keep,
@@ -137,7 +137,7 @@ loci_pi.vctrs_bigSNP <- function(
       } # nolint end
       pi <- bigstatsr::big_apply(
         geno_fbm,
-        a.FUN = gt_pi_sub,
+        a.FUN = gt_pi_sub_poly,
         rows_to_keep = rows_to_keep,
         ind = attr(.x, "loci")$big_index,
         ncores = 1, # parallelisation is used within the function
@@ -216,7 +216,7 @@ loci_pi.grouped_df <- function(
   } else {
     ploidy <- indiv_ploidy(.x)
     # internal function that can be used with a big_apply #nolint start
-    gt_group_pi_sub <- function(BM, ind, rows_to_keep, ploidy) {
+    gt_group_pi_sub_poly <- function(BM, ind, rows_to_keep, ploidy) {
       freq_mat <- gt_grouped_pi_polyploid(
         BM = BM,
         rowInd = rows_to_keep,
@@ -229,7 +229,7 @@ loci_pi.grouped_df <- function(
     } # nolint end
     pi_mat <- bigstatsr::big_apply(
       geno_fbm,
-      a.FUN = gt_group_pi_sub,
+      a.FUN = gt_group_pi_sub_poly,
       rows_to_keep = rows_to_keep,
       ind = show_loci(.x)$big_index,
       ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
