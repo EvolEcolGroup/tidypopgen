@@ -57,12 +57,32 @@ resolve certain tidyselect operations.}
 a vector of frequencies, one per locus
 }
 \description{
-Estimate nucleotide diversity (pi) at each locus, accounting for missing
-values. This uses the formula: c_0 * c_1 / (n * (n-1) / 2), where \code{n} is
-the number of valid allele copies (i.e. the sum of ploidy over the
-non-missing individuals). This is the unbiased gene diversity estimator
-of Nei & Roychoudhury (1974), and works for diploid, polyploid, and
-mixed-ploidy \code{gen_tibble} objects alike.
+Estimate nucleotide diversity (\eqn{\pi}) at each locus, accounting for
+missing values.
+}
+\details{
+Nucleotide diversity is estimated as
+
+\deqn{
+\pi = \frac{c_0 c_1}{n(n - 1)/2},
+}
+
+where:
+\itemize{
+\item \eqn{c_0} is the number of observed copies of allele 0,
+\item \eqn{c_1} is the number of observed copies of allele 1,
+\item \eqn{n = c_0 + c_1} is the total number of non-missing allele
+copies at the locus.
+}
+
+Missing values
+are accommodated by computing \eqn{n}, \eqn{c_0}, and \eqn{c_1} using only
+non-missing genotype data. For polyploid data, each individual contributes
+a number of allele copies equal to its ploidy.
+
+This corresponds to the unbiased gene diversity estimator of
+Nei and Roychoudhury (1974) and is applicable to diploid, polyploid
+and mixed-ploidy \code{gen_tibble} objects alike.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
