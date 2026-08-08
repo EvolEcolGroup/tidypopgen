@@ -35,6 +35,7 @@ pairwise_king <- function(
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x))
 ) {
+  stopifnot_diploid(x)
   # nolint
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- show_loci(x)$big_index

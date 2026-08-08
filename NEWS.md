@@ -5,8 +5,8 @@
 * add option to use numerical identifiers for loci names when working with 
   large datasets, to reduce memory usage and speed up processing. This is
   useful when working with full genomes (tens of millions of positions).
-* generalise `indiv_het_obs()` and `pop_het_obs()` to work with polyploid
-  datasets.
+* generalise several functions to work with polyploid data: `indiv_het_obs()`,
+  `pop_het_obs()` and `loci_pi()`.
 
 # tidypopgen 0.4.4
 * fix seed argument of `gt_admixture()`
