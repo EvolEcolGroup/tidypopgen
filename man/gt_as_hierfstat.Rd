@@ -17,6 +17,10 @@ the genotypes (with alleles recoded as 1 and 2)
 This function converts a \code{gen_tibble} to a data.frame formatted
 to be used by \code{hierfstat} functions.
 }
+\note{
+\code{hierfstat} only supports haploid or diploid data, so this function
+only works on diploid (or pseudohaploid) \code{gen_tibble} objects.
+}
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 

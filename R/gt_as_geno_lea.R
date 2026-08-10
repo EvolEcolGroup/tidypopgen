@@ -7,6 +7,8 @@
 #' NOTE that we currently read all the data into memory to write the file, so
 #' this function is not suitable for very large datasets.
 #'
+#' @note the `.geno` format only supports haploid or diploid data, so this
+#'   function only works on diploid (or pseudohaploid) `gen_tibble` objects.
 #' @param x a [`gen_tibble`]
 #' @param file the .geno filename with a path, or NULL (the default) to use the
 #'   location of the backing files.
@@ -20,6 +22,7 @@
 #' gt_as_geno_lea(example_gt, file = paste0(tempfile(), "_example.geno"))
 # Write a geno file (as used by LEA)
 gt_as_geno_lea <- function(x, file = NULL) {
+  stopifnot_diploid(x)
   if (is.null(file)) {
     file <- sub_rds(gt_get_file_names(x)[1], ".geno")
   }
