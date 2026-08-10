@@ -13,7 +13,10 @@ gt_as_genind(x)
 a \code{genind} object
 }
 \description{
-This function converts a \code{gen_tibble} to a \code{genind} object from \code{adegenet}
+This function converts a \code{gen_tibble} to a \code{genind} object from \code{adegenet}.
+\code{genind} objects support arbitrary ploidy (including mixed-ploidy data
+across individuals), so this works on diploid, polyploid and mixed-ploidy
+\code{gen_tibble} objects alike.
 }
 \examples{
 \dontshow{if (rlang::is_installed("adegenet")) withAutoprint(\{ # examplesIf}
