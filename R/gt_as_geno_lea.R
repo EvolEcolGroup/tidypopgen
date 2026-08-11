@@ -9,6 +9,8 @@
 #'
 #' @note the `.geno` format only supports haploid or diploid data, so this
 #'   function only works on diploid (or pseudohaploid) `gen_tibble` objects.
+#'   Pseudohaploid data is simply treated as regular diploid genotype counts
+#'   (dosage 0/2), the same convention used by other tools (e.g. PLINK).
 #' @param x a [`gen_tibble`]
 #' @param file the .geno filename with a path, or NULL (the default) to use the
 #'   location of the backing files.

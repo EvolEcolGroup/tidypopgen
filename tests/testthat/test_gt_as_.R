@@ -147,7 +147,10 @@ test_that("gt_as_genind treats pseudohaploid dosage as diploid", {
     c(2, NA, 0, 0, 1, 1),
     c(2, 0, 0, 1, 0, 0)
   )
-  test_indiv_meta <- data.frame(id = c("a", "b", "c", "d"), population = rep("pop1", 4))
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c", "d"),
+    population = rep("pop1", 4)
+  )
   test_loci <- data.frame(
     name = paste0("rs", 1:6),
     chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),

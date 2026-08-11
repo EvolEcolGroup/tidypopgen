@@ -20,6 +20,8 @@ to be used by \code{hierfstat} functions.
 \note{
 \code{hierfstat} only supports haploid or diploid data, so this function
 only works on diploid (or pseudohaploid) \code{gen_tibble} objects.
+Pseudohaploid data is simply treated as regular diploid genotype counts
+(dosage 0/2), the same convention used by other tools (e.g. PLINK).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

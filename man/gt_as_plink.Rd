@@ -44,6 +44,8 @@ ped or raw is slower, especially for large datasets.
 \note{
 PLINK's bed, ped and raw formats only support diploid data, so this
 function only works on diploid (or pseudohaploid) \code{gen_tibble} objects.
+Pseudohaploid data is simply treated as regular diploid genotype counts
+(dosage 0/2), the same convention used by PLINK itself.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

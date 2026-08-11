@@ -20,6 +20,8 @@
 #'   of the chromosomes
 #' @note PLINK's bed, ped and raw formats only support diploid data, so this
 #'   function only works on diploid (or pseudohaploid) `gen_tibble` objects.
+#'   Pseudohaploid data is simply treated as regular diploid genotype counts
+#'   (dosage 0/2), the same convention used by PLINK itself.
 #' @returns the path of the saved file
 #' @export
 #' @examples

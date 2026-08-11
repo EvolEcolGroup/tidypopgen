@@ -5,6 +5,9 @@
 #' across individuals), so this works on diploid, polyploid and mixed-ploidy
 #' `gen_tibble` objects alike.
 #'
+#' @note pseudohaploid individuals are treated as diploid (ploidy 2) using
+#'   their stored genotype counts (dosage 0/2) directly, the same convention
+#'   used by other tools (e.g. PLINK) when handling pseudohaploid data.
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @returns a `genind` object
 #' @export
