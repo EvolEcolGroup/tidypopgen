@@ -3,6 +3,10 @@
 #' This function converts a `gen_tibble` to a data.frame formatted
 #' to be used by `hierfstat` functions.
 #'
+#' @note `hierfstat` only supports haploid or diploid data, so this function
+#'   only works on diploid (or pseudohaploid) `gen_tibble` objects.
+#'   Pseudohaploid data is simply treated as regular diploid genotype counts
+#'   (dosage 0/2), the same convention used by other tools (e.g. PLINK).
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @returns a data.frame with a column 'pop' and further column representing
 #' the genotypes (with alleles recoded as 1 and 2)
@@ -16,6 +20,7 @@
 #' # Check object class
 #' class(gt_hierfstat)
 gt_as_hierfstat <- function(x) {
+  stopifnot_diploid(x)
   hier_df <- data.frame(pop = as.factor(x$population), show_genotypes(x))
   hier_df[hier_df == 0] <- 11
   hier_df[hier_df == 1] <- 12

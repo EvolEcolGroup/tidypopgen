@@ -24,6 +24,12 @@ is given, a file with suffix .geno is written in the same location as the
 NOTE that we currently read all the data into memory to write the file, so
 this function is not suitable for very large datasets.
 }
+\note{
+the \code{.geno} format only supports haploid or diploid data, so this
+function only works on diploid (or pseudohaploid) \code{gen_tibble} objects.
+Pseudohaploid data is simply treated as regular diploid genotype counts
+(dosage 0/2), the same convention used by other tools (e.g. PLINK).
+}
 \examples{
 \dontshow{if (rlang::is_installed("LEA")) withAutoprint(\{ # examplesIf}
 example_gt <- load_example_gt("gen_tbl")
