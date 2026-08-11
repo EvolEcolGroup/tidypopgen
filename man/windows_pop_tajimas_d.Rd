@@ -70,6 +70,10 @@ or a list of data frames, one per group, with the following columns:
 \description{
 This function computes Tajima's D for a sliding window across
 each chromosome.
+
+This works for diploid and polyploid \code{gen_tibble} objects alike, but not
+pseudohaploid data (as it relies on \code{\link[=loci_pi]{loci_pi()}}, which does not support
+pseudohaploid data).
 }
 \examples{
 example_gt <- load_example_gt("grouped_gen_tbl")

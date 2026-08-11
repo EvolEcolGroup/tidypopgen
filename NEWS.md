@@ -6,7 +6,8 @@
   large datasets, to reduce memory usage and speed up processing. This is
   useful when working with full genomes (tens of millions of positions).
 * generalise several functions to work with polyploid data: `indiv_het_obs()`,
-  `pop_het_obs()`, `loci_pi()` and `gt_as_genind()`.
+  `pop_het_obs()`, `loci_pi()`, `gt_as_genind()`, `pop_tajimas_d()` and
+  `windows_pop_tajimas_d()`.
 * `gt_as_hierfstat()`, `gt_as_geno_lea()` and `gt_as_plink()` now error clearly
   on polyploid data, as `hierfstat`, LEA's `.geno` format and PLINK's bed/ped/
   raw formats only support haploid or diploid data.

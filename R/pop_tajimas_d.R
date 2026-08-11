@@ -4,6 +4,10 @@
 #' ascertained can be difficult to interpret. This function should ideally
 #' be used on sequence data prior to filtering.
 #'
+#' This works for diploid, polyploid, and mixed-ploidy `gen_tibble` objects
+#' alike. Pseudohaploid individuals are treated as regular diploid genotype
+#' counts (dosage 0/2), the same convention used elsewhere in the package.
+#'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param n_cores number of cores to be used, it defaults to
@@ -59,34 +63,62 @@ pop_tajimas_d.vctrs_bigSNP <- function(
 ) {
   rlang::check_dots_empty()
 
-  stopifnot_diploid(.x)
-  # if we have diploid
   # get the FBM
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
-    # internal function that can be used with a big_apply #nolint start
-    gt_pi_sub <- function(BM, ind, rows_to_keep) {
-      gt_pi_diploid(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        ncores = n_cores
+    # keep the diploid/pseudohaploid path on the original, ploidy-free
+    # kernel, and only pay for the more general, ploidy-aware kernel when
+    # the data actually need it, so the common diploid case is not slowed
+    # down
+    if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+      # internal function that can be used with a big_apply #nolint start
+      gt_pi_sub <- function(BM, ind, rows_to_keep) {
+        gt_pi_diploid(
+          BM = BM,
+          rowInd = rows_to_keep,
+          colInd = ind,
+          ncores = n_cores
+        )
+      } # nolint end
+      pi <- bigstatsr::big_apply(
+        geno_fbm,
+        a.FUN = gt_pi_sub,
+        rows_to_keep = rows_to_keep,
+        ind = attr(.x, "loci")$big_index,
+        ncores = 1, # parallelisation is used within the function
+        block.size = block_size,
+        a.combine = "c"
       )
-    } # nolint end
-    pi <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_pi_sub,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      ncores = 1, # parallelisation is used within the function
-      block.size = block_size,
-      a.combine = "c"
-    )
-    # n individuals (assuming they all contribute some data)
-    n <- length(.x) * 2
+      # n individuals (assuming they all contribute some data)
+      n <- length(.x) * 2
+    } else {
+      ploidy <- indiv_ploidy(.x)
+      # internal function that can be used with a big_apply #nolint start
+      gt_pi_sub <- function(BM, ind, rows_to_keep, ploidy) {
+        gt_pi_polyploid(
+          BM = BM,
+          rowInd = rows_to_keep,
+          colInd = ind,
+          ploidy = ploidy,
+          ncores = n_cores
+        )
+      } # nolint end
+      pi <- bigstatsr::big_apply(
+        geno_fbm,
+        a.FUN = gt_pi_sub,
+        rows_to_keep = rows_to_keep,
+        ind = attr(.x, "loci")$big_index,
+        ncores = 1, # parallelisation is used within the function
+        block.size = block_size,
+        a.combine = "c",
+        ploidy = ploidy
+      )
+      # n valid allele copies (assuming they all contribute some data)
+      n <- sum(ploidy)
+    }
     tajimas_d <- tajimas_d_from_pi_vec(pi, n)
   } else {
     # if we have a single individual
@@ -105,51 +137,82 @@ pop_tajimas_d.grouped_df <- function(
   ...
 ) {
   rlang::check_dots_empty()
-  stopifnot_diploid(.x)
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- .gt_fbm_rows(.x)
 
-  # internal function that can be used with a big_apply #nolint start
-  gt_group_pi_sub <- function(BM, ind, rows_to_keep) {
-    freq_mat <- gt_grouped_pi_diploid(
-      BM = BM,
-      rowInd = rows_to_keep,
-      colInd = ind,
-      groupIds = dplyr::group_indices(.x) - 1,
-      ngroups = max(dplyr::group_indices(.x)),
-      ncores = n_cores
-    )$pi
-  } # nolint end
-  pi_mat <- bigstatsr::big_apply(
-    geno_fbm,
-    a.FUN = gt_group_pi_sub,
-    rows_to_keep = rows_to_keep,
-    ind = show_loci(.x)$big_index,
-    ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-    # in the cpp code
-    block.size = block_size,
-    a.combine = "rbind"
-  )
-  # number of rows per group
-  n_by_grp <- .x %>%
-    dplyr::summarise(n = n()) %>%
-    dplyr::pull(.data$n)
+  # keep the diploid/pseudohaploid path on the original, ploidy-free
+  # kernel, and only pay for the more general, ploidy-aware kernel when the
+  # data actually need it, so the common diploid case is not slowed down
+  if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+    # internal function that can be used with a big_apply #nolint start
+    gt_group_pi_sub <- function(BM, ind, rows_to_keep) {
+      freq_mat <- gt_grouped_pi_diploid(
+        BM = BM,
+        rowInd = rows_to_keep,
+        colInd = ind,
+        groupIds = dplyr::group_indices(.x) - 1,
+        ngroups = max(dplyr::group_indices(.x)),
+        ncores = n_cores
+      )$pi
+    } # nolint end
+    pi_mat <- bigstatsr::big_apply(
+      geno_fbm,
+      a.FUN = gt_group_pi_sub,
+      rows_to_keep = rows_to_keep,
+      ind = show_loci(.x)$big_index,
+      ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
+      # in the cpp code
+      block.size = block_size,
+      a.combine = "rbind"
+    )
+    # number of valid allele copies per group (2 per individual)
+    n_by_grp <- .x %>%
+      dplyr::summarise(n = n()) %>%
+      dplyr::pull(.data$n)
+    n_by_grp <- n_by_grp * 2
+  } else {
+    ploidy <- indiv_ploidy(.x)
+    # internal function that can be used with a big_apply #nolint start
+    gt_group_pi_sub <- function(BM, ind, rows_to_keep, ploidy) {
+      freq_mat <- gt_grouped_pi_polyploid(
+        BM = BM,
+        rowInd = rows_to_keep,
+        colInd = ind,
+        groupIds = dplyr::group_indices(.x) - 1,
+        ngroups = max(dplyr::group_indices(.x)),
+        ploidy = ploidy,
+        ncores = n_cores
+      )$pi
+    } # nolint end
+    pi_mat <- bigstatsr::big_apply(
+      geno_fbm,
+      a.FUN = gt_group_pi_sub,
+      rows_to_keep = rows_to_keep,
+      ind = show_loci(.x)$big_index,
+      ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
+      # in the cpp code
+      block.size = block_size,
+      a.combine = "rbind",
+      ploidy = ploidy
+    )
+    # number of valid allele copies per group
+    n_by_grp <- as.numeric(tapply(ploidy, dplyr::group_indices(.x), sum))
+  }
   tajimas_d <- list()
   # TODO this should be done with an apply function or in cpp
   for (i_grp in seq_along(n_by_grp)) {
-    # get the number of individuals in the group
-    n <- n_by_grp[i_grp] * 2
     # compute tajimas d for each group
-    tajimas_d[i_grp] <- tajimas_d_from_pi_vec(pi_mat[, i_grp], n)
+    tajimas_d[i_grp] <- tajimas_d_from_pi_vec(pi_mat[, i_grp], n_by_grp[i_grp])
   }
   # return a list to mimic a group_map
   return(tajimas_d)
 }
 
 
-# estimate tajimas d from a vector of pi per locus and the number of
-# haploid genomes (i.e. 2 * N individuals)
+# estimate tajimas d from a vector of pi per locus and the number of valid
+# allele copies (i.e. 2 * N individuals for diploids, sum(ploidy) more
+# generally)
 tajimas_d_from_pi_vec <- function(pi, n) {
   # count segregating sites from pi
   seg <- sum(pi > 0.0 & pi < 1.0, na.rm = TRUE)

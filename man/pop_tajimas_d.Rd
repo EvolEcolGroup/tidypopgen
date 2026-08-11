@@ -51,6 +51,11 @@ Note that Tajima's D estimates from data that have been filtered or
 ascertained can be difficult to interpret. This function should ideally
 be used on sequence data prior to filtering.
 }
+\details{
+This works for diploid, polyploid, and mixed-ploidy \code{gen_tibble} objects
+alike. Pseudohaploid individuals are treated as regular diploid genotype
+counts (dosage 0/2), the same convention used elsewhere in the package.
+}
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
 \dontshow{

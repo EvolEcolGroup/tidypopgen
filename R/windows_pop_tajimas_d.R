@@ -3,6 +3,10 @@
 #' @description This function computes Tajima's D for a sliding window across
 #'   each chromosome.
 #'
+#' This works for diploid and polyploid `gen_tibble` objects alike, but not
+#' pseudohaploid data (as it relies on [loci_pi()], which does not support
+#' pseudohaploid data).
+#'
 #' @param .x a (potentially grouped) `gen_tibble` object
 #' @param type type of object to return, if using grouped method. One of
 #'   "matrix", "tidy", or "list". Default is "matrix".
@@ -66,15 +70,24 @@ windows_pop_tajimas_d <- function(.x,
   stopifnot_gen_tibble(.x)
   type <- match.arg(type)
 
-  # if x is grouped, get the pop sizes for each group
-  if (inherits(.x, "grouped_gen_tbl")) {
-    # get the population sizes
-    n <- .x %>%
-      dplyr::summarise(n = n()) %>%
-      dplyr::pull(.data$n)
+  # get the number of valid allele copies for each group (or overall, if
+  # not grouped)
+  if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+    if (inherits(.x, "grouped_gen_tbl")) {
+      n <- .x %>%
+        dplyr::summarise(n = n()) %>%
+        dplyr::pull(.data$n)
+      n <- n * 2
+    } else {
+      n <- nrow(.x) * 2
+    }
   } else {
-    # if not grouped, just use the number of individuals
-    n <- nrow(.x)
+    ploidy <- indiv_ploidy(.x)
+    if (inherits(.x, "grouped_gen_tbl")) {
+      n <- as.numeric(tapply(ploidy, dplyr::group_indices(.x), sum))
+    } else {
+      n <- sum(ploidy)
+    }
   }
   # get the pi for each locus (if it x is grouped, it will be a list)
   pi_by_locus <- loci_pi(.x, type = "list")
@@ -97,7 +110,7 @@ windows_pop_tajimas_d <- function(.x,
       min_loci = min_loci,
       complete = complete,
       f = tajimas_d_from_pi_vec,
-      n = n[i_grp] * 2 # because we need the number of alleles
+      n = n[i_grp] # number of valid allele copies
     )
     res[[i_grp]] <- window_taj
   }
