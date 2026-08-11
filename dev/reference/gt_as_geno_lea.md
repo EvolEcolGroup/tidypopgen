@@ -33,6 +33,13 @@ the path of the .geno file
 NOTE that we currently read all the data into memory to write the file,
 so this function is not suitable for very large datasets.
 
+## Note
+
+the `.geno` format only supports haploid or diploid data, so this
+function only works on diploid (or pseudohaploid) `gen_tibble` objects.
+Pseudohaploid data is simply treated as regular diploid genotype counts
+(dosage 0/2), the same convention used by other tools (e.g. PLINK).
+
 ## See also
 
 [`LEA::geno()`](https://rdrr.io/pkg/LEA/man/geno.html)
@@ -44,5 +51,5 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a geno file
 gt_as_geno_lea(example_gt, file = paste0(tempfile(), "_example.geno"))
-#> [1] "/tmp/Rtmp68tY9F/file210174a20d96_example.geno"
+#> [1] "/tmp/RtmpsHDfeM/file210d5783fe33_example.geno"
 ```

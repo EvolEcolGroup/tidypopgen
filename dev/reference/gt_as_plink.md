@@ -54,6 +54,13 @@ resulting plink files. NOTE that writing to bed has been optimised for
 speed, but writing to ped or raw is slower, especially for large
 datasets.
 
+## Note
+
+PLINK's bed, ped and raw formats only support diploid data, so this
+function only works on diploid (or pseudohaploid) `gen_tibble` objects.
+Pseudohaploid data is simply treated as regular diploid genotype counts
+(dosage 0/2), the same convention used by PLINK itself.
+
 ## Examples
 
 ``` r
@@ -61,13 +68,13 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a bed file
 example_gt %>% gt_as_plink(type = "bed", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/Rtmp68tY9F/file2101665510e1_plink.bed"
+#> [1] "/tmp/RtmpsHDfeM/file210d38143a7b_plink.bed"
 
 # Write a ped file
 example_gt %>% gt_as_plink(type = "ped", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/Rtmp68tY9F/file210168aeadd8_plink.ped"
+#> [1] "/tmp/RtmpsHDfeM/file210d5a7e380f_plink.ped"
 
 # Write a raw file
 example_gt %>% gt_as_plink(type = "raw", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/Rtmp68tY9F/file210142390188_plink.raw"
+#> [1] "/tmp/RtmpsHDfeM/file210d567b509b_plink.raw"
 ```

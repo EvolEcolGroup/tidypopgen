@@ -52,13 +52,13 @@ example_gt <- example_gt %>% filter(id != "a")
 # save filtered gen_tibble object
 gt_save(example_gt, file_name = paste0(tempfile(), "_example_filtered"))
 #> 
-#> gen_tibble saved to /tmp/Rtmp68tY9F/file21011d1d0083_example_filtered.gt
-#> using FBM RDS: /tmp/Rtmp68tY9F/file210153d48342.rds
-#> with FBM backing file: /tmp/Rtmp68tY9F/file210153d48342.bk
+#> gen_tibble saved to /tmp/RtmpsHDfeM/file210d23186d80_example_filtered.gt
+#> using FBM RDS: /tmp/RtmpsHDfeM/file210d62eeb26a.rds
+#> with FBM backing file: /tmp/RtmpsHDfeM/file210d62eeb26a.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/Rtmp68tY9F/file21011d1d0083_example_filtered.gt')
-#> [1] "/tmp/Rtmp68tY9F/file21011d1d0083_example_filtered.gt"
-#> [2] "/tmp/Rtmp68tY9F/file210153d48342.rds"                
-#> [3] "/tmp/Rtmp68tY9F/file210153d48342.bk"                 
+#> gt_load('/tmp/RtmpsHDfeM/file210d23186d80_example_filtered.gt')
+#> [1] "/tmp/RtmpsHDfeM/file210d23186d80_example_filtered.gt"
+#> [2] "/tmp/RtmpsHDfeM/file210d62eeb26a.rds"                
+#> [3] "/tmp/RtmpsHDfeM/file210d62eeb26a.bk"                 
 ```

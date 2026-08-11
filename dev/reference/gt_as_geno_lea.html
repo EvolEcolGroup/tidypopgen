@@ -81,6 +81,13 @@ location of the backing files.</p></dd>
 this function is not suitable for very large datasets.</p>
     </div>
     <div class="section level2">
+    <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
+    <p>the <code>.geno</code> format only supports haploid or diploid data, so this
+function only works on diploid (or pseudohaploid) <code>gen_tibble</code> objects.
+Pseudohaploid data is simply treated as regular diploid genotype counts
+(dosage 0/2), the same convention used by other tools (e.g. PLINK).</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/LEA/man/geno.html" class="external-link">LEA::geno()</a></code></p></div>
     </div>
@@ -91,7 +98,7 @@ this function is not suitable for very large datasets.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Write a geno file</span></span></span>
 <span class="r-in"><span><span class="fu">gt_as_geno_lea</span><span class="op">(</span><span class="va">example_gt</span>, file <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_example.geno"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/Rtmp68tY9F/file210174a20d96_example.geno"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpsHDfeM/file210d5783fe33_example.geno"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

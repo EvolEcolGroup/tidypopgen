@@ -22,6 +22,13 @@ gt_as_hierfstat(x)
 a data.frame with a column 'pop' and further column representing the
 genotypes (with alleles recoded as 1 and 2)
 
+## Note
+
+`hierfstat` only supports haploid or diploid data, so this function only
+works on diploid (or pseudohaploid) `gen_tibble` objects. Pseudohaploid
+data is simply treated as regular diploid genotype counts (dosage 0/2),
+the same convention used by other tools (e.g. PLINK).
+
 ## Examples
 
 ``` r
