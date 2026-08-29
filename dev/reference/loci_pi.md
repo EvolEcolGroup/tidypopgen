@@ -95,8 +95,8 @@ using only non-missing genotype data. For polyploid data, each
 individual contributes a number of allele copies equal to its ploidy.
 
 This corresponds to the unbiased gene diversity estimator of Nei and
-Roychoudhury (1974) and is applicable to diploid, polyploid and
-mixed-ploidy `gen_tibble` objects alike.
+Roychoudhury (1974) and is applicable to diploid, polyploid
+mixed-ploidy, and pseudohaploid `gen_tibble` objects alike.
 
 ## Examples
 
