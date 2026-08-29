@@ -24,7 +24,7 @@
 #'
 #' This corresponds to the unbiased gene diversity estimator of
 #' Nei and Roychoudhury (1974) and is applicable to diploid, polyploid
-#' and mixed-ploidy `gen_tibble` objects alike.
+#' mixed-ploidy, and pseudohaploid `gen_tibble` objects alike.
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
@@ -112,18 +112,16 @@ loci_pi.vctrs_bigSNP <- function(
 ) {
   rlang::check_dots_empty()
 
-  stopifnot_no_pseudohaploid(.x)
   # get the FBM
   geno_fbm <- attr(.x, "fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
-    # keep the diploid/pseudohaploid path on the original, ploidy-free
-    # kernel, and only pay for the more general, ploidy-aware kernel when
-    # the data actually need it, so the common diploid case is not slowed
-    # down
-    if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+    # Keep the common diploid case on the ploidy-free kernel. Pseudohaploid
+    # samples retain 0/2 dosage storage despite contributing one allele, so
+    # they must use the ploidy-aware kernel.
+    if (is_diploid_only(.x)) {
       # internal function that can be used with a big_apply #nolint start
       gt_pi_sub <- function(BM, ind, rows_to_keep) {
         gt_pi_diploid(
@@ -151,6 +149,7 @@ loci_pi.vctrs_bigSNP <- function(
           rowInd = rows_to_keep,
           colInd = ind,
           ploidy = ploidy,
+          is_pseudohaploid = is_pseudohaploid(.x),
           ncores = n_cores
         )
       } # nolint end
@@ -192,7 +191,6 @@ loci_pi.grouped_df <- function(
   }
   rlang::check_dots_empty()
   type <- match.arg(type)
-  stopifnot_no_pseudohaploid(.x)
   # if we only have one individual, return NA for all loci
   if (nrow(.x) == 1) {
     return(rep(NA_real_, nrow(show_loci(.x))))
@@ -207,10 +205,10 @@ loci_pi.grouped_df <- function(
   # rows (individuals) that we want to use
   rows_to_keep <- .gt_fbm_rows(.x)
 
-  # keep the diploid/pseudohaploid path on the original, ploidy-free
-  # kernel, and only pay for the more general, ploidy-aware kernel when the
-  # data actually need it, so the common diploid case is not slowed down
-  if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
+  # Keep the common diploid case on the ploidy-free kernel. Pseudohaploid
+  # samples retain 0/2 dosage storage despite contributing one allele, so
+  # they must use the ploidy-aware kernel.
+  if (is_diploid_only(.x)) {
     # internal function that can be used with a big_apply #nolint start
     gt_group_pi_sub <- function(BM, ind, rows_to_keep) {
       freq_mat <- gt_grouped_pi_diploid(
@@ -243,6 +241,7 @@ loci_pi.grouped_df <- function(
         groupIds = dplyr::group_indices(.x) - 1,
         ngroups = max(dplyr::group_indices(.x)),
         ploidy = ploidy,
+        is_pseudohaploid = is_pseudohaploid(.x),
         ncores = n_cores
       )$pi
     } # nolint end

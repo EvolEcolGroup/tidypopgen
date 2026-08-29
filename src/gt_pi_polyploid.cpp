@@ -10,13 +10,16 @@
 // Rosenberg (2010) eqn 3: M/(M-1) * (1 - sum_i p_i^2), where M is the total
 // number of allele copies. Kept as a separate function from gt_pi_diploid()
 // so the diploid fast path stays free of the extra ploidy lookup this
-// requires.
+// requires. When the dataset is marked pseudohaploid, individuals with ploidy
+// one retain 0/2 storage while diploid individuals retain their usual dosage.
+// The dataset-level flag distinguishes this from ordinary 0/1 haploid calls.
 
 // [[Rcpp::export]]
 NumericVector gt_pi_polyploid(Environment BM,
                                    const IntegerVector& rowInd,
                                    const IntegerVector& colInd,
                                    const NumericVector& ploidy,
+                                   bool is_pseudohaploid,
                                    int ncores) {
 
   XPtr<FBM> xpBM = BM["address"];
@@ -38,7 +41,8 @@ NumericVector gt_pi_polyploid(Environment BM,
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
       if (x > -1){
-        this_allele_count += x;
+        this_allele_count +=
+          (is_pseudohaploid && ploidy[i] == 1) ? x / 2 : x;
         this_valid_alleles += ploidy[i];
       }
     }

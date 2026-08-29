@@ -139,8 +139,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // gt_grouped_pi_polyploid
-ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, int ncores);
-RcppExport SEXP _tidypopgen_gt_grouped_pi_polyploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP ncoresSEXP) {
+ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, int ncores);
+RcppExport SEXP _tidypopgen_gt_grouped_pi_polyploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -150,8 +150,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
     Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< bool >::type is_pseudohaploid(is_pseudohaploidSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    rcpp_result_gen = Rcpp::wrap(gt_grouped_pi_polyploid(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores));
+    rcpp_result_gen = Rcpp::wrap(gt_grouped_pi_polyploid(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -199,8 +200,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // gt_pi_polyploid
-NumericVector gt_pi_polyploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& ploidy, int ncores);
-RcppExport SEXP _tidypopgen_gt_pi_polyploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ploidySEXP, SEXP ncoresSEXP) {
+NumericVector gt_pi_polyploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& ploidy, bool is_pseudohaploid, int ncores);
+RcppExport SEXP _tidypopgen_gt_pi_polyploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -208,8 +209,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< bool >::type is_pseudohaploid(is_pseudohaploidSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    rcpp_result_gen = Rcpp::wrap(gt_pi_polyploid(BM, rowInd, colInd, ploidy, ncores));
+    rcpp_result_gen = Rcpp::wrap(gt_pi_polyploid(BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -418,11 +420,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 6},
     {"_tidypopgen_grouped_summaries_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_summaries_dip_pseudo_cpp, 7},
     {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 6},
-    {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 7},
+    {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 8},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
     {"_tidypopgen_gt_ind_hetero_polyploid", (DL_FUNC) &_tidypopgen_gt_ind_hetero_polyploid, 5},
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 4},
-    {"_tidypopgen_gt_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_pi_polyploid, 5},
+    {"_tidypopgen_gt_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_pi_polyploid, 6},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 6},

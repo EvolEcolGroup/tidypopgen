@@ -7,7 +7,10 @@
 // Grouped (per-population) version of gt_pi_polyploid(); see that function
 // for details of the estimator. Kept as a separate function from
 // gt_grouped_pi_diploid() so the diploid fast path stays free of the extra
-// ploidy lookup this requires.
+// ploidy lookup this requires. When the dataset is marked pseudohaploid,
+// individuals with ploidy one retain 0/2 storage while diploid individuals
+// retain their usual dosage. The dataset-level flag distinguishes this from
+// ordinary 0/1 haploid calls.
 
 // [[Rcpp::export]]
 ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM,
@@ -16,6 +19,7 @@ ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM,
                                    const IntegerVector& groupIds,
                                    int ngroups,
                                    const NumericVector& ploidy,
+                                   bool is_pseudohaploid,
                                    int ncores) {
 
   XPtr<FBM> xpBM = BM["address"];
@@ -36,7 +40,8 @@ ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM,
     for (size_t i = 0; i < n; i++) {
       double x = macc(i, j);
       if (x > -1){
-        pi(j, groupIds[i]) += x;
+        pi(j, groupIds[i]) +=
+          (is_pseudohaploid && ploidy[i] == 1) ? x / 2 : x;
         valid_alleles(j, groupIds[i]) += ploidy[i];
       }
     }

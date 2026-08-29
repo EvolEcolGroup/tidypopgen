@@ -222,8 +222,10 @@ import(tibble)
 importFrom(Rcpp,sourceCpp)
 importFrom(dplyr,"%>%")
 importFrom(foreach,"%do%")
-importFrom(generics,augment)
-importFrom(generics,tidy)
+importFrom(generics,
+  augment,
+  tidy
+)
 importFrom(ggplot2,autoplot)
 importFrom(grid,grid.draw)
 importFrom(patchwork,plot_layout)

@@ -257,7 +257,8 @@ test_that("the polyploid kernel reduces to the diploid kernel at ploidy 2", {
     BM = X, rowInd = rows, colInd = ind, ncores = 1
   )
   poly_pi <- tidypopgen:::gt_pi_polyploid(
-    BM = X, rowInd = rows, colInd = ind, ploidy = ploidy_2, ncores = 1
+    BM = X, rowInd = rows, colInd = ind, ploidy = ploidy_2,
+    is_pseudohaploid = FALSE, ncores = 1
   )
   expect_equal(dip_pi, poly_pi)
 
@@ -270,7 +271,54 @@ test_that("the polyploid kernel reduces to the diploid kernel at ploidy 2", {
   poly_grouped <- tidypopgen:::gt_grouped_pi_polyploid(
     BM = X, rowInd = rows, colInd = ind,
     groupIds = dplyr::group_indices(grouped) - 1,
-    ngroups = 2, ploidy = ploidy_2, ncores = 1
+    ngroups = 2, ploidy = ploidy_2, is_pseudohaploid = FALSE, ncores = 1
   )$pi
   expect_equal(dip_grouped, poly_grouped)
+})
+
+test_that("loci_pi computes pseudohaploid allele counts correctly", {
+  test_genotypes <- rbind(
+    c(0, 2, NA),
+    c(1, 2, 0),
+    c(0, NA, 2),
+    c(1, 0, 0)
+  )
+  test_indiv_meta <- data.frame(
+    id = letters[1:4],
+    population = c("popA", "popA", "popB", "popB")
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:3),
+    chromosome = 1,
+    position = 1:3,
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ) %>% gt_pseudohaploid(test_n_loci = NULL)
+
+  expect_true(is_pseudohaploid(test_gt))
+  ploidy <- indiv_ploidy(test_gt)
+  expect_equal(ploidy, c(1, 2, 1, 2))
+  expected <- ref_loci_pi(
+    sweep(test_genotypes, 1, 3 - ploidy, FUN = "/"),
+    ploidy
+  )
+  expect_equal(loci_pi(test_gt), unname(expected))
+
+  grouped <- test_gt %>% dplyr::group_by(population)
+  expected_grouped <- ref_grouped_loci_pi(
+    sweep(test_genotypes, 1, 3 - ploidy, FUN = "/"),
+    ploidy,
+    test_indiv_meta$population
+  )
+  expect_equal(
+    unname(loci_pi(grouped, type = "matrix")),
+    unname(expected_grouped)
+  )
 })
