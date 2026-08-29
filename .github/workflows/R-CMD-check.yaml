@@ -73,7 +73,7 @@ jobs:
           cat >> ~/.Rprofile << 'EOF'
           local({
             r <- getOption("repos")
-            r <- r[!grepl("bioconductor.org", r, fixed = FALSE)]
+            r <- r[!grepl("bioconductor.org", r, fixed = TRUE)]
             options(repos = r)
           })
           EOF
