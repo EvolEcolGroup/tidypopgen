@@ -68,6 +68,17 @@ jobs:
              echo "$PWD/admixture/dist/admixture_linux-1.3.0" >> "$GITHUB_PATH"
 
 
+      - name: Remove inaccessible Bioconductor repos
+        run: |
+          cat >> ~/.Rprofile << 'EOF'
+          local({
+            r <- getOption("repos")
+            r <- r[!grepl("bioconductor.org", r, fixed = FALSE)]
+            options(repos = r)
+          })
+          EOF
+        shell: bash
+
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
