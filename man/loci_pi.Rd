@@ -82,7 +82,7 @@ a number of allele copies equal to its ploidy.
 
 This corresponds to the unbiased gene diversity estimator of
 Nei and Roychoudhury (1974) and is applicable to diploid, polyploid
-and mixed-ploidy \code{gen_tibble} objects alike.
+mixed-ploidy, and pseudohaploid \code{gen_tibble} objects alike.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

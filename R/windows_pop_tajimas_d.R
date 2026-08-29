@@ -66,15 +66,14 @@ windows_pop_tajimas_d <- function(.x,
   stopifnot_gen_tibble(.x)
   type <- match.arg(type)
 
-  # if x is grouped, get the pop sizes for each group
+  # Get the number of sampled allele copies for each group. Pseudohaploid
+  # genotypes are stored as 0/2 dosages but contribute one allele per sample.
   if (inherits(.x, "grouped_gen_tbl")) {
-    # get the population sizes
     n <- .x %>%
-      dplyr::summarise(n = n()) %>%
+      dplyr::summarise(n = sum(indiv_ploidy(.data$genotypes))) %>%
       dplyr::pull(.data$n)
   } else {
-    # if not grouped, just use the number of individuals
-    n <- nrow(.x)
+    n <- sum(indiv_ploidy(.x))
   }
   # get the pi for each locus (if it x is grouped, it will be a list)
   pi_by_locus <- loci_pi(.x, type = "list")
@@ -97,7 +96,7 @@ windows_pop_tajimas_d <- function(.x,
       min_loci = min_loci,
       complete = complete,
       f = tajimas_d_from_pi_vec,
-      n = n[i_grp] * 2 # because we need the number of alleles
+      n = n[i_grp]
     )
     res[[i_grp]] <- window_taj
   }

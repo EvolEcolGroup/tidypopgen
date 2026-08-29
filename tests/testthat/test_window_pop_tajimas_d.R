@@ -142,3 +142,49 @@ test_that("windows type", {
   expect_equal(pop1_pop2_tidy$stat, window_taj_list$pop3$stat)
   expect_equal(windows_taj_matrix$pop3, window_taj_list$pop3$stat)
 })
+
+test_that("windows_pop_tajimas_d counts pseudohaploid allele copies", {
+  pseudohaploid_genotypes <- rbind(
+    c(0, 2, NA),
+    c(1, 2, 0),
+    c(0, NA, 2),
+    c(1, 0, 0)
+  )
+  pseudohaploid_meta <- data.frame(
+    id = letters[1:4],
+    population = c("popA", "popA", "popB", "popB")
+  )
+  pseudohaploid_loci <- data.frame(
+    name = paste0("rs", 1:3),
+    chromosome = 1,
+    position = 1:3,
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  pseudohaploid_gt <- gen_tibble(
+    x = pseudohaploid_genotypes,
+    loci = pseudohaploid_loci,
+    indiv_meta = pseudohaploid_meta,
+    quiet = TRUE
+  ) %>%
+    gt_pseudohaploid(test_n_loci = NULL) %>%
+    dplyr::group_by(population)
+
+  window_tajimas_d <- windows_pop_tajimas_d(
+    pseudohaploid_gt,
+    type = "list",
+    window_size = 3,
+    step_size = 3
+  )
+  pi_by_group <- loci_pi(pseudohaploid_gt, type = "list")
+  ploidy_by_group <- pseudohaploid_gt %>%
+    dplyr::summarise(n = sum(indiv_ploidy(genotypes))) %>%
+    dplyr::pull(.data$n)
+
+  expected <- Map(tajimas_d_from_pi_vec, pi_by_group, ploidy_by_group)
+  expect_equal(
+    unname(vapply(window_tajimas_d, function(x) x$stat[1], numeric(1))),
+    unname(unlist(expected))
+  )
+})
