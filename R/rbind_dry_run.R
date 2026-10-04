@@ -96,9 +96,15 @@ rbind_dry_run <- function(
   ref_df <- ref %>% show_loci()
   ref_df <- ref_df %>% mutate(id = seq_len(nrow(ref_df)))
   # replace NA with "0" for missing allele to avoid subsetting headaches
-  # (NA does not play nice with subsetting)
+  # (NA does not play nice with subsetting). Both allele columns need this:
+  # gen_tibble_bed() maps allele_ref to the bim file's allele2 column, so a
+  # missing allele can arrive in either one, and an NA left in allele_ref
+  # propagates through the == comparisons below into the logical vectors used
+  # as subscripts.
   ref_df$allele_alt[is.na(ref_df$allele_alt)] <- "0"
   target_df$allele_alt[is.na(target_df$allele_alt)] <- "0"
+  ref_df$allele_ref[is.na(ref_df$allele_ref)] <- "0"
+  target_df$allele_ref[is.na(target_df$allele_ref)] <- "0"
 
   # replace the names with a combination of chromosome and position
   if (use_position) {
