@@ -112,16 +112,3 @@ windows_pop_tajimas_d <- function(.x,
     return(res)
   }
 }
-
-# Get the number of sampled allele copies for each group (or for the whole
-# gen_tibble if it is not grouped). Pseudohaploid genotypes are stored as 0/2
-# dosages but contribute one allele per sample.
-.n_allele_copies <- function(.x) {
-  if (inherits(.x, "grouped_gen_tbl")) {
-    .x %>%
-      dplyr::summarise(n = sum(indiv_ploidy(.data$genotypes))) %>%
-      dplyr::pull(.data$n)
-  } else {
-    sum(indiv_ploidy(.x))
-  }
-}

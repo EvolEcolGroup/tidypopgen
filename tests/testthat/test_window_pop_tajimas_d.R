@@ -188,3 +188,34 @@ test_that("windows_pop_tajimas_d counts pseudohaploid allele copies", {
     unname(unlist(expected))
   )
 })
+
+test_that("windows_pop_tajimas_d ignores loci with missing pi", {
+  # make the 2nd locus missing for all individuals in pop1
+  test_genotypes_miss <- test_genotypes
+  test_genotypes_miss[test_indiv_meta$population == "pop1", 2] <- NA
+  test_gt_miss <- gen_tibble(
+    x = test_genotypes_miss,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ) %>%
+    dplyr::group_by(population)
+  # a single window covering each chromosome
+  window_taj <- windows_pop_tajimas_d(
+    test_gt_miss,
+    type = "list",
+    window_size = 1000,
+    step_size = 1000,
+    size_unit = "bp"
+  )
+  expect_false(is.na(window_taj$pop1$stat[1]))
+  # the window is the same as tajima's d for chr1 without the missing locus
+  test_gt_chr1 <- test_gt_miss %>%
+    select_loci_if(loci_chromosomes(genotypes) == "chr1") %>%
+    select_loci(-2) %>%
+    dplyr::filter(population == "pop1") %>%
+    dplyr::ungroup()
+  expect_equal(window_taj$pop1$stat[1], pop_tajimas_d(test_gt_chr1))
+  # the number of loci only counts loci with data
+  expect_equal(window_taj$pop1$n_loci[1], 2)
+})

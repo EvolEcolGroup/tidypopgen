@@ -97,3 +97,23 @@ test_that("jackknife_pop_tajimas_d counts pseudohaploid allele copies", {
     unname(unlist(expected))
   )
 })
+
+test_that("jackknife_pop_tajimas_d matches pop_tajimas_d with missing pi", {
+  test_gt <- make_jack_test_gt()
+  # make the 2nd locus missing for all individuals in pop1
+  test_genotypes <- show_genotypes(test_gt)
+  test_genotypes[dplyr::group_indices(test_gt) == 1, 2] <- NA
+  test_gt_miss <- gen_tibble(
+    x = test_genotypes,
+    loci = show_loci(test_gt) %>% dplyr::select(-"big_index"),
+    indiv_meta = test_gt %>%
+      dplyr::ungroup() %>%
+      dplyr::select(dplyr::all_of(c("id", "population"))),
+    quiet = TRUE
+  ) %>%
+    dplyr::group_by(population)
+  jack_tidy <- jackknife_pop_tajimas_d(test_gt_miss,
+    type = "tidy", block_size = 2
+  )
+  expect_equal(jack_tidy$estimate, unlist(pop_tajimas_d(test_gt_miss)))
+})

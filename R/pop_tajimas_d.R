@@ -4,6 +4,13 @@
 #' ascertained can be difficult to interpret. This function should ideally
 #' be used on sequence data prior to filtering.
 #'
+#' Nucleotide diversity is estimated at each locus with [loci_pi()], so this
+#' function works with diploid, polyploid, mixed-ploidy and pseudohaploid data.
+#' The sample size is the total number of allele copies sampled (i.e. the sum
+#' of the ploidy of the individuals, with pseudohaploids contributing one
+#' copy each). Loci with missing nucleotide diversity (e.g. loci with no
+#' genotyped individuals) are ignored.
+#'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param n_cores number of cores to be used, it defaults to
@@ -59,34 +66,13 @@ pop_tajimas_d.vctrs_bigSNP <- function(
 ) {
   rlang::check_dots_empty()
 
-  stopifnot_diploid(.x)
-  # if we have diploid
-  # get the FBM
-  geno_fbm <- .gt_get_fbm(.x)
-  # rows (individuals) that we want to use
-  rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
-  if (length(rows_to_keep) > 1) {
-    # internal function that can be used with a big_apply #nolint start
-    gt_pi_sub <- function(BM, ind, rows_to_keep) {
-      gt_pi_diploid(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        ncores = n_cores
-      )
-    } # nolint end
-    pi <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_pi_sub,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      ncores = 1, # parallelisation is used within the function
-      block.size = block_size,
-      a.combine = "c"
-    )
-    # n individuals (assuming they all contribute some data)
-    n <- length(.x) * 2
+  if (length(.x) > 1) {
+    # get pi for each locus (this deals with polyploids and pseudohaploids)
+    pi <- loci_pi(.x, n_cores = n_cores, block_size = block_size)
+    # number of sampled allele copies (assuming all individuals contribute
+    # some data)
+    n <- sum(indiv_ploidy(.x))
     tajimas_d <- tajimas_d_from_pi_vec(pi, n)
   } else {
     # if we have a single individual
@@ -105,55 +91,28 @@ pop_tajimas_d.grouped_df <- function(
   ...
 ) {
   rlang::check_dots_empty()
-  stopifnot_diploid(.x)
-  geno_fbm <- .gt_get_fbm(.x)
-  # rows (individuals) that we want to use
-  rows_to_keep <- .gt_fbm_rows(.x)
-
-  # internal function that can be used with a big_apply #nolint start
-  gt_group_pi_sub <- function(BM, ind, rows_to_keep) {
-    freq_mat <- gt_grouped_pi_diploid(
-      BM = BM,
-      rowInd = rows_to_keep,
-      colInd = ind,
-      groupIds = dplyr::group_indices(.x) - 1,
-      ngroups = max(dplyr::group_indices(.x)),
-      ncores = n_cores
-    )$pi
-  } # nolint end
-  pi_mat <- bigstatsr::big_apply(
-    geno_fbm,
-    a.FUN = gt_group_pi_sub,
-    rows_to_keep = rows_to_keep,
-    ind = show_loci(.x)$big_index,
-    ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-    # in the cpp code
-    block.size = block_size,
-    a.combine = "rbind"
+  # get pi for each locus and group (this deals with polyploids and
+  # pseudohaploids)
+  pi_by_grp <- loci_pi(.x,
+    n_cores = n_cores, block_size = block_size,
+    type = "list"
   )
-  # number of rows per group
-  n_by_grp <- .x %>%
-    dplyr::summarise(n = n()) %>%
-    dplyr::pull(.data$n)
-  tajimas_d <- list()
-  # TODO this should be done with an apply function or in cpp
-  for (i_grp in seq_along(n_by_grp)) {
-    # get the number of individuals in the group
-    n <- n_by_grp[i_grp] * 2
-    # compute tajimas d for each group
-    tajimas_d[i_grp] <- tajimas_d_from_pi_vec(pi_mat[, i_grp], n)
-  }
+  # number of sampled allele copies per group
+  n_by_grp <- .n_allele_copies(.x)
+  # compute tajimas d for each group
+  tajimas_d <- Map(tajimas_d_from_pi_vec, unname(pi_by_grp), n_by_grp)
   # return a list to mimic a group_map
   return(tajimas_d)
 }
 
 
 # estimate tajimas d from a vector of pi per locus and the number of
-# haploid genomes (i.e. 2 * N individuals)
+# sampled allele copies (i.e. 2 * N individuals for diploids). Loci with
+# missing pi are ignored
 tajimas_d_from_pi_vec <- function(pi, n) {
   # count segregating sites from pi
   seg <- sum(pi > 0.0 & pi < 1.0, na.rm = TRUE)
-  k_hat <- sum(pi)
+  k_hat <- sum(pi, na.rm = TRUE)
   return(tajimas_d_from_sums(k_hat = k_hat, seg = seg, n = n))
 }
 
@@ -170,4 +129,17 @@ tajimas_d_from_sums <- function(k_hat, seg, n) {
   e2_den <- a1^2 + a2
   vd <- e1 * seg + e2_num / e2_den * seg * (seg - 1)
   return((k_hat - seg / a1) / sqrt(vd))
+}
+
+# Get the number of sampled allele copies for each group (or for the whole
+# gen_tibble if it is not grouped). Pseudohaploid genotypes are stored as 0/2
+# dosages but contribute one allele per sample.
+.n_allele_copies <- function(.x) {
+  if (inherits(.x, "grouped_gen_tbl")) {
+    .x %>%
+      dplyr::summarise(n = sum(indiv_ploidy(.data$genotypes))) %>%
+      dplyr::pull(.data$n)
+  } else {
+    sum(indiv_ploidy(.x))
+  }
 }

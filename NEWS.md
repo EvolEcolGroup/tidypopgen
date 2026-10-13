@@ -17,6 +17,9 @@
   SNPs, centiMorgans or base pairs.
 * fix `windows_pairwise_pop_fst()` (and thus `windows_nwise_pop_pbs()`)
   ignoring the `method` argument and always using "Hudson".
+* `pop_tajimas_d()` now works with polyploid and pseudohaploid data.
+* `pop_tajimas_d()` and `windows_pop_tajimas_d()` now ignore loci with missing
+  nucleotide diversity, instead of returning `NA`.
 
 # tidypopgen 0.4.4
 * fix seed argument of `gt_admixture()`

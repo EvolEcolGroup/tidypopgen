@@ -51,6 +51,14 @@ Note that Tajima's D estimates from data that have been filtered or
 ascertained can be difficult to interpret. This function should ideally
 be used on sequence data prior to filtering.
 }
+\details{
+Nucleotide diversity is estimated at each locus with \code{\link[=loci_pi]{loci_pi()}}, so this
+function works with diploid, polyploid, mixed-ploidy and pseudohaploid data.
+The sample size is the total number of allele copies sampled (i.e. the sum
+of the ploidy of the individuals, with pseudohaploids contributing one
+copy each). Loci with missing nucleotide diversity (e.g. loci with no
+genotyped individuals) are ignored.
+}
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
 \dontshow{
