@@ -12,7 +12,7 @@ jackknife_pop_tajimas_d(
 )
 }
 \arguments{
-\item{.x}{a (potentially grouped) \code{gen_tibble} object}
+\item{.x}{a \code{gen_tibble} object, optionally grouped by one variable}
 
 \item{type}{type of object to return, if using grouped method. One of
 "matrix", "tidy", or "list". Default is "matrix".}

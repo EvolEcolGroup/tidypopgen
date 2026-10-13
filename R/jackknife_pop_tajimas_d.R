@@ -25,7 +25,7 @@
 #'   \eqn{\theta_W} and Tajima's D from missing data in next-generation
 #'   sequencing. Molecular Ecology Resources, e14104.
 #'   \doi{10.1111/1755-0998.14104}
-#' @param .x a (potentially grouped) `gen_tibble` object
+#' @param .x a `gen_tibble` object, optionally grouped by one variable
 #' @param type type of object to return, if using grouped method. One of
 #'   "matrix", "tidy", or "list". Default is "matrix".
 #' @param block_size The size of the blocks to leave out.
@@ -67,6 +67,9 @@ jackknife_pop_tajimas_d <- function(.x,
                                     size_unit = c("snp", "cM", "bp")) {
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
+  if (length(dplyr::group_vars(.x)) > 1) {
+    stop("jackknife_pop_tajimas_d only works with one grouping variable")
+  }
   type <- match.arg(type)
   size_unit <- match.arg(size_unit)
 

@@ -53,6 +53,15 @@ test_that("jackknife_pop_tajimas_d returns the right format", {
   )
 })
 
+test_that("jackknife_pop_tajimas_d only accepts one grouping variable", {
+  test_gt <- make_jack_test_gt() %>%
+    dplyr::group_by(population, id)
+  expect_error(
+    jackknife_pop_tajimas_d(test_gt, block_size = 2),
+    "jackknife_pop_tajimas_d only works with one grouping variable"
+  )
+})
+
 test_that("jackknife_pop_tajimas_d counts pseudohaploid allele copies", {
   pseudohaploid_genotypes <- rbind(
     c(0, 2, NA),
