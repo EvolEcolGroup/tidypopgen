@@ -201,9 +201,49 @@ loci_pi.grouped_df <- function(
     stop("loci_pi only works with one grouping variable")
   }
 
-  geno_fbm <- .gt_get_fbm(.x)
+  # compute pi (and the number of valid allele copies) for each group
+  pi_mat <- .loci_pi_n(
+    .x$genotypes,
+    group_ids = dplyr::group_indices(.x) - 1,
+    n_groups = max(dplyr::group_indices(.x)),
+    n_cores = n_cores,
+    block_size = block_size
+  )$pi
+
+  pi_mat <- format_grouped_output(
+    out_mat = pi_mat,
+    group_ids = dplyr::group_keys(.x) %>% pull(1),
+    loci_names = loci_names(.x),
+    type = type
+  )
+  return(pi_mat)
+}
+
+#' Estimate pi and the number of valid allele copies at each locus by group
+#'
+#' Internal function that computes nucleotide diversity (pi) at each locus for
+#' each group of individuals, together with the number of non-missing allele
+#' copies (`n`) used to estimate pi at that locus. Pi is `NA` when a group has
+#' fewer than 2 valid allele copies at a locus. Ungrouped data can be handled
+#' by assigning all individuals to a single group (i.e. `group_ids` set to 0
+#' for all individuals, and `n_groups = 1`).
+#'
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column
+#'   of a [`gen_tibble`] object).
+#' @param group_ids a vector of 0-based group indices, one per individual in
+#'   `.x`.
+#' @param n_groups the number of groups.
+#' @param n_cores number of cores to be used.
+#' @param block_size maximum number of loci read at once.
+#' @returns a list with two matrices with one row per locus and one column per
+#'   group: `pi`, the nucleotide diversity, and `n`, the number of valid
+#'   allele copies.
+#' @keywords internal
+#' @noRd
+.loci_pi_n <- function(.x, group_ids, n_groups, n_cores, block_size) {
+  geno_fbm <- attr(.x, "fbm")
   # rows (individuals) that we want to use
-  rows_to_keep <- .gt_fbm_rows(.x)
+  rows_to_keep <- vctrs::vec_data(.x)
 
   # Keep the common diploid case on the ploidy-free kernel. Pseudohaploid
   # samples retain 0/2 dosage storage despite contributing one allele, so
@@ -215,16 +255,18 @@ loci_pi.grouped_df <- function(
         BM = BM,
         rowInd = rows_to_keep,
         colInd = ind,
-        groupIds = dplyr::group_indices(.x) - 1,
-        ngroups = max(dplyr::group_indices(.x)),
+        groupIds = group_ids,
+        ngroups = n_groups,
         ncores = n_cores
-      )$pi
+      )
+      # bind pi and n so that they can be combined across blocks of loci
+      cbind(freq_mat$pi, freq_mat$n)
     } # nolint end
-    pi_mat <- bigstatsr::big_apply(
+    pi_n_mat <- bigstatsr::big_apply(
       geno_fbm,
       a.FUN = gt_group_pi_sub,
       rows_to_keep = rows_to_keep,
-      ind = show_loci(.x)$big_index,
+      ind = attr(.x, "loci")$big_index,
       ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
       # in the cpp code
       block.size = block_size,
@@ -238,18 +280,20 @@ loci_pi.grouped_df <- function(
         BM = BM,
         rowInd = rows_to_keep,
         colInd = ind,
-        groupIds = dplyr::group_indices(.x) - 1,
-        ngroups = max(dplyr::group_indices(.x)),
+        groupIds = group_ids,
+        ngroups = n_groups,
         ploidy = ploidy,
         is_pseudohaploid = is_pseudohaploid(.x),
         ncores = n_cores
-      )$pi
+      )
+      # bind pi and n so that they can be combined across blocks of loci
+      cbind(freq_mat$pi, freq_mat$n)
     } # nolint end
-    pi_mat <- bigstatsr::big_apply(
+    pi_n_mat <- bigstatsr::big_apply(
       geno_fbm,
       a.FUN = gt_group_pi_sub_poly,
       rows_to_keep = rows_to_keep,
-      ind = show_loci(.x)$big_index,
+      ind = attr(.x, "loci")$big_index,
       ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
       # in the cpp code
       block.size = block_size,
@@ -257,12 +301,9 @@ loci_pi.grouped_df <- function(
       ploidy = ploidy
     )
   }
-
-  pi_mat <- format_grouped_output(
-    out_mat = pi_mat,
-    group_ids = dplyr::group_keys(.x) %>% pull(1),
-    loci_names = loci_names(.x),
-    type = type
+  # split the combined matrix back into pi and n
+  list(
+    pi = pi_n_mat[, seq_len(n_groups), drop = FALSE],
+    n = pi_n_mat[, n_groups + seq_len(n_groups), drop = FALSE]
   )
-  return(pi_mat)
 }

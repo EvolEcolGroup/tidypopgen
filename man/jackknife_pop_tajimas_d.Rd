@@ -54,11 +54,16 @@ The genome is divided into non-overlapping blocks, which never span
 more than one chromosome, and Tajima's D is recomputed leaving out one
 block at a time. The standard error is computed with the weighted delete-m
 jackknife of Busing et al. (1999), where each block is weighted by the
-number of loci it contains. Tajima's D is a function of the sum of the per
-locus nucleotide diversity and of the number of segregating sites, so
-leaving out a block is achieved by subtracting its sums, without having to
-rescan the genotypes. Loci with missing nucleotide diversity are ignored.
-See \code{\link[=jackknife_stats_generic]{jackknife_stats_generic()}} for details.
+number of loci it contains. Tajima's D is a function of sums across loci
+(of the nucleotide diversity, the number of segregating sites, and
+quantities that depend on the sample size of each locus), so leaving out
+a block is achieved by subtracting its sums, without having to rescan the
+genotypes. See \code{\link[=jackknife_stats_generic]{jackknife_stats_generic()}} for details.
+
+Missing genotypes are accounted for by using the number of non-missing
+allele copies at each locus as its sample size, following Bailey et al.
+(2025) as implemented in \code{pixy}. See \code{\link[=pop_tajimas_d]{pop_tajimas_d()}} for details. Loci
+with no genotyped individuals are ignored.
 }
 \examples{
 example_gt <- load_example_gt("grouped_gen_tbl")
@@ -74,4 +79,9 @@ example_gt \%>\%
 \references{
 Busing FMTA, Meijer E, Van Der Leeden R (1999) Delete-m
 jackknife for unequal m. Statistics and Computing 9:3-8.
+
+Bailey N, Stevison L, Samuk K (2025) Correcting for bias in estimates of
+\eqn{\theta_W} and Tajima's D from missing data in next-generation
+sequencing. Molecular Ecology Resources, e14104.
+\doi{10.1111/1755-0998.14104}
 }

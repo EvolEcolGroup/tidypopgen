@@ -21,19 +21,24 @@
   if (!is.numeric(block_size) || length(block_size) != 1 || block_size <= 0) {
     stop("block_size must be a single positive number.")
   }
-  chrom <- loci_table$chromosome
+  # integer index for each chromosome (we avoid creating character vectors
+  # with one element per locus, as they are very large for big datasets)
+  chrom_idx <- match(loci_table$chromosome, unique(loci_table$chromosome))
   # block id within each chromosome
   if (size_unit == "snp") {
     # count the snps within each chromosome
-    snp_idx <- stats::ave(seq_along(chrom), chrom, FUN = seq_along)
+    snp_idx <- stats::ave(seq_along(chrom_idx), chrom_idx, FUN = seq_along)
     local_id <- ceiling(snp_idx / block_size)
   } else if (size_unit == "bp") {
     local_id <- floor(loci_table$position / block_size)
   } else if (size_unit == "cM") {
     local_id <- floor(loci_table$genetic_dist / block_size)
   }
-  # combine chromosome and local block id into a global id
-  block_key <- paste(chrom, local_id, sep = "_")
+  # combine chromosome and local block id into a single numeric key (local
+  # ids are shifted to start from 0, so that keys are unique across
+  # chromosomes), and number the blocks in order of appearance
+  local_id <- local_id - min(local_id)
+  block_key <- chrom_idx * (max(local_id) + 1) + local_id
   match(block_key, unique(block_key))
 }
 
@@ -48,13 +53,20 @@
 #' @keywords internal
 #' @noRd
 .block_sums <- function(mat, block_id) {
-  mat <- as.matrix(mat)
-  # remove all attributes other than dim (e.g. matrix_int_names)
-  mat <- matrix(as.numeric(mat), nrow = nrow(mat), ncol = ncol(mat))
-  list(
-    sums = rowsum(mat, block_id, na.rm = TRUE, reorder = TRUE),
-    n = rowsum((!is.na(mat)) * 1, block_id, reorder = TRUE)
+  # remove all attributes other than dim (e.g. names of the loci, or
+  # matrix_int_names), only keeping the column names (one per statistic); we
+  # avoid as.matrix(), which would copy the names of a vector as row names
+  mat <- matrix(as.numeric(mat),
+    nrow = NROW(mat), ncol = NCOL(mat),
+    dimnames = list(NULL, colnames(mat))
   )
+  sums <- rowsum(mat, block_id, na.rm = TRUE, reorder = TRUE)
+  n <- rowsum((!is.na(mat)) * 1, block_id, reorder = TRUE)
+  # rowsum() names the rows with the block ids (as characters), which we drop
+  # (rows are in the order of the block ids)
+  rownames(sums) <- NULL
+  rownames(n) <- NULL
+  list(sums = sums, n = n)
 }
 
 #' Weighted block jackknife

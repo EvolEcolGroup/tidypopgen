@@ -54,10 +54,30 @@ be used on sequence data prior to filtering.
 \details{
 Nucleotide diversity is estimated at each locus with \code{\link[=loci_pi]{loci_pi()}}, so this
 function works with diploid, polyploid, mixed-ploidy and pseudohaploid data.
-The sample size is the total number of allele copies sampled (i.e. the sum
-of the ploidy of the individuals, with pseudohaploids contributing one
-copy each). Loci with missing nucleotide diversity (e.g. loci with no
-genotyped individuals) are ignored.
+
+Missing genotypes are accounted for following Bailey et al. (2025), as
+implemented in \code{pixy}: the sample size \eqn{n_x} at each locus \eqn{x} is
+the number of non-missing allele copies at that locus (i.e. the sum of the
+ploidy of the genotyped individuals, with pseudohaploids contributing one
+copy each). The two estimators of \eqn{\theta} are then:
+\itemize{
+\item \eqn{\hat{\theta}_\pi = \sum_x \pi_x}, where \eqn{\pi_x} is
+the nucleotide diversity at locus \eqn{x}, estimated from its
+\eqn{n_x} allele copies (loci with fewer than 2 allele copies
+contribute 0);
+\item \eqn{\hat{\theta}_W = \sum_x 1 / a_{n_x}}, summed over the
+segregating sites, where \eqn{a_{n_x} = \sum_{i=1}^{n_x - 1} 1/i} (i.e.
+each segregating site is weighted by its own sample size).
+}
+The standard deviation of \eqn{\hat{\theta}_\pi - \hat{\theta}_W} is
+computed with the formula of Tajima (1989), using the number of
+segregating sites \eqn{S} and the mean sample size across loci with at
+least one non-missing allele copy (rounded to the nearest integer, as the
+formula is only defined for integer sample sizes). When there are no
+missing data, all loci have the same sample size and the statistic is
+identical to the classic Tajima's D. Loci with no genotyped individuals
+are ignored. Tajima's D is \code{NA} when there are no segregating sites, or
+when the mean sample size is smaller than 2.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
@@ -71,4 +91,13 @@ example_gt <- load_example_gt("grouped_gen_tbl")
 # Compute Tajima's D
 example_gt \%>\% pop_tajimas_d()
 \dontshow{\}) # examplesIf}
+}
+\references{
+Tajima F (1989) Statistical method for testing the neutral
+mutation hypothesis by DNA polymorphism. Genetics 123:585-595.
+
+Bailey N, Stevison L, Samuk K (2025) Correcting for bias in estimates of
+\eqn{\theta_W} and Tajima's D from missing data in next-generation
+sequencing. Molecular Ecology Resources, e14104.
+\doi{10.1111/1755-0998.14104}
 }

@@ -178,11 +178,18 @@ test_that("windows_pop_tajimas_d counts pseudohaploid allele copies", {
     step_size = 3
   )
   pi_by_group <- loci_pi(pseudohaploid_gt, type = "list")
-  ploidy_by_group <- pseudohaploid_gt %>%
-    dplyr::summarise(n = sum(indiv_ploidy(genotypes))) %>%
-    dplyr::pull(.data$n)
+  # number of valid allele copies at each locus for each group (pseudohaploids
+  # contribute one copy, diploids two)
+  ploidy <- indiv_ploidy(pseudohaploid_gt)
+  n_by_group <- lapply(
+    split(seq_along(ploidy), pseudohaploid_meta$population),
+    function(rows) {
+      valid <- !is.na(pseudohaploid_genotypes[rows, , drop = FALSE])
+      colSums(valid * ploidy[rows])
+    }
+  )
 
-  expected <- Map(tajimas_d_from_pi_vec, pi_by_group, ploidy_by_group)
+  expected <- Map(tajimas_d_from_pi_vec, pi_by_group, n_by_group)
   expect_equal(
     unname(vapply(window_tajimas_d, function(x) x$stat[1], numeric(1))),
     unname(unlist(expected))

@@ -7,14 +7,24 @@
 #'   more than one chromosome, and Tajima's D is recomputed leaving out one
 #'   block at a time. The standard error is computed with the weighted delete-m
 #'   jackknife of Busing et al. (1999), where each block is weighted by the
-#'   number of loci it contains. Tajima's D is a function of the sum of the per
-#'   locus nucleotide diversity and of the number of segregating sites, so
-#'   leaving out a block is achieved by subtracting its sums, without having to
-#'   rescan the genotypes. Loci with missing nucleotide diversity are ignored.
-#'   See [jackknife_stats_generic()] for details.
+#'   number of loci it contains. Tajima's D is a function of sums across loci
+#'   (of the nucleotide diversity, the number of segregating sites, and
+#'   quantities that depend on the sample size of each locus), so leaving out
+#'   a block is achieved by subtracting its sums, without having to rescan the
+#'   genotypes. See [jackknife_stats_generic()] for details.
+#'
+#'   Missing genotypes are accounted for by using the number of non-missing
+#'   allele copies at each locus as its sample size, following Bailey et al.
+#'   (2025) as implemented in `pixy`. See [pop_tajimas_d()] for details. Loci
+#'   with no genotyped individuals are ignored.
 #'
 #' @references Busing FMTA, Meijer E, Van Der Leeden R (1999) Delete-m
 #'   jackknife for unequal m. Statistics and Computing 9:3-8.
+#'
+#'   Bailey N, Stevison L, Samuk K (2025) Correcting for bias in estimates of
+#'   \eqn{\theta_W} and Tajima's D from missing data in next-generation
+#'   sequencing. Molecular Ecology Resources, e14104.
+#'   \doi{10.1111/1755-0998.14104}
 #' @param .x a (potentially grouped) `gen_tibble` object
 #' @param type type of object to return, if using grouped method. One of
 #'   "matrix", "tidy", or "list". Default is "matrix".
@@ -66,37 +76,29 @@ jackknife_pop_tajimas_d <- function(.x,
     block_size = block_size,
     size_unit = size_unit
   )
-  # get the number of sampled allele copies for each group
-  n <- .n_allele_copies(.x)
-  # get the pi for each locus (if it x is grouped, it will be a list)
-  pi_by_locus <- loci_pi(.x, type = "list")
-
-  # recast pi_by_locus as a list of one for just a population
-  if (!inherits(pi_by_locus, "list")) {
-    pi_by_locus <- list(pi_by_locus)
-  }
+  # get pi and the number of valid allele copies for each locus (one column
+  # per group)
+  pi_n <- .pi_n_by_group(.x)
 
   res <- list()
   # now we can loop around each population to compute the jackknife
-  for (i_grp in seq_along(pi_by_locus)) {
-    pi <- pi_by_locus[[i_grp]]
-    # sum pi and count segregating sites within each block
-    seg <- ifelse(is.na(pi), NA, pi > 0.0 & pi < 1.0)
-    pi_blocks <- .block_sums(pi, block_id)
-    seg_blocks <- .block_sums(seg, block_id)
-    k_tot <- sum(pi_blocks$sums)
-    seg_tot <- sum(seg_blocks$sums)
+  for (i_grp in seq_len(ncol(pi_n$pi))) {
+    # get the quantities needed to compute tajimas d at each locus
+    locus_terms <- tajimas_d_locus_terms(pi_n$pi[, i_grp], pi_n$n[, i_grp])
+    # sum each of these quantities within each block
+    term_blocks <- .block_sums(locus_terms, block_id)
+    # sum across all loci, and leaving out each block in turn
+    term_tot <- colSums(term_blocks$sums)
+    term_loo <- rep_rows(term_tot, nrow(term_blocks$sums)) - term_blocks$sums
+    colnames(term_loo) <- colnames(locus_terms)
     # Tajima's D on all loci, and leaving out each block in turn
-    taj_full <- tajimas_d_from_sums(k_hat = k_tot, seg = seg_tot, n = n[i_grp])
-    taj_loo <- tajimas_d_from_sums(
-      k_hat = k_tot - pi_blocks$sums,
-      seg = seg_tot - seg_blocks$sums,
-      n = n[i_grp]
-    )
+    taj_full <- tajimas_d_from_term_sums(term_tot)
+    taj_loo <- tajimas_d_from_term_sums(term_loo)
     res[[i_grp]] <- .jackknife_weighted(
       theta_full = taj_full,
       theta_loo = taj_loo,
-      m = pi_blocks$n
+      # the number of loci with valid pi in each block
+      m = term_blocks$n[, 1, drop = FALSE]
     )
   }
   if (length(res) == 1) { # if we only have one pop, return a data.frame

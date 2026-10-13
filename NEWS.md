@@ -20,6 +20,14 @@
 * `pop_tajimas_d()` now works with polyploid and pseudohaploid data.
 * `pop_tajimas_d()` and `windows_pop_tajimas_d()` now ignore loci with missing
   nucleotide diversity, instead of returning `NA`.
+* `pop_tajimas_d()`, `windows_pop_tajimas_d()` and `jackknife_pop_tajimas_d()`
+  now account for missing genotypes by using the number of non-missing allele
+  copies at each locus as its sample size, rather than the total number of
+  allele copies in the sample. This follows Bailey et al. (2025), and results
+  match those of `pixy` (version 2.2.4). Results will differ from previous
+  versions when data contain missing genotypes. Loci where a single
+  heterozygous diploid is genotyped are now correctly counted as segregating
+  sites.
 
 # tidypopgen 0.4.4
 * fix seed argument of `gt_admixture()`

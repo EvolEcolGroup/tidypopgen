@@ -80,3 +80,25 @@ test_that(".jackknife_weighted follows Busing et al. for unequal m", {
   jack_one <- .jackknife_weighted(1, matrix(1), matrix(3))
   expect_true(is.na(jack_one$se))
 })
+
+test_that(".block_sums does not create row names", {
+  test_gt <- make_jack_test_gt()
+  block_id <- .jackknife_block_ids(show_loci(test_gt),
+    block_size = 2, size_unit = "snp"
+  )
+  # a named vector of per locus values (e.g. with loci names)
+  x <- stats::setNames(
+    c(0.1, 0.4, NA, 0.3, 0.2, 0.6, 0.5, 0.1),
+    loci_names(test_gt)
+  )
+  x_blocks <- .block_sums(x, block_id)
+  expect_null(rownames(x_blocks$sums))
+  expect_null(colnames(x_blocks$sums))
+  expect_null(rownames(x_blocks$n))
+  expect_equal(as.vector(x_blocks$sums), c(0.5, 0, 0.5, 1.1, 0.1))
+  expect_equal(as.vector(x_blocks$n), c(2, 0, 2, 2, 1))
+  # only the column names (one per statistic) are kept for matrices
+  fst_blocks <- .jackknife_fst_blocks(test_gt, "Hudson", block_id)
+  expect_null(rownames(fst_blocks$loo))
+  expect_null(rownames(fst_blocks$m))
+})
