@@ -29,7 +29,10 @@
 #'   being dropped), `to_flip` (loci that need to be flipped to align the two
 #'   datasets, only found in `target` data.frame) and `to_swap` (loci for which
 #'   the order of alleles needs to be swapped to align the two datasets,
-#'   `target` data.frame)
+#'   `target` data.frame). Loci with one unobserved allele (NA) have it
+#'   inferred from the other dataset where possible: `missing_allele` gives the
+#'   inferred allele, and `missing_allele_col` the column it fills
+#'   (`allele_alt` or `allele_ref`); both are NA if nothing was inferred.
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
@@ -166,19 +169,15 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
   # we now have two data.frames with the same loci and in the same order
   stopifnot(all.equal(target_sub$name, ref_sub$name))
 
-  # fix any missing alleles
-  target_sub$missing_allele <-
-    resolve_missing_alleles(missing_table = target_sub, other_table = ref_sub)
-  target_missing_to_fix <-
-    target_sub$allele_1 == "0" & !is.na(target_sub$missing_allele)
-  target_sub$allele_1[target_missing_to_fix] <-
-    target_sub$missing_allele[target_missing_to_fix]
-  ref_sub$missing_allele <-
-    resolve_missing_alleles(missing_table = ref_sub, other_table = target_sub)
-  ref_missing_to_fix <-
-    ref_sub$allele_1 == "0" & !is.na(ref_sub$missing_allele)
-  ref_sub$allele_1[ref_missing_to_fix] <-
-    ref_sub$missing_allele[ref_missing_to_fix]
+  # fix any missing alleles (the gap can be in either allele column)
+  target_sub <- fill_missing_alleles(
+    missing_table = target_sub,
+    other_table = ref_sub
+  )
+  ref_sub <- fill_missing_alleles(
+    missing_table = ref_sub,
+    other_table = target_sub
+  )
 
   # preliminary list of alleles to keep based on whether alleles are correct
   # (irrespective of order, we will deal with that later)
@@ -221,10 +220,13 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
     new_id = match(ref_df$name, ref_sub$name[to_keep_flip]),
     name = ref_df$name,
     missing_allele = NA,
+    missing_allele_col = NA,
     ambiguous = ambiguous(ref_df)
   )
   ref_report$missing_allele[match(ref_sub$name, ref_df$name)] <-
     ref_sub$missing_allele
+  ref_report$missing_allele_col[match(ref_sub$name, ref_df$name)] <-
+    allele_col_names(ref_sub$missing_allele_col)
   # and now one for target
   target_report <- data.frame(
     id = target_df$id,
@@ -233,6 +235,7 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
     to_flip = FALSE,
     to_swap = FALSE,
     missing_allele = NA,
+    missing_allele_col = NA,
     ambiguous = ambiguous(target_df)
   )
 
@@ -243,6 +246,9 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
     TRUE
   target_report$missing_allele[match(target_sub$name, target_report$name)] <-
     target_sub$missing_allele
+  target_report$missing_allele_col[
+    match(target_sub$name, target_report$name)
+  ] <- allele_col_names(target_sub$missing_allele_col)
 
   report <- list(target = target_report, ref = ref_report)
   class(report) <- c("rbind_report", class(report))
@@ -255,28 +261,72 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
 }
 
 
+# Infer the unobserved allele of each locus in missing_table from the alleles
+# of the same locus in other_table (the two tables must have the same loci in
+# the same order). Missing alleles are coded as "0", and can be in either
+# allele_1 or allele_2. A locus can only be resolved if exactly one of its
+# alleles is missing, and both alleles are known in other_table.
+# Returns a list with the inferred allele (`allele`) and the column it belongs
+# to (`col`, either "allele_1" or "allele_2"); both are NA for loci that were
+# not resolved.
 resolve_missing_alleles <- function(missing_table, other_table) {
-  missing_replacements <- rep(NA, nrow(missing_table))
-  for (i_row in which(missing_table$allele_1 == "0")) {
-    # get non-missing allele
-    known_allele <- missing_table[i_row, "allele_2"]
-    other_alleles <- unlist(other_table[i_row, c("allele_1", "allele_2")])
+  missing_replacements <- rep(NA_character_, nrow(missing_table))
+  missing_cols <- rep(NA_character_, nrow(missing_table))
+  one_missing <- xor(
+    missing_table$allele_1 == "0",
+    missing_table$allele_2 == "0"
+  )
+  for (i_row in which(one_missing)) {
+    # get the non-missing allele, and record which column is missing
+    if (missing_table$allele_1[i_row] == "0") {
+      missing_col <- "allele_1"
+      known_allele <- missing_table$allele_2[i_row]
+    } else {
+      missing_col <- "allele_2"
+      known_allele <- missing_table$allele_1[i_row]
+    }
+    other_alleles <- c(other_table$allele_1[i_row], other_table$allele_2[i_row])
     # as long as we don't have a missing allele in the other table as well
-    if (other_alleles[1] != "0") {
+    # (if so, there is nothing to infer it from)
+    if (all(other_alleles != "0")) {
       if (known_allele %in% other_alleles) {
         missing_replacements[i_row] <-
           other_alleles[!other_alleles %in% known_allele]
+        missing_cols[i_row] <- missing_col
       } else if (known_allele %in% flip(other_alleles)) {
         missing_replacements[i_row] <-
           flip(other_alleles)[!flip(other_alleles) %in% known_allele]
+        missing_cols[i_row] <- missing_col
       }
     }
-    # if both datasets have missing alleles
-    # we don't need to do anything
-    # if (known_allele %in% other_allele | known_allele %in% flip(other_allele))
-    # but what do we do if they don't match? Arguably just ditch the locus
+    # if the known allele matches neither strand of the other dataset, we
+    # leave the gap, and the locus will be dropped as mismatched
   }
-  return(missing_replacements) # nolint
+  return(list(allele = missing_replacements, col = missing_cols)) # nolint
+}
+
+# Resolve the missing alleles in missing_table using other_table, fill them in
+# the appropriate allele column, and record them in the columns
+# missing_allele and missing_allele_col
+fill_missing_alleles <- function(missing_table, other_table) {
+  resolved <- resolve_missing_alleles(
+    missing_table = missing_table,
+    other_table = other_table
+  )
+  for (allele_col in c("allele_1", "allele_2")) {
+    to_fix <- resolved$col %in% allele_col
+    missing_table[[allele_col]][to_fix] <- resolved$allele[to_fix]
+  }
+  missing_table$missing_allele <- resolved$allele
+  missing_table$missing_allele_col <- resolved$col
+  return(missing_table) # nolint
+}
+
+# Translate the internal allele column names into those used in the loci
+# table (allele_1 is allele_alt and allele_2 is allele_ref, see
+# rbind_dry_run())
+allele_col_names <- function(cols) {
+  unname(c(allele_1 = "allele_alt", allele_2 = "allele_ref")[cols])
 }
 
 
