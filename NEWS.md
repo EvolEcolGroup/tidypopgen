@@ -10,6 +10,13 @@
 * `gt_as_hierfstat()`, `gt_as_geno_lea()` and `gt_as_plink()` now error clearly
   on polyploid data, as `hierfstat`, LEA's `.geno` format and PLINK's bed/ped/
   raw formats only support haploid or diploid data.
+* add `jackknife_*` functions (`jackknife_pairwise_pop_fst()`,
+  `jackknife_nwise_pop_pbs()`, `jackknife_pop_tajimas_d()` and
+  `jackknife_stats_generic()`) to estimate genome-wide statistics with
+  standard errors from a weighted block jackknife, with blocks defined in
+  SNPs, centiMorgans or base pairs.
+* fix `windows_pairwise_pop_fst()` (and thus `windows_nwise_pop_pbs()`)
+  ignoring the `method` argument and always using "Hudson".
 
 # tidypopgen 0.4.4
 * fix seed argument of `gt_admixture()`

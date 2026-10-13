@@ -61,7 +61,7 @@ windows_pairwise_pop_fst <- function(.x,
 
   # create the pairwise Fst by locus, saving numerator and denominator
   pair_fst <- pairwise_pop_fst(.x,
-    method = "Hudson", return_num_dem = TRUE,
+    method = method, return_num_dem = TRUE,
     by_locus = TRUE
   )
 
@@ -108,7 +108,7 @@ windows_pairwise_pop_fst <- function(.x,
   if (type == "matrix") {
     return(res)
   } else if (type == "tidy") {
-    cols <- names(res)[names(res) != c("chromosome", "start", "end")]
+    cols <- names(res)[!names(res) %in% c("chromosome", "start", "end")]
     res <-
       res %>% tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(res)

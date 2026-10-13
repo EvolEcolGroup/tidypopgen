@@ -66,15 +66,8 @@ windows_pop_tajimas_d <- function(.x,
   stopifnot_gen_tibble(.x)
   type <- match.arg(type)
 
-  # Get the number of sampled allele copies for each group. Pseudohaploid
-  # genotypes are stored as 0/2 dosages but contribute one allele per sample.
-  if (inherits(.x, "grouped_gen_tbl")) {
-    n <- .x %>%
-      dplyr::summarise(n = sum(indiv_ploidy(.data$genotypes))) %>%
-      dplyr::pull(.data$n)
-  } else {
-    n <- sum(indiv_ploidy(.x))
-  }
+  # get the number of sampled allele copies for each group
+  n <- .n_allele_copies(.x)
   # get the pi for each locus (if it x is grouped, it will be a list)
   pi_by_locus <- loci_pi(.x, type = "list")
 
@@ -117,5 +110,18 @@ windows_pop_tajimas_d <- function(.x,
     return(res)
   } else if (type == "list") {
     return(res)
+  }
+}
+
+# Get the number of sampled allele copies for each group (or for the whole
+# gen_tibble if it is not grouped). Pseudohaploid genotypes are stored as 0/2
+# dosages but contribute one allele per sample.
+.n_allele_copies <- function(.x) {
+  if (inherits(.x, "grouped_gen_tbl")) {
+    .x %>%
+      dplyr::summarise(n = sum(indiv_ploidy(.data$genotypes))) %>%
+      dplyr::pull(.data$n)
+  } else {
+    sum(indiv_ploidy(.x))
   }
 }

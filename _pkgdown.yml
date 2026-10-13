@@ -89,6 +89,10 @@ reference:
     desc: "Functions to compute statistics in sliding windows across loci."
     contents:
         - starts_with("windows_")
+  - title: "Jackknife"
+    desc: "Functions to compute genome-wide statistics with block jackknife standard errors."
+    contents:
+        - starts_with("jackknife_")
   - title: "PCA"
     desc: "Functions for performing Principal Component Analysis."
     contents:
