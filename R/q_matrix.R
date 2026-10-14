@@ -386,11 +386,12 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #'   metadata of the `gt_admixt` object is a factor, the data will be ordered by
 #'   the levels of the factor; else it will be ordered alphabetically.
 #' @param arrange_by_indiv Boolean determining whether to arrange the
-#'   individuals by their individual id (if arrange_by_group is TRUE, they will
-#'   be arranged by group first and then by individual id, i.e. within each
-#'   group). If `id` in the `get_tibble` or the metadata of the `gt_admix`
-#'   object is a factor, it will be ordered by the levels of the factor; else it
-#'   will be ordered alphabetically.
+#'   individuals by their individual id within each group (groups are arranged
+#'   first if `arrange_by_group` is TRUE, otherwise they are kept in their
+#'   current order). This only applies if `annotate_group` is TRUE and group
+#'   information is available. If `id` in the `get_tibble` or the metadata of
+#'   the `gt_admix` object is a factor, it will be ordered by the levels of the
+#'   factor; else it will be ordered alphabetically.
 #' @param reorder_within_groups Boolean determining whether to reorder the
 #'   individuals within each group based on their ancestry proportion (note that
 #'   this is not advised if you are making multiple plots, as you would get a
@@ -459,7 +460,7 @@ autoplot.q_matrix <- function(
     q_tbl <- augment(object, data)
   }
   # if we have a grouping variable and we plan to use it, then reorder by it
-  q_tbl$id <- seq_len(nrow(q_tbl))
+  # (and by individual id within each group, if requested)
   if (("group" %in% names(q_tbl)) && annotate_group) {
     if (arrange_by_group && arrange_by_indiv) {
       q_tbl <- q_tbl %>%
@@ -468,8 +469,10 @@ autoplot.q_matrix <- function(
       q_tbl <- q_tbl %>%
         dplyr::arrange(.data$group)
     } else if (arrange_by_indiv) {
+      # keep groups in their current order (they must stay in consecutive
+      # blocks to be annotated), and sort individuals within each group
       q_tbl <- q_tbl %>%
-        dplyr::arrange(.data$group)
+        dplyr::arrange(fct_inorder_base(.data$group), .data$id)
     }
   }
   # now reset the id to the new order

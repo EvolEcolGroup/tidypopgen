@@ -30,11 +30,12 @@ metadata of the \code{gt_admixt} object is a factor, the data will be ordered by
 the levels of the factor; else it will be ordered alphabetically.}
 
 \item{arrange_by_indiv}{Boolean determining whether to arrange the
-individuals by their individual id (if arrange_by_group is TRUE, they will
-be arranged by group first and then by individual id, i.e. within each
-group). If \code{id} in the \code{get_tibble} or the metadata of the \code{gt_admix}
-object is a factor, it will be ordered by the levels of the factor; else it
-will be ordered alphabetically.}
+individuals by their individual id within each group (groups are arranged
+first if \code{arrange_by_group} is TRUE, otherwise they are kept in their
+current order). This only applies if \code{annotate_group} is TRUE and group
+information is available. If \code{id} in the \code{get_tibble} or the metadata of
+the \code{gt_admix} object is a factor, it will be ordered by the levels of the
+factor; else it will be ordered alphabetically.}
 
 \item{reorder_within_groups}{Boolean determining whether to reorder the
 individuals within each group based on their ancestry proportion (note that

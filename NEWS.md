@@ -1,6 +1,8 @@
 # tidypopgen 0.4.4
 * fix `reorder_within_groups` in `autoplot()` for `q_matrix` and `gt_admix`
   objects, which did not sort individuals by their dominant component
+* fix `arrange_by_indiv` in `autoplot()` for `q_matrix` and `gt_admix`
+  objects, which did not sort individuals by their id within each group
 * fix seed argument of `gt_admixture()`
 * implement our own upset plot function to avoid dependency on `UpSetR`
   package, which is no longer maintained
