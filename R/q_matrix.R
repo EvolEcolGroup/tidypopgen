@@ -495,16 +495,37 @@ autoplot.q_matrix <- function(
         )
       ) # nolint
 
-    dominant_q <- q_tbl %>%
-      dplyr::group_by(.data$id) %>%
-      dplyr::summarize(dominant_q = max(.data$percentage), .groups = "drop")
-
-    q_tbl <- q_tbl %>%
-      dplyr::left_join(dominant_q, by = "id")
-
-    q_tbl <- q_tbl %>%
+    # within each group, rank the components by their mean proportion
+    q_rank <- q_tbl %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(q = as.character(.data$q)) %>%
+      dplyr::group_by(.data$group, .data$q) %>%
+      dplyr::summarize(mean_q = mean(.data$percentage), .groups = "drop") %>%
       dplyr::group_by(.data$group) %>%
-      dplyr::arrange(desc(.data$dominant_q), .by_group = TRUE)
+      dplyr::mutate(q_rank = rank(-.data$mean_q, ties.method = "first")) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(-"mean_q")
+
+    # find the dominant component of each individual
+    dominant_q <- q_tbl %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(q = as.character(.data$q)) %>%
+      dplyr::group_by(.data$group, .data$id) %>%
+      dplyr::slice_max(.data$percentage, n = 1, with_ties = FALSE) %>%
+      dplyr::ungroup() %>%
+      dplyr::left_join(q_rank, by = c("group", "q")) %>%
+      dplyr::select("id", "q_rank", dominant_q = "percentage")
+
+    # sort individuals within each group by their dominant component (most
+    # common component in the group first), and then by the proportion of
+    # that component
+    q_tbl <- q_tbl %>%
+      dplyr::left_join(dominant_q, by = "id") %>%
+      dplyr::group_by(.data$group) %>%
+      dplyr::arrange(
+        .data$q_rank, dplyr::desc(.data$dominant_q),
+        .by_group = TRUE
+      )
   }
 
   levels_q <- unique(q_tbl$id)

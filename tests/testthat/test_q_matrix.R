@@ -193,3 +193,33 @@ if (rlang::is_installed("readr")) {
     expect_equal(augment_q$id, anole_gt$id)
   })
 }
+
+test_that("reorder_within_groups sorts individuals by dominant component", {
+  admix_obj <-
+    readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+      package = "tidypopgen"
+    ))
+  q_mat <- get_q_matrix(admix_obj, k = 3, run = 1)
+  plt <- autoplot(q_mat, reorder_within_groups = TRUE)
+  ind_tbl <- plt$data %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(q = as.character(.data$q)) %>%
+    dplyr::group_by(.data$group, .data$id) %>%
+    dplyr::slice_max(.data$percentage, n = 1, with_ties = FALSE) %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(.data$id)
+  for (this_group in unique(ind_tbl$group)) {
+    group_tbl <- ind_tbl %>% dplyr::filter(.data$group == this_group)
+    # individuals with the same dominant component are contiguous
+    expect_equal(
+      length(rle(group_tbl$q)$values),
+      length(unique(group_tbl$q))
+    )
+    # within each block, individuals are sorted by decreasing proportion
+    for (this_q in unique(group_tbl$q)) {
+      expect_false(is.unsorted(
+        rev(group_tbl$percentage[group_tbl$q == this_q])
+      ))
+    }
+  }
+})
