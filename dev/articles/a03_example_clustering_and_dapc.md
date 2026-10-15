@@ -767,8 +767,9 @@ head(anole_gt_adm)
 #> Dimension:     XY
 #> Bounding box:  xmin: -65.3576 ymin: -23.7564 xmax: -46.0247 ymax: -3.3228
 #> Geodetic CRS:  WGS 84
-#> # A tibble: 6 × 43
-#> # Groups:   population [2]
+#> # A gen_tibble: 3249 loci
+#> # A tibble:     6 × 43
+#> # Groups:       population [2]
 #>   id     genotypes population longitude latitude pop              geometry
 #>   <chr>  <vctr_SN> <chr>          <dbl>    <dbl> <chr>         <POINT [°]>
 #> 1 punc_… [0,0,...] Amazonian…     -51.8    -3.32 Eam    (-51.8448 -3.3228)
