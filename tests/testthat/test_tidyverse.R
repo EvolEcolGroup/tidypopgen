@@ -109,3 +109,55 @@ test_that("sf and grouped methods work", {
   gen_tbl_sf$region <- "East"
   expect_equal(class(gen_tbl_sf), class_before_sf_un)
 })
+
+test_that("$<- on grouping variables preserves grouped gen_tibble classes", {
+  grouped_gen_tbl <- load_example_gt("grouped_gen_tbl")
+  grouped_gen_tbl_sf <- load_example_gt("grouped_gen_tbl_sf")
+
+  # modify the grouping variable
+  class_before <- class(grouped_gen_tbl)
+  new_pops <- rev(grouped_gen_tbl$population)
+  grouped_gen_tbl$population <- new_pops
+  expect_equal(class(grouped_gen_tbl), class_before)
+  # groups are recomputed
+  expect_equal(group_vars(grouped_gen_tbl), "population")
+  expect_equal(
+    group_indices(grouped_gen_tbl),
+    as.integer(factor(new_pops))
+  )
+  # and we can still filter
+  filtered_group <- grouped_gen_tbl %>% filter(population == "pop1")
+  expect_equal(class(filtered_group), class_before)
+
+  # same with sf
+  class_before_sf <- class(grouped_gen_tbl_sf)
+  grouped_gen_tbl_sf$population <- rev(grouped_gen_tbl_sf$population)
+  expect_equal(class(grouped_gen_tbl_sf), class_before_sf)
+
+  # removing the grouping variable returns an ungrouped gen_tibble
+  grouped_gen_tbl$population <- NULL
+  expect_true(inherits(grouped_gen_tbl, "gen_tbl"))
+  expect_false(inherits(grouped_gen_tbl, "grouped_df"))
+  expect_false(inherits(grouped_gen_tbl, "grouped_gen_tbl"))
+
+  # removing the genotypes drops the gen_tbl classes
+  grouped_gen_tbl <- load_example_gt("grouped_gen_tbl")
+  grouped_gen_tbl$genotypes <- NULL
+  expect_false(inherits(grouped_gen_tbl, "gen_tbl"))
+  expect_false(inherits(grouped_gen_tbl, "grouped_gen_tbl"))
+  expect_true(inherits(grouped_gen_tbl, "grouped_df"))
+})
+
+test_that("$<- can remove the geometry from a gen_tibble with sf", {
+  gen_tbl_sf <- load_example_gt("gen_tbl_sf")
+  gen_tbl_sf$geometry <- NULL
+  expect_false(inherits(gen_tbl_sf, "sf"))
+  expect_false("geometry" %in% names(gen_tbl_sf))
+  expect_true(inherits(gen_tbl_sf, "gen_tbl"))
+
+  grouped_gen_tbl_sf <- load_example_gt("grouped_gen_tbl_sf")
+  grouped_gen_tbl_sf$geometry <- NULL
+  expect_false(inherits(grouped_gen_tbl_sf, "sf"))
+  expect_false("geometry" %in% names(grouped_gen_tbl_sf))
+  expect_true(inherits(grouped_gen_tbl_sf, "grouped_gen_tbl"))
+})

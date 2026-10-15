@@ -191,5 +191,13 @@ if (rlang::is_installed("readr")) {
     expect_true("group" %in% colnames(augment_q))
     expect_equal(augment_q$group, anole_gt$population)
     expect_equal(augment_q$id, anole_gt$id)
+    # the grouped class should be preserved
+    expect_equal(class(augment_q), class(anole_gt))
+    expect_equal(group_vars(augment_q), group_vars(anole_gt))
+    # and we should be able to filter the augmented gen_tibble
+    pop_to_keep <- unique(anole_gt$population)[1]
+    augment_sub <- augment_q %>% filter(population == pop_to_keep)
+    expect_equal(class(augment_sub), class(anole_gt))
+    expect_true(all(augment_sub$population == pop_to_keep))
   })
 }
