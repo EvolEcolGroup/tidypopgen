@@ -154,6 +154,173 @@ test_that("missing cases are given the correct alleles", {
   expect_true(miss_pop_a_flipped_swapped$to_flip)
 })
 
+# Loci with an unobserved allele ------------------------------------------
+#
+# A locus can carry an unobserved allele on either side of a merge, and the
+# gap can sit in either allele column: gen_tibble_bed() maps allele_ref to
+# the bim file's allele2 column and allele_alt to allele1, so a missing code
+# in either column of the source file can arrive in either column here.
+# When the other dataset has both alleles, the gap is inferred from them,
+# whichever column it is in. When both datasets have a gap, there is nothing
+# to infer it from, and the locus is kept (with its gap) only if the observed
+# alleles match. A gap must never be carried into the report as NA (which
+# propagates into the logical subscripting used downstream), nor filled with
+# the internal missing code "0".
+#
+# Note when extending this fixture: strand-ambiguous pairs (A/T, C/G) are
+# removed when flip_strand = TRUE, and that applies to the alleles *after*
+# any missing allele has been resolved from the other dataset. Every pair
+# below is chosen to be non-ambiguous post-resolution.
+
+unobs_indiv_ref <- data.frame(
+  id = c("a", "b", "c"), population = c("pop1", "pop1", "pop2")
+)
+unobs_indiv_tgt <- data.frame(
+  id = c("x", "y", "z"), population = c("pop3", "pop3", "pop4")
+)
+unobs_geno <- rbind(
+  c(1, 1, 0, 1, 1, 0, 0, 1),
+  c(2, 1, 0, 0, 0, 0, 1, 2),
+  c(2, 2, 0, 0, 1, 1, 2, 0)
+)
+unobs_base_loci <- data.frame(
+  name = paste0("rs", 1:8),
+  chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2, 2, 2)),
+  position = as.integer(c(3, 5, 65, 343, 23, 456, 500, 600)),
+  genetic_dist = as.double(rep(0, 8))
+)
+
+#        ref        target     expected
+# rs1    A/G        A/G        kept, matches as is
+# rs2    T/C        C/T        kept, needs swap
+# rs3    C/NA       C/T        kept, ref allele_alt resolved from target
+# rs4    NA/G       A/G        kept, ref allele_ref resolved from target
+# rs5    A/G        G/NA       kept, target allele_alt resolved, needs swap
+# rs6    T/C        A/G        kept, needs strand flip
+# rs7    NA/G       G/NA       kept, gaps on both sides cannot be resolved,
+#                              G is observed in both, needs swap
+# rs8    NA/C       NA/C       kept, gap on both sides cannot be resolved
+# (alleles are given as allele_ref/allele_alt)
+unobs_loci_ref <- cbind(unobs_base_loci, data.frame(
+  allele_ref = c("A", "T", "C", NA, "A", "T", NA, NA),
+  allele_alt = c("G", "C", NA, "G", "G", "C", "G", "C")
+))
+unobs_loci_tgt <- cbind(unobs_base_loci, data.frame(
+  allele_ref = c("A", "C", "C", "A", "G", "A", "G", NA),
+  allele_alt = c("G", "T", "T", "G", NA, "G", NA, "C")
+))
+
+unobs_gt_ref <- gen_tibble(
+  x = unobs_geno, loci = unobs_loci_ref, indiv_meta = unobs_indiv_ref,
+  valid_alleles = c("A", "T", "C", "G"), quiet = TRUE
+)
+unobs_gt_tgt <- gen_tibble(
+  x = unobs_geno, loci = unobs_loci_tgt, indiv_meta = unobs_indiv_tgt,
+  valid_alleles = c("A", "T", "C", "G"), quiet = TRUE
+)
+
+unobs_kept_loci <- paste0("rs", 1:8)
+
+
+test_that("an unobserved allele in either column does not error", {
+  # the gap sits in allele_ref for rs4 and in allele_alt for rs3 and rs5
+  expect_no_error(
+    rbind_dry_run(unobs_gt_ref, unobs_gt_tgt,
+      flip_strand = TRUE, quiet = TRUE
+    )
+  )
+  expect_no_error(
+    rbind_dry_run(unobs_gt_ref, unobs_gt_tgt,
+      flip_strand = FALSE, quiet = TRUE
+    )
+  )
+})
+
+test_that("unobserved alleles are never filled with the missing code", {
+  unobs_report <- rbind_dry_run(unobs_gt_ref, unobs_gt_tgt,
+    flip_strand = TRUE, quiet = TRUE
+  )
+  # rs7 has gaps in opposite columns on the two sides, which must not be used
+  # to "resolve" each other
+  for (side in c("target", "ref")) {
+    expect_false(any(unobs_report[[side]]$missing_allele %in% "0"))
+    rs7 <- unobs_report[[side]][unobs_report[[side]]$name == "rs7", ]
+    expect_true(is.na(rs7$missing_allele))
+    expect_true(is.na(rs7$missing_allele_col))
+  }
+})
+
+test_that("an unobserved allele_alt is resolved from the other dataset", {
+  unobs_report <- rbind_dry_run(unobs_gt_ref, unobs_gt_tgt,
+    flip_strand = TRUE, quiet = TRUE
+  )
+  # rs3's gap is on the reference side, rs5's on the target side
+  ref <- unobs_report$ref
+  tgt <- unobs_report$target
+  expect_equal(ref$missing_allele[ref$name == "rs3"], "T")
+  expect_equal(ref$missing_allele_col[ref$name == "rs3"], "allele_alt")
+  expect_equal(tgt$missing_allele[tgt$name == "rs5"], "A")
+  expect_equal(tgt$missing_allele_col[tgt$name == "rs5"], "allele_alt")
+  expect_false(is.na(tgt$new_id[tgt$name == "rs3"]))
+  expect_false(is.na(tgt$new_id[tgt$name == "rs5"]))
+})
+
+test_that("an unobserved allele_ref is resolved from the other dataset", {
+  # rs4 is NA/G in the reference and A/G in the target, so the missing
+  # allele_ref can only be A
+  for (flip_strand in c(TRUE, FALSE)) {
+    unobs_report <- rbind_dry_run(unobs_gt_ref, unobs_gt_tgt,
+      flip_strand = flip_strand, quiet = TRUE
+    )
+    ref <- unobs_report$ref
+    tgt <- unobs_report$target
+    expect_equal(ref$missing_allele[ref$name == "rs4"], "A")
+    expect_equal(ref$missing_allele_col[ref$name == "rs4"], "allele_ref")
+    expect_false(is.na(tgt$new_id[tgt$name == "rs4"]))
+    expect_false(tgt$to_flip[tgt$name == "rs4"])
+    expect_false(tgt$to_swap[tgt$name == "rs4"])
+  }
+})
+
+test_that("swaps and flips are still detected alongside unobserved alleles", {
+  unobs_report <- rbind_dry_run(unobs_gt_ref, unobs_gt_tgt,
+    flip_strand = TRUE, quiet = TRUE
+  )
+  tgt <- unobs_report$target
+  expect_setequal(tgt$name[tgt$to_swap], c("rs2", "rs5", "rs7"))
+  expect_setequal(tgt$name[tgt$to_flip], "rs6")
+  expect_setequal(tgt$name[!is.na(tgt$new_id)], unobs_kept_loci)
+})
+
+test_that("rbind of loci with unobserved alleles gives a complete object", {
+  merged <- rbind(unobs_gt_ref, unobs_gt_tgt,
+    flip_strand = TRUE, quiet = TRUE,
+    backingfile = tempfile("test_unobserved_allele_")
+  )
+  expect_equal(nrow(merged), nrow(unobs_gt_ref) + nrow(unobs_gt_tgt))
+  merged_loci <- show_loci(merged)
+  expect_equal(merged_loci$name, unobs_kept_loci)
+  # resolved gaps are filled in the right column; gaps that could not be
+  # resolved (rs7 and rs8) stay NA, and the missing code "0" never appears
+  expect_equal(
+    merged_loci$allele_ref,
+    c("A", "T", "C", "A", "A", "T", NA, NA)
+  )
+  expect_equal(
+    merged_loci$allele_alt,
+    c("G", "C", "T", "G", "G", "C", "G", "C")
+  )
+  # the target genotypes are recoded for the swapped loci (rs2, rs5, rs7)
+  swapped <- c(2, 5, 7)
+  expected_tgt_geno <- unobs_geno
+  expected_tgt_geno[, swapped] <- 2 - expected_tgt_geno[, swapped]
+  merged_geno <- show_genotypes(merged)
+  dimnames(merged_geno) <- NULL
+  expect_equal(merged_geno, rbind(unobs_geno, expected_tgt_geno))
+})
+
+
+
 #
 #
 # #reference file reordered

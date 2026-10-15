@@ -158,10 +158,12 @@ rbind.gen_tbl <- function(
   ###########
   # we start with the ref object
   # we fix the missing alleles
-  ## in the gt_table
-  id_missing <- which(!is.na(report$ref$missing_allele))
-  attr(ref$genotypes, "loci")$allele_alt[id_missing] <-
-    report$ref$missing_allele[id_missing]
+  ## in the gt_table, in whichever allele column was missing
+  for (allele_col in c("allele_alt", "allele_ref")) {
+    id_missing <- which(report$ref$missing_allele_col %in% allele_col)
+    attr(ref$genotypes, "loci")[[allele_col]][id_missing] <-
+      report$ref$missing_allele[id_missing]
+  }
   # now create a new loci table (we'll use it later)
   new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id, na.last = NA), ]
   # now we subset the SNP object
@@ -177,10 +179,12 @@ rbind.gen_tbl <- function(
   ###########
   # now we move to the target object
   # we fix the missing alleles
-  ## in the gt_table
-  id_missing <- which(!is.na(report$target$missing_allele))
-  attr(target$genotypes, "loci")$allele_alt[id_missing] <-
-    report$target$missing_allele[id_missing]
+  ## in the gt_table, in whichever allele column was missing
+  for (allele_col in c("allele_alt", "allele_ref")) {
+    id_missing <- which(report$target$missing_allele_col %in% allele_col)
+    attr(target$genotypes, "loci")[[allele_col]][id_missing] <-
+      report$target$missing_allele[id_missing]
+  }
   # now flip the strands
   ## in the gt_table
   to_flip <- report$target$to_flip

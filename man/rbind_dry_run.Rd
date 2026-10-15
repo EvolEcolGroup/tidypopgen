@@ -42,7 +42,10 @@ found in both datasets but with mismatched alleles, leading to those loci
 being dropped), \code{to_flip} (loci that need to be flipped to align the two
 datasets, only found in \code{target} data.frame) and \code{to_swap} (loci for which
 the order of alleles needs to be swapped to align the two datasets,
-\code{target} data.frame)
+\code{target} data.frame). Loci with one unobserved allele (NA) have it
+inferred from the other dataset where possible: \code{missing_allele} gives the
+inferred allele, and \code{missing_allele_col} the column it fills
+(\code{allele_alt} or \code{allele_ref}); both are NA if nothing was inferred.
 }
 \description{
 This function provides an overview of the fate of each SNP in two
