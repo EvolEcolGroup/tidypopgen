@@ -237,12 +237,23 @@ dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
   if (is.null(value) && inherits(x[[i]], "sfc") && ((is.character(i) && # nolint start
     i == attr(x, "sf_column")) || (is.integer(i) && names(x)[i] ==
     attr(x, "sf_column")))) { # nolint end
-    sf::st_set_geometry(x, NULL)
+    x <- sf::st_set_geometry(x, NULL)
   } else {
     x[[i]] <- value
     x
   }
   return(x)
+}
+
+# without this method, `$<-.grouped_df` from dplyr is dispatched before
+# `$<-.gen_tbl`, and it drops the `gen_tbl` class when a grouping variable
+# is modified
+#' @export
+#' @noRd
+"$<-.grouped_gen_tbl" <- function(x, i, value) {
+  # the `gen_tbl` method uses `[[<-`, which regroups the tibble and restores
+  # the appropriate classes
+  `$<-.gen_tbl`(x, i, value)
 }
 
 #' @export
@@ -322,7 +333,12 @@ ungroup.grouped_gen_tbl <- function(x, ...) {
 "[[<-.grouped_gen_tbl" <- function(x, i, value) {
   original_class <- class(x)
   x <- NextMethod()
-  class(x) <- original_class
+  if (inherits(x, "grouped_df")) {
+    class(x) <- original_class
+  } else {
+    # all grouping variables were removed, so the tibble is no longer grouped
+    class(x) <- original_class[!original_class %in% c("grouped_gen_tbl", "grouped_df")] # nolint
+  }
   if (!"genotypes" %in% names(x)) {
     class(x) <- class(x)[!class(x) %in% c("grouped_gen_tbl", "gen_tbl")]
   }
