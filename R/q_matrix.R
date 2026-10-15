@@ -386,11 +386,12 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #'   metadata of the `gt_admixt` object is a factor, the data will be ordered by
 #'   the levels of the factor; else it will be ordered alphabetically.
 #' @param arrange_by_indiv Boolean determining whether to arrange the
-#'   individuals by their individual id (if arrange_by_group is TRUE, they will
-#'   be arranged by group first and then by individual id, i.e. within each
-#'   group). If `id` in the `get_tibble` or the metadata of the `gt_admix`
-#'   object is a factor, it will be ordered by the levels of the factor; else it
-#'   will be ordered alphabetically.
+#'   individuals by their individual id within each group (groups are arranged
+#'   first if `arrange_by_group` is TRUE, otherwise they are kept in their
+#'   current order). This only applies if `annotate_group` is TRUE and group
+#'   information is available. If `id` in the `get_tibble` or the metadata of
+#'   the `gt_admix` object is a factor, it will be ordered by the levels of the
+#'   factor; else it will be ordered alphabetically.
 #' @param reorder_within_groups Boolean determining whether to reorder the
 #'   individuals within each group based on their ancestry proportion (note that
 #'   this is not advised if you are making multiple plots, as you would get a
@@ -460,7 +461,7 @@ autoplot.q_matrix <- function(
     q_tbl <- augment(object, data)
   }
   # if we have a grouping variable and we plan to use it, then reorder by it
-  q_tbl$id <- seq_len(nrow(q_tbl))
+  # (and by individual id within each group, if requested)
   if (("group" %in% names(q_tbl)) && annotate_group) {
     if (arrange_by_group && arrange_by_indiv) {
       q_tbl <- q_tbl %>%
@@ -469,8 +470,10 @@ autoplot.q_matrix <- function(
       q_tbl <- q_tbl %>%
         dplyr::arrange(.data$group)
     } else if (arrange_by_indiv) {
+      # keep groups in their current order (they must stay in consecutive
+      # blocks to be annotated), and sort individuals within each group
       q_tbl <- q_tbl %>%
-        dplyr::arrange(.data$group)
+        dplyr::arrange(fct_inorder_base(.data$group), .data$id)
     }
   }
   # now reset the id to the new order
@@ -496,16 +499,37 @@ autoplot.q_matrix <- function(
         )
       ) # nolint
 
-    dominant_q <- q_tbl %>%
-      dplyr::group_by(.data$id) %>%
-      dplyr::summarize(dominant_q = max(.data$percentage), .groups = "drop")
-
-    q_tbl <- q_tbl %>%
-      dplyr::left_join(dominant_q, by = "id")
-
-    q_tbl <- q_tbl %>%
+    # within each group, rank the components by their mean proportion
+    q_rank <- q_tbl %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(q = as.character(.data$q)) %>%
+      dplyr::group_by(.data$group, .data$q) %>%
+      dplyr::summarize(mean_q = mean(.data$percentage), .groups = "drop") %>%
       dplyr::group_by(.data$group) %>%
-      dplyr::arrange(desc(.data$dominant_q), .by_group = TRUE)
+      dplyr::mutate(q_rank = rank(-.data$mean_q, ties.method = "first")) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(-"mean_q")
+
+    # find the dominant component of each individual
+    dominant_q <- q_tbl %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(q = as.character(.data$q)) %>%
+      dplyr::group_by(.data$group, .data$id) %>%
+      dplyr::slice_max(.data$percentage, n = 1, with_ties = FALSE) %>%
+      dplyr::ungroup() %>%
+      dplyr::left_join(q_rank, by = c("group", "q")) %>%
+      dplyr::select("id", "q_rank", dominant_q = "percentage")
+
+    # sort individuals within each group by their dominant component (most
+    # common component in the group first), and then by the proportion of
+    # that component
+    q_tbl <- q_tbl %>%
+      dplyr::left_join(dominant_q, by = "id") %>%
+      dplyr::group_by(.data$group) %>%
+      dplyr::arrange(
+        .data$q_rank, dplyr::desc(.data$dominant_q),
+        .by_group = TRUE
+      )
   }
 
   levels_q <- unique(q_tbl$id)
