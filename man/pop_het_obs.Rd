@@ -25,7 +25,7 @@ will return a vector of n populations plus 1 (the global value), or a
 matrix with n+1 columns if \code{by_locus=TRUE}.}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 a vector of mean population observed heterozygosities (if
@@ -47,6 +47,15 @@ specific case, there are only two alleles, so \eqn{m=2}. For population
 specific estimates, the sum is done over a single value of \eqn{k}.
 \eqn{\hat{h}_o} at the genome level is simply the mean of the locus
 estimates.
+
+This statistic is ploidy-agnostic: an individual is heterozygous at a
+locus whenever its dosage is neither zero nor its own ploidy, so
+\code{pop_het_obs()} works for diploid, polyploid, and populations that mix
+individuals of different ploidy. The genome-wide estimate when
+\code{include_global = TRUE} is the unweighted mean of the population
+estimates for polyploid/mixed-ploidy data; for diploid and pseudohaploid
+data it is computed via \code{\link[=pop_global_stats]{pop_global_stats()}}, for consistency with
+previous releases.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

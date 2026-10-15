@@ -39,5 +39,9 @@ test_that("snp_allele_sharing and pairwise_allele_sharing computes allele sharin
 
   # now estimate it with gen_tibble
   test_as_gt <- pairwise_allele_sharing(test_gt, as_matrix = TRUE)
-  expect_true(all.equal(test_as, test_as_gt, check.attributes = FALSE))
+  # remove the special class to allow comparison with the reference
+  class(test_as_gt) <- setdiff(class(test_as_gt), "pairwise_matrix")
+  expect_true(all.equal(test_as, test_as_gt,
+    check.attributes = FALSE
+  ))
 })

@@ -40,11 +40,12 @@
 #' snp_ibs(X, type = "raw_counts")
 #'
 snp_ibs <- function(
-    X, # nolint start
-    ind.row = bigstatsr::rows_along(X),
-    ind.col = bigstatsr::cols_along(X),
-    type = c("proportion", "adjusted_counts", "raw_counts"),
-    block.size = bigstatsr::block_size(nrow(X))) {
+  X, # nolint start
+  ind.row = bigstatsr::rows_along(X),
+  ind.col = bigstatsr::cols_along(X),
+  type = c("proportion", "adjusted_counts", "raw_counts"),
+  block.size = bigstatsr::block_size(nrow(X))
+) {
   # nolint end
   type <- match.arg(type)
 

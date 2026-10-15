@@ -73,13 +73,14 @@
 #' )
 #'
 gt_cluster_pca <- function(
-    x = NULL,
-    n_pca = NULL,
-    k_clusters = c(1, round(nrow(x$u) / 10)),
-    method = c("kmeans", "ward"),
-    n_iter = 1e5,
-    n_start = 10,
-    quiet = FALSE) {
+  x = NULL,
+  n_pca = NULL,
+  k_clusters = c(1, round(nrow(x$u) / 10)),
+  method = c("kmeans", "ward"),
+  n_iter = 1e5,
+  n_start = 10,
+  quiet = FALSE
+) {
   if (is.null(x) || !inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }
@@ -240,9 +241,10 @@ compute_wss <- function(x, f) {
 #' # # Autoplot WSS
 #' autoplot(cluster_pca, metric = "WSS")
 autoplot.gt_cluster_pca <- function(
-    object,
-    metric = c("BIC", "AIC", "WSS"),
-    ...) {
+  object,
+  metric = c("BIC", "AIC", "WSS"),
+  ...
+) {
   metric <- match.arg(metric)
   # create a small tibble with the data of interest
   metric_tbl <- tibble::tibble(

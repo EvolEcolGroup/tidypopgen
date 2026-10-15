@@ -18,6 +18,10 @@
 #' @param overwrite boolean whether to overwrite the file.
 #' @param chromosomes_as_int boolean whether to use the integer representation
 #'   of the chromosomes
+#' @note PLINK's bed, ped and raw formats only support diploid data, so this
+#'   function only works on diploid (or pseudohaploid) `gen_tibble` objects.
+#'   Pseudohaploid data is simply treated as regular diploid genotype counts
+#'   (dosage 0/2), the same convention used by PLINK itself.
 #' @returns the path of the saved file
 #' @export
 #' @examples
@@ -32,15 +36,17 @@
 #' # Write a raw file
 #' example_gt %>% gt_as_plink(type = "raw", file = paste0(tempfile(), "_plink"))
 gt_as_plink <- function(
-    x,
-    file = NULL,
-    type = c("bed", "ped", "raw"),
-    overwrite = TRUE,
-    chromosomes_as_int = FALSE) {
+  x,
+  file = NULL,
+  type = c("bed", "ped", "raw"),
+  overwrite = TRUE,
+  chromosomes_as_int = FALSE
+) {
   # check that x is a gen_tibble
   if (!methods::is(x, "gen_tbl")) {
     stop("x must be a gen_tibble")
   }
+  stopifnot_diploid(x)
 
   type <- match.arg(type)
 
@@ -215,10 +221,11 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
 
 
 gt_write_ped_raw <- function(
-    x,
-    file,
-    plink_format = c("raw", "ped"),
-    chunk_size = 10000) {
+  x,
+  file,
+  plink_format = c("raw", "ped"),
+  chunk_size = 10000
+) {
   plink_format <- match.arg(plink_format)
   # loci information
   loci <- show_loci(x)

@@ -1,10 +1,11 @@
 # from https://www.mv.helsinki.fi/home/mjxpirin/GWAS_course/material/GWAS5.html
 
 offspring.geno <- function(
-    n.families,
-    n.snps,
-    fs = rep(0.5, n.snps),
-    n.shared.parents = 2) {
+  n.families,
+  n.snps,
+  fs = rep(0.5, n.snps),
+  n.shared.parents = 2
+) {
   # INPUT:
   # n.families, number of families where each family produces two offspring (>0)
   # n.snps, number of independent SNPs used in simulation (>0)

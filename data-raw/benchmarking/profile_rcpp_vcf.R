@@ -10,8 +10,6 @@ stop_profiler()
 # ~/go/bin/pprof --http=localhost:8080 ~/git/tidypopgen/src/tidypopgen.so /tmp/RtmpTmt48o/vcf_profile2.out
 
 
-
-
 ##############
 # profile in R
 #

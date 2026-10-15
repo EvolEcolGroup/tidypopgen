@@ -1,5 +1,6 @@
 /******************************************************************************/
 
+// [[Rcpp::depends(RcppArmadillo)]]
 #include <bigstatsr/arma-strict-R-headers.h>
 #include <bigstatsr/BMAcc-dispatcher.h>
 

@@ -40,14 +40,12 @@ rhub::rhub_check(platforms = c("linux", "m1-san", "macos-arm64", "windows", "val
 # answer 1,2,3,4,5
 
 
-
 # check on macos and windows via devtools
 devtools::check_mac_release()
 devtools::check_win_devel()
 
 # TO DO MANUALLY: if everything passes, edit the cran-comments.md to explain any notes
 devtools::release()
-
 
 
 ################################################################################

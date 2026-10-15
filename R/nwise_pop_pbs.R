@@ -78,7 +78,7 @@ nwise_pop_pbs <- function(.x,
   # combine all tables
   pbs_results <- do.call(cbind, pbs_results)
   # set row names same as the fst table
-  rownames(pbs_results) <- rownames(fst_values)
+  row.names(pbs_results) <- row.names(fst_values)
 
   if (type == "matrix") {
     # add fst values if requested

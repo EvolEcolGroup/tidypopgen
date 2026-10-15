@@ -13,8 +13,8 @@ snp_ibs(
 )
 }
 \arguments{
-\item{X}{a \link[bigstatsr:FBM.code256-class]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes}
-slot of a \link[bigsnpr:bigSNP-class]{bigsnpr::bigSNP} object).}
+\item{X}{a \link[bigstatsr:FBM.code256]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes}
+slot of a \link[bigsnpr:bigSNP]{bigsnpr::bigSNP} object).}
 
 \item{ind.row}{An optional vector of the row indices that are used. If not
 specified, all rows are used. Don't use negative indices.}
@@ -32,7 +32,7 @@ optimise the speed of matrix operations, we have to store in memory 3 times
 the columns.}
 }
 \value{
-if as.counts = TRUE function returns a list of two \link[bigstatsr:FBM-class]{bigstatsr::FBM}
+if as.counts = TRUE function returns a list of two \link[bigstatsr:FBM]{bigstatsr::FBM}
 matrices, one of counts of IBS by alleles (i.e. 2*n loci), and one of valid
 alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns
 a single matrix of IBS proportions.

@@ -35,11 +35,12 @@
 #'
 # Note that this is tested through gt_order_loci()
 gt_update_backingfile <- function(
-    .x,
-    backingfile = NULL,
-    chunk_size = NULL,
-    rm_unsorted_dist = TRUE,
-    quiet = FALSE) {
+  .x,
+  backingfile = NULL,
+  chunk_size = NULL,
+  rm_unsorted_dist = TRUE,
+  quiet = FALSE
+) {
   # if the backingfile is null, create a name based on the current backing file
   if (is.null(backingfile)) {
     backingfile <- change_duplicated_file_name(gt_get_file_names(.x)[2])

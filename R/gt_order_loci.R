@@ -34,11 +34,12 @@
 #' # Loci are now in the correct order
 #' show_loci(example_gt_ordered)
 gt_order_loci <- function(
-    .x,
-    use_current_table = FALSE,
-    ignore_genetic_dist = TRUE,
-    quiet = FALSE,
-    ...) {
+  .x,
+  use_current_table = FALSE,
+  ignore_genetic_dist = TRUE,
+  quiet = FALSE,
+  ...
+) {
   if (use_current_table) {
     new_table <- show_loci(.x)
   } else {

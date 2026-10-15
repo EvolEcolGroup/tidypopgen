@@ -29,14 +29,18 @@ tidy_dist_matrix <- function(mat) {
   }
   xy <- t(utils::combn(colnames(mat), 2))
   colnames(xy) <- c("item1", "item2")
-  xy %>%
+  xy <- xy %>%
     tibble::as_tibble() %>%
     dplyr::mutate(value = mat[xy])
+  # add a class to indicate this is a pairwise tibble
+  class(xy) <- c("pairwise_tbl", class(xy))
+  return(xy)
 }
 
 # stop if not diploid
 stopifnot_diploid <- function(x) {
-  if (inherits(x, "gen_tbl")) {
+  if (inherits(x, "tbl_df")) {
+    stopifnot_gen_tibble(x)
     x <- x$genotypes
   }
   if (abs(attr(x, "ploidy")) != 2) {
@@ -49,8 +53,10 @@ stopifnot_diploid <- function(x) {
   }
 }
 
+# stop if not diploid or pseudohaploid
 stopifnot_dip_pseudo <- function(x) {
-  if (inherits(x, "gen_tbl")) {
+  if (inherits(x, "tbl_df")) {
+    stopifnot_gen_tibble(x)
     x <- x$genotypes
   }
   if (abs(attr(x, "ploidy")) != 2) {
@@ -60,7 +66,8 @@ stopifnot_dip_pseudo <- function(x) {
 
 
 is_diploid_only <- function(x) {
-  if (inherits(x, "gen_tbl")) {
+  if (inherits(x, "tbl_df")) {
+    stopifnot_gen_tibble(x)
     (attr(x$genotypes, "ploidy") == 2)
   } else {
     (attr(x, "ploidy") == 2)
@@ -72,5 +79,53 @@ is_pseudohaploid <- function(x) {
     (attr(x$genotypes, "ploidy") == -2)
   } else {
     (attr(x, "ploidy") == -2)
+  }
+}
+
+# refresh a gen_tibble's top-level ploidy label after some individuals have
+# been dropped (e.g. by filter()), which does not update it automatically.
+# Only two cases can safely be inferred purely from which individuals
+# remain:
+# - pseudohaploid (-2): reset to diploid (2) if no pseudohaploid
+#   individuals remain (pseudohaploid is a data-quality flag, not a
+#   ploidy value, so it is only ever reset to 2, never to whatever
+#   fbm_ploidy the remaining individuals happen to have)
+# - mixed ploidy (0): reset to that single ploidy if the remaining
+#   individuals now all happen to share the same one
+# any other ploidy value is a definite single ploidy (diploid or
+# polyploid) that dropping individuals cannot make stale, so it is left
+# untouched.
+.gt_refresh_ploidy <- function(out) {
+  remaining_ploidy <-
+    attr(out$genotypes, "fbm_ploidy")[vctrs::vec_data(out$genotypes)]
+  if (length(remaining_ploidy) == 0) {
+    return(out)
+  }
+  if (is_pseudohaploid(out)) {
+    if (min(remaining_ploidy) == 2) {
+      attr(out$genotypes, "ploidy") <- 2
+    }
+  } else if (attr(out$genotypes, "ploidy") == 0) {
+    if (length(unique(remaining_ploidy)) == 1) {
+      attr(out$genotypes, "ploidy") <- remaining_ploidy[1]
+    }
+  }
+  out
+}
+
+# stop if the gen_tibble is flagged as containing pseudohaploid data
+# (heterozygosity is undefined when only one allele was observed). Trusts
+# the ploidy label rather than inspecting which individuals are currently
+# selected: filter() refreshes the label where it safely can (see
+# .gt_refresh_ploidy()), but e.g. dropping only some pseudohaploid
+# individuals, or subsetting some other way, will not, so rerun
+# gt_pseudohaploid() if this keeps erroring unexpectedly.
+stopifnot_no_pseudohaploid <- function(x) {
+  if (is_pseudohaploid(x)) {
+    stop(
+      "this function does not support pseudohaploid data; ",
+      "if you think all pseudohaploid individuals have been ",
+      "already removed, rerun gt_pseudohaploid() on your tibble"
+    )
   }
 }

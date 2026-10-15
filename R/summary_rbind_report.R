@@ -52,10 +52,11 @@
 #' # Get the summary
 #' summary(report)
 summary.rbind_report <- function(
-    object,
-    ...,
-    ref_label = "reference",
-    target_label = "target") {
+  object,
+  ...,
+  ref_label = "reference",
+  target_label = "target"
+) {
   cat("harmonising loci between two datasets\n")
   cat(
     "flip_strand = ",

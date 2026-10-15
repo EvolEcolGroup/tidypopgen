@@ -36,7 +36,6 @@ fs_stats_tg <- function(allele_sharing_mat, pop) {
   ###################################################
 
 
-
   # branch off for kinship pop pairwise
   resM <- (mMij - Mb) / (1 - Mb)
   rownames(resM) <- colnames(resM) <- levels(pop)
@@ -94,7 +93,6 @@ fis_stats_tg <- function(allele_sharing_matrix, pop) {
   Fis <- c(Fis, mean(Fis, na.rm = TRUE))
   return(Fis)
 }
-
 
 
 fst_stats_tg <- function(allele_sharing_mat, pop) {

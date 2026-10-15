@@ -32,8 +32,12 @@ ListOf<NumericMatrix> gt_grouped_pi_diploid(Environment BM,
     }
     // now for each group, divide freq by valid_alleles
     for (int group_i = 0; group_i < ngroups; group_i++) {
-      pi(j, group_i) = (pi(j, group_i) * (valid_alleles(j, group_i) - pi(j, group_i)) / 
-        (valid_alleles(j, group_i) * (valid_alleles(j, group_i) -1) /2));
+      double this_valid_alleles = valid_alleles(j, group_i);
+      // guard against 0 valid individuals in this group at this locus,
+      // where the denominator would be 0
+      pi(j, group_i) = (this_valid_alleles > 0) ?
+        (pi(j, group_i) * (this_valid_alleles - pi(j, group_i)) /
+          (this_valid_alleles * (this_valid_alleles - 1) / 2)) : NA_REAL;
     }
   }
 

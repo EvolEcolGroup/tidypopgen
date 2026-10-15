@@ -86,26 +86,27 @@
 #' gt_extract_f2(lobsters, outdir = f2_path, quiet = TRUE)
 #' admixtools::f2_from_precomp(f2_path, verbose = FALSE)
 gt_extract_f2 <- function(
-    .x,
-    outdir = NULL,
-    blgsize = 0.05,
-    maxmem = 8000,
-    maxmiss = 0,
-    minmaf = 0,
-    maxmaf = 0.5,
-    minac2 = FALSE,
-    outpop = NULL,
-    outpop_scale = TRUE,
-    transitions = TRUE,
-    transversions = TRUE,
-    overwrite = FALSE,
-    adjust_pseudohaploid = NULL,
-    fst = TRUE,
-    afprod = TRUE,
-    poly_only = c("f2"),
-    apply_corr = TRUE,
-    n_cores = 1,
-    quiet = FALSE) {
+  .x,
+  outdir = NULL,
+  blgsize = 0.05,
+  maxmem = 8000,
+  maxmiss = 0,
+  minmaf = 0,
+  maxmaf = 0.5,
+  minac2 = FALSE,
+  outpop = NULL,
+  outpop_scale = TRUE,
+  transitions = TRUE,
+  transversions = TRUE,
+  overwrite = FALSE,
+  adjust_pseudohaploid = NULL,
+  fst = TRUE,
+  afprod = TRUE,
+  poly_only = c("f2"),
+  apply_corr = TRUE,
+  n_cores = 1,
+  quiet = FALSE
+) {
   if (!requireNamespace("admixtools", quietly = TRUE)) {
     stop(
       "to use this function, first install package 'admixtools' with\n",
@@ -212,14 +213,14 @@ gt_extract_f2 <- function(
 #' @keywords internal
 #' @noRd
 gt_to_aftable <- function(
-    .x,
-    adjust_pseudohaploid = TRUE,
-    n_cores = bigstatsr::nb_cores()) {
+  .x,
+  adjust_pseudohaploid = TRUE,
+  n_cores = bigstatsr::nb_cores()
+) {
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }
   geno_fbm <- .gt_get_fbm(.x)
-
 
 
   aftable <- grouped_alt_freq_dip_pseudo_cpp(

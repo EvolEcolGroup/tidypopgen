@@ -86,9 +86,9 @@ gt_pca_partialSVD(lobsters,
 \seealso{
 \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}} which this function wraps.
 
-Other gt_pca_functions: 
+Other gt_pca_functions:
 \code{\link{gt_pca}},
-\code{\link{gt_pca_autoSVD}()},
-\code{\link{gt_pca_randomSVD}()}
+\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}},
+\code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}}
 }
 \concept{gt_pca_functions}

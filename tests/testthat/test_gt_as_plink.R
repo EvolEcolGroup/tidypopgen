@@ -367,6 +367,43 @@ test_that("handling of duplicated loci", {
   )
 })
 
+test_that("gt_as_plink errors on polyploid data", {
+  test_indiv_meta <- data.frame(id = letters[1:4], population = rep("popA", 4))
+  test_genotypes <- rbind(
+    c(1, 4, 0, 2),
+    c(4, 4, 0, 0),
+    c(0, 2, 0, 4),
+    c(2, 0, 4, NA)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:4),
+    chromosome = c(1, 1, 2, 2),
+    position = c(3, 5, 23, 456),
+    genetic_dist = as.double(rep(0, 4)),
+    allele_ref = c("A", "T", "C", "G"),
+    allele_alt = c("T", "C", "G", "A")
+  )
+  tetra_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    ploidy = 4,
+    quiet = TRUE
+  )
+  expect_error(
+    gt_as_plink(tetra_gt, file = paste0(tempfile(), ".bed"), type = "bed"),
+    "this function only works on diploid data"
+  )
+  expect_error(
+    gt_as_plink(tetra_gt, file = paste0(tempfile(), ".ped"), type = "ped"),
+    "this function only works on diploid data"
+  )
+  expect_error(
+    gt_as_plink(tetra_gt, file = tempfile(), type = "raw"),
+    "this function only works on diploid data"
+  )
+})
+
 test_that("plink files location when 'file' is NULL", {
   # create file
   test_indiv_meta <- data.frame(

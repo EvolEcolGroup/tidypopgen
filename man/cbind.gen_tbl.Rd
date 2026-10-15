@@ -18,7 +18,7 @@ a \code{gen_tibble}
 \description{
 A \code{\link[=cbind]{cbind()}} method to merge \code{gen_tibble} objects with data.frames and normal
 tibbles. Whilst this works, it is not ideal as it does not check the order of
-the tables, and we suggest that you use \code{\link[dplyr:mutate-joins]{dplyr::left_join()}} instead. Note
+the tables, and we suggest that you use \code{\link[dplyr:left_join]{dplyr::left_join()}} instead. Note
 that \code{cbind} will not combine two \code{gen_tibbles} (i.e. it will NOT combine
 markers for the same individuals)
 }

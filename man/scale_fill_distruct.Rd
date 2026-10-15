@@ -7,16 +7,16 @@
 scale_fill_distruct(guide = "none", ...)
 }
 \arguments{
-\item{guide}{guide function passed to \code{\link[ggplot2:scale_manual]{ggplot2::scale_fill_manual()}}.
+\item{guide}{guide function passed to \code{\link[ggplot2:scale_fill_manual]{ggplot2::scale_fill_manual()}}.
 Defaults to "none", set to "legend" if a legend is required.}
 
-\item{...}{further parameters to be passed to \code{\link[ggplot2:scale_manual]{ggplot2::scale_fill_manual()}}}
+\item{...}{further parameters to be passed to \code{\link[ggplot2:scale_fill_manual]{ggplot2::scale_fill_manual()}}}
 }
 \value{
 a scale constructor to be used with ggplot
 }
 \description{
-A wrapper around \code{\link[ggplot2:scale_manual]{ggplot2::scale_fill_manual()}}, using the distruct colours
+A wrapper around \code{\link[ggplot2:scale_fill_manual]{ggplot2::scale_fill_manual()}}, using the distruct colours
 from \code{\link{distruct_colours}}.
 }
 \examples{
@@ -41,5 +41,5 @@ autoplot(pca, type = "scores") +
   aes(colour = lobsters$population) + scale_fill_distruct()
 }
 \seealso{
-\code{\link[ggplot2:scale_manual]{ggplot2::scale_fill_manual()}} which this function wraps.
+\code{\link[ggplot2:scale_fill_manual]{ggplot2::scale_fill_manual()}} which this function wraps.
 }

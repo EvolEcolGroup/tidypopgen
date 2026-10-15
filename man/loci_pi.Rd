@@ -44,7 +44,7 @@ that value. There is no need for the user to set it, but it is included to
 resolve certain tidyselect operations.}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
 
@@ -57,8 +57,32 @@ resolve certain tidyselect operations.}
 a vector of frequencies, one per locus
 }
 \description{
-Estimate nucleotide diversity (pi) at each locus, accounting for missing
-values. This uses the formula: c_0 * c_1 / (n * (n-1) / 2)
+Estimate nucleotide diversity (\eqn{\pi}) at each locus, accounting for
+missing values.
+}
+\details{
+Nucleotide diversity is estimated as
+
+\deqn{
+\pi = \frac{c_0 c_1}{n(n - 1)/2},
+}
+
+where:
+\itemize{
+\item \eqn{c_0} is the number of observed copies of allele 0,
+\item \eqn{c_1} is the number of observed copies of allele 1,
+\item \eqn{n = c_0 + c_1} is the total number of non-missing allele
+copies at the locus.
+}
+
+Missing values
+are accommodated by computing \eqn{n}, \eqn{c_0}, and \eqn{c_1} using only
+non-missing genotype data. For polyploid data, each individual contributes
+a number of allele copies equal to its ploidy.
+
+This corresponds to the unbiased gene diversity estimator of
+Nei and Roychoudhury (1974) and is applicable to diploid, polyploid
+mixed-ploidy, and pseudohaploid \code{gen_tibble} objects alike.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

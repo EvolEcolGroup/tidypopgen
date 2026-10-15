@@ -59,6 +59,8 @@ test_that("snp_king and pairwise_king compute king-robust correctly", {
 
   # now estimate it with gen_tibble
   test_king_gt <- pairwise_king(test_gt, as_matrix = TRUE)
+  # remove the special class to allow comparison with the reference
+  class(test_king_gt) <- setdiff(class(test_king_gt), "pairwise_matrix")
   expect_true(all.equal(test_king, test_king_gt, check.attributes = FALSE))
 
   # now test with missing data

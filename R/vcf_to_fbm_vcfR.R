@@ -20,15 +20,16 @@
 #' @noRd
 # nolint start
 vcf_to_fbm_vcfR <- function(
-    # nolint end
-    vcf_path,
-    chunk_size = NULL,
-    backingfile = NULL,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    quiet = FALSE,
-    ...) {
+  # nolint end
+  vcf_path,
+  chunk_size = NULL,
+  backingfile = NULL,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  quiet = FALSE,
+  ...
+) {
   dots <- list(...)
   forbidden <- intersect(
     names(dots),

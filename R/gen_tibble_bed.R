@@ -1,12 +1,13 @@
 gen_tibble_bed_rds <- function(
-    x,
-    ...,
-    ploidy = 2,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    backingfile = NULL,
-    quiet = FALSE) {
+  x,
+  ...,
+  ploidy = 2,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  backingfile = NULL,
+  quiet = FALSE
+) {
   # if file ends in bed
   if (grepl("\\.bed$", x)) {
     # check that the bim and fam files exist
@@ -73,7 +74,7 @@ gen_tibble_bed_rds <- function(
       fbm_ploidy <- rep(ploidy, nrow(indiv_meta))
     } else {
       stop(
-        "'ploidy' 0 (mixed ploidy) or -2 (haplodiploids) ",
+        "'ploidy' 0 (mixed ploidy) or -2 (pseudohaploids) ",
         "require a vector of individual ploidies"
       )
     }

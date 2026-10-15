@@ -110,9 +110,9 @@ gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
 \seealso{
 \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}} which this function wraps.
 
-Other gt_pca_functions: 
+Other gt_pca_functions:
 \code{\link{gt_pca}},
-\code{\link{gt_pca_autoSVD}()},
-\code{\link{gt_pca_partialSVD}()}
+\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}},
+\code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}}
 }
 \concept{gt_pca_functions}

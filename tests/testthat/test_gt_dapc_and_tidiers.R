@@ -107,3 +107,23 @@ test_that("gt_dapc_and_tidiers", {
   # expect augmented to have 3 additional columns plus one for .rownames
   expect_true(ncol(augmented_gt) == 3 + 1)
 })
+
+test_that("scores plot error if only 2 populations", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt$population <- c(rep("pop1", 100), rep("pop2", 100))
+  test_gt <- test_gt %>% group_by(population)
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 2)
+  test_dapc <- test_pca %>% gt_dapc(pop = as.factor(test_gt$population))
+  expect_error(
+    autoplot(test_dapc, type = "scores"),
+    "object has only one discriminant axis, cannot plot scores"
+  )
+})

@@ -26,8 +26,8 @@ quantities are computed)}
 improve speed, but will tax memory.}
 }
 \value{
-a \link[bigstatsr:FBM-class]{bigstatsr::FBM} of proportion or adjusted counts, or a list of
-two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles, and one of
+a \link[bigstatsr:FBM]{bigstatsr::FBM} of proportion or adjusted counts, or a list of
+two \link[bigstatsr:FBM]{bigstatsr::FBM} matrices, one of counts of IBS by alleles, and one of
 number of valid alleles (i.e. 2\emph{n_loci - 2}missing_loci)
 }
 \description{

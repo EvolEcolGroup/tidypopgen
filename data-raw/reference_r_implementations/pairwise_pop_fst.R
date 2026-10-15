@@ -39,11 +39,12 @@
 #' @export
 
 pairwise_pop_fst <- function(
-    .x,
-    tidy = TRUE,
-    by_locus = FALSE,
-    method = c("Hudson", "Nei87", "WC84"),
-    n_cores = bigstatsr::nb_cores()) {
+  .x,
+  tidy = TRUE,
+  by_locus = FALSE,
+  method = c("Hudson", "Nei87", "WC84"),
+  n_cores = bigstatsr::nb_cores()
+) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
@@ -68,10 +69,11 @@ pairwise_pop_fst <- function(
 }
 
 pairwise_pop_fst_hudson <- function(
-    .x,
-    tidy = TRUE,
-    by_locus = FALSE,
-    n_cores = bigstatsr::nb_cores()) {
+  .x,
+  tidy = TRUE,
+  by_locus = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   # get the populations
   .group_levels <- .x %>% group_keys()
   # create all combinations
@@ -146,10 +148,11 @@ pairwise_pop_fst_hudson <- function(
 
 # the implementation for Nei 87, adapted from hierfstat
 pairwise_pop_fst_nei87 <- function(
-    .x,
-    tidy = TRUE,
-    by_locus = FALSE,
-    n_cores = bigstatsr::nb_cores()) {
+  .x,
+  tidy = TRUE,
+  by_locus = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   # get the populations
   .group_levels <- .x %>% group_keys()
   # create all combinations
@@ -242,10 +245,11 @@ pairwise_pop_fst_nei87 <- function(
 
 # This should be equivalent to the hierfstat implementation
 pairwise_pop_fst_wc84 <- function(
-    .x,
-    tidy = TRUE,
-    by_locus = FALSE,
-    n_cores = bigstatsr::nb_cores()) {
+  .x,
+  tidy = TRUE,
+  by_locus = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   # get the populations
   .group_levels <- .x %>% group_keys()
   # create all combinations

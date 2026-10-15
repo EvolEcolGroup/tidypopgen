@@ -13,7 +13,15 @@ gt_as_genind(x)
 a \code{genind} object
 }
 \description{
-This function converts a \code{gen_tibble} to a \code{genind} object from \code{adegenet}
+This function converts a \code{gen_tibble} to a \code{genind} object from \code{adegenet}.
+\code{genind} objects support arbitrary ploidy (including mixed-ploidy data
+across individuals), so this works on diploid, polyploid and mixed-ploidy
+\code{gen_tibble} objects alike.
+}
+\note{
+pseudohaploid individuals are treated as diploid (ploidy 2) using
+their stored genotype counts (dosage 0/2) directly, the same convention
+used by other tools (e.g. PLINK) when handling pseudohaploid data.
 }
 \examples{
 \dontshow{if (rlang::is_installed("adegenet")) withAutoprint(\{ # examplesIf}

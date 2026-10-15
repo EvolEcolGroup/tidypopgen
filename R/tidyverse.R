@@ -23,6 +23,9 @@ filter.gen_tbl <- function(..., deparse.level = 1) { # nolint
       c("gen_tbl", "sf", obj_class[!obj_class %in% c("gen_tbl", "sf")])
     class(out) <- obj_class
   }
+  # refresh the ploidy label where it can be safely inferred from the
+  # individuals that remain (see .gt_refresh_ploidy())
+  out <- .gt_refresh_ploidy(out)
   return(out)
 }
 
@@ -48,6 +51,11 @@ filter.grouped_gen_tbl <- function(..., deparse.level = 1) { # nolint
       c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf", obj_class[!obj_class %in% c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf")]) # nolint
     class(out) <- obj_class
   }
+  # refresh the ploidy label where it can be safely inferred from the
+  # individuals that remain (see .gt_refresh_ploidy()); filter.gen_tbl()'s
+  # own refresh is not reached here, since S3 dispatch on the more specific
+  # "grouped_gen_tbl" class picks this method instead
+  out <- .gt_refresh_ploidy(out)
   return(out)
 }
 
@@ -240,10 +248,11 @@ dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
 #' @export
 #' @noRd
 group_by.gen_tbl <- function(
-    .data,
-    ...,
-    .add = FALSE,
-    .drop = group_by_drop_default(.data)) {
+  .data,
+  ...,
+  .add = FALSE,
+  .drop = group_by_drop_default(.data)
+) {
   out <- NextMethod()
 
   # prioritise "gen_tbl" class over "sf"

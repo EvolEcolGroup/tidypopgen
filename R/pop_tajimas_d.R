@@ -32,15 +32,16 @@ pop_tajimas_d <- function(.x, n_cores, block_size, ...) {
 #' @export
 #' @rdname pop_tajimas_d
 pop_tajimas_d.tbl_df <- function(
-    .x,
-    # multicore is used by openMP within the
-    # freq cpp function
-    n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(.x), 1),
-    # the bigapply that splits in blocks is not
-    # multithreaded, as we use the multiple threads
-    # for openMP
-    ...) {
+  .x,
+  # multicore is used by openMP within the
+  # freq cpp function
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  # the bigapply that splits in blocks is not
+  # multithreaded, as we use the multiple threads
+  # for openMP
+  ...
+) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
   stopifnot_gen_tibble(.x)
@@ -51,10 +52,11 @@ pop_tajimas_d.tbl_df <- function(
 #' @export
 #' @rdname pop_tajimas_d
 pop_tajimas_d.vctrs_bigSNP <- function(
-    .x,
-    n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(length(.x), 1),
-    ...) {
+  .x,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1),
+  ...
+) {
   rlang::check_dots_empty()
 
   stopifnot_diploid(.x)
@@ -97,10 +99,11 @@ pop_tajimas_d.vctrs_bigSNP <- function(
 #' @export
 #' @rdname pop_tajimas_d
 pop_tajimas_d.grouped_df <- function(
-    .x,
-    n_cores = bigstatsr::nb_cores(),
-    block_size = bigstatsr::block_size(nrow(.x), 1),
-    ...) {
+  .x,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   geno_fbm <- .gt_get_fbm(.x)
