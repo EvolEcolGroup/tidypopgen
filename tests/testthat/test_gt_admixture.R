@@ -147,6 +147,59 @@ test_that("run admixture as single run", {
   expect_true(all(anole_adm_comb2$cv == c(anole_adm3$cv, anole_adm4$cv)))
 })
 
+test_that("P matrix rows match the loci of the gen_tibble", {
+  # log-likelihood of the genotypes given Q and P, as computed by ADMIXTURE
+  admixture_loglik <- function(x, adm) {
+    g <- show_genotypes(x)
+    # ADMIXTURE reports the frequency of allele_ref, we count allele_alt
+    qp <- as.matrix(adm$Q[[1]]) %*% t(1 - as.matrix(adm$P[[1]]))
+    ok <- !is.na(g)
+    sum(g[ok] * log(qp[ok]) + (2 - g[ok]) * log(1 - qp[ok]))
+  }
+  # the chromosomes of anole_gt are not sorted once cast to integers, and
+  # reversing the loci also reverses the positions within each chromosome
+  anole_rev <- select_loci(anole_gt, rev(seq_len(count_loci(anole_gt))))
+  for (this_gt in list(anole_gt, anole_rev)) {
+    anole_adm <- gt_admixture(
+      x = this_gt,
+      k = 2,
+      crossval = FALSE,
+      n_cores = 1,
+      seed = 123,
+      conda_env = "none"
+    )
+    expect_equal(nrow(anole_adm$P[[1]]), count_loci(this_gt))
+    expect_equal(admixture_loglik(this_gt, anole_adm), anole_adm$loglik,
+      tolerance = 1e-6
+    )
+  }
+})
+
+test_that("admixture_loci_order sorts by chromosome and position", {
+  bim_file <- tempfile(fileext = ".bim")
+  bim <- data.frame(
+    chromosome = c(2, 1, 2, 1, 1, 2),
+    name = paste0("rs", 1:6),
+    genetic_dist = 0,
+    position = c(10, 30, 5, 10, 30, 10),
+    allele_1 = "A",
+    allele_2 = "T"
+  )
+  utils::write.table(bim, bim_file,
+    quote = FALSE, row.names = FALSE,
+    col.names = FALSE, sep = "\t"
+  )
+  # ties (loci 2 and 5, and loci 1 and 6) keep the order of the bim file
+  expect_identical(admixture_loci_order(bim_file), c(4L, 2L, 5L, 3L, 1L, 6L))
+  # non-integer chromosomes keep the order of the bim file
+  bim$chromosome <- c("chr2", "chr1", "chr2", "chr1", "chr1", "chr2")
+  utils::write.table(bim, bim_file,
+    quote = FALSE, row.names = FALSE,
+    col.names = FALSE, sep = "\t"
+  )
+  expect_identical(admixture_loci_order(bim_file), 1:6)
+})
+
 test_that("run admixture as multiple runs", {
   anole_gt <- anole_gt %>% dplyr::group_by(population)
   anole_adm_cv <- gt_admixture(
