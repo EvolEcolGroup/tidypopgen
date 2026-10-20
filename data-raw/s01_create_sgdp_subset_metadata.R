@@ -1,3 +1,5 @@
+# This script should be run BEFORE `create_sgdp_subset.sh` to create the .txt files
+
 metadata <-
   read.table("data-raw/SGDP_metadata.279public.21signedLetter.44Fan.samples.csv",
              header = TRUE,
