@@ -143,7 +143,7 @@ test_that("loci_pi computes correctly grouped by uniform-ploidy populations", { 
   )
 
   test_pi <- test_gt %>% loci_pi(type = "matrix")
-  expect_equal(unname(test_pi), unname(expected))
+  expect_equal(unname(unclass(test_pi)), unname(expected))
   expect_identical(colnames(test_pi), c("popA", "popB"))
 })
 
@@ -183,7 +183,7 @@ test_that("loci_pi handles a population mixing diploid and tetraploid individual
     test_indiv_meta$population
   )
   test_pi <- test_gt %>% loci_pi(type = "matrix")
-  expect_equal(unname(test_pi), unname(expected))
+  expect_equal(unname(unclass(test_pi)), unname(expected))
 })
 
 test_that("loci_pi is NA when a locus has 0 or 1 valid allele copies in a group", { # nolint
@@ -318,7 +318,7 @@ test_that("loci_pi computes pseudohaploid allele counts correctly", {
     test_indiv_meta$population
   )
   expect_equal(
-    unname(loci_pi(grouped, type = "matrix")),
+    unname(unclass(loci_pi(grouped, type = "matrix"))),
     unname(expected_grouped)
   )
 })

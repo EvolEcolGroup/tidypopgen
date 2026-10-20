@@ -121,19 +121,15 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
         mutate(cumulative = cum_percentage)
     }
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
-    colnames(x$v) <- seq_len(ncol(x$v))
-    # as_tibble.matrix uses matrixToDataFrame, which fails on our custom matrix
-    # so, we first cast the matrix to a data.frame and then pass it to as_tibble
-    ret <- x$v %>%
-      as.data.frame() %>%
-      tibble::as_tibble(rownames = "column") %>%
-      tidyr::pivot_longer(
-        cols = -"column",
-        names_to = "PC",
-        values_to = "value"
-      )
-    ret <- mutate(ret, PC = as.numeric(.data$PC))
-    if (is.null(rownames(x$v))) ret$column <- as.integer(ret$column)
+    # build the long table directly, so that loci names (which can be
+    # integers in a matrix_int_names) are not cast to characters
+    loci_ids <- row_names(x$v)
+    if (is.null(loci_ids)) loci_ids <- seq_len(nrow(x$v))
+    ret <- tibble(
+      column = rep(loci_ids, each = ncol(x$v)),
+      PC = rep(seq_len(ncol(x$v)), times = nrow(x$v)),
+      value = as.vector(t(unclass(x$v)))
+    )
   } else if (matrix %in% c("x", "samples", "scores")) {
     ret <- sweep(x$u, 2, x$d, "*")
     colnames(ret) <- paste0("PC", seq_len(ncol(ret)))
@@ -277,9 +273,7 @@ augment_loci.gt_pca <- function(x, data = NULL, k = NULL, ...) {
   names(loadings) <- paste0(".loadingPC", seq_len(ncol(loadings)))
   ret <- if (!missing(data) && !is.null(data)) {
     # check that names of the two columns are in sync
-    # @TODO reinstate this check once we have rownames in the pca object
-    # for loadings
-    if (!identical(loci_names(data), rownames(as.data.frame(x$v)))) {
+    if (!identical(loci_names(data), row_names(x$v))) {
       stop(paste(
         "the loci names in 'data' do not correspond to the loci in",
         "the pca object 'x'"
@@ -287,8 +281,7 @@ augment_loci.gt_pca <- function(x, data = NULL, k = NULL, ...) {
     }
     show_loci(data) <- show_loci(data) %>% tibble::add_column(loadings)
   } else {
-    # @TODO fix this once we have loci names in the pca object
-    tibble(.rownames = rownames(x$v)) %>%
+    tibble(.rownames = row_names(x$v)) %>%
       add_column(loadings)
   }
   ret

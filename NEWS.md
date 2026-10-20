@@ -1,4 +1,16 @@
 # tidypopgen `dev`
+* preserve integer loci names (rather than casting them to character) in the
+  matrices returned by grouped `loci_*()` functions with `type = "matrix"`,
+  `nwise_pop_pbs()`, `gt_pca_autoSVD()` loadings and `gt_dapc()` loadings, and
+  in `tidy()` and `augment_loci()` for `gt_pca` and `gt_dapc` objects. These
+  matrices are now `matrix_int_names` objects: use `row_names()` to get the
+  loci names.
+* fix `nwise_pop_pbs()` returning row positions instead of loci names in the
+  tidy output when loci names are integers, and fix `return_fst = TRUE` for
+  the tidy output.
+* fix `[` and `[<-` for `matrix_int_names` with a single index (e.g.
+  `x[x > 0.5]`), and `as.data.frame()` for `matrix_int_names` without column
+  names.
 * fix the order of the loci in the P matrices returned by `gt_admixture()`:
   ADMIXTURE sorts loci by chromosome and position, so rows did not match the
   loci of the input when these were not already sorted (e.g. when chromosome

@@ -24,7 +24,9 @@ Default is "tidy".}
 along with the PBS values. Default is \code{FALSE}.}
 }
 \value{
-Either a matrix with locus ID as rownames and the following columns:
+Either a \link{matrix_int_names} with locus ID as row names (use
+\code{\link[=row_names]{row_names()}} to retrieve them, as they can be integers) and the following
+columns:
 \itemize{
 \item \code{pbs_a.b.c}: the PBS value for population a given b & c (there
 will be multiple such columns covering all 3 way combinations of

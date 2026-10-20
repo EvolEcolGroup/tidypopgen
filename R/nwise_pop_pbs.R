@@ -13,7 +13,9 @@
 #'   'Nei87', and 'WC84'. See [pairwise_pop_fst()] for details.
 #' @param return_fst A logical value indicating whether to return the Fst values
 #'   along with the PBS values. Default is `FALSE`.
-#' @return Either a matrix with locus ID as rownames and the following columns:
+#' @return Either a [matrix_int_names] with locus ID as row names (use
+#'   [row_names()] to retrieve them, as they can be integers) and the following
+#'   columns:
 #' - `pbs_a.b.c`: the PBS value for population a given b & c (there
 #'   will be multiple such columns covering all 3 way combinations of
 #'   populations in the grouped `gen_tibble` object)
@@ -77,19 +79,24 @@ nwise_pop_pbs <- function(.x,
   )
   # combine all tables
   pbs_results <- do.call(cbind, pbs_results)
-  # set row names same as the fst table
-  row.names(pbs_results) <- row.names(fst_values)
+  # add fst values if requested
+  if (return_fst) {
+    # as_tibble drops the row names, we add the loci names back below
+    fst_tbl <- tibble::as_tibble(as.data.frame(fst_values))
+    pbs_results <- dplyr::bind_cols(fst_tbl, pbs_results)
+  }
+  # get the loci names (integer or character) from the fst matrix
+  loci_ids <- row_names(fst_values)
 
   if (type == "matrix") {
-    # add fst values if requested
-    pbs_results <- as.matrix(pbs_results)
-    if (return_fst) {
-      pbs_results <- cbind(fst_values, pbs_results)
-    }
+    pbs_results <- matrix_int_names(
+      as.matrix(pbs_results),
+      row_names = loci_ids
+    )
     return(pbs_results)
   } else if (type == "tidy") {
     pbs_results <- as.data.frame(pbs_results)
-    pbs_results$loci <- rownames(pbs_results)
+    pbs_results$loci <- loci_ids
     cols <- names(pbs_results)[names(pbs_results) != c("loci")]
     pbs_results <-
       pbs_results %>%
@@ -97,9 +104,6 @@ nwise_pop_pbs <- function(.x,
         cols = dplyr::all_of(cols),
         names_to = "stat_name"
       )
-    if (return_fst) {
-      pbs_results <- cbind(fst_values, pbs_results)
-    }
     return(pbs_results)
   }
 }
