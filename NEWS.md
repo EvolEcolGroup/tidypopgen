@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gt_cluster_pca()` failing when only one value of k above 1 (or only k =
+  1) is explored, which includes the default `k_clusters` for datasets with 25
+  or fewer individuals, and when `n_pca = 1`
 * `augment_loci()` now works on `gt_pca_autoSVD()` results, giving NA loadings
   to the loci removed by LD pruning
 * fix `augment()` for `gt_pca` and `gt_dapc` objects (and `augment_loci()` for

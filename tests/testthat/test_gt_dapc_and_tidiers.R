@@ -128,6 +128,46 @@ test_that("scores plot error if only 2 populations", {
   )
 })
 
+test_that("gt_cluster_pca works with a single k and a single component", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  # only one k larger than 1
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 5, k_clusters = c(1, 2),
+    quiet = TRUE
+  )
+  expect_identical(names(test_cluster$clusters$groups), c("1", "2"))
+  expect_identical(
+    names(test_cluster$clusters$groups[["1"]]),
+    rownames(test_pca$u)
+  )
+  # only k = 1
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 5, k_clusters = 1,
+    quiet = TRUE
+  )
+  expect_identical(names(test_cluster$clusters$groups), "1")
+  expect_true(all(test_cluster$clusters$groups[["1"]] == 1))
+  # a single component
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 1, k_clusters = c(1, 3),
+    quiet = TRUE
+  )
+  expect_length(test_cluster$clusters$WSS, 3)
+  expect_identical(
+    names(test_cluster$clusters$groups[["3"]]),
+    rownames(test_pca$u)
+  )
+})
+
 test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
   bed_file <- system.file("extdata", "example-missing.bed",
     package = "bigsnpr"
