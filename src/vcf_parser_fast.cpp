@@ -107,18 +107,19 @@ List vcf_loci_table(std::string filename) {
 
   // is a locus biallelic
   std::vector<bool> biallelic;
-  biallelic.reserve(10e6);
-  // loci metadata (preallocate a million loci, as a start)
+  biallelic.reserve(1e5);
+  // loci metadata (preallocate 100,000 loci, as a start; vectors grow as
+  // needed)
   std::vector<std::string>chromosome;
-  chromosome.reserve(10e6);
+  chromosome.reserve(1e5);
   std::vector<std::string> marker_id;
-  marker_id.reserve(10e6);
+  marker_id.reserve(1e5);
   std::vector<int32_t> physical_pos;
-  physical_pos.reserve(10e6);
+  physical_pos.reserve(1e5);
   std::vector<std::string> allele1;
-  allele1.reserve(10e6);
+  allele1.reserve(1e5);
   std::vector<std::string> allele2;
-  allele2.reserve(10e6);
+  allele2.reserve(1e5);
   // individual metadata
   std::vector<int> ploidy;
   std::vector<std::string> sample_names;
