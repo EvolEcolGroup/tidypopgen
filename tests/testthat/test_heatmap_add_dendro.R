@@ -45,6 +45,50 @@ test_that("heatmap_add_dendro adds requested dendrogram panels", {
   expect_true(all(c("dend-left", "dend-top") %in% both_plot$gt$layout$name))
 })
 
+test_that("heatmap_add_dendro matches the heatmap order with tied distances", {
+  # complete linkage has several equally good merges for this matrix
+  toy_mat <- matrix(
+    c(
+      0, 4, 3, 3,
+      4, 0, 6, 3,
+      3, 6, 0, 3,
+      3, 3, 3, 0
+    ),
+    nrow = 4,
+    byrow = TRUE,
+    dimnames = list(
+      c("pop_a", "pop_b", "pop_c", "pop_d"),
+      c("pop_a", "pop_b", "pop_c", "pop_d")
+    )
+  )
+  order_fun <- function(x) {
+    stats::hclust(stats::as.dist(x), method = "complete")
+  }
+  base_plot <- heatmap_pairwise(toy_mat, order = order_fun) +
+    ggplot2::scale_fill_viridis_c()
+  # the dendrogram should be the clustering used to order the heatmap
+  hc <- order_fun(toy_mat)
+
+  # segment coordinates of a dendrogram panel, ignoring drawing order
+  seg_coords <- function(grob) {
+    segs <- Filter(function(x) inherits(x, "segments"), grob$children)[[1]]
+    coords <- sapply(segs[c("x0", "y0", "x1", "y1")], as.numeric)
+    coords[do.call(order, as.data.frame(coords)), ]
+  }
+  dendro_plot <- heatmap_add_dendro(base_plot)
+  for (side in c("left", "top")) {
+    drawn <- dendro_plot$gt$grobs[[
+      which(dendro_plot$gt$layout$name == paste0("dend-", side))
+    ]]
+    expected <- .dend_grob(hc, side, "grey30", 0.5)
+    expect_equal(seg_coords(drawn), seg_coords(expected))
+  }
+
+  # plots without a stored clustering fall back to reclustering
+  attr(base_plot, "order_obj") <- NULL
+  expect_s3_class(heatmap_add_dendro(base_plot), "heatmap_dendro")
+})
+
 test_that("heatmap_add_dendro objects can be drawn and saved", {
   toy_mat <- matrix(
     c(

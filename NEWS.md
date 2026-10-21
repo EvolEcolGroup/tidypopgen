@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `heatmap_add_dendro()` drawing dendrograms that did not match the order of
+  the heatmap when there are tied distances
 * fix `heatmap_add_dendro()` failing with ggplot2 versions earlier than 4.0.0
 * fix `heatmap_pairwise()` (and `autoplot()` of tidy pairwise results) always
   failing with "Duplicate pairs found" when the id columns are factors, e.g.

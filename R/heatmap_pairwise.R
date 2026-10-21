@@ -273,5 +273,10 @@ heatmap_pairwise <- function(x,
       )
     )
   attr(p, "order_fun") <- order
+  # store the output of the ordering function (e.g. an hclust object), so
+  # that heatmap_add_dendro() can reuse the clustering that ordered the plot
+  if (is.function(order)) {
+    attr(p, "order_obj") <- ord_obj
+  }
   return(p)
 }

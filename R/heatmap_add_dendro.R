@@ -57,25 +57,27 @@ heatmap_add_dendro <- function(plot,
   side <- match.arg(side)
 
   #############################################
-  # get data
+  # get the clustering
   #############################################
-  df <- plot$data
-  # determine matrix size
-  n <- max(c(df$row, df$col))
-  # initialise matrix
-  mat <- matrix(
-    NA_real_,
-    nrow = n,
-    ncol = n
-  )
-  # fill matrix
-  mat[cbind(df$row, df$col)] <- df$value
-
-  #############################################
-  # cluster the data
-  #############################################
-  cluster_fun <- attr(plot, "order_fun")
-  hc <- cluster_fun(mat)
+  # reuse the clustering that ordered the heatmap, as reclustering the
+  # reordered matrix can give a different leaf order when distances are tied
+  hc <- attr(plot, "order_obj")
+  if (is.null(hc)) {
+    # otherwise, recluster the (already ordered) data of the plot
+    df <- plot$data
+    # determine matrix size
+    n <- max(c(df$row, df$col))
+    # initialise matrix
+    mat <- matrix(
+      NA_real_,
+      nrow = n,
+      ncol = n
+    )
+    # fill matrix
+    mat[cbind(df$row, df$col)] <- df$value
+    cluster_fun <- attr(plot, "order_fun")
+    hc <- cluster_fun(mat)
+  }
 
   # validate that the clustering function returned an hclust object
   if (!inherits(hc, "hclust")) {
