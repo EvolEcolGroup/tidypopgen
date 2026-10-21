@@ -36,7 +36,7 @@ select_loci_if <- function(.data, .sel_logical) {
   if (!inherits(loci_sel, "logical")) {
     stop(".sel_logical should be a logical boolean vector")
   }
-  if (length(loci_sel) != ncol(show_genotypes(.data$genotypes))) {
+  if (length(loci_sel) != count_loci(.data$genotypes)) {
     stop(".sel_logical should be the same length as the number of loci")
   }
   # set to FALSE any missing value

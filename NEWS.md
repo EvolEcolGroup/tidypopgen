@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* `select_loci_if()` no longer loads the whole genotype matrix into memory to
+  check the length of the selection
 * fix `gt_as_genind()` failing when loci names contain '.' (which are now
   replaced by '_', with a warning)
 * `gt_as_genlight()` now stores the alleles (`loc.all`), chromosome and position
