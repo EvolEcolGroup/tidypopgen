@@ -218,7 +218,7 @@ List vcf_loci_table(std::string filename) {
  * @param int missingValue The value to use for missing genotypes
  */
 
-inline void count_alt_alleles(const std::string &line,
+inline bool count_alt_alleles(const std::string &line,
                               unsigned char* alt_counts,
                               size_t* separator_pos,
                               size_t n,
@@ -242,18 +242,29 @@ inline void count_alt_alleles(const std::string &line,
   // we ignore the first 9 fields (so start from position 9)
   for (size_t i=0; i<n; i++){
     size_t pos = separator_pos[i+8];
+    size_t n_alleles = 1;
+    bool is_missing = false;
     // the genotypes start at pos +1
     for (size_t pos_i = pos+1; pos_i < separator_pos[i+9]+1; pos_i++){
       if (line[pos_i] == '1'){
         alt_counts[i]++;
       } else if (line[pos_i] == '.'){
         // if any allele is missing, the genotype is missing
-        alt_counts[i] = missingValue;
-        break;
+        is_missing = true;
+      } else if ((line[pos_i] == '/') || (line[pos_i] == '|')){
+        n_alleles++;
       } else if (line[pos_i] == ':') //if at the end of the genotype section
         break;
     }
+    // a genotype can not have more alleles than max_ploidy
+    if (n_alleles > missingValue - 1) {
+      return false;
+    }
+    if (is_missing) {
+      alt_counts[i] = missingValue;
+    }
   }
+  return true;
 }
 
 /**
@@ -335,22 +346,20 @@ bool vcf_genotypes_to_fbm(std::string filename,
       stop("end of file reached before all expected genotypes were read");
     }
     if (biallelic[i_geno]){
-      count_alt_alleles(line, &alt_counts[0], &separator_pos[0], n,missing_value, tab_delimiter);
+      // count alternate alleles, checking that no genotype has more alleles
+      // than max_ploidy (in case we estimated it incorrectly in the first line)
+      if (!count_alt_alleles(line, &alt_counts[0], &separator_pos[0], n,
+                             missing_value, tab_delimiter)) {
+        if (is_gz) {
+          gzclose(vcfGzFile);
+        } else {
+          vcfFile.close();
+        }
+        stop("a genotype has more than max_ploidy alleles. We estimate max_ploidy from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome)");
+      }
       ptr = std::copy(&alt_counts[0], &alt_counts[0] + n, ptr);
     }
 
-  }
-  // check ploidy for the last line, in case we estimated it incorrectly in the first
-  // line
-  std::vector<std::string> fields = split_line(line, "\t");
-  for (unsigned int i = 9; i < fields.size(); ++i) {
-    // get everything up to the first : delimiter
-    std::vector<std::string> this_fields = split_line(fields[i], ":");
-    // now split by the genotype deliminear (unphased or phased)
-    std::vector<std::string> genotype_fields = split_line(this_fields[0], "/|");
-    if (genotype_fields.size() > size_t((missing_value-1))) {
-      stop("a genotype has more than max_ploidy alleles. We estimate max_ploidy from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome)");
-    }
   }
 
   // close the file

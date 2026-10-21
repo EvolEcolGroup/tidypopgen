@@ -1,4 +1,8 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` on VCF files silently mis-coding genotypes with more
+  alleles than the ploidy estimated from the first variant (e.g. a tetraploid
+  genotype in a diploid file) when they are not on the last line; this is now an
+  error
 * fix `gen_tibble()` rejecting "0" alleles (the PLINK missing value) when custom
   `missing_alleles` are given
 * `gen_tibble()` on a matrix now checks that a vector of `ploidy` has one value

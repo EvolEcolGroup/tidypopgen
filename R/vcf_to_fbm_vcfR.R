@@ -221,20 +221,29 @@ poly_indiv_dosage <- function(x, max_ploidy) {
 
 # get dosages for a genotype x and return them as raw for inclusion in the FBM
 poly_genotype_dosage <- function(x, max_ploidy) {
+  # a genotype can not have more alleles than max_ploidy
+  if (length(x) > max_ploidy) {
+    stop_max_ploidy()
+  }
   # if any allele is missing, the genotype is missing
   if (length(x) > 0 && !anyNA(x) && !any(x == ".")) {
     dosage <- sum(as.numeric(x))
     if (dosage < (max_ploidy + 1)) {
       return(as.raw(dosage)) # nolint
     } else {
-      stop(paste(
-        "a genotype has more than max_ploidy alleles. We estimate",
-        "max_ploidy from the first variant in the vcf file, make",
-        "sure that variant is representative of ploidy (e.g. it is",
-        "not on a sex chromosome)."
-      ))
+      stop_max_ploidy()
     }
   } else {
     return(as.raw(max_ploidy + 1)) # nolint
   }
+}
+
+# error for genotypes with more alleles than max_ploidy
+stop_max_ploidy <- function() {
+  stop(paste(
+    "a genotype has more than max_ploidy alleles. We estimate",
+    "max_ploidy from the first variant in the vcf file, make",
+    "sure that variant is representative of ploidy (e.g. it is",
+    "not on a sex chromosome)."
+  ), call. = FALSE)
 }

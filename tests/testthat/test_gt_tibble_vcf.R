@@ -75,3 +75,23 @@ test_that("partially missing vcf genotypes are coded as missing", {
     expect_equal(show_genotypes(vcf_gt), expected)
   }
 })
+
+test_that("genotypes with more alleles than max_ploidy are caught", {
+  # a tetraploid genotype in the middle of a diploid vcf (the last variant is
+  # diploid)
+  for (tetra_genotype in c("1/1/1/1", "0/0/0/1")) {
+    vcf_path <- write_small_vcf(list(
+      c("1", "10", "rs1", "A", "T", "0/1", "0/0", "1/1"),
+      c("1", "20", "rs2", "C", "G", "0/1", tetra_genotype, "0/1"),
+      c("1", "30", "rs3", "G", "A", "1/1", "0/0", "0/1")
+    ))
+    for (this_parser in c("cpp", "vcfR")) {
+      expect_error(
+        gen_tibble(vcf_path,
+          parser = this_parser, backingfile = tempfile(), quiet = TRUE
+        ),
+        "a genotype has more than max_ploidy alleles"
+      )
+    }
+  }
+})
