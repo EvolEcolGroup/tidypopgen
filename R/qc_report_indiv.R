@@ -1,6 +1,6 @@
 #' Create a Quality Control report for individuals
 #'
-#' Return QC information to assess loci (Observed heterozygosity and
+#' Return QC information to assess individuals (Observed heterozygosity and
 #' missingness).
 #'
 #' Providing the parameter kings_threshold will return two additional columns,
@@ -224,7 +224,9 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 #' @param kings_threshold an optional numeric, a threshold of relatedness for
 #'   the sample
 #' @param ... not currently used.
-#' @returns a `ggplot2` object
+#' @returns a `ggplot2` object. For `relatedness` plots of a report created
+#'   from a grouped [`gen_tibble`], a named list of `ggplot2` objects, one for
+#'   each group.
 #' @export
 #' @examples
 #' # Create a gen_tibble of lobster genotypes

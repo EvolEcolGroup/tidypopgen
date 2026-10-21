@@ -34,7 +34,7 @@ het_obs, missingness, id and to_keep. For pseudohaploid data, a tibble with
 ploidy and missingness.
 }
 \description{
-Return QC information to assess loci (Observed heterozygosity and
+Return QC information to assess individuals (Observed heterozygosity and
 missingness).
 }
 \details{
