@@ -170,3 +170,58 @@ test_that("results after subsetting", {
     check.attributes = FALSE
   ))
 })
+
+test_that("homozygotes for the alternate allele are homozygous", {
+  test_genotypes <- rbind(
+    rep(1, 6),
+    rep(2, 6),
+    rep(0, 6)
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = data.frame(
+      name = paste0("rs", 1:6),
+      chromosome = "chr1",
+      position = as.integer(1:6 * 500 + 500),
+      genetic_dist = as.double(rep(0, 6)),
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    indiv_meta = data.frame(
+      id = c("het", "hom_alt", "hom_ref"),
+      population = "pop1"
+    ),
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  # runs of heterozygosity are only found in the heterozygous individual
+  suppressMessages(test_rohet <- windows_indiv_roh(
+    test_gt,
+    window_size = 4,
+    min_snp = 2,
+    heterozygosity = TRUE,
+    min_density = 1 / 500,
+    max_gap = 5000,
+    min_length_bps = 1000,
+    threshold = 0.05
+  ))
+  expect_equal(unique(test_rohet$id), "het")
+  # runs of homozygosity are the same for both homozygotes
+  suppressMessages(test_rohom <- windows_indiv_roh(
+    test_gt,
+    window_size = 4,
+    min_snp = 2,
+    heterozygosity = FALSE,
+    min_density = 1 / 500,
+    max_gap = 5000,
+    min_length_bps = 1000,
+    threshold = 0.05
+  ))
+  expect_equal(sort(unique(test_rohom$id)), c("hom_alt", "hom_ref"))
+  run_cols <- c("chrom", "nSNP", "from", "to", "lengthBps")
+  expect_equal(
+    test_rohom[test_rohom$id == "hom_alt", run_cols],
+    test_rohom[test_rohom$id == "hom_ref", run_cols],
+    ignore_attr = TRUE
+  )
+})

@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `windows_indiv_roh()` with `heterozygosity = TRUE` treating homozygotes
+  for the alternate allele as heterozygotes
 * fix `windows_stats_generic()` (and thus all `windows_*` functions) leaving out
   the last loci of a chromosome when the window range is not a multiple of
   `step_size`

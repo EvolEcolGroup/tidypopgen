@@ -128,6 +128,11 @@ windows_indiv_roh <- function(
   rows_to_keep <- .gt_fbm_rows(.x)
   for (i in seq_len(nrow(.x))) {
     this_genotype <- X[rows_to_keep[i], col_ind]
+    # detectRUNS expects 0 for homozygotes and 1 for heterozygotes (its
+    # readers recode 0/1/2 dosages with genoConvert), otherwise homozygotes
+    # for the alternate allele count as heterozygotes for runs of
+    # heterozygosity
+    this_genotype[which(this_genotype == 2)] <- 0
     this_indiv <- list(FID = groups[i], IID = .x$id[i])
     # find runs for this individual
     this_runs <-
