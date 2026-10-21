@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_snmf()` and `gt_admixture()` failing when the path of the input file
+  contains "geno" (or the file name contains ".bed") other than in the extension
 * fix `gt_snmf()` failing with the default `seed` when `n_runs > 1`
 * fix `gt_snmf()` returning the results of earlier runs when adding runs to an
   existing project (`project = "continue"` or `"force"`)

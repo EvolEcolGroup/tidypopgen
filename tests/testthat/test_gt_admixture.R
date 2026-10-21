@@ -666,6 +666,29 @@ test_that("set output dir for admixture Q files", {
   expect_true(all(grepl("\\.Q$|\\.P$", list.files(relative_path))))
 })
 
+test_that("gt_admixture works with '.bed' elsewhere in the file name", {
+  bed_file <- system.file("extdata", "lobster", "lobster.bed",
+    package = "tidypopgen"
+  )
+  bed_dir <- tempfile("admix_")
+  dir.create(bed_dir)
+  for (this_ext in c(".bed", ".bim", ".fam")) {
+    file.copy(
+      sub("\\.bed$", this_ext, bed_file),
+      file.path(bed_dir, paste0("lobster.bedfile", this_ext))
+    )
+  }
+  adm <- gt_admixture(
+    x = file.path(bed_dir, "lobster.bedfile.bed"),
+    k = 2,
+    seed = 1,
+    conda_env = "none",
+    outdir = bed_dir
+  )
+  expect_true(inherits(adm$Q[[1]], "q_matrix"))
+  expect_equal(ncol(adm$Q[[1]]), 2)
+})
+
 test_that("seed length", {
   vcf_path <-
     system.file(

@@ -270,9 +270,7 @@ gt_admixture <- function(
       # read the output
       output_prefix <- file.path(
         outdir,
-        gsub(".bed", "", basename(input_file),
-          fixed = TRUE
-        )
+        gsub("\\.bed$", "", basename(input_file))
       )
 
       adm_list$k[index] <- this_k

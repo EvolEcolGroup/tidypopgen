@@ -187,6 +187,30 @@ test_that("gt_snmf cross-entropy matches k and run", {
   expect_equal(example_snmf$cv, lea_cv, tolerance = 1e-5)
 })
 
+test_that("gt_snmf works with 'geno' elsewhere in the path", {
+  example_gt <- load_example_gt("gen_tbl")
+  geno_dir <- tempfile("genomics_")
+  dir.create(geno_dir)
+  input_file <- file.path(geno_dir, "my_genotypes.geno")
+  file.copy(gt_as_geno_lea(example_gt), input_file)
+  capture.output(example_snmf <- gt_snmf(
+    x = input_file,
+    k = 2,
+    project = "new",
+    n_runs = 1,
+    seed = 1,
+    alpha = 100
+  ))
+  snmf_project <- LEA::load.snmfProject(
+    sub("\\.geno$", ".snmfProject", input_file)
+  )
+  expect_equal(
+    unclass(example_snmf$Q[[1]]),
+    LEA::Q(snmf_project, K = 2, run = 1),
+    ignore_attr = TRUE
+  )
+})
+
 test_that("gt_snmf default seed works with several runs", {
   example_gt <- load_example_gt("gen_tbl")
   capture.output(example_snmf <- gt_snmf(

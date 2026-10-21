@@ -76,8 +76,8 @@ gt_snmf <- function(
     input_file <- gt_as_geno_lea(x)
     # expand path to file to be full path
     input_file <- normalizePath(input_file)
-    out_file <- sub(".geno", "", input_file)
-    file_name <- sub(".geno", "", basename(input_file))
+    out_file <- sub("\\.geno$", "", input_file)
+    file_name <- sub("\\.geno$", "", basename(input_file))
   } else if (is.character(x) && length(x) == 1L) {
     if (!file.exists(x)) {
       stop("The file ", x, " does not exist")
@@ -87,8 +87,8 @@ gt_snmf <- function(
       stop("The input file must be a .geno file")
     }
     input_file <- x
-    out_file <- sub(".geno", "", input_file)
-    file_name <- sub(".geno", "", basename(input_file))
+    out_file <- sub("\\.geno$", "", input_file)
+    file_name <- sub("\\.geno$", "", basename(input_file))
   } else {
     stop(paste(
       "x must be a gen_tibble or a character giving the path to the",
