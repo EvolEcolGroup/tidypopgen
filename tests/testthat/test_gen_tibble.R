@@ -562,3 +562,24 @@ test_that("gen_tibbles with no loci or no individuals can be formatted", {
   no_indiv_gt <- test_gt %>% filter(id == "z")
   expect_identical(format(no_indiv_gt$genotypes), character(0))
 })
+
+test_that("gen_tibble from a bigSNP rds does not overwrite the rds", {
+  bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
+  bed_gt <- gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE)
+  backingfile <- tempfile()
+  rds_gt <- gen_tibble(bigsnp_path, backingfile = backingfile, quiet = TRUE)
+  expect_identical(show_genotypes(rds_gt), show_genotypes(bed_gt))
+  # the backingfile argument is used
+  expect_equal(
+    gt_get_file_names(rds_gt),
+    paste0(backingfile, c(".rds", ".bk"))
+  )
+  # the original rds is still a bigSNP object
+  expect_true(inherits(readRDS(bigsnp_path), "bigSNP"))
+  expect_no_error(bigsnpr::snp_attach(bigsnp_path))
+  # and we can create a gen_tibble from it a second time
+  rds_gt2 <- gen_tibble(bigsnp_path, quiet = TRUE)
+  expect_identical(show_genotypes(rds_gt2), show_genotypes(bed_gt))
+  expect_true(inherits(readRDS(bigsnp_path), "bigSNP"))
+})

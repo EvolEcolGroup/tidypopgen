@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` on a bigSNP .rds file overwriting that .rds and ignoring
+  `backingfile`; the backing file is now copied to `backingfile`
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both)

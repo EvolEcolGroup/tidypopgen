@@ -62,7 +62,10 @@
 #'   same as PLINK 1.9).
 #' @param backingfile the path, including the file name without extension, for
 #'   backing files used to store the data (they will be given a .bk and .RDS
-#'   automatically). This is not needed if `x` is already an .RDS file. If `x`
+#'   automatically). If `x` is a bigSNP .RDS file, its backing file is copied to
+#'   `backingfile`, so that the original files are not modified (if
+#'   `backingfile` is left NULL, the copy is saved next to the original, with a
+#'   version suffix such as `_v2`). If `x`
 #'   is a .BED or a *VCF* file and `backingfile` is left NULL, the backing file
 #'   will be saved in the same directory as the bed or vcf file, using the same
 #'   file name but with a different file type (.bk rather than .bed or .vcf). If

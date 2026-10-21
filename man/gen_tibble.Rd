@@ -73,7 +73,10 @@ same as PLINK 1.9).}
 
 \item{backingfile}{the path, including the file name without extension, for
 backing files used to store the data (they will be given a .bk and .RDS
-automatically). This is not needed if \code{x} is already an .RDS file. If \code{x}
+automatically). If \code{x} is a bigSNP .RDS file, its backing file is copied to
+\code{backingfile}, so that the original files are not modified (if
+\code{backingfile} is left NULL, the copy is saved next to the original, with a
+version suffix such as \verb{_v2}). If \code{x}
 is a .BED or a \emph{VCF} file and \code{backingfile} is left NULL, the backing file
 will be saved in the same directory as the bed or vcf file, using the same
 file name but with a different file type (.bk rather than .bed or .vcf). If
