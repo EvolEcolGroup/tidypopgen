@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* `gt_pcadapt()` now errors if the individuals of `x` do not match (in identity
+  and order) those used for `pca`
 * fix `gt_impute_xgboost()` assigning loci to the wrong chromosome (and so
   imputing them from the wrong neighbours) when the loci table is not in the
   order of the backing file

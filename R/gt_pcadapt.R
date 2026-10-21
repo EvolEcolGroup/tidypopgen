@@ -60,6 +60,13 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   if (k > ncol(pca$v)) {
     stop("K must be less than or equal to the number of components in pca")
   }
+  # check that the scores are in the same order as the individuals in x
+  if (
+    !is.null(rownames(pca$u)) &&
+      !identical(rownames(pca$u), as.character(x$id))
+  ) {
+    stop("the individuals in 'x' do not correspond to those in 'pca'")
+  }
   # set imputation if needed
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
