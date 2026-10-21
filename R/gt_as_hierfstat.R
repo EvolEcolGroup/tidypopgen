@@ -20,7 +20,7 @@
 #' # Check object class
 #' class(gt_hierfstat)
 gt_as_hierfstat <- function(x) {
-  stopifnot_diploid(x)
+  stopifnot_dip_pseudo(x)
   hier_df <- data.frame(pop = as.factor(x$population), show_genotypes(x))
   hier_df[hier_df == 0] <- 11
   hier_df[hier_df == 1] <- 12

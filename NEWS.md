@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gt_as_plink()`, `gt_as_geno_lea()` and `gt_as_hierfstat()` (and hence
+  `gt_admixture()` and `gt_snmf()`) erroring on pseudohaploid data, which they
+  document as supported
 * fix grouped `qc_report_loci()` returning HWE p-values greater than 1 (the
   Bonferroni-corrected p-value is now capped at 1)
 * grouped `qc_report_indiv()` now gives informative errors when data are grouped

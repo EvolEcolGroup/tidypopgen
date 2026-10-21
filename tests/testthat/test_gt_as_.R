@@ -109,8 +109,45 @@ mixed_ploidy_gt <- function() {
 test_that("gt_as_hierfstat errors on polyploid data", {
   expect_error(
     gt_as_hierfstat(tetraploid_gt()),
-    "this function only works on diploid data"
+    "this function only works on diploid or pseudohaploid data"
   )
+  expect_error(
+    gt_as_hierfstat(mixed_ploidy_gt()),
+    "this function only works on diploid or pseudohaploid data"
+  )
+})
+
+test_that("gt_as_hierfstat treats pseudohaploid dosage as diploid", {
+  test_genotypes <- rbind(
+    c(2, NA, 0, NA, 2, 0),
+    c(2, 2, 0, NA, 0, NA),
+    c(2, NA, 0, 0, 1, 1),
+    c(2, 0, 0, 1, 0, 0)
+  )
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c", "d"),
+    population = rep("pop1", 4)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt <- gt_pseudohaploid(test_gt)
+  expect_true(is_pseudohaploid(test_gt))
+  test_hier <- gt_as_hierfstat(test_gt)
+  # pseudohaploid individuals a and b are homozygous diploids
+  expect_equal(unname(unlist(test_hier[1, -1])), c(22, NA, 11, NA, 22, 11))
+  expect_equal(unname(unlist(test_hier[2, -1])), c(22, 22, 11, NA, 11, NA))
 })
 
 test_that("gt_as_genind works on uniform polyploid data", {

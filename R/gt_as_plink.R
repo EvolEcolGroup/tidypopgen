@@ -46,7 +46,7 @@ gt_as_plink <- function(
   if (!methods::is(x, "gen_tbl")) {
     stop("x must be a gen_tibble")
   }
-  stopifnot_diploid(x)
+  stopifnot_dip_pseudo(x)
 
   type <- match.arg(type)
 

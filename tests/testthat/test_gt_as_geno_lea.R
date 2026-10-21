@@ -23,7 +23,7 @@ test_that("gt_as_geno_lea errors on polyploid data", {
   )
   expect_error(
     gt_as_geno_lea(tetra_gt, file = paste0(tempfile(), ".geno")),
-    "this function only works on diploid data"
+    "this function only works on diploid or pseudohaploid data"
   )
 })
 
@@ -56,6 +56,46 @@ test_that("gt_as_geno_lea writes a .geno file for diploid data", {
   # concatenated with no separator (9 for missing)
   geno_lines <- readLines(geno_file)
   geno_matrix <- do.call(rbind, strsplit(geno_lines, ""))
+  expected <- t(test_genotypes)
+  expected[is.na(expected)] <- 9
+  storage.mode(expected) <- "character"
+  dimnames(geno_matrix) <- NULL
+  dimnames(expected) <- NULL
+  expect_equal(geno_matrix, expected)
+})
+
+test_that("gt_as_geno_lea writes a .geno file for pseudohaploid data", {
+  test_indiv_meta <- data.frame(
+    id = c("d1", "p1", "p2", "d2"),
+    population = c("pop1", "pop1", "pop2", "pop2")
+  )
+  # p1 and p2 are pseudohaploids (only homozygous calls)
+  test_genotypes <- rbind(
+    c(1, 0, 1, 0),
+    c(2, NA, 0, 2),
+    c(0, 2, 2, NA),
+    c(2, 1, 0, 1)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:4),
+    chromosome = c(1, 1, 1, 2),
+    position = c(3, 5, 65, 456),
+    genetic_dist = as.double(rep(0, 4)),
+    allele_ref = c("A", "T", "C", "G"),
+    allele_alt = c("T", "C", "G", "A")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  test_gt <- gt_pseudohaploid(test_gt, test_n_loci = 4)
+  expect_true(is_pseudohaploid(test_gt))
+  geno_file <- gt_as_geno_lea(test_gt, file = paste0(tempfile(), ".geno"))
+  # pseudohaploid dosages are written as regular diploid counts (0/2)
+  geno_matrix <- do.call(rbind, strsplit(readLines(geno_file), ""))
   expected <- t(test_genotypes)
   expected[is.na(expected)] <- 9
   storage.mode(expected) <- "character"

@@ -24,7 +24,7 @@
 #' gt_as_geno_lea(example_gt, file = paste0(tempfile(), "_example.geno"))
 # Write a geno file (as used by LEA)
 gt_as_geno_lea <- function(x, file = NULL) {
-  stopifnot_diploid(x)
+  stopifnot_dip_pseudo(x)
   if (is.null(file)) {
     file <- sub_rds(gt_get_file_names(x)[1], ".geno")
   }
