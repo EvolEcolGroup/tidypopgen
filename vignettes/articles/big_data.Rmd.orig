@@ -1,5 +1,7 @@
 ---
 title: "Working with big data"
+output: html_document
+date: "2026-10-21"
 ---
 
 ```{r setup, include=FALSE}
@@ -14,69 +16,46 @@ hook_benchmark()
 set.seed(123)
 ```
 
-# Working with big data
-
 This vignette will demonstrate how to work with large datasets in tidypopgen.
 
 This includes whole-genome data. *Note* that tidypopgen only handles variant sites, so if you are using a whole-genome dataset make sure it has been previously subsetted to variant sites only. Think very carefully before merging this kind of data during your pipeline!
 
-The latest version of tidypopgen has implemented a new option to minimise the memory footprint of very large datasets. As a large chunk of memory is occupied by loci names, the `gen_tibble()` function now offers the user the option to switch loci names from character strings to integers, reducing the memory used by the gen_tibble object. 
+The latest version of tidypopgen has implemented a new option to minimise the memory footprint of very large datasets. As a large chunk of memory is occupied by loci names, the `gen_tibble()` function now offers the user the option to switch loci names from character strings to integers, reducing the memory used by the gen_tibble object.
+
+# Getting the data
 
 ## Downloading the SGDP data
 
-We will demonstrate the new capacity of tidypopgen using a small subset of the
-[Simons Genome Diversity Project (SGDP)](https://reichdata.hms.harvard.edu/pub/datasets/sgdp/),
-containing 10 individuals each from Africa, Oceania, America and West Eurasia.
-Because the full dataset is large (279 individual VCF files), we do not
-download it as part of the vignette. Instead, the code below shows how to
-create the subset yourself if you wish to follow along. You will need
-[bcftools](https://samtools.github.io/bcftools/) installed and available on
-your `PATH`.
+We will demonstrate the new capacity of tidypopgen using a subset of the [Simons Genome Diversity Project (SGDP)](https://reichdata.hms.harvard.edu/pub/datasets/sgdp/), containing 10 individuals each from Africa, Oceania, America and West Eurasia. Because the full dataset is large (279 individual VCF files), we do not download it as part of the vignette. Instead, the code below shows how to create the subset yourself if you wish to follow along. You will need [bcftools](https://samtools.github.io/bcftools/) installed and available on your `PATH`.
 
-The shell script `data-raw/s02_create_sgdp_subset.sh` downloads the
-SGDP archive, extracts only the individuals listed in the text files, and
-uses `bcftools` to merge them into one VCF per region, plus a single VCF
-containing all four regions (`all_subset.vcf.gz`):
+@TODO simplify the download steps
+
+The shell script `data-raw/s02_create_sgdp_subset.sh` downloads the SGDP archive, extracts only the individuals listed in the text files, and uses `bcftools` to merge them into one VCF per region, plus a single VCF containing all four regions (`all_subset.vcf.gz`):
 
 ```{bash, eval = FALSE}
 data-raw/s02_create_sgdp_subset.sh
 ```
 
-Note that the download is large, so this step can take a while. The resulting
-`.vcf.gz` files (and their `.tbi` indexes) are written to `data-raw/`.
+Note that the download is large, so this step can take a while. The resulting `.vcf.gz` files (and their `.tbi` indexes) are written to `data-raw/`.
 
-## Setting up cores
+## Reading a large VCF into a gen_tibble
 
-Because tidypopgen utilizes disk storage through file-backed matrices (FBM), we can run this pipeline on a modern laptop without running out of RAM. Here, we use a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU and 31 GiB of RAM.
-
-Before we begin, we will limit the number of cores used by the parallelised BLAS library with `bigparallelr::set_blas_ncores()`, and by the package data.table with `data.table::setDTthreads()`.
-
-```{r}
-n_cores <- 20
-data.table::setDTthreads(n_cores)
-bigparallelr::set_blas_ncores(n_cores)
-```
-
-And we need to load the necessary libraries:
+Now that we have our data we can begin by loading the necessary libraries:
 
 ```{r}
 library(tidypopgen)
 library(ggplot2)
 ```
 
-# Tips for working with large datasets
-
-Now that we have our data we can begin.
-
-In many descriptive population genetic analyses, where the end goal is to visualise populations (e.g., PCA) or calculate a summary statistic (e.g. Fst), the names of your loci are not needed for the analysis. In these cases, we can save a lot of memory (over half of the memory footprint of the `gen_tibble`) by switching the loci names from strings to integers.
+In many descriptive population genetic analyses, where the end goal is to visualise populations (e.g., PCA) or calculate a summary statistic (e.g. F~ST~), the names of your loci are not needed for the analysis. In these cases, we can save a lot of memory (over half of the memory footprint of the `gen_tibble`) by switching the loci names from strings to integers.
 
 This option is only enabled when loading from a .vcf file. To do this, we need to set parameter `names_as_int` to TRUE when creating the gen_tibble:
 
 ```{r read_gen_tibble, eval = FALSE}
 sgdp <-
-  gen_tibble("../data/intermediate/all_subset.vcf.gz",
+  gen_tibble("data/sgdp/all_subset.vcf.gz",
     quiet = TRUE,
-    backingfile = "../data/intermediate/all_subset",
+    backingfile = "data/sgdp/all_subset",
     names_as_int = TRUE
   )
 ```
@@ -113,13 +92,27 @@ When we now call our loci tibble with `show_loci()`, we can see that the loci na
 show_loci(sgdp)
 ```
 
-And we can check the memory footprint of the gen_tibble using:
+The rsID's of each SNP have been removed, but all other metadata (chromosome, position, genetic distance, and alleles) are retained. We can check the memory footprint of the gen_tibble using:
 
 ```{r check_size}
 format(object.size(sgdp), units = "auto", digits = 2)
 ```
 
-# QC for large datasets
+## Setting up cores
+
+Because tidypopgen utilizes disk storage through file-backed matrices (FBM), we can run the following pipeline on a modern laptop without running out of RAM. Here, we use a GenuineIntel, Intel(R) Core(TM) Ultra 7 155H, 22 CPU and 31 GiB of RAM.
+
+Before we begin, we will limit the number of cores used by the parallelised BLAS library with `bigparallelr::set_blas_ncores()`, and by the package data.table with `data.table::setDTthreads()`. *Note* You may need to adjust `n_cores` according to your own hardware.
+
+```{r}
+n_cores <- 20
+data.table::setDTthreads(n_cores)
+bigparallelr::set_blas_ncores(n_cores)
+```
+
+# Quality control for large datasets
+
+## Individual and loci reports
 
 All the normal functionality of tidypopgen is preserved, as our `qc_report` functions exemplify:
 
@@ -158,36 +151,43 @@ When objects are no longer needed, or once results outputs have been saved, we c
 rm(sgdp_loci_rep)
 ```
 
+## Filtering
+
 We can then proceed with basic data filtering in the same way as working with any other gen_tibble object.
 
-@TODO adjust filtering thresholds to get an appropriate sized dataset for this demonstration
-
-First we can filter for MAF:
+First we can filter for minor allele frequency, choosing to select loci with MAF greater than 5%:
 
 ```{r maf_filter, benchmark = TRUE}
 sgdp <- sgdp %>%
   select_loci_if(loci_maf(genotypes) > 0.05)
+cat("Loci remaining:", count_loci(sgdp))
 ```
 
-And then for missingness:
+And then for missingness, keeping loci which are missing in fewer than 4 of the 40 individuals (less than 10% missingness):
 
 ```{r missingness_filter, benchmark = TRUE}
 sgdp <- sgdp %>%
-  select_loci_if(loci_missingness(genotypes) < 0.05)
+  select_loci_if(loci_missingness(genotypes) < 0.1)
+cat("Loci remaining:", count_loci(sgdp))
 ```
+
+## Imputing missing genotypes
 
 After removing loci, and before imputing, we need to update the file backing matrix with `gt_update_backingfile`:
 
 ```{r update_backingfile, benchmark = TRUE}
-sgdp <- gt_update_backingfile(sgdp, quiet = TRUE)
+sgdp <- gt_update_backingfile(sgdp, quiet = TRUE,
+                              backingfile = tempfile())
 ```
 
-This will help us with the next step, LD clumping Let's start by imputing the tibble:
+This will help us with the next step (LD clumping). Let's start by imputing the tibble:
 
 ```{r impute, benchmark = TRUE}
-sgdp <- gt_impute_simple(sgdp, method = "mode", n_cores = n_cores)
+sgdp <- gt_impute_simple(sgdp, method = "mean", n_cores = n_cores)
 gt_set_imputed(sgdp, TRUE)
 ```
+
+## LD clumping
 
 Then we can LD clump the dataset to remove loci in linkage disequilibrium.
 
@@ -197,11 +197,14 @@ With many loci, this step can be a little more time consuming, so it is importan
 sgdp <- sgdp %>%
   select_loci_if(loci_ld_clump(genotypes,
     n_cores = n_cores,
-    thr_r2 = 0.5
+    thr_r2 = 0.2
   ))
+cat("Loci remaining:", count_loci(sgdp))
 ```
 
 # Analysis
+
+## PCA
 
 Now that we have a clean dataset, we can proceed with our analysis by plotting a PCA:
 
@@ -215,9 +218,13 @@ autoplot(sgdp_pca, type = "scores") +
   labs(color = "Region")
 ```
 
+Our PCA shows separation between regions along PC1 and PC2. PC1 (8.14% of the variance) separates the African individuals on the left from the American and Oceanian individuals on the right, and PC2 (5.34%) mainly separates West Eurasian individuals at the bottom from the rest. Individuals from America, Oceania and West Eurasia each form tight clusters, whereas the African individuals are much more spread out, reflecting the greater genetic diversity within Africa. A few African individuals lie between the main African group and the West Eurasian cluster, and one Oceanian individual sits well away from its own cluster, closer to West Eurasia.
+
+## DAPC
+
 We can also perform a discriminant analysis of principal components (DAPC) using `gt_dapc`.
 
-```{r}
+```{r dapc, benchmark = TRUE}
 sgdp_dapc <- gt_dapc(sgdp_pca,
   pop = as.factor(sgdp$Region)
 )
@@ -227,14 +234,14 @@ sgdp_dapc <- gt_dapc(sgdp_pca,
 autoplot(sgdp_dapc, type = "components")
 ```
 
-Our autoplot shows that the probability of assignment for each individual to each cluster. We can see that most individuals are assigned to one cluster with high probability, but there are two individuals that are not. This is likely due to the fact that the two clusters do not sufficiently differentiate between the two regions.
+Our DAPC autoplot shows that most individuals are assigned to their own region’s group with a high probability, showing that there is some genetic differentiation between individuals from each continental region. However, three individuals stand out: one African individual is assigned mostly to the West Eurasian group, a second African individual has a small probability of West Eurasian membership, and one Oceanian individual is assigned entirely to the West Eurasian group.  These are consistent with the individuals that stood out in the PCA analysis above. They may have admixed ancestry, or they may have migrated over the course of their lifetime.
 
-# Calculate Fst
+# Pairwise F~ST~
 
-Finally, to quantify the differentiation between regions, we can calculate pairwise Fst.
+Finally, to examine the differentiation between regions, we can calculate pairwise F~ST~.
 
-```{r fst, benchmark = TRUE}
-grouped_sgdp <- sgdp %>% group_by(population)
+```{r pairwise_fst, benchmark = TRUE}
+grouped_sgdp <- sgdp %>% group_by(Region)
 pairwise_fst <- grouped_sgdp %>% pairwise_pop_fst(
   n_cores = n_cores,
   type = "pairwise"
@@ -253,11 +260,15 @@ autoplot(pairwise_fst,
   labs(
     x = element_blank(),
     y = element_blank(),
-    fill = "Fst"
+    fill = expression("Pairwise F"[ST])
   )
 ```
 
-# Summary
+@TODO add description - negative values due to small n per region
+
+The pairwise F~ST~ matrix shows that...
+
+# Performance summary
 
 Here is a summary of the time taken (in seconds) to perform each step using a large dataset:
 
@@ -280,3 +291,10 @@ total <- c("Total", sum(benchmark_results$time))
 benchmark_results <- rbind(benchmark_results, total)
 benchmark_results
 ```
+
+# Key takeaways
+
+- **Large data don't need a large machine.** `gen_tibble` objects are file-backed, so the genotypes stay on disk and only what you are working on is held in memory.
+- **Use `names_as_int = TRUE` when reading a VCF** to reduce the memory taken by locus names. The trade-off is that the original locus IDs are not kept (chromosome and position are).
+- **Set your cores.** Limit BLAS and `data.table` threads at the start, and pass `n_cores` to the functions that support it (imputation, LD clumping, F~ST~).
+- **Large analyses make large outputs.** Reports such as `qc_report_loci()` can be big, so save what you need and `rm()` the rest.
