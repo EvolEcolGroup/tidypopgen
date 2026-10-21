@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <algorithm>
 #include <zlib.h>
 #include <bigstatsr/BMCodeAcc.h>
 
@@ -110,6 +111,7 @@ List vcf_loci_table(std::string filename) {
 
   bool get_sample_names = true;
   bool get_ploidy = true;
+  size_t n_unknown_ploidy = 0; // number of individuals with unknown ploidy
 
   // Read the file line by line until the end of file
   while (true) {
@@ -160,20 +162,50 @@ List vcf_loci_table(std::string filename) {
     }
 
 
-    // Check if we need to get ploidy (this is only the case for the first line
-    // of real data)
-    if (get_ploidy) {
+    // Check if we need to get ploidy (this is the case for the first line
+    // of real data; a missing genotype "." gives no information on ploidy, so
+    // for those individuals we use the first genotype that is not ".")
+    if (get_ploidy || (n_unknown_ploidy > 0)) {
       std::vector<std::string> fields = split_line(line, "\t");
-      for (unsigned int i = 9; i < fields.size(); ++i) {
+      if (get_ploidy) {
+        // 0 indicates that the ploidy is not known yet
+        ploidy.assign(fields.size() > 9 ? fields.size() - 9 : 0, 0);
+        n_unknown_ploidy = ploidy.size();
+        get_ploidy = false;
+      }
+      for (unsigned int i = 9; (i < fields.size()) && (i - 9 < ploidy.size()); ++i) {
+        if (ploidy[i - 9] > 0) {
+          continue;
+        }
         // get everything up to the first : delimiter
         std::vector<std::string> this_fields = split_line(fields[i], ":");
+        if (this_fields.empty() || (this_fields[0] == ".")) {
+          continue;
+        }
         // now split by the genotype deliminear (unphased or phased)
         std::vector<std::string> genotype_fields = split_line(this_fields[0], "/|");
-        ploidy.push_back(genotype_fields.size());
+        ploidy[i - 9] = genotype_fields.size();
+        n_unknown_ploidy--;
       }
-      get_ploidy = false;
     }
 
+  }
+
+  // individuals with only missing genotypes get the largest ploidy of the
+  // other individuals (or 2 if no ploidy could be estimated)
+  if (n_unknown_ploidy > 0) {
+    int default_ploidy = 0;
+    for (size_t i = 0; i < ploidy.size(); ++i) {
+      default_ploidy = std::max(default_ploidy, ploidy[i]);
+    }
+    if (default_ploidy == 0) {
+      default_ploidy = 2;
+    }
+    for (size_t i = 0; i < ploidy.size(); ++i) {
+      if (ploidy[i] == 0) {
+        ploidy[i] = default_ploidy;
+      }
+    }
   }
 
   // close the file

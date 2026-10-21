@@ -8,7 +8,10 @@
 #' variant is found in a sex chromosome (or mtDNA), the parser will fail with
 #' 'Error: a genotype has more than max_ploidy alleles...'. To successful import
 #' such a *VCF*, change the order of variants so that the first chromosome is an
-#' autosome using a tool such as `vcftools`. Currently, only biallelic SNPs are
+#' autosome using a tool such as `vcftools`. Individuals with a missing genotype
+#' ('.') on the first variant get their ploidy from their first genotype that
+#' is not '.' (or the largest ploidy of the other individuals, if all their
+#' genotypes are '.'). Currently, only biallelic SNPs are
 #' supported. If haploid variants (e.g. sex chromosomes) are included in the
 #' *VCF*, they are not transformed into homozygous calls. Instead, reference
 #' alleles will be coded as 0 and alternative alleles will be coded as 1.

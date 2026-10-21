@@ -76,6 +76,40 @@ test_that("partially missing vcf genotypes are coded as missing", {
   }
 })
 
+test_that("missing genotypes on the first variant do not set ploidy", {
+  # B is missing on the first variant, C is missing on all variants
+  vcf_path <- write_small_vcf(list(
+    c("1", "10", "rs1", "A", "T", "0/1", ".", "."),
+    c("1", "20", "rs2", "C", "G", "0/0", "1/1", "."),
+    c("1", "30", "rs3", "G", "A", "1/1", "0/1", ".")
+  ))
+  vcf_path_tetra <- write_small_vcf(list(
+    c("1", "10", "rs1", "A", "T", "0/0/1/1", ".", "."),
+    c("1", "20", "rs2", "C", "G", "0/0/0/0", "0/1/1/1", "."),
+    c("1", "30", "rs3", "G", "A", "1/1/1/1", "0/0/0/1", ".")
+  ))
+  for (this_parser in c("cpp", "vcfR")) {
+    vcf_gt <- gen_tibble(vcf_path,
+      parser = this_parser, backingfile = tempfile(), quiet = TRUE
+    )
+    expect_equal(show_ploidy(vcf_gt), 2)
+    expect_equal(indiv_ploidy(vcf_gt), c(2, 2, 2))
+    expect_equal(
+      show_genotypes(vcf_gt),
+      matrix(c(1, NA, NA, 0, 2, NA, 2, 1, NA), nrow = 3)
+    )
+    vcf_gt_tetra <- gen_tibble(vcf_path_tetra,
+      parser = this_parser, backingfile = tempfile(), quiet = TRUE
+    )
+    expect_equal(show_ploidy(vcf_gt_tetra), 4)
+    expect_equal(indiv_ploidy(vcf_gt_tetra), c(4, 4, 4))
+    expect_equal(
+      show_genotypes(vcf_gt_tetra),
+      matrix(c(2, NA, NA, 0, 3, NA, 4, 1, NA), nrow = 3)
+    )
+  }
+})
+
 test_that("genotypes with more alleles than max_ploidy are caught", {
   # a tetraploid genotype in the middle of a diploid vcf (the last variant is
   # diploid)

@@ -77,6 +77,37 @@ vcf_to_fbm_vcfR <- function(
   )
   temp_gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
   ploidy <- unname(apply(temp_gt, 2, get_ploidy))
+  # a missing genotype "." gives no information on ploidy, so for those
+  # individuals we use the first genotype that is not "."
+  unknown_ploidy <- unname(temp_gt[1, ] == ".")
+  n_read <- 1
+  while (any(unknown_ploidy) && (n_read < no_variants)) {
+    next_gt <- vcfR::extract.gt(
+      vcfR::read.vcfR(
+        vcf_path,
+        nrows = min(chunk_size, no_variants - n_read),
+        skip = n_read,
+        verbose = !quiet,
+        convertNA = FALSE,
+        ...
+      ),
+      convertNA = FALSE
+    )
+    for (i in which(unknown_ploidy)) {
+      known <- which(next_gt[, i] != ".")
+      if (length(known) > 0) {
+        ploidy[i] <- get_ploidy(next_gt[known[1], i])
+        unknown_ploidy[i] <- FALSE
+      }
+    }
+    n_read <- n_read + nrow(next_gt)
+  }
+  # individuals with only missing genotypes get the largest ploidy of the
+  # other individuals (or 2 if no ploidy could be estimated)
+  if (any(unknown_ploidy)) {
+    ploidy[unknown_ploidy] <-
+      if (all(unknown_ploidy)) 2 else max(ploidy[!unknown_ploidy])
+  }
 
 
   # check that there are no missing values in ploidy vector

@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` on VCF files setting the ploidy of individuals with a
+  missing genotype (".") on the first variant to 1; their ploidy is now taken
+  from their first non-missing genotype
 * fix `gen_tibble()` on VCF files silently mis-coding genotypes with more
   alleles than the ploidy estimated from the first variant (e.g. a tetraploid
   genotype in a diploid file) when they are not on the last line; this is now an
