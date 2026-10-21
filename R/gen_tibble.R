@@ -550,6 +550,8 @@ check_allele_alphabet <- function(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", ".")
 ) {
+  # 0 is always considered as a missing value (see harmonise_missing_values)
+  missing_alleles <- union(missing_alleles, "0")
   if (
     any(
       !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),

@@ -130,6 +130,29 @@ test_that("valid alleles check for .character method", {
   )
 })
 
+test_that("0 is always accepted as a missing allele", {
+  # pop_a.bim uses 0 for missing alleles
+  bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  pop_a_gt <- gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE)
+  pop_a_n_gt <- gen_tibble(bed_path,
+    backingfile = tempfile(),
+    missing_alleles = "N",
+    quiet = TRUE
+  )
+  expect_identical(show_loci(pop_a_n_gt), show_loci(pop_a_gt))
+  # same for the matrix method
+  test_loci_zero <- test_loci
+  test_loci_zero$allele_alt[3] <- "0"
+  test_dfs_gt <- gen_tibble(
+    test_genotypes,
+    indiv_meta = test_indiv_meta,
+    loci = test_loci_zero,
+    missing_alleles = "N",
+    quiet = TRUE
+  )
+  expect_true(is.na(show_loci(test_dfs_gt)$allele_alt[3]))
+})
+
 test_that("error if genotypes and loci tables differ in length", {
   test_loci_short <- test_loci[1:5, ]
   expect_error(

@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` rejecting "0" alleles (the PLINK missing value) when custom
+  `missing_alleles` are given
 * `gen_tibble()` on a matrix now checks that a vector of `ploidy` has one value
   per individual, and that dosages are non-negative integers not greater than
   each individual's ploidy (previously invalid values were silently corrupted)
