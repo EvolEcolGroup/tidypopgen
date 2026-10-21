@@ -134,27 +134,29 @@ gt_dapc <- function(
     stop("'x' was run without centering; centering is necessary for 'gt_dapc'")
   }
 
+  pop.fac <- NULL
   if (is.null(pop)) {
     # if no pop was given, use best_k
     if (any(!inherits(x, "gt_cluster_pca"), is.null(x$best_k))) {
       stop("if 'pop' is not set, 'x' should be a 'gt_cluster_pca'")
     }
     # groups are named by their k value
-    pop.fac <- as.factor(x$clusters$groups[[as.character(x$best_k)]])
+    pop.fac <- x$clusters$groups[[as.character(x$best_k)]]
   } else if (is.factor(pop)) {
     # if a factor with all assignments was given
     pop.fac <- pop
   } else if (is.numeric(pop) && inherits(x, "gt_cluster_pca")) {
     # if pop is the k value
-    pop.fac <- as.factor(x$clusters$groups[[as.character(pop)]])
+    pop.fac <- x$clusters$groups[[as.character(pop)]]
   }
 
   if (is.null(pop.fac)) {
     stop(paste(
-      "x does not include pre-defined",
-      "populations, and `pop' is not provided"
+      "'pop' should be a factor, or a value of k in 'x$clusters$k'",
+      "if 'x' is a 'gt_cluster_pca'"
     ))
   }
+  pop.fac <- as.factor(pop.fac)
   # FIXME: is this actually nlevels(pop)?
   n_pop <- nlevels(pop.fac)
 

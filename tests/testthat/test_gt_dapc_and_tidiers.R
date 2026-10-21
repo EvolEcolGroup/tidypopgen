@@ -213,6 +213,39 @@ test_that("best_k is a value of k when k_clusters does not start at 1", {
   expect_equal(nlevels(test_dapc$grp), 5)
 })
 
+test_that("gt_dapc gives an informative error for an invalid pop", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  pops <- c(rep("pop1", 100), rep("pop2", 100))
+  # a character vector rather than a factor
+  expect_error(
+    gt_dapc(test_pca, pop = pops),
+    "'pop' should be a factor, or a value of k"
+  )
+  # a value of k, but x is not a gt_cluster_pca
+  expect_error(
+    gt_dapc(test_pca, pop = 3),
+    "'pop' should be a factor, or a value of k"
+  )
+  # a value of k that was not explored
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 5, k_clusters = c(1, 4),
+    quiet = TRUE
+  )
+  expect_error(
+    gt_dapc(test_cluster, pop = 10),
+    "'pop' should be a factor, or a value of k"
+  )
+})
+
 test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
   bed_file <- system.file("extdata", "example-missing.bed",
     package = "bigsnpr"

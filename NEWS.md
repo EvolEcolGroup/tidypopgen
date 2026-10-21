@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* `gt_dapc()` now gives an informative error when `pop` is not a factor or a
+  value of k explored by `gt_cluster_pca()`
 * fix `gt_cluster_pca_best_k()` returning the position of the best k rather than
   its value, and `gt_dapc()` selecting the wrong clustering when `k_clusters`
   did not start at 1
