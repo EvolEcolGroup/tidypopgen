@@ -96,7 +96,11 @@ qc_report_loci.grouped_df <- function(.x, ...) {
   # Calculate hwe across groups
   hwe_res <- loci_hwe(.x, type = "matrix")
   hwe_res <- as.data.frame(hwe_res)
-  hwe_res$p_corrected <- apply(hwe_res, 1, function(row) min(row) * pops)
+  # Bonferroni correction of the smallest p-value, capped at 1
+  hwe_res$p_corrected <- apply(
+    hwe_res, 1,
+    function(row) pmin(1, min(row) * pops)
+  )
 
   qc_report <- .x %>%
     ungroup() %>%

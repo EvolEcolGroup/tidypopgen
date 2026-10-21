@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix grouped `qc_report_loci()` returning HWE p-values greater than 1 (the
+  Bonferroni-corrected p-value is now capped at 1)
 * grouped `qc_report_indiv()` now gives informative errors when data are grouped
   by more than one variable, or when `kings_threshold` is used with
   pseudohaploid data (previously silently ignored)

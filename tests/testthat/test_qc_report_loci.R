@@ -44,9 +44,18 @@ test_that("grouped hwe within qc_report_loci", {
     select(dplyr::group_vars(test_gt)) %>%
     dplyr::pull(1)
   pops <- length(unique(pops))
-  hwe_res$p_corrected <- apply(hwe_res, 1, function(row) min(row) * pops)
+  # Bonferroni correction, capped at 1
+  hwe_res$p_corrected <- apply(
+    hwe_res, 1,
+    function(row) pmin(1, min(row) * pops)
+  )
   # Compare
   expect_equal(loci_report$hwe_p, hwe_res$p_corrected)
+  # corrected p-values are valid probabilities
+  expect_true(all(loci_report$hwe_p <= 1))
+  example_gt <- load_example_gt("gen_tbl") %>% group_by(population)
+  example_report <- qc_report_loci(example_gt)
+  expect_true(all(example_report$hwe_p >= 0 & example_report$hwe_p <= 1))
 })
 
 test_that("qc_report_loci for pseudohaploid data", {
