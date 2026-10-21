@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_dapc()` reporting the proportion of variance retained by the PCs
+  (`$var`) from singular values instead of eigenvalues
 * `gt_dapc()` now gives an informative error when `pop` is not a factor or a
   value of k explored by `gt_cluster_pca()`
 * fix `gt_cluster_pca_best_k()` returning the position of the best k rather than

@@ -182,7 +182,8 @@ gt_dapc <- function(
   XU <- sweep(x$u, 2, x$d, "*")[, 1:n_pca, drop = FALSE] # principal components
   # note that this is the proportion of variance out of the variance
   # we started with (i.e. what we retained with the PCAs)
-  XU.lambda <- sum(x$d[1:n_pca]) / sum(x$d) # sum of retained eigenvalues
+  # sum of retained eigenvalues (the squared singular values)
+  XU.lambda <- sum(x$d[1:n_pca]^2) / sum(x$d^2)
   colnames(XU) <- paste("PCA-pc", seq_len(ncol(XU)), sep = ".")
 
   ## PERFORM DA ##

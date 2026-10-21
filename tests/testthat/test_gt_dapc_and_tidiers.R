@@ -213,6 +213,23 @@ test_that("best_k is a value of k when k_clusters does not start at 1", {
   expect_equal(nlevels(test_dapc$grp), 5)
 })
 
+test_that("gt_dapc var is the proportion of variance of the retained PCs", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 10)
+  pops <- as.factor(rep(c("pop1", "pop2", "pop3", "pop4"), each = 50))
+  test_dapc <- gt_dapc(test_pca, pop = pops, n_pca = 6)
+  # the eigenvalues are the squared singular values
+  expect_equal(test_dapc$var, sum(test_pca$d[1:6]^2) / sum(test_pca$d^2))
+})
+
 test_that("gt_dapc gives an informative error for an invalid pop", {
   bed_file <- system.file("extdata", "example-missing.bed",
     package = "bigsnpr"
