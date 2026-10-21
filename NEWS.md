@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `loci_alt_freq()` and `loci_maf()` returning all NA for a single polyploid
+  individual
 * fix `loci_alt_freq(as_counts = TRUE)` on a single individual returning NA
   alternate and non-zero valid allele counts for missing genotypes, and unnamed
   columns

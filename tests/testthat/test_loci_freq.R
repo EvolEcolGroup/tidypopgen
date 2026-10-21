@@ -301,6 +301,41 @@ test_that("test loci_ with only one individual", {
 })
 
 
+test_that("loci_alt_freq on polyploids", {
+  test_genotypes <- rbind(
+    c(0, 1, 2, 3, 4),
+    c(4, 3, 2, 1, 0),
+    c(2, 2, NA, 4, 1)
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = data.frame(
+      name = paste0("rs", 1:5),
+      chromosome = 1L,
+      position = as.integer(1:5 * 10),
+      genetic_dist = as.double(rep(0, 5)),
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    indiv_meta = data.frame(
+      id = c("a", "b", "c"),
+      population = c("pop1", "pop2", "pop2")
+    ),
+    ploidy = 4,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  # frequencies
+  freq <- colSums(test_genotypes, na.rm = TRUE) / (c(3, 3, 2, 3, 3) * 4)
+  expect_equal(suppressWarnings(loci_alt_freq(test_gt)), freq)
+  # a single individual that is not the first in the FBM
+  one_indiv <- test_gt %>% filter(id == "c")
+  expect_equal(
+    suppressWarnings(loci_alt_freq(one_indiv)),
+    test_genotypes[3, ] / 4
+  )
+})
+
 test_that("loci_alt_freq grouped with one allele", {
   test_gt <- load_example_gt("grouped_gen_tbl")
   test_gt <- test_gt %>% select_loci(1)
