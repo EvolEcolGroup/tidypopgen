@@ -82,6 +82,68 @@ test_that("windows_stats_generic is correct", {
   )
 })
 
+test_that("windows_stats_generic windows include the last loci", {
+  x <- rep(1, 100)
+  loci_table <- data.frame(
+    chromosome = "chr1",
+    position = 1:100 * 10
+  )
+  # (100 - 10) is not a multiple of the step size
+  window_res <- windows_stats_generic(
+    .x = x,
+    loci_table = loci_table,
+    window_size = 10,
+    step_size = 4,
+    size_unit = "snp",
+    operator = "sum"
+  )
+  in_window <- sapply(1:100, function(i) {
+    any(window_res$start <= i & window_res$end >= i)
+  })
+  expect_true(all(in_window))
+  # the last window is partial, and includes loci 93 to 100
+  expect_equal(utils::tail(window_res$end, 1), 102)
+  expect_equal(utils::tail(window_res$n_loci, 1), 8)
+  expect_equal(utils::tail(window_res$stat, 1), 8)
+  # windows before the last one are unchanged
+  expect_equal(window_res$end[-nrow(window_res)], seq(10, 98, by = 4))
+  # and it is NA if we only want complete windows
+  window_res_complete <- windows_stats_generic(
+    .x = x,
+    loci_table = loci_table,
+    window_size = 10,
+    step_size = 4,
+    size_unit = "snp",
+    operator = "sum",
+    complete = TRUE
+  )
+  expect_true(is.na(utils::tail(window_res_complete$stat, 1)))
+  # same in bp
+  window_res <- windows_stats_generic(
+    .x = x,
+    loci_table = loci_table,
+    window_size = 100,
+    step_size = 40,
+    size_unit = "bp",
+    operator = "sum"
+  )
+  in_window <- sapply(loci_table$position, function(i) {
+    any(window_res$start <= i & window_res$end >= i)
+  })
+  expect_true(all(in_window))
+  expect_equal(utils::tail(window_res$n_loci, 1), 8)
+  # no extra window if the trailing loci are in a gap between windows
+  window_res <- windows_stats_generic(
+    .x = x,
+    loci_table = loci_table,
+    window_size = 10,
+    step_size = 20,
+    size_unit = "snp",
+    operator = "sum"
+  )
+  expect_equal(window_res$end, seq(10, 90, by = 20))
+})
+
 test_that("windows generic correctly catches errors", {
   x <- c(1, 2, 3, 4, 5, 6, 10, 11, 12, 13, 14, 15, 16)
   loci_table <- data.frame(

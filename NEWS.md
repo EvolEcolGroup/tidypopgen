@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `windows_stats_generic()` (and thus all `windows_*` functions) leaving out
+  the last loci of a chromosome when the window range is not a multiple of
+  `step_size`
 * fix spurious warnings from `windows_pairwise_pop_fst()` and
   `windows_nwise_pop_pbs()` with `type = "tidy"` for some numbers of populations
 * fix `gt_as_vcf()` writing a space-padded day in the `##fileDate` header line

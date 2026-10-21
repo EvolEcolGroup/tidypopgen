@@ -127,6 +127,15 @@ windows_stats_generic <- function(.x, loci_table,
       to = window_range[2] * window_size,
       by = step_size
     )
+    # if the last loci are beyond the last window (as the range is not a
+    # multiple of step_size), add one more step to include them (unless they
+    # fall in a gap between windows, when step_size is larger than
+    # window_size)
+    last_at <- window_at[length(window_at)]
+    max_pos <- max(position_sub)
+    if (last_at < max_pos && last_at + step_size - window_size < max_pos) {
+      window_at <- c(window_at, last_at + step_size)
+    }
 
     # note that runner measures the window from the end (not the front)
     if (operator != "custom") {
