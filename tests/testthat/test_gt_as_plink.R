@@ -626,3 +626,29 @@ test_that("plink files location when 'file' is NULL", {
 
   expect_equal(bed_path, expected_bed_file)
 })
+
+test_that("double positions are not written in scientific notation", {
+  test_gt_dbl <- test_gt
+  show_loci(test_gt_dbl)$position <- c(100000, 200000, 3e6, 999999, 1e5, 1e6)
+  ped_path <- gt_as_plink(
+    test_gt_dbl,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  map <- read.table(
+    sub("\\.ped$", ".map", ped_path),
+    header = FALSE,
+    colClasses = "character"
+  )
+  expect_equal(
+    map$V4,
+    c("100000", "200000", "3000000", "999999", "100000", "1000000")
+  )
+  bed_path <- gt_as_plink(test_gt_dbl, file = paste0(tempfile(), ".bed"))
+  bim <- read.table(
+    sub("\\.bed$", ".bim", bed_path),
+    header = FALSE,
+    colClasses = "character"
+  )
+  expect_equal(bim$V4, map$V4)
+})

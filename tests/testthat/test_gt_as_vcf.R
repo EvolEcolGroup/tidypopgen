@@ -192,3 +192,26 @@ test_that("integer chromosome becomes factor", {
     as.factor(test_loci$chromosome)
   )
 })
+
+test_that("double positions are not written in scientific notation", {
+  test_loci_dbl <- test_loci
+  test_loci_dbl$position <- c(100000, 200000, 3e6, 999999, 1e5, 999999)
+  test_gt_dbl <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci_dbl,
+    indiv_meta = test_indiv_meta,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  vcf_path <- gt_as_vcf(test_gt_dbl, file = paste0(tempfile(), ".vcf"))
+  vcf_lines <- readLines(vcf_path)
+  vcf_body <- vcf_lines[!startsWith(vcf_lines, "#")]
+  vcf_pos <- vapply(strsplit(vcf_body, "\t"), `[`, character(1), 2)
+  expect_equal(
+    vcf_pos,
+    c("100000", "200000", "3000000", "999999", "100000", "999999")
+  )
+  expect_true("##contig=<ID=chr2,length=1000000>" %in% vcf_lines)
+  test_gt2 <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile())
+  expect_equal(show_loci(test_gt2)$position, test_loci_dbl$position)
+})

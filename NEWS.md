@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_as_vcf()` and `gt_as_plink(type = "ped")` writing positions stored as
+  doubles in scientific notation (e.g. `1e+05`)
 * fix `gt_as_plink(type = "bed")` not writing the population (as family ID),
   parents, sex and phenotype to the .fam file, and `gt_as_plink(type =
   "ped")`/`type = "raw"` ignoring the grouping variable as family ID

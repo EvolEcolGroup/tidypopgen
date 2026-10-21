@@ -69,7 +69,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
         "##contig=<ID=",
         chromosome_summary$chromosome[chrom_i],
         ",length=",
-        chromosome_summary$max[chrom_i] + 1,
+        format_position(chromosome_summary$max[chrom_i] + 1),
         ">"
       )
     )
@@ -117,7 +117,13 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
     loci_cols <- c("chromosome", "position", "name", "allele_ref", "allele_alt")
     loci_sub <- loci_sub %>%
       select(any_of(loci_cols)) %>%
-      mutate(qual = ".", filter = ".", info = "PR", format = "GT")
+      mutate(
+        position = format_position(.data$position),
+        qual = ".",
+        filter = ".",
+        info = "PR",
+        format = "GT"
+      )
     loci_sub[is.na(loci_sub)] <- "."
     genotypes_matrix <- cbind(loci_sub, genotypes_matrix)
     # append table to previous chunk
@@ -132,6 +138,14 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
     )
   }
   return(file)
+}
+
+# format positions as plain integers for text files (positions stored as
+# doubles would otherwise be written in scientific notation, e.g. 1e+05)
+format_position <- function(x) {
+  out <- format(x, scientific = FALSE, trim = TRUE)
+  out[is.na(x)] <- NA
+  out
 }
 
 # TODO for tests
