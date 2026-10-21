@@ -481,3 +481,17 @@ test_that("gen_tibble allow_duplicates finds duplicates", {
 #                             quiet = TRUE)
 #   expect_true(file.exists(paste0(this_bkfile,".bk")))
 # }) #nolint end
+
+test_that("gen_tibbles with no loci or no individuals can be formatted", {
+  expect_equal(
+    format(test_gt$genotypes),
+    c("[1,1,...]", "[2,1,...]", "[2,2,...]")
+  )
+  # no loci
+  no_loci_gt <- select_loci_if(test_gt, rep(FALSE, 6))
+  expect_equal(format(no_loci_gt$genotypes), rep("[]", 3))
+  expect_output(print(no_loci_gt), "0 loci")
+  # no individuals
+  no_indiv_gt <- test_gt %>% filter(id == "z")
+  expect_identical(format(no_indiv_gt$genotypes), character(0))
+})

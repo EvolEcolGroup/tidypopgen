@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix printing a `gen_tibble` with no loci, and `format()` of a genotype column
+  with no individuals returning a non-empty vector
 * fix chromosome names being renumbered in lexicographic order (e.g. chromosome
   10 coded as 2) when some chromosome names are not numeric, which affected
   `gt_as_plink(chromosomes_as_int = TRUE)`, `gt_order_loci()` and
