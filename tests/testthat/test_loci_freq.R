@@ -284,6 +284,20 @@ test_that("test loci_ with only one individual", {
   one_indiv <- test_gt %>% filter(id == "a")
   expect_equal(loci_alt_freq(one_indiv), c(0.5, 0.5, 0, 0.5, 0.5, 1))
   expect_equal(loci_maf(one_indiv), c(0.5, 0.5, 0, 0.5, 0.5, 0))
+
+  # counts for an individual with missing genotypes are consistent with the
+  # counts for multiple individuals (missing loci have no valid alleles)
+  one_indiv <- test_gt %>% filter(id == "b")
+  expect_equal(
+    loci_alt_freq(one_indiv, as_counts = TRUE),
+    cbind(n_alt = c(2, 1, 0, 0, 0, 0), n_valid = c(2, 2, 2, 0, 2, 0))
+  )
+  expect_equal(loci_alt_freq(one_indiv), c(1, 0.5, 0, NaN, 0, NaN))
+  two_indiv <- test_gt %>% filter(id %in% c("b", "c"))
+  expect_equal(
+    colnames(loci_alt_freq(two_indiv, as_counts = TRUE)),
+    c("n_alt", "n_valid")
+  )
 })
 
 

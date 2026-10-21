@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `loci_alt_freq(as_counts = TRUE)` on a single individual returning NA
+  alternate and non-zero valid allele counts for missing genotypes, and unnamed
+  columns
 * fix `pop_tajimas_d()` and `windows_pop_tajimas_d()` returning NA when a locus
   has no valid genotypes, and ignoring segregating sites with pi equal to 1 (a
   single heterozygote genotyped)
