@@ -724,3 +724,39 @@ test_that("vcf tests storing names as integers", {
   )
   expect_true(inherits(combined_gt, "gen_tbl"))
 })
+
+test_that("file extensions are matched ignoring case", {
+  # copy the pop_a files, using upper case extensions for the main files
+  upper_dir <- tempfile("upper_")
+  dir.create(upper_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  for (ext in c("bim", "fam", "map", "snp", "ind")) {
+    file.copy(
+      file.path(ext_dir, paste0("pop_a.", ext)),
+      file.path(upper_dir, paste0("pop_a.", ext))
+    )
+  }
+  for (ext in c("bed", "ped", "geno")) {
+    file.copy(
+      file.path(ext_dir, paste0("pop_a.", ext)),
+      file.path(upper_dir, paste0("pop_a.", toupper(ext)))
+    )
+  }
+  # a gzipped vcf
+  gz_con <- gzfile(file.path(upper_dir, "pop_a.VCF.GZ"), "w")
+  writeLines(readLines(file.path(ext_dir, "pop_a.vcf")), gz_con)
+  close(gz_con)
+
+  for (ext in c("bed", "ped", "geno", "vcf")) {
+    lower_gt <- gen_tibble(file.path(ext_dir, paste0("pop_a.", ext)),
+      backingfile = tempfile(), quiet = TRUE
+    )
+    upper_file <- file.path(
+      upper_dir,
+      paste0("pop_a.", toupper(ext), ifelse(ext == "vcf", ".GZ", ""))
+    )
+    upper_gt <- gen_tibble(upper_file, backingfile = tempfile(), quiet = TRUE)
+    expect_identical(show_genotypes(upper_gt), show_genotypes(lower_gt))
+    expect_identical(show_loci(upper_gt), show_loci(lower_gt))
+  }
+})

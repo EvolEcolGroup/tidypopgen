@@ -590,6 +590,19 @@ harmonise_missing_values <- function(loci_info, missing_alleles = c("0", ".")) {
 }
 
 
+# replace the extension `ext` of a file (matched ignoring case) with
+# `new_ext`; if that file does not exist, but one with an upper case `new_ext`
+# does, the latter is returned
+sub_ext_ignore_case <- function(file, ext, new_ext) {
+  ext_pattern <- paste0("\\.", ext, "$")
+  new_file <- sub(ext_pattern, new_ext, file, ignore.case = TRUE)
+  upper_file <- sub(ext_pattern, toupper(new_ext), file, ignore.case = TRUE)
+  if (!file.exists(new_file) && file.exists(upper_file)) {
+    new_file <- upper_file
+  }
+  new_file
+}
+
 # check for existing .bk files
 change_duplicated_file_name <- function(file) {
   file <- tools::file_path_sans_ext(file)

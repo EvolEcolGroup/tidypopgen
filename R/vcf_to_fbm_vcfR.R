@@ -43,8 +43,8 @@ vcf_to_fbm_vcfR <- function(
 
   if (is.null(backingfile)) {
     backingfile <- vcf_path
-    backingfile <- sub("\\.vcf.gz$", "", backingfile)
-    backingfile <- sub("\\.vcf$", "", backingfile)
+    backingfile <- sub("\\.vcf\\.gz$", "", backingfile, ignore.case = TRUE)
+    backingfile <- sub("\\.vcf$", "", backingfile, ignore.case = TRUE)
   }
   if (file_ext(backingfile) == "bk") {
     backingfile <- bigstatsr::sub_bk(backingfile, "")

@@ -9,24 +9,26 @@ gen_tibble_bed_rds <- function(
   quiet = FALSE
 ) {
   # if file ends in bed
-  if (grepl("\\.bed$", x)) {
+  if (grepl("\\.bed$", x, ignore.case = TRUE)) {
     # check that the bim and fam files exist
-    if (!file.exists(bigsnpr::sub_bed(x, ".bim"))) {
-      stop("bim file ", bigsnpr::sub_bed(x, ".bim"), " does not exist")
+    bim_file <- sub_ext_ignore_case(x, "bed", ".bim")
+    fam_file <- sub_ext_ignore_case(x, "bed", ".fam")
+    if (!file.exists(bim_file)) {
+      stop("bim file ", bim_file, " does not exist")
     }
-    if (!file.exists(bigsnpr::sub_bed(x, ".fam"))) {
-      stop("fam file ", bigsnpr::sub_bed(x, ".fam"), " does not exist")
+    if (!file.exists(fam_file)) {
+      stop("fam file ", fam_file, " does not exist")
     }
     # read in the loci and indiv_meta from the bim and fam files
-    loci <- loci_from_bim(bigsnpr::sub_bed(x, ".bim"),
+    loci <- loci_from_bim(bim_file,
       valid_alleles = valid_alleles,
       missing_alleles = missing_alleles,
       allow_duplicates = allow_duplicates
     )
-    indiv_meta <- indiv_meta_from_fam(bigsnpr::sub_bed(x, ".fam"))
+    indiv_meta <- indiv_meta_from_fam(fam_file)
 
     if (is.null(backingfile)) {
-      backingfile <- bigsnpr::sub_bed(x)
+      backingfile <- sub("\\.bed$", "", x, ignore.case = TRUE)
     }
     fbm_path <- fbm_read_bed(x,
       n_indiv = nrow(indiv_meta),

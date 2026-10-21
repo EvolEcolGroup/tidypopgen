@@ -9,7 +9,7 @@ gen_tibble_ped <- function(
   quiet = FALSE
 ) {
   # Substitute .ped with .map
-  map_file <- sub("\\.ped$", ".map", x)
+  map_file <- sub_ext_ignore_case(x, "ped", ".map")
   if (!file.exists(map_file)) {
     stop("map file ", map_file, " does not exist")
   }

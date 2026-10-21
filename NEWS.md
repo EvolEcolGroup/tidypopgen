@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` failing on files with upper case extensions (e.g. .BED,
+  .PED, .GENO, .VCF.GZ)
 * fix `gen_tibble()` on VCF files leaving a backing file behind when the loci
   fail validation (e.g. duplicated loci), which caused a retry to use a new
   versioned file name

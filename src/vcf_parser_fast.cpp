@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <algorithm>
+#include <cctype>
 #include <zlib.h>
 #include <bigstatsr/BMCodeAcc.h>
 
@@ -23,6 +24,17 @@ inline bool gz_getline(gzFile file, std::string &line) {
     }
   }
   return !line.empty();
+}
+
+
+// Function to check whether a file name ends in .gz (ignoring case)
+inline bool is_gz_file(const std::string &filename) {
+  if (filename.size() < 3) {
+    return false;
+  }
+  std::string ext = filename.substr(filename.size() - 3);
+  std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+  return ext == ".gz";
 }
 
 
@@ -70,7 +82,7 @@ inline std::vector<std::string> split_locus_meta(const std::string &s,
 // [[Rcpp::export]]
 List vcf_loci_table(std::string filename) {
   // open the file
-  bool is_gz = (filename.substr(filename.size() - 3) == ".gz");
+  bool is_gz = is_gz_file(filename);
   std::ifstream vcfFile;
   gzFile vcfGzFile;
 
@@ -320,7 +332,7 @@ bool vcf_genotypes_to_fbm(std::string filename,
                           const int missing_value,
                           const int n_header_lines) {
   // open the file
-  bool is_gz = (filename.substr(filename.size() - 3) == ".gz");
+  bool is_gz = is_gz_file(filename);
   std::ifstream vcfFile;
   gzFile vcfGzFile;
 
