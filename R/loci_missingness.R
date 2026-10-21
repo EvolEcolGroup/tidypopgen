@@ -164,7 +164,7 @@ loci_missingness.grouped_df <- function(
       rowInd = rows_to_keep,
       colInd = ind,
       groupIds = dplyr::group_indices(.x) - 1,
-      ngroups = max(dplyr::group_indices(.x)),
+      ngroups = dplyr::n_groups(.x),
       ncores = n_cores
     )
   }

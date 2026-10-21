@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix grouped `loci_alt_freq()`, `loci_maf()`, `loci_hwe()`,
+  `loci_missingness()`, `loci_pi()` and `pop_tajimas_d()` failing when the last
+  group is empty (factor grouping with `.drop = FALSE`)
 * fix `gt_as_plink()`, `gt_as_geno_lea()` and `gt_as_hierfstat()` (and hence
   `gt_admixture()` and `gt_snmf()`) erroring on pseudohaploid data, which they
   document as supported

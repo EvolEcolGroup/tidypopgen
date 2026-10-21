@@ -369,3 +369,50 @@ test_that("grouped loci_ functions work with factor and numeric groups", {
     expect_equal(num_tidy$value, chr_tidy$value)
   }
 })
+
+test_that("grouped loci_ functions keep empty groups with .drop = FALSE", {
+  test_genotypes <- rbind(
+    c(0, 1, 2, NA),
+    c(2, 1, 0, 0),
+    c(2, 2, 0, 2),
+    c(0, 0, 2, 2)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:4),
+    chromosome = 1L,
+    position = as.integer(1:4 * 10),
+    genetic_dist = as.double(rep(0, 4)),
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = data.frame(
+      id = c("a", "b", "c", "d"),
+      # the last level has no individuals
+      population = factor(
+        c("p1", "p1", "p2", "p2"),
+        levels = c("p1", "p2", "p3")
+      )
+    ),
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  drop_grp <- test_gt %>% group_by(population)
+  keep_grp <- test_gt %>% group_by(population, .drop = FALSE)
+  loci_funs <- list(
+    loci_alt_freq, loci_maf, loci_missingness, loci_hwe, loci_pi
+  )
+  for (this_fun in loci_funs) {
+    drop_mat <- this_fun(drop_grp, type = "matrix")
+    keep_mat <- this_fun(keep_grp, type = "matrix")
+    expect_equal(colnames(keep_mat), c("p1", "p2", "p3"))
+    expect_equal(unclass(keep_mat)[, 1:2], unclass(drop_mat))
+    keep_tidy <- this_fun(keep_grp, type = "tidy")
+    expect_equal(nrow(keep_tidy), 4 * 3)
+  }
+  keep_counts <- loci_alt_freq(keep_grp, as_counts = TRUE)
+  expect_equal(ncol(keep_counts$n_alt), 3)
+  expect_equal(keep_counts$n_valid[, 3], rep(0, 4))
+})

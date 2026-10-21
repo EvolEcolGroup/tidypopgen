@@ -85,4 +85,17 @@ test_that("pop_tajimas_d on grouped tibbles", {
   taj_grp_chunked <- test_gt %>%
     pop_tajimas_d(n_cores = 2, block_size = 2)
   expect_true(all.equal(taj_grp, taj_grp_chunked))
+
+  # an empty last group (factor level with no individuals) is kept when
+  # grouping without dropping empty levels
+  test_gt <- test_gt %>% dplyr::ungroup()
+  test_gt$population <- factor(
+    test_gt$population,
+    levels = c("pop1", "pop2", "pop3", "pop4")
+  )
+  taj_keep <- test_gt %>%
+    group_by(population, .drop = FALSE) %>%
+    pop_tajimas_d()
+  expect_length(taj_keep, 4)
+  expect_equal(taj_keep[1:3], taj_grp)
 })

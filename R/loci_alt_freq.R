@@ -168,7 +168,7 @@ loci_alt_freq.grouped_df <- function(
     # rows (individuals) that we want to use
     rows_to_keep <- .gt_fbm_rows(.x)
     # number of groups (used to define dimensions of objects)
-    n_groups <- max(dplyr::group_indices(.x))
+    n_groups <- dplyr::n_groups(.x)
     ploidy <- indiv_ploidy(.x)
 
     gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
