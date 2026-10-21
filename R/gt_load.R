@@ -105,11 +105,14 @@ update_old_bigsnp <- function(x) {
   if (!is.null(attr(x$genotypes, "bigsnp"))) {
     # move the fbm into its own slot
     attr(x$genotypes, "fbm") <- attr(x$genotypes, "bigsnp")$genotypes
-    # fix ploidy
+    # fix ploidy (fbm_ploidy covers all the individuals in the fbm)
     if ((attr(x$genotypes, "ploidy") != 0) && (attr(x$genotypes, "ploidy") != -2)) { # nolint
-      fbm_ploidy <- rep(attr(x$genotypes, "ploidy"), nrow(x))
+      fbm_ploidy <- rep(
+        attr(x$genotypes, "ploidy"),
+        nrow(attr(x$genotypes, "fbm"))
+      )
     } else {
-      fbm_ploidy <- attr(x, "bigsnp")$fam$ploidy[vctrs::vec_data(x)]
+      fbm_ploidy <- attr(x$genotypes, "bigsnp")$fam$ploidy
     }
     attr(x$genotypes, "fbm_ploidy") <- fbm_ploidy
 

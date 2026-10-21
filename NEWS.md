@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gt_load()` on gen_tibbles saved in the old bigSNP format losing the
+  individual ploidies of mixed-ploidy and pseudohaploid data, and setting too
+  few ploidies for subsetted gen_tibbles
 * fix `gt_admixture()` with `seed = NULL` (the default) giving identical runs
   when `n_runs > 1`, as ADMIXTURE used its default seed (43) for every run;
   runs now use seeds 43, 44, etc.
