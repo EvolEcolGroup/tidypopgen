@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* `gen_tibble()` on a matrix now checks that a vector of `ploidy` has one value
+  per individual, and that dosages are non-negative integers not greater than
+  each individual's ploidy (previously invalid values were silently corrupted)
 * fix `gt_load()` on gen_tibbles saved in the old bigSNP format losing the
   individual ploidies of mixed-ploidy and pseudohaploid data, and setting too
   few ploidies for subsetted gen_tibbles

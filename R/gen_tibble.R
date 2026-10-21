@@ -311,6 +311,13 @@ gen_tibble.matrix <- function(
   }
 
   if (length(ploidy) > 1) {
+    # check that there is a ploidy value for each individual
+    if (length(ploidy) != nrow(x)) {
+      stop(
+        "'ploidy' should be a single value or a vector with one value ",
+        "per individual (row of 'x')"
+      )
+    }
     # check that there are no missing values in ploidy vector
     if (any(is.na(ploidy))) {
       stop("'ploidy' can not contain NAs")
@@ -353,6 +360,16 @@ gen_tibble.matrix <- function(
   }
   if (!(is.matrix(x) && is.numeric(x))) {
     stop("'x' is not a numeric matrix of integers")
+  }
+  # check that dosages are non-negative integers, within each ploidy
+  if (any(x != round(x) | x < 0, na.rm = TRUE)) {
+    stop("'x' should only contain non-negative integer dosages (or NA)")
+  }
+  if (any(x > fbm_ploidy, na.rm = TRUE)) {
+    stop(
+      "'x' contains dosages greater than the ploidy of the individual ",
+      "(see 'ploidy')"
+    )
   }
 
   # check dimensions

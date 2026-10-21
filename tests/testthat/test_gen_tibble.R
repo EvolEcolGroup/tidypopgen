@@ -303,6 +303,50 @@ test_that("gen_tibble identifies wrong dimensions in genotypes", {
   )
 })
 
+test_that("gen_tibble.matrix validates ploidy and dosages", {
+  # ploidy vector of the wrong length
+  expect_error(
+    gen_tibble(
+      x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+      ploidy = c(2, 2), quiet = TRUE, backingfile = tempfile()
+    ),
+    "one value per individual"
+  )
+  # non-integer dosages
+  bad_genotypes <- test_genotypes
+  bad_genotypes[1, 1] <- 1.6
+  expect_error(
+    gen_tibble(
+      x = bad_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+      quiet = TRUE, backingfile = tempfile()
+    ),
+    "non-negative integer dosages"
+  )
+  # negative dosages
+  bad_genotypes[1, 1] <- -1
+  expect_error(
+    gen_tibble(
+      x = bad_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+      quiet = TRUE, backingfile = tempfile()
+    ),
+    "non-negative integer dosages"
+  )
+  # dosages greater than the ploidy of an individual
+  expect_error(
+    gen_tibble(
+      x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+      ploidy = c(4, 1, 2), quiet = TRUE, backingfile = tempfile()
+    ),
+    "greater than the ploidy"
+  )
+  # valid mixed ploidy data
+  mixed_gt <- gen_tibble(
+    x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+    ploidy = c(4, 2, 2), quiet = TRUE, backingfile = tempfile()
+  )
+  expect_equal(indiv_ploidy(mixed_gt), c(4, 2, 2))
+})
+
 test_that("gen_tibble identifies wrong loci table columns", {
   wrong_loci <- data.frame(
     a = paste0("rs", 1:6),
