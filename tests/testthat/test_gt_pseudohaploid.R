@@ -297,3 +297,31 @@ test_that("gt_pseudohaploid updates ploidy after dropping pseudohploids", {
   expect_equal(length(indiv_het_obs(test_gt)), 4)
   expect_equal(round(indiv_het_obs(test_gt), 1), c(0.2, 0.5, 0.3, 0.5))
 })
+
+test_that("gt_pseudohaploid keeps ploidy of individuals not in the tibble", {
+  test_gt_pseudo <- gt_pseudohaploid(test_gt)
+  sub_gt <- test_gt_pseudo %>% filter(id %in% c("a", "c"))
+  sub_gt <- gt_pseudohaploid(sub_gt)
+  expect_equal(show_ploidy(sub_gt), 2)
+  expect_equal(indiv_ploidy(sub_gt), c(2, 2))
+  # fbm_ploidy covers the whole FBM, and is unchanged for the other rows
+  expect_equal(
+    attr(sub_gt$genotypes, "fbm_ploidy"),
+    c(2, 1, 2, 1, 2, 1, 2)
+  )
+})
+
+test_that("gt_pseudohaploid only works on diploid data", {
+  test_gt_tetra <- gen_tibble(
+    x = rbind(c(4, 0, 4, 0), c(1, 2, 3, 0), c(0, 4, 0, 4), c(2, 2, 1, 3)),
+    loci = test_loci[1:4, ],
+    indiv_meta = test_indiv_meta[1:4, ],
+    ploidy = 4,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_error(
+    gt_pseudohaploid(test_gt_tetra),
+    "this function only works on diploid or pseudohaploid data"
+  )
+})

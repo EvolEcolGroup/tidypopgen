@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gt_pseudohaploid()` resetting the ploidy of individuals in the backing
+  matrix that are not in the `gen_tibble`, and make it error on data that are
+  not diploid
 * fix `tidy()` and `augment()` of a `q_matrix` ignoring its individual ids when
   it has no group information, which misassigned proportions when `data` was in
   a different order
