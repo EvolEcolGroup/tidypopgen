@@ -57,23 +57,6 @@ vcf_to_fbm_cpp <- function(
   fbm_ploidy <- ploidy
   max_ploidy <- max(ploidy)
 
-  code256 <- rep(NA_real_, 256)
-  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
-
-  # create the file backed matrix
-  file_backed_matrix <- bigstatsr::FBM.code256(
-    nrow = no_individuals,
-    ncol = nrow(vcf_meta$loci_tbl),
-    code = code256,
-    backingfile = backingfile
-  )
-
-  vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
-    biallelic = vcf_meta$biallelic,
-    n_header_lines = vcf_meta$n_header_lines,
-    missing_value = max_ploidy + 1
-  )
-
   indiv_meta <- list(
     id = vcf_meta$sample_names
   )
@@ -109,7 +92,7 @@ vcf_to_fbm_cpp <- function(
     allele_alt = loci$allele1
   )
 
-  # validate the loci
+  # validate the loci (before creating the backing files)
   loci <- validate_loci(loci,
     check_alphabet = TRUE,
     harmonise_loci = TRUE,
@@ -120,6 +103,24 @@ vcf_to_fbm_cpp <- function(
   )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
+
+  code256 <- rep(NA_real_, 256)
+  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+
+  # create the file backed matrix
+  file_backed_matrix <- bigstatsr::FBM.code256(
+    nrow = no_individuals,
+    ncol = nrow(vcf_meta$loci_tbl),
+    code = code256,
+    backingfile = backingfile
+  )
+
+  vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
+    biallelic = vcf_meta$biallelic,
+    n_header_lines = vcf_meta$n_header_lines,
+    missing_value = max_ploidy + 1
+  )
+
   # construct path
   fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
 

@@ -208,14 +208,21 @@ vcf_to_fbm_vcfR <- function(
       )
     )
   }
-  # validate the loci
-  loci <- validate_loci(loci,
-    check_alphabet = TRUE,
-    harmonise_loci = TRUE,
-    check_duplicates = TRUE,
-    allow_duplicates = allow_duplicates,
-    valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles
+  # validate the loci (the loci are only known once the backing file has been
+  # written, so we remove it if the validation fails)
+  loci <- tryCatch(
+    validate_loci(loci,
+      check_alphabet = TRUE,
+      harmonise_loci = TRUE,
+      check_duplicates = TRUE,
+      allow_duplicates = allow_duplicates,
+      valid_alleles = valid_alleles,
+      missing_alleles = missing_alleles
+    ),
+    error = function(e) {
+      unlink(file_backed_matrix$backingfile)
+      stop(e)
+    }
   )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))

@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` on VCF files leaving a backing file behind when the loci
+  fail validation (e.g. duplicated loci), which caused a retry to use a new
+  versioned file name
 * fix `gen_tibble()` on VCF files setting the ploidy of individuals with a
   missing genotype (".") on the first variant to 1; their ploidy is now taken
   from their first non-missing genotype

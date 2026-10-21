@@ -110,6 +110,35 @@ test_that("missing genotypes on the first variant do not set ploidy", {
   }
 })
 
+test_that("invalid vcf loci do not leave backing files behind", {
+  vcf_path <- write_small_vcf(list(
+    c("1", "10", "rs1", "A", "T", "0/1", "0/0", "1/1"),
+    c("1", "10", "rs2", "C", "G", "0/0", "1/1", "0/1"),
+    c("1", "30", "rs3", "G", "A", "1/1", "0/1", "0/1")
+  ))
+  # vcfR has to remove the backing file, which Windows might prevent
+  parsers <- if (.Platform$OS.type == "windows") "cpp" else c("cpp", "vcfR")
+  for (this_parser in parsers) {
+    backingfile <- tempfile()
+    expect_error(
+      gen_tibble(vcf_path,
+        parser = this_parser, backingfile = backingfile, quiet = TRUE
+      ),
+      "Your data contain duplicated loci"
+    )
+    expect_false(file.exists(paste0(backingfile, ".bk")))
+    # so the backingfile name can be reused without a new version
+    expect_warning(
+      vcf_gt <- gen_tibble(vcf_path,
+        parser = this_parser, backingfile = backingfile, quiet = TRUE,
+        allow_duplicates = TRUE
+      ),
+      "duplicated loci"
+    )
+    expect_equal(gt_get_file_names(vcf_gt)[2], paste0(backingfile, ".bk"))
+  }
+})
+
 test_that("genotypes with more alleles than max_ploidy are caught", {
   # a tetraploid genotype in the middle of a diploid vcf (the last variant is
   # diploid)
