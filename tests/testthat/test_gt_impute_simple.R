@@ -209,6 +209,11 @@ test_that("n_cores can be set", {
     "operator is invalid for atomic vectors"
   )
   expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # the previous value of the option is restored on exit
+  withr::local_options(bigstatsr.check.parallel.blas = FALSE)
+  two_core <- gt_impute_simple(missing_gt, method = "mode", n_cores = 2)
+  expect_false(getOption("bigstatsr.check.parallel.blas"))
 })
 
 test_that("imputed gt retains status after gt_update_backingfile", {

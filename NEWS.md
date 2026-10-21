@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_impute_simple()` with `n_cores > 1` resetting the option
+  `bigstatsr.check.parallel.blas` to `TRUE` rather than to its previous value
 * fix `filter_high_relatedness()` (and the `kings_threshold` option of
   `qc_report_indiv()`) treating strongly negative kinship coefficients as high
   relatedness
