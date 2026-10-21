@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gt_cluster_pca_best_k()` returning the position of the best k rather than
+  its value, and `gt_dapc()` selecting the wrong clustering when `k_clusters`
+  did not start at 1
 * fix `gt_cluster_pca()` failing when only one value of k above 1 (or only k =
   1) is explored, which includes the default `k_clusters` for datasets with 25
   or fewer individuals, and when `n_pca = 1`

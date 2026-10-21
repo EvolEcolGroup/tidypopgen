@@ -168,6 +168,51 @@ test_that("gt_cluster_pca works with a single k and a single component", {
   )
 })
 
+test_that("best_k is a value of k when k_clusters does not start at 1", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 10)
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 10, k_clusters = c(3, 8),
+    quiet = TRUE
+  )
+  for (this_criterion in c("min", "diffNgroup")) {
+    test_cluster_best <- gt_cluster_pca_best_k(test_cluster,
+      stat = "WSS", criterion = this_criterion, quiet = TRUE
+    )
+    expect_true(test_cluster_best$best_k %in% test_cluster$clusters$k)
+  }
+  test_cluster_best <- gt_cluster_pca_best_k(test_cluster,
+    stat = "WSS", criterion = "min", quiet = TRUE
+  )
+  # the WSS decreases with k, so the minimum is at the largest k
+  expect_equal(
+    test_cluster_best$best_k,
+    test_cluster$clusters$k[which.min(test_cluster$clusters$WSS)]
+  )
+  expect_message(
+    gt_cluster_pca_best_k(test_cluster, stat = "WSS", criterion = "min"),
+    paste0(test_cluster_best$best_k, " clusters")
+  )
+  # gt_dapc uses the groups for best_k
+  test_dapc <- gt_dapc(test_cluster_best)
+  expect_equal(nlevels(test_dapc$grp), test_cluster_best$best_k)
+  # best_k can be overridden by the user
+  test_cluster_best$best_k <- 4
+  test_dapc <- gt_dapc(test_cluster_best)
+  expect_equal(nlevels(test_dapc$grp), 4)
+  # pop can be given as the value of k
+  test_dapc <- gt_dapc(test_cluster, pop = 5)
+  expect_equal(nlevels(test_dapc$grp), 5)
+})
+
 test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
   bed_file <- system.file("extdata", "example-missing.bed",
     package = "bigsnpr"
