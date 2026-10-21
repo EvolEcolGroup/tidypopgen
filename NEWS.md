@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `windows_pairwise_pop_fst()` and `windows_nwise_pop_pbs()` always using
+  Hudson's Fst, ignoring `method` and `fst_method` respectively
 * `pop_fst()` and `pop_fis(method = "WG17")` now give an informative error,
   instead of "subscript out of bounds", when there is only one group
 * fix `loci_alt_freq()` on polyploids ignoring `as_counts = TRUE` and failing

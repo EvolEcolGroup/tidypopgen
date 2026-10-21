@@ -132,3 +132,33 @@ test_that("windows type", {
     )
   expect_true(is.data.frame(pbs_windows_tidy_fst))
 })
+
+test_that("windows_nwise_pop_pbs uses the requested fst_method", {
+  pbs_nei <- test_gt %>%
+    windows_nwise_pop_pbs(
+      fst_method = "Nei87",
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp",
+      return_fst = TRUE
+    )
+  fst_nei <- test_gt %>%
+    windows_pairwise_pop_fst(
+      method = "Nei87",
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp"
+    )
+  expect_equal(pbs_nei[, names(fst_nei)], fst_nei)
+  pbs_hudson <- test_gt %>%
+    windows_nwise_pop_pbs(
+      fst_method = "Hudson",
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp"
+    )
+  expect_false(isTRUE(all.equal(
+    pbs_hudson$pbs_pop1.pop2.pop3,
+    pbs_nei$pbs_pop1.pop2.pop3
+  )))
+})

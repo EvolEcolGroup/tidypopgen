@@ -473,3 +473,43 @@ test_that("windows type", {
     subset(fst_windows_tidy, fst_windows_tidy$stat_name == "fst_pop1.pop2")
   expect_equal(pop1_pop2_tidy$value, fst_windows_matrix$fst_pop1.pop2)
 })
+
+test_that("windows_pairwise_pop_fst uses the requested method", {
+  for (this_method in c("Hudson", "Nei87", "WC84")) {
+    fst_nd <- test_gt %>%
+      pairwise_pop_fst(
+        method = this_method,
+        return_num_dem = TRUE,
+        by_locus = TRUE
+      )
+    snp_window <- test_gt %>%
+      windows_pairwise_pop_fst(
+        method = this_method,
+        window_size = 3,
+        step_size = 2,
+        size_unit = "snp",
+        min_loci = 2
+      )
+    # chr1, window 1 covers the first 3 loci
+    expect_equal(
+      snp_window$fst_pop1.pop2[1],
+      mean(fst_nd$Fst_by_locus_num[1:3, 1]) /
+        mean(fst_nd$Fst_by_locus_den[1:3, 1])
+    )
+    expect_equal(
+      snp_window$fst_pop2.pop3[1],
+      mean(fst_nd$Fst_by_locus_num[1:3, 3]) /
+        mean(fst_nd$Fst_by_locus_den[1:3, 3])
+    )
+  }
+  # the methods give different values
+  hudson_window <- test_gt %>%
+    windows_pairwise_pop_fst(
+      method = "Hudson", window_size = 3, step_size = 2, size_unit = "snp"
+    )
+  nei_window <- test_gt %>%
+    windows_pairwise_pop_fst(
+      method = "Nei87", window_size = 3, step_size = 2, size_unit = "snp"
+    )
+  expect_false(isTRUE(all.equal(hudson_window, nei_window)))
+})

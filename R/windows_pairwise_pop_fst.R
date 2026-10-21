@@ -61,7 +61,7 @@ windows_pairwise_pop_fst <- function(.x,
 
   # create the pairwise Fst by locus, saving numerator and denominator
   pair_fst <- pairwise_pop_fst(.x,
-    method = "Hudson", return_num_dem = TRUE,
+    method = method, return_num_dem = TRUE,
     by_locus = TRUE
   )
 
