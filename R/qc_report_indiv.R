@@ -180,11 +180,14 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 
     relatives <- indivs_to_keep(relatives, king)
 
-    # reorder relatives
-    relatives <- relatives[unique(qc_report$group)]
-    all_flags <- unlist(relatives)
+    # relatives are in group order; assign each group's flags to its rows
+    to_keep <- logical(nrow(.x))
+    rows <- dplyr::group_rows(.x)
+    for (i in seq_along(rows)) {
+      to_keep[rows[[i]]] <- relatives[[i]]
+    }
     # add to_remove
-    qc_report$to_keep <- as.vector(all_flags)
+    qc_report$to_keep <- to_keep
     attr(qc_report$to_keep, "king") <- king
   }
 

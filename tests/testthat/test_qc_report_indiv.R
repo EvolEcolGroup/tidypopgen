@@ -106,6 +106,54 @@ test_that("qc_report_indiv$to_keep is correctly ordered", {
   )
 })
 
+test_that("qc_report_indiv$to_keep is correct for interleaved groups", {
+  # relatives are 9-10 and 11-12; groups are not contiguous in the data
+  families$population <- ifelse(
+    families$id %in% c("2", "4", "9", "10"),
+    "A",
+    "B"
+  )
+  # run separate qc reports for each population
+  group_a_report <- qc_report_indiv(
+    filter(families, population == "A"),
+    kings_threshold = 0.2
+  )
+  group_b_report <- qc_report_indiv(
+    filter(families, population == "B"),
+    kings_threshold = 0.2
+  )
+  expected <- c(group_a_report$to_keep, group_b_report$to_keep)
+  names(expected) <- c(group_a_report$id, group_b_report$id)
+  expected <- unname(expected[families$id])
+  expect_equal(sum(!expected), 2)
+
+  grouped <- qc_report_indiv(
+    families %>% group_by(population),
+    kings_threshold = 0.2
+  )
+  expect_equal(grouped$id, families$id)
+  expect_equal(as.vector(grouped$to_keep), expected)
+
+  # grouping by a factor with an unused level
+  families$population <- factor(
+    families$population,
+    levels = c("C", "A", "B")
+  )
+  grouped <- qc_report_indiv(
+    families %>% group_by(population),
+    kings_threshold = 0.2
+  )
+  expect_equal(as.vector(grouped$to_keep), expected)
+
+  # grouping by a numeric variable
+  families$population <- ifelse(families$population == "A", 0, 1)
+  grouped <- qc_report_indiv(
+    families %>% group_by(population),
+    kings_threshold = 0.2
+  )
+  expect_equal(as.vector(grouped$to_keep), expected)
+})
+
 test_that("autoplot qc_report_indiv list for each population", {
   ungrouped <- qc_report_indiv(families, kings_threshold = 0.2)
   expect_error(autoplot(ungrouped, type = "blah"), "'arg' should be one of")

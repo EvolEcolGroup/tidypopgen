@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `qc_report_indiv()` on grouped `gen_tibble`s attaching `to_keep` flags to
+  the wrong individuals when groups are not contiguous, and failing when
+  grouping by a factor with unused levels or a numeric variable
 * fix grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`,
   `loci_hwe()` and `loci_pi()` failing when the grouping variable is a factor,
   or numeric with values other than 1 to the number of groups
