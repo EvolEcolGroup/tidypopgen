@@ -7,6 +7,25 @@ if (rlang::is_installed("RhpcBLASctl")) {
 
 skip_if_not_installed("vcfR")
 
+# write a small vcf; `variants` is a list of character vectors, each with
+# chromosome, position, id, ref, alt and the genotypes of samples A, B and C
+write_small_vcf <- function(variants, vcf_path = tempfile(fileext = ".vcf")) {
+  header <- c(
+    "##fileformat=VCFv4.2",
+    "##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">",
+    paste(
+      "#CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER", "INFO",
+      "FORMAT", "A", "B", "C",
+      sep = "\t"
+    )
+  )
+  body <- vapply(variants, function(x) {
+    paste(c(x[1:5], ".", "PASS", ".", "GT", x[-(1:5)]), collapse = "\t")
+  }, character(1))
+  writeLines(c(header, body), vcf_path)
+  vcf_path
+}
+
 test_that("gen_tibble_vcf filters non-biallelic SNPs", {
   # get path for non-biallelic SNPs
   vcf_path <- test_path("testdata/vcf", "pop_a_non_biallelic.vcf")
@@ -39,4 +58,19 @@ test_that("gen_tibble_vcf filters non-biallelic SNPs", {
     backingfile = tempfile(),
     quiet = TRUE
   ), "valid alleles are ")
+})
+
+test_that("partially missing vcf genotypes are coded as missing", {
+  vcf_path <- write_small_vcf(list(
+    c("1", "10", "rs1", "A", "T", "0/1", "0/0", "1/1"),
+    c("1", "20", "rs2", "C", "G", "1/.", "0/.", "./."),
+    c("1", "30", "rs3", "G", "A", "1|.", "./1", "0|1")
+  ))
+  expected <- matrix(c(1, 0, 2, NA, NA, NA, NA, NA, 1), nrow = 3)
+  for (this_parser in c("cpp", "vcfR")) {
+    vcf_gt <- gen_tibble(vcf_path,
+      parser = this_parser, backingfile = tempfile(), quiet = TRUE
+    )
+    expect_equal(show_genotypes(vcf_gt), expected)
+  }
 })

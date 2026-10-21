@@ -243,15 +243,15 @@ inline void count_alt_alleles(const std::string &line,
   for (size_t i=0; i<n; i++){
     size_t pos = separator_pos[i+8];
     // the genotypes start at pos +1
-    if (line[pos+1] == '.') {
-      alt_counts[i] = missingValue;
-    } else {
-      for (size_t pos_i = pos+1; pos_i < separator_pos[i+9]+1; pos_i++){
-        if (line[pos_i] == '1'){
-          alt_counts[i]++;
-        } else if (line[pos_i] == ':') //if at the end of the genotype section
-          break;
-      }
+    for (size_t pos_i = pos+1; pos_i < separator_pos[i+9]+1; pos_i++){
+      if (line[pos_i] == '1'){
+        alt_counts[i]++;
+      } else if (line[pos_i] == '.'){
+        // if any allele is missing, the genotype is missing
+        alt_counts[i] = missingValue;
+        break;
+      } else if (line[pos_i] == ':') //if at the end of the genotype section
+        break;
     }
   }
 }

@@ -217,7 +217,8 @@ poly_indiv_dosage <- function(x, max_ploidy) {
 
 # get dosages for a genotype x and return them as raw for inclusion in the FBM
 poly_genotype_dosage <- function(x, max_ploidy) {
-  if (!is.na(x[1]) && x[1] != ".") {
+  # if any allele is missing, the genotype is missing
+  if (length(x) > 0 && !anyNA(x) && !any(x == ".")) {
     dosage <- sum(as.numeric(x))
     if (dosage < (max_ploidy + 1)) {
       return(as.raw(dosage)) # nolint

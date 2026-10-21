@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` on VCF files with partially missing genotypes (e.g. "1/."):
+  the "cpp" parser silently coded them as non-missing dosages, and the "vcfR"
+  parser failed; they are now coded as missing
 * fix `gen_tibble()` with `parser = "vcfR"` failing when a sample has a missing
   genotype (".") on the second variant of the VCF
 * fix `gt_update_backingfile()` (and `gt_order_loci()`) failing when the number
