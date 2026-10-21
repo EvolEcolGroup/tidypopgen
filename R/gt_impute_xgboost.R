@@ -98,9 +98,14 @@ gt_impute_xgboost <- function(
     }
   }
 
+  # the chromosomes need to be in the order of the columns of the FBM, which
+  # is not necessarily the order of the loci table
+  infos_chr <- integer(count_loci(x))
+  infos_chr[show_loci(x)$big_index] <-
+    cast_chromosome_to_int(show_loci(x)$chromosome)
   infos <- bigsnpr::snp_fastImpute(
     attr(x$genotypes, "fbm"), # this needs subsetting
-    infos.chr = cast_chromosome_to_int(show_loci(x)$chromosome),
+    infos.chr = infos_chr,
     alpha = alpha,
     size = size,
     p.train = p_train,

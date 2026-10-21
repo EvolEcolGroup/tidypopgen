@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gt_impute_xgboost()` assigning loci to the wrong chromosome (and so
+  imputing them from the wrong neighbours) when the loci table is not in the
+  order of the backing file
 * fix `gt_impute_simple()` with `n_cores > 1` resetting the option
   `bigstatsr.check.parallel.blas` to `TRUE` rather than to its previous value
 * fix `filter_high_relatedness()` (and the `kings_threshold` option of

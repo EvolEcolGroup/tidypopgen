@@ -41,6 +41,46 @@ test_that("impute and use the imputation", {
   )
 })
 
+test_that("gt_impute_xgboost works with loci out of order", {
+  set.seed(42)
+  n_ind <- 100
+  n_loci <- 80
+  # correlated blocks of loci, on two chromosomes of different size
+  base_geno <- matrix(stats::rbinom(n_ind * 16, 2, 0.5), nrow = n_ind)
+  geno <- base_geno[, rep(1:16, each = 5)]
+  flip <- matrix(stats::runif(n_ind * n_loci) < 0.05, nrow = n_ind)
+  geno[flip] <- stats::rbinom(sum(flip), 2, 0.5)
+  geno[matrix(stats::runif(n_ind * n_loci) < 0.1, nrow = n_ind)] <- NA
+  loci <- data.frame(
+    name = paste0("rs", seq_len(n_loci)),
+    chromosome = c(rep(1L, 60), rep(2L, 20)),
+    position = c(seq_len(60), seq_len(20)) * 1000L,
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  meta <- data.frame(id = paste0("ind", seq_len(n_ind)), population = "a")
+  ordered_gt <- gen_tibble(geno,
+    indiv_meta = meta, loci = loci,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  rev_gt <- gen_tibble(geno,
+    indiv_meta = meta, loci = loci,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  # reverse the order of the loci table
+  rev_gt <- rev_gt %>% select_loci(rev(seq_len(n_loci)))
+  ordered_gt <- gt_impute_xgboost(ordered_gt, seed = 1)
+  rev_gt <- gt_impute_xgboost(rev_gt, seed = 1)
+  gt_set_imputed(ordered_gt, set = TRUE)
+  gt_set_imputed(rev_gt, set = TRUE)
+  # the imputed genotypes should be the same
+  expect_identical(
+    show_genotypes(rev_gt)[, rev(seq_len(n_loci))],
+    show_genotypes(ordered_gt)
+  )
+})
+
 test_that("backingfile error if gt and bk have uneven number of loci/indivs", {
   # remove an individual from missing_gt
   missing_indiv_gt <- missing_gt[-1, ]
