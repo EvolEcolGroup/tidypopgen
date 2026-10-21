@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `loci_alt_freq()` on polyploids ignoring `as_counts = TRUE` and failing
+  when only one locus is selected
 * fix `loci_alt_freq()` and `loci_maf()` returning all NA for a single polyploid
   individual
 * fix `loci_alt_freq(as_counts = TRUE)` on a single individual returning NA

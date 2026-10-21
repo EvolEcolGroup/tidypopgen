@@ -334,6 +334,30 @@ test_that("loci_alt_freq on polyploids", {
     suppressWarnings(loci_alt_freq(one_indiv)),
     test_genotypes[3, ] / 4
   )
+  # counts
+  expect_equal(
+    suppressWarnings(loci_alt_freq(test_gt, as_counts = TRUE)),
+    cbind(
+      n_alt = colSums(test_genotypes, na.rm = TRUE),
+      n_valid = c(3, 3, 2, 3, 3) * 4
+    )
+  )
+  expect_equal(
+    suppressWarnings(loci_alt_freq(one_indiv, as_counts = TRUE)),
+    cbind(n_alt = c(2, 2, 0, 4, 1), n_valid = c(4, 4, 0, 4, 4))
+  )
+  # a single locus
+  one_locus <- test_gt %>% select_loci(3)
+  expect_equal(suppressWarnings(loci_alt_freq(one_locus)), 0.5)
+  expect_equal(
+    suppressWarnings(loci_alt_freq(one_locus, as_counts = TRUE)),
+    cbind(n_alt = 4, n_valid = 8)
+  )
+  # and with multiple blocks of loci
+  expect_equal(
+    suppressWarnings(loci_alt_freq(test_gt, block_size = 1)),
+    freq
+  )
 })
 
 test_that("loci_alt_freq grouped with one allele", {

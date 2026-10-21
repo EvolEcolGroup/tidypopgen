@@ -133,7 +133,10 @@ loci_alt_freq.vctrs_bigSNP <- function(
       as_counts = as_counts
     )
   } else {
-    loci_alt_freq_polyploid(.x, n_cores = n_cores, block_size = block_size, ...)
+    loci_alt_freq_polyploid(.x,
+      as_counts = as_counts,
+      n_cores = n_cores, block_size = block_size, ...
+    )
   }
 }
 
@@ -383,7 +386,8 @@ loci_alt_freq_dip_pseudo <- function(.x,
   }
 }
 
-loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
+loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
+                                    block_size, ...) {
   warning(paste(
     "this function still needs a proper unit test!!!",
     "It assumes alleles are the unit of observation"
@@ -397,14 +401,15 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
   if (length(rows_to_keep) > 1) {
     # col means for submatrix (all rows, only some columns)
     col_sums_na <- function(X, ind, rows_to_keep, ploidy_by_indiv) {
-      res <- colSums(X[rows_to_keep, ind], na.rm = TRUE)
+      # drop = FALSE keeps a matrix when the block has a single locus
+      res <- colSums(X[rows_to_keep, ind, drop = FALSE], na.rm = TRUE)
       col_na <- function(a, ploidy_by_indiv) {
         sum(is.na(a) * ploidy_by_indiv)
       }
       res <- cbind(
         res,
         apply(
-          X[rows_to_keep, ind],
+          X[rows_to_keep, ind, drop = FALSE],
           2,
           col_na,
           ploidy_by_indiv = ploidy_by_indiv
@@ -422,13 +427,25 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
       block.size = block_size,
       a.combine = "rbind"
     )
-    # now get frequency accounting for missing values
-    col_sums_na_mat[, 1] / (sum(ploidy_by_indiv) - col_sums_na_mat[, 2])
+    # counts of alternate and valid alleles, accounting for missing values
+    counts <- col_sums_na_mat
+    counts[, 2] <- sum(ploidy_by_indiv) - counts[, 2]
+    colnames(counts) <- c("n_alt", "n_valid")
   } else {
     # if we have a single individual (ploidy_by_indiv is already restricted
-    # to the individuals in .x, so it has length 1)
-    geno_fbm[rows_to_keep, attr(.x, "loci")$big_index] / ploidy_by_indiv
+    # to the individuals in .x, so it has length 1); missing genotypes have
+    # no valid alleles
+    geno <- geno_fbm[rows_to_keep, attr(.x, "loci")$big_index]
+    counts <- cbind(
+      n_alt = ifelse(is.na(geno), 0, geno),
+      n_valid = ifelse(is.na(geno), 0, ploidy_by_indiv)
+    )
   }
+  if (as_counts) {
+    return(counts)
+  }
+  # now get frequency (unname, as a single locus would keep the column name)
+  unname(counts[, 1] / counts[, 2])
 }
 
 #' Function to format the matrix for grouped operations
