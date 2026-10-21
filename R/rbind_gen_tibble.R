@@ -97,14 +97,14 @@ rbind.gen_tbl <- function(
       " same ID."
     )
   }
+  if (as_is && flip_strand) {
+    stop(paste(
+      "if 'as_is' is set to TRUE, 'flip_strand' and",
+      "'remove_ambiguous' have to be FALSE"
+    ))
+  }
   if (!quiet) {
     if (as_is) {
-      if (flip_strand) {
-        stop(paste(
-          "if 'as_is' is set to TRUE, 'flip_strand' and",
-          "'remove_ambiguous' have to be FALSE"
-        ))
-      }
       message(
         "rbind will not attempt to harmonise the loci (e.g. flip strand,\n",
         " reorder or subset) set 'as_is' to FALSE to subset to loci in common\n"

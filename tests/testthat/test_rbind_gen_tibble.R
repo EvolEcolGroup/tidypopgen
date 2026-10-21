@@ -321,6 +321,20 @@ test_that("rbind keeps ploidy of subset and reordered individuals", {
   expect_equal(show_ploidy(merged_dip), 2)
 })
 
+test_that("rbind rejects as_is with flip_strand even when quiet", {
+  expect_error(
+    rbind(
+      pop_b_gt,
+      pop_a_gt,
+      as_is = TRUE,
+      flip_strand = TRUE,
+      quiet = TRUE,
+      backingfile = tempfile()
+    ),
+    "if 'as_is' is set to TRUE, 'flip_strand'"
+  )
+})
+
 test_that("rbind fails if gen_tibbles contain same ID", {
   pop_a_gt$id[1] <- "A"
   pop_b_gt$id[1] <- "A"
