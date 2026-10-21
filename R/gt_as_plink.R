@@ -255,16 +255,19 @@ gt_write_ped_raw <- function(
     # without a population (e.g. from a vcf), the family ID is the sample ID
     population = if ("population" %in% names(x)) x$population else x$id,
     id = x$id,
-    pat = pull_na(x, "pat"),
-    mat = pull_na(x, "mat"),
+    # parents are paternal_ID/maternal_ID when read from a bed file, and
+    # father/mother when read from a ped file
+    pat = pull_na(x, c("paternal_ID", "father")),
+    mat = pull_na(x, c("maternal_ID", "mother")),
     sex = pull_na(x, "sex"),
     phenotype = pull_na(x, "phenotype")
   )
-  # recode some variables
+  # recode some variables (sex is a factor when read from a bed file, and
+  # PLINK's numeric code when read from a ped file)
   indiv_meta$sex <- dplyr::recode_values(
     as.character(indiv_meta$sex),
-    "female" ~ "2",
-    "male" ~ "1",
+    c("female", "2") ~ "2",
+    c("male", "1") ~ "1",
     default = "0"
   )
   indiv_meta$pat[is.na(indiv_meta$pat)] <- 0
@@ -336,11 +339,12 @@ gt_write_ped_raw <- function(
 }
 
 
-# internal function returning either a vector from a given column
-# or NA if it does not exist
+# internal function returning either a vector from the first of the given
+# columns that exists, or NA if none of them exists
 pull_na <- function(.x, .col_name) {
-  if (.col_name %in% names(.x)) {
-    return(.x %>% pull(.col_name)) # nolint
+  .col_name <- intersect(.col_name, names(.x))
+  if (length(.col_name) > 0) {
+    return(.x %>% pull(.col_name[1])) # nolint
   } else {
     return(rep(NA, nrow(.x))) # nolint
   }

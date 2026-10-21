@@ -237,6 +237,49 @@ test_that("ped map file includes the genetic distance", {
   )
 })
 
+test_that("ped and raw keep parents, sex and phenotype", {
+  # write a fam file with parents, sex and phenotype, and read it back
+  bed_path <- gt_as_plink(test_gt, file = paste0(tempfile(), ".bed"))
+  fam_path <- sub("\\.bed$", ".fam", bed_path)
+  fam <- read.table(fam_path, header = FALSE)
+  fam$V3 <- c("0", "0", "a")
+  fam$V4 <- c("0", "0", "b")
+  fam$V5 <- c(1, 2, 1)
+  fam$V6 <- c(1, 2, 2)
+  write.table(
+    fam,
+    fam_path,
+    quote = FALSE,
+    row.names = FALSE,
+    col.names = FALSE
+  )
+  bed_gt <- gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(bed_gt$paternal_ID, c(NA, NA, "a"))
+  expect_equal(bed_gt$maternal_ID, c(NA, NA, "b"))
+  ped_path <- gt_as_plink(
+    bed_gt,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(ped$V3, c("0", "0", "a"))
+  expect_equal(ped$V4, c("0", "0", "b"))
+  expect_equal(ped$V5, c("1", "2", "1"))
+  expect_equal(ped$V6, c("1", "2", "2"))
+  raw_path <- gt_as_plink(bed_gt, file = tempfile(), type = "raw")
+  raw <- read.table(raw_path, header = TRUE, colClasses = "character")
+  expect_equal(unname(as.list(raw[, 3:6])), unname(as.list(ped[, 3:6])))
+  # the metadata read from a ped file is also written back
+  ped_gt <- gen_tibble(ped_path, backingfile = tempfile(), quiet = TRUE)
+  ped_path2 <- gt_as_plink(
+    ped_gt,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped2 <- read.table(ped_path2, header = FALSE, colClasses = "character")
+  expect_equal(ped2[, 1:6], ped[, 1:6])
+})
+
 test_that("handling of duplicated loci", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
