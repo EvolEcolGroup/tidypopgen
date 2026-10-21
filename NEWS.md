@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` with `parser = "vcfR"` failing on VCF files containing
+  biallelic indels; these are now dropped, as with the "cpp" parser
 * `show_loci<-` now errors if the replacement table does not have a valid
   `big_index` column, rather than silently creating a broken `gen_tibble`
 * fix printing a `gen_tibble` with no loci, and `format()` of a genotype column

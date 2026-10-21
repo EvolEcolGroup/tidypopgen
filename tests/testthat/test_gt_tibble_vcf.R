@@ -50,14 +50,15 @@ test_that("gen_tibble_vcf filters non-biallelic SNPs", {
   # and check
   expect_true(all(show_genotypes(pop_a_gt_sub) == show_genotypes(vcf_cpp_gt)))
 
-  # note that our vcfr does not cope with biallelic non-SNPs
-  # we catch an error as one of the alleles is not a valid allele
-  expect_error(vcf_vcfr_gt <- gen_tibble(
+  # the vcfR parser also drops biallelic non-SNPs (e.g. indels)
+  vcf_vcfr_gt <- gen_tibble(
     x = vcf_path,
     parser = "vcfR",
     backingfile = tempfile(),
     quiet = TRUE
-  ), "valid alleles are ")
+  )
+  expect_identical(show_loci(vcf_vcfr_gt), show_loci(vcf_cpp_gt))
+  expect_identical(show_genotypes(vcf_vcfr_gt), show_genotypes(vcf_cpp_gt))
 })
 
 test_that("partially missing vcf genotypes are coded as missing", {

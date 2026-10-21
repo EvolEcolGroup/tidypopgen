@@ -127,8 +127,12 @@ vcf_to_fbm_vcfR <- function(
       verbose = !quiet,
       ...
     )
-    # filter any marker that is not biallelic
-    bi <- vcfR::is.biallelic(temp_vcf)
+    # filter any marker that is not a biallelic SNP (as in the cpp parser, REF
+    # and ALT must be a single character; a missing allele "." is NA)
+    is_single_allele <- function(x) is.na(x) | nchar(x) == 1
+    bi <- vcfR::is.biallelic(temp_vcf) &
+      is_single_allele(vcfR::getREF(temp_vcf)) &
+      is_single_allele(vcfR::getALT(temp_vcf))
     gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
     gt <- gt[bi, , drop = FALSE]
     if (nrow(gt) > 1) {
