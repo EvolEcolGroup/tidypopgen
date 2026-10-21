@@ -744,6 +744,24 @@ test_that("ped files with a trailing blank line can be read", {
   expect_identical(show_genotypes(ped_gt), show_genotypes(orig_gt))
 })
 
+test_that("truncated packedancestry geno files are caught", {
+  geno_dir <- tempfile("geno_")
+  dir.create(geno_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  file.copy(file.path(ext_dir, "pop_a.snp"), geno_dir)
+  file.copy(file.path(ext_dir, "pop_a.ind"), geno_dir)
+  geno_bytes <- readBin(file.path(ext_dir, "pop_a.geno"), "raw", n = 1e5)
+  geno_path <- file.path(geno_dir, "pop_a.geno")
+  # remove a few bytes, or most of the file (keeping the header)
+  for (n_bytes in c(length(geno_bytes) - 10, 48)) {
+    writeBin(geno_bytes[seq_len(n_bytes)], geno_path)
+    expect_error(
+      gen_tibble(geno_path, backingfile = tempfile(), quiet = TRUE),
+      "truncated or corrupted"
+    )
+  }
+})
+
 test_that("file extensions are matched ignoring case", {
   # copy the pop_a files, using upper case extensions for the main files
   upper_dir <- tempfile("upper_")

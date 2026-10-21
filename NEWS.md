@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* `gen_tibble()` now errors on truncated or corrupted packedancestry .geno
+  files, rather than reading garbage genotypes (or reading out of bounds)
 * document that the `n_cores` argument of `gen_tibble()` is currently ignored
 * reduce the memory preallocated by the "cpp" VCF parser of `gen_tibble()`
 * fix `gen_tibble()` truncating user-supplied `backingfile` names at the last

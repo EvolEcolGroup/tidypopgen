@@ -2,6 +2,7 @@
 
 #include <bigstatsr/BMCodeAcc.h>
 #include <fstream>
+#include <algorithm>
 //#include <bigsnpr/bed-acc.h>
 
 using namespace Rcpp;
@@ -41,6 +42,14 @@ bool read_packedancestry(const char * filename,
   long long len = (long long)myFile.tellg();
   // bytes per snp (there are additional empty bytes at the end of lines)
   long long bytespersnp = len/(m+1);
+  // each record (the header and each snp) has max(48, ceil(n/4)) bytes; a
+  // smaller file would lead to misaligned reads (or reads out of bounds)
+  long long min_bytespersnp = std::max(48LL, (long long)((n + 3) / 4));
+  if (bytespersnp < min_bytespersnp) {
+    myFile.close();
+    stop("the .geno file is smaller than expected for the number of "
+         "individuals and loci; it might be truncated or corrupted");
+  }
 
   // skip the first row (which is metadata on n_ind and n_snps)
   myFile.seekg((0+1)*bytespersnp, std::ifstream::beg);
