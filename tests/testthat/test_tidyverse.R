@@ -162,6 +162,23 @@ test_that("mutate dropping genotypes returns a plain ungrouped tibble", {
   expect_identical(class(test_tbl), c("tbl_df", "tbl", "data.frame"))
 })
 
+test_that("group_by without variables returns an ungrouped gen_tibble", {
+  test_ungrouped <- test_gt %>% group_by()
+  expect_identical(class(test_ungrouped), class(test_gt))
+  expect_equal(count_loci(test_ungrouped), 6)
+  expect_identical(
+    class(test_ungrouped %>% filter(id != "a")),
+    class(test_gt)
+  )
+  # regrouping a grouped gen_tibble with no variables ungroups it
+  test_ungrouped <- test_gt %>%
+    group_by(population) %>%
+    group_by()
+  expect_identical(class(test_ungrouped), class(test_gt))
+  gen_tbl_sf <- load_example_gt("gen_tbl_sf")
+  expect_identical(class(gen_tbl_sf %>% group_by()), class(gen_tbl_sf))
+})
+
 test_that("$<- can remove the geometry from a gen_tibble with sf", {
   gen_tbl_sf <- load_example_gt("gen_tbl_sf")
   gen_tbl_sf$geometry <- NULL

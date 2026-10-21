@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `group_by()` without grouping variables returning a corrupt grouped
+  `gen_tibble`
 * fix `mutate()` on an ungrouped `gen_tibble` returning a corrupt `grouped_df`
   when the genotypes column is dropped
 * fix `windows_indiv_roh()` with `heterozygosity = TRUE` treating homozygotes

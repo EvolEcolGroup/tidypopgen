@@ -266,8 +266,13 @@ group_by.gen_tbl <- function(
 ) {
   out <- NextMethod()
 
-  # prioritise "gen_tbl" class over "sf"
   obj_class <- class(out)
+  # without grouping variables the tibble is not grouped
+  if (!inherits(out, "grouped_df")) {
+    class(out) <- c("gen_tbl", obj_class[obj_class != "gen_tbl"])
+    return(out)
+  }
+  # prioritise "gen_tbl" class over "sf"
   if ("sf" %in% obj_class) {
     obj_class <-
       c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf", obj_class[!obj_class %in% c("grouped_df", "gen_tbl", "sf")]) # nolint
