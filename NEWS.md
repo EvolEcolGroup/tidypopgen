@@ -1,4 +1,5 @@
 # tidypopgen `dev`
+* fix the description of the upset plot in the quality control vignette
 * the `heatmap_dendro` object returned by `heatmap_add_dendro()` is now a proper
   `gtable`, so it can be combined with other plots using patchwork (previously
   this failed on printing or saving)
