@@ -354,7 +354,7 @@ gt_admix_reorder_q <- function(x, group = NULL) {
   # sort group meta by group
   group_meta <- group_meta %>% arrange(.data$group)
   # reorder the q matrices
-  x$Q <- lapply(x$Q, function(y) y[group_meta$id, ])
+  x$Q <- lapply(x$Q, function(y) y[group_meta$id, , drop = FALSE])
   # if we have an id element, reorder it
   if (!is.null(x$id)) {
     x$id <- x$id[group_meta$id]

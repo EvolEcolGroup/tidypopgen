@@ -1,4 +1,5 @@
 # tidypopgen `dev`
+* fix `gt_admix_reorder_q()` turning the Q matrices for K = 1 into vectors
 * fix `autoplot()` for `q_matrix` and `gt_admix` objects not arranging
   individuals by their id when `arrange_by_indiv = TRUE`
 * fix group annotations of admixture barplots showing extra separators and
