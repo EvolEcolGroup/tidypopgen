@@ -123,7 +123,7 @@ mutate.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # do not remove
   if (!"genotypes" %in% names(out)) {
     message("as genotypes were dropped, this is no longer a 'gen_tbl'")
-    class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
+    class(out) <- c("tbl_df", "tbl", "data.frame")
     return(out)
   }
   # prioritise "gen_tbl" class over "sf"

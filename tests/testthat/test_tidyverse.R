@@ -148,6 +148,20 @@ test_that("$<- on grouping variables preserves grouped gen_tibble classes", {
   expect_true(inherits(grouped_gen_tbl, "grouped_df"))
 })
 
+test_that("mutate dropping genotypes returns a plain ungrouped tibble", {
+  expect_message(
+    test_tbl <- test_gt %>% mutate(genotypes = NULL),
+    "this is no longer a 'gen_tbl'"
+  )
+  expect_identical(class(test_tbl), c("tbl_df", "tbl", "data.frame"))
+  expect_equal(summarise(test_tbl, n = n())$n, 3)
+  expect_message(
+    test_tbl <- test_gt %>% mutate(z = 1, .keep = "none"),
+    "this is no longer a 'gen_tbl'"
+  )
+  expect_identical(class(test_tbl), c("tbl_df", "tbl", "data.frame"))
+})
+
 test_that("$<- can remove the geometry from a gen_tibble with sf", {
   gen_tbl_sf <- load_example_gt("gen_tbl_sf")
   gen_tbl_sf$geometry <- NULL

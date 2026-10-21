@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `mutate()` on an ungrouped `gen_tibble` returning a corrupt `grouped_df`
+  when the genotypes column is dropped
 * fix `windows_indiv_roh()` with `heterozygosity = TRUE` treating homozygotes
   for the alternate allele as heterozygotes
 * fix `windows_stats_generic()` (and thus all `windows_*` functions) leaving out
