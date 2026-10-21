@@ -97,8 +97,8 @@ count_vcf_variants <- function(file, chunk_size = 50e6) {
 
 #' Counts the number of individuals in a vcf file
 #'
-#' Count the number of VCF individuals by first parsing the header, and then
-#' getting the first line, then separating on tabs.
+#' Count the number of VCF individuals by parsing the header, and then
+#' separating the last header line (#CHROM ...) on tabs.
 #'
 #' @author author Henrik Bengtsson for the original `countLines` in `R.utils`;
 #'   Andrea Manica for the modified version focussed on vcf; Max Carter-Brown
@@ -117,18 +117,19 @@ count_vcf_individuals <- function(file) {
   con <- gzfile(file, open = "rb")
   on.exit(close(con))
 
-  # skip the header (all lines start with #)
+  # read the header (all lines start with #); the last header line
+  # (#CHROM ...) contains the sample names
+  header_line <- NULL
   while (TRUE) {
     a_line <- readLines(con, n = 1)
-    if (!substr(a_line, 1, 1) == "#") {
+    if (length(a_line) == 0 || !substr(a_line, 1, 1) == "#") {
       break
     }
+    header_line <- a_line
   }
 
-  # read the first variant line
-  a_line <- readLines(con, n = 1)
   # split the line by tab
-  a_line <- strsplit(a_line, "\t")[[1]]
-  # count the number of individuals
-  sum(a_line[10:length(a_line)] != ".")
+  header_line <- strsplit(header_line, "\t")[[1]]
+  # count the number of individuals (the first 9 fields are not samples)
+  length(header_line) - 9
 }

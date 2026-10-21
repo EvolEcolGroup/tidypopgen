@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` with `parser = "vcfR"` failing when a sample has a missing
+  genotype (".") on the second variant of the VCF
 * fix `gt_update_backingfile()` (and `gt_order_loci()`) failing when the number
   of loci is an exact multiple of `chunk_size`
 * fix `snp_allele_sharing()` (and thus `pairwise_allele_sharing()`,
