@@ -42,6 +42,9 @@ pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
   pop <- factor(dplyr::group_indices(.x))
   pop_levels <- levels(pop)
   n_pop <- length(pop_levels)
+  if (n_pop < 2) {
+    stop("pop_fst requires at least two groups")
+  }
   wil <- lapply(pop_levels, function(z) which(pop == z))
   Fsts <- unlist(lapply(
     wil,

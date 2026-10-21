@@ -156,6 +156,9 @@ pop_fis_wg17 <- function(
   pop <- factor(group_indices(.x))
   pop_levels <- levels(pop)
   n_pop <- length(pop_levels)
+  if (n_pop < 2) {
+    stop("pop_fis with method 'WG17' requires at least two groups")
+  }
   wil <- lapply(pop_levels, function(z) which(pop == z))
   Fi <- lapply(wil, function(pop_levels) Mii[pop_levels])
   Fsts <- unlist(lapply(
