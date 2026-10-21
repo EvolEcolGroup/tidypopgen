@@ -262,6 +262,65 @@ test_that("original gen_tibble objects remain the same after merge", {
   expect_equal(md5_before_b_bk, md5_after_b_bk)
 })
 
+test_that("rbind keeps ploidy of subset and reordered individuals", {
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", "G", "C", "G", "A")
+  )
+  # two pseudohaploids (all homozygous) followed by two diploids
+  ref_gt <- gen_tibble(
+    x = rbind(
+      c(0, 2, 0, 2, 0, 2),
+      c(2, 0, 2, 0, 2, 0),
+      c(1, 1, 0, 1, 1, 0),
+      c(2, 1, 1, 0, 1, 1)
+    ),
+    loci = test_loci,
+    indiv_meta = data.frame(id = c("p1", "p2", "d1", "d2"), population = "A"),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  ref_gt <- gt_pseudohaploid(ref_gt, test_n_loci = 6)
+  target_gt <- gen_tibble(
+    x = rbind(c(1, 1, 0, 1, 1, 0), c(2, 1, 0, 0, 0, 0)),
+    loci = test_loci,
+    indiv_meta = data.frame(id = c("x", "y"), population = "B"),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # drop one pseudohaploid and reorder the remaining individuals
+  ref_sub <- ref_gt %>%
+    filter(id != "p1") %>%
+    arrange(id)
+  expect_equal(indiv_ploidy(ref_sub), c(2, 2, 1))
+  merged_gt <- rbind(
+    ref_sub,
+    target_gt,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_equal(merged_gt$id, c("d1", "d2", "p2", "x", "y"))
+  expect_equal(indiv_ploidy(merged_gt), c(2, 2, 1, 2, 2))
+  expect_length(
+    attr(merged_gt$genotypes, "fbm_ploidy"),
+    nrow(attr(merged_gt$genotypes, "fbm"))
+  )
+  expect_equal(show_ploidy(merged_gt), -2)
+  # if no pseudohaploids are left, the merged ploidy is diploid
+  merged_dip <- rbind(
+    ref_sub %>% filter(id != "p2"),
+    target_gt,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_equal(indiv_ploidy(merged_dip), c(2, 2, 2, 2))
+  expect_equal(show_ploidy(merged_dip), 2)
+})
+
 test_that("rbind fails if gen_tibbles contain same ID", {
   pop_a_gt$id[1] <- "A"
   pop_b_gt$id[1] <- "A"

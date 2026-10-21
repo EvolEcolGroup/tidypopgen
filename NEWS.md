@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `rbind()` attaching individual ploidies to the wrong individuals (and
+  mislabelling the merged ploidy) when the input `gen_tibble`s had been filtered
+  or reordered
 * fix `loci_transversions()` and `loci_transitions()` misclassifying A<->C and
   G<->T substitutions as transitions
 * fix `gen_tibble()` on VCF files with partially missing genotypes (e.g. "1/."):

@@ -241,9 +241,11 @@ rbind.gen_tbl <- function(
 
   fbm_path <- merged_fbm$backingfile
 
+  # fbm_ploidy covers the full FBM of each object, but only the rows in the
+  # tibbles (in tibble order) were copied into the merged FBM
   indivs_ploidy <- c(
-    attr(ref$genotypes, "fbm_ploidy"),
-    attr(target$genotypes, "fbm_ploidy")
+    attr(ref$genotypes, "fbm_ploidy")[vctrs::vec_data(ref$genotypes)],
+    attr(target$genotypes, "fbm_ploidy")[vctrs::vec_data(target$genotypes)]
   )
   merged_tbl$genotypes <- new_vctrs_bigsnp(
     fbm_obj = merged_fbm,
