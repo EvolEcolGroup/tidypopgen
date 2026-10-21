@@ -56,6 +56,8 @@ gt_update_backingfile <- function(
     rep(chunk_size, floor(no_variants / chunk_size)),
     no_variants %% chunk_size
   )
+  # remove any 0 length chunks (there could be one at the end)
+  chunks_vec <- chunks_vec[chunks_vec > 0L]
   chunks_vec <- c(0, cumsum(chunks_vec))
 
   # get the 256 code

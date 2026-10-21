@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_update_backingfile()` (and `gt_order_loci()`) failing when the number
+  of loci is an exact multiple of `chunk_size`
 * fix `snp_allele_sharing()` (and thus `pairwise_allele_sharing()`,
   `pairwise_grm()`, `pop_fst()` and `indiv_inbreeding()`), which overestimated
   allele sharing when loci were processed in blocks of different sizes

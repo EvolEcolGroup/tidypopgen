@@ -657,3 +657,19 @@ test_that("cast_chromosome_to_int transforms correctly from factor", {
     as.character(c(1, 2, 2, 3, 8, 13))
   )
 })
+
+test_that("gt_update_backingfile works if n loci is a multiple of chunk_size", {
+  example_gt <- load_example_gt("gen_tbl")
+  # 6 loci, processed in 2 chunks of 3 loci (no trailing partial chunk)
+  new_gt <- gt_update_backingfile(
+    example_gt,
+    backingfile = tempfile(),
+    chunk_size = 3,
+    quiet = TRUE
+  )
+  expect_identical(show_genotypes(new_gt), show_genotypes(example_gt))
+  # also through gt_order_loci
+  shuffled_gt <- example_gt %>% select_loci(c(1, 5, 2, 6, 4, 3))
+  ordered_gt <- gt_order_loci(shuffled_gt, chunk_size = 2, quiet = TRUE)
+  expect_identical(show_genotypes(ordered_gt), show_genotypes(example_gt))
+})
