@@ -108,7 +108,7 @@ windows_pairwise_pop_fst <- function(.x,
   if (type == "matrix") {
     return(res)
   } else if (type == "tidy") {
-    cols <- names(res)[names(res) != c("chromosome", "start", "end")]
+    cols <- names(res)[!names(res) %in% c("chromosome", "start", "end")]
     res <-
       res %>% tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(res)

@@ -513,3 +513,23 @@ test_that("windows_pairwise_pop_fst uses the requested method", {
     )
   expect_false(isTRUE(all.equal(hudson_window, nei_window)))
 })
+
+test_that("windows_pairwise_pop_fst tidy output works with two populations", {
+  two_pops <- test_gt %>%
+    dplyr::filter(population != "pop3") %>%
+    dplyr::group_by(population)
+  expect_no_warning(
+    fst_windows_tidy <- two_pops %>%
+      windows_pairwise_pop_fst(
+        type = "tidy",
+        window_size = 3,
+        step_size = 2,
+        size_unit = "snp"
+      )
+  )
+  expect_equal(unique(fst_windows_tidy$stat_name), "fst_pop1.pop2")
+  expect_named(
+    fst_windows_tidy,
+    c("chromosome", "start", "end", "stat_name", "value")
+  )
+})

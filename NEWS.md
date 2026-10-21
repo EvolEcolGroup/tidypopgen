@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix spurious warnings from `windows_pairwise_pop_fst()` and
+  `windows_nwise_pop_pbs()` with `type = "tidy"` for some numbers of populations
 * fix `gt_as_vcf()` writing a space-padded day in the `##fileDate` header line
   on the first nine days of a month
 * fix `gen_tibble()` with `parser = "vcfR"` failing on VCF files containing
