@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gt_admixture()` with `seed = NULL` (the default) giving identical runs
+  when `n_runs > 1`, as ADMIXTURE used its default seed (43) for every run;
+  runs now use seeds 43, 44, etc.
 * fix `gt_snmf()` and `gt_admixture()` failing when the path of the input file
   contains "geno" (or the file name contains ".bed") other than in the extension
 * fix `gt_snmf()` failing with the default `seed` when `n_runs > 1`

@@ -719,8 +719,9 @@ test_that("seed length", {
     conda_env = "none"
   )
   null_seeds <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res_null$log)
-  # this should be the default seed of 43
-  expect_equal(as.numeric(null_seeds), rep(43, 4))
+  # the runs start from the default seed of 43, and each run has its own seed
+  expect_equal(as.numeric(null_seeds), c(43, 44, 43, 44))
+  expect_false(identical(res_null$Q[[1]], res_null$Q[[2]]))
 
   # seed should be the length of n_runs * K OR the length of n_runs
   # and the whole vector is repeated for each k

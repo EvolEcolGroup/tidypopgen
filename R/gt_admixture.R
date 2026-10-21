@@ -20,7 +20,11 @@
 #' @param crossval boolean, should cross validation be used to assess the fit
 #'   (defaults to FALSE)
 #' @param n_cores number of cores (defaults to 1)
-#' @param seed the seed for the random number generator (defaults to NULL)
+#' @param seed the seed for the random number generator, either a vector of
+#'   length `n_runs` (used for each value of `k`) or of length `n_runs` *
+#'   `length(k)`. If NULL (the default), the runs for each value of `k` use
+#'   seeds 43, 44, 45, etc. (43 being the default seed of ADMIXTURE), so that
+#'   each run is different but results are reproducible.
 #' @param conda_env the name of the conda environment to use. "none" forces the
 #'   use of a local copy, whilst any other string will direct the function to
 #'   use a custom conda environment.
@@ -81,7 +85,14 @@ gt_admixture <- function(
     )
   }
 
-  if (!is.null(seed) && length(seed) == n_runs) {
+  if (is.null(seed)) {
+    # without a seed, ADMIXTURE uses its default seed (43) for every run, which
+    # would make all runs identical; so we use a different seed for each run,
+    # starting from that default
+    seed <- 43 + seq_len(n_runs) - 1
+  }
+
+  if (length(seed) == n_runs) {
     # if seed is the same for each k, repeat it for each k value
     seed <- rep(seed, length(k))
   }
