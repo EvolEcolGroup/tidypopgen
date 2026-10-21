@@ -59,7 +59,7 @@ heatmap_add_dendro <- function(plot,
   #############################################
   # get data
   #############################################
-  df <- plot@data
+  df <- plot$data
   # determine matrix size
   n <- max(c(df$row, df$col))
   # initialise matrix

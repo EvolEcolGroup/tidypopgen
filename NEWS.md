@@ -1,4 +1,5 @@
 # tidypopgen `dev`
+* fix `heatmap_add_dendro()` failing with ggplot2 versions earlier than 4.0.0
 * fix `heatmap_pairwise()` (and `autoplot()` of tidy pairwise results) always
   failing with "Duplicate pairs found" when the id columns are factors, e.g.
   from `pairwise_pop_fst()` on data grouped by a factor
