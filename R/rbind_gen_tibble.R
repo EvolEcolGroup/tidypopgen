@@ -166,16 +166,51 @@ rbind.gen_tbl <- function(
   }
   # now create a new loci table (we'll use it later)
   new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id, na.last = NA), ]
+
+  ###
+  # loci whose observed allele ended up as alt, with ref unresolved
+  norm_swap <- flip_strand &
+    is.na(new_ref_loci_tbl$allele_ref) &
+    !is.na(new_ref_loci_tbl$allele_alt)
+  # the target's existing swaps, restricted to kept loci, same order
+  target_swap_kept <- report$target$to_swap[
+    order(report$target$new_id, na.last = NA)
+  ]
+  target_swap_final <- xor(target_swap_kept, norm_swap)
+  if (any(norm_swap) && !quiet) {
+    message(
+      sum(norm_swap), " loci had a missing reference allele with an observed ",
+      "alternate allele in both datasets. The alleles were swapped so that the",
+      " observed allele is the reference."
+    )
+  }
+  # swap in the final loci table (this becomes the merged loci table)
+  new_ref_loci_tbl$allele_ref[norm_swap] <- new_ref_loci_tbl$allele_alt[norm_swap] #nolint
+  new_ref_loci_tbl$allele_alt[norm_swap] <- NA
+  ###
+
+
   # now we subset the SNP object
   ## in the snp object
   if (nrow(new_ref_loci_tbl) == 0) {
     stop("there are no loci in common between the two gen_tibbles")
   }
-  ref_snp <- subset_FBM(
-    attr(ref$genotypes, "fbm"),
-    loci_indices = new_ref_loci_tbl$big_index,
-    indiv_indices = vctrs::vec_data(ref$genotypes)
-  )
+
+  if (flip_strand) {
+    ref_snp <- subset_FBM(
+      attr(ref$genotypes, "fbm"),
+      loci_indices = new_ref_loci_tbl$big_index,
+      indiv_indices = vctrs::vec_data(ref$genotypes),
+      swap_indices = new_ref_loci_tbl$big_index[norm_swap]
+    )
+  } else {
+    ref_snp <- subset_FBM(
+      attr(ref$genotypes, "fbm"),
+      loci_indices = new_ref_loci_tbl$big_index,
+      indiv_indices = vctrs::vec_data(ref$genotypes)
+    )
+  }
+
   ###########
   # now we move to the target object
   # we fix the missing alleles
@@ -197,12 +232,21 @@ rbind.gen_tbl <- function(
   new_target_loci_tbl <-
     show_loci(target)[order(report$target$new_id, na.last = NA), ]
 
-  target_snp <- subset_FBM(
-    attr(target$genotypes, "fbm"),
-    loci_indices = new_target_loci_tbl$big_index,
-    indiv_indices = vctrs::vec_data(target$genotypes),
-    swap_indices = show_loci(target)$big_index[report$target$to_swap]
-  )
+  if (flip_strand) {
+    target_snp <- subset_FBM(
+      attr(target$genotypes, "fbm"),
+      loci_indices = new_target_loci_tbl$big_index,
+      indiv_indices = vctrs::vec_data(target$genotypes),
+      swap_indices = new_target_loci_tbl$big_index[target_swap_final]
+    )
+  } else {
+    target_snp <- subset_FBM(
+      attr(target$genotypes, "fbm"),
+      loci_indices = new_target_loci_tbl$big_index,
+      indiv_indices = vctrs::vec_data(target$genotypes),
+      swap_indices = show_loci(target)$big_index[report$target$to_swap]
+    )
+  }
 
   # this check does not work if we change the names of markers
   #  if (!identical(target_snp$map$marker.ID,ref_snp$map$marker.ID) |

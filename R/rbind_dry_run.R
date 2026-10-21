@@ -84,7 +84,7 @@ rbind_dry_run <- function(
   # if use_position is FALSE, then the names can not be integers
   if (!use_position) {
     if (!is.character(show_loci(ref)$name) ||
-          !is.character(show_loci(target)$name)) {
+      !is.character(show_loci(target)$name)) {
       stop(
         "When 'use_position' is FALSE, loci names must be characters.",
         " Please set 'use_position' to TRUE if you use integers as loci names."
