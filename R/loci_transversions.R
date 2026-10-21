@@ -40,11 +40,12 @@ loci_transversions.tbl_df <- function(.x, .col = "genotypes", ...) {
 #' @rdname loci_transversions
 loci_transversions.vctrs_bigSNP <- function(.x, .col = "genotypes", ...) {
   rlang::check_dots_empty()
+  # a transversion swaps a purine (A, G) with a pyrimidine (C, T)
   transversions <- function(loci_df) {
-    (((loci_df$allele_ref == "A") & (loci_df$allele_alt == "T")) |
-      ((loci_df$allele_ref == "T") & (loci_df$allele_alt == "A")) | # nolint start
-      ((loci_df$allele_ref == "C") & (loci_df$allele_alt == "G")) |
-      ((loci_df$allele_ref == "G") & (loci_df$allele_alt == "C"))) # nolint end
+    purine <- function(x) (x == "A") | (x == "G")
+    pyrimidine <- function(x) (x == "C") | (x == "T")
+    (purine(loci_df$allele_ref) & pyrimidine(loci_df$allele_alt)) |
+      (pyrimidine(loci_df$allele_ref) & purine(loci_df$allele_alt))
   }
   transversions(show_loci(.x))
 }

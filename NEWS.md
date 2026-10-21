@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `loci_transversions()` and `loci_transitions()` misclassifying A<->C and
+  G<->T substitutions as transitions
 * fix `gen_tibble()` on VCF files with partially missing genotypes (e.g. "1/."):
   the "cpp" parser silently coded them as non-missing dosages, and the "vcfR"
   parser failed; they are now coded as missing
