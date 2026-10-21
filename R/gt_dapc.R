@@ -251,8 +251,12 @@ gt_dapc <- function(
       }
       return(x * x / temp)
     }
-    res$var.contr <- apply(var.load, 2, f1)
-    res$var.load <- var.load
+    # matrix multiplication and apply() drop the integer loci names of a
+    # matrix_int_names, so we add them back
+    res$var.contr <- matrix_int_names(apply(var.load, 2, f1),
+      row_names = row_names(V)
+    )
+    res$var.load <- matrix_int_names(var.load, row_names = row_names(V))
   }
 
   class(res) <- c("gt_dapc", "dapc")

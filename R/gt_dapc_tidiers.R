@@ -112,13 +112,15 @@ tidy.gt_dapc <- function(x, matrix = "eigenvalues", ...) {
       # mutate(percent =  (std.dev)^2/nrow(x$d),
       mutate(cumulative = cumsum(.data$eigenvalue))
   } else if (matrix %in% c("rotation", "variables", "v", "loadings")) {
-    ret <- x$var.load %>%
-      tibble::as_tibble(rownames = "column") %>%
-      tidyr::pivot_longer(
-        cols = -"column",
-        names_to = "LD",
-        values_to = "value"
-      )
+    # build the long table directly, so that loci names (which can be
+    # integers in a matrix_int_names) are not cast to characters
+    loci_ids <- row_names(x$var.load)
+    if (is.null(loci_ids)) loci_ids <- seq_len(nrow(x$var.load))
+    ret <- tibble(
+      column = rep(loci_ids, each = ncol(x$var.load)),
+      LD = rep(colnames(x$var.load), times = nrow(x$var.load)),
+      value = as.vector(t(unclass(x$var.load)))
+    )
   } else if (matrix %in% c("x", "samples", "scores")) {
     ret <- x$ind.coord
     ret <- ret %>%

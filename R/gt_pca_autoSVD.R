@@ -194,6 +194,8 @@ gt_pca_autoSVD <- function(
   # subset the loci table to have only the snps of interest
   this_svd$loci <-
     show_loci(x)[.gt_fbm_cols(x) %in% attr(this_svd, "subset"), ]
+  # add loci names to the loadings (as integers if the names are integers)
+  this_svd$v <- matrix_int_names(this_svd$v, row_names = this_svd$loci$name)
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var) {
     loci <- this_svd$loci

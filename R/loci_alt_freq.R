@@ -438,11 +438,12 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
 #' @noRd
 format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
   if (is.vector(out_mat)) {
+    # names are added below, so that integer loci names are not cast to
+    # characters
     out_mat <- matrix(
       out_mat,
       nrow = length(loci_names),
-      ncol = length(group_ids),
-      dimnames = list(loci_names, group_ids)
+      ncol = length(group_ids)
     )
   }
 
@@ -457,9 +458,7 @@ format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
     # return a list to mimic a group_map
     lapply(seq_len(ncol(out_mat)), function(i) out_mat[, i])
   } else if (type == "matrix") {
-    # return a matrix
-    colnames(out_mat) <- group_ids
-    row_names(out_mat) <- loci_names
-    out_mat
+    # return a matrix_int_names, so that integer loci names are preserved
+    matrix_int_names(out_mat, row_names = loci_names, col_names = group_ids)
   }
 }

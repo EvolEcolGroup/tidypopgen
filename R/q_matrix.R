@@ -361,9 +361,15 @@ augment.q_matrix <- function(x, data = NULL, ...) {
   # and finally left join
   data <- dplyr::left_join(data, q_tbl, by = "id")
 
+  # left_join drops the gen_tbl class from grouped tibbles, so we ungroup,
+  # restore the gen_tbl class, and regroup to get a grouped_gen_tbl
   if (inherits(data, "grouped_df")) {
-    data <- data %>% dplyr::group_by(across(group_vars(data)))
-    class(data) <- c("gen_tbl", class(data))
+    group_vars <- group_vars(data)
+    data <- data %>% dplyr::ungroup()
+    if (!inherits(data, "gen_tbl")) {
+      class(data) <- c("gen_tbl", class(data))
+    }
+    data <- data %>% dplyr::group_by(across(all_of(group_vars)))
   }
   data
 }
