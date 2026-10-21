@@ -1,4 +1,5 @@
 # tidypopgen `dev`
+* fix `gt_snmf()` failing with the default `seed` when `n_runs > 1`
 * fix `gt_snmf()` returning the results of earlier runs when adding runs to an
   existing project (`project = "continue"` or `"force"`)
 * fix `gt_snmf()` returning cross-entropies (`$cv`) in the wrong order when

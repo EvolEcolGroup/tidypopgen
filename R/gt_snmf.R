@@ -17,7 +17,8 @@
 #' @param I number of SNPs for initialising the snmf algorithm
 #' @param iterations numeric integer for maximum iterations (default 200)
 #' @param ploidy the ploidy of the input data (defaults to 2)
-#' @param seed the seed for the random number generator
+#' @param seed the seed for the random number generator, either a vector of
+#'   length `n_runs`, or -1 (the default) to use a random seed for each run
 #' @return an object of class `gt_admix` consisting of a list with the following
 #'   elements:
 #' - `k` the number of clusters
@@ -54,8 +55,12 @@ gt_snmf <- function(
   ploidy = 2,
   seed = -1
 ) {
-  # add seed check again!!!
-  if (!is.null(seed) && length(seed) != n_runs) {
+  # a single seed of -1 (the default) lets LEA draw a random seed for each run
+  if (
+    !is.null(seed) &&
+      length(seed) != n_runs &&
+      !identical(as.numeric(seed), -1)
+  ) {
     stop("'seed' should be a vector of length 'n_runs'")
   }
 

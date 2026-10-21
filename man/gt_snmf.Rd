@@ -46,7 +46,8 @@ ranging between 0 and 1, to be used when entropy = TRUE}
 
 \item{ploidy}{the ploidy of the input data (defaults to 2)}
 
-\item{seed}{the seed for the random number generator}
+\item{seed}{the seed for the random number generator, either a vector of
+length \code{n_runs}, or -1 (the default) to use a random seed for each run}
 }
 \value{
 an object of class \code{gt_admix} consisting of a list with the following

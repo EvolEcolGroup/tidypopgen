@@ -187,6 +187,31 @@ test_that("gt_snmf cross-entropy matches k and run", {
   expect_equal(example_snmf$cv, lea_cv, tolerance = 1e-5)
 })
 
+test_that("gt_snmf default seed works with several runs", {
+  example_gt <- load_example_gt("gen_tbl")
+  capture.output(example_snmf <- gt_snmf(
+    x = example_gt,
+    k = 2,
+    project = "new",
+    n_runs = 2,
+    alpha = 100
+  ))
+  expect_equal(example_snmf$k, c(2, 2))
+  expect_length(example_snmf$Q, 2)
+  # a single seed is still not accepted for several runs
+  expect_error(
+    gt_snmf(
+      x = example_gt,
+      k = 2,
+      project = "new",
+      n_runs = 2,
+      seed = 1,
+      alpha = 100
+    ),
+    "'seed' should be a vector of length 'n_runs'"
+  )
+})
+
 test_that("gt_snmf returns the runs of the current call in a project", {
   example_gt <- load_example_gt("gen_tbl")
   input_file <- gt_as_geno_lea(example_gt)
