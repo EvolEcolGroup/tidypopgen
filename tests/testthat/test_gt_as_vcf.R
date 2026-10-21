@@ -193,6 +193,13 @@ test_that("integer chromosome becomes factor", {
   )
 })
 
+test_that("vcf fileDate is a zero-padded YYYYMMDD date", {
+  vcf_path <- gt_as_vcf(test_gt, file = paste0(tempfile(), ".vcf"))
+  file_date <- grep("^##fileDate=", readLines(vcf_path), value = TRUE)
+  expect_match(file_date, "^##fileDate=[0-9]{8}$")
+  expect_equal(file_date, paste0("##fileDate=", format(Sys.Date(), "%Y%m%d")))
+})
+
 test_that("double positions are not written in scientific notation", {
   test_loci_dbl <- test_loci
   test_loci_dbl$position <- c(100000, 200000, 3e6, 999999, 1e5, 999999)

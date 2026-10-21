@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_as_vcf()` writing a space-padded day in the `##fileDate` header line
+  on the first nine days of a month
 * fix `gen_tibble()` with `parser = "vcfR"` failing on VCF files containing
   biallelic indels; these are now dropped, as with the "cpp" parser
 * `show_loci<-` now errors if the replacement table does not have a valid

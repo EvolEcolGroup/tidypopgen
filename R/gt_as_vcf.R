@@ -51,7 +51,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
   # generate the header
   vcf_header <- c(
     "##fileformat=VCFv4.3",
-    paste0("##fileDate=", format(Sys.time(), "%Y%m%e")),
+    paste0("##fileDate=", format(Sys.time(), "%Y%m%d")),
     paste0("##source=tidypopgen_v", utils::packageVersion("tidypopgen"))
   )
   # create copy of loci table
