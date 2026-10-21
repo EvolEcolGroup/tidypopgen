@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `[` on a grouped `gen_tibble` returning a corrupt grouped object when the
+  grouping variables are dropped
 * fix `ungroup()` dropping the `sf` class and geometry column attribute of
   grouped `gen_tibble`s, and returning malformed classes when only some grouping
   variables are removed

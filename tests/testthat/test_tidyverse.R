@@ -206,6 +206,22 @@ test_that("ungroup keeps the sf and gen_tbl classes", {
   expect_equal(group_vars(test_partial), "population")
 })
 
+test_that("[ dropping the grouping variables returns an ungrouped tibble", {
+  test_grouped <- test_gt %>% group_by(population)
+  test_sub <- test_grouped[, c("id", "genotypes")]
+  expect_identical(class(test_sub), class(test_gt))
+  expect_equal(group_vars(test_sub), character(0))
+  test_sub <- test_grouped[, "id"]
+  expect_identical(class(test_sub), c("tbl_df", "tbl", "data.frame"))
+  # keeping the grouping variable keeps the groups
+  test_sub <- test_grouped[, c("population", "genotypes")]
+  expect_identical(class(test_sub), class(test_grouped))
+  expect_equal(group_vars(test_sub), "population")
+  test_sub <- test_grouped[2:3, ]
+  expect_identical(class(test_sub), class(test_grouped))
+  expect_equal(group_vars(test_sub), "population")
+})
+
 test_that("$<- can remove the geometry from a gen_tibble with sf", {
   gen_tbl_sf <- load_example_gt("gen_tbl_sf")
   gen_tbl_sf$geometry <- NULL

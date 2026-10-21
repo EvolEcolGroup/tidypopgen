@@ -321,7 +321,12 @@ ungroup.grouped_gen_tbl <- function(x, ...) {
 "[.grouped_gen_tbl" <- function(x, i, j, ...) {
   original_class <- class(x)
   x <- NextMethod()
-  class(x) <- original_class
+  if (inherits(x, "grouped_df")) {
+    class(x) <- original_class
+  } else {
+    # all grouping variables were removed, so the tibble is no longer grouped
+    class(x) <- original_class[!original_class %in% c("grouped_gen_tbl", "grouped_df")] # nolint
+  }
   if (!"genotypes" %in% names(x)) {
     class(x) <- class(x)[!class(x) %in% c("grouped_gen_tbl", "gen_tbl")]
   }
