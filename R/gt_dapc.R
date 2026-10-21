@@ -169,7 +169,7 @@ gt_dapc <- function(
       n_pca <- length(x$d)
     }
     # by default, use number of clusters minus 1
-    if (n_pca > n_pop) {
+    if (n_pca > n_pop - 1) {
       n_pca <- n_pop - 1
     }
   } else {

@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_dapc()` using k instead of k - 1 principal components by default when
+  the number of available components equals the number of groups k
 * fix `gt_dapc()` reporting the proportion of variance retained by the PCs
   (`$var`) from singular values instead of eigenvalues
 * `gt_dapc()` now gives an informative error when `pop` is not a factor or a

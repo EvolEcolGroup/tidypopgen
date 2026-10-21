@@ -230,6 +230,31 @@ test_that("gt_dapc var is the proportion of variance of the retained PCs", {
   expect_equal(test_dapc$var, sum(test_pca$d[1:6]^2) / sum(test_pca$d^2))
 })
 
+test_that("gt_dapc uses k-1 PCs by default", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  # as many populations as PCs
+  pops <- as.factor(rep(paste0("pop", 1:5), each = 40))
+  test_dapc <- gt_dapc(test_pca, pop = pops)
+  expect_equal(test_dapc$n.pca, 4)
+  # fewer populations than PCs
+  pops <- as.factor(rep(paste0("pop", 1:3), length.out = 200))
+  test_dapc <- gt_dapc(test_pca, pop = pops)
+  expect_equal(test_dapc$n.pca, 2)
+  # more populations than PCs
+  pops <- as.factor(rep(paste0("pop", 1:8), each = 25))
+  test_dapc <- gt_dapc(test_pca, pop = pops)
+  expect_equal(test_dapc$n.pca, 5)
+})
+
 test_that("gt_dapc gives an informative error for an invalid pop", {
   bed_file <- system.file("extdata", "example-missing.bed",
     package = "bigsnpr"
