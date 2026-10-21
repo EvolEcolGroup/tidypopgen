@@ -179,6 +179,33 @@ test_that("group_by without variables returns an ungrouped gen_tibble", {
   expect_identical(class(gen_tbl_sf %>% group_by()), class(gen_tbl_sf))
 })
 
+test_that("ungroup keeps the sf and gen_tbl classes", {
+  gen_tbl_sf <- load_example_gt("gen_tbl_sf")
+  grouped_gen_tbl_sf <- load_example_gt("grouped_gen_tbl_sf")
+  ungrouped_sf <- grouped_gen_tbl_sf %>% ungroup()
+  expect_identical(class(ungrouped_sf), class(gen_tbl_sf))
+  expect_identical(attr(ungrouped_sf, "sf_column"), "geometry")
+  expect_true(inherits(sf::st_geometry(ungrouped_sf), "sfc"))
+  expect_identical(
+    class(grouped_gen_tbl_sf %>% ungroup(population)),
+    class(gen_tbl_sf)
+  )
+  expect_identical(
+    class(load_example_gt("grouped_gen_tbl") %>% ungroup()),
+    class(test_gt)
+  )
+  # removing only some of the grouping variables keeps the others
+  test_partial <- test_gt %>%
+    mutate(k = c(1, 1, 2)) %>%
+    group_by(population, k) %>%
+    ungroup(k)
+  expect_identical(
+    class(test_partial),
+    c("grouped_gen_tbl", "grouped_df", class(test_gt))
+  )
+  expect_equal(group_vars(test_partial), "population")
+})
+
 test_that("$<- can remove the geometry from a gen_tibble with sf", {
   gen_tbl_sf <- load_example_gt("gen_tbl_sf")
   gen_tbl_sf$geometry <- NULL

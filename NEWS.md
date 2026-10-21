@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `ungroup()` dropping the `sf` class and geometry column attribute of
+  grouped `gen_tibble`s, and returning malformed classes when only some grouping
+  variables are removed
 * fix `group_by()` without grouping variables returning a corrupt grouped
   `gen_tibble`
 * fix `mutate()` on an ungrouped `gen_tibble` returning a corrupt `grouped_df`

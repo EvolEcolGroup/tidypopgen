@@ -286,8 +286,21 @@ group_by.gen_tbl <- function(
 #' @export
 #' @noRd
 ungroup.grouped_gen_tbl <- function(x, ...) {
+  sf_column <- attr(x, "sf_column")
   out <- NextMethod(...)
-  class(out) <- c("gen_tbl", class(out))
+  obj_class <- class(out)
+  obj_class <- obj_class[!obj_class %in% c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf")] # nolint
+  # dplyr's method returns a plain tibble, so we restore sf if needed
+  if (!is.null(sf_column)) {
+    attr(out, "sf_column") <- sf_column
+    obj_class <- c("sf", obj_class)
+  }
+  if (inherits(out, "grouped_df")) {
+    # only some grouping variables were removed
+    class(out) <- c("grouped_gen_tbl", "grouped_df", "gen_tbl", obj_class)
+  } else {
+    class(out) <- c("gen_tbl", obj_class)
+  }
   return(out) # nolint
 }
 
