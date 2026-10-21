@@ -40,7 +40,6 @@ gen_tibble_bed_rds <- function(
   } else {
     # read the bigsnp object from the rds file
     bigsnp_obj <- bigsnpr::snp_attach(x)
-    fbm_obj <- bigsnp_obj$genotypes
     # note that position and genetic dist are already flipped in the bigsnpr obj
     loci <- loci_from_bim(bigsnp_obj$map,
       valid_alleles = valid_alleles,
@@ -48,11 +47,25 @@ gen_tibble_bed_rds <- function(
       allow_duplicates = allow_duplicates
     )
     indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
-    # create a copy of the bigsnp object
-    # new file name for the bigsnp ends in "_bigsnp.rds"
-    file.copy(x, sub("\\.bk$", "_bigsnp.rds", fbm_obj$backingfile))
-    fbm_path <- sub("\\.bk$", ".rds", fbm_obj$backingfile)
-    # replace the bigsnp rds with the fbm rds
+    if (is.null(backingfile)) {
+      backingfile <- change_duplicated_file_name(x)
+    }
+    # copy the backing file of the bigsnp object, so that the fbm rds does
+    # not overwrite the bigsnp rds (an FBM rds has the name of its .bk file)
+    if (!file.copy(
+      bigsnp_obj$genotypes$backingfile,
+      paste0(backingfile, ".bk")
+    )) {
+      stop("could not copy the backing file to ", paste0(backingfile, ".bk"))
+    }
+    fbm_obj <- bigstatsr::FBM.code256(
+      nrow = nrow(bigsnp_obj$genotypes),
+      ncol = ncol(bigsnp_obj$genotypes),
+      code = bigsnp_obj$genotypes$code256,
+      backingfile = backingfile,
+      create_bk = FALSE
+    )
+    fbm_path <- bigstatsr::sub_bk(fbm_obj$backingfile, ".rds")
     saveRDS(fbm_obj, fbm_path)
     # remove the bisnp object from memory
     rm(bigsnp_obj)
