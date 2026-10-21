@@ -185,6 +185,9 @@ test_that("merge by position works correctly", {
     quiet = TRUE
   )
   expect_true(all.equal(show_genotypes(merged_gen), show_genotypes(pos_merge)))
+  # positions are only used for matching, the loci keep the reference names
+  expect_equal(show_loci(pos_merge), show_loci(merged_gen))
+  expect_false("name_old" %in% names(show_loci(pos_merge)))
 })
 
 test_that("original gen_tibble objects remain the same after merge", {
