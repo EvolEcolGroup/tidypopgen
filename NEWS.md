@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `select()`, `rename()` and `relocate()` on a grouped `gen_tibble`
+  returning a plain `grouped_df`
 * fix `[` on a grouped `gen_tibble` returning a corrupt grouped object when the
   grouping variables are dropped
 * fix `ungroup()` dropping the `sf` class and geometry column attribute of

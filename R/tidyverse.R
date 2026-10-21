@@ -375,6 +375,29 @@ ungroup.grouped_gen_tbl <- function(x, ...) {
   x
 }
 
+# without this method, `names<-.grouped_df` from dplyr (used by select(),
+# rename() and relocate()) rebuilds a plain grouped_df, dropping the
+# `gen_tbl` (and `sf`) classes
+#' @export
+#' @noRd
+"names<-.grouped_gen_tbl" <- function(x, value) {
+  original_class <- class(x)
+  sf_column <- attr(x, "sf_column")
+  if (!is.null(sf_column)) {
+    # the geometry column might have been renamed
+    sf_column <- value[match(sf_column, names(x))]
+  }
+  x <- NextMethod()
+  if (!"genotypes" %in% value || !inherits(x, "grouped_df")) {
+    return(x)
+  }
+  class(x) <- original_class
+  if (!is.null(sf_column)) {
+    attr(x, "sf_column") <- sf_column
+  }
+  x
+}
+
 
 #' @export
 #' @noRd

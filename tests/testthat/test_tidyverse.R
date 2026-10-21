@@ -222,6 +222,42 @@ test_that("[ dropping the grouping variables returns an ungrouped tibble", {
   expect_equal(group_vars(test_sub), "population")
 })
 
+test_that("select, rename and relocate keep grouped gen_tibble classes", {
+  test_grouped <- test_gt %>% group_by(population)
+  test_sel <- test_grouped %>% select(id, population, genotypes)
+  expect_identical(class(test_sel), class(test_grouped))
+  expect_equal(group_vars(test_sel), "population")
+  expect_message(
+    test_sel <- test_grouped %>% select(id, genotypes),
+    "Adding missing grouping variables"
+  )
+  expect_identical(class(test_sel), class(test_grouped))
+  expect_true(file.exists(gt_as_plink(test_sel, file = tempfile())))
+  test_ren <- test_grouped %>% rename(ID = id)
+  expect_identical(class(test_ren), class(test_grouped))
+  expect_equal(names(test_ren), c("ID", "population", "genotypes"))
+  test_ren <- test_grouped %>% rename(pop = population)
+  expect_identical(class(test_ren), class(test_grouped))
+  expect_equal(group_vars(test_ren), "pop")
+  test_rel <- test_grouped %>% relocate(genotypes)
+  expect_identical(class(test_rel), class(test_grouped))
+  # renaming the genotypes means this is no longer a gen_tibble
+  test_ren <- test_grouped %>% rename(geno = genotypes)
+  expect_false(inherits(test_ren, "gen_tbl"))
+  expect_true(inherits(test_ren, "grouped_df"))
+  # with sf (sf's own select() method puts the "sf" class first)
+  grouped_gen_tbl_sf <- load_example_gt("grouped_gen_tbl_sf")
+  test_sel_sf <- grouped_gen_tbl_sf %>% select(id, population, genotypes)
+  expect_true(inherits(test_sel_sf, "grouped_gen_tbl"))
+  expect_true(inherits(test_sel_sf, "sf"))
+  expect_equal(group_vars(test_sel_sf), "population")
+  expect_identical(attr(test_sel_sf, "sf_column"), "geometry")
+  test_ren_sf <- grouped_gen_tbl_sf %>% rename(ID = id)
+  expect_true(inherits(test_ren_sf, "grouped_gen_tbl"))
+  expect_true(inherits(test_ren_sf, "sf"))
+  expect_identical(attr(test_ren_sf, "sf_column"), "geometry")
+})
+
 test_that("$<- can remove the geometry from a gen_tibble with sf", {
   gen_tbl_sf <- load_example_gt("gen_tbl_sf")
   gen_tbl_sf$geometry <- NULL
