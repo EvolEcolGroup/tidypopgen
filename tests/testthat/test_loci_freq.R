@@ -318,3 +318,54 @@ test_that("loci_alt_freq grouped with one group", {
     rep(unique(test_gt$population), count_loci(test_gt))
   )
 })
+
+test_that("grouped loci_ functions work with factor and numeric groups", {
+  test_genotypes <- rbind(
+    c(0, 1, 2, NA),
+    c(2, 1, 0, 0),
+    c(2, 2, 0, 2),
+    c(0, 0, 2, 2)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:4),
+    chromosome = 1L,
+    position = as.integer(1:4 * 10),
+    genetic_dist = as.double(rep(0, 4)),
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = data.frame(
+      id = c("a", "b", "c", "d"),
+      population = c("p1", "p1", "p2", "p2")
+    ),
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  chr_grp <- test_gt %>% group_by(population)
+  # factor groups
+  test_gt$pop_factor <- factor(test_gt$population)
+  fct_grp <- test_gt %>% group_by(pop_factor)
+  # numeric groups that are not 1..k
+  test_gt$pop_numeric <- c(2, 2, 5, 5)
+  num_grp <- test_gt %>% group_by(pop_numeric)
+  loci_funs <- list(
+    loci_alt_freq, loci_maf, loci_missingness, loci_hwe, loci_pi
+  )
+  for (this_fun in loci_funs) {
+    chr_mat <- this_fun(chr_grp, type = "matrix")
+    chr_tidy <- this_fun(chr_grp, type = "tidy")
+    fct_mat <- this_fun(fct_grp, type = "matrix")
+    expect_equal(colnames(fct_mat), c("p1", "p2"))
+    expect_equal(unclass(fct_mat), unclass(chr_mat))
+    expect_equal(this_fun(fct_grp, type = "tidy"), chr_tidy)
+    num_mat <- this_fun(num_grp, type = "matrix")
+    expect_equal(colnames(num_mat), c("2", "5"))
+    expect_equal(as.vector(num_mat), as.vector(chr_mat))
+    num_tidy <- this_fun(num_grp, type = "tidy")
+    expect_equal(num_tidy$group, rep(c("2", "5"), 4))
+    expect_equal(num_tidy$value, chr_tidy$value)
+  }
+})

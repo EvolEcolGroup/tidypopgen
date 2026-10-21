@@ -437,6 +437,9 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
 #' @keywords internal
 #' @noRd
 format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
+  # use the group labels as names (factors and numbers would otherwise fail
+  # as matrix column names, or be used as column positions in tidyselect)
+  group_ids <- as.character(group_ids)
   if (is.vector(out_mat)) {
     # names are added below, so that integer loci names are not cast to
     # characters

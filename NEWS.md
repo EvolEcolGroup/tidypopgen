@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`,
+  `loci_hwe()` and `loci_pi()` failing when the grouping variable is a factor,
+  or numeric with values other than 1 to the number of groups
 * fix `pop_global_stats()` (and the global values of `pop_het_exp()` and
   `pop_fis()`) returning NaN at loci where a population has no valid genotypes,
   which also biased the genome-wide estimates
