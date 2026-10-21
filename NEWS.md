@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_as_genind()` failing when loci names contain '.' (which are now
+  replaced by '_', with a warning)
 * `gt_as_genlight()` now stores the alleles (`loc.all`), chromosome and position
   of each locus, so that the result can be converted back with
   `gt_from_genlight()`

@@ -207,6 +207,34 @@ test_that("gt_as_genind works on mixed-ploidy data", {
   expect_equal(unname(allele_tab["a", "rs1.2"]), 1)
 })
 
+test_that("gt_as_genind replaces '.' in loci names", {
+  test_gt <- gen_tibble(
+    x = rbind(c(0, 1, 2), c(1, NA, 1)),
+    loci = data.frame(
+      name = c("NC_031965.1_10", "NC_031965.1_20", "chr2_5"),
+      chromosome = "NC_031965.1",
+      position = 1:3,
+      genetic_dist = 0,
+      allele_ref = c("A", "C", "G"),
+      allele_alt = c("G", "T", "T")
+    ),
+    indiv_meta = data.frame(id = c("a", "b"), population = "pop1"),
+    quiet = TRUE
+  )
+  # genind uses '.' to separate loci and alleles
+  expect_warning(
+    test_genind <- gt_as_genind(test_gt),
+    "character '.' detected in names of loci; replacing with '_'"
+  )
+  expect_equal(
+    unname(adegenet::locNames(test_genind)),
+    c("NC_031965_1_10", "NC_031965_1_20", "chr2_5")
+  )
+  allele_tab <- adegenet::tab(test_genind)
+  expect_equal(unname(allele_tab["a", "NC_031965_1_20.2"]), 1)
+  expect_equal(unname(allele_tab["b", "chr2_5.2"]), 1)
+})
+
 test_that("gt_as_genind treats pseudohaploid dosage as diploid", {
   test_genotypes <- rbind(
     c(2, NA, 0, NA, 2, 0),

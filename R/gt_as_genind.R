@@ -55,12 +55,20 @@ gt_as_genind <- function(x) {
     ncol = ncol(geno_mat)
   )
 
+  # genind names its columns [LOCUS].[ALLELE], so loci names can not contain
+  # '.'; df2genind() means to replace it with '_', but does not
+  loc_names <- loci_names(x)
+  if (any(grepl(".", loc_names, fixed = TRUE))) {
+    warning("character '.' detected in names of loci; replacing with '_'")
+    loc_names <- gsub(".", "_", loc_names, fixed = TRUE)
+  }
+
   adegenet::df2genind(
     X = df_for_genind,
     ind.names = x$id,
     pop = x$population,
     ploidy = geno_ploidy,
     ncode = 1,
-    loc.names = loci_names(x)
+    loc.names = loc_names
   )
 }
