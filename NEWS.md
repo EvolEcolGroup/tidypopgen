@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* the `heatmap_dendro` object returned by `heatmap_add_dendro()` is now a proper
+  `gtable`, so it can be combined with other plots using patchwork (previously
+  this failed on printing or saving)
 * fix `heatmap_add_dendro()` drawing dendrograms that did not match the order of
   the heatmap when there are tied distances
 * fix `heatmap_add_dendro()` failing with ggplot2 versions earlier than 4.0.0

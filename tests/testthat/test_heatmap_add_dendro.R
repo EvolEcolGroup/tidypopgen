@@ -30,19 +30,19 @@ test_that("heatmap_add_dendro adds requested dendrogram panels", {
   )
 
   expect_s3_class(left_plot, "heatmap_dendro")
-  expect_true("dend-left" %in% left_plot$gt$layout$name)
-  expect_false("dend-top" %in% left_plot$gt$layout$name)
+  expect_true("dend-left" %in% left_plot$layout$name)
+  expect_false("dend-top" %in% left_plot$layout$name)
 
   top_plot <- heatmap_add_dendro(base_plot, side = "top", rel_size = 0.2)
 
   expect_s3_class(top_plot, "heatmap_dendro")
-  expect_true("dend-top" %in% top_plot$gt$layout$name)
-  expect_false("dend-left" %in% top_plot$gt$layout$name)
+  expect_true("dend-top" %in% top_plot$layout$name)
+  expect_false("dend-left" %in% top_plot$layout$name)
 
   both_plot <- heatmap_add_dendro(base_plot, side = "both")
 
   expect_s3_class(both_plot, "heatmap_dendro")
-  expect_true(all(c("dend-left", "dend-top") %in% both_plot$gt$layout$name))
+  expect_true(all(c("dend-left", "dend-top") %in% both_plot$layout$name))
 })
 
 test_that("heatmap_add_dendro matches the heatmap order with tied distances", {
@@ -77,8 +77,8 @@ test_that("heatmap_add_dendro matches the heatmap order with tied distances", {
   }
   dendro_plot <- heatmap_add_dendro(base_plot)
   for (side in c("left", "top")) {
-    drawn <- dendro_plot$gt$grobs[[
-      which(dendro_plot$gt$layout$name == paste0("dend-", side))
+    drawn <- dendro_plot$grobs[[
+      which(dendro_plot$layout$name == paste0("dend-", side))
     ]]
     expected <- .dend_grob(hc, side, "grey30", 0.5)
     expect_equal(seg_coords(drawn), seg_coords(expected))
@@ -129,6 +129,23 @@ test_that("heatmap_add_dendro objects can be drawn and saved", {
     )
   )
   expect_true(file.exists(tmp_png))
+
+  # it is a proper gtable, so it can be combined with other plots
+  expect_s3_class(dendro_plot, "gtable")
+  expect_true(all(dim(dendro_plot) > 0))
+  expect_no_error(plot(dendro_plot))
+  combined <- patchwork::wrap_plots(dendro_plot, base_plot)
+  tmp_png_combined <- tempfile(fileext = ".png")
+  expect_no_error(
+    ggplot2::ggsave(
+      filename = tmp_png_combined,
+      plot = combined,
+      width = 8,
+      height = 4,
+      units = "in"
+    )
+  )
+  expect_true(file.exists(tmp_png_combined))
 })
 
 test_that("heatmap_add_dendro validates input plots", {

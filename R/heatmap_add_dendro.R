@@ -103,25 +103,20 @@ heatmap_add_dendro <- function(plot,
 
 #############################################
 # <heatmap_dendro> S3 class
-#     A thin wrapper around a gtable that auto-draws on bare evaluation and
-#     is accepted by ggsave(), just like a ggplot or patchwork object.
+#     A gtable subclass that auto-draws on bare evaluation and is accepted
+#     by ggsave() and patchwork, just like a ggplot or patchwork object.
 #############################################
 
 new_heatmap_dendro <- function(gt) {
-  structure(list(gt = gt), class = c("heatmap_dendro", "gtable"))
+  class(gt) <- c("heatmap_dendro", setdiff(class(gt), "heatmap_dendro"))
+  gt
 }
 
 #' @export
 print.heatmap_dendro <- function(x, ...) {
   grid::grid.newpage()
-  grid::grid.draw(x$gt)
+  grid::grid.draw(x)
   invisible(x)
-}
-
-#' @importFrom grid grid.draw
-#' @export
-grid.draw.heatmap_dendro <- function(x, recording = TRUE) {
-  grid::grid.draw(x$gt, recording = recording)
 }
 
 
@@ -155,7 +150,7 @@ annotate_dendrogram <- function(plot,
   if (inherits(plot, "ggplot")) {
     gt <- ggplot2::ggplotGrob(plot)
   } else if (inherits(plot, "heatmap_dendro")) {
-    gt <- plot$gt
+    gt <- plot
   } else {
     stop("plot must be a ggplot or heatmap_dendro")
   }
