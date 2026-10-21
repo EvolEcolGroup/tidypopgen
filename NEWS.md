@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* `augment_loci()` now works on `gt_pca_autoSVD()` results, giving NA loadings
+  to the loci removed by LD pruning
 * fix `augment()` for `gt_pca` and `gt_dapc` objects (and `augment_loci()` for
   `gt_pca`) failing when a single component is requested, when individual ids
   are integers, or when ids do not match (now giving an informative error)

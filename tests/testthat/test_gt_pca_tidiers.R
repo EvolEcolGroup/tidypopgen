@@ -95,6 +95,49 @@ test_that("augment and augment_loci work with a single component", {
   expect_true(ncol(augmented_loci) == 1 + 1)
 })
 
+test_that("augment_loci works with gt_pca_autoSVD", {
+  set.seed(123)
+  n_ind <- 100
+  n_loci <- 900
+  pops <- rep(1:4, each = n_ind / 4)
+  freqs <- matrix(stats::runif(4 * n_loci, 0.05, 0.95), nrow = 4)
+  geno <- t(sapply(seq_len(n_ind), function(i) {
+    stats::rbinom(n_loci, 2, freqs[pops[i], ])
+  }))
+  loci <- data.frame(
+    name = paste0("rs", seq_len(n_loci)),
+    chromosome = rep(1:3, each = n_loci / 3),
+    position = rep(seq_len(n_loci / 3) * 1000, 3),
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  meta <- data.frame(id = paste0("ind", seq_len(n_ind)), population = pops)
+  test_gt <- gen_tibble(
+    geno,
+    indiv_meta = meta,
+    loci = loci,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  test_pca <- gt_pca_autoSVD(test_gt, k = 3, roll_size = 7, verbose = FALSE)
+  # some loci are removed by the LD pruning
+  expect_true(nrow(test_pca$v) < n_loci)
+  augmented_loci <- test_pca %>% augment_loci(data = test_gt)
+  expect_identical(augmented_loci$name, loci_names(test_gt))
+  # loci used in the pca have their loadings, the others are NA
+  used <- match(row_names(test_pca$v), augmented_loci$name)
+  expect_equal(augmented_loci$.loadingPC1[used], unclass(test_pca$v)[, 1],
+    ignore_attr = TRUE
+  )
+  expect_true(all(is.na(augmented_loci$.loadingPC1[-used])))
+  # error if data does not contain the loci used in the pca
+  expect_error(
+    test_pca %>% augment_loci(data = test_gt %>% select_loci(1:100)),
+    "the loci names in 'data' do not correspond"
+  )
+})
+
 test_that("augment checks the ids of data", {
   bed_file <- system.file("extdata", "example-missing.bed",
     package = "bigsnpr"

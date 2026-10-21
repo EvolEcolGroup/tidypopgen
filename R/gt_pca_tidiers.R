@@ -274,10 +274,21 @@ augment_loci.gt_pca <- function(x, data = NULL, k = NULL, ...) {
   ret <- if (!missing(data) && !is.null(data)) {
     # check that names of the two columns are in sync
     if (!identical(loci_names(data), row_names(x$v))) {
-      stop(paste(
-        "the loci names in 'data' do not correspond to the loci in",
-        "the pca object 'x'"
-      ))
+      # if not, match the loci by name; this is needed when only a subset of
+      # loci was used for the pca (e.g. by gt_pca_autoSVD); loci of data that
+      # were not used for the pca get NA loadings
+      if (
+        anyDuplicated(loci_names(data)) > 0 ||
+          !all(row_names(x$v) %in% loci_names(data))
+      ) {
+        stop(paste(
+          "the loci names in 'data' do not correspond to the loci in",
+          "the pca object 'x'"
+        ))
+      }
+      loadings <- loadings[match(loci_names(data), row_names(x$v)), ,
+        drop = FALSE
+      ]
     }
     show_loci(data) <- show_loci(data) %>% tibble::add_column(loadings)
   } else {
