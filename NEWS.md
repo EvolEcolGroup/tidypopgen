@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* grouped `qc_report_indiv()` now gives informative errors when data are grouped
+  by more than one variable, or when `kings_threshold` is used with
+  pseudohaploid data (previously silently ignored)
 * `autoplot()` of a `qc_report_indiv` with `type = "relatedness"` now gives an
   informative error if the report was created without `kings_threshold`
 * fix `qc_report_indiv()` on grouped `gen_tibble`s attaching `to_keep` flags to

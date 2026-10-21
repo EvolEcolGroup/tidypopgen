@@ -120,8 +120,16 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
+    if (!is.null(kings_threshold)) {
+      stop("KING kinship estimates are not supported for pseudohaploid data.")
+    }
     qc_report <- qc_report_indiv_pseudohaploid(.x)
     return(qc_report)
+  }
+
+  # check that we only have one grouping variable
+  if (length(.x %>% dplyr::group_vars()) > 1) {
+    stop("qc_report_indiv only works with one grouping variable")
   }
 
   if (!is.null(kings_threshold)) {

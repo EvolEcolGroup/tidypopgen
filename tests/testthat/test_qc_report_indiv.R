@@ -280,6 +280,16 @@ test_that("qc_report_indiv for pseudohaploid data", {
 
   expect_equal(indiv_report, indiv_report_grouped)
 
+  # kinship is not supported, whether grouped or not
+  expect_error(
+    qc_report_indiv(ungroup(test_gt_pseudo), kings_threshold = 0.2),
+    "not supported for pseudohaploid data"
+  )
+  expect_error(
+    qc_report_indiv(test_gt_pseudo, kings_threshold = 0.2),
+    "not supported for pseudohaploid data"
+  )
+
   # autoplot relatedness
   expect_error(
     autoplot(indiv_report,
@@ -319,6 +329,20 @@ test_that("qc_report_indiv for pseudohaploid data", {
       type = "histogram"
     ),
     "ggplot"
+  )
+})
+
+test_that("qc_report_indiv only works with one grouping variable", {
+  families$population <- rep(c("pop1", "pop2"), 6)
+  families$sex <- rep(c("F", "F", "M"), 4)
+  families <- families %>% group_by(population, sex)
+  expect_error(
+    qc_report_indiv(families),
+    "only works with one grouping variable"
+  )
+  expect_error(
+    qc_report_indiv(families, kings_threshold = 0.2),
+    "only works with one grouping variable"
   )
 })
 
