@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_snmf()` returning cross-entropies (`$cv`) in the wrong order when
+  `n_runs > 1` and several values of `k` are used
 * `gt_pcadapt()` now errors if the individuals of `x` do not match (in identity
   and order) those used for `pca`
 * fix `gt_impute_xgboost()` assigning loci to the wrong chromosome (and so

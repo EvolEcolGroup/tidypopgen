@@ -146,3 +146,27 @@ test_that("gt_snmf from file and from gen_tibble are the same", {
   plt <- autoplot(anole_snmf_gt)
   expect_true(plt$labels$y == "Cross-Entropy")
 })
+
+test_that("gt_snmf cross-entropy matches k and run", {
+  example_gt <- load_example_gt("gen_tbl")
+  input_file <- gt_as_geno_lea(example_gt)
+  capture.output(example_snmf <- gt_snmf(
+    x = input_file,
+    k = 2:3,
+    project = "new",
+    n_runs = 2,
+    seed = c(1, 2),
+    entropy = TRUE,
+    percentage = 0.5,
+    alpha = 100
+  ))
+  snmf_project <- LEA::load.snmfProject(
+    sub("\\.geno$", ".snmfProject", input_file)
+  )
+  expect_equal(example_snmf$k, c(2, 2, 3, 3))
+  lea_cv <- c(
+    LEA::cross.entropy(snmf_project, K = 2),
+    LEA::cross.entropy(snmf_project, K = 3)
+  )
+  expect_equal(example_snmf$cv, lea_cv, tolerance = 1e-5)
+})

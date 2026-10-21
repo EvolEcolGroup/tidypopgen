@@ -185,7 +185,12 @@ gt_snmf <- function(
   if (entropy) {
     # extract value from line with cross-Entropy (number after :)
     entropy <- extract_cross_entropy(snmf_res)
-    adm_list$cv <- entropy$cross_entropy_masked
+    # LEA loops over repetitions and then k, whereas we store the results by
+    # k and then repetition, so we match them on both
+    adm_list$cv <- entropy$cross_entropy_masked[match(
+      paste(adm_list$k, rep(seq_len(n_runs), times = length(k))),
+      paste(entropy$K, entropy$repetition)
+    )]
   }
 
   # add metadata if x is a gen_tibble
