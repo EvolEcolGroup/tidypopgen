@@ -151,9 +151,11 @@ pop_tajimas_d.grouped_df <- function(
 # estimate tajimas d from a vector of pi per locus and the number of
 # haploid genomes (i.e. 2 * N individuals)
 tajimas_d_from_pi_vec <- function(pi, n) {
-  # count segregating sites from pi
-  seg <- sum(pi > 0.0 & pi < 1.0, na.rm = TRUE)
-  k_hat <- sum(pi)
+  # count segregating sites from pi (pi is 0 only for monomorphic loci, and
+  # can be 1 for a locus with a single heterozygote genotyped); loci with no
+  # data (NA pi) are ignored
+  seg <- sum(pi > 0.0, na.rm = TRUE)
+  k_hat <- sum(pi, na.rm = TRUE)
 
   a1 <- sum(1 / (1:(n - 1)))
   a2 <- sum(1 / ((1:(n - 1))^2))

@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `pop_tajimas_d()` and `windows_pop_tajimas_d()` returning NA when a locus
+  has no valid genotypes, and ignoring segregating sites with pi equal to 1 (a
+  single heterozygote genotyped)
 * fix `gt_as_vcf()` and `gt_as_plink(type = "ped")` writing positions stored as
   doubles in scientific notation (e.g. `1e+05`)
 * fix `gt_as_plink(type = "bed")` not writing the population (as family ID),

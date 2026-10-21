@@ -46,6 +46,71 @@ test_that("pop_tajimas_d computes correctly", {
   expect_true(taj_gt == taj_chunked)
 })
 
+test_that("pop_tajimas_d handles loci with little or no data", {
+  set.seed(5)
+  test_genotypes <- matrix(sample(c(0, 1, 2), 6 * 10, replace = TRUE), 6, 10)
+  test_loci <- data.frame(
+    name = paste0("rs", 1:10),
+    chromosome = 1L,
+    position = as.integer(1:10 * 10),
+    genetic_dist = as.double(rep(0, 10)),
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  test_indiv_meta <- data.frame(
+    id = paste0("i", 1:6),
+    population = rep(c("pop1", "pop2"), each = 3)
+  )
+  # a locus with no valid genotypes
+  missing_genotypes <- test_genotypes
+  missing_genotypes[, 4] <- NA
+  missing_gt <- gen_tibble(
+    x = missing_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_equal(
+    pop_tajimas_d(missing_gt),
+    hierfstat::TajimaD.dosage(missing_genotypes)
+  )
+  # the locus has no data only in pop1
+  missing_genotypes[4:6, 4] <- test_genotypes[4:6, 4]
+  missing_gt <- gen_tibble(
+    x = missing_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  taj_grp <- missing_gt %>%
+    group_by(population) %>%
+    pop_tajimas_d()
+  expect_equal(
+    taj_grp,
+    list(
+      hierfstat::TajimaD.dosage(missing_genotypes[1:3, ]),
+      hierfstat::TajimaD.dosage(missing_genotypes[4:6, ])
+    )
+  )
+  # a segregating locus genotyped in a single heterozygote (pi = 1)
+  het_genotypes <- test_genotypes
+  het_genotypes[, 4] <- c(1, NA, NA, NA, NA, NA)
+  het_gt <- gen_tibble(
+    x = het_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_equal(loci_pi(het_gt)[4], 1)
+  expect_equal(
+    pop_tajimas_d(het_gt),
+    hierfstat::TajimaD.dosage(het_genotypes)
+  )
+})
+
 test_that("pop_tajimas_d on grouped tibbles", {
   test_genotypes <- rbind(
     c(1, 1, 0, 1, 1, 0),
