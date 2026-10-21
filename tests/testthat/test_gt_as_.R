@@ -117,6 +117,32 @@ test_that("gt_as_hierfstat errors on polyploid data", {
   )
 })
 
+test_that("gt_as_hierfstat keeps population labels and loci names", {
+  test_gt <- gen_tibble(
+    x = rbind(c(0, 1, 2), c(1, 2, NA), c(2, 0, 0)),
+    loci = data.frame(
+      name = c("rs1", "rs2", "rs3"),
+      chromosome = 1,
+      position = 1:3,
+      genetic_dist = 0,
+      allele_ref = c("A", "C", "G"),
+      allele_alt = c("G", "T", "A")
+    ),
+    # population labels that look like genotype codes
+    indiv_meta = data.frame(
+      id = c("a", "b", "c"),
+      population = c("1", "2", "2")
+    ),
+    quiet = TRUE
+  )
+  test_hier <- gt_as_hierfstat(test_gt)
+  expect_equal(test_hier$pop, factor(c("1", "2", "2")))
+  expect_equal(names(test_hier), c("pop", "rs1", "rs2", "rs3"))
+  expect_equal(test_hier$rs1, c(11, 12, 22))
+  expect_equal(test_hier$rs2, c(12, 22, 11))
+  expect_equal(test_hier$rs3, c(22, NA, 11))
+})
+
 test_that("gt_as_hierfstat treats pseudohaploid dosage as diploid", {
   test_genotypes <- rbind(
     c(2, NA, 0, NA, 2, 0),

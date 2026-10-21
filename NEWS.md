@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_as_hierfstat()` turning numeric-like population labels (e.g. "1", "2")
+  into NA, and keep loci names as column names
 * fix the `scale_fill_distruct()` example, and the documentation of
   `qc_report_indiv()` and its `autoplot()` method
 * fix the description of the upset plot in the quality control vignette
