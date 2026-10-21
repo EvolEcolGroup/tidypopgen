@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `rbind_dry_run()` failing when `ref` or `target` are paths to PLINK .bim
+  files, as documented
 * `rbind(use_position = TRUE)` now keeps the loci names of the reference
   dataset, instead of renaming loci to "chromosome_position" and adding a
   `name_old` column

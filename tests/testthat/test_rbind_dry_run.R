@@ -31,11 +31,20 @@ test_that("merge report detects matching rsID's correctly", {
 
   # now create report directly from the bim files and check that it is the same
   # as from the gen_tibble objects
-  #  report_char <- rbind_dry_run(ref = raw_path_pop_b, #nolint start
-  #                               target = raw_path_pop_a,
-  #                               flip_strand = TRUE,
-  #                               quiet = TRUE)
-  #  expect_identical(report, report_char) #nolint end
+  report_char <- rbind_dry_run(
+    ref = bigsnpr::sub_bed(raw_path_pop_b, ".bim"),
+    target = bigsnpr::sub_bed(raw_path_pop_a, ".bim"),
+    flip_strand = TRUE,
+    quiet = TRUE
+  )
+  expect_identical(report, report_char)
+  report_mixed <- rbind_dry_run(
+    ref = pop_b_gt,
+    target = bigsnpr::sub_bed(raw_path_pop_a, ".bim"),
+    flip_strand = TRUE,
+    quiet = TRUE
+  )
+  expect_identical(report, report_mixed)
 })
 
 test_that("merge report evaluates non-matching target loci correctly", {

@@ -70,18 +70,23 @@ rbind_dry_run <- function(
   flip_strand = FALSE,
   quiet = FALSE
 ) {
-  # check there are no ID's in common
-  if (any(ref$id %in% target$id)) {
-    stop(
-      "The two gen_tibbles contain at least one individual with the",
-      " same ID."
-    )
+  # check there are no ID's in common (bim files have no individuals)
+  if (!is.character(ref) && !is.character(target)) {
+    if (any(ref$id %in% target$id)) {
+      stop(
+        "The two gen_tibbles contain at least one individual with the",
+        " same ID."
+      )
+    }
   }
+  # get the loci tables (read from the bim files if paths were given)
+  ref_df <- dry_run_loci(ref)
+  target_df <- dry_run_loci(target)
 
   # if use_position is FALSE, then the names can not be integers
   if (!use_position) {
-    if (!is.character(show_loci(ref)$name) ||
-          !is.character(show_loci(target)$name)) {
+    if (!is.character(ref_df$name) ||
+          !is.character(target_df$name)) {
       stop(
         "When 'use_position' is FALSE, loci names must be characters.",
         " Please set 'use_position' to TRUE if you use integers as loci names."
@@ -91,9 +96,7 @@ rbind_dry_run <- function(
 
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
-  target_df <- target %>% show_loci()
   target_df <- target_df %>% mutate(id = seq_len(nrow(target_df)))
-  ref_df <- ref %>% show_loci()
   ref_df <- ref_df %>% mutate(id = seq_len(nrow(ref_df)))
   # replace NA with "0" for missing allele to avoid subsetting headaches
   # (NA does not play nice with subsetting)
@@ -145,6 +148,17 @@ rbind_dry_run <- function(
   )
 }
 
+
+# get the loci table of a gen_tibble, or read it from the path to a PLINK bim
+# file
+dry_run_loci <- function(x) {
+  if (is.character(x)) {
+    # duplicated loci are reported by rbind_dry_run()
+    loci_from_bim(x, allow_duplicates = TRUE)
+  } else {
+    show_loci(x)
+  }
+}
 
 ##############################################################################
 # Methods can simply call the function below after having correctly formatted
