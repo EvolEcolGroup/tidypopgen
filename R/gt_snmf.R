@@ -106,7 +106,7 @@ gt_snmf <- function(
   class(adm_list) <- c("gt_admix", "list")
 
   if (entropy) {
-    snmf_res <- utils::capture.output(LEA::snmf(
+    snmf_res <- utils::capture.output(snmf_project <- LEA::snmf(
       input.file = input_file,
       K = k,
       project = project,
@@ -119,9 +119,9 @@ gt_snmf <- function(
       iterations = iterations,
       ploidy = ploidy,
       seed = seed
-    ))
+    ), print(snmf_project))
   } else {
-    snmf_res <- utils::capture.output(LEA::snmf(
+    snmf_res <- utils::capture.output(snmf_project <- LEA::snmf(
       input.file = input_file,
       K = k,
       project = project,
@@ -132,13 +132,18 @@ gt_snmf <- function(
       iterations = iterations,
       ploidy = ploidy,
       seed = seed
-    ))
+    ), print(snmf_project))
   }
 
   # loop over values of k and number of repeats
   index <- 1
   for (this_k in as.integer(k)) {
+    # if the project already had runs for this k (project = "continue" or
+    # "force"), LEA numbers the new runs after them, so the runs of this call
+    # are the last n_runs
+    n_runs_previous <- sum(snmf_project@K == this_k) - n_runs
     for (this_rep in seq_len(n_runs)) {
+      this_run <- n_runs_previous + this_rep
       adm_list$k[index] <- this_k
       adm_list$Q[[index]] <- q_matrix(utils::read.table(
         paste0(
@@ -146,11 +151,11 @@ gt_snmf <- function(
           ".snmf/K",
           this_k,
           "/run",
-          this_rep,
+          this_run,
           "/",
           file_name,
           "_r",
-          this_rep,
+          this_run,
           ".",
           this_k,
           ".Q"
@@ -163,11 +168,11 @@ gt_snmf <- function(
           ".snmf/K",
           this_k,
           "/run",
-          this_rep,
+          this_run,
           "/",
           file_name,
           "_r",
-          this_rep,
+          this_run,
           ".",
           this_k,
           ".G"

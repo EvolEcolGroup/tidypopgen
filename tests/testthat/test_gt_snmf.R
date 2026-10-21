@@ -139,8 +139,24 @@ test_that("gt_snmf from file and from gen_tibble are the same", {
     seed = 1,
     alpha = 100
   )
-  expect_equal(anole_snmf_gt$Q, anole_snmf_gt_ne$Q)
-  expect_equal(anole_snmf_gt$G, anole_snmf_gt_ne$G)
+  # the results differ from the runs with entropy (which are estimated on
+  # the masked genotypes), so we check that we get the latest run (run 4,
+  # after the 3 runs above) from the project
+  expect_equal(anole_snmf_gt_ne$k, anole_snmf_gt$k)
+  expect_null(anole_snmf_gt_ne$cv)
+  anole_project <- LEA::load.snmfProject(
+    sub("\\.geno$", ".snmfProject", input_file)
+  )
+  expect_equal(
+    unclass(anole_snmf_gt_ne$Q[[3]]),
+    LEA::Q(anole_project, K = 3, run = 4),
+    ignore_attr = TRUE
+  )
+  expect_equal(
+    unclass(anole_snmf_gt_ne$G[[3]]),
+    LEA::G(anole_project, K = 3, run = 4),
+    ignore_attr = TRUE
+  )
 
   # test plot
   plt <- autoplot(anole_snmf_gt)
@@ -169,4 +185,58 @@ test_that("gt_snmf cross-entropy matches k and run", {
     LEA::cross.entropy(snmf_project, K = 3)
   )
   expect_equal(example_snmf$cv, lea_cv, tolerance = 1e-5)
+})
+
+test_that("gt_snmf returns the runs of the current call in a project", {
+  example_gt <- load_example_gt("gen_tbl")
+  input_file <- gt_as_geno_lea(example_gt)
+  project_file <- sub("\\.geno$", ".snmfProject", input_file)
+  capture.output(snmf_1 <- gt_snmf(
+    x = input_file,
+    k = 2,
+    project = "new",
+    n_runs = 1,
+    seed = 11,
+    alpha = 100
+  ))
+  # add runs to the existing project
+  capture.output(snmf_2 <- gt_snmf(
+    x = input_file,
+    k = 2:3,
+    project = "continue",
+    n_runs = 2,
+    seed = c(5, 6),
+    entropy = TRUE,
+    percentage = 0.5,
+    alpha = 1
+  ))
+  snmf_project <- LEA::load.snmfProject(project_file)
+  expect_equal(
+    unclass(snmf_1$Q[[1]]),
+    LEA::Q(snmf_project, K = 2, run = 1),
+    ignore_attr = TRUE
+  )
+  # the first call created run 1 of K = 2, so the second call created runs 2
+  # and 3 for K = 2, and runs 1 and 2 for K = 3
+  lea_runs <- list(c(2, 2), c(2, 3), c(3, 1), c(3, 2))
+  for (i in seq_along(lea_runs)) {
+    expect_equal(
+      unclass(snmf_2$Q[[i]]),
+      LEA::Q(snmf_project, K = lea_runs[[i]][1], run = lea_runs[[i]][2]),
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      unclass(snmf_2$G[[i]]),
+      LEA::G(snmf_project, K = lea_runs[[i]][1], run = lea_runs[[i]][2]),
+      ignore_attr = TRUE
+    )
+    expect_equal(
+      snmf_2$cv[i],
+      LEA::cross.entropy(snmf_project,
+        K = lea_runs[[i]][1],
+        run = lea_runs[[i]][2]
+      )[1, 1],
+      tolerance = 1e-5
+    )
+  }
 })

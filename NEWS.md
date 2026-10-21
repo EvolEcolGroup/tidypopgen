@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_snmf()` returning the results of earlier runs when adding runs to an
+  existing project (`project = "continue"` or `"force"`)
 * fix `gt_snmf()` returning cross-entropies (`$cv`) in the wrong order when
   `n_runs > 1` and several values of `k` are used
 * `gt_pcadapt()` now errors if the individuals of `x` do not match (in identity
