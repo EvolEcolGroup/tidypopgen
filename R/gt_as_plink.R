@@ -273,7 +273,7 @@ gt_write_ped_raw <- function(
     as.character(indiv_meta$phenotype),
     "control" ~ "1",
     "case" ~ "2",
-    default = indiv_meta$phenotype
+    default = as.character(indiv_meta$phenotype)
   )
   indiv_meta$phenotype[is.na(indiv_meta$phenotype)] <- -9
 

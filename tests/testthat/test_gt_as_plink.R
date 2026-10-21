@@ -205,6 +205,21 @@ test_that("ped and raw use the sample ID as family ID without population", {
   )
 })
 
+test_that("ped and raw write numeric phenotypes", {
+  test_gt_pheno <- test_gt %>% mutate(phenotype = c(1.5, 2.3, NA))
+  ped_path <- gt_as_plink(
+    test_gt_pheno,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(ped$V6, c("1.5", "2.3", "-9"))
+  test_gt_pheno <- test_gt %>% mutate(phenotype = c(1L, 2L, NA))
+  raw_path <- gt_as_plink(test_gt_pheno, file = tempfile(), type = "raw")
+  raw <- read.table(raw_path, header = TRUE)
+  expect_equal(raw$PHENOTYPE, c(1, 2, -9))
+})
+
 test_that("handling of duplicated loci", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
