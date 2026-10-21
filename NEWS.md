@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `heatmap_pairwise()` (and `autoplot()` of tidy pairwise results) always
+  failing with "Duplicate pairs found" when the id columns are factors, e.g.
+  from `pairwise_pop_fst()` on data grouped by a factor
 * fix grouped `loci_alt_freq()`, `loci_maf()`, `loci_hwe()`,
   `loci_missingness()`, `loci_pi()` and `pop_tajimas_d()` failing when the last
   group is empty (factor grouping with `.drop = FALSE`)

@@ -93,6 +93,9 @@ heatmap_pairwise <- function(x,
 
     df <- x
     colnames(df)[1:3] <- c("from", "to", "value")
+    # ids may be factors (e.g. from group_keys()), which pmin/pmax can't handle
+    df$from <- as.character(df$from)
+    df$to <- as.character(df$to)
 
     ids <- sort(unique(c(df$from, df$to)))
     n <- length(ids)
