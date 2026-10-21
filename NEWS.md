@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix group annotations of admixture barplots showing extra separators and
+  labels for unused levels of the grouping factor
 * `select_loci_if()` no longer loads the whole genotype matrix into memory to
   check the length of the selection
 * fix `gt_as_genind()` failing when loci names contain '.' (which are now

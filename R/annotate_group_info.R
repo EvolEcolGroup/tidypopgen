@@ -22,7 +22,8 @@ annotate_group_info <- function(q_tbl, plt) {
   if (length(group) != length(unique(plt$data$id))) {
     stop("'groups' should be of the same length as the original data")
   }
-  group_x <- cumsum(table(fct_inorder_base(group)))
+  # drop unused levels, which would create empty groups
+  group_x <- cumsum(table(droplevels(fct_inorder_base(group))))
   segment_data <- data.frame(
     x = group_x + 0.5,
     xend = group_x + 0.5,
