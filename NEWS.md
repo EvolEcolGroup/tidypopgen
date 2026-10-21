@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* correct the documentation of the columns returned by `tidy()` for the loadings
+  of `gt_dapc` objects
 * fix `gt_dapc()` using k instead of k - 1 principal components by default when
   the number of available components equals the number of groups k
 * fix `gt_dapc()` reporting the proportion of variance retained by the PCs

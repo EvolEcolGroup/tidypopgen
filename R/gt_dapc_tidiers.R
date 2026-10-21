@@ -38,9 +38,10 @@
 #'   information about the principle components in the original space. The
 #'   columns are:
 #'
-#'   \item{`row`}{The variable labels (colnames) of the data set on
+#'   \item{`column`}{The variable labels (colnames) of the data set on
 #'   which PCA was performed.}
-#'   \item{`LD`}{An integer vector indicating the principal component.}
+#'   \item{`LD`}{A character vector indicating the discriminant axis (e.g.
+#'   "LD1").}
 #'   \item{`value`}{The value of the eigenvector (axis score) on the
 #'   indicated principal component.}
 #'

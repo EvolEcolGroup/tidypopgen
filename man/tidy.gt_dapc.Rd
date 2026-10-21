@@ -43,9 +43,10 @@ If \code{matrix} is  \code{"loadings"}, each row in the tidied output correspond
 information about the principle components in the original space. The
 columns are:
 
-\item{\code{row}}{The variable labels (colnames) of the data set on
+\item{\code{column}}{The variable labels (colnames) of the data set on
 which PCA was performed.}
-\item{\code{LD}}{An integer vector indicating the principal component.}
+\item{\code{LD}}{A character vector indicating the discriminant axis (e.g.
+"LD1").}
 \item{\code{value}}{The value of the eigenvector (axis score) on the
 indicated principal component.}
 
