@@ -193,3 +193,48 @@ test_that("n_cores can be set", {
   two_core <- test_gt %>% pop_global_stats(by_locus = TRUE, n_cores = 2)
   expect_equal(one_core, two_core)
 })
+
+test_that("pop_global_stats handles a population with no data at a locus", {
+  set.seed(3)
+  missing_genotypes <- matrix(
+    sample(c(0, 1, 2), 12 * 30, replace = TRUE, prob = c(0.4, 0.35, 0.25)),
+    nrow = 12
+  )
+  missing_pops <- rep(c("a", "b", "c"), each = 4)
+  # population "a" has no valid genotypes at locus 5
+  missing_genotypes[missing_pops == "a", 5] <- NA
+  missing_gt <- gen_tibble(
+    x = missing_genotypes,
+    loci = data.frame(
+      name = paste0("rs", 1:30),
+      chromosome = 1L,
+      position = as.integer(1:30 * 10),
+      genetic_dist = as.double(rep(0, 30)),
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    indiv_meta = data.frame(
+      id = paste0("i", 1:12),
+      population = missing_pops
+    ),
+    quiet = TRUE,
+    backingfile = tempfile()
+  ) %>%
+    dplyr::group_by(population)
+  basic_hier <- hierfstat::basic.stats(gt_as_hierfstat(missing_gt))
+  # by locus, including the locus where population "a" has no data
+  test_global_stats <- missing_gt %>% pop_global_stats(by_locus = TRUE)
+  expect_false(anyNA(test_global_stats[5, ]))
+  expect_true(all.equal(
+    basic_hier$perloc,
+    round(test_global_stats, 4),
+    check.attributes = FALSE
+  ))
+  # overall
+  test_global_stats <- missing_gt %>% pop_global_stats(by_locus = FALSE)
+  expect_true(all.equal(
+    basic_hier$overall,
+    round(test_global_stats, 4),
+    check.attributes = FALSE
+  ))
+})

@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `pop_global_stats()` (and the global values of `pop_het_exp()` and
+  `pop_fis()`) returning NaN at loci where a population has no valid genotypes,
+  which also biased the genome-wide estimates
 * fix `rbind()` attaching individual ploidies to the wrong individuals (and
   mislabelling the merged ploidy) when the input `gen_tibble`s had been filtered
   or reordered

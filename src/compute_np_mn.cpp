@@ -1,8 +1,10 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-// function to compute the number of non-missing values (np) and the mean of 
+// function to compute the number of non-missing values (np) and the mean of
 // the inverse (mn) for each row in a matrix. This is used as part of loci_globals_stats
+// Counts of zero (a population with no valid genotypes at a locus) are treated
+// as missing, as hierfstat::ind.count returns NA for them
 
 // [[Rcpp::export]]
 List compute_np_mn(NumericMatrix n) {
@@ -15,7 +17,7 @@ List compute_np_mn(NumericMatrix n) {
   for (int j = 0; j < ncol; ++j) {
     for (int i = 0; i < nrow; ++i) {
       double val = n(i, j);
-      if (!NumericVector::is_na(val)) {
+      if (!NumericVector::is_na(val) && val > 0.0) {
         np[i] += 1.0;
         denom[i] += 1.0 / val;
       }

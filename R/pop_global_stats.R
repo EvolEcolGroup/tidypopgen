@@ -162,7 +162,8 @@ pop_global_stats <- function(
   mn <- np_mn$mn
   # mean sum of square frequencies
   msp2 <- rowMeans(sp2, na.rm = TRUE) # nolint start
-  mp2 <- rowMeans(pop_freqs_df$freq_alt)^2 + rowMeans(pop_freqs_df$freq_ref)^2
+  mp2 <- rowMeans(pop_freqs_df$freq_alt, na.rm = TRUE)^2 +
+    rowMeans(pop_freqs_df$freq_ref, na.rm = TRUE)^2
   mHs <- mn / (mn - 1) * (1 - msp2 - mHo / 2 / mn)
   Ht <- 1 - mp2 + mHs / mn / np - mHo / 2 / mn / np
   mFis <- 1 - mHo / mHs
