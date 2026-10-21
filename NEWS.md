@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gt_pca_autoSVD()` mislabelling loadings, misreporting variance explained
+  and breaking `predict()` when the loci table is not in the order of the
+  backing file
 * fix `windows_pairwise_pop_fst()` and `windows_nwise_pop_pbs()` always using
   Hudson's Fst, ignoring `method` and `fst_method` respectively
 * `pop_fst()` and `pop_fis(method = "WG17")` now give an informative error,

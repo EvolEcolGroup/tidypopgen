@@ -191,22 +191,20 @@ gt_pca_autoSVD <- function(
   row.names(this_svd$u) <- x$id
   this_svd$method <- "autoSVD"
   this_svd$call <- match.call()
-  # subset the loci table to have only the snps of interest
+  # subset the loci table to have only the snps of interest, in the order of
+  # the columns used for the svd (which is not necessarily the order of the
+  # loci table), so that it matches the loadings, center and scale
+  ind_col_svd <- attr(this_svd, "subset")
   this_svd$loci <-
-    show_loci(x)[.gt_fbm_cols(x) %in% attr(this_svd, "subset"), ]
+    show_loci(x)[match(ind_col_svd, x_ind_col), ]
   # add loci names to the loadings (as integers if the names are integers)
   this_svd$v <- matrix_int_names(this_svd$v, row_names = this_svd$loci$name)
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var) {
-    loci <- this_svd$loci
-    loci_after_ld <- which(show_loci(x)$name %in% loci$name)
-    x_autoSVD_subset <- x %>% select_loci(all_of(loci_after_ld)) # nolint
-    x_ind_col <- show_loci(x_autoSVD_subset)$big_index
-    x_ind_row <- vctrs::vec_data(x_autoSVD_subset$genotypes)
     this_svd$square_frobenius <- square_frobenius(
       X, # nolint
       x_ind_row,
-      x_ind_col,
+      ind_col_svd,
       center = this_svd$center,
       scale = this_svd$scale
     )
