@@ -127,3 +127,33 @@ test_that("scores plot error if only 2 populations", {
     "object has only one discriminant axis, cannot plot scores"
   )
 })
+
+test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  # use integer ids
+  test_gt$id <- seq_len(nrow(test_gt))
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  pops <- as.factor(c(rep("pop1", 100), rep("pop2", 100)))
+  test_dapc <- test_pca %>% gt_dapc(pop = pops, n_pca = 3)
+  expect_equal(test_dapc$n.da, 1)
+  augmented_gt <- test_dapc %>% augment(data = test_gt)
+  expect_true(ncol(augmented_gt) == ncol(test_gt) + 1 + 1)
+  expect_equal(augmented_gt$.fittedLD1, test_dapc$ind.coord[, 1],
+    ignore_attr = TRUE
+  )
+  augmented_gt <- test_dapc %>% augment()
+  expect_true(ncol(augmented_gt) == 1 + 1)
+  # error if the individuals are not in the same order
+  expect_error(
+    test_dapc %>% augment(data = test_gt[rev(seq_len(nrow(test_gt))), ]),
+    "the data id column does not correspond to the individuals"
+  )
+})

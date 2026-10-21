@@ -192,11 +192,11 @@ augment.gt_pca <- function(x, data = NULL, k = NULL, ...) {
   if (any(is.null(k), (k > ncol(x$u)))) {
     k <- ncol(x$u)
   }
-  pred <- as.data.frame(sweep(x$u, 2, x$d, "*"))[, 1:k]
+  pred <- as.data.frame(sweep(x$u, 2, x$d, "*"))[, 1:k, drop = FALSE]
   names(pred) <- paste0(".fittedPC", seq_len(ncol(pred)))
   ret <- if (!missing(data) && !is.null(data)) {
     # check that names of the two columns are in sync
-    if (!all.equal(data$id, rownames(as.data.frame(x$u)))) {
+    if (!identical(as.character(data$id), rownames(as.data.frame(x$u)))) {
       stop(paste(
         "the data id column does not correspond to the individuals",
         "in the pca object 'x'"
@@ -215,7 +215,7 @@ augment.gt_pca <- function(x, data = NULL, k = NULL, ...) {
         tibble::add_column(pred)
     }
   } else {
-    tibble(.rownames = rownames(as.data.frame(x$u[, 1:k]))) %>%
+    tibble(.rownames = rownames(as.data.frame(x$u[, 1:k, drop = FALSE]))) %>%
       add_column(pred)
   }
 
@@ -269,7 +269,7 @@ augment_loci.gt_pca <- function(x, data = NULL, k = NULL, ...) {
   if (any(is.null(k), (k > ncol(x$v)))) {
     k <- ncol(x$v)
   }
-  loadings <- as.data.frame(x$v)[, 1:k]
+  loadings <- as.data.frame(x$v)[, 1:k, drop = FALSE]
   names(loadings) <- paste0(".loadingPC", seq_len(ncol(loadings)))
   ret <- if (!missing(data) && !is.null(data)) {
     # check that names of the two columns are in sync

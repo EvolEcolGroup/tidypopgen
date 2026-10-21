@@ -183,11 +183,11 @@ augment.gt_dapc <- function(x, data = NULL, k = NULL, ...) {
   if (is.null(k)) {
     k <- ncol(x$ind.coord)
   }
-  pred <- as.data.frame(x$ind.coord)[, 1:k]
+  pred <- as.data.frame(x$ind.coord)[, 1:k, drop = FALSE]
   names(pred) <- paste0(".fittedLD", seq_len(ncol(pred)))
   ret <- if (!missing(data) && !is.null(data)) {
     # check that names of the two columns are in sync
-    if (!all.equal(data$id, rownames(pred))) {
+    if (!identical(as.character(data$id), rownames(pred))) {
       stop(paste(
         "the data id column does not correspond to the individuals",
         "in the gt_dapc object 'x'"

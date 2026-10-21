@@ -70,3 +70,49 @@ test_that("gt_pca_tidiers", {
   # expect augmented to have 3 columns plus .rownames
   expect_true(ncol(augmented_loci) == 3 + 1)
 })
+
+test_that("augment and augment_loci work with a single component", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  augmented_gt <- test_pca %>% augment(data = test_gt, k = 1)
+  expect_true(ncol(augmented_gt) == ncol(test_gt) + 1 + 1)
+  expect_equal(augmented_gt$.fittedPC1, test_pca$u[, 1] * test_pca$d[1],
+    ignore_attr = TRUE
+  )
+  augmented_gt <- test_pca %>% augment(k = 1)
+  expect_true(ncol(augmented_gt) == 1 + 1)
+  augmented_loci <- test_pca %>% augment_loci(data = test_gt, k = 1)
+  expect_true(ncol(augmented_loci) == ncol(show_loci(test_gt)) + 1)
+  augmented_loci <- test_pca %>% augment_loci(k = 1)
+  expect_true(ncol(augmented_loci) == 1 + 1)
+})
+
+test_that("augment checks the ids of data", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  # use integer ids
+  test_gt$id <- seq_len(nrow(test_gt))
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  augmented_gt <- test_pca %>% augment(data = test_gt)
+  expect_identical(augmented_gt$id, test_gt$id)
+  # error if the individuals are not in the same order
+  expect_error(
+    test_pca %>% augment(data = test_gt[rev(seq_len(nrow(test_gt))), ]),
+    "the data id column does not correspond to the individuals"
+  )
+})
