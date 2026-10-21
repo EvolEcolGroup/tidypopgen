@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` truncating user-supplied `backingfile` names at the last
+  dot (e.g. "pop_a.filtered" became "pop_a"), and naming the backing files of
+  "x.vcf.gz" "x.vcf.bk" rather than "x.bk"
 * fix `gen_tibble()` failing on VCF and PED files with a trailing blank line,
   and keeping a carriage return in the last sample name of VCF files with CRLF
   line endings

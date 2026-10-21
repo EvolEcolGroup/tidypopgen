@@ -605,7 +605,14 @@ sub_ext_ignore_case <- function(file, ext, new_ext) {
 
 # check for existing .bk files
 change_duplicated_file_name <- function(file) {
-  file <- tools::file_path_sans_ext(file)
+  # remove the extensions of backing files and of input files (other dots in
+  # the file name are kept)
+  file <- sub(
+    "\\.(bk|rds|gt|bed|ped|geno|vcf\\.gz|vcf|gz)$",
+    "",
+    file,
+    ignore.case = TRUE
+  )
 
   bk <- paste0(file, ".bk")
   rds <- paste0(file, ".rds")
