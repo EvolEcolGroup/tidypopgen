@@ -97,7 +97,9 @@ indiv_het_obs.vctrs_bigSNP <- function(.x, as_counts = FALSE, ...) {
     )
   }
   if (!as_counts) {
-    return(this_col_1_na[1, ] / (ncol(X) - this_col_1_na[2, ]))
+    # use the number of selected loci, not the number of columns in the FBM
+    n_loci <- length(attr(.x, "loci")$big_index)
+    return(this_col_1_na[1, ] / (n_loci - this_col_1_na[2, ]))
   } else {
     this_col_1_na <- t(this_col_1_na)
     colnames(this_col_1_na) <- c("het_n", "na_n")

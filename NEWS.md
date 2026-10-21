@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `indiv_het_obs()` to divide by the number of selected loci rather than
+  the number of loci in the backing file (results were deflated after
+  `select_loci()`)
 * fix the order of the loci in the P matrices returned by `gt_admixture()`:
   ADMIXTURE sorts loci by chromosome and position, so rows did not match the
   loci of the input when these were not already sorted (e.g. when chromosome
