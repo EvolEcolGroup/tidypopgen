@@ -184,6 +184,27 @@ if (rlang::is_installed("vcfR")) {
   })
 }
 
+test_that("ped and raw use the sample ID as family ID without population", {
+  # e.g. a gen_tibble read from a vcf, which has no population column
+  test_gt_no_pop <- test_gt %>% select(-population)
+  ped_path <- gt_as_plink(
+    test_gt_no_pop,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(ped$V1, test_gt$id)
+  expect_equal(ped$V2, test_gt$id)
+  raw_path <- gt_as_plink(test_gt_no_pop, file = tempfile(), type = "raw")
+  raw <- read.table(raw_path, header = TRUE)
+  expect_equal(raw$FID, test_gt$id)
+  expect_equal(raw$IID, test_gt$id)
+  expect_equal(
+    unname(as.matrix(raw[, -(1:6)])),
+    show_genotypes(test_gt)
+  )
+})
+
 test_that("handling of duplicated loci", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),

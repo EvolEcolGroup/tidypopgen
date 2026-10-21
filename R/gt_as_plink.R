@@ -252,7 +252,8 @@ gt_write_ped_raw <- function(
 
   # create the info for the fam file
   indiv_meta <- tibble(
-    population = x$population,
+    # without a population (e.g. from a vcf), the family ID is the sample ID
+    population = if ("population" %in% names(x)) x$population else x$id,
     id = x$id,
     pat = pull_na(x, "pat"),
     mat = pull_na(x, "mat"),

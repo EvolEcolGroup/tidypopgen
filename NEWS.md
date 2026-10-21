@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_as_plink()` failing to write ped and raw files for `gen_tibble`s
+  without a population column (e.g. read from a vcf)
 * fix `gt_as_hierfstat()` turning numeric-like population labels (e.g. "1", "2")
   into NA, and keep loci names as column names
 * fix the `scale_fill_distruct()` example, and the documentation of
