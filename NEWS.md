@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_from_genlight()` rejecting `genlight` objects without a `pop` slot,
+  which is documented as optional
 * fix `rbind_dry_run()` failing when `ref` or `target` are paths to PLINK .bim
   files, as documented
 * `rbind(use_position = TRUE)` now keeps the loci names of the reference

@@ -42,10 +42,10 @@ gt_from_genlight <- function(x, backingfile = NULL, ...) {
   if (is.null(backingfile)) {
     backingfile <- tempfile()
   }
-  # check x contains the slots we need
+  # check x contains the slots we need (pop is optional)
   required_slots <- c(
     "loc.names", "n.loc", "loc.all", "chromosome", "position",
-    "ploidy", "ind.names", "pop"
+    "ploidy", "ind.names"
   )
   if (any(sapply(required_slots, function(slot) is.null(methods::slot(x, slot))))) { # nolint
     null_slots <-
