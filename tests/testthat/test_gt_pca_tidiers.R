@@ -93,6 +93,11 @@ test_that("augment and augment_loci work with a single component", {
   expect_true(ncol(augmented_loci) == ncol(show_loci(test_gt)) + 1)
   augmented_loci <- test_pca %>% augment_loci(k = 1)
   expect_true(ncol(augmented_loci) == 1 + 1)
+  # a scores plot needs two components
+  expect_error(
+    autoplot(test_pca, type = "scores", k = 1),
+    "for 'scores' plots, 'k' should be a pair of values"
+  )
 })
 
 test_that("augment_loci works with gt_pca_autoSVD", {

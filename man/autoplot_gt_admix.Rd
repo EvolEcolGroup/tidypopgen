@@ -12,8 +12,7 @@
 
 \item{type}{the type of plot (one of "cv", and "barplot")}
 
-\item{k}{the value of \code{k} to plot (for \code{barplot} type only) param repeat the
-repeat to plot (for \code{barplot} type only)}
+\item{k}{the value of \code{k} to plot (for \code{barplot} type only)}
 
 \item{run}{the run to plot (for \code{barplot} type only)}
 

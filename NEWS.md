@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix error messages and documentation of `autoplot()` for `gt_admix` and
+  `gt_pca` objects referring to non-existent arguments (`repeat`, `pc`)
 * fix `autoplot()` of `gt_admix` objects with `type = "cv"` failing when the
   object has no `algorithm` element
 * fix `gt_admix_reorder_q()` turning the Q matrices for K = 1 into vectors

@@ -242,7 +242,7 @@ test_that("run admixture as multiple runs", {
   )
   expect_error(
     autoplot(anole_adm_cv, type = "barplot", k = 2),
-    "^You must specify a value for repeat"
+    "^You must specify a value for run"
   )
   bar_plot <- autoplot(anole_adm_cv, type = "barplot", k = 2, run = 1)
   # check that this is indeed a ggplot object

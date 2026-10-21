@@ -26,9 +26,9 @@ For \code{gt_pca}, the following types of plots are available:
 \item \code{screeplot}: a plot of the eigenvalues of the principal components
 (currently it plots the singular value)
 \item \code{scores} a scatterplot of the scores of each individual on two principal
-components (defined by \code{pc})
+components (defined by \code{k})
 \item \code{loadings} a plot of loadings of all loci for a given component
-(chosen with \code{pc})
+(chosen with \code{k})
 }
 }
 \details{
