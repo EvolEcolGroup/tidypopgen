@@ -658,6 +658,62 @@ test_that("cast_chromosome_to_int transforms correctly from factor", {
   )
 })
 
+test_that("cast_chromosome_to_int keeps numeric names with non-numeric ones", {
+  # numeric names keep their own value, non-numeric ones are coded above the
+  # largest numeric value, in order of first appearance
+  expect_identical(
+    cast_chromosome_to_int(c("1", "2", "10", "X", "Y", "MT", "2", "X")),
+    c(1L, 2L, 10L, 11L, 12L, 13L, 2L, 11L)
+  )
+  expect_identical(
+    cast_chromosome_to_int(c("chr1", "chr2", "chr10", "chrX")),
+    c(1L, 2L, 10L, 11L)
+  )
+  # for factors, non-numeric names are coded in the order of the levels
+  expect_identical(
+    cast_chromosome_to_int(factor(c("chr2", "chrY", "chr10", "chrX"))),
+    c(2L, 12L, 10L, 11L)
+  )
+  # missing values remain missing
+  expect_identical(
+    cast_chromosome_to_int(c("1", NA, "X")),
+    c(1L, NA, 2L)
+  )
+  # all non-numeric names
+  expect_identical(cast_chromosome_to_int(c("b", "a", "b")), c(1L, 2L, 1L))
+
+  # gt_order_loci sorts numeric chromosomes numerically
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 0),
+    c(2, 1, 0, 0, 0, 0),
+    c(2, 2, 0, 0, 1, 1)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = c("X", "10", "2", "1", "MT", "2"),
+    position = as.integer(c(23, 3, 5, 65, 343, 46)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  test_gt <- gt_order_loci(test_gt, quiet = TRUE)
+  expect_equal(
+    as.character(show_loci(test_gt)$chromosome),
+    c("1", "2", "2", "10", "MT", "X")
+  )
+})
+
 test_that("gt_update_backingfile works if n loci is a multiple of chunk_size", {
   example_gt <- load_example_gt("gen_tbl")
   # 6 loci, processed in 2 chunks of 3 loci (no trailing partial chunk)

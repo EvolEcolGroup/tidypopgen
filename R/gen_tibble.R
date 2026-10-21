@@ -623,22 +623,37 @@ change_duplicated_file_name <- function(file) {
 
 # adding a chr_int column
 cast_chromosome_to_int <- function(chromosome) {
-  # if chromosome is an factor, then cast it to character
+  # if chromosome is an factor, then cast it to character (but keep the levels
+  # to order non-numeric chromosomes)
+  chr_levels <- NULL
   if (is.factor(chromosome)) {
+    chr_levels <- levels(chromosome)
     chromosome <- as.character(chromosome)
   }
   # if chromosome is a character, then cast it to integer
   if (is.character(chromosome)) {
     # attempt to strip chr from the chromosome
-    chromosome <- gsub(
-      "^(chromosome_|chr_|chromosome|chr)",
-      "",
-      chromosome,
-      ignore.case = TRUE
-    )
-    chromosome <- tryCatch(as.integer(chromosome), warning = function(e) {
-      as.integer(as.factor(chromosome))
-    })
+    strip_chr <- function(x) {
+      gsub("^(chromosome_|chr_|chromosome|chr)", "", x, ignore.case = TRUE)
+    }
+    chromosome <- strip_chr(chromosome)
+    # numeric names keep their own value
+    is_numeric <- grepl("^[0-9]+$", chromosome)
+    chr_int <- rep(NA_integer_, length(chromosome))
+    chr_int[is_numeric] <- as.integer(chromosome[is_numeric])
+    # other names are coded above the largest numeric value, in order of first
+    # appearance (or in the order of the levels for a factor)
+    is_other <- !is_numeric & !is.na(chromosome)
+    if (any(is_other)) {
+      if (is.null(chr_levels)) {
+        other_names <- unique(chromosome[is_other])
+      } else {
+        other_names <- intersect(strip_chr(chr_levels), chromosome[is_other])
+      }
+      chr_int[is_other] <- max(c(0L, chr_int[is_numeric])) +
+        match(chromosome[is_other], other_names)
+    }
+    chromosome <- chr_int
   }
   if (is.numeric(chromosome)) {
     chromosome <- as.integer(chromosome)
