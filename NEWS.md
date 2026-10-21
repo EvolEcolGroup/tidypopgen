@@ -1,4 +1,5 @@
 # tidypopgen `dev`
+* document that the `n_cores` argument of `gen_tibble()` is currently ignored
 * reduce the memory preallocated by the "cpp" VCF parser of `gen_tibble()`
 * fix `gen_tibble()` truncating user-supplied `backingfile` names at the last
   dot (e.g. "pop_a.filtered" became "pop_a"), and naming the backing files of

@@ -94,7 +94,8 @@ latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 in case your
 \emph{VCF} has an unusual structure.}
 
-\item{n_cores}{the number of cores to use for parallel processing}
+\item{n_cores}{currently ignored (reading files is not parallelised); kept
+for backwards compatibility}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
