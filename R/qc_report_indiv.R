@@ -280,6 +280,12 @@ autoplot.qc_report_indiv <- function(
     if ("ploidy" %in% colnames(object)) {
       stop("Relatedness plot is not available for pseudohaploid data")
     }
+    if (!"to_keep" %in% colnames(object)) {
+      stop(
+        "Relatedness plot requires a qc_report_indiv created with ",
+        "`kings_threshold`"
+      )
+    }
     report_plot <- autoplot_qc_report_indiv_king(
       object,
       kings_threshold = kings_threshold

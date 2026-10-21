@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* `autoplot()` of a `qc_report_indiv` with `type = "relatedness"` now gives an
+  informative error if the report was created without `kings_threshold`
 * fix `qc_report_indiv()` on grouped `gen_tibble`s attaching `to_keep` flags to
   the wrong individuals when groups are not contiguous, and failing when
   grouping by a factor with unused levels or a numeric variable

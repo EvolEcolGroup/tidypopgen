@@ -322,6 +322,22 @@ test_that("qc_report_indiv for pseudohaploid data", {
   )
 })
 
+test_that("relatedness autoplot fails without kings_threshold", {
+  report <- qc_report_indiv(families)
+  # an unrelated object called p should not be returned
+  p <- "not a plot"
+  expect_error(
+    autoplot(report, type = "relatedness", kings_threshold = 0.2),
+    "created with `kings_threshold`"
+  )
+  families$population <- rep(c("pop1", "pop2"), 6)
+  report <- qc_report_indiv(families %>% group_by(population))
+  expect_error(
+    autoplot(report, type = "relatedness", kings_threshold = 0.2),
+    "created with `kings_threshold`"
+  )
+})
+
 test_that("histogram autoplot fails for non-pseudohaploid", {
   report <- qc_report_indiv(families, kings_threshold = 0.2)
   expect_error(
