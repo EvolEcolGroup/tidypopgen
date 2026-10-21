@@ -51,10 +51,10 @@ filter_high_relatedness <-
       return(list(passed_filter, to_remove, var_names))
     }
 
-    # take absolute value of each relationship
-    matrix <- abs(matrix)
+    # note that we do not take the absolute value of each relationship, as
+    # negative kinship coefficients indicate unrelated individuals
 
-    # re-ordered columns based on max absolute correlation
+    # re-ordered columns based on average relatedness
     original_order <- 1:var_num
 
     # function to calculate average relatedness

@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `filter_high_relatedness()` (and the `kings_threshold` option of
+  `qc_report_indiv()`) treating strongly negative kinship coefficients as high
+  relatedness
 * fix error messages and documentation of `autoplot()` for `gt_admix` and
   `gt_pca` objects referring to non-existent arguments (`repeat`, `pc`)
 * fix `autoplot()` of `gt_admix` objects with `type = "cv"` failing when the
