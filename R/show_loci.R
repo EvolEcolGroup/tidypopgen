@@ -62,6 +62,23 @@ show_loci.vctrs_bigSNP <- function(.x, ...) {
       "of loci as the original one"
     ))
   }
+  # big_index links each locus to a column of the file backed matrix
+  if (!"big_index" %in% names(value)) {
+    stop("the replacement loci tibble must contain a 'big_index' column")
+  }
+  if (
+    !is.numeric(value$big_index) ||
+      anyNA(value$big_index) ||
+      any(value$big_index != round(value$big_index)) ||
+      any(value$big_index < 1) ||
+      any(value$big_index > ncol(attr(.x, "fbm")))
+  ) {
+    stop(
+      "'big_index' must contain integers between 1 and the number of ",
+      "loci in the file backed matrix"
+    )
+  }
+  value$big_index <- as.integer(value$big_index)
   attr(.x, "loci") <- tibble::as_tibble(value)
   .x
 }

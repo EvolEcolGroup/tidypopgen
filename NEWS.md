@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* `show_loci<-` now errors if the replacement table does not have a valid
+  `big_index` column, rather than silently creating a broken `gen_tibble`
 * fix printing a `gen_tibble` with no loci, and `format()` of a genotype column
   with no individuals returning a non-empty vector
 * fix chromosome names being renumbered in lexicographic order (e.g. chromosome
