@@ -220,6 +220,23 @@ test_that("ped and raw write numeric phenotypes", {
   expect_equal(raw$PHENOTYPE, c(1, 2, -9))
 })
 
+test_that("ped map file includes the genetic distance", {
+  test_gt_cm <- test_gt
+  show_loci(test_gt_cm)$genetic_dist <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+  ped_path <- gt_as_plink(
+    test_gt_cm,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  map <- read.table(sub("\\.ped$", ".map", ped_path), header = FALSE)
+  expect_equal(map$V3, c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6))
+  ped_gt <- gen_tibble(ped_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(
+    show_loci(ped_gt)$genetic_dist,
+    show_loci(test_gt_cm)$genetic_dist
+  )
+})
+
 test_that("handling of duplicated loci", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),

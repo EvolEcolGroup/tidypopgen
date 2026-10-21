@@ -1,4 +1,6 @@
 # tidypopgen `dev`
+* fix `gt_as_plink(type = "ped")` writing a genetic distance of 0 for all loci
+  in the .map file
 * fix `gt_as_plink()` failing to write ped and raw files when the phenotype
   column is numeric
 * fix `gt_as_plink()` failing to write ped and raw files for `gen_tibble`s

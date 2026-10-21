@@ -320,7 +320,7 @@ gt_write_ped_raw <- function(
   map_table <- tibble(
     chrom = pull_na(loci_meta, "chromosome"),
     id = pull_na(loci_meta, "name"),
-    cM = pull_na(loci_meta, "cM"),
+    cM = pull_na(loci_meta, "genetic_dist"),
     position = pull_na(loci_meta, "position")
   )
   map_table[is.na(map_table)] <- 0
