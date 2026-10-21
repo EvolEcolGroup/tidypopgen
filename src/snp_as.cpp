@@ -58,7 +58,7 @@ inline arma::mat FBM_RW2arma(Rcpp::Environment BM) {
   if (m2 > m) {
     myassert(m2 == (m + 1), ERROR_BUG);
     for (unsigned int i = 0; i < n; i++) {
-      dos_mat(i, m) = 1;
+      dos_mat(i, m) = 0;
       na_mat(i, m) = 0;
     }
   }

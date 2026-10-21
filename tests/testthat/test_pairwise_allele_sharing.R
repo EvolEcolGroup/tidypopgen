@@ -45,3 +45,19 @@ test_that("snp_allele_sharing and pairwise_allele_sharing computes allele sharin
     check.attributes = FALSE
   ))
 })
+
+test_that("snp_allele_sharing is correct when blocks have different sizes", {
+  test_fbm <- tidypopgen:::.gt_get_fbm(test_gt)
+  # 5 loci in blocks of at most 2 loci gives blocks of different sizes
+  test_as_uneven <- snp_allele_sharing(test_fbm,
+    ind.col = 1:5,
+    block.size = 2
+  )
+  dos_hier_match <- hierfstat::matching(test_genotypes[, 1:5])
+  expect_equal(test_as_uneven, dos_hier_match, ignore_attr = TRUE)
+  # and the same as computing it in a single block
+  expect_equal(
+    test_as_uneven,
+    snp_allele_sharing(test_fbm, ind.col = 1:5)
+  )
+})

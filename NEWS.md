@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `snp_allele_sharing()` (and thus `pairwise_allele_sharing()`,
+  `pairwise_grm()`, `pop_fst()` and `indiv_inbreeding()`), which overestimated
+  allele sharing when loci were processed in blocks of different sizes
 * fix `indiv_het_obs()` to divide by the number of selected loci rather than
   the number of loci in the backing file (results were deflated after
   `select_loci()`)
