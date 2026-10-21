@@ -139,6 +139,34 @@ test_that("invalid vcf loci do not leave backing files behind", {
   }
 })
 
+test_that("vcf with a trailing blank line or CRLF line endings can be read", {
+  vcf_path <- write_small_vcf(list(
+    c("1", "10", "rs1", "A", "T", "0/1", "0/0", "1/1"),
+    c("1", "20", "rs2", "C", "G", "0/0", "1/1", "0/1"),
+    c("1", "30", "rs3", "G", "A", "1/1", "0/1", "./.")
+  ))
+  vcf_lines <- readLines(vcf_path)
+  # trailing blank line
+  vcf_blank <- tempfile(fileext = ".vcf")
+  writeLines(c(vcf_lines, ""), vcf_blank)
+  # CRLF line endings
+  vcf_crlf <- tempfile(fileext = ".vcf")
+  writeBin(charToRaw(paste0(vcf_lines, "\r\n", collapse = "")), vcf_crlf)
+  for (this_parser in c("cpp", "vcfR")) {
+    vcf_gt <- gen_tibble(vcf_path,
+      parser = this_parser, backingfile = tempfile(), quiet = TRUE
+    )
+    for (this_vcf in c(vcf_blank, vcf_crlf)) {
+      this_gt <- gen_tibble(this_vcf,
+        parser = this_parser, backingfile = tempfile(), quiet = TRUE
+      )
+      expect_identical(this_gt$id, c("A", "B", "C"))
+      expect_identical(show_genotypes(this_gt), show_genotypes(vcf_gt))
+      expect_identical(show_loci(this_gt), show_loci(vcf_gt))
+    }
+  }
+})
+
 test_that("genotypes with more alleles than max_ploidy are caught", {
   # a tetraploid genotype in the middle of a diploid vcf (the last variant is
   # diploid)

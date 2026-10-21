@@ -61,6 +61,8 @@ read_pedfile <- function(
     repeat {
       line <- readLines(con, n = 1)
       if (length(line) == 0) break
+      # do not count blank lines (e.g. a trailing empty line)
+      if (grepl("^\\s*$", line)) next
       n <- n + 1
     }
     if (n == 0) {
@@ -117,6 +119,10 @@ read_pedfile <- function(
   mallelic <- rep(FALSE, m) ## Multiallelic?
   for (i in 1:n) {
     line <- readLines(con, n = 1)
+    # skip blank lines
+    while (grepl("^\\s*$", line)) {
+      line <- readLines(con, n = 1)
+    }
     fields <- strsplit(line, "\t| +")[[1]]
     to_na <- fields %in% na_strings
     fields[to_na] <- NA

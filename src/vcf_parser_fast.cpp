@@ -27,6 +27,13 @@ inline bool gz_getline(gzFile file, std::string &line) {
 }
 
 
+// Function to remove the carriage return at the end of a line (CRLF endings)
+inline void strip_carriage_return(std::string &line) {
+  if (!line.empty() && line.back() == '\r') {
+    line.pop_back();
+  }
+}
+
 // Function to check whether a file name ends in .gz (ignoring case)
 inline bool is_gz_file(const std::string &filename) {
   if (filename.size() < 3) {
@@ -137,6 +144,11 @@ List vcf_loci_table(std::string filename) {
     // Check if we reached the end of the file
     if (!gotLine) {
       break;
+    }
+    // remove the carriage return of CRLF line endings, and skip empty lines
+    strip_carriage_return(line);
+    if (line.empty()) {
+      continue;
     }
 
     // Skip header lines
@@ -380,11 +392,17 @@ bool vcf_genotypes_to_fbm(std::string filename,
   // Read the genotypes line by line until the end of file
   for (int i_geno = 0; i_geno < n_loci; i_geno++) {
     bool gotLine;
-    if (is_gz) {
-      gotLine = gz_getline(vcfGzFile, line);
-    } else {
-      gotLine = (bool)std::getline(vcfFile, line);
-    }
+    // skip empty lines (and any header line left), as in vcf_loci_table
+    do {
+      if (is_gz) {
+        gotLine = gz_getline(vcfGzFile, line);
+      } else {
+        gotLine = (bool)std::getline(vcfFile, line);
+      }
+      if (gotLine) {
+        strip_carriage_return(line);
+      }
+    } while (gotLine && (line.empty() || (line[0] == '#')));
     // Check if we reached the end of the file
     if (!gotLine) {
       stop("end of file reached before all expected genotypes were read");

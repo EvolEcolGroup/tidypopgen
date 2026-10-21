@@ -1,4 +1,7 @@
 # tidypopgen `dev`
+* fix `gen_tibble()` failing on VCF and PED files with a trailing blank line,
+  and keeping a carriage return in the last sample name of VCF files with CRLF
+  line endings
 * fix `gen_tibble()` failing on files with upper case extensions (e.g. .BED,
   .PED, .GENO, .VCF.GZ)
 * fix `gen_tibble()` on VCF files leaving a backing file behind when the loci

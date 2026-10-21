@@ -725,6 +725,25 @@ test_that("vcf tests storing names as integers", {
   expect_true(inherits(combined_gt, "gen_tbl"))
 })
 
+test_that("ped files with a trailing blank line can be read", {
+  ped_dir <- tempfile("ped_")
+  dir.create(ped_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  file.copy(file.path(ext_dir, "pop_a.map"), ped_dir)
+  writeLines(
+    c(readLines(file.path(ext_dir, "pop_a.ped")), ""),
+    file.path(ped_dir, "pop_a.ped")
+  )
+  ped_gt <- gen_tibble(file.path(ped_dir, "pop_a.ped"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  orig_gt <- gen_tibble(file.path(ext_dir, "pop_a.ped"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(ped_gt$id, orig_gt$id)
+  expect_identical(show_genotypes(ped_gt), show_genotypes(orig_gt))
+})
+
 test_that("file extensions are matched ignoring case", {
   # copy the pop_a files, using upper case extensions for the main files
   upper_dir <- tempfile("upper_")
