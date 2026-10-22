@@ -84,7 +84,7 @@ rbind_dry_run <- function(
   # if use_position is FALSE, then the names can not be integers
   if (!use_position) {
     if (!is.character(show_loci(ref)$name) ||
-      !is.character(show_loci(target)$name)) {
+      !is.character(show_loci(target)$name)) { # nolint
       stop(
         "When 'use_position' is FALSE, loci names must be characters.",
         " Please set 'use_position' to TRUE if you use integers as loci names."
@@ -213,9 +213,10 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
     to_keep_flip <- to_keep_flip & !ambiguous_sub
     to_flip <- to_flip & !ambiguous_sub
     to_swap <- to_swap & !ambiguous_sub
-    # loci that rbind() will reorient so that the observed allele is the reference:
-    # the ref allele is unresolved (still "0") but the alt allele is observed.
-    # Only done when flip_strand is TRUE, and only for loci that are kept.
+    # loci that rbind() will reorient so that the observed allele is
+    # the reference: the ref allele is unresolved (still "0") but the alt
+    # allele is observed. Only done when flip_strand is TRUE, and only for
+    # loci that are kept.
     missing_ref_swap <- to_keep_flip &
       ref_sub$allele_2 == "0" &
       ref_sub$allele_1 != "0"

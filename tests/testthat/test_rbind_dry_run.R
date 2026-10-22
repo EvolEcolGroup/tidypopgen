@@ -227,9 +227,11 @@ test_that("an unobserved allele in either column does not error", {
       flip_strand = TRUE, quiet = TRUE
     )
   )
-  expect_message(res_gt <- rbind(unobs_gt_ref, unobs_gt_tgt,
-    flip_strand = TRUE
-  ), "loci had a missing reference allele with an observed alternate")
+  expect_message(
+    res_gt <-
+      rbind(unobs_gt_ref, unobs_gt_tgt, flip_strand = TRUE),
+    "loci had a missing reference allele with an observed alternate"
+  )
   # rs3 and rs4 are resolved from the other dataset.
   expect_false(any(is.na(show_loci(res_gt)[c(3, 4), "allele_ref"])))
   # However, when both datasets have missingness, and the missing allele cannot
@@ -338,19 +340,28 @@ test_that("rbind of loci with unobserved alleles gives a complete object", {
     merged_loci$allele_alt,
     c("G", "C", "T", "G", "G", "C", NA, NA)
   )
-  # the target genotypes are recoded for the swapped loci (rs2, rs5, rs7)
-  swapped <- c(2, 5, 7)
+  # loci whose genotypes are recoded relative to the input
+  # (dosage is recoded as 2 - g):
+  #  - target rs2 and rs5: alleles are swapped relative to the reference
+  #  - rs7 and rs8: only one allele is observed in both datasets, and it is
+  #    reported as allele_ref, so the genotypes are recoded to match
+  #    (rs7: ref dataset only, as the target already had it as allele_ref;
+  #     rs8: both datasets)
+
+  swapped <- c(2, 5, 7, 8)
+  expected_ref_geno <- unobs_geno
+  expected_ref_geno[, c(7, 8)] <- 2 - expected_ref_geno[, c(7, 8)]
   expected_tgt_geno <- unobs_geno
-  expected_tgt_geno[, swapped] <- 2 - expected_tgt_geno[, swapped]
+  expected_tgt_geno[, c(2, 5, 8)] <- 2 - expected_tgt_geno[, c(2, 5, 8)]
+
   merged_geno <- show_genotypes(merged)
   dimnames(merged_geno) <- NULL
   # TODO fix this test, this is no longer true with the new swapping behaviour
   # when there is an NA in ref
-  # expect_equal(merged_geno, rbind(unobs_geno, expected_tgt_geno))
+  expect_equal(merged_geno, rbind(expected_ref_geno, expected_tgt_geno))
 })
 
 
-#
 #
 # #reference file reordered
 # raw_path_reordered_pop_b <- #nolint start
