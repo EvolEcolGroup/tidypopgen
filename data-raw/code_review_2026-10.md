@@ -10,6 +10,10 @@ entry.
 - **Fixes:** 92 commits.
 - **Not fixed:** 15 findings that need a decision from the maintainers
   (see [Findings not fixed](#findings-not-fixed)).
+- **Optional fix on a separate branch:** `codereview-bigsnp-rds` adds one
+  commit on top of `codereview` that stops `gen_tibble()` from overwriting
+  bigSNP `.rds` files, at the cost of copying the backing file (see
+  [Optional fix on a separate branch](#optional-fix-on-a-separate-branch)).
 - **Version:** unchanged in `DESCRIPTION`; no pull request has been opened.
 
 ## Contents
@@ -18,6 +22,7 @@ entry.
 - [How the review was done](#how-the-review-was-done)
 - [Changes in behaviour to check before merging](#changes-in-behaviour-to-check-before-merging)
 - [Fixes by area](#fixes-by-area)
+- [Optional fix on a separate branch](#optional-fix-on-a-separate-branch)
 - [Findings not fixed](#findings-not-fixed)
 - [Notes on the test environment](#notes-on-the-test-environment)
 
@@ -242,6 +247,35 @@ The impact column uses these categories:
 | `41efcd0` | QC vignette | The upset plot description gave the wrong bar and total (806, not 804). | Docs |
 | `c7e748c` | `scale_fill_distruct()`, `qc_report_indiv()` | The example had no visible effect; descriptions were wrong. | Docs |
 
+## Optional fix on a separate branch
+
+The branch `codereview-bigsnp-rds` contains one commit, `3c9a54b` ("Do not
+overwrite the bigSNP rds when creating a gen_tibble from it"), on top of
+`codereview` at `bbf502c`. It can be merged after `codereview`, or
+cherry-picked onto it; it does not touch this report.
+
+- **Problem:** `gen_tibble()` on a bigSNP `.rds` file (e.g. `foo.rds` and
+  `foo.bk` created by `bigsnpr::snp_readBed()`) replaces `foo.rds` with a
+  bare FBM (keeping a copy of the bigSNP object as `foo_bigsnp.rds`) and
+  ignores `backingfile`. A second `gen_tibble("foo.rds")`, or
+  `bigsnpr::snp_attach("foo.rds")`, then fails with "'genotypes' is not a
+  valid field or method name for reference class FBM.code256".
+- **Fix:** the backing file is copied to `backingfile`, and the FBM of the
+  gen_tibble is created from that copy, so the original files are left
+  untouched. If `backingfile` is NULL, the copy is saved next to the
+  original with a version suffix (e.g. `foo_v2.bk`). The documentation of
+  `backingfile` is updated.
+- **Trade-off:** the backing file is copied rather than shared, which
+  doubles the disk space used. This matters for the large datasets the
+  package is designed for, which is why the fix is kept separate. Because
+  an FBM `.rds` must share the name of its `.bk` file, the alternatives are
+  copying (this fix) or the current behaviour.
+- **Verification:** the new test in `tests/testthat/test_gen_tibble.R`
+  fails on `codereview` (3 failures and 1 error) and passes with the fix.
+  `test_gen_tibble.R`, `test_gen_tibble_versioning.R` and
+  `test_gen_tibble_save_load.R` all pass, and the changed files have no
+  lints.
+
 ## Findings not fixed
 
 These issues were confirmed but not fixed. In each case the right fix is a
@@ -249,7 +283,7 @@ design decision, or the issue could not be tested here.
 
 | # | Location | Issue | Why not fixed / suggestion |
 |---|---|---|---|
-| 1 | `R/gen_tibble_bed.R:52-55` | `gen_tibble()` on a bigSNP `.rds` overwrites the user's `.rds` with an FBM (keeping a `*_bigsnp.rds` copy) and ignores `backingfile`. A second `gen_tibble("foo.rds")` or `bigsnpr::snp_attach("foo.rds")` then fails. | A fix exists (`f0fb342`, not on this branch): it copies the `.bk` file to `backingfile`, but that doubles disk use for large datasets. Since an FBM `.rds` must share the name of its `.bk`, the choice is between copying and the current behaviour. |
+| 1 | `R/gen_tibble_bed.R:52-55` | `gen_tibble()` on a bigSNP `.rds` overwrites the user's `.rds` with an FBM (keeping a `*_bigsnp.rds` copy) and ignores `backingfile`. A second `gen_tibble("foo.rds")` or `bigsnpr::snp_attach("foo.rds")` then fails. | A fix is available on the separate branch `codereview-bigsnp-rds` (commit `3c9a54b`); it copies the `.bk` file, which doubles disk use (see [Optional fix on a separate branch](#optional-fix-on-a-separate-branch)). |
 | 2 | `R/snp_ibs.R:100` | `pairwise_ibs(type = "adjusted_counts")` is `ibs_prop * m`, a similarity counted in loci, whereas `raw_counts` is counted in alleles (identical individuals give 8 raw, 4 adjusted). The docs call it PLINK's "distance", which is a dissimilarity. | The intended definition is unclear. |
 | 3 | `src/snp_as.cpp`, `src/snp_ibs.cpp`, `src/snp_king.cpp` | The pairwise kernels (allele sharing, IBS, KING, GRM, `pop_fst()`) read raw genotype codes, so imputed genotypes are treated as missing; frequency, missingness, pi and Fst functions do use them. | Possibly intended; document it or decode through `code256`. |
 | 4 | `src/pairwise_fst_wc84_loop.cpp` | WC84 drops loci where one population has no data; `hierfstat::wc()` keeps them with σa = 0 (e.g. 0.01398 against 0.01374). | Small difference; decide which convention to follow. |
