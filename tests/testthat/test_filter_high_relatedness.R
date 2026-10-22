@@ -78,3 +78,31 @@ test_that("filter_high_relatedness ignores negative kinship", {
   expect_true(all(res[[3]]))
   expect_length(res[[2]], 0)
 })
+
+test_that("filter_high_relatedness handles missing kinship", {
+  ids <- c("a", "b", "c", "d")
+  # kinship can be NaN for pairs with no loci genotyped in both individuals
+  king_matrix <- matrix(
+    c(
+      0.5, NaN, 0.3, NaN,
+      NaN, 0.5, 0.02, 0.01,
+      0.3, 0.02, 0.5, 0.01,
+      NaN, 0.01, 0.01, 0.5
+    ),
+    nrow = 4,
+    dimnames = list(ids, ids)
+  )
+  res <- filter_high_relatedness(king_matrix, kings_threshold = 0.177)
+  # only a and c are related above the threshold; missing kinship is not
+  # evidence of relatedness
+  expect_length(res[[2]], 1)
+  expect_true(res[[2]] %in% c("a", "c"))
+  # with the lobster data, which have missing kinship values
+  bed_file <-
+    system.file("extdata", "lobster", "lobster.bed", package = "tidypopgen")
+  lobsters <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
+  lobster_king <- pairwise_king(lobsters, as_matrix = TRUE)
+  expect_true(anyNA(lobster_king))
+  res <- filter_high_relatedness(lobster_king, kings_threshold = 0.088)
+  expect_length(res[[3]], nrow(lobsters))
+})

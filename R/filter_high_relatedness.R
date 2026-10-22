@@ -98,7 +98,9 @@ filter_high_relatedness <-
       }
       for (j in (i + 1):var_num) {
         if (!col_to_delete[i] && !col_to_delete[j]) {
-          if (matrix[i, j] > kings_threshold) {
+          # missing kinship (e.g. no loci genotyped in both individuals) is
+          # not evidence of relatedness
+          if (isTRUE(matrix[i, j] > kings_threshold)) {
             mn1 <- mean(matrix2[i, ], na.rm = TRUE)
             mn2 <- mean(matrix2[-j, ], na.rm = TRUE)
             if (verbose) {
