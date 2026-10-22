@@ -214,7 +214,7 @@ test_that("an unobserved allele in either column does not error", {
   # the gap sits in allele_ref for rs4 and in allele_alt for rs3 and rs5
 
   ######
-  # flip_strand = TRUE
+  # when flip_strand is TRUE
   ######
 
   # rs3    C/NA       C/T        ->    C/T
@@ -239,7 +239,7 @@ test_that("an unobserved allele in either column does not error", {
   # give a message to the user
 
   ######
-  # flip_strand = FALSE
+  # when flip_strand is FALSE
   ######
 
   # rs3    C/NA       C/T        ->    C/T

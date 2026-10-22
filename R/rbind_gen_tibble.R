@@ -169,9 +169,9 @@ rbind.gen_tbl <- function(
 
   ###
   # loci whose observed allele ended up as alt, with ref unresolved
-  norm_swap <- flip_strand &
-    is.na(new_ref_loci_tbl$allele_ref) &
-    !is.na(new_ref_loci_tbl$allele_alt)
+  norm_swap <- report$ref$missing_ref_swap[
+    order(report$ref$new_id, na.last = NA)
+  ]
   # the target's existing swaps, restricted to kept loci, same order
   target_swap_kept <- report$target$to_swap[
     order(report$target$new_id, na.last = NA)
@@ -185,7 +185,7 @@ rbind.gen_tbl <- function(
     )
   }
   # swap in the final loci table (this becomes the merged loci table)
-  new_ref_loci_tbl$allele_ref[norm_swap] <- new_ref_loci_tbl$allele_alt[norm_swap] #nolint
+  new_ref_loci_tbl$allele_ref[norm_swap] <- new_ref_loci_tbl$allele_alt[norm_swap] # nolint
   new_ref_loci_tbl$allele_alt[norm_swap] <- NA
   ###
 

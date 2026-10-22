@@ -204,12 +204,21 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
   # and now check which have to be swapped
   to_swap <- (target_sub$allele_1 == ref_sub$allele_2) &
     (target_sub$allele_2 == ref_sub$allele_1)
+
+  # default: nothing to swap
+  missing_ref_swap <- rep(FALSE, length(to_keep_flip))
   if (flip_strand) {
     # remove ambiguous snps from the boolean vectors
     ambiguous_sub <- ambiguous(target_sub)
     to_keep_flip <- to_keep_flip & !ambiguous_sub
     to_flip <- to_flip & !ambiguous_sub
     to_swap <- to_swap & !ambiguous_sub
+    # loci that rbind() will reorient so that the observed allele is the reference:
+    # the ref allele is unresolved (still "0") but the alt allele is observed.
+    # Only done when flip_strand is TRUE, and only for loci that are kept.
+    missing_ref_swap <- to_keep_flip &
+      ref_sub$allele_2 == "0" &
+      ref_sub$allele_1 != "0"
   }
   # now we create the two reporting data.frames
   # note that they include all loci (including the ones we dropped because they
@@ -227,6 +236,9 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
     ref_sub$missing_allele
   ref_report$missing_allele_col[match(ref_sub$name, ref_df$name)] <-
     allele_col_names(ref_sub$missing_allele_col)
+  ref_report$missing_ref_swap <- FALSE
+  ref_report$missing_ref_swap[match(ref_sub$name, ref_df$name)] <-
+    missing_ref_swap
   # and now one for target
   target_report <- data.frame(
     id = target_df$id,
