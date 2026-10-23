@@ -5,7 +5,7 @@
 * `gen_tibble()` now errors on truncated or corrupted packedancestry .geno
   files, rather than reading garbage genotypes (or reading out of bounds)
 * document that the `n_cores` argument of `gen_tibble()` is currently ignored
-* reduce the memory preallocated by the "cpp" VCF parser of `gen_tibble()`
+* speed up reading genotypes with the "cpp" VCF parser of `gen_tibble()`
 * fix `gen_tibble()` truncating user-supplied `backingfile` names at the last
   dot (e.g. "pop_a.filtered" became "pop_a"), and naming the backing files of
   "x.vcf.gz" "x.vcf.bk" rather than "x.bk"
@@ -19,7 +19,9 @@
   versioned file name
 * fix `gen_tibble()` on VCF files setting the ploidy of individuals with a
   missing genotype (".") on the first variant to 1; their ploidy is now taken
-  from their first non-missing genotype
+  from their first non-missing genotype (searched in the first 1,000 variants
+  by the "cpp" parser), or is the largest ploidy of the other individuals if
+  there is none
 * fix `gen_tibble()` on VCF files silently mis-coding genotypes with more
   alleles than the ploidy estimated from the first variant (e.g. a tetraploid
   genotype in a diploid file) when they are not on the last line; this is now an
