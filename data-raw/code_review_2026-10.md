@@ -7,7 +7,9 @@ entry.
 
 - **Branch:** `codereview`, based on `a2da534` ("Bump version number",
   which includes `dev` plus the integer loci names work).
-- **Fixes:** 92 commits.
+- **Fixes:** 93 commits: the 92 of the review, plus `7081979`, added
+  afterwards, which restores the speed of the cpp VCF parser and reverts
+  one of them (`79b092c`).
 - **Not fixed:** 15 findings that need a decision from the maintainers
   (see [Findings not fixed](#findings-not-fixed)).
 - **Optional fix on a separate branch:** `codereview-bigsnp-rds` adds one
@@ -26,6 +28,11 @@ this file, tick a box by changing `[ ]` to `[x]`. If a section is copied into
 a GitHub issue or pull request description, the boxes can be clicked
 directly, and GitHub shows how many have been ticked.
 
+[code_review_2026-10_review_strategy.md](code_review_2026-10_review_strategy.md)
+describes how to check each commit, how to record the outcome here, and what
+is needed before merging. It can be followed by collaborators or given to a
+coding agent.
+
 ## Contents
 
 - [Verification](#verification)
@@ -38,12 +45,15 @@ directly, and GitHub shows how many have been ticked.
 
 ## Verification
 
-These checks were run on the tip of `codereview` (`458144f`), with the
-package installed.
+These checks were run on `7081979`, the last commit that changes the
+package (later commits only change files in `data-raw`), with the package
+installed. At the end of the review they had been run on `458144f`, with
+the same results except that `test_gt_extract_f2.R` was skipped, as
+`admixtools` could not be installed (2,222 tests passed).
 
 | Check | Result |
 |---|---|
-| Full test suite (`devtools::test()`, `NOT_CRAN=true`) | 2,222 passed, 0 failed, 1 skipped (`test_gt_extract_f2.R`, as `admixtools` could not be installed) |
+| Full test suite (`testthat::test_dir()` on the installed package, `NOT_CRAN=true`) | 2,230 passed, 0 failed, 0 skipped |
 | `lintr::lint_package()` | No lints |
 | All Rd examples (`devtools::run_examples(run_donttest = TRUE)`) | All run without errors |
 | Vignettes (`a01_overview`, `a02_qc`, `a03_example_clustering_and_dapc`, `a99_plink_cheatsheet`, `tidypopgen`) | All render |
@@ -53,9 +63,45 @@ to pass after it. The exceptions are:
 
 - **No new test:** changes that only affect documentation or performance
   (`c321a74`, `9d026bf`, `79b092c`, `6a675b6`, `d0686f5`, `41efcd0`,
-  `c7e748c`).
+  `c7e748c`, `7081979`). `7081979` keeps the behaviour of the VCF fixes it
+  reimplements, so their tests cover it, and it was benchmarked against
+  `dev` (see [Performance of the cpp VCF parser](#performance-of-the-cpp-vcf-parser)).
 - **`347aae0` (`##fileDate`):** the test can only fail on the old code on
   days 1 to 9 of a month.
+
+### Performance of the cpp VCF parser
+
+The cpp VCF parsers of `dev`, of `codereview` before `7081979`, and of
+`7081979` were compared with `data-raw/benchmarking/benchmark_vcf_parser.R`,
+on files made by the same script (5% missing genotypes, 30% phased, 2%
+multiallelic variants). Times are in seconds, for building the loci table /
+reading the genotypes, as ranges over three rounds (two for 10 million
+variants), each running every version once.
+
+| File (variants × samples) | `dev` | Before `7081979` | `7081979` |
+|---|---|---|---|
+| 50,000 × 1,000, diploid | 0.16 / 1.11–1.13 | 0.16 / 1.45–1.47 | 0.16 / 1.00–1.05 |
+| Same, gzipped | 1.38–1.41 / 2.30–2.33 | 1.39–1.58 / 2.65–3.03 | 1.38–1.42 / 2.18–2.20 |
+| Same, one sample `.` on every variant | 0.14 / 1.08–1.09 | 2.97–3.03 / 1.49–1.50 | 0.14–0.16 / 0.98–1.14 |
+| 20,000 × 1,000, tetraploid | 0.08 / 0.63–0.67 | 0.08–0.09 / 0.83–0.84 | 0.08 / 0.49–0.50 |
+| 20,000 × 1,000, diploid and tetraploid | 0.08–0.14 / 0.60–0.83 | 0.08–0.09 / 0.86–0.95 | 0.07–0.08 / 0.49–0.56 |
+| 10 million × 20, diploid | 15.2–16.0 / 6.5–7.2 | 16.0–16.6 / 8.0–8.5 | 15.1–16.9 / 5.4–6.4 |
+| Same, gzipped | 21.4–23.1 / 13.4–13.7 | 23.3–26.8 / 15.8–17.2 | 21.8–22.6 / 12.4–13.3 |
+| Same, one sample `.` on every variant | 15.1–15.5 / 6.6–6.9 | 36.1–36.9 / 7.6–8.9 | 15.2–17.4 / 5.8–6.8 |
+
+- For each file, the three versions wrote identical backing files and used
+  the same peak memory (190 MB for 50,000 × 1,000, 2.4 GB for 10 million ×
+  20). `dev` gives ploidy 1 to the sample that is always `.`; the other
+  two versions give it ploidy 2 (`4b0611b`).
+- Before `7081979`, genotypes were read 15–30% more slowly than on `dev`,
+  and the loci table was built 2.4 (20 samples) to 21 (1,000 samples) times
+  more slowly when a sample is always `.`.
+- With `7081979`, the loci table is built as fast as on `dev`, and genotypes
+  are read 5–25% faster (most for polyploids).
+- For the gzipped 10 million variant file, `dev` and `7081979` were re-run
+  in a balanced order (`7081979`, `dev`, `dev`, `7081979`, `7081979`,
+  `dev`): when each version always ran in the same position, the timings of
+  that file depended on the position.
 
 ## How the review was done
 
@@ -181,9 +227,9 @@ in brackets, its impact:
 
 ### Reading data and backing files
 
-- [ ] `12ad131` · `gen_tibble()` (VCF) — Partially missing genotypes (`1/.`) were stored as heterozygotes by the cpp parser; the vcfR parser failed. *[Wrong results]*
-- [ ] `ffe7274` · `gen_tibble()` (VCF) — Genotypes with more alleles than the estimated ploidy were silently mis-coded unless on the last line. *[Wrong results]*
-- [ ] `4b0611b` · `gen_tibble()` (VCF) — A missing first genotype set an individual's ploidy to 1, turning diploid data into mixed ploidy. *[Wrong results]*
+- [ ] `12ad131` · `gen_tibble()` (VCF) — Partially missing genotypes (`1/.`) were stored as heterozygotes by the cpp parser; the vcfR parser failed. *[Wrong results]* The cpp part was reimplemented in `7081979`.
+- [ ] `ffe7274` · `gen_tibble()` (VCF) — Genotypes with more alleles than the estimated ploidy were silently mis-coded unless on the last line. *[Wrong results]* The cpp part was reimplemented in `7081979`.
+- [ ] `4b0611b` · `gen_tibble()` (VCF) — A missing first genotype set an individual's ploidy to 1, turning diploid data into mixed ploidy. *[Wrong results]* The cpp part was reimplemented in `7081979`, which only looks for the ploidy in the first 1,000 variants (see finding 13 in [Findings not fixed](#findings-not-fixed)).
 - [ ] `9961603` · `gt_pseudohaploid()` — Reset the ploidy of backing-file rows not in the tibble to NA, and relabelled polyploid data as pseudohaploid. *[Wrong results]*
 - [ ] `5e4927c` · `cast_chromosome_to_int()` — Renumbered chromosomes alphabetically when any name was non-numeric. *[Wrong results]*
 - [ ] `288904e` · `gt_load()` on old bigSNP-format objects — Lost individual ploidies for mixed and pseudohaploid data. *[Wrong results]*
@@ -199,7 +245,8 @@ in brackets, its impact:
 - [ ] `8fb5c92` · `show_loci<-` — Accepted a table without a valid `big_index`, creating a broken object. *[Robustness]*
 - [ ] `a1f4741` · `gen_tibble()` (VCF) — Loci validation ran after the backing file was written, leaving orphan files. *[Robustness]*
 - [ ] `9759258` · `gen_tibble()` (packedancestry) — Truncated or corrupted `.geno` files were read out of bounds, giving garbage genotypes. *[Robustness]*
-- [ ] `79b092c` · cpp VCF parser — Reserved about 1.3 GB of address space even for tiny files. *[Performance]*
+- [ ] `79b092c` · cpp VCF parser — Reserved about 1.3 GB of address space even for tiny files. *[Performance]* Reverted in `7081979`: VCFs with 10 million variants are common, the reserved memory is only committed when it is used, and peak memory on a 10 million variant file was the same with and without this commit (2.4 GB).
+- [ ] `7081979` · cpp VCF parser — `12ad131`, `ffe7274` and `4b0611b` slowed the parser down: genotypes were read 15–30% more slowly, and the loci table was built up to 21 times more slowly when a sample's genotypes were all `.` (the cost grows with the number of samples). The fixes are reimplemented without splitting lines, and `79b092c` is reverted. The loci table is now built as fast as on `dev`, genotypes are read 5–25% faster, and the backing files are identical (see [Performance of the cpp VCF parser](#performance-of-the-cpp-vcf-parser)). *[Performance]*
 - [ ] `6a675b6` · `gen_tibble()` — `n_cores` is documented as ignored (it always was). *[Docs]*
 
 ### Exporting data
@@ -290,18 +337,22 @@ design decision, or the issue could not be tested here.
 | 10 | `R/gt_as_hierfstat.R` | Fails with an unclear "differing number of rows" error without a population column. | Not in the original findings; add a check. |
 | 11 | `R/autoplot_gt_dapc.R:122` (also `autoplot.gt_pca(type = "loadings", k = c(1, 2))` via bigstatsr) | `geom_hex()` needs `hexbin`, which is not declared in `DESCRIPTION`. | Add `hexbin` to Suggests with `rlang::check_installed()`, or use points. |
 | 12 | `data/distruct_colours` | The palette repeats colours (positions 4/35, 12/54, 24/46, 59/60), so K ≥ 35 has clusters sharing a colour; K > 60 errors. | Palette design. |
-| 13 | VCF parsers | Ploidy is still taken from the first non-missing genotype, so haploid calls (e.g. chrX in males) on the first variant set ploidy 1. | Documented limitation. |
+| 13 | VCF parsers | Ploidy is still taken from the first non-missing genotype, so haploid calls (e.g. chrX in males) on the first variant set ploidy 1. The cpp parser only looks for that genotype in the first 1,000 variants (to keep parsing fast); individuals missing on all of them get the largest ploidy of the others. | Documented limitation. |
 | 14 | `R/gen_tibble.R` (`new_vctrs_bigsnp()`) | `fbm_md5sum` is NA for VCF inputs, as the `.rds` is hashed before it is saved. | The attribute is not used anywhere. |
 | 15 | `R/gt_pca_autoSVD.R:141` | `infos_chr + abs(min(infos_chr) + 1)` is wrong when the smallest code is −1 or less. | No observable effect: bigsnpr only uses `infos.chr` to group SNPs. |
 
 ## Notes on the test environment
 
-- The checks were run with R 4.5.3 and the package dependencies from
-  conda-forge and bioconda (`dplyr` 1.2.1, `ggplot2` 4.0.3, `xgboost`
-  3.4.2, `LEA` 3.22.0), plus the ADMIXTURE and PLINK binaries.
-- `detectRUNS`, which is not on conda-forge, was installed from source.
-- `admixtools` could not be installed, so `test_gt_extract_f2.R` was
-  skipped.
+- The checks at the end of the review (on `458144f`) were run with R 4.5.3
+  and the package dependencies from conda-forge and bioconda (`dplyr`
+  1.2.1, `ggplot2` 4.0.3, `xgboost` 3.4.2, `LEA` 3.22.0), plus the
+  ADMIXTURE and PLINK binaries. `detectRUNS`, which is not on conda-forge,
+  was installed from source. `admixtools` could not be installed, so
+  `test_gt_extract_f2.R` was skipped.
+- The checks on `7081979` and the benchmarks of the cpp VCF parser were
+  run on a Linux laptop (4 cores, 16 GB of RAM) with R 4.6.1 and the
+  dependencies (including `admixtools`) in the user library, plus the
+  ADMIXTURE binary.
 - When the package is loaded with `pkgload::load_all()` rather than
   installed, the test "n_cores can be set for predict_gt_pca" fails. The
   parallel workers cannot find the package's internal C++ function this
