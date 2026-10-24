@@ -25,7 +25,7 @@
 #'
 #' # Compute Tajima's D
 #' example_gt %>% pop_tajimas_d()
-pop_tajimas_d <- function(.x, n_cores, block_size, ...) {
+pop_tajimas_d <- function(.x, ...) {
   UseMethod("pop_tajimas_d", .x)
 }
 

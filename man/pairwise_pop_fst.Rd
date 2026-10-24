@@ -2,20 +2,27 @@
 % Please edit documentation in R/pairwise_pop_fst.R
 \name{pairwise_pop_fst}
 \alias{pairwise_pop_fst}
+\alias{pairwise_pop_fst.tbl_df}
 \title{Compute pairwise population Fst}
 \usage{
-pairwise_pop_fst(
+pairwise_pop_fst(.x, ...)
+
+\method{pairwise_pop_fst}{tbl_df}(
   .x,
   type = c("tidy", "pairwise"),
   by_locus = FALSE,
   by_locus_type = c("tidy", "matrix", "list"),
   method = c("Hudson", "Nei87", "WC84"),
   return_num_dem = FALSE,
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
+
+\item{...}{other arguments passed to specific methods, currently
+unused.}
 
 \item{type}{type of object to return One of "tidy" or "pairwise" for a
 pairwise matrix of populations. Default is "tidy".}

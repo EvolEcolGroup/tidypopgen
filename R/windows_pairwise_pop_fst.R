@@ -35,6 +35,9 @@
 #' - `stat_name`: the name of population a and b used in the pairwise Fst
 #'   calculation (e.g. "fst_pop1.pop2")
 #' - `value`: the pairwise Fst value for the population a and b
+#' @param ... other arguments passed to specific methods, currently
+#'   unused.
+#' @rdname windows_pairwise_pop_fst
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
@@ -46,14 +49,22 @@
 #'     size_unit = "snp", min_loci = 2
 #'   )
 #'
-windows_pairwise_pop_fst <- function(.x,
-                                     type = c("matrix", "tidy"),
-                                     method = c("Hudson", "Nei87", "WC84"),
-                                     window_size,
-                                     step_size,
-                                     size_unit = c("snp", "bp"),
-                                     min_loci = 1,
-                                     complete = FALSE) {
+windows_pairwise_pop_fst <- function(.x, ...) {
+  UseMethod("windows_pairwise_pop_fst", .x)
+}
+
+#' @export
+#' @rdname windows_pairwise_pop_fst
+windows_pairwise_pop_fst.tbl_df <- function(.x,
+                                            type = c("matrix", "tidy"),
+                                            method = c("Hudson", "Nei87", "WC84"),
+                                            window_size,
+                                            step_size,
+                                            size_unit = c("snp", "bp"),
+                                            min_loci = 1,
+                                            complete = FALSE,
+                                            ...) {
+  rlang::check_dots_empty()
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
   method <- match.arg(method)

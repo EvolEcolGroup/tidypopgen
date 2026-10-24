@@ -43,6 +43,9 @@
 #'   pairwise Fst by locus with loci as rows and and pairwise combinations as
 #'   columns. If `type=pairwise`, a matrix of genome-wide pairwise Fst values is
 #'   returned.
+#' @param ... other arguments passed to specific methods, currently
+#'   unused.
+#' @rdname pairwise_pop_fst
 #' @export
 #' @seealso [hierfstat::pairwise.neifst()]
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
@@ -68,15 +71,23 @@
 #'   group_by(population) %>%
 #'   pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
 #'
-pairwise_pop_fst <- function(
+pairwise_pop_fst <- function(.x, ...) {
+  UseMethod("pairwise_pop_fst", .x)
+}
+
+#' @export
+#' @rdname pairwise_pop_fst
+pairwise_pop_fst.tbl_df <- function(
   .x,
   type = c("tidy", "pairwise"),
   by_locus = FALSE,
   by_locus_type = c("tidy", "matrix", "list"),
   method = c("Hudson", "Nei87", "WC84"),
   return_num_dem = FALSE,
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 ) {
+  rlang::check_dots_empty()
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)

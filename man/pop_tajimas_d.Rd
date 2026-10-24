@@ -7,7 +7,7 @@
 \alias{pop_tajimas_d.grouped_df}
 \title{Estimate Tajima's D for the whole genome}
 \usage{
-pop_tajimas_d(.x, n_cores, block_size, ...)
+pop_tajimas_d(.x, ...)
 
 \method{pop_tajimas_d}{tbl_df}(
   .x,
@@ -34,12 +34,12 @@ pop_tajimas_d(.x, n_cores, block_size, ...)
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotypes} column of
 a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 
+\item{...}{other arguments passed to specific methods, currently unused.}
+
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
-
-\item{...}{other arguments passed to specific methods, currently unused.}
 }
 \value{
 A single numeric value (Tajima's D D) for the whole data set, \code{NA}

@@ -44,6 +44,9 @@
 #' - `end`: the ending locus of the window
 #' - `stat`: the Tajima's D for the given window
 #' - `n_loci`: the number of loci in the window
+#' @param ... other arguments passed to specific methods, currently
+#'   unused.
+#' @rdname windows_pop_tajimas_d
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("grouped_gen_tbl")
@@ -55,13 +58,21 @@
 #'     size_unit = "snp", min_loci = 2
 #'   )
 #'
-windows_pop_tajimas_d <- function(.x,
-                                  type = c("matrix", "tidy", "list"),
-                                  window_size,
-                                  step_size,
-                                  size_unit = c("snp", "bp"),
-                                  min_loci = 1,
-                                  complete = FALSE) {
+windows_pop_tajimas_d <- function(.x, ...) {
+  UseMethod("windows_pop_tajimas_d", .x)
+}
+
+#' @export
+#' @rdname windows_pop_tajimas_d
+windows_pop_tajimas_d.tbl_df <- function(.x,
+                                         type = c("matrix", "tidy", "list"),
+                                         window_size,
+                                         step_size,
+                                         size_unit = c("snp", "bp"),
+                                         min_loci = 1,
+                                         complete = FALSE,
+                                         ...) {
+  rlang::check_dots_empty()
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
   type <- match.arg(type)

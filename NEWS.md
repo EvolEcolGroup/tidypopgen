@@ -1,4 +1,9 @@
 # tidypopgen `dev`
+* `pairwise_pop_fst()`, `nwise_pop_pbs()`, `windows_pairwise_pop_fst()`,
+  `windows_nwise_pop_pbs()` and `windows_pop_tajimas_d()` are now S3 generics
+  (with methods for `gen_tibble` objects), and the generic `pop_tajimas_d()`
+  only has the arguments `.x` and `...`, so that other packages (e.g.
+  `tidypopgl`) can provide methods for their own objects
 * fix the order of the loci in the P matrices returned by `gt_admixture()`:
   ADMIXTURE sorts loci by chromosome and position, so rows did not match the
   loci of the input when these were not already sorted (e.g. when chromosome

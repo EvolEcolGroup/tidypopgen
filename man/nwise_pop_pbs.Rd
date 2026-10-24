@@ -2,17 +2,24 @@
 % Please edit documentation in R/nwise_pop_pbs.R
 \name{nwise_pop_pbs}
 \alias{nwise_pop_pbs}
+\alias{nwise_pop_pbs.tbl_df}
 \title{Compute the Population Branch Statistics for each combination of populations}
 \usage{
-nwise_pop_pbs(
+nwise_pop_pbs(.x, ...)
+
+\method{nwise_pop_pbs}{tbl_df}(
   .x,
   type = c("tidy", "matrix"),
   fst_method = c("Hudson", "Nei87", "WC84"),
-  return_fst = FALSE
+  return_fst = FALSE,
+  ...
 )
 }
 \arguments{
 \item{.x}{A grouped \code{gen_tibble}}
+
+\item{...}{other arguments passed to specific methods, currently
+unused.}
 
 \item{type}{type of object to return. One of "tidy" or "matrix".
 Default is "tidy".}

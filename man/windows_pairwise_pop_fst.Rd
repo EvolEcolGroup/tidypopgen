@@ -2,9 +2,12 @@
 % Please edit documentation in R/windows_pairwise_pop_fst.R
 \name{windows_pairwise_pop_fst}
 \alias{windows_pairwise_pop_fst}
+\alias{windows_pairwise_pop_fst.tbl_df}
 \title{Compute pairwise Fst for a sliding window}
 \usage{
-windows_pairwise_pop_fst(
+windows_pairwise_pop_fst(.x, ...)
+
+\method{windows_pairwise_pop_fst}{tbl_df}(
   .x,
   type = c("matrix", "tidy"),
   method = c("Hudson", "Nei87", "WC84"),
@@ -12,11 +15,15 @@ windows_pairwise_pop_fst(
   step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
-  complete = FALSE
+  complete = FALSE,
+  ...
 )
 }
 \arguments{
 \item{.x}{a grouped \code{gen_tibble} object}
+
+\item{...}{other arguments passed to specific methods, currently
+unused.}
 
 \item{type}{type of object to return. One of "matrix" or "tidy". Default is
 "matrix". "matrix" returns a dataframe where each row is a window, followed

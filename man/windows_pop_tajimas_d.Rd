@@ -2,20 +2,27 @@
 % Please edit documentation in R/windows_pop_tajimas_d.R
 \name{windows_pop_tajimas_d}
 \alias{windows_pop_tajimas_d}
+\alias{windows_pop_tajimas_d.tbl_df}
 \title{Compute Tajima's D for a sliding window}
 \usage{
-windows_pop_tajimas_d(
+windows_pop_tajimas_d(.x, ...)
+
+\method{windows_pop_tajimas_d}{tbl_df}(
   .x,
   type = c("matrix", "tidy", "list"),
   window_size,
   step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
-  complete = FALSE
+  complete = FALSE,
+  ...
 )
 }
 \arguments{
 \item{.x}{a (potentially grouped) \code{gen_tibble} object}
+
+\item{...}{other arguments passed to specific methods, currently
+unused.}
 
 \item{type}{type of object to return, if using grouped method. One of
 "matrix", "tidy", or "list". Default is "matrix".}
