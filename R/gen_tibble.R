@@ -517,6 +517,15 @@ stopifnot_gen_tibble <- function(.x) {
   return(invisible(.x))
 }
 
+# a tibble with a genotypes column, whose class determines the method used
+# (vctrs_bigSNP for a gen_tibble; other packages define their own classes)
+stopifnot_has_genotypes <- function(.x) {
+  if (!"genotypes" %in% names(.x)) {
+    stop("not a gen_tibble, 'genotypes' column is missing")
+  }
+  return(invisible(.x))
+}
+
 # print method
 #' @export
 tbl_sum.gen_tbl <- function(x, ...) {

@@ -97,7 +97,9 @@ loci_alt_freq.tbl_df <- function(
   # for openMP
   ...
 ) {
-  stopifnot_gen_tibble(.x)
+  # dispatch on the genotypes column: vctrs_bigSNP for a gen_tibble, or the
+  # genotypes of objects from other packages (e.g. tidypopgl's gl_tibble)
+  stopifnot_has_genotypes(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()
@@ -244,7 +246,8 @@ loci_maf.tbl_df <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 ) {
-  stopifnot_gen_tibble(.x) # confirm that .col is "genotypes"
+  # dispatch on the genotypes column (see loci_alt_freq.tbl_df)
+  stopifnot_has_genotypes(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()
