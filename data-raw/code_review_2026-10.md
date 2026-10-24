@@ -169,11 +169,11 @@ in brackets, its impact:
 
 ### Loci, individual and population statistics
 
-- [ ] `3a07998` · `indiv_het_obs()` — Divided by the number of loci in the backing file, not the selected loci, so heterozygosity was deflated after `select_loci()` (e.g. 0.115 instead of 0.474). *[Wrong results]*
-- [ ] `50378f3` · `snp_allele_sharing()`, `pairwise_allele_sharing()`, `pairwise_grm()`, `pop_fst()`, `indiv_inbreeding()` — The C++ kernel padded short blocks with 1 instead of 0, adding about 1/(number of blocks) to every pair when blocks had uneven sizes. *[Wrong results]*
-- [ ] `3524ca1` · `pop_global_stats()`, global values of `pop_het_exp()` and `pop_fis()` — A population with no data at a locus was counted as observed, making that locus NaN and biasing genome-wide Fst (−0.0205 against 0.0061 in hierfstat). *[Wrong results]*
-- [ ] `896675d` · `pop_tajimas_d()`, `windows_pop_tajimas_d()` — One locus with no data made D NA; sites with pi = 1 were not counted as segregating. *[Wrong results]*
-- [ ] `b34f37a` · `loci_transversions()`, `loci_transitions()` — A↔C and G↔T were classed as transitions. *[Wrong results]*
+- [x] `3a07998` · `indiv_het_obs()` — Divided by the number of loci in the backing file, not the selected loci, so heterozygosity was deflated after `select_loci()` (e.g. 0.115 instead of 0.474). *[Wrong results]*
+- [x] `50378f3` · `snp_allele_sharing()`, `pairwise_allele_sharing()`, `pairwise_grm()`, `pop_fst()`, `indiv_inbreeding()` — The C++ kernel padded short blocks with 1 instead of 0, adding about 1/(number of blocks) to every pair when blocks had uneven sizes. *[Wrong results]*
+- [x] `3524ca1` · `pop_global_stats()`, global values of `pop_het_exp()` and `pop_fis()` — A population with no data at a locus was counted as observed, making that locus NaN and biasing genome-wide Fst (−0.0205 against 0.0061 in hierfstat). *[Wrong results]*
+- [x] `896675d` · `pop_tajimas_d()`, `windows_pop_tajimas_d()` — One locus with no data made D NA; sites with pi = 1 were not counted as segregating. *[Wrong results]*
+- [x] `b34f37a` · `loci_transversions()`, `loci_transitions()` — A↔C and G↔T were classed as transitions. *[Wrong results]*
 - [ ] `2c3d7bf` · `loci_alt_freq()`, `loci_maf()` (polyploid) — All NA for a single polyploid individual. *[Wrong results]*
 - [ ] `27a6335` · `loci_alt_freq()` (polyploid) — `as_counts` was ignored, and selecting a single locus failed. *[Wrong results / Error]*
 - [ ] `9e90ebe` · `loci_alt_freq(as_counts = TRUE)` — For a single individual, missing genotypes gave NA alternate and non-zero valid allele counts, and the columns were unnamed. *[Wrong results]*
@@ -183,7 +183,7 @@ in brackets, its impact:
 
 ### Windowed statistics
 
-- [ ] `5b766c0` · `windows_pairwise_pop_fst()`, `windows_nwise_pop_pbs()` — Always used Hudson's Fst, ignoring `method` and `fst_method`. *[Wrong results]*
+- [x] `5b766c0` · `windows_pairwise_pop_fst()`, `windows_nwise_pop_pbs()` — Always used Hudson's Fst, ignoring `method` and `fst_method`. *[Wrong results]*
 - [ ] `5aa10b4` · `windows_stats_generic()` and all `windows_*` functions — The last loci of a chromosome fell outside every window when the range was not a multiple of `step_size`. *[Wrong results]*
 - [ ] `7da3a98` · `windows_indiv_roh(heterozygosity = TRUE)` — Homozygotes for the alternate allele were passed to detectRUNS as heterozygotes. Runs of homozygosity are unaffected. *[Wrong results]*
 - [ ] `75c4361` · `windows_pairwise_pop_fst()`, `windows_nwise_pop_pbs()` (tidy) — A recycled name comparison gave spurious warnings. *[Robustness]*
@@ -193,7 +193,7 @@ in brackets, its impact:
 - [ ] `2734aaf` · `gt_pca_autoSVD()`, `predict()` — With a loci table not in backing-file order, loadings were mislabelled, variance explained was wrong and `predict()` gave unrelated scores. *[Wrong results]*
 - [ ] `dc78da4` · `gt_cluster_pca_best_k()`, `gt_dapc()` — `best_k` was a position in `$clusters$k`, not a k value, so the wrong clustering was used when `k_clusters` did not start at 1. *[Wrong results]*
 - [ ] `f97169c` · `gt_dapc()` — `$var` was computed from singular values rather than eigenvalues. *[Wrong results]*
-- [ ] `88e6080` · `gt_dapc()` — Used k rather than k − 1 PCs by default when the number of PCs equalled k. *[Wrong results]*
+- [x] `88e6080` · `gt_dapc()` — Used k rather than k − 1 PCs by default when the number of PCs equalled k. *[Wrong results]*
 - [ ] `320ef63` · `augment()` for `gt_pca`/`gt_dapc`, `augment_loci()` — Failed with one component, with integer ids, or with mismatched ids (a cryptic error instead of the intended one). *[Error]*
 - [ ] `194c44c` · `augment_loci()` — Always failed on `gt_pca_autoSVD()` results; loci removed by LD pruning now get NA. *[Error]*
 - [ ] `f33c15f` · `gt_cluster_pca()` — Failed when only one k > 1 was explored (including the default for 25 or fewer individuals) or with `n_pca = 1`. *[Error]*
