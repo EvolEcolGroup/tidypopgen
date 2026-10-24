@@ -190,20 +190,20 @@ in brackets, its impact:
 
 ### PCA, DAPC and clustering
 
-- [ ] `2734aaf` · `gt_pca_autoSVD()`, `predict()` — With a loci table not in backing-file order, loadings were mislabelled, variance explained was wrong and `predict()` gave unrelated scores. *[Wrong results]*
-- [ ] `dc78da4` · `gt_cluster_pca_best_k()`, `gt_dapc()` — `best_k` was a position in `$clusters$k`, not a k value, so the wrong clustering was used when `k_clusters` did not start at 1. *[Wrong results]*
-- [ ] `f97169c` · `gt_dapc()` — `$var` was computed from singular values rather than eigenvalues. *[Wrong results]*
+- [x] `2734aaf` · `gt_pca_autoSVD()`, `predict()` — With a loci table not in backing-file order, loadings were mislabelled, variance explained was wrong and `predict()` gave unrelated scores. *[Wrong results]*
+- [x] `dc78da4` · `gt_cluster_pca_best_k()`, `gt_dapc()` — `best_k` was a position in `$clusters$k`, not a k value, so the wrong clustering was used when `k_clusters` did not start at 1. *[Wrong results]*
+- [x] `f97169c` · `gt_dapc()` — `$var` was computed from singular values rather than eigenvalues. *[Wrong results]*
 - [x] `88e6080` · `gt_dapc()` — Used k rather than k − 1 PCs by default when the number of PCs equalled k. *[Wrong results]*
 - [ ] `320ef63` · `augment()` for `gt_pca`/`gt_dapc`, `augment_loci()` — Failed with one component, with integer ids, or with mismatched ids (a cryptic error instead of the intended one). *[Error]*
 - [ ] `194c44c` · `augment_loci()` — Always failed on `gt_pca_autoSVD()` results; loci removed by LD pruning now get NA. *[Error]*
 - [ ] `f33c15f` · `gt_cluster_pca()` — Failed when only one k > 1 was explored (including the default for 25 or fewer individuals) or with `n_pca = 1`. *[Error]*
 - [ ] `5ba89ae` · `gt_dapc()` — "Object 'pop.fac' not found" for an invalid `pop`. *[Error]*
 - [ ] `f004500` · `gt_pcadapt()` — Did not check that `x` and `pca` have the same individuals in the same order. *[Robustness]*
-- [ ] `d0686f5` · `tidy.gt_dapc()` — Documented loadings columns did not match the output. *[Docs]*
+- [x] `d0686f5` · `tidy.gt_dapc()` — Documented loadings columns did not match the output. *[Docs]*
 
 ### Admixture (ADMIXTURE, sNMF, Q matrices)
 
-- [ ] `8735f89` · `gt_admixture()` — With `seed = NULL`, all replicates used seed 43 and were identical. *[Wrong results]*
+- [x] `8735f89` · `gt_admixture()` — With `seed = NULL`, all replicates used seed 43 and were identical. *[Wrong results]*
 - [ ] `011a0f4` · `gt_snmf()` — Cross-entropies (`$cv`) were not matched to their k and run when `n_runs > 1`. *[Wrong results]*
 - [ ] `d848508` · `gt_snmf()` — Returned results of earlier runs when adding to an existing project (`project = "continue"`/`"force"`). *[Wrong results]*
 - [ ] `93c4fa6` · `tidy()`, `augment()` of `q_matrix` — Ignored the `id` attribute without group information, misassigning proportions when `data` was in a different order. *[Wrong results]*
@@ -227,9 +227,9 @@ in brackets, its impact:
 
 ### Reading data and backing files
 
-- [ ] `12ad131` · `gen_tibble()` (VCF) — Partially missing genotypes (`1/.`) were stored as heterozygotes by the cpp parser; the vcfR parser failed. *[Wrong results]* The cpp part was reimplemented in `7081979`.
-- [ ] `ffe7274` · `gen_tibble()` (VCF) — Genotypes with more alleles than the estimated ploidy were silently mis-coded unless on the last line. *[Wrong results]* The cpp part was reimplemented in `7081979`.
-- [ ] `4b0611b` · `gen_tibble()` (VCF) — A missing first genotype set an individual's ploidy to 1, turning diploid data into mixed ploidy. *[Wrong results]* The cpp part was reimplemented in `7081979`, which only looks for the ploidy in the first 1,000 variants (see finding 13 in [Findings not fixed](#findings-not-fixed)).
+- [x] `12ad131` · `gen_tibble()` (VCF) — Partially missing genotypes (`1/.`) were stored as heterozygotes by the cpp parser; the vcfR parser failed. *[Wrong results]* The cpp part was reimplemented in `7081979`.
+- [x] `ffe7274` · `gen_tibble()` (VCF) — Genotypes with more alleles than the estimated ploidy were silently mis-coded unless on the last line. *[Wrong results]* The cpp part was reimplemented in `7081979`.
+- [x] `4b0611b` · `gen_tibble()` (VCF) — A missing first genotype set an individual's ploidy to 1, turning diploid data into mixed ploidy. *[Wrong results]* The cpp part was reimplemented in `7081979`, which only looks for the ploidy in the first 1,000 variants (see finding 13 in [Findings not fixed](#findings-not-fixed)).
 - [ ] `9961603` · `gt_pseudohaploid()` — Reset the ploidy of backing-file rows not in the tibble to NA, and relabelled polyploid data as pseudohaploid. *[Wrong results]*
 - [ ] `5e4927c` · `cast_chromosome_to_int()` — Renumbered chromosomes alphabetically when any name was non-numeric. *[Wrong results]*
 - [ ] `288904e` · `gt_load()` on old bigSNP-format objects — Lost individual ploidies for mixed and pseudohaploid data. *[Wrong results]*
@@ -245,9 +245,9 @@ in brackets, its impact:
 - [ ] `8fb5c92` · `show_loci<-` — Accepted a table without a valid `big_index`, creating a broken object. *[Robustness]*
 - [ ] `a1f4741` · `gen_tibble()` (VCF) — Loci validation ran after the backing file was written, leaving orphan files. *[Robustness]*
 - [ ] `9759258` · `gen_tibble()` (packedancestry) — Truncated or corrupted `.geno` files were read out of bounds, giving garbage genotypes. *[Robustness]*
-- [ ] `79b092c` · cpp VCF parser — Reserved about 1.3 GB of address space even for tiny files. *[Performance]* Reverted in `7081979`: VCFs with 10 million variants are common, the reserved memory is only committed when it is used, and peak memory on a 10 million variant file was the same with and without this commit (2.4 GB).
-- [ ] `7081979` · cpp VCF parser — `12ad131`, `ffe7274` and `4b0611b` slowed the parser down: genotypes were read 15–30% more slowly, and the loci table was built up to 21 times more slowly when a sample's genotypes were all `.` (the cost grows with the number of samples). The fixes are reimplemented without splitting lines, and `79b092c` is reverted. The loci table is now built as fast as on `dev`, genotypes are read 5–25% faster, and the backing files are identical (see [Performance of the cpp VCF parser](#performance-of-the-cpp-vcf-parser)). *[Performance]*
-- [ ] `6a675b6` · `gen_tibble()` — `n_cores` is documented as ignored (it always was). *[Docs]*
+- [x] `79b092c` · cpp VCF parser — Reserved about 1.3 GB of address space even for tiny files. *[Performance]* Reverted in `7081979`: VCFs with 10 million variants are common, the reserved memory is only committed when it is used, and peak memory on a 10 million variant file was the same with and without this commit (2.4 GB).
+- [x] `7081979` · cpp VCF parser — `12ad131`, `ffe7274` and `4b0611b` slowed the parser down: genotypes were read 15–30% more slowly, and the loci table was built up to 21 times more slowly when a sample's genotypes were all `.` (the cost grows with the number of samples). The fixes are reimplemented without splitting lines, and `79b092c` is reverted. The loci table is now built as fast as on `dev`, genotypes are read 5–25% faster, and the backing files are identical (see [Performance of the cpp VCF parser](#performance-of-the-cpp-vcf-parser)). *[Performance]*
+- [x] `6a675b6` · `gen_tibble()` — `n_cores` is documented as ignored (it always was). *[Docs]*
 
 ### Exporting data
 
@@ -261,15 +261,15 @@ in brackets, its impact:
 - [ ] `f61fe58` · `gt_as_genlight()` — Alleles, chromosome and position were not stored, so `gt_from_genlight()` could not read the result back. *[Data lost]*
 - [ ] `6a3fd51` · `gt_as_plink(type = "ped"/"raw")` — Failed without a population column (e.g. data read from a VCF). *[Error]*
 - [ ] `6260459` · `gt_as_plink(type = "ped"/"raw")` — Failed with a numeric phenotype column. *[Error]*
-- [ ] `ec4ac8d` · `gt_as_genind()` — Failed when loci names contain "." (common with RefSeq chromosome names). *[Error]*
-- [ ] `9c88b10` · `gt_from_genlight()` — Rejected `genlight` objects without the (documented as optional) `pop` slot. *[Error]*
+- [x] `ec4ac8d` · `gt_as_genind()` — Failed when loci names contain "." (common with RefSeq chromosome names). *[Error]*
+- [x] `9c88b10` · `gt_from_genlight()` — Rejected `genlight` objects without the (documented as optional) `pop` slot. *[Error]*
 
 ### Merging and dplyr methods
 
 - [ ] `01ae5d6` · `rbind()` — Individual ploidies were attached to the wrong individuals after `filter()`/`arrange()`. *[Wrong results]*
 - [ ] `eaf612d` · `rbind(use_position = TRUE)` — Loci were renamed to `chromosome_position`. *[Wrong results]*
 - [ ] `6eaa674` · `ungroup()` — Dropped the `sf` class and geometry column attribute; partial ungrouping gave malformed classes. *[Wrong results]*
-- [ ] `7e97c81` · `select()`, `rename()`, `relocate()` on grouped gen_tibbles — Returned a plain `grouped_df`, which package functions then rejected. *[Error]*
+- [x] `7e97c81` · `select()`, `rename()`, `relocate()` on grouped gen_tibbles — Returned a plain `grouped_df`, which package functions then rejected. *[Error]*
 - [ ] `c18bc32` · `[` on grouped gen_tibbles — Returned a corrupt grouped object when the grouping variables were dropped. *[Error]*
 - [ ] `cff2c50` · `mutate()` — Returned a corrupt `grouped_df` when the genotypes column was dropped. *[Error]*
 - [ ] `dfde255` · `group_by()` — Returned a corrupt object without grouping variables. *[Error]*
