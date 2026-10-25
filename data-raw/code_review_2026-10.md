@@ -174,9 +174,9 @@ in brackets, its impact:
 - [x] `3524ca1` · `pop_global_stats()`, global values of `pop_het_exp()` and `pop_fis()` — A population with no data at a locus was counted as observed, making that locus NaN and biasing genome-wide Fst (−0.0205 against 0.0061 in hierfstat). *[Wrong results]*
 - [x] `896675d` · `pop_tajimas_d()`, `windows_pop_tajimas_d()` — One locus with no data made D NA; sites with pi = 1 were not counted as segregating. *[Wrong results]*
 - [x] `b34f37a` · `loci_transversions()`, `loci_transitions()` — A↔C and G↔T were classed as transitions. *[Wrong results]*
-- [ ] `2c3d7bf` · `loci_alt_freq()`, `loci_maf()` (polyploid) — All NA for a single polyploid individual. *[Wrong results]*
-- [ ] `27a6335` · `loci_alt_freq()` (polyploid) — `as_counts` was ignored, and selecting a single locus failed. *[Wrong results / Error]*
-- [ ] `9e90ebe` · `loci_alt_freq(as_counts = TRUE)` — For a single individual, missing genotypes gave NA alternate and non-zero valid allele counts, and the columns were unnamed. *[Wrong results]*
+- [x] `2c3d7bf` · `loci_alt_freq()`, `loci_maf()` (polyploid) — All NA for a single polyploid individual. *[Wrong results]*
+- [x] `27a6335` · `loci_alt_freq()` (polyploid) — `as_counts` was ignored, and selecting a single locus failed. *[Wrong results / Error]*
+- [x] `9e90ebe` · `loci_alt_freq(as_counts = TRUE)` — For a single individual, missing genotypes gave NA alternate and non-zero valid allele counts, and the columns were unnamed. *[Wrong results]*
 - [ ] `83aa04e` · Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
 - [ ] `6a61c22` · Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]*
 - [ ] `a79b7ce` · `pop_fst()`, `pop_fis(method = "WG17")` — "Subscript out of bounds" with a single group; now an informative error. *[Error]*
@@ -184,9 +184,9 @@ in brackets, its impact:
 ### Windowed statistics
 
 - [x] `5b766c0` · `windows_pairwise_pop_fst()`, `windows_nwise_pop_pbs()` — Always used Hudson's Fst, ignoring `method` and `fst_method`. *[Wrong results]*
-- [ ] `5aa10b4` · `windows_stats_generic()` and all `windows_*` functions — The last loci of a chromosome fell outside every window when the range was not a multiple of `step_size`. *[Wrong results]*
-- [ ] `7da3a98` · `windows_indiv_roh(heterozygosity = TRUE)` — Homozygotes for the alternate allele were passed to detectRUNS as heterozygotes. Runs of homozygosity are unaffected. *[Wrong results]*
-- [ ] `75c4361` · `windows_pairwise_pop_fst()`, `windows_nwise_pop_pbs()` (tidy) — A recycled name comparison gave spurious warnings. *[Robustness]*
+- [ ] AM TODO check if this is really correct `5aa10b4` · `windows_stats_generic()` and all `windows_*` functions — The last loci of a chromosome fell outside every window when the range was not a multiple of `step_size`. *[Wrong results]*
+- [x] `7da3a98` · `windows_indiv_roh(heterozygosity = TRUE)` — Homozygotes for the alternate allele were passed to detectRUNS as heterozygotes. Runs of homozygosity are unaffected. *[Wrong results]*
+- [x] `75c4361` · `windows_pairwise_pop_fst()`, `windows_nwise_pop_pbs()` (tidy) — A recycled name comparison gave spurious warnings. *[Robustness]*
 
 ### PCA, DAPC and clustering
 
@@ -194,11 +194,11 @@ in brackets, its impact:
 - [x] `dc78da4` · `gt_cluster_pca_best_k()`, `gt_dapc()` — `best_k` was a position in `$clusters$k`, not a k value, so the wrong clustering was used when `k_clusters` did not start at 1. *[Wrong results]*
 - [x] `f97169c` · `gt_dapc()` — `$var` was computed from singular values rather than eigenvalues. *[Wrong results]*
 - [x] `88e6080` · `gt_dapc()` — Used k rather than k − 1 PCs by default when the number of PCs equalled k. *[Wrong results]*
-- [ ] `320ef63` · `augment()` for `gt_pca`/`gt_dapc`, `augment_loci()` — Failed with one component, with integer ids, or with mismatched ids (a cryptic error instead of the intended one). *[Error]*
-- [ ] `194c44c` · `augment_loci()` — Always failed on `gt_pca_autoSVD()` results; loci removed by LD pruning now get NA. *[Error]*
-- [ ] `f33c15f` · `gt_cluster_pca()` — Failed when only one k > 1 was explored (including the default for 25 or fewer individuals) or with `n_pca = 1`. *[Error]*
-- [ ] `5ba89ae` · `gt_dapc()` — "Object 'pop.fac' not found" for an invalid `pop`. *[Error]*
-- [ ] `f004500` · `gt_pcadapt()` — Did not check that `x` and `pca` have the same individuals in the same order. *[Robustness]*
+- [x] `320ef63` · `augment()` for `gt_pca`/`gt_dapc`, `augment_loci()` — Failed with one component, with integer ids, or with mismatched ids (a cryptic error instead of the intended one). *[Error]*
+- [x] `194c44c` · `augment_loci()` — Always failed on `gt_pca_autoSVD()` results; loci removed by LD pruning now get NA. *[Error]*
+- [x] `f33c15f` · `gt_cluster_pca()` — Failed when only one k > 1 was explored (including the default for 25 or fewer individuals) or with `n_pca = 1`. *[Error]*
+- [x] `5ba89ae` · `gt_dapc()` — "Object 'pop.fac' not found" for an invalid `pop`. *[Error]*
+- [x] `f004500` · `gt_pcadapt()` — Did not check that `x` and `pca` have the same individuals in the same order. *[Robustness]*
 - [x] `d0686f5` · `tidy.gt_dapc()` — Documented loadings columns did not match the output. *[Docs]*
 
 ### Admixture (ADMIXTURE, sNMF, Q matrices)
@@ -216,8 +216,8 @@ in brackets, its impact:
 
 ### Relatedness, imputation and QC reports
 
-- [ ] `8987f22` · `filter_high_relatedness()`, `qc_report_indiv(kings_threshold = )` — Negative kinship was treated as high relatedness (25 of 30 unrelated individuals removed in a simulation). *[Wrong results]*
-- [ ] `458144f` · `filter_high_relatedness()` — Failed on missing (NaN) kinship values, e.g. in the lobster data. *[Error]*
+- [x] `8987f22` · `filter_high_relatedness()`, `qc_report_indiv(kings_threshold = )` — Negative kinship was treated as high relatedness (25 of 30 unrelated individuals removed in a simulation). *[Wrong results]*
+- [ ] `458144f` · AM TODO we should issue a warning that some individuals could not be compared `filter_high_relatedness()` — Failed on missing (NaN) kinship values, e.g. in the lobster data. *[Error]*
 - [ ] `ca37fe3` · Grouped `qc_report_indiv()` — `to_keep` flags were attached to the wrong individuals when groups were not contiguous (as in the example data). *[Wrong results]*
 - [ ] `ab8006b` · Grouped `qc_report_loci()` — HWE p-values could exceed 1 (up to 2.89). *[Wrong results]*
 - [ ] `3d23bf4` · `gt_impute_xgboost()` — Chromosomes were in loci-table rather than backing-file order, so SNPs were imputed from the wrong neighbours. *[Wrong results]*
@@ -251,11 +251,11 @@ in brackets, its impact:
 
 ### Exporting data
 
-- [ ] `3d23bdb` · `gt_as_plink()`, `gt_as_geno_lea()`, `gt_as_hierfstat()` (and hence `gt_admixture()`, `gt_snmf()`) — Rejected pseudohaploid data, which they document as supported. *[Error]*
-- [ ] `2d7e163` · `gt_as_hierfstat()` — Population labels such as "1" or "2" became NA; loci names were lost. *[Wrong results]*
-- [ ] `af2c9a3` · `gt_as_vcf()`, `gt_as_plink(type = "ped")` — Positions stored as doubles were written in scientific notation (`1e+05`). *[Wrong results]*
-- [ ] `347aae0` · `gt_as_vcf()` — `##fileDate` had a space-padded day. *[Wrong results]*
-- [ ] `e5082cc` · `gt_as_plink(type = "ped")` — Genetic distance was always written as 0 in the `.map` file. *[Data lost]*
+- [x] `3d23bdb` · `gt_as_plink()`, `gt_as_geno_lea()`, `gt_as_hierfstat()` (and hence `gt_admixture()`, `gt_snmf()`) — Rejected pseudohaploid data, which they document as supported. *[Error]*
+- [x] `2d7e163` · `gt_as_hierfstat()` — Population labels such as "1" or "2" became NA; loci names were lost. *[Wrong results]*
+- [x] `af2c9a3` · `gt_as_vcf()`, `gt_as_plink(type = "ped")` — Positions stored as doubles were written in scientific notation (`1e+05`). *[Wrong results]*
+- [x] `347aae0` · `gt_as_vcf()` — `##fileDate` had a space-padded day. *[Wrong results]*
+- [x] `e5082cc` · `gt_as_plink(type = "ped")` — Genetic distance was always written as 0 in the `.map` file. *[Data lost]*
 - [ ] `6923229` · `gt_as_plink(type = "ped"/"raw")` — Parents and numeric sex codes read by `gen_tibble()` were dropped. *[Data lost]*
 - [ ] `4292aa8` · `gt_as_plink(type = "bed")` — The `.fam` file lacked population, parents, sex and phenotype (see behaviour changes). *[Data lost]*
 - [ ] `f61fe58` · `gt_as_genlight()` — Alleles, chromosome and position were not stored, so `gt_from_genlight()` could not read the result back. *[Data lost]*
@@ -279,13 +279,13 @@ in brackets, its impact:
 
 ### Plots, heatmaps and documentation
 
-- [ ] `3ed0d99` · `heatmap_add_dendro()` — With tied distances, the dendrogram did not match the heatmap order (20–50% of integer-valued matrices). *[Wrong results]*
-- [ ] `7664b8c` · `heatmap_pairwise()`, `autoplot()` of tidy pairwise results — Always failed ("Duplicate pairs found") with factor ids. *[Error]*
-- [ ] `47afd1e` · `heatmap_add_dendro()` — Combining with patchwork failed on printing or saving. *[Error]*
-- [ ] `c321a74` · `heatmap_add_dendro()` — Used `plot@data`, which needs ggplot2 ≥ 4.0. *[Error]*
-- [ ] `2eb6da0` · `autoplot()` of `gt_admix`/`gt_pca` — Messages and docs referred to non-existent arguments (`repeat`, `pc`). *[Docs]*
+- [x] `3ed0d99` · `heatmap_add_dendro()` — With tied distances, the dendrogram did not match the heatmap order (20–50% of integer-valued matrices). *[Wrong results]*
+- [x] `7664b8c` · `heatmap_pairwise()`, `autoplot()` of tidy pairwise results — Always failed ("Duplicate pairs found") with factor ids. *[Error]*
+- [x] `47afd1e` · `heatmap_add_dendro()` — Combining with patchwork failed on printing or saving. *[Error]*
+- [x] `c321a74` · `heatmap_add_dendro()` — Used `plot@data`, which needs ggplot2 ≥ 4.0. *[Error]*
+- [x] `2eb6da0` · `autoplot()` of `gt_admix`/`gt_pca` — Messages and docs referred to non-existent arguments (`repeat`, `pc`). *[Docs]*
 - [ ] `41efcd0` · QC vignette — The upset plot description gave the wrong bar and total (806, not 804). *[Docs]*
-- [ ] `c7e748c` · `scale_fill_distruct()`, `qc_report_indiv()` — The example had no visible effect; descriptions were wrong. *[Docs]*
+- [x] `c7e748c` · `scale_fill_distruct()`, `qc_report_indiv()` — The example had no visible effect; descriptions were wrong. *[Docs]*
 
 ## Optional fix on a separate branch
 
