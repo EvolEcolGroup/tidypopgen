@@ -36,16 +36,20 @@ removed.  It defaults to FALSE}
 \value{
 a list with two \code{data.frames}, named \code{target} and \code{ref}. Each
 data.frame has \code{nrow()} equal to the number of loci in the respective
-dataset, a column \code{id} with the locus name, and boolean columns \code{to_keep}
-(the valid loci that will be kept in the merge), \code{alleles_mismatched} (loci
-found in both datasets but with mismatched alleles, leading to those loci
-being dropped), \code{to_flip} (loci that need to be flipped to align the two
-datasets, only found in \code{target} data.frame) and \code{to_swap} (loci for which
-the order of alleles needs to be swapped to align the two datasets,
-\code{target} data.frame). Loci with one unobserved allele (NA) have it
-inferred from the other dataset where possible: \code{missing_allele} gives the
-inferred allele, and \code{missing_allele_col} the column it fills
-(\code{allele_alt} or \code{allele_ref}); both are NA if nothing was inferred.
+dataset, and columns \code{id} (the index of the locus in the dataset), \code{new_id}
+(the index of the locus in the merged dataset, NA if the locus is dropped,
+either because it is not found in both datasets, because its alleles do not
+match, or because it is ambiguous), \code{name} (the locus name), \code{to_flip}
+(boolean, loci whose strand is flipped to match the reference, only in the
+\code{target} data.frame), \code{to_swap} (boolean, loci whose alleles, and thus
+genotypes, are swapped in the merge: in \code{target}, to match the order of
+alleles in the reference; in \code{ref}, loci whose \code{allele_ref} is missing in
+both datasets, which are swapped so that the observed allele becomes
+\code{allele_ref}, only when \code{flip_strand = TRUE}), \code{missing_allele} and
+\code{missing_allele_col} (for loci with one unobserved allele (NA), the allele
+inferred from the other dataset, and the column it fills, \code{allele_alt} or
+\code{allele_ref}; both are NA if nothing was inferred), and \code{ambiguous}
+(boolean, strand-ambiguous loci, i.e. A/T and C/G).
 }
 \description{
 This function provides an overview of the fate of each SNP in two

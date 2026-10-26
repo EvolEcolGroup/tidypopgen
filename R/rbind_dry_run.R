@@ -23,16 +23,20 @@
 #' @param quiet boolean whether to omit reporting to screen
 #' @returns a list with two `data.frames`, named `target` and `ref`. Each
 #'   data.frame has `nrow()` equal to the number of loci in the respective
-#'   dataset, a column `id` with the locus name, and boolean columns `to_keep`
-#'   (the valid loci that will be kept in the merge), `alleles_mismatched` (loci
-#'   found in both datasets but with mismatched alleles, leading to those loci
-#'   being dropped), `to_flip` (loci that need to be flipped to align the two
-#'   datasets, only found in `target` data.frame) and `to_swap` (loci for which
-#'   the order of alleles needs to be swapped to align the two datasets,
-#'   `target` data.frame). Loci with one unobserved allele (NA) have it
-#'   inferred from the other dataset where possible: `missing_allele` gives the
-#'   inferred allele, and `missing_allele_col` the column it fills
-#'   (`allele_alt` or `allele_ref`); both are NA if nothing was inferred.
+#'   dataset, and columns `id` (the index of the locus in the dataset), `new_id`
+#'   (the index of the locus in the merged dataset, NA if the locus is dropped,
+#'   either because it is not found in both datasets, because its alleles do not
+#'   match, or because it is ambiguous), `name` (the locus name), `to_flip`
+#'   (boolean, loci whose strand is flipped to match the reference, only in the
+#'   `target` data.frame), `to_swap` (boolean, loci whose alleles, and thus
+#'   genotypes, are swapped in the merge: in `target`, to match the order of
+#'   alleles in the reference; in `ref`, loci whose `allele_ref` is missing in
+#'   both datasets, which are swapped so that the observed allele becomes
+#'   `allele_ref`, only when `flip_strand = TRUE`), `missing_allele` and
+#'   `missing_allele_col` (for loci with one unobserved allele (NA), the allele
+#'   inferred from the other dataset, and the column it fills, `allele_alt` or
+#'   `allele_ref`; both are NA if nothing was inferred), and `ambiguous`
+#'   (boolean, strand-ambiguous loci, i.e. A/T and C/G).
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
@@ -84,7 +88,7 @@ rbind_dry_run <- function(
   # if use_position is FALSE, then the names can not be integers
   if (!use_position) {
     if (!is.character(show_loci(ref)$name) ||
-      !is.character(show_loci(target)$name)) { # nolint
+          !is.character(show_loci(target)$name)) {
       stop(
         "When 'use_position' is FALSE, loci names must be characters.",
         " Please set 'use_position' to TRUE if you use integers as loci names."
@@ -205,21 +209,24 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
   to_swap <- (target_sub$allele_1 == ref_sub$allele_2) &
     (target_sub$allele_2 == ref_sub$allele_1)
 
-  # default: nothing to swap
-  missing_ref_swap <- rep(FALSE, length(to_keep_flip))
+  # loci to swap in the reference (none unless flip_strand is TRUE)
+  ref_to_swap <- rep(FALSE, length(to_keep_flip))
   if (flip_strand) {
     # remove ambiguous snps from the boolean vectors
     ambiguous_sub <- ambiguous(target_sub)
     to_keep_flip <- to_keep_flip & !ambiguous_sub
     to_flip <- to_flip & !ambiguous_sub
     to_swap <- to_swap & !ambiguous_sub
-    # loci that rbind() will reorient so that the observed allele is
-    # the reference: the ref allele is unresolved (still "0") but the alt
-    # allele is observed. Only done when flip_strand is TRUE, and only for
-    # loci that are kept.
-    missing_ref_swap <- to_keep_flip &
+    # kept loci whose allele_ref is missing in both datasets (so it could not
+    # be resolved, and is still "0") but whose allele_alt is observed: we swap
+    # them in the reference, so that the observed allele becomes allele_ref
+    ref_to_swap <- to_keep_flip &
       ref_sub$allele_2 == "0" &
       ref_sub$allele_1 != "0"
+    # the target has to follow the new orientation of the reference: loci that
+    # matched the reference as is now need swapping, and those that needed
+    # swapping already match it
+    to_swap <- xor(to_swap, ref_to_swap)
   }
   # now we create the two reporting data.frames
   # note that they include all loci (including the ones we dropped because they
@@ -229,17 +236,16 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
     id = ref_df$id,
     new_id = match(ref_df$name, ref_sub$name[to_keep_flip]),
     name = ref_df$name,
+    to_swap = FALSE,
     missing_allele = NA,
     missing_allele_col = NA,
     ambiguous = ambiguous(ref_df)
   )
+  ref_report$to_swap[match(ref_sub$name[ref_to_swap], ref_df$name)] <- TRUE
   ref_report$missing_allele[match(ref_sub$name, ref_df$name)] <-
     ref_sub$missing_allele
   ref_report$missing_allele_col[match(ref_sub$name, ref_df$name)] <-
     allele_col_names(ref_sub$missing_allele_col)
-  ref_report$missing_ref_swap <- FALSE
-  ref_report$missing_ref_swap[match(ref_sub$name, ref_df$name)] <-
-    missing_ref_swap
   # and now one for target
   target_report <- data.frame(
     id = target_df$id,

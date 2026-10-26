@@ -1,15 +1,12 @@
 # tidypopgen `dev`
-* fix `rbind()` and `rbind_dry_run()` failing on a locus whose missing
-  allele is in `allele_ref`. NA alleles are replaced with "0" before
-  matching, but only `allele_alt` was covered; since `gen_tibble_bed()` maps
-  `allele_ref` to the bim file's allele2 column, a missing allele there left
-  an NA that reached a logical subscript and failed with "NAs are not
-  allowed in subscripted assignments" under `flip_strand = TRUE`. A missing
+* fix `rbind()` and `rbind_dry_run()` failing ("NAs are not allowed in
+  subscripted assignments") on loci with a missing `allele_ref`. A missing
   allele is now inferred from the other dataset whichever column it is in
-  (previously only `allele_alt` was inferred), and the report of
-  `rbind_dry_run()` gains a `missing_allele_col` column giving the column
-  that was filled. A gap present in both datasets is left as NA, rather than
-  being "inferred" as the missing code "0".
+  (previously only `allele_alt` was), and the report of `rbind_dry_run()`
+  gains a `missing_allele_col` column giving the column that was filled. With
+  `flip_strand = TRUE`, loci whose `allele_ref` is missing in both datasets
+  are swapped so that the observed allele becomes `allele_ref`; these are
+  flagged in a new `to_swap` column of the `ref` report.
 * fix the order of the loci in the P matrices returned by `gt_admixture()`:
   ADMIXTURE sorts loci by chromosome and position, so rows did not match the
   loci of the input when these were not already sorted (e.g. when chromosome

@@ -29,7 +29,9 @@
 #'   large number variants are dropped when merging).
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #'   match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T
-#'   and C/G) will also be removed. It defaults to FALSE
+#'   and C/G) will also be removed, and loci whose `allele_ref` is missing in
+#'   both datasets will have their alleles swapped, so that the observed allele
+#'   becomes `allele_ref`. It defaults to FALSE
 #' @param quiet boolean whether to omit reporting to screen
 #' @param backingfile the path and prefix of the files used to store the merged
 #'   data (it will be a .RDS to store the `bigSNP` object and a .bk file as its
@@ -164,53 +166,28 @@ rbind.gen_tbl <- function(
     attr(ref$genotypes, "loci")[[allele_col]][id_missing] <-
       report$ref$missing_allele[id_missing]
   }
+  # swap the alleles of loci whose allele_ref is missing in both datasets, so
+  # that the observed allele becomes allele_ref (only with flip_strand)
+  ## in the gt_table
+  to_swap <- report$ref$to_swap
+  ref_loci <- attr(ref$genotypes, "loci")
+  attr(ref$genotypes, "loci")$allele_ref[to_swap] <-
+    ref_loci$allele_alt[to_swap]
+  attr(ref$genotypes, "loci")$allele_alt[to_swap] <-
+    ref_loci$allele_ref[to_swap]
   # now create a new loci table (we'll use it later)
   new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id, na.last = NA), ]
-
-  ###
-  # loci whose observed allele ended up as alt, with ref unresolved
-  norm_swap <- report$ref$missing_ref_swap[
-    order(report$ref$new_id, na.last = NA)
-  ]
-  # the target's existing swaps, restricted to kept loci, same order
-  target_swap_kept <- report$target$to_swap[
-    order(report$target$new_id, na.last = NA)
-  ]
-  target_swap_final <- xor(target_swap_kept, norm_swap)
-  if (any(norm_swap) && !quiet) {
-    message(
-      sum(norm_swap), " loci had a missing reference allele with an observed ",
-      "alternate allele in both datasets. The alleles were swapped so that the",
-      " observed allele is the reference."
-    )
-  }
-  # swap in the final loci table (this becomes the merged loci table)
-  new_ref_loci_tbl$allele_ref[norm_swap] <- new_ref_loci_tbl$allele_alt[norm_swap] # nolint
-  new_ref_loci_tbl$allele_alt[norm_swap] <- NA
-  ###
-
-
   # now we subset the SNP object
   ## in the snp object
   if (nrow(new_ref_loci_tbl) == 0) {
     stop("there are no loci in common between the two gen_tibbles")
   }
-
-  if (flip_strand) {
-    ref_snp <- subset_FBM(
-      attr(ref$genotypes, "fbm"),
-      loci_indices = new_ref_loci_tbl$big_index,
-      indiv_indices = vctrs::vec_data(ref$genotypes),
-      swap_indices = new_ref_loci_tbl$big_index[norm_swap]
-    )
-  } else {
-    ref_snp <- subset_FBM(
-      attr(ref$genotypes, "fbm"),
-      loci_indices = new_ref_loci_tbl$big_index,
-      indiv_indices = vctrs::vec_data(ref$genotypes)
-    )
-  }
-
+  ref_snp <- subset_FBM(
+    attr(ref$genotypes, "fbm"),
+    loci_indices = new_ref_loci_tbl$big_index,
+    indiv_indices = vctrs::vec_data(ref$genotypes),
+    swap_indices = show_loci(ref)$big_index[report$ref$to_swap]
+  )
   ###########
   # now we move to the target object
   # we fix the missing alleles
@@ -232,21 +209,12 @@ rbind.gen_tbl <- function(
   new_target_loci_tbl <-
     show_loci(target)[order(report$target$new_id, na.last = NA), ]
 
-  if (flip_strand) {
-    target_snp <- subset_FBM(
-      attr(target$genotypes, "fbm"),
-      loci_indices = new_target_loci_tbl$big_index,
-      indiv_indices = vctrs::vec_data(target$genotypes),
-      swap_indices = new_target_loci_tbl$big_index[target_swap_final]
-    )
-  } else {
-    target_snp <- subset_FBM(
-      attr(target$genotypes, "fbm"),
-      loci_indices = new_target_loci_tbl$big_index,
-      indiv_indices = vctrs::vec_data(target$genotypes),
-      swap_indices = show_loci(target)$big_index[report$target$to_swap]
-    )
-  }
+  target_snp <- subset_FBM(
+    attr(target$genotypes, "fbm"),
+    loci_indices = new_target_loci_tbl$big_index,
+    indiv_indices = vctrs::vec_data(target$genotypes),
+    swap_indices = show_loci(target)$big_index[report$target$to_swap]
+  )
 
   # this check does not work if we change the names of markers
   #  if (!identical(target_snp$map$marker.ID,ref_snp$map$marker.ID) |
