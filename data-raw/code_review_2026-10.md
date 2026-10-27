@@ -268,14 +268,14 @@ in brackets, its impact:
 
 - [ ] `01ae5d6` · `rbind()` — Individual ploidies were attached to the wrong individuals after `filter()`/`arrange()`. *[Wrong results]*
 - [ ] `eaf612d` · `rbind(use_position = TRUE)` — Loci were renamed to `chromosome_position`. *[Wrong results]*
-- [ ] `6eaa674` · `ungroup()` — Dropped the `sf` class and geometry column attribute; partial ungrouping gave malformed classes. *[Wrong results]*
+- [x] `6eaa674` · `ungroup()` — Dropped the `sf` class and geometry column attribute; partial ungrouping gave malformed classes. *[Wrong results]* E.C
 - [x] `7e97c81` · `select()`, `rename()`, `relocate()` on grouped gen_tibbles — Returned a plain `grouped_df`, which package functions then rejected. *[Error]*
-- [ ] `c18bc32` · `[` on grouped gen_tibbles — Returned a corrupt grouped object when the grouping variables were dropped. *[Error]*
-- [ ] `cff2c50` · `mutate()` — Returned a corrupt `grouped_df` when the genotypes column was dropped. *[Error]*
-- [ ] `dfde255` · `group_by()` — Returned a corrupt object without grouping variables. *[Error]*
-- [ ] `9a740d0` · `rbind_dry_run()` — Failed with paths to `.bim` files, as documented. *[Error]*
+- [x] `c18bc32` · `[` on grouped gen_tibbles — Returned a corrupt grouped object when the grouping variables were dropped. *[Error]* E.C
+- [x] `cff2c50` · `mutate()` — Returned a corrupt `grouped_df` when the genotypes column was dropped. *[Error]* E.C
+- [x] `dfde255` · `group_by()` — Returned a corrupt object without grouping variables. *[Error]* E.C
+- [x] `9a740d0` · `rbind_dry_run()` — Failed with paths to `.bim` files, as documented. *[Error]* E.C
 - [ ] `9253461` · `rbind()` — `as_is = TRUE` with `flip_strand = TRUE` was accepted when `quiet = TRUE`. *[Robustness]*
-- [ ] `9d026bf` · `select_loci_if()` — Loaded the whole genotype matrix into memory to count loci. *[Performance]*
+- [x] `9d026bf` · `select_loci_if()` — Loaded the whole genotype matrix into memory to count loci. *[Performance]* E.C
 
 ### Plots, heatmaps and documentation
 
