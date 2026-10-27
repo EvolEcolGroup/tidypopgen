@@ -1,4 +1,12 @@
 # tidypopgen `dev`
+* fix `rbind()` and `rbind_dry_run()` failing ("NAs are not allowed in
+  subscripted assignments") on loci with a missing `allele_ref`. A missing
+  allele is now inferred from the other dataset whichever column it is in
+  (previously only `allele_alt` was), and the report of `rbind_dry_run()`
+  gains a `missing_allele_col` column giving the column that was filled. With
+  `flip_strand = TRUE`, loci whose `allele_ref` is missing in both datasets
+  are swapped so that the observed allele becomes `allele_ref`; these are
+  flagged in a new `to_swap` column of the `ref` report.
 * fix the order of the loci in the P matrices returned by `gt_admixture()`:
   ADMIXTURE sorts loci by chromosome and position, so rows did not match the
   loci of the input when these were not already sorted (e.g. when chromosome

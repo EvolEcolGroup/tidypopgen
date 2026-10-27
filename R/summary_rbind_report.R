@@ -81,6 +81,14 @@ summary.rbind_report <- function(
     (sum(object$ref$ambiguous & is.na(object$ref$new_id))),
     " were removed)\n"
   )
+  if (sum(object$ref$to_swap) > 0) {
+    cat(
+      "(",
+      sum(object$ref$to_swap),
+      "had allele_ref missing in both datasets, and were swapped so that",
+      "the observed allele is allele_ref)\n"
+    )
+  }
   cat("-----------------------------\n")
   cat("dataset:", target_label, "\n")
   cat(

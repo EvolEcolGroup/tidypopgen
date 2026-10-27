@@ -29,7 +29,9 @@
 #'   large number variants are dropped when merging).
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #'   match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T
-#'   and C/G) will also be removed. It defaults to FALSE
+#'   and C/G) will also be removed, and loci whose `allele_ref` is missing in
+#'   both datasets will have their alleles swapped, so that the observed allele
+#'   becomes `allele_ref`. It defaults to FALSE
 #' @param quiet boolean whether to omit reporting to screen
 #' @param backingfile the path and prefix of the files used to store the merged
 #'   data (it will be a .RDS to store the `bigSNP` object and a .bk file as its
@@ -158,10 +160,21 @@ rbind.gen_tbl <- function(
   ###########
   # we start with the ref object
   # we fix the missing alleles
+  ## in the gt_table, in whichever allele column was missing
+  for (allele_col in c("allele_alt", "allele_ref")) {
+    id_missing <- which(report$ref$missing_allele_col %in% allele_col)
+    attr(ref$genotypes, "loci")[[allele_col]][id_missing] <-
+      report$ref$missing_allele[id_missing]
+  }
+  # swap the alleles of loci whose allele_ref is missing in both datasets, so
+  # that the observed allele becomes allele_ref (only with flip_strand)
   ## in the gt_table
-  id_missing <- which(!is.na(report$ref$missing_allele))
-  attr(ref$genotypes, "loci")$allele_alt[id_missing] <-
-    report$ref$missing_allele[id_missing]
+  to_swap <- report$ref$to_swap
+  ref_loci <- attr(ref$genotypes, "loci")
+  attr(ref$genotypes, "loci")$allele_ref[to_swap] <-
+    ref_loci$allele_alt[to_swap]
+  attr(ref$genotypes, "loci")$allele_alt[to_swap] <-
+    ref_loci$allele_ref[to_swap]
   # now create a new loci table (we'll use it later)
   new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id, na.last = NA), ]
   # now we subset the SNP object
@@ -172,15 +185,18 @@ rbind.gen_tbl <- function(
   ref_snp <- subset_FBM(
     attr(ref$genotypes, "fbm"),
     loci_indices = new_ref_loci_tbl$big_index,
-    indiv_indices = vctrs::vec_data(ref$genotypes)
+    indiv_indices = vctrs::vec_data(ref$genotypes),
+    swap_indices = show_loci(ref)$big_index[report$ref$to_swap]
   )
   ###########
   # now we move to the target object
   # we fix the missing alleles
-  ## in the gt_table
-  id_missing <- which(!is.na(report$target$missing_allele))
-  attr(target$genotypes, "loci")$allele_alt[id_missing] <-
-    report$target$missing_allele[id_missing]
+  ## in the gt_table, in whichever allele column was missing
+  for (allele_col in c("allele_alt", "allele_ref")) {
+    id_missing <- which(report$target$missing_allele_col %in% allele_col)
+    attr(target$genotypes, "loci")[[allele_col]][id_missing] <-
+      report$target$missing_allele[id_missing]
+  }
   # now flip the strands
   ## in the gt_table
   to_flip <- report$target$to_flip
