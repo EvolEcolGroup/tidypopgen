@@ -179,7 +179,7 @@ in brackets, its impact:
 - [x] `9e90ebe` · `loci_alt_freq(as_counts = TRUE)` — For a single individual, missing genotypes gave NA alternate and non-zero valid allele counts, and the columns were unnamed. *[Wrong results]*
 - [ ] `83aa04e` · Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
 - [ ] `6a61c22` · Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]*
-- [ ] `a79b7ce` · `pop_fst()`, `pop_fis(method = "WG17")` — "Subscript out of bounds" with a single group; now an informative error. *[Error]*
+- [x] `a79b7ce` · `pop_fst()`, `pop_fis(method = "WG17")` — "Subscript out of bounds" with a single group; now an informative error. *[Error]* E.C
 
 ### Windowed statistics
 
@@ -267,7 +267,7 @@ in brackets, its impact:
 ### Merging and dplyr methods
 
 - [ ] `01ae5d6` · `rbind()` — Individual ploidies were attached to the wrong individuals after `filter()`/`arrange()`. *[Wrong results]*
-- [ ] `eaf612d` · `rbind(use_position = TRUE)` — Loci were renamed to `chromosome_position`. *[Wrong results]*
+- [ ] `eaf612d` · E.C TODO fix this commit, we want the opposite behaviour to this fix, to keep 'old_names' - `rbind(use_position = TRUE)` — Loci were renamed to `chromosome_position`. *[Wrong results]*
 - [x] `6eaa674` · `ungroup()` — Dropped the `sf` class and geometry column attribute; partial ungrouping gave malformed classes. *[Wrong results]* E.C
 - [x] `7e97c81` · `select()`, `rename()`, `relocate()` on grouped gen_tibbles — Returned a plain `grouped_df`, which package functions then rejected. *[Error]*
 - [x] `c18bc32` · `[` on grouped gen_tibbles — Returned a corrupt grouped object when the grouping variables were dropped. *[Error]* E.C
