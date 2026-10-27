@@ -22,6 +22,10 @@
 * `gt_as_hierfstat()`, `gt_as_geno_lea()` and `gt_as_plink()` now error clearly
   on polyploid data, as `hierfstat`, LEA's `.geno` format and PLINK's bed/ped/
   raw formats only support haploid or diploid data.
+* fix `reorder_within_groups` in `autoplot()` for `q_matrix` and `gt_admix`
+  objects, which did not sort individuals by their dominant component
+* fix `arrange_by_indiv` in `autoplot()` for `q_matrix` and `gt_admix`
+  objects, which did not sort individuals by their id within each group
 
 # tidypopgen 0.4.4
 * fix seed argument of `gt_admixture()`

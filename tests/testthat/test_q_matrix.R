@@ -201,3 +201,92 @@ if (rlang::is_installed("readr")) {
     expect_true(all(augment_sub$population == pop_to_keep))
   })
 }
+
+test_that("reorder_within_groups sorts individuals by dominant component", {
+  admix_obj <-
+    readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+      package = "tidypopgen"
+    ))
+  q_mat <- get_q_matrix(admix_obj, k = 3, run = 1)
+  plt <- autoplot(q_mat, reorder_within_groups = TRUE)
+  ind_tbl <- plt$data %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(q = as.character(.data$q)) %>%
+    dplyr::group_by(.data$group, .data$id) %>%
+    dplyr::slice_max(.data$percentage, n = 1, with_ties = FALSE) %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(.data$id)
+  for (this_group in unique(ind_tbl$group)) {
+    group_tbl <- ind_tbl %>% dplyr::filter(.data$group == this_group)
+    # individuals with the same dominant component are contiguous
+    expect_equal(
+      length(rle(group_tbl$q)$values),
+      length(unique(group_tbl$q))
+    )
+    # within each block, individuals are sorted by decreasing proportion
+    for (this_q in unique(group_tbl$q)) {
+      expect_false(is.unsorted(
+        rev(group_tbl$percentage[group_tbl$q == this_q])
+      ))
+    }
+  }
+})
+
+test_that("arrange_by_indiv sorts individuals by their id", {
+  admix_obj <-
+    readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+      package = "tidypopgen"
+    ))
+  q_mat <- get_q_matrix(admix_obj, k = 3, run = 1)
+  # shuffle the individuals, with the Atlantic Forest group first
+  ids <- attr(q_mat, "id")
+  groups <- attr(q_mat, "group")
+  set.seed(42)
+  new_order <- c(
+    sample(which(groups == "Atlantic_Forest")),
+    sample(which(groups == "Amazonian_Forest"))
+  )
+  q_shuffled <- q_mat[new_order, ]
+  class(q_shuffled) <- class(q_mat)
+  attr(q_shuffled, "id") <- ids[new_order]
+  attr(q_shuffled, "group") <- groups[new_order]
+  # expected first component for a given ordering of the original matrix
+  q1_in_order <- function(ord) unname(q_mat[ord, ".Q1"])
+  get_q1 <- function(plt) {
+    plt$data %>%
+      dplyr::filter(.data$q == ".Q1") %>%
+      dplyr::arrange(.data$id) %>%
+      dplyr::pull("percentage")
+  }
+
+  # arrange by group and then by id
+  plt <- autoplot(q_shuffled,
+    annotate_group = TRUE, arrange_by_group = TRUE,
+    arrange_by_indiv = TRUE
+  )
+  expect_equal(get_q1(plt), q1_in_order(order(groups, ids)))
+  # arrange by group only (individuals keep their order within groups)
+  plt <- autoplot(q_shuffled,
+    annotate_group = TRUE, arrange_by_group = TRUE,
+    arrange_by_indiv = FALSE
+  )
+  expect_equal(
+    get_q1(plt),
+    q1_in_order(new_order[order(groups[new_order])])
+  )
+  # arrange by id within groups, keeping the current order of the groups
+  plt <- autoplot(q_shuffled,
+    annotate_group = TRUE, arrange_by_group = FALSE,
+    arrange_by_indiv = TRUE
+  )
+  expect_equal(
+    get_q1(plt),
+    q1_in_order(order(groups != "Atlantic_Forest", ids))
+  )
+  # without group annotation, individuals are not rearranged
+  plt <- autoplot(q_shuffled,
+    annotate_group = FALSE, arrange_by_group = FALSE,
+    arrange_by_indiv = TRUE
+  )
+  expect_equal(get_q1(plt), q1_in_order(new_order))
+})
