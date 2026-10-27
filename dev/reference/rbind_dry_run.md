@@ -58,13 +58,21 @@ rbind_dry_run(
 
 a list with two `data.frames`, named `target` and `ref`. Each data.frame
 has [`nrow()`](https://rdrr.io/r/base/nrow.html) equal to the number of
-loci in the respective dataset, a column `id` with the locus name, and
-boolean columns `to_keep` (the valid loci that will be kept in the
-merge), `alleles_mismatched` (loci found in both datasets but with
-mismatched alleles, leading to those loci being dropped), `to_flip`
-(loci that need to be flipped to align the two datasets, only found in
-`target` data.frame) and `to_swap` (loci for which the order of alleles
-needs to be swapped to align the two datasets, `target` data.frame)
+loci in the respective dataset, and columns `id` (the index of the locus
+in the dataset), `new_id` (the index of the locus in the merged dataset,
+NA if the locus is dropped, either because it is not found in both
+datasets, because its alleles do not match, or because it is ambiguous),
+`name` (the locus name), `to_flip` (boolean, loci whose strand is
+flipped to match the reference, only in the `target` data.frame),
+`to_swap` (boolean, loci whose alleles, and thus genotypes, are swapped
+in the merge: in `target`, to match the order of alleles in the
+reference; in `ref`, loci whose `allele_ref` is missing in both
+datasets, which are swapped so that the observed allele becomes
+`allele_ref`, only when `flip_strand = TRUE`), `missing_allele` and
+`missing_allele_col` (for loci with one unobserved allele (NA), the
+allele inferred from the other dataset, and the column it fills,
+`allele_alt` or `allele_ref`; both are NA if nothing was inferred), and
+`ambiguous` (boolean, strand-ambiguous loci, i.e. A/T and C/G).
 
 ## Examples
 
@@ -112,21 +120,21 @@ rbind_dry_run(example_gt, test_gt, flip_strand = TRUE)
 #> ( 0 were flipped to match the reference set)
 #> ( 3 are ambiguous, of which 3 were removed)
 #> $target
-#>   id new_id name to_flip to_swap missing_allele ambiguous
-#> 1  1     NA  rs1   FALSE   FALSE             NA      TRUE
-#> 2  2      1  rs2   FALSE   FALSE             NA     FALSE
-#> 3  3      2  rs3   FALSE   FALSE             NA     FALSE
-#> 4  4     NA  rs4   FALSE   FALSE             NA      TRUE
-#> 5  5     NA  rs5   FALSE   FALSE             NA      TRUE
+#>   id new_id name to_flip to_swap missing_allele missing_allele_col ambiguous
+#> 1  1     NA  rs1   FALSE   FALSE           <NA>               <NA>      TRUE
+#> 2  2      1  rs2   FALSE   FALSE           <NA>               <NA>     FALSE
+#> 3  3      2  rs3   FALSE   FALSE           <NA>               <NA>     FALSE
+#> 4  4     NA  rs4   FALSE   FALSE           <NA>               <NA>      TRUE
+#> 5  5     NA  rs5   FALSE   FALSE           <NA>               <NA>      TRUE
 #> 
 #> $ref
-#>   id new_id name missing_allele ambiguous
-#> 1  1     NA  rs1             NA      TRUE
-#> 2  2      1  rs2             NA     FALSE
-#> 3  3      2  rs3             NA     FALSE
-#> 4  4     NA  rs4             NA      TRUE
-#> 5  5     NA  rs5             NA      TRUE
-#> 6  6     NA  rs6             NA      TRUE
+#>   id new_id name to_swap missing_allele missing_allele_col ambiguous
+#> 1  1     NA  rs1   FALSE           <NA>               <NA>      TRUE
+#> 2  2      1  rs2   FALSE           <NA>               <NA>     FALSE
+#> 3  3      2  rs3   FALSE           <NA>               <NA>     FALSE
+#> 4  4     NA  rs4   FALSE           <NA>               <NA>      TRUE
+#> 5  5     NA  rs5   FALSE           <NA>               <NA>      TRUE
+#> 6  6     NA  rs6   FALSE           <NA>               <NA>      TRUE
 #> 
 #> attr(,"class")
 #> [1] "rbind_report" "list"        

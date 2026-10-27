@@ -23,7 +23,7 @@ correct strand can not be guessed.'><meta property="og:image" content="https://e
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9008</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,7 +103,9 @@ swap alleles as needed.</p></dd>
 <dt id="arg-flip-strand">flip_strand<a class="anchor" aria-label="anchor" href="#arg-flip-strand"></a></dt>
 <dd><p>boolean on whether strand flipping should be checked to
 match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T
-and C/G) will also be removed. It defaults to FALSE</p></dd>
+and C/G) will also be removed, and loci whose <code>allele_ref</code> is missing in
+both datasets will have their alleles swapped, so that the observed allele
+becomes <code>allele_ref</code>. It defaults to FALSE</p></dd>
 
 
 <dt id="arg-use-position">use_position<a class="anchor" aria-label="anchor" href="#arg-use-position"></a></dt>
@@ -182,12 +184,12 @@ to allele frequency.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ( 0 were flipped to match the reference set)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ( 4 are ambiguous, of which 4 were removed)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/Rtmp7GUd2i/gt_merged_1f777cb3e09c.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/Rtmp7GUd2i/gt_merged_1f777cb3e09c.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/Rtmp7GUd2i/gt_merged_1f777cb3e09c.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpDyjJAF/gt_merged_20c411110c81.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpDyjJAF/gt_merged_20c411110c81.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpDyjJAF/gt_merged_20c411110c81.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/Rtmp7GUd2i/gt_merged_1f777cb3e09c.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpDyjJAF/gt_merged_20c411110c81.gt')</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">merged_gt</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 2 loci</span></span>

@@ -45,7 +45,9 @@ rbind(
 
   boolean on whether strand flipping should be checked to match the two
   datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T and C/G)
-  will also be removed. It defaults to FALSE
+  will also be removed, and loci whose `allele_ref` is missing in both
+  datasets will have their alleles swapped, so that the observed allele
+  becomes `allele_ref`. It defaults to FALSE
 
 - use_position:
 
@@ -125,12 +127,12 @@ merged_gt <- rbind(ref = example_gt, target = test_gt, flip_strand = TRUE)
 #> ( 0 were flipped to match the reference set)
 #> ( 4 are ambiguous, of which 4 were removed)
 #> 
-#> gen_tibble saved to /tmp/Rtmp7GUd2i/gt_merged_1f777cb3e09c.gt
-#> using FBM RDS: /tmp/Rtmp7GUd2i/gt_merged_1f777cb3e09c.rds
-#> with FBM backing file: /tmp/Rtmp7GUd2i/gt_merged_1f777cb3e09c.bk
+#> gen_tibble saved to /tmp/RtmpDyjJAF/gt_merged_20c411110c81.gt
+#> using FBM RDS: /tmp/RtmpDyjJAF/gt_merged_20c411110c81.rds
+#> with FBM backing file: /tmp/RtmpDyjJAF/gt_merged_20c411110c81.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/Rtmp7GUd2i/gt_merged_1f777cb3e09c.gt')
+#> gt_load('/tmp/RtmpDyjJAF/gt_merged_20c411110c81.gt')
 
 merged_gt
 #> # A gen_tibble: 2 loci

@@ -15,7 +15,7 @@ have different alleles in the two datasets will also be dropped."><meta property
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9008</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,13 +108,20 @@ removed.  It defaults to FALSE</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>a list with two <code>data.frames</code>, named <code>target</code> and <code>ref</code>. Each
 data.frame has <code><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow()</a></code> equal to the number of loci in the respective
-dataset, a column <code>id</code> with the locus name, and boolean columns <code>to_keep</code>
-(the valid loci that will be kept in the merge), <code>alleles_mismatched</code> (loci
-found in both datasets but with mismatched alleles, leading to those loci
-being dropped), <code>to_flip</code> (loci that need to be flipped to align the two
-datasets, only found in <code>target</code> data.frame) and <code>to_swap</code> (loci for which
-the order of alleles needs to be swapped to align the two datasets,
-<code>target</code> data.frame)</p>
+dataset, and columns <code>id</code> (the index of the locus in the dataset), <code>new_id</code>
+(the index of the locus in the merged dataset, NA if the locus is dropped,
+either because it is not found in both datasets, because its alleles do not
+match, or because it is ambiguous), <code>name</code> (the locus name), <code>to_flip</code>
+(boolean, loci whose strand is flipped to match the reference, only in the
+<code>target</code> data.frame), <code>to_swap</code> (boolean, loci whose alleles, and thus
+genotypes, are swapped in the merge: in <code>target</code>, to match the order of
+alleles in the reference; in <code>ref</code>, loci whose <code>allele_ref</code> is missing in
+both datasets, which are swapped so that the observed allele becomes
+<code>allele_ref</code>, only when <code>flip_strand = TRUE</code>), <code>missing_allele</code> and
+<code>missing_allele_col</code> (for loci with one unobserved allele (NA), the allele
+inferred from the other dataset, and the column it fills, <code>allele_alt</code> or
+<code>allele_ref</code>; both are NA if nothing was inferred), and <code>ambiguous</code>
+(boolean, strand-ambiguous loci, i.e. A/T and C/G).</p>
     </div>
 
     <div class="section level2">
@@ -162,21 +169,21 @@ the order of alleles needs to be swapped to align the two datasets,
 <span class="r-out co"><span class="r-pr">#&gt;</span> ( 0 were flipped to match the reference set)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ( 3 are ambiguous, of which 3 were removed)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $target</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   id new_id name to_flip to_swap missing_allele ambiguous</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1     NA  rs1   FALSE   FALSE             NA      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2      1  rs2   FALSE   FALSE             NA     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  3      2  rs3   FALSE   FALSE             NA     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4     NA  rs4   FALSE   FALSE             NA      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  5     NA  rs5   FALSE   FALSE             NA      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   id new_id name to_flip to_swap missing_allele missing_allele_col ambiguous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1     NA  rs1   FALSE   FALSE           &lt;NA&gt;               &lt;NA&gt;      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2      1  rs2   FALSE   FALSE           &lt;NA&gt;               &lt;NA&gt;     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  3      2  rs3   FALSE   FALSE           &lt;NA&gt;               &lt;NA&gt;     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4     NA  rs4   FALSE   FALSE           &lt;NA&gt;               &lt;NA&gt;      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  5     NA  rs5   FALSE   FALSE           &lt;NA&gt;               &lt;NA&gt;      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ref</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   id new_id name missing_allele ambiguous</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1     NA  rs1             NA      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2      1  rs2             NA     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3  3      2  rs3             NA     FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4     NA  rs4             NA      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  5     NA  rs5             NA      TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6  6     NA  rs6             NA      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   id new_id name to_swap missing_allele missing_allele_col ambiguous</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1     NA  rs1   FALSE           &lt;NA&gt;               &lt;NA&gt;      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  2      1  rs2   FALSE           &lt;NA&gt;               &lt;NA&gt;     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  3      2  rs3   FALSE           &lt;NA&gt;               &lt;NA&gt;     FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  4     NA  rs4   FALSE           &lt;NA&gt;               &lt;NA&gt;      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  5     NA  rs5   FALSE           &lt;NA&gt;               &lt;NA&gt;      TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  6     NA  rs6   FALSE           &lt;NA&gt;               &lt;NA&gt;      TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "rbind_report" "list"        </span>
