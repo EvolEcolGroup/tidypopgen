@@ -212,18 +212,18 @@ in brackets, its impact:
 - [ ] `ffcb031` · `gt_snmf()` — The default `seed` was rejected when `n_runs > 1`. *[Error]*
 - [ ] `18b6d98` · `gt_snmf()`, `gt_admixture()` — Unanchored extension patterns broke paths containing "geno" or ".bed". *[Error]*
 - [ ] `54df9c6` · `gt_admix_reorder_q()` — Q matrices for K = 1 became vectors. *[Error]*
-- [ ] `0b43996` · `autoplot.gt_admix(type = "cv")` — Failed when the object had no `algorithm` element. *[Error]*
+- [ ] `0b43996` · TODO if algorithm is missing, then should we send a message here?`autoplot.gt_admix(type = "cv")` — Failed when the object had no `algorithm` element. *[Error]*
 
 ### Relatedness, imputation and QC reports
 
 - [x] `8987f22` · `filter_high_relatedness()`, `qc_report_indiv(kings_threshold = )` — Negative kinship was treated as high relatedness (25 of 30 unrelated individuals removed in a simulation). *[Wrong results]*
 - [ ] `458144f` · AM TODO we should issue a warning that some individuals could not be compared `filter_high_relatedness()` — Failed on missing (NaN) kinship values, e.g. in the lobster data. *[Error]*
 - [ ] `ca37fe3` · Grouped `qc_report_indiv()` — `to_keep` flags were attached to the wrong individuals when groups were not contiguous (as in the example data). *[Wrong results]*
-- [ ] `ab8006b` · Grouped `qc_report_loci()` — HWE p-values could exceed 1 (up to 2.89). *[Wrong results]*
+- [ ] `ab8006b` · TODO we know about this, just need to check we're still happy with this behaviour? Grouped `qc_report_loci()` — HWE p-values could exceed 1 (up to 2.89). *[Wrong results]*
 - [ ] `3d23bf4` · `gt_impute_xgboost()` — Chromosomes were in loci-table rather than backing-file order, so SNPs were imputed from the wrong neighbours. *[Wrong results]*
-- [ ] `cb9a91f` · Grouped `qc_report_indiv()` — Obscure error with several grouping variables; `kings_threshold` silently ignored for pseudohaploids. *[Error]*
-- [ ] `96b1600` · `autoplot()` of `qc_report_indiv` — "Object 'p' not found" (or an unrelated global `p` returned) without `kings_threshold`. *[Error]*
-- [ ] `ac19d4f` · `gt_impute_simple()` — Reset a global option to `TRUE` instead of its previous value. *[Robustness]*
+- [x] `cb9a91f` · Grouped `qc_report_indiv()` — Obscure error with several grouping variables; `kings_threshold` silently ignored for pseudohaploids. *[Error]* E.C
+- [x] `96b1600` · `autoplot()` of `qc_report_indiv` — "Object 'p' not found" (or an unrelated global `p` returned) without `kings_threshold`. *[Error]* E.C
+- [x] `ac19d4f` · `gt_impute_simple()` — Reset a global option to `TRUE` instead of its previous value. *[Robustness]* E.C
 
 ### Reading data and backing files
 
@@ -259,8 +259,8 @@ in brackets, its impact:
 - [ ] `6923229` · `gt_as_plink(type = "ped"/"raw")` — Parents and numeric sex codes read by `gen_tibble()` were dropped. *[Data lost]*
 - [ ] `4292aa8` · `gt_as_plink(type = "bed")` — The `.fam` file lacked population, parents, sex and phenotype (see behaviour changes). *[Data lost]*
 - [ ] `f61fe58` · `gt_as_genlight()` — Alleles, chromosome and position were not stored, so `gt_from_genlight()` could not read the result back. *[Data lost]*
-- [ ] `6a3fd51` · `gt_as_plink(type = "ped"/"raw")` — Failed without a population column (e.g. data read from a VCF). *[Error]*
-- [ ] `6260459` · `gt_as_plink(type = "ped"/"raw")` — Failed with a numeric phenotype column. *[Error]*
+- [x] `6a3fd51` · `gt_as_plink(type = "ped"/"raw")` — Failed without a population column (e.g. data read from a VCF). *[Error]* E.C
+- [x] `6260459` · `gt_as_plink(type = "ped"/"raw")` — Failed with a numeric phenotype column. *[Error]* E.C
 - [x] `ec4ac8d` · `gt_as_genind()` — Failed when loci names contain "." (common with RefSeq chromosome names). *[Error]*
 - [x] `9c88b10` · `gt_from_genlight()` — Rejected `genlight` objects without the (documented as optional) `pop` slot. *[Error]*
 
