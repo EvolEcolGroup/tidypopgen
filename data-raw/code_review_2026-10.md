@@ -177,7 +177,7 @@ in brackets, its impact:
 - [x] `2c3d7bf` · `loci_alt_freq()`, `loci_maf()` (polyploid) — All NA for a single polyploid individual. *[Wrong results]*
 - [x] `27a6335` · `loci_alt_freq()` (polyploid) — `as_counts` was ignored, and selecting a single locus failed. *[Wrong results / Error]*
 - [x] `9e90ebe` · `loci_alt_freq(as_counts = TRUE)` — For a single individual, missing genotypes gave NA alternate and non-zero valid allele counts, and the columns were unnamed. *[Wrong results]*
-- [ ] `83aa04e` · Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
+- [ ] `83aa04e` · TODO is this behaviour what we want? It would be more tidyverse consistent, but feels odd to keep groups with no individuals in output. - Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
 - [ ] `6a61c22` · Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]*
 - [x] `a79b7ce` · `pop_fst()`, `pop_fis(method = "WG17")` — "Subscript out of bounds" with a single group; now an informative error. *[Error]* E.C
 
@@ -204,13 +204,13 @@ in brackets, its impact:
 ### Admixture (ADMIXTURE, sNMF, Q matrices)
 
 - [x] `8735f89` · `gt_admixture()` — With `seed = NULL`, all replicates used seed 43 and were identical. *[Wrong results]*
-- [ ] `011a0f4` · `gt_snmf()` — Cross-entropies (`$cv`) were not matched to their k and run when `n_runs > 1`. *[Wrong results]*
+- [x] `011a0f4` · `gt_snmf()` — Cross-entropies (`$cv`) were not matched to their k and run when `n_runs > 1`. *[Wrong results]* E.C
 - [ ] `d848508` · `gt_snmf()` — Returned results of earlier runs when adding to an existing project (`project = "continue"`/`"force"`). *[Wrong results]*
 - [ ] `93c4fa6` · `tidy()`, `augment()` of `q_matrix` — Ignored the `id` attribute without group information, misassigning proportions when `data` was in a different order. *[Wrong results]*
 - [ ] `d8553e1` · `autoplot()` of `q_matrix`/`gt_admix` — `arrange_by_indiv` never sorted by id. *[Wrong results]*
 - [ ] `e66f7a0` · `autoplot()` of `q_matrix` with group annotation — Unused factor levels added phantom separators and labels. *[Wrong results]*
 - [ ] `ffcb031` · `gt_snmf()` — The default `seed` was rejected when `n_runs > 1`. *[Error]*
-- [ ] `18b6d98` · `gt_snmf()`, `gt_admixture()` — Unanchored extension patterns broke paths containing "geno" or ".bed". *[Error]*
+- [x] `18b6d98` · `gt_snmf()`, `gt_admixture()` — Unanchored extension patterns broke paths containing "geno" or ".bed". *[Error]* E.C
 - [ ] `54df9c6` · `gt_admix_reorder_q()` — Q matrices for K = 1 became vectors. *[Error]*
 - [ ] `0b43996` · TODO if algorithm is missing, then should we send a message here?`autoplot.gt_admix(type = "cv")` — Failed when the object had no `algorithm` element. *[Error]*
 
@@ -284,7 +284,7 @@ in brackets, its impact:
 - [x] `47afd1e` · `heatmap_add_dendro()` — Combining with patchwork failed on printing or saving. *[Error]*
 - [x] `c321a74` · `heatmap_add_dendro()` — Used `plot@data`, which needs ggplot2 ≥ 4.0. *[Error]*
 - [x] `2eb6da0` · `autoplot()` of `gt_admix`/`gt_pca` — Messages and docs referred to non-existent arguments (`repeat`, `pc`). *[Docs]*
-- [ ] `41efcd0` · QC vignette — The upset plot description gave the wrong bar and total (806, not 804). *[Docs]*
+- [x] `41efcd0` · QC vignette — The upset plot description gave the wrong bar and total (806, not 804). *[Docs]* E.C
 - [x] `c7e748c` · `scale_fill_distruct()`, `qc_report_indiv()` — The example had no visible effect; descriptions were wrong. *[Docs]*
 
 ## Optional fix on a separate branch
