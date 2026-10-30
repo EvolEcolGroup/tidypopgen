@@ -142,7 +142,7 @@ been accepted (each commit also appears, with its own box, in
 - [ ] `8735f89` `gt_admixture(seed = NULL)` used ADMIXTURE's default seed (43) for every run, so replicates were identical. Runs now use seeds 43, 44, … (repeated for each `k`). A single run is unchanged. The existing "seed length" test asserted the old behaviour and has been updated.
 - [ ] `4292aa8` `gt_as_plink(type = "bed")` now writes the population (or the grouping variable, if grouped) as family ID in the `.fam` file, together with parents, sex and phenotype, as ped/raw already did. Ped/raw now use the grouping variable as family ID when grouped, as documented.
 - [ ] `5e4927c` `cast_chromosome_to_int()` keeps numeric chromosome names as their own number and codes other names (X, Y, MT, …) above the largest number. Previously any non-numeric name renumbered all chromosomes alphabetically (chr10 became 2), which affected `gt_as_plink(chromosomes_as_int = TRUE)`, `gt_order_loci()` and `gt_pca_autoSVD()`.
-- [ ] `de580df` Backing file names: `x.vcf.gz` now gives `x.bk`/`x.rds` (as documented), not `x.vcf.bk`. User-supplied names are no longer cut at the last dot (`"pop_a.filtered"` used to become `"pop_a"`).
+- [x] `de580df` Backing file names: `x.vcf.gz` now gives `x.bk`/`x.rds` (as documented), not `x.vcf.bk`. User-supplied names are no longer cut at the last dot (`"pop_a.filtered"` used to become `"pop_a"`). E.C
 - [ ] `8987f22` `filter_high_relatedness()` (and `qc_report_indiv(kings_threshold = )`) no longer takes absolute values, so strongly negative kinship no longer counts as high relatedness. Fewer individuals are flagged for removal.
 - [ ] `a502859` `gen_tibble()` on a matrix now errors on non-integer or negative dosages, dosages above an individual's ploidy, and a `ploidy` vector of the wrong length. These were previously silently corrupted.
 - [ ] `9961603` `gt_pseudohaploid()` now errors on data that are not diploid.
@@ -233,7 +233,7 @@ in brackets, its impact:
 - [ ] `9961603` · `gt_pseudohaploid()` — Reset the ploidy of backing-file rows not in the tibble to NA, and relabelled polyploid data as pseudohaploid. *[Wrong results]*
 - [ ] `5e4927c` · `cast_chromosome_to_int()` — Renumbered chromosomes alphabetically when any name was non-numeric. *[Wrong results]*
 - [ ] `288904e` · `gt_load()` on old bigSNP-format objects — Lost individual ploidies for mixed and pseudohaploid data. *[Wrong results]*
-- [ ] `de580df` · `gen_tibble()` — Backing file names were truncated at the last dot; `x.vcf.gz` gave `x.vcf.bk`. *[Wrong results]*
+- [x] `de580df` · `gen_tibble()` — Backing file names were truncated at the last dot; `x.vcf.gz` gave `x.vcf.bk`. *[Wrong results]* E.C
 - [ ] `41d51f2` · `gt_update_backingfile()`, `gt_order_loci()` — Failed when the number of loci was a multiple of `chunk_size`. *[Error]*
 - [ ] `cbdaa56` · `count_vcf_individuals()`, vcfR parser — Miscounted samples missing on the second variant, so the vcfR parser crashed. *[Error]*
 - [ ] `4031d3c` · `gen_tibble(parser = "vcfR")` — Aborted on biallelic indels instead of dropping them, as the cpp parser does. *[Error]*
@@ -242,7 +242,7 @@ in brackets, its impact:
 - [ ] `137a431` · `gen_tibble()` — Rejected the PLINK missing allele "0" when custom `missing_alleles` were given. *[Error]*
 - [ ] `236c0ce` · Printing and `format()` — Failed for a gen_tibble with no loci; wrong length with no individuals. *[Error]*
 - [ ] `a502859` · `gen_tibble()` on a matrix — Invalid dosages and ploidy vectors were silently corrupted (see behaviour changes). *[Robustness]*
-- [ ] `8fb5c92` · `show_loci<-` — Accepted a table without a valid `big_index`, creating a broken object. *[Robustness]*
+- [x] `8fb5c92` · `show_loci<-` — Accepted a table without a valid `big_index`, creating a broken object. *[Robustness]* E.C
 - [ ] `a1f4741` · `gen_tibble()` (VCF) — Loci validation ran after the backing file was written, leaving orphan files. *[Robustness]*
 - [ ] `9759258` · `gen_tibble()` (packedancestry) — Truncated or corrupted `.geno` files were read out of bounds, giving garbage genotypes. *[Robustness]*
 - [x] `79b092c` · cpp VCF parser — Reserved about 1.3 GB of address space even for tiny files. *[Performance]* Reverted in `7081979`: VCFs with 10 million variants are common, the reserved memory is only committed when it is used, and peak memory on a 10 million variant file was the same with and without this commit (2.4 GB).
