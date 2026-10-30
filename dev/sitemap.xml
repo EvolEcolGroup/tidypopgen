@@ -84,6 +84,10 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_missingness.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_ploidy.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/is_loci_table_ordered.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_nwise_pop_pbs.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_pairwise_pop_fst.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_pop_tajimas_d.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_stats_generic.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/load_example_gt.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_alt_freq.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_chromosomes.html</loc></url>

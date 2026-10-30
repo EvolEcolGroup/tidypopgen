@@ -317,6 +317,21 @@ Functions to compute statistics in sliding windows across loci.
 - [`windows_stats_generic()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_stats_generic.md)
   : Estimate window statistics from per locus estimates
 
+## Jackknife
+
+Functions to compute genome-wide statistics with block jackknife
+standard errors.
+
+- [`jackknife_nwise_pop_pbs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_nwise_pop_pbs.md)
+  : Compute the Population Branch Statistics with block jackknife
+  standard errors
+- [`jackknife_pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_pairwise_pop_fst.md)
+  : Compute pairwise Fst with block jackknife standard errors
+- [`jackknife_pop_tajimas_d()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_pop_tajimas_d.md)
+  : Compute Tajima's D with block jackknife standard errors
+- [`jackknife_stats_generic()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_stats_generic.md)
+  : Estimate a block jackknife standard error from per locus estimates
+
 ## PCA
 
 Functions for performing Principal Component Analysis.

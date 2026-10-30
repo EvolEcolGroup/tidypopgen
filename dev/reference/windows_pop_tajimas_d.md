@@ -103,6 +103,23 @@ if data is not grouped, a data frame with the following columns:
 
 - `n_loci`: the number of loci in the window
 
+## Details
+
+Missing genotypes are accounted for by using the number of non-missing
+allele copies at each locus as its sample size, following Bailey et al.
+(2025) as implemented in `pixy`. See
+[`pop_tajimas_d()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_tajimas_d.md)
+for details. Loci with no genotyped individuals are ignored, and are not
+counted in `n_loci`. With windows defined in base pairs and `step_size`
+equal to `window_size`, the windows match those used by `pixy`.
+
+## References
+
+Bailey N, Stevison L, Samuk K (2025) Correcting for bias in estimates of
+\\\theta_W\\ and Tajima's D from missing data in next-generation
+sequencing. Molecular Ecology Resources, e14104.
+[doi:10.1111/1755-0998.14104](https://doi.org/10.1111/1755-0998.14104)
+
 ## Examples
 
 ``` r
@@ -115,9 +132,9 @@ example_gt %>%
     size_unit = "snp", min_loci = 2
   )
 #> # A tibble: 3 × 7
-#>   chromosome start   end n_loci  pop1   pop2    pop3
-#>   <chr>      <dbl> <dbl>  <dbl> <dbl>  <dbl>   <dbl>
-#> 1 chr1           1     3      3 1.03  -0.612  -0.710
-#> 2 chr1           3     5      2 2.04  -0.612  -0.612
-#> 3 chr2           1     3      2 0.311 -0.710 Inf    
+#>   chromosome start   end n_loci  pop1     pop2    pop3
+#>   <chr>      <dbl> <dbl>  <dbl> <dbl>    <dbl>   <dbl>
+#> 1 chr1           1     3      3 1.03  -Inf      -0.710
+#> 2 chr1           3     5      2 1.24    -0.612  -0.612
+#> 3 chr2           1     3      2 0.311   -0.710 NaN    
 ```

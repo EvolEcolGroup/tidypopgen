@@ -110,6 +110,40 @@ a <code><a href="gen_tibble.html">gen_tibble</a></code> object), or a <code><a h
 when the statistic is not defined. For grouped data a list of Tajima's D D
 values (one per group) is returned.</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Nucleotide diversity is estimated at each locus with <code><a href="loci_pi.html">loci_pi()</a></code>, so this
+function works with diploid, polyploid, mixed-ploidy and pseudohaploid data.</p>
+<p>Missing genotypes are accounted for following Bailey et al. (2025), as
+implemented in <code>pixy</code>: the sample size \(n_x\) at each locus \(x\) is
+the number of non-missing allele copies at that locus (i.e. the sum of the
+ploidy of the genotyped individuals, with pseudohaploids contributing one
+copy each). The two estimators of \(\theta\) are then:</p><ul><li><p>\(\hat{\theta}_\pi = \sum_x \pi_x\), where \(\pi_x\) is
+the nucleotide diversity at locus \(x\), estimated from its
+\(n_x\) allele copies (loci with fewer than 2 allele copies
+contribute 0);</p></li>
+<li><p>\(\hat{\theta}_W = \sum_x 1 / a_{n_x}\), summed over the
+segregating sites, where \(a_{n_x} = \sum_{i=1}^{n_x - 1} 1/i\) (i.e.
+each segregating site is weighted by its own sample size).</p></li>
+</ul><p>The standard deviation of \(\hat{\theta}_\pi - \hat{\theta}_W\) is
+computed with the formula of Tajima (1989), using the number of
+segregating sites \(S\) and the mean sample size across loci with at
+least one non-missing allele copy (rounded to the nearest integer, as the
+formula is only defined for integer sample sizes). When there are no
+missing data, all loci have the same sample size and the statistic is
+identical to the classic Tajima's D. Loci with no genotyped individuals
+are ignored. Tajima's D is <code>NA</code> when there are no segregating sites, or
+when the mean sample size is smaller than 2.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Tajima F (1989) Statistical method for testing the neutral
+mutation hypothesis by DNA polymorphism. Genetics 123:585-595.</p>
+<p>Bailey N, Stevison L, Samuk K (2025) Correcting for bias in estimates of
+\(\theta_W\) and Tajima's D from missing data in next-generation
+sequencing. Molecular Ecology Resources, e14104.
+<a href="https://doi.org/10.1111/1755-0998.14104" class="external-link">doi:10.1111/1755-0998.14104</a></p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -118,13 +152,13 @@ values (one per group) is returned.</p>
 <span class="r-in"><span><span class="co"># Compute Tajima's D</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">pop_tajimas_d</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1.218829</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.944084</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.780123</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 14.90782</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -Inf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

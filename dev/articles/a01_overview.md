@@ -116,12 +116,12 @@ example_gt <- gen_tibble(example_genotypes,
   backingfile = tempfile()
 )
 #> 
-#> gen_tibble saved to /tmp/RtmplX5EZa/file29bd66f1c4dd.gt
-#> using FBM RDS: /tmp/RtmplX5EZa/file29bd66f1c4dd.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/file29bd66f1c4dd.bk
+#> gen_tibble saved to /tmp/RtmpsVDqWC/file322e3ca802ec.gt
+#> using FBM RDS: /tmp/RtmpsVDqWC/file322e3ca802ec.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/file322e3ca802ec.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/file29bd66f1c4dd.gt')
+#> gt_load('/tmp/RtmpsVDqWC/file322e3ca802ec.gt')
 ```
 
 We are provided information on where the three files underlying the
@@ -666,12 +666,12 @@ for example, if we want to read a PLINK bed file, we can simply use:
 bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
 pop_a_gt <- gen_tibble(bed_path_pop_a, backingfile = tempfile("pop_a_"))
 #> 
-#> gen_tibble saved to /tmp/RtmplX5EZa/pop_a_29bd3ddf0ad9.gt
-#> using FBM RDS: /tmp/RtmplX5EZa/pop_a_29bd3ddf0ad9.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/pop_a_29bd3ddf0ad9.bk
+#> gen_tibble saved to /tmp/RtmpsVDqWC/pop_a_322ed17c96d.gt
+#> using FBM RDS: /tmp/RtmpsVDqWC/pop_a_322ed17c96d.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/pop_a_322ed17c96d.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/pop_a_29bd3ddf0ad9.gt')
+#> gt_load('/tmp/RtmpsVDqWC/pop_a_322ed17c96d.gt')
 ```
 
 For this vignette, we don’t want to keep files, so we are using again a
@@ -696,7 +696,7 @@ use:
 ``` r
 
 gt_as_plink(example_gt, file = tempfile("new_bed_"))
-#> [1] "/tmp/RtmplX5EZa/new_bed_29bd7b6f1da3.bed"
+#> [1] "/tmp/RtmpsVDqWC/new_bed_322e6d2efecd.bed"
 ```
 
 This will also write a .bim and .fam file and save them together with
@@ -733,21 +733,21 @@ the bed file is stored):
 bed_path_pop_a <- system.file("extdata/pop_a.bed", package = "tidypopgen")
 pop_a_gt <- gen_tibble(bed_path_pop_a, backingfile = tempfile("pop_a_"))
 #> 
-#> gen_tibble saved to /tmp/RtmplX5EZa/pop_a_29bd673809e.gt
-#> using FBM RDS: /tmp/RtmplX5EZa/pop_a_29bd673809e.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/pop_a_29bd673809e.bk
+#> gen_tibble saved to /tmp/RtmpsVDqWC/pop_a_322e6f13952e.gt
+#> using FBM RDS: /tmp/RtmpsVDqWC/pop_a_322e6f13952e.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/pop_a_322e6f13952e.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/pop_a_29bd673809e.gt')
+#> gt_load('/tmp/RtmpsVDqWC/pop_a_322e6f13952e.gt')
 bed_path_pop_b <- system.file("extdata/pop_b.bed", package = "tidypopgen")
 pop_b_gt <- gen_tibble(bed_path_pop_b, backingfile = tempfile("pop_b_"))
 #> 
-#> gen_tibble saved to /tmp/RtmplX5EZa/pop_b_29bd3e3f510d.gt
-#> using FBM RDS: /tmp/RtmplX5EZa/pop_b_29bd3e3f510d.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/pop_b_29bd3e3f510d.bk
+#> gen_tibble saved to /tmp/RtmpsVDqWC/pop_b_322e18a578a2.gt
+#> using FBM RDS: /tmp/RtmpsVDqWC/pop_b_322e18a578a2.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/pop_b_322e18a578a2.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/pop_b_29bd3e3f510d.gt')
+#> gt_load('/tmp/RtmpsVDqWC/pop_b_322e18a578a2.gt')
 ```
 
 And inspect them:
@@ -836,12 +836,12 @@ merged_gt <- rbind(pop_a_gt, pop_b_gt,
 #> ( 5 were flipped to match the reference set)
 #> ( 2 are ambiguous, of which 2 were removed)
 #> 
-#> gen_tibble saved to /tmp/RtmplX5EZa/gt_merged.gt
-#> using FBM RDS: /tmp/RtmplX5EZa/gt_merged.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/gt_merged.bk
+#> gen_tibble saved to /tmp/RtmpsVDqWC/gt_merged.gt
+#> using FBM RDS: /tmp/RtmpsVDqWC/gt_merged.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/gt_merged.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/gt_merged.gt')
+#> gt_load('/tmp/RtmpsVDqWC/gt_merged.gt')
 ```
 
 Let’s check the resulting `gen_tibble`:
@@ -910,12 +910,12 @@ Let us start with a dataset that has some missing genotypes:
 bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
 missing_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"))
 #> 
-#> gen_tibble saved to /tmp/RtmplX5EZa/missing_29bd145a069b.gt
-#> using FBM RDS: /tmp/RtmplX5EZa/missing_29bd145a069b.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/missing_29bd145a069b.bk
+#> gen_tibble saved to /tmp/RtmpsVDqWC/missing_322e2e1712dc.gt
+#> using FBM RDS: /tmp/RtmpsVDqWC/missing_322e2e1712dc.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/missing_322e2e1712dc.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/missing_29bd145a069b.gt')
+#> gt_load('/tmp/RtmpsVDqWC/missing_322e2e1712dc.gt')
 missing_gt
 #> # A gen_tibble: 500 loci
 #> # A tibble:     200 × 3
@@ -1112,16 +1112,16 @@ So, let us save our file:
 
 gt_file_name <- gt_save(example_gt)
 #> 
-#> gen_tibble saved to /tmp/RtmplX5EZa/file29bd66f1c4dd.gt
-#> using FBM RDS: /tmp/RtmplX5EZa/file29bd66f1c4dd.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/file29bd66f1c4dd.bk
+#> gen_tibble saved to /tmp/RtmpsVDqWC/file322e3ca802ec.gt
+#> using FBM RDS: /tmp/RtmpsVDqWC/file322e3ca802ec.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/file322e3ca802ec.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/file29bd66f1c4dd.gt')
+#> gt_load('/tmp/RtmpsVDqWC/file322e3ca802ec.gt')
 gt_file_name
-#> [1] "/tmp/RtmplX5EZa/file29bd66f1c4dd.gt" 
-#> [2] "/tmp/RtmplX5EZa/file29bd66f1c4dd.rds"
-#> [3] "/tmp/RtmplX5EZa/file29bd66f1c4dd.bk"
+#> [1] "/tmp/RtmpsVDqWC/file322e3ca802ec.gt" 
+#> [2] "/tmp/RtmpsVDqWC/file322e3ca802ec.rds"
+#> [3] "/tmp/RtmpsVDqWC/file322e3ca802ec.bk"
 ```
 
 And if we ever need to retrieve the location of the `.bk` and `.rds`
@@ -1130,8 +1130,8 @@ files for a gen_tibble, we can use:
 ``` r
 
 gt_get_file_names(example_gt)
-#> [1] "/tmp/RtmplX5EZa/file29bd66f1c4dd.rds"
-#> [2] "/tmp/RtmplX5EZa/file29bd66f1c4dd.bk"
+#> [1] "/tmp/RtmpsVDqWC/file322e3ca802ec.rds"
+#> [2] "/tmp/RtmpsVDqWC/file322e3ca802ec.bk"
 ```
 
 In a later session, we could reload the data with:
@@ -1195,11 +1195,11 @@ new_example_gt <- gt_update_backingfile(new_example_gt,
 )
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmplX5EZa/file29bd2ae8c4e6.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/file29bd2ae8c4e6.bk
+#> using FBM RDS: /tmp/RtmpsVDqWC/file322e6fa9f4a0.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/file322e6fa9f4a0.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/file29bd2ae8c4e6.gt')
+#> gt_load('/tmp/RtmpsVDqWC/file322e6fa9f4a0.gt')
 ```
 
 And now we can impute without any problems:
@@ -1281,11 +1281,11 @@ the `gen_tibble` object:
 reorder_test_gt <- gt_order_loci(test_gt)
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmplX5EZa/file29bd40fde5d8_v2.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/file29bd40fde5d8_v2.bk
+#> using FBM RDS: /tmp/RtmpsVDqWC/file322e3770abd3_v2.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/file322e3770abd3_v2.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/file29bd40fde5d8_v2.gt')
+#> gt_load('/tmp/RtmpsVDqWC/file322e3770abd3_v2.gt')
 ```
 
 And we can check that the loci are now ordered:
@@ -1309,11 +1309,11 @@ reorder_test_gt_again <- gt_order_loci(reorder_test_gt,
 )
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmplX5EZa/file29bd40fde5d8_v3.rds
-#> with FBM backing file: /tmp/RtmplX5EZa/file29bd40fde5d8_v3.bk
+#> using FBM RDS: /tmp/RtmpsVDqWC/file322e3770abd3_v3.rds
+#> with FBM backing file: /tmp/RtmpsVDqWC/file322e3770abd3_v3.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmplX5EZa/file29bd40fde5d8_v3.gt')
+#> gt_load('/tmp/RtmpsVDqWC/file322e3770abd3_v3.gt')
 ```
 
 And, again, we can check that the loci are ordered with respect to

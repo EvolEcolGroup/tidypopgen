@@ -131,6 +131,23 @@ or a list of data frames, one per group, with the following columns:</p></li>
 <li><p><code>stat</code>: the Tajima's D for the given window</p></li>
 <li><p><code>n_loci</code>: the number of loci in the window</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Missing genotypes are accounted for by using the number of
+non-missing allele copies at each locus as its sample size, following
+Bailey et al. (2025) as implemented in <code>pixy</code>. See <code><a href="pop_tajimas_d.html">pop_tajimas_d()</a></code> for
+details. Loci with no genotyped individuals are ignored, and are not
+counted in <code>n_loci</code>. With windows defined in base pairs and
+<code>step_size</code> equal to <code>window_size</code>, the windows match those used by
+<code>pixy</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Bailey N, Stevison L, Samuk K (2025) Correcting for bias in
+estimates of \(\theta_W\) and Tajima's D from missing data in
+next-generation sequencing. Molecular Ecology Resources, e14104.
+<a href="https://doi.org/10.1111/1755-0998.14104" class="external-link">doi:10.1111/1755-0998.14104</a></p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -143,11 +160,11 @@ or a list of data frames, one per group, with the following columns:</p></li>
 <span class="r-in"><span>    size_unit <span class="op">=</span> <span class="st">"snp"</span>, min_loci <span class="op">=</span> <span class="fl">2</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   chromosome start   end n_loci  pop1   pop2    pop3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> chr1           1     3      3 1.03  -<span style="color: #BB0000;">0.612</span>  -<span style="color: #BB0000;">0.710</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> chr1           3     5      2 2.04  -<span style="color: #BB0000;">0.612</span>  -<span style="color: #BB0000;">0.612</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> chr2           1     3      2 0.311 -<span style="color: #BB0000;">0.710</span> <span style="color: #BB0000;">Inf</span>    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   chromosome start   end n_loci  pop1     pop2    pop3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> chr1           1     3      3 1.03  -<span style="color: #BB0000;">Inf</span>      -<span style="color: #BB0000;">0.710</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> chr1           3     5      2 1.24    -<span style="color: #BB0000;">0.612</span>  -<span style="color: #BB0000;">0.612</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> chr2           1     3      2 0.311   -<span style="color: #BB0000;">0.710</span> <span style="color: #BB0000;">NaN</span>    </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
