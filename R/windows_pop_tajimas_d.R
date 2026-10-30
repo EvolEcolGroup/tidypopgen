@@ -76,6 +76,9 @@ windows_pop_tajimas_d <- function(.x,
                                   complete = FALSE) {
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
+  if (length(dplyr::group_vars(.x)) > 1) {
+    stop("windows_pop_tajimas_d only works with one grouping variable")
+  }
   type <- match.arg(type)
 
   # get pi and the number of valid allele copies for each locus (one column

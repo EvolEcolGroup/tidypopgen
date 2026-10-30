@@ -226,3 +226,15 @@ test_that("windows_pop_tajimas_d ignores loci with missing pi", {
   # the number of loci only counts loci with data
   expect_equal(window_taj$pop1$n_loci[1], 2)
 })
+
+test_that("windows_pop_tajimas_d only accepts one grouping variable", {
+  test_gt <- make_jack_test_gt() %>%
+    dplyr::group_by(population, id)
+  expect_error(
+    windows_pop_tajimas_d(test_gt,
+      window_size = 4, step_size = 4,
+      size_unit = "snp"
+    ),
+    "windows_pop_tajimas_d only works with one grouping variable"
+  )
+})
