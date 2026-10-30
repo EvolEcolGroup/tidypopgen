@@ -34,5 +34,5 @@ make_jack_test_gt <- function() {
     indiv_meta = test_indiv_meta,
     quiet = TRUE
   )
-  test_gt %>% dplyr::group_by(population)
+  test_gt %>% dplyr::group_by(.data$population)
 }
