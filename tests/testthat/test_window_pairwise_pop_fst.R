@@ -473,3 +473,22 @@ test_that("windows type", {
     subset(fst_windows_tidy, fst_windows_tidy$stat_name == "fst_pop1.pop2")
   expect_equal(pop1_pop2_tidy$value, fst_windows_matrix$fst_pop1.pop2)
 })
+
+test_that("windows_pairwise_pop_fst uses the requested method", {
+  window_hudson <- windows_pairwise_pop_fst(test_gt,
+    method = "Hudson", window_size = 3, step_size = 3
+  )
+  window_wc84 <- windows_pairwise_pop_fst(test_gt,
+    method = "WC84", window_size = 3, step_size = 3
+  )
+  expect_false(isTRUE(all.equal(window_hudson, window_wc84)))
+  # tidy format only pivots the fst columns
+  window_tidy <- windows_pairwise_pop_fst(test_gt,
+    type = "tidy", window_size = 3, step_size = 3
+  )
+  expect_equal(
+    sort(unique(window_tidy$stat_name)),
+    c("fst_pop1.pop2", "fst_pop1.pop3", "fst_pop2.pop3")
+  )
+  expect_equal(nrow(window_tidy), nrow(window_hudson) * 3)
+})

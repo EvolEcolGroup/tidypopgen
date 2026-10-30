@@ -71,6 +71,15 @@ or a list of data frames, one per group, with the following columns:
 This function computes Tajima's D for a sliding window across
 each chromosome.
 }
+\details{
+Missing genotypes are accounted for by using the number of
+non-missing allele copies at each locus as its sample size, following
+Bailey et al. (2025) as implemented in \code{pixy}. See \code{\link[=pop_tajimas_d]{pop_tajimas_d()}} for
+details. Loci with no genotyped individuals are ignored, and are not
+counted in \code{n_loci}. With windows defined in base pairs and
+\code{step_size} equal to \code{window_size}, the windows match those used by
+\code{pixy}.
+}
 \examples{
 example_gt <- load_example_gt("grouped_gen_tbl")
 
@@ -81,4 +90,10 @@ example_gt \%>\%
     size_unit = "snp", min_loci = 2
   )
 
+}
+\references{
+Bailey N, Stevison L, Samuk K (2025) Correcting for bias in
+estimates of \eqn{\theta_W} and Tajima's D from missing data in
+next-generation sequencing. Molecular Ecology Resources, e14104.
+\doi{10.1111/1755-0998.14104}
 }

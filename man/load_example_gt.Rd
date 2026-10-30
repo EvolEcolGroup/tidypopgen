@@ -5,7 +5,8 @@
 \title{Load example gen_tibble}
 \usage{
 load_example_gt(
-  type = c("gen_tbl", "grouped_gen_tbl", "grouped_gen_tbl_sf", "gen_tbl_sf")
+  type = c("gen_tbl", "grouped_gen_tbl", "grouped_gen_tbl_sf", "gen_tbl_sf",
+    "gen_tbl_gen_dist")
 )
 }
 \arguments{

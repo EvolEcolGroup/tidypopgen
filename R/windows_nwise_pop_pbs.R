@@ -116,8 +116,8 @@ windows_nwise_pop_pbs <- function(.x,
   if (type == "matrix") {
     return(pbs_results)
   } else if (type == "tidy") {
-    cols <-
-      names(pbs_results)[names(pbs_results) != c("chromosome", "start", "end")]
+    window_cols <- c("chromosome", "start", "end")
+    cols <- names(pbs_results)[!names(pbs_results) %in% window_cols]
     pbs_results <-
       pbs_results %>%
       tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
