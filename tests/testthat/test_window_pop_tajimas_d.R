@@ -228,7 +228,7 @@ test_that("windows_pop_tajimas_d ignores loci with missing pi", {
 })
 
 test_that("windows_pop_tajimas_d only accepts one grouping variable", {
-  test_gt <- make_jack_test_gt() %>%
+  test_gt <- load_example_gt("gen_tbl_gen_dist") %>%
     dplyr::group_by(population, id)
   expect_error(
     windows_pop_tajimas_d(test_gt,

@@ -1,5 +1,5 @@
 test_that("jackknife_nwise_pop_pbs matches pbs from genome-wide fst", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   jack_pbs <- jackknife_nwise_pop_pbs(test_gt,
     type = "tidy", return_fst = TRUE, block_size = 2, size_unit = "snp"
   )
@@ -52,7 +52,7 @@ test_that("jackknife_nwise_pop_pbs matches pbs from genome-wide fst", {
 })
 
 test_that("jackknife_nwise_pop_pbs checks its inputs", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   expect_error(
     test_gt %>%
       dplyr::ungroup() %>%

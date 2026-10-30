@@ -1,5 +1,5 @@
 test_that("jackknife_stats_generic works with mean, sum and custom", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   loci <- show_loci(test_gt)
   x <- c(0.1, 0.4, NA, 0.3, 0.2, 0.6, 0.5, 0.1)
   jack_mean <- jackknife_stats_generic(x,
@@ -26,7 +26,7 @@ test_that("jackknife_stats_generic works with mean, sum and custom", {
 })
 
 test_that("jackknife_stats_generic checks its inputs", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   loci <- show_loci(test_gt)
   expect_error(
     jackknife_stats_generic(1:3, loci_table = loci, block_size = 2),

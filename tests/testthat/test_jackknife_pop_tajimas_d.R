@@ -1,5 +1,5 @@
 test_that("jackknife_pop_tajimas_d leave-one-out matches subsets", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   block_id <- .jackknife_block_ids(show_loci(test_gt),
     block_size = 1, size_unit = "cM"
   )
@@ -30,7 +30,7 @@ test_that("jackknife_pop_tajimas_d leave-one-out matches subsets", {
 })
 
 test_that("jackknife_pop_tajimas_d returns the right format", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   jack_matrix <- jackknife_pop_tajimas_d(test_gt, block_size = 2)
   jack_tidy <- jackknife_pop_tajimas_d(test_gt, type = "tidy", block_size = 2)
   jack_list <- jackknife_pop_tajimas_d(test_gt, type = "list", block_size = 2)
@@ -54,7 +54,7 @@ test_that("jackknife_pop_tajimas_d returns the right format", {
 })
 
 test_that("jackknife_pop_tajimas_d only accepts one grouping variable", {
-  test_gt <- make_jack_test_gt() %>%
+  test_gt <- load_example_gt("gen_tbl_gen_dist") %>%
     dplyr::group_by(population, id)
   expect_error(
     jackknife_pop_tajimas_d(test_gt, block_size = 2),
@@ -115,7 +115,7 @@ test_that("jackknife_pop_tajimas_d counts pseudohaploid allele copies", {
 })
 
 test_that("jackknife_pop_tajimas_d matches pop_tajimas_d with missing pi", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   # make the 2nd locus missing for all individuals in pop1
   test_genotypes <- show_genotypes(test_gt)
   test_genotypes[dplyr::group_indices(test_gt) == 1, 2] <- NA

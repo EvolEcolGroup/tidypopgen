@@ -1,5 +1,5 @@
 test_that("jackknife_pairwise_pop_fst leave-one-out matches subsets", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   for (method in c("Hudson", "Nei87", "WC84")) {
     block_id <- .jackknife_block_ids(show_loci(test_gt),
       block_size = 1, size_unit = "cM"
@@ -22,7 +22,7 @@ test_that("jackknife_pairwise_pop_fst leave-one-out matches subsets", {
 })
 
 test_that("jackknife_pairwise_pop_fst returns the right format", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   jack_matrix <- jackknife_pairwise_pop_fst(test_gt,
     method = "WC84", block_size = 2, size_unit = "snp"
   )

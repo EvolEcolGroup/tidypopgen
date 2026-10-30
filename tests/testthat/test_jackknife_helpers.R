@@ -1,5 +1,5 @@
 test_that(".jackknife_block_ids never spans chromosomes", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   loci <- show_loci(test_gt)
   # snps
   block_snp <- .jackknife_block_ids(loci, block_size = 2, size_unit = "snp")
@@ -19,7 +19,7 @@ test_that(".jackknife_block_ids never spans chromosomes", {
 })
 
 test_that(".jackknife_block_ids checks its inputs", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   loci <- show_loci(test_gt)
   expect_error(
     .jackknife_block_ids(loci, block_size = -1, size_unit = "snp"),
@@ -82,7 +82,7 @@ test_that(".jackknife_weighted follows Busing et al. for unequal m", {
 })
 
 test_that(".block_sums does not create row names", {
-  test_gt <- make_jack_test_gt()
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
   block_id <- .jackknife_block_ids(show_loci(test_gt),
     block_size = 2, size_unit = "snp"
   )
