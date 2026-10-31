@@ -142,7 +142,7 @@ been accepted (each commit also appears, with its own box, in
 - [ ] `8735f89` `gt_admixture(seed = NULL)` used ADMIXTURE's default seed (43) for every run, so replicates were identical. Runs now use seeds 43, 44, … (repeated for each `k`). A single run is unchanged. The existing "seed length" test asserted the old behaviour and has been updated.
 - [ ] `4292aa8` `gt_as_plink(type = "bed")` now writes the population (or the grouping variable, if grouped) as family ID in the `.fam` file, together with parents, sex and phenotype, as ped/raw already did. Ped/raw now use the grouping variable as family ID when grouped, as documented.
 - [ ] `5e4927c` `cast_chromosome_to_int()` keeps numeric chromosome names as their own number and codes other names (X, Y, MT, …) above the largest number. Previously any non-numeric name renumbered all chromosomes alphabetically (chr10 became 2), which affected `gt_as_plink(chromosomes_as_int = TRUE)`, `gt_order_loci()` and `gt_pca_autoSVD()`.
-- [ ] `de580df` Backing file names: `x.vcf.gz` now gives `x.bk`/`x.rds` (as documented), not `x.vcf.bk`. User-supplied names are no longer cut at the last dot (`"pop_a.filtered"` used to become `"pop_a"`).
+- [x] `de580df` Backing file names: `x.vcf.gz` now gives `x.bk`/`x.rds` (as documented), not `x.vcf.bk`. User-supplied names are no longer cut at the last dot (`"pop_a.filtered"` used to become `"pop_a"`). E.C
 - [ ] `8987f22` `filter_high_relatedness()` (and `qc_report_indiv(kings_threshold = )`) no longer takes absolute values, so strongly negative kinship no longer counts as high relatedness. Fewer individuals are flagged for removal.
 - [ ] `a502859` `gen_tibble()` on a matrix now errors on non-integer or negative dosages, dosages above an individual's ploidy, and a `ploidy` vector of the wrong length. These were previously silently corrupted.
 - [ ] `9961603` `gt_pseudohaploid()` now errors on data that are not diploid.
@@ -177,9 +177,9 @@ in brackets, its impact:
 - [x] `2c3d7bf` · `loci_alt_freq()`, `loci_maf()` (polyploid) — All NA for a single polyploid individual. *[Wrong results]*
 - [x] `27a6335` · `loci_alt_freq()` (polyploid) — `as_counts` was ignored, and selecting a single locus failed. *[Wrong results / Error]*
 - [x] `9e90ebe` · `loci_alt_freq(as_counts = TRUE)` — For a single individual, missing genotypes gave NA alternate and non-zero valid allele counts, and the columns were unnamed. *[Wrong results]*
-- [x] `83aa04e` · Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
 - [ ] AM TODO do we want empty groups to show up as columns? I think we want to drop them `6a61c22` · Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]*
 - [x] `a79b7ce` · `pop_fst()`, `pop_fis(method = "WG17")` — "Subscript out of bounds" with a single group; now an informative error. *[Error]*
+- [ ] `83aa04e` · TODO is this behaviour what we want? It would be more tidyverse consistent, but feels odd to keep groups with no individuals in output. - Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
 
 ### Windowed statistics
 
@@ -204,7 +204,7 @@ in brackets, its impact:
 ### Admixture (ADMIXTURE, sNMF, Q matrices)
 
 - [x] `8735f89` · `gt_admixture()` — With `seed = NULL`, all replicates used seed 43 and were identical. *[Wrong results]*
-- [ ] `011a0f4` · `gt_snmf()` — Cross-entropies (`$cv`) were not matched to their k and run when `n_runs > 1`. *[Wrong results]*
+- [x] `011a0f4` · `gt_snmf()` — Cross-entropies (`$cv`) were not matched to their k and run when `n_runs > 1`. *[Wrong results]* E.C
 - [ ] `d848508` · `gt_snmf()` — Returned results of earlier runs when adding to an existing project (`project = "continue"`/`"force"`). *[Wrong results]*
 - [ ] `93c4fa6` · `tidy()`, `augment()` of `q_matrix` — Ignored the `id` attribute without group information, misassigning proportions when `data` was in a different order. *[Wrong results]*
 - [ ] `d8553e1` · `autoplot()` of `q_matrix`/`gt_admix` — `arrange_by_indiv` never sorted by id. *[Wrong results]*
@@ -212,7 +212,7 @@ in brackets, its impact:
 - [x] `ffcb031` · `gt_snmf()` — The default `seed` was rejected when `n_runs > 1`. *[Error]*
 - [x] `18b6d98` · `gt_snmf()`, `gt_admixture()` — Unanchored extension patterns broke paths containing "geno" or ".bed". *[Error]*
 - [x] `54df9c6` · `gt_admix_reorder_q()` — Q matrices for K = 1 became vectors. *[Error]*
-- [x] `0b43996` · `autoplot.gt_admix(type = "cv")` — Failed when the object had no `algorithm` element. *[Error]*
+- [ ] `0b43996` · TODO if algorithm is missing, then should we send a message here?`autoplot.gt_admix(type = "cv")` — Failed when the object had no `algorithm` element. *[Error]*
 
 ### Relatedness, imputation and QC reports
 
@@ -233,7 +233,7 @@ in brackets, its impact:
 - [ ] `9961603` · `gt_pseudohaploid()` — Reset the ploidy of backing-file rows not in the tibble to NA, and relabelled polyploid data as pseudohaploid. *[Wrong results]*
 - [ ] `5e4927c` · `cast_chromosome_to_int()` — Renumbered chromosomes alphabetically when any name was non-numeric. *[Wrong results]*
 - [ ] `288904e` · `gt_load()` on old bigSNP-format objects — Lost individual ploidies for mixed and pseudohaploid data. *[Wrong results]*
-- [ ] `de580df` · `gen_tibble()` — Backing file names were truncated at the last dot; `x.vcf.gz` gave `x.vcf.bk`. *[Wrong results]*
+- [x] `de580df` · `gen_tibble()` — Backing file names were truncated at the last dot; `x.vcf.gz` gave `x.vcf.bk`. *[Wrong results]* E.C
 - [ ] `41d51f2` · `gt_update_backingfile()`, `gt_order_loci()` — Failed when the number of loci was a multiple of `chunk_size`. *[Error]*
 - [ ] `cbdaa56` · `count_vcf_individuals()`, vcfR parser — Miscounted samples missing on the second variant, so the vcfR parser crashed. *[Error]*
 - [ ] `4031d3c` · `gen_tibble(parser = "vcfR")` — Aborted on biallelic indels instead of dropping them, as the cpp parser does. *[Error]*
@@ -242,7 +242,7 @@ in brackets, its impact:
 - [ ] `137a431` · `gen_tibble()` — Rejected the PLINK missing allele "0" when custom `missing_alleles` were given. *[Error]*
 - [ ] `236c0ce` · Printing and `format()` — Failed for a gen_tibble with no loci; wrong length with no individuals. *[Error]*
 - [ ] `a502859` · `gen_tibble()` on a matrix — Invalid dosages and ploidy vectors were silently corrupted (see behaviour changes). *[Robustness]*
-- [ ] `8fb5c92` · `show_loci<-` — Accepted a table without a valid `big_index`, creating a broken object. *[Robustness]*
+- [x] `8fb5c92` · `show_loci<-` — Accepted a table without a valid `big_index`, creating a broken object. *[Robustness]* E.C
 - [ ] `a1f4741` · `gen_tibble()` (VCF) — Loci validation ran after the backing file was written, leaving orphan files. *[Robustness]*
 - [ ] `9759258` · `gen_tibble()` (packedancestry) — Truncated or corrupted `.geno` files were read out of bounds, giving garbage genotypes. *[Robustness]*
 - [x] `79b092c` · cpp VCF parser — Reserved about 1.3 GB of address space even for tiny files. *[Performance]* Reverted in `7081979`: VCFs with 10 million variants are common, the reserved memory is only committed when it is used, and peak memory on a 10 million variant file was the same with and without this commit (2.4 GB).
@@ -259,15 +259,15 @@ in brackets, its impact:
 - [ ] `6923229` · `gt_as_plink(type = "ped"/"raw")` — Parents and numeric sex codes read by `gen_tibble()` were dropped. *[Data lost]*
 - [ ] `4292aa8` · `gt_as_plink(type = "bed")` — The `.fam` file lacked population, parents, sex and phenotype (see behaviour changes). *[Data lost]*
 - [ ] `f61fe58` · `gt_as_genlight()` — Alleles, chromosome and position were not stored, so `gt_from_genlight()` could not read the result back. *[Data lost]*
-- [ ] `6a3fd51` · `gt_as_plink(type = "ped"/"raw")` — Failed without a population column (e.g. data read from a VCF). *[Error]*
-- [ ] `6260459` · `gt_as_plink(type = "ped"/"raw")` — Failed with a numeric phenotype column. *[Error]*
+- [x] `6a3fd51` · `gt_as_plink(type = "ped"/"raw")` — Failed without a population column (e.g. data read from a VCF). *[Error]* E.C
+- [x] `6260459` · `gt_as_plink(type = "ped"/"raw")` — Failed with a numeric phenotype column. *[Error]* E.C
 - [x] `ec4ac8d` · `gt_as_genind()` — Failed when loci names contain "." (common with RefSeq chromosome names). *[Error]*
 - [x] `9c88b10` · `gt_from_genlight()` — Rejected `genlight` objects without the (documented as optional) `pop` slot. *[Error]*
 
 ### Merging and dplyr methods
 
+- [ ] `eaf612d` · E.C TODO fix this commit, we want the opposite behaviour to this fix, to keep 'old_names' - `rbind(use_position = TRUE)` — Loci were renamed to `chromosome_position`. *[Wrong results]*
 - [x] `01ae5d6` · `rbind()` — Individual ploidies were attached to the wrong individuals after `filter()`/`arrange()`. *[Wrong results]*
-- [x] `eaf612d` · `rbind(use_position = TRUE)` — Loci were renamed to `chromosome_position`. *[Wrong results]*
 - [x] `6eaa674` · `ungroup()` — Dropped the `sf` class and geometry column attribute; partial ungrouping gave malformed classes. *[Wrong results]*
 - [x] `7e97c81` · `select()`, `rename()`, `relocate()` on grouped gen_tibbles — Returned a plain `grouped_df`, which package functions then rejected. *[Error]*
 - [x] `c18bc32` · `[` on grouped gen_tibbles — Returned a corrupt grouped object when the grouping variables were dropped. *[Error]*
@@ -284,7 +284,7 @@ in brackets, its impact:
 - [x] `47afd1e` · `heatmap_add_dendro()` — Combining with patchwork failed on printing or saving. *[Error]*
 - [x] `c321a74` · `heatmap_add_dendro()` — Used `plot@data`, which needs ggplot2 ≥ 4.0. *[Error]*
 - [x] `2eb6da0` · `autoplot()` of `gt_admix`/`gt_pca` — Messages and docs referred to non-existent arguments (`repeat`, `pc`). *[Docs]*
-- [ ] `41efcd0` · QC vignette — The upset plot description gave the wrong bar and total (806, not 804). *[Docs]*
+- [x] `41efcd0` · QC vignette — The upset plot description gave the wrong bar and total (806, not 804). *[Docs]* E.C
 - [x] `c7e748c` · `scale_fill_distruct()`, `qc_report_indiv()` — The example had no visible effect; descriptions were wrong. *[Docs]*
 
 ## Optional fix on a separate branch
