@@ -129,7 +129,12 @@ gt_admixture <- function(
     # if reticulate is available
     # if we have "auto"
     if (conda_env == "auto") {
-      conda_envs <- reticulate::conda_list()[["name"]]
+      # the conda environments (none if conda itself is not installed, in
+      # which case conda_list() gives an error)
+      conda_envs <- tryCatch(
+        reticulate::conda_list()[["name"]],
+        error = function(e) character()
+      )
       # if we are on Linux and have ctidygenclust installed
       if (
         (Sys.info()["sysname"] == "Linux") &&
@@ -159,7 +164,7 @@ gt_admixture <- function(
 
   # if conda is "none", check that we have admixture installed
   if (conda_env == "none") {
-    if (system2("which", args = "admixture", stdout = NULL) != 0) {
+    if (!nzchar(Sys.which("admixture"))) {
       stop("ADMIXTURE is not installed in this path")
     }
   }
