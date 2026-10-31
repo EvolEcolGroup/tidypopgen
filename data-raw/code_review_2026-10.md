@@ -177,9 +177,9 @@ in brackets, its impact:
 - [x] `2c3d7bf` · `loci_alt_freq()`, `loci_maf()` (polyploid) — All NA for a single polyploid individual. *[Wrong results]*
 - [x] `27a6335` · `loci_alt_freq()` (polyploid) — `as_counts` was ignored, and selecting a single locus failed. *[Wrong results / Error]*
 - [x] `9e90ebe` · `loci_alt_freq(as_counts = TRUE)` — For a single individual, missing genotypes gave NA alternate and non-zero valid allele counts, and the columns were unnamed. *[Wrong results]*
-- [ ] `83aa04e` · Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
-- [ ] `6a61c22` · Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]*
-- [ ] `a79b7ce` · `pop_fst()`, `pop_fis(method = "WG17")` — "Subscript out of bounds" with a single group; now an informative error. *[Error]*
+- [x] `83aa04e` · Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
+- [ ] AM TODO do we want empty groups to show up as columns? I think we want to drop them `6a61c22` · Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]*
+- [x] `a79b7ce` · `pop_fst()`, `pop_fis(method = "WG17")` — "Subscript out of bounds" with a single group; now an informative error. *[Error]*
 
 ### Windowed statistics
 
@@ -209,21 +209,21 @@ in brackets, its impact:
 - [ ] `93c4fa6` · `tidy()`, `augment()` of `q_matrix` — Ignored the `id` attribute without group information, misassigning proportions when `data` was in a different order. *[Wrong results]*
 - [ ] `d8553e1` · `autoplot()` of `q_matrix`/`gt_admix` — `arrange_by_indiv` never sorted by id. *[Wrong results]*
 - [ ] `e66f7a0` · `autoplot()` of `q_matrix` with group annotation — Unused factor levels added phantom separators and labels. *[Wrong results]*
-- [ ] `ffcb031` · `gt_snmf()` — The default `seed` was rejected when `n_runs > 1`. *[Error]*
-- [ ] `18b6d98` · `gt_snmf()`, `gt_admixture()` — Unanchored extension patterns broke paths containing "geno" or ".bed". *[Error]*
-- [ ] `54df9c6` · `gt_admix_reorder_q()` — Q matrices for K = 1 became vectors. *[Error]*
-- [ ] `0b43996` · `autoplot.gt_admix(type = "cv")` — Failed when the object had no `algorithm` element. *[Error]*
+- [x] `ffcb031` · `gt_snmf()` — The default `seed` was rejected when `n_runs > 1`. *[Error]*
+- [x] `18b6d98` · `gt_snmf()`, `gt_admixture()` — Unanchored extension patterns broke paths containing "geno" or ".bed". *[Error]*
+- [x] `54df9c6` · `gt_admix_reorder_q()` — Q matrices for K = 1 became vectors. *[Error]*
+- [x] `0b43996` · `autoplot.gt_admix(type = "cv")` — Failed when the object had no `algorithm` element. *[Error]*
 
 ### Relatedness, imputation and QC reports
 
 - [x] `8987f22` · `filter_high_relatedness()`, `qc_report_indiv(kings_threshold = )` — Negative kinship was treated as high relatedness (25 of 30 unrelated individuals removed in a simulation). *[Wrong results]*
 - [ ] `458144f` · AM TODO we should issue a warning that some individuals could not be compared `filter_high_relatedness()` — Failed on missing (NaN) kinship values, e.g. in the lobster data. *[Error]*
-- [ ] `ca37fe3` · Grouped `qc_report_indiv()` — `to_keep` flags were attached to the wrong individuals when groups were not contiguous (as in the example data). *[Wrong results]*
-- [ ] `ab8006b` · Grouped `qc_report_loci()` — HWE p-values could exceed 1 (up to 2.89). *[Wrong results]*
-- [ ] `3d23bf4` · `gt_impute_xgboost()` — Chromosomes were in loci-table rather than backing-file order, so SNPs were imputed from the wrong neighbours. *[Wrong results]*
-- [ ] `cb9a91f` · Grouped `qc_report_indiv()` — Obscure error with several grouping variables; `kings_threshold` silently ignored for pseudohaploids. *[Error]*
-- [ ] `96b1600` · `autoplot()` of `qc_report_indiv` — "Object 'p' not found" (or an unrelated global `p` returned) without `kings_threshold`. *[Error]*
-- [ ] `ac19d4f` · `gt_impute_simple()` — Reset a global option to `TRUE` instead of its previous value. *[Robustness]*
+- [x] `ca37fe3` · Grouped `qc_report_indiv()` — `to_keep` flags were attached to the wrong individuals when groups were not contiguous (as in the example data). *[Wrong results]*
+- [x] `ab8006b` · Grouped `qc_report_loci()` — HWE p-values could exceed 1 (up to 2.89). *[Wrong results]*
+- [x] `3d23bf4` · `gt_impute_xgboost()` — Chromosomes were in loci-table rather than backing-file order, so SNPs were imputed from the wrong neighbours. *[Wrong results]*
+- [x] `cb9a91f` · Grouped `qc_report_indiv()` — Obscure error with several grouping variables; `kings_threshold` silently ignored for pseudohaploids. *[Error]*
+- [x] `96b1600` · `autoplot()` of `qc_report_indiv` — "Object 'p' not found" (or an unrelated global `p` returned) without `kings_threshold`. *[Error]*
+- [x] `ac19d4f` · `gt_impute_simple()` — Reset a global option to `TRUE` instead of its previous value. *[Robustness]*
 
 ### Reading data and backing files
 
@@ -266,16 +266,16 @@ in brackets, its impact:
 
 ### Merging and dplyr methods
 
-- [ ] `01ae5d6` · `rbind()` — Individual ploidies were attached to the wrong individuals after `filter()`/`arrange()`. *[Wrong results]*
-- [ ] `eaf612d` · `rbind(use_position = TRUE)` — Loci were renamed to `chromosome_position`. *[Wrong results]*
-- [ ] `6eaa674` · `ungroup()` — Dropped the `sf` class and geometry column attribute; partial ungrouping gave malformed classes. *[Wrong results]*
+- [x] `01ae5d6` · `rbind()` — Individual ploidies were attached to the wrong individuals after `filter()`/`arrange()`. *[Wrong results]*
+- [x] `eaf612d` · `rbind(use_position = TRUE)` — Loci were renamed to `chromosome_position`. *[Wrong results]*
+- [x] `6eaa674` · `ungroup()` — Dropped the `sf` class and geometry column attribute; partial ungrouping gave malformed classes. *[Wrong results]*
 - [x] `7e97c81` · `select()`, `rename()`, `relocate()` on grouped gen_tibbles — Returned a plain `grouped_df`, which package functions then rejected. *[Error]*
-- [ ] `c18bc32` · `[` on grouped gen_tibbles — Returned a corrupt grouped object when the grouping variables were dropped. *[Error]*
-- [ ] `cff2c50` · `mutate()` — Returned a corrupt `grouped_df` when the genotypes column was dropped. *[Error]*
-- [ ] `dfde255` · `group_by()` — Returned a corrupt object without grouping variables. *[Error]*
-- [ ] `9a740d0` · `rbind_dry_run()` — Failed with paths to `.bim` files, as documented. *[Error]*
-- [ ] `9253461` · `rbind()` — `as_is = TRUE` with `flip_strand = TRUE` was accepted when `quiet = TRUE`. *[Robustness]*
-- [ ] `9d026bf` · `select_loci_if()` — Loaded the whole genotype matrix into memory to count loci. *[Performance]*
+- [x] `c18bc32` · `[` on grouped gen_tibbles — Returned a corrupt grouped object when the grouping variables were dropped. *[Error]*
+- [x] `cff2c50` · `mutate()` — Returned a corrupt `grouped_df` when the genotypes column was dropped. *[Error]*
+- [x] `dfde255` · `group_by()` — Returned a corrupt object without grouping variables. *[Error]*
+- [x] `9a740d0` · `rbind_dry_run()` — Failed with paths to `.bim` files, as documented. *[Error]*
+- [x] `9253461` · `rbind()` — `as_is = TRUE` with `flip_strand = TRUE` was accepted when `quiet = TRUE`. *[Robustness]*
+- [x] `9d026bf` · `select_loci_if()` — Loaded the whole genotype matrix into memory to count loci. *[Performance]*
 
 ### Plots, heatmaps and documentation
 
