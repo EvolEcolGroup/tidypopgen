@@ -62,6 +62,13 @@ test_that("gt_as_geno_lea writes a .geno file for diploid data", {
   dimnames(geno_matrix) <- NULL
   dimnames(expected) <- NULL
   expect_equal(geno_matrix, expected)
+  # writing again overwrites the file (rather than appending to it)
+  gt_as_geno_lea(test_gt, file = geno_file)
+  expect_equal(readLines(geno_file), geno_lines)
+  # a subset with reordered individuals and loci
+  sub_gt <- test_gt[c(3, 1), ] %>% select_loci(c(4, 2))
+  gt_as_geno_lea(sub_gt, file = geno_file)
+  expect_equal(readLines(geno_file), c("19", "21"))
 })
 
 test_that("gt_as_geno_lea writes a .geno file for pseudohaploid data", {

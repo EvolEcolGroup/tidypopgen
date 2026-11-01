@@ -12,8 +12,8 @@ gt_as_vcf(x, file = NULL, chunk_size = NULL, overwrite = FALSE)
 \item{file}{the .vcf file name with a path, or NULL (the default) to use the
 location of the backing files.}
 
-\item{chunk_size}{the number of loci processed at a time. Automatically set
-if left to NULL}
+\item{chunk_size}{the number of loci processed at a time. If left to NULL,
+100,000 loci are processed at a time.}
 
 \item{overwrite}{logical, should the file be overwritten if it already
 exists?}
@@ -22,7 +22,9 @@ exists?}
 the path of the .vcf file
 }
 \description{
-This function write a VCF from a \code{gen_tibble}.
+This function write a VCF from a \code{gen_tibble}. The genotypes are read and
+written in chunks of loci, so that this works on datasets that do not fit in
+memory.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

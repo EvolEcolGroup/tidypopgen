@@ -53,6 +53,10 @@ gt_pi_polyploid <- function(BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores
     .Call(`_tidypopgen_gt_pi_polyploid`, BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores)
 }
 
+gt_write_text_by_locus <- function(BM, rowInd, colInd, lut, prefix, sep, file) {
+    invisible(.Call(`_tidypopgen_gt_write_text_by_locus`, BM, rowInd, colInd, lut, prefix, sep, file))
+}
+
 SNPHWE2_R <- function(obs_hets, obs_hom1, obs_hom2, midp) {
     .Call(`_tidypopgen_SNPHWE2_R`, obs_hets, obs_hom1, obs_hom2, midp)
 }

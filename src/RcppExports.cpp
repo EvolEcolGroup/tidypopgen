@@ -215,6 +215,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gt_write_text_by_locus
+void gt_write_text_by_locus(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const CharacterVector& lut, const CharacterVector& prefix, const std::string& sep, const std::string& file);
+RcppExport SEXP _tidypopgen_gt_write_text_by_locus(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP lutSEXP, SEXP prefixSEXP, SEXP sepSEXP, SEXP fileSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type lut(lutSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type prefix(prefixSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type sep(sepSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type file(fileSEXP);
+    gt_write_text_by_locus(BM, rowInd, colInd, lut, prefix, sep, file);
+    return R_NilValue;
+END_RCPP
+}
 // SNPHWE2_R
 double SNPHWE2_R(int32_t obs_hets, int32_t obs_hom1, int32_t obs_hom2, uint32_t midp);
 RcppExport SEXP _tidypopgen_SNPHWE2_R(SEXP obs_hetsSEXP, SEXP obs_hom1SEXP, SEXP obs_hom2SEXP, SEXP midpSEXP) {
@@ -425,6 +441,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_ind_hetero_polyploid", (DL_FUNC) &_tidypopgen_gt_ind_hetero_polyploid, 5},
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 4},
     {"_tidypopgen_gt_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_pi_polyploid, 6},
+    {"_tidypopgen_gt_write_text_by_locus", (DL_FUNC) &_tidypopgen_gt_write_text_by_locus, 7},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 6},

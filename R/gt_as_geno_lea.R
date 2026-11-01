@@ -4,8 +4,9 @@
 #' is given, a file with suffix .geno is written in the same location as the
 #' .rds and .bk files that underpin the [`gen_tibble`].
 #'
-#' NOTE that we currently read all the data into memory to write the file, so
-#' this function is not suitable for very large datasets.
+#' The genotypes are read and written directly from the file backed matrix
+#' (one locus at a time), so this function also works on datasets that do not
+#' fit in memory.
 #'
 #' @note the `.geno` format only supports haploid or diploid data, so this
 #'   function only works on diploid (or pseudohaploid) `gen_tibble` objects.
@@ -31,15 +32,23 @@ gt_as_geno_lea <- function(x, file = NULL) {
   if (file_ext(file) != "geno") {
     file <- paste0(file, ".geno")
   }
-  # TODO this should be done in chunks for larger files
-  geno_matrix <- t(x %>% show_genotypes())
-  geno_matrix[is.na(geno_matrix)] <- 9
-  utils::write.table(
-    geno_matrix,
+  # create a lookup table with the string for each raw value of the FBM, from
+  # its decoded dosages (missing values are coded as 9)
+  genotypes_lut <- .gt_get_fbm(x)$code256
+  genotypes_lut[is.na(genotypes_lut)] <- 9
+  genotypes_lut <- as.character(genotypes_lut)
+  # create an empty file (overwriting any existing file), and append the
+  # genotypes to it in C++, one line per locus (with no separator between
+  # individuals)
+  file.create(file)
+  gt_write_text_by_locus(
+    BM = .gt_get_fbm(x),
+    rowInd = .gt_fbm_rows(x),
+    colInd = .gt_fbm_cols(x),
+    lut = genotypes_lut,
+    prefix = character(0),
     sep = "",
-    file = file,
-    row.names = FALSE,
-    col.names = FALSE
+    file = path.expand(file)
   )
   # return the file name
   return(file)
