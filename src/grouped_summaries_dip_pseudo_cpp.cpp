@@ -1,6 +1,6 @@
 /******************************************************************************/
 
-#include <bigstatsr/BMCodeAcc.h>
+#include "grouped_summaries_dip_pseudo.h"
 
 /******************************************************************************/
 // Summarise a grouped gen_tibble
@@ -16,45 +16,42 @@ ListOf<NumericMatrix> grouped_summaries_dip_pseudo_cpp(Environment BM,
                                    const NumericVector& ploidy,
                                    int ncores) {
 
-  XPtr<FBM> xpBM = BM["address"];
-  SubBMCode256Acc macc(xpBM, rowInd, colInd, BM["code256"], 1);
+  // lookup tables and per-individual constants (see
+  // grouped_summaries_dip_pseudo.h)
+  GroupedSummariesDipPseudo summ(BM, rowInd, colInd, groupIds, ngroups,
+                                 ploidy);
 
-  size_t n = macc.nrow(); // number of individuals
-  size_t m = macc.ncol(); // number of loci
+  size_t m = summ.ncol(); // number of loci
 
   NumericMatrix freq(m, ngroups);
   NumericMatrix ref_freq(m, ngroups);
   NumericMatrix valid_alleles(m, ngroups);
   NumericMatrix heterozygotes(m, ngroups);
-  
-  // multiplier to convert dosages for pseudohaploid data
-  NumericVector pseudo_multiplier (n);
-  for (size_t i = 0; i < n; i++) {
-    pseudo_multiplier[i] = 1 / (3 - ploidy[i]);
-  }
+  // raw pointers to the outputs, so that we don't touch Rcpp objects within
+  // the parallel region
+  double* p_freq = REAL(freq);
+  double* p_ref_freq = REAL(ref_freq);
+  double* p_valid = REAL(valid_alleles);
+  double* p_het = REAL(heterozygotes);
 
-#pragma omp parallel for num_threads(ncores)
+#pragma omp parallel num_threads(ncores)
+{
+  // per-thread buffers for the sums of each group
+  std::vector<double> alt_sum(ngroups), n_alleles(ngroups), het2(ngroups);
+
+#pragma omp for
   for (size_t j = 0; j < m; j++) {
-    for (size_t i = 0; i < n; i++) {
-      double x = macc(i, j);
-      if (x > -1){
-        freq(j, groupIds[i]) += x * pseudo_multiplier[i];
-        valid_alleles(j, groupIds[i]) += ploidy[i];
-        if (x==1){
-          // we add 2 so that we can then divide by valid alleles
-          // we don't have to worry about pseudohaploids, as heterozygote
-          // counts are meaningless for them
-          heterozygotes(j, groupIds[i]) +=2;
-        }
-      }
-    }
+    summ.locus(j, alt_sum.data(), n_alleles.data(), het2.data());
     // now for each group, divide freq by valid_alleles
     for (size_t group_i = 0; group_i < ngroups; group_i++) {
-      freq(j, group_i) = freq(j, group_i) / valid_alleles(j, group_i);
-      ref_freq(j, group_i) = 1-freq(j, group_i);
-      heterozygotes(j, group_i) = heterozygotes(j, group_i) / valid_alleles(j, group_i);
+      size_t k = j + group_i * m;
+      p_freq[k] = alt_sum[group_i] / n_alleles[group_i];
+      p_ref_freq[k] = 1 - p_freq[k];
+      p_valid[k] = n_alleles[group_i];
+      p_het[k] = het2[group_i] / n_alleles[group_i];
     }
   }
+}
 
   return List::create(_["freq_alt"]  = freq,
                       _["freq_ref"]  = ref_freq,
