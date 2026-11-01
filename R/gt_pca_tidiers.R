@@ -141,10 +141,12 @@ tidy.gt_pca <- function(x, matrix = "eigenvalues", ...) {
         values_to = "value"
       )
     if (is.null(rownames(x$u))) ret$row <- as.integer(ret$row)
+    # change the PC to an integer (the other branches already create PC as
+    # an integer; converting it there would cast every value, one per locus
+    # and component for the loadings, to a string and back)
+    ret <- mutate(ret, PC = as.integer(str_replace_base(.data$PC, "PC", "")))
   }
 
-  # change the PC to a numeric
-  ret <- mutate(ret, PC = as.integer(str_replace_base(.data$PC, "PC", "")))
   as_tibble(ret)
 }
 
