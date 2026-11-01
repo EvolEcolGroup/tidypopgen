@@ -85,6 +85,10 @@ gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp, ncores =
     .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp, ncores, block_size)
 }
 
+loci_qc_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, hwe, midp, ncores, block_size = 100000L) {
+    .Call(`_tidypopgen_loci_qc_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, hwe, midp, ncores, block_size)
+}
+
 pairwise_fst_hudson_loop <- function(pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem) {
     .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem)
 }

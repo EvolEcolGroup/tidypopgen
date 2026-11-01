@@ -91,10 +91,15 @@ test_that("qc_report_loci for pseudohaploid data", {
   test_gt_pseudo <- gt_pseudohaploid(test_gt)
 
   loci_report <- qc_report_loci(test_gt_pseudo)
+  # maf (accounting for ploidy) and missingness match the individual functions
+  expect_equal(loci_report$maf, loci_maf(test_gt_pseudo))
+  expect_equal(loci_report$missingness, loci_missingness(test_gt_pseudo))
 
   test_gt_pseudo <- test_gt_pseudo %>% group_by(population)
 
   loci_report_grouped <- qc_report_loci(test_gt_pseudo)
+  # grouping does not change maf and missingness
+  expect_equal(loci_report_grouped, loci_report)
 
   # try to plot hwe
   expect_error(autoplot(loci_report, type = "hwe"), "not available")
@@ -109,4 +114,23 @@ test_that("qc_report_loci for pseudohaploid data", {
   expect_s3_class(autoplot(loci_report_grouped, type = "all"), "ggplot")
 
   # test other plots individually
+})
+
+test_that("qc_report_loci matches loci_maf, loci_missingness and loci_hwe", {
+  example_gt <- load_example_gt("gen_tbl")
+  loci_report <- suppressMessages(qc_report_loci(example_gt))
+  expect_equal(loci_report$snp_id, loci_names(example_gt))
+  expect_equal(loci_report$maf, loci_maf(example_gt))
+  expect_equal(loci_report$missingness, loci_missingness(example_gt))
+  expect_equal(loci_report$hwe_p, loci_hwe(example_gt))
+  # codes other than 0, 1, 2 (e.g. dosages) use the individual functions,
+  # which must give the same results (bytes 0 to 3 decode as with CODE_012)
+  attr(example_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_DOSAGE
+  expect_equal(suppressMessages(qc_report_loci(example_gt)), loci_report)
+  grouped_report <- qc_report_loci(example_gt %>% group_by(population))
+  attr(example_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_012
+  expect_equal(
+    qc_report_loci(example_gt %>% group_by(population)),
+    grouped_report
+  )
 })

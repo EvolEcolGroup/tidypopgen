@@ -354,6 +354,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// loci_qc_cpp
+List loci_qc_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool hwe, uint32_t midp, int ncores, int block_size);
+RcppExport SEXP _tidypopgen_loci_qc_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP hweSEXP, SEXP midpSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< bool >::type hwe(hweSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type midp(midpSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(loci_qc_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, hwe, midp, ncores, block_size));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pairwise_fst_hudson_loop
 List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, NumericMatrix n, NumericMatrix freq_alt, NumericMatrix freq_ref, bool by_locus, bool return_num_dem);
 RcppExport SEXP _tidypopgen_pairwise_fst_hudson_loop(SEXP pairwise_combnSEXP, SEXP nSEXP, SEXP freq_altSEXP, SEXP freq_refSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP) {
@@ -530,6 +550,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 8},
+    {"_tidypopgen_loci_qc_cpp", (DL_FUNC) &_tidypopgen_loci_qc_cpp, 10},
     {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 6},
     {"_tidypopgen_pairwise_fst_nei87_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_nei87_loop, 7},
     {"_tidypopgen_pairwise_fst_wc84_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_wc84_loop, 6},
