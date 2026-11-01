@@ -374,52 +374,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// pairwise_fst_hudson_loop
-List pairwise_fst_hudson_loop(NumericMatrix pairwise_combn, NumericMatrix n, NumericMatrix freq_alt, NumericMatrix freq_ref, bool by_locus, bool return_num_dem);
-RcppExport SEXP _tidypopgen_pairwise_fst_hudson_loop(SEXP pairwise_combnSEXP, SEXP nSEXP, SEXP freq_altSEXP, SEXP freq_refSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP) {
+// pairwise_pop_fst_cpp
+List pairwise_pop_fst_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, const IntegerMatrix& pairwise_combn, std::string method, bool by_locus, bool return_num_dem, int block_size, int ncores);
+RcppExport SEXP _tidypopgen_pairwise_pop_fst_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP pairwise_combnSEXP, SEXP methodSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type pairwise_combn(pairwise_combnSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type n(nSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type freq_alt(freq_altSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type freq_ref(freq_refSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< size_t >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< const IntegerMatrix& >::type pairwise_combn(pairwise_combnSEXP);
+    Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
     Rcpp::traits::input_parameter< bool >::type by_locus(by_locusSEXP);
     Rcpp::traits::input_parameter< bool >::type return_num_dem(return_num_demSEXP);
-    rcpp_result_gen = Rcpp::wrap(pairwise_fst_hudson_loop(pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem));
-    return rcpp_result_gen;
-END_RCPP
-}
-// pairwise_fst_nei87_loop
-List pairwise_fst_nei87_loop(NumericMatrix pairwise_combn, NumericMatrix n, NumericMatrix het_obs, NumericMatrix freq_alt, NumericMatrix freq_ref, bool by_locus, bool return_num_dem);
-RcppExport SEXP _tidypopgen_pairwise_fst_nei87_loop(SEXP pairwise_combnSEXP, SEXP nSEXP, SEXP het_obsSEXP, SEXP freq_altSEXP, SEXP freq_refSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type pairwise_combn(pairwise_combnSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type n(nSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type het_obs(het_obsSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type freq_alt(freq_altSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type freq_ref(freq_refSEXP);
-    Rcpp::traits::input_parameter< bool >::type by_locus(by_locusSEXP);
-    Rcpp::traits::input_parameter< bool >::type return_num_dem(return_num_demSEXP);
-    rcpp_result_gen = Rcpp::wrap(pairwise_fst_nei87_loop(pairwise_combn, n, het_obs, freq_alt, freq_ref, by_locus, return_num_dem));
-    return rcpp_result_gen;
-END_RCPP
-}
-// pairwise_fst_wc84_loop
-List pairwise_fst_wc84_loop(NumericMatrix pairwise_combn, NumericMatrix n, NumericMatrix freq_alt, NumericMatrix het_obs, bool by_locus, bool return_num_dem);
-RcppExport SEXP _tidypopgen_pairwise_fst_wc84_loop(SEXP pairwise_combnSEXP, SEXP nSEXP, SEXP freq_altSEXP, SEXP het_obsSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type pairwise_combn(pairwise_combnSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type n(nSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type freq_alt(freq_altSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type het_obs(het_obsSEXP);
-    Rcpp::traits::input_parameter< bool >::type by_locus(by_locusSEXP);
-    Rcpp::traits::input_parameter< bool >::type return_num_dem(return_num_demSEXP);
-    rcpp_result_gen = Rcpp::wrap(pairwise_fst_wc84_loop(pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem));
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(pairwise_pop_fst_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -551,9 +524,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 8},
     {"_tidypopgen_loci_qc_cpp", (DL_FUNC) &_tidypopgen_loci_qc_cpp, 10},
-    {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 6},
-    {"_tidypopgen_pairwise_fst_nei87_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_nei87_loop, 7},
-    {"_tidypopgen_pairwise_fst_wc84_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_wc84_loop, 6},
+    {"_tidypopgen_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_pairwise_pop_fst_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},

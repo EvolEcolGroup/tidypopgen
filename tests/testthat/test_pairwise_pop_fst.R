@@ -389,6 +389,56 @@ test_that("n_cores can be set", {
   expect_true(getOption("bigstatsr.check.parallel.blas"))
 })
 
+test_that("pairwise_pop_fst does not depend on blocks, cores or ordering", {
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  # call the cpp function directly, so that we can change the block size
+  fst_cpp <- function(.x, method, block_size, ncores, return_num_dem) {
+    pairwise_pop_fst_cpp(
+      .gt_get_fbm(.x),
+      rowInd = .gt_fbm_rows(.x),
+      colInd = .gt_fbm_cols(.x),
+      groupIds = dplyr::group_indices(.x) - 1,
+      ngroups = 3,
+      ploidy = indiv_ploidy(.x),
+      pairwise_combn = utils::combn(3, 2),
+      method = method,
+      by_locus = TRUE,
+      return_num_dem = return_num_dem,
+      block_size = block_size,
+      ncores = ncores
+    )
+  }
+  # reorder the individuals and select a subset of loci in a different order
+  sub_gt <- test_gt %>%
+    dplyr::ungroup() %>%
+    dplyr::slice(c(7, 2, 5, 1, 4, 6, 3)) %>%
+    select_loci(c(6, 2, 4)) %>%
+    dplyr::group_by(population)
+  for (method in c("Hudson", "Nei87", "WC84")) {
+    for (return_num_dem in c(FALSE, TRUE)) {
+      # a single block of loci, on a single core
+      one_block <- fst_cpp(test_gt, method, 1024, 1, return_num_dem)
+      # blocks of different sizes (including blocks that do not divide the
+      # number of loci), on multiple cores, give identical results
+      expect_identical(
+        fst_cpp(test_gt, method, 1, 1, return_num_dem),
+        one_block
+      )
+      expect_identical(
+        fst_cpp(test_gt, method, 4, 2, return_num_dem),
+        one_block
+      )
+      # estimates by locus for a subset of reordered loci (from reordered
+      # individuals) are the same as from the full data
+      sub_res <- fst_cpp(sub_gt, method, 2, 2, return_num_dem)
+      expect_equal(sub_res[[1]], one_block[[1]][c(6, 2, 4), ])
+      if (return_num_dem) {
+        expect_equal(sub_res[[2]], one_block[[2]][c(6, 2, 4), ])
+      }
+    }
+  }
+})
+
 test_that("type = pairwise", {
   ############
   # Test hudson

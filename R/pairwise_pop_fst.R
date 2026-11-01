@@ -118,47 +118,25 @@ pairwise_pop_fst <- function(
   # create all combinations
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
 
-  # summarise population frequencies
-  # TODO this should be done in chunks!!!!
-  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
+  # compute the numerator and denominator of Fst for every pair of
+  # populations in a single pass over the genotypes: loci are processed in
+  # blocks, summarising the populations within each block and then looping
+  # over the pairs, so that we never store the full loci x populations
+  # summaries (only the matrices by locus are stored, if requested)
+  fst_list <- pairwise_pop_fst_cpp(
     .gt_get_fbm(.x),
     rowInd = .gt_fbm_rows(.x),
     colInd = .gt_fbm_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = nrow(.group_levels),
     ploidy = indiv_ploidy(.x),
+    pairwise_combn = pairwise_combn,
+    method = method,
+    by_locus = by_locus,
+    return_num_dem = return_num_dem,
+    block_size = 1024,
     ncores = n_cores
   )
-
-  if (method == "Hudson") {
-    fst_list <- pairwise_fst_hudson_loop(
-      pairwise_combn = pairwise_combn,
-      n = pop_freqs_df$n,
-      freq_alt = pop_freqs_df$freq_alt,
-      freq_ref = pop_freqs_df$freq_ref,
-      by_locus = by_locus,
-      return_num_dem = return_num_dem
-    )
-  } else if (method == "Nei87") {
-    fst_list <- pairwise_fst_nei87_loop(
-      pairwise_combn = pairwise_combn,
-      n = pop_freqs_df$n,
-      het_obs = pop_freqs_df$het_obs,
-      freq_alt = pop_freqs_df$freq_alt,
-      freq_ref = pop_freqs_df$freq_ref,
-      by_locus = by_locus,
-      return_num_dem = return_num_dem
-    )
-  } else if (method == "WC84") {
-    fst_list <- pairwise_fst_wc84_loop(
-      pairwise_combn = pairwise_combn,
-      n = pop_freqs_df$n,
-      freq_alt = pop_freqs_df$freq_alt,
-      het_obs = pop_freqs_df$het_obs,
-      by_locus = by_locus,
-      return_num_dem = return_num_dem
-    )
-  }
 
   # format nicely the group combinations object
   # (we'll use it to create column names)

@@ -89,16 +89,8 @@ loci_qc_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, hwe, midp
     .Call(`_tidypopgen_loci_qc_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, hwe, midp, ncores, block_size)
 }
 
-pairwise_fst_hudson_loop <- function(pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem) {
-    .Call(`_tidypopgen_pairwise_fst_hudson_loop`, pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem)
-}
-
-pairwise_fst_nei87_loop <- function(pairwise_combn, n, het_obs, freq_alt, freq_ref, by_locus, return_num_dem) {
-    .Call(`_tidypopgen_pairwise_fst_nei87_loop`, pairwise_combn, n, het_obs, freq_alt, freq_ref, by_locus, return_num_dem)
-}
-
-pairwise_fst_wc84_loop <- function(pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem) {
-    .Call(`_tidypopgen_pairwise_fst_wc84_loop`, pairwise_combn, n, freq_alt, het_obs, by_locus, return_num_dem)
+pairwise_pop_fst_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores) {
+    .Call(`_tidypopgen_pairwise_pop_fst_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores)
 }
 
 read_packedancestry <- function(filename, BM, tab) {
