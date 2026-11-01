@@ -27,6 +27,18 @@ at \code{\link[=select_loci_if]{select_loci_if()}} for that feature.
 \details{
 Note that the \code{select_loci} verb does not modify the backing FBM files,
 but rather it subsets the list of loci to be used stored in the \code{gen_tibble}.
+
+For large datasets (millions of loci), select loci with \code{\link[dplyr:all_of]{dplyr::all_of()}}
+or \code{\link[dplyr:any_of]{dplyr::any_of()}}, with helpers that match names (such as
+\code{\link[dplyr:starts_with]{dplyr::starts_with()}} or \code{\link[dplyr:everything]{dplyr::everything()}}), or with numeric
+positions written as numbers (e.g. \code{1:100} or \code{-c(1, 5)}), each
+optionally negated with \code{-} or \code{!}. These selections are resolved
+directly, which is much faster and uses much less memory than the general
+\code{tidyselect} machinery, which has to create an R symbol for every locus
+name (and R never frees symbols). Other expressions (e.g. combinations
+such as \code{c(all_of(x), starts_with("rs"))}, bare loci names, or
+expressions such as \code{which(...)}) still work, but are slow and memory
+hungry on very large datasets: use \code{all_of(which(...))} instead.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
