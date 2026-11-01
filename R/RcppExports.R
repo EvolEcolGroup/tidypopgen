@@ -29,6 +29,10 @@ grouped_summaries_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngrou
     .Call(`_tidypopgen_grouped_summaries_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores)
 }
 
+gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut) {
+    invisible(.Call(`_tidypopgen_gt_copy_fbm`, BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut))
+}
+
 gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
     .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
 }

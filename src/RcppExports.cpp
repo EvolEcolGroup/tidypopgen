@@ -122,6 +122,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// gt_copy_fbm
+void gt_copy_fbm(Environment BM_from, Environment BM_to, const IntegerVector& rowInd, const IntegerVector& colInd, const int col_offset, const int row_offset, const LogicalVector& swap, const IntegerVector& swap_lut);
+RcppExport SEXP _tidypopgen_gt_copy_fbm(SEXP BM_fromSEXP, SEXP BM_toSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP col_offsetSEXP, SEXP row_offsetSEXP, SEXP swapSEXP, SEXP swap_lutSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM_from(BM_fromSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM_to(BM_toSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const int >::type col_offset(col_offsetSEXP);
+    Rcpp::traits::input_parameter< const int >::type row_offset(row_offsetSEXP);
+    Rcpp::traits::input_parameter< const LogicalVector& >::type swap(swapSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type swap_lut(swap_lutSEXP);
+    gt_copy_fbm(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut);
+    return R_NilValue;
+END_RCPP
+}
 // gt_grouped_pi_diploid
 ListOf<NumericMatrix> gt_grouped_pi_diploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, int ncores);
 RcppExport SEXP _tidypopgen_gt_grouped_pi_diploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP) {
@@ -455,6 +472,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_grouped_het_obs_polyploid", (DL_FUNC) &_tidypopgen_grouped_het_obs_polyploid, 7},
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 6},
     {"_tidypopgen_grouped_summaries_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_summaries_dip_pseudo_cpp, 7},
+    {"_tidypopgen_gt_copy_fbm", (DL_FUNC) &_tidypopgen_gt_copy_fbm, 8},
     {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 6},
     {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 8},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},

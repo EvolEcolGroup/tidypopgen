@@ -62,9 +62,6 @@ gt_update_backingfile <- function(
 
   # get the 256 code
   original_256code <- attr(.x$genotypes, "fbm")$code256
-  on.exit(
-    attr(.x$genotypes, "fbm")$code256 <- original_256code
-  )
   original_imputation_code <- attr(.x$genotypes, "imputed")
 
   # initialise a FBM with the dimensions of the data used in the gen_tibble
@@ -77,13 +74,23 @@ gt_update_backingfile <- function(
     create_bk = TRUE
   )
 
-  # set the code of original file as 1:256 to get raw values
-  attr(.x$genotypes, "fbm")$code256 <- as.integer(0:255)
-  # now process the genotype matrix in chunks
+  # now copy the raw values of the genotypes (so that imputed values are kept)
+  # in chunks of loci; the copy is done in C++, so the genotypes are never
+  # decoded into R
+  fbm_rows <- .gt_fbm_rows(.x)
+  fbm_cols <- .gt_fbm_cols(.x)
   for (i in seq_along(chunks_vec[-1])) {
     this_chunk <- seq(chunks_vec[i] + 1, chunks_vec[i + 1])
-    this_genotypes <- show_genotypes(.x, loci_indices = this_chunk)
-    new_bk_matrix[, this_chunk] <- as.raw(this_genotypes)
+    gt_copy_fbm(
+      BM_from = .gt_get_fbm(.x),
+      BM_to = new_bk_matrix,
+      rowInd = fbm_rows,
+      colInd = fbm_cols[this_chunk],
+      col_offset = chunks_vec[i],
+      row_offset = 0,
+      swap = logical(0),
+      swap_lut = 0:255
+    )
   }
   # get fbm_ploidy
   fbm_ploidy <- attr(.x$genotypes, "fbm_ploidy")
