@@ -41,12 +41,12 @@ gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, 
     invisible(.Call(`_tidypopgen_gt_copy_fbm`, BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut))
 }
 
-gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
-    .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores)
+gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size = 100000L) {
+    .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores, block_size)
 }
 
-gt_grouped_pi_polyploid <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores) {
-    .Call(`_tidypopgen_gt_grouped_pi_polyploid`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores)
+gt_grouped_pi_polyploid <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores, block_size = 100000L) {
+    .Call(`_tidypopgen_gt_grouped_pi_polyploid`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores, block_size)
 }
 
 gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {
@@ -57,12 +57,12 @@ gt_ind_hetero_polyploid <- function(BM, rowInd, colInd, ploidy, ncores) {
     .Call(`_tidypopgen_gt_ind_hetero_polyploid`, BM, rowInd, colInd, ploidy, ncores)
 }
 
-gt_pi_diploid <- function(BM, rowInd, colInd, ncores) {
-    .Call(`_tidypopgen_gt_pi_diploid`, BM, rowInd, colInd, ncores)
+gt_pi_diploid <- function(BM, rowInd, colInd, ncores, block_size = 100000L) {
+    .Call(`_tidypopgen_gt_pi_diploid`, BM, rowInd, colInd, ncores, block_size)
 }
 
-gt_pi_polyploid <- function(BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores) {
-    .Call(`_tidypopgen_gt_pi_polyploid`, BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores)
+gt_pi_polyploid <- function(BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores, block_size = 100000L) {
+    .Call(`_tidypopgen_gt_pi_polyploid`, BM, rowInd, colInd, ploidy, is_pseudohaploid, ncores, block_size)
 }
 
 gt_write_text_by_locus <- function(BM, rowInd, colInd, lut, prefix, sep, file) {
