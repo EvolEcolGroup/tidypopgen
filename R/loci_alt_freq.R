@@ -170,21 +170,11 @@ loci_alt_freq.grouped_df <- function(
     # number of groups (used to define dimensions of objects)
     n_groups <- dplyr::n_groups(.x)
 
-    # the cpp code reads the FBM directly, in blocks of block_size loci, and
-    # fills a single matrix (rather than binding the matrices from each
-    # block); openMP uses multiple cores in the cpp code. If we want
-    # frequencies, it only returns them (freq_only = TRUE)
-    freq_mat <- grouped_alt_freq_dip_pseudo_cpp(
-      BM = .gt_get_fbm(.x),
-      rowInd = .gt_fbm_rows(.x),
-      colInd = .gt_fbm_cols(.x),
-      groupIds = dplyr::group_indices(.x) - 1L,
-      ngroups = n_groups,
-      ploidy = indiv_ploidy(.x),
-      ncores = n_cores,
+    freq_mat <- grouped_alt_freq_dip_pseudo(
+      .x,
       as_counts = as_counts,
-      block_size = block_size,
-      freq_only = TRUE
+      n_cores = n_cores,
+      block_size = block_size
     )
 
     if (as_counts) {
@@ -253,7 +243,11 @@ loci_maf.vctrs_bigSNP <- function(
   ...
 ) {
   freq <- loci_alt_freq(.x, n_cores = n_cores, block_size = block_size, ...)
-  freq[freq > 0.5 & !is.na(freq)] <- 1 - freq[freq > 0.5 & !is.na(freq)]
+  # fold the frequencies above 0.5 (which() skips missing values, and only
+  # stores the indices of the loci to fold, rather than creating several
+  # logical vectors as long as the number of loci)
+  to_fold <- which(freq > 0.5)
+  freq[to_fold] <- 1 - freq[to_fold]
   freq
 }
 
@@ -283,18 +277,17 @@ loci_maf.grouped_df <- function(
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-    freq_mat <- loci_alt_freq(
+    # matrix of frequencies (loci x groups), without names
+    freq_mat <- grouped_alt_freq_dip_pseudo(
       .x,
+      as_counts = FALSE,
       n_cores = n_cores,
-      block_size = block_size,
-      type = "matrix",
-      as_counts = FALSE
+      block_size = block_size
     )
-    # remove dimnames to then process this
-    dimnames(freq_mat) <- NULL
-
-    freq_mat[freq_mat > 0.5 & !is.na(freq_mat)] <-
-      1 - freq_mat[freq_mat > 0.5 & !is.na(freq_mat)]
+    # fold the frequencies above 0.5 (which() skips missing values, and only
+    # stores the indices of the values to fold)
+    to_fold <- which(freq_mat > 0.5)
+    freq_mat[to_fold] <- 1 - freq_mat[to_fold]
 
     freq_mat <- format_grouped_output(
       out_mat = freq_mat,
@@ -310,6 +303,33 @@ loci_maf.grouped_df <- function(
       "group_map(.x, .f = ~ loci_maf(.x))"
     )
   }
+}
+
+# function to estimate frequencies for each group (diploid and pseudohaploid
+# data): it returns a plain matrix with one row per locus and one column per
+# group of frequencies or, if as_counts = TRUE, with the alternate allele
+# counts in the first n_groups columns and the valid allele counts in the
+# next n_groups columns
+grouped_alt_freq_dip_pseudo <- function(.x,
+                                        as_counts = FALSE,
+                                        n_cores,
+                                        block_size) {
+  # the cpp code reads the FBM directly, in blocks of block_size loci, and
+  # fills a single matrix (rather than binding the matrices from each
+  # block); openMP uses multiple cores in the cpp code. If we want
+  # frequencies, it only returns them (freq_only = TRUE)
+  grouped_alt_freq_dip_pseudo_cpp(
+    BM = .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
+    groupIds = dplyr::group_indices(.x) - 1L,
+    ngroups = dplyr::n_groups(.x),
+    ploidy = indiv_ploidy(.x),
+    ncores = n_cores,
+    as_counts = as_counts,
+    block_size = block_size,
+    freq_only = TRUE
+  )
 }
 
 # function to estimate frequencies for diploid
