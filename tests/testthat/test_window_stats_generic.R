@@ -276,3 +276,44 @@ test_that("windows generic correctly catches errors", {
     "min_loci must be less than window_size."
   )
 })
+
+test_that("windows_stats_generic matches runner on each chromosome", {
+  set.seed(1)
+  # chromosomes as a factor, not contiguous in the table, with tied positions
+  chr1_pos <- sort(sample(1:200, 30, replace = TRUE))
+  chr2_pos <- sort(sample(1:150, 20))
+  loci_table <- data.frame(
+    chromosome = factor(rep(c("chr1", "chr2", "chr1"), c(20, 20, 10))),
+    position = c(chr1_pos[1:20], chr2_pos, chr1_pos[21:30])
+  )
+  x <- runif(50)
+  x[c(3, 17, 18, 40)] <- NA
+  for (unit in c("snp", "bp")) {
+    ws <- if (unit == "snp") 5 else 40
+    for (st in c(ws, 3)) {
+      for (complete in c(FALSE, TRUE)) {
+        for (op in c("mean", "sum")) {
+          res <- windows_stats_generic(x,
+            loci_table = loci_table, operator = op, window_size = ws,
+            step_size = st, size_unit = unit, complete = complete
+          )
+          # the reference: runner on the loci of each chromosome
+          run_fun <- if (op == "mean") runner::mean_run else runner::sum_run
+          for (chr in c("chr1", "chr2")) {
+            in_chr <- loci_table$chromosome == chr
+            res_chr <- res[res$chromosome == chr, ]
+            idx <- if (unit == "bp") loci_table$position[in_chr] else integer(0)
+            expect_identical(res_chr$stat, run_fun(x[in_chr],
+              k = ws, at = res_chr$end, idx = idx, na_rm = TRUE,
+              na_pad = complete
+            ))
+            expect_identical(res_chr$n_loci, runner::sum_run(!is.na(x[in_chr]),
+              k = ws, at = res_chr$end, idx = idx, na_rm = TRUE,
+              na_pad = complete
+            ))
+          }
+        }
+      }
+    }
+  }
+})

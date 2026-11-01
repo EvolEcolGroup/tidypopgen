@@ -113,6 +113,10 @@ vcf_genotypes_to_fbm <- function(filename, BM, biallelic, missing_value, n_heade
     .Call(`_tidypopgen_vcf_genotypes_to_fbm`, filename, BM, biallelic, missing_value, n_header_lines)
 }
 
+window_sums_cpp <- function(x, loci, lo, hi, long_double) {
+    .Call(`_tidypopgen_window_sums_cpp`, x, loci, lo, hi, long_double)
+}
+
 write_to_FBM <- function(BM, allele_counts, col_start, n_loci, ncores) {
     invisible(.Call(`_tidypopgen_write_to_FBM`, BM, allele_counts, col_start, n_loci, ncores))
 }

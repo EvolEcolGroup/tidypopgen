@@ -480,6 +480,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// window_sums_cpp
+List window_sums_cpp(const NumericMatrix& x, const IntegerVector& loci, const IntegerVector& lo, const IntegerVector& hi, bool long_double);
+RcppExport SEXP _tidypopgen_window_sums_cpp(SEXP xSEXP, SEXP lociSEXP, SEXP loSEXP, SEXP hiSEXP, SEXP long_doubleSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type loci(lociSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type lo(loSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type hi(hiSEXP);
+    Rcpp::traits::input_parameter< bool >::type long_double(long_doubleSEXP);
+    rcpp_result_gen = Rcpp::wrap(window_sums_cpp(x, loci, lo, hi, long_double));
+    return rcpp_result_gen;
+END_RCPP
+}
 // write_to_FBM
 void write_to_FBM(Environment BM, IntegerMatrix& allele_counts, const int col_start, const int n_loci, int ncores);
 RcppExport SEXP _tidypopgen_write_to_FBM(SEXP BMSEXP, SEXP allele_countsSEXP, SEXP col_startSEXP, SEXP n_lociSEXP, SEXP ncoresSEXP) {
@@ -524,6 +539,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},
     {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 1},
     {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},
+    {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}
 };
