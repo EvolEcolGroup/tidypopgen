@@ -194,6 +194,39 @@ test_that("n_cores can be set", {
   expect_equal(one_core, two_core)
 })
 
+test_that("pop_stats_dip_pseudo_cpp does not depend on blocks or cores", {
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  # call the cpp function directly, so that we can change the block size
+  stats_cpp <- function(block_size, ncores) {
+    pop_stats_dip_pseudo_cpp(
+      .gt_get_fbm(test_gt),
+      rowInd = .gt_fbm_rows(test_gt),
+      colInd = .gt_fbm_cols(test_gt),
+      groupIds = dplyr::group_indices(test_gt) - 1,
+      ngroups = 3,
+      ploidy = indiv_ploidy(test_gt),
+      by_locus_ho = TRUE,
+      by_locus_hs = TRUE,
+      by_locus_fis = TRUE,
+      by_locus_global = TRUE,
+      block_size = block_size,
+      ncores = ncores
+    )
+  }
+  # a single block of loci, on a single core
+  one_block <- stats_cpp(1024, 1)
+  # blocks of different sizes (including blocks that do not divide the
+  # number of loci), on multiple cores, give identical results
+  expect_identical(stats_cpp(1, 1), one_block)
+  expect_identical(stats_cpp(4, 2), one_block)
+  # the means across loci match those of the statistics by locus
+  expect_equal(one_block$mean_hs, unname(colMeans(one_block$hs, na.rm = TRUE)))
+  expect_equal(
+    one_block$mean_global,
+    unname(colMeans(one_block$global, na.rm = TRUE))
+  )
+})
+
 test_that("pop_global_stats handles a population with no data at a locus", {
   set.seed(3)
   missing_genotypes <- matrix(

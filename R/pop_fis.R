@@ -88,47 +88,32 @@ pop_fis_nei87 <- function(
   n_cores = bigstatsr::nb_cores()
 ) {
   stopifnot_diploid(.x)
-  # get the populations if it is a grouped gen_tibble
-  if (inherits(.x, "grouped_df")) {
-    .group_levels <- .x %>% group_keys()
-    .group_ids <- dplyr::group_indices(.x) - 1
-  } else {
-    # create a dummy pop
-    .group_levels <- tibble(population = "pop")
-    .group_ids <- rep(0, nrow(.x))
-  }
-
-  # summarise population frequencies
-  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_fbm(.x),
-    rowInd = .gt_fbm_rows(.x),
-    colInd = .gt_fbm_cols(.x),
-    groupIds = .group_ids,
-    ngroups = nrow(.group_levels),
-    ploidy = indiv_ploidy(.x),
-    ncores = n_cores
+  # compute Fis = 1 - Ho/Hs for each population (and the global statistics,
+  # which include the global Fis) in a single pass over the genotypes
+  pop_stats <- .pop_stats_dip_pseudo(
+    .x,
+    by_locus_fis = by_locus,
+    by_locus_global = by_locus && include_global,
+    n_cores = n_cores
   )
-  sHo <- pop_freqs_df$het_obs # nolint
-  mHo <- rowMeans(sHo, na.rm = TRUE) # nolint
-  n <- pop_freqs_df$n / 2
-  # sum of squared frequencies
-  sp2 <- pop_freqs_df$freq_alt^2 + pop_freqs_df$freq_ref^2
-  Hs <- (1 - sp2 - sHo / 2 / n) # nolint start
-  Hs <- n / (n - 1) * Hs
-  Fis <- 1 - sHo / Hs # nolint end
 
-  colnames(Fis) <- .group_levels %>% dplyr::pull(1) # nolint
   if (by_locus) {
+    Fis <- pop_stats$fis # nolint
+    colnames(Fis) <- pop_stats$group_names # nolint
     if (include_global) {
-      global <-
-        (.x %>% pop_global_stats(by_locus = TRUE, n_cores = n_cores))$Fis
+      # Fis is the ninth global statistic
+      global <- pop_stats$global[, 9]
       Fis <- cbind(Fis, global) # nolint
     }
   } else {
-    Fis <- colMeans(Fis, na.rm = TRUE) # nolint
+    # means across loci
+    Fis <- pop_stats$mean_fis # nolint
+    names(Fis) <- pop_stats$group_names
     if (include_global) {
-      global <-
-        (.x %>% pop_global_stats(by_locus = FALSE, n_cores = n_cores))["Fis"]
+      # as in pop_global_stats(), the genome-wide global Fis is computed from
+      # the means of Ho and Hs (ignoring infinite values)
+      global <- 1 - pop_stats$mean_global_finite[1] /
+        pop_stats$mean_global_finite[2]
       names(global) <- "global"
       Fis <- c(Fis, global) # nolint
     }

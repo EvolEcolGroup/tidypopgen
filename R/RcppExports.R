@@ -9,10 +9,6 @@ alt_freq_polyploid_cpp <- function(BM, rowInd, colInd, ploidy, ncores, as_counts
     .Call(`_tidypopgen_alt_freq_polyploid_cpp`, BM, rowInd, colInd, ploidy, ncores, as_counts, block_size)
 }
 
-compute_np_mn <- function(n) {
-    .Call(`_tidypopgen_compute_np_mn`, n)
-}
-
 fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V) {
     .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V)
 }
@@ -31,10 +27,6 @@ grouped_missingness_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ncore
 
 missingness_cpp <- function(BM, rowInd, colInd, ncores, block_size = 100000L) {
     .Call(`_tidypopgen_missingness_cpp`, BM, rowInd, colInd, ncores, block_size)
-}
-
-grouped_summaries_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores) {
-    .Call(`_tidypopgen_grouped_summaries_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores)
 }
 
 gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut) {
@@ -91,6 +83,10 @@ loci_qc_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, hwe, midp
 
 pairwise_pop_fst_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores) {
     .Call(`_tidypopgen_pairwise_pop_fst_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores)
+}
+
+pop_stats_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, by_locus_ho, by_locus_hs, by_locus_fis, by_locus_global, block_size, ncores) {
+    .Call(`_tidypopgen_pop_stats_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, by_locus_ho, by_locus_hs, by_locus_fis, by_locus_global, block_size, ncores)
 }
 
 read_packedancestry <- function(filename, BM, tab) {

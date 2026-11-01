@@ -45,17 +45,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_np_mn
-List compute_np_mn(NumericMatrix n);
-RcppExport SEXP _tidypopgen_compute_np_mn(SEXP nSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type n(nSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_np_mn(n));
-    return rcpp_result_gen;
-END_RCPP
-}
 // fbm256_prod_and_rowSumsSq
 List fbm256_prod_and_rowSumsSq(Environment BM, const IntegerVector& ind_row, const IntegerVector& ind_col, const NumericVector& center, const NumericVector& scale, const NumericMatrix& V);
 RcppExport SEXP _tidypopgen_fbm256_prod_and_rowSumsSq(SEXP BMSEXP, SEXP ind_rowSEXP, SEXP ind_colSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP VSEXP) {
@@ -140,23 +129,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
     rcpp_result_gen = Rcpp::wrap(missingness_cpp(BM, rowInd, colInd, ncores, block_size));
-    return rcpp_result_gen;
-END_RCPP
-}
-// grouped_summaries_dip_pseudo_cpp
-ListOf<NumericMatrix> grouped_summaries_dip_pseudo_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, int ncores);
-RcppExport SEXP _tidypopgen_grouped_summaries_dip_pseudo_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP ncoresSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
-    Rcpp::traits::input_parameter< size_t >::type ngroups(ngroupsSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
-    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    rcpp_result_gen = Rcpp::wrap(grouped_summaries_dip_pseudo_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -396,6 +368,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// pop_stats_dip_pseudo_cpp
+List pop_stats_dip_pseudo_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, bool by_locus_ho, bool by_locus_hs, bool by_locus_fis, bool by_locus_global, int block_size, int ncores);
+RcppExport SEXP _tidypopgen_pop_stats_dip_pseudo_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP by_locus_hoSEXP, SEXP by_locus_hsSEXP, SEXP by_locus_fisSEXP, SEXP by_locus_globalSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< size_t >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< bool >::type by_locus_ho(by_locus_hoSEXP);
+    Rcpp::traits::input_parameter< bool >::type by_locus_hs(by_locus_hsSEXP);
+    Rcpp::traits::input_parameter< bool >::type by_locus_fis(by_locus_fisSEXP);
+    Rcpp::traits::input_parameter< bool >::type by_locus_global(by_locus_globalSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(pop_stats_dip_pseudo_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, by_locus_ho, by_locus_hs, by_locus_fis, by_locus_global, block_size, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // read_packedancestry
 bool read_packedancestry(const char * filename, Environment BM, const RawMatrix& tab);
 RcppExport SEXP _tidypopgen_read_packedancestry(SEXP filenameSEXP, SEXP BMSEXP, SEXP tabSEXP) {
@@ -504,13 +498,11 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_alt_freq_dip_pseudo_cpp, 7},
     {"_tidypopgen_alt_freq_polyploid_cpp", (DL_FUNC) &_tidypopgen_alt_freq_polyploid_cpp, 7},
-    {"_tidypopgen_compute_np_mn", (DL_FUNC) &_tidypopgen_compute_np_mn, 1},
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 6},
     {"_tidypopgen_grouped_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_alt_freq_dip_pseudo_cpp, 10},
     {"_tidypopgen_grouped_het_obs_polyploid", (DL_FUNC) &_tidypopgen_grouped_het_obs_polyploid, 8},
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 8},
     {"_tidypopgen_missingness_cpp", (DL_FUNC) &_tidypopgen_missingness_cpp, 5},
-    {"_tidypopgen_grouped_summaries_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_summaries_dip_pseudo_cpp, 7},
     {"_tidypopgen_gt_copy_fbm", (DL_FUNC) &_tidypopgen_gt_copy_fbm, 8},
     {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 7},
     {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 9},
@@ -525,6 +517,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 8},
     {"_tidypopgen_loci_qc_cpp", (DL_FUNC) &_tidypopgen_loci_qc_cpp, 10},
     {"_tidypopgen_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_pairwise_pop_fst_cpp, 12},
+    {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},

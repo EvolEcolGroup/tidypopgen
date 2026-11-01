@@ -11,8 +11,8 @@
 // Summarise the genotypes of diploid (and pseudohaploid) individuals by group,
 // one locus at a time.
 //
-// This is shared by grouped_summaries_dip_pseudo_cpp() and
-// pairwise_pop_fst_cpp(). Rather than decoding each genotype through the
+// This is shared by pop_stats_dip_pseudo_cpp() and pairwise_pop_fst_cpp(),
+// which process loci in blocks. Rather than decoding each genotype through the
 // code256 vector into a double (and accumulating directly into large
 // loci x groups matrices), we read the raw bytes of the FBM and use small
 // lookup tables (one entry per possible byte) to get the dosage, whether the
