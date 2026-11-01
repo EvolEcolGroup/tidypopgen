@@ -729,3 +729,21 @@ test_that("gt_update_backingfile works if n loci is a multiple of chunk_size", {
   ordered_gt <- gt_order_loci(shuffled_gt, chunk_size = 2, quiet = TRUE)
   expect_identical(show_genotypes(ordered_gt), show_genotypes(example_gt))
 })
+
+test_that("cast_chromosome_to_int gives the same codes for factors", {
+  chr <- c("chr2", "chrX", NA, "chr10", "chrX", "MT")
+  # unused levels (chr30, chrY) do not change the codes of the others
+  chr_factor <- factor(
+    chr,
+    levels = c("chr10", "chr2", "chr30", "chrX", "chrY", "MT")
+  )
+  expect_identical(
+    cast_chromosome_to_int(chr_factor),
+    c(2L, 11L, NA, 10L, 11L, 12L)
+  )
+  # same codes as the character vector when levels follow first appearance
+  expect_identical(
+    cast_chromosome_to_int(factor(chr, levels = unique(chr[!is.na(chr)]))),
+    cast_chromosome_to_int(chr)
+  )
+})

@@ -666,12 +666,18 @@ change_duplicated_file_name <- function(file) {
 
 # adding a chr_int column
 cast_chromosome_to_int <- function(chromosome) {
-  # if chromosome is an factor, then cast it to character (but keep the levels
-  # to order non-numeric chromosomes)
+  # if chromosome is a factor, cast its levels rather than each locus (a
+  # factor has few levels, but it can have tens of millions of elements); we
+  # keep the levels to order non-numeric chromosomes
   chr_levels <- NULL
+  level_codes <- NULL
   if (is.factor(chromosome)) {
     chr_levels <- levels(chromosome)
-    chromosome <- as.character(chromosome)
+    level_codes <- as.integer(chromosome)
+    # only cast the levels that are used, which are exactly the values found
+    # in the data (unused levels would change the largest numeric chromosome)
+    used_levels <- tabulate(level_codes, nbins = length(chr_levels)) > 0
+    chromosome <- chr_levels[used_levels]
   }
   # if chromosome is a character, then cast it to integer
   if (is.character(chromosome)) {
@@ -697,6 +703,12 @@ cast_chromosome_to_int <- function(chromosome) {
         match(chromosome[is_other], other_names)
     }
     chromosome <- chr_int
+  }
+  # for a factor, map each locus to the integer of its level
+  if (!is.null(level_codes)) {
+    levels_int <- rep(NA_integer_, length(chr_levels))
+    levels_int[used_levels] <- chromosome
+    chromosome <- levels_int[level_codes]
   }
   if (is.numeric(chromosome)) {
     chromosome <- as.integer(chromosome)
