@@ -489,3 +489,25 @@ test_that("grouped loci_ functions keep empty groups with .drop = FALSE", {
   expect_equal(ncol(keep_counts$n_alt), 3)
   expect_equal(keep_counts$n_valid[, 3], rep(0, 4))
 })
+
+test_that("format_grouped_output tidy is the pivoted matrix", {
+  out_mat <- matrix(c(0.1, 0.2, NA, 0.4, 0.5, 0.6), nrow = 3)
+  # character and integer loci names
+  for (loci_names in list(c("rs1", "rs2", "rs3"), c(10L, 20L, 30L))) {
+    tidy <- format_grouped_output(out_mat, c("p1", "p2"), loci_names, "tidy")
+    pivoted <- as.data.frame(out_mat)
+    colnames(pivoted) <- c("p1", "p2")
+    pivoted$loci <- loci_names
+    pivoted <- tidyr::pivot_longer(
+      pivoted,
+      cols = c("p1", "p2"),
+      names_to = "group"
+    )
+    expect_identical(tidy, pivoted)
+  }
+  # a single group, as a vector
+  tidy <- format_grouped_output(c(0.1, 0.2), factor("p1"), 1:2, "tidy")
+  expect_identical(tidy$loci, 1:2)
+  expect_identical(tidy$group, c("p1", "p1"))
+  expect_identical(tidy$value, c(0.1, 0.2))
+})

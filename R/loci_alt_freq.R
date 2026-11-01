@@ -452,7 +452,13 @@ loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
 #'
 #' This function is used to format the matrix for grouped operations
 #'
-#' @param out_mat a matrix of the output
+#' Loci names are only added where they are needed: for "tidy", they become
+#' the `loci` column; for "matrix", they become the row names of a
+#' [matrix_int_names()] object (so integer names stay integers); "list" has
+#' no loci names.
+#'
+#' @param out_mat a matrix of the output (loci in rows, groups in columns), or
+#'   a vector (for a single group or a single locus)
 #' @param group_ids a vector of group ids
 #' @param loci_names a vector of loci names
 #' @param type a string indicating the type of output
@@ -463,24 +469,40 @@ format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
   # use the group labels as names (factors and numbers would otherwise fail
   # as matrix column names, or be used as column positions in tidyselect)
   group_ids <- as.character(group_ids)
+  n_loci <- length(loci_names)
+  n_groups <- length(group_ids)
+
+  if (type == "tidy") {
+    # build the long tibble directly, with one row per locus and group (loci
+    # in the outer loop, as given by tidyr::pivot_longer()), rather than
+    # casting the matrix to a data.frame and pivoting it, which makes several
+    # copies of the data. Once the matrix is transposed, each of its rows
+    # (a locus) becomes n_groups consecutive values (this also works if
+    # out_mat is a vector, i.e. a single group or a single locus)
+    values <- t(out_mat)
+    # drop all attributes (dim, dimnames, any class) to get a plain vector
+    # (values is not shared, so this happens in place)
+    attributes(values) <- NULL
+    return(tibble::new_tibble(
+      list(
+        loci = rep(loci_names, each = n_groups),
+        group = rep(group_ids, times = n_loci),
+        value = values
+      ),
+      nrow = n_loci * n_groups
+    ))
+  }
+
   if (is.vector(out_mat)) {
     # names are added below, so that integer loci names are not cast to
     # characters
     out_mat <- matrix(
       out_mat,
-      nrow = length(loci_names),
-      ncol = length(group_ids)
+      nrow = n_loci,
+      ncol = n_groups
     )
   }
-
-  if (type == "tidy") {
-    out_mat_tbl <- as.data.frame(out_mat)
-    colnames(out_mat_tbl) <- group_ids
-    out_mat_tbl$loci <- loci_names
-    long_freq <- out_mat_tbl %>% # nolint start
-      tidyr::pivot_longer(cols = dplyr::all_of(group_ids), names_to = "group") # nolint end
-    long_freq
-  } else if (type == "list") {
+  if (type == "list") {
     # return a list to mimic a group_map
     lapply(seq_len(ncol(out_mat)), function(i) out_mat[, i])
   } else if (type == "matrix") {
