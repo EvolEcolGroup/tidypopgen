@@ -21,8 +21,8 @@ grouped_alt_freq_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroup
     .Call(`_tidypopgen_grouped_alt_freq_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, as_counts, block_size, freq_only)
 }
 
-grouped_het_obs_polyploid <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores) {
-    .Call(`_tidypopgen_grouped_het_obs_polyploid`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores)
+grouped_het_obs_polyploid <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, block_size = 100000L) {
+    .Call(`_tidypopgen_grouped_het_obs_polyploid`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, block_size)
 }
 
 grouped_missingness_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, as_counts = TRUE, block_size = 100000L) {

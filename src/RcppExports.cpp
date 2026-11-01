@@ -93,8 +93,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // grouped_het_obs_polyploid
-ListOf<NumericMatrix> grouped_het_obs_polyploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, int ncores);
-RcppExport SEXP _tidypopgen_grouped_het_obs_polyploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP ncoresSEXP) {
+ListOf<NumericMatrix> grouped_het_obs_polyploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, int ncores, int block_size);
+RcppExport SEXP _tidypopgen_grouped_het_obs_polyploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -105,7 +105,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< size_t >::type ngroups(ngroupsSEXP);
     Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    rcpp_result_gen = Rcpp::wrap(grouped_het_obs_polyploid(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores));
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(grouped_het_obs_polyploid(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, block_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -513,7 +514,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_compute_np_mn", (DL_FUNC) &_tidypopgen_compute_np_mn, 1},
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 6},
     {"_tidypopgen_grouped_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_alt_freq_dip_pseudo_cpp, 10},
-    {"_tidypopgen_grouped_het_obs_polyploid", (DL_FUNC) &_tidypopgen_grouped_het_obs_polyploid, 7},
+    {"_tidypopgen_grouped_het_obs_polyploid", (DL_FUNC) &_tidypopgen_grouped_het_obs_polyploid, 8},
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 8},
     {"_tidypopgen_missingness_cpp", (DL_FUNC) &_tidypopgen_missingness_cpp, 5},
     {"_tidypopgen_grouped_summaries_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_summaries_dip_pseudo_cpp, 7},
