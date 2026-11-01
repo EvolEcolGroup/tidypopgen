@@ -71,13 +71,15 @@ validate_loci <- function(loci,
     )
   }
   if (check_duplicates == TRUE) {
-    # check for duplicates
-    duplicated_pos <- loci %>%
-      group_by(.data$chromosome) %>% # nolint
-      group_map(~ .x[duplicated(.x$position) | duplicated(.x$position, fromLast = TRUE), ]$name) %>% # nolint
-      unlist(use.names = FALSE)
-
-    has_dup_pos <- length(duplicated_pos) > 0
+    # check for duplicated positions within chromosomes, i.e. duplicated
+    # pairs of chromosome and position (this avoids splitting the whole loci
+    # table by chromosome)
+    has_dup_pos <- vctrs::vec_duplicate_any(
+      vctrs::data_frame(
+        chromosome = loci$chromosome,
+        position = loci$position
+      )
+    )
     has_dup_names <- anyDuplicated(loci$name) > 0
 
     if (!allow_duplicates) {
