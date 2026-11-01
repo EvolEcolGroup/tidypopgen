@@ -1,4 +1,8 @@
 # tidypopgen `dev`
+* `gt_admixture()` with `conda_env = "auto"` (the default) uses a copy of
+  ADMIXTURE on the PATH when conda is not installed, as documented: it
+  failed with the error of `reticulate::conda_list()` ("Unable to find
+  conda binary"). The check for ADMIXTURE on the PATH also works on Windows.
 * fix `rbind()` and `rbind_dry_run()` failing ("NAs are not allowed in
   subscripted assignments") on loci with a missing `allele_ref`. A missing
   allele is now inferred from the other dataset whichever column it is in
