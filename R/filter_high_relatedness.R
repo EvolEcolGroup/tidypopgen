@@ -83,11 +83,26 @@ filter_high_relatedness <-
     matrix2 <- matrix
     diag(matrix2) <- NA
 
+    # which relationships are above the threshold (missing kinship, e.g. no
+    # loci genotyped in both individuals, is not evidence of relatedness)
+    is_above <- function(x) !is.na(x) & x > kings_threshold
+    # number of relationships above the threshold among the individuals that
+    # have not been removed; rather than scanning the whole matrix at every
+    # iteration (which costs O(n^3) overall), this count is updated whenever
+    # an individual is removed
+    n_above <- sum(is_above(matrix2))
+    # number of relationships above the threshold in row and column k of
+    # matrix2 (i.e. those lost when individual k is removed; the diagonal is
+    # NA, so nothing is counted twice)
+    n_above_k <- function(matrix2, k) {
+      sum(is_above(matrix2[k, ])) + sum(is_above(matrix2[, k]))
+    }
+
     # loop through each individual
     # for pairs with higher than kings_threshold relatedness
     # the individual with higher average relatedness is removed
     for (i in 1:(var_num - 1)) {
-      if (!any(matrix2[!is.na(matrix2)] > kings_threshold)) {
+      if (n_above == 0) {
         if (verbose) {
           message("All correlations <=", kings_threshold, "\n")
         }
@@ -96,42 +111,47 @@ filter_high_relatedness <-
       if (col_to_delete[i]) {
         next
       }
-      for (j in (i + 1):var_num) {
-        if (!col_to_delete[i] && !col_to_delete[j]) {
-          # missing kinship (e.g. no loci genotyped in both individuals) is
-          # not evidence of relatedness
-          if (isTRUE(matrix[i, j] > kings_threshold)) {
-            mn1 <- mean(matrix2[i, ], na.rm = TRUE)
-            mn2 <- mean(matrix2[-j, ], na.rm = TRUE)
-            if (verbose) {
-              message(
-                "Compare row",
-                new_order[i],
-                " and column ",
-                new_order[j],
-                "with corr ",
-                round(matrix[i, j], 3),
-                "\n"
-              )
-            }
-            if (verbose) {
-              message("  Means: ", round(mn1, 3), "vs", round(mn2, 3))
-            }
-            if (mn1 > mn2) {
-              col_to_delete[i] <- TRUE
-              matrix2[i, ] <- NA
-              matrix2[, i] <- NA
-              if (verbose) {
-                message(" so flagging column", new_order[i], "\n")
-              }
-            } else {
-              col_to_delete[j] <- TRUE
-              matrix2[j, ] <- NA
-              matrix2[, j] <- NA
-              if (verbose) {
-                message(" so flagging column", new_order[j], "\n")
-              }
-            }
+      # the individuals after i (that have not been removed) whose
+      # relationship with i is above the threshold; removing one of them
+      # does not affect the others, so they can all be found at once
+      js <- (i + 1):var_num
+      js <- js[!col_to_delete[js] & is_above(matrix[i, js])]
+      for (j in js) {
+        # stop comparing i once it has been removed
+        if (col_to_delete[i]) {
+          break()
+        }
+        mn1 <- mean(matrix2[i, ], na.rm = TRUE)
+        mn2 <- mean(matrix2[-j, ], na.rm = TRUE)
+        if (verbose) {
+          message(
+            "Compare row",
+            new_order[i],
+            " and column ",
+            new_order[j],
+            "with corr ",
+            round(matrix[i, j], 3),
+            "\n"
+          )
+        }
+        if (verbose) {
+          message("  Means: ", round(mn1, 3), "vs", round(mn2, 3))
+        }
+        if (mn1 > mn2) {
+          col_to_delete[i] <- TRUE
+          n_above <- n_above - n_above_k(matrix2, i)
+          matrix2[i, ] <- NA
+          matrix2[, i] <- NA
+          if (verbose) {
+            message(" so flagging column", new_order[i], "\n")
+          }
+        } else {
+          col_to_delete[j] <- TRUE
+          n_above <- n_above - n_above_k(matrix2, j)
+          matrix2[j, ] <- NA
+          matrix2[, j] <- NA
+          if (verbose) {
+            message(" so flagging column", new_order[j], "\n")
           }
         }
       }
