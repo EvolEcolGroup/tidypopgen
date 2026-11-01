@@ -167,42 +167,27 @@ loci_alt_freq.grouped_df <- function(
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-    geno_fbm <- .gt_get_fbm(.x)
-    # rows (individuals) that we want to use
-    rows_to_keep <- .gt_fbm_rows(.x)
     # number of groups (used to define dimensions of objects)
     n_groups <- dplyr::n_groups(.x)
-    ploidy <- indiv_ploidy(.x)
 
-    gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-      freq_mat <- grouped_alt_freq_dip_pseudo_cpp(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        groupIds = dplyr::group_indices(.x) - 1,
-        ngroups = n_groups,
-        ncores = n_cores,
-        ploidy = ploidy,
-        as_counts = as_counts
-      )
-      return(freq_mat)
-    }
-
-    freq_mat <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_group_alt_freq_sub,
-      rows_to_keep = rows_to_keep,
-      ind = show_loci(.x)$big_index,
-      ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-      # in the cpp code
-      block.size = block_size,
-      a.combine = "rbind"
+    # the cpp code reads the FBM directly, in blocks of block_size loci, and
+    # fills a single matrix (rather than binding the matrices from each
+    # block); openMP uses multiple cores in the cpp code. If we want
+    # frequencies, it only returns them (freq_only = TRUE)
+    freq_mat <- grouped_alt_freq_dip_pseudo_cpp(
+      BM = .gt_get_fbm(.x),
+      rowInd = .gt_fbm_rows(.x),
+      colInd = .gt_fbm_cols(.x),
+      groupIds = dplyr::group_indices(.x) - 1L,
+      ngroups = n_groups,
+      ploidy = indiv_ploidy(.x),
+      ncores = n_cores,
+      as_counts = as_counts,
+      block_size = block_size,
+      freq_only = TRUE
     )
 
-    if (!as_counts) {
-      # only keep the frequencies
-      freq_mat <- freq_mat[, 1:n_groups]
-    } else {
+    if (as_counts) {
       # split into two matrices (alt counts and valid allele counts, and return
       # as a list)
       counts_list <- list(
@@ -340,26 +325,19 @@ loci_alt_freq_dip_pseudo <- function(.x,
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
-    # internal function that can be used with a big_apply #nolint start
-    gt_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-      alt_freq_dip_pseudo_cpp(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        ploidy = ploidy,
-        as_counts = as_counts,
-        ncores = n_cores
-      )
-    } # nolint end
-    freq <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_alt_freq_sub,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      ncores = 1, # parallelisation is used within the function
-      block.size = block_size,
-      a.combine = "rbind"
+    # the cpp code reads the FBM directly (in blocks of block_size loci, using
+    # openMP for parallelisation) and returns either the vector of
+    # frequencies, or a matrix with the counts of alternate and valid alleles
+    freq <- alt_freq_dip_pseudo_cpp(
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = attr(.x, "loci")$big_index,
+      ploidy = ploidy,
+      ncores = n_cores,
+      as_counts = as_counts,
+      block_size = block_size
     )
+    return(freq)
   } else {
     # if we have a single individual, create a matrix with two columns
     # counts and ploidy (i.e. number of copies), with no valid alleles (and
@@ -399,38 +377,22 @@ loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
   # as long as we have more than one individual
   ploidy_by_indiv <- indiv_ploidy(.x)
   if (length(rows_to_keep) > 1) {
-    # col means for submatrix (all rows, only some columns)
-    col_sums_na <- function(X, ind, rows_to_keep, ploidy_by_indiv) {
-      # drop = FALSE keeps a matrix when the block has a single locus
-      res <- colSums(X[rows_to_keep, ind, drop = FALSE], na.rm = TRUE)
-      col_na <- function(a, ploidy_by_indiv) {
-        sum(is.na(a) * ploidy_by_indiv)
-      }
-      res <- cbind(
-        res,
-        apply(
-          X[rows_to_keep, ind, drop = FALSE],
-          2,
-          col_na,
-          ploidy_by_indiv = ploidy_by_indiv
-        )
-      )
-      res
-    }
-    col_sums_na_mat <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = col_sums_na,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      ploidy_by_indiv = ploidy_by_indiv,
-      ncores = 1, # parallelisation is used within the function
-      block.size = block_size,
-      a.combine = "rbind"
-    )
     # counts of alternate and valid alleles, accounting for missing values
-    counts <- col_sums_na_mat
-    counts[, 2] <- sum(ploidy_by_indiv) - counts[, 2]
-    colnames(counts) <- c("n_alt", "n_valid")
+    # (the cpp code reads the FBM directly, in blocks of block_size loci,
+    # using openMP for parallelisation)
+    counts <- alt_freq_polyploid_cpp(
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = attr(.x, "loci")$big_index,
+      ploidy = ploidy_by_indiv,
+      ncores = n_cores,
+      as_counts = as_counts,
+      block_size = block_size
+    )
+    # if we only want frequencies, the cpp code returned them directly
+    if (!as_counts) {
+      return(counts)
+    }
   } else {
     # if we have a single individual (ploidy_by_indiv is already restricted
     # to the individuals in .x, so it has length 1); missing genotypes have

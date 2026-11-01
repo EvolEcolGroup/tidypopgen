@@ -511,3 +511,61 @@ test_that("format_grouped_output tidy is the pivoted matrix", {
   expect_identical(tidy$group, c("p1", "p1"))
   expect_identical(tidy$value, c(0.1, 0.2))
 })
+
+test_that("loci_alt_freq matches a reference for reordered indiv and loci", {
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 0),
+    c(2, 1, 0, NA, 0, 0),
+    c(2, NA, 0, 0, 1, 1),
+    c(1, 0, 0, 1, 0, 0),
+    c(1, 2, 0, 1, 2, 1),
+    c(0, 0, 0, 0, NA, 1),
+    c(0, 1, 1, 0, 1, NA)
+  )
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c", "d", "e", "f", "g"),
+    population = c("pop1", "pop2", "pop1", "pop2", "pop1", "pop3", "pop3")
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  # reorder (and drop some) individuals and loci
+  indiv_order <- c(7, 2, 5, 1, 4, 3)
+  loci_order <- c(6, 2, 4, 1)
+  sub_gt <- test_gt %>%
+    dplyr::slice(indiv_order) %>%
+    select_loci(all_of(loci_order))
+  sub_geno <- test_genotypes[indiv_order, loci_order]
+  # reference frequencies from the genotype matrix
+  ref_freq <- function(geno) {
+    colSums(geno, na.rm = TRUE) / (2 * colSums(!is.na(geno)))
+  }
+  expect_equal(loci_alt_freq(sub_gt), ref_freq(sub_geno))
+  sub_grp <- sub_gt %>% group_by(population)
+  grp_mat <- loci_alt_freq(sub_grp, type = "matrix")
+  for (pop in colnames(grp_mat)) {
+    expect_equal(
+      unname(unclass(grp_mat)[, pop]),
+      ref_freq(sub_geno[sub_gt$population == pop, , drop = FALSE])
+    )
+  }
+  # codes that are not small integers (e.g. dosages) use a different code
+  # path, which must give the same results (bytes 0 to 3 decode as with
+  # CODE_012)
+  attr(sub_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_DOSAGE
+  expect_equal(loci_alt_freq(sub_gt), ref_freq(sub_geno))
+  expect_equal(loci_alt_freq(sub_grp, type = "matrix"), grp_mat)
+  attr(sub_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_012
+})

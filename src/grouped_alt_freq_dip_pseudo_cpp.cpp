@@ -1,8 +1,14 @@
 /******************************************************************************/
 
-#include <bigstatsr/BMCodeAcc.h>
+#include "fbm_byte_acc.h"
 
 /******************************************************************************/
+
+// Estimate the alternate allele frequency at each locus for each group, for
+// diploid and pseudohaploid data. If freq_only = TRUE (and as_counts = FALSE),
+// only the ngroups columns of frequencies are returned, to avoid allocating
+// the valid allele counts when they are not needed. Loci are processed in
+// blocks of block_size, checking for user interrupts between blocks.
 
 // [[Rcpp::export]]
 NumericMatrix grouped_alt_freq_dip_pseudo_cpp(Environment BM,
@@ -12,48 +18,44 @@ NumericMatrix grouped_alt_freq_dip_pseudo_cpp(Environment BM,
                                    int ngroups,
                                    const NumericVector& ploidy,
                                    int ncores,
-                                   bool as_counts) {
+                                   bool as_counts,
+                                   int block_size = 100000,
+                                   bool freq_only = false) {
 
-  XPtr<FBM> xpBM = BM["address"];
-  SubBMCode256Acc macc(xpBM, rowInd, colInd, BM["code256"], 1);
+  FBMByteAcc acc(BM, rowInd, colInd);
 
-  size_t n = macc.nrow(); // number of individuals
-  size_t m = macc.ncol(); // number of loci
+  size_t n = acc.nrow(); // number of individuals
+  size_t m = acc.ncol(); // number of loci
 
-  // multiplier to convert dosages for pseudohaploid data
-  NumericVector pseudo_multiplier (n);
+  if (static_cast<size_t>(ploidy.size()) != n) {
+    stop("ploidy must have one entry per individual (rowInd)");
+  }
+  std::vector<size_t> group_ids = check_group_ids(groupIds, n, ngroups);
+
+  // multiplier to convert dosages for pseudohaploid data, and number of
+  // valid alleles contributed by each individual
+  std::vector<double> pseudo_multiplier(n), copies(n);
   for (size_t i = 0; i < n; i++) {
     pseudo_multiplier[i] = 1 / (3 - ploidy[i]);
+    copies[i] = ploidy[i];
   }
-  
-  // We use a single large matrix, the first ngroup columns are frequencies
-  // and the next ngroups columns are valid alleles. If as_counts = TRUE, then
-  // we return the counts before we compute the frequencies
-  
-  NumericMatrix freq_mat(m, ngroups*2);
 
-#pragma omp parallel for num_threads(ncores)
-  for (size_t j = 0; j < m; j++) { // loop over loci
-    for (size_t i = 0; i < n; i++) { //loop over individuals
-      double x = macc(i, j);
-      if (x > -1){
-        freq_mat(j, groupIds[i]) += x * pseudo_multiplier[i];
-        freq_mat(j, ngroups+groupIds[i]) += ploidy[i];
-      }
-    }
-  }
-  
-  if (as_counts){
-    return freq_mat;
-  }
-  // compute frequencies
-  for (size_t j = 0; j < m; j++) { // loop over loci
-    for (int group_i = 0; group_i < ngroups; group_i++) {
-      freq_mat(j, group_i) = freq_mat(j, group_i) / 
-        freq_mat(j, ngroups + group_i); // divide alt count by valid count
-    }
-  }
-  
+  // We use a single large matrix, the first ngroup columns are frequencies
+  // and the next ngroups columns are valid alleles (unless freq_only). If
+  // as_counts = TRUE, then we return the counts instead of the frequencies
+  bool with_valid = as_counts || !freq_only;
+  NumericMatrix freq_mat(m, with_valid ? ngroups * 2 : ngroups);
+  double* out = freq_mat.begin();
+
+  alt_valid_counts(acc, group_ids, ngroups, pseudo_multiplier, copies, ncores,
+                   block_size,
+                   [&](size_t j, size_t g, double alt, double valid) {
+                     // divide alt count by valid count (NaN if no valid
+                     // alleles), unless we want the counts
+                     out[j + g * m] = as_counts ? alt : alt / valid;
+                     if (with_valid) out[j + (ngroups + g) * m] = valid;
+                   });
+
   return freq_mat;
 }
 
