@@ -130,6 +130,20 @@ test_that("valid alleles check for .character method", {
   )
 })
 
+test_that("loci_from_bim reads loci names and alleles as characters", {
+  # an allele column with only "T" should not become TRUE, and names with
+  # leading zeros should not become integers
+  bim_file <- tempfile(fileext = ".bim")
+  writeLines(c("1\t001\t0\t100\tT\tA", "2\t002\t0.5\t200\tT\tC"), bim_file)
+  loci <- loci_from_bim(bim_file)
+  expect_equal(loci$name, c("001", "002"))
+  expect_equal(loci$allele_alt, c("T", "T"))
+  expect_equal(loci$allele_ref, c("A", "C"))
+  expect_equal(loci$chromosome, factor(c(1, 2)))
+  expect_equal(loci$position, c(100L, 200L))
+  expect_equal(loci$genetic_dist, c(0, 0.5))
+})
+
 test_that("0 is always accepted as a missing allele", {
   # pop_a.bim uses 0 for missing alleles
   bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")

@@ -39,7 +39,8 @@ gen_tibble_packedancestry <- function(
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
 
   # count the loci
-  loci_table <- utils::read.table(map_file, header = FALSE)
+  # (names and alleles are read as characters)
+  loci_table <- read_loci_file(map_file, character_cols = c(1, 5, 6))
   names(loci_table) <- c(
     "name",
     "chromosome",

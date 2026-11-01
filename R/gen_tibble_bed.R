@@ -150,7 +150,7 @@ loci_from_bim <- function(bim,
                           missing_alleles = c("0", "."),
                           allow_duplicates = FALSE) {
   if (is.character(bim)) {
-    bim <- utils::read.table(bim, stringsAsFactors = FALSE)
+    bim <- read_loci_file(bim, character_cols = c(2, 5, 6))
     names(bim)[1:6] <- c(
       "chromosome", "marker.ID", "genetic.dist",
       "physical.pos", "allele1", "allele2"
@@ -181,6 +181,35 @@ loci_from_bim <- function(bim,
   )
 
   return(loci)
+}
+
+#' Read a whitespace delimited file with one row per locus
+#'
+#' This function reads files such as PLINK .bim or *packedancestry* .snp files
+#' with [data.table::fread()], which is much faster than [utils::read.table()]
+#' and uses much less memory on large files (read.table() creates a string for
+#' every field before converting the columns, which costs several GB for tens
+#' of millions of loci).
+#' @param file the path to the file
+#' @param character_cols the indices of the columns to read as characters
+#'   (locus names and alleles, so that e.g. an allele "T" is not read as
+#'   TRUE, nor a name "001" as the integer 1); the type of the other columns
+#'   is guessed, as done by read.table() (e.g. chromosomes are integers if
+#'   all values are integers, so that their factor levels are sorted
+#'   numerically)
+#' @returns a data.frame with columns V1, V2, ...
+#' @keywords internal
+#' @noRd
+read_loci_file <- function(file, character_cols) {
+  data.table::fread(
+    file,
+    header = FALSE,
+    colClasses = list(character = character_cols),
+    # read large integers (e.g. positions) as doubles, not integer64
+    integer64 = "double",
+    data.table = FALSE,
+    showProgress = FALSE
+  )
 }
 
 
