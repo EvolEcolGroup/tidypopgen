@@ -25,8 +25,12 @@ grouped_het_obs_polyploid <- function(BM, rowInd, colInd, groupIds, ngroups, plo
     .Call(`_tidypopgen_grouped_het_obs_polyploid`, BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores)
 }
 
-grouped_missingness_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ncores) {
-    .Call(`_tidypopgen_grouped_missingness_cpp`, BM, rowInd, colInd, groupIds, ngroups, ncores)
+grouped_missingness_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, as_counts = TRUE, block_size = 100000L) {
+    .Call(`_tidypopgen_grouped_missingness_cpp`, BM, rowInd, colInd, groupIds, ngroups, ncores, as_counts, block_size)
+}
+
+missingness_cpp <- function(BM, rowInd, colInd, ncores, block_size = 100000L) {
+    .Call(`_tidypopgen_missingness_cpp`, BM, rowInd, colInd, ncores, block_size)
 }
 
 grouped_summaries_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores) {
