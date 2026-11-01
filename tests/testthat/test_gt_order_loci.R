@@ -747,3 +747,24 @@ test_that("cast_chromosome_to_int gives the same codes for factors", {
     cast_chromosome_to_int(chr)
   )
 })
+
+test_that("find_duplicated_loci lists duplicates by chromosome", {
+  test_gt <- load_example_gt("gen_tbl")
+  loci <- show_loci(test_gt)
+  # duplicated positions on chr2 (first in the table) and chr1
+  loci$chromosome <- factor(c("chr2", "chr1", "chr2", "chr1", "chr1", "chr3"))
+  loci$position <- c(5L, 3L, 5L, 7L, 3L, 1L)
+  show_loci(test_gt) <- loci
+  # names are grouped by chromosome, and then in the order of the table
+  expect_identical(find_duplicated_loci(test_gt), c("rs2", "rs5", "rs1", "rs3"))
+  expect_false(find_duplicated_loci(test_gt, list_duplicates = FALSE))
+  expect_false(is_loci_table_ordered(test_gt))
+  # missing chromosomes split the runs of loci, as with rle()
+  loci$chromosome <- factor(c("chr1", NA, NA, "chr2", "chr2", "chr3"))
+  loci$position <- 1:6
+  show_loci(test_gt) <- loci
+  expect_error(
+    is_loci_table_ordered(test_gt, error_on_false = TRUE),
+    "should be adjacent"
+  )
+})

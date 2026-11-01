@@ -55,14 +55,13 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
 ) {
   rlang::check_dots_empty()
 
+  loci <- show_loci(.x)
+  # integer chromosome of each locus, computed once and used to split
+  # individual columns (rather than splitting the whole loci table)
+  chr_int <- cast_chromosome_to_int(loci$chromosome)
+
   # check that within each chromosome positions are sorted
-  if (
-    any(unlist(
-      show_loci(.x) %>%
-        group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
-        group_map(~ is.unsorted(.x$position))
-    ))
-  ) {
+  if (any_unsorted_by_group(loci$position, chr_int)) {
     if (error_on_false) {
       stop("Your loci are not sorted within chromosomes")
     } else {
@@ -79,8 +78,14 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
     return(FALSE)
   }
 
-  # check that all positions in a chromosome are adjacent
-  if (any(duplicated(rle(as.integer(show_loci(.x)$chromosome))$values))) {
+  # check that all positions in a chromosome are adjacent, i.e. that no
+  # chromosome has more than one run of loci; vctrs::vec_unrep() finds the
+  # runs without the several copies of the chromosome codes made by rle()
+  chr_runs <- vctrs::vec_unrep(as.integer(loci$chromosome))
+  # (rle() would split consecutive missing chromosomes into separate runs,
+  # so treat any run of missing chromosomes longer than one as a duplicate)
+  if (anyDuplicated(chr_runs$key) > 0 ||
+        any(is.na(chr_runs$key) & chr_runs$times > 1)) {
     if (error_on_false) {
       stop("All SNPs in a chromosome should be adjacent in the loci table")
     } else {
@@ -90,13 +95,7 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
 
   # check genetic distance
   if (!ignore_genetic_dist) {
-    if (
-      any(unlist(
-        show_loci(.x) %>%
-          group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
-          group_map(~ is.unsorted(.x$genetic_dist))
-      ))
-    ) {
+    if (any_unsorted_by_group(loci$genetic_dist, chr_int)) {
       if (error_on_false) {
         stop("Your genetic distances are not sorted within chromosomes")
       } else {
@@ -146,18 +145,21 @@ find_duplicated_loci <- function(.x,
                                  error_on_false = FALSE,
                                  list_duplicates = TRUE,
                                  ...) {
-  if (
-    any(unlist(
-      show_loci(.x) %>%
-        group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
-        group_map(~ duplicated(.x$position))
-    ))
-  ) {
+  loci <- show_loci(.x)
+  chr_int <- cast_chromosome_to_int(loci$chromosome)
+  # pairs of chromosome and position (this avoids splitting the whole loci
+  # table by chromosome)
+  chr_pos <- vctrs::data_frame(chromosome = chr_int, position = loci$position)
+  if (vctrs::vec_duplicate_any(chr_pos)) {
     if (list_duplicates) {
-      show_loci(.x) %>%
-        group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
-        group_map(~ .x[duplicated(.x$position) | duplicated(.x$position, fromLast = TRUE), ]$name) %>% # nolint
-        unlist(use.names = FALSE)
+      # flag all loci that share chromosome and position with another locus
+      is_dup <- vctrs::vec_duplicate_detect(chr_pos)
+      # return their names ordered by chromosome (as when grouping by
+      # chromosome), and then by their order in the loci table (the radix
+      # sort is stable, and puts missing chromosomes last as group_by does)
+      dup_index <- which(is_dup)
+      dup_index <- dup_index[order(chr_int[dup_index], method = "radix")]
+      loci$name[dup_index]
     } else if (error_on_false) {
       stop("Your loci table contains duplicates")
     } else {
@@ -170,4 +172,20 @@ find_duplicated_loci <- function(.x,
       return(TRUE)
     }
   }
+}
+
+
+#' Test whether values are unsorted within any group
+#'
+#' Equivalent to splitting `x` by `group` and checking whether any of the
+#' groups is unsorted (as [is.unsorted()], so a group with missing values
+#' gives NA), but it only splits `x` rather than a whole table.
+#' @param x a vector
+#' @param group a vector of groups, of the same length as `x`
+#' @returns TRUE, FALSE or NA
+#' @keywords internal
+#' @noRd
+any_unsorted_by_group <- function(x, group) {
+  x_by_group <- vctrs::vec_split(x, group)$val
+  any(vapply(x_by_group, is.unsorted, logical(1)))
 }
