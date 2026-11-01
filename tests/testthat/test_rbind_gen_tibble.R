@@ -54,6 +54,12 @@ test_that("merge combines datasets correctly", {
   # Check ambiguous SNPs are dropped (remove_ambiguous TRUE by default)
   expect_false("rs1240719" %in% loci_names(merged_gen))
   expect_false("rs307354" %in% loci_names(merged_gen))
+
+  # the merged gen_tibble refers to the rds of its FBM (as other gen_tibbles)
+  expect_equal(
+    attr(merged_gen$genotypes, "fbm_file"),
+    gt_get_file_names(merged_gen)[1]
+  )
 })
 
 test_that("warning when no snps overlap", {
