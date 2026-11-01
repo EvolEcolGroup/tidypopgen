@@ -57,6 +57,10 @@ gt_write_text_by_locus <- function(BM, rowInd, colInd, lut, prefix, sep, file) {
     invisible(.Call(`_tidypopgen_gt_write_text_by_locus`, BM, rowInd, colInd, lut, prefix, sep, file))
 }
 
+gt_write_text_by_indiv <- function(BM, rowInd, colInd, byte_cat, lut, n_cat, locus_lut, prefix, sep, file, block_bytes = 256e6) {
+    invisible(.Call(`_tidypopgen_gt_write_text_by_indiv`, BM, rowInd, colInd, byte_cat, lut, n_cat, locus_lut, prefix, sep, file, block_bytes))
+}
+
 SNPHWE2_R <- function(obs_hets, obs_hom1, obs_hom2, midp) {
     .Call(`_tidypopgen_SNPHWE2_R`, obs_hets, obs_hom1, obs_hom2, midp)
 }

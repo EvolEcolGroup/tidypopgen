@@ -652,3 +652,26 @@ test_that("double positions are not written in scientific notation", {
   )
   expect_equal(bim$V4, map$V4)
 })
+
+test_that("ped and raw write subsets of individuals and loci", {
+  # reorder individuals and loci, and use integer loci names
+  sub_gt <- test_gt[c(3, 1), ] %>% select_loci(c(6, 3, 5))
+  sub_loci <- show_loci(sub_gt)
+  sub_loci$name <- c(3L, 2L, 1L)
+  show_loci(sub_gt) <- sub_loci
+  ped_path <- gt_as_plink(sub_gt, file = paste0(tempfile(), ".ped"), "ped")
+  # the second locus has a missing alternate allele (written as 0)
+  expect_equal(
+    readLines(ped_path),
+    c("pop2 c 0 0 0 -9 T A C C 0 0", "pop1 a 0 0 0 -9 T T C C C G")
+  )
+  raw_path <- gt_as_plink(sub_gt, file = paste0(tempfile(), ".raw"), "raw")
+  expect_equal(
+    readLines(raw_path),
+    c(
+      "FID IID PAT MAT SEX PHENOTYPE 3_A(/T) 2_0(/C) 1_G(/C)",
+      "pop2 c 0 0 0 -9 1 0 NA",
+      "pop1 a 0 0 0 -9 0 0 1"
+    )
+  )
+})

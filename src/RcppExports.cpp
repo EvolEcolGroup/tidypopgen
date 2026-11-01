@@ -231,6 +231,26 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// gt_write_text_by_indiv
+void gt_write_text_by_indiv(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& byte_cat, const CharacterVector& lut, const int n_cat, const IntegerVector& locus_lut, const CharacterVector& prefix, const std::string& sep, const std::string& file, const double block_bytes);
+RcppExport SEXP _tidypopgen_gt_write_text_by_indiv(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP byte_catSEXP, SEXP lutSEXP, SEXP n_catSEXP, SEXP locus_lutSEXP, SEXP prefixSEXP, SEXP sepSEXP, SEXP fileSEXP, SEXP block_bytesSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type byte_cat(byte_catSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type lut(lutSEXP);
+    Rcpp::traits::input_parameter< const int >::type n_cat(n_catSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type locus_lut(locus_lutSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type prefix(prefixSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type sep(sepSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< const double >::type block_bytes(block_bytesSEXP);
+    gt_write_text_by_indiv(BM, rowInd, colInd, byte_cat, lut, n_cat, locus_lut, prefix, sep, file, block_bytes);
+    return R_NilValue;
+END_RCPP
+}
 // SNPHWE2_R
 double SNPHWE2_R(int32_t obs_hets, int32_t obs_hom1, int32_t obs_hom2, uint32_t midp);
 RcppExport SEXP _tidypopgen_SNPHWE2_R(SEXP obs_hetsSEXP, SEXP obs_hom1SEXP, SEXP obs_hom2SEXP, SEXP midpSEXP) {
@@ -442,6 +462,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 4},
     {"_tidypopgen_gt_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_pi_polyploid, 6},
     {"_tidypopgen_gt_write_text_by_locus", (DL_FUNC) &_tidypopgen_gt_write_text_by_locus, 7},
+    {"_tidypopgen_gt_write_text_by_indiv", (DL_FUNC) &_tidypopgen_gt_write_text_by_indiv, 11},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 6},
