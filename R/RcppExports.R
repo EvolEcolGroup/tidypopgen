@@ -97,16 +97,16 @@ read_packedancestry <- function(filename, BM, tab) {
     .Call(`_tidypopgen_read_packedancestry`, filename, BM, tab)
 }
 
-increment_as_counts <- function(k, k2, na_mat, dos_mat, BM, rowInd, colInd) {
-    invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, na_mat, dos_mat, BM, rowInd, colInd))
+increment_as_counts <- function(k, k2, BM, rowInd, colInd, ncores) {
+    invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, BM, rowInd, colInd, ncores))
 }
 
-increment_ibs_counts <- function(k, k2, genotype0, genotype1, genotype2, BM, rowInd, colInd) {
-    invisible(.Call(`_tidypopgen_increment_ibs_counts`, k, k2, genotype0, genotype1, genotype2, BM, rowInd, colInd))
+increment_ibs_counts <- function(k, k2, BM, rowInd, colInd, ncores) {
+    invisible(.Call(`_tidypopgen_increment_ibs_counts`, k, k2, BM, rowInd, colInd, ncores))
 }
 
-increment_king_numerator <- function(k, n_Aa_i, genotype0, genotype1, genotype2, genotype_valid, BM, rowInd, colInd) {
-    invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, genotype0, genotype1, genotype2, genotype_valid, BM, rowInd, colInd))
+increment_king_numerator <- function(k, n_Aa_i, BM, rowInd, colInd, ncores) {
+    invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, BM, rowInd, colInd, ncores))
 }
 
 vcf_loci_table <- function(filename) {

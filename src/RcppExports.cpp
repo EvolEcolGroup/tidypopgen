@@ -427,53 +427,47 @@ BEGIN_RCPP
 END_RCPP
 }
 // increment_as_counts
-void increment_as_counts(Environment k, Environment k2, arma::mat& na_mat, arma::mat& dos_mat, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
-RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP na_matSEXP, SEXP dos_matSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
+void increment_as_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
+RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
     Rcpp::traits::input_parameter< Environment >::type k2(k2SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type na_mat(na_matSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type dos_mat(dos_matSEXP);
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    increment_as_counts(k, k2, na_mat, dos_mat, BM, rowInd, colInd);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    increment_as_counts(k, k2, BM, rowInd, colInd, ncores);
     return R_NilValue;
 END_RCPP
 }
 // increment_ibs_counts
-void increment_ibs_counts(Environment k, Environment k2, arma::mat& genotype0, arma::mat& genotype1, arma::mat& genotype2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
-RcppExport SEXP _tidypopgen_increment_ibs_counts(SEXP kSEXP, SEXP k2SEXP, SEXP genotype0SEXP, SEXP genotype1SEXP, SEXP genotype2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
+void increment_ibs_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
+RcppExport SEXP _tidypopgen_increment_ibs_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
     Rcpp::traits::input_parameter< Environment >::type k2(k2SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type genotype0(genotype0SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type genotype1(genotype1SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type genotype2(genotype2SEXP);
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    increment_ibs_counts(k, k2, genotype0, genotype1, genotype2, BM, rowInd, colInd);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    increment_ibs_counts(k, k2, BM, rowInd, colInd, ncores);
     return R_NilValue;
 END_RCPP
 }
 // increment_king_numerator
-void increment_king_numerator(Environment k, Environment n_Aa_i, arma::mat& genotype0, arma::mat& genotype1, arma::mat& genotype2, arma::mat& genotype_valid, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd);
-RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP kSEXP, SEXP n_Aa_iSEXP, SEXP genotype0SEXP, SEXP genotype1SEXP, SEXP genotype2SEXP, SEXP genotype_validSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP) {
+void increment_king_numerator(Environment k, Environment n_Aa_i, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
+RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP kSEXP, SEXP n_Aa_iSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
     Rcpp::traits::input_parameter< Environment >::type n_Aa_i(n_Aa_iSEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type genotype0(genotype0SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type genotype1(genotype1SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type genotype2(genotype2SEXP);
-    Rcpp::traits::input_parameter< arma::mat& >::type genotype_valid(genotype_validSEXP);
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    increment_king_numerator(k, n_Aa_i, genotype0, genotype1, genotype2, genotype_valid, BM, rowInd, colInd);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    increment_king_numerator(k, n_Aa_i, BM, rowInd, colInd, ncores);
     return R_NilValue;
 END_RCPP
 }
@@ -558,9 +552,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 13},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
-    {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
-    {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 8},
-    {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 9},
+    {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 6},
+    {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 6},
+    {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 6},
     {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 1},
     {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},

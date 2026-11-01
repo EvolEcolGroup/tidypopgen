@@ -12,8 +12,10 @@
 #' @param x a `gen_tibble` object.
 #' @param as_matrix boolean, determining whether the results should be a square
 #'   symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)
-#' @param block_size maximum number of loci read at once. More loci should
-#'   improve speed, but will tax memory.
+#' @param block_size maximum number of loci read at once. Genotypes are
+#'   compared in a compact bit-packed form, so this has little effect on
+#'   memory use.
+#' @param n_cores number of cores to be used (default 1).
 #' @returns a square symmetrical matrix of relationship coefficients between
 #'   individuals if `as_matrix` is TRUE, or a tidied tibble of coefficients if
 #'   `as_matrix` is FALSE.
@@ -33,7 +35,8 @@
 pairwise_king <- function(
   x,
   as_matrix = FALSE,
-  block_size = bigstatsr::block_size(nrow(x))
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = 1
 ) {
   stopifnot_diploid(x)
   # nolint
@@ -44,7 +47,8 @@ pairwise_king <- function(
     X,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
-    block.size = block_size
+    block.size = block_size,
+    n_cores = n_cores
   )
   dimnames(king_matrix) <- list(x$id, x$id)
   if (as_matrix) {

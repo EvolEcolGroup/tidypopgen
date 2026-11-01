@@ -8,7 +8,8 @@ pairwise_ibs(
   x,
   as_matrix = FALSE,
   type = c("proportion", "adjusted_counts", "raw_counts"),
-  block_size = bigstatsr::block_size(nrow(x))
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = 1
 )
 }
 \arguments{
@@ -22,8 +23,11 @@ symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 identical alleles and non-missing alleles, from which the two other
 quantities are computed)}
 
-\item{block_size}{maximum number of loci read at once. More loci should
-improve speed, but will tax memory.}
+\item{block_size}{maximum number of loci read at once. Genotypes are
+compared in a compact bit-packed form, so this has little effect on
+memory use.}
+
+\item{n_cores}{number of cores to be used (default 1).}
 }
 \value{
 a \link[bigstatsr:FBM]{bigstatsr::FBM} of proportion or adjusted counts, or a list of

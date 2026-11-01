@@ -61,3 +61,39 @@ test_that("snp_allele_sharing is correct when blocks have different sizes", {
     snp_allele_sharing(test_fbm, ind.col = 1:5)
   )
 })
+
+test_that("snp_allele_sharing is correct across bit-packing boundaries", {
+  # more than 64 individuals and loci, with missing data, so that genotypes
+  # are packed into several words and blocks of individuals
+  set.seed(123)
+  geno_vals <- sample(c(0:2, NA), 70 * 150,
+    replace = TRUE,
+    prob = c(0.4, 0.3, 0.25, 0.05)
+  )
+  geno_mat <- matrix(geno_vals, nrow = 70)
+  big_gt <- gen_tibble(
+    x = geno_mat,
+    loci = data.frame(
+      name = paste0("rs", 1:150), chromosome = 1L, position = 1:150,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    indiv_meta = data.frame(id = paste0("i", 1:70), population = "p1"),
+    quiet = TRUE
+  )
+  test_fbm <- tidypopgen:::.gt_get_fbm(big_gt)
+  # reordered subsets of individuals and loci, and multiple cores
+  rows <- c(70:3, 1)
+  cols <- c(150:80, 2:60)
+  test_as <- snp_allele_sharing(test_fbm,
+    ind.row = rows, ind.col = cols,
+    block.size = 70, n_cores = 2
+  )
+  # reference: 1/2 * (1 + tcrossprod(dos - 1) / tcrossprod(valid)), with
+  # missing dosages set to 1
+  g <- geno_mat[rows, cols]
+  valid <- !is.na(g) + 0
+  dos_1 <- g - 1
+  dos_1[is.na(dos_1)] <- 0
+  as_ref <- 0.5 * (1 + tcrossprod(dos_1) / tcrossprod(valid))
+  expect_equal(test_as, as_ref, tolerance = 1e-12)
+})

@@ -8,7 +8,8 @@ snp_allele_sharing(
   X,
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
-  block.size = bigstatsr::block_size(nrow(X))
+  block.size = bigstatsr::block_size(nrow(X)),
+  n_cores = 1
 )
 }
 \arguments{
@@ -21,9 +22,11 @@ specified, all rows are used. Don't use negative indices.}
 \item{ind.col}{An optional vector of the column indices that are used. If not
 specified, all columns are used. Don't use negative indices.}
 
-\item{block.size}{maximum number of columns read at once. Note that, to
-optimise the speed of matrix operations, we have to store in memory 3 times
-the columns.}
+\item{block.size}{maximum number of columns read at once. Genotypes are
+compared in a compact bit-packed form, so this has little effect on
+memory use.}
+
+\item{n_cores}{number of cores to be used (default 1).}
 }
 \value{
 a matrix of allele sharing between all pairs of individuals

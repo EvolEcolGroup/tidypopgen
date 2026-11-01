@@ -103,3 +103,41 @@ test_that("snp_ibs as.counts = FALSE gives the same results as plink", {
   # Check matrices are equal
   expect_true(all.equal(tidy_ibs, plink_matrix))
 })
+
+test_that("snp_ibs is correct across bit-packing boundaries", {
+  # more than 64 individuals and loci, with missing data, so that genotypes
+  # are packed into several words and blocks of individuals
+  set.seed(123)
+  geno_vals <- sample(c(0:2, NA), 70 * 150,
+    replace = TRUE,
+    prob = c(0.4, 0.3, 0.25, 0.05)
+  )
+  geno_mat <- matrix(geno_vals, nrow = 70)
+  big_gt <- gen_tibble(
+    x = geno_mat,
+    loci = data.frame(
+      name = paste0("rs", 1:150), chromosome = 1L, position = 1:150,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    indiv_meta = data.frame(id = paste0("i", 1:70), population = "p1"),
+    quiet = TRUE
+  )
+  test_fbm <- tidypopgen:::.gt_get_fbm(big_gt)
+  # reordered subsets of individuals and loci, and multiple cores
+  rows <- c(70:3, 1)
+  cols <- c(150:80, 2:60)
+  test_ibs <- snp_ibs(test_fbm,
+    ind.row = rows, ind.col = cols,
+    type = "raw_counts", block.size = 70, n_cores = 2
+  )
+  # reference: the sum of (2 - |g_i - g_j|) over the loci valid in both
+  # individuals, and 2 * the number of those loci
+  g <- geno_mat[rows, cols]
+  valid <- !is.na(g) + 0
+  g[is.na(g)] <- 0
+  abs_diff <- sapply(seq_len(nrow(g)), function(j) {
+    rowSums(abs(sweep(g, 2, g[j, ])) * sweep(valid, 2, valid[j, ], "*"))
+  })
+  expect_identical(test_ibs$ibs[], 2 * tcrossprod(valid) - abs_diff)
+  expect_identical(test_ibs$valid_n[], 2 * tcrossprod(valid))
+})
