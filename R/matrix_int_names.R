@@ -289,12 +289,13 @@ is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
                                  j_names = NULL, drop = TRUE) {
   # if we only have one index (e.g. x[i] or x[logical_matrix]), we are not
   # subsetting rows and columns, so we index the underlying data directly
+  # with the default method (unclass(x) would copy the whole matrix first)
   n_index <- nargs() - !missing(drop) - !missing(i_names) - !missing(j_names)
   if (n_index < 3) {
     if (missing(i)) {
       return(x)
     }
-    return(unclass(x)[i])
+    return(NextMethod())
   }
   # check that we don't have i and i_names both provided
   if (!missing(i) && !is.null(i_names)) {
@@ -404,14 +405,11 @@ is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
 `[<-.matrix_int_names` <- function(x, i, j, i_names = NULL,
                                    j_names = NULL, value) {
   # if we only have one index (e.g. x[i] <- value or x[logical_matrix] <-
-  # value), we assign to the underlying data directly, keeping all attributes
+  # value), we assign to the underlying data directly with the default
+  # method, which keeps all attributes (unclass(x) would copy the matrix)
   n_index <- nargs() - 1 - !missing(i_names) - !missing(j_names)
   if (n_index < 3) {
-    x_class <- class(x)
-    x <- unclass(x)
-    x[i] <- value
-    class(x) <- x_class
-    return(x)
+    return(NextMethod())
   }
   # Get the integer names and character dimnames
   rnames <- attr(x, "int_rownames")
