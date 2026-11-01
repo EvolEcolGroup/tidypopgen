@@ -336,8 +336,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // gt_grouped_hwe
-NumericMatrix gt_grouped_hwe(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, uint32_t midp);
-RcppExport SEXP _tidypopgen_gt_grouped_hwe(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP midpSEXP) {
+NumericMatrix gt_grouped_hwe(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, uint32_t midp, int ncores, int block_size);
+RcppExport SEXP _tidypopgen_gt_grouped_hwe(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP midpSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -347,7 +347,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
     Rcpp::traits::input_parameter< size_t >::type ngroups(ngroupsSEXP);
     Rcpp::traits::input_parameter< uint32_t >::type midp(midpSEXP);
-    rcpp_result_gen = Rcpp::wrap(gt_grouped_hwe(BM, rowInd, colInd, groupIds, ngroups, midp));
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_grouped_hwe(BM, rowInd, colInd, groupIds, ngroups, midp, ncores, block_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -526,7 +528,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_write_text_by_indiv", (DL_FUNC) &_tidypopgen_gt_write_text_by_indiv, 11},
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
-    {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 6},
+    {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 8},
     {"_tidypopgen_pairwise_fst_hudson_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_hudson_loop, 6},
     {"_tidypopgen_pairwise_fst_nei87_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_nei87_loop, 7},
     {"_tidypopgen_pairwise_fst_wc84_loop", (DL_FUNC) &_tidypopgen_pairwise_fst_wc84_loop, 6},

@@ -81,8 +81,8 @@ hwe_on_matrix <- function(geno_counts, midp) {
     .Call(`_tidypopgen_hwe_on_matrix`, geno_counts, midp)
 }
 
-gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp) {
-    .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp)
+gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp, ncores = 1L, block_size = 100000L) {
+    .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp, ncores, block_size)
 }
 
 pairwise_fst_hudson_loop <- function(pairwise_combn, n, freq_alt, freq_ref, by_locus, return_num_dem) {
