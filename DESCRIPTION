@@ -69,6 +69,7 @@ Suggests:
     reticulate,
     testthat (>= 3.0.0),
     vcfR,
+    withr,
     xgboost,
     spelling
 Additional_repositories: https://evolecolgroup.r-universe.dev/

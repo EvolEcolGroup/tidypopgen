@@ -23,7 +23,7 @@
   from their first non-missing genotype (searched in the first 1,000 variants
   by the "cpp" parser), or is the largest ploidy of the other individuals if
   there is none
-* fix `gen_tibble()` on VCF files silently mis-coding genotypes with more
+* fix `gen_tibble()` on VCF files silently corrupting genotypes with more
   alleles than the ploidy estimated from the first variant (e.g. a tetraploid
   genotype in a diploid file) when they are not on the last line; this is now an
   error
