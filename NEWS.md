@@ -138,9 +138,6 @@
   single heterozygote genotyped)
 * fix `gt_as_vcf()` and `gt_as_plink(type = "ped")` writing positions stored as
   doubles in scientific notation (e.g. `1e+05`)
-* fix `gt_as_plink(type = "bed")` not writing the population (as family ID),
-  parents, sex and phenotype to the .fam file, and `gt_as_plink(type =
-  "ped")`/`type = "raw"` ignoring the grouping variable as family ID
 * fix `gt_as_plink(type = "ped")` and `gt_as_plink(type = "raw")` dropping
   parents (`paternal_ID`/`maternal_ID`, or `father`/`mother`) and numeric sex
   codes read from PLINK files
