@@ -152,8 +152,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // gt_grouped_pi_diploid
-ListOf<NumericMatrix> gt_grouped_pi_diploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, int ncores, int block_size);
-RcppExport SEXP _tidypopgen_gt_grouped_pi_diploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
+ListOf<NumericMatrix> gt_grouped_pi_diploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, int ncores, int block_size, bool return_n);
+RcppExport SEXP _tidypopgen_gt_grouped_pi_diploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP, SEXP return_nSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -164,13 +164,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(gt_grouped_pi_diploid(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size));
+    Rcpp::traits::input_parameter< bool >::type return_n(return_nSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_grouped_pi_diploid(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size, return_n));
     return rcpp_result_gen;
 END_RCPP
 }
 // gt_grouped_pi_polyploid
-ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, int ncores, int block_size);
-RcppExport SEXP _tidypopgen_gt_grouped_pi_polyploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
+ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, int ncores, int block_size, bool return_n);
+RcppExport SEXP _tidypopgen_gt_grouped_pi_polyploid(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP, SEXP return_nSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -183,7 +184,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type is_pseudohaploid(is_pseudohaploidSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(gt_grouped_pi_polyploid(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores, block_size));
+    Rcpp::traits::input_parameter< bool >::type return_n(return_nSEXP);
+    rcpp_result_gen = Rcpp::wrap(gt_grouped_pi_polyploid(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores, block_size, return_n));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -539,8 +541,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 8},
     {"_tidypopgen_missingness_cpp", (DL_FUNC) &_tidypopgen_missingness_cpp, 5},
     {"_tidypopgen_gt_copy_fbm", (DL_FUNC) &_tidypopgen_gt_copy_fbm, 8},
-    {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 7},
-    {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 9},
+    {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 8},
+    {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 10},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
     {"_tidypopgen_gt_ind_hetero_polyploid", (DL_FUNC) &_tidypopgen_gt_ind_hetero_polyploid, 5},
     {"_tidypopgen_gt_pi_diploid", (DL_FUNC) &_tidypopgen_gt_pi_diploid, 5},

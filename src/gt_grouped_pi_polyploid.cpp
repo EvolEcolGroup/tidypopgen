@@ -8,7 +8,8 @@
 // for details of the estimator. When the dataset is marked pseudohaploid,
 // individuals with ploidy one retain 0/2 storage while diploid individuals
 // retain their usual dosage. The dataset-level flag distinguishes this from
-// ordinary 0/1 haploid calls.
+// ordinary 0/1 haploid calls. The number of valid allele copies (`n`) is
+// only returned if return_n = TRUE.
 
 // [[Rcpp::export]]
 ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM,
@@ -19,7 +20,8 @@ ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM,
                                    const NumericVector& ploidy,
                                    bool is_pseudohaploid,
                                    int ncores,
-                                   int block_size = 100000) {
+                                   int block_size = 100000,
+                                   bool return_n = false) {
 
   FBMByteAcc acc(BM, rowInd, colInd);
 
@@ -40,7 +42,8 @@ ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM,
   }
 
   NumericMatrix pi(m, ngroups);
-  NumericMatrix valid_alleles(m, ngroups);
+  // only allocate the valid allele counts if they are needed
+  NumericMatrix valid_alleles(return_n ? m : 0, return_n ? ngroups : 0);
   double* p_pi = pi.begin();
   double* p_valid = valid_alleles.begin();
 
@@ -53,9 +56,12 @@ ListOf<NumericMatrix> gt_grouped_pi_polyploid(Environment BM,
                        (alt * (this_valid_alleles - alt) /
                          (this_valid_alleles * (this_valid_alleles - 1) / 2)) :
                        NA_REAL;
-                     p_valid[j + g * m] = this_valid_alleles;
+                     if (return_n) p_valid[j + g * m] = this_valid_alleles;
                    });
 
+  if (!return_n) {
+    return List::create(_["pi"] = pi);
+  }
   return List::create(_["pi"]  = pi,
                       _["n"] = valid_alleles);
 }

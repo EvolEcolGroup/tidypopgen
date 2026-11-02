@@ -33,12 +33,12 @@ gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, 
     invisible(.Call(`_tidypopgen_gt_copy_fbm`, BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut))
 }
 
-gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size = 100000L) {
-    .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores, block_size)
+gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size = 100000L, return_n = FALSE) {
+    .Call(`_tidypopgen_gt_grouped_pi_diploid`, BM, rowInd, colInd, groupIds, ngroups, ncores, block_size, return_n)
 }
 
-gt_grouped_pi_polyploid <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores, block_size = 100000L) {
-    .Call(`_tidypopgen_gt_grouped_pi_polyploid`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores, block_size)
+gt_grouped_pi_polyploid <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores, block_size = 100000L, return_n = FALSE) {
+    .Call(`_tidypopgen_gt_grouped_pi_polyploid`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, ncores, block_size, return_n)
 }
 
 gt_ind_hetero <- function(BM, rowInd, colInd, ncores) {
