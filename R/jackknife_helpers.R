@@ -23,11 +23,14 @@
   }
   # integer index for each chromosome (we avoid creating character vectors
   # with one element per locus, as they are very large for big datasets)
-  chrom_idx <- match(loci_table$chromosome, unique(loci_table$chromosome))
+  chrom_idx <- .chromosome_index(loci_table$chromosome)
   # block id within each chromosome
   if (size_unit == "snp") {
-    # count the snps within each chromosome
-    snp_idx <- stats::ave(seq_along(chrom_idx), chrom_idx, FUN = seq_along)
+    # the rank of each snp within its chromosome (the loci of a chromosome
+    # need not be contiguous in the table): order() lists the loci of each
+    # chromosome in turn, in the order of the table
+    snp_idx <- integer(length(chrom_idx))
+    snp_idx[order(chrom_idx)] <- sequence(tabulate(chrom_idx))
     local_id <- ceiling(snp_idx / block_size)
   } else if (size_unit == "bp") {
     local_id <- floor(loci_table$position / block_size)
@@ -54,18 +57,25 @@
 #' @noRd
 .block_sums <- function(mat, block_id) {
   # remove all attributes other than dim (e.g. names of the loci, or
-  # matrix_int_names), only keeping the column names (one per statistic); we
-  # avoid as.matrix(), which would copy the names of a vector as row names
-  mat <- matrix(as.numeric(mat),
-    nrow = NROW(mat), ncol = NCOL(mat),
-    dimnames = list(NULL, colnames(mat))
+  # matrix_int_names); we avoid as.matrix(), which would copy the names of a
+  # vector as row names
+  stat_names <- colnames(mat)
+  mat <- matrix(as.numeric(mat), nrow = NROW(mat), ncol = NCOL(mat))
+  # each block is a window of window_sums_cpp(): the loci sorted by block
+  # (keeping their order within each block), with block b covering positions
+  # (lo[b], hi[b]] of that order
+  n_loci <- tabulate(block_id, nbins = max(block_id))
+  hi <- cumsum(n_loci)
+  block_sums <- window_sums_cpp(mat,
+    loci = order(block_id),
+    lo = as.integer(hi - n_loci),
+    hi = as.integer(hi),
+    # accumulate in double, as rowsum() does
+    long_double = FALSE
   )
-  sums <- rowsum(mat, block_id, na.rm = TRUE, reorder = TRUE)
-  n <- rowsum((!is.na(mat)) * 1, block_id, reorder = TRUE)
-  # rowsum() names the rows with the block ids (as characters), which we drop
-  # (rows are in the order of the block ids)
-  rownames(sums) <- NULL
-  rownames(n) <- NULL
+  sums <- block_sums$sum
+  n <- block_sums$n
+  colnames(sums) <- colnames(n) <- stat_names
   list(sums = sums, n = n)
 }
 

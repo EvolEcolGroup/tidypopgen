@@ -211,14 +211,8 @@ windows_stats_generic <- function(.x, loci_table,
   size_unit <- match.arg(size_unit)
   chrom <- loci_table$chromosome
   chromosomes <- unique(chrom)
-  # the chromosome of each locus, as an index into chromosomes (for factors,
-  # we match the integer codes, as matching factors would convert them to
-  # character vectors)
-  if (is.factor(chrom)) {
-    chrom_id <- match(as.integer(chrom), as.integer(chromosomes))
-  } else {
-    chrom_id <- match(chrom, chromosomes)
-  }
+  # the chromosome of each locus, as an index into chromosomes
+  chrom_id <- .chromosome_index(chrom, chromosomes)
   # the indices of the loci of each chromosome, in the order of the table
   # (we split by a factor built directly from chrom_id, to avoid converting
   # it to character)
@@ -305,6 +299,18 @@ windows_stats_generic <- function(.x, loci_table,
     locus_first = locus_first,
     locus_last = locus_last
   )
+}
+
+# The chromosome of each locus, as an index into the chromosomes in order of
+# appearance (chromosomes, i.e. unique(chrom)). For factors, we match the
+# integer codes, as matching factors would convert them to character vectors
+# (with one element per locus, which are large for big datasets)
+.chromosome_index <- function(chrom, chromosomes = unique(chrom)) {
+  if (is.factor(chrom)) {
+    match(as.integer(chrom), as.integer(chromosomes))
+  } else {
+    match(chrom, chromosomes)
+  }
 }
 
 # Check that a loci_table has the columns needed to define windows or blocks
