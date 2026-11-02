@@ -109,8 +109,8 @@ increment_king_numerator <- function(k, n_Aa_i, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, BM, rowInd, colInd, ncores))
 }
 
-vcf_loci_table <- function(filename) {
-    .Call(`_tidypopgen_vcf_loci_table`, filename)
+vcf_loci_table <- function(filename, read_names = TRUE) {
+    .Call(`_tidypopgen_vcf_loci_table`, filename, read_names)
 }
 
 vcf_genotypes_to_fbm <- function(filename, BM, biallelic, missing_value, n_header_lines) {

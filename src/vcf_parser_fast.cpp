@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstring>
+#include <unordered_map>
 #include <zlib.h>
 #include <bigstatsr/BMCodeAcc.h>
 
@@ -76,6 +77,24 @@ inline int genotype_ploidy(const char* p) {
 }
 
 
+// Function to convert a vector of characters into an R character vector,
+// reusing a single R string for each distinct character (rather than creating
+// a string for each element)
+inline CharacterVector chars_to_strings(const std::vector<char> &x) {
+  CharacterVector res(x.size());
+  // the R string of each of the 256 possible characters (created when first
+  // needed; each is protected by being stored in res)
+  std::vector<SEXP> char_strings(256, R_NilValue);
+  for (size_t i = 0; i < x.size(); i++) {
+    unsigned char c = x[i];
+    if (char_strings[c] == R_NilValue) {
+      char_strings[c] = Rf_mkCharLen(&x[i], 1);
+    }
+    SET_STRING_ELT(res, i, char_strings[c]);
+  }
+  return res;
+}
+
 // Function to split a string by multiple delimiters and return a vector of tokens
 inline std::vector<std::string> split_line(const std::string &s, const std::string &delimiters) {
   std::vector<std::string> tokens;
@@ -115,10 +134,16 @@ inline std::vector<std::string> split_locus_meta(const std::string &s,
  * with information for those snps. It also creates a boolean vector to indicate
  * which loci are biallelic, and a vector with the ploidy of each individual.
  *
+ * To limit memory use with many loci, chromosomes are returned as an integer
+ * index (1-based) into a vector of chromosome names (in order of appearance),
+ * alleles (a single character for biallelic snps) are stored as characters,
+ * and locus names are only read if they are needed.
+ *
  * @param filename The name of the VCF file to parse
+ * @param read_names Whether to read the names (IDs) of the loci
  */
 // [[Rcpp::export]]
-List vcf_loci_table(std::string filename) {
+List vcf_loci_table(std::string filename, bool read_names = true) {
   // open the file
   bool is_gz = is_gz_file(filename);
   std::ifstream vcfFile;
@@ -140,15 +165,23 @@ List vcf_loci_table(std::string filename) {
   std::vector<bool> biallelic;
   biallelic.reserve(10e6);
   // loci metadata (preallocate 10 million loci, as a start)
-  std::vector<std::string>chromosome;
-  chromosome.reserve(10e6);
+  // chromosomes are stored as an index into the vector of their names (with a
+  // lookup table to find the index of a name)
+  std::vector<int> chromosome_index;
+  chromosome_index.reserve(10e6);
+  std::vector<std::string> chromosome_names;
+  std::unordered_map<std::string, int> chromosome_lookup;
+  int this_chromosome = -1; // index of the chromosome of the previous locus
   std::vector<std::string> marker_id;
-  marker_id.reserve(10e6);
+  if (read_names) {
+    marker_id.reserve(10e6);
+  }
   std::vector<int32_t> physical_pos;
   physical_pos.reserve(10e6);
-  std::vector<std::string> allele1;
+  // alleles of biallelic snps are a single character
+  std::vector<char> allele1;
   allele1.reserve(10e6);
-  std::vector<std::string> allele2;
+  std::vector<char> allele2;
   allele2.reserve(10e6);
   // individual metadata
   std::vector<int> ploidy;
@@ -212,11 +245,27 @@ List vcf_loci_table(std::string filename) {
     // if yes, get the metadata for this locus
     if ((fields[3].length() ==1) && (fields[4].length() ==1)) {
       biallelic.push_back(true);
-      chromosome.push_back(fields[0]);
+      // find the index of the chromosome (loci are usually sorted by
+      // chromosome, so we only need a lookup when the chromosome changes)
+      if ((this_chromosome < 0) ||
+          (fields[0] != chromosome_names[this_chromosome])) {
+        std::unordered_map<std::string, int>::iterator found =
+          chromosome_lookup.find(fields[0]);
+        if (found == chromosome_lookup.end()) {
+          this_chromosome = chromosome_names.size();
+          chromosome_lookup[fields[0]] = this_chromosome;
+          chromosome_names.push_back(fields[0]);
+        } else {
+          this_chromosome = found->second;
+        }
+      }
+      chromosome_index.push_back(this_chromosome + 1);
       physical_pos.push_back(std::stoi(fields[1]));
-      marker_id.push_back(fields[2]);
-      allele1.push_back(fields[4]);
-      allele2.push_back(fields[3]);
+      if (read_names) {
+        marker_id.push_back(fields[2]);
+      }
+      allele1.push_back(fields[4][0]);
+      allele2.push_back(fields[3][0]);
     } else {
       biallelic.push_back(false);
     }
@@ -286,16 +335,29 @@ List vcf_loci_table(std::string filename) {
     vcfFile.close();
   }
 
-  // craete loci table
-  DataFrame loci_table = DataFrame::create( Named("chromosome") = chromosome ,
-                                            _["marker.ID"] = marker_id,
-                                            _["physical.pos"] = physical_pos,
-                                            _["allele1"] = allele1,
-                                            _["allele2"] = allele2);
+  // create the loci table; alleles are converted to strings reusing a single
+  // R string for each character, and the C++ vectors are freed as soon as
+  // they have been copied into R
+  IntegerVector chromosome_r(chromosome_index.begin(), chromosome_index.end());
+  std::vector<int>().swap(chromosome_index);
+  IntegerVector physical_pos_r(physical_pos.begin(), physical_pos.end());
+  std::vector<int32_t>().swap(physical_pos);
+  CharacterVector allele1_r = chars_to_strings(allele1);
+  std::vector<char>().swap(allele1);
+  CharacterVector allele2_r = chars_to_strings(allele2);
+  std::vector<char>().swap(allele2);
+  List loci_table = List::create(Named("chromosome") = chromosome_r,
+                                 _["physical.pos"] = physical_pos_r,
+                                 _["allele1"] = allele1_r,
+                                 _["allele2"] = allele2_r);
+  if (read_names) {
+    loci_table["marker.ID"] = marker_id;
+    std::vector<std::string>().swap(marker_id);
+  }
 
-
-  // Return a list containing the matrix and the ploidy vector
+  // Return a list containing the loci table and the ploidy vector
   return (List::create(Named("loci_tbl") = loci_table,
+                       Named("chromosome_names") = chromosome_names,
                        Named("sample_names") = sample_names,
                        Named("ploidy") = ploidy,
                        Named("biallelic") = biallelic,
@@ -386,7 +448,7 @@ inline bool count_alt_alleles(const std::string &line,
 // [[Rcpp::export]]
 bool vcf_genotypes_to_fbm(std::string filename,
                           Environment BM,
-                          IntegerVector& biallelic,
+                          LogicalVector& biallelic,
                           const int missing_value,
                           const int n_header_lines) {
   // open the file
