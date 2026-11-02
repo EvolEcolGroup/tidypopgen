@@ -192,6 +192,10 @@ test_that("n_cores can be set", {
   one_core <- test_gt %>% pop_global_stats(by_locus = TRUE, n_cores = 1)
   two_core <- test_gt %>% pop_global_stats(by_locus = TRUE, n_cores = 2)
   expect_equal(one_core, two_core)
+  # pop_fis
+  one_core <- test_gt %>% pop_fis(by_locus = TRUE, n_cores = 1)
+  two_core <- test_gt %>% pop_fis(by_locus = TRUE, n_cores = 2)
+  expect_equal(one_core, two_core)
 })
 
 test_that("pop_stats_dip_pseudo_cpp does not depend on blocks or cores", {

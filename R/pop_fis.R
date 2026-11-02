@@ -26,6 +26,9 @@
 #'   of Allele Sharing returned by [pairwise_allele_sharing()] with
 #'   `as_matrix=TRUE`. As a number of statistics can be derived from the Allele
 #'   Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
+#' @param n_cores number of cores to be used for "Nei87" (it defaults to
+#'   [bigstatsr::nb_cores()]); "WG17" uses the allele sharing matrix, see
+#'   [pairwise_allele_sharing()].
 #' @returns a vector of population specific fis (plus the global value if
 #'   `include_global=TRUE`)
 #' @export
@@ -61,14 +64,18 @@ pop_fis <- function(
   method = c("Nei87", "WG17"),
   by_locus = FALSE,
   include_global = FALSE,
-  allele_sharing_mat = NULL
+  allele_sharing_mat = NULL,
+  n_cores = bigstatsr::nb_cores()
 ) {
   method <- match.arg(method)
   if (method == "Nei87") {
     if (!is.null(allele_sharing_mat)) {
       stop("allele_sharing_mat not relevant for Nei87")
     }
-    pop_fis_nei87(.x, by_locus = by_locus, include_global = include_global)
+    pop_fis_nei87(.x,
+      by_locus = by_locus, include_global = include_global,
+      n_cores = n_cores
+    )
   } else if (method == "WG17") {
     if (by_locus) {
       stop("by_locus not implemented for WG17")
