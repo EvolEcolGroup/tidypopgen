@@ -102,33 +102,24 @@ windows_pop_tajimas_d <- function(.x,
   # windows without loci are NA
   empty <- win$hi == win$lo
 
-  # get pi and the number of valid allele copies for each locus (one column
-  # per group)
-  pi_n <- .pi_n_by_group(.x)
+  # sum the quantities needed to compute tajimas d in each window, for each
+  # group, in a single pass over the genotypes
+  term_sums <- .tajimas_d_sums_by_group(.x,
+    locus_first = win$locus_first,
+    locus_last = win$locus_last,
+    n_windows = nrow(win$windows)
+  )
 
   res <- list()
   # now we can loop around each population to compute the windows
-  for (i_grp in seq_len(ncol(pi_n$pi))) {
-    # get the quantities needed to compute tajimas d at each locus
-    locus_terms <- tajimas_d_locus_terms(pi_n$pi[, i_grp], pi_n$n[, i_grp])
-    # sum each of these quantities within each window (accumulated in long
-    # double, as sum() does); all of them are NA for the same loci (those
-    # with no valid allele copies), which are ignored
-    win_sums <- window_sums_cpp(
-      locus_terms,
-      loci = win$loci,
-      lo = win$lo,
-      hi = win$hi,
-      long_double = TRUE
-    )
-    term_sums <- win_sums$sum
-    colnames(term_sums) <- colnames(locus_terms)
+  for (i_grp in seq_len(ncol(term_sums$k_hat))) {
+    grp_sums <- .tajimas_d_group_sums(term_sums, i_grp)
     # the number of loci with at least one valid allele copy in each window;
     # windows without such loci have no sums (as in windows_stats_generic())
-    n_loci <- win_sums$n[, 1]
-    term_sums[n_loci == 0, ] <- NA
+    n_loci <- grp_sums[, "n_loci"]
+    grp_sums[n_loci == 0, ] <- NA
     # compute tajimas d for each window from the sums
-    stat <- tajimas_d_from_term_sums(term_sums)
+    stat <- tajimas_d_from_term_sums(grp_sums)
     stat[empty] <- NA
     n_loci[empty] <- NA
     # if we only want complete windows, set incomplete ones to NA

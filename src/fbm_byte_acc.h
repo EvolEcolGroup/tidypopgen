@@ -249,19 +249,29 @@ private:
   size_t _ngroups;
 };
 
+// Default block callback of lut_sums(), dosage_sums() and
+// alt_valid_counts(), which does nothing.
+struct NoBlockDone {
+  void operator()(size_t, size_t) const {}
+};
+
 // Loop over all loci (push interface): for each locus j, compute the sums
 // with LutSums::locus() and call finish(j, tot) to compute and store the
 // statistics of that locus. Loci are processed in blocks of block_size,
 // checking for user interrupts between blocks (outside of the parallel
-// region).
-template <int NFIELDS, class Finish>
+// region). finish() is called in parallel, in no particular order; after
+// each block, block_done(j0, j1) is called once (outside of the parallel
+// region) with the range [j0, j1) of the loci of the block, so that results
+// stored by finish() for that block can be combined in the order of the loci.
+template <int NFIELDS, class Finish, class BlockDone = NoBlockDone>
 void lut_sums(const FBMByteAcc& acc,
               const GroupedRows& grouped,
               const std::vector<uint64_t>& luts,
               size_t ngroups,
               int ncores,
               size_t block_size,
-              Finish finish) {
+              Finish finish,
+              BlockDone block_done = BlockDone()) {
   const LutSums<NFIELDS> sums(acc, grouped, luts, ngroups);
   const size_t m = acc.ncol();
   if (block_size < 1) block_size = 1;
@@ -278,6 +288,7 @@ void lut_sums(const FBMByteAcc& acc,
       finish(j, tot.data());
     }
 }
+    block_done(j0, j1);
     Rcpp::checkUserInterrupt();
   }
 }
@@ -293,7 +304,8 @@ void lut_sums(const FBMByteAcc& acc,
 // original order of the individuals). Individuals are added in their original
 // order within each group, so results are identical to accumulating over
 // individuals in order. grouped should be built with all lut_ids equal.
-template <class Finish>
+// block_done(j0, j1) is called after each block, as in lut_sums().
+template <class Finish, class BlockDone = NoBlockDone>
 void dosage_sums(const FBMByteAcc& acc,
                  const GroupedRows& grouped,
                  const std::vector<double>& weight,
@@ -301,7 +313,8 @@ void dosage_sums(const FBMByteAcc& acc,
                  size_t ngroups,
                  int ncores,
                  size_t block_size,
-                 Finish finish) {
+                 Finish finish,
+                 BlockDone block_done = BlockDone()) {
   const size_t m = acc.ncol();
   const size_t n = grouped.rows.size();
   const size_t* rows = grouped.rows.data();
@@ -339,6 +352,7 @@ void dosage_sums(const FBMByteAcc& acc,
       finish(j, tot.data());
     }
 }
+    block_done(j0, j1);
     Rcpp::checkUserInterrupt();
   }
 }
@@ -352,14 +366,16 @@ void dosage_sums(const FBMByteAcc& acc,
 // added to the alternate allele count and copies[i] (usually its ploidy) to
 // the number of valid allele copies; weight[i] is 0.5 for pseudohaploids
 // (whose single allele is stored as a 0/2 dosage) and 1 otherwise.
-// finish(j, g, alt, valid) is called for each locus j and group g.
+// finish(j, g, alt, valid) is called for each locus j and group g (in
+// parallel), and block_done(j0, j1) after each block of loci (see
+// lut_sums()).
 //
 // When all codes are integers and weights are 1 or 0.5, it uses one lookup
 // table per (copies, weight) class, packing 2 * x * weight (an integer) and
 // copies into two 32-bit counters: sums are then exact, so results are
 // identical to summing the doubles. Otherwise (e.g. dosages from imputation
 // probabilities) it falls back on summing doubles in the original order.
-template <class Finish>
+template <class Finish, class BlockDone = NoBlockDone>
 void alt_valid_counts(const FBMByteAcc& acc,
                       const std::vector<size_t>& group_ids,
                       size_t ngroups,
@@ -367,7 +383,8 @@ void alt_valid_counts(const FBMByteAcc& acc,
                       const std::vector<double>& copies,
                       int ncores,
                       size_t block_size,
-                      Finish finish) {
+                      Finish finish,
+                      BlockDone block_done = BlockDone()) {
   const size_t n = acc.nrow();
   // check whether we can use integer lookup tables
   bool use_luts = acc.has_int_codes(255);
@@ -417,7 +434,7 @@ void alt_valid_counts(const FBMByteAcc& acc,
                     finish(j, g, tot[2 * g] / 2.0,
                            static_cast<double>(tot[2 * g + 1]));
                   }
-                });
+                }, block_done);
   } else {
     // sum doubles, keeping the original order of individuals within groups
     std::vector<size_t> lut_ids(n, 0);
@@ -428,7 +445,7 @@ void alt_valid_counts(const FBMByteAcc& acc,
                   for (size_t g = 0; g < ngroups; g++) {
                     finish(j, g, tot[2 * g], tot[2 * g + 1]);
                   }
-                });
+                }, block_done);
   }
 }
 

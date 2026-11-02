@@ -200,8 +200,11 @@ test_that("windows_pop_tajimas_d matches window sums of the locus terms", {
   # windows_pop_tajimas_d() sums the terms of each locus in all windows at
   # once; check it against summing each term with windows_stats_generic()
   test_ungrouped <- dplyr::ungroup(test_gt)
-  pi_n <- .pi_n_by_group(test_ungrouped)
-  locus_terms <- tajimas_d_locus_terms(pi_n$pi[, 1], pi_n$n[, 1])
+  # pi, and the number of valid allele copies, at each locus
+  locus_terms <- tajimas_d_locus_terms(
+    loci_pi(test_ungrouped),
+    colSums(!is.na(test_genotypes)) * 2
+  )
   for (unit in c("snp", "bp")) {
     ws <- if (unit == "snp") 3 else 100
     st <- if (unit == "snp") 2 else 70

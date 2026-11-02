@@ -408,3 +408,76 @@ test_that("pop_tajimas_d uses the sample size of each locus", {
     hierfstat::TajimaD.dosage(test_genotypes[, c(1, 2)])
   )
 })
+
+test_that(".tajimas_d_sums matches the sums of the locus terms", {
+  # diploid data with missing genotypes, in two groups
+  set.seed(3)
+  geno <- matrix(
+    sample(c(0, 1, 2, NA), 8 * 12, replace = TRUE, prob = c(4, 3, 2, 1)),
+    nrow = 8
+  )
+  # a locus with no data in the first group
+  geno[1:4, 5] <- NA
+  test_gt <- gen_tibble(
+    x = geno,
+    loci = data.frame(
+      name = paste0("rs", 1:12),
+      chromosome = rep(1:2, each = 6),
+      position = rep(1:6 * 10L, 2),
+      genetic_dist = 0,
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    indiv_meta = data.frame(
+      id = paste0("i", 1:8),
+      population = rep(c("p1", "p2"), each = 4)
+    ),
+    quiet = TRUE
+  ) %>%
+    dplyr::group_by(population)
+  # the terms of each locus for each group
+  pi_by_group <- loci_pi(test_gt, type = "list")
+  terms_by_group <- lapply(1:2, function(i_grp) {
+    rows <- 1:4 + 4 * (i_grp - 1)
+    tajimas_d_locus_terms(
+      pi_by_group[[i_grp]],
+      colSums(!is.na(geno[rows, ])) * 2
+    )
+  })
+  # overlapping windows (each locus is in up to two windows)
+  win <- .window_definitions(show_loci(test_gt),
+    window_size = 3, step_size = 2, size_unit = "snp"
+  )
+  # the sums should not depend on the block size or the number of cores
+  for (block_size in c(1, 5, 100)) {
+    for (n_cores in c(1, 2)) {
+      sums <- .tajimas_d_sums(test_gt$genotypes,
+        group_ids = dplyr::group_indices(test_gt) - 1L,
+        n_groups = 2L,
+        locus_first = win$locus_first,
+        locus_last = win$locus_last,
+        n_windows = nrow(win$windows),
+        n_cores = n_cores,
+        block_size = block_size
+      )
+      for (i_grp in 1:2) {
+        expected <- t(vapply(seq_len(nrow(win$windows)), function(w) {
+          in_window <- win$loci[seq_len(win$hi[w] - win$lo[w]) + win$lo[w]]
+          colSums(terms_by_group[[i_grp]][in_window, , drop = FALSE],
+            na.rm = TRUE
+          )
+        }, numeric(5)))
+        expect_equal(.tajimas_d_group_sums(sums, i_grp), expected)
+      }
+    }
+  }
+  # by default, all loci are in a single window
+  sums <- .tajimas_d_sums(test_gt$genotypes,
+    group_ids = dplyr::group_indices(test_gt) - 1L,
+    n_groups = 2L
+  )
+  expect_equal(
+    .tajimas_d_group_sums(sums, 1)[1, ],
+    colSums(terms_by_group[[1]], na.rm = TRUE)
+  )
+})

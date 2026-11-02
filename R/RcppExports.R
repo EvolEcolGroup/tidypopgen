@@ -109,6 +109,10 @@ increment_king_numerator <- function(k, n_Aa_i, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, BM, rowInd, colInd, ncores))
 }
 
+tajimas_d_window_sums_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size) {
+    .Call(`_tidypopgen_tajimas_d_window_sums_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size)
+}
+
 vcf_loci_table <- function(filename, read_names = TRUE) {
     .Call(`_tidypopgen_vcf_loci_table`, filename, read_names)
 }
