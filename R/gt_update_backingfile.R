@@ -101,14 +101,12 @@ gt_update_backingfile <- function(
 
   # if we remove unsorted genetic distance, set it to zero if it is not sorted
   if (rm_unsorted_dist) {
-    if (
-      any(unlist(
-        show_loci(.x) %>%
-          group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint start
-          group_map(~ is.unsorted(.x$genetic_dist))
-      ))
-    ) {
-      # nolint end
+    # check the genetic distances within each chromosome (splitting only that
+    # column, rather than the whole loci table)
+    if (any_unsorted_by_group(
+      show_loci(.x)$genetic_dist,
+      cast_chromosome_to_int(show_loci(.x)$chromosome)
+    )) {
       if (!quiet) {
         message("Genetic distances are not sorted, setting them to zero")
       }
