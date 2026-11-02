@@ -55,8 +55,6 @@
 * fix error messages and documentation of `autoplot()` for `gt_admix` and
   `gt_pca` objects referring to non-existent arguments (`repeat`, `pc`)
 * fix `gt_admix_reorder_q()` turning the Q matrices for K = 1 into vectors
-* fix `autoplot()` for `q_matrix` and `gt_admix` objects not arranging
-  individuals by their id when `arrange_by_indiv = TRUE`
 * fix group annotations of admixture barplots showing extra separators and
   labels for unused levels of the grouping factor
 * `select_loci_if()` no longer loads the whole genotype matrix into memory to
