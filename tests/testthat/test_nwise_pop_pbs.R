@@ -54,8 +54,36 @@ test_that("nwise_pop_pbs works correctly", {
     nwise_pop_pbs(fst_method = "Hudson", type = "matrix")
   # expect 24 columns
   expect_equal(ncol(test_pbs), 24)
-  # @TODO we need some more meaningul tests here
-  # maybe check sk.allele if it does pbs
+  # compare a triplet with the pbs computed directly from Fst by locus
+  fst <- test_gt %>%
+    group_by(population) %>%
+    pairwise_pop_fst(
+      method = "Hudson", by_locus = TRUE,
+      by_locus_type = "matrix"
+    )
+  fst <- fst$Fst_by_locus
+  t24 <- -log(1 - fst[, "fst_pop2.pop4"])
+  t23 <- -log(1 - fst[, "fst_pop2.pop3"])
+  t34 <- -log(1 - fst[, "fst_pop3.pop4"])
+  pbs_3 <- (t23 + t34 - t24) / 2
+  expect_equal(as.vector(test_pbs[, "pbs_pop3.pop2.pop4"]), as.vector(pbs_3))
+  pbs_sum <- 1 + (t23 + t24 - t34) / 2 + (t24 + t34 - t23) / 2 + pbs_3
+  expect_equal(
+    as.vector(test_pbs[, "pbsn1_pop3.pop2.pop4"]),
+    as.vector(pbs_3 / pbs_sum)
+  )
+  # with return_fst, the fst values come first, followed by the pbs
+  test_pbs_fst <- test_gt %>%
+    group_by(population) %>%
+    nwise_pop_pbs(fst_method = "Hudson", type = "matrix", return_fst = TRUE)
+  expect_equal(colnames(test_pbs_fst), c(colnames(fst), colnames(test_pbs)))
+  expect_equal(as.vector(test_pbs_fst[, 1:6]), as.vector(fst))
+  # the tidy output has the same values, by locus and then by statistic
+  test_pbs_tidy <- test_gt %>%
+    group_by(population) %>%
+    nwise_pop_pbs(fst_method = "Hudson", type = "tidy")
+  expect_equal(test_pbs_tidy$value, as.vector(t(unclass(test_pbs))))
+  expect_equal(test_pbs_tidy$loci, rep(row_names(test_pbs), each = 24))
 })
 
 test_that("type argument delivers correct objects", {
