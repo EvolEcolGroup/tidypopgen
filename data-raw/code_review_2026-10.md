@@ -153,7 +153,7 @@ been accepted (each commit also appears, with its own box, in
 - [x] `dc78da4` `gt_cluster_pca_best_k()` stores `best_k` as a value of k, not a position in `$clusters$k`. Code that set `x$best_k` to a position needs to use the k value, as documented.
 - [x] `ab8006b` Grouped `qc_report_loci()` caps the Bonferroni-corrected HWE p-value at 1.
 - [x] `9e90ebe` For a single individual, `loci_alt_freq()` now returns NaN (0/0) rather than NA for missing loci, as already happens with several individuals.
-- [ ] `896675d` TODO check if this has already been fixed `pop_tajimas_d()` counts a site genotyped in a single heterozygote (pi = 1) as segregating, matching `hierfstat::TajimaD.dosage()`.
+- [ ] `896675d` **Superseded:** `dev`'s #214 (merged into `speed` in `e7113886`) also counts these sites as segregating and ignores loci with no data; with #214, each locus has its own sample size (as in `pixy`), so results match `hierfstat::TajimaD.dosage()` only without missing data. Kept in `speed_to_merge`. `pop_tajimas_d()` counts a site genotyped in a single heterozygote (pi = 1) as segregating, matching `hierfstat::TajimaD.dosage()`.
 
 ## Fixes by area
 
@@ -177,14 +177,14 @@ in brackets, its impact:
 - [x] `2c3d7bf` · `loci_alt_freq()`, `loci_maf()` (polyploid) — All NA for a single polyploid individual. *[Wrong results]*
 - [x] `27a6335` · `loci_alt_freq()` (polyploid) — `as_counts` was ignored, and selecting a single locus failed. *[Wrong results / Error]*
 - [x] `9e90ebe` · `loci_alt_freq(as_counts = TRUE)` — For a single individual, missing genotypes gave NA alternate and non-zero valid allele counts, and the columns were unnamed. *[Wrong results]*
-- [ ] `6a61c22` · AM TODO do we want empty groups to show up as columns? I think we want to drop them Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]*
+- [ ] `6a61c22` · **Decision needed:** should empty groups (`group_by(.drop = FALSE)`) show up as columns, or be dropped (AM: drop them)? Kept in `speed_to_merge`, as `speed`'s kernels (and the merge of `dev`) use `dplyr::n_groups()`. Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]*
 - [x] `a79b7ce` · `pop_fst()`, `pop_fis(method = "WG17")` — "Subscript out of bounds" with a single group; now an informative error. *[Error]*
-- [ ] `83aa04e` · TODO is this behaviour what we want? It would be more tidyverse consistent, but feels odd to keep groups with no individuals in output. - Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
+- [ ] `83aa04e` · **Decision needed:** is this behaviour what we want? It would be more tidyverse consistent, but feels odd to keep groups with no individuals in output. Kept in `speed_to_merge`, as the test of `6a61c22` (also kept) groups by a factor with `type = "matrix"`, which needs this fix. Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
 
 ### Windowed statistics
 
 - [x] `5b766c0` · `windows_pairwise_pop_fst()`, `windows_nwise_pop_pbs()` — Always used Hudson's Fst, ignoring `method` and `fst_method`. *[Wrong results]*
-- [ ] `5aa10b4` · AM TODO check if this is really correct `windows_stats_generic()` and all `windows_*` functions — The last loci of a chromosome fell outside every window when the range was not a multiple of `step_size`. *[Wrong results]*
+- [x] `5aa10b4` · `windows_stats_generic()` and all `windows_*` functions — The last loci of a chromosome fell outside every window when the range was not a multiple of `step_size`. *[Wrong results]* Checked: the test fails on the code before the fix (8 failures, e.g. loci 99 and 100 of 100 in no window with `window_size = 10`, `step_size = 4`) and passes on it. A property check of 600 random cases (snp and bp units, window sizes 1–15, steps 1–20, `complete` TRUE and FALSE) found every locus in a window unless it falls in a gap between windows (steps larger than the window), the earlier windows unchanged, at most one extra window, which contains the last locus, and correct counts in every window, both on this commit and on `speed`, where `.window_definitions()` keeps the same rule for all `windows_*` functions. The extra window is partial, like the first window of each chromosome, and is NA with `complete = TRUE`. The jackknife blocks of `dev`'s #214 have no equivalent problem (checked on 900 random cases): every locus is in a block, and the last, truncated block of each chromosome is kept and weighted by its number of loci; their bp boundaries were off by one from the windows, and were aligned with them on `speed` (`e52ab590`). — Claude, for AM
 - [x] `7da3a98` · `windows_indiv_roh(heterozygosity = TRUE)` — Homozygotes for the alternate allele were passed to detectRUNS as heterozygotes. Runs of homozygosity are unaffected. *[Wrong results]*
 - [x] `75c4361` · `windows_pairwise_pop_fst()`, `windows_nwise_pop_pbs()` (tidy) — A recycled name comparison gave spurious warnings. *[Robustness]*
 
