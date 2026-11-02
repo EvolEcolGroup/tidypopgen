@@ -150,9 +150,10 @@ test_that("vcf with a trailing blank line or CRLF line endings can be read", {
     c("1", "30", "rs3", "G", "A", "1/1", "0/1", "./.")
   ))
   vcf_lines <- readLines(vcf_path)
-  # trailing blank line
+  # trailing blank line, with LF line endings (writeLines() would use CRLF
+  # on Windows, and vcfR fails on a trailing blank line with CRLF endings)
   vcf_blank <- tempfile(fileext = ".vcf")
-  writeLines(c(vcf_lines, ""), vcf_blank)
+  writeBin(charToRaw(paste0(c(vcf_lines, ""), "\n", collapse = "")), vcf_blank)
   # CRLF line endings
   vcf_crlf <- tempfile(fileext = ".vcf")
   writeBin(charToRaw(paste0(vcf_lines, "\r\n", collapse = "")), vcf_crlf)
