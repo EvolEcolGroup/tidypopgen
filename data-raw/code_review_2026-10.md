@@ -217,7 +217,7 @@ in brackets, its impact:
 ### Relatedness, imputation and QC reports
 
 - [x] `8987f22` · `filter_high_relatedness()`, `qc_report_indiv(kings_threshold = )` — Negative kinship was treated as high relatedness (25 of 30 unrelated individuals removed in a simulation). *[Wrong results]*
-- [ ] `458144f` · AM TODO we should issue a warning that some individuals could not be compared `filter_high_relatedness()` — Failed on missing (NaN) kinship values, e.g. in the lobster data. *[Error]*
+- [ ] `458144f` · AM TODO we should issue a warning that some individuals could not be compared. **Follow-up:** the warning is added on `speed` in `3cec8bc7` (not yet checked), and the `Rplots.pdf` that this commit added by mistake is removed in `219cae68`. Kept in `speed_to_merge`, as the faster `filter_high_relatedness()` of `speed` (`6ae86f86`) relies on its handling of missing kinship. `filter_high_relatedness()` — Failed on missing (NaN) kinship values, e.g. in the lobster data. *[Error]*
 - [x] `ca37fe3` · Grouped `qc_report_indiv()` — `to_keep` flags were attached to the wrong individuals when groups were not contiguous (as in the example data). *[Wrong results]*
 - [x] `ab8006b` · Grouped `qc_report_loci()` — HWE p-values could exceed 1 (up to 2.89). *[Wrong results]*
 - [x] `3d23bf4` · `gt_impute_xgboost()` — Chromosomes were in loci-table rather than backing-file order, so SNPs were imputed from the wrong neighbours. *[Wrong results]*
