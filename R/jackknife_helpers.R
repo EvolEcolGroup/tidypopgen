@@ -33,8 +33,13 @@
     snp_idx[order(chrom_idx)] <- sequence(tabulate(chrom_idx))
     local_id <- ceiling(snp_idx / block_size)
   } else if (size_unit == "bp") {
-    local_id <- floor(loci_table$position / block_size)
+    # positions start from 1, so block b covers positions
+    # ((b - 1) * block_size, b * block_size], as the windows of
+    # .window_definitions() with step_size equal to window_size
+    local_id <- ceiling(loci_table$position / block_size)
   } else if (size_unit == "cM") {
+    # genetic distances start from 0, so block b covers distances
+    # [(b - 1) * block_size, b * block_size)
     local_id <- floor(loci_table$genetic_dist / block_size)
   }
   # combine chromosome and local block id into a single numeric key (local

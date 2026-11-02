@@ -56,12 +56,16 @@ e.g \code{\link[=jackknife_pairwise_pop_fst]{jackknife_pairwise_pop_fst()}} to c
 The genome is divided into non-overlapping blocks, which never span
 more than one chromosome. Blocks can be defined as a number of SNPs, a
 number of base pairs, or a size in centiMorgans (which requires the
-'genetic_dist' column of the loci table to be filled in). The statistic is
-then recomputed leaving out one block at a time, and the standard error is
-computed with the weighted delete-m jackknife of Busing et al. (1999),
-where each block is weighted by the number of loci with non-missing values
-that it contains. Blocks should be larger than the extent of linkage
-disequilibrium (e.g. 5 cM, or a few Mb).
+'genetic_dist' column of the loci table to be filled in). Blocks in base
+pairs cover positions 1 to \code{block_size}, \code{block_size + 1} to
+\code{2 * block_size}, and so on along each chromosome (as the windows of
+\code{\link[=windows_stats_generic]{windows_stats_generic()}} with \code{step_size} equal to \code{window_size}), and
+blocks in centiMorgans start from a genetic distance of 0. The statistic
+is then recomputed leaving out one block at a time, and the standard
+error is computed with the weighted delete-m jackknife of Busing et al.
+(1999), where each block is weighted by the number of loci with
+non-missing values that it contains. Blocks should be larger than the
+extent of linkage disequilibrium (e.g. 5 cM, or a few Mb).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

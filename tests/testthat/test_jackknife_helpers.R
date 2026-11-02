@@ -130,3 +130,20 @@ test_that("jackknife blocks work with chromosomes not contiguous in a table", {
   expect_equal(x_blocks$n[, "stat_a"], c(1, 2, 2, 1))
   expect_equal(x_blocks$sums[, "stat_b"], c(2, 2, 2, 1))
 })
+
+test_that("jackknife blocks in bp match windows of the same size", {
+  loci <- data.frame(
+    chromosome = "chr1",
+    position = c(1L, 99L, 100L, 101L, 200L, 201L)
+  )
+  # positions 1 to 100 are in the first block, 101 to 200 in the second, and
+  # so on
+  block_id <- .jackknife_block_ids(loci, block_size = 100, size_unit = "bp")
+  expect_equal(block_id, c(1, 1, 1, 2, 2, 3))
+  # as windows with step_size equal to window_size
+  win <- windows_stats_generic(rep(1, 6),
+    loci_table = loci, operator = "sum",
+    window_size = 100, step_size = 100, size_unit = "bp"
+  )
+  expect_equal(win$n_loci, tabulate(block_id))
+})

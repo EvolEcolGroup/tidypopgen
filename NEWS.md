@@ -250,7 +250,9 @@
   `jackknife_nwise_pop_pbs()`, `jackknife_pop_tajimas_d()` and
   `jackknife_stats_generic()`) to estimate genome-wide statistics with
   standard errors from a weighted block jackknife, with blocks defined in
-  SNPs, centiMorgans or base pairs.
+  SNPs, centiMorgans or base pairs (blocks in base pairs cover the same
+  positions as the windows of the `windows_*` functions with `step_size`
+  equal to `window_size`).
 * `pop_tajimas_d()` now works with polyploid and pseudohaploid data.
 * `pop_tajimas_d()`, `windows_pop_tajimas_d()` and `jackknife_pop_tajimas_d()`
   now account for missing genotypes by using the number of non-missing allele
