@@ -461,3 +461,24 @@ test_that("a flipped locus missing allele_ref in both datasets is swapped", {
 #
 #
 # }) #nolint end
+
+test_that("resolve_missing_alleles infers each kind of missing allele", {
+  missing_table <- data.frame(
+    allele_1 = c("0", "G", "0", "0", "0", "A", "0"),
+    allele_2 = c("A", "0", "T", "A", "A", "G", "0")
+  )
+  other_table <- data.frame(
+    allele_1 = c("G", "G", "G", "0", "C", "A", "A"),
+    allele_2 = c("A", "A", "A", "A", "G", "G", "G")
+  )
+  resolved <- resolve_missing_alleles(missing_table, other_table)
+  # 1: allele_1 on the same strand; 2: allele_2 on the same strand; 3: the
+  # known allele is on the opposite strand, so the missing one is flipped;
+  # 4: missing in the other table as well; 5: the known allele matches
+  # neither strand; 6: no missing allele; 7: both alleles missing
+  expect_equal(resolved$allele, c("G", "A", "C", NA, NA, NA, NA))
+  expect_equal(
+    resolved$col,
+    c("allele_1", "allele_2", "allele_1", NA, NA, NA, NA)
+  )
+})
