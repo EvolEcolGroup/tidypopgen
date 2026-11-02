@@ -219,6 +219,13 @@ test_that("pop_stats_dip_pseudo_cpp does not depend on blocks or cores", {
   # number of loci), on multiple cores, give identical results
   expect_identical(stats_cpp(1, 1), one_block)
   expect_identical(stats_cpp(4, 2), one_block)
+  # codes that are not small integers (e.g. dosages) use a different code
+  # path (doubles summed by individual instead of integer lookup tables),
+  # which gives identical results (bytes 0 to 3 decode in the same way)
+  old_code <- attr(test_gt$genotypes, "fbm")$code256
+  attr(test_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_DOSAGE
+  expect_identical(stats_cpp(4, 2), one_block)
+  attr(test_gt$genotypes, "fbm")$code256 <- old_code
   # the means across loci match those of the statistics by locus
   expect_equal(one_block$mean_hs, unname(colMeans(one_block$hs, na.rm = TRUE)))
   expect_equal(

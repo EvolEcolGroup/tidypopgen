@@ -1,6 +1,6 @@
 /******************************************************************************/
 
-#include "grouped_summaries_dip_pseudo.h"
+#include "fbm_byte_acc.h"
 #include <cmath>
 #include <string>
 
@@ -177,9 +177,11 @@ void pairwise_fst_blocks(const GroupedSummariesDipPseudo& summ,
 {
     // per-thread buffers for the sums of each group
     std::vector<double> alt_sum(ngroups), n_alleles(ngroups), het2(ngroups);
+    std::vector<uint64_t> summ_buffer(summ.buffer_size());
 #pragma omp for
     for (size_t jj = 0; jj < nb; jj++) {
-      summ.locus(j0 + jj, alt_sum.data(), n_alleles.data(), het2.data());
+      summ.locus(j0 + jj, alt_sum.data(), n_alleles.data(), het2.data(),
+                 summ_buffer.data());
       for (size_t g = 0; g < ngroups; g++) {
         size_t k = g * bs + jj;
         double freq_alt = alt_sum[g] / n_alleles[g];

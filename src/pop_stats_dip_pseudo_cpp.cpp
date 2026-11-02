@@ -1,6 +1,6 @@
 /******************************************************************************/
 
-#include "grouped_summaries_dip_pseudo.h"
+#include "fbm_byte_acc.h"
 #include <cmath>
 
 /******************************************************************************/
@@ -125,12 +125,14 @@ List pop_stats_dip_pseudo_cpp(Environment BM,
 {
     // per-thread buffers for the group summaries
     std::vector<double> alt_sum(ngroups), n_alleles(ngroups), het2(ngroups);
+    std::vector<uint64_t> summ_buffer(summ.buffer_size());
     std::vector<double> freq_alt(ngroups), freq_ref(ngroups), n_ind(ngroups);
     std::vector<double> sp2(ngroups);
 #pragma omp for
     for (size_t jj = 0; jj < nb; jj++) {
       size_t j = j0 + jj;
-      summ.locus(j, alt_sum.data(), n_alleles.data(), het2.data());
+      summ.locus(j, alt_sum.data(), n_alleles.data(), het2.data(),
+                 summ_buffer.data());
       double* ho = &b_ho[jj * ngroups];
       double* hs = &b_hs[jj * ngroups];
       double* fis = &b_fis[jj * ngroups];

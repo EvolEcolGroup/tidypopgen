@@ -110,6 +110,9 @@ struct RowRun {
 // their original relative order (stable sort), and split into runs
 class GroupedRows {
 public:
+  // empty (to be assigned later)
+  GroupedRows() {}
+
   // rows: 0-based FBM rows; group_ids and lut_ids: group and lookup table
   // of each individual; max_len: maximum length of a run (to avoid
   // overflowing the packed counters)
@@ -428,6 +431,156 @@ void alt_valid_counts(const FBMByteAcc& acc,
                 });
   }
 }
+
+/******************************************************************************/
+
+// Summarise the genotypes of diploid (and pseudohaploid) individuals by group,
+// one locus at a time (pull interface, for kernels that process loci in
+// their own blocks, such as pop_stats_dip_pseudo_cpp() and
+// pairwise_pop_fst_cpp()).
+//
+// For locus j (0-based index into colInd), locus() returns, for each group
+// g, alt_sum[g], the sum of alternate allele dosages (multiplied by
+// 1 / (3 - ploidy), i.e. halved for pseudohaploids), n_alleles[g], the
+// number of valid alleles (sum of ploidy), and het2[g], twice the number of
+// heterozygotes (dosage 1), over the individuals with a valid genotype.
+//
+// When all codes are integers and ploidy is 1 or 2, it uses one lookup
+// table per ploidy that packs 2 * dosage * multiplier, ploidy and the
+// heterozygote indicator into three 21-bit counters (LutSums<3>), so each
+// genotype costs one integer addition; as the sums are exact, results are
+// identical to summing doubles. Otherwise (e.g. dosages), it sums doubles by
+// individual, in the original order within each group. locus() only reads
+// plain C++ objects, so it can be called from multiple OpenMP threads, each
+// with its own buffer of buffer_size() 64-bit integers.
+class GroupedSummariesDipPseudo {
+public:
+  GroupedSummariesDipPseudo(Environment BM,
+                            const IntegerVector& rowInd,
+                            const IntegerVector& colInd,
+                            const IntegerVector& groupIds,
+                            size_t ngroups,
+                            const NumericVector& ploidy)
+    : _acc(BM, rowInd, colInd), _ngroups(ngroups) {
+    size_t n = _acc.nrow();
+    if (groupIds.size() != (R_xlen_t) n || ploidy.size() != (R_xlen_t) n) {
+      stop("groupIds and ploidy should have one value per individual");
+    }
+    std::vector<size_t> group_ids(n);
+    std::vector<double> multiplier(n), copies(n);
+    for (size_t i = 0; i < n; i++) {
+      if (groupIds[i] < 0 || (size_t) groupIds[i] >= ngroups) {
+        stop("groupIds should be between 0 and ngroups - 1");
+      }
+      group_ids[i] = groupIds[i];
+      copies[i] = ploidy[i];
+      // multiplier to convert dosages for pseudohaploid data
+      multiplier[i] = 1 / (3 - ploidy[i]);
+    }
+
+    // use lookup tables if codes are integers and ploidy is 1 or 2
+    _use_luts = _acc.has_int_codes(255);
+    for (size_t i = 0; i < n && _use_luts; i++) {
+      if (!(copies[i] == 1 || copies[i] == 2)) _use_luts = false;
+    }
+
+    if (_use_luts) {
+      // one lookup table per ploidy (table 0 for ploidy 1, 1 for ploidy 2):
+      // 2 * dosage * multiplier, ploidy and the heterozygote indicator
+      std::vector<size_t> lut_ids(n);
+      for (size_t i = 0; i < n; i++) lut_ids[i] = (copies[i] == 1) ? 0 : 1;
+      _luts.assign(256 * 2, 0);
+      for (size_t c = 0; c < 2; c++) {
+        double p = c + 1;
+        for (int b = 0; b < 256; b++) {
+          double x = _acc.code(b);
+          // NA (and NaN) fail this comparison, so they are not valid
+          if (x > -1) {
+            uint64_t alt2 = static_cast<uint64_t>(2 * x * (1 / (3 - p)));
+            uint64_t het = (x == 1) ? 1 : 0;
+            _luts[256 * c + b] = alt2 | (static_cast<uint64_t>(p) << 21) |
+              (het << 42);
+          }
+        }
+      }
+      _grouped = GroupedRows(_acc.rows(), group_ids, lut_ids,
+                             max_run_length<3>(_luts));
+    } else {
+      // keep the original order of individuals within each group, with
+      // their multiplier and ploidy, and decode bytes into doubles
+      _grouped = GroupedRows(_acc.rows(), group_ids,
+                             std::vector<size_t>(n, 0),
+                             std::numeric_limits<size_t>::max());
+      _multiplier.resize(n);
+      _copies.resize(n);
+      for (size_t k = 0; k < n; k++) {
+        _multiplier[k] = multiplier[_grouped.order[k]];
+        _copies[k] = copies[_grouped.order[k]];
+      }
+      for (int b = 0; b < 256; b++) {
+        double x = _acc.code(b);
+        _dosage[b] = x;
+        _is_valid[b] = (x > -1);
+        // we add 2 for heterozygotes so that we can then divide by valid
+        // alleles (heterozygote counts are meaningless for pseudohaploids)
+        _het_inc[b] = (x == 1) ? 2.0 : 0.0;
+      }
+    }
+  }
+
+  size_t nrow() const { return _acc.nrow(); }
+  size_t ncol() const { return _acc.ncol(); }
+  size_t ngroups() const { return _ngroups; }
+  // size of the (per-thread) buffer needed by locus()
+  size_t buffer_size() const { return 3 * _ngroups; }
+
+  // Summarise locus j; each output array must have ngroups elements, and
+  // buffer buffer_size() elements
+  inline void locus(size_t j, double* alt_sum, double* n_alleles,
+                    double* het2, uint64_t* buffer) const {
+    if (_use_luts) {
+      LutSums<3>(_acc, _grouped, _luts, _ngroups).locus(j, buffer);
+      for (size_t g = 0; g < _ngroups; g++) {
+        alt_sum[g] = buffer[3 * g] / 2.0;
+        n_alleles[g] = static_cast<double>(buffer[3 * g + 1]);
+        het2[g] = 2.0 * buffer[3 * g + 2];
+      }
+    } else {
+      std::fill(alt_sum, alt_sum + _ngroups, 0.0);
+      std::fill(n_alleles, n_alleles + _ngroups, 0.0);
+      std::fill(het2, het2 + _ngroups, 0.0);
+      const unsigned char* col = _acc.col(j);
+      const std::vector<size_t>& rows = _grouped.rows;
+      for (size_t r = 0; r < _grouped.runs.size(); r++) {
+        const RowRun& run = _grouped.runs[r];
+        size_t g = run.group;
+        for (size_t k = run.start; k < run.end; k++) {
+          unsigned char b = col[rows[k]];
+          if (_is_valid[b]) {
+            alt_sum[g] += _dosage[b] * _multiplier[k];
+            n_alleles[g] += _copies[k];
+            // adding 0 for homozygotes leaves the sum unchanged
+            het2[g] += _het_inc[b];
+          }
+        }
+      }
+    }
+  }
+
+private:
+  FBMByteAcc _acc;
+  size_t _ngroups;
+  bool _use_luts;
+  GroupedRows _grouped;
+  // lookup tables (integer codes)
+  std::vector<uint64_t> _luts;
+  // per-individual constants (in the order of _grouped.rows) and decoded
+  // bytes (other codes)
+  std::vector<double> _multiplier, _copies;
+  double _dosage[256];
+  bool _is_valid[256];
+  double _het_inc[256];
+};
 
 /******************************************************************************/
 
