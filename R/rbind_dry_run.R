@@ -166,11 +166,15 @@ dry_run_loci <- function(x) {
 ##############################################################################
 
 rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
+  # match the loci names only once (matching strings is slow for many loci),
+  # and keep the rows of the loci in common in each table: names are unique
+  # within each table, so the loci of target are in the same order as in ref
+  ref_in_target <- match(ref_df$name, target_df$name)
+  ref_sub_rows <- which(!is.na(ref_in_target))
+  target_sub_rows <- ref_in_target[ref_sub_rows]
   # now filter for alleles in common
-  target_sub <- target_df[target_df$name %in% ref_df$name, ]
-  ref_sub <- ref_df[ref_df$name %in% target_df$name, ]
-  # reorder target_sub to match ref_sub
-  target_sub <- target_sub[match(ref_sub$name, target_sub$name), ]
+  ref_sub <- ref_df[ref_sub_rows, ]
+  target_sub <- target_df[target_sub_rows, ]
   # we now have two data.frames with the same loci and in the same order
   stopifnot(all.equal(target_sub$name, ref_sub$name))
 
@@ -220,23 +224,32 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
     to_flip <- to_flip & !ambiguous_sub
     to_swap <- to_swap & !ambiguous_sub
   }
+  # the new index of each locus in common in the merged data: loci to keep
+  # are numbered in the order of ref (loci with an NA in to_keep_flip also
+  # take up an index, as when matching names against
+  # ref_sub$name[to_keep_flip])
+  new_id_sub <- cumsum(is.na(to_keep_flip) | to_keep_flip)
+  new_id_sub[!(to_keep_flip %in% TRUE)] <- NA
   # now we create the two reporting data.frames
   # note that they include all loci (including the ones we dropped because they
   # did not exist in one of the datasets)
   # first create a report for the ref
+  ref_new_id <- rep(NA_integer_, nrow(ref_df))
+  ref_new_id[ref_sub_rows] <- new_id_sub
   ref_report <- data.frame(
     id = ref_df$id,
-    new_id = match(ref_df$name, ref_sub$name[to_keep_flip]),
+    new_id = ref_new_id,
     name = ref_df$name,
     missing_allele = NA,
     ambiguous = ambiguous(ref_df)
   )
-  ref_report$missing_allele[match(ref_sub$name, ref_df$name)] <-
-    ref_sub$missing_allele
+  ref_report$missing_allele[ref_sub_rows] <- ref_sub$missing_allele
   # and now one for target
+  target_new_id <- rep(NA_integer_, nrow(target_df))
+  target_new_id[target_sub_rows] <- new_id_sub
   target_report <- data.frame(
     id = target_df$id,
-    new_id = match(target_df$name, ref_sub$name[to_keep_flip]),
+    new_id = target_new_id,
     name = target_df$name,
     to_flip = FALSE,
     to_swap = FALSE,
@@ -244,13 +257,10 @@ rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
     ambiguous = ambiguous(target_df)
   )
 
-  # update the to_keep list
-  target_report$to_flip[match(target_sub$name[to_flip], target_report$name)] <-
-    TRUE
-  target_report$to_swap[match(target_sub$name[to_swap], target_report$name)] <-
-    TRUE
-  target_report$missing_allele[match(target_sub$name, target_report$name)] <-
-    target_sub$missing_allele
+  # update the to_keep list (using the rows of the loci in common in target)
+  target_report$to_flip[target_sub_rows[to_flip]] <- TRUE
+  target_report$to_swap[target_sub_rows[to_swap]] <- TRUE
+  target_report$missing_allele[target_sub_rows] <- target_sub$missing_allele
 
   report <- list(target = target_report, ref = ref_report)
   class(report) <- c("rbind_report", class(report))

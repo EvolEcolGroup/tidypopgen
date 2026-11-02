@@ -118,34 +118,23 @@ rbind.gen_tbl <- function(
     backingfile <- tempfile("gt_merged_", tmpdir = save_path, fileext = "")
   }
 
-  # if we use position, we update the names of the loci
-  if (use_position) {
-    show_loci(ref) <-
-      show_loci(ref) %>%
-      mutate(
-        name_old = .data$name,
-        name = paste(.data$chromosome, .data$position, sep = "_")
+  # check for duplicates within each dataset (if we use position, loci are
+  # matched by a combination of chromosome and position, which
+  # rbind_dry_run() creates and checks for duplicates, so the names of the
+  # loci are left as they are)
+  if (!use_position) {
+    if (anyDuplicated(loci_names(target)) > 0) {
+      stop(
+        "The target gen_tibble contains duplicated loci. ",
+        "Use 'find_duplicated_loci()' to identify and remove them."
       )
-    show_loci(target) <-
-      show_loci(target) %>%
-      mutate(
-        name_old = .data$name,
-        name = paste(.data$chromosome, .data$position, sep = "_")
+    }
+    if (anyDuplicated(loci_names(ref)) > 0) {
+      stop(
+        "The reference gen_tibble contains duplicated loci. ",
+        "Use 'find_duplicated_loci()' to identify and remove them."
       )
-  }
-
-  # check for duplicates within each dataset
-  if (anyDuplicated(loci_names(target)) > 0) {
-    stop(
-      "The target gen_tibble contains duplicated loci. ",
-      "Use 'find_duplicated_loci()' to identify and remove them."
-    )
-  }
-  if (anyDuplicated(loci_names(ref)) > 0) {
-    stop(
-      "The reference gen_tibble contains duplicated loci. ",
-      "Use 'find_duplicated_loci()' to identify and remove them."
-    )
+    }
   }
 
   report <- rbind_dry_run(
@@ -245,11 +234,6 @@ rbind.gen_tbl <- function(
   indivs_with_big_names <- c(names(ref$genotypes), names(target$genotypes))
   # TODO check that this is the correct order!!!!
   new_ref_loci_tbl$big_index <- seq_len(nrow(new_ref_loci_tbl))
-  # positions were only used for matching, so restore the reference names
-  if (use_position) {
-    new_ref_loci_tbl$name <- new_ref_loci_tbl$name_old
-    new_ref_loci_tbl$name_old <- NULL
-  }
   # by default, this should just be a subset in the same order as the reference
   # TODO check that all individuals in tibble and bigsnp object are the same
 
