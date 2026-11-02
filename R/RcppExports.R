@@ -9,8 +9,8 @@ alt_freq_polyploid_cpp <- function(BM, rowInd, colInd, ploidy, ncores, as_counts
     .Call(`_tidypopgen_alt_freq_polyploid_cpp`, BM, rowInd, colInd, ploidy, ncores, as_counts, block_size)
 }
 
-fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V) {
-    .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V)
+fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs) {
+    .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs)
 }
 
 grouped_alt_freq_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, ncores, as_counts, block_size = 100000L, freq_only = FALSE) {
