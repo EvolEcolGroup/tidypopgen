@@ -135,7 +135,11 @@ test_that("invalid vcf loci do not leave backing files behind", {
       ),
       "duplicated loci"
     )
-    expect_equal(gt_get_file_names(vcf_gt)[2], paste0(backingfile, ".bk"))
+    # the stored path is normalised (on macOS, /var is a link to /private/var)
+    expect_equal(
+      normalizePath(gt_get_file_names(vcf_gt)[2]),
+      normalizePath(paste0(backingfile, ".bk"))
+    )
   }
 })
 
