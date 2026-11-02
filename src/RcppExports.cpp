@@ -368,6 +368,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// windows_pairwise_pop_fst_cpp
+List windows_pairwise_pop_fst_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, const IntegerMatrix& pairwise_combn, std::string method, const IntegerVector& locus_first, const IntegerVector& locus_last, int n_windows, int block_size, int ncores);
+RcppExport SEXP _tidypopgen_windows_pairwise_pop_fst_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP pairwise_combnSEXP, SEXP methodSEXP, SEXP locus_firstSEXP, SEXP locus_lastSEXP, SEXP n_windowsSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< size_t >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< const IntegerMatrix& >::type pairwise_combn(pairwise_combnSEXP);
+    Rcpp::traits::input_parameter< std::string >::type method(methodSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type locus_first(locus_firstSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type locus_last(locus_lastSEXP);
+    Rcpp::traits::input_parameter< int >::type n_windows(n_windowsSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(windows_pairwise_pop_fst_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, locus_first, locus_last, n_windows, block_size, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pop_stats_dip_pseudo_cpp
 List pop_stats_dip_pseudo_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, bool by_locus_ho, bool by_locus_hs, bool by_locus_fis, bool by_locus_global, int block_size, int ncores);
 RcppExport SEXP _tidypopgen_pop_stats_dip_pseudo_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP by_locus_hoSEXP, SEXP by_locus_hsSEXP, SEXP by_locus_fisSEXP, SEXP by_locus_globalSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP) {
@@ -532,6 +555,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 8},
     {"_tidypopgen_loci_qc_cpp", (DL_FUNC) &_tidypopgen_loci_qc_cpp, 10},
     {"_tidypopgen_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_pairwise_pop_fst_cpp, 12},
+    {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 13},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},

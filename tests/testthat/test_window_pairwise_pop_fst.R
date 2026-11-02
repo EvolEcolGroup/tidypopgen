@@ -533,3 +533,37 @@ test_that("windows_pairwise_pop_fst tidy output works with two populations", {
     c("chromosome", "start", "end", "stat_name", "value")
   )
 })
+
+test_that("windows_pairwise_pop_fst matches windows of num and den", {
+  # windowed Fst is computed in a single pass, without storing numerators and
+  # denominators by locus; check it against windows_stats_generic() applied
+  # to them
+  for (method in c("Hudson", "Nei87", "WC84")) {
+    for (unit in c("snp", "bp")) {
+      ws <- if (unit == "snp") 3 else 100
+      st <- if (unit == "snp") 2 else 70
+      win_fst <- test_gt %>% windows_pairwise_pop_fst(
+        method = method, window_size = ws, step_size = st,
+        size_unit = unit, min_loci = 2, complete = (unit == "bp")
+      )
+      num_den <- test_gt %>% pairwise_pop_fst(
+        method = method, by_locus = TRUE, return_num_dem = TRUE
+      )
+      for (i_pair in seq_len(ncol(num_den$Fst_by_locus_num))) {
+        win_stats <- lapply(num_den[c("Fst_by_locus_num", "Fst_by_locus_den")],
+          function(values) {
+            windows_stats_generic(values[, i_pair],
+              loci_table = show_loci(test_gt), window_size = ws,
+              step_size = st, size_unit = unit, min_loci = 2,
+              complete = (unit == "bp")
+            )
+          }
+        )
+        expect_identical(
+          win_fst[[3 + i_pair]],
+          win_stats[[1]]$stat / win_stats[[2]]$stat
+        )
+      }
+    }
+  }
+})
