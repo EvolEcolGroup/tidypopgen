@@ -188,3 +188,28 @@ test_that("windows_pop_tajimas_d counts pseudohaploid allele copies", {
     unname(unlist(expected))
   )
 })
+
+test_that("windows_pop_tajimas_d matches a custom function in windows", {
+  # windows_pop_tajimas_d() sums pi and segregating sites in each window;
+  # check it against applying tajimas_d_from_pi_vec() to each window
+  test_ungrouped <- dplyr::ungroup(test_gt)
+  pi <- loci_pi(test_ungrouped)
+  for (unit in c("snp", "bp")) {
+    ws <- if (unit == "snp") 3 else 100
+    st <- if (unit == "snp") 2 else 70
+    for (complete in c(FALSE, TRUE)) {
+      expect_identical(
+        windows_pop_tajimas_d(test_ungrouped,
+          window_size = ws, step_size = st, size_unit = unit,
+          complete = complete
+        ),
+        windows_stats_generic(pi,
+          loci_table = show_loci(test_ungrouped), operator = "custom",
+          window_size = ws, step_size = st, size_unit = unit,
+          complete = complete, f = tajimas_d_from_pi_vec,
+          n = sum(indiv_ploidy(test_ungrouped))
+        )
+      )
+    }
+  }
+})

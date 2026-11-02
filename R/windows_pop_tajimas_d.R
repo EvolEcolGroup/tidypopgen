@@ -83,21 +83,59 @@ windows_pop_tajimas_d <- function(.x,
     pi_by_locus <- list(pi_by_locus)
   }
 
+  # define the windows once (as in windows_stats_generic())
+  size_unit <- match.arg(size_unit)
+  loci_table <- show_loci(.x)
+  .check_window_args(
+    loci_table,
+    n_values = nrow(loci_table),
+    window_size = window_size,
+    step_size = step_size,
+    size_unit = size_unit,
+    min_loci = min_loci,
+    complete = complete
+  )
+  win <- .window_definitions(
+    loci_table,
+    window_size = window_size,
+    step_size = step_size,
+    size_unit = size_unit
+  )
+  # windows without loci are NA
+  empty <- win$hi == win$lo
+
   res <- list()
   # now we can loop around each population to compute the windows
   for (i_grp in seq_along(pi_by_locus)) {
-    window_taj <- windows_stats_generic(
-      .x = pi_by_locus[[i_grp]],
-      loci_table = show_loci(.x),
-      operator = "custom",
-      window_size = window_size,
-      step_size = step_size,
-      size_unit = size_unit,
-      min_loci = min_loci,
-      complete = complete,
-      f = tajimas_d_from_pi_vec,
+    pi <- as.numeric(pi_by_locus[[i_grp]])
+    # tajimas d only needs, for each window, the sum of pi (accumulated in
+    # long double, as sum() does) and the number of segregating sites
+    win_sums <- window_sums_cpp(
+      matrix(c(pi, as.numeric(pi > 0)), ncol = 2),
+      loci = win$loci,
+      lo = win$lo,
+      hi = win$hi,
+      long_double = TRUE
+    )
+    stat <- tajimas_d_from_k_hat_seg(
+      k_hat = win_sums$sum[, 1],
+      seg = win_sums$sum[, 2],
       n = n[i_grp]
     )
+    # the number of loci with a non-missing pi in each window
+    n_loci <- win_sums$n[, 1]
+    stat[empty] <- NA
+    n_loci[empty] <- NA
+    # if we only want complete windows, set incomplete ones to NA
+    if (complete) {
+      stat[!win$complete] <- NA
+      n_loci[!win$complete] <- NA
+    }
+    window_taj <- win$windows
+    window_taj$stat <- stat
+    window_taj$n_loci <- n_loci
+    # set values to NA if there are fewer than min_loci loci
+    window_taj$stat[window_taj$n_loci < min_loci] <- NA
     res[[i_grp]] <- window_taj
   }
   if (length(res) == 1) { # if we only have one pop, return a data.frame

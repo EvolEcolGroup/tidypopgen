@@ -156,7 +156,14 @@ tajimas_d_from_pi_vec <- function(pi, n) {
   # data (NA pi) are ignored
   seg <- sum(pi > 0.0, na.rm = TRUE)
   k_hat <- sum(pi, na.rm = TRUE)
+  tajimas_d_from_k_hat_seg(k_hat, seg, n)
+}
 
+# estimate tajimas d from the sum of pi across loci (k_hat) and the number of
+# segregating sites (seg), given the number of haploid genomes n; this is
+# vectorised over k_hat and seg (e.g. to compute tajimas d for many windows at
+# once)
+tajimas_d_from_k_hat_seg <- function(k_hat, seg, n) {
   a1 <- sum(1 / (1:(n - 1)))
   a2 <- sum(1 / ((1:(n - 1))^2))
   e1 <- ((n + 1) / (3 * (n - 1)) - 1 / a1) / a1
