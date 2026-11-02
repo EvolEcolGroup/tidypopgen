@@ -120,7 +120,7 @@ All the normal functionality of tidypopgen is preserved, as our `qc_report` func
 sgdp_indiv_rep <- qc_report_indiv(sgdp)
 ```
 
-indiv_report: 2s
+indiv_report: 439ms
 
 
 ``` r
@@ -129,7 +129,7 @@ sgdp_loci_rep <- qc_report_loci(sgdp)
 sgdp <- sgdp %>% ungroup()
 ```
 
-loci_report: 36.6s
+loci_report: 394ms
 
 However, it is important to be mindful that analyses on very large datasets will produce large outputs:
 
@@ -184,7 +184,7 @@ cat("Loci remaining:", count_loci(sgdp))
 #> Loci remaining: 7579668
 ```
 
-maf_filter: 4s
+maf_filter: 430ms
 
 With other datasets, we would also remove loci with too many missing genotypes (e.g. with `select_loci_if(loci_missingness(genotypes) < 0.1)`), and then impute the remaining missing genotypes with `gt_impute_simple()`, as LD clumping and PCA do not accept missing values. Our dataset has no missing genotypes, so we can skip both steps.
 
@@ -198,7 +198,7 @@ sgdp <- gt_update_backingfile(sgdp, quiet = TRUE,
                               backingfile = tempfile())
 ```
 
-update_backingfile: 8.7s
+update_backingfile: 5.9s
 
 This will help us with the next step (LD clumping).
 
@@ -219,7 +219,7 @@ cat("Loci remaining:", count_loci(sgdp))
 #> Loci remaining: 412999
 ```
 
-ld_clump: 12.7s
+ld_clump: 7.8s
 
 # Analysis
 
@@ -232,7 +232,7 @@ Now that we have a clean dataset, we can proceed with our analysis by plotting a
 sgdp_pca <- sgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 529ms
+pca: 544ms
 
 
 ``` r
@@ -256,7 +256,7 @@ sgdp_dapc <- gt_dapc(sgdp_pca,
 )
 ```
 
-dapc: 23ms
+dapc: 22ms
 
 
 ``` r
@@ -296,7 +296,7 @@ autoplot(pairwise_fst,
   )
 ```
 
-![plot of chunk pairwise_fst](./figure/big_data/pairwise_fst-1.png)pairwise_fst: 186ms
+![plot of chunk pairwise_fst](./figure/big_data/pairwise_fst-1.png)pairwise_fst: 166ms
 
 The pairwise F~ST~ values are all small (between 0.03 and 0.07), as is typical of human populations. America is the most differentiated region, and Africa and America are the most differentiated pair (F~ST~ = 0.069). Africa and West Eurasia are the least differentiated pair (0.033), closely followed by Oceania and West Eurasia (0.034); the low value between Africa and West Eurasia partly reflects the West Eurasian-related ancestry of the Mozabite, Somali and Masai individuals in our African sample. Note that with only 10 individuals per region, these estimates are imprecise.
 
@@ -307,15 +307,15 @@ Here is a summary of the time taken (in seconds) to perform each step using a la
 
 ```
 #>                 step  time
-#> 1       indiv_report  2.03
-#> 2        loci_report 36.65
-#> 3         maf_filter  3.98
-#> 4 update_backingfile  8.74
-#> 5           ld_clump 12.71
-#> 6                pca  0.53
+#> 1       indiv_report  0.44
+#> 2        loci_report  0.39
+#> 3         maf_filter  0.43
+#> 4 update_backingfile  5.91
+#> 5           ld_clump  7.82
+#> 6                pca  0.54
 #> 7               dapc  0.02
-#> 8       pairwise_fst  0.19
-#> 9              Total 64.85
+#> 8       pairwise_fst  0.17
+#> 9              Total 15.72
 ```
 
 # Key takeaways
