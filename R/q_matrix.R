@@ -257,14 +257,6 @@ tidy.q_matrix <- function(x, data, ...) {
         id = data$id,
         group = colu
       )
-  } else if (!is.null(attr(x, "id"))) {
-    # use the id attribute if available, so that the order of data does
-    # not matter
-    q_tbl$id <- attr(x, "id")
-    for (i in seq_len(ncol(q_tbl))) {
-      attr(q_tbl[[i]], "id") <- NULL
-      attr(q_tbl[[i]], "class") <- NULL
-    }
   } else {
     q_tbl <- q_tbl %>%
       dplyr::mutate(id = data$id)
@@ -360,14 +352,6 @@ augment.q_matrix <- function(x, data = NULL, ...) {
         id = data$id,
         group = colu
       )
-  } else if (!is.null(attr(x, "id"))) {
-    # use the id attribute if available, so that the order of data does
-    # not matter
-    q_tbl$id <- attr(x, "id")
-    for (i in seq_len(ncol(q_tbl))) {
-      attr(q_tbl[[i]], "id") <- NULL
-      attr(q_tbl[[i]], "class") <- NULL
-    }
   } else {
     q_tbl <- q_tbl %>%
       dplyr::mutate(id = data$id)
