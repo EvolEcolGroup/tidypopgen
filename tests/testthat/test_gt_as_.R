@@ -41,11 +41,7 @@ test_that("show_loci gets and sets information", {
     check.attributes = FALSE
   ))
 
-  # genlight can not store the missing allele of rs3
-  expect_warning(
-    test_genlight <- gt_as_genlight(test_gt),
-    "the alleles \\(loc.all\\) were not stored"
-  )
+  test_genlight <- gt_as_genlight(test_gt)
   expect_true(all.equal(
     show_genotypes(test_gt),
     as.matrix(test_genlight),
