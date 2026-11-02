@@ -55,8 +55,7 @@ autoplot.gt_admix <- function(
       stop("No cross validation error available")
     }
 
-    # the algorithm can be missing (e.g. after combining objects)
-    if (identical(object$algorithm, "SNMF")) {
+    if (object$algorithm == "SNMF") {
       ggplot2::ggplot(
         data.frame(k = object$k, cv = object$cv),
         ggplot2::aes(x = .data$k, y = .data$cv)
