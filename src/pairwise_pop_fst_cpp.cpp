@@ -331,8 +331,12 @@ List pairwise_pop_fst_cpp(Environment BM,
 // locus_first). For each window and pair, we accumulate the sum and the
 // number of the non-missing numerators and denominators, in the order of the
 // loci (as runner::mean_run() does when applied to each column of numerators
-// and denominators). Returns a list of 4 matrices (windows x pairs): sum_num,
-// n_num, sum_den and n_den.
+// and denominators). If both_valid is TRUE, a locus is only used (for both
+// the numerator and the denominator) if both are non-missing, as for the
+// genome-wide Fst in pairwise_pop_fst_cpp(); this is used for the blocks of
+// the jackknife, where each block is a window (and n_num equals n_den).
+// Returns a list of 4 matrices (windows x pairs): sum_num, n_num, sum_den and
+// n_den.
 
 // [[Rcpp::export]]
 List windows_pairwise_pop_fst_cpp(Environment BM,
@@ -346,6 +350,7 @@ List windows_pairwise_pop_fst_cpp(Environment BM,
                                   const IntegerVector& locus_first,
                                   const IntegerVector& locus_last,
                                   int n_windows,
+                                  bool both_valid,
                                   int block_size,
                                   int ncores) {
 
@@ -384,12 +389,17 @@ List windows_pairwise_pop_fst_cpp(Environment BM,
       size_t offset = k * (size_t) n_windows;
       for (size_t jj = 0; jj < nb; jj++) {
         size_t j = j0 + jj;
+        bool num_valid = !std::isnan(num[jj]);
+        bool den_valid = !std::isnan(den[jj]);
+        if (both_valid) {
+          num_valid = den_valid = num_valid && den_valid;
+        }
         for (int w = p_first[j]; w <= p_last[j]; w++) {
-          if (!std::isnan(num[jj])) {
+          if (num_valid) {
             p_sum_num[offset + w] += num[jj];
             p_n_num[offset + w] += 1;
           }
-          if (!std::isnan(den[jj])) {
+          if (den_valid) {
             p_sum_den[offset + w] += den[jj];
             p_n_den[offset + w] += 1;
           }

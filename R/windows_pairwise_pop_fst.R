@@ -65,12 +65,7 @@ windows_pairwise_pop_fst <- function(.x,
     stop(".x should be a grouped df")
   }
   # only operate on diploids or, if pseudohaploids, Hudson
-  if (!is_diploid_only(.x) && !is_pseudohaploid(.x)) {
-    stop("fst can be currently computed on diploid data")
-  }
-  if (is_pseudohaploid(.x) && method != "Hudson") {
-    stop("only `method = Hudson` is valid when the data include pseudohaploids")
-  }
+  .check_fst_ploidy(.x, method)
   # get the populations, and all pairs of populations
   .group_levels <- .x %>% group_keys()
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
@@ -108,6 +103,7 @@ windows_pairwise_pop_fst <- function(.x,
     locus_first = win$locus_first,
     locus_last = win$locus_last,
     n_windows = nrow(win$windows),
+    both_valid = FALSE,
     block_size = 1024,
     ncores = bigstatsr::nb_cores()
   )

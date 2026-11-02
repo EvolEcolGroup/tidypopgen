@@ -85,8 +85,8 @@ pairwise_pop_fst_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, 
     .Call(`_tidypopgen_pairwise_pop_fst_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores)
 }
 
-windows_pairwise_pop_fst_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, locus_first, locus_last, n_windows, block_size, ncores) {
-    .Call(`_tidypopgen_windows_pairwise_pop_fst_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, locus_first, locus_last, n_windows, block_size, ncores)
+windows_pairwise_pop_fst_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, locus_first, locus_last, n_windows, both_valid, block_size, ncores) {
+    .Call(`_tidypopgen_windows_pairwise_pop_fst_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, locus_first, locus_last, n_windows, both_valid, block_size, ncores)
 }
 
 pop_stats_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, by_locus_ho, by_locus_hs, by_locus_fis, by_locus_global, block_size, ncores) {

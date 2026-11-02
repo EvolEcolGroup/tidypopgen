@@ -93,45 +93,65 @@ jackknife_nwise_pop_pbs <- function(.x,
     block_id = block_id
   )
 
+  # fst on all loci (first row) and leaving out each block in turn (other
+  # rows)
+  fst_values <- rbind(fst_blocks$full, fst_blocks$loo)
   # create all 3 way combinations of populations
   pops <- .group_levels %>% dplyr::pull(1)
   pop_combinations <- utils::combn(pops, 3, simplify = FALSE)
+  # for each triplet, the column of fst_blocks of the pair of its i-th and
+  # j-th populations
+  pair_col <- function(i, j) {
+    pair_names <- vapply(pop_combinations, function(trip) {
+      paste0("fst_", trip[i], ".", trip[j])
+    }, character(1))
+    match(pair_names, colnames(fst_blocks$m))
+  }
+  col_12 <- pair_col(1, 2)
+  col_13 <- pair_col(1, 3)
+  col_23 <- pair_col(2, 3)
 
-  # for each combination of populations, compute the pbs on all loci (first
-  # row) and leaving out each block in turn (other rows)
-  pbs_all <- pbs_all_triplets(
-    rbind(fst_blocks$full, fst_blocks$loo),
-    pops = pops
+  # compute the jackknife for chunks of triplets, so that the matrices of
+  # leave-one-out pbs (one row per block, 6 columns per triplet) stay small
+  # even with many populations
+  chunks <- split(
+    seq_along(pop_combinations),
+    ceiling(seq_along(pop_combinations) / 1000)
   )
-  pbs_full <- pbs_all[1, ]
-  pbs_loo <- pbs_all[-1, , drop = FALSE]
-  # the number of loci in a block is the minimum across the three pairs
-  pbs_m <- lapply(pop_combinations, function(pops) {
-    pairs <- paste0("fst_", c(
-      paste(pops[1], pops[2], sep = "."),
-      paste(pops[1], pops[3], sep = "."),
-      paste(pops[2], pops[3], sep = ".")
-    ))
-    # pbs_all_triplets returns 6 statistics per triplet
-    m_triplet <- do.call(
-      pmin,
-      as.data.frame(fst_blocks$m[, pairs, drop = FALSE])
+  res <- lapply(chunks, function(i_trip) {
+    # pbs on all loci (first row) and leaving out each block in turn
+    pbs_all <- pbs_all_triplets(fst_values,
+      pops = pops,
+      pop_combinations = pop_combinations[i_trip]
     )
-    matrix(m_triplet, nrow = length(m_triplet), ncol = 6)
+    # the number of loci in a block is the minimum across the three pairs
+    # of each triplet (pbs_all_triplets returns 6 statistics per triplet)
+    m_triplet <- pmin(
+      fst_blocks$m[, col_12[i_trip], drop = FALSE],
+      fst_blocks$m[, col_13[i_trip], drop = FALSE],
+      fst_blocks$m[, col_23[i_trip], drop = FALSE]
+    )
+    jack <- .jackknife_weighted(
+      theta_full = pbs_all[1, ],
+      theta_loo = pbs_all[-1, , drop = FALSE],
+      m = m_triplet[, rep(seq_along(i_trip), each = 6), drop = FALSE]
+    )
+    list(jack = jack, stat_names = colnames(pbs_all))
   })
-  pbs_m <- do.call(cbind, pbs_m)
+  stat_names <- unlist(lapply(res, `[[`, "stat_names"), use.names = FALSE)
+  res <- dplyr::bind_rows(lapply(res, `[[`, "jack"))
 
   # if we return fst, we add it before the pbs values
   if (return_fst) {
-    pbs_full <- c(fst_blocks$full, pbs_full)
-    pbs_loo <- cbind(fst_blocks$loo, pbs_loo)
-    pbs_m <- cbind(fst_blocks$m, pbs_m)
+    res <- dplyr::bind_rows(
+      .jackknife_weighted(
+        theta_full = fst_blocks$full,
+        theta_loo = fst_blocks$loo,
+        m = fst_blocks$m
+      ),
+      res
+    )
+    stat_names <- c(names(fst_blocks$full), stat_names)
   }
-  # compute the jackknife estimates
-  res <- .jackknife_weighted(
-    theta_full = pbs_full,
-    theta_loo = pbs_loo,
-    m = pbs_m
-  )
-  .jackknife_format(res, stat_names = names(pbs_full), type = type)
+  .jackknife_format(res, stat_names = stat_names, type = type)
 }

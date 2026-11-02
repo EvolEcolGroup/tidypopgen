@@ -106,12 +106,7 @@ pairwise_pop_fst <- function(
   }
 
   # only operate on diploids or, if pseudohaploids, Hudson
-  if (!is_diploid_only(.x) && !is_pseudohaploid(.x)) {
-    stop("fst can be currently computed on diploid data")
-  }
-  if (is_pseudohaploid(.x) && method != "Hudson") {
-    stop("only `method = Hudson` is valid when the data include pseudohaploids")
-  }
+  .check_fst_ploidy(.x, method)
 
   # get the populations
   .group_levels <- .x %>% group_keys()
@@ -247,4 +242,18 @@ col_names_combinations <- function(group_combinations, prefix = NULL) {
     comb_labels <- paste(prefix, comb_labels, sep = "_")
   }
   return(comb_labels)
+}
+
+# Check that Fst can be computed on the ploidy of .x with the given method:
+# Fst is only implemented for diploids or, if the data include
+# pseudohaploids, for Hudson (used by pairwise_pop_fst(),
+# windows_pairwise_pop_fst() and the jackknife functions)
+.check_fst_ploidy <- function(.x, method) {
+  if (!is_diploid_only(.x) && !is_pseudohaploid(.x)) {
+    stop("fst can be currently computed on diploid data")
+  }
+  if (is_pseudohaploid(.x) && method != "Hudson") {
+    stop("only `method = Hudson` is valid when the data include pseudohaploids")
+  }
+  invisible(TRUE)
 }

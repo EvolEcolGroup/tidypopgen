@@ -114,17 +114,21 @@ nwise_pop_pbs <- function(.x,
 #'   columns are named as fst_pop1.pop2, fst_pop1.pop3, fst_pop2.pop3, etc.)
 #' @param pops A vector of population names (in the order used to create the
 #'   pairs)
+#' @param pop_combinations A list of triplets of populations (by default, all
+#'   triplets of `pops`, as given by `utils::combn()`); a subset can be given
+#'   to compute the PBS of some triplets only
 #' @return A matrix with one row per row of `fst_values`, and 6 columns for
-#'   each triplet of populations a, b and c (as given by `utils::combn()`):
+#'   each triplet of populations a, b and c (in `pop_combinations`):
 #'   `pbs_a.b.c`, `pbs_b.a.c`, `pbs_c.a.b`, `pbsn1_a.b.c`, `pbsn1_b.a.c` and
 #'   `pbsn1_c.a.b`
 #' @keywords internal
 #' @noRd
-pbs_all_triplets <- function(fst_values, pops) {
+pbs_all_triplets <- function(fst_values, pops,
+                             pop_combinations = utils::combn(pops, 3,
+                               simplify = FALSE
+                             )) {
   # branch lengths for all pairs of populations (computed once per pair)
   t_values <- -log(1 - fst_values)
-  # create all 3 way combinations of populations
-  pop_combinations <- utils::combn(pops, 3, simplify = FALSE)
   # preallocate the results
   pbs_names <- unlist(lapply(pop_combinations, function(pops) {
     c(
