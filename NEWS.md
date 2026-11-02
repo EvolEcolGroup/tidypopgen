@@ -1,7 +1,8 @@
 # tidypopgen `dev`
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
-  individuals with no loci genotyped in both)
+  individuals with no loci genotyped in both); such pairs are treated as not
+  related, with a warning
 * `gen_tibble()` now errors on truncated or corrupted packedancestry .geno
   files, rather than reading garbage genotypes (or reading out of bounds)
 * document that the `n_cores` argument of `gen_tibble()` is currently ignored
