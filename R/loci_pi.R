@@ -179,39 +179,16 @@ loci_pi.grouped_df <- function(
     stop("loci_pi only works with one grouping variable")
   }
 
-  geno_fbm <- .gt_get_fbm(.x)
-  # rows (individuals) that we want to use
-  rows_to_keep <- .gt_fbm_rows(.x)
-
-  # Keep the common diploid case on the ploidy-free kernel. Pseudohaploid
-  # samples retain 0/2 dosage storage despite contributing one allele, so
-  # they must use the ploidy-aware kernel. The cpp code reads the FBM
-  # directly, in blocks of block_size loci, and fills a single matrix
-  # (rather than binding the matrices from each block); openMP uses
-  # multiple cores in the cpp code.
-  if (is_diploid_only(.x)) {
-    pi_mat <- gt_grouped_pi_diploid(
-      BM = geno_fbm,
-      rowInd = rows_to_keep,
-      colInd = .gt_fbm_cols(.x),
-      groupIds = dplyr::group_indices(.x) - 1L,
-      ngroups = dplyr::n_groups(.x),
-      ncores = n_cores,
-      block_size = block_size
-    )$pi
-  } else {
-    pi_mat <- gt_grouped_pi_polyploid(
-      BM = geno_fbm,
-      rowInd = rows_to_keep,
-      colInd = .gt_fbm_cols(.x),
-      groupIds = dplyr::group_indices(.x) - 1L,
-      ngroups = dplyr::n_groups(.x),
-      ploidy = indiv_ploidy(.x),
-      is_pseudohaploid = is_pseudohaploid(.x),
-      ncores = n_cores,
-      block_size = block_size
-    )$pi
-  }
+  # compute pi for each group (the number of valid allele copies is not
+  # needed, so it is not returned)
+  pi_mat <- .loci_pi_n(
+    .x$genotypes,
+    group_ids = dplyr::group_indices(.x) - 1L,
+    n_groups = dplyr::n_groups(.x),
+    n_cores = n_cores,
+    block_size = block_size,
+    return_n = FALSE
+  )$pi
 
   pi_mat <- format_grouped_output(
     out_mat = pi_mat,
@@ -220,4 +197,69 @@ loci_pi.grouped_df <- function(
     type = type
   )
   return(pi_mat)
+}
+
+#' Estimate pi and the number of valid allele copies at each locus by group
+#'
+#' Internal function that computes nucleotide diversity (pi) at each locus for
+#' each group of individuals, together with the number of non-missing allele
+#' copies (`n`) used to estimate pi at that locus. Pi is `NA` when a group has
+#' fewer than 2 valid allele copies at a locus. Ungrouped data can be handled
+#' by assigning all individuals to a single group (i.e. `group_ids` set to 0
+#' for all individuals, and `n_groups = 1`).
+#'
+#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column
+#'   of a [`gen_tibble`] object).
+#' @param group_ids a vector of 0-based group indices, one per individual in
+#'   `.x`.
+#' @param n_groups the number of groups.
+#' @param n_cores number of cores to be used.
+#' @param block_size maximum number of loci read at once.
+#' @param return_n boolean, should the number of valid allele copies be
+#'   returned? If FALSE, `n` is NULL (the matrix is as large as `pi`, so we
+#'   only build it when needed).
+#' @returns a list with two matrices with one row per locus and one column per
+#'   group: `pi`, the nucleotide diversity, and `n`, the number of valid
+#'   allele copies.
+#' @keywords internal
+#' @noRd
+.loci_pi_n <- function(.x, group_ids, n_groups, n_cores, block_size,
+                       return_n = TRUE) {
+  geno_fbm <- attr(.x, "fbm")
+  # rows (individuals) and columns (loci) of the FBM that we want to use
+  rows_to_keep <- vctrs::vec_data(.x)
+  cols_to_keep <- attr(.x, "loci")$big_index
+
+  # Keep the common diploid case on the ploidy-free kernel. Pseudohaploid
+  # samples retain 0/2 dosage storage despite contributing one allele, so
+  # they must use the ploidy-aware kernel. The cpp code reads the FBM
+  # directly, in blocks of block_size loci, and fills a single matrix
+  # (rather than binding the matrices from each block); openMP uses
+  # multiple cores in the cpp code.
+  if (is_diploid_only(.x)) {
+    pi_n <- gt_grouped_pi_diploid(
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = cols_to_keep,
+      groupIds = group_ids,
+      ngroups = n_groups,
+      ncores = n_cores,
+      block_size = block_size,
+      return_n = return_n
+    )
+  } else {
+    pi_n <- gt_grouped_pi_polyploid(
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = cols_to_keep,
+      groupIds = group_ids,
+      ngroups = n_groups,
+      ploidy = indiv_ploidy(.x),
+      is_pseudohaploid = is_pseudohaploid(.x),
+      ncores = n_cores,
+      block_size = block_size,
+      return_n = return_n
+    )
+  }
+  list(pi = pi_n$pi, n = pi_n$n)
 }

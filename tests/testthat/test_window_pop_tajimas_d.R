@@ -178,38 +178,100 @@ test_that("windows_pop_tajimas_d counts pseudohaploid allele copies", {
     step_size = 3
   )
   pi_by_group <- loci_pi(pseudohaploid_gt, type = "list")
-  ploidy_by_group <- pseudohaploid_gt %>%
-    dplyr::summarise(n = sum(indiv_ploidy(genotypes))) %>%
-    dplyr::pull(.data$n)
+  # number of valid allele copies at each locus for each group (pseudohaploids
+  # contribute one copy, diploids two)
+  ploidy <- indiv_ploidy(pseudohaploid_gt)
+  n_by_group <- lapply(
+    split(seq_along(ploidy), pseudohaploid_meta$population),
+    function(rows) {
+      valid <- !is.na(pseudohaploid_genotypes[rows, , drop = FALSE])
+      colSums(valid * ploidy[rows])
+    }
+  )
 
-  expected <- Map(tajimas_d_from_pi_vec, pi_by_group, ploidy_by_group)
+  expected <- Map(tajimas_d_from_pi_vec, pi_by_group, n_by_group)
   expect_equal(
     unname(vapply(window_tajimas_d, function(x) x$stat[1], numeric(1))),
     unname(unlist(expected))
   )
 })
 
-test_that("windows_pop_tajimas_d matches a custom function in windows", {
-  # windows_pop_tajimas_d() sums pi and segregating sites in each window;
-  # check it against applying tajimas_d_from_pi_vec() to each window
+test_that("windows_pop_tajimas_d matches window sums of the locus terms", {
+  # windows_pop_tajimas_d() sums the terms of each locus in all windows at
+  # once; check it against summing each term with windows_stats_generic()
   test_ungrouped <- dplyr::ungroup(test_gt)
-  pi <- loci_pi(test_ungrouped)
+  pi_n <- .pi_n_by_group(test_ungrouped)
+  locus_terms <- tajimas_d_locus_terms(pi_n$pi[, 1], pi_n$n[, 1])
   for (unit in c("snp", "bp")) {
     ws <- if (unit == "snp") 3 else 100
     st <- if (unit == "snp") 2 else 70
     for (complete in c(FALSE, TRUE)) {
-      expect_identical(
+      window_sums <- lapply(colnames(locus_terms), function(i_term) {
+        windows_stats_generic(locus_terms[, i_term],
+          loci_table = show_loci(test_ungrouped), operator = "sum",
+          window_size = ws, step_size = st, size_unit = unit,
+          min_loci = 2, complete = complete
+        )
+      })
+      names(window_sums) <- colnames(locus_terms)
+      expected <- window_sums$k_hat
+      expected$stat <- tajimas_d_from_sums(
+        k_hat = window_sums$k_hat$stat,
+        seg = window_sums$seg$stat,
+        theta_w = window_sums$theta_w$stat,
+        n_sum = window_sums$n$stat,
+        n_loci = window_sums$n_loci$stat
+      )
+      expect_equal(
         windows_pop_tajimas_d(test_ungrouped,
           window_size = ws, step_size = st, size_unit = unit,
-          complete = complete
+          min_loci = 2, complete = complete
         ),
-        windows_stats_generic(pi,
-          loci_table = show_loci(test_ungrouped), operator = "custom",
-          window_size = ws, step_size = st, size_unit = unit,
-          complete = complete, f = tajimas_d_from_pi_vec,
-          n = sum(indiv_ploidy(test_ungrouped))
-        )
+        expected
       )
     }
   }
+})
+
+test_that("windows_pop_tajimas_d ignores loci with missing pi", {
+  # make the 2nd locus missing for all individuals in pop1
+  test_genotypes_miss <- test_genotypes
+  test_genotypes_miss[test_indiv_meta$population == "pop1", 2] <- NA
+  test_gt_miss <- gen_tibble(
+    x = test_genotypes_miss,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ) %>%
+    dplyr::group_by(population)
+  # a single window covering each chromosome
+  window_taj <- windows_pop_tajimas_d(
+    test_gt_miss,
+    type = "list",
+    window_size = 1000,
+    step_size = 1000,
+    size_unit = "bp"
+  )
+  expect_false(is.na(window_taj$pop1$stat[1]))
+  # the window is the same as tajima's d for chr1 without the missing locus
+  test_gt_chr1 <- test_gt_miss %>%
+    select_loci_if(loci_chromosomes(genotypes) == "chr1") %>%
+    select_loci(-2) %>%
+    dplyr::filter(population == "pop1") %>%
+    dplyr::ungroup()
+  expect_equal(window_taj$pop1$stat[1], pop_tajimas_d(test_gt_chr1))
+  # the number of loci only counts loci with data
+  expect_equal(window_taj$pop1$n_loci[1], 2)
+})
+
+test_that("windows_pop_tajimas_d only accepts one grouping variable", {
+  test_gt <- load_example_gt("gen_tbl_gen_dist") %>%
+    dplyr::group_by(population, id)
+  expect_error(
+    windows_pop_tajimas_d(test_gt,
+      window_size = 4, step_size = 4,
+      size_unit = "snp"
+    ),
+    "windows_pop_tajimas_d only works with one grouping variable"
+  )
 })

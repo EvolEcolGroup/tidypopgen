@@ -141,23 +141,8 @@ windows_stats_generic <- function(.x, loci_table,
 # n_values is the number of values (one per locus) to be summarised
 .check_window_args <- function(loci_table, n_values, window_size, step_size,
                                size_unit, min_loci, complete) {
-  # if size_unit is snp, check that loci_table has column chromosome
-  # else we also need position
-  if (size_unit == "snp") {
-    if (!all(c("chromosome") %in% colnames(loci_table))) {
-      stop(
-        "loci_table must contain column 'chromosome' when ",
-        "size_unit is 'snp'."
-      )
-    }
-  } else if (size_unit == "bp") {
-    if (!all(c("chromosome", "position") %in% colnames(loci_table))) {
-      stop(
-        "loci_table must contain columns 'chromosome' and 'position' ",
-        "when size_unit is 'bp'."
-      )
-    }
-  }
+  # check that loci_table has the columns needed for this size_unit
+  .check_loci_table_units(loci_table, size_unit)
 
   # check that complete is a boolean
   if (!is.logical(complete)) {
@@ -320,4 +305,44 @@ windows_stats_generic <- function(.x, loci_table,
     locus_first = locus_first,
     locus_last = locus_last
   )
+}
+
+# Check that a loci_table has the columns needed to define windows or blocks
+# in a given size_unit ("snp" only needs 'chromosome', "bp" also needs
+# 'position', and "cM" also needs a non-zero 'genetic_dist')
+.check_loci_table_units <- function(loci_table, size_unit) {
+  # if size_unit is snp, check that loci_table has column chromosome
+  # else we also need position (or genetic_dist)
+  if (size_unit == "snp") {
+    if (!all(c("chromosome") %in% colnames(loci_table))) {
+      stop(
+        "loci_table must contain column 'chromosome' when ",
+        "size_unit is 'snp'."
+      )
+    }
+  } else if (size_unit == "bp") {
+    if (!all(c("chromosome", "position") %in% colnames(loci_table))) {
+      stop(
+        "loci_table must contain columns 'chromosome' and 'position' ",
+        "when size_unit is 'bp'."
+      )
+    }
+  } else if (size_unit == "cM") {
+    if (!all(c("chromosome", "genetic_dist") %in% colnames(loci_table))) {
+      stop(
+        "loci_table must contain columns 'chromosome' and 'genetic_dist' ",
+        "when size_unit is 'cM'."
+      )
+    }
+    if (all(loci_table$genetic_dist == 0, na.rm = TRUE)) {
+      stop(
+        "all values of 'genetic_dist' are 0: genetic distances are needed ",
+        "when size_unit is 'cM'."
+      )
+    }
+    if (anyNA(loci_table$genetic_dist)) {
+      stop("'genetic_dist' can not contain NAs when size_unit is 'cM'.")
+    }
+  }
+  invisible(TRUE)
 }

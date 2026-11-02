@@ -3,6 +3,18 @@
 #' @description This function computes Tajima's D for a sliding window across
 #'   each chromosome.
 #'
+#' @details Missing genotypes are accounted for by using the number of
+#'   non-missing allele copies at each locus as its sample size, following
+#'   Bailey et al. (2025) as implemented in `pixy`. See [pop_tajimas_d()] for
+#'   details. Loci with no genotyped individuals are ignored, and are not
+#'   counted in `n_loci`. With windows defined in base pairs and
+#'   `step_size` equal to `window_size`, the windows match those used by
+#'   `pixy`.
+#'
+#' @references Bailey N, Stevison L, Samuk K (2025) Correcting for bias in
+#'   estimates of \eqn{\theta_W} and Tajima's D from missing data in
+#'   next-generation sequencing. Molecular Ecology Resources, e14104.
+#'   \doi{10.1111/1755-0998.14104}
 #' @param .x a (potentially grouped) `gen_tibble` object
 #' @param type type of object to return, if using grouped method. One of
 #'   "matrix", "tidy", or "list". Default is "matrix".
@@ -64,24 +76,10 @@ windows_pop_tajimas_d <- function(.x,
                                   complete = FALSE) {
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
+  if (length(dplyr::group_vars(.x)) > 1) {
+    stop("windows_pop_tajimas_d only works with one grouping variable")
+  }
   type <- match.arg(type)
-
-  # Get the number of sampled allele copies for each group. Pseudohaploid
-  # genotypes are stored as 0/2 dosages but contribute one allele per sample.
-  if (inherits(.x, "grouped_gen_tbl")) {
-    n <- .x %>%
-      dplyr::summarise(n = sum(indiv_ploidy(.data$genotypes))) %>%
-      dplyr::pull(.data$n)
-  } else {
-    n <- sum(indiv_ploidy(.x))
-  }
-  # get the pi for each locus (if it x is grouped, it will be a list)
-  pi_by_locus <- loci_pi(.x, type = "list")
-
-  # recast pi_by_locus as a list of one for just a population
-  if (!inherits(pi_by_locus, "list")) {
-    pi_by_locus <- list(pi_by_locus)
-  }
 
   # define the windows once (as in windows_stats_generic())
   size_unit <- match.arg(size_unit)
@@ -104,26 +102,33 @@ windows_pop_tajimas_d <- function(.x,
   # windows without loci are NA
   empty <- win$hi == win$lo
 
+  # get pi and the number of valid allele copies for each locus (one column
+  # per group)
+  pi_n <- .pi_n_by_group(.x)
+
   res <- list()
   # now we can loop around each population to compute the windows
-  for (i_grp in seq_along(pi_by_locus)) {
-    pi <- as.numeric(pi_by_locus[[i_grp]])
-    # tajimas d only needs, for each window, the sum of pi (accumulated in
-    # long double, as sum() does) and the number of segregating sites
+  for (i_grp in seq_len(ncol(pi_n$pi))) {
+    # get the quantities needed to compute tajimas d at each locus
+    locus_terms <- tajimas_d_locus_terms(pi_n$pi[, i_grp], pi_n$n[, i_grp])
+    # sum each of these quantities within each window (accumulated in long
+    # double, as sum() does); all of them are NA for the same loci (those
+    # with no valid allele copies), which are ignored
     win_sums <- window_sums_cpp(
-      matrix(c(pi, as.numeric(pi > 0)), ncol = 2),
+      locus_terms,
       loci = win$loci,
       lo = win$lo,
       hi = win$hi,
       long_double = TRUE
     )
-    stat <- tajimas_d_from_k_hat_seg(
-      k_hat = win_sums$sum[, 1],
-      seg = win_sums$sum[, 2],
-      n = n[i_grp]
-    )
-    # the number of loci with a non-missing pi in each window
+    term_sums <- win_sums$sum
+    colnames(term_sums) <- colnames(locus_terms)
+    # the number of loci with at least one valid allele copy in each window;
+    # windows without such loci have no sums (as in windows_stats_generic())
     n_loci <- win_sums$n[, 1]
+    term_sums[n_loci == 0, ] <- NA
+    # compute tajimas d for each window from the sums
+    stat <- tajimas_d_from_term_sums(term_sums)
     stat[empty] <- NA
     n_loci[empty] <- NA
     # if we only want complete windows, set incomplete ones to NA

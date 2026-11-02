@@ -567,3 +567,17 @@ test_that("windows_pairwise_pop_fst matches windows of num and den", {
     }
   }
 })
+
+test_that("windows_pairwise_pop_fst tidy output only pivots the fst columns", {
+  window_fst <- windows_pairwise_pop_fst(test_gt,
+    window_size = 3, step_size = 3
+  )
+  window_tidy <- windows_pairwise_pop_fst(test_gt,
+    type = "tidy", window_size = 3, step_size = 3
+  )
+  expect_equal(
+    sort(unique(window_tidy$stat_name)),
+    c("fst_pop1.pop2", "fst_pop1.pop3", "fst_pop2.pop3")
+  )
+  expect_equal(nrow(window_tidy), nrow(window_fst) * 3)
+})

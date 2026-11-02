@@ -30,7 +30,9 @@
 #'   large number variants are dropped when merging).
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #'   match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T
-#'   and C/G) will also be removed. It defaults to FALSE
+#'   and C/G) will also be removed, and loci whose `allele_ref` is missing in
+#'   both datasets will have their alleles swapped, so that the observed allele
+#'   becomes `allele_ref`. It defaults to FALSE
 #' @param quiet boolean whether to omit reporting to screen
 #' @param backingfile the path and prefix of the files used to store the merged
 #'   data (it will be a .RDS to store the `bigSNP` object and a .bk file as its
@@ -148,22 +150,38 @@ rbind.gen_tbl <- function(
   ###########
   # we start with the ref object
   # we fix the missing alleles
-  ## in the gt_table
-  id_missing <- which(!is.na(report$ref$missing_allele))
-  attr(ref$genotypes, "loci")$allele_alt[id_missing] <-
-    report$ref$missing_allele[id_missing]
+  ## in the gt_table, in whichever allele column was missing
+  for (allele_col in c("allele_alt", "allele_ref")) {
+    id_missing <- which(report$ref$missing_allele_col %in% allele_col)
+    attr(ref$genotypes, "loci")[[allele_col]][id_missing] <-
+      report$ref$missing_allele[id_missing]
+  }
+  # swap the alleles of loci whose allele_ref is missing in both datasets, so
+  # that the observed allele becomes allele_ref (only with flip_strand)
+  ## in the gt_table (only if needed, to avoid copying the loci table)
+  to_swap <- report$ref$to_swap
+  if (any(to_swap)) {
+    ref_loci <- attr(ref$genotypes, "loci")
+    attr(ref$genotypes, "loci")$allele_ref[to_swap] <-
+      ref_loci$allele_alt[to_swap]
+    attr(ref$genotypes, "loci")$allele_alt[to_swap] <-
+      ref_loci$allele_ref[to_swap]
+  }
   # now create a new loci table (we'll use it later)
-  new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id, na.last = NA), ]
+  ref_loci_order <- order(report$ref$new_id, na.last = NA)
+  new_ref_loci_tbl <- show_loci(ref)[ref_loci_order, ]
   if (nrow(new_ref_loci_tbl) == 0) {
     stop("there are no loci in common between the two gen_tibbles")
   }
   ###########
   # now we move to the target object
   # we fix the missing alleles
-  ## in the gt_table
-  id_missing <- which(!is.na(report$target$missing_allele))
-  attr(target$genotypes, "loci")$allele_alt[id_missing] <-
-    report$target$missing_allele[id_missing]
+  ## in the gt_table, in whichever allele column was missing
+  for (allele_col in c("allele_alt", "allele_ref")) {
+    id_missing <- which(report$target$missing_allele_col %in% allele_col)
+    attr(target$genotypes, "loci")[[allele_col]][id_missing] <-
+      report$target$missing_allele[id_missing]
+  }
   # now flip the strands
   ## in the gt_table
   to_flip <- report$target$to_flip
@@ -189,7 +207,12 @@ rbind.gen_tbl <- function(
     create_bk = TRUE
   )
   # and copy the raw genotypes of the loci in common directly into it (in
-  # C++, without intermediate files)
+  # C++, without intermediate files), swapping the dosages of the loci whose
+  # alleles are swapped (raw values 0 <-> 2, and imputed values 4 <-> 6): in
+  # ref, loci whose allele_ref is missing in both datasets (only with
+  # flip_strand), and in target, loci swapped to match ref
+  swap_lut <- 0:255
+  swap_lut[c(1, 3, 5, 7)] <- c(2, 0, 6, 4)
   gt_copy_fbm(
     BM_from = attr(ref$genotypes, "fbm"),
     BM_to = merged_fbm,
@@ -197,13 +220,9 @@ rbind.gen_tbl <- function(
     colInd = new_ref_loci_tbl$big_index,
     col_offset = 0,
     row_offset = 0,
-    swap = logical(0),
-    swap_lut = 0:255
+    swap = report$ref$to_swap[ref_loci_order],
+    swap_lut = swap_lut
   )
-  # for target, we also swap the dosages of the loci whose alleles are
-  # swapped (raw values 0 <-> 2, and imputed values 4 <-> 6)
-  swap_lut <- 0:255
-  swap_lut[c(1, 3, 5, 7)] <- c(2, 0, 6, 4)
   gt_copy_fbm(
     BM_from = attr(target$genotypes, "fbm"),
     BM_to = merged_fbm,

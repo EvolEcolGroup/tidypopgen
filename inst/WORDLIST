@@ -10,6 +10,7 @@ Balloux
 Bazin
 Bhatia
 Bonferroni
+Busing
 CMD
 DAPC
 Devillard
@@ -17,7 +18,9 @@ Distruct
 Eam
 FAM
 FBM
+FMTA
 FST
+Ferretti
 Fst
 GRM
 GST
@@ -39,15 +42,18 @@ Jost's
 LD
 LEA's
 Lazaridis
+Leeden
 Luu
 MAF
 MAFs
 Manichaikul
 Math
 Mei
+Meijer
 Novembre
 OADP
 ORCID
+Onsins
 PBS
 PED
 PLINK's
@@ -57,10 +63,14 @@ Qiu
 RSpectra
 RStudio's
 RUNs
+Raineri
 Roychoudhury
 SMARTPCA
 SNMF
+Samuk
 Sankararaman
+Stevison
+Tajima
 Tajima's
 Thia
 Tidyverse
@@ -97,6 +107,7 @@ btq
 cM
 centering
 centers
+centiMorgans
 centimorgan
 centimorgans
 cheatsheet
@@ -195,6 +206,7 @@ rowname
 rs
 rsID
 sNMF
+se
 sel
 smoothNgoesup
 snmf

@@ -219,6 +219,18 @@
 * fix `indiv_het_obs()` to divide by the number of selected loci rather than
   the number of loci in the backing file (results were deflated after
   `select_loci()`)
+* `gt_admixture()` with `conda_env = "auto"` (the default) uses a copy of
+  ADMIXTURE on the PATH when conda is not installed, as documented: it
+  failed with the error of `reticulate::conda_list()` ("Unable to find
+  conda binary"). The check for ADMIXTURE on the PATH also works on Windows.
+* fix `rbind()` and `rbind_dry_run()` failing ("NAs are not allowed in
+  subscripted assignments") on loci with a missing `allele_ref`. A missing
+  allele is now inferred from the other dataset whichever column it is in
+  (previously only `allele_alt` was), and the report of `rbind_dry_run()`
+  gains a `missing_allele_col` column giving the column that was filled. With
+  `flip_strand = TRUE`, loci whose `allele_ref` is missing in both datasets
+  are swapped so that the observed allele becomes `allele_ref`; these are
+  flagged in a new `to_swap` column of the `ref` report.
 * fix the order of the loci in the P matrices returned by `gt_admixture()`:
   ADMIXTURE sorts loci by chromosome and position, so rows did not match the
   loci of the input when these were not already sorted (e.g. when chromosome
@@ -234,6 +246,18 @@
 * `gt_as_hierfstat()`, `gt_as_geno_lea()` and `gt_as_plink()` now error clearly
   on polyploid data, as `hierfstat`, LEA's `.geno` format and PLINK's bed/ped/
   raw formats only support haploid or diploid data.
+* add `jackknife_*` functions (`jackknife_pairwise_pop_fst()`,
+  `jackknife_nwise_pop_pbs()`, `jackknife_pop_tajimas_d()` and
+  `jackknife_stats_generic()`) to estimate genome-wide statistics with
+  standard errors from a weighted block jackknife, with blocks defined in
+  SNPs, centiMorgans or base pairs.
+* `pop_tajimas_d()` now works with polyploid and pseudohaploid data.
+* `pop_tajimas_d()`, `windows_pop_tajimas_d()` and `jackknife_pop_tajimas_d()`
+  now account for missing genotypes by using the number of non-missing allele
+  copies at each locus as its sample size, rather than the total number of
+  allele copies in the sample. This follows Bailey et al. (2025), and results
+  match those of `pixy` (version 2.2.4). Results will differ from previous
+  versions when data contain missing genotypes.
 
 # tidypopgen 0.4.4
 * fix seed argument of `gt_admixture()`
