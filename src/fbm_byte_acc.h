@@ -9,8 +9,8 @@
 // vectors (rowInd and colInd, both copied to std::vector<size_t>, i.e. 8 bytes
 // per locus) and a bounds-checked Rcpp NumericVector lookup, returning a
 // double; kernels then accumulate those doubles into Rcpp matrices inside the
-// OpenMP loop. On HGDP (1043 x 643733) this runs at ~65 M genotypes/s, about
-// 20x slower than simply reading the bytes. Here instead:
+// OpenMP loop. On HGDP (1043 x 643733) this runs at ~110 M genotypes/s, about
+// 15x slower than simply reading the bytes. Here instead:
 // - each locus is resolved once to a pointer to the start of its column, and
 //   the column indices are not copied;
 // - individuals are reordered by group (stable, so the order within a group is
@@ -22,6 +22,11 @@
 //   word, so each genotype costs a single integer addition;
 // - no Rcpp object is touched inside the OpenMP regions: totals are kept in
 //   thread-local buffers and results are written through raw pointers.
+//
+// Kernels either loop over all loci with lut_sums() (push interface, with a
+// callback that stores the results of each locus), or call
+// LutSums::locus() from their own loops (pull interface). alt_valid_counts()
+// wraps the common case of alternate and valid allele counts by group.
 /******************************************************************************/
 
 #include <bigstatsr/BMCodeAcc.h>
@@ -167,13 +172,13 @@ inline std::vector<size_t> check_group_ids(const IntegerVector& groupIds,
 //
 // Each lookup table has 256 entries (one per byte value) of NFIELDS counters
 // of 64 / NFIELDS bits each, packed in a 64-bit word (e.g. NFIELDS = 2 gives
-// two 32-bit counters). For locus j, the packed words of all individuals in a
-// run are added up, the counters are unpacked and added into
-// tot[group * NFIELDS + field] (64-bit totals), and finish(j, tot) is called
-// to compute and store the statistics of that locus. Runs are short enough
-// that the packed counters cannot overflow (see max_run_length()).
-// Loci are processed in blocks of block_size, checking for user interrupts
-// between blocks (outside of the parallel region).
+// two 32-bit counters, NFIELDS = 3 three 21-bit counters). For locus j, the
+// packed words of all individuals in a run are added up, and the counters
+// are unpacked and added into tot[group * NFIELDS + field] (64-bit totals).
+// Runs are short enough that the packed counters cannot overflow (see
+// max_run_length(), to be used when building the GroupedRows).
+
+// largest run of individuals for which the packed counters cannot overflow
 template <int NFIELDS>
 inline size_t max_run_length(const std::vector<uint64_t>& luts) {
   const int width = 64 / NFIELDS;
@@ -189,6 +194,63 @@ inline size_t max_run_length(const std::vector<uint64_t>& luts) {
   return static_cast<size_t>(mask / max_value);
 }
 
+// Per-locus sums (pull interface): locus(j, tot) fills tot (ngroups * NFIELDS
+// 64-bit totals) for locus j. It only reads plain C++ objects, so it can be
+// called from multiple OpenMP threads, each with its own tot buffer. The
+// accessor, grouped rows and lookup tables must outlive this object.
+template <int NFIELDS>
+class LutSums {
+public:
+  LutSums(const FBMByteAcc& acc,
+          const GroupedRows& grouped,
+          const std::vector<uint64_t>& luts,
+          size_t ngroups)
+    : _acc(acc), _grouped(grouped), _luts(luts), _ngroups(ngroups) {}
+
+  size_t ngroups() const { return _ngroups; }
+
+  inline void locus(size_t j, uint64_t* tot) const {
+    const int width = 64 / NFIELDS;
+    const uint64_t mask = (width == 64) ? ~uint64_t(0)
+                                        : ((uint64_t(1) << width) - 1);
+    const size_t* rows = _grouped.rows.data();
+    const std::vector<RowRun>& runs = _grouped.runs;
+    const unsigned char* col = _acc.col(j);
+    std::fill(tot, tot + _ngroups * NFIELDS, 0);
+    for (size_t r = 0; r < runs.size(); r++) {
+      const RowRun& run = runs[r];
+      const uint64_t* lut = _luts.data() + 256 * run.lut;
+      uint64_t packed = 0;
+      if (run.contiguous) {
+        // consecutive rows: read the bytes directly
+        const unsigned char* p = col + rows[run.start];
+        size_t len = run.end - run.start;
+        for (size_t i = 0; i < len; i++) packed += lut[p[i]];
+      } else {
+        for (size_t i = run.start; i < run.end; i++) {
+          packed += lut[col[rows[i]]];
+        }
+      }
+      // unpack the counters into the totals for this group
+      uint64_t* t = tot + run.group * NFIELDS;
+      for (int k = 0; k < NFIELDS; k++) {
+        t[k] += (packed >> (k * width)) & mask;
+      }
+    }
+  }
+
+private:
+  const FBMByteAcc& _acc;
+  const GroupedRows& _grouped;
+  const std::vector<uint64_t>& _luts;
+  size_t _ngroups;
+};
+
+// Loop over all loci (push interface): for each locus j, compute the sums
+// with LutSums::locus() and call finish(j, tot) to compute and store the
+// statistics of that locus. Loci are processed in blocks of block_size,
+// checking for user interrupts between blocks (outside of the parallel
+// region).
 template <int NFIELDS, class Finish>
 void lut_sums(const FBMByteAcc& acc,
               const GroupedRows& grouped,
@@ -197,12 +259,8 @@ void lut_sums(const FBMByteAcc& acc,
               int ncores,
               size_t block_size,
               Finish finish) {
-  const int width = 64 / NFIELDS;
-  const uint64_t mask = (width == 64) ? ~uint64_t(0)
-                                      : ((uint64_t(1) << width) - 1);
+  const LutSums<NFIELDS> sums(acc, grouped, luts, ngroups);
   const size_t m = acc.ncol();
-  const size_t* rows = grouped.rows.data();
-  const std::vector<RowRun>& runs = grouped.runs;
   if (block_size < 1) block_size = 1;
 
   for (size_t j0 = 0; j0 < m; j0 += block_size) {
@@ -213,28 +271,7 @@ void lut_sums(const FBMByteAcc& acc,
     std::vector<uint64_t> tot(ngroups * NFIELDS);
 #pragma omp for
     for (size_t j = j0; j < j1; j++) {
-      const unsigned char* col = acc.col(j);
-      std::fill(tot.begin(), tot.end(), 0);
-      for (size_t r = 0; r < runs.size(); r++) {
-        const RowRun& run = runs[r];
-        const uint64_t* lut = luts.data() + 256 * run.lut;
-        uint64_t packed = 0;
-        if (run.contiguous) {
-          // consecutive rows: read the bytes directly
-          const unsigned char* p = col + rows[run.start];
-          size_t len = run.end - run.start;
-          for (size_t i = 0; i < len; i++) packed += lut[p[i]];
-        } else {
-          for (size_t i = run.start; i < run.end; i++) {
-            packed += lut[col[rows[i]]];
-          }
-        }
-        // unpack the counters into the totals for this group
-        uint64_t* t = tot.data() + run.group * NFIELDS;
-        for (int k = 0; k < NFIELDS; k++) {
-          t[k] += (packed >> (k * width)) & mask;
-        }
-      }
+      sums.locus(j, tot.data());
       finish(j, tot.data());
     }
 }
