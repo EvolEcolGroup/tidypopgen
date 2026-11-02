@@ -65,9 +65,6 @@
   which is documented as optional
 * fix `rbind_dry_run()` failing when `ref` or `target` are paths to PLINK .bim
   files, as documented
-* `rbind(use_position = TRUE)` now keeps the loci names of the reference
-  dataset, instead of renaming loci to "chromosome_position" and adding a
-  `name_old` column
 * fix `rbind()` silently accepting `as_is = TRUE` with `flip_strand = TRUE` when
   `quiet = TRUE`
 * fix `select()`, `rename()` and `relocate()` on a grouped `gen_tibble`

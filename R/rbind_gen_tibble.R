@@ -23,8 +23,7 @@
 #'   swap alleles as needed.
 #' @param use_position boolean of whether a combination of chromosome and
 #'   position should be used for matching SNPs. By default, `rbind` uses the
-#'   locus name, so this is set to FALSE. In either case, the merged loci keep
-#'   the names of the reference dataset. When using 'use_position=TRUE', make
+#'   locus name, so this is set to FALSE. When using 'use_position=TRUE', make
 #'   sure chromosomes are coded in the same way in both `gen_tibbles` (a mix of
 #'   e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
 #'   large number variants are dropped when merging).
@@ -172,6 +171,16 @@ rbind.gen_tbl <- function(
   new_ref_loci_tbl <- show_loci(ref)[ref_loci_order, ]
   if (nrow(new_ref_loci_tbl) == 0) {
     stop("there are no loci in common between the two gen_tibbles")
+  }
+  # if we matched by position, the merged loci are named after their
+  # chromosome and position, and their names in the reference are kept in
+  # name_old
+  if (use_position) {
+    new_ref_loci_tbl <- new_ref_loci_tbl %>%
+      mutate(
+        name_old = .data$name,
+        name = paste(.data$chromosome, .data$position, sep = "_")
+      )
   }
   ###########
   # now we move to the target object
