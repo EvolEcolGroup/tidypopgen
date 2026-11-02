@@ -10,6 +10,9 @@
 #' @param .x a [`gen_tibble`] object
 #' @param kings_threshold a threshold over which
 #' @param verbose boolean whether to report to screen
+#' @details Missing relationship coefficients (e.g. KING kinship for pairs of
+#'   individuals with no loci genotyped in both) are not evidence of
+#'   relatedness: such pairs are treated as not related, with a warning.
 #' @return a list where '1' is individual ID's to retain, '2' is individual ID's
 #'   to remove, and '3' is a boolean where individuals to keep are TRUE and
 #'   individuals to remove are FALSE
@@ -49,6 +52,18 @@ filter_high_relatedness <-
       to_remove <- character(0)
       var_names <- var_names %in% passed_filter == TRUE
       return(list(passed_filter, to_remove, var_names))
+    }
+
+    # missing kinship (e.g. no loci genotyped in both individuals) is not
+    # evidence of relatedness, so such pairs are treated as not related; we
+    # warn, as these pairs could not be compared
+    n_missing <- sum(is.na(matrix[upper.tri(matrix)]))
+    if (n_missing > 0) {
+      warning(
+        n_missing, " pairs of individuals have missing kinship (e.g. no loci ",
+        "genotyped in both), so they could not be compared, and are not ",
+        "treated as related"
+      )
     }
 
     # note that we do not take the absolute value of each relationship, as

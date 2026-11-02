@@ -31,6 +31,11 @@ This function takes a matrix of x by y individuals containing relatedness
 coefficients and returns the maximum set of individuals that contains no
 relationships above the given threshold.
 }
+\details{
+Missing relationship coefficients (e.g. KING kinship for pairs of
+individuals with no loci genotyped in both) are not evidence of
+relatedness: such pairs are treated as not related, with a warning.
+}
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 

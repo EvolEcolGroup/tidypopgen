@@ -92,7 +92,11 @@ test_that("filter_high_relatedness handles missing kinship", {
     nrow = 4,
     dimnames = list(ids, ids)
   )
-  res <- filter_high_relatedness(king_matrix, kings_threshold = 0.177)
+  # the pairs with missing kinship could not be compared
+  expect_warning(
+    res <- filter_high_relatedness(king_matrix, kings_threshold = 0.177),
+    "2 pairs of individuals have missing kinship"
+  )
   # only a and c are related above the threshold; missing kinship is not
   # evidence of relatedness
   expect_length(res[[2]], 1)
@@ -103,6 +107,9 @@ test_that("filter_high_relatedness handles missing kinship", {
   lobsters <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
   lobster_king <- pairwise_king(lobsters, as_matrix = TRUE)
   expect_true(anyNA(lobster_king))
-  res <- filter_high_relatedness(lobster_king, kings_threshold = 0.088)
+  expect_warning(
+    res <- filter_high_relatedness(lobster_king, kings_threshold = 0.088),
+    "pairs of individuals have missing kinship"
+  )
   expect_length(res[[3]], nrow(lobsters))
 })
