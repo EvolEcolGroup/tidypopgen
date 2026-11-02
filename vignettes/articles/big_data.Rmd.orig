@@ -62,7 +62,7 @@ sgdp <-
   )
 ```
 
-```{r gt_load, results="hide", echo=FALSE, eval=TRUE, warning=FALSE}
+```{r gt_load, results="hide", echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
 if (file.exists("data/sgdp/all_subset.gt")) {
   sgdp <-
     gt_load("data/sgdp/all_subset.gt",
@@ -118,7 +118,7 @@ bigparallelr::set_blas_ncores(n_cores)
 
 All the normal functionality of tidypopgen is preserved, as our `qc_report` functions exemplify:
 
-```{r filter_loci, benchmark = TRUE}
+```{r indiv_report, benchmark = TRUE}
 sgdp_indiv_rep <- qc_report_indiv(sgdp)
 ```
 
@@ -215,9 +215,7 @@ autoplot(sgdp_pca, type = "scores") +
   labs(color = "Region")
 ```
 
-@TODO update this description after re-knitting with the new data (merged with `--missing-to-ref`)
-
-Our PCA shows separation between regions along PC1 and PC2. PC1 (8.14% of the variance) separates the African individuals on the left from the American and Oceanian individuals on the right, and PC2 (5.34%) mainly separates West Eurasian individuals at the bottom from the rest. Individuals from America, Oceania and West Eurasia each form tight clusters, whereas the African individuals are much more spread out, reflecting the greater genetic diversity within Africa. A few African individuals lie between the main African group and the West Eurasian cluster, and one Oceanian individual sits well away from its own cluster, closer to West Eurasia.
+Our PCA separates the four regions. PC1 (5.98% of the variance) runs from the African individuals on the left, through West Eurasia, to the American individuals on the right, and PC2 (4.48%) separates the Oceanian individuals at the top from the American individuals at the bottom. The individuals from America and West Eurasia form tight clusters, whereas the African individuals are spread out along PC1: the Mbuti, Ju/'hoan North, Yoruba, Mandenka and Dinka individuals are on the far left, followed by the Masai and Somali individuals from East Africa, while the two Mozabite individuals from Algeria lie close to the West Eurasian cluster. This is consistent with North and East African populations carrying some West Eurasian-related ancestry. The Oceanian individuals form two groups: the Papuan, Bougainville and Australian individuals at the top, and the Dusun (from Borneo), Hawaiian and Maori individuals closer to the centre of the plot.
 
 ## DAPC
 
@@ -233,9 +231,7 @@ sgdp_dapc <- gt_dapc(sgdp_pca,
 autoplot(sgdp_dapc, type = "components")
 ```
 
-@TODO update this description after re-knitting with the new data (merged with `--missing-to-ref`)
-
-Our DAPC autoplot shows that most individuals are assigned to their own region’s group with a high probability, showing that there is some genetic differentiation between individuals from each continental region. However, three individuals stand out: one African individual is assigned mostly to the West Eurasian group, a second African individual has a small probability of West Eurasian membership, and one Oceanian individual is assigned entirely to the West Eurasian group.  These are consistent with the individuals that stood out in the PCA analysis above. They may have admixed ancestry, or they may have migrated over the course of their lifetime.
+Our DAPC autoplot shows that most individuals are assigned to their own region's group with a probability close to one, showing that there is genetic differentiation between the continental regions. The exceptions are consistent with the PCA above: the two Mozabite individuals are assigned to the West Eurasian group (with probabilities of 0.94 and 0.99), the Somali individual has a small probability (about 0.01) of West Eurasian membership, and the Maori individual has a probability of 0.16 of West Eurasian membership. These individuals may have admixed ancestry.
 
 # Pairwise F~ST~
 
@@ -265,9 +261,7 @@ autoplot(pairwise_fst,
   )
 ```
 
-@TODO add description - negative values due to small n per region
-
-The pairwise F~ST~ matrix shows that...
+The pairwise F~ST~ values are all small (between 0.03 and 0.07), as is typical of human populations. America is the most differentiated region, and Africa and America are the most differentiated pair (F~ST~ = 0.069). Africa and West Eurasia are the least differentiated pair (0.033), closely followed by Oceania and West Eurasia (0.034); the low value between Africa and West Eurasia partly reflects the West Eurasian-related ancestry of the Mozabite, Somali and Masai individuals in our African sample. Note that with only 10 individuals per region, these estimates are imprecise.
 
 # Performance summary
 
