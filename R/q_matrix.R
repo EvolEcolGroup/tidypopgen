@@ -482,7 +482,7 @@ autoplot.q_matrix <- function(
     q_tbl <- augment(object, data)
   }
   # if we have a grouping variable and we plan to use it, then reorder by it
-  q_tbl$id <- seq_len(nrow(q_tbl))
+  # (and by the individual id)
   if (("group" %in% names(q_tbl)) && annotate_group) {
     if (arrange_by_group && arrange_by_indiv) {
       q_tbl <- q_tbl %>%
@@ -492,7 +492,7 @@ autoplot.q_matrix <- function(
         dplyr::arrange(.data$group)
     } else if (arrange_by_indiv) {
       q_tbl <- q_tbl %>%
-        dplyr::arrange(.data$group)
+        dplyr::arrange(.data$id)
     }
   }
   # now reset the id to the new order
