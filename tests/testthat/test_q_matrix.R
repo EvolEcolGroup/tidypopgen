@@ -201,3 +201,33 @@ if (rlang::is_installed("readr")) {
     expect_true(all(augment_sub$population == pop_to_keep))
   })
 }
+
+test_that("tidy and augment use the id attribute of a q_matrix", {
+  example_gt <- load_example_gt("gen_tbl")
+  n_ind <- nrow(example_gt)
+  q <- seq(0.1, 0.9, length.out = n_ind)
+  admix_obj <- structure(
+    list(
+      k = 2L,
+      Q = list(q_matrix(matrix(c(q, 1 - q), ncol = 2))),
+      id = example_gt$id,
+      algorithm = "ADMIXTURE"
+    ),
+    class = c("gt_admix", "list")
+  )
+  # a q_matrix with an id attribute, but no group attribute
+  q_mat <- get_q_matrix(admix_obj, k = 2, run = 1)
+  expect_null(attr(q_mat, "group"))
+  # augment with data in a different order
+  example_gt_rev <- example_gt %>% dplyr::arrange(dplyr::desc(id))
+  augment_q <- augment(q_mat, data = example_gt_rev)
+  expect_equal(augment_q$id, example_gt_rev$id)
+  expect_identical(
+    augment_q$.Q1,
+    q[match(example_gt_rev$id, example_gt$id)]
+  )
+  # tidy with data in a different order
+  tidy_q <- tidy(q_mat, data = example_gt_rev)
+  expect_equal(tidy_q$id, rep(example_gt$id, each = 2))
+  expect_equal(tidy_q$percentage[tidy_q$q == ".Q1"], q)
+})
