@@ -280,6 +280,52 @@ test_that("ped and raw keep parents, sex and phenotype", {
   expect_equal(ped2[, 1:6], ped[, 1:6])
 })
 
+test_that("bed fam file has the same individual information as ped", {
+  test_gt_meta <- test_gt %>%
+    mutate(
+      paternal_ID = c(NA, NA, "a"),
+      maternal_ID = c(NA, NA, "b"),
+      sex = factor(c("male", "female", "male")),
+      phenotype = factor(
+        c("control", "case", "case"),
+        levels = c("control", "case")
+      ),
+      region = c("north", "south", "south")
+    )
+  bed_path <- gt_as_plink(test_gt_meta, file = paste0(tempfile(), ".bed"))
+  fam <- read.table(
+    sub("\\.bed$", ".fam", bed_path),
+    header = FALSE,
+    colClasses = "character"
+  )
+  ped_path <- gt_as_plink(
+    test_gt_meta,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(fam$V1, test_gt$population)
+  expect_equal(fam, ped[, 1:6])
+  # population and the other metadata survive the round trip
+  bed_gt <- gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(
+    bed_gt %>% select(-genotypes),
+    test_gt_meta %>% select(-genotypes, -region)
+  )
+  # a grouping variable is used as family ID by all formats
+  test_gt_grouped <- test_gt_meta %>% group_by(region)
+  bed_path <- gt_as_plink(test_gt_grouped, file = paste0(tempfile(), ".bed"))
+  fam <- read.table(sub("\\.bed$", ".fam", bed_path), header = FALSE)
+  expect_equal(fam$V1, test_gt_meta$region)
+  ped_path <- gt_as_plink(
+    test_gt_grouped,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE)
+  expect_equal(ped$V1, test_gt_meta$region)
+})
+
 test_that("handling of duplicated loci", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
