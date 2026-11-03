@@ -239,6 +239,9 @@ test_that("qc reports and exports work with several grouping variables", {
   bed_file <- gt_as_plink(gt_two, file = tempfile(), type = "bed")
   fam <- utils::read.table(sub("\\.bed$", ".fam", bed_file))
   expect_equal(fam$V1, test_gt$pop_sex)
+  ped_file <- gt_as_plink(gt_two, file = tempfile(), type = "ped")
+  ped <- utils::read.table(ped_file)
+  expect_equal(ped$V1, test_gt$pop_sex)
   # and so is the group of a q_matrix
   q_mat <- matrix(stats::runif(n_indiv * 2), ncol = 2)
   q_mat <- q_matrix(q_mat / rowSums(q_mat))

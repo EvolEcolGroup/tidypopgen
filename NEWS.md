@@ -10,10 +10,10 @@
   variable. This also fixes silently wrong labels with several grouping
   variables: the names of the results of `pop_het_obs()`, `pop_het_exp()`,
   `pop_fis()` and `pop_fst()`, the family ID written by `gt_as_plink()`, and
-  the groups of `windows_indiv_roh()` and of
-  `tidy()`/`augment()` of a `q_matrix`, which only used the first grouping
-  variable; and the Bonferroni correction of `qc_report_loci()`, which
-  counted the values of the first grouping variable rather than the groups.
+  the groups of `windows_indiv_roh()` and of `tidy()`/`augment()` of a
+  `q_matrix`, which only used the first grouping variable; and the Bonferroni
+  correction of `qc_report_loci()`, which counted the values of the first
+  grouping variable rather than the groups.
   `heatmap_pairwise()` and `autoplot()` accept the tidy output of
   `pairwise_pop_fst()` with several grouping variables
 * empty groups, which only exist if requested (with `group_by(.drop = FALSE)`,
@@ -49,6 +49,8 @@
   alleles than the ploidy estimated from the first variant (e.g. a tetraploid
   genotype in a diploid file) when they are not on the last line; this is now an
   error
+* fix `gen_tibble()` rejecting "0" alleles (the PLINK missing value) when custom
+  `missing_alleles` are given
 * `gen_tibble()` on a matrix now checks that a vector of `ploidy` has one value
   per individual, and that dosages are non-negative integers not greater than
   each individual's ploidy (previously invalid values were silently corrupted)
@@ -77,17 +79,27 @@
   relatedness
 * fix error messages and documentation of `autoplot()` for `gt_admix` and
   `gt_pca` objects referring to non-existent arguments (`repeat`, `pc`)
+* fix `autoplot()` of `gt_admix` objects with `type = "cv"` failing when the
+  object has no `algorithm` element
 * fix `gt_admix_reorder_q()` turning the Q matrices for K = 1 into vectors
+* fix `autoplot()` for `q_matrix` and `gt_admix` objects not arranging
+  individuals by their id when `arrange_by_indiv = TRUE`
 * fix group annotations of admixture barplots showing extra separators and
   labels for unused levels of the grouping factor
 * `select_loci_if()` no longer loads the whole genotype matrix into memory to
   check the length of the selection
 * fix `gt_as_genind()` failing when loci names contain '.' (which are now
   replaced by '_', with a warning)
+* `gt_as_genlight()` now stores the alleles (`loc.all`), chromosome and position
+  of each locus, so that the result can be converted back with
+  `gt_from_genlight()`
 * fix `gt_from_genlight()` rejecting `genlight` objects without a `pop` slot,
   which is documented as optional
 * fix `rbind_dry_run()` failing when `ref` or `target` are paths to PLINK .bim
   files, as documented
+* `rbind(use_position = TRUE)` now keeps the loci names of the reference
+  dataset, instead of renaming loci to "chromosome_position" and adding a
+  `name_old` column
 * fix `rbind()` silently accepting `as_is = TRUE` with `flip_strand = TRUE` when
   `quiet = TRUE`
 * fix `select()`, `rename()` and `relocate()` on a grouped `gen_tibble`
@@ -123,6 +135,9 @@
 * fix `gt_pseudohaploid()` resetting the ploidy of individuals in the backing
   matrix that are not in the `gen_tibble`, and make it error on data that are
   not diploid
+* fix `tidy()` and `augment()` of a `q_matrix` ignoring its individual ids when
+  it has no group information, which misassigned proportions when `data` was in
+  a different order
 * correct the documentation of the columns returned by `tidy()` for the loadings
   of `gt_dapc` objects
 * fix `gt_dapc()` using k instead of k - 1 principal components by default when
@@ -161,6 +176,12 @@
   single heterozygote genotyped)
 * fix `gt_as_vcf()` and `gt_as_plink(type = "ped")` writing positions stored as
   doubles in scientific notation (e.g. `1e+05`)
+* fix `gt_as_plink(type = "bed")` not writing the population (as family ID),
+  parents, sex and phenotype to the .fam file, and `gt_as_plink(type =
+  "ped")`/`type = "raw"` ignoring the grouping variable as family ID
+* fix `gt_as_plink(type = "ped")` and `gt_as_plink(type = "raw")` dropping
+  parents (`paternal_ID`/`maternal_ID`, or `father`/`mother`) and numeric sex
+  codes read from PLINK files
 * fix `gt_as_plink(type = "ped")` writing a genetic distance of 0 for all loci
   in the .map file
 * fix `gt_as_plink()` failing to write ped and raw files when the phenotype

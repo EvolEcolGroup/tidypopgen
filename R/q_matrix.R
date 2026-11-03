@@ -253,6 +253,14 @@ tidy.q_matrix <- function(x, data, ...) {
         id = data$id,
         group = colu
       )
+  } else if (!is.null(attr(x, "id"))) {
+    # use the id attribute if available, so that the order of data does
+    # not matter
+    q_tbl$id <- attr(x, "id")
+    for (i in seq_len(ncol(q_tbl))) {
+      attr(q_tbl[[i]], "id") <- NULL
+      attr(q_tbl[[i]], "class") <- NULL
+    }
   } else {
     q_tbl <- q_tbl %>%
       dplyr::mutate(id = data$id)
@@ -343,6 +351,14 @@ augment.q_matrix <- function(x, data = NULL, ...) {
         id = data$id,
         group = colu
       )
+  } else if (!is.null(attr(x, "id"))) {
+    # use the id attribute if available, so that the order of data does
+    # not matter
+    q_tbl$id <- attr(x, "id")
+    for (i in seq_len(ncol(q_tbl))) {
+      attr(q_tbl[[i]], "id") <- NULL
+      attr(q_tbl[[i]], "class") <- NULL
+    }
   } else {
     q_tbl <- q_tbl %>%
       dplyr::mutate(id = data$id)
@@ -457,7 +473,7 @@ autoplot.q_matrix <- function(
     q_tbl <- augment(object, data)
   }
   # if we have a grouping variable and we plan to use it, then reorder by it
-  q_tbl$id <- seq_len(nrow(q_tbl))
+  # (and by the individual id)
   if (("group" %in% names(q_tbl)) && annotate_group) {
     if (arrange_by_group && arrange_by_indiv) {
       q_tbl <- q_tbl %>%
@@ -467,7 +483,7 @@ autoplot.q_matrix <- function(
         dplyr::arrange(.data$group)
     } else if (arrange_by_indiv) {
       q_tbl <- q_tbl %>%
-        dplyr::arrange(.data$group)
+        dplyr::arrange(.data$id)
     }
   }
   # now reset the id to the new order

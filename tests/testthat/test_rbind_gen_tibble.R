@@ -191,14 +191,9 @@ test_that("merge by position works correctly", {
     quiet = TRUE
   )
   expect_true(all.equal(show_genotypes(merged_gen), show_genotypes(pos_merge)))
-  # the loci are named after their chromosome and position, and the names of
-  # the reference are kept in name_old
-  pos_loci <- show_loci(pos_merge)
-  expect_equal(
-    pos_loci$name,
-    paste(pos_loci$chromosome, pos_loci$position, sep = "_")
-  )
-  expect_equal(pos_loci$name_old, show_loci(merged_gen)$name)
+  # positions are only used for matching, the loci keep the reference names
+  expect_equal(show_loci(pos_merge), show_loci(merged_gen))
+  expect_false("name_old" %in% names(show_loci(pos_merge)))
 })
 
 test_that("original gen_tibble objects remain the same after merge", {

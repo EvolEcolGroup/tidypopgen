@@ -39,10 +39,12 @@ If the gen_tibble has been read in from vcf format, family.ID in the
 resulting plink files will be the same as sample.ID. If the gen_tibble has a
 grouping variable, this will be used as the family.ID in the resulting plink
 files (with several grouping variables, their values are pasted with ".",
-e.g. \code{pop1.F}). Genotypes are read and written directly from the file backed
-matrix, so all formats can be written for datasets that do not fit in
-memory (but note that ped and raw files are much larger, and thus slower to
-write, than bed files).
+e.g. \code{pop1.F}); otherwise, the population is used as the family.ID. Parents,
+sex and phenotype are taken from the columns \code{paternal_ID}, \code{maternal_ID},
+\code{sex} and \code{phenotype} (as created when reading PLINK files), if present.
+Genotypes are read and written directly from the file backed matrix, so all
+formats can be written for datasets that do not fit in memory (but note that
+ped and raw files are much larger, and thus slower to write, than bed files).
 }
 \note{
 PLINK's bed, ped and raw formats only support diploid data, so this
