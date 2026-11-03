@@ -62,6 +62,9 @@
   check the length of the selection
 * fix `gt_as_genind()` failing when loci names contain '.' (which are now
   replaced by '_', with a warning)
+* `gt_as_genlight()` now stores the alleles (`loc.all`), chromosome and position
+  of each locus, so that the result can be converted back with
+  `gt_from_genlight()`
 * fix `gt_from_genlight()` rejecting `genlight` objects without a `pop` slot,
   which is documented as optional
 * fix `rbind_dry_run()` failing when `ref` or `target` are paths to PLINK .bim
