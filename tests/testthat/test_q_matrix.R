@@ -282,3 +282,53 @@ test_that("arrange_by_indiv sorts individuals by their id", {
   )
   expect_equal(get_q1(plt), q1_in_order(new_order))
 })
+
+test_that("autoplot of a q_matrix works with numeric groups", {
+  admix_obj <-
+    readRDS(system.file("extdata", "anolis", "anole_adm_k3.rds",
+      package = "tidypopgen"
+    ))
+  q_mat <- get_q_matrix(admix_obj, k = 3, run = 1)
+  # code the groups as numbers (10 and 2, so that numeric and alphabetical
+  # sorting differ), and shuffle the individuals with group 10 first
+  ids <- attr(q_mat, "id")
+  groups <- ifelse(attr(q_mat, "group") == "Atlantic_Forest", 10, 2)
+  set.seed(42)
+  new_order <- c(sample(which(groups == 10)), sample(which(groups == 2)))
+  q_shuffled <- q_mat[new_order, ]
+  class(q_shuffled) <- class(q_mat)
+  attr(q_shuffled, "id") <- ids[new_order]
+  attr(q_shuffled, "group") <- groups[new_order]
+  # expected first component for a given ordering of the original matrix
+  q1_in_order <- function(ord) unname(q_mat[ord, ".Q1"])
+  get_q1 <- function(plt) {
+    plt$data %>%
+      dplyr::filter(.data$q == ".Q1") %>%
+      dplyr::arrange(.data$id) %>%
+      dplyr::pull("percentage")
+  }
+  # group labels on the x axis, and number of lines separating the groups
+  get_group_labels <- function(plt) ggplot2::layer_scales(plt)$x$labels
+  get_n_lines <- function(plt) nrow(ggplot2::layer_data(plt, 2))
+
+  # arrange by id within groups, keeping the current order of the groups
+  plt <- autoplot(q_shuffled,
+    annotate_group = TRUE, arrange_by_group = FALSE,
+    arrange_by_indiv = TRUE
+  )
+  expect_equal(get_q1(plt), q1_in_order(order(groups != 10, ids)))
+  expect_equal(get_group_labels(plt), c("10", "2"))
+  expect_equal(get_n_lines(plt), 2)
+  # arrange by group (numerically) and then by id
+  plt <- autoplot(q_shuffled,
+    annotate_group = TRUE, arrange_by_group = TRUE,
+    arrange_by_indiv = TRUE
+  )
+  expect_equal(get_q1(plt), q1_in_order(order(groups, ids)))
+  expect_equal(get_group_labels(plt), c("2", "10"))
+  expect_equal(get_n_lines(plt), 2)
+  # reorder within groups
+  plt <- autoplot(q_shuffled, reorder_within_groups = TRUE)
+  expect_equal(get_group_labels(plt), c("2", "10"))
+  expect_equal(get_n_lines(plt), 2)
+})

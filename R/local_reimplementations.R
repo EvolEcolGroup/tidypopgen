@@ -26,7 +26,8 @@ seq2 <- function(lims) {
 #' order they first appear in the data.  This is a drop-in replacement for
 #' `forcats::fct_inorder()`
 #'
-#' @param f A factor or character vector
+#' @param f A factor, or a vector (e.g. character or numeric) to be converted
+#'   to a factor
 #' @param ordered Logical, should the resulting factor be ordered?
 #' @return A factor with levels in the order they first appear
 #' @keywords internal
@@ -35,10 +36,13 @@ seq2 <- function(lims) {
 # x <- factor(c("b", "a", "c", "a", "b", "c", "b", "a"))
 # fct_inorder_base(x)
 # fct_inorder_base(x, ordered = TRUE)
+# fct_inorder_base(c(3, 3, 1, 2))
 # nolint end
 
 fct_inorder_base <- function(f, ordered = FALSE) {
-  if (is.character(f)) {
+  # convert any non-factor (not only characters, but also e.g. numeric group
+  # labels, which would otherwise have no levels and become all NA)
+  if (!is.factor(f)) {
     f <- factor(f)
   }
   if (!is.logical(ordered) || length(ordered) != 1) {
