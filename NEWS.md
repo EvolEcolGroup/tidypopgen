@@ -139,6 +139,9 @@
   single heterozygote genotyped)
 * fix `gt_as_vcf()` and `gt_as_plink(type = "ped")` writing positions stored as
   doubles in scientific notation (e.g. `1e+05`)
+* fix `gt_as_plink(type = "ped")` and `gt_as_plink(type = "raw")` dropping
+  parents (`paternal_ID`/`maternal_ID`, or `father`/`mother`) and numeric sex
+  codes read from PLINK files
 * fix `gt_as_plink(type = "ped")` writing a genetic distance of 0 for all loci
   in the .map file
 * fix `gt_as_plink()` failing to write ped and raw files when the phenotype
