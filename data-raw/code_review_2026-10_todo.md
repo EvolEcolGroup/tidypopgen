@@ -104,14 +104,22 @@ The first hash is the commit on `codereview`, the second the commit on
 These are already in `dev`, so they are not on this branch as separate
 commits, but their boxes in `code_review_2026-10.md` were never ticked:
 
-- [ ] `6a61c22` · Grouped stats with an empty last group
+- [x] `6a61c22` · Grouped stats with an empty last group
   (`group_by(.drop = FALSE)`). *"Decision needed: should empty groups show up
   as columns, or be dropped (AM: drop them)?"* Kept because `speed`'s kernels
   use `dplyr::n_groups()`.
-- [ ] `83aa04e` · Grouped `loci_*()` with factor or numeric group labels.
+  **Decided (AM, 2026-11-03):** keep empty groups, as `dplyr::summarise()`
+  does with `.drop = FALSE`. Checked on `codereview_todo` (installed):
+  with an empty level in the middle or at the end, grouped `loci_*()` and
+  `pop_tajimas_d()` return the empty group in level order, with NA/NaN
+  (and 0 counts for `as_counts = TRUE`); the other groups are identical to
+  `.drop = TRUE`. — Claude, for AM
+- [x] `83aa04e` · Grouped `loci_*()` with factor or numeric group labels.
   *"Decision needed: is this behaviour what we want? It would be more
   tidyverse consistent, but feels odd to keep groups with no individuals in
   output."* Kept because the test of `6a61c22` needs it.
+  **Decided (AM, 2026-11-03):** yes, keep empty groups (see `6a61c22`).
+  — Claude, for AM
 - [ ] `896675d` · `pop_tajimas_d()` with loci lacking data or pi = 1.
   *Superseded by `dev`'s #214.*
 - [ ] `458144f` · `filter_high_relatedness()` with missing kinship.
@@ -120,3 +128,72 @@ commits, but their boxes in `code_review_2026-10.md` were never ticked:
   but has not been checked.
 - [ ] `29cd292`, `3aad9d4` · Windows/macOS fixes to the tests of `ddd6579`
   and `a1f4741`. Test-only changes.
+
+## Empty groups (`group_by(.drop = FALSE)`)
+
+Following the decision on `6a61c22`/`83aa04e` (keep empty groups, as dplyr
+does with `.drop = FALSE`), every grouped function was run with an empty
+factor level in the middle and at the end (checked 2026-11-04 on
+`c41797ce`, installed). `ee8bd631` (#217, grouping by several variables)
+already keeps empty groups as NA/NaN in most functions, and fixed
+`pop_fst()` and `pop_fis(method = "WG17")` (finding #8 of the full report)
+and `qc_report_indiv(kings_threshold = )`, which failed on them. Grouped
+`loci_*()`, `pop_het_obs()`, `pop_het_exp()`, `pop_gene_div()`, `pop_fis()`
+(both methods), `pop_fst()`, `pop_tajimas_d()`, `pairwise_pop_fst()` (all
+methods), `nwise_pop_pbs()`, the `windows_*()` and `jackknife_*()`
+functions (tidy output) keep the empty group with NA/NaN (0 for counts),
+and the other groups are identical to `.drop = TRUE`. Outputs that are not
+per group (`pop_global_stats()`, `qc_report_loci()`, `qc_report_indiv()`)
+are identical to `.drop = TRUE`.
+
+### Fixed on this branch
+
+- [x] `90bc45fe` · `gt_extract_f2()` — Empty groups were passed to
+  admixtools as populations without data, so every SNP was discarded and
+  it failed ("No SNPs remain!"). Before `ee8bd631` it failed earlier, when
+  the last group was empty, as the number of groups was
+  `max(group_indices())` (finding #7 of the full report). *[Error]*
+  **Decided (AM, 2026-11-03):** as the data are passed to another package,
+  empty groups are always dropped (the result is the same as with
+  `.drop = TRUE`). Checked: the new test (empty groups in the middle and at
+  the end; same aftable and same f2 from `admixtools::f2_from_precomp()` as
+  with `.drop = TRUE`) fails on `ee8bd631` (2 failures, and the "No SNPs
+  remain!" error) and passes on the fix. No benchmark: the change regroups
+  the individuals in R, outside the kernel. — Claude, for AM
+- [x] `c41797ce` · `loci_hwe()` (grouped), `qc_report_loci()` (grouped) —
+  Empty groups got the p-value of a test on no genotypes (0.5 with
+  `mid_p = TRUE`); in `qc_report_loci()`, empty groups entered the smallest
+  p-value across groups, which could lower it to 0.5 (e.g. from 0.6 with
+  one non-empty group; with several groups, the Bonferroni correction caps
+  such values at 1). *[Wrong results]*
+  **Decided (AM, 2026-11-03):** an empty group gets NA. Groups with
+  individuals but no data at a locus still get 0.5, as before.
+  **Change in behaviour:** grouped `loci_hwe()` returns NA for empty groups.
+  `qc_report_loci()` now skips empty groups in both its single-pass kernel
+  (the non-empty groups are renumbered 1 to k) and its fallback (which
+  ignores the NAs of `loci_hwe()`). Checked: the new tests fail on
+  `ee8bd631` (3 failures for `loci_hwe()`, 1 for `qc_report_loci()`) and
+  pass on the fix. No benchmark: the changes are vectorised R over
+  individuals or groups, outside the kernels. — Claude, for AM
+
+Full test suite on `c41797ce` (installed, `NOT_CRAN=true`, with the library
+on `R_LIBS` so that the parallel workers of `predict_gt_pca()` find the
+package): 2,787 passed, 0 failed, 0 skipped.
+
+### Not consistent yet (no fix written)
+
+- [ ] `indiv_inbreeding()` (grouped) — Error ("Error when mapping file:
+  Invalid argument") with any empty group: it uses `group_map()`, which
+  calls `indiv_inbreeding()` on the 0-row slice, and it fails on a 0-row
+  gen_tibble. The same applies to user code such as
+  `group_map(~ loci_alt_freq(.x))` (the idiom suggested for polyploids),
+  as `loci_alt_freq()` fails on a 0-row gen_tibble ("argument is of length
+  zero"). `indiv_het_obs()` returns `numeric(0)`, so
+  `summarise(mean(indiv_het_obs(genotypes)))` already gives NaN, as dplyr
+  does.
+- [ ] `windows_pop_tajimas_d(type = "matrix")` — Every window appears twice
+  with an empty group (12 rows instead of 6): the `n_loci` column is not the
+  same for all groups, so `pivot_wider()` splits the windows into one row
+  per `n_loci` value. This also happens without empty groups when a group
+  has no data in a window (that window gets an extra row). The tidy output
+  is correct.
