@@ -724,3 +724,76 @@ test_that("vcf tests storing names as integers", {
   )
   expect_true(inherits(combined_gt, "gen_tbl"))
 })
+
+test_that("ped files with a trailing blank line can be read", {
+  ped_dir <- tempfile("ped_")
+  dir.create(ped_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  file.copy(file.path(ext_dir, "pop_a.map"), ped_dir)
+  writeLines(
+    c(readLines(file.path(ext_dir, "pop_a.ped")), ""),
+    file.path(ped_dir, "pop_a.ped")
+  )
+  ped_gt <- gen_tibble(file.path(ped_dir, "pop_a.ped"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  orig_gt <- gen_tibble(file.path(ext_dir, "pop_a.ped"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(ped_gt$id, orig_gt$id)
+  expect_identical(show_genotypes(ped_gt), show_genotypes(orig_gt))
+})
+
+test_that("truncated packedancestry geno files are caught", {
+  geno_dir <- tempfile("geno_")
+  dir.create(geno_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  file.copy(file.path(ext_dir, "pop_a.snp"), geno_dir)
+  file.copy(file.path(ext_dir, "pop_a.ind"), geno_dir)
+  geno_bytes <- readBin(file.path(ext_dir, "pop_a.geno"), "raw", n = 1e5)
+  geno_path <- file.path(geno_dir, "pop_a.geno")
+  # remove a few bytes, or most of the file (keeping the header)
+  for (n_bytes in c(length(geno_bytes) - 10, 48)) {
+    writeBin(geno_bytes[seq_len(n_bytes)], geno_path)
+    expect_error(
+      gen_tibble(geno_path, backingfile = tempfile(), quiet = TRUE),
+      "truncated or corrupted"
+    )
+  }
+})
+
+test_that("file extensions are matched ignoring case", {
+  # copy the pop_a files, using upper case extensions for the main files
+  upper_dir <- tempfile("upper_")
+  dir.create(upper_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  for (ext in c("bim", "fam", "map", "snp", "ind")) {
+    file.copy(
+      file.path(ext_dir, paste0("pop_a.", ext)),
+      file.path(upper_dir, paste0("pop_a.", ext))
+    )
+  }
+  for (ext in c("bed", "ped", "geno")) {
+    file.copy(
+      file.path(ext_dir, paste0("pop_a.", ext)),
+      file.path(upper_dir, paste0("pop_a.", toupper(ext)))
+    )
+  }
+  # a gzipped vcf
+  gz_con <- gzfile(file.path(upper_dir, "pop_a.VCF.GZ"), "w")
+  writeLines(readLines(file.path(ext_dir, "pop_a.vcf")), gz_con)
+  close(gz_con)
+
+  for (ext in c("bed", "ped", "geno", "vcf")) {
+    lower_gt <- gen_tibble(file.path(ext_dir, paste0("pop_a.", ext)),
+      backingfile = tempfile(), quiet = TRUE
+    )
+    upper_file <- file.path(
+      upper_dir,
+      paste0("pop_a.", toupper(ext), ifelse(ext == "vcf", ".GZ", ""))
+    )
+    upper_gt <- gen_tibble(upper_file, backingfile = tempfile(), quiet = TRUE)
+    expect_identical(show_genotypes(upper_gt), show_genotypes(lower_gt))
+    expect_identical(show_loci(upper_gt), show_loci(lower_gt))
+  }
+})

@@ -194,3 +194,58 @@ test_that("indiv_het_obs computes correctly for mixed-ploidy data", {
   )
   expect_equal(indiv_het_obs(test_gt_mixed), expected_het)
 })
+
+test_that("indiv_het_obs uses only the selected loci as denominator", {
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 2),
+    c(2, 1, 0, NA, 0, NA),
+    c(2, 2, 0, 0, 1, NA)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = c(1, 1, 1, 1, 2, 2),
+    position = c(3, 5, 65, 343, 23, 456),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  # subset the loci (the FBM still contains all 6 loci)
+  test_gt_sub <- test_gt %>% select_loci(c(1, 2, 4))
+  expect_equal(
+    indiv_het_obs(test_gt_sub),
+    rowMeans(test_genotypes[, c(1, 2, 4)] == 1, na.rm = TRUE)
+  )
+
+  # same for polyploid data
+  test_genotypes_tetra <- rbind(
+    c(1, 4, 0, 2, 3, 4),
+    c(4, 4, 0, 0, 1, NA),
+    c(0, 2, 0, 4, 4, NA)
+  )
+  test_gt_tetra <- gen_tibble(
+    x = test_genotypes_tetra,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    ploidy = 4,
+    quiet = TRUE
+  )
+  test_gt_tetra_sub <- test_gt_tetra %>% select_loci(c(1, 5, 6))
+  expect_equal(
+    indiv_het_obs(test_gt_tetra_sub),
+    rowMeans(
+      test_genotypes_tetra[, c(1, 5, 6)] > 0 &
+        test_genotypes_tetra[, c(1, 5, 6)] < 4,
+      na.rm = TRUE
+    )
+  )
+})

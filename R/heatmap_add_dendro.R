@@ -57,25 +57,27 @@ heatmap_add_dendro <- function(plot,
   side <- match.arg(side)
 
   #############################################
-  # get data
+  # get the clustering
   #############################################
-  df <- plot@data
-  # determine matrix size
-  n <- max(c(df$row, df$col))
-  # initialise matrix
-  mat <- matrix(
-    NA_real_,
-    nrow = n,
-    ncol = n
-  )
-  # fill matrix
-  mat[cbind(df$row, df$col)] <- df$value
-
-  #############################################
-  # cluster the data
-  #############################################
-  cluster_fun <- attr(plot, "order_fun")
-  hc <- cluster_fun(mat)
+  # reuse the clustering that ordered the heatmap, as reclustering the
+  # reordered matrix can give a different leaf order when distances are tied
+  hc <- attr(plot, "order_obj")
+  if (is.null(hc)) {
+    # otherwise, recluster the (already ordered) data of the plot
+    df <- plot$data
+    # determine matrix size
+    n <- max(c(df$row, df$col))
+    # initialise matrix
+    mat <- matrix(
+      NA_real_,
+      nrow = n,
+      ncol = n
+    )
+    # fill matrix
+    mat[cbind(df$row, df$col)] <- df$value
+    cluster_fun <- attr(plot, "order_fun")
+    hc <- cluster_fun(mat)
+  }
 
   # validate that the clustering function returned an hclust object
   if (!inherits(hc, "hclust")) {
@@ -101,25 +103,20 @@ heatmap_add_dendro <- function(plot,
 
 #############################################
 # <heatmap_dendro> S3 class
-#     A thin wrapper around a gtable that auto-draws on bare evaluation and
-#     is accepted by ggsave(), just like a ggplot or patchwork object.
+#     A gtable subclass that auto-draws on bare evaluation and is accepted
+#     by ggsave() and patchwork, just like a ggplot or patchwork object.
 #############################################
 
 new_heatmap_dendro <- function(gt) {
-  structure(list(gt = gt), class = c("heatmap_dendro", "gtable"))
+  class(gt) <- c("heatmap_dendro", setdiff(class(gt), "heatmap_dendro"))
+  gt
 }
 
 #' @export
 print.heatmap_dendro <- function(x, ...) {
   grid::grid.newpage()
-  grid::grid.draw(x$gt)
+  grid::grid.draw(x)
   invisible(x)
-}
-
-#' @importFrom grid grid.draw
-#' @export
-grid.draw.heatmap_dendro <- function(x, recording = TRUE) {
-  grid::grid.draw(x$gt, recording = recording)
 }
 
 
@@ -153,7 +150,7 @@ annotate_dendrogram <- function(plot,
   if (inherits(plot, "ggplot")) {
     gt <- ggplot2::ggplotGrob(plot)
   } else if (inherits(plot, "heatmap_dendro")) {
-    gt <- plot$gt
+    gt <- plot
   } else {
     stop("plot must be a ggplot or heatmap_dendro")
   }

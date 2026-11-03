@@ -130,6 +130,20 @@ test_that("valid alleles check for .character method", {
   )
 })
 
+test_that("loci_from_bim reads loci names and alleles as characters", {
+  # an allele column with only "T" should not become TRUE, and names with
+  # leading zeros should not become integers
+  bim_file <- tempfile(fileext = ".bim")
+  writeLines(c("1\t001\t0\t100\tT\tA", "2\t002\t0.5\t200\tT\tC"), bim_file)
+  loci <- loci_from_bim(bim_file)
+  expect_equal(loci$name, c("001", "002"))
+  expect_equal(loci$allele_alt, c("T", "T"))
+  expect_equal(loci$allele_ref, c("A", "C"))
+  expect_equal(loci$chromosome, factor(c(1, 2)))
+  expect_equal(loci$position, c(100L, 200L))
+  expect_equal(loci$genetic_dist, c(0, 0.5))
+})
+
 test_that("error if genotypes and loci tables differ in length", {
   test_loci_short <- test_loci[1:5, ]
   expect_error(
@@ -301,6 +315,50 @@ test_that("gen_tibble identifies wrong dimensions in genotypes", {
       "table x and in the indiv_meta table"
     )
   )
+})
+
+test_that("gen_tibble.matrix validates ploidy and dosages", {
+  # ploidy vector of the wrong length
+  expect_error(
+    gen_tibble(
+      x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+      ploidy = c(2, 2), quiet = TRUE, backingfile = tempfile()
+    ),
+    "one value per individual"
+  )
+  # non-integer dosages
+  bad_genotypes <- test_genotypes
+  bad_genotypes[1, 1] <- 1.6
+  expect_error(
+    gen_tibble(
+      x = bad_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+      quiet = TRUE, backingfile = tempfile()
+    ),
+    "non-negative integer dosages"
+  )
+  # negative dosages
+  bad_genotypes[1, 1] <- -1
+  expect_error(
+    gen_tibble(
+      x = bad_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+      quiet = TRUE, backingfile = tempfile()
+    ),
+    "non-negative integer dosages"
+  )
+  # dosages greater than the ploidy of an individual
+  expect_error(
+    gen_tibble(
+      x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+      ploidy = c(4, 1, 2), quiet = TRUE, backingfile = tempfile()
+    ),
+    "greater than the ploidy"
+  )
+  # valid mixed ploidy data
+  mixed_gt <- gen_tibble(
+    x = test_genotypes, loci = test_loci, indiv_meta = test_indiv_meta,
+    ploidy = c(4, 2, 2), quiet = TRUE, backingfile = tempfile()
+  )
+  expect_equal(indiv_ploidy(mixed_gt), c(4, 2, 2))
 })
 
 test_that("gen_tibble identifies wrong loci table columns", {
@@ -481,3 +539,17 @@ test_that("gen_tibble allow_duplicates finds duplicates", {
 #                             quiet = TRUE)
 #   expect_true(file.exists(paste0(this_bkfile,".bk")))
 # }) #nolint end
+
+test_that("gen_tibbles with no loci or no individuals can be formatted", {
+  expect_equal(
+    format(test_gt$genotypes),
+    c("[1,1,...]", "[2,1,...]", "[2,2,...]")
+  )
+  # no loci
+  no_loci_gt <- select_loci_if(test_gt, rep(FALSE, 6))
+  expect_equal(format(no_loci_gt$genotypes), rep("[]", 3))
+  expect_output(print(no_loci_gt), "0 loci")
+  # no individuals
+  no_indiv_gt <- test_gt %>% filter(id == "z")
+  expect_identical(format(no_indiv_gt$genotypes), character(0))
+})

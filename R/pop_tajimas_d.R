@@ -95,16 +95,16 @@ pop_tajimas_d.vctrs_bigSNP <- function(
 
   # as long as we have more than one individual
   if (length(.x) > 1) {
-    # get pi and the number of valid allele copies for each locus (this deals
+    # sum the quantities needed for tajimas d across all loci (this deals
     # with polyploids and pseudohaploids), treating all individuals as a
     # single group
-    pi_n <- .loci_pi_n(.x,
-      group_ids = rep(0, length(.x)),
-      n_groups = 1,
+    term_sums <- .tajimas_d_sums(.x,
+      group_ids = rep(0L, length(.x)),
+      n_groups = 1L,
       n_cores = n_cores,
       block_size = block_size
     )
-    tajimas_d <- tajimas_d_from_pi_vec(pi_n$pi[, 1], pi_n$n[, 1])
+    tajimas_d <- tajimas_d_from_term_sums(.tajimas_d_group_sums(term_sums, 1))
   } else {
     # if we have a single individual
     # tajimas_d does not really make sense for a single individual
@@ -122,17 +122,17 @@ pop_tajimas_d.grouped_df <- function(
   ...
 ) {
   rlang::check_dots_empty()
-  # get pi and the number of valid allele copies for each locus and group
+  # sum the quantities needed for tajimas d across all loci for each group
   # (this deals with polyploids and pseudohaploids)
-  pi_n <- .loci_pi_n(.x$genotypes,
-    group_ids = dplyr::group_indices(.x) - 1,
-    n_groups = max(dplyr::group_indices(.x)),
+  term_sums <- .tajimas_d_sums(.x$genotypes,
+    group_ids = dplyr::group_indices(.x) - 1L,
+    n_groups = dplyr::n_groups(.x),
     n_cores = n_cores,
     block_size = block_size
   )
   # compute tajimas d for each group
-  tajimas_d <- lapply(seq_len(ncol(pi_n$pi)), function(i_grp) {
-    tajimas_d_from_pi_vec(pi_n$pi[, i_grp], pi_n$n[, i_grp])
+  tajimas_d <- lapply(seq_len(dplyr::n_groups(.x)), function(i_grp) {
+    tajimas_d_from_term_sums(.tajimas_d_group_sums(term_sums, i_grp))
   })
   # return a list to mimic a group_map
   return(tajimas_d)
@@ -252,22 +252,60 @@ harmonic_sum <- function(n, power = 1) {
   res
 }
 
-# get pi and the number of valid allele copies for each locus and each group
-# of a gen_tibble (if the gen_tibble is not grouped, all individuals are
-# treated as a single group). Returns a list with two matrices (pi and n), with
-# one row per locus and one column per group
-.pi_n_by_group <- function(.x,
-                           n_cores = bigstatsr::nb_cores(),
-                           block_size = bigstatsr::block_size(nrow(.x), 1)) {
-  if (inherits(.x, "grouped_df")) {
-    group_ids <- dplyr::group_indices(.x) - 1
-  } else {
-    group_ids <- rep(0, nrow(.x))
-  }
-  .loci_pi_n(.x$genotypes,
-    group_ids = group_ids,
-    n_groups = max(group_ids) + 1,
-    n_cores = n_cores,
-    block_size = block_size
+# Sum, within windows, the quantities used to estimate tajimas d for each
+# group (see tajimas_d_locus_terms()), in a single pass over the genotypes
+# (without storing pi or the number of valid allele copies by locus).
+# .x is a vctrs_bigSNP (the genotypes column of a gen_tibble), and group_ids
+# the 0-based group of each individual. locus_first and locus_last are, for
+# each locus, the first and last (0-based) window that includes it (as given
+# by .window_definitions()), and n_windows the number of windows; by default,
+# all loci are in a single window (to compute genome-wide estimates). Returns
+# a list of 5 matrices (one row per window, one column per group): k_hat,
+# seg, theta_w, n and n_loci
+.tajimas_d_sums <- function(.x, group_ids, n_groups,
+                            locus_first = integer(0),
+                            locus_last = integer(0),
+                            n_windows = 1L,
+                            n_cores = bigstatsr::nb_cores(),
+                            block_size = bigstatsr::block_size(length(.x), 1)) {
+  tajimas_d_window_sums_cpp(
+    BM = attr(.x, "fbm"),
+    rowInd = vctrs::vec_data(.x),
+    colInd = attr(.x, "loci")$big_index,
+    groupIds = group_ids,
+    ngroups = n_groups,
+    ploidy = indiv_ploidy(.x),
+    is_pseudohaploid = is_pseudohaploid(.x),
+    locus_first = locus_first,
+    locus_last = locus_last,
+    n_windows = n_windows,
+    ncores = n_cores,
+    # the kernel keeps pi and n for a block of loci and all groups, so we
+    # cap the size of the blocks
+    block_size = as.integer(min(block_size, 4096))
   )
+}
+
+# The same as .tajimas_d_sums(), for a (potentially grouped) gen_tibble (if
+# it is not grouped, all individuals are treated as a single group)
+.tajimas_d_sums_by_group <- function(.x, ...) {
+  if (inherits(.x, "grouped_df")) {
+    group_ids <- dplyr::group_indices(.x) - 1L
+    n_groups <- dplyr::n_groups(.x)
+  } else {
+    group_ids <- rep(0L, nrow(.x))
+    n_groups <- 1L
+  }
+  .tajimas_d_sums(.x$genotypes,
+    group_ids = group_ids,
+    n_groups = n_groups,
+    ...
+  )
+}
+
+# Get the sums of a group from the output of .tajimas_d_sums(), as a matrix
+# with one row per window and one column per quantity (as needed by
+# tajimas_d_from_term_sums())
+.tajimas_d_group_sums <- function(term_sums, i_grp) {
+  do.call(cbind, lapply(term_sums, function(x) x[, i_grp]))
 }

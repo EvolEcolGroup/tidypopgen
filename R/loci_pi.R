@@ -120,48 +120,26 @@ loci_pi.vctrs_bigSNP <- function(
   if (length(rows_to_keep) > 1) {
     # Keep the common diploid case on the ploidy-free kernel. Pseudohaploid
     # samples retain 0/2 dosage storage despite contributing one allele, so
-    # they must use the ploidy-aware kernel.
+    # they must use the ploidy-aware kernel. The cpp code reads the FBM
+    # directly, in blocks of block_size loci, using openMP for
+    # parallelisation.
     if (is_diploid_only(.x)) {
-      # internal function that can be used with a big_apply #nolint start
-      gt_pi_sub <- function(BM, ind, rows_to_keep) {
-        gt_pi_diploid(
-          BM = BM,
-          rowInd = rows_to_keep,
-          colInd = ind,
-          ncores = n_cores
-        )
-      } # nolint end
-      pi <- bigstatsr::big_apply(
-        geno_fbm,
-        a.FUN = gt_pi_sub,
-        rows_to_keep = rows_to_keep,
-        ind = attr(.x, "loci")$big_index,
-        ncores = 1, # parallelisation is used within the function
-        block.size = block_size,
-        a.combine = "c"
+      pi <- gt_pi_diploid(
+        BM = geno_fbm,
+        rowInd = rows_to_keep,
+        colInd = attr(.x, "loci")$big_index,
+        ncores = n_cores,
+        block_size = block_size
       )
     } else {
-      ploidy <- indiv_ploidy(.x)
-      # internal function that can be used with a big_apply #nolint start
-      gt_pi_sub_poly <- function(BM, ind, rows_to_keep, ploidy) {
-        gt_pi_polyploid(
-          BM = BM,
-          rowInd = rows_to_keep,
-          colInd = ind,
-          ploidy = ploidy,
-          is_pseudohaploid = is_pseudohaploid(.x),
-          ncores = n_cores
-        )
-      } # nolint end
-      pi <- bigstatsr::big_apply(
-        geno_fbm,
-        a.FUN = gt_pi_sub_poly,
-        rows_to_keep = rows_to_keep,
-        ind = attr(.x, "loci")$big_index,
-        ncores = 1, # parallelisation is used within the function
-        block.size = block_size,
-        a.combine = "c",
-        ploidy = ploidy
+      pi <- gt_pi_polyploid(
+        BM = geno_fbm,
+        rowInd = rows_to_keep,
+        colInd = attr(.x, "loci")$big_index,
+        ploidy = indiv_ploidy(.x),
+        is_pseudohaploid = is_pseudohaploid(.x),
+        ncores = n_cores,
+        block_size = block_size
       )
     }
   } else {
@@ -201,14 +179,39 @@ loci_pi.grouped_df <- function(
     stop("loci_pi only works with one grouping variable")
   }
 
-  # compute pi (and the number of valid allele copies) for each group
-  pi_mat <- .loci_pi_n(
-    .x$genotypes,
-    group_ids = dplyr::group_indices(.x) - 1,
-    n_groups = max(dplyr::group_indices(.x)),
-    n_cores = n_cores,
-    block_size = block_size
-  )$pi
+  geno_fbm <- .gt_get_fbm(.x)
+  # rows (individuals) that we want to use
+  rows_to_keep <- .gt_fbm_rows(.x)
+
+  # Keep the common diploid case on the ploidy-free kernel. Pseudohaploid
+  # samples retain 0/2 dosage storage despite contributing one allele, so
+  # they must use the ploidy-aware kernel. The cpp code reads the FBM
+  # directly, in blocks of block_size loci, and fills a single matrix
+  # (rather than binding the matrices from each block); openMP uses
+  # multiple cores in the cpp code.
+  if (is_diploid_only(.x)) {
+    pi_mat <- gt_grouped_pi_diploid(
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = .gt_fbm_cols(.x),
+      groupIds = dplyr::group_indices(.x) - 1L,
+      ngroups = dplyr::n_groups(.x),
+      ncores = n_cores,
+      block_size = block_size
+    )$pi
+  } else {
+    pi_mat <- gt_grouped_pi_polyploid(
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = .gt_fbm_cols(.x),
+      groupIds = dplyr::group_indices(.x) - 1L,
+      ngroups = dplyr::n_groups(.x),
+      ploidy = indiv_ploidy(.x),
+      is_pseudohaploid = is_pseudohaploid(.x),
+      ncores = n_cores,
+      block_size = block_size
+    )$pi
+  }
 
   pi_mat <- format_grouped_output(
     out_mat = pi_mat,
@@ -217,93 +220,4 @@ loci_pi.grouped_df <- function(
     type = type
   )
   return(pi_mat)
-}
-
-#' Estimate pi and the number of valid allele copies at each locus by group
-#'
-#' Internal function that computes nucleotide diversity (pi) at each locus for
-#' each group of individuals, together with the number of non-missing allele
-#' copies (`n`) used to estimate pi at that locus. Pi is `NA` when a group has
-#' fewer than 2 valid allele copies at a locus. Ungrouped data can be handled
-#' by assigning all individuals to a single group (i.e. `group_ids` set to 0
-#' for all individuals, and `n_groups = 1`).
-#'
-#' @param .x a vector of class `vctrs_bigSNP` (usually the `genotypes` column
-#'   of a [`gen_tibble`] object).
-#' @param group_ids a vector of 0-based group indices, one per individual in
-#'   `.x`.
-#' @param n_groups the number of groups.
-#' @param n_cores number of cores to be used.
-#' @param block_size maximum number of loci read at once.
-#' @returns a list with two matrices with one row per locus and one column per
-#'   group: `pi`, the nucleotide diversity, and `n`, the number of valid
-#'   allele copies.
-#' @keywords internal
-#' @noRd
-.loci_pi_n <- function(.x, group_ids, n_groups, n_cores, block_size) {
-  geno_fbm <- attr(.x, "fbm")
-  # rows (individuals) that we want to use
-  rows_to_keep <- vctrs::vec_data(.x)
-
-  # Keep the common diploid case on the ploidy-free kernel. Pseudohaploid
-  # samples retain 0/2 dosage storage despite contributing one allele, so
-  # they must use the ploidy-aware kernel.
-  if (is_diploid_only(.x)) {
-    # internal function that can be used with a big_apply #nolint start
-    gt_group_pi_sub <- function(BM, ind, rows_to_keep) {
-      freq_mat <- gt_grouped_pi_diploid(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        groupIds = group_ids,
-        ngroups = n_groups,
-        ncores = n_cores
-      )
-      # bind pi and n so that they can be combined across blocks of loci
-      cbind(freq_mat$pi, freq_mat$n)
-    } # nolint end
-    pi_n_mat <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_group_pi_sub,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-      # in the cpp code
-      block.size = block_size,
-      a.combine = "rbind"
-    )
-  } else {
-    ploidy <- indiv_ploidy(.x)
-    # internal function that can be used with a big_apply #nolint start
-    gt_group_pi_sub_poly <- function(BM, ind, rows_to_keep, ploidy) {
-      freq_mat <- gt_grouped_pi_polyploid(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        groupIds = group_ids,
-        ngroups = n_groups,
-        ploidy = ploidy,
-        is_pseudohaploid = is_pseudohaploid(.x),
-        ncores = n_cores
-      )
-      # bind pi and n so that they can be combined across blocks of loci
-      cbind(freq_mat$pi, freq_mat$n)
-    } # nolint end
-    pi_n_mat <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_group_pi_sub_poly,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-      # in the cpp code
-      block.size = block_size,
-      a.combine = "rbind",
-      ploidy = ploidy
-    )
-  }
-  # split the combined matrix back into pi and n
-  list(
-    pi = pi_n_mat[, seq_len(n_groups), drop = FALSE],
-    n = pi_n_mat[, n_groups + seq_len(n_groups), drop = FALSE]
-  )
 }

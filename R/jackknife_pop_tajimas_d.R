@@ -79,29 +79,31 @@ jackknife_pop_tajimas_d <- function(.x,
     block_size = block_size,
     size_unit = size_unit
   )
-  # get pi and the number of valid allele copies for each locus (one column
-  # per group)
-  pi_n <- .pi_n_by_group(.x)
+  # sum the quantities needed to compute tajimas d in each block (each block
+  # is a non-overlapping window), for each group, in a single pass over the
+  # genotypes
+  term_sums <- .tajimas_d_sums_by_group(.x,
+    locus_first = block_id - 1L,
+    locus_last = block_id - 1L,
+    n_windows = max(block_id)
+  )
 
   res <- list()
   # now we can loop around each population to compute the jackknife
-  for (i_grp in seq_len(ncol(pi_n$pi))) {
-    # get the quantities needed to compute tajimas d at each locus
-    locus_terms <- tajimas_d_locus_terms(pi_n$pi[, i_grp], pi_n$n[, i_grp])
-    # sum each of these quantities within each block
-    term_blocks <- .block_sums(locus_terms, block_id)
+  for (i_grp in seq_len(ncol(term_sums$k_hat))) {
+    term_blocks <- .tajimas_d_group_sums(term_sums, i_grp)
     # sum across all loci, and leaving out each block in turn
-    term_tot <- colSums(term_blocks$sums)
-    term_loo <- rep_rows(term_tot, nrow(term_blocks$sums)) - term_blocks$sums
-    colnames(term_loo) <- colnames(locus_terms)
+    term_tot <- colSums(term_blocks)
+    term_loo <- rep_rows(term_tot, nrow(term_blocks)) - term_blocks
+    colnames(term_loo) <- colnames(term_blocks)
     # Tajima's D on all loci, and leaving out each block in turn
     taj_full <- tajimas_d_from_term_sums(term_tot)
     taj_loo <- tajimas_d_from_term_sums(term_loo)
     res[[i_grp]] <- .jackknife_weighted(
       theta_full = taj_full,
       theta_loo = taj_loo,
-      # the number of loci with valid pi in each block
-      m = term_blocks$n[, 1, drop = FALSE]
+      # the number of loci with at least one valid allele copy in each block
+      m = term_blocks[, "n_loci", drop = FALSE]
     )
   }
   if (length(res) == 1) { # if we only have one pop, return a data.frame

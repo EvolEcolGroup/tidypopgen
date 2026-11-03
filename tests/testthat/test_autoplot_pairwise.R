@@ -169,6 +169,33 @@ test_that("heatmap_pairwise detects duplicate pairs in tidy input", {
   )
 })
 
+test_that("heatmap_pairwise works with factor ids in tidy input", {
+  example_gt <- load_example_gt("gen_tbl")
+  fst_chr <- example_gt %>%
+    dplyr::group_by(population) %>%
+    pairwise_pop_fst(method = "Nei87", type = "tidy")
+
+  # grouping by a factor gives factor id columns
+  example_gt$population <- as.factor(example_gt$population)
+  fst_fct <- example_gt %>%
+    dplyr::group_by(population) %>%
+    pairwise_pop_fst(method = "Nei87", type = "tidy")
+  expect_true(is.factor(fst_fct$population_1))
+
+  p_chr <- heatmap_pairwise(fst_chr)
+  p_fct <- heatmap_pairwise(fst_fct)
+  expect_true(inherits(p_fct, "ggplot"))
+  expect_equal(p_fct$data, p_chr$data)
+  expect_true(inherits(autoplot(fst_fct), "ggplot"))
+
+  # duplicates are still detected
+  dup_tbl <- rbind(fst_fct[-nrow(fst_fct), ], fst_fct[1, ])
+  expect_error(
+    heatmap_pairwise(dup_tbl),
+    "Duplicate pairs found"
+  )
+})
+
 
 test_that("heatmap_pairwise error messages", {
   # load the example dataset

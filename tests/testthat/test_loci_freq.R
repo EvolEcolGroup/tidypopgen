@@ -284,8 +284,81 @@ test_that("test loci_ with only one individual", {
   one_indiv <- test_gt %>% filter(id == "a")
   expect_equal(loci_alt_freq(one_indiv), c(0.5, 0.5, 0, 0.5, 0.5, 1))
   expect_equal(loci_maf(one_indiv), c(0.5, 0.5, 0, 0.5, 0.5, 0))
+
+  # counts for an individual with missing genotypes are consistent with the
+  # counts for multiple individuals (missing loci have no valid alleles)
+  one_indiv <- test_gt %>% filter(id == "b")
+  expect_equal(
+    loci_alt_freq(one_indiv, as_counts = TRUE),
+    cbind(n_alt = c(2, 1, 0, 0, 0, 0), n_valid = c(2, 2, 2, 0, 2, 0))
+  )
+  expect_equal(loci_alt_freq(one_indiv), c(1, 0.5, 0, NaN, 0, NaN))
+  two_indiv <- test_gt %>% filter(id %in% c("b", "c"))
+  expect_equal(
+    colnames(loci_alt_freq(two_indiv, as_counts = TRUE)),
+    c("n_alt", "n_valid")
+  )
 })
 
+
+test_that("loci_alt_freq on polyploids", {
+  test_genotypes <- rbind(
+    c(0, 1, 2, 3, 4),
+    c(4, 3, 2, 1, 0),
+    c(2, 2, NA, 4, 1)
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = data.frame(
+      name = paste0("rs", 1:5),
+      chromosome = 1L,
+      position = as.integer(1:5 * 10),
+      genetic_dist = as.double(rep(0, 5)),
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    indiv_meta = data.frame(
+      id = c("a", "b", "c"),
+      population = c("pop1", "pop2", "pop2")
+    ),
+    ploidy = 4,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  # frequencies
+  freq <- colSums(test_genotypes, na.rm = TRUE) / (c(3, 3, 2, 3, 3) * 4)
+  expect_equal(suppressWarnings(loci_alt_freq(test_gt)), freq)
+  # a single individual that is not the first in the FBM
+  one_indiv <- test_gt %>% filter(id == "c")
+  expect_equal(
+    suppressWarnings(loci_alt_freq(one_indiv)),
+    test_genotypes[3, ] / 4
+  )
+  # counts
+  expect_equal(
+    suppressWarnings(loci_alt_freq(test_gt, as_counts = TRUE)),
+    cbind(
+      n_alt = colSums(test_genotypes, na.rm = TRUE),
+      n_valid = c(3, 3, 2, 3, 3) * 4
+    )
+  )
+  expect_equal(
+    suppressWarnings(loci_alt_freq(one_indiv, as_counts = TRUE)),
+    cbind(n_alt = c(2, 2, 0, 4, 1), n_valid = c(4, 4, 0, 4, 4))
+  )
+  # a single locus
+  one_locus <- test_gt %>% select_loci(3)
+  expect_equal(suppressWarnings(loci_alt_freq(one_locus)), 0.5)
+  expect_equal(
+    suppressWarnings(loci_alt_freq(one_locus, as_counts = TRUE)),
+    cbind(n_alt = 4, n_valid = 8)
+  )
+  # and with multiple blocks of loci
+  expect_equal(
+    suppressWarnings(loci_alt_freq(test_gt, block_size = 1)),
+    freq
+  )
+})
 
 test_that("loci_alt_freq grouped with one allele", {
   test_gt <- load_example_gt("grouped_gen_tbl")
@@ -317,4 +390,182 @@ test_that("loci_alt_freq grouped with one group", {
     out_tbl$group,
     rep(unique(test_gt$population), count_loci(test_gt))
   )
+})
+
+test_that("grouped loci_ functions work with factor and numeric groups", {
+  test_genotypes <- rbind(
+    c(0, 1, 2, NA),
+    c(2, 1, 0, 0),
+    c(2, 2, 0, 2),
+    c(0, 0, 2, 2)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:4),
+    chromosome = 1L,
+    position = as.integer(1:4 * 10),
+    genetic_dist = as.double(rep(0, 4)),
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = data.frame(
+      id = c("a", "b", "c", "d"),
+      population = c("p1", "p1", "p2", "p2")
+    ),
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  chr_grp <- test_gt %>% group_by(population)
+  # factor groups
+  test_gt$pop_factor <- factor(test_gt$population)
+  fct_grp <- test_gt %>% group_by(pop_factor)
+  # numeric groups that are not 1..k
+  test_gt$pop_numeric <- c(2, 2, 5, 5)
+  num_grp <- test_gt %>% group_by(pop_numeric)
+  loci_funs <- list(
+    loci_alt_freq, loci_maf, loci_missingness, loci_hwe, loci_pi
+  )
+  for (this_fun in loci_funs) {
+    chr_mat <- this_fun(chr_grp, type = "matrix")
+    chr_tidy <- this_fun(chr_grp, type = "tidy")
+    fct_mat <- this_fun(fct_grp, type = "matrix")
+    expect_equal(colnames(fct_mat), c("p1", "p2"))
+    expect_equal(unclass(fct_mat), unclass(chr_mat))
+    expect_equal(this_fun(fct_grp, type = "tidy"), chr_tidy)
+    num_mat <- this_fun(num_grp, type = "matrix")
+    expect_equal(colnames(num_mat), c("2", "5"))
+    expect_equal(as.vector(num_mat), as.vector(chr_mat))
+    num_tidy <- this_fun(num_grp, type = "tidy")
+    expect_equal(num_tidy$group, rep(c("2", "5"), 4))
+    expect_equal(num_tidy$value, chr_tidy$value)
+  }
+})
+
+test_that("grouped loci_ functions keep empty groups with .drop = FALSE", {
+  test_genotypes <- rbind(
+    c(0, 1, 2, NA),
+    c(2, 1, 0, 0),
+    c(2, 2, 0, 2),
+    c(0, 0, 2, 2)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:4),
+    chromosome = 1L,
+    position = as.integer(1:4 * 10),
+    genetic_dist = as.double(rep(0, 4)),
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = data.frame(
+      id = c("a", "b", "c", "d"),
+      # the last level has no individuals
+      population = factor(
+        c("p1", "p1", "p2", "p2"),
+        levels = c("p1", "p2", "p3")
+      )
+    ),
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  drop_grp <- test_gt %>% group_by(population)
+  keep_grp <- test_gt %>% group_by(population, .drop = FALSE)
+  loci_funs <- list(
+    loci_alt_freq, loci_maf, loci_missingness, loci_hwe, loci_pi
+  )
+  for (this_fun in loci_funs) {
+    drop_mat <- this_fun(drop_grp, type = "matrix")
+    keep_mat <- this_fun(keep_grp, type = "matrix")
+    expect_equal(colnames(keep_mat), c("p1", "p2", "p3"))
+    expect_equal(unclass(keep_mat)[, 1:2], unclass(drop_mat))
+    keep_tidy <- this_fun(keep_grp, type = "tidy")
+    expect_equal(nrow(keep_tidy), 4 * 3)
+  }
+  keep_counts <- loci_alt_freq(keep_grp, as_counts = TRUE)
+  expect_equal(ncol(keep_counts$n_alt), 3)
+  expect_equal(keep_counts$n_valid[, 3], rep(0, 4))
+})
+
+test_that("format_grouped_output tidy is the pivoted matrix", {
+  out_mat <- matrix(c(0.1, 0.2, NA, 0.4, 0.5, 0.6), nrow = 3)
+  # character and integer loci names
+  for (loci_names in list(c("rs1", "rs2", "rs3"), c(10L, 20L, 30L))) {
+    tidy <- format_grouped_output(out_mat, c("p1", "p2"), loci_names, "tidy")
+    pivoted <- as.data.frame(out_mat)
+    colnames(pivoted) <- c("p1", "p2")
+    pivoted$loci <- loci_names
+    pivoted <- tidyr::pivot_longer(
+      pivoted,
+      cols = c("p1", "p2"),
+      names_to = "group"
+    )
+    expect_identical(tidy, pivoted)
+  }
+  # a single group, as a vector
+  tidy <- format_grouped_output(c(0.1, 0.2), factor("p1"), 1:2, "tidy")
+  expect_identical(tidy$loci, 1:2)
+  expect_identical(tidy$group, c("p1", "p1"))
+  expect_identical(tidy$value, c(0.1, 0.2))
+})
+
+test_that("loci_alt_freq matches a reference for reordered indiv and loci", {
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 0),
+    c(2, 1, 0, NA, 0, 0),
+    c(2, NA, 0, 0, 1, 1),
+    c(1, 0, 0, 1, 0, 0),
+    c(1, 2, 0, 1, 2, 1),
+    c(0, 0, 0, 0, NA, 1),
+    c(0, 1, 1, 0, 1, NA)
+  )
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c", "d", "e", "f", "g"),
+    population = c("pop1", "pop2", "pop1", "pop2", "pop1", "pop3", "pop3")
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  # reorder (and drop some) individuals and loci
+  indiv_order <- c(7, 2, 5, 1, 4, 3)
+  loci_order <- c(6, 2, 4, 1)
+  sub_gt <- test_gt %>%
+    dplyr::slice(indiv_order) %>%
+    select_loci(all_of(loci_order))
+  sub_geno <- test_genotypes[indiv_order, loci_order]
+  # reference frequencies from the genotype matrix
+  ref_freq <- function(geno) {
+    colSums(geno, na.rm = TRUE) / (2 * colSums(!is.na(geno)))
+  }
+  expect_equal(loci_alt_freq(sub_gt), ref_freq(sub_geno))
+  sub_grp <- sub_gt %>% group_by(population)
+  grp_mat <- loci_alt_freq(sub_grp, type = "matrix")
+  for (pop in colnames(grp_mat)) {
+    expect_equal(
+      unname(unclass(grp_mat)[, pop]),
+      ref_freq(sub_geno[sub_gt$population == pop, , drop = FALSE])
+    )
+  }
+  # codes that are not small integers (e.g. dosages) use a different code
+  # path, which must give the same results (bytes 0 to 3 decode as with
+  # CODE_012)
+  attr(sub_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_DOSAGE
+  expect_equal(loci_alt_freq(sub_gt), ref_freq(sub_geno))
+  expect_equal(loci_alt_freq(sub_grp, type = "matrix"), grp_mat)
+  attr(sub_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_012
 })

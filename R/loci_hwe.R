@@ -46,7 +46,14 @@ loci_hwe <- function(.x, .col = "genotypes", ...) {
 
 #' @export
 #' @rdname loci_hwe
-loci_hwe.tbl_df <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
+loci_hwe.tbl_df <- function(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+) {
   stopifnot_gen_tibble(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
@@ -55,38 +62,44 @@ loci_hwe.tbl_df <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
   if (.col != "genotypes") {
     stop("loci_hwe only works with the genotypes column")
   }
-  loci_hwe(.x$genotypes, mid_p = mid_p, ...)
+  loci_hwe(.x$genotypes,
+    mid_p = mid_p, n_cores = n_cores,
+    block_size = block_size, ...
+  )
 }
 
 
 #' @export
 #' @rdname loci_hwe
-loci_hwe.vctrs_bigSNP <- function(.x, .col = "genotypes", mid_p = TRUE, ...) {
+loci_hwe.vctrs_bigSNP <- function(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1),
+  ...
+) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
-  # get the FBM
-  geno_fbm <- attr(.x, "fbm")
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
-    # col hwe for submatrix (some rows, and some columns)
-    col_hwe_sub <- function(X, ind, rows_to_keep) { # nolint
-      # apply(X[rows_to_keep, ind], 2, HWExact_geno_vec) #nolint
-      geno_counts <- bigstatsr::big_counts(
-        X,
-        ind.row = rows_to_keep,
-        ind.col = ind
-      )
-      hwe_on_matrix(geno_counts = geno_counts, midp = mid_p)
-    }
-    hwe_p <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = col_hwe_sub,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      a.combine = "c"
+    # count genotypes and test HWE at each locus, treating all individuals as
+    # a single group (the cpp code reads the FBM directly, in blocks of
+    # block_size loci, using openMP for parallelisation)
+    hwe_p <- gt_grouped_hwe(
+      BM = attr(.x, "fbm"),
+      rowInd = rows_to_keep,
+      colInd = attr(.x, "loci")$big_index,
+      groupIds = rep(0L, length(rows_to_keep)),
+      ngroups = 1,
+      midp = mid_p,
+      ncores = n_cores,
+      block_size = block_size
     )
+    # drop the dimensions of the one column matrix (without copying it)
+    dim(hwe_p) <- NULL
   } else {
     # if we have a single individual
     stop("Not implemented for a single individual")
@@ -122,27 +135,18 @@ loci_hwe.grouped_df <- function(
   }
   rlang::check_dots_empty()
   type <- match.arg(type)
-  geno_fbm <- .gt_get_fbm(.x)
-  rows_to_keep <- .gt_fbm_rows(.x)
-  hwe_p_sub <- function(geno_fbm, ind, rows_to_keep) {
-    gt_grouped_hwe( # nolint
-      BM = geno_fbm,
-      rowInd = rows_to_keep,
-      colInd = ind,
-      groupIds = dplyr::group_indices(.x) - 1,
-      ngroups = max(dplyr::group_indices(.x)),
-      midp = mid_p
-    )
-  }
-
-  hwe_mat <- bigstatsr::big_apply(
-    geno_fbm,
-    a.FUN = hwe_p_sub,
-    rows_to_keep = rows_to_keep,
-    ind = attr(.x$genotypes, "loci")$big_index,
-    ncores = 1, # parallelisation is used within the function
-    block.size = block_size,
-    a.combine = "rbind"
+  # count genotypes and test HWE at each locus for each group (the cpp code
+  # reads the FBM directly, in blocks of block_size loci, and fills a single
+  # matrix; openMP is used for parallelisation)
+  hwe_mat <- gt_grouped_hwe( # nolint
+    BM = .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
+    groupIds = dplyr::group_indices(.x) - 1L,
+    ngroups = dplyr::n_groups(.x),
+    midp = mid_p,
+    ncores = n_cores,
+    block_size = block_size
   )
 
   hwe_mat <- format_grouped_output(

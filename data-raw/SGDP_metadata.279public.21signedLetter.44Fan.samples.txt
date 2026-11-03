@@ -1,0 +1,345 @@
+#Sequencing_Panel	Illumina_ID	Sample_ID	Sample_ID(Aliases)	SGDP_ID	Population_ID	Region	Country	Town	Contributor	Gender	Latitude	Longitude	DNA_Source	Embargo	"SGDP-lite category: X=FullyPublic, Y=SignedLetterNoDelay, Z=SignedLetterDelay, DO_NOT_USE=do.not.use"
+B	SS6004478	IHW9118	IHW9118	B_Australian-3	Australian	Oceania	Australia	Cell_line_repository_sampling_location_unknown	ECCAC	U	-13	143	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004477	IHW9193	IHW9193	B_Australian-4	Australian	Oceania	Australia	Cell_line_repository_sampling_location_unknown	ECCAC	M	-13	143	Genomic_from_cell_lines	FullyPublic	X
+B	LP6007069-DNA_A01	AV-21	AV-21	B_Crete-1	Crete	WestEurasia	Greece	"Preveliana, Irakleioy"	George Stamatoyannopoulos	F	35.166668	25.166666	Genomic_from_blood	FullyPublic	X
+B	LP6007068-DNA_A01	TZ-11	TZ-11	B_Crete-2	Crete	WestEurasia	Greece	"Psychro ,Lassithi"	George Stamatoyannopoulos	M	35.163	25.445	Genomic_from_blood	FullyPublic	X
+B	SS6004467	HGDP01308	HGDP01308	B_Dai-4	Dai	EastAsia	China	?	Howard Cann	M	21	100	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004480	DNK07	DNK07	B_Dinka-3	Dinka	Africa	Sudan	Aweil	Michael Hammer	M	8.783333333	27.4	Genomic_from_saliva	FullyPublic	X
+B	SS6004468	HGDP00533	HGDP00533	B_French-3	French	WestEurasia	France	?	Howard Cann	M	46	2	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004469	HGDP00775	HGDP00775	B_Han-3	Han	EastAsia	China	?	Howard Cann	M	32.26566812	114	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004473	HGDP01036	HGDP01036	B_Ju_hoan_North-4	Ju_hoan_North	Africa	Namibia	?	Howard Cann	M	-18.93725689	21.45244764	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004476	HGDP01015	HGDP01015	B_Karitiana-3	Karitiana	America	Brazil	?	Howard Cann	M	-10	-63	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004470	HGDP01286	HGDP01286	B_Mandenka-3	Mandenka	Africa	Senegal	?	Howard Cann	M	12	-12	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004471	HGDP00982	HGDP00982	B_Mbuti-4	Mbuti	Africa	Congo	?	Howard Cann	M	1	29	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004479	mixe0007	mixe0007	B_Mixe-1	Mixe	America	Mexico	"Tmazulapan, Mixe"	William Klitz / Cheryl Winkler	F	16.95	-96.58	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004472	HGDP00546	HGDP00546	B_Papuan-15	Papuan	Oceania	PapuaNewGuinea	?	Howard Cann	M	-4	143	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004474	HGDP01076	HGDP01076	B_Sardinian-3	Sardinian	WestEurasia	Italy	?	Howard Cann	M	40	9	Genomic_from_cell_lines	FullyPublic	X
+B	SS6004475	HGDP00936	HGDP00936	B_Yoruba-3	Yoruba	Africa	Nigeria	?	Howard Cann	M	7.4	3.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005677-DNA_B01	ALB212	ALB212	S_Albanian-1	Albanian	WestEurasia	Albania	Tirana	David Comas	F	41.3	19.8	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_F02	altai363p	altai363p	S_Altaian-1	Altaian	CentralAsiaSiberia	Russia	"Tenga, Ongudaisky district, Altai Republic"	Mait Metspalu / Olga Posukh	M	50.840	85.654	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_E07	NA13604	NA13604	S_Atayal-1	Atayal	EastAsia	Taiwan	Cell_line_repository_sampling_location_unknown	Coriell	M	24.611712	121.296444	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_D01	TGBS21	TGBS21	S_Chane-1	Chane	America	Argentina	"Salta (province), Tartagal (city) "	Andres Ruiz-Linares / Claudio M. Bravi	M	-22.53	-63.82	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_D03	ch113	ch113	S_Chechen-1	Chechen	WestEurasia	Russia	Grozny_in_Chechen_Republic	Mait Metspalu / Elza Khusnutdinova / Rita Khusainova	M	43.333	45.650	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_C03	Sir19	Sir19	S_Chukchi-1	Chukchi	CentralAsiaSiberia	Russia	"Sireniki, Chukchi Peninsula"	Rem Sukernik / Stanislav Dryomov	M	69	169	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_H05	NA15728	NA15728	S_Czech-2	Czech	WestEurasia	Czechoslovia(pre1989)	Cell_line_repository_sampling_location_unknown	Coriell	M	50.1	14.4	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_D03	Esk29	Esk29	S_Eskimo_Chaplin-1	Eskimo_Chaplin	CentralAsiaSiberia	Russia	"New Chaplino, Chukchi Peninsula"	Rem Sukernik / Stanislav Dryomov	M	64.48	172.86	Genomic_from_blood	FullyPublic	X
+C	LP6005592-DNA_H03	NA17385	NA17385	S_Hawaiian-1	Hawaiian	Oceania	USA	Cell_line_repository_sampling_location_unknown	Coriell	M	21.3	-157.8	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_D04	Kor82	Kor82	S_Itelman-1	Itelman	CentralAsiaSiberia	Russia	"Kovran, Kamchatka"	Rem Sukernik / Stanislav Dryomov	F	57	157	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_E05	KD4	KD4	S_Khonda_Dora-1	Khonda_Dora	SouthAsia	India	?	Lynn Jorde / Mike Bamshad / Scott Watkins	M	18.3	82.9	Genomic_from_blood	FullyPublic	X
+C	LP6005592-DNA_B02	NA17386	NA17386	S_Maori-1	Maori	Oceania	New Zealand	Cell_line_repository_sampling_location_unknown	Coriell	M	-41.3	174.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_B01	NOR111	NOR111	S_Norwegian-1	Norwegian	WestEurasia	Norway	Bergen	Cristian Capelli / Tor Hervig	U	60.4	5.4	Genomic_from_blood	FullyPublic	X
+C	LP6005592-DNA_E02	ND15865	ND15865	S_Polish-1	Polish	WestEurasia	Poland	Cell_line_repository_sampling_location_unknown	Coriell	M	52.2	21.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_D04	Sam02	Sam02	S_Samaritan-1	Samaritan	WestEurasia	Israel	Mount Gerizim	Mait Metspalu / Doron Behar	M	32.203	35.270	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_D09	Ayodo_81S	Ayodo_81S	S_Somali-1	Somali	Africa	Kenya	Garissa	Geoge Ayodo	F	5.6	48.3	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_G02	armenia293	armenia293	S_Armenian-1	Armenian	WestEurasia	Armenia	Yerevan but all 4 ancestorscome from Nagorno Kharabakh	Mait Metspalu/ Levon Yepiskoposyan / Hovhannes Sahakyan	M	39.815	46.752	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_F03	Armenian222	Armenian222	S_Armenian-2	Armenian	WestEurasia	Armenia	born in Akhuzyan but all 4 ancestors come from Kars - now Turkey	Mait Metspalu/ Levon Yepiskoposyan / Hovhannes Sahakyan	M	40.605	43.101	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_D01	HGDP00090	HGDP00090	S_Balochi-1	Balochi	SouthAsia	Pakistan	?	Howard Cann	M	30.5	66.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_C01	HGDP00058	HGDP00058	S_Balochi-2	Balochi	SouthAsia	Pakistan	?	Howard Cann	M	30.49871492	66.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_A06	HGDP01153	HGDP01153	S_Bergamo-1	Bergamo	WestEurasia	Italy(Bergamo)	?	Howard Cann	M	46.0	10.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B06	HGDP01172	HGDP01172	S_Bergamo-2	Bergamo	WestEurasia	Italy(Bergamo)	?	Howard Cann	F	46.0	10.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_C01	HGDP01217	HGDP01217	S_Daur-1	Daur	EastAsia	China	?	Howard Cann	U	48.5	124.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F04	HGDP01215	HGDP01215	S_Daur-2	Daur	EastAsia	China	?	Howard Cann	F	48.5	124.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_F06	NA21490	NA21490	S_Masai-1	Masai	Africa	Kenya	Kinyawa	Coriell	M	-1.5	35.2	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_E06	NA21581	NA21581	S_Masai-2	Masai	Africa	Kenya	Kinyawa	Coriell	M	-1.5	35.2	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_G08	HGDP01253	HGDP01253	S_Mozabite-1	Mozabite	Africa	Algeria	?	Howard Cann	M	32.0	3.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_H08	HGDP01274	HGDP01274	S_Mozabite-2	Mozabite	Africa	Algeria	?	Howard Cann	F	32.0	3.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_E10	HGDP01047	HGDP01047	S_Pima-1	Pima	America	Mexico	?	Howard Cann	M	29.0	-108.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F10	HGDP01044	HGDP01044	S_Pima-2	Pima	America	Mexico	?	Howard Cann	F	29.0	-108.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_G10	HGDP00887	HGDP00887	S_Russian-1	Russian	WestEurasia	Russia	Vologda Administrative Region	Howard Cann	M	61.0	40.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_H10	HGDP00903	HGDP00903	S_Russian-2	Russian	WestEurasia	Russia	Vologda Administrative Region	Howard Cann	F	61.0	40.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_C06	HGDP00749	HGDP00749	S_Japanese-1	Japanese	EastAsia	Japan	?	Howard Cann	M	37.85	139.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_F04	Jordan603	Jordan603	S_Jordanian-2	Jordanian	WestEurasia	Jordan	migrants_collected_in_Kuwait	Mait Metspalu / Ene Metspalu / Richard Villems / Jüri Parik	M	32.055	35.914	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_G08	HGDP00991	HGDP00991	S_Ju_hoan_North-1	Ju_hoan_North	Africa	Namibia	?	Howard Cann	M	-18.9	21.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_H09	HGDP00737	HGDP00737	S_Palestinian-3	Palestinian	WestEurasia	Israel(Central)	?	Howard Cann	F	32.0	35.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_A04	HG02494	HG02494	S_Punjabi-4	Punjabi	SouthAsia	Pakistan	Lahore	1KG	F	31.5	74.3	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_A10	HGDP00541	HGDP00541	S_Papuan-3	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_C02	abh107	abh107	S_Abkhasian-1	Abkhasian	WestEurasia	Abkhazia	Sukhum	Mait Metspalu / Elza Khusnutdinova / Rita Khusainova	M	43.003	41.015	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_D02	abh100	abh100	S_Abkhasian-2	Abkhasian	WestEurasia	Russia	Sukhum	Mait Metspalu / Elza Khusnutdinova / Rita Khusainova	M	43.003	41.015	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_A01	HGDP01402	HGDP01402	S_Adygei-1	Adygei	WestEurasia	Russia(Caucasus)	Krasnodar	Howard Cann	M	44.0	39.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B01	HGDP01401	HGDP01401	S_Adygei-2	Adygei	WestEurasia	Russia(Caucasus)	Krasnodar	Howard Cann	F	44.0	39.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_A03	Ale22	Ale22	S_Aleut-1	Aleut	CentralAsiaSiberia	Russia	"Nikolskoye, Commander Islands"	Rem Sukernik / Stanislav Dryomov	M	55.18	166	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_H02	Ale20	Ale20	S_Aleut-2	Aleut	CentralAsiaSiberia	Russia	"Nikolskoye, Commander Islands"	Rem Sukernik / Stanislav Dryomov	F	55.18	166	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_C07	NA13607	NA13607	S_Ami-1	Ami	EastAsia	Taiwan	Cell_line_repository_sampling_location_unknown	Coriell	M	22.843145	121.185356	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_G05	NA13616	NA13616	S_Ami-2	Ami	EastAsia	Taiwan	Cell_line_repository_sampling_location_unknown	Coriell	M	22.843145	121.185356	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_E02	HGDP01028	HGDP01028	S_BantuHerero-1	BantuHerero	Africa	BotswanaOrNamibia	?	Howard Cann	M	-22.0	19.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F01	HGDP01035	HGDP01035	S_BantuHerero-2	BantuHerero	Africa	BotswanaOrNamibia	?	Howard Cann	M	-22.0	19.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_A01	HGDP01417	HGDP01417	S_BantuKenya-1	BantuKenya	Africa	Kenya	?	Howard Cann	M	-3.0	37.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B02	HGDP01414	HGDP01414	S_BantuKenya-2	BantuKenya	Africa	Kenya	?	Howard Cann	F	-3.0	37.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_G02	HGDP01030	HGDP01030	S_BantuTswana-1	BantuTswana	Africa	BotswanaOrNamibia	?	Howard Cann	M	-28.0	24.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_F02	HGDP01034	HGDP01034	S_BantuTswana-2	BantuTswana	Africa	BotswanaOrNamibia	?	Howard Cann	M	-28.0	24.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_C02	HGDP01364	HGDP01364	S_Basque-1	Basque	WestEurasia	France	?	Howard Cann	M	43.0	0.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D02	HGDP01365	HGDP01365	S_Basque-2	Basque	WestEurasia	France	?	Howard Cann	F	43.0	0.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_E02	HGDP00616	HGDP00616	S_BedouinB-1	BedouinB	WestEurasia	Israel(Negev)	?	Howard Cann	M	31.0	35.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F02	HGDP00650	HGDP00650	S_BedouinB-2	BedouinB	WestEurasia	Israel(Negev)	?	Howard Cann	F	31.0	35.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_G09	HG03006	HG03006	S_Bengali-1	Bengali	SouthAsia	Bangladesh	?	1KG	M	23.7	90.4	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_H09	HG03007	HG03007	S_Bengali-2	Bengali	SouthAsia	Bangladesh	?	1KG	F	23.7	90.4	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_G02	HGDP00457	HGDP00457	S_Biaka-1	Biaka	Africa	Central African Republic	?	Howard Cann	M	4.0	17.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_H02	HGDP00461	HGDP00461	S_Biaka-2	Biaka	Africa	Central African Republic	?	Howard Cann	M	4.0	17.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B03	HGDP00660	HGDP00660	S_Bougainville-1	Bougainville	Oceania	PapuaNewGuinea	Bougainville_Island	Howard Cann	F	-6.0	155.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_A03	HGDP00656	HGDP00656	S_Bougainville-2	Bougainville	Oceania	PapuaNewGuinea	Bougainville_Island	Howard Cann	F	-6.0	155.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_G03	B11	B11	S_Brahmin-1	Brahmin	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_H03	B17	B17	S_Brahmin-2	Brahmin	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_D03	HGDP00027	HGDP00027	S_Brahui-1	Brahui	SouthAsia	Pakistan	?	Howard Cann	M	30.5	66.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_C03	HGDP00019	HGDP00019	S_Brahui-2	Brahui	SouthAsia	Pakistan	?	Howard Cann	M	30.5	66.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_A03	BulgarianB4	BulgarianB4	S_Bulgarian-1	Bulgarian	WestEurasia	Bulgaria	Plovdiv	Mait Metspalu / Draga Toncheva / Sena Karachanak-Yankova	M	42.163	24.741	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_B03	BulgarianC1	BulgarianC1	S_Bulgarian-2	Bulgarian	WestEurasia	Bulgaria	Plovdiv	Mait Metspalu / Draga Toncheva / Sena Karachanak-Yankova	M	42.163	24.741	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_B06	Bu16	Bu16	S_Burmese-1	Burmese	EastAsia	Myanmar	Mandalay (sampled in Singapore)	Toomas Kivisild / Joseph Wee Tien Seng	M	17.0	96.7	Genomic_from_saliva	FullyPublic	X
+C	LP6005519-DNA_A06	Bu5	Bu5	S_Burmese-2	Burmese	EastAsia	Myanmar	Yangon (sampled in Singapore)	Toomas Kivisild / Joseph Wee Tien Seng	M	17.0	96.7	Genomic_from_saliva	FullyPublic	X
+C	LP6005441-DNA_E03	HGDP00428	HGDP00428	S_Burusho-1	Burusho	SouthAsia	Pakistan	?	Howard Cann	M	36.5	74.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F03	HGDP00338	HGDP00338	S_Burusho-2	Burusho	SouthAsia	Pakistan	?	Howard Cann	F	36.5	74.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_G03	HGDP00717	HGDP00717	S_Cambodian-1	Cambodian	EastAsia	Cambodia	?	Howard Cann	M	12.0	105.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_H03	HGDP00713	HGDP00713	S_Cambodian-2	Cambodian	EastAsia	Cambodia	?	Howard Cann	F	12.0	105.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_H08	DNK05	DNK5	S_Dinka-1	Dinka	Africa	Sudan	Aweil	Michael Hammer	M	8.8	27.4	Genomic_from_saliva	FullyPublic	X
+C	LP6005443-DNA_B09	DNK11	DNK11	S_Dinka-2	Dinka	Africa	Sudan	Aweil	Michael Hammer	M	8.8	27.4	Genomic_from_saliva	FullyPublic	X
+C	LP6005443-DNA_D01	HGDP00569	HGDP00569	S_Druze-1	Druze	WestEurasia	Israel(Carmel)	?	Howard Cann	F	32.0	35.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_G04	HGDP00597	HGDP00597	S_Druze-2	Druze	WestEurasia	Israel(Carmel)	?	Howard Cann	M	32.0	35.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_F06	Dus22	Dus22	S_Dusun-1	Dusun	Oceania	Brunei	Tutong District	Toomas Kivisild / M. Syafiq Abdullah	F	4.7	114.7	Genomic_from_saliva	FullyPublic	X
+C	LP6005519-DNA_E06	Dus16	Dus16	S_Dusun-2	Dusun	Oceania	Brunei	"Lamunin, Tutong District"	Toomas Kivisild / M. Syafiq Abdullah	F	4.7	114.7	Genomic_from_saliva	FullyPublic	X
+C	LP6005442-DNA_E10	HG00126	HG00126	S_English-1	English	WestEurasia	England	Kent	1KG	M	51.2	0.7	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_F10	HG00128	HG00128	S_English-2	English	WestEurasia	England	Kent	1KG	F	51.2	0.7	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_A10	HG03100	HG03100	S_Esan-1	Esan	Africa	Nigeria	?	1KG	M	6.5	6.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_B10	HG02943	HG02943	S_Esan-2	Esan	Africa	Nigeria	?	1KG	F	6.5	6.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_F03	Nesk_22	Nesk_22	S_Eskimo_Naukan-1	Eskimo_Naukan	CentralAsiaSiberia	Russia	"Naukan, Chukchi Peninsula"	Rem Sukernik / Stanislav Dryomov	F	66.02	169.71	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_G03	Nesk_25	Nesk_25	S_Eskimo_Naukan-2	Eskimo_Naukan	CentralAsiaSiberia	Russia	"Big Diomide Island, Chukchi Peninsula"	Rem Sukernik / Stanislav Dryomov	F	66.02	169.71	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_B03	Sir26	Sir26	S_Eskimo_Sireniki-1	Eskimo_Sireniki	CentralAsiaSiberia	Russia	"Sireniki, Chukchi Peninsula"	Rem Sukernik / Stanislav Dryomov	M	64.4	173.9	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_H03	Sir40	Sir40	S_Eskimo_Sireniki-2	Eskimo_Sireniki	CentralAsiaSiberia	Russia	"Sireniki, Chukchi Peninsula"	Rem Sukernik / Stanislav Dryomov	F	64.4	173.9	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_H03	Est375	Est375	S_Estonian-1	Estonian	WestEurasia	Estonia	Parnu	Mait Metspalu / Ene Metspalu / Richard Villems / Jüri Parik	M	58.386	24.502	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_G03	Est400	Est400	S_Estonian-2	Estonian	WestEurasia	Estonia	Avinurme	Mait Metspalu / Ene Metspalu / Richard Villems / Jüri Parik	M	58.985	26.864	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_A05	HGDP00530	HGDP00530	S_French-1	French	WestEurasia	France	?	Howard Cann	M	46.0	2.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B05	HGDP00526	HGDP00526	S_French-2	French	WestEurasia	France	?	Howard Cann	F	46.0	2.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_G10	HG02464	HG02464	S_Gambian-1	Gambian	Africa	Gambia	Western District	1KG	M	13.4	-16.7	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_H10	HG02574	HG02574	S_Gambian-2	Gambian	Africa	Gambia	Western District	1KG	F	13.4	-16.7	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_B04	mg27	mg27	S_Georgian-1	Georgian	WestEurasia	Georgia	Zugdidi_in_Megrelia	Mait Metspalu / Elza Khusnutdinova / Rita Khusainova	M	42.500	41.850	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_A04	mg31	mg31	S_Georgian-2	Georgian	WestEurasia	Georgia	Zugdidi_in_Megrelia	Mait Metspalu / Elza Khusnutdinova / Rita Khusainova	M	42.500	41.850	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_G07	NA17377	NA17377	S_Greek-1	Greek	WestEurasia	Greece	Cell_line_repository_sampling_location_unknown	Coriell	M	38.0	23.7	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_A06	NA17374	NA17374	S_Greek-2	Greek	WestEurasia	Greece	Cell_line_repository_sampling_location_unknown	Coriell	M	38.0	23.7	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D05	HGDP00783	HGDP00783	S_Han-1	Han	EastAsia	China	?	Howard Cann	F	32.3	114.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_C05	HGDP00785	HGDP00785	S_Han-2	Han	EastAsia	China	?	Howard Cann	M	32.3	114.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F05	HGDP00124	HGDP00124	S_Hazara-1	Hazara	SouthAsia	Pakistan	?	Howard Cann	M	33.5	70.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_E05	HGDP00125	HGDP00125	S_Hazara-2	Hazara	SouthAsia	Pakistan	?	Howard Cann	M	33.5	70.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_G05	HGDP01240	HGDP01240	S_Hezhen-1	Hezhen	EastAsia	China	?	Howard Cann	M	47.5	133.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_H05	HGDP01242	HGDP01242	S_Hezhen-2	Hezhen	EastAsia	China	?	Howard Cann	F	47.5	133.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_B08	NA15203	NA15203	S_Hungarian-1	Hungarian	WestEurasia	Hungary	Cell_line_repository_sampling_location_unknown	Coriell	F	47.5	19.1	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_A08	NA15202	NA15202	S_Hungarian-2	Hungarian	WestEurasia	Hungary	Cell_line_repository_sampling_location_unknown	Coriell	M	47.5	19.1	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_D08	NA15761	NA15761	S_Icelandic-1	Icelandic	WestEurasia	Iceland	Cell_line_repository_sampling_location_unknown	Coriell	F	64.1	-21.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_B06	NA15763	NA15763	S_Icelandic-2	Icelandic	WestEurasia	Iceland	Cell_line_repository_sampling_location_unknown	Coriell	F	64.1	-21.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_C06	Igor20	Igor20	S_Igorot-1	Igorot	Oceania	Philippines	"Mountain Province, Luzon Island (sampled in Singapore)"	Toomas Kivisild / Joseph Wee Tien Seng	F	17.1	121.0	Genomic_from_saliva	FullyPublic	X
+C	LP6005519-DNA_D06	Igor21	Igor21	S_Igorot-2	Igorot	Oceania	Philippines	"Mountain Province, Luzon Island (sampled in Singapore)"	Toomas Kivisild / Joseph Wee Tien Seng	M	17.1	121.0	Genomic_from_saliva	FullyPublic	X
+C	LP6005442-DNA_C04	iran17	iran17	S_Iranian-1	Iranian	WestEurasia	Iran	migrants_collected_in_Kuwait	Mait Metspalu / Ene Metspalu / Richard Villems / Jüri Parik	M	35.586	51.460	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_B10	iran11	iran11	S_Iranian-2	Iranian	WestEurasia	Iran	migrants_collected_in_Kuwait	Mait Metspalu / Ene Metspalu / Richard Villems / Jüri Parik	M	35.586	51.460	Genomic_from_blood	FullyPublic	X
+C	LP6005592-DNA_F01	IraqiJew1771	IraqiJew1771	S_Iraqi_Jew-1	Iraqi_Jew	WestEurasia	Iraq	Cell_line_repository	Tel-Aviv University	F	33.3	44.4	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_E01	IraqiJew4291	IraqiJew4291	S_Iraqi_Jew-2	Iraqi_Jew	WestEurasia	Iraq	Cell_line_repository	Tel-Aviv University	M	33.3	44.4	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_C05	I1	I1	S_Irula-1	Irula	SouthAsia	India	?	Lynn Jorde / Mike Bamshad / Scott Watkins	M	13.5	80.0	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_D05	I3	I3	S_Irula-2	Irula	SouthAsia	India	?	Lynn Jorde / Mike Bamshad / Scott Watkins	M	13.5	80.0	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_E06	HGDP00328	HGDP00328	S_Kalash-1	Kalash	SouthAsia	Pakistan	?	Howard Cann	M	36.0	71.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F06	HGDP00286	HGDP00286	S_Kalash-2	Kalash	SouthAsia	Pakistan	?	Howard Cann	F	36.0	71.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_A04	K1	K1	S_Kapu-1	Kapu	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_B04	K4	K4	S_Kapu-2	Kapu	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_G06	HGDP01012	HGDP01012	S_Karitiana-1	Karitiana	America	Brazil	?	Howard Cann	M	-10.0	-63.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_H06	HGDP01018	HGDP01018	S_Karitiana-2	Karitiana	America	Brazil	?	Howard Cann	F	-10.0	-63.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005677-DNA_D03	SA0342	SA0342	S_Khomani_San-1	Khomani_San	Africa	SouthAfrica	"Andriesvale Northern Cape, South Africa"	Brenna Henn	F	-27.0	20.8	Genomic_from_saliva	FullyPublic	X
+C	LP6005592-DNA_C05	SA0722	SA0722	S_Khomani_San-2	Khomani_San	Africa	SouthAfrica	"Andriesvale, Northern Cape, South Africa"	Brenna Henn	F	-27.0	20.8	Genomic_from_saliva	FullyPublic	X
+C	LP6005442-DNA_D11	HG01600	HG01600	S_Kinh-1	Kinh	EastAsia	Vietnam	Ho Chi Minh City	1KG	F	21.0	105.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_C11	HG01846	HG01846	S_Kinh-2	Kinh	EastAsia	Vietnam	Ho Chi Minh City	1KG	M	21.0	105.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_D06	ND19394	ND19394	S_Korean-1	Korean	EastAsia	Korea	Cell_line_repository_sampling_location_unknown	Coriell	M	37.6	127.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_C06	NA00726	NA00726	S_Korean-2	Korean	EastAsia	Korea	Cell_line_repository_sampling_location_unknown	Coriell	F	37.6	127.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_C09	Kusunda02	K-2	S_Kusunda-1	Kusunda	SouthAsia	Nepal	"Ghorahi, Dang"	Aashish R. Jha / George van Driem / Irene Gallego Romero	M	28.07245287	82.48778	Genomic_from_saliva	FullyPublic	X
+C	LP6005443-DNA_D09	Kusunda15	K-15	S_Kusunda-2	Kusunda	SouthAsia	Nepal	"Damauli, Tanahu"	Aashish R. Jha / George van Driem / Irene Gallego Romero	M	28.07245287	84.259486	Genomic_from_saliva	FullyPublic	X
+C	LP6005677-DNA_B02	Bishkek28440	Bishkek28440	S_Kyrgyz-1	Kyrgyz	CentralAsiaSiberia	Kyrgyzystan	Bishkek	Robert Mahley / Ugur Hodoglugil	M	42.9	74.6	Genomic_from_blood	FullyPublic	X
+C	LP6005677-DNA_A02	Bishkek28439	Bishkek28439	S_Kyrgyz-2	Kyrgyz	CentralAsiaSiberia	Kyrgyzystan	Bishkek	Robert Mahley / Ugur Hodoglugil	F	42.9	74.6	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_B07	HGDP01323	HGDP01323	S_Lahu-1	Lahu	EastAsia	China	?	Howard Cann	F	22.0	100.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_E01	HGDP01320	HGDP01320	S_Lahu-2	Lahu	EastAsia	China	?	Howard Cann	M	22.0	100.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_H04	lez49	lez49	S_Lezgin-1	Lezgin	WestEurasia	Russia	Dagestanskiye_Ogni_in_Dagestan	Mait Metspalu / Elza Khusnutdinova / Rita Khusainova	M	42.117	48.183	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_G04	lez42	lez42	S_Lezgin-2	Lezgin	WestEurasia	Russia	Dagestanskiye_Ogni_in_Dagestan	Mait Metspalu / Elza Khusnutdinova / Rita Khusainova	M	42.117	48.183	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_F11	NA19023	NA19023	S_Luhya-1	Luhya	Africa	Kenya	Webuye	Coriell	F	1.3	36.8	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_E11	NA19044	NA19044	S_Luhya-2	Luhya	Africa	Kenya	Webuye	Coriell	M	1.3	36.8	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005677-DNA_G01	Ayodo_430C	Ayodo_430C	S_Luo-1	Luo	Africa	Kenya	BondoDistrict	Geoge Ayodo	M	-0.1	34.3	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_F09	Ayodo_502C	Ayodo_502C	S_Luo-2	Luo	Africa	Kenya	BondoDistrict	Geoge Ayodo	F	-0.1	34.3	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_G04	M4	M4	S_Madiga-1	Madiga	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_H04	M13	M13	S_Madiga-2	Madiga	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_C07	HGDP00160	HGDP00160	S_Makrani-1	Makrani	SouthAsia	Pakistan	?	Howard Cann	M	26.0	64.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D07	HGDP00157	HGDP00157	S_Makrani-2	Makrani	SouthAsia	Pakistan	?	Howard Cann	F	26.0	64.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_E04	ML2	ML2	S_Mala-2	Mala	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_F04	ML3	ML3	S_Mala-3	Mala	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_E07	HGDP01199	HGDP01199	S_Mandenka-1	Mandenka	Africa	Senegal	?	Howard Cann	M	12.0	-12.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F07	HGDP00915	HGDP00915	S_Mandenka-2	Mandenka	Africa	Senegal	?	Howard Cann	F	12.0	-12.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_F04	Mansi79	Mansi79	S_Mansi-1	Mansi	CentralAsiaSiberia	Russia	"Sos'va river, Western Siberia"	Rem Sukernik / Stanislav Dryomov / Elena Starikovskaya	M	63.8	61.45	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_G04	Mansi41	Mansi41	S_Mansi-2	Mansi	CentralAsiaSiberia	Russia	"Shugur, Western Siberia"	Rem Sukernik / Stanislav Dryomov / Elena Starikovskaya	F	63.65	62.1	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_G07	HGDP00855	HGDP00855	S_Mayan-1	Mayan	America	Mexico	?	Howard Cann	F	19.0	-91.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_H07	HGDP00857	HGDP00857	S_Mayan-2	Mayan	America	Mexico	?	Howard Cann	F	19.0	-91.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_G11	HG03078	HG03078	S_Mende-1	Mende	Africa	SierraLeone	?	1KG	M	8.5	-13.2	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_H11	HG03085	HG03085	S_Mende-2	Mende	Africa	SierraLeone	?	1KG	F	8.5	-13.2	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_C08	HGDP01191	HGDP01191	S_Miao-1	Miao	EastAsia	China	?	Howard Cann	M	28.0	109.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D08	HGDP01198	HGDP01198	S_Miao-2	Miao	EastAsia	China	?	Howard Cann	F	28.0	109.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_E11	mixe0002	mixe0002	S_Mixe-2	Mixe	America	Mexico	"Tmazulapan, Mixe"	William Klitz / Cheryl Winkler	F	16.95	-96.58	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_F11	mixe0042	mixe0042	S_Mixe-3	Mixe	America	Mexico	"Tamazulapan, Mixe"	William Klitz / Cheryl Winkler	F	16.95	-96.58	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_G11	mixa0099	mixa0099	S_Mixtec-1	Mixtec	America	Mexico	San Andres Nuxino	William Klitz / Cheryl Winkler	M	17.0	-97.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_H11	mixa0105	mixa0105	S_Mixtec-2	Mixtec	America	Mexico	?	William Klitz / Cheryl Winkler	F	17.0	-97.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_E08	HGDP01228	HGDP01228	S_Mongola-1	Mongola	CentralAsiaSiberia	China	?	Howard Cann	M	45.0	111.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F08	HGDP01223	HGDP01223	S_Mongola-2	Mongola	CentralAsiaSiberia	China	?	Howard Cann	F	45.0	111.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_E10	NorthOssetia12	NorthOssetia12	S_North_Ossetian-1	North_Ossetian	WestEurasia	Russia	"Vladikavkaz in Republic of North Ossetia–Alania"	Mait Metspalu / Elza Khusnutdinova / Rita Khusainova	M	43.017	44.650	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_F10	NorthOssetia5	NorthOssetia5	S_North_Ossetian-2	North_Ossetian	WestEurasia	Russia	"Vladikavkaz in Republic of North Ossetia–Alania"	Mait Metspalu / Elza Khusnutdinova / Rita Khusainova	M	43.017	44.650	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_C09	HGDP00798	HGDP00798	S_Orcadian-1	Orcadian	WestEurasia	OrkneyIslands	?	Howard Cann	M	59.0	-3.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D09	HGDP00796	HGDP00796	S_Orcadian-2	Orcadian	WestEurasia	OrkneyIslands	?	Howard Cann	F	59.0	-3.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_E09	HGDP01203	HGDP01203	S_Oroqen-1	Oroqen	EastAsia	China	?	Howard Cann	M	50.4	126.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F09	HGDP01211	HGDP01211	S_Oroqen-2	Oroqen	EastAsia	China	?	Howard Cann	F	50.4	126.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_C10	HGDP00216	HGDP00216	S_Pathan-1	Pathan	SouthAsia	Pakistan	?	Howard Cann	M	33.5	70.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D10	HGDP00232	HGDP00232	S_Pathan-2	Pathan	SouthAsia	Pakistan	?	Howard Cann	F	33.5	70.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_A04	HGDP00702	HGDP00702	S_Piapoco-1	Piapoco	America	Colombia	?	Howard Cann	F	3.0	-68.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B04	HGDP00706	HGDP00706	S_Piapoco-2	Piapoco	America	Colombia	?	Howard Cann	F	3.0	-68.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_A05	R3	R3	S_Relli-1	Relli	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_B05	R6	R6	S_Relli-2	Relli	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005592-DNA_C01	Utsa21	Utsa21	S_Saami-1	Saami	WestEurasia	Finland	Utsjoki	Antti Sajantila	F	69.9	27.0	Genomic_from_saliva	FullyPublic	X
+C	LP6005592-DNA_D01	Utsa22	Utsa22	S_Saami-2	Saami	WestEurasia	Finland	Utsjoki	Antti Sajantila	M	69.9	27.0	Genomic_from_saliva	FullyPublic	X
+C	LP6005619-DNA_B01	SAH31	SAH31	S_Saharawi-1	Saharawi	Africa	Western Sahara (Morocco)	Close to the Algerian border	David Comas	M	27.3	-8.9	Genomic_from_blood	FullyPublic	X
+C	LP6005619-DNA_C01	SAH41	SAH41	S_Saharawi-2	Saharawi	Africa	Western Sahara (Morocco)	Close to the Algerian border	David Comas	M	27.3	-8.9	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_C11	HGDP01079	HGDP01079	S_Sardinian-1	Sardinian	WestEurasia	Italy(Sardinia)	?	Howard Cann	M	40.0	9.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D11	HGDP01078	HGDP01078	S_Sardinian-2	Sardinian	WestEurasia	Italy(Sardinia)	?	Howard Cann	F	40.0	9.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_G01	HGDP01335	HGDP01335	S_She-1	She	EastAsia	China	?	Howard Cann	F	27.0	119.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_F01	HGDP01333	HGDP01333	S_She-2	She	EastAsia	China	?	Howard Cann	M	27.0	119.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_G11	HGDP00208	HGDP00208	S_Sindhi-1	Sindhi	SouthAsia	Pakistan	?	Howard Cann	M	25.5	69.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_H11	HGDP00195	HGDP00195	S_Sindhi-2	Sindhi	SouthAsia	Pakistan	?	Howard Cann	F	25.5	69.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_A11	HG01503	HG01503	S_Spanish-1	Spanish	WestEurasia	Spain	Castilla la Mancha	1KG	M	39.9	-4.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_B11	HG01504	HG01504	S_Spanish-2	Spanish	WestEurasia	Spain	Castilla la Mancha	1KG	F	39.9	-4.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_A12	HGDP00846	HGDP00846	S_Surui-1	Surui	America	Brazil	?	Howard Cann	F	-11.0	-62.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B12	HGDP00852	HGDP00852	S_Surui-2	Surui	America	Brazil	?	Howard Cann	F	-11.0	-62.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_C03	tdj409_shugnan	tdj409_shugnan	S_Tajik-1	Tajik	WestEurasia	Tajikistan	Shughnon District	Mait Metspalu / Oleg Balanovsky /Elena Balanovska	M	37.508	71.568	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_D03	tdj430_shugnan	tdj430_shugnan	S_Tajik-2	Tajik	WestEurasia	Tajikistan	Shughnon District	Mait Metspalu / Oleg Balanovsky /Elena Balanovska	M	37.508	71.568	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_A07	CHI-007	CHI-007	S_Thai-1	Thai	EastAsia	Thailand	Cell_line_repository_sampling_location_unknown	ECCAC	M	13.8	100.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_B07	CHI-034	CHI-034	S_Thai-2	Thai	EastAsia	Thailand	Cell_line_repository_sampling_location_unknown	ECCAC	F	13.8	100.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_E05	Ale32	Ale32	S_Tlingit-1	Tlingit	CentralAsiaSiberia	Russia	"Petropavlovsk-Kamchatski, Commander Islands"	Rem Sukernik / Stanislav Dryomov	M	53	158.65	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_D05	Ale14	Ale14	S_Tlingit-2	Tlingit	CentralAsiaSiberia	Russia	"Nikolskoye, Commander Islands"	Rem Sukernik / Stanislav Dryomov	F	55.18	166	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_H01	HGDP01350	HGDP01350	S_Tu-1	Tu	EastAsia	China	?	Howard Cann	M	36.0	101.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D12	HGDP01355	HGDP01355	S_Tu-2	Tu	EastAsia	China	?	Howard Cann	F	36.0	101.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_F12	Tuba19	Tuba19	S_Tubalar-1	Tubalar	CentralAsiaSiberia	Russia	"Artybash and Kebezen, Altai-Sayan Upland"	Rem Sukernik / Stanislav Dryomov	F	51.13333333	87	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_E12	Tuba9	Tuba9	S_Tubalar-2	Tubalar	CentralAsiaSiberia	Russia	"Artybash and Kebezen, Altai-Sayan Upland"	Rem Sukernik / Stanislav Dryomov	F	51.13333333	87	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_A02	HGDP01095	HGDP01095	S_Tujia-1	Tujia	EastAsia	China	?	Howard Cann	M	29.0	109.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_F12	HGDP01098	HGDP01098	S_Tujia-2	Tujia	EastAsia	China	?	Howard Cann	F	29.0	109.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005677-DNA_C03	Kayseri23827	Kayseri23827	S_Turkish-1	Turkish	WestEurasia	Turkey	Kayseri	Robert Mahley / Ugur Hodoglugil	M	38.7	35.5	Genomic_from_blood	FullyPublic	X
+C	LP6005677-DNA_A03	Kayseri24424	Kayseri24424	S_Turkish-2	Turkish	WestEurasia	Turkey	Kayseri	Robert Mahley / Ugur Hodoglugil	F	38.7	35.5	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_H12	HGDP01168	HGDP01168	S_Tuscan-1	Tuscan	WestEurasia	Italy(Tuscany)	?	Howard Cann	F	43.0	11.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_G12	HGDP01163	HGDP01163	S_Tuscan-2	Tuscan	WestEurasia	Italy(Tuscany)	?	Howard Cann	M	43.0	11.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_H12	Ul31	Ul31	S_Ulchi-1	Ulchi	CentralAsiaSiberia	Russia	"Nizhniy Gavan, Lower Amur"	Rem Sukernik / Stanislav Dryomov	F	52.43	140.42	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_G12	Ul5	Ul5	S_Ulchi-2	Ulchi	CentralAsiaSiberia	Russia	"Bogorodskoe, Lower Amur"	Rem Sukernik / Stanislav Dryomov	F	52.37	140.45	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_B01	HGDP01306	HGDP01306	S_Uygur-1	Uygur	EastAsia	China	Yili	Howard Cann	F	44.0	81.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_B02	HGDP01297	HGDP01297	S_Uygur-2	Uygur	EastAsia	China	Yili	Howard Cann	M	44.0	81.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_D01	HGDP01250	HGDP01250	S_Xibo-1	Xibo	EastAsia	China	?	Howard Cann	M	43.5	81.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_C02	HGDP01246	HGDP01246	S_Xibo-2	Xibo	EastAsia	China	?	Howard Cann	M	43.5	81.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_C04	Y4	Y4	S_Yadava-1	Yadava	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005519-DNA_D04	Y8	Y8	S_Yadava-2	Yadava	SouthAsia	India	Visakhapatnam	Lynn Jorde / Mike Bamshad / Scott Watkins	M	17.7	83.3	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_F01	HGDP00956	HGDP00956	S_Yakut-1	Yakut	CentralAsiaSiberia	Russia	?	Howard Cann	F	63.0	129.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_D02	HGDP00951	HGDP00951	S_Yakut-2	Yakut	CentralAsiaSiberia	Russia	?	Howard Cann	M	63.0	129.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_H01	YemeniteJew4695	YemeniteJew4695	S_Yemenite_Jew-1	Yemenite_Jew	WestEurasia	Yemen	Cell_line_repository	Tel-Aviv University	F	15.4	44.2	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_G01	YemeniteJew5433	YemeniteJew5433	S_Yemenite_Jew-2	Yemenite_Jew	WestEurasia	Yemen	Cell_line_repository	Tel-Aviv University	M	15.4	44.2	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_G01	HGDP01179	HGDP01179	S_Yi-1	Yi	EastAsia	China	?	Howard Cann	M	28.0	103.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_H01	HGDP01188	HGDP01188	S_Yi-2	Yi	EastAsia	China	?	Howard Cann	F	28.0	103.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_B02	HGDP00928	HGDP00928	S_Yoruba-1	Yoruba	Africa	Nigeria	?	Howard Cann	F	7.4	3.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_A02	HGDP00932	HGDP00932	S_Yoruba-2	Yoruba	Africa	Nigeria	?	Howard Cann	M	7.4	3.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_A12	zapo0098	zapo0098	S_Zapotec-1	Zapotec	America	Mexico	San Juan Guelavia	William Klitz / Cheryl Winkler	M	16.5	-97.2	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005677-DNA_D01	zapo0099	zapo0099	S_Zapotec-2	Zapotec	America	Mexico	San Juan Guelavia	William Klitz / Cheryl Winkler	M	16.5	-97.2	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_D03	HGDP01314	HGDP01314	S_Dai-1	Dai	EastAsia	China	?	Howard Cann	F	21.0	100.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_B01	HGDP01312	HGDP01312	S_Dai-2	Dai	EastAsia	China	?	Howard Cann	M	21.0	100.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D04	HGDP01315	HGDP01315	S_Dai-3	Dai	EastAsia	China	?	Howard Cann	F	21.0	100.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_F03	Nlk1	Nlk1	S_Even-1	Even	CentralAsiaSiberia	Russia	"Djigda, Eastern Siberia"	Rem Sukernik / Stanislav Dryomov / Elena Starikovskaya	F	57.53	135.88	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_C04	Nlk18	Nlk18	S_Even-2	Even	CentralAsiaSiberia	Russia	"Djigda, Eastern Siberia"	Rem Sukernik / Stanislav Dryomov / Elena Starikovskaya	M	57.53	135.88	Genomic_from_blood	FullyPublic	X
+C	LP6005443-DNA_B04	Nlk3	Nlk3	S_Even-3	Even	CentralAsiaSiberia	Russia	"Djigda, Eastern Siberia"	Rem Sukernik / Stanislav Dryomov / Elena Starikovskaya	F	57.53	135.88	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_D10	HG00174	HG00174	S_Finnish-1	Finnish	WestEurasia	Finland	?	1KG	F	60.2	24.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_C10	HG00190	HG00190	S_Finnish-2	Finnish	WestEurasia	Finland	?	1KG	M	60.2	24.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_A02	HG00360	HG00360	S_Finnish-3	Finnish	WestEurasia	Finland	?	1KG	M	60.2	24.9	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_D06	HGDP00773	HGDP00773	S_Japanese-2	Japanese	EastAsia	Japan	?	Howard Cann	F	37.85	139.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_C02	NA18940	NA18940	S_Japanese-3	Japanese	EastAsia	Japan	Tokyo	Coriell	M	37.85	139.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_G03	Jordan445	Jordan445	S_Jordanian-1	Jordanian	WestEurasia	Jordan	migrants_collected_in_Kuwait	Mait Metspalu / Ene Metspalu / Richard Villems / Jüri Parik	M	32.055	35.914	Genomic_from_blood	FullyPublic	X
+C	LP6005442-DNA_E04	Jordan214	Jordan214	S_Jordanian-3	Jordanian	WestEurasia	Jordan	migrants_collected_in_Kuwait	Mait Metspalu / Ene Metspalu / Richard Villems / Jüri Parik	M	32.055	35.914	Genomic_from_blood	FullyPublic	X
+C	LP6005441-DNA_B11	HGDP00987	HGDP00987	S_Ju_hoan_North-2	Ju_hoan_North	Africa	Namibia	?	Howard Cann	M	-18.9	21.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_A11	HGDP01032	HGDP01032	S_Ju_hoan_North-3	Ju_hoan_North	Africa	Namibia	?	Howard Cann	M	-18.9	21.5	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_C03	HGDP00474	HGDP00474	S_Mbuti-1	Mbuti	Africa	Congo	?	Howard Cann	M	1.0	29.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B08	HGDP00476	HGDP00476	S_Mbuti-2	Mbuti	Africa	Congo	?	Howard Cann	F	1.0	29.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_A08	HGDP00449	HGDP00449	S_Mbuti-3	Mbuti	Africa	Congo	?	Howard Cann	M	1.0	29.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_E09	HGDP01338	HGDP01338	S_Naxi-1	Naxi	EastAsia	China	?	Howard Cann	M	26.0	100.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B09	HGDP01345	HGDP01345	S_Naxi-3	Naxi	EastAsia	China	?	Howard Cann	F	26.0	100.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005592-DNA_B03	HGDP00722	HGDP00722	S_Palestinian-1	Palestinian	WestEurasia	Israel(Central)	?	Howard Cann	M	32.0	35.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_G09	HGDP00725	HGDP00725	S_Palestinian-2	Palestinian	WestEurasia	Israel(Central)	?	Howard Cann	M	32.0	35.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005677-DNA_F01	NA11201	NA11201	S_Quechua-1	Quechua	America	Peru	Cell_line_repository_sampling_location_unknown	Coriell	F	-13.5	-72.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005677-DNA_E01	NA11200	NA11200	S_Quechua-2	Quechua	America	Peru	Cell_line_repository_sampling_location_unknown	Coriell	M	-13.5	-72.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005519-DNA_G02	Peru60	Peru60	S_Quechua-3	Quechua	America	Peru	?	Chris Tyler-Smith / Andres Ruiz-Linares	F	-13.5	-72.0	Genomic_from_blood	FullyPublic	X
+C	LP6005592-DNA_B04	HG02724	HG02724	S_Punjabi-1	Punjabi	SouthAsia	Pakistan	Lahore	1KG	M	31.5	74.3	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_A12	HG02783	HG02783	S_Punjabi-2	Punjabi	SouthAsia	Pakistan	Lahore	1KG	M	31.5	74.3	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005442-DNA_B12	HG02790	HG02790	S_Punjabi-3	Punjabi	SouthAsia	Pakistan	Lahore	1KG	F	31.5	74.3	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005441-DNA_B10	HGDP00550	HGDP00550	S_Papuan-1	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	F	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_B08	HGDP00553	HGDP00553	S_Papuan-10	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_C07	HGDP00555	HGDP00555	S_Papuan-11	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_G07	HGDP00556	HGDP00556	S_Papuan-12	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_D08	HGDP00552	HGDP00552	S_Papuan-13	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	F	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_E08	HGDP00554	HGDP00554	S_Papuan-14	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	F	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_H07	HGDP00540	HGDP00540	S_Papuan-2	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_E07	HGDP00543	HGDP00543	S_Papuan-4	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_D07	HGDP00545	HGDP00545	S_Papuan-5	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_C08	HGDP00547	HGDP00547	S_Papuan-6	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_F07	HGDP00548	HGDP00548	S_Papuan-7	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_A08	HGDP00549	HGDP00549	S_Papuan-8	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+C	LP6005443-DNA_F08	HGDP00551	HGDP00551	S_Papuan-9	Papuan	Oceania	PapuaNewGuinea	NewGuinea	Howard Cann	M	-4.0	143.0	Genomic_from_cell_lines	FullyPublic	X
+B	LP6007076-DNA_A01	SS6004486	SS6004486	BR_Kashmiri_Pandit-1	Kashmiri_Pandit	SouthAsia	India	"Draw, Jammu & Kashmir"	K. Thangaraj / Lalji Singh	M	34.43333333	75.75	Genomic_from_blood	SignedLetterNoDelay	Y
+B	LP6007071-DNA_A01	SS6004481	SS6004481	BR_Kharia-1	Kharia	SouthAsia	India	"Tapkara, Chattisgarh"	K. Thangaraj / Lalji Singh	M	22.5	83.95	Genomic_from_blood	SignedLetterNoDelay	Y
+B	LP6007072-DNA_A01	SS6004482	SS6004482	BR_Kurumba-1	Kurumba	SouthAsia	India	"Palakkad, Kerala"	K. Thangaraj / Lalji Singh	M	10.78333333	76.65	Genomic_from_blood	SignedLetterNoDelay	Y
+B	LP6007075-DNA_A01	SS6004485	SS6004485	BR_Mala-1	Mala	SouthAsia	India	"Vishakapatman, Andhra Pradesh"	K. Thangaraj / Lalji Singh	F	17.68333333	83.21666667	Genomic_from_blood	SignedLetterNoDelay	Y
+B	LP6007073-DNA_A01	SS6004483	SS6004483	BR_Onge-1	Onge	SouthAsia	India	Andaman & Nicobar	K. Thangaraj / Lalji Singh	F	11.66666667	92.65	Genomic_from_blood	SignedLetterNoDelay	Y
+B	LP6007074-DNA_A01	SS6004484	SS6004484	BR_Onge-2	Onge	SouthAsia	India	Andaman & Nicobar	K. Thangaraj / Lalji Singh	F	11.66666667	92.65	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005519-DNA_A09	COKN016	COKN016	S_Kongo-2	Kongo	Africa	Congo	Bandevouri-Fang	Sarah Tishkoff	F	2.5	11.8	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005519-DNA_A03	Mex02	Mex02	S_Nahua-1	Nahua	America	Mexico	Zitlala	Chris Tyler-Smith / Andres Ruiz-Linares / Andres Moreno-Estrada	U	19.01	-99.06	Genomic_from_saliva	SignedLetterNoDelay	Y
+C	LP6005519-DNA_B03	Mex20	Mex20	S_Nahua-2	Nahua	America	Mexico	Zitlala	Chris Tyler-Smith / Andres Ruiz-Linares / Andres Moreno-Estrada	M	19.01	-99.06	Genomic_from_saliva	SignedLetterNoDelay	Y
+C	LP6005442-DNA_H06	NAD93	NAD93	S_Chipewyan-1	Chipewyan	America	Canada	Uranium City	Damian Labuda	F	59.6	-107.3	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005443-DNA_F05	NAD59	NAD59	S_Chipewyan-2	Chipewyan	America	Canada	Saskatchewan	Damian Labuda	M	59.6	-107.3	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005442-DNA_A07	Cree5	Cree5	S_Cree-1	Cree	America	Canada	Saskatchewan	Damian Labuda	M	50.3	-102.5	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005442-DNA_B07	Cree6	Cree6	S_Cree-2	Cree	America	Canada	Saskatchewan	Damian Labuda	F	50.3	-102.5	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005519-DNA_A12	NGIB034	NGIB034	S_Igbo-1	Igbo	Africa	Nigeria	Kwamba Suleja	Sarah Tishkoff	M	6.0	7.0	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005519-DNA_B12	NGIB042	NGIB042	S_Igbo-2	Igbo	Africa	Nigeria	Kwamba Suleja	Sarah Tishkoff	F	6.0	7.0	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005677-DNA_C04	CALM031	CALM031	S_Lemande-1	Lemande	Africa	Cameroon	Tobagne	Sarah Tishkoff	F	4.5	11.1	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005677-DNA_D04	CALM016	CALM016	S_Lemande-2	Lemande	Africa	Cameroon	Tobagne	Sarah Tishkoff	M	4.5	11.1	Genomic_from_blood	SignedLetterNoDelay	Y
+C	LP6005592-DNA_E05	ADR1	ADR1	T_Sherpa-1	Sherpa	SouthAsia	Nepal	Khumbu	Anna Di Rienzo / Cynthia Beall	M	27.8	86.7	Genomic from saliva	SignedLetterNoDelay	Y
+C	LP6005592-DNA_F05	ADR2	ADR2	T_Sherpa-2	Sherpa	SouthAsia	Nepal	Khumbu	Anna Di Rienzo / Cynthia Beall	F	27.8	86.7	Genomic from saliva	SignedLetterNoDelay	Y
+C	LP6005592-DNA_G05	ADR3	ADR3	T_Tibetan-1	Tibetan	SouthAsia	Tibet	Gorkha District	Anna Di Rienzo / Cynthia Beall	F	28.9	84.3	Genomic from saliva	SignedLetterNoDelay	Y
+C	LP6005619-DNA_A01	ADR4	ADR4	T_Tibetan-2	Tibetan	SouthAsia	Tibet	Mustang District	Anna Di Rienzo / Cynthia Beall	F	28.9	84.3	Genomic from saliva	SignedLetterNoDelay	Y
+C	LP6005519-DNA_C09	ETAR011	ETAR011	T_Aari-1	Aari	Africa	Ethiopia	Gieza	Sarah Tishkoff	M	5.8	36.5	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_D09	ETAR005	ETAR005	T_Aari-2	Aari	Africa	Ethiopia	Gieza	Sarah Tishkoff	F	5.8	36.5	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_E09	ETAI021	ETAI021	T_Agaw-1	Agaw	Africa	Ethiopia	Sankit Ledeta	Sarah Tishkoff	M	11.0	36.9	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_F09	ETAI032	ETAI032	T_Agaw-2	Agaw	Africa	Ethiopia	Sankit Ledeta	Sarah Tishkoff	F	11.0	36.9	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_G09	ETAM046	ETAM046	T_Amhara-1	Amhara	Africa	Ethiopia	Debele	Sarah Tishkoff	M	9.7	39.7	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_H09	ETAM048	ETAM048	T_Amhara-2	Amhara	Africa	Ethiopia	Debele	Sarah Tishkoff	F	9.7	39.7	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_G06	CAPB016	CAPB016	T_Baka-1	Baka	Africa	Cameroon	Yen Oveng	Sarah Tishkoff	M	2.5	12.7	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005677-DNA_E03	CAPB007	CAPB007	T_Baka-2	Baka	Africa	Cameroon	Yen Oveng	Sarah Tishkoff	F	2.5	12.7	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005677-DNA_F03	CAPL056	CAPL056	T_Bakola-1	Bakola	Africa	Cameroon	Lolodorf	Sarah Tishkoff	M	3.1	10.6	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005677-DNA_G03	CAPL044	CAPL044	T_Bakola-2	Bakola	Africa	Cameroon	Bipindi	Sarah Tishkoff	F	3.1	10.6	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_C07	CAPM001	CAPM001	T_Bedzan-1	Bedzan	Africa	Cameroon	Nditam	Sarah Tishkoff	M	5.3	11.3	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005677-DNA_H03	CAPM019	CAPM019	T_Bedzan-2	Bedzan	Africa	Cameroon	Nditam	Sarah Tishkoff	F	5.3	11.3	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_E08	CHBU007	CHBU007	T_Bulala-1	Bulala	Africa	Chad	Lac Fitri	Sarah Tishkoff	M	12.9	17.4	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_F08	CHBU001	CHBU001	T_Bulala-2	Bulala	Africa	Chad	Lac Fitri	Sarah Tishkoff	F	12.9	17.4	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_G10	KEEL005B	KEEL005B	T_Elmolo-1	Elmolo	Africa	Kenya	Layeni	Sarah Tishkoff	M	3.0	36.9	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_H10	KEEL023A	KEEL023A	T_Elmolo-2	Elmolo	Africa	Kenya	Layeni	Sarah Tishkoff	M	3.0	36.9	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005677-DNA_A04	CAMF011	CAMF011	T_Fulani-1	Fulani	Africa	Cameroon	Saah	Sarah Tishkoff	F	11.1	14.1	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005677-DNA_B04	CAMF023	CAMF023	T_Fulani-2	Fulani	Africa	Cameroon	Saah	Sarah Tishkoff	M	11.1	14.1	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_D12	TZHZ027	TZHZ027	T_Hadza-1	Hadza	Africa	Tanzania	Somoyanda	Sarah Tishkoff	F	-3.8	35.3	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_C12	TZHZ018	TZHZ018	T_Hadza-2	Hadza	Africa	Tanzania	Shimbiguga	Sarah Tishkoff	F	-3.8	35.3	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_F12	TZIQ045	TZIQ045	T_Iraqw-1	Iraqw	Africa	Tanzania	Seloto	Sarah Tishkoff	F	-3.7	35.5	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_E12	TZIQ065	TZIQ065	T_Iraqw-2	Iraqw	Africa	Tanzania	Mbuga Nyekundu	Sarah Tishkoff	M	-3.7	35.5	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_C08	CARKA005	CARKA005	T_Kaba-1	Kaba	Africa	CentralAfricanRepublic	Paoua	Sarah Tishkoff	M	7.2	16.4	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_D08	CARKA030	CARKA030	T_Kaba-2	Kaba	Africa	CentralAfricanRepublic	Paoua	Sarah Tishkoff	F	7.2	16.4	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_A11	KEGK001	KEGK001	T_Kikuyu-1	Kikuyu	Africa	Kenya	Kamoi	Sarah Tishkoff	F	0.4	35.6	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_B11	KEGK032	KEGK032	T_Kikuyu-2	Kikuyu	Africa	Kenya	Mariashoni	Sarah Tishkoff	M	0.4	35.6	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_G08	CHLA001	CHLA001	T_Laka-1	Laka	Africa	Chad	Bessao	Sarah Tishkoff	M	8.3	16.2	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005677-DNA_E04	CHLA074	CHLA074	T_Laka-2	Laka	Africa	Chad	Bessao	Sarah Tishkoff	F	8.3	16.2	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_A08	CAMD042	CAMD042	T_Mada-1	Mada	Africa	Cameroon	Mayo-Uldeme	Sarah Tishkoff	F	10.8	14.2	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_B08	CAMD045	CAMD045	T_Mada-2	Mada	Africa	Cameroon	Mayo-Uldeme	Sarah Tishkoff	M	10.8	14.2	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_A10	ETMS008	ETMS008	T_Mursi-1	Mursi	Africa	Ethiopia	Haile Wuha	Sarah Tishkoff	M	5.9	36.2	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_B10	ETMS033	ETMS033	T_Mursi-2	Mursi	Africa	Ethiopia	Haile Wuha	Sarah Tishkoff	F	5.9	36.2	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_E10	CANG014	CANG014	T_Ngumba-1	Ngumba	Africa	Cameroon	Lambi	Sarah Tishkoff	M	3.0	10.5	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_F10	CANG007	CANG007	T_Ngumba-2	Ngumba	Africa	Cameroon	Lambi	Sarah Tishkoff	M	3.0	10.5	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_C11	KEOG013	KEOG013	T_Ogiek-1	Ogiek	Africa	Kenya	Mariashoni	Sarah Tishkoff	F	-0.4	35.9	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_D11	KEOG015	KEOG015	T_Ogiek-2	Ogiek	Africa	Kenya	Mariashoni	Sarah Tishkoff	M	-0.4	35.9	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_E11	KERD022	KERD022	T_Rendille-1	Rendille	Africa	Kenya	Kargi	Sarah Tishkoff	M	2.6	37.7	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_F11	KERD016	KERD016	T_Rendille-2	Rendille	Africa	Kenya	Kargi	Sarah Tishkoff	F	2.6	37.7	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_H12	Sandawe026	TZSW131	T_Sandawe-1	Sandawe	Africa	Tanzania	Motto	Sarah Tishkoff	M	-5.5	35.5	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_G12	TZSW057	TZSW057	T_Sandawe-2	Sandawe	Africa	Tanzania	"Motto, Kondoa, Dom"	Sarah Tishkoff	F	-5.5	35.5	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_G11	KESN014	KESN014	T_Sengwer-1	Sengwer	Africa	Kenya	Kamoi	Sarah Tishkoff	F	1.1	35.3	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_H11	KESN030	KESN030	T_Sengwer-2	Sengwer	Africa	Kenya	Kamoi	Sarah Tishkoff	M	1.1	35.3	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_C10	CATS023	CATS023	T_Tikar_South-1	Tikar_South	Africa	Cameroon	Nditam	Sarah Tishkoff	M	5.4	11.4	Genomic_from_blood	SignedLetterDelay	Z
+C	LP6005519-DNA_D10	CATS005	CATS005	T_Tikar_South-2	Tikar_South	Africa	Cameroon	Ngoume	Sarah Tishkoff	F	5.4	11.4	Genomic_from_blood	SignedLetterDelay	Z

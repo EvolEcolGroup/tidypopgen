@@ -4,6 +4,10 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <algorithm>
+#include <cctype>
+#include <cstring>
+#include <unordered_map>
 #include <zlib.h>
 #include <bigstatsr/BMCodeAcc.h>
 
@@ -24,6 +28,72 @@ inline bool gz_getline(gzFile file, std::string &line) {
   return !line.empty();
 }
 
+
+// Function to remove the carriage return at the end of a line (CRLF endings)
+inline void strip_carriage_return(std::string &line) {
+  if (!line.empty() && line.back() == '\r') {
+    line.pop_back();
+  }
+}
+
+// Function to check whether a file name ends in .gz (ignoring case)
+inline bool is_gz_file(const std::string &filename) {
+  if (filename.size() < 3) {
+    return false;
+  }
+  std::string ext = filename.substr(filename.size() - 3);
+  std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
+  return ext == ".gz";
+}
+
+// Function to move a pointer from the start of a field to the start of the
+// field n_fields further along a tab separated line (it returns NULL if the
+// line has fewer fields)
+inline const char* skip_fields(const char* p, size_t n_fields) {
+  for (size_t i = 0; (i < n_fields) && (p != NULL); i++) {
+    p = std::strchr(p, '\t');
+    if (p != NULL) {
+      p++;
+    }
+  }
+  return p;
+}
+
+// Function to get the ploidy of a genotype (the number of alleles before the
+// first ':' or tab), without splitting the line. A missing genotype "." gives
+// no information on ploidy, so it returns 0
+inline int genotype_ploidy(const char* p) {
+  if ((p[0] == '.') && ((p[1] == ':') || (p[1] == '\t') || (p[1] == '\0'))) {
+    return 0;
+  }
+  int n_alleles = 1;
+  for (; (*p != ':') && (*p != '\t') && (*p != '\0'); p++) {
+    // count the genotype delimiters (unphased or phased)
+    if ((*p == '/') || (*p == '|')) {
+      n_alleles++;
+    }
+  }
+  return n_alleles;
+}
+
+
+// Function to convert a vector of characters into an R character vector,
+// reusing a single R string for each distinct character (rather than creating
+// a string for each element)
+inline CharacterVector chars_to_strings(const std::vector<char> &x) {
+  CharacterVector res(x.size());
+  // the R string of each of the 256 possible characters (created when first
+  // needed; each is protected by being stored in res)
+  std::vector<SEXP> char_strings(256, R_NilValue);
+  for (size_t i = 0; i < x.size(); i++) {
+    unsigned char c = x[i];
+    if (char_strings[c] == R_NilValue) {
+      char_strings[c] = Rf_mkCharLen(&x[i], 1);
+    }
+    SET_STRING_ELT(res, i, char_strings[c]);
+  }
+  return res;
+}
 
 // Function to split a string by multiple delimiters and return a vector of tokens
 inline std::vector<std::string> split_line(const std::string &s, const std::string &delimiters) {
@@ -64,12 +134,18 @@ inline std::vector<std::string> split_locus_meta(const std::string &s,
  * with information for those snps. It also creates a boolean vector to indicate
  * which loci are biallelic, and a vector with the ploidy of each individual.
  *
+ * To limit memory use with many loci, chromosomes are returned as an integer
+ * index (1-based) into a vector of chromosome names (in order of appearance),
+ * alleles (a single character for biallelic snps) are stored as characters,
+ * and locus names are only read if they are needed.
+ *
  * @param filename The name of the VCF file to parse
+ * @param read_names Whether to read the names (IDs) of the loci
  */
 // [[Rcpp::export]]
-List vcf_loci_table(std::string filename) {
+List vcf_loci_table(std::string filename, bool read_names = true) {
   // open the file
-  bool is_gz = (filename.substr(filename.size() - 3) == ".gz");
+  bool is_gz = is_gz_file(filename);
   std::ifstream vcfFile;
   gzFile vcfGzFile;
 
@@ -88,16 +164,24 @@ List vcf_loci_table(std::string filename) {
   // is a locus biallelic
   std::vector<bool> biallelic;
   biallelic.reserve(10e6);
-  // loci metadata (preallocate a million loci, as a start)
-  std::vector<std::string>chromosome;
-  chromosome.reserve(10e6);
+  // loci metadata (preallocate 10 million loci, as a start)
+  // chromosomes are stored as an index into the vector of their names (with a
+  // lookup table to find the index of a name)
+  std::vector<int> chromosome_index;
+  chromosome_index.reserve(10e6);
+  std::vector<std::string> chromosome_names;
+  std::unordered_map<std::string, int> chromosome_lookup;
+  int this_chromosome = -1; // index of the chromosome of the previous locus
   std::vector<std::string> marker_id;
-  marker_id.reserve(10e6);
+  if (read_names) {
+    marker_id.reserve(10e6);
+  }
   std::vector<int32_t> physical_pos;
   physical_pos.reserve(10e6);
-  std::vector<std::string> allele1;
+  // alleles of biallelic snps are a single character
+  std::vector<char> allele1;
   allele1.reserve(10e6);
-  std::vector<std::string> allele2;
+  std::vector<char> allele2;
   allele2.reserve(10e6);
   // individual metadata
   std::vector<int> ploidy;
@@ -110,6 +194,12 @@ List vcf_loci_table(std::string filename) {
 
   bool get_sample_names = true;
   bool get_ploidy = true;
+  // individuals whose genotypes have all been missing (".") so far, and the
+  // number of variants in which we still look for their ploidy (we only look
+  // in the first few variants, so that the search does not slow down
+  // parsing)
+  std::vector<size_t> unknown_ploidy;
+  int ploidy_lines_left = 1000;
 
   // Read the file line by line until the end of file
   while (true) {
@@ -123,6 +213,11 @@ List vcf_loci_table(std::string filename) {
     // Check if we reached the end of the file
     if (!gotLine) {
       break;
+    }
+    // remove the carriage return of CRLF line endings, and skip empty lines
+    strip_carriage_return(line);
+    if (line.empty()) {
+      continue;
     }
 
     // Skip header lines
@@ -150,30 +245,87 @@ List vcf_loci_table(std::string filename) {
     // if yes, get the metadata for this locus
     if ((fields[3].length() ==1) && (fields[4].length() ==1)) {
       biallelic.push_back(true);
-      chromosome.push_back(fields[0]);
+      // find the index of the chromosome (loci are usually sorted by
+      // chromosome, so we only need a lookup when the chromosome changes)
+      if ((this_chromosome < 0) ||
+          (fields[0] != chromosome_names[this_chromosome])) {
+        std::unordered_map<std::string, int>::iterator found =
+          chromosome_lookup.find(fields[0]);
+        if (found == chromosome_lookup.end()) {
+          this_chromosome = chromosome_names.size();
+          chromosome_lookup[fields[0]] = this_chromosome;
+          chromosome_names.push_back(fields[0]);
+        } else {
+          this_chromosome = found->second;
+        }
+      }
+      chromosome_index.push_back(this_chromosome + 1);
       physical_pos.push_back(std::stoi(fields[1]));
-      marker_id.push_back(fields[2]);
-      allele1.push_back(fields[4]);
-      allele2.push_back(fields[3]);
+      if (read_names) {
+        marker_id.push_back(fields[2]);
+      }
+      allele1.push_back(fields[4][0]);
+      allele2.push_back(fields[3][0]);
     } else {
       biallelic.push_back(false);
     }
 
 
-    // Check if we need to get ploidy (this is only the case for the first line
-    // of real data)
+    // Check if we need to get ploidy (this is the case for the first line
+    // of real data; a missing genotype "." gives no information on ploidy, so
+    // for those individuals we use their first genotype that is not ".")
     if (get_ploidy) {
-      std::vector<std::string> fields = split_line(line, "\t");
-      for (unsigned int i = 9; i < fields.size(); ++i) {
-        // get everything up to the first : delimiter
-        std::vector<std::string> this_fields = split_line(fields[i], ":");
-        // now split by the genotype deliminear (unphased or phased)
-        std::vector<std::string> genotype_fields = split_line(this_fields[0], "/|");
-        ploidy.push_back(genotype_fields.size());
+      // the genotypes start at the 10th field
+      const char* p = skip_fields(line.c_str(), 9);
+      while (p != NULL) {
+        int this_ploidy = genotype_ploidy(p);
+        if (this_ploidy == 0) {
+          unknown_ploidy.push_back(ploidy.size());
+        }
+        ploidy.push_back(this_ploidy);
+        p = skip_fields(p, 1);
       }
       get_ploidy = false;
+    } else if (!unknown_ploidy.empty() && (ploidy_lines_left > 0)) {
+      ploidy_lines_left--;
+      const char* p = line.c_str();
+      size_t field = 0; // the field that p points to
+      size_t n_unknown = 0; // individuals still with unknown ploidy
+      for (size_t k = 0; k < unknown_ploidy.size(); k++) {
+        size_t i = unknown_ploidy[k];
+        // move to the genotype of this individual (the field 9 + i)
+        if (p != NULL) {
+          p = skip_fields(p, i + 9 - field);
+          field = i + 9;
+        }
+        int this_ploidy = (p != NULL) ? genotype_ploidy(p) : 0;
+        if (this_ploidy > 0) {
+          ploidy[i] = this_ploidy;
+        } else {
+          unknown_ploidy[n_unknown++] = i;
+        }
+      }
+      unknown_ploidy.resize(n_unknown);
     }
 
+  }
+
+  // individuals with only missing genotypes (in the variants where we looked
+  // for their ploidy) get the largest ploidy of the other individuals (or 2 if
+  // no ploidy could be estimated)
+  if (!unknown_ploidy.empty()) {
+    int default_ploidy = 0;
+    for (size_t i = 0; i < ploidy.size(); ++i) {
+      default_ploidy = std::max(default_ploidy, ploidy[i]);
+    }
+    if (default_ploidy == 0) {
+      default_ploidy = 2;
+    }
+    for (size_t i = 0; i < ploidy.size(); ++i) {
+      if (ploidy[i] == 0) {
+        ploidy[i] = default_ploidy;
+      }
+    }
   }
 
   // close the file
@@ -183,16 +335,29 @@ List vcf_loci_table(std::string filename) {
     vcfFile.close();
   }
 
-  // craete loci table
-  DataFrame loci_table = DataFrame::create( Named("chromosome") = chromosome ,
-                                            _["marker.ID"] = marker_id,
-                                            _["physical.pos"] = physical_pos,
-                                            _["allele1"] = allele1,
-                                            _["allele2"] = allele2);
+  // create the loci table; alleles are converted to strings reusing a single
+  // R string for each character, and the C++ vectors are freed as soon as
+  // they have been copied into R
+  IntegerVector chromosome_r(chromosome_index.begin(), chromosome_index.end());
+  std::vector<int>().swap(chromosome_index);
+  IntegerVector physical_pos_r(physical_pos.begin(), physical_pos.end());
+  std::vector<int32_t>().swap(physical_pos);
+  CharacterVector allele1_r = chars_to_strings(allele1);
+  std::vector<char>().swap(allele1);
+  CharacterVector allele2_r = chars_to_strings(allele2);
+  std::vector<char>().swap(allele2);
+  List loci_table = List::create(Named("chromosome") = chromosome_r,
+                                 _["physical.pos"] = physical_pos_r,
+                                 _["allele1"] = allele1_r,
+                                 _["allele2"] = allele2_r);
+  if (read_names) {
+    loci_table["marker.ID"] = marker_id;
+    std::vector<std::string>().swap(marker_id);
+  }
 
-
-  // Return a list containing the matrix and the ploidy vector
+  // Return a list containing the loci table and the ploidy vector
   return (List::create(Named("loci_tbl") = loci_table,
+                       Named("chromosome_names") = chromosome_names,
                        Named("sample_names") = sample_names,
                        Named("ploidy") = ploidy,
                        Named("biallelic") = biallelic,
@@ -216,21 +381,16 @@ List vcf_loci_table(std::string filename) {
  * @param unsigned char* alt_counts The array to store the counts
  * @param int n The number of individuals
  * @param int missingValue The value to use for missing genotypes
+ * @return false if a genotype has more alleles than max_ploidy
  */
 
-inline void count_alt_alleles(const std::string &line,
+inline bool count_alt_alleles(const std::string &line,
                               unsigned char* alt_counts,
                               size_t* separator_pos,
                               size_t n,
                               const size_t missingValue,
                               const std::string &separator
 ) {
-  // reset counts to 0
-  std::fill(alt_counts, alt_counts+n, 0);
-  // for (uint i = 0; i < n; i++) {
-  //   alt_counts[i] = 0;
-  // }
-
   separator_pos[0] = line.find(separator, 0);
   // find the position of all separators
   for (size_t i = 1; i < 8+n; i++) {
@@ -240,20 +400,35 @@ inline void count_alt_alleles(const std::string &line,
 
   // now move through each of the genotypes and process them
   // we ignore the first 9 fields (so start from position 9)
+  const char* line_ptr = line.c_str();
   for (size_t i=0; i<n; i++){
-    size_t pos = separator_pos[i+8];
     // the genotypes start at pos +1
-    if (line[pos+1] == '.') {
-      alt_counts[i] = missingValue;
-    } else {
-      for (size_t pos_i = pos+1; pos_i < separator_pos[i+9]+1; pos_i++){
-        if (line[pos_i] == '1'){
-          alt_counts[i]++;
-        } else if (line[pos_i] == ':') //if at the end of the genotype section
-          break;
+    const char* p = line_ptr + separator_pos[i+8] + 1;
+    const char* field_end = line_ptr + separator_pos[i+9];
+    // for a biallelic locus, each allele is a single character ('0', '1' or
+    // '.'), and alleles are delimited by '/' or '|' (unphased or phased), so
+    // we jump from one allele to the next, until we reach the end of the
+    // genotype section (':' or the end of the field)
+    size_t n_alt = 0;
+    size_t n_alleles = 0;
+    bool is_missing = false;
+    while (true) {
+      n_alt += (p[0] == '1');
+      // if any allele is missing, the genotype is missing
+      is_missing |= (p[0] == '.');
+      n_alleles++;
+      if ((p + 1 >= field_end) || ((p[1] != '/') && (p[1] != '|'))) {
+        break;
       }
+      p += 2;
     }
+    // a genotype can not have more alleles than max_ploidy
+    if (n_alleles > missingValue - 1) {
+      return false;
+    }
+    alt_counts[i] = is_missing ? missingValue : n_alt;
   }
+  return true;
 }
 
 /**
@@ -273,11 +448,11 @@ inline void count_alt_alleles(const std::string &line,
 // [[Rcpp::export]]
 bool vcf_genotypes_to_fbm(std::string filename,
                           Environment BM,
-                          IntegerVector& biallelic,
+                          LogicalVector& biallelic,
                           const int missing_value,
                           const int n_header_lines) {
   // open the file
-  bool is_gz = (filename.substr(filename.size() - 3) == ".gz");
+  bool is_gz = is_gz_file(filename);
   std::ifstream vcfFile;
   gzFile vcfGzFile;
 
@@ -325,32 +500,36 @@ bool vcf_genotypes_to_fbm(std::string filename,
   // Read the genotypes line by line until the end of file
   for (int i_geno = 0; i_geno < n_loci; i_geno++) {
     bool gotLine;
-    if (is_gz) {
-      gotLine = gz_getline(vcfGzFile, line);
-    } else {
-      gotLine = (bool)std::getline(vcfFile, line);
-    }
+    // skip empty lines (and any header line left), as in vcf_loci_table
+    do {
+      if (is_gz) {
+        gotLine = gz_getline(vcfGzFile, line);
+      } else {
+        gotLine = (bool)std::getline(vcfFile, line);
+      }
+      if (gotLine) {
+        strip_carriage_return(line);
+      }
+    } while (gotLine && (line.empty() || (line[0] == '#')));
     // Check if we reached the end of the file
     if (!gotLine) {
       stop("end of file reached before all expected genotypes were read");
     }
     if (biallelic[i_geno]){
-      count_alt_alleles(line, &alt_counts[0], &separator_pos[0], n,missing_value, tab_delimiter);
+      // count alternate alleles, checking that no genotype has more alleles
+      // than max_ploidy (in case we estimated it incorrectly in the first line)
+      if (!count_alt_alleles(line, &alt_counts[0], &separator_pos[0], n,
+                             missing_value, tab_delimiter)) {
+        if (is_gz) {
+          gzclose(vcfGzFile);
+        } else {
+          vcfFile.close();
+        }
+        stop("a genotype has more than max_ploidy alleles. We estimate max_ploidy from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome)");
+      }
       ptr = std::copy(&alt_counts[0], &alt_counts[0] + n, ptr);
     }
 
-  }
-  // check ploidy for the last line, in case we estimated it incorrectly in the first
-  // line
-  std::vector<std::string> fields = split_line(line, "\t");
-  for (unsigned int i = 9; i < fields.size(); ++i) {
-    // get everything up to the first : delimiter
-    std::vector<std::string> this_fields = split_line(fields[i], ":");
-    // now split by the genotype deliminear (unphased or phased)
-    std::vector<std::string> genotype_fields = split_line(this_fields[0], "/|");
-    if (genotype_fields.size() > size_t((missing_value-1))) {
-      stop("a genotype has more than max_ploidy alleles. We estimate max_ploidy from the first variant in the vcf file, make sure that variant is representative of ploidy (e.g. it is not on a sex chromosome)");
-    }
   }
 
   // close the file

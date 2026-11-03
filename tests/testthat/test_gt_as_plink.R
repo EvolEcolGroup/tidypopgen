@@ -184,6 +184,59 @@ if (rlang::is_installed("vcfR")) {
   })
 }
 
+test_that("ped and raw use the sample ID as family ID without population", {
+  # e.g. a gen_tibble read from a vcf, which has no population column
+  test_gt_no_pop <- test_gt %>% select(-population)
+  ped_path <- gt_as_plink(
+    test_gt_no_pop,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(ped$V1, test_gt$id)
+  expect_equal(ped$V2, test_gt$id)
+  raw_path <- gt_as_plink(test_gt_no_pop, file = tempfile(), type = "raw")
+  raw <- read.table(raw_path, header = TRUE)
+  expect_equal(raw$FID, test_gt$id)
+  expect_equal(raw$IID, test_gt$id)
+  expect_equal(
+    unname(as.matrix(raw[, -(1:6)])),
+    show_genotypes(test_gt)
+  )
+})
+
+test_that("ped and raw write numeric phenotypes", {
+  test_gt_pheno <- test_gt %>% mutate(phenotype = c(1.5, 2.3, NA))
+  ped_path <- gt_as_plink(
+    test_gt_pheno,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(ped$V6, c("1.5", "2.3", "-9"))
+  test_gt_pheno <- test_gt %>% mutate(phenotype = c(1L, 2L, NA))
+  raw_path <- gt_as_plink(test_gt_pheno, file = tempfile(), type = "raw")
+  raw <- read.table(raw_path, header = TRUE)
+  expect_equal(raw$PHENOTYPE, c(1, 2, -9))
+})
+
+test_that("ped map file includes the genetic distance", {
+  test_gt_cm <- test_gt
+  show_loci(test_gt_cm)$genetic_dist <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+  ped_path <- gt_as_plink(
+    test_gt_cm,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  map <- read.table(sub("\\.ped$", ".map", ped_path), header = FALSE)
+  expect_equal(map$V3, c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6))
+  ped_gt <- gen_tibble(ped_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(
+    show_loci(ped_gt)$genetic_dist,
+    show_loci(test_gt_cm)$genetic_dist
+  )
+})
+
 test_that("handling of duplicated loci", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
@@ -392,16 +445,61 @@ test_that("gt_as_plink errors on polyploid data", {
   )
   expect_error(
     gt_as_plink(tetra_gt, file = paste0(tempfile(), ".bed"), type = "bed"),
-    "this function only works on diploid data"
+    "this function only works on diploid or pseudohaploid data"
   )
   expect_error(
     gt_as_plink(tetra_gt, file = paste0(tempfile(), ".ped"), type = "ped"),
-    "this function only works on diploid data"
+    "this function only works on diploid or pseudohaploid data"
   )
   expect_error(
     gt_as_plink(tetra_gt, file = tempfile(), type = "raw"),
-    "this function only works on diploid data"
+    "this function only works on diploid or pseudohaploid data"
   )
+})
+
+test_that("gt_as_plink works on pseudohaploid data", {
+  test_indiv_meta <- data.frame(
+    id = c("d1", "p1", "p2", "d2"),
+    population = c("pop1", "pop1", "pop2", "pop2")
+  )
+  # p1 and p2 are pseudohaploids (only homozygous calls)
+  test_genotypes <- rbind(
+    c(1, 0, 1, 0, 1, 1),
+    c(2, NA, 0, 2, 2, 0),
+    c(0, 2, 2, NA, 0, 2),
+    c(2, 1, 0, 1, 0, 0)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", "G", "C", "G", "A")
+  )
+  pseudo_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  pseudo_gt <- gt_pseudohaploid(pseudo_gt, test_n_loci = 6)
+  expect_true(is_pseudohaploid(pseudo_gt))
+  # pseudohaploid dosages are written as regular diploid counts (0/2)
+  bed_path <- gt_as_plink(pseudo_gt, file = paste0(tempfile(), ".bed"))
+  bed_gt <- gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(show_genotypes(bed_gt), test_genotypes)
+  ped_path <- gt_as_plink(
+    pseudo_gt,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped_gt <- gen_tibble(ped_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(show_genotypes(ped_gt), test_genotypes)
+  raw_path <- gt_as_plink(pseudo_gt, file = tempfile(), type = "raw")
+  raw_table <- read.table(raw_path, header = TRUE)
+  expect_equal(unname(as.matrix(raw_table[, -(1:6)])), test_genotypes)
 })
 
 test_that("plink files location when 'file' is NULL", {
@@ -438,4 +536,53 @@ test_that("plink files location when 'file' is NULL", {
   expected_bed_file <- paste0(expected_bed_file, ".bed")
 
   expect_equal(bed_path, expected_bed_file)
+})
+
+test_that("double positions are not written in scientific notation", {
+  test_gt_dbl <- test_gt
+  show_loci(test_gt_dbl)$position <- c(100000, 200000, 3e6, 999999, 1e5, 1e6)
+  ped_path <- gt_as_plink(
+    test_gt_dbl,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  map <- read.table(
+    sub("\\.ped$", ".map", ped_path),
+    header = FALSE,
+    colClasses = "character"
+  )
+  expect_equal(
+    map$V4,
+    c("100000", "200000", "3000000", "999999", "100000", "1000000")
+  )
+  bed_path <- gt_as_plink(test_gt_dbl, file = paste0(tempfile(), ".bed"))
+  bim <- read.table(
+    sub("\\.bed$", ".bim", bed_path),
+    header = FALSE,
+    colClasses = "character"
+  )
+  expect_equal(bim$V4, map$V4)
+})
+
+test_that("ped and raw write subsets of individuals and loci", {
+  # reorder individuals and loci, and use integer loci names
+  sub_gt <- test_gt[c(3, 1), ] %>% select_loci(c(6, 3, 5))
+  sub_loci <- show_loci(sub_gt)
+  sub_loci$name <- c(3L, 2L, 1L)
+  show_loci(sub_gt) <- sub_loci
+  ped_path <- gt_as_plink(sub_gt, file = paste0(tempfile(), ".ped"), "ped")
+  # the second locus has a missing alternate allele (written as 0)
+  expect_equal(
+    readLines(ped_path),
+    c("pop2 c 0 0 0 -9 T A C C 0 0", "pop1 a 0 0 0 -9 T T C C C G")
+  )
+  raw_path <- gt_as_plink(sub_gt, file = paste0(tempfile(), ".raw"), "raw")
+  expect_equal(
+    readLines(raw_path),
+    c(
+      "FID IID PAT MAT SEX PHENOTYPE 3_A(/T) 2_0(/C) 1_G(/C)",
+      "pop2 c 0 0 0 -9 1 0 NA",
+      "pop1 a 0 0 0 -9 0 0 1"
+    )
+  )
 })

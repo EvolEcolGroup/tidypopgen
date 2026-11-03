@@ -196,6 +196,46 @@ test_that("windows_pop_tajimas_d counts pseudohaploid allele copies", {
   )
 })
 
+test_that("windows_pop_tajimas_d matches window sums of the locus terms", {
+  # windows_pop_tajimas_d() sums the terms of each locus in all windows at
+  # once; check it against summing each term with windows_stats_generic()
+  test_ungrouped <- dplyr::ungroup(test_gt)
+  # pi, and the number of valid allele copies, at each locus
+  locus_terms <- tajimas_d_locus_terms(
+    loci_pi(test_ungrouped),
+    colSums(!is.na(test_genotypes)) * 2
+  )
+  for (unit in c("snp", "bp")) {
+    ws <- if (unit == "snp") 3 else 100
+    st <- if (unit == "snp") 2 else 70
+    for (complete in c(FALSE, TRUE)) {
+      window_sums <- lapply(colnames(locus_terms), function(i_term) {
+        windows_stats_generic(locus_terms[, i_term],
+          loci_table = show_loci(test_ungrouped), operator = "sum",
+          window_size = ws, step_size = st, size_unit = unit,
+          min_loci = 2, complete = complete
+        )
+      })
+      names(window_sums) <- colnames(locus_terms)
+      expected <- window_sums$k_hat
+      expected$stat <- tajimas_d_from_sums(
+        k_hat = window_sums$k_hat$stat,
+        seg = window_sums$seg$stat,
+        theta_w = window_sums$theta_w$stat,
+        n_sum = window_sums$n$stat,
+        n_loci = window_sums$n_loci$stat
+      )
+      expect_equal(
+        windows_pop_tajimas_d(test_ungrouped,
+          window_size = ws, step_size = st, size_unit = unit,
+          min_loci = 2, complete = complete
+        ),
+        expected
+      )
+    }
+  }
+})
+
 test_that("windows_pop_tajimas_d ignores loci with missing pi", {
   # make the 2nd locus missing for all individuals in pop1
   test_genotypes_miss <- test_genotypes

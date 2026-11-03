@@ -29,16 +29,17 @@ vcf_to_fbm_cpp <- function(
 ) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
-    backingfile <- sub("\\.vcf.gz$", "", backingfile)
-    backingfile <- sub("\\.vcf$", "", backingfile)
+    backingfile <- sub("\\.vcf\\.gz$", "", backingfile, ignore.case = TRUE)
+    backingfile <- sub("\\.vcf$", "", backingfile, ignore.case = TRUE)
   }
   if (file_ext(backingfile) == "bk") {
     backingfile <- bigstatsr::sub_bk(backingfile, "")
   }
 
   # create a loci_table, and figure out no_individuals and ploidy from first
-  # marker
-  vcf_meta <- vcf_loci_table(vcf_path)
+  # marker (locus names are not read if we store them as integers, which saves
+  # a lot of memory with many loci)
+  vcf_meta <- vcf_loci_table(vcf_path, read_names = !names_as_int)
   # figure out no_individuals and ploidy
   ploidy <- vcf_meta$ploidy
   no_individuals <- length(ploidy)
@@ -57,33 +58,22 @@ vcf_to_fbm_cpp <- function(
   fbm_ploidy <- ploidy
   max_ploidy <- max(ploidy)
 
-  code256 <- rep(NA_real_, 256)
-  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
-
-  # create the file backed matrix
-  file_backed_matrix <- bigstatsr::FBM.code256(
-    nrow = no_individuals,
-    ncol = nrow(vcf_meta$loci_tbl),
-    code = code256,
-    backingfile = backingfile
-  )
-
-  vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
-    biallelic = vcf_meta$biallelic,
-    n_header_lines = vcf_meta$n_header_lines,
-    missing_value = max_ploidy + 1
-  )
-
   indiv_meta <- list(
     id = vcf_meta$sample_names
   )
 
   # loci metadata table
   loci <- vcf_meta$loci_tbl
-
-  # add an empty genetic.pos column
-  loci <- loci %>% mutate(genetic.dist = 0, .before = "physical.pos")
-  loci$physical.pos <- as.integer(loci$physical.pos)
+  # chromosomes are given as an index into their names (in order of
+  # appearance): turn them into a factor, with the levels sorted as in
+  # as.factor() (this avoids creating and sorting a string for each locus)
+  chromosome_names <- vcf_meta$chromosome_names
+  chromosome_levels <- unique(chromosome_names[order(chromosome_names)])
+  loci$chromosome <- structure(
+    match(chromosome_names, chromosome_levels)[loci$chromosome],
+    levels = chromosome_levels,
+    class = "factor"
+  )
   # if we store loci names as characters
   if (!names_as_int) {
     # if loci names are missing, create a name with scaffold and position
@@ -97,19 +87,20 @@ vcf_to_fbm_cpp <- function(
       )
     }
   } else { # if we store them as integers
-    loci$marker.ID <- seq_len(nrow(loci))
+    loci$marker.ID <- seq_along(loci$physical.pos)
   }
 
+  # (with an empty genetic distance column)
   loci <- tibble::tibble(
     name = loci$marker.ID,
     chromosome = loci$chromosome,
     position = loci$physical.pos,
-    genetic_dist = loci$genetic.dist,
+    genetic_dist = 0,
     allele_ref = loci$allele2,
     allele_alt = loci$allele1
   )
 
-  # validate the loci
+  # validate the loci (before creating the backing files)
   loci <- validate_loci(loci,
     check_alphabet = TRUE,
     harmonise_loci = TRUE,
@@ -120,6 +111,24 @@ vcf_to_fbm_cpp <- function(
   )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
+
+  code256 <- rep(NA_real_, 256)
+  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+
+  # create the file backed matrix
+  file_backed_matrix <- bigstatsr::FBM.code256(
+    nrow = no_individuals,
+    ncol = nrow(loci),
+    code = code256,
+    backingfile = backingfile
+  )
+
+  vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
+    biallelic = vcf_meta$biallelic,
+    n_header_lines = vcf_meta$n_header_lines,
+    missing_value = max_ploidy + 1
+  )
+
   # construct path
   fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
 

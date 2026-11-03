@@ -94,7 +94,8 @@ latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 in case your
 \emph{VCF} has an unusual structure.}
 
-\item{n_cores}{the number of cores to use for parallel processing}
+\item{n_cores}{currently ignored (reading files is not parallelised); kept
+for backwards compatibility}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
@@ -134,7 +135,10 @@ here the format
 variant is found in a sex chromosome (or mtDNA), the parser will fail with
 'Error: a genotype has more than max_ploidy alleles...'. To successful import
 such a \emph{VCF}, change the order of variants so that the first chromosome is an
-autosome using a tool such as \code{vcftools}. Currently, only biallelic SNPs are
+autosome using a tool such as \code{vcftools}. Individuals with a missing genotype
+('.') on the first variant get their ploidy from their first genotype that
+is not '.' (or the largest ploidy of the other individuals, if all their
+genotypes are '.'). Currently, only biallelic SNPs are
 supported. If haploid variants (e.g. sex chromosomes) are included in the
 \emph{VCF}, they are not transformed into homozygous calls. Instead, reference
 alleles will be coded as 0 and alternative alleles will be coded as 1.

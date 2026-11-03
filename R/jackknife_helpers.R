@@ -23,15 +23,23 @@
   }
   # integer index for each chromosome (we avoid creating character vectors
   # with one element per locus, as they are very large for big datasets)
-  chrom_idx <- match(loci_table$chromosome, unique(loci_table$chromosome))
+  chrom_idx <- .chromosome_index(loci_table$chromosome)
   # block id within each chromosome
   if (size_unit == "snp") {
-    # count the snps within each chromosome
-    snp_idx <- stats::ave(seq_along(chrom_idx), chrom_idx, FUN = seq_along)
+    # the rank of each snp within its chromosome (the loci of a chromosome
+    # need not be contiguous in the table): order() lists the loci of each
+    # chromosome in turn, in the order of the table
+    snp_idx <- integer(length(chrom_idx))
+    snp_idx[order(chrom_idx)] <- sequence(tabulate(chrom_idx))
     local_id <- ceiling(snp_idx / block_size)
   } else if (size_unit == "bp") {
-    local_id <- floor(loci_table$position / block_size)
+    # positions start from 1, so block b covers positions
+    # ((b - 1) * block_size, b * block_size], as the windows of
+    # .window_definitions() with step_size equal to window_size
+    local_id <- ceiling(loci_table$position / block_size)
   } else if (size_unit == "cM") {
+    # genetic distances start from 0, so block b covers distances
+    # [(b - 1) * block_size, b * block_size)
     local_id <- floor(loci_table$genetic_dist / block_size)
   }
   # combine chromosome and local block id into a single numeric key (local
@@ -54,18 +62,25 @@
 #' @noRd
 .block_sums <- function(mat, block_id) {
   # remove all attributes other than dim (e.g. names of the loci, or
-  # matrix_int_names), only keeping the column names (one per statistic); we
-  # avoid as.matrix(), which would copy the names of a vector as row names
-  mat <- matrix(as.numeric(mat),
-    nrow = NROW(mat), ncol = NCOL(mat),
-    dimnames = list(NULL, colnames(mat))
+  # matrix_int_names); we avoid as.matrix(), which would copy the names of a
+  # vector as row names
+  stat_names <- colnames(mat)
+  mat <- matrix(as.numeric(mat), nrow = NROW(mat), ncol = NCOL(mat))
+  # each block is a window of window_sums_cpp(): the loci sorted by block
+  # (keeping their order within each block), with block b covering positions
+  # (lo[b], hi[b]] of that order
+  n_loci <- tabulate(block_id, nbins = max(block_id))
+  hi <- cumsum(n_loci)
+  block_sums <- window_sums_cpp(mat,
+    loci = order(block_id),
+    lo = as.integer(hi - n_loci),
+    hi = as.integer(hi),
+    # accumulate in double, as rowsum() does
+    long_double = FALSE
   )
-  sums <- rowsum(mat, block_id, na.rm = TRUE, reorder = TRUE)
-  n <- rowsum((!is.na(mat)) * 1, block_id, reorder = TRUE)
-  # rowsum() names the rows with the block ids (as characters), which we drop
-  # (rows are in the order of the block ids)
-  rownames(sums) <- NULL
-  rownames(n) <- NULL
+  sums <- block_sums$sum
+  n <- block_sums$n
+  colnames(sums) <- colnames(n) <- stat_names
   list(sums = sums, n = n)
 }
 
@@ -129,9 +144,17 @@
 
 #' Compute full and leave-one-out pairwise Fst for jackknife blocks
 #'
+#' The numerators and denominators of Fst of each pair of populations are
+#' summed within each block in a single pass over the genotypes (each block is
+#' a non-overlapping window for `windows_pairwise_pop_fst_cpp()`), without
+#' storing them by locus. As for the genome-wide Fst in [pairwise_pop_fst()],
+#' only loci where both the numerator and the denominator are available are
+#' used.
+#'
 #' @param .x a grouped `gen_tibble`
 #' @param method the method to use for calculating Fst
-#' @param block_id a vector of block ids, one per locus
+#' @param block_id a vector of block ids, one per locus (integers from 1 to the
+#'   number of blocks, as returned by `.jackknife_block_ids()`)
 #' @returns a list with `full` (a named vector of Fst based on all loci),
 #'   `loo` (a matrix of leave-one-out Fst, one row per block and one column per
 #'   pair of populations, named `fst_a.b`), and `m` (a matrix of the number of
@@ -139,35 +162,49 @@
 #' @keywords internal
 #' @noRd
 .jackknife_fst_blocks <- function(.x, method, block_id) {
-  # create the pairwise Fst by locus, saving numerator and denominator
-  pair_fst <- pairwise_pop_fst(.x,
-    method = method, return_num_dem = TRUE,
-    by_locus = TRUE
+  # the same checks as in pairwise_pop_fst()
+  if (!inherits(.x, "grouped_df")) {
+    stop(".x should be a grouped df")
+  }
+  .check_fst_ploidy(.x, method)
+  # get the populations, and all pairs of populations
+  .group_levels <- .x %>% group_keys()
+  pairwise_combn <- utils::combn(nrow(.group_levels), 2)
+  n_blocks <- max(block_id)
+  # sum the numerators and denominators of each pair in each block, with
+  # memory n_blocks x n_pairs (rather than n_loci x n_pairs)
+  block_sums <- windows_pairwise_pop_fst_cpp(
+    .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
+    groupIds = dplyr::group_indices(.x) - 1,
+    ngroups = nrow(.group_levels),
+    ploidy = indiv_ploidy(.x),
+    pairwise_combn = pairwise_combn,
+    method = method,
+    locus_first = block_id - 1L,
+    locus_last = block_id - 1L,
+    n_windows = n_blocks,
+    both_valid = TRUE,
+    block_size = 1024,
+    ncores = bigstatsr::nb_cores()
   )
-  stat_names <- paste0("fst_", colnames(pair_fst$Fst_by_locus_num))
-  # convert to plain numeric matrices (dropping the matrix_int_names class)
-  num <- matrix(as.numeric(pair_fst$Fst_by_locus_num),
-    nrow = nrow(pair_fst$Fst_by_locus_num)
+  # name the statistics after the pairs of populations
+  group_combinations <- cbind(
+    .group_levels[pairwise_combn[1, ], ],
+    .group_levels[pairwise_combn[2, ], ]
   )
-  den <- matrix(as.numeric(pair_fst$Fst_by_locus_den),
-    nrow = nrow(pair_fst$Fst_by_locus_den)
-  )
-  # only use loci where both numerator and denominator are available
-  # (as done when computing the genome-wide Fst in pairwise_pop_fst)
-  valid <- !is.na(num) & !is.na(den)
-  num[!valid] <- NA
-  den[!valid] <- NA
-  num_blocks <- .block_sums(num, block_id)
-  den_blocks <- .block_sums(den, block_id)
+  stat_names <- paste0("fst_", col_names_combinations(group_combinations))
   # Fst on all loci, and leaving each block out in turn
-  num_tot <- colSums(num_blocks$sums)
-  den_tot <- colSums(den_blocks$sums)
+  num_tot <- colSums(block_sums$sum_num)
+  den_tot <- colSums(block_sums$sum_den)
   full <- num_tot / den_tot
-  loo <- (rep_rows(num_tot, nrow(num_blocks$sums)) - num_blocks$sums) /
-    (rep_rows(den_tot, nrow(den_blocks$sums)) - den_blocks$sums)
+  loo <- (rep_rows(num_tot, n_blocks) - block_sums$sum_num) /
+    (rep_rows(den_tot, n_blocks) - block_sums$sum_den)
   names(full) <- stat_names
   colnames(loo) <- stat_names
-  m <- num_blocks$n
+  # the number of loci used in each block
+  m <- block_sums$n_num
   colnames(m) <- stat_names
   list(full = full, loo = loo, m = m)
 }

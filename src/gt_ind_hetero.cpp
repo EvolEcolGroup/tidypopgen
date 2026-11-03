@@ -1,7 +1,6 @@
 /******************************************************************************/
 
-#include <bigstatsr/BMCodeAcc.h>
-#include <vector>
+#include "gt_ind_counts.h"
 
 /******************************************************************************/
 
@@ -9,8 +8,10 @@
 // by individual
 // this only works for diploid data; see gt_ind_hetero_polyploid() for the
 // generalised, ploidy-aware version used for polyploid/mixed-ploidy data.
-// Kept separate (rather than folded into a single ploidy-aware function) so
-// that the diploid hot path stays branch- and lookup-free.
+// Both share the same lookup-table kernel (gt_ind_het_na_counts(), see
+// gt_ind_counts.h); here all individuals use a single table, built from
+// code256 with the same rules as decoding each genotype (a genotype is
+// missing unless its decoded value is > -1, and heterozygous if it equals 1).
 
 
 // [[Rcpp::export]]
@@ -19,50 +20,18 @@ IntegerMatrix gt_ind_hetero(Environment BM,
                                    const IntegerVector& colInd,
                                    int ncores) {
 
-  XPtr<FBM> xpBM = BM["address"];
-  SubBMCode256Acc macc(xpBM, rowInd, colInd, BM["code256"], 1);
-
-  size_t n = macc.nrow(); // number of individuals
-  size_t m = macc.ncol(); // number of loci
-
-  IntegerMatrix het_counts(2, n); // matrix of 2 rows, n_het and n_na
-
-  // the outer loop is parallelised over loci, but the output is indexed by
-  // individual, so different threads would otherwise race on the same
-  // het_counts(*, i) cells; accumulate into thread-local counters (keeping
-  // the loci-outer loop order, since bigstatsr's FBM is stored column-major
-  // and this keeps access to macc(i, j) contiguous) and merge once per
-  // thread rather than once per element.
-  #pragma omp parallel num_threads(ncores)
-  {
-    std::vector<int> het_local(n, 0);
-    std::vector<int> na_local(n, 0);
-
-    #pragma omp for
-    for (size_t j = 0; j < m; j++) {
-      for (size_t i = 0; i < n; i++) {
-        double x = macc(i, j);
-        if (x > -1){
-          if (x == 1){ // count heterozygote
-            het_local[i] += 1;
-          }
-        } else {
-          // count missingness
-          na_local[i] += 1;
-        }
-      }
-    }
-
-    #pragma omp critical
-    {
-      for (size_t i = 0; i < n; i++) {
-        het_counts(0, i) += het_local[i];
-        het_counts(1, i) += na_local[i];
-      }
-    }
+  // build the lookup table from the raw byte to (het, na) increments
+  NumericVector code256 = BM["code256"];
+  std::vector<uint64_t> lut(256);
+  for (int b = 0; b < 256; b++) {
+    double x = code256[b];
+    bool valid = x > -1; // false for NA (as NaN)
+    lut[b] = gt_pack_het_na(valid && (x == 1), !valid);
   }
+  // a single table for all individuals
+  std::vector<std::size_t> row_class(rowInd.size(), 0);
 
-  return het_counts;
+  return gt_ind_het_na_counts(BM, rowInd, colInd, lut, row_class, ncores);
 }
 
 /******************************************************************************/

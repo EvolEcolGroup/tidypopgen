@@ -133,7 +133,10 @@ loci_alt_freq.vctrs_bigSNP <- function(
       as_counts = as_counts
     )
   } else {
-    loci_alt_freq_polyploid(.x, n_cores = n_cores, block_size = block_size, ...)
+    loci_alt_freq_polyploid(.x,
+      as_counts = as_counts,
+      n_cores = n_cores, block_size = block_size, ...
+    )
   }
 }
 
@@ -164,42 +167,17 @@ loci_alt_freq.grouped_df <- function(
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-    geno_fbm <- .gt_get_fbm(.x)
-    # rows (individuals) that we want to use
-    rows_to_keep <- .gt_fbm_rows(.x)
     # number of groups (used to define dimensions of objects)
-    n_groups <- max(dplyr::group_indices(.x))
-    ploidy <- indiv_ploidy(.x)
+    n_groups <- dplyr::n_groups(.x)
 
-    gt_group_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-      freq_mat <- grouped_alt_freq_dip_pseudo_cpp(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        groupIds = dplyr::group_indices(.x) - 1,
-        ngroups = n_groups,
-        ncores = n_cores,
-        ploidy = ploidy,
-        as_counts = as_counts
-      )
-      return(freq_mat)
-    }
-
-    freq_mat <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_group_alt_freq_sub,
-      rows_to_keep = rows_to_keep,
-      ind = show_loci(.x)$big_index,
-      ncores = 1, # we only use 1 cpu, we let openMP use multiple cores
-      # in the cpp code
-      block.size = block_size,
-      a.combine = "rbind"
+    freq_mat <- grouped_alt_freq_dip_pseudo(
+      .x,
+      as_counts = as_counts,
+      n_cores = n_cores,
+      block_size = block_size
     )
 
-    if (!as_counts) {
-      # only keep the frequencies
-      freq_mat <- freq_mat[, 1:n_groups]
-    } else {
+    if (as_counts) {
       # split into two matrices (alt counts and valid allele counts, and return
       # as a list)
       counts_list <- list(
@@ -265,7 +243,11 @@ loci_maf.vctrs_bigSNP <- function(
   ...
 ) {
   freq <- loci_alt_freq(.x, n_cores = n_cores, block_size = block_size, ...)
-  freq[freq > 0.5 & !is.na(freq)] <- 1 - freq[freq > 0.5 & !is.na(freq)]
+  # fold the frequencies above 0.5 (which() skips missing values, and only
+  # stores the indices of the loci to fold, rather than creating several
+  # logical vectors as long as the number of loci)
+  to_fold <- which(freq > 0.5)
+  freq[to_fold] <- 1 - freq[to_fold]
   freq
 }
 
@@ -295,18 +277,17 @@ loci_maf.grouped_df <- function(
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-    freq_mat <- loci_alt_freq(
+    # matrix of frequencies (loci x groups), without names
+    freq_mat <- grouped_alt_freq_dip_pseudo(
       .x,
+      as_counts = FALSE,
       n_cores = n_cores,
-      block_size = block_size,
-      type = "matrix",
-      as_counts = FALSE
+      block_size = block_size
     )
-    # remove dimnames to then process this
-    dimnames(freq_mat) <- NULL
-
-    freq_mat[freq_mat > 0.5 & !is.na(freq_mat)] <-
-      1 - freq_mat[freq_mat > 0.5 & !is.na(freq_mat)]
+    # fold the frequencies above 0.5 (which() skips missing values, and only
+    # stores the indices of the values to fold)
+    to_fold <- which(freq_mat > 0.5)
+    freq_mat[to_fold] <- 1 - freq_mat[to_fold]
 
     freq_mat <- format_grouped_output(
       out_mat = freq_mat,
@@ -324,6 +305,33 @@ loci_maf.grouped_df <- function(
   }
 }
 
+# function to estimate frequencies for each group (diploid and pseudohaploid
+# data): it returns a plain matrix with one row per locus and one column per
+# group of frequencies or, if as_counts = TRUE, with the alternate allele
+# counts in the first n_groups columns and the valid allele counts in the
+# next n_groups columns
+grouped_alt_freq_dip_pseudo <- function(.x,
+                                        as_counts = FALSE,
+                                        n_cores,
+                                        block_size) {
+  # the cpp code reads the FBM directly, in blocks of block_size loci, and
+  # fills a single matrix (rather than binding the matrices from each
+  # block); openMP uses multiple cores in the cpp code. If we want
+  # frequencies, it only returns them (freq_only = TRUE)
+  grouped_alt_freq_dip_pseudo_cpp(
+    BM = .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
+    groupIds = dplyr::group_indices(.x) - 1L,
+    ngroups = dplyr::n_groups(.x),
+    ploidy = indiv_ploidy(.x),
+    ncores = n_cores,
+    as_counts = as_counts,
+    block_size = block_size,
+    freq_only = TRUE
+  )
+}
+
 # function to estimate frequencies for diploid
 loci_alt_freq_dip_pseudo <- function(.x,
                                      as_counts = FALSE,
@@ -337,30 +345,28 @@ loci_alt_freq_dip_pseudo <- function(.x,
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
-    # internal function that can be used with a big_apply #nolint start
-    gt_alt_freq_sub <- function(BM, ind, rows_to_keep) {
-      alt_freq_dip_pseudo_cpp(
-        BM = BM,
-        rowInd = rows_to_keep,
-        colInd = ind,
-        ploidy = ploidy,
-        as_counts = as_counts,
-        ncores = n_cores
-      )
-    } # nolint end
-    freq <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = gt_alt_freq_sub,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      ncores = 1, # parallelisation is used within the function
-      block.size = block_size,
-      a.combine = "rbind"
+    # the cpp code reads the FBM directly (in blocks of block_size loci, using
+    # openMP for parallelisation) and returns either the vector of
+    # frequencies, or a matrix with the counts of alternate and valid alleles
+    freq <- alt_freq_dip_pseudo_cpp(
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = attr(.x, "loci")$big_index,
+      ploidy = ploidy,
+      ncores = n_cores,
+      as_counts = as_counts,
+      block_size = block_size
     )
+    return(freq)
   } else {
     # if we have a single individual, create a matrix with two columns
-    # counts and ploidy (i.e. number of copies)
-    freq <- cbind(geno_fbm[rows_to_keep, attr(.x, "loci")$big_index], ploidy)
+    # counts and ploidy (i.e. number of copies), with no valid alleles (and
+    # thus no alternate alleles) for missing genotypes, as in the cpp code
+    geno <- geno_fbm[rows_to_keep, attr(.x, "loci")$big_index]
+    freq <- cbind(
+      n_alt = ifelse(is.na(geno), 0, geno),
+      n_valid = ifelse(is.na(geno), 0, ploidy)
+    )
     # if this individual is pseudohaploid, get the right counts by dividing by 2
     if (ploidy == 1) {
       freq[, 1] <- freq[, 1] / 2
@@ -378,7 +384,8 @@ loci_alt_freq_dip_pseudo <- function(.x,
   }
 }
 
-loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
+loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
+                                    block_size, ...) {
   warning(paste(
     "this function still needs a proper unit test!!!",
     "It assumes alleles are the unit of observation"
@@ -390,46 +397,50 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
   # as long as we have more than one individual
   ploidy_by_indiv <- indiv_ploidy(.x)
   if (length(rows_to_keep) > 1) {
-    # col means for submatrix (all rows, only some columns)
-    col_sums_na <- function(X, ind, rows_to_keep, ploidy_by_indiv) {
-      res <- colSums(X[rows_to_keep, ind], na.rm = TRUE)
-      col_na <- function(a, ploidy_by_indiv) {
-        sum(is.na(a) * ploidy_by_indiv)
-      }
-      res <- cbind(
-        res,
-        apply(
-          X[rows_to_keep, ind],
-          2,
-          col_na,
-          ploidy_by_indiv = ploidy_by_indiv
-        )
-      )
-      res
-    }
-    col_sums_na_mat <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = col_sums_na,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      ploidy_by_indiv = ploidy_by_indiv,
-      ncores = 1, # parallelisation is used within the function
-      block.size = block_size,
-      a.combine = "rbind"
+    # counts of alternate and valid alleles, accounting for missing values
+    # (the cpp code reads the FBM directly, in blocks of block_size loci,
+    # using openMP for parallelisation)
+    counts <- alt_freq_polyploid_cpp(
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = attr(.x, "loci")$big_index,
+      ploidy = ploidy_by_indiv,
+      ncores = n_cores,
+      as_counts = as_counts,
+      block_size = block_size
     )
-    # now get frequency accounting for missing values
-    col_sums_na_mat[, 1] / (sum(ploidy_by_indiv) - col_sums_na_mat[, 2])
+    # if we only want frequencies, the cpp code returned them directly
+    if (!as_counts) {
+      return(counts)
+    }
   } else {
-    # if we have a single individual
-    geno_fbm[rows_to_keep, attr(.x, "loci")$big_index] / ploidy_by_indiv[rows_to_keep] # nolint
+    # if we have a single individual (ploidy_by_indiv is already restricted
+    # to the individuals in .x, so it has length 1); missing genotypes have
+    # no valid alleles
+    geno <- geno_fbm[rows_to_keep, attr(.x, "loci")$big_index]
+    counts <- cbind(
+      n_alt = ifelse(is.na(geno), 0, geno),
+      n_valid = ifelse(is.na(geno), 0, ploidy_by_indiv)
+    )
   }
+  if (as_counts) {
+    return(counts)
+  }
+  # now get frequency (unname, as a single locus would keep the column name)
+  unname(counts[, 1] / counts[, 2])
 }
 
 #' Function to format the matrix for grouped operations
 #'
 #' This function is used to format the matrix for grouped operations
 #'
-#' @param out_mat a matrix of the output
+#' Loci names are only added where they are needed: for "tidy", they become
+#' the `loci` column; for "matrix", they become the row names of a
+#' [matrix_int_names()] object (so integer names stay integers); "list" has
+#' no loci names.
+#'
+#' @param out_mat a matrix of the output (loci in rows, groups in columns), or
+#'   a vector (for a single group or a single locus)
 #' @param group_ids a vector of group ids
 #' @param loci_names a vector of loci names
 #' @param type a string indicating the type of output
@@ -437,29 +448,47 @@ loci_alt_freq_polyploid <- function(.x, n_cores, block_size, ...) {
 #' @keywords internal
 #' @noRd
 format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
-  if (is.vector(out_mat)) {
-    out_mat <- matrix(
-      out_mat,
-      nrow = length(loci_names),
-      ncol = length(group_ids),
-      dimnames = list(loci_names, group_ids)
-    )
-  }
+  # use the group labels as names (factors and numbers would otherwise fail
+  # as matrix column names, or be used as column positions in tidyselect)
+  group_ids <- as.character(group_ids)
+  n_loci <- length(loci_names)
+  n_groups <- length(group_ids)
 
   if (type == "tidy") {
-    out_mat_tbl <- as.data.frame(out_mat)
-    colnames(out_mat_tbl) <- group_ids
-    out_mat_tbl$loci <- loci_names
-    long_freq <- out_mat_tbl %>% # nolint start
-      tidyr::pivot_longer(cols = dplyr::all_of(group_ids), names_to = "group") # nolint end
-    long_freq
-  } else if (type == "list") {
+    # build the long tibble directly, with one row per locus and group (loci
+    # in the outer loop, as given by tidyr::pivot_longer()), rather than
+    # casting the matrix to a data.frame and pivoting it, which makes several
+    # copies of the data. Once the matrix is transposed, each of its rows
+    # (a locus) becomes n_groups consecutive values (this also works if
+    # out_mat is a vector, i.e. a single group or a single locus)
+    values <- t(out_mat)
+    # drop all attributes (dim, dimnames, any class) to get a plain vector
+    # (values is not shared, so this happens in place)
+    attributes(values) <- NULL
+    return(tibble::new_tibble(
+      list(
+        loci = rep(loci_names, each = n_groups),
+        group = rep(group_ids, times = n_loci),
+        value = values
+      ),
+      nrow = n_loci * n_groups
+    ))
+  }
+
+  if (is.vector(out_mat)) {
+    # names are added below, so that integer loci names are not cast to
+    # characters
+    out_mat <- matrix(
+      out_mat,
+      nrow = n_loci,
+      ncol = n_groups
+    )
+  }
+  if (type == "list") {
     # return a list to mimic a group_map
     lapply(seq_len(ncol(out_mat)), function(i) out_mat[, i])
   } else if (type == "matrix") {
-    # return a matrix
-    colnames(out_mat) <- group_ids
-    row_names(out_mat) <- loci_names
-    out_mat
+    # return a matrix_int_names, so that integer loci names are preserved
+    matrix_int_names(out_mat, row_names = loci_names, col_names = group_ids)
   }
 }

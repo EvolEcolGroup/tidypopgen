@@ -209,6 +209,11 @@ test_that("n_cores can be set", {
     "operator is invalid for atomic vectors"
   )
   expect_true(getOption("bigstatsr.check.parallel.blas"))
+
+  # the previous value of the option is restored on exit
+  withr::local_options(bigstatsr.check.parallel.blas = FALSE)
+  two_core <- gt_impute_simple(missing_gt, method = "mode", n_cores = 2)
+  expect_false(getOption("bigstatsr.check.parallel.blas"))
 })
 
 test_that("imputed gt retains status after gt_update_backingfile", {
@@ -218,6 +223,7 @@ test_that("imputed gt retains status after gt_update_backingfile", {
   # subset by loci
   missing_gt_imputed <- missing_gt_imputed %>%
     select_loci(c(1:100))
+  before_update <- missing_gt_imputed
   # update backingfile
   missing_gt_imputed <- gt_update_backingfile(
     missing_gt_imputed,
@@ -226,6 +232,20 @@ test_that("imputed gt retains status after gt_update_backingfile", {
   )
   # check if still imputed
   gt_has_imputed(missing_gt_imputed)
+  # the raw values are copied, so genotypes are the same with and without
+  # using the imputed values
+  expect_identical(
+    show_genotypes(missing_gt_imputed),
+    show_genotypes(before_update)
+  )
+  gt_set_imputed(missing_gt_imputed, set = TRUE)
+  gt_set_imputed(before_update, set = TRUE)
+  expect_identical(
+    show_genotypes(missing_gt_imputed),
+    show_genotypes(before_update)
+  )
+  gt_set_imputed(missing_gt_imputed, set = FALSE)
+  gt_set_imputed(before_update, set = FALSE)
   # test we can use a function that requires imputation
   expect_true(inherits(missing_gt_imputed %>% gt_pca_partialSVD(), "gt_pca"))
 

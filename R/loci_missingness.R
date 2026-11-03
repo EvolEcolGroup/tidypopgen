@@ -105,20 +105,15 @@ loci_missingness.vctrs_bigSNP <- function(
   rows_to_keep <- vctrs::vec_data(.x)
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
-    # internal function that can be used with a big_apply
-    count_na_sub <- function(BM, ind, rows_to_keep) { # nolint
-      n_na <- bigstatsr::big_counts(BM, ind.row = rows_to_keep, ind.col = ind)
-      n_na <- n_na[nrow(n_na), ] # this should work also with polyploids
-      n_na
-    }
-    n_na <- bigstatsr::big_apply(
-      geno_fbm,
-      a.FUN = count_na_sub,
-      rows_to_keep = rows_to_keep,
-      ind = attr(.x, "loci")$big_index,
-      ncores = 1, # parallelisation is used within the function
-      block.size = block_size,
-      a.combine = "c"
+    # count the missing genotypes at each locus (the cpp code reads the FBM
+    # directly, in blocks of block_size loci, using openMP for
+    # parallelisation)
+    n_na <- missingness_cpp(
+      BM = geno_fbm,
+      rowInd = rows_to_keep,
+      colInd = attr(.x, "loci")$big_index,
+      ncores = n_cores,
+      block_size = block_size
     )
     if (!as_counts) {
       n_na <- n_na / length(rows_to_keep)
@@ -156,33 +151,20 @@ loci_missingness.grouped_df <- function(
   }
   rlang::check_dots_empty()
   type <- match.arg(type)
-  geno_fbm <- .gt_get_fbm(.x)
-  rows_to_keep <- .gt_fbm_rows(.x)
-  count_na_sub <- function(geno_fbm, ind, rows_to_keep) {
-    na_mat <- grouped_missingness_cpp( # nolint
-      BM = geno_fbm,
-      rowInd = rows_to_keep,
-      colInd = ind,
-      groupIds = dplyr::group_indices(.x) - 1,
-      ngroups = max(dplyr::group_indices(.x)),
-      ncores = n_cores
-    )
-  }
-
-  na_mat <- bigstatsr::big_apply(
-    geno_fbm,
-    a.FUN = count_na_sub,
-    rows_to_keep = rows_to_keep,
-    ind = attr(.x$genotypes, "loci")$big_index,
-    ncores = 1, # parallelisation is used within the function
-    block.size = block_size,
-    a.combine = "rbind"
+  # count the missing genotypes at each locus for each group, dividing them by
+  # the size of each group unless we want counts (the cpp code reads the FBM
+  # directly, in blocks of block_size loci, and fills a single matrix; openMP
+  # is used for parallelisation)
+  na_mat <- grouped_missingness_cpp( # nolint
+    BM = .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
+    groupIds = dplyr::group_indices(.x) - 1L,
+    ngroups = dplyr::n_groups(.x),
+    ncores = n_cores,
+    as_counts = as_counts,
+    block_size = block_size
   )
-
-  group_sizes <- tally(.x) %>% dplyr::pull(dplyr::all_of("n"))
-  if (!as_counts) {
-    na_mat <- sweep(na_mat, MARGIN = 2, STATS = group_sizes, FUN = "/")
-  }
 
   na_mat <- format_grouped_output(
     out_mat = na_mat,

@@ -13,7 +13,10 @@
 #' If not specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not
 #'  specified, all columns are used. Don't use negative indices.
-#' @param block.size maximum number of columns read at once.
+#' @param block.size maximum number of columns read at once. Genotypes are
+#'   compared in a compact bit-packed form, so this has little effect on
+#'   memory use.
+#' @param n_cores number of cores to be used (default 1).
 #' @returns a square symmetrical matrix of relationship coefficients between
 #'  individuals
 #' @export
@@ -33,7 +36,8 @@ snp_king <- function(
   X, # nolint start
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
-  block.size = bigstatsr::block_size(nrow(X)) * 4
+  block.size = bigstatsr::block_size(nrow(X)) * 4,
+  n_cores = 1
 ) {
   # nolint end
   if (!inherits(X, "FBM.code256")) {
@@ -50,29 +54,19 @@ snp_king <- function(
 
   intervals <- CutBySize(m, block.size)
 
-  # Preassign memory where we will store the slices of genotypes.
-  # For efficiency, when we read in the slice,
-  # we will immediately recode it into these 3 matrices,
-  # one per genotype, equivalent to X==0, X==1, and X==2 respectively
-  X_0_part <- matrix(0, n, max(intervals[, "size"])) # nolint start
-  X_1_part <- matrix(0, n, max(intervals[, "size"]))
-  X_2_part <- matrix(0, n, max(intervals[, "size"]))
-  # valid loci (i.e. with genotype 0, 1 or 2)
-  X_valid_part <- matrix(0, n, max(intervals[, "size"])) # nolint end
-
+  # for each block of loci, genotypes are packed into bits and compared
+  # with popcounts in C++ (see src/pairwise_bitpacked.h), so no dense
+  # copy of the block is needed
   for (j in bigstatsr::rows_along(intervals)) {
     ind <- seq2(intervals[j, ]) # this iteration indices
     ind.col.ind <- ind.col[ind] # subset given indices by the iteration indices #nolint
     increment_king_numerator(
       k_numerator,
       N_Aa_i,
-      X_0_part,
-      X_1_part,
-      X_2_part,
-      X_valid_part,
       X,
       ind.row,
-      ind.col.ind
+      ind.col.ind,
+      ncores = n_cores
     )
   }
   # transpose the counts of heterozygous sites to confirm that this is valid

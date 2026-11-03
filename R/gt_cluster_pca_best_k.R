@@ -150,6 +150,8 @@ gt_cluster_pca_best_k <- function(
     )
     n_clust <- min(which(diff(temp) > 0))
   }
+  # n_clust is the position in the vector of k values; get the actual k
+  n_clust <- x$clusters$k[n_clust]
   if (!quiet) {
     message(
       "Using ",

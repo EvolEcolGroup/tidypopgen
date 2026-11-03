@@ -123,7 +123,7 @@ mutate.gen_tbl <- function(..., deparse.level = 1) { # nolint
   # do not remove
   if (!"genotypes" %in% names(out)) {
     message("as genotypes were dropped, this is no longer a 'gen_tbl'")
-    class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
+    class(out) <- c("tbl_df", "tbl", "data.frame")
     return(out)
   }
   # prioritise "gen_tbl" class over "sf"
@@ -266,8 +266,13 @@ group_by.gen_tbl <- function(
 ) {
   out <- NextMethod()
 
-  # prioritise "gen_tbl" class over "sf"
   obj_class <- class(out)
+  # without grouping variables the tibble is not grouped
+  if (!inherits(out, "grouped_df")) {
+    class(out) <- c("gen_tbl", obj_class[obj_class != "gen_tbl"])
+    return(out)
+  }
+  # prioritise "gen_tbl" class over "sf"
   if ("sf" %in% obj_class) {
     obj_class <-
       c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf", obj_class[!obj_class %in% c("grouped_df", "gen_tbl", "sf")]) # nolint
@@ -281,8 +286,21 @@ group_by.gen_tbl <- function(
 #' @export
 #' @noRd
 ungroup.grouped_gen_tbl <- function(x, ...) {
+  sf_column <- attr(x, "sf_column")
   out <- NextMethod(...)
-  class(out) <- c("gen_tbl", class(out))
+  obj_class <- class(out)
+  obj_class <- obj_class[!obj_class %in% c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf")] # nolint
+  # dplyr's method returns a plain tibble, so we restore sf if needed
+  if (!is.null(sf_column)) {
+    attr(out, "sf_column") <- sf_column
+    obj_class <- c("sf", obj_class)
+  }
+  if (inherits(out, "grouped_df")) {
+    # only some grouping variables were removed
+    class(out) <- c("grouped_gen_tbl", "grouped_df", "gen_tbl", obj_class)
+  } else {
+    class(out) <- c("gen_tbl", obj_class)
+  }
   return(out) # nolint
 }
 
@@ -303,7 +321,12 @@ ungroup.grouped_gen_tbl <- function(x, ...) {
 "[.grouped_gen_tbl" <- function(x, i, j, ...) {
   original_class <- class(x)
   x <- NextMethod()
-  class(x) <- original_class
+  if (inherits(x, "grouped_df")) {
+    class(x) <- original_class
+  } else {
+    # all grouping variables were removed, so the tibble is no longer grouped
+    class(x) <- original_class[!original_class %in% c("grouped_gen_tbl", "grouped_df")] # nolint
+  }
   if (!"genotypes" %in% names(x)) {
     class(x) <- class(x)[!class(x) %in% c("grouped_gen_tbl", "gen_tbl")]
   }
@@ -348,6 +371,29 @@ ungroup.grouped_gen_tbl <- function(x, ...) {
     obj_class <-
       c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf", obj_class[!obj_class %in% c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf")]) # nolint
     class(x) <- obj_class
+  }
+  x
+}
+
+# without this method, `names<-.grouped_df` from dplyr (used by select(),
+# rename() and relocate()) rebuilds a plain grouped_df, dropping the
+# `gen_tbl` (and `sf`) classes
+#' @export
+#' @noRd
+"names<-.grouped_gen_tbl" <- function(x, value) {
+  original_class <- class(x)
+  sf_column <- attr(x, "sf_column")
+  if (!is.null(sf_column)) {
+    # the geometry column might have been renamed
+    sf_column <- value[match(sf_column, names(x))]
+  }
+  x <- NextMethod()
+  if (!"genotypes" %in% value || !inherits(x, "grouped_df")) {
+    return(x)
+  }
+  class(x) <- original_class
+  if (!is.null(sf_column)) {
+    attr(x, "sf_column") <- sf_column
   }
   x
 }

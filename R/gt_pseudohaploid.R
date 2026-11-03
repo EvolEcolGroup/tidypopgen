@@ -30,6 +30,8 @@
 gt_pseudohaploid <- function(x, test_n_loci = 10000) {
   # check that the input is a gen_tibble
   stopifnot_gen_tibble(x)
+  # pseudohaploids can only be identified in diploid data
+  stopifnot_dip_pseudo(x)
 
   # if this is already set to pseudohaploid, reset it to diploid to reprocess it
   if (attr(x$genotypes, "ploidy") == -2) {
@@ -46,8 +48,10 @@ gt_pseudohaploid <- function(x, test_n_loci = 10000) {
   # if test_n_loci greater than n_loci, set it to n_loci
   test_n_loci <- min(test_n_loci, n_loci)
 
-  if (!"ploidy" %in% names(attr(x, "fbm_ploidy"))) {
-    attr(x$genotypes, "fbm_ploidy") <- NA_integer_
+  # if fbm_ploidy is missing, initialise it for the whole FBM (it also covers
+  # individuals not in the tibble, whose ploidy is kept as is)
+  if (is.null(attr(x$genotypes, "fbm_ploidy"))) {
+    attr(x$genotypes, "fbm_ploidy") <- rep(2, nrow(.gt_get_fbm(x)))
   }
 
   attr(x$genotypes, "fbm_ploidy")[.gt_fbm_rows(x)] <-

@@ -132,6 +132,7 @@ doi
 eig
 eigen
 eqn
+erroring
 etc
 exomes
 fam
@@ -153,13 +154,16 @@ hclust
 het
 heterozygosities
 heterozygosity
+heterozygote
 heterozygotes
 homozyg
 homozygosity
 homozygote
+homozygotes
 hwe
 ibs
 ind
+indels
 indep
 indiv
 individuals’
@@ -173,6 +177,7 @@ loadingPC
 maf
 magrittr
 minilanguage
+misassigned
 nSNP
 nolint
 nwise
@@ -186,6 +191,7 @@ pbs
 pca
 pcadapt
 ped
+ploidies
 pos
 prcomp
 precomputing

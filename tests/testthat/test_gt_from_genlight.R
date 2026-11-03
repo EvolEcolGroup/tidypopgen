@@ -26,6 +26,28 @@ test_that("gt can convert from genlight", {
   expect_true(grepl(".bk$", gt_get_file_names(new_gt)[2]))
 })
 
+test_that("gt can convert from genlight without pop", {
+  x <- new("genlight",
+    list(
+      indiv1 = c(1, 1, 0, 1, 1, 0),
+      indiv2 = c(2, 1, 1, 0, 0, 0)
+    ),
+    ploidy = c(2, 2),
+    loc.names = paste0("locus", 1:6),
+    chromosome = c("chr1", "chr1", "chr2", "chr2", "chr3", "chr3"),
+    position = c(100, 200, 150, 250, 300, 400),
+    loc.all = c("A/T", "C/G", "G/C", "A/T", "T/C", "G/A")
+  )
+  new_gt <- gt_from_genlight(x, backingfile = tempfile())
+  expect_true(inherits(new_gt, "gen_tbl"))
+  expect_equal(names(new_gt), c("id", "genotypes"))
+  expect_equal(new_gt$id, c("indiv1", "indiv2"))
+  expect_equal(
+    show_genotypes(new_gt),
+    rbind(c(1, 1, 0, 1, 1, 0), c(2, 1, 1, 0, 0, 0))
+  )
+})
+
 test_that("error with non-diploid genlight", {
   x <- new("genlight",
     list(

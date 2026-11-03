@@ -48,29 +48,86 @@ qc_report_loci.tbl_df <- function(.x, ...) {
     "populations or groups, please use`group_by()` before calling",
     "`qc_report_loci()`."
   ))
-  qc_report <- .x %>%
-    reframe(
-      snp_id = loci_names(.x),
-      maf = loci_maf(.data$genotypes),
-      missingness = loci_missingness(.data$genotypes),
-      hwe_p = loci_hwe(.data$genotypes)
-    )
+  # compute maf, missingness and hwe (treating all individuals as a single
+  # group)
+  qc_report <- qc_report_loci_stats(.x, hwe = TRUE)
   class(qc_report) <- c("qc_report_loci", class(qc_report))
   return(qc_report)
 }
 
 qc_report_loci_pseudohaploid <- function(.x, ...) {
   rlang::check_dots_empty()
-  # use the grouped method
-  qc_report <- .x %>%
-    ungroup() %>%
-    reframe(
-      snp_id = loci_names(.x),
-      maf = loci_maf(.data$genotypes),
-      missingness = loci_missingness(.data$genotypes)
-    )
+  # maf and missingness are computed across all individuals, without HWE
+  qc_report <- qc_report_loci_stats(ungroup(.x), hwe = FALSE)
   class(qc_report) <- c("qc_report_loci", class(qc_report))
   return(qc_report)
+}
+
+#' Compute the statistics for qc_report_loci
+#'
+#' Internal function that computes the minor allele frequency and missingness
+#' of each locus across all individuals and, if `hwe = TRUE`, the HWE exact
+#' test p-value (mid-p) within each group, returning the smallest p-value
+#' across groups (a single group for an ungrouped `gen_tibble`). When
+#' genotypes are coded as 0, 1, 2 or missing (raw or imputed calls), all
+#' statistics are computed in a single pass over the genotypes by
+#' `loci_qc_cpp()`, rather than reading the genotypes once for each
+#' statistic; otherwise (e.g. dosages), or for a single individual, it falls
+#' back on [loci_maf()], [loci_missingness()] and [loci_hwe()].
+#'
+#' @param .x a [`gen_tibble`] object, possibly grouped.
+#' @param hwe boolean, whether the HWE test should be computed.
+#' @returns a tibble with columns `snp_id`, `maf`, `missingness` and (if
+#'   `hwe = TRUE`) `hwe_p`, the smallest p-value across groups.
+#' @keywords internal
+#' @noRd
+qc_report_loci_stats <- function(.x, hwe) {
+  geno_fbm <- .gt_get_fbm(.x)
+  # group of each individual (all in one group if not grouped)
+  if (inherits(.x, "grouped_df")) {
+    group_ids <- dplyr::group_indices(.x)
+  } else {
+    group_ids <- rep(1L, nrow(.x))
+  }
+  code256 <- geno_fbm$code256
+  if (all(is.na(code256) | code256 %in% c(0, 1, 2)) && nrow(.x) > 1) {
+    # a single pass over the genotypes (openMP is used for parallelisation)
+    qc_stats <- loci_qc_cpp(
+      BM = geno_fbm,
+      rowInd = .gt_fbm_rows(.x),
+      colInd = .gt_fbm_cols(.x),
+      groupIds = group_ids - 1L,
+      ngroups = max(group_ids),
+      ploidy = indiv_ploidy(.x),
+      hwe = hwe,
+      midp = TRUE,
+      ncores = bigstatsr::nb_cores(),
+      block_size = bigstatsr::block_size(nrow(.x), 1)
+    )
+  } else {
+    # compute each statistic separately
+    qc_stats <- list(
+      maf = loci_maf(.x$genotypes),
+      missingness = loci_missingness(.x$genotypes)
+    )
+    if (hwe) {
+      if (inherits(.x, "grouped_df")) {
+        # smallest p-value across groups (one vector per group)
+        qc_stats$hwe_p <- do.call(pmin, loci_hwe(.x, type = "list"))
+      } else {
+        qc_stats$hwe_p <- loci_hwe(.x$genotypes)
+      }
+    }
+  }
+  qc_report <- tibble::tibble(
+    snp_id = loci_names(.x),
+    maf = qc_stats$maf,
+    missingness = qc_stats$missingness
+  )
+  if (hwe) {
+    qc_report$hwe_p <- qc_stats$hwe_p
+  }
+  qc_report
 }
 
 #' @export
@@ -93,19 +150,11 @@ qc_report_loci.grouped_df <- function(.x, ...) {
   # Take grouped variable pops and find how many unique groups
   pops <- length(unique(pops))
 
-  # Calculate hwe across groups
-  hwe_res <- loci_hwe(.x, type = "matrix")
-  hwe_res <- as.data.frame(hwe_res)
-  hwe_res$p_corrected <- apply(hwe_res, 1, function(row) min(row) * pops)
-
-  qc_report <- .x %>%
-    ungroup() %>%
-    reframe(
-      snp_id = loci_names(.x),
-      maf = loci_maf(.data$genotypes),
-      missingness = loci_missingness(.data$genotypes),
-      hwe_p = hwe_res$p_corrected
-    )
+  # Calculate maf and missingness across all individuals, and the smallest
+  # hwe p-value across groups (in a single pass over the genotypes)
+  qc_report <- qc_report_loci_stats(.x, hwe = TRUE)
+  # Bonferroni correction of the smallest p-value, capped at 1
+  qc_report$hwe_p <- pmin(1, qc_report$hwe_p * pops)
   class(qc_report) <- c("qc_report_loci", class(qc_report))
   return(qc_report)
 }

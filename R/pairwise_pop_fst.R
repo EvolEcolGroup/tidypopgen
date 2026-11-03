@@ -106,59 +106,32 @@ pairwise_pop_fst <- function(
   }
 
   # only operate on diploids or, if pseudohaploids, Hudson
-  if (!is_diploid_only(.x) && !is_pseudohaploid(.x)) {
-    stop("fst can be currently computed on diploid data")
-  }
-  if (is_pseudohaploid(.x) && method != "Hudson") {
-    stop("only `method = Hudson` is valid when the data include pseudohaploids")
-  }
+  .check_fst_ploidy(.x, method)
 
   # get the populations
   .group_levels <- .x %>% group_keys()
   # create all combinations
   pairwise_combn <- utils::combn(nrow(.group_levels), 2)
 
-  # summarise population frequencies
-  # TODO this should be done in chunks!!!!
-  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
+  # compute the numerator and denominator of Fst for every pair of
+  # populations in a single pass over the genotypes: loci are processed in
+  # blocks, summarising the populations within each block and then looping
+  # over the pairs, so that we never store the full loci x populations
+  # summaries (only the matrices by locus are stored, if requested)
+  fst_list <- pairwise_pop_fst_cpp(
     .gt_get_fbm(.x),
     rowInd = .gt_fbm_rows(.x),
     colInd = .gt_fbm_cols(.x),
     groupIds = dplyr::group_indices(.x) - 1,
     ngroups = nrow(.group_levels),
     ploidy = indiv_ploidy(.x),
+    pairwise_combn = pairwise_combn,
+    method = method,
+    by_locus = by_locus,
+    return_num_dem = return_num_dem,
+    block_size = 1024,
     ncores = n_cores
   )
-
-  if (method == "Hudson") {
-    fst_list <- pairwise_fst_hudson_loop(
-      pairwise_combn = pairwise_combn,
-      n = pop_freqs_df$n,
-      freq_alt = pop_freqs_df$freq_alt,
-      freq_ref = pop_freqs_df$freq_ref,
-      by_locus = by_locus,
-      return_num_dem = return_num_dem
-    )
-  } else if (method == "Nei87") {
-    fst_list <- pairwise_fst_nei87_loop(
-      pairwise_combn = pairwise_combn,
-      n = pop_freqs_df$n,
-      het_obs = pop_freqs_df$het_obs,
-      freq_alt = pop_freqs_df$freq_alt,
-      freq_ref = pop_freqs_df$freq_ref,
-      by_locus = by_locus,
-      return_num_dem = return_num_dem
-    )
-  } else if (method == "WC84") {
-    fst_list <- pairwise_fst_wc84_loop(
-      pairwise_combn = pairwise_combn,
-      n = pop_freqs_df$n,
-      freq_alt = pop_freqs_df$freq_alt,
-      het_obs = pop_freqs_df$het_obs,
-      by_locus = by_locus,
-      return_num_dem = return_num_dem
-    )
-  }
 
   # format nicely the group combinations object
   # (we'll use it to create column names)
@@ -269,4 +242,18 @@ col_names_combinations <- function(group_combinations, prefix = NULL) {
     comb_labels <- paste(prefix, comb_labels, sep = "_")
   }
   return(comb_labels)
+}
+
+# Check that Fst can be computed on the ploidy of .x with the given method:
+# Fst is only implemented for diploids or, if the data include
+# pseudohaploids, for Hudson (used by pairwise_pop_fst(),
+# windows_pairwise_pop_fst() and the jackknife functions)
+.check_fst_ploidy <- function(.x, method) {
+  if (!is_diploid_only(.x) && !is_pseudohaploid(.x)) {
+    stop("fst can be currently computed on diploid data")
+  }
+  if (is_pseudohaploid(.x) && method != "Hudson") {
+    stop("only `method = Hudson` is valid when the data include pseudohaploids")
+  }
+  invisible(TRUE)
 }

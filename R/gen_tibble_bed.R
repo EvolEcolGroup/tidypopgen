@@ -9,24 +9,26 @@ gen_tibble_bed_rds <- function(
   quiet = FALSE
 ) {
   # if file ends in bed
-  if (grepl("\\.bed$", x)) {
+  if (grepl("\\.bed$", x, ignore.case = TRUE)) {
     # check that the bim and fam files exist
-    if (!file.exists(bigsnpr::sub_bed(x, ".bim"))) {
-      stop("bim file ", bigsnpr::sub_bed(x, ".bim"), " does not exist")
+    bim_file <- sub_ext_ignore_case(x, "bed", ".bim")
+    fam_file <- sub_ext_ignore_case(x, "bed", ".fam")
+    if (!file.exists(bim_file)) {
+      stop("bim file ", bim_file, " does not exist")
     }
-    if (!file.exists(bigsnpr::sub_bed(x, ".fam"))) {
-      stop("fam file ", bigsnpr::sub_bed(x, ".fam"), " does not exist")
+    if (!file.exists(fam_file)) {
+      stop("fam file ", fam_file, " does not exist")
     }
     # read in the loci and indiv_meta from the bim and fam files
-    loci <- loci_from_bim(bigsnpr::sub_bed(x, ".bim"),
+    loci <- loci_from_bim(bim_file,
       valid_alleles = valid_alleles,
       missing_alleles = missing_alleles,
       allow_duplicates = allow_duplicates
     )
-    indiv_meta <- indiv_meta_from_fam(bigsnpr::sub_bed(x, ".fam"))
+    indiv_meta <- indiv_meta_from_fam(fam_file)
 
     if (is.null(backingfile)) {
-      backingfile <- bigsnpr::sub_bed(x)
+      backingfile <- sub("\\.bed$", "", x, ignore.case = TRUE)
     }
     fbm_path <- fbm_read_bed(x,
       n_indiv = nrow(indiv_meta),
@@ -148,7 +150,7 @@ loci_from_bim <- function(bim,
                           missing_alleles = c("0", "."),
                           allow_duplicates = FALSE) {
   if (is.character(bim)) {
-    bim <- utils::read.table(bim, stringsAsFactors = FALSE)
+    bim <- read_loci_file(bim, character_cols = c(2, 5, 6))
     names(bim)[1:6] <- c(
       "chromosome", "marker.ID", "genetic.dist",
       "physical.pos", "allele1", "allele2"
@@ -179,6 +181,35 @@ loci_from_bim <- function(bim,
   )
 
   return(loci)
+}
+
+#' Read a whitespace delimited file with one row per locus
+#'
+#' This function reads files such as PLINK .bim or *packedancestry* .snp files
+#' with [data.table::fread()], which is much faster than [utils::read.table()]
+#' and uses much less memory on large files (read.table() creates a string for
+#' every field before converting the columns, which costs several GB for tens
+#' of millions of loci).
+#' @param file the path to the file
+#' @param character_cols the indices of the columns to read as characters
+#'   (locus names and alleles, so that e.g. an allele "T" is not read as
+#'   TRUE, nor a name "001" as the integer 1); the type of the other columns
+#'   is guessed, as done by read.table() (e.g. chromosomes are integers if
+#'   all values are integers, so that their factor levels are sorted
+#'   numerically)
+#' @returns a data.frame with columns V1, V2, ...
+#' @keywords internal
+#' @noRd
+read_loci_file <- function(file, character_cols) {
+  data.table::fread(
+    file,
+    header = FALSE,
+    colClasses = list(character = character_cols),
+    # read large integers (e.g. positions) as doubles, not integer64
+    integer64 = "double",
+    data.table = FALSE,
+    showProgress = FALSE
+  )
 }
 
 

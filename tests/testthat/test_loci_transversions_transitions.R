@@ -66,3 +66,35 @@ test_that("check warning message for different alleles", {
     "valid alleles are A T C G 0 . but "
   )
 })
+
+test_that("all purine-pyrimidine pairs are transversions", {
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 2, 0, 1, 2, 0, 1),
+    c(2, 1, 0, 0, 0, 1, 1, 0, 0, 2, NA),
+    c(2, 2, 0, 0, 1, 0, 2, 1, 1, 1, 0)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:11),
+    chromosome = 1,
+    position = 1:11,
+    genetic_dist = as.double(rep(0, 11)),
+    allele_ref = c("A", "C", "G", "T", "A", "T", "C", "G", "A", "C", "A"),
+    allele_alt = c("C", "A", "T", "G", "G", "C", "T", "A", "T", "G", NA)
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  # A<->C and G<->T are transversions, A<->G and C<->T are transitions
+  transv_bool <- c(
+    TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, NA
+  )
+  expect_identical(loci_transversions(test_gt), transv_bool)
+  expect_identical(loci_transitions(test_gt), !transv_bool)
+})

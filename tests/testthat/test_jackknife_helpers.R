@@ -102,3 +102,48 @@ test_that(".block_sums does not create row names", {
   expect_null(rownames(fst_blocks$loo))
   expect_null(rownames(fst_blocks$m))
 })
+
+test_that("jackknife blocks work with chromosomes not contiguous in a table", {
+  # a factor chromosome: "2" (first in the table) has loci 1, 3 and 6, and
+  # "1" has loci 2, 4, 5 and 7
+  loci <- data.frame(
+    chromosome = factor(c("2", "1", "2", "1", "1", "2", "1"),
+      levels = c("1", "2")
+    ),
+    position = c(10L, 5L, 20L, 15L, 25L, 30L, 35L)
+  )
+  # blocks of 2 snps within each chromosome, numbered in order of appearance
+  block_id <- .jackknife_block_ids(loci, block_size = 2, size_unit = "snp")
+  expect_equal(block_id, c(1, 2, 1, 2, 3, 4, 3))
+  # the same with character chromosomes
+  loci_chr <- loci
+  loci_chr$chromosome <- as.character(loci_chr$chromosome)
+  expect_equal(
+    .jackknife_block_ids(loci_chr, block_size = 2, size_unit = "snp"),
+    block_id
+  )
+  # sums and counts of the non-missing values in each block
+  x <- cbind(stat_a = c(1, 2, NA, 4, 5, 6, 7), stat_b = 1)
+  x_blocks <- .block_sums(x, block_id)
+  expect_equal(colnames(x_blocks$sums), c("stat_a", "stat_b"))
+  expect_equal(x_blocks$sums[, "stat_a"], c(1, 6, 12, 6))
+  expect_equal(x_blocks$n[, "stat_a"], c(1, 2, 2, 1))
+  expect_equal(x_blocks$sums[, "stat_b"], c(2, 2, 2, 1))
+})
+
+test_that("jackknife blocks in bp match windows of the same size", {
+  loci <- data.frame(
+    chromosome = "chr1",
+    position = c(1L, 99L, 100L, 101L, 200L, 201L)
+  )
+  # positions 1 to 100 are in the first block, 101 to 200 in the second, and
+  # so on
+  block_id <- .jackknife_block_ids(loci, block_size = 100, size_unit = "bp")
+  expect_equal(block_id, c(1, 1, 1, 2, 2, 3))
+  # as windows with step_size equal to window_size
+  win <- windows_stats_generic(rep(1, 6),
+    loci_table = loci, operator = "sum",
+    window_size = 100, step_size = 100, size_unit = "bp"
+  )
+  expect_equal(win$n_loci, tabulate(block_id))
+})

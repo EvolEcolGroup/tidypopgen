@@ -9,9 +9,23 @@
 \usage{
 loci_hwe(.x, .col = "genotypes", ...)
 
-\method{loci_hwe}{tbl_df}(.x, .col = "genotypes", mid_p = TRUE, ...)
+\method{loci_hwe}{tbl_df}(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+)
 
-\method{loci_hwe}{vctrs_bigSNP}(.x, .col = "genotypes", mid_p = TRUE, ...)
+\method{loci_hwe}{vctrs_bigSNP}(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1),
+  ...
+)
 
 \method{loci_hwe}{grouped_df}(
   .x,

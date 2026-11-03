@@ -11,10 +11,8 @@ test_that("jackknife_nwise_pop_pbs matches pbs from genome-wide fst", {
       "fst_", fst_all$population_1, ".", fst_all$population_2
     ))
   )
-  pbs_all <- unlist(lapply(
-    pbs_one_triplet(c("pop1", "pop2", "pop3"), fst_all),
-    unname
-  ))
+  pops <- c("pop1", "pop2", "pop3")
+  pbs_all <- pbs_all_triplets(fst_all, pops = pops)[1, ]
   expect_equal(
     jack_pbs$estimate,
     unname(c(fst_all[1, ], pbs_all))
@@ -32,18 +30,12 @@ test_that("jackknife_nwise_pop_pbs matches pbs from genome-wide fst", {
     select_loci(which(block_id != 1)) %>%
     pairwise_pop_fst(method = "Hudson")
   fst_sub <- matrix(fst_sub$value, nrow = 1, dimnames = dimnames(fst_all))
-  pbs_sub <- unlist(lapply(
-    pbs_one_triplet(c("pop1", "pop2", "pop3"), fst_sub),
-    unname
-  ))
+  pbs_sub <- pbs_all_triplets(fst_sub, pops = pops)[1, ]
   fst_blocks <- .jackknife_fst_blocks(test_gt, "Hudson", block_id)
-  pbs_loo <- unlist(lapply(
-    pbs_one_triplet(
-      c("pop1", "pop2", "pop3"),
-      fst_blocks$loo[1, , drop = FALSE]
-    ),
-    unname
-  ))
+  pbs_loo <- pbs_all_triplets(
+    fst_blocks$loo[1, , drop = FALSE],
+    pops = pops
+  )[1, ]
   expect_equal(pbs_loo, pbs_sub)
 
   # matrix format

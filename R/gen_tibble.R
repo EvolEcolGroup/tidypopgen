@@ -8,7 +8,10 @@
 #' variant is found in a sex chromosome (or mtDNA), the parser will fail with
 #' 'Error: a genotype has more than max_ploidy alleles...'. To successful import
 #' such a *VCF*, change the order of variants so that the first chromosome is an
-#' autosome using a tool such as `vcftools`. Currently, only biallelic SNPs are
+#' autosome using a tool such as `vcftools`. Individuals with a missing genotype
+#' ('.') on the first variant get their ploidy from their first genotype that
+#' is not '.' (or the largest ploidy of the other individuals, if all their
+#' genotypes are '.'). Currently, only biallelic SNPs are
 #' supported. If haploid variants (e.g. sex chromosomes) are included in the
 #' *VCF*, they are not transformed into homozygous calls. Instead, reference
 #' alleles will be coded as 0 and alternative alleles will be coded as 1.
@@ -49,7 +52,8 @@
 #'   latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 #'   in case your
 #'   *VCF* has an unusual structure.
-#' @param n_cores the number of cores to use for parallel processing
+#' @param n_cores currently ignored (reading files is not parallelised); kept
+#'   for backwards compatibility
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #'   'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -311,6 +315,13 @@ gen_tibble.matrix <- function(
   }
 
   if (length(ploidy) > 1) {
+    # check that there is a ploidy value for each individual
+    if (length(ploidy) != nrow(x)) {
+      stop(
+        "'ploidy' should be a single value or a vector with one value ",
+        "per individual (row of 'x')"
+      )
+    }
     # check that there are no missing values in ploidy vector
     if (any(is.na(ploidy))) {
       stop("'ploidy' can not contain NAs")
@@ -353,6 +364,16 @@ gen_tibble.matrix <- function(
   }
   if (!(is.matrix(x) && is.numeric(x))) {
     stop("'x' is not a numeric matrix of integers")
+  }
+  # check that dosages are non-negative integers, within each ploidy
+  if (any(x != round(x) | x < 0, na.rm = TRUE)) {
+    stop("'x' should only contain non-negative integer dosages (or NA)")
+  }
+  if (any(x > fbm_ploidy, na.rm = TRUE)) {
+    stop(
+      "'x' contains dosages greater than the ploidy of the individual ",
+      "(see 'ploidy')"
+    )
   }
 
   # check dimensions
@@ -568,9 +589,29 @@ harmonise_missing_values <- function(loci_info, missing_alleles = c("0", ".")) {
 }
 
 
+# replace the extension `ext` of a file (matched ignoring case) with
+# `new_ext`; if that file does not exist, but one with an upper case `new_ext`
+# does, the latter is returned
+sub_ext_ignore_case <- function(file, ext, new_ext) {
+  ext_pattern <- paste0("\\.", ext, "$")
+  new_file <- sub(ext_pattern, new_ext, file, ignore.case = TRUE)
+  upper_file <- sub(ext_pattern, toupper(new_ext), file, ignore.case = TRUE)
+  if (!file.exists(new_file) && file.exists(upper_file)) {
+    new_file <- upper_file
+  }
+  new_file
+}
+
 # check for existing .bk files
 change_duplicated_file_name <- function(file) {
-  file <- tools::file_path_sans_ext(file)
+  # remove the extensions of backing files and of input files (other dots in
+  # the file name are kept)
+  file <- sub(
+    "\\.(bk|rds|gt|bed|ped|geno|vcf\\.gz|vcf|gz)$",
+    "",
+    file,
+    ignore.case = TRUE
+  )
 
   bk <- paste0(file, ".bk")
   rds <- paste0(file, ".rds")
@@ -623,22 +664,49 @@ change_duplicated_file_name <- function(file) {
 
 # adding a chr_int column
 cast_chromosome_to_int <- function(chromosome) {
-  # if chromosome is an factor, then cast it to character
+  # if chromosome is a factor, cast its levels rather than each locus (a
+  # factor has few levels, but it can have tens of millions of elements); we
+  # keep the levels to order non-numeric chromosomes
+  chr_levels <- NULL
+  level_codes <- NULL
   if (is.factor(chromosome)) {
-    chromosome <- as.character(chromosome)
+    chr_levels <- levels(chromosome)
+    level_codes <- as.integer(chromosome)
+    # only cast the levels that are used, which are exactly the values found
+    # in the data (unused levels would change the largest numeric chromosome)
+    used_levels <- tabulate(level_codes, nbins = length(chr_levels)) > 0
+    chromosome <- chr_levels[used_levels]
   }
   # if chromosome is a character, then cast it to integer
   if (is.character(chromosome)) {
     # attempt to strip chr from the chromosome
-    chromosome <- gsub(
-      "^(chromosome_|chr_|chromosome|chr)",
-      "",
-      chromosome,
-      ignore.case = TRUE
-    )
-    chromosome <- tryCatch(as.integer(chromosome), warning = function(e) {
-      as.integer(as.factor(chromosome))
-    })
+    strip_chr <- function(x) {
+      gsub("^(chromosome_|chr_|chromosome|chr)", "", x, ignore.case = TRUE)
+    }
+    chromosome <- strip_chr(chromosome)
+    # numeric names keep their own value
+    is_numeric <- grepl("^[0-9]+$", chromosome)
+    chr_int <- rep(NA_integer_, length(chromosome))
+    chr_int[is_numeric] <- as.integer(chromosome[is_numeric])
+    # other names are coded above the largest numeric value, in order of first
+    # appearance (or in the order of the levels for a factor)
+    is_other <- !is_numeric & !is.na(chromosome)
+    if (any(is_other)) {
+      if (is.null(chr_levels)) {
+        other_names <- unique(chromosome[is_other])
+      } else {
+        other_names <- intersect(strip_chr(chr_levels), chromosome[is_other])
+      }
+      chr_int[is_other] <- max(c(0L, chr_int[is_numeric])) +
+        match(chromosome[is_other], other_names)
+    }
+    chromosome <- chr_int
+  }
+  # for a factor, map each locus to the integer of its level
+  if (!is.null(level_codes)) {
+    levels_int <- rep(NA_integer_, length(chr_levels))
+    levels_int[used_levels] <- chromosome
+    chromosome <- levels_int[level_codes]
   }
   if (is.numeric(chromosome)) {
     chromosome <- as.integer(chromosome)

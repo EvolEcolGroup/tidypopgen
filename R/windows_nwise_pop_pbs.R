@@ -89,18 +89,16 @@ windows_nwise_pop_pbs <- function(.x,
     stop("windows_nwise_pop_pbs only works with one grouping variable")
   }
 
-  # create all 3 way combinations of populations
-  pop_combinations <- utils::combn(.group_levels %>% dplyr::pull(1), 3,
-    simplify = FALSE
+  # compute the pbs for all 3 way combinations of populations, from a matrix
+  # of the windowed fst values (windows as rows, pairs as columns)
+  fst_cols <- names(fst_values)[
+    !names(fst_values) %in% c("chromosome", "start", "end")
+  ]
+  pbs_results <- pbs_all_triplets(
+    as.matrix(fst_values[fst_cols]),
+    pops = .group_levels %>% dplyr::pull(1)
   )
-
-  # for each combination of populations, compute the pbs
-  pbs_results <- lapply(pop_combinations,
-    pbs_one_triplet,
-    fst_values = fst_values
-  )
-  # combine all tables
-  pbs_results <- do.call(cbind, pbs_results)
+  pbs_results <- tibble::as_tibble(pbs_results)
   # if we returns fst, we simply cbind the whole thing
   if (return_fst) {
     pbs_results <- dplyr::bind_cols(fst_values, pbs_results)
@@ -116,8 +114,9 @@ windows_nwise_pop_pbs <- function(.x,
   if (type == "matrix") {
     return(pbs_results)
   } else if (type == "tidy") {
-    window_cols <- c("chromosome", "start", "end")
-    cols <- names(pbs_results)[!names(pbs_results) %in% window_cols]
+    cols <- names(pbs_results)[
+      !names(pbs_results) %in% c("chromosome", "start", "end")
+    ]
     pbs_results <-
       pbs_results %>%
       tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")

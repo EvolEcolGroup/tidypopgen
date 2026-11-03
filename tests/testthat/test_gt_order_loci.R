@@ -657,3 +657,114 @@ test_that("cast_chromosome_to_int transforms correctly from factor", {
     as.character(c(1, 2, 2, 3, 8, 13))
   )
 })
+
+test_that("cast_chromosome_to_int keeps numeric names with non-numeric ones", {
+  # numeric names keep their own value, non-numeric ones are coded above the
+  # largest numeric value, in order of first appearance
+  expect_identical(
+    cast_chromosome_to_int(c("1", "2", "10", "X", "Y", "MT", "2", "X")),
+    c(1L, 2L, 10L, 11L, 12L, 13L, 2L, 11L)
+  )
+  expect_identical(
+    cast_chromosome_to_int(c("chr1", "chr2", "chr10", "chrX")),
+    c(1L, 2L, 10L, 11L)
+  )
+  # for factors, non-numeric names are coded in the order of the levels
+  expect_identical(
+    cast_chromosome_to_int(factor(c("chr2", "chrY", "chr10", "chrX"))),
+    c(2L, 12L, 10L, 11L)
+  )
+  # missing values remain missing
+  expect_identical(
+    cast_chromosome_to_int(c("1", NA, "X")),
+    c(1L, NA, 2L)
+  )
+  # all non-numeric names
+  expect_identical(cast_chromosome_to_int(c("b", "a", "b")), c(1L, 2L, 1L))
+
+  # gt_order_loci sorts numeric chromosomes numerically
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c"),
+    population = c("pop1", "pop1", "pop2")
+  )
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 0),
+    c(2, 1, 0, 0, 0, 0),
+    c(2, 2, 0, 0, 1, 1)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = c("X", "10", "2", "1", "MT", "2"),
+    position = as.integer(c(23, 3, 5, 65, 343, 46)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", NA, "C", "G", "A")
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  test_gt <- gt_order_loci(test_gt, quiet = TRUE)
+  expect_equal(
+    as.character(show_loci(test_gt)$chromosome),
+    c("1", "2", "2", "10", "MT", "X")
+  )
+})
+
+test_that("gt_update_backingfile works if n loci is a multiple of chunk_size", {
+  example_gt <- load_example_gt("gen_tbl")
+  # 6 loci, processed in 2 chunks of 3 loci (no trailing partial chunk)
+  new_gt <- gt_update_backingfile(
+    example_gt,
+    backingfile = tempfile(),
+    chunk_size = 3,
+    quiet = TRUE
+  )
+  expect_identical(show_genotypes(new_gt), show_genotypes(example_gt))
+  # also through gt_order_loci
+  shuffled_gt <- example_gt %>% select_loci(c(1, 5, 2, 6, 4, 3))
+  ordered_gt <- gt_order_loci(shuffled_gt, chunk_size = 2, quiet = TRUE)
+  expect_identical(show_genotypes(ordered_gt), show_genotypes(example_gt))
+})
+
+test_that("cast_chromosome_to_int gives the same codes for factors", {
+  chr <- c("chr2", "chrX", NA, "chr10", "chrX", "MT")
+  # unused levels (chr30, chrY) do not change the codes of the others
+  chr_factor <- factor(
+    chr,
+    levels = c("chr10", "chr2", "chr30", "chrX", "chrY", "MT")
+  )
+  expect_identical(
+    cast_chromosome_to_int(chr_factor),
+    c(2L, 11L, NA, 10L, 11L, 12L)
+  )
+  # same codes as the character vector when levels follow first appearance
+  expect_identical(
+    cast_chromosome_to_int(factor(chr, levels = unique(chr[!is.na(chr)]))),
+    cast_chromosome_to_int(chr)
+  )
+})
+
+test_that("find_duplicated_loci lists duplicates by chromosome", {
+  test_gt <- load_example_gt("gen_tbl")
+  loci <- show_loci(test_gt)
+  # duplicated positions on chr2 (first in the table) and chr1
+  loci$chromosome <- factor(c("chr2", "chr1", "chr2", "chr1", "chr1", "chr3"))
+  loci$position <- c(5L, 3L, 5L, 7L, 3L, 1L)
+  show_loci(test_gt) <- loci
+  # names are grouped by chromosome, and then in the order of the table
+  expect_identical(find_duplicated_loci(test_gt), c("rs2", "rs5", "rs1", "rs3"))
+  expect_false(find_duplicated_loci(test_gt, list_duplicates = FALSE))
+  expect_false(is_loci_table_ordered(test_gt))
+  # missing chromosomes split the runs of loci, as with rle()
+  loci$chromosome <- factor(c("chr1", NA, NA, "chr2", "chr2", "chr3"))
+  loci$position <- 1:6
+  show_loci(test_gt) <- loci
+  expect_error(
+    is_loci_table_ordered(test_gt, error_on_false = TRUE),
+    "should be adjacent"
+  )
+})

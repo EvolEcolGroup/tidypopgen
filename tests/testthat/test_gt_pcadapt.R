@@ -19,6 +19,15 @@ test_that("gt_pcadapt works on gt_pca object", {
   expect_true((inherits(missing_pcadapt, "gt_pcadapt")))
 })
 
+test_that("gt_pcadapt checks that individuals match the pca", {
+  # same individuals, in a different order
+  rev_gt <- missing_gt[rev(seq_len(nrow(missing_gt))), ]
+  expect_error(
+    gt_pcadapt(rev_gt, missing_pca, k = 3),
+    "the individuals in 'x' do not correspond to those in 'pca'"
+  )
+})
+
 test_that("n_cores can be set", {
   expect_true(getOption("bigstatsr.check.parallel.blas"))
   one_core <- gt_pcadapt(missing_gt, missing_pca, k = 3, n_cores = 1)

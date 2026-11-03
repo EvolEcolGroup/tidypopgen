@@ -106,6 +106,54 @@ test_that("qc_report_indiv$to_keep is correctly ordered", {
   )
 })
 
+test_that("qc_report_indiv$to_keep is correct for interleaved groups", {
+  # relatives are 9-10 and 11-12; groups are not contiguous in the data
+  families$population <- ifelse(
+    families$id %in% c("2", "4", "9", "10"),
+    "A",
+    "B"
+  )
+  # run separate qc reports for each population
+  group_a_report <- qc_report_indiv(
+    filter(families, population == "A"),
+    kings_threshold = 0.2
+  )
+  group_b_report <- qc_report_indiv(
+    filter(families, population == "B"),
+    kings_threshold = 0.2
+  )
+  expected <- c(group_a_report$to_keep, group_b_report$to_keep)
+  names(expected) <- c(group_a_report$id, group_b_report$id)
+  expected <- unname(expected[families$id])
+  expect_equal(sum(!expected), 2)
+
+  grouped <- qc_report_indiv(
+    families %>% group_by(population),
+    kings_threshold = 0.2
+  )
+  expect_equal(grouped$id, families$id)
+  expect_equal(as.vector(grouped$to_keep), expected)
+
+  # grouping by a factor with an unused level
+  families$population <- factor(
+    families$population,
+    levels = c("C", "A", "B")
+  )
+  grouped <- qc_report_indiv(
+    families %>% group_by(population),
+    kings_threshold = 0.2
+  )
+  expect_equal(as.vector(grouped$to_keep), expected)
+
+  # grouping by a numeric variable
+  families$population <- ifelse(families$population == "A", 0, 1)
+  grouped <- qc_report_indiv(
+    families %>% group_by(population),
+    kings_threshold = 0.2
+  )
+  expect_equal(as.vector(grouped$to_keep), expected)
+})
+
 test_that("autoplot qc_report_indiv list for each population", {
   ungrouped <- qc_report_indiv(families, kings_threshold = 0.2)
   expect_error(autoplot(ungrouped, type = "blah"), "'arg' should be one of")
@@ -232,6 +280,16 @@ test_that("qc_report_indiv for pseudohaploid data", {
 
   expect_equal(indiv_report, indiv_report_grouped)
 
+  # kinship is not supported, whether grouped or not
+  expect_error(
+    qc_report_indiv(ungroup(test_gt_pseudo), kings_threshold = 0.2),
+    "not supported for pseudohaploid data"
+  )
+  expect_error(
+    qc_report_indiv(test_gt_pseudo, kings_threshold = 0.2),
+    "not supported for pseudohaploid data"
+  )
+
   # autoplot relatedness
   expect_error(
     autoplot(indiv_report,
@@ -271,6 +329,36 @@ test_that("qc_report_indiv for pseudohaploid data", {
       type = "histogram"
     ),
     "ggplot"
+  )
+})
+
+test_that("qc_report_indiv only works with one grouping variable", {
+  families$population <- rep(c("pop1", "pop2"), 6)
+  families$sex <- rep(c("F", "F", "M"), 4)
+  families <- families %>% group_by(population, sex)
+  expect_error(
+    qc_report_indiv(families),
+    "only works with one grouping variable"
+  )
+  expect_error(
+    qc_report_indiv(families, kings_threshold = 0.2),
+    "only works with one grouping variable"
+  )
+})
+
+test_that("relatedness autoplot fails without kings_threshold", {
+  report <- qc_report_indiv(families)
+  # an unrelated object called p should not be returned
+  p <- "not a plot"
+  expect_error(
+    autoplot(report, type = "relatedness", kings_threshold = 0.2),
+    "created with `kings_threshold`"
+  )
+  families$population <- rep(c("pop1", "pop2"), 6)
+  report <- qc_report_indiv(families %>% group_by(population))
+  expect_error(
+    autoplot(report, type = "relatedness", kings_threshold = 0.2),
+    "created with `kings_threshold`"
   )
 })
 

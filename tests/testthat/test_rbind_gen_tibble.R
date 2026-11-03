@@ -54,6 +54,12 @@ test_that("merge combines datasets correctly", {
   # Check ambiguous SNPs are dropped (remove_ambiguous TRUE by default)
   expect_false("rs1240719" %in% loci_names(merged_gen))
   expect_false("rs307354" %in% loci_names(merged_gen))
+
+  # the merged gen_tibble refers to the rds of its FBM (as other gen_tibbles)
+  expect_equal(
+    attr(merged_gen$genotypes, "fbm_file"),
+    gt_get_file_names(merged_gen)[1]
+  )
 })
 
 test_that("warning when no snps overlap", {
@@ -185,6 +191,14 @@ test_that("merge by position works correctly", {
     quiet = TRUE
   )
   expect_true(all.equal(show_genotypes(merged_gen), show_genotypes(pos_merge)))
+  # the loci are named after their chromosome and position, and the names of
+  # the reference are kept in name_old
+  pos_loci <- show_loci(pos_merge)
+  expect_equal(
+    pos_loci$name,
+    paste(pos_loci$chromosome, pos_loci$position, sep = "_")
+  )
+  expect_equal(pos_loci$name_old, show_loci(merged_gen)$name)
 })
 
 test_that("original gen_tibble objects remain the same after merge", {
@@ -260,6 +274,79 @@ test_that("original gen_tibble objects remain the same after merge", {
 
   expect_equal(md5_before_a_bk, md5_after_a_bk)
   expect_equal(md5_before_b_bk, md5_after_b_bk)
+})
+
+test_that("rbind keeps ploidy of subset and reordered individuals", {
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", "G", "C", "G", "A")
+  )
+  # two pseudohaploids (all homozygous) followed by two diploids
+  ref_gt <- gen_tibble(
+    x = rbind(
+      c(0, 2, 0, 2, 0, 2),
+      c(2, 0, 2, 0, 2, 0),
+      c(1, 1, 0, 1, 1, 0),
+      c(2, 1, 1, 0, 1, 1)
+    ),
+    loci = test_loci,
+    indiv_meta = data.frame(id = c("p1", "p2", "d1", "d2"), population = "A"),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  ref_gt <- gt_pseudohaploid(ref_gt, test_n_loci = 6)
+  target_gt <- gen_tibble(
+    x = rbind(c(1, 1, 0, 1, 1, 0), c(2, 1, 0, 0, 0, 0)),
+    loci = test_loci,
+    indiv_meta = data.frame(id = c("x", "y"), population = "B"),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # drop one pseudohaploid and reorder the remaining individuals
+  ref_sub <- ref_gt %>%
+    filter(id != "p1") %>%
+    arrange(id)
+  expect_equal(indiv_ploidy(ref_sub), c(2, 2, 1))
+  merged_gt <- rbind(
+    ref_sub,
+    target_gt,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_equal(merged_gt$id, c("d1", "d2", "p2", "x", "y"))
+  expect_equal(indiv_ploidy(merged_gt), c(2, 2, 1, 2, 2))
+  expect_length(
+    attr(merged_gt$genotypes, "fbm_ploidy"),
+    nrow(attr(merged_gt$genotypes, "fbm"))
+  )
+  expect_equal(show_ploidy(merged_gt), -2)
+  # if no pseudohaploids are left, the merged ploidy is diploid
+  merged_dip <- rbind(
+    ref_sub %>% filter(id != "p2"),
+    target_gt,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_equal(indiv_ploidy(merged_dip), c(2, 2, 2, 2))
+  expect_equal(show_ploidy(merged_dip), 2)
+})
+
+test_that("rbind rejects as_is with flip_strand even when quiet", {
+  expect_error(
+    rbind(
+      pop_b_gt,
+      pop_a_gt,
+      as_is = TRUE,
+      flip_strand = TRUE,
+      quiet = TRUE,
+      backingfile = tempfile()
+    ),
+    "if 'as_is' is set to TRUE, 'flip_strand'"
+  )
 })
 
 test_that("rbind fails if gen_tibbles contain same ID", {
