@@ -16,7 +16,11 @@
 #' @param mid_p boolean on whether the mid-p value should be computed. Default
 #'   is TRUE, as in PLINK.
 #' @param type type of object to return, if using grouped method. One of "tidy",
-#' "list", or "matrix". Default is "tidy".
+#'   "list", or "matrix". Default is "tidy".
+#'   Data can be grouped by more than one variable: groups are then labelled
+#'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
+#'   and the "tidy" output has one column per grouping variable rather than a
+#'   single `group` column.
 #' @param ... not used.
 #' @returns a vector of probabilities from HWE exact test, one per locus
 #' @author the C++ algorithm was written by Christopher Chang for PLINK 1.90,
@@ -129,10 +133,6 @@ loci_hwe.grouped_df <- function(
     stop("loci_hwe only works with the genotypes column")
   }
 
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("loci_hwe only works with one grouping variable")
-  }
   rlang::check_dots_empty()
   type <- match.arg(type)
   # count genotypes and test HWE at each locus for each group (the cpp code
@@ -149,11 +149,13 @@ loci_hwe.grouped_df <- function(
     block_size = block_size
   )
 
+  groups <- .group_info(.x)
   hwe_mat <- format_grouped_output(
     out_mat = hwe_mat,
-    group_ids = dplyr::group_keys(.x) %>% pull(1),
+    group_ids = groups$labels,
     loci_names = loci_names(.x),
-    type = type
+    type = type,
+    group_keys = groups$keys
   )
   return(hwe_mat)
 }

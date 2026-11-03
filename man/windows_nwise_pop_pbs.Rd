@@ -17,7 +17,9 @@ windows_nwise_pop_pbs(
 )
 }
 \arguments{
-\item{.x}{a grouped \code{gen_tibble} object}
+\item{.x}{a grouped \code{gen_tibble} object.
+If grouped by more than one variable, groups are labelled by the values
+of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
 
 \item{type}{type of object to return. One of "matrix" or "tidy". Default is
 "matrix". "matrix" returns a dataframe where each row is a window, followed

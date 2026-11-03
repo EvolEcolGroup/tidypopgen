@@ -332,17 +332,19 @@ test_that("qc_report_indiv for pseudohaploid data", {
   )
 })
 
-test_that("qc_report_indiv only works with one grouping variable", {
+test_that("qc_report_indiv works with several grouping variables", {
   families$population <- rep(c("pop1", "pop2"), 6)
   families$sex <- rep(c("F", "F", "M"), 4)
+  families$pop_sex <- paste(families$population, families$sex, sep = ".")
+  families_combined <- families %>% group_by(pop_sex)
   families <- families %>% group_by(population, sex)
-  expect_error(
-    qc_report_indiv(families),
-    "only works with one grouping variable"
-  )
-  expect_error(
+  # the group is the values of the grouping variables pasted with "."
+  report <- qc_report_indiv(families)
+  expect_equal(report$group, families$pop_sex)
+  expect_equal(report, qc_report_indiv(families_combined))
+  expect_equal(
     qc_report_indiv(families, kings_threshold = 0.2),
-    "only works with one grouping variable"
+    qc_report_indiv(families_combined, kings_threshold = 0.2)
   )
 })
 

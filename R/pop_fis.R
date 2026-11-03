@@ -9,7 +9,9 @@
 #' @references Weir, BS and Goudet J (2017) A Unified Characterization of
 #'   Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a grouped [`gen_tibble`] (as obtained by using
-#'   [dplyr::group_by()]); if method == "Nei87", it is also possible to use
+#'   [dplyr::group_by()], by one or more variables; with several, groups are
+#'   labelled by their values pasted with ".", e.g. `pop1.F`); if method ==
+#'   "Nei87", it is also possible to use
 #'   a regular `gen_tibble`, in which case all individuals are considered to
 #'   belong to a single population.
 #' @param method one of "Nei87" (based on Nei 1987, eqn 7.41) or "WG17" (for
@@ -145,8 +147,12 @@ pop_fis_wg17 <- function(
   Mij <- allele_sharing_mat
   Mii <- diag(Mij) * 2 - 1
   diag(Mij) <- NA
-  pop <- factor(group_indices(.x))
-  pop_levels <- levels(pop)
+  groups <- .group_info(.x)
+  # the group of each individual
+  pop <- groups$ids + 1L
+  # empty groups (which only exist if the user asked for them) do not
+  # contribute to the mean allele sharing between groups, and get NaN
+  pop_levels <- which(groups$sizes > 0)
   n_pop <- length(pop_levels)
   if (n_pop < 2) {
     stop("pop_fis with method 'WG17' requires at least two groups")
@@ -177,14 +183,15 @@ pop_fis_wg17 <- function(
   for (i in 1:n_pop) {
     Fi[[i]] <- (Fi[[i]] - Fsts[[i]]) / (1 - Fsts[[i]])
   }
-  names(Fi) <- as.character(pop_levels)
-  fis_by_pop <- unlist(lapply(Fi, mean, na.rm = TRUE))
+  fis_non_empty <- unlist(lapply(Fi, mean, na.rm = TRUE))
+  fis_by_pop <- rep(NaN, groups$n)
+  fis_by_pop[pop_levels] <- fis_non_empty
 
   if (include_global) {
-    fis_by_pop <- c(fis_by_pop, mean(fis_by_pop, na.rm = TRUE))
-    names(fis_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1), "global")
+    fis_by_pop <- c(fis_by_pop, mean(fis_non_empty, na.rm = TRUE))
+    names(fis_by_pop) <- c(groups$labels, "global")
   } else {
-    names(fis_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1))
+    names(fis_by_pop) <- groups$labels
   }
   return(fis_by_pop)
 }

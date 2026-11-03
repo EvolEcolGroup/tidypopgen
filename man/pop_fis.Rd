@@ -15,7 +15,9 @@ pop_fis(
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using
-\code{\link[dplyr:group_by]{dplyr::group_by()}}); if method == "Nei87", it is also possible to use
+\code{\link[dplyr:group_by]{dplyr::group_by()}}, by one or more variables; with several, groups are
+labelled by their values pasted with ".", e.g. \code{pop1.F}); if method ==
+"Nei87", it is also possible to use
 a regular \code{gen_tibble}, in which case all individuals are considered to
 belong to a single population.}
 

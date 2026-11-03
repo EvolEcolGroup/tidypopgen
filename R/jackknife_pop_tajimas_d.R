@@ -28,6 +28,10 @@
 #' @param .x a `gen_tibble` object, optionally grouped by one variable
 #' @param type type of object to return, if using grouped method. One of
 #'   "matrix", "tidy", or "list". Default is "matrix".
+#'   Data can be grouped by more than one variable: groups are then labelled
+#'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
+#'   and the "tidy" output has one column per grouping variable rather than a
+#'   single `group` column.
 #' @param block_size The size of the blocks to leave out.
 #' @param size_unit Either "snp", "cM" or "bp". If "snp", the block size is in
 #'   number of SNPs. If "cM", the block size is in centiMorgans. If "bp", the
@@ -67,9 +71,6 @@ jackknife_pop_tajimas_d <- function(.x,
                                     size_unit = c("snp", "cM", "bp")) {
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
-  if (length(dplyr::group_vars(.x)) > 1) {
-    stop("jackknife_pop_tajimas_d only works with one grouping variable")
-  }
   type <- match.arg(type)
   size_unit <- match.arg(size_unit)
 
@@ -111,7 +112,8 @@ jackknife_pop_tajimas_d <- function(.x,
     return(res)
   }
 
-  names(res) <- dplyr::group_keys(.x) %>% pull(1)
+  groups <- .group_info(.x)
+  names(res) <- groups$labels
 
   if (type == "matrix") {
     res <- .jackknife_format(dplyr::bind_rows(res),
@@ -120,7 +122,7 @@ jackknife_pop_tajimas_d <- function(.x,
     )
     return(res)
   } else if (type == "tidy") {
-    res <- bind_rows(res, .id = "group")
+    res <- .bind_group_rows(res, groups)
     return(res)
   } else if (type == "list") {
     return(res)

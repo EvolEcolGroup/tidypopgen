@@ -53,12 +53,17 @@ test_that("jackknife_pop_tajimas_d returns the right format", {
   )
 })
 
-test_that("jackknife_pop_tajimas_d only accepts one grouping variable", {
-  test_gt <- load_example_gt("gen_tbl_gen_dist") %>%
-    dplyr::group_by(population, id)
-  expect_error(
-    jackknife_pop_tajimas_d(test_gt, block_size = 2),
-    "jackknife_pop_tajimas_d only works with one grouping variable"
+test_that("jackknife_pop_tajimas_d works with several grouping variables", {
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
+  test_gt$sex <- rep(c("F", "M"), length.out = nrow(test_gt))
+  test_gt$pop_sex <- paste(test_gt$population, test_gt$sex, sep = ".")
+  # the same results as grouping by a single variable combining them
+  expect_equal(
+    jackknife_pop_tajimas_d(
+      dplyr::group_by(test_gt, population, sex),
+      block_size = 2
+    ),
+    jackknife_pop_tajimas_d(dplyr::group_by(test_gt, pop_sex), block_size = 2)
   )
 })
 

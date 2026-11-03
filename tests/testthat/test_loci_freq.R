@@ -182,9 +182,15 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   # test a second grouping variable
   test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
   test_gt <- test_gt %>% group_by(population, region)
-  expect_error(
-    test_gt %>% loci_alt_freq(),
-    "only works with one grouping variable"
+  # several grouping variables give the same results as a single variable
+  # combining them
+  test_gt_combined <- test_gt %>%
+    ungroup() %>%
+    mutate(pop_region = paste(population, region, sep = ".")) %>%
+    group_by(pop_region)
+  expect_equal(
+    test_gt %>% loci_alt_freq(type = "matrix"),
+    test_gt_combined %>% loci_alt_freq(type = "matrix")
   )
 
   # and now for maf
@@ -250,9 +256,15 @@ test_that("loci_alt_freq and loci_maf on grouped tibbles", {
   # test a second grouping variable
   test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
   test_gt <- test_gt %>% group_by(population, region)
-  expect_error(
-    test_gt %>% loci_maf(),
-    "only works with one grouping variable"
+  # several grouping variables give the same results as a single variable
+  # combining them
+  test_gt_combined <- test_gt %>%
+    ungroup() %>%
+    mutate(pop_region = paste(population, region, sep = ".")) %>%
+    group_by(pop_region)
+  expect_equal(
+    test_gt %>% loci_maf(type = "matrix"),
+    test_gt_combined %>% loci_maf(type = "matrix")
   )
 })
 

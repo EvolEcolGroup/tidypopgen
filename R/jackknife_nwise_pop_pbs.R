@@ -15,7 +15,9 @@
 #'
 #' @references Busing FMTA, Meijer E, Van Der Leeden R (1999) Delete-m
 #'   jackknife for unequal m. Statistics and Computing 9:3-8.
-#' @param .x a grouped `gen_tibble` object
+#' @param .x a grouped `gen_tibble` object.
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param type type of object to return. One of "matrix" or "tidy". Default is
 #'   "matrix". "matrix" returns a dataframe where each row is a quantity
 #'   (estimate, jack_estimate, se, z and n_blocks), followed by columns for
@@ -63,10 +65,6 @@ jackknife_nwise_pop_pbs <- function(.x,
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("jackknife_nwise_pop_pbs only works with one grouping variable")
-  }
   # Check if the return_fst is logical
   if (!is.logical(return_fst)) {
     stop("return_fst must be a logical value (TRUE or FALSE)")
@@ -74,9 +72,9 @@ jackknife_nwise_pop_pbs <- function(.x,
   type <- match.arg(type)
   size_unit <- match.arg(size_unit)
   # get the populations
-  .group_levels <- .x %>% group_keys()
+  groups <- .group_info(.x)
   # Check if there are at least 3 populations
-  if (nrow(.group_levels) < 3) {
+  if (groups$n < 3) {
     stop("At least 3 populations are required to compute PBS.")
   }
   fst_method <- match.arg(fst_method)
@@ -97,7 +95,7 @@ jackknife_nwise_pop_pbs <- function(.x,
   # rows)
   fst_values <- rbind(fst_blocks$full, fst_blocks$loo)
   # create all 3 way combinations of populations
-  pops <- .group_levels %>% dplyr::pull(1)
+  pops <- groups$labels
   pop_combinations <- utils::combn(pops, 3, simplify = FALSE)
   # for each triplet, the column of fst_blocks of the pair of its i-th and
   # j-th populations

@@ -1,4 +1,26 @@
 # tidypopgen `dev`
+* grouped functions now work with gen_tibbles grouped by more than one
+  variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
+  `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,
+  `qc_report_indiv()`, `nwise_pop_pbs()`, the windowed and jackknife versions
+  of `pop_tajimas_d()` and `nwise_pop_pbs()`, `gt_admixture()`, `gt_snmf()`
+  and `pairwise_pop_fst(type = "pairwise")`, which used to stop with an
+  error. Groups are labelled by the values of the grouping variables pasted
+  with "." (e.g. "pop1.F"), and "tidy" outputs have one column per grouping
+  variable. This also fixes silently wrong labels with several grouping
+  variables: the names of the results of `pop_het_obs()`, `pop_het_exp()`,
+  `pop_fis()` and `pop_fst()`, the family ID written by `gt_as_plink()`, and
+  the groups of `windows_indiv_roh()` and of
+  `tidy()`/`augment()` of a `q_matrix`, which only used the first grouping
+  variable; and the Bonferroni correction of `qc_report_loci()`, which
+  counted the values of the first grouping variable rather than the groups.
+  `heatmap_pairwise()` and `autoplot()` accept the tidy output of
+  `pairwise_pop_fst()` with several grouping variables
+* empty groups, which only exist if requested (with `group_by(.drop = FALSE)`,
+  or `filter()`/`slice()` with `.preserve = TRUE`), are kept in the results
+  as NA/NaN, without changing the results of the other groups. `pop_fst()` and
+  `pop_fis(method = "WG17")` used to fail with an empty group, and
+  `qc_report_indiv(kings_threshold = )` now skips empty groups
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not

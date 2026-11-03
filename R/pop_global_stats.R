@@ -85,7 +85,9 @@
 #'
 #' @param .x a [`gen_tibble`] (usually grouped, as obtained by using
 #'   [dplyr::group_by()]; use on a single population will return a number of
-#'   quantities as NA/NaN)
+#'   quantities as NA/NaN).
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param by_locus boolean, determining whether the statistics should be
 #'   returned by locus(TRUE), or as a single genome wide value (FALSE, the
 #'   default).
@@ -194,20 +196,18 @@ pop_global_stats <- function(
 ) {
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
-    .group_levels <- .x %>% group_keys()
-    .group_ids <- dplyr::group_indices(.x) - 1
+    groups <- .group_info(.x)
   } else {
     # create a dummy pop
-    .group_levels <- tibble(population = "pop")
-    .group_ids <- rep(0, nrow(.x))
+    groups <- list(n = 1L, ids = rep(0L, nrow(.x)), labels = "pop")
   }
 
   pop_stats <- pop_stats_dip_pseudo_cpp(
     .gt_get_fbm(.x),
     rowInd = .gt_fbm_rows(.x),
     colInd = .gt_fbm_cols(.x),
-    groupIds = .group_ids,
-    ngroups = nrow(.group_levels),
+    groupIds = groups$ids,
+    ngroups = groups$n,
     ploidy = indiv_ploidy(.x),
     by_locus_ho = by_locus_ho,
     by_locus_hs = by_locus_hs,
@@ -216,6 +216,6 @@ pop_global_stats <- function(
     block_size = 1024,
     ncores = n_cores
   )
-  pop_stats$group_names <- .group_levels %>% dplyr::pull(1)
+  pop_stats$group_names <- groups$labels
   pop_stats
 }

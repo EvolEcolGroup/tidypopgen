@@ -18,6 +18,10 @@
 #' @param .x a (potentially grouped) `gen_tibble` object
 #' @param type type of object to return, if using grouped method. One of
 #'   "matrix", "tidy", or "list". Default is "matrix".
+#'   Data can be grouped by more than one variable: groups are then labelled
+#'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
+#'   and the "tidy" output has one column per grouping variable rather than a
+#'   single `group` column.
 #' @param window_size The size of the window to use for the estimates.
 #' @param step_size The step size to use for the windows.
 #' @param size_unit Either "snp" or "bp". If "snp", the window size and step
@@ -76,9 +80,6 @@ windows_pop_tajimas_d <- function(.x,
                                   complete = FALSE) {
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
-  if (length(dplyr::group_vars(.x)) > 1) {
-    stop("windows_pop_tajimas_d only works with one grouping variable")
-  }
   type <- match.arg(type)
 
   # define the windows once (as in windows_stats_generic())
@@ -139,7 +140,8 @@ windows_pop_tajimas_d <- function(.x,
     return(res)
   }
 
-  names(res) <- dplyr::group_keys(.x) %>% pull(1)
+  groups <- .group_info(.x)
+  names(res) <- groups$labels
 
   if (type == "matrix") {
     res <- bind_rows(res, .id = "group")
@@ -147,7 +149,7 @@ windows_pop_tajimas_d <- function(.x,
       res %>% tidyr::pivot_wider(names_from = "group", values_from = "stat")
     return(res)
   } else if (type == "tidy") {
-    res <- bind_rows(res, .id = "group")
+    res <- .bind_group_rows(res, groups)
     return(res)
   } else if (type == "list") {
     return(res)

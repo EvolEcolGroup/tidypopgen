@@ -7,7 +7,10 @@
 pop_fst(.x, include_global = FALSE, allele_sharing_mat = NULL)
 }
 \arguments{
-\item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
+\item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using
+\code{\link[dplyr:group_by]{dplyr::group_by()}}). If grouped by more than one variable, groups are
+labelled by the values of the grouping variables pasted with "." (e.g.
+\code{pop1.F}).}
 
 \item{include_global}{boolean determining whether, besides the population
 specific Fst, a global Fst should be appended. Note that this will return a

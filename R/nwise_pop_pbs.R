@@ -6,7 +6,9 @@
 #' and is used to identify outlier loci that may be under selection.
 #' @references Yi X, et al. (2010) Sequencing of 50 human exomes reveals
 #'   adaptation to high altitude. Science 329: 75-78.
-#' @param .x A grouped `gen_tibble`
+#' @param .x A grouped `gen_tibble`.
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param type type of object to return. One of "tidy" or "matrix".
 #'   Default is "tidy".
 #' @param fst_method the method to use for calculating Fst, one of 'Hudson',
@@ -43,10 +45,6 @@ nwise_pop_pbs <- function(.x,
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("nwise_pop_pbs only works with one grouping variable")
-  }
   # Check if the return_fst is logical
   if (!is.logical(return_fst)) {
     stop("return_fst must be a logical value (TRUE or FALSE)")
@@ -55,9 +53,9 @@ nwise_pop_pbs <- function(.x,
   fst_method <- match.arg(fst_method)
 
   # get the populations
-  .group_levels <- .x %>% group_keys()
+  groups <- .group_info(.x)
   # Check if there are at least 3 populations
-  if (nrow(.group_levels) < 3) {
+  if (groups$n < 3) {
     stop("At least 3 populations are required to compute PBS.")
   }
 
@@ -80,7 +78,7 @@ nwise_pop_pbs <- function(.x,
   # single matrix (loci as rows)
   pbs_results <- pbs_all_triplets(
     fst_values,
-    pops = .group_levels %>% dplyr::pull(1)
+    pops = groups$labels
   )
   # add fst values if requested
   if (return_fst) {

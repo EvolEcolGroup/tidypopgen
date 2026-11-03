@@ -17,7 +17,11 @@
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
 #' @param type type of object to return, if using grouped method. One of "tidy",
-#' "list", or "matrix". Default is "tidy".
+#'   "list", or "matrix". Default is "tidy".
+#'   Data can be grouped by more than one variable: groups are then labelled
+#'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
+#'   and the "tidy" output has one column per grouping variable rather than a
+#'   single `group` column.
 #' @param ... other arguments passed to specific methods.
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_missingness
@@ -145,10 +149,6 @@ loci_missingness.grouped_df <- function(
     stop("loci_missingness only works with the genotypes column")
   }
 
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("loci_missingness only works with one grouping variable")
-  }
   rlang::check_dots_empty()
   type <- match.arg(type)
   # count the missing genotypes at each locus for each group, dividing them by
@@ -166,11 +166,13 @@ loci_missingness.grouped_df <- function(
     block_size = block_size
   )
 
+  groups <- .group_info(.x)
   na_mat <- format_grouped_output(
     out_mat = na_mat,
-    group_ids = dplyr::group_keys(.x) %>% pull(1),
+    group_ids = groups$labels,
     loci_names = loci_names(.x),
-    type = type
+    type = type,
+    group_keys = groups$keys
   )
 
   return(na_mat)

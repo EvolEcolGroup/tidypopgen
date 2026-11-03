@@ -18,7 +18,11 @@ windows_pop_tajimas_d(
 \item{.x}{a (potentially grouped) \code{gen_tibble} object}
 
 \item{type}{type of object to return, if using grouped method. One of
-"matrix", "tidy", or "list". Default is "matrix".}
+"matrix", "tidy", or "list". Default is "matrix".
+Data can be grouped by more than one variable: groups are then labelled
+by the values of the grouping variables pasted with "." (e.g. \code{pop1.F}),
+and the "tidy" output has one column per grouping variable rather than a
+single \code{group} column.}
 
 \item{window_size}{The size of the window to use for the estimates.}
 

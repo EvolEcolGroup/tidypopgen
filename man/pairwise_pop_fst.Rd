@@ -18,7 +18,11 @@ pairwise_pop_fst(
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
 \item{type}{type of object to return One of "tidy" or "pairwise" for a
-pairwise matrix of populations. Default is "tidy".}
+pairwise matrix of populations. Default is "tidy". If data are grouped by
+more than one variable, the "tidy" output has one column per grouping
+variable for each population of a pair (e.g. \code{population_1}, \code{sex_1},
+\code{population_2}, \code{sex_2}), and populations are otherwise labelled by the
+values of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
 
 \item{by_locus}{boolean, determining whether Fst should be returned by
 locus(TRUE), or as a single genome wide value obtained by taking the ratio

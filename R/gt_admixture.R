@@ -326,7 +326,7 @@ gt_admixture <- function(
     adm_list$id <- x$id
     # if it is grouped, add the group
     if (inherits(x, "grouped_gen_tbl")) {
-      adm_list$group <- x[[dplyr::group_vars(x)]]
+      adm_list$group <- .group_of_rows(x)
     }
   }
 

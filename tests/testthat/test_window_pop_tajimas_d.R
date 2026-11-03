@@ -267,14 +267,19 @@ test_that("windows_pop_tajimas_d ignores loci with missing pi", {
   expect_equal(window_taj$pop1$n_loci[1], 2)
 })
 
-test_that("windows_pop_tajimas_d only accepts one grouping variable", {
-  test_gt <- load_example_gt("gen_tbl_gen_dist") %>%
-    dplyr::group_by(population, id)
-  expect_error(
-    windows_pop_tajimas_d(test_gt,
+test_that("windows_pop_tajimas_d works with several grouping variables", {
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
+  test_gt$sex <- rep(c("F", "M"), length.out = nrow(test_gt))
+  test_gt$pop_sex <- paste(test_gt$population, test_gt$sex, sep = ".")
+  # the same results as grouping by a single variable combining them
+  expect_equal(
+    windows_pop_tajimas_d(dplyr::group_by(test_gt, population, sex),
       window_size = 4, step_size = 4,
       size_unit = "snp"
     ),
-    "windows_pop_tajimas_d only works with one grouping variable"
+    windows_pop_tajimas_d(dplyr::group_by(test_gt, pop_sex),
+      window_size = 4, step_size = 4,
+      size_unit = "snp"
+    )
   )
 })

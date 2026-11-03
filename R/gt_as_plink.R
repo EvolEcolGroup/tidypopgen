@@ -7,7 +7,8 @@
 #' If the gen_tibble has been read in from vcf format, family.ID in the
 #' resulting plink files will be the same as sample.ID. If the gen_tibble has a
 #' grouping variable, this will be used as the family.ID in the resulting plink
-#' files. Genotypes are read and written directly from the file backed
+#' files (with several grouping variables, their values are pasted with ".",
+#' e.g. `pop1.F`). Genotypes are read and written directly from the file backed
 #' matrix, so all formats can be written for datasets that do not fit in
 #' memory (but note that ped and raw files are much larger, and thus slower to
 #' write, than bed files).
@@ -166,11 +167,10 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
     "Phenotype"
   )
   fam_table$IID <- x$id
-  # if this is a group tibble, use the grouping variable
+  # if this is a group tibble, use the grouping variable (or the values of
+  # the grouping variables pasted with ".", if there are several)
   if (inherits(x, "grouped_gen_tbl")) {
-    fam_table$FID <- x %>%
-      select(dplyr::group_vars(x)) %>%
-      dplyr::pull(1)
+    fam_table$FID <- .group_of_rows(x)
   } else {
     fam_table$FID <- x$id
   }

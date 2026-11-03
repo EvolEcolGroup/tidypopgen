@@ -14,7 +14,9 @@ qc_report_indiv(.x, ...)
 }
 \arguments{
 \item{.x}{either a \code{\link{gen_tibble}} object or a grouped \code{\link{gen_tibble}} (as
-obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
+obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}}). If grouped by more than one
+variable, the \code{group} column holds the values of the grouping variables
+pasted with "." (e.g. \code{pop1.F}).}
 
 \item{...}{further arguments to pass}
 
