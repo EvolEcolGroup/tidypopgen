@@ -15,7 +15,7 @@ at select_loci_if() for that feature."><meta property="og:image" content="https:
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -33,6 +33,7 @@ at select_loci_if() for that feature."><meta property="og:image" content="https:
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -87,6 +88,17 @@ like x:y can be used to select a range of variables.</p></dd>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Note that the <code>select_loci</code> verb does not modify the backing FBM files,
 but rather it subsets the list of loci to be used stored in the <code>gen_tibble</code>.</p>
+<p>For large datasets (millions of loci), select loci with <code><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">dplyr::all_of()</a></code>
+or <code><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">dplyr::any_of()</a></code>, with helpers that match names (such as
+<code><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">dplyr::starts_with()</a></code> or <code><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">dplyr::everything()</a></code>), or with numeric
+positions written as numbers (e.g. <code>1:100</code> or <code>-c(1, 5)</code>), each
+optionally negated with <code>-</code> or <code>!</code>. These selections are resolved
+directly, which is much faster and uses much less memory than the general
+<code>tidyselect</code> machinery, which has to create an R symbol for every locus
+name (and R never frees symbols). Other expressions (e.g. combinations
+such as <code>c(all_of(x), starts_with("rs"))</code>, bare loci names, or
+expressions such as <code>which(...)</code>) still work, but are slow and memory
+hungry on very large datasets: use <code>all_of(which(...))</code> instead.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

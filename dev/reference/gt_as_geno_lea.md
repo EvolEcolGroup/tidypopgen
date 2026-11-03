@@ -30,8 +30,9 @@ the path of the .geno file
 
 ## Details
 
-NOTE that we currently read all the data into memory to write the file,
-so this function is not suitable for very large datasets.
+The genotypes are read and written directly from the file backed matrix
+(one locus at a time), so this function also works on datasets that do
+not fit in memory.
 
 ## Note
 
@@ -51,5 +52,5 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a geno file
 gt_as_geno_lea(example_gt, file = paste0(tempfile(), "_example.geno"))
-#> [1] "/tmp/RtmpZ5h01j/file1fa5cd48b47_example.geno"
+#> [1] "/tmp/Rtmp93Vrtx/file1fc871b90a80_example.geno"
 ```

@@ -120,7 +120,8 @@ gen_tibble(
 
 - n_cores:
 
-  the number of cores to use for parallel processing
+  currently ignored (reading files is not parallelised); kept for
+  backwards compatibility
 
 - chunk_size:
 
@@ -167,6 +168,9 @@ an object of the class `gen_tbl`.
   fail with 'Error: a genotype has more than max_ploidy alleles...'. To
   successful import such a *VCF*, change the order of variants so that
   the first chromosome is an autosome using a tool such as `vcftools`.
+  Individuals with a missing genotype ('.') on the first variant get
+  their ploidy from their first genotype that is not '.' (or the largest
+  ploidy of the other individuals, if all their genotypes are '.').
   Currently, only biallelic SNPs are supported. If haploid variants
   (e.g. sex chromosomes) are included in the *VCF*, they are not
   transformed into homozygous calls. Instead, reference alleles will be

@@ -31,6 +31,16 @@ We can now load the necessary libraries:
 ``` r
 
 library(tidypopgen)
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+#> Loading required package: tibble
 library(ggplot2)
 ```
 
@@ -65,10 +75,10 @@ in our data.
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
 #> Rows: 1064 Columns: 6
-#> ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────
+#> ── Column specification ────────────────────────────────────────────────────────
 #> Delimiter: "\t"
 #> chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups
-#>
+#> 
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -87,7 +97,7 @@ hgdp <- gen_tibble(bed_path,
 )
 ```
 
-read_plink: 2.6s
+read_plink: 1.6s
 
 Add metadata
 
@@ -105,19 +115,19 @@ Let’s confirm that we have read all the expected information:
 
 hgdp
 #> # A gen_tibble: 643733 loci
-#> # A tibble:     1,043 × 4
-#>    id         genotypes population region
-#>    <chr>     <vctr_SNP> <chr>      <chr>
-#>  1 HGDP00448          1 Biaka_HG   Africa
-#>  2 HGDP00479          2 Biaka_HG   Africa
-#>  3 HGDP00985          3 Biaka_HG   Africa
-#>  4 HGDP01094          4 Biaka_HG   Africa
-#>  5 HGDP00982          5 Mbuti_HG   Africa
-#>  6 HGDP00911          6 Mandenka   Africa
-#>  7 HGDP01202          7 Mandenka   Africa
-#>  8 HGDP00927          8 Yoruba     Africa
-#>  9 HGDP00461          9 Biaka_HG   Africa
-#> 10 HGDP00451         10 Biaka_HG   Africa
+#> # A tibble:     1,043 × 5
+#>    id        phenotype  genotypes population region
+#>    <chr>     <fct>     <vctr_SNP> <chr>      <chr> 
+#>  1 HGDP00448 control    [2,0,...] Biaka_HG   Africa
+#>  2 HGDP00479 control    [1,0,...] Biaka_HG   Africa
+#>  3 HGDP00985 control    [0,0,...] Biaka_HG   Africa
+#>  4 HGDP01094 control    [1,0,...] Biaka_HG   Africa
+#>  5 HGDP00982 control    [2,0,...] Mbuti_HG   Africa
+#>  6 HGDP00911 control    [1,0,...] Mandenka   Africa
+#>  7 HGDP01202 control    [2,0,...] Mandenka   Africa
+#>  8 HGDP00927 control    [2,0,...] Yoruba     Africa
+#>  9 HGDP00461 control    [2,0,...] Biaka_HG   Africa
+#> 10 HGDP00451 control    [2,0,...] Biaka_HG   Africa
 #> # ℹ 1,033 more rows
 ```
 
@@ -133,7 +143,8 @@ loci_report <- qc_report_loci(hgdp)
 #> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
 ```
 
-loci_report: 1.8s The resulting report can be observed using `autoplot`.
+loci_report: 304ms The resulting report can be observed using
+`autoplot`.
 
 ``` r
 
@@ -169,7 +180,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.4s
+indiv_report: 201ms
 
 ``` r
 
@@ -202,12 +213,13 @@ need to update the file backing matrix with `gt_update_backingfile`.
 ``` r
 
 hgdp <- gt_update_backingfile(hgdp)
-#> Genetic distances are not sorted, setting them to zero
-#>
+#> 
 #> gen_backing files updated, now
-#> using bigSNP file: /tmp/RtmppmRPhl/test_11da24e07766_v2.rds
-#> with backing file: /tmp/RtmppmRPhl/test_11da24e07766_v2.bk
+#> using FBM RDS: /tmp/RtmpI1vFHR/test_31b04a6e82f9b6_v2.rds
+#> with FBM backing file: /tmp/RtmpI1vFHR/test_31b04a6e82f9b6_v2.bk
 #> make sure that you do NOT delete those files!
+#> to reload the gen_tibble in another session, use:
+#> gt_load('/tmp/RtmpI1vFHR/test_31b04a6e82f9b6_v2.gt')
 ```
 
 ## Impute data
@@ -234,7 +246,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 3.6s
+ld_clumping: 1.7s
 
 ## PCA
 
@@ -246,7 +258,7 @@ cleaned and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 1.7s
+pca: 2.5s
 
 Plot PCA:
 
@@ -271,7 +283,7 @@ regions covered by the dataset.
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
-dapc: 35ms
+dapc: 97ms
 
 Plot DAPC:
 
@@ -299,7 +311,7 @@ pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
 )
 ```
 
-pairwise_fst: 3.5s
+pairwise_fst: 60ms
 
 Plot pairwise Fst:
 
@@ -323,11 +335,6 @@ ggheatmap(pairwise_fsts) +
   )
 ```
 
-![plot of chunk
-pairwise_fst_plot](figure/hgdp_benchmark/pairwise_fst_plot-1.png)
-
-plot of chunk pairwise_fst_plot
-
 ## Save in plink bed format
 
 Finally, we can save the resulting cleaned dataset to a PLINK .bed file.
@@ -339,36 +346,38 @@ gt_as_plink(hgdp,
   type = "bed",
   overwrite = TRUE
 )
-#> [1] "/tmp/RtmppmRPhl/file11da6e81448a.bed"
+#> [1] "/tmp/RtmpI1vFHR/file31b04a218108bb.bed"
 ```
 
-plink_save: 246ms
+plink_save: 170ms
 
 ## Summary
 
 Here is a summary of the time taken (in seconds) to perform each step of
 the analyses:
 
-    #>            step  time
-    #> 1    read_plink  2.61
-    #> 2   loci_report  1.83
-    #> 3   filter_loci  1.53
-    #> 4  indiv_report  2.42
-    #> 5  filter_indiv     0
-    #> 6        impute  0.13
-    #> 7   ld_clumping  3.65
-    #> 8           pca  1.71
-    #> 9          dapc  0.03
-    #> 10 pairwise_fst  3.48
-    #> 11   plink_save  0.25
-    #> 12        Total 17.64
+    #>            step time
+    #> 1    read_plink 1.63
+    #> 2   loci_report  0.3
+    #> 3   filter_loci 1.54
+    #> 4  indiv_report  0.2
+    #> 5  filter_indiv    0
+    #> 6        impute 0.13
+    #> 7   ld_clumping 1.65
+    #> 8           pca 2.48
+    #> 9          dapc  0.1
+    #> 10 pairwise_fst 0.06
+    #> 11   plink_save 0.17
+    #> 12        Total 8.26
 
 ## Running the benchmark on a laptop
 
 We will now run this benchmark on a laptop with a GenuineIntel, Intel(R)
 Core(TM) Ultra 7 155H, 22 CPU and 31 GiB of RAM, limiting the number of
-cores to 4. Here is a summary of the time taken (in seconds) to perform
-each step of the analyses:
+cores to 4. Note that these laptop timings were measured with an earlier
+version of tidypopgen (August 2025) and have not been updated. Here is a
+summary of the time taken (in seconds) to perform each step of the
+analyses:
 
     #>            step  time
     #> 1    read_plink  4.68

@@ -677,6 +677,8 @@ objects.
   samples](https://evolecolgroup.github.io/tidypopgen/dev/articles/aDNA_pseudohaploids.md):
 - [Benchmark on the
   HGDP](https://evolecolgroup.github.io/tidypopgen/dev/articles/benchmark_hgdp.md):
+- [Working with big
+  data](https://evolecolgroup.github.io/tidypopgen/dev/articles/big_data.md):
 - [Interpolating genetic
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.md):
 - [tidypopgen](https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.md):

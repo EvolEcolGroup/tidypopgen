@@ -8,10 +8,24 @@ Return the p-value from an exact test of HWE.
 loci_hwe(.x, .col = "genotypes", ...)
 
 # S3 method for class 'tbl_df'
-loci_hwe(.x, .col = "genotypes", mid_p = TRUE, ...)
+loci_hwe(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+)
 
 # S3 method for class 'vctrs_bigSNP'
-loci_hwe(.x, .col = "genotypes", mid_p = TRUE, ...)
+loci_hwe(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1),
+  ...
+)
 
 # S3 method for class 'grouped_df'
 loci_hwe(

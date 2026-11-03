@@ -15,7 +15,8 @@ pop_fis(
   method = c("Nei87", "WG17"),
   by_locus = FALSE,
   include_global = FALSE,
-  allele_sharing_mat = NULL
+  allele_sharing_mat = NULL,
+  n_cores = bigstatsr::nb_cores()
 )
 ```
 
@@ -57,6 +58,13 @@ pop_fis(
   with `as_matrix=TRUE`. As a number of statistics can be derived from
   the Allele Sharing matrix, it is sometimes more efficient to
   pre-compute this matrix.
+
+- n_cores:
+
+  number of cores to be used for "Nei87" (it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html));
+  "WG17" uses the allele sharing matrix, see
+  [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.md).
 
 ## Value
 

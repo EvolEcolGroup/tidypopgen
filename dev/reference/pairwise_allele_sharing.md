@@ -14,7 +14,8 @@ heterozygous. Matching is the average of these 0, 1/2 and 1s)
 pairwise_allele_sharing(
   x,
   as_matrix = FALSE,
-  block_size = bigstatsr::block_size(nrow(x))
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = 1
 )
 ```
 
@@ -31,8 +32,12 @@ pairwise_allele_sharing(
 
 - block_size:
 
-  maximum number of loci read at once. More loci should improve speed,
-  but will tax memory.
+  maximum number of loci read at once. Genotypes are compared in a
+  compact bit-packed form, so this has little effect on memory use.
+
+- n_cores:
+
+  number of cores to be used (default 1).
 
 ## Value
 

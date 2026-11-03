@@ -63,14 +63,14 @@ If `matrix` is `"loadings"`, each row in the tidied output corresponds
 to information about the principle components in the original space. The
 columns are:
 
-- `row`:
+- `column`:
 
   The variable labels (colnames) of the data set on which PCA was
   performed.
 
 - `LD`:
 
-  An integer vector indicating the principal component.
+  A character vector indicating the discriminant axis (e.g. "LD1").
 
 - `value`:
 

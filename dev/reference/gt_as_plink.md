@@ -50,9 +50,10 @@ the path of the saved file
 If the gen_tibble has been read in from vcf format, family.ID in the
 resulting plink files will be the same as sample.ID. If the gen_tibble
 has a grouping variable, this will be used as the family.ID in the
-resulting plink files. NOTE that writing to bed has been optimised for
-speed, but writing to ped or raw is slower, especially for large
-datasets.
+resulting plink files. Genotypes are read and written directly from the
+file backed matrix, so all formats can be written for datasets that do
+not fit in memory (but note that ped and raw files are much larger, and
+thus slower to write, than bed files).
 
 ## Note
 
@@ -68,13 +69,13 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a bed file
 example_gt %>% gt_as_plink(type = "bed", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/RtmpZ5h01j/file1fa52b6707c2_plink.bed"
+#> [1] "/tmp/Rtmp93Vrtx/file1fc844b9be3c_plink.bed"
 
 # Write a ped file
 example_gt %>% gt_as_plink(type = "ped", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/RtmpZ5h01j/file1fa54524412b_plink.ped"
+#> [1] "/tmp/Rtmp93Vrtx/file1fc82d28eb28_plink.ped"
 
 # Write a raw file
 example_gt %>% gt_as_plink(type = "raw", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/RtmpZ5h01j/file1fa572f8704f_plink.raw"
+#> [1] "/tmp/Rtmp93Vrtx/file1fc84ebc7ce1_plink.raw"
 ```

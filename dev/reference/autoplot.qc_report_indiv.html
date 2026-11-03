@@ -21,7 +21,7 @@ of missingness, split by ploidy.
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,7 @@ of missingness, split by ploidy.
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -105,7 +106,9 @@ the sample</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a <code>ggplot2</code> object</p>
+    <p>a <code>ggplot2</code> object. For <code>relatedness</code> plots of a report created
+from a grouped <code><a href="gen_tibble.html">gen_tibble</a></code>, a named list of <code>ggplot2</code> objects, one for
+each group.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -134,6 +137,7 @@ ready plots.</p>
 <span class="r-in"><span><span class="co"># Create QC report with kinship filtering</span></span></span>
 <span class="r-in"><span><span class="va">indiv_report_rel</span> <span class="op">&lt;-</span></span></span>
 <span class="r-in"><span>  <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span>kings_threshold <span class="op">=</span> <span class="st">"second"</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>2 pairs of individuals have missing kinship (e.g. no loci genotyped in both), so they could not be compared, and are not treated as related</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Autoplot relatedness</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">indiv_report_rel</span>, type <span class="op">=</span> <span class="st">"relatedness"</span>, kings_threshold <span class="op">=</span> <span class="st">"second"</span><span class="op">)</span></span></span>

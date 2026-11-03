@@ -9,7 +9,8 @@ pairwise_ibs(
   x,
   as_matrix = FALSE,
   type = c("proportion", "adjusted_counts", "raw_counts"),
-  block_size = bigstatsr::block_size(nrow(x))
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = 1
 )
 ```
 
@@ -33,8 +34,12 @@ pairwise_ibs(
 
 - block_size:
 
-  maximum number of loci read at once. More loci should improve speed,
-  but will tax memory.
+  maximum number of loci read at once. Genotypes are compared in a
+  compact bit-packed form, so this has little effect on memory use.
+
+- n_cores:
+
+  number of cores to be used (default 1).
 
 ## Value
 

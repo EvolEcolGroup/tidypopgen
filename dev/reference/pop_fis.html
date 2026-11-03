@@ -13,7 +13,7 @@ equivalent to the one used by hierfstat::fis.dosage())."><meta property="og:imag
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@ equivalent to the one used by hierfstat::fis.dosage())."><meta property="og:imag
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -63,7 +64,8 @@ equivalent to the one used by <code><a href="https://rdrr.io/pkg/hierfstat/man/f
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Nei87"</span>, <span class="st">"WG17"</span><span class="op">)</span>,</span>
 <span>  by_locus <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  include_global <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  allele_sharing_mat <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  allele_sharing_mat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -102,6 +104,12 @@ matrix with n+1 columns if <code>by_locus=TRUE</code>.</p></dd>
 of Allele Sharing returned by <code><a href="pairwise_allele_sharing.html">pairwise_allele_sharing()</a></code> with
 <code>as_matrix=TRUE</code>. As a number of statistics can be derived from the Allele
 Sharing matrix, it is sometimes more efficient to pre-compute this matrix.</p></dd>
+
+
+<dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
+<dd><p>number of cores to be used for "Nei87" (it defaults to
+<code><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">bigstatsr::nb_cores()</a></code>); "WG17" uses the allele sharing matrix, see
+<code><a href="pairwise_allele_sharing.html">pairwise_allele_sharing()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

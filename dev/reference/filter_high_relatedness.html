@@ -11,7 +11,7 @@ relationships above the given threshold."><meta property="og:image" content="htt
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,6 +29,7 @@ relationships above the given threshold."><meta property="og:image" content="htt
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -90,6 +91,12 @@ relationship coefficients</p></dd>
 to remove, and '3' is a boolean where individuals to keep are TRUE and
 individuals to remove are FALSE</p>
     </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Missing relationship coefficients (e.g. KING kinship for pairs of
+individuals with no loci genotyped in both) are not evidence of
+relatedness: such pairs are treated as not related, with a warning.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -100,14 +107,15 @@ individuals to remove are FALSE</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Filter individuals with threshold above 0.2</span></span></span>
 <span class="r-in"><span><span class="fu">filter_high_relatedness</span><span class="op">(</span><span class="va">king_matrix</span>, <span class="va">example_gt</span>, kings_threshold <span class="op">=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>2 pairs of individuals have missing kinship (e.g. no loci genotyped in both), so they could not be compared, and are not treated as related</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "c" "d"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "d" "c" "g" "e" "b" "f"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a" "b" "e" "f" "g"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "a"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>

@@ -11,7 +11,7 @@ returned."><meta property="og:image" content="https://evolecolgroup.github.io/ti
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,6 +29,7 @@ returned."><meta property="og:image" content="https://evolecolgroup.github.io/ti
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -106,12 +107,13 @@ component. That is, the location of the observation in PCA space.</p></dd>
 </dl><p>If <code>matrix</code> is  <code>"loadings"</code>, each row in the tidied output corresponds to
 information about the principle components in the original space. The
 columns are:</p>
-<dl><dt><code>row</code></dt>
+<dl><dt><code>column</code></dt>
 <dd><p>The variable labels (colnames) of the data set on
 which PCA was performed.</p></dd>
 
 <dt><code>LD</code></dt>
-<dd><p>An integer vector indicating the principal component.</p></dd>
+<dd><p>A character vector indicating the discriminant axis (e.g.
+"LD1").</p></dd>
 
 <dt><code>value</code></dt>
 <dd><p>The value of the eigenvector (axis score) on the

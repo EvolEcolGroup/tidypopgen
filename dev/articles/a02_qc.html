@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,6 +46,7 @@
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul>
 </li>
@@ -210,13 +211,13 @@ our data has reduced from the original; 12 individuals, to 8.</p>
 <pre><code><span><span class="co">## This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.</span></span></code></pre>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">loci_report</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">##        snp_id         maf          missingness          hwe_p        </span></span>
-<span><span class="co">##  Length   :961   Min.   :0.0000   Min.   :0.00000   Min.   :0.00272  </span></span>
-<span><span class="co">##  N.unique :961   1st Qu.:0.1667   1st Qu.:0.00000   1st Qu.:0.32867  </span></span>
-<span><span class="co">##  N.blank  :  0   Median :0.2500   Median :0.00000   Median :0.53333  </span></span>
-<span><span class="co">##  Min.nchar:  1   Mean   :0.2661   Mean   :0.03733   Mean   :0.50321  </span></span>
-<span><span class="co">##  Max.nchar:  3   3rd Qu.:0.3750   3rd Qu.:0.12500   3rd Qu.:0.69231  </span></span>
-<span><span class="co">##                  Max.   :0.5000   Max.   :0.37500   Max.   :0.76503</span></span></code></pre>
+<pre><code><span><span class="co">##        snp_id         maf          missingness         hwe_p        </span></span>
+<span><span class="co">##  Length   :961   Min.   :0.0000   Min.   :0.0000   Min.   :0.01538  </span></span>
+<span><span class="co">##  N.unique :961   1st Qu.:0.1429   1st Qu.:0.0000   1st Qu.:0.32867  </span></span>
+<span><span class="co">##  N.blank  :  0   Median :0.2500   Median :0.0000   Median :0.53333  </span></span>
+<span><span class="co">##  Min.nchar:  1   Mean   :0.2648   Mean   :0.0372   Mean   :0.50413  </span></span>
+<span><span class="co">##  Max.nchar:  3   3rd Qu.:0.3750   3rd Qu.:0.1250   3rd Qu.:0.69231  </span></span>
+<span><span class="co">##                  Max.   :0.5000   Max.   :0.3750   Max.   :0.76503</span></span></code></pre>
 <p>The output of <code>qc_report_loci</code> supplies minor allele
 frequency, rate of missingness, and a Hardy-Weinberg exact p-value for
 each SNP. These data can be visualised in autoplot :</p>
@@ -244,10 +245,10 @@ frequency, and a Hardy-Weinberg p-value of 0.05.</p>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="a02_qc_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="Upset plot as above, with adjusted thresholds" width="700"></p>
 <p>The upset plot then visualises our 961 SNPs within their respective
-sets. The number above the second bar indicates that 607 SNPs occur in
+sets. The number above the first bar indicates that 607 SNPs occur in
 all 3 sets, meaning 607 SNPs pass all of our QC thresholds. The combined
 total of the first and second bars represents the number of SNPs that
-pass our MAF and HWE thresholds, here 806 SNPs.</p>
+pass our MAF and HWE thresholds, here 804 SNPs.</p>
 <p>To examine each QC measure in further detail, we can plot a different
 summary panel.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
@@ -271,7 +272,7 @@ greater than 2%. This operation is equivalent to plink –maf 0.02.</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.02</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 931</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 929</span></span></code></pre>
 <p>Following this, we can remove SNPs with a high rate of missingness.
 Lets say we want to remove SNPs that are missing in more than 5% of
 individuals, equivalent to using plink –geno 0.05</p>
@@ -284,7 +285,7 @@ remove these SNPs, we can again use <code>select_loci_if</code>.</p>
 <div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_missingness.html">loci_missingness</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 698</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 693</span></span></code></pre>
 <p>Finally, we may want to remove SNPs that show significant deviation
 from Hardy-Weinberg equilibrium, if our study design requires. To
 visualise SNPs with significant p-values in the Hardy-Weinberg exact
@@ -298,7 +299,7 @@ these data were real, these cases could indicate genotyping errors.</p>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">data</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_hwe.html">loci_hwe</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.01</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 697</span></span></code></pre>
+<pre><code><span><span class="co">## [1] 693</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="linkage-disequilibrium">Linkage Disequilibrium<a class="anchor" aria-label="anchor" href="#linkage-disequilibrium"></a>
@@ -317,11 +318,11 @@ need to update the backingfiles with:</p>
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_update_backingfile.html">gt_update_backingfile</a></span><span class="op">(</span><span class="va">data</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## gen_backing files updated, now</span></span></code></pre>
-<pre><code><span><span class="co">## using FBM RDS: /tmp/RtmphbH7ly/file29336fd90ea1_v2.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with FBM backing file: /tmp/RtmphbH7ly/file29336fd90ea1_v2.bk</span></span></code></pre>
+<pre><code><span><span class="co">## using FBM RDS: /tmp/RtmplkufQU/file294e4fa34733_v2.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with FBM backing file: /tmp/RtmplkufQU/file294e4fa34733_v2.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/RtmphbH7ly/file29336fd90ea1_v2.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/RtmplkufQU/file294e4fa34733_v2.gt')</span></span></code></pre>
 <p>And then we can impute using:</p>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">imputed_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_impute_simple.html">gt_impute_simple</a></span><span class="op">(</span><span class="va">data</span>, method <span class="op">=</span> <span class="st">"random"</span><span class="op">)</span></span></code></pre></div>
@@ -331,7 +332,7 @@ with <code>thr_r2</code> and <code>size</code> respectively.</p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">to_keep_ld</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">imputed_data</span>, thr_r2 <span class="op">=</span> <span class="fl">0.2</span>, size <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">to_keep_ld</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] FALSE FALSE FALSE FALSE FALSE FALSE</span></span></code></pre>
+<pre><code><span><span class="co">## [1] FALSE FALSE FALSE FALSE  TRUE FALSE</span></span></code></pre>
 <p><code>loci_ld_clump</code> provides a boolean vector the same length
 as our list of SNPs, telling us which to keep in the data set. We can
 then use this list to create a pruned version of our data:</p>
@@ -351,15 +352,15 @@ using <code>gt_save</code>.</p>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/gt_save.html">gt_save</a></span><span class="op">(</span><span class="va">ld_data</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## </span></span>
-<span><span class="co">## gen_tibble saved to /tmp/RtmphbH7ly/file29333f58c4a4.gt</span></span></code></pre>
-<pre><code><span><span class="co">## using FBM RDS: /tmp/RtmphbH7ly/file29336fd90ea1_v2.rds</span></span></code></pre>
-<pre><code><span><span class="co">## with FBM backing file: /tmp/RtmphbH7ly/file29336fd90ea1_v2.bk</span></span></code></pre>
+<span><span class="co">## gen_tibble saved to /tmp/RtmplkufQU/file294e390cf941.gt</span></span></code></pre>
+<pre><code><span><span class="co">## using FBM RDS: /tmp/RtmplkufQU/file294e4fa34733_v2.rds</span></span></code></pre>
+<pre><code><span><span class="co">## with FBM backing file: /tmp/RtmplkufQU/file294e4fa34733_v2.bk</span></span></code></pre>
 <pre><code><span><span class="co">## make sure that you do NOT delete those files!</span></span></code></pre>
 <pre><code><span><span class="co">## to reload the gen_tibble in another session, use:</span></span></code></pre>
-<pre><code><span><span class="co">## gt_load('/tmp/RtmphbH7ly/file29333f58c4a4.gt')</span></span></code></pre>
-<pre><code><span><span class="co">## [1] "/tmp/RtmphbH7ly/file29333f58c4a4.gt"    </span></span>
-<span><span class="co">## [2] "/tmp/RtmphbH7ly/file29336fd90ea1_v2.rds"</span></span>
-<span><span class="co">## [3] "/tmp/RtmphbH7ly/file29336fd90ea1_v2.bk"</span></span></code></pre>
+<pre><code><span><span class="co">## gt_load('/tmp/RtmplkufQU/file294e390cf941.gt')</span></span></code></pre>
+<pre><code><span><span class="co">## [1] "/tmp/RtmplkufQU/file294e390cf941.gt"    </span></span>
+<span><span class="co">## [2] "/tmp/RtmplkufQU/file294e4fa34733_v2.rds"</span></span>
+<span><span class="co">## [3] "/tmp/RtmplkufQU/file294e4fa34733_v2.bk"</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="grouping-data">Grouping data<a class="anchor" aria-label="anchor" href="#grouping-data"></a>
@@ -379,14 +380,14 @@ group:</p>
 <span>  <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">grouped_loci_report</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
-<span><span class="co">##   snp_id   maf missingness hwe_p</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> 2      0.438           0 0.429</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> 3      0.188           0 1    </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> 5      0.25            0 1    </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> 7      0.312           0 0.429</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> 8      0.312           0 1.14 </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> 10     0.438           0 0.429</span></span></code></pre>
+<span><span class="co">##   snp_id    maf missingness hwe_p</span></span>
+<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span> 2      0.375            0 0.429</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span> 3      0.188            0 1    </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span> 5      0.312            0 1    </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span> 8      0.25             0 1    </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span> 10     0.5              0 1    </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span> 11     0.062<span style="text-decoration: underline;">5</span>           0 1</span></span></code></pre>
 <p>The loci report that we receive here will calculate Hardy-Weinberg
 equilibrium for each SNP within each population separately, providing a
 Bonferroni corrected p-value for each SNP.</p>
@@ -400,12 +401,12 @@ each population:</p>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
 <span><span class="co">##   het_obs missingness id    group to_keep</span></span>
 <span><span class="co">##     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>  </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span>   0.382           0 1     A     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span>   0.377           0 4     A     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span>   0.393           0 5     A     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span>   0.382           0 6     A     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span>   0.403           0 7     B     TRUE   </span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span>   0.382           0 8     B     TRUE</span></span></code></pre>
+<span><span class="co">## <span style="color: #BCBCBC;">1</span>   0.380           0 1     A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">2</span>   0.375           0 4     A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">3</span>   0.390           0 5     A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">4</span>   0.380           0 6     A     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">5</span>   0.410           0 7     B     TRUE   </span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">6</span>   0.378           0 8     B     TRUE</span></span></code></pre>
 <p>This is important when we have related individuals, as background
 population structure can affect the filtering of relatives.</p>
 </div>

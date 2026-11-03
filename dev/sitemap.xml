@@ -1,4 +1,5 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/CLAUDE.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/CODE_OF_CONDUCT.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/CONTRIBUTING.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/LICENSE.html</loc></url>
@@ -8,6 +9,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/a99_plink_cheatsheet.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/aDNA_pseudohaploids.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/benchmark_hgdp.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/big_data.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/index.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.html</loc></url>

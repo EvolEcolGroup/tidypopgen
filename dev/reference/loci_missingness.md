@@ -144,6 +144,8 @@ example_gt %>%
 example_gt %>%
   group_by(population) %>%
   loci_missingness(type = "matrix")
+#> Matrix with character rownames and character colnames
+#> Dimensions: 6 x 3 
 #>          pop1 pop2 pop3
 #> rs1 0.0000000  0.0  0.0
 #> rs2 0.0000000  0.5  0.0

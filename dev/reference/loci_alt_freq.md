@@ -183,6 +183,8 @@ example_gt %>%
 example_gt %>%
   group_by(population) %>%
   loci_alt_freq(type = "matrix")
+#> Matrix with character rownames and character colnames
+#> Dimensions: 6 x 3 
 #>          pop1 pop2 pop3
 #> rs1 0.6666667 0.75 0.00
 #> rs2 0.6666667 0.00 0.25
@@ -263,6 +265,8 @@ example_gt %>%
 example_gt %>%
   group_by(population) %>%
   loci_maf(type = "matrix")
+#> Matrix with character rownames and character colnames
+#> Dimensions: 6 x 3 
 #>          pop1 pop2 pop3
 #> rs1 0.3333333 0.25 0.00
 #> rs2 0.3333333 0.00 0.25

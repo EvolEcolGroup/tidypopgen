@@ -190,13 +190,13 @@ loci_report <- qc_report_loci(data)
 summary(loci_report)
 ```
 
-    ##        snp_id         maf          missingness          hwe_p        
-    ##  Length   :961   Min.   :0.0000   Min.   :0.00000   Min.   :0.00272  
-    ##  N.unique :961   1st Qu.:0.1667   1st Qu.:0.00000   1st Qu.:0.32867  
-    ##  N.blank  :  0   Median :0.2500   Median :0.00000   Median :0.53333  
-    ##  Min.nchar:  1   Mean   :0.2661   Mean   :0.03733   Mean   :0.50321  
-    ##  Max.nchar:  3   3rd Qu.:0.3750   3rd Qu.:0.12500   3rd Qu.:0.69231  
-    ##                  Max.   :0.5000   Max.   :0.37500   Max.   :0.76503
+    ##        snp_id         maf          missingness         hwe_p        
+    ##  Length   :961   Min.   :0.0000   Min.   :0.0000   Min.   :0.01538  
+    ##  N.unique :961   1st Qu.:0.1429   1st Qu.:0.0000   1st Qu.:0.32867  
+    ##  N.blank  :  0   Median :0.2500   Median :0.0000   Median :0.53333  
+    ##  Min.nchar:  1   Mean   :0.2648   Mean   :0.0372   Mean   :0.50413  
+    ##  Max.nchar:  3   3rd Qu.:0.3750   3rd Qu.:0.1250   3rd Qu.:0.69231  
+    ##                  Max.   :0.5000   Max.   :0.3750   Max.   :0.76503
 
 The output of `qc_report_loci` supplies minor allele frequency, rate of
 missingness, and a Hardy-Weinberg exact p-value for each SNP. These data
@@ -239,10 +239,10 @@ autoplot(loci_report,
 thresholds](a02_qc_files/figure-html/unnamed-chunk-12-1.png)
 
 The upset plot then visualises our 961 SNPs within their respective
-sets. The number above the second bar indicates that 607 SNPs occur in
+sets. The number above the first bar indicates that 607 SNPs occur in
 all 3 sets, meaning 607 SNPs pass all of our QC thresholds. The combined
 total of the first and second bars represents the number of SNPs that
-pass our MAF and HWE thresholds, here 806 SNPs.
+pass our MAF and HWE thresholds, here 804 SNPs.
 
 To examine each QC measure in further detail, we can plot a different
 summary panel.
@@ -287,7 +287,7 @@ data <- data %>% select_loci_if(loci_maf(genotypes) > 0.02)
 count_loci(data)
 ```
 
-    ## [1] 931
+    ## [1] 929
 
 Following this, we can remove SNPs with a high rate of missingness. Lets
 say we want to remove SNPs that are missing in more than 5% of
@@ -311,7 +311,7 @@ data <- data %>% select_loci_if(loci_missingness(genotypes) < 0.05)
 count_loci(data)
 ```
 
-    ## [1] 698
+    ## [1] 693
 
 Finally, we may want to remove SNPs that show significant deviation from
 Hardy-Weinberg equilibrium, if our study design requires. To visualise
@@ -336,7 +336,7 @@ data <- data %>% select_loci_if(loci_hwe(genotypes) > 0.01)
 count_loci(data)
 ```
 
-    ## [1] 697
+    ## [1] 693
 
 ## Linkage Disequilibrium
 
@@ -363,15 +363,15 @@ data <- gt_update_backingfile(data)
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/RtmphbH7ly/file29336fd90ea1_v2.rds
+    ## using FBM RDS: /tmp/RtmplkufQU/file294e4fa34733_v2.rds
 
-    ## with FBM backing file: /tmp/RtmphbH7ly/file29336fd90ea1_v2.bk
+    ## with FBM backing file: /tmp/RtmplkufQU/file294e4fa34733_v2.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmphbH7ly/file29336fd90ea1_v2.gt')
+    ## gt_load('/tmp/RtmplkufQU/file294e4fa34733_v2.gt')
 
 And then we can impute using:
 
@@ -390,7 +390,7 @@ to_keep_ld <- loci_ld_clump(imputed_data, thr_r2 = 0.2, size = 10)
 head(to_keep_ld)
 ```
 
-    ## [1] FALSE FALSE FALSE FALSE FALSE FALSE
+    ## [1] FALSE FALSE FALSE FALSE  TRUE FALSE
 
 `loci_ld_clump` provides a boolean vector the same length as our list of
 SNPs, telling us which to keep in the data set. We can then use this
@@ -416,21 +416,21 @@ gt_save(ld_data, file_name = tempfile())
 ```
 
     ## 
-    ## gen_tibble saved to /tmp/RtmphbH7ly/file29333f58c4a4.gt
+    ## gen_tibble saved to /tmp/RtmplkufQU/file294e390cf941.gt
 
-    ## using FBM RDS: /tmp/RtmphbH7ly/file29336fd90ea1_v2.rds
+    ## using FBM RDS: /tmp/RtmplkufQU/file294e4fa34733_v2.rds
 
-    ## with FBM backing file: /tmp/RtmphbH7ly/file29336fd90ea1_v2.bk
+    ## with FBM backing file: /tmp/RtmplkufQU/file294e4fa34733_v2.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmphbH7ly/file29333f58c4a4.gt')
+    ## gt_load('/tmp/RtmplkufQU/file294e390cf941.gt')
 
-    ## [1] "/tmp/RtmphbH7ly/file29333f58c4a4.gt"    
-    ## [2] "/tmp/RtmphbH7ly/file29336fd90ea1_v2.rds"
-    ## [3] "/tmp/RtmphbH7ly/file29336fd90ea1_v2.bk"
+    ## [1] "/tmp/RtmplkufQU/file294e390cf941.gt"    
+    ## [2] "/tmp/RtmplkufQU/file294e4fa34733_v2.rds"
+    ## [3] "/tmp/RtmplkufQU/file294e4fa34733_v2.bk"
 
 ## Grouping data
 
@@ -456,14 +456,14 @@ head(grouped_loci_report)
 ```
 
     ## # A tibble: 6 × 4
-    ##   snp_id   maf missingness hwe_p
-    ##   <chr>  <dbl>       <dbl> <dbl>
-    ## 1 2      0.438           0 0.429
-    ## 2 3      0.188           0 1    
-    ## 3 5      0.25            0 1    
-    ## 4 7      0.312           0 0.429
-    ## 5 8      0.312           0 1.14 
-    ## 6 10     0.438           0 0.429
+    ##   snp_id    maf missingness hwe_p
+    ##   <chr>   <dbl>       <dbl> <dbl>
+    ## 1 2      0.375            0 0.429
+    ## 2 3      0.188            0 1    
+    ## 3 5      0.312            0 1    
+    ## 4 8      0.25             0 1    
+    ## 5 10     0.5              0 1    
+    ## 6 11     0.0625           0 1
 
 The loci report that we receive here will calculate Hardy-Weinberg
 equilibrium for each SNP within each population separately, providing a
@@ -483,12 +483,12 @@ head(grouped_individual_report)
     ## # A tibble: 6 × 5
     ##   het_obs missingness id    group to_keep
     ##     <dbl>       <dbl> <chr> <chr> <lgl>  
-    ## 1   0.382           0 1     A     TRUE   
-    ## 2   0.377           0 4     A     TRUE   
-    ## 3   0.393           0 5     A     TRUE   
-    ## 4   0.382           0 6     A     TRUE   
-    ## 5   0.403           0 7     B     TRUE   
-    ## 6   0.382           0 8     B     TRUE
+    ## 1   0.380           0 1     A     TRUE   
+    ## 2   0.375           0 4     A     TRUE   
+    ## 3   0.390           0 5     A     TRUE   
+    ## 4   0.380           0 6     A     TRUE   
+    ## 5   0.410           0 7     B     TRUE   
+    ## 6   0.378           0 8     B     TRUE
 
 This is important when we have related individuals, as background
 population structure can affect the filtering of relatives.

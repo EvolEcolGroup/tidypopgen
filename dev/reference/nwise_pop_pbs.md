@@ -42,7 +42,11 @@ nwise_pop_pbs(
 
 ## Value
 
-Either a matrix with locus ID as rownames and the following columns:
+Either a
+[matrix_int_names](https://evolecolgroup.github.io/tidypopgen/dev/reference/matrix_int_names.md)
+with locus ID as row names (use
+[`row_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/row_names.md)
+to retrieve them, as they can be integers) and the following columns:
 
 - `pbs_a.b.c`: the PBS value for population a given b & c (there will be
   multiple such columns covering all 3 way combinations of populations

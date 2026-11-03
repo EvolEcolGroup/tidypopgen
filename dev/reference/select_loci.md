@@ -39,6 +39,23 @@ Note that the `select_loci` verb does not modify the backing FBM files,
 but rather it subsets the list of loci to be used stored in the
 `gen_tibble`.
 
+For large datasets (millions of loci), select loci with
+[`dplyr::all_of()`](https://tidyselect.r-lib.org/reference/all_of.html)
+or
+[`dplyr::any_of()`](https://tidyselect.r-lib.org/reference/all_of.html),
+with helpers that match names (such as
+[`dplyr::starts_with()`](https://tidyselect.r-lib.org/reference/starts_with.html)
+or
+[`dplyr::everything()`](https://tidyselect.r-lib.org/reference/everything.html)),
+or with numeric positions written as numbers (e.g. `1:100` or
+`-c(1, 5)`), each optionally negated with `-` or `!`. These selections
+are resolved directly, which is much faster and uses much less memory
+than the general `tidyselect` machinery, which has to create an R symbol
+for every locus name (and R never frees symbols). Other expressions
+(e.g. combinations such as `c(all_of(x), starts_with("rs"))`, bare loci
+names, or expressions such as `which(...)`) still work, but are slow and
+memory hungry on very large datasets: use `all_of(which(...))` instead.
+
 ## See also
 
 [`dplyr::select()`](https://dplyr.tidyverse.org/reference/select.html)

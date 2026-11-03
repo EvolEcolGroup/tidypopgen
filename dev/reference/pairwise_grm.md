@@ -12,7 +12,8 @@ estimators).
 pairwise_grm(
   x,
   allele_sharing_mat = NULL,
-  block_size = bigstatsr::block_size(nrow(x))
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = 1
 )
 ```
 
@@ -34,6 +35,11 @@ pairwise_grm(
 
   the size of the blocks to use for the computation of the allele
   sharing matrix.
+
+- n_cores:
+
+  number of cores to be used for the computation of the allele sharing
+  matrix (default 1).
 
 ## Value
 

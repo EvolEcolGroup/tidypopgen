@@ -169,6 +169,8 @@ example_gt %>%
 example_gt %>%
   group_by(population) %>%
   loci_pi(type = "matrix")
+#> Matrix with character rownames and character colnames
+#> Dimensions: 6 x 3 
 #>          pop1 pop2 pop3
 #> rs1 0.5333333  0.5  0.0
 #> rs2 0.5333333  0.0  0.5

@@ -46,7 +46,11 @@ gt_admixture(
 
 - seed:
 
-  the seed for the random number generator (defaults to NULL)
+  the seed for the random number generator, either a vector of length
+  `n_runs` (used for each value of `k`) or of length `n_runs` \*
+  `length(k)`. If NULL (the default), the runs for each value of `k` use
+  seeds 43, 44, 45, etc. (43 being the default seed of ADMIXTURE), so
+  that each run is different but results are reproducible.
 
 - conda_env:
 

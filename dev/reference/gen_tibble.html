@@ -9,7 +9,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,6 +27,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -161,7 +162,8 @@ in case your
 
 
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
-<dd><p>the number of cores to use for parallel processing</p></dd>
+<dd><p>currently ignored (reading files is not parallelised); kept
+for backwards compatibility</p></dd>
 
 
 <dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
@@ -210,7 +212,10 @@ automatically from the data as they are read.</p></dd>
 variant is found in a sex chromosome (or mtDNA), the parser will fail with
 'Error: a genotype has more than max_ploidy alleles...'. To successful import
 such a <em>VCF</em>, change the order of variants so that the first chromosome is an
-autosome using a tool such as <code>vcftools</code>. Currently, only biallelic SNPs are
+autosome using a tool such as <code>vcftools</code>. Individuals with a missing genotype
+('.') on the first variant get their ploidy from their first genotype that
+is not '.' (or the largest ploidy of the other individuals, if all their
+genotypes are '.'). Currently, only biallelic SNPs are
 supported. If haploid variants (e.g. sex chromosomes) are included in the
 <em>VCF</em>, they are not transformed into homozygous calls. Instead, reference
 alleles will be coded as 0 and alternative alleles will be coded as 1.</p></li>

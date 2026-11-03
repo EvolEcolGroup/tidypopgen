@@ -13,7 +13,7 @@ and is used to identify outlier loci that may be under selection."><meta propert
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@ and is used to identify outlier loci that may be under selection."><meta propert
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -91,7 +92,9 @@ along with the PBS values. Default is <code>FALSE</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Either a matrix with locus ID as rownames and the following columns:</p><ul><li><p><code>pbs_a.b.c</code>: the PBS value for population a given b &amp; c (there
+    <p>Either a <a href="matrix_int_names.html">matrix_int_names</a> with locus ID as row names (use
+<code><a href="row_names.html">row_names()</a></code> to retrieve them, as they can be integers) and the following
+columns:</p><ul><li><p><code>pbs_a.b.c</code>: the PBS value for population a given b &amp; c (there
 will be multiple such columns covering all 3 way combinations of
 populations in the grouped <code>gen_tibble</code> object)</p></li>
 <li><p><code>pbsn1_a.b.c</code>: the normalized PBS value for population a given b &amp; c.</p></li>

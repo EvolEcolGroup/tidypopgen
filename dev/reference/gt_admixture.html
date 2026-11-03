@@ -13,7 +13,7 @@ each k."><meta property="og:image" content="https://evolecolgroup.github.io/tidy
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9009</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@ each k."><meta property="og:image" content="https://evolecolgroup.github.io/tidy
     <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -97,7 +98,11 @@ file</p></dd>
 
 
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>the seed for the random number generator (defaults to NULL)</p></dd>
+<dd><p>the seed for the random number generator, either a vector of
+length <code>n_runs</code> (used for each value of <code>k</code>) or of length <code>n_runs</code> *
+<code>length(k)</code>. If NULL (the default), the runs for each value of <code>k</code> use
+seeds 43, 44, 45, etc. (43 being the default seed of ADMIXTURE), so that
+each run is different but results are reproducible.</p></dd>
 
 
 <dt id="arg-conda-env">conda_env<a class="anchor" aria-label="anchor" href="#arg-conda-env"></a></dt>
