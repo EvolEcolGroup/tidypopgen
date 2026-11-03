@@ -221,14 +221,14 @@ gt_to_aftable <- function(
     stop(".x should be a grouped df")
   }
   geno_fbm <- .gt_get_fbm(.x)
-
+  groups <- .group_info(.x)
 
   aftable <- grouped_alt_freq_dip_pseudo_cpp(
     BM = geno_fbm,
     rowInd = .gt_fbm_rows(.x),
     colInd = .gt_fbm_cols(.x),
-    groupIds = dplyr::group_indices(.x) - 1,
-    ngroups = max(dplyr::group_indices(.x)),
+    groupIds = groups$ids,
+    ngroups = groups$n,
     ncores = n_cores,
     ploidy = indiv_ploidy(.x),
     as_counts = FALSE
@@ -239,11 +239,8 @@ gt_to_aftable <- function(
     counts = aftable[, ((ncol(aftable) / 2) + 1):(ncol(aftable))]
   )
 
-  .group_levels <- .x %>%
-    group_keys() %>%
-    pull(1)
-  dimnames(aftable$afs) <- list(loci_names(.x), .group_levels)
-  dimnames(aftable$counts) <- list(loci_names(.x), .group_levels)
+  dimnames(aftable$afs) <- list(loci_names(.x), groups$labels)
+  dimnames(aftable$counts) <- list(loci_names(.x), groups$labels)
 
   loci_new_names <- c(
     SNP = "name",

@@ -86,8 +86,10 @@ qc_report_loci_stats <- function(.x, hwe) {
   # group of each individual (all in one group if not grouped)
   if (inherits(.x, "grouped_df")) {
     group_ids <- dplyr::group_indices(.x)
+    n_groups <- dplyr::n_groups(.x)
   } else {
     group_ids <- rep(1L, nrow(.x))
+    n_groups <- 1L
   }
   code256 <- geno_fbm$code256
   if (all(is.na(code256) | code256 %in% c(0, 1, 2)) && nrow(.x) > 1) {
@@ -97,7 +99,7 @@ qc_report_loci_stats <- function(.x, hwe) {
       rowInd = .gt_fbm_rows(.x),
       colInd = .gt_fbm_cols(.x),
       groupIds = group_ids - 1L,
-      ngroups = max(group_ids),
+      ngroups = n_groups,
       ploidy = indiv_ploidy(.x),
       hwe = hwe,
       midp = TRUE,
@@ -142,13 +144,9 @@ qc_report_loci.grouped_df <- function(.x, ...) {
 
   stopifnot_diploid(.x$genotypes)
 
-  # Find number of groups
-  pops <- .x %>%
-    select(dplyr::group_vars(.x)) %>%
-    dplyr::pull(1)
-
-  # Take grouped variable pops and find how many unique groups
-  pops <- length(unique(pops))
+  # Find the number of groups tested for HWE (empty groups, which only exist
+  # if the user asked for them, are not tested)
+  pops <- sum(lengths(dplyr::group_rows(.x)) > 0)
 
   # Calculate maf and missingness across all individuals, and the smallest
   # hwe p-value across groups (in a single pass over the genotypes)

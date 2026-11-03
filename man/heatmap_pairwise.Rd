@@ -8,7 +8,12 @@ heatmap_pairwise(x, order = NULL)
 }
 \arguments{
 \item{x}{A square numeric matrix OR a data.frame/tibble with 3 columns:
-names1, names2, value (half-matrix representation).}
+names1, names2, value (half-matrix representation). The tidy output of
+\code{\link[=pairwise_pop_fst]{pairwise_pop_fst()}} for data grouped by several variables, which has
+one column per grouping variable for each member of a pair (e.g.
+\code{population_1}, \code{sex_1}, \code{population_2}, \code{sex_2}, \code{value}), is also
+accepted: the names are the values of the grouping variables pasted with
+".".}
 
 \item{order}{Optional ordering specification. Can be:
 \itemize{

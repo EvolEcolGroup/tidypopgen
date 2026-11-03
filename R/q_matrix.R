@@ -245,13 +245,9 @@ tidy.q_matrix <- function(x, data, ...) {
       inherits(data, "grouped_df")
   ) {
     # nolint
-    groupdf <- data %>% dplyr::group_data()
-    colu <- seq(1, nrow(data))
-    for (i in seq_len(nrow(groupdf))) {
-      group_rows <- groupdf$.rows[[i]]
-      group_name <- groupdf[[1]][i]
-      colu[group_rows] <- as.character(group_name)
-    }
+    # the group of each individual (the values of the grouping variables
+    # pasted with ".", if there are several)
+    colu <- as.character(.group_of_rows(data))
     q_tbl <- q_tbl %>%
       dplyr::mutate(
         id = data$id,
@@ -346,14 +342,9 @@ augment.q_matrix <- function(x, data = NULL, ...) {
       inherits(data, "grouped_df")
   ) {
     # nolint
-    groupdf <- data %>% dplyr::group_data()
-    colu <- seq(1, nrow(data))
-
-    for (i in seq_len(nrow(groupdf))) {
-      group_rows <- groupdf$.rows[[i]]
-      group_name <- groupdf[[1]][i]
-      colu[group_rows] <- as.character(group_name)
-    }
+    # the group of each individual (the values of the grouping variables
+    # pasted with ".", if there are several)
+    colu <- as.character(.group_of_rows(data))
 
     q_tbl <- q_tbl %>%
       dplyr::mutate(

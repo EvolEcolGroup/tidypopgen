@@ -7,12 +7,13 @@
 #' If the gen_tibble has been read in from vcf format, family.ID in the
 #' resulting plink files will be the same as sample.ID. If the gen_tibble has a
 #' grouping variable, this will be used as the family.ID in the resulting plink
-#' files; otherwise, the population is used as the family.ID. Parents, sex and
-#' phenotype are taken from the columns `paternal_ID`, `maternal_ID`, `sex` and
-#' `phenotype` (as created when reading PLINK files), if present. Genotypes are
-#' read and written directly from the file backed matrix, so all formats can be
-#' written for datasets that do not fit in memory (but note that ped and raw
-#' files are much larger, and thus slower to write, than bed files).
+#' files (with several grouping variables, their values are pasted with ".",
+#' e.g. `pop1.F`); otherwise, the population is used as the family.ID. Parents,
+#' sex and phenotype are taken from the columns `paternal_ID`, `maternal_ID`,
+#' `sex` and `phenotype` (as created when reading PLINK files), if present.
+#' Genotypes are read and written directly from the file backed matrix, so all
+#' formats can be written for datasets that do not fit in memory (but note that
+#' ped and raw files are much larger, and thus slower to write, than bed files).
 #'
 #' @param x a [`gen_tibble`] object
 #' @param file a character string giving the path to output file. If left to
@@ -325,13 +326,12 @@ gt_write_ped_raw <- function(
 # internal function creating the individual information shared by the fam,
 # ped and raw files (family ID, individual ID, parents, sex and phenotype)
 plink_indiv_meta <- function(x) {
-  # if this is a group tibble, use the grouping variable as family ID;
+  # if this is a group tibble, use the grouping variable as family ID (or the
+  # values of the grouping variables pasted with ".", if there are several);
   # otherwise use the population, or the sample ID if there is no
   # population (e.g. from a vcf)
   if (inherits(x, "grouped_gen_tbl")) {
-    family_id <- x %>%
-      select(dplyr::group_vars(x)) %>%
-      dplyr::pull(1)
+    family_id <- .group_of_rows(x)
   } else if ("population" %in% names(x)) {
     family_id <- x$population
   } else {

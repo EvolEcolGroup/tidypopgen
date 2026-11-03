@@ -12,7 +12,9 @@ nwise_pop_pbs(
 )
 }
 \arguments{
-\item{.x}{A grouped \code{gen_tibble}}
+\item{.x}{A grouped \code{gen_tibble}.
+If grouped by more than one variable, groups are labelled by the values
+of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
 
 \item{type}{type of object to return. One of "tidy" or "matrix".
 Default is "tidy".}

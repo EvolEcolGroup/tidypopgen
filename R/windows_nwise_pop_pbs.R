@@ -6,7 +6,9 @@
 #'   population and two reference populations, and is used to identify outlier
 #'   loci that may be under selection.
 #'
-#' @param .x a grouped `gen_tibble` object
+#' @param .x a grouped `gen_tibble` object.
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param type type of object to return. One of "matrix" or "tidy". Default is
 #'   "matrix". "matrix" returns a dataframe where each row is a window, followed
 #'   by columns of pbs values for each population comparison. "tidy" returns a
@@ -67,9 +69,9 @@ windows_nwise_pop_pbs <- function(.x,
   }
   type <- match.arg(type)
   # get the populations
-  .group_levels <- .x %>% group_keys()
+  groups <- .group_info(.x)
   # Check if there are at least 3 populations
-  if (nrow(.group_levels) < 3) {
+  if (groups$n < 3) {
     stop("At least 3 populations are required to compute PBS.")
   }
   fst_method <- match.arg(fst_method)
@@ -84,11 +86,6 @@ windows_nwise_pop_pbs <- function(.x,
     complete = complete
   )
 
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("windows_nwise_pop_pbs only works with one grouping variable")
-  }
-
   # compute the pbs for all 3 way combinations of populations, from a matrix
   # of the windowed fst values (windows as rows, pairs as columns)
   fst_cols <- names(fst_values)[
@@ -96,7 +93,7 @@ windows_nwise_pop_pbs <- function(.x,
   ]
   pbs_results <- pbs_all_triplets(
     as.matrix(fst_values[fst_cols]),
-    pops = .group_levels %>% dplyr::pull(1)
+    pops = groups$labels
   )
   pbs_results <- tibble::as_tibble(pbs_results)
   # if we returns fst, we simply cbind the whole thing

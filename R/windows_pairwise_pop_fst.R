@@ -3,7 +3,9 @@
 #' @description This function computes pairwise Fst for a sliding window across
 #'   each chromosome.
 #'
-#' @param .x a grouped `gen_tibble` object
+#' @param .x a grouped `gen_tibble` object.
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param type type of object to return. One of "matrix" or "tidy". Default is
 #'   "matrix". "matrix" returns a dataframe where each row is a window, followed
 #'   by columns of Fst values for each pairwise population a and b comparison.
@@ -67,8 +69,8 @@ windows_pairwise_pop_fst <- function(.x,
   # only operate on diploids or, if pseudohaploids, Hudson
   .check_fst_ploidy(.x, method)
   # get the populations, and all pairs of populations
-  .group_levels <- .x %>% group_keys()
-  pairwise_combn <- utils::combn(nrow(.group_levels), 2)
+  groups <- .group_info(.x)
+  pairwise_combn <- utils::combn(groups$n, 2)
 
   # define the windows, and find the windows that include each locus
   loci_table <- show_loci(.x)
@@ -95,8 +97,8 @@ windows_pairwise_pop_fst <- function(.x,
     .gt_get_fbm(.x),
     rowInd = .gt_fbm_rows(.x),
     colInd = .gt_fbm_cols(.x),
-    groupIds = dplyr::group_indices(.x) - 1,
-    ngroups = nrow(.group_levels),
+    groupIds = groups$ids,
+    ngroups = groups$n,
     ploidy = indiv_ploidy(.x),
     pairwise_combn = pairwise_combn,
     method = method,
@@ -124,13 +126,9 @@ windows_pairwise_pop_fst <- function(.x,
     window_means(win_sums$sum_den, win_sums$n_den)
 
   # name the columns after the pairs of populations
-  group_combinations <- cbind(
-    .group_levels[pairwise_combn[1, ], ],
-    .group_levels[pairwise_combn[2, ], ]
-  )
   colnames(window_fst) <- paste0(
     "fst_",
-    col_names_combinations(group_combinations)
+    .pair_labels(groups$labels, pairwise_combn)
   )
   res <- dplyr::bind_cols(win$windows, tibble::as_tibble(window_fst))
   if (type == "matrix") {

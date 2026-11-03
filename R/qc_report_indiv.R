@@ -15,7 +15,9 @@
 #' in KING. For pseudohaploid data, only missingness and ploidy are reported.
 #'
 #' @param .x either a [`gen_tibble`] object or a grouped [`gen_tibble`] (as
-#'   obtained by using [dplyr::group_by()])
+#'   obtained by using [dplyr::group_by()]). If grouped by more than one
+#'   variable, the `group` column holds the values of the grouping variables
+#'   pasted with "." (e.g. `pop1.F`).
 #' @param kings_threshold an optional numeric giving a KING kinship coefficient,
 #' or one of:
 #'   - "first": removing first degree relatives, equivalent to a kinship
@@ -127,11 +129,6 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
     return(qc_report)
   }
 
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("qc_report_indiv only works with one grouping variable")
-  }
-
   if (!is.null(kings_threshold)) {
     if (is.numeric(kings_threshold)) {
       kings_threshold <- kings_threshold
@@ -159,15 +156,24 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
     ) %>%
     mutate(id = .x$id)
   # re-group according to original .x grouping
-  qc_report$group <- .x[[dplyr::group_vars(.x)]]
+  qc_report$group <- .group_of_rows(.x)
 
   if (!is.null(kings_threshold)) {
     # find grouping levels
-    grouping_order <- group_keys(.x)
+    groups <- .group_info(.x)
+    # empty groups (which only exist if the user asked for them) have no
+    # individuals to compare, and are left out
+    non_empty <- groups$sizes > 0
 
     # calculate the kinship matrix for each population
-    king <- .x %>% group_map(~ pairwise_king(.x, as_matrix = TRUE))
-    names(king) <- as.matrix(grouping_order)[, 1]
+    king <- .x %>% group_map(function(.x, .y) {
+      if (nrow(.x) == 0) {
+        return(NULL)
+      }
+      pairwise_king(.x, as_matrix = TRUE)
+    })
+    names(king) <- groups$labels
+    king <- king[non_empty]
 
     # create relatives, an empty list
     relatives <- vector("list")
@@ -190,7 +196,7 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 
     # relatives are in group order; assign each group's flags to its rows
     to_keep <- logical(nrow(.x))
-    rows <- dplyr::group_rows(.x)
+    rows <- dplyr::group_rows(.x)[non_empty]
     for (i in seq_along(rows)) {
       to_keep[rows[[i]]] <- relatives[[i]]
     }

@@ -57,7 +57,11 @@ is TRUE, as in PLINK.}
 \item{block_size}{maximum number of loci read at once.}
 
 \item{type}{type of object to return, if using grouped method. One of "tidy",
-"list", or "matrix". Default is "tidy".}
+"list", or "matrix". Default is "tidy".
+Data can be grouped by more than one variable: groups are then labelled
+by the values of the grouping variables pasted with "." (e.g. \code{pop1.F}),
+and the "tidy" output has one column per grouping variable rather than a
+single \code{group} column.}
 }
 \value{
 a vector of probabilities from HWE exact test, one per locus
