@@ -200,6 +200,9 @@ get_p_matrix <- function(x, ..., k, run) {
 #' @param x A Q matrix object (as returned by [`q_matrix`]).
 #' @param data An associated tibble (e.g. a [`gen_tibble`]), with the
 #'   individuals in the same order as the data used to generate the Q matrix
+#'   (unless the Q matrix has the ids of the individuals as an attribute, as
+#'   from [get_q_matrix()]). If the Q matrix has no group information and
+#'   `data` is grouped, the groups of `data` are used.
 #' @param ... not currently used
 #' @return A tidied tibble containing columns:
 #'   \item{`row`}{ID of the original observation (i.e. rowname from original
@@ -223,48 +226,12 @@ get_p_matrix <- function(x, ..., k, run) {
 #' }
 tidy.q_matrix <- function(x, data, ...) {
   rlang::check_dots_empty()
-
-  # convert to tibble
-  q_tbl <- x %>%
-    tibble::as_tibble()
-
-  # use attributes if supplied
-  if (!is.null(attr(x, "id")) && !is.null(attr(x, "group"))) {
-    q_tbl$id <- attr(x, "id")
-    q_tbl$group <- attr(x, "group")
-    for (i in seq_len(ncol(q_tbl))) {
-      attr(q_tbl[[i]], "id") <- NULL
-      attr(q_tbl[[i]], "group") <- NULL
-      attr(q_tbl[[i]], "class") <- NULL
-    }
-
-    # otherwise use supplied gen_tibble
-  } else if (
-    is.null(attr(x, "id")) &&
-      is.null(attr(x, "group")) &&
-      inherits(data, "grouped_df")
-  ) {
-    # nolint
-    # the group of each individual (the values of the grouping variables
-    # pasted with ".", if there are several)
-    colu <- as.character(.group_of_rows(data))
-    q_tbl <- q_tbl %>%
-      dplyr::mutate(
-        id = data$id,
-        group = colu
-      )
-  } else if (!is.null(attr(x, "id"))) {
-    # use the id attribute if available, so that the order of data does
-    # not matter
-    q_tbl$id <- attr(x, "id")
-    for (i in seq_len(ncol(q_tbl))) {
-      attr(q_tbl[[i]], "id") <- NULL
-      attr(q_tbl[[i]], "class") <- NULL
-    }
-  } else {
-    q_tbl <- q_tbl %>%
-      dplyr::mutate(id = data$id)
+  if (missing(data)) {
+    data <- NULL
   }
+
+  # the Q matrix as a tibble, with the id and group of each individual
+  q_tbl <- .q_matrix_to_tbl(x, data)
 
   # pivot the resulting data
   q_tbl <- q_tbl %>%
@@ -288,7 +255,9 @@ tidy.q_matrix <- function(x, data, ...) {
 #' [broom::augment.prcomp] will work out of the box (this is especially helpful
 #' when adapting plotting scripts).
 #' @param x  A `q_matrix` object
-#' @param data the `gen_tibble` used to run the clustering algorithm
+#' @param data the `gen_tibble` used to run the clustering algorithm. If the
+#'   Q matrix has no group information and `data` is grouped, the groups of
+#'   `data` are added as a `group` column.
 #' @param ... Not used. Needed to match generic signature only.
 #' @return A  [gen_tibble] containing the original data along with additional
 #'   columns containing each observation's Q values.
@@ -324,46 +293,8 @@ augment.q_matrix <- function(x, data = NULL, ...) {
     }
   }
 
-  q_tbl <- x %>%
-    tibble::as_tibble()
-
-  if (!is.null(attr(x, "id")) && !is.null(attr(x, "group"))) {
-    q_tbl$id <- attr(x, "id")
-    q_tbl$group <- attr(x, "group")
-
-    for (i in seq_len(ncol(q_tbl))) {
-      attr(q_tbl[[i]], "id") <- NULL
-      attr(q_tbl[[i]], "group") <- NULL
-      attr(q_tbl[[i]], "class") <- NULL
-    }
-  } else if (
-    is.null(attr(x, "id")) &&
-      is.null(attr(x, "group")) &&
-      inherits(data, "grouped_df")
-  ) {
-    # nolint
-    # the group of each individual (the values of the grouping variables
-    # pasted with ".", if there are several)
-    colu <- as.character(.group_of_rows(data))
-
-    q_tbl <- q_tbl %>%
-      dplyr::mutate(
-        id = data$id,
-        group = colu
-      )
-  } else if (!is.null(attr(x, "id"))) {
-    # use the id attribute if available, so that the order of data does
-    # not matter
-    q_tbl$id <- attr(x, "id")
-    for (i in seq_len(ncol(q_tbl))) {
-      attr(q_tbl[[i]], "id") <- NULL
-      attr(q_tbl[[i]], "class") <- NULL
-    }
-  } else {
-    q_tbl <- q_tbl %>%
-      dplyr::mutate(id = data$id)
-  }
-  q_tbl
+  # the Q matrix as a tibble, with the id and group of each individual
+  q_tbl <- .q_matrix_to_tbl(x, data)
 
   # and finally left join
   data <- dplyr::left_join(data, q_tbl, by = "id")
@@ -381,6 +312,42 @@ augment.q_matrix <- function(x, data = NULL, ...) {
   data
 }
 
+#' A Q matrix as a tibble, with the id and group of each individual
+#'
+#' The id and group attributes of the Q matrix are used if present (so that
+#' the order of `data` does not matter); otherwise the ids of `data` are used
+#' (its individuals being in the order of the rows of the Q matrix), and, if
+#' `data` is grouped, its groups. Groups keep their type (e.g. a factor keeps
+#' its levels, and several grouping variables give a factor with the levels
+#' in the order of the groups, see `.group_of_rows()`), so that they are
+#' sorted in the same order as by the grouped functions.
+#'
+#' @param x a `q_matrix`
+#' @param data a tibble (e.g. a `gen_tibble`) with the individuals, or NULL
+#' @returns a tibble with the Q columns (`.Q1`, `.Q2`, ...), `id` and, if
+#'   known, `group`
+#' @keywords internal
+#' @noRd
+.q_matrix_to_tbl <- function(x, data) {
+  q_tbl <- tibble::as_tibble(x)
+  for (i in seq_len(ncol(q_tbl))) {
+    attr(q_tbl[[i]], "id") <- NULL
+    attr(q_tbl[[i]], "group") <- NULL
+    attr(q_tbl[[i]], "class") <- NULL
+  }
+  if (!is.null(attr(x, "id"))) {
+    q_tbl$id <- attr(x, "id")
+  } else {
+    q_tbl$id <- data$id
+  }
+  if (!is.null(attr(x, "group"))) {
+    q_tbl$group <- attr(x, "group")
+  } else if (inherits(data, "grouped_df")) {
+    # the group of each individual, matched by id
+    q_tbl$group <- .group_of_rows(data)[match(q_tbl$id, data$id)]
+  }
+  q_tbl
+}
 
 #' Autoplots for `q_matrix` objects
 #'
@@ -392,12 +359,18 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #' @param object A Q matrix object (as returned by [q_matrix()]).
 #' @param data An associated tibble (e.g. a [`gen_tibble`]), with the
 #'   individuals in the same order as the data used to generate the Q matrix
+#'   (unless the Q matrix has the ids of the individuals as an attribute, as
+#'   from [get_q_matrix()]). If the Q matrix has no group information and
+#'   `data` is grouped, the groups of `data` are used.
 #' @param annotate_group Boolean determining whether to annotate the plot with
 #'   the group information
 #' @param arrange_by_group Boolean determining whether to arrange the
-#'   individuals by group. If the grouping variable in the `gen_tibble` or the
-#'   metadata of the `gt_admixt` object is a factor, the data will be ordered by
-#'   the levels of the factor; else it will be ordered alphabetically.
+#'   individuals by group. Groups are ordered as by the grouped functions
+#'   (see [dplyr::group_keys()]): if the grouping variable in the `gen_tibble`
+#'   or the metadata of the `gt_admix` object is a factor, by the levels of the
+#'   factor; numbers in numeric order; otherwise alphabetically. With several
+#'   grouping variables, groups are ordered by the first variable, then by the
+#'   second, and so on.
 #' @param arrange_by_indiv Boolean determining whether to arrange the
 #'   individuals by their individual id within each group (groups are arranged
 #'   first if `arrange_by_group` is TRUE, otherwise they are kept in their

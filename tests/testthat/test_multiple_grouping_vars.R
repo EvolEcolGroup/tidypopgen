@@ -251,7 +251,7 @@ test_that("qc reports and exports work with several grouping variables", {
   # (one row per individual and ancestry component)
   expect_equal(
     tidy(q_mat, data = gt_two)$group,
-    rep(test_gt$pop_sex, each = 2)
+    factor(rep(test_gt$pop_sex, each = 2), levels = group_labels)
   )
 })
 

@@ -60,6 +60,13 @@
   group labels in the order of the groups, rather than characters, which
   sorted alphabetically; `gt_admix_reorder_q()` and `autoplot()` thus order
   the groups as the grouped functions do
+* fix `tidy()`, `augment()` and `autoplot()` of a `q_matrix` with grouped
+  `data` turning the groups into characters, so that `autoplot()` ordered them
+  alphabetically rather than by the levels of a factor (as documented) or in
+  numeric order; and ignoring the groups of `data` when the `q_matrix` had the
+  ids of the individuals but no groups (e.g. from `gt_admixture()` or
+  `gt_snmf()` on an ungrouped `gen_tibble`), so that `autoplot()` could not
+  annotate the groups
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not

@@ -98,3 +98,49 @@ test_that("groups of individuals from several grouping variables are ordered", {
     test_gt$id[order(match(test_gt$population, c("pop3", "pop1", "pop2")))]
   )
 })
+
+test_that("tidy, augment and autoplot of a q_matrix keep the order of groups", {
+  q <- seq(0.1, 0.7, length.out = nrow(test_gt))
+  q_mat <- q_matrix(matrix(c(q, 1 - q), ncol = 2))
+  factor_gt <- test_gt %>% dplyr::group_by(pop_factor)
+  number_gt <- test_gt %>% dplyr::group_by(pop_number)
+  # the groups from grouped data keep their type
+  expect_equal(augment(q_mat, data = factor_gt)$group, test_gt$pop_factor)
+  expect_equal(
+    tidy(q_mat, data = number_gt)$group,
+    rep(test_gt$pop_number, each = 2)
+  )
+  # autoplot() orders the groups as the grouped functions do, whether they
+  # come from the data or from the attributes of the q_matrix
+  plot_labels <- function(plt) ggplot2::layer_scales(plt)$x$labels
+  expect_equal(
+    plot_labels(autoplot(q_mat, data = factor_gt)),
+    c("pop3", "pop1", "pop2")
+  )
+  expect_equal(
+    plot_labels(autoplot(q_mat, data = number_gt)),
+    c("1", "2", "10")
+  )
+  q_attr <- q_mat
+  attr(q_attr, "id") <- test_gt$id
+  attr(q_attr, "group") <- test_gt$pop_factor
+  expect_equal(plot_labels(autoplot(q_attr)), c("pop3", "pop1", "pop2"))
+  # a q_matrix with ids but no groups (e.g. from an ungrouped gen_tibble)
+  # takes the groups from grouped data, matched by id
+  q_id <- q_mat
+  attr(q_id, "id") <- test_gt$id
+  rev_gt <- test_gt %>%
+    dplyr::arrange(dplyr::desc(id)) %>%
+    dplyr::group_by(pop_factor)
+  expect_equal(
+    tidy(q_id, data = rev_gt)$group,
+    rep(test_gt$pop_factor, each = 2)
+  )
+  augment_id <- augment(q_id, data = rev_gt)
+  expect_equal(augment_id$group, rev_gt$pop_factor)
+  expect_equal(augment_id$.Q1, q[match(rev_gt$id, test_gt$id)])
+  expect_equal(
+    plot_labels(autoplot(q_id, data = rev_gt)),
+    c("pop3", "pop1", "pop2")
+  )
+})
