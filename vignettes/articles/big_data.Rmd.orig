@@ -1,7 +1,7 @@
 ---
 title: "Working with big data"
 output: html_document
-date: "2026-10-21"
+date: "2026-11-04"
 ---
 
 ```{r setup, include=FALSE}
@@ -216,7 +216,7 @@ autoplot(sgdp_pca, type = "scores") +
   labs(color = "Region")
 ```
 
-Our PCA separates the four regions. PC1 (5.98% of the variance) runs from the African individuals on the left, through West Eurasia, to the American individuals on the right, and PC2 (4.48%) separates the Oceanian individuals at the top from the American individuals at the bottom. The individuals from America and West Eurasia form tight clusters, whereas the African individuals are spread out along PC1: the Mbuti, Ju/'hoan North, Yoruba, Mandenka and Dinka individuals are on the far left, followed by the Masai and Somali individuals from East Africa, while the two Mozabite individuals from Algeria lie close to the West Eurasian cluster. This is consistent with North and East African populations carrying some West Eurasian-related ancestry. The Oceanian individuals form two groups: the Papuan, Bougainville and Australian individuals at the top, and the Dusun (from Borneo), Hawaiian and Maori individuals closer to the centre of the plot.
+Our PCA separates the five regions. PC1 (5.23% of the variance) runs from the African individuals on the left, through West Eurasia, Oceania and East Asia, to the American individuals on the right, and PC2 (3.86%) separates the Oceanian and East Asian individuals at the top from the American individuals at the bottom. The individuals from America, West Eurasia and East Asia form fairly tight clusters, whereas the African individuals are spread out along PC1: the Mbuti, Ju/'hoan North, Yoruba, Mandenka and Dinka individuals are on the far left, followed by the Masai and Somali individuals from East Africa, while the two Mozabite individuals from Algeria lie close to the West Eurasian cluster. This is consistent with North and East African populations carrying some West Eurasian-related ancestry. The Oceanian individuals are also spread out: the Papuan, Bougainville and Australian individuals are at the top, the Maori individual is closer to the centre of the plot, and the Hawaiian individual and the two Dusun individuals (from Borneo) lie within the East Asian cluster. This reflects the Austronesian ancestry of these populations, which is largely related to East Asian populations.
 
 ## DAPC
 
@@ -232,7 +232,7 @@ sgdp_dapc <- gt_dapc(sgdp_pca,
 autoplot(sgdp_dapc, type = "components")
 ```
 
-Our DAPC autoplot shows that most individuals are assigned to their own region's group with a probability close to one, showing that there is genetic differentiation between the continental regions. The exceptions are consistent with the PCA above: the two Mozabite individuals are assigned to the West Eurasian group (with probabilities of 0.94 and 0.99), the Somali individual has a small probability (about 0.01) of West Eurasian membership, and the Maori individual has a probability of 0.16 of West Eurasian membership. These individuals may have admixed ancestry.
+Our DAPC autoplot shows that most individuals are assigned to their own region's group with a probability close to one, showing that there is genetic differentiation between the continental regions. The exceptions are consistent with the PCA above: the two Mozabite individuals are assigned to the West Eurasian group (with probabilities of 0.93 and 0.99), the two Dusun individuals and the Hawaiian individual are assigned to the East Asian group (with probabilities of 0.96, 0.98 and 0.91), and the Maori individual has a probability of 0.10 of East Asian membership. These individuals may have admixed ancestry, or (as for the Dusun) be closer to the East Asian populations than to the other Oceanian populations in our sample.
 
 # Pairwise F~ST~
 
@@ -262,7 +262,7 @@ autoplot(pairwise_fst,
   )
 ```
 
-The pairwise F~ST~ values are all small (between 0.03 and 0.07), as is typical of human populations. America is the most differentiated region, and Africa and America are the most differentiated pair (F~ST~ = 0.069). Africa and West Eurasia are the least differentiated pair (0.033), closely followed by Oceania and West Eurasia (0.034); the low value between Africa and West Eurasia partly reflects the West Eurasian-related ancestry of the Mozabite, Somali and Masai individuals in our African sample. Note that with only 10 individuals per region, these estimates are imprecise.
+The pairwise F~ST~ values are all small (between 0.02 and 0.08), as is typical of human populations. America is the most differentiated region, and Africa and America are the most differentiated pair (F~ST~ = 0.079); America is closest to East Asia (0.043). East Asia and Oceania are the least differentiated pair (0.017), reflecting the East Asian-related ancestry of the Dusun, Hawaiian and Maori individuals in our Oceanian sample. Africa is closest to West Eurasia (0.038), which partly reflects the West Eurasian-related ancestry of the Mozabite, Somali and Masai individuals in our African sample. Note that with only 10 individuals per region, these estimates are imprecise.
 
 # Performance summary
 
