@@ -655,3 +655,51 @@ test_that("gen_tibble from a bigSNP rds does not overwrite the rds", {
   expect_identical(show_genotypes(rds_gt2), show_genotypes(bed_gt))
   expect_true(inherits(readRDS(bigsnp_path), "bigSNP"))
 })
+
+test_that("functions writing to the FBM leave the bigSNP files untouched", {
+  # a dataset with missing genotypes, so that imputation writes into the FBM
+  bed_path <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
+  bigsnp_files <- c(bigsnp_path, sub("\\.rds$", ".bk", bigsnp_path))
+  md5 <- unname(tools::md5sum(bigsnp_files))
+  expect_bigsnp_untouched <- function() {
+    expect_identical(unname(tools::md5sum(bigsnp_files)), md5)
+    expect_s3_class(bigsnpr::snp_attach(bigsnp_path), "bigSNP")
+  }
+  rds_gt <- gen_tibble(bigsnp_path, quiet = TRUE)
+  expect_false(any(gt_get_file_names(rds_gt) %in% bigsnp_files))
+  expect_bigsnp_untouched()
+  gt_file <- gt_save(rds_gt, quiet = TRUE)[1]
+  expect_bigsnp_untouched()
+  rds_gt <- gt_load(gt_file)
+  expect_bigsnp_untouched()
+  # imputation writes into the backing file, and changes the code256
+  imputed_gt <- gt_impute_simple(rds_gt)
+  gt_set_imputed(imputed_gt, set = TRUE)
+  gt_save(imputed_gt, quiet = TRUE)
+  expect_bigsnp_untouched()
+  gt_set_imputed(imputed_gt, set = FALSE)
+  gt_save(imputed_gt, quiet = TRUE)
+  expect_bigsnp_untouched()
+  gt_order_loci(select_loci(rds_gt, c(3, 1, 2)), quiet = TRUE)
+  expect_bigsnp_untouched()
+  # gen_tibble() removes the files it created when it stops, but it must not
+  # remove the files of the bigSNP
+  double_na_path <- bigsnpr::snp_readBed(
+    test_path("testdata/plink_doubleNA", "plink_doubleNA.bed"),
+    backingfile = tempfile()
+  )
+  double_na_files <- c(double_na_path, sub("\\.rds$", ".bk", double_na_path))
+  double_na_md5 <- unname(tools::md5sum(double_na_files))
+  expect_error(
+    gen_tibble(double_na_path, quiet = TRUE),
+    "Some loci are missing both reference and alternate alleles"
+  )
+  expect_identical(unname(tools::md5sum(double_na_files)), double_na_md5)
+  expect_s3_class(bigsnpr::snp_attach(double_na_path), "bigSNP")
+  skip_if_not_installed("xgboost")
+  xgboost_gt <- gt_impute_xgboost(gen_tibble(bigsnp_path, quiet = TRUE))
+  gt_set_imputed(xgboost_gt, set = TRUE)
+  gt_save(xgboost_gt, quiet = TRUE)
+  expect_bigsnp_untouched()
+})

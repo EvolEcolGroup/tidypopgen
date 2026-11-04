@@ -78,7 +78,10 @@
   individual, and putting the label of a group of a single individual on the
   last individual of the previous group
 * fix `gen_tibble()` on a bigSNP .rds file overwriting that .rds and ignoring
-  `backingfile`; the backing file is now copied to `backingfile`
+  `backingfile`; the backing file is now copied to `backingfile`, so that the
+  files of the bigSNP are never modified (`gt_impute_simple()` and
+  `gt_impute_xgboost()` used to write into its .bk file, and `gen_tibble()`
+  deleted both files when it stopped on loci with no alleles)
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not
