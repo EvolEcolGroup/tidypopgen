@@ -107,8 +107,10 @@
 * fix `autoplot()` of `gt_admix` objects with `type = "cv"` failing when the
   object has no `algorithm` element
 * fix `gt_admix_reorder_q()` turning the Q matrices for K = 1 into vectors
-* fix `autoplot()` for `q_matrix` and `gt_admix` objects not arranging
-  individuals by their id when `arrange_by_indiv = TRUE`
+* fix `reorder_within_groups` in `autoplot()` for `q_matrix` and `gt_admix`
+  objects, which did not sort individuals by their dominant component
+* fix `arrange_by_indiv` in `autoplot()` for `q_matrix` and `gt_admix`
+  objects, which did not sort individuals by their id within each group
 * fix group annotations of admixture barplots showing extra separators and
   labels for unused levels of the grouping factor
 * `select_loci_if()` no longer loads the whole genotype matrix into memory to
