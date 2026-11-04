@@ -31,7 +31,10 @@
 #'   Data can be grouped by more than one variable: groups are then labelled
 #'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
 #'   and the "tidy" output has one column per grouping variable rather than a
-#'   single `group` column.
+#'   single `group` column. The `group` column, or the columns of the
+#'   grouping variables, keep the type of the grouping variables (e.g. a
+#'   factor keeps its levels), so that groups stay in their order when the
+#'   output is sorted or plotted.
 #' @param block_size The size of the blocks to leave out.
 #' @param size_unit Either "snp", "cM" or "bp". If "snp", the block size is in
 #'   number of SNPs. If "cM", the block size is in centiMorgans. If "bp", the

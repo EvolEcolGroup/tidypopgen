@@ -445,12 +445,15 @@ test_that("grouped loci_ functions work with factor and numeric groups", {
     fct_mat <- this_fun(fct_grp, type = "matrix")
     expect_equal(colnames(fct_mat), c("p1", "p2"))
     expect_equal(unclass(fct_mat), unclass(chr_mat))
-    expect_equal(this_fun(fct_grp, type = "tidy"), chr_tidy)
+    # the tidy group column keeps the type of the grouping variable
+    fct_tidy <- this_fun(fct_grp, type = "tidy")
+    expect_equal(fct_tidy$group, factor(chr_tidy$group))
+    expect_equal(fct_tidy[-2], chr_tidy[-2])
     num_mat <- this_fun(num_grp, type = "matrix")
     expect_equal(colnames(num_mat), c("2", "5"))
     expect_equal(as.vector(num_mat), as.vector(chr_mat))
     num_tidy <- this_fun(num_grp, type = "tidy")
-    expect_equal(num_tidy$group, rep(c("2", "5"), 4))
+    expect_equal(num_tidy$group, rep(c(2, 5), 4))
     expect_equal(num_tidy$value, chr_tidy$value)
   }
 })

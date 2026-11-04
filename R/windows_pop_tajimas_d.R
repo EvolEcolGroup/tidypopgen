@@ -21,7 +21,10 @@
 #'   Data can be grouped by more than one variable: groups are then labelled
 #'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
 #'   and the "tidy" output has one column per grouping variable rather than a
-#'   single `group` column.
+#'   single `group` column. The `group` column, or the columns of the
+#'   grouping variables, keep the type of the grouping variables (e.g. a
+#'   factor keeps its levels), so that groups stay in their order when the
+#'   output is sorted or plotted.
 #' @param window_size The size of the window to use for the estimates.
 #' @param step_size The step size to use for the windows.
 #' @param size_unit Either "snp" or "bp". If "snp", the window size and step

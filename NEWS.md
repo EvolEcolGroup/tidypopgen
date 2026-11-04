@@ -46,6 +46,14 @@
   (e.g. with an empty group, or a group without data at a locus); `n_loci` is
   now the number of loci in the window, and the number with data in each group
   is given by the "tidy" and "list" outputs
+* the `group` column of the "tidy" outputs of grouped `loci_alt_freq()`,
+  `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,
+  `windows_pop_tajimas_d()` and `jackknife_pop_tajimas_d()` now keeps the type
+  of the grouping variable (e.g. a factor keeps its levels, and numbers stay
+  numbers), as `dplyr::summarise()` does and as the columns of several
+  grouping variables already did, rather than being character; groups thus
+  stay in their order (e.g. the levels of the factor) when the output is
+  sorted or plotted
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not

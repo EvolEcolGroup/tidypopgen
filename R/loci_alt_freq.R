@@ -26,7 +26,10 @@
 #'   Data can be grouped by more than one variable: groups are then labelled
 #'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
 #'   and the "tidy" output has one column per grouping variable rather than a
-#'   single `group` column.
+#'   single `group` column. The `group` column, or the columns of the
+#'   grouping variables, keep the type of the grouping variables (e.g. a
+#'   factor keeps its levels), so that groups stay in their order when the
+#'   output is sorted or plotted.
 #' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a vector of frequencies, one per locus, if `as_counts = FALSE`;
 #' else a matrix of two columns, the count of alternate alleles and the count
@@ -464,8 +467,10 @@ loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
 #' @param type a string indicating the type of output
 #' @param group_keys optionally, the group keys (a tibble with one row per
 #'   group and one column per grouping variable, as [dplyr::group_keys()]);
-#'   if there are several grouping variables, the "tidy" output has one
-#'   column per grouping variable rather than a single `group` column
+#'   the "tidy" output then has the values of the grouping variables (keeping
+#'   their type, e.g. a factor keeps its levels), in one column per grouping
+#'   variable if there are several, rather than the labels in a single
+#'   `group` column
 #' @returns the data formatted as a tibble, list, or matrix
 #' @keywords internal
 #' @noRd
@@ -496,10 +501,18 @@ format_grouped_output <- function(out_mat, group_ids, loci_names, type,
         tibble::tibble(value = values)
       ))
     }
+    # a single group column, with the values of the grouping variable (keeping
+    # its type, e.g. a factor keeps its levels), or the labels if the keys are
+    # not given
+    if (is.null(group_keys)) {
+      group_col <- group_ids
+    } else {
+      group_col <- group_keys[[1]]
+    }
     return(tibble::new_tibble(
       list(
         loci = rep(loci_names, each = n_groups),
-        group = rep(group_ids, times = n_loci),
+        group = rep(group_col, times = n_loci),
         value = values
       ),
       nrow = n_loci * n_groups

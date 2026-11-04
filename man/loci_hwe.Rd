@@ -61,7 +61,10 @@ is TRUE, as in PLINK.}
 Data can be grouped by more than one variable: groups are then labelled
 by the values of the grouping variables pasted with "." (e.g. \code{pop1.F}),
 and the "tidy" output has one column per grouping variable rather than a
-single \code{group} column.}
+single \code{group} column. The \code{group} column, or the columns of
+the grouping variables, keep the type of the grouping variables (e.g. a
+factor keeps its levels), so that groups stay in their order when the output
+is sorted or plotted.}
 }
 \value{
 a vector of probabilities from HWE exact test, one per locus. For

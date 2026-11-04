@@ -12,7 +12,9 @@
 # the grouping variables are pasted with ".", as in the names of the pairs of
 # groups (e.g. fst_pop1.pop2). Tidy outputs with a row per group have one
 # column per grouping variable when there are several (as with
-# dplyr::summarise()), and a single `group` column otherwise.
+# dplyr::summarise()), and a single `group` column otherwise; either way, the
+# columns keep the type of the grouping variables (e.g. a factor keeps its
+# levels), so that sorting or plotting them keeps the order of the groups.
 
 #' Information on the groups of a grouped gen_tibble
 #'
@@ -75,13 +77,14 @@
 #' @param groups the group information, as returned by `.group_info()`
 #' @param idx the index of the group of each row of the output
 #' @returns a tibble with one row per element of `idx`: a single `group`
-#'   column (with the group labels) if there is one grouping variable, or one
-#'   column per grouping variable (with their values) if there are several
+#'   column if there is one grouping variable, or one column per grouping
+#'   variable if there are several, with the values of the grouping variables
+#'   (keeping their type, e.g. a factor keeps its levels)
 #' @keywords internal
 #' @noRd
 .group_columns <- function(groups, idx) {
   if (length(groups$vars) == 1) {
-    tibble::new_tibble(list(group = groups$labels[idx]), nrow = length(idx))
+    tibble::new_tibble(list(group = groups$keys[[1]][idx]), nrow = length(idx))
   } else {
     groups$keys[idx, , drop = FALSE]
   }
