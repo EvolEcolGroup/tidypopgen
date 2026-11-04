@@ -14,8 +14,10 @@ only"). In #216 each of them was reverted in `speed_to_merge`.
 - **Also on this branch:** #217 (`ee8bd631`, grouping by several
   variables), the [empty group fixes](#empty-groups-group_bydrop--false),
   PR #209 (`autoplot()` of Q matrices), merged in `de645781` (see
-  [PR #209](#pr-209-merged-into-this-branch)), and the
-  [group order fixes](#group-order).
+  [PR #209](#pr-209-merged-into-this-branch)), the
+  [group order fixes](#group-order), and `3c9a54b` from
+  `codereview-bigsnp-rds`, cherry-picked (see
+  [below](#fix-from-codereview-bigsnp-rds-cherry-picked-onto-this-branch)).
 - The comments in *italics* are the original reviewers' comments from
   `code_review_2026-10.md`, explaining why each fix was held back. They
   still need an answer before this branch is merged.
@@ -58,9 +60,41 @@ The first hash is the commit on `codereview`, the second the commit on
 
 ### Reading data
 
-- [ ] `137a431` / `61b370b7` · `gen_tibble()` — Rejected the PLINK missing
+- [x] `137a431` / `61b370b7` · `gen_tibble()` — Rejected the PLINK missing
   allele "0" when custom `missing_alleles` were given. *[Error]*
   *Held back: "AM TODO Is this correct?"*
+  **AM (2026-11-04): check that it does not get confused with the default
+  use of 0 in PLINK.** Checked:
+  - With `missing_alleles = "N"`, the bed, bigSNP rds, matrix,
+    packedancestry and vcfR readers give the same loci and genotypes as
+    with the default, and no "0" allele survives.
+  - Other zeros are untouched: chromosome "0" stays a level, and numeric 0
+    positions and genetic distances are kept.
+  - Missing alleles are written as "0" in bim files and read back the same.
+
+  It did expose a bug in the ped reader, fixed in `afc26e56` (below). Accepted
+  with that follow-up. — Claude, for AM
+- [x] `afc26e56` · `gen_tibble()` on ped files — With custom
+  `missing_alleles`, a missing genotype "0 0" (the PLINK default, also
+  written by `gt_as_plink()`) was read as an allele "0". Since `61b370b7`,
+  that allele became NA, so the genotypes were silently wrong (e.g. missing
+  became 0), and a locus with only missing genotypes could not be read.
+  *[Wrong results]* "0" is now always missing in ped genotypes. Checked: the
+  new test fails on `b0072133` (5 failures and an error) and passes on the
+  fix. — Claude, for AM
+- [ ] `62dc0eca` · `gen_tibble()` on VCF files with the "cpp" parser —
+  Kept a missing allele "." (e.g. the ALT of a monomorphic locus) as the
+  string ".", so with custom `missing_alleles` it stopped with an error,
+  whereas the vcfR parser reads it as NA. *[Error]* Already on `dev`; found
+  while checking `61b370b7`. The fix is vectorised R on the loci table,
+  outside the parser. Checked: the new test errors on `b0072133` and passes
+  on the fix.
+- [ ] `900c4895` · `gt_as_plink(type = "raw"/"ped")` — Wrote a missing
+  `allele_ref` as "NA" (e.g. `rs1_T(/NA)` in the raw header) rather than
+  "0". *[Wrong results]* Already on `dev`; found while checking `61b370b7`.
+  Checked: the new test fails on `b0072133` and passes on the fix.
+  `62dc0eca` and `900c4895` are independent of `61b370b7`, and were not
+  asked for, so their boxes are left for AM.
 
 ### Exporting data
 
@@ -74,11 +108,65 @@ The first hash is the commit on `codereview`, the second the commit on
   *Held back: its box was ticked under "Fixes by area" but not under
   "Changes in behaviour", i.e. the new warning on the example data had not
   been accepted.*
-- [ ] `6923229` / `5ba47046` · `gt_as_plink(type = "ped"/"raw")` — Parents
+- [x] `6923229` / `5ba47046` · `gt_as_plink(type = "ped"/"raw")` — Parents
   and numeric sex codes read by `gen_tibble()` were dropped. *[Data lost]*
   *Held back: "TODO it would be better to harmonise the names used by
   different readers".*
-- [ ] `4292aa8` / `f5027b83` · `gt_as_plink(type = "bed")` — The `.fam` file
+  **AM (2026-11-04): fix it in a different way: all PLINK readers must store
+  the same information in the same columns.** Reimplemented in `860ae0c7`,
+  `3ff198df` and `c61ed29e` (below). `c61ed29e` also removes this commit's
+  workarounds in the writer: the `father`/`mother` fallback, the numeric sex
+  codes, and the `pull_na()` of several columns. — Claude, for AM
+- [x] `860ae0c7` · `gen_tibble()` on bed files (and bigSNP rds) — The IDs of
+  the .fam file were read as numbers when they looked like numbers (e.g.
+  "001" became "1"), unlike the ped reader. *[Wrong results]* Checked: the
+  new test fails on `b0072133` (4 failures) and passes on the fix.
+  — Claude, for AM
+- [x] `3ff198df` · `gen_tibble()` on bed files (and bigSNP rds) —
+  Quantitative phenotypes were set to NA, unlike the ped reader. *[Data
+  lost]* As in PLINK, the phenotype is case/control unless it has values
+  other than 0, 1, 2 and -9; otherwise it stays numeric, with -9 as NA.
+  Checked: the new test fails on `b0072133` (2 failures) and passes on the
+  fix. — Claude, for AM
+- [x] `c61ed29e` · `gen_tibble()` on ped files — The individual information
+  was stored in different columns and types from the bed reader:
+  `father`/`mother` rather than `paternal_ID`/`maternal_ID`; PLINK's
+  numeric codes for sex and phenotype rather than factors; always present,
+  even when missing. *[Inconsistent]*
+  **Change in behaviour:** ped files now give the same columns as bed files
+  (`id`, `population`, `paternal_ID`, `maternal_ID`, `sex` as a
+  female/male factor, `phenotype` as a control/case factor or a number).
+  `population` is only present if some family ID differs from the
+  individual ID, and the other columns only if they have some known value.
+  The bed reader's names were kept, as it is the most used reader, and they
+  were already used by `gt_as_plink()` and in the documentation.
+  `gen_tibble()` has no raw reader; vcf and packedancestry are not PLINK
+  formats.
+  Checked:
+  - The new tests fail on `3ff198df` (29 failures) and pass on the fix.
+  - Round trips give identical individual information and genotypes:
+    bed and ped input, through `gt_as_plink()` to bed, ped and raw, and back
+    through `gen_tibble()`. The cases covered are full information, a
+    quantitative phenotype, missing parents/sex/phenotype, no population,
+    and grouped data.
+  - All six example files in inst/extdata round-trip, except that a
+    phenotype of 0 comes back as -9 (both mean missing).
+  - The files written were read with genio and snpStats, as no PLINK binary
+    is installed.
+
+  — Claude, for AM
+  **Decisions needed (AM):**
+  1. The writer only recognises "male"/"female" for sex. Other values (e.g.
+     numeric 1/2 or "M"/"F" set by the user) are written as 0 (unknown)
+     without a warning. Should it accept PLINK's codes again, or warn?
+  2. gen_tibbles read from ped files by earlier versions keep
+     `father`/`mother` and numeric sex, which the writer now ignores.
+     NEWS.md tells users to rename them; there is no automatic migration.
+  3. A missing population (NA) is written as family ID "0" in .fam files,
+     but as "NA" in ped and raw files.
+  4. packedancestry files do not keep the sex in the .ind file (M/F/U).
+     Should it become a female/male `sex` factor, as for PLINK files?
+- [x] `4292aa8` / `f5027b83` · `gt_as_plink(type = "bed")` — The `.fam` file
   lacked population, parents, sex and phenotype. *[Data lost]*
   **Change in behaviour:** the `.fam` file now has the population (or the
   grouping variable, if grouped) as family ID, together with parents, sex
@@ -90,10 +178,16 @@ The first hash is the commit on `codereview`, the second the commit on
   so the revert in #216 was resolved by hand; this commit undoes that
   revert, restoring the `4292aa8` behaviour on top of the C++ writer. Check
   the ped/raw/bed output against the `codereview` branch.
+  **AM (2026-11-04): check that it still works with the harmonised
+  readers.** Checked with `c61ed29e`: the .fam, ped and raw files all have
+  the same six columns, in PLINK's layout (FID IID PAT MAT SEX PHENOTYPE,
+  with 0 for missing parents and unknown sex and -9 for a missing
+  phenotype). The grouping variable is the family ID, and its tests still
+  pass. — Claude, for AM
 
 ### Merging
 
-- [ ] `eaf612d` / `83dd95b2` · `rbind(use_position = TRUE)` — Loci were
+- [x] `eaf612d` / `83dd95b2` · `rbind(use_position = TRUE)` — Loci were
   renamed to `chromosome_position`. *[Wrong results]*
   **Change in behaviour:** `rbind(use_position = TRUE)` keeps the reference
   loci names instead of renaming them to `chromosome_position` and adding a
@@ -106,6 +200,15 @@ The first hash is the commit on `codereview`, the second the commit on
   commit undoes that revert. Given E.C's comment, this fix is likely to be
   dropped (revert `83dd95b2`) or replaced by one that keeps the
   `name_old` column.
+  **Decided (AM, 2026-11-04): remove `name_old`, i.e. keep this fix.**
+  Checked: `name_old` is not in any output (the loci of `rbind()`, the
+  columns or attributes of `rbind_dry_run()`, `summary()`) or in the
+  documentation and articles. `rbind_dry_run()` still creates it
+  internally, but never uses it. — Claude, for AM
+  **Decision needed (AM):** with `use_position = TRUE`, the `name` column of
+  the `rbind_dry_run()` report holds the `chromosome_position` key (e.g.
+  `1_752566`), while the merged object keeps the reference name
+  (`rs3094315`). Should the report show the original names?
 
 ## PR #209, merged into this branch
 
@@ -173,12 +276,56 @@ the groups into character. So `autoplot(q_mat, data = grouped_gt)` ordered
 the groups alphabetically even when the grouping variable was a factor,
 contrary to the documentation of `arrange_by_group`.
 
-## Optional fix on a separate branch (not on this branch)
+Full test suite on `c61ed29e`, after the PLINK reader, bigSNP and missing
+allele fixes (installed, `NOT_CRAN=true`, library on `R_LIBS`): 3,151
+passed, 0 failed, 0 skipped.
 
-- [ ] `3c9a54b` · `gen_tibble()` — Do not overwrite the bigSNP rds when
-  creating a gen_tibble from it. *[Robustness]* Still only on
-  `codereview-bigsnp-rds`, as it doubles disk use by copying the backing
-  file (see the full report).
+## Fix from `codereview-bigsnp-rds`, cherry-picked onto this branch
+
+- [x] `3c9a54b` / `2f12715a` · `gen_tibble()` on a bigSNP .rds — Saved the
+  bare FBM over the user's bigSNP .rds, and ignored `backingfile`.
+  *[Robustness]* **AM (2026-11-04): cherry-pick it; we don't want to
+  overwrite files or modify FBMs that belong to bigsnpr objects.** The
+  backing file is copied to `backingfile`, and the gen_tibble uses the copy;
+  this doubles disk use. Only NEWS.md conflicted. Copying a 400 MB .bk takes
+  0.12-0.17 s, and `gen_tibble()` goes from 0.29 to 0.41-0.51 s. Checked:
+  its test fails on `b0072133` (4 failures) and passes on the fix.
+  — Claude, for AM
+- [x] `c8e36257` · Tests that gen_tibbles from a bigSNP .rds never modify the
+  bigSNP files. Without `2f12715a`, `gt_impute_simple()` and
+  `gt_impute_xgboost()` wrote into the user's .bk, and `gen_tibble()`
+  deleted the user's .rds and .bk when it stopped on loci without alleles.
+  Checked: the test fails on `b0072133` (7 failures) and passes after.
+  The md5 sums of the original .rds and .bk, and `bigsnpr::snp_attach()` on
+  it, are unchanged after:
+  - creation (also with `backingfile` set to the original name);
+  - `gt_save()` and `gt_load()`;
+  - `select_loci()`, `select_loci_if()`, `filter()`;
+  - `gt_order_loci()`, `gt_update_backingfile()`, `gt_pseudohaploid()`;
+  - both imputations, and `gt_set_imputed()`;
+  - `gt_pca_partialSVD()`, `gt_as_plink()`;
+  - the error path.
+
+  — Claude, for AM
+- [x] `48361225` · `gen_tibble()` on read-only bigSNP files — The copy
+  kept the read-only mode of the original, so imputing failed. The copy is
+  now writable. Checked: the test (skipped on Windows) fails on `c8e36257`
+  (2 failures) and passes on the fix. — Claude, for AM
+
+**Decisions needed (AM):**
+1. **Old .gt files:** `gt_load()` of a .gt saved by an old version
+   (whose gen_tibble used the user's bigSNP .rds directly) still overwrites
+   that .rds when it upgrades the object, by design ("note that the old RDS
+   was overwritten"). Afterwards, `snp_attach()` on it fails, which goes
+   against the rule above. Copying the .bk on upgrade would avoid it, but
+   every `gt_load()` of an old .gt that is not re-saved would then make
+   another copy.
+2. **`gt_as_plink()` default file:** on a gen_tibble read from `foo.bed`,
+   the default output is `foo.bed`, so `overwrite = TRUE` replaces the
+   user's input .bed/.bim/.fam.
+3. **Lazy copy:** the copy could be made only before the first write into
+   the FBM, which avoids doubling disk use for read-only analyses. This is
+   more complex; a hard link would not protect the original.
 
 ## Merged into `dev` but still unticked in the full report
 
