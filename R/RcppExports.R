@@ -101,8 +101,8 @@ sfs_config_counts_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy,
     .Call(`_tidypopgen_sfs_config_counts_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, ncores, block_size)
 }
 
-sfs_project_cpp <- function(n, k, count, n_proj) {
-    .Call(`_tidypopgen_sfs_project_cpp`, n, k, count, n_proj)
+sfs_project_cpp <- function(configs, spectra, n_proj, ncores) {
+    .Call(`_tidypopgen_sfs_project_cpp`, configs, spectra, n_proj, ncores)
 }
 
 sfs_preview_cpp <- function(n, k, count, n_max) {

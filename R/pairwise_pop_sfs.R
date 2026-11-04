@@ -86,11 +86,10 @@ pairwise_pop_sfs <- function(
     n_cores = n_cores,
     block_size = block_size
   )
-  spectra <- lapply(seq_along(spectra_def), function(i) {
-    .sfs_from_configs(configs[[i]], n_proj[spectra_def[[i]]],
-      folded = folded
-    )
-  })
+  spectra <- .sfs_from_configs(configs, spectra_def, n_proj,
+    folded = folded,
+    n_cores = n_cores
+  )
   names(spectra) <- .pair_labels(data$labels, pairwise_combn)
   if (type == "array") {
     return(spectra)

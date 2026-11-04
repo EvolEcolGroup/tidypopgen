@@ -9,8 +9,8 @@
 # 1. sfs_config_counts_cpp() counts, in a single pass over the genotypes, the
 #    loci with each configuration (number of called and alternate allele
 #    copies in each population) of each spectrum;
-# 2. sfs_project_cpp() projects the configurations of a spectrum, which is
-#    then folded (if needed) in R by .sfs_fold().
+# 2. sfs_project_cpp() projects the configurations of each spectrum (in
+#    parallel), which are then folded (if needed) in R by .sfs_fold().
 
 #' The genotypes and groups used to compute site frequency spectra
 #'
@@ -248,42 +248,47 @@
   n_proj
 }
 
-#' Build a spectrum from its configurations
+#' Build spectra from their configurations
 #'
-#' @param configs the configurations of the spectrum (an element of the list
-#'   returned by `.sfs_config_counts()`)
-#' @param n_proj the projection of each population of the spectrum (named
-#'   with the population labels)
-#' @param folded whether to fold the spectrum
-#' @returns an `sfs` object
+#' @param configs the configurations of each spectrum (as returned by
+#'   `.sfs_config_counts()`)
+#' @param spectra a list of integer vectors, each with the (1-based) groups of
+#'   a spectrum
+#' @param n_proj the projection of each group (named with the group labels)
+#' @param folded whether to fold the spectra
+#' @param n_cores the number of cores used to project the spectra
+#' @returns a list of `sfs` objects
 #' @keywords internal
 #' @noRd
-.sfs_from_configs <- function(configs, n_proj, folded) {
+.sfs_from_configs <- function(configs, spectra, n_proj, folded, n_cores) {
   projected <- sfs_project_cpp(
-    n = configs$n,
-    k = configs$k,
-    count = configs$count,
-    n_proj = n_proj
+    configs = configs,
+    spectra = lapply(spectra, function(x) as.integer(x) - 1L),
+    n_proj = unname(n_proj),
+    ncores = n_cores
   )
-  dims <- unname(n_proj) + 1L
-  fs <- array(projected$sfs, dim = dims)
-  # mask the corners (monomorphic in the projected sample), as dadi does
-  mask <- array(FALSE, dim = dims)
-  mask[1] <- TRUE
-  mask[length(mask)] <- TRUE
-  if (folded) {
-    folded_fs <- .sfs_fold(fs, mask)
-    fs <- folded_fs$fs
-    mask <- folded_fs$mask
-  }
-  new_sfs(
-    fs,
-    mask = mask,
-    pop_ids = names(n_proj),
-    folded = folded,
-    n_loci = projected$n_loci,
-    n_loci_dropped = projected$n_dropped + configs$n_dropped
-  )
+  lapply(seq_along(spectra), function(i) {
+    this_proj <- n_proj[spectra[[i]]]
+    dims <- unname(this_proj) + 1L
+    fs <- array(projected[[i]]$sfs, dim = dims)
+    # mask the corners (monomorphic in the projected sample), as dadi does
+    mask <- array(FALSE, dim = dims)
+    mask[1] <- TRUE
+    mask[length(mask)] <- TRUE
+    if (folded) {
+      folded_fs <- .sfs_fold(fs, mask)
+      fs <- folded_fs$fs
+      mask <- folded_fs$mask
+    }
+    new_sfs(
+      fs,
+      mask = mask,
+      pop_ids = names(this_proj),
+      folded = folded,
+      n_loci = projected[[i]]$n_loci,
+      n_loci_dropped = projected[[i]]$n_dropped + configs[[i]]$n_dropped
+    )
+  })
 }
 
 #' Fold a spectrum

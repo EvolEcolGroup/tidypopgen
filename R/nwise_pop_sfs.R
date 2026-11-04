@@ -89,7 +89,10 @@ nwise_pop_sfs <- function(
     n_cores = n_cores,
     block_size = block_size
   )
-  fs <- .sfs_from_configs(configs[[1]], n_proj, folded = folded)
+  fs <- .sfs_from_configs(configs, list(seq_len(data$n_groups)), n_proj,
+    folded = folded,
+    n_cores = n_cores
+  )[[1]]
   if (type == "array") {
     return(fs)
   }

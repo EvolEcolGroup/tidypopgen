@@ -453,16 +453,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // sfs_project_cpp
-List sfs_project_cpp(const IntegerMatrix& n, const IntegerMatrix& k, const NumericVector& count, const IntegerVector& n_proj);
-RcppExport SEXP _tidypopgen_sfs_project_cpp(SEXP nSEXP, SEXP kSEXP, SEXP countSEXP, SEXP n_projSEXP) {
+List sfs_project_cpp(const List& configs, const List& spectra, const IntegerVector& n_proj, int ncores);
+RcppExport SEXP _tidypopgen_sfs_project_cpp(SEXP configsSEXP, SEXP spectraSEXP, SEXP n_projSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerMatrix& >::type n(nSEXP);
-    Rcpp::traits::input_parameter< const IntegerMatrix& >::type k(kSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type count(countSEXP);
+    Rcpp::traits::input_parameter< const List& >::type configs(configsSEXP);
+    Rcpp::traits::input_parameter< const List& >::type spectra(spectraSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type n_proj(n_projSEXP);
-    rcpp_result_gen = Rcpp::wrap(sfs_project_cpp(n, k, count, n_proj));
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(sfs_project_cpp(configs, spectra, n_proj, ncores));
     return rcpp_result_gen;
 END_RCPP
 }

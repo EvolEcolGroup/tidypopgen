@@ -3,6 +3,7 @@
 #include "fbm_byte_acc.h"
 #include <cmath>
 #include <map>
+#include <numeric>
 #include <unordered_map>
 
 /******************************************************************************/
@@ -16,8 +17,8 @@
 //   spectrum (a set of groups), the number of loci with each "configuration",
 //   i.e. the number of called allele copies n and of alternate allele copies
 //   k in each group of the spectrum (dadi's Spectrum.count_data_dict()).
-// - sfs_project_cpp(): project the configurations of a spectrum into the SFS
-//   (dadi's Spectrum._from_count_dict()).
+// - sfs_project_cpp(): project the configurations of each spectrum into the
+//   SFS (dadi's Spectrum._from_count_dict()).
 // - sfs_preview_cpp(): the number of segregating sites in the projected 1D
 //   SFS, for every projection (easySFS --preview).
 /******************************************************************************/
@@ -299,107 +300,294 @@ List sfs_config_counts_cpp(Environment BM,
 
 /******************************************************************************/
 
-// Add w times the outer product of the projection vectors of the
-// populations into the cells of the (column-major) spectrum out, for the
-// populations 0 to d: population i only contributes to the cells lo[i] to
-// hi[i] (its probabilities are probs[i][0 .. hi[i] - lo[i]])
-static void sfs_add_box(double* out, int d, size_t offset, double w,
-                        const std::vector<int>& lo,
-                        const std::vector<int>& hi,
-                        const std::vector<size_t>& stride,
-                        const std::vector<const double*>& probs) {
-  const double* pr = probs[d];
-  if (d == 0) {
-    double* o = out + offset;
-    for (int j = lo[0]; j <= hi[0]; j++) o[j] += w * pr[j - lo[0]];
-    return;
-  }
-  for (int j = lo[d]; j <= hi[d]; j++) {
-    sfs_add_box(out, d - 1, offset + j * stride[d], w * pr[j - lo[d]], lo, hi,
-                stride, probs);
+// Projection of the configurations of each spectrum (dadi's
+// Spectrum._from_count_dict()).
+//
+// A locus with n called copies in a population, k of which are alternate,
+// contributes to cell j of the spectrum of that population the
+// hypergeometric probability of drawing j alternate copies when sampling
+// n_proj of its n copies without replacement (dhyper(j, k, n - k, n_proj)),
+// which is non-zero for j in [max(0, n_proj - (n - k)), min(k, n_proj)]. Its
+// contribution to a joint spectrum is the outer product of these vectors over
+// the populations. Configurations with fewer than n_proj called copies in
+// any population are dropped.
+//
+// Rather than adding the outer product of each configuration (which costs
+// prod(n_proj + 1) operations per configuration), the configurations are
+// sorted by the configuration of the last population, then the one before,
+// and so on, and the outer products are factorised (a sparse tensor
+// contraction): the vectors of the first population are summed over the
+// configurations that share the configurations of all other populations,
+// the result is multiplied by the vector of the second population and summed
+// over the configurations that share the configurations of the third to last
+// populations, and so on. Only the bounding box of the non-zero cells of each
+// partial sum is visited. The result is the same (up to rounding), and the
+// order of the operations only depends on the configurations.
+
+// the hypergeometric probabilities of a configuration (n, k) of a population
+struct SfsProjVec {
+  int lo;        // first cell with a non-zero probability
+  int hi;        // last cell with a non-zero probability
+  size_t offset; // position of the probabilities in the flat storage
+};
+
+// the data needed to project a spectrum, as plain C++ objects
+struct SfsSpectrumData {
+  size_t K;                             // number of populations
+  std::vector<int> p;                   // projection of each population
+  std::vector<size_t> stride;           // stride of each dimension
+  std::vector<uint64_t> keys;           // config of each kept row and pop
+  std::vector<const SfsProjVec*> vecs;  // probabilities, idem
+  std::vector<double> count;            // number of loci of each kept row
+  double n_used;
+  double n_dropped;
+  std::vector<double> out;              // the spectrum (column-major)
+};
+
+// call f(i) for every linear index i of the box lo..hi (dimensions 0 to d)
+// of an array with the given strides (dimension 0 is contiguous)
+template <class F>
+inline void sfs_box_for_each(int d, const int* lo, const int* hi,
+                             const size_t* stride, F f) {
+  std::vector<int> j(lo, lo + d + 1);
+  while (true) {
+    size_t base = 0;
+    for (int i = 1; i <= d; i++) base += (size_t) j[i] * stride[i];
+    for (int j0 = lo[0]; j0 <= hi[0]; j0++) f(base + j0);
+    int i = 1;
+    while (i <= d) {
+      if (++j[i] <= hi[i]) break;
+      j[i] = lo[i];
+      i++;
+    }
+    if (i > d) break;
   }
 }
 
-// Project the configurations of a spectrum (n and k: one row per
-// configuration, one column per population; count: the number of loci with
-// each configuration) down to n_proj allele copies in each population.
-// A locus with n called copies, k of which are alternate, contributes to
-// cell j of a population the hypergeometric probability of drawing j
-// alternate copies when sampling n_proj copies out of n without replacement
-// (dhyper(j, k, n - k, n_proj)), and to a joint spectrum the product of these
-// probabilities over the populations. Configurations with fewer than n_proj
-// called copies in any population are dropped. The spectrum is returned as a
-// vector of the cells in column-major order (the first population changes
-// fastest), with the number of loci used and dropped.
+// project the configurations of a spectrum (see above)
+inline void sfs_contract(SfsSpectrumData& sd, const double* probs) {
+  const size_t K = sd.K;
+  const size_t n_rows = sd.count.size();
+  // partial sums: T[d] has the dimensions 0 to d of the spectrum, and its
+  // non-zero cells are within the box blo[d], bhi[d] (empty if
+  // !has_box[d])
+  std::vector<std::vector<double>> T(K);
+  std::vector<std::vector<int>> blo(K), bhi(K);
+  std::vector<char> has_box(K, 0);
+  for (size_t d = 0; d < K; d++) {
+    T[d].assign(sd.stride[d] * (sd.p[d] + 1), 0.0);
+    blo[d].assign(d + 1, 0);
+    bhi[d].assign(d + 1, 0);
+  }
+  // rows sorted by the configuration of the last population, then the one
+  // before, ...
+  std::vector<size_t> order(n_rows);
+  std::iota(order.begin(), order.end(), 0);
+  const uint64_t* keys = sd.keys.data();
+  std::sort(order.begin(), order.end(), [&](size_t a, size_t b) {
+    for (size_t i = K; i-- > 0;) {
+      if (keys[a * K + i] != keys[b * K + i]) {
+        return keys[a * K + i] < keys[b * K + i];
+      }
+    }
+    return a < b;
+  });
+
+  // multiply T[d] by the vector of population d + 1 of row r, add it to
+  // T[d + 1], and reset T[d]
+  auto flush = [&](size_t d, size_t r) {
+    if (!has_box[d]) return;
+    const SfsProjVec* v = sd.vecs[r * K + d + 1];
+    const double* pr = probs + v->offset;
+    double* t_in = T[d].data();
+    double* t_out = T[d + 1].data();
+    size_t st = sd.stride[d + 1];
+    sfs_box_for_each((int) d, blo[d].data(), bhi[d].data(),
+                     sd.stride.data(), [&](size_t idx) {
+                       double val = t_in[idx];
+                       if (val != 0) {
+                         for (int j = v->lo; j <= v->hi; j++) {
+                           t_out[idx + (size_t) j * st] += val * pr[j - v->lo];
+                         }
+                         t_in[idx] = 0;
+                       }
+                     });
+    // the box of T[d + 1] now includes the box of T[d] times lo..hi
+    for (size_t i = 0; i <= d + 1; i++) {
+      int lo = (i <= d) ? blo[d][i] : v->lo;
+      int hi = (i <= d) ? bhi[d][i] : v->hi;
+      if (!has_box[d + 1]) {
+        blo[d + 1][i] = lo;
+        bhi[d + 1][i] = hi;
+      } else {
+        blo[d + 1][i] = std::min(blo[d + 1][i], lo);
+        bhi[d + 1][i] = std::max(bhi[d + 1][i], hi);
+      }
+    }
+    has_box[d + 1] = 1;
+    has_box[d] = 0;
+  };
+
+  for (size_t o = 0; o < n_rows; o++) {
+    size_t r = order[o];
+    if (o > 0) {
+      size_t prev = order[o - 1];
+      // the last population whose configuration differs from the previous
+      // row: the partial sums of the populations before it are complete
+      size_t L = 0;
+      for (size_t i = K; i-- > 0;) {
+        if (keys[r * K + i] != keys[prev * K + i]) {
+          L = i;
+          break;
+        }
+      }
+      for (size_t d = 0; d < L; d++) flush(d, prev);
+    }
+    // add the vector of the first population
+    const SfsProjVec* v = sd.vecs[r * K];
+    const double* pr = probs + v->offset;
+    double w = sd.count[r];
+    double* t0 = T[0].data();
+    for (int j = v->lo; j <= v->hi; j++) t0[j] += w * pr[j - v->lo];
+    if (!has_box[0]) {
+      blo[0][0] = v->lo;
+      bhi[0][0] = v->hi;
+      has_box[0] = 1;
+    } else {
+      blo[0][0] = std::min(blo[0][0], v->lo);
+      bhi[0][0] = std::max(bhi[0][0], v->hi);
+    }
+  }
+  if (n_rows > 0) {
+    for (size_t d = 0; d + 1 < K; d++) flush(d, order[n_rows - 1]);
+  }
+  sd.out.swap(T[K - 1]);
+}
+
+// Project the configurations of each spectrum. configs is a list with, for
+// each spectrum, the output of sfs_config_counts_cpp() (n and k: one row per
+// configuration and one column per population of the spectrum; count: the
+// number of loci with each configuration); spectra gives the (0-based)
+// groups of each spectrum, and n_proj the projection of each group. The
+// hypergeometric probabilities are computed first (with R::dhyper()), and
+// the spectra are then projected in parallel. Returns a list with, for each
+// spectrum, its cells in column-major order (the first population changes
+// fastest), the number of loci used and the number of loci dropped (with
+// fewer than n_proj called copies in at least one population).
 
 // [[Rcpp::export]]
-List sfs_project_cpp(const IntegerMatrix& n,
-                     const IntegerMatrix& k,
-                     const NumericVector& count,
-                     const IntegerVector& n_proj) {
-  size_t K = n_proj.size();
-  size_t n_configs = count.size();
-  if ((size_t) n.ncol() != K || (size_t) k.ncol() != K ||
-      (size_t) n.nrow() != n_configs || (size_t) k.nrow() != n_configs) {
-    stop("n and k should have one row per configuration and one column per "
-         "population");
+List sfs_project_cpp(const List& configs,
+                     const List& spectra,
+                     const IntegerVector& n_proj,
+                     int ncores) {
+  size_t n_spectra = spectra.size();
+  if ((size_t) configs.size() != n_spectra) {
+    stop("configs and spectra should have the same length");
   }
-  std::vector<size_t> stride(K);
-  double n_cells_dbl = 1;
-  size_t n_cells = 1;
-  for (size_t i = 0; i < K; i++) {
-    if (n_proj[i] < 0) stop("n_proj should not be negative");
-    stride[i] = n_cells;
-    n_cells *= (size_t) n_proj[i] + 1;
-    n_cells_dbl *= (double) n_proj[i] + 1;
+  size_t ngroups = n_proj.size();
+  for (size_t g = 0; g < ngroups; g++) {
+    if (n_proj[g] < 0) stop("n_proj should not be negative");
   }
-  if (n_cells_dbl > 1e10) stop("the spectrum has too many cells");
-  std::vector<double> fs(n_cells, 0.0);
 
-  // projection vectors of each population, by triangular index of (n, k):
-  // the first cell with a non-zero probability, and the probabilities
-  std::vector<std::unordered_map<uint64_t, std::pair<int, std::vector<double>>>>
-    cache(K);
-  std::vector<int> lo(K), hi(K);
-  std::vector<const double*> probs(K);
-  double n_used = 0, n_dropped = 0;
+  // the probabilities of each configuration (n, k) of each group, in a flat
+  // storage
+  std::vector<std::unordered_map<uint64_t, SfsProjVec>> tables(ngroups);
+  std::vector<double> probs;
+  std::vector<SfsSpectrumData> data(n_spectra);
 
-  for (size_t r = 0; r < n_configs; r++) {
-    bool keep = true;
-    for (size_t i = 0; i < K; i++) {
-      if (n(r, i) < n_proj[i]) {
-        keep = false;
-        break;
-      }
+  // first pass: the probabilities needed, and the plain data of each
+  // spectrum (without pointers, as the tables can still be rehashed)
+  std::vector<std::vector<int>> spectrum_groups(n_spectra);
+  for (size_t s = 0; s < n_spectra; s++) {
+    IntegerVector groups = spectra[s];
+    List conf = configs[s];
+    IntegerMatrix n = conf["n"], k = conf["k"];
+    NumericVector count = conf["count"];
+    size_t K = groups.size();
+    if (K < 1 || (size_t) n.ncol() != K || (size_t) k.ncol() != K ||
+        n.nrow() != count.size() || k.nrow() != count.size()) {
+      stop("invalid configurations");
     }
-    if (!keep) {
-      n_dropped += count[r];
-      continue;
-    }
+    SfsSpectrumData& sd = data[s];
+    sd.K = K;
+    sd.p.resize(K);
+    sd.stride.resize(K);
+    double n_cells = 1;
+    size_t stride = 1;
     for (size_t i = 0; i < K; i++) {
-      int nn = n(r, i), kk = k(r, i), p = n_proj[i];
-      if (kk < 0 || kk > nn) stop("invalid configuration");
-      uint64_t key = sfs_tri(nn, kk);
-      auto it = cache[i].find(key);
-      if (it == cache[i].end()) {
-        int l = std::max(0, p - (nn - kk));
-        int h = std::min(kk, p);
-        std::vector<double> v(h - l + 1);
-        for (int j = l; j <= h; j++) {
-          v[j - l] = R::dhyper(j, kk, nn - kk, p, 0);
+      int g = groups[i];
+      if (g < 0 || (size_t) g >= ngroups) stop("invalid group in spectra");
+      spectrum_groups[s].push_back(g);
+      sd.p[i] = n_proj[g];
+      sd.stride[i] = stride;
+      stride *= (size_t) n_proj[g] + 1;
+      n_cells *= (double) n_proj[g] + 1;
+    }
+    if (n_cells > 1e10) stop("the spectrum has too many cells");
+    sd.n_used = 0;
+    sd.n_dropped = 0;
+    for (size_t r = 0; r < (size_t) count.size(); r++) {
+      bool keep = true;
+      for (size_t i = 0; i < K; i++) {
+        if (n(r, i) < sd.p[i]) {
+          keep = false;
+          break;
         }
-        it = cache[i].emplace(key, std::make_pair(l, v)).first;
       }
-      lo[i] = it->second.first;
-      hi[i] = lo[i] + (int) it->second.second.size() - 1;
-      probs[i] = it->second.second.data();
+      if (!keep) {
+        sd.n_dropped += count[r];
+        continue;
+      }
+      for (size_t i = 0; i < K; i++) {
+        int nn = n(r, i), kk = k(r, i), p = sd.p[i];
+        if (kk < 0 || kk > nn) stop("invalid configuration");
+        uint64_t key = sfs_tri(nn, kk);
+        auto& table = tables[spectrum_groups[s][i]];
+        if (table.find(key) == table.end()) {
+          SfsProjVec v;
+          v.lo = std::max(0, p - (nn - kk));
+          v.hi = std::min(kk, p);
+          v.offset = probs.size();
+          for (int j = v.lo; j <= v.hi; j++) {
+            probs.push_back(R::dhyper(j, kk, nn - kk, p, 0));
+          }
+          table.emplace(key, v);
+        }
+        sd.keys.push_back(key);
+      }
+      sd.count.push_back(count[r]);
+      sd.n_used += count[r];
     }
-    sfs_add_box(fs.data(), (int) K - 1, 0, count[r], lo, hi, stride, probs);
-    n_used += count[r];
+  }
+  // pointers to the probabilities of each row (the tables are now fixed)
+  for (size_t s = 0; s < n_spectra; s++) {
+    SfsSpectrumData& sd = data[s];
+    size_t n_rows = sd.count.size();
+    sd.vecs.resize(n_rows * sd.K);
+    for (size_t r = 0; r < n_rows; r++) {
+      for (size_t i = 0; i < sd.K; i++) {
+        sd.vecs[r * sd.K + i] =
+          &tables[spectrum_groups[s][i]].at(sd.keys[r * sd.K + i]);
+      }
+    }
   }
 
-  return List::create(_["sfs"] = NumericVector(fs.begin(), fs.end()),
-                      _["n_loci"] = n_used, _["n_dropped"] = n_dropped);
+  // project the spectra in parallel
+  const double* p_probs = probs.data();
+#pragma omp parallel for num_threads(ncores) schedule(dynamic, 1)
+  for (size_t s = 0; s < n_spectra; s++) {
+    sfs_contract(data[s], p_probs);
+  }
+
+  List res(n_spectra);
+  for (size_t s = 0; s < n_spectra; s++) {
+    res[s] = List::create(
+      _["sfs"] = NumericVector(data[s].out.begin(), data[s].out.end()),
+      _["n_loci"] = data[s].n_used,
+      _["n_dropped"] = data[s].n_dropped
+    );
+  }
+  return res;
 }
 
 /******************************************************************************/

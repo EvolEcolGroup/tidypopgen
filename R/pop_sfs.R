@@ -214,9 +214,10 @@ pop_sfs.grouped_df <- function(
       block_size = block_size
     )
   }
-  spectra <- lapply(seq_along(spectra_def), function(i) {
-    .sfs_from_configs(configs[[i]], n_proj[i], folded = folded)
-  })
+  spectra <- .sfs_from_configs(configs, spectra_def, n_proj,
+    folded = folded,
+    n_cores = n_cores
+  )
   names(spectra) <- data$labels
 
   if (type == "array") {
