@@ -41,7 +41,11 @@ pairwise_pop_fst(
 - type:
 
   type of object to return One of "tidy" or "pairwise" for a pairwise
-  matrix of populations. Default is "tidy".
+  matrix of populations. Default is "tidy". If data are grouped by more
+  than one variable, the "tidy" output has one column per grouping
+  variable for each population of a pair (e.g. `population_1`, `sex_1`,
+  `population_2`, `sex_2`), and populations are otherwise labelled by
+  the values of the grouping variables pasted with "." (e.g. `pop1.F`).
 
 - by_locus:
 

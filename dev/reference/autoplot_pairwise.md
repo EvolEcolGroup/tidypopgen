@@ -27,7 +27,10 @@ autoplot(object, order = NULL, ...)
 
   Optional ordering specification. Can be:
 
-  - `NULL` (default): preserve the existing order.
+  - `NULL` (default): preserve the existing order (for a tidy tibble,
+    the order in which the names first appear in the pairs, i.e. the
+    order of the individuals or groups for the outputs of the
+    `pairwise_*` functions).
 
   - A character vector containing all row/column names in the desired
     order.

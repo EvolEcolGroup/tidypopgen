@@ -115,10 +115,11 @@ refer to the `detectRUNS` vignette).
 If the
 [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
 is grouped, then the grouping variable is used to fill in the 'group'
-column. Otherwise, the 'group' column is filled with the same values as
-the 'id' column. Note that this behaviour is different from other
-windowed operations in `tidypopgen`, which return a list for grouped
-`gen_tibbles`; this different behaviour is designed to maintain
+column (with several grouping variables, their values are pasted with
+".", e.g. `pop1.F`). Otherwise, the 'group' column is filled with the
+same values as the 'id' column. Note that this behaviour is different
+from other windowed operations in `tidypopgen`, which return a list for
+grouped `gen_tibbles`; this different behaviour is designed to maintain
 compatibility with `detectRUNS`.
 
 The old name for this function, `gt_roh_window`, is still available, but

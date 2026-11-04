@@ -33,8 +33,10 @@ gt_extract_f2(
 
 - .x:
 
-  a
-  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+  a grouped
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+  with a group for each population. Empty groups (e.g. from
+  `group_by(.drop = FALSE)`) are dropped.
 
 - outdir:
 

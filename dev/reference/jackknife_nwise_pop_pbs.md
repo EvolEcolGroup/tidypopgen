@@ -23,7 +23,9 @@ jackknife_nwise_pop_pbs(
 
 - .x:
 
-  a grouped `gen_tibble` object
+  a grouped `gen_tibble` object. If grouped by more than one variable,
+  groups are labelled by the values of the grouping variables pasted
+  with "." (e.g. `pop1.F`).
 
 - type:
 

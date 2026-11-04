@@ -32,7 +32,11 @@ autoplot(
   An associated tibble (e.g. a
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)),
   with the individuals in the same order as the data used to generate
-  the Q matrix
+  the Q matrix (unless the Q matrix has the ids of the individuals as an
+  attribute, as from
+  [`get_q_matrix()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/get_q_matrix.md)).
+  If the Q matrix has no group information and `data` is grouped, the
+  groups of `data` are used.
 
 - annotate_group:
 
@@ -41,26 +45,32 @@ autoplot(
 
 - arrange_by_group:
 
-  Boolean determining whether to arrange the individuals by group. If
-  the grouping variable in the `gen_tibble` or the metadata of the
-  `gt_admixt` object is a factor, the data will be ordered by the levels
-  of the factor; else it will be ordered alphabetically.
+  Boolean determining whether to arrange the individuals by group.
+  Groups are ordered as by the grouped functions (see
+  [`dplyr::group_keys()`](https://dplyr.tidyverse.org/reference/group_data.html)):
+  if the grouping variable in the `gen_tibble` or the metadata of the
+  `gt_admix` object is a factor, by the levels of the factor; numbers in
+  numeric order; otherwise alphabetically. With several grouping
+  variables, groups are ordered by the first variable, then by the
+  second, and so on.
 
 - arrange_by_indiv:
 
   Boolean determining whether to arrange the individuals by their
-  individual id (if arrange_by_group is TRUE, they will be arranged by
-  group first and then by individual id, i.e. within each group). If
-  `id` in the `get_tibble` or the metadata of the `gt_admix` object is a
-  factor, it will be ordered by the levels of the factor; else it will
-  be ordered alphabetically.
+  individual id within each group (groups are arranged first if
+  `arrange_by_group` is TRUE, otherwise they are kept in their current
+  order). This only applies if `annotate_group` is TRUE and group
+  information is available. If `id` in the `get_tibble` or the metadata
+  of the `gt_admix` object is a factor, it will be ordered by the levels
+  of the factor; else it will be ordered alphabetically.
 
 - reorder_within_groups:
 
   Boolean determining whether to reorder the individuals within each
   group based on their ancestry proportion (note that this is not
   advised if you are making multiple plots, as you would get a different
-  order for each plot!). If TRUE, `annotate_group` must also be TRUE.
+  order for each plot!). Groups keep the order set by
+  `arrange_by_group`. If TRUE, `annotate_group` must also be TRUE.
 
 - ...:
 

@@ -26,7 +26,9 @@ augment(x, data = NULL, ...)
 
 - data:
 
-  the `gen_tibble` used to run the clustering algorithm
+  the `gen_tibble` used to run the clustering algorithm. If the Q matrix
+  has no group information and `data` is grouped, the groups of `data`
+  are added as a `group` column.
 
 - ...:
 
@@ -57,13 +59,13 @@ if (requireNamespace("LEA", quietly = TRUE)) {
 }
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 7
-#>   id    population  genotypes .rownames .Q1        .Q2        .Q3       
-#>   <chr> <chr>      <vctr_SNP> <chr>     <q_matrix> <q_matrix> <q_matrix>
-#> 1 a     pop1        [1,1,...] a         9.999e-05  9.998e-01  9.999e-05 
-#> 2 b     pop1        [2,1,...] b         9.999e-05  9.999e-05  9.998e-01 
-#> 3 c     pop2        [2,.,...] c         9.999e-05  9.999e-05  9.998e-01 
-#> 4 d     pop2        [1,0,...] d         9.998e-01  9.999e-05  9.999e-05 
-#> 5 e     pop1        [1,2,...] e         9.998e-01  9.999e-05  9.999e-05 
-#> 6 f     pop3        [0,0,...] f         9.999e-05  9.999e-05  9.998e-01 
-#> 7 g     pop3        [0,1,...] g         9.999e-05  9.998e-01  9.999e-05 
+#>   id    population  genotypes .rownames       .Q1       .Q2       .Q3
+#>   <chr> <chr>      <vctr_SNP> <chr>         <dbl>     <dbl>     <dbl>
+#> 1 a     pop1        [1,1,...] a         0.0001000 1.000     0.0001000
+#> 2 b     pop1        [2,1,...] b         0.0001000 0.0001000 1.000    
+#> 3 c     pop2        [2,.,...] c         0.0001000 0.0001000 1.000    
+#> 4 d     pop2        [1,0,...] d         1.000     0.0001000 0.0001000
+#> 5 e     pop1        [1,2,...] e         1.000     0.0001000 0.0001000
+#> 6 f     pop3        [0,0,...] f         0.0001000 0.0001000 1.000    
+#> 7 g     pop3        [0,1,...] g         0.0001000 1.000     0.0001000
 ```

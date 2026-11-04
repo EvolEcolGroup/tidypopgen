@@ -23,7 +23,14 @@ jackknife_pop_tajimas_d(
 - type:
 
   type of object to return, if using grouped method. One of "matrix",
-  "tidy", or "list". Default is "matrix".
+  "tidy", or "list". Default is "matrix". Data can be grouped by more
+  than one variable: groups are then labelled by the values of the
+  grouping variables pasted with "." (e.g. `pop1.F`), and the "tidy"
+  output has one column per grouping variable rather than a single
+  `group` column. The `group` column, or the columns of the grouping
+  variables, keep the type of the grouping variables (e.g. a factor
+  keeps its levels), so that groups stay in their order when the output
+  is sorted or plotted.
 
 - block_size:
 

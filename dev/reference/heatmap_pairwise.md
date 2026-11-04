@@ -22,13 +22,21 @@ heatmap_pairwise(x, order = NULL)
 - x:
 
   A square numeric matrix OR a data.frame/tibble with 3 columns: names1,
-  names2, value (half-matrix representation).
+  names2, value (half-matrix representation). The tidy output of
+  [`pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_pop_fst.md)
+  for data grouped by several variables, which has one column per
+  grouping variable for each member of a pair (e.g. `population_1`,
+  `sex_1`, `population_2`, `sex_2`, `value`), is also accepted: the
+  names are the values of the grouping variables pasted with ".".
 
 - order:
 
   Optional ordering specification. Can be:
 
-  - `NULL` (default): preserve the existing order.
+  - `NULL` (default): preserve the existing order (for a tidy tibble,
+    the order in which the names first appear in the pairs, i.e. the
+    order of the individuals or groups for the outputs of the
+    `pairwise_*` functions).
 
   - A character vector containing all row/column names in the desired
     order.

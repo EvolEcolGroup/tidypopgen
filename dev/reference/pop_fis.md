@@ -27,10 +27,11 @@ pop_fis(
   a grouped
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
   (as obtained by using
-  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html));
-  if method == "Nei87", it is also possible to use a regular
-  `gen_tibble`, in which case all individuals are considered to belong
-  to a single population.
+  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),
+  by one or more variables; with several, groups are labelled by their
+  values pasted with ".", e.g. `pop1.F`); if method == "Nei87", it is
+  also possible to use a regular `gen_tibble`, in which case all
+  individuals are considered to belong to a single population.
 
 - method:
 

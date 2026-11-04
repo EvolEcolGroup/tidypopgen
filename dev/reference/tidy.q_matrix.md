@@ -22,7 +22,11 @@ tidy(x, data, ...)
   An associated tibble (e.g. a
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)),
   with the individuals in the same order as the data used to generate
-  the Q matrix
+  the Q matrix (unless the Q matrix has the ids of the individuals as an
+  attribute, as from
+  [`get_q_matrix()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/get_q_matrix.md)).
+  If the Q matrix has no group information and `data` is grouped, the
+  groups of `data` are used.
 
 - ...:
 

@@ -53,7 +53,8 @@ rbind(
 
   boolean of whether a combination of chromosome and position should be
   used for matching SNPs. By default, `rbind` uses the locus name, so
-  this is set to FALSE. When using 'use_position=TRUE', make sure
+  this is set to FALSE. In either case, the merged loci keep the names
+  of the reference dataset. When using 'use_position=TRUE', make sure
   chromosomes are coded in the same way in both `gen_tibbles` (a mix of
   e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an
   unexpectedly large number variants are dropped when merging).
@@ -127,12 +128,12 @@ merged_gt <- rbind(ref = example_gt, target = test_gt, flip_strand = TRUE)
 #> ( 0 were flipped to match the reference set)
 #> ( 4 are ambiguous, of which 4 were removed)
 #> 
-#> gen_tibble saved to /tmp/Rtmp93Vrtx/gt_merged_1fc83ec1e221.gt
-#> using FBM RDS: /tmp/Rtmp93Vrtx/gt_merged_1fc83ec1e221.rds
-#> with FBM backing file: /tmp/Rtmp93Vrtx/gt_merged_1fc83ec1e221.bk
+#> gen_tibble saved to /tmp/RtmpLvkY5u/gt_merged_28132c839c26.gt
+#> using FBM RDS: /tmp/RtmpLvkY5u/gt_merged_28132c839c26.rds
+#> with FBM backing file: /tmp/RtmpLvkY5u/gt_merged_28132c839c26.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/Rtmp93Vrtx/gt_merged_1fc83ec1e221.gt')
+#> gt_load('/tmp/RtmpLvkY5u/gt_merged_28132c839c26.gt')
 
 merged_gt
 #> # A gen_tibble: 2 loci

@@ -21,7 +21,9 @@ nwise_pop_pbs(
 
 - .x:
 
-  A grouped `gen_tibble`
+  A grouped `gen_tibble`. If grouped by more than one variable, groups
+  are labelled by the values of the grouping variables pasted with "."
+  (e.g. `pop1.F`).
 
 - type:
 

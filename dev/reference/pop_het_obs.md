@@ -23,7 +23,9 @@ pop_het_obs(
   (usually grouped, as obtained by using
   [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),
   otherwise the full tibble will be considered as belonging to a single
-  population).
+  population). If grouped by more than one variable, groups are labelled
+  by the values of the grouping variables pasted with "." (e.g.
+  `pop1.F`).
 
 - by_locus:
 

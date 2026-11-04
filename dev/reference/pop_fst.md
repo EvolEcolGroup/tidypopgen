@@ -17,7 +17,9 @@ pop_fst(.x, include_global = FALSE, allele_sharing_mat = NULL)
   a grouped
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
   (as obtained by using
-  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html))
+  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)).
+  If grouped by more than one variable, groups are labelled by the
+  values of the grouping variables pasted with "." (e.g. `pop1.F`).
 
 - include_global:
 

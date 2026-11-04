@@ -40,7 +40,8 @@ pop_global_stats(.x, by_locus = FALSE, n_cores = bigstatsr::nb_cores())
   (usually grouped, as obtained by using
   [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html);
   use on a single population will return a number of quantities as
-  NA/NaN)
+  NA/NaN). If grouped by more than one variable, groups are labelled by
+  the values of the grouping variables pasted with "." (e.g. `pop1.F`).
 
 - by_locus:
 

@@ -97,7 +97,7 @@ hgdp <- gen_tibble(bed_path,
 )
 ```
 
-read_plink: 1.6s
+read_plink: 1.7s
 
 Add metadata
 
@@ -143,7 +143,7 @@ loci_report <- qc_report_loci(hgdp)
 #> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
 ```
 
-loci_report: 304ms The resulting report can be observed using
+loci_report: 302ms The resulting report can be observed using
 `autoplot`.
 
 ``` r
@@ -168,7 +168,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 1.5s
+filter_loci: 1.6s
 
 ## Individual Report
 
@@ -180,7 +180,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 201ms
+indiv_report: 212ms
 
 ``` r
 
@@ -215,11 +215,11 @@ need to update the file backing matrix with `gt_update_backingfile`.
 hgdp <- gt_update_backingfile(hgdp)
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpI1vFHR/test_31b04a6e82f9b6_v2.rds
-#> with FBM backing file: /tmp/RtmpI1vFHR/test_31b04a6e82f9b6_v2.bk
+#> using FBM RDS: /tmp/RtmpGT02qf/test_12567f3f87ce84_v2.rds
+#> with FBM backing file: /tmp/RtmpGT02qf/test_12567f3f87ce84_v2.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpI1vFHR/test_31b04a6e82f9b6_v2.gt')
+#> gt_load('/tmp/RtmpGT02qf/test_12567f3f87ce84_v2.gt')
 ```
 
 ## Impute data
@@ -234,7 +234,7 @@ hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 134ms
+impute: 135ms
 
 ## LD clumping
 
@@ -246,7 +246,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 1.7s
+ld_clumping: 1.6s
 
 ## PCA
 
@@ -283,7 +283,7 @@ regions covered by the dataset.
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
-dapc: 97ms
+dapc: 101ms
 
 Plot DAPC:
 
@@ -311,7 +311,7 @@ pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
 )
 ```
 
-pairwise_fst: 60ms
+pairwise_fst: 53ms
 
 Plot pairwise Fst:
 
@@ -346,10 +346,10 @@ gt_as_plink(hgdp,
   type = "bed",
   overwrite = TRUE
 )
-#> [1] "/tmp/RtmpI1vFHR/file31b04a218108bb.bed"
+#> [1] "/tmp/RtmpGT02qf/file12567f106fc82f.bed"
 ```
 
-plink_save: 170ms
+plink_save: 166ms
 
 ## Summary
 
@@ -357,18 +357,18 @@ Here is a summary of the time taken (in seconds) to perform each step of
 the analyses:
 
     #>            step time
-    #> 1    read_plink 1.63
+    #> 1    read_plink 1.71
     #> 2   loci_report  0.3
-    #> 3   filter_loci 1.54
-    #> 4  indiv_report  0.2
+    #> 3   filter_loci 1.61
+    #> 4  indiv_report 0.21
     #> 5  filter_indiv    0
     #> 6        impute 0.13
-    #> 7   ld_clumping 1.65
-    #> 8           pca 2.48
+    #> 7   ld_clumping 1.64
+    #> 8           pca 2.47
     #> 9          dapc  0.1
-    #> 10 pairwise_fst 0.06
+    #> 10 pairwise_fst 0.05
     #> 11   plink_save 0.17
-    #> 12        Total 8.26
+    #> 12        Total 8.39
 
 ## Running the benchmark on a laptop
 

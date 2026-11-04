@@ -91,13 +91,16 @@ gen_tibble(
 
   the path, including the file name without extension, for backing files
   used to store the data (they will be given a .bk and .RDS
-  automatically). This is not needed if `x` is already an .RDS file. If
-  `x` is a .BED or a *VCF* file and `backingfile` is left NULL, the
-  backing file will be saved in the same directory as the bed or vcf
-  file, using the same file name but with a different file type (.bk
-  rather than .bed or .vcf). If `x` is a genotype matrix and
-  `backingfile` is NULL, then a temporary file will be created (but note
-  that R will delete it at the end of the session!)
+  automatically). If `x` is a bigSNP .RDS file, its backing file is
+  copied to `backingfile`, so that the original files are not modified
+  (if `backingfile` is left NULL, the copy is saved next to the
+  original, with a version suffix such as `_v2`). If `x` is a .BED or a
+  *VCF* file and `backingfile` is left NULL, the backing file will be
+  saved in the same directory as the bed or vcf file, using the same
+  file name but with a different file type (.bk rather than .bed or
+  .vcf). If `x` is a genotype matrix and `backingfile` is NULL, then a
+  temporary file will be created (but note that R will delete it at the
+  end of the session!)
 
 - allow_duplicates:
 
@@ -175,6 +178,22 @@ an object of the class `gen_tbl`.
   (e.g. sex chromosomes) are included in the *VCF*, they are not
   transformed into homozygous calls. Instead, reference alleles will be
   coded as 0 and alternative alleles will be coded as 1.
+
+- *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual
+  information (from the .fam file, or the first six columns of the .ped
+  file) is stored in the same columns for all formats: the individual ID
+  as `id`; the family ID as `population` (unless it is the same as the
+  individual ID for all individuals); the paternal and maternal IDs as
+  `paternal_ID` and `maternal_ID`; sex as `sex`, a factor with levels
+  "female" (PLINK code 2) and "male" (code 1); and the phenotype as
+  `phenotype`, a factor with levels "control" (code 1) and "case" (code
+  2), or a number for a quantitative phenotype (with values other than
+  1, 2, 0 and -9). Missing values (0 for parents and sex, 0 or -9 for a
+  case/control phenotype, and -9 for a quantitative one) are NA, and
+  `paternal_ID`, `maternal_ID`, `sex` and `phenotype` are only created
+  if they have some non-missing values.
+  [`gt_as_plink()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_plink.md)
+  writes these columns back to PLINK files.
 
 - *packedancestry* files: When loading *packedancestry* files, missing
   alleles will be converted from 'X' to NA
