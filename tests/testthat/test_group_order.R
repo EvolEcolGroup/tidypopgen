@@ -170,3 +170,22 @@ test_that("reorder_within_groups keeps the order of the groups", {
     c("pop1", "pop2", "pop3")
   )
 })
+
+test_that("heatmap_pairwise keeps the order of a tidy input", {
+  axis_labels <- function(plt) ggplot2::layer_scales(plt)$x$labels
+  # groups, in the order of the levels
+  factor_gt <- test_gt %>% dplyr::group_by(pop_factor)
+  fst_mat <- pairwise_pop_fst(factor_gt, type = "pairwise", method = "Nei87")
+  fst_tidy <- pairwise_pop_fst(factor_gt, type = "tidy", method = "Nei87")
+  expect_equal(axis_labels(heatmap_pairwise(fst_mat)), c("pop3", "pop1", "pop2"))
+  expect_equal(
+    axis_labels(heatmap_pairwise(fst_tidy)),
+    c("pop3", "pop1", "pop2")
+  )
+  # individuals, in the order of the gen_tibble
+  rev_gt <- test_gt %>% dplyr::arrange(dplyr::desc(id))
+  king_mat <- pairwise_king(rev_gt, as_matrix = TRUE)
+  king_tidy <- pairwise_king(rev_gt)
+  expect_equal(axis_labels(heatmap_pairwise(king_mat)), rev_gt$id)
+  expect_equal(axis_labels(heatmap_pairwise(king_tidy)), rev_gt$id)
+})

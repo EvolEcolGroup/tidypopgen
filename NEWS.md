@@ -70,6 +70,9 @@
 * fix `autoplot()` of `q_matrix` and `gt_admix` objects with
   `reorder_within_groups = TRUE` sorting the groups even with
   `arrange_by_group = FALSE`
+* fix `heatmap_pairwise()` and `autoplot()` of tidy pairwise outputs sorting
+  the individuals or groups alphabetically, rather than keeping their order (as
+  documented, and as for the same data as a matrix)
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not

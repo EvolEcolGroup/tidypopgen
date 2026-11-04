@@ -17,7 +17,10 @@ accepted: the names are the values of the grouping variables pasted with
 
 \item{order}{Optional ordering specification. Can be:
 \itemize{
-\item \code{NULL} (default): preserve the existing order.
+\item \code{NULL} (default): preserve the existing order (for a tidy
+tibble, the order in which the names first appear in the pairs,
+i.e. the order of the individuals or groups for the outputs of the
+\verb{pairwise_*} functions).
 \item A character vector containing all row/column names in the desired
 order.
 \item A function taking the matrix \code{x} as input and returning either:

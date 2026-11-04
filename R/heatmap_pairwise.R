@@ -19,7 +19,10 @@
 #'
 #' @param order Optional ordering specification. Can be:
 #' \itemize{
-#'   \item `NULL` (default): preserve the existing order.
+#'   \item `NULL` (default): preserve the existing order (for a tidy
+#'     tibble, the order in which the names first appear in the pairs,
+#'     i.e. the order of the individuals or groups for the outputs of the
+#'     `pairwise_*` functions).
 #'   \item A character vector containing all row/column names in the desired
 #'     order.
 #'   \item A function taking the matrix `x` as input and returning either:
@@ -121,7 +124,10 @@ heatmap_pairwise <- function(x,
     df$from <- as.character(df$from)
     df$to <- as.character(df$to)
 
-    ids <- sort(unique(c(df$from, df$to)))
+    # keep the existing order, i.e. the order in which the names first appear
+    # in the pairs (for the outputs of the pairwise_* functions, the order of
+    # the individuals or groups, as in the matrix they are tidied from)
+    ids <- unique(c(rbind(df$from, df$to)))
     n <- length(ids)
 
     if (nrow(df) != n * (n - 1) / 2) {
