@@ -6,7 +6,7 @@ set -euo pipefail
 # Create <out_dir>/all_subset.vcf.gz (and its .tbi index): a VCF of the SGDP
 # individuals listed in the ${pop}_subset.txt files that sit next to this
 # script (written by s01_create_sgdp_subset_metadata.R). <out_dir> defaults to
-# the folder containing this script (data-raw/).
+# the folder containing this script (data-raw/sgdp/).
 #
 # SGDP distributes its per-individual VCFs as a single 57 GB tar archive. We
 # do not download the archive: SGDP also publishes its listing (`tar -tv`

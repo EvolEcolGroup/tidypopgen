@@ -16,7 +16,7 @@ The latest version of tidypopgen has implemented a new option to minimise the me
 
 ## Downloading the SGDP data
 
-We will demonstrate the new capacity of tidypopgen using a subset of the [Simons Genome Diversity Project (SGDP)](https://reichdata.hms.harvard.edu/pub/datasets/sgdp/), containing 10 individuals each from Africa, Oceania, America and West Eurasia. The data are too large to download as part of this article, but the scripts in the [`data-raw` folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/data-raw) of the tidypopgen repository let you create the dataset yourself if you wish to follow along.
+We will demonstrate the new capacity of tidypopgen using a subset of the [Simons Genome Diversity Project (SGDP)](https://reichdata.hms.harvard.edu/pub/datasets/sgdp/), containing 10 individuals each from Africa, Oceania, America and West Eurasia. The data are too large to download as part of this article, but the scripts in the [`data-raw/sgdp` folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/data-raw/sgdp) of the tidypopgen repository let you create the dataset yourself if you wish to follow along.
 
 The 40 individuals are listed in the files `afr_subset.txt`, `oceania_subset.txt`, `america_subset.txt` and `west_eur_subset.txt`. These were created by `s01_create_sgdp_subset_metadata.R`, which takes the first 10 fully public individuals from each region in the SGDP metadata.
 
@@ -24,10 +24,10 @@ SGDP provides a VCF for each individual, but distributes them as a single 57 GB 
 
 
 ``` bash
-bash data-raw/s02_create_sgdp_subset.sh data/sgdp
+bash data-raw/sgdp/s02_create_sgdp_subset.sh vignettes/articles/data/sgdp
 ```
 
-This writes `all_subset.vcf.gz` and its index to `data/sgdp/`, which is where we read it from below. The individual VCFs are kept in `data/sgdp/sgdp_vcfs/`, so that an interrupted download can be resumed by running the script again; once the merged VCF has been created, they can be deleted.
+This writes `all_subset.vcf.gz` and its index to `vignettes/articles/data/sgdp/`, which is where we read it from below (the paths in this article are relative to `vignettes/articles/`). The individual VCFs are kept in `vignettes/articles/data/sgdp/sgdp_vcfs/`, so that an interrupted download can be resumed by running the script again; once the merged VCF has been created, they can be deleted.
 
 Note that each SGDP VCF only contains the sites at which that individual carries a non-reference allele. When merging, a site that is absent from an individual's VCF is therefore set to homozygous for the reference allele (with the `--missing-to-ref` option of `bcftools merge`). Without this option, every homozygous reference genotype would be recorded as missing. The cost is that a site that was not sequenced in an individual is also set to homozygous reference, which is a reasonable approximation for these high-coverage genomes.
 
