@@ -106,6 +106,10 @@ loci_hwe.vctrs_bigSNP <- function(
     )
     # drop the dimensions of the one column matrix (without copying it)
     dim(hwe_p) <- NULL
+  } else if (length(rows_to_keep) == 0) {
+    # no individuals (e.g. an empty group in group_map()), so no genotypes to
+    # test, as for empty groups in the grouped method
+    hwe_p <- rep(NA_real_, length(attr(.x, "loci")$big_index))
   } else {
     # if we have a single individual
     stop("Not implemented for a single individual")

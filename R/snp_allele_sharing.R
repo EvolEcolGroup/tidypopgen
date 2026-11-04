@@ -41,6 +41,11 @@ snp_allele_sharing <- function(
   # nolint end
 
   n <- length(ind.row)
+  # no individuals (e.g. an empty group in group_map()): an empty matrix, as
+  # FBMs can not be empty
+  if (n == 0) {
+    return(matrix(numeric(0), 0, 0))
+  }
   # FBM matrix to store the tcrossproduct of (dos-1)
   dos_tcross <- bigstatsr::FBM(n, n, init = 0)
   # FBM matrix to store tcrossproduct of NA matrix

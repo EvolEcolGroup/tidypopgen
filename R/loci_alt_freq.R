@@ -341,6 +341,10 @@ loci_alt_freq_dip_pseudo <- function(.x,
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
+  # no individuals (e.g. an empty group in group_map()): no valid alleles
+  if (length(rows_to_keep) == 0) {
+    return(.alt_freq_no_indiv(.x, as_counts))
+  }
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
     # the cpp code reads the FBM directly (in blocks of block_size loci, using
@@ -382,6 +386,18 @@ loci_alt_freq_dip_pseudo <- function(.x,
   }
 }
 
+# The output of loci_alt_freq() when there are no individuals (e.g. an empty
+# group in group_map()): no valid alleles at any locus, so the frequencies are
+# NA (as for loci without valid alleles), and the counts are zero
+.alt_freq_no_indiv <- function(.x, as_counts) {
+  n_loci <- length(attr(.x, "loci")$big_index)
+  if (as_counts) {
+    cbind(n_alt = numeric(n_loci), n_valid = numeric(n_loci))
+  } else {
+    rep(NA_real_, n_loci)
+  }
+}
+
 loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
                                     block_size, ...) {
   warning(paste(
@@ -392,6 +408,10 @@ loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
+  # no individuals (e.g. an empty group in group_map()): no valid alleles
+  if (length(rows_to_keep) == 0) {
+    return(.alt_freq_no_indiv(.x, as_counts))
+  }
   # as long as we have more than one individual
   ploidy_by_indiv <- indiv_ploidy(.x)
   if (length(rows_to_keep) > 1) {

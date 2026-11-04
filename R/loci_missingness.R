@@ -107,6 +107,16 @@ loci_missingness.vctrs_bigSNP <- function(
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
+  # no individuals (e.g. an empty group in group_map()): no missing
+  # genotypes, and the proportion is NaN, as for empty groups in the grouped
+  # method
+  if (length(rows_to_keep) == 0) {
+    n_na <- integer(length(attr(.x, "loci")$big_index))
+    if (!as_counts) {
+      n_na <- n_na / 0
+    }
+    return(n_na)
+  }
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
     # count the missing genotypes at each locus (the cpp code reads the FBM
