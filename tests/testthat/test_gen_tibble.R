@@ -271,6 +271,27 @@ test_that("sex is stored in gen_tibble if not missing", {
   expect_equal(as.character(pop_b$sex), as.character(fam$V5))
 })
 
+test_that("IDs in fam files are read as characters", {
+  # copy pop_b, with IDs that look like numbers
+  bed_dir <- tempfile("fam_ids_")
+  dir.create(bed_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  file.copy(file.path(ext_dir, "pop_b.bed"), bed_dir)
+  file.copy(file.path(ext_dir, "pop_b.bim"), bed_dir)
+  writeLines(
+    c("01 001 0 0 1 -9", "01 002 001 0 2 -9", "02 1.10 001 002 1 -9"),
+    file.path(bed_dir, "pop_b.fam")
+  )
+  pop_b <- gen_tibble(file.path(bed_dir, "pop_b.bed"),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  expect_identical(pop_b$id, c("001", "002", "1.10"))
+  expect_identical(pop_b$population, c("01", "01", "02"))
+  expect_identical(pop_b$paternal_ID, c(NA, "001", "001"))
+  expect_identical(pop_b$maternal_ID, c(NA, NA, "002"))
+})
+
 test_that("if order of loci is changed, order of genotypes also changes", {
   pop_b <-
     gen_tibble(

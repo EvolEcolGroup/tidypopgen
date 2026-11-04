@@ -101,6 +101,10 @@
   line endings
 * fix `gen_tibble()` failing on files with upper case extensions (e.g. .BED,
   .PED, .GENO, .VCF.GZ)
+* fix `gen_tibble()` on PLINK bed files turning the family, individual and
+  parental IDs of the .fam file into numbers when they look like numbers (e.g.
+  "001" became "1", and "1.10" became "1.1"); they are now kept as they are, as
+  when reading ped files
 * fix `gen_tibble()` on VCF files leaving a backing file behind when the loci
   fail validation (e.g. duplicated loci), which caused a retry to use a new
   versioned file name

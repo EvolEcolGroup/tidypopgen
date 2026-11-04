@@ -243,7 +243,13 @@ read_loci_file <- function(file, character_cols) {
 
 indiv_meta_from_fam <- function(fam) {
   if (is.character(fam)) {
-    fam <- utils::read.table(fam, stringsAsFactors = FALSE)
+    # read the family, individual and parental IDs as characters, so that e.g.
+    # "001" is not turned into "1" (the type of sex and phenotype is guessed)
+    fam <- utils::read.table(
+      fam,
+      stringsAsFactors = FALSE,
+      colClasses = c(rep("character", 4), NA, NA)
+    )
   }
 
   if (!is.data.frame(fam) || ncol(fam) < 6) {
