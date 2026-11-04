@@ -60,7 +60,9 @@
 #' @param .x a grouped gen_tibble
 #' @returns a vector with the group of each individual (row) of `.x`: the
 #'   grouping variable itself (keeping its type) if there is only one, or
-#'   the group labels (see `.group_labels()`) if there are several
+#'   the group labels (see `.group_labels()`) if there are several, as a
+#'   factor with the labels as levels in the order of the groups (rather than
+#'   characters, which would sort alphabetically)
 #' @keywords internal
 #' @noRd
 .group_of_rows <- function(.x) {
@@ -68,7 +70,8 @@
   if (length(vars) == 1) {
     .x[[vars]]
   } else {
-    .group_labels(dplyr::group_keys(.x))[dplyr::group_indices(.x)]
+    labels <- .group_labels(dplyr::group_keys(.x))
+    factor(labels[dplyr::group_indices(.x)], levels = labels)
   }
 }
 

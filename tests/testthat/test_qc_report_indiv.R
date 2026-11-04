@@ -338,14 +338,21 @@ test_that("qc_report_indiv works with several grouping variables", {
   families$pop_sex <- paste(families$population, families$sex, sep = ".")
   families_combined <- families %>% group_by(pop_sex)
   families <- families %>% group_by(population, sex)
-  # the group is the values of the grouping variables pasted with "."
-  report <- qc_report_indiv(families)
-  expect_equal(report$group, families$pop_sex)
-  expect_equal(report, qc_report_indiv(families_combined))
-  expect_equal(
-    qc_report_indiv(families, kings_threshold = 0.2),
-    qc_report_indiv(families_combined, kings_threshold = 0.2)
+  # the group is the values of the grouping variables pasted with ".", as a
+  # factor with the levels in the order of the groups
+  group_labels <- with(
+    dplyr::group_keys(families),
+    paste(population, sex, sep = ".")
   )
+  report <- qc_report_indiv(families)
+  expect_equal(report$group, factor(families$pop_sex, levels = group_labels))
+  report_combined <- qc_report_indiv(families_combined)
+  report_combined$group <- factor(report_combined$group, levels = group_labels)
+  expect_equal(report, report_combined)
+  report <- qc_report_indiv(families, kings_threshold = 0.2)
+  report_combined <- qc_report_indiv(families_combined, kings_threshold = 0.2)
+  report_combined$group <- factor(report_combined$group, levels = group_labels)
+  expect_equal(report, report_combined)
 })
 
 test_that("relatedness autoplot fails without kings_threshold", {

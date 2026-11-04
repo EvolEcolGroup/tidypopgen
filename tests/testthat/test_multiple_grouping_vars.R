@@ -233,7 +233,10 @@ test_that("qc reports and exports work with several grouping variables", {
   expect_equal(qc_report_loci(gt_two), qc_report_loci(gt_one))
   report_two <- qc_report_indiv(gt_two, kings_threshold = "first")
   report_one <- qc_report_indiv(gt_one, kings_threshold = "first")
-  expect_equal(report_two$group, test_gt$pop_sex)
+  # the group of each individual is a factor, with the levels in the order of
+  # the groups
+  expect_equal(report_two$group, factor(test_gt$pop_sex, levels = group_labels))
+  report_one$group <- factor(report_one$group, levels = group_labels)
   expect_equal(report_two, report_one)
   # the family ID of the plink files are the combined labels
   bed_file <- gt_as_plink(gt_two, file = tempfile(), type = "bed")
@@ -295,8 +298,12 @@ test_that("empty groups get NA without changing other groups", {
   expect_equal(fst_empty$value[!with_empty], fst_dropped$value)
   # qc reports are not affected by the empty group
   expect_equal(qc_report_loci(gt_empty), qc_report_loci(gt_dropped))
+  # (but the empty group is still a level of the factor of groups)
+  report_empty <- qc_report_indiv(gt_empty, kings_threshold = "first")
+  expect_equal(levels(report_empty$group), group_labels)
+  report_empty$group <- droplevels(report_empty$group)
   expect_equal(
-    qc_report_indiv(gt_empty, kings_threshold = "first"),
+    report_empty,
     qc_report_indiv(gt_dropped, kings_threshold = "first")
   )
 })
@@ -332,5 +339,5 @@ test_that("gt_snmf stores the combined group labels", {
     n_runs = 1,
     seed = 1
   )
-  expect_equal(snmf_res$group, test_gt$pop_sex)
+  expect_equal(snmf_res$group, factor(test_gt$pop_sex, levels = group_labels))
 })

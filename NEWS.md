@@ -54,6 +54,12 @@
   grouping variables already did, rather than being character; groups thus
   stay in their order (e.g. the levels of the factor) when the output is
   sorted or plotted
+* with several grouping variables, the group of each individual (the `group`
+  column of `qc_report_indiv()`, and the `group` element of the results of
+  `gt_admixture()` and `gt_snmf()`) is now a factor whose levels are the
+  group labels in the order of the groups, rather than characters, which
+  sorted alphabetically; `gt_admix_reorder_q()` and `autoplot()` thus order
+  the groups as the grouped functions do
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not
