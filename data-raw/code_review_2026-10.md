@@ -207,7 +207,7 @@ in brackets, its impact:
 - [x] `011a0f4` · `gt_snmf()` — Cross-entropies (`$cv`) were not matched to their k and run when `n_runs > 1`. *[Wrong results]* E.C
 - [x] `d848508` · `gt_snmf()` — Returned results of earlier runs when adding to an existing project (`project = "continue"`/`"force"`). *[Wrong results]*
 - [ ] `93c4fa6` · TODO check that these are still valid, as we have made some changes`tidy()`, `augment()` of `q_matrix` — Ignored the `id` attribute without group information, misassigning proportions when `data` was in a different order. *[Wrong results]*
-- [ ] `d8553e1` · TODO check that these are still valid, as we have made some changes`autoplot()` of `q_matrix`/`gt_admix` — `arrange_by_indiv` never sorted by id. *[Wrong results]*
+- [ ] `d8553e1` · TODO check that these are still valid, as we have made some changes`autoplot()` of `q_matrix`/`gt_admix` — `arrange_by_indiv` never sorted by id. *[Wrong results]* Superseded by PR #209 (`374e736e`), merged into `codereview_todo` in `de645781`: see [code_review_2026-10_todo.md](code_review_2026-10_todo.md).
 - [x] `e66f7a0` · `autoplot()` of `q_matrix` with group annotation — Unused factor levels added phantom separators and labels. *[Wrong results]*
 - [x] `ffcb031` · `gt_snmf()` — The default `seed` was rejected when `n_runs > 1`. *[Error]*
 - [x] `18b6d98` · `gt_snmf()`, `gt_admixture()` — Unanchored extension patterns broke paths containing "geno" or ".bed". *[Error]*

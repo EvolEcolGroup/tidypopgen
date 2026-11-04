@@ -11,6 +11,10 @@ only"). In #216 each of them was reverted in `speed_to_merge`.
   corresponding revert of `speed_to_merge`, so it includes the conflicts
   resolved by hand against the `speed` changes (see `eaf612d` and `4292aa8`
   below), together with its regression test and `NEWS.md` entry.
+- **Also on this branch:** #217 (`ee8bd631`, grouping by several
+  variables), the [empty group fixes](#empty-groups-group_bydrop--false),
+  and PR #209 (`autoplot()` of Q matrices), merged in `de645781` (see
+  [PR #209](#pr-209-merged-into-this-branch)).
 - The comments in *italics* are the original reviewers' comments from
   `code_review_2026-10.md`, explaining why each fix was held back. They
   still need an answer before this branch is merged.
@@ -32,10 +36,20 @@ The first hash is the commit on `codereview`, the second the commit on
   `data` was in a different order. *[Wrong results]*
   *Held back: "TODO check that these are still valid, as we have made some
   changes".*
+  Not affected by PR #209, which only changes `autoplot()`: its test still
+  passes after the merge (`de645781`).
 - [ ] `d8553e1` / `deab61f3` · `autoplot()` of `q_matrix`/`gt_admix` —
   `arrange_by_indiv` never sorted by id. *[Wrong results]*
   *Held back: "TODO check that these are still valid, as we have made some
   changes".*
+  **Superseded by `374e736e` (PR #209, see below)**, which fixes the same
+  bug. With `arrange_by_group = FALSE`, `deab61f3` sorted individuals by id
+  across groups. Whenever the ids of different groups interleave, that
+  splits groups into several blocks, so `autoplot()` then failed in
+  `annotate_group_info()` ("values in 'group' are not ordered"). The merge `de645781` keeps the #209 version (by id within each
+  group, with the groups in their current order) and its `NEWS.md` entries,
+  and updates the expectation of the `deab61f3` test for that case. Tick
+  this box together with `374e736e`.
 - [ ] `0b43996` / `2a8a162d` · `autoplot.gt_admix(type = "cv")` — Failed when
   the object had no `algorithm` element. *[Error]*
   *Held back: "TODO if algorithm is missing, then should we send a message
@@ -91,6 +105,72 @@ The first hash is the commit on `codereview`, the second the commit on
   commit undoes that revert. Given E.C's comment, this fix is likely to be
   dropped (revert `83dd95b2`) or replaced by one that keeps the
   `name_old` column.
+
+## PR #209, merged into this branch
+
+PR #209 (`fix-reorder-within-groups`) was merged into this branch in
+`de645781`, rather than cherry-picked. Its commits therefore keep their
+hashes, and GitHub will close #209 as merged when this branch is merged
+into `dev`.
+
+**Overlap with this branch:** only `deab61f3` (above), which fixed the same
+`arrange_by_indiv` bug. The conflicts in `R/q_matrix.R`,
+`tests/testthat/test_q_matrix.R` and `NEWS.md` were resolved in favour of
+#209. #209 does not touch the code of the empty group fixes. Nor does it
+touch the code that #217 changed in `R/q_matrix.R`: #217 changed how
+`tidy()` and `augment()` label groups, #209 the order of the plot.
+
+- [ ] `df06dfee` · `autoplot()` of `q_matrix`/`gt_admix` with
+  `reorder_within_groups = TRUE` — Individuals were sorted by the size of
+  their largest component, whichever component it was, so individuals
+  dominated by different components were interleaved. *[Wrong results]*
+  They are now sorted by their dominant component (the most common
+  component in the group first), and then by its proportion.
+- [ ] `374e736e` · `autoplot()` of `q_matrix`/`gt_admix` with
+  `arrange_by_indiv = TRUE` — Ids were overwritten with row numbers before
+  arranging, so individuals were never sorted by id. With
+  `arrange_by_group = FALSE`, they were sorted by group instead.
+  *[Wrong results]* Supersedes `deab61f3`.
+  **Change in behaviour:** with `arrange_by_group = FALSE`, individuals are
+  sorted by id within each group, and the groups keep their current order.
+  The documentation now says that `arrange_by_indiv` only applies when
+  groups are annotated.
+- [ ] `76df84ca` · `autoplot()` of `q_matrix`/`gt_admix` with numeric
+  groups (e.g. from `gt_admixture()` on a gen_tibble grouped by a numeric
+  column) — `fct_inorder_base()` turned numeric vectors into all NA. As a
+  result, the default plot on `dev` had no group lines or labels, and with
+  `374e736e`, `arrange_by_group = FALSE` failed. *[Wrong results]*
+  `fct_inorder_base()` is also used by `gt_as_vcf()`, but only on
+  chromosomes, which gen_tibbles store as factors (checked: same contig
+  lines before and after).
+  **Decision needed:** this commit has no `NEWS.md` entry, although the
+  missing group lines and labels are visible to users. Add one?
+
+Checked with installed builds of `de645781` and, as the old code, of
+`de645781` with `R/q_matrix.R`, `R/local_reimplementations.R` and the Rd
+file from `271f8aaf` (before the merge, i.e. including `deab61f3`):
+
+- On the old code, the tests of the three commits and the updated
+  `deab61f3` test give 5 failures and 2 errors in `test_q_matrix.R` and
+  `test_local_reimplementations.R`. The 2 errors come from
+  `annotate_group_info()`, with the `deab61f3` ordering.
+- After the merge, all 70 tests in these two files pass.
+- With an unused level of a factor group (as from
+  `group_by(.drop = FALSE)`), `arrange_by_indiv` with and without
+  `arrange_by_group`, and `reorder_within_groups`, all plot the two groups
+  with two separators.
+
+No benchmark was run, as this is plotting code. Full test suite on
+`de645781` (installed, `NOT_CRAN=true`, library on `R_LIBS`): 2,875
+passed, 0 failed, 0 skipped. — Claude, for AM
+
+Found while checking, not fixed (already on `dev`, before #217 and #209):
+`augment()` of a `q_matrix` without `id` and `group` attributes, with
+grouped `data`, turns the groups into character. So `autoplot(q_mat, data =
+grouped_gt)` orders the groups alphabetically even when the grouping
+variable is a factor, contrary to the documentation of `arrange_by_group`.
+Groups are ordered by the levels when they come from the attributes of the
+`q_matrix` (as for `gt_admixture()` results).
 
 ## Optional fix on a separate branch (not on this branch)
 
