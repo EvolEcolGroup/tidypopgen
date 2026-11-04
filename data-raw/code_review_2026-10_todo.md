@@ -134,8 +134,9 @@ commits, but their boxes in `code_review_2026-10.md` were never ticked:
 Following the decision on `6a61c22`/`83aa04e` (keep empty groups, as dplyr
 does with `.drop = FALSE`), every grouped function was run with an empty
 factor level in the middle and at the end (checked 2026-11-04 on
-`c41797ce`, installed). `ee8bd631` (#217, grouping by several variables)
-already keeps empty groups as NA/NaN in most functions, and fixed
+`c41797ce`, and again on `2ed7dec0` after the fixes below, installed).
+`ee8bd631` (#217, grouping by several variables) already keeps empty
+groups as NA/NaN in most functions, and fixed
 `pop_fst()` and `pop_fis(method = "WG17")` (finding #8 of the full report)
 and `qc_report_indiv(kings_threshold = )`, which failed on them. Grouped
 `loci_*()`, `pop_het_obs()`, `pop_het_exp()`, `pop_gene_div()`, `pop_fis()`
@@ -176,24 +177,51 @@ are identical to `.drop = TRUE`.
   pass on the fix. No benchmark: the changes are vectorised R over
   individuals or groups, outside the kernels. — Claude, for AM
 
-Full test suite on `c41797ce` (installed, `NOT_CRAN=true`, with the library
+- [x] `1b2a8802` · `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`,
+  `loci_hwe()`, `pairwise_king()`, `pairwise_ibs()`,
+  `pairwise_allele_sharing()`, `pairwise_grm()`, `indiv_inbreeding()` on a
+  gen_tibble without individuals, as `group_map()` gives them for an empty
+  group — Failed ("argument is of length zero", "Error when mapping file:
+  Invalid argument", as FBMs can not be empty), or returned an empty vector
+  (`loci_missingness()`), so grouped `indiv_inbreeding()` failed with any
+  empty group, and so did user code such as `group_map(~ loci_alt_freq(.x))`
+  (the idiom suggested for polyploids). *[Error]*
+  Without individuals, the `loci_*()` functions now give the values of the
+  grouped methods for an empty group (NA for each locus, NaN for the
+  proportion of missing genotypes, zero counts), and the pairwise functions
+  an empty matrix or tidy tibble; `pairwise_ibs(type = "raw_counts")`, which
+  returns FBMs, gives an informative error. The `loci_*()` results are built
+  in R rather than by the cpp kernels, which would otherwise get an NA block
+  size (`bigstatsr::block_size(0)` is `Inf`). Checked: the new tests
+  (`test_empty_groups.R`) error on `b46fc431` and pass on the fix. No
+  benchmark: the changes are early returns for 0 individuals.
+  — Claude, for AM
+- [x] `8a02899f` · `pairwise_allele_sharing()`, `pairwise_grm()`,
+  `indiv_inbreeding()` with a single individual (and thus grouped
+  `indiv_inbreeding()` with a group of one individual) — Failed
+  ("'dimnames' applied to non-array"), as the 1 x 1 matrix read from the
+  FBMs was dropped to a vector. *[Error]* Found while checking `1b2a8802`
+  (not an empty group, but the same use of `group_map()`).
+  `indiv_inbreeding()` of a single individual is NaN, as it is relative to
+  the mean allele sharing between pairs. Checked: the new test errors on
+  `b46fc431` and passes on the fix. No benchmark: `X[, , drop = FALSE]`
+  takes the same path in bigstatsr as `X[]`, only skipping the final
+  `drop()`. — Claude, for AM
+- [x] `2ed7dec0` · `windows_pop_tajimas_d(type = "matrix")` — A window was
+  split over several rows, each with NA for some groups, when the number
+  of loci with data in the window differed between groups: every window
+  appeared twice with an empty group, and a window had an extra row when a
+  group had no data at one of its loci. *[Wrong results]*
+  **Change in behaviour:** `n_loci` in the matrix is now the number of
+  loci in the window (as documented), rather than the number with data in
+  each group, which is still given by the "tidy" and "list" outputs. The
+  two only differ when some group has no data at a locus, which is when
+  windows were split. Checked: the new test fails on `b46fc431` (5
+  failures) and passes on the fix. — Claude, for AM
+
+Full test suite on `2ed7dec0` (installed, `NOT_CRAN=true`, with the library
 on `R_LIBS` so that the parallel workers of `predict_gt_pca()` find the
-package): 2,787 passed, 0 failed, 0 skipped.
-
-### Not consistent yet (no fix written)
-
-- [ ] `indiv_inbreeding()` (grouped) — Error ("Error when mapping file:
-  Invalid argument") with any empty group: it uses `group_map()`, which
-  calls `indiv_inbreeding()` on the 0-row slice, and it fails on a 0-row
-  gen_tibble. The same applies to user code such as
-  `group_map(~ loci_alt_freq(.x))` (the idiom suggested for polyploids),
-  as `loci_alt_freq()` fails on a 0-row gen_tibble ("argument is of length
-  zero"). `indiv_het_obs()` returns `numeric(0)`, so
-  `summarise(mean(indiv_het_obs(genotypes)))` already gives NaN, as dplyr
-  does.
-- [ ] `windows_pop_tajimas_d(type = "matrix")` — Every window appears twice
-  with an empty group (12 rows instead of 6): the `n_loci` column is not the
-  same for all groups, so `pivot_wider()` splits the windows into one row
-  per `n_loci` value. This also happens without empty groups when a group
-  has no data in a window (that window gets an extra row). The tidy output
-  is correct.
+package): 2,851 passed, 0 failed, 0 skipped. With these fixes, the check
+of every grouped function with an empty group (in the middle and at the
+end) finds no function left that fails, or differs from dplyr's handling
+of empty groups.
