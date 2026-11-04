@@ -8,7 +8,8 @@
 #' package *ADMIXTOOLS 2*. It takes a [`gen_tibble`], computes allele
 #' frequencies and blocked f2-statistics, and writes the results to `outdir`. It
 #' is equivalent to `admixtools::extract_f2()`.
-#' @param .x a [`gen_tibble`]
+#' @param .x a grouped [`gen_tibble`], with a group for each population. Empty
+#'   groups (e.g. from `group_by(.drop = FALSE)`) are dropped.
 #' @param outdir Directory where data will be stored.
 #' @param blgsize SNP block size in Morgan. Default is 0.05 (5 cM). If `blgsize`
 #'   is 100 or greater, it will be interpreted as base pair distance rather than
@@ -220,6 +221,13 @@ gt_to_aftable <- function(
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped df")
   }
+  # the aftable is passed on to admixtools, so always drop empty groups (e.g.
+  # from group_by(.drop = FALSE)), which would be populations without data
+  .x <- dplyr::group_by(
+    .x,
+    dplyr::across(dplyr::all_of(dplyr::group_vars(.x))),
+    .drop = TRUE
+  )
   geno_fbm <- .gt_get_fbm(.x)
   groups <- .group_info(.x)
 

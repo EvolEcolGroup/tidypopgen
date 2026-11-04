@@ -21,6 +21,9 @@
   as NA/NaN, without changing the results of the other groups. `pop_fst()` and
   `pop_fis(method = "WG17")` used to fail with an empty group, and
   `qc_report_indiv(kings_threshold = )` now skips empty groups
+* `gt_extract_f2()` always drops empty groups (from `group_by(.drop = FALSE)`,
+  or `filter()`/`slice()` with `.preserve = TRUE`), rather than passing them to
+  *ADMIXTOOLS 2* as populations without data
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not
