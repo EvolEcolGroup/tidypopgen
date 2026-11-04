@@ -167,6 +167,64 @@ test_that("0 is always accepted as a missing allele", {
   expect_true(is.na(show_loci(test_dfs_gt)$allele_alt[3]))
 })
 
+test_that("0 is always a missing genotype in ped files", {
+  # with custom missing_alleles, a missing genotype "0 0" (the PLINK default)
+  # must not be read as an allele "0", even if it is the first genotype of a
+  # locus
+  ped_file <- tempfile(fileext = ".ped")
+  writeLines(c(
+    "p1 i1 0 0 1 -9 0 0 A C",
+    "p1 i2 0 0 2 -9 A A A C",
+    "p1 i3 0 0 1 -9 A G C C"
+  ), ped_file)
+  writeLines(
+    c("1\tsnpA\t0\t100", "1\tsnpB\t0\t200"),
+    sub("\\.ped$", ".map", ped_file)
+  )
+  ped_gt <- gen_tibble(ped_file, backingfile = tempfile(), quiet = TRUE)
+  ped_n_gt <- gen_tibble(ped_file,
+    backingfile = tempfile(),
+    missing_alleles = "N",
+    quiet = TRUE
+  )
+  expect_equal(show_loci(ped_n_gt)$allele_ref, c("A", "A"))
+  expect_equal(show_loci(ped_n_gt)$allele_alt, c("G", "C"))
+  expect_equal(show_genotypes(ped_n_gt)[, 1], c(NA, 0, 1))
+  expect_identical(show_genotypes(ped_n_gt), show_genotypes(ped_gt))
+  expect_identical(show_loci(ped_n_gt), show_loci(ped_gt))
+  # a ped file written by gt_as_plink() (where missing genotypes are "0 0")
+  # is read back in the same way, including loci with only missing genotypes
+  na_genotypes <- test_genotypes
+  na_genotypes[1, 1] <- NA
+  na_genotypes[, 6] <- NA
+  na_loci <- test_loci
+  na_loci$allele_ref[6] <- NA
+  na_loci$allele_alt[6] <- NA
+  na_gt <- suppressWarnings(gen_tibble(
+    na_genotypes,
+    indiv_meta = test_indiv_meta,
+    loci = na_loci,
+    backingfile = tempfile(),
+    quiet = TRUE
+  ))
+  na_ped <- gt_as_plink(na_gt, file = paste0(tempfile(), ".ped"), type = "ped")
+  na_ped_gt <- suppressWarnings(gen_tibble(na_ped,
+    backingfile = tempfile(),
+    quiet = TRUE
+  ))
+  na_ped_n_gt <- suppressWarnings(gen_tibble(na_ped,
+    backingfile = tempfile(),
+    missing_alleles = "N",
+    quiet = TRUE
+  ))
+  expect_identical(show_genotypes(na_ped_n_gt), show_genotypes(na_ped_gt))
+  expect_identical(show_loci(na_ped_n_gt), show_loci(na_ped_gt))
+  expect_identical(
+    is.na(show_genotypes(na_ped_n_gt)),
+    is.na(show_genotypes(na_gt))
+  )
+})
+
 test_that("error if genotypes and loci tables differ in length", {
   test_loci_short <- test_loci[1:5, ]
   expect_error(

@@ -107,6 +107,11 @@
   error
 * fix `gen_tibble()` rejecting "0" alleles (the PLINK missing value) when custom
   `missing_alleles` are given
+* fix `gen_tibble()` on ped files reading a missing genotype "0 0" (the PLINK
+  default, also written by `gt_as_plink()`) as an allele "0" when custom
+  `missing_alleles` are given, which silently corrupted the genotypes of the
+  locus (or stopped with an error for loci with only missing genotypes); "0"
+  is now always missing in ped files
 * `gen_tibble()` on a matrix now checks that a vector of `ploidy` has one value
   per individual, and that dosages are non-negative integers not greater than
   each individual's ploidy (previously invalid values were silently corrupted)

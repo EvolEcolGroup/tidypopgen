@@ -13,10 +13,13 @@ gen_tibble_ped <- function(
   if (!file.exists(map_file)) {
     stop("map file ", map_file, " does not exist")
   }
+  # 0 is always a missing value (as in check_allele_alphabet()), so that a
+  # missing genotype "0 0" (the PLINK default, also written by gt_as_plink())
+  # is never read as an allele "0" when custom missing_alleles are given
   res <- read_pedfile(
     file = x,
     snps = map_file,
-    na_strings = missing_alleles,
+    na_strings = union(missing_alleles, "0"),
     quiet = quiet
   )
   # using the gen_tibble.matrix method
