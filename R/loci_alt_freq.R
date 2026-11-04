@@ -23,6 +23,13 @@
 #' @param block_size maximum number of loci read at once.
 #' @param type type of object to return, if using grouped method. One of "tidy",
 #'   "list", or "matrix". Default is "tidy".
+#'   Data can be grouped by more than one variable: groups are then labelled
+#'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
+#'   and the "tidy" output has one column per grouping variable rather than a
+#'   single `group` column. The `group` column, or the columns of the
+#'   grouping variables, keep the type of the grouping variables (e.g. a
+#'   factor keeps its levels), so that groups stay in their order when the
+#'   output is sorted or plotted.
 #' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a vector of frequencies, one per locus, if `as_counts = FALSE`;
 #' else a matrix of two columns, the count of alternate alleles and the count
@@ -159,11 +166,6 @@ loci_alt_freq.grouped_df <- function(
     stop("loci_alt_freq only works with the genotypes column")
   }
 
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("loci_alt_freq only works with one grouping variable")
-  }
-
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
@@ -189,11 +191,13 @@ loci_alt_freq.grouped_df <- function(
       return(counts_list)
     }
 
+    groups <- .group_info(.x)
     freq_mat <- format_grouped_output(
       out_mat = freq_mat,
-      group_ids = dplyr::group_keys(.x) %>% pull(1),
+      group_ids = groups$labels,
       loci_names = loci_names(.x),
-      type = type
+      type = type,
+      group_keys = groups$keys
     )
   } else {
     # the polyploid case
@@ -269,11 +273,6 @@ loci_maf.grouped_df <- function(
     stop("loci_maf only works with the genotypes column")
   }
 
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("loci_maf only works with one grouping variable")
-  }
-
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
@@ -289,11 +288,13 @@ loci_maf.grouped_df <- function(
     to_fold <- which(freq_mat > 0.5)
     freq_mat[to_fold] <- 1 - freq_mat[to_fold]
 
+    groups <- .group_info(.x)
     freq_mat <- format_grouped_output(
       out_mat = freq_mat,
-      group_ids = dplyr::group_keys(.x) %>% pull(1),
+      group_ids = groups$labels,
       loci_names = loci_names(.x),
-      type = type
+      type = type,
+      group_keys = groups$keys
     )
     return(freq_mat)
   } else {
@@ -343,6 +344,10 @@ loci_alt_freq_dip_pseudo <- function(.x,
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
+  # no individuals (e.g. an empty group in group_map()): no valid alleles
+  if (length(rows_to_keep) == 0) {
+    return(.alt_freq_no_indiv(.x, as_counts))
+  }
   # as long as we have more than one individual
   if (length(rows_to_keep) > 1) {
     # the cpp code reads the FBM directly (in blocks of block_size loci, using
@@ -384,6 +389,18 @@ loci_alt_freq_dip_pseudo <- function(.x,
   }
 }
 
+# The output of loci_alt_freq() when there are no individuals (e.g. an empty
+# group in group_map()): no valid alleles at any locus, so the frequencies are
+# NA (as for loci without valid alleles), and the counts are zero
+.alt_freq_no_indiv <- function(.x, as_counts) {
+  n_loci <- length(attr(.x, "loci")$big_index)
+  if (as_counts) {
+    cbind(n_alt = numeric(n_loci), n_valid = numeric(n_loci))
+  } else {
+    rep(NA_real_, n_loci)
+  }
+}
+
 loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
                                     block_size, ...) {
   warning(paste(
@@ -394,6 +411,10 @@ loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- vctrs::vec_data(.x)
+  # no individuals (e.g. an empty group in group_map()): no valid alleles
+  if (length(rows_to_keep) == 0) {
+    return(.alt_freq_no_indiv(.x, as_counts))
+  }
   # as long as we have more than one individual
   ploidy_by_indiv <- indiv_ploidy(.x)
   if (length(rows_to_keep) > 1) {
@@ -441,13 +462,20 @@ loci_alt_freq_polyploid <- function(.x, as_counts = FALSE, n_cores,
 #'
 #' @param out_mat a matrix of the output (loci in rows, groups in columns), or
 #'   a vector (for a single group or a single locus)
-#' @param group_ids a vector of group ids
+#' @param group_ids a vector of group ids (labels)
 #' @param loci_names a vector of loci names
 #' @param type a string indicating the type of output
+#' @param group_keys optionally, the group keys (a tibble with one row per
+#'   group and one column per grouping variable, as [dplyr::group_keys()]);
+#'   the "tidy" output then has the values of the grouping variables (keeping
+#'   their type, e.g. a factor keeps its levels), in one column per grouping
+#'   variable if there are several, rather than the labels in a single
+#'   `group` column
 #' @returns the data formatted as a tibble, list, or matrix
 #' @keywords internal
 #' @noRd
-format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
+format_grouped_output <- function(out_mat, group_ids, loci_names, type,
+                                  group_keys = NULL) {
   # use the group labels as names (factors and numbers would otherwise fail
   # as matrix column names, or be used as column positions in tidyselect)
   group_ids <- as.character(group_ids)
@@ -465,10 +493,26 @@ format_grouped_output <- function(out_mat, group_ids, loci_names, type) {
     # drop all attributes (dim, dimnames, any class) to get a plain vector
     # (values is not shared, so this happens in place)
     attributes(values) <- NULL
+    if (!is.null(group_keys) && ncol(group_keys) > 1) {
+      # one column per grouping variable (as dplyr::summarise())
+      return(dplyr::bind_cols(
+        tibble::tibble(loci = rep(loci_names, each = n_groups)),
+        group_keys[rep(seq_len(n_groups), times = n_loci), , drop = FALSE],
+        tibble::tibble(value = values)
+      ))
+    }
+    # a single group column, with the values of the grouping variable (keeping
+    # its type, e.g. a factor keeps its levels), or the labels if the keys are
+    # not given
+    if (is.null(group_keys)) {
+      group_col <- group_ids
+    } else {
+      group_col <- group_keys[[1]]
+    }
     return(tibble::new_tibble(
       list(
         loci = rep(loci_names, each = n_groups),
-        group = rep(group_ids, times = n_loci),
+        group = rep(group_col, times = n_loci),
         value = values
       ),
       nrow = n_loci * n_groups

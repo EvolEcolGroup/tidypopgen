@@ -177,9 +177,9 @@ in brackets, its impact:
 - [x] `2c3d7bf` · `loci_alt_freq()`, `loci_maf()` (polyploid) — All NA for a single polyploid individual. *[Wrong results]*
 - [x] `27a6335` · `loci_alt_freq()` (polyploid) — `as_counts` was ignored, and selecting a single locus failed. *[Wrong results / Error]*
 - [x] `9e90ebe` · `loci_alt_freq(as_counts = TRUE)` — For a single individual, missing genotypes gave NA alternate and non-zero valid allele counts, and the columns were unnamed. *[Wrong results]*
-- [ ] `6a61c22` · **Decision needed:** should empty groups (`group_by(.drop = FALSE)`) show up as columns, or be dropped (AM: drop them)? Kept in `speed_to_merge`, as `speed`'s kernels (and the merge of `dev`) use `dplyr::n_groups()`. Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]*
+- [x] `6a61c22` · **Decided (AM, 2026-11-03):** keep empty groups (`group_by(.drop = FALSE)`) as columns, as `dplyr::summarise()` does (the question was: should empty groups show up as columns, or be dropped?). Kept in `speed_to_merge`, as `speed`'s kernels (and the merge of `dev`) use `dplyr::n_groups()`. Same functions plus `pop_tajimas_d()` — Failed when the last group was empty (`group_by(.drop = FALSE)`). *[Error]* — Claude, for AM
 - [x] `a79b7ce` · `pop_fst()`, `pop_fis(method = "WG17")` — "Subscript out of bounds" with a single group; now an informative error. *[Error]*
-- [ ] `83aa04e` · **Decision needed:** is this behaviour what we want? It would be more tidyverse consistent, but feels odd to keep groups with no individuals in output. Kept in `speed_to_merge`, as the test of `6a61c22` (also kept) groups by a factor with `type = "matrix"`, which needs this fix. Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]*
+- [x] `83aa04e` · **Decided (AM, 2026-11-03):** keep groups with no individuals in the output, for consistency with the tidyverse (see `6a61c22`). Kept in `speed_to_merge`, as the test of `6a61c22` (also kept) groups by a factor with `type = "matrix"`, which needs this fix. Grouped `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()` — Failed when grouping by a factor, or by numbers other than 1 to k. *[Error]* — Claude, for AM
 
 ### Windowed statistics
 
@@ -207,7 +207,7 @@ in brackets, its impact:
 - [x] `011a0f4` · `gt_snmf()` — Cross-entropies (`$cv`) were not matched to their k and run when `n_runs > 1`. *[Wrong results]* E.C
 - [x] `d848508` · `gt_snmf()` — Returned results of earlier runs when adding to an existing project (`project = "continue"`/`"force"`). *[Wrong results]*
 - [ ] `93c4fa6` · TODO check that these are still valid, as we have made some changes`tidy()`, `augment()` of `q_matrix` — Ignored the `id` attribute without group information, misassigning proportions when `data` was in a different order. *[Wrong results]*
-- [ ] `d8553e1` · TODO check that these are still valid, as we have made some changes`autoplot()` of `q_matrix`/`gt_admix` — `arrange_by_indiv` never sorted by id. *[Wrong results]*
+- [ ] `d8553e1` · TODO check that these are still valid, as we have made some changes`autoplot()` of `q_matrix`/`gt_admix` — `arrange_by_indiv` never sorted by id. *[Wrong results]* Superseded by PR #209 (`374e736e`), merged into `codereview_todo` in `de645781`: see [code_review_2026-10_todo.md](code_review_2026-10_todo.md).
 - [x] `e66f7a0` · `autoplot()` of `q_matrix` with group annotation — Unused factor levels added phantom separators and labels. *[Wrong results]*
 - [x] `ffcb031` · `gt_snmf()` — The default `seed` was rejected when `n_runs > 1`. *[Error]*
 - [x] `18b6d98` · `gt_snmf()`, `gt_admixture()` — Unanchored extension patterns broke paths containing "geno" or ".bed". *[Error]*
@@ -333,8 +333,8 @@ design decision, or the issue could not be tested here.
 | 4 | `src/pairwise_fst_wc84_loop.cpp` | WC84 drops loci where one population has no data; `hierfstat::wc()` keeps them with σa = 0 (e.g. 0.01398 against 0.01374). | Small difference; decide which convention to follow. |
 | 5 | `R/rbind_gen_tibble.R:110` | `as_is` is not implemented: loci are always harmonised, although a message (printed with `as_is = TRUE`) says they will not be. | Needs a definition of what `as_is` should do when loci differ; the message should be fixed at the same time. |
 | 6 | `R/filter_high_relatedness.R:105` | `mn2 <- mean(matrix2[-j, ])` (copied from `caret::findCorrelation()`) is not "the average relatedness of individual j" as the comment says. | Both are greedy heuristics with no pair left above the threshold; neither is clearly better in simulations. |
-| 7 | `R/gt_extract_f2.R:231` | Uses `max(group_indices())` for the number of groups, which fails with an empty last group (as fixed elsewhere in `6a61c22`). | `admixtools` could not be installed here to test it; the fix is `dplyr::n_groups(.x)`. |
-| 8 | `R/pop_fst.R:42`, `R/pop_fis.R:156` | Groups are counted with `factor(group_indices())`, which does not match `group_keys()` when a group is empty. | Edge case (`.drop = FALSE`). |
+| 7 | `R/gt_extract_f2.R:231` | Uses `max(group_indices())` for the number of groups, which fails with an empty last group (as fixed elsewhere in `6a61c22`). | Fixed on `codereview_todo`: groups are counted with `n_groups()` (`ee8bd631`, #217), and empty groups are always dropped, as the data are passed to admixtools (`90bc45fe`). |
+| 8 | `R/pop_fst.R:42`, `R/pop_fis.R:156` | Groups are counted with `factor(group_indices())`, which does not match `group_keys()` when a group is empty. | Fixed on `codereview_todo` (`ee8bd631`, #217): empty groups are NaN. |
 | 9 | `R/cbind_gen_tibble.R` | `cbind()` on a grouped gen_tibble returns an invalid grouped object. | Not in the original findings; same pattern as `c18bc32`. |
 | 10 | `R/gt_as_hierfstat.R` | Fails with an unclear "differing number of rows" error without a population column. | Not in the original findings; add a check. |
 | 11 | `R/autoplot_gt_dapc.R:122` (also `autoplot.gt_pca(type = "loadings", k = c(1, 2))` via bigstatsr) | `geom_hex()` needs `hexbin`, which is not declared in `DESCRIPTION`. | Add `hexbin` to Suggests with `rlang::check_installed()`, or use points. |

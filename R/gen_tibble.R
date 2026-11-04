@@ -16,6 +16,20 @@
 #' *VCF*, they are not transformed into homozygous calls. Instead, reference
 #' alleles will be coded as 0 and alternative alleles will be coded as 1.
 #'
+#' - *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual information
+#' (from the .fam file, or the first six columns of the .ped file) is stored
+#' in the same columns for all formats: the individual ID as `id`; the family
+#' ID as `population` (unless it is the same as the individual ID for all
+#' individuals); the paternal and maternal IDs as `paternal_ID` and
+#' `maternal_ID`; sex as `sex`, a factor with levels "female" (PLINK code 2)
+#' and "male" (code 1); and the phenotype as `phenotype`, a factor with levels
+#' "control" (code 1) and "case" (code 2), or a number for a quantitative
+#' phenotype (with values other than 1, 2, 0 and -9). Missing values (0 for
+#' parents and sex, 0 or -9 for a case/control phenotype, and -9 for a
+#' quantitative one) are NA, and `paternal_ID`, `maternal_ID`, `sex` and
+#' `phenotype` are only created if they have some non-missing values.
+#' [gt_as_plink()] writes these columns back to PLINK files.
+#'
 #' - *packedancestry* files: When loading *packedancestry* files,
 #' missing alleles will be converted from 'X' to NA
 #'
@@ -62,7 +76,10 @@
 #'   same as PLINK 1.9).
 #' @param backingfile the path, including the file name without extension, for
 #'   backing files used to store the data (they will be given a .bk and .RDS
-#'   automatically). This is not needed if `x` is already an .RDS file. If `x`
+#'   automatically). If `x` is a bigSNP .RDS file, its backing file is copied to
+#'   `backingfile`, so that the original files are not modified (if
+#'   `backingfile` is left NULL, the copy is saved next to the original, with a
+#'   version suffix such as `_v2`). If `x`
 #'   is a .BED or a *VCF* file and `backingfile` is left NULL, the backing file
 #'   will be saved in the same directory as the bed or vcf file, using the same
 #'   file name but with a different file type (.bk rather than .bed or .vcf). If
@@ -256,10 +273,11 @@ gen_tibble.character <-
         select_loci(all_of(doubles)) %>%
         loci_missingness()
       if (any(check_missing < 1, na.rm = TRUE)) {
-        # clean up files if we are stopping
+        # clean up files if we are stopping (dropping the gen_tibble first,
+        # so that its backing file can be unmapped, see remove_fbm_files())
         files <- gt_get_file_names(x_gt)
-        if (file.exists(files[1])) file.remove(files[1])
-        if (file.exists(files[2])) file.remove(files[2])
+        rm(x_gt)
+        remove_fbm_files(files)
         stop(paste(
           "Some loci are missing both reference and alternate alleles.",
           "Genotypes are not missing at these loci.",
@@ -429,9 +447,12 @@ gen_tibble.matrix <- function(
       select_loci(all_of(doubles)) %>%
       loci_missingness()
     if (any(check_missing < 1, na.rm = TRUE)) {
+      # clean up files if we are stopping (dropping every object holding the
+      # FBM first, so that its backing file can be unmapped, see
+      # remove_fbm_files())
       files <- gt_get_file_names(new_gen_tbl)
-      if (file.exists(files[1])) file.remove(files[1])
-      if (file.exists(files[2])) file.remove(files[2])
+      rm(new_gen_tbl, indiv_meta, fbm_obj)
+      remove_fbm_files(files)
       stop(paste(
         "Some loci are missing both reference and alternate alleles.",
         "Genotypes are not missing at these loci.",
@@ -554,6 +575,8 @@ check_allele_alphabet <- function(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", ".")
 ) {
+  # 0 is always considered as a missing value (see harmonise_missing_values)
+  missing_alleles <- union(missing_alleles, "0")
   if (
     any(
       !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),
@@ -600,6 +623,18 @@ sub_ext_ignore_case <- function(file, ext, new_ext) {
     new_file <- upper_file
   }
   new_file
+}
+
+# remove the files (.rds and .bk) of a gen_tibble that is being discarded.
+# An FBM keeps its backing file memory-mapped until it is garbage collected,
+# and Windows cannot delete a mapped file, so the caller must first drop
+# every object referring to the FBM; we then garbage collect (which unmaps
+# the backing file) before removing the files
+remove_fbm_files <- function(files) {
+  gc()
+  files <- files[file.exists(files)]
+  file.remove(files)
+  invisible(NULL)
 }
 
 # check for existing .bk files

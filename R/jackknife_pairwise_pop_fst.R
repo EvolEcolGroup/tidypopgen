@@ -14,7 +14,9 @@
 #'
 #' @references Busing FMTA, Meijer E, Van Der Leeden R (1999) Delete-m
 #'   jackknife for unequal m. Statistics and Computing 9:3-8.
-#' @param .x a grouped `gen_tibble` object
+#' @param .x a grouped `gen_tibble` object.
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param type type of object to return. One of "matrix" or "tidy". Default is
 #'   "matrix". "matrix" returns a dataframe where each row is a quantity
 #'   (estimate, jack_estimate, se, z and n_blocks), followed by columns for

@@ -18,7 +18,14 @@ windows_pop_tajimas_d(
 \item{.x}{a (potentially grouped) \code{gen_tibble} object}
 
 \item{type}{type of object to return, if using grouped method. One of
-"matrix", "tidy", or "list". Default is "matrix".}
+"matrix", "tidy", or "list". Default is "matrix".
+Data can be grouped by more than one variable: groups are then labelled
+by the values of the grouping variables pasted with "." (e.g. \code{pop1.F}),
+and the "tidy" output has one column per grouping variable rather than a
+single \code{group} column. The \code{group} column, or the columns of
+the grouping variables, keep the type of the grouping variables (e.g. a
+factor keeps its levels), so that groups stay in their order when the output
+is sorted or plotted.}
 
 \item{window_size}{The size of the window to use for the estimates.}
 
@@ -48,7 +55,9 @@ a data frame as above with the following columns:
 \item \code{chromosome}: the chromosome for the window
 \item \code{start}: the starting locus of the window
 \item \code{end}: the ending locus of the window
-\item \code{n_loci}: the number of loci in the window
+\item \code{n_loci}: the number of loci in the window (including loci with no
+genotyped individuals in some groups; the number of loci with data in
+each group is given by the "tidy" and "list" outputs)
 \item \code{group}: the Tajima's D for the group for the given window  (there will be
 as many of these columns as groups in the gen_tibble, and they will be
 named by the grouping levels)

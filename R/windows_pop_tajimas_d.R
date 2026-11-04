@@ -18,6 +18,13 @@
 #' @param .x a (potentially grouped) `gen_tibble` object
 #' @param type type of object to return, if using grouped method. One of
 #'   "matrix", "tidy", or "list". Default is "matrix".
+#'   Data can be grouped by more than one variable: groups are then labelled
+#'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
+#'   and the "tidy" output has one column per grouping variable rather than a
+#'   single `group` column. The `group` column, or the columns of the
+#'   grouping variables, keep the type of the grouping variables (e.g. a
+#'   factor keeps its levels), so that groups stay in their order when the
+#'   output is sorted or plotted.
 #' @param window_size The size of the window to use for the estimates.
 #' @param step_size The step size to use for the windows.
 #' @param size_unit Either "snp" or "bp". If "snp", the window size and step
@@ -39,7 +46,9 @@
 #' - `chromosome`: the chromosome for the window
 #' - `start`: the starting locus of the window
 #' - `end`: the ending locus of the window
-#' - `n_loci`: the number of loci in the window
+#' - `n_loci`: the number of loci in the window (including loci with no
+#'    genotyped individuals in some groups; the number of loci with data in
+#'    each group is given by the "tidy" and "list" outputs)
 #' - `group`: the Tajima's D for the group for the given window  (there will be
 #'    as many of these columns as groups in the gen_tibble, and they will be
 #'    named by the grouping levels)
@@ -76,9 +85,6 @@ windows_pop_tajimas_d <- function(.x,
                                   complete = FALSE) {
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
-  if (length(dplyr::group_vars(.x)) > 1) {
-    stop("windows_pop_tajimas_d only works with one grouping variable")
-  }
   type <- match.arg(type)
 
   # define the windows once (as in windows_stats_generic())
@@ -139,15 +145,29 @@ windows_pop_tajimas_d <- function(.x,
     return(res)
   }
 
-  names(res) <- dplyr::group_keys(.x) %>% pull(1)
+  groups <- .group_info(.x)
+  names(res) <- groups$labels
 
   if (type == "matrix") {
+    # one row per window: as the number of loci with data can differ between
+    # groups (e.g. with an empty group), which would split a window over
+    # several rows, n_loci is the number of loci in the window (the number
+    # with data in each group is in the "tidy" and "list" outputs)
+    n_loci <- as.numeric(win$hi - win$lo)
+    n_loci[empty] <- NA
+    if (complete) {
+      n_loci[!win$complete] <- NA
+    }
+    res <- lapply(res, function(grp_res) {
+      grp_res$n_loci <- n_loci
+      grp_res
+    })
     res <- bind_rows(res, .id = "group")
     res <-
       res %>% tidyr::pivot_wider(names_from = "group", values_from = "stat")
     return(res)
   } else if (type == "tidy") {
-    res <- bind_rows(res, .id = "group")
+    res <- .bind_group_rows(res, groups)
     return(res)
   } else if (type == "list") {
     return(res)

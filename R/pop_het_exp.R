@@ -21,6 +21,8 @@
 #' @param .x a [`gen_tibble`] (usually grouped, as obtained by using
 #'   [dplyr::group_by()], otherwise the full tibble will be considered as
 #'   belonging to a single population).
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param by_locus boolean, determining whether Hs should be returned by
 #'   locus(TRUE), or as a single genome wide value (FALSE, the default).
 #' @param include_global boolean determining whether, besides the population

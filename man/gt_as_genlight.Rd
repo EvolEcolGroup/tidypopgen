@@ -15,6 +15,13 @@ a \code{genlight} object
 \description{
 This function converts a \code{gen_tibble} to a \code{genlight} object from \code{adegenet}
 }
+\details{
+The chromosome and position of each locus are stored in the \code{genlight}
+object, and the alleles are stored as "ref/alt" in \code{loc.all} (\code{genlight}
+counts the second allele, i.e. the alternate allele). As \code{genlight} only
+supports single letter alleles, \code{loc.all} is not set (with a warning) if any
+locus has a missing or multi-character allele.
+}
 \examples{
 \dontshow{if (rlang::is_installed("adegenet")) withAutoprint(\{ # examplesIf}
 example_gt <- load_example_gt("gen_tbl")

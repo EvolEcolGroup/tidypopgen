@@ -36,7 +36,14 @@
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
 #' @param type type of object to return, if using grouped method. One of "tidy",
-#' "list", or "matrix". Default is "tidy".
+#'   "list", or "matrix". Default is "tidy".
+#'   Data can be grouped by more than one variable: groups are then labelled
+#'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
+#'   and the "tidy" output has one column per grouping variable rather than a
+#'   single `group` column. The `group` column, or the columns of the
+#'   grouping variables, keep the type of the grouping variables (e.g. a
+#'   factor keeps its levels), so that groups stay in their order when the
+#'   output is sorted or plotted.
 #' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a vector of frequencies, one per locus
 #' @rdname loci_pi
@@ -174,11 +181,6 @@ loci_pi.grouped_df <- function(
     return(rep(NA_real_, nrow(show_loci(.x))))
   }
 
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("loci_pi only works with one grouping variable")
-  }
-
   geno_fbm <- .gt_get_fbm(.x)
   # rows (individuals) that we want to use
   rows_to_keep <- .gt_fbm_rows(.x)
@@ -213,11 +215,13 @@ loci_pi.grouped_df <- function(
     )$pi
   }
 
+  groups <- .group_info(.x)
   pi_mat <- format_grouped_output(
     out_mat = pi_mat,
-    group_ids = dplyr::group_keys(.x) %>% pull(1),
+    group_ids = groups$labels,
     loci_names = loci_names(.x),
-    type = type
+    type = type,
+    group_keys = groups$keys
   )
   return(pi_mat)
 }

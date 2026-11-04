@@ -52,6 +52,14 @@ snp_ibs <- function(
   type <- match.arg(type)
 
   n <- length(ind.row)
+  # no individuals (e.g. an empty group in group_map()): an empty matrix, as
+  # FBMs can not be empty
+  if (n == 0) {
+    if (type == "raw_counts") {
+      stop("type = 'raw_counts' needs at least one individual")
+    }
+    return(matrix(numeric(0), 0, 0))
+  }
   # FBM matrix to count the IBS counts
   IBS <- bigstatsr::FBM(n, n, init = 0) # nolint
   # FBM matrix to store valid number of comparisons (i.e NOT NA)

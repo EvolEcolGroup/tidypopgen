@@ -45,6 +45,11 @@ snp_king <- function(
   }
 
   n <- length(ind.row)
+  # no individuals (e.g. an empty group in group_map()): an empty matrix, as
+  # FBMs can not be empty
+  if (n == 0) {
+    return(matrix(numeric(0), 0, 0))
+  }
   # FBM matrix for the KING numerator
   k_numerator <- bigstatsr::FBM(n, n, init = 0)
   # FBM matrix of number of heterozygous loci for individual i

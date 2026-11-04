@@ -19,28 +19,35 @@
 \item{object}{A Q matrix object (as returned by \code{\link[=q_matrix]{q_matrix()}}).}
 
 \item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the
-individuals in the same order as the data used to generate the Q matrix}
+individuals in the same order as the data used to generate the Q matrix
+(unless the Q matrix has the ids of the individuals as an attribute, as
+from \code{\link[=get_q_matrix]{get_q_matrix()}}). If the Q matrix has no group information and
+\code{data} is grouped, the groups of \code{data} are used.}
 
 \item{annotate_group}{Boolean determining whether to annotate the plot with
 the group information}
 
 \item{arrange_by_group}{Boolean determining whether to arrange the
-individuals by group. If the grouping variable in the \code{gen_tibble} or the
-metadata of the \code{gt_admixt} object is a factor, the data will be ordered by
-the levels of the factor; else it will be ordered alphabetically.}
+individuals by group. Groups are ordered as by the grouped functions
+(see \code{\link[dplyr:group_data]{dplyr::group_keys()}}): if the grouping variable in the \code{gen_tibble}
+or the metadata of the \code{gt_admix} object is a factor, by the levels of the
+factor; numbers in numeric order; otherwise alphabetically. With several
+grouping variables, groups are ordered by the first variable, then by the
+second, and so on.}
 
 \item{arrange_by_indiv}{Boolean determining whether to arrange the
-individuals by their individual id (if arrange_by_group is TRUE, they will
-be arranged by group first and then by individual id, i.e. within each
-group). If \code{id} in the \code{get_tibble} or the metadata of the \code{gt_admix}
-object is a factor, it will be ordered by the levels of the factor; else it
-will be ordered alphabetically.}
+individuals by their individual id within each group (groups are arranged
+first if \code{arrange_by_group} is TRUE, otherwise they are kept in their
+current order). This only applies if \code{annotate_group} is TRUE and group
+information is available. If \code{id} in the \code{get_tibble} or the metadata of
+the \code{gt_admix} object is a factor, it will be ordered by the levels of the
+factor; else it will be ordered alphabetically.}
 
 \item{reorder_within_groups}{Boolean determining whether to reorder the
 individuals within each group based on their ancestry proportion (note that
 this is not advised if you are making multiple plots, as you would get a
-different order for each plot!). If TRUE, \code{annotate_group} must also be
-TRUE.}
+different order for each plot!). Groups keep the order set by
+\code{arrange_by_group}. If TRUE, \code{annotate_group} must also be TRUE.}
 
 \item{...}{not currently used.}
 }

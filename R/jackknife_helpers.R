@@ -168,8 +168,8 @@
   }
   .check_fst_ploidy(.x, method)
   # get the populations, and all pairs of populations
-  .group_levels <- .x %>% group_keys()
-  pairwise_combn <- utils::combn(nrow(.group_levels), 2)
+  groups <- .group_info(.x)
+  pairwise_combn <- utils::combn(groups$n, 2)
   n_blocks <- max(block_id)
   # sum the numerators and denominators of each pair in each block, with
   # memory n_blocks x n_pairs (rather than n_loci x n_pairs)
@@ -177,8 +177,8 @@
     .gt_get_fbm(.x),
     rowInd = .gt_fbm_rows(.x),
     colInd = .gt_fbm_cols(.x),
-    groupIds = dplyr::group_indices(.x) - 1,
-    ngroups = nrow(.group_levels),
+    groupIds = groups$ids,
+    ngroups = groups$n,
     ploidy = indiv_ploidy(.x),
     pairwise_combn = pairwise_combn,
     method = method,
@@ -190,11 +190,7 @@
     ncores = bigstatsr::nb_cores()
   )
   # name the statistics after the pairs of populations
-  group_combinations <- cbind(
-    .group_levels[pairwise_combn[1, ], ],
-    .group_levels[pairwise_combn[2, ], ]
-  )
-  stat_names <- paste0("fst_", col_names_combinations(group_combinations))
+  stat_names <- paste0("fst_", .pair_labels(groups$labels, pairwise_combn))
   # Fst on all loci, and leaving each block out in turn
   num_tot <- colSums(block_sums$sum_num)
   den_tot <- colSums(block_sums$sum_den)

@@ -898,3 +898,19 @@ test_that("gt_admix_reorder_q keeps a K = 1 q matrix as a matrix", {
   expect_equal(nrow(tidy_q), n_ind)
   expect_true(all(tidy_q$percentage == 1))
 })
+
+test_that("autoplot cv works for gt_admix without algorithm", {
+  admix_obj <- structure(
+    list(
+      k = 1:3,
+      Q = lapply(1:3, function(k) q_matrix(matrix(1 / k, nrow = 5, ncol = k))),
+      cv = c(0.5, 0.4, 0.45)
+    ),
+    class = c("gt_admix", "list")
+  )
+  plt <- autoplot(admix_obj, type = "cv")
+  expect_true(plt$labels$y == "Cross validation error")
+  admix_obj$algorithm <- "SNMF"
+  plt <- autoplot(admix_obj, type = "cv")
+  expect_true(plt$labels$y == "Cross-Entropy")
+})

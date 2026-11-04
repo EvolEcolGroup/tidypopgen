@@ -1,7 +1,7 @@
 ---
 title: "Working with big data"
 output: html_document
-date: "2026-10-21"
+date: "2026-11-04"
 ---
 
 
@@ -16,18 +16,18 @@ The latest version of tidypopgen has implemented a new option to minimise the me
 
 ## Downloading the SGDP data
 
-We will demonstrate the new capacity of tidypopgen using a subset of the [Simons Genome Diversity Project (SGDP)](https://reichdata.hms.harvard.edu/pub/datasets/sgdp/), containing 10 individuals each from Africa, Oceania, America and West Eurasia. The data are too large to download as part of this article, but the scripts in the [`data-raw` folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/data-raw) of the tidypopgen repository let you create the dataset yourself if you wish to follow along.
+We will demonstrate the new capacity of tidypopgen using a subset of the [Simons Genome Diversity Project (SGDP)](https://reichdata.hms.harvard.edu/pub/datasets/sgdp/), containing 10 individuals each from Africa, Oceania, America, West Eurasia and East Asia. The data are too large to download as part of this article, but the scripts in the [`data-raw/sgdp` folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/data-raw/sgdp) of the tidypopgen repository let you create the dataset yourself if you wish to follow along.
 
-The 40 individuals are listed in the files `afr_subset.txt`, `oceania_subset.txt`, `america_subset.txt` and `west_eur_subset.txt`. These were created by `s01_create_sgdp_subset_metadata.R`, which takes the first 10 fully public individuals from each region in the SGDP metadata.
+The 50 individuals are listed in the files `afr_subset.txt`, `oceania_subset.txt`, `america_subset.txt`, `west_eur_subset.txt` and `east_asia_subset.txt`. These were created by `s01_create_sgdp_subset_metadata.R`, which takes the first 10 fully public individuals from each region in the SGDP metadata.
 
-SGDP provides a VCF for each individual, but distributes them as a single 57 GB archive containing all 279 public individuals. The shell script `s02_create_sgdp_subset.sh` downloads only the parts of the archive that hold our 40 individuals (about 8.7 GB), checks them against the checksums provided by SGDP, and merges them into a single VCF, `all_subset.vcf.gz`, with [bcftools](https://samtools.github.io/bcftools/). You will need `bcftools` and `curl` installed and available on your `PATH`. From the root of a copy of the tidypopgen repository, run:
+SGDP provides a VCF for each individual, but distributes them as a single 57 GB archive containing all 279 public individuals. The shell script `s02_create_sgdp_subset.sh` downloads only the parts of the archive that hold our 50 individuals (about 10.8 GB), checks them against the checksums provided by SGDP, and merges them into a single VCF, `all_subset.vcf.gz`, with [bcftools](https://samtools.github.io/bcftools/). You will need `bcftools` and `curl` installed and available on your `PATH`. From the root of a copy of the tidypopgen repository, run:
 
 
 ``` bash
-bash data-raw/s02_create_sgdp_subset.sh data/sgdp
+bash data-raw/sgdp/s02_create_sgdp_subset.sh vignettes/articles/data/sgdp
 ```
 
-This writes `all_subset.vcf.gz` and its index to `data/sgdp/`, which is where we read it from below. The individual VCFs are kept in `data/sgdp/sgdp_vcfs/`, so that an interrupted download can be resumed by running the script again; once the merged VCF has been created, they can be deleted.
+This writes `all_subset.vcf.gz` and its index to `vignettes/articles/data/sgdp/`, which is where we read it from below (the paths in this article are relative to `vignettes/articles/`). The individual VCFs are kept in `vignettes/articles/data/sgdp/sgdp_vcfs/`, so that an interrupted download can be resumed by running the script again; once the merged VCF has been created, they can be deleted.
 
 Note that each SGDP VCF only contains the sites at which that individual carries a non-reference allele. When merging, a site that is absent from an individual's VCF is therefore set to homozygous for the reference allele (with the `--missing-to-ref` option of `bcftools merge`). Without this option, every homozygous reference genotype would be recorded as missing. The cost is that a site that was not sequenced in an individual is also set to homozygous reference, which is a reasonable approximation for these high-coverage genomes.
 
@@ -72,7 +72,7 @@ When we now call our loci tibble with `show_loci()`, we can see that the loci na
 
 ``` r
 show_loci(sgdp)
-#> # A tibble: 19,537,993 × 7
+#> # A tibble: 20,728,532 × 7
 #>    big_index  name chromosome position genetic_dist allele_ref allele_alt
 #>        <int> <int> <fct>         <int>        <dbl> <chr>      <chr>     
 #>  1         1     1 1             10109            0 A          T         
@@ -80,12 +80,12 @@ show_loci(sgdp)
 #>  3         3     3 1             10180            0 T          C         
 #>  4         4     4 1             10231            0 C          A         
 #>  5         5     5 1             10234            0 C          G         
-#>  6         6     6 1             10248            0 A          T         
-#>  7         7     7 1             10250            0 A          C         
-#>  8         8     8 1             10255            0 A          T         
-#>  9         9     9 1             10257            0 A          C         
-#> 10        10    10 1             10285            0 T          C         
-#> # ℹ 19,537,983 more rows
+#>  6         6     6 1             10241            0 T          A         
+#>  7         7     7 1             10248            0 A          T         
+#>  8         8     8 1             10250            0 A          C         
+#>  9         9     9 1             10255            0 A          T         
+#> 10        10    10 1             10257            0 A          C         
+#> # ℹ 20,728,522 more rows
 ```
 
 The rsID's of each SNP have been removed, but all other metadata (chromosome, position, genetic distance, and alleles) are retained. We can check the memory footprint of the gen_tibble using:
@@ -93,7 +93,7 @@ The rsID's of each SNP have been removed, but all other metadata (chromosome, po
 
 ``` r
 format(object.size(sgdp), units = "auto", digits = 2)
-#> [1] "745.34 Mb"
+#> [1] "790.76 Mb"
 ```
 
 ## Setting up cores
@@ -120,7 +120,7 @@ All the normal functionality of tidypopgen is preserved, as our `qc_report` func
 sgdp_indiv_rep <- qc_report_indiv(sgdp)
 ```
 
-indiv_report: 439ms
+indiv_report: 537ms
 
 
 ``` r
@@ -129,17 +129,17 @@ sgdp_loci_rep <- qc_report_loci(sgdp)
 sgdp <- sgdp %>% ungroup()
 ```
 
-loci_report: 394ms
+loci_report: 406ms
 
 However, it is important to be mindful that analyses on very large datasets will produce large outputs:
 
 
 ``` r
 format(object.size(sgdp_loci_rep), units = "auto", digits = 2)
-#> [1] "521.72 Mb"
+#> [1] "553.51 Mb"
 ```
 
-In this case, a loci report on 19537993 loci for 40 individuals occupies approximately 521.72 Mb of memory.
+In this case, a loci report on 20728532 loci for 50 individuals occupies approximately 553.51 Mb of memory.
 
 Let's plot the overview of the loci report:
 
@@ -181,10 +181,10 @@ We filter for minor allele frequency, choosing to select loci with MAF greater t
 sgdp <- sgdp %>%
   select_loci_if(loci_maf(genotypes) > 0.05)
 cat("Loci remaining:", count_loci(sgdp))
-#> Loci remaining: 7579668
+#> Loci remaining: 7456643
 ```
 
-maf_filter: 430ms
+maf_filter: 463ms
 
 With other datasets, we would also remove loci with too many missing genotypes (e.g. with `select_loci_if(loci_missingness(genotypes) < 0.1)`), and then impute the remaining missing genotypes with `gt_impute_simple()`, as LD clumping and PCA do not accept missing values. Our dataset has no missing genotypes, so we can skip both steps.
 
@@ -198,7 +198,7 @@ sgdp <- gt_update_backingfile(sgdp, quiet = TRUE,
                               backingfile = tempfile())
 ```
 
-update_backingfile: 5.9s
+update_backingfile: 6.1s
 
 This will help us with the next step (LD clumping).
 
@@ -216,10 +216,10 @@ sgdp <- sgdp %>%
     thr_r2 = 0.2
   ))
 cat("Loci remaining:", count_loci(sgdp))
-#> Loci remaining: 412999
+#> Loci remaining: 507481
 ```
 
-ld_clump: 7.8s
+ld_clump: 7.9s
 
 # Analysis
 
@@ -232,7 +232,7 @@ Now that we have a clean dataset, we can proceed with our analysis by plotting a
 sgdp_pca <- sgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 544ms
+pca: 612ms
 
 
 ``` r
@@ -243,7 +243,7 @@ autoplot(sgdp_pca, type = "scores") +
 
 ![plot of chunk PCA](./figure/big_data/PCA-1.png)
 
-Our PCA separates the four regions. PC1 (5.98% of the variance) runs from the African individuals on the left, through West Eurasia, to the American individuals on the right, and PC2 (4.48%) separates the Oceanian individuals at the top from the American individuals at the bottom. The individuals from America and West Eurasia form tight clusters, whereas the African individuals are spread out along PC1: the Mbuti, Ju/'hoan North, Yoruba, Mandenka and Dinka individuals are on the far left, followed by the Masai and Somali individuals from East Africa, while the two Mozabite individuals from Algeria lie close to the West Eurasian cluster. This is consistent with North and East African populations carrying some West Eurasian-related ancestry. The Oceanian individuals form two groups: the Papuan, Bougainville and Australian individuals at the top, and the Dusun (from Borneo), Hawaiian and Maori individuals closer to the centre of the plot.
+Our PCA separates the five regions. PC1 (5.23% of the variance) runs from the African individuals on the left, through West Eurasia, Oceania and East Asia, to the American individuals on the right, and PC2 (3.86%) separates the Oceanian and East Asian individuals at the top from the American individuals at the bottom. The individuals from America, West Eurasia and East Asia form fairly tight clusters, whereas the African individuals are spread out along PC1: the Mbuti, Ju/'hoan North, Yoruba, Mandenka and Dinka individuals are on the far left, followed by the Masai and Somali individuals from East Africa, while the two Mozabite individuals from Algeria lie close to the West Eurasian cluster. This is consistent with North and East African populations carrying some West Eurasian-related ancestry. The Oceanian individuals are also spread out: the Papuan, Bougainville and Australian individuals are at the top, the Maori individual is closer to the centre of the plot, and the Hawaiian individual and the two Dusun individuals (from Borneo) lie within the East Asian cluster. This reflects the Austronesian ancestry of these populations, which is largely related to East Asian populations.
 
 ## DAPC
 
@@ -256,7 +256,7 @@ sgdp_dapc <- gt_dapc(sgdp_pca,
 )
 ```
 
-dapc: 22ms
+dapc: 29ms
 
 
 ``` r
@@ -265,7 +265,7 @@ autoplot(sgdp_dapc, type = "components")
 
 ![plot of chunk DAPC_components_plot](./figure/big_data/DAPC_components_plot-1.png)
 
-Our DAPC autoplot shows that most individuals are assigned to their own region's group with a probability close to one, showing that there is genetic differentiation between the continental regions. The exceptions are consistent with the PCA above: the two Mozabite individuals are assigned to the West Eurasian group (with probabilities of 0.94 and 0.99), the Somali individual has a small probability (about 0.01) of West Eurasian membership, and the Maori individual has a probability of 0.16 of West Eurasian membership. These individuals may have admixed ancestry.
+Our DAPC autoplot shows that most individuals are assigned to their own region's group with a probability close to one, showing that there is genetic differentiation between the continental regions. The exceptions are consistent with the PCA above: the two Mozabite individuals are assigned to the West Eurasian group (with probabilities of 0.93 and 0.99), the two Dusun individuals and the Hawaiian individual are assigned to the East Asian group (with probabilities of 0.96, 0.98 and 0.91), and the Maori individual has a probability of 0.10 of East Asian membership. These individuals may have admixed ancestry, or (as for the Dusun) be closer to the East Asian populations than to the other Oceanian populations in our sample.
 
 # Pairwise F~ST~
 
@@ -296,9 +296,9 @@ autoplot(pairwise_fst,
   )
 ```
 
-![plot of chunk pairwise_fst](./figure/big_data/pairwise_fst-1.png)pairwise_fst: 166ms
+![plot of chunk pairwise_fst](./figure/big_data/pairwise_fst-1.png)pairwise_fst: 188ms
 
-The pairwise F~ST~ values are all small (between 0.03 and 0.07), as is typical of human populations. America is the most differentiated region, and Africa and America are the most differentiated pair (F~ST~ = 0.069). Africa and West Eurasia are the least differentiated pair (0.033), closely followed by Oceania and West Eurasia (0.034); the low value between Africa and West Eurasia partly reflects the West Eurasian-related ancestry of the Mozabite, Somali and Masai individuals in our African sample. Note that with only 10 individuals per region, these estimates are imprecise.
+The pairwise F~ST~ values are all small (between 0.02 and 0.08), as is typical of human populations. America is the most differentiated region, and Africa and America are the most differentiated pair (F~ST~ = 0.079); America is closest to East Asia (0.043). East Asia and Oceania are the least differentiated pair (0.017), reflecting the East Asian-related ancestry of the Dusun, Hawaiian and Maori individuals in our Oceanian sample. Africa is closest to West Eurasia (0.038), which partly reflects the West Eurasian-related ancestry of the Mozabite, Somali and Masai individuals in our African sample. Note that with only 10 individuals per region, these estimates are imprecise.
 
 # Performance summary
 
@@ -307,15 +307,15 @@ Here is a summary of the time taken (in seconds) to perform each step using a la
 
 ```
 #>                 step  time
-#> 1       indiv_report  0.44
-#> 2        loci_report  0.39
-#> 3         maf_filter  0.43
-#> 4 update_backingfile  5.91
-#> 5           ld_clump  7.82
-#> 6                pca  0.54
-#> 7               dapc  0.02
-#> 8       pairwise_fst  0.17
-#> 9              Total 15.72
+#> 1       indiv_report  0.54
+#> 2        loci_report  0.41
+#> 3         maf_filter  0.46
+#> 4 update_backingfile  6.06
+#> 5           ld_clump  7.86
+#> 6                pca  0.61
+#> 7               dapc  0.03
+#> 8       pairwise_fst  0.19
+#> 9              Total 16.16
 ```
 
 # Key takeaways

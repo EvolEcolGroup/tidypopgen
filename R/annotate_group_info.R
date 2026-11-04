@@ -47,7 +47,10 @@ annotate_group_info <- function(q_tbl, plt) {
       inherit.aes = FALSE
     ),
     ggplot2::scale_x_discrete(
-      breaks = unique(q_tbl$id)[get_mid_points(c(0, group_x))],
+      # the individual in the middle of each group (rounding up, as rounding
+      # down would put the label of a group of one individual on the last
+      # individual of the previous group, or on none for the first group)
+      breaks = unique(q_tbl$id)[ceiling(get_mid_points(c(0, group_x)))],
       labels = names(group_x)
     ),
     ggplot2::theme(

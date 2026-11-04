@@ -332,18 +332,27 @@ test_that("qc_report_indiv for pseudohaploid data", {
   )
 })
 
-test_that("qc_report_indiv only works with one grouping variable", {
+test_that("qc_report_indiv works with several grouping variables", {
   families$population <- rep(c("pop1", "pop2"), 6)
   families$sex <- rep(c("F", "F", "M"), 4)
+  families$pop_sex <- paste(families$population, families$sex, sep = ".")
+  families_combined <- families %>% group_by(pop_sex)
   families <- families %>% group_by(population, sex)
-  expect_error(
-    qc_report_indiv(families),
-    "only works with one grouping variable"
+  # the group is the values of the grouping variables pasted with ".", as a
+  # factor with the levels in the order of the groups
+  group_labels <- with(
+    dplyr::group_keys(families),
+    paste(population, sex, sep = ".")
   )
-  expect_error(
-    qc_report_indiv(families, kings_threshold = 0.2),
-    "only works with one grouping variable"
-  )
+  report <- qc_report_indiv(families)
+  expect_equal(report$group, factor(families$pop_sex, levels = group_labels))
+  report_combined <- qc_report_indiv(families_combined)
+  report_combined$group <- factor(report_combined$group, levels = group_labels)
+  expect_equal(report, report_combined)
+  report <- qc_report_indiv(families, kings_threshold = 0.2)
+  report_combined <- qc_report_indiv(families_combined, kings_threshold = 0.2)
+  report_combined$group <- factor(report_combined$group, levels = group_labels)
+  expect_equal(report, report_combined)
 })
 
 test_that("relatedness autoplot fails without kings_threshold", {

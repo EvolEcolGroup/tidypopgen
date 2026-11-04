@@ -18,7 +18,10 @@ names1, names2, value (half-matrix representation).}
 
 \item{order}{Optional ordering specification. Can be:
 \itemize{
-\item \code{NULL} (default): preserve the existing order.
+\item \code{NULL} (default): preserve the existing order (for a tidy
+tibble, the order in which the names first appear in the pairs,
+i.e. the order of the individuals or groups for the outputs of the
+\verb{pairwise_*} functions).
 \item A character vector containing all row/column names in the desired
 order.
 \item A function taking the matrix as input and returning either:

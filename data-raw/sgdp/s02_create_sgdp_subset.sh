@@ -6,14 +6,14 @@ set -euo pipefail
 # Create <out_dir>/all_subset.vcf.gz (and its .tbi index): a VCF of the SGDP
 # individuals listed in the ${pop}_subset.txt files that sit next to this
 # script (written by s01_create_sgdp_subset_metadata.R). <out_dir> defaults to
-# the folder containing this script (data-raw/).
+# the folder containing this script (data-raw/sgdp/).
 #
 # SGDP distributes its per-individual VCFs as a single 57 GB tar archive. We
 # do not download the archive: SGDP also publishes its listing (`tar -tv`
 # output, in archive order), and since every file in a tar is a 512-byte
 # header followed by the file contents padded to a multiple of 512 bytes, the
 # listing tells us where each file starts. We then download just the files we
-# need with HTTP range requests (about 8.7 GB for 40 individuals), into
+# need with HTTP range requests (about 10.8 GB for 50 individuals), into
 # <out_dir>/sgdp_vcfs/. An interrupted download resumes when the script is run
 # again.
 #
@@ -32,7 +32,7 @@ OUT_DIR=$(cd "$OUT_DIR" && pwd)
 BASE_URL=https://sharehost.hms.harvard.edu/genetics/reich_lab/sgdp/vcf_variants
 TAR_URL=$BASE_URL/vcfs.variants.public_samples.279samples.tar
 LIST_URL=$BASE_URL/vcfs.variants.public_samples.279samples.file.list
-POPS=(afr oceania america west_eur) # expects ${pop}_subset.txt for each
+POPS=(afr oceania america west_eur east_asia) # expects ${pop}_subset.txt for each
 DL_DIR=$OUT_DIR/sgdp_vcfs           # per-individual files go here
 
 mkdir -p "$DL_DIR"

@@ -1,4 +1,90 @@
 # tidypopgen `dev`
+* grouped functions now work with gen_tibbles grouped by more than one
+  variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
+  `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,
+  `qc_report_indiv()`, `nwise_pop_pbs()`, the windowed and jackknife versions
+  of `pop_tajimas_d()` and `nwise_pop_pbs()`, `gt_admixture()`, `gt_snmf()`
+  and `pairwise_pop_fst(type = "pairwise")`, which used to stop with an
+  error. Groups are labelled by the values of the grouping variables pasted
+  with "." (e.g. "pop1.F"), and "tidy" outputs have one column per grouping
+  variable. This also fixes silently wrong labels with several grouping
+  variables: the names of the results of `pop_het_obs()`, `pop_het_exp()`,
+  `pop_fis()` and `pop_fst()`, the family ID written by `gt_as_plink()`, and
+  the groups of `windows_indiv_roh()` and of `tidy()`/`augment()` of a
+  `q_matrix`, which only used the first grouping variable; and the Bonferroni
+  correction of `qc_report_loci()`, which counted the values of the first
+  grouping variable rather than the groups.
+  `heatmap_pairwise()` and `autoplot()` accept the tidy output of
+  `pairwise_pop_fst()` with several grouping variables
+* empty groups, which only exist if requested (with `group_by(.drop = FALSE)`,
+  or `filter()`/`slice()` with `.preserve = TRUE`), are kept in the results
+  as NA/NaN, without changing the results of the other groups. `pop_fst()` and
+  `pop_fis(method = "WG17")` used to fail with an empty group, and
+  `qc_report_indiv(kings_threshold = )` now skips empty groups
+* `gt_extract_f2()` always drops empty groups (from `group_by(.drop = FALSE)`,
+  or `filter()`/`slice()` with `.preserve = TRUE`), rather than passing them to
+  *ADMIXTOOLS 2* as populations without data
+* grouped `loci_hwe()` now returns NA for empty groups, rather than the p-value
+  of a test on no genotypes (0.5 with `mid_p = TRUE`); grouped
+  `qc_report_loci()` ignores empty groups accordingly, as they could lower the
+  smallest HWE p-value to 0.5
+* functions applied to a `gen_tibble` without individuals (as `group_map()`
+  does for an empty group) now return NA for each locus (`loci_alt_freq()`,
+  `loci_maf()` and `loci_hwe()`, and NaN for `loci_missingness()`, which
+  returned an empty vector), or empty results (`pairwise_king()`,
+  `pairwise_ibs()`, `pairwise_allele_sharing()`, `pairwise_grm()` and
+  `indiv_inbreeding()`), rather than failing, as the grouped methods do for
+  empty groups. Grouped `indiv_inbreeding()`, which uses `group_map()`, now
+  works with empty groups
+* fix `pairwise_allele_sharing()`, `pairwise_grm()` and `indiv_inbreeding()`
+  failing ("'dimnames' applied to non-array") with a single individual, and
+  thus grouped `indiv_inbreeding()` with a group of one individual;
+  `indiv_inbreeding()` is NaN for a single individual, as it is relative to the
+  other individuals
+* fix `windows_pop_tajimas_d(type = "matrix")` splitting a window over several
+  rows when the number of loci with data in the window differs between groups
+  (e.g. with an empty group, or a group without data at a locus); `n_loci` is
+  now the number of loci in the window, and the number with data in each group
+  is given by the "tidy" and "list" outputs
+* the `group` column of the "tidy" outputs of grouped `loci_alt_freq()`,
+  `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,
+  `windows_pop_tajimas_d()` and `jackknife_pop_tajimas_d()` now keeps the type
+  of the grouping variable (e.g. a factor keeps its levels, and numbers stay
+  numbers), as `dplyr::summarise()` does and as the columns of several
+  grouping variables already did, rather than being character; groups thus
+  stay in their order (e.g. the levels of the factor) when the output is
+  sorted or plotted
+* with several grouping variables, the group of each individual (the `group`
+  column of `qc_report_indiv()`, and the `group` element of the results of
+  `gt_admixture()` and `gt_snmf()`) is now a factor whose levels are the
+  group labels in the order of the groups, rather than characters, which
+  sorted alphabetically; `gt_admix_reorder_q()` and `autoplot()` thus order
+  the groups as the grouped functions do
+* fix `tidy()`, `augment()` and `autoplot()` of a `q_matrix` with grouped
+  `data` turning the groups into characters, so that `autoplot()` ordered them
+  alphabetically rather than by the levels of a factor (as documented) or in
+  numeric order; and ignoring the groups of `data` when the `q_matrix` had the
+  ids of the individuals but no groups (e.g. from `gt_admixture()` or
+  `gt_snmf()` on an ungrouped `gen_tibble`), so that `autoplot()` could not
+  annotate the groups
+* fix `autoplot()` of `q_matrix` and `gt_admix` objects with
+  `reorder_within_groups = TRUE` sorting the groups even with
+  `arrange_by_group = FALSE`
+* fix `heatmap_pairwise()` and `autoplot()` of tidy pairwise outputs sorting
+  the individuals or groups alphabetically, rather than keeping their order (as
+  documented, and as for the same data as a matrix)
+* fix `autoplot()` of `q_matrix` and `gt_admix` objects failing ("`breaks` and
+  `labels` must have the same length") when the first group has a single
+  individual, and putting the label of a group of a single individual on the
+  last individual of the previous group
+* fix `gen_tibble()` on a bigSNP .rds file overwriting that .rds and ignoring
+  `backingfile`; the backing file is now copied to `backingfile`, so that the
+  files of the bigSNP are never modified (`gt_impute_simple()` and
+  `gt_impute_xgboost()` used to write into its .bk file, and `gen_tibble()`
+  deleted both files when it stopped on loci with no alleles)
+* `gen_tibble()` now works on read-only bigSNP .rds and .bk files (it used to
+  fail when overwriting the .rds); the copy of the backing file is writable,
+  so that the gen_tibble can be imputed
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not
@@ -15,9 +101,19 @@
   line endings
 * fix `gen_tibble()` failing on files with upper case extensions (e.g. .BED,
   .PED, .GENO, .VCF.GZ)
+* fix `gen_tibble()` on PLINK bed files turning the family, individual and
+  parental IDs of the .fam file into numbers when they look like numbers (e.g.
+  "001" became "1", and "1.10" became "1.1"); they are now kept as they are, as
+  when reading ped files
+* fix `gen_tibble()` on PLINK bed files setting quantitative phenotypes (with
+  values other than 1, 2, 0 and -9 in the .fam file) to NA; as in PLINK, they
+  are now kept as numbers, with -9 as missing
 * fix `gen_tibble()` on VCF files leaving a backing file behind when the loci
   fail validation (e.g. duplicated loci), which caused a retry to use a new
   versioned file name
+* fix `gen_tibble()` leaving its backing file behind on Windows (with a
+  "Permission denied" warning) when it stops on loci with no alleles but with
+  genotypes; the backing file is now unmapped before it is removed
 * fix `gen_tibble()` on VCF files setting the ploidy of individuals with a
   missing genotype (".") on the first variant to 1; their ploidy is now taken
   from their first non-missing genotype (searched in the first 1,000 variants
@@ -27,6 +123,20 @@
   alleles than the ploidy estimated from the first variant (e.g. a tetraploid
   genotype in a diploid file) when they are not on the last line; this is now an
   error
+* fix `gen_tibble()` rejecting "0" alleles (the PLINK missing value) when custom
+  `missing_alleles` are given
+* fix `gen_tibble()` on ped files reading a missing genotype "0 0" (the PLINK
+  default, also written by `gt_as_plink()`) as an allele "0" when custom
+  `missing_alleles` are given, which silently corrupted the genotypes of the
+  locus (or stopped with an error for loci with only missing genotypes); "0"
+  is now always missing in ped files
+* fix `gen_tibble()` on VCF files with the "cpp" parser stopping with an error
+  on missing alleles "." (e.g. the ALT of monomorphic loci) when custom
+  `missing_alleles` are given; as with the "vcfR" parser, "." is now always
+  missing
+* fix `gt_as_plink(type = "raw")` writing a missing `allele_ref` as "NA"
+  rather than "0" in the header of raw files; missing alleles are now "0" in
+  both allele columns, as in bim files
 * `gen_tibble()` on a matrix now checks that a vector of `ploidy` has one value
   per individual, and that dosages are non-negative integers not greater than
   each individual's ploidy (previously invalid values were silently corrupted)
@@ -55,17 +165,32 @@
   relatedness
 * fix error messages and documentation of `autoplot()` for `gt_admix` and
   `gt_pca` objects referring to non-existent arguments (`repeat`, `pc`)
+* fix `autoplot()` of `gt_admix` objects with `type = "cv"` failing when the
+  object has no `algorithm` element
 * fix `gt_admix_reorder_q()` turning the Q matrices for K = 1 into vectors
+* fix `reorder_within_groups` in `autoplot()` for `q_matrix` and `gt_admix`
+  objects, which did not sort individuals by their dominant component
+* fix `arrange_by_indiv` in `autoplot()` for `q_matrix` and `gt_admix`
+  objects, which did not sort individuals by their id within each group
+* fix `autoplot()` for `q_matrix` and `gt_admix` objects with numeric groups
+  (e.g. from `gt_admixture()` or `gt_snmf()` on a `gen_tibble` grouped by a
+  numeric column) drawing no group separators or labels
 * fix group annotations of admixture barplots showing extra separators and
   labels for unused levels of the grouping factor
 * `select_loci_if()` no longer loads the whole genotype matrix into memory to
   check the length of the selection
 * fix `gt_as_genind()` failing when loci names contain '.' (which are now
   replaced by '_', with a warning)
+* `gt_as_genlight()` now stores the alleles (`loc.all`), chromosome and position
+  of each locus, so that the result can be converted back with
+  `gt_from_genlight()`
 * fix `gt_from_genlight()` rejecting `genlight` objects without a `pop` slot,
   which is documented as optional
 * fix `rbind_dry_run()` failing when `ref` or `target` are paths to PLINK .bim
   files, as documented
+* `rbind(use_position = TRUE)` now keeps the loci names of the reference
+  dataset, instead of renaming loci to "chromosome_position" and adding a
+  `name_old` column
 * fix `rbind()` silently accepting `as_is = TRUE` with `flip_strand = TRUE` when
   `quiet = TRUE`
 * fix `select()`, `rename()` and `relocate()` on a grouped `gen_tibble`
@@ -101,6 +226,9 @@
 * fix `gt_pseudohaploid()` resetting the ploidy of individuals in the backing
   matrix that are not in the `gen_tibble`, and make it error on data that are
   not diploid
+* fix `tidy()` and `augment()` of a `q_matrix` ignoring its individual ids when
+  it has no group information, which misassigned proportions when `data` was in
+  a different order
 * correct the documentation of the columns returned by `tidy()` for the loadings
   of `gt_dapc` objects
 * fix `gt_dapc()` using k instead of k - 1 principal components by default when
@@ -139,6 +267,27 @@
   single heterozygote genotyped)
 * fix `gt_as_vcf()` and `gt_as_plink(type = "ped")` writing positions stored as
   doubles in scientific notation (e.g. `1e+05`)
+* `gen_tibble()` on PLINK ped files now stores the individual information in
+  the same columns, with the same types, as for bed files (see "Details" in
+  `?gen_tibble`): the parents are `paternal_ID` and `maternal_ID` (rather than
+  `father` and `mother`); `sex` is a factor with levels "female" and "male"
+  (rather than PLINK's codes 2 and 1); `phenotype` is a factor with levels
+  "control" and "case" (rather than the codes 1 and 2, with -9 for missing
+  values), or a number for a quantitative phenotype (with NA rather than -9
+  for missing values); `population` is only created if the family IDs differ
+  from the individual IDs, and parents, sex and phenotype only if they have
+  some non-missing values. `gt_as_plink()` thus writes back the parents and
+  sex read from ped files, which used to be written as unknown. `gen_tibble`s
+  read from ped files by earlier versions keep the old columns: rename and
+  recode them (e.g. with
+  `rename(paternal_ID = father, maternal_ID = mother)`) to write them with
+  `gt_as_plink()`
+* fix `gt_as_plink(type = "bed")` not writing the population (as family ID),
+  parents, sex and phenotype to the .fam file, and `gt_as_plink(type =
+  "ped")`/`type = "raw"` ignoring the grouping variable as family ID
+* fix `gt_as_plink(type = "ped")` and `gt_as_plink(type = "raw")` dropping the
+  parents (`paternal_ID` and `maternal_ID`, as created when reading PLINK
+  files)
 * fix `gt_as_plink(type = "ped")` writing a genetic distance of 0 for all loci
   in the .map file
 * fix `gt_as_plink()` failing to write ped and raw files when the phenotype

@@ -29,6 +29,8 @@
 #' @param .x a [`gen_tibble`] (usually grouped, as obtained by using
 #'   [dplyr::group_by()], otherwise the full tibble will be considered as
 #'   belonging to a single population).
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param by_locus boolean, determining whether Ho should be returned by
 #'   locus(TRUE), or as a single genome wide value (FALSE, the default).
 #' @param include_global boolean determining whether, besides the population
@@ -68,12 +70,10 @@ pop_het_obs <- function(
   stopifnot_no_pseudohaploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
-    .group_levels <- .x %>% group_keys()
-    .group_ids <- dplyr::group_indices(.x) - 1
+    groups <- .group_info(.x)
   } else {
     # create a dummy pop
-    .group_levels <- tibble(population = "pop")
-    .group_ids <- rep(0, nrow(.x))
+    groups <- list(n = 1L, ids = rep(0L, nrow(.x)), labels = "pop")
   }
 
   # keep the diploid/pseudohaploid path on the kernel shared with
@@ -111,14 +111,14 @@ pop_het_obs <- function(
       .gt_get_fbm(.x),
       rowInd = .gt_fbm_rows(.x),
       colInd = .gt_fbm_cols(.x),
-      groupIds = .group_ids,
-      ngroups = nrow(.group_levels),
+      groupIds = groups$ids,
+      ngroups = groups$n,
       ploidy = indiv_ploidy(.x),
       ncores = n_cores
     )
     Ho <- het_obs_df$het_obs # nolint
   }
-  colnames(Ho) <- .group_levels %>% dplyr::pull(1) # nolint
+  colnames(Ho) <- groups$labels # nolint
   if (include_global) {
     # Hs, Fst, Fis etc. in pop_global_stats() rely on allele-frequency
     # formulae not yet generalised beyond diploid/pseudohaploid data, but

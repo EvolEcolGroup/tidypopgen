@@ -200,6 +200,9 @@ get_p_matrix <- function(x, ..., k, run) {
 #' @param x A Q matrix object (as returned by [`q_matrix`]).
 #' @param data An associated tibble (e.g. a [`gen_tibble`]), with the
 #'   individuals in the same order as the data used to generate the Q matrix
+#'   (unless the Q matrix has the ids of the individuals as an attribute, as
+#'   from [get_q_matrix()]). If the Q matrix has no group information and
+#'   `data` is grouped, the groups of `data` are used.
 #' @param ... not currently used
 #' @return A tidied tibble containing columns:
 #'   \item{`row`}{ID of the original observation (i.e. rowname from original
@@ -223,44 +226,12 @@ get_p_matrix <- function(x, ..., k, run) {
 #' }
 tidy.q_matrix <- function(x, data, ...) {
   rlang::check_dots_empty()
-
-  # convert to tibble
-  q_tbl <- x %>%
-    tibble::as_tibble()
-
-  # use attributes if supplied
-  if (!is.null(attr(x, "id")) && !is.null(attr(x, "group"))) {
-    q_tbl$id <- attr(x, "id")
-    q_tbl$group <- attr(x, "group")
-    for (i in seq_len(ncol(q_tbl))) {
-      attr(q_tbl[[i]], "id") <- NULL
-      attr(q_tbl[[i]], "group") <- NULL
-      attr(q_tbl[[i]], "class") <- NULL
-    }
-
-    # otherwise use supplied gen_tibble
-  } else if (
-    is.null(attr(x, "id")) &&
-      is.null(attr(x, "group")) &&
-      inherits(data, "grouped_df")
-  ) {
-    # nolint
-    groupdf <- data %>% dplyr::group_data()
-    colu <- seq(1, nrow(data))
-    for (i in seq_len(nrow(groupdf))) {
-      group_rows <- groupdf$.rows[[i]]
-      group_name <- groupdf[[1]][i]
-      colu[group_rows] <- as.character(group_name)
-    }
-    q_tbl <- q_tbl %>%
-      dplyr::mutate(
-        id = data$id,
-        group = colu
-      )
-  } else {
-    q_tbl <- q_tbl %>%
-      dplyr::mutate(id = data$id)
+  if (missing(data)) {
+    data <- NULL
   }
+
+  # the Q matrix as a tibble, with the id and group of each individual
+  q_tbl <- .q_matrix_to_tbl(x, data)
 
   # pivot the resulting data
   q_tbl <- q_tbl %>%
@@ -284,7 +255,9 @@ tidy.q_matrix <- function(x, data, ...) {
 #' [broom::augment.prcomp] will work out of the box (this is especially helpful
 #' when adapting plotting scripts).
 #' @param x  A `q_matrix` object
-#' @param data the `gen_tibble` used to run the clustering algorithm
+#' @param data the `gen_tibble` used to run the clustering algorithm. If the
+#'   Q matrix has no group information and `data` is grouped, the groups of
+#'   `data` are added as a `group` column.
 #' @param ... Not used. Needed to match generic signature only.
 #' @return A  [gen_tibble] containing the original data along with additional
 #'   columns containing each observation's Q values.
@@ -320,43 +293,8 @@ augment.q_matrix <- function(x, data = NULL, ...) {
     }
   }
 
-  q_tbl <- x %>%
-    tibble::as_tibble()
-
-  if (!is.null(attr(x, "id")) && !is.null(attr(x, "group"))) {
-    q_tbl$id <- attr(x, "id")
-    q_tbl$group <- attr(x, "group")
-
-    for (i in seq_len(ncol(q_tbl))) {
-      attr(q_tbl[[i]], "id") <- NULL
-      attr(q_tbl[[i]], "group") <- NULL
-      attr(q_tbl[[i]], "class") <- NULL
-    }
-  } else if (
-    is.null(attr(x, "id")) &&
-      is.null(attr(x, "group")) &&
-      inherits(data, "grouped_df")
-  ) {
-    # nolint
-    groupdf <- data %>% dplyr::group_data()
-    colu <- seq(1, nrow(data))
-
-    for (i in seq_len(nrow(groupdf))) {
-      group_rows <- groupdf$.rows[[i]]
-      group_name <- groupdf[[1]][i]
-      colu[group_rows] <- as.character(group_name)
-    }
-
-    q_tbl <- q_tbl %>%
-      dplyr::mutate(
-        id = data$id,
-        group = colu
-      )
-  } else {
-    q_tbl <- q_tbl %>%
-      dplyr::mutate(id = data$id)
-  }
-  q_tbl
+  # the Q matrix as a tibble, with the id and group of each individual
+  q_tbl <- .q_matrix_to_tbl(x, data)
 
   # and finally left join
   data <- dplyr::left_join(data, q_tbl, by = "id")
@@ -374,6 +312,42 @@ augment.q_matrix <- function(x, data = NULL, ...) {
   data
 }
 
+#' A Q matrix as a tibble, with the id and group of each individual
+#'
+#' The id and group attributes of the Q matrix are used if present (so that
+#' the order of `data` does not matter); otherwise the ids of `data` are used
+#' (its individuals being in the order of the rows of the Q matrix), and, if
+#' `data` is grouped, its groups. Groups keep their type (e.g. a factor keeps
+#' its levels, and several grouping variables give a factor with the levels
+#' in the order of the groups, see `.group_of_rows()`), so that they are
+#' sorted in the same order as by the grouped functions.
+#'
+#' @param x a `q_matrix`
+#' @param data a tibble (e.g. a `gen_tibble`) with the individuals, or NULL
+#' @returns a tibble with the Q columns (`.Q1`, `.Q2`, ...), `id` and, if
+#'   known, `group`
+#' @keywords internal
+#' @noRd
+.q_matrix_to_tbl <- function(x, data) {
+  q_tbl <- tibble::as_tibble(x)
+  for (i in seq_len(ncol(q_tbl))) {
+    attr(q_tbl[[i]], "id") <- NULL
+    attr(q_tbl[[i]], "group") <- NULL
+    attr(q_tbl[[i]], "class") <- NULL
+  }
+  if (!is.null(attr(x, "id"))) {
+    q_tbl$id <- attr(x, "id")
+  } else {
+    q_tbl$id <- data$id
+  }
+  if (!is.null(attr(x, "group"))) {
+    q_tbl$group <- attr(x, "group")
+  } else if (inherits(data, "grouped_df")) {
+    # the group of each individual, matched by id
+    q_tbl$group <- .group_of_rows(data)[match(q_tbl$id, data$id)]
+  }
+  q_tbl
+}
 
 #' Autoplots for `q_matrix` objects
 #'
@@ -385,23 +359,30 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #' @param object A Q matrix object (as returned by [q_matrix()]).
 #' @param data An associated tibble (e.g. a [`gen_tibble`]), with the
 #'   individuals in the same order as the data used to generate the Q matrix
+#'   (unless the Q matrix has the ids of the individuals as an attribute, as
+#'   from [get_q_matrix()]). If the Q matrix has no group information and
+#'   `data` is grouped, the groups of `data` are used.
 #' @param annotate_group Boolean determining whether to annotate the plot with
 #'   the group information
 #' @param arrange_by_group Boolean determining whether to arrange the
-#'   individuals by group. If the grouping variable in the `gen_tibble` or the
-#'   metadata of the `gt_admixt` object is a factor, the data will be ordered by
-#'   the levels of the factor; else it will be ordered alphabetically.
+#'   individuals by group. Groups are ordered as by the grouped functions
+#'   (see [dplyr::group_keys()]): if the grouping variable in the `gen_tibble`
+#'   or the metadata of the `gt_admix` object is a factor, by the levels of the
+#'   factor; numbers in numeric order; otherwise alphabetically. With several
+#'   grouping variables, groups are ordered by the first variable, then by the
+#'   second, and so on.
 #' @param arrange_by_indiv Boolean determining whether to arrange the
-#'   individuals by their individual id (if arrange_by_group is TRUE, they will
-#'   be arranged by group first and then by individual id, i.e. within each
-#'   group). If `id` in the `get_tibble` or the metadata of the `gt_admix`
-#'   object is a factor, it will be ordered by the levels of the factor; else it
-#'   will be ordered alphabetically.
+#'   individuals by their individual id within each group (groups are arranged
+#'   first if `arrange_by_group` is TRUE, otherwise they are kept in their
+#'   current order). This only applies if `annotate_group` is TRUE and group
+#'   information is available. If `id` in the `get_tibble` or the metadata of
+#'   the `gt_admix` object is a factor, it will be ordered by the levels of the
+#'   factor; else it will be ordered alphabetically.
 #' @param reorder_within_groups Boolean determining whether to reorder the
 #'   individuals within each group based on their ancestry proportion (note that
 #'   this is not advised if you are making multiple plots, as you would get a
-#'   different order for each plot!). If TRUE, `annotate_group` must also be
-#'   TRUE.
+#'   different order for each plot!). Groups keep the order set by
+#'   `arrange_by_group`. If TRUE, `annotate_group` must also be TRUE.
 #' @param ... not currently used.
 #' @returns a barplot of individuals, coloured by ancestry proportion
 #' @name autoplot_q_matrix
@@ -466,7 +447,7 @@ autoplot.q_matrix <- function(
     q_tbl <- augment(object, data)
   }
   # if we have a grouping variable and we plan to use it, then reorder by it
-  q_tbl$id <- seq_len(nrow(q_tbl))
+  # (and by individual id within each group, if requested)
   if (("group" %in% names(q_tbl)) && annotate_group) {
     if (arrange_by_group && arrange_by_indiv) {
       q_tbl <- q_tbl %>%
@@ -475,8 +456,10 @@ autoplot.q_matrix <- function(
       q_tbl <- q_tbl %>%
         dplyr::arrange(.data$group)
     } else if (arrange_by_indiv) {
+      # keep groups in their current order (they must stay in consecutive
+      # blocks to be annotated), and sort individuals within each group
       q_tbl <- q_tbl %>%
-        dplyr::arrange(.data$group)
+        dplyr::arrange(fct_inorder_base(.data$group), .data$id)
     }
   }
   # now reset the id to the new order
@@ -489,12 +472,14 @@ autoplot.q_matrix <- function(
     ) %>%
     dplyr::mutate(percentage = as.numeric(.data$percentage))
 
-  # if we reorder within group
+  # if we reorder within group (keeping the groups in their current order,
+  # i.e. sorted if arrange_by_group is TRUE, as they are in consecutive blocks
+  # once arranged above; fct_inorder_base() orders them by first appearance)
   if (("group" %in% names(q_tbl)) && reorder_within_groups) {
     q_tbl <- q_tbl %>%
       dplyr::group_by(.data$group, .data$id) %>%
       # only sort by group, so that we don't reorder individuals within groups
-      dplyr::arrange(.data$group) %>%
+      dplyr::arrange(fct_inorder_base(.data$group)) %>%
       dplyr::mutate(
         q = factor(
           .data$q,
@@ -502,16 +487,38 @@ autoplot.q_matrix <- function(
         )
       ) # nolint
 
-    dominant_q <- q_tbl %>%
-      dplyr::group_by(.data$id) %>%
-      dplyr::summarize(dominant_q = max(.data$percentage), .groups = "drop")
-
-    q_tbl <- q_tbl %>%
-      dplyr::left_join(dominant_q, by = "id")
-
-    q_tbl <- q_tbl %>%
+    # within each group, rank the components by their mean proportion
+    q_rank <- q_tbl %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(q = as.character(.data$q)) %>%
+      dplyr::group_by(.data$group, .data$q) %>%
+      dplyr::summarize(mean_q = mean(.data$percentage), .groups = "drop") %>%
       dplyr::group_by(.data$group) %>%
-      dplyr::arrange(desc(.data$dominant_q), .by_group = TRUE)
+      dplyr::mutate(q_rank = rank(-.data$mean_q, ties.method = "first")) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(-"mean_q")
+
+    # find the dominant component of each individual
+    dominant_q <- q_tbl %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(q = as.character(.data$q)) %>%
+      dplyr::group_by(.data$group, .data$id) %>%
+      dplyr::slice_max(.data$percentage, n = 1, with_ties = FALSE) %>%
+      dplyr::ungroup() %>%
+      dplyr::left_join(q_rank, by = c("group", "q")) %>%
+      dplyr::select("id", "q_rank", dominant_q = "percentage")
+
+    # sort individuals within each group by their dominant component (most
+    # common component in the group first), and then by the proportion of
+    # that component
+    q_tbl <- q_tbl %>%
+      dplyr::ungroup() %>%
+      dplyr::left_join(dominant_q, by = "id") %>%
+      dplyr::arrange(
+        fct_inorder_base(.data$group),
+        .data$q_rank, dplyr::desc(.data$dominant_q)
+      ) %>%
+      dplyr::group_by(.data$group)
   }
 
   levels_q <- unique(q_tbl$id)

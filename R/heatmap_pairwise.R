@@ -10,11 +10,19 @@
 #' customization afterwards.
 #'
 #' @param x A square numeric matrix OR a data.frame/tibble with 3 columns:
-#'   names1, names2, value (half-matrix representation).
+#'   names1, names2, value (half-matrix representation). The tidy output of
+#'   [pairwise_pop_fst()] for data grouped by several variables, which has
+#'   one column per grouping variable for each member of a pair (e.g.
+#'   `population_1`, `sex_1`, `population_2`, `sex_2`, `value`), is also
+#'   accepted: the names are the values of the grouping variables pasted with
+#'   ".".
 #'
 #' @param order Optional ordering specification. Can be:
 #' \itemize{
-#'   \item `NULL` (default): preserve the existing order.
+#'   \item `NULL` (default): preserve the existing order (for a tidy
+#'     tibble, the order in which the names first appear in the pairs,
+#'     i.e. the order of the individuals or groups for the outputs of the
+#'     `pairwise_*` functions).
 #'   \item A character vector containing all row/column names in the desired
 #'     order.
 #'   \item A function taking the matrix `x` as input and returning either:
@@ -83,6 +91,25 @@ heatmap_pairwise <- function(x,
   # ============================================================
 
   if (is.data.frame(x)) {
+    # pairs of groups defined by several grouping variables (e.g. the tidy
+    # output of pairwise_pop_fst()) have k columns for the first group of
+    # each pair (ending in "_1"), k for the second (ending in "_2"), and the
+    # value: combine each set of columns into a single name
+    n_name_cols <- (ncol(x) - 1) / 2
+    if (ncol(x) > 3 && n_name_cols == round(n_name_cols) &&
+      all(grepl("_1$", colnames(x)[seq_len(n_name_cols)])) &&
+      all(grepl("_2$", colnames(x)[n_name_cols + seq_len(n_name_cols)])) &&
+      identical(
+        sub("_1$", "", colnames(x)[seq_len(n_name_cols)]),
+        sub("_2$", "", colnames(x)[n_name_cols + seq_len(n_name_cols)])
+      )) {
+      x <- data.frame(
+        names_1 = .group_labels(x[seq_len(n_name_cols)]),
+        names_2 = .group_labels(x[n_name_cols + seq_len(n_name_cols)]),
+        value = x[[ncol(x)]]
+      )
+    }
+
     if (ncol(x) != 3) {
       stop("Data frame must have 3 columns: names_1, names_2, value.")
     }
@@ -97,7 +124,10 @@ heatmap_pairwise <- function(x,
     df$from <- as.character(df$from)
     df$to <- as.character(df$to)
 
-    ids <- sort(unique(c(df$from, df$to)))
+    # keep the existing order, i.e. the order in which the names first appear
+    # in the pairs (for the outputs of the pairwise_* functions, the order of
+    # the individuals or groups, as in the matrix they are tidied from)
+    ids <- unique(c(rbind(df$from, df$to)))
     n <- length(ids)
 
     if (nrow(df) != n * (n - 1) / 2) {

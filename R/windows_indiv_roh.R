@@ -32,8 +32,9 @@
 #'   the `detectRUNS` vignette).
 #'
 #'   If the [`gen_tibble`] is grouped, then the grouping variable is used to
-#'   fill in the 'group' column. Otherwise, the 'group' column is filled with
-#'   the same values as the 'id' column. Note that this behaviour is
+#'   fill in the 'group' column (with several grouping variables, their values
+#'   are pasted with ".", e.g. `pop1.F`). Otherwise, the 'group' column is
+#'   filled with the same values as the 'id' column. Note that this behaviour is
 #'   different from other windowed operations in `tidypopgen`, which
 #'   return a list for grouped `gen_tibbles`; this different behaviour is
 #'   designed to maintain compatibility with `detectRUNS`.
@@ -111,9 +112,7 @@ windows_indiv_roh <- function(
   gaps <- diff(map$bps)
   # use groups (if defined)
   if (dplyr::is_grouped_df(.x)) {
-    groups <- .x %>%
-      select(dplyr::group_vars(.x)) %>%
-      dplyr::pull(1)
+    groups <- .group_of_rows(.x)
   } else {
     groups <- .x$id
   }

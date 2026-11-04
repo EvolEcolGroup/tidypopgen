@@ -16,9 +16,18 @@
 #' @param mid_p boolean on whether the mid-p value should be computed. Default
 #'   is TRUE, as in PLINK.
 #' @param type type of object to return, if using grouped method. One of "tidy",
-#' "list", or "matrix". Default is "tidy".
+#'   "list", or "matrix". Default is "tidy".
+#'   Data can be grouped by more than one variable: groups are then labelled
+#'   by the values of the grouping variables pasted with "." (e.g. `pop1.F`),
+#'   and the "tidy" output has one column per grouping variable rather than a
+#'   single `group` column. The `group` column, or the columns of the
+#'   grouping variables, keep the type of the grouping variables (e.g. a
+#'   factor keeps its levels), so that groups stay in their order when the
+#'   output is sorted or plotted.
 #' @param ... not used.
-#' @returns a vector of probabilities from HWE exact test, one per locus
+#' @returns a vector of probabilities from HWE exact test, one per locus. For
+#'   a grouped [`gen_tibble`], empty groups (e.g. from
+#'   `group_by(.drop = FALSE)`) are NA.
 #' @author the C++ algorithm was written by Christopher Chang for PLINK 1.90,
 #'   based on original code by Jan Wigginton (the code was released under GPL3).
 #' @rdname loci_hwe
@@ -100,6 +109,10 @@ loci_hwe.vctrs_bigSNP <- function(
     )
     # drop the dimensions of the one column matrix (without copying it)
     dim(hwe_p) <- NULL
+  } else if (length(rows_to_keep) == 0) {
+    # no individuals (e.g. an empty group in group_map()), so no genotypes to
+    # test, as for empty groups in the grouped method
+    hwe_p <- rep(NA_real_, length(attr(.x, "loci")$big_index))
   } else {
     # if we have a single individual
     stop("Not implemented for a single individual")
@@ -129,10 +142,6 @@ loci_hwe.grouped_df <- function(
     stop("loci_hwe only works with the genotypes column")
   }
 
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("loci_hwe only works with one grouping variable")
-  }
   rlang::check_dots_empty()
   type <- match.arg(type)
   # count genotypes and test HWE at each locus for each group (the cpp code
@@ -149,11 +158,18 @@ loci_hwe.grouped_df <- function(
     block_size = block_size
   )
 
+  groups <- .group_info(.x)
+  # empty groups have no genotypes to test, so they are NA (rather than the
+  # p-value of a test on zero counts)
+  if (any(groups$sizes == 0)) {
+    hwe_mat[, groups$sizes == 0] <- NA_real_
+  }
   hwe_mat <- format_grouped_output(
     out_mat = hwe_mat,
-    group_ids = dplyr::group_keys(.x) %>% pull(1),
+    group_ids = groups$labels,
     loci_names = loci_names(.x),
-    type = type
+    type = type,
+    group_keys = groups$keys
   )
   return(hwe_mat)
 }

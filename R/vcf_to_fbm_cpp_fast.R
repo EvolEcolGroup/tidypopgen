@@ -99,6 +99,15 @@ vcf_to_fbm_cpp <- function(
     allele_ref = loci$allele2,
     allele_alt = loci$allele1
   )
+  # a missing allele "." (e.g. the ALT of a monomorphic locus) is always
+  # missing, also with custom missing_alleles, as in the vcfR parser (which
+  # reads it as NA)
+  for (allele_col in c("allele_ref", "allele_alt")) {
+    missing_dot <- which(loci[[allele_col]] == ".")
+    if (length(missing_dot) > 0) {
+      loci[[allele_col]][missing_dot] <- NA
+    }
+  }
 
   # validate the loci (before creating the backing files)
   loci <- validate_loci(loci,

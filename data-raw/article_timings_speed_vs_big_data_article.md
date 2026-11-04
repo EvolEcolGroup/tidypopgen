@@ -42,7 +42,7 @@ benchmark tables.
   load average was below 1.
 - Data:
   - big data: 40 SGDP individuals, 19,537,993 loci, created with
-    `data-raw/s02_create_sgdp_subset.sh`;
+    `data-raw/sgdp/s02_create_sgdp_subset.sh`;
   - HGDP: 1,043 individuals, 643,733 loci.
 
 ## Big data article (SGDP, 40 individuals, 19.5M loci)

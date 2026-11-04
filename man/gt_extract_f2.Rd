@@ -28,7 +28,8 @@ gt_extract_f2(
 )
 }
 \arguments{
-\item{.x}{a \code{\link{gen_tibble}}}
+\item{.x}{a grouped \code{\link{gen_tibble}}, with a group for each population. Empty
+groups (e.g. from \code{group_by(.drop = FALSE)}) are dropped.}
 
 \item{outdir}{Directory where data will be stored.}
 

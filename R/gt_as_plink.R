@@ -7,8 +7,16 @@
 #' If the gen_tibble has been read in from vcf format, family.ID in the
 #' resulting plink files will be the same as sample.ID. If the gen_tibble has a
 #' grouping variable, this will be used as the family.ID in the resulting plink
-#' files. Genotypes are read and written directly from the file backed
-#' matrix, so all formats can be written for datasets that do not fit in
+#' files (with several grouping variables, their values are pasted with ".",
+#' e.g. `pop1.F`); otherwise, the population is used as the family.ID. Parents,
+#' sex and phenotype are taken from the columns `paternal_ID`, `maternal_ID`,
+#' `sex` and `phenotype`, if present, as created by [gen_tibble()] when
+#' reading PLINK files (bed, ped or bigSNP rds): sex is written as 1 for
+#' "male", 2 for "female" and 0 (unknown) otherwise; phenotype as 1 for
+#' "control" and 2 for "case", and other values (e.g. a quantitative
+#' phenotype) as they are; missing parents are written as 0, and missing
+#' phenotypes as -9. Genotypes are read and written directly from the file
+#' backed matrix, so all formats can be written for datasets that do not fit in
 #' memory (but note that ped and raw files are much larger, and thus slower to
 #' write, than bed files).
 #'
@@ -156,24 +164,7 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
   }
 
   # create a fam table
-  fam_table <- data.frame(matrix(NA, nrow = nrow(x), ncol = 6))
-  colnames(fam_table) <- c(
-    "FID",
-    "IID",
-    "MID",
-    "PID",
-    "Sex",
-    "Phenotype"
-  )
-  fam_table$IID <- x$id
-  # if this is a group tibble, use the grouping variable
-  if (inherits(x, "grouped_gen_tbl")) {
-    fam_table$FID <- x %>%
-      select(dplyr::group_vars(x)) %>%
-      dplyr::pull(1)
-  } else {
-    fam_table$FID <- x$id
-  }
+  fam_table <- as.data.frame(plink_indiv_meta(x))
 
   # code adapted from bigsnpr::snp_writeBed
   write_bed <- function(G, bedfile, new_fam, new_bim, ind.row = NULL, ind.col = NULL) { # nolint start
@@ -231,35 +222,12 @@ gt_write_ped_raw <- function(
   plink_format <- match.arg(plink_format)
   # loci information
   loci <- show_loci(x)
-  # replace missing value with zero
+  # replace missing values with zero (in either allele column, as for bed)
   loci$allele_alt[is.na(loci$allele_alt)] <- "0"
+  loci$allele_ref[is.na(loci$allele_ref)] <- "0"
 
   # create the info for the fam file
-  indiv_meta <- tibble(
-    # without a population (e.g. from a vcf), the family ID is the sample ID
-    population = if ("population" %in% names(x)) x$population else x$id,
-    id = x$id,
-    pat = pull_na(x, "pat"),
-    mat = pull_na(x, "mat"),
-    sex = pull_na(x, "sex"),
-    phenotype = pull_na(x, "phenotype")
-  )
-  # recode some variables
-  indiv_meta$sex <- dplyr::recode_values(
-    as.character(indiv_meta$sex),
-    "female" ~ "2",
-    "male" ~ "1",
-    default = "0"
-  )
-  indiv_meta$pat[is.na(indiv_meta$pat)] <- 0
-  indiv_meta$mat[is.na(indiv_meta$mat)] <- 0
-  indiv_meta$phenotype <- dplyr::recode_values(
-    as.character(indiv_meta$phenotype),
-    "control" ~ "1",
-    "case" ~ "2",
-    default = as.character(indiv_meta$phenotype)
-  )
-  indiv_meta$phenotype[is.na(indiv_meta$phenotype)] <- -9
+  indiv_meta <- plink_indiv_meta(x)
   # the start of each line (one per individual), with the information for the
   # fam file, formatted as utils::write.table() would (factors as their labels,
   # and "NA" for missing values)
@@ -360,6 +328,49 @@ gt_write_ped_raw <- function(
   return(file)
 }
 
+
+# internal function creating the individual information shared by the fam,
+# ped and raw files (family ID, individual ID, parents, sex and phenotype)
+plink_indiv_meta <- function(x) {
+  # if this is a group tibble, use the grouping variable as family ID (or the
+  # values of the grouping variables pasted with ".", if there are several);
+  # otherwise use the population, or the sample ID if there is no
+  # population (e.g. from a vcf)
+  if (inherits(x, "grouped_gen_tbl")) {
+    family_id <- .group_of_rows(x)
+  } else if ("population" %in% names(x)) {
+    family_id <- x$population
+  } else {
+    family_id <- x$id
+  }
+  # the other columns are those created by gen_tibble() when reading PLINK
+  # files (bed, ped or a bigSNP rds)
+  indiv_meta <- tibble(
+    population = family_id,
+    id = x$id,
+    pat = pull_na(x, "paternal_ID"),
+    mat = pull_na(x, "maternal_ID"),
+    sex = pull_na(x, "sex"),
+    phenotype = pull_na(x, "phenotype")
+  )
+  # recode some variables
+  indiv_meta$sex <- dplyr::recode_values(
+    as.character(indiv_meta$sex),
+    "female" ~ "2",
+    "male" ~ "1",
+    default = "0"
+  )
+  indiv_meta$pat[is.na(indiv_meta$pat)] <- 0
+  indiv_meta$mat[is.na(indiv_meta$mat)] <- 0
+  indiv_meta$phenotype <- dplyr::recode_values(
+    as.character(indiv_meta$phenotype),
+    "control" ~ "1",
+    "case" ~ "2",
+    default = as.character(indiv_meta$phenotype)
+  )
+  indiv_meta$phenotype[is.na(indiv_meta$phenotype)] <- -9
+  indiv_meta
+}
 
 # internal function returning either a vector from a given column
 # or NA if it does not exist
