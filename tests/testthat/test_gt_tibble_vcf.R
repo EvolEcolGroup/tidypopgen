@@ -191,3 +191,25 @@ test_that("genotypes with more alleles than max_ploidy are caught", {
     }
   }
 })
+
+test_that("missing vcf alleles are missing with custom missing_alleles", {
+  # the ALT of the monomorphic locus rs2 is ".", which both parsers read as
+  # missing, even if "." is not one of the missing_alleles
+  vcf_path <- write_small_vcf(list(
+    c("1", "10", "rs1", "A", "T", "0/1", "0/0", "1/1"),
+    c("1", "20", "rs2", "C", ".", "0/0", "0/0", "0/0"),
+    c("1", "30", "rs3", "G", "A", "1/1", "0/1", "0/1")
+  ))
+  for (this_parser in c("cpp", "vcfR")) {
+    default_gt <- gen_tibble(vcf_path,
+      parser = this_parser, backingfile = tempfile(), quiet = TRUE
+    )
+    n_gt <- gen_tibble(vcf_path,
+      parser = this_parser, backingfile = tempfile(), quiet = TRUE,
+      missing_alleles = "N"
+    )
+    expect_equal(show_loci(n_gt)$allele_alt, c("T", NA, "A"))
+    expect_identical(show_loci(n_gt), show_loci(default_gt))
+    expect_identical(show_genotypes(n_gt), show_genotypes(default_gt))
+  }
+})

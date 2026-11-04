@@ -112,6 +112,10 @@
   `missing_alleles` are given, which silently corrupted the genotypes of the
   locus (or stopped with an error for loci with only missing genotypes); "0"
   is now always missing in ped files
+* fix `gen_tibble()` on VCF files with the "cpp" parser stopping with an error
+  on missing alleles "." (e.g. the ALT of monomorphic loci) when custom
+  `missing_alleles` are given; as with the "vcfR" parser, "." is now always
+  missing
 * `gen_tibble()` on a matrix now checks that a vector of `ploidy` has one value
   per individual, and that dosages are non-negative integers not greater than
   each individual's ploidy (previously invalid values were silently corrupted)
