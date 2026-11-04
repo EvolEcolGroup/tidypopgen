@@ -73,6 +73,10 @@
 * fix `heatmap_pairwise()` and `autoplot()` of tidy pairwise outputs sorting
   the individuals or groups alphabetically, rather than keeping their order (as
   documented, and as for the same data as a matrix)
+* fix `autoplot()` of `q_matrix` and `gt_admix` objects failing ("`breaks` and
+  `labels` must have the same length") when the first group has a single
+  individual, and putting the label of a group of a single individual on the
+  last individual of the previous group
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not
