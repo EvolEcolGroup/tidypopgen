@@ -36,6 +36,24 @@ projections and options, the spectra match easySFS's output.
 - `data-raw/create_easysfs_test_data.R` and `test_easysfs.R`, which is
   skipped until the easySFS fixtures are generated.
 
+**Benchmark.** The data were 1000 diploids x 100k loci, 10 groups of 100,
+with 5% missing genotypes. The branch was installed at -O2 in its own
+library, as `CLAUDE.md` requires.
+
+| Function | 1 core | 4 cores |
+|---|---|---|
+| grouped `loci_alt_freq()` (one pass, for reference) | 0.14 s | 0.06 s |
+| `pop_sfs_preview()` | 0.13 s | 0.07 s |
+| `pop_sfs(n_proj = 160)` | 0.35 s | 0.27 s |
+| `pairwise_pop_sfs()`, 45 pairs, `n_proj = 40` | 2.1 s | 1.4 s |
+| `nwise_pop_sfs()`, 3 populations, `n_proj = 40` | 0.35 s | 0.33 s |
+
+- With missing data, each pair has about 60k distinct configurations.
+  Counting them takes about 1 s, and projecting them about 1 s.
+- In the projection, building the probability tables and copying the
+  configurations into C++ is serial, so it is the next thing to speed up if
+  needed.
+
 **Still to do:**
 
 - generate the easySFS fixtures (run `data-raw/create_easysfs_test_data.R`);
