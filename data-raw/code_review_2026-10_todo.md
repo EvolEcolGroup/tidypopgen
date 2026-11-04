@@ -144,8 +144,9 @@ touch the code that #217 changed in `R/q_matrix.R`: #217 changed how
   `fct_inorder_base()` is also used by `gt_as_vcf()`, but only on
   chromosomes, which gen_tibbles store as factors (checked: same contig
   lines before and after).
-  **Decision needed:** this commit has no `NEWS.md` entry, although the
-  missing group lines and labels are visible to users. Add one?
+  It had no `NEWS.md` entry, although the missing group lines and labels
+  are visible to users. **Decided (AM, 2026-11-04):** add one, done in
+  `297c4c5c`.
 
 Checked with installed builds of `de645781` and, as the old code, of
 `de645781` with `R/q_matrix.R`, `R/local_reimplementations.R` and the Rd
@@ -386,14 +387,14 @@ of the groups.
   that is the order of the individuals or groups.
   Checked: the new test (groups and individuals) fails on `732e9f2d` (2
   failures) and passes on the fix. — Claude, for AM
-- [ ] `e4d475d8` · `autoplot()` of `q_matrix`/`gt_admix` (group
+- [x] `e4d475d8` · `autoplot()` of `q_matrix`/`gt_admix` (group
   annotation) — Failed ("`breaks` and `labels` must have the same length")
   when the first group had a single individual. A group of a single
   individual elsewhere was labelled on the last individual of the previous
   group. *[Error]* Already on `dev`. Found by the check below: with several
   grouping variables, groups often have a single individual.
-  **Not in the approved plan**, so the box is left for AM. Checked: the new
-  test errors on `0e1ee67c` and passes on the fix.
+  Not in the approved plan; **accepted (AM, 2026-11-04)**. Checked: the new
+  test errors on `0e1ee67c` and passes on the fix. — Claude, for AM
 
 Checked on `e4d475d8` (installed): every grouped function was run with a
 factor whose levels are not alphabetical (with an empty level and
