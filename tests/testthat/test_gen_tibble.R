@@ -695,10 +695,11 @@ test_that("gen_tibble from a bigSNP rds does not overwrite the rds", {
   backingfile <- tempfile()
   rds_gt <- gen_tibble(bigsnp_path, backingfile = backingfile, quiet = TRUE)
   expect_identical(show_genotypes(rds_gt), show_genotypes(bed_gt))
-  # the backingfile argument is used
+  # the backingfile argument is used (normalise both sides, as on macOS the
+  # temporary directory /var is a symlink to /private/var)
   expect_equal(
-    gt_get_file_names(rds_gt),
-    paste0(backingfile, c(".rds", ".bk"))
+    normalizePath(gt_get_file_names(rds_gt)),
+    normalizePath(paste0(backingfile, c(".rds", ".bk")))
   )
   # the original rds is still a bigSNP object
   expect_true(inherits(readRDS(bigsnp_path), "bigSNP"))

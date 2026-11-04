@@ -330,7 +330,7 @@ test_that("bed fam file has the same individual information as ped", {
 indiv_info <- function(x) {
   x %>%
     dplyr::ungroup() %>%
-    select(-genotypes)
+    select(-"genotypes")
 }
 
 # whether two gen_tibbles have the same genotypes, allowing for loci with
