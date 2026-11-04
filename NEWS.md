@@ -264,12 +264,27 @@
   single heterozygote genotyped)
 * fix `gt_as_vcf()` and `gt_as_plink(type = "ped")` writing positions stored as
   doubles in scientific notation (e.g. `1e+05`)
+* `gen_tibble()` on PLINK ped files now stores the individual information in
+  the same columns, with the same types, as for bed files (see "Details" in
+  `?gen_tibble`): the parents are `paternal_ID` and `maternal_ID` (rather than
+  `father` and `mother`); `sex` is a factor with levels "female" and "male"
+  (rather than PLINK's codes 2 and 1); `phenotype` is a factor with levels
+  "control" and "case" (rather than the codes 1 and 2, with -9 for missing
+  values), or a number for a quantitative phenotype (with NA rather than -9
+  for missing values); `population` is only created if the family IDs differ
+  from the individual IDs, and parents, sex and phenotype only if they have
+  some non-missing values. `gt_as_plink()` thus writes back the parents and
+  sex read from ped files, which used to be written as unknown. `gen_tibble`s
+  read from ped files by earlier versions keep the old columns: rename and
+  recode them (e.g. with
+  `rename(paternal_ID = father, maternal_ID = mother)`) to write them with
+  `gt_as_plink()`
 * fix `gt_as_plink(type = "bed")` not writing the population (as family ID),
   parents, sex and phenotype to the .fam file, and `gt_as_plink(type =
   "ped")`/`type = "raw"` ignoring the grouping variable as family ID
-* fix `gt_as_plink(type = "ped")` and `gt_as_plink(type = "raw")` dropping
-  parents (`paternal_ID`/`maternal_ID`, or `father`/`mother`) and numeric sex
-  codes read from PLINK files
+* fix `gt_as_plink(type = "ped")` and `gt_as_plink(type = "raw")` dropping the
+  parents (`paternal_ID` and `maternal_ID`, as created when reading PLINK
+  files)
 * fix `gt_as_plink(type = "ped")` writing a genetic distance of 0 for all loci
   in the .map file
 * fix `gt_as_plink()` failing to write ped and raw files when the phenotype

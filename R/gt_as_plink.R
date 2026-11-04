@@ -10,10 +10,15 @@
 #' files (with several grouping variables, their values are pasted with ".",
 #' e.g. `pop1.F`); otherwise, the population is used as the family.ID. Parents,
 #' sex and phenotype are taken from the columns `paternal_ID`, `maternal_ID`,
-#' `sex` and `phenotype` (as created when reading PLINK files), if present.
-#' Genotypes are read and written directly from the file backed matrix, so all
-#' formats can be written for datasets that do not fit in memory (but note that
-#' ped and raw files are much larger, and thus slower to write, than bed files).
+#' `sex` and `phenotype`, if present, as created by [gen_tibble()] when
+#' reading PLINK files (bed, ped or bigSNP rds): sex is written as 1 for
+#' "male", 2 for "female" and 0 (unknown) otherwise; phenotype as 1 for
+#' "control" and 2 for "case", and other values (e.g. a quantitative
+#' phenotype) as they are; missing parents are written as 0, and missing
+#' phenotypes as -9. Genotypes are read and written directly from the file
+#' backed matrix, so all formats can be written for datasets that do not fit in
+#' memory (but note that ped and raw files are much larger, and thus slower to
+#' write, than bed files).
 #'
 #' @param x a [`gen_tibble`] object
 #' @param file a character string giving the path to output file. If left to
@@ -338,22 +343,21 @@ plink_indiv_meta <- function(x) {
   } else {
     family_id <- x$id
   }
+  # the other columns are those created by gen_tibble() when reading PLINK
+  # files (bed, ped or a bigSNP rds)
   indiv_meta <- tibble(
     population = family_id,
     id = x$id,
-    # parents are paternal_ID/maternal_ID when read from a bed file, and
-    # father/mother when read from a ped file
-    pat = pull_na(x, c("paternal_ID", "father")),
-    mat = pull_na(x, c("maternal_ID", "mother")),
+    pat = pull_na(x, "paternal_ID"),
+    mat = pull_na(x, "maternal_ID"),
     sex = pull_na(x, "sex"),
     phenotype = pull_na(x, "phenotype")
   )
-  # recode some variables (sex is a factor when read from a bed file, and
-  # PLINK's numeric code when read from a ped file)
+  # recode some variables
   indiv_meta$sex <- dplyr::recode_values(
     as.character(indiv_meta$sex),
-    c("female", "2") ~ "2",
-    c("male", "1") ~ "1",
+    "female" ~ "2",
+    "male" ~ "1",
     default = "0"
   )
   indiv_meta$pat[is.na(indiv_meta$pat)] <- 0
@@ -368,12 +372,11 @@ plink_indiv_meta <- function(x) {
   indiv_meta
 }
 
-# internal function returning either a vector from the first of the given
-# columns that exists, or NA if none of them exists
+# internal function returning either a vector from a given column
+# or NA if it does not exist
 pull_na <- function(.x, .col_name) {
-  .col_name <- intersect(.col_name, names(.x))
-  if (length(.col_name) > 0) {
-    return(.x %>% pull(.col_name[1])) # nolint
+  if (.col_name %in% names(.x)) {
+    return(.x %>% pull(.col_name)) # nolint
   } else {
     return(rep(NA, nrow(.x))) # nolint
   }
