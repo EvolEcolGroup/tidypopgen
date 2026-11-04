@@ -392,3 +392,24 @@ analyses:
     #> 10 pairwise_fst  5.49
     #> 11   plink_save  0.34
     #> 12        Total 34.12
+
+## Running the benchmark on a laptop
+
+We will now run this benchmark on a laptop with a GenuineIntel, Intel(R)
+Core(TM) Ultra 7 155H, 22 CPU and 31 GiB of RAM, limiting the number of
+cores to 4. Here is a summary of the time taken (in seconds) to perform
+each step of the analyses:
+
+    #>            step  time
+    #> 1    read_plink  2.01
+    #> 2   loci_report  0.11
+    #> 3   filter_loci  3.17
+    #> 4  indiv_report  0.37
+    #> 5  filter_indiv  0.01
+    #> 6        impute  0.96
+    #> 7   ld_clumping  6.83
+    #> 8           pca  5.06
+    #> 9          dapc  0.32
+    #> 10 pairwise_fst  0.33
+    #> 11   plink_save   0.3
+    #> 12        Total 19.47
