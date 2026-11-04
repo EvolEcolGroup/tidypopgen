@@ -537,13 +537,27 @@ inline void sfs_box_for_each(int d, const int* lo, const int* hi,
 }
 
 // project the configurations of a spectrum (see above); weights (replicates x
-// blocks, column-major) gives the weight of each block in each replicate
+// blocks, column-major) gives the weight of each block in each replicate.
+// The spectra of the blocks are buffered (up to 32 at a time), and added to
+// the replicates by tiles of cells, so that the replicates are read and
+// written once per buffer rather than once per block (with many replicates
+// of a large spectrum, this is limited by memory bandwidth); tiles are
+// processed with inner_threads threads. Each cell of each replicate adds the
+// blocks in their order, so the results do not depend on the size of the
+// buffer or the number of threads.
 inline void sfs_contract(SfsSpectrumData& sd, const double* probs,
-                         const double* weights, size_t n_rep) {
+                         const double* weights, size_t n_rep,
+                         int inner_threads) {
   const size_t K = sd.K;
   const size_t n_rows = sd.count.size();
   const size_t n_cells = sd.n_cells;
   sd.out.assign(n_cells * n_rep, 0.0);
+  // the buffer of block spectra (at most 32, and about 64 MB)
+  const size_t max_pending = std::max((size_t) 1, std::min((size_t) 32,
+    (size_t) (8e6 / (double) std::max(n_cells, (size_t) 1))));
+  std::vector<double> pending;
+  std::vector<int> pending_block;
+  pending_block.reserve(max_pending);
   // partial sums: T[d] has the dimensions 0 to d of the spectrum, and its
   // non-zero cells are within the box blo[d], bhi[d] (empty if
   // !has_box[d])
@@ -606,22 +620,49 @@ inline void sfs_contract(SfsSpectrumData& sd, const double* probs,
     has_box[d] = 0;
   };
 
-  // add the spectrum of block b (in T[K - 1]) to each replicate, weighted by
-  // the number of times the block was drawn, and reset it
+  // add the buffered block spectra to each replicate, weighted by the number
+  // of times each block was drawn, and empty the buffer
+  auto flush_pending = [&]() {
+    size_t n_pending = pending_block.size();
+    if (n_pending == 0) return;
+    const size_t tile = 2048;
+    const size_t n_tiles = (n_cells + tile - 1) / tile;
+    const double* p_pending = pending.data();
+    const int* p_pending_block = pending_block.data();
+    double* p_out = sd.out.data();
+#pragma omp parallel for num_threads(inner_threads) if (inner_threads > 1) \
+    schedule(dynamic, 1)
+    for (size_t i_tile = 0; i_tile < n_tiles; i_tile++) {
+      size_t c0 = i_tile * tile;
+      size_t c1 = std::min(n_cells, c0 + tile);
+      for (size_t r = 0; r < n_rep; r++) {
+        double* o = p_out + r * n_cells;
+        for (size_t g = 0; g < n_pending; g++) {
+          double w = weights[r + (size_t) p_pending_block[g] * n_rep];
+          if (w == 0) continue;
+          const double* bg = p_pending + g * n_cells;
+          for (size_t c = c0; c < c1; c++) o[c] += w * bg[c];
+        }
+      }
+    }
+    std::fill(pending.begin(), pending.begin() + n_pending * n_cells, 0.0);
+    pending_block.clear();
+  };
+
+  // move the spectrum of block b (in T[K - 1]) to the buffer, and reset it
   auto emit = [&](int b) {
     if (!has_box[K - 1]) return;
+    if (pending.empty()) pending.assign(max_pending * n_cells, 0.0);
+    double* slot = pending.data() + pending_block.size() * n_cells;
     double* t = T[K - 1].data();
-    for (size_t r = 0; r < n_rep; r++) {
-      double w = weights[r + (size_t) b * n_rep];
-      if (w == 0) continue;
-      double* out = sd.out.data() + r * n_cells;
-      sfs_box_for_each((int) K - 1, blo[K - 1].data(), bhi[K - 1].data(),
-                       sd.stride.data(),
-                       [&](size_t idx) { out[idx] += w * t[idx]; });
-    }
     sfs_box_for_each((int) K - 1, blo[K - 1].data(), bhi[K - 1].data(),
-                     sd.stride.data(), [&](size_t idx) { t[idx] = 0; });
+                     sd.stride.data(), [&](size_t idx) {
+                       slot[idx] = t[idx];
+                       t[idx] = 0;
+                     });
     has_box[K - 1] = 0;
+    pending_block.push_back(b);
+    if (pending_block.size() == max_pending) flush_pending();
   };
 
   for (size_t o = 0; o < n_rows; o++) {
@@ -665,6 +706,7 @@ inline void sfs_contract(SfsSpectrumData& sd, const double* probs,
     for (size_t d = 0; d + 1 < K; d++) flush(d, last);
     emit(block[last]);
   }
+  flush_pending();
 }
 
 // Project the configurations of each spectrum. configs is a list with, for
@@ -791,12 +833,17 @@ List sfs_project_cpp(const List& configs,
     }
   }
 
-  // project the spectra in parallel
+  // project the spectra in parallel (or, for a single spectrum, add the
+  // blocks to the replicates in parallel)
   const double* p_probs = probs.data();
   const double* p_w = w.data();
+  if (n_spectra == 1) {
+    sfs_contract(data[0], p_probs, p_w, n_rep, ncores);
+  } else {
 #pragma omp parallel for num_threads(ncores) schedule(dynamic, 1)
-  for (size_t s = 0; s < n_spectra; s++) {
-    sfs_contract(data[s], p_probs, p_w, n_rep);
+    for (size_t s = 0; s < n_spectra; s++) {
+      sfs_contract(data[s], p_probs, p_w, n_rep, 1);
+    }
   }
 
   List res(n_spectra);

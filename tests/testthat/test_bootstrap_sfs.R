@@ -348,3 +348,37 @@ test_that("gt_as_easysfs writes bootstrap replicates", {
     "`block_size` is needed"
   )
 })
+
+test_that("replicates with many blocks do not depend on the number of cores", {
+  # 60 blocks of 2 SNPs: the block spectra are buffered (32 at a time) before
+  # being added to the replicates, and a single spectrum adds them in
+  # parallel
+  block_id <- .jackknife_block_ids(show_loci(sim$gt),
+    block_size = 2,
+    size_unit = "snp"
+  )
+  boot_1 <- withr::with_seed(30, {
+    bootstrap_nwise_pop_sfs(sim$gt,
+      n_bootstrap = 4, block_size = 2,
+      n_proj = n_proj, type = "array", n_cores = 1
+    )
+  })
+  boot_2 <- withr::with_seed(30, {
+    bootstrap_nwise_pop_sfs(sim$gt,
+      n_bootstrap = 4, block_size = 2,
+      n_proj = n_proj, type = "array", n_cores = 2
+    )
+  })
+  expect_identical(boot_1, boot_2)
+  for (i_rep in c(1, 4)) {
+    gt_rep <- resampled_gt(
+      sim, block_id,
+      attr(boot_1, "bootstrap_blocks")[i_rep, ]
+    )
+    expect_equal(
+      boot_1[[i_rep]],
+      nwise_pop_sfs(gt_rep, n_proj = n_proj, type = "array"),
+      tolerance = 1e-10
+    )
+  }
+})
