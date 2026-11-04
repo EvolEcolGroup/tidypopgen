@@ -32,6 +32,8 @@ and \code{n_loci} (the number of loci with at least \code{n_proj} called allele
 copies), and \code{best}, which is \code{TRUE} for the projection that maximises
 the number of segregating sites (the largest one in case of ties), used
 by default by \code{\link[=pop_sfs]{pop_sfs()}}, \code{\link[=pairwise_pop_sfs]{pairwise_pop_sfs()}} and \code{\link[=nwise_pop_sfs]{nwise_pop_sfs()}}.
+The tibble has class \code{sfs_preview_tbl}, and can be plotted with
+\link[=autoplot_sfs]{autoplot()}.
 }
 \description{
 For each population, compute the number of segregating sites in its
@@ -64,6 +66,11 @@ example_gt \%>\% pop_sfs_preview()
 example_gt \%>\%
   pop_sfs_preview() \%>\%
   dplyr::filter(best)
+
+# plot the number of segregating sites for each projection
+example_gt \%>\%
+  pop_sfs_preview() \%>\%
+  autoplot()
 }
 \seealso{
 \code{\link[=pop_sfs]{pop_sfs()}}

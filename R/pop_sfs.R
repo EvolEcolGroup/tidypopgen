@@ -109,6 +109,8 @@
 #'   - `masked`: whether the cell is masked (see details).
 #'
 #'   The projection of each population is stored in the attribute `n_proj`.
+#'   The tibble has class `pop_sfs_tbl`, and can be plotted with
+#'   [autoplot()][autoplot_sfs].
 #'   If `type = "array"`, a list of `sfs` objects (one per population, named
 #'   by the group labels), or a single `sfs` object for ungrouped data. An
 #'   `sfs` object is an array of the numbers of sites, with attributes
@@ -262,7 +264,7 @@ pop_sfs.grouped_df <- function(
   } else {
     res <- .bind_group_rows(cells, data$groups)
   }
-  .sfs_tidy_attributes(res, n_proj, folded)
+  .sfs_tidy_attributes(res, n_proj, folded, class = "pop_sfs_tbl")
 }
 
 #' Preview the projections of the site frequency spectrum
@@ -302,6 +304,8 @@ pop_sfs.grouped_df <- function(
 #'   copies), and `best`, which is `TRUE` for the projection that maximises
 #'   the number of segregating sites (the largest one in case of ties), used
 #'   by default by [pop_sfs()], [pairwise_pop_sfs()] and [nwise_pop_sfs()].
+#'   The tibble has class `sfs_preview_tbl`, and can be plotted with
+#'   [autoplot()][autoplot_sfs].
 #' @seealso [pop_sfs()]
 #' @export
 #' @examples
@@ -313,6 +317,11 @@ pop_sfs.grouped_df <- function(
 #' example_gt %>%
 #'   pop_sfs_preview() %>%
 #'   dplyr::filter(best)
+#'
+#' # plot the number of segregating sites for each projection
+#' example_gt %>%
+#'   pop_sfs_preview() %>%
+#'   autoplot()
 pop_sfs_preview <- function(
   .x,
   ancestral = NULL,
@@ -329,10 +338,13 @@ pop_sfs_preview <- function(
   )
   previews <- .sfs_preview_from_configs(configs, data$max_n)
   if (is.null(data$groups)) {
-    tibble::as_tibble(previews[[1]])
+    res <- tibble::as_tibble(previews[[1]])
   } else {
-    .bind_group_rows(previews, data$groups)
+    res <- .bind_group_rows(previews, data$groups)
   }
+  # a class for autoplot()
+  class(res) <- c("sfs_preview_tbl", class(res))
+  res
 }
 
 # check the folded argument
@@ -343,9 +355,13 @@ pop_sfs_preview <- function(
   invisible(TRUE)
 }
 
-# add the projections and folding to a tidy spectrum, as attributes
-.sfs_tidy_attributes <- function(res, n_proj, folded) {
+# add the projections and folding to a tidy spectrum, as attributes, and a
+# class (used by autoplot())
+.sfs_tidy_attributes <- function(res, n_proj, folded, class = NULL) {
   attr(res, "n_proj") <- n_proj
   attr(res, "folded") <- folded
+  if (!is.null(class)) {
+    class(res) <- c(class, class(res))
+  }
   res
 }

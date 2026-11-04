@@ -45,6 +45,15 @@ projections and options, the spectra match easySFS's output.
   pass, and loci without a usable ancestral allele are dropped (counted in
   `n_loci_unpolarised`), as dadi does with an outgroup allele. It is ignored,
   with a warning, for folded spectra, which polarisation does not change;
+- `autoplot()` methods for the tidy outputs of `pop_sfs()` (class
+  `pop_sfs_tbl`, bar plots with one panel per population) and
+  `pairwise_pop_sfs()` (class `pairwise_sfs_tbl`, heatmaps with one panel per
+  pair), for `sfs` objects of one or two populations, and for the output of
+  `pop_sfs_preview()` (class `sfs_preview_tbl`, with the default projection
+  marked). Masked cells are hidden by default. Heatmaps use a single blue
+  ramp on a log scale that starts at `min_sites` (a thousandth of the
+  largest cell by default, like dadi's `vmin`), because the projection spreads
+  each locus over many cells with tiny fractions of a site;
 - `gt_as_easysfs()`, which computes, in one pass, all the spectra that
   easySFS writes (1D, each pair, all populations) and writes them in both
   formats, with easySFS's directory layout and file names. It was checked
@@ -73,7 +82,6 @@ library, as `CLAUDE.md` requires.
 **Still to do:**
 
 - generate the easySFS fixtures (run `data-raw/create_easysfs_test_data.R`);
-- the `autoplot()` methods;
 - the block bootstrap;
 - verify the cell order of fsc MSFS files against the fsc manual. In fsc's
   2D files the first population changes fastest along each row, which

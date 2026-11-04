@@ -15,7 +15,10 @@
   monomorphic sites from the total length of the sequences. Unfolded spectra
   can be polarised with the ancestral allele of each locus (`ancestral`, a
   column of the loci table or a vector); loci with an unknown ancestral
-  allele are then dropped, as in dadi.
+  allele are then dropped, as in dadi. `autoplot()` plots the spectra of
+  `pop_sfs()` (bar plots) and `pairwise_pop_sfs()` (heatmaps, on a log scale),
+  `sfs` objects of one or two populations, and the output of
+  `pop_sfs_preview()`.
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,

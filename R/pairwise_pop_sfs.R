@@ -33,6 +33,8 @@
 #'   - `masked`: whether the cell is masked (see [pop_sfs()]).
 #'
 #'   The projection of each population is stored in the attribute `n_proj`.
+#'   The tibble has class `pairwise_sfs_tbl`, and can be plotted with
+#'   [autoplot()][autoplot_sfs].
 #'   If `type = "array"`, a list of `sfs` objects (one per pair, named with
 #'   the labels of the two groups pasted with "."), each an array with the
 #'   first population in the rows and the second in the columns (see
@@ -110,5 +112,5 @@ pairwise_pop_sfs <- function(
   group_2 <- groups$keys[pairwise_combn[2, pair_idx], , drop = FALSE]
   names(group_2) <- paste0(groups$vars, "_2")
   res <- dplyr::bind_cols(group_1, group_2, dplyr::bind_rows(unname(cells)))
-  .sfs_tidy_attributes(res, n_proj, folded)
+  .sfs_tidy_attributes(res, n_proj, folded, class = "pairwise_sfs_tbl")
 }

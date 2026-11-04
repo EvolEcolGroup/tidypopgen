@@ -68,6 +68,8 @@ alternate (or minor) allele in the first and second population;
 }
 
 The projection of each population is stored in the attribute \code{n_proj}.
+The tibble has class \code{pairwise_sfs_tbl}, and can be plotted with
+\link[=autoplot_sfs]{autoplot()}.
 If \code{type = "array"}, a list of \code{sfs} objects (one per pair, named with
 the labels of the two groups pasted with "."), each an array with the
 first population in the rows and the second in the columns (see

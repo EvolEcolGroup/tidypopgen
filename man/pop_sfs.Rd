@@ -98,6 +98,8 @@ unfolded spectrum) or of the minor allele (for a folded spectrum);
 }
 
 The projection of each population is stored in the attribute \code{n_proj}.
+The tibble has class \code{pop_sfs_tbl}, and can be plotted with
+\link[=autoplot_sfs]{autoplot()}.
 If \code{type = "array"}, a list of \code{sfs} objects (one per population, named
 by the group labels), or a single \code{sfs} object for ungrouped data. An
 \code{sfs} object is an array of the numbers of sites, with attributes
