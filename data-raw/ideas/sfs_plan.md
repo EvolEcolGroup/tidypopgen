@@ -86,6 +86,20 @@ library, as `CLAUDE.md` requires.
 | `pairwise_pop_sfs()`, 45 pairs, `n_proj = 40` | 2.1 s | 1.4 s |
 | `nwise_pop_sfs()`, 3 populations, `n_proj = 40` | 0.35 s | 0.33 s |
 
+- Bootstrap timings: 100 replicates, 1000 blocks of 100 SNPs, -O2 build.
+  Without bootstrap, the timings are unchanged.
+
+  | Function | 1 core | 4 cores |
+  |---|---|---|
+  | `bootstrap_pop_sfs(n_proj = 160)` | 0.85 s | 0.68 s |
+  | `bootstrap_pairwise_pop_sfs()`, 45 pairs, `n_proj = 40` | 11.2 s | 4.8 s |
+  | `bootstrap_nwise_pop_sfs()`, 3 populations, `n_proj = 40` | 6.1 s | 4.1 s |
+
+  The projection dominates. Within a block, almost every locus has its own
+  configuration (about 99k rows per spectrum), so the factorisation saves
+  little. Each block spectrum is then added to every replicate. The block
+  spectra are buffered (32 at a time) and added by tiles of cells, which cut
+  the `nwise` time from about 9 s.
 - With missing data, each pair has about 60k distinct configurations.
   Counting them takes about 1 s, and projecting them about 1 s.
 - In the projection, building the probability tables and copying the
