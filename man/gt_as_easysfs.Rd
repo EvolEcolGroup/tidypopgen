@@ -14,6 +14,9 @@ gt_as_easysfs(
   total_length = NULL,
   round = FALSE,
   fastest = c("last", "first"),
+  n_bootstrap = 0,
+  bootstrap_block_size = NULL,
+  bootstrap_size_unit = c("snp", "cM", "bp"),
   max_cells = 1e+07,
   overwrite = FALSE,
   n_cores = bigstatsr::nb_cores(),
@@ -66,6 +69,13 @@ second, and so on (the number of copies in the last population changes
 fastest, as in the files written by \code{dadi} and \code{easySFS}); "first" makes
 the number of copies in the first population change fastest.}
 
+\item{n_bootstrap}{the number of bootstrap replicates to write (0, the
+default, for none).}
+
+\item{bootstrap_block_size, bootstrap_size_unit}{the size of the blocks of
+loci resampled for the bootstrap, and its unit ("snp", the default, "cM"
+or "bp"); see \code{\link[=bootstrap_pop_sfs]{bootstrap_pop_sfs()}}.}
+
 \item{max_cells}{the maximum number of cells of the joint spectrum of all
 populations; an error is raised for larger spectra.}
 
@@ -103,6 +113,15 @@ and \code{pop1-pop2-...-popK.sfs} for all populations;
 the pair is in the rows), and \code{prefix_MSFS.obs} for all populations.
 }
 
+With \code{n_bootstrap} replicates of a block bootstrap (see
+\code{\link[=bootstrap_pop_sfs]{bootstrap_pop_sfs()}}), the spectra of each replicate are also written,
+with the same layout and file names, in the sub-directories \code{bootstrap_1},
+\code{bootstrap_2}, ... of \code{out_dir}, numbered with as many digits as
+\code{n_bootstrap} (e.g. \code{bootstrap_001} to \code{bootstrap_100}), which can be
+used to estimate confidence intervals with \code{fastsimcoal2}. Replicates use
+the same projections as the spectra of all loci, and \code{total_length} and
+\code{round} are applied to each of them.
+
 See \code{\link[=write_sfs]{write_sfs()}} for the formats, and for the order of the cells set by
 \code{fastest}. Populations are in the order of the groups (see
 \code{\link[dplyr:group_keys]{dplyr::group_keys()}}): to change their order, which matters for \code{dadi}
@@ -122,8 +141,18 @@ out_dir <- file.path(tempdir(), "example_sfs")
 files <- example_gt \%>\%
   gt_as_easysfs(out_dir = out_dir, n_proj = 2, prefix = "example")
 basename(files)
+
+# with 3 bootstrap replicates, resampling blocks of 2 SNPs
+set.seed(1)
+files <- example_gt \%>\%
+  gt_as_easysfs(
+    out_dir = out_dir, n_proj = 2, prefix = "example",
+    n_bootstrap = 3, bootstrap_block_size = 2, overwrite = TRUE
+  )
+list.files(out_dir)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=write_sfs]{write_sfs()}}, \code{\link[=pop_sfs]{pop_sfs()}}, \code{\link[=pop_sfs_preview]{pop_sfs_preview()}}
+\code{\link[=write_sfs]{write_sfs()}}, \code{\link[=pop_sfs]{pop_sfs()}}, \code{\link[=pop_sfs_preview]{pop_sfs_preview()}},
+\code{\link[=bootstrap_pop_sfs]{bootstrap_pop_sfs()}}
 }

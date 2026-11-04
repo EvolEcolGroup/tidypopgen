@@ -141,14 +141,27 @@
 #'   a spectrum
 #' @param min_n the minimum number of called allele copies, for each group,
 #'   for a locus to be counted (loci below it are counted as dropped)
+#' @param block_ids optional, the (1-based) bootstrap block of each locus (as
+#'   returned by `.jackknife_block_ids()`), to count the configurations in
+#'   each block
 #' @returns a list with, for each spectrum, `n` and `k` (matrices of the
 #'   number of called and alternate allele copies, one row per configuration
-#'   and one column per population), `count` (the number of loci with each
-#'   configuration) and `n_dropped`
+#'   and one column per population), `block` (the 0-based block of each
+#'   configuration), `count` (the number of loci with each configuration),
+#'   and `n_dropped` and `n_unpolarised` (the number of loci dropped in each
+#'   block)
 #' @keywords internal
 #' @noRd
-.sfs_config_counts <- function(data, spectra, min_n, n_cores, block_size) {
+.sfs_config_counts <- function(data, spectra, min_n, n_cores, block_size,
+                               block_ids = NULL) {
   genotypes <- data$genotypes
+  if (is.null(block_ids)) {
+    block_ids <- integer(0)
+    n_blocks <- 1L
+  } else {
+    n_blocks <- max(block_ids)
+    block_ids <- as.integer(block_ids) - 1L
+  }
   sfs_config_counts_cpp(
     BM = attr(genotypes, "fbm"),
     rowInd = vctrs::vec_data(genotypes),
@@ -160,6 +173,8 @@
     spectra = lapply(spectra, function(x) as.integer(x) - 1L),
     min_n = as.integer(min_n),
     polarise = data$polarise,
+    block_ids = block_ids,
+    n_blocks = as.integer(n_blocks),
     ncores = n_cores,
     # the kernel keeps the counts of a block of loci for all groups, so we
     # cap the size of the blocks
@@ -314,7 +329,7 @@
   n_proj
 }
 
-#' Build spectra from their configurations
+#' Project the configurations of a set of spectra, for each replicate
 #'
 #' @param configs the configurations of each spectrum (as returned by
 #'   `.sfs_config_counts()`)
@@ -323,39 +338,86 @@
 #' @param n_proj the projection of each group (named with the group labels)
 #' @param folded whether to fold the spectra
 #' @param n_cores the number of cores used to project the spectra
-#' @returns a list of `sfs` objects
+#' @param weights a matrix with the weight of each block (columns) in each
+#'   bootstrap replicate (rows); by default, a single replicate with all loci
+#'   (a single block of weight 1)
+#' @returns a list with, for each spectrum, `values` (a matrix of the cells of
+#'   the spectrum, in column-major order, for each replicate (columns)),
+#'   `mask`, `dims`, `pop_ids`, `folded`, and the number of loci used
+#'   (`n_loci`), dropped for missing data (`n_loci_dropped`) and without
+#'   ancestral allele (`n_loci_unpolarised`) in each replicate
 #' @keywords internal
 #' @noRd
-.sfs_from_configs <- function(configs, spectra, n_proj, folded, n_cores) {
+.sfs_project <- function(configs, spectra, n_proj, folded, n_cores,
+                         weights = matrix(1, 1, 1)) {
+  storage.mode(weights) <- "double"
   projected <- sfs_project_cpp(
     configs = configs,
     spectra = lapply(spectra, function(x) as.integer(x) - 1L),
     n_proj = unname(n_proj),
+    weights = weights,
     ncores = n_cores
   )
   lapply(seq_along(spectra), function(i) {
     this_proj <- n_proj[spectra[[i]]]
     dims <- unname(this_proj) + 1L
-    fs <- array(projected[[i]]$sfs, dim = dims)
+    values <- projected[[i]]$sfs
     # mask the corners (monomorphic in the projected sample), as dadi does
     mask <- array(FALSE, dim = dims)
     mask[1] <- TRUE
     mask[length(mask)] <- TRUE
     if (folded) {
-      folded_fs <- .sfs_fold(fs, mask)
-      fs <- folded_fs$fs
-      mask <- folded_fs$mask
+      folded_values <- .sfs_fold_values(values, mask)
+      values <- folded_values$values
+      mask <- folded_values$mask
     }
-    new_sfs(
-      fs,
+    # the loci of each replicate are the loci of its blocks
+    block_sums <- function(x) as.vector(weights %*% x)
+    list(
+      values = values,
       mask = mask,
+      dims = dims,
       pop_ids = names(this_proj),
       folded = folded,
-      n_loci = projected[[i]]$n_loci,
-      n_loci_dropped = projected[[i]]$n_dropped + configs[[i]]$n_dropped,
-      n_loci_unpolarised = configs[[i]]$n_unpolarised
+      n_loci = block_sums(projected[[i]]$n_used),
+      n_loci_dropped = block_sums(
+        projected[[i]]$n_dropped + configs[[i]]$n_dropped
+      ),
+      n_loci_unpolarised = block_sums(configs[[i]]$n_unpolarised)
     )
   })
+}
+
+#' The `sfs` object of a replicate of a projected spectrum
+#'
+#' @param projected an element of the list returned by `.sfs_project()`
+#' @param i_rep the replicate
+#' @returns an `sfs` object
+#' @keywords internal
+#' @noRd
+.sfs_replicate <- function(projected, i_rep = 1) {
+  new_sfs(
+    array(projected$values[, i_rep], dim = projected$dims),
+    mask = projected$mask,
+    pop_ids = projected$pop_ids,
+    folded = projected$folded,
+    n_loci = projected$n_loci[i_rep],
+    n_loci_dropped = projected$n_loci_dropped[i_rep],
+    n_loci_unpolarised = projected$n_loci_unpolarised[i_rep]
+  )
+}
+
+#' Build spectra from their configurations
+#'
+#' @inheritParams .sfs_project
+#' @returns a list of `sfs` objects (computed with all loci)
+#' @keywords internal
+#' @noRd
+.sfs_from_configs <- function(configs, spectra, n_proj, folded, n_cores) {
+  lapply(
+    .sfs_project(configs, spectra, n_proj, folded, n_cores),
+    .sfs_replicate
+  )
 }
 
 #' Fold a spectrum
@@ -374,24 +436,43 @@
 #' @keywords internal
 #' @noRd
 .sfs_fold <- function(fs, mask) {
-  dims <- dim(fs)
+  folded <- .sfs_fold_values(matrix(as.vector(fs), ncol = 1), mask)
+  list(
+    fs = array(folded$values[, 1], dim = dim(mask)),
+    mask = folded$mask
+  )
+}
+
+#' Fold the spectra of several replicates
+#'
+#' As `.sfs_fold()`, for a matrix with the cells of a spectrum (in
+#' column-major order) for each replicate (columns).
+#'
+#' @param values a numeric matrix, with one row per cell and one column per
+#'   replicate
+#' @param mask a logical array with the dimensions of the spectrum
+#' @returns a list with the folded `values` and the `mask`
+#' @keywords internal
+#' @noRd
+.sfs_fold_values <- function(values, mask) {
+  dims <- dim(mask)
   total_samples <- sum(dims - 1)
   # the total number of copies of each cell
   total_per_entry <- array(0L, dim = dims)
   for (i in seq_along(dims)) {
-    total_per_entry <- total_per_entry + slice.index(fs, i) - 1L
+    total_per_entry <- total_per_entry + slice.index(mask, i) - 1L
   }
   # reversing an array along all its axes reverses its elements
-  rev_array <- function(x) array(rev(x), dim = dim(x))
-  where_folded_out <- total_per_entry > floor(total_samples / 2)
-  folded <- fs + rev_array(ifelse(where_folded_out, fs, 0))
-  folded[where_folded_out] <- 0
-  where_ambiguous <- total_per_entry == total_samples / 2
-  ambiguous <- ifelse(where_ambiguous, fs, 0)
-  folded <- folded - 0.5 * ambiguous + 0.5 * rev_array(ambiguous)
+  rev_idx <- rev(seq_along(mask))
+  where_folded_out <- as.vector(total_per_entry > floor(total_samples / 2))
+  folded <- values + (values * where_folded_out)[rev_idx, , drop = FALSE]
+  folded[where_folded_out, ] <- 0
+  where_ambiguous <- as.vector(total_per_entry == total_samples / 2)
+  ambiguous <- values * where_ambiguous
+  folded <- folded - 0.5 * ambiguous + 0.5 * ambiguous[rev_idx, , drop = FALSE]
   list(
-    fs = array(folded, dim = dims),
-    mask = array(mask | rev_array(mask) | where_folded_out, dim = dims)
+    values = folded,
+    mask = array(mask | rev(mask) | where_folded_out, dim = dims)
   )
 }
 
@@ -433,37 +514,76 @@ new_sfs <- function(fs, mask, pop_ids, folded, n_loci, n_loci_dropped,
   )
 }
 
-#' The cells of a spectrum as a tibble
+#' The order of the cells of a spectrum in a tibble
 #'
-#' @param x an `sfs` object
+#' @param dims the dimensions of the spectrum
 #' @param fastest the population whose number of allele copies changes
 #'   fastest from one row to the next: "last" (the order of the populations
 #'   is respected: rows are sorted by the first population, then the second,
 #'   ...), or "first"
 #' @param count_names the names of the columns with the number of allele
 #'   copies of each population
+#' @returns a list with `counts` (a tibble with the number of copies of each
+#'   population in each cell, one row per cell) and `order` (the index, in
+#'   the column-major array, of the cell of each row)
+#' @keywords internal
+#' @noRd
+.sfs_cell_index <- function(dims, fastest = c("last", "first"), count_names) {
+  fastest <- match.arg(fastest)
+  copies <- lapply(dims, function(d) seq_len(d) - 1L)
+  if (fastest == "first") {
+    # R arrays are column-major: the first dimension changes fastest
+    counts <- expand.grid(copies, KEEP.OUT.ATTRS = FALSE)
+    cell_order <- seq_len(prod(dims))
+  } else {
+    perm <- rev(seq_along(dims))
+    counts <- expand.grid(copies[perm], KEEP.OUT.ATTRS = FALSE)[perm]
+    cell_order <- as.vector(aperm(array(seq_len(prod(dims)), dim = dims), perm))
+  }
+  names(counts) <- count_names
+  list(counts = tibble::as_tibble(counts), order = cell_order)
+}
+
+#' The cells of a spectrum as a tibble
+#'
+#' @param x an `sfs` object
+#' @inheritParams .sfs_cell_index
 #' @returns a tibble with one row per cell, one column of allele copies per
 #'   population, `n_sites` (the projected number of sites) and `masked`
 #' @keywords internal
 #' @noRd
 .sfs_cells <- function(x, fastest = c("last", "first"), count_names) {
-  fastest <- match.arg(fastest)
-  dims <- dim(x)
-  values <- as.vector(unclass(x))
-  masked <- as.vector(attr(x, "mask"))
-  copies <- lapply(dims, function(d) seq_len(d) - 1L)
-  if (fastest == "first") {
-    # R arrays are column-major: the first dimension changes fastest
-    idx <- expand.grid(copies, KEEP.OUT.ATTRS = FALSE)
-  } else {
-    perm <- rev(seq_along(dims))
-    idx <- expand.grid(copies[perm], KEEP.OUT.ATTRS = FALSE)[perm]
-    values <- as.vector(aperm(array(values, dim = dims), perm))
-    masked <- as.vector(aperm(array(masked, dim = dims), perm))
-  }
-  names(idx) <- count_names
-  tibble::as_tibble(idx) %>%
-    dplyr::mutate(n_sites = values, masked = masked)
+  index <- .sfs_cell_index(dim(x), fastest, count_names)
+  index$counts %>%
+    dplyr::mutate(
+      n_sites = as.vector(unclass(x))[index$order],
+      masked = as.vector(attr(x, "mask"))[index$order]
+    )
+}
+
+#' The cells of the bootstrap replicates of a spectrum as a tibble
+#'
+#' @param projected an element of the list returned by `.sfs_project()`
+#' @inheritParams .sfs_cell_index
+#' @returns a tibble with one row per replicate and cell, with columns
+#'   `replicate`, one column of allele copies per population, `n_sites` and
+#'   `masked`
+#' @keywords internal
+#' @noRd
+.sfs_replicate_cells <- function(projected, fastest = c("last", "first"),
+                                 count_names) {
+  index <- .sfs_cell_index(projected$dims, fastest, count_names)
+  n_rep <- ncol(projected$values)
+  n_cells <- length(index$order)
+  rows <- rep(seq_len(n_cells), times = n_rep)
+  dplyr::bind_cols(
+    tibble::tibble(replicate = rep(seq_len(n_rep), each = n_cells)),
+    index$counts[rows, , drop = FALSE],
+    tibble::tibble(
+      n_sites = as.vector(projected$values[index$order, , drop = FALSE]),
+      masked = rep(as.vector(projected$mask)[index$order], times = n_rep)
+    )
+  )
 }
 
 #' Tidy a site frequency spectrum

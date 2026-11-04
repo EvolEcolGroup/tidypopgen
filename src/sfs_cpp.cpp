@@ -123,57 +123,70 @@ private:
 
 /******************************************************************************/
 
-// Count the loci with each configuration of a spectrum. Each population i of
-// the spectrum (group pops[i]) has at most max_n[i] allele copies; loci with
-// fewer than min_n[i] called copies in any population are only counted as
-// dropped. The configuration of a population is stored as the triangular
-// index of (n, k), and the configurations of the populations are combined
-// into a single key:
-// - DENSE: a single population with few possible configurations, counted in
-//   a dense vector indexed by the triangular index;
+// Count the loci with each configuration of a spectrum, in each block of loci
+// (the blocks of a block bootstrap; a single block otherwise). Each
+// population i of the spectrum (group pops[i]) has at most max_n[i] allele
+// copies; loci with fewer than min_n[i] called copies in any population are
+// only counted as dropped. The configuration of a population is stored as the
+// triangular index of (n, k), and the configurations of the populations and
+// the block are combined into a single key:
+// - DENSE: a single population with few possible configurations (and
+//   blocks), counted in a dense vector indexed by the block and the
+//   triangular index;
 // - MAP64: the mixed radix number of the triangular indices of the
-//   populations (the first population is the least significant), if it fits
-//   in 64 bits (and is not UINT64_MAX), counted in an SfsFlatCounter;
-// - MAPVEC: otherwise, a vector (n_1, k_1, ..., n_K, k_K) in an ordered map.
+//   populations (the first population is the least significant) and of the
+//   block (the most significant), if it fits in 64 bits (and is not
+//   UINT64_MAX), counted in an SfsFlatCounter;
+// - MAPVEC: otherwise, a vector (n_1, k_1, ..., n_K, k_K, block) in an
+//   ordered map.
 // Counts are integers (stored as doubles, exact up to 2^53), so they do not
 // depend on the order in which loci are added.
 class SfsConfigCounter {
 public:
   SfsConfigCounter(const std::vector<int>& pops,
                    const std::vector<int>& max_n,
-                   const std::vector<int>& min_n)
-    : _pops(pops), _K(pops.size()), _min_n(min_n), _n_dropped(0),
-      _n_unpolarised(0) {
+                   const std::vector<int>& min_n,
+                   size_t n_blocks)
+    : _pops(pops), _K(pops.size()), _min_n(min_n), _n_blocks(n_blocks),
+      _n_dropped(n_blocks, 0.0), _n_unpolarised(n_blocks, 0.0) {
     _radix.resize(_K);
     _n_tri.resize(_K);
     _mode = MAP64;
+    const uint64_t max_key = std::numeric_limits<uint64_t>::max() - 1;
     uint64_t prod = 1;
     for (size_t i = 0; i < _K; i++) {
       // number of pairs (n, k) with 0 <= k <= n <= max_n
       _n_tri[i] = sfs_tri(max_n[i] + 1, 0);
       _radix[i] = prod;
-      if (prod > (std::numeric_limits<uint64_t>::max() - 1) / _n_tri[i]) {
+      if (prod > max_key / _n_tri[i]) {
         _mode = MAPVEC;
       } else {
         prod *= _n_tri[i];
       }
     }
-    if (_K == 1 && prod <= ((uint64_t) 1 << 21)) {
+    // the block is the most significant digit
+    _radix_block = prod;
+    if (_mode == MAP64 && prod > max_key / _n_blocks) {
+      _mode = MAPVEC;
+    }
+    if (_mode == MAP64 && _K == 1 && prod * _n_blocks <= ((uint64_t) 1 << 21)) {
       _mode = DENSE;
-      _dense.assign(prod, 0.0);
+      _dense.assign(prod * _n_blocks, 0.0);
     }
   }
 
-  // add the loci of a block; b_n and b_k hold the number of called and
+  // add the loci of a chunk; b_n and b_k hold the number of called and
   // derived allele copies of each locus (row) and group (column), with
   // ngroups values per locus; b_drop (if not NULL) flags the loci that cannot
-  // be polarised, which are only counted as unpolarised
+  // be polarised, which are only counted as unpolarised; b_block (if not
+  // NULL) gives the block of each locus (otherwise, all loci are in block 0)
   void add_block(const int* b_n, const int* b_k, const char* b_drop,
-                 size_t ngroups, size_t n_loci) {
-    std::vector<int> key_vec(_mode == MAPVEC ? 2 * _K : 0);
+                 const int* b_block, size_t ngroups, size_t n_loci) {
+    std::vector<int> key_vec(_mode == MAPVEC ? 2 * _K + 1 : 0);
     for (size_t j = 0; j < n_loci; j++) {
+      uint64_t block = (b_block != NULL) ? (uint64_t) b_block[j] : 0;
       if (b_drop != NULL && b_drop[j]) {
-        _n_unpolarised += 1;
+        _n_unpolarised[block] += 1;
         continue;
       }
       const int* n = b_n + j * ngroups;
@@ -186,13 +199,13 @@ public:
         }
       }
       if (!keep) {
-        _n_dropped += 1;
+        _n_dropped[block] += 1;
         continue;
       }
       if (_mode == DENSE) {
-        _dense[sfs_tri(n[_pops[0]], k[_pops[0]])] += 1;
+        _dense[block * _radix_block + sfs_tri(n[_pops[0]], k[_pops[0]])] += 1;
       } else if (_mode == MAP64) {
-        uint64_t key = 0;
+        uint64_t key = block * _radix_block;
         for (size_t i = 0; i < _K; i++) {
           key += sfs_tri(n[_pops[i]], k[_pops[i]]) * _radix[i];
         }
@@ -202,25 +215,28 @@ public:
           key_vec[2 * i] = n[_pops[i]];
           key_vec[2 * i + 1] = k[_pops[i]];
         }
+        key_vec[2 * _K] = (int) block;
         _mapvec[key_vec] += 1;
       }
     }
   }
 
   // the configurations (sorted by key) as a list with matrices n and k (one
-  // row per configuration, one column per population), the number of loci
-  // with each configuration (count), and the number of loci dropped for
-  // missing data and because they could not be polarised
+  // row per configuration, one column per population), the (0-based) block
+  // of each configuration, the number of loci with each configuration
+  // (count), and the number of loci dropped in each block for missing data
+  // and because they could not be polarised
   List result() const {
-    std::vector<int> n_out, k_out;
+    std::vector<int> n_out, k_out, block_out;
     std::vector<double> count_out;
     if (_mode == DENSE) {
       for (size_t t = 0; t < _dense.size(); t++) {
         if (_dense[t] > 0) {
           int n, k;
-          sfs_untri(t, n, k);
+          sfs_untri(t % _radix_block, n, k);
           n_out.push_back(n);
           k_out.push_back(k);
+          block_out.push_back((int) (t / _radix_block));
           count_out.push_back(_dense[t]);
         }
       }
@@ -229,12 +245,14 @@ public:
       std::vector<double> counts;
       _map64.sorted(keys, counts);
       for (size_t r = 0; r < keys.size(); r++) {
+        uint64_t config_key = keys[r] % _radix_block;
         for (size_t i = 0; i < _K; i++) {
           int n, k;
-          sfs_untri((keys[r] / _radix[i]) % _n_tri[i], n, k);
+          sfs_untri((config_key / _radix[i]) % _n_tri[i], n, k);
           n_out.push_back(n);
           k_out.push_back(k);
         }
+        block_out.push_back((int) (keys[r] / _radix_block));
         count_out.push_back(counts[r]);
       }
     } else {
@@ -243,22 +261,28 @@ public:
           n_out.push_back(kv.first[2 * i]);
           k_out.push_back(kv.first[2 * i + 1]);
         }
+        block_out.push_back(kv.first[2 * _K]);
         count_out.push_back(kv.second);
       }
     }
     size_t n_configs = count_out.size();
     IntegerMatrix n_mat(n_configs, _K), k_mat(n_configs, _K);
+    IntegerVector block(n_configs);
     NumericVector count(n_configs);
     for (size_t r = 0; r < n_configs; r++) {
       for (size_t i = 0; i < _K; i++) {
         n_mat(r, i) = n_out[r * _K + i];
         k_mat(r, i) = k_out[r * _K + i];
       }
+      block[r] = block_out[r];
       count[r] = count_out[r];
     }
-    return List::create(_["n"] = n_mat, _["k"] = k_mat, _["count"] = count,
-                        _["n_dropped"] = _n_dropped,
-                        _["n_unpolarised"] = _n_unpolarised);
+    return List::create(
+      _["n"] = n_mat, _["k"] = k_mat, _["block"] = block, _["count"] = count,
+      _["n_dropped"] = NumericVector(_n_dropped.begin(), _n_dropped.end()),
+      _["n_unpolarised"] = NumericVector(_n_unpolarised.begin(),
+                                         _n_unpolarised.end())
+    );
   }
 
 private:
@@ -266,13 +290,15 @@ private:
   std::vector<int> _pops;
   size_t _K;
   std::vector<int> _min_n;
+  size_t _n_blocks;
   std::vector<uint64_t> _radix, _n_tri;
+  uint64_t _radix_block;
   Mode _mode;
   std::vector<double> _dense;
   SfsFlatCounter _map64;
   std::map<std::vector<int>, double> _mapvec;
-  double _n_dropped;
-  double _n_unpolarised;
+  std::vector<double> _n_dropped;
+  std::vector<double> _n_unpolarised;
 };
 
 /******************************************************************************/
@@ -290,9 +316,12 @@ private:
 // copies), or has a value for each locus: 0 if the reference allele is
 // ancestral, 1 if the alternate allele is ancestral (k then counts reference
 // copies), and -1 if the locus cannot be polarised (it is then dropped from
-// all spectra). After each block of loci, the spectra are updated in
-// parallel (each spectrum by a single thread). Returns a list with the
-// result of SfsConfigCounter::result() for each spectrum.
+// all spectra). block_ids is either empty (all loci are in a single block)
+// or gives the (0-based) block of each locus, between 0 and n_blocks - 1 (the
+// blocks of a block bootstrap): configurations are then counted separately in
+// each block. After each chunk of loci, the spectra are updated in parallel
+// (each spectrum by a single thread). Returns a list with the result of
+// SfsConfigCounter::result() for each spectrum.
 
 // [[Rcpp::export]]
 List sfs_config_counts_cpp(Environment BM,
@@ -305,6 +334,8 @@ List sfs_config_counts_cpp(Environment BM,
                            const List& spectra,
                            const IntegerVector& min_n,
                            const IntegerVector& polarise,
+                           const IntegerVector& block_ids,
+                           int n_blocks,
                            int ncores,
                            int block_size) {
 
@@ -331,6 +362,17 @@ List sfs_config_counts_cpp(Environment BM,
     }
   }
   const int* p_polarise = polarise.begin();
+  if (n_blocks < 1) stop("n_blocks should be a positive integer");
+  bool has_blocks = block_ids.size() > 0;
+  if (has_blocks && (size_t) block_ids.size() != m) {
+    stop("block_ids should be empty or have one value per locus");
+  }
+  for (R_xlen_t j = 0; j < block_ids.size(); j++) {
+    if (block_ids[j] < 0 || block_ids[j] >= n_blocks) {
+      stop("block_ids should be between 0 and n_blocks - 1");
+    }
+  }
+  const int* p_block = block_ids.begin();
   // allele counts need integer genotypes (not dosages)
   if (!acc.has_int_codes(255)) {
     stop("the site frequency spectrum needs integer genotype calls; it "
@@ -365,7 +407,8 @@ List sfs_config_counts_cpp(Environment BM,
       max_n[i] = group_max[g];
       this_min_n[i] = min_n[g];
     }
-    counters.push_back(SfsConfigCounter(pops, max_n, this_min_n));
+    counters.push_back(SfsConfigCounter(pops, max_n, this_min_n,
+                                        (size_t) n_blocks));
   }
 
   // called and derived allele copies of the loci of the current block, for
@@ -404,6 +447,7 @@ List sfs_config_counts_cpp(Environment BM,
                        counters[s].add_block(b_n.data(), b_k.data(),
                                              has_polarise ? b_drop.data() :
                                                NULL,
+                                             has_blocks ? p_block + j0 : NULL,
                                              (size_t) ngroups, n_block);
                      }
                    });
@@ -440,6 +484,14 @@ List sfs_config_counts_cpp(Environment BM,
 // populations, and so on. Only the bounding box of the non-zero cells of each
 // partial sum is visited. The result is the same (up to rounding), and the
 // order of the operations only depends on the configurations.
+//
+// For a block bootstrap, configurations are counted in each block of loci,
+// and the rows are first sorted by block: the spectrum of each block is
+// completed in turn, and added to the spectrum of each bootstrap replicate,
+// weighted by the number of times the block was drawn in that replicate (as
+// a spectrum is a sum over loci, a replicate is the weighted sum of the
+// spectra of the blocks). Without bootstrap, there is a single block, and a
+// single "replicate" with weight 1.
 
 // the hypergeometric probabilities of a configuration (n, k) of a population
 struct SfsProjVec {
@@ -455,10 +507,13 @@ struct SfsSpectrumData {
   std::vector<size_t> stride;           // stride of each dimension
   std::vector<uint64_t> keys;           // config of each kept row and pop
   std::vector<const SfsProjVec*> vecs;  // probabilities, idem
+  std::vector<int> block;               // block of each kept row
   std::vector<double> count;            // number of loci of each kept row
-  double n_used;
-  double n_dropped;
-  std::vector<double> out;              // the spectrum (column-major)
+  std::vector<double> n_used;           // loci used in each block
+  std::vector<double> n_dropped;        // loci dropped in each block
+  size_t n_cells;                       // cells of the spectrum
+  std::vector<double> out;              // the spectrum of each replicate
+                                        // (cells x replicates, column-major)
 };
 
 // call f(i) for every linear index i of the box lo..hi (dimensions 0 to d)
@@ -481,10 +536,14 @@ inline void sfs_box_for_each(int d, const int* lo, const int* hi,
   }
 }
 
-// project the configurations of a spectrum (see above)
-inline void sfs_contract(SfsSpectrumData& sd, const double* probs) {
+// project the configurations of a spectrum (see above); weights (replicates x
+// blocks, column-major) gives the weight of each block in each replicate
+inline void sfs_contract(SfsSpectrumData& sd, const double* probs,
+                         const double* weights, size_t n_rep) {
   const size_t K = sd.K;
   const size_t n_rows = sd.count.size();
+  const size_t n_cells = sd.n_cells;
+  sd.out.assign(n_cells * n_rep, 0.0);
   // partial sums: T[d] has the dimensions 0 to d of the spectrum, and its
   // non-zero cells are within the box blo[d], bhi[d] (empty if
   // !has_box[d])
@@ -496,12 +555,14 @@ inline void sfs_contract(SfsSpectrumData& sd, const double* probs) {
     blo[d].assign(d + 1, 0);
     bhi[d].assign(d + 1, 0);
   }
-  // rows sorted by the configuration of the last population, then the one
-  // before, ...
+  // rows sorted by block, then by the configuration of the last population,
+  // then the one before, ...
   std::vector<size_t> order(n_rows);
   std::iota(order.begin(), order.end(), 0);
   const uint64_t* keys = sd.keys.data();
+  const int* block = sd.block.data();
   std::sort(order.begin(), order.end(), [&](size_t a, size_t b) {
+    if (block[a] != block[b]) return block[a] < block[b];
     for (size_t i = K; i-- > 0;) {
       if (keys[a * K + i] != keys[b * K + i]) {
         return keys[a * K + i] < keys[b * K + i];
@@ -545,20 +606,44 @@ inline void sfs_contract(SfsSpectrumData& sd, const double* probs) {
     has_box[d] = 0;
   };
 
+  // add the spectrum of block b (in T[K - 1]) to each replicate, weighted by
+  // the number of times the block was drawn, and reset it
+  auto emit = [&](int b) {
+    if (!has_box[K - 1]) return;
+    double* t = T[K - 1].data();
+    for (size_t r = 0; r < n_rep; r++) {
+      double w = weights[r + (size_t) b * n_rep];
+      if (w == 0) continue;
+      double* out = sd.out.data() + r * n_cells;
+      sfs_box_for_each((int) K - 1, blo[K - 1].data(), bhi[K - 1].data(),
+                       sd.stride.data(),
+                       [&](size_t idx) { out[idx] += w * t[idx]; });
+    }
+    sfs_box_for_each((int) K - 1, blo[K - 1].data(), bhi[K - 1].data(),
+                     sd.stride.data(), [&](size_t idx) { t[idx] = 0; });
+    has_box[K - 1] = 0;
+  };
+
   for (size_t o = 0; o < n_rows; o++) {
     size_t r = order[o];
     if (o > 0) {
       size_t prev = order[o - 1];
-      // the last population whose configuration differs from the previous
-      // row: the partial sums of the populations before it are complete
-      size_t L = 0;
-      for (size_t i = K; i-- > 0;) {
-        if (keys[r * K + i] != keys[prev * K + i]) {
-          L = i;
-          break;
+      if (block[r] != block[prev]) {
+        // the spectrum of the previous block is complete
+        for (size_t d = 0; d + 1 < K; d++) flush(d, prev);
+        emit(block[prev]);
+      } else {
+        // the last population whose configuration differs from the previous
+        // row: the partial sums of the populations before it are complete
+        size_t L = 0;
+        for (size_t i = K; i-- > 0;) {
+          if (keys[r * K + i] != keys[prev * K + i]) {
+            L = i;
+            break;
+          }
         }
+        for (size_t d = 0; d < L; d++) flush(d, prev);
       }
-      for (size_t d = 0; d < L; d++) flush(d, prev);
     }
     // add the vector of the first population
     const SfsProjVec* v = sd.vecs[r * K];
@@ -576,26 +661,32 @@ inline void sfs_contract(SfsSpectrumData& sd, const double* probs) {
     }
   }
   if (n_rows > 0) {
-    for (size_t d = 0; d + 1 < K; d++) flush(d, order[n_rows - 1]);
+    size_t last = order[n_rows - 1];
+    for (size_t d = 0; d + 1 < K; d++) flush(d, last);
+    emit(block[last]);
   }
-  sd.out.swap(T[K - 1]);
 }
 
 // Project the configurations of each spectrum. configs is a list with, for
 // each spectrum, the output of sfs_config_counts_cpp() (n and k: one row per
-// configuration and one column per population of the spectrum; count: the
-// number of loci with each configuration); spectra gives the (0-based)
-// groups of each spectrum, and n_proj the projection of each group. The
-// hypergeometric probabilities are computed first (with R::dhyper()), and
-// the spectra are then projected in parallel. Returns a list with, for each
-// spectrum, its cells in column-major order (the first population changes
-// fastest), the number of loci used and the number of loci dropped (with
-// fewer than n_proj called copies in at least one population).
+// configuration and one column per population of the spectrum; block: the
+// block of each configuration; count: the number of loci with each
+// configuration); spectra gives the (0-based) groups of each spectrum, and
+// n_proj the projection of each group. weights (replicates x blocks) gives
+// the weight of each block in each bootstrap replicate (a 1 x 1 matrix of 1
+// without bootstrap). The hypergeometric probabilities are computed first
+// (with R::dhyper()), and the spectra are then projected in parallel. Returns
+// a list with, for each spectrum, a matrix with the cells of each replicate
+// (one column per replicate, with the cells in column-major order, i.e. the
+// first population changes fastest), and the number of loci used and
+// dropped (with fewer than n_proj called copies in at least one population)
+// in each block.
 
 // [[Rcpp::export]]
 List sfs_project_cpp(const List& configs,
                      const List& spectra,
                      const IntegerVector& n_proj,
+                     const NumericMatrix& weights,
                      int ncores) {
   size_t n_spectra = spectra.size();
   if ((size_t) configs.size() != n_spectra) {
@@ -605,6 +696,10 @@ List sfs_project_cpp(const List& configs,
   for (size_t g = 0; g < ngroups; g++) {
     if (n_proj[g] < 0) stop("n_proj should not be negative");
   }
+  size_t n_rep = weights.nrow();
+  size_t n_blocks = weights.ncol();
+  if (n_rep < 1 || n_blocks < 1) stop("weights should not be empty");
+  std::vector<double> w(weights.begin(), weights.end());
 
   // the probabilities of each configuration (n, k) of each group, in a flat
   // storage
@@ -619,10 +714,12 @@ List sfs_project_cpp(const List& configs,
     IntegerVector groups = spectra[s];
     List conf = configs[s];
     IntegerMatrix n = conf["n"], k = conf["k"];
+    IntegerVector block = conf["block"];
     NumericVector count = conf["count"];
     size_t K = groups.size();
     if (K < 1 || (size_t) n.ncol() != K || (size_t) k.ncol() != K ||
-        n.nrow() != count.size() || k.nrow() != count.size()) {
+        n.nrow() != count.size() || k.nrow() != count.size() ||
+        block.size() != count.size()) {
       stop("invalid configurations");
     }
     SfsSpectrumData& sd = data[s];
@@ -640,10 +737,14 @@ List sfs_project_cpp(const List& configs,
       stride *= (size_t) n_proj[g] + 1;
       n_cells *= (double) n_proj[g] + 1;
     }
-    if (n_cells > 1e10) stop("the spectrum has too many cells");
-    sd.n_used = 0;
-    sd.n_dropped = 0;
+    if (n_cells * n_rep > 1e10) stop("the spectra have too many cells");
+    sd.n_cells = stride;
+    sd.n_used.assign(n_blocks, 0.0);
+    sd.n_dropped.assign(n_blocks, 0.0);
     for (size_t r = 0; r < (size_t) count.size(); r++) {
+      if (block[r] < 0 || (size_t) block[r] >= n_blocks) {
+        stop("the blocks of the configurations do not match the weights");
+      }
       bool keep = true;
       for (size_t i = 0; i < K; i++) {
         if (n(r, i) < sd.p[i]) {
@@ -652,7 +753,7 @@ List sfs_project_cpp(const List& configs,
         }
       }
       if (!keep) {
-        sd.n_dropped += count[r];
+        sd.n_dropped[block[r]] += count[r];
         continue;
       }
       for (size_t i = 0; i < K; i++) {
@@ -672,8 +773,9 @@ List sfs_project_cpp(const List& configs,
         }
         sd.keys.push_back(key);
       }
+      sd.block.push_back(block[r]);
       sd.count.push_back(count[r]);
-      sd.n_used += count[r];
+      sd.n_used[block[r]] += count[r];
     }
   }
   // pointers to the probabilities of each row (the tables are now fixed)
@@ -691,17 +793,24 @@ List sfs_project_cpp(const List& configs,
 
   // project the spectra in parallel
   const double* p_probs = probs.data();
+  const double* p_w = w.data();
 #pragma omp parallel for num_threads(ncores) schedule(dynamic, 1)
   for (size_t s = 0; s < n_spectra; s++) {
-    sfs_contract(data[s], p_probs);
+    sfs_contract(data[s], p_probs, p_w, n_rep);
   }
 
   List res(n_spectra);
   for (size_t s = 0; s < n_spectra; s++) {
+    NumericMatrix sfs(data[s].n_cells, n_rep);
+    std::copy(data[s].out.begin(), data[s].out.end(), sfs.begin());
+    // free the memory of the spectra as they are copied
+    std::vector<double>().swap(data[s].out);
     res[s] = List::create(
-      _["sfs"] = NumericVector(data[s].out.begin(), data[s].out.end()),
-      _["n_loci"] = data[s].n_used,
-      _["n_dropped"] = data[s].n_dropped
+      _["sfs"] = sfs,
+      _["n_used"] = NumericVector(data[s].n_used.begin(),
+                                  data[s].n_used.end()),
+      _["n_dropped"] = NumericVector(data[s].n_dropped.begin(),
+                                     data[s].n_dropped.end())
     );
   }
   return res;

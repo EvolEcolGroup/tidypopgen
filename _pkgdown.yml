@@ -96,6 +96,7 @@ reference:
         - write_sfs
         - gt_as_easysfs
         - autoplot_sfs
+        - bootstrap_pop_sfs
   - title: "Windows"
     desc: "Functions to compute statistics in sliding windows across loci."
     contents:

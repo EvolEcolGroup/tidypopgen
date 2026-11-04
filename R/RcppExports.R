@@ -97,12 +97,12 @@ read_packedancestry <- function(filename, BM, tab) {
     .Call(`_tidypopgen_read_packedancestry`, filename, BM, tab)
 }
 
-sfs_config_counts_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, ncores, block_size) {
-    .Call(`_tidypopgen_sfs_config_counts_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, ncores, block_size)
+sfs_config_counts_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, block_ids, n_blocks, ncores, block_size) {
+    .Call(`_tidypopgen_sfs_config_counts_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, block_ids, n_blocks, ncores, block_size)
 }
 
-sfs_project_cpp <- function(configs, spectra, n_proj, ncores) {
-    .Call(`_tidypopgen_sfs_project_cpp`, configs, spectra, n_proj, ncores)
+sfs_project_cpp <- function(configs, spectra, n_proj, weights, ncores) {
+    .Call(`_tidypopgen_sfs_project_cpp`, configs, spectra, n_proj, weights, ncores)
 }
 
 sfs_preview_cpp <- function(n, k, count, n_max) {

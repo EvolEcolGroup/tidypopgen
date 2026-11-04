@@ -18,7 +18,11 @@
   allele are then dropped, as in dadi. `autoplot()` plots the spectra of
   `pop_sfs()` (bar plots) and `pairwise_pop_sfs()` (heatmaps, on a log scale),
   `sfs` objects of one or two populations, and the output of
-  `pop_sfs_preview()`.
+  `pop_sfs_preview()`. `bootstrap_pop_sfs()`, `bootstrap_pairwise_pop_sfs()`
+  and `bootstrap_nwise_pop_sfs()` compute block bootstrap replicates of the
+  spectra (with the blocks of the `jackknife_*` functions), reading the
+  genotypes only once, and `gt_as_easysfs(n_bootstrap = )` writes the
+  replicates in dadi and fastsimcoal2 format.
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,

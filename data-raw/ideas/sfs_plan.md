@@ -54,6 +54,19 @@ projections and options, the spectra match easySFS's output.
   ramp on a log scale that starts at `min_sites` (a thousandth of the
   largest cell by default, like dadi's `vmin`), because the projection spreads
   each locus over many cells with tiny fractions of a site;
+- the block bootstrap: `bootstrap_pop_sfs()`, `bootstrap_pairwise_pop_sfs()`,
+  `bootstrap_nwise_pop_sfs()` and `gt_as_easysfs(n_bootstrap = )`. They work
+  as follows:
+  - the blocks are those of the jackknife (`.jackknife_block_ids()`);
+  - the counting pass keys each configuration by block as well, so the
+    genotypes are read once;
+  - the projection sorts the rows by block, completes the spectrum of each
+    block in turn, and adds it to every replicate, weighted by the number of
+    times the block was drawn (`rmultinom()`, so `set.seed()` makes it
+    reproducible);
+  - replicates use the projections chosen with all loci;
+  - `gt_as_easysfs()` projects the replicates in chunks of at most 1e7 cells,
+    to limit memory;
 - `gt_as_easysfs()`, which computes, in one pass, all the spectra that
   easySFS writes (1D, each pair, all populations) and writes them in both
   formats, with easySFS's directory layout and file names. It was checked
@@ -82,7 +95,6 @@ library, as `CLAUDE.md` requires.
 **Still to do:**
 
 - generate the easySFS fixtures (run `data-raw/create_easysfs_test_data.R`);
-- the block bootstrap;
 - verify the cell order of fsc MSFS files against the fsc manual. In fsc's
   2D files the first population changes fastest along each row, which
   suggests that fsc may expect `fastest = "first"` for MSFS files too.
