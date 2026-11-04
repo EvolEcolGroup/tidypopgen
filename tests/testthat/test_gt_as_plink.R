@@ -675,3 +675,39 @@ test_that("ped and raw write subsets of individuals and loci", {
     )
   )
 })
+
+test_that("ped and raw write missing reference alleles as 0", {
+  # the first locus has a missing reference allele (all genotypes are
+  # homozygous for the alternate allele), the second has no alleles (and no
+  # genotypes)
+  na_ref_loci <- test_loci[1:2, ]
+  na_ref_loci$allele_ref <- c(NA_character_, NA_character_)
+  na_ref_loci$allele_alt <- c("T", NA)
+  na_ref_gt <- suppressWarnings(gen_tibble(
+    x = cbind(c(2, 2, NA), c(NA, NA, NA)),
+    loci = na_ref_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ))
+  raw_path <- gt_as_plink(na_ref_gt, file = paste0(tempfile(), ".raw"), "raw")
+  expect_equal(
+    readLines(raw_path, n = 1),
+    "FID IID PAT MAT SEX PHENOTYPE rs1_T(/0) rs2_0(/0)"
+  )
+  ped_path <- gt_as_plink(na_ref_gt, file = paste0(tempfile(), ".ped"), "ped")
+  expect_equal(
+    readLines(ped_path),
+    c(
+      "pop1 a 0 0 0 -9 T T 0 0",
+      "pop1 b 0 0 0 -9 T T 0 0",
+      "pop2 c 0 0 0 -9 0 0 0 0"
+    )
+  )
+  # the bim file of a bed also uses 0 for both missing alleles
+  bed_path <- gt_as_plink(na_ref_gt, file = paste0(tempfile(), ".bed"))
+  bim <- utils::read.table(sub("\\.bed$", ".bim", bed_path),
+    colClasses = "character"
+  )
+  expect_equal(bim$V5, c("T", "0"))
+  expect_equal(bim$V6, c("0", "0"))
+})

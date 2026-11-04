@@ -217,8 +217,9 @@ gt_write_ped_raw <- function(
   plink_format <- match.arg(plink_format)
   # loci information
   loci <- show_loci(x)
-  # replace missing value with zero
+  # replace missing values with zero (in either allele column, as for bed)
   loci$allele_alt[is.na(loci$allele_alt)] <- "0"
+  loci$allele_ref[is.na(loci$allele_ref)] <- "0"
 
   # create the info for the fam file
   indiv_meta <- plink_indiv_meta(x)

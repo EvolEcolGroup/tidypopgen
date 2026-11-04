@@ -116,6 +116,9 @@
   on missing alleles "." (e.g. the ALT of monomorphic loci) when custom
   `missing_alleles` are given; as with the "vcfR" parser, "." is now always
   missing
+* fix `gt_as_plink(type = "raw")` writing a missing `allele_ref` as "NA"
+  rather than "0" in the header of raw files; missing alleles are now "0" in
+  both allele columns, as in bim files
 * `gen_tibble()` on a matrix now checks that a vector of `ploidy` has one value
   per individual, and that dosages are non-negative integers not greater than
   each individual's ploidy (previously invalid values were silently corrupted)
