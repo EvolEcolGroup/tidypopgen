@@ -703,3 +703,21 @@ test_that("functions writing to the FBM leave the bigSNP files untouched", {
   gt_save(xgboost_gt, quiet = TRUE)
   expect_bigsnp_untouched()
 })
+
+test_that("gen_tibble from a read-only bigSNP rds can be imputed", {
+  skip_on_os("windows")
+  bed_path <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
+  bigsnp_path <- bigsnpr::snp_readBed(bed_path, backingfile = tempfile())
+  bigsnp_files <- c(bigsnp_path, sub("\\.rds$", ".bk", bigsnp_path))
+  Sys.chmod(bigsnp_files, "0444")
+  on.exit(Sys.chmod(bigsnp_files, "0644"), add = TRUE)
+  md5 <- unname(tools::md5sum(bigsnp_files))
+  rds_gt <- gen_tibble(bigsnp_path, quiet = TRUE)
+  # the copy of the backing file is writable
+  expect_identical(unname(file.access(gt_get_file_names(rds_gt)[2], 2)), 0L)
+  rds_gt <- gt_impute_simple(rds_gt)
+  expect_true(gt_has_imputed(rds_gt))
+  gt_set_imputed(rds_gt, set = TRUE)
+  expect_no_error(gt_save(rds_gt, quiet = TRUE))
+  expect_identical(unname(tools::md5sum(bigsnp_files)), md5)
+})

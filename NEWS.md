@@ -82,6 +82,9 @@
   files of the bigSNP are never modified (`gt_impute_simple()` and
   `gt_impute_xgboost()` used to write into its .bk file, and `gen_tibble()`
   deleted both files when it stopped on loci with no alleles)
+* `gen_tibble()` now works on read-only bigSNP .rds and .bk files (it used to
+  fail when overwriting the .rds); the copy of the backing file is writable,
+  so that the gen_tibble can be imputed
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not

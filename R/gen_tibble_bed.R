@@ -52,9 +52,13 @@ gen_tibble_bed_rds <- function(
     }
     # copy the backing file of the bigsnp object, so that the fbm rds does
     # not overwrite the bigsnp rds (an FBM rds has the name of its .bk file)
+    # the copy belongs to the gen_tibble, so it does not keep the permissions
+    # of the original (which might be read-only), as we need to write into it
+    # (e.g. to impute)
     if (!file.copy(
       bigsnp_obj$genotypes$backingfile,
-      paste0(backingfile, ".bk")
+      paste0(backingfile, ".bk"),
+      copy.mode = FALSE
     )) {
       stop("could not copy the backing file to ", paste0(backingfile, ".bk"))
     }
