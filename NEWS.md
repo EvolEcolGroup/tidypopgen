@@ -142,6 +142,9 @@
   objects, which did not sort individuals by their dominant component
 * fix `arrange_by_indiv` in `autoplot()` for `q_matrix` and `gt_admix`
   objects, which did not sort individuals by their id within each group
+* fix `autoplot()` for `q_matrix` and `gt_admix` objects with numeric groups
+  (e.g. from `gt_admixture()` or `gt_snmf()` on a `gen_tibble` grouped by a
+  numeric column) drawing no group separators or labels
 * fix group annotations of admixture barplots showing extra separators and
   labels for unused levels of the grouping factor
 * `select_loci_if()` no longer loads the whole genotype matrix into memory to
