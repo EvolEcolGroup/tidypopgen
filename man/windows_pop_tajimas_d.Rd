@@ -52,7 +52,9 @@ a data frame as above with the following columns:
 \item \code{chromosome}: the chromosome for the window
 \item \code{start}: the starting locus of the window
 \item \code{end}: the ending locus of the window
-\item \code{n_loci}: the number of loci in the window
+\item \code{n_loci}: the number of loci in the window (including loci with no
+genotyped individuals in some groups; the number of loci with data in
+each group is given by the "tidy" and "list" outputs)
 \item \code{group}: the Tajima's D for the group for the given window  (there will be
 as many of these columns as groups in the gen_tibble, and they will be
 named by the grouping levels)

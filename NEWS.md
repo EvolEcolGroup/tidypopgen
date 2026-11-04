@@ -41,6 +41,11 @@
   thus grouped `indiv_inbreeding()` with a group of one individual;
   `indiv_inbreeding()` is NaN for a single individual, as it is relative to the
   other individuals
+* fix `windows_pop_tajimas_d(type = "matrix")` splitting a window over several
+  rows when the number of loci with data in the window differs between groups
+  (e.g. with an empty group, or a group without data at a locus); `n_loci` is
+  now the number of loci in the window, and the number with data in each group
+  is given by the "tidy" and "list" outputs
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not

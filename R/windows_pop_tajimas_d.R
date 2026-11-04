@@ -43,7 +43,9 @@
 #' - `chromosome`: the chromosome for the window
 #' - `start`: the starting locus of the window
 #' - `end`: the ending locus of the window
-#' - `n_loci`: the number of loci in the window
+#' - `n_loci`: the number of loci in the window (including loci with no
+#'    genotyped individuals in some groups; the number of loci with data in
+#'    each group is given by the "tidy" and "list" outputs)
 #' - `group`: the Tajima's D for the group for the given window  (there will be
 #'    as many of these columns as groups in the gen_tibble, and they will be
 #'    named by the grouping levels)
@@ -144,6 +146,19 @@ windows_pop_tajimas_d <- function(.x,
   names(res) <- groups$labels
 
   if (type == "matrix") {
+    # one row per window: as the number of loci with data can differ between
+    # groups (e.g. with an empty group), which would split a window over
+    # several rows, n_loci is the number of loci in the window (the number
+    # with data in each group is in the "tidy" and "list" outputs)
+    n_loci <- as.numeric(win$hi - win$lo)
+    n_loci[empty] <- NA
+    if (complete) {
+      n_loci[!win$complete] <- NA
+    }
+    res <- lapply(res, function(grp_res) {
+      grp_res$n_loci <- n_loci
+      grp_res
+    })
     res <- bind_rows(res, .id = "group")
     res <-
       res %>% tidyr::pivot_wider(names_from = "group", values_from = "stat")

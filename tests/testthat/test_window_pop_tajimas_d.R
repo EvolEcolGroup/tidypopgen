@@ -283,3 +283,53 @@ test_that("windows_pop_tajimas_d works with several grouping variables", {
     )
   )
 })
+
+test_that("windows_pop_tajimas_d matrix has one row per window", {
+  windows_args <- list(window_size = 3, step_size = 2, size_unit = "snp")
+  taj_list <- do.call(
+    windows_pop_tajimas_d,
+    c(list(test_gt, type = "list"), windows_args)
+  )
+  taj_mat <- do.call(windows_pop_tajimas_d, c(list(test_gt), windows_args))
+  n_windows <- nrow(taj_list$pop1)
+  expect_equal(nrow(taj_mat), n_windows)
+  # n_loci is the number of loci in each window
+  expect_equal(taj_mat$n_loci, c(3, 3, 3))
+  # the same with a group that has no data in a window (pop1 at locus 1,
+  # so that its first window has 2 loci with data), and with an empty group
+  test_genotypes_miss <- test_genotypes
+  test_genotypes_miss[test_indiv_meta$population == "pop1", 1] <- NA
+  test_gt_miss <- gen_tibble(
+    x = test_genotypes_miss,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_miss$population <- factor(
+    test_gt_miss$population,
+    levels = c("pop1", "pop2", "pop3", "pop_empty")
+  )
+  test_gt_miss <- test_gt_miss %>% dplyr::group_by(population, .drop = FALSE)
+  miss_list <- do.call(
+    windows_pop_tajimas_d,
+    c(list(test_gt_miss, type = "list"), windows_args)
+  )
+  expect_equal(miss_list$pop1$n_loci[1], 2)
+  expect_equal(miss_list$pop2$n_loci[1], 3)
+  miss_mat <- do.call(
+    windows_pop_tajimas_d,
+    c(list(test_gt_miss), windows_args)
+  )
+  expect_equal(nrow(miss_mat), n_windows)
+  expect_named(
+    miss_mat,
+    c("chromosome", "start", "end", "n_loci", "pop1", "pop2", "pop3",
+      "pop_empty")
+  )
+  expect_equal(miss_mat$n_loci, taj_mat$n_loci)
+  expect_true(all(is.na(miss_mat$pop_empty)))
+  for (pop in c("pop1", "pop2", "pop3")) {
+    expect_equal(miss_mat[[pop]], miss_list[[pop]]$stat)
+  }
+})
+
