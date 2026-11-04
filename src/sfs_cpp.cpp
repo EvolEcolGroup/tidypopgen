@@ -1,0 +1,460 @@
+/******************************************************************************/
+
+#include "fbm_byte_acc.h"
+#include <cmath>
+#include <map>
+#include <unordered_map>
+
+/******************************************************************************/
+// Site frequency spectra (SFS), with missing genotypes handled as in dadi
+// (Gutenkunst et al. 2009) and easySFS: each population is projected down to
+// a fixed number of allele copies with the hypergeometric distribution, and
+// loci with fewer called allele copies than the projection in any population
+// of a spectrum are dropped from that spectrum.
+//
+// - sfs_config_counts_cpp() (one pass over the FBM): for each requested
+//   spectrum (a set of groups), the number of loci with each "configuration",
+//   i.e. the number of called allele copies n and of alternate allele copies
+//   k in each group of the spectrum (dadi's Spectrum.count_data_dict()).
+// - sfs_project_cpp(): project the configurations of a spectrum into the SFS
+//   (dadi's Spectrum._from_count_dict()).
+// - sfs_preview_cpp(): the number of segregating sites in the projected 1D
+//   SFS, for every projection (easySFS --preview).
+/******************************************************************************/
+
+// index of the pair (n, k), with 0 <= k <= n, in a triangular array
+inline uint64_t sfs_tri(uint64_t n, uint64_t k) { return n * (n + 1) / 2 + k; }
+
+// inverse of sfs_tri()
+inline void sfs_untri(uint64_t t, int& n, int& k) {
+  uint64_t nn = (uint64_t) ((std::sqrt(8.0 * (double) t + 1.0) - 1.0) / 2.0);
+  while (nn > 0 && nn * (nn + 1) / 2 > t) nn--;
+  while ((nn + 1) * (nn + 2) / 2 <= t) nn++;
+  n = (int) nn;
+  k = (int) (t - nn * (nn + 1) / 2);
+}
+
+/******************************************************************************/
+
+// Count the loci with each configuration of a spectrum. Each population i of
+// the spectrum (group pops[i]) has at most max_n[i] allele copies; loci with
+// fewer than min_n[i] called copies in any population are only counted as
+// dropped. The configuration of a population is stored as the triangular
+// index of (n, k), and the configurations of the populations are combined
+// into a single key:
+// - DENSE: a single population with few possible configurations, counted in
+//   a dense vector indexed by the triangular index;
+// - MAP64: the mixed radix number of the triangular indices of the
+//   populations (the first population is the least significant), if it fits
+//   in 64 bits;
+// - MAPVEC: otherwise, a vector (n_1, k_1, ..., n_K, k_K) in an ordered map.
+// Counts are integers (stored as doubles, exact up to 2^53), so they do not
+// depend on the order in which loci are added.
+class SfsConfigCounter {
+public:
+  SfsConfigCounter(const std::vector<int>& pops,
+                   const std::vector<int>& max_n,
+                   const std::vector<int>& min_n)
+    : _pops(pops), _K(pops.size()), _min_n(min_n), _n_dropped(0) {
+    _radix.resize(_K);
+    _n_tri.resize(_K);
+    _mode = MAP64;
+    uint64_t prod = 1;
+    for (size_t i = 0; i < _K; i++) {
+      // number of pairs (n, k) with 0 <= k <= n <= max_n
+      _n_tri[i] = sfs_tri(max_n[i] + 1, 0);
+      _radix[i] = prod;
+      if (prod > std::numeric_limits<uint64_t>::max() / _n_tri[i]) {
+        _mode = MAPVEC;
+      } else {
+        prod *= _n_tri[i];
+      }
+    }
+    if (_K == 1 && prod <= ((uint64_t) 1 << 21)) {
+      _mode = DENSE;
+      _dense.assign(prod, 0.0);
+    }
+  }
+
+  // add the loci of a block; b_n and b_k hold the number of called and
+  // alternate allele copies of each locus (row) and group (column), with
+  // ngroups values per locus
+  void add_block(const int* b_n, const int* b_k, size_t ngroups,
+                 size_t n_loci) {
+    std::vector<int> key_vec(_mode == MAPVEC ? 2 * _K : 0);
+    for (size_t j = 0; j < n_loci; j++) {
+      const int* n = b_n + j * ngroups;
+      const int* k = b_k + j * ngroups;
+      bool keep = true;
+      for (size_t i = 0; i < _K; i++) {
+        if (n[_pops[i]] < _min_n[i]) {
+          keep = false;
+          break;
+        }
+      }
+      if (!keep) {
+        _n_dropped += 1;
+        continue;
+      }
+      if (_mode == DENSE) {
+        _dense[sfs_tri(n[_pops[0]], k[_pops[0]])] += 1;
+      } else if (_mode == MAP64) {
+        uint64_t key = 0;
+        for (size_t i = 0; i < _K; i++) {
+          key += sfs_tri(n[_pops[i]], k[_pops[i]]) * _radix[i];
+        }
+        _map64[key] += 1;
+      } else {
+        for (size_t i = 0; i < _K; i++) {
+          key_vec[2 * i] = n[_pops[i]];
+          key_vec[2 * i + 1] = k[_pops[i]];
+        }
+        _mapvec[key_vec] += 1;
+      }
+    }
+  }
+
+  // the configurations (sorted by key) as a list with matrices n and k (one
+  // row per configuration, one column per population), the number of loci
+  // with each configuration (count), and the number of dropped loci
+  List result() const {
+    std::vector<int> n_out, k_out;
+    std::vector<double> count_out;
+    if (_mode == DENSE) {
+      for (size_t t = 0; t < _dense.size(); t++) {
+        if (_dense[t] > 0) {
+          int n, k;
+          sfs_untri(t, n, k);
+          n_out.push_back(n);
+          k_out.push_back(k);
+          count_out.push_back(_dense[t]);
+        }
+      }
+    } else if (_mode == MAP64) {
+      std::vector<uint64_t> keys;
+      keys.reserve(_map64.size());
+      for (const auto& kv : _map64) keys.push_back(kv.first);
+      std::sort(keys.begin(), keys.end());
+      for (size_t r = 0; r < keys.size(); r++) {
+        for (size_t i = 0; i < _K; i++) {
+          int n, k;
+          sfs_untri((keys[r] / _radix[i]) % _n_tri[i], n, k);
+          n_out.push_back(n);
+          k_out.push_back(k);
+        }
+        count_out.push_back(_map64.at(keys[r]));
+      }
+    } else {
+      for (const auto& kv : _mapvec) {
+        for (size_t i = 0; i < _K; i++) {
+          n_out.push_back(kv.first[2 * i]);
+          k_out.push_back(kv.first[2 * i + 1]);
+        }
+        count_out.push_back(kv.second);
+      }
+    }
+    size_t n_configs = count_out.size();
+    IntegerMatrix n_mat(n_configs, _K), k_mat(n_configs, _K);
+    NumericVector count(n_configs);
+    for (size_t r = 0; r < n_configs; r++) {
+      for (size_t i = 0; i < _K; i++) {
+        n_mat(r, i) = n_out[r * _K + i];
+        k_mat(r, i) = k_out[r * _K + i];
+      }
+      count[r] = count_out[r];
+    }
+    return List::create(_["n"] = n_mat, _["k"] = k_mat, _["count"] = count,
+                        _["n_dropped"] = _n_dropped);
+  }
+
+private:
+  enum Mode { DENSE, MAP64, MAPVEC };
+  std::vector<int> _pops;
+  size_t _K;
+  std::vector<int> _min_n;
+  std::vector<uint64_t> _radix, _n_tri;
+  Mode _mode;
+  std::vector<double> _dense;
+  std::unordered_map<uint64_t, double> _map64;
+  std::map<std::vector<int>, double> _mapvec;
+  double _n_dropped;
+};
+
+/******************************************************************************/
+
+// Count the configurations of each spectrum in a single pass over the FBM.
+//
+// The number of called (n) and alternate (k) allele copies of each locus and
+// group are computed with alt_valid_counts(), as in
+// tajimas_d_window_sums_cpp(): every individual contributes as many allele
+// copies as its ploidy, and pseudohaploids half their 0/2 dosage. Each
+// element of spectra is an integer vector with the (0-based) groups of a
+// spectrum; min_n gives, for each group, the smallest number of called
+// allele copies for a locus to be counted (i.e. the projection). After each
+// block of loci, the spectra are updated in parallel (each spectrum by a
+// single thread). Returns a list with the result of
+// SfsConfigCounter::result() for each spectrum.
+
+// [[Rcpp::export]]
+List sfs_config_counts_cpp(Environment BM,
+                           const IntegerVector& rowInd,
+                           const IntegerVector& colInd,
+                           const IntegerVector& groupIds,
+                           int ngroups,
+                           const NumericVector& ploidy,
+                           bool is_pseudohaploid,
+                           const List& spectra,
+                           const IntegerVector& min_n,
+                           int ncores,
+                           int block_size) {
+
+  FBMByteAcc acc(BM, rowInd, colInd);
+
+  size_t n = acc.nrow(); // number of individuals
+  size_t m = acc.ncol(); // number of loci
+
+  if (static_cast<size_t>(ploidy.size()) != n) {
+    stop("ploidy must have one entry per individual (rowInd)");
+  }
+  std::vector<size_t> group_ids = check_group_ids(groupIds, n, ngroups);
+  if (block_size < 1) stop("block_size should be a positive integer");
+  if (min_n.size() != ngroups) {
+    stop("min_n should have one value per group");
+  }
+  // allele counts need integer genotypes (not dosages)
+  if (!acc.has_int_codes(255)) {
+    stop("the site frequency spectrum needs integer genotype calls; it "
+         "cannot be computed from dosages");
+  }
+
+  // pseudohaploid individuals contribute half their (0/2) dosage, and every
+  // individual contributes as many allele copies as its ploidy
+  std::vector<double> weight(n), copies(n);
+  std::vector<int> group_max(ngroups, 0);
+  for (size_t i = 0; i < n; i++) {
+    weight[i] = (is_pseudohaploid && ploidy[i] == 1) ? 0.5 : 1;
+    copies[i] = ploidy[i];
+    group_max[group_ids[i]] += (int) ploidy[i];
+  }
+
+  // the counters of the spectra
+  size_t n_spectra = spectra.size();
+  std::vector<SfsConfigCounter> counters;
+  counters.reserve(n_spectra);
+  for (size_t s = 0; s < n_spectra; s++) {
+    IntegerVector this_spectrum = spectra[s];
+    if (this_spectrum.size() < 1) stop("each spectrum needs at least a group");
+    std::vector<int> pops(this_spectrum.size()), max_n(pops.size()),
+      this_min_n(pops.size());
+    for (size_t i = 0; i < pops.size(); i++) {
+      int g = this_spectrum[i];
+      if (g < 0 || g >= ngroups) {
+        stop("spectra should contain groups between 0 and ngroups - 1");
+      }
+      pops[i] = g;
+      max_n[i] = group_max[g];
+      this_min_n[i] = min_n[g];
+    }
+    counters.push_back(SfsConfigCounter(pops, max_n, this_min_n));
+  }
+
+  // called and alternate allele copies of the loci of the current block, for
+  // each group (element [(j - j0) * ngroups + g]; blocks start at multiples
+  // of bs, so j - j0 = j % bs), and whether a locus had a non-integer count
+  size_t bs = std::min((size_t) block_size, std::max(m, (size_t) 1));
+  std::vector<int> b_n(bs * ngroups), b_k(bs * ngroups);
+  std::vector<char> b_bad(bs, 0);
+
+  alt_valid_counts(acc, group_ids, ngroups, weight, copies, ncores, bs,
+                   [&](size_t j, size_t g, double alt, double valid) {
+                     size_t k = (j % bs) * ngroups + g;
+                     b_n[k] = (int) valid;
+                     b_k[k] = (int) alt;
+                     // e.g. a heterozygous genotype in a pseudohaploid
+                     if (alt != (double) b_k[k] || valid != (double) b_n[k]) {
+                       b_bad[j % bs] = 1;
+                     }
+                   },
+                   [&](size_t j0, size_t j1) {
+                     size_t n_block = j1 - j0;
+                     for (size_t j = 0; j < n_block; j++) {
+                       if (b_bad[j]) {
+                         stop("non-integer allele counts (e.g. heterozygous "
+                              "genotypes in pseudohaploid individuals)");
+                       }
+                     }
+#pragma omp parallel for num_threads(ncores) schedule(dynamic, 1)
+                     for (size_t s = 0; s < n_spectra; s++) {
+                       counters[s].add_block(b_n.data(), b_k.data(),
+                                             (size_t) ngroups, n_block);
+                     }
+                   });
+
+  List res(n_spectra);
+  for (size_t s = 0; s < n_spectra; s++) {
+    res[s] = counters[s].result();
+  }
+  return res;
+}
+
+/******************************************************************************/
+
+// Add w times the outer product of the projection vectors of the
+// populations into the cells of the (column-major) spectrum out, for the
+// populations 0 to d: population i only contributes to the cells lo[i] to
+// hi[i] (its probabilities are probs[i][0 .. hi[i] - lo[i]])
+static void sfs_add_box(double* out, int d, size_t offset, double w,
+                        const std::vector<int>& lo,
+                        const std::vector<int>& hi,
+                        const std::vector<size_t>& stride,
+                        const std::vector<const double*>& probs) {
+  const double* pr = probs[d];
+  if (d == 0) {
+    double* o = out + offset;
+    for (int j = lo[0]; j <= hi[0]; j++) o[j] += w * pr[j - lo[0]];
+    return;
+  }
+  for (int j = lo[d]; j <= hi[d]; j++) {
+    sfs_add_box(out, d - 1, offset + j * stride[d], w * pr[j - lo[d]], lo, hi,
+                stride, probs);
+  }
+}
+
+// Project the configurations of a spectrum (n and k: one row per
+// configuration, one column per population; count: the number of loci with
+// each configuration) down to n_proj allele copies in each population.
+// A locus with n called copies, k of which are alternate, contributes to
+// cell j of a population the hypergeometric probability of drawing j
+// alternate copies when sampling n_proj copies out of n without replacement
+// (dhyper(j, k, n - k, n_proj)), and to a joint spectrum the product of these
+// probabilities over the populations. Configurations with fewer than n_proj
+// called copies in any population are dropped. The spectrum is returned as a
+// vector of the cells in column-major order (the first population changes
+// fastest), with the number of loci used and dropped.
+
+// [[Rcpp::export]]
+List sfs_project_cpp(const IntegerMatrix& n,
+                     const IntegerMatrix& k,
+                     const NumericVector& count,
+                     const IntegerVector& n_proj) {
+  size_t K = n_proj.size();
+  size_t n_configs = count.size();
+  if ((size_t) n.ncol() != K || (size_t) k.ncol() != K ||
+      (size_t) n.nrow() != n_configs || (size_t) k.nrow() != n_configs) {
+    stop("n and k should have one row per configuration and one column per "
+         "population");
+  }
+  std::vector<size_t> stride(K);
+  double n_cells_dbl = 1;
+  size_t n_cells = 1;
+  for (size_t i = 0; i < K; i++) {
+    if (n_proj[i] < 0) stop("n_proj should not be negative");
+    stride[i] = n_cells;
+    n_cells *= (size_t) n_proj[i] + 1;
+    n_cells_dbl *= (double) n_proj[i] + 1;
+  }
+  if (n_cells_dbl > 1e10) stop("the spectrum has too many cells");
+  std::vector<double> fs(n_cells, 0.0);
+
+  // projection vectors of each population, by triangular index of (n, k):
+  // the first cell with a non-zero probability, and the probabilities
+  std::vector<std::unordered_map<uint64_t, std::pair<int, std::vector<double>>>>
+    cache(K);
+  std::vector<int> lo(K), hi(K);
+  std::vector<const double*> probs(K);
+  double n_used = 0, n_dropped = 0;
+
+  for (size_t r = 0; r < n_configs; r++) {
+    bool keep = true;
+    for (size_t i = 0; i < K; i++) {
+      if (n(r, i) < n_proj[i]) {
+        keep = false;
+        break;
+      }
+    }
+    if (!keep) {
+      n_dropped += count[r];
+      continue;
+    }
+    for (size_t i = 0; i < K; i++) {
+      int nn = n(r, i), kk = k(r, i), p = n_proj[i];
+      if (kk < 0 || kk > nn) stop("invalid configuration");
+      uint64_t key = sfs_tri(nn, kk);
+      auto it = cache[i].find(key);
+      if (it == cache[i].end()) {
+        int l = std::max(0, p - (nn - kk));
+        int h = std::min(kk, p);
+        std::vector<double> v(h - l + 1);
+        for (int j = l; j <= h; j++) {
+          v[j - l] = R::dhyper(j, kk, nn - kk, p, 0);
+        }
+        it = cache[i].emplace(key, std::make_pair(l, v)).first;
+      }
+      lo[i] = it->second.first;
+      hi[i] = lo[i] + (int) it->second.second.size() - 1;
+      probs[i] = it->second.second.data();
+    }
+    sfs_add_box(fs.data(), (int) K - 1, 0, count[r], lo, hi, stride, probs);
+    n_used += count[r];
+  }
+
+  return List::create(_["sfs"] = NumericVector(fs.begin(), fs.end()),
+                      _["n_loci"] = n_used, _["n_dropped"] = n_dropped);
+}
+
+/******************************************************************************/
+
+// The number of segregating sites in the 1D spectrum projected to each
+// number of allele copies p from 0 to n_max, given the configurations of a
+// population (n, k and count, as returned by sfs_config_counts_cpp()). A
+// locus with n >= p called copies, k of which are alternate, is segregating
+// in the projected sample with probability
+// 1 - C(n - k, p) / C(n, p) - C(k, p) / C(n, p) (the probabilities of
+// drawing only reference or only alternate copies), which is the sum of its
+// contributions to the cells of the projected spectrum that are not
+// corners. Also returns the number of loci with at least p called copies.
+// The ratios of binomial coefficients are computed iteratively over p.
+
+// [[Rcpp::export]]
+List sfs_preview_cpp(const IntegerVector& n,
+                     const IntegerVector& k,
+                     const NumericVector& count,
+                     int n_max) {
+  size_t n_configs = count.size();
+  if ((size_t) n.size() != n_configs || (size_t) k.size() != n_configs) {
+    stop("n, k and count should have the same length");
+  }
+  if (n_max < 0) stop("n_max should not be negative");
+  std::vector<long double> seg(n_max + 2, 0.0), loci(n_max + 2, 0.0);
+  for (size_t r = 0; r < n_configs; r++) {
+    int nn = n[r], kk = k[r];
+    double c = count[r];
+    if (nn < 1) continue;
+    if (nn > n_max || kk < 0 || kk > nn) stop("invalid configuration");
+    // the locus counts towards every p from 1 to nn
+    loci[1] += c;
+    loci[nn + 1] -= c;
+    // a monomorphic locus is never segregating
+    if (kk == 0 || kk == nn) continue;
+    double h_ref = 1, h_alt = 1;
+    for (int p = 1; p <= nn; p++) {
+      // C(n - k, p) / C(n, p) and C(k, p) / C(n, p) (they reach 0, and stay
+      // there, once p is larger than n - k or k)
+      h_ref *= (double) (nn - kk - p + 1) / (double) (nn - p + 1);
+      h_alt *= (double) (kk - p + 1) / (double) (nn - p + 1);
+      if (h_ref < 0) h_ref = 0;
+      if (h_alt < 0) h_alt = 0;
+      seg[p] += c * (1 - h_ref - h_alt);
+    }
+  }
+  NumericVector n_seg(n_max + 1), n_loci(n_max + 1);
+  long double cum = 0;
+  for (int p = 0; p <= n_max; p++) {
+    cum += loci[p];
+    n_loci[p] = (double) cum;
+    n_seg[p] = (double) seg[p];
+  }
+  return List::create(_["n_seg_sites"] = n_seg, _["n_loci"] = n_loci);
+}
+
+/******************************************************************************/

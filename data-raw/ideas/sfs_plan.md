@@ -7,6 +7,46 @@ population is projected down to a fixed number of allele copies with the
 hypergeometric projection of dadi. The aim is that, for the same data,
 projections and options, the spectra match easySFS's output.
 
+## Status (branch `sfs`)
+
+**Decisions taken:**
+
+- **Choosing the sample size.** `n_proj = NULL` (the default) projects each
+  population to the number of allele copies that maximises its number of
+  segregating sites, which is the rationale of easySFS and the dadi manual.
+  Ties go to the largest projection. `pop_sfs_preview()` shows the full curve
+  and flags this choice in a `best` column, and a message lists the chosen
+  values.
+- **Return type.** A tidy tibble by default, like the other functions;
+  `type = "array"` returns `sfs` arrays.
+- **Cell order.** The order of the populations is respected by default:
+  rows are sorted by the first population, then the second, and so on, so
+  the last population changes fastest, as in dadi and easySFS.
+  `fastest = "first"` makes the first population change fastest. This is set
+  in `pairwise_pop_sfs()`, `nwise_pop_sfs()` and `tidy.sfs()`.
+
+**Implemented:**
+
+- stage 1 and stage 2 of the engine (`src/sfs_cpp.cpp`, `R/sfs_helpers.R`);
+- `pop_sfs()`, `pairwise_pop_sfs()`, `nwise_pop_sfs()` and
+  `pop_sfs_preview()`;
+- the `sfs` class with `print()` and `tidy()`;
+- the reference tests (`helper_sfs_reference.R`, a port of easySFS and
+  dadi);
+- `data-raw/create_easysfs_test_data.R` and `test_easysfs.R`, which is
+  skipped until the easySFS fixtures are generated.
+
+**Still to do:**
+
+- generate the easySFS fixtures (run `data-raw/create_easysfs_test_data.R`);
+- `write_sfs()` / `gt_as_easysfs()` (dadi and fsc files), using `fastest`;
+- `total_length`;
+- `ancestral`;
+- the `autoplot()` methods;
+- the block bootstrap;
+- verify the cell order of fsc MSFS files against the fsc manual;
+- an HGDP-sized benchmark.
+
 Contents:
 
 1. [What easySFS does](#1-what-easysfs-does-the-logic-to-reproduce)
@@ -117,21 +157,37 @@ already places them in the "Population" and "Pairwise" sections. They take a
 grouped `gen_tibble` and return `sfs` objects
 ([section 3](#3-the-sfs-object)).
 
+As implemented on the `sfs` branch (`ancestral` and `total_length` are not
+implemented yet):
+
 ```r
-pop_sfs(.x, n_proj = NULL, folded = TRUE, ancestral = NULL,
-        total_length = NULL, n_cores = bigstatsr::nb_cores(),
+pop_sfs(.x, n_proj = NULL, folded = TRUE, type = c("tidy", "array"),
+        n_cores = bigstatsr::nb_cores(),
         block_size = bigstatsr::block_size(nrow(.x), 1), ...)
 
-pairwise_pop_sfs(.x, n_proj = NULL, folded = TRUE, ancestral = NULL,
-                 total_length = NULL, n_cores = ..., block_size = ...)
+pairwise_pop_sfs(.x, n_proj = NULL, folded = TRUE,
+                 type = c("tidy", "array"), fastest = c("last", "first"),
+                 n_cores = ..., block_size = ...)
 
-nwise_pop_sfs(.x, n_proj = NULL, folded = TRUE, ancestral = NULL,
-              total_length = NULL, max_cells = 1e8,
+nwise_pop_sfs(.x, n_proj = NULL, folded = TRUE, type = c("tidy", "array"),
+              fastest = c("last", "first"), max_cells = 1e7,
               n_cores = ..., block_size = ...)
 
-pop_sfs_preview(.x, folded = TRUE, ancestral = NULL,
-                n_cores = ..., block_size = ...)
+pop_sfs_preview(.x, n_cores = ..., block_size = ...)
 ```
+
+The tidy outputs have these columns:
+
+- `pop_sfs()`: `group` (or one column per grouping variable),
+  `allele_count`, `n_sites` and `masked`;
+- `pairwise_pop_sfs()`: `<var>_1`, `<var>_2`, `allele_count_1`,
+  `allele_count_2`, `n_sites` and `masked`;
+- `nwise_pop_sfs()`: one column per population (named by its label),
+  `n_sites` and `masked`.
+
+The tidy outputs carry the attributes `n_proj` and `folded`.
+
+The plan as first written is below.
 
 What each function returns:
 
@@ -533,14 +589,13 @@ Its name follows the `gt_as_*` export family (pkgdown "Exporting" section).
 
 ## 10. Decisions for the maintainers
 
-1. **The default `n_proj`.** The plan uses `NULL`, the full sample size with
-   loci with missing data dropped, plus a message. easySFS instead requires
-   explicit projections. Making `n_proj` required is the safer option if
-   silent loss of loci is a concern.
-2. **The return type.** The plan returns `sfs` arrays, with lists for pop and
-   pairwise, and `tidy()` for long format. The other option is a tidy tibble
-   by default, as `pairwise_pop_fst()` does.
-3. **One SNP per RAD locus.** The plan leaves this to loci selection and the
-   documentation, rather than an argument of the SFS functions.
-4. **The MSFS cell order.** Match easySFS exactly, or match the fsc manual if
-   the two differ.
+Decisions 1, 2 and 4 have been taken; see [Status](#status-branch-sfs).
+
+1. **The default `n_proj`.** Decided: the projection that maximises the
+   number of segregating sites.
+2. **The return type.** Decided: a tidy tibble by default.
+3. **One SNP per RAD locus.** Still open. The plan leaves this to loci
+   selection and the documentation, rather than an argument of the SFS
+   functions.
+4. **The MSFS cell order.** Decided: the order of the populations by default,
+   with the `fastest` option.

@@ -11,7 +11,9 @@ Bazin
 Bhatia
 Bonferroni
 Busing
+Bustamante
 CMD
+Czabarka
 DAPC
 Devillard
 Distruct
@@ -27,6 +29,7 @@ GST
 GenuineIntel
 Github
 Goudet
+Gutenkunst
 HGDP
 Heterozygosity
 Homarus
@@ -47,9 +50,11 @@ Luu
 MAF
 MAFs
 Manichaikul
+Marth
 Math
 Mei
 Meijer
+Murvai
 Novembre
 OADP
 ORCID
@@ -57,6 +62,7 @@ Onsins
 PBS
 PED
 PLINK's
+PLoS
 Procrustes
 Pseudohaploid
 Qiu
@@ -65,6 +71,7 @@ RStudio's
 RUNs
 Raineri
 Roychoudhury
+SFS
 SMARTPCA
 SNMF
 Samuk
@@ -123,12 +130,14 @@ cpp
 csv
 cutoff
 cv
+dadi
 dapc
 dendro
 diffNgroup
 dist
 distruct
 doi
+easySFS
 eig
 eigen
 eqn
@@ -178,6 +187,7 @@ maf
 magrittr
 minilanguage
 misassigned
+multiSFS
 nSNP
 nolint
 nwise

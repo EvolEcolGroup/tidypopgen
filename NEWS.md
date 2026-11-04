@@ -1,4 +1,14 @@
 # tidypopgen `dev`
+* new functions to compute site frequency spectra (SFS) for demographic
+  inference: `pop_sfs()` (1D spectrum of each population),
+  `pairwise_pop_sfs()` (joint spectrum of each pair of populations) and
+  `nwise_pop_sfs()` (joint spectrum of all populations). Missing genotypes
+  are handled as in easySFS (and dadi), by projecting each population down to
+  a fixed number of allele copies. `pop_sfs_preview()` gives the number of
+  segregating sites for each projection (as `easySFS --preview`) and the
+  projection that maximises it, which is used by default. Spectra are
+  returned as tidy tibbles (with the order of the cells of joint spectra set
+  by `fastest`), or as `sfs` arrays (`type = "array"`).
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,

@@ -85,6 +85,14 @@ reference:
         - autoplot_pairwise
         - heatmap_pairwise
         - heatmap_add_dendro
+  - title: "Site frequency spectrum"
+    desc: "Functions to compute site frequency spectra, with missing data handled as in easySFS."
+    contents:
+        - pop_sfs
+        - pop_sfs_preview
+        - pairwise_pop_sfs
+        - nwise_pop_sfs
+        - tidy.sfs
   - title: "Windows"
     desc: "Functions to compute statistics in sliding windows across loci."
     contents:
