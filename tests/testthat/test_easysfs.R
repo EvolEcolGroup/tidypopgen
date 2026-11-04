@@ -29,24 +29,6 @@ read_easysfs_gt <- function(vcf, pops_file, levels) {
   gt %>% dplyr::group_by(population)
 }
 
-# read a spectrum written by dadi's Spectrum.to_file() (as used by easySFS):
-# a line with the dimensions, "folded" or "unfolded" and the population
-# labels, a line with the cells (the last population changing fastest), and
-# a line with the mask
-read_dadi_sfs <- function(file) {
-  lines <- readLines(file)
-  lines <- lines[!startsWith(lines, "#")]
-  header <- strsplit(trimws(lines[1]), " +")[[1]]
-  is_dim <- grepl("^[0-9]+$", header)
-  list(
-    dims = as.integer(header[is_dim]),
-    folded = header[!is_dim][1] == "folded",
-    pop_ids = gsub("\"", "", header[!is_dim][-1]),
-    data = as.numeric(strsplit(trimws(lines[2]), " +")[[1]]),
-    mask = as.logical(as.integer(strsplit(trimws(lines[3]), " +")[[1]]))
-  )
-}
-
 # compare a tidy spectrum (with the last population changing fastest) to a
 # dadi file
 expect_tidy_equals_dadi <- function(sfs_tidy, file) {
@@ -174,4 +156,56 @@ test_that("pop_sfs matches easySFS on haploid data", {
     pairwise_pop_sfs(haploid_gt, n_proj = hap_proj),
     file.path(dadi_dir, "popA-popB.sfs")
   )
+})
+
+# compare all the files written by gt_as_easysfs() and by easySFS (the text,
+# and the numbers to a tolerance)
+expect_same_files_as_easysfs <- function(our_dir, easysfs_out_dir) {
+  easysfs_files <- sort(list.files(easysfs_out_dir, recursive = TRUE))
+  expect_identical(sort(list.files(our_dir, recursive = TRUE)), easysfs_files)
+  for (f in easysfs_files) {
+    ours <- sfs_file_parts(file.path(our_dir, f))
+    theirs <- sfs_file_parts(file.path(easysfs_out_dir, f))
+    expect_identical(ours$text, theirs$text, label = f)
+    expect_equal(ours$numbers, theirs$numbers, tolerance = 1e-10, label = f)
+  }
+}
+
+test_that("gt_as_easysfs writes the same files as easySFS", {
+  skip_if_no_easysfs_data()
+  easysfs_gt <- read_easysfs_gt(
+    "easysfs_test.vcf", "easysfs_populations.txt",
+    levels = pops
+  )
+  runs <- list(
+    folded = list(levels = pops, args = list()),
+    unfolded = list(levels = pops, args = list(folded = FALSE)),
+    ordered = list(levels = c("popC", "popA", "popB"), args = list()),
+    total_length = list(levels = pops, args = list(total_length = 100000))
+  )
+  for (run in names(runs)) {
+    this_gt <- easysfs_gt %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate(population = factor(population,
+        levels = runs[[run]]$levels
+      )) %>%
+      dplyr::group_by(population)
+    out_dir <- withr::local_tempdir()
+    do.call(gt_as_easysfs, c(
+      list(this_gt, out_dir = out_dir, n_proj = proj, prefix = "test"),
+      runs[[run]]$args
+    ))
+    expect_same_files_as_easysfs(out_dir, file.path(easysfs_dir, run))
+  }
+  # haploid data
+  haploid_gt <- read_easysfs_gt(
+    "easysfs_haploid.vcf", "easysfs_haploid_populations.txt",
+    levels = c("popA", "popB")
+  )
+  out_dir <- withr::local_tempdir()
+  gt_as_easysfs(haploid_gt,
+    out_dir = out_dir, n_proj = c(popA = 5, popB = 4),
+    prefix = "test"
+  )
+  expect_same_files_as_easysfs(out_dir, file.path(easysfs_dir, "haploid"))
 })

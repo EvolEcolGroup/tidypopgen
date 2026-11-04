@@ -35,6 +35,15 @@ projections and options, the spectra match easySFS's output.
   dadi);
 - `data-raw/create_easysfs_test_data.R` and `test_easysfs.R`, which is
   skipped until the easySFS fixtures are generated.
+- `write_sfs()`, which writes one spectrum in dadi or fastsimcoal2 format,
+  with `fastest` and with easySFS's `--total-length` (`total_length`) and
+  `--dtype int` (`round`);
+- `gt_as_easysfs()`, which computes, in one pass, all the spectra that
+  easySFS writes (1D, each pair, all populations) and writes them in both
+  formats, with easySFS's directory layout and file names. It was checked
+  against emulated easySFS outputs, written by a literal R port of easySFS's
+  writing code; `test_easysfs.R` compares every file once the real fixtures
+  exist.
 
 **Benchmark.** The data were 1000 diploids x 100k loci, 10 groups of 100,
 with 5% missing genotypes. The branch was installed at -O2 in its own
@@ -57,12 +66,15 @@ library, as `CLAUDE.md` requires.
 **Still to do:**
 
 - generate the easySFS fixtures (run `data-raw/create_easysfs_test_data.R`);
-- `write_sfs()` / `gt_as_easysfs()` (dadi and fsc files), using `fastest`;
-- `total_length`;
 - `ancestral`;
 - the `autoplot()` methods;
 - the block bootstrap;
-- verify the cell order of fsc MSFS files against the fsc manual;
+- verify the cell order of fsc MSFS files against the fsc manual. In fsc's
+  2D files the first population changes fastest along each row, which
+  suggests that fsc may expect `fastest = "first"` for MSFS files too.
+  easySFS writes them in dadi's order (`fastest = "last"`, the default);
+- check whether fsc expects `_DSFS.obs` rather than `_MSFS.obs` for an
+  unfolded multidimensional spectrum (easySFS always writes `_MSFS.obs`);
 - an HGDP-sized benchmark.
 
 Contents:

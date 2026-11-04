@@ -204,3 +204,33 @@ ref_sfs_simulate <- function(pop_sizes, n_loci, ploidy = 2,
 sfs_values <- function(fs) {
   array(as.vector(fs), dim = dim(fs))
 }
+
+# read a spectrum written by dadi's Spectrum.to_file() (as used by easySFS):
+# a line with the dimensions, "folded" or "unfolded" and the population
+# labels, a line with the cells (the last population changing fastest), and
+# a line with the mask
+read_dadi_sfs <- function(file) {
+  lines <- readLines(file)
+  lines <- lines[!startsWith(lines, "#")]
+  header <- strsplit(trimws(lines[1]), " +")[[1]]
+  is_dim <- grepl("^[0-9]+$", header)
+  list(
+    dims = as.integer(header[is_dim]),
+    folded = header[!is_dim][1] == "folded",
+    pop_ids = gsub("\"", "", header[!is_dim][-1]),
+    data = as.numeric(strsplit(trimws(lines[2]), " +")[[1]]),
+    mask = as.logical(as.integer(strsplit(trimws(lines[3]), " +")[[1]]))
+  )
+}
+
+# the text of a file, with its numbers replaced by "#", and its numbers (in
+# the order they appear), to compare files whose numbers may differ in their
+# last digits
+sfs_file_parts <- function(file) {
+  lines <- readLines(file)
+  num_re <- "-?[0-9]+(\\.[0-9]+)?(e[-+]?[0-9]+)?"
+  list(
+    text = gsub(num_re, "#", lines),
+    numbers = as.numeric(unlist(regmatches(lines, gregexpr(num_re, lines))))
+  )
+}

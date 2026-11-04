@@ -8,7 +8,11 @@
   segregating sites for each projection (as `easySFS --preview`) and the
   projection that maximises it, which is used by default. Spectra are
   returned as tidy tibbles (with the order of the cells of joint spectra set
-  by `fastest`), or as `sfs` arrays (`type = "array"`).
+  by `fastest`), or as `sfs` arrays (`type = "array"`). `write_sfs()` writes
+  a spectrum in dadi or fastsimcoal2 format, and `gt_as_easysfs()` writes all
+  the spectra written by easySFS (1D, 2D and multidimensional, in both
+  formats, with the same file names), optionally setting the number of
+  monomorphic sites from the total length of the sequences.
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,

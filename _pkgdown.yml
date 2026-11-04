@@ -93,6 +93,8 @@ reference:
         - pairwise_pop_sfs
         - nwise_pop_sfs
         - tidy.sfs
+        - write_sfs
+        - gt_as_easysfs
   - title: "Windows"
     desc: "Functions to compute statistics in sliding windows across loci."
     contents:

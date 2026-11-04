@@ -169,7 +169,8 @@ preview <- run_easysfs(c(
 writeLines(preview, file.path(out_dir, "easysfs_preview.txt"))
 
 # spectra with projections smaller than the number of allele copies (16, 12
-# and 10), folded and unfolded, and with the populations in another order
+# and 10), folded and unfolded, with the populations in another order, and
+# with the total length of the sequences (to set the monomorphic sites)
 run_spectra <- function(out_name, extra_args) {
   tmp_out <- file.path(tempdir(), out_name)
   run_easysfs(c(
@@ -187,6 +188,7 @@ run_spectra <- function(out_name, extra_args) {
 run_spectra("folded", c("--proj", "10,8,6"))
 run_spectra("unfolded", c("--proj", "10,8,6", "--unfolded"))
 run_spectra("ordered", c("--proj", "6,10,8", "--order", "popC,popA,popB"))
+run_spectra("total_length", c("--proj", "10,8,6", "--total-length", "100000"))
 
 ###############################################################################
 # Haploid data: two populations
@@ -213,4 +215,6 @@ run_easysfs(c(
 dest <- file.path(out_dir, "haploid")
 unlink(dest, recursive = TRUE)
 dir.create(dest)
-file.copy(file.path(tmp_out, "dadi"), dest, recursive = TRUE)
+file.copy(file.path(tmp_out, c("dadi", "fastsimcoal2")), dest,
+  recursive = TRUE
+)
