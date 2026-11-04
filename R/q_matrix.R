@@ -381,8 +381,8 @@ augment.q_matrix <- function(x, data = NULL, ...) {
 #' @param reorder_within_groups Boolean determining whether to reorder the
 #'   individuals within each group based on their ancestry proportion (note that
 #'   this is not advised if you are making multiple plots, as you would get a
-#'   different order for each plot!). If TRUE, `annotate_group` must also be
-#'   TRUE.
+#'   different order for each plot!). Groups keep the order set by
+#'   `arrange_by_group`. If TRUE, `annotate_group` must also be TRUE.
 #' @param ... not currently used.
 #' @returns a barplot of individuals, coloured by ancestry proportion
 #' @name autoplot_q_matrix
@@ -472,12 +472,14 @@ autoplot.q_matrix <- function(
     ) %>%
     dplyr::mutate(percentage = as.numeric(.data$percentage))
 
-  # if we reorder within group
+  # if we reorder within group (keeping the groups in their current order,
+  # i.e. sorted if arrange_by_group is TRUE, as they are in consecutive blocks
+  # once arranged above; fct_inorder_base() orders them by first appearance)
   if (("group" %in% names(q_tbl)) && reorder_within_groups) {
     q_tbl <- q_tbl %>%
       dplyr::group_by(.data$group, .data$id) %>%
       # only sort by group, so that we don't reorder individuals within groups
-      dplyr::arrange(.data$group) %>%
+      dplyr::arrange(fct_inorder_base(.data$group)) %>%
       dplyr::mutate(
         q = factor(
           .data$q,
@@ -510,12 +512,13 @@ autoplot.q_matrix <- function(
     # common component in the group first), and then by the proportion of
     # that component
     q_tbl <- q_tbl %>%
+      dplyr::ungroup() %>%
       dplyr::left_join(dominant_q, by = "id") %>%
-      dplyr::group_by(.data$group) %>%
       dplyr::arrange(
-        .data$q_rank, dplyr::desc(.data$dominant_q),
-        .by_group = TRUE
-      )
+        fct_inorder_base(.data$group),
+        .data$q_rank, dplyr::desc(.data$dominant_q)
+      ) %>%
+      dplyr::group_by(.data$group)
   }
 
   levels_q <- unique(q_tbl$id)

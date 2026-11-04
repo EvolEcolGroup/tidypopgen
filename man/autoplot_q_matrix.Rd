@@ -46,8 +46,8 @@ factor; else it will be ordered alphabetically.}
 \item{reorder_within_groups}{Boolean determining whether to reorder the
 individuals within each group based on their ancestry proportion (note that
 this is not advised if you are making multiple plots, as you would get a
-different order for each plot!). If TRUE, \code{annotate_group} must also be
-TRUE.}
+different order for each plot!). Groups keep the order set by
+\code{arrange_by_group}. If TRUE, \code{annotate_group} must also be TRUE.}
 
 \item{...}{not currently used.}
 }

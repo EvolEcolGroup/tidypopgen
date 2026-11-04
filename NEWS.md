@@ -67,6 +67,9 @@
   ids of the individuals but no groups (e.g. from `gt_admixture()` or
   `gt_snmf()` on an ungrouped `gen_tibble`), so that `autoplot()` could not
   annotate the groups
+* fix `autoplot()` of `q_matrix` and `gt_admix` objects with
+  `reorder_within_groups = TRUE` sorting the groups even with
+  `arrange_by_group = FALSE`
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not

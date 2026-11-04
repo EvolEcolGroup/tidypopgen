@@ -144,3 +144,29 @@ test_that("tidy, augment and autoplot of a q_matrix keep the order of groups", {
     c("pop3", "pop1", "pop2")
   )
 })
+
+test_that("reorder_within_groups keeps the order of the groups", {
+  q <- seq(0.1, 0.7, length.out = nrow(test_gt))
+  q_attr <- q_matrix(matrix(c(q, 1 - q), ncol = 2))
+  attr(q_attr, "id") <- test_gt$id
+  attr(q_attr, "group") <- test_gt$pop_factor
+  plot_labels <- function(plt) ggplot2::layer_scales(plt)$x$labels
+  # arranged by group: in the order of the levels
+  expect_equal(
+    plot_labels(autoplot(q_attr, reorder_within_groups = TRUE)),
+    c("pop3", "pop1", "pop2")
+  )
+  # not arranged by group: in their current order (of first appearance), as
+  # without reorder_within_groups
+  expect_equal(
+    plot_labels(autoplot(q_attr, arrange_by_group = FALSE)),
+    c("pop1", "pop2", "pop3")
+  )
+  expect_equal(
+    plot_labels(autoplot(q_attr,
+      arrange_by_group = FALSE,
+      reorder_within_groups = TRUE
+    )),
+    c("pop1", "pop2", "pop3")
+  )
+})
