@@ -106,16 +106,19 @@ List fbm256_prod_and_rowSumsSq(Environment BM,
       } else {
         // missing genotypes are set to 0 (i.e. the mean)
         x = 0;
-        // and, for least squares, their loadings are recorded
-        double* p_miss = &miss_t[i * K2 * K2];
-        for (std::size_t k1 = 0; k1 < K2; k1++) {
-          for (std::size_t k2 = 0; k2 < K2; k2++) {
-            p_miss[k1 + k2 * K2] += v_j_lsq[k1] * v_j_lsq[k2];
+        // and, for least squares, their loadings are recorded (miss_t is
+        // empty without least squares, so it must not be indexed then)
+        if (K2 > 0) {
+          double* p_miss = miss_t.data() + i * K2 * K2;
+          for (std::size_t k1 = 0; k1 < K2; k1++) {
+            for (std::size_t k2 = 0; k2 < K2; k2++) {
+              p_miss[k1 + k2 * K2] += v_j_lsq[k1] * v_j_lsq[k2];
+            }
           }
         }
       }
       row_sums_sq[i] += x * x;
-      double* p_xv = &xv_t[i * K];
+      double* p_xv = xv_t.data() + i * K;
       for (std::size_t k = 0; k < K; k++) {
         p_xv[k] += x * v_j[k];
       }
