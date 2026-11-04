@@ -111,6 +111,9 @@
 * fix `gen_tibble()` on VCF files leaving a backing file behind when the loci
   fail validation (e.g. duplicated loci), which caused a retry to use a new
   versioned file name
+* fix `gen_tibble()` leaving its backing file behind on Windows (with a
+  "Permission denied" warning) when it stops on loci with no alleles but with
+  genotypes; the backing file is now unmapped before it is removed
 * fix `gen_tibble()` on VCF files setting the ploidy of individuals with a
   missing genotype (".") on the first variant to 1; their ploidy is now taken
   from their first non-missing genotype (searched in the first 1,000 variants
