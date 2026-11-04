@@ -236,8 +236,11 @@ read_loci_file <- function(file, character_cols) {
 #' to create an indiv_meta tibble compatible with a `gen_tibble` object.
 #' @param fam the path to a fam file or a data.frame containing the contents of
 #' a fam file.
-#' @returns A tibble with columns: `id`, `population`, `paternal_ID`,
-#' `maternal_ID`, `sex`, `phenotype`
+#' @returns A data.frame with columns: `id`, `population`, `paternal_ID`,
+#' `maternal_ID`, `sex`, `phenotype` (a factor for case/control phenotypes,
+#' or numeric for quantitative ones); `population` is only present if the
+#' family ID differs from the individual ID for some individuals, and the
+#' other columns if they have some non-missing values
 #' @keywords internal
 #' @noRd
 
@@ -303,23 +306,21 @@ indiv_meta_from_fam <- function(fam) {
     }
   }
 
-  if (inherits(
-    fam$affection,
-    "numeric"
-  ) ||
-    inherits(
-      fam$affection,
-      "integer"
-    )) {
-    if (!all(fam$affection %in% c(0, -9))) {
+  # as in PLINK, the phenotype is case/control (1 = control, 2 = case, and 0
+  # or -9 = missing) unless it has other values, in which case it is
+  # quantitative (with -9 as missing)
+  if (is.numeric(fam$affection) && !all(fam$affection %in% c(0, -9))) {
+    if (all(fam$affection %in% c(0, 1, 2, -9, NA))) {
       indiv_meta$phenotype <- dplyr::recode_values(
         fam$affection,
         1 ~ "control",
         2 ~ "case",
-        -9 ~ NA,
         default = NA,
         ptype = factor(levels = c("control", "case"))
       )
+    } else {
+      indiv_meta$phenotype <- as.numeric(fam$affection)
+      indiv_meta$phenotype[indiv_meta$phenotype %in% -9] <- NA
     }
   }
 

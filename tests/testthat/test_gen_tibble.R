@@ -292,6 +292,38 @@ test_that("IDs in fam files are read as characters", {
   expect_identical(pop_b$maternal_ID, c(NA, NA, "002"))
 })
 
+test_that("phenotypes in fam files are read as case/control or quantitative", {
+  bed_dir <- tempfile("fam_pheno_")
+  dir.create(bed_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  file.copy(file.path(ext_dir, "pop_b.bed"), bed_dir)
+  file.copy(file.path(ext_dir, "pop_b.bim"), bed_dir)
+  read_pheno <- function(pheno) {
+    writeLines(
+      paste("pop_b", c("a", "b", "c"), "0 0 0", pheno),
+      file.path(bed_dir, "pop_b.fam")
+    )
+    gen_tibble(file.path(bed_dir, "pop_b.bed"),
+      backingfile = tempfile(),
+      quiet = TRUE
+    )
+  }
+  # case/control, with 0 and -9 as missing
+  expect_identical(
+    read_pheno(c(2, 0, 1))$phenotype,
+    factor(c("case", NA, "control"), levels = c("control", "case"))
+  )
+  expect_identical(
+    read_pheno(c(-9, 2, 2))$phenotype,
+    factor(c(NA, "case", "case"), levels = c("control", "case"))
+  )
+  # quantitative, with -9 as missing (0 is a valid value)
+  expect_identical(read_pheno(c(1.5, 0, -9))$phenotype, c(1.5, 0, NA))
+  expect_identical(read_pheno(c(3, 1, -9))$phenotype, c(3, 1, NA))
+  # no phenotype
+  expect_false("phenotype" %in% names(read_pheno(c(-9, 0, -9))))
+})
+
 test_that("if order of loci is changed, order of genotypes also changes", {
   pop_b <-
     gen_tibble(

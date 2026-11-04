@@ -105,6 +105,9 @@
   parental IDs of the .fam file into numbers when they look like numbers (e.g.
   "001" became "1", and "1.10" became "1.1"); they are now kept as they are, as
   when reading ped files
+* fix `gen_tibble()` on PLINK bed files setting quantitative phenotypes (with
+  values other than 1, 2, 0 and -9 in the .fam file) to NA; as in PLINK, they
+  are now kept as numbers, with -9 as missing
 * fix `gen_tibble()` on VCF files leaving a backing file behind when the loci
   fail validation (e.g. duplicated loci), which caused a retry to use a new
   versioned file name
