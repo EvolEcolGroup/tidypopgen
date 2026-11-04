@@ -64,3 +64,28 @@ test_that("indiv_inbreeding compute correctly", {
     check.attributes = FALSE
   ))
 })
+
+test_that("indiv_inbreeding and allele sharing work with a single individual", {
+  test_gt <- load_example_gt("gen_tbl")
+  single_gt <- test_gt[1, ]
+  # a 1 x 1 matrix, rather than a vector
+  ashare <- pairwise_allele_sharing(single_gt, as_matrix = TRUE)
+  expect_equal(dim(ashare), c(1, 1))
+  expect_equal(dimnames(ashare), list(single_gt$id, single_gt$id))
+  # the same value as in the matrix of all individuals
+  expect_equal(
+    unclass(ashare)[1, 1],
+    unclass(pairwise_allele_sharing(test_gt, as_matrix = TRUE))[1, 1]
+  )
+  expect_equal(dim(pairwise_grm(single_gt)), c(1, 1))
+  # inbreeding is relative to the other individuals, so it is NaN for a
+  # single individual
+  expect_true(is.nan(indiv_inbreeding(single_gt)))
+  # a group with a single individual
+  test_gt$population[1] <- "pop_single"
+  grouped_gt <- test_gt %>% group_by(population)
+  inb_grp <- indiv_inbreeding(grouped_gt)
+  expect_length(inb_grp, 4)
+  single_grp <- which(group_keys(grouped_gt)$population == "pop_single")
+  expect_true(is.nan(inb_grp[[single_grp]]))
+})

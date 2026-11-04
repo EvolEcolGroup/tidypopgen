@@ -76,8 +76,9 @@ snp_allele_sharing <- function(
   # na is a matrix with 0 for NAs and 1 for valid values
   # TODO this could be done in chunks to avoid bringing
   # everything to memory at once
-  denom <- na_tcross[]
-  num <- dos_tcross[]
+  # (drop = FALSE keeps a 1 x 1 matrix for a single individual)
+  denom <- na_tcross[, , drop = FALSE]
+  num <- dos_tcross[, , drop = FALSE]
   res <- 0.5 * (1 + num / denom)
   res[denom == 0] <- NA_real_
   return(res)

@@ -36,6 +36,11 @@
   `indiv_inbreeding()`), rather than failing, as the grouped methods do for
   empty groups. Grouped `indiv_inbreeding()`, which uses `group_map()`, now
   works with empty groups
+* fix `pairwise_allele_sharing()`, `pairwise_grm()` and `indiv_inbreeding()`
+  failing ("'dimnames' applied to non-array") with a single individual, and
+  thus grouped `indiv_inbreeding()` with a group of one individual;
+  `indiv_inbreeding()` is NaN for a single individual, as it is relative to the
+  other individuals
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not
