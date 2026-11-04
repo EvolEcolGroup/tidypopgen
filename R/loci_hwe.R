@@ -22,7 +22,9 @@
 #'   and the "tidy" output has one column per grouping variable rather than a
 #'   single `group` column.
 #' @param ... not used.
-#' @returns a vector of probabilities from HWE exact test, one per locus
+#' @returns a vector of probabilities from HWE exact test, one per locus. For
+#'   a grouped [`gen_tibble`], empty groups (e.g. from
+#'   `group_by(.drop = FALSE)`) are NA.
 #' @author the C++ algorithm was written by Christopher Chang for PLINK 1.90,
 #'   based on original code by Jan Wigginton (the code was released under GPL3).
 #' @rdname loci_hwe
@@ -150,6 +152,11 @@ loci_hwe.grouped_df <- function(
   )
 
   groups <- .group_info(.x)
+  # empty groups have no genotypes to test, so they are NA (rather than the
+  # p-value of a test on zero counts)
+  if (any(groups$sizes == 0)) {
+    hwe_mat[, groups$sizes == 0] <- NA_real_
+  }
   hwe_mat <- format_grouped_output(
     out_mat = hwe_mat,
     group_ids = groups$labels,

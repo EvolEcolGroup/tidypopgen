@@ -134,3 +134,31 @@ test_that("qc_report_loci matches loci_maf, loci_missingness and loci_hwe", {
     grouped_report
   )
 })
+
+test_that("grouped qc_report_loci ignores empty groups", {
+  test_gt <- load_example_gt("gen_tbl") %>%
+    filter(population == "pop1")
+  # a single non-empty group (so that the Bonferroni correction does not cap
+  # the p-values at 1), with an empty level before and after it
+  test_gt$population <- factor(
+    test_gt$population,
+    levels = c("pop_empty1", "pop1", "pop_empty2")
+  )
+  drop_report <- qc_report_loci(test_gt %>% group_by(population))
+  keep_gt <- test_gt %>% group_by(population, .drop = FALSE)
+  expect_equal(dplyr::n_groups(keep_gt), 3)
+  # some loci have a p-value above 0.5, the p-value of the empty groups
+  # before they were set to NA
+  expect_true(any(drop_report$hwe_p > 0.5))
+  expect_equal(qc_report_loci(keep_gt), drop_report)
+
+  # the same when the stats are not computed in a single pass (here with a
+  # single individual), where the empty groups of loci_hwe() are NA
+  single_gt <- test_gt[1, ]
+  drop_report <- qc_report_loci(single_gt %>% group_by(population))
+  keep_report <- qc_report_loci(
+    single_gt %>% group_by(population, .drop = FALSE)
+  )
+  expect_false(anyNA(keep_report$hwe_p))
+  expect_equal(keep_report, drop_report)
+})

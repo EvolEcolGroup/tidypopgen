@@ -24,6 +24,10 @@
 * `gt_extract_f2()` always drops empty groups (from `group_by(.drop = FALSE)`,
   or `filter()`/`slice()` with `.preserve = TRUE`), rather than passing them to
   *ADMIXTOOLS 2* as populations without data
+* grouped `loci_hwe()` now returns NA for empty groups, rather than the p-value
+  of a test on no genotypes (0.5 with `mid_p = TRUE`); grouped
+  `qc_report_loci()` ignores empty groups accordingly, as they could lower the
+  smallest HWE p-value to 0.5
 * fix `filter_high_relatedness()` (and `qc_report_indiv()` with
   `kings_threshold`) failing when some kinship values are missing (e.g. pairs of
   individuals with no loci genotyped in both); such pairs are treated as not

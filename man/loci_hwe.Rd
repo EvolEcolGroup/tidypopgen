@@ -64,7 +64,9 @@ and the "tidy" output has one column per grouping variable rather than a
 single \code{group} column.}
 }
 \value{
-a vector of probabilities from HWE exact test, one per locus
+a vector of probabilities from HWE exact test, one per locus. For
+a grouped \code{\link{gen_tibble}}, empty groups (e.g. from
+\code{group_by(.drop = FALSE)}) are NA.
 }
 \description{
 Return the p-value from an exact test of HWE.

@@ -86,7 +86,11 @@ qc_report_loci_stats <- function(.x, hwe) {
   # group of each individual (all in one group if not grouped)
   if (inherits(.x, "grouped_df")) {
     group_ids <- dplyr::group_indices(.x)
-    n_groups <- dplyr::n_groups(.x)
+    # number the non-empty groups from 1 to k, so that empty groups (from
+    # group_by(.drop = FALSE), or filter()/slice() with .preserve = TRUE) do
+    # not enter the smallest hwe p-value, as loci_hwe() gives them NA
+    group_ids <- match(group_ids, sort(unique(group_ids)))
+    n_groups <- length(unique(group_ids))
   } else {
     group_ids <- rep(1L, nrow(.x))
     n_groups <- 1L
@@ -114,8 +118,12 @@ qc_report_loci_stats <- function(.x, hwe) {
     )
     if (hwe) {
       if (inherits(.x, "grouped_df")) {
-        # smallest p-value across groups (one vector per group)
-        qc_stats$hwe_p <- do.call(pmin, loci_hwe(.x, type = "list"))
+        # smallest p-value across groups (one vector per group), ignoring
+        # empty groups, which are NA
+        qc_stats$hwe_p <- do.call(
+          pmin,
+          c(loci_hwe(.x, type = "list"), na.rm = TRUE)
+        )
       } else {
         qc_stats$hwe_p <- loci_hwe(.x$genotypes)
       }
