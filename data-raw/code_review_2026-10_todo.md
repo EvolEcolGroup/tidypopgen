@@ -13,8 +13,9 @@ only"). In #216 each of them was reverted in `speed_to_merge`.
   below), together with its regression test and `NEWS.md` entry.
 - **Also on this branch:** #217 (`ee8bd631`, grouping by several
   variables), the [empty group fixes](#empty-groups-group_bydrop--false),
-  and PR #209 (`autoplot()` of Q matrices), merged in `de645781` (see
-  [PR #209](#pr-209-merged-into-this-branch)).
+  PR #209 (`autoplot()` of Q matrices), merged in `de645781` (see
+  [PR #209](#pr-209-merged-into-this-branch)), and the
+  [group order fixes](#group-order).
 - The comments in *italics* are the original reviewers' comments from
   `code_review_2026-10.md`, explaining why each fix was held back. They
   still need an answer before this branch is merged.
@@ -164,13 +165,12 @@ No benchmark was run, as this is plotting code. Full test suite on
 `de645781` (installed, `NOT_CRAN=true`, library on `R_LIBS`): 2,875
 passed, 0 failed, 0 skipped. — Claude, for AM
 
-Found while checking, not fixed (already on `dev`, before #217 and #209):
-`augment()` of a `q_matrix` without `id` and `group` attributes, with
-grouped `data`, turns the groups into character. So `autoplot(q_mat, data =
-grouped_gt)` orders the groups alphabetically even when the grouping
-variable is a factor, contrary to the documentation of `arrange_by_group`.
-Groups are ordered by the levels when they come from the attributes of the
-`q_matrix` (as for `gt_admixture()` results).
+Found while checking (already on `dev`, before #217 and #209), and since
+fixed in `ace18ade` (see [Group order](#group-order)): `augment()` of a
+`q_matrix` without `id` and `group` attributes, with grouped `data`, turned
+the groups into character. So `autoplot(q_mat, data = grouped_gt)` ordered
+the groups alphabetically even when the grouping variable was a factor,
+contrary to the documentation of `arrange_by_group`.
 
 ## Optional fix on a separate branch (not on this branch)
 
@@ -200,6 +200,9 @@ commits, but their boxes in `code_review_2026-10.md` were never ticked:
   output."* Kept because the test of `6a61c22` needs it.
   **Decided (AM, 2026-11-03):** yes, keep empty groups (see `6a61c22`).
   — Claude, for AM
+  Its test now expects the "tidy" `group` column to keep the type of the
+  grouping variable (factor or numeric), following `2b6c38b3` (see
+  [Group order](#group-order)).
 - [ ] `896675d` · `pop_tajimas_d()` with loci lacking data or pi = 1.
   *Superseded by `dev`'s #214.*
 - [ ] `458144f` · `filter_high_relatedness()` with missing kinship.
@@ -305,3 +308,108 @@ package): 2,851 passed, 0 failed, 0 skipped. With these fixes, the check
 of every grouped function with an empty group (in the middle and at the
 end) finds no function left that fails, or differs from dplyr's handling
 of empty groups.
+
+## Group order
+
+Every grouped function computes its groups in the order of
+`dplyr::group_keys()`: the levels of a factor, numbers in numeric order,
+characters sorted; with several grouping variables, by the first variable,
+then the second, and so on. Several outputs lost that order once they were
+sorted or plotted, because they turned the groups into characters
+(alphabetical), or sorted the names themselves. The fixes below make every
+output keep the order of the groups. The plan, and the decision on the type
+of the tidy `group` column, are AM's (2026-11-04).
+
+Unchanged: matrix column names, vector names and pair labels (e.g.
+`fst_pop1.pop2`) stay the character labels. They are already in the order
+of the groups.
+
+- [x] `2b6c38b3` · "tidy" output of grouped `loci_alt_freq()`,
+  `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,
+  `windows_pop_tajimas_d()` and `jackknife_pop_tajimas_d()` — With one
+  grouping variable, the `group` column held the character labels, so a
+  factor lost its levels and numbers sorted as "10" < "2". *[Wrong order]*
+  **Decided (AM, 2026-11-04):** the `group` column keeps the type of the
+  grouping variable, as `dplyr::summarise()` does, and as the columns of
+  several grouping variables and the tidy output of `pairwise_pop_fst()`
+  already did.
+  **Change in behaviour:** for factor or numeric grouping variables only
+  (characters are unchanged). The test of `83aa04e` that expected
+  characters is updated.
+  Checked: the new test (`test_group_order.R`) fails on `aed8beee` (28
+  failures) and passes on the fix. No slowdown: the column is built with
+  `rep()` of a factor rather than of characters, which is faster (0.012 s
+  rather than 0.042 s for 8 million rows) and takes half the memory.
+  — Claude, for AM
+- [x] `73729ce3` · `qc_report_indiv()$group`, and `$group` of the results
+  of `gt_admixture()` and `gt_snmf()`, with several grouping variables —
+  The group of each individual was a character label, which sorts
+  alphabetically, so `gt_admix_reorder_q()` and the admixture barplots
+  ordered the groups differently from the grouped functions.
+  *[Wrong order]*
+  **Change in behaviour:** these are now a factor, whose levels are the
+  labels in the order of the groups (an empty group stays a level, as with
+  `group_by(.drop = FALSE)` on a factor). With one grouping variable they
+  are still the variable itself. `gt_as_plink()` (bed, ped) and
+  `windows_indiv_roh()` still write the labels (checked). The tests of
+  #217 that expected characters are updated.
+  Checked: the new test fails on `2b6c38b3`, and passes on the fix, as do
+  the updated #217 tests. — Claude, for AM
+- [x] `ace18ade` · `tidy()`, `augment()` and `autoplot()` of a `q_matrix`
+  with `data` — With grouped `data` and no attributes, the groups were
+  turned into characters (alphabetical order in `autoplot()`, contrary to
+  its documentation). With ids but no groups (e.g. from `gt_admixture()` or
+  `gt_snmf()` on an ungrouped gen_tibble), the groups of `data` were
+  ignored, so `autoplot()` could not annotate them. With groups but no ids,
+  the groups were dropped. *[Wrong order]*
+  Both methods now share `.q_matrix_to_tbl()`. It uses the attributes if
+  present, otherwise the ids and groups of `data` (matched by id), keeping
+  the type of the groups.
+  Checked: the new test (factor, numeric, and ids with `data` in reverse
+  order) fails on `73729ce3` (8 failures, with the updated #217 test) and
+  passes on the fix. — Claude, for AM
+- [x] `732e9f2d` · `autoplot()` of `q_matrix`/`gt_admix` with
+  `reorder_within_groups = TRUE` — The groups were sorted even with
+  `arrange_by_group = FALSE`, whereas without it (and with
+  `arrange_by_indiv`, since #209) they keep their current order.
+  *[Wrong order]* The #209 tests still pass.
+  Checked: the new test fails on `ace18ade` (1 failure) and passes on the
+  fix. — Claude, for AM
+- [x] `0e1ee67c` · `heatmap_pairwise()`, `autoplot()` of tidy pairwise
+  outputs — The names of a tidy input were sorted alphabetically (in the
+  locale's collation). So groups were not in the order of their levels, and
+  individuals not in the order of the gen_tibble, unlike the same data as a
+  matrix, and contrary to the documentation of `order` ("NULL: preserve
+  the existing order"). *[Wrong order]*
+  **Change in behaviour:** the names are in the order in which they first
+  appear in the pairs. For the outputs of the `pairwise_*()` functions,
+  that is the order of the individuals or groups.
+  Checked: the new test (groups and individuals) fails on `732e9f2d` (2
+  failures) and passes on the fix. — Claude, for AM
+- [ ] `e4d475d8` · `autoplot()` of `q_matrix`/`gt_admix` (group
+  annotation) — Failed ("`breaks` and `labels` must have the same length")
+  when the first group had a single individual. A group of a single
+  individual elsewhere was labelled on the last individual of the previous
+  group. *[Error]* Already on `dev`. Found by the check below: with several
+  grouping variables, groups often have a single individual.
+  **Not in the approved plan**, so the box is left for AM. Checked: the new
+  test errors on `0e1ee67c` and passes on the fix.
+
+Checked on `e4d475d8` (installed): every grouped function was run with a
+factor whose levels are not alphabetical (with an empty level and
+`.drop = FALSE`), with numeric groups (10, 2, 1), and with two grouping
+variables. The checks cover:
+
+- tidy group columns, once sorted;
+- matrix column names and vector names;
+- `pairwise_pop_fst()`, with tidy and matrix input to `heatmap_pairwise()`;
+- `qc_report_indiv()`;
+- `autoplot()` of a `q_matrix`, with the groups from the data, from ids
+  plus data, or from the attributes, and with `reorder_within_groups`;
+- `gt_admix_reorder_q()`.
+
+All 72 checks follow the order of `group_keys()`. Before these fixes (on
+`aed8beee`), 27 of them failed. The sweep script is not in the repository.
+Full test suite on `0e1ee67c`: 2,941 passed, 0 failed, 0 skipped.
+Full test suite on `e4d475d8` (installed, `NOT_CRAN=true`, library on
+`R_LIBS`): 2,945 passed, 0 failed, 0 skipped.
