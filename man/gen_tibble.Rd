@@ -145,6 +145,8 @@ genotypes are '.'). Currently, only biallelic SNPs are
 supported. If haploid variants (e.g. sex chromosomes) are included in the
 \emph{VCF}, they are not transformed into homozygous calls. Instead, reference
 alleles will be coded as 0 and alternative alleles will be coded as 1.
+The phase of phased genotypes (e.g. \code{0|1}) is ignored: use
+\code{\link[=gen_tibble_phased]{gen_tibble_phased()}} to keep it.
 \item \emph{PLINK} files (.bed, .ped, or a bigSNP .rds): the individual information
 (from the .fam file, or the first six columns of the .ped file) is stored
 in the same columns for all formats: the individual ID as \code{id}; the family

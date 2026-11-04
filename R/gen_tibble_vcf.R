@@ -1,4 +1,5 @@
-# read in a vcf
+# read in a vcf (with phased = TRUE, phased diploid genotypes are stored, see
+# gen_tibble_phased())
 gen_tibble_vcf <- function(
   x,
   ...,
@@ -10,7 +11,8 @@ gen_tibble_vcf <- function(
   backingfile = NULL,
   allow_duplicates = FALSE,
   names_as_int = FALSE,
-  quiet = FALSE
+  quiet = FALSE,
+  phased = FALSE
 ) {
   parser <- match.arg(parser)
   if (!file.exists(x)) {
@@ -29,7 +31,8 @@ gen_tibble_vcf <- function(
       missing_alleles = missing_alleles,
       allow_duplicates = allow_duplicates,
       names_as_int = names_as_int,
-      quiet = quiet
+      quiet = quiet,
+      phased = phased
     )
   } else {
     new_gen_tbl <- vcf_to_fbm_vcfR(
@@ -40,6 +43,7 @@ gen_tibble_vcf <- function(
       chunk_size = chunk_size,
       allow_duplicates = allow_duplicates,
       quiet = quiet,
+      phased = phased,
       ...
     )
   }

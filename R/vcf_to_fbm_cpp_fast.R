@@ -15,6 +15,8 @@
 #' @param names_as_int whether to convert locus names to
 #'   integers. Default is FALSE.
 #' @param quiet whether to print messages.
+#' @param phased whether to store phased diploid genotypes (see
+#'   [gen_tibble_phased()]), rather than alternate allele counts.
 #' @returns an object of the class `gen_tbl`.
 #' @keywords internal
 #' @noRd
@@ -25,7 +27,8 @@ vcf_to_fbm_cpp <- function(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   names_as_int = FALSE,
-  quiet = FALSE
+  quiet = FALSE,
+  phased = FALSE
 ) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
@@ -57,6 +60,10 @@ vcf_to_fbm_cpp <- function(
   }
   fbm_ploidy <- ploidy
   max_ploidy <- max(ploidy)
+  # phased genotypes are only stored for diploid individuals
+  if (phased) {
+    stopifnot_phased_ploidy(ploidy, vcf_meta$sample_names)
+  }
 
   indiv_meta <- list(
     id = vcf_meta$sample_names
@@ -121,8 +128,12 @@ vcf_to_fbm_cpp <- function(
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
 
-  code256 <- rep(NA_real_, 256)
-  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+  if (phased) {
+    code256 <- code_phased
+  } else {
+    code256 <- rep(NA_real_, 256)
+    code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+  }
 
   # create the file backed matrix
   file_backed_matrix <- bigstatsr::FBM.code256(
@@ -132,11 +143,27 @@ vcf_to_fbm_cpp <- function(
     backingfile = backingfile
   )
 
-  vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
-    biallelic = vcf_meta$biallelic,
-    n_header_lines = vcf_meta$n_header_lines,
-    missing_value = max_ploidy + 1
+  # fill in the genotypes (phased genotypes use the byte of each genotype a|b
+  # in phased_genotype_byte, and missing ones the same byte as unphased data,
+  # max_ploidy + 1 = 3)
+  read_ok <- tryCatch(
+    vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
+      biallelic = vcf_meta$biallelic,
+      n_header_lines = vcf_meta$n_header_lines,
+      missing_value = max_ploidy + 1,
+      phased_lut = if (phased) phased_genotype_byte else integer(0),
+      sample_names = vcf_meta$sample_names
+    ),
+    error = function(e) e
   )
+  if (inherits(read_ok, "error")) {
+    # remove the backing file before stopping (dropping the FBM first, so that
+    # it can be unmapped, see remove_fbm_files())
+    bk_file <- file_backed_matrix$backingfile
+    rm(file_backed_matrix)
+    remove_fbm_files(bk_file)
+    stop(conditionMessage(read_ok), call. = FALSE)
+  }
 
   # construct path
   fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")

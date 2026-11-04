@@ -135,8 +135,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // gt_copy_fbm
-void gt_copy_fbm(Environment BM_from, Environment BM_to, const IntegerVector& rowInd, const IntegerVector& colInd, const int col_offset, const int row_offset, const LogicalVector& swap, const IntegerVector& swap_lut);
-RcppExport SEXP _tidypopgen_gt_copy_fbm(SEXP BM_fromSEXP, SEXP BM_toSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP col_offsetSEXP, SEXP row_offsetSEXP, SEXP swapSEXP, SEXP swap_lutSEXP) {
+void gt_copy_fbm(Environment BM_from, Environment BM_to, const IntegerVector& rowInd, const IntegerVector& colInd, const int col_offset, const int row_offset, const LogicalVector& swap, const IntegerVector& swap_lut, const IntegerVector& copy_lut);
+RcppExport SEXP _tidypopgen_gt_copy_fbm(SEXP BM_fromSEXP, SEXP BM_toSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP col_offsetSEXP, SEXP row_offsetSEXP, SEXP swapSEXP, SEXP swap_lutSEXP, SEXP copy_lutSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type BM_from(BM_fromSEXP);
@@ -147,7 +147,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type row_offset(row_offsetSEXP);
     Rcpp::traits::input_parameter< const LogicalVector& >::type swap(swapSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type swap_lut(swap_lutSEXP);
-    gt_copy_fbm(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type copy_lut(copy_lutSEXP);
+    gt_copy_fbm(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut, copy_lut);
     return R_NilValue;
 END_RCPP
 }
@@ -432,8 +433,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // increment_as_counts
-void increment_as_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
-RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
+void increment_as_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& byte_genotype, int ncores);
+RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP byte_genotypeSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
@@ -441,14 +442,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type byte_genotype(byte_genotypeSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    increment_as_counts(k, k2, BM, rowInd, colInd, ncores);
+    increment_as_counts(k, k2, BM, rowInd, colInd, byte_genotype, ncores);
     return R_NilValue;
 END_RCPP
 }
 // increment_ibs_counts
-void increment_ibs_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
-RcppExport SEXP _tidypopgen_increment_ibs_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
+void increment_ibs_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& byte_genotype, int ncores);
+RcppExport SEXP _tidypopgen_increment_ibs_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP byte_genotypeSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
@@ -456,14 +458,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type byte_genotype(byte_genotypeSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    increment_ibs_counts(k, k2, BM, rowInd, colInd, ncores);
+    increment_ibs_counts(k, k2, BM, rowInd, colInd, byte_genotype, ncores);
     return R_NilValue;
 END_RCPP
 }
 // increment_king_numerator
-void increment_king_numerator(Environment k, Environment n_Aa_i, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
-RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP kSEXP, SEXP n_Aa_iSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
+void increment_king_numerator(Environment k, Environment n_Aa_i, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& byte_genotype, int ncores);
+RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP kSEXP, SEXP n_Aa_iSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP byte_genotypeSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
@@ -471,8 +474,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type byte_genotype(byte_genotypeSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    increment_king_numerator(k, n_Aa_i, BM, rowInd, colInd, ncores);
+    increment_king_numerator(k, n_Aa_i, BM, rowInd, colInd, byte_genotype, ncores);
     return R_NilValue;
 END_RCPP
 }
@@ -511,8 +515,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // vcf_genotypes_to_fbm
-bool vcf_genotypes_to_fbm(std::string filename, Environment BM, LogicalVector& biallelic, const int missing_value, const int n_header_lines);
-RcppExport SEXP _tidypopgen_vcf_genotypes_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP biallelicSEXP, SEXP missing_valueSEXP, SEXP n_header_linesSEXP) {
+bool vcf_genotypes_to_fbm(std::string filename, Environment BM, LogicalVector& biallelic, const int missing_value, const int n_header_lines, const IntegerVector& phased_lut, const CharacterVector& sample_names);
+RcppExport SEXP _tidypopgen_vcf_genotypes_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP biallelicSEXP, SEXP missing_valueSEXP, SEXP n_header_linesSEXP, SEXP phased_lutSEXP, SEXP sample_namesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -521,7 +525,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< LogicalVector& >::type biallelic(biallelicSEXP);
     Rcpp::traits::input_parameter< const int >::type missing_value(missing_valueSEXP);
     Rcpp::traits::input_parameter< const int >::type n_header_lines(n_header_linesSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_genotypes_to_fbm(filename, BM, biallelic, missing_value, n_header_lines));
+    Rcpp::traits::input_parameter< const IntegerVector& >::type phased_lut(phased_lutSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type sample_names(sample_namesSEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_genotypes_to_fbm(filename, BM, biallelic, missing_value, n_header_lines, phased_lut, sample_names));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -563,7 +569,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_grouped_het_obs_polyploid", (DL_FUNC) &_tidypopgen_grouped_het_obs_polyploid, 8},
     {"_tidypopgen_grouped_missingness_cpp", (DL_FUNC) &_tidypopgen_grouped_missingness_cpp, 8},
     {"_tidypopgen_missingness_cpp", (DL_FUNC) &_tidypopgen_missingness_cpp, 5},
-    {"_tidypopgen_gt_copy_fbm", (DL_FUNC) &_tidypopgen_gt_copy_fbm, 8},
+    {"_tidypopgen_gt_copy_fbm", (DL_FUNC) &_tidypopgen_gt_copy_fbm, 9},
     {"_tidypopgen_gt_grouped_pi_diploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_diploid, 8},
     {"_tidypopgen_gt_grouped_pi_polyploid", (DL_FUNC) &_tidypopgen_gt_grouped_pi_polyploid, 10},
     {"_tidypopgen_gt_ind_hetero", (DL_FUNC) &_tidypopgen_gt_ind_hetero, 4},
@@ -580,12 +586,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
-    {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 6},
-    {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 6},
-    {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 6},
+    {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
+    {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 7},
+    {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 7},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
     {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 2},
-    {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},
+    {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 7},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}

@@ -29,8 +29,8 @@ missingness_cpp <- function(BM, rowInd, colInd, ncores, block_size = 100000L) {
     .Call(`_tidypopgen_missingness_cpp`, BM, rowInd, colInd, ncores, block_size)
 }
 
-gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut) {
-    invisible(.Call(`_tidypopgen_gt_copy_fbm`, BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut))
+gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut, copy_lut) {
+    invisible(.Call(`_tidypopgen_gt_copy_fbm`, BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut, copy_lut))
 }
 
 gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size = 100000L, return_n = FALSE) {
@@ -97,16 +97,16 @@ read_packedancestry <- function(filename, BM, tab) {
     .Call(`_tidypopgen_read_packedancestry`, filename, BM, tab)
 }
 
-increment_as_counts <- function(k, k2, BM, rowInd, colInd, ncores) {
-    invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, BM, rowInd, colInd, ncores))
+increment_as_counts <- function(k, k2, BM, rowInd, colInd, byte_genotype, ncores) {
+    invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, BM, rowInd, colInd, byte_genotype, ncores))
 }
 
-increment_ibs_counts <- function(k, k2, BM, rowInd, colInd, ncores) {
-    invisible(.Call(`_tidypopgen_increment_ibs_counts`, k, k2, BM, rowInd, colInd, ncores))
+increment_ibs_counts <- function(k, k2, BM, rowInd, colInd, byte_genotype, ncores) {
+    invisible(.Call(`_tidypopgen_increment_ibs_counts`, k, k2, BM, rowInd, colInd, byte_genotype, ncores))
 }
 
-increment_king_numerator <- function(k, n_Aa_i, BM, rowInd, colInd, ncores) {
-    invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, BM, rowInd, colInd, ncores))
+increment_king_numerator <- function(k, n_Aa_i, BM, rowInd, colInd, byte_genotype, ncores) {
+    invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, BM, rowInd, colInd, byte_genotype, ncores))
 }
 
 tajimas_d_window_sums_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size) {
@@ -117,8 +117,8 @@ vcf_loci_table <- function(filename, read_names = TRUE) {
     .Call(`_tidypopgen_vcf_loci_table`, filename, read_names)
 }
 
-vcf_genotypes_to_fbm <- function(filename, BM, biallelic, missing_value, n_header_lines) {
-    .Call(`_tidypopgen_vcf_genotypes_to_fbm`, filename, BM, biallelic, missing_value, n_header_lines)
+vcf_genotypes_to_fbm <- function(filename, BM, biallelic, missing_value, n_header_lines, phased_lut, sample_names) {
+    .Call(`_tidypopgen_vcf_genotypes_to_fbm`, filename, BM, biallelic, missing_value, n_header_lines, phased_lut, sample_names)
 }
 
 window_sums_cpp <- function(x, loci, lo, hi, long_double) {

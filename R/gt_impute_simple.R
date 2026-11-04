@@ -62,6 +62,13 @@ gt_impute_simple <- function(
   if (gt_has_imputed(x)) {
     stop("object x is already imputed; use `gt_set_imputed(x, set = TRUE)`")
   }
+  # imputed values would be stored in the bytes used by phased genotypes
+  if (is_phased(x)) {
+    stop(
+      "phased genotypes can not be imputed; to impute the genotypes ",
+      "without their phase, read the data with gen_tibble()"
+    )
+  }
 
   if (
     !identical(attr(x$genotypes, "fbm")$code256, bigsnpr::CODE_012)

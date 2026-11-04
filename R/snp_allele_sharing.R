@@ -54,6 +54,8 @@ snp_allele_sharing <- function(
   m <- length(ind.col)
 
   intervals <- CutBySize(m, block.size)
+  # the genotype held by each raw byte (accounting for phased data)
+  byte_genotype <- pairwise_byte_genotypes(X)
 
   # for each block of loci, genotypes are packed into bits and compared
   # with popcounts in C++ (see src/pairwise_bitpacked.h), so no dense
@@ -67,6 +69,7 @@ snp_allele_sharing <- function(
       X,
       ind.row,
       ind.col.ind,
+      byte_genotype = byte_genotype,
       ncores = n_cores
     )
   }

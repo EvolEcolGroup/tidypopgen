@@ -32,9 +32,11 @@
 // in the packed lower triangle (column-major, including the diagonal).
 //
 // As in the original implementation, the raw bytes of the FBM are used
-// directly (not decoded through code256): 0, 1 and 2 are valid genotypes,
-// and any other value (3 for missing, and 4 to 6 for imputed genotypes) is
-// treated as missing.
+// directly (not decoded through code256), through a lookup table of the
+// genotype held by each byte (byte_genotype, built in R by
+// pairwise_byte_genotypes()): 0, 1 and 2 are valid genotypes, and any other
+// value (3 for missing, and 4 to 6 for imputed genotypes) is treated as
+// missing, except in phased data, where byte 4 is the heterozygote 1|0.
 
 /******************************************************************************/
 
@@ -63,7 +65,8 @@ PW_ALWAYS_INLINE uint32_t pw_popcount(uint64_t x) {
 // Each statistic is described by a small "policy" struct with:
 // - N_PLANES: the number of bit planes per individual
 // - N_COUNTS: the number of counts accumulated for each pair
-// - planes(b): a bitmask (bit p set if plane p is 1) for raw byte b
+// - planes(g): a bitmask (bit p set if plane p is 1) for genotype g (0, 1 or
+//   2 alternate alleles; any other value is missing)
 // - add(wi, wj, c): add the counts for one word (64 loci) of individuals
 //   i and j (wi, wj point at their N_PLANES words) to c
 
@@ -75,7 +78,7 @@ struct PwIbs {
   static const int N_PLANES = 3;
   static const int N_COUNTS = 2;
   static uint8_t planes(int b) {
-    if (b > 2) return 0; // missing
+    if ((b < 0) || (b > 2)) return 0; // missing
     return 1 | ((b >= 1) << 1) | ((b == 2) << 2);
   }
   static PW_ALWAYS_INLINE void add(const uint64_t* wi, const uint64_t* wj,
@@ -96,7 +99,7 @@ struct PwKing {
   static const int N_PLANES = 4;
   static const int N_COUNTS = 4;
   static uint8_t planes(int b) {
-    if (b > 2) return 0; // missing
+    if ((b < 0) || (b > 2)) return 0; // missing
     return 1 | ((b == 1) << 1) | ((b == 0) << 2) | ((b == 2) << 3);
   }
   static PW_ALWAYS_INLINE void add(const uint64_t* wi, const uint64_t* wj,
@@ -117,7 +120,7 @@ struct PwAlleleSharing {
   static const int N_PLANES = 3;
   static const int N_COUNTS = 3;
   static uint8_t planes(int b) {
-    if (b > 2) return 0; // missing
+    if ((b < 0) || (b > 2)) return 0; // missing
     return 1 | ((b == 0) << 1) | ((b == 2) << 2);
   }
   static PW_ALWAYS_INLINE void add(const uint64_t* wi, const uint64_t* wj,
@@ -173,6 +176,8 @@ void pw_row_popcnt(std::size_t i, std::size_t n, std::size_t n_words,
 
 // Accumulate the counts of statistic Stat for all pairs of the selected
 // individuals (rowInd) over the selected loci (colInd).
+// byte_genotype gives the genotype held by each of the 256 raw byte values (0,
+// 1 or 2 alternate alleles, or -1 for missing).
 // Returns the counts for the packed lower triangle (pairs (j, i) with j >= i,
 // column-major), N_COUNTS consecutive values per pair; tri_start[i] is the
 // index of pair (i, i).
@@ -180,8 +185,12 @@ template <class Stat>
 std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
                                           const IntegerVector& rowInd,
                                           const IntegerVector& colInd,
+                                          const IntegerVector& byte_genotype,
                                           std::vector<std::size_t>& tri_start,
                                           int ncores) {
+  if (byte_genotype.size() != 256) {
+    Rcpp::stop("'byte_genotype' should have 256 elements");
+  }
 
   XPtr<FBM> xpBM = BM["address"];
   // raw (undecoded) bytes of the FBM, stored column-major
@@ -217,9 +226,9 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
   }
   std::vector<uint32_t> counts(n_pairs * Stat::N_COUNTS, 0);
 
-  // planes for each possible raw byte
+  // planes for each possible raw byte (from the genotype it holds)
   uint8_t lut[256];
-  for (int b = 0; b < 256; b++) lut[b] = Stat::planes(b);
+  for (int b = 0; b < 256; b++) lut[b] = Stat::planes(byte_genotype[b]);
 
   // number of 64-bit words per chunk: keep the planes of all individuals
   // within ~256KB (so that they stay in cache whilst visiting all pairs),

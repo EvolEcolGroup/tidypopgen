@@ -384,6 +384,25 @@ List vcf_loci_table(std::string filename, bool read_names = true) {
  * @return false if a genotype has more alleles than max_ploidy
  */
 
+// find the position of the field separators of a line of the VCF (there are
+// 8 + n of them, and separator_pos[8 + n] is set to the end of the line);
+// returns false if the line has fewer than 8 + n separators (i.e. fewer
+// genotypes than individuals)
+inline bool find_separators(const std::string &line,
+                            size_t* separator_pos,
+                            size_t n,
+                            const std::string &separator) {
+  bool complete = true;
+  separator_pos[0] = line.find(separator, 0);
+  complete &= (separator_pos[0] != std::string::npos);
+  for (size_t i = 1; i < 8+n; i++) {
+    separator_pos[i] = line.find(separator, separator_pos[i-1]+1);
+    complete &= (separator_pos[i] != std::string::npos);
+  }
+  separator_pos[8+n] = line.length();
+  return complete;
+}
+
 inline bool count_alt_alleles(const std::string &line,
                               unsigned char* alt_counts,
                               size_t* separator_pos,
@@ -391,12 +410,8 @@ inline bool count_alt_alleles(const std::string &line,
                               const size_t missingValue,
                               const std::string &separator
 ) {
-  separator_pos[0] = line.find(separator, 0);
   // find the position of all separators
-  for (size_t i = 1; i < 8+n; i++) {
-    separator_pos[i] = line.find(separator, separator_pos[i-1]+1);
-  }
-  separator_pos[8+n] = line.length();
+  find_separators(line, separator_pos, n, separator);
 
   // now move through each of the genotypes and process them
   // we ignore the first 9 fields (so start from position 9)
@@ -431,6 +446,70 @@ inline bool count_alt_alleles(const std::string &line,
   return true;
 }
 
+/******************************************************************************
+ * phased bytes from the genotypes of a line of the VCF
+ *
+ * For each individual, this stores the byte that encodes its phased diploid
+ * genotype (see `?code_phased`): phased_lut[2 * a + b] for a genotype a|b
+ * (with a and b equal to 0 for the reference allele and 1 for the alternate
+ * allele), or missing_value if any of its alleles is missing ('.'), or if it
+ * is a single missing allele ('.'). The phase of a homozygote is known, so
+ * homozygotes can also be unphased ('0/0' and '1/1').
+ *
+ * @return -1 if all genotypes could be read; otherwise the (0-based) index of
+ *   the first individual whose genotype could not be stored as a phased
+ *   genotype, with `error` set to 1 if the genotype is not diploid, or to 2 if
+ *   it is an unphased heterozygote ('0/1' or '1/0'); or 0, with `error` set
+ *   to 3, if the line has fewer genotypes than individuals.
+ */
+inline long phased_genotype_bytes(const std::string &line,
+                                  unsigned char* bytes,
+                                  size_t* separator_pos,
+                                  size_t n,
+                                  const unsigned char missing_value,
+                                  const unsigned char* phased_lut,
+                                  const std::string &separator,
+                                  int &error) {
+  if (!find_separators(line, separator_pos, n, separator)) {
+    // the line is too short: there are fewer genotypes than individuals
+    error = 3;
+    return 0;
+  }
+  const char* line_ptr = line.c_str();
+  for (size_t i = 0; i < n; i++) {
+    const char* p = line_ptr + separator_pos[i+8] + 1;
+    const char* field_end = line_ptr + separator_pos[i+9];
+    // the end of the genotype (the first ':' or the end of the field)
+    const char* gt_end = p;
+    while ((gt_end < field_end) && (*gt_end != ':')) {
+      gt_end++;
+    }
+    size_t len = gt_end - p;
+    if ((len == 1) && (p[0] == '.')) {
+      // a single missing allele
+      bytes[i] = missing_value;
+    } else if ((len == 3) && ((p[1] == '|') || (p[1] == '/'))) {
+      // a diploid genotype (each allele of a biallelic locus is a single
+      // character)
+      if ((p[0] == '.') || (p[2] == '.')) {
+        bytes[i] = missing_value;
+      } else {
+        int a = (p[0] == '1');
+        int b = (p[2] == '1');
+        if ((p[1] == '/') && (a != b)) {
+          error = 2;
+          return i;
+        }
+        bytes[i] = phased_lut[2 * a + b];
+      }
+    } else {
+      error = 1;
+      return i;
+    }
+  }
+  return -1;
+}
+
 /**
  * @brief Reads genotype data from a VCF file and stores alternate allele counts in a file-backed matrix.
  *
@@ -440,9 +519,13 @@ inline bool count_alt_alleles(const std::string &line,
  * @param biallelic Logical vector indicating which loci are biallelic and should be processed.
  * @param missing_value Value to assign for missing genotypes.
  * @param n_header_lines Number of header lines to skip in the VCF file.
+ * @param phased_lut An empty vector to store alternate allele counts, or, to
+ * store phased diploid genotypes, the bytes of the genotypes 0|0, 0|1, 1|0 and
+ * 1|1 (in this order; see `phased_genotype_bytes()`).
+ * @param sample_names The names of the individuals (used in error messages).
  * @return true if all genotypes are successfully read and stored.
  *
- * @throws Rcpp::exception if the file cannot be opened, if the end of file is reached prematurely, or if a genotype exceeds the maximum allowed ploidy.
+ * @throws Rcpp::exception if the file cannot be opened, if the end of file is reached prematurely, or if a genotype exceeds the maximum allowed ploidy (or, for phased genotypes, if a genotype is not diploid or is an unphased heterozygote).
  */
 
 // [[Rcpp::export]]
@@ -450,7 +533,26 @@ bool vcf_genotypes_to_fbm(std::string filename,
                           Environment BM,
                           LogicalVector& biallelic,
                           const int missing_value,
-                          const int n_header_lines) {
+                          const int n_header_lines,
+                          const IntegerVector& phased_lut,
+                          const CharacterVector& sample_names) {
+  // are we storing phased genotypes?
+  const bool phased = (phased_lut.size() > 0);
+  unsigned char phased_lut_bytes[4] = {0, 0, 0, 0};
+  if (phased) {
+    if (phased_lut.size() != 4) {
+      stop("'phased_lut' should be empty or have 4 elements");
+    }
+    for (int k = 0; k < 4; k++) {
+      if ((phased_lut[k] < 0) || (phased_lut[k] > 255)) {
+        stop("'phased_lut' should contain bytes (0 to 255)");
+      }
+      phased_lut_bytes[k] = (unsigned char) phased_lut[k];
+    }
+    if ((missing_value < 0) || (missing_value > 255)) {
+      stop("'missing_value' should be a byte (0 to 255)");
+    }
+  }
   // open the file
   bool is_gz = is_gz_file(filename);
   std::ifstream vcfFile;
@@ -515,7 +617,43 @@ bool vcf_genotypes_to_fbm(std::string filename,
     if (!gotLine) {
       stop("end of file reached before all expected genotypes were read");
     }
-    if (biallelic[i_geno]){
+    if (biallelic[i_geno] && phased) {
+      // store the phased genotypes, checking that they are all diploid, and
+      // that heterozygotes are phased
+      int error = 0;
+      long bad_indiv = phased_genotype_bytes(line, &alt_counts[0],
+                                             &separator_pos[0], n,
+                                             (unsigned char) missing_value,
+                                             phased_lut_bytes, tab_delimiter,
+                                             error);
+      if (bad_indiv >= 0) {
+        if (is_gz) {
+          gzclose(vcfGzFile);
+        } else {
+          vcfFile.close();
+        }
+        // describe the locus (chromosome and position) and the individual
+        std::vector<std::string> fields = split_locus_meta(line, "\t");
+        std::string indiv = (bad_indiv < sample_names.size()) ?
+          std::string(sample_names[bad_indiv]) :
+          ("number " + std::to_string(bad_indiv + 1));
+        std::string where = "individual " + indiv + " at locus " +
+          fields[0] + ":" + fields[1];
+        if (error == 3) {
+          stop("the line of locus " + fields[0] + ":" + fields[1] +
+               " has fewer genotypes than individuals");
+        } else if (error == 2) {
+          stop("the genotype of " + where + " is an unphased heterozygote " +
+               "('0/1' or '1/0'): phased genotypes need '|' between the " +
+               "alleles of heterozygotes (use gen_tibble() to read " +
+               "unphased genotypes)");
+        } else {
+          stop("the genotype of " + where + " is not diploid: phased " +
+               "genotypes can only be read for diploid individuals");
+        }
+      }
+      ptr = std::copy(&alt_counts[0], &alt_counts[0] + n, ptr);
+    } else if (biallelic[i_geno]){
       // count alternate alleles, checking that no genotype has more alleles
       // than max_ploidy (in case we estimated it incorrectly in the first line)
       if (!count_alt_alleles(line, &alt_counts[0], &separator_pos[0], n,

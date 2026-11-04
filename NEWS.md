@@ -1,4 +1,21 @@
 # tidypopgen `dev`
+* new `gen_tibble_phased()` creates `gen_tibble`s of phased diploid genotypes,
+  from phased VCF files (with the `cpp` or `vcfR` parser) or from a matrix of
+  haplotypes, for haplotype-based statistics (e.g. in `tidygensel`). Phased
+  genotypes are stored in the usual file backed matrix (`0|0` = 0, `0|1` = 1,
+  `1|1` = 2, missing = 3, `1|0` = 4) with the code `code_phased`, which
+  decodes them as ordinary dosages, so that all other functions work on
+  phased `gen_tibble`s as usual. `is_phased()` tests whether a `gen_tibble`
+  is phased, `show_haplotypes()` returns its haplotypes, and `phased_bytes`
+  gives the alleles of each byte. `gen_tibble()` still ignores the phase of
+  phased VCF files. `gt_as_vcf()` writes phased genotypes as phased (`0|1`),
+  and `rbind()` keeps the phase of two phased `gen_tibble`s (swapping the
+  alleles of both haplotypes where it swaps the alleles of a locus), and
+  discards it, with a message, if only one of them is phased. Imputation
+  refuses phased data
+* `pairwise_ibs()`, `pairwise_king()`, `pairwise_allele_sharing()` (and
+  `snp_ibs()`, `snp_king()`, `snp_allele_sharing()`) read the raw bytes of the
+  genotypes through a lookup table, so that they also work on phased data
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,

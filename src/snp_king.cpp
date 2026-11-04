@@ -10,6 +10,8 @@
 //    they are opposite homozygotes
 // n_Aa_i: FBM (n x n) where element (i, j) is the number of loci at which i
 //    is heterozygous and j has a valid genotype
+// byte_genotype: the genotype held by each raw byte (see
+//    pairwise_byte_genotypes() in R)
 // Genotypes are compared with the bit-packed kernel in pairwise_bitpacked.h
 
 // [[Rcpp::export]]
@@ -18,6 +20,7 @@ void increment_king_numerator(Environment k,
                               Environment BM,
                               const IntegerVector& rowInd,
                               const IntegerVector& colInd,
+                              const IntegerVector& byte_genotype,
                               int ncores) {
 
   std::size_t n = rowInd.size();
@@ -28,7 +31,7 @@ void increment_king_numerator(Environment k,
   // i het & j valid, j het & i valid)
   std::vector<std::size_t> tri_start;
   std::vector<uint32_t> counts =
-    pw_bitpacked_counts<PwKing>(BM, rowInd, colInd, tri_start, ncores);
+    pw_bitpacked_counts<PwKing>(BM, rowInd, colInd, byte_genotype, tri_start, ncores);
 
   for (std::size_t i = 0; i < n; i++) {
     for (std::size_t j = i; j < n; j++) {

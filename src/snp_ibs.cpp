@@ -9,6 +9,8 @@
 //    over loci valid in both individuals of 2 - |g_i - g_j|
 // k2: FBM (n x n) of the number of valid alleles compared, i.e. 2 times the
 //    number of loci valid in both individuals
+// byte_genotype: the genotype held by each raw byte (see
+//    pairwise_byte_genotypes() in R)
 // Genotypes are compared with the bit-packed kernel in pairwise_bitpacked.h
 
 // [[Rcpp::export]]
@@ -17,6 +19,7 @@ void increment_ibs_counts(Environment k,
                           Environment BM,
                           const IntegerVector& rowInd,
                           const IntegerVector& colInd,
+                          const IntegerVector& byte_genotype,
                           int ncores) {
 
   std::size_t n = rowInd.size();
@@ -26,7 +29,7 @@ void increment_ibs_counts(Environment k,
   // counts for the packed lower triangle: (n both valid, sum |g_i - g_j|)
   std::vector<std::size_t> tri_start;
   std::vector<uint32_t> counts =
-    pw_bitpacked_counts<PwIbs>(BM, rowInd, colInd, tri_start, ncores);
+    pw_bitpacked_counts<PwIbs>(BM, rowInd, colInd, byte_genotype, tri_start, ncores);
 
   // add them to both triangles of the (symmetric) accumulators
   for (std::size_t i = 0; i < n; i++) {

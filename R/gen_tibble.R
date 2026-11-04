@@ -15,6 +15,8 @@
 #' supported. If haploid variants (e.g. sex chromosomes) are included in the
 #' *VCF*, they are not transformed into homozygous calls. Instead, reference
 #' alleles will be coded as 0 and alternative alleles will be coded as 1.
+#' The phase of phased genotypes (e.g. `0|1`) is ignored: use
+#' [gen_tibble_phased()] to keep it.
 #'
 #' - *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual information
 #' (from the .fam file, or the first six columns of the .ped file) is stored

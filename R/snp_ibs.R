@@ -67,6 +67,8 @@ snp_ibs <- function(
   m <- length(ind.col)
 
   intervals <- CutBySize(m, block.size)
+  # the genotype held by each raw byte (accounting for phased data)
+  byte_genotype <- pairwise_byte_genotypes(X)
 
   # for each block of loci, genotypes are packed into bits and compared
   # with popcounts in C++ (see src/pairwise_bitpacked.h), so no dense
@@ -80,6 +82,7 @@ snp_ibs <- function(
       X,
       ind.row,
       ind.col.ind,
+      byte_genotype = byte_genotype,
       ncores = n_cores
     )
   }
@@ -104,4 +107,21 @@ snp_ibs <- function(
       return(ibs_adj)
     }
   }
+}
+
+# The genotype (0, 1 or 2 alternate alleles, or -1 for missing) held by each
+# of the 256 raw byte values of the FBM `fbm`, for the pairwise kernels that
+# read raw bytes (see src/pairwise_bitpacked.h). Bytes 0, 1 and 2 are the
+# genotypes 0, 1 and 2, and other bytes are missing (3, the missing value, and
+# 4 to 6, imputed genotypes, which are not used); in phased data (see
+# code_phased), each byte holds the sum of the alleles of its two haplotypes
+# (byte 4 is the heterozygote 1|0).
+pairwise_byte_genotypes <- function(fbm) {
+  if (identical(fbm$code256, code_phased)) {
+    byte_genotype <- as.integer(rowSums(phased_bytes))
+  } else {
+    byte_genotype <- c(0L, 1L, 2L, rep(NA_integer_, 253))
+  }
+  byte_genotype[is.na(byte_genotype)] <- -1L
+  byte_genotype
 }
