@@ -37,6 +37,92 @@ inline void sfs_untri(uint64_t t, int& n, int& k) {
 
 /******************************************************************************/
 
+// A counter of 64-bit keys in a flat hash table (open addressing with linear
+// probing), which is much faster than std::unordered_map for the many
+// increments of sfs_config_counts_cpp() (no allocation per key, and usually a
+// single memory access per increment). UINT64_MAX marks empty slots, so it
+// cannot be used as a key.
+const uint64_t SFS_EMPTY_KEY = std::numeric_limits<uint64_t>::max();
+
+class SfsFlatCounter {
+public:
+  SfsFlatCounter() : _size(0), _bits(10) {
+    _keys.assign((size_t) 1 << _bits, SFS_EMPTY_KEY);
+    _counts.assign((size_t) 1 << _bits, 0.0);
+  }
+
+  size_t size() const { return _size; }
+
+  inline void increment(uint64_t key) {
+    size_t mask = _keys.size() - 1;
+    size_t i = slot(key);
+    while (true) {
+      if (_keys[i] == key) {
+        _counts[i] += 1;
+        return;
+      }
+      if (_keys[i] == SFS_EMPTY_KEY) {
+        _keys[i] = key;
+        _counts[i] = 1;
+        _size++;
+        // keep the load factor below 1/2
+        if (2 * _size > _keys.size()) grow();
+        return;
+      }
+      i = (i + 1) & mask;
+    }
+  }
+
+  // the keys and their counts, sorted by key
+  void sorted(std::vector<uint64_t>& keys, std::vector<double>& counts) const {
+    std::vector<size_t> idx;
+    idx.reserve(_size);
+    for (size_t i = 0; i < _keys.size(); i++) {
+      if (_keys[i] != SFS_EMPTY_KEY) idx.push_back(i);
+    }
+    std::sort(idx.begin(), idx.end(), [&](size_t a, size_t b) {
+      return _keys[a] < _keys[b];
+    });
+    keys.resize(idx.size());
+    counts.resize(idx.size());
+    for (size_t r = 0; r < idx.size(); r++) {
+      keys[r] = _keys[idx[r]];
+      counts[r] = _counts[idx[r]];
+    }
+  }
+
+private:
+  std::vector<uint64_t> _keys;
+  std::vector<double> _counts;
+  size_t _size;
+  int _bits;
+
+  // Fibonacci hashing of the key into the table
+  inline size_t slot(uint64_t key) const {
+    return (size_t) ((key * UINT64_C(0x9E3779B97F4A7C15)) >> (64 - _bits));
+  }
+
+  void grow() {
+    std::vector<uint64_t> old_keys;
+    std::vector<double> old_counts;
+    old_keys.swap(_keys);
+    old_counts.swap(_counts);
+    _bits++;
+    _keys.assign((size_t) 1 << _bits, SFS_EMPTY_KEY);
+    _counts.assign((size_t) 1 << _bits, 0.0);
+    size_t mask = _keys.size() - 1;
+    for (size_t j = 0; j < old_keys.size(); j++) {
+      if (old_keys[j] == SFS_EMPTY_KEY) continue;
+      size_t i = slot(old_keys[j]);
+      while (_keys[i] != SFS_EMPTY_KEY) i = (i + 1) & mask;
+      _keys[i] = old_keys[j];
+      _counts[i] = old_counts[j];
+    }
+  }
+};
+
+/******************************************************************************/
+
 // Count the loci with each configuration of a spectrum. Each population i of
 // the spectrum (group pops[i]) has at most max_n[i] allele copies; loci with
 // fewer than min_n[i] called copies in any population are only counted as
@@ -47,7 +133,7 @@ inline void sfs_untri(uint64_t t, int& n, int& k) {
 //   a dense vector indexed by the triangular index;
 // - MAP64: the mixed radix number of the triangular indices of the
 //   populations (the first population is the least significant), if it fits
-//   in 64 bits;
+//   in 64 bits (and is not UINT64_MAX), counted in an SfsFlatCounter;
 // - MAPVEC: otherwise, a vector (n_1, k_1, ..., n_K, k_K) in an ordered map.
 // Counts are integers (stored as doubles, exact up to 2^53), so they do not
 // depend on the order in which loci are added.
@@ -65,7 +151,7 @@ public:
       // number of pairs (n, k) with 0 <= k <= n <= max_n
       _n_tri[i] = sfs_tri(max_n[i] + 1, 0);
       _radix[i] = prod;
-      if (prod > std::numeric_limits<uint64_t>::max() / _n_tri[i]) {
+      if (prod > (std::numeric_limits<uint64_t>::max() - 1) / _n_tri[i]) {
         _mode = MAPVEC;
       } else {
         prod *= _n_tri[i];
@@ -104,7 +190,7 @@ public:
         for (size_t i = 0; i < _K; i++) {
           key += sfs_tri(n[_pops[i]], k[_pops[i]]) * _radix[i];
         }
-        _map64[key] += 1;
+        _map64.increment(key);
       } else {
         for (size_t i = 0; i < _K; i++) {
           key_vec[2 * i] = n[_pops[i]];
@@ -133,9 +219,8 @@ public:
       }
     } else if (_mode == MAP64) {
       std::vector<uint64_t> keys;
-      keys.reserve(_map64.size());
-      for (const auto& kv : _map64) keys.push_back(kv.first);
-      std::sort(keys.begin(), keys.end());
+      std::vector<double> counts;
+      _map64.sorted(keys, counts);
       for (size_t r = 0; r < keys.size(); r++) {
         for (size_t i = 0; i < _K; i++) {
           int n, k;
@@ -143,7 +228,7 @@ public:
           n_out.push_back(n);
           k_out.push_back(k);
         }
-        count_out.push_back(_map64.at(keys[r]));
+        count_out.push_back(counts[r]);
       }
     } else {
       for (const auto& kv : _mapvec) {
@@ -176,7 +261,7 @@ private:
   std::vector<uint64_t> _radix, _n_tri;
   Mode _mode;
   std::vector<double> _dense;
-  std::unordered_map<uint64_t, double> _map64;
+  SfsFlatCounter _map64;
   std::map<std::vector<int>, double> _mapvec;
   double _n_dropped;
 };
