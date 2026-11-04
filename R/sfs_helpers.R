@@ -7,8 +7,10 @@
 # than n_proj called allele copies in any population of a spectrum are
 # dropped from that spectrum. The computation has two stages:
 # 1. sfs_config_counts_cpp() counts, in a single pass over the genotypes, the
-#    loci with each configuration (number of called and alternate allele
-#    copies in each population) of each spectrum;
+#    loci with each configuration (number of called and derived allele
+#    copies in each population) of each spectrum, where the derived allele is
+#    the alternate allele unless the loci are polarised with an ancestral
+#    allele (see .sfs_set_ancestral());
 # 2. sfs_project_cpp() projects the configurations of each spectrum (in
 #    parallel), which are then folded (if needed) in R by .sfs_fold().
 
@@ -19,8 +21,9 @@
 #'   group information of `.group_info()`, or NULL if not grouped), `ids`
 #'   (the 0-based group of each individual), `n_groups`, `labels` (a label for
 #'   each group) and `max_n` (the number of allele copies of each group, i.e.
-#'   the sum of the ploidy of its individuals). Empty groups are dropped,
-#'   with a message.
+#'   the sum of the ploidy of its individuals), `loci` (the loci table) and
+#'   `polarise` (empty, see `.sfs_set_ancestral()`). Empty groups are
+#'   dropped, with a message.
 #' @keywords internal
 #' @noRd
 .sfs_data <- function(.x) {
@@ -65,8 +68,70 @@
     n_groups = length(labels),
     labels = labels,
     ploidy = ploidy,
-    max_n = max_n
+    max_n = max_n,
+    loci = attr(genotypes, "loci"),
+    polarise = integer(0)
   )
+}
+
+#' Polarise the loci with their ancestral allele
+#'
+#' @param data the output of `.sfs_data()`
+#' @param ancestral NULL (the reference allele is ancestral), the name of a
+#'   column of the loci table with the ancestral allele of each locus, or a
+#'   character vector with the ancestral allele of each locus (in the order
+#'   of the loci table)
+#' @param folded whether the spectra are folded: polarisation does not change
+#'   a folded spectrum, so `ancestral` is then ignored (with a warning, as in
+#'   dadi, where all loci are used for folded spectra)
+#' @returns `data`, with `polarise` set to one value per locus: 0 if the
+#'   reference allele is ancestral, 1 if the alternate allele is ancestral,
+#'   and -1 if the ancestral allele is missing or is neither allele (the locus
+#'   is then dropped, as dadi drops loci without a usable outgroup allele)
+#' @keywords internal
+#' @noRd
+.sfs_set_ancestral <- function(data, ancestral, folded = FALSE) {
+  if (is.null(ancestral)) {
+    return(data)
+  }
+  if (folded) {
+    warning(
+      "`ancestral` is ignored for folded spectra; use `folded = FALSE` to ",
+      "polarise the spectra with the ancestral allele"
+    )
+    return(data)
+  }
+  loci <- data$loci
+  is_column <- is.character(ancestral) && length(ancestral) == 1 &&
+    ancestral %in% names(loci)
+  if (is_column) {
+    ancestral <- loci[[ancestral]]
+  }
+  if (is.factor(ancestral)) {
+    ancestral <- as.character(ancestral)
+  }
+  if (!is.character(ancestral) && !all(is.na(ancestral))) {
+    stop(
+      "`ancestral` should be the name of a column of the loci table, or a ",
+      "character vector with the ancestral allele of each locus"
+    )
+  }
+  if (length(ancestral) != nrow(loci)) {
+    stop(
+      "`ancestral` should be the name of a column of the loci table, or have ",
+      "one value per locus (", nrow(loci), ")"
+    )
+  }
+  # alleles are compared ignoring case (e.g. lower case ancestral alleles of
+  # low confidence)
+  ancestral <- toupper(ancestral)
+  is_ref <- !is.na(ancestral) & ancestral == toupper(loci$allele_ref)
+  is_alt <- !is.na(ancestral) & ancestral == toupper(loci$allele_alt)
+  polarise <- rep(-1L, length(ancestral))
+  polarise[is_ref %in% TRUE] <- 0L
+  polarise[is_alt %in% TRUE] <- 1L
+  data$polarise <- polarise
+  data
 }
 
 #' Count the loci with each configuration of a set of spectra
@@ -94,6 +159,7 @@
     is_pseudohaploid = is_pseudohaploid(genotypes),
     spectra = lapply(spectra, function(x) as.integer(x) - 1L),
     min_n = as.integer(min_n),
+    polarise = data$polarise,
     ncores = n_cores,
     # the kernel keeps the counts of a block of loci for all groups, so we
     # cap the size of the blocks
@@ -286,7 +352,8 @@
       pop_ids = names(this_proj),
       folded = folded,
       n_loci = projected[[i]]$n_loci,
-      n_loci_dropped = projected[[i]]$n_dropped + configs[[i]]$n_dropped
+      n_loci_dropped = projected[[i]]$n_dropped + configs[[i]]$n_dropped,
+      n_loci_unpolarised = configs[[i]]$n_unpolarised
     )
   })
 }
@@ -339,12 +406,15 @@
 #' @param n_loci the number of loci used (projected)
 #' @param n_loci_dropped the number of loci dropped (too few called copies in
 #'   at least one population)
+#' @param n_loci_unpolarised the number of loci dropped because their
+#'   ancestral allele is unknown (see `.sfs_set_ancestral()`)
 #' @returns an `sfs` object: the array, with dimnames giving the number of
 #'   allele copies in each population, and the other arguments as attributes
 #'   (plus `n_proj`)
 #' @keywords internal
 #' @noRd
-new_sfs <- function(fs, mask, pop_ids, folded, n_loci, n_loci_dropped) {
+new_sfs <- function(fs, mask, pop_ids, folded, n_loci, n_loci_dropped,
+                    n_loci_unpolarised = 0) {
   dims <- dim(fs)
   dimnames(fs) <- stats::setNames(
     lapply(dims, function(d) as.character(seq_len(d) - 1L)),
@@ -358,6 +428,7 @@ new_sfs <- function(fs, mask, pop_ids, folded, n_loci, n_loci_dropped) {
     folded = folded,
     n_loci = n_loci,
     n_loci_dropped = n_loci_dropped,
+    n_loci_unpolarised = n_loci_unpolarised,
     class = "sfs"
   )
 }
@@ -443,7 +514,14 @@ print.sfs <- function(x, ...) {
     "# Allele copies: ",
     paste(names(n_proj), n_proj, sep = " = ", collapse = ", "), "\n",
     "# Loci used: ", format(attr(x, "n_loci")),
-    " (dropped for missing data: ", format(attr(x, "n_loci_dropped")), ")\n"
+    " (dropped for missing data: ", format(attr(x, "n_loci_dropped")),
+    if (isTRUE(attr(x, "n_loci_unpolarised") > 0)) {
+      paste0(
+        "; without ancestral allele: ",
+        format(attr(x, "n_loci_unpolarised"))
+      )
+    },
+    ")\n"
   ))
   y <- unclass(x)
   attributes(y) <- list(dim = dim(x), dimnames = dimnames(x))

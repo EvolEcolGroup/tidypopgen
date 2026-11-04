@@ -170,6 +170,7 @@ gt_as_easysfs <- function(
   n_proj = NULL,
   prefix = NULL,
   folded = TRUE,
+  ancestral = NULL,
   total_length = NULL,
   round = FALSE,
   fastest = c("last", "first"),
@@ -192,7 +193,7 @@ gt_as_easysfs <- function(
   if (is.null(prefix)) {
     prefix <- basename(backing_name)
   }
-  data <- .sfs_data(.x)
+  data <- .sfs_set_ancestral(.sfs_data(.x), ancestral, folded = folded)
   labels <- data$labels
   if (any(grepl("[/\\\\]", labels))) {
     stop(

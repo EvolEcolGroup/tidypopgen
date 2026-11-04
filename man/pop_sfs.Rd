@@ -11,6 +11,7 @@ pop_sfs(
   .x,
   n_proj = NULL,
   folded = TRUE,
+  ancestral = NULL,
   type = c("tidy", "array"),
   n_cores,
   block_size,
@@ -21,6 +22,7 @@ pop_sfs(
   .x,
   n_proj = NULL,
   folded = TRUE,
+  ancestral = NULL,
   type = c("tidy", "array"),
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
@@ -31,6 +33,7 @@ pop_sfs(
   .x,
   n_proj = NULL,
   folded = TRUE,
+  ancestral = NULL,
   type = c("tidy", "array"),
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(length(.x), 1),
@@ -41,6 +44,7 @@ pop_sfs(
   .x,
   n_proj = NULL,
   folded = TRUE,
+  ancestral = NULL,
   type = c("tidy", "array"),
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
@@ -60,8 +64,16 @@ the number of allele copies that maximises its number of segregating
 sites (see \code{\link[=pop_sfs_preview]{pop_sfs_preview()}}).}
 
 \item{folded}{boolean, whether to fold the spectrum (the default, as the
-ancestral allele is not usually known). If \code{FALSE}, the reference allele
-is taken to be the ancestral one.}
+ancestral allele is not usually known). If \code{FALSE}, the spectrum is
+polarised with \code{ancestral}.}
+
+\item{ancestral}{the ancestral allele of each locus, used to polarise
+unfolded spectra: either the name of a column of the loci table (see
+\code{\link[=show_loci]{show_loci()}}), or a character vector with one allele per locus (in the
+order of the loci table). Loci whose ancestral allele is missing (\code{NA})
+or is neither of their alleles are dropped. If \code{NULL} (the default), the
+reference allele is taken to be ancestral, as in \code{easySFS}. Ignored, with
+a warning, for folded spectra.}
 
 \item{type}{the type of object to return, either "tidy" (the default) or
 "array".}
@@ -90,9 +102,10 @@ If \code{type = "array"}, a list of \code{sfs} objects (one per population, name
 by the group labels), or a single \code{sfs} object for ungrouped data. An
 \code{sfs} object is an array of the numbers of sites, with attributes
 giving its \code{mask}, the population labels (\code{pop_ids}), \code{n_proj}, whether
-it is \code{folded}, and the number of loci used (\code{n_loci}) and dropped for
-lack of called allele copies (\code{n_loci_dropped}). Use \code{\link[=tidy]{tidy()}} to turn
-it into a tibble.
+it is \code{folded}, and the number of loci used (\code{n_loci}), dropped for
+lack of called allele copies (\code{n_loci_dropped}), and dropped because
+their ancestral allele is unknown (\code{n_loci_unpolarised}, only with
+\code{ancestral}). Use \code{\link[=tidy]{tidy()}} to turn it into a tibble.
 }
 \description{
 Compute the one-dimensional site frequency spectrum (SFS) of each
@@ -125,13 +138,22 @@ segregating sites. If \code{n_proj} is not given, each population is projected
 to the number of allele copies that maximises its number of segregating
 sites (the \code{best} projection in \code{\link[=pop_sfs_preview]{pop_sfs_preview()}}).
 
-\strong{Folding.} Unless \code{folded = FALSE}, the spectrum is folded (i.e. it
-counts copies of the minor allele), as the reference allele is not
-necessarily ancestral. If \code{folded = FALSE}, the reference allele is taken
-to be ancestral, so that the spectrum counts copies of the alternate
-(derived) allele: this is only meaningful if the alleles of the \code{gen_tibble}
-are polarised (note that some operations, such as merging datasets with
-\code{\link[=rbind]{rbind()}}, can swap the reference and alternate alleles).
+\strong{Folding and polarisation.} Unless \code{folded = FALSE}, the spectrum is
+folded (i.e. it counts copies of the minor allele), as the ancestral allele
+is not usually known. An unfolded spectrum counts copies of the derived
+allele. By default (\code{ancestral = NULL}), the reference allele is taken to
+be ancestral, as in \code{easySFS}, so that the spectrum counts copies of the
+alternate allele: this is only meaningful if the alleles of the
+\code{gen_tibble} are polarised (note that some operations, such as merging
+datasets with \code{\link[=rbind]{rbind()}}, can swap the reference and alternate alleles).
+Otherwise, \code{ancestral} gives the ancestral allele of each locus (e.g.
+from an outgroup, or the \code{AA} field of a vcf), either as a column of the
+loci table or as a vector: loci whose ancestral allele is the alternate
+allele are polarised (copies of the reference allele are counted), and
+loci whose ancestral allele is missing (\code{NA}) or is neither of their two
+alleles are dropped, as in \code{dadi}. Alleles are compared ignoring case.
+Polarisation does not change a folded spectrum, so \code{ancestral} is ignored
+(with a warning) when \code{folded = TRUE}.
 
 \strong{Masked cells.} As in \code{dadi}, the corners of the spectrum (sites
 monomorphic in the projected sample) are masked, and so are the cells that
@@ -170,6 +192,15 @@ example_gt \%>\% pop_sfs(n_proj = c(pop1 = 4, pop2 = 2, pop3 = 2))
 
 # Unfolded spectra, as arrays
 example_gt \%>\% pop_sfs(n_proj = 2, folded = FALSE, type = "array")
+
+# Unfolded spectra, polarised with the ancestral allele of each locus (the
+# locus with an unknown ancestral allele is dropped)
+show_loci(example_gt)
+example_gt \%>\%
+  pop_sfs(
+    n_proj = 2, folded = FALSE,
+    ancestral = c("T", "C", "C", "G", NA, "T")
+  )
 \dontshow{\}) # examplesIf}
 }
 \references{

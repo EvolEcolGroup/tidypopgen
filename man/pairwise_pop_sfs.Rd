@@ -8,6 +8,7 @@ pairwise_pop_sfs(
   .x,
   n_proj = NULL,
   folded = TRUE,
+  ancestral = NULL,
   type = c("tidy", "array"),
   fastest = c("last", "first"),
   n_cores = bigstatsr::nb_cores(),
@@ -26,8 +27,16 @@ the number of allele copies that maximises its number of segregating
 sites (see \code{\link[=pop_sfs_preview]{pop_sfs_preview()}}).}
 
 \item{folded}{boolean, whether to fold the spectrum (the default, as the
-ancestral allele is not usually known). If \code{FALSE}, the reference allele
-is taken to be the ancestral one.}
+ancestral allele is not usually known). If \code{FALSE}, the spectrum is
+polarised with \code{ancestral}.}
+
+\item{ancestral}{the ancestral allele of each locus, used to polarise
+unfolded spectra: either the name of a column of the loci table (see
+\code{\link[=show_loci]{show_loci()}}), or a character vector with one allele per locus (in the
+order of the loci table). Loci whose ancestral allele is missing (\code{NA})
+or is neither of their alleles are dropped. If \code{NULL} (the default), the
+reference allele is taken to be ancestral, as in \code{easySFS}. Ignored, with
+a warning, for folded spectra.}
 
 \item{type}{the type of object to return, either "tidy" (the default) or
 "array".}

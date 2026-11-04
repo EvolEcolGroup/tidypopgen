@@ -30,13 +30,22 @@
 #' to the number of allele copies that maximises its number of segregating
 #' sites (the `best` projection in [pop_sfs_preview()]).
 #'
-#' **Folding.** Unless `folded = FALSE`, the spectrum is folded (i.e. it
-#' counts copies of the minor allele), as the reference allele is not
-#' necessarily ancestral. If `folded = FALSE`, the reference allele is taken
-#' to be ancestral, so that the spectrum counts copies of the alternate
-#' (derived) allele: this is only meaningful if the alleles of the `gen_tibble`
-#' are polarised (note that some operations, such as merging datasets with
-#' [rbind()], can swap the reference and alternate alleles).
+#' **Folding and polarisation.** Unless `folded = FALSE`, the spectrum is
+#' folded (i.e. it counts copies of the minor allele), as the ancestral allele
+#' is not usually known. An unfolded spectrum counts copies of the derived
+#' allele. By default (`ancestral = NULL`), the reference allele is taken to
+#' be ancestral, as in `easySFS`, so that the spectrum counts copies of the
+#' alternate allele: this is only meaningful if the alleles of the
+#' `gen_tibble` are polarised (note that some operations, such as merging
+#' datasets with [rbind()], can swap the reference and alternate alleles).
+#' Otherwise, `ancestral` gives the ancestral allele of each locus (e.g.
+#' from an outgroup, or the `AA` field of a vcf), either as a column of the
+#' loci table or as a vector: loci whose ancestral allele is the alternate
+#' allele are polarised (copies of the reference allele are counted), and
+#' loci whose ancestral allele is missing (`NA`) or is neither of their two
+#' alleles are dropped, as in `dadi`. Alleles are compared ignoring case.
+#' Polarisation does not change a folded spectrum, so `ancestral` is ignored
+#' (with a warning) when `folded = TRUE`.
 #'
 #' **Masked cells.** As in `dadi`, the corners of the spectrum (sites
 #' monomorphic in the projected sample) are masked, and so are the cells that
@@ -75,8 +84,15 @@
 #'   the number of allele copies that maximises its number of segregating
 #'   sites (see [pop_sfs_preview()]).
 #' @param folded boolean, whether to fold the spectrum (the default, as the
-#'   ancestral allele is not usually known). If `FALSE`, the reference allele
-#'   is taken to be the ancestral one.
+#'   ancestral allele is not usually known). If `FALSE`, the spectrum is
+#'   polarised with `ancestral`.
+#' @param ancestral the ancestral allele of each locus, used to polarise
+#'   unfolded spectra: either the name of a column of the loci table (see
+#'   [show_loci()]), or a character vector with one allele per locus (in the
+#'   order of the loci table). Loci whose ancestral allele is missing (`NA`)
+#'   or is neither of their alleles are dropped. If `NULL` (the default), the
+#'   reference allele is taken to be ancestral, as in `easySFS`. Ignored, with
+#'   a warning, for folded spectra.
 #' @param type the type of object to return, either "tidy" (the default) or
 #'   "array".
 #' @param n_cores number of cores to be used, it defaults to
@@ -97,9 +113,10 @@
 #'   by the group labels), or a single `sfs` object for ungrouped data. An
 #'   `sfs` object is an array of the numbers of sites, with attributes
 #'   giving its `mask`, the population labels (`pop_ids`), `n_proj`, whether
-#'   it is `folded`, and the number of loci used (`n_loci`) and dropped for
-#'   lack of called allele copies (`n_loci_dropped`). Use [tidy()] to turn
-#'   it into a tibble.
+#'   it is `folded`, and the number of loci used (`n_loci`), dropped for
+#'   lack of called allele copies (`n_loci_dropped`), and dropped because
+#'   their ancestral allele is unknown (`n_loci_unpolarised`, only with
+#'   `ancestral`). Use [tidy()] to turn it into a tibble.
 #' @rdname pop_sfs
 #' @export
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
@@ -121,7 +138,16 @@
 #'
 #' # Unfolded spectra, as arrays
 #' example_gt %>% pop_sfs(n_proj = 2, folded = FALSE, type = "array")
-pop_sfs <- function(.x, n_proj = NULL, folded = TRUE,
+#'
+#' # Unfolded spectra, polarised with the ancestral allele of each locus (the
+#' # locus with an unknown ancestral allele is dropped)
+#' show_loci(example_gt)
+#' example_gt %>%
+#'   pop_sfs(
+#'     n_proj = 2, folded = FALSE,
+#'     ancestral = c("T", "C", "C", "G", NA, "T")
+#'   )
+pop_sfs <- function(.x, n_proj = NULL, folded = TRUE, ancestral = NULL,
                     type = c("tidy", "array"), n_cores, block_size, ...) {
   UseMethod("pop_sfs", .x)
 }
@@ -132,6 +158,7 @@ pop_sfs.tbl_df <- function(
   .x,
   n_proj = NULL,
   folded = TRUE,
+  ancestral = NULL,
   type = c("tidy", "array"),
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
@@ -141,7 +168,7 @@ pop_sfs.tbl_df <- function(
   # through group_map
   stopifnot_gen_tibble(.x)
   pop_sfs(.x$genotypes,
-    n_proj = n_proj, folded = folded, type = type,
+    n_proj = n_proj, folded = folded, ancestral = ancestral, type = type,
     n_cores = n_cores, block_size = block_size, ...
   )
 }
@@ -152,6 +179,7 @@ pop_sfs.vctrs_bigSNP <- function(
   .x,
   n_proj = NULL,
   folded = TRUE,
+  ancestral = NULL,
   type = c("tidy", "array"),
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(length(.x), 1),
@@ -159,7 +187,7 @@ pop_sfs.vctrs_bigSNP <- function(
 ) {
   rlang::check_dots_empty()
   .pop_sfs(.x,
-    n_proj = n_proj, folded = folded, type = type,
+    n_proj = n_proj, folded = folded, ancestral = ancestral, type = type,
     n_cores = n_cores, block_size = block_size
   )
 }
@@ -170,6 +198,7 @@ pop_sfs.grouped_df <- function(
   .x,
   n_proj = NULL,
   folded = TRUE,
+  ancestral = NULL,
   type = c("tidy", "array"),
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
@@ -178,16 +207,17 @@ pop_sfs.grouped_df <- function(
   rlang::check_dots_empty()
   stopifnot_gen_tibble(.x)
   .pop_sfs(.x,
-    n_proj = n_proj, folded = folded, type = type,
+    n_proj = n_proj, folded = folded, ancestral = ancestral, type = type,
     n_cores = n_cores, block_size = block_size
   )
 }
 
 # the work of pop_sfs(), for a vctrs_bigSNP or a grouped gen_tibble
-.pop_sfs <- function(.x, n_proj, folded, type, n_cores, block_size) {
+.pop_sfs <- function(.x, n_proj, folded, ancestral, type, n_cores,
+                     block_size) {
   type <- match.arg(type, c("tidy", "array"))
   .sfs_check_folded(folded)
-  data <- .sfs_data(.x)
+  data <- .sfs_set_ancestral(.sfs_data(.x), ancestral, folded = folded)
   spectra_def <- as.list(seq_len(data$n_groups))
   if (is.null(n_proj)) {
     # count the configurations of all loci with at least one called copy,
@@ -252,10 +282,15 @@ pop_sfs.grouped_df <- function(
 #' copies drawn without replacement from the called copies of each locus
 #' (loci with fewer than \eqn{p} called copies are dropped), i.e. the sum of
 #' the cells of the projected spectrum that are not corners. It is the same
-#' for the folded and unfolded spectrum.
+#' for the folded and unfolded spectrum. If unfolded spectra are polarised
+#' with `ancestral` (see [pop_sfs()]), give the same `ancestral` here, so that
+#' the loci without a known ancestral allele are left out of the preview, as
+#' they are of the spectra.
 #'
 #' @param .x a [`gen_tibble`], grouped by population (or ungrouped, to treat
 #'   all individuals as a single population).
+#' @param ancestral the ancestral allele of each locus (see [pop_sfs()]): if
+#'   given, the loci whose ancestral allele is unknown are left out.
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
@@ -280,11 +315,12 @@ pop_sfs.grouped_df <- function(
 #'   dplyr::filter(best)
 pop_sfs_preview <- function(
   .x,
+  ancestral = NULL,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1)
 ) {
   stopifnot_gen_tibble(.x)
-  data <- .sfs_data(.x)
+  data <- .sfs_set_ancestral(.sfs_data(.x), ancestral)
   configs <- .sfs_config_counts(data,
     spectra = as.list(seq_len(data$n_groups)),
     min_n = rep(1L, data$n_groups),

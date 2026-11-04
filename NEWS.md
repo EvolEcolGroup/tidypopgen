@@ -12,7 +12,10 @@
   a spectrum in dadi or fastsimcoal2 format, and `gt_as_easysfs()` writes all
   the spectra written by easySFS (1D, 2D and multidimensional, in both
   formats, with the same file names), optionally setting the number of
-  monomorphic sites from the total length of the sequences.
+  monomorphic sites from the total length of the sequences. Unfolded spectra
+  can be polarised with the ancestral allele of each locus (`ancestral`, a
+  column of the loci table or a vector); loci with an unknown ancestral
+  allele are then dropped, as in dadi.
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,

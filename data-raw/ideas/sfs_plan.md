@@ -38,6 +38,13 @@ projections and options, the spectra match easySFS's output.
 - `write_sfs()`, which writes one spectrum in dadi or fastsimcoal2 format,
   with `fastest` and with easySFS's `--total-length` (`total_length`) and
   `--dtype int` (`round`);
+- `ancestral` (in `pop_sfs()`, `pairwise_pop_sfs()`, `nwise_pop_sfs()`,
+  `pop_sfs_preview()` and `gt_as_easysfs()`): the ancestral allele of each
+  locus, as a loci table column or a vector, compared ignoring case. Loci
+  whose ancestral allele is the alternate allele are flipped in the counting
+  pass, and loci without a usable ancestral allele are dropped (counted in
+  `n_loci_unpolarised`), as dadi does with an outgroup allele. It is ignored,
+  with a warning, for folded spectra, which polarisation does not change;
 - `gt_as_easysfs()`, which computes, in one pass, all the spectra that
   easySFS writes (1D, each pair, all populations) and writes them in both
   formats, with easySFS's directory layout and file names. It was checked
@@ -66,7 +73,6 @@ library, as `CLAUDE.md` requires.
 **Still to do:**
 
 - generate the easySFS fixtures (run `data-raw/create_easysfs_test_data.R`);
-- `ancestral`;
 - the `autoplot()` methods;
 - the block bootstrap;
 - verify the cell order of fsc MSFS files against the fsc manual. In fsc's

@@ -52,6 +52,7 @@ nwise_pop_sfs <- function(
   .x,
   n_proj = NULL,
   folded = TRUE,
+  ancestral = NULL,
   type = c("tidy", "array"),
   fastest = c("last", "first"),
   max_cells = 1e7,
@@ -64,7 +65,7 @@ nwise_pop_sfs <- function(
   type <- match.arg(type)
   fastest <- match.arg(fastest)
   .sfs_check_folded(folded)
-  data <- .sfs_data(.x)
+  data <- .sfs_set_ancestral(.sfs_data(.x), ancestral, folded = folded)
   if (data$n_groups < 2) {
     stop("at least 2 groups are needed to compute a joint spectrum")
   }

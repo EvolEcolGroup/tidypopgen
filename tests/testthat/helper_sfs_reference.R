@@ -234,3 +234,20 @@ sfs_file_parts <- function(file) {
     numbers = as.numeric(unlist(regmatches(lines, gregexpr(num_re, lines))))
   )
 }
+
+# polarise the alternate allele copies (individuals x loci) with the ancestral
+# allele of each locus, as dadi's count_data_dict() does with the outgroup
+# allele: the derived allele is the allele that is not ancestral, so loci
+# whose ancestral allele is the alternate allele count the reference copies,
+# and loci whose ancestral allele is missing or is neither allele are dropped
+# (alleles are compared ignoring case)
+ref_sfs_polarise <- function(alt_copies, ploidy, ancestral, allele_ref,
+                             allele_alt) {
+  ancestral <- toupper(ancestral)
+  is_ref <- ancestral == toupper(allele_ref)
+  is_alt <- ancestral == toupper(allele_alt)
+  is_ref[is.na(is_ref)] <- FALSE
+  is_alt[is.na(is_alt)] <- FALSE
+  alt_copies[, is_alt] <- ploidy - alt_copies[, is_alt]
+  alt_copies[, is_ref | is_alt, drop = FALSE]
+}

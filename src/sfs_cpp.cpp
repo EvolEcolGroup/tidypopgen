@@ -142,7 +142,8 @@ public:
   SfsConfigCounter(const std::vector<int>& pops,
                    const std::vector<int>& max_n,
                    const std::vector<int>& min_n)
-    : _pops(pops), _K(pops.size()), _min_n(min_n), _n_dropped(0) {
+    : _pops(pops), _K(pops.size()), _min_n(min_n), _n_dropped(0),
+      _n_unpolarised(0) {
     _radix.resize(_K);
     _n_tri.resize(_K);
     _mode = MAP64;
@@ -164,12 +165,17 @@ public:
   }
 
   // add the loci of a block; b_n and b_k hold the number of called and
-  // alternate allele copies of each locus (row) and group (column), with
-  // ngroups values per locus
-  void add_block(const int* b_n, const int* b_k, size_t ngroups,
-                 size_t n_loci) {
+  // derived allele copies of each locus (row) and group (column), with
+  // ngroups values per locus; b_drop (if not NULL) flags the loci that cannot
+  // be polarised, which are only counted as unpolarised
+  void add_block(const int* b_n, const int* b_k, const char* b_drop,
+                 size_t ngroups, size_t n_loci) {
     std::vector<int> key_vec(_mode == MAPVEC ? 2 * _K : 0);
     for (size_t j = 0; j < n_loci; j++) {
+      if (b_drop != NULL && b_drop[j]) {
+        _n_unpolarised += 1;
+        continue;
+      }
       const int* n = b_n + j * ngroups;
       const int* k = b_k + j * ngroups;
       bool keep = true;
@@ -203,7 +209,8 @@ public:
 
   // the configurations (sorted by key) as a list with matrices n and k (one
   // row per configuration, one column per population), the number of loci
-  // with each configuration (count), and the number of dropped loci
+  // with each configuration (count), and the number of loci dropped for
+  // missing data and because they could not be polarised
   List result() const {
     std::vector<int> n_out, k_out;
     std::vector<double> count_out;
@@ -250,7 +257,8 @@ public:
       count[r] = count_out[r];
     }
     return List::create(_["n"] = n_mat, _["k"] = k_mat, _["count"] = count,
-                        _["n_dropped"] = _n_dropped);
+                        _["n_dropped"] = _n_dropped,
+                        _["n_unpolarised"] = _n_unpolarised);
   }
 
 private:
@@ -264,6 +272,7 @@ private:
   SfsFlatCounter _map64;
   std::map<std::vector<int>, double> _mapvec;
   double _n_dropped;
+  double _n_unpolarised;
 };
 
 /******************************************************************************/
@@ -276,10 +285,14 @@ private:
 // copies as its ploidy, and pseudohaploids half their 0/2 dosage. Each
 // element of spectra is an integer vector with the (0-based) groups of a
 // spectrum; min_n gives, for each group, the smallest number of called
-// allele copies for a locus to be counted (i.e. the projection). After each
-// block of loci, the spectra are updated in parallel (each spectrum by a
-// single thread). Returns a list with the result of
-// SfsConfigCounter::result() for each spectrum.
+// allele copies for a locus to be counted (i.e. the projection). polarise is
+// either empty (the reference allele is ancestral, and k counts alternate
+// copies), or has a value for each locus: 0 if the reference allele is
+// ancestral, 1 if the alternate allele is ancestral (k then counts reference
+// copies), and -1 if the locus cannot be polarised (it is then dropped from
+// all spectra). After each block of loci, the spectra are updated in
+// parallel (each spectrum by a single thread). Returns a list with the
+// result of SfsConfigCounter::result() for each spectrum.
 
 // [[Rcpp::export]]
 List sfs_config_counts_cpp(Environment BM,
@@ -291,6 +304,7 @@ List sfs_config_counts_cpp(Environment BM,
                            bool is_pseudohaploid,
                            const List& spectra,
                            const IntegerVector& min_n,
+                           const IntegerVector& polarise,
                            int ncores,
                            int block_size) {
 
@@ -307,6 +321,16 @@ List sfs_config_counts_cpp(Environment BM,
   if (min_n.size() != ngroups) {
     stop("min_n should have one value per group");
   }
+  bool has_polarise = polarise.size() > 0;
+  if (has_polarise && (size_t) polarise.size() != m) {
+    stop("polarise should be empty or have one value per locus");
+  }
+  for (R_xlen_t j = 0; j < polarise.size(); j++) {
+    if (polarise[j] < -1 || polarise[j] > 1) {
+      stop("polarise should only contain -1, 0 and 1");
+    }
+  }
+  const int* p_polarise = polarise.begin();
   // allele counts need integer genotypes (not dosages)
   if (!acc.has_int_codes(255)) {
     stop("the site frequency spectrum needs integer genotype calls; it "
@@ -344,12 +368,13 @@ List sfs_config_counts_cpp(Environment BM,
     counters.push_back(SfsConfigCounter(pops, max_n, this_min_n));
   }
 
-  // called and alternate allele copies of the loci of the current block, for
+  // called and derived allele copies of the loci of the current block, for
   // each group (element [(j - j0) * ngroups + g]; blocks start at multiples
-  // of bs, so j - j0 = j % bs), and whether a locus had a non-integer count
+  // of bs, so j - j0 = j % bs), whether a locus had a non-integer count, and
+  // whether it cannot be polarised
   size_t bs = std::min((size_t) block_size, std::max(m, (size_t) 1));
   std::vector<int> b_n(bs * ngroups), b_k(bs * ngroups);
-  std::vector<char> b_bad(bs, 0);
+  std::vector<char> b_bad(bs, 0), b_drop(bs, 0);
 
   alt_valid_counts(acc, group_ids, ngroups, weight, copies, ncores, bs,
                    [&](size_t j, size_t g, double alt, double valid) {
@@ -359,6 +384,11 @@ List sfs_config_counts_cpp(Environment BM,
                      // e.g. a heterozygous genotype in a pseudohaploid
                      if (alt != (double) b_k[k] || valid != (double) b_n[k]) {
                        b_bad[j % bs] = 1;
+                     }
+                     if (has_polarise) {
+                       // the derived copies are the reference copies
+                       if (p_polarise[j] == 1) b_k[k] = b_n[k] - b_k[k];
+                       b_drop[j % bs] = (p_polarise[j] == -1);
                      }
                    },
                    [&](size_t j0, size_t j1) {
@@ -372,6 +402,8 @@ List sfs_config_counts_cpp(Environment BM,
 #pragma omp parallel for num_threads(ncores) schedule(dynamic, 1)
                      for (size_t s = 0; s < n_spectra; s++) {
                        counters[s].add_block(b_n.data(), b_k.data(),
+                                             has_polarise ? b_drop.data() :
+                                               NULL,
                                              (size_t) ngroups, n_block);
                      }
                    });

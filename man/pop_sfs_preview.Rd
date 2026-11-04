@@ -6,6 +6,7 @@
 \usage{
 pop_sfs_preview(
   .x,
+  ancestral = NULL,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1)
 )
@@ -13,6 +14,9 @@ pop_sfs_preview(
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}}, grouped by population (or ungrouped, to treat
 all individuals as a single population).}
+
+\item{ancestral}{the ancestral allele of each locus (see \code{\link[=pop_sfs]{pop_sfs()}}): if
+given, the loci whose ancestral allele is unknown are left out.}
 
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
@@ -46,7 +50,10 @@ the expected number of loci that are polymorphic in a sample of \eqn{p}
 copies drawn without replacement from the called copies of each locus
 (loci with fewer than \eqn{p} called copies are dropped), i.e. the sum of
 the cells of the projected spectrum that are not corners. It is the same
-for the folded and unfolded spectrum.
+for the folded and unfolded spectrum. If unfolded spectra are polarised
+with \code{ancestral} (see \code{\link[=pop_sfs]{pop_sfs()}}), give the same \code{ancestral} here, so that
+the loci without a known ancestral allele are left out of the preview, as
+they are of the spectra.
 }
 \examples{
 example_gt <- load_example_gt("grouped_gen_tbl")

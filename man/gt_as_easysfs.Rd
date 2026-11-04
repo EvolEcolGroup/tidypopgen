@@ -10,6 +10,7 @@ gt_as_easysfs(
   n_proj = NULL,
   prefix = NULL,
   folded = TRUE,
+  ancestral = NULL,
   total_length = NULL,
   round = FALSE,
   fastest = c("last", "first"),
@@ -39,8 +40,16 @@ sites (see \code{\link[=pop_sfs_preview]{pop_sfs_preview()}}).}
 backing files.}
 
 \item{folded}{boolean, whether to fold the spectrum (the default, as the
-ancestral allele is not usually known). If \code{FALSE}, the reference allele
-is taken to be the ancestral one.}
+ancestral allele is not usually known). If \code{FALSE}, the spectrum is
+polarised with \code{ancestral}.}
+
+\item{ancestral}{the ancestral allele of each locus, used to polarise
+unfolded spectra: either the name of a column of the loci table (see
+\code{\link[=show_loci]{show_loci()}}), or a character vector with one allele per locus (in the
+order of the loci table). Loci whose ancestral allele is missing (\code{NA})
+or is neither of their alleles are dropped. If \code{NULL} (the default), the
+reference allele is taken to be ancestral, as in \code{easySFS}. Ignored, with
+a warning, for folded spectra.}
 
 \item{total_length}{the total number of sites sequenced, including
 monomorphic ones, used to set the number of monomorphic sites (the first
