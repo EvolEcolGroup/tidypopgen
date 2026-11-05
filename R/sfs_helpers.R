@@ -213,6 +213,14 @@
     stop("`n_proj` should be a vector of whole numbers")
   }
   if (!is.null(names(n_proj))) {
+    # n_proj[labels] would silently keep the first value of a duplicated name
+    dup_names <- unique(names(n_proj)[duplicated(names(n_proj))])
+    if (length(dup_names) > 0) {
+      stop(
+        "`n_proj` has duplicate names: ",
+        paste(dup_names, collapse = ", ")
+      )
+    }
     unknown <- setdiff(names(n_proj), labels)
     if (length(unknown) > 0) {
       stop(

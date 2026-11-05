@@ -143,6 +143,10 @@ test_that("pop_sfs checks n_proj", {
     pop_sfs(sim$gt, n_proj = c(popA = 2, popB = 2)),
     "no value for: popC"
   )
+  expect_error(
+    pop_sfs(sim$gt, n_proj = c(popA = 2, popB = 2, popC = 2, popA = 4)),
+    "duplicate names: popA"
+  )
   expect_error(pop_sfs(sim$gt, n_proj = 2, folded = NA), "TRUE or FALSE")
   # named values can be in any order
   expect_identical(
