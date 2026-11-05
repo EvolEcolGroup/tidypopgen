@@ -47,6 +47,18 @@
     genotypes <- .x$genotypes
     ids <- groups$ids
     labels <- groups$labels
+    # the labels name the projections (n_proj), the spectra, the columns of
+    # nwise_pop_sfs() and the files of write_sfs(), so they must be distinct
+    # (with several grouping variables, their values are pasted with ".", so
+    # e.g. ("a.b", "c") and ("a", "b.c") both give "a.b.c")
+    dup_labels <- unique(labels[duplicated(labels)])
+    if (length(dup_labels) > 0) {
+      stop(
+        "several groups have the same label (the values of the grouping ",
+        "variables pasted with '.'): ", paste(dup_labels, collapse = ", "),
+        "; rename the groups"
+      )
+    }
   } else {
     groups <- NULL
     genotypes <- if (inherits(.x, "vctrs_bigSNP")) .x else .x$genotypes

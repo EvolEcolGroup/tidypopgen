@@ -299,6 +299,15 @@ test_that("pop_sfs uses one column per grouping variable", {
     "popA.F", "popA.M", "popB.F", "popB.M", "popC.F",
     "popC.M"
   ))
+  # the labels of the groups (pasted with ".") must be distinct
+  gt_same_label <- sim$gt %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(
+      v1 = dplyr::if_else(population == "popA", "a.b", "a"),
+      v2 = dplyr::if_else(population == "popA", "c", "b.c")
+    ) %>%
+    dplyr::group_by(v1, v2)
+  expect_error(pop_sfs(gt_same_label, n_proj = 2), "same label.*: a.b.c;")
   # a grouping variable cannot have the name of another column
   gt_clash <- gt_two %>% dplyr::rename(n_sites = "sex")
   expect_error(pop_sfs(gt_clash, n_proj = 2), "other columns of the output")
