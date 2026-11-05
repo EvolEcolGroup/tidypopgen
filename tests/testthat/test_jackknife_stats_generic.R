@@ -1,4 +1,4 @@
-test_that("jackknife_stats_generic works with mean, sum and custom", {
+test_that("jackknife_stats_generic works with mean and custom", {
   test_gt <- load_example_gt("gen_tbl_gen_dist")
   loci <- show_loci(test_gt)
   x <- c(0.1, 0.4, NA, 0.3, 0.2, 0.6, 0.5, 0.1)
@@ -14,15 +14,18 @@ test_that("jackknife_stats_generic works with mean, sum and custom", {
   # the second block (a single NA locus) is dropped
   expect_equal(jack_mean$n_blocks, 4L)
 
-  jack_sum <- jackknife_stats_generic(x,
-    loci_table = loci, operator = "sum", block_size = 1, size_unit = "cM"
+  # the same with blocks in cM
+  jack_mean_cm <- jackknife_stats_generic(x,
+    loci_table = loci, operator = "mean", block_size = 1, size_unit = "cM"
   )
-  jack_sum_custom <- jackknife_stats_generic(x,
+  jack_custom_cm <- jackknife_stats_generic(x,
     loci_table = loci, operator = "custom", block_size = 1,
-    size_unit = "cM", f = sum, na.rm = TRUE
+    size_unit = "cM", f = mean, na.rm = TRUE
   )
-  expect_equal(jack_sum, jack_sum_custom)
-  expect_equal(jack_sum$estimate, sum(x, na.rm = TRUE))
+  expect_equal(jack_mean_cm, jack_custom_cm)
+  expect_equal(jack_mean_cm$estimate, mean(x, na.rm = TRUE))
+  # the jackknife estimate of a mean is the mean itself
+  expect_equal(jack_mean_cm$jack_estimate, jack_mean_cm$estimate)
 })
 
 test_that("jackknife_stats_generic checks its inputs", {
@@ -38,5 +41,13 @@ test_that("jackknife_stats_generic checks its inputs", {
       block_size = 2
     ),
     "If operator is 'custom', f must be provided"
+  )
+  # the jackknife is not valid for a sum, which grows with the number of loci
+  expect_error(
+    jackknife_stats_generic(1:8,
+      loci_table = loci, operator = "sum",
+      block_size = 2
+    ),
+    "operator = 'sum' is not available"
   )
 })

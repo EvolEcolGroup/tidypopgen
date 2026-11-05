@@ -1,4 +1,12 @@
 # tidypopgen `dev`
+* `jackknife_pop_tajimas_d()` now uses the mean sample size of all loci in the
+  variance of Tajima (1989) when leaving out each block, rather than
+  recomputing it for each block left out. With missing genotypes, the rounded
+  mean sample size could change when some blocks were left out (e.g. when the
+  mean sample size was close to x.5), making Tajima's D jump; the jackknife
+  amplified these jumps, inflating the standard error (by up to 2x in
+  simulations) and biasing `jack_estimate` (by over 10 standard errors in the
+  worst case) when Tajima's D was far from 0. `estimate` is unchanged
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,
