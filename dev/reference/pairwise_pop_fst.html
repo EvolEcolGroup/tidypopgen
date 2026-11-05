@@ -77,14 +77,18 @@ the same formulation as in <code><a href="https://rdrr.io/pkg/hierfstat/man/pair
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pairwise_pop_fst</span><span class="op">(</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pairwise_pop_fst</span><span class="op">(</span><span class="va">.x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'gen_tbl'</span></span>
+<span><span class="fu">pairwise_pop_fst</span><span class="op">(</span></span>
 <span>  <span class="va">.x</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tidy"</span>, <span class="st">"pairwise"</span><span class="op">)</span>,</span>
 <span>  by_locus <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  by_locus_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"tidy"</span>, <span class="st">"matrix"</span>, <span class="st">"list"</span><span class="op">)</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Hudson"</span>, <span class="st">"Nei87"</span>, <span class="st">"WC84"</span><span class="op">)</span>,</span>
 <span>  return_num_dem <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -94,6 +98,11 @@ the same formulation as in <code><a href="https://rdrr.io/pkg/hierfstat/man/pair
 
 <dl><dt id="arg--x">.x<a class="anchor" aria-label="anchor" href="#arg--x"></a></dt>
 <dd><p>a grouped <code><a href="gen_tibble.html">gen_tibble</a></code> (as obtained by using <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">dplyr::group_by()</a></code>)</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>other arguments passed to specific methods, currently
+unused.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>

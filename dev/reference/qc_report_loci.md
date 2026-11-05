@@ -8,10 +8,10 @@ For pseudohaploid data, HWE test is not calculated.
 ``` r
 qc_report_loci(.x, ...)
 
-# S3 method for class 'tbl_df'
+# S3 method for class 'gen_tbl'
 qc_report_loci(.x, ...)
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 qc_report_loci(.x, ...)
 ```
 

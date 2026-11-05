@@ -27,7 +27,7 @@ loci_hwe(
   ...
 )
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 loci_hwe(
   .x,
   .col = "genotypes",

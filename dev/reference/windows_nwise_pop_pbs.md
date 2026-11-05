@@ -9,6 +9,9 @@ outlier loci that may be under selection.
 ## Usage
 
 ``` r
+windows_nwise_pop_pbs(.x, ...)
+
+# S3 method for class 'gen_tbl'
 windows_nwise_pop_pbs(
   .x,
   type = c("matrix", "tidy"),
@@ -18,7 +21,8 @@ windows_nwise_pop_pbs(
   step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
-  complete = FALSE
+  complete = FALSE,
+  ...
 )
 ```
 
@@ -29,6 +33,10 @@ windows_nwise_pop_pbs(
   a grouped `gen_tibble` object. If grouped by more than one variable,
   groups are labelled by the values of the grouping variables pasted
   with "." (e.g. `pop1.F`).
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - type:
 

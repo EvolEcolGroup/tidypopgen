@@ -6,6 +6,9 @@ chromosome.
 ## Usage
 
 ``` r
+windows_pop_tajimas_d(.x, ...)
+
+# S3 method for class 'gen_tbl'
 windows_pop_tajimas_d(
   .x,
   type = c("matrix", "tidy", "list"),
@@ -13,7 +16,8 @@ windows_pop_tajimas_d(
   step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
-  complete = FALSE
+  complete = FALSE,
+  ...
 )
 ```
 
@@ -22,6 +26,10 @@ windows_pop_tajimas_d(
 - .x:
 
   a (potentially grouped) `gen_tibble` object
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - type:
 

@@ -18,6 +18,9 @@ implemented:
 ## Usage
 
 ``` r
+pairwise_pop_fst(.x, ...)
+
+# S3 method for class 'gen_tbl'
 pairwise_pop_fst(
   .x,
   type = c("tidy", "pairwise"),
@@ -25,7 +28,8 @@ pairwise_pop_fst(
   by_locus_type = c("tidy", "matrix", "list"),
   method = c("Hudson", "Nei87", "WC84"),
   return_num_dem = FALSE,
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 ```
 
@@ -37,6 +41,10 @@ pairwise_pop_fst(
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
   (as obtained by using
   [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html))
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - type:
 

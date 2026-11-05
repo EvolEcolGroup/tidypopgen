@@ -26,7 +26,7 @@ loci_pi(
   ...
 )
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 loci_pi(
   .x,
   .col = "genotypes",

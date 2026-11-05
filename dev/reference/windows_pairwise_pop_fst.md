@@ -6,6 +6,9 @@ chromosome.
 ## Usage
 
 ``` r
+windows_pairwise_pop_fst(.x, ...)
+
+# S3 method for class 'gen_tbl'
 windows_pairwise_pop_fst(
   .x,
   type = c("matrix", "tidy"),
@@ -14,7 +17,8 @@ windows_pairwise_pop_fst(
   step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
-  complete = FALSE
+  complete = FALSE,
+  ...
 )
 ```
 
@@ -25,6 +29,10 @@ windows_pairwise_pop_fst(
   a grouped `gen_tibble` object. If grouped by more than one variable,
   groups are labelled by the values of the grouping variables pasted
   with "." (e.g. `pop1.F`).
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - type:
 

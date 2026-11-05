@@ -44,7 +44,7 @@ loci_alt_freq(
   ...
 )
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 loci_alt_freq(
   .x,
   .col = "genotypes",
@@ -75,7 +75,7 @@ loci_maf(
   ...
 )
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 loci_maf(
   .x,
   .col = "genotypes",

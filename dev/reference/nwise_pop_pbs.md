@@ -9,11 +9,15 @@ selection.
 ## Usage
 
 ``` r
+nwise_pop_pbs(.x, ...)
+
+# S3 method for class 'gen_tbl'
 nwise_pop_pbs(
   .x,
   type = c("tidy", "matrix"),
   fst_method = c("Hudson", "Nei87", "WC84"),
-  return_fst = FALSE
+  return_fst = FALSE,
+  ...
 )
 ```
 
@@ -24,6 +28,10 @@ nwise_pop_pbs(
   A grouped `gen_tibble`. If grouped by more than one variable, groups
   are labelled by the values of the grouping variables pasted with "."
   (e.g. `pop1.F`).
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - type:
 

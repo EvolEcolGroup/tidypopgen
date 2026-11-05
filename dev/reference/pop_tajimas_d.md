@@ -7,7 +7,7 @@ be used on sequence data prior to filtering.
 ## Usage
 
 ``` r
-pop_tajimas_d(.x, n_cores, block_size, ...)
+pop_tajimas_d(.x, ...)
 
 # S3 method for class 'tbl_df'
 pop_tajimas_d(
@@ -25,7 +25,7 @@ pop_tajimas_d(
   ...
 )
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 pop_tajimas_d(
   .x,
   n_cores = bigstatsr::nb_cores(),
@@ -43,6 +43,10 @@ pop_tajimas_d(
   object), or a
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md).
 
+- ...:
+
+  other arguments passed to specific methods, currently unused.
+
 - n_cores:
 
   number of cores to be used, it defaults to
@@ -51,10 +55,6 @@ pop_tajimas_d(
 - block_size:
 
   maximum number of loci read at once.
-
-- ...:
-
-  other arguments passed to specific methods, currently unused.
 
 ## Value
 

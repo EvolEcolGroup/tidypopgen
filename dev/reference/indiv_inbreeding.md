@@ -14,7 +14,7 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 # S3 method for class 'vctrs_bigSNP'
 indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 ```
 

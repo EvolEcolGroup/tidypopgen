@@ -238,15 +238,15 @@ lobsters <- gt_update_backingfile(lobsters, backingfile = tempfile())
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/RtmpDOy1RX/file2a6a47205e2b.rds
+    ## using FBM RDS: /tmp/RtmpOAs3lP/file2a0155f27aa1.rds
 
-    ## with FBM backing file: /tmp/RtmpDOy1RX/file2a6a47205e2b.bk
+    ## with FBM backing file: /tmp/RtmpOAs3lP/file2a0155f27aa1.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpDOy1RX/file2a6a47205e2b.gt')
+    ## gt_load('/tmp/RtmpOAs3lP/file2a0155f27aa1.gt')
 
 Now our data are clean and the backingfile is updated, we are ready to
 create a PCA.
