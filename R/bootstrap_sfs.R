@@ -340,6 +340,19 @@ bootstrap_nwise_pop_sfs.gen_tbl <- function(
       "block_size"
     )
   }
+  # the weights are a matrix with one value per replicate and block, which
+  # is copied (as doubles) to project the replicates: with single SNPs as
+  # blocks (block_size = 1) of tens of millions of loci, it would need tens
+  # of GB, so we cap its size (with an option, for testing)
+  max_weights <- getOption("tidypopgen.sfs_max_bootstrap_weights", 1e9)
+  n_weights <- as.numeric(n_blocks) * n_bootstrap
+  if (n_weights > max_weights) {
+    stop(
+      "the bootstrap would need ", format(n_weights), " weights (",
+      n_bootstrap, " replicates of ", n_blocks, " blocks), which would use ",
+      "too much memory; use a larger block_size or fewer replicates"
+    )
+  }
   weights <- t(stats::rmultinom(n_bootstrap,
     size = n_blocks,
     prob = rep(1, n_blocks)

@@ -386,6 +386,16 @@ write_sfs.default <- function(x, ...) {
     )
   }
 
+  # draw the blocks of the bootstrap replicates before writing any file, so
+  # that we stop early if they cannot be drawn
+  if (n_bootstrap > 0) {
+    blocks <- .sfs_bootstrap_blocks(data$loci,
+      n_bootstrap = n_bootstrap,
+      block_size = bootstrap_block_size,
+      size_unit = bootstrap_size_unit
+    )
+  }
+
   configs <- .sfs_config_counts(data,
     spectra = spectra_def,
     min_n = n_proj,
@@ -425,11 +435,6 @@ write_sfs.default <- function(x, ...) {
   # second pass over the genotypes, and the replicates are projected in
   # chunks, to limit the memory used
   if (n_bootstrap > 0) {
-    blocks <- .sfs_bootstrap_blocks(data$loci,
-      n_bootstrap = n_bootstrap,
-      block_size = bootstrap_block_size,
-      size_unit = bootstrap_size_unit
-    )
     configs <- .sfs_config_counts(data,
       spectra = spectra_def,
       min_n = n_proj,

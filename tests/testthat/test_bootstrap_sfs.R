@@ -273,6 +273,24 @@ test_that("bootstrap arguments are checked", {
     ),
     "more than `max_cells`"
   )
+  # the number of block weights (replicates times blocks) is capped, and
+  # write_sfs() stops before writing any file
+  withr::local_options(tidypopgen.sfs_max_bootstrap_weights = 100)
+  expect_error(
+    bootstrap_pop_sfs(sim$gt,
+      n_bootstrap = 10, block_size = 1, n_proj = 2
+    ),
+    "1200 weights \\(10 replicates of 120 blocks\\)"
+  )
+  out_dir <- withr::local_tempdir()
+  expect_error(
+    write_sfs(sim$gt,
+      out_dir = out_dir, n_proj = 2,
+      n_bootstrap = 10, bootstrap_block_size = 1
+    ),
+    "too much memory"
+  )
+  expect_length(list.files(out_dir), 0)
 })
 
 test_that("write_sfs writes the bootstrap replicates of a gen_tibble", {
