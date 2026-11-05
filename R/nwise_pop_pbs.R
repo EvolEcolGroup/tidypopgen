@@ -46,11 +46,13 @@ nwise_pop_pbs <- function(.x, ...) {
 
 #' @export
 #' @rdname nwise_pop_pbs
-nwise_pop_pbs.tbl_df <- function(.x,
-                                 type = c("tidy", "matrix"),
-                                 fst_method = c("Hudson", "Nei87", "WC84"),
-                                 return_fst = FALSE,
-                                 ...) {
+nwise_pop_pbs.gen_tbl <- function(
+  .x,
+  type = c("tidy", "matrix"),
+  fst_method = c("Hudson", "Nei87", "WC84"),
+  return_fst = FALSE,
+  ...
+) {
   rlang::check_dots_empty()
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
@@ -180,4 +182,12 @@ pbs_all_triplets <- function(fst_values, pops,
     pbs_results[, first_col + 6] <- pbs_3 / pbs_sum
   }
   pbs_results
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+nwise_pop_pbs.data.frame <- function(.x, ...) {
+  nwise_pop_pbs(restore_genotypes_tbl(.x, "nwise_pop_pbs"), ...)
 }

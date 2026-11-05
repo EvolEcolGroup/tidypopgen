@@ -27,7 +27,7 @@ show_genotypes.tbl_df <- function(
   loci_indices = NULL,
   ...
 ) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   show_genotypes(
     .x$genotypes,

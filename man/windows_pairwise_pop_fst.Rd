@@ -2,12 +2,12 @@
 % Please edit documentation in R/windows_pairwise_pop_fst.R
 \name{windows_pairwise_pop_fst}
 \alias{windows_pairwise_pop_fst}
-\alias{windows_pairwise_pop_fst.tbl_df}
+\alias{windows_pairwise_pop_fst.gen_tbl}
 \title{Compute pairwise Fst for a sliding window}
 \usage{
 windows_pairwise_pop_fst(.x, ...)
 
-\method{windows_pairwise_pop_fst}{tbl_df}(
+\method{windows_pairwise_pop_fst}{gen_tbl}(
   .x,
   type = c("matrix", "tidy"),
   method = c("Hudson", "Nei87", "WC84"),

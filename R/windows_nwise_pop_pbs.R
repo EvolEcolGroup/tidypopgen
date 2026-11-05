@@ -63,16 +63,18 @@ windows_nwise_pop_pbs <- function(.x, ...) {
 
 #' @export
 #' @rdname windows_nwise_pop_pbs
-windows_nwise_pop_pbs.tbl_df <- function(.x,
-                                         type = c("matrix", "tidy"),
-                                         fst_method = c("Hudson", "Nei87", "WC84"),
-                                         return_fst = FALSE,
-                                         window_size,
-                                         step_size,
-                                         size_unit = c("snp", "bp"),
-                                         min_loci = 1,
-                                         complete = FALSE,
-                                         ...) {
+windows_nwise_pop_pbs.gen_tbl <- function(
+  .x,
+  type = c("matrix", "tidy"),
+  fst_method = c("Hudson", "Nei87", "WC84"),
+  return_fst = FALSE,
+  window_size,
+  step_size,
+  size_unit = c("snp", "bp"),
+  min_loci = 1,
+  complete = FALSE,
+  ...
+) {
   rlang::check_dots_empty()
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
@@ -130,4 +132,12 @@ windows_nwise_pop_pbs.tbl_df <- function(.x,
       tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(pbs_results)
   }
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+windows_nwise_pop_pbs.data.frame <- function(.x, ...) {
+  windows_nwise_pop_pbs(restore_genotypes_tbl(.x, "windows_nwise_pop_pbs"), ...)
 }

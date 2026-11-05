@@ -4,11 +4,11 @@
 \alias{loci_alt_freq}
 \alias{loci_alt_freq.tbl_df}
 \alias{loci_alt_freq.vctrs_bigSNP}
-\alias{loci_alt_freq.grouped_df}
+\alias{loci_alt_freq.grouped_gen_tbl}
 \alias{loci_maf}
 \alias{loci_maf.tbl_df}
 \alias{loci_maf.vctrs_bigSNP}
-\alias{loci_maf.grouped_df}
+\alias{loci_maf.grouped_gen_tbl}
 \title{Estimate allele frequencies at each locus}
 \usage{
 loci_alt_freq(
@@ -39,7 +39,7 @@ loci_alt_freq(
   ...
 )
 
-\method{loci_alt_freq}{grouped_df}(
+\method{loci_alt_freq}{grouped_gen_tbl}(
   .x,
   .col = "genotypes",
   as_counts = FALSE,
@@ -67,7 +67,7 @@ loci_maf(.x, .col = "genotypes", n_cores, block_size, type, ...)
   ...
 )
 
-\method{loci_maf}{grouped_df}(
+\method{loci_maf}{grouped_gen_tbl}(
   .x,
   .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),

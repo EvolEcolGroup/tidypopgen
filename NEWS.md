@@ -6,6 +6,16 @@
   `tidypopgl`) can provide methods for their own objects. Likewise, the
   `tbl_df` methods of `loci_alt_freq()` and `loci_maf()` dispatch on the class
   of the `genotypes` column.
+* the generics work on gen_tibbles that have lost their class, such as the
+  tibbles returned by `pick()` within `summarise()` or `reframe()`, by
+  `reframe()` or by `as_tibble()`. Methods that need the whole tibble are now
+  methods for `gen_tbl` and `grouped_gen_tbl` (rather than `tbl_df` and
+  `grouped_df`), and fallback methods for data frames and grouped data frames
+  restore the class from the `genotypes` column (`restore_genotypes_tbl()`)
+  before dispatching again. Other packages register the class of their
+  tibbles for their `genotypes` column with `genotypes_tbl_class()`. The
+  `tbl_df` methods that hand over the `genotypes` column accept any column
+  of a registered class
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,

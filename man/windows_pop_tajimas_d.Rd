@@ -2,12 +2,12 @@
 % Please edit documentation in R/windows_pop_tajimas_d.R
 \name{windows_pop_tajimas_d}
 \alias{windows_pop_tajimas_d}
-\alias{windows_pop_tajimas_d.tbl_df}
+\alias{windows_pop_tajimas_d.gen_tbl}
 \title{Compute Tajima's D for a sliding window}
 \usage{
 windows_pop_tajimas_d(.x, ...)
 
-\method{windows_pop_tajimas_d}{tbl_df}(
+\method{windows_pop_tajimas_d}{gen_tbl}(
   .x,
   type = c("matrix", "tidy", "list"),
   window_size,

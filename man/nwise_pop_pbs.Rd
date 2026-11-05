@@ -2,12 +2,12 @@
 % Please edit documentation in R/nwise_pop_pbs.R
 \name{nwise_pop_pbs}
 \alias{nwise_pop_pbs}
-\alias{nwise_pop_pbs.tbl_df}
+\alias{nwise_pop_pbs.gen_tbl}
 \title{Compute the Population Branch Statistics for each combination of populations}
 \usage{
 nwise_pop_pbs(.x, ...)
 
-\method{nwise_pop_pbs}{tbl_df}(
+\method{nwise_pop_pbs}{gen_tbl}(
   .x,
   type = c("tidy", "matrix"),
   fst_method = c("Hudson", "Nei87", "WC84"),

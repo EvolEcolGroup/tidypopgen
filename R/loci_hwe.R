@@ -63,7 +63,7 @@ loci_hwe.tbl_df <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 ) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()
@@ -123,7 +123,7 @@ loci_hwe.vctrs_bigSNP <- function(
 
 #' @export
 #' @rdname loci_hwe
-loci_hwe.grouped_df <- function(
+loci_hwe.grouped_gen_tbl <- function(
   .x,
   .col = "genotypes",
   mid_p = TRUE,
@@ -172,4 +172,12 @@ loci_hwe.grouped_df <- function(
     group_keys = groups$keys
   )
   return(hwe_mat)
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+loci_hwe.grouped_df <- function(.x, ...) {
+  loci_hwe(restore_genotypes_tbl(.x, "loci_hwe"), ...)
 }

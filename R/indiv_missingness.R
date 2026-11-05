@@ -34,7 +34,7 @@ indiv_missingness.tbl_df <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
   ...
 ) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   indiv_missingness(
     .x$genotypes,

@@ -78,7 +78,7 @@ pop_tajimas_d.tbl_df <- function(
 ) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   pop_tajimas_d(.x$genotypes, n_cores = n_cores, block_size = block_size)
 }
 
@@ -115,7 +115,7 @@ pop_tajimas_d.vctrs_bigSNP <- function(
 
 #' @export
 #' @rdname pop_tajimas_d
-pop_tajimas_d.grouped_df <- function(
+pop_tajimas_d.grouped_gen_tbl <- function(
   .x,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
@@ -308,4 +308,12 @@ harmonic_sum <- function(n, power = 1) {
 # tajimas_d_from_term_sums())
 .tajimas_d_group_sums <- function(term_sums, i_grp) {
   do.call(cbind, lapply(term_sums, function(x) x[, i_grp]))
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+pop_tajimas_d.grouped_df <- function(.x, ...) {
+  pop_tajimas_d(restore_genotypes_tbl(.x, "pop_tajimas_d"), ...)
 }

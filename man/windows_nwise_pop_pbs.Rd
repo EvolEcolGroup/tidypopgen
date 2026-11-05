@@ -2,12 +2,12 @@
 % Please edit documentation in R/windows_nwise_pop_pbs.R
 \name{windows_nwise_pop_pbs}
 \alias{windows_nwise_pop_pbs}
-\alias{windows_nwise_pop_pbs.tbl_df}
+\alias{windows_nwise_pop_pbs.gen_tbl}
 \title{Compute the Population Branch Statistics over a sliding window}
 \usage{
 windows_nwise_pop_pbs(.x, ...)
 
-\method{windows_nwise_pop_pbs}{tbl_df}(
+\method{windows_nwise_pop_pbs}{gen_tbl}(
   .x,
   type = c("matrix", "tidy"),
   fst_method = c("Hudson", "Nei87", "WC84"),

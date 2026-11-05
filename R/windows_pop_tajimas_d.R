@@ -85,14 +85,16 @@ windows_pop_tajimas_d <- function(.x, ...) {
 
 #' @export
 #' @rdname windows_pop_tajimas_d
-windows_pop_tajimas_d.tbl_df <- function(.x,
-                                         type = c("matrix", "tidy", "list"),
-                                         window_size,
-                                         step_size,
-                                         size_unit = c("snp", "bp"),
-                                         min_loci = 1,
-                                         complete = FALSE,
-                                         ...) {
+windows_pop_tajimas_d.gen_tbl <- function(
+  .x,
+  type = c("matrix", "tidy", "list"),
+  window_size,
+  step_size,
+  size_unit = c("snp", "bp"),
+  min_loci = 1,
+  complete = FALSE,
+  ...
+) {
   rlang::check_dots_empty()
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
@@ -183,4 +185,12 @@ windows_pop_tajimas_d.tbl_df <- function(.x,
   } else if (type == "list") {
     return(res)
   }
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+windows_pop_tajimas_d.data.frame <- function(.x, ...) {
+  windows_pop_tajimas_d(restore_genotypes_tbl(.x, "windows_pop_tajimas_d"), ...)
 }

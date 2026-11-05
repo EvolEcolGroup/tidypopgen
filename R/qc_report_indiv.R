@@ -52,7 +52,7 @@ qc_report_indiv <- function(.x, ...) {
 
 #' @export
 #' @rdname qc_report_indiv
-qc_report_indiv.tbl_df <- function(.x, kings_threshold = NULL, ...) {
+qc_report_indiv.gen_tbl <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
@@ -118,7 +118,7 @@ qc_report_indiv_pseudohaploid <- function(.x, ...) {
 
 #' @export
 #' @rdname qc_report_indiv
-qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
+qc_report_indiv.grouped_gen_tbl <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
@@ -455,4 +455,20 @@ autoplot_qc_report_indiv_box <- function(object) {
   p <- patchwork::wrap_plots(pseudo_plot, dip_plot, ncol = 2)
 
   return(p)
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+qc_report_indiv.data.frame <- function(.x, ...) {
+  qc_report_indiv(restore_genotypes_tbl(.x, "qc_report_indiv"), ...)
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+qc_report_indiv.grouped_df <- function(.x, ...) {
+  qc_report_indiv(restore_genotypes_tbl(.x, "qc_report_indiv"), ...)
 }

@@ -560,10 +560,14 @@ stopifnot_gen_tibble <- function(.x) {
 }
 
 # a tibble with a genotypes column, whose class determines the method used
-# (vctrs_bigSNP for a gen_tibble; other packages define their own classes)
+# (vctrs_bigSNP for a gen_tibble; other packages register their own classes
+# with genotypes_tbl_class())
 stopifnot_has_genotypes <- function(.x) {
   if (!"genotypes" %in% names(.x)) {
     stop("not a gen_tibble, 'genotypes' column is missing")
+  }
+  if (is.null(genotypes_tbl_class(.x$genotypes))) {
+    stop("not a gen_tibble, the genotypes column is not of class vctrs_bigSNP")
   }
   return(invisible(.x))
 }

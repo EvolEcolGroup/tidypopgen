@@ -81,7 +81,7 @@ pairwise_pop_fst <- function(.x, ...) {
 
 #' @export
 #' @rdname pairwise_pop_fst
-pairwise_pop_fst.tbl_df <- function(
+pairwise_pop_fst.gen_tbl <- function(
   .x,
   type = c("tidy", "pairwise"),
   by_locus = FALSE,
@@ -240,4 +240,12 @@ pairwise_pop_fst.tbl_df <- function(
     stop("only `method = Hudson` is valid when the data include pseudohaploids")
   }
   invisible(TRUE)
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+pairwise_pop_fst.data.frame <- function(.x, ...) {
+  pairwise_pop_fst(restore_genotypes_tbl(.x, "pairwise_pop_fst"), ...)
 }

@@ -57,15 +57,17 @@ windows_pairwise_pop_fst <- function(.x, ...) {
 
 #' @export
 #' @rdname windows_pairwise_pop_fst
-windows_pairwise_pop_fst.tbl_df <- function(.x,
-                                            type = c("matrix", "tidy"),
-                                            method = c("Hudson", "Nei87", "WC84"),
-                                            window_size,
-                                            step_size,
-                                            size_unit = c("snp", "bp"),
-                                            min_loci = 1,
-                                            complete = FALSE,
-                                            ...) {
+windows_pairwise_pop_fst.gen_tbl <- function(
+  .x,
+  type = c("matrix", "tidy"),
+  method = c("Hudson", "Nei87", "WC84"),
+  window_size,
+  step_size,
+  size_unit = c("snp", "bp"),
+  min_loci = 1,
+  complete = FALSE,
+  ...
+) {
   rlang::check_dots_empty()
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
@@ -150,4 +152,15 @@ windows_pairwise_pop_fst.tbl_df <- function(.x,
       res %>% tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(res)
   }
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+windows_pairwise_pop_fst.data.frame <- function(.x, ...) {
+  windows_pairwise_pop_fst(
+    restore_genotypes_tbl(.x, "windows_pairwise_pop_fst"),
+    ...
+  )
 }

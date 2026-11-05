@@ -4,7 +4,7 @@
 \alias{pop_tajimas_d}
 \alias{pop_tajimas_d.tbl_df}
 \alias{pop_tajimas_d.vctrs_bigSNP}
-\alias{pop_tajimas_d.grouped_df}
+\alias{pop_tajimas_d.grouped_gen_tbl}
 \title{Estimate Tajima's D for the whole genome}
 \usage{
 pop_tajimas_d(.x, ...)
@@ -23,7 +23,7 @@ pop_tajimas_d(.x, ...)
   ...
 )
 
-\method{pop_tajimas_d}{grouped_df}(
+\method{pop_tajimas_d}{grouped_gen_tbl}(
   .x,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),

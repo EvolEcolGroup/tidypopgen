@@ -77,7 +77,7 @@ loci_missingness.tbl_df <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1), # nolint
   ...
 ) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()
@@ -145,7 +145,7 @@ loci_missingness.vctrs_bigSNP <- function(
 
 #' @export
 #' @rdname loci_missingness
-loci_missingness.grouped_df <- function(
+loci_missingness.grouped_gen_tbl <- function(
   .x,
   .col = "genotypes",
   as_counts = FALSE,
@@ -189,4 +189,12 @@ loci_missingness.grouped_df <- function(
   )
 
   return(na_mat)
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+loci_missingness.grouped_df <- function(.x, ...) {
+  loci_missingness(restore_genotypes_tbl(.x, "loci_missingness"), ...)
 }
