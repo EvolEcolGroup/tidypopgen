@@ -60,7 +60,7 @@
 #'   autoplot()
 #' @name autoplot_sfs
 #' @aliases autoplot_pop_sfs_tbl autoplot_pairwise_sfs_tbl
-#'   autoplot_sfs_preview_tbl
+#' @aliases autoplot_sfs_preview_tbl
 #' @importFrom rlang .data
 #' @export
 autoplot.sfs <- function(object, masked = FALSE, log = NULL,

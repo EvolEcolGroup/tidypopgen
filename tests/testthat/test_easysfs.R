@@ -6,7 +6,7 @@
 easysfs_dir <- test_path("testdata", "easysfs")
 
 skip_if_no_easysfs_data <- function() {
-  skip_if_not(
+  testthat::skip_if_not(
     file.exists(file.path(easysfs_dir, "easysfs_version.txt")),
     "easySFS test data not created (see data-raw/create_easysfs_test_data.R)"
   )
@@ -26,17 +26,7 @@ read_easysfs_gt <- function(vcf, pops_file, levels) {
   gt$population <- factor(pops$population[match(gt$id, pops$id)],
     levels = levels
   )
-  gt %>% dplyr::group_by(population)
-}
-
-# compare a tidy spectrum (with the last population changing fastest) to a
-# dadi file
-expect_tidy_equals_dadi <- function(sfs_tidy, file) {
-  dadi_sfs <- read_dadi_sfs(file)
-  expect_equal(sfs_tidy$n_sites, dadi_sfs$data, tolerance = 1e-10)
-  expect_identical(sfs_tidy$masked, dadi_sfs$mask)
-  expect_identical(attr(sfs_tidy, "folded"), dadi_sfs$folded)
-  dadi_sfs
+  gt %>% dplyr::group_by(.data$population)
 }
 
 pops <- c("popA", "popB", "popC")
@@ -167,19 +157,6 @@ write_easysfs_layout <- function(.x, out_dir, ...) {
     out_dir = file.path(out_dir, "fastsimcoal2"),
     prefix = "test", ...
   )
-}
-
-# compare all the files written by write_sfs() and by easySFS (the text, and
-# the numbers to a tolerance)
-expect_same_files_as_easysfs <- function(our_dir, easysfs_out_dir) {
-  easysfs_files <- sort(list.files(easysfs_out_dir, recursive = TRUE))
-  expect_identical(sort(list.files(our_dir, recursive = TRUE)), easysfs_files)
-  for (f in easysfs_files) {
-    ours <- sfs_file_parts(file.path(our_dir, f))
-    theirs <- sfs_file_parts(file.path(easysfs_out_dir, f))
-    expect_identical(ours$text, theirs$text, label = f)
-    expect_equal(ours$numbers, theirs$numbers, tolerance = 1e-10, label = f)
-  }
 }
 
 test_that("write_sfs writes the files of easySFS", {

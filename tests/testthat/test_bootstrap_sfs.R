@@ -28,7 +28,7 @@ resampled_gt <- function(sim, block_id, weights) {
     ),
     backingfile = tempfile(),
     quiet = TRUE
-  ) %>% dplyr::group_by(population)
+  ) %>% dplyr::group_by(.data$population)
 }
 
 test_that("each replicate is the spectrum of the resampled blocks", {

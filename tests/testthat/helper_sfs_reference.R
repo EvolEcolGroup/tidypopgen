@@ -235,6 +235,35 @@ sfs_file_parts <- function(file) {
   )
 }
 
+# compare a tidy spectrum (with the last population changing fastest) to a
+# dadi file
+expect_tidy_equals_dadi <- function(sfs_tidy, file) {
+  dadi_sfs <- read_dadi_sfs(file)
+  testthat::expect_equal(sfs_tidy$n_sites, dadi_sfs$data, tolerance = 1e-10)
+  testthat::expect_identical(sfs_tidy$masked, dadi_sfs$mask)
+  testthat::expect_identical(attr(sfs_tidy, "folded"), dadi_sfs$folded)
+  dadi_sfs
+}
+
+# compare all the files written by write_sfs() and by easySFS (the text, and
+# the numbers to a tolerance)
+expect_same_files_as_easysfs <- function(our_dir, easysfs_out_dir) {
+  easysfs_files <- sort(list.files(easysfs_out_dir, recursive = TRUE))
+  testthat::expect_identical(
+    sort(list.files(our_dir, recursive = TRUE)),
+    easysfs_files
+  )
+  for (f in easysfs_files) {
+    ours <- sfs_file_parts(file.path(our_dir, f))
+    theirs <- sfs_file_parts(file.path(easysfs_out_dir, f))
+    testthat::expect_identical(ours$text, theirs$text, label = f)
+    testthat::expect_equal(ours$numbers, theirs$numbers,
+      tolerance = 1e-10,
+      label = f
+    )
+  }
+}
+
 # polarise the alternate allele copies (individuals x loci) with the ancestral
 # allele of each locus, as dadi's count_data_dict() does with the outgroup
 # allele: the derived allele is the allele that is not ancestral, so loci
