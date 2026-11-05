@@ -309,9 +309,9 @@ autoplot.sfs_preview_tbl <- function(object, ...) {
         min_sites <- max(cells$n_sites, na.rm = TRUE) / 1000
       }
       is_number <- is.numeric(min_sites) && length(min_sites) == 1 &&
-        !is.na(min_sites) && min_sites > 0
+        is.finite(min_sites) && min_sites > 0
       if (!is_number) {
-        stop("`min_sites` should be a positive number")
+        stop("`min_sites` should be a positive finite number")
       }
       cells$n_sites <- pmax(cells$n_sites, min_sites)
       limits <- c(min_sites, NA)

@@ -72,7 +72,8 @@ test_that("pairwise_pop_sfs tidy outputs are plotted as heatmaps", {
   # or at a given number of sites
   p_min <- autoplot(sfs, min_sites = 0.5)
   expect_equal(min(p_min$data$n_sites, na.rm = TRUE), 0.5)
-  expect_error(autoplot(sfs, min_sites = -1), "positive number")
+  expect_error(autoplot(sfs, min_sites = -1), "positive finite number")
+  expect_error(autoplot(sfs, min_sites = Inf), "positive finite number")
   # on a linear scale, empty cells are shown
   p_linear <- autoplot(sfs, log = FALSE)
   expect_true(any(p_linear$data$n_sites == 0, na.rm = TRUE))

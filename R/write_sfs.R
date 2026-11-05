@@ -484,9 +484,9 @@ write_sfs.default <- function(x, ...) {
 .sfs_finalise <- function(fs, total_length = NULL, round = FALSE) {
   if (!is.null(total_length)) {
     is_number <- is.numeric(total_length) && length(total_length) == 1 &&
-      !is.na(total_length)
+      is.finite(total_length)
     if (!is_number) {
-      stop("`total_length` should be a single number")
+      stop("`total_length` should be a single finite number")
     }
     n_sites <- sum(unclass(fs))
     if (total_length <= n_sites) {

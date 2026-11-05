@@ -103,7 +103,11 @@ test_that("write_sfs sets the monomorphic sites and rounds", {
   )
   expect_error(
     write_sfs(sfs_2d, file, total_length = "a", overwrite = TRUE),
-    "single number"
+    "single finite number"
+  )
+  expect_error(
+    write_sfs(sfs_2d, file, total_length = Inf, overwrite = TRUE),
+    "single finite number"
   )
 })
 
