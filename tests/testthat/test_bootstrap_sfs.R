@@ -1,6 +1,7 @@
 # Tests for the block bootstrap of site frequency spectra
 # (bootstrap_pop_sfs(), bootstrap_pairwise_pop_sfs(),
-# bootstrap_nwise_pop_sfs() and the n_bootstrap argument of gt_as_easysfs())
+# bootstrap_nwise_pop_sfs() and the n_bootstrap argument of sfs_as_dadi() and
+# sfs_as_simcoal())
 
 sim <- ref_sfs_simulate(c(popA = 6, popB = 5, popC = 4),
   n_loci = 120,
@@ -275,20 +276,20 @@ test_that("bootstrap arguments are checked", {
   )
 })
 
-test_that("gt_as_easysfs writes bootstrap replicates", {
+test_that("sfs_as_dadi and sfs_as_simcoal write bootstrap replicates", {
   out_dir <- withr::local_tempdir()
   files <- withr::with_seed(20, {
-    gt_as_easysfs(sim$gt,
+    sfs_as_simcoal(sim$gt,
       out_dir = out_dir, n_proj = n_proj, prefix = "test",
       n_bootstrap = 3, bootstrap_block_size = 20
     )
   })
-  expect_identical(length(files), 4L * 14L)
+  expect_identical(length(files), 4L * 7L)
   expect_true(all(file.exists(files)))
   expect_true(all(dir.exists(file.path(out_dir, paste0("bootstrap_", 1:3)))))
   # the files of all loci are unchanged
   out_dir_no_boot <- withr::local_tempdir()
-  gt_as_easysfs(sim$gt,
+  sfs_as_simcoal(sim$gt,
     out_dir = out_dir_no_boot, n_proj = n_proj,
     prefix = "test"
   )
@@ -298,11 +299,19 @@ test_that("gt_as_easysfs writes bootstrap replicates", {
       readLines(file.path(out_dir_no_boot, f))
     )
   }
-  # the replicates are those of bootstrap_nwise_pop_sfs() with the same seed
+  # the replicates are those of bootstrap_nwise_pop_sfs() with the same seed,
+  # in both formats
   boot_3d <- withr::with_seed(20, {
     bootstrap_nwise_pop_sfs(sim$gt,
       n_bootstrap = 3, block_size = 20,
       n_proj = n_proj, type = "array"
+    )
+  })
+  dadi_dir <- withr::local_tempdir()
+  withr::with_seed(20, {
+    sfs_as_dadi(sim$gt,
+      out_dir = dadi_dir, n_proj = n_proj,
+      n_bootstrap = 3, bootstrap_block_size = 20
     )
   })
   for (i_rep in 1:3) {
@@ -310,8 +319,14 @@ test_that("gt_as_easysfs writes bootstrap replicates", {
     write_sfs(boot_3d[[i_rep]], expected, format = "fsc_msfs")
     expect_identical(
       readLines(file.path(
-        out_dir, paste0("bootstrap_", i_rep),
-        "fastsimcoal2", "test_MSFS.obs"
+        out_dir, paste0("bootstrap_", i_rep), "test_MSFS.obs"
+      )),
+      readLines(expected)
+    )
+    write_sfs(boot_3d[[i_rep]], expected, format = "dadi", overwrite = TRUE)
+    expect_identical(
+      readLines(file.path(
+        dadi_dir, paste0("bootstrap_", i_rep), "popA-popB-popC.sfs"
       )),
       readLines(expected)
     )
@@ -321,7 +336,7 @@ test_that("gt_as_easysfs writes bootstrap replicates", {
   out_dir_chunks <- withr::local_tempdir()
   withr::with_options(list(tidypopgen.sfs_max_chunk_cells = 1), {
     withr::with_seed(20, {
-      gt_as_easysfs(sim$gt,
+      sfs_as_simcoal(sim$gt,
         out_dir = out_dir_chunks, n_proj = n_proj,
         prefix = "test", n_bootstrap = 3, bootstrap_block_size = 20
       )
@@ -334,14 +349,14 @@ test_that("gt_as_easysfs writes bootstrap replicates", {
     )
   }
   expect_error(
-    gt_as_easysfs(sim$gt,
-      out_dir = out_dir, n_proj = n_proj,
+    sfs_as_simcoal(sim$gt,
+      out_dir = out_dir, n_proj = n_proj, prefix = "test",
       n_bootstrap = 3, bootstrap_block_size = 20
     ),
     "already exist"
   )
   expect_error(
-    gt_as_easysfs(sim$gt,
+    sfs_as_dadi(sim$gt,
       out_dir = withr::local_tempdir(), n_proj = n_proj,
       n_bootstrap = 3
     ),

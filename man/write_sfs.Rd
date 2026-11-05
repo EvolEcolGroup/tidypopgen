@@ -50,7 +50,8 @@ Write a site frequency spectrum (an \code{sfs} object, as returned by
 or by \code{fastsimcoal2}, as written by \code{easySFS}. To write all the spectra
 that \code{easySFS} writes (the 1D spectrum of each population, the joint
 spectrum of each pair of populations, and the joint spectrum of all
-populations, in both formats) in a single call, use \code{\link[=gt_as_easysfs]{gt_as_easysfs()}}.
+populations) in a single call, use \code{\link[=sfs_as_dadi]{sfs_as_dadi()}} or
+\code{\link[=sfs_as_simcoal]{sfs_as_simcoal()}}.
 }
 \details{
 \strong{dadi format} (\code{format = "dadi"}): a line with the dimensions of the
@@ -100,5 +101,5 @@ write_sfs(sfs_2d$pop1.pop2, fsc_file, format = "fsc")
 readLines(fsc_file)
 }
 \seealso{
-\code{\link[=gt_as_easysfs]{gt_as_easysfs()}}
+\code{\link[=sfs_as_dadi]{sfs_as_dadi()}}, \code{\link[=sfs_as_simcoal]{sfs_as_simcoal()}}
 }

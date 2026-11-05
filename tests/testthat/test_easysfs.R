@@ -158,8 +158,18 @@ test_that("pop_sfs matches easySFS on haploid data", {
   )
 })
 
-# compare all the files written by gt_as_easysfs() and by easySFS (the text,
-# and the numbers to a tolerance)
+# write the spectra with sfs_as_dadi() and sfs_as_simcoal() in the dadi and
+# fastsimcoal2 sub-directories of out_dir, as easySFS (with prefix "test")
+write_as_easysfs <- function(.x, out_dir, ...) {
+  sfs_as_dadi(.x, out_dir = file.path(out_dir, "dadi"), ...)
+  sfs_as_simcoal(.x,
+    out_dir = file.path(out_dir, "fastsimcoal2"),
+    prefix = "test", ...
+  )
+}
+
+# compare all the files written by sfs_as_dadi() and sfs_as_simcoal() and by
+# easySFS (the text, and the numbers to a tolerance)
 expect_same_files_as_easysfs <- function(our_dir, easysfs_out_dir) {
   easysfs_files <- sort(list.files(easysfs_out_dir, recursive = TRUE))
   expect_identical(sort(list.files(our_dir, recursive = TRUE)), easysfs_files)
@@ -171,7 +181,7 @@ expect_same_files_as_easysfs <- function(our_dir, easysfs_out_dir) {
   }
 }
 
-test_that("gt_as_easysfs writes the same files as easySFS", {
+test_that("sfs_as_dadi and sfs_as_simcoal write the files of easySFS", {
   skip_if_no_easysfs_data()
   easysfs_gt <- read_easysfs_gt(
     "easysfs_test.vcf", "easysfs_populations.txt",
@@ -191,8 +201,8 @@ test_that("gt_as_easysfs writes the same files as easySFS", {
       )) %>%
       dplyr::group_by(population)
     out_dir <- withr::local_tempdir()
-    do.call(gt_as_easysfs, c(
-      list(this_gt, out_dir = out_dir, n_proj = proj, prefix = "test"),
+    do.call(write_as_easysfs, c(
+      list(this_gt, out_dir = out_dir, n_proj = proj),
       runs[[run]]$args
     ))
     expect_same_files_as_easysfs(out_dir, file.path(easysfs_dir, run))
@@ -203,9 +213,9 @@ test_that("gt_as_easysfs writes the same files as easySFS", {
     levels = c("popA", "popB")
   )
   out_dir <- withr::local_tempdir()
-  gt_as_easysfs(haploid_gt,
-    out_dir = out_dir, n_proj = c(popA = 5, popB = 4),
-    prefix = "test"
+  write_as_easysfs(haploid_gt,
+    out_dir = out_dir,
+    n_proj = c(popA = 5, popB = 4)
   )
   expect_same_files_as_easysfs(out_dir, file.path(easysfs_dir, "haploid"))
 })

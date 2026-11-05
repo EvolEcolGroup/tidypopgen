@@ -1,4 +1,4 @@
-# Tests for write_sfs() and gt_as_easysfs()
+# Tests for write_sfs(), sfs_as_dadi() and sfs_as_simcoal()
 
 # a small unfolded 2D spectrum (populations a and b, with 1 and 2 copies)
 sfs_2d <- new_sfs(
@@ -133,48 +133,57 @@ test_that("write_sfs files can be read back", {
   expect_identical(dadi_sfs$mask, sfs_tidy$masked)
 })
 
-test_that("gt_as_easysfs writes the files of easySFS", {
+test_that("sfs_as_dadi and sfs_as_simcoal write the files of easySFS", {
   sim <- ref_sfs_simulate(c(popA = 5, popB = 4, popC = 3),
     n_loci = 60,
     seed = 32
   )
-  out_dir <- withr::local_tempdir()
+  dadi_dir <- withr::local_tempdir()
+  fsc_dir <- withr::local_tempdir()
   n_proj <- c(popA = 6, popB = 4, popC = 3)
-  files <- gt_as_easysfs(sim$gt,
-    out_dir = out_dir, n_proj = n_proj,
+  dadi_files <- sfs_as_dadi(sim$gt, out_dir = dadi_dir, n_proj = n_proj)
+  fsc_files <- sfs_as_simcoal(sim$gt,
+    out_dir = fsc_dir, n_proj = n_proj,
     prefix = "test"
   )
-  expect_identical(sort(basename(files)), sort(c(
+  expect_identical(sort(basename(dadi_files)), sort(c(
     "popA-6.sfs", "popB-4.sfs", "popC-3.sfs", "popA-popB.sfs",
-    "popA-popC.sfs", "popB-popC.sfs", "popA-popB-popC.sfs",
+    "popA-popC.sfs", "popB-popC.sfs", "popA-popB-popC.sfs"
+  )))
+  expect_identical(sort(basename(fsc_files)), sort(c(
     "popA_MAFpop0.obs", "popB_MAFpop0.obs", "popC_MAFpop0.obs",
     "test_jointMAFpop1_0.obs", "test_jointMAFpop2_0.obs",
     "test_jointMAFpop2_1.obs", "test_MSFS.obs"
   )))
-  expect_true(all(file.exists(files)))
-  expect_identical(
-    sort(list.files(out_dir, recursive = TRUE)),
-    sort(sub(paste0(out_dir, "/"), "", files, fixed = TRUE))
-  )
+  # the files are written directly in out_dir
+  expect_identical(dirname(dadi_files), rep(dadi_dir, 7))
+  expect_identical(sort(list.files(dadi_dir)), sort(basename(dadi_files)))
+  expect_identical(sort(list.files(fsc_dir)), sort(basename(fsc_files)))
   # the files are those written by write_sfs() for each spectrum
   expect_same_file <- function(sfs, format, file, ...) {
     tmp <- withr::local_tempfile()
     write_sfs(sfs, tmp, format = format, ...)
-    expect_identical(readLines(file.path(out_dir, file)), readLines(tmp))
+    expect_identical(readLines(file), readLines(tmp))
   }
   sfs_1d <- pop_sfs(sim$gt, n_proj = n_proj, type = "array")
   sfs_2d <- pairwise_pop_sfs(sim$gt, n_proj = n_proj, type = "array")
   sfs_3d <- nwise_pop_sfs(sim$gt, n_proj = n_proj, type = "array")
-  expect_same_file(sfs_1d$popB, "dadi", "dadi/popB-4.sfs")
-  expect_same_file(sfs_1d$popB, "fsc", "fastsimcoal2/popB_MAFpop0.obs")
-  expect_same_file(sfs_2d$popA.popC, "dadi", "dadi/popA-popC.sfs")
-  expect_same_file(sfs_3d, "dadi", "dadi/popA-popB-popC.sfs")
-  expect_same_file(sfs_3d, "fsc_msfs", "fastsimcoal2/test_MSFS.obs")
+  expect_same_file(sfs_1d$popB, "dadi", file.path(dadi_dir, "popB-4.sfs"))
+  expect_same_file(
+    sfs_1d$popB, "fsc",
+    file.path(fsc_dir, "popB_MAFpop0.obs")
+  )
+  expect_same_file(
+    sfs_2d$popA.popC, "dadi",
+    file.path(dadi_dir, "popA-popC.sfs")
+  )
+  expect_same_file(
+    sfs_3d, "dadi",
+    file.path(dadi_dir, "popA-popB-popC.sfs")
+  )
+  expect_same_file(sfs_3d, "fsc_msfs", file.path(fsc_dir, "test_MSFS.obs"))
   # the joint spectrum of popA (0) and popC (2) has popC in the rows
-  fsc_2d <- readLines(file.path(
-    out_dir, "fastsimcoal2",
-    "test_jointMAFpop2_0.obs"
-  ))
+  fsc_2d <- readLines(file.path(fsc_dir, "test_jointMAFpop2_0.obs"))
   col_labels <- paste0("d0_", 0:6, collapse = "\t")
   expect_identical(fsc_2d[2], paste0("\t", col_labels))
   expect_identical(
@@ -188,67 +197,85 @@ test_that("gt_as_easysfs writes the files of easySFS", {
 
   # files are not overwritten
   expect_error(
-    gt_as_easysfs(sim$gt, out_dir = out_dir, n_proj = n_proj),
+    sfs_as_dadi(sim$gt, out_dir = dadi_dir, n_proj = n_proj),
+    "already exist"
+  )
+  expect_error(
+    sfs_as_simcoal(sim$gt, out_dir = fsc_dir, n_proj = n_proj, prefix = "test"),
     "already exist"
   )
   # unfolded spectra, the first population changing fastest, the number of
   # monomorphic sites, and rounding
-  files <- gt_as_easysfs(sim$gt,
-    out_dir = out_dir, n_proj = n_proj, prefix = "test", folded = FALSE,
+  dadi_files <- sfs_as_dadi(sim$gt,
+    out_dir = dadi_dir, n_proj = n_proj, folded = FALSE,
+    fastest = "first", total_length = 1000, round = TRUE, overwrite = TRUE
+  )
+  fsc_files <- sfs_as_simcoal(sim$gt,
+    out_dir = fsc_dir, n_proj = n_proj, prefix = "test", folded = FALSE,
     fastest = "first", total_length = 1000, round = TRUE, overwrite = TRUE
   )
   unfolded_files <- c("popA_DAFpop0.obs", "test_jointDAFpop1_0.obs")
-  expect_true(all(unfolded_files %in% basename(files)))
+  expect_true(all(unfolded_files %in% basename(fsc_files)))
   sfs_unfolded <- nwise_pop_sfs(sim$gt,
     n_proj = n_proj, folded = FALSE,
     type = "array"
   )
-  expect_same_file(sfs_unfolded, "dadi", "dadi/popA-popB-popC.sfs",
+  expect_same_file(sfs_unfolded, "dadi",
+    file.path(dadi_dir, "popA-popB-popC.sfs"),
     fastest = "first", total_length = 1000, round = TRUE
   )
-  expect_same_file(sfs_unfolded, "fsc_msfs", "fastsimcoal2/test_MSFS.obs",
+  expect_same_file(sfs_unfolded, "fsc_msfs",
+    file.path(fsc_dir, "test_MSFS.obs"),
     fastest = "first", total_length = 1000, round = TRUE
   )
 })
 
-test_that("gt_as_easysfs uses the backing files by default", {
+test_that("sfs_as_dadi and sfs_as_simcoal use the backing files by default", {
   test_gt <- load_example_gt("grouped_gen_tbl")
   backing_name <- bigstatsr::sub_bk(attr(test_gt$genotypes, "fbm")$backingfile)
-  out_dir <- paste0(backing_name, "_easysfs")
-  on.exit(unlink(out_dir, recursive = TRUE), add = TRUE)
+  dadi_dir <- paste0(backing_name, "_dadi")
+  fsc_dir <- paste0(backing_name, "_fastsimcoal2")
+  on.exit(unlink(c(dadi_dir, fsc_dir), recursive = TRUE), add = TRUE)
   expect_message(
-    files <- gt_as_easysfs(test_gt),
+    dadi_files <- sfs_as_dadi(test_gt),
     "maximises its number of segregating sites"
   )
-  expect_true(all(startsWith(files, out_dir)))
+  expect_true(all(startsWith(dadi_files, dadi_dir)))
+  fsc_files <- suppressMessages(sfs_as_simcoal(test_gt))
+  expect_true(all(startsWith(fsc_files, fsc_dir)))
   expect_true(file.exists(file.path(
-    out_dir, "fastsimcoal2",
+    fsc_dir,
     paste0(basename(backing_name), "_MSFS.obs")
   )))
 })
 
-test_that("gt_as_easysfs works with a single group", {
+test_that("sfs_as_dadi and sfs_as_simcoal work with a single group", {
   test_gt <- load_example_gt("grouped_gen_tbl") %>%
     dplyr::filter(population == "pop1")
-  out_dir <- withr::local_tempdir()
-  files <- gt_as_easysfs(test_gt,
-    out_dir = out_dir, n_proj = 4,
-    prefix = "test"
+  dadi_files <- sfs_as_dadi(test_gt,
+    out_dir = withr::local_tempdir(),
+    n_proj = 4
   )
-  expect_identical(sort(basename(files)), c(
-    "pop1-4.sfs", "pop1.sfs", "pop1_MAFpop0.obs", "test_MSFS.obs"
-  ))
+  expect_identical(sort(basename(dadi_files)), c("pop1-4.sfs", "pop1.sfs"))
+  fsc_files <- sfs_as_simcoal(test_gt,
+    out_dir = withr::local_tempdir(),
+    n_proj = 4, prefix = "test"
+  )
+  expect_identical(
+    sort(basename(fsc_files)),
+    c("pop1_MAFpop0.obs", "test_MSFS.obs")
+  )
 })
 
-test_that("gt_as_easysfs checks its arguments", {
+test_that("sfs_as_dadi and sfs_as_simcoal check their arguments", {
   test_gt <- load_example_gt("grouped_gen_tbl")
   out_dir <- withr::local_tempdir()
   expect_error(
-    gt_as_easysfs(dplyr::ungroup(test_gt), out_dir = out_dir),
+    sfs_as_dadi(dplyr::ungroup(test_gt), out_dir = out_dir),
     "grouped gen_tibble"
   )
   expect_error(
-    gt_as_easysfs(test_gt, out_dir = out_dir, n_proj = 2, max_cells = 10),
+    sfs_as_simcoal(test_gt, out_dir = out_dir, n_proj = 2, max_cells = 10),
     "27 cells"
   )
   test_gt_slash <- test_gt %>%
@@ -256,7 +283,11 @@ test_that("gt_as_easysfs checks its arguments", {
     dplyr::mutate(population = paste0(population, "/x")) %>%
     dplyr::group_by(population)
   expect_error(
-    gt_as_easysfs(test_gt_slash, out_dir = out_dir, n_proj = 2),
+    sfs_as_dadi(test_gt_slash, out_dir = out_dir, n_proj = 2),
     "cannot contain"
+  )
+  expect_error(
+    sfs_as_simcoal(test_gt, out_dir = out_dir, n_proj = 2, fastest = "middle"),
+    "should be one of"
   )
 })

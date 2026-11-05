@@ -6,7 +6,8 @@
 #' or by `fastsimcoal2`, as written by `easySFS`. To write all the spectra
 #' that `easySFS` writes (the 1D spectrum of each population, the joint
 #' spectrum of each pair of populations, and the joint spectrum of all
-#' populations, in both formats) in a single call, use [gt_as_easysfs()].
+#' populations) in a single call, use [sfs_as_dadi()] or
+#' [sfs_as_simcoal()].
 #'
 #' @details
 #' **dadi format** (`format = "dadi"`): a line with the dimensions of the
@@ -58,7 +59,7 @@
 #' @param overwrite boolean, whether to overwrite `file` if it already exists.
 #'   Defaults to `FALSE`.
 #' @returns the path of the file, invisibly.
-#' @seealso [gt_as_easysfs()]
+#' @seealso [sfs_as_dadi()], [sfs_as_simcoal()]
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("grouped_gen_tbl")
@@ -109,36 +110,43 @@ write_sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
   invisible(file)
 }
 
-#' Write the site frequency spectra of a `gen_tibble` as easySFS does
+#' Write the site frequency spectra of a `gen_tibble` for dadi or fastsimcoal2
 #'
 #' Compute and write all the site frequency spectra that `easySFS` writes for
 #' a set of populations: the 1D spectrum of each population, the joint
 #' spectrum of each pair of populations, and the joint spectrum of all
-#' populations, both in `dadi` and in `fastsimcoal2` format, with the same
-#' directory layout and file names as `easySFS`. All spectra are computed in a
-#' single pass over the genotypes. Missing genotypes are dealt with by
-#' projecting each population down to `n_proj` allele copies (see
-#' [pop_sfs()]).
+#' populations. `sfs_as_dadi()` writes them in `dadi` (and `moments`) format,
+#' and `sfs_as_simcoal()` in `fastsimcoal2` format, with the file names used
+#' by `easySFS`. All spectra are computed in a single pass over the
+#' genotypes. Missing genotypes are dealt with by projecting each population
+#' down to `n_proj` allele copies (see [pop_sfs()]).
 #'
 #' @details
-#' The files are written in two sub-directories of `out_dir`, as
-#' `easySFS` does (`pop` stands for the population labels, `p` for their
-#' projections, and `M` is replaced by `D` for unfolded spectra):
-#' - `dadi`: `pop-p.sfs` for each population, `pop1-pop2.sfs` for each pair,
-#'   and `pop1-pop2-...-popK.sfs` for all populations;
-#' - `fastsimcoal2`: `pop_MAFpop0.obs` for each population,
+#' The files are written in `out_dir` (`pop` stands for the population
+#' labels, `p` for their projections, and `M` is replaced by `D` for unfolded
+#' spectra):
+#' - `sfs_as_dadi()`: `pop-p.sfs` for each population, `pop1-pop2.sfs` for
+#'   each pair, and `pop1-pop2-...-popK.sfs` for all populations;
+#' - `sfs_as_simcoal()`: `pop_MAFpop0.obs` for each population,
 #'   `prefix_jointMAFpopj_i.obs` for each pair (where `i` and `j` are the
 #'   0-based indices of the two populations, so that the second population of
 #'   the pair is in the rows), and `prefix_MSFS.obs` for all populations.
 #'
+#' `easySFS` writes these files in the sub-directories `dadi` and
+#' `fastsimcoal2` of its output directory: use, for example,
+#' `out_dir = file.path(dir, "dadi")` and
+#' `out_dir = file.path(dir, "fastsimcoal2")` to get the same layout.
+#'
 #' With `n_bootstrap` replicates of a block bootstrap (see
 #' [bootstrap_pop_sfs()]), the spectra of each replicate are also written,
-#' with the same layout and file names, in the sub-directories `bootstrap_1`,
+#' with the same file names, in the sub-directories `bootstrap_1`,
 #' `bootstrap_2`, ... of `out_dir`, numbered with as many digits as
 #' `n_bootstrap` (e.g. `bootstrap_001` to `bootstrap_100`), which can be
 #' used to estimate confidence intervals with `fastsimcoal2`. Replicates use
 #' the same projections as the spectra of all loci, and `total_length` and
-#' `round` are applied to each of them.
+#' `round` are applied to each of them. To draw the same replicates with both
+#' functions, set the same seed (with [set.seed()]) before calling each of
+#' them.
 #'
 #' See [write_sfs()] for the formats, and for the order of the cells set by
 #' `fastest`. Populations are in the order of the groups (see
@@ -152,7 +160,7 @@ write_sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
 #'   [dplyr::group_by()]).
 #' @param out_dir the directory in which to write the files, or `NULL` (the
 #'   default) to use the location and name of the backing files, followed by
-#'   `_easysfs`.
+#'   `_dadi` or `_fastsimcoal2`.
 #' @param prefix the prefix of the names of the 2D and multidimensional
 #'   `fastsimcoal2` files, or `NULL` (the default) to use the name of the
 #'   backing files.
@@ -166,6 +174,7 @@ write_sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
 #' @returns the paths of the files written, invisibly.
 #' @seealso [write_sfs()], [pop_sfs()], [pop_sfs_preview()],
 #'   [bootstrap_pop_sfs()]
+#' @rdname sfs_as_dadi
 #' @export
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
@@ -175,20 +184,58 @@ write_sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
 #' }
 #' example_gt <- load_example_gt("grouped_gen_tbl")
 #'
+#' # the files written by easySFS, in the same directories
 #' out_dir <- file.path(tempdir(), "example_sfs")
-#' files <- example_gt %>%
-#'   gt_as_easysfs(out_dir = out_dir, n_proj = 2, prefix = "example")
-#' basename(files)
+#' dadi_files <- example_gt %>%
+#'   sfs_as_dadi(out_dir = file.path(out_dir, "dadi"), n_proj = 2)
+#' basename(dadi_files)
+#' fsc_files <- example_gt %>%
+#'   sfs_as_simcoal(
+#'     out_dir = file.path(out_dir, "fastsimcoal2"), n_proj = 2,
+#'     prefix = "example"
+#'   )
+#' basename(fsc_files)
 #'
 #' # with 3 bootstrap replicates, resampling blocks of 2 SNPs
 #' set.seed(1)
-#' files <- example_gt %>%
-#'   gt_as_easysfs(
-#'     out_dir = out_dir, n_proj = 2, prefix = "example",
-#'     n_bootstrap = 3, bootstrap_block_size = 2, overwrite = TRUE
+#' fsc_files <- example_gt %>%
+#'   sfs_as_simcoal(
+#'     out_dir = file.path(out_dir, "fastsimcoal2"), n_proj = 2,
+#'     prefix = "example", n_bootstrap = 3, bootstrap_block_size = 2,
+#'     overwrite = TRUE
 #'   )
-#' list.files(out_dir)
-gt_as_easysfs <- function(
+#' list.files(file.path(out_dir, "fastsimcoal2"))
+sfs_as_dadi <- function(
+  .x,
+  out_dir = NULL,
+  n_proj = NULL,
+  folded = TRUE,
+  ancestral = NULL,
+  total_length = NULL,
+  round = FALSE,
+  fastest = c("last", "first"),
+  n_bootstrap = 0,
+  bootstrap_block_size = NULL,
+  bootstrap_size_unit = c("snp", "cM", "bp"),
+  max_cells = 1e7,
+  overwrite = FALSE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1)
+) {
+  .sfs_write_set_files(
+    .x,
+    format = "dadi", out_dir = out_dir, n_proj = n_proj, prefix = NULL,
+    folded = folded, ancestral = ancestral, total_length = total_length,
+    round = round, fastest = fastest, n_bootstrap = n_bootstrap,
+    bootstrap_block_size = bootstrap_block_size,
+    bootstrap_size_unit = bootstrap_size_unit, max_cells = max_cells,
+    overwrite = overwrite, n_cores = n_cores, block_size = block_size
+  )
+}
+
+#' @rdname sfs_as_dadi
+#' @export
+sfs_as_simcoal <- function(
   .x,
   out_dir = NULL,
   n_proj = NULL,
@@ -206,11 +253,30 @@ gt_as_easysfs <- function(
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1)
 ) {
+  .sfs_write_set_files(
+    .x,
+    format = "simcoal", out_dir = out_dir, n_proj = n_proj, prefix = prefix,
+    folded = folded, ancestral = ancestral, total_length = total_length,
+    round = round, fastest = fastest, n_bootstrap = n_bootstrap,
+    bootstrap_block_size = bootstrap_block_size,
+    bootstrap_size_unit = bootstrap_size_unit, max_cells = max_cells,
+    overwrite = overwrite, n_cores = n_cores, block_size = block_size
+  )
+}
+
+# the work of sfs_as_dadi() and sfs_as_simcoal(): compute the spectra of each
+# population, each pair and all populations (and their bootstrap
+# replicates), and write them in the given format ("dadi" or "simcoal")
+.sfs_write_set_files <- function(.x, format, out_dir, n_proj, prefix, folded,
+                                 ancestral, total_length, round, fastest,
+                                 n_bootstrap, bootstrap_block_size,
+                                 bootstrap_size_unit, max_cells, overwrite,
+                                 n_cores, block_size) {
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
-  fastest <- match.arg(fastest)
-  bootstrap_size_unit <- match.arg(bootstrap_size_unit)
+  fastest <- match.arg(fastest, c("last", "first"))
+  bootstrap_size_unit <- match.arg(bootstrap_size_unit, c("snp", "cM", "bp"))
   .sfs_check_folded(folded)
   .sfs_check_flag(round, "round")
   .sfs_check_flag(overwrite, "overwrite")
@@ -219,7 +285,10 @@ gt_as_easysfs <- function(
   }
   backing_name <- bigstatsr::sub_bk(attr(.x$genotypes, "fbm")$backingfile)
   if (is.null(out_dir)) {
-    out_dir <- paste0(backing_name, "_easysfs")
+    out_dir <- paste0(
+      backing_name,
+      if (format == "dadi") "_dadi" else "_fastsimcoal2"
+    )
   }
   if (is.null(prefix)) {
     prefix <- basename(backing_name)
@@ -263,27 +332,34 @@ gt_as_easysfs <- function(
 
   # the file names of easySFS (relative to out_dir, and to the directory of
   # each bootstrap replicate)
-  m_or_d <- if (folded) "M" else "D"
-  pair_dadi <- character(0)
-  pair_fsc <- character(0)
-  if (ncol(pairs) > 0) {
-    pair_dadi <- paste0(labels[pairs[1, ]], "-", labels[pairs[2, ]], ".sfs")
-    pair_fsc <- paste0(
-      prefix, "_joint", m_or_d, "AFpop", pairs[2, ] - 1, "_",
-      pairs[1, ] - 1, ".obs"
+  if (format == "dadi") {
+    pair_files <- character(0)
+    if (ncol(pairs) > 0) {
+      pair_files <- paste0(
+        labels[pairs[1, ]], "-", labels[pairs[2, ]],
+        ".sfs"
+      )
+    }
+    set_files <- c(
+      paste0(labels, "-", n_proj, ".sfs"),
+      pair_files,
+      paste0(paste(labels, collapse = "-"), ".sfs")
+    )
+  } else {
+    m_or_d <- if (folded) "M" else "D"
+    pair_files <- character(0)
+    if (ncol(pairs) > 0) {
+      pair_files <- paste0(
+        prefix, "_joint", m_or_d, "AFpop", pairs[2, ] - 1, "_",
+        pairs[1, ] - 1, ".obs"
+      )
+    }
+    set_files <- c(
+      paste0(labels, "_", m_or_d, "AFpop0.obs"),
+      pair_files,
+      paste0(prefix, "_MSFS.obs")
     )
   }
-  dadi_files <- file.path("dadi", c(
-    paste0(labels, "-", n_proj, ".sfs"),
-    pair_dadi,
-    paste0(paste(labels, collapse = "-"), ".sfs")
-  ))
-  fsc_files <- file.path("fastsimcoal2", c(
-    paste0(labels, "_", m_or_d, "AFpop0.obs"),
-    pair_fsc,
-    paste0(prefix, "_MSFS.obs")
-  ))
-  set_files <- unique(c(dadi_files, fsc_files))
   # the directory of each replicate (e.g. bootstrap_001)
   rep_dirs <- character(0)
   if (n_bootstrap > 0) {
@@ -292,10 +368,10 @@ gt_as_easysfs <- function(
       seq_len(n_bootstrap)
     )
   }
-  files <- file.path(out_dir, c(
+  files <- unique(file.path(out_dir, c(
     set_files,
     as.vector(outer(set_files, rep_dirs, function(f, d) file.path(d, f)))
-  ))
+  )))
   if (!overwrite && any(file.exists(files))) {
     stop(
       "some files already exist in ", out_dir,
@@ -319,26 +395,19 @@ gt_as_easysfs <- function(
       total_length = total_length,
       round = round
     )
-    dir.create(file.path(set_dir, "dadi"),
-      recursive = TRUE,
-      showWarnings = FALSE
-    )
-    dir.create(file.path(set_dir, "fastsimcoal2"),
-      recursive = TRUE,
-      showWarnings = FALSE
-    )
+    dir.create(set_dir, recursive = TRUE, showWarnings = FALSE)
     for (i in seq_along(spectra)) {
       fs <- spectra[[i]]
-      writeLines(
-        .sfs_dadi_lines(fs, fastest = fastest),
-        file.path(set_dir, dadi_files[i])
-      )
-      fsc_lines <- switch(type[i],
-        "1d" = .sfs_fsc_1d_lines(fs),
-        "2d" = .sfs_fsc_2d_lines(fs, pop_index = spectra_def[[i]] - 1),
-        "multi" = .sfs_fsc_msfs_lines(fs, fastest = fastest)
-      )
-      writeLines(fsc_lines, file.path(set_dir, fsc_files[i]))
+      if (format == "dadi") {
+        lines <- .sfs_dadi_lines(fs, fastest = fastest)
+      } else {
+        lines <- switch(type[i],
+          "1d" = .sfs_fsc_1d_lines(fs),
+          "2d" = .sfs_fsc_2d_lines(fs, pop_index = spectra_def[[i]] - 1),
+          "multi" = .sfs_fsc_msfs_lines(fs, fastest = fastest)
+        )
+      }
+      writeLines(lines, file.path(set_dir, set_files[i]))
     }
   }
   write_set(spectra, out_dir)
