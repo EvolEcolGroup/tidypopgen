@@ -2,5 +2,5 @@
 setwd(getSrcDirectory(function(x) {
   x
 }))
-unlink("./figure/big_data")
+unlink("./figure/big_data", recursive = TRUE)
 knitr::knit("big_data.Rmd.orig", "big_data.Rmd")
