@@ -89,12 +89,36 @@ Missing genotypes are accounted for by using the number of non-missing
 allele copies at each locus as its sample size, following Bailey et al.
 (2025) as implemented in `pixy`. See
 [`pop_tajimas_d()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_tajimas_d.md)
-for details. Loci with no genotyped individuals are ignored.
+for details. Loci with no genotyped individuals are ignored. The
+variance of Tajima (1989) is computed for the mean sample size across
+all loci (rounded to the nearest integer), and the same sample size is
+used when leaving out each block: recomputing the rounded mean for each
+block left out would make Tajima's D jump whenever this changes the
+rounding (e.g. when the mean sample size is close to x.5), which the
+jackknife would amplify into an inflated standard error and a biased
+jackknife estimate.
+
+Note that the variance of Tajima (1989) assumes that there is no
+recombination among loci. Over a whole genome, Tajima's D is thus not
+standardised: it is approximately proportional to \\\hat{\theta}\_\pi /
+\hat{\theta}\_W - 1\\, with a factor that depends on the sample size
+(about 5 for 10 allele copies, 4.2 for 20, and 3.4 for 100), and with
+genome-wide data its standard error is much smaller than 1. Use the
+jackknife standard error, rather than the rules of thumb used for single
+loci, to judge whether genome-wide Tajima's D differs from 0, and
+compare groups with different sample sizes with caution. The z score
+tests whether genome-wide Tajima's D differs from 0, which most
+demographic histories other than a constant population size will cause.
+Blocks should be larger than the extent of linkage disequilibrium, or
+the standard error will be underestimated.
 
 ## References
 
 Busing FMTA, Meijer E, Van Der Leeden R (1999) Delete-m jackknife for
 unequal m. Statistics and Computing 9:3-8.
+
+Tajima F (1989) Statistical method for testing the neutral mutation
+hypothesis by DNA polymorphism. Genetics 123:585-595.
 
 Bailey N, Stevison L, Samuk K (2025) Correcting for bias in estimates of
 \\\theta_W\\ and Tajima's D from missing data in next-generation
