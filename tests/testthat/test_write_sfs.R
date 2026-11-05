@@ -125,6 +125,12 @@ test_that("write_sfs checks its arguments", {
     write_sfs(sfs_2d, file, round = NA, overwrite = TRUE),
     "`round` should be TRUE or FALSE"
   )
+  sfs_quote <- sfs_2d
+  attr(sfs_quote, "pop_ids") <- c("a", "b\"c")
+  expect_error(
+    write_sfs(sfs_quote, file, overwrite = TRUE),
+    "cannot contain '\"' or line breaks"
+  )
 })
 
 test_that("write_sfs files can be read back", {

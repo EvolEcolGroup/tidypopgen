@@ -538,6 +538,13 @@ write_sfs.default <- function(x, ...) {
 .sfs_dadi_lines <- function(x, fastest = "last") {
   dims <- dim(x)
   pops <- attr(x, "pop_ids")
+  # the labels are written between double quotes on the first line, and
+  # dadi splits that line on '"', so they cannot contain either
+  if (any(grepl("[\"\r\n]", pops))) {
+    stop(
+      "population labels cannot contain '\"' or line breaks in dadi files"
+    )
+  }
   cells <- .sfs_ordered_values(x, fastest)
   if (fastest == "first") {
     dims <- rev(dims)
