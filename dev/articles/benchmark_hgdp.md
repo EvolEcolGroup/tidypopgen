@@ -320,17 +320,16 @@ Plot pairwise Fst:
 # Order by continents
 grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
 regional_order <- unique(grouped_hgdp_order$population)
-pairwise_fsts <- pairwise_fsts[regional_order, regional_order]
 
-ggheatmap(pairwise_fsts) +
+autoplot(pairwise_fsts, order = regional_order) +
   scale_fill_viridis_c() +
   theme(
     axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
     axis.text.y = element_text(angle = 0, hjust = 1, size = 6)
   ) +
   labs(
-    x = element_blank(),
-    y = element_blank(),
+    x = NULL,
+    y = NULL,
     fill = "Fst"
   )
 ```
@@ -369,29 +368,6 @@ the analyses:
     #> 10 pairwise_fst 0.05
     #> 11   plink_save 0.17
     #> 12        Total 8.39
-
-## Running the benchmark on a laptop
-
-We will now run this benchmark on a laptop with a GenuineIntel, Intel(R)
-Core(TM) Ultra 7 155H, 22 CPU and 31 GiB of RAM, limiting the number of
-cores to 4. Note that these laptop timings were measured with an earlier
-version of tidypopgen (August 2025) and have not been updated. Here is a
-summary of the time taken (in seconds) to perform each step of the
-analyses:
-
-    #>            step  time
-    #> 1    read_plink  4.68
-    #> 2   loci_report  3.18
-    #> 3   filter_loci   3.2
-    #> 4  indiv_report  3.27
-    #> 5  filter_indiv     0
-    #> 6        impute  0.88
-    #> 7   ld_clumping  9.28
-    #> 8           pca  3.74
-    #> 9          dapc  0.06
-    #> 10 pairwise_fst  5.49
-    #> 11   plink_save  0.34
-    #> 12        Total 34.12
 
 ## Running the benchmark on a laptop
 

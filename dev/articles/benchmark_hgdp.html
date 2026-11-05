@@ -319,17 +319,16 @@ set, we calculate pairwise Fst.</p>
 <code class="sourceCode R"><span><span class="co"># Order by continents</span></span>
 <span><span class="va">grouped_hgdp_order</span> <span class="op">&lt;-</span> <span class="va">grouped_hgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">region</span>, <span class="va">population</span><span class="op">)</span></span>
 <span><span class="va">regional_order</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">grouped_hgdp_order</span><span class="op">$</span><span class="va">population</span><span class="op">)</span></span>
-<span><span class="va">pairwise_fsts</span> <span class="op">&lt;-</span> <span class="va">pairwise_fsts</span><span class="op">[</span><span class="va">regional_order</span>, <span class="va">regional_order</span><span class="op">]</span></span>
 <span></span>
-<span><span class="fu">ggheatmap</span><span class="op">(</span><span class="va">pairwise_fsts</span><span class="op">)</span> <span class="op">+</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">pairwise_fsts</span>, order <span class="op">=</span> <span class="va">regional_order</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_c</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span></span>
 <span>    axis.text.x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="op">-</span><span class="fl">60</span>, hjust <span class="op">=</span> <span class="fl">0</span>, size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>,</span>
 <span>    axis.text.y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>angle <span class="op">=</span> <span class="fl">0</span>, hjust <span class="op">=</span> <span class="fl">1</span>, size <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span></span>
-<span>    x <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>    y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>    x <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>    y <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>    fill <span class="op">=</span> <span class="st">"Fst"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 </div>
@@ -368,29 +367,6 @@ of the analyses:</p>
 </div>
 <div class="section level2">
 <h2 id="running-the-benchmark-on-a-laptop">Running the benchmark on a laptop<a class="anchor" aria-label="anchor" href="#running-the-benchmark-on-a-laptop"></a>
-</h2>
-<p>We will now run this benchmark on a laptop with a GenuineIntel,
-Intel(R) Core(TM) Ultra 7 155H, 22 CPU and 31 GiB of RAM, limiting the
-number of cores to 4. Note that these laptop timings were measured with
-an earlier version of tidypopgen (August 2025) and have not been
-updated. Here is a summary of the time taken (in seconds) to perform
-each step of the analyses:</p>
-<pre><code><span><span class="co">#&gt;            step  time</span></span>
-<span><span class="co">#&gt; 1    read_plink  4.68</span></span>
-<span><span class="co">#&gt; 2   loci_report  3.18</span></span>
-<span><span class="co">#&gt; 3   filter_loci   3.2</span></span>
-<span><span class="co">#&gt; 4  indiv_report  3.27</span></span>
-<span><span class="co">#&gt; 5  filter_indiv     0</span></span>
-<span><span class="co">#&gt; 6        impute  0.88</span></span>
-<span><span class="co">#&gt; 7   ld_clumping  9.28</span></span>
-<span><span class="co">#&gt; 8           pca  3.74</span></span>
-<span><span class="co">#&gt; 9          dapc  0.06</span></span>
-<span><span class="co">#&gt; 10 pairwise_fst  5.49</span></span>
-<span><span class="co">#&gt; 11   plink_save  0.34</span></span>
-<span><span class="co">#&gt; 12        Total 34.12</span></span></code></pre>
-</div>
-<div class="section level2">
-<h2 id="running-the-benchmark-on-a-laptop-1">Running the benchmark on a laptop<a class="anchor" aria-label="anchor" href="#running-the-benchmark-on-a-laptop-1"></a>
 </h2>
 <p>We will now run this benchmark on a laptop with a GenuineIntel,
 Intel(R) Core(TM) Ultra 7 155H, 22 CPU and 31 GiB of RAM, limiting the
