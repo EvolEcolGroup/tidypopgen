@@ -7,7 +7,7 @@
 jackknife_stats_generic(
   .x,
   loci_table,
-  operator = c("mean", "sum", "custom"),
+  operator = c("mean", "custom"),
   block_size,
   size_unit = c("snp", "cM", "bp"),
   f = NULL,
@@ -22,7 +22,7 @@ additionally a column 'position' if \code{size_unit} is "bp", or a column
 'genetic_dist' if \code{size_unit} is "cM".}
 
 \item{operator}{The operator to use to aggregate the per locus estimates.
-Either "mean", "sum" or "custom" to use a custom function \code{f}.}
+Either "mean" or "custom" to use a custom function \code{f}.}
 
 \item{block_size}{The size of the blocks to leave out.}
 
@@ -34,7 +34,7 @@ block size is in base pairs.}
 should take a vector of locus estimates and return a single value (see
 Details for the functions that are appropriate). Note
 that, for a custom function, the statistic is recomputed from scratch
-for every block, which is slower than using "mean" or "sum".}
+for every block, which is slower than using "mean".}
 
 \item{...}{Additional arguments to be passed to the custom operator function.}
 }
@@ -48,7 +48,7 @@ jackknife standard error), 'z' (the z score, jack_estimate/se), and
 This function is mostly designed for developers: it is a general function to
 estimate the genome-wide value of a statistic, together with its standard
 error, using a weighted block jackknife. It takes a vector of per locus
-estimates, and aggregates them by sum or mean (or a custom function),
+estimates, and aggregates them by their mean (or a custom function),
 leaving out one block of loci at a time. To compute specific quantities
 directly from a \code{gen_tibble}, use the appropriate \verb{jackknife_*} functions,
 e.g \code{\link[=jackknife_pairwise_pop_fst]{jackknife_pairwise_pop_fst()}} to compute pairwise Fst.
@@ -69,16 +69,14 @@ non-missing values that it contains. Blocks should be larger than the
 extent of linkage disequilibrium (e.g. 5 cM, or a few Mb).
 
 The jackknife assumes that the statistic estimates a quantity that does
-not change with the number of loci (such as a mean, or a ratio of sums).
-A sum does not: leaving out a block always makes it smaller, which the
-jackknife would mistake for a bias. For \code{operator = "sum"}, the sum is
-thus treated as the mean of the non-missing values times their number
-(taken as fixed): the jackknife is computed for the mean, and its
-estimates and standard error are multiplied by the number of non-missing
-values, so that \code{jack_estimate} equals \code{estimate}. A custom function \code{f}
-should not be a sum (use \code{operator = "sum"} instead), and should be a
-smooth function of the data: the jackknife does not give valid standard
-errors for statistics such as the median or other quantiles.
+not change with the number of loci (such as a mean, or a ratio of sums),
+and that is a smooth function of the data. A custom function \code{f} should
+thus not be a sum (leaving out a block always makes a sum smaller, which
+the jackknife would mistake for a bias), nor a statistic such as the
+median or other quantiles, for which the jackknife does not give valid
+standard errors. For the sum of the per locus estimates, use
+\code{operator = "mean"}, and multiply the estimates and the standard error by
+the number of non-missing values.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

@@ -7,13 +7,6 @@
   amplified these jumps, inflating the standard error (by up to 2x in
   simulations) and biasing `jack_estimate` (by over 10 standard errors in the
   worst case) when Tajima's D was far from 0. `estimate` is unchanged
-* `jackknife_stats_generic(operator = "sum")` returned a `jack_estimate` (and a
-  `z`) of about twice the sum, as the jackknife treated the smaller sum left
-  when leaving out a block as a bias. The jackknife is now computed for the
-  mean and multiplied by the number of non-missing values, so that
-  `jack_estimate` equals the sum. The documentation now explains that a
-  custom function should not be a sum, and should be a smooth function of the
-  data (not e.g. a median)
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,
