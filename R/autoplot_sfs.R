@@ -116,11 +116,13 @@ autoplot.pairwise_sfs_tbl <- function(object, masked = FALSE, log = NULL,
   count_cols <- c("allele_count_1", "allele_count_2", "n_sites", "masked")
   .sfs_check_columns(object, count_cols, "pairwise_pop_sfs")
   group_cols <- setdiff(names(object), count_cols)
-  group_1 <- .sfs_panel_labels(object, grep("_1$", group_cols, value = TRUE))
-  group_2 <- .sfs_panel_labels(object, grep("_2$", group_cols, value = TRUE))
+  group_1 <- .sfs_paste_groups(object, grep("_1$", group_cols, value = TRUE))
+  group_2 <- .sfs_paste_groups(object, grep("_2$", group_cols, value = TRUE))
   # label each pair as "pop1 (x) - pop2 (y)", keeping the order of the pairs
-  panel <- paste0(group_1, " (x) - ", group_2, " (y)")
-  object$panel <- factor(panel, levels = unique(panel))
+  object$panel <- .sfs_panel_factor(
+    object[group_cols],
+    paste0(group_1, " (x) - ", group_2, " (y)")
+  )
   .sfs_plot_2d(object,
     folded = isTRUE(attr(object, "folded")), masked = masked,
     log = !isFALSE(log), min_sites = min_sites, facet = TRUE
@@ -225,11 +227,28 @@ autoplot.sfs_preview_tbl <- function(object, ...) {
   if (length(group_cols) == 0) {
     return(factor(rep("all", nrow(object))))
   }
-  labels <- do.call(paste, c(
+  .sfs_panel_factor(object[group_cols], .sfs_paste_groups(object, group_cols))
+}
+
+# the values of the group columns of each row, pasted with "."
+.sfs_paste_groups <- function(object, group_cols) {
+  do.call(paste, c(
     unname(lapply(object[group_cols], as.character)),
     sep = "."
   ))
-  factor(labels, levels = unique(labels))
+}
+
+# the panel of each row, as a factor with the panels in the order in which
+# they appear: a panel is a combination of values of the group columns
+# (`keys`), labelled with `labels`. Combinations with the same label (e.g.
+# ("a.b", "c") and ("a", "b.c"), or NA and "NA") are kept in their own
+# panels, with labels made unique
+.sfs_panel_factor <- function(keys, labels) {
+  # ids in the order in which the combinations appear
+  panel_id <- vctrs::vec_group_id(keys)
+  first_row <- match(seq_len(attr(panel_id, "n")), panel_id)
+  panel_labels <- make.unique(labels[first_row], sep = " ")
+  factor(panel_labels[panel_id], levels = panel_labels)
 }
 
 # bar plot of 1D spectra (cells with columns allele_count, n_sites, masked

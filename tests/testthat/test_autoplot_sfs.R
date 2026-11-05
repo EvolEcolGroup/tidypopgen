@@ -37,6 +37,16 @@ test_that("pop_sfs tidy outputs are plotted as bar plots", {
   # ungrouped data give a single panel
   p_all <- autoplot(pop_sfs(dplyr::ungroup(sim$gt), n_proj = 10))
   expect_s3_class(p_all$facet, "FacetNull")
+  # groups whose values paste to the same label have their own panels
+  sfs_same_label <- sfs
+  pop <- as.character(sfs$group)
+  sfs_same_label$group <- c(popA = "a.b", popB = "a", popC = "z")[pop]
+  sfs_same_label$v2 <- c(popA = "c", popB = "b.c", popC = "z")[pop]
+  p_same_label <- autoplot(sfs_same_label)
+  expect_identical(
+    levels(p_same_label$data$panel),
+    c("a.b.c", "a.b.c 1", "z.z")
+  )
 })
 
 test_that("pairwise_pop_sfs tidy outputs are plotted as heatmaps", {
