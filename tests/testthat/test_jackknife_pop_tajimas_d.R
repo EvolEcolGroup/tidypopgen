@@ -10,11 +10,16 @@ expect_jack_matches_subsets <- function(test_gt, block_id, jack_list) {
     tajimas_d_from_term_sums(term_sums, n_var = n_var)
   }
   for (i_grp in seq_along(jack_list)) {
+    # the individuals of the group (the groups are in the order of jack_list)
     pop_gt <- test_gt %>%
-      dplyr::ungroup() %>%
-      dplyr::filter(population == names(jack_list)[i_grp])
+      dplyr::filter(dplyr::cur_group_id() == i_grp) %>%
+      dplyr::ungroup()
+    testthat::expect_equal(
+      as.character(unique(pop_gt$population)),
+      names(jack_list)[i_grp]
+    )
     taj_full <- pop_tajimas_d(pop_gt)
-    expect_equal(tajimas_d_gt(pop_gt), taj_full)
+    testthat::expect_equal(tajimas_d_gt(pop_gt), taj_full)
     term_full <- .tajimas_d_group_sums(.tajimas_d_sums_by_group(pop_gt), 1)
     n_var <- tajimas_d_n_var(term_full[, "n"], term_full[, "n_loci"])
     taj_loo <- vapply(sort(unique(block_id)), function(i_block) {
@@ -24,7 +29,7 @@ expect_jack_matches_subsets <- function(test_gt, block_id, jack_list) {
     }, numeric(1))
     m <- as.vector(table(block_id))
     expected <- .jackknife_weighted(taj_full, matrix(taj_loo), matrix(m))
-    expect_equal(jack_list[[i_grp]], expected)
+    testthat::expect_equal(jack_list[[i_grp]], expected)
   }
 }
 
