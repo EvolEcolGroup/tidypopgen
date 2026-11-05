@@ -73,7 +73,8 @@ projections and options, the spectra match easySFS's output.
   and finally made methods of `write_sfs()`: `write_sfs.sfs()` for a
   spectrum and `write_sfs.gen_tbl()` for a gen_tibble). It computes, in one
   pass, all the spectra that easySFS writes (1D, each pair, all populations)
-  and writes them in `format` ("dadi" or "fsc"), with easySFS's file names,
+  and writes them in `format` ("dadi" or "fastsimcoal2"), with easySFS's
+  file names,
   directly in `out_dir`. Writing them to `dir/dadi` and `dir/fastsimcoal2`
   gives easySFS's layout. This was checked
   against emulated easySFS outputs, written by a literal R port of easySFS's

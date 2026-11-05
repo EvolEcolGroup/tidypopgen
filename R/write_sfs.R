@@ -24,15 +24,16 @@
 #' copies in the first population changes fastest and the file is still a
 #' valid dadi file.
 #'
-#' **fastsimcoal2 format** (`format = "fsc"`): for a 1D spectrum, as a
-#' `_DAFpop0.obs` (unfolded) or `_MAFpop0.obs` (folded) file; for a 2D
+#' **fastsimcoal2 format** (`format = "fastsimcoal2"`): for a 1D spectrum,
+#' as a `_DAFpop0.obs` (unfolded) or `_MAFpop0.obs` (folded) file; for a 2D
 #' spectrum, as a `_jointDAFpop1_0.obs` or `_jointMAFpop1_0.obs` file, a
 #' matrix with the second population in the rows (labelled `d1_0`, `d1_1`,
 #' ...) and the first population in the columns (labelled `d0_0`, `d0_1`,
 #' ...); for a spectrum of three or more populations, as a multidimensional
-#' spectrum (`_MSFS.obs` file). For an `sfs` object, `format = "fsc_msfs"`
-#' writes the multidimensional format whatever the number of populations. In
-#' the multidimensional format, the cells are listed in the order set by
+#' spectrum (`_MSFS.obs` file). For an `sfs` object,
+#' `format = "fastsimcoal2_multidimensional"` writes the multidimensional
+#' format whatever the number of populations. In the multidimensional
+#' format, the cells are listed in the order set by
 #' `fastest`: "last" (the default) has the number of copies in the last
 #' population changing fastest, as written by `easySFS`; "first" has the
 #' first population changing fastest. Please check which order your version
@@ -57,8 +58,8 @@
 #' `easySFS` writes these files in the sub-directories `dadi` and
 #' `fastsimcoal2` of its output directory: use, for example,
 #' `out_dir = file.path(dir, "dadi")` with `format = "dadi"` and
-#' `out_dir = file.path(dir, "fastsimcoal2")` with `format = "fsc"` to get the
-#' same layout. Populations are in the order of the groups (see
+#' `out_dir = file.path(dir, "fastsimcoal2")` with `format = "fastsimcoal2"`
+#' to get the same layout. Populations are in the order of the groups (see
 #' [dplyr::group_keys()]): to change their order, which matters for `dadi`
 #' and `fastsimcoal2` (and is set with `--order` in `easySFS`), change the
 #' order of the levels of the grouping variable (e.g. with [factor()]).
@@ -81,8 +82,8 @@
 #' @param out_dir for a `gen_tibble`, the directory in which to write the
 #'   files, or `NULL` (the default) to use the location and name of the
 #'   backing files, followed by `_dadi` or `_fastsimcoal2`.
-#' @param format the format of the files: `"dadi"` or `"fsc"`
-#'   (fastsimcoal2); for an `sfs` object, also `"fsc_msfs"` (the
+#' @param format the format of the files: `"dadi"` or `"fastsimcoal2"`; for
+#'   an `sfs` object, also `"fastsimcoal2_multidimensional"` (the
 #'   multidimensional format of fastsimcoal2, whatever the number of
 #'   populations). See details.
 #' @param fastest the order of the cells in dadi files and in the
@@ -128,27 +129,27 @@
 #' dadi_file <- tempfile(fileext = ".sfs")
 #' write_sfs(sfs_2d$pop1.pop2, dadi_file)
 #' readLines(dadi_file)
-#' fsc_file <- tempfile(fileext = "_jointMAFpop1_0.obs")
-#' write_sfs(sfs_2d$pop1.pop2, fsc_file, format = "fsc")
-#' readLines(fsc_file)
+#' fastsimcoal2_file <- tempfile(fileext = "_jointMAFpop1_0.obs")
+#' write_sfs(sfs_2d$pop1.pop2, fastsimcoal2_file, format = "fastsimcoal2")
+#' readLines(fastsimcoal2_file)
 #'
 #' # write all the spectra written by easySFS, in the same directories
 #' out_dir <- file.path(tempdir(), "example_sfs")
 #' dadi_files <- example_gt %>%
 #'   write_sfs(out_dir = file.path(out_dir, "dadi"), n_proj = 2)
 #' basename(dadi_files)
-#' fsc_files <- example_gt %>%
+#' fastsimcoal2_files <- example_gt %>%
 #'   write_sfs(
-#'     out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+#'     out_dir = file.path(out_dir, "fastsimcoal2"), format = "fastsimcoal2",
 #'     n_proj = 2, prefix = "example"
 #'   )
-#' basename(fsc_files)
+#' basename(fastsimcoal2_files)
 #'
 #' # with 3 bootstrap replicates, resampling blocks of 2 SNPs
 #' set.seed(1)
-#' fsc_files <- example_gt %>%
+#' fastsimcoal2_files <- example_gt %>%
 #'   write_sfs(
-#'     out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+#'     out_dir = file.path(out_dir, "fastsimcoal2"), format = "fastsimcoal2",
 #'     n_proj = 2, prefix = "example", n_bootstrap = 3,
 #'     bootstrap_block_size = 2, overwrite = TRUE
 #'   )
@@ -159,9 +160,16 @@ write_sfs <- function(x, ...) {
 
 #' @rdname write_sfs
 #' @export
-write_sfs.sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
-                          fastest = c("last", "first"), total_length = NULL,
-                          round = FALSE, overwrite = FALSE, ...) {
+write_sfs.sfs <- function(
+  x,
+  file,
+  format = c("dadi", "fastsimcoal2", "fastsimcoal2_multidimensional"),
+  fastest = c("last", "first"),
+  total_length = NULL,
+  round = FALSE,
+  overwrite = FALSE,
+  ...
+) {
   rlang::check_dots_empty()
   format <- match.arg(format)
   fastest <- match.arg(fastest)
@@ -177,12 +185,12 @@ write_sfs.sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
   n_pops <- length(dim(x))
   if (format == "dadi") {
     lines <- .sfs_dadi_lines(x, fastest = fastest)
-  } else if (format == "fsc_msfs" || n_pops > 2) {
-    lines <- .sfs_fsc_msfs_lines(x, fastest = fastest)
+  } else if (format == "fastsimcoal2_multidimensional" || n_pops > 2) {
+    lines <- .sfs_fastsimcoal2_msfs_lines(x, fastest = fastest)
   } else if (n_pops == 1) {
-    lines <- .sfs_fsc_1d_lines(x)
+    lines <- .sfs_fastsimcoal2_1d_lines(x)
   } else {
-    lines <- .sfs_fsc_2d_lines(x, pop_index = c(0, 1))
+    lines <- .sfs_fastsimcoal2_2d_lines(x, pop_index = c(0, 1))
   }
   writeLines(lines, file)
   invisible(file)
@@ -193,7 +201,7 @@ write_sfs.sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
 write_sfs.gen_tbl <- function(
   x,
   out_dir = NULL,
-  format = c("dadi", "fsc"),
+  format = c("dadi", "fastsimcoal2"),
   n_proj = NULL,
   prefix = NULL,
   folded = TRUE,
@@ -235,7 +243,8 @@ write_sfs.default <- function(x, ...) {
 
 # the work of write_sfs() for a gen_tibble: compute the spectra of each
 # population, each pair and all populations (and their bootstrap
-# replicates), and write them in the given format ("dadi" or "fsc")
+# replicates), and write them in the given format ("dadi" or
+# "fastsimcoal2")
 .sfs_write_set_files <- function(.x, format, out_dir, n_proj, prefix, folded,
                                  ancestral, total_length, round, fastest,
                                  n_bootstrap, bootstrap_block_size,
@@ -371,9 +380,11 @@ write_sfs.default <- function(x, ...) {
         lines <- .sfs_dadi_lines(fs, fastest = fastest)
       } else {
         lines <- switch(type[i],
-          "1d" = .sfs_fsc_1d_lines(fs),
-          "2d" = .sfs_fsc_2d_lines(fs, pop_index = spectra_def[[i]] - 1),
-          "multi" = .sfs_fsc_msfs_lines(fs, fastest = fastest)
+          "1d" = .sfs_fastsimcoal2_1d_lines(fs),
+          "2d" = .sfs_fastsimcoal2_2d_lines(fs,
+            pop_index = spectra_def[[i]] - 1
+          ),
+          "multi" = .sfs_fastsimcoal2_msfs_lines(fs, fastest = fastest)
         )
       }
       writeLines(lines, file.path(set_dir, set_files[i]))
@@ -500,7 +511,7 @@ write_sfs.default <- function(x, ...) {
 }
 
 # the lines of a 1D fastsimcoal2 file (as written by easySFS)
-.sfs_fsc_1d_lines <- function(x) {
+.sfs_fastsimcoal2_1d_lines <- function(x) {
   p <- dim(x)[1] - 1
   c(
     "1 observation",
@@ -513,7 +524,7 @@ write_sfs.default <- function(x, ...) {
 # the lines of a 2D fastsimcoal2 file (as written by easySFS): the second
 # population in the rows, the first in the columns, labelled with their
 # (0-based) indices pop_index
-.sfs_fsc_2d_lines <- function(x, pop_index) {
+.sfs_fastsimcoal2_2d_lines <- function(x, pop_index) {
   dims <- dim(x)
   values <- matrix(as.vector(unclass(x)), nrow = dims[1])
   rows <- vapply(seq_len(dims[2]), function(r) {
@@ -533,7 +544,7 @@ write_sfs.default <- function(x, ...) {
 
 # the lines of a multidimensional fastsimcoal2 file (as written by easySFS),
 # with the cells in the order set by fastest
-.sfs_fsc_msfs_lines <- function(x, fastest = "last") {
+.sfs_fastsimcoal2_msfs_lines <- function(x, fastest = "last") {
   dims <- dim(x)
   cells <- .sfs_ordered_values(x, fastest)
   c(

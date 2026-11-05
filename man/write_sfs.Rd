@@ -12,7 +12,7 @@ write_sfs(x, ...)
 \method{write_sfs}{sfs}(
   x,
   file,
-  format = c("dadi", "fsc", "fsc_msfs"),
+  format = c("dadi", "fastsimcoal2", "fastsimcoal2_multidimensional"),
   fastest = c("last", "first"),
   total_length = NULL,
   round = FALSE,
@@ -23,7 +23,7 @@ write_sfs(x, ...)
 \method{write_sfs}{gen_tbl}(
   x,
   out_dir = NULL,
-  format = c("dadi", "fsc"),
+  format = c("dadi", "fastsimcoal2"),
   n_proj = NULL,
   prefix = NULL,
   folded = TRUE,
@@ -51,8 +51,8 @@ using \code{\link[dplyr:group_by]{dplyr::group_by()}}).}
 
 \item{file}{for an \code{sfs} object, the name of the file to write.}
 
-\item{format}{the format of the files: \code{"dadi"} or \code{"fsc"}
-(fastsimcoal2); for an \code{sfs} object, also \code{"fsc_msfs"} (the
+\item{format}{the format of the files: \code{"dadi"} or \code{"fastsimcoal2"}; for
+an \code{sfs} object, also \code{"fastsimcoal2_multidimensional"} (the
 multidimensional format of fastsimcoal2, whatever the number of
 populations). See details.}
 
@@ -147,15 +147,16 @@ the populations are written in reverse order, so that the number of
 copies in the first population changes fastest and the file is still a
 valid dadi file.
 
-\strong{fastsimcoal2 format} (\code{format = "fsc"}): for a 1D spectrum, as a
-\verb{_DAFpop0.obs} (unfolded) or \verb{_MAFpop0.obs} (folded) file; for a 2D
+\strong{fastsimcoal2 format} (\code{format = "fastsimcoal2"}): for a 1D spectrum,
+as a \verb{_DAFpop0.obs} (unfolded) or \verb{_MAFpop0.obs} (folded) file; for a 2D
 spectrum, as a \verb{_jointDAFpop1_0.obs} or \verb{_jointMAFpop1_0.obs} file, a
 matrix with the second population in the rows (labelled \code{d1_0}, \code{d1_1},
 ...) and the first population in the columns (labelled \code{d0_0}, \code{d0_1},
 ...); for a spectrum of three or more populations, as a multidimensional
-spectrum (\verb{_MSFS.obs} file). For an \code{sfs} object, \code{format = "fsc_msfs"}
-writes the multidimensional format whatever the number of populations. In
-the multidimensional format, the cells are listed in the order set by
+spectrum (\verb{_MSFS.obs} file). For an \code{sfs} object,
+\code{format = "fastsimcoal2_multidimensional"} writes the multidimensional
+format whatever the number of populations. In the multidimensional
+format, the cells are listed in the order set by
 \code{fastest}: "last" (the default) has the number of copies in the last
 population changing fastest, as written by \code{easySFS}; "first" has the
 first population changing fastest. Please check which order your version
@@ -182,8 +183,8 @@ the pair is in the rows), and \code{prefix_MSFS.obs} for all populations.
 \code{easySFS} writes these files in the sub-directories \code{dadi} and
 \code{fastsimcoal2} of its output directory: use, for example,
 \code{out_dir = file.path(dir, "dadi")} with \code{format = "dadi"} and
-\code{out_dir = file.path(dir, "fastsimcoal2")} with \code{format = "fsc"} to get the
-same layout. Populations are in the order of the groups (see
+\code{out_dir = file.path(dir, "fastsimcoal2")} with \code{format = "fastsimcoal2"}
+to get the same layout. Populations are in the order of the groups (see
 \code{\link[dplyr:group_keys]{dplyr::group_keys()}}): to change their order, which matters for \code{dadi}
 and \code{fastsimcoal2} (and is set with \code{--order} in \code{easySFS}), change the
 order of the levels of the grouping variable (e.g. with \code{\link[=factor]{factor()}}).
@@ -214,27 +215,27 @@ sfs_2d <- example_gt \%>\%
 dadi_file <- tempfile(fileext = ".sfs")
 write_sfs(sfs_2d$pop1.pop2, dadi_file)
 readLines(dadi_file)
-fsc_file <- tempfile(fileext = "_jointMAFpop1_0.obs")
-write_sfs(sfs_2d$pop1.pop2, fsc_file, format = "fsc")
-readLines(fsc_file)
+fastsimcoal2_file <- tempfile(fileext = "_jointMAFpop1_0.obs")
+write_sfs(sfs_2d$pop1.pop2, fastsimcoal2_file, format = "fastsimcoal2")
+readLines(fastsimcoal2_file)
 
 # write all the spectra written by easySFS, in the same directories
 out_dir <- file.path(tempdir(), "example_sfs")
 dadi_files <- example_gt \%>\%
   write_sfs(out_dir = file.path(out_dir, "dadi"), n_proj = 2)
 basename(dadi_files)
-fsc_files <- example_gt \%>\%
+fastsimcoal2_files <- example_gt \%>\%
   write_sfs(
-    out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+    out_dir = file.path(out_dir, "fastsimcoal2"), format = "fastsimcoal2",
     n_proj = 2, prefix = "example"
   )
-basename(fsc_files)
+basename(fastsimcoal2_files)
 
 # with 3 bootstrap replicates, resampling blocks of 2 SNPs
 set.seed(1)
-fsc_files <- example_gt \%>\%
+fastsimcoal2_files <- example_gt \%>\%
   write_sfs(
-    out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+    out_dir = file.path(out_dir, "fastsimcoal2"), format = "fastsimcoal2",
     n_proj = 2, prefix = "example", n_bootstrap = 3,
     bootstrap_block_size = 2, overwrite = TRUE
   )

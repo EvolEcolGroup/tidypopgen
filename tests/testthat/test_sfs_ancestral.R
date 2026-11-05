@@ -193,7 +193,7 @@ test_that("monomorphic loci are polarised with their reference allele", {
 
 test_that("write_sfs polarises the unfolded spectra of a gen_tibble", {
   fsc_files <- write_sfs(sim$gt,
-    format = "fsc",
+    format = "fastsimcoal2",
     out_dir = withr::local_tempdir(), n_proj = c(6, 4, 3),
     prefix = "test", folded = FALSE, ancestral = ancestral
   )

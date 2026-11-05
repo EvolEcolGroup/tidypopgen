@@ -46,7 +46,7 @@ test_that("write_sfs writes dadi files", {
 
 test_that("write_sfs writes fastsimcoal2 files", {
   file <- withr::local_tempfile(fileext = ".obs")
-  write_sfs(sfs_1d, file, format = "fsc")
+  write_sfs(sfs_1d, file, format = "fastsimcoal2")
   expect_identical(readLines(file), c(
     "1 observation",
     "d0_0\td0_1\td0_2",
@@ -54,7 +54,7 @@ test_that("write_sfs writes fastsimcoal2 files", {
     ""
   ))
   # 2D: the second population in the rows, the first in the columns
-  write_sfs(sfs_2d, file, format = "fsc", overwrite = TRUE)
+  write_sfs(sfs_2d, file, format = "fastsimcoal2", overwrite = TRUE)
   expect_identical(readLines(file), c(
     "1 observation",
     "\td0_0\td0_1",
@@ -63,7 +63,10 @@ test_that("write_sfs writes fastsimcoal2 files", {
     "d1_2\t4.25 5"
   ))
   # multidimensional
-  write_sfs(sfs_2d, file, format = "fsc_msfs", overwrite = TRUE)
+  write_sfs(sfs_2d, file,
+    format = "fastsimcoal2_multidimensional",
+    overwrite = TRUE
+  )
   expect_identical(readLines(file), c(
     "1 observations. No. of demes and sample sizes are on next line.",
     "2\t1 2",
@@ -71,14 +74,14 @@ test_that("write_sfs writes fastsimcoal2 files", {
     ""
   ))
   write_sfs(sfs_2d, file,
-    format = "fsc_msfs", fastest = "first",
+    format = "fastsimcoal2_multidimensional", fastest = "first",
     overwrite = TRUE
   )
   expect_identical(readLines(file)[2:3], c("2\t1 2", "0 1.5 2 3 4.25 5"))
   # a spectrum of three populations is written in the multidimensional format
   sfs_3d <- load_example_gt("grouped_gen_tbl") %>%
     nwise_pop_sfs(n_proj = 2, type = "array")
-  write_sfs(sfs_3d, file, format = "fsc", overwrite = TRUE)
+  write_sfs(sfs_3d, file, format = "fastsimcoal2", overwrite = TRUE)
   fsc_lines <- readLines(file)
   expect_identical(fsc_lines[2], "3\t2 2 2")
   expect_equal(
@@ -108,6 +111,11 @@ test_that("write_sfs checks its arguments", {
   file <- withr::local_tempfile(fileext = ".sfs")
   write_sfs(sfs_2d, file)
   expect_error(write_sfs(sfs_2d, file), "already exists")
+  # formats are named in full
+  expect_error(
+    write_sfs(sfs_2d, file, format = "fsc", overwrite = TRUE),
+    "should be one of"
+  )
   expect_error(write_sfs(unclass(sfs_2d), file), "should be an sfs object")
   expect_error(
     write_sfs(sfs_2d, file, round = NA, overwrite = TRUE),
@@ -143,7 +151,7 @@ test_that("write_sfs writes the files of easySFS for a gen_tibble", {
   n_proj <- c(popA = 6, popB = 4, popC = 3)
   dadi_files <- write_sfs(sim$gt, out_dir = dadi_dir, n_proj = n_proj)
   fsc_files <- write_sfs(sim$gt,
-    format = "fsc",
+    format = "fastsimcoal2",
     out_dir = fsc_dir, n_proj = n_proj,
     prefix = "test"
   )
@@ -171,7 +179,7 @@ test_that("write_sfs writes the files of easySFS for a gen_tibble", {
   sfs_3d <- nwise_pop_sfs(sim$gt, n_proj = n_proj, type = "array")
   expect_same_file(sfs_1d$popB, "dadi", file.path(dadi_dir, "popB-4.sfs"))
   expect_same_file(
-    sfs_1d$popB, "fsc",
+    sfs_1d$popB, "fastsimcoal2",
     file.path(fsc_dir, "popB_MAFpop0.obs")
   )
   expect_same_file(
@@ -182,7 +190,10 @@ test_that("write_sfs writes the files of easySFS for a gen_tibble", {
     sfs_3d, "dadi",
     file.path(dadi_dir, "popA-popB-popC.sfs")
   )
-  expect_same_file(sfs_3d, "fsc_msfs", file.path(fsc_dir, "test_MSFS.obs"))
+  expect_same_file(
+    sfs_3d, "fastsimcoal2_multidimensional",
+    file.path(fsc_dir, "test_MSFS.obs")
+  )
   # the joint spectrum of popA (0) and popC (2) has popC in the rows
   fsc_2d <- readLines(file.path(fsc_dir, "test_jointMAFpop2_0.obs"))
   col_labels <- paste0("d0_", 0:6, collapse = "\t")
@@ -203,7 +214,7 @@ test_that("write_sfs writes the files of easySFS for a gen_tibble", {
   )
   expect_error(
     write_sfs(sim$gt,
-      format = "fsc", out_dir = fsc_dir, n_proj = n_proj,
+      format = "fastsimcoal2", out_dir = fsc_dir, n_proj = n_proj,
       prefix = "test"
     ),
     "already exist"
@@ -215,7 +226,7 @@ test_that("write_sfs writes the files of easySFS for a gen_tibble", {
     fastest = "first", total_length = 1000, round = TRUE, overwrite = TRUE
   )
   fsc_files <- write_sfs(sim$gt,
-    format = "fsc",
+    format = "fastsimcoal2",
     out_dir = fsc_dir, n_proj = n_proj, prefix = "test", folded = FALSE,
     fastest = "first", total_length = 1000, round = TRUE, overwrite = TRUE
   )
@@ -229,7 +240,7 @@ test_that("write_sfs writes the files of easySFS for a gen_tibble", {
     file.path(dadi_dir, "popA-popB-popC.sfs"),
     fastest = "first", total_length = 1000, round = TRUE
   )
-  expect_same_file(sfs_unfolded, "fsc_msfs",
+  expect_same_file(sfs_unfolded, "fastsimcoal2_multidimensional",
     file.path(fsc_dir, "test_MSFS.obs"),
     fastest = "first", total_length = 1000, round = TRUE
   )
@@ -246,7 +257,7 @@ test_that("write_sfs uses the backing files of a gen_tibble by default", {
     "maximises its number of segregating sites"
   )
   expect_true(all(startsWith(dadi_files, dadi_dir)))
-  fsc_files <- suppressMessages(write_sfs(test_gt, format = "fsc"))
+  fsc_files <- suppressMessages(write_sfs(test_gt, format = "fastsimcoal2"))
   expect_true(all(startsWith(fsc_files, fsc_dir)))
   expect_true(file.exists(file.path(
     fsc_dir,
@@ -263,7 +274,7 @@ test_that("write_sfs works with a gen_tibble with a single group", {
   )
   expect_identical(sort(basename(dadi_files)), c("pop1-4.sfs", "pop1.sfs"))
   fsc_files <- write_sfs(test_gt,
-    format = "fsc",
+    format = "fastsimcoal2",
     out_dir = withr::local_tempdir(),
     n_proj = 4, prefix = "test"
   )
@@ -282,7 +293,7 @@ test_that("write_sfs checks its arguments for a gen_tibble", {
   )
   expect_error(
     write_sfs(test_gt,
-      format = "fsc", out_dir = out_dir, n_proj = 2,
+      format = "fastsimcoal2", out_dir = out_dir, n_proj = 2,
       max_cells = 10
     ),
     "27 cells"
@@ -297,7 +308,7 @@ test_that("write_sfs checks its arguments for a gen_tibble", {
   )
   expect_error(
     write_sfs(test_gt,
-      format = "fsc", out_dir = out_dir, n_proj = 2,
+      format = "fastsimcoal2", out_dir = out_dir, n_proj = 2,
       fastest = "middle"
     ),
     "should be one of"

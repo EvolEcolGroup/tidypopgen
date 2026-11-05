@@ -283,7 +283,7 @@ sfs_1d %>%
 ## Exporting to dadi and fastsimcoal2
 
 `write_sfs()` writes spectra in the formats of `dadi` (`format = "dadi"`)
-and `fastsimcoal2` (`format = "fsc"`). Given a grouped `gen_tibble`, it
+and `fastsimcoal2` (`format = "fastsimcoal2"`). Given a grouped `gen_tibble`, it
 writes all the spectra that `easySFS` writes, in a single pass over the
 genotypes:
 - the 1D spectrum of each population;
@@ -312,8 +312,8 @@ fitted with `fastsimcoal2`:
 
 
 ``` r
-fsc_files <- write_sfs(anole_thin,
-  out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+fastsimcoal2_files <- write_sfs(anole_thin,
+  out_dir = file.path(out_dir, "fastsimcoal2"), format = "fastsimcoal2",
   n_proj = n_proj, prefix = "anolis",
   n_bootstrap = 10, bootstrap_block_size = 1
 )

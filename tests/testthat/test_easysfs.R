@@ -163,7 +163,7 @@ test_that("pop_sfs matches easySFS on haploid data", {
 write_easysfs_layout <- function(.x, out_dir, ...) {
   write_sfs(.x, out_dir = file.path(out_dir, "dadi"), ...)
   write_sfs(.x,
-    format = "fsc",
+    format = "fastsimcoal2",
     out_dir = file.path(out_dir, "fastsimcoal2"),
     prefix = "test", ...
   )

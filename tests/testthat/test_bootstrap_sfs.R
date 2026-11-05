@@ -279,7 +279,7 @@ test_that("write_sfs writes the bootstrap replicates of a gen_tibble", {
   out_dir <- withr::local_tempdir()
   files <- withr::with_seed(20, {
     write_sfs(sim$gt,
-      format = "fsc",
+      format = "fastsimcoal2",
       out_dir = out_dir, n_proj = n_proj, prefix = "test",
       n_bootstrap = 3, bootstrap_block_size = 20
     )
@@ -290,7 +290,7 @@ test_that("write_sfs writes the bootstrap replicates of a gen_tibble", {
   # the files of all loci are unchanged
   out_dir_no_boot <- withr::local_tempdir()
   write_sfs(sim$gt,
-    format = "fsc",
+    format = "fastsimcoal2",
     out_dir = out_dir_no_boot, n_proj = n_proj,
     prefix = "test"
   )
@@ -317,7 +317,9 @@ test_that("write_sfs writes the bootstrap replicates of a gen_tibble", {
   })
   for (i_rep in 1:3) {
     expected <- withr::local_tempfile()
-    write_sfs(boot_3d[[i_rep]], expected, format = "fsc_msfs")
+    write_sfs(boot_3d[[i_rep]], expected,
+      format = "fastsimcoal2_multidimensional"
+    )
     expect_identical(
       readLines(file.path(
         out_dir, paste0("bootstrap_", i_rep), "test_MSFS.obs"
@@ -338,7 +340,7 @@ test_that("write_sfs writes the bootstrap replicates of a gen_tibble", {
   withr::with_options(list(tidypopgen.sfs_max_chunk_cells = 1), {
     withr::with_seed(20, {
       write_sfs(sim$gt,
-        format = "fsc",
+        format = "fastsimcoal2",
         out_dir = out_dir_chunks, n_proj = n_proj,
         prefix = "test", n_bootstrap = 3, bootstrap_block_size = 20
       )
@@ -352,7 +354,7 @@ test_that("write_sfs writes the bootstrap replicates of a gen_tibble", {
   }
   expect_error(
     write_sfs(sim$gt,
-      format = "fsc",
+      format = "fastsimcoal2",
       out_dir = out_dir, n_proj = n_proj, prefix = "test",
       n_bootstrap = 3, bootstrap_block_size = 20
     ),
