@@ -96,7 +96,7 @@ loci_pi.tbl_df <- function(
 ) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()
@@ -159,7 +159,7 @@ loci_pi.vctrs_bigSNP <- function(
 
 #' @export
 #' @rdname loci_pi
-loci_pi.grouped_df <- function(
+loci_pi.grouped_gen_tbl <- function(
   .x,
   .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
@@ -224,4 +224,12 @@ loci_pi.grouped_df <- function(
     group_keys = groups$keys
   )
   return(pi_mat)
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+loci_pi.grouped_df <- function(.x, ...) {
+  loci_pi(restore_genotypes_tbl(.x, "loci_pi"), ...)
 }

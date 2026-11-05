@@ -37,7 +37,7 @@ indiv_het_obs <- function(.x, as_counts = FALSE, ...) {
 #' @export
 #' @rdname indiv_het_obs
 indiv_het_obs.tbl_df <- function(.x, as_counts = FALSE, ...) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   indiv_het_obs(.x$genotypes, as_counts = as_counts, ...)
 }

@@ -27,7 +27,7 @@ show_ploidy <- function(.x, ...) {
 #' @export
 #' @rdname show_ploidy
 show_ploidy.tbl_df <- function(.x, ...) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   show_ploidy(.x$genotypes)
 }

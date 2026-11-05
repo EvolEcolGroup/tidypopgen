@@ -19,7 +19,7 @@ count_loci <- function(.x, ...) {
 #' @export
 #' @rdname count_loci
 count_loci.tbl_df <- function(.x, ...) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   count_loci(.x$genotypes)
 }

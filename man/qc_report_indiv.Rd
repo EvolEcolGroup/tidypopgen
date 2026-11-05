@@ -2,15 +2,15 @@
 % Please edit documentation in R/qc_report_indiv.R
 \name{qc_report_indiv}
 \alias{qc_report_indiv}
-\alias{qc_report_indiv.tbl_df}
-\alias{qc_report_indiv.grouped_df}
+\alias{qc_report_indiv.gen_tbl}
+\alias{qc_report_indiv.grouped_gen_tbl}
 \title{Create a Quality Control report for individuals}
 \usage{
 qc_report_indiv(.x, ...)
 
-\method{qc_report_indiv}{tbl_df}(.x, kings_threshold = NULL, ...)
+\method{qc_report_indiv}{gen_tbl}(.x, kings_threshold = NULL, ...)
 
-\method{qc_report_indiv}{grouped_df}(.x, kings_threshold = NULL, ...)
+\method{qc_report_indiv}{grouped_gen_tbl}(.x, kings_threshold = NULL, ...)
 }
 \arguments{
 \item{.x}{either a \code{\link{gen_tibble}} object or a grouped \code{\link{gen_tibble}} (as

@@ -4,7 +4,7 @@
 \alias{loci_pi}
 \alias{loci_pi.tbl_df}
 \alias{loci_pi.vctrs_bigSNP}
-\alias{loci_pi.grouped_df}
+\alias{loci_pi.grouped_gen_tbl}
 \title{Estimate nucleotide diversity (pi) at each locus}
 \usage{
 loci_pi(.x, .col = "genotypes", n_cores, block_size, type, ...)
@@ -25,7 +25,7 @@ loci_pi(.x, .col = "genotypes", n_cores, block_size, type, ...)
   ...
 )
 
-\method{loci_pi}{grouped_df}(
+\method{loci_pi}{grouped_gen_tbl}(
   .x,
   .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),

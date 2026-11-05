@@ -104,7 +104,9 @@ loci_alt_freq.tbl_df <- function(
   # for openMP
   ...
 ) {
-  stopifnot_gen_tibble(.x)
+  # dispatch on the genotypes column: vctrs_bigSNP for a gen_tibble, or the
+  # genotypes of objects from other packages (e.g. tidypopgl's gl_tibble)
+  stopifnot_has_genotypes(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()
@@ -149,7 +151,7 @@ loci_alt_freq.vctrs_bigSNP <- function(
 
 #' @export
 #' @rdname loci_alt_freq
-loci_alt_freq.grouped_df <- function(
+loci_alt_freq.grouped_gen_tbl <- function(
   .x,
   .col = "genotypes",
   as_counts = FALSE,
@@ -226,7 +228,8 @@ loci_maf.tbl_df <- function(
   block_size = bigstatsr::block_size(nrow(.x), 1),
   ...
 ) {
-  stopifnot_gen_tibble(.x) # confirm that .col is "genotypes"
+  # dispatch on the genotypes column (see loci_alt_freq.tbl_df)
+  stopifnot_has_genotypes(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()
@@ -257,7 +260,7 @@ loci_maf.vctrs_bigSNP <- function(
 
 #' @export
 #' @rdname loci_alt_freq
-loci_maf.grouped_df <- function(
+loci_maf.grouped_gen_tbl <- function(
   .x,
   .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
@@ -535,4 +538,20 @@ format_grouped_output <- function(out_mat, group_ids, loci_names, type,
     # return a matrix_int_names, so that integer loci names are preserved
     matrix_int_names(out_mat, row_names = loci_names, col_names = group_ids)
   }
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+loci_alt_freq.grouped_df <- function(.x, ...) {
+  loci_alt_freq(restore_genotypes_tbl(.x, "loci_alt_freq"), ...)
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+loci_maf.grouped_df <- function(.x, ...) {
+  loci_maf(restore_genotypes_tbl(.x, "loci_maf"), ...)
 }

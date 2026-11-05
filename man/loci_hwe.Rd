@@ -4,7 +4,7 @@
 \alias{loci_hwe}
 \alias{loci_hwe.tbl_df}
 \alias{loci_hwe.vctrs_bigSNP}
-\alias{loci_hwe.grouped_df}
+\alias{loci_hwe.grouped_gen_tbl}
 \title{Test Hardy-Weinberg equilibrium at each locus}
 \usage{
 loci_hwe(.x, .col = "genotypes", ...)
@@ -27,7 +27,7 @@ loci_hwe(.x, .col = "genotypes", ...)
   ...
 )
 
-\method{loci_hwe}{grouped_df}(
+\method{loci_hwe}{grouped_gen_tbl}(
   .x,
   .col = "genotypes",
   mid_p = TRUE,

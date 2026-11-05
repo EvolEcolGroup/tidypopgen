@@ -4,7 +4,7 @@
 \alias{loci_missingness}
 \alias{loci_missingness.tbl_df}
 \alias{loci_missingness.vctrs_bigSNP}
-\alias{loci_missingness.grouped_df}
+\alias{loci_missingness.grouped_gen_tbl}
 \title{Estimate missingness at each locus}
 \usage{
 loci_missingness(
@@ -35,7 +35,7 @@ loci_missingness(
   ...
 )
 
-\method{loci_missingness}{grouped_df}(
+\method{loci_missingness}{grouped_gen_tbl}(
   .x,
   .col = "genotypes",
   as_counts = FALSE,
