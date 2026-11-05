@@ -242,6 +242,14 @@ autoplot.sfs_preview_tbl <- function(object, ...) {
     # empty cells cannot be shown on a log scale
     cells <- cells[cells$n_sites > 0, , drop = FALSE]
   }
+  # e.g. with n_proj = 1, both cells are masked (and facet_wrap() fails
+  # without data)
+  if (nrow(cells) == 0) {
+    stop(
+      "there are no cells to plot (they are all masked",
+      if (log) ", or empty", "); use `masked = TRUE` to show the masked cells"
+    )
+  }
   p <- ggplot2::ggplot(cells, ggplot2::aes(
     x = .data$allele_count,
     y = .data$n_sites

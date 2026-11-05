@@ -113,4 +113,13 @@ test_that("autoplot checks its input", {
   )
   expect_error(autoplot(sfs, masked = NA), "`masked` should be TRUE or FALSE")
   expect_error(autoplot(sfs, colour = "red"), "must be empty")
+  # with a projection to 1 copy, all cells are masked
+  expect_error(
+    autoplot(pop_sfs(sim$gt, n_proj = 1)),
+    "no cells to plot"
+  )
+  expect_true(inherits(
+    autoplot(pop_sfs(sim$gt, n_proj = 1), masked = TRUE),
+    "ggplot"
+  ))
 })
