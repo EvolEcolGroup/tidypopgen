@@ -12,3 +12,4 @@ admixture/
 ^CRAN-SUBMISSION$
 ^\.positai$
 ^\.claude$
+^CLAUDE\.md$

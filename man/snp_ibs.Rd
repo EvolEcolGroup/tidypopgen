@@ -9,7 +9,8 @@ snp_ibs(
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
   type = c("proportion", "adjusted_counts", "raw_counts"),
-  block.size = bigstatsr::block_size(nrow(X))
+  block.size = bigstatsr::block_size(nrow(X)),
+  n_cores = 1
 )
 }
 \arguments{
@@ -27,9 +28,11 @@ specified, all columns are used. Don't use negative indices.}
 identical alleles and non-missing alleles, from which the two other
 quantities are computed)}
 
-\item{block.size}{maximum number of columns read at once. Note that, to
-optimise the speed of matrix operations, we have to store in memory 3 times
-the columns.}
+\item{block.size}{maximum number of columns read at once. Genotypes are
+compared in a compact bit-packed form, so this has little effect on
+memory use.}
+
+\item{n_cores}{number of cores to be used (default 1).}
 }
 \value{
 if as.counts = TRUE function returns a list of two \link[bigstatsr:FBM]{bigstatsr::FBM}

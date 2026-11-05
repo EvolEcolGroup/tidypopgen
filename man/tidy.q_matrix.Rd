@@ -10,7 +10,10 @@
 \item{x}{A Q matrix object (as returned by \code{\link{q_matrix}}).}
 
 \item{data}{An associated tibble (e.g. a \code{\link{gen_tibble}}), with the
-individuals in the same order as the data used to generate the Q matrix}
+individuals in the same order as the data used to generate the Q matrix
+(unless the Q matrix has the ids of the individuals as an attribute, as
+from \code{\link[=get_q_matrix]{get_q_matrix()}}). If the Q matrix has no group information and
+\code{data} is grouped, the groups of \code{data} are used.}
 
 \item{...}{not currently used}
 }

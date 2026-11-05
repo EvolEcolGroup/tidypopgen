@@ -10,7 +10,6 @@ knitr::opts_chunk$set(
 )
 library(benchmarkme)
 library(chunkhooks)
-library(ggheatmap)
 hook_benchmark()
 set.seed(123)
 ```
@@ -231,17 +230,17 @@ Plot pairwise Fst:
 # Order by continents
 grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
 regional_order <- unique(grouped_hgdp_order$population)
-pairwise_fsts <- pairwise_fsts[regional_order, regional_order]
 
-ggheatmap(pairwise_fsts) +
+autoplot(pairwise_fsts,
+         order = regional_order) +
   scale_fill_viridis_c() +
   theme(
     axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
     axis.text.y = element_text(angle = 0, hjust = 1, size = 6)
   ) +
   labs(
-    x = element_blank(),
-    y = element_blank(),
+    x = NULL,
+    y = NULL,
     fill = "Fst"
   )
 ```

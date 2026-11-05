@@ -9,24 +9,26 @@ gen_tibble_bed_rds <- function(
   quiet = FALSE
 ) {
   # if file ends in bed
-  if (grepl("\\.bed$", x)) {
+  if (grepl("\\.bed$", x, ignore.case = TRUE)) {
     # check that the bim and fam files exist
-    if (!file.exists(bigsnpr::sub_bed(x, ".bim"))) {
-      stop("bim file ", bigsnpr::sub_bed(x, ".bim"), " does not exist")
+    bim_file <- sub_ext_ignore_case(x, "bed", ".bim")
+    fam_file <- sub_ext_ignore_case(x, "bed", ".fam")
+    if (!file.exists(bim_file)) {
+      stop("bim file ", bim_file, " does not exist")
     }
-    if (!file.exists(bigsnpr::sub_bed(x, ".fam"))) {
-      stop("fam file ", bigsnpr::sub_bed(x, ".fam"), " does not exist")
+    if (!file.exists(fam_file)) {
+      stop("fam file ", fam_file, " does not exist")
     }
     # read in the loci and indiv_meta from the bim and fam files
-    loci <- loci_from_bim(bigsnpr::sub_bed(x, ".bim"),
+    loci <- loci_from_bim(bim_file,
       valid_alleles = valid_alleles,
       missing_alleles = missing_alleles,
       allow_duplicates = allow_duplicates
     )
-    indiv_meta <- indiv_meta_from_fam(bigsnpr::sub_bed(x, ".fam"))
+    indiv_meta <- indiv_meta_from_fam(fam_file)
 
     if (is.null(backingfile)) {
-      backingfile <- bigsnpr::sub_bed(x)
+      backingfile <- sub("\\.bed$", "", x, ignore.case = TRUE)
     }
     fbm_path <- fbm_read_bed(x,
       n_indiv = nrow(indiv_meta),
@@ -38,7 +40,6 @@ gen_tibble_bed_rds <- function(
   } else {
     # read the bigsnp object from the rds file
     bigsnp_obj <- bigsnpr::snp_attach(x)
-    fbm_obj <- bigsnp_obj$genotypes
     # note that position and genetic dist are already flipped in the bigsnpr obj
     loci <- loci_from_bim(bigsnp_obj$map,
       valid_alleles = valid_alleles,
@@ -46,11 +47,29 @@ gen_tibble_bed_rds <- function(
       allow_duplicates = allow_duplicates
     )
     indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
-    # create a copy of the bigsnp object
-    # new file name for the bigsnp ends in "_bigsnp.rds"
-    file.copy(x, sub("\\.bk$", "_bigsnp.rds", fbm_obj$backingfile))
-    fbm_path <- sub("\\.bk$", ".rds", fbm_obj$backingfile)
-    # replace the bigsnp rds with the fbm rds
+    if (is.null(backingfile)) {
+      backingfile <- change_duplicated_file_name(x)
+    }
+    # copy the backing file of the bigsnp object, so that the fbm rds does
+    # not overwrite the bigsnp rds (an FBM rds has the name of its .bk file)
+    # the copy belongs to the gen_tibble, so it does not keep the permissions
+    # of the original (which might be read-only), as we need to write into it
+    # (e.g. to impute)
+    if (!file.copy(
+      bigsnp_obj$genotypes$backingfile,
+      paste0(backingfile, ".bk"),
+      copy.mode = FALSE
+    )) {
+      stop("could not copy the backing file to ", paste0(backingfile, ".bk"))
+    }
+    fbm_obj <- bigstatsr::FBM.code256(
+      nrow = nrow(bigsnp_obj$genotypes),
+      ncol = ncol(bigsnp_obj$genotypes),
+      code = bigsnp_obj$genotypes$code256,
+      backingfile = backingfile,
+      create_bk = FALSE
+    )
+    fbm_path <- bigstatsr::sub_bk(fbm_obj$backingfile, ".rds")
     saveRDS(fbm_obj, fbm_path)
     # remove the bisnp object from memory
     rm(bigsnp_obj)
@@ -148,7 +167,7 @@ loci_from_bim <- function(bim,
                           missing_alleles = c("0", "."),
                           allow_duplicates = FALSE) {
   if (is.character(bim)) {
-    bim <- utils::read.table(bim, stringsAsFactors = FALSE)
+    bim <- read_loci_file(bim, character_cols = c(2, 5, 6))
     names(bim)[1:6] <- c(
       "chromosome", "marker.ID", "genetic.dist",
       "physical.pos", "allele1", "allele2"
@@ -181,6 +200,35 @@ loci_from_bim <- function(bim,
   return(loci)
 }
 
+#' Read a whitespace delimited file with one row per locus
+#'
+#' This function reads files such as PLINK .bim or *packedancestry* .snp files
+#' with [data.table::fread()], which is much faster than [utils::read.table()]
+#' and uses much less memory on large files (read.table() creates a string for
+#' every field before converting the columns, which costs several GB for tens
+#' of millions of loci).
+#' @param file the path to the file
+#' @param character_cols the indices of the columns to read as characters
+#'   (locus names and alleles, so that e.g. an allele "T" is not read as
+#'   TRUE, nor a name "001" as the integer 1); the type of the other columns
+#'   is guessed, as done by read.table() (e.g. chromosomes are integers if
+#'   all values are integers, so that their factor levels are sorted
+#'   numerically)
+#' @returns a data.frame with columns V1, V2, ...
+#' @keywords internal
+#' @noRd
+read_loci_file <- function(file, character_cols) {
+  data.table::fread(
+    file,
+    header = FALSE,
+    colClasses = list(character = character_cols),
+    # read large integers (e.g. positions) as doubles, not integer64
+    integer64 = "double",
+    data.table = FALSE,
+    showProgress = FALSE
+  )
+}
+
 
 #' Generate a tibble of indiv_meta from a fam file
 #'
@@ -188,14 +236,23 @@ loci_from_bim <- function(bim,
 #' to create an indiv_meta tibble compatible with a `gen_tibble` object.
 #' @param fam the path to a fam file or a data.frame containing the contents of
 #' a fam file.
-#' @returns A tibble with columns: `id`, `population`, `paternal_ID`,
-#' `maternal_ID`, `sex`, `phenotype`
+#' @returns A data.frame with columns: `id`, `population`, `paternal_ID`,
+#' `maternal_ID`, `sex`, `phenotype` (a factor for case/control phenotypes,
+#' or numeric for quantitative ones); `population` is only present if the
+#' family ID differs from the individual ID for some individuals, and the
+#' other columns if they have some non-missing values
 #' @keywords internal
 #' @noRd
 
 indiv_meta_from_fam <- function(fam) {
   if (is.character(fam)) {
-    fam <- utils::read.table(fam, stringsAsFactors = FALSE)
+    # read the family, individual and parental IDs as characters, so that e.g.
+    # "001" is not turned into "1" (the type of sex and phenotype is guessed)
+    fam <- utils::read.table(
+      fam,
+      stringsAsFactors = FALSE,
+      colClasses = c(rep("character", 4), NA, NA)
+    )
   }
 
   if (!is.data.frame(fam) || ncol(fam) < 6) {
@@ -249,23 +306,21 @@ indiv_meta_from_fam <- function(fam) {
     }
   }
 
-  if (inherits(
-    fam$affection,
-    "numeric"
-  ) ||
-    inherits(
-      fam$affection,
-      "integer"
-    )) {
-    if (!all(fam$affection %in% c(0, -9))) {
+  # as in PLINK, the phenotype is case/control (1 = control, 2 = case, and 0
+  # or -9 = missing) unless it has other values, in which case it is
+  # quantitative (with -9 as missing)
+  if (is.numeric(fam$affection) && !all(fam$affection %in% c(0, -9))) {
+    if (all(fam$affection %in% c(0, 1, 2, -9, NA))) {
       indiv_meta$phenotype <- dplyr::recode_values(
         fam$affection,
         1 ~ "control",
         2 ~ "case",
-        -9 ~ NA,
         default = NA,
         ptype = factor(levels = c("control", "case"))
       )
+    } else {
+      indiv_meta$phenotype <- as.numeric(fam$affection)
+      indiv_meta$phenotype[indiv_meta$phenotype %in% -9] <- NA
     }
   }
 

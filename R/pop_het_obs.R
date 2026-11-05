@@ -29,6 +29,8 @@
 #' @param .x a [`gen_tibble`] (usually grouped, as obtained by using
 #'   [dplyr::group_by()], otherwise the full tibble will be considered as
 #'   belonging to a single population).
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param by_locus boolean, determining whether Ho should be returned by
 #'   locus(TRUE), or as a single genome wide value (FALSE, the default).
 #' @param include_global boolean determining whether, besides the population
@@ -68,54 +70,61 @@ pop_het_obs <- function(
   stopifnot_no_pseudohaploid(.x)
   # get the populations if it is a grouped gen_tibble
   if (inherits(.x, "grouped_df")) {
-    .group_levels <- .x %>% group_keys()
-    .group_ids <- dplyr::group_indices(.x) - 1
+    groups <- .group_info(.x)
   } else {
     # create a dummy pop
-    .group_levels <- tibble(population = "pop")
-    .group_ids <- rep(0, nrow(.x))
+    groups <- list(n = 1L, ids = rep(0L, nrow(.x)), labels = "pop")
   }
 
-  # keep the diploid/pseudohaploid path on the original allele-frequency
-  # kernel shared with pop_het_exp()/pop_fis()/pop_global_stats() (so
-  # nothing changes, in behaviour or speed, for the common diploid case),
-  # and only use the more general, ploidy-aware kernel when the data
-  # actually contain polyploid or mixed-ploidy individuals.
+  # keep the diploid/pseudohaploid path on the kernel shared with
+  # pop_het_exp()/pop_fis()/pop_global_stats() (which also gives the global
+  # Ho in the same pass over the genotypes), and only use the more general,
+  # ploidy-aware kernel when the data actually contain polyploid or
+  # mixed-ploidy individuals.
   if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-    pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-      .gt_get_fbm(.x),
-      rowInd = .gt_fbm_rows(.x),
-      colInd = .gt_fbm_cols(.x),
-      groupIds = .group_ids,
-      ngroups = nrow(.group_levels),
-      ploidy = indiv_ploidy(.x),
-      ncores = n_cores
+    pop_stats <- .pop_stats_dip_pseudo(
+      .x,
+      by_locus_ho = by_locus,
+      by_locus_global = by_locus && include_global,
+      n_cores = n_cores
     )
-    Ho <- pop_freqs_df$het_obs # nolint
+    if (by_locus) {
+      Ho <- pop_stats$ho # nolint
+      colnames(Ho) <- pop_stats$group_names # nolint
+      if (include_global) {
+        # Ho is the first global statistic
+        global <- pop_stats$global[, 1]
+        Ho <- cbind(Ho, global) # nolint
+      }
+      return(Ho)
+    } else {
+      # means across loci
+      Ho <- pop_stats$mean_ho # nolint
+      names(Ho) <- pop_stats$group_names # nolint
+      if (include_global) {
+        Ho <- c(Ho, global = pop_stats$mean_global[1]) # nolint
+      }
+      return(Ho)
+    }
   } else {
     het_obs_df <- grouped_het_obs_polyploid(
       .gt_get_fbm(.x),
       rowInd = .gt_fbm_rows(.x),
       colInd = .gt_fbm_cols(.x),
-      groupIds = .group_ids,
-      ngroups = nrow(.group_levels),
+      groupIds = groups$ids,
+      ngroups = groups$n,
       ploidy = indiv_ploidy(.x),
       ncores = n_cores
     )
     Ho <- het_obs_df$het_obs # nolint
   }
-  colnames(Ho) <- .group_levels %>% dplyr::pull(1) # nolint
+  colnames(Ho) <- groups$labels # nolint
   if (include_global) {
-    if (is_diploid_only(.x) || is_pseudohaploid(.x)) {
-      global <-
-        (.x %>% pop_global_stats(by_locus = TRUE, n_cores = n_cores))$Ho
-    } else {
-      # Hs, Fst, Fis etc. in pop_global_stats() rely on allele-frequency
-      # formulae not yet generalised beyond diploid/pseudohaploid data, but
-      # the global Ho (Nei 1987 eqn 7.38) is simply the unweighted mean of
-      # the population estimates, which holds regardless of ploidy.
-      global <- rowMeans(Ho, na.rm = TRUE)
-    }
+    # Hs, Fst, Fis etc. in pop_global_stats() rely on allele-frequency
+    # formulae not yet generalised beyond diploid/pseudohaploid data, but
+    # the global Ho (Nei 1987 eqn 7.38) is simply the unweighted mean of
+    # the population estimates, which holds regardless of ploidy.
+    global <- rowMeans(Ho, na.rm = TRUE)
     Ho <- cbind(Ho, global) # nolint
   }
 

@@ -14,9 +14,10 @@
 #'   "adjusted_counts" ("distance" in PLINK), and "raw_counts" (the counts of
 #'   identical alleles and non-missing alleles, from which the two other
 #'   quantities are computed)
-#' @param block.size maximum number of columns read at once. Note that, to
-#'   optimise the speed of matrix operations, we have to store in memory 3 times
-#'   the columns.
+#' @param block.size maximum number of columns read at once. Genotypes are
+#'   compared in a compact bit-packed form, so this has little effect on
+#'   memory use.
+#' @param n_cores number of cores to be used (default 1).
 #' @returns if as.counts = TRUE function returns a list of two [bigstatsr::FBM]
 #'   matrices, one of counts of IBS by alleles (i.e. 2*n loci), and one of valid
 #'   alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns
@@ -44,12 +45,21 @@ snp_ibs <- function(
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
   type = c("proportion", "adjusted_counts", "raw_counts"),
-  block.size = bigstatsr::block_size(nrow(X))
+  block.size = bigstatsr::block_size(nrow(X)),
+  n_cores = 1
 ) {
   # nolint end
   type <- match.arg(type)
 
   n <- length(ind.row)
+  # no individuals (e.g. an empty group in group_map()): an empty matrix, as
+  # FBMs can not be empty
+  if (n == 0) {
+    if (type == "raw_counts") {
+      stop("type = 'raw_counts' needs at least one individual")
+    }
+    return(matrix(numeric(0), 0, 0))
+  }
   # FBM matrix to count the IBS counts
   IBS <- bigstatsr::FBM(n, n, init = 0) # nolint
   # FBM matrix to store valid number of comparisons (i.e NOT NA)
@@ -58,26 +68,19 @@ snp_ibs <- function(
 
   intervals <- CutBySize(m, block.size)
 
-  # Preassign memory where we will store the slices of genotypes.
-  # For efficiency, when we read in the slice,
-  # we will immediately recode it into these3 matrices,
-  # one per genotype, equivalent to X==0, X==1, and X==2 respectively
-  X_0_part <- matrix(0, n, max(intervals[, "size"])) # nolint start
-  X_1_part <- matrix(0, n, max(intervals[, "size"]))
-  X_2_part <- matrix(0, n, max(intervals[, "size"])) # nolint end
-
+  # for each block of loci, genotypes are packed into bits and compared
+  # with popcounts in C++ (see src/pairwise_bitpacked.h), so no dense
+  # copy of the block is needed
   for (j in bigstatsr::rows_along(intervals)) {
     ind <- seq2(intervals[j, ]) # this iteration indices
     ind.col.ind <- ind.col[ind] # subset given indices by the iteration indices #nolint
     increment_ibs_counts(
       IBS,
       IBS_valid_loci,
-      X_0_part,
-      X_1_part,
-      X_2_part,
       X,
       ind.row,
-      ind.col.ind
+      ind.col.ind,
+      ncores = n_cores
     )
   }
 

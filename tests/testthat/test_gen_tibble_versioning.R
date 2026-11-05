@@ -143,3 +143,43 @@ test_that("versioning if .bk already exists", {
 
   expect_equal(new_version_files[2], paste0(file, "_v3.bk"))
 })
+
+test_that("only file type extensions are removed from backing file names", {
+  test_dir <- tempfile("bk_names_")
+  dir.create(test_dir)
+  bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
+  # dots in a user supplied backingfile are kept
+  gt_filtered <- gen_tibble(bed_path,
+    backingfile = file.path(test_dir, "pop_a.filtered"), quiet = TRUE
+  )
+  gt_raw <- gen_tibble(bed_path,
+    backingfile = file.path(test_dir, "pop_a.raw"), quiet = TRUE
+  )
+  expect_equal(
+    basename(gt_get_file_names(gt_filtered)),
+    c("pop_a.filtered.rds", "pop_a.filtered.bk")
+  )
+  expect_equal(
+    basename(gt_get_file_names(gt_raw)),
+    c("pop_a.raw.rds", "pop_a.raw.bk")
+  )
+  # but .bk and .rds extensions are removed
+  gt_bk <- gen_tibble(bed_path,
+    backingfile = file.path(test_dir, "pop_a_bk.bk"), quiet = TRUE
+  )
+  expect_equal(basename(gt_get_file_names(gt_bk))[2], "pop_a_bk.bk")
+  # the backing files of x.vcf.gz are x.bk and x.rds
+  vcf_gz_path <- file.path(test_dir, "pop_a_gz.vcf.gz")
+  gz_con <- gzfile(vcf_gz_path, "w")
+  writeLines(
+    readLines(system.file("extdata/pop_a.vcf", package = "tidypopgen")),
+    gz_con
+  )
+  close(gz_con)
+  gt_vcf <- gen_tibble(vcf_gz_path, quiet = TRUE)
+  expect_equal(
+    basename(gt_get_file_names(gt_vcf)),
+    c("pop_a_gz.rds", "pop_a_gz.bk")
+  )
+  expect_true(file.exists(file.path(test_dir, "pop_a_gz.gt")))
+})

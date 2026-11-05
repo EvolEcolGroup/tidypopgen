@@ -90,8 +90,9 @@ results (see plots and statistics functions in this manual, and/or refer to
 the \code{detectRUNS} vignette).
 
 If the \code{\link{gen_tibble}} is grouped, then the grouping variable is used to
-fill in the 'group' column. Otherwise, the 'group' column is filled with
-the same values as the 'id' column. Note that this behaviour is
+fill in the 'group' column (with several grouping variables, their values
+are pasted with ".", e.g. \code{pop1.F}). Otherwise, the 'group' column is
+filled with the same values as the 'id' column. Note that this behaviour is
 different from other windowed operations in \code{tidypopgen}, which
 return a list for grouped \code{gen_tibbles}; this different behaviour is
 designed to maintain compatibility with \code{detectRUNS}.

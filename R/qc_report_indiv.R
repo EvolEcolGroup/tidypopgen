@@ -1,6 +1,6 @@
 #' Create a Quality Control report for individuals
 #'
-#' Return QC information to assess loci (Observed heterozygosity and
+#' Return QC information to assess individuals (Observed heterozygosity and
 #' missingness).
 #'
 #' Providing the parameter kings_threshold will return two additional columns,
@@ -15,7 +15,9 @@
 #' in KING. For pseudohaploid data, only missingness and ploidy are reported.
 #'
 #' @param .x either a [`gen_tibble`] object or a grouped [`gen_tibble`] (as
-#'   obtained by using [dplyr::group_by()])
+#'   obtained by using [dplyr::group_by()]). If grouped by more than one
+#'   variable, the `group` column holds the values of the grouping variables
+#'   pasted with "." (e.g. `pop1.F`).
 #' @param kings_threshold an optional numeric giving a KING kinship coefficient,
 #' or one of:
 #'   - "first": removing first degree relatives, equivalent to a kinship
@@ -120,6 +122,9 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
+    if (!is.null(kings_threshold)) {
+      stop("KING kinship estimates are not supported for pseudohaploid data.")
+    }
     qc_report <- qc_report_indiv_pseudohaploid(.x)
     return(qc_report)
   }
@@ -151,15 +156,24 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
     ) %>%
     mutate(id = .x$id)
   # re-group according to original .x grouping
-  qc_report$group <- .x[[dplyr::group_vars(.x)]]
+  qc_report$group <- .group_of_rows(.x)
 
   if (!is.null(kings_threshold)) {
     # find grouping levels
-    grouping_order <- group_keys(.x)
+    groups <- .group_info(.x)
+    # empty groups (which only exist if the user asked for them) have no
+    # individuals to compare, and are left out
+    non_empty <- groups$sizes > 0
 
     # calculate the kinship matrix for each population
-    king <- .x %>% group_map(~ pairwise_king(.x, as_matrix = TRUE))
-    names(king) <- as.matrix(grouping_order)[, 1]
+    king <- .x %>% group_map(function(.x, .y) {
+      if (nrow(.x) == 0) {
+        return(NULL)
+      }
+      pairwise_king(.x, as_matrix = TRUE)
+    })
+    names(king) <- groups$labels
+    king <- king[non_empty]
 
     # create relatives, an empty list
     relatives <- vector("list")
@@ -180,11 +194,14 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 
     relatives <- indivs_to_keep(relatives, king)
 
-    # reorder relatives
-    relatives <- relatives[unique(qc_report$group)]
-    all_flags <- unlist(relatives)
+    # relatives are in group order; assign each group's flags to its rows
+    to_keep <- logical(nrow(.x))
+    rows <- dplyr::group_rows(.x)[non_empty]
+    for (i in seq_along(rows)) {
+      to_keep[rows[[i]]] <- relatives[[i]]
+    }
     # add to_remove
-    qc_report$to_keep <- as.vector(all_flags)
+    qc_report$to_keep <- to_keep
     attr(qc_report$to_keep, "king") <- king
   }
 
@@ -213,7 +230,9 @@ qc_report_indiv.grouped_df <- function(.x, kings_threshold = NULL, ...) {
 #' @param kings_threshold an optional numeric, a threshold of relatedness for
 #'   the sample
 #' @param ... not currently used.
-#' @returns a `ggplot2` object
+#' @returns a `ggplot2` object. For `relatedness` plots of a report created
+#'   from a grouped [`gen_tibble`], a named list of `ggplot2` objects, one for
+#'   each group.
 #' @export
 #' @examples
 #' # Create a gen_tibble of lobster genotypes
@@ -276,6 +295,12 @@ autoplot.qc_report_indiv <- function(
   } else if (type == "relatedness") {
     if ("ploidy" %in% colnames(object)) {
       stop("Relatedness plot is not available for pseudohaploid data")
+    }
+    if (!"to_keep" %in% colnames(object)) {
+      stop(
+        "Relatedness plot requires a qc_report_indiv created with ",
+        "`kings_threshold`"
+      )
     }
     report_plot <- autoplot_qc_report_indiv_king(
       object,

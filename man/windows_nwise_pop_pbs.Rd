@@ -21,7 +21,9 @@ windows_nwise_pop_pbs(.x, ...)
 )
 }
 \arguments{
-\item{.x}{a grouped \code{gen_tibble} object}
+\item{.x}{a grouped \code{gen_tibble} object.
+If grouped by more than one variable, groups are labelled by the values
+of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
 
 \item{...}{other arguments passed to specific methods, currently
 unused.}

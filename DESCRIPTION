@@ -1,6 +1,6 @@
 Package: tidypopgen
 Title: Tidy Population Genetics
-Version: 0.4.4.9008
+Version: 0.4.4.9010
 Authors@R: 
     c(person("Evie", "Carter", role = c("aut")),
     person("Eirlys", "Tysall", role = c("aut")),
@@ -35,6 +35,7 @@ Imports:
     bigparallelr,
     bigsnpr,
     bigstatsr,
+    data.table,
     foreach,
     generics,
     ggplot2,
@@ -55,7 +56,6 @@ Suggests:
     adegenet,
     admixtools,
     broom,
-    data.table,
     hierfstat,
     knitr,
     detectRUNS,
@@ -69,6 +69,7 @@ Suggests:
     reticulate,
     testthat (>= 3.0.0),
     vcfR,
+    withr,
     xgboost,
     spelling
 Additional_repositories: https://evolecolgroup.r-universe.dev/

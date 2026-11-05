@@ -7,8 +7,18 @@
 #' If the gen_tibble has been read in from vcf format, family.ID in the
 #' resulting plink files will be the same as sample.ID. If the gen_tibble has a
 #' grouping variable, this will be used as the family.ID in the resulting plink
-#' files. NOTE that writing to bed has been optimised for speed, but writing to
-#' ped or raw is slower, especially for large datasets.
+#' files (with several grouping variables, their values are pasted with ".",
+#' e.g. `pop1.F`); otherwise, the population is used as the family.ID. Parents,
+#' sex and phenotype are taken from the columns `paternal_ID`, `maternal_ID`,
+#' `sex` and `phenotype`, if present, as created by [gen_tibble()] when
+#' reading PLINK files (bed, ped or bigSNP rds): sex is written as 1 for
+#' "male", 2 for "female" and 0 (unknown) otherwise; phenotype as 1 for
+#' "control" and 2 for "case", and other values (e.g. a quantitative
+#' phenotype) as they are; missing parents are written as 0, and missing
+#' phenotypes as -9. Genotypes are read and written directly from the file
+#' backed matrix, so all formats can be written for datasets that do not fit in
+#' memory (but note that ped and raw files are much larger, and thus slower to
+#' write, than bed files).
 #'
 #' @param x a [`gen_tibble`] object
 #' @param file a character string giving the path to output file. If left to
@@ -46,7 +56,7 @@ gt_as_plink <- function(
   if (!methods::is(x, "gen_tbl")) {
     stop("x must be a gen_tibble")
   }
-  stopifnot_diploid(x)
+  stopifnot_dip_pseudo(x)
 
   type <- match.arg(type)
 
@@ -154,24 +164,7 @@ gt_write_bed <- function(x, file, chromosomes_as_int) {
   }
 
   # create a fam table
-  fam_table <- data.frame(matrix(NA, nrow = nrow(x), ncol = 6))
-  colnames(fam_table) <- c(
-    "FID",
-    "IID",
-    "MID",
-    "PID",
-    "Sex",
-    "Phenotype"
-  )
-  fam_table$IID <- x$id
-  # if this is a group tibble, use the grouping variable
-  if (inherits(x, "grouped_gen_tbl")) {
-    fam_table$FID <- x %>%
-      select(dplyr::group_vars(x)) %>%
-      dplyr::pull(1)
-  } else {
-    fam_table$FID <- x$id
-  }
+  fam_table <- as.data.frame(plink_indiv_meta(x))
 
   # code adapted from bigsnpr::snp_writeBed
   write_bed <- function(G, bedfile, new_fam, new_bim, ind.row = NULL, ind.col = NULL) { # nolint start
@@ -224,38 +217,139 @@ gt_write_ped_raw <- function(
   x,
   file,
   plink_format = c("raw", "ped"),
-  chunk_size = 10000
+  chunk_size = 1e5
 ) {
   plink_format <- match.arg(plink_format)
   # loci information
   loci <- show_loci(x)
-  # replace missing value with zero
+  # replace missing values with zero (in either allele column, as for bed)
   loci$allele_alt[is.na(loci$allele_alt)] <- "0"
-
-  # create col names to use in the raw file
-  raw_col_names <- c(
-    "FID",
-    "IID",
-    "PAT",
-    "MAT",
-    "SEX",
-    "PHENOTYPE",
-    paste0(
-      loci$name,
-      "_",
-      toupper(loci$allele_alt),
-      "(/",
-      toupper(loci$allele_ref),
-      ")"
-    )
-  )
+  loci$allele_ref[is.na(loci$allele_ref)] <- "0"
 
   # create the info for the fam file
+  indiv_meta <- plink_indiv_meta(x)
+  # the start of each line (one per individual), with the information for the
+  # fam file, formatted as utils::write.table() would (factors as their labels,
+  # and "NA" for missing values)
+  indiv_prefix <- do.call(paste, c(unname(as.list(indiv_meta)), sep = " "))
+
+  # the dosages decoded from each raw value of the FBM
+  fbm_dosages <- .gt_get_fbm(x)$code256
+  if (plink_format == "raw") {
+    # write the header with the column names (processing the loci in chunks,
+    # to avoid creating a string for each locus at once)
+    con <- file(file, open = "w")
+    writeLines("FID IID PAT MAT SEX PHENOTYPE", con, sep = "")
+    for (chunk_i in seq_len(ceiling(nrow(loci) / chunk_size))) {
+      chunk <- seq(
+        (chunk_i - 1) * chunk_size + 1,
+        min(chunk_i * chunk_size, nrow(loci))
+      )
+      writeLines(
+        paste0(
+          " ",
+          loci$name[chunk],
+          "_",
+          toupper(loci$allele_alt[chunk]),
+          "(/",
+          toupper(loci$allele_ref[chunk]),
+          ")",
+          collapse = ""
+        ),
+        con,
+        sep = ""
+      )
+    }
+    writeLines("", con)
+    close(con)
+    # genotypes are written as their dosages (and missing values as NA), so
+    # each raw value has its own category, and all loci use the same strings
+    byte_cat <- 0:255
+    genotypes_lut <- as.character(fbm_dosages)
+    genotypes_lut[is.na(genotypes_lut)] <- "NA"
+    n_cat <- 256L
+    locus_lut <- integer(0)
+  } else {
+    # genotypes are written as pairs of alleles; raw values are put into four
+    # categories (dosages 0, 1 and 2, and anything else, which is missing)
+    byte_cat <- match(as.character(fbm_dosages), c("0", "1", "2"),
+      nomatch = 4L
+    ) - 1L
+    # the strings for each category depend on the alleles of a locus; to avoid
+    # creating strings for each locus, we create them for each combination of
+    # alleles found in the data, and give each locus the index of its
+    # combination
+    allele_values <- unique(c(loci$allele_ref, loci$allele_alt))
+    allele_pair <- match(loci$allele_ref, allele_values) +
+      length(allele_values) * (match(loci$allele_alt, allele_values) - 1L)
+    unique_pairs <- unique(allele_pair)
+    locus_lut <- match(allele_pair, unique_pairs) - 1L
+    first_locus <- match(unique_pairs, allele_pair)
+    genotypes_lut <- as.vector(rbind(
+      paste(loci$allele_ref[first_locus], loci$allele_ref[first_locus]),
+      paste(loci$allele_ref[first_locus], loci$allele_alt[first_locus]),
+      paste(loci$allele_alt[first_locus], loci$allele_alt[first_locus]),
+      "0 0"
+    ))
+    n_cat <- 4L
+  }
+  # append the genotypes to the file in C++, one line per individual
+  gt_write_text_by_indiv(
+    BM = .gt_get_fbm(x),
+    rowInd = .gt_fbm_rows(x),
+    colInd = .gt_fbm_cols(x),
+    byte_cat = byte_cat,
+    lut = genotypes_lut,
+    n_cat = n_cat,
+    locus_lut = locus_lut,
+    prefix = indiv_prefix,
+    sep = " ",
+    file = path.expand(file)
+  )
+
+  ## create info for the map file
+  loci_meta <- show_loci(x)
+  map_file <- paste0(substr(file, 1, nchar(file) - 4), ".map")
+  map_table <- tibble(
+    chrom = pull_na(loci_meta, "chromosome"),
+    id = pull_na(loci_meta, "name"),
+    cM = pull_na(loci_meta, "genetic_dist"),
+    position = format_position(pull_na(loci_meta, "position"))
+  )
+  map_table[is.na(map_table)] <- 0
+
+  utils::write.table(
+    map_table,
+    file = map_file,
+    row.names = FALSE,
+    col.names = FALSE,
+    quote = FALSE
+  )
+  return(file)
+}
+
+
+# internal function creating the individual information shared by the fam,
+# ped and raw files (family ID, individual ID, parents, sex and phenotype)
+plink_indiv_meta <- function(x) {
+  # if this is a group tibble, use the grouping variable as family ID (or the
+  # values of the grouping variables pasted with ".", if there are several);
+  # otherwise use the population, or the sample ID if there is no
+  # population (e.g. from a vcf)
+  if (inherits(x, "grouped_gen_tbl")) {
+    family_id <- .group_of_rows(x)
+  } else if ("population" %in% names(x)) {
+    family_id <- x$population
+  } else {
+    family_id <- x$id
+  }
+  # the other columns are those created by gen_tibble() when reading PLINK
+  # files (bed, ped or a bigSNP rds)
   indiv_meta <- tibble(
-    population = x$population,
+    population = family_id,
     id = x$id,
-    pat = pull_na(x, "pat"),
-    mat = pull_na(x, "mat"),
+    pat = pull_na(x, "paternal_ID"),
+    mat = pull_na(x, "maternal_ID"),
     sex = pull_na(x, "sex"),
     phenotype = pull_na(x, "phenotype")
   )
@@ -272,68 +366,11 @@ gt_write_ped_raw <- function(
     as.character(indiv_meta$phenotype),
     "control" ~ "1",
     "case" ~ "2",
-    default = indiv_meta$phenotype
+    default = as.character(indiv_meta$phenotype)
   )
   indiv_meta$phenotype[is.na(indiv_meta$phenotype)] <- -9
-
-  # create chunks
-  n_ind <- nrow(x)
-  chunks <- split(1:n_ind, ceiling(seq_along(1:n_ind) / chunk_size))
-
-  # loop over to write
-  for (i_chunk in seq_along(chunks)) {
-    chunk <- chunks[[i_chunk]]
-    raw_table <- cbind(
-      indiv_meta[chunk, ],
-      show_genotypes(x[chunk, ])
-    )
-
-    # now recode the genotypes with letters if raw
-    if (plink_format == "ped") {
-      # TODO this would be faster as an apply function
-      for (i in 1:(ncol(raw_table) - 6)) {
-        raw_table[, i + 6] <- recode_genotype(
-          raw_table[, i + 6],
-          loci$allele_ref[i],
-          loci$allele_alt[i]
-        )
-      }
-    }
-
-    colnames(raw_table) <- raw_col_names
-    # append column names only the first time, when the file does not exist
-    utils::write.table(
-      raw_table,
-      file = file,
-      sep = " ",
-      row.names = FALSE,
-      col.names = (!file.exists(file) & plink_format == "raw"),
-      append = file.exists(file),
-      quote = FALSE
-    )
-  }
-
-  ## create info for the map file
-  loci_meta <- show_loci(x)
-  map_file <- paste0(substr(file, 1, nchar(file) - 4), ".map")
-  map_table <- tibble(
-    chrom = pull_na(loci_meta, "chromosome"),
-    id = pull_na(loci_meta, "name"),
-    cM = pull_na(loci_meta, "cM"),
-    position = pull_na(loci_meta, "position")
-  )
-  map_table[is.na(map_table)] <- 0
-
-  utils::write.table(
-    map_table,
-    file = map_file,
-    row.names = FALSE,
-    col.names = FALSE,
-    quote = FALSE
-  )
-  return(file)
+  indiv_meta
 }
-
 
 # internal function returning either a vector from a given column
 # or NA if it does not exist
@@ -343,22 +380,4 @@ pull_na <- function(.x, .col_name) {
   } else {
     return(rep(NA, nrow(.x))) # nolint
   }
-}
-
-# recode dosage as letter genotypes
-recode_genotype <- function(x, allele_ref, allele_alt) {
-  x <- as.character(x)
-  genotypes <- c( # nolint
-    paste(allele_ref, allele_ref),
-    paste(allele_ref, allele_alt),
-    paste(allele_alt, allele_alt)
-  )
-  x <- dplyr::recode_values(
-    x,
-    "0" ~ genotypes[1],
-    "1" ~ genotypes[2],
-    "2" ~ genotypes[3]
-  )
-  x[is.na(x)] <- c("0 0")
-  x
 }

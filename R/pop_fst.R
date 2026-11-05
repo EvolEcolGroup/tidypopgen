@@ -4,7 +4,10 @@
 #' and Goudet 2017 (as computed by [hierfstat::fst.dosage()]).
 #' @references Weir, BS and Goudet J (2017) A Unified Characterization of
 #'   Population Structure and Relatedness. Genetics (2017) 206:2085
-#' @param .x a grouped [`gen_tibble`] (as obtained by using [dplyr::group_by()])
+#' @param .x a grouped [`gen_tibble`] (as obtained by using
+#'   [dplyr::group_by()]). If grouped by more than one variable, groups are
+#'   labelled by the values of the grouping variables pasted with "." (e.g.
+#'   `pop1.F`).
 #' @param include_global boolean determining whether, besides the population
 #'   specific Fst, a global Fst should be appended. Note that this will return a
 #'   vector of n populations plus 1 (the global value)
@@ -39,9 +42,16 @@ pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
 
   Mij <- allele_sharing_mat
   diag(Mij) <- NA
-  pop <- factor(dplyr::group_indices(.x))
-  pop_levels <- levels(pop)
+  groups <- .group_info(.x)
+  # the group of each individual
+  pop <- groups$ids + 1L
+  # empty groups (which only exist if the user asked for them) do not
+  # contribute to the mean allele sharing between groups, and get NaN
+  pop_levels <- which(groups$sizes > 0)
   n_pop <- length(pop_levels)
+  if (n_pop < 2) {
+    stop("pop_fst requires at least two groups")
+  }
   wil <- lapply(pop_levels, function(z) which(pop == z))
   Fsts <- unlist(lapply(
     wil,
@@ -64,13 +74,15 @@ pop_fst <- function(.x, include_global = FALSE, allele_sharing_mat = NULL) {
   Mb <- Mb * 2 / (n_pop * (n_pop - 1))
 
   # pop specific fsts
-  fst_by_pop <- c((Fsts - Mb) / (1 - Mb))
+  fst_non_empty <- (Fsts - Mb) / (1 - Mb)
+  fst_by_pop <- rep(NaN, groups$n)
+  fst_by_pop[pop_levels] <- fst_non_empty
 
   if (include_global) {
-    fst_by_pop <- c(fst_by_pop, mean((Fsts - Mb) / (1 - Mb), na.rm = TRUE))
-    names(fst_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1), "global")
+    fst_by_pop <- c(fst_by_pop, mean(fst_non_empty, na.rm = TRUE))
+    names(fst_by_pop) <- c(groups$labels, "global")
   } else {
-    names(fst_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1))
+    names(fst_by_pop) <- groups$labels
   }
   return(fst_by_pop)
 }

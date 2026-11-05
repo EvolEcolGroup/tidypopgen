@@ -14,7 +14,9 @@ qc_report_indiv(.x, ...)
 }
 \arguments{
 \item{.x}{either a \code{\link{gen_tibble}} object or a grouped \code{\link{gen_tibble}} (as
-obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
+obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}}). If grouped by more than one
+variable, the \code{group} column holds the values of the grouping variables
+pasted with "." (e.g. \code{pop1.F}).}
 
 \item{...}{further arguments to pass}
 
@@ -34,7 +36,7 @@ het_obs, missingness, id and to_keep. For pseudohaploid data, a tibble with
 ploidy and missingness.
 }
 \description{
-Return QC information to assess loci (Observed heterozygosity and
+Return QC information to assess individuals (Observed heterozygosity and
 missingness).
 }
 \details{

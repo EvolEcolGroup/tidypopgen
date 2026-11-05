@@ -9,9 +9,23 @@
 \usage{
 loci_hwe(.x, .col = "genotypes", ...)
 
-\method{loci_hwe}{tbl_df}(.x, .col = "genotypes", mid_p = TRUE, ...)
+\method{loci_hwe}{tbl_df}(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+)
 
-\method{loci_hwe}{vctrs_bigSNP}(.x, .col = "genotypes", mid_p = TRUE, ...)
+\method{loci_hwe}{vctrs_bigSNP}(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1),
+  ...
+)
 
 \method{loci_hwe}{grouped_df}(
   .x,
@@ -43,10 +57,19 @@ is TRUE, as in PLINK.}
 \item{block_size}{maximum number of loci read at once.}
 
 \item{type}{type of object to return, if using grouped method. One of "tidy",
-"list", or "matrix". Default is "tidy".}
+"list", or "matrix". Default is "tidy".
+Data can be grouped by more than one variable: groups are then labelled
+by the values of the grouping variables pasted with "." (e.g. \code{pop1.F}),
+and the "tidy" output has one column per grouping variable rather than a
+single \code{group} column. The \code{group} column, or the columns of
+the grouping variables, keep the type of the grouping variables (e.g. a
+factor keeps its levels), so that groups stay in their order when the output
+is sorted or plotted.}
 }
 \value{
-a vector of probabilities from HWE exact test, one per locus
+a vector of probabilities from HWE exact test, one per locus. For
+a grouped \code{\link{gen_tibble}}, empty groups (e.g. from
+\code{group_by(.drop = FALSE)}) are NA.
 }
 \description{
 Return the p-value from an exact test of HWE.

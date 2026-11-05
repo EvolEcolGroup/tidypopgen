@@ -17,7 +17,8 @@
 #' @param I number of SNPs for initialising the snmf algorithm
 #' @param iterations numeric integer for maximum iterations (default 200)
 #' @param ploidy the ploidy of the input data (defaults to 2)
-#' @param seed the seed for the random number generator
+#' @param seed the seed for the random number generator, either a vector of
+#'   length `n_runs`, or -1 (the default) to use a random seed for each run
 #' @return an object of class `gt_admix` consisting of a list with the following
 #'   elements:
 #' - `k` the number of clusters
@@ -54,8 +55,12 @@ gt_snmf <- function(
   ploidy = 2,
   seed = -1
 ) {
-  # add seed check again!!!
-  if (!is.null(seed) && length(seed) != n_runs) {
+  # a single seed of -1 (the default) lets LEA draw a random seed for each run
+  if (
+    !is.null(seed) &&
+      length(seed) != n_runs &&
+      !identical(as.numeric(seed), -1)
+  ) {
     stop("'seed' should be a vector of length 'n_runs'")
   }
 
@@ -71,8 +76,8 @@ gt_snmf <- function(
     input_file <- gt_as_geno_lea(x)
     # expand path to file to be full path
     input_file <- normalizePath(input_file)
-    out_file <- sub(".geno", "", input_file)
-    file_name <- sub(".geno", "", basename(input_file))
+    out_file <- sub("\\.geno$", "", input_file)
+    file_name <- sub("\\.geno$", "", basename(input_file))
   } else if (is.character(x) && length(x) == 1L) {
     if (!file.exists(x)) {
       stop("The file ", x, " does not exist")
@@ -82,8 +87,8 @@ gt_snmf <- function(
       stop("The input file must be a .geno file")
     }
     input_file <- x
-    out_file <- sub(".geno", "", input_file)
-    file_name <- sub(".geno", "", basename(input_file))
+    out_file <- sub("\\.geno$", "", input_file)
+    file_name <- sub("\\.geno$", "", basename(input_file))
   } else {
     stop(paste(
       "x must be a gen_tibble or a character giving the path to the",
@@ -106,7 +111,7 @@ gt_snmf <- function(
   class(adm_list) <- c("gt_admix", "list")
 
   if (entropy) {
-    snmf_res <- utils::capture.output(LEA::snmf(
+    snmf_res <- utils::capture.output(snmf_project <- LEA::snmf(
       input.file = input_file,
       K = k,
       project = project,
@@ -119,9 +124,9 @@ gt_snmf <- function(
       iterations = iterations,
       ploidy = ploidy,
       seed = seed
-    ))
+    ), print(snmf_project))
   } else {
-    snmf_res <- utils::capture.output(LEA::snmf(
+    snmf_res <- utils::capture.output(snmf_project <- LEA::snmf(
       input.file = input_file,
       K = k,
       project = project,
@@ -132,13 +137,18 @@ gt_snmf <- function(
       iterations = iterations,
       ploidy = ploidy,
       seed = seed
-    ))
+    ), print(snmf_project))
   }
 
   # loop over values of k and number of repeats
   index <- 1
   for (this_k in as.integer(k)) {
+    # if the project already had runs for this k (project = "continue" or
+    # "force"), LEA numbers the new runs after them, so the runs of this call
+    # are the last n_runs
+    n_runs_previous <- sum(snmf_project@K == this_k) - n_runs
     for (this_rep in seq_len(n_runs)) {
+      this_run <- n_runs_previous + this_rep
       adm_list$k[index] <- this_k
       adm_list$Q[[index]] <- q_matrix(utils::read.table(
         paste0(
@@ -146,11 +156,11 @@ gt_snmf <- function(
           ".snmf/K",
           this_k,
           "/run",
-          this_rep,
+          this_run,
           "/",
           file_name,
           "_r",
-          this_rep,
+          this_run,
           ".",
           this_k,
           ".Q"
@@ -163,11 +173,11 @@ gt_snmf <- function(
           ".snmf/K",
           this_k,
           "/run",
-          this_rep,
+          this_run,
           "/",
           file_name,
           "_r",
-          this_rep,
+          this_run,
           ".",
           this_k,
           ".G"
@@ -185,7 +195,12 @@ gt_snmf <- function(
   if (entropy) {
     # extract value from line with cross-Entropy (number after :)
     entropy <- extract_cross_entropy(snmf_res)
-    adm_list$cv <- entropy$cross_entropy_masked
+    # LEA loops over repetitions and then k, whereas we store the results by
+    # k and then repetition, so we match them on both
+    adm_list$cv <- entropy$cross_entropy_masked[match(
+      paste(adm_list$k, rep(seq_len(n_runs), times = length(k))),
+      paste(entropy$K, entropy$repetition)
+    )]
   }
 
   # add metadata if x is a gen_tibble
@@ -193,7 +208,7 @@ gt_snmf <- function(
     adm_list$id <- x$id
     # if it is grouped, add the group
     if (inherits(x, "grouped_gen_tbl")) {
-      adm_list$group <- x[[dplyr::group_vars(x)]]
+      adm_list$group <- .group_of_rows(x)
     }
   }
 

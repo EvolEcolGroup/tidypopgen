@@ -21,8 +21,9 @@ is given, a file with suffix .geno is written in the same location as the
 .rds and .bk files that underpin the \code{\link{gen_tibble}}.
 }
 \details{
-NOTE that we currently read all the data into memory to write the file, so
-this function is not suitable for very large datasets.
+The genotypes are read and written directly from the file backed matrix
+(one locus at a time), so this function also works on datasets that do not
+fit in memory.
 }
 \note{
 the \code{.geno} format only supports haploid or diploid data, so this

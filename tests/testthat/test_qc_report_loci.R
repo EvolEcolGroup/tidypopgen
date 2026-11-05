@@ -44,9 +44,18 @@ test_that("grouped hwe within qc_report_loci", {
     select(dplyr::group_vars(test_gt)) %>%
     dplyr::pull(1)
   pops <- length(unique(pops))
-  hwe_res$p_corrected <- apply(hwe_res, 1, function(row) min(row) * pops)
+  # Bonferroni correction, capped at 1
+  hwe_res$p_corrected <- apply(
+    hwe_res, 1,
+    function(row) pmin(1, min(row) * pops)
+  )
   # Compare
   expect_equal(loci_report$hwe_p, hwe_res$p_corrected)
+  # corrected p-values are valid probabilities
+  expect_true(all(loci_report$hwe_p <= 1))
+  example_gt <- load_example_gt("gen_tbl") %>% group_by(population)
+  example_report <- qc_report_loci(example_gt)
+  expect_true(all(example_report$hwe_p >= 0 & example_report$hwe_p <= 1))
 })
 
 test_that("qc_report_loci for pseudohaploid data", {
@@ -82,10 +91,15 @@ test_that("qc_report_loci for pseudohaploid data", {
   test_gt_pseudo <- gt_pseudohaploid(test_gt)
 
   loci_report <- qc_report_loci(test_gt_pseudo)
+  # maf (accounting for ploidy) and missingness match the individual functions
+  expect_equal(loci_report$maf, loci_maf(test_gt_pseudo))
+  expect_equal(loci_report$missingness, loci_missingness(test_gt_pseudo))
 
   test_gt_pseudo <- test_gt_pseudo %>% group_by(population)
 
   loci_report_grouped <- qc_report_loci(test_gt_pseudo)
+  # grouping does not change maf and missingness
+  expect_equal(loci_report_grouped, loci_report)
 
   # try to plot hwe
   expect_error(autoplot(loci_report, type = "hwe"), "not available")
@@ -100,4 +114,51 @@ test_that("qc_report_loci for pseudohaploid data", {
   expect_s3_class(autoplot(loci_report_grouped, type = "all"), "ggplot")
 
   # test other plots individually
+})
+
+test_that("qc_report_loci matches loci_maf, loci_missingness and loci_hwe", {
+  example_gt <- load_example_gt("gen_tbl")
+  loci_report <- suppressMessages(qc_report_loci(example_gt))
+  expect_equal(loci_report$snp_id, loci_names(example_gt))
+  expect_equal(loci_report$maf, loci_maf(example_gt))
+  expect_equal(loci_report$missingness, loci_missingness(example_gt))
+  expect_equal(loci_report$hwe_p, loci_hwe(example_gt))
+  # codes other than 0, 1, 2 (e.g. dosages) use the individual functions,
+  # which must give the same results (bytes 0 to 3 decode as with CODE_012)
+  attr(example_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_DOSAGE
+  expect_equal(suppressMessages(qc_report_loci(example_gt)), loci_report)
+  grouped_report <- qc_report_loci(example_gt %>% group_by(population))
+  attr(example_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_012
+  expect_equal(
+    qc_report_loci(example_gt %>% group_by(population)),
+    grouped_report
+  )
+})
+
+test_that("grouped qc_report_loci ignores empty groups", {
+  test_gt <- load_example_gt("gen_tbl") %>%
+    filter(population == "pop1")
+  # a single non-empty group (so that the Bonferroni correction does not cap
+  # the p-values at 1), with an empty level before and after it
+  test_gt$population <- factor(
+    test_gt$population,
+    levels = c("pop_empty1", "pop1", "pop_empty2")
+  )
+  drop_report <- qc_report_loci(test_gt %>% group_by(population))
+  keep_gt <- test_gt %>% group_by(population, .drop = FALSE)
+  expect_equal(dplyr::n_groups(keep_gt), 3)
+  # some loci have a p-value above 0.5, the p-value of the empty groups
+  # before they were set to NA
+  expect_true(any(drop_report$hwe_p > 0.5))
+  expect_equal(qc_report_loci(keep_gt), drop_report)
+
+  # the same when the stats are not computed in a single pass (here with a
+  # single individual), where the empty groups of loci_hwe() are NA
+  single_gt <- test_gt[1, ]
+  drop_report <- qc_report_loci(single_gt %>% group_by(population))
+  keep_report <- qc_report_loci(
+    single_gt %>% group_by(population, .drop = FALSE)
+  )
+  expect_false(anyNA(keep_report$hwe_p))
+  expect_equal(keep_report, drop_report)
 })

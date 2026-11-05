@@ -73,7 +73,10 @@ same as PLINK 1.9).}
 
 \item{backingfile}{the path, including the file name without extension, for
 backing files used to store the data (they will be given a .bk and .RDS
-automatically). This is not needed if \code{x} is already an .RDS file. If \code{x}
+automatically). If \code{x} is a bigSNP .RDS file, its backing file is copied to
+\code{backingfile}, so that the original files are not modified (if
+\code{backingfile} is left NULL, the copy is saved next to the original, with a
+version suffix such as \verb{_v2}). If \code{x}
 is a .BED or a \emph{VCF} file and \code{backingfile} is left NULL, the backing file
 will be saved in the same directory as the bed or vcf file, using the same
 file name but with a different file type (.bk rather than .bed or .vcf). If
@@ -94,7 +97,8 @@ latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 in case your
 \emph{VCF} has an unusual structure.}
 
-\item{n_cores}{the number of cores to use for parallel processing}
+\item{n_cores}{currently ignored (reading files is not parallelised); kept
+for backwards compatibility}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
@@ -134,10 +138,26 @@ here the format
 variant is found in a sex chromosome (or mtDNA), the parser will fail with
 'Error: a genotype has more than max_ploidy alleles...'. To successful import
 such a \emph{VCF}, change the order of variants so that the first chromosome is an
-autosome using a tool such as \code{vcftools}. Currently, only biallelic SNPs are
+autosome using a tool such as \code{vcftools}. Individuals with a missing genotype
+('.') on the first variant get their ploidy from their first genotype that
+is not '.' (or the largest ploidy of the other individuals, if all their
+genotypes are '.'). Currently, only biallelic SNPs are
 supported. If haploid variants (e.g. sex chromosomes) are included in the
 \emph{VCF}, they are not transformed into homozygous calls. Instead, reference
 alleles will be coded as 0 and alternative alleles will be coded as 1.
+\item \emph{PLINK} files (.bed, .ped, or a bigSNP .rds): the individual information
+(from the .fam file, or the first six columns of the .ped file) is stored
+in the same columns for all formats: the individual ID as \code{id}; the family
+ID as \code{population} (unless it is the same as the individual ID for all
+individuals); the paternal and maternal IDs as \code{paternal_ID} and
+\code{maternal_ID}; sex as \code{sex}, a factor with levels "female" (PLINK code 2)
+and "male" (code 1); and the phenotype as \code{phenotype}, a factor with levels
+"control" (code 1) and "case" (code 2), or a number for a quantitative
+phenotype (with values other than 1, 2, 0 and -9). Missing values (0 for
+parents and sex, 0 or -9 for a case/control phenotype, and -9 for a
+quantitative one) are NA, and \code{paternal_ID}, \code{maternal_ID}, \code{sex} and
+\code{phenotype} are only created if they have some non-missing values.
+\code{\link[=gt_as_plink]{gt_as_plink()}} writes these columns back to PLINK files.
 \item \emph{packedancestry} files: When loading \emph{packedancestry} files,
 missing alleles will be converted from 'X' to NA
 }

@@ -32,8 +32,9 @@
 #'   the `detectRUNS` vignette).
 #'
 #'   If the [`gen_tibble`] is grouped, then the grouping variable is used to
-#'   fill in the 'group' column. Otherwise, the 'group' column is filled with
-#'   the same values as the 'id' column. Note that this behaviour is
+#'   fill in the 'group' column (with several grouping variables, their values
+#'   are pasted with ".", e.g. `pop1.F`). Otherwise, the 'group' column is
+#'   filled with the same values as the 'id' column. Note that this behaviour is
 #'   different from other windowed operations in `tidypopgen`, which
 #'   return a list for grouped `gen_tibbles`; this different behaviour is
 #'   designed to maintain compatibility with `detectRUNS`.
@@ -111,9 +112,7 @@ windows_indiv_roh <- function(
   gaps <- diff(map$bps)
   # use groups (if defined)
   if (dplyr::is_grouped_df(.x)) {
-    groups <- .x %>%
-      select(dplyr::group_vars(.x)) %>%
-      dplyr::pull(1)
+    groups <- .group_of_rows(.x)
   } else {
     groups <- .x$id
   }
@@ -128,6 +127,11 @@ windows_indiv_roh <- function(
   rows_to_keep <- .gt_fbm_rows(.x)
   for (i in seq_len(nrow(.x))) {
     this_genotype <- X[rows_to_keep[i], col_ind]
+    # detectRUNS expects 0 for homozygotes and 1 for heterozygotes (its
+    # readers recode 0/1/2 dosages with genoConvert), otherwise homozygotes
+    # for the alternate allele count as heterozygotes for runs of
+    # heterozygosity
+    this_genotype[which(this_genotype == 2)] <- 0
     this_indiv <- list(FID = groups[i], IID = .x$id[i])
     # find runs for this individual
     this_runs <-

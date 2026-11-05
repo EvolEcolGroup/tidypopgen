@@ -28,7 +28,11 @@ file}
 
 \item{n_cores}{number of cores (defaults to 1)}
 
-\item{seed}{the seed for the random number generator (defaults to NULL)}
+\item{seed}{the seed for the random number generator, either a vector of
+length \code{n_runs} (used for each value of \code{k}) or of length \code{n_runs} *
+\code{length(k)}. If NULL (the default), the runs for each value of \code{k} use
+seeds 43, 44, 45, etc. (43 being the default seed of ADMIXTURE), so that
+each run is different but results are reproducible.}
 
 \item{conda_env}{the name of the conda environment to use. "none" forces the
 use of a local copy, whilst any other string will direct the function to

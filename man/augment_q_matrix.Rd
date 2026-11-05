@@ -10,7 +10,9 @@
 \arguments{
 \item{x}{A \code{q_matrix} object}
 
-\item{data}{the \code{gen_tibble} used to run the clustering algorithm}
+\item{data}{the \code{gen_tibble} used to run the clustering algorithm. If the
+Q matrix has no group information and \code{data} is grouped, the groups of
+\code{data} are added as a \code{group} column.}
 
 \item{...}{Not used. Needed to match generic signature only.}
 }

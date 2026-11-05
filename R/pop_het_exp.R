@@ -21,6 +21,8 @@
 #' @param .x a [`gen_tibble`] (usually grouped, as obtained by using
 #'   [dplyr::group_by()], otherwise the full tibble will be considered as
 #'   belonging to a single population).
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param by_locus boolean, determining whether Hs should be returned by
 #'   locus(TRUE), or as a single genome wide value (FALSE, the default).
 #' @param include_global boolean determining whether, besides the population
@@ -57,44 +59,32 @@ pop_het_exp <- function(
   n_cores = bigstatsr::nb_cores()
 ) {
   stopifnot_diploid(.x)
-  # get the populations if it is a grouped gen_tibble
-  if (inherits(.x, "grouped_df")) {
-    .group_levels <- .x %>% group_keys()
-    .group_ids <- dplyr::group_indices(.x) - 1
-  } else {
-    # create a dummy pop
-    .group_levels <- tibble(population = "pop")
-    .group_ids <- rep(0, nrow(.x))
-  }
-
-  # summarise population frequencies
-  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_fbm(.x),
-    rowInd = .gt_fbm_rows(.x),
-    colInd = .gt_fbm_cols(.x),
-    groupIds = .group_ids,
-    ngroups = nrow(.group_levels),
-    ploidy = indiv_ploidy(.x),
-    ncores = n_cores
+  # compute Hs for each population (and the global Hs, which is part of the
+  # global statistics) in a single pass over the genotypes
+  pop_stats <- .pop_stats_dip_pseudo(
+    .x,
+    by_locus_hs = by_locus,
+    by_locus_global = by_locus && include_global,
+    n_cores = n_cores
   )
-  sHo <- pop_freqs_df$het_obs # nolint start
-  mHo <- rowMeans(sHo, na.rm = TRUE)
-  n <- pop_freqs_df$n / 2
-  # sum of squared frequencies
-  sp2 <- pop_freqs_df$freq_alt^2 + pop_freqs_df$freq_ref^2
-  Hs <- (1 - sp2 - sHo / 2 / n)
-  Hs <- n / (n - 1) * Hs # nolint end
-
-  colnames(Hs) <- .group_levels %>% dplyr::pull(1) # nolint
-  if (include_global) {
-    global <- (.x %>% pop_global_stats(by_locus = TRUE, n_cores = n_cores))$Hs
-    Hs <- cbind(Hs, global) # nolint
-  }
 
   if (by_locus) {
+    Hs <- pop_stats$hs # nolint
+    colnames(Hs) <- pop_stats$group_names # nolint
+    if (include_global) {
+      # Hs is the second global statistic
+      global <- pop_stats$global[, 2]
+      Hs <- cbind(Hs, global) # nolint
+    }
     return(Hs)
   } else {
-    return(colMeans(Hs, na.rm = TRUE))
+    # means across loci
+    Hs <- pop_stats$mean_hs # nolint
+    names(Hs) <- pop_stats$group_names # nolint
+    if (include_global) {
+      Hs <- c(Hs, global = pop_stats$mean_global[2]) # nolint
+    }
+    return(Hs)
   }
 }
 

@@ -3,7 +3,9 @@
 #' @description This function computes pairwise Fst for a sliding window across
 #'   each chromosome.
 #'
-#' @param .x a grouped `gen_tibble` object
+#' @param .x a grouped `gen_tibble` object.
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param type type of object to return. One of "matrix" or "tidy". Default is
 #'   "matrix". "matrix" returns a dataframe where each row is a window, followed
 #'   by columns of Fst values for each pairwise population a and b comparison.
@@ -69,57 +71,81 @@ windows_pairwise_pop_fst.tbl_df <- function(.x,
   stopifnot_gen_tibble(.x)
   method <- match.arg(method)
   type <- match.arg(type)
+  size_unit <- match.arg(size_unit)
 
-  # create the pairwise Fst by locus, saving numerator and denominator
-  pair_fst <- pairwise_pop_fst(.x,
-    method = "Hudson", return_num_dem = TRUE,
-    by_locus = TRUE
+  # the same checks as in pairwise_pop_fst()
+  if (!inherits(.x, "grouped_df")) {
+    stop(".x should be a grouped df")
+  }
+  # only operate on diploids or, if pseudohaploids, Hudson
+  .check_fst_ploidy(.x, method)
+  # get the populations, and all pairs of populations
+  groups <- .group_info(.x)
+  pairwise_combn <- utils::combn(groups$n, 2)
+
+  # define the windows, and find the windows that include each locus
+  loci_table <- show_loci(.x)
+  .check_window_args(
+    loci_table,
+    n_values = nrow(loci_table),
+    window_size = window_size,
+    step_size = step_size,
+    size_unit = size_unit,
+    min_loci = min_loci,
+    complete = complete
+  )
+  win <- .window_definitions(
+    loci_table,
+    window_size = window_size,
+    step_size = step_size,
+    size_unit = size_unit
   )
 
-  # for each column (i.e. each statistics), run the window analysis
-  compn <- colnames(pair_fst$Fst_by_locus_num)
-  res <- NULL
-  for (i_col in seq_along(compn)) {
-    # get the column name
-    col_name <- compn[i_col]
-    # compute the windows for numerator
-    window_num <- windows_stats_generic(
-      .x = pair_fst$Fst_by_locus_num[, i_col],
-      loci_table = show_loci(.x),
-      window_size = window_size,
-      step_size = step_size,
-      size_unit = size_unit,
-      min_loci = min_loci,
-      complete = complete
-    )
-    # same for the denominator
-    window_dem <- windows_stats_generic(
-      .x = pair_fst$Fst_by_locus_den[, i_col],
-      loci_table = show_loci(.x),
-      window_size = window_size,
-      step_size = step_size,
-      size_unit = size_unit,
-      min_loci = min_loci,
-      complete = complete
-    )
-    # compute the Fst for the window
-    window_fst <- data.frame(stat = window_num$stat / window_dem$stat)
-    names(window_fst) <- paste0("fst_", col_name)
-    # if res is null
-    if (is.null(res)) {
-      # create the data frame
-      res <- dplyr::bind_cols(
-        window_num[, 1:3],
-        window_fst
-      )
-    } else {
-      res <- dplyr::bind_cols(res, window_fst)
+  # sum the numerators and denominators of Fst of each pair of populations
+  # in each window, in a single pass over the genotypes (without storing
+  # them by locus)
+  win_sums <- windows_pairwise_pop_fst_cpp(
+    .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
+    groupIds = groups$ids,
+    ngroups = groups$n,
+    ploidy = indiv_ploidy(.x),
+    pairwise_combn = pairwise_combn,
+    method = method,
+    locus_first = win$locus_first,
+    locus_last = win$locus_last,
+    n_windows = nrow(win$windows),
+    both_valid = FALSE,
+    block_size = 1024,
+    ncores = bigstatsr::nb_cores()
+  )
+
+  # mean of the numerators (or denominators) in each window, as computed by
+  # windows_stats_generic() with operator = "mean": NA if the window has
+  # fewer than min_loci values (or no values), or if it is incomplete and
+  # only complete windows are requested
+  window_means <- function(sums, n) {
+    means <- sums / n
+    means[n < min_loci | n == 0] <- NA
+    if (complete) {
+      means[!win$complete, ] <- NA
     }
+    means
   }
+  window_fst <- window_means(win_sums$sum_num, win_sums$n_num) /
+    window_means(win_sums$sum_den, win_sums$n_den)
+
+  # name the columns after the pairs of populations
+  colnames(window_fst) <- paste0(
+    "fst_",
+    .pair_labels(groups$labels, pairwise_combn)
+  )
+  res <- dplyr::bind_cols(win$windows, tibble::as_tibble(window_fst))
   if (type == "matrix") {
     return(res)
   } else if (type == "tidy") {
-    cols <- names(res)[names(res) != c("chromosome", "start", "end")]
+    cols <- names(res)[!names(res) %in% c("chromosome", "start", "end")]
     res <-
       res %>% tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(res)

@@ -124,7 +124,7 @@ autoplot(loci_report,
 )
 ```
 
-The upset plot then visualises our 961 SNPs within their respective sets. The number above the second bar indicates that 607 SNPs occur in all 3 sets, meaning 607 SNPs pass all of our QC thresholds. The combined total of the first and second bars represents the number of SNPs that pass our MAF and HWE thresholds, here 806 SNPs.
+The upset plot then visualises our 961 SNPs within their respective sets. The number above the first bar indicates that 607 SNPs occur in all 3 sets, meaning 607 SNPs pass all of our QC thresholds. The combined total of the first and second bars represents the number of SNPs that pass our MAF and HWE thresholds, here 804 SNPs.
 
 To examine each QC measure in further detail, we can plot a different summary panel.
 

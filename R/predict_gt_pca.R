@@ -202,24 +202,48 @@ predict.gt_pca <- function(
       if (any(duplicated(lsq_pcs))) {
         stop("lsq_pcs should not contain duplicate values")
       }
-      X <- .gt_get_fbm(new_data) # pointer for FBM #nolint
-      proj_i <- NULL # hack to define iterator
-      lsq_proj <- foreach::foreach(
-        proj_i = seq_len(nrow(new_data)),
-        .final = t,
-        .combine = cbind
-      ) %do% {
-        # scaled genotypes for this individual
-        genotypes <- X[
-          .gt_fbm_rows(new_data)[proj_i],
-          .gt_fbm_cols(new_data)[loci_subset]
-        ]
-        genotypes_scaled <- (genotypes - object$center) / object$scale
-        na_ids <- which(!is.na(genotypes_scaled))
-        genotypes_scaled <- genotypes_scaled[na_ids]
-        v_sub <- object$v[na_ids, lsq_pcs]
-        solve(crossprod(v_sub), crossprod(v_sub, genotypes_scaled))
-      }
+      # For each individual, we solve the least squares problem
+      #   crossprod(v_sub) b = crossprod(v_sub, genotypes_scaled)
+      # where v_sub are the loadings (for lsq_pcs) of the loci genotyped in
+      # that individual. Rather than reading the genotypes one individual at a
+      # time (which is slow on a column-major FBM), both sides are obtained
+      # from a single pass over the loci:
+      # - crossprod(v_sub, genotypes_scaled) is the simple projection XV
+      #   (where missing genotypes contribute 0)
+      # - crossprod(v_sub) is crossprod(V) minus the sum of v_j v_j' over the
+      #   loci j missing in that individual (X_miss)
+      n_lsq <- length(lsq_pcs)
+      X_norm <- bigstatsr::FBM(nrow(new_data), 1, init = 0) # nolint
+      XV <- bigstatsr::FBM(nrow(new_data), ncol(object$u), init = 0) # nolint
+      X_miss <- bigstatsr::FBM(nrow(new_data), n_lsq^2, init = 0) # nolint
+      bigstatsr::big_parallelize(
+        .gt_get_fbm(new_data),
+        p.FUN = fbm256_part_prod,
+        ind = seq_along(loci_subset),
+        ncores = n_cores,
+        ind.row = .gt_fbm_rows(new_data),
+        ind.col = .gt_fbm_cols(new_data)[loci_subset],
+        center = object$center,
+        scale = object$scale,
+        V = object$v,
+        XV = XV,
+        X_norm = X_norm,
+        lsq_pcs = as.integer(lsq_pcs),
+        X_miss = X_miss
+      )
+      # crossproduct of the loadings over all loci
+      vtv <- crossprod(unclass(object$v)[, lsq_pcs, drop = FALSE])
+      XV <- XV[, lsq_pcs, drop = FALSE] # nolint
+      X_miss <- X_miss[, , drop = FALSE] # nolint
+      lsq_proj <- vapply(
+        seq_len(nrow(new_data)),
+        function(i) {
+          solve(vtv - matrix(X_miss[i, ], n_lsq, n_lsq), XV[i, ])
+        },
+        numeric(n_lsq)
+      )
+      # one row per individual
+      lsq_proj <- matrix(lsq_proj, nrow = nrow(new_data), byrow = TRUE)
       dimnames(lsq_proj) <-
         list(new_data$id, paste0(".PC", lsq_pcs))
       output <- output_type(object = lsq_proj, as_matrix, id = new_data$id)
@@ -255,18 +279,29 @@ fbm256_part_prod <- function(
   scale,
   V,
   XV,
-  X_norm
+  X_norm,
+  lsq_pcs = integer(0),
+  X_miss = NULL
 ) {
   # nolint
+  # the loci `ind` are selected within the C++ code, rather than by
+  # subsetting ind.col, center, scale and V here (which would copy the
+  # loadings, one row per locus)
   res <- fbm256_prod_and_rowSumsSq(
     BM = X,
     ind_row = ind.row,
-    ind_col = ind.col[ind],
-    center = center[ind],
-    scale = scale[ind],
-    V = V[ind, , drop = FALSE]
+    ind_col = ind.col,
+    center = center,
+    scale = scale,
+    V = V,
+    ind = ind,
+    lsq_pcs = lsq_pcs
   )
 
   bigstatsr::big_increment(XV, res[[1]], use_lock = TRUE)
   bigstatsr::big_increment(X_norm, res[[2]], use_lock = TRUE)
+  # for least squares, the crossproducts of the loadings of missing loci
+  if (!is.null(X_miss)) {
+    bigstatsr::big_increment(X_miss, res[[3]], use_lock = TRUE)
+  }
 }

@@ -27,11 +27,21 @@ tidy_dist_matrix <- function(mat) {
   if (!inherits(mat, "matrix")) {
     stop("mat should be a matrix")
   }
-  xy <- t(utils::combn(colnames(mat), 2))
-  colnames(xy) <- c("item1", "item2")
-  xy <- xy %>%
-    tibble::as_tibble() %>%
-    dplyr::mutate(value = mat[xy])
+  n <- ncol(mat)
+  # indices of all pairs (i < j), in the same order as utils::combn(n, 2),
+  # i.e. (1,2), (1,3), ..., (1,n), (2,3), ...; using integer indices avoids
+  # building a character matrix of names and matching names to index mat
+  # (there are no pairs with fewer than two individuals)
+  n_first <- max(n - 1L, 0L)
+  index1 <- rep.int(seq_len(n_first), rev(seq_len(n_first)))
+  index2 <- sequence(rev(seq_len(n_first)), from = seq_len(n_first) + 1)
+  # (the names of an empty matrix are NULL, which would drop the columns)
+  item_names <- if (n == 0) character(0) else colnames(mat)
+  xy <- tibble::tibble(
+    item1 = item_names[index1],
+    item2 = item_names[index2],
+    value = mat[cbind(index1, index2)]
+  )
   # add a class to indicate this is a pairwise tibble
   class(xy) <- c("pairwise_tbl", class(xy))
   return(xy)

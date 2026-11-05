@@ -8,10 +8,27 @@
 #' variant is found in a sex chromosome (or mtDNA), the parser will fail with
 #' 'Error: a genotype has more than max_ploidy alleles...'. To successful import
 #' such a *VCF*, change the order of variants so that the first chromosome is an
-#' autosome using a tool such as `vcftools`. Currently, only biallelic SNPs are
+#' autosome using a tool such as `vcftools`. Individuals with a missing genotype
+#' ('.') on the first variant get their ploidy from their first genotype that
+#' is not '.' (or the largest ploidy of the other individuals, if all their
+#' genotypes are '.'). Currently, only biallelic SNPs are
 #' supported. If haploid variants (e.g. sex chromosomes) are included in the
 #' *VCF*, they are not transformed into homozygous calls. Instead, reference
 #' alleles will be coded as 0 and alternative alleles will be coded as 1.
+#'
+#' - *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual information
+#' (from the .fam file, or the first six columns of the .ped file) is stored
+#' in the same columns for all formats: the individual ID as `id`; the family
+#' ID as `population` (unless it is the same as the individual ID for all
+#' individuals); the paternal and maternal IDs as `paternal_ID` and
+#' `maternal_ID`; sex as `sex`, a factor with levels "female" (PLINK code 2)
+#' and "male" (code 1); and the phenotype as `phenotype`, a factor with levels
+#' "control" (code 1) and "case" (code 2), or a number for a quantitative
+#' phenotype (with values other than 1, 2, 0 and -9). Missing values (0 for
+#' parents and sex, 0 or -9 for a case/control phenotype, and -9 for a
+#' quantitative one) are NA, and `paternal_ID`, `maternal_ID`, `sex` and
+#' `phenotype` are only created if they have some non-missing values.
+#' [gt_as_plink()] writes these columns back to PLINK files.
 #'
 #' - *packedancestry* files: When loading *packedancestry* files,
 #' missing alleles will be converted from 'X' to NA
@@ -49,7 +66,8 @@
 #'   latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 #'   in case your
 #'   *VCF* has an unusual structure.
-#' @param n_cores the number of cores to use for parallel processing
+#' @param n_cores currently ignored (reading files is not parallelised); kept
+#'   for backwards compatibility
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #'   'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -58,7 +76,10 @@
 #'   same as PLINK 1.9).
 #' @param backingfile the path, including the file name without extension, for
 #'   backing files used to store the data (they will be given a .bk and .RDS
-#'   automatically). This is not needed if `x` is already an .RDS file. If `x`
+#'   automatically). If `x` is a bigSNP .RDS file, its backing file is copied to
+#'   `backingfile`, so that the original files are not modified (if
+#'   `backingfile` is left NULL, the copy is saved next to the original, with a
+#'   version suffix such as `_v2`). If `x`
 #'   is a .BED or a *VCF* file and `backingfile` is left NULL, the backing file
 #'   will be saved in the same directory as the bed or vcf file, using the same
 #'   file name but with a different file type (.bk rather than .bed or .vcf). If
@@ -252,10 +273,11 @@ gen_tibble.character <-
         select_loci(all_of(doubles)) %>%
         loci_missingness()
       if (any(check_missing < 1, na.rm = TRUE)) {
-        # clean up files if we are stopping
+        # clean up files if we are stopping (dropping the gen_tibble first,
+        # so that its backing file can be unmapped, see remove_fbm_files())
         files <- gt_get_file_names(x_gt)
-        if (file.exists(files[1])) file.remove(files[1])
-        if (file.exists(files[2])) file.remove(files[2])
+        rm(x_gt)
+        remove_fbm_files(files)
         stop(paste(
           "Some loci are missing both reference and alternate alleles.",
           "Genotypes are not missing at these loci.",
@@ -311,6 +333,13 @@ gen_tibble.matrix <- function(
   }
 
   if (length(ploidy) > 1) {
+    # check that there is a ploidy value for each individual
+    if (length(ploidy) != nrow(x)) {
+      stop(
+        "'ploidy' should be a single value or a vector with one value ",
+        "per individual (row of 'x')"
+      )
+    }
     # check that there are no missing values in ploidy vector
     if (any(is.na(ploidy))) {
       stop("'ploidy' can not contain NAs")
@@ -353,6 +382,16 @@ gen_tibble.matrix <- function(
   }
   if (!(is.matrix(x) && is.numeric(x))) {
     stop("'x' is not a numeric matrix of integers")
+  }
+  # check that dosages are non-negative integers, within each ploidy
+  if (any(x != round(x) | x < 0, na.rm = TRUE)) {
+    stop("'x' should only contain non-negative integer dosages (or NA)")
+  }
+  if (any(x > fbm_ploidy, na.rm = TRUE)) {
+    stop(
+      "'x' contains dosages greater than the ploidy of the individual ",
+      "(see 'ploidy')"
+    )
   }
 
   # check dimensions
@@ -408,9 +447,12 @@ gen_tibble.matrix <- function(
       select_loci(all_of(doubles)) %>%
       loci_missingness()
     if (any(check_missing < 1, na.rm = TRUE)) {
+      # clean up files if we are stopping (dropping every object holding the
+      # FBM first, so that its backing file can be unmapped, see
+      # remove_fbm_files())
       files <- gt_get_file_names(new_gen_tbl)
-      if (file.exists(files[1])) file.remove(files[1])
-      if (file.exists(files[2])) file.remove(files[2])
+      rm(new_gen_tbl, indiv_meta, fbm_obj)
+      remove_fbm_files(files)
       stop(paste(
         "Some loci are missing both reference and alternate alleles.",
         "Genotypes are not missing at these loci.",
@@ -542,6 +584,8 @@ check_allele_alphabet <- function(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", ".")
 ) {
+  # 0 is always considered as a missing value (see harmonise_missing_values)
+  missing_alleles <- union(missing_alleles, "0")
   if (
     any(
       !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),
@@ -577,9 +621,41 @@ harmonise_missing_values <- function(loci_info, missing_alleles = c("0", ".")) {
 }
 
 
+# replace the extension `ext` of a file (matched ignoring case) with
+# `new_ext`; if that file does not exist, but one with an upper case `new_ext`
+# does, the latter is returned
+sub_ext_ignore_case <- function(file, ext, new_ext) {
+  ext_pattern <- paste0("\\.", ext, "$")
+  new_file <- sub(ext_pattern, new_ext, file, ignore.case = TRUE)
+  upper_file <- sub(ext_pattern, toupper(new_ext), file, ignore.case = TRUE)
+  if (!file.exists(new_file) && file.exists(upper_file)) {
+    new_file <- upper_file
+  }
+  new_file
+}
+
+# remove the files (.rds and .bk) of a gen_tibble that is being discarded.
+# An FBM keeps its backing file memory-mapped until it is garbage collected,
+# and Windows cannot delete a mapped file, so the caller must first drop
+# every object referring to the FBM; we then garbage collect (which unmaps
+# the backing file) before removing the files
+remove_fbm_files <- function(files) {
+  gc()
+  files <- files[file.exists(files)]
+  file.remove(files)
+  invisible(NULL)
+}
+
 # check for existing .bk files
 change_duplicated_file_name <- function(file) {
-  file <- tools::file_path_sans_ext(file)
+  # remove the extensions of backing files and of input files (other dots in
+  # the file name are kept)
+  file <- sub(
+    "\\.(bk|rds|gt|bed|ped|geno|vcf\\.gz|vcf|gz)$",
+    "",
+    file,
+    ignore.case = TRUE
+  )
 
   bk <- paste0(file, ".bk")
   rds <- paste0(file, ".rds")
@@ -632,22 +708,49 @@ change_duplicated_file_name <- function(file) {
 
 # adding a chr_int column
 cast_chromosome_to_int <- function(chromosome) {
-  # if chromosome is an factor, then cast it to character
+  # if chromosome is a factor, cast its levels rather than each locus (a
+  # factor has few levels, but it can have tens of millions of elements); we
+  # keep the levels to order non-numeric chromosomes
+  chr_levels <- NULL
+  level_codes <- NULL
   if (is.factor(chromosome)) {
-    chromosome <- as.character(chromosome)
+    chr_levels <- levels(chromosome)
+    level_codes <- as.integer(chromosome)
+    # only cast the levels that are used, which are exactly the values found
+    # in the data (unused levels would change the largest numeric chromosome)
+    used_levels <- tabulate(level_codes, nbins = length(chr_levels)) > 0
+    chromosome <- chr_levels[used_levels]
   }
   # if chromosome is a character, then cast it to integer
   if (is.character(chromosome)) {
     # attempt to strip chr from the chromosome
-    chromosome <- gsub(
-      "^(chromosome_|chr_|chromosome|chr)",
-      "",
-      chromosome,
-      ignore.case = TRUE
-    )
-    chromosome <- tryCatch(as.integer(chromosome), warning = function(e) {
-      as.integer(as.factor(chromosome))
-    })
+    strip_chr <- function(x) {
+      gsub("^(chromosome_|chr_|chromosome|chr)", "", x, ignore.case = TRUE)
+    }
+    chromosome <- strip_chr(chromosome)
+    # numeric names keep their own value
+    is_numeric <- grepl("^[0-9]+$", chromosome)
+    chr_int <- rep(NA_integer_, length(chromosome))
+    chr_int[is_numeric] <- as.integer(chromosome[is_numeric])
+    # other names are coded above the largest numeric value, in order of first
+    # appearance (or in the order of the levels for a factor)
+    is_other <- !is_numeric & !is.na(chromosome)
+    if (any(is_other)) {
+      if (is.null(chr_levels)) {
+        other_names <- unique(chromosome[is_other])
+      } else {
+        other_names <- intersect(strip_chr(chr_levels), chromosome[is_other])
+      }
+      chr_int[is_other] <- max(c(0L, chr_int[is_numeric])) +
+        match(chromosome[is_other], other_names)
+    }
+    chromosome <- chr_int
+  }
+  # for a factor, map each locus to the integer of its level
+  if (!is.null(level_codes)) {
+    levels_int <- rep(NA_integer_, length(chr_levels))
+    levels_int[used_levels] <- chromosome
+    chromosome <- levels_int[level_codes]
   }
   if (is.numeric(chromosome)) {
     chromosome <- as.integer(chromosome)

@@ -9,17 +9,17 @@ gen_tibble_packedancestry <- function(
   quiet = FALSE
 ) {
   # Substitute .geno with .snp
-  map_file <- sub("\\.geno$", ".snp", x)
+  map_file <- sub_ext_ignore_case(x, "geno", ".snp")
   if (!file.exists(map_file)) {
     stop("snp file ", map_file, " does not exist")
   }
-  ind_file <- sub("\\.geno$", ".ind", x)
+  ind_file <- sub_ext_ignore_case(x, "geno", ".ind")
   if (!file.exists(ind_file)) {
     stop("ind file ", ind_file, " does not exist")
   }
 
   if (is.null(backingfile)) {
-    backingfile <- sub("\\.geno$", "", x)
+    backingfile <- sub("\\.geno$", "", x, ignore.case = TRUE)
   }
   if (file_ext(backingfile) == "bk") {
     backingfile <- bigstatsr::sub_bk(backingfile, "")
@@ -39,7 +39,8 @@ gen_tibble_packedancestry <- function(
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
 
   # count the loci
-  loci_table <- utils::read.table(map_file, header = FALSE)
+  # (names and alleles are read as characters)
+  loci_table <- read_loci_file(map_file, character_cols = c(1, 5, 6))
   names(loci_table) <- c(
     "name",
     "chromosome",

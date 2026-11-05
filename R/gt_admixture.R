@@ -20,7 +20,11 @@
 #' @param crossval boolean, should cross validation be used to assess the fit
 #'   (defaults to FALSE)
 #' @param n_cores number of cores (defaults to 1)
-#' @param seed the seed for the random number generator (defaults to NULL)
+#' @param seed the seed for the random number generator, either a vector of
+#'   length `n_runs` (used for each value of `k`) or of length `n_runs` *
+#'   `length(k)`. If NULL (the default), the runs for each value of `k` use
+#'   seeds 43, 44, 45, etc. (43 being the default seed of ADMIXTURE), so that
+#'   each run is different but results are reproducible.
 #' @param conda_env the name of the conda environment to use. "none" forces the
 #'   use of a local copy, whilst any other string will direct the function to
 #'   use a custom conda environment.
@@ -81,7 +85,14 @@ gt_admixture <- function(
     )
   }
 
-  if (!is.null(seed) && length(seed) == n_runs) {
+  if (is.null(seed)) {
+    # without a seed, ADMIXTURE uses its default seed (43) for every run, which
+    # would make all runs identical; so we use a different seed for each run,
+    # starting from that default
+    seed <- 43 + seq_len(n_runs) - 1
+  }
+
+  if (length(seed) == n_runs) {
     # if seed is the same for each k, repeat it for each k value
     seed <- rep(seed, length(k))
   }
@@ -129,7 +140,12 @@ gt_admixture <- function(
     # if reticulate is available
     # if we have "auto"
     if (conda_env == "auto") {
-      conda_envs <- reticulate::conda_list()[["name"]]
+      # the conda environments (none if conda itself is not installed, in
+      # which case conda_list() gives an error)
+      conda_envs <- tryCatch(
+        reticulate::conda_list()[["name"]],
+        error = function(e) character()
+      )
       # if we are on Linux and have ctidygenclust installed
       if (
         (Sys.info()["sysname"] == "Linux") &&
@@ -159,7 +175,7 @@ gt_admixture <- function(
 
   # if conda is "none", check that we have admixture installed
   if (conda_env == "none") {
-    if (system2("which", args = "admixture", stdout = NULL) != 0) {
+    if (!nzchar(Sys.which("admixture"))) {
       stop("ADMIXTURE is not installed in this path")
     }
   }
@@ -270,9 +286,7 @@ gt_admixture <- function(
       # read the output
       output_prefix <- file.path(
         outdir,
-        gsub(".bed", "", basename(input_file),
-          fixed = TRUE
-        )
+        gsub("\\.bed$", "", basename(input_file))
       )
 
       adm_list$k[index] <- this_k
@@ -312,7 +326,7 @@ gt_admixture <- function(
     adm_list$id <- x$id
     # if it is grouped, add the group
     if (inherits(x, "grouped_gen_tbl")) {
-      adm_list$group <- x[[dplyr::group_vars(x)]]
+      adm_list$group <- .group_of_rows(x)
     }
   }
 

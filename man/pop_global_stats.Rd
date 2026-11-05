@@ -9,7 +9,9 @@ pop_global_stats(.x, by_locus = FALSE, n_cores = bigstatsr::nb_cores())
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} (usually grouped, as obtained by using
 \code{\link[dplyr:group_by]{dplyr::group_by()}}; use on a single population will return a number of
-quantities as NA/NaN)}
+quantities as NA/NaN).
+If grouped by more than one variable, groups are labelled by the values
+of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
 
 \item{by_locus}{boolean, determining whether the statistics should be
 returned by locus(TRUE), or as a single genome wide value (FALSE, the

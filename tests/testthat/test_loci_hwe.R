@@ -125,8 +125,44 @@ test_that("loci_hwe for grouped tibble gives the correct result", {
   # test a second grouping variable
   test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
   test_gt <- test_gt %>% group_by(population, region)
-  expect_error(
-    test_gt %>% loci_hwe(),
-    "only works with one grouping variable"
+  # several grouping variables give the same results as a single variable
+  # combining them
+  test_gt_combined <- test_gt %>%
+    ungroup() %>%
+    mutate(pop_region = paste(population, region, sep = ".")) %>%
+    group_by(pop_region)
+  expect_equal(
+    test_gt %>% loci_hwe(type = "matrix"),
+    test_gt_combined %>% loci_hwe(type = "matrix")
   )
+})
+
+test_that("grouped loci_hwe gives NA for empty groups", {
+  test_gt <- load_example_gt("gen_tbl")
+  # an empty level in the middle and at the end
+  test_gt$population <- factor(
+    test_gt$population,
+    levels = c("pop1", "pop_empty1", "pop2", "pop3", "pop_empty2")
+  )
+  drop_hwe <- test_gt %>%
+    group_by(population) %>%
+    loci_hwe(type = "matrix")
+  keep_gt <- test_gt %>% group_by(population, .drop = FALSE)
+  keep_hwe <- keep_gt %>% loci_hwe(type = "matrix")
+  expect_equal(
+    colnames(keep_hwe),
+    c("pop1", "pop_empty1", "pop2", "pop3", "pop_empty2")
+  )
+  expect_true(all(is.na(keep_hwe[, c("pop_empty1", "pop_empty2")])))
+  # the other groups are unchanged
+  expect_equal(
+    unclass(keep_hwe)[, c("pop1", "pop2", "pop3")],
+    unclass(drop_hwe)
+  )
+  # also in the tidy and list outputs
+  keep_tidy <- keep_gt %>% loci_hwe(type = "tidy")
+  expect_true(all(is.na(keep_tidy$value[keep_tidy$group == "pop_empty2"])))
+  keep_list <- keep_gt %>% loci_hwe(type = "list")
+  expect_true(all(is.na(keep_list[[2]])))
+  expect_false(anyNA(keep_list[[1]]))
 })

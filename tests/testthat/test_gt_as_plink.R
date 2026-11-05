@@ -184,6 +184,353 @@ if (rlang::is_installed("vcfR")) {
   })
 }
 
+test_that("ped and raw use the sample ID as family ID without population", {
+  # e.g. a gen_tibble read from a vcf, which has no population column
+  test_gt_no_pop <- test_gt %>% select(-population)
+  ped_path <- gt_as_plink(
+    test_gt_no_pop,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(ped$V1, test_gt$id)
+  expect_equal(ped$V2, test_gt$id)
+  raw_path <- gt_as_plink(test_gt_no_pop, file = tempfile(), type = "raw")
+  raw <- read.table(raw_path, header = TRUE)
+  expect_equal(raw$FID, test_gt$id)
+  expect_equal(raw$IID, test_gt$id)
+  expect_equal(
+    unname(as.matrix(raw[, -(1:6)])),
+    show_genotypes(test_gt)
+  )
+})
+
+test_that("ped and raw write numeric phenotypes", {
+  test_gt_pheno <- test_gt %>% mutate(phenotype = c(1.5, 2.3, NA))
+  ped_path <- gt_as_plink(
+    test_gt_pheno,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(ped$V6, c("1.5", "2.3", "-9"))
+  test_gt_pheno <- test_gt %>% mutate(phenotype = c(1L, 2L, NA))
+  raw_path <- gt_as_plink(test_gt_pheno, file = tempfile(), type = "raw")
+  raw <- read.table(raw_path, header = TRUE)
+  expect_equal(raw$PHENOTYPE, c(1, 2, -9))
+})
+
+test_that("ped map file includes the genetic distance", {
+  test_gt_cm <- test_gt
+  show_loci(test_gt_cm)$genetic_dist <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+  ped_path <- gt_as_plink(
+    test_gt_cm,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  map <- read.table(sub("\\.ped$", ".map", ped_path), header = FALSE)
+  expect_equal(map$V3, c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6))
+  ped_gt <- gen_tibble(ped_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(
+    show_loci(ped_gt)$genetic_dist,
+    show_loci(test_gt_cm)$genetic_dist
+  )
+})
+
+test_that("ped and raw keep parents, sex and phenotype", {
+  # write a fam file with parents, sex and phenotype, and read it back
+  bed_path <- gt_as_plink(test_gt, file = paste0(tempfile(), ".bed"))
+  fam_path <- sub("\\.bed$", ".fam", bed_path)
+  fam <- read.table(fam_path, header = FALSE)
+  fam$V3 <- c("0", "0", "a")
+  fam$V4 <- c("0", "0", "b")
+  fam$V5 <- c(1, 2, 1)
+  fam$V6 <- c(1, 2, 2)
+  write.table(
+    fam,
+    fam_path,
+    quote = FALSE,
+    row.names = FALSE,
+    col.names = FALSE
+  )
+  bed_gt <- gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(bed_gt$paternal_ID, c(NA, NA, "a"))
+  expect_equal(bed_gt$maternal_ID, c(NA, NA, "b"))
+  ped_path <- gt_as_plink(
+    bed_gt,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(ped$V3, c("0", "0", "a"))
+  expect_equal(ped$V4, c("0", "0", "b"))
+  expect_equal(ped$V5, c("1", "2", "1"))
+  expect_equal(ped$V6, c("1", "2", "2"))
+  raw_path <- gt_as_plink(bed_gt, file = tempfile(), type = "raw")
+  raw <- read.table(raw_path, header = TRUE, colClasses = "character")
+  expect_equal(unname(as.list(raw[, 3:6])), unname(as.list(ped[, 3:6])))
+  # the metadata read from a ped file is also written back
+  ped_gt <- gen_tibble(ped_path, backingfile = tempfile(), quiet = TRUE)
+  ped_path2 <- gt_as_plink(
+    ped_gt,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped2 <- read.table(ped_path2, header = FALSE, colClasses = "character")
+  expect_equal(ped2[, 1:6], ped[, 1:6])
+})
+
+test_that("bed fam file has the same individual information as ped", {
+  test_gt_meta <- test_gt %>%
+    mutate(
+      paternal_ID = c(NA, NA, "a"),
+      maternal_ID = c(NA, NA, "b"),
+      sex = factor(c("male", "female", "male")),
+      phenotype = factor(
+        c("control", "case", "case"),
+        levels = c("control", "case")
+      ),
+      region = c("north", "south", "south")
+    )
+  bed_path <- gt_as_plink(test_gt_meta, file = paste0(tempfile(), ".bed"))
+  fam <- read.table(
+    sub("\\.bed$", ".fam", bed_path),
+    header = FALSE,
+    colClasses = "character"
+  )
+  ped_path <- gt_as_plink(
+    test_gt_meta,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE, colClasses = "character")
+  expect_equal(fam$V1, test_gt$population)
+  expect_equal(fam, ped[, 1:6])
+  # population and the other metadata survive the round trip
+  bed_gt <- gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(
+    bed_gt %>% select(-genotypes),
+    test_gt_meta %>% select(-genotypes, -region)
+  )
+  # a grouping variable is used as family ID by all formats
+  test_gt_grouped <- test_gt_meta %>% group_by(region)
+  bed_path <- gt_as_plink(test_gt_grouped, file = paste0(tempfile(), ".bed"))
+  fam <- read.table(sub("\\.bed$", ".fam", bed_path), header = FALSE)
+  expect_equal(fam$V1, test_gt_meta$region)
+  ped_path <- gt_as_plink(
+    test_gt_grouped,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, header = FALSE)
+  expect_equal(ped$V1, test_gt_meta$region)
+})
+
+# the individual information of a gen_tibble (without the genotypes)
+indiv_info <- function(x) {
+  x %>%
+    dplyr::ungroup() %>%
+    select(-"genotypes")
+}
+
+# whether two gen_tibbles have the same genotypes, allowing for loci with
+# swapped alleles (ped readers take as reference the first allele found)
+same_genotypes <- function(x, y) {
+  geno_y <- show_genotypes(y)
+  swapped <- which(show_loci(x)$allele_ref != show_loci(y)$allele_ref)
+  geno_y[, swapped] <- 2 - geno_y[, swapped]
+  identical(show_genotypes(x), geno_y)
+}
+
+test_that("ped files are read into the same columns as bed files", {
+  # write the same individuals as bed and ped files, replacing their fam
+  # information (the first six columns of the ped file)
+  plink_dir <- tempfile("plink_meta_")
+  dir.create(plink_dir)
+  bed_path <- gt_as_plink(test_gt, file = file.path(plink_dir, "x.bed"))
+  ped_path <- gt_as_plink(
+    test_gt,
+    file = file.path(plink_dir, "x.ped"),
+    type = "ped"
+  )
+  ped_genotypes <- sub("^(\\S+\\s+){6}", "", readLines(ped_path))
+  read_bed_ped <- function(fam) {
+    writeLines(fam, file.path(plink_dir, "x.fam"))
+    writeLines(paste(fam, ped_genotypes), ped_path)
+    list(
+      bed = gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE),
+      ped = gen_tibble(ped_path, backingfile = tempfile(), quiet = TRUE)
+    )
+  }
+  # parents, sex and a case/control phenotype, with IDs that look like numbers
+  gts <- read_bed_ped(c("f1 001 0 0 1 2", "f1 b 001 0 2 1", "2 c 001 b 0 -9"))
+  expect_identical(
+    indiv_info(gts$ped),
+    tibble::tibble(
+      id = c("001", "b", "c"),
+      population = c("f1", "f1", "2"),
+      paternal_ID = c(NA, "001", "001"),
+      maternal_ID = c(NA, NA, "b"),
+      sex = factor(c("male", "female", NA), levels = c("female", "male")),
+      phenotype = factor(
+        c("case", "control", NA),
+        levels = c("control", "case")
+      )
+    )
+  )
+  expect_identical(indiv_info(gts$ped), indiv_info(gts$bed))
+  expect_identical(show_genotypes(gts$ped), show_genotypes(gts$bed))
+  # a quantitative phenotype
+  gts <- read_bed_ped(c("f1 a 0 0 1 1.5", "f1 b 0 0 2 0", "f2 c 0 0 1 -9"))
+  expect_identical(gts$ped$phenotype, c(1.5, 0, NA))
+  expect_identical(indiv_info(gts$ped), indiv_info(gts$bed))
+  # no information besides the IDs, with the family ID equal to the
+  # individual ID (as written for a gen_tibble without population)
+  gts <- read_bed_ped(c("a a 0 0 0 -9", "b b 0 0 0 -9", "c c 0 0 0 -9"))
+  expect_identical(names(gts$ped), c("id", "genotypes"))
+  expect_identical(indiv_info(gts$ped), indiv_info(gts$bed))
+})
+
+test_that("individual information survives round trips through PLINK files", {
+  test_gt_meta <- test_gt %>%
+    mutate(
+      paternal_ID = c(NA, NA, "a"),
+      maternal_ID = c(NA, "a", "b"),
+      sex = factor(c("male", NA, "female"), levels = c("female", "male")),
+      phenotype = factor(
+        c("control", "case", NA),
+        levels = c("control", "case")
+      )
+    )
+  # the files written for the gen_tibble with all the information are as
+  # expected by PLINK (with 0 for missing parents and unknown sex, and -9 for
+  # missing phenotypes)
+  fam_info <- list(
+    c("pop1", "pop1", "pop2"),
+    c("a", "b", "c"),
+    c("0", "0", "a"),
+    c("0", "a", "b"),
+    c("1", "0", "2"),
+    c("1", "2", "-9")
+  )
+  bed_path <- gt_as_plink(test_gt_meta, file = paste0(tempfile(), ".bed"))
+  fam <- read.table(sub("\\.bed$", ".fam", bed_path), colClasses = "character")
+  expect_identical(unname(as.list(fam)), fam_info)
+  ped_path <- gt_as_plink(
+    test_gt_meta,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped <- read.table(ped_path, colClasses = "character")
+  expect_identical(unname(as.list(ped[, 1:6])), fam_info)
+  raw_path <- gt_as_plink(test_gt_meta, file = tempfile(), type = "raw")
+  raw <- read.table(raw_path, header = TRUE, colClasses = "character")
+  expect_identical(
+    names(raw)[1:6],
+    c("FID", "IID", "PAT", "MAT", "SEX", "PHENOTYPE")
+  )
+  expect_identical(unname(as.list(raw[, 1:6])), fam_info)
+
+  # write a gen_tibble to bed, ped and raw files, and read the bed and ped
+  # files back
+  round_trip <- function(x) {
+    bed_path <- gt_as_plink(x, file = paste0(tempfile(), ".bed"))
+    ped_path <- gt_as_plink(x, file = paste0(tempfile(), ".ped"), type = "ped")
+    raw_path <- gt_as_plink(x, file = tempfile(), type = "raw")
+    fam <- read.table(
+      sub("\\.bed$", ".fam", bed_path),
+      colClasses = "character"
+    )
+    ped <- read.table(ped_path, colClasses = "character")
+    raw <- read.table(raw_path, header = TRUE, colClasses = "character")
+    # the same individual information is written to all files
+    expect_identical(unname(as.list(ped[, 1:6])), unname(as.list(fam)))
+    expect_identical(unname(as.list(raw[, 1:6])), unname(as.list(fam)))
+    # (missing genotypes are written as NA, and read as NA)
+    expect_identical(
+      unname(as.matrix(raw[, -(1:6)])),
+      matrix(as.character(show_genotypes(x)), nrow = nrow(x))
+    )
+    list(
+      bed = gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE),
+      ped = gen_tibble(ped_path, backingfile = tempfile(), quiet = TRUE)
+    )
+  }
+  inputs <- list(
+    test_gt_meta,
+    # a quantitative phenotype
+    test_gt_meta %>% mutate(phenotype = c(1.5, NA, 0)),
+    # no parents, sex or phenotype
+    test_gt,
+    # no population (written with the individual ID as family ID)
+    test_gt_meta %>% select(-population),
+    # grouped by population (the family ID)
+    test_gt_meta %>% group_by(population)
+  )
+  for (x in inputs) {
+    # from gen_tibbles read from bed and ped files, to bed and ped files
+    for (in_gt in round_trip(x)) {
+      expect_identical(indiv_info(in_gt), indiv_info(x))
+      expect_true(same_genotypes(in_gt, x))
+      for (out_gt in round_trip(in_gt)) {
+        expect_identical(indiv_info(out_gt), indiv_info(x))
+        expect_true(same_genotypes(out_gt, x))
+      }
+    }
+  }
+  # grouped by another variable, which becomes the family ID (and thus the
+  # population when the files are read back)
+  test_gt_region <- test_gt_meta %>%
+    mutate(region = c("north", "north", "south")) %>%
+    group_by(region)
+  for (out_gt in round_trip(test_gt_region)) {
+    expect_identical(
+      indiv_info(out_gt),
+      indiv_info(test_gt_meta) %>% mutate(population = test_gt_region$region)
+    )
+  }
+})
+
+test_that("information of example PLINK files survives round trips", {
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  files <- c(
+    file.path(ext_dir, c("pop_a.bed", "pop_b.bed", "pop_a.ped", "pop_b.ped")),
+    file.path(ext_dir, "lobster", "lobster.bed"),
+    file.path(ext_dir, "related", "families.bed")
+  )
+  for (file in files) {
+    in_gt <- gen_tibble(
+      file,
+      backingfile = tempfile(),
+      valid_alleles = c("A", "T", "C", "G", "1", "2"),
+      quiet = TRUE
+    )
+    for (type in c("bed", "ped")) {
+      out_path <- gt_as_plink(
+        in_gt,
+        file = paste0(tempfile(), ".", type),
+        type = type
+      )
+      out_gt <- gen_tibble(
+        out_path,
+        backingfile = tempfile(),
+        valid_alleles = c("A", "T", "C", "G", "1", "2"),
+        quiet = TRUE
+      )
+      expect_identical(indiv_info(out_gt), indiv_info(in_gt))
+      expect_true(same_genotypes(out_gt, in_gt))
+    }
+    # the raw file has the same individual information as the fam file
+    raw_path <- gt_as_plink(in_gt, file = tempfile(), type = "raw")
+    raw <- read.table(raw_path, header = TRUE, colClasses = "character")
+    fam <- read.table(
+      sub("\\.bed$", ".fam", gt_as_plink(in_gt, file = tempfile())),
+      colClasses = "character"
+    )
+    expect_identical(unname(as.list(raw[, 1:6])), unname(as.list(fam)))
+  }
+})
+
 test_that("handling of duplicated loci", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
@@ -392,16 +739,61 @@ test_that("gt_as_plink errors on polyploid data", {
   )
   expect_error(
     gt_as_plink(tetra_gt, file = paste0(tempfile(), ".bed"), type = "bed"),
-    "this function only works on diploid data"
+    "this function only works on diploid or pseudohaploid data"
   )
   expect_error(
     gt_as_plink(tetra_gt, file = paste0(tempfile(), ".ped"), type = "ped"),
-    "this function only works on diploid data"
+    "this function only works on diploid or pseudohaploid data"
   )
   expect_error(
     gt_as_plink(tetra_gt, file = tempfile(), type = "raw"),
-    "this function only works on diploid data"
+    "this function only works on diploid or pseudohaploid data"
   )
+})
+
+test_that("gt_as_plink works on pseudohaploid data", {
+  test_indiv_meta <- data.frame(
+    id = c("d1", "p1", "p2", "d2"),
+    population = c("pop1", "pop1", "pop2", "pop2")
+  )
+  # p1 and p2 are pseudohaploids (only homozygous calls)
+  test_genotypes <- rbind(
+    c(1, 0, 1, 0, 1, 1),
+    c(2, NA, 0, 2, 2, 0),
+    c(0, 2, 2, NA, 0, 2),
+    c(2, 1, 0, 1, 0, 0)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = paste0("chr", c(1, 1, 1, 1, 2, 2)),
+    position = as.integer(c(3, 5, 65, 343, 23, 456)),
+    genetic_dist = as.double(rep(0, 6)),
+    allele_ref = c("A", "T", "C", "G", "C", "T"),
+    allele_alt = c("T", "C", "G", "C", "G", "A")
+  )
+  pseudo_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  pseudo_gt <- gt_pseudohaploid(pseudo_gt, test_n_loci = 6)
+  expect_true(is_pseudohaploid(pseudo_gt))
+  # pseudohaploid dosages are written as regular diploid counts (0/2)
+  bed_path <- gt_as_plink(pseudo_gt, file = paste0(tempfile(), ".bed"))
+  bed_gt <- gen_tibble(bed_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(show_genotypes(bed_gt), test_genotypes)
+  ped_path <- gt_as_plink(
+    pseudo_gt,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  ped_gt <- gen_tibble(ped_path, backingfile = tempfile(), quiet = TRUE)
+  expect_equal(show_genotypes(ped_gt), test_genotypes)
+  raw_path <- gt_as_plink(pseudo_gt, file = tempfile(), type = "raw")
+  raw_table <- read.table(raw_path, header = TRUE)
+  expect_equal(unname(as.matrix(raw_table[, -(1:6)])), test_genotypes)
 })
 
 test_that("plink files location when 'file' is NULL", {
@@ -438,4 +830,89 @@ test_that("plink files location when 'file' is NULL", {
   expected_bed_file <- paste0(expected_bed_file, ".bed")
 
   expect_equal(bed_path, expected_bed_file)
+})
+
+test_that("double positions are not written in scientific notation", {
+  test_gt_dbl <- test_gt
+  show_loci(test_gt_dbl)$position <- c(100000, 200000, 3e6, 999999, 1e5, 1e6)
+  ped_path <- gt_as_plink(
+    test_gt_dbl,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  map <- read.table(
+    sub("\\.ped$", ".map", ped_path),
+    header = FALSE,
+    colClasses = "character"
+  )
+  expect_equal(
+    map$V4,
+    c("100000", "200000", "3000000", "999999", "100000", "1000000")
+  )
+  bed_path <- gt_as_plink(test_gt_dbl, file = paste0(tempfile(), ".bed"))
+  bim <- read.table(
+    sub("\\.bed$", ".bim", bed_path),
+    header = FALSE,
+    colClasses = "character"
+  )
+  expect_equal(bim$V4, map$V4)
+})
+
+test_that("ped and raw write subsets of individuals and loci", {
+  # reorder individuals and loci, and use integer loci names
+  sub_gt <- test_gt[c(3, 1), ] %>% select_loci(c(6, 3, 5))
+  sub_loci <- show_loci(sub_gt)
+  sub_loci$name <- c(3L, 2L, 1L)
+  show_loci(sub_gt) <- sub_loci
+  ped_path <- gt_as_plink(sub_gt, file = paste0(tempfile(), ".ped"), "ped")
+  # the second locus has a missing alternate allele (written as 0)
+  expect_equal(
+    readLines(ped_path),
+    c("pop2 c 0 0 0 -9 T A C C 0 0", "pop1 a 0 0 0 -9 T T C C C G")
+  )
+  raw_path <- gt_as_plink(sub_gt, file = paste0(tempfile(), ".raw"), "raw")
+  expect_equal(
+    readLines(raw_path),
+    c(
+      "FID IID PAT MAT SEX PHENOTYPE 3_A(/T) 2_0(/C) 1_G(/C)",
+      "pop2 c 0 0 0 -9 1 0 NA",
+      "pop1 a 0 0 0 -9 0 0 1"
+    )
+  )
+})
+
+test_that("ped and raw write missing reference alleles as 0", {
+  # the first locus has a missing reference allele (all genotypes are
+  # homozygous for the alternate allele), the second has no alleles (and no
+  # genotypes)
+  na_ref_loci <- test_loci[1:2, ]
+  na_ref_loci$allele_ref <- c(NA_character_, NA_character_)
+  na_ref_loci$allele_alt <- c("T", NA)
+  na_ref_gt <- suppressWarnings(gen_tibble(
+    x = cbind(c(2, 2, NA), c(NA, NA, NA)),
+    loci = na_ref_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ))
+  raw_path <- gt_as_plink(na_ref_gt, file = paste0(tempfile(), ".raw"), "raw")
+  expect_equal(
+    readLines(raw_path, n = 1),
+    "FID IID PAT MAT SEX PHENOTYPE rs1_T(/0) rs2_0(/0)"
+  )
+  ped_path <- gt_as_plink(na_ref_gt, file = paste0(tempfile(), ".ped"), "ped")
+  expect_equal(
+    readLines(ped_path),
+    c(
+      "pop1 a 0 0 0 -9 T T 0 0",
+      "pop1 b 0 0 0 -9 T T 0 0",
+      "pop2 c 0 0 0 -9 0 0 0 0"
+    )
+  )
+  # the bim file of a bed also uses 0 for both missing alleles
+  bed_path <- gt_as_plink(na_ref_gt, file = paste0(tempfile(), ".bed"))
+  bim <- utils::read.table(sub("\\.bed$", ".bim", bed_path),
+    colClasses = "character"
+  )
+  expect_equal(bim$V5, c("T", "0"))
+  expect_equal(bim$V6, c("0", "0"))
 })

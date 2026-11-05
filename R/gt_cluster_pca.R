@@ -131,7 +131,7 @@ gt_cluster_pca <- function(
   # vector to store within sum of squares
   wss <- numeric(0)
   # get the scores
-  x_scores <- sweep(x$u, 2, x$d, "*")[, seq_len(n_pca)]
+  x_scores <- sweep(x$u, 2, x$d, "*")[, seq_len(n_pca), drop = FALSE]
 
   # TODO this is an obvious place to parallelise
   for (i in seq_along(nb_clust)) {
@@ -160,7 +160,7 @@ gt_cluster_pca <- function(
     # add the classification for 1 cluster (they are all 1!)
     cluster_list$groups <- append(
       cluster_list$groups,
-      list(stats::setNames(rep(1, n), names(cluster_list$groups[[2]]))),
+      list(stats::setNames(rep(1, n), rownames(x_scores))),
       after = 0
     )
     nb_clust <- c(1, nb_clust)

@@ -242,7 +242,7 @@ test_that("run admixture as multiple runs", {
   )
   expect_error(
     autoplot(anole_adm_cv, type = "barplot", k = 2),
-    "^You must specify a value for repeat"
+    "^You must specify a value for run"
   )
   bar_plot <- autoplot(anole_adm_cv, type = "barplot", k = 2, run = 1)
   # check that this is indeed a ggplot object
@@ -666,6 +666,29 @@ test_that("set output dir for admixture Q files", {
   expect_true(all(grepl("\\.Q$|\\.P$", list.files(relative_path))))
 })
 
+test_that("gt_admixture works with '.bed' elsewhere in the file name", {
+  bed_file <- system.file("extdata", "lobster", "lobster.bed",
+    package = "tidypopgen"
+  )
+  bed_dir <- tempfile("admix_")
+  dir.create(bed_dir)
+  for (this_ext in c(".bed", ".bim", ".fam")) {
+    file.copy(
+      sub("\\.bed$", this_ext, bed_file),
+      file.path(bed_dir, paste0("lobster.bedfile", this_ext))
+    )
+  }
+  adm <- gt_admixture(
+    x = file.path(bed_dir, "lobster.bedfile.bed"),
+    k = 2,
+    seed = 1,
+    conda_env = "none",
+    outdir = bed_dir
+  )
+  expect_true(inherits(adm$Q[[1]], "q_matrix"))
+  expect_equal(ncol(adm$Q[[1]]), 2)
+})
+
 test_that("seed length", {
   vcf_path <-
     system.file(
@@ -696,8 +719,9 @@ test_that("seed length", {
     conda_env = "none"
   )
   null_seeds <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res_null$log)
-  # this should be the default seed of 43
-  expect_equal(as.numeric(null_seeds), rep(43, 4))
+  # the runs start from the default seed of 43, and each run has its own seed
+  expect_equal(as.numeric(null_seeds), c(43, 44, 43, 44))
+  expect_false(identical(res_null$Q[[1]], res_null$Q[[2]]))
 
   # seed should be the length of n_runs * K OR the length of n_runs
   # and the whole vector is repeated for each k

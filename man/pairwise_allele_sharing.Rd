@@ -7,7 +7,8 @@
 pairwise_allele_sharing(
   x,
   as_matrix = FALSE,
-  block_size = bigstatsr::block_size(nrow(x))
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = 1
 )
 }
 \arguments{
@@ -16,8 +17,11 @@ pairwise_allele_sharing(
 \item{as_matrix}{boolean, determining whether the results should be a square
 symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 
-\item{block_size}{maximum number of loci read at once. More loci should
-improve speed, but will tax memory.}
+\item{block_size}{maximum number of loci read at once. Genotypes are
+compared in a compact bit-packed form, so this has little effect on
+memory use.}
+
+\item{n_cores}{number of cores to be used (default 1).}
 }
 \value{
 a matrix of allele sharing between all pairs of individuals

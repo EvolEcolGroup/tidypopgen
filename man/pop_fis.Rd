@@ -9,12 +9,15 @@ pop_fis(
   method = c("Nei87", "WG17"),
   by_locus = FALSE,
   include_global = FALSE,
-  allele_sharing_mat = NULL
+  allele_sharing_mat = NULL,
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using
-\code{\link[dplyr:group_by]{dplyr::group_by()}}); if method == "Nei87", it is also possible to use
+\code{\link[dplyr:group_by]{dplyr::group_by()}}, by one or more variables; with several, groups are
+labelled by their values pasted with ".", e.g. \code{pop1.F}); if method ==
+"Nei87", it is also possible to use
 a regular \code{gen_tibble}, in which case all individuals are considered to
 belong to a single population.}
 
@@ -35,6 +38,10 @@ matrix with n+1 columns if \code{by_locus=TRUE}.}
 of Allele Sharing returned by \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with
 \code{as_matrix=TRUE}. As a number of statistics can be derived from the Allele
 Sharing matrix, it is sometimes more efficient to pre-compute this matrix.}
+
+\item{n_cores}{number of cores to be used for "Nei87" (it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}); "WG17" uses the allele sharing matrix, see
+\code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}}.}
 }
 \value{
 a vector of population specific fis (plus the global value if

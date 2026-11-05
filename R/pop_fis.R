@@ -9,7 +9,9 @@
 #' @references Weir, BS and Goudet J (2017) A Unified Characterization of
 #'   Population Structure and Relatedness. Genetics (2017) 206:2085
 #' @param .x a grouped [`gen_tibble`] (as obtained by using
-#'   [dplyr::group_by()]); if method == "Nei87", it is also possible to use
+#'   [dplyr::group_by()], by one or more variables; with several, groups are
+#'   labelled by their values pasted with ".", e.g. `pop1.F`); if method ==
+#'   "Nei87", it is also possible to use
 #'   a regular `gen_tibble`, in which case all individuals are considered to
 #'   belong to a single population.
 #' @param method one of "Nei87" (based on Nei 1987, eqn 7.41) or "WG17" (for
@@ -26,6 +28,9 @@
 #'   of Allele Sharing returned by [pairwise_allele_sharing()] with
 #'   `as_matrix=TRUE`. As a number of statistics can be derived from the Allele
 #'   Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
+#' @param n_cores number of cores to be used for "Nei87" (it defaults to
+#'   [bigstatsr::nb_cores()]); "WG17" uses the allele sharing matrix, see
+#'   [pairwise_allele_sharing()].
 #' @returns a vector of population specific fis (plus the global value if
 #'   `include_global=TRUE`)
 #' @export
@@ -61,14 +66,18 @@ pop_fis <- function(
   method = c("Nei87", "WG17"),
   by_locus = FALSE,
   include_global = FALSE,
-  allele_sharing_mat = NULL
+  allele_sharing_mat = NULL,
+  n_cores = bigstatsr::nb_cores()
 ) {
   method <- match.arg(method)
   if (method == "Nei87") {
     if (!is.null(allele_sharing_mat)) {
       stop("allele_sharing_mat not relevant for Nei87")
     }
-    pop_fis_nei87(.x, by_locus = by_locus, include_global = include_global)
+    pop_fis_nei87(.x,
+      by_locus = by_locus, include_global = include_global,
+      n_cores = n_cores
+    )
   } else if (method == "WG17") {
     if (by_locus) {
       stop("by_locus not implemented for WG17")
@@ -88,47 +97,32 @@ pop_fis_nei87 <- function(
   n_cores = bigstatsr::nb_cores()
 ) {
   stopifnot_diploid(.x)
-  # get the populations if it is a grouped gen_tibble
-  if (inherits(.x, "grouped_df")) {
-    .group_levels <- .x %>% group_keys()
-    .group_ids <- dplyr::group_indices(.x) - 1
-  } else {
-    # create a dummy pop
-    .group_levels <- tibble(population = "pop")
-    .group_ids <- rep(0, nrow(.x))
-  }
-
-  # summarise population frequencies
-  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_fbm(.x),
-    rowInd = .gt_fbm_rows(.x),
-    colInd = .gt_fbm_cols(.x),
-    groupIds = .group_ids,
-    ngroups = nrow(.group_levels),
-    ploidy = indiv_ploidy(.x),
-    ncores = n_cores
+  # compute Fis = 1 - Ho/Hs for each population (and the global statistics,
+  # which include the global Fis) in a single pass over the genotypes
+  pop_stats <- .pop_stats_dip_pseudo(
+    .x,
+    by_locus_fis = by_locus,
+    by_locus_global = by_locus && include_global,
+    n_cores = n_cores
   )
-  sHo <- pop_freqs_df$het_obs # nolint
-  mHo <- rowMeans(sHo, na.rm = TRUE) # nolint
-  n <- pop_freqs_df$n / 2
-  # sum of squared frequencies
-  sp2 <- pop_freqs_df$freq_alt^2 + pop_freqs_df$freq_ref^2
-  Hs <- (1 - sp2 - sHo / 2 / n) # nolint start
-  Hs <- n / (n - 1) * Hs
-  Fis <- 1 - sHo / Hs # nolint end
 
-  colnames(Fis) <- .group_levels %>% dplyr::pull(1) # nolint
   if (by_locus) {
+    Fis <- pop_stats$fis # nolint
+    colnames(Fis) <- pop_stats$group_names # nolint
     if (include_global) {
-      global <-
-        (.x %>% pop_global_stats(by_locus = TRUE, n_cores = n_cores))$Fis
+      # Fis is the ninth global statistic
+      global <- pop_stats$global[, 9]
       Fis <- cbind(Fis, global) # nolint
     }
   } else {
-    Fis <- colMeans(Fis, na.rm = TRUE) # nolint
+    # means across loci
+    Fis <- pop_stats$mean_fis # nolint
+    names(Fis) <- pop_stats$group_names
     if (include_global) {
-      global <-
-        (.x %>% pop_global_stats(by_locus = FALSE, n_cores = n_cores))["Fis"]
+      # as in pop_global_stats(), the genome-wide global Fis is computed from
+      # the means of Ho and Hs (ignoring infinite values)
+      global <- 1 - pop_stats$mean_global_finite[1] /
+        pop_stats$mean_global_finite[2]
       names(global) <- "global"
       Fis <- c(Fis, global) # nolint
     }
@@ -153,9 +147,16 @@ pop_fis_wg17 <- function(
   Mij <- allele_sharing_mat
   Mii <- diag(Mij) * 2 - 1
   diag(Mij) <- NA
-  pop <- factor(group_indices(.x))
-  pop_levels <- levels(pop)
+  groups <- .group_info(.x)
+  # the group of each individual
+  pop <- groups$ids + 1L
+  # empty groups (which only exist if the user asked for them) do not
+  # contribute to the mean allele sharing between groups, and get NaN
+  pop_levels <- which(groups$sizes > 0)
   n_pop <- length(pop_levels)
+  if (n_pop < 2) {
+    stop("pop_fis with method 'WG17' requires at least two groups")
+  }
   wil <- lapply(pop_levels, function(z) which(pop == z))
   Fi <- lapply(wil, function(pop_levels) Mii[pop_levels])
   Fsts <- unlist(lapply(
@@ -182,14 +183,15 @@ pop_fis_wg17 <- function(
   for (i in 1:n_pop) {
     Fi[[i]] <- (Fi[[i]] - Fsts[[i]]) / (1 - Fsts[[i]])
   }
-  names(Fi) <- as.character(pop_levels)
-  fis_by_pop <- unlist(lapply(Fi, mean, na.rm = TRUE))
+  fis_non_empty <- unlist(lapply(Fi, mean, na.rm = TRUE))
+  fis_by_pop <- rep(NaN, groups$n)
+  fis_by_pop[pop_levels] <- fis_non_empty
 
   if (include_global) {
-    fis_by_pop <- c(fis_by_pop, mean(fis_by_pop, na.rm = TRUE))
-    names(fis_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1), "global")
+    fis_by_pop <- c(fis_by_pop, mean(fis_non_empty, na.rm = TRUE))
+    names(fis_by_pop) <- c(groups$labels, "global")
   } else {
-    names(fis_by_pop) <- c(dplyr::group_keys(.x) %>% pull(1))
+    names(fis_by_pop) <- groups$labels
   }
   return(fis_by_pop)
 }

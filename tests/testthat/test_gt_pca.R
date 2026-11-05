@@ -296,6 +296,74 @@ test_that("PCA functions work with loci out of order", {
   expect_equal(missing_rand_pca1$loadings, missing_rand_pca2$loadings)
 })
 
+test_that("gt_pca_autoSVD works with loci out of order", {
+  set.seed(123)
+  n_ind <- 100
+  n_loci <- 900
+  pops <- rep(1:4, each = n_ind / 4)
+  freqs <- matrix(stats::runif(4 * n_loci, 0.05, 0.95), nrow = 4)
+  geno <- t(sapply(seq_len(n_ind), function(i) {
+    stats::rbinom(n_loci, 2, freqs[pops[i], ])
+  }))
+  loci <- data.frame(
+    name = paste0("rs", seq_len(n_loci)),
+    chromosome = rep(1:3, each = n_loci / 3),
+    position = rep(seq_len(n_loci / 3) * 1000, 3),
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  meta <- data.frame(id = paste0("ind", seq_len(n_ind)), population = pops)
+  test_gt <- gen_tibble(
+    geno,
+    indiv_meta = meta,
+    loci = loci,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  pca_ordered <- gt_pca_autoSVD(test_gt,
+    k = 3, use_positions = FALSE,
+    roll_size = 7, verbose = FALSE
+  )
+  # reverse the order of the loci in the loci table
+  test_gt_rev <- test_gt %>% select_loci(rev(seq_len(n_loci)))
+  pca_rev <- gt_pca_autoSVD(test_gt_rev,
+    k = 3, use_positions = FALSE,
+    roll_size = 7, verbose = FALSE
+  )
+  # the same loci should be retained, and the loci table should be in the
+  # same order as the loadings
+  expect_identical(pca_rev$loci$name, row_names(pca_rev$v))
+  expect_identical(pca_ordered$loci$name, row_names(pca_ordered$v))
+  expect_identical(sort(pca_rev$loci$name), sort(pca_ordered$loci$name))
+  # loadings, centre and scale of each locus are the same
+  match_loci <- match(row_names(pca_ordered$v), row_names(pca_rev$v))
+  expect_equal(
+    abs(unclass(pca_rev$v)[match_loci, ]),
+    abs(unclass(pca_ordered$v)),
+    ignore_attr = TRUE
+  )
+  expect_equal(pca_rev$center[match_loci], pca_ordered$center)
+  expect_equal(pca_rev$scale[match_loci], pca_ordered$scale)
+  # the total variance is the same
+  expect_equal(pca_rev$square_frobenius, pca_ordered$square_frobenius)
+  expect_equal(
+    tidy(pca_rev, "eigenvalues")$percent,
+    tidy(pca_ordered, "eigenvalues")$percent
+  )
+  # predicting the original data recovers the scores
+  expect_equal(
+    abs(predict(pca_rev, new_data = test_gt_rev, project_method = "none")),
+    abs(predict(pca_rev)),
+    ignore_attr = TRUE
+  )
+  expect_equal(
+    abs(predict(pca_rev, new_data = test_gt, project_method = "none")),
+    abs(predict(pca_ordered)),
+    ignore_attr = TRUE
+  )
+})
+
 test_that("PCA computes frobenius when needed", {
   bed_file <- system.file("extdata", "example-missing.bed", package = "bigsnpr")
   missing_gt <- gen_tibble(

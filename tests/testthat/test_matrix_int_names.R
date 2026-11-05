@@ -457,3 +457,34 @@ test_that("as.data.frame preserves numeric row names", {
   # but the column names have been turned into character
   expect_equal(colnames(df), c("100", "200", "300", "400"))
 })
+
+test_that("as.data.frame works without row or column names", {
+  im <- matrix_int_names(matrix(1:4, nrow = 2), row_names = c(3L, 4L))
+  df <- as.data.frame(im)
+  expect_equal(attr(df, "row.names"), c(3L, 4L))
+  expect_equal(names(df), c("V1", "V2"))
+  df <- as.data.frame(matrix_int_names(matrix(1:4, nrow = 2)))
+  expect_equal(dim(df), c(2, 2))
+  expect_equal(names(df), c("V1", "V2"))
+})
+
+test_that("indexing with a single index works as for a standard matrix", {
+  m <- matrix(c(0.1, 0.7, 0.2, 0.9), nrow = 2)
+  im <- matrix_int_names(m, row_names = c(5L, 6L), col_names = c("a", "b"))
+  # vector indexing
+  expect_equal(im[3], m[3])
+  expect_equal(im[c(1, 4)], m[c(1, 4)])
+  # logical matrix indexing
+  expect_equal(im[im > 0.5], m[m > 0.5])
+  # assignment with a logical matrix
+  im[im > 0.5] <- 0
+  m[m > 0.5] <- 0
+  expect_equal(unclass(im)[], m, ignore_attr = TRUE)
+  expect_s3_class(im, "matrix_int_names")
+  expect_equal(row_names(im), c(5L, 6L))
+  expect_equal(col_names(im), c("a", "b"))
+  # single index assignment
+  im[1] <- 42
+  expect_equal(im[1, 1], c(a = 42))
+  expect_equal(row_names(im), c(5L, 6L))
+})

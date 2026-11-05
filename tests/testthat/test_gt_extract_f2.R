@@ -133,3 +133,31 @@ test_that("n_cores can be set", {
     suppressWarnings(admixtools::f2_from_precomp(temp2, verbose = FALSE))
   )
 })
+
+test_that("gt_extract_f2 drops empty groups", {
+  test_gt <- test_gt %>% dplyr::ungroup()
+  drop_gt <- test_gt %>% group_by(population)
+  # an empty level in the middle and at the end
+  test_gt$population <- factor(
+    test_gt$population,
+    levels = c("pop1", "pop_empty1", "pop2", "pop3", "pop_empty2")
+  )
+  keep_gt <- test_gt %>% group_by(population, .drop = FALSE)
+  expect_equal(dplyr::n_groups(keep_gt), 5)
+
+  # the aftable has the same populations as when dropping empty groups
+  drop_aftable <- gt_to_aftable(drop_gt)
+  keep_aftable <- gt_to_aftable(keep_gt)
+  expect_equal(colnames(keep_aftable$afs), c("pop1", "pop2", "pop3"))
+  expect_equal(keep_aftable, drop_aftable)
+
+  # and so do the f2 statistics
+  drop_dir <- tempfile()
+  keep_dir <- tempfile()
+  suppressWarnings(gt_extract_f2(drop_gt, outdir = drop_dir, quiet = TRUE))
+  suppressWarnings(gt_extract_f2(keep_gt, outdir = keep_dir, quiet = TRUE))
+  expect_equal(
+    suppressWarnings(admixtools::f2_from_precomp(keep_dir, verbose = FALSE)),
+    suppressWarnings(admixtools::f2_from_precomp(drop_dir, verbose = FALSE))
+  )
+})
