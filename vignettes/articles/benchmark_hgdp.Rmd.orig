@@ -226,13 +226,12 @@ pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
 
 Plot pairwise Fst:
 
-```{r pairwise_fst_plot, eval = FALSE}
+```{r pairwise_fst_plot}
 # Order by continents
 grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
 regional_order <- unique(grouped_hgdp_order$population)
 
-autoplot(pairwise_fsts,
-         order = regional_order) +
+autoplot(pairwise_fsts, order = regional_order) +
   scale_fill_viridis_c() +
   theme(
     axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
