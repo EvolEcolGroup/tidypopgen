@@ -313,6 +313,13 @@ test_that("write_sfs checks its arguments for a gen_tibble", {
     write_sfs(test_gt_slash, out_dir = out_dir, n_proj = 2),
     "cannot contain"
   )
+  expect_error(
+    write_sfs(test_gt,
+      format = "fastsimcoal2", out_dir = out_dir, n_proj = 2,
+      prefix = "../test"
+    ),
+    "`prefix` should be a single string without"
+  )
   # the spectrum of pop1 (projected to 2 copies) and of the pair of pop1 and
   # a group "2" would both be pop1-2.sfs
   test_gt_2 <- test_gt %>%

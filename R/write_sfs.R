@@ -284,6 +284,16 @@ write_sfs.default <- function(x, ...) {
   if (is.null(prefix)) {
     prefix <- basename(backing_name)
   }
+  # the prefix is part of the file names (in fastsimcoal2 format), so a
+  # path separator would write files outside out_dir
+  is_name <- is.character(prefix) && length(prefix) == 1 && !is.na(prefix) &&
+    nzchar(prefix) && !grepl("[/\\\\]", prefix)
+  if (!is_name) {
+    stop(
+      "`prefix` should be a single string without '/' or '\\', as it is ",
+      "used in file names"
+    )
+  }
   data <- .sfs_set_ancestral(.sfs_data(.x), ancestral, folded = folded)
   labels <- data$labels
   if (any(grepl("[/\\\\]", labels))) {
