@@ -309,6 +309,28 @@ test_that("write_sfs checks its arguments for a gen_tibble", {
     write_sfs(test_gt_slash, out_dir = out_dir, n_proj = 2),
     "cannot contain"
   )
+  # the spectrum of pop1 (projected to 2 copies) and of the pair of pop1 and
+  # a group "2" would both be pop1-2.sfs
+  test_gt_2 <- test_gt %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(population = factor(
+      dplyr::if_else(population == "pop2", "2", population),
+      levels = c("pop1", "2", "pop3")
+    )) %>%
+    dplyr::group_by(population)
+  expect_error(
+    write_sfs(test_gt_2, out_dir = out_dir, n_proj = 2),
+    "same file \\(pop1-2.sfs\\)"
+  )
+  # with two groups, the pair and all groups share their file (as in
+  # easySFS)
+  pair_files <- write_sfs(test_gt %>% dplyr::filter(population != "pop3"),
+    out_dir = withr::local_tempdir(), n_proj = 2
+  )
+  expect_identical(
+    basename(pair_files),
+    c("pop1-2.sfs", "pop2-2.sfs", "pop1-pop2.sfs")
+  )
   expect_error(
     write_sfs(test_gt,
       format = "fastsimcoal2", out_dir = out_dir, n_proj = 2,

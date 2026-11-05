@@ -351,6 +351,22 @@ write_sfs.default <- function(x, ...) {
       paste0(prefix, "_MSFS.obs")
     )
   }
+  # two different spectra cannot be written to the same file (e.g. in dadi
+  # format, the spectrum of a group "pop1" projected to 2 copies and the
+  # spectrum of the pair of "pop1" and a group "2" are both "pop1-2.sfs").
+  # With two groups, the spectra of the pair and of all groups are the same,
+  # and share their file, as in easySFS
+  spectra_key <- vapply(spectra_def, paste, character(1), collapse = ",")
+  is_shared <- tapply(spectra_key, set_files, function(k) {
+    length(unique(k)) > 1
+  })
+  if (any(is_shared)) {
+    stop(
+      "several spectra would be written to the same file (",
+      paste(names(is_shared)[is_shared], collapse = ", "),
+      "); rename the groups"
+    )
+  }
   # the directory of each replicate (e.g. bootstrap_001)
   rep_dirs <- character(0)
   if (n_bootstrap > 0) {
