@@ -192,6 +192,20 @@ test_that("bootstrap replicates are returned as tidy tibbles", {
   })
   expect_named(boot_3d, c("replicate", pops, "n_sites", "masked"))
   expect_identical(boot_3d$popA[1:5], c(0:4))
+  # the cells of each replicate are those of its array (in column-major
+  # order, as the first population changes fastest)
+  boot_3d_array <- withr::with_seed(13, {
+    bootstrap_nwise_pop_sfs(sim$gt,
+      n_bootstrap = 2, block_size = 20, n_proj = c(4, 4, 2),
+      type = "array"
+    )
+  })
+  for (i_rep in 1:2) {
+    expect_equal(
+      boot_3d$n_sites[boot_3d$replicate == i_rep],
+      as.vector(boot_3d_array[[i_rep]])
+    )
+  }
 
   # ungrouped data
   boot_all <- withr::with_seed(14, {
