@@ -17,12 +17,36 @@ test_that("jackknife_stats_generic works with mean, sum and custom", {
   jack_sum <- jackknife_stats_generic(x,
     loci_table = loci, operator = "sum", block_size = 1, size_unit = "cM"
   )
-  jack_sum_custom <- jackknife_stats_generic(x,
-    loci_table = loci, operator = "custom", block_size = 1,
-    size_unit = "cM", f = sum, na.rm = TRUE
+  jack_mean_cm <- jackknife_stats_generic(x,
+    loci_table = loci, operator = "mean", block_size = 1, size_unit = "cM"
   )
-  expect_equal(jack_sum, jack_sum_custom)
   expect_equal(jack_sum$estimate, sum(x, na.rm = TRUE))
+  # the sum is the mean times the number of non-missing values
+  expect_equal(jack_sum$jack_estimate, jack_sum$estimate)
+  expect_equal(jack_sum$se, jack_mean_cm$se * sum(!is.na(x)))
+  expect_equal(jack_sum$z, jack_mean_cm$z)
+  expect_equal(jack_sum$n_blocks, jack_mean_cm$n_blocks)
+})
+
+test_that("jackknife_stats_generic does not bias correct a sum", {
+  # leaving out a block always makes a sum smaller; a jackknife of the sum
+  # itself would mistake this for a bias, and give a jackknife estimate of
+  # (2 - 1 / n_blocks) times the sum
+  set.seed(1)
+  x <- stats::rnorm(1000, mean = 1)
+  x[sample(1000, 50)] <- NA
+  loci <- data.frame(chromosome = rep(c("1", "2"), each = 500))
+  jack_sum <- jackknife_stats_generic(x,
+    loci_table = loci, operator = "sum", block_size = 50
+  )
+  jack_mean <- jackknife_stats_generic(x,
+    loci_table = loci, operator = "mean", block_size = 50
+  )
+  expect_equal(jack_sum$n_blocks, 20L)
+  expect_equal(jack_sum$estimate, sum(x, na.rm = TRUE))
+  expect_equal(jack_sum$jack_estimate, jack_sum$estimate)
+  expect_equal(jack_sum$se, jack_mean$se * 950)
+  expect_equal(jack_sum$z, jack_mean$z)
 })
 
 test_that("jackknife_stats_generic checks its inputs", {

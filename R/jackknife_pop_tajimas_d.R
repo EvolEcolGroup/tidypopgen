@@ -16,10 +16,33 @@
 #'   Missing genotypes are accounted for by using the number of non-missing
 #'   allele copies at each locus as its sample size, following Bailey et al.
 #'   (2025) as implemented in `pixy`. See [pop_tajimas_d()] for details. Loci
-#'   with no genotyped individuals are ignored.
+#'   with no genotyped individuals are ignored. The variance of Tajima (1989)
+#'   is computed for the mean sample size across all loci (rounded to the
+#'   nearest integer), and the same sample size is used when leaving out each
+#'   block: recomputing the rounded mean for each block left out would make
+#'   Tajima's D jump whenever this changes the rounding (e.g. when the mean
+#'   sample size is close to x.5), which the jackknife would amplify into an
+#'   inflated standard error and a biased jackknife estimate.
+#'
+#'   Note that the variance of Tajima (1989) assumes that there is no
+#'   recombination among loci. Over a whole genome, Tajima's D is thus not
+#'   standardised: it is approximately proportional to
+#'   \eqn{\hat{\theta}_\pi / \hat{\theta}_W - 1}, with a factor that depends
+#'   on the sample size (about 5 for 10 allele copies, 4.2 for 20, and 3.4
+#'   for 100), and with genome-wide data its standard error is much smaller
+#'   than 1. Use the jackknife standard error, rather than the rules of thumb
+#'   used for single loci, to judge whether genome-wide Tajima's D differs
+#'   from 0, and compare groups with different sample sizes with caution. The
+#'   z score tests whether genome-wide Tajima's D differs from 0, which most
+#'   demographic histories other than a constant population size will cause.
+#'   Blocks should be larger than the extent of linkage disequilibrium, or
+#'   the standard error will be underestimated.
 #'
 #' @references Busing FMTA, Meijer E, Van Der Leeden R (1999) Delete-m
 #'   jackknife for unequal m. Statistics and Computing 9:3-8.
+#'
+#'   Tajima F (1989) Statistical method for testing the neutral mutation
+#'   hypothesis by DNA polymorphism. Genetics 123:585-595.
 #'
 #'   Bailey N, Stevison L, Samuk K (2025) Correcting for bias in estimates of
 #'   \eqn{\theta_W} and Tajima's D from missing data in next-generation
@@ -95,19 +118,8 @@ jackknife_pop_tajimas_d <- function(.x,
   res <- list()
   # now we can loop around each population to compute the jackknife
   for (i_grp in seq_len(ncol(term_sums$k_hat))) {
-    term_blocks <- .tajimas_d_group_sums(term_sums, i_grp)
-    # sum across all loci, and leaving out each block in turn
-    term_tot <- colSums(term_blocks)
-    term_loo <- rep_rows(term_tot, nrow(term_blocks)) - term_blocks
-    colnames(term_loo) <- colnames(term_blocks)
-    # Tajima's D on all loci, and leaving out each block in turn
-    taj_full <- tajimas_d_from_term_sums(term_tot)
-    taj_loo <- tajimas_d_from_term_sums(term_loo)
-    res[[i_grp]] <- .jackknife_weighted(
-      theta_full = taj_full,
-      theta_loo = taj_loo,
-      # the number of loci with at least one valid allele copy in each block
-      m = term_blocks[, "n_loci", drop = FALSE]
+    res[[i_grp]] <- .jackknife_tajimas_d_blocks(
+      .tajimas_d_group_sums(term_sums, i_grp)
     )
   }
   if (length(res) == 1) { # if we only have one pop, return a data.frame
@@ -130,4 +142,37 @@ jackknife_pop_tajimas_d <- function(.x,
   } else if (type == "list") {
     return(res)
   }
+}
+
+#' Weighted block jackknife of Tajima's D from the sums of each block
+#'
+#' Tajima's D is computed on all loci, and leaving out each block in turn by
+#' subtracting its sums. The sample size used in the variance of Tajima (1989)
+#' is the rounded mean sample size across all loci, and it is the same for all
+#' the leave-one-out estimates: rounding the mean sample size of each
+#' leave-one-out estimate would make Tajima's D jump whenever leaving out a
+#' block changes the rounding (e.g. when the mean sample size is close to
+#' x.5), and the jackknife amplifies these jumps (by about the number of
+#' blocks), inflating the standard error and biasing the jackknife estimate.
+#'
+#' @param term_blocks a matrix with one row per block, and the sums of the
+#'   quantities of `tajimas_d_locus_terms()` as columns (`k_hat`, `seg`,
+#'   `theta_w`, `n` and `n_loci`), as returned by `.tajimas_d_group_sums()`
+#' @returns a tibble as returned by `.jackknife_weighted()`
+#' @keywords internal
+#' @noRd
+.jackknife_tajimas_d_blocks <- function(term_blocks) {
+  # sum across all loci, and leaving out each block in turn
+  term_tot <- colSums(term_blocks)
+  term_loo <- rep_rows(term_tot, nrow(term_blocks)) - term_blocks
+  colnames(term_loo) <- colnames(term_blocks)
+  # the sample size for the variance, from all loci
+  n_var <- tajimas_d_n_var(term_tot[["n"]], term_tot[["n_loci"]])
+  # Tajima's D on all loci, and leaving out each block in turn
+  .jackknife_weighted(
+    theta_full = tajimas_d_from_term_sums(term_tot, n_var = n_var),
+    theta_loo = tajimas_d_from_term_sums(term_loo, n_var = n_var),
+    # the number of loci with at least one valid allele copy in each block
+    m = term_blocks[, "n_loci", drop = FALSE]
+  )
 }
