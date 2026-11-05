@@ -210,12 +210,17 @@ dplyr_reconstruct.grouped_gen_tbl <- function(data, template) {
     class(out) <- c("grouped_df", "tbl_df", "tbl", "data.frame")
     return(out)
   }
-  # prioritise "grouped_gen_tbl" class over "sf"
+  # dplyr_reconstruct.grouped_df() rebuilds a plain grouped_df (e.g. in
+  # joins, bind_rows() and bind_cols()), or an ungrouped tibble if the
+  # grouping variables are gone, so we restore the gen_tbl classes,
+  # prioritising them over "sf"
   obj_class <- class(out)
-  if ("sf" %in% obj_class) {
-    obj_class <-
-      c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf", obj_class[!obj_class %in% c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf")]) # nolint
-    class(out) <- obj_class
+  sf_class <- if ("sf" %in% obj_class) "sf"
+  other_class <- obj_class[!obj_class %in% c("grouped_gen_tbl", "grouped_df", "gen_tbl", "sf")] # nolint
+  if (inherits(out, "grouped_df")) {
+    class(out) <- c("grouped_gen_tbl", "grouped_df", "gen_tbl", sf_class, other_class) # nolint
+  } else {
+    class(out) <- c("gen_tbl", sf_class, other_class)
   }
   return(out)
 }

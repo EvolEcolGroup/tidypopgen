@@ -16,6 +16,8 @@
   tibbles for their `genotypes` column with `genotypes_tbl_class()`. The
   `tbl_df` methods that hand over the `genotypes` column accept any column
   of a registered class
+* joins, `bind_rows()` and `bind_cols()` keep the class of a grouped
+  gen_tibble
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,
