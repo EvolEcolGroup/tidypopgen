@@ -9,9 +9,9 @@
   projection that maximises it, which is used by default. Spectra are
   returned as tidy tibbles (with the order of the cells of joint spectra set
   by `fastest`), or as `sfs` arrays (`type = "array"`). `write_sfs()` writes
-  a spectrum in dadi or fastsimcoal2 format, and `sfs_as_dadi()` and
-  `sfs_as_simcoal()` write all the spectra written by easySFS (1D, 2D and
-  multidimensional, with the same file names), optionally setting the number of
+  a spectrum in dadi or fastsimcoal2 format and, for a grouped gen_tibble,
+  all the spectra written by easySFS (1D, 2D and multidimensional, with the
+  same file names), optionally setting the number of
   monomorphic sites from the total length of the sequences. Unfolded spectra
   can be polarised with the ancestral allele of each locus (`ancestral`, a
   column of the loci table or a vector); loci with an unknown ancestral
@@ -21,8 +21,8 @@
   `pop_sfs_preview()`. `bootstrap_pop_sfs()`, `bootstrap_pairwise_pop_sfs()`
   and `bootstrap_nwise_pop_sfs()` compute block bootstrap replicates of the
   spectra (with the blocks of the `jackknife_*` functions), reading the
-  genotypes only once; `sfs_as_dadi(n_bootstrap = )` and
-  `sfs_as_simcoal(n_bootstrap = )` write the replicates.
+  genotypes only once; `write_sfs(n_bootstrap = )` writes the replicates of
+  a gen_tibble.
 * grouped functions now work with gen_tibbles grouped by more than one
   variable (e.g. `group_by(population, sex)`), including `loci_alt_freq()`,
   `loci_maf()`, `loci_missingness()`, `loci_hwe()`, `loci_pi()`,

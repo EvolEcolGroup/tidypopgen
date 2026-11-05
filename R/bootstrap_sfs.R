@@ -5,8 +5,7 @@
 #' blocks of loci with replacement. Replicates are used to estimate the
 #' uncertainty of statistics computed from the spectra, or of the parameters
 #' of demographic models fitted with `dadi`, `moments` or `fastsimcoal2`
-#' (see [sfs_as_dadi()] and [sfs_as_simcoal()] to write the replicates in
-#' their formats).
+#' (see [write_sfs()] to write the replicates in their formats).
 #'
 #' @details
 #' The loci are divided into non-overlapping blocks that never span more
@@ -50,8 +49,7 @@
 #'   number of times each block (columns, numbered in the order in which they
 #'   appear in the loci table) was drawn in each replicate (rows), and the
 #'   tibble also has the attributes `n_proj` and `folded`.
-#' @seealso [pop_sfs()], [sfs_as_dadi()], [sfs_as_simcoal()],
-#'   [jackknife_stats_generic()]
+#' @seealso [pop_sfs()], [write_sfs()], [jackknife_stats_generic()]
 #' @rdname bootstrap_sfs
 #' @export
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))

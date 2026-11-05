@@ -112,8 +112,7 @@ Compute bootstrap replicates of the site frequency spectra of
 blocks of loci with replacement. Replicates are used to estimate the
 uncertainty of statistics computed from the spectra, or of the parameters
 of demographic models fitted with \code{dadi}, \code{moments} or \code{fastsimcoal2}
-(see \code{\link[=sfs_as_dadi]{sfs_as_dadi()}} and \code{\link[=sfs_as_simcoal]{sfs_as_simcoal()}} to write the replicates in
-their formats).
+(see \code{\link[=write_sfs]{write_sfs()}} to write the replicates in their formats).
 }
 \details{
 The loci are divided into non-overlapping blocks that never span more
@@ -169,6 +168,5 @@ boot_2d[[1]]$pop1.pop2
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=pop_sfs]{pop_sfs()}}, \code{\link[=sfs_as_dadi]{sfs_as_dadi()}}, \code{\link[=sfs_as_simcoal]{sfs_as_simcoal()}},
-\code{\link[=jackknife_stats_generic]{jackknife_stats_generic()}}
+\code{\link[=pop_sfs]{pop_sfs()}}, \code{\link[=write_sfs]{write_sfs()}}, \code{\link[=jackknife_stats_generic]{jackknife_stats_generic()}}
 }

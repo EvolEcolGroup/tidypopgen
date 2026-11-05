@@ -282,20 +282,22 @@ sfs_1d %>%
 
 ## Exporting to dadi and fastsimcoal2
 
-`sfs_as_dadi()` and `sfs_as_simcoal()` write all the spectra that `easySFS`
-writes, each in a single pass over the genotypes:
+`write_sfs()` writes spectra in the formats of `dadi` (`format = "dadi"`)
+and `fastsimcoal2` (`format = "fsc"`). Given a grouped `gen_tibble`, it
+writes all the spectra that `easySFS` writes, in a single pass over the
+genotypes:
 - the 1D spectrum of each population;
 - the joint spectrum of each pair;
 - the joint spectrum of all populations.
 
-They are written in `dadi` and `fastsimcoal2` format respectively, with the
-same file names as `easySFS`. Writing them to the `dadi` and `fastsimcoal2`
-sub-directories of a folder gives the layout of `easySFS`:
+They have the same file names as in `easySFS`. Writing each format to the
+`dadi` and `fastsimcoal2` sub-directories of a folder gives the layout of
+`easySFS`:
 
 
 ``` r
 out_dir <- file.path(tempdir(), "anolis_sfs")
-dadi_files <- sfs_as_dadi(anole_thin,
+dadi_files <- write_sfs(anole_thin,
   out_dir = file.path(out_dir, "dadi"),
   n_proj = n_proj
 )
@@ -304,15 +306,16 @@ basename(dadi_files)
 #> [5] "AF-Wam.sfs"     "Eam-Wam.sfs"    "AF-Eam-Wam.sfs"
 ```
 
-With `n_bootstrap`, they also write each bootstrap replicate in its own
+With `n_bootstrap`, it also writes each bootstrap replicate in its own
 sub-directory, e.g. to estimate confidence intervals of the parameters
 fitted with `fastsimcoal2`:
 
 
 ``` r
-fsc_files <- sfs_as_simcoal(anole_thin,
-  out_dir = file.path(out_dir, "fastsimcoal2"), n_proj = n_proj,
-  prefix = "anolis", n_bootstrap = 10, bootstrap_block_size = 1
+fsc_files <- write_sfs(anole_thin,
+  out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+  n_proj = n_proj, prefix = "anolis",
+  n_bootstrap = 10, bootstrap_block_size = 1
 )
 list.files(file.path(out_dir, "fastsimcoal2"))
 #>  [1] "AF_MAFpop0.obs"            "Eam_MAFpop0.obs"          
@@ -332,8 +335,9 @@ list.files(file.path(out_dir, "fastsimcoal2", "bootstrap_01"))
 ```
 
 `total_length` sets the number of monomorphic sites from the total length
-of the sequenced data, as `easySFS --total-length` does. A single spectrum
-can be written with `write_sfs()`:
+of the sequenced data, as `easySFS --total-length` does. Given a single
+spectrum (an `sfs` object, returned with `type = "array"`), `write_sfs()`
+writes it to a file:
 
 
 ``` r

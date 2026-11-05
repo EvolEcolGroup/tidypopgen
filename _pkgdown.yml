@@ -94,7 +94,6 @@ reference:
         - nwise_pop_sfs
         - tidy.sfs
         - write_sfs
-        - sfs_as_dadi
         - autoplot_sfs
         - bootstrap_pop_sfs
   - title: "Windows"

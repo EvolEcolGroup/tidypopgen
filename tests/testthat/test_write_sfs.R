@@ -1,4 +1,4 @@
-# Tests for write_sfs(), sfs_as_dadi() and sfs_as_simcoal()
+# Tests for write_sfs(), for sfs objects and gen_tibbles
 
 # a small unfolded 2D spectrum (populations a and b, with 1 and 2 copies)
 sfs_2d <- new_sfs(
@@ -133,7 +133,7 @@ test_that("write_sfs files can be read back", {
   expect_identical(dadi_sfs$mask, sfs_tidy$masked)
 })
 
-test_that("sfs_as_dadi and sfs_as_simcoal write the files of easySFS", {
+test_that("write_sfs writes the files of easySFS for a gen_tibble", {
   sim <- ref_sfs_simulate(c(popA = 5, popB = 4, popC = 3),
     n_loci = 60,
     seed = 32
@@ -141,8 +141,9 @@ test_that("sfs_as_dadi and sfs_as_simcoal write the files of easySFS", {
   dadi_dir <- withr::local_tempdir()
   fsc_dir <- withr::local_tempdir()
   n_proj <- c(popA = 6, popB = 4, popC = 3)
-  dadi_files <- sfs_as_dadi(sim$gt, out_dir = dadi_dir, n_proj = n_proj)
-  fsc_files <- sfs_as_simcoal(sim$gt,
+  dadi_files <- write_sfs(sim$gt, out_dir = dadi_dir, n_proj = n_proj)
+  fsc_files <- write_sfs(sim$gt,
+    format = "fsc",
     out_dir = fsc_dir, n_proj = n_proj,
     prefix = "test"
   )
@@ -197,20 +198,24 @@ test_that("sfs_as_dadi and sfs_as_simcoal write the files of easySFS", {
 
   # files are not overwritten
   expect_error(
-    sfs_as_dadi(sim$gt, out_dir = dadi_dir, n_proj = n_proj),
+    write_sfs(sim$gt, out_dir = dadi_dir, n_proj = n_proj),
     "already exist"
   )
   expect_error(
-    sfs_as_simcoal(sim$gt, out_dir = fsc_dir, n_proj = n_proj, prefix = "test"),
+    write_sfs(sim$gt,
+      format = "fsc", out_dir = fsc_dir, n_proj = n_proj,
+      prefix = "test"
+    ),
     "already exist"
   )
   # unfolded spectra, the first population changing fastest, the number of
   # monomorphic sites, and rounding
-  dadi_files <- sfs_as_dadi(sim$gt,
+  dadi_files <- write_sfs(sim$gt,
     out_dir = dadi_dir, n_proj = n_proj, folded = FALSE,
     fastest = "first", total_length = 1000, round = TRUE, overwrite = TRUE
   )
-  fsc_files <- sfs_as_simcoal(sim$gt,
+  fsc_files <- write_sfs(sim$gt,
+    format = "fsc",
     out_dir = fsc_dir, n_proj = n_proj, prefix = "test", folded = FALSE,
     fastest = "first", total_length = 1000, round = TRUE, overwrite = TRUE
   )
@@ -230,18 +235,18 @@ test_that("sfs_as_dadi and sfs_as_simcoal write the files of easySFS", {
   )
 })
 
-test_that("sfs_as_dadi and sfs_as_simcoal use the backing files by default", {
+test_that("write_sfs uses the backing files of a gen_tibble by default", {
   test_gt <- load_example_gt("grouped_gen_tbl")
   backing_name <- bigstatsr::sub_bk(attr(test_gt$genotypes, "fbm")$backingfile)
   dadi_dir <- paste0(backing_name, "_dadi")
   fsc_dir <- paste0(backing_name, "_fastsimcoal2")
   on.exit(unlink(c(dadi_dir, fsc_dir), recursive = TRUE), add = TRUE)
   expect_message(
-    dadi_files <- sfs_as_dadi(test_gt),
+    dadi_files <- write_sfs(test_gt),
     "maximises its number of segregating sites"
   )
   expect_true(all(startsWith(dadi_files, dadi_dir)))
-  fsc_files <- suppressMessages(sfs_as_simcoal(test_gt))
+  fsc_files <- suppressMessages(write_sfs(test_gt, format = "fsc"))
   expect_true(all(startsWith(fsc_files, fsc_dir)))
   expect_true(file.exists(file.path(
     fsc_dir,
@@ -249,15 +254,16 @@ test_that("sfs_as_dadi and sfs_as_simcoal use the backing files by default", {
   )))
 })
 
-test_that("sfs_as_dadi and sfs_as_simcoal work with a single group", {
+test_that("write_sfs works with a gen_tibble with a single group", {
   test_gt <- load_example_gt("grouped_gen_tbl") %>%
     dplyr::filter(population == "pop1")
-  dadi_files <- sfs_as_dadi(test_gt,
+  dadi_files <- write_sfs(test_gt,
     out_dir = withr::local_tempdir(),
     n_proj = 4
   )
   expect_identical(sort(basename(dadi_files)), c("pop1-4.sfs", "pop1.sfs"))
-  fsc_files <- sfs_as_simcoal(test_gt,
+  fsc_files <- write_sfs(test_gt,
+    format = "fsc",
     out_dir = withr::local_tempdir(),
     n_proj = 4, prefix = "test"
   )
@@ -267,15 +273,18 @@ test_that("sfs_as_dadi and sfs_as_simcoal work with a single group", {
   )
 })
 
-test_that("sfs_as_dadi and sfs_as_simcoal check their arguments", {
+test_that("write_sfs checks its arguments for a gen_tibble", {
   test_gt <- load_example_gt("grouped_gen_tbl")
   out_dir <- withr::local_tempdir()
   expect_error(
-    sfs_as_dadi(dplyr::ungroup(test_gt), out_dir = out_dir),
+    write_sfs(dplyr::ungroup(test_gt), out_dir = out_dir),
     "grouped gen_tibble"
   )
   expect_error(
-    sfs_as_simcoal(test_gt, out_dir = out_dir, n_proj = 2, max_cells = 10),
+    write_sfs(test_gt,
+      format = "fsc", out_dir = out_dir, n_proj = 2,
+      max_cells = 10
+    ),
     "27 cells"
   )
   test_gt_slash <- test_gt %>%
@@ -283,11 +292,14 @@ test_that("sfs_as_dadi and sfs_as_simcoal check their arguments", {
     dplyr::mutate(population = paste0(population, "/x")) %>%
     dplyr::group_by(population)
   expect_error(
-    sfs_as_dadi(test_gt_slash, out_dir = out_dir, n_proj = 2),
+    write_sfs(test_gt_slash, out_dir = out_dir, n_proj = 2),
     "cannot contain"
   )
   expect_error(
-    sfs_as_simcoal(test_gt, out_dir = out_dir, n_proj = 2, fastest = "middle"),
+    write_sfs(test_gt,
+      format = "fsc", out_dir = out_dir, n_proj = 2,
+      fastest = "middle"
+    ),
     "should be one of"
   )
 })

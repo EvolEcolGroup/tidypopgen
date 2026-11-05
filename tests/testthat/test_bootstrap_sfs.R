@@ -1,7 +1,6 @@
 # Tests for the block bootstrap of site frequency spectra
 # (bootstrap_pop_sfs(), bootstrap_pairwise_pop_sfs(),
-# bootstrap_nwise_pop_sfs() and the n_bootstrap argument of sfs_as_dadi() and
-# sfs_as_simcoal())
+# bootstrap_nwise_pop_sfs() and the n_bootstrap argument of write_sfs())
 
 sim <- ref_sfs_simulate(c(popA = 6, popB = 5, popC = 4),
   n_loci = 120,
@@ -276,10 +275,11 @@ test_that("bootstrap arguments are checked", {
   )
 })
 
-test_that("sfs_as_dadi and sfs_as_simcoal write bootstrap replicates", {
+test_that("write_sfs writes the bootstrap replicates of a gen_tibble", {
   out_dir <- withr::local_tempdir()
   files <- withr::with_seed(20, {
-    sfs_as_simcoal(sim$gt,
+    write_sfs(sim$gt,
+      format = "fsc",
       out_dir = out_dir, n_proj = n_proj, prefix = "test",
       n_bootstrap = 3, bootstrap_block_size = 20
     )
@@ -289,7 +289,8 @@ test_that("sfs_as_dadi and sfs_as_simcoal write bootstrap replicates", {
   expect_true(all(dir.exists(file.path(out_dir, paste0("bootstrap_", 1:3)))))
   # the files of all loci are unchanged
   out_dir_no_boot <- withr::local_tempdir()
-  sfs_as_simcoal(sim$gt,
+  write_sfs(sim$gt,
+    format = "fsc",
     out_dir = out_dir_no_boot, n_proj = n_proj,
     prefix = "test"
   )
@@ -309,7 +310,7 @@ test_that("sfs_as_dadi and sfs_as_simcoal write bootstrap replicates", {
   })
   dadi_dir <- withr::local_tempdir()
   withr::with_seed(20, {
-    sfs_as_dadi(sim$gt,
+    write_sfs(sim$gt,
       out_dir = dadi_dir, n_proj = n_proj,
       n_bootstrap = 3, bootstrap_block_size = 20
     )
@@ -336,7 +337,8 @@ test_that("sfs_as_dadi and sfs_as_simcoal write bootstrap replicates", {
   out_dir_chunks <- withr::local_tempdir()
   withr::with_options(list(tidypopgen.sfs_max_chunk_cells = 1), {
     withr::with_seed(20, {
-      sfs_as_simcoal(sim$gt,
+      write_sfs(sim$gt,
+        format = "fsc",
         out_dir = out_dir_chunks, n_proj = n_proj,
         prefix = "test", n_bootstrap = 3, bootstrap_block_size = 20
       )
@@ -349,14 +351,15 @@ test_that("sfs_as_dadi and sfs_as_simcoal write bootstrap replicates", {
     )
   }
   expect_error(
-    sfs_as_simcoal(sim$gt,
+    write_sfs(sim$gt,
+      format = "fsc",
       out_dir = out_dir, n_proj = n_proj, prefix = "test",
       n_bootstrap = 3, bootstrap_block_size = 20
     ),
     "already exist"
   )
   expect_error(
-    sfs_as_dadi(sim$gt,
+    write_sfs(sim$gt,
       out_dir = withr::local_tempdir(), n_proj = n_proj,
       n_bootstrap = 3
     ),

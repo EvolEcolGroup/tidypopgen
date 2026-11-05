@@ -1,13 +1,17 @@
-#' Write a site frequency spectrum to a file for dadi or fastsimcoal2
+#' Write site frequency spectra for dadi or fastsimcoal2
 #'
-#' Write a site frequency spectrum (an `sfs` object, as returned by
-#' [pop_sfs()], [pairwise_pop_sfs()] and [nwise_pop_sfs()] with
-#' `type = "array"`) to a file in the format used by `dadi` (and `moments`)
-#' or by `fastsimcoal2`, as written by `easySFS`. To write all the spectra
-#' that `easySFS` writes (the 1D spectrum of each population, the joint
-#' spectrum of each pair of populations, and the joint spectrum of all
-#' populations) in a single call, use [sfs_as_dadi()] or
-#' [sfs_as_simcoal()].
+#' Write site frequency spectra in the formats used by `dadi` (and `moments`)
+#' and by `fastsimcoal2`, as written by `easySFS`:
+#' - for an `sfs` object (as returned by [pop_sfs()], [pairwise_pop_sfs()] and
+#'   [nwise_pop_sfs()] with `type = "array"`, or by the `bootstrap_*`
+#'   functions, e.g. [bootstrap_pop_sfs()]), write that spectrum to `file`;
+#' - for a grouped [`gen_tibble`], compute all the spectra that `easySFS`
+#'   writes (the 1D spectrum of each population, the joint spectrum of each
+#'   pair of populations, and the joint spectrum of all populations, in a
+#'   single pass over the genotypes), and write them in `out_dir`, with the
+#'   file names of `easySFS`, optionally with bootstrap replicates. Missing
+#'   genotypes are dealt with by projecting each population down to `n_proj`
+#'   allele copies (see [pop_sfs()]).
 #'
 #' @details
 #' **dadi format** (`format = "dadi"`): a line with the dimensions of the
@@ -26,9 +30,9 @@
 #' matrix with the second population in the rows (labelled `d1_0`, `d1_1`,
 #' ...) and the first population in the columns (labelled `d0_0`, `d0_1`,
 #' ...); for a spectrum of three or more populations, as a multidimensional
-#' spectrum (`_MSFS.obs` file). `format = "fsc_msfs"` writes the
-#' multidimensional format whatever the number of populations. In the
-#' multidimensional format, the cells are listed in the order set by
+#' spectrum (`_MSFS.obs` file). For an `sfs` object, `format = "fsc_msfs"`
+#' writes the multidimensional format whatever the number of populations. In
+#' the multidimensional format, the cells are listed in the order set by
 #' `fastest`: "last" (the default) has the number of copies in the last
 #' population changing fastest, as written by `easySFS`; "first" has the
 #' first population changing fastest. Please check which order your version
@@ -40,11 +44,47 @@
 #' the alternate or minor allele) is then set to `total_length` minus the
 #' number of sites in all the other cells.
 #'
-#' @param x an `sfs` object.
-#' @param file the name of the file to write.
-#' @param format the format of the file: `"dadi"`, `"fsc"` (fastsimcoal2) or
-#'   `"fsc_msfs"` (the multidimensional format of fastsimcoal2, whatever the
-#'   number of populations). See details.
+#' **The spectra of a `gen_tibble`** are written in `out_dir`, with the file
+#' names of `easySFS` (`pop` stands for the population labels, `p` for their
+#' projections, and `M` is replaced by `D` for unfolded spectra):
+#' - dadi: `pop-p.sfs` for each population, `pop1-pop2.sfs` for each pair,
+#'   and `pop1-pop2-...-popK.sfs` for all populations;
+#' - fastsimcoal2: `pop_MAFpop0.obs` for each population,
+#'   `prefix_jointMAFpopj_i.obs` for each pair (where `i` and `j` are the
+#'   0-based indices of the two populations, so that the second population of
+#'   the pair is in the rows), and `prefix_MSFS.obs` for all populations.
+#'
+#' `easySFS` writes these files in the sub-directories `dadi` and
+#' `fastsimcoal2` of its output directory: use, for example,
+#' `out_dir = file.path(dir, "dadi")` with `format = "dadi"` and
+#' `out_dir = file.path(dir, "fastsimcoal2")` with `format = "fsc"` to get the
+#' same layout. Populations are in the order of the groups (see
+#' [dplyr::group_keys()]): to change their order, which matters for `dadi`
+#' and `fastsimcoal2` (and is set with `--order` in `easySFS`), change the
+#' order of the levels of the grouping variable (e.g. with [factor()]).
+#'
+#' With `n_bootstrap` replicates of a block bootstrap (see
+#' [bootstrap_pop_sfs()]), the spectra of each replicate are also written,
+#' with the same file names, in the sub-directories `bootstrap_1`,
+#' `bootstrap_2`, ... of `out_dir`, numbered with as many digits as
+#' `n_bootstrap` (e.g. `bootstrap_001` to `bootstrap_100`), which can be
+#' used to estimate confidence intervals with `fastsimcoal2`. Replicates use
+#' the same projections as the spectra of all loci, and `total_length` and
+#' `round` are applied to each of them. To draw the same replicates in both
+#' formats, set the same seed (with [set.seed()]) before writing each of
+#' them.
+#'
+#' @inheritParams nwise_pop_sfs
+#' @param x an `sfs` object, or a grouped [`gen_tibble`] (as obtained by
+#'   using [dplyr::group_by()]).
+#' @param file for an `sfs` object, the name of the file to write.
+#' @param out_dir for a `gen_tibble`, the directory in which to write the
+#'   files, or `NULL` (the default) to use the location and name of the
+#'   backing files, followed by `_dadi` or `_fastsimcoal2`.
+#' @param format the format of the files: `"dadi"` or `"fsc"`
+#'   (fastsimcoal2); for an `sfs` object, also `"fsc_msfs"` (the
+#'   multidimensional format of fastsimcoal2, whatever the number of
+#'   populations). See details.
 #' @param fastest the order of the cells in dadi files and in the
 #'   multidimensional fastsimcoal2 format: "last" (the default) keeps the order
 #'   of the populations, so that the number of allele copies in the last
@@ -52,39 +92,77 @@
 #'   number of copies in the first population change fastest. See details.
 #' @param total_length the total number of sites sequenced, including
 #'   monomorphic ones, used to set the number of monomorphic sites (the first
-#'   cell). If `NULL` (the default), the spectrum is written as is.
+#'   cell). If `NULL` (the default), the spectra are written as they are.
 #' @param round boolean, whether to round the number of sites in each cell to
 #'   the nearest integer (as `easySFS` with `--dtype int`). Defaults to
 #'   `FALSE`.
-#' @param overwrite boolean, whether to overwrite `file` if it already exists.
+#' @param overwrite boolean, whether to overwrite files that already exist.
 #'   Defaults to `FALSE`.
-#' @returns the path of the file, invisibly.
-#' @seealso [sfs_as_dadi()], [sfs_as_simcoal()]
+#' @param prefix for a `gen_tibble` written in fastsimcoal2 format, the
+#'   prefix of the names of the 2D and multidimensional files, or `NULL` (the
+#'   default) to use the name of the backing files.
+#' @param n_bootstrap for a `gen_tibble`, the number of bootstrap replicates
+#'   to write (0, the default, for none).
+#' @param bootstrap_block_size,bootstrap_size_unit for a `gen_tibble`, the
+#'   size of the blocks of loci resampled for the bootstrap, and its unit
+#'   ("snp", the default, "cM" or "bp"); see [bootstrap_pop_sfs()].
+#' @param max_cells for a `gen_tibble`, the maximum number of cells of the
+#'   joint spectrum of all populations; an error is raised for larger
+#'   spectra.
+#' @param ... further arguments passed to the methods.
+#' @returns the path of the file (for an `sfs` object) or the paths of the
+#'   files written (for a `gen_tibble`), invisibly.
+#' @seealso [pop_sfs()], [pop_sfs_preview()], [bootstrap_pop_sfs()]
 #' @export
-#' @examples
+#' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
+#' \dontshow{
+#' data.table::setDTthreads(2)
+#' RhpcBLASctl::blas_set_num_threads(2)
+#' RhpcBLASctl::omp_set_num_threads(2)
+#' }
 #' example_gt <- load_example_gt("grouped_gen_tbl")
 #'
+#' # write a single spectrum
 #' sfs_2d <- example_gt %>%
 #'   pairwise_pop_sfs(n_proj = 2, type = "array")
-#'
-#' # a dadi file
 #' dadi_file <- tempfile(fileext = ".sfs")
 #' write_sfs(sfs_2d$pop1.pop2, dadi_file)
 #' readLines(dadi_file)
-#'
-#' # a fastsimcoal2 file
 #' fsc_file <- tempfile(fileext = "_jointMAFpop1_0.obs")
 #' write_sfs(sfs_2d$pop1.pop2, fsc_file, format = "fsc")
 #' readLines(fsc_file)
-write_sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
-                      fastest = c("last", "first"), total_length = NULL,
-                      round = FALSE, overwrite = FALSE) {
-  if (!inherits(x, "sfs")) {
-    stop(
-      "`x` should be an sfs object, as returned by pop_sfs(), ",
-      "pairwise_pop_sfs() or nwise_pop_sfs() with type = \"array\""
-    )
-  }
+#'
+#' # write all the spectra written by easySFS, in the same directories
+#' out_dir <- file.path(tempdir(), "example_sfs")
+#' dadi_files <- example_gt %>%
+#'   write_sfs(out_dir = file.path(out_dir, "dadi"), n_proj = 2)
+#' basename(dadi_files)
+#' fsc_files <- example_gt %>%
+#'   write_sfs(
+#'     out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+#'     n_proj = 2, prefix = "example"
+#'   )
+#' basename(fsc_files)
+#'
+#' # with 3 bootstrap replicates, resampling blocks of 2 SNPs
+#' set.seed(1)
+#' fsc_files <- example_gt %>%
+#'   write_sfs(
+#'     out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+#'     n_proj = 2, prefix = "example", n_bootstrap = 3,
+#'     bootstrap_block_size = 2, overwrite = TRUE
+#'   )
+#' list.files(file.path(out_dir, "fastsimcoal2"))
+write_sfs <- function(x, ...) {
+  UseMethod("write_sfs", x)
+}
+
+#' @rdname write_sfs
+#' @export
+write_sfs.sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
+                          fastest = c("last", "first"), total_length = NULL,
+                          round = FALSE, overwrite = FALSE, ...) {
+  rlang::check_dots_empty()
   format <- match.arg(format)
   fastest <- match.arg(fastest)
   .sfs_check_flag(round, "round")
@@ -110,134 +188,12 @@ write_sfs <- function(x, file, format = c("dadi", "fsc", "fsc_msfs"),
   invisible(file)
 }
 
-#' Write the site frequency spectra of a `gen_tibble` for dadi or fastsimcoal2
-#'
-#' Compute and write all the site frequency spectra that `easySFS` writes for
-#' a set of populations: the 1D spectrum of each population, the joint
-#' spectrum of each pair of populations, and the joint spectrum of all
-#' populations. `sfs_as_dadi()` writes them in `dadi` (and `moments`) format,
-#' and `sfs_as_simcoal()` in `fastsimcoal2` format, with the file names used
-#' by `easySFS`. All spectra are computed in a single pass over the
-#' genotypes. Missing genotypes are dealt with by projecting each population
-#' down to `n_proj` allele copies (see [pop_sfs()]).
-#'
-#' @details
-#' The files are written in `out_dir` (`pop` stands for the population
-#' labels, `p` for their projections, and `M` is replaced by `D` for unfolded
-#' spectra):
-#' - `sfs_as_dadi()`: `pop-p.sfs` for each population, `pop1-pop2.sfs` for
-#'   each pair, and `pop1-pop2-...-popK.sfs` for all populations;
-#' - `sfs_as_simcoal()`: `pop_MAFpop0.obs` for each population,
-#'   `prefix_jointMAFpopj_i.obs` for each pair (where `i` and `j` are the
-#'   0-based indices of the two populations, so that the second population of
-#'   the pair is in the rows), and `prefix_MSFS.obs` for all populations.
-#'
-#' `easySFS` writes these files in the sub-directories `dadi` and
-#' `fastsimcoal2` of its output directory: use, for example,
-#' `out_dir = file.path(dir, "dadi")` and
-#' `out_dir = file.path(dir, "fastsimcoal2")` to get the same layout.
-#'
-#' With `n_bootstrap` replicates of a block bootstrap (see
-#' [bootstrap_pop_sfs()]), the spectra of each replicate are also written,
-#' with the same file names, in the sub-directories `bootstrap_1`,
-#' `bootstrap_2`, ... of `out_dir`, numbered with as many digits as
-#' `n_bootstrap` (e.g. `bootstrap_001` to `bootstrap_100`), which can be
-#' used to estimate confidence intervals with `fastsimcoal2`. Replicates use
-#' the same projections as the spectra of all loci, and `total_length` and
-#' `round` are applied to each of them. To draw the same replicates with both
-#' functions, set the same seed (with [set.seed()]) before calling each of
-#' them.
-#'
-#' See [write_sfs()] for the formats, and for the order of the cells set by
-#' `fastest`. Populations are in the order of the groups (see
-#' [dplyr::group_keys()]): to change their order, which matters for `dadi`
-#' and `fastsimcoal2` (and is set with `--order` in `easySFS`), change the
-#' order of the levels of the grouping variable (e.g. with [factor()]).
-#'
-#' @inheritParams nwise_pop_sfs
-#' @inheritParams write_sfs
-#' @param .x a grouped [`gen_tibble`] (as obtained by using
-#'   [dplyr::group_by()]).
-#' @param out_dir the directory in which to write the files, or `NULL` (the
-#'   default) to use the location and name of the backing files, followed by
-#'   `_dadi` or `_fastsimcoal2`.
-#' @param prefix the prefix of the names of the 2D and multidimensional
-#'   `fastsimcoal2` files, or `NULL` (the default) to use the name of the
-#'   backing files.
-#' @param n_bootstrap the number of bootstrap replicates to write (0, the
-#'   default, for none).
-#' @param bootstrap_block_size,bootstrap_size_unit the size of the blocks of
-#'   loci resampled for the bootstrap, and its unit ("snp", the default, "cM"
-#'   or "bp"); see [bootstrap_pop_sfs()].
-#' @param max_cells the maximum number of cells of the joint spectrum of all
-#'   populations; an error is raised for larger spectra.
-#' @returns the paths of the files written, invisibly.
-#' @seealso [write_sfs()], [pop_sfs()], [pop_sfs_preview()],
-#'   [bootstrap_pop_sfs()]
-#' @rdname sfs_as_dadi
+#' @rdname write_sfs
 #' @export
-#' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
-#' \dontshow{
-#' data.table::setDTthreads(2)
-#' RhpcBLASctl::blas_set_num_threads(2)
-#' RhpcBLASctl::omp_set_num_threads(2)
-#' }
-#' example_gt <- load_example_gt("grouped_gen_tbl")
-#'
-#' # the files written by easySFS, in the same directories
-#' out_dir <- file.path(tempdir(), "example_sfs")
-#' dadi_files <- example_gt %>%
-#'   sfs_as_dadi(out_dir = file.path(out_dir, "dadi"), n_proj = 2)
-#' basename(dadi_files)
-#' fsc_files <- example_gt %>%
-#'   sfs_as_simcoal(
-#'     out_dir = file.path(out_dir, "fastsimcoal2"), n_proj = 2,
-#'     prefix = "example"
-#'   )
-#' basename(fsc_files)
-#'
-#' # with 3 bootstrap replicates, resampling blocks of 2 SNPs
-#' set.seed(1)
-#' fsc_files <- example_gt %>%
-#'   sfs_as_simcoal(
-#'     out_dir = file.path(out_dir, "fastsimcoal2"), n_proj = 2,
-#'     prefix = "example", n_bootstrap = 3, bootstrap_block_size = 2,
-#'     overwrite = TRUE
-#'   )
-#' list.files(file.path(out_dir, "fastsimcoal2"))
-sfs_as_dadi <- function(
-  .x,
+write_sfs.gen_tbl <- function(
+  x,
   out_dir = NULL,
-  n_proj = NULL,
-  folded = TRUE,
-  ancestral = NULL,
-  total_length = NULL,
-  round = FALSE,
-  fastest = c("last", "first"),
-  n_bootstrap = 0,
-  bootstrap_block_size = NULL,
-  bootstrap_size_unit = c("snp", "cM", "bp"),
-  max_cells = 1e7,
-  overwrite = FALSE,
-  n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(.x), 1)
-) {
-  .sfs_write_set_files(
-    .x,
-    format = "dadi", out_dir = out_dir, n_proj = n_proj, prefix = NULL,
-    folded = folded, ancestral = ancestral, total_length = total_length,
-    round = round, fastest = fastest, n_bootstrap = n_bootstrap,
-    bootstrap_block_size = bootstrap_block_size,
-    bootstrap_size_unit = bootstrap_size_unit, max_cells = max_cells,
-    overwrite = overwrite, n_cores = n_cores, block_size = block_size
-  )
-}
-
-#' @rdname sfs_as_dadi
-#' @export
-sfs_as_simcoal <- function(
-  .x,
-  out_dir = NULL,
+  format = c("dadi", "fsc"),
   n_proj = NULL,
   prefix = NULL,
   folded = TRUE,
@@ -251,11 +207,14 @@ sfs_as_simcoal <- function(
   max_cells = 1e7,
   overwrite = FALSE,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(.x), 1)
+  block_size = bigstatsr::block_size(nrow(x), 1),
+  ...
 ) {
+  rlang::check_dots_empty()
+  format <- match.arg(format)
   .sfs_write_set_files(
-    .x,
-    format = "simcoal", out_dir = out_dir, n_proj = n_proj, prefix = prefix,
+    x,
+    format = format, out_dir = out_dir, n_proj = n_proj, prefix = prefix,
     folded = folded, ancestral = ancestral, total_length = total_length,
     round = round, fastest = fastest, n_bootstrap = n_bootstrap,
     bootstrap_block_size = bootstrap_block_size,
@@ -264,16 +223,26 @@ sfs_as_simcoal <- function(
   )
 }
 
-# the work of sfs_as_dadi() and sfs_as_simcoal(): compute the spectra of each
+#' @rdname write_sfs
+#' @export
+write_sfs.default <- function(x, ...) {
+  stop(
+    "`x` should be an sfs object (as returned by pop_sfs(), ",
+    "pairwise_pop_sfs() or nwise_pop_sfs() with type = \"array\"), or a ",
+    "grouped gen_tibble"
+  )
+}
+
+# the work of write_sfs() for a gen_tibble: compute the spectra of each
 # population, each pair and all populations (and their bootstrap
-# replicates), and write them in the given format ("dadi" or "simcoal")
+# replicates), and write them in the given format ("dadi" or "fsc")
 .sfs_write_set_files <- function(.x, format, out_dir, n_proj, prefix, folded,
                                  ancestral, total_length, round, fastest,
                                  n_bootstrap, bootstrap_block_size,
                                  bootstrap_size_unit, max_cells, overwrite,
                                  n_cores, block_size) {
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
-    stop(".x should be a grouped gen_tibble")
+    stop("`x` should be a grouped gen_tibble (see dplyr::group_by())")
   }
   fastest <- match.arg(fastest, c("last", "first"))
   bootstrap_size_unit <- match.arg(bootstrap_size_unit, c("snp", "cM", "bp"))

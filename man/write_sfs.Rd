@@ -2,26 +2,59 @@
 % Please edit documentation in R/write_sfs.R
 \name{write_sfs}
 \alias{write_sfs}
-\title{Write a site frequency spectrum to a file for dadi or fastsimcoal2}
+\alias{write_sfs.sfs}
+\alias{write_sfs.gen_tbl}
+\alias{write_sfs.default}
+\title{Write site frequency spectra for dadi or fastsimcoal2}
 \usage{
-write_sfs(
+write_sfs(x, ...)
+
+\method{write_sfs}{sfs}(
   x,
   file,
   format = c("dadi", "fsc", "fsc_msfs"),
   fastest = c("last", "first"),
   total_length = NULL,
   round = FALSE,
-  overwrite = FALSE
+  overwrite = FALSE,
+  ...
 )
+
+\method{write_sfs}{gen_tbl}(
+  x,
+  out_dir = NULL,
+  format = c("dadi", "fsc"),
+  n_proj = NULL,
+  prefix = NULL,
+  folded = TRUE,
+  ancestral = NULL,
+  total_length = NULL,
+  round = FALSE,
+  fastest = c("last", "first"),
+  n_bootstrap = 0,
+  bootstrap_block_size = NULL,
+  bootstrap_size_unit = c("snp", "cM", "bp"),
+  max_cells = 1e+07,
+  overwrite = FALSE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(x), 1),
+  ...
+)
+
+\method{write_sfs}{default}(x, ...)
 }
 \arguments{
-\item{x}{an \code{sfs} object.}
+\item{x}{an \code{sfs} object, or a grouped \code{\link{gen_tibble}} (as obtained by
+using \code{\link[dplyr:group_by]{dplyr::group_by()}}).}
 
-\item{file}{the name of the file to write.}
+\item{...}{further arguments passed to the methods.}
 
-\item{format}{the format of the file: \code{"dadi"}, \code{"fsc"} (fastsimcoal2) or
-\code{"fsc_msfs"} (the multidimensional format of fastsimcoal2, whatever the
-number of populations). See details.}
+\item{file}{for an \code{sfs} object, the name of the file to write.}
+
+\item{format}{the format of the files: \code{"dadi"} or \code{"fsc"}
+(fastsimcoal2); for an \code{sfs} object, also \code{"fsc_msfs"} (the
+multidimensional format of fastsimcoal2, whatever the number of
+populations). See details.}
 
 \item{fastest}{the order of the cells in dadi files and in the
 multidimensional fastsimcoal2 format: "last" (the default) keeps the order
@@ -31,27 +64,77 @@ number of copies in the first population change fastest. See details.}
 
 \item{total_length}{the total number of sites sequenced, including
 monomorphic ones, used to set the number of monomorphic sites (the first
-cell). If \code{NULL} (the default), the spectrum is written as is.}
+cell). If \code{NULL} (the default), the spectra are written as they are.}
 
 \item{round}{boolean, whether to round the number of sites in each cell to
 the nearest integer (as \code{easySFS} with \verb{--dtype int}). Defaults to
 \code{FALSE}.}
 
-\item{overwrite}{boolean, whether to overwrite \code{file} if it already exists.
+\item{overwrite}{boolean, whether to overwrite files that already exist.
 Defaults to \code{FALSE}.}
+
+\item{out_dir}{for a \code{gen_tibble}, the directory in which to write the
+files, or \code{NULL} (the default) to use the location and name of the
+backing files, followed by \verb{_dadi} or \verb{_fastsimcoal2}.}
+
+\item{n_proj}{the number of allele copies to project each population to:
+either a single value used for all populations, a vector with one value
+per population (in the order of the groups), or a vector named with the
+group labels. If \code{NULL} (the default), each population is projected to
+the number of allele copies that maximises its number of segregating
+sites (see \code{\link[=pop_sfs_preview]{pop_sfs_preview()}}).}
+
+\item{prefix}{for a \code{gen_tibble} written in fastsimcoal2 format, the
+prefix of the names of the 2D and multidimensional files, or \code{NULL} (the
+default) to use the name of the backing files.}
+
+\item{folded}{boolean, whether to fold the spectrum (the default, as the
+ancestral allele is not usually known). If \code{FALSE}, the spectrum is
+polarised with \code{ancestral}.}
+
+\item{ancestral}{the ancestral allele of each locus, used to polarise
+unfolded spectra: either the name of a column of the loci table (see
+\code{\link[=show_loci]{show_loci()}}), or a character vector with one allele per locus (in the
+order of the loci table). Loci whose ancestral allele is missing (\code{NA})
+or is neither of their alleles are dropped. If \code{NULL} (the default), the
+reference allele is taken to be ancestral, as in \code{easySFS}. Ignored, with
+a warning, for folded spectra.}
+
+\item{n_bootstrap}{for a \code{gen_tibble}, the number of bootstrap replicates
+to write (0, the default, for none).}
+
+\item{bootstrap_block_size, bootstrap_size_unit}{for a \code{gen_tibble}, the
+size of the blocks of loci resampled for the bootstrap, and its unit
+("snp", the default, "cM" or "bp"); see \code{\link[=bootstrap_pop_sfs]{bootstrap_pop_sfs()}}.}
+
+\item{max_cells}{for a \code{gen_tibble}, the maximum number of cells of the
+joint spectrum of all populations; an error is raised for larger
+spectra.}
+
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
+
+\item{block_size}{maximum number of loci read at once.}
 }
 \value{
-the path of the file, invisibly.
+the path of the file (for an \code{sfs} object) or the paths of the
+files written (for a \code{gen_tibble}), invisibly.
 }
 \description{
-Write a site frequency spectrum (an \code{sfs} object, as returned by
-\code{\link[=pop_sfs]{pop_sfs()}}, \code{\link[=pairwise_pop_sfs]{pairwise_pop_sfs()}} and \code{\link[=nwise_pop_sfs]{nwise_pop_sfs()}} with
-\code{type = "array"}) to a file in the format used by \code{dadi} (and \code{moments})
-or by \code{fastsimcoal2}, as written by \code{easySFS}. To write all the spectra
-that \code{easySFS} writes (the 1D spectrum of each population, the joint
-spectrum of each pair of populations, and the joint spectrum of all
-populations) in a single call, use \code{\link[=sfs_as_dadi]{sfs_as_dadi()}} or
-\code{\link[=sfs_as_simcoal]{sfs_as_simcoal()}}.
+Write site frequency spectra in the formats used by \code{dadi} (and \code{moments})
+and by \code{fastsimcoal2}, as written by \code{easySFS}:
+\itemize{
+\item for an \code{sfs} object (as returned by \code{\link[=pop_sfs]{pop_sfs()}}, \code{\link[=pairwise_pop_sfs]{pairwise_pop_sfs()}} and
+\code{\link[=nwise_pop_sfs]{nwise_pop_sfs()}} with \code{type = "array"}, or by the \verb{bootstrap_*}
+functions, e.g. \code{\link[=bootstrap_pop_sfs]{bootstrap_pop_sfs()}}), write that spectrum to \code{file};
+\item for a grouped \code{\link{gen_tibble}}, compute all the spectra that \code{easySFS}
+writes (the 1D spectrum of each population, the joint spectrum of each
+pair of populations, and the joint spectrum of all populations, in a
+single pass over the genotypes), and write them in \code{out_dir}, with the
+file names of \code{easySFS}, optionally with bootstrap replicates. Missing
+genotypes are dealt with by projecting each population down to \code{n_proj}
+allele copies (see \code{\link[=pop_sfs]{pop_sfs()}}).
+}
 }
 \details{
 \strong{dadi format} (\code{format = "dadi"}): a line with the dimensions of the
@@ -70,9 +153,9 @@ spectrum, as a \verb{_jointDAFpop1_0.obs} or \verb{_jointMAFpop1_0.obs} file, a
 matrix with the second population in the rows (labelled \code{d1_0}, \code{d1_1},
 ...) and the first population in the columns (labelled \code{d0_0}, \code{d0_1},
 ...); for a spectrum of three or more populations, as a multidimensional
-spectrum (\verb{_MSFS.obs} file). \code{format = "fsc_msfs"} writes the
-multidimensional format whatever the number of populations. In the
-multidimensional format, the cells are listed in the order set by
+spectrum (\verb{_MSFS.obs} file). For an \code{sfs} object, \code{format = "fsc_msfs"}
+writes the multidimensional format whatever the number of populations. In
+the multidimensional format, the cells are listed in the order set by
 \code{fastest}: "last" (the default) has the number of copies in the last
 population changing fastest, as written by \code{easySFS}; "first" has the
 first population changing fastest. Please check which order your version
@@ -83,23 +166,81 @@ number of sites sequenced (including monomorphic sites that are not in
 the \code{gen_tibble}): the first cell of the spectrum (sites with no copies of
 the alternate or minor allele) is then set to \code{total_length} minus the
 number of sites in all the other cells.
+
+\strong{The spectra of a \code{gen_tibble}} are written in \code{out_dir}, with the file
+names of \code{easySFS} (\code{pop} stands for the population labels, \code{p} for their
+projections, and \code{M} is replaced by \code{D} for unfolded spectra):
+\itemize{
+\item dadi: \code{pop-p.sfs} for each population, \code{pop1-pop2.sfs} for each pair,
+and \code{pop1-pop2-...-popK.sfs} for all populations;
+\item fastsimcoal2: \code{pop_MAFpop0.obs} for each population,
+\code{prefix_jointMAFpopj_i.obs} for each pair (where \code{i} and \code{j} are the
+0-based indices of the two populations, so that the second population of
+the pair is in the rows), and \code{prefix_MSFS.obs} for all populations.
+}
+
+\code{easySFS} writes these files in the sub-directories \code{dadi} and
+\code{fastsimcoal2} of its output directory: use, for example,
+\code{out_dir = file.path(dir, "dadi")} with \code{format = "dadi"} and
+\code{out_dir = file.path(dir, "fastsimcoal2")} with \code{format = "fsc"} to get the
+same layout. Populations are in the order of the groups (see
+\code{\link[dplyr:group_keys]{dplyr::group_keys()}}): to change their order, which matters for \code{dadi}
+and \code{fastsimcoal2} (and is set with \code{--order} in \code{easySFS}), change the
+order of the levels of the grouping variable (e.g. with \code{\link[=factor]{factor()}}).
+
+With \code{n_bootstrap} replicates of a block bootstrap (see
+\code{\link[=bootstrap_pop_sfs]{bootstrap_pop_sfs()}}), the spectra of each replicate are also written,
+with the same file names, in the sub-directories \code{bootstrap_1},
+\code{bootstrap_2}, ... of \code{out_dir}, numbered with as many digits as
+\code{n_bootstrap} (e.g. \code{bootstrap_001} to \code{bootstrap_100}), which can be
+used to estimate confidence intervals with \code{fastsimcoal2}. Replicates use
+the same projections as the spectra of all loci, and \code{total_length} and
+\code{round} are applied to each of them. To draw the same replicates in both
+formats, set the same seed (with \code{\link[=set.seed]{set.seed()}}) before writing each of
+them.
 }
 \examples{
+\dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}
+\dontshow{
+data.table::setDTthreads(2)
+RhpcBLASctl::blas_set_num_threads(2)
+RhpcBLASctl::omp_set_num_threads(2)
+}
 example_gt <- load_example_gt("grouped_gen_tbl")
 
+# write a single spectrum
 sfs_2d <- example_gt \%>\%
   pairwise_pop_sfs(n_proj = 2, type = "array")
-
-# a dadi file
 dadi_file <- tempfile(fileext = ".sfs")
 write_sfs(sfs_2d$pop1.pop2, dadi_file)
 readLines(dadi_file)
-
-# a fastsimcoal2 file
 fsc_file <- tempfile(fileext = "_jointMAFpop1_0.obs")
 write_sfs(sfs_2d$pop1.pop2, fsc_file, format = "fsc")
 readLines(fsc_file)
+
+# write all the spectra written by easySFS, in the same directories
+out_dir <- file.path(tempdir(), "example_sfs")
+dadi_files <- example_gt \%>\%
+  write_sfs(out_dir = file.path(out_dir, "dadi"), n_proj = 2)
+basename(dadi_files)
+fsc_files <- example_gt \%>\%
+  write_sfs(
+    out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+    n_proj = 2, prefix = "example"
+  )
+basename(fsc_files)
+
+# with 3 bootstrap replicates, resampling blocks of 2 SNPs
+set.seed(1)
+fsc_files <- example_gt \%>\%
+  write_sfs(
+    out_dir = file.path(out_dir, "fastsimcoal2"), format = "fsc",
+    n_proj = 2, prefix = "example", n_bootstrap = 3,
+    bootstrap_block_size = 2, overwrite = TRUE
+  )
+list.files(file.path(out_dir, "fastsimcoal2"))
+\dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=sfs_as_dadi]{sfs_as_dadi()}}, \code{\link[=sfs_as_simcoal]{sfs_as_simcoal()}}
+\code{\link[=pop_sfs]{pop_sfs()}}, \code{\link[=pop_sfs_preview]{pop_sfs_preview()}}, \code{\link[=bootstrap_pop_sfs]{bootstrap_pop_sfs()}}
 }

@@ -1,6 +1,6 @@
 # Tests for the polarisation of unfolded spectra with the ancestral allele
 # (the ancestral argument of pop_sfs(), pairwise_pop_sfs(), nwise_pop_sfs(),
-# pop_sfs_preview(), sfs_as_dadi() and sfs_as_simcoal())
+# pop_sfs_preview() and write_sfs())
 
 sim <- ref_sfs_simulate(c(popA = 6, popB = 5, popC = 4),
   n_loci = 80,
@@ -191,14 +191,15 @@ test_that("monomorphic loci are polarised with their reference allele", {
   expect_output(print(sfs_other$pop1), "without ancestral allele: 1")
 })
 
-test_that("sfs_as_dadi and sfs_as_simcoal polarise unfolded spectra", {
-  fsc_files <- sfs_as_simcoal(sim$gt,
+test_that("write_sfs polarises the unfolded spectra of a gen_tibble", {
+  fsc_files <- write_sfs(sim$gt,
+    format = "fsc",
     out_dir = withr::local_tempdir(), n_proj = c(6, 4, 3),
     prefix = "test", folded = FALSE, ancestral = ancestral
   )
   expect_true("test_jointDAFpop1_0.obs" %in% basename(fsc_files))
   dadi_dir <- withr::local_tempdir()
-  sfs_as_dadi(sim$gt,
+  write_sfs(sim$gt,
     out_dir = dadi_dir, n_proj = c(6, 4, 3),
     folded = FALSE, ancestral = ancestral
   )

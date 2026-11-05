@@ -39,9 +39,9 @@ projections and options, the spectra match easySFS's output.
   with `fastest` and with easySFS's `--total-length` (`total_length`) and
   `--dtype int` (`round`);
 - `ancestral` (in `pop_sfs()`, `pairwise_pop_sfs()`, `nwise_pop_sfs()`,
-  `pop_sfs_preview()`, `sfs_as_dadi()` and `sfs_as_simcoal()`): the
-  ancestral allele of each
-  locus, as a loci table column or a vector, compared ignoring case. Loci
+  `pop_sfs_preview()` and `write_sfs()` for a gen_tibble): the ancestral
+  allele of each locus, as a loci table column or a vector, compared ignoring
+  case. Loci
   whose ancestral allele is the alternate allele are flipped in the counting
   pass, and loci without a usable ancestral allele are dropped (counted in
   `n_loci_unpolarised`), as dadi does with an outgroup allele. It is ignored,
@@ -57,8 +57,7 @@ projections and options, the spectra match easySFS's output.
   each locus over many cells with tiny fractions of a site;
 - the block bootstrap: `bootstrap_pop_sfs()`, `bootstrap_pairwise_pop_sfs()`,
   `bootstrap_nwise_pop_sfs()`, and the `n_bootstrap` argument of
-  `sfs_as_dadi()` and `sfs_as_simcoal()`. They work
-  as follows:
+  `write_sfs()` for a gen_tibble. They work as follows:
   - the blocks are those of the jackknife (`.jackknife_block_ids()`);
   - the counting pass keys each configuration by block as well, so the
     genotypes are read once;
@@ -67,13 +66,16 @@ projections and options, the spectra match easySFS's output.
     times the block was drawn (`rmultinom()`, so `set.seed()` makes it
     reproducible);
   - replicates use the projections chosen with all loci;
-  - `sfs_as_dadi()` and `sfs_as_simcoal()` project the replicates in chunks
-    of at most 1e7 cells, to limit memory;
-- `sfs_as_dadi()` and `sfs_as_simcoal()` (first written as a single
-  `gt_as_easysfs()`). Each computes, in one pass, all the spectra that
-  easySFS writes (1D, each pair, all populations) and writes them in its
-  format, with easySFS's file names, directly in `out_dir`. Writing them to
-  `dir/dadi` and `dir/fastsimcoal2` gives easySFS's layout. They were checked
+  - `write_sfs()` projects the replicates in chunks of at most 1e7 cells, to
+    limit memory;
+- `write_sfs()` for a grouped gen_tibble (first written as
+  `gt_as_easysfs()`, then split into `sfs_as_dadi()` and `sfs_as_simcoal()`,
+  and finally made methods of `write_sfs()`: `write_sfs.sfs()` for a
+  spectrum and `write_sfs.gen_tbl()` for a gen_tibble). It computes, in one
+  pass, all the spectra that easySFS writes (1D, each pair, all populations)
+  and writes them in `format` ("dadi" or "fsc"), with easySFS's file names,
+  directly in `out_dir`. Writing them to `dir/dadi` and `dir/fastsimcoal2`
+  gives easySFS's layout. This was checked
   against emulated easySFS outputs, written by a literal R port of easySFS's
   writing code; `test_easysfs.R` compares every file once the real fixtures
   exist.
