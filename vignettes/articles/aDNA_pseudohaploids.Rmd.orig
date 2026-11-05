@@ -12,7 +12,6 @@ library(tidypopgen)
 library(ggplot2)
 library(ggrepel)
 library(admixtools)
-library(ggheatmap)
 library(stringr)
 ```
 

@@ -367,7 +367,10 @@ phased_missing_byte <- 3L
 #' is_phased(x)
 is_phased <- function(.x) {
   if (inherits(.x, "data.frame")) {
+    # use the genotypes column, so that this also works on tibbles that have
+    # lost the gen_tbl class (e.g. from as_tibble() or pick())
     stopifnot_gen_tibble(.x)
+    .x <- .x$genotypes
   } else if (!inherits(.x, "vctrs_bigSNP")) {
     stop(".x should be a gen_tibble, or its genotypes column", call. = FALSE)
   }

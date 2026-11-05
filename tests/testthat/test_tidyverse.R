@@ -258,6 +258,28 @@ test_that("select, rename and relocate keep grouped gen_tibble classes", {
   expect_identical(attr(test_ren_sf, "sf_column"), "geometry")
 })
 
+test_that("joins, bind_rows and bind_cols keep grouped gen_tibble classes", {
+  test_grouped <- test_gt %>% group_by(population)
+  meta <- tibble(id = c("a", "b", "c"), sex = c("F", "M", "F"))
+  test_join <- test_grouped %>% left_join(meta, by = "id")
+  expect_identical(class(test_join), class(test_grouped))
+  expect_equal(group_vars(test_join), "population")
+  expect_identical(show_loci(test_join), show_loci(test_gt))
+  test_join <- test_grouped %>% inner_join(meta[1:2, ], by = "id")
+  expect_identical(class(test_join), class(test_grouped))
+  expect_equal(test_join$id, c("a", "b"))
+  test_bind <- bind_rows(test_grouped, test_grouped)
+  expect_identical(class(test_bind), class(test_grouped))
+  expect_equal(nrow(test_bind), 6)
+  test_bind <- bind_cols(test_grouped, sex = c("F", "M", "F"))
+  expect_identical(class(test_bind), class(test_grouped))
+  # grouped statistics work on the result
+  expect_identical(
+    loci_alt_freq(test_join),
+    loci_alt_freq(test_grouped %>% filter(id %in% c("a", "b")))
+  )
+})
+
 test_that("$<- can remove the geometry from a gen_tibble with sf", {
   gen_tbl_sf <- load_example_gt("gen_tbl_sf")
   gen_tbl_sf$geometry <- NULL

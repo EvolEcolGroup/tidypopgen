@@ -26,7 +26,7 @@ writeLines(rmd_orig, "./laptop_benchmark_hgdp.Rmd.orig")
 # run the benchmark
 knitr::knit("laptop_benchmark_hgdp.Rmd.orig", "laptop_benchmark_hgdp.Rmd")
 # ditch the new figures and bring back to old ones
-unlink("./figure/hgdp_benchmark")
+unlink("./figure/hgdp_benchmark", recursive = TRUE)
 fs::dir_copy("./figure_backup",
   "./figure/hgdp_benchmark",
   overwrite = TRUE

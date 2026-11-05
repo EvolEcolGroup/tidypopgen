@@ -400,6 +400,51 @@ test_that("population statistics are the same with phased data", {
     pairwise_pop_fst(unphased_grp, method = "WC84")
   )
   expect_equal(pop_tajimas_d(phased_grp), pop_tajimas_d(unphased_grp))
+  expect_equal(nwise_pop_pbs(phased_grp), nwise_pop_pbs(unphased_grp))
+  # windowed and jackknife versions
+  expect_equal(
+    windows_pairwise_pop_fst(phased_grp, window_size = 50, step_size = 25),
+    windows_pairwise_pop_fst(unphased_grp, window_size = 50, step_size = 25)
+  )
+  expect_equal(
+    windows_nwise_pop_pbs(phased_grp, window_size = 50, step_size = 25),
+    windows_nwise_pop_pbs(unphased_grp, window_size = 50, step_size = 25)
+  )
+  expect_equal(
+    windows_pop_tajimas_d(phased_grp, window_size = 50, step_size = 25),
+    windows_pop_tajimas_d(unphased_grp, window_size = 50, step_size = 25)
+  )
+  expect_equal(
+    jackknife_pairwise_pop_fst(phased_grp, block_size = 50),
+    jackknife_pairwise_pop_fst(unphased_grp, block_size = 50)
+  )
+  expect_equal(
+    jackknife_pop_tajimas_d(phased_grp, block_size = 50),
+    jackknife_pop_tajimas_d(unphased_grp, block_size = 50)
+  )
+})
+
+test_that("tibbles that lost the gen_tbl class keep the phase", {
+  # e.g. from as_tibble(), or pick() and reframe(), whose class the generics
+  # restore from the genotypes column (see restore_genotypes_tbl())
+  plain <- tibble::as_tibble(phased_gt)
+  expect_false(inherits(plain, "gen_tbl"))
+  expect_true(is_phased(plain))
+  expect_identical(show_haplotypes(plain), show_haplotypes(phased_gt))
+  expect_equal(loci_alt_freq(plain), loci_alt_freq(unphased_gt))
+  reframe_stats <- function(x) {
+    x %>%
+      dplyr::group_by(population) %>%
+      dplyr::reframe(
+        phased = is_phased(dplyr::pick(dplyr::everything())),
+        hwe = loci_hwe(dplyr::pick(dplyr::everything()))
+      )
+  }
+  phased_stats <- reframe_stats(phased_gt)
+  unphased_stats <- reframe_stats(unphased_gt)
+  expect_true(all(phased_stats$phased))
+  expect_false(any(unphased_stats$phased))
+  expect_equal(phased_stats$hwe, unphased_stats$hwe)
 })
 
 test_that("pairwise statistics of individuals are the same with phased data", {
@@ -413,6 +458,8 @@ test_that("pairwise statistics of individuals are the same with phased data", {
     pairwise_allele_sharing(phased_gt),
     pairwise_allele_sharing(unphased_gt)
   )
+  expect_equal(pairwise_grm(phased_gt), pairwise_grm(unphased_gt))
+  expect_equal(indiv_inbreeding(phased_gt), indiv_inbreeding(unphased_gt))
   # the same as computing the statistics from the dosages in R
   dosages <- show_genotypes(unphased_gt)
   i <- 3

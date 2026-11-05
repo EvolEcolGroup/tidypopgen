@@ -20,7 +20,7 @@ show_loci <- function(.x, ...) {
 #' @export
 #' @rdname show_loci
 show_loci.tbl_df <- function(.x, ...) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   show_loci(.x$genotypes, ...)
 }
@@ -45,7 +45,7 @@ show_loci.vctrs_bigSNP <- function(.x, ...) {
 #' @export
 #' @rdname show_loci
 "show_loci<-.tbl_df" <- function(.x, value) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   show_loci(.x$genotypes) <- value
   .x

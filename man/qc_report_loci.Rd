@@ -2,15 +2,15 @@
 % Please edit documentation in R/qc_report_loci.R
 \name{qc_report_loci}
 \alias{qc_report_loci}
-\alias{qc_report_loci.tbl_df}
-\alias{qc_report_loci.grouped_df}
+\alias{qc_report_loci.gen_tbl}
+\alias{qc_report_loci.grouped_gen_tbl}
 \title{Create a Quality Control report for loci}
 \usage{
 qc_report_loci(.x, ...)
 
-\method{qc_report_loci}{tbl_df}(.x, ...)
+\method{qc_report_loci}{gen_tbl}(.x, ...)
 
-\method{qc_report_loci}{grouped_df}(.x, ...)
+\method{qc_report_loci}{grouped_gen_tbl}(.x, ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object.}

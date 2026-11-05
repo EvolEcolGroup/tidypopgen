@@ -59,7 +59,7 @@
 #'
 #' # Compute Tajima's D
 #' example_gt %>% pop_tajimas_d()
-pop_tajimas_d <- function(.x, n_cores, block_size, ...) {
+pop_tajimas_d <- function(.x, ...) {
   UseMethod("pop_tajimas_d", .x)
 }
 
@@ -78,7 +78,7 @@ pop_tajimas_d.tbl_df <- function(
 ) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   pop_tajimas_d(.x$genotypes, n_cores = n_cores, block_size = block_size)
 }
 
@@ -115,7 +115,7 @@ pop_tajimas_d.vctrs_bigSNP <- function(
 
 #' @export
 #' @rdname pop_tajimas_d
-pop_tajimas_d.grouped_df <- function(
+pop_tajimas_d.grouped_gen_tbl <- function(
   .x,
   n_cores = bigstatsr::nb_cores(),
   block_size = bigstatsr::block_size(nrow(.x), 1),
@@ -153,8 +153,9 @@ tajimas_d_from_pi_vec <- function(pi, n) {
 # estimate tajimas d from the sums of the quantities computed by
 # tajimas_d_locus_terms(); term_sums is either a named vector (one estimate),
 # or a matrix with named columns (one estimate per row, e.g. for each window
-# or jackknife block)
-tajimas_d_from_term_sums <- function(term_sums) {
+# or jackknife block). n_var is passed to tajimas_d_from_sums(): if given, it
+# is the sample size used in the variance of every estimate
+tajimas_d_from_term_sums <- function(term_sums, n_var = NULL) {
   # recast a vector as a matrix with a single row
   if (is.null(dim(term_sums))) {
     term_sums <- matrix(term_sums,
@@ -167,7 +168,8 @@ tajimas_d_from_term_sums <- function(term_sums) {
     seg = term_sums[, "seg"],
     theta_w = term_sums[, "theta_w"],
     n_sum = term_sums[, "n"],
-    n_loci = term_sums[, "n_loci"]
+    n_loci = term_sums[, "n_loci"],
+    n_var = n_var
   )
   return(unname(tajimas_d))
 }
@@ -214,12 +216,21 @@ tajimas_d_locus_terms <- function(pi, n) {
 # - n_loci: the number of loci
 # This is vectorised over all arguments (e.g. to compute estimates for
 # windows, or leave-one-out estimates for a block jackknife). With no missing
-# data (i.e. the same n for all loci), this is the classic Tajima's D
-tajimas_d_from_sums <- function(k_hat, seg, theta_w, n_sum, n_loci) {
+# data (i.e. the same n for all loci), this is the classic Tajima's D.
+# n_var, if given, is the sample size used in the variance for all estimates
+# (rather than the rounded mean sample size of each), so that the leave-one-out
+# estimates of a jackknife use the sample size of the full data (see
+# .jackknife_tajimas_d_blocks())
+tajimas_d_from_sums <- function(k_hat, seg, theta_w, n_sum, n_loci,
+                                n_var = NULL) {
   # the standard deviation of Tajima (1989) is computed for the mean sample
   # size across loci (rounded to the nearest integer, as the formula is only
   # defined for integer sample sizes), as done in pixy
-  n <- round(n_sum / n_loci)
+  if (is.null(n_var)) {
+    n <- tajimas_d_n_var(n_sum, n_loci)
+  } else {
+    n <- rep_len(n_var, length(k_hat))
+  }
   # the formula is not defined for fewer than 2 allele copies
   n[n < 2] <- NA
   a1 <- harmonic_sum(n, power = 1)
@@ -233,6 +244,12 @@ tajimas_d_from_sums <- function(k_hat, seg, theta_w, n_sum, n_loci) {
   # tajimas d is not defined without segregating sites
   tajimas_d[seg == 0] <- NA
   return(tajimas_d)
+}
+
+# the sample size used in the variance of Tajima (1989): the mean sample size
+# across loci, rounded to the nearest integer (as in pixy)
+tajimas_d_n_var <- function(n_sum, n_loci) {
+  round(n_sum / n_loci)
 }
 
 # compute sum_{i=1}^{n-1} 1/i^power for each value of n (a vector of
@@ -308,4 +325,12 @@ harmonic_sum <- function(n, power = 1) {
 # tajimas_d_from_term_sums())
 .tajimas_d_group_sums <- function(term_sums, i_grp) {
   do.call(cbind, lapply(term_sums, function(x) x[, i_grp]))
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+pop_tajimas_d.grouped_df <- function(.x, ...) {
+  pop_tajimas_d(restore_genotypes_tbl(.x, "pop_tajimas_d"), ...)
 }

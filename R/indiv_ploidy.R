@@ -20,7 +20,7 @@ indiv_ploidy <- function(.x, ...) {
 #' @export
 #' @rdname indiv_ploidy
 indiv_ploidy.tbl_df <- function(.x, ...) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   indiv_ploidy(.x$genotypes, ...)
 }

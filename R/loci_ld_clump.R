@@ -66,7 +66,7 @@ loci_ld_clump <- function(.x, .col = "genotypes", ...) {
 #' @export
 #' @rdname loci_ld_clump
 loci_ld_clump.tbl_df <- function(.x, .col = "genotypes", ...) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # check n_cores are available
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%

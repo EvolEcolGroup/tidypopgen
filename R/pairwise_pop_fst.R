@@ -47,6 +47,9 @@
 #'   pairwise Fst by locus with loci as rows and and pairwise combinations as
 #'   columns. If `type=pairwise`, a matrix of genome-wide pairwise Fst values is
 #'   returned.
+#' @param ... other arguments passed to specific methods, currently
+#'   unused.
+#' @rdname pairwise_pop_fst
 #' @export
 #' @seealso [hierfstat::pairwise.neifst()]
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
@@ -72,15 +75,23 @@
 #'   group_by(population) %>%
 #'   pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
 #'
-pairwise_pop_fst <- function(
+pairwise_pop_fst <- function(.x, ...) {
+  UseMethod("pairwise_pop_fst", .x)
+}
+
+#' @export
+#' @rdname pairwise_pop_fst
+pairwise_pop_fst.gen_tbl <- function(
   .x,
   type = c("tidy", "pairwise"),
   by_locus = FALSE,
   by_locus_type = c("tidy", "matrix", "list"),
   method = c("Hudson", "Nei87", "WC84"),
   return_num_dem = FALSE,
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 ) {
+  rlang::check_dots_empty()
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
@@ -229,4 +240,12 @@ pairwise_pop_fst <- function(
     stop("only `method = Hudson` is valid when the data include pseudohaploids")
   }
   invisible(TRUE)
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+pairwise_pop_fst.data.frame <- function(.x, ...) {
+  pairwise_pop_fst(restore_genotypes_tbl(.x, "pairwise_pop_fst"), ...)
 }
