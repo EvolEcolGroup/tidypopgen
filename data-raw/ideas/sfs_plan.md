@@ -31,6 +31,9 @@ projections and options, the spectra match easySFS's output.
 - `pop_sfs()`, `pairwise_pop_sfs()`, `nwise_pop_sfs()` and
   `pop_sfs_preview()`;
 - the `sfs` class with `print()` and `tidy()`;
+- the article `vignettes/articles/sfs.Rmd`, on the Anolis RAD data. It is a
+  live article, built by pkgdown, as it renders in about 10 s (unlike the
+  big data articles, which are precompiled from `.Rmd.orig` files);
 - the reference tests (`helper_sfs_reference.R`, a port of easySFS and
   dadi);
 - `data-raw/create_easysfs_test_data.R` and `test_easysfs.R`, which is
