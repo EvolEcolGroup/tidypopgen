@@ -281,21 +281,23 @@ other cells, as `easySFS --total-length` does. If the SNPs have been
 thinned, as here, where we kept one SNP per RAD locus, scale the total
 length by the proportion of SNPs kept (the number of SNPs after thinning
 over the number before), so that monomorphic sites are sampled at the same
-rate as SNPs. The *Anolis* data shipped with
-the package do not record the number of sites sequenced, so here we use a
-made-up total length of 100,000 sites:
+rate as SNPs. The *Anolis* data shipped with the package do not record the
+number of sites sequenced, so here we use a made-up total length of 100,000
+sites before thinning, scaled by the proportion of SNPs we kept:
 
 ```{r total_length}
+total_length <- 100000 * count_loci(anole_thin) / count_loci(anole_gt)
+total_length
 fastsimcoal2_file <- tempfile(fileext = "_MAFpop0.obs")
 write_sfs(sfs_wam, fastsimcoal2_file,
   format = "fastsimcoal2",
-  total_length = 100000, round = TRUE
+  total_length = total_length, round = TRUE
 )
 writeLines(readLines(fastsimcoal2_file))
 ```
 
 In the `fastsimcoal2` file, the first line gives the number of observed
-spectra, and the second labels the cells. The first cell now holds 100,000
-sites minus the sites in the other cells, which are unchanged. `total_length`
-can also be given to `write_sfs()` for a `gen_tibble`, to set the first cell
-of all the spectra it writes.
+spectra, and the second labels the cells. The first cell now holds the
+scaled total length minus the sites in the other cells, which are
+unchanged. `total_length` can also be given to `write_sfs()` for a
+`gen_tibble`, to set the first cell of all the spectra it writes.
