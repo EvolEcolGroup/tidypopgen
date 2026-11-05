@@ -54,15 +54,20 @@ anole_gt <- anole_gt %>%
   group_by(pop)
 ```
 
-As usual for RAD-seq data, many SNPs are missing in some individuals. In the
-two Amazonian populations, only about a third of the SNPs are genotyped in
-every individual:
+As usual for RAD-seq data, many genotypes are missing. `loci_missingness()`
+gives the proportion of missing genotypes at each SNP in each population.
+Only 4 to 10% of the genotypes are missing (`mean_missing`), but they are
+spread over many SNPs: in the two Amazonian populations, about two thirds of
+the SNPs are missing in at least one individual (`prop_snps_missing`):
 
 ```{r missingness}
 anole_gt %>%
   loci_missingness(type = "tidy") %>%
   group_by(group) %>%
-  summarise(prop_complete = mean(value == 0))
+  summarise(
+    mean_missing = mean(value),
+    prop_snps_missing = mean(value > 0)
+  )
 ```
 
 SNPs found on the same RAD locus are tightly linked. By default, `easySFS`
@@ -240,17 +245,57 @@ list.files(file.path(out_dir, "fastsimcoal2"))
 list.files(file.path(out_dir, "fastsimcoal2", "bootstrap_01"))
 ```
 
-`total_length` sets the number of monomorphic sites from the total length
-of the sequenced data, as `easySFS --total-length` does. Given a single
-spectrum (an `sfs` object, returned with `type = "array"`), `write_sfs()`
-writes it to a file:
+Given a single spectrum (an `sfs` object, returned with `type = "array"`),
+`write_sfs()` writes it to a file. Here we write the spectrum of the western
+Amazonian population. We round its cells to integers (`round = TRUE`, as
+`easySFS --dtype int`) to make the file easier to read:
 
 ```{r write_sfs}
-sfs_eam_wam <- pairwise_pop_sfs(anole_thin,
-  n_proj = n_proj,
-  type = "array"
-)$Eam.Wam
+sfs_wam <- pop_sfs(anole_thin, n_proj = n_proj, type = "array")$Wam
 dadi_file <- tempfile(fileext = ".sfs")
-write_sfs(sfs_eam_wam, dadi_file, format = "dadi")
-substr(readLines(dadi_file), 1, 60)
+write_sfs(sfs_wam, dadi_file, format = "dadi", round = TRUE)
+writeLines(readLines(dadi_file))
 ```
+
+A dadi file has three lines:
+
+1. the number of cells (the number of allele copies plus 1), whether the
+   spectrum is folded, and the population label;
+2. the number of sites with 0, 1, 2, ... copies of the minor allele;
+3. the mask: 1 for the masked cells, which are the cell with no copies of
+   the minor allele and the cells with more than half of the copies (which
+   are folded out).
+
+For a joint spectrum, the first line gives the number of cells and the label
+of each population. The second line lists the cells with the number of
+copies in the last population changing fastest.
+
+The first cell (no copies of the minor allele in the projected sample) only
+counts the SNPs in the `gen_tibble` that are monomorphic in this population.
+It does not count the sites that were sequenced but are not SNPs. `dadi`
+masks this cell. `fastsimcoal2` uses it as the number of monomorphic sites,
+to estimate parameters in absolute units (e.g. effective population sizes,
+given a mutation rate). If you know the total number of sites sequenced,
+`total_length` sets the first cell to that number minus the sites in all the
+other cells, as `easySFS --total-length` does. If the SNPs have been
+thinned, as here, where we kept one SNP per RAD locus, scale the total
+length by the proportion of SNPs kept (the number of SNPs after thinning
+over the number before), so that monomorphic sites are sampled at the same
+rate as SNPs. The *Anolis* data shipped with
+the package do not record the number of sites sequenced, so here we use a
+made-up total length of 100,000 sites:
+
+```{r total_length}
+fastsimcoal2_file <- tempfile(fileext = "_MAFpop0.obs")
+write_sfs(sfs_wam, fastsimcoal2_file,
+  format = "fastsimcoal2",
+  total_length = 100000, round = TRUE
+)
+writeLines(readLines(fastsimcoal2_file))
+```
+
+In the `fastsimcoal2` file, the first line gives the number of observed
+spectra, and the second labels the cells. The first cell now holds 100,000
+sites minus the sites in the other cells, which are unchanged. `total_length`
+can also be given to `write_sfs()` for a `gen_tibble`, to set the first cell
+of all the spectra it writes.
