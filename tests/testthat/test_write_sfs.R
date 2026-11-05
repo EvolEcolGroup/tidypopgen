@@ -165,7 +165,10 @@ test_that("write_sfs writes the files of easySFS for a gen_tibble", {
     "test_jointMAFpop2_1.obs", "test_MSFS.obs"
   )))
   # the files are written directly in out_dir
-  expect_identical(dirname(dadi_files), rep(dadi_dir, 7))
+  expect_identical(
+    normalizePath(dirname(dadi_files), winslash = "/"),
+    rep(normalizePath(dadi_dir, winslash = "/"), 7)
+  )
   expect_identical(sort(list.files(dadi_dir)), sort(basename(dadi_files)))
   expect_identical(sort(list.files(fsc_dir)), sort(basename(fsc_files)))
   # the files are those written by write_sfs() for each spectrum
