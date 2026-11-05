@@ -2,7 +2,7 @@
 #'
 #' Compute the multidimensional (joint) site frequency spectrum (SFS) of all
 #' the populations of a grouped `gen_tibble`, i.e. the number of loci with
-#' each combination of numbers of copies of the alternate (or minor) allele
+#' each combination of numbers of copies of the derived (or minor) allele
 #' in the populations (the "multiSFS" of `easySFS` and `fastsimcoal2`).
 #' Missing genotypes are dealt with as in `easySFS`, by projecting each
 #' population down to `n_proj` allele copies (see [pop_sfs()] for details).
@@ -29,7 +29,8 @@
 #'   raised for larger spectra, to avoid running out of memory.
 #' @returns If `type = "tidy"`, a tibble with one row per cell of the joint
 #'   spectrum, with one column per population (named with the group labels)
-#'   giving its number of copies of the alternate (or minor) allele,
+#'   giving its number of copies of the derived (or minor) allele (see
+#'   `allele_count` in [pop_sfs()]),
 #'   `n_sites` (the projected number of sites) and `masked` (whether the cell
 #'   is masked, see [pop_sfs()]). The projection of each population is
 #'   stored in the attribute `n_proj`. If `type = "array"`, an `sfs` object

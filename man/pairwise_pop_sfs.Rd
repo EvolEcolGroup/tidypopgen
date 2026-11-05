@@ -68,7 +68,8 @@ spectrum of each pair of populations, with the columns:
 column per grouping variable for each population of the pair, if the
 data are grouped by more than one variable);
 \item \code{allele_count_1} and \code{allele_count_2}: the number of copies of the
-alternate (or minor) allele in the first and second population;
+derived (or minor) allele in the first and second population (see
+\code{allele_count} in \code{\link[=pop_sfs]{pop_sfs()}});
 \item \code{n_sites}: the (projected) number of sites;
 \item \code{masked}: whether the cell is masked (see \code{\link[=pop_sfs]{pop_sfs()}}).
 }
@@ -84,7 +85,7 @@ first population in the rows and the second in the columns (see
 \description{
 Compute the two-dimensional (joint) site frequency spectrum (SFS) of each
 pair of populations, i.e. the number of loci with \eqn{i} copies of the
-alternate (or minor) allele in the first population and \eqn{j} in the
+derived (or minor) allele in the first population and \eqn{j} in the
 second. Missing genotypes are dealt with as in \code{easySFS}, by projecting
 each population down to \code{n_proj} allele copies (see \code{\link[=pop_sfs]{pop_sfs()}} for
 details). Each spectrum only uses the loci that have at least \code{n_proj}

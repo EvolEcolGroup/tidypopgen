@@ -620,9 +620,12 @@ new_sfs <- function(fs, mask, pop_ids, folded, n_loci, n_loci_dropped,
 #'   dadi and easySFS) or "first".
 #' @param ... currently unused.
 #' @returns a tibble with one column per population (named with the
-#'   population labels) giving the number of allele copies (alternate copies
-#'   for an unfolded spectrum, copies of the minor allele across all the
-#'   populations of the spectrum for a folded one), `n_sites`, the number
+#'   population labels) giving the number of allele copies (for an unfolded
+#'   spectrum, copies of the derived allele: the alternate allele, unless
+#'   the loci were polarised with `ancestral`, in which case it is the
+#'   reference allele at loci whose ancestral allele is the alternate one;
+#'   for a folded spectrum, copies of the minor allele across all the
+#'   populations of the spectrum), `n_sites`, the number
 #'   of sites in that cell (a fractional number, as each locus is spread over
 #'   the cells by the projection), and `masked`, TRUE for the cells that are
 #'   masked (the corners, i.e. monomorphic sites, and for a folded spectrum

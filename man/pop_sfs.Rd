@@ -82,8 +82,9 @@ spectrum of each population, with the columns:
 \itemize{
 \item \code{group} (or one column per grouping variable, if the data are grouped
 by more than one variable), absent for ungrouped data;
-\item \code{allele_count}: the number of copies of the alternate allele (for an
-unfolded spectrum) or of the minor allele (for a folded spectrum);
+\item \code{allele_count}: the number of copies of the derived allele (for an
+unfolded spectrum: the alternate allele, unless the loci are polarised
+with \code{ancestral}) or of the minor allele (for a folded spectrum);
 \item \code{n_sites}: the (projected) number of sites;
 \item \code{masked}: whether the cell is masked (see details).
 }
@@ -103,7 +104,7 @@ their ancestral allele is unknown (\code{n_loci_unpolarised}, only with
 \description{
 Compute the one-dimensional site frequency spectrum (SFS) of each
 population, i.e. the number of loci with 0, 1, 2, ... copies of the
-alternate (or minor) allele. Missing genotypes are dealt with as in
+derived (or minor) allele. Missing genotypes are dealt with as in
 \code{easySFS} (which relies on \code{dadi}), so that the spectra can be used for
 demographic inference with \code{dadi}, \code{moments} or \code{fastsimcoal2}. See
 \code{\link[=pairwise_pop_sfs]{pairwise_pop_sfs()}} for the joint spectra of pairs of populations, and
@@ -114,9 +115,9 @@ demographic inference with \code{dadi}, \code{moments} or \code{fastsimcoal2}. S
 copies called at a locus varies from locus to locus. Each population is
 therefore projected down to a fixed number of allele copies, \code{n_proj}
 (Marth et al. 2004; Gutenkunst et al. 2009): a locus with \eqn{n} called
-allele copies, \eqn{k} of which are alternate, contributes to cell
+allele copies, \eqn{k} of which are derived, contributes to cell
 \eqn{j} of the spectrum the hypergeometric probability of drawing \eqn{j}
-alternate copies when sampling \code{n_proj} of its \eqn{n} copies without
+derived copies when sampling \code{n_proj} of its \eqn{n} copies without
 replacement. Loci with fewer than \code{n_proj} called copies are dropped. Each
 locus is thus spread over several cells, and the spectrum contains
 fractional numbers of sites. This is the approach of \code{easySFS} (with the

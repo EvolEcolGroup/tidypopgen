@@ -66,7 +66,8 @@ raised for larger spectra, to avoid running out of memory.}
 \value{
 If \code{type = "tidy"}, a tibble with one row per cell of the joint
 spectrum, with one column per population (named with the group labels)
-giving its number of copies of the alternate (or minor) allele,
+giving its number of copies of the derived (or minor) allele (see
+\code{allele_count} in \code{\link[=pop_sfs]{pop_sfs()}}),
 \code{n_sites} (the projected number of sites) and \code{masked} (whether the cell
 is masked, see \code{\link[=pop_sfs]{pop_sfs()}}). The projection of each population is
 stored in the attribute \code{n_proj}. If \code{type = "array"}, an \code{sfs} object
@@ -75,7 +76,7 @@ stored in the attribute \code{n_proj}. If \code{type = "array"}, an \code{sfs} o
 \description{
 Compute the multidimensional (joint) site frequency spectrum (SFS) of all
 the populations of a grouped \code{gen_tibble}, i.e. the number of loci with
-each combination of numbers of copies of the alternate (or minor) allele
+each combination of numbers of copies of the derived (or minor) allele
 in the populations (the "multiSFS" of \code{easySFS} and \code{fastsimcoal2}).
 Missing genotypes are dealt with as in \code{easySFS}, by projecting each
 population down to \code{n_proj} allele copies (see \code{\link[=pop_sfs]{pop_sfs()}} for details).
