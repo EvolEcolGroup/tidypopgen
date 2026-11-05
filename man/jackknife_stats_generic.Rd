@@ -31,7 +31,8 @@ number of SNPs. If "cM", the block size is in centiMorgans. If "bp", the
 block size is in base pairs.}
 
 \item{f}{a custom function to use for the statistic. This function
-should take a vector of locus estimates and return a single value. Note
+should take a vector of locus estimates and return a single value (see
+Details for the functions that are appropriate). Note
 that, for a custom function, the statistic is recomputed from scratch
 for every block, which is slower than using "mean" or "sum".}
 
@@ -66,6 +67,18 @@ error is computed with the weighted delete-m jackknife of Busing et al.
 (1999), where each block is weighted by the number of loci with
 non-missing values that it contains. Blocks should be larger than the
 extent of linkage disequilibrium (e.g. 5 cM, or a few Mb).
+
+The jackknife assumes that the statistic estimates a quantity that does
+not change with the number of loci (such as a mean, or a ratio of sums).
+A sum does not: leaving out a block always makes it smaller, which the
+jackknife would mistake for a bias. For \code{operator = "sum"}, the sum is
+thus treated as the mean of the non-missing values times their number
+(taken as fixed): the jackknife is computed for the mean, and its
+estimates and standard error are multiplied by the number of non-missing
+values, so that \code{jack_estimate} equals \code{estimate}. A custom function \code{f}
+should not be a sum (use \code{operator = "sum"} instead), and should be a
+smooth function of the data: the jackknife does not give valid standard
+errors for statistics such as the median or other quantiles.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

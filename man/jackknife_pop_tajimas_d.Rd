@@ -19,10 +19,10 @@ jackknife_pop_tajimas_d(
 Data can be grouped by more than one variable: groups are then labelled
 by the values of the grouping variables pasted with "." (e.g. \code{pop1.F}),
 and the "tidy" output has one column per grouping variable rather than a
-single \code{group} column. The \code{group} column, or the columns of
-the grouping variables, keep the type of the grouping variables (e.g. a
-factor keeps its levels), so that groups stay in their order when the output
-is sorted or plotted.}
+single \code{group} column. The \code{group} column, or the columns of the
+grouping variables, keep the type of the grouping variables (e.g. a
+factor keeps its levels), so that groups stay in their order when the
+output is sorted or plotted.}
 
 \item{block_size}{The size of the blocks to leave out.}
 
@@ -70,7 +70,27 @@ genotypes. See \code{\link[=jackknife_stats_generic]{jackknife_stats_generic()}}
 Missing genotypes are accounted for by using the number of non-missing
 allele copies at each locus as its sample size, following Bailey et al.
 (2025) as implemented in \code{pixy}. See \code{\link[=pop_tajimas_d]{pop_tajimas_d()}} for details. Loci
-with no genotyped individuals are ignored.
+with no genotyped individuals are ignored. The variance of Tajima (1989)
+is computed for the mean sample size across all loci (rounded to the
+nearest integer), and the same sample size is used when leaving out each
+block: recomputing the rounded mean for each block left out would make
+Tajima's D jump whenever this changes the rounding (e.g. when the mean
+sample size is close to x.5), which the jackknife would amplify into an
+inflated standard error and a biased jackknife estimate.
+
+Note that the variance of Tajima (1989) assumes that there is no
+recombination among loci. Over a whole genome, Tajima's D is thus not
+standardised: it is approximately proportional to
+\eqn{\hat{\theta}_\pi / \hat{\theta}_W - 1}, with a factor that depends
+on the sample size (about 5 for 10 allele copies, 4.2 for 20, and 3.4
+for 100), and with genome-wide data its standard error is much smaller
+than 1. Use the jackknife standard error, rather than the rules of thumb
+used for single loci, to judge whether genome-wide Tajima's D differs
+from 0, and compare groups with different sample sizes with caution. The
+z score tests whether genome-wide Tajima's D differs from 0, which most
+demographic histories other than a constant population size will cause.
+Blocks should be larger than the extent of linkage disequilibrium, or
+the standard error will be underestimated.
 }
 \examples{
 example_gt <- load_example_gt("grouped_gen_tbl")
@@ -86,6 +106,9 @@ example_gt \%>\%
 \references{
 Busing FMTA, Meijer E, Van Der Leeden R (1999) Delete-m
 jackknife for unequal m. Statistics and Computing 9:3-8.
+
+Tajima F (1989) Statistical method for testing the neutral mutation
+hypothesis by DNA polymorphism. Genetics 123:585-595.
 
 Bailey N, Stevison L, Samuk K (2025) Correcting for bias in estimates of
 \eqn{\theta_W} and Tajima's D from missing data in next-generation

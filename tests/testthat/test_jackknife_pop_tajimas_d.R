@@ -2,7 +2,7 @@
 # jackknife_pop_tajimas_d(type = "list")) matches the jackknife computed by
 # recomputing tajima's d from the genotypes of the loci left when leaving out
 # each block, with the variance computed for the sample size of all loci
-expect_jackknife_matches_subsets <- function(test_gt, block_id, jack_list) {
+expect_jack_matches_subsets <- function(test_gt, block_id, jack_list) {
   # tajima's d of a gen_tibble (as a single group), with sample size n_var
   # in the variance (by default, the rounded mean sample size of its loci)
   tajimas_d_gt <- function(.x, n_var = NULL) {
@@ -41,7 +41,7 @@ test_that("jackknife_pop_tajimas_d leave-one-out matches subsets", {
     unname(vapply(jack_list, function(x) x$estimate, numeric(1))),
     unlist(pop_tajimas_d(test_gt))
   )
-  expect_jackknife_matches_subsets(test_gt, block_id, jack_list)
+  expect_jack_matches_subsets(test_gt, block_id, jack_list)
 })
 
 test_that("jackknife_pop_tajimas_d uses the sample size of all loci", {
@@ -98,7 +98,7 @@ test_that("jackknife_pop_tajimas_d uses the sample size of all loci", {
     unname(vapply(jack_list, function(x) x$estimate, numeric(1))),
     unlist(pop_tajimas_d(test_gt))
   )
-  expect_jackknife_matches_subsets(test_gt, block_id, jack_list)
+  expect_jack_matches_subsets(test_gt, block_id, jack_list)
 })
 
 test_that("the jackknife of tajimas d depends on the total sample size", {
