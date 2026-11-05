@@ -138,11 +138,11 @@ write_test_vcf <- function(genotypes, file = tempfile(fileext = ".vcf")) {
   file
 }
 
-test_that("gen_tibble_phased reads unphased homozygotes and missing data", {
+test_that("gen_tibble_phased reads missing genotypes", {
   vcf <- write_test_vcf(list(
-    c("0/0", "0|1", "1/1", "./."),
-    c(".", "1|0", "0|.", ".|."),
-    c("1|1", "0/0", "1|0", "0|0")
+    c(".", "0|1", "1|1", ".|."),
+    c("0|0", "1|0", "0|.", ".|1"),
+    c("1|1", "0|0", "1|0", "0|0")
   ))
   for (parser in vcf_parsers) {
     x <- gen_tibble_phased(vcf,
@@ -151,8 +151,8 @@ test_that("gen_tibble_phased reads unphased homozygotes and missing data", {
     )
     haps <- unname(show_haplotypes(x))
     expected <- matrix(c(
-      0L, NA, 1L,
-      0L, NA, 1L,
+      NA, 0L, 1L,
+      NA, 0L, 1L,
       0L, 1L, 0L,
       1L, 0L, 0L,
       1L, NA, 1L,
@@ -164,10 +164,28 @@ test_that("gen_tibble_phased reads unphased homozygotes and missing data", {
   }
 })
 
-test_that("gen_tibble_phased refuses unphased heterozygotes", {
+test_that("gen_tibble_phased refuses any unphased genotype", {
+  # heterozygotes, homozygotes and missing genotypes
+  for (unphased in c("0/1", "1/0", "0/0", "1/1", "./.")) {
+    vcf <- write_test_vcf(list(
+      c("0|0", "0|1", "1|1"),
+      c("0|1", "1|0", unphased)
+    ))
+    for (parser in vcf_parsers) {
+      expect_error(
+        gen_tibble_phased(vcf,
+          parser = parser, backingfile = tempfile(),
+          quiet = TRUE
+        ),
+        "individual s3 at locus 1:200 is unphased (with '/')",
+        fixed = TRUE
+      )
+    }
+  }
+  # both parsers name the first unphased genotype of the file
   vcf <- write_test_vcf(list(
-    c("0|0", "0|1", "1|1"),
-    c("0|1", "1|0", "0/1")
+    c("0|0", "0|1", "0/0"),
+    c("1/1", "1|0", "0|1")
   ))
   for (parser in vcf_parsers) {
     expect_error(
@@ -175,12 +193,12 @@ test_that("gen_tibble_phased refuses unphased heterozygotes", {
         parser = parser, backingfile = tempfile(),
         quiet = TRUE
       ),
-      "individual s3 at locus 1:200 is an unphased heterozygote"
+      "individual s3 at locus 1:100 is unphased"
     )
   }
   # the same file can be read (unphased) by gen_tibble
   x <- gen_tibble(vcf, backingfile = tempfile(), quiet = TRUE)
-  expect_identical(show_genotypes(x), rbind(c(0, 1), c(1, 1), c(2, 1)))
+  expect_identical(show_genotypes(x), rbind(c(0, 2), c(1, 1), c(0, 1)))
   # no backing file is left behind by the failed attempts
   bk <- tempfile()
   expect_error(gen_tibble_phased(vcf, backingfile = bk, quiet = TRUE))
@@ -532,46 +550,108 @@ test_that("gt_as_vcf writes phased genotypes, which can be read back", {
   expect_false(any(grepl("|", vcf_body, fixed = TRUE)))
 })
 
-test_that("rbind keeps the phase, swapping the alleles of both haplotypes", {
-  set.seed(42)
-  haps_a <- random_haplotypes(6, 20, p_missing = 0.1)
-  haps_b <- random_haplotypes(5, 20, p_missing = 0.1)
-  loci <- random_loci(20)
-  indiv_a <- data.frame(id = paste0("a", 1:6), population = "a")
-  indiv_b <- data.frame(id = paste0("b", 1:5), population = "b")
-  x_a <- gen_tibble_phased(haps_a,
-    indiv_meta = indiv_a, loci = loci,
+# two phased gen_tibbles with the same loci, and a version of the second one
+# in which the reference and alternate alleles of some loci are swapped (its
+# haplotypes then carry the other allele)
+set.seed(42)
+rb_haps_a <- random_haplotypes(6, 20, p_missing = 0.1)
+rb_haps_b <- random_haplotypes(5, 20, p_missing = 0.1)
+rb_loci <- random_loci(20)
+rb_indiv_a <- data.frame(id = paste0("a", 1:6), population = "a")
+rb_indiv_b <- data.frame(id = paste0("b", 1:5), population = "b")
+rb_swapped <- c(2, 5, 6, 11, 17)
+rb_loci_b_swapped <- rb_loci
+rb_loci_b_swapped$allele_ref[rb_swapped] <- rb_loci$allele_alt[rb_swapped]
+rb_loci_b_swapped$allele_alt[rb_swapped] <- rb_loci$allele_ref[rb_swapped]
+rb_haps_b_swapped <- rb_haps_b
+rb_haps_b_swapped[, rb_swapped] <- 1 - rb_haps_b[, rb_swapped]
+rb_expected <- rbind(rb_haps_a, rb_haps_b)
+storage.mode(rb_expected) <- "integer"
+
+test_that("rbind keeps the phase of two phased gen_tibbles", {
+  x_a <- gen_tibble_phased(rb_haps_a,
+    indiv_meta = rb_indiv_a, loci = rb_loci,
     backingfile = tempfile(), quiet = TRUE
   )
-  # in b, the reference and alternate alleles of some loci are swapped (the
-  # haplotypes then carry the other allele)
-  swapped <- c(2, 5, 6, 11, 17)
-  loci_b <- loci
-  loci_b$allele_ref[swapped] <- loci$allele_alt[swapped]
-  loci_b$allele_alt[swapped] <- loci$allele_ref[swapped]
-  haps_b_swapped <- haps_b
-  haps_b_swapped[, swapped] <- 1 - haps_b[, swapped]
-  x_b <- gen_tibble_phased(haps_b_swapped,
-    indiv_meta = indiv_b, loci = loci_b,
+  x_b <- gen_tibble_phased(rb_haps_b,
+    indiv_meta = rb_indiv_b, loci = rb_loci,
     backingfile = tempfile(), quiet = TRUE
   )
   merged <- rbind(x_a, x_b, quiet = TRUE, backingfile = tempfile())
   expect_true(is_phased(merged))
-  expected <- rbind(haps_a, haps_b)
-  storage.mode(expected) <- "integer"
-  expect_identical(unname(show_haplotypes(merged)), unname(expected))
-  expect_identical(show_loci(merged)$allele_ref, loci$allele_ref)
+  expect_identical(unname(show_haplotypes(merged)), unname(rb_expected))
+  expect_identical(show_loci(merged)$allele_ref, rb_loci$allele_ref)
+  expect_identical(show_loci(merged)$allele_alt, rb_loci$allele_alt)
+  # only the loci in common are kept
+  x_b_sub <- x_b %>% select_loci(c(1:10, 15))
+  merged_sub <- rbind(x_a, x_b_sub, quiet = TRUE, backingfile = tempfile())
+  expect_true(is_phased(merged_sub))
+  expect_identical(
+    unname(show_haplotypes(merged_sub)),
+    unname(rb_expected[, c(1:10, 15)])
+  )
+})
 
-  # merging phased with unphased data discards the phase (with a message)
-  x_b_unphased <- gen_tibble(haps_to_dosages(haps_b_swapped),
-    indiv_meta = indiv_b, loci = loci_b,
+test_that("rbind does not swap or flip the alleles of phased gen_tibbles", {
+  x_a <- gen_tibble_phased(rb_haps_a,
+    indiv_meta = rb_indiv_a, loci = rb_loci,
     backingfile = tempfile(), quiet = TRUE
   )
-  x_a_unphased <- gen_tibble(haps_to_dosages(haps_a),
-    indiv_meta = indiv_a, loci = loci,
+  x_b <- gen_tibble_phased(rb_haps_b,
+    indiv_meta = rb_indiv_b, loci = rb_loci,
     backingfile = tempfile(), quiet = TRUE
   )
-  expected_dosages <- unname(haps_to_dosages(expected) * 1)
+  x_b_swapped <- gen_tibble_phased(rb_haps_b_swapped,
+    indiv_meta = rb_indiv_b, loci = rb_loci_b_swapped,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  # swapped alleles (no backing file is created)
+  bk <- tempfile()
+  expect_error(
+    rbind(x_a, x_b_swapped, quiet = TRUE, backingfile = bk),
+    "alleles of 5 loci are swapped between the two phased gen_tibbles"
+  )
+  expect_false(file.exists(paste0(bk, ".bk")))
+  # the loci can be found with rbind_dry_run(), and removed
+  report <- rbind_dry_run(x_a, x_b_swapped, quiet = TRUE)
+  to_swap <- which(report$target$to_swap)
+  expect_equal(to_swap, rb_swapped)
+  merged <- rbind(x_a, x_b_swapped %>% select_loci(-dplyr::all_of(to_swap)),
+    quiet = TRUE, backingfile = tempfile()
+  )
+  expect_true(is_phased(merged))
+  expect_identical(
+    unname(show_haplotypes(merged)),
+    unname(rb_expected[, -rb_swapped])
+  )
+  # strand flipping
+  expect_error(
+    rbind(x_a, x_b, flip_strand = TRUE, quiet = TRUE, backingfile = bk),
+    "strands can not be flipped when merging phased gen_tibbles"
+  )
+  expect_false(file.exists(paste0(bk, ".bk")))
+})
+
+test_that("rbind of phased and unphased gen_tibbles discards the phase", {
+  x_a <- gen_tibble_phased(rb_haps_a,
+    indiv_meta = rb_indiv_a, loci = rb_loci,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  x_b_swapped <- gen_tibble_phased(rb_haps_b_swapped,
+    indiv_meta = rb_indiv_b, loci = rb_loci_b_swapped,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  x_a_unphased <- gen_tibble(haps_to_dosages(rb_haps_a),
+    indiv_meta = rb_indiv_a, loci = rb_loci,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  x_b_unphased <- gen_tibble(haps_to_dosages(rb_haps_b_swapped),
+    indiv_meta = rb_indiv_b, loci = rb_loci_b_swapped,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  # (the merged data are unphased, so alleles are swapped as for any
+  # unphased data)
+  expected_dosages <- unname(haps_to_dosages(rb_expected) * 1)
   # (the report of rbind is printed, so we capture it)
   utils::capture.output(expect_message(
     merged_ab <- rbind(x_a, x_b_unphased, backingfile = tempfile()),
@@ -584,7 +664,7 @@ test_that("rbind keeps the phase, swapping the alleles of both haplotypes", {
   raw_bytes <- .gt_get_fbm(merged_ab)$copy(code = as.numeric(0:255))[, ]
   expect_true(all(raw_bytes %in% 0:3))
   utils::capture.output(expect_message(
-    merged_ba <- rbind(x_a_unphased, x_b, backingfile = tempfile()),
+    merged_ba <- rbind(x_a_unphased, x_b_swapped, backingfile = tempfile()),
     "only the target gen_tibble is phased"
   ))
   expect_false(is_phased(merged_ba))
@@ -601,16 +681,17 @@ test_that("rbind keeps the phase, swapping the alleles of both haplotypes", {
 })
 
 test_that("rbind_byte_luts recodes phased bytes", {
-  # alleles of both haplotypes are swapped: 0|0 <-> 1|1, 0|1 <-> 1|0
+  # phased data that stay phased are copied as they are (and never swapped)
   luts <- rbind_byte_luts(phased = TRUE, keep_phase = TRUE)
   expect_identical(luts$copy, 0:255)
-  expect_identical(luts$swap[1:6], c(2L, 4L, 0L, 3L, 1L, 5L))
-  # without keeping the phase, 1|0 becomes 0|1 (the unphased heterozygote)
+  expect_identical(luts$swap, 0:255)
+  # without keeping the phase, 1|0 becomes 0|1 (the unphased heterozygote),
+  # also after swapping the alleles of both haplotypes
   luts <- rbind_byte_luts(phased = TRUE, keep_phase = FALSE)
   expect_identical(luts$copy[1:6], c(0L, 1L, 2L, 3L, 1L, 5L))
   expect_identical(luts$swap[1:6], c(2L, 1L, 0L, 3L, 1L, 5L))
   # unphased (and imputed) data
-  luts <- rbind_byte_luts(phased = FALSE, keep_phase = TRUE)
+  luts <- rbind_byte_luts(phased = FALSE, keep_phase = FALSE)
   expect_identical(luts$copy, 0:255)
   expect_identical(luts$swap[1:8], c(2L, 1L, 0L, 3L, 6L, 5L, 4L, 7L))
 })

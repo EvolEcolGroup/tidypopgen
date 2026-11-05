@@ -8,11 +8,13 @@
   phased `gen_tibble`s as usual. `is_phased()` tests whether a `gen_tibble`
   is phased, `show_haplotypes()` returns its haplotypes, and `phased_bytes`
   gives the alleles of each byte. `gen_tibble()` still ignores the phase of
-  phased VCF files. `gt_as_vcf()` writes phased genotypes as phased (`0|1`),
-  and `rbind()` keeps the phase of two phased `gen_tibble`s (swapping the
-  alleles of both haplotypes where it swaps the alleles of a locus), and
-  discards it, with a message, if only one of them is phased. Imputation
-  refuses phased data
+  phased VCF files; `gen_tibble_phased()` refuses VCF files with unphased
+  genotypes (any `/`, e.g. `0/1`, `0/0` or `./.`). `gt_as_vcf()` writes
+  phased genotypes as phased (`0|1`). `rbind()` keeps the phase of two phased
+  `gen_tibble`s, without ever swapping or flipping their alleles (it stops if
+  `flip_strand = TRUE`, or if the alleles of a locus are swapped between the
+  two datasets), and discards the phase, with a message, if only one of them
+  is phased. Imputation refuses phased data
 * `pairwise_ibs()`, `pairwise_king()`, `pairwise_allele_sharing()` (and
   `snp_ibs()`, `snp_king()`, `snp_allele_sharing()`) read the raw bytes of the
   genotypes through a lookup table, so that they also work on phased data

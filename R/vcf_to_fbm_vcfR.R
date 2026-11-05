@@ -161,13 +161,21 @@ vcf_to_fbm_vcfR <- function(
   )
 
   for (i in seq_along(chunks_vec)) {
+    # phased genotypes are read as they are written (vcfR would otherwise turn
+    # a field "./." into NA, which could not be told apart from ".|."), and
+    # missing values of the fixed fields are then converted to NA, as vcfR
+    # does by default
     temp_vcf <- vcfR::read.vcfR(
       vcf_path,
       nrows = chunks_vec[i],
       skip = sum(chunks_vec[seq_len(i - 1)]),
       verbose = !quiet,
+      convertNA = !phased,
       ...
     )
+    if (phased) {
+      temp_vcf@fix[temp_vcf@fix == "."] <- NA
+    }
     # filter any marker that is not a biallelic SNP (as in the cpp parser, REF
     # and ALT must be a single character; a missing allele "." is NA)
     is_single_allele <- function(x) is.na(x) | nchar(x) == 1
@@ -272,29 +280,30 @@ vcf_to_fbm_vcfR <- function(
 # vcfR::extract.gt(), for biallelic loci) into a matrix of phased bytes (see
 # code_phased): a|b is phased_genotype_byte[1 + 2 * a + b], and a genotype
 # with a missing allele (or a single missing allele ".") is missing (byte 3,
-# as in unphased data). Homozygotes can be unphased (their phase is known);
-# unphased heterozygotes and genotypes that are not diploid are errors (naming
-# the first such genotype, with `locus` giving the name of each row)
+# as in unphased data). Unphased genotypes (with "/", e.g. "0/1", "0/0" or
+# "./.") and genotypes that are not diploid are errors (naming the first such
+# genotype, by locus and then by individual, as the cpp parser, with `locus`
+# giving the name of each row)
 vcf_gt_to_phased_bytes <- function(gt, locus) {
   gt[is.na(gt)] <- "."
   is_diploid <- grepl("^[^/|][/|][^/|]$", gt)
   a1 <- substr(gt, 1, 1)
   delim <- substr(gt, 2, 2)
   a2 <- substr(gt, 3, 3)
-  is_missing <- (gt == ".") | (is_diploid & (a1 == "." | a2 == "."))
-  h1 <- as.integer(a1 == "1")
-  h2 <- as.integer(a2 == "1")
-  bad <- which(!is_missing & (!is_diploid | (delim == "/" & h1 != h2)))
+  is_unphased <- is_diploid & delim == "/"
+  is_missing <- (gt == ".") |
+    (is_diploid & !is_unphased & (a1 == "." | a2 == "."))
+  bad <- which(!is_missing & (!is_diploid | is_unphased))
   if (length(bad) > 0) {
-    bad <- bad[1]
+    bad <- bad[order(row(gt)[bad], col(gt)[bad])][1]
     where <- paste0(
       "individual ", colnames(gt)[col(gt)[bad]],
       " at locus ", locus[row(gt)[bad]]
     )
-    if (is_diploid[bad]) {
-      stop("the genotype of ", where, " is an unphased heterozygote ",
-        "('0/1' or '1/0'): phased genotypes need '|' between the alleles ",
-        "of heterozygotes (use gen_tibble() to read unphased genotypes)",
+    if (is_unphased[bad]) {
+      stop("the genotype of ", where, " is unphased (with '/'): phased ",
+        "genotypes need '|' between their alleles (use gen_tibble() to read ",
+        "unphased genotypes)",
         call. = FALSE
       )
     } else {
@@ -304,6 +313,8 @@ vcf_gt_to_phased_bytes <- function(gt, locus) {
       )
     }
   }
+  h1 <- as.integer(a1 == "1")
+  h2 <- as.integer(a2 == "1")
   bytes <- phased_genotype_byte[1 + 2 * h1 + h2]
   bytes[is_missing] <- phased_missing_byte
   matrix(as.raw(bytes), nrow = nrow(gt), ncol = ncol(gt))

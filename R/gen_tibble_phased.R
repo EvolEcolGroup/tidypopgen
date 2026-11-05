@@ -8,19 +8,20 @@
 #' [phased_encoding], so that all other `tidypopgen` functions (e.g.
 #' [loci_alt_freq()], [loci_missingness()], [pop_fst()] or
 #' [gt_pca_partialSVD()]) work on phased `gen_tibble`s as usual, treating their
-#' genotypes as ordinary dosages of the alternate allele. [is_phased()] tests whether a `gen_tibble`
-#' is phased, and [show_haplotypes()] returns its haplotypes.
+#' genotypes as ordinary dosages of the alternate allele. [is_phased()] tests
+#' whether a `gen_tibble` is phased, and [show_haplotypes()] returns its
+#' haplotypes.
 #'
 #' [gen_tibble()] ignores phasing (a phased *VCF* read with [gen_tibble()]
 #' gives an ordinary, unphased `gen_tibble`); use `gen_tibble_phased()` to keep
 #' the phase.
 #'
 #' - *VCF* files: as for [gen_tibble()], only biallelic SNPs are read. All
-#' individuals have to be diploid. Heterozygous genotypes have to be phased
-#' (`0|1` or `1|0`): an unphased heterozygote (`0/1`) is an error. Homozygous
-#' genotypes can be written either way (`0|0` or `0/0`), as their phase is
-#' known. A genotype with a missing allele (e.g. `.|.`, `./.`, `.`, or `0|.`)
-#' is missing.
+#' individuals have to be diploid, and all genotypes phased (with `|`, e.g.
+#' `0|1`): any unphased genotype (with `/`, including homozygotes such as
+#' `0/0` and missing genotypes such as `./.`) is an error, naming the
+#' individual and the locus. A genotype with a missing allele (e.g. `.|.`,
+#' `0|.`, or a single `.`) is missing.
 #'
 #' - a matrix of haplotypes (mostly useful for small datasets and tests), with
 #' two rows per individual (the first and second haplotypes of individual `i`
@@ -33,8 +34,8 @@
 #' [gt_as_vcf()] writes phased genotypes (`0|1`), subsetting, [gt_save()],
 #' [gt_load()], [gt_order_loci()] and [gt_update_backingfile()] keep phased
 #' data phased, and [rbind.gen_tbl()] keeps the phase when both `gen_tibble`s
-#' are phased (swapping the alleles of both haplotypes when it swaps the
-#' reference and alternate alleles of a locus), and discards it (with a
+#' are phased (it then never swaps or flips alleles: it stops if the alleles
+#' of a locus differ between the two datasets), and discards it (with a
 #' message) when only one of them is phased. Imputation
 #' ([gt_impute_simple()], [gt_impute_xgboost()]) is not available for phased
 #' `gen_tibble`s; read the data with [gen_tibble()] to impute them.

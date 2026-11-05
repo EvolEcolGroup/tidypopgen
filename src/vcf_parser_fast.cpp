@@ -453,14 +453,14 @@ inline bool count_alt_alleles(const std::string &line,
  * genotype (see `?code_phased`): phased_lut[2 * a + b] for a genotype a|b
  * (with a and b equal to 0 for the reference allele and 1 for the alternate
  * allele), or missing_value if any of its alleles is missing ('.'), or if it
- * is a single missing allele ('.'). The phase of a homozygote is known, so
- * homozygotes can also be unphased ('0/0' and '1/1').
+ * is a single missing allele ('.'). Any unphased genotype (with '/', e.g.
+ * '0/1', '0/0' or './.') is an error.
  *
  * @return -1 if all genotypes could be read; otherwise the (0-based) index of
  *   the first individual whose genotype could not be stored as a phased
  *   genotype, with `error` set to 1 if the genotype is not diploid, or to 2 if
- *   it is an unphased heterozygote ('0/1' or '1/0'); or 0, with `error` set
- *   to 3, if the line has fewer genotypes than individuals.
+ *   it is unphased (with '/'); or 0, with `error` set to 3, if the line has
+ *   fewer genotypes than individuals.
  */
 inline long phased_genotype_bytes(const std::string &line,
                                   unsigned char* bytes,
@@ -488,18 +488,18 @@ inline long phased_genotype_bytes(const std::string &line,
     if ((len == 1) && (p[0] == '.')) {
       // a single missing allele
       bytes[i] = missing_value;
-    } else if ((len == 3) && ((p[1] == '|') || (p[1] == '/'))) {
-      // a diploid genotype (each allele of a biallelic locus is a single
-      // character)
+    } else if ((len == 3) && (p[1] == '/')) {
+      // an unphased diploid genotype
+      error = 2;
+      return i;
+    } else if ((len == 3) && (p[1] == '|')) {
+      // a phased diploid genotype (each allele of a biallelic locus is a
+      // single character)
       if ((p[0] == '.') || (p[2] == '.')) {
         bytes[i] = missing_value;
       } else {
         int a = (p[0] == '1');
         int b = (p[2] == '1');
-        if ((p[1] == '/') && (a != b)) {
-          error = 2;
-          return i;
-        }
         bytes[i] = phased_lut[2 * a + b];
       }
     } else {
@@ -525,7 +525,7 @@ inline long phased_genotype_bytes(const std::string &line,
  * @param sample_names The names of the individuals (used in error messages).
  * @return true if all genotypes are successfully read and stored.
  *
- * @throws Rcpp::exception if the file cannot be opened, if the end of file is reached prematurely, or if a genotype exceeds the maximum allowed ploidy (or, for phased genotypes, if a genotype is not diploid or is an unphased heterozygote).
+ * @throws Rcpp::exception if the file cannot be opened, if the end of file is reached prematurely, or if a genotype exceeds the maximum allowed ploidy (or, for phased genotypes, if a genotype is not diploid or is unphased).
  */
 
 // [[Rcpp::export]]
@@ -618,8 +618,8 @@ bool vcf_genotypes_to_fbm(std::string filename,
       stop("end of file reached before all expected genotypes were read");
     }
     if (biallelic[i_geno] && phased) {
-      // store the phased genotypes, checking that they are all diploid, and
-      // that heterozygotes are phased
+      // store the phased genotypes, checking that they are all diploid and
+      // phased
       int error = 0;
       long bad_indiv = phased_genotype_bytes(line, &alt_counts[0],
                                              &separator_pos[0], n,
@@ -643,10 +643,9 @@ bool vcf_genotypes_to_fbm(std::string filename,
           stop("the line of locus " + fields[0] + ":" + fields[1] +
                " has fewer genotypes than individuals");
         } else if (error == 2) {
-          stop("the genotype of " + where + " is an unphased heterozygote " +
-               "('0/1' or '1/0'): phased genotypes need '|' between the " +
-               "alleles of heterozygotes (use gen_tibble() to read " +
-               "unphased genotypes)");
+          stop("the genotype of " + where + " is unphased (with '/'): " +
+               "phased genotypes need '|' between their alleles (use " +
+               "gen_tibble() to read unphased genotypes)");
         } else {
           stop("the genotype of " + where + " is not diploid: phased " +
                "genotypes can only be read for diploid individuals");

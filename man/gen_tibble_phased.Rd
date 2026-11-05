@@ -102,8 +102,9 @@ the same file backed matrix as unphased ones, with the encoding described in
 \link{phased_encoding}, so that all other \code{tidypopgen} functions (e.g.
 \code{\link[=loci_alt_freq]{loci_alt_freq()}}, \code{\link[=loci_missingness]{loci_missingness()}}, \code{\link[=pop_fst]{pop_fst()}} or
 \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}}) work on phased \code{gen_tibble}s as usual, treating their
-genotypes as ordinary dosages of the alternate allele. \code{\link[=is_phased]{is_phased()}} tests whether a \code{gen_tibble}
-is phased, and \code{\link[=show_haplotypes]{show_haplotypes()}} returns its haplotypes.
+genotypes as ordinary dosages of the alternate allele. \code{\link[=is_phased]{is_phased()}} tests
+whether a \code{gen_tibble} is phased, and \code{\link[=show_haplotypes]{show_haplotypes()}} returns its
+haplotypes.
 }
 \details{
 \code{\link[=gen_tibble]{gen_tibble()}} ignores phasing (a phased \emph{VCF} read with \code{\link[=gen_tibble]{gen_tibble()}}
@@ -111,11 +112,11 @@ gives an ordinary, unphased \code{gen_tibble}); use \code{gen_tibble_phased()} t
 the phase.
 \itemize{
 \item \emph{VCF} files: as for \code{\link[=gen_tibble]{gen_tibble()}}, only biallelic SNPs are read. All
-individuals have to be diploid. Heterozygous genotypes have to be phased
-(\code{0|1} or \code{1|0}): an unphased heterozygote (\code{0/1}) is an error. Homozygous
-genotypes can be written either way (\code{0|0} or \code{0/0}), as their phase is
-known. A genotype with a missing allele (e.g. \code{.|.}, \code{./.}, \code{.}, or \code{0|.})
-is missing.
+individuals have to be diploid, and all genotypes phased (with \code{|}, e.g.
+\code{0|1}): any unphased genotype (with \code{/}, including homozygotes such as
+\code{0/0} and missing genotypes such as \code{./.}) is an error, naming the
+individual and the locus. A genotype with a missing allele (e.g. \code{.|.},
+\code{0|.}, or a single \code{.}) is missing.
 \item a matrix of haplotypes (mostly useful for small datasets and tests), with
 two rows per individual (the first and second haplotypes of individual \code{i}
 are rows \code{2 * i - 1} and \code{2 * i}) and one column per locus, containing 0
@@ -128,8 +129,8 @@ Functions that write genotypes keep the phase where they can:
 \code{\link[=gt_as_vcf]{gt_as_vcf()}} writes phased genotypes (\code{0|1}), subsetting, \code{\link[=gt_save]{gt_save()}},
 \code{\link[=gt_load]{gt_load()}}, \code{\link[=gt_order_loci]{gt_order_loci()}} and \code{\link[=gt_update_backingfile]{gt_update_backingfile()}} keep phased
 data phased, and \code{\link[=rbind.gen_tbl]{rbind.gen_tbl()}} keeps the phase when both \code{gen_tibble}s
-are phased (swapping the alleles of both haplotypes when it swaps the
-reference and alternate alleles of a locus), and discards it (with a
+are phased (it then never swaps or flips alleles: it stops if the alleles
+of a locus differ between the two datasets), and discards it (with a
 message) when only one of them is phased. Imputation
 (\code{\link[=gt_impute_simple]{gt_impute_simple()}}, \code{\link[=gt_impute_xgboost]{gt_impute_xgboost()}}) is not available for phased
 \code{gen_tibble}s; read the data with \code{\link[=gen_tibble]{gen_tibble()}} to impute them.
