@@ -149,8 +149,7 @@
 #'     n_proj = 2, folded = FALSE,
 #'     ancestral = c("T", "C", "C", "G", NA, "T")
 #'   )
-pop_sfs <- function(.x, n_proj = NULL, folded = TRUE, ancestral = NULL,
-                    type = c("tidy", "array"), n_cores, block_size, ...) {
+pop_sfs <- function(.x, ...) {
   UseMethod("pop_sfs", .x)
 }
 
@@ -168,7 +167,7 @@ pop_sfs.tbl_df <- function(
 ) {
   # TODO this is a hack to deal with the class being dropped when going
   # through group_map
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   pop_sfs(.x$genotypes,
     n_proj = n_proj, folded = folded, ancestral = ancestral, type = type,
     n_cores = n_cores, block_size = block_size, ...
@@ -196,7 +195,7 @@ pop_sfs.vctrs_bigSNP <- function(
 
 #' @export
 #' @rdname pop_sfs
-pop_sfs.grouped_df <- function(
+pop_sfs.grouped_gen_tbl <- function(
   .x,
   n_proj = NULL,
   folded = TRUE,
@@ -207,7 +206,6 @@ pop_sfs.grouped_df <- function(
   ...
 ) {
   rlang::check_dots_empty()
-  stopifnot_gen_tibble(.x)
   .pop_sfs(.x,
     n_proj = n_proj, folded = folded, ancestral = ancestral, type = type,
     n_cores = n_cores, block_size = block_size
@@ -290,12 +288,14 @@ pop_sfs.grouped_df <- function(
 #' they are of the spectra.
 #'
 #' @param .x a [`gen_tibble`], grouped by population (or ungrouped, to treat
-#'   all individuals as a single population).
+#'   all individuals as a single population), or a vector of class
+#'   `vctrs_bigSNP` (usually the `genotypes` column of a [`gen_tibble`]).
 #' @param ancestral the ancestral allele of each locus (see [pop_sfs()]): if
 #'   given, the loci whose ancestral allele is unknown are left out.
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
 #' @param block_size maximum number of loci read at once.
+#' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a tibble with columns `group` (or one column per grouping
 #'   variable, if the data are grouped by more than one variable; absent for
 #'   ungrouped data), `n_proj` (the number of allele copies of the
@@ -307,6 +307,7 @@ pop_sfs.grouped_df <- function(
 #'   The tibble has class `sfs_preview_tbl`, and can be plotted with
 #'   [autoplot()][autoplot_sfs].
 #' @seealso [pop_sfs()]
+#' @rdname pop_sfs_preview
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("grouped_gen_tbl")
@@ -322,13 +323,57 @@ pop_sfs.grouped_df <- function(
 #' example_gt %>%
 #'   pop_sfs_preview() %>%
 #'   autoplot()
-pop_sfs_preview <- function(
+pop_sfs_preview <- function(.x, ...) {
+  UseMethod("pop_sfs_preview", .x)
+}
+
+#' @export
+#' @rdname pop_sfs_preview
+pop_sfs_preview.tbl_df <- function(
   .x,
   ancestral = NULL,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(.x), 1)
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
 ) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
+  pop_sfs_preview(.x$genotypes,
+    ancestral = ancestral, n_cores = n_cores, block_size = block_size, ...
+  )
+}
+
+#' @export
+#' @rdname pop_sfs_preview
+pop_sfs_preview.vctrs_bigSNP <- function(
+  .x,
+  ancestral = NULL,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1),
+  ...
+) {
+  rlang::check_dots_empty()
+  .pop_sfs_preview(.x,
+    ancestral = ancestral, n_cores = n_cores, block_size = block_size
+  )
+}
+
+#' @export
+#' @rdname pop_sfs_preview
+pop_sfs_preview.grouped_gen_tbl <- function(
+  .x,
+  ancestral = NULL,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+) {
+  rlang::check_dots_empty()
+  .pop_sfs_preview(.x,
+    ancestral = ancestral, n_cores = n_cores, block_size = block_size
+  )
+}
+
+# the work of pop_sfs_preview(), for a vctrs_bigSNP or a grouped gen_tibble
+.pop_sfs_preview <- function(.x, ancestral, n_cores, block_size) {
   data <- .sfs_set_ancestral(.sfs_data(.x), ancestral)
   configs <- .sfs_config_counts(data,
     spectra = as.list(seq_len(data$n_groups)),
@@ -345,6 +390,20 @@ pop_sfs_preview <- function(
   # a class for autoplot()
   class(res) <- c("sfs_preview_tbl", class(res))
   res
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+pop_sfs.grouped_df <- function(.x, ...) {
+  pop_sfs(restore_genotypes_tbl(.x, "pop_sfs"), ...)
+}
+
+#' @export
+#' @noRd
+pop_sfs_preview.grouped_df <- function(.x, ...) {
+  pop_sfs_preview(restore_genotypes_tbl(.x, "pop_sfs_preview"), ...)
 }
 
 # check the folded argument

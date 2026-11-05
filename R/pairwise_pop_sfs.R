@@ -22,6 +22,7 @@
 #'   population changes fastest, as in the files written by `dadi` and
 #'   `easySFS`); "first" makes the number of copies in the first population
 #'   change fastest.
+#' @param ... other arguments passed to specific methods, currently unused.
 #' @returns If `type = "tidy"`, a tibble with one row per cell of the joint
 #'   spectrum of each pair of populations, with the columns:
 #'   - the groups of the pair (e.g. `population_1` and `population_2`; one
@@ -40,6 +41,7 @@
 #'   first population in the rows and the second in the columns (see
 #'   [pop_sfs()]). Pairs are in the order given by [utils::combn()].
 #' @seealso [pop_sfs()], [nwise_pop_sfs()], [pop_sfs_preview()]
+#' @rdname pairwise_pop_sfs
 #' @export
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
@@ -53,7 +55,13 @@
 #'
 #' # as arrays
 #' example_gt %>% pairwise_pop_sfs(n_proj = 2, type = "array")
-pairwise_pop_sfs <- function(
+pairwise_pop_sfs <- function(.x, ...) {
+  UseMethod("pairwise_pop_sfs", .x)
+}
+
+#' @export
+#' @rdname pairwise_pop_sfs
+pairwise_pop_sfs.gen_tbl <- function(
   .x,
   n_proj = NULL,
   folded = TRUE,
@@ -61,8 +69,10 @@ pairwise_pop_sfs <- function(
   type = c("tidy", "array"),
   fastest = c("last", "first"),
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(.x), 1)
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
 ) {
+  rlang::check_dots_empty()
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
@@ -113,4 +123,12 @@ pairwise_pop_sfs <- function(
   names(group_2) <- paste0(groups$vars, "_2")
   res <- dplyr::bind_cols(group_1, group_2, dplyr::bind_rows(unname(cells)))
   .sfs_tidy_attributes(res, n_proj, folded, class = "pairwise_sfs_tbl")
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+pairwise_pop_sfs.data.frame <- function(.x, ...) {
+  pairwise_pop_sfs(restore_genotypes_tbl(.x, "pairwise_pop_sfs"), ...)
 }

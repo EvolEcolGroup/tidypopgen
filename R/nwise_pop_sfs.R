@@ -35,6 +35,7 @@
 #'   stored in the attribute `n_proj`. If `type = "array"`, an `sfs` object
 #'   (see [pop_sfs()]), an array with one dimension per population.
 #' @seealso [pop_sfs()], [pairwise_pop_sfs()], [pop_sfs_preview()]
+#' @rdname nwise_pop_sfs
 #' @export
 #' @examplesIf all(rlang::is_installed(c("RhpcBLASctl", "data.table")))
 #' \dontshow{
@@ -48,7 +49,13 @@
 #'
 #' # the first population changing fastest
 #' example_gt %>% nwise_pop_sfs(n_proj = 2, fastest = "first")
-nwise_pop_sfs <- function(
+nwise_pop_sfs <- function(.x, ...) {
+  UseMethod("nwise_pop_sfs", .x)
+}
+
+#' @export
+#' @rdname nwise_pop_sfs
+nwise_pop_sfs.gen_tbl <- function(
   .x,
   n_proj = NULL,
   folded = TRUE,
@@ -57,8 +64,10 @@ nwise_pop_sfs <- function(
   fastest = c("last", "first"),
   max_cells = 1e7,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(.x), 1)
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
 ) {
+  rlang::check_dots_empty()
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
@@ -99,4 +108,12 @@ nwise_pop_sfs <- function(
   }
   res <- .sfs_cells(fs, fastest = fastest, count_names = data$labels)
   .sfs_tidy_attributes(res, n_proj, folded)
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+nwise_pop_sfs.data.frame <- function(.x, ...) {
+  nwise_pop_sfs(restore_genotypes_tbl(.x, "nwise_pop_sfs"), ...)
 }

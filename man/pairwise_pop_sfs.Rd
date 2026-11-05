@@ -2,9 +2,12 @@
 % Please edit documentation in R/pairwise_pop_sfs.R
 \name{pairwise_pop_sfs}
 \alias{pairwise_pop_sfs}
+\alias{pairwise_pop_sfs.gen_tbl}
 \title{Compute the joint site frequency spectrum of each pair of populations}
 \usage{
-pairwise_pop_sfs(
+pairwise_pop_sfs(.x, ...)
+
+\method{pairwise_pop_sfs}{gen_tbl}(
   .x,
   n_proj = NULL,
   folded = TRUE,
@@ -12,12 +15,15 @@ pairwise_pop_sfs(
   type = c("tidy", "array"),
   fastest = c("last", "first"),
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(.x), 1)
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
 )
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using
 \code{\link[dplyr:group_by]{dplyr::group_by()}}), with at least two groups.}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{n_proj}{the number of allele copies to project each population to:
 either a single value used for all populations, a vector with one value

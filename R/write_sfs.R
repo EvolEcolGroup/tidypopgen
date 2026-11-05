@@ -231,6 +231,19 @@ write_sfs.gen_tbl <- function(
   )
 }
 
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+write_sfs.data.frame <- function(x, ...) {
+  if (!"genotypes" %in% names(x)) {
+    # not a tibble of genotypes (e.g. the tidy output of pop_sfs()): explain
+    # what x should be
+    return(NextMethod())
+  }
+  write_sfs(restore_genotypes_tbl(x, "write_sfs"), ...)
+}
+
 #' @rdname write_sfs
 #' @export
 write_sfs.default <- function(x, ...) {

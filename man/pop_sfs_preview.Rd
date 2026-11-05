@@ -2,18 +2,43 @@
 % Please edit documentation in R/pop_sfs.R
 \name{pop_sfs_preview}
 \alias{pop_sfs_preview}
+\alias{pop_sfs_preview.tbl_df}
+\alias{pop_sfs_preview.vctrs_bigSNP}
+\alias{pop_sfs_preview.grouped_gen_tbl}
 \title{Preview the projections of the site frequency spectrum}
 \usage{
-pop_sfs_preview(
+pop_sfs_preview(.x, ...)
+
+\method{pop_sfs_preview}{tbl_df}(
   .x,
   ancestral = NULL,
   n_cores = bigstatsr::nb_cores(),
-  block_size = bigstatsr::block_size(nrow(.x), 1)
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+)
+
+\method{pop_sfs_preview}{vctrs_bigSNP}(
+  .x,
+  ancestral = NULL,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1),
+  ...
+)
+
+\method{pop_sfs_preview}{grouped_gen_tbl}(
+  .x,
+  ancestral = NULL,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
 )
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}}, grouped by population (or ungrouped, to treat
-all individuals as a single population).}
+all individuals as a single population), or a vector of class
+\code{vctrs_bigSNP} (usually the \code{genotypes} column of a \code{\link{gen_tibble}}).}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{ancestral}{the ancestral allele of each locus (see \code{\link[=pop_sfs]{pop_sfs()}}): if
 given, the loci whose ancestral allele is unknown are left out.}

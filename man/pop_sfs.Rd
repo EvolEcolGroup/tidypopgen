@@ -4,19 +4,10 @@
 \alias{pop_sfs}
 \alias{pop_sfs.tbl_df}
 \alias{pop_sfs.vctrs_bigSNP}
-\alias{pop_sfs.grouped_df}
+\alias{pop_sfs.grouped_gen_tbl}
 \title{Compute the site frequency spectrum of each population}
 \usage{
-pop_sfs(
-  .x,
-  n_proj = NULL,
-  folded = TRUE,
-  ancestral = NULL,
-  type = c("tidy", "array"),
-  n_cores,
-  block_size,
-  ...
-)
+pop_sfs(.x, ...)
 
 \method{pop_sfs}{tbl_df}(
   .x,
@@ -40,7 +31,7 @@ pop_sfs(
   ...
 )
 
-\method{pop_sfs}{grouped_df}(
+\method{pop_sfs}{grouped_gen_tbl}(
   .x,
   n_proj = NULL,
   folded = TRUE,
@@ -55,6 +46,8 @@ pop_sfs(
 \item{.x}{a \code{\link{gen_tibble}} (grouped by population, or ungrouped to compute
 a single spectrum for all individuals), or a vector of class
 \code{vctrs_bigSNP} (usually the \code{genotypes} column of a \code{\link{gen_tibble}}).}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{n_proj}{the number of allele copies to project each population to:
 either a single value used for all populations, a vector with one value
@@ -82,8 +75,6 @@ a warning, for folded spectra.}
 \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
-
-\item{...}{other arguments passed to specific methods, currently unused.}
 }
 \value{
 If \code{type = "tidy"}, a tibble with one row per cell of the
