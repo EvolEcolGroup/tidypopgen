@@ -2,20 +2,26 @@
 % Please edit documentation in R/jackknife_pairwise_pop_fst.R
 \name{jackknife_pairwise_pop_fst}
 \alias{jackknife_pairwise_pop_fst}
+\alias{jackknife_pairwise_pop_fst.gen_tbl}
 \title{Compute pairwise Fst with block jackknife standard errors}
 \usage{
-jackknife_pairwise_pop_fst(
+jackknife_pairwise_pop_fst(.x, ...)
+
+\method{jackknife_pairwise_pop_fst}{gen_tbl}(
   .x,
   type = c("matrix", "tidy"),
   method = c("Hudson", "Nei87", "WC84"),
   block_size,
-  size_unit = c("snp", "cM", "bp")
+  size_unit = c("snp", "cM", "bp"),
+  ...
 )
 }
 \arguments{
 \item{.x}{a grouped \code{gen_tibble} object.
 If grouped by more than one variable, groups are labelled by the values
 of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{type}{type of object to return. One of "matrix" or "tidy". Default is
 "matrix". "matrix" returns a dataframe where each row is a quantity

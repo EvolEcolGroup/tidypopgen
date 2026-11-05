@@ -39,6 +39,7 @@
 #'   "bp".
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
+#' @param ... other arguments passed to specific methods, currently unused.
 #' @returns If `type = "tidy"`, a tibble with the columns of the tidy output
 #'   of [pop_sfs()], [pairwise_pop_sfs()] or [nwise_pop_sfs()], and a column
 #'   `replicate` (after the group columns) with the number of the replicate.
@@ -81,7 +82,13 @@
 #'     type = "array"
 #'   )
 #' boot_2d[[1]]$pop1.pop2
-bootstrap_pop_sfs <- function(
+bootstrap_pop_sfs <- function(.x, ...) {
+  UseMethod("bootstrap_pop_sfs", .x)
+}
+
+#' @export
+#' @rdname bootstrap_sfs
+bootstrap_pop_sfs.gen_tbl <- function(
   .x,
   n_bootstrap = 100,
   block_size,
@@ -90,8 +97,10 @@ bootstrap_pop_sfs <- function(
   folded = TRUE,
   ancestral = NULL,
   type = c("tidy", "array"),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 ) {
+  rlang::check_dots_empty()
   stopifnot_gen_tibble(.x)
   type <- match.arg(type)
   size_unit <- match.arg(size_unit)
@@ -134,7 +143,13 @@ bootstrap_pop_sfs <- function(
 
 #' @rdname bootstrap_sfs
 #' @export
-bootstrap_pairwise_pop_sfs <- function(
+bootstrap_pairwise_pop_sfs <- function(.x, ...) {
+  UseMethod("bootstrap_pairwise_pop_sfs", .x)
+}
+
+#' @export
+#' @rdname bootstrap_sfs
+bootstrap_pairwise_pop_sfs.gen_tbl <- function(
   .x,
   n_bootstrap = 100,
   block_size,
@@ -144,8 +159,10 @@ bootstrap_pairwise_pop_sfs <- function(
   ancestral = NULL,
   type = c("tidy", "array"),
   fastest = c("last", "first"),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 ) {
+  rlang::check_dots_empty()
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
@@ -204,7 +221,13 @@ bootstrap_pairwise_pop_sfs <- function(
 #'   number of cells of the joint spectrum times `n_bootstrap`); an error is
 #'   raised for more cells, to avoid running out of memory.
 #' @export
-bootstrap_nwise_pop_sfs <- function(
+bootstrap_nwise_pop_sfs <- function(.x, ...) {
+  UseMethod("bootstrap_nwise_pop_sfs", .x)
+}
+
+#' @export
+#' @rdname bootstrap_sfs
+bootstrap_nwise_pop_sfs.gen_tbl <- function(
   .x,
   n_bootstrap = 100,
   block_size,
@@ -215,8 +238,10 @@ bootstrap_nwise_pop_sfs <- function(
   type = c("tidy", "array"),
   fastest = c("last", "first"),
   max_cells = 1e7,
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 ) {
+  rlang::check_dots_empty()
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
@@ -362,4 +387,30 @@ bootstrap_nwise_pop_sfs <- function(
     weights = blocks$weights
   )
   list(projected = projected, weights = blocks$weights)
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+bootstrap_pop_sfs.data.frame <- function(.x, ...) {
+  bootstrap_pop_sfs(restore_genotypes_tbl(.x, "bootstrap_pop_sfs"), ...)
+}
+
+#' @export
+#' @noRd
+bootstrap_pairwise_pop_sfs.data.frame <- function(.x, ...) {
+  bootstrap_pairwise_pop_sfs(
+    restore_genotypes_tbl(.x, "bootstrap_pairwise_pop_sfs"),
+    ...
+  )
+}
+
+#' @export
+#' @noRd
+bootstrap_nwise_pop_sfs.data.frame <- function(.x, ...) {
+  bootstrap_nwise_pop_sfs(
+    restore_genotypes_tbl(.x, "bootstrap_nwise_pop_sfs"),
+    ...
+  )
 }

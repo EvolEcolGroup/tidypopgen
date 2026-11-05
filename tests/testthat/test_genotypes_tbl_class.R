@@ -138,6 +138,43 @@ test_that("generics work on gen_tibbles returned by pick() and reframe()", {
   )
 })
 
+test_that("the jackknife generics restore the class of tibbles that lost it", {
+  lost <- as_tibble(test_gt)
+  test_grouped <- test_gt %>% group_by(population)
+  lost_grouped <- lost %>% group_by(population)
+  # gen_tbl methods (via the data.frame fallback)
+  expect_identical(
+    jackknife_pop_tajimas_d(lost, block_size = 2),
+    jackknife_pop_tajimas_d(test_gt, block_size = 2)
+  )
+  expect_identical(
+    jackknife_pop_tajimas_d(lost_grouped, type = "tidy", block_size = 2),
+    jackknife_pop_tajimas_d(test_grouped, type = "tidy", block_size = 2)
+  )
+  expect_identical(
+    jackknife_pairwise_pop_fst(lost_grouped, block_size = 2),
+    jackknife_pairwise_pop_fst(test_grouped, block_size = 2)
+  )
+  # PBS needs three populations
+  test_trio <- test_gt %>% mutate(trio = rep(c("a", "b", "c"), each = 2))
+  expect_identical(
+    jackknife_nwise_pop_pbs(
+      as_tibble(test_trio) %>% group_by(trio),
+      block_size = 2
+    ),
+    jackknife_nwise_pop_pbs(test_trio %>% group_by(trio), block_size = 2)
+  )
+  # the arguments are checked by the methods
+  expect_error(
+    jackknife_pop_tajimas_d(lost_grouped, block_size = 2, n_prj = 4),
+    "must be empty"
+  )
+  expect_error(
+    jackknife_pairwise_pop_fst(test_grouped, block_size = 2, n_prj = 4),
+    "must be empty"
+  )
+})
+
 test_that("the SFS generics restore the class of tibbles that lost it", {
   lost <- as_tibble(test_gt)
   test_grouped <- test_gt %>% group_by(population)
@@ -186,6 +223,43 @@ test_that("the SFS generics restore the class of tibbles that lost it", {
   expect_error(pop_sfs(lost_grouped, n_prj = 4), "must be empty")
   expect_error(pairwise_pop_sfs(lost_grouped, n_prj = 4), "must be empty")
   expect_error(nwise_pop_sfs(test_grouped, n_prj = 4), "must be empty")
+  # bootstrap functions (gen_tbl methods, via the data.frame fallback)
+  expect_identical(
+    withr::with_seed(1, bootstrap_pop_sfs(lost_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    )),
+    withr::with_seed(1, bootstrap_pop_sfs(test_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    ))
+  )
+  expect_identical(
+    withr::with_seed(1, bootstrap_pop_sfs(lost,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    )),
+    withr::with_seed(1, bootstrap_pop_sfs(test_gt,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    ))
+  )
+  expect_identical(
+    withr::with_seed(1, bootstrap_pairwise_pop_sfs(lost_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    )),
+    withr::with_seed(1, bootstrap_pairwise_pop_sfs(test_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    ))
+  )
+  expect_identical(
+    withr::with_seed(1, bootstrap_nwise_pop_sfs(lost_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4, type = "array"
+    )),
+    withr::with_seed(1, bootstrap_nwise_pop_sfs(test_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4, type = "array"
+    ))
+  )
+  expect_error(
+    bootstrap_pop_sfs(lost_grouped, block_size = 2, n_prj = 4),
+    "must be empty"
+  )
   # pick() returns a plain tibble without the grouping variables
   sfs_pick <- test_grouped %>%
     summarise(sfs = list(

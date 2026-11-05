@@ -2,11 +2,16 @@
 % Please edit documentation in R/bootstrap_sfs.R
 \name{bootstrap_pop_sfs}
 \alias{bootstrap_pop_sfs}
+\alias{bootstrap_pop_sfs.gen_tbl}
 \alias{bootstrap_pairwise_pop_sfs}
+\alias{bootstrap_pairwise_pop_sfs.gen_tbl}
 \alias{bootstrap_nwise_pop_sfs}
+\alias{bootstrap_nwise_pop_sfs.gen_tbl}
 \title{Block bootstrap of site frequency spectra}
 \usage{
-bootstrap_pop_sfs(
+bootstrap_pop_sfs(.x, ...)
+
+\method{bootstrap_pop_sfs}{gen_tbl}(
   .x,
   n_bootstrap = 100,
   block_size,
@@ -15,10 +20,13 @@ bootstrap_pop_sfs(
   folded = TRUE,
   ancestral = NULL,
   type = c("tidy", "array"),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 
-bootstrap_pairwise_pop_sfs(
+bootstrap_pairwise_pop_sfs(.x, ...)
+
+\method{bootstrap_pairwise_pop_sfs}{gen_tbl}(
   .x,
   n_bootstrap = 100,
   block_size,
@@ -28,10 +36,13 @@ bootstrap_pairwise_pop_sfs(
   ancestral = NULL,
   type = c("tidy", "array"),
   fastest = c("last", "first"),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 
-bootstrap_nwise_pop_sfs(
+bootstrap_nwise_pop_sfs(.x, ...)
+
+\method{bootstrap_nwise_pop_sfs}{gen_tbl}(
   .x,
   n_bootstrap = 100,
   block_size,
@@ -42,13 +53,16 @@ bootstrap_nwise_pop_sfs(
   type = c("tidy", "array"),
   fastest = c("last", "first"),
   max_cells = 1e+07,
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}}, grouped by population (or, for
 \code{bootstrap_pop_sfs()}, ungrouped to compute the spectrum of all
 individuals).}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{n_bootstrap}{the number of bootstrap replicates.}
 

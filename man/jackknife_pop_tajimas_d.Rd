@@ -2,17 +2,23 @@
 % Please edit documentation in R/jackknife_pop_tajimas_d.R
 \name{jackknife_pop_tajimas_d}
 \alias{jackknife_pop_tajimas_d}
+\alias{jackknife_pop_tajimas_d.gen_tbl}
 \title{Compute Tajima's D with block jackknife standard errors}
 \usage{
-jackknife_pop_tajimas_d(
+jackknife_pop_tajimas_d(.x, ...)
+
+\method{jackknife_pop_tajimas_d}{gen_tbl}(
   .x,
   type = c("matrix", "tidy", "list"),
   block_size,
-  size_unit = c("snp", "cM", "bp")
+  size_unit = c("snp", "cM", "bp"),
+  ...
 )
 }
 \arguments{
 \item{.x}{a \code{gen_tibble} object, optionally grouped by one variable}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{type}{type of object to return, if using grouped method. One of
 "matrix", "tidy", or "list". Default is "matrix".

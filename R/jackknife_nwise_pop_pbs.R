@@ -30,6 +30,7 @@
 #' @param size_unit Either "snp", "cM" or "bp". If "snp", the block size is in
 #'   number of SNPs. If "cM", the block size is in centiMorgans. If "bp", the
 #'   block size is in base pairs.
+#' @param ... other arguments passed to specific methods, currently unused.
 #' @returns either a data frame with the following columns:
 #' - `quantity`: the quantity reported in the row, one of `estimate` (computed
 #'   on all loci), `jack_estimate` (the bias corrected jackknife estimate), `se`
@@ -45,6 +46,7 @@
 #'    (e.g. "pbs_pop1.pop2.pop3"). If return_fst is TRUE, stat_name will also
 #'    include "fst" calculations in the same column (e.g. "fst_pop1.pop2").
 #' - `estimate`, `jack_estimate`, `se`, `z`, `n_blocks`: as described above
+#' @rdname jackknife_nwise_pop_pbs
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("grouped_gen_tbl")
@@ -55,12 +57,22 @@
 #'     block_size = 2,
 #'     size_unit = "snp"
 #'   )
-jackknife_nwise_pop_pbs <- function(.x,
-                                    type = c("matrix", "tidy"),
-                                    fst_method = c("Hudson", "Nei87", "WC84"),
-                                    return_fst = FALSE,
-                                    block_size,
-                                    size_unit = c("snp", "cM", "bp")) {
+jackknife_nwise_pop_pbs <- function(.x, ...) {
+  UseMethod("jackknife_nwise_pop_pbs", .x)
+}
+
+#' @export
+#' @rdname jackknife_nwise_pop_pbs
+jackknife_nwise_pop_pbs.gen_tbl <- function(
+  .x,
+  type = c("matrix", "tidy"),
+  fst_method = c("Hudson", "Nei87", "WC84"),
+  return_fst = FALSE,
+  block_size,
+  size_unit = c("snp", "cM", "bp"),
+  ...
+) {
+  rlang::check_dots_empty()
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
@@ -152,4 +164,15 @@ jackknife_nwise_pop_pbs <- function(.x,
     stat_names <- c(names(fst_blocks$full), stat_names)
   }
   .jackknife_format(res, stat_names = stat_names, type = type)
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+jackknife_nwise_pop_pbs.data.frame <- function(.x, ...) {
+  jackknife_nwise_pop_pbs(
+    restore_genotypes_tbl(.x, "jackknife_nwise_pop_pbs"),
+    ...
+  )
 }
