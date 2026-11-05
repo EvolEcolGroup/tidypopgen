@@ -112,17 +112,32 @@ pairwise_pop_sfs.gen_tbl <- function(
     fastest = fastest,
     count_names = c("allele_count_1", "allele_count_2")
   )
-  # the groups of the pair of each row, with one column per grouping
-  # variable for each of the two groups (e.g. population_1 and
-  # population_2)
-  groups <- data$groups
+  res <- .sfs_bind_pair_rows(cells, data$groups, pairwise_combn)
+  .sfs_tidy_attributes(res, n_proj, folded, class = "pairwise_sfs_tbl")
+}
+
+#' Bind the cells of the spectra of pairs of groups into a tidy tibble
+#'
+#' @param cells a list of data frames, the cells of the spectrum of each pair
+#' @param groups the group information, as returned by `.group_info()`
+#' @param pairwise_combn a matrix with two rows, giving the indices of the
+#'   two groups of each pair
+#' @returns a tibble with the groups of the pair of each row, with one column
+#'   per grouping variable for each of the two groups (e.g. population_1 and
+#'   population_2), followed by the columns of `cells`
+#' @keywords internal
+#' @noRd
+.sfs_bind_pair_rows <- function(cells, groups, pairwise_combn) {
   pair_idx <- rep(seq_along(cells), vapply(cells, nrow, integer(1)))
   group_1 <- groups$keys[pairwise_combn[1, pair_idx], , drop = FALSE]
   names(group_1) <- paste0(groups$vars, "_1")
   group_2 <- groups$keys[pairwise_combn[2, pair_idx], , drop = FALSE]
   names(group_2) <- paste0(groups$vars, "_2")
-  res <- dplyr::bind_cols(group_1, group_2, dplyr::bind_rows(unname(cells)))
-  .sfs_tidy_attributes(res, n_proj, folded, class = "pairwise_sfs_tbl")
+  cells <- dplyr::bind_rows(unname(cells))
+  # e.g. a grouping variable called allele_count gives a column
+  # allele_count_1
+  .check_group_col_names(c(names(group_1), names(group_2)), names(cells))
+  dplyr::bind_cols(group_1, group_2, cells)
 }
 
 # a data frame that has lost the class of its tibble (e.g. a gen_tibble

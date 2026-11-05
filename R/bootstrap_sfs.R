@@ -204,13 +204,7 @@ bootstrap_pairwise_pop_sfs.gen_tbl <- function(
     count_names = c("allele_count_1", "allele_count_2")
   )
   # the groups of the pair of each row (as in pairwise_pop_sfs())
-  groups <- data$groups
-  pair_idx <- rep(seq_along(cells), vapply(cells, nrow, integer(1)))
-  group_1 <- groups$keys[pairwise_combn[1, pair_idx], , drop = FALSE]
-  names(group_1) <- paste0(groups$vars, "_1")
-  group_2 <- groups$keys[pairwise_combn[2, pair_idx], , drop = FALSE]
-  names(group_2) <- paste0(groups$vars, "_2")
-  res <- dplyr::bind_cols(group_1, group_2, dplyr::bind_rows(unname(cells)))
+  res <- .sfs_bind_pair_rows(cells, data$groups, pairwise_combn)
   res <- .sfs_tidy_attributes(res, n_proj, folded)
   attr(res, "bootstrap_blocks") <- boot$weights
   res

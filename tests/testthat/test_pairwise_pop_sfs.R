@@ -130,4 +130,17 @@ test_that("pairwise_pop_sfs uses one column per grouping variable", {
   expect_identical(nrow(sfs), as.integer(choose(6, 2) * 9))
   sfs_array <- pairwise_pop_sfs(gt_two, n_proj = 2, type = "array")
   expect_identical(names(sfs_array)[1], "popA.F.popA.M")
+  # a grouping variable called allele_count would give a column
+  # allele_count_1
+  gt_clash <- sim$gt %>% dplyr::rename(allele_count = "population")
+  expect_error(
+    pairwise_pop_sfs(gt_clash, n_proj = 2),
+    "allele_count_1, allele_count_2"
+  )
+  expect_error(
+    bootstrap_pairwise_pop_sfs(gt_clash,
+      n_bootstrap = 2, block_size = 20, n_proj = 2
+    ),
+    "allele_count_1, allele_count_2"
+  )
 })

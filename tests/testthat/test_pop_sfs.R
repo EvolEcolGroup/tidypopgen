@@ -299,4 +299,13 @@ test_that("pop_sfs uses one column per grouping variable", {
     "popA.F", "popA.M", "popB.F", "popB.M", "popC.F",
     "popC.M"
   ))
+  # a grouping variable cannot have the name of another column
+  gt_clash <- gt_two %>% dplyr::rename(n_sites = "sex")
+  expect_error(pop_sfs(gt_clash, n_proj = 2), "other columns of the output")
+  expect_error(
+    bootstrap_pop_sfs(gt_two %>% dplyr::rename(replicate = "sex"),
+      n_bootstrap = 2, block_size = 20, n_proj = 2
+    ),
+    "\\(replicate\\)"
+  )
 })
