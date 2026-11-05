@@ -273,10 +273,11 @@ gen_tibble.character <-
         select_loci(all_of(doubles)) %>%
         loci_missingness()
       if (any(check_missing < 1, na.rm = TRUE)) {
-        # clean up files if we are stopping
+        # clean up files if we are stopping (dropping the gen_tibble first,
+        # so that its backing file can be unmapped, see remove_fbm_files())
         files <- gt_get_file_names(x_gt)
-        if (file.exists(files[1])) file.remove(files[1])
-        if (file.exists(files[2])) file.remove(files[2])
+        rm(x_gt)
+        remove_fbm_files(files)
         stop(paste(
           "Some loci are missing both reference and alternate alleles.",
           "Genotypes are not missing at these loci.",
@@ -446,9 +447,12 @@ gen_tibble.matrix <- function(
       select_loci(all_of(doubles)) %>%
       loci_missingness()
     if (any(check_missing < 1, na.rm = TRUE)) {
+      # clean up files if we are stopping (dropping every object holding the
+      # FBM first, so that its backing file can be unmapped, see
+      # remove_fbm_files())
       files <- gt_get_file_names(new_gen_tbl)
-      if (file.exists(files[1])) file.remove(files[1])
-      if (file.exists(files[2])) file.remove(files[2])
+      rm(new_gen_tbl, indiv_meta, fbm_obj)
+      remove_fbm_files(files)
       stop(paste(
         "Some loci are missing both reference and alternate alleles.",
         "Genotypes are not missing at these loci.",
@@ -555,6 +559,19 @@ stopifnot_gen_tibble <- function(.x) {
   return(invisible(.x))
 }
 
+# a tibble with a genotypes column, whose class determines the method used
+# (vctrs_bigSNP for a gen_tibble; other packages register their own classes
+# with genotypes_tbl_class())
+stopifnot_has_genotypes <- function(.x) {
+  if (!"genotypes" %in% names(.x)) {
+    stop("not a gen_tibble, 'genotypes' column is missing")
+  }
+  if (is.null(genotypes_tbl_class(.x$genotypes))) {
+    stop("not a gen_tibble, the genotypes column is not of class vctrs_bigSNP")
+  }
+  return(invisible(.x))
+}
+
 # print method
 #' @export
 tbl_sum.gen_tbl <- function(x, ...) {
@@ -619,6 +636,18 @@ sub_ext_ignore_case <- function(file, ext, new_ext) {
     new_file <- upper_file
   }
   new_file
+}
+
+# remove the files (.rds and .bk) of a gen_tibble that is being discarded.
+# An FBM keeps its backing file memory-mapped until it is garbage collected,
+# and Windows cannot delete a mapped file, so the caller must first drop
+# every object referring to the FBM; we then garbage collect (which unmaps
+# the backing file) before removing the files
+remove_fbm_files <- function(files) {
+  gc()
+  files <- files[file.exists(files)]
+  file.remove(files)
+  invisible(NULL)
 }
 
 # check for existing .bk files

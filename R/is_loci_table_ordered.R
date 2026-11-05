@@ -35,7 +35,7 @@ is_loci_table_ordered.tbl_df <- function(
   ignore_genetic_dist = TRUE,
   ...
 ) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   is_loci_table_ordered(
     .x$genotypes,
     error_on_false = error_on_false,

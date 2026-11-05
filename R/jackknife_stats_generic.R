@@ -3,7 +3,7 @@
 #' This function is mostly designed for developers: it is a general function to
 #' estimate the genome-wide value of a statistic, together with its standard
 #' error, using a weighted block jackknife. It takes a vector of per locus
-#' estimates, and aggregates them by sum or mean (or a custom function),
+#' estimates, and aggregates them by their mean (or a custom function),
 #' leaving out one block of loci at a time. To compute specific quantities
 #' directly from a `gen_tibble`, use the appropriate `jackknife_*` functions,
 #' e.g [jackknife_pairwise_pop_fst()] to compute pairwise Fst.
@@ -22,6 +22,16 @@
 #'   non-missing values that it contains. Blocks should be larger than the
 #'   extent of linkage disequilibrium (e.g. 5 cM, or a few Mb).
 #'
+#'   The jackknife assumes that the statistic estimates a quantity that does
+#'   not change with the number of loci (such as a mean, or a ratio of sums),
+#'   and that is a smooth function of the data. A custom function `f` should
+#'   thus not be a sum (leaving out a block always makes a sum smaller, which
+#'   the jackknife would mistake for a bias), nor a statistic such as the
+#'   median or other quantiles, for which the jackknife does not give valid
+#'   standard errors. For the sum of the per locus estimates, use
+#'   `operator = "mean"`, and multiply the estimates and the standard error by
+#'   the number of non-missing values.
+#'
 #' @references Busing FMTA, Meijer E, Van Der Leeden R (1999) Delete-m
 #'   jackknife for unequal m. Statistics and Computing 9:3-8.
 #' @param .x A vector containing the per locus estimates.
@@ -29,15 +39,16 @@
 #'   additionally a column 'position' if `size_unit` is "bp", or a column
 #'   'genetic_dist' if `size_unit` is "cM".
 #' @param operator The operator to use to aggregate the per locus estimates.
-#'   Either "mean", "sum" or "custom" to use a custom function `f`.
+#'   Either "mean" or "custom" to use a custom function `f`.
 #' @param block_size The size of the blocks to leave out.
 #' @param size_unit Either "snp", "cM" or "bp". If "snp", the block size is in
 #'   number of SNPs. If "cM", the block size is in centiMorgans. If "bp", the
 #'   block size is in base pairs.
 #' @param f a custom function to use for the statistic. This function
-#'   should take a vector of locus estimates and return a single value. Note
+#'   should take a vector of locus estimates and return a single value (see
+#'   Details for the functions that are appropriate). Note
 #'   that, for a custom function, the statistic is recomputed from scratch
-#'   for every block, which is slower than using "mean" or "sum".
+#'   for every block, which is slower than using "mean".
 #' @param ... Additional arguments to be passed to the custom operator function.
 #' @returns A tibble with columns: 'estimate' (the statistic computed on all
 #'   loci), 'jack_estimate' (the bias corrected jackknife estimate), 'se' (the
@@ -58,11 +69,20 @@
 #' )
 #'
 jackknife_stats_generic <- function(.x, loci_table,
-                                    operator = c("mean", "sum", "custom"),
+                                    operator = c("mean", "custom"),
                                     block_size,
                                     size_unit = c("snp", "cM", "bp"),
                                     f = NULL, ...) {
   size_unit <- match.arg(size_unit)
+  # a sum grows with the number of loci, which the jackknife would mistake
+  # for a bias (giving a jackknife estimate of about twice the sum)
+  if (identical(operator, "sum")) {
+    stop(
+      "operator = 'sum' is not available, as the jackknife is not valid for ",
+      "a sum. Use operator = 'mean', and multiply the estimates and the ",
+      "standard error by the number of non-missing values."
+    )
+  }
   operator <- match.arg(operator)
   if (operator == "custom" && is.null(f)) {
     stop("If operator is 'custom', f must be provided.")
@@ -81,10 +101,8 @@ jackknife_stats_generic <- function(.x, loci_table,
   # get the sums and number of non-missing loci in each block
   x_blocks <- .block_sums(.x, block_id)
   m <- x_blocks$n
-  if (operator == "sum") {
-    theta_full <- sum(x_blocks$sums)
-    theta_loo <- theta_full - x_blocks$sums
-  } else if (operator == "mean") {
+  if (operator == "mean") {
+    # the mean of the non-missing values
     theta_full <- sum(x_blocks$sums) / sum(m)
     theta_loo <- (sum(x_blocks$sums) - x_blocks$sums) / (sum(m) - m)
   } else if (operator == "custom") {

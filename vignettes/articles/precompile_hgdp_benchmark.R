@@ -2,5 +2,5 @@
 setwd(getSrcDirectory(function(x) {
   x
 }))
-unlink("./figure/hgdp_benchmark")
+unlink("./figure/hgdp_benchmark", recursive = TRUE)
 knitr::knit("benchmark_hgdp.Rmd.orig", "benchmark_hgdp.Rmd")

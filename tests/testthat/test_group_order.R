@@ -177,7 +177,10 @@ test_that("heatmap_pairwise keeps the order of a tidy input", {
   factor_gt <- test_gt %>% dplyr::group_by(pop_factor)
   fst_mat <- pairwise_pop_fst(factor_gt, type = "pairwise", method = "Nei87")
   fst_tidy <- pairwise_pop_fst(factor_gt, type = "tidy", method = "Nei87")
-  expect_equal(axis_labels(heatmap_pairwise(fst_mat)), c("pop3", "pop1", "pop2"))
+  expect_equal(
+    axis_labels(heatmap_pairwise(fst_mat)),
+    c("pop3", "pop1", "pop2")
+  )
   expect_equal(
     axis_labels(heatmap_pairwise(fst_tidy)),
     c("pop3", "pop1", "pop2")

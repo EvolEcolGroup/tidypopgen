@@ -23,7 +23,7 @@ loci_names <- function(.x, .col = "genotypes", ...) {
 #' @export
 #' @rdname loci_names
 loci_names.tbl_df <- function(.x, .col = "genotypes", ...) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%

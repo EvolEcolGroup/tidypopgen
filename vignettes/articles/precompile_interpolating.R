@@ -2,5 +2,5 @@
 setwd(getSrcDirectory(function(x) {
   x
 }))
-unlink("./figure/interpolating")
+unlink("./figure/interpolating", recursive = TRUE)
 knitr::knit("interpolating.Rmd.orig", "interpolating.Rmd")

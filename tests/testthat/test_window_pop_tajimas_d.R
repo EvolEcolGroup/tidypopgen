@@ -332,4 +332,3 @@ test_that("windows_pop_tajimas_d matrix has one row per window", {
     expect_equal(miss_mat[[pop]], miss_list[[pop]]$stat)
   }
 })
-

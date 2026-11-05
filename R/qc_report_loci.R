@@ -31,7 +31,7 @@ qc_report_loci <- function(.x, ...) {
 
 #' @export
 #' @rdname qc_report_loci
-qc_report_loci.tbl_df <- function(.x, ...) {
+qc_report_loci.gen_tbl <- function(.x, ...) {
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
@@ -142,7 +142,7 @@ qc_report_loci_stats <- function(.x, hwe) {
 
 #' @export
 #' @rdname qc_report_loci
-qc_report_loci.grouped_df <- function(.x, ...) {
+qc_report_loci.grouped_gen_tbl <- function(.x, ...) {
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
@@ -493,4 +493,20 @@ autoplot_l_qc_missing <- function(
     ggplot2::geom_vline(xintercept = miss_threshold, lty = 2, col = "red") +
     ggplot2::scale_color_brewer(palette = "Dark2")
   return(missing_plot)
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+qc_report_loci.data.frame <- function(.x, ...) {
+  qc_report_loci(restore_genotypes_tbl(.x, "qc_report_loci"), ...)
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+qc_report_loci.grouped_df <- function(.x, ...) {
+  qc_report_loci(restore_genotypes_tbl(.x, "qc_report_loci"), ...)
 }

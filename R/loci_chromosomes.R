@@ -22,7 +22,7 @@ loci_chromosomes <- function(.x, .col = "genotypes", ...) {
 #' @export
 #' @rdname loci_chromosomes
 loci_chromosomes.tbl_df <- function(.x, .col = "genotypes", ...) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
     rlang::as_string()

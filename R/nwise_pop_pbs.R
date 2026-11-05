@@ -29,6 +29,9 @@
 #'    (e.g. "pbs_pop1.pop2.pop3"). If return_fst is TRUE, stat_name will also
 #'    include "fst" calculations in the same column (e.g. "fst_pop1.pop2").
 #' - `value`: the pbs value for the populations
+#' @param ... other arguments passed to specific methods, currently
+#'   unused.
+#' @rdname nwise_pop_pbs
 #' @export
 #' @examples
 #' example_gt <- load_example_gt()
@@ -37,10 +40,20 @@
 #' example_gt %>%
 #'   group_by(population) %>%
 #'   nwise_pop_pbs(fst_method = "Hudson")
-nwise_pop_pbs <- function(.x,
-                          type = c("tidy", "matrix"),
-                          fst_method = c("Hudson", "Nei87", "WC84"),
-                          return_fst = FALSE) {
+nwise_pop_pbs <- function(.x, ...) {
+  UseMethod("nwise_pop_pbs", .x)
+}
+
+#' @export
+#' @rdname nwise_pop_pbs
+nwise_pop_pbs.gen_tbl <- function(
+  .x,
+  type = c("tidy", "matrix"),
+  fst_method = c("Hudson", "Nei87", "WC84"),
+  return_fst = FALSE,
+  ...
+) {
+  rlang::check_dots_empty()
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
@@ -169,4 +182,12 @@ pbs_all_triplets <- function(fst_values, pops,
     pbs_results[, first_col + 6] <- pbs_3 / pbs_sum
   }
   pbs_results
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+nwise_pop_pbs.data.frame <- function(.x, ...) {
+  nwise_pop_pbs(restore_genotypes_tbl(.x, "nwise_pop_pbs"), ...)
 }

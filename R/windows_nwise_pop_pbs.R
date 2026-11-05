@@ -44,6 +44,9 @@
 #'    (e.g. "pbs_pop1.pop2.pop3"). If return_fst is TRUE, stat_name will also
 #'    include "fst" calculations in the same column (e.g. "fst_pop1.pop2").
 #' - `value`: the pbs value for the populations
+#' @param ... other arguments passed to specific methods, currently
+#'   unused.
+#' @rdname windows_nwise_pop_pbs
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("grouped_gen_tbl")
@@ -54,15 +57,25 @@
 #'     window_size = 3, step_size = 2,
 #'     size_unit = "snp", min_loci = 2
 #'   )
-windows_nwise_pop_pbs <- function(.x,
-                                  type = c("matrix", "tidy"),
-                                  fst_method = c("Hudson", "Nei87", "WC84"),
-                                  return_fst = FALSE,
-                                  window_size,
-                                  step_size,
-                                  size_unit = c("snp", "bp"),
-                                  min_loci = 1,
-                                  complete = FALSE) {
+windows_nwise_pop_pbs <- function(.x, ...) {
+  UseMethod("windows_nwise_pop_pbs", .x)
+}
+
+#' @export
+#' @rdname windows_nwise_pop_pbs
+windows_nwise_pop_pbs.gen_tbl <- function(
+  .x,
+  type = c("matrix", "tidy"),
+  fst_method = c("Hudson", "Nei87", "WC84"),
+  return_fst = FALSE,
+  window_size,
+  step_size,
+  size_unit = c("snp", "bp"),
+  min_loci = 1,
+  complete = FALSE,
+  ...
+) {
+  rlang::check_dots_empty()
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
@@ -119,4 +132,12 @@ windows_nwise_pop_pbs <- function(.x,
       tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(pbs_results)
   }
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+windows_nwise_pop_pbs.data.frame <- function(.x, ...) {
+  windows_nwise_pop_pbs(restore_genotypes_tbl(.x, "windows_nwise_pop_pbs"), ...)
 }

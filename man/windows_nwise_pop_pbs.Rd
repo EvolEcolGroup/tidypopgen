@@ -2,9 +2,12 @@
 % Please edit documentation in R/windows_nwise_pop_pbs.R
 \name{windows_nwise_pop_pbs}
 \alias{windows_nwise_pop_pbs}
+\alias{windows_nwise_pop_pbs.gen_tbl}
 \title{Compute the Population Branch Statistics over a sliding window}
 \usage{
-windows_nwise_pop_pbs(
+windows_nwise_pop_pbs(.x, ...)
+
+\method{windows_nwise_pop_pbs}{gen_tbl}(
   .x,
   type = c("matrix", "tidy"),
   fst_method = c("Hudson", "Nei87", "WC84"),
@@ -13,13 +16,17 @@ windows_nwise_pop_pbs(
   step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
-  complete = FALSE
+  complete = FALSE,
+  ...
 )
 }
 \arguments{
 \item{.x}{a grouped \code{gen_tibble} object.
 If grouped by more than one variable, groups are labelled by the values
 of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
+
+\item{...}{other arguments passed to specific methods, currently
+unused.}
 
 \item{type}{type of object to return. One of "matrix" or "tidy". Default is
 "matrix". "matrix" returns a dataframe where each row is a window, followed
