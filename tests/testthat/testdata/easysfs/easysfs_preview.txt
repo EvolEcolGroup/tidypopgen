@@ -1,0 +1,20 @@
+
+  Processing 3 populations - ['popA', 'popB', 'popC']
+
+    Running preview mode. We will print out the results for # of segregating sites
+    for multiple values of projecting down for each population. The dadi
+    manual recommends maximizing the # of seg sites for projections, but also
+    a balance must be struck between # of seg sites and sample size.
+
+    For each population you should choose the value of the projection that looks
+    best and then rerun easySFS with the `--proj` flag.
+    
+popA
+(2, 58)	(3, 85)	(4, 103)	(5, 113)	(6, 123)	(7, 125)	(8, 131)	(9, 114)	(10, 117)	(11, 93)	(12, 95)	(13, 64)	(14, 65)	(15, 33)	(16, 33)	
+
+popB
+(2, 58)	(3, 83)	(4, 100)	(5, 100)	(6, 108)	(7, 99)	(8, 103)	(9, 69)	(10, 71)	(11, 36)	(12, 36)	
+
+popC
+(2, 54)	(3, 79)	(4, 96)	(5, 100)	(6, 109)	(7, 83)	(8, 87)	(9, 45)	(10, 47)	
+
