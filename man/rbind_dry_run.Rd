@@ -22,7 +22,12 @@ file}
 
 \item{use_position}{boolean of whether a combination of chromosome and
 position should be used for matching SNPs. By default, \code{rbind} uses the
-locus name, so this is set to FALSE. When using 'use_position=TRUE', make
+locus name, so this is set to FALSE. If the loci names of either dataset
+are integers (as created by \code{gen_tibble(names_as_int = TRUE)}, which
+numbers the loci in the order in which they are found in the \emph{VCF}), the
+names do not identify the same locus in the two datasets, so loci are
+always matched by position: \code{use_position} is then set to TRUE
+automatically (even if it was set to FALSE), with a message unless \code{quiet = TRUE}. When using 'use_position=TRUE', make
 sure chromosomes are coded in the same way in both \code{gen_tibbles} (a mix of
 e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
 large number variants are dropped when merging).}
@@ -58,6 +63,11 @@ This function provides an overview of the fate of each SNP in two
 objects will be kept. One object is used as a \code{reference}, and SNPs in the
 other dataset will be flipped and/or alleles swapped as needed. SNPs that
 have different alleles in the two datasets will also be dropped.
+}
+\details{
+Loci are matched by name, unless \code{use_position = TRUE}. If the loci names of
+either dataset are integers (as created by \code{gen_tibble(names_as_int = TRUE)}), loci are always matched by chromosome and position (see
+\code{use_position}).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

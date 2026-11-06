@@ -119,6 +119,12 @@
   when the gen_tibble is set to use them (`gt_set_imputed(x, TRUE)`); they
   used to always treat imputed genotypes as missing. Results are unchanged
   for data that are not imputed, or not set to use imputed genotypes
+* `rbind()` and `rbind_dry_run()` now match loci by position, with a message,
+  when loci names are integers (`gen_tibble(names_as_int = TRUE)`), rather
+  than stopping with an error
+* `pairwise_ibs()` and `snp_ibs()` with `type = "adjusted_counts"` now return
+  PLINK's allele count distance (`--distance flat-missing`), rather than the
+  IBS proportion multiplied by the number of loci (a similarity)
 * `rbind()` and `rbind_dry_run()` with `use_position = TRUE` match loci on
   their chromosome and position without pasting them into a string for every
   locus, which used about 90 MB of memory per million loci. The `name` column

@@ -72,6 +72,28 @@ the same formulation as in \code{hierfstat::pairwise.WCfst()}).
 \details{
 For all formulae, the genome wide estimate is obtained by taking the ratio of
 the mean numerators and denominators over all relevant SNPs.
+
+Loci with no genotypes in one of the two populations of a pair
+(e.g. loci that failed in all the individuals of a population) carry no
+information on the differentiation between them, so they are dropped for
+that pair with all methods: their Fst by locus is \code{NaN}, and they do not
+contribute to the mean numerator and denominator of the genome wide
+estimate.
+
+\strong{Difference from \code{hierfstat} for 'WC84'}: \code{\link[hierfstat:pairwise.WCfst]{hierfstat::pairwise.WCfst()}}
+(and \code{\link[hierfstat:wc]{hierfstat::wc()}}) keep these loci. Their among-population variance
+component (\eqn{\sigma^2_a}, the numerator) is set to 0, while their
+within-population components (\eqn{\sigma^2_b} and \eqn{\sigma^2_w},
+estimated from the one population with data) still add to the
+denominator. So \code{hierfstat} gives these loci an Fst of 0 rather than
+\code{NaN}, and its genome wide estimate is pulled towards 0 (i.e. it is
+usually lower than the one computed here).
+The two estimates are identical when every locus has data in both
+populations, or if such loci are removed before using \code{hierfstat}. This
+applies to every function that computes Fst with 'WC84' (e.g.
+\code{\link[=windows_pairwise_pop_fst]{windows_pairwise_pop_fst()}}, \code{\link[=jackknife_pairwise_pop_fst]{jackknife_pairwise_pop_fst()}} and
+\code{\link[=nwise_pop_pbs]{nwise_pop_pbs()}}). 'Nei87' gives the same results as
+\code{\link[hierfstat:pairwise.neifst]{hierfstat::pairwise.neifst()}}, which also drops these loci.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

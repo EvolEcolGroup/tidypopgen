@@ -107,7 +107,10 @@ processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
 converted to integers. Only used when \code{x} is a \emph{VCF} file with parser
 "cpp". Default is FALSE. This can be useful when working with very large
 datasets where storing the names as string can use a large amount of
-memory.}
+memory. Integer names are the index of each locus in the \emph{VCF}, so they
+can not be used to match loci across datasets: \link[=rbind.gen_tbl]{rbind()} and
+\code{\link[=rbind_dry_run]{rbind_dry_run()}} always match loci with integer names by chromosome and
+position.}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only

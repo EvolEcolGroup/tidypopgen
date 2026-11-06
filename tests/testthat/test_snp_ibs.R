@@ -55,6 +55,19 @@ test_that("snp_ibs and pairwise_ibs computes ibs correctly", {
   expect_true(all.equal(test_ibs_gt_prop$value[2], by_hand$a[3])) # a and c
   expect_true(all.equal(test_ibs_gt_prop$value[3], by_hand$b[3])) # b and c
 
+  # adjusted counts are the number of alleles that differ (no genotypes are
+  # missing, so they are not rescaled)
+  test_dist <- snp_ibs(test_fbm, type = "adjusted_counts")
+  differ_by_hand <- outer(1:3, 1:3, Vectorize(function(i, j) {
+    sum(abs(test_genotypes[i, ] - test_genotypes[j, ]))
+  }))
+  expect_equal(test_dist, differ_by_hand, ignore_attr = TRUE)
+  # a and b differ by one allele at loci 1, 4 and 5
+  expect_identical(test_dist[1, 2], 3)
+  expect_identical(diag(test_dist), c(0, 0, 0))
+  test_dist_gt <- pairwise_ibs(test_gt, type = "adjusted_counts")
+  expect_identical(test_dist_gt$value, test_dist[upper.tri(test_dist)])
+
   # now subset to the first and second individual, and a subset of loci
   test_gt_sub <- test_gt[c(1, 3), ]
   loci_subset <- c(2, 3, 5, 6)
@@ -102,6 +115,44 @@ test_that("snp_ibs as.counts = FALSE gives the same results as plink", {
 
   # Check matrices are equal
   expect_true(all.equal(tidy_ibs, plink_matrix))
+})
+
+test_that("snp_ibs adjusted_counts gives the same results as plink", {
+  # Read in results from (PLINK v1.9.0 64-bit, 27 Sep 2026):
+  # plink --bfile families --distance square flat-missing
+  # (the allele count distance, with genotypes missing in 352 of 961 loci)
+  plink_dist <- read.table(
+    system.file("extdata/related/test_plinkDist.dist", package = "tidypopgen"),
+    header = FALSE
+  )
+  plink_dist <- unname(as.matrix(plink_dist))
+
+  bed_path <- system.file(
+    "extdata/related/families.bed",
+    package = "tidypopgen"
+  )
+  families <- gen_tibble(
+    bed_path,
+    quiet = TRUE,
+    valid_alleles = c("1", "2"),
+    backingfile = tempfile()
+  )
+  families_fbm <- tidypopgen:::.gt_get_fbm(families)
+  tidy_dist <- snp_ibs(families_fbm, type = "adjusted_counts")
+  # PLINK writes 6 significant digits
+  expect_equal(unname(tidy_dist), plink_dist, tolerance = 1e-5)
+  expect_identical(diag(tidy_dist), rep(0, nrow(families)))
+  # it is a dissimilarity in alleles: 2 * n_loci * (1 - proportion)
+  expect_equal(
+    tidy_dist,
+    2 * count_loci(families) * (1 - snp_ibs(families_fbm))
+  )
+  # and pairwise_ibs gives the same values
+  families_dist <- pairwise_ibs(families,
+    type = "adjusted_counts",
+    as_matrix = TRUE
+  )
+  expect_equal(unclass(families_dist), tidy_dist, ignore_attr = TRUE)
 })
 
 test_that("snp_ibs is correct across bit-packing boundaries", {

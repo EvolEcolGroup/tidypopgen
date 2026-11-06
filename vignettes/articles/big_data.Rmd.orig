@@ -307,6 +307,6 @@ The memory is measured with `gc()`, and only covers memory allocated by R. It do
 # Key takeaways
 
 - **Large data don't need a large machine.** `gen_tibble` objects are file-backed, so the genotypes stay on disk and only what you are working on is held in memory.
-- **Use `names_as_int = TRUE` when reading a VCF** to reduce the memory taken by locus names. The trade-off is that the original locus IDs are not kept (chromosome and position are).
+- **Use `names_as_int = TRUE` when reading a VCF** to reduce the memory taken by locus names. The trade-off is that the original locus IDs are not kept (chromosome and position are), so `rbind()` matches loci by chromosome and position.
 - **Set your cores.** Limit BLAS and `data.table` threads at the start, and pass `n_cores` to the functions that support it (e.g. LD clumping and F~ST~).
 - **Large analyses make large outputs.** Reports such as `qc_report_loci()` can be big, so save what you need and `rm()` the rest.

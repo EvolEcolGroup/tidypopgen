@@ -6,6 +6,11 @@
 #' other dataset will be flipped and/or alleles swapped as needed. SNPs that
 #' have different alleles in the two datasets will also be dropped.
 #'
+#' Loci are matched by name, unless `use_position = TRUE`. If the loci names of
+#' either dataset are integers (as created by `gen_tibble(names_as_int =
+#' TRUE)`), loci are always matched by chromosome and position (see
+#' `use_position`).
+#'
 #' @param ref either a [`gen_tibble`] object, or the path to the PLINK bim file;
 #'   the alleles in this objects will be used as template to flip the ones in
 #'   `target` and/or swap their order as necessary.
@@ -13,7 +18,13 @@
 #'   file
 #' @param use_position boolean of whether a combination of chromosome and
 #'   position should be used for matching SNPs. By default, `rbind` uses the
-#'   locus name, so this is set to FALSE. When using 'use_position=TRUE', make
+#'   locus name, so this is set to FALSE. If the loci names of either dataset
+#'   are integers (as created by `gen_tibble(names_as_int = TRUE)`, which
+#'   numbers the loci in the order in which they are found in the *VCF*), the
+#'   names do not identify the same locus in the two datasets, so loci are
+#'   always matched by position: `use_position` is then set to TRUE
+#'   automatically (even if it was set to FALSE), with a message unless `quiet
+#'   = TRUE`. When using 'use_position=TRUE', make
 #'   sure chromosomes are coded in the same way in both `gen_tibbles` (a mix of
 #'   e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
 #'   large number variants are dropped when merging).
@@ -91,16 +102,14 @@ rbind_dry_run <- function(
   ref_df <- dry_run_loci(ref)
   target_df <- dry_run_loci(target)
 
-  # if use_position is FALSE, then the names can not be integers
-  if (!use_position) {
-    if (!is.character(ref_df$name) ||
-          !is.character(target_df$name)) {
-      stop(
-        "When 'use_position' is FALSE, loci names must be characters.",
-        " Please set 'use_position' to TRUE if you use integers as loci names."
-      )
-    }
-  }
+  # integer loci names can not be used to match loci, so match them by
+  # position
+  use_position <- rbind_use_position(
+    ref_names = ref_df$name,
+    target_names = target_df$name,
+    use_position = use_position,
+    quiet = quiet
+  )
 
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
@@ -159,6 +168,25 @@ rbind_dry_run <- function(
   )
 }
 
+
+# Whether rbind() and rbind_dry_run() should match loci by position: loci
+# names that are not characters (i.e. integers, from gen_tibble(names_as_int =
+# TRUE), which are the index of each locus in its own VCF) do not identify the
+# same locus in two datasets, so loci are then always matched by position
+# (with a message, unless quiet). Returns use_position, set to TRUE if needed.
+rbind_use_position <- function(ref_names, target_names, use_position, quiet) {
+  if (!use_position &&
+        (!is.character(ref_names) || !is.character(target_names))) {
+    if (!quiet) {
+      message(
+        "Loci names are integers in at least one of the two datasets, so ",
+        "loci are matched by chromosome and position (use_position = TRUE)"
+      )
+    }
+    use_position <- TRUE
+  }
+  use_position
+}
 
 # The keys to match loci by chromosome and position: a data.frame for each of
 # ref and target, with the chromosome (as an integer code) and the position of

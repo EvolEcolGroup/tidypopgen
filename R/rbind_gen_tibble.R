@@ -10,6 +10,11 @@
 #' different SNP chips), and remove ambiguous alleles (C/G and A/T) where the
 #' correct strand can not be guessed.
 #'
+#' Loci are matched by name, unless `use_position = TRUE`. If the loci names of
+#' either `gen_tibble` are integers (as created by `gen_tibble(names_as_int =
+#' TRUE)`), loci are always matched by chromosome and position (see
+#' `use_position`).
+#'
 #' rbind differs from merging data with plink, which swaps the order of allele1
 #' and allele2 according to minor allele frequency when merging datasets. rbind
 #' flips and/or swaps alleles according to the reference dataset, not according
@@ -23,7 +28,13 @@
 #'   swap alleles as needed.
 #' @param use_position boolean of whether a combination of chromosome and
 #'   position should be used for matching SNPs. By default, `rbind` uses the
-#'   locus name, so this is set to FALSE. In either case, the merged loci keep
+#'   locus name, so this is set to FALSE. If the loci names of either
+#'   `gen_tibble` are integers (as created by `gen_tibble(names_as_int =
+#'   TRUE)`, which numbers the loci in the order in which they are found in the
+#'   *VCF*), the names do not identify the same locus in the two datasets, so
+#'   loci are always matched by position: `use_position` is then set to TRUE
+#'   automatically (even if it was set to FALSE), with a message unless `quiet
+#'   = TRUE`. In either case, the merged loci keep
 #'   the names of the reference dataset. When using 'use_position=TRUE', make
 #'   sure chromosomes are coded in the same way in both `gen_tibbles` (a mix of
 #'   e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
@@ -114,6 +125,15 @@ rbind.gen_tbl <- function(
       )
     }
   }
+  # integer loci names can not be used to match loci, so match them by
+  # position (rbind_dry_run() is then called with use_position = TRUE, so the
+  # message is only given once)
+  use_position <- rbind_use_position(
+    ref_names = loci_names(ref),
+    target_names = loci_names(target),
+    use_position = use_position,
+    quiet = quiet
+  )
   # sort out paths
   if (is.null(backingfile)) {
     save_path <- dirname(attr(ref$genotypes, "fbm")$backingfile)

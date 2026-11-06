@@ -708,16 +708,6 @@ test_that("vcf tests storing names as integers", {
     backingfile = tempfile("pop_b_"),
     names_as_int = TRUE
   )
-  # check that we can not rbind by name if names are integers
-  expect_error(
-    rbind_dry_run(pop_a_gt, pop_b_gt, use_position = FALSE),
-    "When 'use_position' is FALSE, loci names must be characters."
-  )
-  expect_error(
-    rbind(pop_a_gt, pop_b_gt, use_position = FALSE),
-    "When 'use_position' is FALSE, loci names must be characters."
-  )
-  # but not error if we use positions
   combined_gt <- rbind(pop_a_gt, pop_b_gt,
     use_position = TRUE,
     quiet = TRUE
@@ -727,6 +717,83 @@ test_that("vcf tests storing names as integers", {
   report <- rbind_dry_run(pop_a_gt, pop_b_gt, use_position = TRUE, quiet = TRUE)
   expect_identical(report$ref$name, show_loci(pop_a_gt)$name)
   expect_identical(report$target$name, show_loci(pop_b_gt)$name)
+
+  # integer names can not be used to match loci, so loci are matched by
+  # position even with use_position = FALSE (the default), with a message
+  # (only once for rbind, which also calls rbind_dry_run)
+  # (the report is printed with cat(), so we capture it)
+  expect_message(
+    capture.output(report_auto <- rbind_dry_run(pop_a_gt, pop_b_gt)),
+    "loci are matched by chromosome and position"
+  )
+  expect_identical(report_auto, report)
+  msgs <- character(0)
+  capture.output(withCallingHandlers(
+    combined_auto <- rbind(pop_a_gt, pop_b_gt,
+      backingfile = tempfile("auto_")
+    ),
+    message = function(m) {
+      msgs <<- c(msgs, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  ))
+  expect_identical(
+    sum(grepl("loci are matched by chromosome and position", msgs)),
+    1L
+  )
+  expect_identical(show_loci(combined_auto), show_loci(combined_gt))
+  expect_identical(
+    show_genotypes(combined_auto),
+    show_genotypes(combined_gt)
+  )
+  # no message if quiet
+  expect_no_message(
+    combined_quiet <- rbind(pop_a_gt, pop_b_gt,
+      use_position = FALSE,
+      quiet = TRUE,
+      backingfile = tempfile("quiet_")
+    )
+  )
+  expect_identical(show_loci(combined_quiet), show_loci(combined_gt))
+  expect_no_message(
+    rbind_dry_run(pop_a_gt, pop_b_gt, use_position = FALSE, quiet = TRUE)
+  )
+
+  # the same if only one of the datasets has integer names
+  pop_b_chr_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    parser = "cpp",
+    backingfile = tempfile("pop_b_chr_")
+  )
+  expect_true(is.character(show_loci(pop_b_chr_gt)$name))
+  for (ref_target in list(
+    list(pop_a_gt, pop_b_chr_gt),
+    list(pop_b_chr_gt, pop_a_gt)
+  )) {
+    expect_identical(
+      rbind_dry_run(ref_target[[1]], ref_target[[2]], quiet = TRUE),
+      rbind_dry_run(ref_target[[1]], ref_target[[2]],
+        use_position = TRUE, quiet = TRUE
+      )
+    )
+    mixed_gt <- rbind(ref_target[[1]], ref_target[[2]],
+      quiet = TRUE,
+      backingfile = tempfile("mixed_")
+    )
+    mixed_pos_gt <- rbind(ref_target[[1]], ref_target[[2]],
+      use_position = TRUE,
+      quiet = TRUE,
+      backingfile = tempfile("mixed_pos_")
+    )
+    expect_identical(show_loci(mixed_gt), show_loci(mixed_pos_gt))
+    expect_identical(show_genotypes(mixed_gt), show_genotypes(mixed_pos_gt))
+    # the merged loci keep the names (and their type) of the reference
+    expect_identical(
+      typeof(show_loci(mixed_gt)$name),
+      typeof(show_loci(ref_target[[1]])$name)
+    )
+  }
 })
 
 test_that("ped files with a trailing blank line can be read", {

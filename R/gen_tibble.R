@@ -94,7 +94,10 @@
 #'   converted to integers. Only used when `x` is a *VCF* file with parser
 #'   "cpp". Default is FALSE. This can be useful when working with very large
 #'   datasets where storing the names as string can use a large amount of
-#'   memory.
+#'   memory. Integer names are the index of each locus in the *VCF*, so they
+#'   can not be used to match loci across datasets: [rbind()][rbind.gen_tbl] and
+#'   [rbind_dry_run()] always match loci with integer names by chromosome and
+#'   position.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble

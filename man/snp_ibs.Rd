@@ -24,10 +24,22 @@ specified, all rows are used. Don't use negative indices.}
 \item{ind.col}{An optional vector of the column indices that are used. If not
 specified, all columns are used. Don't use negative indices.}
 
-\item{type}{one of "proportion" (equivalent to "ibs" in PLINK),
-"adjusted_counts" ("distance" in PLINK), and "raw_counts" (the counts of
-identical alleles and non-missing alleles, from which the two other
-quantities are computed)}
+\item{type}{one of:
+\itemize{
+\item "proportion" (the default): the proportion of alleles that are identical
+by state, a similarity (as \verb{--distance ibs flat-missing} in PLINK, which
+writes it to a .mibs file).
+\item "adjusted_counts": the allele count distance, a dissimilarity (as
+\verb{--distance flat-missing} in PLINK, which writes it to a .dist file): the
+number of alleles that differ between two individuals, scaled up by the
+number of loci over the number of loci genotyped in both individuals, to
+correct for missing genotypes. It equals \code{2 * n_loci * (1 - proportion)}, where \code{n_loci} is the number of loci used, so it is 0 for
+identical individuals and at most \code{2 * n_loci}. Note that, without
+\code{flat-missing}, PLINK corrects for missing genotypes differently, which
+gives slightly different values when genotypes are missing.
+\item "raw_counts": the counts of identical alleles and of non-missing
+alleles, from which the two other quantities are computed.
+}}
 
 \item{block.size}{maximum number of columns read at once. Genotypes are
 compared in a compact bit-packed form, so this has little effect on
@@ -37,17 +49,18 @@ memory use.}
 \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
-if as.counts = TRUE function returns a list of two \link[bigstatsr:FBM]{bigstatsr::FBM}
-matrices, one of counts of IBS by alleles (i.e. 2*n loci), and one of valid
-alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns
-a single matrix of IBS proportions.
+for "proportion" and "adjusted_counts", a matrix with one row and
+one column per individual; for "raw_counts", a list of two
+\link[bigstatsr:FBM]{bigstatsr::FBM} matrices, \code{ibs} (the counts of alleles identical by
+state) and \code{valid_n} (the counts of non-missing alleles, i.e. twice the
+number of loci genotyped in both individuals).
 }
 \description{
 This function computes the IBS matrix.
 }
 \details{
-Note that monomorphic sites are currently counted. Should we filter them
-beforehand? What does plink do?
+Note that monomorphic sites are counted (as in PLINK). Remove monomorphic
+sites beforehand if this is a concern.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
