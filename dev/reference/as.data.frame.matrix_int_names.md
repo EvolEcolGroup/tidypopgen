@@ -30,6 +30,11 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 
   Additional arguments passed to as.data.frame.matrix
 
+## Value
+
+A data.frame with integer row names if present, otherwise character row
+names
+
 ## See also
 
 Other matrix_int_names_functions:
