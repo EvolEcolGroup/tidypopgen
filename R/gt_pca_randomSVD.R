@@ -8,6 +8,14 @@
 #' This function is a wrapper
 #' for [bigstatsr::big_randomSVD()]
 #'
+#' With up to a few thousand individuals, [gt_pca_partialSVD()] is usually
+#' much faster: on 1,043 individuals and 643,733 loci, this function took
+#' about 175 s on one core (with the default `tol`), against about 31 s for
+#' [gt_pca_partialSVD()]. This algorithm is most useful when there are too
+#' many individuals for [gt_pca_partialSVD()], whose memory grows with the
+#' square of the number of individuals. Using several cores (`n_cores`), or a
+#' larger `tol`, also reduces its time.
+#'
 #' @param x a `gen_tibble` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
 #'   **This algorithm should be used to compute a few singular vectors/values.**
