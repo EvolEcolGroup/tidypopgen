@@ -134,11 +134,12 @@ loci_ld_clump.vctrs_bigSNP <- function(
   .chromosome[show_loci(.x)$big_index] <-
     cast_chromosome_to_int(show_loci(.x)$chromosome)
   # now figure out if we have any snp which have already been removed
-  # those will go into `exclude`
-  loci_not_in_tibble <-
-    seq_len(ncol(geno_fbm))[
-      !seq_len(ncol(geno_fbm)) %in% .gt_fbm_cols(.x)
-    ] # nolint
+  # those will go into `exclude` (we flag the columns of the FBM used by the
+  # tibble, rather than hashing all of them with %in%)
+  in_tibble <- logical(ncol(geno_fbm))
+  in_tibble[.gt_fbm_cols(.x)] <- TRUE
+  loci_not_in_tibble <- which(!in_tibble)
+  rm(in_tibble)
   exclude <- c(loci_not_in_tibble, .gt_fbm_cols(.x)[exclude])
   if (length(exclude) == 0) {
     exclude <- NULL
