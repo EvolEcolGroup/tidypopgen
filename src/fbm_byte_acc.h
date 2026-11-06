@@ -64,6 +64,8 @@ public:
 
   size_t nrow() const { return _rows.size(); }
   size_t ncol() const { return _ncol; }
+  // number of rows of the whole FBM
+  size_t nrow_fbm() const { return _nrow_fbm; }
   const std::vector<size_t>& rows() const { return _rows; }
   // value decoded from byte b (NA for missing genotypes)
   double code(int b) const { return _code256[b]; }
