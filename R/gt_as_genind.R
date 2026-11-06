@@ -38,19 +38,32 @@ gt_as_genind <- function(x) {
 
   # build a genotype string per individual/locus (ncode = 1 digit per
   # allele, as required by adegenet::df2genind()): `dosage` copies of
-  # allele "2" (alt) and `ploidy - dosage` copies of allele "1" (ref)
-  dosage_to_genotype <- function(dosage, ploidy) {
-    if (is.na(dosage)) {
-      return(NA_character_)
-    }
-    paste0(strrep("1", ploidy - dosage), strrep("2", dosage))
+  # allele "2" (alt) and `ploidy - dosage` copies of allele "1" (ref). The
+  # strings are built once for each ploidy and dosage, and looked up for each
+  # genotype (rather than calling a function for each genotype)
+  ploidies <- sort(unique(geno_ploidy))
+  dosages <- seq(0, max(ploidies))
+  # genotype_strings[dosage + 1, k] is the genotype of a dosage for ploidy
+  # ploidies[k] (NA for dosages larger than the ploidy)
+  genotype_strings <- vapply(ploidies, function(ploidy) {
+    ifelse(dosages <= ploidy,
+      paste0(
+        strrep("1", pmax(ploidy - dosages, 0)),
+        strrep("2", dosages)
+      ),
+      NA_character_
+    )
+  }, character(length(dosages)))
+  # the dosages must be valid for the ploidy of each individual
+  if (any(geno_mat > geno_ploidy, na.rm = TRUE)) {
+    stop("some dosages are larger than the ploidy of their individual")
   }
+  # (missing dosages give a missing row index, and thus a missing genotype)
   df_for_genind <- matrix(
-    mapply(
-      dosage_to_genotype,
-      dosage = as.vector(geno_mat),
-      ploidy = rep(geno_ploidy, times = ncol(geno_mat))
-    ),
+    genotype_strings[cbind(
+      as.vector(geno_mat) + 1,
+      rep(match(geno_ploidy, ploidies), times = ncol(geno_mat))
+    )],
     nrow = nrow(geno_mat),
     ncol = ncol(geno_mat)
   )
