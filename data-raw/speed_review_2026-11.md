@@ -340,6 +340,8 @@ collects). Ideas that were not worth a change are explained in the list of
 further ideas.
 
 - [ ] `d1abae55` · `validate_loci()` (run when reading any dataset: `gen_tibble()` from VCF, PLINK, packedancestry, a matrix), `loci_transitions()`, `loci_transversions()` — `check_allele_alphabet()` and `harmonise_missing_values()` used `%in%` on each allele column, which allocates several vectors as long as the loci table, and harmonising copied both columns even with nothing to change. Two C++ functions (`src/strings_in_cpp.cpp`), `all_in_cpp()` and `which_in_cpp()`, give `all(x %in% table)` and `which(x %in% table)` in one pass with no allocation per element: strings are compared by their CHARSXP (falling back to comparing characters across encodings), and the result for each distinct CHARSXP is kept in a small hash table keyed by its address. A column is only modified if it has missing alleles. At 40M loci: 4.6–6.4 s → 0.8 s, and peak RSS +1.22 GB → +0.31 GB (the copy of a column with missing alleles); with nothing to harmonise, 0.47 s and no extra memory. `validate_loci()` as run by `gen_tibble()` goes from 9.2–10.3 s to 4.3 s; the rest is the check for duplicated loci (vctrs on chromosome and position, and `anyDuplicated()` on names). Identical results on 20,000 random small tables with all options, and on non-ASCII strings in different encodings. With strings marked as "bytes", `%in%` fails, whereas these functions compare bytes. `vctrs::vec_in()` was also tried: twice as fast as `%in%`, but with the same peak memory. *[Speed, Memory]* (further idea 2)
+- [ ] `a2d8870f` · the per-locus kernels that use `lut_sums()` in `src/fbm_byte_acc.h`: `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_pi()`, `loci_hwe()`, `qc_report_loci()`, `pop_het_obs()`, `pop_tajimas_d()` and the windows and SFS functions built on them — `LutSums::loci4()` sums four consecutive loci at once: each run of individuals is read once for the four columns, with four independent sums, which saves the loading of row indices and the setup of each run (the cost of grouped kernels with many small groups) for three loci out of four. Results are identical (the sums are exact integers). HGDP, one core, both versions installed with `R CMD INSTALL`: ungrouped kernels 0.40–0.41 s → 0.26 s (so the "memory floor" above was not the floor); with 51 populations `loci_missingness()` 0.69 → 0.54 s, `pop_het_obs()` 1.45 → 1.24 s, `loci_pi()` 0.70 → 0.64 s, `loci_alt_freq()` 0.91 → 0.87 s, `qc_report_loci()` 0.67–0.71 → 0.64–0.67 s, `pop_tajimas_d()` 1.04–1.07 → 1.01 s; `loci_hwe()` by region and runs with 4 cores (limited by memory bandwidth) are unchanged. The kernels of `pop_*` statistics and pairwise Fst (`GroupedSummariesDipPseudo`) still sum one locus at a time. *[Speed]* (further idea 5, in part)
+- [ ] `fee67118` · `.window_definitions()` (all `windows_*` functions) and `.chromosome_index()` (also used by the jackknife blocks) — The loci are no longer split by chromosome into a list (kept alongside its concatenation): they are ordered with a radix sort only when chromosomes are not adjacent (otherwise the order is a compact sequence that takes no memory), and each chromosome is a range of that order. The first and last window of each locus are only computed for the kernels that need them (Tajima's D, pairwise Fst, PBS), not for `windows_stats_generic()`. The chromosome index of a factor uses its codes without copying them, and the chromosomes in order of appearance come from the runs of chromosomes. 10M loci: peak RSS +330 MB (35 bytes per locus) → +205 MB (21), time 1.4 s → 0.3 s (0.6 s with the windows of each locus), result 16 → 4 bytes per locus (12 with the windows of each locus). Most of the remaining peak is garbage not yet collected, from per-chromosome temporaries. Identical results on 5,000 random tables and identical outputs of the windows functions on HGDP. The 100 bytes per locus quoted in the list of ideas was not reproduced on `dev`, where it was 35. *[Memory, Speed]* (further idea 6)
 
 ## Findings not fixed
 
@@ -387,13 +389,23 @@ further ideas.
   - *Done in `9b07dde1`.* A one-pass C++ `is_loci_table_ordered()`.
   - *Done in `d1abae55`.* The allele checks in `validate_loci()` cost about 0.24 s per 1M loci.
 - **Per-locus statistics:**
-  - `pop_tajimas_d()` still wraps its kernel in `big_apply()` (about
-    8 bytes per locus per group in transient memory).
-  - Kernels could allocate outputs with `Rcpp::no_init` to skip a zero fill.
-  - Grouped kernels with many small groups run at about 2.5× the memory
-    floor.
+  - *Already done on `dev`.* `pop_tajimas_d()` still wraps its kernel in `big_apply()` (about
+    8 bytes per locus per group in transient memory). The Tajima's D rewrite
+    (#214, `0e2ecc6f`) replaced it with `tajimas_d_window_sums_cpp()`, which
+    keeps a block of at most 4096 loci: on 3M loci and 4 groups the call
+    allocates about 0.3 MB (12 MB on the first call, which expands the
+    compact `big_index`).
+  - *Not done: no gain.* Kernels could allocate outputs with `Rcpp::no_init` to skip a zero fill.
+    Tried on `loci_alt_freq()`: 0.071 → 0.082 s on 3M loci × 20
+    individuals, and 0.32 → 0.41 s on HGDP. The zero fill mostly pays the
+    page faults of the new output, which then move into the kernel's loop.
+  - *Done in part in `a2d8870f`.* Grouped kernels with many small groups run at about 2.5× the memory
+    floor. Summing four loci at a time helps both grouped and ungrouped
+    kernels (see above). Ordering the individuals by group does not help
+    (the column of a locus is in L1 cache), nor does writing the outputs in
+    tiles; prefix sums over the runs were also tried and were no faster.
 - **Populations and windows:**
-  - `.window_definitions()` uses about 100 bytes per locus; `order()` +
+  - *Done in `fee67118`.* `.window_definitions()` uses about 100 bytes per locus; `order()` +
     `tabulate()` instead of `split()` would bring it to about 40.
   - `windows_indiv_roh()` takes about 2.6 s per individual (about 45 min for
     HGDP), 60% of it in detectRUNS' plyr-based `createRUNdf`.
