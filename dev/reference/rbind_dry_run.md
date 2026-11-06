@@ -62,17 +62,18 @@ loci in the respective dataset, and columns `id` (the index of the locus
 in the dataset), `new_id` (the index of the locus in the merged dataset,
 NA if the locus is dropped, either because it is not found in both
 datasets, because its alleles do not match, or because it is ambiguous),
-`name` (the locus name), `to_flip` (boolean, loci whose strand is
-flipped to match the reference, only in the `target` data.frame),
-`to_swap` (boolean, loci whose alleles, and thus genotypes, are swapped
-in the merge: in `target`, to match the order of alleles in the
-reference; in `ref`, loci whose `allele_ref` is missing in both
-datasets, which are swapped so that the observed allele becomes
-`allele_ref`, only when `flip_strand = TRUE`), `missing_allele` and
-`missing_allele_col` (for loci with one unobserved allele (NA), the
-allele inferred from the other dataset, and the column it fills,
-`allele_alt` or `allele_ref`; both are NA if nothing was inferred), and
-`ambiguous` (boolean, strand-ambiguous loci, i.e. A/T and C/G).
+`name` (the locus name, also when loci are matched by position),
+`to_flip` (boolean, loci whose strand is flipped to match the reference,
+only in the `target` data.frame), `to_swap` (boolean, loci whose
+alleles, and thus genotypes, are swapped in the merge: in `target`, to
+match the order of alleles in the reference; in `ref`, loci whose
+`allele_ref` is missing in both datasets, which are swapped so that the
+observed allele becomes `allele_ref`, only when `flip_strand = TRUE`),
+`missing_allele` and `missing_allele_col` (for loci with one unobserved
+allele (NA), the allele inferred from the other dataset, and the column
+it fills, `allele_alt` or `allele_ref`; both are NA if nothing was
+inferred), and `ambiguous` (boolean, strand-ambiguous loci, i.e. A/T and
+C/G).
 
 ## Examples
 

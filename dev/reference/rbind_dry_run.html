@@ -113,7 +113,8 @@ data.frame has <code><a href="https://rdrr.io/r/base/nrow.html" class="external-
 dataset, and columns <code>id</code> (the index of the locus in the dataset), <code>new_id</code>
 (the index of the locus in the merged dataset, NA if the locus is dropped,
 either because it is not found in both datasets, because its alleles do not
-match, or because it is ambiguous), <code>name</code> (the locus name), <code>to_flip</code>
+match, or because it is ambiguous), <code>name</code> (the locus name, also when loci
+are matched by position), <code>to_flip</code>
 (boolean, loci whose strand is flipped to match the reference, only in the
 <code>target</code> data.frame), <code>to_swap</code> (boolean, loci whose alleles, and thus
 genotypes, are swapped in the merge: in <code>target</code>, to match the order of
