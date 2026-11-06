@@ -16,7 +16,8 @@ branch, one commit per fix, each with its tests where needed.
 - **Developer guide:** [speed_accessors_guide.md](speed_accessors_guide.md)
   explains how to write new kernels with the accessors added here.
 - **Follow-up:** four of the [decisions for the maintainers](#decisions-for-the-maintainers)
-  were settled later with commits made directly on `dev`, listed in
+  and the first of the [further ideas](#further-ideas-not-prototyped) were
+  settled later with commits made directly on `dev`, listed in
   [Follow-up on dev](#follow-up-on-dev).
 - **Version:** unchanged in `DESCRIPTION`; no `NEWS.md` entries yet; no pull
   request has been opened.
@@ -308,17 +309,19 @@ identical to `codereview` unless noted in
 ## Follow-up on dev
 
 After the speed work was merged into `dev` (#216), the following commits
-were made directly on `dev`, each with its tests and a `NEWS.md` entry. They
-settle items 1, 2, 5 and 9 of the
-[decisions for the maintainers](#decisions-for-the-maintainers). After the
-last of them, the full test suite passes (4094 expectations, 0 failed, 0
-skipped) and `lintr` finds no lints in the changed files.
+were made directly on `dev`, each with its tests and (when users can see the
+change) a `NEWS.md` entry. They settle items 1, 2, 5 and 9 of the
+[decisions for the maintainers](#decisions-for-the-maintainers), and the
+first of the [further ideas](#further-ideas-not-prototyped). After the last
+of them (`9b07dde1`), the full test suite passes (4144 expectations, 0
+failed, 0 skipped, on an -O2 build).
 
 - [ ] `f26f046b` · `pairwise_ibs()`, `pairwise_king()`, `pairwise_allele_sharing()` (and `pairwise_grm()`, `pop_fst()`, `pop_fis()`, `indiv_inbreeding()`, `qc_report_indiv()`) — `pairwise_bitpacked.h` builds its lookup table from `code256` instead of treating raw bytes other than 0, 1 and 2 as missing, so imputed genotypes are used when the `gen_tibble` is set to use them (`gt_set_imputed(x, TRUE)`), and still treated as missing otherwise. Results change only for imputed data set to use imputation. The table has 256 entries and is built once per call, so speed is unchanged. *[Behaviour]* (item 9)
 - [ ] `280ecc9f` · `rbind()`, `rbind_dry_run()` with `use_position = TRUE` — Loci are matched on two integer columns (a chromosome code over the labels of both datasets, and the position) with `vctrs::vec_match()`, instead of a "chromosome_position" string per locus. The strings took about 92 MB per million loci (about 7 GB at 40M + 40M, more than the 5 GB estimated above) and 14.5 s per 10M loci to build. The `name` column of the report now gives the locus names (integers for integer names), as documented; nothing in the package read it. Integer names with `use_position = FALSE` remain an error, so that users choose position matching explicitly. *[Speed, Memory, Behaviour]* (item 1)
 - [ ] `d6abc3ac` · `gt_as_plink()` `.map` files — Integer positions are written as they are; `write.table()` never writes integers in scientific notation, so the text is identical. `format_position()` took about 84 MB per million loci (about 3.4 GB at 40M, more than the 2.2 GB estimated above). Double positions are still formatted, and the VCF writer is unchanged. *[Memory]* (item 2)
 - [ ] `bc83e6d2` · `pairwise_ibs()`, `pairwise_king()`, `pairwise_allele_sharing()`, `pairwise_grm()`, `snp_ibs()`, `snp_king()`, `snp_allele_sharing()` — The default `n_cores` is now `bigstatsr::nb_cores()`, as for most functions, so `pop_fst()`, `indiv_inbreeding()` and the relatedness filter of `qc_report_indiv()` use several cores by default. `pop_fis(method = "WG17")` passes its `n_cores` on. For CRAN, which allows at most 2 cores, `tests/testthat/setup.R` sets option `mc.cores` to 2 (so `nb_cores()` returns 1 in tests, as it does under `R CMD check --as-cran`) and limits data.table, BLAS and OpenMP to 2 threads for every test file. A test that used 12 cores now uses 2. Over the whole suite, CPU time is 1.02 times the elapsed time, and at most 1.9 times for a single test (CRAN flags 2.5). *[Behaviour, CRAN]* (item 5)
 - [ ] `6fb3bb6a` · `vignettes/articles/big_data.Rmd.orig` — Reading the VCF is now timed, and the performance summary also gives the peak memory used by R in each step (measured with `gc()`, which excludes the backing file and memory allocated by compiled code). The knitted article has not been regenerated yet (see [Before merging](#before-merging)). *[Docs]*
+- [ ] `9b07dde1` · `is_loci_table_ordered()` (run by `gt_order_loci()`, `loci_ld_clump()` and `gt_pca_autoSVD()`), and the check of genetic distances in `gt_update_backingfile()` — Two C++ kernels (`src/loci_order_cpp.cpp`) check the order in a single pass over the columns, keeping a few values per chromosome rather than per locus. Once positions are known to be sorted, duplicated loci are equal consecutive positions within a chromosome, so the `vctrs` hash of every pair of chromosome and position (70% of the time) is no longer needed. Chromosomes are still grouped by their integer chromosome (`"chr1"` and `"1"` are one group), casting only the levels of the factor. At 40M loci: 5.2–6.0 s → 0.31 s, and peak memory 1.4–1.8 GB → about 0 (6.4 s → 0.52 s with `ignore_genetic_dist = FALSE`); HGDP 0.09 s → 0.008 s. Return values and errors are identical to the R code on 30,000 random small tables with all four combinations of options (including missing chromosomes, positions and distances, levels that cast to the same integer, and double positions). A missing position in a chromosome still gives an `if (NA)` error ("missing value where TRUE/FALSE needed"), as before, and so does a missing genetic distance in `gt_order_loci()`; this predates the change. No `NEWS.md` entry, as nothing visible changes. *[Speed, Memory]* (further idea 1)
 
 ## Findings not fixed
 
@@ -363,7 +366,7 @@ skipped) and `lintr` finds no lints in the changed files.
 ### Further ideas, not prototyped
 
 - **Data structure:**
-  - A one-pass C++ `is_loci_table_ordered()`.
+  - *Done in `9b07dde1`.* A one-pass C++ `is_loci_table_ordered()`.
   - The allele checks in `validate_loci()` cost about 0.24 s per 1M loci.
 - **Per-locus statistics:**
   - `pop_tajimas_d()` still wraps its kernel in `big_apply()` (about
