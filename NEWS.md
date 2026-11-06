@@ -113,6 +113,12 @@
 * fix `filter_high_relatedness()` (and the `kings_threshold` option of
   `qc_report_indiv()`) treating strongly negative kinship coefficients as high
   relatedness
+* `pairwise_ibs()`, `pairwise_king()` and `pairwise_allele_sharing()` (and
+  thus `pairwise_grm()`, `pop_fst()`, `pop_fis()`, `indiv_inbreeding()` and
+  the relatedness filter of `qc_report_indiv()`) now use imputed genotypes
+  when the gen_tibble is set to use them (`gt_set_imputed(x, TRUE)`); they
+  used to always treat imputed genotypes as missing. Results are unchanged
+  for data that are not imputed, or not set to use imputed genotypes
 * fix error messages and documentation of `autoplot()` for `gt_admix` and
   `gt_pca` objects referring to non-existent arguments (`repeat`, `pc`)
 * fix `autoplot()` of `gt_admix` objects with `type = "cv"` failing when the

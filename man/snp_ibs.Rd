@@ -15,7 +15,8 @@ snp_ibs(
 }
 \arguments{
 \item{X}{a \link[bigstatsr:FBM.code256]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes}
-slot of a \link[bigsnpr:bigSNP]{bigsnpr::bigSNP} object).}
+slot of a \link[bigsnpr:bigSNP]{bigsnpr::bigSNP} object). Genotypes are decoded with its
+\code{code256}, and values other than 0, 1 and 2 are treated as missing.}
 
 \item{ind.row}{An optional vector of the row indices that are used. If not
 specified, all rows are used. Don't use negative indices.}

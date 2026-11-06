@@ -34,6 +34,10 @@ homozygous for the same allele, 0 if they are homozygous for a different
 allele, and 1/2 if at least one individual is heterozygous. Matching is the
 average of these 0, 1/2 and 1s)
 }
+\details{
+Imputed genotypes are used if \code{x} is set to use them (see
+\code{\link[=gt_set_imputed]{gt_set_imputed()}}), and treated as missing otherwise.
+}
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 

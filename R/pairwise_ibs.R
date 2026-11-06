@@ -4,6 +4,9 @@
 #'
 #' Note that monomorphic sites are currently considered. Remove monomorphic
 #' sites before running pairwise_king if this is a concern.
+#'
+#' Imputed genotypes are used if `x` is set to use them (see
+#' [gt_set_imputed()]), and treated as missing otherwise.
 #' @param x a `gen_tibble` object.
 #' @param as_matrix boolean, determining whether the results should be a square
 #'   symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)

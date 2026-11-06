@@ -5,7 +5,8 @@
 #' Note that monomorphic sites are currently counted. Should we filter them
 #' beforehand? What does plink do?
 #' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
-#' slot of a [bigsnpr::bigSNP] object).
+#' slot of a [bigsnpr::bigSNP] object). Genotypes are decoded with its
+#' `code256`, and values other than 0, 1 and 2 are treated as missing.
 #' @param ind.row An optional vector of the row indices that are used. If not
 #'   specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not

@@ -31,10 +31,11 @@
 // computed for both directions at once), and per pair counts are accumulated
 // in the packed lower triangle (column-major, including the diagonal).
 //
-// As in the original implementation, the raw bytes of the FBM are used
-// directly (not decoded through code256): 0, 1 and 2 are valid genotypes,
-// and any other value (3 for missing, and 4 to 6 for imputed genotypes) is
-// treated as missing.
+// The bytes of the FBM are decoded through its code256, so that imputed
+// genotypes (bytes 4 to 6) are used if the gen_tibble is set to use them
+// (code256 is then CODE_IMPUTE_PRED, see gt_set_imputed()), and treated as
+// missing otherwise (CODE_012). Decoded values other than 0, 1 and 2 (NA,
+// or fractional dosages) are treated as missing.
 
 /******************************************************************************/
 
@@ -63,7 +64,8 @@ PW_ALWAYS_INLINE uint32_t pw_popcount(uint64_t x) {
 // Each statistic is described by a small "policy" struct with:
 // - N_PLANES: the number of bit planes per individual
 // - N_COUNTS: the number of counts accumulated for each pair
-// - planes(b): a bitmask (bit p set if plane p is 1) for raw byte b
+// - planes(g): a bitmask (bit p set if plane p is 1) for genotype g (0, 1 or
+//   2); missing genotypes have no bit set (not even the valid plane)
 // - add(wi, wj, c): add the counts for one word (64 loci) of individuals
 //   i and j (wi, wj point at their N_PLANES words) to c
 
@@ -74,9 +76,8 @@ PW_ALWAYS_INLINE uint32_t pw_popcount(uint64_t x) {
 struct PwIbs {
   static const int N_PLANES = 3;
   static const int N_COUNTS = 2;
-  static uint8_t planes(int b) {
-    if (b > 2) return 0; // missing
-    return 1 | ((b >= 1) << 1) | ((b == 2) << 2);
+  static uint8_t planes(int g) {
+    return 1 | ((g >= 1) << 1) | ((g == 2) << 2);
   }
   static PW_ALWAYS_INLINE void add(const uint64_t* wi, const uint64_t* wj,
                                    uint32_t* c) {
@@ -95,9 +96,8 @@ struct PwIbs {
 struct PwKing {
   static const int N_PLANES = 4;
   static const int N_COUNTS = 4;
-  static uint8_t planes(int b) {
-    if (b > 2) return 0; // missing
-    return 1 | ((b == 1) << 1) | ((b == 0) << 2) | ((b == 2) << 3);
+  static uint8_t planes(int g) {
+    return 1 | ((g == 1) << 1) | ((g == 0) << 2) | ((g == 2) << 3);
   }
   static PW_ALWAYS_INLINE void add(const uint64_t* wi, const uint64_t* wj,
                                    uint32_t* c) {
@@ -116,9 +116,8 @@ struct PwKing {
 struct PwAlleleSharing {
   static const int N_PLANES = 3;
   static const int N_COUNTS = 3;
-  static uint8_t planes(int b) {
-    if (b > 2) return 0; // missing
-    return 1 | ((b == 0) << 1) | ((b == 2) << 2);
+  static uint8_t planes(int g) {
+    return 1 | ((g == 0) << 1) | ((g == 2) << 2);
   }
   static PW_ALWAYS_INLINE void add(const uint64_t* wi, const uint64_t* wj,
                                    uint32_t* c) {
@@ -217,9 +216,18 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
   }
   std::vector<uint32_t> counts(n_pairs * Stat::N_COUNTS, 0);
 
-  // planes for each possible raw byte
+  // planes for each possible raw byte, decoded through the code256 of the
+  // FBM (NA, and values other than 0, 1 and 2, are missing)
+  NumericVector code256 = BM["code256"];
+  if (code256.size() != 256) {
+    Rcpp::stop("The FBM should have a code256 of 256 values.");
+  }
   uint8_t lut[256];
-  for (int b = 0; b < 256; b++) lut[b] = Stat::planes(b);
+  for (int b = 0; b < 256; b++) {
+    double g = code256[b];
+    lut[b] = (g == 0 || g == 1 || g == 2) ?
+      Stat::planes(static_cast<int>(g)) : 0;
+  }
 
   // number of 64-bit words per chunk: keep the planes of all individuals
   // within ~256KB (so that they stay in cache whilst visiting all pairs),

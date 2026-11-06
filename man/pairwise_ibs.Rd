@@ -40,6 +40,9 @@ This function computes the IBS matrix.
 \details{
 Note that monomorphic sites are currently considered. Remove monomorphic
 sites before running pairwise_king if this is a concern.
+
+Imputed genotypes are used if \code{x} is set to use them (see
+\code{\link[=gt_set_imputed]{gt_set_imputed()}}), and treated as missing otherwise.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

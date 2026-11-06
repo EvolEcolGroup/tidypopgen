@@ -32,6 +32,10 @@ individuals if \code{as_matrix} is TRUE, or a tidied tibble of coefficients if
 This function computes the KING-robust estimator of kinship, reimplementing
 the KING algorithm of Manichaikul et al. (2010).
 }
+\details{
+Imputed genotypes are used if \code{x} is set to use them (see
+\code{\link[=gt_set_imputed]{gt_set_imputed()}}), and treated as missing otherwise.
+}
 \examples{
 example_gt <- load_example_gt("gen_tbl")
 
