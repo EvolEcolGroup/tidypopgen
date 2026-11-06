@@ -16,6 +16,10 @@ data.frame). If NULL, row names are inherited from the \code{matrix_int_names}}
 
 \item{...}{Additional arguments passed to as.data.frame.matrix}
 }
+\value{
+A data.frame with integer row names if present, otherwise character
+row names
+}
 \description{
 This method converts a matrix_int_names object to a data.frame, preserving
 the integer row names. Otherwise, it works similarly to the default

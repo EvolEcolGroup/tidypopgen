@@ -580,6 +580,8 @@ print.matrix_int_names <- function(x, ..., n = 10L) {
 #' @param optional Ignored, included for compatibility with generic signature
 #' @param ... Additional arguments passed to as.data.frame.matrix
 #' @export
+#' @returns A data.frame with integer row names if present, otherwise character
+#' row names
 #' @family matrix_int_names_functions
 #' @examples
 #' # Create a matrix with integer row and column names
