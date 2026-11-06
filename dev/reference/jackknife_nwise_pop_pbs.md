@@ -9,13 +9,17 @@ populations.
 ## Usage
 
 ``` r
+jackknife_nwise_pop_pbs(.x, ...)
+
+# S3 method for class 'gen_tbl'
 jackknife_nwise_pop_pbs(
   .x,
   type = c("matrix", "tidy"),
   fst_method = c("Hudson", "Nei87", "WC84"),
   return_fst = FALSE,
   block_size,
-  size_unit = c("snp", "cM", "bp")
+  size_unit = c("snp", "cM", "bp"),
+  ...
 )
 ```
 
@@ -26,6 +30,10 @@ jackknife_nwise_pop_pbs(
   a grouped `gen_tibble` object. If grouped by more than one variable,
   groups are labelled by the values of the grouping variables pasted
   with "." (e.g. `pop1.F`).
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - type:
 

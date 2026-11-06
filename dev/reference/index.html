@@ -27,6 +27,7 @@
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -543,6 +544,20 @@
 
         <dt>
 
+          <code><a href="pop_sfs.html">pop_sfs()</a></code>
+
+        </dt>
+        <dd>Compute the site frequency spectrum of each population</dd>
+
+        <dt>
+
+          <code><a href="pop_sfs_preview.html">pop_sfs_preview()</a></code>
+
+        </dt>
+        <dd>Preview the projections of the site frequency spectrum</dd>
+
+        <dt>
+
           <code><a href="pop_tajimas_d.html">pop_tajimas_d()</a></code>
 
         </dt>
@@ -594,10 +609,24 @@
 
         <dt>
 
+          <code><a href="pairwise_pop_sfs.html">pairwise_pop_sfs()</a></code>
+
+        </dt>
+        <dd>Compute the joint site frequency spectrum of each pair of populations</dd>
+
+        <dt>
+
           <code><a href="nwise_pop_pbs.html">nwise_pop_pbs()</a></code>
 
         </dt>
         <dd>Compute the Population Branch Statistics for each combination of populations</dd>
+
+        <dt>
+
+          <code><a href="nwise_pop_sfs.html">nwise_pop_sfs()</a></code>
+
+        </dt>
+        <dd>Compute the joint site frequency spectrum of all populations</dd>
 
         <dt>
 
@@ -619,6 +648,71 @@
 
         </dt>
         <dd>Add dendrograms to a heatmap of pairwise distances</dd>
+      </dl></div><div class="section level2">
+      <h2 id="site-frequency-spectrum">Site frequency spectrum<a class="anchor" aria-label="anchor" href="#site-frequency-spectrum"></a></h2>
+
+      <div class="section-desc"><p>Functions to compute site frequency spectra, with missing data handled as in easySFS.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="pop_sfs.html">pop_sfs()</a></code>
+
+        </dt>
+        <dd>Compute the site frequency spectrum of each population</dd>
+
+        <dt>
+
+          <code><a href="pop_sfs_preview.html">pop_sfs_preview()</a></code>
+
+        </dt>
+        <dd>Preview the projections of the site frequency spectrum</dd>
+
+        <dt>
+
+          <code><a href="pairwise_pop_sfs.html">pairwise_pop_sfs()</a></code>
+
+        </dt>
+        <dd>Compute the joint site frequency spectrum of each pair of populations</dd>
+
+        <dt>
+
+          <code><a href="nwise_pop_sfs.html">nwise_pop_sfs()</a></code>
+
+        </dt>
+        <dd>Compute the joint site frequency spectrum of all populations</dd>
+
+        <dt>
+
+          <code><a href="tidy.sfs.html">tidy(<i>&lt;sfs&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Tidy a site frequency spectrum</dd>
+
+        <dt>
+
+          <code><a href="write_sfs.html">write_sfs()</a></code>
+
+        </dt>
+        <dd>Write site frequency spectra for dadi or fastsimcoal2</dd>
+
+        <dt>
+
+          <code><a href="autoplot_sfs.html">autoplot(<i>&lt;sfs&gt;</i>)</a></code> <code><a href="autoplot_sfs.html">autoplot(<i>&lt;pop_sfs_tbl&gt;</i>)</a></code> <code><a href="autoplot_sfs.html">autoplot(<i>&lt;pairwise_sfs_tbl&gt;</i>)</a></code> <code><a href="autoplot_sfs.html">autoplot(<i>&lt;sfs_preview_tbl&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot site frequency spectra</dd>
+
+        <dt>
+
+          <code><a href="bootstrap_sfs.html">bootstrap_pop_sfs()</a></code> <code><a href="bootstrap_sfs.html">bootstrap_pairwise_pop_sfs()</a></code> <code><a href="bootstrap_sfs.html">bootstrap_nwise_pop_sfs()</a></code>
+
+        </dt>
+        <dd>Block bootstrap of site frequency spectra</dd>
       </dl></div><div class="section level2">
       <h2 id="windows">Windows<a class="anchor" aria-label="anchor" href="#windows"></a></h2>
 

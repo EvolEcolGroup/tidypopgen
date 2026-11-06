@@ -6,12 +6,16 @@ standard error estimated with a weighted block jackknife.
 ## Usage
 
 ``` r
+jackknife_pairwise_pop_fst(.x, ...)
+
+# S3 method for class 'gen_tbl'
 jackknife_pairwise_pop_fst(
   .x,
   type = c("matrix", "tidy"),
   method = c("Hudson", "Nei87", "WC84"),
   block_size,
-  size_unit = c("snp", "cM", "bp")
+  size_unit = c("snp", "cM", "bp"),
+  ...
 )
 ```
 
@@ -22,6 +26,10 @@ jackknife_pairwise_pop_fst(
   a grouped `gen_tibble` object. If grouped by more than one variable,
   groups are labelled by the values of the grouping variables pasted
   with "." (e.g. `pop1.F`).
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - type:
 

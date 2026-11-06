@@ -6,11 +6,15 @@ standard error estimated with a weighted block jackknife.
 ## Usage
 
 ``` r
+jackknife_pop_tajimas_d(.x, ...)
+
+# S3 method for class 'gen_tbl'
 jackknife_pop_tajimas_d(
   .x,
   type = c("matrix", "tidy", "list"),
   block_size,
-  size_unit = c("snp", "cM", "bp")
+  size_unit = c("snp", "cM", "bp"),
+  ...
 )
 ```
 
@@ -19,6 +23,10 @@ jackknife_pop_tajimas_d(
 - .x:
 
   a `gen_tibble` object, optionally grouped by one variable
+
+- ...:
+
+  other arguments passed to specific methods, currently unused.
 
 - type:
 

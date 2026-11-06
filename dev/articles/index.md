@@ -18,4 +18,6 @@
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/big_data.md):
 - [Interpolating genetic
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.md):
+- [Site frequency
+  spectra](https://evolecolgroup.github.io/tidypopgen/dev/articles/sfs.md):
 - [tidypopgen](https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.md):
