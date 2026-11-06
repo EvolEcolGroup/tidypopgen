@@ -554,6 +554,30 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// all_in_cpp
+bool all_in_cpp(const CharacterVector& x, const CharacterVector& table);
+RcppExport SEXP _tidypopgen_all_in_cpp(SEXP xSEXP, SEXP tableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type table(tableSEXP);
+    rcpp_result_gen = Rcpp::wrap(all_in_cpp(x, table));
+    return rcpp_result_gen;
+END_RCPP
+}
+// which_in_cpp
+SEXP which_in_cpp(const CharacterVector& x, const CharacterVector& table);
+RcppExport SEXP _tidypopgen_which_in_cpp(SEXP xSEXP, SEXP tableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type table(tableSEXP);
+    rcpp_result_gen = Rcpp::wrap(which_in_cpp(x, table));
+    return rcpp_result_gen;
+END_RCPP
+}
 // tajimas_d_window_sums_cpp
 List tajimas_d_window_sums_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, const IntegerVector& locus_first, const IntegerVector& locus_last, int n_windows, int ncores, int block_size);
 RcppExport SEXP _tidypopgen_tajimas_d_window_sums_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP locus_firstSEXP, SEXP locus_lastSEXP, SEXP n_windowsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
@@ -666,6 +690,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 6},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 6},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 6},
+    {"_tidypopgen_all_in_cpp", (DL_FUNC) &_tidypopgen_all_in_cpp, 2},
+    {"_tidypopgen_which_in_cpp", (DL_FUNC) &_tidypopgen_which_in_cpp, 2},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
     {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 2},
     {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},

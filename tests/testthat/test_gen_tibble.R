@@ -117,6 +117,45 @@ test_that("gen_tibble catches invalid alleles", {
   )
 })
 
+test_that("the allele checks in C++ match %in%", {
+  # the same non-ASCII string in two encodings, NA and the string "NA", and
+  # more distinct strings than the C++ code keeps in its hash table
+  e_utf8 <- "é"
+  e_latin1 <- iconv(e_utf8, "UTF-8", "latin1")
+  x <- c(
+    "A", e_latin1, NA, "NA", "0", ".", e_utf8,
+    as.character(1:300), "A", NA
+  )
+  tables <- list(
+    c("A", "T", "C", "G", "0", ".", NA),
+    c("0", "."),
+    c(e_utf8, "NA"),
+    c(NA, "150", "299"),
+    character(0)
+  )
+  for (table in tables) {
+    expect_identical(which_in_cpp(x, table), which(x %in% table))
+    expect_identical(all_in_cpp(x, table), all(x %in% table))
+    expect_identical(
+      all_in_cpp(x[1:7], table),
+      all(x[1:7] %in% table)
+    )
+  }
+  expect_true(all_in_cpp(c(e_latin1, NA), c(e_utf8, NA)))
+  # missing alleles are set to NA in both columns
+  loci <- data.frame(
+    allele_ref = c("A", "0", ".", "N", NA),
+    allele_alt = c(".", "T", "N", "C", "0")
+  )
+  expect_identical(
+    harmonise_missing_values(loci, missing_alleles = c(".", "N")),
+    data.frame(
+      allele_ref = c("A", NA, NA, NA, NA),
+      allele_alt = c(NA, "T", NA, "C", NA)
+    )
+  )
+})
+
 test_that("valid alleles check for .character method", {
   expect_error(
     pop_b <-

@@ -129,6 +129,14 @@ increment_king_numerator <- function(k, n_Aa_i, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, BM, rowInd, colInd, ncores))
 }
 
+all_in_cpp <- function(x, table) {
+    .Call(`_tidypopgen_all_in_cpp`, x, table)
+}
+
+which_in_cpp <- function(x, table) {
+    .Call(`_tidypopgen_which_in_cpp`, x, table)
+}
+
 tajimas_d_window_sums_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size) {
     .Call(`_tidypopgen_tajimas_d_window_sums_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size)
 }

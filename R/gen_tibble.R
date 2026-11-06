@@ -593,20 +593,23 @@ check_allele_alphabet <- function(
 ) {
   # 0 is always considered as a missing value (see harmonise_missing_values)
   missing_alleles <- union(missing_alleles, "0")
+  allowed_alleles <- as.character(c(valid_alleles, missing_alleles, NA))
+  # all_in_cpp(x, table) is all(x %in% table), in a single pass that does not
+  # allocate vectors as long as the loci table
   if (
-    any(
-      !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),
-      !x$allele_alt %in% c(valid_alleles, missing_alleles, NA)
-    )
+    !all_in_cpp(as.character(x$allele_ref), allowed_alleles) ||
+      !all_in_cpp(as.character(x$allele_alt), allowed_alleles)
   ) {
     stop(
       "valid alleles are ",
       paste(c(valid_alleles, missing_alleles), collapse = " "),
       " but ",
       paste(
+        # the same as unique(c(allele_ref, allele_alt)), without
+        # concatenating the two columns
         unique(c(
-          x$allele_ref,
-          x$allele_alt
+          unique(x$allele_ref),
+          unique(x$allele_alt)
         )),
         collapse = " "
       ),
@@ -622,8 +625,18 @@ harmonise_missing_values <- function(loci_info, missing_alleles = c("0", ".")) {
   if (!"0" %in% missing_alleles) {
     missing_alleles <- c(missing_alleles, "0")
   }
-  loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles] <- NA
-  loci_info$allele_alt[loci_info$allele_alt %in% missing_alleles] <- NA
+  for (allele_col in c("allele_ref", "allele_alt")) {
+    # which_in_cpp(x, table) is which(x %in% table), in a single pass that
+    # does not allocate vectors as long as the loci table; we only modify the
+    # column if it has missing alleles, as modifying it copies the whole column
+    is_missing <- which_in_cpp(
+      as.character(loci_info[[allele_col]]),
+      as.character(missing_alleles)
+    )
+    if (length(is_missing) > 0) {
+      loci_info[[allele_col]][is_missing] <- NA
+    }
+  }
   return(loci_info)
 }
 
