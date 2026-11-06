@@ -15,6 +15,9 @@ branch, one commit per fix, each with its tests where needed.
   in [Findings not fixed](#findings-not-fixed).
 - **Developer guide:** [speed_accessors_guide.md](speed_accessors_guide.md)
   explains how to write new kernels with the accessors added here.
+- **Follow-up:** four of the [decisions for the maintainers](#decisions-for-the-maintainers)
+  were settled later with commits made directly on `dev`, listed in
+  [Follow-up on dev](#follow-up-on-dev).
 - **Version:** unchanged in `DESCRIPTION`; no `NEWS.md` entries yet; no pull
   request has been opened.
 
@@ -41,6 +44,7 @@ whether it is maintainable, and whether the gain justifies the extra code.
 - [Memory at 40 million loci](#memory-at-40-million-loci)
 - [Changes in behaviour to check before merging](#changes-in-behaviour-to-check-before-merging)
 - [Commits by area](#commits-by-area)
+- [Follow-up on dev](#follow-up-on-dev)
 - [Findings not fixed](#findings-not-fixed)
 - [Before merging](#before-merging)
 - [Notes on the benchmark environment](#notes-on-the-benchmark-environment)
@@ -213,9 +217,10 @@ along the loci dimension, except in the following places:
   transiently (about 3.8 GB at 40M, then freed).
 - `select_loci()` with bare names or `which(...)` still goes through
   tidyselect, at the old cost (see [Findings not fixed](#findings-not-fixed)).
-- `rbind()`/`rbind_dry_run()` with `use_position = TRUE` build a
-  "chromosome_position" string per locus.
-- `gt_as_plink()` `.map` files build one string per position.
+- `rbind()`/`rbind_dry_run()` with `use_position = TRUE` built a
+  "chromosome_position" string per locus, and `gt_as_plink()` built one
+  string per position for `.map` files; both are fixed on `dev`
+  (`280ecc9f` and `d6abc3ac`, see [Follow-up on dev](#follow-up-on-dev)).
 - The writers paste names per chunk of 100,000 loci, which is unavoidable
   for text output.
 - `gt_extract_f2()` is out of scope: the external package it calls sets its
@@ -232,7 +237,7 @@ Tick each box once the change has been accepted (each commit also appears in
 - [ ] `f4758d55`, `9e129040`, `5bd1f2fe`, `c8e44eae` In `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_pi()` and `loci_hwe()`, `block_size` now only sets how often user interrupts are checked, since the kernels no longer use `big_apply()`.
 - [ ] `9e129040` `loci_missingness()` on a single locus no longer returns a named value.
 - [ ] `c8e44eae` The ungrouped `loci_hwe()` gains `n_cores` and `block_size` arguments, and the exact tests now run in parallel.
-- [ ] `69ca3fe1` `snp_ibs()`, `snp_king()`, `snp_allele_sharing()`, `pairwise_ibs()`, `pairwise_king()`, `pairwise_allele_sharing()` and `pairwise_grm()` gain an `n_cores` argument, defaulting to 1 (most other functions default to `bigstatsr::nb_cores()`).
+- [ ] `69ca3fe1` `snp_ibs()`, `snp_king()`, `snp_allele_sharing()`, `pairwise_ibs()`, `pairwise_king()`, `pairwise_allele_sharing()` and `pairwise_grm()` gain an `n_cores` argument, defaulting to 1 (most other functions default to `bigstatsr::nb_cores()`). The default is now `bigstatsr::nb_cores()` (`bc83e6d2`, see [Follow-up on dev](#follow-up-on-dev)).
 - [ ] `5c8aec58` `tidy_dist_matrix()` (the tidy output of the `pairwise_*()` functions) returns a 0-row tibble for a 1 × 1 matrix instead of an error.
 - [ ] `1133cb67` By-locus Hudson Fst values in `pairwise_pop_fst()` can differ from `codereview` by 1 ulp (at most 2.2e-16), because the square is now computed as `x * x` rather than with `pow()`. Genome-wide values are identical. Windowed Hudson Fst (`dbee7b86`) and PBS (`eabcb56b`) inherit this (equal to 1e-12 on HGDP).
 - [ ] `6ba856d9` `predict.gt_pca(project_method = "least_squares")` changes the order of summation, so results agree with `codereview` to 1e-12 rather than exactly. The simple and OADP projections are identical.
@@ -300,16 +305,31 @@ identical to `codereview` unless noted in
 - [ ] `066f3311` · `rbind_dry_run()`, `rbind()` — Loci names are matched once instead of about nine times. 3M loci: 21.8 s → 6.2 s; with `587d5aef`, `rbind()` on 3M loci with integer names 425 s → 32 s. *[Speed]*
 - [ ] `e036a486` · `gt_update_backingfile()` — The genetic distance check uses `any_unsorted_by_group()` on one column instead of grouping the table. 3M loci: 0.31 s → 0.11 s. *[Speed]*
 
+## Follow-up on dev
+
+After the speed work was merged into `dev` (#216), the following commits
+were made directly on `dev`, each with its tests and a `NEWS.md` entry. They
+settle items 1, 2, 5 and 9 of the
+[decisions for the maintainers](#decisions-for-the-maintainers). After the
+last of them, the full test suite passes (4094 expectations, 0 failed, 0
+skipped) and `lintr` finds no lints in the changed files.
+
+- [ ] `f26f046b` · `pairwise_ibs()`, `pairwise_king()`, `pairwise_allele_sharing()` (and `pairwise_grm()`, `pop_fst()`, `pop_fis()`, `indiv_inbreeding()`, `qc_report_indiv()`) — `pairwise_bitpacked.h` builds its lookup table from `code256` instead of treating raw bytes other than 0, 1 and 2 as missing, so imputed genotypes are used when the `gen_tibble` is set to use them (`gt_set_imputed(x, TRUE)`), and still treated as missing otherwise. Results change only for imputed data set to use imputation. The table has 256 entries and is built once per call, so speed is unchanged. *[Behaviour]* (item 9)
+- [ ] `280ecc9f` · `rbind()`, `rbind_dry_run()` with `use_position = TRUE` — Loci are matched on two integer columns (a chromosome code over the labels of both datasets, and the position) with `vctrs::vec_match()`, instead of a "chromosome_position" string per locus. The strings took about 92 MB per million loci (about 7 GB at 40M + 40M, more than the 5 GB estimated above) and 14.5 s per 10M loci to build. The `name` column of the report now gives the locus names (integers for integer names), as documented; nothing in the package read it. Integer names with `use_position = FALSE` remain an error, so that users choose position matching explicitly. *[Speed, Memory, Behaviour]* (item 1)
+- [ ] `d6abc3ac` · `gt_as_plink()` `.map` files — Integer positions are written as they are; `write.table()` never writes integers in scientific notation, so the text is identical. `format_position()` took about 84 MB per million loci (about 3.4 GB at 40M, more than the 2.2 GB estimated above). Double positions are still formatted, and the VCF writer is unchanged. *[Memory]* (item 2)
+- [ ] `bc83e6d2` · `pairwise_ibs()`, `pairwise_king()`, `pairwise_allele_sharing()`, `pairwise_grm()`, `snp_ibs()`, `snp_king()`, `snp_allele_sharing()` — The default `n_cores` is now `bigstatsr::nb_cores()`, as for most functions, so `pop_fst()`, `indiv_inbreeding()` and the relatedness filter of `qc_report_indiv()` use several cores by default. `pop_fis(method = "WG17")` passes its `n_cores` on. For CRAN, which allows at most 2 cores, `tests/testthat/setup.R` sets option `mc.cores` to 2 (so `nb_cores()` returns 1 in tests, as it does under `R CMD check --as-cran`) and limits data.table, BLAS and OpenMP to 2 threads for every test file. A test that used 12 cores now uses 2. Over the whole suite, CPU time is 1.02 times the elapsed time, and at most 1.9 times for a single test (CRAN flags 2.5). *[Behaviour, CRAN]* (item 5)
+- [ ] `6fb3bb6a` · `vignettes/articles/big_data.Rmd.orig` — Reading the VCF is now timed, and the performance summary also gives the peak memory used by R in each step (measured with `gc()`, which excludes the backing file and memory allocated by compiled code). The knitted article has not been regenerated yet (see [Before merging](#before-merging)). *[Docs]*
+
 ## Findings not fixed
 
 ### Decisions for the maintainers
 
-1. **`rbind(use_position = TRUE)` with integer names** still builds a
+1. *Done in `280ecc9f`.* **`rbind(use_position = TRUE)` with integer names** still builds a
    "chromosome_position" string for every locus of both datasets (about 5 GB
    at 40M + 40M). Matching on a numeric key (chromosome code × 2^31 +
    position) would avoid it, but would change the `name` column of the
    `rbind_dry_run()` report.
-2. **`format_position()`** in `gt_as_plink()` creates one string per position
+2. *Done in `d6abc3ac`.* **`format_position()`** in `gt_as_plink()` creates one string per position
    for the `.map` file (about 2.2 GB at 40M). Returning integer positions
    unchanged gives identical text.
 3. **`gt_save()`/`gt_load()` compression.** gzip of the loci table takes
@@ -323,7 +343,7 @@ identical to `codereview` unless noted in
    tidyselect, with the cost and the never-freed symbols described in
    `e7cf07b9`. The documentation now recommends `all_of()` for large data.
    An alternative would be to warn on large datasets.
-5. **Default `n_cores`** of the pairwise functions is 1, unlike most
+5. *Done in `bc83e6d2`.* **Default `n_cores`** of the pairwise functions is 1, unlike most
    functions (`bigstatsr::nb_cores()`).
 6. **Tidy outputs at 40M loci are inherently huge.** For example, the grouped
    tidy output for 51 groups would take about 49 GB, against 16 GB as a
@@ -335,7 +355,7 @@ identical to `codereview` unless noted in
 8. **Nei87/WC84 per-group precomputation** in `pairwise_pop_fst()` was
    implemented and gave identical results, but only gained 2–3%, so it was
    not committed.
-9. **`pairwise_bitpacked.h` treats imputed genotypes as missing.** As in the
+9. *Done in `f26f046b` (imputed genotypes are now used when set).* **`pairwise_bitpacked.h` treats imputed genotypes as missing.** As in the
    original kernels, it reads raw bytes and treats anything other than 0, 1
    and 2 as missing, whatever `code256` says. This behaviour predates these
    changes, but it should be documented.
@@ -399,6 +419,10 @@ identical to `codereview` unless noted in
     `omp_*` functions.
 - [ ] Render the vignettes, and re-run `vignettes/articles/benchmark_hgdp.Rmd`
   to update its timings.
+- [ ] Re-run `vignettes/articles/precompile_big_data.R` on the machine used
+  for the article (it needs the SGDP data, see `data-raw/sgdp`), so that the
+  knitted `big_data.Rmd` includes the time to read the VCF and the peak
+  memory of each step.
 
 ## Notes on the benchmark environment
 
