@@ -310,11 +310,18 @@ gt_write_ped_raw <- function(
   ## create info for the map file
   loci_meta <- show_loci(x)
   map_file <- paste0(substr(file, 1, nchar(file) - 4), ".map")
+  # integer positions are written as they are (write.table() never writes
+  # integers in scientific notation), rather than creating a string for each
+  # locus; other positions are formatted as plain integers
+  position <- pull_na(loci_meta, "position")
+  if (!is.integer(position)) {
+    position <- format_position(position)
+  }
   map_table <- tibble(
     chrom = pull_na(loci_meta, "chromosome"),
     id = pull_na(loci_meta, "name"),
     cM = pull_na(loci_meta, "genetic_dist"),
-    position = format_position(pull_na(loci_meta, "position"))
+    position = position
   )
   map_table[is.na(map_table)] <- 0
 
