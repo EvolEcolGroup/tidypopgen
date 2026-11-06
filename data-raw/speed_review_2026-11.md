@@ -19,6 +19,10 @@ branch, one commit per fix, each with its tests where needed.
   and the first of the [further ideas](#further-ideas-not-prototyped) were
   settled later with commits made directly on `dev`, listed in
   [Follow-up on dev](#follow-up-on-dev).
+- **Further ideas:** the other [further ideas](#further-ideas-not-prototyped)
+  were then worked through on the `speed_extra` branch (from `dev` at
+  `1e801ab0`), one commit per fix, listed in
+  [Further ideas on speed_extra](#further-ideas-on-speed_extra).
 - **Version:** unchanged in `DESCRIPTION`; no `NEWS.md` entries yet; no pull
   request has been opened.
 
@@ -46,6 +50,7 @@ whether it is maintainable, and whether the gain justifies the extra code.
 - [Changes in behaviour to check before merging](#changes-in-behaviour-to-check-before-merging)
 - [Commits by area](#commits-by-area)
 - [Follow-up on dev](#follow-up-on-dev)
+- [Further ideas on speed_extra](#further-ideas-on-speed_extra)
 - [Findings not fixed](#findings-not-fixed)
 - [Before merging](#before-merging)
 - [Notes on the benchmark environment](#notes-on-the-benchmark-environment)
@@ -323,6 +328,19 @@ failed, 0 skipped, on an -O2 build).
 - [ ] `6fb3bb6a` · `vignettes/articles/big_data.Rmd.orig` — Reading the VCF is now timed, and the performance summary also gives the peak memory used by R in each step (measured with `gc()`, which excludes the backing file and memory allocated by compiled code). The knitted article has not been regenerated yet (see [Before merging](#before-merging)). *[Docs]*
 - [ ] `9b07dde1` · `is_loci_table_ordered()` (run by `gt_order_loci()`, `loci_ld_clump()` and `gt_pca_autoSVD()`), and the check of genetic distances in `gt_update_backingfile()` — Two C++ kernels (`src/loci_order_cpp.cpp`) check the order in a single pass over the columns, keeping a few values per chromosome rather than per locus. Once positions are known to be sorted, duplicated loci are equal consecutive positions within a chromosome, so the `vctrs` hash of every pair of chromosome and position (70% of the time) is no longer needed. Chromosomes are still grouped by their integer chromosome (`"chr1"` and `"1"` are one group), casting only the levels of the factor. At 40M loci: 5.2–6.0 s → 0.31 s, and peak memory 1.4–1.8 GB → about 0 (6.4 s → 0.52 s with `ignore_genetic_dist = FALSE`); HGDP 0.09 s → 0.008 s. Return values and errors are identical to the R code on 30,000 random small tables with all four combinations of options (including missing chromosomes, positions and distances, levels that cast to the same integer, and double positions). A missing position in a chromosome still gives an `if (NA)` error ("missing value where TRUE/FALSE needed"), as before, and so does a missing genetic distance in `gt_order_loci()`; this predates the change. No `NEWS.md` entry, as nothing visible changes. *[Speed, Memory]* (further idea 1)
 
+## Further ideas on speed_extra
+
+The [further ideas](#further-ideas-not-prototyped) were worked through in
+order on the `speed_extra` branch, which starts from `dev` at `1e801ab0`.
+Each fix is one commit, with its tests; this report is updated in separate
+commits. Timings use -O2 builds; peak memory at 40M loci is the peak RSS of
+a separate process for each version, unless stated otherwise (the peak of
+`gc()` also counts garbage not yet collected, so it depends on when R
+collects). Ideas that were not worth a change are explained in the list of
+further ideas.
+
+- [ ] `d1abae55` · `validate_loci()` (run when reading any dataset: `gen_tibble()` from VCF, PLINK, packedancestry, a matrix), `loci_transitions()`, `loci_transversions()` — `check_allele_alphabet()` and `harmonise_missing_values()` used `%in%` on each allele column, which allocates several vectors as long as the loci table, and harmonising copied both columns even with nothing to change. Two C++ functions (`src/strings_in_cpp.cpp`), `all_in_cpp()` and `which_in_cpp()`, give `all(x %in% table)` and `which(x %in% table)` in one pass with no allocation per element: strings are compared by their CHARSXP (falling back to comparing characters across encodings), and the result for each distinct CHARSXP is kept in a small hash table keyed by its address. A column is only modified if it has missing alleles. At 40M loci: 4.6–6.4 s → 0.8 s, and peak RSS +1.22 GB → +0.31 GB (the copy of a column with missing alleles); with nothing to harmonise, 0.47 s and no extra memory. `validate_loci()` as run by `gen_tibble()` goes from 9.2–10.3 s to 4.3 s; the rest is the check for duplicated loci (vctrs on chromosome and position, and `anyDuplicated()` on names). Identical results on 20,000 random small tables with all options, and on non-ASCII strings in different encodings. With strings marked as "bytes", `%in%` fails, whereas these functions compare bytes. `vctrs::vec_in()` was also tried: twice as fast as `%in%`, but with the same peak memory. *[Speed, Memory]* (further idea 2)
+
 ## Findings not fixed
 
 ### Decisions for the maintainers
@@ -367,7 +385,7 @@ failed, 0 skipped, on an -O2 build).
 
 - **Data structure:**
   - *Done in `9b07dde1`.* A one-pass C++ `is_loci_table_ordered()`.
-  - The allele checks in `validate_loci()` cost about 0.24 s per 1M loci.
+  - *Done in `d1abae55`.* The allele checks in `validate_loci()` cost about 0.24 s per 1M loci.
 - **Per-locus statistics:**
   - `pop_tajimas_d()` still wraps its kernel in `big_apply()` (about
     8 bytes per locus per group in transient memory).
