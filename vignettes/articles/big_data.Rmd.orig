@@ -11,9 +11,23 @@ knitr::opts_chunk$set(
   fig.path = "./figure/big_data/"
 )
 library(benchmarkme)
-library(chunkhooks)
-hook_benchmark()
 set.seed(123)
+# time the chunks with `benchmark = TRUE`, and record the peak memory used by
+# R while they run (gc(reset = TRUE) resets the maximum reported by gc())
+benchmarks <- new.env()
+knitr::knit_hooks$set(benchmark = function(before, options) {
+  if (before) {
+    gc(reset = TRUE)
+    benchmarks$start <- proc.time()[["elapsed"]]
+  } else {
+    elapsed <- proc.time()[["elapsed"]] - benchmarks$start
+    mem <- gc()
+    # the "(Mb)" column that follows "max used", for Ncells and Vcells
+    peak_mb <- sum(mem[, which(colnames(mem) == "max used") + 1])
+    benchmarks[[options$label]] <- c(time = elapsed, memory = peak_mb)
+  }
+  invisible(NULL)
+})
 ```
 
 This vignette will demonstrate how to work with large datasets in tidypopgen.
@@ -53,7 +67,12 @@ In many descriptive population genetic analyses, where the end goal is to visual
 
 This option is only enabled when loading from a .vcf file. To do this, we need to set parameter `names_as_int` to TRUE when creating the gen_tibble:
 
-```{r read_gen_tibble, eval = FALSE}
+```{r remove_old_files, include = FALSE}
+# remove the files of a previous run, so that the vcf is read (and timed) again
+unlink(paste0("data/sgdp/all_subset", c(".bk", ".rds", ".gt")))
+```
+
+```{r read_vcf, benchmark = TRUE}
 sgdp <-
   gen_tibble("data/sgdp/all_subset.vcf.gz",
     quiet = TRUE,
@@ -62,20 +81,9 @@ sgdp <-
   )
 ```
 
-```{r gt_load, results="hide", echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
-if (file.exists("data/sgdp/all_subset.gt")) {
-  sgdp <-
-    gt_load("data/sgdp/all_subset.gt",
-      reattach_to = "data/sgdp/all_subset.rds"
-    )
-} else {
-  sgdp <-
-    gen_tibble("data/sgdp/all_subset.vcf.gz",
-      backingfile = "data/sgdp/all_subset",
-      names_as_int = TRUE
-    )
-}
+Reading the VCF is the slowest step of this article (see the [performance summary](#performance-summary) at the end), but it only needs to be done once: the `gen_tibble` is saved alongside its backing file, and can be loaded again in a later session with `gt_load()`.
 
+```{r add_metadata, results="hide", echo=FALSE, warning=FALSE, message=FALSE}
 metadata <-
   read.table("../../data-raw/sgdp/SGDP_metadata.279public.21signedLetter.44Fan.samples.csv",
     header = TRUE,
@@ -266,27 +274,35 @@ The pairwise F~ST~ values are all small (between 0.02 and 0.08), as is typical o
 
 # Performance summary
 
-Here is a summary of the time taken (in seconds) to perform each step using a large dataset:
+Here is a summary of the time taken (in seconds) by each step on our large dataset, and of the peak memory used by R during each step (in MB, including the objects that were already in memory, such as the `gen_tibble` itself):
 
 ```{r echo=FALSE}
-chunk_order <- knitr::all_labels() # Get order
-# Chunks that have benchmarks
-benchmarked_chunks <- names(chunkhooks::benchmarks)
-
-ordered_benchmark_chunks <- chunk_order[chunk_order %in% benchmarked_chunks]
-
+# the benchmarked chunks, in the order in which they were run
+steps <- knitr::all_labels()
+steps <- steps[steps %in% names(benchmarks)]
 benchmark_results <- data.frame(
-  step = ordered_benchmark_chunks,
-  time = NA_real_
+  step = steps,
+  time_s = vapply(steps, function(x) benchmarks[[x]][["time"]], numeric(1)),
+  peak_memory_mb = vapply(
+    steps, function(x) benchmarks[[x]][["memory"]], numeric(1)
+  ),
+  row.names = NULL
 )
-for (i in seq_along(benchmark_results$step)) {
-  this_step <- benchmark_results$step[i]
-  benchmark_results$time[i] <- round(chunkhooks::benchmarks[[this_step]], 2)
-}
-total <- c("Total", sum(benchmark_results$time))
-benchmark_results <- rbind(benchmark_results, total)
+# the total time, and the largest peak of memory
+benchmark_results <- rbind(
+  benchmark_results,
+  data.frame(
+    step = "Total (time) / maximum (memory)",
+    time_s = sum(benchmark_results$time_s),
+    peak_memory_mb = max(benchmark_results$peak_memory_mb)
+  )
+)
+benchmark_results$time_s <- round(benchmark_results$time_s, 2)
+benchmark_results$peak_memory_mb <- round(benchmark_results$peak_memory_mb)
 benchmark_results
 ```
+
+The memory is measured with `gc()`, and only covers memory allocated by R. It does not include the genotypes, which stay in the backing file on disk (the operating system caches the parts that are read, but this cache can be freed whenever memory is needed), nor memory allocated directly by compiled code (for example, by the VCF parser while it reads the file).
 
 # Key takeaways
 
