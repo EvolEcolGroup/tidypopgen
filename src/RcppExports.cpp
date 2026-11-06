@@ -45,6 +45,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// check_dosage_matrix_cpp
+int check_dosage_matrix_cpp(SEXP x, const NumericVector& ploidy, bool check_integer);
+RcppExport SEXP _tidypopgen_check_dosage_matrix_cpp(SEXP xSEXP, SEXP ploidySEXP, SEXP check_integerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< bool >::type check_integer(check_integerSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_dosage_matrix_cpp(x, ploidy, check_integer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// write_dosage_matrix_cpp
+void write_dosage_matrix_cpp(SEXP x, Environment BM, int na_byte);
+RcppExport SEXP _tidypopgen_write_dosage_matrix_cpp(SEXP xSEXP, SEXP BMSEXP, SEXP na_byteSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< int >::type na_byte(na_byteSEXP);
+    write_dosage_matrix_cpp(x, BM, na_byte);
+    return R_NilValue;
+END_RCPP
+}
 // fbm256_prod_and_rowSumsSq
 List fbm256_prod_and_rowSumsSq(Environment BM, const IntegerVector& ind_row, const IntegerVector& ind_col, const NumericVector& center, const NumericVector& scale, const NumericMatrix& V, const IntegerVector& ind, const IntegerVector& lsq_pcs);
 RcppExport SEXP _tidypopgen_fbm256_prod_and_rowSumsSq(SEXP BMSEXP, SEXP ind_rowSEXP, SEXP ind_colSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP VSEXP, SEXP indSEXP, SEXP lsq_pcsSEXP) {
@@ -660,6 +685,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_alt_freq_dip_pseudo_cpp, 7},
     {"_tidypopgen_alt_freq_polyploid_cpp", (DL_FUNC) &_tidypopgen_alt_freq_polyploid_cpp, 7},
+    {"_tidypopgen_check_dosage_matrix_cpp", (DL_FUNC) &_tidypopgen_check_dosage_matrix_cpp, 3},
+    {"_tidypopgen_write_dosage_matrix_cpp", (DL_FUNC) &_tidypopgen_write_dosage_matrix_cpp, 3},
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 8},
     {"_tidypopgen_grouped_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_alt_freq_dip_pseudo_cpp, 10},
     {"_tidypopgen_grouped_het_obs_polyploid", (DL_FUNC) &_tidypopgen_grouped_het_obs_polyploid, 8},

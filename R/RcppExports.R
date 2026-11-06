@@ -9,6 +9,14 @@ alt_freq_polyploid_cpp <- function(BM, rowInd, colInd, ploidy, ncores, as_counts
     .Call(`_tidypopgen_alt_freq_polyploid_cpp`, BM, rowInd, colInd, ploidy, ncores, as_counts, block_size)
 }
 
+check_dosage_matrix_cpp <- function(x, ploidy, check_integer) {
+    .Call(`_tidypopgen_check_dosage_matrix_cpp`, x, ploidy, check_integer)
+}
+
+write_dosage_matrix_cpp <- function(x, BM, na_byte) {
+    invisible(.Call(`_tidypopgen_write_dosage_matrix_cpp`, x, BM, na_byte))
+}
+
 fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs) {
     .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs)
 }

@@ -386,11 +386,17 @@ gen_tibble.matrix <- function(
   if (!(is.matrix(x) && is.numeric(x))) {
     stop("'x' is not a numeric matrix of integers")
   }
-  # check that dosages are non-negative integers, within each ploidy
-  if (any(x != round(x) | x < 0, na.rm = TRUE)) {
+  # check that dosages are non-negative integers, within each ploidy (in a
+  # single pass in C++, which does not create temporary matrices as large as
+  # x)
+  dosage_check <- check_dosage_matrix_cpp(x,
+    ploidy = as.numeric(fbm_ploidy),
+    check_integer = TRUE
+  )
+  if (dosage_check == 1) {
     stop("'x' should only contain non-negative integer dosages (or NA)")
   }
-  if (any(x > fbm_ploidy, na.rm = TRUE)) {
+  if (dosage_check == 2) {
     stop(
       "'x' contains dosages greater than the ploidy of the individual ",
       "(see 'ploidy')"

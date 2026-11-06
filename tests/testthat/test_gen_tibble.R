@@ -534,6 +534,55 @@ test_that("gen_tibble.matrix validates ploidy and dosages", {
   expect_equal(indiv_ploidy(mixed_gt), c(4, 2, 2))
 })
 
+test_that("dosage matrices are checked and written in C++ as in R", {
+  # the R checks of gen_tibble.matrix(), for reference
+  ref_check <- function(x, ploidy) {
+    if (any(x != round(x) | x < 0, na.rm = TRUE)) {
+      return(1L)
+    }
+    if (any(x > ploidy, na.rm = TRUE)) {
+      return(2L)
+    }
+    0L
+  }
+  x <- matrix(c(0, 1, 2, NA, NaN, 2), nrow = 2)
+  ploidy <- c(2, 2)
+  for (bad in list(1.5, -1, Inf, -Inf, 3, NA)) {
+    x_bad <- x
+    x_bad[2, 3] <- bad
+    for (storage in c("double", "integer")) {
+      if (storage == "integer" && !is.finite(bad) && !is.na(bad)) next
+      storage.mode(x_bad) <- storage
+      expect_identical(
+        check_dosage_matrix_cpp(x_bad, ploidy, check_integer = TRUE),
+        ref_check(x_bad, ploidy)
+      )
+    }
+  }
+  # a different ploidy for each individual (row)
+  expect_identical(
+    check_dosage_matrix_cpp(x, c(2, 1), check_integer = TRUE),
+    ref_check(x, c(2, 1))
+  )
+  # without checking that dosages are integers
+  expect_identical(
+    check_dosage_matrix_cpp(matrix(c(1.5, 3)), 2, check_integer = FALSE),
+    2L
+  )
+  # the bytes of the FBM are those of as.raw(), with missing values as
+  # na_byte
+  fbm <- bigstatsr::FBM.code256(2, 3,
+    code = c(0, 1, 2, rep(NA, 253)),
+    backingfile = tempfile()
+  )
+  write_dosage_matrix_cpp(x, fbm, na_byte = 3)
+  expect_identical(fbm[], matrix(c(0, 1, 2, NA, NA, 2), 2, 3))
+  expect_identical(
+    readBin(fbm$backingfile, "raw", n = 6),
+    as.raw(c(0, 1, 2, 3, 3, 2))
+  )
+})
+
 test_that("gen_tibble identifies wrong loci table columns", {
   wrong_loci <- data.frame(
     a = paste0("rs", 1:6),

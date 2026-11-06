@@ -176,7 +176,11 @@ gt_write_fbm_from_dfs <- function(
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
   # ensure max_ploidy is appropriate for the data
-  if (any(genotypes > max_ploidy, na.rm = TRUE)) {
+  dosage_check <- check_dosage_matrix_cpp(genotypes,
+    ploidy = as.numeric(max_ploidy),
+    check_integer = FALSE
+  )
+  if (dosage_check == 2) {
     stop(
       "max ploidy is set to ",
       max_ploidy,
@@ -193,8 +197,9 @@ gt_write_fbm_from_dfs <- function(
     init = NULL,
     create_bk = TRUE
   )
-  genotypes[is.na(genotypes)] <- max_ploidy + 1
-  big_geno[] <- as.raw(genotypes)
+  # write the dosages as bytes (missing genotypes as max_ploidy + 1) directly
+  # into the FBM, without copying the matrix
+  write_dosage_matrix_cpp(genotypes, big_geno, na_byte = max_ploidy + 1)
 
   # save it and return the path of the saved object
   rds <- bigstatsr::sub_bk(big_geno$backingfile, ".rds")
