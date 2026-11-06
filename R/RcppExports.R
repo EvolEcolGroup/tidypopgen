@@ -77,6 +77,14 @@ gt_grouped_hwe <- function(BM, rowInd, colInd, groupIds, ngroups, midp, ncores =
     .Call(`_tidypopgen_gt_grouped_hwe`, BM, rowInd, colInd, groupIds, ngroups, midp, ncores, block_size)
 }
 
+unsorted_by_chromosome_cpp <- function(x, chromosome, level_group) {
+    .Call(`_tidypopgen_unsorted_by_chromosome_cpp`, x, chromosome, level_group)
+}
+
+chromosomes_not_adjacent_cpp <- function(chromosome, n_levels) {
+    .Call(`_tidypopgen_chromosomes_not_adjacent_cpp`, chromosome, n_levels)
+}
+
 loci_qc_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, hwe, midp, ncores, block_size = 100000L) {
     .Call(`_tidypopgen_loci_qc_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, hwe, midp, ncores, block_size)
 }

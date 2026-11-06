@@ -330,6 +330,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// unsorted_by_chromosome_cpp
+LogicalVector unsorted_by_chromosome_cpp(SEXP x, const IntegerVector& chromosome, const IntegerVector& level_group);
+RcppExport SEXP _tidypopgen_unsorted_by_chromosome_cpp(SEXP xSEXP, SEXP chromosomeSEXP, SEXP level_groupSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type chromosome(chromosomeSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type level_group(level_groupSEXP);
+    rcpp_result_gen = Rcpp::wrap(unsorted_by_chromosome_cpp(x, chromosome, level_group));
+    return rcpp_result_gen;
+END_RCPP
+}
+// chromosomes_not_adjacent_cpp
+bool chromosomes_not_adjacent_cpp(const IntegerVector& chromosome, int n_levels);
+RcppExport SEXP _tidypopgen_chromosomes_not_adjacent_cpp(SEXP chromosomeSEXP, SEXP n_levelsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector& >::type chromosome(chromosomeSEXP);
+    Rcpp::traits::input_parameter< int >::type n_levels(n_levelsSEXP);
+    rcpp_result_gen = Rcpp::wrap(chromosomes_not_adjacent_cpp(chromosome, n_levels));
+    return rcpp_result_gen;
+END_RCPP
+}
 // loci_qc_cpp
 List loci_qc_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool hwe, uint32_t midp, int ncores, int block_size);
 RcppExport SEXP _tidypopgen_loci_qc_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP hweSEXP, SEXP midpSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
@@ -628,6 +653,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 8},
+    {"_tidypopgen_unsorted_by_chromosome_cpp", (DL_FUNC) &_tidypopgen_unsorted_by_chromosome_cpp, 3},
+    {"_tidypopgen_chromosomes_not_adjacent_cpp", (DL_FUNC) &_tidypopgen_chromosomes_not_adjacent_cpp, 2},
     {"_tidypopgen_loci_qc_cpp", (DL_FUNC) &_tidypopgen_loci_qc_cpp, 10},
     {"_tidypopgen_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_pairwise_pop_fst_cpp, 12},
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
