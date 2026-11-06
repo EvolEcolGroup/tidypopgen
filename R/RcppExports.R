@@ -97,6 +97,18 @@ read_packedancestry <- function(filename, BM, tab) {
     .Call(`_tidypopgen_read_packedancestry`, filename, BM, tab)
 }
 
+sfs_config_counts_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, block_ids, n_blocks, ncores, block_size) {
+    .Call(`_tidypopgen_sfs_config_counts_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, block_ids, n_blocks, ncores, block_size)
+}
+
+sfs_project_cpp <- function(configs, spectra, n_proj, weights, ncores) {
+    .Call(`_tidypopgen_sfs_project_cpp`, configs, spectra, n_proj, weights, ncores)
+}
+
+sfs_preview_cpp <- function(n, k, count, n_max) {
+    .Call(`_tidypopgen_sfs_preview_cpp`, n, k, count, n_max)
+}
+
 increment_as_counts <- function(k, k2, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_as_counts`, k, k2, BM, rowInd, colInd, ncores))
 }

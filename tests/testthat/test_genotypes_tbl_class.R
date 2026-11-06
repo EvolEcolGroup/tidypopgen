@@ -138,6 +138,139 @@ test_that("generics work on gen_tibbles returned by pick() and reframe()", {
   )
 })
 
+test_that("the jackknife generics restore the class of tibbles that lost it", {
+  lost <- as_tibble(test_gt)
+  test_grouped <- test_gt %>% group_by(population)
+  lost_grouped <- lost %>% group_by(population)
+  # gen_tbl methods (via the data.frame fallback)
+  expect_identical(
+    jackknife_pop_tajimas_d(lost, block_size = 2),
+    jackknife_pop_tajimas_d(test_gt, block_size = 2)
+  )
+  expect_identical(
+    jackknife_pop_tajimas_d(lost_grouped, type = "tidy", block_size = 2),
+    jackknife_pop_tajimas_d(test_grouped, type = "tidy", block_size = 2)
+  )
+  expect_identical(
+    jackknife_pairwise_pop_fst(lost_grouped, block_size = 2),
+    jackknife_pairwise_pop_fst(test_grouped, block_size = 2)
+  )
+  # PBS needs three populations
+  test_trio <- test_gt %>% mutate(trio = rep(c("a", "b", "c"), each = 2))
+  expect_identical(
+    jackknife_nwise_pop_pbs(
+      as_tibble(test_trio) %>% group_by(trio),
+      block_size = 2
+    ),
+    jackknife_nwise_pop_pbs(test_trio %>% group_by(trio), block_size = 2)
+  )
+  # the arguments are checked by the methods
+  expect_error(
+    jackknife_pop_tajimas_d(lost_grouped, block_size = 2, n_prj = 4),
+    "must be empty"
+  )
+  expect_error(
+    jackknife_pairwise_pop_fst(test_grouped, block_size = 2, n_prj = 4),
+    "must be empty"
+  )
+})
+
+test_that("the SFS generics restore the class of tibbles that lost it", {
+  lost <- as_tibble(test_gt)
+  test_grouped <- test_gt %>% group_by(population)
+  lost_grouped <- lost %>% group_by(population)
+  # tbl_df methods hand the genotypes column over
+  expect_identical(pop_sfs(lost, n_proj = 4), pop_sfs(test_gt, n_proj = 4))
+  expect_identical(pop_sfs_preview(lost), pop_sfs_preview(test_gt))
+  # grouped_gen_tbl methods (via the grouped_df fallback)
+  expect_identical(
+    pop_sfs(lost_grouped, n_proj = 4),
+    pop_sfs(test_grouped, n_proj = 4)
+  )
+  expect_identical(
+    pop_sfs_preview(lost_grouped),
+    pop_sfs_preview(test_grouped)
+  )
+  # gen_tbl methods (via the data.frame fallback)
+  expect_identical(
+    pairwise_pop_sfs(lost_grouped, n_proj = 4),
+    pairwise_pop_sfs(test_grouped, n_proj = 4)
+  )
+  expect_identical(
+    nwise_pop_sfs(lost_grouped, n_proj = 4, type = "array"),
+    nwise_pop_sfs(test_grouped, n_proj = 4, type = "array")
+  )
+  lost_dir <- withr::local_tempdir()
+  grouped_dir <- withr::local_tempdir()
+  write_sfs(lost_grouped, out_dir = lost_dir, n_proj = 4)
+  write_sfs(test_grouped, out_dir = grouped_dir, n_proj = 4)
+  files <- list.files(grouped_dir, recursive = TRUE)
+  expect_setequal(files, c("pop1-4.sfs", "pop2-4.sfs", "pop1-pop2.sfs"))
+  expect_identical(list.files(lost_dir, recursive = TRUE), files)
+  for (f in files) {
+    expect_identical(
+      readLines(file.path(lost_dir, f)),
+      readLines(file.path(grouped_dir, f))
+    )
+  }
+  # a data frame without genotypes (e.g. a tidy spectrum) is not taken for a
+  # gen_tibble that lost its class
+  expect_error(
+    write_sfs(pop_sfs(test_grouped, n_proj = 4), tempfile()),
+    "should be an sfs object"
+  )
+  # the arguments are checked by the methods
+  expect_error(pop_sfs(lost_grouped, n_prj = 4), "must be empty")
+  expect_error(pairwise_pop_sfs(lost_grouped, n_prj = 4), "must be empty")
+  expect_error(nwise_pop_sfs(test_grouped, n_prj = 4), "must be empty")
+  # bootstrap functions (gen_tbl methods, via the data.frame fallback)
+  expect_identical(
+    withr::with_seed(1, bootstrap_pop_sfs(lost_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    )),
+    withr::with_seed(1, bootstrap_pop_sfs(test_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    ))
+  )
+  expect_identical(
+    withr::with_seed(1, bootstrap_pop_sfs(lost,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    )),
+    withr::with_seed(1, bootstrap_pop_sfs(test_gt,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    ))
+  )
+  expect_identical(
+    withr::with_seed(1, bootstrap_pairwise_pop_sfs(lost_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    )),
+    withr::with_seed(1, bootstrap_pairwise_pop_sfs(test_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4
+    ))
+  )
+  expect_identical(
+    withr::with_seed(1, bootstrap_nwise_pop_sfs(lost_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4, type = "array"
+    )),
+    withr::with_seed(1, bootstrap_nwise_pop_sfs(test_grouped,
+      n_bootstrap = 2, block_size = 2, n_proj = 4, type = "array"
+    ))
+  )
+  expect_error(
+    bootstrap_pop_sfs(lost_grouped, block_size = 2, n_prj = 4),
+    "must be empty"
+  )
+  # pick() returns a plain tibble without the grouping variables
+  sfs_pick <- test_grouped %>%
+    summarise(sfs = list(
+      pop_sfs(pick(everything()), n_proj = 4, type = "array")
+    ))
+  expect_identical(
+    sfs_pick$sfs,
+    group_map(test_grouped, ~ pop_sfs(.x, n_proj = 4, type = "array"))
+  )
+})
+
 test_that("the fallback errors for a class without a method", {
   # a genotypes column of another package, whose tibble class has no method
   registerS3method(
@@ -154,11 +287,23 @@ test_that("the fallback errors for a class without a method", {
     loci_hwe(group_by(fake, id)),
     "loci_hwe\\(\\) has no method for objects of class 'grouped_fake_tbl'"
   )
+  expect_error(
+    pairwise_pop_sfs(fake),
+    "pairwise_pop_sfs\\(\\) has no method for objects of class 'fake_tbl'"
+  )
+  expect_error(
+    pop_sfs(group_by(fake, id)),
+    "pop_sfs\\(\\) has no method for objects of class 'grouped_fake_tbl'"
+  )
 })
 
 test_that("tbl_df methods hand any known genotypes column over", {
   expect_error(
     indiv_missingness(tibble(id = 1:3, genotypes = 1:3)),
+    "the genotypes column is not of class vctrs_bigSNP"
+  )
+  expect_error(
+    pop_sfs(tibble(id = 1:3, genotypes = 1:3)),
     "the genotypes column is not of class vctrs_bigSNP"
   )
   expect_identical(show_loci(as_tibble(test_gt)), show_loci(test_gt))

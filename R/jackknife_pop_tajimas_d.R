@@ -62,6 +62,7 @@
 #' @param size_unit Either "snp", "cM" or "bp". If "snp", the block size is in
 #'   number of SNPs. If "cM", the block size is in centiMorgans. If "bp", the
 #'   block size is in base pairs.
+#' @param ... other arguments passed to specific methods, currently unused.
 #' @returns if data is not grouped, a data frame with the following columns:
 #' - `estimate`: Tajima's D computed on all loci
 #' - `jack_estimate`: the bias corrected jackknife estimate
@@ -80,6 +81,7 @@
 #' - `estimate`, `jack_estimate`, `se`, `z`, `n_blocks`: as described above
 #' or a list of data frames, one per group, with the same columns as for
 #' ungrouped data.
+#' @rdname jackknife_pop_tajimas_d
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("grouped_gen_tbl")
@@ -91,10 +93,20 @@
 #'     size_unit = "snp"
 #'   )
 #'
-jackknife_pop_tajimas_d <- function(.x,
-                                    type = c("matrix", "tidy", "list"),
-                                    block_size,
-                                    size_unit = c("snp", "cM", "bp")) {
+jackknife_pop_tajimas_d <- function(.x, ...) {
+  UseMethod("jackknife_pop_tajimas_d", .x)
+}
+
+#' @export
+#' @rdname jackknife_pop_tajimas_d
+jackknife_pop_tajimas_d.gen_tbl <- function(
+  .x,
+  type = c("matrix", "tidy", "list"),
+  block_size,
+  size_unit = c("snp", "cM", "bp"),
+  ...
+) {
+  rlang::check_dots_empty()
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
   type <- match.arg(type)
@@ -174,5 +186,16 @@ jackknife_pop_tajimas_d <- function(.x,
     theta_loo = tajimas_d_from_term_sums(term_loo, n_var = n_var),
     # the number of loci with at least one valid allele copy in each block
     m = term_blocks[, "n_loci", drop = FALSE]
+  )
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+jackknife_pop_tajimas_d.data.frame <- function(.x, ...) {
+  jackknife_pop_tajimas_d(
+    restore_genotypes_tbl(.x, "jackknife_pop_tajimas_d"),
+    ...
   )
 }

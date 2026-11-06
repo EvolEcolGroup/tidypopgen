@@ -1,4 +1,28 @@
 # tidypopgen `dev`
+* new functions to compute site frequency spectra (SFS) for demographic
+  inference: `pop_sfs()` (1D spectrum of each population),
+  `pairwise_pop_sfs()` (joint spectrum of each pair of populations) and
+  `nwise_pop_sfs()` (joint spectrum of all populations). Missing genotypes
+  are handled as in easySFS (and dadi), by projecting each population down to
+  a fixed number of allele copies. `pop_sfs_preview()` gives the number of
+  segregating sites for each projection (as `easySFS --preview`) and the
+  projection that maximises it, which is used by default. Spectra are
+  returned as tidy tibbles (with the order of the cells of joint spectra set
+  by `fastest`), or as `sfs` arrays (`type = "array"`). `write_sfs()` writes
+  a spectrum in dadi or fastsimcoal2 format and, for a grouped gen_tibble,
+  all the spectra written by easySFS (1D, 2D and multidimensional, with the
+  same file names), optionally setting the number of
+  monomorphic sites from the total length of the sequences. Unfolded spectra
+  can be polarised with the ancestral allele of each locus (`ancestral`, a
+  column of the loci table or a vector); loci with an unknown ancestral
+  allele are then dropped, as in dadi. `autoplot()` plots the spectra of
+  `pop_sfs()` (bar plots) and `pairwise_pop_sfs()` (heatmaps, on a log scale),
+  `sfs` objects of one or two populations, and the output of
+  `pop_sfs_preview()`. `bootstrap_pop_sfs()`, `bootstrap_pairwise_pop_sfs()`
+  and `bootstrap_nwise_pop_sfs()` compute block bootstrap replicates of the
+  spectra (with the blocks of the `jackknife_*` functions), reading the
+  genotypes only once; `write_sfs(n_bootstrap = )` writes the replicates of
+  a gen_tibble.
 * Preserve classes with all dplyr operations and make many functions generics
 * grouped functions now preserve order of factor levels, work with gen_tibbles
   grouped by more than one variable, and respect empty groups

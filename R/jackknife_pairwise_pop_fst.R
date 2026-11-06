@@ -28,6 +28,7 @@
 #' @param size_unit Either "snp", "cM" or "bp". If "snp", the block size is in
 #'   number of SNPs. If "cM", the block size is in centiMorgans. If "bp", the
 #'   block size is in base pairs.
+#' @param ... other arguments passed to specific methods, currently unused.
 #' @returns either a data frame with the following columns:
 #' - `quantity`: the quantity reported in the row, one of `estimate` (Fst
 #'   computed on all loci), `jack_estimate` (the bias corrected jackknife
@@ -40,6 +41,7 @@
 #' - `stat_name`: the name of population a and b used in the pairwise Fst
 #'   calculation (e.g. "fst_pop1.pop2")
 #' - `estimate`, `jack_estimate`, `se`, `z`, `n_blocks`: as described above
+#' @rdname jackknife_pairwise_pop_fst
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
@@ -51,11 +53,21 @@
 #'     size_unit = "snp"
 #'   )
 #'
-jackknife_pairwise_pop_fst <- function(.x,
-                                       type = c("matrix", "tidy"),
-                                       method = c("Hudson", "Nei87", "WC84"),
-                                       block_size,
-                                       size_unit = c("snp", "cM", "bp")) {
+jackknife_pairwise_pop_fst <- function(.x, ...) {
+  UseMethod("jackknife_pairwise_pop_fst", .x)
+}
+
+#' @export
+#' @rdname jackknife_pairwise_pop_fst
+jackknife_pairwise_pop_fst.gen_tbl <- function(
+  .x,
+  type = c("matrix", "tidy"),
+  method = c("Hudson", "Nei87", "WC84"),
+  block_size,
+  size_unit = c("snp", "cM", "bp"),
+  ...
+) {
+  rlang::check_dots_empty()
   # Check if the input is a gen_tibble
   stopifnot_gen_tibble(.x)
   method <- match.arg(method)
@@ -77,4 +89,15 @@ jackknife_pairwise_pop_fst <- function(.x,
     m = fst_blocks$m
   )
   .jackknife_format(res, stat_names = names(fst_blocks$full), type = type)
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+jackknife_pairwise_pop_fst.data.frame <- function(.x, ...) {
+  jackknife_pairwise_pop_fst(
+    restore_genotypes_tbl(.x, "jackknife_pairwise_pop_fst"),
+    ...
+  )
 }

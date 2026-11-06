@@ -431,6 +431,59 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sfs_config_counts_cpp
+List sfs_config_counts_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, const List& spectra, const IntegerVector& min_n, const IntegerVector& polarise, const IntegerVector& block_ids, int n_blocks, int ncores, int block_size);
+RcppExport SEXP _tidypopgen_sfs_config_counts_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP spectraSEXP, SEXP min_nSEXP, SEXP polariseSEXP, SEXP block_idsSEXP, SEXP n_blocksSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< bool >::type is_pseudohaploid(is_pseudohaploidSEXP);
+    Rcpp::traits::input_parameter< const List& >::type spectra(spectraSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type min_n(min_nSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type polarise(polariseSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type block_ids(block_idsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_blocks(n_blocksSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(sfs_config_counts_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, block_ids, n_blocks, ncores, block_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sfs_project_cpp
+List sfs_project_cpp(const List& configs, const List& spectra, const IntegerVector& n_proj, const NumericMatrix& weights, int ncores);
+RcppExport SEXP _tidypopgen_sfs_project_cpp(SEXP configsSEXP, SEXP spectraSEXP, SEXP n_projSEXP, SEXP weightsSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List& >::type configs(configsSEXP);
+    Rcpp::traits::input_parameter< const List& >::type spectra(spectraSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type n_proj(n_projSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(sfs_project_cpp(configs, spectra, n_proj, weights, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sfs_preview_cpp
+List sfs_preview_cpp(const IntegerVector& n, const IntegerVector& k, const NumericVector& count, int n_max);
+RcppExport SEXP _tidypopgen_sfs_preview_cpp(SEXP nSEXP, SEXP kSEXP, SEXP countSEXP, SEXP n_maxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector& >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type count(countSEXP);
+    Rcpp::traits::input_parameter< int >::type n_max(n_maxSEXP);
+    rcpp_result_gen = Rcpp::wrap(sfs_preview_cpp(n, k, count, n_max));
+    return rcpp_result_gen;
+END_RCPP
+}
 // increment_as_counts
 void increment_as_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
 RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
@@ -580,6 +633,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
+    {"_tidypopgen_sfs_config_counts_cpp", (DL_FUNC) &_tidypopgen_sfs_config_counts_cpp, 14},
+    {"_tidypopgen_sfs_project_cpp", (DL_FUNC) &_tidypopgen_sfs_project_cpp, 5},
+    {"_tidypopgen_sfs_preview_cpp", (DL_FUNC) &_tidypopgen_sfs_preview_cpp, 4},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 6},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 6},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 6},
