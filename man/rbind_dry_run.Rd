@@ -39,7 +39,8 @@ data.frame has \code{nrow()} equal to the number of loci in the respective
 dataset, and columns \code{id} (the index of the locus in the dataset), \code{new_id}
 (the index of the locus in the merged dataset, NA if the locus is dropped,
 either because it is not found in both datasets, because its alleles do not
-match, or because it is ambiguous), \code{name} (the locus name), \code{to_flip}
+match, or because it is ambiguous), \code{name} (the locus name, also when loci
+are matched by position), \code{to_flip}
 (boolean, loci whose strand is flipped to match the reference, only in the
 \code{target} data.frame), \code{to_swap} (boolean, loci whose alleles, and thus
 genotypes, are swapped in the merge: in \code{target}, to match the order of

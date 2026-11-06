@@ -121,9 +121,9 @@ rbind.gen_tbl <- function(
   }
 
   # check for duplicates within each dataset (if we use position, loci are
-  # matched by a combination of chromosome and position, which
-  # rbind_dry_run() creates and checks for duplicates, so the names of the
-  # loci are left as they are)
+  # matched by a combination of chromosome and position, whose duplicates
+  # are checked by rbind_dry_run(), so the names of the loci are left as
+  # they are)
   if (!use_position) {
     if (anyDuplicated(loci_names(target)) > 0) {
       stop(

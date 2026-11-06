@@ -119,6 +119,11 @@
   when the gen_tibble is set to use them (`gt_set_imputed(x, TRUE)`); they
   used to always treat imputed genotypes as missing. Results are unchanged
   for data that are not imputed, or not set to use imputed genotypes
+* `rbind()` and `rbind_dry_run()` with `use_position = TRUE` match loci on
+  their chromosome and position without pasting them into a string for every
+  locus, which used about 90 MB of memory per million loci. The `name` column
+  of the `rbind_dry_run()` report now gives the names of the loci (integers
+  for integer names), rather than strings of chromosome and position
 * fix error messages and documentation of `autoplot()` for `gt_admix` and
   `gt_pca` objects referring to non-existent arguments (`repeat`, `pc`)
 * fix `autoplot()` of `gt_admix` objects with `type = "cv"` failing when the

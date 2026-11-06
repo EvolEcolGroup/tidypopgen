@@ -194,6 +194,22 @@ test_that("merge by position works correctly", {
   # positions are only used for matching, the loci keep the reference names
   expect_equal(show_loci(pos_merge), show_loci(merged_gen))
   expect_false("name_old" %in% names(show_loci(pos_merge)))
+  # the report keeps the names of each dataset, and chromosomes are matched
+  # by their labels (not by the order of the levels of the factors)
+  chr <- show_loci(pop_a_renamed_gt)$chromosome
+  show_loci(pop_a_renamed_gt)$chromosome <- factor(as.character(chr),
+    levels = rev(levels(chr))
+  )
+  report <- rbind_dry_run(pop_b_gt, pop_a_renamed_gt,
+    flip_strand = TRUE, use_position = TRUE, quiet = TRUE
+  )
+  expect_identical(report$ref$name, show_loci(pop_b_gt)$name)
+  expect_identical(report$target$name, show_loci(pop_a_renamed_gt)$name)
+  report_names <- rbind_dry_run(pop_b_gt, pop_a_gt,
+    flip_strand = TRUE, quiet = TRUE
+  )
+  expect_identical(report$ref$new_id, report_names$ref$new_id)
+  expect_identical(report$target$new_id, report_names$target$new_id)
 })
 
 test_that("original gen_tibble objects remain the same after merge", {

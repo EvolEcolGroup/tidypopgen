@@ -723,6 +723,10 @@ test_that("vcf tests storing names as integers", {
     quiet = TRUE
   )
   expect_true(inherits(combined_gt, "gen_tbl"))
+  # and the report keeps the integer names of the loci
+  report <- rbind_dry_run(pop_a_gt, pop_b_gt, use_position = TRUE, quiet = TRUE)
+  expect_identical(report$ref$name, show_loci(pop_a_gt)$name)
+  expect_identical(report$target$name, show_loci(pop_b_gt)$name)
 })
 
 test_that("ped files with a trailing blank line can be read", {
