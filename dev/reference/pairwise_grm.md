@@ -13,7 +13,7 @@ pairwise_grm(
   x,
   allele_sharing_mat = NULL,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 ```
 
@@ -39,7 +39,8 @@ pairwise_grm(
 - n_cores:
 
   number of cores to be used for the computation of the allele sharing
-  matrix (default 1).
+  matrix, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 

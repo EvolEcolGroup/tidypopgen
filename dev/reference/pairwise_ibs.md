@@ -10,7 +10,7 @@ pairwise_ibs(
   as_matrix = FALSE,
   type = c("proportion", "adjusted_counts", "raw_counts"),
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 ```
 
@@ -39,7 +39,8 @@ pairwise_ibs(
 
 - n_cores:
 
-  number of cores to be used (default 1).
+  number of cores to be used, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 

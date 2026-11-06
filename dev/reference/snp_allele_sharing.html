@@ -68,7 +68,7 @@ heterozygous. Matching is the average of these 0, 1/2 and 1s)</p>
 <span>  ind.row <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/seq-dim.html" class="external-link">rows_along</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,</span>
 <span>  ind.col <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/seq-dim.html" class="external-link">cols_along</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,</span>
 <span>  block.size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  n_cores <span class="op">=</span> <span class="fl">1</span></span>
+<span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,7 +99,8 @@ memory use.</p></dd>
 
 
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
-<dd><p>number of cores to be used (default 1).</p></dd>
+<dd><p>number of cores to be used, it defaults to
+<code><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">bigstatsr::nb_cores()</a></code></p></dd>
 
 </dl></div>
     <div class="section level2">

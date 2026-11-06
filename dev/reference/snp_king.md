@@ -11,7 +11,7 @@ snp_king(
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
   block.size = bigstatsr::block_size(nrow(X)) * 4,
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 ```
 
@@ -43,7 +43,8 @@ snp_king(
 
 - n_cores:
 
-  number of cores to be used (default 1).
+  number of cores to be used, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 

@@ -64,7 +64,7 @@ the approach of Weir and Goudet 2017 based on beta estimators).</p>
 <span>  <span class="va">x</span>,</span>
 <span>  allele_sharing_mat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  n_cores <span class="op">=</span> <span class="fl">1</span></span>
+<span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -90,7 +90,7 @@ allele sharing matrix.</p></dd>
 
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
 <dd><p>number of cores to be used for the computation of the
-allele sharing matrix (default 1).</p></dd>
+allele sharing matrix, it defaults to <code><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">bigstatsr::nb_cores()</a></code></p></dd>
 
 </dl></div>
     <div class="section level2">

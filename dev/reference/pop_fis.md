@@ -62,10 +62,11 @@ pop_fis(
 
 - n_cores:
 
-  number of cores to be used for "Nei87" (it defaults to
-  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html));
-  "WG17" uses the allele sharing matrix, see
-  [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.md).
+  number of cores to be used, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
+  (for "WG17", to compute the allele sharing matrix if it is not given,
+  see
+  [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_allele_sharing.md))
 
 ## Value
 

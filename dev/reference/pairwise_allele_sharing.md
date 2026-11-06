@@ -15,7 +15,7 @@ pairwise_allele_sharing(
   x,
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 ```
 
@@ -37,7 +37,8 @@ pairwise_allele_sharing(
 
 - n_cores:
 
-  number of cores to be used (default 1).
+  number of cores to be used, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 
