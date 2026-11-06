@@ -58,6 +58,12 @@ on one core against about 175 s). The covariance between individuals is
 kept in memory, which takes 8 bytes per pair of individuals (about 0.2 GB
 for 5,000 individuals, and 3.2 GB for 20,000); with many more
 individuals, \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} uses much less memory.
+
+The genotypes are read in blocks of loci, decoded as doubles, of about
+1 GB (set by \code{options(bigstatsr.block.sizeGB)}). A smaller size reduces the
+memory used, at the cost of some speed: on the same data, blocks of
+0.25 GB (\code{options(bigstatsr.block.sizeGB = 0.25)}) reduced the peak memory
+from about 2.0 to 0.6 GB, and took about 25\% longer.
 }
 \note{
 Rather than accessing these elements directly, it is better to use

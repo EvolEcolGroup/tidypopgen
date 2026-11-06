@@ -13,6 +13,12 @@
 #' for 5,000 individuals, and 3.2 GB for 20,000); with many more
 #' individuals, [gt_pca_randomSVD()] uses much less memory.
 #'
+#' The genotypes are read in blocks of loci, decoded as doubles, of about
+#' 1 GB (set by `options(bigstatsr.block.sizeGB)`). A smaller size reduces the
+#' memory used, at the cost of some speed: on the same data, blocks of
+#' 0.25 GB (`options(bigstatsr.block.sizeGB = 0.25)`) reduced the peak memory
+#' from about 2.0 to 0.6 GB, and took about 25% longer.
+#'
 #' @param x a `gen_tbl` object
 #' @param k Number of singular vectors/values to compute. Default is `10`.
 #'   **This algorithm should be used to compute a few singular vectors/values.**
