@@ -40,6 +40,12 @@ a square symmetrical matrix of relationship coefficients between
 individuals if `as_matrix` is TRUE, or a tidied tibble of coefficients
 if `as_matrix` is FALSE.
 
+## Details
+
+Imputed genotypes are used if `x` is set to use them (see
+[`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.md)),
+and treated as missing otherwise.
+
 ## References
 
 Manichaikul, A. et al. (2010) Robust relationship inference in

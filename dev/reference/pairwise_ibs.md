@@ -55,6 +55,10 @@ alleles (i.e. 2*n_loci - 2*missing_loci)
 Note that monomorphic sites are currently considered. Remove monomorphic
 sites before running pairwise_king if this is a concern.
 
+Imputed genotypes are used if `x` is set to use them (see
+[`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.md)),
+and treated as missing otherwise.
+
 ## Examples
 
 ``` r

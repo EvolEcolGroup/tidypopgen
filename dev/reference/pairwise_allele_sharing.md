@@ -43,6 +43,12 @@ pairwise_allele_sharing(
 
 a matrix of allele sharing between all pairs of individuals
 
+## Details
+
+Imputed genotypes are used if `x` is set to use them (see
+[`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.md)),
+and treated as missing otherwise.
+
 ## See also
 
 [`hierfstat::matching()`](https://rdrr.io/pkg/hierfstat/man/matching.html)

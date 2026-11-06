@@ -27,7 +27,8 @@ snp_allele_sharing(
   [bigstatsr::FBM.code256](https://privefl.github.io/bigstatsr/reference/FBM.code256-class.html)
   matrix (as found in the `genotypes` slot of a
   [bigsnpr::bigSNP](https://privefl.github.io/bigsnpr/reference/bigSNP-class.html)
-  object).
+  object). Genotypes are decoded with its `code256`, and values other
+  than 0, 1 and 2 are treated as missing.
 
 - ind.row:
 
