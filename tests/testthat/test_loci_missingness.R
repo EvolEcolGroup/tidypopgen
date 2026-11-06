@@ -169,7 +169,8 @@ test_that("loci_missingness on grouped tibble", {
 
 test_that("n_cores can be set", {
   one_core <- loci_missingness(test_gt, n_cores = 1)
-  two_cores <- loci_missingness(test_gt, n_cores = 12)
+  # (never more than 2 cores in tests, as required by CRAN)
+  two_cores <- loci_missingness(test_gt, n_cores = 2)
   expect_equal(one_core, two_cores)
 })
 

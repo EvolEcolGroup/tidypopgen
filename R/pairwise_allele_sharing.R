@@ -16,7 +16,8 @@
 #' @param block_size maximum number of loci read at once. Genotypes are
 #'   compared in a compact bit-packed form, so this has little effect on
 #'   memory use.
-#' @param n_cores number of cores to be used (default 1).
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
 #' @seealso [hierfstat::matching()]
@@ -32,7 +33,7 @@ pairwise_allele_sharing <- function(
   x,
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 ) {
   stopifnot_diploid(x)
   # nolint

@@ -10,7 +10,7 @@ snp_ibs(
   ind.col = bigstatsr::cols_along(X),
   type = c("proportion", "adjusted_counts", "raw_counts"),
   block.size = bigstatsr::block_size(nrow(X)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
@@ -33,7 +33,8 @@ quantities are computed)}
 compared in a compact bit-packed form, so this has little effect on
 memory use.}
 
-\item{n_cores}{number of cores to be used (default 1).}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 if as.counts = TRUE function returns a list of two \link[bigstatsr:FBM]{bigstatsr::FBM}

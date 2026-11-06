@@ -17,7 +17,8 @@
 #' @param block.size maximum number of columns read at once. Genotypes are
 #'   compared in a compact bit-packed form, so this has little effect on
 #'   memory use.
-#' @param n_cores number of cores to be used (default 1).
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
 #' @returns a square symmetrical matrix of relationship coefficients between
 #'  individuals
 #' @export
@@ -38,7 +39,7 @@ snp_king <- function(
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
   block.size = bigstatsr::block_size(nrow(X)) * 4,
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 ) {
   # nolint end
   if (!inherits(X, "FBM.code256")) {

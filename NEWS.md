@@ -124,6 +124,13 @@
   locus, which used about 90 MB of memory per million loci. The `name` column
   of the `rbind_dry_run()` report now gives the names of the loci (integers
   for integer names), rather than strings of chromosome and position
+* the default `n_cores` of `pairwise_ibs()`, `pairwise_king()`,
+  `pairwise_allele_sharing()`, `pairwise_grm()` and of `snp_ibs()`,
+  `snp_king()` and `snp_allele_sharing()` is now `bigstatsr::nb_cores()`, as
+  for most other functions, rather than 1 (so `pop_fst()`,
+  `indiv_inbreeding()` and the relatedness filter of `qc_report_indiv()` use
+  several cores by default); `pop_fis(method = "WG17")` now passes `n_cores`
+  to `pairwise_allele_sharing()`
 * fix error messages and documentation of `autoplot()` for `gt_admix` and
   `gt_pca` objects referring to non-existent arguments (`repeat`, `pc`)
 * fix `autoplot()` of `gt_admix` objects with `type = "cv"` failing when the

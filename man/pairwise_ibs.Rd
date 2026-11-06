@@ -9,7 +9,7 @@ pairwise_ibs(
   as_matrix = FALSE,
   type = c("proportion", "adjusted_counts", "raw_counts"),
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
@@ -27,7 +27,8 @@ quantities are computed)}
 compared in a compact bit-packed form, so this has little effect on
 memory use.}
 
-\item{n_cores}{number of cores to be used (default 1).}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 a \link[bigstatsr:FBM]{bigstatsr::FBM} of proportion or adjusted counts, or a list of

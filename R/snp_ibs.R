@@ -18,7 +18,8 @@
 #' @param block.size maximum number of columns read at once. Genotypes are
 #'   compared in a compact bit-packed form, so this has little effect on
 #'   memory use.
-#' @param n_cores number of cores to be used (default 1).
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
 #' @returns if as.counts = TRUE function returns a list of two [bigstatsr::FBM]
 #'   matrices, one of counts of IBS by alleles (i.e. 2*n loci), and one of valid
 #'   alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns
@@ -47,7 +48,7 @@ snp_ibs <- function(
   ind.col = bigstatsr::cols_along(X),
   type = c("proportion", "adjusted_counts", "raw_counts"),
   block.size = bigstatsr::block_size(nrow(X)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 ) {
   # nolint end
   type <- match.arg(type)

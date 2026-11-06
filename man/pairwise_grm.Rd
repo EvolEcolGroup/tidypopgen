@@ -8,7 +8,7 @@ pairwise_grm(
   x,
   allele_sharing_mat = NULL,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
@@ -23,7 +23,7 @@ more efficient to pre-compute this matrix.}
 allele sharing matrix.}
 
 \item{n_cores}{number of cores to be used for the computation of the
-allele sharing matrix (default 1).}
+allele sharing matrix, it defaults to \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 a matrix of GR between all pairs of individuals
