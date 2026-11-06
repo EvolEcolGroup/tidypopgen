@@ -27,7 +27,7 @@ the same formulation as in hierfstat::pairwise.WCfst()).
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -155,6 +155,26 @@ returned.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>For all formulae, the genome wide estimate is obtained by taking the ratio of
 the mean numerators and denominators over all relevant SNPs.</p>
+<p>Loci with no genotypes in one of the two populations of a pair
+(e.g. loci that failed in all the individuals of a population) carry no
+information on the differentiation between them, so they are dropped for
+that pair with all methods: their Fst by locus is <code>NaN</code>, and they do not
+contribute to the mean numerator and denominator of the genome wide
+estimate.</p>
+<p><strong>Difference from <code>hierfstat</code> for 'WC84'</strong>: <code><a href="https://rdrr.io/pkg/hierfstat/man/pairwise.WCfst.html" class="external-link">hierfstat::pairwise.WCfst()</a></code>
+(and <code><a href="https://rdrr.io/pkg/hierfstat/man/wc.html" class="external-link">hierfstat::wc()</a></code>) keep these loci. Their among-population variance
+component (\(\sigma^2_a\), the numerator) is set to 0, while their
+within-population components (\(\sigma^2_b\) and \(\sigma^2_w\),
+estimated from the one population with data) still add to the
+denominator. So <code>hierfstat</code> gives these loci an Fst of 0 rather than
+<code>NaN</code>, and its genome wide estimate is pulled towards 0 (i.e. it is
+usually lower than the one computed here).
+The two estimates are identical when every locus has data in both
+populations, or if such loci are removed before using <code>hierfstat</code>. This
+applies to every function that computes Fst with 'WC84' (e.g.
+<code><a href="windows_pairwise_pop_fst.html">windows_pairwise_pop_fst()</a></code>, <code><a href="jackknife_pairwise_pop_fst.html">jackknife_pairwise_pop_fst()</a></code> and
+<code><a href="nwise_pop_pbs.html">nwise_pop_pbs()</a></code>). 'Nei87' gives the same results as
+<code><a href="https://rdrr.io/pkg/hierfstat/man/pairwise.neifst.html" class="external-link">hierfstat::pairwise.neifst()</a></code>, which also drops these loci.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

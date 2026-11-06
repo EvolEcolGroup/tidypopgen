@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -207,8 +207,12 @@ pruning.</p>
 <h2 id="quality-control-for-relatedness-king">Quality control for relatedness (KING)<a class="anchor" aria-label="anchor" href="#quality-control-for-relatedness-king"></a>
 </h2>
 <table class="table">
+<colgroup>
+<col width="40%">
+<col width="59%">
+</colgroup>
 <thead><tr class="header">
-<th>KING</th>
+<th>KING / PLINK</th>
 <th><code>tidypopgen</code></th>
 </tr></thead>
 <tbody>
@@ -217,10 +221,14 @@ pruning.</p>
 <td><code><a href="../reference/pairwise_king.html">pairwise_king()</a></code></td>
 </tr>
 <tr class="even">
-<td>–distance</td>
+<td>–distance ibs flat-missing</td>
 <td><code><a href="../reference/pairwise_ibs.html">pairwise_ibs()</a></code></td>
 </tr>
 <tr class="odd">
+<td>–distance flat-missing</td>
+<td><code>pairwise_ibs(type = "adjusted_counts")</code></td>
+</tr>
+<tr class="even">
 <td>–unrelated</td>
 <td><code><a href="../reference/filter_high_relatedness.html">filter_high_relatedness()</a></code></td>
 </tr>

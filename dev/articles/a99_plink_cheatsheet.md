@@ -96,10 +96,11 @@ To explore why clumping is preferable to pruning, see
 
 ## Quality control for relatedness (KING)
 
-| KING | `tidypopgen` |
+| KING / PLINK | `tidypopgen` |
 |----|----|
 | –kinship | [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md) |
-| –distance | [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md) |
+| –distance ibs flat-missing | [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md) |
+| –distance flat-missing | `pairwise_ibs(type = "adjusted_counts")` |
 | –unrelated | [`filter_high_relatedness()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/filter_high_relatedness.md) |
 
 [`pairwise_king()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.md)

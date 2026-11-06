@@ -9,7 +9,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -180,7 +180,10 @@ processed at a time (currently used if <code>x</code> is a vcf with parser "vcfR
 converted to integers. Only used when <code>x</code> is a <em>VCF</em> file with parser
 "cpp". Default is FALSE. This can be useful when working with very large
 datasets where storing the names as string can use a large amount of
-memory.</p></dd>
+memory. Integer names are the index of each locus in the <em>VCF</em>, so they
+can not be used to match loci across datasets: <a href="rbind.gen_tbl.html">rbind()</a> and
+<code><a href="rbind_dry_run.html">rbind_dry_run()</a></code> always match loci with integer names by chromosome and
+position.</p></dd>
 
 
 <dt id="arg-indiv-meta">indiv_meta<a class="anchor" aria-label="anchor" href="#arg-indiv-meta"></a></dt>

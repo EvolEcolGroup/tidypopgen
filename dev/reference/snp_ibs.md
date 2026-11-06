@@ -38,10 +38,25 @@ snp_ibs(
 
 - type:
 
-  one of "proportion" (equivalent to "ibs" in PLINK), "adjusted_counts"
-  ("distance" in PLINK), and "raw_counts" (the counts of identical
-  alleles and non-missing alleles, from which the two other quantities
-  are computed)
+  one of:
+
+  - "proportion" (the default): the proportion of alleles that are
+    identical by state, a similarity (as `--distance ibs flat-missing`
+    in PLINK, which writes it to a .mibs file).
+
+  - "adjusted_counts": the allele count distance, a dissimilarity (as
+    `--distance flat-missing` in PLINK, which writes it to a .dist
+    file): the number of alleles that differ between two individuals,
+    scaled up by the number of loci over the number of loci genotyped in
+    both individuals, to correct for missing genotypes. It equals
+    `2 * n_loci * (1 - proportion)`, where `n_loci` is the number of
+    loci used, so it is 0 for identical individuals and at most
+    `2 * n_loci`. Note that, without `flat-missing`, PLINK corrects for
+    missing genotypes differently, which gives slightly different values
+    when genotypes are missing.
+
+  - "raw_counts": the counts of identical alleles and of non-missing
+    alleles, from which the two other quantities are computed.
 
 - block.size:
 
@@ -55,16 +70,17 @@ snp_ibs(
 
 ## Value
 
-if as.counts = TRUE function returns a list of two
+for "proportion" and "adjusted_counts", a matrix with one row and one
+column per individual; for "raw_counts", a list of two
 [bigstatsr::FBM](https://privefl.github.io/bigstatsr/reference/FBM-class.html)
-matrices, one of counts of IBS by alleles (i.e. 2\*n loci), and one of
-valid alleles (i.e. 2 \* n_loci - 2 \* missing_loci). If as.counts =
-FALSE returns a single matrix of IBS proportions.
+matrices, `ibs` (the counts of alleles identical by state) and `valid_n`
+(the counts of non-missing alleles, i.e. twice the number of loci
+genotyped in both individuals).
 
 ## Details
 
-Note that monomorphic sites are currently counted. Should we filter them
-beforehand? What does plink do?
+Note that monomorphic sites are counted (as in PLINK). Remove
+monomorphic sites beforehand if this is a concern.
 
 ## Examples
 
@@ -114,13 +130,13 @@ snp_ibs(X, type = "proportion")
 #> [7,] 0.7000000 0.50 0.625 0.5000000 0.5000000 0.75 1.000
 snp_ibs(X, type = "adjusted_counts")
 #>      [,1] [,2] [,3] [,4] [,5] [,6] [,7]
-#> [1,]  6.0  4.8 4.20  5.0  4.5  3.6 4.20
-#> [2,]  4.8  6.0 4.50  4.8  3.0  3.0 3.00
-#> [3,]  4.2  4.5 6.00  3.6  4.2  4.5 3.75
-#> [4,]  5.0  4.8 3.60  6.0  3.5  4.2 3.00
-#> [5,]  4.5  3.0 4.20  3.5  6.0  3.6 3.00
-#> [6,]  3.6  3.0 4.50  4.2  3.6  6.0 4.50
-#> [7,]  4.2  3.0 3.75  3.0  3.0  4.5 6.00
+#> [1,]  0.0  2.4  3.6  2.0  3.0  4.8  3.6
+#> [2,]  2.4  0.0  3.0  2.4  6.0  6.0  6.0
+#> [3,]  3.6  3.0  0.0  4.8  3.6  3.0  4.5
+#> [4,]  2.0  2.4  4.8  0.0  5.0  3.6  6.0
+#> [5,]  3.0  6.0  3.6  5.0  0.0  4.8  6.0
+#> [6,]  4.8  6.0  3.0  3.6  4.8  0.0  3.0
+#> [7,]  3.6  6.0  4.5  6.0  6.0  3.0  0.0
 snp_ibs(X, type = "raw_counts")
 #> $ibs
 #> A Filebacked Big Matrix of type 'double' with 7 rows and 7 columns.

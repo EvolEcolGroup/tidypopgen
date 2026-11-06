@@ -136,7 +136,13 @@ gen_tibble(
   logical. If TRUE, locus names will be converted to integers. Only used
   when `x` is a *VCF* file with parser "cpp". Default is FALSE. This can
   be useful when working with very large datasets where storing the
-  names as string can use a large amount of memory.
+  names as string can use a large amount of memory. Integer names are
+  the index of each locus in the *VCF*, so they can not be used to match
+  loci across datasets:
+  [rbind()](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind.gen_tbl.md)
+  and
+  [`rbind_dry_run()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind_dry_run.md)
+  always match loci with integer names by chromosome and position.
 
 - indiv_meta:
 

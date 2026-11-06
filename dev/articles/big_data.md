@@ -446,7 +446,9 @@ using a large dataset:
   working on is held in memory.
 - **Use `names_as_int = TRUE` when reading a VCF** to reduce the memory
   taken by locus names. The trade-off is that the original locus IDs are
-  not kept (chromosome and position are).
+  not kept (chromosome and position are), so
+  [`rbind()`](https://rdrr.io/r/base/cbind.html) matches loci by
+  chromosome and position.
 - **Set your cores.** Limit BLAS and `data.table` threads at the start,
   and pass `n_cores` to the functions that support it (e.g. LD clumping
   and F_(ST)).

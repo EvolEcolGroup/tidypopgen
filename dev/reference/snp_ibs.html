@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,10 +82,20 @@ specified, all columns are used. Don't use negative indices.</p></dd>
 
 
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
-<dd><p>one of "proportion" (equivalent to "ibs" in PLINK),
-"adjusted_counts" ("distance" in PLINK), and "raw_counts" (the counts of
-identical alleles and non-missing alleles, from which the two other
-quantities are computed)</p></dd>
+<dd><p>one of:</p><ul><li><p>"proportion" (the default): the proportion of alleles that are identical
+by state, a similarity (as <code>--distance ibs flat-missing</code> in PLINK, which
+writes it to a .mibs file).</p></li>
+<li><p>"adjusted_counts": the allele count distance, a dissimilarity (as
+<code>--distance flat-missing</code> in PLINK, which writes it to a .dist file): the
+number of alleles that differ between two individuals, scaled up by the
+number of loci over the number of loci genotyped in both individuals, to
+correct for missing genotypes. It equals <code>2 * n_loci * (1 - proportion)</code>, where <code>n_loci</code> is the number of loci used, so it is 0 for
+identical individuals and at most <code>2 * n_loci</code>. Note that, without
+<code>flat-missing</code>, PLINK corrects for missing genotypes differently, which
+gives slightly different values when genotypes are missing.</p></li>
+<li><p>"raw_counts": the counts of identical alleles and of non-missing
+alleles, from which the two other quantities are computed.</p></li>
+</ul></dd>
 
 
 <dt id="arg-block-size">block.size<a class="anchor" aria-label="anchor" href="#arg-block-size"></a></dt>
@@ -101,15 +111,16 @@ memory use.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>if as.counts = TRUE function returns a list of two <a href="https://privefl.github.io/bigstatsr/reference/FBM-class.html" class="external-link">bigstatsr::FBM</a>
-matrices, one of counts of IBS by alleles (i.e. 2*n loci), and one of valid
-alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns
-a single matrix of IBS proportions.</p>
+    <p>for "proportion" and "adjusted_counts", a matrix with one row and
+one column per individual; for "raw_counts", a list of two
+<a href="https://privefl.github.io/bigstatsr/reference/FBM-class.html" class="external-link">bigstatsr::FBM</a> matrices, <code>ibs</code> (the counts of alleles identical by
+state) and <code>valid_n</code> (the counts of non-missing alleles, i.e. twice the
+number of loci genotyped in both individuals).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Note that monomorphic sites are currently counted. Should we filter them
-beforehand? What does plink do?</p>
+    <p>Note that monomorphic sites are counted (as in PLINK). Remove monomorphic
+sites beforehand if this is a concern.</p>
     </div>
 
     <div class="section level2">
@@ -159,13 +170,13 @@ beforehand? What does plink do?</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [7,] 0.7000000 0.50 0.625 0.5000000 0.5000000 0.75 1.000</span>
 <span class="r-in"><span><span class="fu">snp_ibs</span><span class="op">(</span><span class="va">X</span>, type <span class="op">=</span> <span class="st">"adjusted_counts"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      [,1] [,2] [,3] [,4] [,5] [,6] [,7]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  6.0  4.8 4.20  5.0  4.5  3.6 4.20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  4.8  6.0 4.50  4.8  3.0  3.0 3.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  4.2  4.5 6.00  3.6  4.2  4.5 3.75</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  5.0  4.8 3.60  6.0  3.5  4.2 3.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  4.5  3.0 4.20  3.5  6.0  3.6 3.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]  3.6  3.0 4.50  4.2  3.6  6.0 4.50</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [7,]  4.2  3.0 3.75  3.0  3.0  4.5 6.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]  0.0  2.4  3.6  2.0  3.0  4.8  3.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]  2.4  0.0  3.0  2.4  6.0  6.0  6.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]  3.6  3.0  0.0  4.8  3.6  3.0  4.5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]  2.0  2.4  4.8  0.0  5.0  3.6  6.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,]  3.0  6.0  3.6  5.0  0.0  4.8  6.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,]  4.8  6.0  3.0  3.6  4.8  0.0  3.0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,]  3.6  6.0  4.5  6.0  6.0  3.0  0.0</span>
 <span class="r-in"><span><span class="fu">snp_ibs</span><span class="op">(</span><span class="va">X</span>, type <span class="op">=</span> <span class="st">"raw_counts"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $ibs</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> A Filebacked Big Matrix of type 'double' with 7 rows and 7 columns.</span>

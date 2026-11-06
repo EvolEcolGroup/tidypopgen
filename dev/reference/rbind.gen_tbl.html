@@ -23,7 +23,7 @@ correct strand can not be guessed."><meta property="og:image" content="https://e
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -113,7 +113,11 @@ becomes <code>allele_ref</code>. It defaults to FALSE</p></dd>
 <dt id="arg-use-position">use_position<a class="anchor" aria-label="anchor" href="#arg-use-position"></a></dt>
 <dd><p>boolean of whether a combination of chromosome and
 position should be used for matching SNPs. By default, <code>rbind</code> uses the
-locus name, so this is set to FALSE. In either case, the merged loci keep
+locus name, so this is set to FALSE. If the loci names of either
+<code>gen_tibble</code> are integers (as created by <code>gen_tibble(names_as_int = TRUE)</code>, which numbers the loci in the order in which they are found in the
+<em>VCF</em>), the names do not identify the same locus in the two datasets, so
+loci are always matched by position: <code>use_position</code> is then set to TRUE
+automatically (even if it was set to FALSE), with a message unless <code>quiet = TRUE</code>. In either case, the merged loci keep
 the names of the reference dataset. When using 'use_position=TRUE', make
 sure chromosomes are coded in the same way in both <code>gen_tibbles</code> (a mix of
 e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
@@ -136,7 +140,10 @@ backing file for the FBM)</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>rbind differs from merging data with plink, which swaps the order of allele1
+    <p>Loci are matched by name, unless <code>use_position = TRUE</code>. If the loci names of
+either <code>gen_tibble</code> are integers (as created by <code>gen_tibble(names_as_int = TRUE)</code>), loci are always matched by chromosome and position (see
+<code>use_position</code>).</p>
+<p>rbind differs from merging data with plink, which swaps the order of allele1
 and allele2 according to minor allele frequency when merging datasets. rbind
 flips and/or swaps alleles according to the reference dataset, not according
 to allele frequency.</p>
@@ -187,12 +194,12 @@ to allele frequency.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ( 0 were flipped to match the reference set)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ( 4 are ambiguous, of which 4 were removed)</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/Rtmp9l912Q/gt_merged_1fee3013c023.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/Rtmp9l912Q/gt_merged_1fee3013c023.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/Rtmp9l912Q/gt_merged_1fee3013c023.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpOwAwHE/gt_merged_231f45e2c5cd.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpOwAwHE/gt_merged_231f45e2c5cd.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpOwAwHE/gt_merged_231f45e2c5cd.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/Rtmp9l912Q/gt_merged_1fee3013c023.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpOwAwHE/gt_merged_231f45e2c5cd.gt')</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">merged_gt</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 2 loci</span></span>

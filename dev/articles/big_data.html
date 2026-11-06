@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -447,8 +447,8 @@ on disk and only what you are working on is held in memory.</li>
 <li>
 <strong>Use <code>names_as_int = TRUE</code> when reading a
 VCF</strong> to reduce the memory taken by locus names. The trade-off is
-that the original locus IDs are not kept (chromosome and position
-are).</li>
+that the original locus IDs are not kept (chromosome and position are),
+so <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> matches loci by chromosome and position.</li>
 <li>
 <strong>Set your cores.</strong> Limit BLAS and
 <code>data.table</code> threads at the start, and pass

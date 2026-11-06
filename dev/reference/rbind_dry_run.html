@@ -15,7 +15,7 @@ have different alleles in the two datasets will also be dropped."><meta property
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9010</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9011</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,7 +90,12 @@ file</p></dd>
 <dt id="arg-use-position">use_position<a class="anchor" aria-label="anchor" href="#arg-use-position"></a></dt>
 <dd><p>boolean of whether a combination of chromosome and
 position should be used for matching SNPs. By default, <code>rbind</code> uses the
-locus name, so this is set to FALSE. When using 'use_position=TRUE', make
+locus name, so this is set to FALSE. If the loci names of either dataset
+are integers (as created by <code>gen_tibble(names_as_int = TRUE)</code>, which
+numbers the loci in the order in which they are found in the <em>VCF</em>), the
+names do not identify the same locus in the two datasets, so loci are
+always matched by position: <code>use_position</code> is then set to TRUE
+automatically (even if it was set to FALSE), with a message unless <code>quiet = TRUE</code>. When using 'use_position=TRUE', make
 sure chromosomes are coded in the same way in both <code>gen_tibbles</code> (a mix of
 e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
 large number variants are dropped when merging).</p></dd>
@@ -125,6 +130,12 @@ both datasets, which are swapped so that the observed allele becomes
 inferred from the other dataset, and the column it fills, <code>allele_alt</code> or
 <code>allele_ref</code>; both are NA if nothing was inferred), and <code>ambiguous</code>
 (boolean, strand-ambiguous loci, i.e. A/T and C/G).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Loci are matched by name, unless <code>use_position = TRUE</code>. If the loci names of
+either dataset are integers (as created by <code>gen_tibble(names_as_int = TRUE)</code>), loci are always matched by chromosome and position (see
+<code>use_position</code>).</p>
     </div>
 
     <div class="section level2">

@@ -96,6 +96,34 @@ returned.
 For all formulae, the genome wide estimate is obtained by taking the
 ratio of the mean numerators and denominators over all relevant SNPs.
 
+Loci with no genotypes in one of the two populations of a pair (e.g.
+loci that failed in all the individuals of a population) carry no
+information on the differentiation between them, so they are dropped for
+that pair with all methods: their Fst by locus is `NaN`, and they do not
+contribute to the mean numerator and denominator of the genome wide
+estimate.
+
+**Difference from `hierfstat` for 'WC84'**:
+[`hierfstat::pairwise.WCfst()`](https://rdrr.io/pkg/hierfstat/man/pairwise.WCfst.html)
+(and [`hierfstat::wc()`](https://rdrr.io/pkg/hierfstat/man/wc.html))
+keep these loci. Their among-population variance component
+(\\\sigma^2_a\\, the numerator) is set to 0, while their
+within-population components (\\\sigma^2_b\\ and \\\sigma^2_w\\,
+estimated from the one population with data) still add to the
+denominator. So `hierfstat` gives these loci an Fst of 0 rather than
+`NaN`, and its genome wide estimate is pulled towards 0 (i.e. it is
+usually lower than the one computed here). The two estimates are
+identical when every locus has data in both populations, or if such loci
+are removed before using `hierfstat`. This applies to every function
+that computes Fst with 'WC84' (e.g.
+[`windows_pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_pairwise_pop_fst.md),
+[`jackknife_pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_pairwise_pop_fst.md)
+and
+[`nwise_pop_pbs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/nwise_pop_pbs.md)).
+'Nei87' gives the same results as
+[`hierfstat::pairwise.neifst()`](https://rdrr.io/pkg/hierfstat/man/pairwise.neifst.html),
+which also drops these loci.
+
 ## References
 
 Bhatia G, Patterson N, Sankararaman S, Price AL. (2013) Estimating and

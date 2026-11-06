@@ -39,10 +39,16 @@ rbind_dry_run(
 
   boolean of whether a combination of chromosome and position should be
   used for matching SNPs. By default, `rbind` uses the locus name, so
-  this is set to FALSE. When using 'use_position=TRUE', make sure
-  chromosomes are coded in the same way in both `gen_tibbles` (a mix of
-  e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an
-  unexpectedly large number variants are dropped when merging).
+  this is set to FALSE. If the loci names of either dataset are integers
+  (as created by `gen_tibble(names_as_int = TRUE)`, which numbers the
+  loci in the order in which they are found in the *VCF*), the names do
+  not identify the same locus in the two datasets, so loci are always
+  matched by position: `use_position` is then set to TRUE automatically
+  (even if it was set to FALSE), with a message unless `quiet = TRUE`.
+  When using 'use_position=TRUE', make sure chromosomes are coded in the
+  same way in both `gen_tibbles` (a mix of e.g. 'chr1', '1' or
+  'chromosome1' can be the reasons if an unexpectedly large number
+  variants are dropped when merging).
 
 - flip_strand:
 
@@ -74,6 +80,13 @@ allele (NA), the allele inferred from the other dataset, and the column
 it fills, `allele_alt` or `allele_ref`; both are NA if nothing was
 inferred), and `ambiguous` (boolean, strand-ambiguous loci, i.e. A/T and
 C/G).
+
+## Details
+
+Loci are matched by name, unless `use_position = TRUE`. If the loci
+names of either dataset are integers (as created by
+`gen_tibble(names_as_int = TRUE)`), loci are always matched by
+chromosome and position (see `use_position`).
 
 ## Examples
 
