@@ -29,6 +29,15 @@ The modified matrix_int_names object
 Returns integer names if present, otherwise character dimnames. Use instead
 of \code{rownames()} for guaranteed dispatch.
 }
+\examples{
+my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+  row_names = c(10L, 20L),
+  col_names = c(100L, 200L, 300L)
+)
+row_names(my_mat)
+row_names(my_mat) <- c(1L, 2L)
+row_names(my_mat)
+}
 \seealso{
 Other matrix_int_names_functions:
 \code{\link[=[.matrix_int_names]{[.matrix_int_names()}},
