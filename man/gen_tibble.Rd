@@ -143,11 +143,14 @@ variant is found in a sex chromosome (or mtDNA), the parser will fail with
 such a \emph{VCF}, change the order of variants so that the first chromosome is an
 autosome using a tool such as \code{vcftools}. Individuals with a missing genotype
 ('.') on the first variant get their ploidy from their first genotype that
-is not '.' (or the largest ploidy of the other individuals, if all their
-genotypes are '.'). Currently, only biallelic SNPs are
-supported. If haploid variants (e.g. sex chromosomes) are included in the
-\emph{VCF}, they are not transformed into homozygous calls. Instead, reference
-alleles will be coded as 0 and alternative alleles will be coded as 1.
+is not '.': the \code{cpp} parser looks for it in the next 1,000 variants only
+(so that the search does not slow down parsing), the \code{vcfR} parser in the
+whole file. Individuals with no such genotype get the largest ploidy of the
+other individuals (or 2, if no ploidy is known). Currently, only biallelic
+SNPs are supported. If haploid variants (e.g. sex chromosomes) are included
+in the \emph{VCF}, they are not transformed into homozygous calls. Instead,
+reference alleles will be coded as 0 and alternative alleles will be coded
+as 1.
 \item \emph{PLINK} files (.bed, .ped, or a bigSNP .rds): the individual information
 (from the .fam file, or the first six columns of the .ped file) is stored
 in the same columns for all formats: the individual ID as \code{id}; the family

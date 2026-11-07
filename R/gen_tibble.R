@@ -10,11 +10,14 @@
 #' such a *VCF*, change the order of variants so that the first chromosome is an
 #' autosome using a tool such as `vcftools`. Individuals with a missing genotype
 #' ('.') on the first variant get their ploidy from their first genotype that
-#' is not '.' (or the largest ploidy of the other individuals, if all their
-#' genotypes are '.'). Currently, only biallelic SNPs are
-#' supported. If haploid variants (e.g. sex chromosomes) are included in the
-#' *VCF*, they are not transformed into homozygous calls. Instead, reference
-#' alleles will be coded as 0 and alternative alleles will be coded as 1.
+#' is not '.': the `cpp` parser looks for it in the next 1,000 variants only
+#' (so that the search does not slow down parsing), the `vcfR` parser in the
+#' whole file. Individuals with no such genotype get the largest ploidy of the
+#' other individuals (or 2, if no ploidy is known). Currently, only biallelic
+#' SNPs are supported. If haploid variants (e.g. sex chromosomes) are included
+#' in the *VCF*, they are not transformed into homozygous calls. Instead,
+#' reference alleles will be coded as 0 and alternative alleles will be coded
+#' as 1.
 #'
 #' - *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual information
 #' (from the .fam file, or the first six columns of the .ped file) is stored
