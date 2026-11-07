@@ -47,6 +47,7 @@
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul>
 </li>
@@ -101,25 +102,27 @@ gen_tibble object.</p>
 the <a href="https://reichdata.hms.harvard.edu/pub/datasets/sgdp/" class="external-link">Simons
 Genome Diversity Project (SGDP)</a>, containing 10 individuals each from
 Africa, Oceania, America, West Eurasia and East Asia. The data are too
-large to download as part of this article, but the scripts in the <a href="https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/data-raw/sgdp" class="external-link"><code>data-raw/sgdp</code>
+large to download as part of this article, but the
+<code>create_sgdp_subset_*</code> scripts in the <a href="https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/data-raw" class="external-link"><code>data-raw</code>
 folder</a> of the tidypopgen repository let you create the dataset
 yourself if you wish to follow along.</p>
 <p>The 50 individuals are listed in the files
 <code>afr_subset.txt</code>, <code>oceania_subset.txt</code>,
 <code>america_subset.txt</code>, <code>west_eur_subset.txt</code> and
-<code>east_asia_subset.txt</code>. These were created by
-<code>s01_create_sgdp_subset_metadata.R</code>, which takes the first 10
+<code>east_asia_subset.txt</code>, in
+<code>data-raw/data_files/sgdp</code>. These were created by
+<code>create_sgdp_subset_s01_metadata.R</code>, which takes the first 10
 fully public individuals from each region in the SGDP metadata.</p>
 <p>SGDP provides a VCF for each individual, but distributes them as a
 single 57 GB archive containing all 279 public individuals. The shell
-script <code>s02_create_sgdp_subset.sh</code> downloads only the parts
+script <code>create_sgdp_subset_s02.sh</code> downloads only the parts
 of the archive that hold our 50 individuals (about 10.8 GB), checks them
 against the checksums provided by SGDP, and merges them into a single
 VCF, <code>all_subset.vcf.gz</code>, with <a href="https://samtools.github.io/bcftools/" class="external-link">bcftools</a>. You will need
 <code>bcftools</code> and <code>curl</code> installed and available on
 your <code>PATH</code>. From the root of a copy of the tidypopgen
 repository, run:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">bash</span> data-raw/sgdp/s02_create_sgdp_subset.sh vignettes/articles/data/sgdp</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">bash</span> data-raw/create_sgdp_subset_s02.sh vignettes/articles/data/sgdp</span></code></pre></div>
 <p>This writes <code>all_subset.vcf.gz</code> and its index to
 <code>vignettes/articles/data/sgdp/</code>, which is where we read it
 from below (the paths in this article are relative to

@@ -2,15 +2,14 @@
 
 This function combined two
 [gen_tibble](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)s.
-By defaults, it subsets the loci and swaps ref and alt alleles to make
-the two datasets compatible (this behaviour can be switched off with
-`as_is`). The first object is used as a "reference" , and SNPs in the
-other dataset will be flipped and/or alleles swapped as needed. SNPs
-that have different alleles in the two datasets (i.e. triallelic) will
-also be dropped. There are also options (NOT default) to attempt strand
-flipping to match alleles (often needed in human datasets from different
-SNP chips), and remove ambiguous alleles (C/G and A/T) where the correct
-strand can not be guessed.
+It subsets the loci and swaps ref and alt alleles to make the two
+datasets compatible. The first object is used as a "reference" , and
+SNPs in the other dataset will be flipped and/or alleles swapped as
+needed. SNPs that have different alleles in the two datasets (i.e.
+triallelic) will also be dropped. There are also options (NOT default)
+to attempt strand flipping to match alleles (often needed in human
+datasets from different SNP chips), and remove ambiguous alleles (C/G
+and A/T) where the correct strand can not be guessed.
 
 ## Usage
 
@@ -37,9 +36,9 @@ rbind(
 
 - as_is:
 
-  boolean determining whether the loci should be left as they are before
-  merging. If FALSE (the defaults), `rbind` will attempt to subset and
-  swap alleles as needed.
+  deprecated, and ignored: `rbind` always subsets the loci and swaps
+  alleles as needed (setting `as_is = TRUE` never stopped it, and now
+  gives a warning).
 
 - flip_strand:
 
@@ -139,12 +138,12 @@ merged_gt <- rbind(ref = example_gt, target = test_gt, flip_strand = TRUE)
 #> ( 0 were flipped to match the reference set)
 #> ( 4 are ambiguous, of which 4 were removed)
 #> 
-#> gen_tibble saved to /tmp/RtmpuPTqr3/gt_merged_2000414836d.gt
-#> using FBM RDS: /tmp/RtmpuPTqr3/gt_merged_2000414836d.rds
-#> with FBM backing file: /tmp/RtmpuPTqr3/gt_merged_2000414836d.bk
+#> gen_tibble saved to /tmp/RtmpkB239F/gt_merged_1f052ad4f568.gt
+#> using FBM RDS: /tmp/RtmpkB239F/gt_merged_1f052ad4f568.rds
+#> with FBM backing file: /tmp/RtmpkB239F/gt_merged_1f052ad4f568.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpuPTqr3/gt_merged_2000414836d.gt')
+#> gt_load('/tmp/RtmpkB239F/gt_merged_1f052ad4f568.gt')
 
 merged_gt
 #> # A gen_tibble: 2 loci

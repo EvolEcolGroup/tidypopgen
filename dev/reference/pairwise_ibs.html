@@ -27,6 +27,7 @@
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -81,9 +82,8 @@ writes it to a .mibs file).</p></li>
 <code>--distance flat-missing</code> in PLINK, which writes it to a .dist file): the
 number of alleles that differ between two individuals, scaled up by the
 number of loci over the number of loci genotyped in both individuals, to
-correct for missing genotypes. It equals <code>2 * n_loci * (1 - proportion)</code>, so it is 0 for identical individuals and at most <code>2 * n_loci</code>. Note that, without <code>flat-missing</code>, PLINK corrects for missing
-genotypes differently, which gives slightly different values when
-genotypes are missing.</p></li>
+correct for missing genotypes. It equals <code>2 * n_loci * (1 - proportion)</code>, so it is 0 for identical individuals and at most <code>2 * n_loci</code>. PLINK's default correction for missing genotypes (without
+<code>flat-missing</code>) is not available (see Details).</p></li>
 <li><p>"raw_counts": the counts of identical alleles and of non-missing
 alleles, from which the two other quantities are computed.</p></li>
 </ul></dd>
@@ -115,6 +115,16 @@ number of loci genotyped in both individuals).</p>
 monomorphic sites before running <code>pairwise_ibs()</code> if this is a concern.</p>
 <p>Imputed genotypes are used if <code>x</code> is set to use them (see
 <code><a href="gt_set_imputed.html">gt_set_imputed()</a></code>), and treated as missing otherwise.</p>
+<p>Missing genotypes are handled as in PLINK with the <code>flat-missing</code> modifier
+(<code>--distance ibs flat-missing</code> for "proportion", <code>--distance flat-missing</code> for "adjusted_counts"): each pair of individuals is compared
+only on the loci genotyped in both, and all loci have the same weight. By
+default (without <code>flat-missing</code>), PLINK 1.9 instead divides each distance
+by one minus the sum of the average contributions to the distance of the
+loci missing in the pair, which depend on their allele frequencies. This
+default correction is not available in <code>pairwise_ibs()</code>, so, when
+genotypes are missing, its values are only comparable to those of PLINK
+run with <code>flat-missing</code>. Without missing genotypes, both corrections give
+the same values.</p>
     </div>
 
     <div class="section level2">

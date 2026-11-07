@@ -39,6 +39,7 @@ for bigstatsr::big_randomSVD()"><meta property="og:image" content="https://evole
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -150,6 +151,16 @@ vectors)</p></li>
 <li><p><code>method</code>, a string defining the method (in this case 'randomSVD'),</p></li>
 <li><p><code>call</code>, the call that generated the object.</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>With up to a few thousand individuals, <code><a href="gt_pca_partialSVD.html">gt_pca_partialSVD()</a></code> is usually
+much faster: on 1,043 individuals and 643,733 loci, this function took
+about 175 s on one core (with the default <code>tol</code>), against about 31 s for
+<code><a href="gt_pca_partialSVD.html">gt_pca_partialSVD()</a></code>. This algorithm is most useful when there are too
+many individuals for <code><a href="gt_pca_partialSVD.html">gt_pca_partialSVD()</a></code>, whose memory grows with the
+square of the number of individuals. Using several cores (<code>n_cores</code>), or a
+larger <code>tol</code>, also reduces its time.</p>
+    </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>Rather than accessing these elements directly, it is better to use

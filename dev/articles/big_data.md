@@ -25,20 +25,20 @@ We will demonstrate the new capacity of tidypopgen using a subset of the
 (SGDP)](https://reichdata.hms.harvard.edu/pub/datasets/sgdp/),
 containing 10 individuals each from Africa, Oceania, America, West
 Eurasia and East Asia. The data are too large to download as part of
-this article, but the scripts in the [`data-raw/sgdp`
-folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/data-raw/sgdp)
+this article, but the `create_sgdp_subset_*` scripts in the [`data-raw`
+folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/data-raw)
 of the tidypopgen repository let you create the dataset yourself if you
 wish to follow along.
 
 The 50 individuals are listed in the files `afr_subset.txt`,
 `oceania_subset.txt`, `america_subset.txt`, `west_eur_subset.txt` and
-`east_asia_subset.txt`. These were created by
-`s01_create_sgdp_subset_metadata.R`, which takes the first 10 fully
-public individuals from each region in the SGDP metadata.
+`east_asia_subset.txt`, in `data-raw/data_files/sgdp`. These were
+created by `create_sgdp_subset_s01_metadata.R`, which takes the first 10
+fully public individuals from each region in the SGDP metadata.
 
 SGDP provides a VCF for each individual, but distributes them as a
 single 57 GB archive containing all 279 public individuals. The shell
-script `s02_create_sgdp_subset.sh` downloads only the parts of the
+script `create_sgdp_subset_s02.sh` downloads only the parts of the
 archive that hold our 50 individuals (about 10.8 GB), checks them
 against the checksums provided by SGDP, and merges them into a single
 VCF, `all_subset.vcf.gz`, with
@@ -47,7 +47,7 @@ VCF, `all_subset.vcf.gz`, with
 root of a copy of the tidypopgen repository, run:
 
 ``` bash
-bash data-raw/sgdp/s02_create_sgdp_subset.sh vignettes/articles/data/sgdp
+bash data-raw/create_sgdp_subset_s02.sh vignettes/articles/data/sgdp
 ```
 
 This writes `all_subset.vcf.gz` and its index to

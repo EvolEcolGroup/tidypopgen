@@ -35,6 +35,7 @@ wrapper for bigstatsr::big_SVD()."><meta property="og:image" content="https://ev
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -113,6 +114,20 @@ vectors)</p></li>
 <li><p><code>square_frobenius</code>, used to compute the proportion of variance explained
 by the components (optional)</p></li>
 </ul></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>With up to a few thousand individuals, this is usually much faster than
+<code><a href="gt_pca_randomSVD.html">gt_pca_randomSVD()</a></code> (on 1,043 individuals and 643,733 loci, about 31 s
+on one core against about 175 s). The covariance between individuals is
+kept in memory, which takes 8 bytes per pair of individuals (about 0.2 GB
+for 5,000 individuals, and 3.2 GB for 20,000); with many more
+individuals, <code><a href="gt_pca_randomSVD.html">gt_pca_randomSVD()</a></code> uses much less memory.</p>
+<p>The genotypes are read in blocks of loci, decoded as doubles, of about
+1 GB (set by <code>options(bigstatsr.block.sizeGB)</code>). A smaller size reduces the
+memory used, at the cost of some speed: on the same data, blocks of
+0.25 GB (<code>options(bigstatsr.block.sizeGB = 0.25)</code>) reduced the peak memory
+from about 2.0 to 0.6 GB, and took about 25% longer.</p>
+    </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>Rather than accessing these elements directly, it is better to use

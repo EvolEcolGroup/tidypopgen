@@ -1,7 +1,10 @@
 # Test if the loci table is ordered
 
 This functions checks that all SNPs in a chromosome are adjacent in the
-loci table, and that positions are sorted within chromosomes.
+loci table, and that positions (and, unless
+`ignore_genetic_dist = TRUE`, genetic distances) are sorted within
+chromosomes. Missing positions (or missing genetic distances, if they
+are checked) are an error, as the order of those loci is unknown.
 
 ## Usage
 
@@ -45,7 +48,8 @@ is_loci_table_ordered(
 
 - ignore_genetic_dist:
 
-  logical, if `TRUE` the physical position is not checked.
+  logical, if `TRUE` (the default) only the positions are checked, and
+  genetic distances are ignored (they can then be missing).
 
 - ...:
 
@@ -53,7 +57,7 @@ is_loci_table_ordered(
 
 ## Value
 
-a logical vector defining which loci are transversions
+`TRUE` if the loci are ordered, `FALSE` otherwise
 
 ## Examples
 

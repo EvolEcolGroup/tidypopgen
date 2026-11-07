@@ -1,41 +1,27 @@
-# Detect runs of homozygosity using a sliding-window approach
+# Detect runs of homozygosity using a sliding-window approach, as PLINK
 
-This function uses a sliding-window approach to look for runs of
-homozygosity (or heterozygosity) in a diploid genome. It is based on the
-package `detectRUNS`, which implements an approach equivalent to the one
-in PLINK.
+This function looks for runs of homozygosity in a diploid genome with
+the sliding-window algorithm of PLINK 1.9 (`--homozyg`), with the same
+parameters and defaults. It is implemented natively in C++: all
+individuals are analysed in a single pass over the genotypes.
 
 ## Usage
 
 ``` r
 windows_indiv_roh(
   .x,
-  window_size = 15,
-  threshold = 0.05,
-  min_snp = 3,
-  heterozygosity = FALSE,
-  max_opp_window = 1,
-  max_miss_window = 1,
-  max_gap = 10^6,
-  min_length_bps = 1000,
-  min_density = 1/1000,
-  max_opp_run = NULL,
-  max_miss_run = NULL
-)
-
-gt_roh_window(
-  .x,
-  window_size = 15,
-  threshold = 0.05,
-  min_snp = 3,
-  heterozygosity = FALSE,
-  max_opp_window = 1,
-  max_miss_window = 1,
-  max_gap = 10^6,
-  min_length_bps = 1000,
-  min_density = 1/1000,
-  max_opp_run = NULL,
-  max_miss_run = NULL
+  window_snp = 50,
+  window_het = 1,
+  window_missing = 5,
+  window_threshold = 0.05,
+  min_snp = 100,
+  min_kb = 1000,
+  max_kb_per_snp = 50,
+  max_gap_kb = 1000,
+  max_het = Inf,
+  subtract_1_from_lengths = FALSE,
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 ```
 
@@ -46,208 +32,212 @@ gt_roh_window(
   a
   [gen_tibble](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
 
-- window_size:
+- window_snp:
 
-  the size of sliding window (number of SNP loci) (default = 15)
+  the number of loci in each window (PLINK `--homozyg-window-snp`,
+  default 50)
 
-- threshold:
+- window_het:
 
-  the threshold of overlapping windows of the same state
-  (homozygous/heterozygous) to call a SNP in a RUN (default = 0.05)
+  the largest number of heterozygous genotypes in a window that is a hit
+  (PLINK `--homozyg-window-het`, default 1)
+
+- window_missing:
+
+  the largest number of missing genotypes in a window that is a hit
+  (PLINK `--homozyg-window-missing`, default 5)
+
+- window_threshold:
+
+  the smallest proportion of the windows that include a locus that must
+  be hits for the locus to be in a run (PLINK
+  `--homozyg-window-threshold`, default 0.05)
 
 - min_snp:
 
-  minimum n. of SNP in a RUN (default = 3)
+  the smallest number of loci in a run (PLINK `--homozyg-snp`, default
+  100)
 
-- heterozygosity:
+- min_kb:
 
-  should we look for runs of heterozygosity (instead of homozygosity?
-  (default = FALSE)
+  the smallest length of a run, in kb (PLINK `--homozyg-kb`, default
+  1000)
 
-- max_opp_window:
+- max_kb_per_snp:
 
-  max n. of SNPs of the opposite type (e.g. heterozygous snps for runs
-  of homozygosity) in the sliding window (default = 1)
+  the largest average distance between the loci of a run, in kb per
+  locus, i.e. the inverse of its smallest density (PLINK
+  `--homozyg-density`, default 50)
 
-- max_miss_window:
+- max_gap_kb:
 
-  max. n. of missing SNP in the sliding window (default = 1)
+  the largest gap between two consecutive loci of a run, in kb: a larger
+  gap breaks a run (PLINK `--homozyg-gap`, default 1000)
 
-- max_gap:
+- max_het:
 
-  max distance between consecutive SNP to be still considered a
-  potential run (default = 10^6 bps)
+  the largest number of heterozygous genotypes in a run (PLINK
+  `--homozyg-het`, default `Inf`, i.e. no limit): a run is broken before
+  the heterozygous genotype that would exceed it
 
-- min_length_bps:
+- subtract_1_from_lengths:
 
-  minimum length of run in bps (defaults to 1000 bps = 1 kbps)
+  if `TRUE`, the length of a run is the distance between its first and
+  last positions; by default it is that distance + 1, as in PLINK 1.9
+  (PLINK `--homozyg subtract-1-from-lengths`, which gives the lengths of
+  PLINK 1.07)
 
-- min_density:
+- n_cores:
 
-  minimum n. of SNP per kbps (defaults to 0.1 = 1 SNP every 10 kbps)
+  the number of cores to use (individuals are analysed in parallel)
 
-- max_opp_run:
+- ...:
 
-  max n. of opposite genotype SNPs in the run (optional)
-
-- max_miss_run:
-
-  max n. of missing SNPs in the run (optional)
+  not used. The arguments of the version of this function based on
+  `detectRUNS` (e.g. `window_size`) give an error: use
+  [`gt_roh_window()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_window.md)
+  for that version.
 
 ## Value
 
-A dataframe with RUNs of Homozygosity or Heterozygosity in the analysed
-dataset. The returned dataframe contains the following seven columns:
-"group", "id", "chrom", "nSNP", "from", "to", "lengthBps" (group:
-population, breed, case/control etc.; id: individual identifier; chrom:
-chromosome on which the run is located; nSNP: number of SNPs in the run;
-from: starting position of the run, in bps; to: end position of the run,
-in bps; lengthBps: size of the run)
+An `indiv_roh` object, a tibble with one row per run, ordered by
+individual, then by chromosome (in the order of its levels) and
+position, with columns:
+
+- the grouping variable(s), if the
+  [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+  is grouped (a single `group` column for one grouping variable, keeping
+  its type, or one column per grouping variable);
+
+- `id`: the individual;
+
+- `chromosome`: the chromosome of the run (a factor, with the levels of
+  the loci table);
+
+- `start`, `end`: the positions of the first and last locus of the run
+  (in bp; PLINK `POS1` and `POS2`);
+
+- `length_bp`: `end - start + 1` (or `end - start` with
+  `subtract_1_from_lengths = TRUE`; PLINK `KB` x 1000);
+
+- `n_loci`: the number of loci in the run (PLINK `NSNP`);
+
+- `first_locus`, `last_locus`: the rows of the first and last locus of
+  the run in the loci table
+  ([`show_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_loci.md));
+
+- `n_het`: the number of heterozygous genotypes in the run (PLINK `PHET`
+  x `NSNP`);
+
+- `n_missing`: the number of missing genotypes in the run.
+
+Its attributes `individuals` (a tibble of all the individuals, with
+their groups, including those with no run), `chromosome_length` (the
+length of each chromosome, its largest position, as in `detectRUNS`) and
+`n_loci` (the number of loci) are used by
+[`autoplot.indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot.indiv_roh.md),
+[`gt_roh_froh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_froh.md),
+[`gt_roh_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_loci.md)
+and
+[`gt_roh_islands()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_islands.md).
 
 ## Details
 
-This function returns a data frame with all runs detected in the
-dataset. The data frame is, in turn, the input for other functions of
-the `detectRUNS` package that create plots and produce statistics from
-the results (see plots and statistics functions in this manual, and/or
-refer to the `detectRUNS` vignette).
+On each chromosome, a window of `window_snp` consecutive loci starts at
+each locus (except the last `window_snp - 1`). A window is a hit if it
+has at most `window_het` heterozygous and at most `window_missing`
+missing genotypes. A locus is in a run if at least a proportion
+`window_threshold` (rounded up) of the windows that include it are hits.
+Runs are stretches of consecutive loci in a run, which are broken where
+the gap between two loci is larger than `max_gap_kb`, and before the
+heterozygous genotype that would exceed `max_het`. Runs are returned if
+they have at least `min_snp` loci, a length of at least `min_kb`, and at
+most `max_kb_per_snp` kb per locus.
 
-If the
-[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
-is grouped, then the grouping variable is used to fill in the 'group'
-column (with several grouping variables, their values are pasted with
-".", e.g. `pop1.F`). Otherwise, the 'group' column is filled with the
-same values as the 'id' column. Note that this behaviour is different
-from other windowed operations in `tidypopgen`, which return a list for
-grouped `gen_tibbles`; this different behaviour is designed to maintain
-compatibility with `detectRUNS`.
+The runs are those of `plink --homozyg` with the same parameters,
+including the features of its algorithm:
 
-The old name for this function, `gt_roh_window`, is still available, but
-it is soft deprecated and will be removed in future versions of
-`tidypopgen`.
+- windows restart at each chromosome, so a chromosome with fewer loci
+  than `window_snp` has no runs; windows can span large gaps, which only
+  break runs;
 
-## See also
+- the number of windows used for the threshold of the last
+  `window_snp - 1` loci of a chromosome is the number of loci to its end
+  (which, on chromosomes with fewer than `2 * window_snp - 2` loci, is
+  more than the number of windows that include the locus);
 
-[`detectRUNS::slidingRUNS.run()`](https://rdrr.io/pkg/detectRUNS/man/slidingRUNS.run.html)
-which this function wraps.
+- runs are not trimmed, so they can start or end with heterozygous or
+  missing genotypes; missing genotypes in a run are not limited.
+
+Genotypes are classified by their dosage (1 is heterozygous, 0 and 2 are
+homozygous). Unlike PLINK, all chromosomes are analysed: PLINK skips
+haploid chromosomes (e.g. Y and MT), and male X chromosomes. Remove them
+first (e.g. with
+[`select_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci.md))
+to get the same runs. PLINK has no runs of heterozygosity;
+[`gt_roh_window()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_window.md)
+(based on `detectRUNS`) can still find them. The loci must be sorted by
+chromosome and position (see
+[`gt_order_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.md)).
+
+Runs can be plotted with
+[`autoplot.indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot.indiv_roh.md),
+which draws the plots of `detectRUNS`. Use
+[`as_detectRUNS()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/as_detectRUNS.md)
+to convert the runs to the format of `detectRUNS`, to use its own
+functions.
+
+## References
+
+Chang CC, Chow CC, Tellier LCAM, Vattikuti S, Purcell SM, Lee JJ (2015)
+Second-generation PLINK: rising to the challenge of larger and richer
+datasets. GigaScience, 4.
+[doi:10.1186/s13742-015-0047-8](https://doi.org/10.1186/s13742-015-0047-8)
 
 ## Examples
 
 ``` r
-sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
-  package = "detectRUNS"
+# a simulated dataset of three populations with increasing inbreeding
+# (see data-raw/create_roh_dataset.R in the source of the package)
+bed_file <- system.file("extdata", "roh", "roh_sim.bed",
+  package = "tidypopgen"
 )
-sheep_gt <- tidypopgen::gen_tibble(sheep_ped,
-  backingfile = tempfile(),
-  quiet = TRUE
-)
-sheep_gt <- sheep_gt %>% group_by(population)
-sheep_roh <- windows_indiv_roh(sheep_gt)
-#> N. of RUNS for individual H114 is: 27
-#> N. of RUNS for individual H115 is: 29
-#> N. of RUNS for individual H116 is: 28
-#> N. of RUNS for individual H26 is: 25
-#> N. of RUNS for individual H32 is: 21
-#> N. of RUNS for individual H38 is: 16
-#> N. of RUNS for individual H44 is: 14
-#> N. of RUNS for individual H56 is: 14
-#> N. of RUNS for individual H50 is: 29
-#> N. of RUNS for individual H27 is: 18
-#> N. of RUNS for individual H33 is: 21
-#> N. of RUNS for individual H39 is: 17
-#> N. of RUNS for individual H45 is: 18
-#> N. of RUNS for individual H51 is: 29
-#> N. of RUNS for individual H57 is: 20
-#> N. of RUNS for individual H28 is: 13
-#> N. of RUNS for individual H34 is: 18
-#> N. of RUNS for individual H40 is: 28
-#> N. of RUNS for individual H46 is: 29
-#> N. of RUNS for individual H52 is: 20
-#> N. of RUNS for individual H58 is: 13
-#> N. of RUNS for individual H29 is: 17
-#> N. of RUNS for individual H35 is: 27
-#> N. of RUNS for individual H41 is: 19
-#> N. of RUNS for individual H47 is: 22
-#> N. of RUNS for individual H53 is: 25
-#> N. of RUNS for individual H59 is: 28
-#> N. of RUNS for individual H30 is: 19
-#> N. of RUNS for individual H42 is: 20
-#> N. of RUNS for individual H48 is: 32
-#> N. of RUNS for individual H54 is: 20
-#> N. of RUNS for individual H60 is: 17
-#> N. of RUNS for individual H31 is: 15
-#> N. of RUNS for individual H37 is: 17
-#> N. of RUNS for individual H43 is: 14
-#> N. of RUNS for individual H49 is: 19
-#> N. of RUNS for individual H55 is: 33
-#> N. of RUNS for individual H1 is: 21
-#> N. of RUNS for individual H9 is: 13
-#> N. of RUNS for individual H17 is: 29
-#> N. of RUNS for individual H2 is: 19
-#> N. of RUNS for individual H10 is: 20
-#> N. of RUNS for individual H19 is: 22
-#> N. of RUNS for individual H3 is: 25
-#> N. of RUNS for individual H11 is: 21
-#> N. of RUNS for individual H20 is: 36
-#> N. of RUNS for individual H4 is: 20
-#> N. of RUNS for individual H12 is: 17
-#> N. of RUNS for individual H21 is: 25
-#> N. of RUNS for individual H13 is: 22
-#> N. of RUNS for individual H22 is: 30
-#> N. of RUNS for individual H6 is: 17
-#> N. of RUNS for individual H14 is: 20
-#> N. of RUNS for individual H7 is: 31
-#> N. of RUNS for individual H15 is: 15
-#> N. of RUNS for individual H24 is: 22
-#> N. of RUNS for individual H8 is: 23
-#> N. of RUNS for individual H16 is: 35
-#> N. of RUNS for individual H25 is: 22
-#> N. of RUNS for individual H64 is: 30
-#> N. of RUNS for individual H62 is: 20
-#> N. of RUNS for individual H63 is: 11
-#> N. of RUNS for individual H118 is: 30
-#> N. of RUNS for individual H119 is: 27
-#> N. of RUNS for individual H120 is: 28
-#> N. of RUNS for individual H121 is: 31
-#> N. of RUNS for individual H122 is: 31
-#> N. of RUNS for individual H123 is: 22
-#> N. of RUNS for individual H124 is: 31
-#> N. of RUNS for individual H125 is: 22
-#> N. of RUNS for individual H126 is: 26
-#> N. of RUNS for individual H127 is: 28
-#> N. of RUNS for individual H128 is: 33
-#> N. of RUNS for individual H129 is: 19
-#> N. of RUNS for individual H130 is: 30
-#> N. of RUNS for individual H131 is: 33
-#> N. of RUNS for individual H132 is: 30
-#> N. of RUNS for individual H133 is: 33
-#> N. of RUNS for individual H134 is: 27
-#> N. of RUNS for individual H135 is: 27
-#> N. of RUNS for individual H136 is: 17
-#> N. of RUNS for individual H137 is: 33
-#> N. of RUNS for individual H138 is: 23
-#> N. of RUNS for individual H139 is: 32
-#> N. of RUNS for individual H140 is: 27
-#> N. of RUNS for individual H141 is: 28
-#> N. of RUNS for individual H142 is: 27
-#> N. of RUNS for individual H143 is: 24
-#> N. of RUNS for individual H144 is: 26
-#> N. of RUNS for individual H145 is: 32
-#> N. of RUNS for individual H146 is: 23
-#> N. of RUNS for individual H147 is: 23
-#> N. of RUNS for individual H148 is: 25
-#> N. of RUNS for individual H149 is: 26
-#> N. of RUNS for individual H150 is: 31
-#> N. of RUNS for individual H151 is: 36
-#> N. of RUNS for individual H152 is: 26
-#> N. of RUNS for individual H153 is: 27
-#> N. of RUNS for individual H154 is: 31
-#> N. of RUNS for individual H155 is: 32
-detectRUNS::plot_Runs(runs = sheep_roh)
+sim_gt <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
+sim_gt <- sim_gt %>% group_by(population)
+sim_roh <- windows_indiv_roh(sim_gt)
+sim_roh
+#> # A tibble: 36 × 11
+#>    group  id    chromosome  start    end length_bp n_loci first_locus last_locus
+#>  * <chr>  <chr> <fct>       <int>  <int>     <int>  <int>       <int>      <int>
+#>  1 moder… mode… 1          6.22e6 8.46e6   2240031    242         606        847
+#>  2 moder… mode… 2          4.99e6 6.27e6   1278671    181        1568       1748
+#>  3 moder… mode… 1          2.36e6 4.53e6   2178354    217         227        443
+#>  4 moder… mode… 1          1.24e6 4.16e6   2915333    293         113        405
+#>  5 moder… mode… 2          5.85e6 7.39e6   1546032    240        1682       1921
+#>  6 moder… mode… 3          2.70e6 4.11e6   1408627    238        2456       2693
+#>  7 moder… mode… 2          1.10e6 2.49e6   1392978    215        1152       1366
+#>  8 moder… mode… 3          3.38e5 1.80e6   1464842    226        2077       2302
+#>  9 moder… mode… 3          3.76e6 5.51e6   1744833    279        2641       2919
+#> 10 moder… mode… 3          1.50e6 3.01e6   1514616    275        2244       2518
+#> # ℹ 26 more rows
+#> # ℹ 2 more variables: n_het <int>, n_missing <int>
+# the number of runs in each population
+table(sim_roh$group)
+#> 
+#>   inbred moderate 
+#>       26       10 
+# \donttest{
+# use the plots of detectRUNS
+if (rlang::is_installed("detectRUNS")) {
+  detectRUNS::plot_Runs(runs = as_detectRUNS(sim_roh))
+}
 #> Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
 #> ℹ Please use `linewidth` instead.
 #> ℹ The deprecated feature was likely used in the detectRUNS package.
 #>   Please report the issue at
 #>   <https://github.com/bioinformatics-ptp/detectRUNS/issues>.
 
+
+
+# }
 ```

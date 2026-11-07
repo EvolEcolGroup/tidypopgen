@@ -31,6 +31,7 @@ relationships above the given threshold."><meta property="og:image" content="htt
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -94,7 +95,15 @@ individuals to remove are FALSE</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Missing relationship coefficients (e.g. KING kinship for pairs of
+    <p>Individuals are removed greedily, as in
+<code>caret::findCorrelation()</code>: individuals are considered in order of
+decreasing mean relatedness, and for each pair related above
+<code>kings_threshold</code>, the first individual is removed if its mean
+relatedness is larger than the mean of the remaining matrix without the
+second individual, and the second one otherwise. No pair above the
+threshold is left, but the set of individuals kept is not guaranteed to
+be the largest possible.</p>
+<p>Missing relationship coefficients (e.g. KING kinship for pairs of
 individuals with no loci genotyped in both) are not evidence of
 relatedness: such pairs are treated as not related, with a warning.</p>
     </div>

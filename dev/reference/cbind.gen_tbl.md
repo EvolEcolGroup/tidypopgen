@@ -13,6 +13,9 @@ will NOT combine markers for the same individuals)
 ``` r
 # S3 method for class 'gen_tbl'
 cbind(..., deparse.level = 1)
+
+# S3 method for class 'grouped_gen_tbl'
+cbind(..., deparse.level = 1)
 ```
 
 ## Arguments
@@ -29,6 +32,17 @@ cbind(..., deparse.level = 1)
 ## Value
 
 a `gen_tibble`
+
+## Details
+
+As in
+[`dplyr::bind_cols()`](https://dplyr.tidyverse.org/reference/bind_cols.html)
+(which `dplyr` uses to [`cbind()`](https://rdrr.io/r/base/cbind.html)
+grouped tibbles), duplicated column names are made unique (e.g.
+`population...2` and `population...4`), with a message. If a grouping
+variable is renamed, the result is no longer grouped. The columns `id`
+and `genotypes` of the `gen_tibble` can not be duplicated, as renaming
+them would break it.
 
 ## Examples
 

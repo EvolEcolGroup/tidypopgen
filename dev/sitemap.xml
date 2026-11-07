@@ -12,6 +12,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/big_data.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/index.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/roh_hgdp.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/sfs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/authors.html</loc></url>
@@ -21,11 +22,13 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/arrange.gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/arrange.grouped_gen_tbl.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/as.data.frame.matrix_int_names.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/as_detectRUNS.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment.gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment_loci_gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/augment_q_matrix.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot.indiv_roh.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot.qc_report_indiv.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot.qc_report_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot_gt_admix.html</loc></url>
@@ -77,6 +80,10 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_randomSVD.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pcadapt.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pseudohaploid.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_froh.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_islands.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_loci.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_window.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_snmf.html</loc></url>

@@ -106,6 +106,19 @@ with elements: A named list (an S3 class "big_SVD") of
 
 - `call`, the call that generated the object.
 
+## Details
+
+With up to a few thousand individuals,
+[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md)
+is usually much faster: on 1,043 individuals and 643,733 loci, this
+function took about 175 s on one core (with the default `tol`), against
+about 31 s for
+[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md).
+This algorithm is most useful when there are too many individuals for
+[`gt_pca_partialSVD()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_partialSVD.md),
+whose memory grows with the square of the number of individuals. Using
+several cores (`n_cores`), or a larger `tol`, also reduces its time.
+
 ## Note
 
 Rather than accessing these elements directly, it is better to use

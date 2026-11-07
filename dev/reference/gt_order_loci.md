@@ -41,9 +41,12 @@ gt_order_loci(
 
 - ignore_genetic_dist:
 
-  boolean to ignore the genetic distance when checking. Note that, if
-  `genetic_dist` are being ignored and they are not sorted, the function
-  will set them to zero to avoid problems with other software.
+  boolean to ignore the genetic distance when checking (the default), so
+  that only positions are checked. Note that, if `genetic_dist` are
+  being ignored and they are not sorted (or are missing), the function
+  will set them to zero to avoid problems with other software. Missing
+  positions (or missing genetic distances, when they are not ignored)
+  are an error.
 
 - quiet:
 
@@ -79,11 +82,11 @@ show_loci(example_gt)
 example_gt_ordered <- gt_order_loci(example_gt, ignore_genetic_dist = TRUE)
 #> 
 #> gen_backing files updated, now
-#> using FBM RDS: /tmp/RtmpuPTqr3/file200011a986c8_v2.rds
-#> with FBM backing file: /tmp/RtmpuPTqr3/file200011a986c8_v2.bk
+#> using FBM RDS: /tmp/RtmpkB239F/file1f0527453cf8_v2.rds
+#> with FBM backing file: /tmp/RtmpkB239F/file1f0527453cf8_v2.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpuPTqr3/file200011a986c8_v2.gt')
+#> gt_load('/tmp/RtmpkB239F/file1f0527453cf8_v2.gt')
 
 # Loci are now in the correct order
 show_loci(example_gt_ordered)

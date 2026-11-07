@@ -122,6 +122,7 @@ Functions for merging `gen_tibble` objects.
 - [`summary(`*`<rbind_report>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/summary_rbind_dry_run.md)
   : Print a summary of a merge report
 - [`cbind(`*`<gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/cbind.gen_tbl.md)
+  [`cbind(`*`<grouped_gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/cbind.gen_tbl.md)
   : Combine a gen_tibble to a data.frame or tibble by column
 
 ## Exporting
@@ -345,8 +346,8 @@ as in easySFS.
 Functions to compute statistics in sliding windows across loci.
 
 - [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
-  [`gt_roh_window()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
-  : Detect runs of homozygosity using a sliding-window approach
+  : Detect runs of homozygosity using a sliding-window approach, as
+  PLINK
 - [`windows_nwise_pop_pbs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_nwise_pop_pbs.md)
   : Compute the Population Branch Statistics over a sliding window
 - [`windows_pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_pairwise_pop_fst.md)
@@ -355,6 +356,33 @@ Functions to compute statistics in sliding windows across loci.
   : Compute Tajima's D for a sliding window
 - [`windows_stats_generic()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_stats_generic.md)
   : Estimate window statistics from per locus estimates
+
+## Runs of homozygosity
+
+Functions to find and summarise runs of homozygosity.
+
+- [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
+  : Detect runs of homozygosity using a sliding-window approach, as
+  PLINK
+
+- [`gt_roh_froh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_froh.md)
+  : Inbreeding from runs of homozygosity (F_ROH)
+
+- [`gt_roh_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_loci.md)
+  : The loci in runs of homozygosity
+
+- [`gt_roh_islands()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_islands.md)
+  : Islands of runs of homozygosity
+
+- [`autoplot(`*`<indiv_roh>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/autoplot.indiv_roh.md)
+  :
+
+  Autoplots for `indiv_roh` objects
+
+- [`as_detectRUNS()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/as_detectRUNS.md)
+  :
+
+  Convert runs of homozygosity to the format of `detectRUNS`
 
 ## Jackknife
 

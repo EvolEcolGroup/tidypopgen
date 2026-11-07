@@ -41,6 +41,7 @@ backingfiles are stored in the gen_tibble object."><meta property="og:image" con
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -98,9 +99,11 @@ chromosome are sequential</p></dd>
 
 <dt id="arg-ignore-genetic-dist">ignore_genetic_dist<a class="anchor" aria-label="anchor" href="#arg-ignore-genetic-dist"></a></dt>
 <dd><p>boolean to ignore the genetic distance when
-checking. Note that, if <code>genetic_dist</code> are being ignored and they are not
-sorted, the function will set them to zero to avoid problems with other
-software.</p></dd>
+checking (the default), so that only positions are checked. Note that, if
+<code>genetic_dist</code> are being ignored and they are not sorted (or are missing),
+the function will set them to zero to avoid problems with other software.
+Missing positions (or missing genetic distances, when they are not
+ignored) are an error.</p></dd>
 
 
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
@@ -136,11 +139,11 @@ software.</p></dd>
 <span class="r-in"><span><span class="va">example_gt_ordered</span> <span class="op">&lt;-</span> <span class="fu">gt_order_loci</span><span class="op">(</span><span class="va">example_gt</span>, ignore_genetic_dist <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> gen_backing files updated, now</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpuPTqr3/file200011a986c8_v2.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpuPTqr3/file200011a986c8_v2.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpkB239F/file1f0527453cf8_v2.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpkB239F/file1f0527453cf8_v2.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpuPTqr3/file200011a986c8_v2.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpkB239F/file1f0527453cf8_v2.gt')</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Loci are now in the correct order</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="show_loci.html">show_loci</a></span><span class="op">(</span><span class="va">example_gt_ordered</span><span class="op">)</span></span></span>

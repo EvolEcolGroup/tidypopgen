@@ -18,6 +18,8 @@
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/big_data.md):
 - [Interpolating genetic
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.md):
+- [Runs of homozygosity in the
+  HGDP](https://evolecolgroup.github.io/tidypopgen/dev/articles/roh_hgdp.md):
 - [Site frequency
   spectra](https://evolecolgroup.github.io/tidypopgen/dev/articles/sfs.md):
 - [tidypopgen](https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.md):

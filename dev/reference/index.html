@@ -27,6 +27,7 @@
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -266,7 +267,7 @@
 
         <dt>
 
-          <code><a href="cbind.gen_tbl.html">cbind(<i>&lt;gen_tbl&gt;</i>)</a></code>
+          <code><a href="cbind.gen_tbl.html">cbind(<i>&lt;gen_tbl&gt;</i>)</a></code> <code><a href="cbind.gen_tbl.html">cbind(<i>&lt;grouped_gen_tbl&gt;</i>)</a></code>
 
         </dt>
         <dd>Combine a gen_tibble to a data.frame or tibble by column</dd>
@@ -725,10 +726,10 @@
 
       <dl><dt>
 
-          <code><a href="windows_indiv_roh.html">windows_indiv_roh()</a></code> <code><a href="windows_indiv_roh.html">gt_roh_window()</a></code>
+          <code><a href="windows_indiv_roh.html">windows_indiv_roh()</a></code>
 
         </dt>
-        <dd>Detect runs of homozygosity using a sliding-window approach</dd>
+        <dd>Detect runs of homozygosity using a sliding-window approach, as PLINK</dd>
 
         <dt>
 
@@ -757,6 +758,57 @@
 
         </dt>
         <dd>Estimate window statistics from per locus estimates</dd>
+      </dl></div><div class="section level2">
+      <h2 id="runs-of-homozygosity">Runs of homozygosity<a class="anchor" aria-label="anchor" href="#runs-of-homozygosity"></a></h2>
+
+      <div class="section-desc"><p>Functions to find and summarise runs of homozygosity.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="windows_indiv_roh.html">windows_indiv_roh()</a></code>
+
+        </dt>
+        <dd>Detect runs of homozygosity using a sliding-window approach, as PLINK</dd>
+
+        <dt>
+
+          <code><a href="gt_roh_froh.html">gt_roh_froh()</a></code>
+
+        </dt>
+        <dd>Inbreeding from runs of homozygosity (F_ROH)</dd>
+
+        <dt>
+
+          <code><a href="gt_roh_loci.html">gt_roh_loci()</a></code>
+
+        </dt>
+        <dd>The loci in runs of homozygosity</dd>
+
+        <dt>
+
+          <code><a href="gt_roh_islands.html">gt_roh_islands()</a></code>
+
+        </dt>
+        <dd>Islands of runs of homozygosity</dd>
+
+        <dt>
+
+          <code><a href="autoplot.indiv_roh.html">autoplot(<i>&lt;indiv_roh&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Autoplots for <code>indiv_roh</code> objects</dd>
+
+        <dt>
+
+          <code><a href="as_detectRUNS.html">as_detectRUNS()</a></code>
+
+        </dt>
+        <dd>Convert runs of homozygosity to the format of <code>detectRUNS</code></dd>
       </dl></div><div class="section level2">
       <h2 id="jackknife">Jackknife<a class="anchor" aria-label="anchor" href="#jackknife"></a></h2>
 

@@ -39,9 +39,9 @@ pairwise_ibs(
     scaled up by the number of loci over the number of loci genotyped in
     both individuals, to correct for missing genotypes. It equals
     `2 * n_loci * (1 - proportion)`, so it is 0 for identical
-    individuals and at most `2 * n_loci`. Note that, without
-    `flat-missing`, PLINK corrects for missing genotypes differently,
-    which gives slightly different values when genotypes are missing.
+    individuals and at most `2 * n_loci`. PLINK's default correction for
+    missing genotypes (without `flat-missing`) is not available (see
+    Details).
 
   - "raw_counts": the counts of identical alleles and of non-missing
     alleles, from which the two other quantities are computed.
@@ -75,6 +75,18 @@ concern.
 Imputed genotypes are used if `x` is set to use them (see
 [`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_set_imputed.md)),
 and treated as missing otherwise.
+
+Missing genotypes are handled as in PLINK with the `flat-missing`
+modifier (`--distance ibs flat-missing` for "proportion",
+`--distance flat-missing` for "adjusted_counts"): each pair of
+individuals is compared only on the loci genotyped in both, and all loci
+have the same weight. By default (without `flat-missing`), PLINK 1.9
+instead divides each distance by one minus the sum of the average
+contributions to the distance of the loci missing in the pair, which
+depend on their allele frequencies. This default correction is not
+available in `pairwise_ibs()`, so, when genotypes are missing, its
+values are only comparable to those of PLINK run with `flat-missing`.
+Without missing genotypes, both corrections give the same values.
 
 ## Examples
 
