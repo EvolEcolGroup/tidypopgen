@@ -1,6 +1,7 @@
 ^tidypopgen\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
+^dev_notes$
 ^LICENSE\.md$
 ^\.github$
 pkgdown/
