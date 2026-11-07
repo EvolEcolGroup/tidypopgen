@@ -2,8 +2,7 @@
 
 This folder holds the code and files used to build the package, but which
 are not part of it. It is excluded from the package build (`.Rbuildignore`)
-and from linting (`.lintr`). Development notes (reviews, plans, guides) are
-not kept here: they go in `dev_notes/` at the root of the repository.
+and from linting (`.lintr`).
 
 Unless a script says otherwise, run it from the root of the repository, as
 paths are written relative to it (e.g. `data-raw/data_files/...`).
@@ -17,6 +16,7 @@ paths are written relative to it (e.g. `data-raw/data_files/...`).
 | `benchmarking/` | Scripts that time or profile the package. Large input files go in `benchmarking/data/`, which is not tracked by git. |
 | `validate/` | Comparisons of tidypopgen with other software or with slow, reference R implementations, including the scripts that run other software to create the test fixtures in `tests/testthat/testdata/` and `inst/extdata/`. |
 | `misc/` | Anything that does not fit above: helper scripts for development, ideas and drafts. |
+| `dev_notes/` | Development notes in markdown, mostly written with Claude Code: code and speed reviews, open issues, plans and developer guides. Not scripts or data. |
 
 When you move or rename a file, check the paths inside the scripts, and
 search the repository for references to it (`git grep data-raw/`): tests,
@@ -75,3 +75,15 @@ Remember to time installed (-O2) builds, not `load_all()` (see `CLAUDE.md`).
 | `test_with_valgrind.sh` | Runs a test file under valgrind. |
 | `AdegenetPolyplChapter.R` | An external example script (polyploid analysis with adegenet), the source of the data of `create_ploidy_vcf.R`. |
 | `ideas/` | Notes and drafts of possible features: `ideas.R` and `packages_to_look_into` (to-do notes), `fs_stats_WG.R` (F-statistics from allele sharing), `ibd_notes` and `ibd_r.R` (IBD estimation), `pruning` (LD pruning removed from bigsnpr), `prettify_chromosomes/` (ordering chromosome names, with tests). |
+
+### `dev_notes/`
+
+| File | What it is |
+|---|---|
+| `code_review_2026-10.md` | The October 2026 code review: the fixes, with a checkbox for each commit once checked, and the findings not fixed. |
+| `code_review_2026-10_review_strategy.md` | How the commits of that review are checked and accepted or reverted. |
+| `speed_review_2026-11.md` | The November 2026 speed work (`speed`, `speed_extra`, `roh`): each commit, its timings and the further ideas. |
+| `speed_accessors_guide.md` | A developer guide to the fast C++ accessors of the genotypes and how to write new kernels. |
+| `article_timings_speed_vs_big_data_article.md` | Timings of the big data article before and after the speed work. |
+| `open_issues_2026-11.md` | What is still open after the review and the speed work, and what was resolved. |
+| `sfs_plan.md` | The plan for the site frequency spectra (implemented in #221). |

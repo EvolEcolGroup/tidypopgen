@@ -109,7 +109,7 @@ fourth `speed` knit (total 8.26 s).
 
 ## Where the gains come from
 
-The commits are described in `dev_notes/speed_review_2026-11.md`.
+The commits are described in `data-raw/dev_notes/speed_review_2026-11.md`.
 
 - **`qc_report_loci()` and `qc_report_indiv()`.** `c3b013ba` makes one pass over
   the genotypes for the loci report, without an `apply()` over groups.

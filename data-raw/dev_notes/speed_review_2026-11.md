@@ -7,7 +7,7 @@ branch, one commit per fix, each with its tests where needed.
 
 - **Branch:** `speed`, based on `codereview` at `9e4e5b4` ("confirm more
   fixes"). The work started from `ffaefe7`; the only later `codereview`
-  commit changes `dev_notes/code_review_2026-10.md`.
+  commit changes `data-raw/dev_notes/code_review_2026-10.md`.
 - **Changes:** 39 commits. Every output checked is identical to `codereview`,
   except for the floating-point differences listed in
   [Changes in behaviour](#changes-in-behaviour-to-check-before-merging).

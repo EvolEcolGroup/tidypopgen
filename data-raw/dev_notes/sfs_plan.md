@@ -419,7 +419,7 @@ Other options and why they were rejected:
 - **Return the `n` and `k` matrices to R** (the same as
   `grouped_alt_freq_dip_pseudo_cpp(as_counts = TRUE)`). This allocates
   `m x 2G` doubles, 1.6 GB for 10M loci and 10 groups, which goes against
-  the kernel guide (`dev_notes/speed_accessors_guide.md`).
+  the kernel guide (`data-raw/dev_notes/speed_accessors_guide.md`).
 - **Project each locus inside the kernel.** This costs
   `m x prod(n_proj + 1)` instead of `distinct configs x prod(n_proj + 1)`.
   Without missing data there are at most `N + 1` configurations per
