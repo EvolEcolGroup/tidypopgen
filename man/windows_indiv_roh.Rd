@@ -100,10 +100,11 @@ homozygous windows among all the windows that include it is larger than
 \code{threshold}. Runs are stretches of consecutive loci in a run on a
 chromosome, and only those with at least \code{min_snp} loci, a length of at
 least \code{min_length_bps} and a density of at least \code{min_density} loci per
-1000 bps (and, if given, at most \code{max_opp_run} heterozygous and \code{max_miss_run} missing
-genotypes) are returned. For runs of heterozygosity, homozygous and
-heterozygous genotypes swap their roles. Genotypes are classified by their
-dosage (0 and 2 are homozygous, 1 is heterozygous).
+1000 bps (and, if given, at most \code{max_opp_run} heterozygous and
+\code{max_miss_run} missing genotypes) are returned. For runs of
+heterozygosity, homozygous and heterozygous genotypes swap their roles.
+Genotypes are classified by their dosage (0 and 2 are homozygous, 1 is
+heterozygous).
 
 This function returns a data frame with all runs detected in the
 dataset, in the format of \code{detectRUNS}, so that it can be used as the

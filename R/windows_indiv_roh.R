@@ -15,10 +15,11 @@
 #' `threshold`. Runs are stretches of consecutive loci in a run on a
 #' chromosome, and only those with at least `min_snp` loci, a length of at
 #' least `min_length_bps` and a density of at least `min_density` loci per
-#' 1000 bps (and, if given, at most `max_opp_run` heterozygous and `max_miss_run` missing
-#' genotypes) are returned. For runs of heterozygosity, homozygous and
-#' heterozygous genotypes swap their roles. Genotypes are classified by their
-#' dosage (0 and 2 are homozygous, 1 is heterozygous).
+#' 1000 bps (and, if given, at most `max_opp_run` heterozygous and
+#' `max_miss_run` missing genotypes) are returned. For runs of
+#' heterozygosity, homozygous and heterozygous genotypes swap their roles.
+#' Genotypes are classified by their dosage (0 and 2 are homozygous, 1 is
+#' heterozygous).
 #'
 #' @param .x a [gen_tibble]
 #' @param window_size the size of sliding window (number of SNP loci) (default =
