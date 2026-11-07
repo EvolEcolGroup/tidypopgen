@@ -10,7 +10,16 @@
 #' @param .x a [`gen_tibble`] object
 #' @param kings_threshold a threshold over which
 #' @param verbose boolean whether to report to screen
-#' @details Missing relationship coefficients (e.g. KING kinship for pairs of
+#' @details Individuals are removed greedily, as in
+#'   `caret::findCorrelation()`: individuals are considered in order of
+#'   decreasing mean relatedness, and for each pair related above
+#'   `kings_threshold`, the first individual is removed if its mean
+#'   relatedness is larger than the mean of the remaining matrix without the
+#'   second individual, and the second one otherwise. No pair above the
+#'   threshold is left, but the set of individuals kept is not guaranteed to
+#'   be the largest possible.
+#'
+#'   Missing relationship coefficients (e.g. KING kinship for pairs of
 #'   individuals with no loci genotyped in both) are not evidence of
 #'   relatedness: such pairs are treated as not related, with a warning.
 #' @return a list where '1' is individual ID's to retain, '2' is individual ID's
@@ -113,9 +122,14 @@ filter_high_relatedness <-
       sum(is_above(matrix2[k, ])) + sum(is_above(matrix2[, k]))
     }
 
-    # loop through each individual
-    # for pairs with higher than kings_threshold relatedness
-    # the individual with higher average relatedness is removed
+    # loop through each individual; for each pair (i, j) related above
+    # kings_threshold, one of the two is removed. As in
+    # caret::findCorrelation(), the mean relatedness of individual i is
+    # compared with the mean relatedness of the remaining matrix without row
+    # j (not with the mean relatedness of individual j): i is removed if its
+    # mean is larger, and j otherwise. This is a greedy heuristic: it leaves
+    # no pair above the threshold, but does not guarantee to keep the largest
+    # possible set of individuals
     for (i in 1:(var_num - 1)) {
       if (n_above == 0) {
         if (verbose) {
@@ -136,6 +150,8 @@ filter_high_relatedness <-
         if (col_to_delete[i]) {
           break()
         }
+        # the mean relatedness of individual i, and of the remaining matrix
+        # without row j (see above)
         mn1 <- mean(matrix2[i, ], na.rm = TRUE)
         mn2 <- mean(matrix2[-j, ], na.rm = TRUE)
         if (verbose) {
