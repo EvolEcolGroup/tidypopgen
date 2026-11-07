@@ -138,6 +138,12 @@ windows_indiv_roh <- function(
   if (anyNA(chromosome)) {
     stop("the chromosomes of the loci should not be missing")
   }
+  if (anyNA(loci$position)) {
+    stop(
+      sum(is.na(loci$position)), " loci have a missing position, ",
+      "so runs can not be found"
+    )
+  }
   # windows slide along the loci table, so the loci of each chromosome must
   # be adjacent, and sorted by position (both checks are a single pass in
   # C++)

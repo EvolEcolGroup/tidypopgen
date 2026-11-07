@@ -336,6 +336,14 @@ test_that("windows_indiv_roh checks the loci and uses several cores", {
     windows_indiv_roh(unsorted_gt, window_size = 3),
     "sorted by chromosome and position"
   )
+  # positions can not be missing
+  loci <- show_loci(test_gt)
+  loci$position[4] <- NA
+  show_loci(test_gt) <- loci
+  expect_error(
+    windows_indiv_roh(test_gt, window_size = 3),
+    "1 loci have a missing position"
+  )
 })
 
 test_that("windows_indiv_roh returns tidy runs", {
