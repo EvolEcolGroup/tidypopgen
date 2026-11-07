@@ -1,4 +1,4 @@
-# Interpolating genetic data
+# Spatial interpolation of genetic data
 
 In this vignette, we will demonstrate how to interpolate principal
 component scores across geographic space using the tidypopgen

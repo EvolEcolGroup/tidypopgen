@@ -744,7 +744,7 @@ objects.
   HGDP](https://evolecolgroup.github.io/tidypopgen/articles/benchmark_hgdp.md):
 - [Working with big
   data](https://evolecolgroup.github.io/tidypopgen/articles/big_data.md):
-- [Interpolating genetic
+- [Spatial interpolation of genetic
   data](https://evolecolgroup.github.io/tidypopgen/articles/interpolating.md):
 - [Runs of homozygosity in the
   HGDP](https://evolecolgroup.github.io/tidypopgen/articles/roh_hgdp.md):

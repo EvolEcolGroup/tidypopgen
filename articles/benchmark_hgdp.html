@@ -45,7 +45,7 @@
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
-    <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul>
@@ -135,7 +135,7 @@ temporary directory:</p>
 <code>hgdp650_id_pop.txt</code> to read in our data.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bed_path</span> <span class="op">&lt;-</span> <span class="st">"./data/hgdp/hgdp650.qc.hg19.bed"</span></span>
-<span><span class="va">meta_info</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_tsv</a></span><span class="op">(</span><span class="st">"./data/hgdp/hgdp650_id_pop.txt"</span><span class="op">)</span></span>
+<span><span class="va">meta_info</span> <span class="op">&lt;-</span> <span class="fu">readr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/readr/man/read_delim.html" class="external-link">read_tsv</a></span><span class="op">(</span><span class="st">"./data/hgdp/hgdp650_id_pop.txt"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 1064 Columns: 6</span></span>
 <span><span class="co">#&gt; ── Column specification ────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; Delimiter: "\t"</span></span>
