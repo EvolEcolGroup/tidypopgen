@@ -21,6 +21,13 @@
 #' class(gt_hierfstat)
 gt_as_hierfstat <- function(x) {
   stopifnot_dip_pseudo(x)
+  # hierfstat needs the population of each individual
+  if (!"population" %in% names(x)) {
+    stop(
+      "x should have a 'population' column, with the population of each ",
+      "individual"
+    )
+  }
   # recode the dosages only (not the population labels): hierfstat codes the
   # genotypes 0, 1 and 2 as 11, 12 and 22. The genotypes are decoded in
   # blocks of loci, and each locus is recoded directly into a column of the

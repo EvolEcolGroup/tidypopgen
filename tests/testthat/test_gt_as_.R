@@ -270,3 +270,9 @@ test_that("gt_as_genind treats pseudohaploid dosage as diploid", {
   allele_tab <- adegenet::tab(test_genind)
   expect_equal(unname(allele_tab["a", "rs1.2"]), 2)
 })
+
+test_that("gt_as_hierfstat needs a population column", {
+  test_gt <- load_example_gt("gen_tbl")
+  test_gt$population <- NULL
+  expect_error(gt_as_hierfstat(test_gt), "'population' column")
+})
