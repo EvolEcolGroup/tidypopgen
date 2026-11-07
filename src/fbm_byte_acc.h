@@ -616,8 +616,34 @@ public:
   size_t nrow() const { return _acc.nrow(); }
   size_t ncol() const { return _acc.ncol(); }
   size_t ngroups() const { return _ngroups; }
-  // size of the (per-thread) buffer needed by locus()
+  // size of the (per-thread) buffer needed by locus(), and by loci4()
   size_t buffer_size() const { return 3 * _ngroups; }
+  size_t buffer_size4() const { return 4 * 3 * _ngroups; }
+
+  // The same as locus() for the four loci j, ..., j + 3: each output array
+  // must have 4 * ngroups elements (the groups of locus j + u start at
+  // u * ngroups), and buffer buffer_size4() elements. With lookup tables,
+  // the four loci are summed at once (see LutSums::loci4()).
+  inline void loci4(size_t j, double* alt_sum, double* n_alleles,
+                    double* het2, uint64_t* buffer) const {
+    if (_use_luts) {
+      LutSums<3>(_acc, _grouped, _luts, _ngroups).loci4(j, buffer);
+      for (size_t u = 0; u < 4; u++) {
+        const uint64_t* b = buffer + u * 3 * _ngroups;
+        size_t o = u * _ngroups;
+        for (size_t g = 0; g < _ngroups; g++) {
+          alt_sum[o + g] = b[3 * g] / 2.0;
+          n_alleles[o + g] = static_cast<double>(b[3 * g + 1]);
+          het2[o + g] = 2.0 * b[3 * g + 2];
+        }
+      }
+    } else {
+      for (size_t u = 0; u < 4; u++) {
+        size_t o = u * _ngroups;
+        locus(j + u, alt_sum + o, n_alleles + o, het2 + o, buffer);
+      }
+    }
+  }
 
   // Summarise locus j; each output array must have ngroups elements, and
   // buffer buffer_size() elements
