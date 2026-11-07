@@ -15,7 +15,13 @@
 #
 # It needs PLINK 1.9 (https://www.cog-genomics.org/plink/1.9/): by default
 # the `plink` executable on the PATH, or the one given by the environment
-# variable PLINK. PLINK 2 has no --homozyg.
+# variable PLINK. PLINK 2 has no --homozyg. It can be installed in a conda
+# environment with:
+# conda create -n plink19 -c bioconda -c conda-forge plink
+# and the script then run with:
+# PLINK=$(conda run -n plink19 which plink) Rscript \
+#   data-raw/validate/create_plink_roh_test_data.R
+# (the test data were created with PLINK v1.9.0 64-bit (27 Sep 2026))
 #
 # This script should be run from the root of the package
 

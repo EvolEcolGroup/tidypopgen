@@ -1,0 +1,8 @@
+"case","dataset","window_snp","window_het","window_missing","window_threshold","min_snp","min_kb","max_kb_per_snp","max_gap_kb","max_het","subtract_1_from_lengths"
+"sim_default","roh_sim",NA,NA,NA,NA,NA,NA,NA,NA,NA,FALSE
+"sim_window","roh_sim",20,0,1,0.1,30,300,NA,500,NA,FALSE
+"sim_het","roh_sim",NA,NA,NA,NA,50,500,NA,NA,0,FALSE
+"sim_lengths","roh_sim",30,2,NA,0.3,NA,800,20,NA,2,TRUE
+"small_a","small",5,1,1,0.05,3,1,10,15,1,FALSE
+"small_b","small",3,0,0,0.5,2,0.5,5,30,0,TRUE
+"small_c","small",8,2,2,0.2,5,10,50,1000,2,FALSE

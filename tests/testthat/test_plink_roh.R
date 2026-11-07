@@ -42,12 +42,13 @@ test_that("windows_indiv_roh gives the runs of PLINK --homozyg", {
     expect_identical(roh$end, hom$POS2, label = label)
     expect_identical(roh$n_loci, hom$NSNP, label = label)
     # PLINK prints the length in kb, and the proportion of heterozygous
-    # genotypes, with 3 decimals
+    # genotypes, with 3 decimals (which is enough to recover the number of
+    # heterozygous genotypes of runs of fewer than 1000 loci)
     expect_equal(roh$length_bp / 1000, hom$KB, tolerance = 1e-6,
       label = label
     )
-    expect_equal(round(roh$n_het / roh$n_loci, 3), hom$PHET,
-      tolerance = 1e-6, label = label
+    expect_identical(roh$n_het, as.integer(round(hom$PHET * hom$NSNP)),
+      label = label
     )
   }
 })
