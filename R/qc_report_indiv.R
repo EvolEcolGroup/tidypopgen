@@ -165,13 +165,10 @@ qc_report_indiv.grouped_gen_tbl <- function(.x, kings_threshold = NULL, ...) {
     # individuals to compare, and are left out
     non_empty <- groups$sizes > 0
 
-    # calculate the kinship matrix for each population
-    king <- .x %>% group_map(function(.x, .y) {
-      if (nrow(.x) == 0) {
-        return(NULL)
-      }
-      pairwise_king(.x, as_matrix = TRUE)
-    })
+    # calculate the kinship matrix for each population (packing the
+    # genotypes of all individuals once, and comparing only the pairs within
+    # each population)
+    king <- .pairwise_king_by_group(.x)
     names(king) <- groups$labels
     king <- king[non_empty]
 

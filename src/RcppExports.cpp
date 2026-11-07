@@ -579,6 +579,21 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// king_counts_within_groups
+NumericMatrix king_counts_within_groups(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupEnd, int ncores);
+RcppExport SEXP _tidypopgen_king_counts_within_groups(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupEndSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupEnd(groupEndSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(king_counts_within_groups(BM, rowInd, colInd, groupEnd, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
 // all_in_cpp
 bool all_in_cpp(const CharacterVector& x, const CharacterVector& table);
 RcppExport SEXP _tidypopgen_all_in_cpp(SEXP xSEXP, SEXP tableSEXP) {
@@ -729,6 +744,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 6},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 6},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 6},
+    {"_tidypopgen_king_counts_within_groups", (DL_FUNC) &_tidypopgen_king_counts_within_groups, 5},
     {"_tidypopgen_all_in_cpp", (DL_FUNC) &_tidypopgen_all_in_cpp, 2},
     {"_tidypopgen_which_in_cpp", (DL_FUNC) &_tidypopgen_which_in_cpp, 2},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},

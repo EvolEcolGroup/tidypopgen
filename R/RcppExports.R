@@ -137,6 +137,10 @@ increment_king_numerator <- function(k, n_Aa_i, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, BM, rowInd, colInd, ncores))
 }
 
+king_counts_within_groups <- function(BM, rowInd, colInd, groupEnd, ncores) {
+    .Call(`_tidypopgen_king_counts_within_groups`, BM, rowInd, colInd, groupEnd, ncores)
+}
+
 all_in_cpp <- function(x, table) {
     .Call(`_tidypopgen_all_in_cpp`, x, table)
 }
