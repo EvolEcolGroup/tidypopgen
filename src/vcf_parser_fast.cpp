@@ -95,6 +95,37 @@ inline CharacterVector chars_to_strings(const std::vector<char> &x) {
   return res;
 }
 
+// Strings stored one after the other in a single buffer, with the offset of
+// the start of each (and of the end of the last). With tens of millions of
+// loci names, this takes much less memory than a std::vector<std::string>
+// (32 bytes per string, plus a separate allocation for strings longer than
+// 15 characters, and copies of all of them whenever the vector grows)
+struct StringBuffer {
+  std::string chars;
+  std::vector<size_t> starts;
+  StringBuffer() { starts.push_back(0); }
+  void reserve(size_t n_strings, size_t n_chars) {
+    starts.reserve(n_strings + 1);
+    chars.reserve(n_chars);
+  }
+  void push_back(const std::string &x) {
+    chars.append(x);
+    starts.push_back(chars.size());
+  }
+  size_t size() const { return starts.size() - 1; }
+  // convert to an R character vector (freeing the buffer)
+  CharacterVector to_r() {
+    CharacterVector res(size());
+    for (size_t i = 0; i < size(); i++) {
+      SET_STRING_ELT(res, i, Rf_mkCharLen(chars.data() + starts[i],
+                                          starts[i + 1] - starts[i]));
+    }
+    std::string().swap(chars);
+    std::vector<size_t>().swap(starts);
+    return res;
+  }
+};
+
 // Function to split a string by multiple delimiters and return a vector of tokens
 inline std::vector<std::string> split_line(const std::string &s, const std::string &delimiters) {
   std::vector<std::string> tokens;
@@ -172,9 +203,9 @@ List vcf_loci_table(std::string filename, bool read_names = true) {
   std::vector<std::string> chromosome_names;
   std::unordered_map<std::string, int> chromosome_lookup;
   int this_chromosome = -1; // index of the chromosome of the previous locus
-  std::vector<std::string> marker_id;
+  StringBuffer marker_id;
   if (read_names) {
-    marker_id.reserve(10e6);
+    marker_id.reserve(10e6, 10e7);
   }
   std::vector<int32_t> physical_pos;
   physical_pos.reserve(10e6);
@@ -351,8 +382,7 @@ List vcf_loci_table(std::string filename, bool read_names = true) {
                                  _["allele1"] = allele1_r,
                                  _["allele2"] = allele2_r);
   if (read_names) {
-    loci_table["marker.ID"] = marker_id;
-    std::vector<std::string>().swap(marker_id);
+    loci_table["marker.ID"] = marker_id.to_r();
   }
 
   // Return a list containing the loci table and the ploidy vector
