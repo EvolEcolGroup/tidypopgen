@@ -42,6 +42,11 @@
   needs `detectRUNS` to be installed. The loci must now be sorted by
   chromosome and position (on unsorted loci, `detectRUNS` gave runs that
   start on the wrong chromosome)
+* `cbind()` on a `gen_tibble` makes duplicated column names unique, with a
+  message, as `dplyr::bind_cols()` (which `dplyr` already used for grouped
+  `gen_tibble`s); an ungrouped `gen_tibble` used to get two columns with the
+  same name. Adding a column called `id` or `genotypes` is now an error, as
+  renaming those would break the `gen_tibble`
 * the `as_is` argument of `rbind()` is deprecated: it was never implemented
   (loci were always harmonised, although a message said they would not be),
   and setting it to TRUE now gives a warning and has no effect
