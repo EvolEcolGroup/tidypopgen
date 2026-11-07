@@ -178,7 +178,7 @@ find_duplicated_loci <- function(.x,
 
 #' Test whether values are unsorted within any chromosome
 #'
-#' Equivalent to splitting `x` by [cast_chromosome_to_int()] of `chromosome`
+#' Equivalent to splitting `x` by `cast_chromosome_to_int()` of `chromosome`
 #' and checking whether any of the groups is unsorted (as [is.unsorted()], so a
 #' group of more than one value with missing values gives NA), but in a single
 #' pass in C++, without copying or splitting `x`. Chromosomes that cast to the
