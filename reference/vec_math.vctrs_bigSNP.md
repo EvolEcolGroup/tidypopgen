@@ -9,7 +9,8 @@ vectors.
 ## Usage
 
 ``` r
-vec_math.vctrs_bigSNP(.fn, .x, ...)
+# S3 method for class 'vctrs_bigSNP'
+vec_math(.fn, .x, ...)
 ```
 
 ## Arguments

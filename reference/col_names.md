@@ -47,3 +47,18 @@ Other matrix_int_names_functions:
 [`matrix_int_names()`](https://evolecolgroup.github.io/tidypopgen/reference/matrix_int_names.md),
 [`print.matrix_int_names()`](https://evolecolgroup.github.io/tidypopgen/reference/print.matrix_int_names.md),
 [`row_names()`](https://evolecolgroup.github.io/tidypopgen/reference/row_names.md)
+
+## Examples
+
+``` r
+my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+  row_names = c(10L, 20L),
+  col_names = c(100L, 200L, 300L)
+)
+col_names(my_mat)
+#> [1] 100 200 300
+# set character names instead
+col_names(my_mat) <- c("a", "b", "c")
+col_names(my_mat)
+#> [1] "a" "b" "c"
+```

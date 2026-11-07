@@ -46,6 +46,121 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.0" id="tidypopgen-100">tidypopgen 1.0.0<a class="anchor" aria-label="anchor" href="#tidypopgen-100"></a></h2>
+<div class="section level3">
+<h3 id="new-features-and-changes-1-0-0">New features and changes<a class="anchor" aria-label="anchor" href="#new-features-and-changes-1-0-0"></a></h3>
+<ul><li>optimisations to work on whole genomes, both speed and memory</li>
+<li>new functions to compute site frequency spectra (SFS) for demographic inference: <code><a href="../reference/pop_sfs.html">pop_sfs()</a></code>,<code><a href="../reference/pairwise_pop_sfs.html">pairwise_pop_sfs()</a></code> and <code><a href="../reference/nwise_pop_sfs.html">nwise_pop_sfs()</a></code>
+</li>
+<li>native <code><a href="../reference/windows_indiv_roh.html">windows_indiv_roh()</a></code> matching the algorithm used by PLINK 1.9 (<code>--homozyg</code>); the old version, based on <code>detectRUNS</code>, is deprecated as <code><a href="../reference/gt_roh_window.html">gt_roh_window()</a></code>
+</li>
+<li>
+<code><a href="../reference/gt_roh_froh.html">gt_roh_froh()</a></code>, <code><a href="../reference/gt_roh_loci.html">gt_roh_loci()</a></code> and <code><a href="../reference/gt_roh_islands.html">gt_roh_islands()</a></code> summarise runs of homozygosity (F_ROH, loci in runs, and ROH islands)</li>
+<li>
+<code>jackknife_*</code> functions for genome-wide statistics with block jackknife standard errors</li>
+<li>
+<code><a href="../reference/pop_tajimas_d.html">pop_tajimas_d()</a></code> and related functions handle missing genotypes as <code>pixy</code>, and work with polyploid and pseudohaploid data</li>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> method for the distance matrices of <code>pairwise_*</code> functions</li>
+<li>option to use integer loci names (<code>names_as_int</code>) for large datasets, when reading VCF and PLINK bed files</li>
+<li>polyploid support in <code><a href="../reference/indiv_het_obs.html">indiv_het_obs()</a></code>, <code><a href="../reference/pop_het_obs.html">pop_het_obs()</a></code>, <code><a href="../reference/loci_pi.html">loci_pi()</a></code> and <code><a href="../reference/gt_as_genind.html">gt_as_genind()</a></code>; clear errors where polyploids are not supported</li>
+<li>
+<code>pairwise_ibs(type = "adjusted_counts")</code> now returns PLINK’s allele count distance (<code>--distance flat-missing</code>)</li>
+<li>
+<code>pairwise_*</code> functions use imputed genotypes when set with <code><a href="../reference/gt_set_imputed.html">gt_set_imputed()</a></code>, and use several cores by default</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> on ped files stores individual information in the same columns as for bed files (see <code><a href="../reference/gen_tibble.html">?gen_tibble</a></code>)</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> copies the backing file of bigSNP objects (never modifying them), and works on read-only files</li>
+<li>
+<code>rbind(use_position = TRUE)</code> keeps the loci names of the reference, and needs much less memory; integer names are matched by position</li>
+<li>the <code>as_is</code> argument of <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> is deprecated (it was never implemented)</li>
+<li>
+<code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind()</a></code> renames duplicated columns as <code><a href="https://dplyr.tidyverse.org/reference/bind_cols.html" class="external-link">dplyr::bind_cols()</a></code>; <code>id</code> and <code>genotypes</code> can not be added</li>
+<li>
+<code>distruct_colours</code> holds the 56 distinct distruct colours, recycled with a warning by <code><a href="../reference/scale_fill_distruct.html">scale_fill_distruct()</a></code>
+</li>
+<li>
+<code><a href="../reference/gt_as_genlight.html">gt_as_genlight()</a></code> keeps alleles, chromosomes and positions, so that <code><a href="../reference/gt_from_genlight.html">gt_from_genlight()</a></code> can convert back</li>
+<li>classes are preserved by all dplyr verbs; grouped functions keep the order of factor levels, and work with several grouping variables and empty groups</li>
+<li>
+<code><a href="../reference/heatmap_add_dendro.html">heatmap_add_dendro()</a></code> returns a <code>gtable</code>, which can be combined with patchwork</li>
+<li>
+<code><a href="../reference/augment_loci.html">augment_loci()</a></code> works on <code><a href="../reference/gt_pca_autoSVD.html">gt_pca_autoSVD()</a></code> results</li>
+<li>
+<code><a href="../reference/gt_admixture.html">gt_admixture()</a></code> uses ADMIXTURE on the PATH when conda is not installed</li>
+<li>faster “cpp” VCF parser, and <code><a href="../reference/select_loci_if.html">select_loci_if()</a></code> no longer loads all the genotypes</li>
+<li>informative errors for invalid inputs to <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>, <code>show_loci&lt;-</code>, <code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code>, <code><a href="../reference/gt_pcadapt.html">gt_pcadapt()</a></code>, <code><a href="../reference/gt_dapc.html">gt_dapc()</a></code>, <code><a href="../reference/pop_fst.html">pop_fst()</a></code> and others</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-1-0-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>: fix backing file names (truncated at dots, or “.vcf.bk”), and backing files left behind on errors</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>: fix files with trailing blank lines, CRLF line endings or upper case extensions</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> on bed files keeps .fam IDs as text, and quantitative phenotypes as numbers</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> on VCF files: fix the ploidy of individuals missing on the first variant, partially missing genotypes, and genotypes above the ploidy</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>: “0” and “.” are always missing alleles; fix the “vcfR” parser on indels and on missing genotypes on the second variant</li>
+<li>
+<code><a href="../reference/gt_load.html">gt_load()</a></code>: fix the ploidies of gen_tibbles saved in the old bigSNP format</li>
+<li>
+<code><a href="../reference/gt_as_plink.html">gt_as_plink()</a></code>: fix the .fam and .map information, missing alleles, and ped/raw files with numeric phenotypes, no population or pseudohaploids</li>
+<li>
+<code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> and <code><a href="../reference/gt_as_plink.html">gt_as_plink()</a></code>: fix positions in scientific notation, and the date in the VCF header</li>
+<li>
+<code><a href="../reference/gt_admixture.html">gt_admixture()</a></code> and <code><a href="../reference/gt_snmf.html">gt_snmf()</a></code>: fix seeds with several runs, paths containing “geno”, and the order of loci in P matrices</li>
+<li>
+<code><a href="../reference/gt_snmf.html">gt_snmf()</a></code>: fix continued projects, and the order of cross-entropies</li>
+<li>
+<code><a href="../reference/gt_impute_xgboost.html">gt_impute_xgboost()</a></code>: fix unsorted loci; <code><a href="../reference/gt_impute_simple.html">gt_impute_simple()</a></code>: restore the BLAS option</li>
+<li>
+<code><a href="../reference/filter_high_relatedness.html">filter_high_relatedness()</a></code>: fix missing and strongly negative kinship coefficients</li>
+<li>
+<code><a href="../reference/snp_allele_sharing.html">snp_allele_sharing()</a></code>: fix blocks of different sizes; <code><a href="../reference/indiv_het_obs.html">indiv_het_obs()</a></code>: fix the number of loci after <code><a href="../reference/select_loci.html">select_loci()</a></code>
+</li>
+<li>
+<code><a href="../reference/pop_global_stats.html">pop_global_stats()</a></code>: fix loci where a population has no data; <code><a href="../reference/pop_tajimas_d.html">pop_tajimas_d()</a></code>: fix loci with no valid genotypes</li>
+<li>
+<code><a href="../reference/loci_alt_freq.html">loci_alt_freq()</a></code> and <code><a href="../reference/loci_alt_freq.html">loci_maf()</a></code>: fix polyploids and single individuals</li>
+<li>grouped <code>loci_*</code> functions and <code>qc_report_*</code>: fix factor, numeric, non-contiguous and empty groups, and p-values above 1</li>
+<li>
+<code><a href="../reference/loci_transitions.html">loci_transitions()</a></code> and <code><a href="../reference/loci_transversions.html">loci_transversions()</a></code>: fix misclassified substitutions</li>
+<li>
+<code>windows_*</code> functions: fix the last loci of chromosomes; <code><a href="../reference/windows_pairwise_pop_fst.html">windows_pairwise_pop_fst()</a></code> and <code><a href="../reference/windows_nwise_pop_pbs.html">windows_nwise_pop_pbs()</a></code> ignoring <code>method</code>
+</li>
+<li>
+<code><a href="../reference/gt_roh_window.html">gt_roh_window()</a></code>: fix homozygotes for the alternate allele with <code>heterozygosity = TRUE</code>
+</li>
+<li>
+<code><a href="../reference/gt_dapc.html">gt_dapc()</a></code> and <code><a href="../reference/gt_cluster_pca.html">gt_cluster_pca()</a></code>: fix the default number of components, the variance retained, and the choice of k</li>
+<li>
+<code><a href="../reference/gt_pca_autoSVD.html">gt_pca_autoSVD()</a></code>: fix unsorted loci; <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> of <code>gt_pca</code> and <code>gt_dapc</code>: fix single components and integer ids</li>
+<li>
+<code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>: fix ploidies after filtering, and missing <code>allele_ref</code>; <code><a href="../reference/rbind_dry_run.html">rbind_dry_run()</a></code>: fix paths to .bim files</li>
+<li>dplyr verbs on grouped gen_tibbles: fix <code><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/relocate.html" class="external-link">relocate()</a></code>, <code>[</code>, <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup()</a></code>, <code><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by()</a></code> and <code><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate()</a></code>
+</li>
+<li>
+<code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> of <code>q_matrix</code> and <code>gt_admix</code>: fix the sorting options, numeric and unused groups, and <code>type = "cv"</code>; ordering in other <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code>s</li>
+<li>
+<code><a href="../reference/gt_admix_reorder_q.html">gt_admix_reorder_q()</a></code>: fix K = 1</li>
+<li>
+<code><a href="../reference/heatmap_add_dendro.html">heatmap_add_dendro()</a></code>: fix ties and older ggplot2; <code><a href="../reference/heatmap_pairwise.html">heatmap_pairwise()</a></code>: fix factor ids</li>
+<li>fix chromosome names being renumbered in lexicographic order</li>
+<li>
+<code><a href="../reference/gt_pseudohaploid.html">gt_pseudohaploid()</a></code>: fix other individuals of the backing file, and error on data that are not diploid</li>
+<li>
+<code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> and <code><a href="https://generics.r-lib.org/reference/augment.html" class="external-link">augment()</a></code> of <code>q_matrix</code>: fix ignoring individual ids</li>
+<li>
+<code><a href="../reference/gt_as_genind.html">gt_as_genind()</a></code>: fix loci names with “.”; <code><a href="../reference/gt_from_genlight.html">gt_from_genlight()</a></code>: fix objects without <code>pop</code>; <code><a href="../reference/gt_as_hierfstat.html">gt_as_hierfstat()</a></code>: fix numeric labels</li>
+<li>
+<code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code>: fix numbers of loci that are multiples of <code>chunk_size</code>; fix printing gen_tibbles with no loci</li>
+<li>fix documentation and error messages of several functions</li>
+</ul></div>
+</div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.4.4" id="tidypopgen-044">tidypopgen 0.4.4<a class="anchor" aria-label="anchor" href="#tidypopgen-044"></a></h2><p class="text-muted">CRAN release: 2026-05-19</p>
 <ul><li>fix seed argument of <code><a href="../reference/gt_admixture.html">gt_admixture()</a></code>
 </li>
