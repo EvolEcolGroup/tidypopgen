@@ -4,7 +4,7 @@
 \alias{vec_math.vctrs_bigSNP}
 \title{Mathematical predicates for vctrs_bigSNP vectors}
 \usage{
-vec_math.vctrs_bigSNP(.fn, .x, ...)
+\method{vec_math}{vctrs_bigSNP}(.fn, .x, ...)
 }
 \arguments{
 \item{.fn}{Name of the mathematical function being dispatched.}
@@ -30,3 +30,4 @@ mathematical predicates on custom vctrs classes.
 All other Math-group generics are deliberately unsupported and
 will raise an error.
 }
+\keyword{internal}

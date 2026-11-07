@@ -1,4 +1,4 @@
-# tidypopgen `dev`
+# tidypopgen 1.0.0
 
 ## New features and changes
 
