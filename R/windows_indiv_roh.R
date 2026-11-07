@@ -1,4 +1,4 @@
-#' Detect runs of homozygosity using a sliding-window approach, as PLINK
+#' Detect runs of homozygosity using a sliding-window
 #'
 #' This function looks for runs of homozygosity in a diploid genome with the
 #' sliding-window algorithm of PLINK 1.9 (`--homozyg`), with the same

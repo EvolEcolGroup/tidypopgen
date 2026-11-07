@@ -95,10 +95,11 @@
 #'   Default is FALSE.
 #' @param names_as_int logical. If TRUE, locus names will be
 #'   converted to integers. Only used when `x` is a *VCF* file with parser
-#'   "cpp". Default is FALSE. This can be useful when working with very large
-#'   datasets where storing the names as string can use a large amount of
-#'   memory. Integer names are the index of each locus in the *VCF*, so they
-#'   can not be used to match loci across datasets: [rbind()][rbind.gen_tbl] and
+#'   "cpp", a PLINK *bed* file or a bigSNP *rds* file. Default is FALSE. This
+#'   can be useful when working with very large datasets where storing the
+#'   names as string can use a large amount of memory. Integer names are the
+#'   index of each locus in the *VCF* (or *bim*) file, so they can not be used
+#'   to match loci across datasets: [rbind()][rbind.gen_tbl] and
 #'   [rbind_dry_run()] always match loci with integer names by chromosome and
 #'   position.
 #' @param quiet provide information on the files used to store the data
@@ -207,6 +208,17 @@ gen_tibble.character <-
     # normalise path
     x <- normalizePath(x, mustWork = FALSE)
 
+    # integer names of loci are only available for some formats
+    ext <- tolower(file_ext(x))
+    names_as_int_ok <- ext %in% c("bed", "rds") ||
+      (ext %in% c("vcf", "gz") && parser == "cpp")
+    if (isTRUE(names_as_int) && !names_as_int_ok) {
+      stop(
+        "names_as_int = TRUE is only available for PLINK bed files, ",
+        "bigSNP rds files and VCF files read with parser = 'cpp'"
+      )
+    }
+
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
       x_gt <- gen_tibble_bed_rds(
@@ -216,6 +228,7 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
+        names_as_int = names_as_int,
         quiet = quiet
       )
     } else if (

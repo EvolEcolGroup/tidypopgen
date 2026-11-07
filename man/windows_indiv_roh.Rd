@@ -2,7 +2,7 @@
 % Please edit documentation in R/windows_indiv_roh.R
 \name{windows_indiv_roh}
 \alias{windows_indiv_roh}
-\title{Detect runs of homozygosity using a sliding-window approach, as PLINK}
+\title{Detect runs of homozygosity using a sliding-window}
 \usage{
 windows_indiv_roh(
   .x,

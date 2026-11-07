@@ -2,6 +2,7 @@
 
 ## New features and changes
 
+* optimisations to work on whole genomes, both speed and memory
 * new functions to compute site frequency spectra (SFS) for demographic
   inference: `pop_sfs()`,`pairwise_pop_sfs()` and `nwise_pop_sfs()`
 * native `windows_indiv_roh()` matching the algorithm used by PLINK 1.9 
@@ -14,7 +15,8 @@
 * `pop_tajimas_d()` and related functions handle missing genotypes as `pixy`,
   and work with polyploid and pseudohaploid data
 * `autoplot()` method for the distance matrices of `pairwise_*` functions
-* option to use integer loci names (`names_as_int`) for large datasets
+* option to use integer loci names (`names_as_int`) for large datasets, when
+  reading VCF and PLINK bed files
 * polyploid support in `indiv_het_obs()`, `pop_het_obs()`, `loci_pi()` and
   `gt_as_genind()`; clear errors where polyploids are not supported
 * `pairwise_ibs(type = "adjusted_counts")` now returns PLINK's allele count
