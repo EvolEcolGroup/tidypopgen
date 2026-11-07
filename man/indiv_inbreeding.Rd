@@ -2,14 +2,14 @@
 % Please edit documentation in R/indiv_inbreeding.R
 \name{indiv_inbreeding}
 \alias{indiv_inbreeding}
-\alias{indiv_inbreeding.tbl_df}
+\alias{indiv_inbreeding.gen_tbl}
 \alias{indiv_inbreeding.vctrs_bigSNP}
 \alias{indiv_inbreeding.grouped_gen_tbl}
 \title{Individual inbreeding coefficient}
 \usage{
-indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
+indiv_inbreeding(.x, ...)
 
-\method{indiv_inbreeding}{tbl_df}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
+\method{indiv_inbreeding}{gen_tbl}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
 \method{indiv_inbreeding}{vctrs_bigSNP}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
@@ -17,7 +17,10 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of
-a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
+a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}. The method for the
+\code{genotypes} column needs \code{allele_sharing_mat}.}
+
+\item{...}{other arguments passed to specific methods, currently unused.}
 
 \item{method}{currently only "WG17" (for Weir and Goudet 2017).}
 
@@ -26,15 +29,21 @@ of Allele Sharing returned by \code{\link[=pairwise_allele_sharing]{pairwise_all
 \code{as_matrix=TRUE}. As a number of statistics can be derived from the Allele
 Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
 It is not possible to use this with grouped tibbles.}
-
-\item{...}{currently unused.}
 }
 \value{
-a numeric vector of inbreeding coefficients.
+a numeric vector of inbreeding coefficients. For a grouped
+\code{\link{gen_tibble}}, a list of such vectors, one per group (the coefficients
+are computed within each group).
 }
 \description{
 This function calculates the inbreeding coefficient for each individual based
 on the beta estimate from Weir and Goudet (2017).
+}
+\details{
+\code{indiv_inbreeding()} is an S3 generic, with methods for \code{\link{gen_tibble}}
+objects (grouped or not) and for their \code{genotypes} column. Other packages
+can add methods for their own classes (e.g. tibbles of genotype
+likelihoods).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
