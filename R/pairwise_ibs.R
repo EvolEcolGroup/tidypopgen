@@ -51,7 +51,15 @@
 #' Pairs of individuals without any locus genotyped in both (or, with
 #' "allele_freq", without any polymorphic locus genotyped in both) have
 #' `NaN` (or `Inf`) values.
-#' @param x a `gen_tibble` object.
+#'
+#' `pairwise_ibs()` is an S3 generic. The method for a [`gen_tibble`]
+#' computes the matrix with the method for its `genotypes` column (of class
+#' `vctrs_bigSNP`), and labels it with the `id` of the individuals; grouping
+#' is ignored. Other packages can add methods for their own classes of
+#' genotypes (e.g. genotype likelihoods).
+#' @param x a `gen_tibble` object, or a vector of class `vctrs_bigSNP` (the
+#'   `genotypes` column of a [`gen_tibble`], whose individuals are then
+#'   labelled with the names of the vector).
 #' @param as_matrix boolean, determining whether the results should be a square
 #'   symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)
 #' @param type one of:
@@ -90,6 +98,8 @@
 #'   [bigstatsr::FBM] matrices, `ibs` (the counts of alleles identical by
 #'   state) and `valid_n` (the counts of non-missing alleles, i.e. twice the
 #'   number of loci genotyped in both individuals).
+#' @param ... other arguments passed to specific methods, currently unused.
+#' @rdname pairwise_ibs
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
@@ -111,7 +121,13 @@
 #'   type = "adjusted_counts",
 #'   missing_correction = "allele_freq"
 #' )
-pairwise_ibs <- function(
+pairwise_ibs <- function(x, ...) {
+  UseMethod("pairwise_ibs", x)
+}
+
+#' @export
+#' @rdname pairwise_ibs
+pairwise_ibs.tbl_df <- function(
   x,
   as_matrix = FALSE,
   type = c(
@@ -122,29 +138,76 @@ pairwise_ibs <- function(
   block_size = bigstatsr::block_size(nrow(x)),
   n_cores = bigstatsr::nb_cores(),
   missing_correction = c("flat", "allele_freq"),
-  allele_freqs = NULL
+  allele_freqs = NULL,
+  ...
 ) {
+  stopifnot_has_genotypes(x)
+  # hand the genotypes column over to its method, which returns a
+  # pairwise_matrix (or a list of two count matrices for "raw_counts"), and
+  # label it with the ids of the tibble (the matrix is modified in place,
+  # without copies)
+  ibs_matrix <- pairwise_ibs(
+    x$genotypes,
+    as_matrix = TRUE,
+    type = type,
+    block_size = block_size,
+    n_cores = n_cores,
+    missing_correction = missing_correction,
+    allele_freqs = allele_freqs,
+    ...
+  )
+  if (inherits(ibs_matrix, "matrix")) {
+    dimnames(ibs_matrix) <- list(x$id, x$id)
+    if (as_matrix) {
+      return(ibs_matrix)
+    } else {
+      class(ibs_matrix) <- NULL
+      return(tidy_dist_matrix(ibs_matrix))
+    }
+  }
+  # else if we have a list of two count matrices
+  attr(ibs_matrix[[1]], "indiv_names") <- x$id
+  attr(ibs_matrix[[2]], "indiv_names") <- x$id
+  ibs_matrix
+}
+
+#' @export
+#' @rdname pairwise_ibs
+pairwise_ibs.vctrs_bigSNP <- function(
+  x,
+  as_matrix = FALSE,
+  type = c(
+    "proportion",
+    "adjusted_counts",
+    "raw_counts"
+  ),
+  block_size = bigstatsr::block_size(length(x)),
+  n_cores = bigstatsr::nb_cores(),
+  missing_correction = c("flat", "allele_freq"),
+  allele_freqs = NULL,
+  ...
+) {
+  rlang::check_dots_empty()
   stopifnot_diploid(x)
   type <- match.arg(type)
-  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
-  x_ind_col <- show_loci(x)$big_index
-  x_ind_row <- vctrs::vec_data(x$genotypes)
   ibs_matrix <- snp_ibs(
-    X,
-    ind.row = x_ind_row,
-    ind.col = x_ind_col,
+    attr(x, "fbm"),
+    ind.row = vctrs::vec_data(x),
+    ind.col = show_loci(x)$big_index,
     type = type,
     block.size = block_size,
     n_cores = n_cores,
     missing_correction = missing_correction,
     allele_freqs = allele_freqs
   )
+  # the individuals are labelled with the names of the vector (the ids of the
+  # gen_tibble)
   if (inherits(ibs_matrix, "matrix")) {
-    dimnames(ibs_matrix) <- list(x$id, x$id)
+    dimnames(ibs_matrix) <- list(names(x), names(x))
   } else {
     # else if we have a list of two count matrices
-    attr(ibs_matrix[[1]], "indiv_names") <- x$id
-    attr(ibs_matrix[[2]], "indiv_names") <- x$id
+    attr(ibs_matrix[[1]], "indiv_names") <- names(x)
+    attr(ibs_matrix[[2]], "indiv_names") <- names(x)
   }
 
   if (type == "proportion" || type == "adjusted_counts") {
