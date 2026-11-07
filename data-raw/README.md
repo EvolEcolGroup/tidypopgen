@@ -29,6 +29,7 @@ vignettes and `dev_notes/` point to some of these files.
 | File | What it makes |
 |---|---|
 | `create_distruct_colours.R` | The `distruct_colours` dataset (`data/`), from `data_files/default_colors.txt`. |
+| `create_roh_dataset.R` | A simulated dataset with known runs of homozygosity (`inst/extdata/roh/roh_sim.*` and `roh_sim_truth.csv`): 30 individuals in three populations with increasing inbreeding, 3,000 loci on three chromosomes, and runs designed to test edge cases. Used by the examples and tests of `windows_indiv_roh()`. |
 | `create_ibs_dataset.R` | The simulated families (`inst/extdata/related/families.*`), used to test relatedness and IBS. |
 | `create_ploidy_vcf.R` | A small VCF of mixed ploidy (*Arabidopsis arenosa*), from the data of the chapter whose script is `misc/AdegenetPolyplChapter.R`. |
 | `create_a03_admixture_output.Rmd` | The ADMIXTURE results for the anolis data, used by vignette a03 (`vignettes/a03_anole_adm.rds`) and in `inst/extdata/anolis/anole_adm_k3.rds`. |
