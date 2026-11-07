@@ -51,11 +51,12 @@ read_pedfile <- function(
   na_strings = "0",
   quiet = FALSE
 ) {
-  # constants
+  # constants (integers, so that the matrix of genotypes is an integer
+  # matrix, rather than a double one)
   r0 <- NA_integer_
-  r1 <- 0
-  r2 <- 1
-  r3 <- 2
+  r1 <- 0L
+  r2 <- 1L
+  r3 <- 2L
 
   ## Input file
   con <- gzfile(file)
@@ -110,8 +111,9 @@ read_pedfile <- function(
     seek(con, 0)
   }
   nf <- 6 + 2 * m
-  ## Generate empty matrix
-  result <- matrix(rep(NA, n * m), nrow = n)
+  ## Generate empty matrix (of integers, so that it is not converted, and
+  ## copied, when the first row is filled in)
+  result <- matrix(NA_integer_, nrow = n, ncol = m)
   ## Columns of subject dataframe
   ped <- character(n)
   mem <- character(n)
