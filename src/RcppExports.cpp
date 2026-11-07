@@ -482,8 +482,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // roh_sliding_cpp
-List roh_sliding_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& chrom, SEXP position, int window_size, double threshold, bool heterozygosity, int max_opp_window, int max_miss_window, double max_gap, double min_snp, double min_length_bps, double min_density, double max_opp_run, double max_miss_run, int ncores, int block_size);
-RcppExport SEXP _tidypopgen_roh_sliding_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP chromSEXP, SEXP positionSEXP, SEXP window_sizeSEXP, SEXP thresholdSEXP, SEXP heterozygositySEXP, SEXP max_opp_windowSEXP, SEXP max_miss_windowSEXP, SEXP max_gapSEXP, SEXP min_snpSEXP, SEXP min_length_bpsSEXP, SEXP min_densitySEXP, SEXP max_opp_runSEXP, SEXP max_miss_runSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
+List roh_sliding_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& chrom, SEXP position, int window_size, int max_het_window, int max_miss_window, double threshold, double max_gap, double min_snp, double min_bases, double max_bases_per_snp, double max_het, bool old_lengths, int ncores, int block_size);
+RcppExport SEXP _tidypopgen_roh_sliding_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP chromSEXP, SEXP positionSEXP, SEXP window_sizeSEXP, SEXP max_het_windowSEXP, SEXP max_miss_windowSEXP, SEXP thresholdSEXP, SEXP max_gapSEXP, SEXP min_snpSEXP, SEXP min_basesSEXP, SEXP max_bases_per_snpSEXP, SEXP max_hetSEXP, SEXP old_lengthsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -493,19 +493,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type chrom(chromSEXP);
     Rcpp::traits::input_parameter< SEXP >::type position(positionSEXP);
     Rcpp::traits::input_parameter< int >::type window_size(window_sizeSEXP);
-    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
-    Rcpp::traits::input_parameter< bool >::type heterozygosity(heterozygositySEXP);
-    Rcpp::traits::input_parameter< int >::type max_opp_window(max_opp_windowSEXP);
+    Rcpp::traits::input_parameter< int >::type max_het_window(max_het_windowSEXP);
     Rcpp::traits::input_parameter< int >::type max_miss_window(max_miss_windowSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
     Rcpp::traits::input_parameter< double >::type max_gap(max_gapSEXP);
     Rcpp::traits::input_parameter< double >::type min_snp(min_snpSEXP);
-    Rcpp::traits::input_parameter< double >::type min_length_bps(min_length_bpsSEXP);
-    Rcpp::traits::input_parameter< double >::type min_density(min_densitySEXP);
-    Rcpp::traits::input_parameter< double >::type max_opp_run(max_opp_runSEXP);
-    Rcpp::traits::input_parameter< double >::type max_miss_run(max_miss_runSEXP);
+    Rcpp::traits::input_parameter< double >::type min_bases(min_basesSEXP);
+    Rcpp::traits::input_parameter< double >::type max_bases_per_snp(max_bases_per_snpSEXP);
+    Rcpp::traits::input_parameter< double >::type max_het(max_hetSEXP);
+    Rcpp::traits::input_parameter< bool >::type old_lengths(old_lengthsSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
-    rcpp_result_gen = Rcpp::wrap(roh_sliding_cpp(BM, rowInd, colInd, chrom, position, window_size, threshold, heterozygosity, max_opp_window, max_miss_window, max_gap, min_snp, min_length_bps, min_density, max_opp_run, max_miss_run, ncores, block_size));
+    rcpp_result_gen = Rcpp::wrap(roh_sliding_cpp(BM, rowInd, colInd, chrom, position, window_size, max_het_window, max_miss_window, threshold, max_gap, min_snp, min_bases, max_bases_per_snp, max_het, old_lengths, ncores, block_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -777,7 +776,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
-    {"_tidypopgen_roh_sliding_cpp", (DL_FUNC) &_tidypopgen_roh_sliding_cpp, 18},
+    {"_tidypopgen_roh_sliding_cpp", (DL_FUNC) &_tidypopgen_roh_sliding_cpp, 17},
     {"_tidypopgen_sfs_config_counts_cpp", (DL_FUNC) &_tidypopgen_sfs_config_counts_cpp, 14},
     {"_tidypopgen_sfs_project_cpp", (DL_FUNC) &_tidypopgen_sfs_project_cpp, 5},
     {"_tidypopgen_sfs_preview_cpp", (DL_FUNC) &_tidypopgen_sfs_preview_cpp, 4},

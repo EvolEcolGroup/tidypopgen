@@ -2,76 +2,68 @@
 % Please edit documentation in R/windows_indiv_roh.R
 \name{windows_indiv_roh}
 \alias{windows_indiv_roh}
-\alias{gt_roh_window}
-\title{Detect runs of homozygosity using a sliding-window approach}
+\title{Detect runs of homozygosity using a sliding-window approach, as PLINK}
 \usage{
 windows_indiv_roh(
   .x,
-  window_size = 15,
-  threshold = 0.05,
-  min_snp = 3,
-  heterozygosity = FALSE,
-  max_opp_window = 1,
-  max_miss_window = 1,
-  max_gap = 10^6,
-  min_length_bps = 1000,
-  min_density = 1/1000,
-  max_opp_run = NULL,
-  max_miss_run = NULL,
-  n_cores = bigstatsr::nb_cores()
-)
-
-gt_roh_window(
-  .x,
-  window_size = 15,
-  threshold = 0.05,
-  min_snp = 3,
-  heterozygosity = FALSE,
-  max_opp_window = 1,
-  max_miss_window = 1,
-  max_gap = 10^6,
-  min_length_bps = 1000,
-  min_density = 1/1000,
-  max_opp_run = NULL,
-  max_miss_run = NULL,
-  n_cores = bigstatsr::nb_cores()
+  window_snp = 50,
+  window_het = 1,
+  window_missing = 5,
+  window_threshold = 0.05,
+  min_snp = 100,
+  min_kb = 1000,
+  max_kb_per_snp = 50,
+  max_gap_kb = 1000,
+  max_het = Inf,
+  subtract_1_from_lengths = FALSE,
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 }
 \arguments{
 \item{.x}{a \link{gen_tibble}}
 
-\item{window_size}{the size of sliding window (number of SNP loci) (default =
-15)}
+\item{window_snp}{the number of loci in each window (PLINK
+\code{--homozyg-window-snp}, default 50)}
 
-\item{threshold}{the threshold of overlapping windows of the same state
-(homozygous/heterozygous) to call a SNP in a RUN (default = 0.05)}
+\item{window_het}{the largest number of heterozygous genotypes in a window
+that is a hit (PLINK \code{--homozyg-window-het}, default 1)}
 
-\item{min_snp}{minimum n. of SNP in a RUN (default = 3)}
+\item{window_missing}{the largest number of missing genotypes in a window
+that is a hit (PLINK \code{--homozyg-window-missing}, default 5)}
 
-\item{heterozygosity}{should we look for runs of heterozygosity (instead of
-homozygosity? (default = FALSE)}
+\item{window_threshold}{the smallest proportion of the windows that
+include a locus that must be hits for the locus to be in a run (PLINK
+\code{--homozyg-window-threshold}, default 0.05)}
 
-\item{max_opp_window}{max n. of SNPs of the opposite type (e.g. heterozygous
-snps for runs of homozygosity) in the sliding window (default = 1)}
+\item{min_snp}{the smallest number of loci in a run (PLINK \code{--homozyg-snp},
+default 100)}
 
-\item{max_miss_window}{max. n. of missing SNP in the sliding window (default
-= 1)}
+\item{min_kb}{the smallest length of a run, in kb (PLINK \code{--homozyg-kb},
+default 1000)}
 
-\item{max_gap}{max distance between consecutive SNP to be still considered a
-potential run (default = 10^6 bps)}
+\item{max_kb_per_snp}{the largest average distance between the loci of a
+run, in kb per locus, i.e. the inverse of its smallest density (PLINK
+\code{--homozyg-density}, default 50)}
 
-\item{min_length_bps}{minimum length of run in bps (defaults to 1000 bps = 1
-kbps)}
+\item{max_gap_kb}{the largest gap between two consecutive loci of a run, in
+kb: a larger gap breaks a run (PLINK \code{--homozyg-gap}, default 1000)}
 
-\item{min_density}{minimum n. of SNP per kbps (defaults to 0.1 = 1 SNP every
-10 kbps)}
+\item{max_het}{the largest number of heterozygous genotypes in a run
+(PLINK \code{--homozyg-het}, default \code{Inf}, i.e. no limit): a run is broken
+before the heterozygous genotype that would exceed it}
 
-\item{max_opp_run}{max n. of opposite genotype SNPs in the run (optional)}
-
-\item{max_miss_run}{max n. of missing SNPs in the run (optional)}
+\item{subtract_1_from_lengths}{if \code{TRUE}, the length of a run is the
+distance between its first and last positions; by default it is that
+distance + 1, as in PLINK 1.9 (PLINK \verb{--homozyg subtract-1-from-lengths},
+which gives the lengths of PLINK 1.07)}
 
 \item{n_cores}{the number of cores to use (individuals are analysed in
 parallel)}
+
+\item{...}{not used. The arguments of the version of this function based
+on \code{detectRUNS} (e.g. \code{window_size}) give an error: use
+\code{\link[=gt_roh_window]{gt_roh_window()}} for that version.}
 }
 \value{
 An \code{indiv_roh} object, a tibble with one row per run, ordered by
@@ -85,64 +77,65 @@ per grouping variable);
 \item \code{chromosome}: the chromosome of the run (a factor, with the levels of
 the loci table);
 \item \code{start}, \code{end}: the positions of the first and last locus of the run
-(in bp);
-\item \code{length_bp}: \code{end - start};
-\item \code{n_loci}: the number of loci in the run;
+(in bp; PLINK \code{POS1} and \code{POS2});
+\item \code{length_bp}: \code{end - start + 1} (or \code{end - start} with
+\code{subtract_1_from_lengths = TRUE}; PLINK \code{KB} x 1000);
+\item \code{n_loci}: the number of loci in the run (PLINK \code{NSNP});
 \item \code{first_locus}, \code{last_locus}: the rows of the first and last locus of
 the run in the loci table (\code{\link[=show_loci]{show_loci()}});
-\item \code{n_opp}: the number of loci of the run with the opposite genotype
-(heterozygous for runs of homozygosity, homozygous for runs of
-heterozygosity);
-\item \code{n_missing}: the number of loci of the run with a missing genotype.
+\item \code{n_het}: the number of heterozygous genotypes in the run (PLINK \code{PHET}
+x \code{NSNP});
+\item \code{n_missing}: the number of missing genotypes in the run.
 }
 
 Its attributes \code{individuals} (a tibble of all the individuals, with
-their groups, including those with no run), \code{chromosome_length} (the
-length of each chromosome, its largest position, as in \code{detectRUNS}) and
-\code{heterozygosity} are used by \code{\link[=autoplot.indiv_roh]{autoplot.indiv_roh()}}.
+their groups, including those with no run) and \code{chromosome_length} (the
+length of each chromosome, its largest position, as in \code{detectRUNS}) are
+used by \code{\link[=autoplot.indiv_roh]{autoplot.indiv_roh()}}.
 }
 \description{
-This function uses a sliding-window approach to look for runs of homozygosity
-(or heterozygosity) in a diploid genome. It implements the algorithm of
-\code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}}, which is equivalent to the one in PLINK,
-natively in C++: all individuals are analysed in a single pass over the
-genotypes, without loading the genotypes of each individual into R.
+This function looks for runs of homozygosity in a diploid genome with the
+sliding-window algorithm of PLINK 1.9 (\code{--homozyg}), with the same
+parameters and defaults. It is implemented natively in C++: all individuals
+are analysed in a single pass over the genotypes.
 }
 \details{
-Windows of \code{window_size} consecutive loci slide along each chromosome, one
-locus at a time. A window is homozygous (for runs of homozygosity) if it
-contains at most \code{max_opp_window} heterozygous genotypes and at most
-\code{max_miss_window} missing genotypes, and no gap larger than \code{max_gap}
-between consecutive loci. A locus is in a run if the proportion of
-homozygous windows among all the windows that include it is larger than
-\code{threshold}. Runs are stretches of consecutive loci in a run on a
-chromosome, and only those with at least \code{min_snp} loci, a length of at
-least \code{min_length_bps} and a density of at least \code{min_density} loci per
-1000 bps (and, if given, at most \code{max_opp_run} heterozygous and
-\code{max_miss_run} missing genotypes) are returned. For runs of
-heterozygosity, homozygous and heterozygous genotypes swap their roles.
-Genotypes are classified by their dosage (0 and 2 are homozygous, 1 is
-heterozygous).
+On each chromosome, a window of \code{window_snp} consecutive loci starts at
+each locus (except the last \code{window_snp - 1}). A window is a hit if it has
+at most \code{window_het} heterozygous and at most \code{window_missing} missing
+genotypes. A locus is in a run if at least a proportion \code{window_threshold}
+(rounded up) of the windows that include it are hits. Runs are stretches of
+consecutive loci in a run, which are broken where the gap between two loci
+is larger than \code{max_gap_kb}, and before the heterozygous genotype that
+would exceed \code{max_het}. Runs are returned if they have at least \code{min_snp}
+loci, a length of at least \code{min_kb}, and at most \code{max_kb_per_snp} kb per
+locus.
 
-As in PLINK, windows restart at each chromosome, so that no
-window holds the loci of two chromosomes. This departs from
-\code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}}, whose windows slide along the loci table
-as a whole: near the end of a chromosome, they also hold the first loci
-of the next one, and count towards the loci at the ends of both
-chromosomes. The runs are thus those of \code{detectRUNS} run on each
-chromosome separately. The counts of opposite and missing genotypes
-compared to \code{max_opp_run} and \code{max_miss_run} are those of the loci of the
-run. A chromosome with fewer loci than \code{window_size} has no windows, and
-no runs. The loci must be sorted by chromosome and position (see
+The runs are those of \code{plink --homozyg} with the same parameters,
+including the features of its algorithm:
+\itemize{
+\item windows restart at each chromosome, so a chromosome with fewer loci
+than \code{window_snp} has no runs; windows can span large gaps, which only
+break runs;
+\item the number of windows used for the threshold of the last
+\code{window_snp - 1} loci of a chromosome is the number of loci to its end
+(which, on chromosomes with fewer than \code{2 * window_snp - 2} loci, is
+more than the number of windows that include the locus);
+\item runs are not trimmed, so they can start or end with heterozygous or
+missing genotypes; missing genotypes in a run are not limited.
+}
+
+Genotypes are classified by their dosage (1 is heterozygous, 0 and 2 are
+homozygous). Unlike PLINK, all chromosomes are analysed: PLINK skips
+haploid chromosomes (e.g. Y and MT), and male X chromosomes. Remove them
+first (e.g. with \code{\link[=select_loci]{select_loci()}}) to get the same runs. PLINK has no
+runs of heterozygosity; \code{\link[=gt_roh_window]{gt_roh_window()}} (based on \code{detectRUNS}) can
+still find them. The loci must be sorted by chromosome and position (see
 \code{\link[=gt_order_loci]{gt_order_loci()}}).
 
 Runs can be plotted with \code{\link[=autoplot.indiv_roh]{autoplot.indiv_roh()}}, which draws the plots
 of \code{detectRUNS}. Use \code{\link[=as_detectRUNS]{as_detectRUNS()}} to convert the runs to the format
 of \code{detectRUNS}, to use its own functions.
-
-The old name for this function, \code{gt_roh_window}, is still available, but
-it is soft deprecated and will be removed in future versions of
-\code{tidypopgen}.
 }
 \examples{
 # a simulated dataset of three populations with increasing inbreeding
@@ -164,11 +157,7 @@ if (rlang::is_installed("detectRUNS")) {
 }
 }
 \references{
-Biscarini F, Cozzi P, Gaspa G, Marras G (2019) \code{detectRUNS}:
-Detect Runs of Homozygosity and Runs of Heterozygosity in Diploid Genomes.
-R package. \doi{10.32614/CRAN.package.detectRUNS}
-}
-\seealso{
-\code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}}, whose algorithm this function
-implements (on each chromosome separately).
+Chang CC, Chow CC, Tellier LCAM, Vattikuti S, Purcell SM, Lee
+JJ (2015) Second-generation PLINK: rising to the challenge of larger and
+richer datasets. GigaScience, 4. \doi{10.1186/s13742-015-0047-8}
 }

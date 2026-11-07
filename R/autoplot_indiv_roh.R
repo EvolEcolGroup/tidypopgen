@@ -1,6 +1,6 @@
 #' Autoplots for `indiv_roh` objects
 #'
-#' Plots of runs of homozygosity (or heterozygosity) found by
+#' Plots of runs of homozygosity found by
 #' [windows_indiv_roh()], equivalent to the plots of `detectRUNS`. Runs are
 #' coloured (or split) by group if the [`gen_tibble`] was grouped. The
 #' following types of plots are available:
@@ -94,11 +94,7 @@ autoplot.indiv_roh <- function(
       ]
     }
   }
-  run_word <- if (isTRUE(attr(object, "heterozygosity"))) {
-    "Runs of heterozygosity"
-  } else {
-    "Runs of homozygosity"
-  }
+  run_word <- "Runs of homozygosity"
 
   if (type == "runs") {
     # one line per individual (ordered by group), one segment per run

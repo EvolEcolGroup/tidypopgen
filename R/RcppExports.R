@@ -113,8 +113,8 @@ read_packedancestry <- function(filename, BM, tab) {
     .Call(`_tidypopgen_read_packedancestry`, filename, BM, tab)
 }
 
-roh_sliding_cpp <- function(BM, rowInd, colInd, chrom, position, window_size, threshold, heterozygosity, max_opp_window, max_miss_window, max_gap, min_snp, min_length_bps, min_density, max_opp_run, max_miss_run, ncores, block_size) {
-    .Call(`_tidypopgen_roh_sliding_cpp`, BM, rowInd, colInd, chrom, position, window_size, threshold, heterozygosity, max_opp_window, max_miss_window, max_gap, min_snp, min_length_bps, min_density, max_opp_run, max_miss_run, ncores, block_size)
+roh_sliding_cpp <- function(BM, rowInd, colInd, chrom, position, window_size, max_het_window, max_miss_window, threshold, max_gap, min_snp, min_bases, max_bases_per_snp, max_het, old_lengths, ncores, block_size) {
+    .Call(`_tidypopgen_roh_sliding_cpp`, BM, rowInd, colInd, chrom, position, window_size, max_het_window, max_miss_window, threshold, max_gap, min_snp, min_bases, max_bases_per_snp, max_het, old_lengths, ncores, block_size)
 }
 
 sfs_config_counts_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, block_ids, n_blocks, ncores, block_size) {

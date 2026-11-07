@@ -4,49 +4,46 @@
 #include <cmath>
 
 /******************************************************************************/
-// Runs of homozygosity (or heterozygosity) with sliding windows, as in
-// detectRUNS::slidingRUNS.run() (and PLINK), used by windows_indiv_roh().
+// Runs of homozygosity with sliding windows, as PLINK 1.9 --homozyg
+// (calc_homozyg() and roh_update() in plink_homozyg.c), used by
+// windows_indiv_roh().
 //
-// For each individual, windows of window_size consecutive loci slide one
-// locus at a time along each chromosome (as in PLINK, windows restart at each
-// chromosome, so no window holds the loci of two chromosomes). A window is homozygous (for
-// runs of homozygosity) if it has at most max_opp heterozygous genotypes, at
-// most max_miss missing genotypes, and no gap between consecutive loci larger
-// than max_gap. A locus is in a run if the proportion of homozygous windows
-// among the windows that include it is larger than threshold. Runs are the
-// stretches of consecutive loci in a run on each chromosome, which are then
-// filtered by their number of loci, length, density and (optionally) their
-// numbers of opposite and missing genotypes. For runs of heterozygosity, the
-// roles of homozygous and heterozygous genotypes are swapped.
+// For each individual, on each chromosome with N loci (N >= w), a window of
+// w consecutive loci starts at each of the loci 0 to N - w (windows do not
+// cross chromosomes, but do span gaps between loci). A window is a hit if it
+// has at most max_het_window heterozygous and at most max_miss_window missing
+// genotypes. Each locus c is then classified as in a run if at least h_min of
+// the windows that include it are hits, where h_min is
+// (int) (n * threshold + 1 - EPSILON) (i.e. the ceiling of n * threshold), and
+// n is min(c + 1, w) for c <= N - w, and N - c for the last w - 1 loci, as in
+// PLINK. The loci are then scanned in order, and a run (if open) is closed
+// before locus c if c is not in a run, if c is heterozygous and the run
+// already has max_het heterozygous genotypes, or if the gap between loci c - 1
+// and c is larger than max_gap; a run is opened at each locus in a run when
+// none is open (except at a heterozygous locus if max_het is 0). A closed run
+// is kept if it has at least min_snp loci, a length (last position - first
+// position + 1, or without the + 1 with old lengths) of at least min_bases,
+// and at most max_bases_per_snp bases per locus. The last run of each
+// chromosome is closed at its last locus. A chromosome with fewer than w loci
+// has no runs. Genotypes are classified by their dosage: 1 is heterozygous,
+// NA is missing, and anything else is homozygous.
 //
-// detectRUNS works on one individual at a time, on a copy of its genotypes,
-// and builds its runs with plyr; here, all individuals are processed in a
-// single pass over the loci (reading the FBM column by column, as it is
-// stored), keeping for each individual only the classes of its last
-// window_size genotypes, the status of its last window_size windows, and its
-// current run. detectRUNS slides its windows along the whole loci table, so
-// that near the end of a chromosome they also hold the first loci of the
-// next one; here, the windows of each chromosome are those of detectRUNS run
-// on that chromosome alone, so the results are those of detectRUNS run on
-// each chromosome separately, including features of its algorithm:
-// - the proportion of windows is computed in single precision (float);
-// - the number of windows that include each locus is that of detectRUNS,
-//   which overestimates it for the first and last loci of a chromosome with
-//   fewer than 2 * window_size - 1 loci;
-// - genotypes are classified by their dosage: 0 and 2 are homozygous, 1 is
-//   heterozygous, NA is missing, and other dosages are neither.
-// A chromosome with fewer loci than window_size has no windows, and no runs
-// (detectRUNS fails). The loci of each chromosome must be adjacent in the
-// loci table (checked in R), so that each individual has at most one open
-// run at a time, and its state can be reset at the end of each chromosome.
+// All individuals are processed in a single pass over the loci (reading the
+// FBM column by column, as it is stored), keeping for each individual only
+// the classes of its last w genotypes, the hits of its last w windows, and
+// its current run. The loci of each chromosome must be adjacent in the loci
+// table (checked in R), so that the state of each individual can be reset at
+// the end of each chromosome.
 
 namespace {
+
+// PLINK's tolerance in floating point comparisons (2^-30)
+const double ROH_EPSILON = 0.000000000931322574615478515625;
 
 // genotype classes
 const unsigned char ROH_HOM = 0;
 const unsigned char ROH_HET = 1;
 const unsigned char ROH_MISS = 2;
-const unsigned char ROH_OTHER = 3;
 
 // the positions of the loci, read from an integer or a double vector without
 // copying it
@@ -71,173 +68,145 @@ struct Positions {
 };
 
 // the current run of an individual (if open), with its first and last loci,
-// and its numbers of loci, and of opposite and missing genotypes
+// and its numbers of loci, and of heterozygous and missing genotypes
 struct OpenRun {
   bool open;
   uint32_t start;
   uint32_t last;
   int n_snp;
-  int n_opp;
+  int n_het;
   int n_miss;
 };
 
 // a run that passed the filters (individual, chromosome code, first and last
-// loci, number of loci, and of opposite and missing genotypes)
+// loci, number of loci, and of heterozygous and missing genotypes)
 struct FoundRun {
   uint32_t indiv;
   int32_t chrom;
   uint32_t start;
   uint32_t last;
   int32_t n_snp;
-  int32_t n_opp;
+  int32_t n_het;
   int32_t n_miss;
 };
 
 // parameters of the search, shared by all individuals
 struct RohParams {
   size_t window_size;
-  float threshold;
-  unsigned char opp_class;
-  int max_opp;
-  int max_miss;
+  int max_het_window;
+  int max_miss_window;
   double min_snp;
-  double min_length_bps;
-  double min_density;
-  bool check_opp_run;
-  double max_opp_run;
-  bool check_miss_run;
-  double max_miss_run;
+  double min_bases;
+  double max_bases_per_snp;
+  double max_het; // the largest number of heterozygous genotypes in a run
+  double length_offset; // 1, or 0 for old lengths
 };
 
-// the number of windows that include locus k (of n_loci on its chromosome),
-// as in detectRUNS
-inline int roh_n_win(size_t k, size_t n_loci, size_t w) {
-  bool first = (k < w);
-  bool last = (n_loci - 1 - k < w);
-  int a = (int) (k + 1);
-  int b = (int) (n_loci - k);
-  if (first && last) return std::max(a, b);
-  if (first) return a;
-  if (last) return b;
-  return (int) w;
-}
-
-// what is known about a locus that is classified (finalised): its index, the
-// slot of its genotype class (and of the status of the window that starts at
-// it) in the rings of each individual, whether a window (the one that starts
+// what is known about a locus that is classified: its index, the slot of
+// its genotype class (and of the hit of the window that starts at it) in the
+// rings of each individual, whether a window (the one that starts
 // window_size loci earlier on its chromosome) must be dropped from the count
-// of good windows before it is classified, the smallest number of good
-// windows that puts it in a run, its chromosome, and whether it is the last
-// locus of its chromosome
+// of hits before it is classified, the smallest number of hits that puts it
+// in a run, whether the gap from the previous locus is larger than max_gap,
+// its chromosome, and whether it is the last locus of its chromosome
 struct LocusInfo {
   size_t k;
   size_t slot;
   bool drop;
   int h_min;
+  bool gap_before;
   int chrom;
   bool chrom_end;
 };
 
 // what is known about locus t when it is added: the slot of its genotype
 // class in the rings, whether it replaces a locus (of the same chromosome)
-// in the window, whether the window that ends at it is complete and has no
-// large gap (-1 if it is not complete, i.e. it would start on the previous
-// chromosome), and whether it is the last locus of its chromosome, followed
-// by the loci of the chromosome that are then finalised (tails[tail_begin]
-// to tails[tail_end - 1] of the block)
+// in the window, whether the window that ends at it is complete (so that the
+// locus that starts it can be classified), and whether it is the last locus
+// of its chromosome, followed by the loci of the chromosome that are then
+// classified (tails[tail_begin] to tails[tail_end - 1] of the block)
 struct LocusStep {
   size_t slot;
   bool replaces;
-  signed char gap_ok;
+  bool complete;
   bool chrom_end;
   size_t tail_begin;
   size_t tail_end;
 };
 
-// the smallest number h of good windows (out of the n_win windows that
-// include a locus) for which the locus is in a run, i.e. for which
-// h / n_win > threshold, computed in single precision as in detectRUNS
-// (h / n_win increases with h, so this is the same as testing each h); if
-// no h is large enough, n_win + 1
-inline int roh_h_min(int n_win, float threshold) {
-  for (int h = 0; h <= n_win; h++) {
-    float quotient = (float) h / n_win;
-    if (quotient > threshold) return h;
-  }
-  return n_win + 1;
-}
-
-// the state of an individual (the classes of its last w loci and the status
+// the state of an individual (the classes of its last w loci and the hits
 // of its last w windows are in rings, in separate arrays)
 struct RohState {
-  int n_opp;   // opposite genotypes in the current window
+  int n_het;   // heterozygous genotypes in the current window
   int n_miss;  // missing genotypes in the current window
-  int h_sum;   // good windows among the last w windows
+  int h_sum;   // hits among the windows that include the next locus
   OpenRun run; // the current run
 };
 
-// filter the run r of individual indiv, and keep it if it passes
+// close the run r of individual indiv, and keep it if it passes the filters
 inline void roh_close(OpenRun& r, size_t indiv, int chrom,
                       const RohParams& par, const Positions& pos,
                       std::vector<FoundRun>& found) {
   r.open = false;
-  // as in detectRUNS::createRUNdf()
-  double length_bps = pos[r.last] - pos[r.start];
-  bool keep = r.n_snp >= par.min_snp &&
-    length_bps >= par.min_length_bps &&
-    (r.n_snp / length_bps) * 1000 >= par.min_density;
-  if (par.check_opp_run && !(r.n_opp <= par.max_opp_run)) keep = false;
-  if (par.check_miss_run && !(r.n_miss <= par.max_miss_run)) keep = false;
+  double base_len = pos[r.last] + par.length_offset - pos[r.start];
+  bool keep = r.n_snp >= par.min_snp && base_len >= par.min_bases &&
+    (double) r.n_snp * par.max_bases_per_snp >= base_len;
   if (keep) {
     FoundRun f = {(uint32_t) indiv, chrom, r.start, r.last, r.n_snp,
-                  r.n_opp, r.n_miss};
+                  r.n_het, r.n_miss};
     found.push_back(f);
   }
 }
 
 // classify locus info.k (with genotype class cls), given h_sum, the number
-// of good windows that include it, and update the run r
+// of hits among the windows that include it, and update the run r, as
+// roh_update() in PLINK
 inline void roh_finalise(OpenRun& r, int h_sum, unsigned char cls,
                          const LocusInfo& info, size_t indiv,
                          const RohParams& par, const Positions& pos,
                          std::vector<FoundRun>& found) {
-  if (h_sum >= info.h_min) {
+  bool hit = h_sum >= info.h_min;
+  bool het = (cls == ROH_HET);
+  if (r.open && (!hit || (het && r.n_het == par.max_het) ||
+                 info.gap_before)) {
+    roh_close(r, indiv, info.chrom, par, pos, found);
+  }
+  if (hit) {
     if (!r.open) {
+      // a run can not start with a heterozygous genotype if none is allowed
+      if (het && par.max_het == 0) return;
       r.open = true;
       r.start = (uint32_t) info.k;
       r.n_snp = 0;
-      r.n_opp = 0;
+      r.n_het = 0;
       r.n_miss = 0;
     }
     r.last = (uint32_t) info.k;
     r.n_snp++;
-    r.n_opp += (cls == par.opp_class);
+    r.n_het += het;
     r.n_miss += (cls == ROH_MISS);
-    // the last locus of a chromosome ends its run
-    if (info.chrom_end) roh_close(r, indiv, info.chrom, par, pos, found);
-  } else if (r.open) {
-    roh_close(r, indiv, info.chrom, par, pos, found);
   }
+  // the last locus of a chromosome ends its run
+  if (info.chrom_end && r.open) roh_close(r, indiv, info.chrom, par, pos, found);
 }
 
 // Add loci t0 to t1 - 1 (of the block that starts at locus j0) for one
-// individual (with its state st and its rings geno and status), reading its
+// individual (with its state st and its rings geno and hits), reading its
 // genotypes at offset row in the columns of the block (cols). steps[t - j0]
 // describes locus t, and, once the window that ends at t is complete,
-// infos[t - j0] describes the locus that is then finalised (the first locus
+// infos[t - j0] describes the locus that is then classified (the first locus
 // of that window). After the last locus of a chromosome, its last loci (in
-// no complete window) are finalised, and the state is reset for the next
+// no complete window) are classified, and the state is reset for the next
 // chromosome. The state is kept in local variables while the loci are added.
 inline void roh_add_loci(RohState& st, unsigned char* geno,
-                         unsigned char* status, size_t t0, size_t t1,
+                         unsigned char* hits, size_t t0, size_t t1,
                          size_t j0, const unsigned char* const* cols,
                          size_t row, const unsigned char* lut,
                          const LocusStep* steps, const LocusInfo* infos,
                          const LocusInfo* tails, size_t indiv,
                          const RohParams& par, const Positions& pos,
                          std::vector<FoundRun>& found) {
-  const unsigned char opp = par.opp_class;
-  int n_opp = st.n_opp;
+  int n_het = st.n_het;
   int n_miss = st.n_miss;
   int h_sum = st.h_sum;
   OpenRun r = st.run;
@@ -249,20 +218,20 @@ inline void roh_add_loci(RohState& st, unsigned char* geno,
     // replaced by locus t
     if (step.replaces) {
       unsigned char old = geno[step.slot];
-      n_opp -= (old == opp);
+      n_het -= (old == ROH_HET);
       n_miss -= (old == ROH_MISS);
     }
     geno[step.slot] = cls;
-    n_opp += (cls == opp);
+    n_het += (cls == ROH_HET);
     n_miss += (cls == ROH_MISS);
-    if (step.gap_ok >= 0) {
+    if (step.complete) {
       // the window that starts at locus info.k is complete
       const LocusInfo& info = infos[b];
-      unsigned char ok = (n_opp <= par.max_opp) &
-        (n_miss <= par.max_miss) & (step.gap_ok == 1);
-      if (info.drop) h_sum -= status[info.slot];
-      status[info.slot] = ok;
-      h_sum += ok;
+      unsigned char hit = (n_het <= par.max_het_window) &
+        (n_miss <= par.max_miss_window);
+      if (info.drop) h_sum -= hits[info.slot];
+      hits[info.slot] = hit;
+      h_sum += hit;
       // locus info.k is in no later window, so it can now be classified
       roh_finalise(r, h_sum, geno[info.slot], info, indiv, par, pos, found);
     }
@@ -271,18 +240,18 @@ inline void roh_add_loci(RohState& st, unsigned char* geno,
       // w loci earlier (if any) no longer includes it
       for (size_t k = step.tail_begin; k < step.tail_end; k++) {
         const LocusInfo& info = tails[k];
-        if (info.drop) h_sum -= status[info.slot];
+        if (info.drop) h_sum -= hits[info.slot];
         roh_finalise(r, h_sum, geno[info.slot], info, indiv, par, pos,
                      found);
       }
       // the next chromosome starts with no window (its run, if any, was
       // closed by its last locus)
-      n_opp = 0;
+      n_het = 0;
       n_miss = 0;
       h_sum = 0;
     }
   }
-  st.n_opp = n_opp;
+  st.n_het = n_het;
   st.n_miss = n_miss;
   st.h_sum = h_sum;
   st.run = r;
@@ -295,15 +264,21 @@ inline void roh_add_loci(RohState& st, unsigned char* geno,
 //   the loci table)
 // chrom: the chromosome of each locus (1-based codes, e.g. of a factor); the
 //   loci of each chromosome must be adjacent
-// position: the position of each locus
-// max_opp_run, max_miss_run: NA for no limit
+// position: the position of each locus (in bp)
+// window_size, max_het_window, max_miss_window, threshold: the windows
+// max_gap: the largest gap (in bp) between consecutive loci of a run
+// min_snp, min_bases, max_bases_per_snp: filters of the runs
+// max_het: the largest number of heterozygous genotypes in a run (Inf for no
+//   limit)
+// old_lengths: whether the length of a run is last - first position (rather
+//   than last - first + 1)
 // block_size: the number of loci read at a time (user interrupts are checked
 //   between blocks)
 // Returns a list with, for each run, the individual (1-based index into
 // rowInd), the chromosome code, the first and last locus (1-based indices
-// into colInd), the number of loci in the run, and its numbers of opposite
-// and missing genotypes, ordered by individual and then along the loci
-// table.
+// into colInd), the number of loci in the run, and its numbers of
+// heterozygous and missing genotypes, ordered by individual and then along
+// the loci table.
 
 // [[Rcpp::export]]
 List roh_sliding_cpp(Environment BM,
@@ -312,16 +287,15 @@ List roh_sliding_cpp(Environment BM,
                      const IntegerVector& chrom,
                      SEXP position,
                      int window_size,
-                     double threshold,
-                     bool heterozygosity,
-                     int max_opp_window,
+                     int max_het_window,
                      int max_miss_window,
+                     double threshold,
                      double max_gap,
                      double min_snp,
-                     double min_length_bps,
-                     double min_density,
-                     double max_opp_run,
-                     double max_miss_run,
+                     double min_bases,
+                     double max_bases_per_snp,
+                     double max_het,
+                     bool old_lengths,
                      int ncores,
                      int block_size) {
   FBMByteAcc acc(BM, rowInd, colInd);
@@ -343,28 +317,22 @@ List roh_sliding_cpp(Environment BM,
     double g = acc.code(b);
     if (ISNAN(g)) {
       lut[b] = ROH_MISS;
-    } else if (g == 0 || g == 2) {
-      lut[b] = ROH_HOM;
     } else if (g == 1) {
       lut[b] = ROH_HET;
     } else {
-      lut[b] = ROH_OTHER;
+      lut[b] = ROH_HOM;
     }
   }
 
   RohParams par;
   par.window_size = window_size;
-  par.threshold = (float) threshold;
-  par.opp_class = heterozygosity ? ROH_HOM : ROH_HET;
-  par.max_opp = max_opp_window;
-  par.max_miss = max_miss_window;
+  par.max_het_window = max_het_window;
+  par.max_miss_window = max_miss_window;
   par.min_snp = min_snp;
-  par.min_length_bps = min_length_bps;
-  par.min_density = min_density;
-  par.check_opp_run = !ISNAN(max_opp_run);
-  par.max_opp_run = max_opp_run;
-  par.check_miss_run = !ISNAN(max_miss_run);
-  par.max_miss_run = max_miss_run;
+  par.min_bases = min_bases;
+  par.max_bases_per_snp = max_bases_per_snp;
+  par.max_het = max_het;
+  par.length_offset = old_lengths ? 0 : 1;
   const size_t w = window_size;
 
   // the first and last locus of each chromosome
@@ -380,16 +348,10 @@ List roh_sliding_cpp(Environment BM,
   for (size_t j = m; j-- > 0;) chrom_first[p_chrom[j] - 1] = j;
   for (size_t j = 0; j < m; j++) chrom_last[p_chrom[j] - 1] = j;
 
-  // the smallest number of good windows that puts a locus in a run, for each
-  // number of windows that include it (at most 2 * w - 2, see roh_n_win())
-  std::vector<int> h_min_table(2 * w + 1);
-  for (size_t n_win = 0; n_win < h_min_table.size(); n_win++) {
-    h_min_table[n_win] = roh_h_min((int) n_win, par.threshold);
-  }
-
-  // what is known about locus k when it is finalised (the same for all
+  // what is known about locus k when it is classified (the same for all
   // individuals); ring slots and window counts are relative to the first
   // locus of its chromosome
+  Positions pos(position);
   auto locus_info = [&](size_t k) -> LocusInfo {
     size_t c = p_chrom[k] - 1;
     size_t k_chrom = k - chrom_first[c];
@@ -398,24 +360,18 @@ List roh_sliding_cpp(Environment BM,
     info.k = k;
     info.slot = k_chrom % w;
     info.drop = (k_chrom >= w);
-    info.h_min = h_min_table[roh_n_win(k_chrom, n_chrom_loci, w)];
+    // the number of windows used for the threshold, as in PLINK (for the
+    // last w - 1 loci, it is that of the loci to the end of the chromosome,
+    // which is more than the windows that include the locus on chromosomes
+    // with fewer than 2 * w - 2 loci)
+    size_t n_win = (k_chrom + w <= n_chrom_loci) ?
+      std::min(k_chrom + 1, w) : n_chrom_loci - k_chrom;
+    info.h_min = (int) ((double) n_win * threshold + 1.0 - ROH_EPSILON);
+    info.gap_before = k_chrom > 0 && (pos[k] - pos[k - 1]) > max_gap;
     info.chrom = p_chrom[k];
     info.chrom_end = (chrom_last[c] == k);
     return info;
   };
-
-  // whether each window has no gap larger than max_gap between its loci (as
-  // in detectRUNS, gaps are truncated to integers); this is the same for all
-  // individuals, and is computed as the loci are added, from the number of
-  // large gaps among the last w - 1 gaps
-  Positions pos(position);
-  double max_gap_trunc = std::trunc(max_gap);
-  // is the gap between loci k and k + 1 large?
-  auto large_gap = [&](size_t k) -> int {
-    double gap = std::trunc(pos[k + 1] - pos[k]);
-    return (!ISNAN(gap) && gap > max_gap_trunc) ? 1 : 0;
-  };
-  int n_large = 0;
 
   // individuals are processed in groups (in parallel), each with its own
   // list of runs; each individual has its state and its two rings
@@ -423,16 +379,16 @@ List roh_sliding_cpp(Environment BM,
   size_t n_groups = (n + group_size - 1) / group_size;
   std::vector<RohState> states(n);
   for (size_t i = 0; i < n; i++) {
-    states[i].n_opp = 0;
+    states[i].n_het = 0;
     states[i].n_miss = 0;
     states[i].h_sum = 0;
     states[i].run.open = false;
   }
-  std::vector<unsigned char> geno_rings(n * w, 0), status_rings(n * w, 0);
+  std::vector<unsigned char> geno_rings(n * w, 0), hit_rings(n * w, 0);
   std::vector<std::vector<FoundRun> > found(n_groups);
   const size_t* rows = acc.rows().data();
   // for each locus of a block: its column, what is known about it, and the
-  // locus that is finalised once the window that ends at it is complete;
+  // locus that is classified once the window that ends at it is complete;
   // and the last loci of the chromosomes that end in the block
   std::vector<const unsigned char*> cols;
   std::vector<LocusStep> steps;
@@ -454,20 +410,12 @@ List roh_sliding_cpp(Environment BM,
       size_t b = t - j0;
       size_t c = p_chrom[t] - 1;
       size_t t_chrom = t - chrom_first[c];
-      // the large gaps of the window that ends at t (gaps t + 1 - w to
-      // t - 1)
-      if (t >= 1) n_large += large_gap(t - 1);
-      if (t >= w) n_large -= large_gap(t - w);
       cols[b] = acc.col(t);
       LocusStep& step = steps[b];
       step.slot = t_chrom % w;
       step.replaces = (t_chrom >= w);
-      if (t_chrom + 1 >= w) {
-        infos[b] = locus_info(t + 1 - w);
-        step.gap_ok = (n_large == 0);
-      } else {
-        step.gap_ok = -1;
-      }
+      step.complete = (t_chrom + 1 >= w);
+      if (step.complete) infos[b] = locus_info(t + 1 - w);
       step.chrom_end = (chrom_last[c] == t);
       step.tail_begin = tails.size();
       // the last w - 1 loci of the chromosome, if it has any window
@@ -485,7 +433,7 @@ List roh_sliding_cpp(Environment BM,
       for (size_t s0 = j0; s0 < j1; s0 += sub_block) {
         size_t s1 = std::min(j1, s0 + sub_block);
         for (size_t i = i0; i < i1; i++) {
-          roh_add_loci(states[i], &geno_rings[i * w], &status_rings[i * w],
+          roh_add_loci(states[i], &geno_rings[i * w], &hit_rings[i * w],
                        s0, s1, j0, cols.data(), rows[i], lut, steps.data(),
                        infos.data(), tails.data(), i, par, pos, found[g]);
         }
@@ -497,7 +445,7 @@ List roh_sliding_cpp(Environment BM,
   size_t n_runs = 0;
   for (size_t g = 0; g < n_groups; g++) n_runs += found[g].size();
   IntegerVector r_indiv(n_runs), r_chrom(n_runs), r_start(n_runs),
-    r_end(n_runs), r_n_snp(n_runs), r_n_opp(n_runs), r_n_miss(n_runs);
+    r_end(n_runs), r_n_snp(n_runs), r_n_het(n_runs), r_n_miss(n_runs);
   size_t k = 0;
   for (size_t g = 0; g < n_groups; g++) {
     // runs of the same group are ordered by end, not by individual
@@ -512,14 +460,14 @@ List roh_sliding_cpp(Environment BM,
       r_start[k] = (int) f.start + 1;
       r_end[k] = (int) f.last + 1;
       r_n_snp[k] = f.n_snp;
-      r_n_opp[k] = f.n_opp;
+      r_n_het[k] = f.n_het;
       r_n_miss[k] = f.n_miss;
     }
     std::vector<FoundRun>().swap(found[g]);
   }
   return List::create(_["indiv"] = r_indiv, _["chrom"] = r_chrom,
                       _["start"] = r_start, _["end"] = r_end,
-                      _["n_snp"] = r_n_snp, _["n_opp"] = r_n_opp,
+                      _["n_snp"] = r_n_snp, _["n_het"] = r_n_het,
                       _["n_miss"] = r_n_miss);
 }
 

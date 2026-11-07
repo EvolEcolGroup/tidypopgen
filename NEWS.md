@@ -23,27 +23,28 @@
   spectra (with the blocks of the `jackknife_*` functions), reading the
   genotypes only once; `write_sfs(n_bootstrap = )` writes the replicates of
   a gen_tibble.
-* `windows_indiv_roh()` now finds runs of homozygosity (or heterozygosity)
-  natively in C++, processing all individuals in a single pass over the
-  genotypes, rather than calling `detectRUNS::slidingRUNS.run()` for each
-  individual: on HGDP (1,043 individuals x 643,733 loci) it takes about 7 s
-  on one core, rather than about 27 minutes. As in PLINK, windows now restart
-  at each chromosome (the windows of `detectRUNS` crossed from one chromosome
-  to the next, and counted towards the loci at the ends of both), so the runs
-  are those of `detectRUNS` run on each chromosome separately. It now returns
-  a tidy `indiv_roh` tibble (the grouping variables if any, `id`,
-  `chromosome`, `start`, `end`, `length_bp`, `n_loci`, the rows of the first
-  and last locus of each run in the loci table, and the numbers of opposite
-  and missing genotypes in each run); `as_detectRUNS()` converts it to the
-  format of `detectRUNS`, and `autoplot()` draws the plots of `detectRUNS`
-  (runs, stacked runs, the percentage of individuals in a run, F_ROH,
-  distributions of run lengths and length classes). It gains an `n_cores`
-  argument, no longer prints a message for each individual, and no longer
-  needs `detectRUNS` to be installed. The loci must now be sorted by
-  chromosome and position (on unsorted loci, `detectRUNS` gave runs that
-  start on the wrong chromosome). A small simulated dataset with known runs
-  of homozygosity (`inst/extdata/roh/roh_sim.bed`) is used by its examples,
-  which no longer need `detectRUNS`
+* `windows_indiv_roh()` now finds runs of homozygosity with the algorithm of
+  PLINK 1.9 (`--homozyg`), with its parameters (`window_snp`, `window_het`,
+  `window_missing`, `window_threshold`, `min_snp`, `min_kb`,
+  `max_kb_per_snp`, `max_gap_kb`, `max_het` and `subtract_1_from_lengths`)
+  and defaults, and gives the same runs as PLINK. It is implemented natively
+  in C++, processing all individuals in a single pass over the genotypes,
+  which is orders of magnitude faster than calling `detectRUNS` for each
+  individual. It returns a tidy `indiv_roh` tibble
+  (the grouping variables if any, `id`, `chromosome`, `start`, `end`,
+  `length_bp`, `n_loci`, the rows of the first and last locus of each run in
+  the loci table, and the numbers of heterozygous and missing genotypes in
+  each run); `as_detectRUNS()` converts it to the format of `detectRUNS`, and
+  `autoplot()` draws the plots of `detectRUNS` (runs, stacked runs, the
+  percentage of individuals in a run, F_ROH, distributions of run lengths
+  and length classes). It gains an `n_cores` argument, and no longer needs
+  `detectRUNS`. The loci must be sorted by chromosome and position. The
+  arguments of the previous version (e.g. `window_size`) give an error:
+  `gt_roh_window()`, now deprecated, keeps the previous version (based on
+  `detectRUNS`, with its arguments, output and runs of heterozygosity), so
+  that old code gives the same results. A small simulated dataset with known
+  runs of homozygosity (`inst/extdata/roh/roh_sim.bed`) is used by the
+  examples
 * `cbind()` on a `gen_tibble` makes duplicated column names unique, with a
   message, as `dplyr::bind_cols()` (which `dplyr` already used for grouped
   `gen_tibble`s); an ungrouped `gen_tibble` used to get two columns with the

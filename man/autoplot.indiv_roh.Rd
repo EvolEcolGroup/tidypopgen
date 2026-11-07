@@ -40,7 +40,7 @@ of the runs, in Mb (the last class has no upper bound)}
 a \code{ggplot2} object
 }
 \description{
-Plots of runs of homozygosity (or heterozygosity) found by
+Plots of runs of homozygosity found by
 \code{\link[=windows_indiv_roh]{windows_indiv_roh()}}, equivalent to the plots of \code{detectRUNS}. Runs are
 coloured (or split) by group if the \code{\link{gen_tibble}} was grouped. The
 following types of plots are available:
