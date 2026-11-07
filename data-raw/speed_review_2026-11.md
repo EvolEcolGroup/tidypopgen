@@ -337,11 +337,37 @@ commits. Timings use -O2 builds; peak memory at 40M loci is the peak RSS of
 a separate process for each version, unless stated otherwise (the peak of
 `gc()` also counts garbage not yet collected, so it depends on when R
 collects). Ideas that were not worth a change are explained in the list of
-further ideas.
+further ideas. The ideas are numbered 1 to 20 in the order of that list
+(idea 1, the order of the loci table, was done on `dev`). In summary:
+
+- done: 2, 6, 8 to 10, 12 to 14 and 16 to 18, and 20;
+- done in part: 5 (four loci at a time; the `pop_*` and Fst kernels still
+  sum one locus at a time) and 15 (the ped matrix is smaller, but still in
+  memory);
+- already done on `dev`: 3 and 19;
+- not done: 4 (no gain) and 11 (the simple approach was slower);
+- left to the `roh` branch: 7.
+
+After the last of these commits (`a8f3e56f`), the full test suite passes
+(4194 expectations, 0 failed, 0 skipped, on an -O2 build), and
+`lintr::lint_package()` finds no lints (with the branch installed). There
+are no `NEWS.md` entries for these commits: apart from the documentation of
+the PCA functions, nothing visible changes.
 
 - [ ] `d1abae55` · `validate_loci()` (run when reading any dataset: `gen_tibble()` from VCF, PLINK, packedancestry, a matrix), `loci_transitions()`, `loci_transversions()` — `check_allele_alphabet()` and `harmonise_missing_values()` used `%in%` on each allele column, which allocates several vectors as long as the loci table, and harmonising copied both columns even with nothing to change. Two C++ functions (`src/strings_in_cpp.cpp`), `all_in_cpp()` and `which_in_cpp()`, give `all(x %in% table)` and `which(x %in% table)` in one pass with no allocation per element: strings are compared by their CHARSXP (falling back to comparing characters across encodings), and the result for each distinct CHARSXP is kept in a small hash table keyed by its address. A column is only modified if it has missing alleles. At 40M loci: 4.6–6.4 s → 0.8 s, and peak RSS +1.22 GB → +0.31 GB (the copy of a column with missing alleles); with nothing to harmonise, 0.47 s and no extra memory. `validate_loci()` as run by `gen_tibble()` goes from 9.2–10.3 s to 4.3 s; the rest is the check for duplicated loci (vctrs on chromosome and position, and `anyDuplicated()` on names). Identical results on 20,000 random small tables with all options, and on non-ASCII strings in different encodings. With strings marked as "bytes", `%in%` fails, whereas these functions compare bytes. `vctrs::vec_in()` was also tried: twice as fast as `%in%`, but with the same peak memory. *[Speed, Memory]* (further idea 2)
 - [ ] `a2d8870f` · the per-locus kernels that use `lut_sums()` in `src/fbm_byte_acc.h`: `loci_alt_freq()`, `loci_maf()`, `loci_missingness()`, `loci_pi()`, `loci_hwe()`, `qc_report_loci()`, `pop_het_obs()`, `pop_tajimas_d()` and the windows and SFS functions built on them — `LutSums::loci4()` sums four consecutive loci at once: each run of individuals is read once for the four columns, with four independent sums, which saves the loading of row indices and the setup of each run (the cost of grouped kernels with many small groups) for three loci out of four. Results are identical (the sums are exact integers). HGDP, one core, both versions installed with `R CMD INSTALL`: ungrouped kernels 0.40–0.41 s → 0.26 s (so the "memory floor" above was not the floor); with 51 populations `loci_missingness()` 0.69 → 0.54 s, `pop_het_obs()` 1.45 → 1.24 s, `loci_pi()` 0.70 → 0.64 s, `loci_alt_freq()` 0.91 → 0.87 s, `qc_report_loci()` 0.67–0.71 → 0.64–0.67 s, `pop_tajimas_d()` 1.04–1.07 → 1.01 s; `loci_hwe()` by region and runs with 4 cores (limited by memory bandwidth) are unchanged. The kernels of `pop_*` statistics and pairwise Fst (`GroupedSummariesDipPseudo`) still sum one locus at a time. *[Speed]* (further idea 5, in part)
 - [ ] `fee67118` · `.window_definitions()` (all `windows_*` functions) and `.chromosome_index()` (also used by the jackknife blocks) — The loci are no longer split by chromosome into a list (kept alongside its concatenation): they are ordered with a radix sort only when chromosomes are not adjacent (otherwise the order is a compact sequence that takes no memory), and each chromosome is a range of that order. The first and last window of each locus are only computed for the kernels that need them (Tajima's D, pairwise Fst, PBS), not for `windows_stats_generic()`. The chromosome index of a factor uses its codes without copying them, and the chromosomes in order of appearance come from the runs of chromosomes. 10M loci: peak RSS +330 MB (35 bytes per locus) → +205 MB (21), time 1.4 s → 0.3 s (0.6 s with the windows of each locus), result 16 → 4 bytes per locus (12 with the windows of each locus). Most of the remaining peak is garbage not yet collected, from per-chromosome temporaries. Identical results on 5,000 random tables and identical outputs of the windows functions on HGDP. The 100 bytes per locus quoted in the list of ideas was not reproduced on `dev`, where it was 35. *[Memory, Speed]* (further idea 6)
+- [ ] `7bac2495` · documentation of `gt_pca_randomSVD()` and `gt_pca_partialSVD()` — Both pages now say that with up to a few thousand individuals partialSVD is usually much faster, and that its memory grows with the square of the number of individuals (8 bytes per pair), so that randomSVD is the choice for many more individuals. Re-timed on imputed HGDP (k = 10): partialSVD 31 s on one BLAS thread (19 s with the default OpenBLAS threads), randomSVD 175 s with `n_cores = 1` (the 279 s against 46 s above were measured earlier, with other settings). *[Docs]* (further idea 8)
+- [ ] `50f74b08` · documentation of `gt_pca_partialSVD()` — `big_SVD()` decodes blocks of about 1 GB, set by `options(bigstatsr.block.sizeGB)` through `bigstatsr::block_size()`. On imputed HGDP, blocks of 1, 0.25 and 0.06 GB took 13.1, 16.2 and 19.7 s, with peak RSS +2.0, +0.6 and +0.24 GB and the same singular values (to 4e-16). As smaller blocks cost time, the default is unchanged, and the page explains how to use smaller blocks. *[Docs, Memory]* (further idea 9)
+- [ ] `a8f3e56f` · grouped `qc_report_indiv()` with `kings_threshold` — `pw_bitpacked_counts()` can count only the pairs within groups of consecutive individuals, and `king_counts_within_groups()` uses it to pack the genotypes of all individuals once, rather than once per group. `.pairwise_king_by_group()` orders the individuals by group and builds the KING matrix of each group with the same expression as `snp_king()`, so results are identical to `pairwise_king()` on each group (tested, including interleaved, single-individual and empty groups). HGDP, one core: 51 populations 11.6 → 4.3 s, 7 regions 8.0 → 6.9 s; packing the genotypes now takes most of the time. *[Speed]* (further idea 10)
+- [ ] `2e909ba5` · `predict()` for `gt_pca`, `loci_ld_clump()` — `predict()` uses a single `match()` and `anyNA()` (same check, same error) instead of `%in%` and then `match()`; `loci_ld_clump()` flags the FBM columns of the gen_tibble in a logical vector instead of `%in%` over every column. At 40M loci: 4.0 → 0.29 s for the columns to exclude, and 6.6 → 3.3 s to match 20M integer names. *[Speed]* (further idea 12)
+- [ ] `8a2c6daf` · `indiv_het_obs()`, `indiv_missingness()`, `qc_report_indiv()` — `gt_ind_counts.h` reads the genotypes through `FBMByteAcc` (which gains `nrow_fbm()`), so the column indices are no longer copied into a vector of `size_t` (8 bytes per locus). Synthetic 3M loci × 20 individuals: peak RSS +57 → +46 MB (about 0.15 GB less at 40M), time unchanged; outputs identical on HGDP, a reordered subset, and polyploid data. *[Memory, Consistency]* (further idea 13)
+- [ ] `b97a4cbf` · `gen_tibble()` from a matrix (and from a .ped file) — `check_dosage_matrix_cpp()` checks all dosages in one pass (same checks and errors, in the same order) and `write_dosage_matrix_cpp()` writes the bytes directly into the FBM, without the temporary matrices of `round()`, the comparisons, `is.na()` and the copy (a double copy for an integer matrix). 1,000 × 50,000: peak RSS above the input +960 MB → +52 MB (the pages of the new FBM), 2.8–2.9 s → 0.4 s (integer matrix) and 0.9 s (double matrix); identical backing files. *[Memory, Speed]* (further idea 14)
+- [ ] `015f4e3a` · `gen_tibble()` from a .ped file — `read_pedfile()` allocates an integer matrix (it was a logical matrix converted, and copied, to double when the first row was filled in). 100 × 50,000: peak RSS +171–194 MB → +84 MB, time unchanged (6.4 s, reading lines in R); identical results. The matrix is still held in memory, as the coding of each locus is only known once all individuals are read. *[Memory]* (further idea 15, in part)
+- [ ] `61dbf714` · `gt_as_genind()` — The genotype strings are built once per ploidy and dosage and looked up for all genotypes, instead of an R function per genotype (`mapply`). Dosages larger than the ploidy (impossible in a gen_tibble) now give an explicit error instead of one from `strrep()`. HGDP 200 × 20,000: 38.9 → 11.7 s (the rest is `adegenet::df2genind()`); identical genind objects, also for mixed ploidy with missing data. *[Speed]* (further idea 16)
+- [ ] `c25bf1e2` · `gt_as_hierfstat()` — Genotypes are decoded in blocks of loci (about 1 GB, as in bigstatsr), each locus is recoded into a column, and the data frame is built from the list of columns without copying. HGDP 1,043 × 49,518 (a 400 MB result): peak RSS +2.2 → +1.5 GB, time unchanged (4.0 s); blocks of 64 MB reduce the peak to +1.16 GB but take 6.0 s, so they were not used. Identical data frames (including reordered subsets, one locus and no loci). *[Memory]* (further idea 17)
+- [ ] `bda5c70b` · `gen_tibble(parser = "vcfR")` — `vcf_gt_dosages_cpp()` parses the genotype strings of a chunk in C++ with the rules of `poly_genotype_dosage()` (which, with `poly_indiv_dosage()`, is removed); errors are still raised in R by `stop_max_ploidy()`. VCF of 200 × 20,000: 27.7 → 3.3 s (the cpp parser takes 0.25 s). Identical genotypes, loci and ploidies on the 11 VCF files of `inst/extdata` and `tests/testthat`, including the error for a file whose first variant is haploid. *[Speed]* (further idea 18)
+- [ ] `9b66fd51` · `gen_tibble()` from a VCF with `names_as_int = FALSE` — The IDs are appended to a single character buffer (with their offsets) rather than a `std::vector<std::string>`. 3M loci: peak RSS +367 → +303 MB with "rs…" IDs, +515 → +379 MB with "chr1:pos:A:T" IDs (about 0.85 and 1.8 GB less at 40M); identical loci tables. *[Memory]* (further idea 20)
 
 ## Findings not fixed
 
@@ -407,29 +433,41 @@ further ideas.
 - **Populations and windows:**
   - *Done in `fee67118`.* `.window_definitions()` uses about 100 bytes per locus; `order()` +
     `tabulate()` instead of `split()` would bring it to about 40.
-  - `windows_indiv_roh()` takes about 2.6 s per individual (about 45 min for
-    HGDP), 60% of it in detectRUNS' plyr-based `createRUNdf`.
+  - *Left to the `roh` branch.* `windows_indiv_roh()` takes about 2.6 s per individual (about 45 min for
+    HGDP), 60% of it in detectRUNS' plyr-based `createRUNdf`. detectRUNS
+    is not changed here; a native implementation of runs of homozygosity
+    is on the `roh` branch.
 - **Individuals and PCA:**
-  - `gt_pca_randomSVD()` takes 279 s on HGDP against 46 s for
+  - *Done (documentation) in `7bac2495`.* `gt_pca_randomSVD()` takes 279 s on HGDP against 46 s for
     `gt_pca_partialSVD()`. The time is spent inside bigstatsr, so the docs
     could recommend partialSVD below about 5,000 individuals.
-  - partialSVD decodes 1 GB blocks (3.2 GB peak RSS); a smaller block size
-    would save about 0.75 GB.
-  - Grouped `qc_report_indiv()` with `kings_threshold` runs one KING pass
+  - *Documented in `50f74b08`; default unchanged.* partialSVD decodes 1 GB blocks (3.2 GB peak RSS); a smaller block size
+    would save about 0.75 GB. It saves 1.4 GB, but takes 25% longer.
+  - *Done in `a8f3e56f`.* Grouped `qc_report_indiv()` with `kings_threshold` runs one KING pass
     per group.
-  - An AVX2 popcount would give about 1.5–2× more in the pairwise kernels.
-  - `predict()` hashes loci names twice, and `loci_ld_clump()` builds a
+  - *Not done.* An AVX2 popcount would give about 1.5–2× more in the pairwise kernels.
+    Compiling the row kernel for AVX2 (a `target("avx2,popcnt")` clone,
+    chosen at run time) was 15% slower on HGDP (3.34 s against 2.91 s for
+    200,000 loci): the compiler does not vectorise the popcounts. A
+    hand-written Harley-Seal popcount with intrinsics and run-time dispatch
+    is a larger change, with portability risks for CRAN, and is left as an
+    idea.
+  - *Done in `2e909ba5`.* `predict()` hashes loci names twice, and `loci_ld_clump()` builds a
     `%in%` over all loci (1–2 s each at 40M).
-  - `gt_ind_counts.h` could be moved onto `FBMByteAcc` for consistency.
+  - *Done in `8a2c6daf`.* `gt_ind_counts.h` could be moved onto `FBMByteAcc` for consistency.
 - **Reading and exporting:**
-  - `gen_tibble.matrix()` / `gt_write_fbm_from_dfs()` peak at about 6× the
+  - *Done in `b97a4cbf`.* `gen_tibble.matrix()` / `gt_write_fbm_from_dfs()` peak at about 6× the
     input matrix.
-  - `read_pedfile()` holds the whole genotype matrix in memory.
-  - `gt_as_genind()` calls an R function for each genotype (`mapply`).
-  - `gt_as_hierfstat()` builds doubles plus two copies.
-  - The vcfR parser path converts genotypes one at a time in R.
-  - `resolve_missing_alleles()` loops over loci in R.
-  - With character names, the VCF reader keeps IDs as `std::string`; a
+  - *Done in part in `015f4e3a`.* `read_pedfile()` holds the whole genotype matrix in memory. It now
+    holds an integer matrix (half the size) that is never copied; streaming
+    the genotypes into the FBM would need the coding of each locus, which
+    is only known once all individuals are read.
+  - *Done in `61dbf714`.* `gt_as_genind()` calls an R function for each genotype (`mapply`).
+  - *Done in `c25bf1e2`.* `gt_as_hierfstat()` builds doubles plus two copies.
+  - *Done in `bda5c70b`.* The vcfR parser path converts genotypes one at a time in R.
+  - *Already done on `dev`.* `resolve_missing_alleles()` loops over loci in R. It was vectorised
+    in #216 (`d53025b3`).
+  - *Done in `9b66fd51`.* With character names, the VCF reader keeps IDs as `std::string`; a
     single buffer would save about 0.5 GB at 40M.
 
 ## Before merging
