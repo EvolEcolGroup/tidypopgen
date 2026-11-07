@@ -20,13 +20,14 @@ ideas, not bugs.
 
 | Topic | Question or idea |
 |---|---|
-| `ignore_genetic_dist` default | `is_loci_table_ordered()` and `gt_order_loci()` check positions only by default (`ignore_genetic_dist = TRUE`). Missing positions, and missing genetic distances when they are checked, are now informative errors (`7dad1c9f`). Should checking genetic distances be the default, with positions only as the opt-in? |
 | `genetic_dist` column | It takes 8 bytes per locus (0.32 GB at 40M loci) and is all zeros for VCF inputs. It is needed for cM blocks and windows, `gt_extract_f2()` and PLINK exports, but could become optional (filled with 0 when exported). |
-| Runs of homozygosity across chromosomes | `windows_indiv_roh()` keeps the algorithm of detectRUNS: windows slide along the whole loci table, so near a boundary they mix the last loci of one chromosome and the first of the next (runs never span two chromosomes). PLINK resets windows at each chromosome; an option to do so would knowingly depart from detectRUNS. |
 | Duplicated loci names | `validate_loci()` now finds duplicated positions in one pass when loci are sorted (`0b3df790`), but duplicated character names still take `anyDuplicated()`: 3.2 s and 0.5 GB for 40M names (integer names are cheap). |
 | AVX2 popcount | Further idea 11 of the speed review: compiling the pairwise row kernel for AVX2 was 15% slower; a hand-written Harley-Seal popcount with run-time dispatch remains possible, with CRAN portability risks. |
 | `read_pedfile()` | The genotype matrix is still held in memory (now as integers, never copied); streaming it to the FBM would need the allele coding of each locus, known only once all individuals are read. |
-| `NEWS.md` | The speed commits on `speed_extra` have no `NEWS.md` entries (nothing visible changes); decide whether to add a general entry. |
+
+Resolved: windows of `windows_indiv_roh()` no longer cross chromosomes. They
+restart at each chromosome, as in PLINK, so the runs are those of detectRUNS
+run on each chromosome separately (`0248be2e`).
 
 ### Not reproduced
 
