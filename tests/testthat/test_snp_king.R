@@ -183,3 +183,47 @@ test_that("pairwise_king uses imputed genotypes only if set to", {
     pairwise_king(gt_filled, as_matrix = TRUE)
   )
 })
+
+test_that("pairwise_king is a generic with methods for gen_tibbles", {
+  king_mat <- pairwise_king(test_gt, as_matrix = TRUE)
+  king_tidy <- pairwise_king(test_gt)
+  # the method for the genotypes column labels the individuals with the names
+  # of the vector, and the method for gen_tibbles with their ids
+  expect_identical(pairwise_king(test_gt$genotypes, as_matrix = TRUE), king_mat)
+  expect_identical(pairwise_king(test_gt$genotypes), king_tidy)
+  renamed_gt <- test_gt %>% mutate(id = toupper(id))
+  expect_identical(
+    dimnames(pairwise_king(renamed_gt, as_matrix = TRUE)),
+    list(renamed_gt$id, renamed_gt$id)
+  )
+  expect_identical(pairwise_king(renamed_gt)$item1, c("A", "A", "B"))
+  # arguments are matched by the methods, also by position
+  expect_identical(pairwise_king(test_gt, TRUE, 2, 1), king_mat)
+  expect_error(pairwise_king(test_gt, foo = 1), "must be empty")
+  # grouping is ignored, and tibbles that lost their class work
+  expect_identical(pairwise_king(test_gt %>% group_by(population)), king_tidy)
+  expect_identical(pairwise_king(as_tibble(test_gt)), king_tidy)
+  # other packages can add methods for their own classes of genotypes
+  registerS3method(
+    "genotypes_tbl_class", "dummy_genotypes",
+    function(genotypes, ...) "dummy_tbl",
+    envir = asNamespace("tidypopgen")
+  )
+  registerS3method(
+    "pairwise_king", "dummy_genotypes",
+    function(x, as_matrix = FALSE, ...) {
+      structure(diag(0.5, length(x)),
+        class = c("pairwise_matrix", "matrix", "array")
+      )
+    },
+    envir = asNamespace("tidypopgen")
+  )
+  dummy_tbl <- tibble(
+    id = c("a", "b", "c"),
+    genotypes = structure(1:3, class = "dummy_genotypes")
+  )
+  dummy_king <- pairwise_king(dummy_tbl)
+  expect_s3_class(dummy_king, "pairwise_tbl")
+  expect_identical(dummy_king$item2, c("b", "c", "c"))
+  expect_identical(dummy_king$value, c(0, 0, 0))
+})

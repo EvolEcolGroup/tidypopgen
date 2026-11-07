@@ -40,10 +40,11 @@
   left behind on errors
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
 
-* the generic `indiv_inbreeding()` only has the arguments `.x` and `...`, and
-  its method for `gen_tibble` objects is a `gen_tbl` method, so that other
-  packages (e.g. `tidypopgl`) can provide methods for their own objects
-  (with their own arguments)
+* `pairwise_king()` is now an S3 generic (with methods for `gen_tibble`
+  objects and their `genotypes` column), and the generic `indiv_inbreeding()`
+  only has the arguments `.x` and `...` (its method for `gen_tibble` objects
+  is a `gen_tbl` method), so that other packages (e.g. `tidypopgl`) can
+  provide methods for their own objects, with their own arguments
 
 # tidypopgen 1.0.0
 

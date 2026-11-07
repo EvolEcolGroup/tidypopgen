@@ -6,13 +6,21 @@
 #' Imputed genotypes are used if `x` is set to use them (see
 #' [gt_set_imputed()]), and treated as missing otherwise.
 #'
+#' `pairwise_king()` is an S3 generic. The method for a [`gen_tibble`]
+#' computes the matrix with the method for its `genotypes` column (of class
+#' `vctrs_bigSNP`), and labels it with the `id` of the individuals; grouping
+#' is ignored. Other packages can add methods for their own classes of
+#' genotypes (e.g. genotype likelihoods).
+#'
 #' @references Manichaikul, A. et al. (2010) Robust relationship inference in
 #'   genome-wide association studies. Bioinformatics, 26(22), 2867–2873.
 #'   https://doi.org/10.1093/bioinformatics/btq559.
 #'
 #' Note that monomorphic sites are currently considered. Remove monomorphic
 #' sites before running pairwise_king if this is a concern.
-#' @param x a `gen_tibble` object.
+#' @param x a `gen_tibble` object, or a vector of class `vctrs_bigSNP` (the
+#'   `genotypes` column of a [`gen_tibble`], whose individuals are then
+#'   labelled with the names of the vector).
 #' @param as_matrix boolean, determining whether the results should be a square
 #'   symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)
 #' @param block_size maximum number of loci read at once. Genotypes are
@@ -20,9 +28,11 @@
 #'   memory use.
 #' @param n_cores number of cores to be used, it defaults to
 #'   [bigstatsr::nb_cores()]
+#' @param ... other arguments passed to specific methods, currently unused.
 #' @returns a square symmetrical matrix of relationship coefficients between
 #'   individuals if `as_matrix` is TRUE, or a tidied tibble of coefficients if
 #'   `as_matrix` is FALSE.
+#' @rdname pairwise_king
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
@@ -36,25 +46,60 @@
 #' # Adjust block_size
 #' pairwise_king(example_gt, block_size = 2)
 #'
-pairwise_king <- function(
+pairwise_king <- function(x, ...) {
+  UseMethod("pairwise_king", x)
+}
+
+#' @export
+#' @rdname pairwise_king
+pairwise_king.tbl_df <- function(
   x,
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 ) {
+  stopifnot_has_genotypes(x)
+  # hand the genotypes column over to its method, which returns a
+  # pairwise_matrix, and label it with the ids of the tibble (the matrix is
+  # modified in place, without copies)
+  king_matrix <- pairwise_king(
+    x$genotypes,
+    as_matrix = TRUE,
+    block_size = block_size,
+    n_cores = n_cores,
+    ...
+  )
+  dimnames(king_matrix) <- list(x$id, x$id)
+  if (as_matrix) {
+    return(king_matrix)
+  } else {
+    class(king_matrix) <- NULL
+    return(tidy_dist_matrix(king_matrix))
+  }
+}
+
+#' @export
+#' @rdname pairwise_king
+pairwise_king.vctrs_bigSNP <- function(
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(length(x)),
+  n_cores = bigstatsr::nb_cores(),
+  ...
+) {
+  rlang::check_dots_empty()
   stopifnot_diploid(x)
-  # nolint
-  X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
-  x_ind_col <- show_loci(x)$big_index
-  x_ind_row <- vctrs::vec_data(x$genotypes)
   king_matrix <- snp_king(
-    X,
-    ind.row = x_ind_row,
-    ind.col = x_ind_col,
+    attr(x, "fbm"),
+    ind.row = vctrs::vec_data(x),
+    ind.col = show_loci(x)$big_index,
     block.size = block_size,
     n_cores = n_cores
   )
-  dimnames(king_matrix) <- list(x$id, x$id)
+  # the individuals are labelled with the names of the vector (the ids of the
+  # gen_tibble)
+  dimnames(king_matrix) <- list(names(x), names(x))
   if (as_matrix) {
     # add a class to indicate this is a pairwise matrix
     class(king_matrix) <- c("pairwise_matrix", class(king_matrix))
