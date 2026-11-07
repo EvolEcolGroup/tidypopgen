@@ -21,9 +21,12 @@ ideas, not bugs.
 | Topic | Question or idea |
 |---|---|
 | `genetic_dist` column | It takes 8 bytes per locus (0.32 GB at 40M loci) and is all zeros for VCF inputs. It is needed for cM blocks and windows, `gt_extract_f2()` and PLINK exports, but could become optional (filled with 0 when exported). |
-| Duplicated loci names | `validate_loci()` now finds duplicated positions in one pass when loci are sorted (`0b3df790`), but duplicated character names still take `anyDuplicated()`: 3.2 s and 0.5 GB for 40M names (integer names are cheap). |
 | AVX2 popcount | Further idea 11 of the speed review: compiling the pairwise row kernel for AVX2 was 15% slower; a hand-written Harley-Seal popcount with run-time dispatch remains possible, with CRAN portability risks. |
 | `read_pedfile()` | The genotype matrix is still held in memory (now as integers, never copied); streaming it to the FBM would need the allele coding of each locus, known only once all individuals are read. |
+
+Resolved: duplicated character names of loci are found in C++
+(`42c3825e`), in 1.3 s and 256 MB for 40M names rather than 3.3 s and 512 MB
+with `anyDuplicated()`.
 
 Resolved: windows of `windows_indiv_roh()` no longer cross chromosomes. They
 restart at each chromosome, as in PLINK, so the runs are those of detectRUNS
