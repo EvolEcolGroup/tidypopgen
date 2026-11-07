@@ -39,6 +39,9 @@
   needs `detectRUNS` to be installed. The loci must now be sorted by
   chromosome and position (on unsorted loci, `detectRUNS` gave runs that
   start on the wrong chromosome)
+* the `as_is` argument of `rbind()` is deprecated: it was never implemented
+  (loci were always harmonised, although a message said they would not be),
+  and setting it to TRUE now gives a warning and has no effect
 * Preserve classes with all dplyr operations and make many functions generics
 * grouped functions now preserve order of factor levels, work with gen_tibbles
   grouped by more than one variable, and respect empty groups

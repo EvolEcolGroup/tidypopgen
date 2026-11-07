@@ -346,18 +346,21 @@ test_that("rbind keeps ploidy of subset and reordered individuals", {
   expect_equal(show_ploidy(merged_dip), 2)
 })
 
-test_that("rbind rejects as_is with flip_strand even when quiet", {
-  expect_error(
-    rbind(
+test_that("as_is is deprecated and ignored by rbind", {
+  expect_warning(
+    merged_as_is <- rbind(
       pop_b_gt,
       pop_a_gt,
       as_is = TRUE,
-      flip_strand = TRUE,
       quiet = TRUE,
       backingfile = tempfile()
     ),
-    "if 'as_is' is set to TRUE, 'flip_strand'"
+    "'as_is' is deprecated"
   )
+  # the loci are harmonised as without as_is
+  merged <- rbind(pop_b_gt, pop_a_gt, quiet = TRUE, backingfile = tempfile())
+  expect_identical(show_loci(merged_as_is), show_loci(merged))
+  expect_identical(show_genotypes(merged_as_is), show_genotypes(merged))
 })
 
 test_that("rbind fails if gen_tibbles contain same ID", {
