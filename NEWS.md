@@ -3,6 +3,8 @@
 * `gt_as_vcf()` is much faster, and uses less memory, on data with many
   chromosomes (e.g. RAD loci assembled de novo, with one chromosome per locus)
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
+* `gt_as_genlight()` reads the genotypes in chunks of loci (new argument
+  `chunk_size`), instead of loading them all in memory
 * `gen_tibble()` on VCF files: the "cpp" parser reads a missing chromosome
   (".") as `NA`, as the "vcfR" parser does
 

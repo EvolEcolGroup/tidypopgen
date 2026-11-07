@@ -53,6 +53,72 @@ test_that("show_loci gets and sets information", {
   ))
 })
 
+test_that("gt_as_genlight in chunks is the same as from the full matrix", {
+  # individuals with dosages of 0, 1 and 2, with no dosage of 2, with only
+  # dosages of 0, and with all genotypes missing; 13 loci, so that the last
+  # byte of bits is not full
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 0, 2, 0, 1, 2, NA, 0, 1),
+    c(0, 1, 0, NA, 0, 0, 1, 1, 0, 0, 0, NA, 1),
+    c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+    rep(NA, 13),
+    c(2, NA, 2, 2, NA, 1, 0, 2, 2, NA, 1, 1, 2)
+  )
+  test_indiv_meta <- data.frame(
+    id = c("a", "b", "c", "d", "e"),
+    population = c("pop1", "pop1", "pop2", "pop2", "pop3")
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:13),
+    chromosome = rep(c("chr1", "chr2"), c(8, 5)),
+    position = as.integer(c(1:8, 1:5) * 10),
+    genetic_dist = as.double(rep(0, 13)),
+    allele_ref = rep("A", 13),
+    allele_alt = rep("T", 13)
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # adegenet's conversion of the full matrix of genotypes
+  ref_genlight <- new("genlight",
+    gen = show_genotypes(test_gt),
+    ploidy = 2,
+    ind.names = test_gt$id,
+    pop = test_gt$population,
+    loc.names = loci_names(test_gt),
+    loc.all = paste0(test_loci$allele_ref, "/", test_loci$allele_alt),
+    chromosome = show_loci(test_gt)$chromosome,
+    position = show_loci(test_gt)$position
+  )
+  # the default chunks, chunks of 8 loci, and chunks of 5 loci (rounded up
+  # to 8)
+  for (chunk_size in list(NULL, 8, 5)) {
+    expect_identical(
+      gt_as_genlight(test_gt, chunk_size = chunk_size),
+      ref_genlight
+    )
+  }
+  # also for a subset of individuals and loci, in a different order
+  sub_gt <- test_gt[c(5, 2, 4), ] %>% select_loci(c(13, 2, 9, 4, 5))
+  expect_identical(
+    gt_as_genlight(sub_gt, chunk_size = 8),
+    new("genlight",
+      gen = show_genotypes(sub_gt),
+      ploidy = 2,
+      ind.names = sub_gt$id,
+      pop = sub_gt$population,
+      loc.names = loci_names(sub_gt),
+      loc.all = rep("A/T", 5),
+      chromosome = show_loci(sub_gt)$chromosome,
+      position = show_loci(sub_gt)$position
+    )
+  )
+})
+
 # a tetraploid gen_tibble, used to check that hierfstat (which does not
 # support polyploid data) errors cleanly, and that genind (which does)
 # decodes dosage into allele counts correctly
