@@ -16,7 +16,6 @@ are decisions or ideas, not bugs.
 |---|---|
 | `genetic_dist` column | It takes 8 bytes per locus (0.32 GB at 40M loci) and is all zeros for VCF inputs. It is needed for cM blocks and windows, `gt_extract_f2()` and PLINK exports, but could become optional (filled with 0 when exported). |
 | AVX2 popcount | Further idea 11 of the [speed review](speed_review_2026-11.md): compiling the pairwise row kernel for AVX2 was 15% slower; a hand-written Harley-Seal popcount with run-time dispatch remains possible, with CRAN portability risks. |
-| ROH across gaps | In `windows_indiv_roh()`, as in detectRUNS, a gap larger than `max_gap` only makes the windows that span it non-homozygous: the loci on each side are still in homozygous windows, so a run continues across the gap (inbred_03 of the simulated ROH dataset, `inst/extdata/roh`). PLINK (`--homozyg-gap`) splits runs at such gaps. Splitting would be more sensible, but departs from detectRUNS. |
 | `read_pedfile()` | The genotype matrix is still held in memory (now as integers, never copied); streaming it to the FBM would need the allele coding of each locus, known only once all individuals are read. |
 | `cbind(df, gt)` | With the gen_tibble not first, R dispatches to `cbind.data.frame()`, which returns a plain data.frame (related to #9, see below). |
 | PLINK missingness | `pairwise_ibs()` matches PLINK's `--distance flat-missing`; PLINK 1.9's default correction for missing genotypes is not available (documented in `0c326be2`). Add it only if users ask for it. |
@@ -25,6 +24,7 @@ are decisions or ideas, not bugs.
 
 | Topic | Resolution |
 |---|---|
+| ROH as PLINK | `windows_indiv_roh()` now follows PLINK 1.9 `--homozyg`, with its parameters and defaults (a gap larger than `max_gap_kb` splits runs, as in PLINK); `gt_roh_window()`, deprecated, keeps the version based on detectRUNS. Checked against an R transcription of PLINK's code; the comparison with PLINK itself (`data-raw/validate/create_plink_roh_test_data.R`) needs PLINK 1.9 to be run. |
 | ROH windows across chromosomes | Windows of `windows_indiv_roh()` restart at each chromosome, as in PLINK, so the runs are those of detectRUNS run on each chromosome separately (`0248be2e`). |
 | Duplicated loci names | Duplicated character names are found in C++ (`42c3825e`), in 1.3 s and 256 MB for 40M names rather than 3.3 s and 512 MB with `anyDuplicated()`. |
 | #9, `cbind()` on a gen_tibble | Not reproduced on `dev`: `cbind(grouped_gt, df)` returns a valid grouped gen_tibble. A clash with the grouping variable (`cbind(grouped_gt, data.frame(population = ...))`) renames both columns with a message and drops the grouping, as `dplyr::bind_cols()` (which dplyr uses for `cbind()` on grouped data frames), and is kept. An ungrouped gen_tibble used to get two columns with the same name; it is now renamed in the same way, and a column called `id` or `genotypes` is an error (`7627bfc5`). |
