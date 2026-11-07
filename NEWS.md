@@ -2,6 +2,7 @@
 
 ## New features and changes
 
+* optimisations to work on whole genomes, both speed and memory
 * new functions to compute site frequency spectra (SFS) for demographic
   inference: `pop_sfs()`,`pairwise_pop_sfs()` and `nwise_pop_sfs()`
 * native `windows_indiv_roh()` matching the algorithm used by PLINK 1.9 
