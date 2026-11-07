@@ -5,8 +5,9 @@ Checks run on `dev` at `a11a21a7` (after #223), with fixes on the branch
 
 ## Summary
 
-**Not ready to submit yet:** the code and the docs are ready, but two release
-decisions are still open: the NEWS heading and `cran-comments.md`.
+**Ready for the remote checks:** the code and the docs are ready. The NEWS
+heading is now `# tidypopgen 1.0.0`, and `cran-comments.md` has been drafted;
+its test environments must be updated with the results of the remote checks.
 
 - 3 issues fixed (2 would have been flagged by CRAN, 1 bug).
 - 2 open: both release metadata, and both need the maintainer.
@@ -34,11 +35,10 @@ The other checks found nothing to fix:
 
 ## Needs your decision
 
-1. **NEWS heading:** `NEWS.md` starts with `# tidypopgen \`dev\``. For the
-   release it should be `# tidypopgen 1.0.0`. This blocks submission.
-2. **`cran-comments.md`:** it still describes the 0.4.4 resubmission (the
-   data.table threads and UpSetR). It needs rewriting after the remote
-   checks; there is a draft below.
+1. **NEWS heading:** done, it is now `# tidypopgen 1.0.0`.
+2. **`cran-comments.md`:** drafted (major speed improvements, bug fixes and
+   added functionality). Update the test environments with the remote
+   checks.
 3. **Version:** `1.0.0`, which is above the 0.4.4 on CRAN, so it can be
    submitted. The jump to 1.0.0 is your call, and the NEWS has enough new
    features to justify it.
