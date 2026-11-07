@@ -38,7 +38,12 @@ run on each chromosome separately (`0248be2e`).
   object either, but may be worth a look:
   - `cbind(grouped_gt, data.frame(population = ...))` (a column with the name
     of the grouping variable) renames both columns (`population...2` and
-    `population...4`) and returns an ungrouped gen_tibble.
+    `population...4`), with a message, and returns an ungrouped gen_tibble.
+    This is the behaviour of `dplyr::bind_cols()`, which dplyr uses for
+    `cbind()` on grouped data frames (`cbind.grouped_df()`), and is kept.
+    An ungrouped gen_tibble used to get two columns with the same name; it
+    is now renamed in the same way, and a column called `id` or `genotypes`
+    is an error (`7627bfc5`).
   - `cbind(df, gt)` (the gen_tibble not first) is dispatched to
     `cbind.data.frame()`, and returns a plain data.frame.
 
