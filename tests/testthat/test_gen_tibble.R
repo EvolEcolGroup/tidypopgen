@@ -863,3 +863,36 @@ test_that("gen_tibble from a read-only bigSNP rds can be imputed", {
   expect_no_error(gt_save(rds_gt, quiet = TRUE))
   expect_identical(unname(tools::md5sum(bigsnp_files)), md5)
 })
+
+test_that("validate_loci finds duplicated loci, sorted or not", {
+  loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = c("1", "1", "chr1", "chr1", "2", "2"),
+    position = as.integer(c(10, 20, 10, 20, 10, 30)),
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  # sorted within each chromosome, no duplicates ("1" and "chr1" are
+  # different chromosomes in the loci table)
+  expect_no_error(validate_loci(loci, check_duplicates = TRUE))
+  # sorted, with a duplicate
+  loci_dup <- loci
+  loci_dup$position[2] <- 10L
+  expect_error(
+    validate_loci(loci_dup, check_duplicates = TRUE),
+    "duplicated loci"
+  )
+  # not sorted, with and without a duplicate
+  loci_unsorted <- loci[c(2, 1, 3:6), ]
+  loci_unsorted$name <- loci$name
+  expect_no_error(validate_loci(loci_unsorted, check_duplicates = TRUE))
+  loci_unsorted$position[6] <- 10L
+  loci_unsorted$position[5] <- 30L
+  expect_no_error(validate_loci(loci_unsorted, check_duplicates = TRUE))
+  loci_unsorted$position[6] <- 30L
+  expect_error(
+    validate_loci(loci_unsorted, check_duplicates = TRUE),
+    "duplicated loci"
+  )
+})

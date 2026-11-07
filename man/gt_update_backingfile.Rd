@@ -23,7 +23,7 @@ on the name of the current backing file.}
 \item{chunk_size}{the number of loci to process at once}
 
 \item{rm_unsorted_dist}{boolean to set \code{genetic_dist} to zero (i.e. remove
-it) if it is unsorted within the chromosomes.}
+it) if it is unsorted within the chromosomes, or has missing values.}
 
 \item{quiet}{boolean to suppress information about the files}
 }

@@ -1,16 +1,20 @@
 #' Test if the loci table is ordered
 #'
 #' This functions checks that all SNPs in a chromosome are adjacent in the loci
-#' table, and that positions are sorted within chromosomes.
+#' table, and that positions (and, unless `ignore_genetic_dist = TRUE`,
+#' genetic distances) are sorted within chromosomes. Missing positions (or
+#' missing genetic distances, if they are checked) are an error, as the order
+#' of those loci is unknown.
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param error_on_false logical, if `TRUE` an error is thrown if the loci are
 #'   not ordered.
-#' @param ignore_genetic_dist logical, if `TRUE` the physical position is not
-#'   checked.
+#' @param ignore_genetic_dist logical, if `TRUE` (the default) only the
+#'   positions are checked, and genetic distances are ignored (they can then
+#'   be missing).
 #' @param ... other arguments passed to specific methods.
-#' @returns a logical vector defining which loci are transversions
+#' @returns `TRUE` if the loci are ordered, `FALSE` otherwise
 #' @rdname is_loci_table_ordered
 #' @export
 #' @examples
@@ -56,6 +60,21 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
   rlang::check_dots_empty()
 
   loci <- show_loci(.x)
+
+  # loci with a missing position (or genetic distance, if it is checked) can
+  # not be ordered
+  if (anyNA(loci$position)) {
+    stop(
+      sum(is.na(loci$position)), " loci have a missing position, so the ",
+      "order of the loci table can not be checked"
+    )
+  }
+  if (!ignore_genetic_dist && anyNA(loci$genetic_dist)) {
+    stop(
+      sum(is.na(loci$genetic_dist)), " loci have a missing genetic distance; ",
+      "use ignore_genetic_dist = TRUE to check the order of positions only"
+    )
+  }
 
   # check that within each chromosome positions are sorted (each check is a
   # single pass in C++, which does not copy or split the columns of the loci

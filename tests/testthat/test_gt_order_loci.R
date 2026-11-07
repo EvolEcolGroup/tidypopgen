@@ -819,3 +819,35 @@ test_that("order checks in C++ match split() and is.unsorted()", {
     )
   }
 })
+
+test_that("missing positions and genetic distances give informative errors", {
+  test_gt <- load_example_gt("gen_tbl")
+  loci <- show_loci(test_gt)
+  loci$genetic_dist <- c(0.1, 0.2, NA, 0.4, 0.5, 0.6)
+  show_loci(test_gt) <- loci
+  # genetic distances are ignored by default, and can then be missing
+  expect_true(is_loci_table_ordered(test_gt))
+  expect_error(
+    is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE),
+    "1 loci have a missing genetic distance"
+  )
+  expect_error(
+    gt_order_loci(test_gt, ignore_genetic_dist = FALSE, quiet = TRUE),
+    "ignore_genetic_dist = TRUE"
+  )
+  # gt_order_loci() then sets the genetic distances to zero
+  # (the other messages, on the new backing files, are not tested)
+  suppressMessages(expect_message(
+    ordered_gt <- gt_order_loci(test_gt, quiet = FALSE),
+    "genetic distances are missing"
+  ))
+  expect_true(all(show_loci(ordered_gt)$genetic_dist == 0))
+  # positions are always needed
+  loci$position[c(2, 5)] <- NA
+  show_loci(test_gt) <- loci
+  expect_error(
+    is_loci_table_ordered(test_gt),
+    "2 loci have a missing position"
+  )
+  expect_error(gt_order_loci(test_gt, quiet = TRUE), "missing position")
+})
