@@ -625,6 +625,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// vcf_gt_dosages_cpp
+List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy);
+RcppExport SEXP _tidypopgen_vcf_gt_dosages_cpp(SEXP gtSEXP, SEXP max_ploidySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterMatrix& >::type gt(gtSEXP);
+    Rcpp::traits::input_parameter< int >::type max_ploidy(max_ploidySEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_gt_dosages_cpp(gt, max_ploidy));
+    return rcpp_result_gen;
+END_RCPP
+}
 // vcf_loci_table
 List vcf_loci_table(std::string filename, bool read_names);
 RcppExport SEXP _tidypopgen_vcf_loci_table(SEXP filenameSEXP, SEXP read_namesSEXP) {
@@ -720,6 +732,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_all_in_cpp", (DL_FUNC) &_tidypopgen_all_in_cpp, 2},
     {"_tidypopgen_which_in_cpp", (DL_FUNC) &_tidypopgen_which_in_cpp, 2},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
+    {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
     {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 2},
     {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},

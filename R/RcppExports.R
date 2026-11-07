@@ -149,6 +149,10 @@ tajimas_d_window_sums_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, plo
     .Call(`_tidypopgen_tajimas_d_window_sums_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size)
 }
 
+vcf_gt_dosages_cpp <- function(gt, max_ploidy) {
+    .Call(`_tidypopgen_vcf_gt_dosages_cpp`, gt, max_ploidy)
+}
+
 vcf_loci_table <- function(filename, read_names = TRUE) {
     .Call(`_tidypopgen_vcf_loci_table`, filename, read_names)
 }

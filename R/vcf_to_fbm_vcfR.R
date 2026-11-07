@@ -166,19 +166,21 @@ vcf_to_fbm_vcfR <- function(
       is_single_allele(vcfR::getALT(temp_vcf))
     gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
     gt <- gt[bi, , drop = FALSE]
-    if (nrow(gt) > 1) {
-      # @TODO we could parallelise here
-      gt <- t(apply(gt, 2, poly_indiv_dosage, max_ploidy = max_ploidy))
-    } else if (nrow(gt) == 1) {
-      # if we only have one marker
-      gt <-
-        matrix(
-          apply(gt, 2, poly_indiv_dosage, max_ploidy = max_ploidy),
-          ncol = 1
-        )
-    } else {
+    if (nrow(gt) == 0) {
       next
     }
+    # dosages as raw bytes, with individuals as rows (as in the FBM), parsed
+    # in C++: a genotype is missing if any of its alleles is missing, its
+    # dosage is otherwise the sum of its alleles, and genotypes with more
+    # than max_ploidy alleles (or a larger dosage) are an error
+    gt_dosages <- vcf_gt_dosages_cpp(gt, max_ploidy = max_ploidy)
+    if (gt_dosages$error == 1) {
+      stop_max_ploidy()
+    } else if (gt_dosages$error == 2) {
+      stop("the genotypes (GT) contain alleles that are not numbers")
+    }
+    gt <- gt_dosages$dosages
+    rm(gt_dosages)
     # expand the file backed matrix according to the size of the gt matrix
     # get current size
     index_start <- dim(file_backed_matrix)[2] + 1
@@ -249,31 +251,6 @@ vcf_to_fbm_vcfR <- function(
 # get ploidy for a given individual
 get_ploidy <- function(x) {
   max(sapply(strsplit(x, "[/|]"), function(x) length(x)))
-}
-
-# get dosages for all the genotypes of an individual
-# (x is a vector of genotypes in the standard vcf format)
-poly_indiv_dosage <- function(x, max_ploidy) {
-  sapply(strsplit(x, "[/|]"), poly_genotype_dosage, max_ploidy)
-}
-
-# get dosages for a genotype x and return them as raw for inclusion in the FBM
-poly_genotype_dosage <- function(x, max_ploidy) {
-  # a genotype can not have more alleles than max_ploidy
-  if (length(x) > max_ploidy) {
-    stop_max_ploidy()
-  }
-  # if any allele is missing, the genotype is missing
-  if (length(x) > 0 && !anyNA(x) && !any(x == ".")) {
-    dosage <- sum(as.numeric(x))
-    if (dosage < (max_ploidy + 1)) {
-      return(as.raw(dosage)) # nolint
-    } else {
-      stop_max_ploidy()
-    }
-  } else {
-    return(as.raw(max_ploidy + 1)) # nolint
-  }
 }
 
 # error for genotypes with more alleles than max_ploidy
