@@ -6,6 +6,7 @@ gen_tibble_bed_rds <- function(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   backingfile = NULL,
+  names_as_int = FALSE,
   quiet = FALSE
 ) {
   # if file ends in bed
@@ -23,7 +24,8 @@ gen_tibble_bed_rds <- function(
     loci <- loci_from_bim(bim_file,
       valid_alleles = valid_alleles,
       missing_alleles = missing_alleles,
-      allow_duplicates = allow_duplicates
+      allow_duplicates = allow_duplicates,
+      names_as_int = names_as_int
     )
     indiv_meta <- indiv_meta_from_fam(fam_file)
 
@@ -44,7 +46,8 @@ gen_tibble_bed_rds <- function(
     loci <- loci_from_bim(bigsnp_obj$map,
       valid_alleles = valid_alleles,
       missing_alleles = missing_alleles,
-      allow_duplicates = allow_duplicates
+      allow_duplicates = allow_duplicates,
+      names_as_int = names_as_int
     )
     indiv_meta <- indiv_meta_from_fam(bigsnp_obj$fam)
     if (is.null(backingfile)) {
@@ -157,6 +160,9 @@ fbm_read_bed <- function(bedfile,
 #' @param allow_duplicates logical, if FALSE (default) an error is raised if
 #'   there are duplicate locus names. If TRUE, duplicate locus names are
 #'   allowed, but a warning is issued.
+#' @param names_as_int logical, if TRUE the names of the loci are their
+#'   index in the bim file (an integer), and the names in the file are not
+#'   read.
 #' @returns A tibble with columns: `big_index`, `name`, `chromosome`,
 #'   `position`, `gentic_dist`, `allele_ref`, `allele_alt`
 #' @keywords internal
@@ -165,13 +171,27 @@ fbm_read_bed <- function(bedfile,
 loci_from_bim <- function(bim,
                           valid_alleles = c("A", "T", "C", "G"),
                           missing_alleles = c("0", "."),
-                          allow_duplicates = FALSE) {
+                          allow_duplicates = FALSE,
+                          names_as_int = FALSE) {
   if (is.character(bim)) {
-    bim <- read_loci_file(bim, character_cols = c(2, 5, 6))
-    names(bim)[1:6] <- c(
-      "chromosome", "marker.ID", "genetic.dist",
-      "physical.pos", "allele1", "allele2"
-    )
+    if (names_as_int) {
+      # the names are not read (they can take several GB for tens of
+      # millions of loci)
+      bim <- read_loci_file(bim, character_cols = c(5, 6), drop = 2)
+      names(bim)[1:5] <- c(
+        "chromosome", "genetic.dist", "physical.pos", "allele1", "allele2"
+      )
+    } else {
+      bim <- read_loci_file(bim, character_cols = c(2, 5, 6))
+      names(bim)[1:6] <- c(
+        "chromosome", "marker.ID", "genetic.dist",
+        "physical.pos", "allele1", "allele2"
+      )
+    }
+  }
+  if (is.data.frame(bim) && names_as_int) {
+    # the names of the loci are their index (as for vcf files)
+    bim$marker.ID <- seq_len(nrow(bim))
   }
   if (!is.data.frame(bim) || ncol(bim) < 6) {
     stop(
@@ -180,7 +200,7 @@ loci_from_bim <- function(bim,
     )
   }
   loci <- tibble::tibble(
-    name = as.character(bim$marker.ID),
+    name = if (names_as_int) bim$marker.ID else as.character(bim$marker.ID),
     chromosome = as.factor(bim$chromosome),
     position = as.integer(bim$physical.pos),
     genetic_dist = as.numeric(bim$genetic.dist),
@@ -214,13 +234,16 @@ loci_from_bim <- function(bim,
 #'   is guessed, as done by read.table() (e.g. chromosomes are integers if
 #'   all values are integers, so that their factor levels are sorted
 #'   numerically)
-#' @returns a data.frame with columns V1, V2, ...
+#' @param drop the indices of the columns not to read (`NULL` to read all)
+#' @returns a data.frame with columns V1, V2, ... (named after their position
+#'   in the file)
 #' @keywords internal
 #' @noRd
-read_loci_file <- function(file, character_cols) {
+read_loci_file <- function(file, character_cols, drop = NULL) {
   data.table::fread(
     file,
     header = FALSE,
+    drop = drop,
     colClasses = list(character = character_cols),
     # read large integers (e.g. positions) as doubles, not integer64
     integer64 = "double",

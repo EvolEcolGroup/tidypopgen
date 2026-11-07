@@ -219,6 +219,41 @@ test_that("loci_from_bim reads loci names and alleles as characters", {
   expect_equal(loci$genetic_dist, c(0, 0.5))
 })
 
+test_that("gen_tibble reads bed and rds files with integer loci names", {
+  bed_file <- system.file("extdata", "pop_a.bed", package = "tidypopgen")
+  gt_names <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
+  gt_int <- gen_tibble(bed_file,
+    backingfile = tempfile(), names_as_int = TRUE, quiet = TRUE
+  )
+  # the names are the index of each locus in the bim file
+  loci_int <- show_loci(gt_int)
+  expect_identical(loci_int$name, seq_len(count_loci(gt_names)))
+  # everything else is unchanged
+  loci_names <- show_loci(gt_names)
+  expect_identical(loci_int[names(loci_int) != "name"],
+    loci_names[names(loci_names) != "name"]
+  )
+  expect_identical(show_genotypes(gt_int), show_genotypes(gt_names))
+  # a bigSNP rds file
+  rds_file <- bigsnpr::snp_readBed(bed_file, backingfile = tempfile())
+  gt_rds <- gen_tibble(rds_file,
+    backingfile = tempfile(), names_as_int = TRUE, quiet = TRUE
+  )
+  expect_identical(show_loci(gt_rds)$name, loci_int$name)
+  expect_identical(show_genotypes(gt_rds), show_genotypes(gt_int))
+  # other formats give an error
+  ped_file <- system.file("extdata", "pop_a.ped", package = "tidypopgen")
+  expect_error(
+    gen_tibble(ped_file, names_as_int = TRUE, quiet = TRUE),
+    "names_as_int = TRUE is only available"
+  )
+  vcf_file <- system.file("extdata", "pop_a.vcf", package = "tidypopgen")
+  expect_error(
+    gen_tibble(vcf_file, parser = "vcfR", names_as_int = TRUE, quiet = TRUE),
+    "names_as_int = TRUE is only available"
+  )
+})
+
 test_that("0 is always accepted as a missing allele", {
   # pop_a.bim uses 0 for missing alleles
   bed_path <- system.file("extdata/pop_a.bed", package = "tidypopgen")
