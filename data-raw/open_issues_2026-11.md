@@ -54,6 +54,7 @@ run on each chromosome separately (`0248be2e`).
 - `pairwise_ibs(type = "adjusted_counts")` matches PLINK's
   `--distance flat-missing`. PLINK's default correction for missing genotypes
   (without `flat-missing`) is not available; add it only if users ask for it.
+  This is documented in the details of `pairwise_ibs()` (`0c326be2`).
 
 ## Resolved since the review
 
