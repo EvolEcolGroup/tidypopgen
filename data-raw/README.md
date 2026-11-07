@@ -89,3 +89,4 @@ Remember to time installed (-O2) builds, not `load_all()` (see `CLAUDE.md`).
 | `article_timings_speed_vs_big_data_article.md` | Timings of the big data article before and after the speed work. |
 | `open_issues_2026-11.md` | What is still open after the review and the speed work, and what was resolved. |
 | `sfs_plan.md` | The plan for the site frequency spectra (implemented in #221). |
+| `cran_checks_2026-11-07.md` | The pre-submission checks for CRAN of version 1.0.0: what was fixed, what needs a decision, and a draft of `cran-comments.md`. |
