@@ -23,6 +23,9 @@ branch, one commit per fix, each with its tests where needed.
   were then worked through on the `speed_extra` branch (from `dev` at
   `1e801ab0`), one commit per fix, listed in
   [Further ideas on speed_extra](#further-ideas-on-speed_extra).
+- **Runs of homozygosity:** `windows_indiv_roh()` was then reimplemented
+  natively on the `roh` branch (from `speed_extra`), listed in
+  [Runs of homozygosity on roh](#runs-of-homozygosity-on-roh).
 - **Version:** unchanged in `DESCRIPTION`; no `NEWS.md` entries yet; no pull
   request has been opened.
 
@@ -51,6 +54,7 @@ whether it is maintainable, and whether the gain justifies the extra code.
 - [Commits by area](#commits-by-area)
 - [Follow-up on dev](#follow-up-on-dev)
 - [Further ideas on speed_extra](#further-ideas-on-speed_extra)
+- [Runs of homozygosity on roh](#runs-of-homozygosity-on-roh)
 - [Findings not fixed](#findings-not-fixed)
 - [Before merging](#before-merging)
 - [Notes on the benchmark environment](#notes-on-the-benchmark-environment)
@@ -346,7 +350,8 @@ further ideas. The ideas are numbered 1 to 20 in the order of that list
   memory);
 - already done on `dev`: 3 and 19;
 - not done: 4 (no gain) and 11 (the simple approach was slower);
-- left to the `roh` branch: 7.
+- done on the `roh` branch: 7 (see
+  [Runs of homozygosity on roh](#runs-of-homozygosity-on-roh)).
 
 After the last of these commits (`a8f3e56f`), the full test suite passes
 (4194 expectations, 0 failed, 0 skipped, on an -O2 build), and
@@ -368,6 +373,19 @@ the PCA functions, nothing visible changes.
 - [ ] `c25bf1e2` · `gt_as_hierfstat()` — Genotypes are decoded in blocks of loci (about 1 GB, as in bigstatsr), each locus is recoded into a column, and the data frame is built from the list of columns without copying. HGDP 1,043 × 49,518 (a 400 MB result): peak RSS +2.2 → +1.5 GB, time unchanged (4.0 s); blocks of 64 MB reduce the peak to +1.16 GB but take 6.0 s, so they were not used. Identical data frames (including reordered subsets, one locus and no loci). *[Memory]* (further idea 17)
 - [ ] `bda5c70b` · `gen_tibble(parser = "vcfR")` — `vcf_gt_dosages_cpp()` parses the genotype strings of a chunk in C++ with the rules of `poly_genotype_dosage()` (which, with `poly_indiv_dosage()`, is removed); errors are still raised in R by `stop_max_ploidy()`. VCF of 200 × 20,000: 27.7 → 3.3 s (the cpp parser takes 0.25 s). Identical genotypes, loci and ploidies on the 11 VCF files of `inst/extdata` and `tests/testthat`, including the error for a file whose first variant is haploid. *[Speed]* (further idea 18)
 - [ ] `9b66fd51` · `gen_tibble()` from a VCF with `names_as_int = FALSE` — The IDs are appended to a single character buffer (with their offsets) rather than a `std::vector<std::string>`. 3M loci: peak RSS +367 → +303 MB with "rs…" IDs, +515 → +379 MB with "chr1:pos:A:T" IDs (about 0.85 and 1.8 GB less at 40M); identical loci tables. *[Memory]* (further idea 20)
+
+## Runs of homozygosity on roh
+
+The `roh` branch starts from `speed_extra` at `b9bf4ea8`, so that the two
+branches do not conflict (both add C++ functions, and so change the
+`RcppExports` files). It replaces the call to `detectRUNS` in
+`windows_indiv_roh()` with a native implementation of the same algorithm.
+
+- [ ] `1c7bbfc5` · `windows_indiv_roh()` (and `gt_roh_window()`) — `roh_sliding_cpp()` (`src/roh_sliding_cpp.cpp`) implements the sliding-window algorithm of `detectRUNS::slidingRUNS.run()` for all individuals in a single pass over the FBM, column by column. Each individual keeps only the classes of its last `window_size` genotypes, the status of its last `window_size` windows, a few counters and its current run (in registers while it goes through a sub-block of 256 loci); what does not depend on the individual (windows with a large gap, ring slots, the number of good windows that puts a locus in a run, the ends of chromosomes) is computed once per locus. Individuals are processed in parallel (new argument `n_cores`). The results are those of detectRUNS, in the same order, including the features of its algorithm, which are documented: windows slide across chromosomes (only the gaps between consecutive loci of the table are checked); the proportion of windows is compared in single precision; and for genomes with fewer than 2 × `window_size` − 1 loci, its count of the windows of each locus is kept. Differences: the loci must be sorted by chromosome and position (with chromosomes that are not adjacent, detectRUNS gave runs that start on the wrong chromosome: 5 of 300 random cases); with fewer loci than `window_size` there are no runs (detectRUNS fails); there is no message for each individual; `detectRUNS` is no longer needed; the types of the columns no longer depend on whether some individual had no run. HGDP, all 1,043 individuals, default settings (6.9M runs): 6.9 s on one core and 3.2 s on four, against about 27 minutes (1.55 s per individual); for runs of heterozygosity, the kernel takes 4.2 s on one core. Most of the 0.45 GB peak RSS is the output (6.9M rows); the kernel needs about 1 byte per locus and 2 × `window_size` bytes per individual. Identical runs (with numbers compared as doubles) to the detectRUNS-based code on 4,000 random datasets on the final code (several chromosomes, large gaps, missing and tetraploid dosages, genomes from `window_size` loci, all settings, grouped or not), on the sheep example of detectRUNS with four settings (grouped or not), on 30 tetraploid datasets and on 10 HGDP individuals. A test compares with detectRUNS directly. The output works with `detectRUNS::plot_Runs()` and `detectRUNS::summaryRuns()`. With a `NEWS.md` entry. *[Speed, Memory, Behaviour]* (further idea 7)
+- [ ] `5a9cc99e` · internal documentation of `any_unsorted_by_chromosome()` — The roxygen block added in `9b07dde1` linked to `cast_chromosome_to_int()`, which has no help page, so roxygen warned; it is now written as code. *[Docs]*
+- [ ] `64a57808` · help of `windows_indiv_roh()` — A line added in `1c7bbfc5` was longer than 80 characters. *[Docs]*
+
+After the last of these commits, the full test suite passes (4202 expectations, 0 failed, 0 skipped, on an -O2 build), `lintr::lint_package()` finds no lints (with the branch installed), and the new C++ files compile without warnings with `-Wall -pedantic`.
 
 ## Findings not fixed
 
@@ -433,10 +451,9 @@ the PCA functions, nothing visible changes.
 - **Populations and windows:**
   - *Done in `fee67118`.* `.window_definitions()` uses about 100 bytes per locus; `order()` +
     `tabulate()` instead of `split()` would bring it to about 40.
-  - *Left to the `roh` branch.* `windows_indiv_roh()` takes about 2.6 s per individual (about 45 min for
+  - *Done on the `roh` branch in `1c7bbfc5`.* `windows_indiv_roh()` takes about 2.6 s per individual (about 45 min for
     HGDP), 60% of it in detectRUNS' plyr-based `createRUNdf`. detectRUNS
-    is not changed here; a native implementation of runs of homozygosity
-    is on the `roh` branch.
+    is not changed; `windows_indiv_roh()` no longer uses it.
 - **Individuals and PCA:**
   - *Done (documentation) in `7bac2495`.* `gt_pca_randomSVD()` takes 279 s on HGDP against 46 s for
     `gt_pca_partialSVD()`. The time is spent inside bigstatsr, so the docs
