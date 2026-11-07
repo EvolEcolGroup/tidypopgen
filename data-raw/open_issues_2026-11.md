@@ -8,17 +8,11 @@ at the commit that adds this file.
 
 ## Still to solve
 
-| # | Location | Issue | Suggestion |
-|---|---|---|---|
-| 5 | `R/rbind_gen_tibble.R:121-125` | `as_is` is not implemented: loci are always harmonised, although the message printed with `as_is = TRUE` says they will not be. | Decide what `as_is` should do when the loci differ (e.g. require identical loci tables, and error otherwise), and fix the message at the same time. |
-| 6 | `R/filter_high_relatedness.R:140` | `mn2 <- mean(matrix2[-j, ])` (copied from `caret::findCorrelation()`) is not "the average relatedness of individual j", as the comment says. | Both versions are greedy heuristics that leave no pair above the threshold, and neither was clearly better in simulations. Either fix the comment, or use `mean(matrix2[j, ])` and document the change. |
-| 11 | `R/autoplot_gt_dapc.R:122` (also `autoplot.gt_pca(type = "loadings", k = c(1, 2))`, via bigstatsr) | `geom_hex()` needs `hexbin`, which is not declared in `DESCRIPTION`. | Add `hexbin` to Suggests and call `rlang::check_installed("hexbin")`, or plot points. |
-| 12 | `data/distruct_colours` | The palette repeats colours (positions 4/35, 12/54, 24/46, 59/60), so with K >= 35 some clusters share a colour, and K > 60 errors. | Replace the duplicated colours, and give a clear error (or recycle with a warning) for K > 60. |
-| 13 | VCF parsers (`src/vcf_parser_fast.cpp:202`) | Ploidy is taken from the first non-missing genotype, so haploid calls (e.g. chrX in males) on the first variant set ploidy 1. The cpp parser only looks for that genotype in the first 1,000 variants; individuals missing on all of them get the largest ploidy of the others. | Documented limitation, but the docs of `gen_tibble()` (`R/gen_tibble.R:6-14`) say the ploidy comes from the first genotype that is not '.', without the 1,000 variants limit: update them. |
-| 14 | `R/gen_tibble.R:529` (`new_vctrs_bigsnp()`) | `fbm_md5sum` is NA for VCF inputs, as the `.rds` is hashed before it is saved. | The attribute is not used anywhere: either drop it, or save the `.rds` before hashing it. |
-| 15 | `R/gt_pca_autoSVD.R:141` | `infos_chr + abs(min(infos_chr) + 1)` is wrong when the smallest code is -1 or less. | No observable effect (bigsnpr only uses `infos.chr` to group SNPs), but `infos_chr - min(infos_chr) + 1` is what was meant. |
+All the confirmed findings of the October 2026 review are now resolved (see
+[Resolved since the review](#resolved-since-the-review)); the points below
+remain.
 
-## Open from the November 2026 speed and ROH work
+### Open from the November 2026 speed and ROH work
 
 These come from the work on `speed_extra` and `roh` (see
 [speed_review_2026-11.md](speed_review_2026-11.md)). They are decisions or
@@ -63,6 +57,13 @@ ideas, not bugs.
 | 2 | `pairwise_ibs(type = "adjusted_counts")` was a similarity in loci, documented as PLINK's "distance". | Fixed in the commit that adds this file: it is now PLINK's allele count distance (`--distance flat-missing`), tested against a PLINK 1.9 `.dist` file (`inst/extdata/related/test_plinkDist.dist`). No other function used it. |
 | 3 | The pairwise kernels treated imputed genotypes as missing. | Fixed in `f26f046b`: genotypes are decoded through `code256`. |
 | 4 | WC84 drops loci with no data in one population, whereas `hierfstat::wc()` keeps them with sigma_a = 0. | Kept. The difference is documented in the details of `pairwise_pop_fst()`, and tested, in the commit that adds this file. Nei87 already matches `hierfstat::pairwise.neifst()`. |
+| 5 | `rbind()` did not implement `as_is` (loci were always harmonised), although with `as_is = TRUE` it said that they would not be. | Deprecated in `dd527bc5`: `as_is = TRUE` gives a warning and has no effect, and the misleading message is removed. With a `NEWS.md` entry. |
+| 6 | `filter_high_relatedness()`: the comment said that the individual with the higher mean relatedness is removed, but (as in `caret::findCorrelation()`) the mean of the first individual is compared with the mean of the remaining matrix without the second. | The comments and the details of the help now describe the greedy rule (`78826707`); the code is unchanged. |
 | 7 | `gt_extract_f2()` counted groups with `max(group_indices())`. | Fixed on `dev` (#218): groups are counted with `.group_info()`, and empty groups are dropped. |
 | 8 | `pop_fst()` and `pop_fis()` counted groups with `factor(group_indices())`. | Fixed on `dev` (#218): empty groups give NaN. |
 | 10 | `gt_as_hierfstat()` without a `population` column failed with an unclear "differing number of rows" error. | Fixed in `8949cf81` (on `speed_extra`, merged into `roh`): it stops with a clear error. (`c25bf1e2`, which builds the data frame column by column, had made it return a corrupt data frame instead.) |
+| 11 | `geom_hex()` (loadings of several axes in `autoplot()` of `gt_dapc` and `gt_pca`) needs `hexbin`, which was not declared. | `hexbin` is in Suggests, and both functions call `rlang::check_installed("hexbin")` before plotting several axes (`60cfe4b8`). |
+| 12 | The distruct palette repeats 4 of its 60 colours, so clusters shared colours for K >= 35, and K > 60 failed. | `distruct_colours` holds the 56 distinct colours, and `scale_fill_distruct()` recycles them with a warning when there are more groups (`d4e156df`; needs ggplot2 >= 3.5.0). With a `NEWS.md` entry. |
+| 13 | The documentation of `gen_tibble()` did not say that the cpp parser only looks for the ploidy of individuals missing on the first variant in the next 1,000 variants. | Documented (`6d387fed`), with the behaviour of the vcfR parser (the whole file) and the fallback (the largest ploidy of the others, or 2). Haploid calls on the first variant remain a documented limitation. |
+| 14 | `fbm_md5sum` was NA for VCF inputs, as the `.rds` was hashed before it was saved. | Both VCF readers save the `.rds` before the gen_tibble is created, and `gen_tibble()` then saves only the gen_tibble for every input, so the FBM is no longer saved twice (`b2e614d9`). Saving and hashing the `.rds` takes about 60 ms whatever the size of the data. |
+| 15 | `gt_pca_autoSVD()` shifted chromosome codes with `infos_chr + abs(min(infos_chr) + 1)`, wrong when the smallest code is -1 or less. | Fixed to `infos_chr - min(infos_chr) + 1` (`c22fa88d`); no observable effect, as codes are never negative. |
