@@ -25,9 +25,12 @@
   a gen_tibble.
 * `windows_indiv_roh()` now finds runs of homozygosity (or heterozygosity)
   natively in C++, processing all individuals in a single pass over the
-  genotypes, with the same runs as `detectRUNS::slidingRUNS.run()`, which it
-  used to call for each individual: on HGDP (1,043 individuals x 643,733 loci)
-  it takes about 7 s on one core, rather than about 27 minutes. It now returns
+  genotypes, rather than calling `detectRUNS::slidingRUNS.run()` for each
+  individual: on HGDP (1,043 individuals x 643,733 loci) it takes about 7 s
+  on one core, rather than about 27 minutes. As in PLINK, windows now restart
+  at each chromosome (the windows of `detectRUNS` crossed from one chromosome
+  to the next, and counted towards the loci at the ends of both), so the runs
+  are those of `detectRUNS` run on each chromosome separately. It now returns
   a tidy `indiv_roh` tibble (the grouping variables if any, `id`,
   `chromosome`, `start`, `end`, `length_bp`, `n_loci`, the rows of the first
   and last locus of each run in the loci table, and the numbers of opposite

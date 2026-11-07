@@ -6,9 +6,9 @@
 #' natively in C++: all individuals are analysed in a single pass over the
 #' genotypes, without loading the genotypes of each individual into R.
 #'
-#' Windows of `window_size` consecutive loci slide along the genome, one locus
-#' at a time. A window is homozygous (for runs of homozygosity) if it contains
-#' at most `max_opp_window` heterozygous genotypes and at most
+#' Windows of `window_size` consecutive loci slide along each chromosome, one
+#' locus at a time. A window is homozygous (for runs of homozygosity) if it
+#' contains at most `max_opp_window` heterozygous genotypes and at most
 #' `max_miss_window` missing genotypes, and no gap larger than `max_gap`
 #' between consecutive loci. A locus is in a run if the proportion of
 #' homozygous windows among all the windows that include it is larger than
@@ -44,19 +44,16 @@
 #' @param n_cores the number of cores to use (individuals are analysed in
 #'   parallel)
 #'
-#' @details The runs are the same as those of [detectRUNS::slidingRUNS.run()],
-#'   including two features of its algorithm. First, windows slide along the
-#'   loci table as a whole, so they cross from one chromosome to the next:
-#'   near a boundary, a window holds the last loci of one chromosome and the
-#'   first loci of the next. Only the distance between consecutive loci is
-#'   checked against `max_gap`, and across a boundary it is usually negative
-#'   (the next chromosome starts at a smaller position), so such windows are
-#'   not discarded; they count towards the loci at the ends of both
-#'   chromosomes, but runs never span two chromosomes, as each run ends with
-#'   the last locus of its chromosome. Second, the counts of opposite and
-#'   missing genotypes compared to `max_opp_run` and `max_miss_run` are those
-#'   of the loci of the run. With fewer loci than `window_size`, no run is
-#'   found. The loci must be sorted by chromosome and position (see
+#' @details As in PLINK, windows restart at each chromosome, so that no
+#'   window holds the loci of two chromosomes. This departs from
+#'   [detectRUNS::slidingRUNS.run()], whose windows slide along the loci table
+#'   as a whole: near the end of a chromosome, they also hold the first loci
+#'   of the next one, and count towards the loci at the ends of both
+#'   chromosomes. The runs are thus those of `detectRUNS` run on each
+#'   chromosome separately. The counts of opposite and missing genotypes
+#'   compared to `max_opp_run` and `max_miss_run` are those of the loci of the
+#'   run. A chromosome with fewer loci than `window_size` has no windows, and
+#'   no runs. The loci must be sorted by chromosome and position (see
 #'   [gt_order_loci()]).
 #'
 #'   Runs can be plotted with [autoplot.indiv_roh()], which draws the plots
@@ -93,7 +90,7 @@
 #'   `heterozygosity` are used by [autoplot.indiv_roh()].
 #' @export
 #' @seealso [detectRUNS::slidingRUNS.run()], whose algorithm this function
-#'   implements.
+#'   implements (on each chromosome separately).
 #' @references Biscarini F, Cozzi P, Gaspa G, Marras G (2019) `detectRUNS`:
 #'   Detect Runs of Homozygosity and Runs of Heterozygosity in Diploid Genomes.
 #'   R package. \doi{10.32614/CRAN.package.detectRUNS}
@@ -144,9 +141,9 @@ windows_indiv_roh <- function(
       "so runs can not be found"
     )
   }
-  # windows slide along the loci table, so the loci of each chromosome must
-  # be adjacent, and sorted by position (both checks are a single pass in
-  # C++)
+  # windows slide along each chromosome in a single pass over the loci
+  # table, so the loci of each chromosome must be adjacent, and sorted by
+  # position (both checks are a single pass in C++)
   positions_unsorted <- any_unsorted_by_chromosome(
     loci$position,
     chromosome

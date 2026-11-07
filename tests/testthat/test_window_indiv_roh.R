@@ -235,7 +235,8 @@ test_that("windows_indiv_roh gives the same runs as detectRUNS", {
   sheep_gt <- gen_tibble(sheep_ped, backingfile = tempfile(), quiet = TRUE)
   sheep_gt <- sheep_gt[c(1:6, 51:56), ] %>% group_by(population)
   # the runs of detectRUNS, one individual at a time (as windows_indiv_roh()
-  # used to do)
+  # used to do), and one chromosome at a time (as windows restart at each
+  # chromosome)
   ref_roh <- function(x, ...) {
     parameters <- list(
       windowSize = 15, threshold = 0.05, minSNP = 3, ROHet = FALSE,
@@ -253,15 +254,18 @@ test_that("windows_indiv_roh gives the same runs as detectRUNS", {
     genotypes[genotypes == 2] <- 0
     groups <- as.character(x$population)
     runs <- lapply(seq_len(nrow(x)), function(i) {
-      utils::getFromNamespace("slidingRuns", "detectRUNS")(
-        genotypes[i, ],
-        list(FID = groups[i], IID = x$id[i]),
-        map,
-        diff(map$bps),
-        parameters
-      )
+      lapply(unique(map$Chrom), function(chrom) {
+        chrom_loci <- map$Chrom == chrom
+        utils::getFromNamespace("slidingRuns", "detectRUNS")(
+          genotypes[i, chrom_loci],
+          list(FID = groups[i], IID = x$id[i]),
+          map[chrom_loci, ],
+          diff(map$bps[chrom_loci]),
+          parameters
+        )
+      })
     })
-    runs <- dplyr::bind_rows(runs)
+    runs <- dplyr::bind_rows(unlist(runs, recursive = FALSE))
     row.names(runs) <- NULL
     runs
   }
@@ -320,6 +324,25 @@ test_that("windows_indiv_roh checks the loci and uses several cores", {
   expect_identical(
     windows_indiv_roh(test_gt, window_size = 3, min_snp = 2, n_cores = 2),
     roh_1
+  )
+  # windows restart at each chromosome, so the runs of a chromosome are
+  # those found on that chromosome alone (with windows that crossed into
+  # chr2, which is homozygous for b, b would have a run on the last two loci
+  # of chr1 with threshold = 0.5, and its run on chr1 would end with locus 6
+  # with the default threshold)
+  roh_half <- windows_indiv_roh(test_gt,
+    window_size = 3, min_snp = 2, threshold = 0.5
+  )
+  roh_chr1 <- windows_indiv_roh(test_gt %>% select_loci(1:6),
+    window_size = 3, min_snp = 2, threshold = 0.5
+  )
+  expect_equal(roh_half[roh_half$chromosome == "chr1", ], roh_chr1,
+    ignore_attr = TRUE
+  )
+  expect_false("b" %in% roh_chr1$id)
+  expect_identical(
+    roh_1$last_locus[roh_1$id == "b" & roh_1$chromosome == "chr1"],
+    5L
   )
   # with fewer loci than window_size, there are no runs
   roh_none <- windows_indiv_roh(test_gt, window_size = 13)
