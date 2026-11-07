@@ -1,5 +1,3 @@
-skip_if_not_installed("detectRUNS")
-
 test_that("windows_indiv_roh works without backingfile update", {
   test_indiv_meta <- data.frame(
     id = c("a", "b", "c"),
@@ -223,5 +221,115 @@ test_that("homozygotes for the alternate allele are homozygous", {
     test_rohom[test_rohom$id == "hom_alt", run_cols],
     test_rohom[test_rohom$id == "hom_ref", run_cols],
     ignore_attr = TRUE
+  )
+})
+
+test_that("windows_indiv_roh gives the same runs as detectRUNS", {
+  skip_if_not_installed("detectRUNS")
+  sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
+    package = "detectRUNS"
+  )
+  sheep_gt <- gen_tibble(sheep_ped, backingfile = tempfile(), quiet = TRUE)
+  sheep_gt <- sheep_gt[c(1:6, 51:56), ] %>% group_by(population)
+  # the runs of detectRUNS, one individual at a time (as windows_indiv_roh()
+  # used to do)
+  ref_roh <- function(x, ...) {
+    parameters <- list(
+      windowSize = 15, threshold = 0.05, minSNP = 3, ROHet = FALSE,
+      maxOppWindow = 1, maxMissWindow = 1, maxGap = 10^6,
+      minLengthBps = 1000, minDensity = 1 / 1000, maxOppRun = NULL,
+      maxMissRun = NULL
+    )
+    parameters[names(list(...))] <- list(...)
+    map <- data.frame(
+      Chrom = show_loci(x)$chromosome,
+      SNP = show_loci(x)$name,
+      bps = show_loci(x)$position
+    )
+    genotypes <- show_genotypes(x)
+    genotypes[genotypes == 2] <- 0
+    groups <- as.character(x$population)
+    runs <- lapply(seq_len(nrow(x)), function(i) {
+      utils::getFromNamespace("slidingRuns", "detectRUNS")(
+        genotypes[i, ],
+        list(FID = groups[i], IID = x$id[i]),
+        map,
+        diff(map$bps),
+        parameters
+      )
+    })
+    runs <- dplyr::bind_rows(runs)
+    row.names(runs) <- NULL
+    runs
+  }
+  as_doubles <- function(runs) {
+    for (col in c("nSNP", "from", "to", "lengthBps")) {
+      runs[[col]] <- as.double(runs[[col]])
+    }
+    runs
+  }
+  suppressMessages(expected <- ref_roh(sheep_gt))
+  expect_identical(
+    as_doubles(windows_indiv_roh(sheep_gt)),
+    as_doubles(expected)
+  )
+  suppressMessages(
+    expected <- ref_roh(sheep_gt,
+      ROHet = TRUE, windowSize = 10, threshold = 0.1, maxOppWindow = 2,
+      maxOppRun = 1, maxMissRun = 1
+    )
+  )
+  expect_identical(
+    as_doubles(windows_indiv_roh(sheep_gt,
+      heterozygosity = TRUE, window_size = 10, threshold = 0.1,
+      max_opp_window = 2, max_opp_run = 1, max_miss_run = 1
+    )),
+    as_doubles(expected)
+  )
+})
+
+test_that("windows_indiv_roh checks the loci and uses several cores", {
+  test_genotypes <- rbind(
+    c(0, 0, 0, 0, 1, 0, 0, 0, NA, 0, 2, 2),
+    c(0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0),
+    c(2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:12),
+    chromosome = rep(c("chr1", "chr2"), each = 6),
+    position = as.integer(rep(1:6 * 1000, 2)),
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = data.frame(id = c("a", "b", "c")),
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  roh_1 <- windows_indiv_roh(test_gt,
+    window_size = 3, min_snp = 2, n_cores = 1
+  )
+  expect_true(nrow(roh_1) > 0)
+  expect_identical(
+    windows_indiv_roh(test_gt, window_size = 3, min_snp = 2, n_cores = 2),
+    roh_1
+  )
+  # with fewer loci than window_size, there are no runs
+  roh_none <- windows_indiv_roh(test_gt, window_size = 13)
+  expect_identical(nrow(roh_none), 0L)
+  expect_identical(names(roh_none), names(roh_1))
+  # the loci must be sorted by chromosome and position
+  unsorted_gt <- test_gt %>% select_loci(c(1:3, 7:9, 4:6, 10:12))
+  expect_error(
+    windows_indiv_roh(unsorted_gt, window_size = 3),
+    "sorted by chromosome and position"
+  )
+  unsorted_gt <- test_gt %>% select_loci(c(2, 1, 3:12))
+  expect_error(
+    windows_indiv_roh(unsorted_gt, window_size = 3),
+    "sorted by chromosome and position"
   )
 })

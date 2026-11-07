@@ -1,8 +1,24 @@
 #' Detect runs of homozygosity using a sliding-window approach
 #'
 #' This function uses a sliding-window approach to look for runs of homozygosity
-#' (or heterozygosity) in a diploid genome. It is based on the package
-#' `detectRUNS`, which implements an approach equivalent to the one in PLINK.
+#' (or heterozygosity) in a diploid genome. It implements the algorithm of
+#' [detectRUNS::slidingRUNS.run()], which is equivalent to the one in PLINK,
+#' natively in C++: all individuals are analysed in a single pass over the
+#' genotypes, without loading the genotypes of each individual into R.
+#'
+#' Windows of `window_size` consecutive loci slide along the genome, one locus
+#' at a time. A window is homozygous (for runs of homozygosity) if it contains
+#' at most `max_opp_window` heterozygous genotypes and at most
+#' `max_miss_window` missing genotypes, and no gap larger than `max_gap`
+#' between consecutive loci. A locus is in a run if the proportion of
+#' homozygous windows among all the windows that include it is larger than
+#' `threshold`. Runs are stretches of consecutive loci in a run on a
+#' chromosome, and only those with at least `min_snp` loci, a length of at
+#' least `min_length_bps` and a density of at least `min_density` loci per
+#' 1000 bps (and, if given, at most `max_opp_run` heterozygous and `max_miss_run` missing
+#' genotypes) are returned. For runs of heterozygosity, homozygous and
+#' heterozygous genotypes swap their roles. Genotypes are classified by their
+#' dosage (0 and 2 are homozygous, 1 is heterozygous).
 #'
 #' @param .x a [gen_tibble]
 #' @param window_size the size of sliding window (number of SNP loci) (default =
@@ -24,12 +40,23 @@
 #'   10 kbps)
 #' @param max_opp_run max n. of opposite genotype SNPs in the run (optional)
 #' @param max_miss_run max n. of missing SNPs in the run (optional)
+#' @param n_cores the number of cores to use (individuals are analysed in
+#'   parallel)
 #'
 #' @details This function returns a data frame with all runs detected in the
-#'   dataset. The data frame is, in turn, the input for other functions of the
-#'   `detectRUNS` package that create plots and produce statistics from the
-#'   results (see plots and statistics functions in this manual, and/or refer to
-#'   the `detectRUNS` vignette).
+#'   dataset, in the format of `detectRUNS`, so that it can be used as the
+#'   input of the functions of the `detectRUNS` package that create plots and
+#'   produce statistics from the results (see plots and statistics functions
+#'   in its manual, and/or refer to the `detectRUNS` vignette). The runs are
+#'   the same as those of [detectRUNS::slidingRUNS.run()], including two
+#'   features of its algorithm: windows slide across chromosomes (only the
+#'   distance between consecutive loci in the loci table is checked against
+#'   `max_gap`), and the counts of opposite and missing genotypes compared to
+#'   `max_opp_run` and `max_miss_run` are those of the loci of the run. With
+#'   fewer loci than `window_size`, no run is found. The loci must be sorted by
+#'   chromosome and position (see [gt_order_loci()]); `detectRUNS` does not
+#'   check this, and gives runs that start on the wrong chromosome when the
+#'   loci of a chromosome are not adjacent.
 #'
 #'   If the [`gen_tibble`] is grouped, then the grouping variable is used to
 #'   fill in the 'group' column (with several grouping variables, their values
@@ -49,9 +76,14 @@
 #'   population, breed, case/control etc.; id: individual identifier; chrom:
 #'   chromosome on which the run is located; nSNP: number of SNPs in the run;
 #'   from: starting position of the run, in bps; to: end position of the run, in
-#'   bps; lengthBps: size of the run)
+#'   bps; lengthBps: size of the run). Runs are ordered by individual, then by
+#'   chromosome (in the order of its levels) and position.
 #' @export
-#' @seealso [detectRUNS::slidingRUNS.run()] which this function wraps.
+#' @seealso [detectRUNS::slidingRUNS.run()], whose algorithm this function
+#'   implements.
+#' @references Biscarini F, Cozzi P, Gaspa G, Marras G (2019) `detectRUNS`:
+#'   Detect Runs of Homozygosity and Runs of Heterozygosity in Diploid Genomes.
+#'   R package. \doi{10.32614/CRAN.package.detectRUNS}
 #' @examplesIf rlang::is_installed("detectRUNS")
 #' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
 #'   package = "detectRUNS"
@@ -75,41 +107,35 @@ windows_indiv_roh <- function(
   min_length_bps = 1000,
   min_density = 1 / 1000,
   max_opp_run = NULL,
-  max_miss_run = NULL
+  max_miss_run = NULL,
+  n_cores = bigstatsr::nb_cores()
 ) {
-  if (!requireNamespace("detectRUNS", quietly = TRUE)) {
+  stopifnot_has_genotypes(.x)
+  if (!is.numeric(window_size) || length(window_size) != 1 ||
+        is.na(window_size) || window_size < 1) {
+    stop("window_size should be a positive integer")
+  }
+  loci <- show_loci(.x)
+  chromosome <- loci$chromosome
+  if (!is.factor(chromosome)) {
+    chromosome <- as.factor(chromosome)
+  }
+  if (anyNA(chromosome)) {
+    stop("the chromosomes of the loci should not be missing")
+  }
+  # windows slide along the loci table, so the loci of each chromosome must
+  # be adjacent, and sorted by position (both checks are a single pass in
+  # C++)
+  positions_unsorted <- any_unsorted_by_chromosome(
+    loci$position,
+    chromosome
+  )[["unsorted"]]
+  if (chromosomes_not_adjacent(chromosome) || isTRUE(positions_unsorted)) {
     stop(
-      "to use this function, first install package 'detectRUNS' with\n",
-      "install.packages('detectRUNS')"
+      "the loci should be sorted by chromosome and position ",
+      "(see gt_order_loci())"
     )
   }
-  # collect all parameters in a variable
-  parameters <- list(
-    windowSize = window_size,
-    threshold = threshold,
-    minSNP = min_snp,
-    ROHet = heterozygosity,
-    maxOppWindow = max_opp_window,
-    maxMissWindow = max_miss_window,
-    maxGap = max_gap,
-    minLengthBps = min_length_bps,
-    minDensity = min_density,
-    maxOppRun = max_opp_run,
-    maxMissRun = max_miss_run
-  )
-
-  # create a map object
-  map <- show_loci(.x) %>%
-    dplyr::select(dplyr::all_of(c("chromosome", "name", "position"))) %>%
-    dplyr::rename(
-      "Chrom" = "chromosome",
-      "SNP" = "name",
-      "bps" = "position"
-    ) %>%
-    as.data.frame()
-
-  # compute the gaps between snps
-  gaps <- diff(map$bps)
   # use groups (if defined)
   if (dplyr::is_grouped_df(.x)) {
     groups <- .group_of_rows(.x)
@@ -117,40 +143,45 @@ windows_indiv_roh <- function(
     groups <- .x$id
   }
 
-  runs_list <- vector("list", nrow(.x))
+  # find the runs of all individuals in C++, in a single pass over the loci
+  # (optional limits are NA when they are not used)
+  runs <- roh_sliding_cpp(
+    BM = .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
+    chrom = chromosome,
+    position = loci$position,
+    window_size = window_size,
+    threshold = threshold,
+    heterozygosity = heterozygosity,
+    max_opp_window = max_opp_window,
+    max_miss_window = max_miss_window,
+    max_gap = max_gap,
+    min_snp = min_snp,
+    min_length_bps = min_length_bps,
+    min_density = min_density,
+    max_opp_run = if (is.null(max_opp_run)) NA_real_ else max_opp_run,
+    max_miss_run = if (is.null(max_miss_run)) NA_real_ else max_miss_run,
+    ncores = n_cores,
+    block_size = 10000L
+  )
 
-  # naively process it by row (the parallelism is implemented within individual)
-  # access time is horrible, but I don't think this is the bottleneck
-  # it needs some profiling
-  X <- .gt_get_fbm(.x) # pointer for the FBM #nolint
-  col_ind <- .gt_fbm_cols(.x) # column indices for the snps to consider
-  rows_to_keep <- .gt_fbm_rows(.x)
-  for (i in seq_len(nrow(.x))) {
-    this_genotype <- X[rows_to_keep[i], col_ind]
-    # detectRUNS expects 0 for homozygotes and 1 for heterozygotes (its
-    # readers recode 0/1/2 dosages with genoConvert), otherwise homozygotes
-    # for the alternate allele count as heterozygotes for runs of
-    # heterozygosity
-    this_genotype[which(this_genotype == 2)] <- 0
-    this_indiv <- list(FID = groups[i], IID = .x$id[i])
-    # find runs for this individual
-    this_runs <-
-      utils::getFromNamespace("slidingRuns", "detectRUNS")(
-        this_genotype,
-        this_indiv,
-        map,
-        gaps,
-        parameters
-      ) # nolint
-    # bind this run (if has rows) to others RUNs (if any)
-    runs_list[[i]] <- this_runs
-  }
-
-  # return calculated runs (data.frame)
-  runs_df <- dplyr::bind_rows(runs_list)
-  # fix row names
-  row.names(runs_df) <- NULL
-  return(runs_df)
+  # order the runs by individual, then by chromosome (in the order of its
+  # levels) and position, as in detectRUNS
+  run_order <- order(runs$indiv, runs$chrom, runs$start)
+  indiv <- runs$indiv[run_order]
+  from <- loci$position[runs$start[run_order]]
+  to <- loci$position[runs$end[run_order]]
+  data.frame(
+    group = as.character(groups[indiv]),
+    id = as.character(.x$id[indiv]),
+    chrom = levels(chromosome)[runs$chrom[run_order]],
+    nSNP = runs$n_snp[run_order],
+    from = from,
+    to = to,
+    lengthBps = to - from,
+    stringsAsFactors = FALSE
+  )
 }
 
 
@@ -169,7 +200,8 @@ gt_roh_window <- function(
   min_length_bps = 1000,
   min_density = 1 / 1000,
   max_opp_run = NULL,
-  max_miss_run = NULL
+  max_miss_run = NULL,
+  n_cores = bigstatsr::nb_cores()
 ) {
   warning(
     "This is a soft-deprecated function, and will be removed in the ",
@@ -190,6 +222,7 @@ gt_roh_window <- function(
     min_length_bps = min_length_bps,
     min_density = min_density,
     max_opp_run = max_opp_run,
-    max_miss_run = max_miss_run
+    max_miss_run = max_miss_run,
+    n_cores = n_cores
   )
 }

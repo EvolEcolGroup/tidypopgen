@@ -23,6 +23,15 @@
   spectra (with the blocks of the `jackknife_*` functions), reading the
   genotypes only once; `write_sfs(n_bootstrap = )` writes the replicates of
   a gen_tibble.
+* `windows_indiv_roh()` now finds runs of homozygosity (or heterozygosity)
+  natively in C++, processing all individuals in a single pass over the
+  genotypes, with the same results as `detectRUNS::slidingRUNS.run()`, which it
+  used to call for each individual: on HGDP (1,043 individuals x 643,733 loci)
+  it takes about 7 s on one core, rather than about 27 minutes. It gains an
+  `n_cores` argument, no longer prints a message for each individual, and no
+  longer needs `detectRUNS` to be installed. The loci must now be sorted by
+  chromosome and position (on unsorted loci, `detectRUNS` gave runs that start
+  on the wrong chromosome)
 * Preserve classes with all dplyr operations and make many functions generics
 * grouped functions now preserve order of factor levels, work with gen_tibbles
   grouped by more than one variable, and respect empty groups

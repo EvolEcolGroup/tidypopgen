@@ -17,7 +17,8 @@ windows_indiv_roh(
   min_length_bps = 1000,
   min_density = 1/1000,
   max_opp_run = NULL,
-  max_miss_run = NULL
+  max_miss_run = NULL,
+  n_cores = bigstatsr::nb_cores()
 )
 
 gt_roh_window(
@@ -32,7 +33,8 @@ gt_roh_window(
   min_length_bps = 1000,
   min_density = 1/1000,
   max_opp_run = NULL,
-  max_miss_run = NULL
+  max_miss_run = NULL,
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
@@ -67,6 +69,9 @@ kbps)}
 \item{max_opp_run}{max n. of opposite genotype SNPs in the run (optional)}
 
 \item{max_miss_run}{max n. of missing SNPs in the run (optional)}
+
+\item{n_cores}{the number of cores to use (individuals are analysed in
+parallel)}
 }
 \value{
 A dataframe with RUNs of Homozygosity or Heterozygosity in the
@@ -75,19 +80,45 @@ columns: "group", "id", "chrom", "nSNP", "from", "to", "lengthBps" (group:
 population, breed, case/control etc.; id: individual identifier; chrom:
 chromosome on which the run is located; nSNP: number of SNPs in the run;
 from: starting position of the run, in bps; to: end position of the run, in
-bps; lengthBps: size of the run)
+bps; lengthBps: size of the run). Runs are ordered by individual, then by
+chromosome (in the order of its levels) and position.
 }
 \description{
 This function uses a sliding-window approach to look for runs of homozygosity
-(or heterozygosity) in a diploid genome. It is based on the package
-\code{detectRUNS}, which implements an approach equivalent to the one in PLINK.
+(or heterozygosity) in a diploid genome. It implements the algorithm of
+\code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}}, which is equivalent to the one in PLINK,
+natively in C++: all individuals are analysed in a single pass over the
+genotypes, without loading the genotypes of each individual into R.
 }
 \details{
+Windows of \code{window_size} consecutive loci slide along the genome, one locus
+at a time. A window is homozygous (for runs of homozygosity) if it contains
+at most \code{max_opp_window} heterozygous genotypes and at most
+\code{max_miss_window} missing genotypes, and no gap larger than \code{max_gap}
+between consecutive loci. A locus is in a run if the proportion of
+homozygous windows among all the windows that include it is larger than
+\code{threshold}. Runs are stretches of consecutive loci in a run on a
+chromosome, and only those with at least \code{min_snp} loci, a length of at
+least \code{min_length_bps} and a density of at least \code{min_density} loci per
+1000 bps (and, if given, at most \code{max_opp_run} heterozygous and \code{max_miss_run} missing
+genotypes) are returned. For runs of heterozygosity, homozygous and
+heterozygous genotypes swap their roles. Genotypes are classified by their
+dosage (0 and 2 are homozygous, 1 is heterozygous).
+
 This function returns a data frame with all runs detected in the
-dataset. The data frame is, in turn, the input for other functions of the
-\code{detectRUNS} package that create plots and produce statistics from the
-results (see plots and statistics functions in this manual, and/or refer to
-the \code{detectRUNS} vignette).
+dataset, in the format of \code{detectRUNS}, so that it can be used as the
+input of the functions of the \code{detectRUNS} package that create plots and
+produce statistics from the results (see plots and statistics functions
+in its manual, and/or refer to the \code{detectRUNS} vignette). The runs are
+the same as those of \code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}}, including two
+features of its algorithm: windows slide across chromosomes (only the
+distance between consecutive loci in the loci table is checked against
+\code{max_gap}), and the counts of opposite and missing genotypes compared to
+\code{max_opp_run} and \code{max_miss_run} are those of the loci of the run. With
+fewer loci than \code{window_size}, no run is found. The loci must be sorted by
+chromosome and position (see \code{\link[=gt_order_loci]{gt_order_loci()}}); \code{detectRUNS} does not
+check this, and gives runs that start on the wrong chromosome when the
+loci of a chromosome are not adjacent.
 
 If the \code{\link{gen_tibble}} is grouped, then the grouping variable is used to
 fill in the 'group' column (with several grouping variables, their values
@@ -115,6 +146,12 @@ sheep_roh <- windows_indiv_roh(sheep_gt)
 detectRUNS::plot_Runs(runs = sheep_roh)
 \dontshow{\}) # examplesIf}
 }
+\references{
+Biscarini F, Cozzi P, Gaspa G, Marras G (2019) \code{detectRUNS}:
+Detect Runs of Homozygosity and Runs of Heterozygosity in Diploid Genomes.
+R package. \doi{10.32614/CRAN.package.detectRUNS}
+}
 \seealso{
-\code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}} which this function wraps.
+\code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}}, whose algorithm this function
+implements.
 }
