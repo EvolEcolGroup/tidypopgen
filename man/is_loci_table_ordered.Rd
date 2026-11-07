@@ -34,17 +34,21 @@ a \code{\link{gen_tibble}} object), or a \code{\link{gen_tibble}}.}
 \item{error_on_false}{logical, if \code{TRUE} an error is thrown if the loci are
 not ordered.}
 
-\item{ignore_genetic_dist}{logical, if \code{TRUE} the physical position is not
-checked.}
+\item{ignore_genetic_dist}{logical, if \code{TRUE} (the default) only the
+positions are checked, and genetic distances are ignored (they can then
+be missing).}
 
 \item{...}{other arguments passed to specific methods.}
 }
 \value{
-a logical vector defining which loci are transversions
+\code{TRUE} if the loci are ordered, \code{FALSE} otherwise
 }
 \description{
 This functions checks that all SNPs in a chromosome are adjacent in the loci
-table, and that positions are sorted within chromosomes.
+table, and that positions (and, unless \code{ignore_genetic_dist = TRUE},
+genetic distances) are sorted within chromosomes. Missing positions (or
+missing genetic distances, if they are checked) are an error, as the order
+of those loci is unknown.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

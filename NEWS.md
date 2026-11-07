@@ -178,6 +178,12 @@
   `gen_tibble`
 * fix `mutate()` on an ungrouped `gen_tibble` returning a corrupt `grouped_df`
   when the genotypes column is dropped
+* `is_loci_table_ordered()` and `gt_order_loci()` give an informative error
+  when positions (or genetic distances, if they are not ignored) are missing,
+  rather than "missing value where TRUE/FALSE needed". With
+  `ignore_genetic_dist = TRUE` (the default), only positions are checked, and
+  `gt_order_loci()` sets missing genetic distances to zero, as it does for
+  unsorted ones
 * fix `windows_indiv_roh()` with `heterozygosity = TRUE` treating homozygotes
   for the alternate allele as heterozygotes
 * fix `windows_stats_generic()` (and thus all `windows_*` functions) leaving out
