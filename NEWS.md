@@ -42,6 +42,10 @@
 * the `as_is` argument of `rbind()` is deprecated: it was never implemented
   (loci were always harmonised, although a message said they would not be),
   and setting it to TRUE now gives a warning and has no effect
+* `distruct_colours` now holds the 56 distinct colours of the distruct palette
+  (which repeats 4 of its 60 colours), and `scale_fill_distruct()` recycles
+  them, with a warning, when there are more groups (it used to give clusters
+  the same colour for K >= 35, and to fail for K > 60)
 * Preserve classes with all dplyr operations and make many functions generics
 * grouped functions now preserve order of factor levels, work with gen_tibbles
   grouped by more than one variable, and respect empty groups

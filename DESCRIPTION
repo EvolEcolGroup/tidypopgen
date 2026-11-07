@@ -38,7 +38,7 @@ Imports:
     data.table,
     foreach,
     generics,
-    ggplot2,
+    ggplot2 (>= 3.5.0),
     methods,
     MASS,
     patchwork,
