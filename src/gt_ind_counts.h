@@ -3,7 +3,7 @@
 
 /******************************************************************************/
 
-#include <bigstatsr/BMCodeAcc.h>
+#include "fbm_byte_acc.h"
 #include <vector>
 #include <cstdint>
 #include <algorithm>
@@ -22,22 +22,9 @@
 // high 32 bits. The inner loop is then a single load and add per genotype,
 // with no branches. Individuals that need different tables (e.g. different
 // ploidy) are given different lut "classes", each a block of 256 entries.
-
-// Check that 1-based indices are within 1..max and convert them to 0-based
-// size_t offsets (as bigstatsr does when creating a sub-accessor).
-inline std::vector<std::size_t> gt_index_to_offset(const IntegerVector& ind,
-                                                   std::size_t max) {
-  std::size_t n = ind.size();
-  std::vector<std::size_t> offset(n);
-  for (std::size_t k = 0; k < n; k++) {
-    int this_ind = ind[k];
-    if (this_ind < 1 || static_cast<std::size_t>(this_ind) > max) {
-      Rcpp::stop("Subscript out of bounds.");
-    }
-    offset[k] = this_ind - 1;
-  }
-  return offset;
-}
+// The genotypes are read through FBMByteAcc (see fbm_byte_acc.h), which
+// resolves each locus to a pointer to its column without copying the column
+// indices.
 
 // Pack a heterozygote and a missing indicator into a single increment
 inline uint64_t gt_pack_het_na(bool het, bool na) {
@@ -104,22 +91,16 @@ inline IntegerMatrix gt_ind_het_na_counts(Environment BM,
                                           const std::vector<std::size_t>& row_class,
                                           int ncores) {
 
-  XPtr<FBM> xpBM = BM["address"];
-  // raw (undecoded) bytes of the FBM, stored column-major
-  const unsigned char* p_mat =
-    static_cast<const unsigned char*>(xpBM->matrix());
-  std::size_t nrow_fbm = xpBM->nrow();
+  // raw (undecoded) bytes of the selected rows and columns of the FBM
+  // (indices are checked against the dimensions of the FBM)
+  FBMByteAcc acc(BM, rowInd, colInd);
+  const std::vector<std::size_t>& rows = acc.rows(); // 0-based
 
-  // 0-based offsets of the selected rows and columns (checked against the
-  // dimensions of the FBM)
-  std::vector<std::size_t> rows = gt_index_to_offset(rowInd, nrow_fbm);
-  std::vector<std::size_t> cols = gt_index_to_offset(colInd, xpBM->ncol());
-
-  std::size_t n = rows.size(); // number of individuals
-  std::size_t m = cols.size(); // number of loci
+  std::size_t n = acc.nrow(); // number of individuals
+  std::size_t m = acc.ncol(); // number of loci
 
   // are we using all the rows of the FBM, in their original order?
-  bool all_rows = (n == nrow_fbm);
+  bool all_rows = (n == acc.nrow_fbm());
   for (std::size_t i = 0; all_rows && i < n; i++) {
     all_rows = (rows[i] == i);
   }
@@ -149,7 +130,7 @@ inline IntegerMatrix gt_ind_het_na_counts(Environment BM,
       // start of each locus of this group in the FBM
       const unsigned char* p_cols[4];
       for (std::size_t k = 0; k < n_cols; k++) {
-        p_cols[k] = p_mat + cols[j0 + k] * nrow_fbm;
+        p_cols[k] = acc.col(j0 + k);
       }
       if (n_cols == 4) {
         gt_ind_het_na_dispatch<4>(all_rows, single_class, p_cols, p_lut,

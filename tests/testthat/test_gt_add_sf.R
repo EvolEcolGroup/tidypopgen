@@ -298,8 +298,8 @@ test_that("cbind gen_tibble and extra data with sf", {
     ),
     age = c(1, 2, 3, 4, 5, 6, 7)
   )
-  # geometry dropped after merging
-  test_combined_gt <- cbind(test_gt, new_df)
+  # geometry dropped after merging (population, in both, is renamed)
+  expect_message(test_combined_gt <- cbind(test_gt, new_df), "New names")
   expect_false(inherits(test_combined_gt, "sf"))
   # we can add it back
   sf_gt_merged <- gt_add_sf(

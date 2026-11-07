@@ -175,13 +175,15 @@ void pairwise_fst_blocks(const GroupedSummariesDipPseudo& summ,
     // summarise each locus in the block by group
 #pragma omp parallel num_threads(ncores)
 {
-    // per-thread buffers for the sums of each group
+    // per-thread buffers for the sums of each group, for one or four loci
     std::vector<double> alt_sum(ngroups), n_alleles(ngroups), het2(ngroups);
     std::vector<uint64_t> summ_buffer(summ.buffer_size());
-#pragma omp for
-    for (size_t jj = 0; jj < nb; jj++) {
-      summ.locus(j0 + jj, alt_sum.data(), n_alleles.data(), het2.data(),
-                 summ_buffer.data());
+    std::vector<double> alt_sum4(4 * ngroups), n_alleles4(4 * ngroups),
+      het24(4 * ngroups);
+    std::vector<uint64_t> summ_buffer4(summ.buffer_size4());
+    // store the summaries of locus j0 + jj, from the sums of its groups
+    auto store = [&](size_t jj, const double* alt_sum,
+                     const double* n_alleles, const double* het2) {
       for (size_t g = 0; g < ngroups; g++) {
         size_t k = g * bs + jj;
         double freq_alt = alt_sum[g] / n_alleles[g];
@@ -198,6 +200,24 @@ void pairwise_fst_blocks(const GroupedSummariesDipPseudo& summ,
           b_het[k] = het2[g] / n_alleles[g];
         }
       }
+    };
+    // loci are summed four at a time, and the last (up to three) loci of the
+    // block one at a time
+    size_t n_quads = nb / 4;
+#pragma omp for
+    for (size_t q = 0; q < n_quads; q++) {
+      summ.loci4(j0 + 4 * q, alt_sum4.data(), n_alleles4.data(),
+                 het24.data(), summ_buffer4.data());
+      for (size_t u = 0; u < 4; u++) {
+        store(4 * q + u, &alt_sum4[u * ngroups], &n_alleles4[u * ngroups],
+              &het24[u * ngroups]);
+      }
+    }
+#pragma omp for
+    for (size_t jj = 4 * n_quads; jj < nb; jj++) {
+      summ.locus(j0 + jj, alt_sum.data(), n_alleles.data(), het2.data(),
+                 summ_buffer.data());
+      store(jj, alt_sum.data(), n_alleles.data(), het2.data());
     }
 }
 

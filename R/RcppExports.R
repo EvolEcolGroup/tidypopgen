@@ -9,6 +9,14 @@ alt_freq_polyploid_cpp <- function(BM, rowInd, colInd, ploidy, ncores, as_counts
     .Call(`_tidypopgen_alt_freq_polyploid_cpp`, BM, rowInd, colInd, ploidy, ncores, as_counts, block_size)
 }
 
+check_dosage_matrix_cpp <- function(x, ploidy, check_integer) {
+    .Call(`_tidypopgen_check_dosage_matrix_cpp`, x, ploidy, check_integer)
+}
+
+write_dosage_matrix_cpp <- function(x, BM, na_byte) {
+    invisible(.Call(`_tidypopgen_write_dosage_matrix_cpp`, x, BM, na_byte))
+}
+
 fbm256_prod_and_rowSumsSq <- function(BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs) {
     .Call(`_tidypopgen_fbm256_prod_and_rowSumsSq`, BM, ind_row, ind_col, center, scale, V, ind, lsq_pcs)
 }
@@ -105,6 +113,10 @@ read_packedancestry <- function(filename, BM, tab) {
     .Call(`_tidypopgen_read_packedancestry`, filename, BM, tab)
 }
 
+roh_sliding_cpp <- function(BM, rowInd, colInd, chrom, position, window_size, max_het_window, max_miss_window, threshold, max_gap, min_snp, min_bases, max_bases_per_snp, max_het, old_lengths, ncores, block_size) {
+    .Call(`_tidypopgen_roh_sliding_cpp`, BM, rowInd, colInd, chrom, position, window_size, max_het_window, max_miss_window, threshold, max_gap, min_snp, min_bases, max_bases_per_snp, max_het, old_lengths, ncores, block_size)
+}
+
 sfs_config_counts_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, block_ids, n_blocks, ncores, block_size) {
     .Call(`_tidypopgen_sfs_config_counts_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, block_ids, n_blocks, ncores, block_size)
 }
@@ -129,8 +141,28 @@ increment_king_numerator <- function(k, n_Aa_i, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, BM, rowInd, colInd, ncores))
 }
 
+king_counts_within_groups <- function(BM, rowInd, colInd, groupEnd, ncores) {
+    .Call(`_tidypopgen_king_counts_within_groups`, BM, rowInd, colInd, groupEnd, ncores)
+}
+
+all_in_cpp <- function(x, table) {
+    .Call(`_tidypopgen_all_in_cpp`, x, table)
+}
+
+which_in_cpp <- function(x, table) {
+    .Call(`_tidypopgen_which_in_cpp`, x, table)
+}
+
+any_duplicated_strings_cpp <- function(x) {
+    .Call(`_tidypopgen_any_duplicated_strings_cpp`, x)
+}
+
 tajimas_d_window_sums_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size) {
     .Call(`_tidypopgen_tajimas_d_window_sums_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size)
+}
+
+vcf_gt_dosages_cpp <- function(gt, max_ploidy) {
+    .Call(`_tidypopgen_vcf_gt_dosages_cpp`, gt, max_ploidy)
 }
 
 vcf_loci_table <- function(filename, read_names = TRUE) {

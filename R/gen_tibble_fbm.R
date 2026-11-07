@@ -72,15 +72,27 @@ validate_loci <- function(loci,
   }
   if (check_duplicates == TRUE) {
     # check for duplicated positions within chromosomes, i.e. duplicated
-    # pairs of chromosome and position (this avoids splitting the whole loci
-    # table by chromosome)
-    has_dup_pos <- vctrs::vec_duplicate_any(
-      vctrs::data_frame(
-        chromosome = loci$chromosome,
-        position = loci$position
-      )
+    # pairs of chromosome and position. When positions are sorted within
+    # each chromosome (as usual), duplicates are equal consecutive positions,
+    # which a single pass in C++ finds without hashing every pair (each level
+    # of the factor of chromosomes is a group of its own); otherwise (or with
+    # missing positions) we hash the pairs with vctrs
+    position_order <- unsorted_by_chromosome_cpp(
+      loci$position,
+      loci$chromosome,
+      seq_len(nlevels(loci$chromosome))
     )
-    has_dup_names <- anyDuplicated(loci$name) > 0
+    if (isFALSE(position_order[["unsorted"]])) {
+      has_dup_pos <- position_order[["ties"]]
+    } else {
+      has_dup_pos <- vctrs::vec_duplicate_any(
+        vctrs::data_frame(
+          chromosome = loci$chromosome,
+          position = loci$position
+        )
+      )
+    }
+    has_dup_names <- any_duplicated_names(loci$name) > 0
 
     if (!allow_duplicates) {
       if (has_dup_pos) {
@@ -176,7 +188,11 @@ gt_write_fbm_from_dfs <- function(
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
   # ensure max_ploidy is appropriate for the data
-  if (any(genotypes > max_ploidy, na.rm = TRUE)) {
+  dosage_check <- check_dosage_matrix_cpp(genotypes,
+    ploidy = as.numeric(max_ploidy),
+    check_integer = FALSE
+  )
+  if (dosage_check == 2) {
     stop(
       "max ploidy is set to ",
       max_ploidy,
@@ -193,11 +209,27 @@ gt_write_fbm_from_dfs <- function(
     init = NULL,
     create_bk = TRUE
   )
-  genotypes[is.na(genotypes)] <- max_ploidy + 1
-  big_geno[] <- as.raw(genotypes)
+  # write the dosages as bytes (missing genotypes as max_ploidy + 1) directly
+  # into the FBM, without copying the matrix
+  write_dosage_matrix_cpp(genotypes, big_geno, na_byte = max_ploidy + 1)
 
   # save it and return the path of the saved object
   rds <- bigstatsr::sub_bk(big_geno$backingfile, ".rds")
   saveRDS(big_geno, rds)
   return(big_geno)
+}
+
+# anyDuplicated() for the names of loci (a character or an integer vector);
+# for character vectors, the CHARSXPs are hashed in C++, which is about 3
+# times faster than anyDuplicated() and takes half of the memory (1.3 s and
+# 256 MB for 40M names), unless the strings are not all in the native
+# encoding (see any_duplicated_strings_cpp())
+any_duplicated_names <- function(x) {
+  if (is.character(x)) {
+    res <- any_duplicated_strings_cpp(x)
+    if (res >= 0) {
+      return(res)
+    }
+  }
+  anyDuplicated(x)
 }

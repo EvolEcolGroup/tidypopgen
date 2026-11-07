@@ -378,3 +378,24 @@ test_that("histogram autoplot fails for non-pseudohaploid", {
     "only available for pseudohaploid data"
   )
 })
+
+test_that(".pairwise_king_by_group matches pairwise_king on each group", {
+  # interleaved groups, a group of one individual, and an empty group
+  families$population <- factor(
+    c("A", "B", "A", "C", "B", "A", "B", "B", "A", "A", "B", "A"),
+    levels = c("A", "B", "C", "D")
+  )
+  grouped <- families %>% group_by(population, .drop = FALSE)
+  expected <- group_map(grouped, function(.x, .y) {
+    if (nrow(.x) == 0) {
+      return(NULL)
+    }
+    pairwise_king(.x, as_matrix = TRUE)
+  })
+  # one block of loci, or several
+  expect_identical(.pairwise_king_by_group(grouped), expected)
+  expect_identical(
+    .pairwise_king_by_group(grouped, block_size = 7, n_cores = 2),
+    expected
+  )
+})

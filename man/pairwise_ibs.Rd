@@ -27,9 +27,8 @@ writes it to a .mibs file).
 \verb{--distance flat-missing} in PLINK, which writes it to a .dist file): the
 number of alleles that differ between two individuals, scaled up by the
 number of loci over the number of loci genotyped in both individuals, to
-correct for missing genotypes. It equals \code{2 * n_loci * (1 - proportion)}, so it is 0 for identical individuals and at most \code{2 * n_loci}. Note that, without \code{flat-missing}, PLINK corrects for missing
-genotypes differently, which gives slightly different values when
-genotypes are missing.
+correct for missing genotypes. It equals \code{2 * n_loci * (1 - proportion)}, so it is 0 for identical individuals and at most \code{2 * n_loci}. PLINK's default correction for missing genotypes (without
+\code{flat-missing}) is not available (see Details).
 \item "raw_counts": the counts of identical alleles and of non-missing
 alleles, from which the two other quantities are computed.
 }}
@@ -58,6 +57,17 @@ monomorphic sites before running \code{pairwise_ibs()} if this is a concern.
 
 Imputed genotypes are used if \code{x} is set to use them (see
 \code{\link[=gt_set_imputed]{gt_set_imputed()}}), and treated as missing otherwise.
+
+Missing genotypes are handled as in PLINK with the \code{flat-missing} modifier
+(\verb{--distance ibs flat-missing} for "proportion", \verb{--distance flat-missing} for "adjusted_counts"): each pair of individuals is compared
+only on the loci genotyped in both, and all loci have the same weight. By
+default (without \code{flat-missing}), PLINK 1.9 instead divides each distance
+by one minus the sum of the average contributions to the distance of the
+loci missing in the pair, which depend on their allele frequencies. This
+default correction is not available in \code{pairwise_ibs()}, so, when
+genotypes are missing, its values are only comparable to those of PLINK
+run with \code{flat-missing}. Without missing genotypes, both corrections give
+the same values.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

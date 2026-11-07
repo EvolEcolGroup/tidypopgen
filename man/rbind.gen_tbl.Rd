@@ -18,9 +18,9 @@
 more objects, \code{rbind} has to be done sequentially for large sets of
 objects.}
 
-\item{as_is}{boolean determining whether the loci should be left as they are
-before merging. If FALSE (the defaults), \code{rbind} will attempt to subset and
-swap alleles as needed.}
+\item{as_is}{deprecated, and ignored: \code{rbind} always subsets the loci and
+swaps alleles as needed (setting \code{as_is = TRUE} never stopped it, and now
+gives a warning).}
 
 \item{flip_strand}{boolean on whether strand flipping should be checked to
 match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T
@@ -50,9 +50,9 @@ backing file for the FBM)}
 a \code{\link{gen_tibble}} with the merged data.
 }
 \description{
-This function combined two \link{gen_tibble}s. By defaults, it subsets the loci
-and swaps ref and alt alleles to make the two datasets compatible (this
-behaviour can be switched off with \code{as_is}). The first object is used as a
+This function combined two \link{gen_tibble}s. It subsets the loci and swaps ref
+and alt alleles to make the two datasets compatible. The first object is
+used as a
 "reference" , and SNPs in the other dataset will be flipped and/or alleles
 swapped as needed. SNPs that have different alleles in the two datasets (i.e.
 triallelic) will also be dropped. There are also options (NOT default) to

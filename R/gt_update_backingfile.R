@@ -16,7 +16,7 @@
 #'   automatically). If left to NULL (the default), the file name will be based
 #'   on the name of the current backing file.
 #' @param rm_unsorted_dist boolean to set `genetic_dist` to zero (i.e. remove
-#'   it) if it is unsorted within the chromosomes.
+#'   it) if it is unsorted within the chromosomes, or has missing values.
 #' @param chunk_size the number of loci to process at once
 #' @param quiet boolean to suppress information about the files
 #' @returns a [`gen_tibble`] with updated `.gt`, `.bk`, and `.rds` files
@@ -101,9 +101,15 @@ gt_update_backingfile <- function(
 
   # if we remove unsorted genetic distance, set it to zero if it is not sorted
   if (rm_unsorted_dist) {
-    # check the genetic distances within each chromosome (in a single pass,
-    # without copying the column)
-    if (any_unsorted_by_chromosome(
+    # missing genetic distances can not be used either; otherwise, check the
+    # genetic distances within each chromosome (in a single pass, without
+    # copying the column)
+    if (anyNA(show_loci(.x)$genetic_dist)) {
+      if (!quiet) {
+        message("Some genetic distances are missing, setting them all to zero")
+      }
+      show_loci(.x)$genetic_dist <- 0
+    } else if (any_unsorted_by_chromosome(
       show_loci(.x)$genetic_dist,
       show_loci(.x)$chromosome
     )[["unsorted"]]) {

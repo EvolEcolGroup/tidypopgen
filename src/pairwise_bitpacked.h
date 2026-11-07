@@ -129,9 +129,9 @@ struct PwAlleleSharing {
 
 /******************************************************************************/
 
-// Counts for individual i against all individuals j >= i, over n_words words
-// of the current chunk; cnt_i points at the counts of pair (i, i) in the
-// packed lower triangle.
+// Counts for individual i against all individuals j with i <= j < n, over
+// n_words words of the current chunk; cnt_i points at the counts of pair
+// (i, i) in the packed lower triangle.
 template <class Stat>
 PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t n,
                                   std::size_t n_words,
@@ -175,12 +175,20 @@ void pw_row_popcnt(std::size_t i, std::size_t n, std::size_t n_words,
 // Returns the counts for the packed lower triangle (pairs (j, i) with j >= i,
 // column-major), N_COUNTS consecutive values per pair; tri_start[i] is the
 // index of pair (i, i).
+// If row_end is not empty, only the pairs within groups of consecutive
+// individuals are counted: row_end[i] is the (0-based, exclusive) end of the
+// group of individual i in rowInd, and individual i is only paired with
+// individuals j with i <= j < row_end[i] (so the packed triangles of the
+// groups follow one another).
 template <class Stat>
 std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
                                           const IntegerVector& rowInd,
                                           const IntegerVector& colInd,
                                           std::vector<std::size_t>& tri_start,
-                                          int ncores) {
+                                          int ncores,
+                                          const std::vector<std::size_t>&
+                                            row_end =
+                                            std::vector<std::size_t>()) {
 
   XPtr<FBM> xpBM = BM["address"];
   // raw (undecoded) bytes of the FBM, stored column-major
@@ -207,12 +215,27 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
     cols[j] = colInd[j] - 1;
   }
 
+  // the end of the pairs of each individual (all individuals, or the end of
+  // its group)
+  std::vector<std::size_t> pair_end(n, n);
+  if (!row_end.empty()) {
+    if (row_end.size() != n) {
+      Rcpp::stop("row_end should have one value per individual.");
+    }
+    for (std::size_t i = 0; i < n; i++) {
+      if (row_end[i] <= i || row_end[i] > n) {
+        Rcpp::stop("row_end should be after each individual.");
+      }
+      pair_end[i] = row_end[i];
+    }
+  }
+
   // start of each column of the packed lower triangle
   tri_start.resize(n);
   std::size_t n_pairs = 0;
   for (std::size_t i = 0; i < n; i++) {
     tri_start[i] = n_pairs;
-    n_pairs += n - i;
+    n_pairs += pair_end[i] - i;
   }
   std::vector<uint32_t> counts(n_pairs * Stat::N_COUNTS, 0);
 
@@ -295,14 +318,15 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
       #pragma omp for schedule(dynamic, 8)
       for (std::size_t i = 0; i < n; i++) {
         uint32_t* cnt_i = p_counts + tri_start[i] * Stat::N_COUNTS;
+        std::size_t end_i = pair_end[i];
 #ifdef PW_X86_POPCNT
         if (use_popcnt) {
-          pw_row_popcnt<Stat>(i, n, n_words, p_planes, cnt_i);
+          pw_row_popcnt<Stat>(i, end_i, n_words, p_planes, cnt_i);
         } else {
-          pw_row_generic<Stat>(i, n, n_words, p_planes, cnt_i);
+          pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i);
         }
 #else
-        pw_row_generic<Stat>(i, n, n_words, p_planes, cnt_i);
+        pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i);
 #endif
       }
       // (implicit barrier: the planes can be overwritten by the next chunk)

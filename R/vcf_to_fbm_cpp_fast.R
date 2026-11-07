@@ -138,8 +138,11 @@ vcf_to_fbm_cpp <- function(
     missing_value = max_ploidy + 1
   )
 
-  # construct path
+  # construct path, and save the FBM (before its md5 sum is taken by
+  # new_vctrs_bigsnp(); this takes the same time whatever the size of the
+  # data, as the .rds only holds the description of the FBM)
   fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
+  saveRDS(file_backed_matrix, fbm_path)
 
   # create genotypes column
   indiv_meta$genotypes <- new_vctrs_bigsnp(

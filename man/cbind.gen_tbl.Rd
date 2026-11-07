@@ -2,9 +2,12 @@
 % Please edit documentation in R/cbind_gen_tibble.R
 \name{cbind.gen_tbl}
 \alias{cbind.gen_tbl}
+\alias{cbind.grouped_gen_tbl}
 \title{Combine a gen_tibble to a data.frame or tibble by column}
 \usage{
 \method{cbind}{gen_tbl}(..., deparse.level = 1)
+
+\method{cbind}{grouped_gen_tbl}(..., deparse.level = 1)
 }
 \arguments{
 \item{...}{a gen_tibble and a data.frame or tibble}
@@ -21,6 +24,14 @@ tibbles. Whilst this works, it is not ideal as it does not check the order of
 the tables, and we suggest that you use \code{\link[dplyr:left_join]{dplyr::left_join()}} instead. Note
 that \code{cbind} will not combine two \code{gen_tibbles} (i.e. it will NOT combine
 markers for the same individuals)
+}
+\details{
+As in \code{\link[dplyr:bind_cols]{dplyr::bind_cols()}} (which \code{dplyr} uses to \code{cbind()} grouped
+tibbles), duplicated column names are made unique (e.g. \code{population...2}
+and \code{population...4}), with a message. If a grouping variable is renamed,
+the result is no longer grouped. The columns \code{id} and
+\code{genotypes} of the \code{gen_tibble} can not be duplicated, as renaming them
+would break it.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

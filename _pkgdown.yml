@@ -100,6 +100,15 @@ reference:
     desc: "Functions to compute statistics in sliding windows across loci."
     contents:
         - starts_with("windows_")
+  - title: "Runs of homozygosity"
+    desc: "Functions to find and summarise runs of homozygosity."
+    contents:
+        - windows_indiv_roh
+        - gt_roh_froh
+        - gt_roh_loci
+        - gt_roh_islands
+        - autoplot.indiv_roh
+        - as_detectRUNS
   - title: "Jackknife"
     desc: "Functions to compute genome-wide statistics with block jackknife standard errors."
     contents:

@@ -1,8 +1,8 @@
 #' Combine two gen_tibbles
 #'
-#' This function combined two [gen_tibble]s. By defaults, it subsets the loci
-#' and swaps ref and alt alleles to make the two datasets compatible (this
-#' behaviour can be switched off with `as_is`). The first object is used as a
+#' This function combined two [gen_tibble]s. It subsets the loci and swaps ref
+#' and alt alleles to make the two datasets compatible. The first object is
+#' used as a
 #' "reference" , and SNPs in the other dataset will be flipped and/or alleles
 #' swapped as needed. SNPs that have different alleles in the two datasets (i.e.
 #' triallelic) will also be dropped. There are also options (NOT default) to
@@ -23,9 +23,9 @@
 #' @param ... two [`gen_tibble`] objects. Note that this function can not take
 #'   more objects, `rbind` has to be done sequentially for large sets of
 #'   objects.
-#' @param as_is boolean determining whether the loci should be left as they are
-#'   before merging. If FALSE (the defaults), `rbind` will attempt to subset and
-#'   swap alleles as needed.
+#' @param as_is deprecated, and ignored: `rbind` always subsets the loci and
+#'   swaps alleles as needed (setting `as_is = TRUE` never stopped it, and now
+#'   gives a warning).
 #' @param use_position boolean of whether a combination of chromosome and
 #'   position should be used for matching SNPs. By default, `rbind` uses the
 #'   locus name, so this is set to FALSE. If the loci names of either
@@ -111,19 +111,13 @@ rbind.gen_tbl <- function(
       " same ID."
     )
   }
-  if (as_is && flip_strand) {
-    stop(paste(
-      "if 'as_is' is set to TRUE, 'flip_strand' and",
-      "'remove_ambiguous' have to be FALSE"
-    ))
-  }
-  if (!quiet) {
-    if (as_is) {
-      message(
-        "rbind will not attempt to harmonise the loci (e.g. flip strand,\n",
-        " reorder or subset) set 'as_is' to FALSE to subset to loci in common\n"
-      )
-    }
+  # deprecation of as_is (which was never implemented: loci were always
+  # harmonised)
+  if (isTRUE(as_is)) {
+    warning(
+      "'as_is' is deprecated and ignored: rbind always harmonises the loci ",
+      "(subsetting them and swapping alleles as needed)"
+    )
   }
   # integer loci names can not be used to match loci, so match them by
   # position (rbind_dry_run() is then called with use_position = TRUE, so the
@@ -145,13 +139,13 @@ rbind.gen_tbl <- function(
   # are checked by rbind_dry_run(), so the names of the loci are left as
   # they are)
   if (!use_position) {
-    if (anyDuplicated(loci_names(target)) > 0) {
+    if (any_duplicated_names(loci_names(target)) > 0) {
       stop(
         "The target gen_tibble contains duplicated loci. ",
         "Use 'find_duplicated_loci()' to identify and remove them."
       )
     }
-    if (anyDuplicated(loci_names(ref)) > 0) {
+    if (any_duplicated_names(loci_names(ref)) > 0) {
       stop(
         "The reference gen_tibble contains duplicated loci. ",
         "Use 'find_duplicated_loci()' to identify and remove them."

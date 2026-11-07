@@ -106,12 +106,12 @@ predict.gt_pca <- function(
     if (!inherits(new_data, "gen_tbl")) {
       stop("new_data should be a gen_tibble")
     }
-    # check the new_data have the same loci as the dataset used to build the pca
-    if (!all(object$loci$name %in% show_loci(new_data)$name)) {
+    # get id of loci in new_data, and check that new_data have all the loci
+    # used to build the pca (a single match() hashes the loci names once)
+    loci_subset <- match(object$loci$name, show_loci(new_data)$name)
+    if (anyNA(loci_subset)) {
       stop("loci used in object are not present in new_data")
     }
-    # get id of loci in new_data
-    loci_subset <- match(object$loci$name, show_loci(new_data)$name)
     if (
       !all(
         all(

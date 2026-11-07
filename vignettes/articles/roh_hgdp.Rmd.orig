@@ -1,0 +1,314 @@
+---
+title: "Runs of homozygosity in the HGDP"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "./figure/roh_hgdp/",
+  fig.width = 7,
+  fig.height = 4.5
+)
+set.seed(123)
+# time the chunks with `benchmark = TRUE`
+timings <- new.env()
+knitr::knit_hooks$set(benchmark = function(before, options) {
+  if (before) {
+    timings$start <- proc.time()[["elapsed"]]
+  } else {
+    timings[[options$label]] <- proc.time()[["elapsed"]] - timings$start
+  }
+  invisible(NULL)
+})
+# the CPU of the machine (on Linux)
+cpu <- tryCatch(
+  sub(
+    ".*: ", "",
+    grep("model name", readLines("/proc/cpuinfo"), value = TRUE)[1]
+  ),
+  error = function(e) "unknown",
+  warning = function(w) "unknown"
+)
+```
+
+Runs of homozygosity (ROH) are stretches of the genome where both copies of
+a chromosome are identical, because the individual inherited them from a
+common ancestor of its parents. Their number and length tell us about the
+demographic history of populations: many short runs point to a small
+population in the distant past, while long runs point to recent inbreeding,
+as the runs inherited from recent ancestors have had little time to be broken
+up by recombination. Regions that are in runs in most individuals of a
+population (ROH islands) can point to selection.
+
+`tidypopgen` finds runs of homozygosity with the sliding-window algorithm of
+PLINK 1.9 (`plink --homozyg`), with the same parameters and defaults, and
+gives the same runs. In this article, we look at the runs of homozygosity of
+the Human Genome Diversity Project (HGDP): 1,043 individuals from 51
+populations, typed at about 650k loci. We also time each step, on a laptop
+with a `r cpu` CPU.
+
+```{r}
+library(tidypopgen)
+library(ggplot2)
+n_cores <- 4
+```
+
+# The data
+
+We download the HGDP files (see the
+[HGDP benchmark](benchmark_hgdp.html) for the code) into `data/hgdp/`, and
+read the bed file into a `gen_tibble`:
+
+```{r read_bed, benchmark = TRUE}
+hgdp <- gen_tibble("./data/hgdp/hgdp650.qc.hg19.bed",
+  quiet = TRUE,
+  backingfile = tempfile("hgdp_")
+)
+```
+
+We add the population and region of each individual, from the metadata file
+of the HGDP. We use seven broad regions, which we group the individuals by:
+
+```{r}
+meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt",
+  show_col_types = FALSE
+)
+regions <- c(
+  Africa = "Africa", Middle_Est = "Middle East", Europe = "Europe",
+  Central_South_Asia = "Central and South Asia", Est_Asia = "East Asia",
+  Oceania = "Oceania", America = "America"
+)
+hgdp <- hgdp %>%
+  mutate(
+    population = meta_info$population[match(id, meta_info$Id)],
+    region = factor(
+      regions[meta_info$Pop7Groups[match(id, meta_info$Id)]],
+      levels = regions
+    )
+  ) %>%
+  group_by(region)
+hgdp
+```
+
+# Finding runs of homozygosity
+
+`windows_indiv_roh()` slides windows of 50 loci along each chromosome, and
+finds the runs of at least 1,000 kb and 100 loci (the defaults of PLINK; see
+`?windows_indiv_roh` for all the parameters). All individuals are analysed in
+a single pass over the genotypes, on one or more cores:
+
+```{r roh_1_core, benchmark = TRUE}
+hgdp_roh <- windows_indiv_roh(hgdp, n_cores = 1)
+```
+
+```{r roh_4_cores, benchmark = TRUE}
+hgdp_roh <- windows_indiv_roh(hgdp, n_cores = n_cores)
+```
+
+```{r include = FALSE}
+roh_times <- c(timings$roh_1_core, timings$roh_4_cores)
+```
+
+On one core, this takes `r round(roh_times[1], 1)` s, and on `r n_cores`
+cores, `r round(roh_times[2], 1)` s. We get a tibble with one row per run:
+
+```{r}
+hgdp_roh
+```
+
+## Comparison with PLINK
+
+```{r include = FALSE}
+plink <- Sys.getenv("PLINK", Sys.which("plink"))
+has_plink <- nzchar(plink) &&
+  isTRUE(grepl("^PLINK v1\\.9", system2(plink, "--version", stdout = TRUE)[1]))
+```
+
+```{r plink, eval = has_plink, benchmark = TRUE}
+plink_out <- tempfile("plink_roh")
+system2(plink,
+  c("--bfile", "./data/hgdp/hgdp650.qc.hg19", "--homozyg", "--out", plink_out),
+  stdout = FALSE
+)
+```
+
+```{r eval = has_plink}
+plink_roh <- read.table(paste0(plink_out, ".hom"), header = TRUE)
+nrow(plink_roh)
+# the same runs as PLINK
+all(hgdp_roh$id == plink_roh$IID & hgdp_roh$start == plink_roh$POS1 &
+  hgdp_roh$end == plink_roh$POS2 & hgdp_roh$n_loci == plink_roh$NSNP)
+```
+
+```{r include = FALSE}
+plink_time <- if (has_plink) timings$plink else NA
+```
+
+PLINK, run on the same machine with the default parameters, finds the same
+`r format(nrow(hgdp_roh), big.mark = ",")` runs in
+`r round(plink_time, 1)` s (reading the bed file from disk, and writing the
+runs to a file). So `windows_indiv_roh()` is about as fast as PLINK on one
+core, and faster on several cores; and the runs are already in R, ready to be
+analysed.
+
+# Number and length of runs
+
+A classic way to look at runs of homozygosity is to plot, for each
+individual, the number of runs against their total length. Individuals of
+populations that have been small for a long time have many short runs, which
+add up to a moderate total length; individuals whose parents are related
+have a few very long runs, which add up to a large total length.
+
+```{r n_vs_length}
+roh_per_indiv <- hgdp_roh %>%
+  dplyr::summarise(
+    n_runs = dplyr::n(),
+    total_mb = sum(length_bp) / 1e6,
+    .by = c(group, id)
+  )
+ggplot(roh_per_indiv, aes(x = total_mb, y = n_runs, colour = group)) +
+  geom_point(alpha = 0.7) +
+  labs(
+    x = "Total length of runs (Mb)", y = "Number of runs",
+    colour = "Region"
+  ) +
+  theme_minimal()
+```
+
+African individuals have the fewest runs (18 on average), and the smallest
+total length, as African populations have been large for a long time. The
+number of runs increases with the distance from Africa, as populations went
+through bottlenecks while they spread out of Africa, and is largest in
+Oceania and the Americas (more than 100 on average). Many Native Americans,
+from small and isolated populations, have more than 200 Mb in runs. In the
+Middle East and in Central and South Asia, some individuals have a large
+total length from fewer, longer runs: their parents are related, as
+consanguineous marriages are common in some of these populations.
+
+# Inbreeding from runs of homozygosity
+
+The inbreeding coefficient F_ROH is the proportion of the genome in runs of
+homozygosity. `gt_roh_froh()` computes it for each individual (with 0 for
+those with no runs):
+
+```{r froh, benchmark = TRUE}
+hgdp_froh <- gt_roh_froh(hgdp_roh)
+hgdp_froh
+```
+
+`autoplot()` shows F_ROH by group:
+
+```{r froh_plot}
+autoplot(hgdp_roh, type = "froh") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+The populations with the highest mean F_ROH:
+
+```{r}
+hgdp_froh %>%
+  dplyr::mutate(population = hgdp$population[match(id, hgdp$id)]) %>%
+  dplyr::summarise(mean_froh = mean(froh), .by = c(group, population)) %>%
+  dplyr::slice_max(mean_froh, n = 8)
+```
+
+## Recent and ancient inbreeding
+
+Runs are broken up by recombination over the generations, so the length of
+a run tells us how long ago the common ancestor lived: runs of more than 8
+Mb come from ancestors a few generations back, while runs of 1 to 2 Mb come
+from ancestors dozens of generations back. F_ROH computed from the runs of
+at least a given length separates recent from ancient inbreeding:
+
+```{r froh_classes}
+froh_classes <- gt_roh_froh(hgdp_roh, min_length_mb = c(1, 2, 4, 8, 16))
+froh_classes %>%
+  dplyr::summarise(mean_froh = mean(froh), .by = c(group, min_length_mb)) %>%
+  ggplot(aes(x = factor(min_length_mb), y = mean_froh, colour = group,
+             group = group)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    x = "Smallest length of runs (Mb)", y = "Mean F_ROH",
+    colour = "Region"
+  ) +
+  theme_minimal()
+```
+
+In Oceania and East Asia, F_ROH drops quickly when only long runs are kept:
+less than 10% of it comes from runs longer than 8 Mb, so it mostly reflects
+small populations in the past. In the Middle East and in Central and South
+Asia, almost half of F_ROH comes from runs longer than 8 Mb, from recent
+inbreeding. In the Americas, F_ROH is high for runs of all lengths: these
+populations were both small in the past and isolated recently.
+
+# Where are the runs?
+
+`autoplot()` shows the runs along each chromosome. With so many
+individuals, the proportion of the individuals of each group that are in a
+run (`type = "coverage"`) is easier to read than the runs themselves:
+
+```{r coverage}
+autoplot(hgdp_roh, type = "coverage", chromosome = c("1", "2", "3"))
+```
+
+## ROH islands
+
+`gt_roh_loci()` counts, at each locus, the individuals of each group that are
+in a run. `gt_roh_islands()` then finds the regions where at least a given
+proportion of the individuals of a group are in a run:
+
+```{r islands, benchmark = TRUE}
+hgdp_islands <- gt_roh_islands(hgdp_roh, show_loci(hgdp), threshold = 0.5)
+```
+
+```{r}
+hgdp_islands %>%
+  dplyr::arrange(dplyr::desc(max_prop))
+```
+
+We can look at the proportion of individuals in a run along the chromosome
+of the most frequent island:
+
+```{r island_plot}
+top_island <- hgdp_islands %>% dplyr::slice_max(max_prop, n = 1)
+roh_loci <- gt_roh_loci(hgdp_roh, show_loci(hgdp))
+roh_loci %>%
+  dplyr::filter(chromosome == top_island$chromosome) %>%
+  ggplot(aes(x = position / 1e6, y = prop_roh, colour = group)) +
+  geom_line() +
+  annotate("rect",
+    xmin = top_island$start / 1e6, xmax = top_island$end / 1e6,
+    ymin = -Inf, ymax = Inf, alpha = 0.2
+  ) +
+  labs(
+    x = paste("Position on chromosome", top_island$chromosome, "(Mb)"),
+    y = "Proportion of individuals in a run", colour = "Region"
+  ) +
+  theme_minimal()
+```
+
+Islands found from a few hundred thousand SNPs should be interpreted with
+care: regions with few SNPs, or with low recombination, are more likely to
+be in runs, whatever selection did.
+
+# Timings
+
+```{r echo = FALSE}
+steps <- c(
+  read_bed = "Read the bed file (gen_tibble())",
+  roh_1_core = "Find the runs (windows_indiv_roh(), 1 core)",
+  roh_4_cores = paste0("Find the runs (windows_indiv_roh(), ", n_cores,
+                       " cores)"),
+  plink = "PLINK --homozyg (1 thread)",
+  froh = "F_ROH (gt_roh_froh())",
+  islands = "ROH islands (gt_roh_islands())"
+)
+steps <- steps[names(steps) %in% ls(timings)]
+knitr::kable(data.frame(
+  Step = unname(steps),
+  `Time (s)` = round(vapply(names(steps), function(x) timings[[x]], 1), 2),
+  check.names = FALSE
+))
+```

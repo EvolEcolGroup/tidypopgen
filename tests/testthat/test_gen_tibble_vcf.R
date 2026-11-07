@@ -868,3 +868,57 @@ test_that("file extensions are matched ignoring case", {
     expect_identical(show_loci(upper_gt), show_loci(lower_gt))
   }
 })
+
+test_that("vcf_gt_dosages_cpp reads genotypes as the R code did", {
+  # the R code that vcf_gt_dosages_cpp() replaces, for one genotype
+  ref_dosage <- function(g, max_ploidy) {
+    x <- strsplit(g, "[/|]")[[1]]
+    if (length(x) > max_ploidy) {
+      return("error")
+    }
+    if (length(x) > 0 && !anyNA(x) && !any(x == ".")) {
+      dosage <- sum(as.numeric(x))
+      if (dosage < (max_ploidy + 1)) as.raw(dosage) else "error"
+    } else {
+      as.raw(max_ploidy + 1)
+    }
+  }
+  gt <- matrix(
+    c("0/1", "1|1", "./.", ".", NA, "", "0|0", "./1", "0/", "1"),
+    nrow = 5
+  )
+  res <- vcf_gt_dosages_cpp(gt, max_ploidy = 2)
+  expect_identical(res$error, 0L)
+  # individuals are rows
+  expect_identical(
+    res$dosages,
+    matrix(vapply(t(gt), ref_dosage, raw(1), max_ploidy = 2), nrow = 2,
+      byrow = FALSE
+    )
+  )
+  # polyploids
+  gt <- matrix(c("0/1/1/0", "1/1/1/1", "0/./1/1", "0/0/0/0"), nrow = 2)
+  res <- vcf_gt_dosages_cpp(gt, max_ploidy = 4)
+  expect_identical(res$dosages, matrix(as.raw(c(2, 5, 4, 0)), nrow = 2))
+  # too many alleles, a dosage that is too large, and alleles that are not
+  # numbers
+  expect_identical(vcf_gt_dosages_cpp(matrix("0/1/1"), 2)$error, 1L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("2/1"), 2)$error, 1L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("a/1"), 2)$error, 2L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("0//1"), 3)$error, 2L)
+})
+
+test_that("the md5 sum of the FBM is that of its saved rds for VCF inputs", {
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  for (parser in c("cpp", "vcfR")) {
+    if (parser == "vcfR") skip_if_not_installed("vcfR")
+    test_gt <- gen_tibble(vcf_path,
+      parser = parser, quiet = TRUE, backingfile = tempfile()
+    )
+    rds_file <- gt_get_file_names(test_gt)[1]
+    expect_identical(
+      attr(test_gt$genotypes, "fbm_md5sum"),
+      tools::md5sum(rds_file)
+    )
+  }
+})

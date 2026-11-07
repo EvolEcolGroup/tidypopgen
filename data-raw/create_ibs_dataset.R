@@ -70,7 +70,7 @@ X <- t(X)
 fake_bim <- genio::make_bim(n = nrow(X))
 fake_fam <- genio::make_fam(n = ncol(X))
 # this should be saved directly into inst, I think...
-# genio::write_plink("./data-raw/datasets/families", X,bim=fake_bim, fam=fake_fam)
+# genio::write_plink("./data-raw/data_files/families", X,bim=fake_bim, fam=fake_fam)
 genio::write_plink(
   "./inst/extdata/related/families",
   X,

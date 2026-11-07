@@ -10,11 +10,14 @@
 #' such a *VCF*, change the order of variants so that the first chromosome is an
 #' autosome using a tool such as `vcftools`. Individuals with a missing genotype
 #' ('.') on the first variant get their ploidy from their first genotype that
-#' is not '.' (or the largest ploidy of the other individuals, if all their
-#' genotypes are '.'). Currently, only biallelic SNPs are
-#' supported. If haploid variants (e.g. sex chromosomes) are included in the
-#' *VCF*, they are not transformed into homozygous calls. Instead, reference
-#' alleles will be coded as 0 and alternative alleles will be coded as 1.
+#' is not '.': the `cpp` parser looks for it in the next 1,000 variants only
+#' (so that the search does not slow down parsing), the `vcfR` parser in the
+#' whole file. Individuals with no such genotype get the largest ploidy of the
+#' other individuals (or 2, if no ploidy is known). Currently, only biallelic
+#' SNPs are supported. If haploid variants (e.g. sex chromosomes) are included
+#' in the *VCF*, they are not transformed into homozygous calls. Instead,
+#' reference alleles will be coded as 0 and alternative alleles will be coded
+#' as 1.
 #'
 #' - *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual information
 #' (from the .fam file, or the first six columns of the .ped file) is stored
@@ -204,8 +207,6 @@ gen_tibble.character <-
     # normalise path
     x <- normalizePath(x, mustWork = FALSE)
 
-    save_full <- FALSE
-
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
       x_gt <- gen_tibble_bed_rds(
@@ -237,7 +238,6 @@ gen_tibble.character <-
         names_as_int = names_as_int,
         quiet = quiet
       )
-      save_full <- TRUE
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,
@@ -295,11 +295,8 @@ gen_tibble.character <-
       }
     }
 
-    if (save_full) {
-      gt_save(x_gt, quiet = quiet) # nolint
-    } else {
-      gt_save_light(x_gt, quiet = quiet) # nolint
-    }
+    # the readers save the FBM (.rds), so only the gen_tibble is saved
+    gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
   }
 
@@ -386,11 +383,17 @@ gen_tibble.matrix <- function(
   if (!(is.matrix(x) && is.numeric(x))) {
     stop("'x' is not a numeric matrix of integers")
   }
-  # check that dosages are non-negative integers, within each ploidy
-  if (any(x != round(x) | x < 0, na.rm = TRUE)) {
+  # check that dosages are non-negative integers, within each ploidy (in a
+  # single pass in C++, which does not create temporary matrices as large as
+  # x)
+  dosage_check <- check_dosage_matrix_cpp(x,
+    ploidy = as.numeric(fbm_ploidy),
+    check_integer = TRUE
+  )
+  if (dosage_check == 1) {
     stop("'x' should only contain non-negative integer dosages (or NA)")
   }
-  if (any(x > fbm_ploidy, na.rm = TRUE)) {
+  if (dosage_check == 2) {
     stop(
       "'x' contains dosages greater than the ploidy of the individual ",
       "(see 'ploidy')"
@@ -593,20 +596,23 @@ check_allele_alphabet <- function(
 ) {
   # 0 is always considered as a missing value (see harmonise_missing_values)
   missing_alleles <- union(missing_alleles, "0")
+  allowed_alleles <- as.character(c(valid_alleles, missing_alleles, NA))
+  # all_in_cpp(x, table) is all(x %in% table), in a single pass that does not
+  # allocate vectors as long as the loci table
   if (
-    any(
-      !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),
-      !x$allele_alt %in% c(valid_alleles, missing_alleles, NA)
-    )
+    !all_in_cpp(as.character(x$allele_ref), allowed_alleles) ||
+      !all_in_cpp(as.character(x$allele_alt), allowed_alleles)
   ) {
     stop(
       "valid alleles are ",
       paste(c(valid_alleles, missing_alleles), collapse = " "),
       " but ",
       paste(
+        # the same as unique(c(allele_ref, allele_alt)), without
+        # concatenating the two columns
         unique(c(
-          x$allele_ref,
-          x$allele_alt
+          unique(x$allele_ref),
+          unique(x$allele_alt)
         )),
         collapse = " "
       ),
@@ -622,8 +628,18 @@ harmonise_missing_values <- function(loci_info, missing_alleles = c("0", ".")) {
   if (!"0" %in% missing_alleles) {
     missing_alleles <- c(missing_alleles, "0")
   }
-  loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles] <- NA
-  loci_info$allele_alt[loci_info$allele_alt %in% missing_alleles] <- NA
+  for (allele_col in c("allele_ref", "allele_alt")) {
+    # which_in_cpp(x, table) is which(x %in% table), in a single pass that
+    # does not allocate vectors as long as the loci table; we only modify the
+    # column if it has missing alleles, as modifying it copies the whole column
+    is_missing <- which_in_cpp(
+      as.character(loci_info[[allele_col]]),
+      as.character(missing_alleles)
+    )
+    if (length(is_missing) > 0) {
+      loci_info[[allele_col]][is_missing] <- NA
+    }
+  }
   return(loci_info)
 }
 

@@ -45,6 +45,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// check_dosage_matrix_cpp
+int check_dosage_matrix_cpp(SEXP x, const NumericVector& ploidy, bool check_integer);
+RcppExport SEXP _tidypopgen_check_dosage_matrix_cpp(SEXP xSEXP, SEXP ploidySEXP, SEXP check_integerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< bool >::type check_integer(check_integerSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_dosage_matrix_cpp(x, ploidy, check_integer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// write_dosage_matrix_cpp
+void write_dosage_matrix_cpp(SEXP x, Environment BM, int na_byte);
+RcppExport SEXP _tidypopgen_write_dosage_matrix_cpp(SEXP xSEXP, SEXP BMSEXP, SEXP na_byteSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< int >::type na_byte(na_byteSEXP);
+    write_dosage_matrix_cpp(x, BM, na_byte);
+    return R_NilValue;
+END_RCPP
+}
 // fbm256_prod_and_rowSumsSq
 List fbm256_prod_and_rowSumsSq(Environment BM, const IntegerVector& ind_row, const IntegerVector& ind_col, const NumericVector& center, const NumericVector& scale, const NumericMatrix& V, const IntegerVector& ind, const IntegerVector& lsq_pcs);
 RcppExport SEXP _tidypopgen_fbm256_prod_and_rowSumsSq(SEXP BMSEXP, SEXP ind_rowSEXP, SEXP ind_colSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP VSEXP, SEXP indSEXP, SEXP lsq_pcsSEXP) {
@@ -456,6 +481,33 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// roh_sliding_cpp
+List roh_sliding_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& chrom, SEXP position, int window_size, int max_het_window, int max_miss_window, double threshold, double max_gap, double min_snp, double min_bases, double max_bases_per_snp, double max_het, bool old_lengths, int ncores, int block_size);
+RcppExport SEXP _tidypopgen_roh_sliding_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP chromSEXP, SEXP positionSEXP, SEXP window_sizeSEXP, SEXP max_het_windowSEXP, SEXP max_miss_windowSEXP, SEXP thresholdSEXP, SEXP max_gapSEXP, SEXP min_snpSEXP, SEXP min_basesSEXP, SEXP max_bases_per_snpSEXP, SEXP max_hetSEXP, SEXP old_lengthsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type chrom(chromSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type position(positionSEXP);
+    Rcpp::traits::input_parameter< int >::type window_size(window_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type max_het_window(max_het_windowSEXP);
+    Rcpp::traits::input_parameter< int >::type max_miss_window(max_miss_windowSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< double >::type max_gap(max_gapSEXP);
+    Rcpp::traits::input_parameter< double >::type min_snp(min_snpSEXP);
+    Rcpp::traits::input_parameter< double >::type min_bases(min_basesSEXP);
+    Rcpp::traits::input_parameter< double >::type max_bases_per_snp(max_bases_per_snpSEXP);
+    Rcpp::traits::input_parameter< double >::type max_het(max_hetSEXP);
+    Rcpp::traits::input_parameter< bool >::type old_lengths(old_lengthsSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(roh_sliding_cpp(BM, rowInd, colInd, chrom, position, window_size, max_het_window, max_miss_window, threshold, max_gap, min_snp, min_bases, max_bases_per_snp, max_het, old_lengths, ncores, block_size));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sfs_config_counts_cpp
 List sfs_config_counts_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, const List& spectra, const IntegerVector& min_n, const IntegerVector& polarise, const IntegerVector& block_ids, int n_blocks, int ncores, int block_size);
 RcppExport SEXP _tidypopgen_sfs_config_counts_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP spectraSEXP, SEXP min_nSEXP, SEXP polariseSEXP, SEXP block_idsSEXP, SEXP n_blocksSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
@@ -554,6 +606,56 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// king_counts_within_groups
+NumericMatrix king_counts_within_groups(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupEnd, int ncores);
+RcppExport SEXP _tidypopgen_king_counts_within_groups(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupEndSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupEnd(groupEndSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(king_counts_within_groups(BM, rowInd, colInd, groupEnd, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// all_in_cpp
+bool all_in_cpp(const CharacterVector& x, const CharacterVector& table);
+RcppExport SEXP _tidypopgen_all_in_cpp(SEXP xSEXP, SEXP tableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type table(tableSEXP);
+    rcpp_result_gen = Rcpp::wrap(all_in_cpp(x, table));
+    return rcpp_result_gen;
+END_RCPP
+}
+// which_in_cpp
+SEXP which_in_cpp(const CharacterVector& x, const CharacterVector& table);
+RcppExport SEXP _tidypopgen_which_in_cpp(SEXP xSEXP, SEXP tableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type table(tableSEXP);
+    rcpp_result_gen = Rcpp::wrap(which_in_cpp(x, table));
+    return rcpp_result_gen;
+END_RCPP
+}
+// any_duplicated_strings_cpp
+double any_duplicated_strings_cpp(const CharacterVector& x);
+RcppExport SEXP _tidypopgen_any_duplicated_strings_cpp(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(any_duplicated_strings_cpp(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // tajimas_d_window_sums_cpp
 List tajimas_d_window_sums_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, const IntegerVector& locus_first, const IntegerVector& locus_last, int n_windows, int ncores, int block_size);
 RcppExport SEXP _tidypopgen_tajimas_d_window_sums_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP locus_firstSEXP, SEXP locus_lastSEXP, SEXP n_windowsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
@@ -573,6 +675,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
     rcpp_result_gen = Rcpp::wrap(tajimas_d_window_sums_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// vcf_gt_dosages_cpp
+List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy);
+RcppExport SEXP _tidypopgen_vcf_gt_dosages_cpp(SEXP gtSEXP, SEXP max_ploidySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterMatrix& >::type gt(gtSEXP);
+    Rcpp::traits::input_parameter< int >::type max_ploidy(max_ploidySEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_gt_dosages_cpp(gt, max_ploidy));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -636,6 +750,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_alt_freq_dip_pseudo_cpp, 7},
     {"_tidypopgen_alt_freq_polyploid_cpp", (DL_FUNC) &_tidypopgen_alt_freq_polyploid_cpp, 7},
+    {"_tidypopgen_check_dosage_matrix_cpp", (DL_FUNC) &_tidypopgen_check_dosage_matrix_cpp, 3},
+    {"_tidypopgen_write_dosage_matrix_cpp", (DL_FUNC) &_tidypopgen_write_dosage_matrix_cpp, 3},
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 8},
     {"_tidypopgen_grouped_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_alt_freq_dip_pseudo_cpp, 10},
     {"_tidypopgen_grouped_het_obs_polyploid", (DL_FUNC) &_tidypopgen_grouped_het_obs_polyploid, 8},
@@ -660,13 +776,19 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
+    {"_tidypopgen_roh_sliding_cpp", (DL_FUNC) &_tidypopgen_roh_sliding_cpp, 17},
     {"_tidypopgen_sfs_config_counts_cpp", (DL_FUNC) &_tidypopgen_sfs_config_counts_cpp, 14},
     {"_tidypopgen_sfs_project_cpp", (DL_FUNC) &_tidypopgen_sfs_project_cpp, 5},
     {"_tidypopgen_sfs_preview_cpp", (DL_FUNC) &_tidypopgen_sfs_preview_cpp, 4},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 6},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 6},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 6},
+    {"_tidypopgen_king_counts_within_groups", (DL_FUNC) &_tidypopgen_king_counts_within_groups, 5},
+    {"_tidypopgen_all_in_cpp", (DL_FUNC) &_tidypopgen_all_in_cpp, 2},
+    {"_tidypopgen_which_in_cpp", (DL_FUNC) &_tidypopgen_which_in_cpp, 2},
+    {"_tidypopgen_any_duplicated_strings_cpp", (DL_FUNC) &_tidypopgen_any_duplicated_strings_cpp, 1},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
+    {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
     {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 2},
     {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},

@@ -5,12 +5,17 @@
 \alias{distruct_colours}
 \title{Distruct colours}
 \format{
-A vector of 60 hex colours
+A vector of 56 hex colours
 }
 \usage{
 distruct_colours
 }
 \description{
 Colours in the palette used by distruct
+}
+\details{
+The 56 distinct colours of the palette of distruct (which repeats 4 of its
+60 colours), in their original order. \code{\link[=scale_fill_distruct]{scale_fill_distruct()}} recycles them
+when there are more groups.
 }
 \keyword{datasets}

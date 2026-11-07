@@ -91,7 +91,7 @@ snp_king <- function(
       0.25 * (N_Aa_i_sub + N_Aa_j_sub) / pmin(N_Aa_i_sub, N_Aa_j_sub)
   }
   # This works, but could be done with a FBM in c++ for added speed
-  ibs_counts_matrix <- bigstatsr::big_apply(
+  king_matrix <- bigstatsr::big_apply(
     k_numerator, # nolint
     a.FUN = divide_king_sub,
     ind = seq_len(ncol(k_numerator)),
@@ -100,5 +100,5 @@ snp_king <- function(
     a.combine = "cbind",
     block.size = bigstatsr::block_size(nrow(k_numerator))
   )
-  return(ibs_counts_matrix)
+  return(king_matrix)
 }

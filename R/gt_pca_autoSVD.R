@@ -136,9 +136,10 @@ gt_pca_autoSVD <- function(
   infos_chr <- rep(1, ncol(X))
 
   infos_chr[.gt_fbm_cols(x)] <- cast_chromosome_to_int(show_loci(x)$chromosome)
-  # chromosomes have to be positive numbers
+  # chromosomes have to be positive numbers: shift the codes so that the
+  # smallest one is 1
   if (min(infos_chr) < 1) {
-    infos_chr <- infos_chr + abs(min(infos_chr) + 1)
+    infos_chr <- infos_chr - min(infos_chr) + 1
   }
   infos_pos <- NULL
   if (use_positions) {
