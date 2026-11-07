@@ -3,8 +3,8 @@
 #
 # Writes, in inst/extdata/roh:
 # - roh_sim.bed/.bim/.fam: 30 diploid individuals in three populations, and
-#   3,000 loci on three chromosomes (1,000 loci each, over 5, 4 and 3 Mb, with
-#   genetic distances of 1 cM per Mb);
+#   3,000 loci on three chromosomes (1,000 loci each, over 10, 8 and 6 Mb,
+#   with genetic distances of 1 cM per Mb);
 # - roh_sim_truth.csv: the simulated runs (one row per run), with the
 #   individual, the chromosome, the rows of the first and last locus of the
 #   run in the loci table, their positions, the number of loci, and the
@@ -16,18 +16,22 @@
 # homozygosity (an autozygous segment), the second haplotype is a copy of the
 # first. The populations differ in inbreeding:
 # - "outbred": no runs;
-# - "moderate": one run of 60 to 150 loci per individual;
-# - "inbred": three runs of 150 to 350 loci per individual, except for the
+# - "moderate": one run of 180 to 300 loci per individual;
+# - "inbred": three runs of 250 to 450 loci per individual, except for the
 #   first three individuals, which carry runs designed to test edge cases:
 #   - inbred_01: a run at the end of chromosome 1 (to its last locus), and
 #     one at the start of chromosome 2 (from its first locus); they must be
 #     two runs, one per chromosome;
 #   - inbred_02: a run on chromosome 3 with one heterozygous genotype (a
-#     genotyping error) and two missing genotypes, more than 15 loci apart,
-#     so that with the default settings it is a single run;
+#     genotyping error) and two missing genotypes, so that with the default
+#     settings it is a single run;
 #   - inbred_03: a run on chromosome 2 that spans a gap of 1.3 Mb without
-#     loci, larger than the default max_gap of windows_indiv_roh(), so that
-#     it is found as two runs, one on each side of the gap.
+#     loci, larger than the default max_gap_kb of windows_indiv_roh() (1000
+#     kb, as in PLINK), so that it is found as two runs, one on each side of
+#     the gap.
+# All the simulated runs are at least 1 Mb and 100 loci long, so that they
+# can be found with the default parameters of windows_indiv_roh() (those of
+# PLINK --homozyg).
 # About 0.2% of all genotypes are missing at random.
 #
 # Run from the root of the repository.
@@ -38,9 +42,9 @@ dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 # loci ------------------------------------------------------------------------
 n_per_chrom <- 1000
-chrom_length <- c(5e6, 4e6, 3e6)
-# chromosome 2 has no loci between 1.5 and 2.8 Mb
-gap <- c(1.5e6, 2.8e6)
+chrom_length <- c(10e6, 8e6, 6e6)
+# chromosome 2 has no loci between 3 and 4.3 Mb
+gap <- c(3e6, 4.3e6)
 positions <- lapply(seq_along(chrom_length), function(chrom) {
   candidates <- seq_len(chrom_length[chrom])
   if (chrom == 2) {
@@ -99,12 +103,12 @@ random_runs <- function(id, n, min_len, max_len) {
 }
 ids <- split(indiv_meta$id, indiv_meta$population)
 runs <- rbind(
-  do.call(rbind, lapply(ids$moderate, random_runs, 1, 60, 150)),
+  do.call(rbind, lapply(ids$moderate, random_runs, 1, 180, 300)),
   run("inbred_01", 1, 801, n_per_chrom),
-  run("inbred_01", 2, 1, 150),
+  run("inbred_01", 2, 1, 200),
   run("inbred_02", 3, 300, 600),
-  run("inbred_03", 2, gap_index - 119, gap_index + 120),
-  do.call(rbind, lapply(ids$inbred[-(1:3)], random_runs, 3, 150, 350))
+  run("inbred_03", 2, gap_index - 199, gap_index + 200),
+  do.call(rbind, lapply(ids$inbred[-(1:3)], random_runs, 3, 250, 450))
 )
 runs$first_locus <- locus_row(runs$chrom, runs$from)
 runs$last_locus <- locus_row(runs$chrom, runs$to)
