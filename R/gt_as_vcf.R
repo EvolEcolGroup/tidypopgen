@@ -103,10 +103,15 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
         info = "PR",
         format = "GT"
       )
-    loci_sub[is.na(loci_sub)] <- "."
-    # the start of each line, with the information on the locus (the factor
-    # of chromosomes is pasted as its labels)
-    loci_prefix <- do.call(paste, c(unname(as.list(loci_sub)), sep = "\t"))
+    # write missing values as "." (the columns are converted to text first, as
+    # a factor, e.g. of chromosomes, or integer names can not store ".")
+    loci_sub <- lapply(loci_sub, function(col) {
+      col <- as.character(col)
+      col[is.na(col)] <- "."
+      col
+    })
+    # the start of each line, with the information on the locus
+    loci_prefix <- do.call(paste, c(unname(loci_sub), sep = "\t"))
     # append the lines of this chunk to the file (the genotypes are read and
     # written in C++, one line per locus)
     gt_write_text_by_locus(
@@ -126,11 +131,12 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
 # write the header of a VCF: the lines in `header_start`, then a ##contig
 # line for each chromosome, then the lines in `header_end`. Chromosomes are
 # listed in the order in which they first appear (missing chromosomes last, as
-# dplyr groups them), with their largest position + 1 as their length (NA if
-# a position of the chromosome is missing, as max() would give). Some data
-# have millions of chromosomes (e.g. RAD loci assembled de novo), so the
-# lengths are found without grouping or looping over chromosomes, and the
-# contig lines are made and written `chunk_size` chromosomes at a time.
+# dplyr groups them, with "." as ID), with their largest position + 1 as their
+# length (NA if a position of the chromosome is missing, as max() would
+# give). Some data have millions of chromosomes (e.g. RAD loci assembled de
+# novo), so the lengths are found without grouping or looping over
+# chromosomes, and the contig lines are made and written `chunk_size`
+# chromosomes at a time.
 vcf_write_header <- function(
   file,
   header_start,
@@ -162,10 +168,13 @@ vcf_write_header <- function(
     # write the contig lines in chunks of chromosomes
     for (chunk_start in seq(1, length(first), by = chunk_size)) {
       this_chunk <- chunk_start:min(chunk_start + chunk_size - 1, length(first))
+      # a missing chromosome is written as ".", as in the body of the VCF
+      chrom_id <- as.character(chromosome[first[this_chunk]])
+      chrom_id[is.na(chrom_id)] <- "."
       writeLines(
         paste0(
           "##contig=<ID=",
-          chromosome[first[this_chunk]],
+          chrom_id,
           ",length=",
           format_position(chrom_max[this_chunk] + 1),
           ">"

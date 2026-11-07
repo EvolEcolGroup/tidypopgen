@@ -2,6 +2,7 @@
 
 * `gt_as_vcf()` is much faster, and uses less memory, on data with many
   chromosomes (e.g. RAD loci assembled de novo, with one chromosome per locus)
+* `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
 
 # tidypopgen 1.0.0
 
