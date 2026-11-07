@@ -139,13 +139,13 @@ rbind.gen_tbl <- function(
   # are checked by rbind_dry_run(), so the names of the loci are left as
   # they are)
   if (!use_position) {
-    if (anyDuplicated(loci_names(target)) > 0) {
+    if (any_duplicated_names(loci_names(target)) > 0) {
       stop(
         "The target gen_tibble contains duplicated loci. ",
         "Use 'find_duplicated_loci()' to identify and remove them."
       )
     }
-    if (anyDuplicated(loci_names(ref)) > 0) {
+    if (any_duplicated_names(loci_names(ref)) > 0) {
       stop(
         "The reference gen_tibble contains duplicated loci. ",
         "Use 'find_duplicated_loci()' to identify and remove them."

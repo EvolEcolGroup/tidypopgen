@@ -153,6 +153,10 @@ which_in_cpp <- function(x, table) {
     .Call(`_tidypopgen_which_in_cpp`, x, table)
 }
 
+any_duplicated_strings_cpp <- function(x) {
+    .Call(`_tidypopgen_any_duplicated_strings_cpp`, x)
+}
+
 tajimas_d_window_sums_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size) {
     .Call(`_tidypopgen_tajimas_d_window_sums_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, locus_first, locus_last, n_windows, ncores, block_size)
 }

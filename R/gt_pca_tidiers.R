@@ -280,7 +280,7 @@ augment_loci.gt_pca <- function(x, data = NULL, k = NULL, ...) {
       # loci was used for the pca (e.g. by gt_pca_autoSVD); loci of data that
       # were not used for the pca get NA loadings
       if (
-        anyDuplicated(loci_names(data)) > 0 ||
+        any_duplicated_names(loci_names(data)) > 0 ||
           !all(row_names(x$v) %in% loci_names(data))
       ) {
         stop(paste(

@@ -646,6 +646,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// any_duplicated_strings_cpp
+double any_duplicated_strings_cpp(const CharacterVector& x);
+RcppExport SEXP _tidypopgen_any_duplicated_strings_cpp(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(any_duplicated_strings_cpp(x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // tajimas_d_window_sums_cpp
 List tajimas_d_window_sums_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, const IntegerVector& locus_first, const IntegerVector& locus_last, int n_windows, int ncores, int block_size);
 RcppExport SEXP _tidypopgen_tajimas_d_window_sums_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP locus_firstSEXP, SEXP locus_lastSEXP, SEXP n_windowsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
@@ -776,6 +787,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_king_counts_within_groups", (DL_FUNC) &_tidypopgen_king_counts_within_groups, 5},
     {"_tidypopgen_all_in_cpp", (DL_FUNC) &_tidypopgen_all_in_cpp, 2},
     {"_tidypopgen_which_in_cpp", (DL_FUNC) &_tidypopgen_which_in_cpp, 2},
+    {"_tidypopgen_any_duplicated_strings_cpp", (DL_FUNC) &_tidypopgen_any_duplicated_strings_cpp, 1},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
     {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
     {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 2},

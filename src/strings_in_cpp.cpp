@@ -127,3 +127,69 @@ SEXP which_in_cpp(const CharacterVector& x, const CharacterVector& table) {
 }
 
 /******************************************************************************/
+// The index (1-based) of the first element of a character vector that is a
+// duplicate of an earlier one, or 0 if there is none, as anyDuplicated(), or
+// -1 if this can not be decided here (and anyDuplicated() should be used),
+// to check that the names of the loci are unique (see any_duplicated_names()).
+//
+// anyDuplicated() hashes the addresses of the CHARSXPs, with a table of 2^k
+// ints for at least 2 * n elements (512 MB for 40M names). Here the table is
+// up to 70% full (256 MB for 40M names), and the slot of each element is
+// prefetched a few elements ahead, which makes it about 3 times faster. The
+// addresses identify the strings if all the elements are in the native
+// encoding (as ASCII strings always are, as they are never marked): R keeps
+// a single CHARSXP for each string in each encoding, but the same text can
+// be in two encodings (e.g. UTF-8 and latin1), so other vectors are left to
+// anyDuplicated() (which translates them).
+
+namespace {
+inline void prefetch_slot(const void* a) {
+#if defined(__GNUC__) || defined(__clang__)
+  __builtin_prefetch(a);
+#else
+  (void) a;
+#endif
+}
+
+inline uint64_t string_address_hash(SEXP s) {
+  uint64_t a = (uint64_t)(uintptr_t) s;
+  a ^= a >> 33;
+  a *= 0xff51afd7ed558ccdULL;
+  a ^= a >> 33;
+  return a;
+}
+} // namespace
+
+// [[Rcpp::export]]
+double any_duplicated_strings_cpp(const CharacterVector& x) {
+  const SEXP* p = STRING_PTR_RO(x);
+  R_xlen_t n = x.size();
+  if ((uint64_t) n >= (uint64_t) UINT32_MAX) return -1;
+  for (R_xlen_t i = 0; i < n; i++) {
+    if (p[i] != NA_STRING && Rf_getCharCE(p[i]) != CE_NATIVE) return -1;
+  }
+  // a table of 2^k slots, at most 70% full, holding the index + 1 of each
+  // element (0 for an empty slot), with linear probing; the slot is given by
+  // the top k bits of the hash
+  int k = 4;
+  while ((double)((uint64_t) 1 << k) * 0.7 < (double) n) k++;
+  const uint64_t mask = ((uint64_t) 1 << k) - 1;
+  const int shift = 64 - k;
+  std::vector<uint32_t> slots((size_t) 1 << k, 0);
+  const R_xlen_t ahead = 16;
+  for (R_xlen_t i = 0; i < n; i++) {
+    if (i + ahead < n) {
+      prefetch_slot(&slots[string_address_hash(p[i + ahead]) >> shift]);
+    }
+    SEXP s = p[i];
+    uint64_t h = string_address_hash(s) >> shift;
+    while (slots[h] != 0) {
+      if (p[slots[h] - 1] == s) return (double)(i + 1);
+      h = (h + 1) & mask;
+    }
+    slots[h] = (uint32_t)(i + 1);
+  }
+  return 0;
+}
+
+/******************************************************************************/

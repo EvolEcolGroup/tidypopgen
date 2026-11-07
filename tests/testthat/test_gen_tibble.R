@@ -156,6 +156,42 @@ test_that("the allele checks in C++ match %in%", {
   )
 })
 
+test_that("the check for duplicated loci names matches anyDuplicated()", {
+  e_utf8 <- "\u00e9"
+  e_latin1 <- iconv(e_utf8, "UTF-8", "latin1")
+  names_list <- list(
+    character(0),
+    paste0("rs", 1:1000),
+    c(paste0("rs", 1:1000), "rs500"),
+    c("a", NA, "b", NA),
+    c("NA", NA),
+    # the same text in two encodings (left to anyDuplicated())
+    c("a", e_utf8, e_latin1),
+    c(1:5, 3L)
+  )
+  for (x in names_list) {
+    expect_identical(
+      as.double(any_duplicated_names(x)),
+      as.double(anyDuplicated(x))
+    )
+  }
+  expect_identical(any_duplicated_strings_cpp(c("a", e_utf8, e_latin1)), -1)
+  # duplicated names are reported by gen_tibble()
+  expect_error(
+    gen_tibble(
+      x = matrix(0, 1, 2),
+      loci = data.frame(
+        name = c("rs1", "rs1"), chromosome = 1L, position = 1:2,
+        genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+      ),
+      indiv_meta = data.frame(id = "a"),
+      quiet = TRUE,
+      backingfile = tempfile()
+    ),
+    "duplicated locus names"
+  )
+})
+
 test_that("valid alleles check for .character method", {
   expect_error(
     pop_b <-
