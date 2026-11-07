@@ -907,3 +907,18 @@ test_that("vcf_gt_dosages_cpp reads genotypes as the R code did", {
   expect_identical(vcf_gt_dosages_cpp(matrix("a/1"), 2)$error, 2L)
   expect_identical(vcf_gt_dosages_cpp(matrix("0//1"), 3)$error, 2L)
 })
+
+test_that("the md5 sum of the FBM is that of its saved rds for VCF inputs", {
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  for (parser in c("cpp", "vcfR")) {
+    if (parser == "vcfR") skip_if_not_installed("vcfR")
+    test_gt <- gen_tibble(vcf_path,
+      parser = parser, quiet = TRUE, backingfile = tempfile()
+    )
+    rds_file <- gt_get_file_names(test_gt)[1]
+    expect_identical(
+      attr(test_gt$genotypes, "fbm_md5sum"),
+      tools::md5sum(rds_file)
+    )
+  }
+})

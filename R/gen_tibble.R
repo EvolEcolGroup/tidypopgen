@@ -207,8 +207,6 @@ gen_tibble.character <-
     # normalise path
     x <- normalizePath(x, mustWork = FALSE)
 
-    save_full <- FALSE
-
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
       x_gt <- gen_tibble_bed_rds(
@@ -240,7 +238,6 @@ gen_tibble.character <-
         names_as_int = names_as_int,
         quiet = quiet
       )
-      save_full <- TRUE
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,
@@ -298,11 +295,8 @@ gen_tibble.character <-
       }
     }
 
-    if (save_full) {
-      gt_save(x_gt, quiet = quiet) # nolint
-    } else {
-      gt_save_light(x_gt, quiet = quiet) # nolint
-    }
+    # the readers save the FBM (.rds), so only the gen_tibble is saved
+    gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
   }
 
