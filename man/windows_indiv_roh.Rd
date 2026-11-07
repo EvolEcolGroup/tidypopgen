@@ -89,9 +89,10 @@ x \code{NSNP});
 }
 
 Its attributes \code{individuals} (a tibble of all the individuals, with
-their groups, including those with no run) and \code{chromosome_length} (the
-length of each chromosome, its largest position, as in \code{detectRUNS}) are
-used by \code{\link[=autoplot.indiv_roh]{autoplot.indiv_roh()}}.
+their groups, including those with no run), \code{chromosome_length} (the
+length of each chromosome, its largest position, as in \code{detectRUNS}) and
+\code{n_loci} (the number of loci) are used by \code{\link[=autoplot.indiv_roh]{autoplot.indiv_roh()}},
+\code{\link[=gt_roh_froh]{gt_roh_froh()}}, \code{\link[=gt_roh_loci]{gt_roh_loci()}} and \code{\link[=gt_roh_islands]{gt_roh_islands()}}.
 }
 \description{
 This function looks for runs of homozygosity in a diploid genome with the

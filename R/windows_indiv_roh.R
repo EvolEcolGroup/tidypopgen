@@ -93,9 +93,10 @@
 #'   - `n_missing`: the number of missing genotypes in the run.
 #'
 #'   Its attributes `individuals` (a tibble of all the individuals, with
-#'   their groups, including those with no run) and `chromosome_length` (the
-#'   length of each chromosome, its largest position, as in `detectRUNS`) are
-#'   used by [autoplot.indiv_roh()].
+#'   their groups, including those with no run), `chromosome_length` (the
+#'   length of each chromosome, its largest position, as in `detectRUNS`) and
+#'   `n_loci` (the number of loci) are used by [autoplot.indiv_roh()],
+#'   [gt_roh_froh()], [gt_roh_loci()] and [gt_roh_islands()].
 #' @export
 #' @references Chang CC, Chow CC, Tellier LCAM, Vattikuti S, Purcell SM, Lee
 #'   JJ (2015) Second-generation PLINK: rising to the challenge of larger and
@@ -268,6 +269,7 @@ windows_indiv_roh <- function(
   structure(res,
     individuals = individuals,
     chromosome_length = chromosome_length,
+    n_loci = nrow(loci),
     class = c("indiv_roh", class(res))
   )
 }

@@ -10,8 +10,9 @@
 #   heterozygous and missing genotypes, to test the edge cases of the
 #   algorithm with small windows;
 # and saves the parameters of each case (cases.csv), the small dataset and the
-# PLINK outputs (<case>.hom) in tests/testthat/testdata/plink_roh, where they
-# are used by tests/testthat/test_plink_roh.R
+# PLINK outputs (<case>.hom, and <case>.hom.summary for some cases) in
+# tests/testthat/testdata/plink_roh, where they are used by
+# tests/testthat/test_plink_roh.R
 #
 # It needs PLINK 1.9 (https://www.cog-genomics.org/plink/1.9/): by default
 # the `plink` executable on the PATH, or the one given by the environment
@@ -134,4 +135,12 @@ for (i in seq_len(nrow(cases))) {
     file.path(out_dir, paste0(cases$case[i], ".hom")),
     overwrite = TRUE
   )
+  # the number of individuals in a run at each locus (AFF + UNAFF), for the
+  # default parameters and the small dataset (to keep the files small)
+  if (cases$case[i] == "sim_default" || cases$dataset[i] == "small") {
+    file.copy(paste0(out, ".hom.summary"),
+      file.path(out_dir, paste0(cases$case[i], ".hom.summary")),
+      overwrite = TRUE
+    )
+  }
 }

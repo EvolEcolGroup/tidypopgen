@@ -52,3 +52,47 @@ test_that("windows_indiv_roh gives the runs of PLINK --homozyg", {
     )
   }
 })
+
+test_that("gt_roh_loci counts the individuals in runs as PLINK", {
+  skip_if_not(
+    file.exists(file.path(plink_roh_dir, "plink_version.txt")),
+    paste(
+      "PLINK test data not created",
+      "(see data-raw/validate/create_plink_roh_test_data.R)"
+    )
+  )
+  cases <- utils::read.csv(file.path(plink_roh_dir, "cases.csv"))
+  datasets <- list(
+    roh_sim = system.file("extdata", "roh", "roh_sim.bed",
+      package = "tidypopgen"
+    ),
+    small = file.path(plink_roh_dir, "small.bed")
+  )
+  arg_names <- setdiff(names(cases), c("case", "dataset"))
+  summaries <- list.files(plink_roh_dir, pattern = "\\.hom\\.summary$")
+  expect_true(length(summaries) > 0)
+  for (summary_file in summaries) {
+    i <- match(sub("\\.hom\\.summary$", "", summary_file), cases$case)
+    test_gt <- gen_tibble(datasets[[cases$dataset[i]]],
+      backingfile = tempfile(), quiet = TRUE
+    )
+    args <- as.list(cases[i, arg_names])
+    args <- args[!is.na(args)]
+    # grouped, but counted over all individuals
+    roh <- do.call(
+      windows_indiv_roh,
+      c(list(test_gt %>% group_by(population)), args)
+    )
+    roh_loci <- gt_roh_loci(roh, show_loci(test_gt), by_group = FALSE)
+    plink_summary <- utils::read.table(
+      file.path(plink_roh_dir, summary_file),
+      header = TRUE, stringsAsFactors = FALSE
+    )
+    expect_identical(roh_loci$name, plink_summary$SNP)
+    expect_identical(roh_loci$position, plink_summary$BP)
+    expect_identical(roh_loci$n_roh,
+      as.integer(plink_summary$AFF + plink_summary$UNAFF),
+      label = summary_file
+    )
+  }
+})
