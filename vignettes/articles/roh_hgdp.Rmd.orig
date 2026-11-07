@@ -297,18 +297,19 @@ be in runs, whatever selection did.
 
 ```{r echo = FALSE}
 steps <- c(
-  read_bed = "Read the bed file (gen_tibble())",
-  roh_1_core = "Find the runs (windows_indiv_roh(), 1 core)",
-  roh_4_cores = paste0("Find the runs (windows_indiv_roh(), ", n_cores,
+  read_bed = "Read the bed file (`gen_tibble()`)",
+  roh_1_core = "Find the runs (`windows_indiv_roh()`, 1 core)",
+  roh_4_cores = paste0("Find the runs (`windows_indiv_roh()`, ", n_cores,
                        " cores)"),
-  plink = "PLINK --homozyg (1 thread)",
-  froh = "F_ROH (gt_roh_froh())",
-  islands = "ROH islands (gt_roh_islands())"
+  plink = "PLINK `--homozyg` (1 thread)",
+  froh = "F_ROH (`gt_roh_froh()`)",
+  islands = "ROH islands (`gt_roh_islands()`)"
 )
 steps <- steps[names(steps) %in% ls(timings)]
+step_times <- unlist(mget(names(steps), envir = timings), use.names = FALSE)
 knitr::kable(data.frame(
   Step = unname(steps),
-  `Time (s)` = round(vapply(names(steps), function(x) timings[[x]], 1), 2),
+  `Time (s)` = round(step_times, 2),
   check.names = FALSE
 ))
 ```
