@@ -24,7 +24,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/EvolEcolGroup/tidypopgen/blob/dev/inst/CITATION)
+[`inst/CITATION`](https://github.com/EvolEcolGroup/tidypopgen/blob/v1.0.0/inst/CITATION)
 
 Carter E, Tysall E, Hodgson J, Manica A (2025). “tidypopgen: Tidy
 population genetics in R.” *Methods in Ecology and Evolution*.
