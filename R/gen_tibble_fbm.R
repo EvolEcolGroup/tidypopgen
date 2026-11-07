@@ -72,14 +72,26 @@ validate_loci <- function(loci,
   }
   if (check_duplicates == TRUE) {
     # check for duplicated positions within chromosomes, i.e. duplicated
-    # pairs of chromosome and position (this avoids splitting the whole loci
-    # table by chromosome)
-    has_dup_pos <- vctrs::vec_duplicate_any(
-      vctrs::data_frame(
-        chromosome = loci$chromosome,
-        position = loci$position
-      )
+    # pairs of chromosome and position. When positions are sorted within
+    # each chromosome (as usual), duplicates are equal consecutive positions,
+    # which a single pass in C++ finds without hashing every pair (each level
+    # of the factor of chromosomes is a group of its own); otherwise (or with
+    # missing positions) we hash the pairs with vctrs
+    position_order <- unsorted_by_chromosome_cpp(
+      loci$position,
+      loci$chromosome,
+      seq_len(nlevels(loci$chromosome))
     )
+    if (isFALSE(position_order[["unsorted"]])) {
+      has_dup_pos <- position_order[["ties"]]
+    } else {
+      has_dup_pos <- vctrs::vec_duplicate_any(
+        vctrs::data_frame(
+          chromosome = loci$chromosome,
+          position = loci$position
+        )
+      )
+    }
     has_dup_names <- anyDuplicated(loci$name) > 0
 
     if (!allow_duplicates) {
