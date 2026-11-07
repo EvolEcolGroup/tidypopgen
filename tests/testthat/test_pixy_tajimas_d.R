@@ -1,6 +1,6 @@
 # Compare Tajima's D with missing data to pixy (Bailey et al. 2025)
 # The vcf and the pixy results were generated with pixy version 2.2.4
-# See data-raw/create_pixy_test_data.R for the script
+# See data-raw/validate/create_pixy_test_data.R for the script
 
 # read the test data into a grouped gen_tibble
 pixy_gt <- gen_tibble(

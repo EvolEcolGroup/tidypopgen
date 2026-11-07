@@ -1,5 +1,5 @@
 library(tictoc)
-bed_file <- "./data-raw/benchmarking/hgdp_100k.bed"
+bed_file <- "./data-raw/benchmarking/data/hgdp_100k.bed"
 hgdp_gt <- gen_tibble(bed_file, backingfile = tempfile("missing_"))
 hgdp_gt <- gt_impute_simple(hgdp_gt)
 tic()
@@ -22,7 +22,7 @@ toc()
 
 
 foo <- snp_readBed(
-  "./data-raw/benchmarking/hgdp_100k.bed",
+  "./data-raw/benchmarking/data/hgdp_100k.bed",
   backingfile = tempfile("missing_")
 )
 test_snp <- bigsnpr::snp_attachExtdata()

@@ -19,7 +19,6 @@ are decisions or ideas, not bugs.
 | `read_pedfile()` | The genotype matrix is still held in memory (now as integers, never copied); streaming it to the FBM would need the allele coding of each locus, known only once all individuals are read. |
 | `cbind(df, gt)` | With the gen_tibble not first, R dispatches to `cbind.data.frame()`, which returns a plain data.frame (related to #9, see below). |
 | PLINK missingness | `pairwise_ibs()` matches PLINK's `--distance flat-missing`; PLINK 1.9's default correction for missing genotypes is not available (documented in `0c326be2`). Add it only if users ask for it. |
-| Old CRAN scripts | `data-raw/helper_functions/check_*_in_documentation.R` are superseded by the functions of the `data-raw/submit_to_cran` skill (`1859dd6a`), and could be deleted. |
 
 ## Resolved in November 2026, after the review
 
@@ -30,7 +29,7 @@ are decisions or ideas, not bugs.
 | #9, `cbind()` on a gen_tibble | Not reproduced on `dev`: `cbind(grouped_gt, df)` returns a valid grouped gen_tibble. A clash with the grouping variable (`cbind(grouped_gt, data.frame(population = ...))`) renames both columns with a message and drops the grouping, as `dplyr::bind_cols()` (which dplyr uses for `cbind()` on grouped data frames), and is kept. An ungrouped gen_tibble used to get two columns with the same name; it is now renamed in the same way, and a column called `id` or `genotypes` is an error (`7627bfc5`). |
 | KING variable | The KING matrix in `R/snp_king.R` was stored in `ibs_counts_matrix`; it is now `king_matrix` (`caa23187`). |
 | PLINK missingness | How `pairwise_ibs()` handles missing genotypes compared to PLINK is documented in its details (`0c326be2`). |
-| CRAN checks | A Claude Code skill, `data-raw/submit_to_cran`, runs the checks before a CRAN submission, with documented functions for `@returns`, `@examples` and URLs (`1859dd6a`). |
+| CRAN checks | A Claude Code skill (submit-to-cran) runs the checks before a CRAN submission, with documented functions for `@returns`, `@examples` and URLs (`1859dd6a`). It now lives outside this repository; the old `data-raw/helper_functions/check_*_in_documentation.R` scripts are deleted. |
 
 ## Resolved since the review
 

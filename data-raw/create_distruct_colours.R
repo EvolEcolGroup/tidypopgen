@@ -1,6 +1,6 @@
 ## code to prepare `distruct_colours` dataset
 distruct_colours <- read.csv(
-  "./data-raw/files/default_colors.txt",
+  "./data-raw/data_files/default_colors.txt",
   header = FALSE
 )$V1
 # the distruct palette repeats 4 of its 60 colours (positions 35, 46, 54 and

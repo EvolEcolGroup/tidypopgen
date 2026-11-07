@@ -1,6 +1,6 @@
 # Compare the site frequency spectra with easySFS
 # The vcfs and the easySFS outputs are generated with easySFS (see
-# data-raw/create_easysfs_test_data.R for the script and the commit of
+# data-raw/validate/create_easysfs_test_data.R for the script and the commit of
 # easySFS used). The tests are skipped if the data have not been created.
 
 easysfs_dir <- test_path("testdata", "easysfs")
@@ -8,7 +8,10 @@ easysfs_dir <- test_path("testdata", "easysfs")
 skip_if_no_easysfs_data <- function() {
   testthat::skip_if_not(
     file.exists(file.path(easysfs_dir, "easysfs_version.txt")),
-    "easySFS test data not created (see data-raw/create_easysfs_test_data.R)"
+    paste(
+      "easySFS test data not created",
+      "(see data-raw/validate/create_easysfs_test_data.R)"
+    )
   )
 }
 

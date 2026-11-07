@@ -13,9 +13,9 @@ devtools::check(remote = TRUE, manual = TRUE)
 # to reduce file sizes:
 # tools::resaveRdaFiles("./data")
 
-source("./data-raw/helper_functions/check_returns_in_documentation.R")
-
-source("./data-raw/helper_functions/check_examples_in_documentation.R")
+# check that every help page has @returns and @examples: use the
+# submit-to-cran skill of Claude Code, or its functions
+# check_returns_in_documentation() and check_examples_in_documentation()
 
 # now create a cran_submission branch for the final remote tests
 

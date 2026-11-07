@@ -521,7 +521,7 @@ After the merge of `speed_extra` (`af93029d`), the full test suite passes (4246 
 - [ ] Render the vignettes, and re-run `vignettes/articles/benchmark_hgdp.Rmd`
   to update its timings.
 - [ ] Re-run `vignettes/articles/precompile_big_data.R` on the machine used
-  for the article (it needs the SGDP data, see `data-raw/sgdp`), so that the
+  for the article (it needs the SGDP data, see `data-raw/create_sgdp_subset_*`), so that the
   knitted `big_data.Rmd` includes the time to read the VCF and the peak
   memory of each step.
 

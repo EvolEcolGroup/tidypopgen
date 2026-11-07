@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Usage: s02_create_sgdp_subset.sh [out_dir]
+# Usage: create_sgdp_subset_s02.sh [out_dir]
 #
 # Create <out_dir>/all_subset.vcf.gz (and its .tbi index): a VCF of the SGDP
-# individuals listed in the ${pop}_subset.txt files that sit next to this
-# script (written by s01_create_sgdp_subset_metadata.R). <out_dir> defaults to
-# the folder containing this script (data-raw/sgdp/).
+# individuals listed in the ${pop}_subset.txt files in data_files/sgdp/, next
+# to this script (written by create_sgdp_subset_s01_metadata.R). <out_dir>
+# defaults to that folder (data-raw/data_files/sgdp/).
 #
 # SGDP distributes its per-individual VCFs as a single 57 GB tar archive. We
 # do not download the archive: SGDP also publishes its listing (`tar -tv`
@@ -25,7 +25,8 @@ set -euo pipefail
 # Requires: curl, awk, bcftools, and md5sum (or md5 on macOS).
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-OUT_DIR=${1:-$SCRIPT_DIR}
+SUBSET_DIR=$SCRIPT_DIR/data_files/sgdp # the ${pop}_subset.txt files
+OUT_DIR=${1:-$SUBSET_DIR}
 mkdir -p "$OUT_DIR"
 OUT_DIR=$(cd "$OUT_DIR" && pwd)
 
@@ -114,7 +115,7 @@ check_md5() {
 # 2. Download each individual's VCF and index, and check them
 : > "$DL_DIR/merge_list.txt"
 for pop in "${POPS[@]}"; do
-  ids=$(sed '/^[[:space:]]*$/d' "$SCRIPT_DIR/${pop}_subset.txt" | LC_ALL=C sort -u)
+  ids=$(sed '/^[[:space:]]*$/d' "$SUBSET_DIR/${pop}_subset.txt" | LC_ALL=C sort -u)
   echo "[$pop] downloading $(echo "$ids" | grep -c . || true) individuals"
   for id in $ids; do
     vcf=$id.annotated.nh2.variants.vcf.gz

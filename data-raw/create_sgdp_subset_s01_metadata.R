@@ -1,11 +1,11 @@
 # Create the lists of SGDP individuals used in the big data article
 # (vignettes/articles/big_data.Rmd.orig): the first 10 fully public
 # individuals from each of five regions. Run this script from the root of the
-# repository, BEFORE `s02_create_sgdp_subset.sh`, which downloads the
-# individuals listed in the `<region>_subset.txt` files written here, next to
-# both scripts.
+# repository, BEFORE `create_sgdp_subset_s02.sh`, which downloads the
+# individuals listed in the `<region>_subset.txt` files written here, in
+# data-raw/data_files/sgdp (next to the SGDP metadata).
 
-sgdp_dir <- "data-raw/sgdp"
+sgdp_dir <- "data-raw/data_files/sgdp"
 metadata <-
   read.table(
     file.path(sgdp_dir, "SGDP_metadata.279public.21signedLetter.44Fan.samples.csv"),

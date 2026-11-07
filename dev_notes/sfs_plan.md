@@ -36,7 +36,7 @@ projections and options, the spectra match easySFS's output.
   big data articles, which are precompiled from `.Rmd.orig` files);
 - the reference tests (`helper_sfs_reference.R`, a port of easySFS and
   dadi);
-- `data-raw/create_easysfs_test_data.R` and `test_easysfs.R`, which is
+- `data-raw/validate/create_easysfs_test_data.R` and `test_easysfs.R`, which is
   skipped until the easySFS fixtures are generated.
 - `write_sfs()`, which writes one spectrum in dadi or fastsimcoal2 format,
   with `fastest` and with easySFS's `--total-length` (`total_length`) and
@@ -118,7 +118,7 @@ library, as `CLAUDE.md` requires.
 
 **Still to do:**
 
-- generate the easySFS fixtures (run `data-raw/create_easysfs_test_data.R`);
+- generate the easySFS fixtures (run `data-raw/validate/create_easysfs_test_data.R`);
 - verify the cell order of fsc MSFS files against the fsc manual. In fsc's
   2D files the first population changes fastest along each row, which
   suggests that fsc may expect `fastest = "first"` for MSFS files too.
@@ -586,8 +586,8 @@ Its name follows the `gt_as_*` export family (pkgdown "Exporting" section).
    - for 1, 2 and 3 populations;
    - with reordered or filtered individuals and loci;
    - with two grouping variables.
-2. **easySFS fixtures.** `data-raw/create_easysfs_test_data.R`, modelled on
-   `data-raw/create_pixy_test_data.R`:
+2. **easySFS fixtures.** `data-raw/validate/create_easysfs_test_data.R`, modelled on
+   `data-raw/validate/create_pixy_test_data.R`:
    - create a conda environment (python, numpy, scipy, pandas) and clone
      easySFS at a **pinned commit**;
    - simulate a biallelic VCF: 3 populations of unequal size, several CHROMs,
@@ -645,7 +645,7 @@ Its name follows the `gt_as_*` export family (pkgdown "Exporting" section).
 | `src/sfs_project.cpp` | stage 2 projection (and fold, if in C++) |
 | `tests/testthat/helper_sfs_reference.R` | R port of the easySFS/dadi logic |
 | `tests/testthat/test_pop_sfs.R`, `test_pairwise_pop_sfs.R`, `test_nwise_pop_sfs.R`, `test_easysfs.R` | tests |
-| `data-raw/create_easysfs_test_data.R`, `tests/testthat/testdata/easysfs/` | fixtures |
+| `data-raw/validate/create_easysfs_test_data.R`, `tests/testthat/testdata/easysfs/` | fixtures |
 | `_pkgdown.yml` | `write_sfs`, `tidy.sfs` and `autoplot.sfs` in a new "Site frequency spectrum" section, or under "Population" |
 | `NEWS.md`, `NAMESPACE`, `RcppExports` | the usual |
 | `vignettes/articles/` | a short article: preview, choose projections, compute, export to fsc/dadi, with a note on thinning RAD data |
