@@ -267,7 +267,7 @@ summary.gt_admix <- function(object, ...) {
   } else {
     tab_sum <- table(object$k)
     tab_sum <- rbind(as.numeric(names(tab_sum)), tab_sum)
-    rownames(tab_sum) <- c("k", "n")
+    row.names(tab_sum) <- c("k", "n")
     colnames(tab_sum) <- rep("", ncol(tab_sum))
     cat(" for multiple runs:")
     print(tab_sum)
@@ -354,7 +354,7 @@ gt_admix_reorder_q <- function(x, group = NULL) {
   # sort group meta by group
   group_meta <- group_meta %>% arrange(.data$group)
   # reorder the q matrices
-  x$Q <- lapply(x$Q, function(y) y[group_meta$id, ])
+  x$Q <- lapply(x$Q, function(y) y[group_meta$id, , drop = FALSE])
   # if we have an id element, reorder it
   if (!is.null(x$id)) {
     x$id <- x$id[group_meta$id]

@@ -66,7 +66,7 @@ loci_ld_clump <- function(.x, .col = "genotypes", ...) {
 #' @export
 #' @rdname loci_ld_clump
 loci_ld_clump.tbl_df <- function(.x, .col = "genotypes", ...) {
-  stopifnot_gen_tibble(.x)
+  stopifnot_has_genotypes(.x)
   # check n_cores are available
   .col <- rlang::enquo(.col) %>%
     rlang::quo_get_expr() %>%
@@ -82,16 +82,17 @@ loci_ld_clump.tbl_df <- function(.x, .col = "genotypes", ...) {
 #' @export
 #' @rdname loci_ld_clump
 loci_ld_clump.vctrs_bigSNP <- function(
-    .x,
-    .col = "genotypes",
-    S = NULL, # nolint
-    thr_r2 = 0.2,
-    size = 100 / thr_r2,
-    exclude = NULL,
-    use_positions = TRUE,
-    n_cores = 1,
-    return_id = FALSE,
-    ...) {
+  .x,
+  .col = "genotypes",
+  S = NULL, # nolint
+  thr_r2 = 0.2,
+  size = 100 / thr_r2,
+  exclude = NULL,
+  use_positions = TRUE,
+  n_cores = 1,
+  return_id = FALSE,
+  ...
+) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
 
@@ -133,11 +134,12 @@ loci_ld_clump.vctrs_bigSNP <- function(
   .chromosome[show_loci(.x)$big_index] <-
     cast_chromosome_to_int(show_loci(.x)$chromosome)
   # now figure out if we have any snp which have already been removed
-  # those will go into `exclude`
-  loci_not_in_tibble <-
-    seq_len(ncol(geno_fbm))[
-      !seq_len(ncol(geno_fbm)) %in% .gt_fbm_cols(.x)
-    ] # nolint
+  # those will go into `exclude` (we flag the columns of the FBM used by the
+  # tibble, rather than hashing all of them with %in%)
+  in_tibble <- logical(ncol(geno_fbm))
+  in_tibble[.gt_fbm_cols(.x)] <- TRUE
+  loci_not_in_tibble <- which(!in_tibble)
+  rm(in_tibble)
   exclude <- c(loci_not_in_tibble, .gt_fbm_cols(.x)[exclude])
   if (length(exclude) == 0) {
     exclude <- NULL

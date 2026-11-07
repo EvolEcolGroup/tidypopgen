@@ -84,11 +84,12 @@ To explore why clumping is preferable to pruning, see <https://privefl.github.io
 
 ## Quality control for relatedness (KING)
 
-| KING        | `tidypopgen`                |
-|-------------|-----------------------------|
-| --kinship   | `pairwise_king()`           |
-| --distance  | `pairwise_ibs()`            |
-| --unrelated | `filter_high_relatedness()` |
+| KING / PLINK                 | `tidypopgen`                               |
+|------------------------------|--------------------------------------------|
+| --kinship                    | `pairwise_king()`                          |
+| --distance ibs flat-missing  | `pairwise_ibs()`                           |
+| --distance flat-missing      | `pairwise_ibs(type = "adjusted_counts")`   |
+| --unrelated                  | `filter_high_relatedness()`                |
 
 `pairwise_king()` implements the KING-robust estimator of kinship, equivalent to --kinship in KING. To remove related individuals, the user can pass the kinship matrix of `pairwise_king()` and a relatedness threshold (a numeric KING kinship coefficient) to `filter_high_relatedness()`, which will return the largest possible set of individuals with no relationships above the threshold.
 

@@ -2,23 +2,34 @@
 % Please edit documentation in R/pairwise_pop_fst.R
 \name{pairwise_pop_fst}
 \alias{pairwise_pop_fst}
+\alias{pairwise_pop_fst.gen_tbl}
 \title{Compute pairwise population Fst}
 \usage{
-pairwise_pop_fst(
+pairwise_pop_fst(.x, ...)
+
+\method{pairwise_pop_fst}{gen_tbl}(
   .x,
   type = c("tidy", "pairwise"),
   by_locus = FALSE,
   by_locus_type = c("tidy", "matrix", "list"),
   method = c("Hudson", "Nei87", "WC84"),
   return_num_dem = FALSE,
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 }
 \arguments{
 \item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
 
+\item{...}{other arguments passed to specific methods, currently
+unused.}
+
 \item{type}{type of object to return One of "tidy" or "pairwise" for a
-pairwise matrix of populations. Default is "tidy".}
+pairwise matrix of populations. Default is "tidy". If data are grouped by
+more than one variable, the "tidy" output has one column per grouping
+variable for each population of a pair (e.g. \code{population_1}, \code{sex_1},
+\code{population_2}, \code{sex_2}), and populations are otherwise labelled by the
+values of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
 
 \item{by_locus}{boolean, determining whether Fst should be returned by
 locus(TRUE), or as a single genome wide value obtained by taking the ratio
@@ -35,7 +46,7 @@ compute the mean numerator and denominator within each window). Default is
 FALSE.}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 if \code{type=tidy}, a tibble of genome-wide pairwise Fst values with
@@ -61,6 +72,28 @@ the same formulation as in \code{hierfstat::pairwise.WCfst()}).
 \details{
 For all formulae, the genome wide estimate is obtained by taking the ratio of
 the mean numerators and denominators over all relevant SNPs.
+
+Loci with no genotypes in one of the two populations of a pair
+(e.g. loci that failed in all the individuals of a population) carry no
+information on the differentiation between them, so they are dropped for
+that pair with all methods: their Fst by locus is \code{NaN}, and they do not
+contribute to the mean numerator and denominator of the genome wide
+estimate.
+
+\strong{Difference from \code{hierfstat} for 'WC84'}: \code{\link[hierfstat:pairwise.WCfst]{hierfstat::pairwise.WCfst()}}
+(and \code{\link[hierfstat:wc]{hierfstat::wc()}}) keep these loci. Their among-population variance
+component (\eqn{\sigma^2_a}, the numerator) is set to 0, while their
+within-population components (\eqn{\sigma^2_b} and \eqn{\sigma^2_w},
+estimated from the one population with data) still add to the
+denominator. So \code{hierfstat} gives these loci an Fst of 0 rather than
+\code{NaN}, and its genome wide estimate is pulled towards 0 (i.e. it is
+usually lower than the one computed here).
+The two estimates are identical when every locus has data in both
+populations, or if such loci are removed before using \code{hierfstat}. This
+applies to every function that computes Fst with 'WC84' (e.g.
+\code{\link[=windows_pairwise_pop_fst]{windows_pairwise_pop_fst()}}, \code{\link[=jackknife_pairwise_pop_fst]{jackknife_pairwise_pop_fst()}} and
+\code{\link[=nwise_pop_pbs]{nwise_pop_pbs()}}). 'Nei87' gives the same results as
+\code{\link[hierfstat:pairwise.neifst]{hierfstat::pairwise.neifst()}}, which also drops these loci.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

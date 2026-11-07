@@ -42,6 +42,19 @@ test_that("pop_fst and pop_fist WG17 compute correctly", {
     ".x should be a grouped gen_tibble"
   )
 
+  # expect error if there is only one group
+  one_grp <- test_gt %>%
+    dplyr::filter(population == "pop1") %>%
+    dplyr::group_by(population)
+  expect_error(
+    one_grp %>% pop_fis(method = "WG17"),
+    "at least two groups"
+  )
+  expect_error(
+    one_grp %>% pop_fst(),
+    "at least two groups"
+  )
+
   # group the tibble
   test_gt <- test_gt %>% dplyr::group_by(population)
 

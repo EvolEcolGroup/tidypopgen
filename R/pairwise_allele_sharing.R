@@ -7,11 +7,17 @@
 #' allele, and 1/2 if at least one individual is heterozygous. Matching is the
 #' average of these 0, 1/2 and 1s)
 #'
+#' Imputed genotypes are used if `x` is set to use them (see
+#' [gt_set_imputed()]), and treated as missing otherwise.
+#'
 #' @param x a `gen_tibble` object.
 #' @param as_matrix boolean, determining whether the results should be a square
 #'   symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)
-#' @param block_size maximum number of loci read at once. More loci should
-#'   improve speed, but will tax memory.
+#' @param block_size maximum number of loci read at once. Genotypes are
+#'   compared in a compact bit-packed form, so this has little effect on
+#'   memory use.
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
 #' @seealso [hierfstat::matching()]
@@ -24,9 +30,12 @@
 #' # Alternatively, return as a tibble
 #' example_gt %>% pairwise_allele_sharing(as_matrix = TRUE)
 pairwise_allele_sharing <- function(
-    x,
-    as_matrix = FALSE,
-    block_size = bigstatsr::block_size(nrow(x))) {
+  x,
+  as_matrix = FALSE,
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = bigstatsr::nb_cores()
+) {
+  stopifnot_diploid(x)
   # nolint
   X <- attr(x$genotypes, "fbm") # convenient pointer #nolint
   x_ind_col <- .gt_fbm_cols(x)
@@ -35,10 +44,13 @@ pairwise_allele_sharing <- function(
     X,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
-    block.size = block_size
+    block.size = block_size,
+    n_cores = n_cores
   )
   dimnames(ashare_matrix) <- list(x$id, x$id)
   if (as_matrix) {
+    # add a class to indicate this is a pairwise matrix
+    class(ashare_matrix) <- c("pairwise_matrix", class(ashare_matrix))
     return(ashare_matrix)
   } else {
     return(tidy_dist_matrix(ashare_matrix))

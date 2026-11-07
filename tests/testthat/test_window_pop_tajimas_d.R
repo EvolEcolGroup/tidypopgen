@@ -142,3 +142,193 @@ test_that("windows type", {
   expect_equal(pop1_pop2_tidy$stat, window_taj_list$pop3$stat)
   expect_equal(windows_taj_matrix$pop3, window_taj_list$pop3$stat)
 })
+
+test_that("windows_pop_tajimas_d counts pseudohaploid allele copies", {
+  pseudohaploid_genotypes <- rbind(
+    c(0, 2, NA),
+    c(1, 2, 0),
+    c(0, NA, 2),
+    c(1, 0, 0)
+  )
+  pseudohaploid_meta <- data.frame(
+    id = letters[1:4],
+    population = c("popA", "popA", "popB", "popB")
+  )
+  pseudohaploid_loci <- data.frame(
+    name = paste0("rs", 1:3),
+    chromosome = 1,
+    position = 1:3,
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  pseudohaploid_gt <- gen_tibble(
+    x = pseudohaploid_genotypes,
+    loci = pseudohaploid_loci,
+    indiv_meta = pseudohaploid_meta,
+    quiet = TRUE
+  ) %>%
+    gt_pseudohaploid(test_n_loci = NULL) %>%
+    dplyr::group_by(population)
+
+  window_tajimas_d <- windows_pop_tajimas_d(
+    pseudohaploid_gt,
+    type = "list",
+    window_size = 3,
+    step_size = 3
+  )
+  pi_by_group <- loci_pi(pseudohaploid_gt, type = "list")
+  # number of valid allele copies at each locus for each group (pseudohaploids
+  # contribute one copy, diploids two)
+  ploidy <- indiv_ploidy(pseudohaploid_gt)
+  n_by_group <- lapply(
+    split(seq_along(ploidy), pseudohaploid_meta$population),
+    function(rows) {
+      valid <- !is.na(pseudohaploid_genotypes[rows, , drop = FALSE])
+      colSums(valid * ploidy[rows])
+    }
+  )
+
+  expected <- Map(tajimas_d_from_pi_vec, pi_by_group, n_by_group)
+  expect_equal(
+    unname(vapply(window_tajimas_d, function(x) x$stat[1], numeric(1))),
+    unname(unlist(expected))
+  )
+})
+
+test_that("windows_pop_tajimas_d matches window sums of the locus terms", {
+  # windows_pop_tajimas_d() sums the terms of each locus in all windows at
+  # once; check it against summing each term with windows_stats_generic()
+  test_ungrouped <- dplyr::ungroup(test_gt)
+  # pi, and the number of valid allele copies, at each locus
+  locus_terms <- tajimas_d_locus_terms(
+    loci_pi(test_ungrouped),
+    colSums(!is.na(test_genotypes)) * 2
+  )
+  for (unit in c("snp", "bp")) {
+    ws <- if (unit == "snp") 3 else 100
+    st <- if (unit == "snp") 2 else 70
+    for (complete in c(FALSE, TRUE)) {
+      window_sums <- lapply(colnames(locus_terms), function(i_term) {
+        windows_stats_generic(locus_terms[, i_term],
+          loci_table = show_loci(test_ungrouped), operator = "sum",
+          window_size = ws, step_size = st, size_unit = unit,
+          min_loci = 2, complete = complete
+        )
+      })
+      names(window_sums) <- colnames(locus_terms)
+      expected <- window_sums$k_hat
+      expected$stat <- tajimas_d_from_sums(
+        k_hat = window_sums$k_hat$stat,
+        seg = window_sums$seg$stat,
+        theta_w = window_sums$theta_w$stat,
+        n_sum = window_sums$n$stat,
+        n_loci = window_sums$n_loci$stat
+      )
+      expect_equal(
+        windows_pop_tajimas_d(test_ungrouped,
+          window_size = ws, step_size = st, size_unit = unit,
+          min_loci = 2, complete = complete
+        ),
+        expected
+      )
+    }
+  }
+})
+
+test_that("windows_pop_tajimas_d ignores loci with missing pi", {
+  # make the 2nd locus missing for all individuals in pop1
+  test_genotypes_miss <- test_genotypes
+  test_genotypes_miss[test_indiv_meta$population == "pop1", 2] <- NA
+  test_gt_miss <- gen_tibble(
+    x = test_genotypes_miss,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  ) %>%
+    dplyr::group_by(population)
+  # a single window covering each chromosome
+  window_taj <- windows_pop_tajimas_d(
+    test_gt_miss,
+    type = "list",
+    window_size = 1000,
+    step_size = 1000,
+    size_unit = "bp"
+  )
+  expect_false(is.na(window_taj$pop1$stat[1]))
+  # the window is the same as tajima's d for chr1 without the missing locus
+  test_gt_chr1 <- test_gt_miss %>%
+    select_loci_if(loci_chromosomes(genotypes) == "chr1") %>%
+    select_loci(-2) %>%
+    dplyr::filter(population == "pop1") %>%
+    dplyr::ungroup()
+  expect_equal(window_taj$pop1$stat[1], pop_tajimas_d(test_gt_chr1))
+  # the number of loci only counts loci with data
+  expect_equal(window_taj$pop1$n_loci[1], 2)
+})
+
+test_that("windows_pop_tajimas_d works with several grouping variables", {
+  test_gt <- load_example_gt("gen_tbl_gen_dist")
+  test_gt$sex <- rep(c("F", "M"), length.out = nrow(test_gt))
+  test_gt$pop_sex <- paste(test_gt$population, test_gt$sex, sep = ".")
+  # the same results as grouping by a single variable combining them
+  expect_equal(
+    windows_pop_tajimas_d(dplyr::group_by(test_gt, population, sex),
+      window_size = 4, step_size = 4,
+      size_unit = "snp"
+    ),
+    windows_pop_tajimas_d(dplyr::group_by(test_gt, pop_sex),
+      window_size = 4, step_size = 4,
+      size_unit = "snp"
+    )
+  )
+})
+
+test_that("windows_pop_tajimas_d matrix has one row per window", {
+  windows_args <- list(window_size = 3, step_size = 2, size_unit = "snp")
+  taj_list <- do.call(
+    windows_pop_tajimas_d,
+    c(list(test_gt, type = "list"), windows_args)
+  )
+  taj_mat <- do.call(windows_pop_tajimas_d, c(list(test_gt), windows_args))
+  n_windows <- nrow(taj_list$pop1)
+  expect_equal(nrow(taj_mat), n_windows)
+  # n_loci is the number of loci in each window
+  expect_equal(taj_mat$n_loci, c(3, 3, 3))
+  # the same with a group that has no data in a window (pop1 at locus 1,
+  # so that its first window has 2 loci with data), and with an empty group
+  test_genotypes_miss <- test_genotypes
+  test_genotypes_miss[test_indiv_meta$population == "pop1", 1] <- NA
+  test_gt_miss <- gen_tibble(
+    x = test_genotypes_miss,
+    loci = test_loci,
+    indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  test_gt_miss$population <- factor(
+    test_gt_miss$population,
+    levels = c("pop1", "pop2", "pop3", "pop_empty")
+  )
+  test_gt_miss <- test_gt_miss %>% dplyr::group_by(population, .drop = FALSE)
+  miss_list <- do.call(
+    windows_pop_tajimas_d,
+    c(list(test_gt_miss, type = "list"), windows_args)
+  )
+  expect_equal(miss_list$pop1$n_loci[1], 2)
+  expect_equal(miss_list$pop2$n_loci[1], 3)
+  miss_mat <- do.call(
+    windows_pop_tajimas_d,
+    c(list(test_gt_miss), windows_args)
+  )
+  expect_equal(nrow(miss_mat), n_windows)
+  expect_named(
+    miss_mat,
+    c("chromosome", "start", "end", "n_loci", "pop1", "pop2", "pop3",
+      "pop_empty")
+  )
+  expect_equal(miss_mat$n_loci, taj_mat$n_loci)
+  expect_true(all(is.na(miss_mat$pop_empty)))
+  for (pop in c("pop1", "pop2", "pop3")) {
+    expect_equal(miss_mat[[pop]], miss_list[[pop]]$stat)
+  }
+})

@@ -60,7 +60,7 @@ Default is \code{10}.}
 \code{5}.}
 
 \item{n_cores}{Number of cores used. Default doesn't use parallelism. You may
-use \code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}.}
+use \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}.}
 
 \item{verbose}{Output some information on the iterations? Default is \code{TRUE}.}
 
@@ -144,9 +144,9 @@ gt_pca_autoSVD(lobsters,
 \seealso{
 \code{\link[bigsnpr:snp_autoSVD]{bigsnpr::snp_autoSVD()}}  which this function wraps.
 
-Other gt_pca_functions: 
+Other gt_pca_functions:
 \code{\link{gt_pca}},
-\code{\link{gt_pca_partialSVD}()},
-\code{\link{gt_pca_randomSVD}()}
+\code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}},
+\code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}}
 }
 \concept{gt_pca_functions}

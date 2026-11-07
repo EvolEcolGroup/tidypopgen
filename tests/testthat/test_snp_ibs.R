@@ -55,6 +55,19 @@ test_that("snp_ibs and pairwise_ibs computes ibs correctly", {
   expect_true(all.equal(test_ibs_gt_prop$value[2], by_hand$a[3])) # a and c
   expect_true(all.equal(test_ibs_gt_prop$value[3], by_hand$b[3])) # b and c
 
+  # adjusted counts are the number of alleles that differ (no genotypes are
+  # missing, so they are not rescaled)
+  test_dist <- snp_ibs(test_fbm, type = "adjusted_counts")
+  differ_by_hand <- outer(1:3, 1:3, Vectorize(function(i, j) {
+    sum(abs(test_genotypes[i, ] - test_genotypes[j, ]))
+  }))
+  expect_equal(test_dist, differ_by_hand, ignore_attr = TRUE)
+  # a and b differ by one allele at loci 1, 4 and 5
+  expect_identical(test_dist[1, 2], 3)
+  expect_identical(diag(test_dist), c(0, 0, 0))
+  test_dist_gt <- pairwise_ibs(test_gt, type = "adjusted_counts")
+  expect_identical(test_dist_gt$value, test_dist[upper.tri(test_dist)])
+
   # now subset to the first and second individual, and a subset of loci
   test_gt_sub <- test_gt[c(1, 3), ]
   loci_subset <- c(2, 3, 5, 6)
@@ -102,4 +115,107 @@ test_that("snp_ibs as.counts = FALSE gives the same results as plink", {
 
   # Check matrices are equal
   expect_true(all.equal(tidy_ibs, plink_matrix))
+})
+
+test_that("snp_ibs adjusted_counts gives the same results as plink", {
+  # Read in results from (PLINK v1.9.0 64-bit, 27 Sep 2026):
+  # plink --bfile families --distance square flat-missing
+  # (the allele count distance, with genotypes missing in 352 of 961 loci)
+  plink_dist <- read.table(
+    system.file("extdata/related/test_plinkDist.dist", package = "tidypopgen"),
+    header = FALSE
+  )
+  plink_dist <- unname(as.matrix(plink_dist))
+
+  bed_path <- system.file(
+    "extdata/related/families.bed",
+    package = "tidypopgen"
+  )
+  families <- gen_tibble(
+    bed_path,
+    quiet = TRUE,
+    valid_alleles = c("1", "2"),
+    backingfile = tempfile()
+  )
+  families_fbm <- tidypopgen:::.gt_get_fbm(families)
+  tidy_dist <- snp_ibs(families_fbm, type = "adjusted_counts")
+  # PLINK writes 6 significant digits
+  expect_equal(unname(tidy_dist), plink_dist, tolerance = 1e-5)
+  expect_identical(diag(tidy_dist), rep(0, nrow(families)))
+  # it is a dissimilarity in alleles: 2 * n_loci * (1 - proportion)
+  expect_equal(
+    tidy_dist,
+    2 * count_loci(families) * (1 - snp_ibs(families_fbm))
+  )
+  # and pairwise_ibs gives the same values
+  families_dist <- pairwise_ibs(families,
+    type = "adjusted_counts",
+    as_matrix = TRUE
+  )
+  expect_equal(unclass(families_dist), tidy_dist, ignore_attr = TRUE)
+})
+
+test_that("snp_ibs is correct across bit-packing boundaries", {
+  # more than 64 individuals and loci, with missing data, so that genotypes
+  # are packed into several words and blocks of individuals
+  set.seed(123)
+  geno_vals <- sample(c(0:2, NA), 70 * 150,
+    replace = TRUE,
+    prob = c(0.4, 0.3, 0.25, 0.05)
+  )
+  geno_mat <- matrix(geno_vals, nrow = 70)
+  big_gt <- gen_tibble(
+    x = geno_mat,
+    loci = data.frame(
+      name = paste0("rs", 1:150), chromosome = 1L, position = 1:150,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    indiv_meta = data.frame(id = paste0("i", 1:70), population = "p1"),
+    quiet = TRUE
+  )
+  test_fbm <- tidypopgen:::.gt_get_fbm(big_gt)
+  # reordered subsets of individuals and loci, and multiple cores
+  rows <- c(70:3, 1)
+  cols <- c(150:80, 2:60)
+  test_ibs <- snp_ibs(test_fbm,
+    ind.row = rows, ind.col = cols,
+    type = "raw_counts", block.size = 70, n_cores = 2
+  )
+  # reference: the sum of (2 - |g_i - g_j|) over the loci valid in both
+  # individuals, and 2 * the number of those loci
+  g <- geno_mat[rows, cols]
+  valid <- !is.na(g) + 0
+  g[is.na(g)] <- 0
+  abs_diff <- sapply(seq_len(nrow(g)), function(j) {
+    rowSums(abs(sweep(g, 2, g[j, ])) * sweep(valid, 2, valid[j, ], "*"))
+  })
+  expect_identical(test_ibs$ibs[], 2 * tcrossprod(valid) - abs_diff)
+  expect_identical(test_ibs$valid_n[], 2 * tcrossprod(valid))
+})
+
+test_that("pairwise_ibs uses imputed genotypes only if set to", {
+  geno_na <- test_genotypes
+  geno_na[2, 4] <- NA
+  geno_na[3, 2] <- NA
+  gt_na <- gen_tibble(
+    x = geno_na, loci = test_loci, indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  ibs_na <- pairwise_ibs(gt_na, type = "raw_counts")
+  gt_imputed <- gt_impute_simple(gt_na, method = "mode")
+  # imputed genotypes are missing unless the gen_tibble is set to use them
+  gt_set_imputed(gt_imputed, set = FALSE)
+  ibs_not_used <- pairwise_ibs(gt_imputed, type = "raw_counts")
+  expect_identical(ibs_not_used$ibs[], ibs_na$ibs[])
+  expect_identical(ibs_not_used$valid_n[], ibs_na$valid_n[])
+  # when used, they are the same as genotypes that were never missing
+  gt_set_imputed(gt_imputed, set = TRUE)
+  gt_filled <- gen_tibble(
+    x = show_genotypes(gt_imputed), loci = test_loci,
+    indiv_meta = test_indiv_meta, quiet = TRUE
+  )
+  ibs_used <- pairwise_ibs(gt_imputed, type = "raw_counts")
+  ibs_filled <- pairwise_ibs(gt_filled, type = "raw_counts")
+  expect_identical(ibs_used$ibs[], ibs_filled$ibs[])
+  expect_identical(ibs_used$valid_n[], ibs_filled$valid_n[])
 })

@@ -109,3 +109,187 @@ test_that("sf and grouped methods work", {
   gen_tbl_sf$region <- "East"
   expect_equal(class(gen_tbl_sf), class_before_sf_un)
 })
+
+test_that("$<- on grouping variables preserves grouped gen_tibble classes", {
+  grouped_gen_tbl <- load_example_gt("grouped_gen_tbl")
+  grouped_gen_tbl_sf <- load_example_gt("grouped_gen_tbl_sf")
+
+  # modify the grouping variable
+  class_before <- class(grouped_gen_tbl)
+  new_pops <- rev(grouped_gen_tbl$population)
+  grouped_gen_tbl$population <- new_pops
+  expect_equal(class(grouped_gen_tbl), class_before)
+  # groups are recomputed
+  expect_equal(group_vars(grouped_gen_tbl), "population")
+  expect_equal(
+    group_indices(grouped_gen_tbl),
+    as.integer(factor(new_pops))
+  )
+  # and we can still filter
+  filtered_group <- grouped_gen_tbl %>% filter(population == "pop1")
+  expect_equal(class(filtered_group), class_before)
+
+  # same with sf
+  class_before_sf <- class(grouped_gen_tbl_sf)
+  grouped_gen_tbl_sf$population <- rev(grouped_gen_tbl_sf$population)
+  expect_equal(class(grouped_gen_tbl_sf), class_before_sf)
+
+  # removing the grouping variable returns an ungrouped gen_tibble
+  grouped_gen_tbl$population <- NULL
+  expect_true(inherits(grouped_gen_tbl, "gen_tbl"))
+  expect_false(inherits(grouped_gen_tbl, "grouped_df"))
+  expect_false(inherits(grouped_gen_tbl, "grouped_gen_tbl"))
+
+  # removing the genotypes drops the gen_tbl classes
+  grouped_gen_tbl <- load_example_gt("grouped_gen_tbl")
+  grouped_gen_tbl$genotypes <- NULL
+  expect_false(inherits(grouped_gen_tbl, "gen_tbl"))
+  expect_false(inherits(grouped_gen_tbl, "grouped_gen_tbl"))
+  expect_true(inherits(grouped_gen_tbl, "grouped_df"))
+})
+
+test_that("mutate dropping genotypes returns a plain ungrouped tibble", {
+  expect_message(
+    test_tbl <- test_gt %>% mutate(genotypes = NULL),
+    "this is no longer a 'gen_tbl'"
+  )
+  expect_identical(class(test_tbl), c("tbl_df", "tbl", "data.frame"))
+  expect_equal(summarise(test_tbl, n = n())$n, 3)
+  expect_message(
+    test_tbl <- test_gt %>% mutate(z = 1, .keep = "none"),
+    "this is no longer a 'gen_tbl'"
+  )
+  expect_identical(class(test_tbl), c("tbl_df", "tbl", "data.frame"))
+})
+
+test_that("group_by without variables returns an ungrouped gen_tibble", {
+  test_ungrouped <- test_gt %>% group_by()
+  expect_identical(class(test_ungrouped), class(test_gt))
+  expect_equal(count_loci(test_ungrouped), 6)
+  expect_identical(
+    class(test_ungrouped %>% filter(id != "a")),
+    class(test_gt)
+  )
+  # regrouping a grouped gen_tibble with no variables ungroups it
+  test_ungrouped <- test_gt %>%
+    group_by(population) %>%
+    group_by()
+  expect_identical(class(test_ungrouped), class(test_gt))
+  gen_tbl_sf <- load_example_gt("gen_tbl_sf")
+  expect_identical(class(gen_tbl_sf %>% group_by()), class(gen_tbl_sf))
+})
+
+test_that("ungroup keeps the sf and gen_tbl classes", {
+  gen_tbl_sf <- load_example_gt("gen_tbl_sf")
+  grouped_gen_tbl_sf <- load_example_gt("grouped_gen_tbl_sf")
+  ungrouped_sf <- grouped_gen_tbl_sf %>% ungroup()
+  expect_identical(class(ungrouped_sf), class(gen_tbl_sf))
+  expect_identical(attr(ungrouped_sf, "sf_column"), "geometry")
+  expect_true(inherits(sf::st_geometry(ungrouped_sf), "sfc"))
+  expect_identical(
+    class(grouped_gen_tbl_sf %>% ungroup(population)),
+    class(gen_tbl_sf)
+  )
+  expect_identical(
+    class(load_example_gt("grouped_gen_tbl") %>% ungroup()),
+    class(test_gt)
+  )
+  # removing only some of the grouping variables keeps the others
+  test_partial <- test_gt %>%
+    mutate(k = c(1, 1, 2)) %>%
+    group_by(population, k) %>%
+    ungroup(k)
+  expect_identical(
+    class(test_partial),
+    c("grouped_gen_tbl", "grouped_df", class(test_gt))
+  )
+  expect_equal(group_vars(test_partial), "population")
+})
+
+test_that("[ dropping the grouping variables returns an ungrouped tibble", {
+  test_grouped <- test_gt %>% group_by(population)
+  test_sub <- test_grouped[, c("id", "genotypes")]
+  expect_identical(class(test_sub), class(test_gt))
+  expect_equal(group_vars(test_sub), character(0))
+  test_sub <- test_grouped[, "id"]
+  expect_identical(class(test_sub), c("tbl_df", "tbl", "data.frame"))
+  # keeping the grouping variable keeps the groups
+  test_sub <- test_grouped[, c("population", "genotypes")]
+  expect_identical(class(test_sub), class(test_grouped))
+  expect_equal(group_vars(test_sub), "population")
+  test_sub <- test_grouped[2:3, ]
+  expect_identical(class(test_sub), class(test_grouped))
+  expect_equal(group_vars(test_sub), "population")
+})
+
+test_that("select, rename and relocate keep grouped gen_tibble classes", {
+  test_grouped <- test_gt %>% group_by(population)
+  test_sel <- test_grouped %>% select(id, population, genotypes)
+  expect_identical(class(test_sel), class(test_grouped))
+  expect_equal(group_vars(test_sel), "population")
+  expect_message(
+    test_sel <- test_grouped %>% select(id, genotypes),
+    "Adding missing grouping variables"
+  )
+  expect_identical(class(test_sel), class(test_grouped))
+  expect_true(file.exists(gt_as_plink(test_sel, file = tempfile())))
+  test_ren <- test_grouped %>% rename(ID = id)
+  expect_identical(class(test_ren), class(test_grouped))
+  expect_equal(names(test_ren), c("ID", "population", "genotypes"))
+  test_ren <- test_grouped %>% rename(pop = population)
+  expect_identical(class(test_ren), class(test_grouped))
+  expect_equal(group_vars(test_ren), "pop")
+  test_rel <- test_grouped %>% relocate(genotypes)
+  expect_identical(class(test_rel), class(test_grouped))
+  # renaming the genotypes means this is no longer a gen_tibble
+  test_ren <- test_grouped %>% rename(geno = genotypes)
+  expect_false(inherits(test_ren, "gen_tbl"))
+  expect_true(inherits(test_ren, "grouped_df"))
+  # with sf (sf's own select() method puts the "sf" class first)
+  grouped_gen_tbl_sf <- load_example_gt("grouped_gen_tbl_sf")
+  test_sel_sf <- grouped_gen_tbl_sf %>% select(id, population, genotypes)
+  expect_true(inherits(test_sel_sf, "grouped_gen_tbl"))
+  expect_true(inherits(test_sel_sf, "sf"))
+  expect_equal(group_vars(test_sel_sf), "population")
+  expect_identical(attr(test_sel_sf, "sf_column"), "geometry")
+  test_ren_sf <- grouped_gen_tbl_sf %>% rename(ID = id)
+  expect_true(inherits(test_ren_sf, "grouped_gen_tbl"))
+  expect_true(inherits(test_ren_sf, "sf"))
+  expect_identical(attr(test_ren_sf, "sf_column"), "geometry")
+})
+
+test_that("joins, bind_rows and bind_cols keep grouped gen_tibble classes", {
+  test_grouped <- test_gt %>% group_by(population)
+  meta <- tibble(id = c("a", "b", "c"), sex = c("F", "M", "F"))
+  test_join <- test_grouped %>% left_join(meta, by = "id")
+  expect_identical(class(test_join), class(test_grouped))
+  expect_equal(group_vars(test_join), "population")
+  expect_identical(show_loci(test_join), show_loci(test_gt))
+  test_join <- test_grouped %>% inner_join(meta[1:2, ], by = "id")
+  expect_identical(class(test_join), class(test_grouped))
+  expect_equal(test_join$id, c("a", "b"))
+  test_bind <- bind_rows(test_grouped, test_grouped)
+  expect_identical(class(test_bind), class(test_grouped))
+  expect_equal(nrow(test_bind), 6)
+  test_bind <- bind_cols(test_grouped, sex = c("F", "M", "F"))
+  expect_identical(class(test_bind), class(test_grouped))
+  # grouped statistics work on the result
+  expect_identical(
+    loci_alt_freq(test_join),
+    loci_alt_freq(test_grouped %>% filter(id %in% c("a", "b")))
+  )
+})
+
+test_that("$<- can remove the geometry from a gen_tibble with sf", {
+  gen_tbl_sf <- load_example_gt("gen_tbl_sf")
+  gen_tbl_sf$geometry <- NULL
+  expect_false(inherits(gen_tbl_sf, "sf"))
+  expect_false("geometry" %in% names(gen_tbl_sf))
+  expect_true(inherits(gen_tbl_sf, "gen_tbl"))
+
+  grouped_gen_tbl_sf <- load_example_gt("grouped_gen_tbl_sf")
+  grouped_gen_tbl_sf$geometry <- NULL
+  expect_false(inherits(grouped_gen_tbl_sf, "sf"))
+  expect_false("geometry" %in% names(grouped_gen_tbl_sf))
+  expect_true(inherits(grouped_gen_tbl_sf, "grouped_gen_tbl"))
+})

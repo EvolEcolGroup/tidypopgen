@@ -1,27 +1,33 @@
 # A function to read ped files
 gen_tibble_ped <- function(
-    x,
-    ...,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    backingfile = NULL,
-    quiet = FALSE) {
+  x,
+  ...,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  backingfile = NULL,
+  quiet = FALSE
+) {
   # Substitute .ped with .map
-  map_file <- sub("\\.ped$", ".map", x)
+  map_file <- sub_ext_ignore_case(x, "ped", ".map")
   if (!file.exists(map_file)) {
     stop("map file ", map_file, " does not exist")
   }
+  # 0 is always a missing value (as in check_allele_alphabet()), so that a
+  # missing genotype "0 0" (the PLINK default, also written by gt_as_plink())
+  # is never read as an allele "0" when custom missing_alleles are given
   res <- read_pedfile(
     file = x,
     snps = map_file,
-    na_strings = missing_alleles,
+    na_strings = union(missing_alleles, "0"),
     quiet = quiet
   )
-  # using the gen_tibble.matrix method
+  # using the gen_tibble.matrix method, with the individual information
+  # stored as when reading a bed file (from the first six columns of the ped
+  # file, which are the same as in a fam file)
   new_gen_tbl <- gen_tibble(
     x = res$genotypes,
-    indiv_meta = res$fam,
+    indiv_meta = indiv_meta_from_fam(res$fam),
     loci = res$map,
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles,
@@ -36,19 +42,21 @@ gen_tibble_ped <- function(
 # modified from snpStats::read.pedfile
 
 read_pedfile <- function(
-    file,
-    n,
-    snps,
-    which,
-    split = "\t| +",
-    sep = ".",
-    na_strings = "0",
-    quiet = FALSE) {
-  # constants
+  file,
+  n,
+  snps,
+  which,
+  split = "\t| +",
+  sep = ".",
+  na_strings = "0",
+  quiet = FALSE
+) {
+  # constants (integers, so that the matrix of genotypes is an integer
+  # matrix, rather than a double one)
   r0 <- NA_integer_
-  r1 <- 0
-  r2 <- 1
-  r3 <- 2
+  r1 <- 0L
+  r2 <- 1L
+  r3 <- 2L
 
   ## Input file
   con <- gzfile(file)
@@ -59,6 +67,8 @@ read_pedfile <- function(
     repeat {
       line <- readLines(con, n = 1)
       if (length(line) == 0) break
+      # do not count blank lines (e.g. a trailing empty line)
+      if (grepl("^\\s*$", line)) next
       n <- n + 1
     }
     if (n == 0) {
@@ -101,30 +111,37 @@ read_pedfile <- function(
     seek(con, 0)
   }
   nf <- 6 + 2 * m
-  ## Generate empty matrix
-  result <- matrix(rep(NA, n * m), nrow = n)
+  ## Generate empty matrix (of integers, so that it is not converted, and
+  ## copied, when the first row is filled in)
+  result <- matrix(NA_integer_, nrow = n, ncol = m)
   ## Columns of subject dataframe
   ped <- character(n)
   mem <- character(n)
   pa <- character(n)
   ma <- character(n)
-  sex <- numeric(n)
-  aff <- numeric(n)
+  sex <- character(n)
+  aff <- character(n)
   a1 <- a2 <- rep(NA, m)
   a1m <- a2m <- rep(TRUE, m)
   mallelic <- rep(FALSE, m) ## Multiallelic?
   for (i in 1:n) {
     line <- readLines(con, n = 1)
+    # skip blank lines
+    while (grepl("^\\s*$", line)) {
+      line <- readLines(con, n = 1)
+    }
     fields <- strsplit(line, "\t| +")[[1]]
-    to_na <- fields %in% na_strings
-    fields[to_na] <- NA
+    # the first six fields (as in a fam file) are kept as they are
     ped[i] <- fields[1]
     mem[i] <- fields[2]
     pa[i] <- fields[3]
     ma[i] <- fields[4]
-    sex[i] <- as.numeric(fields[5])
-    aff[i] <- as.numeric(fields[6])
-    alleles <- matrix(fields[7:nf], byrow = TRUE, ncol = 2)
+    sex[i] <- fields[5]
+    aff[i] <- fields[6]
+    # missing alleles are NA
+    alleles <- fields[7:nf]
+    alleles[alleles %in% na_strings] <- NA
+    alleles <- matrix(alleles, byrow = TRUE, ncol = 2)
     one <- two <- rep(FALSE, m)
     for (k in 1:2) {
       ak <- alleles[, k]
@@ -185,15 +202,15 @@ read_pedfile <- function(
   }
   dimnames(result) <- list(rnames, snps)
 
-  ## Subject support file
+  ## Subject support file, with the columns of a fam file (IDs as characters,
+  ## and the type of sex and phenotype guessed, as for a fam file)
   fam <- data.frame(
-    row.names = rnames,
-    population = ped,
-    id = mem,
-    father = pa,
-    mother = ma,
-    sex = sex,
-    phenotype = aff
+    family_id = ped,
+    sample_id = mem,
+    paternal_id = pa,
+    maternal_id = ma,
+    sex = utils::type.convert(sex, as.is = TRUE),
+    affection = utils::type.convert(aff, as.is = TRUE)
   )
   ## map data frame
   if (is.null(map)) {

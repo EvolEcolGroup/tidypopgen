@@ -1,14 +1,19 @@
 #' Combine two gen_tibbles
 #'
-#' This function combined two [gen_tibble]s. By defaults, it subsets the loci
-#' and swaps ref and alt alleles to make the two datasets compatible (this
-#' behaviour can be switched off with `as_is`). The first object is used as a
+#' This function combined two [gen_tibble]s. It subsets the loci and swaps ref
+#' and alt alleles to make the two datasets compatible. The first object is
+#' used as a
 #' "reference" , and SNPs in the other dataset will be flipped and/or alleles
 #' swapped as needed. SNPs that have different alleles in the two datasets (i.e.
 #' triallelic) will also be dropped. There are also options (NOT default) to
 #' attempt strand flipping to match alleles (often needed in human datasets from
 #' different SNP chips), and remove ambiguous alleles (C/G and A/T) where the
 #' correct strand can not be guessed.
+#'
+#' Loci are matched by name, unless `use_position = TRUE`. If the loci names of
+#' either `gen_tibble` are integers (as created by `gen_tibble(names_as_int =
+#' TRUE)`), loci are always matched by chromosome and position (see
+#' `use_position`).
 #'
 #' rbind differs from merging data with plink, which swaps the order of allele1
 #' and allele2 according to minor allele frequency when merging datasets. rbind
@@ -18,18 +23,27 @@
 #' @param ... two [`gen_tibble`] objects. Note that this function can not take
 #'   more objects, `rbind` has to be done sequentially for large sets of
 #'   objects.
-#' @param as_is boolean determining whether the loci should be left as they are
-#'   before merging. If FALSE (the defaults), `rbind` will attempt to subset and
-#'   swap alleles as needed.
+#' @param as_is deprecated, and ignored: `rbind` always subsets the loci and
+#'   swaps alleles as needed (setting `as_is = TRUE` never stopped it, and now
+#'   gives a warning).
 #' @param use_position boolean of whether a combination of chromosome and
 #'   position should be used for matching SNPs. By default, `rbind` uses the
-#'   locus name, so this is set to FALSE. When using 'use_position=TRUE', make
+#'   locus name, so this is set to FALSE. If the loci names of either
+#'   `gen_tibble` are integers (as created by `gen_tibble(names_as_int =
+#'   TRUE)`, which numbers the loci in the order in which they are found in the
+#'   *VCF*), the names do not identify the same locus in the two datasets, so
+#'   loci are always matched by position: `use_position` is then set to TRUE
+#'   automatically (even if it was set to FALSE), with a message unless `quiet
+#'   = TRUE`. In either case, the merged loci keep
+#'   the names of the reference dataset. When using 'use_position=TRUE', make
 #'   sure chromosomes are coded in the same way in both `gen_tibbles` (a mix of
 #'   e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
 #'   large number variants are dropped when merging).
 #' @param flip_strand boolean on whether strand flipping should be checked to
 #'   match the two datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T
-#'   and C/G) will also be removed. It defaults to FALSE
+#'   and C/G) will also be removed, and loci whose `allele_ref` is missing in
+#'   both datasets will have their alleles swapped, so that the observed allele
+#'   becomes `allele_ref`. It defaults to FALSE
 #' @param quiet boolean whether to omit reporting to screen
 #' @param backingfile the path and prefix of the files used to store the merged
 #'   data (it will be a .RDS to store the `bigSNP` object and a .bk file as its
@@ -71,12 +85,13 @@
 #'
 #' merged_gt
 rbind.gen_tbl <- function(
-    ...,
-    as_is = FALSE,
-    flip_strand = FALSE,
-    use_position = FALSE,
-    quiet = FALSE,
-    backingfile = NULL) {
+  ...,
+  as_is = FALSE,
+  flip_strand = FALSE,
+  use_position = FALSE,
+  quiet = FALSE,
+  backingfile = NULL
+) {
   dots <- list(...)
   if (length(dots) != 2) {
     stop("rbind for gen_tibble can only take two tibbles at a time")
@@ -96,54 +111,46 @@ rbind.gen_tbl <- function(
       " same ID."
     )
   }
-  if (!quiet) {
-    if (as_is) {
-      if (flip_strand) {
-        stop(paste(
-          "if 'as_is' is set to TRUE, 'flip_strand' and",
-          "'remove_ambiguous' have to be FALSE"
-        ))
-      }
-      message(
-        "rbind will not attempt to harmonise the loci (e.g. flip strand,\n",
-        " reorder or subset) set 'as_is' to FALSE to subset to loci in common\n"
-      )
-    }
+  # deprecation of as_is (which was never implemented: loci were always
+  # harmonised)
+  if (isTRUE(as_is)) {
+    warning(
+      "'as_is' is deprecated and ignored: rbind always harmonises the loci ",
+      "(subsetting them and swapping alleles as needed)"
+    )
   }
+  # integer loci names can not be used to match loci, so match them by
+  # position (rbind_dry_run() is then called with use_position = TRUE, so the
+  # message is only given once)
+  use_position <- rbind_use_position(
+    ref_names = loci_names(ref),
+    target_names = loci_names(target),
+    use_position = use_position,
+    quiet = quiet
+  )
   # sort out paths
   if (is.null(backingfile)) {
     save_path <- dirname(attr(ref$genotypes, "fbm")$backingfile)
     backingfile <- tempfile("gt_merged_", tmpdir = save_path, fileext = "")
   }
 
-  # if we use position, we update the names of the loci
-  if (use_position) {
-    show_loci(ref) <-
-      show_loci(ref) %>%
-      mutate(
-        name_old = .data$name,
-        name = paste(.data$chromosome, .data$position, sep = "_")
+  # check for duplicates within each dataset (if we use position, loci are
+  # matched by a combination of chromosome and position, whose duplicates
+  # are checked by rbind_dry_run(), so the names of the loci are left as
+  # they are)
+  if (!use_position) {
+    if (any_duplicated_names(loci_names(target)) > 0) {
+      stop(
+        "The target gen_tibble contains duplicated loci. ",
+        "Use 'find_duplicated_loci()' to identify and remove them."
       )
-    show_loci(target) <-
-      show_loci(target) %>%
-      mutate(
-        name_old = .data$name,
-        name = paste(.data$chromosome, .data$position, sep = "_")
+    }
+    if (any_duplicated_names(loci_names(ref)) > 0) {
+      stop(
+        "The reference gen_tibble contains duplicated loci. ",
+        "Use 'find_duplicated_loci()' to identify and remove them."
       )
-  }
-
-  # check for duplicates within each dataset
-  if (anyDuplicated(loci_names(target)) > 0) {
-    stop(
-      "The target gen_tibble contains duplicated loci. ",
-      "Use 'find_duplicated_loci()' to identify and remove them."
-    )
-  }
-  if (anyDuplicated(loci_names(ref)) > 0) {
-    stop(
-      "The reference gen_tibble contains duplicated loci. ",
-      "Use 'find_duplicated_loci()' to identify and remove them."
-    )
+    }
   }
 
   report <- rbind_dry_run(
@@ -157,29 +164,38 @@ rbind.gen_tbl <- function(
   ###########
   # we start with the ref object
   # we fix the missing alleles
-  ## in the gt_table
-  id_missing <- which(!is.na(report$ref$missing_allele))
-  attr(ref$genotypes, "loci")$allele_alt[id_missing] <-
-    report$ref$missing_allele[id_missing]
+  ## in the gt_table, in whichever allele column was missing
+  for (allele_col in c("allele_alt", "allele_ref")) {
+    id_missing <- which(report$ref$missing_allele_col %in% allele_col)
+    attr(ref$genotypes, "loci")[[allele_col]][id_missing] <-
+      report$ref$missing_allele[id_missing]
+  }
+  # swap the alleles of loci whose allele_ref is missing in both datasets, so
+  # that the observed allele becomes allele_ref (only with flip_strand)
+  ## in the gt_table (only if needed, to avoid copying the loci table)
+  to_swap <- report$ref$to_swap
+  if (any(to_swap)) {
+    ref_loci <- attr(ref$genotypes, "loci")
+    attr(ref$genotypes, "loci")$allele_ref[to_swap] <-
+      ref_loci$allele_alt[to_swap]
+    attr(ref$genotypes, "loci")$allele_alt[to_swap] <-
+      ref_loci$allele_ref[to_swap]
+  }
   # now create a new loci table (we'll use it later)
-  new_ref_loci_tbl <- show_loci(ref)[order(report$ref$new_id, na.last = NA), ]
-  # now we subset the SNP object
-  ## in the snp object
+  ref_loci_order <- order(report$ref$new_id, na.last = NA)
+  new_ref_loci_tbl <- show_loci(ref)[ref_loci_order, ]
   if (nrow(new_ref_loci_tbl) == 0) {
     stop("there are no loci in common between the two gen_tibbles")
   }
-  ref_snp <- subset_FBM(
-    attr(ref$genotypes, "fbm"),
-    loci_indices = new_ref_loci_tbl$big_index,
-    indiv_indices = vctrs::vec_data(ref$genotypes)
-  )
   ###########
   # now we move to the target object
   # we fix the missing alleles
-  ## in the gt_table
-  id_missing <- which(!is.na(report$target$missing_allele))
-  attr(target$genotypes, "loci")$allele_alt[id_missing] <-
-    report$target$missing_allele[id_missing]
+  ## in the gt_table, in whichever allele column was missing
+  for (allele_col in c("allele_alt", "allele_ref")) {
+    id_missing <- which(report$target$missing_allele_col %in% allele_col)
+    attr(target$genotypes, "loci")[[allele_col]][id_missing] <-
+      report$target$missing_allele[id_missing]
+  }
   # now flip the strands
   ## in the gt_table
   to_flip <- report$target$to_flip
@@ -189,34 +205,50 @@ rbind.gen_tbl <- function(
     flip(attr(target$genotypes, "loci")$allele_ref[to_flip])
 
   # now create a new loci table (we'll use it later)
-  new_target_loci_tbl <-
-    show_loci(target)[order(report$target$new_id, na.last = NA), ]
+  target_loci_order <- order(report$target$new_id, na.last = NA)
+  new_target_loci_tbl <- show_loci(target)[target_loci_order, ]
 
-  target_snp <- subset_FBM(
-    attr(target$genotypes, "fbm"),
-    loci_indices = new_target_loci_tbl$big_index,
-    indiv_indices = vctrs::vec_data(target$genotypes),
-    swap_indices = show_loci(target)$big_index[report$target$to_swap]
+  # now we create the merged FBM, with the individuals of ref followed by
+  # those of target (it uses the code256 of ref)
+  ref_rows <- vctrs::vec_data(ref$genotypes)
+  target_rows <- vctrs::vec_data(target$genotypes)
+  merged_fbm <- bigstatsr::FBM.code256(
+    nrow = length(ref_rows) + length(target_rows),
+    ncol = nrow(new_ref_loci_tbl),
+    code = attr(ref$genotypes, "fbm")$code256,
+    backingfile = backingfile,
+    init = NULL,
+    create_bk = TRUE
   )
-
-  # this check does not work if we change the names of markers
-  #  if (!identical(target_snp$map$marker.ID,ref_snp$map$marker.ID) |
-  #      !identical(target_snp$map$allele2,ref_snp$map$allele2)) {
-  #    stop("something went wrong when subsetting and
-  #          reordering the two bigSNP objects")
-  #  }
-
-  # now we need to merge the two FBMs
-  # we start by transposing them, so that they just need to be appended
-  t_ref_fbm <- bigstatsr::big_transpose(ref_snp)
-  t_target_fbm <- bigstatsr::big_transpose(target_snp)
-  # append the two files
-  append_success <- file.append(t_ref_fbm$backingfile, t_target_fbm$backingfile) # nolint
-  # and amend the new number of columns
-  t_ref_fbm$ncol <- t_ref_fbm$ncol + t_target_fbm$ncol
-  # now flip the file around
-  merged_fbm <- bigstatsr::big_transpose(t_ref_fbm, backingfile = backingfile)
-  # TODO this should be written in the directory of interest
+  # and copy the raw genotypes of the loci in common directly into it (in
+  # C++, without intermediate files), swapping the dosages of the loci whose
+  # alleles are swapped (raw values 0 <-> 2, and imputed values 4 <-> 6): in
+  # ref, loci whose allele_ref is missing in both datasets (only with
+  # flip_strand), and in target, loci swapped to match ref
+  swap_lut <- 0:255
+  swap_lut[c(1, 3, 5, 7)] <- c(2, 0, 6, 4)
+  gt_copy_fbm(
+    BM_from = attr(ref$genotypes, "fbm"),
+    BM_to = merged_fbm,
+    rowInd = ref_rows,
+    colInd = new_ref_loci_tbl$big_index,
+    col_offset = 0,
+    row_offset = 0,
+    swap = report$ref$to_swap[ref_loci_order],
+    swap_lut = swap_lut
+  )
+  gt_copy_fbm(
+    BM_from = attr(target$genotypes, "fbm"),
+    BM_to = merged_fbm,
+    rowInd = target_rows,
+    colInd = new_target_loci_tbl$big_index,
+    col_offset = 0,
+    row_offset = length(ref_rows),
+    swap = report$target$to_swap[target_loci_order],
+    swap_lut = swap_lut
+  )
+  # save the FBM (its .rds is used as fbm_file below)
+  merged_fbm$save()
 
   # Now we need to create the gen_tibble
   # Make sure that the two tibbles have the same columns
@@ -238,11 +270,15 @@ rbind.gen_tbl <- function(
   # by default, this should just be a subset in the same order as the reference
   # TODO check that all individuals in tibble and bigsnp object are the same
 
-  fbm_path <- merged_fbm$backingfile
+  # the rds of the FBM (as for other gen_tibbles; its md5sum is quick to
+  # compute, unlike that of the backing file)
+  fbm_path <- merged_fbm$rds
 
+  # fbm_ploidy covers the full FBM of each object, but only the rows in the
+  # tibbles (in tibble order) were copied into the merged FBM
   indivs_ploidy <- c(
-    attr(ref$genotypes, "fbm_ploidy"),
-    attr(target$genotypes, "fbm_ploidy")
+    attr(ref$genotypes, "fbm_ploidy")[vctrs::vec_data(ref$genotypes)],
+    attr(target$genotypes, "fbm_ploidy")[vctrs::vec_data(target$genotypes)]
   )
   merged_tbl$genotypes <- new_vctrs_bigsnp(
     fbm_obj = merged_fbm,

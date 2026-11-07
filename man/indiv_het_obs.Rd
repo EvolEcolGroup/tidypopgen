@@ -34,7 +34,12 @@ for each individual
 }
 \description{
 Estimate observed heterozygosity (H_obs) for each individual (i.e. the
-frequency of loci that are heterozygous in an individual).
+frequency of loci that are heterozygous in an individual). A locus is
+heterozygous whenever the dosage of the alternate allele is neither zero
+nor the individual's own ploidy, so this works for diploid, polyploid, and
+mixed-ploidy \code{\link{gen_tibble}} objects alike (each individual is evaluated
+against its own ploidy, so individuals of differing ploidy can be mixed
+freely).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

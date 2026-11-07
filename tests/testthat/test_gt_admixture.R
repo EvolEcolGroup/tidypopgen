@@ -147,6 +147,59 @@ test_that("run admixture as single run", {
   expect_true(all(anole_adm_comb2$cv == c(anole_adm3$cv, anole_adm4$cv)))
 })
 
+test_that("P matrix rows match the loci of the gen_tibble", {
+  # log-likelihood of the genotypes given Q and P, as computed by ADMIXTURE
+  admixture_loglik <- function(x, adm) {
+    g <- show_genotypes(x)
+    # ADMIXTURE reports the frequency of allele_ref, we count allele_alt
+    qp <- as.matrix(adm$Q[[1]]) %*% t(1 - as.matrix(adm$P[[1]]))
+    ok <- !is.na(g)
+    sum(g[ok] * log(qp[ok]) + (2 - g[ok]) * log(1 - qp[ok]))
+  }
+  # the chromosomes of anole_gt are not sorted once cast to integers, and
+  # reversing the loci also reverses the positions within each chromosome
+  anole_rev <- select_loci(anole_gt, rev(seq_len(count_loci(anole_gt))))
+  for (this_gt in list(anole_gt, anole_rev)) {
+    anole_adm <- gt_admixture(
+      x = this_gt,
+      k = 2,
+      crossval = FALSE,
+      n_cores = 1,
+      seed = 123,
+      conda_env = "none"
+    )
+    expect_equal(nrow(anole_adm$P[[1]]), count_loci(this_gt))
+    expect_equal(admixture_loglik(this_gt, anole_adm), anole_adm$loglik,
+      tolerance = 1e-6
+    )
+  }
+})
+
+test_that("admixture_loci_order sorts by chromosome and position", {
+  bim_file <- tempfile(fileext = ".bim")
+  bim <- data.frame(
+    chromosome = c(2, 1, 2, 1, 1, 2),
+    name = paste0("rs", 1:6),
+    genetic_dist = 0,
+    position = c(10, 30, 5, 10, 30, 10),
+    allele_1 = "A",
+    allele_2 = "T"
+  )
+  utils::write.table(bim, bim_file,
+    quote = FALSE, row.names = FALSE,
+    col.names = FALSE, sep = "\t"
+  )
+  # ties (loci 2 and 5, and loci 1 and 6) keep the order of the bim file
+  expect_identical(admixture_loci_order(bim_file), c(4L, 2L, 5L, 3L, 1L, 6L))
+  # non-integer chromosomes keep the order of the bim file
+  bim$chromosome <- c("chr2", "chr1", "chr2", "chr1", "chr1", "chr2")
+  utils::write.table(bim, bim_file,
+    quote = FALSE, row.names = FALSE,
+    col.names = FALSE, sep = "\t"
+  )
+  expect_identical(admixture_loci_order(bim_file), 1:6)
+})
+
 test_that("run admixture as multiple runs", {
   anole_gt <- anole_gt %>% dplyr::group_by(population)
   anole_adm_cv <- gt_admixture(
@@ -189,7 +242,7 @@ test_that("run admixture as multiple runs", {
   )
   expect_error(
     autoplot(anole_adm_cv, type = "barplot", k = 2),
-    "^You must specify a value for repeat"
+    "^You must specify a value for run"
   )
   bar_plot <- autoplot(anole_adm_cv, type = "barplot", k = 2, run = 1)
   # check that this is indeed a ggplot object
@@ -613,6 +666,29 @@ test_that("set output dir for admixture Q files", {
   expect_true(all(grepl("\\.Q$|\\.P$", list.files(relative_path))))
 })
 
+test_that("gt_admixture works with '.bed' elsewhere in the file name", {
+  bed_file <- system.file("extdata", "lobster", "lobster.bed",
+    package = "tidypopgen"
+  )
+  bed_dir <- tempfile("admix_")
+  dir.create(bed_dir)
+  for (this_ext in c(".bed", ".bim", ".fam")) {
+    file.copy(
+      sub("\\.bed$", this_ext, bed_file),
+      file.path(bed_dir, paste0("lobster.bedfile", this_ext))
+    )
+  }
+  adm <- gt_admixture(
+    x = file.path(bed_dir, "lobster.bedfile.bed"),
+    k = 2,
+    seed = 1,
+    conda_env = "none",
+    outdir = bed_dir
+  )
+  expect_true(inherits(adm$Q[[1]], "q_matrix"))
+  expect_equal(ncol(adm$Q[[1]]), 2)
+})
+
 test_that("seed length", {
   vcf_path <-
     system.file(
@@ -643,8 +719,9 @@ test_that("seed length", {
     conda_env = "none"
   )
   null_seeds <- gsub(".*Random seed: ([0-9]+).*", "\\1 ", res_null$log)
-  # this should be the default seed of 43
-  expect_equal(as.numeric(null_seeds), rep(43, 4))
+  # the runs start from the default seed of 43, and each run has its own seed
+  expect_equal(as.numeric(null_seeds), c(43, 44, 43, 44))
+  expect_false(identical(res_null$Q[[1]], res_null$Q[[2]]))
 
   # seed should be the length of n_runs * K OR the length of n_runs
   # and the whole vector is repeated for each k

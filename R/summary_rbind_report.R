@@ -52,10 +52,11 @@
 #' # Get the summary
 #' summary(report)
 summary.rbind_report <- function(
-    object,
-    ...,
-    ref_label = "reference",
-    target_label = "target") {
+  object,
+  ...,
+  ref_label = "reference",
+  target_label = "target"
+) {
   cat("harmonising loci between two datasets\n")
   cat(
     "flip_strand = ",
@@ -80,6 +81,14 @@ summary.rbind_report <- function(
     (sum(object$ref$ambiguous & is.na(object$ref$new_id))),
     " were removed)\n"
   )
+  if (sum(object$ref$to_swap) > 0) {
+    cat(
+      "(",
+      sum(object$ref$to_swap),
+      "had allele_ref missing in both datasets, and were swapped so that",
+      "the observed allele is allele_ref)\n"
+    )
+  }
   cat("-----------------------------\n")
   cat("dataset:", target_label, "\n")
   cat(

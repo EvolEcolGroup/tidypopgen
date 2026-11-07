@@ -22,7 +22,9 @@ pop_gene_div(
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} (usually grouped, as obtained by using
 \code{\link[dplyr:group_by]{dplyr::group_by()}}, otherwise the full tibble will be considered as
-belonging to a single population).}
+belonging to a single population).
+If grouped by more than one variable, groups are labelled by the values
+of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
 
 \item{by_locus}{boolean, determining whether Hs should be returned by
 locus(TRUE), or as a single genome wide value (FALSE, the default).}
@@ -33,7 +35,7 @@ will return a vector of n populations plus 1 (the global value), or a
 matrix with n+1 columns if \code{by_locus=TRUE}.}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 a vector of mean population observed heterozygosities (if

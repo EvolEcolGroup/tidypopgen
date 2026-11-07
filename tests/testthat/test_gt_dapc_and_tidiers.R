@@ -107,3 +107,213 @@ test_that("gt_dapc_and_tidiers", {
   # expect augmented to have 3 additional columns plus one for .rownames
   expect_true(ncol(augmented_gt) == 3 + 1)
 })
+
+test_that("scores plot error if only 2 populations", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt$population <- c(rep("pop1", 100), rep("pop2", 100))
+  test_gt <- test_gt %>% group_by(population)
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 2)
+  test_dapc <- test_pca %>% gt_dapc(pop = as.factor(test_gt$population))
+  expect_error(
+    autoplot(test_dapc, type = "scores"),
+    "object has only one discriminant axis, cannot plot scores"
+  )
+})
+
+test_that("gt_cluster_pca works with a single k and a single component", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  # only one k larger than 1
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 5, k_clusters = c(1, 2),
+    quiet = TRUE
+  )
+  expect_identical(names(test_cluster$clusters$groups), c("1", "2"))
+  expect_identical(
+    names(test_cluster$clusters$groups[["1"]]),
+    rownames(test_pca$u)
+  )
+  # only k = 1
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 5, k_clusters = 1,
+    quiet = TRUE
+  )
+  expect_identical(names(test_cluster$clusters$groups), "1")
+  expect_true(all(test_cluster$clusters$groups[["1"]] == 1))
+  # a single component
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 1, k_clusters = c(1, 3),
+    quiet = TRUE
+  )
+  expect_length(test_cluster$clusters$WSS, 3)
+  expect_identical(
+    names(test_cluster$clusters$groups[["3"]]),
+    rownames(test_pca$u)
+  )
+})
+
+test_that("best_k is a value of k when k_clusters does not start at 1", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 10)
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 10, k_clusters = c(3, 8),
+    quiet = TRUE
+  )
+  for (this_criterion in c("min", "diffNgroup")) {
+    test_cluster_best <- gt_cluster_pca_best_k(test_cluster,
+      stat = "WSS", criterion = this_criterion, quiet = TRUE
+    )
+    expect_true(test_cluster_best$best_k %in% test_cluster$clusters$k)
+  }
+  test_cluster_best <- gt_cluster_pca_best_k(test_cluster,
+    stat = "WSS", criterion = "min", quiet = TRUE
+  )
+  # the WSS decreases with k, so the minimum is at the largest k
+  expect_equal(
+    test_cluster_best$best_k,
+    test_cluster$clusters$k[which.min(test_cluster$clusters$WSS)]
+  )
+  expect_message(
+    gt_cluster_pca_best_k(test_cluster, stat = "WSS", criterion = "min"),
+    paste0(test_cluster_best$best_k, " clusters")
+  )
+  # gt_dapc uses the groups for best_k
+  test_dapc <- gt_dapc(test_cluster_best)
+  expect_equal(nlevels(test_dapc$grp), test_cluster_best$best_k)
+  # best_k can be overridden by the user
+  test_cluster_best$best_k <- 4
+  test_dapc <- gt_dapc(test_cluster_best)
+  expect_equal(nlevels(test_dapc$grp), 4)
+  # pop can be given as the value of k
+  test_dapc <- gt_dapc(test_cluster, pop = 5)
+  expect_equal(nlevels(test_dapc$grp), 5)
+})
+
+test_that("gt_dapc var is the proportion of variance of the retained PCs", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 10)
+  pops <- as.factor(rep(c("pop1", "pop2", "pop3", "pop4"), each = 50))
+  test_dapc <- gt_dapc(test_pca, pop = pops, n_pca = 6)
+  # the eigenvalues are the squared singular values
+  expect_equal(test_dapc$var, sum(test_pca$d[1:6]^2) / sum(test_pca$d^2))
+})
+
+test_that("gt_dapc uses k-1 PCs by default", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  # as many populations as PCs
+  pops <- as.factor(rep(paste0("pop", 1:5), each = 40))
+  test_dapc <- gt_dapc(test_pca, pop = pops)
+  expect_equal(test_dapc$n.pca, 4)
+  # fewer populations than PCs
+  pops <- as.factor(rep(paste0("pop", 1:3), length.out = 200))
+  test_dapc <- gt_dapc(test_pca, pop = pops)
+  expect_equal(test_dapc$n.pca, 2)
+  # more populations than PCs
+  pops <- as.factor(rep(paste0("pop", 1:8), each = 25))
+  test_dapc <- gt_dapc(test_pca, pop = pops)
+  expect_equal(test_dapc$n.pca, 5)
+})
+
+test_that("gt_dapc gives an informative error for an invalid pop", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  pops <- c(rep("pop1", 100), rep("pop2", 100))
+  # a character vector rather than a factor
+  expect_error(
+    gt_dapc(test_pca, pop = pops),
+    "'pop' should be a factor, or a value of k"
+  )
+  # a value of k, but x is not a gt_cluster_pca
+  expect_error(
+    gt_dapc(test_pca, pop = 3),
+    "'pop' should be a factor, or a value of k"
+  )
+  # a value of k that was not explored
+  test_cluster <- gt_cluster_pca(test_pca,
+    n_pca = 5, k_clusters = c(1, 4),
+    quiet = TRUE
+  )
+  expect_error(
+    gt_dapc(test_cluster, pop = 10),
+    "'pop' should be a factor, or a value of k"
+  )
+})
+
+test_that("augment.gt_dapc works with one discriminant axis and checks ids", {
+  bed_file <- system.file("extdata", "example-missing.bed",
+    package = "bigsnpr"
+  )
+  test_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("test_"),
+    quiet = TRUE
+  )
+  test_gt <- gt_impute_simple(test_gt, method = "mode")
+  # use integer ids
+  test_gt$id <- seq_len(nrow(test_gt))
+  test_pca <- test_gt %>% gt_pca_randomSVD(k = 5)
+  pops <- as.factor(c(rep("pop1", 100), rep("pop2", 100)))
+  test_dapc <- test_pca %>% gt_dapc(pop = pops, n_pca = 3)
+  expect_equal(test_dapc$n.da, 1)
+  augmented_gt <- test_dapc %>% augment(data = test_gt)
+  expect_true(ncol(augmented_gt) == ncol(test_gt) + 1 + 1)
+  expect_equal(augmented_gt$.fittedLD1, test_dapc$ind.coord[, 1],
+    ignore_attr = TRUE
+  )
+  augmented_gt <- test_dapc %>% augment()
+  expect_true(ncol(augmented_gt) == 1 + 1)
+  # error if the individuals are not in the same order
+  expect_error(
+    test_dapc %>% augment(data = test_gt[rev(seq_len(nrow(test_gt))), ]),
+    "the data id column does not correspond to the individuals"
+  )
+})

@@ -1,7 +1,13 @@
 #' Convert a `gen_tibble` to a `genind` object from `adegenet`
 #'
-#' This function converts a `gen_tibble` to a `genind` object from `adegenet`
+#' This function converts a `gen_tibble` to a `genind` object from `adegenet`.
+#' `genind` objects support arbitrary ploidy (including mixed-ploidy data
+#' across individuals), so this works on diploid, polyploid and mixed-ploidy
+#' `gen_tibble` objects alike.
 #'
+#' @note pseudohaploid individuals are treated as diploid (ploidy 2) using
+#'   their stored genotype counts (dosage 0/2) directly, the same convention
+#'   used by other tools (e.g. PLINK) when handling pseudohaploid data.
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @returns a `genind` object
 #' @export
@@ -20,15 +26,62 @@ gt_as_genind <- function(x) {
       "install.packages('adegenet')"
     )
   }
-  df_for_genind <- show_genotypes(x)
-  df_for_genind[df_for_genind == 0] <- "11"
-  df_for_genind[df_for_genind == 1] <- "12"
-  df_for_genind[df_for_genind == 2] <- "22"
+  geno_mat <- show_genotypes(x)
+  # pseudohaploid individuals have their dosage stored on the doubled,
+  # diploid-like scale (0/2, never 1); treat them as ploidy 2 when decoding
+  # dosage into allele codes, matching every other diploid/pseudohaploid
+  # dispatch in the package
+  geno_ploidy <- indiv_ploidy(x)
+  if (is_pseudohaploid(x)) {
+    geno_ploidy[geno_ploidy == 1] <- 2
+  }
+
+  # build a genotype string per individual/locus (ncode = 1 digit per
+  # allele, as required by adegenet::df2genind()): `dosage` copies of
+  # allele "2" (alt) and `ploidy - dosage` copies of allele "1" (ref). The
+  # strings are built once for each ploidy and dosage, and looked up for each
+  # genotype (rather than calling a function for each genotype)
+  ploidies <- sort(unique(geno_ploidy))
+  dosages <- seq(0, max(ploidies))
+  # genotype_strings[dosage + 1, k] is the genotype of a dosage for ploidy
+  # ploidies[k] (NA for dosages larger than the ploidy)
+  genotype_strings <- vapply(ploidies, function(ploidy) {
+    ifelse(dosages <= ploidy,
+      paste0(
+        strrep("1", pmax(ploidy - dosages, 0)),
+        strrep("2", dosages)
+      ),
+      NA_character_
+    )
+  }, character(length(dosages)))
+  # the dosages must be valid for the ploidy of each individual
+  if (any(geno_mat > geno_ploidy, na.rm = TRUE)) {
+    stop("some dosages are larger than the ploidy of their individual")
+  }
+  # (missing dosages give a missing row index, and thus a missing genotype)
+  df_for_genind <- matrix(
+    genotype_strings[cbind(
+      as.vector(geno_mat) + 1,
+      rep(match(geno_ploidy, ploidies), times = ncol(geno_mat))
+    )],
+    nrow = nrow(geno_mat),
+    ncol = ncol(geno_mat)
+  )
+
+  # genind names its columns [LOCUS].[ALLELE], so loci names can not contain
+  # '.'; df2genind() means to replace it with '_', but does not
+  loc_names <- loci_names(x)
+  if (any(grepl(".", loc_names, fixed = TRUE))) {
+    warning("character '.' detected in names of loci; replacing with '_'")
+    loc_names <- gsub(".", "_", loc_names, fixed = TRUE)
+  }
+
   adegenet::df2genind(
     X = df_for_genind,
     ind.names = x$id,
     pop = x$population,
+    ploidy = geno_ploidy,
     ncode = 1,
-    loc.names = loci_names(x)
+    loc.names = loc_names
   )
 }

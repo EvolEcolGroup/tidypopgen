@@ -4,7 +4,7 @@
 \alias{indiv_inbreeding}
 \alias{indiv_inbreeding.tbl_df}
 \alias{indiv_inbreeding.vctrs_bigSNP}
-\alias{indiv_inbreeding.grouped_df}
+\alias{indiv_inbreeding.grouped_gen_tbl}
 \title{Individual inbreeding coefficient}
 \usage{
 indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
@@ -13,7 +13,7 @@ indiv_inbreeding(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
 \method{indiv_inbreeding}{vctrs_bigSNP}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 
-\method{indiv_inbreeding}{grouped_df}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
+\method{indiv_inbreeding}{grouped_gen_tbl}(.x, method = c("WG17"), allele_sharing_mat = NULL, ...)
 }
 \arguments{
 \item{.x}{a vector of class \code{vctrs_bigSNP} (usually the \code{genotype} column of

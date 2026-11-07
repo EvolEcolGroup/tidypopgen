@@ -53,7 +53,7 @@ method for the available plots. There are also \link{gt_dapc_tidiers} for
 manipulating the results. For the moment, this function returns objects of
 class \code{\link[adegenet:dapc]{adegenet::dapc}} which are
 compatible with methods from \code{adegenet}; graphical methods for DAPC are
-documented in \link[adegenet:dapcGraphics]{adegenet::scatter.dapc} (see ?scatter.dapc). This is likely
+documented in \link[adegenet:scatter.dapc]{adegenet::scatter.dapc} (see ?scatter.dapc). This is likely
 to change in the future, so make sure you do not rely on the objects
 remaining compatible.
 

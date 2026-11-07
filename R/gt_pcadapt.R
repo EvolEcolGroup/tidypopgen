@@ -11,8 +11,8 @@
 #'   pcadapt: an R package for genome scans for selection based on principal
 #'   component analysis. Molecular Ecology Resources, 17(1), 67–77.
 #' @param x A `gen_tibble` object.
-#' @param pca a [`gt_pca`] object, as returned by `gt_pca_partialSVD()` or
-#'   `gt_pca_randomSVD()`.
+#' @param pca a [`gt_pca`] object, as returned by [gt_pca_partialSVD()] or
+#'   [gt_pca_randomSVD()].
 #' @param k Number of principal components to use in the analysis.
 #' @param n_cores Number of cores to use.
 #' @returns An object of subclass `gt_pcadapt`, a subclass of `mhtest`.
@@ -59,6 +59,13 @@ gt_pcadapt <- function(x, pca, k, n_cores = 1) {
   # check that k is not larger than the number of components in pca
   if (k > ncol(pca$v)) {
     stop("K must be less than or equal to the number of components in pca")
+  }
+  # check that the scores are in the same order as the individuals in x
+  if (
+    !is.null(rownames(pca$u)) &&
+      !identical(rownames(pca$u), as.character(x$id))
+  ) {
+    stop("the individuals in 'x' do not correspond to those in 'pca'")
   }
   # set imputation if needed
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {

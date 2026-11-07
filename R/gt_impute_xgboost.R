@@ -41,14 +41,15 @@
 #' # And we can check it has been imputed
 #' example_gt %>% gt_has_imputed()
 gt_impute_xgboost <- function(
-    x,
-    alpha = 1e-4,
-    size = 200,
-    p_train = 0.8,
-    n_cor = nrow(x),
-    seed = NA,
-    n_cores = 1,
-    append_error = TRUE) {
+  x,
+  alpha = 1e-4,
+  size = 200,
+  p_train = 0.8,
+  n_cor = nrow(x),
+  seed = NA,
+  n_cores = 1,
+  append_error = TRUE
+) {
   if (n_cores > 1) {
     # Remove checking for two levels of parallelism
     .old_opt <- getOption("bigstatsr.check.parallel.blas", TRUE)
@@ -97,9 +98,14 @@ gt_impute_xgboost <- function(
     }
   }
 
+  # the chromosomes need to be in the order of the columns of the FBM, which
+  # is not necessarily the order of the loci table
+  infos_chr <- integer(count_loci(x))
+  infos_chr[show_loci(x)$big_index] <-
+    cast_chromosome_to_int(show_loci(x)$chromosome)
   infos <- bigsnpr::snp_fastImpute(
     attr(x$genotypes, "fbm"), # this needs subsetting
-    infos.chr = cast_chromosome_to_int(show_loci(x)$chromosome),
+    infos.chr = infos_chr,
     alpha = alpha,
     size = size,
     p.train = p_train,

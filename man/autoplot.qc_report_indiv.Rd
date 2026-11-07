@@ -26,7 +26,9 @@ the sample}
 \item{...}{not currently used.}
 }
 \value{
-a \code{ggplot2} object
+a \code{ggplot2} object. For \code{relatedness} plots of a report created
+from a grouped \code{\link{gen_tibble}}, a named list of \code{ggplot2} objects, one for
+each group.
 }
 \description{
 For \code{qc_report_indiv}, the following types of plots are available:

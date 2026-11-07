@@ -22,7 +22,12 @@ file}
 
 \item{use_position}{boolean of whether a combination of chromosome and
 position should be used for matching SNPs. By default, \code{rbind} uses the
-locus name, so this is set to FALSE. When using 'use_position=TRUE', make
+locus name, so this is set to FALSE. If the loci names of either dataset
+are integers (as created by \code{gen_tibble(names_as_int = TRUE)}, which
+numbers the loci in the order in which they are found in the \emph{VCF}), the
+names do not identify the same locus in the two datasets, so loci are
+always matched by position: \code{use_position} is then set to TRUE
+automatically (even if it was set to FALSE), with a message unless \code{quiet = TRUE}. When using 'use_position=TRUE', make
 sure chromosomes are coded in the same way in both \code{gen_tibbles} (a mix of
 e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
 large number variants are dropped when merging).}
@@ -36,13 +41,21 @@ removed.  It defaults to FALSE}
 \value{
 a list with two \code{data.frames}, named \code{target} and \code{ref}. Each
 data.frame has \code{nrow()} equal to the number of loci in the respective
-dataset, a column \code{id} with the locus name, and boolean columns \code{to_keep}
-(the valid loci that will be kept in the merge), \code{alleles_mismatched} (loci
-found in both datasets but with mismatched alleles, leading to those loci
-being dropped), \code{to_flip} (loci that need to be flipped to align the two
-datasets, only found in \code{target} data.frame) and \code{to_swap} (loci for which
-the order of alleles needs to be swapped to align the two datasets,
-\code{target} data.frame)
+dataset, and columns \code{id} (the index of the locus in the dataset), \code{new_id}
+(the index of the locus in the merged dataset, NA if the locus is dropped,
+either because it is not found in both datasets, because its alleles do not
+match, or because it is ambiguous), \code{name} (the locus name, also when loci
+are matched by position), \code{to_flip}
+(boolean, loci whose strand is flipped to match the reference, only in the
+\code{target} data.frame), \code{to_swap} (boolean, loci whose alleles, and thus
+genotypes, are swapped in the merge: in \code{target}, to match the order of
+alleles in the reference; in \code{ref}, loci whose \code{allele_ref} is missing in
+both datasets, which are swapped so that the observed allele becomes
+\code{allele_ref}, only when \code{flip_strand = TRUE}), \code{missing_allele} and
+\code{missing_allele_col} (for loci with one unobserved allele (NA), the allele
+inferred from the other dataset, and the column it fills, \code{allele_alt} or
+\code{allele_ref}; both are NA if nothing was inferred), and \code{ambiguous}
+(boolean, strand-ambiguous loci, i.e. A/T and C/G).
 }
 \description{
 This function provides an overview of the fate of each SNP in two
@@ -50,6 +63,11 @@ This function provides an overview of the fate of each SNP in two
 objects will be kept. One object is used as a \code{reference}, and SNPs in the
 other dataset will be flipped and/or alleles swapped as needed. SNPs that
 have different alleles in the two datasets will also be dropped.
+}
+\details{
+Loci are matched by name, unless \code{use_position = TRUE}. If the loci names of
+either dataset are integers (as created by \code{gen_tibble(names_as_int = TRUE)}), loci are always matched by chromosome and position (see
+\code{use_position}).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

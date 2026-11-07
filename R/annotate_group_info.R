@@ -22,7 +22,8 @@ annotate_group_info <- function(q_tbl, plt) {
   if (length(group) != length(unique(plt$data$id))) {
     stop("'groups' should be of the same length as the original data")
   }
-  group_x <- cumsum(table(fct_inorder_base(group)))
+  # drop unused levels, which would create empty groups
+  group_x <- cumsum(table(droplevels(fct_inorder_base(group))))
   segment_data <- data.frame(
     x = group_x + 0.5,
     xend = group_x + 0.5,
@@ -46,7 +47,10 @@ annotate_group_info <- function(q_tbl, plt) {
       inherit.aes = FALSE
     ),
     ggplot2::scale_x_discrete(
-      breaks = unique(q_tbl$id)[get_mid_points(c(0, group_x))],
+      # the individual in the middle of each group (rounding up, as rounding
+      # down would put the label of a group of one individual on the last
+      # individual of the previous group, or on none for the first group)
+      breaks = unique(q_tbl$id)[ceiling(get_mid_points(c(0, group_x)))],
       labels = names(group_x)
     ),
     ggplot2::theme(

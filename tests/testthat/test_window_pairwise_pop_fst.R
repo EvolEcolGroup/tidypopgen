@@ -473,3 +473,111 @@ test_that("windows type", {
     subset(fst_windows_tidy, fst_windows_tidy$stat_name == "fst_pop1.pop2")
   expect_equal(pop1_pop2_tidy$value, fst_windows_matrix$fst_pop1.pop2)
 })
+
+test_that("windows_pairwise_pop_fst uses the requested method", {
+  for (this_method in c("Hudson", "Nei87", "WC84")) {
+    fst_nd <- test_gt %>%
+      pairwise_pop_fst(
+        method = this_method,
+        return_num_dem = TRUE,
+        by_locus = TRUE
+      )
+    snp_window <- test_gt %>%
+      windows_pairwise_pop_fst(
+        method = this_method,
+        window_size = 3,
+        step_size = 2,
+        size_unit = "snp",
+        min_loci = 2
+      )
+    # chr1, window 1 covers the first 3 loci
+    expect_equal(
+      snp_window$fst_pop1.pop2[1],
+      mean(fst_nd$Fst_by_locus_num[1:3, 1]) /
+        mean(fst_nd$Fst_by_locus_den[1:3, 1])
+    )
+    expect_equal(
+      snp_window$fst_pop2.pop3[1],
+      mean(fst_nd$Fst_by_locus_num[1:3, 3]) /
+        mean(fst_nd$Fst_by_locus_den[1:3, 3])
+    )
+  }
+  # the methods give different values
+  hudson_window <- test_gt %>%
+    windows_pairwise_pop_fst(
+      method = "Hudson", window_size = 3, step_size = 2, size_unit = "snp"
+    )
+  nei_window <- test_gt %>%
+    windows_pairwise_pop_fst(
+      method = "Nei87", window_size = 3, step_size = 2, size_unit = "snp"
+    )
+  expect_false(isTRUE(all.equal(hudson_window, nei_window)))
+})
+
+test_that("windows_pairwise_pop_fst tidy output works with two populations", {
+  two_pops <- test_gt %>%
+    dplyr::filter(population != "pop3") %>%
+    dplyr::group_by(population)
+  expect_no_warning(
+    fst_windows_tidy <- two_pops %>%
+      windows_pairwise_pop_fst(
+        type = "tidy",
+        window_size = 3,
+        step_size = 2,
+        size_unit = "snp"
+      )
+  )
+  expect_equal(unique(fst_windows_tidy$stat_name), "fst_pop1.pop2")
+  expect_named(
+    fst_windows_tidy,
+    c("chromosome", "start", "end", "stat_name", "value")
+  )
+})
+
+test_that("windows_pairwise_pop_fst matches windows of num and den", {
+  # windowed Fst is computed in a single pass, without storing numerators and
+  # denominators by locus; check it against windows_stats_generic() applied
+  # to them
+  for (method in c("Hudson", "Nei87", "WC84")) {
+    for (unit in c("snp", "bp")) {
+      ws <- if (unit == "snp") 3 else 100
+      st <- if (unit == "snp") 2 else 70
+      win_fst <- test_gt %>% windows_pairwise_pop_fst(
+        method = method, window_size = ws, step_size = st,
+        size_unit = unit, min_loci = 2, complete = (unit == "bp")
+      )
+      num_den <- test_gt %>% pairwise_pop_fst(
+        method = method, by_locus = TRUE, return_num_dem = TRUE
+      )
+      for (i_pair in seq_len(ncol(num_den$Fst_by_locus_num))) {
+        win_stats <- lapply(num_den[c("Fst_by_locus_num", "Fst_by_locus_den")],
+          function(values) {
+            windows_stats_generic(values[, i_pair],
+              loci_table = show_loci(test_gt), window_size = ws,
+              step_size = st, size_unit = unit, min_loci = 2,
+              complete = (unit == "bp")
+            )
+          }
+        )
+        expect_identical(
+          win_fst[[3 + i_pair]],
+          win_stats[[1]]$stat / win_stats[[2]]$stat
+        )
+      }
+    }
+  }
+})
+
+test_that("windows_pairwise_pop_fst tidy output only pivots the fst columns", {
+  window_fst <- windows_pairwise_pop_fst(test_gt,
+    window_size = 3, step_size = 3
+  )
+  window_tidy <- windows_pairwise_pop_fst(test_gt,
+    type = "tidy", window_size = 3, step_size = 3
+  )
+  expect_equal(
+    sort(unique(window_tidy$stat_name)),
+    c("fst_pop1.pop2", "fst_pop1.pop3", "fst_pop2.pop3")
+  )
+  expect_equal(nrow(window_tidy), nrow(window_fst) * 3)
+})

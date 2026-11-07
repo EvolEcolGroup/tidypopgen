@@ -22,21 +22,23 @@
 #' example_gt %>% indiv_inbreeding(method = "WG17")
 #'
 indiv_inbreeding <- function(
-    .x,
-    method = c("WG17"),
-    allele_sharing_mat = NULL,
-    ...) {
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  ...
+) {
   UseMethod("indiv_inbreeding", .x)
 }
 
 #' @export
 #' @rdname indiv_inbreeding
 indiv_inbreeding.tbl_df <- function(
-    .x,
-    method = c("WG17"),
-    allele_sharing_mat = NULL,
-    ...) {
-  stopifnot_gen_tibble(.x)
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  ...
+) {
+  stopifnot_has_genotypes(.x)
   # extract the column and hand it over to its method
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
@@ -52,10 +54,11 @@ indiv_inbreeding.tbl_df <- function(
 #' @export
 #' @rdname indiv_inbreeding
 indiv_inbreeding.vctrs_bigSNP <- function(
-    .x,
-    method = c("WG17"),
-    allele_sharing_mat = NULL,
-    ...) {
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  ...
+) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   if (is.null(allele_sharing_mat)) {
@@ -79,11 +82,12 @@ indiv_inbreeding.vctrs_bigSNP <- function(
 
 #' @export
 #' @rdname indiv_inbreeding
-indiv_inbreeding.grouped_df <- function(
-    .x,
-    method = c("WG17"),
-    allele_sharing_mat = NULL,
-    ...) {
+indiv_inbreeding.grouped_gen_tbl <- function(
+  .x,
+  method = c("WG17"),
+  allele_sharing_mat = NULL,
+  ...
+) {
   rlang::check_dots_empty()
   stopifnot_diploid(.x)
   if (!is.null(allele_sharing_mat)) {
@@ -93,4 +97,12 @@ indiv_inbreeding.grouped_df <- function(
     .x,
     .f = ~ indiv_inbreeding(.x, method = method, allele_sharing_mat = NULL)
   )
+}
+
+# a grouped data frame that has lost the class of its tibble (e.g. a grouped
+# gen_tibble returned by summarise()): restore the class and dispatch again
+#' @export
+#' @noRd
+indiv_inbreeding.grouped_df <- function(.x, ...) {
+  indiv_inbreeding(restore_genotypes_tbl(.x, "indiv_inbreeding"), ...)
 }

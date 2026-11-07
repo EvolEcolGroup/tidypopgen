@@ -189,3 +189,43 @@ test_that("old bigsnp gen_tibbles can be loaded", {
     check.attributes = FALSE
   )) # nolint end
 })
+
+test_that("old bigsnp gen_tibbles keep the ploidy of all FBM individuals", {
+  # copy the old gen_tibble to a new temp directory, and point it to the copy
+  copy_old_gt <- function() {
+    temp_dir <- tempfile("old_gt_")
+    dir.create(temp_dir)
+    for (ext in c(".gt", ".bk", ".rds")) {
+      file.copy(
+        system.file(paste0("extdata/bigsnp_obj_gt/old_gen_tibble", ext),
+          package = "tidypopgen"
+        ),
+        file.path(temp_dir, paste0("old_gen_tibble", ext))
+      )
+    }
+    rds_path <- file.path(temp_dir, "old_gen_tibble.rds")
+    gt <- readRDS(file.path(temp_dir, "old_gen_tibble.gt"))
+    attr(gt$genotypes, "bigsnp_file") <- rds_path
+    attr(gt$genotypes, "bigsnp") <- bigsnpr::snp_attach(rds_path)
+    list(gt = gt, gt_path = file.path(temp_dir, "old_gen_tibble.gt"))
+  }
+
+  # a diploid gen_tibble with only some of the individuals of the FBM
+  old <- copy_old_gt()
+  saveRDS(old$gt[5:7, ], old$gt_path)
+  expect_message(test_gt <- gt_load(old$gt_path), "old format")
+  expect_equal(attr(test_gt$genotypes, "fbm_ploidy"), rep(2, 7))
+  expect_equal(indiv_ploidy(test_gt), rep(2, 3))
+
+  # a pseudohaploid gen_tibble
+  old <- copy_old_gt()
+  attr(old$gt$genotypes, "ploidy") <- -2
+  attr(old$gt$genotypes, "bigsnp")$fam$ploidy <- c(2, 1, 2, 1, 2, 1, 2)
+  saveRDS(old$gt[c(2, 3), ], old$gt_path)
+  expect_message(test_gt <- gt_load(old$gt_path), "old format")
+  expect_equal(
+    attr(test_gt$genotypes, "fbm_ploidy"),
+    c(2, 1, 2, 1, 2, 1, 2)
+  )
+  expect_equal(indiv_ploidy(test_gt), c(1, 2))
+})

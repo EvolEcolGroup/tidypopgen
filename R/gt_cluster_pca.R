@@ -73,13 +73,14 @@
 #' )
 #'
 gt_cluster_pca <- function(
-    x = NULL,
-    n_pca = NULL,
-    k_clusters = c(1, round(nrow(x$u) / 10)),
-    method = c("kmeans", "ward"),
-    n_iter = 1e5,
-    n_start = 10,
-    quiet = FALSE) {
+  x = NULL,
+  n_pca = NULL,
+  k_clusters = c(1, round(nrow(x$u) / 10)),
+  method = c("kmeans", "ward"),
+  n_iter = 1e5,
+  n_start = 10,
+  quiet = FALSE
+) {
   if (is.null(x) || !inherits(x, "gt_pca")) {
     stop("'x' should be a 'gt_pca' object")
   }
@@ -130,7 +131,7 @@ gt_cluster_pca <- function(
   # vector to store within sum of squares
   wss <- numeric(0)
   # get the scores
-  x_scores <- sweep(x$u, 2, x$d, "*")[, seq_len(n_pca)]
+  x_scores <- sweep(x$u, 2, x$d, "*")[, seq_len(n_pca), drop = FALSE]
 
   # TODO this is an obvious place to parallelise
   for (i in seq_along(nb_clust)) {
@@ -159,7 +160,7 @@ gt_cluster_pca <- function(
     # add the classification for 1 cluster (they are all 1!)
     cluster_list$groups <- append(
       cluster_list$groups,
-      list(stats::setNames(rep(1, n), names(cluster_list$groups[[2]]))),
+      list(stats::setNames(rep(1, n), rownames(x_scores))),
       after = 0
     )
     nb_clust <- c(1, nb_clust)
@@ -240,9 +241,10 @@ compute_wss <- function(x, f) {
 #' # # Autoplot WSS
 #' autoplot(cluster_pca, metric = "WSS")
 autoplot.gt_cluster_pca <- function(
-    object,
-    metric = c("BIC", "AIC", "WSS"),
-    ...) {
+  object,
+  metric = c("BIC", "AIC", "WSS"),
+  ...
+) {
   metric <- match.arg(metric)
   # create a small tibble with the data of interest
   metric_tbl <- tibble::tibble(

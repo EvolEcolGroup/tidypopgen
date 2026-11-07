@@ -59,6 +59,8 @@ test_that("snp_king and pairwise_king compute king-robust correctly", {
 
   # now estimate it with gen_tibble
   test_king_gt <- pairwise_king(test_gt, as_matrix = TRUE)
+  # remove the special class to allow comparison with the reference
+  class(test_king_gt) <- setdiff(class(test_king_gt), "pairwise_matrix")
   expect_true(all.equal(test_king, test_king_gt, check.attributes = FALSE))
 
   # now test with missing data
@@ -126,4 +128,58 @@ test_that("snp_king gives the same results as plink", {
 
   # Check results are the same
   expect_true(result)
+})
+
+test_that("snp_king is correct across bit-packing boundaries", {
+  # more than 64 individuals and loci, with missing data, so that genotypes
+  # are packed into several words and blocks of individuals
+  set.seed(123)
+  geno_vals <- sample(c(0:2, NA), 70 * 150,
+    replace = TRUE,
+    prob = c(0.4, 0.3, 0.25, 0.05)
+  )
+  geno_mat <- matrix(geno_vals, nrow = 70)
+  big_gt <- gen_tibble(
+    x = geno_mat,
+    loci = data.frame(
+      name = paste0("rs", 1:150), chromosome = 1L, position = 1:150,
+      genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+    ),
+    indiv_meta = data.frame(id = paste0("i", 1:70), population = "p1"),
+    quiet = TRUE
+  )
+  test_fbm <- tidypopgen:::.gt_get_fbm(big_gt)
+  # reordered subsets of individuals and loci, and multiple cores
+  rows <- c(70:3, 1)
+  cols <- c(150:80, 2:60)
+  test_king <- snp_king(test_fbm,
+    ind.row = rows, ind.col = cols,
+    block.size = 70, n_cores = 2
+  )
+  expect_equal(test_king, king_r(geno_mat[rows, cols]), tolerance = 1e-12)
+})
+
+test_that("pairwise_king uses imputed genotypes only if set to", {
+  geno_na <- test_genotypes
+  geno_na[2, 4] <- NA
+  geno_na[3, 2] <- NA
+  gt_na <- gen_tibble(
+    x = geno_na, loci = test_loci, indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  king_na <- pairwise_king(gt_na, as_matrix = TRUE)
+  gt_imputed <- gt_impute_simple(gt_na, method = "mode")
+  # imputed genotypes are missing unless the gen_tibble is set to use them
+  gt_set_imputed(gt_imputed, set = FALSE)
+  expect_identical(pairwise_king(gt_imputed, as_matrix = TRUE), king_na)
+  # when used, they are the same as genotypes that were never missing
+  gt_set_imputed(gt_imputed, set = TRUE)
+  gt_filled <- gen_tibble(
+    x = show_genotypes(gt_imputed), loci = test_loci,
+    indiv_meta = test_indiv_meta, quiet = TRUE
+  )
+  expect_identical(
+    pairwise_king(gt_imputed, as_matrix = TRUE),
+    pairwise_king(gt_filled, as_matrix = TRUE)
+  )
 })

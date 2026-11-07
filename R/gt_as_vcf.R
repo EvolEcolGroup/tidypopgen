@@ -1,12 +1,14 @@
 #' Convert a `gen_tibble` to a VCF
 #'
-#' This function write a VCF from a `gen_tibble`.
+#' This function write a VCF from a `gen_tibble`. The genotypes are read and
+#' written in chunks of loci, so that this works on datasets that do not fit in
+#' memory.
 #'
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @param file the .vcf file name with a path, or NULL (the default) to use the
 #'   location of the backing files.
-#' @param chunk_size the number of loci processed at a time. Automatically set
-#'   if left to NULL
+#' @param chunk_size the number of loci processed at a time. If left to NULL,
+#'   100,000 loci are processed at a time.
 #' @param overwrite logical, should the file be overwritten if it already
 #'   exists?
 #' @returns the path of the .vcf file
@@ -36,9 +38,11 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
     stop("file ", file, " already exists; use 'overwrite=TRUE' to overwrite it")
   }
 
-  # if chunk is null, get the best guess of an efficient approach
+  # if chunk is null, process 100,000 loci at a time (the genotypes are
+  # written in C++, so the memory used by a chunk is only the information on
+  # its loci)
   if (is.null(chunk_size)) {
-    chunk_size <- bigstatsr::block_size(nrow(x))
+    chunk_size <- 1e5
   }
 
   # set up chunks
@@ -51,7 +55,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
   # generate the header
   vcf_header <- c(
     "##fileformat=VCFv4.3",
-    paste0("##fileDate=", format(Sys.time(), "%Y%m%e")),
+    paste0("##fileDate=", format(Sys.time(), "%Y%m%d")),
     paste0("##source=tidypopgen_v", utils::packageVersion("tidypopgen"))
   )
   # create copy of loci table
@@ -69,7 +73,7 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
         "##contig=<ID=",
         chromosome_summary$chromosome[chrom_i],
         ",length=",
-        chromosome_summary$max[chrom_i] + 1,
+        format_position(chromosome_summary$max[chrom_i] + 1),
         ">"
       )
     )
@@ -97,41 +101,56 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
     row.names = FALSE,
     col.names = FALSE
   )
-  # iterate over genotypes in chunks and append to the vcf body
+  # create a lookup table with the string for each raw value of the FBM, by
+  # recoding its decoded dosages (dosages other than 0, 1 and 2, e.g. imputed
+  # dosages, are written as numbers)
+  genotypes_lut <- .gt_get_fbm(x)$code256
+  genotypes_lut[genotypes_lut == 0] <- "0/0"
+  genotypes_lut[genotypes_lut == 1] <- "0/1"
+  genotypes_lut[genotypes_lut == 2] <- "1/1"
+  genotypes_lut[is.na(genotypes_lut)] <- "./."
+  # iterate over loci in chunks and append to the vcf body
   for (chunk_i in seq_along(chunks_vec)) {
-    genotypes_matrix <- t(show_genotypes(
-      x,
-      loci_indices = (chunks_vec_index[chunk_i] + 1):chunks_vec_index[
-        chunk_i + 1
-      ]
-    ))
-    genotypes_matrix[genotypes_matrix == 0] <- "0/0"
-    genotypes_matrix[genotypes_matrix == 1] <- "0/1"
-    genotypes_matrix[genotypes_matrix == 2] <- "1/1"
-    genotypes_matrix[is.na(genotypes_matrix)] <- "./."
+    this_chunk <- (chunks_vec_index[chunk_i] + 1):chunks_vec_index[chunk_i + 1]
     # subset loci to this chunk
-    loci_sub <- show_loci(x)[
-      (chunks_vec_index[chunk_i] + 1):chunks_vec_index[chunk_i + 1],
-    ] # nolint
+    loci_sub <- loci_tbl[this_chunk, ]
     # add the other columns needed for the
     loci_cols <- c("chromosome", "position", "name", "allele_ref", "allele_alt")
     loci_sub <- loci_sub %>%
       select(any_of(loci_cols)) %>%
-      mutate(qual = ".", filter = ".", info = "PR", format = "GT")
+      mutate(
+        position = format_position(.data$position),
+        qual = ".",
+        filter = ".",
+        info = "PR",
+        format = "GT"
+      )
     loci_sub[is.na(loci_sub)] <- "."
-    genotypes_matrix <- cbind(loci_sub, genotypes_matrix)
-    # append table to previous chunk
-    utils::write.table(
-      genotypes_matrix,
-      file = file,
-      quote = FALSE,
-      append = TRUE,
+    # the start of each line, with the information on the locus (the factor
+    # of chromosomes is pasted as its labels)
+    loci_prefix <- do.call(paste, c(unname(as.list(loci_sub)), sep = "\t"))
+    # append the lines of this chunk to the file (the genotypes are read and
+    # written in C++, one line per locus)
+    gt_write_text_by_locus(
+      BM = .gt_get_fbm(x),
+      rowInd = .gt_fbm_rows(x),
+      colInd = loci_tbl$big_index[this_chunk],
+      lut = genotypes_lut,
+      prefix = loci_prefix,
       sep = "\t",
-      col.names = FALSE,
-      row.names = FALSE
+      file = path.expand(file)
     )
   }
   return(file)
+}
+
+
+# format positions as plain integers for text files (positions stored as
+# doubles would otherwise be written in scientific notation, e.g. 1e+05)
+format_position <- function(x) {
+  out <- format(x, scientific = FALSE, trim = TRUE)
+  out[is.na(x)] <- NA
+  out
 }
 
 # TODO for tests

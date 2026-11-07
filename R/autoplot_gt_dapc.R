@@ -57,17 +57,18 @@
 #' autoplot(dapc_res, type = "components", group = populations)
 #'
 autoplot.gt_dapc <- function(
-    object,
-    type = c(
-      "screeplot",
-      "scores",
-      "loadings",
-      "components"
-    ),
-    ld = NULL,
-    group = NULL,
-    n_col = 1,
-    ...) {
+  object,
+  type = c(
+    "screeplot",
+    "scores",
+    "loadings",
+    "components"
+  ),
+  ld = NULL,
+  group = NULL,
+  n_col = 1,
+  ...
+) {
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (type == "screeplot") {
@@ -76,6 +77,13 @@ autoplot.gt_dapc <- function(
       ggplot2::geom_point() +
       ggplot2::geom_line()
   } else if (type == "scores") {
+    if (ncol(object$ind.coord) == 1) {
+      stop(
+        "gt_dapc object has only one discriminant axis, cannot plot",
+        " scores. Check the number of axes and pops used",
+        " in gt_dapc()"
+      )
+    }
     if (is.null(ld)) {
       ld <- c(1, 2)
     }
@@ -108,6 +116,10 @@ autoplot.gt_dapc <- function(
       ld <- 1
     }
     if (length(ld) > 1) {
+      # several axes are plotted as hexagonal bins, which need hexbin
+      rlang::check_installed("hexbin",
+        reason = "to plot the loadings of several discriminant axes"
+      )
       all.p <- lapply(ld, function(i) {
         p <- autoplot(object, type = "loadings", ld = i)
         p$layers[[1]] <- NULL
@@ -145,7 +157,7 @@ autoplot.gt_dapc <- function(
       dplyr::rename_with(~ paste0("Q", .x)) %>%
       # add the pops data for plotting
       dplyr::mutate(
-        name = rownames(object$posterior),
+        name = row_names(object$posterior),
         group = group
       ) %>%
       tidyr::pivot_longer(
@@ -162,7 +174,7 @@ autoplot.gt_dapc <- function(
         fill = .data$q
       )
     ) +
-      ggplot2::geom_col(color = "gray", size = 0.1) +
+      ggplot2::geom_col(color = "gray") +
       ggplot2::facet_grid(
         ~group,
         switch = "x",

@@ -873,3 +873,44 @@ test_that("combine gt_admix where one has optional extras and one doesn't", {
   comb8 <- c(admix1, admix2, admix6, match_attributes = FALSE)
   expect_equal(comb7, comb8)
 })
+
+test_that("gt_admix_reorder_q keeps a K = 1 q matrix as a matrix", {
+  example_gt <- load_example_gt("gen_tbl")
+  n_ind <- nrow(example_gt)
+  q <- seq(0.1, 0.9, length.out = n_ind)
+  admix_obj <- structure(
+    list(
+      k = c(1L, 2L),
+      Q = list(
+        q_matrix(matrix(1, nrow = n_ind, ncol = 1)),
+        q_matrix(matrix(c(q, 1 - q), ncol = 2))
+      ),
+      id = example_gt$id,
+      algorithm = "ADMIXTURE"
+    ),
+    class = c("gt_admix", "list")
+  )
+  reordered <- gt_admix_reorder_q(admix_obj, group = example_gt$population)
+  expect_equal(dim(reordered$Q[[1]]), c(n_ind, 1))
+  expect_equal(dim(reordered$Q[[2]]), c(n_ind, 2))
+  tidy_q <- get_q_matrix(reordered, k = 1, run = 1) %>%
+    tidy(data = example_gt)
+  expect_equal(nrow(tidy_q), n_ind)
+  expect_true(all(tidy_q$percentage == 1))
+})
+
+test_that("autoplot cv works for gt_admix without algorithm", {
+  admix_obj <- structure(
+    list(
+      k = 1:3,
+      Q = lapply(1:3, function(k) q_matrix(matrix(1 / k, nrow = 5, ncol = k))),
+      cv = c(0.5, 0.4, 0.45)
+    ),
+    class = c("gt_admix", "list")
+  )
+  plt <- autoplot(admix_obj, type = "cv")
+  expect_true(plt$labels$y == "Cross validation error")
+  admix_obj$algorithm <- "SNMF"
+  plt <- autoplot(admix_obj, type = "cv")
+  expect_true(plt$labels$y == "Cross-Entropy")
+})

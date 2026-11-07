@@ -27,16 +27,30 @@ tidy_dist_matrix <- function(mat) {
   if (!inherits(mat, "matrix")) {
     stop("mat should be a matrix")
   }
-  xy <- t(utils::combn(colnames(mat), 2))
-  colnames(xy) <- c("item1", "item2")
-  xy %>%
-    tibble::as_tibble() %>%
-    dplyr::mutate(value = mat[xy])
+  n <- ncol(mat)
+  # indices of all pairs (i < j), in the same order as utils::combn(n, 2),
+  # i.e. (1,2), (1,3), ..., (1,n), (2,3), ...; using integer indices avoids
+  # building a character matrix of names and matching names to index mat
+  # (there are no pairs with fewer than two individuals)
+  n_first <- max(n - 1L, 0L)
+  index1 <- rep.int(seq_len(n_first), rev(seq_len(n_first)))
+  index2 <- sequence(rev(seq_len(n_first)), from = seq_len(n_first) + 1)
+  # (the names of an empty matrix are NULL, which would drop the columns)
+  item_names <- if (n == 0) character(0) else colnames(mat)
+  xy <- tibble::tibble(
+    item1 = item_names[index1],
+    item2 = item_names[index2],
+    value = mat[cbind(index1, index2)]
+  )
+  # add a class to indicate this is a pairwise tibble
+  class(xy) <- c("pairwise_tbl", class(xy))
+  return(xy)
 }
 
 # stop if not diploid
 stopifnot_diploid <- function(x) {
-  if (inherits(x, "gen_tbl")) {
+  if (inherits(x, "tbl_df")) {
+    stopifnot_gen_tibble(x)
     x <- x$genotypes
   }
   if (abs(attr(x, "ploidy")) != 2) {
@@ -49,8 +63,10 @@ stopifnot_diploid <- function(x) {
   }
 }
 
+# stop if not diploid or pseudohaploid
 stopifnot_dip_pseudo <- function(x) {
-  if (inherits(x, "gen_tbl")) {
+  if (inherits(x, "tbl_df")) {
+    stopifnot_gen_tibble(x)
     x <- x$genotypes
   }
   if (abs(attr(x, "ploidy")) != 2) {
@@ -60,7 +76,8 @@ stopifnot_dip_pseudo <- function(x) {
 
 
 is_diploid_only <- function(x) {
-  if (inherits(x, "gen_tbl")) {
+  if (inherits(x, "tbl_df")) {
+    stopifnot_gen_tibble(x)
     (attr(x$genotypes, "ploidy") == 2)
   } else {
     (attr(x, "ploidy") == 2)
@@ -72,5 +89,53 @@ is_pseudohaploid <- function(x) {
     (attr(x$genotypes, "ploidy") == -2)
   } else {
     (attr(x, "ploidy") == -2)
+  }
+}
+
+# refresh a gen_tibble's top-level ploidy label after some individuals have
+# been dropped (e.g. by filter()), which does not update it automatically.
+# Only two cases can safely be inferred purely from which individuals
+# remain:
+# - pseudohaploid (-2): reset to diploid (2) if no pseudohaploid
+#   individuals remain (pseudohaploid is a data-quality flag, not a
+#   ploidy value, so it is only ever reset to 2, never to whatever
+#   fbm_ploidy the remaining individuals happen to have)
+# - mixed ploidy (0): reset to that single ploidy if the remaining
+#   individuals now all happen to share the same one
+# any other ploidy value is a definite single ploidy (diploid or
+# polyploid) that dropping individuals cannot make stale, so it is left
+# untouched.
+.gt_refresh_ploidy <- function(out) {
+  remaining_ploidy <-
+    attr(out$genotypes, "fbm_ploidy")[vctrs::vec_data(out$genotypes)]
+  if (length(remaining_ploidy) == 0) {
+    return(out)
+  }
+  if (is_pseudohaploid(out)) {
+    if (min(remaining_ploidy) == 2) {
+      attr(out$genotypes, "ploidy") <- 2
+    }
+  } else if (attr(out$genotypes, "ploidy") == 0) {
+    if (length(unique(remaining_ploidy)) == 1) {
+      attr(out$genotypes, "ploidy") <- remaining_ploidy[1]
+    }
+  }
+  out
+}
+
+# stop if the gen_tibble is flagged as containing pseudohaploid data
+# (heterozygosity is undefined when only one allele was observed). Trusts
+# the ploidy label rather than inspecting which individuals are currently
+# selected: filter() refreshes the label where it safely can (see
+# .gt_refresh_ploidy()), but e.g. dropping only some pseudohaploid
+# individuals, or subsetting some other way, will not, so rerun
+# gt_pseudohaploid() if this keeps erroring unexpectedly.
+stopifnot_no_pseudohaploid <- function(x) {
+  if (is_pseudohaploid(x)) {
+    stop(
+      "this function does not support pseudohaploid data; ",
+      "if you think all pseudohaploid individuals have been ",
+      "already removed, rerun gt_pseudohaploid() on your tibble"
+    )
   }
 }

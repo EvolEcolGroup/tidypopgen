@@ -85,7 +85,9 @@
 #'
 #' @param .x a [`gen_tibble`] (usually grouped, as obtained by using
 #'   [dplyr::group_by()]; use on a single population will return a number of
-#'   quantities as NA/NaN)
+#'   quantities as NA/NaN).
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param by_locus boolean, determining whether the statistics should be
 #'   returned by locus(TRUE), or as a single genome wide value (FALSE, the
 #'   default).
@@ -110,81 +112,20 @@
 #' example_gt %>% pop_global_stats(by_locus = TRUE)
 # this code is adapted from hierfstat::basic.stats by Jerome Goudet
 pop_global_stats <- function(
-    .x,
-    by_locus = FALSE,
-    n_cores = bigstatsr::nb_cores()) {
+  .x,
+  by_locus = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
   stopifnot_diploid(.x)
-  # get the populations if it is a grouped gen_tibble
-  if (inherits(.x, "grouped_df")) {
-    .group_levels <- .x %>% group_keys()
-    .group_ids <- dplyr::group_indices(.x) - 1
-  } else {
-    # create a dummy pop
-    .group_levels <- tibble(population = "pop")
-    .group_ids <- rep(0, nrow(.x))
-  }
-
-  # summarise population frequencies
-  pop_freqs_df <- grouped_summaries_dip_pseudo_cpp(
-    .gt_get_fbm(.x),
-    rowInd = .gt_fbm_rows(.x),
-    colInd = .gt_fbm_cols(.x),
-    groupIds = .group_ids,
-    ngroups = nrow(.group_levels),
-    ploidy = indiv_ploidy(.x),
-    ncores = n_cores
+  # compute the statistics for each locus in a single pass over the
+  # genotypes (see .pop_stats_dip_pseudo() for the formulae); we only keep
+  # the statistics by locus if needed, otherwise we just get their means
+  pop_stats <- .pop_stats_dip_pseudo(
+    .x,
+    by_locus_global = by_locus,
+    n_cores = n_cores
   )
-
-  # get the number of individuals
-  n <- pop_freqs_df$n / 2
-  # is this correct?
-  sHo <- pop_freqs_df$het_obs # nolint
-  mHo <- rowMeans(sHo, na.rm = TRUE) # nolint
-  # sum of squared frequencies
-  sp2 <- pop_freqs_df$freq_alt^2 + pop_freqs_df$freq_ref^2
-  #  Hs <- (1 - sp2 - sHo/2/n) #nolint start
-  #  Hs <- n/(n - 1) * Hs
-  #  Fis = 1 - sHo/Hs #nolint end
-
-  # np <- apply(n, 1, fun <- function(x) sum(!is.na(x))) # nolint start
-  # # mean sample size over the populations
-  # mn <- apply(
-  #   n,
-  #   1,
-  #   fun <- function(x) {
-  #     sum(!is.na(x)) / sum(1 / x[!is.na(x)])
-  #   }
-  # ) #nolint end
-
-  np_mn <- compute_np_mn(n)
-  np <- np_mn$np
-  mn <- np_mn$mn
-  # mean sum of square frequencies
-  msp2 <- rowMeans(sp2, na.rm = TRUE) # nolint start
-  mp2 <- rowMeans(pop_freqs_df$freq_alt)^2 + rowMeans(pop_freqs_df$freq_ref)^2
-  mHs <- mn / (mn - 1) * (1 - msp2 - mHo / 2 / mn)
-  Ht <- 1 - mp2 + mHs / mn / np - mHo / 2 / mn / np
-  mFis <- 1 - mHo / mHs
-
-  Dst <- Ht - mHs
-  Dstp <- np / (np - 1) * Dst
-  Htp <- mHs + Dstp
-  Fst <- Dst / Ht
-  Fstp <- Dstp / Htp
-  Dest <- Dstp / (1 - mHs)
-  res <- data.frame(cbind(
-    mHo,
-    mHs,
-    Ht,
-    Dst,
-    Htp,
-    Dstp,
-    Fst,
-    Fstp,
-    mFis,
-    Dest # nolint end
-  ))
-  names(res) <- c(
+  stat_names <- c(
     "Ho",
     "Hs",
     "Ht",
@@ -198,16 +139,83 @@ pop_global_stats <- function(
   )
 
   if (by_locus) {
+    res <- data.frame(pop_stats$global)
+    names(res) <- stat_names
     return(res)
   } else {
-    # overall summaries
-    is.na(res) <- do.call(cbind, lapply(res, is.infinite))
-    overall <- colMeans(res, na.rm = TRUE)
+    # overall summaries: the means across loci of each statistic (ignoring
+    # NA and infinite values)
+    overall <- pop_stats$mean_global_finite
     overall[7] <- overall[4] / overall[3]
     overall[8] <- overall[6] / overall[5]
     overall[9] <- 1 - overall[1] / overall[2]
     overall[10] <- overall[6] / (1 - overall[2])
-    names(overall) <- names(res)
+    names(overall) <- stat_names
     return(overall)
   }
+}
+
+#' Compute population statistics in a single pass over the genotypes
+#'
+#' Internal function used by [pop_global_stats()], [pop_het_exp()],
+#' [pop_het_obs()] and [pop_fis()] for diploid (and pseudohaploid) data.
+#' Loci are processed in blocks: the genotypes of each group are summarised,
+#' and for each locus we compute, for each group, the observed
+#' heterozygosity `Ho`, the gene diversity `Hs` (Nei 1987 eqn 7.39, see
+#' [pop_het_exp()]) and `Fis = 1 - Ho/Hs`, as well as the 10 global
+#' statistics returned by
+#' [pop_global_stats()] (based on means across groups, see the formulae in
+#' its documentation). Statistics by locus are only stored if requested,
+#' otherwise only their means across loci are returned (so memory use does
+#' not depend on the number of loci). Means across groups and across loci
+#' are accumulated as in [rowMeans()] and [colMeans()] (with
+#' `na.rm = TRUE`).
+#'
+#' @param .x a [`gen_tibble`], grouped or not (in which case all individuals
+#'   are treated as a single population)
+#' @param by_locus_ho,by_locus_hs,by_locus_fis booleans, should matrices of
+#'   the group statistics by locus (loci as rows, groups as columns) be
+#'   returned?
+#' @param by_locus_global boolean, should a matrix of the global statistics
+#'   by locus (loci as rows, 10 statistics as columns) be returned?
+#' @param n_cores number of cores to be used
+#' @returns a list with elements `ho`, `hs`, `fis` and `global` (matrices by
+#'   locus, empty if not requested), `mean_ho`, `mean_hs` and `mean_fis`
+#'   (means across loci for each group), `mean_global` (means across loci of
+#'   the global statistics) and `mean_global_finite` (the same, also
+#'   ignoring infinite values), and `group_names` (the names of the groups)
+#' @keywords internal
+#' @noRd
+.pop_stats_dip_pseudo <- function(
+  .x,
+  by_locus_ho = FALSE,
+  by_locus_hs = FALSE,
+  by_locus_fis = FALSE,
+  by_locus_global = FALSE,
+  n_cores = bigstatsr::nb_cores()
+) {
+  # get the populations if it is a grouped gen_tibble
+  if (inherits(.x, "grouped_df")) {
+    groups <- .group_info(.x)
+  } else {
+    # create a dummy pop
+    groups <- list(n = 1L, ids = rep(0L, nrow(.x)), labels = "pop")
+  }
+
+  pop_stats <- pop_stats_dip_pseudo_cpp(
+    .gt_get_fbm(.x),
+    rowInd = .gt_fbm_rows(.x),
+    colInd = .gt_fbm_cols(.x),
+    groupIds = groups$ids,
+    ngroups = groups$n,
+    ploidy = indiv_ploidy(.x),
+    by_locus_ho = by_locus_ho,
+    by_locus_hs = by_locus_hs,
+    by_locus_fis = by_locus_fis,
+    by_locus_global = by_locus_global,
+    block_size = 1024,
+    ncores = n_cores
+  )
+  pop_stats$group_names <- groups$labels
+  pop_stats
 }

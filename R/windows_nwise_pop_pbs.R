@@ -6,7 +6,9 @@
 #'   population and two reference populations, and is used to identify outlier
 #'   loci that may be under selection.
 #'
-#' @param .x a grouped `gen_tibble` object
+#' @param .x a grouped `gen_tibble` object.
+#'   If grouped by more than one variable, groups are labelled by the values
+#'   of the grouping variables pasted with "." (e.g. `pop1.F`).
 #' @param type type of object to return. One of "matrix" or "tidy". Default is
 #'   "matrix". "matrix" returns a dataframe where each row is a window, followed
 #'   by columns of pbs values for each population comparison. "tidy" returns a
@@ -42,6 +44,9 @@
 #'    (e.g. "pbs_pop1.pop2.pop3"). If return_fst is TRUE, stat_name will also
 #'    include "fst" calculations in the same column (e.g. "fst_pop1.pop2").
 #' - `value`: the pbs value for the populations
+#' @param ... other arguments passed to specific methods, currently
+#'   unused.
+#' @rdname windows_nwise_pop_pbs
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("grouped_gen_tbl")
@@ -52,24 +57,34 @@
 #'     window_size = 3, step_size = 2,
 #'     size_unit = "snp", min_loci = 2
 #'   )
-windows_nwise_pop_pbs <- function(.x,
-                                  type = c("matrix", "tidy"),
-                                  fst_method = c("Hudson", "Nei87", "WC84"),
-                                  return_fst = FALSE,
-                                  window_size,
-                                  step_size,
-                                  size_unit = c("snp", "bp"),
-                                  min_loci = 1,
-                                  complete = FALSE) {
+windows_nwise_pop_pbs <- function(.x, ...) {
+  UseMethod("windows_nwise_pop_pbs", .x)
+}
+
+#' @export
+#' @rdname windows_nwise_pop_pbs
+windows_nwise_pop_pbs.gen_tbl <- function(
+  .x,
+  type = c("matrix", "tidy"),
+  fst_method = c("Hudson", "Nei87", "WC84"),
+  return_fst = FALSE,
+  window_size,
+  step_size,
+  size_unit = c("snp", "bp"),
+  min_loci = 1,
+  complete = FALSE,
+  ...
+) {
+  rlang::check_dots_empty()
   # Check if the input is a grouped gen_tibble
   if (!inherits(.x, "gen_tbl") || !inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
   type <- match.arg(type)
   # get the populations
-  .group_levels <- .x %>% group_keys()
+  groups <- .group_info(.x)
   # Check if there are at least 3 populations
-  if (nrow(.group_levels) < 3) {
+  if (groups$n < 3) {
     stop("At least 3 populations are required to compute PBS.")
   }
   fst_method <- match.arg(fst_method)
@@ -84,23 +99,16 @@ windows_nwise_pop_pbs <- function(.x,
     complete = complete
   )
 
-  # check that we only have one grouping variable
-  if (length(.x %>% dplyr::group_vars()) > 1) {
-    stop("windows_nwise_pop_pbs only works with one grouping variable")
-  }
-
-  # create all 3 way combinations of populations
-  pop_combinations <- utils::combn(.group_levels %>% dplyr::pull(1), 3,
-    simplify = FALSE
+  # compute the pbs for all 3 way combinations of populations, from a matrix
+  # of the windowed fst values (windows as rows, pairs as columns)
+  fst_cols <- names(fst_values)[
+    !names(fst_values) %in% c("chromosome", "start", "end")
+  ]
+  pbs_results <- pbs_all_triplets(
+    as.matrix(fst_values[fst_cols]),
+    pops = groups$labels
   )
-
-  # for each combination of populations, compute the pbs
-  pbs_results <- lapply(pop_combinations,
-    pbs_one_triplet,
-    fst_values = fst_values
-  )
-  # combine all tables
-  pbs_results <- do.call(cbind, pbs_results)
+  pbs_results <- tibble::as_tibble(pbs_results)
   # if we returns fst, we simply cbind the whole thing
   if (return_fst) {
     pbs_results <- dplyr::bind_cols(fst_values, pbs_results)
@@ -116,11 +124,20 @@ windows_nwise_pop_pbs <- function(.x,
   if (type == "matrix") {
     return(pbs_results)
   } else if (type == "tidy") {
-    cols <-
-      names(pbs_results)[names(pbs_results) != c("chromosome", "start", "end")]
+    cols <- names(pbs_results)[
+      !names(pbs_results) %in% c("chromosome", "start", "end")
+    ]
     pbs_results <-
       pbs_results %>%
       tidyr::pivot_longer(cols = all_of(cols), names_to = "stat_name")
     return(pbs_results)
   }
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+windows_nwise_pop_pbs.data.frame <- function(.x, ...) {
+  windows_nwise_pop_pbs(restore_genotypes_tbl(.x, "windows_nwise_pop_pbs"), ...)
 }

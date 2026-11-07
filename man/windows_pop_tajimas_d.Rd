@@ -2,23 +2,37 @@
 % Please edit documentation in R/windows_pop_tajimas_d.R
 \name{windows_pop_tajimas_d}
 \alias{windows_pop_tajimas_d}
+\alias{windows_pop_tajimas_d.gen_tbl}
 \title{Compute Tajima's D for a sliding window}
 \usage{
-windows_pop_tajimas_d(
+windows_pop_tajimas_d(.x, ...)
+
+\method{windows_pop_tajimas_d}{gen_tbl}(
   .x,
   type = c("matrix", "tidy", "list"),
   window_size,
   step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
-  complete = FALSE
+  complete = FALSE,
+  ...
 )
 }
 \arguments{
 \item{.x}{a (potentially grouped) \code{gen_tibble} object}
 
+\item{...}{other arguments passed to specific methods, currently
+unused.}
+
 \item{type}{type of object to return, if using grouped method. One of
-"matrix", "tidy", or "list". Default is "matrix".}
+"matrix", "tidy", or "list". Default is "matrix".
+Data can be grouped by more than one variable: groups are then labelled
+by the values of the grouping variables pasted with "." (e.g. \code{pop1.F}),
+and the "tidy" output has one column per grouping variable rather than a
+single \code{group} column. The \code{group} column, or the columns of the
+grouping variables, keep the type of the grouping variables (e.g. a
+factor keeps its levels), so that groups stay in their order when the
+output is sorted or plotted.}
 
 \item{window_size}{The size of the window to use for the estimates.}
 
@@ -48,7 +62,9 @@ a data frame as above with the following columns:
 \item \code{chromosome}: the chromosome for the window
 \item \code{start}: the starting locus of the window
 \item \code{end}: the ending locus of the window
-\item \code{n_loci}: the number of loci in the window
+\item \code{n_loci}: the number of loci in the window (including loci with no
+genotyped individuals in some groups; the number of loci with data in
+each group is given by the "tidy" and "list" outputs)
 \item \code{group}: the Tajima's D for the group for the given window  (there will be
 as many of these columns as groups in the gen_tibble, and they will be
 named by the grouping levels)
@@ -71,6 +87,15 @@ or a list of data frames, one per group, with the following columns:
 This function computes Tajima's D for a sliding window across
 each chromosome.
 }
+\details{
+Missing genotypes are accounted for by using the number of
+non-missing allele copies at each locus as its sample size, following
+Bailey et al. (2025) as implemented in \code{pixy}. See \code{\link[=pop_tajimas_d]{pop_tajimas_d()}} for
+details. Loci with no genotyped individuals are ignored, and are not
+counted in \code{n_loci}. With windows defined in base pairs and
+\code{step_size} equal to \code{window_size}, the windows match those used by
+\code{pixy}.
+}
 \examples{
 example_gt <- load_example_gt("grouped_gen_tbl")
 
@@ -81,4 +106,10 @@ example_gt \%>\%
     size_unit = "snp", min_loci = 2
   )
 
+}
+\references{
+Bailey N, Stevison L, Samuk K (2025) Correcting for bias in
+estimates of \eqn{\theta_W} and Tajima's D from missing data in
+next-generation sequencing. Molecular Ecology Resources, e14104.
+\doi{10.1111/1755-0998.14104}
 }

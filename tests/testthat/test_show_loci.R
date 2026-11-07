@@ -57,4 +57,30 @@ test_that("show_loci gets and sets information", {
     show_loci(test_gt)$chromosome,
     as.factor(c("1", "1", "2", "2", "3", "3"))
   )
+
+  # `show_loci()<-` fails if big_index is missing or invalid
+  new_loci <- show_loci(test_gt)
+  expect_error(
+    show_loci(test_gt) <- new_loci %>% select(-big_index),
+    "must contain a 'big_index' column"
+  )
+  new_loci$big_index[2] <- NA
+  expect_error(
+    show_loci(test_gt) <- new_loci,
+    "'big_index' must contain integers between 1 and"
+  )
+  new_loci$big_index[2] <- 7L
+  expect_error(
+    show_loci(test_gt) <- new_loci,
+    "'big_index' must contain integers between 1 and"
+  )
+  new_loci$big_index[2] <- 1.5
+  expect_error(
+    show_loci(test_gt) <- new_loci,
+    "'big_index' must contain integers between 1 and"
+  )
+  # a valid big_index (here, reordered) is accepted
+  new_loci$big_index <- as.numeric(6:1)
+  show_loci(test_gt) <- new_loci
+  expect_identical(show_loci(test_gt)$big_index, 6:1)
 })

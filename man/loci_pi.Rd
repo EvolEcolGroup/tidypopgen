@@ -4,7 +4,7 @@
 \alias{loci_pi}
 \alias{loci_pi.tbl_df}
 \alias{loci_pi.vctrs_bigSNP}
-\alias{loci_pi.grouped_df}
+\alias{loci_pi.grouped_gen_tbl}
 \title{Estimate nucleotide diversity (pi) at each locus}
 \usage{
 loci_pi(.x, .col = "genotypes", n_cores, block_size, type, ...)
@@ -25,7 +25,7 @@ loci_pi(.x, .col = "genotypes", n_cores, block_size, type, ...)
   ...
 )
 
-\method{loci_pi}{grouped_df}(
+\method{loci_pi}{grouped_gen_tbl}(
   .x,
   .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
@@ -44,12 +44,19 @@ that value. There is no need for the user to set it, but it is included to
 resolve certain tidyselect operations.}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
 
 \item{type}{type of object to return, if using grouped method. One of "tidy",
-"list", or "matrix". Default is "tidy".}
+"list", or "matrix". Default is "tidy".
+Data can be grouped by more than one variable: groups are then labelled
+by the values of the grouping variables pasted with "." (e.g. \code{pop1.F}),
+and the "tidy" output has one column per grouping variable rather than a
+single \code{group} column. The \code{group} column, or the columns of the
+grouping variables, keep the type of the grouping variables (e.g. a
+factor keeps its levels), so that groups stay in their order when the
+output is sorted or plotted.}
 
 \item{...}{other arguments passed to specific methods, currently unused.}
 }
@@ -57,8 +64,32 @@ resolve certain tidyselect operations.}
 a vector of frequencies, one per locus
 }
 \description{
-Estimate nucleotide diversity (pi) at each locus, accounting for missing
-values. This uses the formula: c_0 * c_1 / (n * (n-1) / 2)
+Estimate nucleotide diversity (\eqn{\pi}) at each locus, accounting for
+missing values.
+}
+\details{
+Nucleotide diversity is estimated as
+
+\deqn{
+\pi = \frac{c_0 c_1}{n(n - 1)/2},
+}
+
+where:
+\itemize{
+\item \eqn{c_0} is the number of observed copies of allele 0,
+\item \eqn{c_1} is the number of observed copies of allele 1,
+\item \eqn{n = c_0 + c_1} is the total number of non-missing allele
+copies at the locus.
+}
+
+Missing values
+are accommodated by computing \eqn{n}, \eqn{c_0}, and \eqn{c_1} using only
+non-missing genotype data. For polyploid data, each individual contributes
+a number of allele copies equal to its ploidy.
+
+This corresponds to the unbiased gene diversity estimator of
+Nei and Roychoudhury (1974) and is applicable to diploid, polyploid
+mixed-ploidy, and pseudohaploid \code{gen_tibble} objects alike.
 }
 \examples{
 \dontshow{if (all(rlang::is_installed(c("RhpcBLASctl", "data.table")))) withAutoprint(\{ # examplesIf}

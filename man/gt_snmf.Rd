@@ -46,7 +46,8 @@ ranging between 0 and 1, to be used when entropy = TRUE}
 
 \item{ploidy}{the ploidy of the input data (defaults to 2)}
 
-\item{seed}{the seed for the random number generator}
+\item{seed}{the seed for the random number generator, either a vector of
+length \code{n_runs}, or -1 (the default) to use a random seed for each run}
 }
 \value{
 an object of class \code{gt_admix} consisting of a list with the following
@@ -67,7 +68,7 @@ on the screen when running from the command line)
 Run SNMF from R in tidypopgen
 }
 \details{
-This is a wrapper for \code{\link[LEA:main_sNMF]{LEA::snmf()}}.
+This is a wrapper for \code{\link[LEA:snmf]{LEA::snmf()}}.
 }
 \examples{
 \dontshow{if (rlang::is_installed("LEA")) withAutoprint(\{ # examplesIf}
@@ -82,5 +83,5 @@ example_gt \%>\% gt_snmf(
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[LEA:main_sNMF]{LEA::snmf()}}
+\code{\link[LEA:snmf]{LEA::snmf()}}
 }

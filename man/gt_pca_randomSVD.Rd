@@ -76,6 +76,15 @@ memory-efficient. Thus, it can be used on very large big.matrices.
 This function is a wrapper
 for \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}}
 }
+\details{
+With up to a few thousand individuals, \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}} is usually
+much faster: on 1,043 individuals and 643,733 loci, this function took
+about 175 s on one core (with the default \code{tol}), against about 31 s for
+\code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}}. This algorithm is most useful when there are too
+many individuals for \code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}}, whose memory grows with the
+square of the number of individuals. Using several cores (\code{n_cores}), or a
+larger \code{tol}, also reduces its time.
+}
 \note{
 Rather than accessing these elements directly, it is better to use
 \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
@@ -110,9 +119,9 @@ gt_pca_randomSVD(anole_gt, k = 10, total_var = TRUE)
 \seealso{
 \code{\link[bigstatsr:big_randomSVD]{bigstatsr::big_randomSVD()}} which this function wraps.
 
-Other gt_pca_functions: 
+Other gt_pca_functions:
 \code{\link{gt_pca}},
-\code{\link{gt_pca_autoSVD}()},
-\code{\link{gt_pca_partialSVD}()}
+\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}},
+\code{\link[=gt_pca_partialSVD]{gt_pca_partialSVD()}}
 }
 \concept{gt_pca_functions}

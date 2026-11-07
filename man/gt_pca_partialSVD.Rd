@@ -51,6 +51,20 @@ if the number of individuals is much smaller than the number of loci;
 otherwise, \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} is a better option. This function is a
 wrapper for \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}}.
 }
+\details{
+With up to a few thousand individuals, this is usually much faster than
+\code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} (on 1,043 individuals and 643,733 loci, about 31 s
+on one core against about 175 s). The covariance between individuals is
+kept in memory, which takes 8 bytes per pair of individuals (about 0.2 GB
+for 5,000 individuals, and 3.2 GB for 20,000); with many more
+individuals, \code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}} uses much less memory.
+
+The genotypes are read in blocks of loci, decoded as doubles, of about
+1 GB (set by \code{options(bigstatsr.block.sizeGB)}). A smaller size reduces the
+memory used, at the cost of some speed: on the same data, blocks of
+0.25 GB (\code{options(bigstatsr.block.sizeGB = 0.25)}) reduced the peak memory
+from about 2.0 to 0.6 GB, and took about 25\% longer.
+}
 \note{
 Rather than accessing these elements directly, it is better to use
 \code{tidy} and \code{augment}. See \code{\link{gt_pca_tidiers}}.
@@ -86,9 +100,9 @@ gt_pca_partialSVD(lobsters,
 \seealso{
 \code{\link[bigstatsr:big_SVD]{bigstatsr::big_SVD()}} which this function wraps.
 
-Other gt_pca_functions: 
+Other gt_pca_functions:
 \code{\link{gt_pca}},
-\code{\link{gt_pca_autoSVD}()},
-\code{\link{gt_pca_randomSVD}()}
+\code{\link[=gt_pca_autoSVD]{gt_pca_autoSVD()}},
+\code{\link[=gt_pca_randomSVD]{gt_pca_randomSVD()}}
 }
 \concept{gt_pca_functions}

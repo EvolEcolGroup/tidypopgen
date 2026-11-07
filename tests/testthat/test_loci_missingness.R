@@ -155,15 +155,22 @@ test_that("loci_missingness on grouped tibble", {
   # test a second grouping variable
   test_gt$region <- c("a", "a", "b", "b", "a", "b", "b")
   test_gt <- test_gt %>% group_by(population, region)
-  expect_error(
-    test_gt %>% loci_missingness(),
-    "only works with one grouping variable"
+  # several grouping variables give the same results as a single variable
+  # combining them
+  test_gt_combined <- test_gt %>%
+    ungroup() %>%
+    mutate(pop_region = paste(population, region, sep = ".")) %>%
+    group_by(pop_region)
+  expect_equal(
+    test_gt %>% loci_missingness(type = "matrix"),
+    test_gt_combined %>% loci_missingness(type = "matrix")
   )
 })
 
 test_that("n_cores can be set", {
   one_core <- loci_missingness(test_gt, n_cores = 1)
-  two_cores <- loci_missingness(test_gt, n_cores = 12)
+  # (never more than 2 cores in tests, as required by CRAN)
+  two_cores <- loci_missingness(test_gt, n_cores = 2)
   expect_equal(one_core, two_cores)
 })
 

@@ -192,4 +192,93 @@ test_that("n_cores can be set", {
   one_core <- test_gt %>% pop_global_stats(by_locus = TRUE, n_cores = 1)
   two_core <- test_gt %>% pop_global_stats(by_locus = TRUE, n_cores = 2)
   expect_equal(one_core, two_core)
+  # pop_fis
+  one_core <- test_gt %>% pop_fis(by_locus = TRUE, n_cores = 1)
+  two_core <- test_gt %>% pop_fis(by_locus = TRUE, n_cores = 2)
+  expect_equal(one_core, two_core)
+})
+
+test_that("pop_stats_dip_pseudo_cpp does not depend on blocks or cores", {
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  # call the cpp function directly, so that we can change the block size
+  stats_cpp <- function(block_size, ncores) {
+    pop_stats_dip_pseudo_cpp(
+      .gt_get_fbm(test_gt),
+      rowInd = .gt_fbm_rows(test_gt),
+      colInd = .gt_fbm_cols(test_gt),
+      groupIds = dplyr::group_indices(test_gt) - 1,
+      ngroups = 3,
+      ploidy = indiv_ploidy(test_gt),
+      by_locus_ho = TRUE,
+      by_locus_hs = TRUE,
+      by_locus_fis = TRUE,
+      by_locus_global = TRUE,
+      block_size = block_size,
+      ncores = ncores
+    )
+  }
+  # a single block of loci, on a single core
+  one_block <- stats_cpp(1024, 1)
+  # blocks of different sizes (including blocks that do not divide the
+  # number of loci), on multiple cores, give identical results
+  expect_identical(stats_cpp(1, 1), one_block)
+  expect_identical(stats_cpp(4, 2), one_block)
+  # codes that are not small integers (e.g. dosages) use a different code
+  # path (doubles summed by individual instead of integer lookup tables),
+  # which gives identical results (bytes 0 to 3 decode in the same way)
+  old_code <- attr(test_gt$genotypes, "fbm")$code256
+  attr(test_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_DOSAGE
+  expect_identical(stats_cpp(4, 2), one_block)
+  attr(test_gt$genotypes, "fbm")$code256 <- old_code
+  # the means across loci match those of the statistics by locus
+  expect_equal(one_block$mean_hs, unname(colMeans(one_block$hs, na.rm = TRUE)))
+  expect_equal(
+    one_block$mean_global,
+    unname(colMeans(one_block$global, na.rm = TRUE))
+  )
+})
+
+test_that("pop_global_stats handles a population with no data at a locus", {
+  set.seed(3)
+  missing_genotypes <- matrix(
+    sample(c(0, 1, 2), 12 * 30, replace = TRUE, prob = c(0.4, 0.35, 0.25)),
+    nrow = 12
+  )
+  missing_pops <- rep(c("a", "b", "c"), each = 4)
+  # population "a" has no valid genotypes at locus 5
+  missing_genotypes[missing_pops == "a", 5] <- NA
+  missing_gt <- gen_tibble(
+    x = missing_genotypes,
+    loci = data.frame(
+      name = paste0("rs", 1:30),
+      chromosome = 1L,
+      position = as.integer(1:30 * 10),
+      genetic_dist = as.double(rep(0, 30)),
+      allele_ref = "A",
+      allele_alt = "T"
+    ),
+    indiv_meta = data.frame(
+      id = paste0("i", 1:12),
+      population = missing_pops
+    ),
+    quiet = TRUE,
+    backingfile = tempfile()
+  ) %>%
+    dplyr::group_by(population)
+  basic_hier <- hierfstat::basic.stats(gt_as_hierfstat(missing_gt))
+  # by locus, including the locus where population "a" has no data
+  test_global_stats <- missing_gt %>% pop_global_stats(by_locus = TRUE)
+  expect_false(anyNA(test_global_stats[5, ]))
+  expect_true(all.equal(
+    basic_hier$perloc,
+    round(test_global_stats, 4),
+    check.attributes = FALSE
+  ))
+  # overall
+  test_global_stats <- missing_gt %>% pop_global_stats(by_locus = FALSE)
+  expect_true(all.equal(
+    basic_hier$overall,
+    round(test_global_stats, 4),
+    check.attributes = FALSE
+  ))
 })

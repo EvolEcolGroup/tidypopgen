@@ -43,8 +43,57 @@ test_that("cbind correctly binds", {
     ),
     age = c(1, 2, 3, 4, 5, 6, 7)
   )
-  test_combined_gt <- cbind(test_gt, new_df)
+  # population is in both, so both columns are renamed (as in bind_cols())
+  expect_message(
+    test_combined_gt <- cbind(test_gt, new_df),
+    "New names"
+  )
   expect_true(inherits(test_combined_gt, "gen_tbl"))
+  expect_identical(
+    names(test_combined_gt),
+    c(
+      "id", "population...2", "genotypes", "id2", "population...5", "age"
+    )
+  )
   # check that the loci info is there
   expect_equal(nrow(show_loci(test_combined_gt)), nrow(test_loci))
+
+  # a grouped gen_tibble keeps its grouping, unless its grouping variable is
+  # renamed; the names are those of bind_cols()
+  test_grouped <- test_gt %>% group_by(population)
+  expect_message(
+    test_combined_gt <- cbind(test_grouped, new_df),
+    "New names"
+  )
+  expect_false(dplyr::is_grouped_df(test_combined_gt))
+  expect_true(inherits(test_combined_gt, "gen_tbl"))
+  expect_identical(
+    names(test_combined_gt),
+    names(suppressMessages(dplyr::bind_cols(
+      dplyr::group_by(tibble::as_tibble(test_indiv_meta), population),
+      genotypes = 1,
+      new_df
+    )))
+  )
+  test_combined_gt <- cbind(test_grouped, new_df["age"])
+  expect_identical(dplyr::group_vars(test_combined_gt), "population")
+  expect_true(inherits(test_combined_gt, "grouped_gen_tbl"))
+  test_combined_gt <- suppressMessages(
+    cbind(test_grouped, data.frame(age = 1:7, age = 7:1, check.names = FALSE))
+  )
+  expect_identical(dplyr::group_vars(test_combined_gt), "population")
+  expect_identical(
+    names(test_combined_gt),
+    c("id", "population", "genotypes", "age...4", "age...5")
+  )
+
+  # the id and genotypes can not be duplicated
+  expect_error(
+    cbind(test_gt, data.frame(id = test_gt$id)),
+    "already has a column 'id'"
+  )
+  expect_error(
+    cbind(test_grouped, genotypes = 1:7),
+    "already has a column 'genotypes'"
+  )
 })

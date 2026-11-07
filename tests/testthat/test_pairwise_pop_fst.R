@@ -193,6 +193,64 @@ if (rlang::is_installed("hierfstat")) {
       wc_tidypopgen_missing_var1$value
     )
   })
+
+  test_that("loci with no data in a population are dropped", {
+    # (unlike hierfstat for WC84) a dataset with two populations, where pop2
+    # has no genotypes at rs1 and rs5
+    set.seed(123)
+    n_loci <- 40
+    pops <- rep(c("pop1", "pop2"), each = 10)
+    geno <- matrix(
+      rbinom(length(pops) * n_loci, 2, 0.4),
+      nrow = length(pops)
+    )
+    geno[pops == "pop2", 1:10] <- rbinom(10 * 10, 2, 0.8)
+    empty_loci <- c(1, 5)
+    geno[pops == "pop2", empty_loci] <- NA
+    empty_gt <- gen_tibble(
+      x = geno,
+      loci = data.frame(
+        name = paste0("rs", seq_len(n_loci)),
+        chromosome = "chr1",
+        position = seq_len(n_loci),
+        genetic_dist = 0,
+        allele_ref = "A",
+        allele_alt = "T"
+      ),
+      indiv_meta = data.frame(
+        id = paste0("i", seq_along(pops)),
+        population = pops
+      ),
+      quiet = TRUE
+    ) %>%
+      dplyr::group_by(population)
+    kept_gt <- empty_gt %>% select_loci(-dplyr::all_of(empty_loci))
+    for (method in c("Hudson", "Nei87", "WC84")) {
+      # their Fst by locus is NaN
+      by_locus <- empty_gt %>%
+        pairwise_pop_fst(
+          method = method,
+          by_locus = TRUE,
+          by_locus_type = "matrix"
+        )
+      expect_true(all(is.nan(by_locus$Fst_by_locus[empty_loci, 1])))
+      expect_false(any(is.nan(by_locus$Fst_by_locus[-empty_loci, 1])))
+      # and they do not contribute to the genome wide estimate
+      expect_equal(
+        pairwise_pop_fst(empty_gt, method = method)$value,
+        pairwise_pop_fst(kept_gt, method = method)$value
+      )
+    }
+    # hierfstat gives the same WC84 estimate only once these loci are removed
+    # (it keeps them, with an among-population variance component of 0)
+    wc_tidypopgen <- pairwise_pop_fst(empty_gt, method = "WC84")$value
+    wc_hierfstat_kept <- hierfstat::pairwise.WCfst(gt_as_hierfstat(kept_gt))
+    expect_equal(wc_tidypopgen, wc_hierfstat_kept[1, 2])
+    wc_hierfstat <- hierfstat::pairwise.WCfst(gt_as_hierfstat(empty_gt))
+    expect_lt(wc_hierfstat[1, 2], wc_tidypopgen)
+    hier_per_loc <- hierfstat::wc(gt_as_hierfstat(empty_gt))$per.loc
+    expect_equal(hier_per_loc$FST[empty_loci], c(0, 0))
+  })
 }
 
 test_that("pairwise_pop_fst hudson", {
@@ -387,6 +445,56 @@ test_that("n_cores can be set", {
   test_gt <- ungroup(test_gt)
   expect_error(test_gt %>% pairwise_pop_fst(method = "WC84", n_cores = 2))
   expect_true(getOption("bigstatsr.check.parallel.blas"))
+})
+
+test_that("pairwise_pop_fst does not depend on blocks, cores or ordering", {
+  test_gt <- test_gt %>% dplyr::group_by(population)
+  # call the cpp function directly, so that we can change the block size
+  fst_cpp <- function(.x, method, block_size, ncores, return_num_dem) {
+    pairwise_pop_fst_cpp(
+      .gt_get_fbm(.x),
+      rowInd = .gt_fbm_rows(.x),
+      colInd = .gt_fbm_cols(.x),
+      groupIds = dplyr::group_indices(.x) - 1,
+      ngroups = 3,
+      ploidy = indiv_ploidy(.x),
+      pairwise_combn = utils::combn(3, 2),
+      method = method,
+      by_locus = TRUE,
+      return_num_dem = return_num_dem,
+      block_size = block_size,
+      ncores = ncores
+    )
+  }
+  # reorder the individuals and select a subset of loci in a different order
+  sub_gt <- test_gt %>%
+    dplyr::ungroup() %>%
+    dplyr::slice(c(7, 2, 5, 1, 4, 6, 3)) %>%
+    select_loci(c(6, 2, 4)) %>%
+    dplyr::group_by(population)
+  for (method in c("Hudson", "Nei87", "WC84")) {
+    for (return_num_dem in c(FALSE, TRUE)) {
+      # a single block of loci, on a single core
+      one_block <- fst_cpp(test_gt, method, 1024, 1, return_num_dem)
+      # blocks of different sizes (including blocks that do not divide the
+      # number of loci), on multiple cores, give identical results
+      expect_identical(
+        fst_cpp(test_gt, method, 1, 1, return_num_dem),
+        one_block
+      )
+      expect_identical(
+        fst_cpp(test_gt, method, 4, 2, return_num_dem),
+        one_block
+      )
+      # estimates by locus for a subset of reordered loci (from reordered
+      # individuals) are the same as from the full data
+      sub_res <- fst_cpp(sub_gt, method, 2, 2, return_num_dem)
+      expect_equal(sub_res[[1]], one_block[[1]][c(6, 2, 4), ])
+      if (return_num_dem) {
+        expect_equal(sub_res[[2]], one_block[[2]][c(6, 2, 4), ])
+      }
+    }
+  }
 })
 
 test_that("type = pairwise", {
@@ -642,4 +750,90 @@ test_that("by_locus_type", {
     wc84_locus_tidy_pairwise$Fst_by_locus
   )
   expect_true(is.matrix(wc84_locus_tidy_pairwise$Fst))
+})
+
+# test with loci coded as integers
+# test coding names as integers to reduce storage
+test_that("pairwise_pop_fst when names stored as integers", {
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  test_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    parser = "cpp",
+    backingfile = tempfile("pop_a_"),
+    names_as_int = TRUE
+  )
+  test_gt$pop <- c("pop1", "pop1", "pop1", "pop2", "pop2")
+  test_gt <- test_gt %>% dplyr::group_by(pop)
+  test_fst <- test_gt %>% pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
+  # check that the loci names of the Fst_by_locus tibble are integers
+  expect_true(is.integer(test_fst$Fst_by_locus$loci))
+  # now get a matrix
+  test_fst <- test_gt %>% pairwise_pop_fst(
+    method = "Hudson",
+    by_locus = TRUE,
+    by_locus_type = "matrix"
+  )
+  expect_true(is.integer(row_names(test_fst$Fst_by_locus)))
+  # check that it is the correct length
+  expect_equal(
+    length(row_names(test_fst$Fst_by_locus)),
+    nrow(show_loci(test_gt))
+  )
+  # and now return numerator and denominator
+  test_fst <- test_gt %>% pairwise_pop_fst(
+    method = "Hudson",
+    by_locus = TRUE,
+    by_locus_type = "matrix",
+    return_num_dem = TRUE
+  )
+  expect_true(is.integer(row_names(test_fst$Fst_by_locus_num)))
+  # check that simple rownames returns NULL
+  expect_null(rownames(test_fst$Fst_by_locus_num))
+
+
+  # and now repeat it if we don't use names_as_int
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  test_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    parser = "cpp",
+    backingfile = tempfile("pop_a_"),
+    names_as_int = FALSE
+  )
+  test_gt$pop <- c("pop1", "pop1", "pop1", "pop2", "pop2")
+  test_gt <- test_gt %>% dplyr::group_by(pop)
+  test_fst <- test_gt %>% pairwise_pop_fst(method = "Hudson", by_locus = TRUE)
+  # check that the loci names of the Fst_by_locus tibble are integers
+  expect_false(is.integer(test_fst$Fst_by_locus$loci))
+  # now get a matrix
+  test_fst <- test_gt %>% pairwise_pop_fst(
+    method = "Hudson",
+    by_locus = TRUE,
+    by_locus_type = "matrix"
+  )
+  expect_false(is.integer(row_names(test_fst$Fst_by_locus)))
+  # check that it is the correct length
+  expect_equal(
+    length(row_names(test_fst$Fst_by_locus)),
+    nrow(show_loci(test_gt))
+  )
+  # check that it is the correct length with simple rownames
+  expect_equal(
+    length(rownames(test_fst$Fst_by_locus)),
+    nrow(show_loci(test_gt))
+  )
+  # and now return numerator and denominator
+  test_fst <- test_gt %>% pairwise_pop_fst(
+    method = "Hudson",
+    by_locus = TRUE,
+    by_locus_type = "matrix",
+    return_num_dem = TRUE
+  )
+  expect_false(is.integer(row_names(test_fst$Fst_by_locus_num)))
+  # check that it is the correct length with simple rownames
+  expect_equal(
+    length(rownames(test_fst$Fst_by_locus_num)),
+    nrow(show_loci(test_gt))
+  )
 })

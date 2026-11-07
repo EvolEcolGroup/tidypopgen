@@ -61,7 +61,7 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
   # so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
-    "this function only works on diploid data"
+    "this function does not support pseudohaploid data"
   )
   expect_error(
     indiv_inbreeding(test_gt_pseudo),
@@ -124,7 +124,6 @@ test_that("gt_pseudohaploid correctly deals with ploidy", {
 })
 
 
-
 test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
   ## now group it
   test_gt <- test_gt %>% group_by(population)
@@ -154,7 +153,7 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
   # so will pop estimates that requires heterozygote counts
   expect_error(
     indiv_het_obs(test_gt_pseudo),
-    "this function only works on diploid data"
+    "this function does not support pseudohaploid data"
   )
   expect_error(
     indiv_inbreeding(test_gt_pseudo),
@@ -190,7 +189,40 @@ test_that("gt_pseudohaploid on grouped tibble correctly deals with ploidy", {
   pseudo_fst <- pairwise_pop_fst(test_gt_pseudo)
   # confirm the results change
   expect_false(all(pseudo_fst$value == pairwise_pop_fst(test_gt)$value))
-  # TODO we should test the values are correct
+  # check the values against a direct computation of Hudson's Fst, where
+  # pseudohaploids contribute a single allele
+  ploidy_hap <- c(2L, 1L, 2L, 1L, 2L, 1L, 2L)
+  pops <- c("pop1", "pop2", "pop3")
+  # alternative allele frequencies and number of valid alleles by population
+  alt_freq <- n_alleles <- matrix(NA_real_, ncol(test_genotypes), length(pops))
+  for (i_pop in seq_along(pops)) {
+    in_pop <- test_indiv_meta$population == pops[i_pop]
+    geno <- test_genotypes[in_pop, , drop = FALSE] / (3 - ploidy_hap[in_pop])
+    n_alleles[, i_pop] <- colSums((!is.na(geno)) * ploidy_hap[in_pop])
+    alt_freq[, i_pop] <- colSums(geno, na.rm = TRUE) / n_alleles[, i_pop]
+  }
+  # numerator and denominator of Hudson's Fst for each pair of populations
+  pairs <- utils::combn(length(pops), 2)
+  ref_num <- ref_den <- matrix(NA_real_, ncol(test_genotypes), ncol(pairs))
+  for (i_pair in seq_len(ncol(pairs))) {
+    p1 <- pairs[1, i_pair]
+    p2 <- pairs[2, i_pair]
+    ref_num[, i_pair] <- (alt_freq[, p1] - alt_freq[, p2])^2 -
+      alt_freq[, p1] * (1 - alt_freq[, p1]) / (n_alleles[, p1] - 1) -
+      alt_freq[, p2] * (1 - alt_freq[, p2]) / (n_alleles[, p2] - 1)
+    ref_den[, i_pair] <- alt_freq[, p1] * (1 - alt_freq[, p2]) +
+      alt_freq[, p2] * (1 - alt_freq[, p1])
+  }
+  pseudo_num_den <- pairwise_pop_fst(test_gt_pseudo,
+    by_locus = TRUE, return_num_dem = TRUE
+  )
+  expect_equal(as.vector(pseudo_num_den$Fst_by_locus_num), as.vector(ref_num))
+  expect_equal(as.vector(pseudo_num_den$Fst_by_locus_den), as.vector(ref_den))
+  # the genome wide estimate uses loci where both terms are defined
+  ref_valid <- !is.na(ref_num) & !is.na(ref_den)
+  ref_num[!ref_valid] <- 0
+  ref_den[!ref_valid] <- 0
+  expect_equal(pseudo_fst$value, colSums(ref_num) / colSums(ref_den))
 
   # only Hudson works on pseudohaploids
   expect_error(pairwise_pop_fst(test_gt_pseudo, method = "Nei87"),
@@ -282,21 +314,47 @@ test_that("gt_pseudohaploid updates ploidy after dropping pseudohploids", {
   # and functions requiring diploid data throw errors
   expect_error(
     round(indiv_het_obs(test_gt), 1),
-    "this function only works on diploid data"
+    "this function does not support pseudohaploid data"
   )
 
   # Now try filtering out pseudohaploid individuals
   test_gt <- test_gt %>% filter(indiv_missingness(genotypes) < 0.15)
 
+  # check ploidy
+  expect_equal(test_gt %>% show_ploidy(), 2)
+  # check individuals
+  expect_equal(test_gt %>% indiv_ploidy(), rep(2, 4))
+
   # Functions using stopifnot_diploid should now work
   # becasue data no longer contain pseudohaploids
   expect_equal(length(indiv_het_obs(test_gt)), 4)
   expect_equal(round(indiv_het_obs(test_gt), 1), c(0.2, 0.5, 0.3, 0.5))
+})
 
-  # Rerun gt_pseudohaploid to update gen_tibble
-  test_gt <- gt_pseudohaploid(test_gt)
-  # check individuals
-  expect_equal(test_gt %>% indiv_ploidy(), rep(2, 4))
-  # check ploidy
-  expect_equal(test_gt %>% show_ploidy(), 2)
+test_that("gt_pseudohaploid keeps ploidy of individuals not in the tibble", {
+  test_gt_pseudo <- gt_pseudohaploid(test_gt)
+  sub_gt <- test_gt_pseudo %>% filter(id %in% c("a", "c"))
+  sub_gt <- gt_pseudohaploid(sub_gt)
+  expect_equal(show_ploidy(sub_gt), 2)
+  expect_equal(indiv_ploidy(sub_gt), c(2, 2))
+  # fbm_ploidy covers the whole FBM, and is unchanged for the other rows
+  expect_equal(
+    attr(sub_gt$genotypes, "fbm_ploidy"),
+    c(2, 1, 2, 1, 2, 1, 2)
+  )
+})
+
+test_that("gt_pseudohaploid only works on diploid data", {
+  test_gt_tetra <- gen_tibble(
+    x = rbind(c(4, 0, 4, 0), c(1, 2, 3, 0), c(0, 4, 0, 4), c(2, 2, 1, 3)),
+    loci = test_loci[1:4, ],
+    indiv_meta = test_indiv_meta[1:4, ],
+    ploidy = 4,
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  expect_error(
+    gt_pseudohaploid(test_gt_tetra),
+    "this function only works on diploid or pseudohaploid data"
+  )
 })

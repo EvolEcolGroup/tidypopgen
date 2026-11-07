@@ -7,17 +7,19 @@
 scale_fill_distruct(guide = "none", ...)
 }
 \arguments{
-\item{guide}{guide function passed to \code{\link[ggplot2:scale_manual]{ggplot2::scale_fill_manual()}}.
+\item{guide}{guide function passed to \code{\link[ggplot2:discrete_scale]{ggplot2::discrete_scale()}}.
 Defaults to "none", set to "legend" if a legend is required.}
 
-\item{...}{further parameters to be passed to \code{\link[ggplot2:scale_manual]{ggplot2::scale_fill_manual()}}}
+\item{...}{further parameters to be passed to \code{\link[ggplot2:discrete_scale]{ggplot2::discrete_scale()}}
+(e.g. \code{name}, \code{labels} or \code{breaks})}
 }
 \value{
 a scale constructor to be used with ggplot
 }
 \description{
-A wrapper around \code{\link[ggplot2:scale_manual]{ggplot2::scale_fill_manual()}}, using the distruct colours
-from \code{\link{distruct_colours}}.
+A discrete fill scale using the distruct colours from
+\code{\link{distruct_colours}}, in order. With more groups than colours (56), the
+colours are recycled, with a warning, so some groups share a colour.
 }
 \examples{
 library(ggplot2)
@@ -29,17 +31,12 @@ lobsters <- gen_tibble(bed_file,
   quiet = TRUE
 )
 
-# Remove monomorphic loci and impute
-lobsters <- lobsters \%>\% select_loci_if(loci_maf(genotypes) > 0)
-lobsters <- gt_impute_simple(lobsters, method = "mode")
-
-# Create PCA object
-pca <- gt_pca_partialSVD(lobsters)
-
-# Colour by population
-autoplot(pca, type = "scores") +
-  aes(colour = lobsters$population) + scale_fill_distruct()
+# Fill bars of individuals per population with the distruct colours
+ggplot(lobsters, aes(x = population, fill = population)) +
+  geom_bar() +
+  scale_fill_distruct()
 }
 \seealso{
-\code{\link[ggplot2:scale_manual]{ggplot2::scale_fill_manual()}} which this function wraps.
+\code{\link[ggplot2:scale_fill_manual]{ggplot2::scale_fill_manual()}}, which this function used to wrap
+(it can not recycle colours).
 }

@@ -132,3 +132,57 @@ test_that("windows type", {
     )
   expect_true(is.data.frame(pbs_windows_tidy_fst))
 })
+
+test_that("windows_nwise_pop_pbs uses the requested fst_method", {
+  pbs_nei <- test_gt %>%
+    windows_nwise_pop_pbs(
+      fst_method = "Nei87",
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp",
+      return_fst = TRUE
+    )
+  fst_nei <- test_gt %>%
+    windows_pairwise_pop_fst(
+      method = "Nei87",
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp"
+    )
+  expect_equal(pbs_nei[, names(fst_nei)], fst_nei)
+  pbs_hudson <- test_gt %>%
+    windows_nwise_pop_pbs(
+      fst_method = "Hudson",
+      window_size = 3,
+      step_size = 2,
+      size_unit = "snp"
+    )
+  expect_false(isTRUE(all.equal(
+    pbs_hudson$pbs_pop1.pop2.pop3,
+    pbs_nei$pbs_pop1.pop2.pop3
+  )))
+})
+
+test_that("windows_nwise_pop_pbs tidy output does not warn", {
+  # with 5 populations, there are 10 Fst and 60 pbs columns, plus the 3
+  # columns describing the windows
+  five_pops <- test_gt %>% dplyr::ungroup()
+  five_pops$population[c(1, 2)] <- "pop5"
+  five_pops <- five_pops %>% dplyr::group_by(population)
+  expect_no_warning(
+    pbs_windows_tidy <- five_pops %>%
+      windows_nwise_pop_pbs(
+        type = "tidy",
+        window_size = 3,
+        step_size = 2,
+        size_unit = "snp",
+        return_fst = TRUE
+      )
+  )
+  expect_length(unique(pbs_windows_tidy$stat_name), 70)
+  expect_true(all(grepl("^(pbs|fst)", pbs_windows_tidy$stat_name)))
+  expect_named(
+    pbs_windows_tidy,
+    c("chromosome", "start", "end", "stat_name", "value")
+  )
+})

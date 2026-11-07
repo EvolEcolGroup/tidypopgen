@@ -100,21 +100,22 @@
 #' @family gt_pca_functions
 # nolint start
 gt_pca_autoSVD <- function(
-    # nolint end
-    x,
-    k = 10,
-    fun_scaling = bigsnpr::snp_scaleBinom(),
-    thr_r2 = 0.2,
-    use_positions = TRUE,
-    size = 100 / thr_r2,
-    roll_size = 50,
-    int_min_size = 20,
-    alpha_tukey = 0.05,
-    min_mac = 10,
-    max_iter = 5,
-    n_cores = 1,
-    verbose = TRUE,
-    total_var = TRUE) {
+  # nolint end
+  x,
+  k = 10,
+  fun_scaling = bigsnpr::snp_scaleBinom(),
+  thr_r2 = 0.2,
+  use_positions = TRUE,
+  size = 100 / thr_r2,
+  roll_size = 50,
+  int_min_size = 20,
+  alpha_tukey = 0.05,
+  min_mac = 10,
+  max_iter = 5,
+  n_cores = 1,
+  verbose = TRUE,
+  total_var = TRUE
+) {
   if (gt_has_imputed(x) && gt_uses_imputed(x) == FALSE) {
     gt_set_imputed(x, set = TRUE)
     on.exit(gt_set_imputed(x, set = FALSE), add = TRUE)
@@ -135,9 +136,10 @@ gt_pca_autoSVD <- function(
   infos_chr <- rep(1, ncol(X))
 
   infos_chr[.gt_fbm_cols(x)] <- cast_chromosome_to_int(show_loci(x)$chromosome)
-  # chromosomes have to be positive numbers
+  # chromosomes have to be positive numbers: shift the codes so that the
+  # smallest one is 1
   if (min(infos_chr) < 1) {
-    infos_chr <- infos_chr + abs(min(infos_chr) + 1)
+    infos_chr <- infos_chr - min(infos_chr) + 1
   }
   infos_pos <- NULL
   if (use_positions) {
@@ -187,23 +189,23 @@ gt_pca_autoSVD <- function(
   )
 
   # add names to the scores (to match them to data later)
-  rownames(this_svd$u) <- x$id
+  row.names(this_svd$u) <- x$id
   this_svd$method <- "autoSVD"
   this_svd$call <- match.call()
-  # subset the loci table to have only the snps of interest
+  # subset the loci table to have only the snps of interest, in the order of
+  # the columns used for the svd (which is not necessarily the order of the
+  # loci table), so that it matches the loadings, center and scale
+  ind_col_svd <- attr(this_svd, "subset")
   this_svd$loci <-
-    show_loci(x)[.gt_fbm_cols(x) %in% attr(this_svd, "subset"), ]
+    show_loci(x)[match(ind_col_svd, x_ind_col), ]
+  # add loci names to the loadings (as integers if the names are integers)
+  this_svd$v <- matrix_int_names(this_svd$v, row_names = this_svd$loci$name)
   class(this_svd) <- c("gt_pca", class(this_svd))
   if (total_var) {
-    loci <- this_svd$loci
-    loci_after_ld <- which(show_loci(x)$name %in% loci$name)
-    x_autoSVD_subset <- x %>% select_loci(all_of(loci_after_ld)) # nolint
-    x_ind_col <- show_loci(x_autoSVD_subset)$big_index
-    x_ind_row <- vctrs::vec_data(x_autoSVD_subset$genotypes)
     this_svd$square_frobenius <- square_frobenius(
       X, # nolint
       x_ind_row,
-      x_ind_col,
+      ind_col_svd,
       center = this_svd$center,
       scale = this_svd$scale
     )

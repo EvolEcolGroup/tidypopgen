@@ -687,3 +687,238 @@ if (rlang::is_installed("vcfR")) {
     )
   })
 }
+
+
+# test coding names as integers to reduce storage
+test_that("vcf tests storing names as integers", {
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  pop_a_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    parser = "cpp",
+    backingfile = tempfile("pop_a_"),
+    names_as_int = TRUE
+  )
+  expect_true(is.integer(show_loci(pop_a_gt)$name))
+  vcf_path <- system.file("extdata/pop_b.vcf", package = "tidypopgen")
+  pop_b_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    parser = "cpp",
+    backingfile = tempfile("pop_b_"),
+    names_as_int = TRUE
+  )
+  combined_gt <- rbind(pop_a_gt, pop_b_gt,
+    use_position = TRUE,
+    quiet = TRUE
+  )
+  expect_true(inherits(combined_gt, "gen_tbl"))
+  # and the report keeps the integer names of the loci
+  report <- rbind_dry_run(pop_a_gt, pop_b_gt, use_position = TRUE, quiet = TRUE)
+  expect_identical(report$ref$name, show_loci(pop_a_gt)$name)
+  expect_identical(report$target$name, show_loci(pop_b_gt)$name)
+
+  # integer names can not be used to match loci, so loci are matched by
+  # position even with use_position = FALSE (the default), with a message
+  # (only once for rbind, which also calls rbind_dry_run)
+  # (the report is printed with cat(), so we capture it)
+  expect_message(
+    capture.output(report_auto <- rbind_dry_run(pop_a_gt, pop_b_gt)),
+    "loci are matched by chromosome and position"
+  )
+  expect_identical(report_auto, report)
+  msgs <- character(0)
+  capture.output(withCallingHandlers(
+    combined_auto <- rbind(pop_a_gt, pop_b_gt,
+      backingfile = tempfile("auto_")
+    ),
+    message = function(m) {
+      msgs <<- c(msgs, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    }
+  ))
+  expect_identical(
+    sum(grepl("loci are matched by chromosome and position", msgs)),
+    1L
+  )
+  expect_identical(show_loci(combined_auto), show_loci(combined_gt))
+  expect_identical(
+    show_genotypes(combined_auto),
+    show_genotypes(combined_gt)
+  )
+  # no message if quiet
+  expect_no_message(
+    combined_quiet <- rbind(pop_a_gt, pop_b_gt,
+      use_position = FALSE,
+      quiet = TRUE,
+      backingfile = tempfile("quiet_")
+    )
+  )
+  expect_identical(show_loci(combined_quiet), show_loci(combined_gt))
+  expect_no_message(
+    rbind_dry_run(pop_a_gt, pop_b_gt, use_position = FALSE, quiet = TRUE)
+  )
+
+  # the same if only one of the datasets has integer names
+  pop_b_chr_gt <- gen_tibble(
+    vcf_path,
+    quiet = TRUE,
+    parser = "cpp",
+    backingfile = tempfile("pop_b_chr_")
+  )
+  expect_true(is.character(show_loci(pop_b_chr_gt)$name))
+  for (ref_target in list(
+    list(pop_a_gt, pop_b_chr_gt),
+    list(pop_b_chr_gt, pop_a_gt)
+  )) {
+    expect_identical(
+      rbind_dry_run(ref_target[[1]], ref_target[[2]], quiet = TRUE),
+      rbind_dry_run(ref_target[[1]], ref_target[[2]],
+        use_position = TRUE, quiet = TRUE
+      )
+    )
+    mixed_gt <- rbind(ref_target[[1]], ref_target[[2]],
+      quiet = TRUE,
+      backingfile = tempfile("mixed_")
+    )
+    mixed_pos_gt <- rbind(ref_target[[1]], ref_target[[2]],
+      use_position = TRUE,
+      quiet = TRUE,
+      backingfile = tempfile("mixed_pos_")
+    )
+    expect_identical(show_loci(mixed_gt), show_loci(mixed_pos_gt))
+    expect_identical(show_genotypes(mixed_gt), show_genotypes(mixed_pos_gt))
+    # the merged loci keep the names (and their type) of the reference
+    expect_identical(
+      typeof(show_loci(mixed_gt)$name),
+      typeof(show_loci(ref_target[[1]])$name)
+    )
+  }
+})
+
+test_that("ped files with a trailing blank line can be read", {
+  ped_dir <- tempfile("ped_")
+  dir.create(ped_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  file.copy(file.path(ext_dir, "pop_a.map"), ped_dir)
+  writeLines(
+    c(readLines(file.path(ext_dir, "pop_a.ped")), ""),
+    file.path(ped_dir, "pop_a.ped")
+  )
+  ped_gt <- gen_tibble(file.path(ped_dir, "pop_a.ped"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  orig_gt <- gen_tibble(file.path(ext_dir, "pop_a.ped"),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(ped_gt$id, orig_gt$id)
+  expect_identical(show_genotypes(ped_gt), show_genotypes(orig_gt))
+})
+
+test_that("truncated packedancestry geno files are caught", {
+  geno_dir <- tempfile("geno_")
+  dir.create(geno_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  file.copy(file.path(ext_dir, "pop_a.snp"), geno_dir)
+  file.copy(file.path(ext_dir, "pop_a.ind"), geno_dir)
+  geno_bytes <- readBin(file.path(ext_dir, "pop_a.geno"), "raw", n = 1e5)
+  geno_path <- file.path(geno_dir, "pop_a.geno")
+  # remove a few bytes, or most of the file (keeping the header)
+  for (n_bytes in c(length(geno_bytes) - 10, 48)) {
+    writeBin(geno_bytes[seq_len(n_bytes)], geno_path)
+    expect_error(
+      gen_tibble(geno_path, backingfile = tempfile(), quiet = TRUE),
+      "truncated or corrupted"
+    )
+  }
+})
+
+test_that("file extensions are matched ignoring case", {
+  # copy the pop_a files, using upper case extensions for the main files
+  upper_dir <- tempfile("upper_")
+  dir.create(upper_dir)
+  ext_dir <- system.file("extdata", package = "tidypopgen")
+  for (ext in c("bim", "fam", "map", "snp", "ind")) {
+    file.copy(
+      file.path(ext_dir, paste0("pop_a.", ext)),
+      file.path(upper_dir, paste0("pop_a.", ext))
+    )
+  }
+  for (ext in c("bed", "ped", "geno")) {
+    file.copy(
+      file.path(ext_dir, paste0("pop_a.", ext)),
+      file.path(upper_dir, paste0("pop_a.", toupper(ext)))
+    )
+  }
+  # a gzipped vcf
+  gz_con <- gzfile(file.path(upper_dir, "pop_a.VCF.GZ"), "w")
+  writeLines(readLines(file.path(ext_dir, "pop_a.vcf")), gz_con)
+  close(gz_con)
+
+  for (ext in c("bed", "ped", "geno", "vcf")) {
+    lower_gt <- gen_tibble(file.path(ext_dir, paste0("pop_a.", ext)),
+      backingfile = tempfile(), quiet = TRUE
+    )
+    upper_file <- file.path(
+      upper_dir,
+      paste0("pop_a.", toupper(ext), ifelse(ext == "vcf", ".GZ", ""))
+    )
+    upper_gt <- gen_tibble(upper_file, backingfile = tempfile(), quiet = TRUE)
+    expect_identical(show_genotypes(upper_gt), show_genotypes(lower_gt))
+    expect_identical(show_loci(upper_gt), show_loci(lower_gt))
+  }
+})
+
+test_that("vcf_gt_dosages_cpp reads genotypes as the R code did", {
+  # the R code that vcf_gt_dosages_cpp() replaces, for one genotype
+  ref_dosage <- function(g, max_ploidy) {
+    x <- strsplit(g, "[/|]")[[1]]
+    if (length(x) > max_ploidy) {
+      return("error")
+    }
+    if (length(x) > 0 && !anyNA(x) && !any(x == ".")) {
+      dosage <- sum(as.numeric(x))
+      if (dosage < (max_ploidy + 1)) as.raw(dosage) else "error"
+    } else {
+      as.raw(max_ploidy + 1)
+    }
+  }
+  gt <- matrix(
+    c("0/1", "1|1", "./.", ".", NA, "", "0|0", "./1", "0/", "1"),
+    nrow = 5
+  )
+  res <- vcf_gt_dosages_cpp(gt, max_ploidy = 2)
+  expect_identical(res$error, 0L)
+  # individuals are rows
+  expect_identical(
+    res$dosages,
+    matrix(vapply(t(gt), ref_dosage, raw(1), max_ploidy = 2), nrow = 2,
+      byrow = FALSE
+    )
+  )
+  # polyploids
+  gt <- matrix(c("0/1/1/0", "1/1/1/1", "0/./1/1", "0/0/0/0"), nrow = 2)
+  res <- vcf_gt_dosages_cpp(gt, max_ploidy = 4)
+  expect_identical(res$dosages, matrix(as.raw(c(2, 5, 4, 0)), nrow = 2))
+  # too many alleles, a dosage that is too large, and alleles that are not
+  # numbers
+  expect_identical(vcf_gt_dosages_cpp(matrix("0/1/1"), 2)$error, 1L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("2/1"), 2)$error, 1L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("a/1"), 2)$error, 2L)
+  expect_identical(vcf_gt_dosages_cpp(matrix("0//1"), 3)$error, 2L)
+})
+
+test_that("the md5 sum of the FBM is that of its saved rds for VCF inputs", {
+  vcf_path <- system.file("extdata/pop_a.vcf", package = "tidypopgen")
+  for (parser in c("cpp", "vcfR")) {
+    if (parser == "vcfR") skip_if_not_installed("vcfR")
+    test_gt <- gen_tibble(vcf_path,
+      parser = parser, quiet = TRUE, backingfile = tempfile()
+    )
+    rds_file <- gt_get_file_names(test_gt)[1]
+    expect_identical(
+      attr(test_gt$genotypes, "fbm_md5sum"),
+      tools::md5sum(rds_file)
+    )
+  }
+})

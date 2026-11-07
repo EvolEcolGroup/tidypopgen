@@ -2,17 +2,26 @@
 % Please edit documentation in R/nwise_pop_pbs.R
 \name{nwise_pop_pbs}
 \alias{nwise_pop_pbs}
+\alias{nwise_pop_pbs.gen_tbl}
 \title{Compute the Population Branch Statistics for each combination of populations}
 \usage{
-nwise_pop_pbs(
+nwise_pop_pbs(.x, ...)
+
+\method{nwise_pop_pbs}{gen_tbl}(
   .x,
   type = c("tidy", "matrix"),
   fst_method = c("Hudson", "Nei87", "WC84"),
-  return_fst = FALSE
+  return_fst = FALSE,
+  ...
 )
 }
 \arguments{
-\item{.x}{A grouped \code{gen_tibble}}
+\item{.x}{A grouped \code{gen_tibble}.
+If grouped by more than one variable, groups are labelled by the values
+of the grouping variables pasted with "." (e.g. \code{pop1.F}).}
+
+\item{...}{other arguments passed to specific methods, currently
+unused.}
 
 \item{type}{type of object to return. One of "tidy" or "matrix".
 Default is "tidy".}
@@ -24,7 +33,9 @@ Default is "tidy".}
 along with the PBS values. Default is \code{FALSE}.}
 }
 \value{
-Either a matrix with locus ID as rownames and the following columns:
+Either a \link{matrix_int_names} with locus ID as row names (use
+\code{\link[=row_names]{row_names()}} to retrieve them, as they can be integers) and the following
+columns:
 \itemize{
 \item \code{pbs_a.b.c}: the PBS value for population a given b & c (there
 will be multiple such columns covering all 3 way combinations of

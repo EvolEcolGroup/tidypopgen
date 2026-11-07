@@ -100,16 +100,17 @@
 #' # Best K is stored in the object
 #' cluster_pca$best_k
 gt_cluster_pca_best_k <- function(
-    x,
-    stat = c("BIC", "AIC", "WSS"),
-    criterion = c(
-      "diffNgroup",
-      "min",
-      "goesup",
-      "smoothNgoesup",
-      "goodfit"
-    ),
-    quiet = FALSE) {
+  x,
+  stat = c("BIC", "AIC", "WSS"),
+  criterion = c(
+    "diffNgroup",
+    "min",
+    "goesup",
+    "smoothNgoesup",
+    "goodfit"
+  ),
+  quiet = FALSE
+) {
   if (!inherits(x, "gt_cluster_pca")) {
     stop(paste(
       "'x' should be a 'gt_cluster_pca' object generated",
@@ -149,6 +150,8 @@ gt_cluster_pca_best_k <- function(
     )
     n_clust <- min(which(diff(temp) > 0))
   }
+  # n_clust is the position in the vector of k values; get the actual k
+  n_clust <- x$clusters$k[n_clust]
   if (!quiet) {
     message(
       "Using ",

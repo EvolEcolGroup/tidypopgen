@@ -4,11 +4,11 @@
 \alias{loci_alt_freq}
 \alias{loci_alt_freq.tbl_df}
 \alias{loci_alt_freq.vctrs_bigSNP}
-\alias{loci_alt_freq.grouped_df}
+\alias{loci_alt_freq.grouped_gen_tbl}
 \alias{loci_maf}
 \alias{loci_maf.tbl_df}
 \alias{loci_maf.vctrs_bigSNP}
-\alias{loci_maf.grouped_df}
+\alias{loci_maf.grouped_gen_tbl}
 \title{Estimate allele frequencies at each locus}
 \usage{
 loci_alt_freq(
@@ -39,7 +39,7 @@ loci_alt_freq(
   ...
 )
 
-\method{loci_alt_freq}{grouped_df}(
+\method{loci_alt_freq}{grouped_gen_tbl}(
   .x,
   .col = "genotypes",
   as_counts = FALSE,
@@ -67,7 +67,7 @@ loci_maf(.x, .col = "genotypes", n_cores, block_size, type, ...)
   ...
 )
 
-\method{loci_maf}{grouped_df}(
+\method{loci_maf}{grouped_gen_tbl}(
   .x,
   .col = "genotypes",
   n_cores = bigstatsr::nb_cores(),
@@ -90,12 +90,19 @@ resolve certain tidyselect operations.}
 returned. It defaults to FALSE (i.e. frequencies are returned by default).}
 
 \item{n_cores}{number of cores to be used, it defaults to
-\code{\link[bigstatsr:reexports]{bigstatsr::nb_cores()}}}
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 
 \item{block_size}{maximum number of loci read at once.}
 
 \item{type}{type of object to return, if using grouped method. One of "tidy",
-"list", or "matrix". Default is "tidy".}
+"list", or "matrix". Default is "tidy".
+Data can be grouped by more than one variable: groups are then labelled
+by the values of the grouping variables pasted with "." (e.g. \code{pop1.F}),
+and the "tidy" output has one column per grouping variable rather than a
+single \code{group} column. The \code{group} column, or the columns of the
+grouping variables, keep the type of the grouping variables (e.g. a
+factor keeps its levels), so that groups stay in their order when the
+output is sorted or plotted.}
 
 \item{...}{other arguments passed to specific methods, currently unused.}
 }

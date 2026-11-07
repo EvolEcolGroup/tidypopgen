@@ -15,8 +15,7 @@
 #'
 #' @param object an object of class `gt_admixture`
 #' @param type the type of plot (one of "cv", and "barplot")
-#' @param k the value of `k` to plot (for `barplot` type only) param repeat the
-#'   repeat to plot (for `barplot` type only)
+#' @param k the value of `k` to plot (for `barplot` type only)
 #' @param run the run to plot (for `barplot` type only)
 #' @param ... additional arguments to be passed to autoplot method for
 #'   q_matrices [autoplot_q_matrix()], used when type is `barplot`.
@@ -44,18 +43,20 @@
 #' )
 #'
 autoplot.gt_admix <- function(
-    object,
-    type = c("cv", "barplot"),
-    k = NULL,
-    run = NULL,
-    ...) {
+  object,
+  type = c("cv", "barplot"),
+  k = NULL,
+  run = NULL,
+  ...
+) {
   type <- match.arg(type)
   if (type == "cv") {
     if (is.null(object$cv)) {
       stop("No cross validation error available")
     }
 
-    if (object$algorithm == "SNMF") {
+    # the algorithm can be missing (e.g. after combining objects)
+    if (identical(object$algorithm, "SNMF")) {
       ggplot2::ggplot(
         data.frame(k = object$k, cv = object$cv),
         ggplot2::aes(x = .data$k, y = .data$cv)
@@ -79,9 +80,9 @@ autoplot.gt_admix <- function(
     }
     # check that run is specified
     if (is.null(run)) {
-      stop("You must specify a value for repeat")
+      stop("You must specify a value for run")
     }
-    # get the Q matrix for the specified k and repeat
+    # get the Q matrix for the specified k and run
     q <- get_q_matrix(object, k = k, run = run)
     autoplot(q, ...)
   }

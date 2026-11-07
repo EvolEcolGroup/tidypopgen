@@ -20,15 +20,16 @@
 #' @noRd
 # nolint start
 vcf_to_fbm_vcfR <- function(
-    # nolint end
-    vcf_path,
-    chunk_size = NULL,
-    backingfile = NULL,
-    valid_alleles = c("A", "T", "C", "G"),
-    missing_alleles = c("0", "."),
-    allow_duplicates = FALSE,
-    quiet = FALSE,
-    ...) {
+  # nolint end
+  vcf_path,
+  chunk_size = NULL,
+  backingfile = NULL,
+  valid_alleles = c("A", "T", "C", "G"),
+  missing_alleles = c("0", "."),
+  allow_duplicates = FALSE,
+  quiet = FALSE,
+  ...
+) {
   dots <- list(...)
   forbidden <- intersect(
     names(dots),
@@ -42,8 +43,8 @@ vcf_to_fbm_vcfR <- function(
 
   if (is.null(backingfile)) {
     backingfile <- vcf_path
-    backingfile <- sub("\\.vcf.gz$", "", backingfile)
-    backingfile <- sub("\\.vcf$", "", backingfile)
+    backingfile <- sub("\\.vcf\\.gz$", "", backingfile, ignore.case = TRUE)
+    backingfile <- sub("\\.vcf$", "", backingfile, ignore.case = TRUE)
   }
   if (file_ext(backingfile) == "bk") {
     backingfile <- bigstatsr::sub_bk(backingfile, "")
@@ -76,6 +77,37 @@ vcf_to_fbm_vcfR <- function(
   )
   temp_gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
   ploidy <- unname(apply(temp_gt, 2, get_ploidy))
+  # a missing genotype "." gives no information on ploidy, so for those
+  # individuals we use the first genotype that is not "."
+  unknown_ploidy <- unname(temp_gt[1, ] == ".")
+  n_read <- 1
+  while (any(unknown_ploidy) && (n_read < no_variants)) {
+    next_gt <- vcfR::extract.gt(
+      vcfR::read.vcfR(
+        vcf_path,
+        nrows = min(chunk_size, no_variants - n_read),
+        skip = n_read,
+        verbose = !quiet,
+        convertNA = FALSE,
+        ...
+      ),
+      convertNA = FALSE
+    )
+    for (i in which(unknown_ploidy)) {
+      known <- which(next_gt[, i] != ".")
+      if (length(known) > 0) {
+        ploidy[i] <- get_ploidy(next_gt[known[1], i])
+        unknown_ploidy[i] <- FALSE
+      }
+    }
+    n_read <- n_read + nrow(next_gt)
+  }
+  # individuals with only missing genotypes get the largest ploidy of the
+  # other individuals (or 2 if no ploidy could be estimated)
+  if (any(unknown_ploidy)) {
+    ploidy[unknown_ploidy] <-
+      if (all(unknown_ploidy)) 2 else max(ploidy[!unknown_ploidy])
+  }
 
 
   # check that there are no missing values in ploidy vector
@@ -126,23 +158,29 @@ vcf_to_fbm_vcfR <- function(
       verbose = !quiet,
       ...
     )
-    # filter any marker that is not biallelic
-    bi <- vcfR::is.biallelic(temp_vcf)
+    # filter any marker that is not a biallelic SNP (as in the cpp parser, REF
+    # and ALT must be a single character; a missing allele "." is NA)
+    is_single_allele <- function(x) is.na(x) | nchar(x) == 1
+    bi <- vcfR::is.biallelic(temp_vcf) &
+      is_single_allele(vcfR::getREF(temp_vcf)) &
+      is_single_allele(vcfR::getALT(temp_vcf))
     gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
     gt <- gt[bi, , drop = FALSE]
-    if (nrow(gt) > 1) {
-      # @TODO we could parallelise here
-      gt <- t(apply(gt, 2, poly_indiv_dosage, max_ploidy = max_ploidy))
-    } else if (nrow(gt) == 1) {
-      # if we only have one marker
-      gt <-
-        matrix(
-          apply(gt, 2, poly_indiv_dosage, max_ploidy = max_ploidy),
-          ncol = 1
-        )
-    } else {
+    if (nrow(gt) == 0) {
       next
     }
+    # dosages as raw bytes, with individuals as rows (as in the FBM), parsed
+    # in C++: a genotype is missing if any of its alleles is missing, its
+    # dosage is otherwise the sum of its alleles, and genotypes with more
+    # than max_ploidy alleles (or a larger dosage) are an error
+    gt_dosages <- vcf_gt_dosages_cpp(gt, max_ploidy = max_ploidy)
+    if (gt_dosages$error == 1) {
+      stop_max_ploidy()
+    } else if (gt_dosages$error == 2) {
+      stop("the genotypes (GT) contain alleles that are not numbers")
+    }
+    gt <- gt_dosages$dosages
+    rm(gt_dosages)
     # expand the file backed matrix according to the size of the gt matrix
     # get current size
     index_start <- dim(file_backed_matrix)[2] + 1
@@ -172,19 +210,29 @@ vcf_to_fbm_vcfR <- function(
       )
     )
   }
-  # validate the loci
-  loci <- validate_loci(loci,
-    check_alphabet = TRUE,
-    harmonise_loci = TRUE,
-    check_duplicates = TRUE,
-    allow_duplicates = allow_duplicates,
-    valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles
+  # validate the loci (the loci are only known once the backing file has been
+  # written, so we remove it if the validation fails)
+  loci <- tryCatch(
+    validate_loci(loci,
+      check_alphabet = TRUE,
+      harmonise_loci = TRUE,
+      check_duplicates = TRUE,
+      allow_duplicates = allow_duplicates,
+      valid_alleles = valid_alleles,
+      missing_alleles = missing_alleles
+    ),
+    error = function(e) {
+      unlink(file_backed_matrix$backingfile)
+      stop(e)
+    }
   )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
-  # construct path
+  # construct path, and save the FBM (before its md5 sum is taken by
+  # new_vctrs_bigsnp(); this takes the same time whatever the size of the
+  # data, as the .rds only holds the description of the FBM)
   fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
+  saveRDS(file_backed_matrix, fbm_path)
 
   # create genotypes column
   indiv_meta$genotypes <- new_vctrs_bigsnp(
@@ -208,27 +256,12 @@ get_ploidy <- function(x) {
   max(sapply(strsplit(x, "[/|]"), function(x) length(x)))
 }
 
-# get dosages for all the genotypes of an individual
-# (x is a vector of genotypes in the standard vcf format)
-poly_indiv_dosage <- function(x, max_ploidy) {
-  sapply(strsplit(x, "[/|]"), poly_genotype_dosage, max_ploidy)
-}
-
-# get dosages for a genotype x and return them as raw for inclusion in the FBM
-poly_genotype_dosage <- function(x, max_ploidy) {
-  if (!is.na(x[1]) && x[1] != ".") {
-    dosage <- sum(as.numeric(x))
-    if (dosage < (max_ploidy + 1)) {
-      return(as.raw(dosage)) # nolint
-    } else {
-      stop(paste(
-        "a genotype has more than max_ploidy alleles. We estimate",
-        "max_ploidy from the first variant in the vcf file, make",
-        "sure that variant is representative of ploidy (e.g. it is",
-        "not on a sex chromosome)."
-      ))
-    }
-  } else {
-    return(as.raw(max_ploidy + 1)) # nolint
-  }
+# error for genotypes with more alleles than max_ploidy
+stop_max_ploidy <- function() {
+  stop(paste(
+    "a genotype has more than max_ploidy alleles. We estimate",
+    "max_ploidy from the first variant in the vcf file, make",
+    "sure that variant is representative of ploidy (e.g. it is",
+    "not on a sex chromosome)."
+  ), call. = FALSE)
 }

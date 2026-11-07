@@ -1,16 +1,20 @@
 #' Test if the loci table is ordered
 #'
 #' This functions checks that all SNPs in a chromosome are adjacent in the loci
-#' table, and that positions are sorted within chromosomes.
+#' table, and that positions (and, unless `ignore_genetic_dist = TRUE`,
+#' genetic distances) are sorted within chromosomes. Missing positions (or
+#' missing genetic distances, if they are checked) are an error, as the order
+#' of those loci is unknown.
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param error_on_false logical, if `TRUE` an error is thrown if the loci are
 #'   not ordered.
-#' @param ignore_genetic_dist logical, if `TRUE` the physical position is not
-#'   checked.
+#' @param ignore_genetic_dist logical, if `TRUE` (the default) only the
+#'   positions are checked, and genetic distances are ignored (they can then
+#'   be missing).
 #' @param ... other arguments passed to specific methods.
-#' @returns a logical vector defining which loci are transversions
+#' @returns `TRUE` if the loci are ordered, `FALSE` otherwise
 #' @rdname is_loci_table_ordered
 #' @export
 #' @examples
@@ -19,21 +23,23 @@
 #' example_gt %>% is_loci_table_ordered()
 #'
 is_loci_table_ordered <- function(
-    .x,
-    error_on_false = FALSE,
-    ignore_genetic_dist = TRUE,
-    ...) {
+  .x,
+  error_on_false = FALSE,
+  ignore_genetic_dist = TRUE,
+  ...
+) {
   UseMethod("is_loci_table_ordered", .x)
 }
 
 #' @export
 #' @rdname is_loci_table_ordered
 is_loci_table_ordered.tbl_df <- function(
-    .x,
-    error_on_false = FALSE,
-    ignore_genetic_dist = TRUE,
-    ...) {
-  stopifnot_gen_tibble(.x)
+  .x,
+  error_on_false = FALSE,
+  ignore_genetic_dist = TRUE,
+  ...
+) {
+  stopifnot_has_genotypes(.x)
   is_loci_table_ordered(
     .x$genotypes,
     error_on_false = error_on_false,
@@ -46,20 +52,35 @@ is_loci_table_ordered.tbl_df <- function(
 #' @export
 #' @rdname is_loci_table_ordered
 is_loci_table_ordered.vctrs_bigSNP <- function(
-    .x,
-    error_on_false = FALSE,
-    ignore_genetic_dist = TRUE,
-    ...) {
+  .x,
+  error_on_false = FALSE,
+  ignore_genetic_dist = TRUE,
+  ...
+) {
   rlang::check_dots_empty()
 
-  # check that within each chromosome positions are sorted
-  if (
-    any(unlist(
-      show_loci(.x) %>%
-        group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
-        group_map(~ is.unsorted(.x$position))
-    ))
-  ) {
+  loci <- show_loci(.x)
+
+  # loci with a missing position (or genetic distance, if it is checked) can
+  # not be ordered
+  if (anyNA(loci$position)) {
+    stop(
+      sum(is.na(loci$position)), " loci have a missing position, so the ",
+      "order of the loci table can not be checked"
+    )
+  }
+  if (!ignore_genetic_dist && anyNA(loci$genetic_dist)) {
+    stop(
+      sum(is.na(loci$genetic_dist)), " loci have a missing genetic distance; ",
+      "use ignore_genetic_dist = TRUE to check the order of positions only"
+    )
+  }
+
+  # check that within each chromosome positions are sorted (each check is a
+  # single pass in C++, which does not copy or split the columns of the loci
+  # table)
+  position_order <- any_unsorted_by_chromosome(loci$position, loci$chromosome)
+  if (position_order[["unsorted"]]) {
     if (error_on_false) {
       stop("Your loci are not sorted within chromosomes")
     } else {
@@ -67,17 +88,21 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
     }
   }
 
-  # check that within each chromosome positions are unique
-  if (isFALSE(find_duplicated_loci(
-    .x,
-    error_on_false = error_on_false,
-    list_duplicates = FALSE
-  ))) {
-    return(FALSE)
+  # check that within each chromosome positions are unique; as positions are
+  # now known to be sorted, duplicated positions are equal consecutive
+  # positions within a chromosome
+  if (position_order[["ties"]]) {
+    if (error_on_false) {
+      stop("Your loci table contains duplicates")
+    } else {
+      return(FALSE)
+    }
   }
 
-  # check that all positions in a chromosome are adjacent
-  if (any(duplicated(rle(as.integer(show_loci(.x)$chromosome))$values))) {
+  # check that all positions in a chromosome are adjacent, i.e. that no
+  # chromosome has more than one run of loci (as with rle(), each missing
+  # chromosome is a run of its own, so more than one missing chromosome fails)
+  if (chromosomes_not_adjacent(loci$chromosome)) {
     if (error_on_false) {
       stop("All SNPs in a chromosome should be adjacent in the loci table")
     } else {
@@ -87,13 +112,10 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
 
   # check genetic distance
   if (!ignore_genetic_dist) {
-    if (
-      any(unlist(
-        show_loci(.x) %>%
-          group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
-          group_map(~ is.unsorted(.x$genetic_dist))
-      ))
-    ) {
+    if (any_unsorted_by_chromosome(
+      loci$genetic_dist,
+      loci$chromosome
+    )[["unsorted"]]) {
       if (error_on_false) {
         stop("Your genetic distances are not sorted within chromosomes")
       } else {
@@ -143,18 +165,21 @@ find_duplicated_loci <- function(.x,
                                  error_on_false = FALSE,
                                  list_duplicates = TRUE,
                                  ...) {
-  if (
-    any(unlist(
-      show_loci(.x) %>%
-        group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
-        group_map(~ duplicated(.x$position))
-    ))
-  ) {
+  loci <- show_loci(.x)
+  chr_int <- cast_chromosome_to_int(loci$chromosome)
+  # pairs of chromosome and position (this avoids splitting the whole loci
+  # table by chromosome)
+  chr_pos <- vctrs::data_frame(chromosome = chr_int, position = loci$position)
+  if (vctrs::vec_duplicate_any(chr_pos)) {
     if (list_duplicates) {
-      show_loci(.x) %>%
-        group_by(cast_chromosome_to_int(.data$chromosome)) %>% # nolint
-        group_map(~ .x[duplicated(.x$position) | duplicated(.x$position, fromLast = TRUE), ]$name) %>% # nolint
-        unlist(use.names = FALSE)
+      # flag all loci that share chromosome and position with another locus
+      is_dup <- vctrs::vec_duplicate_detect(chr_pos)
+      # return their names ordered by chromosome (as when grouping by
+      # chromosome), and then by their order in the loci table (the radix
+      # sort is stable, and puts missing chromosomes last as group_by does)
+      dup_index <- which(is_dup)
+      dup_index <- dup_index[order(chr_int[dup_index], method = "radix")]
+      loci$name[dup_index]
     } else if (error_on_false) {
       stop("Your loci table contains duplicates")
     } else {
@@ -167,4 +192,53 @@ find_duplicated_loci <- function(.x,
       return(TRUE)
     }
   }
+}
+
+
+#' Test whether values are unsorted within any chromosome
+#'
+#' Equivalent to splitting `x` by `cast_chromosome_to_int()` of `chromosome`
+#' and checking whether any of the groups is unsorted (as [is.unsorted()], so a
+#' group of more than one value with missing values gives NA), but in a single
+#' pass in C++, without copying or splitting `x`. Chromosomes that cast to the
+#' same integer (e.g. "chr1" and "1") are a single group, as when sorting the
+#' loci table in [gt_order_loci()].
+#' @param x a numeric vector (e.g. the positions of the loci)
+#' @param chromosome the chromosomes of the loci (a factor, as in the loci
+#'   table)
+#' @returns a named logical vector: `unsorted` is TRUE, FALSE or NA as
+#'   described above, and `ties` is TRUE if two consecutive non-missing values
+#'   of a chromosome are equal (when no chromosome is unsorted, this means that
+#'   some pairs of chromosome and value are duplicated)
+#' @keywords internal
+#' @noRd
+any_unsorted_by_chromosome <- function(x, chromosome) {
+  if (!is.factor(chromosome)) {
+    chromosome <- as.factor(chromosome)
+  }
+  # cast the levels rather than each locus; levels with the same integer
+  # chromosome get the same group (the index of the first of those levels),
+  # and levels that cast to NA are grouped with the missing chromosomes
+  levels_int <- cast_chromosome_to_int(levels(chromosome))
+  level_group <- match(levels_int, levels_int, incomparables = NA)
+  unsorted_by_chromosome_cpp(x, chromosome, level_group)
+}
+
+
+#' Test whether any chromosome is split into several runs of loci
+#'
+#' Equivalent to finding the runs of chromosomes with [rle()] and checking
+#' whether any chromosome has more than one run (so, as `rle()` does not
+#' merge missing values, more than one missing chromosome gives TRUE), but in
+#' a single pass in C++.
+#' @param chromosome the chromosomes of the loci (a factor, as in the loci
+#'   table)
+#' @returns TRUE or FALSE
+#' @keywords internal
+#' @noRd
+chromosomes_not_adjacent <- function(chromosome) {
+  if (!is.factor(chromosome)) {
+    chromosome <- as.factor(chromosome)
+  }
+  chromosomes_not_adjacent_cpp(chromosome, nlevels(chromosome))
 }

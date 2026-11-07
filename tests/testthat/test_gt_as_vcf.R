@@ -192,3 +192,57 @@ test_that("integer chromosome becomes factor", {
     as.factor(test_loci$chromosome)
   )
 })
+
+test_that("vcf fileDate is a zero-padded YYYYMMDD date", {
+  vcf_path <- gt_as_vcf(test_gt, file = paste0(tempfile(), ".vcf"))
+  file_date <- grep("^##fileDate=", readLines(vcf_path), value = TRUE)
+  expect_match(file_date, "^##fileDate=[0-9]{8}$")
+  expect_equal(file_date, paste0("##fileDate=", format(Sys.Date(), "%Y%m%d")))
+})
+
+test_that("double positions are not written in scientific notation", {
+  test_loci_dbl <- test_loci
+  test_loci_dbl$position <- c(100000, 200000, 3e6, 999999, 1e5, 999999)
+  test_gt_dbl <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci_dbl,
+    indiv_meta = test_indiv_meta,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  vcf_path <- gt_as_vcf(test_gt_dbl, file = paste0(tempfile(), ".vcf"))
+  vcf_lines <- readLines(vcf_path)
+  vcf_body <- vcf_lines[!startsWith(vcf_lines, "#")]
+  vcf_pos <- vapply(strsplit(vcf_body, "\t"), `[`, character(1), 2)
+  expect_equal(
+    vcf_pos,
+    c("100000", "200000", "3000000", "999999", "100000", "999999")
+  )
+  expect_true("##contig=<ID=chr2,length=1000000>" %in% vcf_lines)
+  test_gt2 <- gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile())
+  expect_equal(show_loci(test_gt2)$position, test_loci_dbl$position)
+})
+
+test_that("gt_as_vcf writes subsets of individuals and loci", {
+  # reorder individuals and loci, and use integer loci names
+  sub_gt <- test_gt[c(3, 1), ] %>% select_loci(c(6, 2, 5, 3))
+  sub_loci <- show_loci(sub_gt)
+  sub_loci$name <- c(4L, 3L, 2L, 1L)
+  show_loci(sub_gt) <- sub_loci
+  vcf_path <- paste0(tempfile(), ".vcf")
+  gt_as_vcf(sub_gt, file = vcf_path)
+  # overwriting the file does not append to the old one
+  gt_as_vcf(sub_gt, file = vcf_path, chunk_size = 3, overwrite = TRUE)
+  vcf_lines <- readLines(vcf_path)
+  vcf_body <- do.call(
+    rbind,
+    strsplit(vcf_lines[!startsWith(vcf_lines, "#")], "\t")
+  )
+  expect_equal(vcf_body[, 3], c("4", "3", "2", "1"))
+  # the alternate allele of the last locus is missing
+  expect_equal(vcf_body[, 5], c("A", "C", "G", "."))
+  expected <- t(show_genotypes(sub_gt))
+  expected[] <- c("0/0", "0/1", "1/1")[expected + 1]
+  expected[is.na(expected)] <- "./."
+  expect_equal(unname(vcf_body[, 10:11]), unname(expected))
+})

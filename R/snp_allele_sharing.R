@@ -7,14 +7,17 @@
 #' heterozygous. Matching is the average of these 0, 1/2 and 1s)
 #'
 #' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
-#' slot of a [bigsnpr::bigSNP] object).
+#' slot of a [bigsnpr::bigSNP] object). Genotypes are decoded with its
+#' `code256`, and values other than 0, 1 and 2 are treated as missing.
 #' @param ind.row An optional vector of the row indices that are used. If not
 #'   specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not
 #'   specified, all columns are used. Don't use negative indices.
-#' @param block.size maximum number of columns read at once. Note that, to
-#'   optimise the speed of matrix operations, we have to store in memory 3 times
-#'   the columns.
+#' @param block.size maximum number of columns read at once. Genotypes are
+#'   compared in a compact bit-packed form, so this has little effect on
+#'   memory use.
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
 #' @returns a matrix of allele sharing between all pairs of individuals
 #' @export
 #' @seealso [pairwise_allele_sharing()] [hierfstat::matching()]
@@ -31,13 +34,20 @@
 #' snp_allele_sharing(X, block.size = 2)
 #'
 snp_allele_sharing <- function(
-    X, # nolint start
-    ind.row = bigstatsr::rows_along(X),
-    ind.col = bigstatsr::cols_along(X),
-    block.size = bigstatsr::block_size(nrow(X))) {
+  X, # nolint start
+  ind.row = bigstatsr::rows_along(X),
+  ind.col = bigstatsr::cols_along(X),
+  block.size = bigstatsr::block_size(nrow(X)),
+  n_cores = bigstatsr::nb_cores()
+) {
   # nolint end
 
   n <- length(ind.row)
+  # no individuals (e.g. an empty group in group_map()): an empty matrix, as
+  # FBMs can not be empty
+  if (n == 0) {
+    return(matrix(numeric(0), 0, 0))
+  }
   # FBM matrix to store the tcrossproduct of (dos-1)
   dos_tcross <- bigstatsr::FBM(n, n, init = 0)
   # FBM matrix to store tcrossproduct of NA matrix
@@ -47,24 +57,19 @@ snp_allele_sharing <- function(
 
   intervals <- CutBySize(m, block.size)
 
-  # Preassign memory where we will store the slices of genotypes.
-  # For efficiency, when we read in the slice,
-  # we will immediately recode it into these3 matrices,
-  # one per genotype, equivalent to X==0, X==1, and X==2 respectively
-  dos_mat_part <- matrix(0, n, max(intervals[, "size"]))
-  na_mat_part <- matrix(0, n, max(intervals[, "size"]))
-
+  # for each block of loci, genotypes are packed into bits and compared
+  # with popcounts in C++ (see src/pairwise_bitpacked.h), so no dense
+  # copy of the block is needed
   for (j in bigstatsr::rows_along(intervals)) {
     ind <- seq2(intervals[j, ]) # this iteration indices
     ind.col.ind <- ind.col[ind] # subset given indices by the iteration indices #nolint
     increment_as_counts(
       dos_tcross,
       na_tcross,
-      dos_mat_part,
-      na_mat_part,
       X,
       ind.row,
-      ind.col.ind
+      ind.col.ind,
+      ncores = n_cores
     )
   }
   # The allele sharing matrix is:
@@ -73,8 +78,9 @@ snp_allele_sharing <- function(
   # na is a matrix with 0 for NAs and 1 for valid values
   # TODO this could be done in chunks to avoid bringing
   # everything to memory at once
-  denom <- na_tcross[]
-  num <- dos_tcross[]
+  # (drop = FALSE keeps a 1 x 1 matrix for a single individual)
+  denom <- na_tcross[, , drop = FALSE]
+  num <- dos_tcross[, , drop = FALSE]
   res <- 0.5 * (1 + num / denom)
   res[denom == 0] <- NA_real_
   return(res)

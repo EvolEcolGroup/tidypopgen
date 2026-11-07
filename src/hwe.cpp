@@ -2,7 +2,7 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-#include <bigstatsr/BMCodeAcc.h>
+#include "fbm_byte_acc.h"
 
 
 // The functions below are used for HWE. They come from PLINK 1.90 under GPL3, based on
@@ -213,8 +213,28 @@ NumericVector hwe_on_matrix(IntegerMatrix geno_counts, uint32_t midp) {
 }
 
 /******************************************************************************/
+// Lookup table to count genotypes by class, packing four 16-bit counters:
+// dosage 0, 1 and 2 (counters 0 to 2) and missing genotypes (counter 3). As
+// in the original implementation, non-integer dosages are truncated; dosages
+// above 2 (which only occur for non-diploid data) are not counted.
+std::vector<uint64_t> genotype_count_lut(const FBMByteAcc& acc) {
+  std::vector<uint64_t> lut(256, 0);
+  for (int b = 0; b < 256; b++) {
+    double x = acc.code(b);
+    if (x > -1) {
+      size_t geno_class = static_cast<size_t>(x);
+      if (geno_class <= 2) lut[b] = uint64_t(1) << (16 * geno_class);
+    } else {
+      lut[b] = uint64_t(1) << 48;
+    }
+  }
+  return lut;
+}
+
+/******************************************************************************/
 // Estimate HWE p on a grouped gen_tibble
-// this only works for diploid data
+// this only works for diploid data. Loci are processed in blocks of
+// block_size, checking for user interrupts between blocks.
 
 
 // [[Rcpp::export]]
@@ -223,34 +243,37 @@ NumericMatrix gt_grouped_hwe(Environment BM,
                                      const IntegerVector& colInd,
                                      const IntegerVector& groupIds,
                                      size_t ngroups,
-                                     uint32_t midp) {
+                                     uint32_t midp,
+                                     int ncores = 1,
+                                     int block_size = 100000) {
   // midp: if true, use mid-p method
-  
-  XPtr<FBM> xpBM = BM["address"];
-  SubBMCode256Acc macc(xpBM, rowInd, colInd, BM["code256"], 1);
-  
-  size_t n = macc.nrow(); // number of individuals
-  size_t m = macc.ncol(); // number of loci
-  
+
+  FBMByteAcc acc(BM, rowInd, colInd);
+
+  size_t n = acc.nrow(); // number of individuals
+  size_t m = acc.ncol(); // number of loci
+
+  std::vector<size_t> group_ids = check_group_ids(groupIds, n, ngroups);
+  // count the genotypes of each class in each group, using the same lookup
+  // table for all individuals
+  std::vector<uint64_t> lut = genotype_count_lut(acc);
+  GroupedRows grouped(acc.rows(), group_ids, std::vector<size_t>(n, 0),
+                      max_run_length<4>(lut));
+
   NumericMatrix hwe_p(m, ngroups);
-  IntegerMatrix genotypes(3, ngroups);
-  
-  for (size_t j = 0; j < m; j++) { // for each locus
-    genotypes.fill(0); // set all to zero
-    for (size_t i = 0; i < n; i++) { // for each individual
-      double x = macc(i, j);
-      if (x > -1){
-        genotypes(x, groupIds[i]) += 1;
-      }
-    }
-    // now for each group, estimate HWE p
-    for (size_t group_i = 0; group_i < ngroups; group_i++) {
-      hwe_p(j, group_i) = SNPHWE2(genotypes(1,group_i), genotypes(0,group_i), genotypes(2,group_i), midp);
-    }
-  }
-  
+  double* out = hwe_p.begin();
+
+  // the HWE test (pure C++) is run within the parallel loop
+  lut_sums<4>(acc, grouped, lut, ngroups, ncores, block_size,
+              [&](size_t j, const uint64_t* tot) {
+                for (size_t group_i = 0; group_i < ngroups; group_i++) {
+                  const uint64_t* genotypes = tot + 4 * group_i;
+                  out[j + group_i * m] = SNPHWE2(genotypes[1], genotypes[0],
+                                                 genotypes[2], midp);
+                }
+              });
+
   return hwe_p;
 }
 
 /******************************************************************************/
-

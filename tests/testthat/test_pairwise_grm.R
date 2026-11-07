@@ -35,5 +35,7 @@ test_that("pairwise_grm compute correctly", {
   coa_hier <- hierfstat::beta.dosage(test_genotypes, inb = FALSE)
   grm_hier <- 2 * coa_hier
   grm_gt <- pairwise_grm(test_gt)
+  # remove the special class to allow comparison with the reference
+  class(grm_gt) <- setdiff(class(grm_gt), "pairwise_matrix")
   expect_true(all.equal(grm_hier, grm_gt, check.attributes = FALSE))
 })

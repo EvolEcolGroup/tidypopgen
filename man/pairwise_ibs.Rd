@@ -8,7 +8,8 @@ pairwise_ibs(
   x,
   as_matrix = FALSE,
   type = c("proportion", "adjusted_counts", "raw_counts"),
-  block_size = bigstatsr::block_size(nrow(x))
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
@@ -17,25 +18,56 @@ pairwise_ibs(
 \item{as_matrix}{boolean, determining whether the results should be a square
 symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 
-\item{type}{one of "proportion" (equivalent to "ibs" in PLINK),
-"adjusted_counts" ("distance" in PLINK), and "raw_counts" (the counts of
-identical alleles and non-missing alleles, from which the two other
-quantities are computed)}
+\item{type}{one of:
+\itemize{
+\item "proportion" (the default): the proportion of alleles that are identical
+by state, a similarity (as \verb{--distance ibs flat-missing} in PLINK, which
+writes it to a .mibs file).
+\item "adjusted_counts": the allele count distance, a dissimilarity (as
+\verb{--distance flat-missing} in PLINK, which writes it to a .dist file): the
+number of alleles that differ between two individuals, scaled up by the
+number of loci over the number of loci genotyped in both individuals, to
+correct for missing genotypes. It equals \code{2 * n_loci * (1 - proportion)}, so it is 0 for identical individuals and at most \code{2 * n_loci}. PLINK's default correction for missing genotypes (without
+\code{flat-missing}) is not available (see Details).
+\item "raw_counts": the counts of identical alleles and of non-missing
+alleles, from which the two other quantities are computed.
+}}
 
-\item{block_size}{maximum number of loci read at once. More loci should
-improve speed, but will tax memory.}
+\item{block_size}{maximum number of loci read at once. Genotypes are
+compared in a compact bit-packed form, so this has little effect on
+memory use.}
+
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
-a \link[bigstatsr:FBM-class]{bigstatsr::FBM} of proportion or adjusted counts, or a list of
-two \link[bigstatsr:FBM-class]{bigstatsr::FBM} matrices, one of counts of IBS by alleles, and one of
-number of valid alleles (i.e. 2\emph{n_loci - 2}missing_loci)
+for "proportion" and "adjusted_counts", a tidy tibble with one row
+per pair of individuals (columns \code{item1}, \code{item2} and \code{value}), or a
+square matrix if \code{as_matrix = TRUE}; for "raw_counts", a list of two
+\link[bigstatsr:FBM]{bigstatsr::FBM} matrices, \code{ibs} (the counts of alleles identical by
+state) and \code{valid_n} (the counts of non-missing alleles, i.e. twice the
+number of loci genotyped in both individuals).
 }
 \description{
 This function computes the IBS matrix.
 }
 \details{
-Note that monomorphic sites are currently considered. Remove monomorphic
-sites before running pairwise_king if this is a concern.
+Note that monomorphic sites are currently considered (as in PLINK). Remove
+monomorphic sites before running \code{pairwise_ibs()} if this is a concern.
+
+Imputed genotypes are used if \code{x} is set to use them (see
+\code{\link[=gt_set_imputed]{gt_set_imputed()}}), and treated as missing otherwise.
+
+Missing genotypes are handled as in PLINK with the \code{flat-missing} modifier
+(\verb{--distance ibs flat-missing} for "proportion", \verb{--distance flat-missing} for "adjusted_counts"): each pair of individuals is compared
+only on the loci genotyped in both, and all loci have the same weight. By
+default (without \code{flat-missing}), PLINK 1.9 instead divides each distance
+by one minus the sum of the average contributions to the distance of the
+loci missing in the pair, which depend on their allele frequencies. This
+default correction is not available in \code{pairwise_ibs()}, so, when
+genotypes are missing, its values are only comparable to those of PLINK
+run with \code{flat-missing}. Without missing genotypes, both corrections give
+the same values.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

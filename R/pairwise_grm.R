@@ -15,6 +15,8 @@
 #'   more efficient to pre-compute this matrix.
 #' @param block_size the size of the blocks to use for the computation of the
 #'   allele sharing matrix.
+#' @param n_cores number of cores to be used for the computation of the
+#'   allele sharing matrix, it defaults to [bigstatsr::nb_cores()]
 #' @returns a matrix of GR between all pairs of individuals
 #' @export
 #' @seealso [hierfstat::beta.dosage()]
@@ -28,14 +30,18 @@
 #' allele_sharing <- example_gt %>% pairwise_allele_sharing(as_matrix = TRUE)
 #' example_gt %>% pairwise_grm(allele_sharing_mat = allele_sharing)
 pairwise_grm <- function(
-    x,
-    allele_sharing_mat = NULL,
-    block_size = bigstatsr::block_size(nrow(x))) {
+  x,
+  allele_sharing_mat = NULL,
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = bigstatsr::nb_cores()
+) {
+  stopifnot_diploid(x)
   if (is.null(allele_sharing_mat)) {
     allele_sharing_mat <- pairwise_allele_sharing(
       x,
       as_matrix = TRUE,
-      block_size = block_size
+      block_size = block_size,
+      n_cores = n_cores
     )
   }
   mii <- diag(allele_sharing_mat)
@@ -44,5 +50,7 @@ pairwise_grm <- function(
   diag(allele_sharing_mat) <- mii
   # estimate the pairwise kinship (coancestries)
   coa <- (allele_sharing_mat - mb) / (1 - mb)
+  # add a class to indicate this is a pairwise matrix
+  class(coa) <- c("pairwise_matrix", class(coa))
   return(coa * 2)
 }

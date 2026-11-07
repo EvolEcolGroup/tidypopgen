@@ -2,25 +2,40 @@
 #'
 #' This function computes the IBS matrix.
 #'
-#' Note that monomorphic sites are currently counted. Should we filter them
-#' beforehand? What does plink do?
+#' Note that monomorphic sites are counted (as in PLINK). Remove monomorphic
+#' sites beforehand if this is a concern.
 #' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
-#' slot of a [bigsnpr::bigSNP] object).
+#' slot of a [bigsnpr::bigSNP] object). Genotypes are decoded with its
+#' `code256`, and values other than 0, 1 and 2 are treated as missing.
 #' @param ind.row An optional vector of the row indices that are used. If not
 #'   specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not
 #'   specified, all columns are used. Don't use negative indices.
-#' @param type one of "proportion" (equivalent to "ibs" in PLINK),
-#'   "adjusted_counts" ("distance" in PLINK), and "raw_counts" (the counts of
-#'   identical alleles and non-missing alleles, from which the two other
-#'   quantities are computed)
-#' @param block.size maximum number of columns read at once. Note that, to
-#'   optimise the speed of matrix operations, we have to store in memory 3 times
-#'   the columns.
-#' @returns if as.counts = TRUE function returns a list of two [bigstatsr::FBM]
-#'   matrices, one of counts of IBS by alleles (i.e. 2*n loci), and one of valid
-#'   alleles (i.e. 2 * n_loci - 2 * missing_loci). If as.counts = FALSE returns
-#'   a single matrix of IBS proportions.
+#' @param type one of:
+#'   - "proportion" (the default): the proportion of alleles that are identical
+#'   by state, a similarity (as `--distance ibs flat-missing` in PLINK, which
+#'   writes it to a .mibs file).
+#'   - "adjusted_counts": the allele count distance, a dissimilarity (as
+#'   `--distance flat-missing` in PLINK, which writes it to a .dist file): the
+#'   number of alleles that differ between two individuals, scaled up by the
+#'   number of loci over the number of loci genotyped in both individuals, to
+#'   correct for missing genotypes. It equals `2 * n_loci * (1 -
+#'   proportion)`, where `n_loci` is the number of loci used, so it is 0 for
+#'   identical individuals and at most `2 * n_loci`. Note that, without
+#'   `flat-missing`, PLINK corrects for missing genotypes differently, which
+#'   gives slightly different values when genotypes are missing.
+#'   - "raw_counts": the counts of identical alleles and of non-missing
+#'   alleles, from which the two other quantities are computed.
+#' @param block.size maximum number of columns read at once. Genotypes are
+#'   compared in a compact bit-packed form, so this has little effect on
+#'   memory use.
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
+#' @returns for "proportion" and "adjusted_counts", a matrix with one row and
+#'   one column per individual; for "raw_counts", a list of two
+#'   [bigstatsr::FBM] matrices, `ibs` (the counts of alleles identical by
+#'   state) and `valid_n` (the counts of non-missing alleles, i.e. twice the
+#'   number of loci genotyped in both individuals).
 #' @export
 #' @examples
 #' example_gt <- load_example_gt("gen_tbl")
@@ -40,15 +55,25 @@
 #' snp_ibs(X, type = "raw_counts")
 #'
 snp_ibs <- function(
-    X, # nolint start
-    ind.row = bigstatsr::rows_along(X),
-    ind.col = bigstatsr::cols_along(X),
-    type = c("proportion", "adjusted_counts", "raw_counts"),
-    block.size = bigstatsr::block_size(nrow(X))) {
+  X, # nolint start
+  ind.row = bigstatsr::rows_along(X),
+  ind.col = bigstatsr::cols_along(X),
+  type = c("proportion", "adjusted_counts", "raw_counts"),
+  block.size = bigstatsr::block_size(nrow(X)),
+  n_cores = bigstatsr::nb_cores()
+) {
   # nolint end
   type <- match.arg(type)
 
   n <- length(ind.row)
+  # no individuals (e.g. an empty group in group_map()): an empty matrix, as
+  # FBMs can not be empty
+  if (n == 0) {
+    if (type == "raw_counts") {
+      stop("type = 'raw_counts' needs at least one individual")
+    }
+    return(matrix(numeric(0), 0, 0))
+  }
   # FBM matrix to count the IBS counts
   IBS <- bigstatsr::FBM(n, n, init = 0) # nolint
   # FBM matrix to store valid number of comparisons (i.e NOT NA)
@@ -57,26 +82,19 @@ snp_ibs <- function(
 
   intervals <- CutBySize(m, block.size)
 
-  # Preassign memory where we will store the slices of genotypes.
-  # For efficiency, when we read in the slice,
-  # we will immediately recode it into these3 matrices,
-  # one per genotype, equivalent to X==0, X==1, and X==2 respectively
-  X_0_part <- matrix(0, n, max(intervals[, "size"])) # nolint start
-  X_1_part <- matrix(0, n, max(intervals[, "size"]))
-  X_2_part <- matrix(0, n, max(intervals[, "size"])) # nolint end
-
+  # for each block of loci, genotypes are packed into bits and compared
+  # with popcounts in C++ (see src/pairwise_bitpacked.h), so no dense
+  # copy of the block is needed
   for (j in bigstatsr::rows_along(intervals)) {
     ind <- seq2(intervals[j, ]) # this iteration indices
     ind.col.ind <- ind.col[ind] # subset given indices by the iteration indices #nolint
     increment_ibs_counts(
       IBS,
       IBS_valid_loci,
-      X_0_part,
-      X_1_part,
-      X_2_part,
       X,
       ind.row,
-      ind.col.ind
+      ind.col.ind,
+      ncores = n_cores
     )
   }
 
@@ -95,9 +113,11 @@ snp_ibs <- function(
     if (type == "proportion") {
       return(ibs_prop)
     } else {
-      # for adjusted counts
-      ibs_adj <- ibs_prop * m
-      return(ibs_adj)
+      # the allele count distance (as PLINK --distance flat-missing): the
+      # number of alleles that differ, scaled up to all m loci to correct for
+      # missing genotypes, i.e. 2 * m * (1 - ibs_prop)
+      ibs_dist <- 2 * m * (1 - ibs_prop)
+      return(ibs_dist)
     }
   }
 }

@@ -4,9 +4,9 @@
 #' - `screeplot`: a plot of the eigenvalues of the principal components
 #'    (currently it plots the singular value)
 #' - `scores` a scatterplot of the scores of each individual on two principal
-#' components (defined by `pc`)
+#' components (defined by `k`)
 #' - `loadings` a plot of loadings of all loci for a given component
-#'    (chosen with `pc`)
+#'    (chosen with `k`)
 #'
 #' `autoplot` produces simple plots to quickly inspect an object. They are not
 #' customisable; we recommend that you use `ggplot2` to produce publication
@@ -50,10 +50,11 @@
 #' autoplot(pca, type = "scores", k = c(1, 3)) +
 #'   aes(colour = lobsters$population)
 autoplot.gt_pca <- function(
-    object,
-    type = c("screeplot", "scores", "loadings"),
-    k = NULL,
-    ...) {
+  object,
+  type = c("screeplot", "scores", "loadings"),
+  k = NULL,
+  ...
+) {
   rlang::check_dots_empty()
   type <- match.arg(type)
   if (type == "screeplot") {
@@ -63,7 +64,7 @@ autoplot.gt_pca <- function(
       k <- c(1, 2)
     }
     if (length(k) != 2) {
-      stop("for 'scores' plots, 'pc' should be a pair of values, e.g. c(1,2)")
+      stop("for 'scores' plots, 'k' should be a pair of values, e.g. c(1,2)")
     }
     if ("square_frobenius" %in% names(object)) {
       tidy_pca <- tidy(object, "eigenvalues")
@@ -85,6 +86,12 @@ autoplot.gt_pca <- function(
   } else if (type == "loadings") {
     if (is.null(k)) {
       k <- 1
+    }
+    # bigstatsr plots several components as hexagonal bins, which need hexbin
+    if (length(k) > 1) {
+      rlang::check_installed("hexbin",
+        reason = "to plot the loadings of several components"
+      )
     }
     plot(object, type = "loadings", loadings = k)
   }

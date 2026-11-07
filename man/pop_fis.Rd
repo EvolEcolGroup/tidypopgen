@@ -9,11 +9,17 @@ pop_fis(
   method = c("Nei87", "WG17"),
   by_locus = FALSE,
   include_global = FALSE,
-  allele_sharing_mat = NULL
+  allele_sharing_mat = NULL,
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
-\item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using \code{\link[dplyr:group_by]{dplyr::group_by()}})}
+\item{.x}{a grouped \code{\link{gen_tibble}} (as obtained by using
+\code{\link[dplyr:group_by]{dplyr::group_by()}}, by one or more variables; with several, groups are
+labelled by their values pasted with ".", e.g. \code{pop1.F}); if method ==
+"Nei87", it is also possible to use
+a regular \code{gen_tibble}, in which case all individuals are considered to
+belong to a single population.}
 
 \item{method}{one of "Nei87" (based on Nei 1987, eqn 7.41) or "WG17" (for
 Weir and Goudet 2017) to compute FIS}
@@ -32,6 +38,10 @@ matrix with n+1 columns if \code{by_locus=TRUE}.}
 of Allele Sharing returned by \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}} with
 \code{as_matrix=TRUE}. As a number of statistics can be derived from the Allele
 Sharing matrix, it is sometimes more efficient to pre-compute this matrix.}
+
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}} (for "WG17", to compute the allele sharing matrix
+if it is not given, see \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}})}
 }
 \value{
 a vector of population specific fis (plus the global value if
@@ -52,32 +62,33 @@ RhpcBLASctl::omp_set_num_threads(2)
 }
 example_gt <- load_example_gt("grouped_gen_tbl")
 
-# Compute FIS using Nei87
+# Compute FIS using Nei87:
 example_gt \%>\% pop_fis(method = "Nei87")
 
-# Compute FIS using WG17
+# Compute FIS using WG17:
 example_gt \%>\% pop_fis(method = "WG17")
 
-# To include the global FIS, set include_global = TRUE
+# To include the global FIS, set include_global = TRUE:
 example_gt \%>\% pop_fis(method = "Nei87", include_global = TRUE)
 
-# To return FIS by locus, set by_locus = TRUE
+# To return FIS by locus, set by_locus = TRUE:
 example_gt \%>\% pop_fis(method = "Nei87", by_locus = TRUE)
 
 # To calculate from a pre-computed allele sharing matrix:
 allele_sharing_mat <- pairwise_allele_sharing(example_gt, as_matrix = TRUE)
 example_gt \%>\% pop_fis(
-  method = "WG17",
-  allele_sharing_mat = allele_sharing_mat
+  method = "WG17", allele_sharing_mat =
+    allele_sharing_mat
 )
 \dontshow{\}) # examplesIf}
 }
 \references{
 Nei M. (1987) Molecular Evolutionary Genetics. Columbia
-University Press
+University Press.
+
 Weir, BS and Goudet J (2017) A Unified Characterization of
 Population Structure and Relatedness. Genetics (2017) 206:2085
 }
 \seealso{
-\code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}} \code{\link[hierfstat:fs.dosage]{hierfstat::fis.dosage()}}
+\code{\link[hierfstat:basic.stats]{hierfstat::basic.stats()}} \code{\link[hierfstat:fis.dosage]{hierfstat::fis.dosage()}}
 }
