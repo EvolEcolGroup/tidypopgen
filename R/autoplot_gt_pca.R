@@ -87,6 +87,12 @@ autoplot.gt_pca <- function(
     if (is.null(k)) {
       k <- 1
     }
+    # bigstatsr plots several components as hexagonal bins, which need hexbin
+    if (length(k) > 1) {
+      rlang::check_installed("hexbin",
+        reason = "to plot the loadings of several components"
+      )
+    }
     plot(object, type = "loadings", loadings = k)
   }
 }
