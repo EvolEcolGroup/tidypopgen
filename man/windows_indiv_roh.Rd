@@ -145,20 +145,23 @@ it is soft deprecated and will be removed in future versions of
 \code{tidypopgen}.
 }
 \examples{
-\dontshow{if (rlang::is_installed("detectRUNS")) withAutoprint(\{ # examplesIf}
-sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
-  package = "detectRUNS"
+# a simulated dataset of three populations with increasing inbreeding
+# (see data-raw/create_roh_dataset.R in the source of the package)
+bed_file <- system.file("extdata", "roh", "roh_sim.bed",
+  package = "tidypopgen"
 )
-sheep_gt <- tidypopgen::gen_tibble(sheep_ped,
-  backingfile = tempfile(),
-  quiet = TRUE
-)
-sheep_gt <- sheep_gt \%>\% group_by(population)
-sheep_roh <- windows_indiv_roh(sheep_gt)
-sheep_roh
+sim_gt <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
+sim_gt <- sim_gt \%>\% group_by(population)
+sim_roh <- windows_indiv_roh(sim_gt)
+sim_roh
+# the number of runs in each population
+table(sim_roh$group)
+\donttest{
 # use the plots of detectRUNS
-detectRUNS::plot_Runs(runs = as_detectRUNS(sheep_roh))
-\dontshow{\}) # examplesIf}
+if (rlang::is_installed("detectRUNS")) {
+  detectRUNS::plot_Runs(runs = as_detectRUNS(sim_roh))
+}
+}
 }
 \references{
 Biscarini F, Cozzi P, Gaspa G, Marras G (2019) \code{detectRUNS}:

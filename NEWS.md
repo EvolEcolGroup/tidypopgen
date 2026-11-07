@@ -41,7 +41,9 @@
   argument, no longer prints a message for each individual, and no longer
   needs `detectRUNS` to be installed. The loci must now be sorted by
   chromosome and position (on unsorted loci, `detectRUNS` gave runs that
-  start on the wrong chromosome)
+  start on the wrong chromosome). A small simulated dataset with known runs
+  of homozygosity (`inst/extdata/roh/roh_sim.bed`) is used by its examples,
+  which no longer need `detectRUNS`
 * `cbind()` on a `gen_tibble` makes duplicated column names unique, with a
   message, as `dplyr::bind_cols()` (which `dplyr` already used for grouped
   `gen_tibble`s); an ungrouped `gen_tibble` used to get two columns with the

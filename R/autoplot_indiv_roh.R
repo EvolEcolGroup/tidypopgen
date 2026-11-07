@@ -46,17 +46,18 @@
 #' @param ... not currently used.
 #' @returns a `ggplot2` object
 #' @export
-#' @examplesIf rlang::is_installed("detectRUNS")
-#' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
-#'   package = "detectRUNS"
+#' @examples
+#' # a simulated dataset of three populations with increasing inbreeding
+#' bed_file <- system.file("extdata", "roh", "roh_sim.bed",
+#'   package = "tidypopgen"
 #' )
-#' sheep_gt <- gen_tibble(sheep_ped, backingfile = tempfile(), quiet = TRUE)
-#' sheep_roh <- windows_indiv_roh(sheep_gt %>% group_by(population))
+#' sim_gt <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
+#' sim_roh <- windows_indiv_roh(sim_gt %>% group_by(population))
 #'
-#' autoplot(sheep_roh, type = "runs", chromosome = "2")
-#' autoplot(sheep_roh, type = "coverage")
-#' autoplot(sheep_roh, type = "froh")
-#' autoplot(sheep_roh, type = "length_class")
+#' autoplot(sim_roh, type = "runs", chromosome = "3")
+#' autoplot(sim_roh, type = "coverage")
+#' autoplot(sim_roh, type = "froh")
+#' autoplot(sim_roh, type = "length_class")
 autoplot.indiv_roh <- function(
   object,
   type = c("runs", "stacked", "coverage", "froh", "violin", "length_class"),

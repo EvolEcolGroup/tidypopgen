@@ -22,12 +22,10 @@ runs (e.g. \code{\link[detectRUNS:plot_Runs]{detectRUNS::plot_Runs()}}, \code{\l
 used.
 }
 \examples{
-\dontshow{if (rlang::is_installed("detectRUNS")) withAutoprint(\{ # examplesIf}
-sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
-  package = "detectRUNS"
+bed_file <- system.file("extdata", "roh", "roh_sim.bed",
+  package = "tidypopgen"
 )
-sheep_gt <- gen_tibble(sheep_ped, backingfile = tempfile(), quiet = TRUE)
-sheep_roh <- windows_indiv_roh(sheep_gt \%>\% group_by(population))
-head(as_detectRUNS(sheep_roh))
-\dontshow{\}) # examplesIf}
+sim_gt <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
+sim_roh <- windows_indiv_roh(sim_gt \%>\% group_by(population))
+head(as_detectRUNS(sim_roh))
 }

@@ -432,7 +432,122 @@ test_that("windows_indiv_roh returns tidy runs", {
   expect_error(as_detectRUNS(data.frame(id = 1)), "windows_indiv_roh")
 })
 
+# the simulated dataset of inst/extdata/roh, with known runs of homozygosity
+# (see data-raw/create_roh_dataset.R)
+roh_sim_gt <- function() {
+  gen_tibble(
+    system.file("extdata", "roh", "roh_sim.bed", package = "tidypopgen"),
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+}
+roh_sim_truth <- function() {
+  utils::read.csv(
+    system.file("extdata", "roh", "roh_sim_truth.csv", package = "tidypopgen")
+  )
+}
+
+test_that("windows_indiv_roh finds the simulated runs", {
+  sim_gt <- roh_sim_gt()
+  truth <- roh_sim_truth()
+  roh <- windows_indiv_roh(sim_gt %>% group_by(population))
+  # each simulated run is found as a single run, which starts and ends at
+  # most one window (15 loci) beyond it: loci outside the run that are
+  # homozygous by chance are in homozygous windows that overlap the run
+  for (i in seq_len(nrow(truth))) {
+    overlaps <- roh$first_locus <= truth$last_locus[i] &
+      roh$last_locus >= truth$first_locus[i]
+    found <- roh[roh$id == truth$id[i] & overlaps, ]
+    expect_identical(nrow(found), 1L)
+    expect_identical(
+      as.character(found$chromosome), as.character(truth$chromosome[i])
+    )
+    expect_true(found$first_locus <= truth$first_locus[i])
+    expect_true(found$first_locus > truth$first_locus[i] - 15)
+    expect_true(found$last_locus >= truth$last_locus[i])
+    expect_true(found$last_locus < truth$last_locus[i] + 15)
+  }
+  # other runs are chance stretches of homozygous loci, much shorter than the
+  # simulated runs (at least 60 loci)
+  in_truth <- vapply(seq_len(nrow(roh)), function(r) {
+    overlaps <- truth$first_locus <= roh$last_locus[r] &
+      truth$last_locus >= roh$first_locus[r]
+    any(truth$id == roh$id[r] & overlaps)
+  }, logical(1))
+  expect_true(all(roh$n_loci[!in_truth] < 30))
+  # F_ROH (the proportion of the genome in runs) grows with inbreeding
+  froh <- autoplot(roh, type = "froh")$data
+  mean_froh <- tapply(froh$froh, froh$group, mean)
+  expect_true(mean_froh[["outbred"]] < 0.01)
+  expect_true(mean_froh[["outbred"]] < mean_froh[["moderate"]])
+  expect_true(mean_froh[["moderate"]] < mean_froh[["inbred"]])
+})
+
+test_that("windows_indiv_roh deals with the edge cases of the simulated runs", {
+  sim_gt <- roh_sim_gt()
+  loci <- show_loci(sim_gt)
+  roh <- windows_indiv_roh(sim_gt)
+  # inbred_01: runs at the end of chromosome 1 and at the start of chromosome
+  # 2 are two runs, which end and start at the last and first locus of their
+  # chromosome
+  runs_01 <- roh[roh$id == "inbred_01" & roh$n_loci > 30, ]
+  expect_identical(as.character(runs_01$chromosome), c("1", "2"))
+  expect_identical(runs_01$last_locus[1], max(which(loci$chromosome == "1")))
+  expect_identical(runs_01$first_locus[2], min(which(loci$chromosome == "2")))
+  # inbred_02: the run on chromosome 3 holds a heterozygous genotype (locus
+  # 2450) and two missing genotypes (loci 2400 and 2500), but no window holds
+  # more than one of each, so it is a single run
+  has_2450 <- roh$first_locus <= 2450 & roh$last_locus >= 2450
+  run_02 <- roh[roh$id == "inbred_02" & has_2450, ]
+  expect_identical(nrow(run_02), 1L)
+  expect_true(run_02$n_opp >= 1)
+  expect_identical(run_02$n_missing, 2L)
+  # it is dropped if runs can not have heterozygous genotypes
+  roh_no_opp <- windows_indiv_roh(sim_gt[sim_gt$id == "inbred_02", ],
+    max_opp_run = 0
+  )
+  expect_false(any(
+    roh_no_opp$first_locus <= 2450 & roh_no_opp$last_locus >= 2450
+  ))
+  # and it is split around them if windows can not hold any
+  roh_strict <- windows_indiv_roh(sim_gt[sim_gt$id == "inbred_02", ],
+    max_opp_window = 0, max_miss_window = 0
+  )
+  roh_strict <- roh_strict[roh_strict$n_loci > 30, ]
+  expect_identical(roh_strict$last_locus[1:3], c(2399L, 2449L, 2499L))
+  expect_identical(roh_strict$first_locus[2:4], c(2401L, 2451L, 2501L))
+  # inbred_03: a gap larger than max_gap makes the windows that span it
+  # non-homozygous, but, as in detectRUNS, it does not split the run, as the
+  # loci on each side of the gap are in homozygous windows
+  gap <- which(diff(loci$position) > 10^6)
+  spans_gap <- roh$first_locus <= gap & roh$last_locus > gap
+  run_03 <- roh[roh$id == "inbred_03" & spans_gap, ]
+  expect_identical(nrow(run_03), 1L)
+})
+
 test_that("autoplot draws indiv_roh objects", {
+  sim_gt <- roh_sim_gt() %>% group_by(population)
+  roh <- windows_indiv_roh(sim_gt)
+  expect_s3_class(roh, "indiv_roh")
+  # the attributes used by autoplot
+  expect_identical(attr(roh, "individuals")$id, sim_gt$id)
+  expect_identical(
+    as.character(attr(roh, "chromosome_length")$chromosome),
+    c("1", "2", "3")
+  )
+  for (type in c("runs", "stacked", "coverage", "froh", "violin",
+                 "length_class")) {
+    expect_s3_class(autoplot(roh, type = type), "ggplot")
+  }
+  expect_s3_class(
+    autoplot(roh, type = "froh", froh_by = "chromosome"),
+    "ggplot"
+  )
+  expect_s3_class(autoplot(roh, type = "runs", chromosome = "3"), "ggplot")
+  expect_error(autoplot(roh, chromosome = "4"), "chromosomes with runs")
+})
+
+test_that("F_ROH of autoplot is that of detectRUNS", {
   skip_if_not_installed("detectRUNS")
   sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
     package = "detectRUNS"
@@ -443,24 +558,6 @@ test_that("autoplot draws indiv_roh objects", {
   sheep_gt <- gen_tibble(sheep_ped, backingfile = tempfile(), quiet = TRUE)
   sheep_gt <- sheep_gt[c(1:6, 51:56), ] %>% group_by(population)
   roh <- windows_indiv_roh(sheep_gt)
-  expect_s3_class(roh, "indiv_roh")
-  # the attributes used by autoplot
-  expect_identical(attr(roh, "individuals")$id, sheep_gt$id)
-  expect_identical(
-    as.character(attr(roh, "chromosome_length")$chromosome),
-    c("2", "24")
-  )
-  for (type in c("runs", "stacked", "coverage", "froh", "violin",
-                 "length_class")) {
-    expect_s3_class(autoplot(roh, type = type), "ggplot")
-  }
-  expect_s3_class(
-    autoplot(roh, type = "froh", froh_by = "chromosome"),
-    "ggplot"
-  )
-  expect_s3_class(autoplot(roh, type = "runs", chromosome = "24"), "ggplot")
-  expect_error(autoplot(roh, chromosome = "1"), "chromosomes with runs")
-  # F_ROH is that of detectRUNS
   froh <- autoplot(roh, type = "froh")$data
   suppressMessages(
     ref <- detectRUNS::Froh_inbreeding(as_detectRUNS(roh), sheep_map)

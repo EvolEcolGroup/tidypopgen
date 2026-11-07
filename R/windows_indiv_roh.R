@@ -94,19 +94,24 @@
 #' @references Biscarini F, Cozzi P, Gaspa G, Marras G (2019) `detectRUNS`:
 #'   Detect Runs of Homozygosity and Runs of Heterozygosity in Diploid Genomes.
 #'   R package. \doi{10.32614/CRAN.package.detectRUNS}
-#' @examplesIf rlang::is_installed("detectRUNS")
-#' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
-#'   package = "detectRUNS"
+#' @examples
+#' # a simulated dataset of three populations with increasing inbreeding
+#' # (see data-raw/create_roh_dataset.R in the source of the package)
+#' bed_file <- system.file("extdata", "roh", "roh_sim.bed",
+#'   package = "tidypopgen"
 #' )
-#' sheep_gt <- tidypopgen::gen_tibble(sheep_ped,
-#'   backingfile = tempfile(),
-#'   quiet = TRUE
-#' )
-#' sheep_gt <- sheep_gt %>% group_by(population)
-#' sheep_roh <- windows_indiv_roh(sheep_gt)
-#' sheep_roh
+#' sim_gt <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
+#' sim_gt <- sim_gt %>% group_by(population)
+#' sim_roh <- windows_indiv_roh(sim_gt)
+#' sim_roh
+#' # the number of runs in each population
+#' table(sim_roh$group)
+#' \donttest{
 #' # use the plots of detectRUNS
-#' detectRUNS::plot_Runs(runs = as_detectRUNS(sheep_roh))
+#' if (rlang::is_installed("detectRUNS")) {
+#'   detectRUNS::plot_Runs(runs = as_detectRUNS(sim_roh))
+#' }
+#' }
 windows_indiv_roh <- function(
   .x,
   window_size = 15,
@@ -244,13 +249,13 @@ windows_indiv_roh <- function(
 #'   ungrouped [`gen_tibble`]), `id`, `chrom`, `nSNP`, `from`, `to` and
 #'   `lengthBps`, in the order of `x`
 #' @export
-#' @examplesIf rlang::is_installed("detectRUNS")
-#' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
-#'   package = "detectRUNS"
+#' @examples
+#' bed_file <- system.file("extdata", "roh", "roh_sim.bed",
+#'   package = "tidypopgen"
 #' )
-#' sheep_gt <- gen_tibble(sheep_ped, backingfile = tempfile(), quiet = TRUE)
-#' sheep_roh <- windows_indiv_roh(sheep_gt %>% group_by(population))
-#' head(as_detectRUNS(sheep_roh))
+#' sim_gt <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
+#' sim_roh <- windows_indiv_roh(sim_gt %>% group_by(population))
+#' head(as_detectRUNS(sim_roh))
 as_detectRUNS <- function(x) { # nolint: object_name_linter
   required <- c(
     "id", "chromosome", "start", "end", "length_bp", "n_loci"
