@@ -967,3 +967,18 @@ test_that("validate_loci finds duplicated loci, sorted or not", {
     "duplicated loci"
   )
 })
+
+test_that("is.finite() and friends work on the genotypes column", {
+  example_gt <- load_example_gt("gen_tbl")
+  # the method is registered with vctrs, so it does not need the package
+  # to be attached
+  expect_identical(
+    unname(is.finite(example_gt$genotypes)),
+    rep(TRUE, nrow(example_gt))
+  )
+  expect_identical(
+    unname(is.nan(example_gt$genotypes)),
+    rep(FALSE, nrow(example_gt))
+  )
+  expect_error(exp(example_gt$genotypes), "not implemented")
+})
