@@ -49,8 +49,8 @@ run on each chromosome separately (`0248be2e`).
 
 ### Minor points found while checking
 
-- `R/snp_king.R`: the KING matrix is stored in a variable called
-  `ibs_counts_matrix`; rename it.
+- `R/snp_king.R`: the KING matrix was stored in a variable called
+  `ibs_counts_matrix`; it is now `king_matrix` (`caa23187`).
 - `pairwise_ibs(type = "adjusted_counts")` matches PLINK's
   `--distance flat-missing`. PLINK's default correction for missing genotypes
   (without `flat-missing`) is not available; add it only if users ask for it.
