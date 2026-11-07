@@ -69,6 +69,9 @@ vcf_to_fbm_cpp <- function(
   # as.factor() (this avoids creating and sorting a string for each locus)
   chromosome_names <- vcf_meta$chromosome_names
   chromosome_levels <- unique(chromosome_names[order(chromosome_names)])
+  # a missing chromosome "." is not a level, so that it becomes NA, as in the
+  # vcfR parser
+  chromosome_levels <- chromosome_levels[chromosome_levels != "."]
   loci$chromosome <- structure(
     match(chromosome_names, chromosome_levels)[loci$chromosome],
     levels = chromosome_levels,

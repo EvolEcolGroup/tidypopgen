@@ -311,16 +311,20 @@ test_that("missing chromosomes are written as '.'", {
   vcf_body <- vcf_lines[!startsWith(vcf_lines, "#")]
   vcf_chrom <- vapply(strsplit(vcf_body, "\t"), `[`, character(1), 1)
   expect_equal(vcf_chrom, c("chr1", ".", "chr1", "chr1", ".", "chr2"))
-  # vcfR reads "." back as a missing chromosome
-  test_gt2 <- gen_tibble(
-    vcf_path,
-    quiet = TRUE,
-    parser = "vcfR",
-    backingfile = tempfile()
-  )
-  expect_equal(
-    as.character(show_loci(test_gt2)$chromosome),
-    test_loci_na$chromosome
-  )
-  expect_true(identical(show_genotypes(test_gt_na), show_genotypes(test_gt2)))
+  # both parsers read "." back as a missing chromosome
+  for (parser in c("cpp", "vcfR")) {
+    test_gt2 <- gen_tibble(
+      vcf_path,
+      quiet = TRUE,
+      parser = parser,
+      backingfile = tempfile()
+    )
+    expect_equal(
+      as.character(show_loci(test_gt2)$chromosome),
+      test_loci_na$chromosome
+    )
+    expect_true(
+      identical(show_genotypes(test_gt_na), show_genotypes(test_gt2))
+    )
+  }
 })

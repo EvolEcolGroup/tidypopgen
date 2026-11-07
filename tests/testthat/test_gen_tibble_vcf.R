@@ -922,3 +922,39 @@ test_that("the md5 sum of the FBM is that of its saved rds for VCF inputs", {
     )
   }
 })
+
+test_that("a missing chromosome '.' is NA with both parsers", {
+  skip_if_not_installed("vcfR")
+  # missing chromosomes, a missing ID (named from chromosome and position)
+  # and a missing ALT
+  vcf_path <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+      "chrB\t343\trs1\tA\tT\t.\t.\t.\tGT\t0/1\t1/1",
+      ".\t65\trs2\tC\tG\t.\t.\t.\tGT\t0/0\t0/1",
+      "chrB\t5\t.\tG\tC\t.\t.\t.\tGT\t1/1\t./.",
+      ".\t70\t.\tT\t.\t.\t.\t.\tGT\t0/0\t0/0"
+    ),
+    vcf_path
+  )
+  cpp_gt <- gen_tibble(vcf_path,
+    parser = "cpp", backingfile = tempfile(), quiet = TRUE
+  )
+  vcfr_gt <- gen_tibble(vcf_path,
+    parser = "vcfR", backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(
+    as.character(show_loci(cpp_gt)$chromosome),
+    c("chrB", NA, "chrB", NA)
+  )
+  expect_identical(levels(show_loci(cpp_gt)$chromosome), "chrB")
+  expect_identical(
+    show_loci(cpp_gt)$name,
+    c("rs1", "rs2", "chrB_5", "NA_70")
+  )
+  expect_identical(show_loci(cpp_gt), show_loci(vcfr_gt))
+  expect_identical(show_genotypes(cpp_gt), show_genotypes(vcfr_gt))
+})
