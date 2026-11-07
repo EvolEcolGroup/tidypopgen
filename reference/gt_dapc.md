@@ -72,9 +72,10 @@ for manipulating the results. For the moment, this function returns
 objects of class
 [`adegenet::dapc`](https://rdrr.io/pkg/adegenet/man/dapc.html) which are
 compatible with methods from `adegenet`; graphical methods for DAPC are
-documented in adegenet::scatter.dapc (see ?scatter.dapc). This is likely
-to change in the future, so make sure you do not rely on the objects
-remaining compatible.
+documented in
+[adegenet::scatter.dapc](https://rdrr.io/pkg/adegenet/man/dapcGraphics.html)
+(see ?scatter.dapc). This is likely to change in the future, so make
+sure you do not rely on the objects remaining compatible.
 
 This function aligns with the guidelines proposed by Thia (2023) for the
 standardized application of DAPC to genotype data. Our default settings

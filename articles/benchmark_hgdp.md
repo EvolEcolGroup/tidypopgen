@@ -31,6 +31,16 @@ We can now load the necessary libraries:
 ``` r
 
 library(tidypopgen)
+#> Loading required package: dplyr
+#> 
+#> Attaching package: 'dplyr'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     filter, lag
+#> The following objects are masked from 'package:base':
+#> 
+#>     intersect, setdiff, setequal, union
+#> Loading required package: tibble
 library(ggplot2)
 ```
 
@@ -65,10 +75,10 @@ in our data.
 bed_path <- "./data/hgdp/hgdp650.qc.hg19.bed"
 meta_info <- readr::read_tsv("./data/hgdp/hgdp650_id_pop.txt")
 #> Rows: 1064 Columns: 6
-#> ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────
+#> ── Column specification ────────────────────────────────────────────────────────
 #> Delimiter: "\t"
 #> chr (6): Id, Sex, population, Geographic_origin, Region, Pop7Groups
-#>
+#> 
 #> ℹ Use `spec()` to retrieve the full column specification for this data.
 #> ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
@@ -87,7 +97,7 @@ hgdp <- gen_tibble(bed_path,
 )
 ```
 
-read_plink: 2.6s
+read_plink: 1.7s
 
 Add metadata
 
@@ -105,19 +115,19 @@ Let’s confirm that we have read all the expected information:
 
 hgdp
 #> # A gen_tibble: 643733 loci
-#> # A tibble:     1,043 × 4
-#>    id         genotypes population region
-#>    <chr>     <vctr_SNP> <chr>      <chr>
-#>  1 HGDP00448          1 Biaka_HG   Africa
-#>  2 HGDP00479          2 Biaka_HG   Africa
-#>  3 HGDP00985          3 Biaka_HG   Africa
-#>  4 HGDP01094          4 Biaka_HG   Africa
-#>  5 HGDP00982          5 Mbuti_HG   Africa
-#>  6 HGDP00911          6 Mandenka   Africa
-#>  7 HGDP01202          7 Mandenka   Africa
-#>  8 HGDP00927          8 Yoruba     Africa
-#>  9 HGDP00461          9 Biaka_HG   Africa
-#> 10 HGDP00451         10 Biaka_HG   Africa
+#> # A tibble:     1,043 × 5
+#>    id        phenotype  genotypes population region
+#>    <chr>     <fct>     <vctr_SNP> <chr>      <chr> 
+#>  1 HGDP00448 control    [2,0,...] Biaka_HG   Africa
+#>  2 HGDP00479 control    [1,0,...] Biaka_HG   Africa
+#>  3 HGDP00985 control    [0,0,...] Biaka_HG   Africa
+#>  4 HGDP01094 control    [1,0,...] Biaka_HG   Africa
+#>  5 HGDP00982 control    [2,0,...] Mbuti_HG   Africa
+#>  6 HGDP00911 control    [1,0,...] Mandenka   Africa
+#>  7 HGDP01202 control    [2,0,...] Mandenka   Africa
+#>  8 HGDP00927 control    [2,0,...] Yoruba     Africa
+#>  9 HGDP00461 control    [2,0,...] Biaka_HG   Africa
+#> 10 HGDP00451 control    [2,0,...] Biaka_HG   Africa
 #> # ℹ 1,033 more rows
 ```
 
@@ -133,7 +143,8 @@ loci_report <- qc_report_loci(hgdp)
 #> This gen_tibble is not grouped. For Hardy-Weinberg equilibrium, `qc_report_loci()` will assume individuals are part of the same population and HWE test p-values will be calculated across all individuals. If you wish to calculate HWE p-values within populations or groups, please use`group_by()` before calling `qc_report_loci()`.
 ```
 
-loci_report: 1.8s The resulting report can be observed using `autoplot`.
+loci_report: 302ms The resulting report can be observed using
+`autoplot`.
 
 ``` r
 
@@ -157,7 +168,7 @@ to_keep_loci <-
 hgdp <- hgdp %>% select_loci(to_keep_loci$snp_id)
 ```
 
-filter_loci: 1.5s
+filter_loci: 1.6s
 
 ## Individual Report
 
@@ -169,7 +180,7 @@ individual, and rate of missingness per individual.
 indiv_report <- qc_report_indiv(hgdp)
 ```
 
-indiv_report: 2.4s
+indiv_report: 212ms
 
 ``` r
 
@@ -202,12 +213,13 @@ need to update the file backing matrix with `gt_update_backingfile`.
 ``` r
 
 hgdp <- gt_update_backingfile(hgdp)
-#> Genetic distances are not sorted, setting them to zero
-#>
+#> 
 #> gen_backing files updated, now
-#> using bigSNP file: /tmp/RtmppmRPhl/test_11da24e07766_v2.rds
-#> with backing file: /tmp/RtmppmRPhl/test_11da24e07766_v2.bk
+#> using FBM RDS: /tmp/RtmpGT02qf/test_12567f3f87ce84_v2.rds
+#> with FBM backing file: /tmp/RtmpGT02qf/test_12567f3f87ce84_v2.bk
 #> make sure that you do NOT delete those files!
+#> to reload the gen_tibble in another session, use:
+#> gt_load('/tmp/RtmpGT02qf/test_12567f3f87ce84_v2.gt')
 ```
 
 ## Impute data
@@ -222,7 +234,7 @@ hgdp <- gt_impute_simple(hgdp, method = "mode", n_cores = n_cores)
 gt_set_imputed(hgdp, TRUE)
 ```
 
-impute: 134ms
+impute: 135ms
 
 ## LD clumping
 
@@ -234,7 +246,7 @@ hgdp <- hgdp %>%
   select_loci_if(loci_ld_clump(genotypes, thr_r2 = 0.2, n_cores = n_cores))
 ```
 
-ld_clumping: 3.6s
+ld_clumping: 1.6s
 
 ## PCA
 
@@ -246,7 +258,7 @@ cleaned and LD clumped dataset.
 test_pca <- hgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 1.7s
+pca: 2.5s
 
 Plot PCA:
 
@@ -271,7 +283,7 @@ regions covered by the dataset.
 test_dapc <- gt_dapc(test_pca, pop = as.factor(hgdp$region))
 ```
 
-dapc: 35ms
+dapc: 101ms
 
 Plot DAPC:
 
@@ -299,7 +311,7 @@ pairwise_fsts <- grouped_hgdp %>% pairwise_pop_fst(
 )
 ```
 
-pairwise_fst: 3.5s
+pairwise_fst: 53ms
 
 Plot pairwise Fst:
 
@@ -308,25 +320,19 @@ Plot pairwise Fst:
 # Order by continents
 grouped_hgdp_order <- grouped_hgdp %>% arrange(region, population)
 regional_order <- unique(grouped_hgdp_order$population)
-pairwise_fsts <- pairwise_fsts[regional_order, regional_order]
 
-ggheatmap(pairwise_fsts) +
+autoplot(pairwise_fsts, order = regional_order) +
   scale_fill_viridis_c() +
   theme(
     axis.text.x = element_text(angle = -60, hjust = 0, size = 6),
     axis.text.y = element_text(angle = 0, hjust = 1, size = 6)
   ) +
   labs(
-    x = element_blank(),
-    y = element_blank(),
+    x = NULL,
+    y = NULL,
     fill = "Fst"
   )
 ```
-
-![plot of chunk
-pairwise_fst_plot](figure/hgdp_benchmark/pairwise_fst_plot-1.png)
-
-plot of chunk pairwise_fst_plot
 
 ## Save in plink bed format
 
@@ -339,29 +345,29 @@ gt_as_plink(hgdp,
   type = "bed",
   overwrite = TRUE
 )
-#> [1] "/tmp/RtmppmRPhl/file11da6e81448a.bed"
+#> [1] "/tmp/RtmpGT02qf/file12567f106fc82f.bed"
 ```
 
-plink_save: 246ms
+plink_save: 166ms
 
 ## Summary
 
 Here is a summary of the time taken (in seconds) to perform each step of
 the analyses:
 
-    #>            step  time
-    #> 1    read_plink  2.61
-    #> 2   loci_report  1.83
-    #> 3   filter_loci  1.53
-    #> 4  indiv_report  2.42
-    #> 5  filter_indiv     0
-    #> 6        impute  0.13
-    #> 7   ld_clumping  3.65
-    #> 8           pca  1.71
-    #> 9          dapc  0.03
-    #> 10 pairwise_fst  3.48
-    #> 11   plink_save  0.25
-    #> 12        Total 17.64
+    #>            step time
+    #> 1    read_plink 1.71
+    #> 2   loci_report  0.3
+    #> 3   filter_loci 1.61
+    #> 4  indiv_report 0.21
+    #> 5  filter_indiv    0
+    #> 6        impute 0.13
+    #> 7   ld_clumping 1.64
+    #> 8           pca 2.47
+    #> 9          dapc  0.1
+    #> 10 pairwise_fst 0.05
+    #> 11   plink_save 0.17
+    #> 12        Total 8.39
 
 ## Running the benchmark on a laptop
 
@@ -371,15 +377,15 @@ cores to 4. Here is a summary of the time taken (in seconds) to perform
 each step of the analyses:
 
     #>            step  time
-    #> 1    read_plink  4.68
-    #> 2   loci_report  3.18
-    #> 3   filter_loci   3.2
-    #> 4  indiv_report  3.27
-    #> 5  filter_indiv     0
-    #> 6        impute  0.88
-    #> 7   ld_clumping  9.28
-    #> 8           pca  3.74
-    #> 9          dapc  0.06
-    #> 10 pairwise_fst  5.49
-    #> 11   plink_save  0.34
-    #> 12        Total 34.12
+    #> 1    read_plink  2.01
+    #> 2   loci_report  0.11
+    #> 3   filter_loci  3.17
+    #> 4  indiv_report  0.37
+    #> 5  filter_indiv  0.01
+    #> 6        impute  0.96
+    #> 7   ld_clumping  6.83
+    #> 8           pca  5.06
+    #> 9          dapc  0.32
+    #> 10 pairwise_fst  0.33
+    #> 11   plink_save   0.3
+    #> 12        Total 19.47

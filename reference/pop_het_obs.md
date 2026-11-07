@@ -23,7 +23,9 @@ pop_het_obs(
   (usually grouped, as obtained by using
   [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),
   otherwise the full tibble will be considered as belonging to a single
-  population).
+  population). If grouped by more than one variable, groups are labelled
+  by the values of the grouping variables pasted with "." (e.g.
+  `pop1.F`).
 
 - by_locus:
 
@@ -40,7 +42,7 @@ pop_het_obs(
 - n_cores:
 
   number of cores to be used, it defaults to
-  [`bigstatsr::nb_cores()`](https://privefl.github.io/bigstatsr/reference/reexports.html)
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 
@@ -61,6 +63,16 @@ following equation 7.38 in Nei(1987) on pp.164. In our specific case,
 there are only two alleles, so \\m=2\\. For population specific
 estimates, the sum is done over a single value of \\k\\. \\\hat{h}\_o\\
 at the genome level is simply the mean of the locus estimates.
+
+This statistic is ploidy-agnostic: an individual is heterozygous at a
+locus whenever its dosage is neither zero nor its own ploidy, so
+`pop_het_obs()` works for diploid, polyploid, and populations that mix
+individuals of different ploidy. The genome-wide estimate when
+`include_global = TRUE` is the unweighted mean of the population
+estimates for polyploid/mixed-ploidy data; for diploid and pseudohaploid
+data it is computed via
+[`pop_global_stats()`](https://evolecolgroup.github.io/tidypopgen/reference/pop_global_stats.md),
+for consistency with previous releases.
 
 ## References
 

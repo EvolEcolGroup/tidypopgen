@@ -30,8 +30,16 @@ the path of the .geno file
 
 ## Details
 
-NOTE that we currently read all the data into memory to write the file,
-so this function is not suitable for very large datasets.
+The genotypes are read and written directly from the file backed matrix
+(one locus at a time), so this function also works on datasets that do
+not fit in memory.
+
+## Note
+
+the `.geno` format only supports haploid or diploid data, so this
+function only works on diploid (or pseudohaploid) `gen_tibble` objects.
+Pseudohaploid data is simply treated as regular diploid genotype counts
+(dosage 0/2), the same convention used by other tools (e.g. PLINK).
 
 ## See also
 
@@ -44,5 +52,5 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a geno file
 gt_as_geno_lea(example_gt, file = paste0(tempfile(), "_example.geno"))
-#> [1] "/tmp/RtmpylcdcX/file1fba4bf298ef_example.geno"
+#> [1] "/tmp/Rtmp1ritxJ/file1eb977a93292_example.geno"
 ```

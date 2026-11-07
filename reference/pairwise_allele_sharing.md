@@ -14,7 +14,8 @@ heterozygous. Matching is the average of these 0, 1/2 and 1s)
 pairwise_allele_sharing(
   x,
   as_matrix = FALSE,
-  block_size = bigstatsr::block_size(nrow(x))
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = bigstatsr::nb_cores()
 )
 ```
 
@@ -31,12 +32,23 @@ pairwise_allele_sharing(
 
 - block_size:
 
-  maximum number of loci read at once. More loci should improve speed,
-  but will tax memory.
+  maximum number of loci read at once. Genotypes are compared in a
+  compact bit-packed form, so this has little effect on memory use.
+
+- n_cores:
+
+  number of cores to be used, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 
 a matrix of allele sharing between all pairs of individuals
+
+## Details
+
+Imputed genotypes are used if `x` is set to use them (see
+[`gt_set_imputed()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_set_imputed.md)),
+and treated as missing otherwise.
 
 ## See also
 
@@ -74,4 +86,6 @@ example_gt %>% pairwise_allele_sharing(as_matrix = TRUE)
 #> e 0.5833333 0.500 0.600 0.4166667 0.7500000 0.500 0.500
 #> f 0.6000000 0.500 0.625 0.7000000 0.5000000 0.900 0.750
 #> g 0.5000000 0.375 0.500 0.5000000 0.5000000 0.750 0.700
+#> attr(,"class")
+#> [1] "pairwise_matrix" "matrix"          "array"          
 ```

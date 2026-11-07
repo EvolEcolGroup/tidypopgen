@@ -2,15 +2,14 @@
 
 This function combined two
 [gen_tibble](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md)s.
-By defaults, it subsets the loci and swaps ref and alt alleles to make
-the two datasets compatible (this behaviour can be switched off with
-`as_is`). The first object is used as a "reference" , and SNPs in the
-other dataset will be flipped and/or alleles swapped as needed. SNPs
-that have different alleles in the two datasets (i.e. triallelic) will
-also be dropped. There are also options (NOT default) to attempt strand
-flipping to match alleles (often needed in human datasets from different
-SNP chips), and remove ambiguous alleles (C/G and A/T) where the correct
-strand can not be guessed.
+It subsets the loci and swaps ref and alt alleles to make the two
+datasets compatible. The first object is used as a "reference" , and
+SNPs in the other dataset will be flipped and/or alleles swapped as
+needed. SNPs that have different alleles in the two datasets (i.e.
+triallelic) will also be dropped. There are also options (NOT default)
+to attempt strand flipping to match alleles (often needed in human
+datasets from different SNP chips), and remove ambiguous alleles (C/G
+and A/T) where the correct strand can not be guessed.
 
 ## Usage
 
@@ -37,21 +36,30 @@ rbind(
 
 - as_is:
 
-  boolean determining whether the loci should be left as they are before
-  merging. If FALSE (the defaults), `rbind` will attempt to subset and
-  swap alleles as needed.
+  deprecated, and ignored: `rbind` always subsets the loci and swaps
+  alleles as needed (setting `as_is = TRUE` never stopped it, and now
+  gives a warning).
 
 - flip_strand:
 
   boolean on whether strand flipping should be checked to match the two
   datasets. If this is set to TRUE, ambiguous SNPs (i.e. A/T and C/G)
-  will also be removed. It defaults to FALSE
+  will also be removed, and loci whose `allele_ref` is missing in both
+  datasets will have their alleles swapped, so that the observed allele
+  becomes `allele_ref`. It defaults to FALSE
 
 - use_position:
 
   boolean of whether a combination of chromosome and position should be
   used for matching SNPs. By default, `rbind` uses the locus name, so
-  this is set to FALSE. When using 'use_position=TRUE', make sure
+  this is set to FALSE. If the loci names of either `gen_tibble` are
+  integers (as created by `gen_tibble(names_as_int = TRUE)`, which
+  numbers the loci in the order in which they are found in the *VCF*),
+  the names do not identify the same locus in the two datasets, so loci
+  are always matched by position: `use_position` is then set to TRUE
+  automatically (even if it was set to FALSE), with a message unless
+  `quiet = TRUE`. In either case, the merged loci keep the names of the
+  reference dataset. When using 'use_position=TRUE', make sure
   chromosomes are coded in the same way in both `gen_tibbles` (a mix of
   e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an
   unexpectedly large number variants are dropped when merging).
@@ -73,6 +81,11 @@ a
 with the merged data.
 
 ## Details
+
+Loci are matched by name, unless `use_position = TRUE`. If the loci
+names of either `gen_tibble` are integers (as created by
+`gen_tibble(names_as_int = TRUE)`), loci are always matched by
+chromosome and position (see `use_position`).
 
 rbind differs from merging data with plink, which swaps the order of
 allele1 and allele2 according to minor allele frequency when merging
@@ -125,12 +138,12 @@ merged_gt <- rbind(ref = example_gt, target = test_gt, flip_strand = TRUE)
 #> ( 0 were flipped to match the reference set)
 #> ( 4 are ambiguous, of which 4 were removed)
 #> 
-#> gen_tibble saved to /tmp/RtmpylcdcX/gt_merged_1fba3afaa4b3.gt
-#> using FBM RDS: /tmp/RtmpylcdcX/gt_merged_1fba3afaa4b3.rds
-#> with FBM backing file: /tmp/RtmpylcdcX/gt_merged_1fba3afaa4b3.bk
+#> gen_tibble saved to /tmp/Rtmp1ritxJ/gt_merged_1eb95d015aa7.gt
+#> using FBM RDS: /tmp/Rtmp1ritxJ/gt_merged_1eb95d015aa7.rds
+#> with FBM backing file: /tmp/Rtmp1ritxJ/gt_merged_1eb95d015aa7.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpylcdcX/gt_merged_1fba3afaa4b3.gt')
+#> gt_load('/tmp/Rtmp1ritxJ/gt_merged_1eb95d015aa7.gt')
 
 merged_gt
 #> # A gen_tibble: 2 loci

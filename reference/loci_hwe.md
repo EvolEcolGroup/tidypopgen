@@ -8,12 +8,26 @@ Return the p-value from an exact test of HWE.
 loci_hwe(.x, .col = "genotypes", ...)
 
 # S3 method for class 'tbl_df'
-loci_hwe(.x, .col = "genotypes", mid_p = TRUE, ...)
+loci_hwe(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(nrow(.x), 1),
+  ...
+)
 
 # S3 method for class 'vctrs_bigSNP'
-loci_hwe(.x, .col = "genotypes", mid_p = TRUE, ...)
+loci_hwe(
+  .x,
+  .col = "genotypes",
+  mid_p = TRUE,
+  n_cores = bigstatsr::nb_cores(),
+  block_size = bigstatsr::block_size(length(.x), 1),
+  ...
+)
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 loci_hwe(
   .x,
   .col = "genotypes",
@@ -53,7 +67,7 @@ loci_hwe(
 - n_cores:
 
   number of cores to be used, it defaults to
-  [`bigstatsr::nb_cores()`](https://privefl.github.io/bigstatsr/reference/reexports.html)
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 - block_size:
 
@@ -62,11 +76,21 @@ loci_hwe(
 - type:
 
   type of object to return, if using grouped method. One of "tidy",
-  "list", or "matrix". Default is "tidy".
+  "list", or "matrix". Default is "tidy". Data can be grouped by more
+  than one variable: groups are then labelled by the values of the
+  grouping variables pasted with "." (e.g. `pop1.F`), and the "tidy"
+  output has one column per grouping variable rather than a single
+  `group` column. The `group` column, or the columns of the grouping
+  variables, keep the type of the grouping variables (e.g. a factor
+  keeps its levels), so that groups stay in their order when the output
+  is sorted or plotted.
 
 ## Value
 
-a vector of probabilities from HWE exact test, one per locus
+a vector of probabilities from HWE exact test, one per locus. For a
+grouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md),
+empty groups (e.g. from `group_by(.drop = FALSE)`) are NA.
 
 ## Details
 

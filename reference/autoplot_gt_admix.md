@@ -25,8 +25,7 @@ autoplot(object, type = c("cv", "barplot"), k = NULL, run = NULL, ...)
 
 - k:
 
-  the value of `k` to plot (for `barplot` type only) param repeat the
-  repeat to plot (for `barplot` type only)
+  the value of `k` to plot (for `barplot` type only)
 
 - run:
 

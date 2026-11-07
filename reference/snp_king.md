@@ -10,7 +10,8 @@ snp_king(
   X,
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
-  block.size = bigstatsr::block_size(nrow(X)) * 4
+  block.size = bigstatsr::block_size(nrow(X)) * 4,
+  n_cores = bigstatsr::nb_cores()
 )
 ```
 
@@ -22,7 +23,8 @@ snp_king(
   [bigstatsr::FBM.code256](https://privefl.github.io/bigstatsr/reference/FBM.code256-class.html)
   matrix (as found in the `genotypes` slot of a
   [bigsnpr::bigSNP](https://privefl.github.io/bigsnpr/reference/bigSNP-class.html)
-  object).
+  object). Genotypes are decoded with its `code256`, and values other
+  than 0, 1 and 2 are treated as missing.
 
 - ind.row:
 
@@ -36,7 +38,13 @@ snp_king(
 
 - block.size:
 
-  maximum number of columns read at once.
+  maximum number of columns read at once. Genotypes are compared in a
+  compact bit-packed form, so this has little effect on memory use.
+
+- n_cores:
+
+  number of cores to be used, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 

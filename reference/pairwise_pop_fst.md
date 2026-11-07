@@ -18,6 +18,9 @@ implemented:
 ## Usage
 
 ``` r
+pairwise_pop_fst(.x, ...)
+
+# S3 method for class 'gen_tbl'
 pairwise_pop_fst(
   .x,
   type = c("tidy", "pairwise"),
@@ -25,7 +28,8 @@ pairwise_pop_fst(
   by_locus_type = c("tidy", "matrix", "list"),
   method = c("Hudson", "Nei87", "WC84"),
   return_num_dem = FALSE,
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  ...
 )
 ```
 
@@ -38,10 +42,18 @@ pairwise_pop_fst(
   (as obtained by using
   [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html))
 
+- ...:
+
+  other arguments passed to specific methods, currently unused.
+
 - type:
 
   type of object to return One of "tidy" or "pairwise" for a pairwise
-  matrix of populations. Default is "tidy".
+  matrix of populations. Default is "tidy". If data are grouped by more
+  than one variable, the "tidy" output has one column per grouping
+  variable for each population of a pair (e.g. `population_1`, `sex_1`,
+  `population_2`, `sex_2`), and populations are otherwise labelled by
+  the values of the grouping variables pasted with "." (e.g. `pop1.F`).
 
 - by_locus:
 
@@ -68,7 +80,7 @@ pairwise_pop_fst(
 - n_cores:
 
   number of cores to be used, it defaults to
-  [`bigstatsr::nb_cores()`](https://privefl.github.io/bigstatsr/reference/reexports.html)
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 
@@ -83,6 +95,34 @@ returned.
 
 For all formulae, the genome wide estimate is obtained by taking the
 ratio of the mean numerators and denominators over all relevant SNPs.
+
+Loci with no genotypes in one of the two populations of a pair (e.g.
+loci that failed in all the individuals of a population) carry no
+information on the differentiation between them, so they are dropped for
+that pair with all methods: their Fst by locus is `NaN`, and they do not
+contribute to the mean numerator and denominator of the genome wide
+estimate.
+
+**Difference from `hierfstat` for 'WC84'**:
+[`hierfstat::pairwise.WCfst()`](https://rdrr.io/pkg/hierfstat/man/pairwise.WCfst.html)
+(and [`hierfstat::wc()`](https://rdrr.io/pkg/hierfstat/man/wc.html))
+keep these loci. Their among-population variance component
+(\\\sigma^2_a\\, the numerator) is set to 0, while their
+within-population components (\\\sigma^2_b\\ and \\\sigma^2_w\\,
+estimated from the one population with data) still add to the
+denominator. So `hierfstat` gives these loci an Fst of 0 rather than
+`NaN`, and its genome wide estimate is pulled towards 0 (i.e. it is
+usually lower than the one computed here). The two estimates are
+identical when every locus has data in both populations, or if such loci
+are removed before using `hierfstat`. This applies to every function
+that computes Fst with 'WC84' (e.g.
+[`windows_pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/reference/windows_pairwise_pop_fst.md),
+[`jackknife_pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/reference/jackknife_pairwise_pop_fst.md)
+and
+[`nwise_pop_pbs()`](https://evolecolgroup.github.io/tidypopgen/reference/nwise_pop_pbs.md)).
+'Nei87' gives the same results as
+[`hierfstat::pairwise.neifst()`](https://rdrr.io/pkg/hierfstat/man/pairwise.neifst.html),
+which also drops these loci.
 
 ## References
 
@@ -124,6 +164,8 @@ example_gt %>%
 #> pop1        NA 0.0320197 0.1428571
 #> pop2 0.0320197        NA 0.0500000
 #> pop3 0.1428571 0.0500000        NA
+#> attr(,"class")
+#> [1] "pairwise_matrix" "matrix"          "array"          
 
 # To calculate Fst by locus:
 example_gt %>%

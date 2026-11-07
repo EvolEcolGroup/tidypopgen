@@ -14,6 +14,12 @@
   samples](https://evolecolgroup.github.io/tidypopgen/articles/aDNA_pseudohaploids.md):
 - [Benchmark on the
   HGDP](https://evolecolgroup.github.io/tidypopgen/articles/benchmark_hgdp.md):
+- [Working with big
+  data](https://evolecolgroup.github.io/tidypopgen/articles/big_data.md):
 - [Interpolating genetic
   data](https://evolecolgroup.github.io/tidypopgen/articles/interpolating.md):
+- [Runs of homozygosity in the
+  HGDP](https://evolecolgroup.github.io/tidypopgen/articles/roh_hgdp.md):
+- [Site frequency
+  spectra](https://evolecolgroup.github.io/tidypopgen/articles/sfs.md):
 - [tidypopgen](https://evolecolgroup.github.io/tidypopgen/articles/tidypopgen.md):

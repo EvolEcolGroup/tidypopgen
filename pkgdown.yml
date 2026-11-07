@@ -1,5 +1,5 @@
 pandoc: 3.8.3
-pkgdown: 2.2.0
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   a01_overview: a01_overview.html
@@ -8,9 +8,12 @@ articles:
   a99_plink_cheatsheet: a99_plink_cheatsheet.html
   articles/aDNA_pseudohaploids: aDNA_pseudohaploids.html
   articles/benchmark_hgdp: benchmark_hgdp.html
+  articles/big_data: big_data.html
   articles/interpolating: interpolating.html
+  articles/roh_hgdp: roh_hgdp.html
+  articles/sfs: sfs.html
   tidypopgen: tidypopgen.html
-last_built: 2026-05-20T08:27Z
+last_built: 2026-11-07T12:45Z
 urls:
   reference: https://evolecolgroup.github.io/tidypopgen/reference
   article: https://evolecolgroup.github.io/tidypopgen/articles

@@ -6,6 +6,9 @@ chromosome.
 ## Usage
 
 ``` r
+windows_pop_tajimas_d(.x, ...)
+
+# S3 method for class 'gen_tbl'
 windows_pop_tajimas_d(
   .x,
   type = c("matrix", "tidy", "list"),
@@ -13,7 +16,8 @@ windows_pop_tajimas_d(
   step_size,
   size_unit = c("snp", "bp"),
   min_loci = 1,
-  complete = FALSE
+  complete = FALSE,
+  ...
 )
 ```
 
@@ -23,10 +27,21 @@ windows_pop_tajimas_d(
 
   a (potentially grouped) `gen_tibble` object
 
+- ...:
+
+  other arguments passed to specific methods, currently unused.
+
 - type:
 
   type of object to return, if using grouped method. One of "matrix",
-  "tidy", or "list". Default is "matrix".
+  "tidy", or "list". Default is "matrix". Data can be grouped by more
+  than one variable: groups are then labelled by the values of the
+  grouping variables pasted with "." (e.g. `pop1.F`), and the "tidy"
+  output has one column per grouping variable rather than a single
+  `group` column. The `group` column, or the columns of the grouping
+  variables, keep the type of the grouping variables (e.g. a factor
+  keeps its levels), so that groups stay in their order when the output
+  is sorted or plotted.
 
 - window_size:
 
@@ -73,7 +88,9 @@ if data is not grouped, a data frame with the following columns:
 
 - `end`: the ending locus of the window
 
-- `n_loci`: the number of loci in the window
+- `n_loci`: the number of loci in the window (including loci with no
+  genotyped individuals in some groups; the number of loci with data in
+  each group is given by the "tidy" and "list" outputs)
 
 - `group`: the Tajima's D for the group for the given window (there will
   be as many of these columns as groups in the gen_tibble, and they will
@@ -103,6 +120,23 @@ if data is not grouped, a data frame with the following columns:
 
 - `n_loci`: the number of loci in the window
 
+## Details
+
+Missing genotypes are accounted for by using the number of non-missing
+allele copies at each locus as its sample size, following Bailey et al.
+(2025) as implemented in `pixy`. See
+[`pop_tajimas_d()`](https://evolecolgroup.github.io/tidypopgen/reference/pop_tajimas_d.md)
+for details. Loci with no genotyped individuals are ignored, and are not
+counted in `n_loci`. With windows defined in base pairs and `step_size`
+equal to `window_size`, the windows match those used by `pixy`.
+
+## References
+
+Bailey N, Stevison L, Samuk K (2025) Correcting for bias in estimates of
+\\\theta_W\\ and Tajima's D from missing data in next-generation
+sequencing. Molecular Ecology Resources, e14104.
+[doi:10.1111/1755-0998.14104](https://doi.org/10.1111/1755-0998.14104)
+
 ## Examples
 
 ``` r
@@ -115,9 +149,9 @@ example_gt %>%
     size_unit = "snp", min_loci = 2
   )
 #> # A tibble: 3 × 7
-#>   chromosome start   end n_loci  pop1   pop2    pop3
-#>   <chr>      <dbl> <dbl>  <dbl> <dbl>  <dbl>   <dbl>
-#> 1 chr1           1     3      3 1.03  -0.612  -0.710
-#> 2 chr1           3     5      2 2.04  -0.612  -0.612
-#> 3 chr2           1     3      2 0.311 -0.710 Inf    
+#>   chromosome start   end n_loci  pop1     pop2    pop3
+#>   <chr>      <dbl> <dbl>  <dbl> <dbl>    <dbl>   <dbl>
+#> 1 chr1           1     3      3 1.03  -Inf      -0.710
+#> 2 chr1           3     5      2 1.24    -0.612  -0.612
+#> 3 chr2           1     3      2 0.311   -0.710 NaN    
 ```

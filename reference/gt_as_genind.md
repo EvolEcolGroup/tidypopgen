@@ -1,7 +1,9 @@
 # Convert a `gen_tibble` to a `genind` object from `adegenet`
 
 This function converts a `gen_tibble` to a `genind` object from
-`adegenet`
+`adegenet`. `genind` objects support arbitrary ploidy (including
+mixed-ploidy data across individuals), so this works on diploid,
+polyploid and mixed-ploidy `gen_tibble` objects alike.
 
 ## Usage
 
@@ -20,6 +22,12 @@ gt_as_genind(x)
 ## Value
 
 a `genind` object
+
+## Note
+
+pseudohaploid individuals are treated as diploid (ploidy 2) using their
+stored genotype counts (dosage 0/2) directly, the same convention used
+by other tools (e.g. PLINK) when handling pseudohaploid data.
 
 ## Examples
 

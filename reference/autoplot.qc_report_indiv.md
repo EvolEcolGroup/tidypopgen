@@ -47,7 +47,10 @@ autoplot(
 
 ## Value
 
-a `ggplot2` object
+a `ggplot2` object. For `relatedness` plots of a report created from a
+grouped
+[`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md),
+a named list of `ggplot2` objects, one for each group.
 
 ## Details
 
@@ -76,6 +79,7 @@ autoplot(indiv_report, type = "scatter", miss_threshold = 0.1)
 # Create QC report with kinship filtering
 indiv_report_rel <-
   example_gt %>% qc_report_indiv(kings_threshold = "second")
+#> Warning: 2 pairs of individuals have missing kinship (e.g. no loci genotyped in both), so they could not be compared, and are not treated as related
 
 # Autoplot relatedness
 autoplot(indiv_report_rel, type = "relatedness", kings_threshold = "second")

@@ -15,7 +15,8 @@ pop_fis(
   method = c("Nei87", "WG17"),
   by_locus = FALSE,
   include_global = FALSE,
-  allele_sharing_mat = NULL
+  allele_sharing_mat = NULL,
+  n_cores = bigstatsr::nb_cores()
 )
 ```
 
@@ -26,7 +27,11 @@ pop_fis(
   a grouped
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md)
   (as obtained by using
-  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html))
+  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),
+  by one or more variables; with several, groups are labelled by their
+  values pasted with ".", e.g. `pop1.F`); if method == "Nei87", it is
+  also possible to use a regular `gen_tibble`, in which case all
+  individuals are considered to belong to a single population.
 
 - method:
 
@@ -55,6 +60,14 @@ pop_fis(
   the Allele Sharing matrix, it is sometimes more efficient to
   pre-compute this matrix.
 
+- n_cores:
+
+  number of cores to be used, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
+  (for "WG17", to compute the allele sharing matrix if it is not given,
+  see
+  [`pairwise_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/reference/pairwise_allele_sharing.md))
+
 ## Value
 
 a vector of population specific fis (plus the global value if
@@ -62,7 +75,9 @@ a vector of population specific fis (plus the global value if
 
 ## References
 
-Nei M. (1987) Molecular Evolutionary Genetics. Columbia University Press
+Nei M. (1987) Molecular Evolutionary Genetics. Columbia University
+Press.
+
 Weir, BS and Goudet J (2017) A Unified Characterization of Population
 Structure and Relatedness. Genetics (2017) 206:2085
 
@@ -76,22 +91,22 @@ Structure and Relatedness. Genetics (2017) 206:2085
 ``` r
 example_gt <- load_example_gt("grouped_gen_tbl")
 
-# Compute FIS using Nei87
+# Compute FIS using Nei87:
 example_gt %>% pop_fis(method = "Nei87")
 #>       pop1       pop2       pop3 
 #> -0.2333333  0.0000000  0.0000000 
 
-# Compute FIS using WG17
+# Compute FIS using WG17:
 example_gt %>% pop_fis(method = "WG17")
 #>        pop1        pop2        pop3 
 #> -0.12328767  0.08333333 -0.60000000 
 
-# To include the global FIS, set include_global = TRUE
+# To include the global FIS, set include_global = TRUE:
 example_gt %>% pop_fis(method = "Nei87", include_global = TRUE)
 #>        pop1        pop2        pop3      global 
 #> -0.23333333  0.00000000  0.00000000 -0.09696376 
 
-# To return FIS by locus, set by_locus = TRUE
+# To return FIS by locus, set by_locus = TRUE:
 example_gt %>% pop_fis(method = "Nei87", by_locus = TRUE)
 #>               pop1 pop2 pop3
 #> [1,] -3.333333e-01    0  NaN
@@ -104,8 +119,8 @@ example_gt %>% pop_fis(method = "Nei87", by_locus = TRUE)
 # To calculate from a pre-computed allele sharing matrix:
 allele_sharing_mat <- pairwise_allele_sharing(example_gt, as_matrix = TRUE)
 example_gt %>% pop_fis(
-  method = "WG17",
-  allele_sharing_mat = allele_sharing_mat
+  method = "WG17", allele_sharing_mat =
+    allele_sharing_mat
 )
 #>        pop1        pop2        pop3 
 #> -0.12328767  0.08333333 -0.60000000 

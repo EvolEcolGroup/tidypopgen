@@ -70,6 +70,23 @@ with elements: A named list (an S3 class "big_SVD") of
 - `square_frobenius`, used to compute the proportion of variance
   explained by the components (optional)
 
+## Details
+
+With up to a few thousand individuals, this is usually much faster than
+[`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
+(on 1,043 individuals and 643,733 loci, about 31 s on one core against
+about 175 s). The covariance between individuals is kept in memory,
+which takes 8 bytes per pair of individuals (about 0.2 GB for 5,000
+individuals, and 3.2 GB for 20,000); with many more individuals,
+[`gt_pca_randomSVD()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_pca_randomSVD.md)
+uses much less memory.
+
+The genotypes are read in blocks of loci, decoded as doubles, of about 1
+GB (set by `options(bigstatsr.block.sizeGB)`). A smaller size reduces
+the memory used, at the cost of some speed: on the same data, blocks of
+0.25 GB (`options(bigstatsr.block.sizeGB = 0.25)`) reduced the peak
+memory from about 2.0 to 0.6 GB, and took about 25% longer.
+
 ## Note
 
 Rather than accessing these elements directly, it is better to use

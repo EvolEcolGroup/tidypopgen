@@ -1,7 +1,7 @@
 # Estimate nucleotide diversity (pi) at each locus
 
-Estimate nucleotide diversity (pi) at each locus, accounting for missing
-values. This uses the formula: c_0 \* c_1 / (n \* (n-1) / 2)
+Estimate nucleotide diversity (\\\pi\\) at each locus, accounting for
+missing values.
 
 ## Usage
 
@@ -26,7 +26,7 @@ loci_pi(
   ...
 )
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 loci_pi(
   .x,
   .col = "genotypes",
@@ -56,7 +56,7 @@ loci_pi(
 - n_cores:
 
   number of cores to be used, it defaults to
-  [`bigstatsr::nb_cores()`](https://privefl.github.io/bigstatsr/reference/reexports.html)
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 - block_size:
 
@@ -65,7 +65,14 @@ loci_pi(
 - type:
 
   type of object to return, if using grouped method. One of "tidy",
-  "list", or "matrix". Default is "tidy".
+  "list", or "matrix". Default is "tidy". Data can be grouped by more
+  than one variable: groups are then labelled by the values of the
+  grouping variables pasted with "." (e.g. `pop1.F`), and the "tidy"
+  output has one column per grouping variable rather than a single
+  `group` column. The `group` column, or the columns of the grouping
+  variables, keep the type of the grouping variables (e.g. a factor
+  keeps its levels), so that groups stay in their order when the output
+  is sorted or plotted.
 
 - ...:
 
@@ -74,6 +81,29 @@ loci_pi(
 ## Value
 
 a vector of frequencies, one per locus
+
+## Details
+
+Nucleotide diversity is estimated as
+
+\$\$ \pi = \frac{c_0 c_1}{n(n - 1)/2}, \$\$
+
+where:
+
+- \\c_0\\ is the number of observed copies of allele 0,
+
+- \\c_1\\ is the number of observed copies of allele 1,
+
+- \\n = c_0 + c_1\\ is the total number of non-missing allele copies at
+  the locus.
+
+Missing values are accommodated by computing \\n\\, \\c_0\\, and \\c_1\\
+using only non-missing genotype data. For polyploid data, each
+individual contributes a number of allele copies equal to its ploidy.
+
+This corresponds to the unbiased gene diversity estimator of Nei and
+Roychoudhury (1974) and is applicable to diploid, polyploid
+mixed-ploidy, and pseudohaploid `gen_tibble` objects alike.
 
 ## Examples
 
@@ -146,6 +176,8 @@ example_gt %>%
 example_gt %>%
   group_by(population) %>%
   loci_pi(type = "matrix")
+#> Matrix with character rownames and character colnames
+#> Dimensions: 6 x 3 
 #>          pop1 pop2 pop3
 #> rs1 0.5333333  0.5  0.0
 #> rs2 0.5333333  0.0  0.5

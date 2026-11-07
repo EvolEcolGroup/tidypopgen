@@ -12,7 +12,8 @@ estimators).
 pairwise_grm(
   x,
   allele_sharing_mat = NULL,
-  block_size = bigstatsr::block_size(nrow(x))
+  block_size = bigstatsr::block_size(nrow(x)),
+  n_cores = bigstatsr::nb_cores()
 )
 ```
 
@@ -34,6 +35,12 @@ pairwise_grm(
 
   the size of the blocks to use for the computation of the allele
   sharing matrix.
+
+- n_cores:
+
+  number of cores to be used for the computation of the allele sharing
+  matrix, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 
@@ -72,6 +79,8 @@ example_gt %>% pairwise_grm()
 #> e -0.4045802
 #> f  0.7977099
 #> g  0.5572519
+#> attr(,"class")
+#> [1] "pairwise_matrix" "pairwise_matrix" "matrix"          "array"          
 
 # To calculate using a precomputed allele sharing matrix, use:
 allele_sharing <- example_gt %>% pairwise_allele_sharing(as_matrix = TRUE)
@@ -92,4 +101,6 @@ example_gt %>% pairwise_grm(allele_sharing_mat = allele_sharing)
 #> e -0.4045802
 #> f  0.7977099
 #> g  0.5572519
+#> attr(,"class")
+#> [1] "pairwise_matrix" "pairwise_matrix" "matrix"          "array"          
 ```

@@ -214,6 +214,7 @@ Functions for merging `gen_tibble` objects.
 - [`summary(`*`<rbind_report>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/summary_rbind_dry_run.md)
   : Print a summary of a merge report
 - [`cbind(`*`<gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/cbind.gen_tbl.md)
+  [`cbind(`*`<grouped_gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/cbind.gen_tbl.md)
   : Combine a gen_tibble to a data.frame or tibble by column
 
 ## Exporting
@@ -349,6 +350,10 @@ Functions operating on a `gen_tibble` grouped by population.
   : Compute the population expected heterozygosity
 - [`pop_het_obs()`](https://evolecolgroup.github.io/tidypopgen/reference/pop_het_obs.md)
   : Compute the population observed heterozygosity
+- [`pop_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/pop_sfs.md)
+  : Compute the site frequency spectrum of each population
+- [`pop_sfs_preview()`](https://evolecolgroup.github.io/tidypopgen/reference/pop_sfs_preview.md)
+  : Preview the projections of the site frequency spectrum
 - [`pop_tajimas_d()`](https://evolecolgroup.github.io/tidypopgen/reference/pop_tajimas_d.md)
   : Estimate Tajima's D for the whole genome
 
@@ -379,17 +384,61 @@ Functions comparing individuals or populations.
 - [`pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/reference/pairwise_pop_fst.md)
   : Compute pairwise population Fst
 
+- [`pairwise_pop_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/pairwise_pop_sfs.md)
+  : Compute the joint site frequency spectrum of each pair of
+  populations
+
 - [`nwise_pop_pbs()`](https://evolecolgroup.github.io/tidypopgen/reference/nwise_pop_pbs.md)
   : Compute the Population Branch Statistics for each combination of
   populations
+
+- [`nwise_pop_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/nwise_pop_sfs.md)
+  : Compute the joint site frequency spectrum of all populations
+
+- [`autoplot(`*`<pairwise_matrix>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/autoplot_pairwise.md)
+  [`autoplot(`*`<pairwise_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/autoplot_pairwise.md)
+  : Autoplot for pairwise distance matrices
+
+- [`heatmap_pairwise()`](https://evolecolgroup.github.io/tidypopgen/reference/heatmap_pairwise.md)
+  : Pairwise distance heatmap
+
+- [`heatmap_add_dendro()`](https://evolecolgroup.github.io/tidypopgen/reference/heatmap_add_dendro.md)
+  : Add dendrograms to a heatmap of pairwise distances
+
+## Site frequency spectrum
+
+Functions to compute site frequency spectra, with missing data handled
+as in easySFS.
+
+- [`pop_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/pop_sfs.md)
+  : Compute the site frequency spectrum of each population
+- [`pop_sfs_preview()`](https://evolecolgroup.github.io/tidypopgen/reference/pop_sfs_preview.md)
+  : Preview the projections of the site frequency spectrum
+- [`pairwise_pop_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/pairwise_pop_sfs.md)
+  : Compute the joint site frequency spectrum of each pair of
+  populations
+- [`nwise_pop_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/nwise_pop_sfs.md)
+  : Compute the joint site frequency spectrum of all populations
+- [`tidy(`*`<sfs>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/tidy.sfs.md)
+  : Tidy a site frequency spectrum
+- [`write_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/write_sfs.md)
+  : Write site frequency spectra for dadi or fastsimcoal2
+- [`autoplot(`*`<sfs>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/autoplot_sfs.md)
+  [`autoplot(`*`<pop_sfs_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/autoplot_sfs.md)
+  [`autoplot(`*`<pairwise_sfs_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/autoplot_sfs.md)
+  [`autoplot(`*`<sfs_preview_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/autoplot_sfs.md)
+  : Plot site frequency spectra
+- [`bootstrap_pop_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/bootstrap_sfs.md)
+  [`bootstrap_pairwise_pop_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/bootstrap_sfs.md)
+  [`bootstrap_nwise_pop_sfs()`](https://evolecolgroup.github.io/tidypopgen/reference/bootstrap_sfs.md)
+  : Block bootstrap of site frequency spectra
 
 ## Windows
 
 Functions to compute statistics in sliding windows across loci.
 
 - [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/reference/windows_indiv_roh.md)
-  [`gt_roh_window()`](https://evolecolgroup.github.io/tidypopgen/reference/windows_indiv_roh.md)
-  : Detect runs of homozygosity using a sliding-window approach
+  : Detect runs of homozygosity using a sliding-window
 - [`windows_nwise_pop_pbs()`](https://evolecolgroup.github.io/tidypopgen/reference/windows_nwise_pop_pbs.md)
   : Compute the Population Branch Statistics over a sliding window
 - [`windows_pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/reference/windows_pairwise_pop_fst.md)
@@ -398,6 +447,47 @@ Functions to compute statistics in sliding windows across loci.
   : Compute Tajima's D for a sliding window
 - [`windows_stats_generic()`](https://evolecolgroup.github.io/tidypopgen/reference/windows_stats_generic.md)
   : Estimate window statistics from per locus estimates
+
+## Runs of homozygosity
+
+Functions to find and summarise runs of homozygosity.
+
+- [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/reference/windows_indiv_roh.md)
+  : Detect runs of homozygosity using a sliding-window
+
+- [`gt_roh_froh()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_roh_froh.md)
+  : Inbreeding from runs of homozygosity (F_ROH)
+
+- [`gt_roh_loci()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_roh_loci.md)
+  : The loci in runs of homozygosity
+
+- [`gt_roh_islands()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_roh_islands.md)
+  : Islands of runs of homozygosity
+
+- [`autoplot(`*`<indiv_roh>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/autoplot.indiv_roh.md)
+  :
+
+  Autoplots for `indiv_roh` objects
+
+- [`as_detectRUNS()`](https://evolecolgroup.github.io/tidypopgen/reference/as_detectRUNS.md)
+  :
+
+  Convert runs of homozygosity to the format of `detectRUNS`
+
+## Jackknife
+
+Functions to compute genome-wide statistics with block jackknife
+standard errors.
+
+- [`jackknife_nwise_pop_pbs()`](https://evolecolgroup.github.io/tidypopgen/reference/jackknife_nwise_pop_pbs.md)
+  : Compute the Population Branch Statistics with block jackknife
+  standard errors
+- [`jackknife_pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/reference/jackknife_pairwise_pop_fst.md)
+  : Compute pairwise Fst with block jackknife standard errors
+- [`jackknife_pop_tajimas_d()`](https://evolecolgroup.github.io/tidypopgen/reference/jackknife_pop_tajimas_d.md)
+  : Compute Tajima's D with block jackknife standard errors
+- [`jackknife_stats_generic()`](https://evolecolgroup.github.io/tidypopgen/reference/jackknife_stats_generic.md)
+  : Estimate a block jackknife standard error from per locus estimates
 
 ## PCA
 
@@ -556,18 +646,6 @@ Functions for other analyses within `R`.
 
   Autoplots for `gt_pcadapt` objects
 
-## `bigSNP`
-
-Mostly for developers: Functions for operating directly on `bigSNP`
-objects.
-
-- [`snp_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/reference/snp_allele_sharing.md)
-  : Compute the Pairwise Allele Sharing Matrix for a bigSNP object
-- [`snp_ibs()`](https://evolecolgroup.github.io/tidypopgen/reference/snp_ibs.md)
-  : Compute the Identity by State Matrix for a bigSNP object
-- [`snp_king()`](https://evolecolgroup.github.io/tidypopgen/reference/snp_king.md)
-  : Compute the KING-robust Matrix for a bigSNP object
-
 ## Example data
 
 Function for loading an example `gen_tibble`.
@@ -612,6 +690,42 @@ Methods for tidyverse verbs for `gen_tibble` objects
 
   A \$ method for `gen_tibble` objects
 
+- [`vec_math.vctrs_bigSNP()`](https://evolecolgroup.github.io/tidypopgen/reference/vec_math.vctrs_bigSNP.md)
+  : Mathematical predicates for vctrs_bigSNP vectors
+
+## `matrix_int_names`
+
+Matrix class to store names as integers for big data, and associated
+functions
+
+- [`as.data.frame(`*`<matrix_int_names>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/as.data.frame.matrix_int_names.md)
+  : Coercion method to data.frame for matrix_int_names
+- [`col_names()`](https://evolecolgroup.github.io/tidypopgen/reference/col_names.md)
+  [`` `col_names<-`() ``](https://evolecolgroup.github.io/tidypopgen/reference/col_names.md)
+  : Get or set column names for matrix_int_names
+- [`matrix_int_names()`](https://evolecolgroup.github.io/tidypopgen/reference/matrix_int_names.md)
+  : Matrix with integer row/column names class
+- [`print(`*`<matrix_int_names>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/print.matrix_int_names.md)
+  : Print method for matrix_int_names
+- [`row_names()`](https://evolecolgroup.github.io/tidypopgen/reference/row_names.md)
+  [`` `row_names<-`() ``](https://evolecolgroup.github.io/tidypopgen/reference/row_names.md)
+  : Get or set row names for matrix_int_names
+- [`` `[`( ``*`<matrix_int_names>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/subset.md)
+  [`` `[<-`( ``*`<matrix_int_names>`*`)`](https://evolecolgroup.github.io/tidypopgen/reference/subset.md)
+  : Subsetting method for matrix_int_names
+
+## `bigSNP`
+
+Mostly for developers: Functions for operating directly on `bigSNP`
+objects.
+
+- [`snp_allele_sharing()`](https://evolecolgroup.github.io/tidypopgen/reference/snp_allele_sharing.md)
+  : Compute the Pairwise Allele Sharing Matrix for a bigSNP object
+- [`snp_ibs()`](https://evolecolgroup.github.io/tidypopgen/reference/snp_ibs.md)
+  : Compute the Identity by State Matrix for a bigSNP object
+- [`snp_king()`](https://evolecolgroup.github.io/tidypopgen/reference/snp_king.md)
+  : Compute the KING-robust Matrix for a bigSNP object
+
 # Articles
 
 ### All vignettes
@@ -628,6 +742,12 @@ Methods for tidyverse verbs for `gen_tibble` objects
   samples](https://evolecolgroup.github.io/tidypopgen/articles/aDNA_pseudohaploids.md):
 - [Benchmark on the
   HGDP](https://evolecolgroup.github.io/tidypopgen/articles/benchmark_hgdp.md):
+- [Working with big
+  data](https://evolecolgroup.github.io/tidypopgen/articles/big_data.md):
 - [Interpolating genetic
   data](https://evolecolgroup.github.io/tidypopgen/articles/interpolating.md):
+- [Runs of homozygosity in the
+  HGDP](https://evolecolgroup.github.io/tidypopgen/articles/roh_hgdp.md):
+- [Site frequency
+  spectra](https://evolecolgroup.github.io/tidypopgen/articles/sfs.md):
 - [tidypopgen](https://evolecolgroup.github.io/tidypopgen/articles/tidypopgen.md):

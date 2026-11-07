@@ -37,7 +37,7 @@ loci_missingness(
   ...
 )
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 loci_missingness(
   .x,
   .col = "genotypes",
@@ -74,7 +74,7 @@ loci_missingness(
 - n_cores:
 
   number of cores to be used, it defaults to
-  [`bigstatsr::nb_cores()`](https://privefl.github.io/bigstatsr/reference/reexports.html)
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 - block_size:
 
@@ -83,7 +83,14 @@ loci_missingness(
 - type:
 
   type of object to return, if using grouped method. One of "tidy",
-  "list", or "matrix". Default is "tidy".
+  "list", or "matrix". Default is "tidy". Data can be grouped by more
+  than one variable: groups are then labelled by the values of the
+  grouping variables pasted with "." (e.g. `pop1.F`), and the "tidy"
+  output has one column per grouping variable rather than a single
+  `group` column. The `group` column, or the columns of the grouping
+  variables, keep the type of the grouping variables (e.g. a factor
+  keeps its levels), so that groups stay in their order when the output
+  is sorted or plotted.
 
 - ...:
 
@@ -144,6 +151,8 @@ example_gt %>%
 example_gt %>%
   group_by(population) %>%
   loci_missingness(type = "matrix")
+#> Matrix with character rownames and character colnames
+#> Dimensions: 6 x 3 
 #>          pop1 pop2 pop3
 #> rs1 0.0000000  0.0  0.0
 #> rs2 0.0000000  0.5  0.0

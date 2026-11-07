@@ -6,10 +6,10 @@ For `gt_pca`, the following types of plots are available:
   (currently it plots the singular value)
 
 - `scores` a scatterplot of the scores of each individual on two
-  principal components (defined by `pc`)
+  principal components (defined by `k`)
 
 - `loadings` a plot of loadings of all loci for a given component
-  (chosen with `pc`)
+  (chosen with `k`)
 
 ## Usage
 

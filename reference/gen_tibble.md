@@ -27,6 +27,7 @@ gen_tibble(
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
+  names_as_int = FALSE,
   quiet = FALSE
 )
 
@@ -90,13 +91,16 @@ gen_tibble(
 
   the path, including the file name without extension, for backing files
   used to store the data (they will be given a .bk and .RDS
-  automatically). This is not needed if `x` is already an .RDS file. If
-  `x` is a .BED or a *VCF* file and `backingfile` is left NULL, the
-  backing file will be saved in the same directory as the bed or vcf
-  file, using the same file name but with a different file type (.bk
-  rather than .bed or .vcf). If `x` is a genotype matrix and
-  `backingfile` is NULL, then a temporary file will be created (but note
-  that R will delete it at the end of the session!)
+  automatically). If `x` is a bigSNP .RDS file, its backing file is
+  copied to `backingfile`, so that the original files are not modified
+  (if `backingfile` is left NULL, the copy is saved next to the
+  original, with a version suffix such as `_v2`). If `x` is a .BED or a
+  *VCF* file and `backingfile` is left NULL, the backing file will be
+  saved in the same directory as the bed or vcf file, using the same
+  file name but with a different file type (.bk rather than .bed or
+  .vcf). If `x` is a genotype matrix and `backingfile` is NULL, then a
+  temporary file will be created (but note that R will delete it at the
+  end of the session!)
 
 - allow_duplicates:
 
@@ -119,12 +123,27 @@ gen_tibble(
 
 - n_cores:
 
-  the number of cores to use for parallel processing
+  currently ignored (reading files is not parallelised); kept for
+  backwards compatibility
 
 - chunk_size:
 
   the number of loci or individuals (depending on the format) processed
   at a time (currently used if `x` is a vcf with parser "vcfR")
+
+- names_as_int:
+
+  logical. If TRUE, locus names will be converted to integers. Only used
+  when `x` is a *VCF* file with parser "cpp", a PLINK *bed* file or a
+  bigSNP *rds* file. Default is FALSE. This can be useful when working
+  with very large datasets where storing the names as string can use a
+  large amount of memory. Integer names are the index of each locus in
+  the *VCF* (or *bim*) file, so they can not be used to match loci
+  across datasets:
+  [rbind()](https://evolecolgroup.github.io/tidypopgen/reference/rbind.gen_tbl.md)
+  and
+  [`rbind_dry_run()`](https://evolecolgroup.github.io/tidypopgen/reference/rbind_dry_run.md)
+  always match loci with integer names by chromosome and position.
 
 - indiv_meta:
 
@@ -159,10 +178,32 @@ an object of the class `gen_tbl`.
   fail with 'Error: a genotype has more than max_ploidy alleles...'. To
   successful import such a *VCF*, change the order of variants so that
   the first chromosome is an autosome using a tool such as `vcftools`.
-  Currently, only biallelic SNPs are supported. If haploid variants
-  (e.g. sex chromosomes) are included in the *VCF*, they are not
-  transformed into homozygous calls. Instead, reference alleles will be
-  coded as 0 and alternative alleles will be coded as 1.
+  Individuals with a missing genotype ('.') on the first variant get
+  their ploidy from their first genotype that is not '.': the `cpp`
+  parser looks for it in the next 1,000 variants only (so that the
+  search does not slow down parsing), the `vcfR` parser in the whole
+  file. Individuals with no such genotype get the largest ploidy of the
+  other individuals (or 2, if no ploidy is known). Currently, only
+  biallelic SNPs are supported. If haploid variants (e.g. sex
+  chromosomes) are included in the *VCF*, they are not transformed into
+  homozygous calls. Instead, reference alleles will be coded as 0 and
+  alternative alleles will be coded as 1.
+
+- *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual
+  information (from the .fam file, or the first six columns of the .ped
+  file) is stored in the same columns for all formats: the individual ID
+  as `id`; the family ID as `population` (unless it is the same as the
+  individual ID for all individuals); the paternal and maternal IDs as
+  `paternal_ID` and `maternal_ID`; sex as `sex`, a factor with levels
+  "female" (PLINK code 2) and "male" (code 1); and the phenotype as
+  `phenotype`, a factor with levels "control" (code 1) and "case" (code
+  2), or a number for a quantitative phenotype (with values other than
+  1, 2, 0 and -9). Missing values (0 for parents and sex, 0 or -9 for a
+  case/control phenotype, and -9 for a quantitative one) are NA, and
+  `paternal_ID`, `maternal_ID`, `sex` and `phenotype` are only created
+  if they have some non-missing values.
+  [`gt_as_plink()`](https://evolecolgroup.github.io/tidypopgen/reference/gt_as_plink.md)
+  writes these columns back to PLINK files.
 
 - *packedancestry* files: When loading *packedancestry* files, missing
   alleles will be converted from 'X' to NA

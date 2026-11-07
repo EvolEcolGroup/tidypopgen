@@ -31,7 +31,9 @@ pop_gene_div(
   (usually grouped, as obtained by using
   [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html),
   otherwise the full tibble will be considered as belonging to a single
-  population).
+  population). If grouped by more than one variable, groups are labelled
+  by the values of the grouping variables pasted with "." (e.g.
+  `pop1.F`).
 
 - by_locus:
 
@@ -48,7 +50,7 @@ pop_gene_div(
 - n_cores:
 
   number of cores to be used, it defaults to
-  [`bigstatsr::nb_cores()`](https://privefl.github.io/bigstatsr/reference/reexports.html)
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
 ## Value
 

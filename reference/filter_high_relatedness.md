@@ -42,6 +42,20 @@ a list where '1' is individual ID's to retain, '2' is individual ID's to
 remove, and '3' is a boolean where individuals to keep are TRUE and
 individuals to remove are FALSE
 
+## Details
+
+Individuals are removed greedily, as in `caret::findCorrelation()`:
+individuals are considered in order of decreasing mean relatedness, and
+for each pair related above `kings_threshold`, the first individual is
+removed if its mean relatedness is larger than the mean of the remaining
+matrix without the second individual, and the second one otherwise. No
+pair above the threshold is left, but the set of individuals kept is not
+guaranteed to be the largest possible.
+
+Missing relationship coefficients (e.g. KING kinship for pairs of
+individuals with no loci genotyped in both) are not evidence of
+relatedness: such pairs are treated as not related, with a warning.
+
 ## Examples
 
 ``` r
@@ -52,13 +66,14 @@ king_matrix <- example_gt %>% pairwise_king(as_matrix = TRUE)
 
 # Filter individuals with threshold above 0.2
 filter_high_relatedness(king_matrix, example_gt, kings_threshold = 0.2)
+#> Warning: 2 pairs of individuals have missing kinship (e.g. no loci genotyped in both), so they could not be compared, and are not treated as related
 #> [[1]]
-#> [1] "c" "d"
+#> [1] "d" "c" "g" "e" "b" "f"
 #> 
 #> [[2]]
-#> [1] "a" "b" "e" "f" "g"
+#> [1] "a"
 #> 
 #> [[3]]
-#> [1] FALSE FALSE  TRUE  TRUE FALSE FALSE FALSE
+#> [1] FALSE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
 #> 
 ```

@@ -1,6 +1,6 @@
 # Create a Quality Control report for individuals
 
-Return QC information to assess loci (Observed heterozygosity and
+Return QC information to assess individuals (Observed heterozygosity and
 missingness).
 
 ## Usage
@@ -8,10 +8,10 @@ missingness).
 ``` r
 qc_report_indiv(.x, ...)
 
-# S3 method for class 'tbl_df'
+# S3 method for class 'gen_tbl'
 qc_report_indiv(.x, kings_threshold = NULL, ...)
 
-# S3 method for class 'grouped_df'
+# S3 method for class 'grouped_gen_tbl'
 qc_report_indiv(.x, kings_threshold = NULL, ...)
 ```
 
@@ -24,7 +24,9 @@ qc_report_indiv(.x, kings_threshold = NULL, ...)
   object or a grouped
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md)
   (as obtained by using
-  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html))
+  [`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)).
+  If grouped by more than one variable, the `group` column holds the
+  values of the grouping variables pasted with "." (e.g. `pop1.F`).
 
 - ...:
 
@@ -91,18 +93,19 @@ example_gt %>% qc_report_indiv()
 
 # Get QC report with kinship filtering
 example_gt %>% qc_report_indiv(kings_threshold = "first")
+#> Warning: 2 pairs of individuals have missing kinship (e.g. no loci genotyped in both), so they could not be compared, and are not treated as related
 #> # A tibble: 176 × 4
 #>    het_obs missingness to_keep id   
 #>      <dbl>       <dbl> <lgl>   <chr>
-#>  1  0.0769      0.506  FALSE   Ale04
-#>  2  0.429       0.0253 FALSE   Ale05
-#>  3  0           0.494  FALSE   Ale06
-#>  4  0.0930      0.456  FALSE   Ale08
-#>  5  0.0222      0.430  FALSE   Ale13
-#>  6  0.0833      0.544  FALSE   Ale15
-#>  7  0.0476      0.468  FALSE   Ale16
-#>  8  0.329       0.114  FALSE   Ale17
-#>  9  0.217       0.127  FALSE   Ale18
-#> 10  0.0857      0.557  FALSE   Ale19
+#>  1  0.0769      0.506  TRUE    Ale04
+#>  2  0.429       0.0253 TRUE    Ale05
+#>  3  0           0.494  TRUE    Ale06
+#>  4  0.0930      0.456  TRUE    Ale08
+#>  5  0.0222      0.430  TRUE    Ale13
+#>  6  0.0833      0.544  TRUE    Ale15
+#>  7  0.0476      0.468  TRUE    Ale16
+#>  8  0.329       0.114  TRUE    Ale17
+#>  9  0.217       0.127  TRUE    Ale18
+#> 10  0.0857      0.557  TRUE    Ale19
 #> # ℹ 166 more rows
 ```

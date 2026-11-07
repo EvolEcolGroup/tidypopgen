@@ -50,9 +50,27 @@ the path of the saved file
 If the gen_tibble has been read in from vcf format, family.ID in the
 resulting plink files will be the same as sample.ID. If the gen_tibble
 has a grouping variable, this will be used as the family.ID in the
-resulting plink files. NOTE that writing to bed has been optimised for
-speed, but writing to ped or raw is slower, especially for large
-datasets.
+resulting plink files (with several grouping variables, their values are
+pasted with ".", e.g. `pop1.F`); otherwise, the population is used as
+the family.ID. Parents, sex and phenotype are taken from the columns
+`paternal_ID`, `maternal_ID`, `sex` and `phenotype`, if present, as
+created by
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/reference/gen_tibble.md)
+when reading PLINK files (bed, ped or bigSNP rds): sex is written as 1
+for "male", 2 for "female" and 0 (unknown) otherwise; phenotype as 1 for
+"control" and 2 for "case", and other values (e.g. a quantitative
+phenotype) as they are; missing parents are written as 0, and missing
+phenotypes as -9. Genotypes are read and written directly from the file
+backed matrix, so all formats can be written for datasets that do not
+fit in memory (but note that ped and raw files are much larger, and thus
+slower to write, than bed files).
+
+## Note
+
+PLINK's bed, ped and raw formats only support diploid data, so this
+function only works on diploid (or pseudohaploid) `gen_tibble` objects.
+Pseudohaploid data is simply treated as regular diploid genotype counts
+(dosage 0/2), the same convention used by PLINK itself.
 
 ## Examples
 
@@ -61,13 +79,13 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a bed file
 example_gt %>% gt_as_plink(type = "bed", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/RtmpylcdcX/file1fba44fb2bf2_plink.bed"
+#> [1] "/tmp/Rtmp1ritxJ/file1eb92c33a3b9_plink.bed"
 
 # Write a ped file
 example_gt %>% gt_as_plink(type = "ped", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/RtmpylcdcX/file1fba41cb17c8_plink.ped"
+#> [1] "/tmp/Rtmp1ritxJ/file1eb943ad78f_plink.ped"
 
 # Write a raw file
 example_gt %>% gt_as_plink(type = "raw", file = paste0(tempfile(), "_plink"))
-#> [1] "/tmp/RtmpylcdcX/file1fba3df7c792_plink.raw"
+#> [1] "/tmp/Rtmp1ritxJ/file1eb971c5ac9f_plink.raw"
 ```
