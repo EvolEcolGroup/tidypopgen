@@ -44,41 +44,53 @@
 #' @param n_cores the number of cores to use (individuals are analysed in
 #'   parallel)
 #'
-#' @details This function returns a data frame with all runs detected in the
-#'   dataset, in the format of `detectRUNS`, so that it can be used as the
-#'   input of the functions of the `detectRUNS` package that create plots and
-#'   produce statistics from the results (see plots and statistics functions
-#'   in its manual, and/or refer to the `detectRUNS` vignette). The runs are
-#'   the same as those of [detectRUNS::slidingRUNS.run()], including two
-#'   features of its algorithm: windows slide across chromosomes (only the
-#'   distance between consecutive loci in the loci table is checked against
-#'   `max_gap`), and the counts of opposite and missing genotypes compared to
-#'   `max_opp_run` and `max_miss_run` are those of the loci of the run. With
-#'   fewer loci than `window_size`, no run is found. The loci must be sorted by
-#'   chromosome and position (see [gt_order_loci()]); `detectRUNS` does not
-#'   check this, and gives runs that start on the wrong chromosome when the
-#'   loci of a chromosome are not adjacent.
+#' @details The runs are the same as those of [detectRUNS::slidingRUNS.run()],
+#'   including two features of its algorithm. First, windows slide along the
+#'   loci table as a whole, so they cross from one chromosome to the next:
+#'   near a boundary, a window holds the last loci of one chromosome and the
+#'   first loci of the next. Only the distance between consecutive loci is
+#'   checked against `max_gap`, and across a boundary it is usually negative
+#'   (the next chromosome starts at a smaller position), so such windows are
+#'   not discarded; they count towards the loci at the ends of both
+#'   chromosomes, but runs never span two chromosomes, as each run ends with
+#'   the last locus of its chromosome. Second, the counts of opposite and
+#'   missing genotypes compared to `max_opp_run` and `max_miss_run` are those
+#'   of the loci of the run. With fewer loci than `window_size`, no run is
+#'   found. The loci must be sorted by chromosome and position (see
+#'   [gt_order_loci()]).
 #'
-#'   If the [`gen_tibble`] is grouped, then the grouping variable is used to
-#'   fill in the 'group' column (with several grouping variables, their values
-#'   are pasted with ".", e.g. `pop1.F`). Otherwise, the 'group' column is
-#'   filled with the same values as the 'id' column. Note that this behaviour is
-#'   different from other windowed operations in `tidypopgen`, which
-#'   return a list for grouped `gen_tibbles`; this different behaviour is
-#'   designed to maintain compatibility with `detectRUNS`.
+#'   Runs can be plotted with [autoplot.indiv_roh()], which draws the plots
+#'   of `detectRUNS`. Use [as_detectRUNS()] to convert the runs to the format
+#'   of `detectRUNS`, to use its own functions.
 #'
 #'   The old name for this function, `gt_roh_window`, is still available, but
 #'   it is soft deprecated and will be removed in future versions of
 #'   `tidypopgen`.
 #'
-#' @return A dataframe with RUNs of Homozygosity or Heterozygosity in the
-#'   analysed dataset. The returned dataframe contains the following seven
-#'   columns: "group", "id", "chrom", "nSNP", "from", "to", "lengthBps" (group:
-#'   population, breed, case/control etc.; id: individual identifier; chrom:
-#'   chromosome on which the run is located; nSNP: number of SNPs in the run;
-#'   from: starting position of the run, in bps; to: end position of the run, in
-#'   bps; lengthBps: size of the run). Runs are ordered by individual, then by
-#'   chromosome (in the order of its levels) and position.
+#' @return An `indiv_roh` object, a tibble with one row per run, ordered by
+#'   individual, then by chromosome (in the order of its levels) and
+#'   position, with columns:
+#'   - the grouping variable(s), if the [`gen_tibble`] is grouped (a single
+#'   `group` column for one grouping variable, keeping its type, or one column
+#'   per grouping variable);
+#'   - `id`: the individual;
+#'   - `chromosome`: the chromosome of the run (a factor, with the levels of
+#'   the loci table);
+#'   - `start`, `end`: the positions of the first and last locus of the run
+#'   (in bp);
+#'   - `length_bp`: `end - start`;
+#'   - `n_loci`: the number of loci in the run;
+#'   - `first_locus`, `last_locus`: the rows of the first and last locus of
+#'   the run in the loci table ([show_loci()]);
+#'   - `n_opp`: the number of loci of the run with the opposite genotype
+#'   (heterozygous for runs of homozygosity, homozygous for runs of
+#'   heterozygosity);
+#'   - `n_missing`: the number of loci of the run with a missing genotype.
+#'
+#'   Its attributes `individuals` (a tibble of all the individuals, with
+#'   their groups, including those with no run), `chromosome_length` (the
+#'   length of each chromosome, its largest position, as in `detectRUNS`) and
+#'   `heterozygosity` are used by [autoplot.indiv_roh()].
 #' @export
 #' @seealso [detectRUNS::slidingRUNS.run()], whose algorithm this function
 #'   implements.
@@ -95,7 +107,9 @@
 #' )
 #' sheep_gt <- sheep_gt %>% group_by(population)
 #' sheep_roh <- windows_indiv_roh(sheep_gt)
-#' detectRUNS::plot_Runs(runs = sheep_roh)
+#' sheep_roh
+#' # use the plots of detectRUNS
+#' detectRUNS::plot_Runs(runs = as_detectRUNS(sheep_roh))
 windows_indiv_roh <- function(
   .x,
   window_size = 15,
@@ -137,12 +151,6 @@ windows_indiv_roh <- function(
       "(see gt_order_loci())"
     )
   }
-  # use groups (if defined)
-  if (dplyr::is_grouped_df(.x)) {
-    groups <- .group_of_rows(.x)
-  } else {
-    groups <- .x$id
-  }
 
   # find the runs of all individuals in C++, in a single pass over the loci
   # (optional limits are NA when they are not used)
@@ -171,16 +179,100 @@ windows_indiv_roh <- function(
   # levels) and position, as in detectRUNS
   run_order <- order(runs$indiv, runs$chrom, runs$start)
   indiv <- runs$indiv[run_order]
-  from <- loci$position[runs$start[run_order]]
-  to <- loci$position[runs$end[run_order]]
+  first_locus <- runs$start[run_order]
+  last_locus <- runs$end[run_order]
+  start <- loci$position[first_locus]
+  end <- loci$position[last_locus]
+  res <- tibble::tibble(
+    id = .x$id[indiv],
+    chromosome = factor(levels(chromosome)[runs$chrom[run_order]],
+      levels = levels(chromosome)
+    ),
+    start = start,
+    end = end,
+    length_bp = end - start,
+    n_loci = runs$n_snp[run_order],
+    first_locus = first_locus,
+    last_locus = last_locus,
+    n_opp = runs$n_opp[run_order],
+    n_missing = runs$n_miss[run_order]
+  )
+  # the group of each run (as in the other tidy outputs of grouped
+  # gen_tibbles), before the id; all individuals (with their groups) are
+  # kept as an attribute, as some have no runs
+  individuals <- tibble::tibble(id = .x$id)
+  if (dplyr::is_grouped_df(.x)) {
+    groups <- .group_info(.x)
+    res <- dplyr::bind_cols(
+      .group_columns(groups, groups$ids[indiv] + 1L),
+      res
+    )
+    individuals <- dplyr::bind_cols(
+      .group_columns(groups, groups$ids + 1L),
+      individuals
+    )
+  }
+  # the length of each chromosome, as in detectRUNS: its largest position,
+  # i.e. the position of its last locus (loci are sorted); used for F_ROH
+  chrom_runs <- vctrs::vec_unrep(chromosome)
+  chromosome_length <- tibble::tibble(
+    chromosome = chrom_runs$key,
+    length_bp = loci$position[cumsum(chrom_runs$times)]
+  )
+  structure(res,
+    individuals = individuals,
+    chromosome_length = chromosome_length,
+    heterozygosity = heterozygosity,
+    class = c("indiv_roh", class(res))
+  )
+}
+
+
+#' Convert runs of homozygosity to the format of `detectRUNS`
+#'
+#' Converts the runs found by [windows_indiv_roh()] to the data frame used by
+#' the `detectRUNS` package, so that its functions to plot and summarise
+#' runs (e.g. [detectRUNS::plot_Runs()], [detectRUNS::summaryRuns()]) can be
+#' used.
+#'
+#' @param x a tibble of runs, as returned by [windows_indiv_roh()]
+#' @returns a data frame with columns `group` (the grouping variables, pasted
+#'   with "." if there are several, or the `id` if the runs were found on an
+#'   ungrouped [`gen_tibble`]), `id`, `chrom`, `nSNP`, `from`, `to` and
+#'   `lengthBps`, in the order of `x`
+#' @export
+#' @examplesIf rlang::is_installed("detectRUNS")
+#' sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
+#'   package = "detectRUNS"
+#' )
+#' sheep_gt <- gen_tibble(sheep_ped, backingfile = tempfile(), quiet = TRUE)
+#' sheep_roh <- windows_indiv_roh(sheep_gt %>% group_by(population))
+#' head(as_detectRUNS(sheep_roh))
+as_detectRUNS <- function(x) { # nolint: object_name_linter
+  required <- c(
+    "id", "chromosome", "start", "end", "length_bp", "n_loci"
+  )
+  if (!is.data.frame(x) || !all(required %in% names(x))) {
+    stop(
+      "x should be the output of windows_indiv_roh(), with columns ",
+      paste(required, collapse = ", ")
+    )
+  }
+  # the grouping variables are the columns before id
+  group_cols <- names(x)[seq_len(match("id", names(x)) - 1)]
+  if (length(group_cols) == 0) {
+    group <- as.character(x$id)
+  } else {
+    group <- .group_labels(x[group_cols])
+  }
   data.frame(
-    group = as.character(groups[indiv]),
-    id = as.character(.x$id[indiv]),
-    chrom = levels(chromosome)[runs$chrom[run_order]],
-    nSNP = runs$n_snp[run_order],
-    from = from,
-    to = to,
-    lengthBps = to - from,
+    group = group,
+    id = as.character(x$id),
+    chrom = as.character(x$chromosome),
+    nSNP = x$n_loci,
+    from = x$start,
+    to = x$end,
+    lengthBps = x$length_bp,
     stringsAsFactors = FALSE
   )
 }

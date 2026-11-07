@@ -81,13 +81,15 @@ struct OpenRun {
 };
 
 // a run that passed the filters (individual, chromosome code, first and last
-// loci, number of loci)
+// loci, number of loci, and of opposite and missing genotypes)
 struct FoundRun {
   uint32_t indiv;
   int32_t chrom;
   uint32_t start;
   uint32_t last;
   int32_t n_snp;
+  int32_t n_opp;
+  int32_t n_miss;
 };
 
 // parameters of the search, shared by all individuals
@@ -168,7 +170,8 @@ inline void roh_close(OpenRun& r, size_t indiv, int chrom,
   if (par.check_opp_run && !(r.n_opp <= par.max_opp_run)) keep = false;
   if (par.check_miss_run && !(r.n_miss <= par.max_miss_run)) keep = false;
   if (keep) {
-    FoundRun f = {(uint32_t) indiv, chrom, r.start, r.last, r.n_snp};
+    FoundRun f = {(uint32_t) indiv, chrom, r.start, r.last, r.n_snp,
+                  r.n_opp, r.n_miss};
     found.push_back(f);
   }
 }
@@ -275,8 +278,9 @@ inline void roh_add_tail(RohState& st, const unsigned char* geno,
 //   between blocks)
 // Returns a list with, for each run, the individual (1-based index into
 // rowInd), the chromosome code, the first and last locus (1-based indices
-// into colInd) and the number of loci in the run, ordered by individual and
-// then along the loci table.
+// into colInd), the number of loci in the run, and its numbers of opposite
+// and missing genotypes, ordered by individual and then along the loci
+// table.
 
 // [[Rcpp::export]]
 List roh_sliding_cpp(Environment BM,
@@ -468,7 +472,7 @@ List roh_sliding_cpp(Environment BM,
   size_t n_runs = 0;
   for (size_t g = 0; g < n_groups; g++) n_runs += found[g].size();
   IntegerVector r_indiv(n_runs), r_chrom(n_runs), r_start(n_runs),
-    r_end(n_runs), r_n_snp(n_runs);
+    r_end(n_runs), r_n_snp(n_runs), r_n_opp(n_runs), r_n_miss(n_runs);
   size_t k = 0;
   for (size_t g = 0; g < n_groups; g++) {
     // runs of the same group are ordered by end, not by individual
@@ -483,12 +487,15 @@ List roh_sliding_cpp(Environment BM,
       r_start[k] = (int) f.start + 1;
       r_end[k] = (int) f.last + 1;
       r_n_snp[k] = f.n_snp;
+      r_n_opp[k] = f.n_opp;
+      r_n_miss[k] = f.n_miss;
     }
     std::vector<FoundRun>().swap(found[g]);
   }
   return List::create(_["indiv"] = r_indiv, _["chrom"] = r_chrom,
                       _["start"] = r_start, _["end"] = r_end,
-                      _["n_snp"] = r_n_snp);
+                      _["n_snp"] = r_n_snp, _["n_opp"] = r_n_opp,
+                      _["n_miss"] = r_n_miss);
 }
 
 /******************************************************************************/

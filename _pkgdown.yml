@@ -100,6 +100,8 @@ reference:
     desc: "Functions to compute statistics in sliding windows across loci."
     contents:
         - starts_with("windows_")
+        - autoplot.indiv_roh
+        - as_detectRUNS
   - title: "Jackknife"
     desc: "Functions to compute genome-wide statistics with block jackknife standard errors."
     contents:

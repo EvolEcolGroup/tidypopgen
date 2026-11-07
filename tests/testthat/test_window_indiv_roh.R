@@ -34,9 +34,10 @@ test_that("windows_indiv_roh works without backingfile update", {
     threshold = 0.05
   ))
 
-  # test_gt is not grouped, so id and group are identical
-  expect_true("group" %in% colnames(test_roh1))
-  expect_equal(test_roh1$group, test_roh1$id)
+  # test_gt is not grouped, so there is no group column (but as_detectRUNS()
+  # uses the id as the group)
+  expect_false("group" %in% colnames(test_roh1))
+  expect_equal(as_detectRUNS(test_roh1)$group, test_roh1$id)
 
   # remove one snp
   test_gt <- test_gt %>% select_loci(-7)
@@ -52,7 +53,8 @@ test_that("windows_indiv_roh works without backingfile update", {
     threshold = 0.05
   ))
 
-  expect_equal(test_roh1, test_roh2)
+  # the same runs (the length of chr2, in the attributes, has changed)
+  expect_equal(test_roh1, test_roh2, ignore_attr = TRUE)
 
   # check that we get deprecation error if we use gt_roh_window
   suppressMessages(expect_warning(
@@ -108,8 +110,9 @@ test_that("grouping method", {
   ))
 
   # test_gt is grouped, so group is grouping levels
-  expect_true("group" %in% colnames(test_roh1))
+  expect_identical(colnames(test_roh1)[1:2], c("group", "id"))
   expect_equal(test_roh1$group, dplyr::group_keys(test_gt) %>% pull(1))
+  expect_equal(as_detectRUNS(test_roh1)$group, test_roh1$group)
 })
 
 test_that("results after subsetting", {
@@ -216,7 +219,7 @@ test_that("homozygotes for the alternate allele are homozygous", {
     threshold = 0.05
   ))
   expect_equal(sort(unique(test_rohom$id)), c("hom_alt", "hom_ref"))
-  run_cols <- c("chrom", "nSNP", "from", "to", "lengthBps")
+  run_cols <- c("chromosome", "n_loci", "start", "end", "length_bp")
   expect_equal(
     test_rohom[test_rohom$id == "hom_alt", run_cols],
     test_rohom[test_rohom$id == "hom_ref", run_cols],
@@ -270,7 +273,7 @@ test_that("windows_indiv_roh gives the same runs as detectRUNS", {
   }
   suppressMessages(expected <- ref_roh(sheep_gt))
   expect_identical(
-    as_doubles(windows_indiv_roh(sheep_gt)),
+    as_doubles(as_detectRUNS(windows_indiv_roh(sheep_gt))),
     as_doubles(expected)
   )
   suppressMessages(
@@ -280,10 +283,11 @@ test_that("windows_indiv_roh gives the same runs as detectRUNS", {
     )
   )
   expect_identical(
-    as_doubles(windows_indiv_roh(sheep_gt,
+    as_doubles(as_detectRUNS(windows_indiv_roh(
+      sheep_gt,
       heterozygosity = TRUE, window_size = 10, threshold = 0.1,
       max_opp_window = 2, max_opp_run = 1, max_miss_run = 1
-    )),
+    ))),
     as_doubles(expected)
   )
 })
@@ -332,4 +336,103 @@ test_that("windows_indiv_roh checks the loci and uses several cores", {
     windows_indiv_roh(unsorted_gt, window_size = 3),
     "sorted by chromosome and position"
   )
+})
+
+test_that("windows_indiv_roh returns tidy runs", {
+  # individual a: a run on chr1 with one heterozygote and one missing
+  # genotype; b: a run on chr2
+  test_genotypes <- rbind(
+    c(0, 0, 1, 0, NA, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1),
+    c(1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 2, 2)
+  )
+  test_loci <- data.frame(
+    name = paste0("rs", 1:16),
+    chromosome = rep(c("chr1", "chr2"), each = 8),
+    position = as.integer(rep(1:8 * 1000, 2)),
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  test_gt <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci,
+    indiv_meta = data.frame(id = c("a", "b"), pop = "p1", sex = c("F", "M")),
+    quiet = TRUE,
+    backingfile = tempfile()
+  )
+  roh <- windows_indiv_roh(test_gt,
+    window_size = 4, min_snp = 3, max_opp_window = 1, max_miss_window = 1
+  )
+  expect_s3_class(roh, "tbl_df")
+  expect_identical(names(roh), c(
+    "id", "chromosome", "start", "end", "length_bp", "n_loci",
+    "first_locus", "last_locus", "n_opp", "n_missing"
+  ))
+  expect_identical(levels(roh$chromosome), c("chr1", "chr2"))
+  # the loci of each run are rows of the loci table
+  loci <- show_loci(test_gt)
+  expect_identical(roh$start, loci$position[roh$first_locus])
+  expect_identical(roh$end, loci$position[roh$last_locus])
+  expect_identical(roh$length_bp, roh$end - roh$start)
+  expect_identical(
+    as.character(roh$chromosome),
+    as.character(loci$chromosome[roh$first_locus])
+  )
+  # the counts of opposite and missing genotypes are those of the run's loci
+  geno <- show_genotypes(test_gt)
+  for (r in seq_len(nrow(roh))) {
+    run_loci <- seq(roh$first_locus[r], roh$last_locus[r])
+    run_geno <- geno[match(roh$id[r], test_gt$id), run_loci]
+    expect_identical(roh$n_loci[r], length(run_geno))
+    expect_identical(roh$n_opp[r], sum(run_geno == 1, na.rm = TRUE))
+    expect_identical(roh$n_missing[r], sum(is.na(run_geno)))
+  }
+  # with two grouping variables, one column for each
+  roh_grouped <- windows_indiv_roh(test_gt %>% group_by(pop, sex),
+    window_size = 4, min_snp = 3, max_opp_window = 1, max_miss_window = 1
+  )
+  expect_identical(names(roh_grouped)[1:3], c("pop", "sex", "id"))
+  # the same runs (the individuals, in the attributes, now have groups)
+  expect_equal(roh_grouped[-(1:2)], roh, ignore_attr = TRUE)
+  expect_identical(
+    as_detectRUNS(roh_grouped)$group,
+    paste(roh_grouped$pop, roh_grouped$sex, sep = ".")
+  )
+  expect_error(as_detectRUNS(data.frame(id = 1)), "windows_indiv_roh")
+})
+
+test_that("autoplot draws indiv_roh objects", {
+  skip_if_not_installed("detectRUNS")
+  sheep_ped <- system.file("extdata", "Kijas2016_Sheep_subset.ped",
+    package = "detectRUNS"
+  )
+  sheep_map <- system.file("extdata", "Kijas2016_Sheep_subset.map",
+    package = "detectRUNS"
+  )
+  sheep_gt <- gen_tibble(sheep_ped, backingfile = tempfile(), quiet = TRUE)
+  sheep_gt <- sheep_gt[c(1:6, 51:56), ] %>% group_by(population)
+  roh <- windows_indiv_roh(sheep_gt)
+  expect_s3_class(roh, "indiv_roh")
+  # the attributes used by autoplot
+  expect_identical(attr(roh, "individuals")$id, sheep_gt$id)
+  expect_identical(
+    as.character(attr(roh, "chromosome_length")$chromosome),
+    c("2", "24")
+  )
+  for (type in c("runs", "stacked", "coverage", "froh", "violin",
+                 "length_class")) {
+    expect_s3_class(autoplot(roh, type = type), "ggplot")
+  }
+  expect_s3_class(
+    autoplot(roh, type = "froh", froh_by = "chromosome"),
+    "ggplot"
+  )
+  expect_s3_class(autoplot(roh, type = "runs", chromosome = "24"), "ggplot")
+  expect_error(autoplot(roh, chromosome = "1"), "chromosomes with runs")
+  # F_ROH is that of detectRUNS
+  froh <- autoplot(roh, type = "froh")$data
+  suppressMessages(
+    ref <- detectRUNS::Froh_inbreeding(as_detectRUNS(roh), sheep_map)
+  )
+  expect_equal(froh$froh[match(ref$id, froh$id)], ref$Froh_genome)
 })

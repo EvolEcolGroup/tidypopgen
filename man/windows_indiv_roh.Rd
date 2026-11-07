@@ -74,14 +74,32 @@ kbps)}
 parallel)}
 }
 \value{
-A dataframe with RUNs of Homozygosity or Heterozygosity in the
-analysed dataset. The returned dataframe contains the following seven
-columns: "group", "id", "chrom", "nSNP", "from", "to", "lengthBps" (group:
-population, breed, case/control etc.; id: individual identifier; chrom:
-chromosome on which the run is located; nSNP: number of SNPs in the run;
-from: starting position of the run, in bps; to: end position of the run, in
-bps; lengthBps: size of the run). Runs are ordered by individual, then by
-chromosome (in the order of its levels) and position.
+An \code{indiv_roh} object, a tibble with one row per run, ordered by
+individual, then by chromosome (in the order of its levels) and
+position, with columns:
+\itemize{
+\item the grouping variable(s), if the \code{\link{gen_tibble}} is grouped (a single
+\code{group} column for one grouping variable, keeping its type, or one column
+per grouping variable);
+\item \code{id}: the individual;
+\item \code{chromosome}: the chromosome of the run (a factor, with the levels of
+the loci table);
+\item \code{start}, \code{end}: the positions of the first and last locus of the run
+(in bp);
+\item \code{length_bp}: \code{end - start};
+\item \code{n_loci}: the number of loci in the run;
+\item \code{first_locus}, \code{last_locus}: the rows of the first and last locus of
+the run in the loci table (\code{\link[=show_loci]{show_loci()}});
+\item \code{n_opp}: the number of loci of the run with the opposite genotype
+(heterozygous for runs of homozygosity, homozygous for runs of
+heterozygosity);
+\item \code{n_missing}: the number of loci of the run with a missing genotype.
+}
+
+Its attributes \code{individuals} (a tibble of all the individuals, with
+their groups, including those with no run), \code{chromosome_length} (the
+length of each chromosome, its largest position, as in \code{detectRUNS}) and
+\code{heterozygosity} are used by \code{\link[=autoplot.indiv_roh]{autoplot.indiv_roh()}}.
 }
 \description{
 This function uses a sliding-window approach to look for runs of homozygosity
@@ -106,28 +124,24 @@ heterozygosity, homozygous and heterozygous genotypes swap their roles.
 Genotypes are classified by their dosage (0 and 2 are homozygous, 1 is
 heterozygous).
 
-This function returns a data frame with all runs detected in the
-dataset, in the format of \code{detectRUNS}, so that it can be used as the
-input of the functions of the \code{detectRUNS} package that create plots and
-produce statistics from the results (see plots and statistics functions
-in its manual, and/or refer to the \code{detectRUNS} vignette). The runs are
-the same as those of \code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}}, including two
-features of its algorithm: windows slide across chromosomes (only the
-distance between consecutive loci in the loci table is checked against
-\code{max_gap}), and the counts of opposite and missing genotypes compared to
-\code{max_opp_run} and \code{max_miss_run} are those of the loci of the run. With
-fewer loci than \code{window_size}, no run is found. The loci must be sorted by
-chromosome and position (see \code{\link[=gt_order_loci]{gt_order_loci()}}); \code{detectRUNS} does not
-check this, and gives runs that start on the wrong chromosome when the
-loci of a chromosome are not adjacent.
+The runs are the same as those of \code{\link[detectRUNS:slidingRUNS.run]{detectRUNS::slidingRUNS.run()}},
+including two features of its algorithm. First, windows slide along the
+loci table as a whole, so they cross from one chromosome to the next:
+near a boundary, a window holds the last loci of one chromosome and the
+first loci of the next. Only the distance between consecutive loci is
+checked against \code{max_gap}, and across a boundary it is usually negative
+(the next chromosome starts at a smaller position), so such windows are
+not discarded; they count towards the loci at the ends of both
+chromosomes, but runs never span two chromosomes, as each run ends with
+the last locus of its chromosome. Second, the counts of opposite and
+missing genotypes compared to \code{max_opp_run} and \code{max_miss_run} are those
+of the loci of the run. With fewer loci than \code{window_size}, no run is
+found. The loci must be sorted by chromosome and position (see
+\code{\link[=gt_order_loci]{gt_order_loci()}}).
 
-If the \code{\link{gen_tibble}} is grouped, then the grouping variable is used to
-fill in the 'group' column (with several grouping variables, their values
-are pasted with ".", e.g. \code{pop1.F}). Otherwise, the 'group' column is
-filled with the same values as the 'id' column. Note that this behaviour is
-different from other windowed operations in \code{tidypopgen}, which
-return a list for grouped \code{gen_tibbles}; this different behaviour is
-designed to maintain compatibility with \code{detectRUNS}.
+Runs can be plotted with \code{\link[=autoplot.indiv_roh]{autoplot.indiv_roh()}}, which draws the plots
+of \code{detectRUNS}. Use \code{\link[=as_detectRUNS]{as_detectRUNS()}} to convert the runs to the format
+of \code{detectRUNS}, to use its own functions.
 
 The old name for this function, \code{gt_roh_window}, is still available, but
 it is soft deprecated and will be removed in future versions of
@@ -144,7 +158,9 @@ sheep_gt <- tidypopgen::gen_tibble(sheep_ped,
 )
 sheep_gt <- sheep_gt \%>\% group_by(population)
 sheep_roh <- windows_indiv_roh(sheep_gt)
-detectRUNS::plot_Runs(runs = sheep_roh)
+sheep_roh
+# use the plots of detectRUNS
+detectRUNS::plot_Runs(runs = as_detectRUNS(sheep_roh))
 \dontshow{\}) # examplesIf}
 }
 \references{
