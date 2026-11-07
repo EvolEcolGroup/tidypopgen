@@ -1,5 +1,8 @@
 # tidypopgen (development version)
 
+* `gt_as_vcf()` is much faster, and uses less memory, on data with many
+  chromosomes (e.g. RAD loci assembled de novo, with one chromosome per locus)
+
 # tidypopgen 1.0.0
 
 ## New features and changes
