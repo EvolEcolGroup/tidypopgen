@@ -125,6 +125,42 @@ test_that("windows_indiv_roh checks its arguments and the loci", {
   expect_error(small_roh(test_gt), "1 loci have a missing position")
 })
 
+test_that("windows_indiv_roh is a generic with a method for gen_tibbles", {
+  test_gt <- small_gt()
+  roh <- small_roh(test_gt)
+  roh_pop <- small_roh(test_gt %>% group_by(population))
+  # arguments are matched by the method, also by position
+  expect_identical(windows_indiv_roh(test_gt, 3, 1, 5, 0.05, 2, 0, 50, 5), roh)
+  # tibbles that lost their class are restored
+  expect_identical(small_roh(as_tibble(test_gt)), roh)
+  expect_identical(
+    small_roh(as_tibble(test_gt) %>% group_by(population)),
+    roh_pop
+  )
+  # other packages can add methods for their own classes of genotypes and
+  # of tibbles (here, a tibble that lost its class is restored as a dummy_tbl)
+  registerS3method(
+    "genotypes_tbl_class", "dummy_genotypes",
+    function(genotypes, ...) "dummy_tbl",
+    envir = asNamespace("tidypopgen")
+  )
+  dummy_tbl <- tibble(
+    id = c("a", "b", "c"),
+    genotypes = structure(1:3, class = "dummy_genotypes")
+  )
+  expect_error(
+    windows_indiv_roh(dummy_tbl),
+    "windows_indiv_roh\\(\\) has no method for objects of class 'dummy_tbl'"
+  )
+  registerS3method(
+    "windows_indiv_roh", "dummy_tbl",
+    function(.x, ...) "dummy runs",
+    envir = asNamespace("tidypopgen")
+  )
+  expect_identical(windows_indiv_roh(dummy_tbl), "dummy runs")
+  expect_identical(windows_indiv_roh(group_by(dummy_tbl, id)), "dummy runs")
+})
+
 test_that("homozygotes for the alternate allele are homozygous", {
   test_gt <- gen_tibble(
     x = rbind(rep(1, 6), rep(2, 6), rep(0, 6)),

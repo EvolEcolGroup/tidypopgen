@@ -2,9 +2,12 @@
 % Please edit documentation in R/windows_indiv_roh.R
 \name{windows_indiv_roh}
 \alias{windows_indiv_roh}
+\alias{windows_indiv_roh.gen_tbl}
 \title{Detect runs of homozygosity using a sliding-window}
 \usage{
-windows_indiv_roh(
+windows_indiv_roh(.x, ...)
+
+\method{windows_indiv_roh}{gen_tbl}(
   .x,
   window_snp = 50,
   window_het = 1,
@@ -21,7 +24,12 @@ windows_indiv_roh(
 )
 }
 \arguments{
-\item{.x}{a \link{gen_tibble}}
+\item{.x}{a \code{\link{gen_tibble}}, grouped or not}
+
+\item{...}{other arguments passed to specific methods. The method for
+\code{\link{gen_tibble}} objects uses none: the arguments of the version of this
+function based on \code{detectRUNS} (e.g. \code{window_size}) give an error: use
+\code{\link[=gt_roh_window]{gt_roh_window()}} for that version.}
 
 \item{window_snp}{the number of loci in each window (PLINK
 \code{--homozyg-window-snp}, default 50)}
@@ -60,10 +68,6 @@ which gives the lengths of PLINK 1.07)}
 
 \item{n_cores}{the number of cores to use (individuals are analysed in
 parallel)}
-
-\item{...}{not used. The arguments of the version of this function based
-on \code{detectRUNS} (e.g. \code{window_size}) give an error: use
-\code{\link[=gt_roh_window]{gt_roh_window()}} for that version.}
 }
 \value{
 An \code{indiv_roh} object, a tibble with one row per run, ordered by
@@ -140,6 +144,10 @@ still find them. The loci must be sorted by chromosome and position (see
 Runs can be plotted with \code{\link[=autoplot.indiv_roh]{autoplot.indiv_roh()}}, which draws the plots
 of \code{detectRUNS}. Use \code{\link[=as_detectRUNS]{as_detectRUNS()}} to convert the runs to the format
 of \code{detectRUNS}, to use its own functions.
+
+\code{windows_indiv_roh()} is an S3 generic, with a method for \code{\link{gen_tibble}}
+objects (grouped or not). Other packages can add methods for their own
+classes (e.g. tibbles of genotype likelihoods).
 }
 \examples{
 # a simulated dataset of three populations with increasing inbreeding

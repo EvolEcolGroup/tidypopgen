@@ -16,7 +16,7 @@
 #' loci, a length of at least `min_kb`, and at most `max_kb_per_snp` kb per
 #' locus.
 #'
-#' @param .x a [gen_tibble]
+#' @param .x a [`gen_tibble`], grouped or not
 #' @param window_snp the number of loci in each window (PLINK
 #'   `--homozyg-window-snp`, default 50)
 #' @param window_het the largest number of heterozygous genotypes in a window
@@ -44,8 +44,9 @@
 #'   which gives the lengths of PLINK 1.07)
 #' @param n_cores the number of cores to use (individuals are analysed in
 #'   parallel)
-#' @param ... not used. The arguments of the version of this function based
-#'   on `detectRUNS` (e.g. `window_size`) give an error: use
+#' @param ... other arguments passed to specific methods. The method for
+#'   [`gen_tibble`] objects uses none: the arguments of the version of this
+#'   function based on `detectRUNS` (e.g. `window_size`) give an error: use
 #'   [gt_roh_window()] for that version.
 #'
 #' @details The runs are those of `plink --homozyg` with the same parameters,
@@ -71,6 +72,10 @@
 #'   Runs can be plotted with [autoplot.indiv_roh()], which draws the plots
 #'   of `detectRUNS`. Use [as_detectRUNS()] to convert the runs to the format
 #'   of `detectRUNS`, to use its own functions.
+#'
+#'   `windows_indiv_roh()` is an S3 generic, with a method for [`gen_tibble`]
+#'   objects (grouped or not). Other packages can add methods for their own
+#'   classes (e.g. tibbles of genotype likelihoods).
 #'
 #' @return An `indiv_roh` object, a tibble with one row per run, ordered by
 #'   individual, then by chromosome (in the order of its levels) and
@@ -100,6 +105,7 @@
 #'   length of each chromosome, its largest position, as in `detectRUNS`) and
 #'   `n_loci` (the number of loci) are used by [autoplot.indiv_roh()],
 #'   [gt_roh_froh()], [gt_roh_loci()] and [gt_roh_islands()].
+#' @rdname windows_indiv_roh
 #' @export
 #' @references Chang CC, Chow CC, Tellier LCAM, Vattikuti S, Purcell SM, Lee
 #'   JJ (2015) Second-generation PLINK: rising to the challenge of larger and
@@ -122,7 +128,13 @@
 #'   detectRUNS::plot_Runs(runs = as_detectRUNS(sim_roh))
 #' }
 #' }
-windows_indiv_roh <- function(
+windows_indiv_roh <- function(.x, ...) {
+  UseMethod("windows_indiv_roh", .x)
+}
+
+#' @export
+#' @rdname windows_indiv_roh
+windows_indiv_roh.gen_tbl <- function(
   .x,
   window_snp = 50,
   window_het = 1,
@@ -293,6 +305,14 @@ windows_indiv_roh <- function(
     n_loci = nrow(loci),
     class = c("indiv_roh", class(res))
   )
+}
+
+# a data frame that has lost the class of its tibble (e.g. a gen_tibble
+# returned by pick() or reframe()): restore the class and dispatch again
+#' @export
+#' @noRd
+windows_indiv_roh.data.frame <- function(.x, ...) {
+  windows_indiv_roh(restore_genotypes_tbl(.x, "windows_indiv_roh"), ...)
 }
 
 
