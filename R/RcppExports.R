@@ -165,12 +165,8 @@ vcf_gt_dosages_cpp <- function(gt, max_ploidy) {
     .Call(`_tidypopgen_vcf_gt_dosages_cpp`, gt, max_ploidy)
 }
 
-vcf_loci_table <- function(filename, read_names = TRUE) {
-    .Call(`_tidypopgen_vcf_loci_table`, filename, read_names)
-}
-
-vcf_genotypes_to_fbm <- function(filename, BM, biallelic, missing_value, n_header_lines) {
-    .Call(`_tidypopgen_vcf_genotypes_to_fbm`, filename, BM, biallelic, missing_value, n_header_lines)
+vcf_to_bk <- function(filename, bk_file, read_names = TRUE) {
+    .Call(`_tidypopgen_vcf_to_bk`, filename, bk_file, read_names)
 }
 
 window_sums_cpp <- function(x, loci, lo, hi, long_double) {

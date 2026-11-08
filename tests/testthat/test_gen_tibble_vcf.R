@@ -1017,3 +1017,76 @@ test_that("malformed variant lines give clear errors with the cpp parser", {
     "not a valid integer"
   )
 })
+
+test_that("the cpp parser codes missing genotypes once ploidies are known", {
+  # b is missing in the first variants, and has a larger ploidy (4) than the
+  # others, so its ploidy (and the value for missing genotypes, max_ploidy + 1)
+  # is only known after some genotypes have been read
+  vcf_path <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb\tc",
+      "chr1\t5\trs1\tA\tT\t.\t.\t.\tGT\t0/1\t.\t1/1",
+      "chr1\t7\trs2\tA\tT\t.\t.\t.\tGT\t./.\t.\t0/1",
+      "chr1\t9\trs3\tC\tG\t.\t.\t.\tGT\t0/0\t0/1/1/1\t./.",
+      "chr1\t12\trs4\tG\tA\t.\t.\t.\tGT\t1/1\t1/1/0/0\t0/1"
+    ),
+    vcf_path
+  )
+  test_gt <- gen_tibble(vcf_path,
+    parser = "cpp", backingfile = tempfile(), quiet = TRUE
+  )
+  expect_equal(indiv_ploidy(test_gt), c(2, 4, 2))
+  expect_equal(
+    show_genotypes(test_gt),
+    rbind(c(1, NA, 0, 2), c(NA, NA, 3, 2), c(2, 1, NA, 1)),
+    ignore_attr = TRUE
+  )
+  # the backing file stores missing genotypes as max_ploidy + 1 (5)
+  bk_bytes <- readBin(gt_get_file_names(test_gt)[2], what = "raw", n = 12)
+  expect_identical(
+    as.integer(bk_bytes),
+    c(1L, 5L, 2L, 5L, 5L, 1L, 0L, 3L, 5L, 2L, 2L, 1L)
+  )
+})
+
+test_that("the cpp parser leaves no backing files after an error", {
+  # a genotype with more alleles than estimated from the first variant
+  backingfile <- tempfile()
+  expect_error(
+    gen_tibble(
+      system.file("extdata/haploid_first_pop_a.vcf", package = "tidypopgen"),
+      parser = "cpp", backingfile = backingfile, quiet = TRUE
+    ),
+    "a genotype has more than max_ploidy alleles"
+  )
+  expect_length(
+    list.files(dirname(backingfile), pattern = basename(backingfile)),
+    0
+  )
+  # a VCF with no biallelic SNPs (an indel and a multiallelic SNP)
+  vcf_path <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+      "chr1\t5\trs1\tAT\tA\t.\t.\t.\tGT\t0/1\t0/0",
+      "chr1\t9\trs2\tC\tG,T\t.\t.\t.\tGT\t0/0\t0/2"
+    ),
+    vcf_path
+  )
+  backingfile <- tempfile()
+  expect_error(
+    gen_tibble(vcf_path,
+      parser = "cpp", backingfile = backingfile, quiet = TRUE
+    ),
+    "no biallelic SNPs"
+  )
+  expect_length(
+    list.files(dirname(backingfile), pattern = basename(backingfile)),
+    0
+  )
+})

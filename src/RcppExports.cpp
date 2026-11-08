@@ -690,30 +690,16 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// vcf_loci_table
-List vcf_loci_table(std::string filename, bool read_names);
-RcppExport SEXP _tidypopgen_vcf_loci_table(SEXP filenameSEXP, SEXP read_namesSEXP) {
+// vcf_to_bk
+List vcf_to_bk(std::string filename, std::string bk_file, bool read_names);
+RcppExport SEXP _tidypopgen_vcf_to_bk(SEXP filenameSEXP, SEXP bk_fileSEXP, SEXP read_namesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< std::string >::type bk_file(bk_fileSEXP);
     Rcpp::traits::input_parameter< bool >::type read_names(read_namesSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_loci_table(filename, read_names));
-    return rcpp_result_gen;
-END_RCPP
-}
-// vcf_genotypes_to_fbm
-bool vcf_genotypes_to_fbm(std::string filename, Environment BM, LogicalVector& biallelic, const int missing_value, const int n_header_lines);
-RcppExport SEXP _tidypopgen_vcf_genotypes_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP biallelicSEXP, SEXP missing_valueSEXP, SEXP n_header_linesSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
-    Rcpp::traits::input_parameter< LogicalVector& >::type biallelic(biallelicSEXP);
-    Rcpp::traits::input_parameter< const int >::type missing_value(missing_valueSEXP);
-    Rcpp::traits::input_parameter< const int >::type n_header_lines(n_header_linesSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_genotypes_to_fbm(filename, BM, biallelic, missing_value, n_header_lines));
+    rcpp_result_gen = Rcpp::wrap(vcf_to_bk(filename, bk_file, read_names));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -789,8 +775,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_any_duplicated_strings_cpp", (DL_FUNC) &_tidypopgen_any_duplicated_strings_cpp, 1},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
     {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
-    {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 2},
-    {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},
+    {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 3},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}

@@ -36,10 +36,23 @@ vcf_to_fbm_cpp <- function(
     backingfile <- bigstatsr::sub_bk(backingfile, "")
   }
 
-  # create a loci_table, and figure out no_individuals and ploidy from first
-  # marker (locus names are not read if we store them as integers, which saves
-  # a lot of memory with many loci)
-  vcf_meta <- vcf_loci_table(vcf_path, read_names = !names_as_int)
+  # the genotypes are written to the backing file while reading the VCF
+  bk_file <- path.expand(paste0(backingfile, ".bk"))
+  if (file.exists(bk_file)) {
+    stop("the backing file ", bk_file, " already exists")
+  }
+  # read the VCF once: create a loci_table, figure out no_individuals and
+  # ploidy from the first marker, and write the genotypes to the backing file
+  # (locus names are not read if we store them as integers, which saves a lot
+  # of memory with many loci)
+  vcf_meta <- vcf_to_bk(vcf_path, bk_file = bk_file, read_names = !names_as_int)
+  # remove the backing file if we stop before creating the FBM
+  fbm_created <- FALSE
+  on.exit(if (!fbm_created) unlink(bk_file), add = TRUE)
+  # an FBM can not have zero loci (its empty backing file can not be mapped)
+  if (length(vcf_meta$loci_tbl$physical.pos) == 0) {
+    stop("the VCF has no biallelic SNPs")
+  }
   # figure out no_individuals and ploidy
   ploidy <- vcf_meta$ploidy
   no_individuals <- length(ploidy)
@@ -112,7 +125,7 @@ vcf_to_fbm_cpp <- function(
     }
   }
 
-  # validate the loci (before creating the backing files)
+  # validate the loci (before creating the FBM)
   loci <- validate_loci(loci,
     check_alphabet = TRUE,
     harmonise_loci = TRUE,
@@ -127,19 +140,15 @@ vcf_to_fbm_cpp <- function(
   code256 <- rep(NA_real_, 256)
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
-  # create the file backed matrix
+  # create the file backed matrix, from the backing file written above
   file_backed_matrix <- bigstatsr::FBM.code256(
     nrow = no_individuals,
     ncol = nrow(loci),
     code = code256,
-    backingfile = backingfile
+    backingfile = backingfile,
+    create_bk = FALSE
   )
-
-  vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
-    biallelic = vcf_meta$biallelic,
-    n_header_lines = vcf_meta$n_header_lines,
-    missing_value = max_ploidy + 1
-  )
+  fbm_created <- TRUE
 
   # construct path, and save the FBM (before its md5 sum is taken by
   # new_vctrs_bigsnp(); this takes the same time whatever the size of the

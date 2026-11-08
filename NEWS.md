@@ -10,6 +10,9 @@
   general `tidyselect` machinery
 * `select_loci(.engine = "tidyselect")` always uses `tidyselect`, in case a
   selection is not resolved by the faster path as `tidyselect` would
+* `gen_tibble()` reads VCF files in a single pass with the "cpp" parser
+  (decompressing a *.vcf.gz* file only once), and gives a clear error for VCF
+  files with no biallelic SNPs
 * `gen_tibble()` reads VCF files with many chromosomes (e.g. RAD loci
   assembled de novo) faster, sorting the chromosome names in C order when
   this gives the order of the locale
