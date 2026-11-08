@@ -16,6 +16,9 @@
 * `gen_tibble()` uses `n_cores` (previously ignored) to read VCF files with
   the "cpp" parser in parallel: the genotypes are parsed in parallel, and
   *.vcf.gz* files compressed with `bgzip` are also decompressed in parallel
+* `gen_tibble()` with the "cpp" parser gives a clear error, and leaves no
+  backing files, when the first variant of a VCF does not have a genotype
+  for each sample in its header
 * `gen_tibble()` reads VCF files with many chromosomes (e.g. RAD loci
   assembled de novo) faster, sorting the chromosome names in C order when
   this gives the order of the locale

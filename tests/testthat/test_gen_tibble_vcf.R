@@ -1089,6 +1089,27 @@ test_that("the cpp parser leaves no backing files after an error", {
     list.files(dirname(backingfile), pattern = basename(backingfile)),
     0
   )
+  # a VCF with more genotypes than samples in the header (an extra tab)
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+      "chr1\t5\trs1\tA\tT\t.\t.\t.\tGT\t0/1\t\t1/1"
+    ),
+    vcf_path
+  )
+  backingfile <- tempfile()
+  expect_error(
+    gen_tibble(vcf_path,
+      parser = "cpp", backingfile = backingfile, quiet = TRUE
+    ),
+    "has 3 genotypes, but the header line \\(#CHROM\\) has 2 samples"
+  )
+  expect_length(
+    list.files(dirname(backingfile), pattern = basename(backingfile)),
+    0
+  )
 })
 
 test_that("the cpp parser reads bgzipped VCFs in parallel", {

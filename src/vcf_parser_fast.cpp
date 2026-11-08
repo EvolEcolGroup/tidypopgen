@@ -718,6 +718,14 @@ List vcf_to_bk(std::string filename, std::string bk_file,
           p = skip_fields(p, 1);
         }
         n_individuals = ploidy.size();
+        // each sample in the header needs a genotype (otherwise the error
+        // would only come once the FBM is created, from its number of rows)
+        if (n_individuals != sample_names.size()) {
+          stop("the first variant line of the VCF has " +
+               std::to_string(n_individuals) + " genotypes, but the header " +
+               "line (#CHROM) has " + std::to_string(sample_names.size()) +
+               " samples");
+        }
         first_variant = false;
         if (unknown_ploidy.empty()) {
           set_ploidy();
