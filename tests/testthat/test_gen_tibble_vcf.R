@@ -959,9 +959,10 @@ test_that("a missing chromosome '.' is NA with both parsers", {
   expect_identical(show_genotypes(cpp_gt), show_genotypes(vcfr_gt))
 })
 
-test_that("sort_as_levels sorts as the levels of as.factor()", {
+test_that("order_as_levels sorts as the levels of as.factor()", {
+  # (unique strings, as the chromosome names given by the cpp parser)
   examples <- list(
-    paste0("SNP_higher_path_", c(10, 2, 1, 2, 100)),
+    paste0("SNP_higher_path_", c(10, 2, 1, 100)),
     c(paste0("chr", c(10, 2, 1)), "chrX", "chrUn_KI270302v1"),
     # mixed case and punctuation, which C order and collation can sort
     # differently
@@ -971,7 +972,7 @@ test_that("sort_as_levels sorts as the levels of as.factor()", {
   )
   check_levels <- function() {
     for (x in examples) {
-      expect_identical(sort_as_levels(x), levels(as.factor(x)))
+      expect_identical(x[order_as_levels(x)], levels(as.factor(x)))
     }
   }
   # in the collation of the tests (C), and in an English locale if available

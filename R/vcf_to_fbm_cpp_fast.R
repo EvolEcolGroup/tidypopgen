@@ -84,17 +84,21 @@ vcf_to_fbm_cpp <- function(
 
   # loci metadata table
   loci <- vcf_meta$loci_tbl
-  # chromosomes are given as an index into their names (in order of
-  # appearance): turn them into a factor, with the levels sorted as in
+  # chromosomes are given as an index into their (unique) names, in order of
+  # appearance: turn them into a factor, with the levels sorted as in
   # as.factor() (this avoids creating and sorting a string for each locus)
   chromosome_names <- vcf_meta$chromosome_names
-  chromosome_levels <- sort_as_levels(chromosome_names)
+  level_order <- order_as_levels(chromosome_names)
   # a missing chromosome "." is not a level, so that it becomes NA, as in the
   # vcfR parser
-  chromosome_levels <- chromosome_levels[chromosome_levels != "."]
+  level_order <- level_order[chromosome_names[level_order] != "."]
+  # the code of each chromosome name in the factor is its rank among the
+  # levels (NA for ".")
+  chromosome_codes <- rep(NA_integer_, length(chromosome_names))
+  chromosome_codes[level_order] <- seq_along(level_order)
   loci$chromosome <- structure(
-    match(chromosome_names, chromosome_levels)[loci$chromosome],
-    levels = chromosome_levels,
+    chromosome_codes[loci$chromosome],
+    levels = chromosome_names[level_order],
     class = "factor"
   )
   # if we store loci names as characters
@@ -180,21 +184,22 @@ vcf_to_fbm_cpp <- function(
   return(new_gen_tbl)
 }
 
-# the unique values of a character vector, sorted as the levels of
-# as.factor(), i.e. in the collation of the locale (as order() does).
+# the order of a character vector of unique strings (with no NAs) as the
+# levels of as.factor(), i.e. in the collation of the locale (as order()
+# does): x[order_as_levels(x)] are the levels.
 # Sorting millions of strings (e.g. the chromosomes of RAD loci assembled de
 # novo) in the collation of the locale is slow, so we first sort them in C
 # order (method = "radix", much faster); if each string then comes strictly
 # after the previous one in the collation of the locale, which only needs a
-# comparison per pair of neighbours, this is the order in the collation of
-# the locale (e.g. for names that only differ in digits). Otherwise (e.g.
-# with mixed case or punctuation) we sort them in the collation of the locale.
-sort_as_levels <- function(x) {
-  x <- unique(x)
-  x_c_order <- sort(x, method = "radix")
-  n <- length(x_c_order)
-  if (n < 2 || all(x_c_order[-1L] > x_c_order[-n])) {
-    return(x_c_order)
+# comparison per pair of neighbours (made by is.unsorted(), without the
+# copies of the vector that comparing x[-1] with x[-n] needs), this is the
+# order in the collation of the locale (e.g. for names that only differ in
+# digits). Otherwise (e.g. with mixed case or punctuation) we sort them in the
+# collation of the locale.
+order_as_levels <- function(x) {
+  x_order <- order(x, method = "radix")
+  if (length(x) < 2 || !is.unsorted(x[x_order], strictly = TRUE)) {
+    return(x_order)
   }
-  x[order(x)]
+  order(x)
 }
