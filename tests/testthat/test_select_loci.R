@@ -151,3 +151,27 @@ test_that("select_loci evaluates function calls once, as tidyselect does", {
   )
   expect_error(select_loci(test_gt, sort(not_a_variable)), "not_a_variable")
 })
+
+test_that("select_loci can always use tidyselect", {
+  test_gt <- load_example_gt("gen_tbl")
+  idx <- c(4, 2, 4)
+  # make the fast path fail, to check that it is not used
+  local_mocked_bindings(
+    select_loci_eval_call = function(...) stop("the fast path was used"),
+    select_loci_fast = function(...) stop("the fast path was used")
+  )
+  expect_identical(
+    loci_names(select_loci(test_gt, all_of(idx), .engine = "tidyselect")),
+    c("rs4", "rs2")
+  )
+  expect_identical(
+    loci_names(select_loci(test_gt, -sort(idx), .engine = "tidyselect")),
+    c("rs1", "rs3", "rs5", "rs6")
+  )
+  # the fast path is used by default
+  expect_error(select_loci(test_gt, all_of(idx)), "the fast path was used")
+  expect_error(
+    select_loci(test_gt, all_of(idx), .engine = "fast"),
+    "should be one of"
+  )
+})

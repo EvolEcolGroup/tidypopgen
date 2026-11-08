@@ -4,7 +4,7 @@
 \alias{select_loci}
 \title{The \code{select} verb for \code{loci}}
 \usage{
-select_loci(.data, .sel_arg)
+select_loci(.data, .sel_arg, .engine = c("auto", "tidyselect"))
 }
 \arguments{
 \item{.data}{a \code{gen_tibble}}
@@ -13,6 +13,11 @@ select_loci(.data, .sel_arg)
 \code{\link[dplyr:select]{dplyr::select()}} to select loci. Variable names
 can be used as if they were positions in the data frame, so expressions
 like x:y can be used to select a range of variables.}
+
+\item{.engine}{how the selection is resolved: "auto" (the default)
+resolves the common selections described in Details directly, and leaves
+the others to \code{tidyselect}; "tidyselect" always uses \code{tidyselect}, which
+is slow and memory hungry with millions of loci.}
 }
 \value{
 a \code{gen_tibble} with a subset of the loci.
@@ -40,7 +45,9 @@ locus name (and R never frees symbols). Other expressions (e.g.
 combinations such as \code{c(all_of(x), starts_with("rs"))}, bare loci names,
 or a vector given by name, as in \code{select_loci(x, idx)}, which \code{tidyselect}
 deprecates in favour of \code{all_of(idx)}) still work, but are slow and memory
-hungry on very large datasets.
+hungry on very large datasets. To always use \code{tidyselect} (e.g. if a
+selection is not resolved as \code{tidyselect} would resolve it), set
+\code{.engine = "tidyselect"}.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
@@ -53,6 +60,10 @@ show_loci(example_gt_subset)
 # Select loci by index
 example_gt_subset <- example_gt \%>\% select_loci(all_of(c(4, 2, 1)))
 show_loci(example_gt_subset)
+
+# Always use tidyselect to resolve the selection
+example_gt_subset <- example_gt \%>\%
+  select_loci(all_of(c(4, 2, 1)), .engine = "tidyselect")
 
 }
 \seealso{

@@ -8,6 +8,8 @@
 * `select_loci()` resolves function calls that give positions or names (e.g.
   `which(...)` or `sample(...)`) and single values directly, without the slow
   general `tidyselect` machinery
+* `select_loci(.engine = "tidyselect")` always uses `tidyselect`, in case a
+  selection is not resolved by the faster path as `tidyselect` would
 * `gen_tibble()` on VCF files: the "cpp" parser reads a missing chromosome
   (".") as `NA`, as the "vcfR" parser does
 

@@ -21,12 +21,18 @@
 #' combinations such as `c(all_of(x), starts_with("rs"))`, bare loci names,
 #' or a vector given by name, as in `select_loci(x, idx)`, which `tidyselect`
 #' deprecates in favour of `all_of(idx)`) still work, but are slow and memory
-#' hungry on very large datasets.
+#' hungry on very large datasets. To always use `tidyselect` (e.g. if a
+#' selection is not resolved as `tidyselect` would resolve it), set
+#' `.engine = "tidyselect"`.
 #' @param .data a `gen_tibble`
 #' @param .sel_arg one unquoted expression, using the mini-grammar of
 #'  [dplyr::select()] to select loci. Variable names
 #' can be used as if they were positions in the data frame, so expressions
 #' like x:y can be used to select a range of variables.
+#' @param .engine how the selection is resolved: "auto" (the default)
+#'   resolves the common selections described in Details directly, and leaves
+#'   the others to `tidyselect`; "tidyselect" always uses `tidyselect`, which
+#'   is slow and memory hungry with millions of loci.
 #' @returns a `gen_tibble` with a subset of the loci.
 #' @seealso [dplyr::select()]
 #' @export
@@ -42,16 +48,25 @@
 #' example_gt_subset <- example_gt %>% select_loci(all_of(c(4, 2, 1)))
 #' show_loci(example_gt_subset)
 #'
-select_loci <- function(.data, .sel_arg) {
+#' # Always use tidyselect to resolve the selection
+#' example_gt_subset <- example_gt %>%
+#'   select_loci(all_of(c(4, 2, 1)), .engine = "tidyselect")
+#'
+select_loci <- function(.data, .sel_arg, .engine = c("auto", "tidyselect")) {
+  .engine <- match.arg(.engine)
   # defuse the selection criteria
   sel_defused <- rlang::enquo(.sel_arg)
-  # evaluate an ordinary function call (e.g. which() or sample()), as
-  # tidyselect would, and select with its value
-  sel_defused <- select_loci_eval_call(sel_defused)
 
-  # resolve the most common selections (all_of(), any_of(), numeric
-  # positions, values) directly, without building a named vector of all loci
-  loci_sel <- select_loci_fast(sel_defused, .data)
+  loci_sel <- NULL
+  if (.engine == "auto") {
+    # evaluate an ordinary function call (e.g. which() or sample()), as
+    # tidyselect would, and select with its value
+    sel_defused <- select_loci_eval_call(sel_defused)
+    # resolve the most common selections (all_of(), any_of(), numeric
+    # positions, values) directly, without building a named vector of all
+    # loci
+    loci_sel <- select_loci_fast(sel_defused, .data)
+  }
   if (is.null(loci_sel)) {
     # general case: create a named vector of all loci
     loci_names_vec <- stats::setNames(
