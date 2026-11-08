@@ -13,6 +13,8 @@
 * `gen_tibble()` reads VCF files with many chromosomes (e.g. RAD loci
   assembled de novo) faster, sorting the chromosome names in C order when
   this gives the order of the locale
+* `gen_tibble()` and `gt_save()` save the *.gt* file twice as fast, with the
+  fastest gzip compression
 * `gen_tibble()` on VCF files: the "cpp" parser reads a missing chromosome
   (".") as `NA`, as the "vcfR" parser does
 
