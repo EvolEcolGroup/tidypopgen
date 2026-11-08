@@ -987,3 +987,33 @@ test_that("sort_as_levels sorts as the levels of as.factor()", {
     check_levels()
   }
 })
+
+test_that("malformed variant lines give clear errors with the cpp parser", {
+  header <- c(
+    "##fileformat=VCFv4.3",
+    '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+    "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+    "chr1\t5\trs1\tA\tT\t.\t.\t.\tGT\t0/1\t1/1"
+  )
+  # a line with fewer than 5 fields
+  short_vcf <- tempfile(fileext = ".vcf")
+  writeLines(c(header, "chr1\t9"), short_vcf)
+  expect_error(
+    gen_tibble(short_vcf,
+      parser = "cpp", backingfile = tempfile(), quiet = TRUE
+    ),
+    "fewer than 5 fields"
+  )
+  # a position that is not a number
+  bad_pos_vcf <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(header, "chr1\t.\trs2\tC\tG\t.\t.\t.\tGT\t0/0\t0/1"),
+    bad_pos_vcf
+  )
+  expect_error(
+    gen_tibble(bad_pos_vcf,
+      parser = "cpp", backingfile = tempfile(), quiet = TRUE
+    ),
+    "not a valid integer"
+  )
+})

@@ -7,6 +7,9 @@
 #include <algorithm>
 #include <cctype>
 #include <cstring>
+#include <cstdlib>
+#include <cerrno>
+#include <climits>
 #include <unordered_map>
 #include <zlib.h>
 #include <bigstatsr/BMCodeAcc.h>
@@ -112,6 +115,10 @@ struct StringBuffer {
     chars.append(x);
     starts.push_back(chars.size());
   }
+  void push_back(const char* x, size_t len) {
+    chars.append(x, len);
+    starts.push_back(chars.size());
+  }
   size_t size() const { return starts.size() - 1; }
   // convert to an R character vector (freeing the buffer)
   CharacterVector to_r() {
@@ -141,19 +148,51 @@ inline std::vector<std::string> split_line(const std::string &s, const std::stri
   return tokens;
 }
 
-// Function to split the metadata for a locus and return a vector of tokens
-// this only needs to read the first 5 elements in the string
-inline std::vector<std::string> split_locus_meta(const std::string &s,
-                                                 const std::string &delimiters) {
-  std::vector<std::string> tokens;
-  size_t start = s.find_first_not_of(delimiters), end = 0;
-
-  for (int i = 0; i < 5; i++) {
-    end = s.find_first_of(delimiters, start);
-    tokens.push_back(s.substr(start, end - start));
-    start = s.find_first_not_of(delimiters, end);
+// Function to find the metadata of a locus (its first 5 fields: CHROM, POS,
+// ID, REF and ALT) in a line, without copying them: it stores the start and
+// the length of each field, and returns false if the line has fewer than 5
+// fields. As when splitting the line on tabs, consecutive tabs are a single
+// separator.
+inline bool find_locus_meta(const std::string &line,
+                            const char** field_start,
+                            size_t* field_len) {
+  const char* p = line.c_str();
+  const char* line_end = p + line.size();
+  // skip leading tabs
+  while ((p < line_end) && (*p == '\t')) {
+    p++;
   }
-  return tokens;
+  for (int i = 0; i < 5; i++) {
+    if (p >= line_end) {
+      return false;
+    }
+    const char* field_end = static_cast<const char*>(
+      std::memchr(p, '\t', line_end - p));
+    if (field_end == NULL) {
+      field_end = line_end;
+    }
+    field_start[i] = p;
+    field_len[i] = field_end - p;
+    // move to the start of the next field
+    p = field_end;
+    while ((p < line_end) && (*p == '\t')) {
+      p++;
+    }
+  }
+  return true;
+}
+
+// Function to read a position (a 32 bit integer, as in std::stoi), stopping
+// with an error if it is not a number
+inline int32_t parse_position(const char* p) {
+  char* end;
+  errno = 0;
+  long value = std::strtol(p, &end, 10);
+  if ((end == p) || (errno == ERANGE) || (value > INT_MAX) ||
+      (value < INT_MIN)) {
+    stop("the position of a variant is not a valid integer");
+  }
+  return static_cast<int32_t>(value);
 }
 
 
@@ -203,6 +242,7 @@ List vcf_loci_table(std::string filename, bool read_names = true) {
   std::vector<std::string> chromosome_names;
   std::unordered_map<std::string, int> chromosome_lookup;
   int this_chromosome = -1; // index of the chromosome of the previous locus
+  std::string chromosome_key; // reused to look up a chromosome name
   StringBuffer marker_id;
   if (read_names) {
     marker_id.reserve(10e6, 10e7);
@@ -268,35 +308,41 @@ List vcf_loci_table(std::string filename, bool read_names = true) {
       get_sample_names = false;
     }
 
-    // Extract chromosome, position, and
-    // Split the VCF line into fields (only for the first few fields)
-    std::vector<std::string> fields = split_locus_meta(line, "\t");
+    // Find chromosome, position, ID, REF and ALT (the first 5 fields) in the
+    // line, without copying them
+    const char* field_start[5];
+    size_t field_len[5];
+    if (!find_locus_meta(line, field_start, field_len)) {
+      stop("a variant line of the VCF has fewer than 5 fields");
+    }
 
     // Check if the marker is biallelic SNP (REF and ALT allele are single character)
     // if yes, get the metadata for this locus
-    if ((fields[3].length() ==1) && (fields[4].length() ==1)) {
+    if ((field_len[3] == 1) && (field_len[4] == 1)) {
       biallelic.push_back(true);
       // find the index of the chromosome (loci are usually sorted by
       // chromosome, so we only need a lookup when the chromosome changes)
       if ((this_chromosome < 0) ||
-          (fields[0] != chromosome_names[this_chromosome])) {
+          (chromosome_names[this_chromosome].compare(
+              0, std::string::npos, field_start[0], field_len[0]) != 0)) {
+        chromosome_key.assign(field_start[0], field_len[0]);
         std::unordered_map<std::string, int>::iterator found =
-          chromosome_lookup.find(fields[0]);
+          chromosome_lookup.find(chromosome_key);
         if (found == chromosome_lookup.end()) {
           this_chromosome = chromosome_names.size();
-          chromosome_lookup[fields[0]] = this_chromosome;
-          chromosome_names.push_back(fields[0]);
+          chromosome_lookup[chromosome_key] = this_chromosome;
+          chromosome_names.push_back(chromosome_key);
         } else {
           this_chromosome = found->second;
         }
       }
       chromosome_index.push_back(this_chromosome + 1);
-      physical_pos.push_back(std::stoi(fields[1]));
+      physical_pos.push_back(parse_position(field_start[1]));
       if (read_names) {
-        marker_id.push_back(fields[2]);
+        marker_id.push_back(field_start[2], field_len[2]);
       }
-      allele1.push_back(fields[4][0]);
-      allele2.push_back(fields[3][0]);
+      allele1.push_back(field_start[4][0]);
+      allele2.push_back(field_start[3][0]);
     } else {
       biallelic.push_back(false);
     }
