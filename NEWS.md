@@ -5,6 +5,9 @@
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
 * `gt_as_genlight()` reads the genotypes in chunks of loci (new argument
   `chunk_size`), instead of loading them all in memory
+* `select_loci()` resolves function calls that give positions or names (e.g.
+  `which(...)` or `sample(...)`) and single values directly, without the slow
+  general `tidyselect` machinery
 * `gen_tibble()` on VCF files: the "cpp" parser reads a missing chromosome
   (".") as `NA`, as the "vcfR" parser does
 

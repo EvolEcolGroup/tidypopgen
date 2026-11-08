@@ -85,3 +85,69 @@ test_that("select_loci resolves simple selections as tidyselect does", {
     c("rs2", "rs1")
   )
 })
+
+test_that("select_loci evaluates function calls once, as tidyselect does", {
+  test_gt <- load_example_gt("gen_tbl")
+  n_loci <- count_loci(test_gt)
+  # the same gen_tibble with integer loci names
+  int_gt <- test_gt
+  int_loci <- show_loci(int_gt)
+  int_loci$name <- seq_len(n_loci) * 10L
+  show_loci(int_gt) <- int_loci
+  idx <- c(4, 2, 4)
+  # calls (also negated), literals, and injected values
+  selections <- rlang::quos(
+    sort(idx), -rev(idx), base::rev(c(0, 3)), seq(1, n_loci, by = 2),
+    identity(NULL), which(seq_len(n_loci) > 4), 5, -0, !!c(3, 1)
+  )
+  char_selections <- rlang::quos(
+    identity(c("rs3", "rs1")), !setdiff(loci_names(test_gt), "rs2"), "rs2",
+    rev(factor(c("rs3", "rs1")))
+  )
+  int_selections <- rlang::quos(identity(c("30", "10")), "20")
+  cases <- list(
+    list(gt = test_gt, sel = c(selections, char_selections)),
+    list(gt = int_gt, sel = c(selections, int_selections))
+  )
+  for (this_case in cases) {
+    names_vec <- stats::setNames(seq_len(n_loci), loci_names(this_case$gt))
+    for (this_sel in this_case$sel) {
+      fast_pos <- select_loci_fast(
+        select_loci_eval_call(this_sel),
+        this_case$gt
+      )
+      # resolved without tidyselect, with the same result
+      expect_false(is.null(fast_pos))
+      expect_identical(
+        fast_pos,
+        unname(tidyselect::eval_select(this_sel, names_vec))
+      )
+    }
+  }
+  # the call is evaluated only once, also when its value is left to
+  # tidyselect (which gives its usual error)
+  n_calls <- 0
+  count_calls <- function(value) {
+    n_calls <<- n_calls + 1
+    value
+  }
+  expect_identical(
+    loci_names(select_loci(test_gt, count_calls(c(3, 1)))),
+    c("rs3", "rs1")
+  )
+  expect_identical(n_calls, 1)
+  expect_error(
+    select_loci(test_gt, count_calls(c(TRUE, FALSE))),
+    "numeric or character"
+  )
+  expect_identical(n_calls, 2)
+  expect_error(select_loci(test_gt, identity(99)), "past the end")
+  # calls with selection helpers, and calls that fail, are left to tidyselect
+  helper_sel <- rlang::quo(rev(everything()))
+  expect_identical(select_loci_eval_call(helper_sel), helper_sel)
+  expect_identical(
+    loci_names(select_loci(test_gt, rev(everything()))),
+    rev(loci_names(test_gt))
+  )
+  expect_error(select_loci(test_gt, sort(not_a_variable)), "not_a_variable")
+})
