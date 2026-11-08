@@ -1147,3 +1147,27 @@ test_that("the cpp parser reads bgzipped VCFs in parallel", {
     "error decompressing the BGZF file"
   )
 })
+
+test_that("the cpp parser finds chromosomes that come back after others", {
+  # (the index of each chromosome is looked up in a hash table of the names
+  # seen so far)
+  chrom <- c("ctg2", "ctg1", "ctg2", "ctg10", "ctg1")
+  vcf_path <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+      paste(chrom, 1:5, paste0("rs", 1:5), "A\tT\t.\t.\t.\tGT\t0/1\t1/1",
+        sep = "\t"
+      )
+    ),
+    vcf_path
+  )
+  test_gt <- gen_tibble(vcf_path,
+    parser = "cpp", backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(
+    show_loci(test_gt)$chromosome,
+    factor(chrom, levels = c("ctg1", "ctg10", "ctg2"))
+  )
+})

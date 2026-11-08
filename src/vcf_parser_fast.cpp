@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <cerrno>
 #include <climits>
-#include <unordered_map>
+#include <cstdint>
 #include <zlib.h>
 #include <bigstatsr/BMCodeAcc.h>
 
@@ -125,6 +125,74 @@ struct StringBuffer {
     std::string().swap(chars);
     std::vector<size_t>().swap(starts);
     return res;
+  }
+};
+
+// The names of the chromosomes, in order of appearance, with a hash table to
+// find the index of a name. The names are kept in a StringBuffer, and the
+// hash table (open addressing, with linear probing) only holds their indices,
+// so that nothing is allocated for each chromosome: with millions of
+// chromosomes (e.g. RAD loci assembled de novo, one per locus), allocating
+// (and then freeing) a std::string and a node of a std::unordered_map for
+// each took much of the time (and memory) of reading the VCF
+class ChromosomeTable {
+public:
+  StringBuffer names;
+  ChromosomeTable() : slots(1 << 10, -1) {}
+  // whether the name of chromosome k is the string name (of length len)
+  bool is(int k, const char* name, size_t len) const {
+    return (names.starts[k + 1] - names.starts[k] == len) &&
+      (std::memcmp(names.chars.data() + names.starts[k], name, len) == 0);
+  }
+  // the index of the chromosome called name, adding it if it is new
+  int find_or_add(const char* name, size_t len) {
+    uint32_t h = hash(name, len);
+    size_t mask = slots.size() - 1;
+    size_t i = h & mask;
+    while (slots[i] >= 0) {
+      int k = slots[i];
+      if ((hashes[k] == h) && is(k, name, len)) {
+        return k;
+      }
+      i = (i + 1) & mask;
+    }
+    int k = names.size();
+    names.push_back(name, len);
+    hashes.push_back(h);
+    slots[i] = k;
+    // keep the table less than 70% full (so that probes stay short)
+    if (10 * hashes.size() > 7 * slots.size()) {
+      grow();
+    }
+    return k;
+  }
+
+private:
+  std::vector<int> slots; // the chromosome in each slot (-1 if empty)
+  std::vector<uint32_t> hashes; // the hash of the name of each chromosome
+  // FNV-1a hash of a string, with the final mix of MurmurHash3 (so that all
+  // its bits, and so the slot, depend on all the characters)
+  static uint32_t hash(const char* s, size_t len) {
+    uint64_t h = 14695981039346656037ULL;
+    for (size_t i = 0; i < len; i++) {
+      h = (h ^ (unsigned char) s[i]) * 1099511628211ULL;
+    }
+    h ^= h >> 33;
+    h *= 0xff51afd7ed558ccdULL;
+    h ^= h >> 33;
+    return (uint32_t) h;
+  }
+  // double the size of the hash table, and put back the chromosomes
+  void grow() {
+    slots.assign(slots.size() * 2, -1);
+    size_t mask = slots.size() - 1;
+    for (size_t k = 0; k < hashes.size(); k++) {
+      size_t i = hashes[k] & mask;
+      while (slots[i] >= 0) {
+        i = (i + 1) & mask;
+      }
+      slots[i] = k;
+    }
   }
 };
 
@@ -589,14 +657,11 @@ List vcf_to_bk(std::string filename, std::string bk_file,
   BkWriter writer(bk_file);
 
   // loci metadata (preallocate 10 million loci, as a start)
-  // chromosomes are stored as an index into the vector of their names (with a
-  // lookup table to find the index of a name)
+  // chromosomes are stored as an index into the table of their names
   std::vector<int> chromosome_index;
   chromosome_index.reserve(10e6);
-  std::vector<std::string> chromosome_names;
-  std::unordered_map<std::string, int> chromosome_lookup;
+  ChromosomeTable chromosomes;
   int this_chromosome = -1; // index of the chromosome of the previous locus
-  std::string chromosome_key; // reused to look up a chromosome name
   StringBuffer marker_id;
   if (read_names) {
     marker_id.reserve(10e6, 10e7);
@@ -763,18 +828,9 @@ List vcf_to_bk(std::string filename, std::string bk_file,
         // find the index of the chromosome (loci are usually sorted by
         // chromosome, so we only need a lookup when the chromosome changes)
         if ((this_chromosome < 0) ||
-            (chromosome_names[this_chromosome].compare(
-                0, std::string::npos, field_start[0], field_len[0]) != 0)) {
-          chromosome_key.assign(field_start[0], field_len[0]);
-          std::unordered_map<std::string, int>::iterator found =
-            chromosome_lookup.find(chromosome_key);
-          if (found == chromosome_lookup.end()) {
-            this_chromosome = chromosome_names.size();
-            chromosome_lookup[chromosome_key] = this_chromosome;
-            chromosome_names.push_back(chromosome_key);
-          } else {
-            this_chromosome = found->second;
-          }
+            !chromosomes.is(this_chromosome, field_start[0], field_len[0])) {
+          this_chromosome = chromosomes.find_or_add(field_start[0],
+                                                    field_len[0]);
         }
         chromosome_index.push_back(this_chromosome + 1);
         physical_pos.push_back(parse_position(field_start[1]));
@@ -849,7 +905,7 @@ List vcf_to_bk(std::string filename, std::string bk_file,
 
   // Return a list containing the loci table and the ploidy vector
   return (List::create(Named("loci_tbl") = loci_table,
-                       Named("chromosome_names") = chromosome_names,
+                       Named("chromosome_names") = chromosomes.names.to_r(),
                        Named("sample_names") = sample_names,
                        Named("ploidy") = ploidy));
 }
