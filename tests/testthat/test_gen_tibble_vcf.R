@@ -958,3 +958,32 @@ test_that("a missing chromosome '.' is NA with both parsers", {
   expect_identical(show_loci(cpp_gt), show_loci(vcfr_gt))
   expect_identical(show_genotypes(cpp_gt), show_genotypes(vcfr_gt))
 })
+
+test_that("sort_as_levels sorts as the levels of as.factor()", {
+  examples <- list(
+    paste0("SNP_higher_path_", c(10, 2, 1, 2, 100)),
+    c(paste0("chr", c(10, 2, 1)), "chrX", "chrUn_KI270302v1"),
+    # mixed case and punctuation, which C order and collation can sort
+    # differently
+    c("chr_1", "chr1", "Chr2", "chr10", "a", "B", "b"),
+    "1",
+    character(0)
+  )
+  check_levels <- function() {
+    for (x in examples) {
+      expect_identical(sort_as_levels(x), levels(as.factor(x)))
+    }
+  }
+  # in the collation of the tests (C), and in an English locale if available
+  # (checked by setting it, and then restoring the collation)
+  check_levels()
+  old_collate <- Sys.getlocale("LC_COLLATE")
+  has_english <- suppressWarnings(
+    Sys.setlocale("LC_COLLATE", "en_US.UTF-8")
+  ) != ""
+  Sys.setlocale("LC_COLLATE", old_collate)
+  if (has_english) {
+    withr::local_collate("en_US.UTF-8")
+    check_levels()
+  }
+})
