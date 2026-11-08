@@ -69,8 +69,11 @@
 #'   latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 #'   in case your
 #'   *VCF* has an unusual structure.
-#' @param n_cores currently ignored (reading files is not parallelised); kept
-#'   for backwards compatibility
+#' @param n_cores the number of cores used to read a *VCF* file with
+#'   `parser = "cpp"`: the genotypes are parsed in parallel, and a *.vcf.gz*
+#'   file compressed with `bgzip` (as most are) is also decompressed in
+#'   parallel (other gzipped files are decompressed on a single core). It is
+#'   ignored for other formats and for `parser = "vcfR"`.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #'   'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that

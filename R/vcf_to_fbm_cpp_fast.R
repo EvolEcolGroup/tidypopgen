@@ -14,6 +14,8 @@
 #'   position) or duplicated locus names. Default is FALSE.
 #' @param names_as_int whether to convert locus names to
 #'   integers. Default is FALSE.
+#' @param n_cores the number of cores used to decompress a bgzipped vcf and to
+#'   parse the genotypes. Default is 1.
 #' @param quiet whether to print messages.
 #' @returns an object of the class `gen_tbl`.
 #' @keywords internal
@@ -25,6 +27,7 @@ vcf_to_fbm_cpp <- function(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   names_as_int = FALSE,
+  n_cores = 1,
   quiet = FALSE
 ) {
   if (is.null(backingfile)) {
@@ -44,8 +47,12 @@ vcf_to_fbm_cpp <- function(
   # read the VCF once: create a loci_table, figure out no_individuals and
   # ploidy from the first marker, and write the genotypes to the backing file
   # (locus names are not read if we store them as integers, which saves a lot
-  # of memory with many loci)
-  vcf_meta <- vcf_to_bk(vcf_path, bk_file = bk_file, read_names = !names_as_int)
+  # of memory with many loci). With n_cores > 1, the blocks of a bgzipped VCF
+  # are decompressed in parallel, and the genotypes parsed in parallel
+  vcf_meta <- vcf_to_bk(vcf_path,
+    bk_file = bk_file, read_names = !names_as_int,
+    n_threads = n_cores
+  )
   # remove the backing file if we stop before creating the FBM
   fbm_created <- FALSE
   on.exit(if (!fbm_created) unlink(bk_file), add = TRUE)

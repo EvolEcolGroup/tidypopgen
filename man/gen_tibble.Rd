@@ -97,8 +97,11 @@ latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 in case your
 \emph{VCF} has an unusual structure.}
 
-\item{n_cores}{currently ignored (reading files is not parallelised); kept
-for backwards compatibility}
+\item{n_cores}{the number of cores used to read a \emph{VCF} file with
+\code{parser = "cpp"}: the genotypes are parsed in parallel, and a \emph{.vcf.gz}
+file compressed with \code{bgzip} (as most are) is also decompressed in
+parallel (other gzipped files are decompressed on a single core). It is
+ignored for other formats and for \code{parser = "vcfR"}.}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}

@@ -1090,3 +1090,39 @@ test_that("the cpp parser leaves no backing files after an error", {
     0
   )
 })
+
+test_that("the cpp parser reads bgzipped VCFs in parallel", {
+  # this VCF is compressed with bgzip (BGZF, made of blocks of at most 64 KB,
+  # which are decompressed in parallel)
+  bgzf_path <- system.file(
+    "extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+    package = "tidypopgen"
+  )
+  bgzf_gt <- gen_tibble(bgzf_path,
+    parser = "cpp", n_cores = 2, backingfile = tempfile(), quiet = TRUE
+  )
+  # the same VCF compressed with gzip (as a single stream, which is
+  # decompressed sequentially)
+  gzip_path <- tempfile(fileext = ".vcf.gz")
+  gz_con <- gzfile(gzip_path, "w")
+  writeLines(readLines(bgzf_path), gz_con)
+  close(gz_con)
+  gzip_gt <- gen_tibble(gzip_path,
+    parser = "cpp", n_cores = 1, backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(bgzf_gt$id, gzip_gt$id)
+  expect_identical(show_loci(bgzf_gt), show_loci(gzip_gt))
+  expect_identical(show_genotypes(bgzf_gt), show_genotypes(gzip_gt))
+  # a corrupted block gives an error (its CRC32 does not match)
+  bgzf_bytes <- readBin(bgzf_path, what = "raw", n = file.size(bgzf_path))
+  middle <- length(bgzf_bytes) %/% 2
+  bgzf_bytes[middle] <- xor(bgzf_bytes[middle], as.raw(255))
+  corrupt_path <- tempfile(fileext = ".vcf.gz")
+  writeBin(bgzf_bytes, corrupt_path)
+  expect_error(
+    gen_tibble(corrupt_path,
+      parser = "cpp", n_cores = 2, backingfile = tempfile(), quiet = TRUE
+    ),
+    "error decompressing the BGZF file"
+  )
+})

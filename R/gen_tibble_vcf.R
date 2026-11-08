@@ -3,7 +3,7 @@ gen_tibble_vcf <- function(
   x,
   ...,
   parser = c("cpp", "vcfR"),
-  n_cores = 1, # ignored by this function, there is no multithreading
+  n_cores = 1,
   chunk_size = NULL,
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
@@ -29,6 +29,7 @@ gen_tibble_vcf <- function(
       missing_alleles = missing_alleles,
       allow_duplicates = allow_duplicates,
       names_as_int = names_as_int,
+      n_cores = n_cores,
       quiet = quiet
     )
   } else {

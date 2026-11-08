@@ -13,6 +13,9 @@
 * `gen_tibble()` reads VCF files in a single pass with the "cpp" parser
   (decompressing a *.vcf.gz* file only once), and gives a clear error for VCF
   files with no biallelic SNPs
+* `gen_tibble()` uses `n_cores` (previously ignored) to read VCF files with
+  the "cpp" parser in parallel: the genotypes are parsed in parallel, and
+  *.vcf.gz* files compressed with `bgzip` are also decompressed in parallel
 * `gen_tibble()` reads VCF files with many chromosomes (e.g. RAD loci
   assembled de novo) faster, sorting the chromosome names in C order when
   this gives the order of the locale
