@@ -36,18 +36,21 @@ but rather it subsets the list of loci to be used stored in the \code{gen_tibble
 For large datasets (millions of loci), select loci with \code{\link[dplyr:all_of]{dplyr::all_of()}}
 or \code{\link[dplyr:any_of]{dplyr::any_of()}}, with helpers that match names (such as
 \code{\link[dplyr:starts_with]{dplyr::starts_with()}} or \code{\link[dplyr:everything]{dplyr::everything()}}), with numeric positions
-written as numbers (e.g. \code{1:100} or \code{-c(1, 5)}), or with a function call
+written as numbers (e.g. \code{1:100} or \code{-c(1, 5)}), with a function call
 that gives positions or names (e.g. \code{which(...)}, \code{sample(...)} or
-\code{sort(x)}), each optionally negated with \code{-} or \code{!}. These selections are
-resolved directly, which is much faster and uses much less memory than the
-general \code{tidyselect} machinery, which has to create an R symbol for every
-locus name (and R never frees symbols). Other expressions (e.g.
-combinations such as \code{c(all_of(x), starts_with("rs"))}, bare loci names,
-or a vector given by name, as in \code{select_loci(x, idx)}, which \code{tidyselect}
-deprecates in favour of \code{all_of(idx)}) still work, but are slow and memory
-hungry on very large datasets. To always use \code{tidyselect} (e.g. if a
-selection is not resolved as \code{tidyselect} would resolve it), set
-\code{.engine = "tidyselect"}.
+\code{sort(x)}), or with a variable that holds positions or names (e.g.
+\code{select_loci(x, idx)}), each optionally negated with \code{-} or \code{!}. These
+selections are resolved directly, which is much faster and uses much less
+memory than the general \code{tidyselect} machinery, which has to create an R
+symbol for every locus name (and R never frees symbols). As in
+\code{tidyselect}, a locus with the same name as the variable is selected
+instead of the value of the variable, and selecting with a variable gives
+the deprecation warning of \code{tidyselect}: prefer \code{all_of(idx)}, which can
+not be confused with a locus named \code{idx}. Other expressions (e.g.
+combinations such as \code{c(all_of(x), starts_with("rs"))}, or bare loci
+names) still work, but are slow and memory hungry on very large datasets.
+To always use \code{tidyselect} (e.g. if a selection is not resolved as
+\code{tidyselect} would resolve it), set \code{.engine = "tidyselect"}.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

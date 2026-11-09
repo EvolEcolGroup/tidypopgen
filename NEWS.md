@@ -16,6 +16,11 @@
 * `select_loci()` resolves function calls that give positions or names (e.g.
   `which(...)` or `sample(...)`) and single values directly, without the slow
   general `tidyselect` machinery
+* `select_loci()` resolves a variable that holds positions or names (e.g.
+  `select_loci(x, idx)`) directly, as it does `all_of(idx)`: with millions of
+  loci, `tidyselect` took minutes and gigabytes of memory. As in
+  `tidyselect`, a locus named like the variable is selected instead, and the
+  deprecation warning of `tidyselect` (in favour of `all_of(idx)`) is kept
 * `select_loci(.engine = "tidyselect")` always uses `tidyselect`, in case a
   selection is not resolved by the faster path as `tidyselect` would
 * `gen_tibble()` reads VCF files in a single pass with the "cpp" parser

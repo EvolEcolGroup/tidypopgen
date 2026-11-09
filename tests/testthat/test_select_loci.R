@@ -152,6 +152,60 @@ test_that("select_loci evaluates function calls once, as tidyselect does", {
   expect_error(select_loci(test_gt, sort(not_a_variable)), "not_a_variable")
 })
 
+test_that("select_loci resolves a variable as all_of(), as tidyselect does", {
+  test_gt <- load_example_gt("gen_tbl")
+  n_loci <- count_loci(test_gt)
+  names_vec <- stats::setNames(seq_len(n_loci), loci_names(test_gt))
+  idx <- c(4, 2, 4)
+  sel_names <- c("rs3", "rs1")
+  # the deprecation warning of tidyselect is checked in the next test
+  withr::local_options(lifecycle_verbosity = "quiet")
+  for (this_sel in rlang::quos(idx, -idx, !sel_names)) {
+    fast_pos <- select_loci_fast(this_sel, test_gt)
+    # resolved without tidyselect, with the same result
+    expect_false(is.null(fast_pos))
+    expect_identical(
+      fast_pos,
+      unname(tidyselect::eval_select(this_sel, names_vec))
+    )
+  }
+  expect_identical(
+    select_loci(test_gt, idx),
+    select_loci(test_gt, all_of(idx))
+  )
+  # a locus named like the variable is selected instead, by tidyselect
+  rs5 <- 1
+  expect_null(select_loci_fast(rlang::quo(rs5), test_gt))
+  expect_identical(loci_names(select_loci(test_gt, rs5)), "rs5")
+  # values that tidyselect rejects are left to it, to give its error
+  keep <- rep(TRUE, n_loci)
+  expect_null(select_loci_fast(rlang::quo(keep), test_gt))
+  expect_error(select_loci(test_gt, keep), "numeric or character")
+})
+
+test_that("select_loci warns about a variable as tidyselect does", {
+  test_gt <- load_example_gt("gen_tbl")
+  idx <- c(4, 2)
+  # show lifecycle warnings every time (not once every 8 hours)
+  withr::local_options(lifecycle_verbosity = "warning")
+  fast_warning <- expect_warning(
+    select_loci(test_gt, idx),
+    class = "lifecycle_warning_deprecated"
+  )
+  tidy_warning <- expect_warning(
+    select_loci(test_gt, idx, .engine = "tidyselect"),
+    class = "lifecycle_warning_deprecated"
+  )
+  expect_match(conditionMessage(fast_warning), "external vector")
+  expect_identical(
+    conditionMessage(fast_warning),
+    conditionMessage(tidy_warning)
+  )
+  # no warning when a locus named like the variable is selected
+  rs5 <- 1
+  expect_no_warning(select_loci(test_gt, rs5))
+})
+
 test_that("select_loci can always use tidyselect", {
   test_gt <- load_example_gt("gen_tbl")
   idx <- c(4, 2, 4)

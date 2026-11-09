@@ -12,18 +12,21 @@
 #' For large datasets (millions of loci), select loci with [dplyr::all_of()]
 #' or [dplyr::any_of()], with helpers that match names (such as
 #' [dplyr::starts_with()] or [dplyr::everything()]), with numeric positions
-#' written as numbers (e.g. `1:100` or `-c(1, 5)`), or with a function call
+#' written as numbers (e.g. `1:100` or `-c(1, 5)`), with a function call
 #' that gives positions or names (e.g. `which(...)`, `sample(...)` or
-#' `sort(x)`), each optionally negated with `-` or `!`. These selections are
-#' resolved directly, which is much faster and uses much less memory than the
-#' general `tidyselect` machinery, which has to create an R symbol for every
-#' locus name (and R never frees symbols). Other expressions (e.g.
-#' combinations such as `c(all_of(x), starts_with("rs"))`, bare loci names,
-#' or a vector given by name, as in `select_loci(x, idx)`, which `tidyselect`
-#' deprecates in favour of `all_of(idx)`) still work, but are slow and memory
-#' hungry on very large datasets. To always use `tidyselect` (e.g. if a
-#' selection is not resolved as `tidyselect` would resolve it), set
-#' `.engine = "tidyselect"`.
+#' `sort(x)`), or with a variable that holds positions or names (e.g.
+#' `select_loci(x, idx)`), each optionally negated with `-` or `!`. These
+#' selections are resolved directly, which is much faster and uses much less
+#' memory than the general `tidyselect` machinery, which has to create an R
+#' symbol for every locus name (and R never frees symbols). As in
+#' `tidyselect`, a locus with the same name as the variable is selected
+#' instead of the value of the variable, and selecting with a variable gives
+#' the deprecation warning of `tidyselect`: prefer `all_of(idx)`, which can
+#' not be confused with a locus named `idx`. Other expressions (e.g.
+#' combinations such as `c(all_of(x), starts_with("rs"))`, or bare loci
+#' names) still work, but are slow and memory hungry on very large datasets.
+#' To always use `tidyselect` (e.g. if a selection is not resolved as
+#' `tidyselect` would resolve it), set `.engine = "tidyselect"`.
 #' @param .data a `gen_tibble`
 #' @param .sel_arg one unquoted expression, using the mini-grammar of
 #'  [dplyr::select()] to select loci. Variable names
@@ -116,7 +119,12 @@ select_loci <- function(.data, .sel_arg, .engine = c("auto", "tidyselect")) {
 #' - values, optionally negated: literals (e.g. `5` or `"rs1"`), vectors
 #'   injected with `!!`, and the values of function calls (e.g. `which(...)`),
 #'   which [select_loci_eval_call()] puts in place of the calls. They are
-#'   used as the argument of `all_of()`.
+#'   used as the argument of `all_of()`;
+#' - bare variables (e.g. `idx` in `select_loci(x, idx)`), optionally
+#'   negated, that are not loci names and hold a vector of positions or
+#'   names (see [select_loci_symbol_value()]): their value is used as the
+#'   argument of `all_of()`, with the deprecation warning of `tidyselect`
+#'   (see [warn_external_vector()]).
 #'
 #' Anything else, or anything unusual (missing values, zeros in literals,
 #' positions out of range, mixed positive and negative positions, names not
@@ -166,6 +174,21 @@ select_loci_fast <- function(sel_quo, .data) {
     if (is.null(pos)) {
       return(NULL)
     }
+  } else if (is.symbol(expr)) {
+    # a bare variable (e.g. select_loci(x, idx)): unless a locus has the same
+    # name, tidyselect uses its value as it uses the argument of all_of()
+    # (see select_loci_symbol_value())
+    sel <- select_loci_symbol_value(expr, sel_quo, .data)
+    if (is.null(sel)) {
+      return(NULL)
+    }
+    pos <- selection_value_positions(sel[[1]], .data, strict = TRUE)
+    if (is.null(pos)) {
+      return(NULL)
+    }
+    # warn only now that the selection is resolved: when we fall back on
+    # tidyselect, it gives the warning itself
+    warn_external_vector(as.character(expr), rlang::quo_get_env(sel_quo))
   } else if (rlang::is_call(expr, tidyselect_name_helpers, ns = tidy_ns)) {
     # selection helpers that only need the names of the loci: evaluate them
     # (with their arguments evaluated in the caller environment, as in
@@ -281,6 +304,99 @@ select_loci_eval_call <- function(sel_quo) {
     value <- rlang::call2(expr[[1]], value)
   }
   rlang::quo_set_expr(sel_quo, value)
+}
+
+#' Find the value of a bare variable used as a selection
+#'
+#' `tidyselect` resolves a bare symbol (e.g. `idx` in `select_loci(x, idx)`)
+#' by looking it up first in a data mask that binds every locus name, and
+#' then in the caller environment and its parents; a value that is not a
+#' function is then used as the argument of `all_of()` would be (with a
+#' deprecation warning, see [warn_external_vector()]). Building that data
+#' mask is what makes selecting with a vector given by name quadratic with
+#' millions of loci (it creates an R symbol for every locus name), so this
+#' function does the same lookup directly, in the same order. It returns
+#' `NULL`, so that [select_loci()] falls back on `tidyselect`, when the
+#' symbol could be found in the data mask (a locus with the same name, which
+#' `tidyselect` selects instead of the variable, or a name starting with a
+#' dot), when the variable does not exist or can not be evaluated (so that
+#' `tidyselect` gives the error), and when its value is a function (which
+#' `tidyselect` treats as a locus name, or as a deprecated predicate).
+#' @param sym the symbol
+#' @param sel_quo the defused selection (a quosure)
+#' @param .data the `gen_tibble`
+#' @returns the value of the variable, wrapped in a list (as it may be
+#'   `NULL`), or NULL if the selection should be left to `tidyselect`
+#' @keywords internal
+#' @noRd
+select_loci_symbol_value <- function(sym, sel_quo, .data) {
+  name <- as.character(sym)
+  # besides the loci names, the tidyselect data mask binds the .data and
+  # .env pronouns and internal objects (e.g. .top_env), all starting with a
+  # dot, which hide variables of the same name
+  if (startsWith(name, ".")) {
+    return(NULL)
+  }
+  # the loci are in the data mask, so a locus named like the variable is
+  # selected instead (this scans the loci names once, without building a
+  # hash table of all of them, see match_loci_names())
+  if (!is.na(match_loci_names(name, loci_names(.data)))) {
+    return(NULL)
+  }
+  # look up the variable as tidyselect does, in the caller environment and
+  # its parents (which also forces a lazy argument, as tidyselect would)
+  value <- tryCatch(
+    rlang::env_get(
+      rlang::quo_get_env(sel_quo), name,
+      default = rlang::missing_arg(), inherit = TRUE
+    ),
+    error = function(e) rlang::missing_arg()
+  )
+  if (rlang::is_missing(value) || is.function(value)) {
+    return(NULL)
+  }
+  list(value)
+}
+
+#' Warn that a vector given by name was used as a selection
+#'
+#' `tidyselect` deprecates selecting with a bare variable that holds a vector
+#' (e.g. `select_loci(x, idx)`, rather than `select_loci(x, all_of(idx))`,
+#' which can not be confused with a locus named `idx`). When
+#' [select_loci_fast()] resolves such a selection, this gives the warning
+#' that `tidyselect` would give, with the same message and condition class
+#' (`lifecycle_warning_deprecated`). As with any soft deprecation by
+#' `lifecycle`, it is shown only when the selection is made in the global
+#' environment (or in the tests of the package that makes it), and at most
+#' once every 8 hours for each variable name; as the message is the same,
+#' this throttling is shared with the warnings given by `tidyselect` itself.
+#' `env` is the `tidyselect` namespace, so that the message names
+#' `tidyselect` as the package that deprecated this use. If `tidyselect`
+#' ever turns this deprecation into an error, [select_loci_fast()] should
+#' stop resolving bare variables.
+#' @param name the name of the variable
+#' @param user_env the environment in which the selection was made
+#' @returns NULL, invisibly
+#' @keywords internal
+#' @noRd
+warn_external_vector <- function(name, user_env) {
+  # the same arguments as in tidyselect:::eval_sym() (tidyselect 1.2.1)
+  lifecycle::deprecate_soft(
+    when = "1.1.0",
+    what = I("Using an external vector in selections"),
+    with = I("`all_of()` or `any_of()`"),
+    details = c(
+      " " = "# Was:",
+      " " = paste0("data %>% select(", name, ")"),
+      "",
+      " " = "# Now:",
+      " " = paste0("data %>% select(all_of(", name, "))"),
+      "",
+      "See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>."
+    ),
+    env = asNamespace("tidyselect"),
+    user_env = user_env
+  )
 }
 
 #' Find the positions of the loci selected by a value
