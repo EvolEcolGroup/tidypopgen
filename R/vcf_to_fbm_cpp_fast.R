@@ -85,34 +85,20 @@ vcf_to_fbm_cpp <- function(
   # loci metadata table
   loci <- vcf_meta$loci_tbl
   # chromosomes are given as an index into their (unique) names, in order of
-  # appearance: turn them into a factor, with the levels sorted as in
-  # as.factor() (this avoids creating and sorting a string for each locus)
-  chromosome_names <- vcf_meta$chromosome_names
-  level_order <- order_as_levels(chromosome_names)
-  # a missing chromosome "." is not a level, so that it becomes NA, as in the
-  # vcfR parser
-  level_order <- level_order[chromosome_names[level_order] != "."]
-  # the code of each chromosome name in the factor is its rank among the
-  # levels (NA for ".")
-  chromosome_codes <- rep(NA_integer_, length(chromosome_names))
-  chromosome_codes[level_order] <- seq_along(level_order)
-  loci$chromosome <- structure(
-    chromosome_codes[loci$chromosome],
-    levels = chromosome_names[level_order],
-    class = "factor"
+  # appearance: turn them into a factor
+  loci$chromosome <- chromosome_index_to_factor(
+    loci$chromosome,
+    vcf_meta$chromosome_names
   )
   # if we store loci names as characters
   if (!names_as_int) {
     # if loci names are missing, create a name with scaffold and position
     # (same behaviour as vcfR)
-    missing_loci_ids <- which(loci$marker.ID == ".")
-    if (length(missing_loci_ids) > 0) {
-      loci$marker.ID[missing_loci_ids] <- paste(
-        loci$chromosome[missing_loci_ids],
-        loci$physical.pos[missing_loci_ids],
-        sep = "_"
-      )
-    }
+    loci$marker.ID <- fill_missing_loci_names(
+      loci$marker.ID,
+      loci$chromosome,
+      loci$physical.pos
+    )
   } else { # if we store them as integers
     loci$marker.ID <- seq_along(loci$physical.pos)
   }
@@ -182,6 +168,39 @@ vcf_to_fbm_cpp <- function(
     class = "gen_tbl"
   )
   return(new_gen_tbl)
+}
+
+# the chromosomes of the loci of a VCF as a factor, from their index (1-based)
+# into the unique chromosome names (in order of appearance, as returned by
+# vcf_to_bk()), with the levels sorted as in as.factor() (this avoids creating
+# and sorting a string for each locus). A missing chromosome "." is not a
+# level, so that it becomes NA, as in the vcfR parser.
+chromosome_index_to_factor <- function(index, chromosome_names) {
+  level_order <- order_as_levels(chromosome_names)
+  level_order <- level_order[chromosome_names[level_order] != "."]
+  # the code of each chromosome name in the factor is its rank among the
+  # levels (NA for ".")
+  chromosome_codes <- rep(NA_integer_, length(chromosome_names))
+  chromosome_codes[level_order] <- seq_along(level_order)
+  structure(
+    chromosome_codes[index],
+    levels = chromosome_names[level_order],
+    class = "factor"
+  )
+}
+
+# the names of the loci of a VCF, where the missing names (".") are replaced
+# by the chromosome and position (as vcfR does), e.g. "1_752566"
+fill_missing_loci_names <- function(name, chromosome, position) {
+  missing_loci_ids <- which(name == ".")
+  if (length(missing_loci_ids) > 0) {
+    name[missing_loci_ids] <- paste(
+      chromosome[missing_loci_ids],
+      position[missing_loci_ids],
+      sep = "_"
+    )
+  }
+  name
 }
 
 # the order of a character vector of unique strings (with no NAs) as the

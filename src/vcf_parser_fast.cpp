@@ -245,6 +245,15 @@ inline bool find_locus_meta(const char* line, size_t len,
   return true;
 }
 
+// Function to check whether a variant is a biallelic SNP (its REF and ALT
+// alleles are a single character each), given the lengths of its first 5
+// fields (as found by find_locus_meta()). Only these variants are read; the
+// two passes of gt_merge_vcfs() use the same test, so that they number the
+// SNPs of a file in the same way
+inline bool is_biallelic_snp(const size_t* field_len) {
+  return (field_len[3] == 1) && (field_len[4] == 1);
+}
+
 // Function to read a position (a 32 bit integer, as in std::stoi), stopping
 // with an error if it is not a number
 inline int32_t parse_position(const char* p) {
@@ -656,16 +665,28 @@ private:
  * in parallel (with n_threads threads), as are the blocks of a BGZF file
  * decompressed.
  *
+ * With read_genotypes = false, only the loci, the samples and their ploidy
+ * are read (no backing file is created): this is the first pass of
+ * gt_merge_vcfs(), whose second pass (vcf_merge_genotypes()) reads the
+ * genotypes.
+ *
  * @param filename The name of the VCF file to parse
- * @param bk_file The name of the backing file to create
+ * @param bk_file The name of the backing file to create (ignored if
+ *   read_genotypes is false)
  * @param read_names Whether to read the names (IDs) of the loci
  * @param n_threads The number of threads
+ * @param read_genotypes Whether to read the genotypes (into bk_file)
  */
 // [[Rcpp::export]]
 List vcf_to_bk(std::string filename, std::string bk_file,
-               bool read_names = true, int n_threads = 1) {
+               bool read_names = true, int n_threads = 1,
+               bool read_genotypes = true) {
   VcfLineReader reader(filename, n_threads);
-  BkWriter writer(bk_file);
+  // (the backing file is only created if we read the genotypes)
+  std::unique_ptr<BkWriter> writer;
+  if (read_genotypes) {
+    writer.reset(new BkWriter(bk_file));
+  }
 
   // loci metadata (preallocate 10 million loci, as a start)
   // chromosomes are stored as an index into the table of their names
@@ -835,7 +856,7 @@ List vcf_to_bk(std::string filename, std::string bk_file,
 
       // Check if the marker is biallelic SNP (REF and ALT allele are single
       // character); if yes, get the metadata and genotypes of this locus
-      if ((field_len[3] == 1) && (field_len[4] == 1)) {
+      if (is_biallelic_snp(field_len)) {
         // find the index of the chromosome (loci are usually sorted by
         // chromosome, so we only need a lookup when the chromosome changes)
         if ((this_chromosome < 0) ||
@@ -852,6 +873,10 @@ List vcf_to_bk(std::string filename, std::string bk_file,
         allele2.push_back(field_start[3][0]);
         snp_lines.push_back(l);
       }
+    }
+    if (!read_genotypes) {
+      Rcpp::checkUserInterrupt();
+      continue;
     }
     // count the alternate alleles of each individual at the biallelic snps
     // of this chunk, in parallel (with the provisional value for missing
@@ -882,7 +907,7 @@ List vcf_to_bk(std::string filename, std::string bk_file,
     // write the genotypes to the backing file (once the value for missing
     // genotypes is known)
     if (ploidy_known && (genotypes.size() >= genotypes_flush_size)) {
-      writer.write(genotypes);
+      writer->write(genotypes);
       genotypes.clear();
     }
     Rcpp::checkUserInterrupt();
@@ -891,9 +916,11 @@ List vcf_to_bk(std::string filename, std::string bk_file,
     set_ploidy();
     check_alleles();
   }
-  writer.write(genotypes);
-  std::vector<unsigned char>().swap(genotypes);
-  writer.finish();
+  if (read_genotypes) {
+    writer->write(genotypes);
+    std::vector<unsigned char>().swap(genotypes);
+    writer->finish();
+  }
 
   // create the loci table; alleles are converted to strings reusing a single
   // R string for each character, and the C++ vectors are freed as soon as
@@ -919,4 +946,163 @@ List vcf_to_bk(std::string filename, std::string bk_file,
                        Named("chromosome_names") = chromosomes.names.to_r(),
                        Named("sample_names") = sample_names,
                        Named("ploidy") = ploidy));
+}
+
+/******************************************************************************
+ * Write the genotypes of a VCF into the FBM of several merged VCFs
+ *
+ * This is the second pass of gt_merge_vcfs(): its first pass read the loci of
+ * each VCF (with vcf_to_bk(read_genotypes = false)) and matched them across
+ * files, giving the column of the merged FBM of each biallelic snp of this
+ * file. This function reads the VCF again, and writes the number of
+ * alternate alleles of each of its individuals at each of its biallelic snps
+ * that is kept straight into its column of the merged FBM, in the rows of
+ * this file (row_offset onwards). The FBM is column-major, so each snp is a
+ * contiguous block of n_individuals bytes; the snps of a chunk of lines go to
+ * different columns, so they are written in parallel (with n_threads
+ * threads), as are the blocks of a BGZF file decompressed.
+ *
+ * The snps are numbered as in the first pass (in the order of the file, with
+ * the same test, is_biallelic_snp()), so the file must not change between
+ * the two passes (we check that it has the same number of biallelic snps).
+ *
+ * @param filename The name of the VCF file to read
+ * @param BM The merged FBM.code256 (with at least row_offset +
+ *   length(ploidy) rows)
+ * @param row_offset The (0-based) row of the first individual of this file
+ * @param col The (0-based) column of each biallelic snp of the file in the
+ *   merged FBM, or -1 for snps that are not kept
+ * @param swap Whether the alleles of each snp are swapped to match the merged
+ *   locus (its dosage d becomes ploidy - d), or an empty vector (no swapping)
+ * @param ploidy The ploidy of each individual of the file (from the first
+ *   pass)
+ * @param missing_value The value of missing genotypes in the merged FBM
+ *   (its largest ploidy + 1)
+ * @param n_threads The number of threads
+ */
+// [[Rcpp::export]]
+void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
+                         const IntegerVector& col, const LogicalVector& swap,
+                         const IntegerVector& ploidy, int missing_value,
+                         int n_threads = 1) {
+  XPtr<FBM_RW> xp_bm = BM["address_rw"];
+  unsigned char* bm = static_cast<unsigned char*>(xp_bm->matrix());
+  size_t n_rows = xp_bm->nrow(); // number of rows of the merged FBM
+  size_t n_cols = xp_bm->ncol(); // number of columns of the merged FBM
+  size_t n_individuals = ploidy.size();
+  long n_snps = col.size();
+  bool any_swap = swap.size() > 0;
+
+  // check that the rows and columns of this file are within the FBM
+  if ((row_offset < 0) || ((size_t) row_offset + n_individuals > n_rows)) {
+    stop("the merged FBM does not have enough rows for this file");
+  }
+  for (long k = 0; k < n_snps; k++) {
+    if ((col[k] != NA_INTEGER) && (col[k] >= 0) &&
+        ((size_t) col[k] >= n_cols)) {
+      stop("'col' is out of the bounds of the merged FBM");
+    }
+  }
+  if (any_swap && (swap.size() != n_snps)) {
+    stop("'swap' should have one value per biallelic snp");
+  }
+  if ((missing_value < 1) || (missing_value > 255)) {
+    stop("'missing_value' should be between 1 and 255");
+  }
+  // a genotype can not have more alleles than the largest ploidy of the file
+  // (as checked by vcf_to_bk())
+  size_t max_ploidy = 0;
+  std::vector<int> ploidy_vec(ploidy.begin(), ploidy.end());
+  for (size_t i = 0; i < n_individuals; i++) {
+    max_ploidy = std::max(max_ploidy, (size_t) ploidy_vec[i]);
+  }
+  // (copies, so that the parallel loop does not touch R objects)
+  std::vector<int> col_vec(col.begin(), col.end());
+  std::vector<char> swap_vec(n_snps, 0);
+  if (any_swap) {
+    for (long k = 0; k < n_snps; k++) {
+      swap_vec[k] = (swap[k] == TRUE);
+    }
+  }
+  const unsigned char missing = (unsigned char) missing_value;
+
+  VcfLineReader reader(filename, n_threads);
+  std::vector<char*> line_start;
+  std::vector<size_t> line_len;
+  // the lines of a chunk that are biallelic snps kept in the merge, and the
+  // number (in the file) of each of these snps
+  std::vector<size_t> snp_lines;
+  std::vector<long> snp_number;
+  long k = 0; // number of biallelic snps read so far
+  while (reader.next_chunk(line_start, line_len)) {
+    snp_lines.clear();
+    snp_number.clear();
+    for (size_t l = 0; l < line_start.size(); l++) {
+      // skip empty lines and header lines
+      if ((line_len[l] == 0) || (line_start[l][0] == '#')) {
+        continue;
+      }
+      const char* field_start[5];
+      size_t field_len[5];
+      if (!find_locus_meta(line_start[l], line_len[l], field_start,
+                           field_len)) {
+        stop("a variant line of the VCF has fewer than 5 fields");
+      }
+      if (!is_biallelic_snp(field_len)) {
+        continue;
+      }
+      if (k >= n_snps) {
+        stop("the VCF " + filename + " has more biallelic SNPs than when " +
+             "its loci were read (it changed while being merged)");
+      }
+      if ((col_vec[k] != NA_INTEGER) && (col_vec[k] >= 0)) {
+        snp_lines.push_back(l);
+        snp_number.push_back(k);
+      }
+      k++;
+    }
+    // count the alternate alleles of each individual at the kept snps of
+    // this chunk, in parallel, straight into their columns of the FBM
+    long n_snp_lines = snp_lines.size();
+    size_t chunk_max_alleles = 0;
+    bool too_few_genotypes = false;
+#pragma omp parallel for num_threads(n_threads) schedule(static) \
+    reduction(max:chunk_max_alleles) reduction(||:too_few_genotypes)
+    for (long s = 0; s < n_snp_lines; s++) {
+      size_t l = snp_lines[s];
+      long snp = snp_number[s];
+      unsigned char* dest = bm + n_rows * (size_t) col_vec[snp] + row_offset;
+      if (!count_alt_alleles(line_start[l], line_len[l], dest, n_individuals,
+                             missing, chunk_max_alleles)) {
+        too_few_genotypes = true;
+        continue;
+      }
+      // swap the alleles: the dosage d of the alternate allele becomes
+      // ploidy - d (missing genotypes stay missing); a genotype with more
+      // alleles than the ploidy of its individual (which can only happen if
+      // the ploidy estimated from the first variants is wrong) is set to 0
+      if (swap_vec[snp]) {
+        for (size_t i = 0; i < n_individuals; i++) {
+          if (dest[i] != missing) {
+            dest[i] = (dest[i] <= ploidy_vec[i]) ? ploidy_vec[i] - dest[i] : 0;
+          }
+        }
+      }
+    }
+    if (too_few_genotypes) {
+      stop("a variant line of the VCF " + filename +
+           " has fewer genotypes than individuals");
+    }
+    if (chunk_max_alleles > max_ploidy) {
+      stop("a genotype of the VCF " + filename + " has more than max_ploidy " +
+           "alleles. We estimate max_ploidy from the first variant in the " +
+           "vcf file, make sure that variant is representative of ploidy " +
+           "(e.g. it is not on a sex chromosome)");
+    }
+    Rcpp::checkUserInterrupt();
+  }
+  if (k != n_snps) {
+    stop("the VCF " + filename + " has fewer biallelic SNPs than when its " +
+         "loci were read (it changed while being merged)");
+  }
 }

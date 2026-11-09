@@ -165,8 +165,16 @@ vcf_gt_dosages_cpp <- function(gt, max_ploidy) {
     .Call(`_tidypopgen_vcf_gt_dosages_cpp`, gt, max_ploidy)
 }
 
-vcf_to_bk <- function(filename, bk_file, read_names = TRUE, n_threads = 1L) {
-    .Call(`_tidypopgen_vcf_to_bk`, filename, bk_file, read_names, n_threads)
+vcf_merge_sites_cpp <- function(chromosome, position, allele_ref, allele_alt, split_alt, ref_rule) {
+    .Call(`_tidypopgen_vcf_merge_sites_cpp`, chromosome, position, allele_ref, allele_alt, split_alt, ref_rule)
+}
+
+vcf_to_bk <- function(filename, bk_file, read_names = TRUE, n_threads = 1L, read_genotypes = TRUE) {
+    .Call(`_tidypopgen_vcf_to_bk`, filename, bk_file, read_names, n_threads, read_genotypes)
+}
+
+vcf_merge_genotypes <- function(filename, BM, row_offset, col, swap, ploidy, missing_value, n_threads = 1L) {
+    invisible(.Call(`_tidypopgen_vcf_merge_genotypes`, filename, BM, row_offset, col, swap, ploidy, missing_value, n_threads))
 }
 
 window_sums_cpp <- function(x, loci, lo, hi, long_double) {

@@ -1,5 +1,13 @@
 # tidypopgen (development version)
 
+* new `gt_merge_vcfs()` reads several VCF files with different samples into
+  a single `gen_tibble`, as `bcftools merge` would, in one go (without
+  reading each file into its own `gen_tibble` and binding them in pairs with
+  `rbind()`): loci are matched by chromosome and position, keeping the sites
+  found in all files (`variants = "intersection"`) or all sites (`"union"`,
+  with missing or homozygous reference genotypes for the samples of the files
+  without a site); loci with different alleles are dropped, kept apart, or
+  swapped, following the options of `bcftools merge`
 * `gt_as_vcf()` is much faster, and uses less memory, on data with many
   chromosomes (e.g. RAD loci assembled de novo, with one chromosome per locus)
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
