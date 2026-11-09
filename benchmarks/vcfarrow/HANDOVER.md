@@ -4,6 +4,9 @@ Written on 2026-11-08 at the end of a Claude Code session on Andrea's laptop,
 which was too small and slow for the full run. The task is to run this
 harness on a desktop and report to the user. This file is self-contained.
 
+Status: run on the desktop on 2026-11-09 (24 cores, 126 GB). The results
+are in `README.md` ("Results (desktop ...)") and in `results/desktop_24c*`.
+
 ## What to do
 
 ```sh

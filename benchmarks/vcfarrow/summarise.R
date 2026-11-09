@@ -16,6 +16,15 @@ res <- bind_rows(lapply(files, function(f) {
   utils::read.delim(f, na.strings = "NA", colClasses = c(summary = "character"))
 }))
 full_n <- 18579683
+# the machine the summary is made on (assumed to be the one that ran the
+# steps): number of cores and total memory
+machine <- sprintf(
+  "%d cores, %.0f GB", parallel::detectCores(),
+  as.numeric(sub(
+    "MemTotal: *([0-9]+) kB", "\\1",
+    grep("^MemTotal", readLines("/proc/meminfo"), value = TRUE)
+  )) / 1024^2
+)
 
 # published: tidypopgen (4 threads) and VCFArrow (4 workers); time in s,
 # memory median/peak PSS in GB (one session for all functions, so the
@@ -152,8 +161,10 @@ extrap <- res %>%
         Inf
       } else if (length(unique(n_ok)) >= 2) {
         keep <- n_ok %in% sort(unique(n_ok), decreasing = TRUE)[1:2]
-        fit <- stats::lm(log(elapsed_s[ok][keep]) ~ log(n_ok[keep]))
-        exp(stats::predict(fit, data.frame(n_ok = full_n)))
+        # (fitted on a data frame, so that predict() can take new sizes)
+        fit_data <- data.frame(t = elapsed_s[ok][keep], n = n_ok[keep])
+        fit <- stats::lm(log(t) ~ log(n), data = fit_data)
+        exp(stats::predict(fit, data.frame(n = full_n)))
       } else {
         NA_real_
       }
@@ -165,8 +176,9 @@ extrap <- res %>%
         pss_peak_gb[n_variants == full_n & status == "ok"][1]
       } else if (length(unique(n_ok)) >= 2) {
         keep <- n_ok %in% sort(unique(n_ok), decreasing = TRUE)[1:2]
-        fit <- stats::lm(pss_peak_gb[ok][keep] ~ n_ok[keep])
-        stats::predict(fit, data.frame(n_ok = full_n))
+        fit_data <- data.frame(m = pss_peak_gb[ok][keep], n = n_ok[keep])
+        fit <- stats::lm(m ~ n, data = fit_data)
+        stats::predict(fit, data.frame(n = full_n))
       } else {
         NA_real_
       }
@@ -180,8 +192,9 @@ extrap <- res %>%
 if (nrow(extrap) > 0) {
   for (th in sort(unique(extrap$threads))) {
     cat(sprintf("## Estimated at 18.6 M variants (%d threads), with the published numbers\n\n", th))
-    cat("Measured on this machine (4 cores, 15 GB) at",
-      paste(format(sort(unique(res$n_variants)), big.mark = ","),
+    cat("Measured on this machine (", machine, ") at", sep = "")
+    cat("",
+      paste(format(sort(unique(res$n_variants)), big.mark = ",", trim = TRUE),
         collapse = ", "), "variants; values at 18.6 M are measured where",
       "that size was run, otherwise extrapolated from the two largest sizes",
       "(\"—\": not enough sizes). The published runs used another machine,",

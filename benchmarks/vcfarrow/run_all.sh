@@ -15,6 +15,10 @@
 #               at full size); "scaled" (default) gives 3600 s at full size
 #               and proportionally less on smaller sizes, but at least 600 s
 #   STEPS       all (17 functions of the comparison + extras), or core
+#   OLD_STEPS   steps run with OLD (STEPS by default), e.g. all steps but
+#               write_vcf, which is quadratic in the number of chromosomes in
+#               1.0.0 and so only times out on this data (> 2 min already at
+#               200,000 variants)
 set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p logs results
@@ -26,12 +30,14 @@ THREADS=${THREADS:-4}
 MEMORY_MAX=${MEMORY_MAX:-12G}
 TIMEOUT=${TIMEOUT:-scaled}
 STEPS=${STEPS:-all}
+OLD_STEPS=${OLD_STEPS:-$STEPS}
 RESULTS=${RESULTS:-results/vcfarrow_bench.tsv}
 log="logs/run_all_$(date +%Y%m%d_%H%M).log"
 exec > >(tee -a "$log") 2>&1
 
 echo "run_all.sh $(date): SIZES=$SIZES OLD=$OLD NEW=$NEW OLD_MAX=$OLD_MAX" \
-  "THREADS=$THREADS MEMORY_MAX=$MEMORY_MAX TIMEOUT=$TIMEOUT STEPS=$STEPS"
+  "THREADS=$THREADS MEMORY_MAX=$MEMORY_MAX TIMEOUT=$TIMEOUT STEPS=$STEPS" \
+  "OLD_STEPS=$OLD_STEPS"
 uptime
 free -g
 for v in "$OLD" "$NEW"; do
@@ -66,11 +72,13 @@ for n in $SIZES; do
     else
       timeout_s=$TIMEOUT
     fi
+    steps=$STEPS
+    [ "$v" = "$OLD" ] && steps=$OLD_STEPS
     echo "== $v, $n variants, time limit ${timeout_s} s per step"
     python3 bench.py --lib "lib/$v" --label "$v" --vcf "$vcf" \
       --work "work/${v}_${n}_t${THREADS}" --results "$RESULTS" \
       --threads "$THREADS" --memory-max "$MEMORY_MAX" --timeout "$timeout_s" \
-      --steps "$STEPS"
+      --steps "$steps"
     Rscript summarise.R "$RESULTS" > results/summary.md
   done
 done

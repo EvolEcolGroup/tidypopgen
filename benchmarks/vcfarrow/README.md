@@ -118,6 +118,43 @@ object) and `read_vcf_int` (`names_as_int = TRUE`, 1.0.0 only).
 - Both tidypopgen versions drop the insertions (non-ATCG alleles) when
   reading, so they keep ~93% of the variants.
 
+## Results (desktop: 24 cores, 126 GB, 9 November 2026)
+
+`results/desktop_24c.tsv` and `results/desktop_24c_summary.md`: 1.0.0
+against vcf_fast (commit 87598491) at 2.3, 4.6 and 18.6 M variants, with
+`THREADS=4 MEMORY_MAX=50G` and `OLD_STEPS` set to all steps but `write_vcf`
+for 1.0.0 (quadratic in the number of chromosomes, over 2 min already at
+200,000 variants, so it would only time out). The two versions give the same
+results on all steps.
+
+At 18.6 M variants (17.3 M biallelic SNPs), vcf_fast:
+- reads the VCF in 36.5 s and 3.6 GB (1.0.0: 1.8 min and 5.6 GB; published
+  0.4.4: 30 min; VCFArrow: 6.9 min), or 21.3 s with `names_as_int = TRUE`
+  (1.0.0: 1.4 min). With 15 threads (`results/desktop_24c_read_t15.tsv`) it
+  takes 35.4 s and 20.2 s: on a plain (not bgzipped) VCF, reading is limited
+  by its serial part (finding the lines and the loci, looking up
+  chromosomes, creating R strings), not by parsing the genotypes;
+- writes the VCF in 47 s (published 0.4.4: over 60 min; VCFArrow: 8.5 min);
+- converts to genlight in 1.1 min and 9.5 GB (1.0.0: 2.0 min and 19 GB);
+- merges two sample sets with `rbind()` in 39 s (1.0.0: 53 s; VCFArrow:
+  10.3 min);
+- runs every other function of the comparison in under 20 s.
+
+Where tidypopgen is still slow:
+- `subsample_loci_bare` (a bare index vector, without `all_of()`): 5.9 min
+  and 8.9 GB in both versions, and quadratic in the number of loci (7 s, 26 s
+  and 355 s at the three sizes), because `tidyselect` creates an R symbol for
+  every locus name. The first run of vcf_fast at 4.6 M variants gave 32.9 s,
+  but other work was running at the time; on a quiet machine both versions
+  take 26 s (`results/desktop_24c_recheck_subsample_bare.tsv`).
+- `to_ped` (20 s, to write 3.9 GB of text) and `filter_chain_update` (17 s:
+  the filters of the VCFArrow vignette, then `gt_update_backingfile()`,
+  which writes a new copy of the data; not profiled).
+
+Light work (single-core, niced compiles and small tests) ran on the machine
+during part of the run (vcf_fast at 4.6 M variants and the first steps of
+1.0.0 at 18.6 M).
+
 ## Earlier results (laptop: 4 cores, 15 W, 15 GB)
 
 - Smoke test, 20,000 variants, 2 threads: all steps run in 0.4.4 and 1.0.0
