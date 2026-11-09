@@ -229,3 +229,27 @@ test_that("select_loci can always use tidyselect", {
     "should be one of"
   )
 })
+
+test_that("select_loci leaves unusual selections to tidyselect", {
+  test_gt <- load_example_gt("gen_tbl")
+  # no selection, or an empty one, selects no loci
+  expect_identical(count_loci(select_loci(test_gt)), 0L)
+  expect_identical(count_loci(select_loci(test_gt, c())), 0L)
+  # positive and negative positions are combined by tidyselect
+  expect_identical(loci_names(select_loci(test_gt, c(1, -2))), "rs1")
+  # a variable whose name starts with a dot (like the pronouns of tidyselect)
+  .idx <- c(1, 3)
+  withr::local_options(lifecycle_verbosity = "quiet")
+  expect_identical(loci_names(select_loci(test_gt, .idx)), c("rs1", "rs3"))
+  # invalid selections give the errors of tidyselect
+  expect_error(select_loci(test_gt, all_of(no_such_var)), "not found")
+  expect_error(select_loci(test_gt, starts_with(no_such_var)), "not found")
+  expect_error(select_loci(test_gt, no_such_locus), "doesn't exist")
+  expect_error(
+    select_loci(test_gt, all_of(c("rs1", NA))),
+    "missing values"
+  )
+  expect_error(select_loci(test_gt, all_of(1.5)), "loss of precision")
+  expect_error(select_loci(test_gt, all_of(3e9)), "loss of precision")
+  expect_error(select_loci(test_gt, c(1, 2.5)), "loss of precision")
+})

@@ -1147,6 +1147,80 @@ test_that("the cpp parser reads bgzipped VCFs in parallel", {
     ),
     "error decompressing the BGZF file"
   )
+  # the first block of the file (whose size, minus 1, is in bytes 17-18 of
+  # its header), truncated or followed by bytes that are not a BGZF block
+  block_size <- sum(as.integer(bgzf_bytes[17:18]) * c(1L, 256L)) + 1L
+  truncated_path <- tempfile(fileext = ".vcf.gz")
+  writeBin(bgzf_bytes[seq_len(block_size - 10)], truncated_path)
+  expect_error(
+    gen_tibble(truncated_path, backingfile = tempfile(), quiet = TRUE),
+    "the BGZF file is truncated"
+  )
+  junk_path <- tempfile(fileext = ".vcf.gz")
+  writeBin(c(bgzf_bytes[seq_len(block_size)], charToRaw("junk")), junk_path)
+  expect_error(
+    gen_tibble(junk_path, backingfile = tempfile(), quiet = TRUE),
+    "not a valid BGZF file"
+  )
+})
+
+test_that("the cpp parser handles unusual but valid VCF files", {
+  loci <- data.frame(
+    chrom = "1", pos = c(100, 200), id = c("s1", "s2"),
+    ref = c("A", "G"), alt = c("C", "T")
+  )
+  vcf_path <- write_merge_vcf(c("a", "b"), loci,
+    genotypes = rbind(c("0/1", "0/0"), c("1/1", "0/1"))
+  )
+  vcf_lines <- readLines(vcf_path)
+  # a file without a newline at the end of its last line
+  no_newline_path <- tempfile(fileext = ".vcf")
+  cat(paste(vcf_lines, collapse = "\n"), file = no_newline_path)
+  no_newline_gt <- gen_tibble(no_newline_path,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_equal(show_genotypes(no_newline_gt), rbind(c(1, 2), c(0, 1)))
+  # a sample with only missing genotypes is diploid
+  missing_gt <- gen_tibble(
+    write_merge_vcf("a", loci, genotypes = rbind(".", ".")),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(indiv_ploidy(missing_gt), 2L)
+  expect_equal(show_genotypes(missing_gt), rbind(c(NA_real_, NA_real_)))
+  # a variant line (not the first) with too few genotypes is an error
+  n_lines <- length(vcf_lines)
+  vcf_lines[n_lines] <- sub("\t[^\t]*$", "", vcf_lines[n_lines])
+  short_path <- tempfile(fileext = ".vcf")
+  writeLines(vcf_lines, short_path)
+  expect_error(
+    gen_tibble(short_path, backingfile = tempfile(), quiet = TRUE),
+    "fewer genotypes than individuals"
+  )
+})
+
+test_that("vcf_to_fbm_cpp puts the backing file next to the VCF", {
+  vcf_dir <- tempfile()
+  dir.create(vcf_dir)
+  vcf_path <- file.path(vcf_dir, "small.vcf")
+  write_merge_vcf("a",
+    data.frame(chrom = "1", pos = 100, id = "s1", ref = "A", alt = "C"),
+    genotypes = rbind("0/1"), file = vcf_path
+  )
+  small_gt <- vcf_to_fbm_cpp(vcf_path, quiet = TRUE)
+  expect_identical(
+    basename(attr(small_gt$genotypes, "fbm")$backingfile),
+    "small.bk"
+  )
+  # (gen_tibble() gives a new name instead, see change_duplicated_file_name())
+  expect_error(vcf_to_fbm_cpp(vcf_path, quiet = TRUE), "already exists")
+  # a backing file can be given with its extension
+  other_gt <- vcf_to_fbm_cpp(vcf_path,
+    backingfile = file.path(vcf_dir, "other.bk"), quiet = TRUE
+  )
+  expect_identical(
+    basename(attr(other_gt$genotypes, "fbm")$backingfile),
+    "other.bk"
+  )
 })
 
 test_that("the cpp parser finds chromosomes that come back after others", {
