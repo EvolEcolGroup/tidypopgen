@@ -7,7 +7,14 @@
   found in all files (`variants = "intersection"`) or all sites (`"union"`,
   with missing or homozygous reference genotypes for the samples of the files
   without a site); loci with different alleles are dropped, kept apart, or
-  swapped, following the options of `bcftools merge`
+  swapped, following the options of `bcftools merge`. Unlike `gen_tibble()`,
+  it names loci with integers by default (`names_as_int = TRUE`), to save
+  memory with large datasets
+* new `gt_concat_vcfs()` reads several VCF files with the same samples and
+  different loci (e.g. one file per chromosome) into a single `gen_tibble`,
+  as `bcftools concat` would, in one go; the samples can be in a different
+  order in each file. As `gt_merge_vcfs()`, it names loci with integers by
+  default (`names_as_int = TRUE`)
 * `gt_as_vcf()` is much faster, and uses less memory, on data with many
   chromosomes (e.g. RAD loci assembled de novo, with one chromosome per locus)
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")

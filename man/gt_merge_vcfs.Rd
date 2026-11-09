@@ -15,7 +15,7 @@ gt_merge_vcfs(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
-  names_as_int = FALSE,
+  names_as_int = TRUE,
   n_cores = 1,
   quiet = FALSE
 )
@@ -64,7 +64,12 @@ chromosome and position) or duplicated loci names in the merged
 
 \item{names_as_int}{boolean: whether the loci names are integers (the index
 of each locus in the merged \code{gen_tibble}) rather than the \emph{VCF} IDs, which
-saves memory with many loci (see \code{\link[=gen_tibble]{gen_tibble()}}).}
+saves memory with many loci (see \code{\link[=gen_tibble]{gen_tibble()}}). Note that it defaults
+to TRUE, unlike in \code{\link[=gen_tibble]{gen_tibble()}} (where it defaults to FALSE): merging
+\emph{VCF} files is mostly used for large datasets, in which the loci names
+take most of the memory of the \code{gen_tibble} and are rarely needed (loci
+are identified by their chromosome and position). Set it to FALSE to keep
+the \emph{VCF} IDs.}
 
 \item{n_cores}{the number of cores used to decompress bgzipped files and to
 parse the genotypes. Defaults to 1.}
@@ -121,9 +126,14 @@ samples of the
 files without a site get missing genotypes there, or homozygous reference
 genotypes with \code{missing_to_ref = TRUE} (as \verb{bcftools merge -0}). Sites are
 ordered by chromosome (in order of first appearance across the files), then
-by position. Each locus takes its name (\emph{VCF} ID) from the first file where
-it is found (a missing ID '.' gives a name made of the chromosome and the
-position, as in \code{\link[=gen_tibble]{gen_tibble()}}).
+by position.
+
+Unlike \code{\link[=gen_tibble]{gen_tibble()}}, by default (\code{names_as_int = TRUE}) the loci are
+named with integers (their index in the merged \code{gen_tibble}), rather than
+with their \emph{VCF} IDs, to save memory with large datasets. With
+\code{names_as_int = FALSE}, each locus takes its name (\emph{VCF} ID) from the first
+file where it is found (a missing ID '.' gives a name made of the
+chromosome and the position, as in \code{\link[=gen_tibble]{gen_tibble()}}).
 
 Sample names must be unique across files: if they are not, the function
 stops, unless \code{force_samples = TRUE}, in which case the duplicated names are
@@ -138,15 +148,20 @@ different ploidies.
 vcf_a <- system.file("extdata", "pop_a.vcf", package = "tidypopgen")
 vcf_b <- system.file("extdata", "pop_b.vcf", package = "tidypopgen")
 # the REF and ALT alleles of some loci are swapped between these two files
-# (which a VCF from PLINK can have), so we swap them back to merge them
+# (which a VCF from PLINK can have), so we swap them back to merge them;
+# we also keep the VCF IDs as loci names (by default, unlike gen_tibble(),
+# loci are named with integers to save memory)
 merged_gt <- gt_merge_vcfs(c(vcf_a, vcf_b),
   ref_mismatch = "swap",
+  names_as_int = FALSE,
   backingfile = tempfile("merged_")
 )
 merged_gt
 show_loci(merged_gt)
 }
 \seealso{
-\link[=rbind.gen_tbl]{rbind()} to merge two \code{gen_tibble} objects (e.g.
-read from files of other formats).
+\code{\link[=gt_concat_vcfs]{gt_concat_vcfs()}} to combine \emph{VCF} files with the same samples
+and different loci (e.g. one file per chromosome);
+\link[=rbind.gen_tbl]{rbind()} to merge two \code{gen_tibble} objects (e.g. read
+from files of other formats).
 }

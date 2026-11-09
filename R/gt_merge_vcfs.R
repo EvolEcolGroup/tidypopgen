@@ -45,9 +45,14 @@
 #' files without a site get missing genotypes there, or homozygous reference
 #' genotypes with `missing_to_ref = TRUE` (as `bcftools merge -0`). Sites are
 #' ordered by chromosome (in order of first appearance across the files), then
-#' by position. Each locus takes its name (*VCF* ID) from the first file where
-#' it is found (a missing ID '.' gives a name made of the chromosome and the
-#' position, as in [gen_tibble()]).
+#' by position.
+#'
+#' Unlike [gen_tibble()], by default (`names_as_int = TRUE`) the loci are
+#' named with integers (their index in the merged `gen_tibble`), rather than
+#' with their *VCF* IDs, to save memory with large datasets. With
+#' `names_as_int = FALSE`, each locus takes its name (*VCF* ID) from the first
+#' file where it is found (a missing ID '.' gives a name made of the
+#' chromosome and the position, as in [gen_tibble()]).
 #'
 #' Sample names must be unique across files: if they are not, the function
 #' stops, unless `force_samples = TRUE`, in which case the duplicated names are
@@ -91,22 +96,32 @@
 #'   `gen_tibble` (see [gen_tibble()]).
 #' @param names_as_int boolean: whether the loci names are integers (the index
 #'   of each locus in the merged `gen_tibble`) rather than the *VCF* IDs, which
-#'   saves memory with many loci (see [gen_tibble()]).
+#'   saves memory with many loci (see [gen_tibble()]). Note that it defaults
+#'   to TRUE, unlike in [gen_tibble()] (where it defaults to FALSE): merging
+#'   *VCF* files is mostly used for large datasets, in which the loci names
+#'   take most of the memory of the `gen_tibble` and are rarely needed (loci
+#'   are identified by their chromosome and position). Set it to FALSE to keep
+#'   the *VCF* IDs.
 #' @param n_cores the number of cores used to decompress bgzipped files and to
 #'   parse the genotypes. Defaults to 1.
 #' @param quiet boolean: whether to omit the report of the merge.
 #' @returns a [`gen_tibble`] with the merged data (saved, as with
 #'   [gen_tibble()]).
-#' @seealso [rbind()][rbind.gen_tbl] to merge two `gen_tibble` objects (e.g.
-#'   read from files of other formats).
+#' @seealso [gt_concat_vcfs()] to combine *VCF* files with the same samples
+#'   and different loci (e.g. one file per chromosome);
+#'   [rbind()][rbind.gen_tbl] to merge two `gen_tibble` objects (e.g. read
+#'   from files of other formats).
 #' @export
 #' @examples
 #' vcf_a <- system.file("extdata", "pop_a.vcf", package = "tidypopgen")
 #' vcf_b <- system.file("extdata", "pop_b.vcf", package = "tidypopgen")
 #' # the REF and ALT alleles of some loci are swapped between these two files
-#' # (which a VCF from PLINK can have), so we swap them back to merge them
+#' # (which a VCF from PLINK can have), so we swap them back to merge them;
+#' # we also keep the VCF IDs as loci names (by default, unlike gen_tibble(),
+#' # loci are named with integers to save memory)
 #' merged_gt <- gt_merge_vcfs(c(vcf_a, vcf_b),
 #'   ref_mismatch = "swap",
+#'   names_as_int = FALSE,
 #'   backingfile = tempfile("merged_")
 #' )
 #' merged_gt
@@ -122,43 +137,14 @@ gt_merge_vcfs <- function(
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
-  names_as_int = FALSE,
+  names_as_int = TRUE,
   n_cores = 1,
   quiet = FALSE
 ) {
   variants <- match.arg(variants)
   alt_mismatch <- match.arg(alt_mismatch)
   ref_mismatch <- match.arg(ref_mismatch)
-  if (!is.character(files) || length(files) < 2) {
-    stop(
-      "'files' should be the paths to two or more VCF files ",
-      "(use gen_tibble() to read a single file)"
-    )
-  }
-  if (anyNA(files) || any(!file.exists(files))) {
-    stop(
-      "these VCF files do not exist: ",
-      paste(files[is.na(files) | !file.exists(files)], collapse = ", ")
-    )
-  }
-  if (!all(grepl("\\.(vcf|vcf\\.gz)$", files, ignore.case = TRUE))) {
-    stop("'files' should be VCF files (with extension .vcf or .vcf.gz)")
-  }
-  files <- normalizePath(files)
-  if (anyDuplicated(files)) {
-    stop("'files' contains the same file more than once")
-  }
-  # check that valid alleles does not contain zero
-  if ("0" %in% valid_alleles) {
-    stop(paste(
-      "'0' cannot be a valid allele",
-      "(it is the default missing allele value!)"
-    ))
-  }
-  if (!is.numeric(n_cores) || length(n_cores) != 1 || is.na(n_cores) ||
-    n_cores < 1) {
-    stop("'n_cores' should be a positive integer")
-  }
+  files <- check_vcf_files_args(files, valid_alleles, n_cores)
   n_cores <- as.integer(n_cores)
   if (missing_to_ref && variants == "intersection" && !quiet) {
     message(
@@ -166,73 +152,54 @@ gt_merge_vcfs <- function(
       "'intersection', all files have all sites)"
     )
   }
-  # sort out the backing file (by default, next to the first file)
-  if (is.null(backingfile)) {
-    backingfile <- paste0(
-      sub("\\.(vcf\\.gz|vcf)$", "", files[1], ignore.case = TRUE),
-      "_merged"
-    )
-  }
-  backingfile <- change_duplicated_file_name(backingfile)
+  backingfile <- default_vcfs_backingfile(backingfile, files, "_merged")
   n_files <- length(files)
 
   # first pass: the loci of each file (no genotypes), with its samples and
-  # their ploidy (locus names are not read if we use integers)
-  scans <- vector("list", n_files)
+  # their ploidy, matched into sites one file at a time (so that only the
+  # loci of one file are in memory at a time). Missing alleles (a missing
+  # allele "." is always missing, as in gen_tibble()) can be any allele
+  merged_sites <- merge_sites_new(
+    split_alt = alt_mismatch == "split",
+    ref_rule = match(ref_mismatch, c("error", "drop", "swap")) - 1L,
+    missing_alleles = union(c(missing_alleles, "0"), ".")
+  )
+  sample_names <- vector("list", n_files)
+  file_ploidy <- vector("list", n_files)
+  # the names of the sites (the names of the loci that created them)
+  site_names <- vector("list", n_files)
+  # chromosomes get codes shared by all files, in order of first appearance
+  chromosome_names <- character(0)
   for (f in seq_len(n_files)) {
-    if (!quiet) {
-      message("reading the loci of ", files[f])
-    }
-    scans[[f]] <- vcf_to_bk(files[f],
-      bk_file = "", read_names = !names_as_int,
-      n_threads = n_cores, read_genotypes = FALSE
+    scan <- scan_vcf_file(files[f], names_as_int, n_cores, quiet)
+    sample_names[[f]] <- scan$sample_names
+    file_ploidy[[f]] <- scan$ploidy
+    # check the samples as soon as possible
+    merge_vcfs_sample_names(sample_names[seq_len(f)], force_samples)
+    chromosome_names <- vctrs::vec_unique(
+      c(chromosome_names, scan$chromosome_names)
     )
-    if (length(scans[[f]]$sample_names) == 0) {
-      stop("the VCF ", files[f], " has no samples (or no variants)")
+    new_loci <- merge_sites_add_file(merged_sites,
+      chromosome = match(scan$chromosome_names, chromosome_names)[
+        scan$loci_tbl$chromosome
+      ],
+      position = scan$loci_tbl$physical.pos,
+      allele_ref = scan$loci_tbl$allele2,
+      allele_alt = scan$loci_tbl$allele1
+    )
+    if (!names_as_int) {
+      site_names[[f]] <- scan$loci_tbl$marker.ID[new_loci]
     }
+    rm(scan, new_loci)
+  }
+  sites <- merge_sites_result(merged_sites)
+  if (sites$ref_mismatch$n > 0) {
+    stop_ref_mismatch(sites, chromosome_names, files)
   }
 
   # the samples (in the order of the files)
-  sample_id <- merge_vcfs_sample_names(
-    lapply(scans, function(x) x$sample_names),
-    force_samples = force_samples
-  )
-  n_indiv <- vapply(scans, function(x) length(x$sample_names), integer(1))
-  ploidy <- unlist(lapply(scans, function(x) x$ploidy))
-  if (anyNA(ploidy) || any(ploidy <= 0)) {
-    stop("the ploidy of each individual should be a positive integer")
-  }
-  max_ploidy <- max(ploidy)
-
-  # chromosomes: each file numbers its own (unique) chromosome names, so we
-  # give them codes shared by all files, in order of first appearance across
-  # the files
-  chromosome_names <- vctrs::vec_unique(
-    unlist(lapply(scans, function(x) x$chromosome_names))
-  )
-  chromosome <- lapply(scans, function(x) {
-    match(x$chromosome_names, chromosome_names)[x$loci_tbl$chromosome]
-  })
-  # alleles, with all missing alleles as NA (a missing allele "." is always
-  # missing, as in gen_tibble())
-  all_missing <- union(c(missing_alleles, "0"), ".")
-  allele_as_na <- function(x) {
-    x[x %in% all_missing] <- NA_character_
-    x
-  }
-
-  # match the loci of the files into sites
-  sites <- vcf_merge_sites_cpp(
-    chromosome = chromosome,
-    position = lapply(scans, function(x) x$loci_tbl$physical.pos),
-    allele_ref = lapply(scans, function(x) allele_as_na(x$loci_tbl$allele2)),
-    allele_alt = lapply(scans, function(x) allele_as_na(x$loci_tbl$allele1)),
-    split_alt = alt_mismatch == "split",
-    ref_rule = match(ref_mismatch, c("error", "drop", "swap")) - 1L
-  )
-  if (sites$ref_mismatch$n > 0) {
-    stop_ref_mismatch(sites, scans, chromosome_names, files)
-  }
+  sample_id <- merge_vcfs_sample_names(sample_names, force_samples)
+  n_indiv <- lengths(sample_names)
 
   # the sites we keep, ordered by chromosome (in order of first appearance)
   # and position (sites at the same position stay in the order in which they
@@ -271,17 +238,11 @@ gt_merge_vcfs <- function(
     loci_name <- seq_along(keep)
   } else {
     # each locus takes the name it has in the first file where it is found
-    first_file <- sites$first_file[keep]
-    first_locus <- sites$first_locus[keep]
-    loci_name <- character(length(keep))
-    for (f in unique(first_file)) {
-      in_f <- which(first_file == f)
-      loci_name[in_f] <- scans[[f]]$loci_tbl$marker.ID[first_locus[in_f]]
-    }
     loci_name <- fill_missing_loci_names(
-      loci_name, loci_chromosome,
+      unlist(site_names)[keep], loci_chromosome,
       loci_position
     )
+    rm(site_names)
   }
   loci <- tibble::tibble(
     name = loci_name,
@@ -300,83 +261,34 @@ gt_merge_vcfs <- function(
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles
   )
-  indiv_meta <- validate_indiv_meta(data.frame(id = sample_id))
 
   # the column of the merged FBM (0-based) of each site (-1 if not kept)
   site_col <- rep(-1L, length(sites$status))
   site_col[keep] <- seq_along(keep) - 1L
 
-  # the merged FBM: missing genotypes are its largest ploidy + 1. With
-  # variants = "union", the samples of a file have missing genotypes at the
-  # sites that are not in that file (or 0, with missing_to_ref = TRUE, which
-  # is how an FBM starts), so we start with all genotypes missing; with
-  # "intersection", all genotypes are written in the second pass
-  missing_value <- max_ploidy + 1
-  code256 <- rep(NA_real_, 256)
-  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
-  fill_missing <- variants == "union" && !missing_to_ref
-  file_backed_matrix <- bigstatsr::FBM.code256(
-    nrow = sum(n_indiv),
-    ncol = length(keep),
-    code = code256,
-    backingfile = backingfile,
-    init = if (fill_missing) missing_value else NULL
-  )
-  bk_file <- file_backed_matrix$backingfile
-  # remove the backing file if we stop before creating the gen_tibble
-  fbm_done <- FALSE
-  on.exit(
-    if (!fbm_done) {
-      rm(file_backed_matrix)
-      remove_fbm_files(c(bk_file, bigstatsr::sub_bk(bk_file, ".rds")))
-    },
-    add = TRUE
-  )
-
   # second pass: the genotypes of each file, written straight into the
-  # columns of its loci, in the rows of its samples
-  row_offset <- c(0L, cumsum(n_indiv))
-  for (f in seq_len(n_files)) {
-    if (!quiet) {
-      message("reading the genotypes of ", files[f])
-    }
-    vcf_merge_genotypes(files[f],
-      BM = file_backed_matrix,
-      row_offset = row_offset[f],
-      col = site_col[sites$site[[f]]],
-      swap = sites$swap[[f]],
-      ploidy = scans[[f]]$ploidy,
-      missing_value = missing_value,
-      n_threads = n_cores
-    )
-  }
-  # save the FBM (before its md5 sum is taken by new_vctrs_bigsnp())
-  fbm_path <- bigstatsr::sub_bk(bk_file, ".rds")
-  saveRDS(file_backed_matrix, fbm_path)
-
-  indiv_meta$genotypes <- new_vctrs_bigsnp(
-    fbm_obj = file_backed_matrix,
-    fbm_file = fbm_path,
+  # columns of its loci, in the rows of its samples (one file after the
+  # other). With variants = "union", the samples of a file have missing
+  # genotypes at the sites that are not in that file (or 0, with
+  # missing_to_ref = TRUE, which is how an FBM starts), so we start with all
+  # genotypes missing; with "intersection", all genotypes are written
+  # (the columns of the loci of each file are only computed when its
+  # genotypes are written)
+  rm(sites)
+  write_vcfs_gen_tibble(
+    files = files,
     loci = loci,
-    indiv_id = indiv_meta$id,
-    ploidy = max_ploidy,
-    fbm_ploidy = ploidy
+    sample_id = sample_id,
+    ploidy = unlist(file_ploidy),
+    row_offset = c(0L, cumsum(n_indiv))[seq_len(n_files)],
+    row_map = rep(list(integer(0)), n_files),
+    file_cols = function(f) merge_sites_file_cols(merged_sites, f, site_col),
+    file_ploidy = file_ploidy,
+    fill_missing = variants == "union" && !missing_to_ref,
+    backingfile = backingfile,
+    n_cores = n_cores,
+    quiet = quiet
   )
-  x_gt <- tibble::new_tibble(indiv_meta, class = "gen_tbl")
-  fbm_done <- TRUE
-  rm(file_backed_matrix)
-
-  # check alleles (as gen_tibble() does)
-  if (has_genotypes_without_alleles(x_gt)) {
-    # (dropping the gen_tibble first, so that its backing file can be
-    # unmapped, see remove_fbm_files())
-    gt_files <- gt_get_file_names(x_gt)
-    rm(x_gt)
-    remove_fbm_files(gt_files)
-    stop_genotypes_without_alleles()
-  }
-  gt_save_light(x_gt, quiet = quiet) # nolint
-  x_gt
 }
 
 # the sample names of the merged VCFs, from a list of the sample names of each
@@ -423,20 +335,20 @@ merge_vcfs_sample_names <- function(sample_names, force_samples = FALSE) {
 
 # stop because the REF alleles of loci at the same position differ between
 # files, listing the first few
-stop_ref_mismatch <- function(sites, scans, chromosome_names, files) {
+stop_ref_mismatch <- function(sites, chromosome_names, files) {
   mm <- sites$ref_mismatch
-  describe <- function(f, k) {
+  describe <- function(ref, alt, f) {
     paste0(
-      scans[[f]]$loci_tbl$allele2[k], "/",
-      scans[[f]]$loci_tbl$allele1[k], " in ", basename(files[f])
+      ifelse(is.na(ref), ".", ref), "/", ifelse(is.na(alt), ".", alt),
+      " in ", basename(files[f])
     )
   }
   examples <- vapply(seq_along(mm$site), function(i) {
     s <- mm$site[i]
     paste0(
       chromosome_names[sites$chromosome[s]], ":", sites$position[s], " (",
-      describe(sites$first_file[s], sites$first_locus[s]), ", ",
-      describe(mm$file[i], mm$locus[i]), ")"
+      describe(mm$site_ref[i], mm$site_alt[i], sites$first_file[s]), ", ",
+      describe(mm$locus_ref[i], mm$locus_alt[i], mm$file[i]), ")"
     )
   }, character(1))
   stop(
@@ -460,8 +372,172 @@ report_vcf_merge <- function(sites, keep, variants, n_files, n_indiv) {
     "  dropped: ", fmt(sum(sites$status == 1L)),
     " with alleles that would make a multiallelic site, ",
     fmt(sum(sites$status == 2L)), " with different REF alleles\n",
-    "  loci with swapped alleles: ",
-    fmt(sum(vapply(sites$swap, sum, numeric(1)))), "\n",
+    "  loci with swapped alleles: ", fmt(sites$n_swapped), "\n",
     "  kept: ", fmt(length(keep)), " loci (", variants, ")"
   )
+}
+
+# The helpers below are shared by gt_merge_vcfs() and gt_concat_vcfs(), which
+# read several VCF files into a single gen_tibble in two passes: a first pass
+# reads the loci, samples and ploidy of each file (scan_vcf_files()), and a
+# second pass writes the genotypes of each file straight into the backing file
+# of the gen_tibble (write_vcfs_gen_tibble()).
+
+# check the arguments shared by gt_merge_vcfs() and gt_concat_vcfs(),
+# returning the normalised paths of the files
+check_vcf_files_args <- function(files, valid_alleles, n_cores) {
+  if (!is.character(files) || length(files) < 2) {
+    stop(
+      "'files' should be the paths to two or more VCF files ",
+      "(use gen_tibble() to read a single file)"
+    )
+  }
+  if (anyNA(files) || any(!file.exists(files))) {
+    stop(
+      "these VCF files do not exist: ",
+      paste(files[is.na(files) | !file.exists(files)], collapse = ", ")
+    )
+  }
+  if (!all(grepl("\\.(vcf|vcf\\.gz)$", files, ignore.case = TRUE))) {
+    stop("'files' should be VCF files (with extension .vcf or .vcf.gz)")
+  }
+  files <- normalizePath(files)
+  if (anyDuplicated(files)) {
+    stop("'files' contains the same file more than once")
+  }
+  # check that valid alleles does not contain zero
+  if ("0" %in% valid_alleles) {
+    stop(paste(
+      "'0' cannot be a valid allele",
+      "(it is the default missing allele value!)"
+    ))
+  }
+  bad_n_cores <- !is.numeric(n_cores) || length(n_cores) != 1 ||
+    is.na(n_cores) || n_cores < 1
+  if (bad_n_cores) {
+    stop("'n_cores' should be a positive integer")
+  }
+  files
+}
+
+# the backing file of the gen_tibble: by default, next to the first file, with
+# a suffix (and a version number if the files already exist, as in
+# gen_tibble())
+default_vcfs_backingfile <- function(backingfile, files, suffix) {
+  if (is.null(backingfile)) {
+    backingfile <- paste0(
+      sub("\\.(vcf\\.gz|vcf)$", "", files[1], ignore.case = TRUE),
+      suffix
+    )
+  }
+  change_duplicated_file_name(backingfile)
+}
+
+# the first pass: the loci of a file (no genotypes), with its samples and
+# their ploidy (locus names are not read if we use integers)
+scan_vcf_file <- function(file, names_as_int, n_cores, quiet) {
+  if (!quiet) {
+    message("reading the loci of ", file)
+  }
+  scan <- vcf_to_bk(file,
+    bk_file = "", read_names = !names_as_int,
+    n_threads = n_cores, read_genotypes = FALSE
+  )
+  if (length(scan$sample_names) == 0) {
+    stop("the VCF ", file, " has no samples (or no variants)")
+  }
+  scan
+}
+
+# the first pass for all the files
+scan_vcf_files <- function(files, names_as_int, n_cores, quiet) {
+  lapply(files, scan_vcf_file,
+    names_as_int = names_as_int, n_cores = n_cores, quiet = quiet
+  )
+}
+
+# the second pass: create the FBM of the gen_tibble, write the genotypes of
+# each file into it, and create (and save) the gen_tibble. For each file,
+# row_offset and row_map give the rows of its individuals (row_offset onwards,
+# or the 0-based rows in row_map, if not empty), file_cols(f) gives a list
+# with `col`, the 0-based column of each of its biallelic SNPs (-1 if not
+# kept), and `swap`, whether the alleles of each SNP are swapped (or an empty
+# vector), and file_ploidy the ploidy of its individuals. ploidy is the
+# ploidy of the individuals of the gen_tibble.
+write_vcfs_gen_tibble <- function(files, loci, sample_id, ploidy, row_offset,
+                                  row_map, file_cols, file_ploidy,
+                                  fill_missing, backingfile, n_cores, quiet) {
+  if (anyNA(ploidy) || any(ploidy <= 0)) {
+    stop("the ploidy of each individual should be a positive integer")
+  }
+  indiv_meta <- validate_indiv_meta(data.frame(id = sample_id))
+  # the FBM: missing genotypes are its largest ploidy + 1 (all genotypes are
+  # missing at the start if fill_missing, 0 otherwise)
+  max_ploidy <- max(ploidy)
+  missing_value <- max_ploidy + 1
+  code256 <- rep(NA_real_, 256)
+  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+  file_backed_matrix <- bigstatsr::FBM.code256(
+    nrow = length(sample_id),
+    ncol = nrow(loci),
+    code = code256,
+    backingfile = backingfile,
+    init = if (fill_missing) missing_value else NULL
+  )
+  bk_file <- file_backed_matrix$backingfile
+  # remove the backing file if we stop before creating the gen_tibble
+  fbm_done <- FALSE
+  on.exit(
+    if (!fbm_done) {
+      rm(file_backed_matrix)
+      remove_fbm_files(c(bk_file, bigstatsr::sub_bk(bk_file, ".rds")))
+    },
+    add = TRUE
+  )
+
+  # the genotypes of each file, written straight into the columns of its
+  # loci, in the rows of its samples
+  for (f in seq_along(files)) {
+    if (!quiet) {
+      message("reading the genotypes of ", files[f])
+    }
+    this_file <- file_cols(f)
+    vcf_merge_genotypes(files[f],
+      BM = file_backed_matrix,
+      row_offset = row_offset[f],
+      row = row_map[[f]],
+      col = this_file$col,
+      swap = this_file$swap,
+      ploidy = file_ploidy[[f]],
+      missing_value = missing_value,
+      n_threads = n_cores
+    )
+  }
+  # save the FBM (before its md5 sum is taken by new_vctrs_bigsnp())
+  fbm_path <- bigstatsr::sub_bk(bk_file, ".rds")
+  saveRDS(file_backed_matrix, fbm_path)
+
+  indiv_meta$genotypes <- new_vctrs_bigsnp(
+    fbm_obj = file_backed_matrix,
+    fbm_file = fbm_path,
+    loci = loci,
+    indiv_id = indiv_meta$id,
+    ploidy = max_ploidy,
+    fbm_ploidy = ploidy
+  )
+  x_gt <- tibble::new_tibble(indiv_meta, class = "gen_tbl")
+  fbm_done <- TRUE
+  rm(file_backed_matrix)
+
+  # check alleles (as gen_tibble() does)
+  if (has_genotypes_without_alleles(x_gt)) {
+    # (dropping the gen_tibble first, so that its backing file can be
+    # unmapped, see remove_fbm_files())
+    gt_files <- gt_get_file_names(x_gt)
+    rm(x_gt)
+    remove_fbm_files(gt_files)
+    stop_genotypes_without_alleles()
+  }
+  gt_save_light(x_gt, quiet = quiet) # nolint
+  x_gt
 }

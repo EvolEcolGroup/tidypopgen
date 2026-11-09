@@ -690,19 +690,55 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// vcf_merge_sites_cpp
-List vcf_merge_sites_cpp(const List& chromosome, const List& position, const List& allele_ref, const List& allele_alt, bool split_alt, int ref_rule);
-RcppExport SEXP _tidypopgen_vcf_merge_sites_cpp(SEXP chromosomeSEXP, SEXP positionSEXP, SEXP allele_refSEXP, SEXP allele_altSEXP, SEXP split_altSEXP, SEXP ref_ruleSEXP) {
+// merge_sites_new
+SEXP merge_sites_new(bool split_alt, int ref_rule, const CharacterVector& missing_alleles);
+RcppExport SEXP _tidypopgen_merge_sites_new(SEXP split_altSEXP, SEXP ref_ruleSEXP, SEXP missing_allelesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const List& >::type chromosome(chromosomeSEXP);
-    Rcpp::traits::input_parameter< const List& >::type position(positionSEXP);
-    Rcpp::traits::input_parameter< const List& >::type allele_ref(allele_refSEXP);
-    Rcpp::traits::input_parameter< const List& >::type allele_alt(allele_altSEXP);
     Rcpp::traits::input_parameter< bool >::type split_alt(split_altSEXP);
     Rcpp::traits::input_parameter< int >::type ref_rule(ref_ruleSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_merge_sites_cpp(chromosome, position, allele_ref, allele_alt, split_alt, ref_rule));
+    Rcpp::traits::input_parameter< const CharacterVector& >::type missing_alleles(missing_allelesSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_new(split_alt, ref_rule, missing_alleles));
+    return rcpp_result_gen;
+END_RCPP
+}
+// merge_sites_add_file
+IntegerVector merge_sites_add_file(SEXP sites, const IntegerVector& chromosome, const IntegerVector& position, const CharacterVector& allele_ref, const CharacterVector& allele_alt);
+RcppExport SEXP _tidypopgen_merge_sites_add_file(SEXP sitesSEXP, SEXP chromosomeSEXP, SEXP positionSEXP, SEXP allele_refSEXP, SEXP allele_altSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type chromosome(chromosomeSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type position(positionSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type allele_ref(allele_refSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type allele_alt(allele_altSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_add_file(sites, chromosome, position, allele_ref, allele_alt));
+    return rcpp_result_gen;
+END_RCPP
+}
+// merge_sites_result
+List merge_sites_result(SEXP sites);
+RcppExport SEXP _tidypopgen_merge_sites_result(SEXP sitesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_result(sites));
+    return rcpp_result_gen;
+END_RCPP
+}
+// merge_sites_file_cols
+List merge_sites_file_cols(SEXP sites, int file, const IntegerVector& site_col);
+RcppExport SEXP _tidypopgen_merge_sites_file_cols(SEXP sitesSEXP, SEXP fileSEXP, SEXP site_colSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
+    Rcpp::traits::input_parameter< int >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type site_col(site_colSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_file_cols(sites, file, site_col));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -722,19 +758,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // vcf_merge_genotypes
-void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset, const IntegerVector& col, const LogicalVector& swap, const IntegerVector& ploidy, int missing_value, int n_threads);
-RcppExport SEXP _tidypopgen_vcf_merge_genotypes(SEXP filenameSEXP, SEXP BMSEXP, SEXP row_offsetSEXP, SEXP colSEXP, SEXP swapSEXP, SEXP ploidySEXP, SEXP missing_valueSEXP, SEXP n_threadsSEXP) {
+void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset, const IntegerVector& row, const IntegerVector& col, const LogicalVector& swap, const IntegerVector& ploidy, int missing_value, int n_threads);
+RcppExport SEXP _tidypopgen_vcf_merge_genotypes(SEXP filenameSEXP, SEXP BMSEXP, SEXP row_offsetSEXP, SEXP rowSEXP, SEXP colSEXP, SEXP swapSEXP, SEXP ploidySEXP, SEXP missing_valueSEXP, SEXP n_threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< int >::type row_offset(row_offsetSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type row(rowSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type col(colSEXP);
     Rcpp::traits::input_parameter< const LogicalVector& >::type swap(swapSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type ploidy(ploidySEXP);
     Rcpp::traits::input_parameter< int >::type missing_value(missing_valueSEXP);
     Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
-    vcf_merge_genotypes(filename, BM, row_offset, col, swap, ploidy, missing_value, n_threads);
+    vcf_merge_genotypes(filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads);
     return R_NilValue;
 END_RCPP
 }
@@ -810,9 +847,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_any_duplicated_strings_cpp", (DL_FUNC) &_tidypopgen_any_duplicated_strings_cpp, 1},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
     {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
-    {"_tidypopgen_vcf_merge_sites_cpp", (DL_FUNC) &_tidypopgen_vcf_merge_sites_cpp, 6},
+    {"_tidypopgen_merge_sites_new", (DL_FUNC) &_tidypopgen_merge_sites_new, 3},
+    {"_tidypopgen_merge_sites_add_file", (DL_FUNC) &_tidypopgen_merge_sites_add_file, 5},
+    {"_tidypopgen_merge_sites_result", (DL_FUNC) &_tidypopgen_merge_sites_result, 1},
+    {"_tidypopgen_merge_sites_file_cols", (DL_FUNC) &_tidypopgen_merge_sites_file_cols, 3},
     {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 5},
-    {"_tidypopgen_vcf_merge_genotypes", (DL_FUNC) &_tidypopgen_vcf_merge_genotypes, 8},
+    {"_tidypopgen_vcf_merge_genotypes", (DL_FUNC) &_tidypopgen_vcf_merge_genotypes, 9},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}

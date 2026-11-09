@@ -951,16 +951,19 @@ List vcf_to_bk(std::string filename, std::string bk_file,
 /******************************************************************************
  * Write the genotypes of a VCF into the FBM of several merged VCFs
  *
- * This is the second pass of gt_merge_vcfs(): its first pass read the loci of
- * each VCF (with vcf_to_bk(read_genotypes = false)) and matched them across
- * files, giving the column of the merged FBM of each biallelic snp of this
- * file. This function reads the VCF again, and writes the number of
- * alternate alleles of each of its individuals at each of its biallelic snps
- * that is kept straight into its column of the merged FBM, in the rows of
- * this file (row_offset onwards). The FBM is column-major, so each snp is a
- * contiguous block of n_individuals bytes; the snps of a chunk of lines go to
- * different columns, so they are written in parallel (with n_threads
- * threads), as are the blocks of a BGZF file decompressed.
+ * This is the second pass of gt_merge_vcfs() and gt_concat_vcfs(): their
+ * first pass read the loci of each VCF (with vcf_to_bk(read_genotypes =
+ * false)) and matched them across files, giving the column of the merged FBM
+ * of each biallelic snp of this file. This function reads the VCF again, and
+ * writes the number of alternate alleles of each of its individuals at each
+ * of its biallelic snps that is kept straight into its column of the merged
+ * FBM, in the rows of this file (row_offset onwards, or the rows given by
+ * `row`). The FBM is column-major, so each snp is a contiguous block of
+ * n_individuals bytes (unless the rows are given by `row`, in which case the
+ * genotypes of a snp are counted in a buffer, then copied to their rows); the
+ * snps of a chunk of lines go to different columns, so they are written in
+ * parallel (with n_threads threads), as are the blocks of a BGZF file
+ * decompressed.
  *
  * The snps are numbered as in the first pass (in the order of the file, with
  * the same test, is_biallelic_snp()), so the file must not change between
@@ -970,6 +973,10 @@ List vcf_to_bk(std::string filename, std::string bk_file,
  * @param BM The merged FBM.code256 (with at least row_offset +
  *   length(ploidy) rows)
  * @param row_offset The (0-based) row of the first individual of this file
+ *   (ignored if `row` is not empty)
+ * @param row The (0-based) row of each individual of this file in the merged
+ *   FBM (e.g. to put the individuals of the file in the order of the FBM), or
+ *   an empty vector (rows row_offset onwards)
  * @param col The (0-based) column of each biallelic snp of the file in the
  *   merged FBM, or -1 for snps that are not kept
  * @param swap Whether the alleles of each snp are swapped to match the merged
@@ -982,7 +989,8 @@ List vcf_to_bk(std::string filename, std::string bk_file,
  */
 // [[Rcpp::export]]
 void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
-                         const IntegerVector& col, const LogicalVector& swap,
+                         const IntegerVector& row, const IntegerVector& col,
+                         const LogicalVector& swap,
                          const IntegerVector& ploidy, int missing_value,
                          int n_threads = 1) {
   XPtr<FBM_RW> xp_bm = BM["address_rw"];
@@ -992,9 +1000,24 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
   size_t n_individuals = ploidy.size();
   long n_snps = col.size();
   bool any_swap = swap.size() > 0;
+  bool reorder = row.size() > 0;
 
   // check that the rows and columns of this file are within the FBM
-  if ((row_offset < 0) || ((size_t) row_offset + n_individuals > n_rows)) {
+  std::vector<size_t> row_vec;
+  if (reorder) {
+    if ((size_t) row.size() != n_individuals) {
+      stop("'row' should have one value per individual");
+    }
+    row_vec.resize(n_individuals);
+    for (size_t i = 0; i < n_individuals; i++) {
+      if ((row[i] == NA_INTEGER) || (row[i] < 0) ||
+          ((size_t) row[i] >= n_rows)) {
+        stop("'row' is out of the bounds of the merged FBM");
+      }
+      row_vec[i] = row[i];
+    }
+  } else if ((row_offset < 0) ||
+             ((size_t) row_offset + n_individuals > n_rows)) {
     stop("the merged FBM does not have enough rows for this file");
   }
   for (long k = 0; k < n_snps; k++) {
@@ -1033,6 +1056,9 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
   // number (in the file) of each of these snps
   std::vector<size_t> snp_lines;
   std::vector<long> snp_number;
+  // with reordered rows, the genotypes of the snps of a chunk (one slice of
+  // n_individuals per snp, so that the threads write to different slices)
+  std::vector<unsigned char> scratch;
   long k = 0; // number of biallelic snps read so far
   while (reader.next_chunk(line_start, line_len)) {
     snp_lines.clear();
@@ -1062,8 +1088,12 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
       k++;
     }
     // count the alternate alleles of each individual at the kept snps of
-    // this chunk, in parallel, straight into their columns of the FBM
+    // this chunk, in parallel, straight into their columns of the FBM (or,
+    // with reordered rows, into the scratch buffer, and then into their rows)
     long n_snp_lines = snp_lines.size();
+    if (reorder) {
+      scratch.resize((size_t) n_snp_lines * n_individuals);
+    }
     size_t chunk_max_alleles = 0;
     bool too_few_genotypes = false;
 #pragma omp parallel for num_threads(n_threads) schedule(static) \
@@ -1071,7 +1101,9 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
     for (long s = 0; s < n_snp_lines; s++) {
       size_t l = snp_lines[s];
       long snp = snp_number[s];
-      unsigned char* dest = bm + n_rows * (size_t) col_vec[snp] + row_offset;
+      unsigned char* col_start = bm + n_rows * (size_t) col_vec[snp];
+      unsigned char* dest = reorder ?
+        scratch.data() + (size_t) s * n_individuals : col_start + row_offset;
       if (!count_alt_alleles(line_start[l], line_len[l], dest, n_individuals,
                              missing, chunk_max_alleles)) {
         too_few_genotypes = true;
@@ -1086,6 +1118,11 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
           if (dest[i] != missing) {
             dest[i] = (dest[i] <= ploidy_vec[i]) ? ploidy_vec[i] - dest[i] : 0;
           }
+        }
+      }
+      if (reorder) {
+        for (size_t i = 0; i < n_individuals; i++) {
+          col_start[row_vec[i]] = dest[i];
         }
       }
     }
