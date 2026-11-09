@@ -15,6 +15,8 @@
   as `bcftools concat` would, in one go; the samples can be in a different
   order in each file. As `gt_merge_vcfs()`, it names loci with integers by
   default (`names_as_int = TRUE`)
+* the big data article merges the VCFs of the SGDP individuals with
+  `gt_merge_vcfs()`, rather than with `bcftools merge`
 * `gt_as_vcf()` is much faster, and uses less memory, on data with many
   chromosomes (e.g. RAD loci assembled de novo, with one chromosome per locus)
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
