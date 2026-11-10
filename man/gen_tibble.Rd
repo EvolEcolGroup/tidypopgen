@@ -27,6 +27,7 @@ gen_tibble(
   backingfile = NULL,
   allow_duplicates = FALSE,
   names_as_int = FALSE,
+  chromosomes_as_int = FALSE,
   quiet = FALSE
 )
 
@@ -118,6 +119,18 @@ position. For \emph{VCF} files, the original names (with the chromosomes and
 positions) are written to a sidecar file next to the backing file
 (\emph{.loci.tsv}), from which \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_restore_loci]{gt_restore_loci()}} get
 them back.}
+
+\item{chromosomes_as_int}{logical. If TRUE, chromosomes will be stored as
+integer codes rather than as a factor. Only used when \code{x} is a \emph{VCF} file
+with parser "cpp". Default is FALSE. This saves memory and time with
+many chromosomes (e.g. RAD loci assembled de novo, each its own
+"chromosome"). A chromosome whose name is a number (after an optional
+"chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07") keeps that
+number as its code; other names are numbered after the largest number,
+in order of first appearance. The names are written to a sidecar file
+next to the backing file (\emph{.chromosomes.tsv}), from which
+\code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}}, \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_restore_loci]{gt_restore_loci()}}
+get them back.}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only

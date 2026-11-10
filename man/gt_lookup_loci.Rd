@@ -2,76 +2,110 @@
 % Please edit documentation in R/loci_sidecar.R
 \name{gt_lookup_loci}
 \alias{gt_lookup_loci}
+\alias{gt_lookup_chromosomes}
 \alias{gt_restore_loci}
-\title{Look up the original names of loci stored as integers}
+\title{Look up the original names of loci and chromosomes stored as integers}
 \usage{
 gt_lookup_loci(.x, loci, check_positions = TRUE)
 
-gt_restore_loci(.x, check_positions = TRUE)
+gt_lookup_chromosomes(.x, chromosomes)
+
+gt_restore_loci(.x, names = TRUE, chromosomes = TRUE, check_positions = TRUE)
 }
 \arguments{
-\item{.x}{a \code{\link{gen_tibble}} (or, for \code{gt_lookup_loci()}, its \code{genotypes}
-column)}
+\item{.x}{a \code{\link{gen_tibble}} (or, except for \code{gt_restore_loci()}, its
+\code{genotypes} column)}
 
 \item{loci}{a subset of the loci table of \code{.x}: rows of \code{\link[=show_loci]{show_loci()}}, in
 any order, possibly with extra columns (e.g. the statistics of a scan);
 or row numbers of \code{show_loci(.x)}, as given by \code{\link[=which]{which()}}.}
 
 \item{check_positions}{boolean: whether to check that the positions of the
-loci in the sidecar are the same as in \code{loci} (or in the loci table of
-\code{.x}, for \code{gt_restore_loci()}). For \code{gt_lookup_loci()}, they are only
+loci in the locus sidecar are the same as in \code{loci} (or in the loci table
+of \code{.x}, for \code{gt_restore_loci()}). For \code{gt_lookup_loci()}, they are only
 checked if \code{loci} has a \code{position} column. Default is TRUE.}
+
+\item{chromosomes}{for \code{gt_lookup_chromosomes()}, a vector of chromosome
+codes (e.g. the \code{chromosome} column of the results of
+\code{\link[=windows_pairwise_pop_fst]{windows_pairwise_pop_fst()}} or \code{\link[=gt_roh_window]{gt_roh_window()}}); for
+\code{gt_restore_loci()}, boolean: whether to restore the names of the
+chromosomes (if they are integer codes), default TRUE.}
+
+\item{names}{boolean: whether to restore the names of the loci (if they
+are integers). Default is TRUE.}
 }
 \value{
-\code{gt_lookup_loci()} returns \code{loci} (as a table), with the integer
-names in its \code{name} column replaced by the original names; the other
-columns, and the rows and their order, are unchanged. A \code{name} column
-that already holds names is left as it is, so the same code works on data
-read with or without \code{names_as_int}.
+\code{gt_lookup_loci()} returns \code{loci} (as a table), with integer names
+in its \code{name} column, and integer codes in its \code{chromosome} column,
+replaced by their original names (as character vectors); the other
+columns, and the rows and their order, are unchanged. Columns that
+already hold names are left as they are, so the same code works on data
+read with or without the integer options.
+
+\code{gt_lookup_chromosomes()} returns the names of the chromosomes (a
+character vector, with NA for NA). Chromosomes that are already names (a
+factor or a character vector) are returned as a character vector.
 
 \code{gt_restore_loci()} returns \code{.x}, with the original names in its loci
-table (as if it had been read with \code{names_as_int = FALSE}). It does not
-save it: use \code{\link[=gt_save]{gt_save()}}.
+table (as if it had been read without the integer options: names as a
+character vector, and chromosomes as a factor). It does not save it: use
+\code{\link[=gt_save]{gt_save()}}.
 }
 \description{
-With \code{names_as_int = TRUE}, \code{\link[=gen_tibble]{gen_tibble()}} stores the names of the loci as
-integers, to save memory with large datasets, and writes their original
-names, chromosomes and positions to a sidecar file next to the backing file
-(see Details). \code{gt_lookup_loci()} gives back the original names of some
+With \code{names_as_int = TRUE} and \code{chromosomes_as_int = TRUE}, \code{\link[=gen_tibble]{gen_tibble()}}
+stores the names of the loci, and their chromosomes, as integers, to save
+memory and time with large datasets (e.g. RAD loci assembled de novo, with
+millions of loci, each its own "chromosome"). The original names are
+written to sidecar files next to the backing file (see Details), from which
+these functions get them back:
+\itemize{
+\item \code{gt_lookup_loci()} gives back the original names and chromosomes of some
 loci (e.g. the hits of a selection scan), without changing the
-\code{gen_tibble}; \code{gt_restore_loci()} puts the original names back into the
-loci table of a \code{gen_tibble} (e.g. once it has been filtered down to fewer
-loci).
+\code{gen_tibble};
+\item \code{gt_lookup_chromosomes()} gives back the names of chromosome codes (e.g.
+the \code{chromosome} column of the results of window statistics or runs of
+homozygosity);
+\item \code{gt_restore_loci()} puts the original names back into the loci table of
+a \code{gen_tibble} (e.g. once it has been filtered down to fewer loci).
+}
 }
 \details{
-The sidecar of the backing file \code{foo.bk} is \code{foo.loci.tsv}: a tab
-separated text file with a header (\code{int_name}, \code{name}, \code{chromosome},
-\code{position}) and one line per locus, in increasing order of integer name.
-It has no quotes, and "." is a missing value, so it can be read with any
-tool (e.g. \code{data.table::fread(path, quote = "")} or
-\code{readr::read_tsv(path, quote = "")}), and joined to \code{\link[=show_loci]{show_loci()}} by
-\code{name = int_name}. The names are those that \code{names_as_int = FALSE} would
-give (with a missing ID replaced by the chromosome and position).
+The sidecars of the backing file \code{foo.bk} are:
+\itemize{
+\item \code{foo.loci.tsv} (written with \code{names_as_int = TRUE}), with the columns
+\code{int_name}, \code{name}, \code{chromosome} and \code{position}, and one line per locus,
+in increasing order of integer name. The names are those that
+\code{names_as_int = FALSE} would give (with a missing ID replaced by the
+chromosome and position), and the chromosomes are their names (not their
+codes);
+\item \code{foo.chromosomes.tsv} (written with \code{chromosomes_as_int = TRUE}), with
+the columns \code{int_chromosome} and \code{chromosome}, and one line per
+chromosome, in increasing order of code.
+}
 
-The sidecar is written by \code{\link[=gen_tibble]{gen_tibble()}} when it reads a VCF file with
-\code{parser = "cpp"}. Functions that write a new backing file
-(\code{\link[=gt_update_backingfile]{gt_update_backingfile()}}, \code{\link[=gt_order_loci]{gt_order_loci()}}, \link[=rbind.gen_tbl]{rbind()})
-write a new sidecar for it, with the loci that they keep (integer names
-keep their values, so they still find their line). Keep the sidecar with
-the other files of the \code{gen_tibble} (see \code{\link[=gt_save]{gt_save()}}): without it, the
+Both are tab separated text files with a header, with no quotes, and "."
+for missing values, so they can be read with any tool (e.g.
+\code{data.table::fread(path, quote = "")} or \code{readr::read_tsv(path, quote = "")}), and joined to \code{\link[=show_loci]{show_loci()}} by \code{name = int_name} or \code{chromosome = int_chromosome}.
+
+The sidecars are written by \code{\link[=gen_tibble]{gen_tibble()}} when it reads a VCF file with
+\code{parser = "cpp"}, and by \code{\link[=gt_merge_vcfs]{gt_merge_vcfs()}} and \code{\link[=gt_concat_vcfs]{gt_concat_vcfs()}}.
+Functions that write a new backing file (\code{\link[=gt_update_backingfile]{gt_update_backingfile()}},
+\code{\link[=gt_order_loci]{gt_order_loci()}}, \link[=rbind.gen_tbl]{rbind()}) write new sidecars for it,
+with the loci and chromosomes that they keep (integer names and codes keep
+their values, so they still find their line). Keep the sidecars with the
+other files of the \code{gen_tibble} (see \code{\link[=gt_save]{gt_save()}}): without them, the
 original names are lost.
 
 Only the file name ties a sidecar to its data, so the position of each
-locus in the sidecar is compared with its position in the loci table: a
-different position means that the sidecar belongs to other data (e.g.
-files copied by hand from different runs), and is an error. If you
-changed the positions of the loci yourself (e.g. after a liftover to a
-new assembly), the names in the sidecar are still right: use
-\code{check_positions = FALSE}.
+locus in the locus sidecar is compared with its position in the loci
+table: a different position means that the sidecar belongs to other data
+(e.g. files copied by hand from different runs), and is an error. If you
+changed the positions of the loci yourself (e.g. after a liftover to a new
+assembly), the names in the sidecar are still right: use \code{check_positions = FALSE}. The chromosome sidecar has no positions to check.
 
-Lookups are fast: the first lookup in a session reads through the
-sidecar once to index it (about a second per GB), and later lookups of a
-few loci only read the parts of the file that hold them.
+Lookups are fast: the first lookup in a session reads through a sidecar
+once to index it (about a second per GB), and later lookups of a few loci
+only read the parts of the file that hold them.
 }
 \examples{
 vcf_path <- system.file(
@@ -80,7 +114,7 @@ vcf_path <- system.file(
 )
 anole_gt <- gen_tibble(vcf_path,
   backingfile = tempfile("anolis_"),
-  names_as_int = TRUE, quiet = TRUE
+  names_as_int = TRUE, chromosomes_as_int = TRUE, quiet = TRUE
 )
 head(show_loci(anole_gt))
 
@@ -93,6 +127,9 @@ hits <- show_loci(anole_gt) \%>\%
   dplyr::mutate(missing = missing) \%>\%
   dplyr::filter(missing > 0.6)
 gt_lookup_loci(anole_gt, hits)
+
+# the names of some chromosome codes
+gt_lookup_chromosomes(anole_gt, c(1, 5, 5, NA))
 
 # put the original names back into the gen_tibble
 anole_gt <- gt_restore_loci(anole_gt)

@@ -460,6 +460,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// chromosome_int_codes_cpp
+IntegerVector chromosome_int_codes_cpp(CharacterVector names);
+RcppExport SEXP _tidypopgen_chromosome_int_codes_cpp(SEXP namesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type names(namesSEXP);
+    rcpp_result_gen = Rcpp::wrap(chromosome_int_codes_cpp(names));
+    return rcpp_result_gen;
+END_RCPP
+}
+// write_chromosome_sidecar_cpp
+void write_chromosome_sidecar_cpp(std::string path, IntegerVector codes, CharacterVector names);
+RcppExport SEXP _tidypopgen_write_chromosome_sidecar_cpp(SEXP pathSEXP, SEXP codesSEXP, SEXP namesSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type codes(codesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type names(namesSEXP);
+    write_chromosome_sidecar_cpp(path, codes, names);
+    return R_NilValue;
+END_RCPP
+}
 // pairwise_pop_fst_cpp
 List pairwise_pop_fst_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, const IntegerMatrix& pairwise_combn, std::string method, bool by_locus, bool return_num_dem, int block_size, int ncores);
 RcppExport SEXP _tidypopgen_pairwise_pop_fst_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP pairwise_combnSEXP, SEXP methodSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP) {
@@ -803,8 +826,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // vcf_to_bk
-List vcf_to_bk(std::string filename, std::string bk_file, bool read_names, int n_threads, bool read_genotypes, std::string loci_file);
-RcppExport SEXP _tidypopgen_vcf_to_bk(SEXP filenameSEXP, SEXP bk_fileSEXP, SEXP read_namesSEXP, SEXP n_threadsSEXP, SEXP read_genotypesSEXP, SEXP loci_fileSEXP) {
+List vcf_to_bk(std::string filename, std::string bk_file, bool read_names, int n_threads, bool read_genotypes, std::string loci_file, bool chromosomes_as_int, std::string chromosomes_file);
+RcppExport SEXP _tidypopgen_vcf_to_bk(SEXP filenameSEXP, SEXP bk_fileSEXP, SEXP read_namesSEXP, SEXP n_threadsSEXP, SEXP read_genotypesSEXP, SEXP loci_fileSEXP, SEXP chromosomes_as_intSEXP, SEXP chromosomes_fileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -814,7 +837,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< bool >::type read_genotypes(read_genotypesSEXP);
     Rcpp::traits::input_parameter< std::string >::type loci_file(loci_fileSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_to_bk(filename, bk_file, read_names, n_threads, read_genotypes, loci_file));
+    Rcpp::traits::input_parameter< bool >::type chromosomes_as_int(chromosomes_as_intSEXP);
+    Rcpp::traits::input_parameter< std::string >::type chromosomes_file(chromosomes_fileSEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_to_bk(filename, bk_file, read_names, n_threads, read_genotypes, loci_file, chromosomes_as_int, chromosomes_file));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -895,6 +920,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_sidecar_fetch", (DL_FUNC) &_tidypopgen_sidecar_fetch, 8},
     {"_tidypopgen_sidecar_read", (DL_FUNC) &_tidypopgen_sidecar_read, 5},
     {"_tidypopgen_sidecar_subset", (DL_FUNC) &_tidypopgen_sidecar_subset, 4},
+    {"_tidypopgen_chromosome_int_codes_cpp", (DL_FUNC) &_tidypopgen_chromosome_int_codes_cpp, 1},
+    {"_tidypopgen_write_chromosome_sidecar_cpp", (DL_FUNC) &_tidypopgen_write_chromosome_sidecar_cpp, 3},
     {"_tidypopgen_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_pairwise_pop_fst_cpp, 12},
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
@@ -916,7 +943,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_merge_sites_add_file", (DL_FUNC) &_tidypopgen_merge_sites_add_file, 5},
     {"_tidypopgen_merge_sites_result", (DL_FUNC) &_tidypopgen_merge_sites_result, 1},
     {"_tidypopgen_merge_sites_file_cols", (DL_FUNC) &_tidypopgen_merge_sites_file_cols, 3},
-    {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 6},
+    {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 8},
     {"_tidypopgen_vcf_merge_genotypes", (DL_FUNC) &_tidypopgen_vcf_merge_genotypes, 9},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},

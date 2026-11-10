@@ -8,6 +8,17 @@
   numbers), and `gt_restore_loci()` puts them back into the `gen_tibble`.
   `gt_update_backingfile()`, `gt_order_loci()` and `rbind()` write the
   sidecar of their new backing file
+* new argument `chromosomes_as_int` of `gen_tibble()` (VCF files read with the
+  "cpp" parser) stores the chromosomes as integer codes rather than as a
+  factor, which saves much memory and time with millions of chromosomes (e.g.
+  RAD loci assembled de novo). Names that are numbers keep their value (e.g.
+  "chr7" is 7), and other names are numbered after the largest number. The
+  names are written to a sidecar file (*.chromosomes.tsv*); new
+  `gt_lookup_chromosomes()` translates codes (e.g. in the results of window
+  statistics) into names, and `gt_lookup_loci()` and `gt_restore_loci()`
+  restore them too. `rbind()` matches integer chromosomes by name, and the
+  checks of the loci table, window statistics and `windows_indiv_roh()` keep
+  integer chromosomes
 * new `gt_merge_vcfs()` reads several VCF files with different samples into
   a single `gen_tibble`, as `bcftools merge` would, in one go (without
   reading each file into its own `gen_tibble` and binding them in pairs with

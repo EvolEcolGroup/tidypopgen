@@ -15,6 +15,9 @@
 #' @param names_as_int whether to convert locus names to
 #'   integers (their original names are written to the locus sidecar of the
 #'   backing file, see [gt_lookup_loci()]). Default is FALSE.
+#' @param chromosomes_as_int whether to store the chromosomes as integer codes
+#'   (their names are written to the chromosome sidecar of the backing file).
+#'   Default is FALSE.
 #' @param n_cores the number of cores used to decompress a bgzipped vcf and to
 #'   parse the genotypes. Default is 1.
 #' @param quiet whether to print messages.
@@ -28,6 +31,7 @@ vcf_to_fbm_cpp <- function(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   names_as_int = FALSE,
+  chromosomes_as_int = FALSE,
   n_cores = 1,
   quiet = FALSE
 ) {
@@ -51,25 +55,33 @@ vcf_to_fbm_cpp <- function(
     stop("the backing file ", bk_file, " already exists")
   }
   # with integer names, the original names (with the chromosomes and
-  # positions) are written to the locus sidecar of the backing file (see
+  # positions) are written to the locus sidecar of the backing file, and
+  # with integer chromosomes, their names to the chromosome sidecar (see
   # R/loci_sidecar.R); sidecars already next to the new backing file are left
   # from older files with the same name, and can not belong to the new data
   loci_file <- sidecar_path_from_bk(bk_file, "loci")
+  chromosomes_file <- sidecar_path_from_bk(bk_file, "chromosomes")
   remove_stale_sidecars(bk_file)
-  # remove the backing file (and sidecar) if we stop before creating the FBM
+  # remove the backing file (and sidecars) if we stop before creating the FBM
   # (also if the VCF was read, but the loci table could not be created)
   fbm_created <- FALSE
-  on.exit(if (!fbm_created) unlink(c(bk_file, loci_file)), add = TRUE)
+  on.exit(
+    if (!fbm_created) unlink(c(bk_file, loci_file, chromosomes_file)),
+    add = TRUE
+  )
   # read the VCF once: create a loci_table, figure out no_individuals and
   # ploidy from the first marker, and write the genotypes to the backing file
   # (locus names are not read if we store them as integers, which saves a lot
-  # of memory with many loci: they are written to the sidecar instead). With
-  # n_cores > 1, the blocks of a bgzipped VCF are decompressed in parallel,
-  # and the genotypes parsed in parallel
+  # of memory with many loci: they are written to the sidecar instead; the
+  # same goes for the names of the chromosomes with integer chromosomes).
+  # With n_cores > 1, the blocks of a bgzipped VCF are decompressed in
+  # parallel, and the genotypes parsed in parallel
   vcf_meta <- vcf_to_bk(vcf_path,
     bk_file = bk_file, read_names = !names_as_int,
     n_threads = n_cores,
-    loci_file = if (names_as_int) loci_file else ""
+    loci_file = if (names_as_int) loci_file else "",
+    chromosomes_as_int = chromosomes_as_int,
+    chromosomes_file = if (chromosomes_as_int) chromosomes_file else ""
   )
   # an FBM can not have zero loci (its empty backing file can not be mapped)
   if (length(vcf_meta$loci_tbl$physical.pos) == 0) {
@@ -100,21 +112,17 @@ vcf_to_fbm_cpp <- function(
   # loci metadata table
   loci <- vcf_meta$loci_tbl
   # chromosomes are given as an index into their (unique) names, in order of
-  # appearance: turn them into a factor
-  loci$chromosome <- chromosome_index_to_factor(
-    loci$chromosome,
-    vcf_meta$chromosome_names
-  )
-  # if we store loci names as characters
-  if (!names_as_int) {
-    # if loci names are missing, create a name with scaffold and position
-    # (same behaviour as vcfR)
-    loci$marker.ID <- fill_missing_loci_names(
-      loci$marker.ID,
+  # appearance: turn them into a factor (with integer chromosomes, they are
+  # already their integer codes)
+  if (!chromosomes_as_int) {
+    loci$chromosome <- chromosome_index_to_factor(
       loci$chromosome,
-      loci$physical.pos
+      vcf_meta$chromosome_names
     )
-  } else { # if we store them as integers
+  }
+  # missing loci names were replaced in C++ by the chromosome and position
+  # (as vcfR does); integer names are the index of each locus
+  if (names_as_int) {
     loci$marker.ID <- seq_along(loci$physical.pos)
   }
 
@@ -144,7 +152,8 @@ vcf_to_fbm_cpp <- function(
     check_duplicates = TRUE,
     allow_duplicates = allow_duplicates,
     valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles
+    missing_alleles = missing_alleles,
+    chromosomes_as_int = chromosomes_as_int
   )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))

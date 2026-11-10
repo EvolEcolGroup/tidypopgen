@@ -93,9 +93,10 @@ gt_update_backingfile <- function(
       swap_lut = 0:255
     )
   }
-  # with integer loci names, the locus sidecar of the new backing file has the
-  # original names of the loci that are kept (see R/loci_sidecar.R)
-  copy_loci_sidecar(.x, new_bk_matrix$backingfile, show_loci(.x)$name)
+  # with integer loci names (or chromosomes), the sidecars of the new backing
+  # file have the original names of the loci (or chromosomes) that are kept
+  # (see R/loci_sidecar.R)
+  copy_sidecars(.x, new_bk_matrix$backingfile, show_loci(.x))
 
   # get fbm_ploidy
   fbm_ploidy <- attr(.x$genotypes, "fbm_ploidy")

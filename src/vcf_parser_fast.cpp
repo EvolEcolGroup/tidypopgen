@@ -776,6 +776,17 @@ private:
  *   "" for none. It is written while the file is read, so the names are
  *   kept on disk even when they are not read into memory (read_names =
  *   false); it is removed if an error stops the parsing
+ * @param chromosomes_as_int Whether to give the chromosomes as integer codes
+ *   (see chromosome_int_codes() in loci_sidecar.h) rather than as an index
+ *   into their names; their names are then not returned (with millions of
+ *   chromosomes, e.g. RAD loci assembled de novo, R does not have to create
+ *   them), but written to chromosomes_file, if it is not ""
+ * @param chromosomes_file The chromosome sidecar to write (with the code and
+ *   name of each chromosome), or "" for none (only with chromosomes_as_int)
+ * Missing IDs (".") are replaced by the chromosome and position (e.g.
+ * "1_752566", or "NA_752566" for a missing chromosome ".", as vcfR does), so
+ * that the names do not depend on how the chromosomes are returned.
+ *
  * @return a list with the loci table (`loci_tbl`), `chromosome_names`,
  *   `sample_names`, the `ploidy` of each individual, and `ploidy_guessed`,
  *   whether its ploidy was guessed (its genotypes were all missing in the
@@ -784,7 +795,9 @@ private:
 // [[Rcpp::export]]
 List vcf_to_bk(std::string filename, std::string bk_file,
                bool read_names = true, int n_threads = 1,
-               bool read_genotypes = true, std::string loci_file = "") {
+               bool read_genotypes = true, std::string loci_file = "",
+               bool chromosomes_as_int = false,
+               std::string chromosomes_file = "") {
   VcfLineReader reader(filename, n_threads);
   // the locus sidecar, written in order as the metadata of the loci are read
   std::unique_ptr<SidecarWriter> loci_writer;
@@ -982,7 +995,17 @@ List vcf_to_bk(std::string filename, std::string bk_file,
         chromosome_index.push_back(this_chromosome + 1);
         physical_pos.push_back(parse_position(field_start[1], field_len[1]));
         if (read_names) {
-          marker_id.push_back(field_start[2], field_len[2]);
+          if ((field_len[2] == 1) && (field_start[2][0] == '.')) {
+            // a missing ID: the chromosome and position (as
+            // write_locus_line() writes it to the sidecar)
+            std::string filled = ((field_len[0] == 1) &&
+                                  (field_start[0][0] == '.')) ? "NA" :
+              std::string(field_start[0], field_len[0]);
+            filled += "_" + std::to_string(physical_pos.back());
+            marker_id.push_back(filled);
+          } else {
+            marker_id.push_back(field_start[2], field_len[2]);
+          }
         }
         if (loci_writer) {
           write_locus_line(*loci_writer, physical_pos.size(), field_start,
@@ -1042,6 +1065,23 @@ List vcf_to_bk(std::string filename, std::string bk_file,
     loci_writer->finish();
   }
 
+  // with integer chromosomes, replace the index of the chromosome of each
+  // locus by its code, and write the names to the chromosome sidecar
+  if (chromosomes_as_int) {
+    const StringBuffer &names = chromosomes.names;
+    auto name_of = [&](size_t k, const char* &start, size_t &len) {
+      start = names.chars.data() + names.starts[k];
+      len = names.starts[k + 1] - names.starts[k];
+    };
+    std::vector<int> codes = chromosome_int_codes(names.size(), name_of);
+    for (size_t i = 0; i < chromosome_index.size(); i++) {
+      chromosome_index[i] = codes[chromosome_index[i] - 1];
+    }
+    if (!chromosomes_file.empty()) {
+      write_chromosome_sidecar(chromosomes_file, codes, name_of);
+    }
+  }
+
   // create the loci table; alleles are converted to strings reusing a single
   // R string for each character, and the C++ vectors are freed as soon as
   // they have been copied into R
@@ -1064,7 +1104,8 @@ List vcf_to_bk(std::string filename, std::string bk_file,
   // Return a list containing the loci table and the ploidy vector (with
   // whether each ploidy was guessed)
   return (List::create(Named("loci_tbl") = loci_table,
-                       Named("chromosome_names") = chromosomes.names.to_r(),
+                       Named("chromosome_names") = chromosomes_as_int ?
+                         CharacterVector(0) : chromosomes.names.to_r(),
                        Named("sample_names") = sample_names,
                        Named("ploidy") = ploidy,
                        Named("ploidy_guessed") = LogicalVector(

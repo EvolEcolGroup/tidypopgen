@@ -1,61 +1,89 @@
-#' Look up the original names of loci stored as integers
+#' Look up the original names of loci and chromosomes stored as integers
 #'
-#' With `names_as_int = TRUE`, [gen_tibble()] stores the names of the loci as
-#' integers, to save memory with large datasets, and writes their original
-#' names, chromosomes and positions to a sidecar file next to the backing file
-#' (see Details). `gt_lookup_loci()` gives back the original names of some
-#' loci (e.g. the hits of a selection scan), without changing the
-#' `gen_tibble`; `gt_restore_loci()` puts the original names back into the
-#' loci table of a `gen_tibble` (e.g. once it has been filtered down to fewer
-#' loci).
+#' With `names_as_int = TRUE` and `chromosomes_as_int = TRUE`, [gen_tibble()]
+#' stores the names of the loci, and their chromosomes, as integers, to save
+#' memory and time with large datasets (e.g. RAD loci assembled de novo, with
+#' millions of loci, each its own "chromosome"). The original names are
+#' written to sidecar files next to the backing file (see Details), from which
+#' these functions get them back:
+#' - `gt_lookup_loci()` gives back the original names and chromosomes of some
+#'   loci (e.g. the hits of a selection scan), without changing the
+#'   `gen_tibble`;
+#' - `gt_lookup_chromosomes()` gives back the names of chromosome codes (e.g.
+#'   the `chromosome` column of the results of window statistics or runs of
+#'   homozygosity);
+#' - `gt_restore_loci()` puts the original names back into the loci table of
+#'   a `gen_tibble` (e.g. once it has been filtered down to fewer loci).
 #'
-#' @details The sidecar of the backing file `foo.bk` is `foo.loci.tsv`: a tab
-#'   separated text file with a header (`int_name`, `name`, `chromosome`,
-#'   `position`) and one line per locus, in increasing order of integer name.
-#'   It has no quotes, and "." is a missing value, so it can be read with any
-#'   tool (e.g. `data.table::fread(path, quote = "")` or
-#'   `readr::read_tsv(path, quote = "")`), and joined to [show_loci()] by
-#'   `name = int_name`. The names are those that `names_as_int = FALSE` would
-#'   give (with a missing ID replaced by the chromosome and position).
+#' @details The sidecars of the backing file `foo.bk` are:
+#' - `foo.loci.tsv` (written with `names_as_int = TRUE`), with the columns
+#'   `int_name`, `name`, `chromosome` and `position`, and one line per locus,
+#'   in increasing order of integer name. The names are those that
+#'   `names_as_int = FALSE` would give (with a missing ID replaced by the
+#'   chromosome and position), and the chromosomes are their names (not their
+#'   codes);
+#' - `foo.chromosomes.tsv` (written with `chromosomes_as_int = TRUE`), with
+#'   the columns `int_chromosome` and `chromosome`, and one line per
+#'   chromosome, in increasing order of code.
 #'
-#'   The sidecar is written by [gen_tibble()] when it reads a VCF file with
-#'   `parser = "cpp"`. Functions that write a new backing file
-#'   ([gt_update_backingfile()], [gt_order_loci()], [rbind()][rbind.gen_tbl])
-#'   write a new sidecar for it, with the loci that they keep (integer names
-#'   keep their values, so they still find their line). Keep the sidecar with
-#'   the other files of the `gen_tibble` (see [gt_save()]): without it, the
-#'   original names are lost.
+#' Both are tab separated text files with a header, with no quotes, and "."
+#' for missing values, so they can be read with any tool (e.g.
+#' `data.table::fread(path, quote = "")` or `readr::read_tsv(path, quote =
+#' "")`), and joined to [show_loci()] by `name = int_name` or `chromosome =
+#' int_chromosome`.
 #'
-#'   Only the file name ties a sidecar to its data, so the position of each
-#'   locus in the sidecar is compared with its position in the loci table: a
-#'   different position means that the sidecar belongs to other data (e.g.
-#'   files copied by hand from different runs), and is an error. If you
-#'   changed the positions of the loci yourself (e.g. after a liftover to a
-#'   new assembly), the names in the sidecar are still right: use
-#'   `check_positions = FALSE`.
+#' The sidecars are written by [gen_tibble()] when it reads a VCF file with
+#' `parser = "cpp"`, and by [gt_merge_vcfs()] and [gt_concat_vcfs()].
+#' Functions that write a new backing file ([gt_update_backingfile()],
+#' [gt_order_loci()], [rbind()][rbind.gen_tbl]) write new sidecars for it,
+#' with the loci and chromosomes that they keep (integer names and codes keep
+#' their values, so they still find their line). Keep the sidecars with the
+#' other files of the `gen_tibble` (see [gt_save()]): without them, the
+#' original names are lost.
 #'
-#'   Lookups are fast: the first lookup in a session reads through the
-#'   sidecar once to index it (about a second per GB), and later lookups of a
-#'   few loci only read the parts of the file that hold them.
+#' Only the file name ties a sidecar to its data, so the position of each
+#' locus in the locus sidecar is compared with its position in the loci
+#' table: a different position means that the sidecar belongs to other data
+#' (e.g. files copied by hand from different runs), and is an error. If you
+#' changed the positions of the loci yourself (e.g. after a liftover to a new
+#' assembly), the names in the sidecar are still right: use `check_positions
+#' = FALSE`. The chromosome sidecar has no positions to check.
 #'
-#' @param .x a [`gen_tibble`] (or, for `gt_lookup_loci()`, its `genotypes`
-#'   column)
+#' Lookups are fast: the first lookup in a session reads through a sidecar
+#' once to index it (about a second per GB), and later lookups of a few loci
+#' only read the parts of the file that hold them.
+#'
+#' @param .x a [`gen_tibble`] (or, except for `gt_restore_loci()`, its
+#'   `genotypes` column)
 #' @param loci a subset of the loci table of `.x`: rows of [show_loci()], in
 #'   any order, possibly with extra columns (e.g. the statistics of a scan);
 #'   or row numbers of `show_loci(.x)`, as given by [which()].
+#' @param chromosomes for `gt_lookup_chromosomes()`, a vector of chromosome
+#'   codes (e.g. the `chromosome` column of the results of
+#'   [windows_pairwise_pop_fst()] or [gt_roh_window()]); for
+#'   `gt_restore_loci()`, boolean: whether to restore the names of the
+#'   chromosomes (if they are integer codes), default TRUE.
+#' @param names boolean: whether to restore the names of the loci (if they
+#'   are integers). Default is TRUE.
 #' @param check_positions boolean: whether to check that the positions of the
-#'   loci in the sidecar are the same as in `loci` (or in the loci table of
-#'   `.x`, for `gt_restore_loci()`). For `gt_lookup_loci()`, they are only
+#'   loci in the locus sidecar are the same as in `loci` (or in the loci table
+#'   of `.x`, for `gt_restore_loci()`). For `gt_lookup_loci()`, they are only
 #'   checked if `loci` has a `position` column. Default is TRUE.
-#' @returns `gt_lookup_loci()` returns `loci` (as a table), with the integer
-#'   names in its `name` column replaced by the original names; the other
-#'   columns, and the rows and their order, are unchanged. A `name` column
-#'   that already holds names is left as it is, so the same code works on data
-#'   read with or without `names_as_int`.
+#' @returns `gt_lookup_loci()` returns `loci` (as a table), with integer names
+#'   in its `name` column, and integer codes in its `chromosome` column,
+#'   replaced by their original names (as character vectors); the other
+#'   columns, and the rows and their order, are unchanged. Columns that
+#'   already hold names are left as they are, so the same code works on data
+#'   read with or without the integer options.
+#'
+#'   `gt_lookup_chromosomes()` returns the names of the chromosomes (a
+#'   character vector, with NA for NA). Chromosomes that are already names (a
+#'   factor or a character vector) are returned as a character vector.
 #'
 #'   `gt_restore_loci()` returns `.x`, with the original names in its loci
-#'   table (as if it had been read with `names_as_int = FALSE`). It does not
-#'   save it: use [gt_save()].
+#'   table (as if it had been read without the integer options: names as a
+#'   character vector, and chromosomes as a factor). It does not save it: use
+#'   [gt_save()].
 #' @rdname gt_lookup_loci
 #' @export
 #' @examples
@@ -65,7 +93,7 @@
 #' )
 #' anole_gt <- gen_tibble(vcf_path,
 #'   backingfile = tempfile("anolis_"),
-#'   names_as_int = TRUE, quiet = TRUE
+#'   names_as_int = TRUE, chromosomes_as_int = TRUE, quiet = TRUE
 #' )
 #' head(show_loci(anole_gt))
 #'
@@ -78,6 +106,9 @@
 #'   dplyr::mutate(missing = missing) %>%
 #'   dplyr::filter(missing > 0.6)
 #' gt_lookup_loci(anole_gt, hits)
+#'
+#' # the names of some chromosome codes
+#' gt_lookup_chromosomes(anole_gt, c(1, 5, 5, NA))
 #'
 #' # put the original names back into the gen_tibble
 #' anole_gt <- gt_restore_loci(anole_gt)
@@ -103,30 +134,55 @@ gt_lookup_loci <- function(.x, loci, check_positions = TRUE) {
       "or row numbers of show_loci(.x)"
     )
   }
-  if (!"name" %in% names(loci)) {
-    stop("'loci' should have a 'name' column, as the loci table of .x")
+  if (!any(c("name", "chromosome") %in% names(loci))) {
+    stop(
+      "'loci' should have a 'name' or 'chromosome' column, as the loci ",
+      "table of .x"
+    )
   }
-  if (is.numeric(loci$name)) {
+  if (is_int_column(loci$name)) {
     positions <- NULL
     if (check_positions && ("position" %in% names(loci))) {
       positions <- loci$position
     }
     loci$name <- loci_sidecar_names(.x, loci$name, positions)
   }
+  if (is_int_column(loci$chromosome)) {
+    loci$chromosome <- chromosome_sidecar_names(.x, loci$chromosome)
+  }
   loci
 }
 
 #' @rdname gt_lookup_loci
 #' @export
-gt_restore_loci <- function(.x, check_positions = TRUE) {
+gt_lookup_chromosomes <- function(.x, chromosomes) {
+  .x <- genotypes_of(.x)
+  if (is.factor(chromosomes) || is.character(chromosomes)) {
+    return(as.character(chromosomes))
+  }
+  if (!is.numeric(chromosomes)) {
+    stop("'chromosomes' should be integer codes of chromosomes")
+  }
+  chromosome_sidecar_names(.x, chromosomes)
+}
+
+#' @rdname gt_lookup_loci
+#' @export
+gt_restore_loci <- function(.x, names = TRUE, chromosomes = TRUE,
+                            check_positions = TRUE) {
   if (!inherits(.x, "gen_tbl")) {
     stop(".x should be a gen_tibble")
   }
   loci <- show_loci(.x)
-  if (is.numeric(loci$name)) {
+  if (names && is_int_column(loci$name)) {
     positions <- if (check_positions) loci$position else NULL
-    show_loci(.x)$name <- loci_sidecar_names(.x, loci$name, positions)
+    loci$name <- loci_sidecar_names(.x, loci$name, positions)
   }
+  if (chromosomes && is_int_column(loci$chromosome)) {
+    loci$chromosome <- chromosome_sidecar_factor(.x, loci$chromosome)
+  }
+  # (a factor of chromosomes is kept as it is by show_loci<-)
+  show_loci(.x) <- loci
   .x
 }
 
@@ -303,19 +359,138 @@ copy_loci_sidecar <- function(x, new_bk_file, keys) {
   invisible(TRUE)
 }
 
+# the chromosome sidecar of x has the names of its integer chromosomes
+# (chromosomes_as_int): foo.bk -> foo.chromosomes.tsv, with a line for each
+# chromosome (its code and name), in increasing order of code
+
+# the header of a chromosome sidecar
+chromosomes_sidecar_header <- "int_chromosome\tchromosome"
+
+# the path of the chromosome sidecar of a gen_tibble (or of its genotypes
+# column)
+chromosomes_sidecar_path <- function(x) {
+  sidecar_path_from_bk(gt_get_file_names(x)[2], "chromosomes")
+}
+
+# whether a column of the loci table holds integers (integer names or
+# chromosome codes), rather than names (a character vector or a factor)
+is_int_column <- function(x) {
+  is.numeric(x) && !is.factor(x)
+}
+
+# stop if the chromosome sidecar at path does not exist
+check_chromosome_sidecar <- function(path) {
+  if (!file.exists(path)) {
+    stop(
+      "there is no chromosome sidecar (", path, ") with the names of the ",
+      "chromosomes of this gen_tibble. It is written next to the backing ",
+      "file when a VCF is read with chromosomes_as_int = TRUE; if the files ",
+      "of the gen_tibble were moved, move the sidecar with them"
+    )
+  }
+  invisible(NULL)
+}
+
+# the names of the chromosome codes of x (NA for NA), from the chromosome
+# sidecar of x; each distinct code is looked up once
+chromosome_sidecar_names <- function(x, codes) {
+  path <- chromosomes_sidecar_path(x)
+  check_chromosome_sidecar(path)
+  values <- unique(codes)
+  values <- values[!is.na(values)]
+  keys <- as_sidecar_keys(values, "the chromosome codes")
+  index <- sidecar_get_index(path, chromosomes_sidecar_header)
+  res <- sidecar_fetch(path, keys,
+    index_keys = index$keys, index_offsets = index$offsets,
+    fields = 2L, types = "character",
+    check_field = 0L, check_values = integer(0)
+  )
+  if (!all(res$found)) {
+    stop(
+      "the chromosome sidecar ", path, " has no line for ",
+      sum(!res$found), " of the chromosome codes (e.g. ",
+      keys[!res$found][1], "): they are not chromosomes of this gen_tibble"
+    )
+  }
+  res[[1]][match(codes, values)]
+}
+
+# the chromosome codes of x as a factor of their names (as gen_tibble()
+# gives without chromosomes_as_int: the levels are the names in the
+# chromosome sidecar, sorted as as.factor() sorts them), reading the whole
+# sidecar (one line per chromosome) and creating no string per locus
+chromosome_sidecar_factor <- function(x, codes) {
+  path <- chromosomes_sidecar_path(x)
+  check_chromosome_sidecar(path)
+  index <- sidecar_get_index(path, chromosomes_sidecar_header)
+  sidecar <- sidecar_read(path, chromosomes_sidecar_header,
+    fields = c(1L, 2L), types = c("integer", "character"), n = index$n
+  )
+  chromosome_index <- match(codes, sidecar[[1]])
+  not_found <- is.na(chromosome_index) & !is.na(codes)
+  if (any(not_found)) {
+    stop(
+      "the chromosome sidecar ", path, " has no line for some of the ",
+      "chromosome codes (e.g. ", codes[not_found][1], "): they are not ",
+      "chromosomes of this gen_tibble"
+    )
+  }
+  chromosome_index_to_factor(chromosome_index, sidecar[[2]])
+}
+
+# write the chromosome sidecar of a new backing file (new_bk_file), with the
+# lines of the chromosome codes of x in codes (see copy_loci_sidecar())
+copy_chromosomes_sidecar <- function(x, new_bk_file, codes) {
+  new_path <- sidecar_path_from_bk(new_bk_file, "chromosomes")
+  if (file.exists(new_path)) {
+    unlink(new_path)
+  }
+  path <- chromosomes_sidecar_path(x)
+  if (!is_int_column(codes) || !file.exists(path)) {
+    return(invisible(FALSE))
+  }
+  keys <- as_sidecar_keys(unique(codes[!is.na(codes)]), "the chromosome codes")
+  res <- sidecar_subset(path, new_path, chromosomes_sidecar_header, keys)
+  if (res$n_written < res$n_keys) {
+    unlink(new_path)
+    warning(
+      "the chromosome sidecar ", path, " does not have all the chromosomes, ",
+      "so the names of the chromosomes of the new gen_tibble are not kept"
+    )
+    return(invisible(FALSE))
+  }
+  invisible(TRUE)
+}
+
+# write the sidecars of a new backing file (new_bk_file) whose loci table is
+# loci, with the loci (and chromosomes) of x that it keeps
+copy_sidecars <- function(x, new_bk_file, loci) {
+  copy_loci_sidecar(x, new_bk_file, loci$name)
+  copy_chromosomes_sidecar(x, new_bk_file, loci$chromosome)
+  invisible(NULL)
+}
+
 # the sidecars of a gen_tibble that exist, for the messages of gt_save()
 sidecar_files <- function(x) {
-  path <- loci_sidecar_path(x)
-  if (is.numeric(show_loci(x)$name) && file.exists(path)) {
-    return(path)
+  loci <- show_loci(x)
+  paths <- character(0)
+  if (is_int_column(loci$name)) {
+    paths[["loci"]] <- loci_sidecar_path(x)
   }
-  character(0)
+  if (is_int_column(loci$chromosome)) {
+    paths[["chromosomes"]] <- chromosomes_sidecar_path(x)
+  }
+  paths[file.exists(paths)]
 }
 
 # message the sidecars of a gen_tibble (after the files of its FBM)
 message_sidecar_files <- function(x) {
-  for (path in sidecar_files(x)) {
-    message("with original names of loci in: ", path)
+  paths <- sidecar_files(x)
+  if ("loci" %in% names(paths)) {
+    message("with original names of loci in: ", paths[["loci"]])
+  }
+  if ("chromosomes" %in% names(paths)) {
+    message("with names of chromosomes in: ", paths[["chromosomes"]])
   }
   invisible(NULL)
 }

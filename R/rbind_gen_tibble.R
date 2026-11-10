@@ -249,10 +249,11 @@ rbind.gen_tbl <- function(
   )
   # save the FBM (its .rds is used as fbm_file below)
   merged_fbm$save()
-  # with integer loci names, the merged loci are those of ref (with their
-  # names), so the locus sidecar of the merged backing file has the lines of
-  # those loci from the sidecar of ref (see R/loci_sidecar.R)
-  copy_loci_sidecar(ref, merged_fbm$backingfile, new_ref_loci_tbl$name)
+  # with integer loci names (or chromosomes), the merged loci are those of ref
+  # (with their names and chromosomes), so the sidecars of the merged backing
+  # file have the lines of those loci (and chromosomes) from the sidecars of
+  # ref (see R/loci_sidecar.R)
+  copy_sidecars(ref, merged_fbm$backingfile, new_ref_loci_tbl)
 
   # Now we need to create the gen_tibble
   # Make sure that the two tibbles have the same columns

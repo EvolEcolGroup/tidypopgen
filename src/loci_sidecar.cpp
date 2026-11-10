@@ -559,3 +559,52 @@ List sidecar_subset(std::string path_in, std::string path_out,
   writer.finish();
   return List::create(_["n_keys"] = n_keys, _["n_written"] = n_written);
 }
+
+/******************************************************************************
+ * The integer codes of chromosomes, from R
+ *
+ * The rule of chromosome_int_codes() (see loci_sidecar.h), for chromosome
+ * names held in R (e.g. by gt_merge_vcfs() and gt_concat_vcfs(), which match
+ * loci across files by the names of their chromosomes).
+ *
+ * @param names the names of the chromosomes, unique and in order of first
+ *   appearance ("." for a missing chromosome)
+ * @return the code of each chromosome (NA for ".")
+ */
+// [[Rcpp::export]]
+IntegerVector chromosome_int_codes_cpp(CharacterVector names) {
+  auto name_of = [&](size_t k, const char* &start, size_t &len) {
+    SEXP name = STRING_ELT(names, k);
+    if (name == NA_STRING) {
+      start = ".";
+      len = 1;
+    } else {
+      start = CHAR(name);
+      len = LENGTH(name);
+    }
+  };
+  std::vector<int> codes = chromosome_int_codes(names.size(), name_of);
+  return IntegerVector(codes.begin(), codes.end());
+}
+
+/******************************************************************************
+ * Write a chromosome sidecar from R
+ *
+ * @param path the new sidecar
+ * @param codes the code of each chromosome (as given by
+ *   chromosome_int_codes_cpp(); chromosomes coded NA are left out)
+ * @param names the name of each chromosome
+ */
+// [[Rcpp::export]]
+void write_chromosome_sidecar_cpp(std::string path, IntegerVector codes,
+                                  CharacterVector names) {
+  if (codes.size() != names.size()) {
+    stop("codes and names must have the same length");
+  }
+  std::vector<int> codes_cpp(codes.begin(), codes.end());
+  auto name_of = [&](size_t k, const char* &start, size_t &len) {
+    start = CHAR(STRING_ELT(names, k));
+    len = LENGTH(STRING_ELT(names, k));
+  };
+  write_chromosome_sidecar(path, codes_cpp, name_of);
+}

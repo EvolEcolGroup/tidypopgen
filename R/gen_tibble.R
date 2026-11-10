@@ -108,6 +108,17 @@
 #'   positions) are written to a sidecar file next to the backing file
 #'   (*.loci.tsv*), from which [gt_lookup_loci()] and [gt_restore_loci()] get
 #'   them back.
+#' @param chromosomes_as_int logical. If TRUE, chromosomes will be stored as
+#'   integer codes rather than as a factor. Only used when `x` is a *VCF* file
+#'   with parser "cpp". Default is FALSE. This saves memory and time with
+#'   many chromosomes (e.g. RAD loci assembled de novo, each its own
+#'   "chromosome"). A chromosome whose name is a number (after an optional
+#'   "chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07") keeps that
+#'   number as its code; other names are numbered after the largest number,
+#'   in order of first appearance. The names are written to a sidecar file
+#'   next to the backing file (*.chromosomes.tsv*), from which
+#'   [gt_lookup_chromosomes()], [gt_lookup_loci()] and [gt_restore_loci()]
+#'   get them back.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -188,6 +199,7 @@ gen_tibble.character <-
            backingfile = NULL,
            allow_duplicates = FALSE,
            names_as_int = FALSE,
+           chromosomes_as_int = FALSE,
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
@@ -224,6 +236,13 @@ gen_tibble.character <-
         "bigSNP rds files and VCF files read with parser = 'cpp'"
       )
     }
+    if (isTRUE(chromosomes_as_int) &&
+          !(ext %in% c("vcf", "gz") && parser == "cpp")) {
+      stop(
+        "chromosomes_as_int = TRUE is only available for VCF files read ",
+        "with parser = 'cpp'"
+      )
+    }
 
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
@@ -255,6 +274,7 @@ gen_tibble.character <-
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
         names_as_int = names_as_int,
+        chromosomes_as_int = chromosomes_as_int,
         quiet = quiet
       )
     } else if (tolower(file_ext(x)) == "ped") {
@@ -297,7 +317,10 @@ gen_tibble.character <-
     if (has_genotypes_without_alleles(x_gt)) {
       # clean up files if we are stopping (dropping the gen_tibble first,
       # so that its backing file can be unmapped, see remove_fbm_files())
-      files <- c(gt_get_file_names(x_gt), loci_sidecar_path(x_gt))
+      files <- c(
+        gt_get_file_names(x_gt), loci_sidecar_path(x_gt),
+        chromosomes_sidecar_path(x_gt)
+      )
       rm(x_gt)
       remove_fbm_files(files)
       stop_genotypes_without_alleles()

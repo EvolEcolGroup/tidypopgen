@@ -113,6 +113,14 @@ sidecar_subset <- function(path_in, path_out, header, keys) {
     .Call(`_tidypopgen_sidecar_subset`, path_in, path_out, header, keys)
 }
 
+chromosome_int_codes_cpp <- function(names) {
+    .Call(`_tidypopgen_chromosome_int_codes_cpp`, names)
+}
+
+write_chromosome_sidecar_cpp <- function(path, codes, names) {
+    invisible(.Call(`_tidypopgen_write_chromosome_sidecar_cpp`, path, codes, names))
+}
+
 pairwise_pop_fst_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores) {
     .Call(`_tidypopgen_pairwise_pop_fst_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores)
 }
@@ -197,8 +205,8 @@ merge_sites_file_cols <- function(sites, file, site_col) {
     .Call(`_tidypopgen_merge_sites_file_cols`, sites, file, site_col)
 }
 
-vcf_to_bk <- function(filename, bk_file, read_names = TRUE, n_threads = 1L, read_genotypes = TRUE, loci_file = "") {
-    .Call(`_tidypopgen_vcf_to_bk`, filename, bk_file, read_names, n_threads, read_genotypes, loci_file)
+vcf_to_bk <- function(filename, bk_file, read_names = TRUE, n_threads = 1L, read_genotypes = TRUE, loci_file = "", chromosomes_as_int = FALSE, chromosomes_file = "") {
+    .Call(`_tidypopgen_vcf_to_bk`, filename, bk_file, read_names, n_threads, read_genotypes, loci_file, chromosomes_as_int, chromosomes_file)
 }
 
 vcf_merge_genotypes <- function(filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads = 1L) {
