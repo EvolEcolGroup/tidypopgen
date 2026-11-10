@@ -104,22 +104,24 @@ run_parser <- function(lib, vcf_path, label) {
     time_loci <- system.time(
       vcf_meta <- tidypopgen:::vcf_loci_table(vcf_path)
     )[["elapsed"]]
-    max_ploidy <- max(vcf_meta$ploidy)
-    code256 <- rep(NA_real_, 256)
-    code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
-    fbm <- bigstatsr::FBM.code256(
-      nrow = length(vcf_meta$ploidy),
-      ncol = sum(vcf_meta$biallelic),
-      code = code256,
-      backingfile = backingfile
-    )
-    time_geno <- system.time(
+    # (the genotype step includes creating the backing file, as the single
+    # pass does)
+    time_geno <- system.time({
+      max_ploidy <- max(vcf_meta$ploidy)
+      code256 <- rep(NA_real_, 256)
+      code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+      fbm <- bigstatsr::FBM.code256(
+        nrow = length(vcf_meta$ploidy),
+        ncol = sum(vcf_meta$biallelic),
+        code = code256,
+        backingfile = backingfile
+      )
       tidypopgen:::vcf_genotypes_to_fbm(vcf_path, fbm,
         biallelic = vcf_meta$biallelic,
         missing_value = max_ploidy + 1,
         n_header_lines = vcf_meta$n_header_lines
       )
-    )[["elapsed"]]
+    })[["elapsed"]]
     time_total <- time_loci + time_geno
     n_loci <- nrow(vcf_meta$loci_tbl)
     n_biallelic <- sum(vcf_meta$biallelic)

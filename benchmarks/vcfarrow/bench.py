@@ -88,6 +88,28 @@ def read_current_step(work):
         return None, None
 
 
+def read_new_records(path, n_before):
+    """the records appended to the results file after its first n_before
+    lines. A step that died before recording anything may leave no file, and
+    one killed while it appended a record may leave the last line without its
+    newline: a complete record gets its newline, and an incomplete one is
+    removed, so that the next records start on a line of their own"""
+    try:
+        with open(path) as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        return []
+    if lines and not lines[-1].endswith("\n"):
+        try:
+            json.loads(lines[-1])
+            lines[-1] += "\n"
+        except json.JSONDecodeError:
+            lines.pop()
+        with open(path, "w") as f:
+            f.writelines(lines)
+    return [json.loads(line) for line in lines[n_before:]]
+
+
 def run_process(args, steps, results_jsonl):
     """run one R process for `steps`; returns (records, samples, maxrss_kb,
     timed_out_step)"""
@@ -132,12 +154,7 @@ def run_process(args, steps, results_jsonl):
             os.killpg(proc.pid, signal.SIGKILL)
         time.sleep(args.interval)
     log.close()
-    # (a step that died before recording anything may leave no results file)
-    try:
-        with open(results_jsonl) as f:
-            records = [json.loads(line) for line in list(f)[n_before:]]
-    except FileNotFoundError:
-        records = []
+    records = read_new_records(results_jsonl, n_before)
     oom = killed and timed_out is None
     return records, samples, maxrss, timed_out, oom
 
