@@ -35,7 +35,8 @@ a \code{\link{gen_tibble}} with updated \code{.gt}, \code{.bk}, and \code{.rds} 
 This functions forces a re-write of the file backing matrix to match the
 \code{\link{gen_tibble}}. Individuals and loci are subsetted and reordered according to
 the current state of the \code{gen_tibble}. A \code{.gt}, \code{.bk} and \code{.rds} file will be
-created.
+created (and, if the names of the loci are integers, a new locus sidecar
+with their original names, see \code{\link[=gt_lookup_loci]{gt_lookup_loci()}}).
 }
 \details{
 This function does not check whether the positions of your genetic loci are

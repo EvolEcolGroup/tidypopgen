@@ -13,7 +13,8 @@
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
 #'   position) or duplicated locus names. Default is FALSE.
 #' @param names_as_int whether to convert locus names to
-#'   integers. Default is FALSE.
+#'   integers (their original names are written to the locus sidecar of the
+#'   backing file, see [gt_lookup_loci()]). Default is FALSE.
 #' @param n_cores the number of cores used to decompress a bgzipped vcf and to
 #'   parse the genotypes. Default is 1.
 #' @param quiet whether to print messages.
@@ -49,18 +50,26 @@ vcf_to_fbm_cpp <- function(
   if (file.exists(bk_file)) {
     stop("the backing file ", bk_file, " already exists")
   }
-  # remove the backing file if we stop before creating the FBM (also if the
-  # VCF was read, but the loci table could not be created)
+  # with integer names, the original names (with the chromosomes and
+  # positions) are written to the locus sidecar of the backing file (see
+  # R/loci_sidecar.R); sidecars already next to the new backing file are left
+  # from older files with the same name, and can not belong to the new data
+  loci_file <- sidecar_path_from_bk(bk_file, "loci")
+  remove_stale_sidecars(bk_file)
+  # remove the backing file (and sidecar) if we stop before creating the FBM
+  # (also if the VCF was read, but the loci table could not be created)
   fbm_created <- FALSE
-  on.exit(if (!fbm_created) unlink(bk_file), add = TRUE)
+  on.exit(if (!fbm_created) unlink(c(bk_file, loci_file)), add = TRUE)
   # read the VCF once: create a loci_table, figure out no_individuals and
   # ploidy from the first marker, and write the genotypes to the backing file
   # (locus names are not read if we store them as integers, which saves a lot
-  # of memory with many loci). With n_cores > 1, the blocks of a bgzipped VCF
-  # are decompressed in parallel, and the genotypes parsed in parallel
+  # of memory with many loci: they are written to the sidecar instead). With
+  # n_cores > 1, the blocks of a bgzipped VCF are decompressed in parallel,
+  # and the genotypes parsed in parallel
   vcf_meta <- vcf_to_bk(vcf_path,
     bk_file = bk_file, read_names = !names_as_int,
-    n_threads = n_cores
+    n_threads = n_cores,
+    loci_file = if (names_as_int) loci_file else ""
   )
   # an FBM can not have zero loci (its empty backing file can not be mapped)
   if (length(vcf_meta$loci_tbl$physical.pos) == 0) {

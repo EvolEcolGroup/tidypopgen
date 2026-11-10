@@ -400,6 +400,66 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// sidecar_index
+List sidecar_index(std::string path, std::string header, int block);
+RcppExport SEXP _tidypopgen_sidecar_index(SEXP pathSEXP, SEXP headerSEXP, SEXP blockSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< std::string >::type header(headerSEXP);
+    Rcpp::traits::input_parameter< int >::type block(blockSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_index(path, header, block));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sidecar_fetch
+List sidecar_fetch(std::string path, IntegerVector keys, IntegerVector index_keys, NumericVector index_offsets, IntegerVector fields, CharacterVector types, int check_field, IntegerVector check_values);
+RcppExport SEXP _tidypopgen_sidecar_fetch(SEXP pathSEXP, SEXP keysSEXP, SEXP index_keysSEXP, SEXP index_offsetsSEXP, SEXP fieldsSEXP, SEXP typesSEXP, SEXP check_fieldSEXP, SEXP check_valuesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type keys(keysSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type index_keys(index_keysSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type index_offsets(index_offsetsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type fields(fieldsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type types(typesSEXP);
+    Rcpp::traits::input_parameter< int >::type check_field(check_fieldSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type check_values(check_valuesSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_fetch(path, keys, index_keys, index_offsets, fields, types, check_field, check_values));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sidecar_read
+List sidecar_read(std::string path, std::string header, IntegerVector fields, CharacterVector types, double n);
+RcppExport SEXP _tidypopgen_sidecar_read(SEXP pathSEXP, SEXP headerSEXP, SEXP fieldsSEXP, SEXP typesSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< std::string >::type header(headerSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type fields(fieldsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type types(typesSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_read(path, header, fields, types, n));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sidecar_subset
+List sidecar_subset(std::string path_in, std::string path_out, std::string header, IntegerVector keys);
+RcppExport SEXP _tidypopgen_sidecar_subset(SEXP path_inSEXP, SEXP path_outSEXP, SEXP headerSEXP, SEXP keysSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path_in(path_inSEXP);
+    Rcpp::traits::input_parameter< std::string >::type path_out(path_outSEXP);
+    Rcpp::traits::input_parameter< std::string >::type header(headerSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type keys(keysSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_subset(path_in, path_out, header, keys));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pairwise_pop_fst_cpp
 List pairwise_pop_fst_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, const IntegerMatrix& pairwise_combn, std::string method, bool by_locus, bool return_num_dem, int block_size, int ncores);
 RcppExport SEXP _tidypopgen_pairwise_pop_fst_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP pairwise_combnSEXP, SEXP methodSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP) {
@@ -743,8 +803,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // vcf_to_bk
-List vcf_to_bk(std::string filename, std::string bk_file, bool read_names, int n_threads, bool read_genotypes);
-RcppExport SEXP _tidypopgen_vcf_to_bk(SEXP filenameSEXP, SEXP bk_fileSEXP, SEXP read_namesSEXP, SEXP n_threadsSEXP, SEXP read_genotypesSEXP) {
+List vcf_to_bk(std::string filename, std::string bk_file, bool read_names, int n_threads, bool read_genotypes, std::string loci_file);
+RcppExport SEXP _tidypopgen_vcf_to_bk(SEXP filenameSEXP, SEXP bk_fileSEXP, SEXP read_namesSEXP, SEXP n_threadsSEXP, SEXP read_genotypesSEXP, SEXP loci_fileSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -753,7 +813,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type read_names(read_namesSEXP);
     Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
     Rcpp::traits::input_parameter< bool >::type read_genotypes(read_genotypesSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_to_bk(filename, bk_file, read_names, n_threads, read_genotypes));
+    Rcpp::traits::input_parameter< std::string >::type loci_file(loci_fileSEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_to_bk(filename, bk_file, read_names, n_threads, read_genotypes, loci_file));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -830,6 +891,10 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_unsorted_by_chromosome_cpp", (DL_FUNC) &_tidypopgen_unsorted_by_chromosome_cpp, 3},
     {"_tidypopgen_chromosomes_not_adjacent_cpp", (DL_FUNC) &_tidypopgen_chromosomes_not_adjacent_cpp, 2},
     {"_tidypopgen_loci_qc_cpp", (DL_FUNC) &_tidypopgen_loci_qc_cpp, 10},
+    {"_tidypopgen_sidecar_index", (DL_FUNC) &_tidypopgen_sidecar_index, 3},
+    {"_tidypopgen_sidecar_fetch", (DL_FUNC) &_tidypopgen_sidecar_fetch, 8},
+    {"_tidypopgen_sidecar_read", (DL_FUNC) &_tidypopgen_sidecar_read, 5},
+    {"_tidypopgen_sidecar_subset", (DL_FUNC) &_tidypopgen_sidecar_subset, 4},
     {"_tidypopgen_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_pairwise_pop_fst_cpp, 12},
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
@@ -851,7 +916,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_merge_sites_add_file", (DL_FUNC) &_tidypopgen_merge_sites_add_file, 5},
     {"_tidypopgen_merge_sites_result", (DL_FUNC) &_tidypopgen_merge_sites_result, 1},
     {"_tidypopgen_merge_sites_file_cols", (DL_FUNC) &_tidypopgen_merge_sites_file_cols, 3},
-    {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 5},
+    {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 6},
     {"_tidypopgen_vcf_merge_genotypes", (DL_FUNC) &_tidypopgen_vcf_merge_genotypes, 9},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},

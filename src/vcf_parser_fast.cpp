@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <zlib.h>
 #include <bigstatsr/BMCodeAcc.h>
+#include "loci_sidecar.h"
 
 using namespace Rcpp;
 using namespace std;
@@ -665,6 +666,35 @@ private:
 
 // A writer that appends bytes to a new file, and removes the file if it is
 // destroyed before finish() (e.g. when an error stops the parsing)
+// Write the line of a biallelic snp to the locus sidecar (see
+// loci_sidecar.h): its key (its integer name, the index of the snp among the
+// biallelic snps of the file), its name, its chromosome and its position. The
+// name is its ID, or, for a missing ID ".", the chromosome and position, as
+// fill_missing_loci_names() makes it in R (where a missing chromosome "." is
+// NA), so that the names are those that names_as_int = FALSE gives
+inline void write_locus_line(SidecarWriter &writer, size_t key,
+                             const char* const* field_start,
+                             const size_t* field_len, int32_t position) {
+  writer.add_int(key);
+  writer.tab();
+  if ((field_len[2] == 1) && (field_start[2][0] == '.')) {
+    if ((field_len[0] == 1) && (field_start[0][0] == '.')) {
+      writer.add("NA", 2);
+    } else {
+      writer.add(field_start[0], field_len[0]);
+    }
+    writer.add("_", 1);
+    writer.add_int(position);
+  } else {
+    writer.add(field_start[2], field_len[2]);
+  }
+  writer.tab();
+  writer.add(field_start[0], field_len[0]);
+  writer.tab();
+  writer.add_int(position);
+  writer.end_line();
+}
+
 class BkWriter {
 public:
   explicit BkWriter(const std::string &filename)
@@ -741,6 +771,11 @@ private:
  * @param read_names Whether to read the names (IDs) of the loci
  * @param n_threads The number of threads
  * @param read_genotypes Whether to read the genotypes (into bk_file)
+ * @param loci_file The locus sidecar to write (with the key, name,
+ *   chromosome and position of each biallelic snp; see loci_sidecar.h), or
+ *   "" for none. It is written while the file is read, so the names are
+ *   kept on disk even when they are not read into memory (read_names =
+ *   false); it is removed if an error stops the parsing
  * @return a list with the loci table (`loci_tbl`), `chromosome_names`,
  *   `sample_names`, the `ploidy` of each individual, and `ploidy_guessed`,
  *   whether its ploidy was guessed (its genotypes were all missing in the
@@ -749,8 +784,15 @@ private:
 // [[Rcpp::export]]
 List vcf_to_bk(std::string filename, std::string bk_file,
                bool read_names = true, int n_threads = 1,
-               bool read_genotypes = true) {
+               bool read_genotypes = true, std::string loci_file = "") {
   VcfLineReader reader(filename, n_threads);
+  // the locus sidecar, written in order as the metadata of the loci are read
+  std::unique_ptr<SidecarWriter> loci_writer;
+  if (!loci_file.empty()) {
+    loci_writer.reset(new SidecarWriter(loci_file));
+    loci_writer->add("int_name\tname\tchromosome\tposition");
+    loci_writer->end_line();
+  }
   // (the backing file is only created if we read the genotypes)
   std::unique_ptr<BkWriter> writer;
   if (read_genotypes) {
@@ -942,6 +984,10 @@ List vcf_to_bk(std::string filename, std::string bk_file,
         if (read_names) {
           marker_id.push_back(field_start[2], field_len[2]);
         }
+        if (loci_writer) {
+          write_locus_line(*loci_writer, physical_pos.size(), field_start,
+                           field_len, physical_pos.back());
+        }
         allele1.push_back(field_start[4][0]);
         allele2.push_back(field_start[3][0]);
         snp_lines.push_back(l);
@@ -991,6 +1037,9 @@ List vcf_to_bk(std::string filename, std::string bk_file,
     writer->write(genotypes);
     std::vector<unsigned char>().swap(genotypes);
     writer->finish();
+  }
+  if (loci_writer) {
+    loci_writer->finish();
   }
 
   // create the loci table; alleles are converted to strings reusing a single

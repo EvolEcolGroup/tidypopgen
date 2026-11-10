@@ -1,5 +1,13 @@
 # tidypopgen (development version)
 
+* `gen_tibble(names_as_int = TRUE)` writes the original names of the loci of
+  a VCF file, with their chromosomes and positions, to a sidecar file next to
+  the backing file (*.loci.tsv*, plain tab separated text), so that integer
+  names lose nothing. New `gt_lookup_loci()` gives back the original names of
+  some loci (e.g. the hits of a scan, as a subset of the loci table or as row
+  numbers), and `gt_restore_loci()` puts them back into the `gen_tibble`.
+  `gt_update_backingfile()`, `gt_order_loci()` and `rbind()` write the
+  sidecar of their new backing file
 * new `gt_merge_vcfs()` reads several VCF files with different samples into
   a single `gen_tibble`, as `bcftools merge` would, in one go (without
   reading each file into its own `gen_tibble` and binding them in pairs with

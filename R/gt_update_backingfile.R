@@ -3,7 +3,8 @@
 #' This functions forces a re-write of the file backing matrix to match the
 #' [`gen_tibble`]. Individuals and loci are subsetted and reordered according to
 #' the current state of the `gen_tibble`. A `.gt`, `.bk` and `.rds` file will be
-#' created.
+#' created (and, if the names of the loci are integers, a new locus sidecar
+#' with their original names, see [gt_lookup_loci()]).
 #'
 #' This function does not check whether the positions of your genetic loci are
 #' sorted. To check this, and update the file backing matrix, use
@@ -92,6 +93,10 @@ gt_update_backingfile <- function(
       swap_lut = 0:255
     )
   }
+  # with integer loci names, the locus sidecar of the new backing file has the
+  # original names of the loci that are kept (see R/loci_sidecar.R)
+  copy_loci_sidecar(.x, new_bk_matrix$backingfile, show_loci(.x)$name)
+
   # get fbm_ploidy
   fbm_ploidy <- attr(.x$genotypes, "fbm_ploidy")
   # if it is not null, then subset it to the new individuals
@@ -153,6 +158,7 @@ gt_update_backingfile <- function(
     message("\ngen_backing files updated, now")
     message("using FBM RDS: ", gt_get_file_names(new_gen_tbl)[1])
     message("with FBM backing file: ", gt_get_file_names(new_gen_tbl)[2])
+    message_sidecar_files(new_gen_tbl)
     message("make sure that you do NOT delete those files!")
     message("to reload the gen_tibble in another session, use:")
     message("gt_load('", file_name, "')")

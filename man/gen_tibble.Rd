@@ -114,7 +114,10 @@ names as string can use a large amount of memory. Integer names are the
 index of each locus in the \emph{VCF} (or \emph{bim}) file, so they can not be used
 to match loci across datasets: \link[=rbind.gen_tbl]{rbind()} and
 \code{\link[=rbind_dry_run]{rbind_dry_run()}} always match loci with integer names by chromosome and
-position.}
+position. For \emph{VCF} files, the original names (with the chromosomes and
+positions) are written to a sidecar file next to the backing file
+(\emph{.loci.tsv}), from which \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_restore_loci]{gt_restore_loci()}} get
+them back.}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only

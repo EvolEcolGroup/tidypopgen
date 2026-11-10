@@ -209,6 +209,9 @@ gt_write_fbm_from_dfs <- function(
     init = NULL,
     create_bk = TRUE
   )
+  # (sidecars next to the new backing file are left from older files with the
+  # same name, and can not belong to the new data)
+  remove_stale_sidecars(big_geno$backingfile)
   # write the dosages as bytes (missing genotypes as max_ploidy + 1) directly
   # into the FBM, without copying the matrix
   write_dosage_matrix_cpp(genotypes, big_geno, na_byte = max_ploidy + 1)

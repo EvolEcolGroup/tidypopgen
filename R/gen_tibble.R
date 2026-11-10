@@ -104,7 +104,10 @@
 #'   index of each locus in the *VCF* (or *bim*) file, so they can not be used
 #'   to match loci across datasets: [rbind()][rbind.gen_tbl] and
 #'   [rbind_dry_run()] always match loci with integer names by chromosome and
-#'   position.
+#'   position. For *VCF* files, the original names (with the chromosomes and
+#'   positions) are written to a sidecar file next to the backing file
+#'   (*.loci.tsv*), from which [gt_lookup_loci()] and [gt_restore_loci()] get
+#'   them back.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -283,11 +286,18 @@ gen_tibble.character <-
       ))
     }
 
+    # sidecars next to the new backing file are left from older files with
+    # the same name (they can not belong to the new data), unless the reader
+    # wrote them (VCF files with the cpp parser)
+    if (!(tolower(file_ext(x)) %in% c("vcf", "gz") && parser == "cpp")) {
+      remove_stale_sidecars(gt_get_file_names(x_gt)[2])
+    }
+
     # check alleles
     if (has_genotypes_without_alleles(x_gt)) {
       # clean up files if we are stopping (dropping the gen_tibble first,
       # so that its backing file can be unmapped, see remove_fbm_files())
-      files <- gt_get_file_names(x_gt)
+      files <- c(gt_get_file_names(x_gt), loci_sidecar_path(x_gt))
       rm(x_gt)
       remove_fbm_files(files)
       stop_genotypes_without_alleles()
