@@ -27,12 +27,16 @@ inline int sidecar_seek(std::FILE* fp, int64_t offset) {
 }
 
 // A buffered reader of the lines of a sidecar file, which can move to the
-// start of any line (given its byte offset)
+// start of any line (given its byte offset). Lookups seek to a block of 1024
+// lines (about 50 KB) and read a few lines from it, so after a seek the
+// reader reads a small chunk (64 KB), doubling the size of each read while it
+// keeps reading on (up to 1 MB, for streaming through the file); a seek to a
+// line that is already in the buffer does not read the file again
 class SidecarReader {
 public:
   explicit SidecarReader(const std::string &filename)
-    : filename(filename), buf(1 << 20), start(0), end(0), buf_offset(0),
-      at_eof(false) {
+    : filename(filename), buf(max_read), start(0), end(0), buf_offset(0),
+      at_eof(false), read_size(max_read) {
     fp = std::fopen(filename.c_str(), "rb");
     if (fp == NULL) {
       stop("could not open the file " + filename);
@@ -45,6 +49,11 @@ public:
   }
   // move to the line that starts at byte offset
   void seek(int64_t offset) {
+    // (a line already in the buffer)
+    if ((offset >= buf_offset) && (offset < buf_offset + (int64_t) end)) {
+      start = offset - buf_offset;
+      return;
+    }
     if (sidecar_seek(fp, offset) != 0) {
       stop("error reading the file " + filename);
     }
@@ -52,6 +61,7 @@ public:
     end = 0;
     buf_offset = offset;
     at_eof = false;
+    read_size = min_read;
   }
   // the next line (without its "\n"; valid until the next call), and the
   // byte offset of its start in the file; false at the end of the file
@@ -87,7 +97,9 @@ public:
       if (end == buf.size()) {
         buf.resize(buf.size() * 2);
       }
-      size_t n = std::fread(buf.data() + end, 1, buf.size() - end, fp);
+      size_t n = std::fread(buf.data() + end, 1,
+                            std::min(buf.size() - end, read_size), fp);
+      read_size = std::min(read_size * 2, (size_t) max_read);
       if (n == 0) {
         if (std::ferror(fp)) {
           stop("error reading the file " + filename);
@@ -111,6 +123,8 @@ public:
   }
 
 private:
+  static const size_t min_read = 1 << 16;
+  static const size_t max_read = 1 << 20;
   std::string filename;
   std::FILE* fp;
   std::vector<char> buf;
@@ -118,6 +132,7 @@ private:
   size_t end; // the end of the data in buf
   int64_t buf_offset; // the offset in the file of buf[0]
   bool at_eof;
+  size_t read_size; // the size of the next read
 };
 
 // the integer key of a line (its first field), stopping if it is not a
