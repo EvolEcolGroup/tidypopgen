@@ -1,0 +1,456 @@
+---
+title: "Working with large RAD-seq datasets"
+output: html_document
+date: "2026-11-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "./figure/rad_seq/"
+)
+set.seed(123)
+# time the chunks with `benchmark = TRUE`, and record the peak memory used by
+# R while they run (gc(reset = TRUE) resets the maximum reported by gc())
+benchmarks <- new.env()
+knitr::knit_hooks$set(benchmark = function(before, options) {
+  if (before) {
+    gc(reset = TRUE)
+    benchmarks$start <- proc.time()[["elapsed"]]
+  } else {
+    elapsed <- proc.time()[["elapsed"]] - benchmarks$start
+    mem <- gc()
+    # the "(Mb)" column that follows "max used", for Ncells and Vcells
+    peak_mb <- sum(mem[, which(colnames(mem) == "max used") + 1])
+    benchmarks[[options$label]] <- c(time = elapsed, memory = peak_mb)
+  }
+  invisible(NULL)
+})
+# the size of a file, or of an object in memory, in MB
+size_mb <- function(x) round(x / 1024^2)
+```
+
+RAD-seq data assembled de novo (e.g. with
+[DiscoSnpRad](https://github.com/GATB/DiscoSnp),
+[Stacks](https://catchenlab.life.illinois.edu/stacks/) or
+[ipyrad](https://ipyrad.readthedocs.io/)) have an unusual shape: there is no
+reference genome, so each RAD locus is its own "chromosome" in the VCF (e.g.
+`SNP_higher_path_1234` or `RAD_1234`), carrying one or a few SNPs. A dataset
+with millions of SNPs therefore has millions of chromosomes, and every SNP
+also has its own ID. Stored as strings, these names take most of the memory
+of a `gen_tibble`, and much of the time needed to read, save and load it.
+
+tidypopgen has two options to deal with this, for *VCF* files read with
+`gen_tibble()` (and merged with `gt_merge_vcfs()` or `gt_concat_vcfs()`):
+
+- `names_as_int = TRUE` stores the names of the loci as integers (the index
+  of each SNP in the *VCF*);
+- `chromosomes_as_int = TRUE` stores the chromosomes as integer codes. A
+  chromosome whose name is a number (e.g. "7" or "chr7", or the catalog
+  number of a Stacks locus) keeps that number as its code; other names (such
+  as RAD loci assembled by DiscoSnpRad) are numbered in order of appearance.
+
+Nothing is lost: the original names are written to plain text "sidecar"
+files next to the backing file of the `gen_tibble`, from which
+`gt_lookup_loci()`, `gt_lookup_chromosomes()` and `gt_restore_loci()` get
+them back when they are needed, for example to report the hits of a scan.
+
+In this article, we read a VCF with 18.6 million SNPs on 13.8 million RAD
+loci with and without these options, compare the time and memory they need,
+and then run a small analysis on the compact `gen_tibble`, looking up the
+original names of the loci that come out of it.
+
+# The data
+
+We use a synthetic dataset with the shape of a real one: the DiscoSnpRad VCF
+of the tree frog *Phyllomedusa vaillantii* (18,579,683 SNPs and 56 samples
+from 3 lineages and an outgroup, 26 GB) used by
+[VCFArrow](https://github.com/legalLab/VCFArrow) to compare tools for large
+VCF files. The full dataset is not public, but VCFArrow ships a subsample of
+10,000 SNPs and 18 samples, from which the script `make_vcf.R`, in the
+[`benchmarks/vcfarrow` folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/benchmarks/vcfarrow)
+of the tidypopgen repository, builds a VCF of any size with the same
+features: each SNP copies the genotypes (with their missingness, about 34%)
+of a random SNP of the subsample, each sample takes the genotypes of a random
+sample of the same lineage, and each RAD locus (`SNP_higher_path_<n>`)
+carries 1 to 5 SNPs, as in the real data. To create it, download the
+subsample and the lineage of each of its samples, and run `make_vcf.R` from
+the `benchmarks/vcfarrow` folder of a copy of the tidypopgen repository (it
+takes about 30 minutes, and needs 27 GB of disk):
+
+```{bash, eval = FALSE}
+cd benchmarks/vcfarrow
+mkdir -p data ../../vignettes/articles/data/rad
+for f in vaillantii_discosnp_sub.vcf.gz strata; do
+  curl -fsSL -o "data/$f" \
+    "https://raw.githubusercontent.com/legalLab/VCFArrow/main/inst/extdata/$f"
+done
+Rscript make_vcf.R 18579683 ../../vignettes/articles/data/rad/discosnp.vcf 1
+```
+
+This writes the VCF, and the lineage of each of its 56 samples
+(`discosnp.strata.tsv`), to `vignettes/articles/data/rad/`. The paths in this
+article are relative to `vignettes/articles/`.
+
+```{r}
+library(tidypopgen)
+library(dplyr)
+vcf_path <- "./data/rad/discosnp.vcf"
+n_cores <- 4
+```
+
+We read the VCF with 4 cores, as in the VCFArrow comparison, on a machine
+with `r parallel::detectCores()` cores. The file is
+`r round(file.size(vcf_path) / 1024^3, 1)` GB:
+
+```{bash, eval = FALSE}
+head -c 2000 data/rad/discosnp.vcf | grep -v "^##" | cut -f 1-5 | head -4
+```
+
+```{r echo = FALSE, comment = ""}
+lines <- readLines(vcf_path, n = 200)
+lines <- lines[!startsWith(lines, "##")][1:4]
+cat(vapply(strsplit(lines, "\t"), function(x) {
+  paste(x[1:5], collapse = "\t")
+}, character(1)), sep = "\n")
+```
+
+```{r remove_old_files, include = FALSE}
+# remove the files of a previous run, so that the VCF is read (and timed)
+# again
+unlink(list.files("./data/rad",
+  pattern = "^rad_.*\\.(bk|rds|gt|tsv)$",
+  full.names = TRUE
+))
+```
+
+# Reading the VCF
+
+We read the VCF four times: with the default options, with integer names,
+with integer chromosomes, and with both. Each `gen_tibble` has its own
+backing file.
+
+```{r read_default, benchmark = TRUE}
+rad_default <- gen_tibble(vcf_path,
+  backingfile = "./data/rad/rad_default",
+  n_cores = n_cores, quiet = TRUE
+)
+```
+
+```{r include = FALSE}
+# the size of the loci table in memory, and of the files
+sizes <- function(x) {
+  base <- sub("\\.bk$", "", gt_get_file_names(x)[2])
+  files <- paste0(base, c(".rds", ".bk", ".gt"))
+  sidecars <- paste0(base, c(".loci.tsv", ".chromosomes.tsv"))
+  c(
+    loci_table_mb = size_mb(utils::object.size(show_loci(x))),
+    bk_mb = size_mb(file.size(files[2])),
+    gt_mb = size_mb(file.size(files[3])),
+    sidecars_mb = size_mb(sum(file.size(sidecars), na.rm = TRUE))
+  )
+}
+read_sizes <- list(read_default = sizes(rad_default))
+rm(rad_default)
+invisible(gc())
+```
+
+```{r read_names_as_int, benchmark = TRUE}
+rad_names <- gen_tibble(vcf_path,
+  backingfile = "./data/rad/rad_names",
+  names_as_int = TRUE,
+  n_cores = n_cores, quiet = TRUE
+)
+```
+
+```{r include = FALSE}
+read_sizes$read_names_as_int <- sizes(rad_names)
+rm(rad_names)
+invisible(gc())
+```
+
+```{r read_chromosomes_as_int, benchmark = TRUE}
+rad_chromosomes <- gen_tibble(vcf_path,
+  backingfile = "./data/rad/rad_chromosomes",
+  chromosomes_as_int = TRUE,
+  n_cores = n_cores, quiet = TRUE
+)
+```
+
+```{r include = FALSE}
+read_sizes$read_chromosomes_as_int <- sizes(rad_chromosomes)
+rm(rad_chromosomes)
+invisible(gc())
+```
+
+```{r read_both_as_int, benchmark = TRUE}
+rad_gt <- gen_tibble(vcf_path,
+  backingfile = "./data/rad/rad_int",
+  names_as_int = TRUE, chromosomes_as_int = TRUE,
+  n_cores = n_cores, quiet = TRUE
+)
+```
+
+```{r include = FALSE}
+read_sizes$read_both_as_int <- sizes(rad_gt)
+```
+
+The genotypes are the same in all four, and so are their backing files (the
+`.bk` file, with one byte per genotype). What changes is the loci table,
+which is held in memory and saved in the `.gt` file:
+
+```{r echo = FALSE}
+read_options <- c(
+  read_default = "default",
+  read_names_as_int = "names_as_int",
+  read_chromosomes_as_int = "chromosomes_as_int",
+  read_both_as_int = "both"
+)
+read_table <- data.frame(
+  options = read_options,
+  time_s = vapply(names(read_options), function(x) {
+    round(benchmarks[[x]][["time"]], 1)
+  }, numeric(1)),
+  peak_memory_mb = vapply(names(read_options), function(x) {
+    round(benchmarks[[x]][["memory"]])
+  }, numeric(1)),
+  do.call(rbind, read_sizes[names(read_options)]),
+  row.names = NULL
+)
+knitr::kable(read_table)
+```
+
+`time_s` is the time to read the VCF and save the `gen_tibble`;
+`peak_memory_mb` is the largest amount of memory used by R while doing so;
+`loci_table_mb` is the size of the loci table in memory; `bk_mb`, `gt_mb` and
+`sidecars_mb` are the sizes of the backing file, of the `.gt` file and of the
+sidecar files on disk.
+
+With the default options, R creates a string for each of the 18.6 million
+names and each of the 13.8 million chromosomes, and has to sort the
+chromosomes to make the levels of a factor. With both options, the loci table
+only holds integers (and the alleles, which are shared single letters), and
+the names are streamed to the sidecar files while the VCF is read.
+
+The loci table of `rad_gt` looks like this:
+
+```{r}
+show_loci(rad_gt)
+```
+
+The `.gt` file is smaller, so loading the `gen_tibble` in a new session is
+faster too:
+
+```{r load_default, benchmark = TRUE}
+reloaded <- gt_load("./data/rad/rad_default.gt")
+```
+
+```{r include = FALSE}
+rm(reloaded)
+invisible(gc())
+```
+
+```{r load_both_as_int, benchmark = TRUE}
+reloaded <- gt_load("./data/rad/rad_int.gt")
+```
+
+```{r include = FALSE}
+rm(reloaded)
+invisible(gc())
+```
+
+# The sidecar files
+
+The sidecars are tab separated text files next to the backing file:
+`rad_int.loci.tsv` has a line for each locus, with its integer name, its
+original name (the VCF ID), its chromosome and its position;
+`rad_int.chromosomes.tsv` has a line for each chromosome, with its code and
+its name.
+
+```{r}
+cat(readLines("./data/rad/rad_int.loci.tsv", n = 4), sep = "\n")
+cat(readLines("./data/rad/rad_int.chromosomes.tsv", n = 4), sep = "\n")
+```
+
+They can be read with any tool, for example
+`data.table::fread("./data/rad/rad_int.loci.tsv", quote = "")`, and joined to
+`show_loci()` by `name = int_name` (or `chromosome = int_chromosome`). Keep
+them with the other files of the `gen_tibble`: `gt_save()` lists them in its
+messages. Functions that write a new backing file, such as
+`gt_update_backingfile()`, `gt_order_loci()` and `rbind()`, write new
+sidecars for it, with the loci that they keep.
+
+# Quality control
+
+We add the lineage of each sample, from the `strata` file of the dataset:
+
+```{r}
+strata <- read.delim("./data/rad/discosnp.strata.tsv")
+rad_gt <- rad_gt %>%
+  mutate(population = strata$pop[match(id, strata$id)])
+table(rad_gt$population)
+```
+
+and remove the loci with more than 20% of missing genotypes, or with a minor
+allele frequency below 5%:
+
+```{r loci_qc, benchmark = TRUE}
+loci_missing <- loci_missingness(rad_gt, n_cores = n_cores)
+loci_freq <- loci_maf(rad_gt, n_cores = n_cores)
+rad_gt <- rad_gt %>%
+  select_loci(which(loci_missing <= 0.2 & loci_freq >= 0.05))
+count_loci(rad_gt)
+```
+
+We then write a new backing file with only these loci. This also writes new
+sidecar files, with the names of the loci that are kept:
+
+```{r update_backingfile, benchmark = TRUE}
+rad_gt <- gt_update_backingfile(rad_gt,
+  backingfile = "./data/rad/rad_int_qc", quiet = TRUE
+)
+```
+
+```{r}
+file.size(c(
+  "./data/rad/rad_int_qc.loci.tsv",
+  "./data/rad/rad_int_qc.chromosomes.tsv"
+)) / 1024^2
+```
+
+# A scan for differentiated loci
+
+As a simple scan, we look for the loci whose allele frequencies differ most
+between two lineages, GS and BS:
+
+```{r scan, benchmark = TRUE}
+freq <- rad_gt %>%
+  group_by(population) %>%
+  loci_alt_freq(n_cores = n_cores, type = "matrix")
+freq_diff <- abs(freq[, "GS"] - freq[, "BS"])
+```
+
+The loci table gives the integer names and chromosome codes of the hits. We
+keep the frequency difference as an extra column (the synthetic data
+resample the genotypes of a few samples of each lineage, so many loci have
+different fixed alleles in the two lineages):
+
+```{r}
+hits <- show_loci(rad_gt) %>%
+  mutate(freq_diff = freq_diff) %>%
+  filter(freq_diff > 0.95)
+hits
+```
+
+`gt_lookup_loci()` gives back the same table, with the original names and
+chromosomes. The first lookup in a session indexes the sidecar files (a
+single read through each file); later lookups only read the parts of the
+files that hold the loci:
+
+```{r lookup_first, benchmark = TRUE}
+hits_named <- gt_lookup_loci(rad_gt, hits)
+```
+
+```{r}
+hits_named
+```
+
+```{r lookup_again, benchmark = TRUE}
+top_10 <- gt_lookup_loci(rad_gt, order(freq_diff, decreasing = TRUE)[1:10])
+```
+
+```{r}
+top_10
+```
+
+`gt_lookup_loci()` also takes row numbers of the loci table, as we did here
+with `order()`. Since lookups use the integer names, rather than the rows, a
+table of hits stays valid if the `gen_tibble` is filtered or reordered later.
+
+# Summaries by RAD locus
+
+Statistics by chromosome have one row per RAD locus, with the code of the
+chromosome. For example, the number of SNPs on each RAD locus:
+
+```{r}
+snps_per_locus <- show_loci(rad_gt) %>%
+  count(chromosome, name = "n_snps")
+table(snps_per_locus$n_snps)
+```
+
+`gt_lookup_chromosomes()` gives the names of the codes, e.g. of the RAD loci
+with the most SNPs left after quality control:
+
+```{r lookup_chromosomes, benchmark = TRUE}
+top_loci <- snps_per_locus %>%
+  slice_max(n_snps, n = 5, with_ties = FALSE) %>%
+  mutate(rad_locus = gt_lookup_chromosomes(rad_gt, chromosome))
+```
+
+```{r}
+top_loci
+```
+
+# Restoring the names
+
+When a `gen_tibble` has been filtered down to fewer loci, it can be
+convenient to have the original names back in its loci table, e.g. before
+exporting the data. `gt_restore_loci()` does this (it gives the same loci
+table as reading the VCF with the default options, for the loci that are
+kept):
+
+```{r restore, benchmark = TRUE}
+rad_hits <- rad_gt %>%
+  select_loci(which(freq_diff > 0.95)) %>%
+  gt_restore_loci()
+```
+
+```{r}
+show_loci(rad_hits)
+```
+
+# Performance summary
+
+```{r echo=FALSE}
+# the benchmarked chunks, in the order in which they were run
+steps <- c(
+  "read_default", "read_names_as_int", "read_chromosomes_as_int",
+  "read_both_as_int", "load_default", "load_both_as_int", "loci_qc",
+  "update_backingfile", "scan", "lookup_first", "lookup_again",
+  "lookup_chromosomes", "restore"
+)
+steps <- steps[steps %in% names(benchmarks)]
+benchmark_results <- data.frame(
+  step = steps,
+  time_s = vapply(steps, function(x) benchmarks[[x]][["time"]], numeric(1)),
+  peak_memory_mb = vapply(
+    steps, function(x) benchmarks[[x]][["memory"]], numeric(1)
+  ),
+  row.names = NULL
+)
+benchmark_results$time_s <- round(benchmark_results$time_s, 2)
+benchmark_results$peak_memory_mb <- round(benchmark_results$peak_memory_mb)
+knitr::kable(benchmark_results)
+```
+
+`peak_memory_mb` is the memory used by R; the genotypes are in the backing
+files, on disk, and are read a block at a time by the functions that use
+them.
+
+# Key takeaways
+
+- For RAD-seq data assembled de novo, read the *VCF* with
+  `names_as_int = TRUE` and `chromosomes_as_int = TRUE`. The loci table then
+  holds only integers, and reading, saving and loading the `gen_tibble` are
+  faster and use much less memory.
+- Nothing is lost: the original names are in the sidecar files next to the
+  backing file. `gt_lookup_loci()` gives back the names of the hits of a scan
+  (from a subset of the loci table, or from row numbers),
+  `gt_lookup_chromosomes()` translates chromosome codes, and
+  `gt_restore_loci()` puts the names back into a (smaller) `gen_tibble`.
+- Keep the sidecar files with the other files of the `gen_tibble`.
+- The same options are available in `gt_merge_vcfs()` and
+  `gt_concat_vcfs()`, e.g. to merge several RAD-seq runs (for RAD loci
+  assembled separately in each run, the loci of different runs only match if
+  they have the same chromosome and position, so assemble them together).

@@ -24,6 +24,10 @@
   `gt_lookup_loci()` and `gt_restore_loci()` work on merged data, and gain
   the argument `chromosomes_as_int`. The merge keeps on disk only the loci of
   the file being read and the names of the merged sites
+* new article on large RAD-seq datasets: it reads 18.6 million SNPs on 13.8
+  million RAD loci with and without `names_as_int` and `chromosomes_as_int`,
+  compares their time and memory, and looks up the original names of the
+  hits of a scan from the sidecar files
 * new `gt_merge_vcfs()` reads several VCF files with different samples into
   a single `gen_tibble`, as `bcftools merge` would, in one go (without
   reading each file into its own `gen_tibble` and binding them in pairs with
