@@ -1,0 +1,8 @@
+# generated or downloaded by the harness
+data/
+lib/
+src/
+work/
+logs/
+results/vcfarrow_bench.tsv
+results/summary.md

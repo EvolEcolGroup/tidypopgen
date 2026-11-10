@@ -69,8 +69,11 @@
 #'   latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 #'   in case your
 #'   *VCF* has an unusual structure.
-#' @param n_cores currently ignored (reading files is not parallelised); kept
-#'   for backwards compatibility
+#' @param n_cores the number of cores used to read a *VCF* file with
+#'   `parser = "cpp"`: the genotypes are parsed in parallel, and a *.vcf.gz*
+#'   file compressed with `bgzip` (as most are) is also decompressed in
+#'   parallel (other gzipped files are decompressed on a single core). It is
+#'   ignored for other formats and for `parser = "vcfR"`.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #'   'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -281,31 +284,13 @@ gen_tibble.character <-
     }
 
     # check alleles
-    loci <- show_loci(x_gt)
-    doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
-
-    if (length(doubles) > 0) {
-      check_missing <- x_gt %>%
-        select_loci(all_of(doubles)) %>%
-        loci_missingness()
-      if (any(check_missing < 1, na.rm = TRUE)) {
-        # clean up files if we are stopping (dropping the gen_tibble first,
-        # so that its backing file can be unmapped, see remove_fbm_files())
-        files <- gt_get_file_names(x_gt)
-        rm(x_gt)
-        remove_fbm_files(files)
-        stop(paste(
-          "Some loci are missing both reference and alternate alleles.",
-          "Genotypes are not missing at these loci.",
-          "Please check the loci and genotype data."
-        ))
-      } else {
-        warning(
-          "Your data contain loci with no genotypes or allele ",
-          "information. Use loci_missingness() to identify them ",
-          "and select_loci() to remove them."
-        )
-      }
+    if (has_genotypes_without_alleles(x_gt)) {
+      # clean up files if we are stopping (dropping the gen_tibble first,
+      # so that its backing file can be unmapped, see remove_fbm_files())
+      files <- gt_get_file_names(x_gt)
+      rm(x_gt)
+      remove_fbm_files(files)
+      stop_genotypes_without_alleles()
     }
 
     # the readers save the FBM (.rds), so only the gen_tibble is saved
@@ -600,6 +585,43 @@ tbl_sum.gen_tbl <- function(x, ...) {
   )
 }
 
+
+# whether a gen_tibble has loci whose reference and alternate alleles are both
+# missing (NA), but with genotypes that are not all missing, which the readers
+# of files do not allow (the caller then removes the files of the gen_tibble,
+# and stops with stop_genotypes_without_alleles()). If such loci only have
+# missing genotypes, it gives a warning (and returns FALSE)
+has_genotypes_without_alleles <- function(x_gt) {
+  loci <- show_loci(x_gt)
+  doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
+  if (length(doubles) == 0) {
+    return(FALSE)
+  }
+  check_missing <- x_gt %>%
+    select_loci(all_of(doubles)) %>%
+    loci_missingness()
+  if (any(check_missing < 1, na.rm = TRUE)) {
+    return(TRUE)
+  }
+  warning(
+    "Your data contain loci with no genotypes or allele ",
+    "information. Use loci_missingness() to identify them ",
+    "and select_loci() to remove them."
+  )
+  FALSE
+}
+
+# (the error is reported as coming from the caller, e.g. gen_tibble())
+stop_genotypes_without_alleles <- function() {
+  stop(simpleError(
+    paste(
+      "Some loci are missing both reference and alternate alleles.",
+      "Genotypes are not missing at these loci.",
+      "Please check the loci and genotype data."
+    ),
+    call = sys.call(-1)
+  ))
+}
 
 # function to check the allele alphabet
 check_allele_alphabet <- function(

@@ -165,12 +165,28 @@ vcf_gt_dosages_cpp <- function(gt, max_ploidy) {
     .Call(`_tidypopgen_vcf_gt_dosages_cpp`, gt, max_ploidy)
 }
 
-vcf_loci_table <- function(filename, read_names = TRUE) {
-    .Call(`_tidypopgen_vcf_loci_table`, filename, read_names)
+merge_sites_new <- function(split_alt, ref_rule, missing_alleles) {
+    .Call(`_tidypopgen_merge_sites_new`, split_alt, ref_rule, missing_alleles)
 }
 
-vcf_genotypes_to_fbm <- function(filename, BM, biallelic, missing_value, n_header_lines) {
-    .Call(`_tidypopgen_vcf_genotypes_to_fbm`, filename, BM, biallelic, missing_value, n_header_lines)
+merge_sites_add_file <- function(sites, chromosome, position, allele_ref, allele_alt) {
+    .Call(`_tidypopgen_merge_sites_add_file`, sites, chromosome, position, allele_ref, allele_alt)
+}
+
+merge_sites_result <- function(sites) {
+    .Call(`_tidypopgen_merge_sites_result`, sites)
+}
+
+merge_sites_file_cols <- function(sites, file, site_col) {
+    .Call(`_tidypopgen_merge_sites_file_cols`, sites, file, site_col)
+}
+
+vcf_to_bk <- function(filename, bk_file, read_names = TRUE, n_threads = 1L, read_genotypes = TRUE) {
+    .Call(`_tidypopgen_vcf_to_bk`, filename, bk_file, read_names, n_threads, read_genotypes)
+}
+
+vcf_merge_genotypes <- function(filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads = 1L) {
+    invisible(.Call(`_tidypopgen_vcf_merge_genotypes`, filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads))
 }
 
 window_sums_cpp <- function(x, loci, lo, hi, long_double) {

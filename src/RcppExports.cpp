@@ -690,31 +690,89 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// vcf_loci_table
-List vcf_loci_table(std::string filename, bool read_names);
-RcppExport SEXP _tidypopgen_vcf_loci_table(SEXP filenameSEXP, SEXP read_namesSEXP) {
+// merge_sites_new
+SEXP merge_sites_new(bool split_alt, int ref_rule, const CharacterVector& missing_alleles);
+RcppExport SEXP _tidypopgen_merge_sites_new(SEXP split_altSEXP, SEXP ref_ruleSEXP, SEXP missing_allelesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    Rcpp::traits::input_parameter< bool >::type read_names(read_namesSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_loci_table(filename, read_names));
+    Rcpp::traits::input_parameter< bool >::type split_alt(split_altSEXP);
+    Rcpp::traits::input_parameter< int >::type ref_rule(ref_ruleSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type missing_alleles(missing_allelesSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_new(split_alt, ref_rule, missing_alleles));
     return rcpp_result_gen;
 END_RCPP
 }
-// vcf_genotypes_to_fbm
-bool vcf_genotypes_to_fbm(std::string filename, Environment BM, LogicalVector& biallelic, const int missing_value, const int n_header_lines);
-RcppExport SEXP _tidypopgen_vcf_genotypes_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP biallelicSEXP, SEXP missing_valueSEXP, SEXP n_header_linesSEXP) {
+// merge_sites_add_file
+IntegerVector merge_sites_add_file(SEXP sites, const IntegerVector& chromosome, const IntegerVector& position, const CharacterVector& allele_ref, const CharacterVector& allele_alt);
+RcppExport SEXP _tidypopgen_merge_sites_add_file(SEXP sitesSEXP, SEXP chromosomeSEXP, SEXP positionSEXP, SEXP allele_refSEXP, SEXP allele_altSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type chromosome(chromosomeSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type position(positionSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type allele_ref(allele_refSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type allele_alt(allele_altSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_add_file(sites, chromosome, position, allele_ref, allele_alt));
+    return rcpp_result_gen;
+END_RCPP
+}
+// merge_sites_result
+List merge_sites_result(SEXP sites);
+RcppExport SEXP _tidypopgen_merge_sites_result(SEXP sitesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_result(sites));
+    return rcpp_result_gen;
+END_RCPP
+}
+// merge_sites_file_cols
+List merge_sites_file_cols(SEXP sites, int file, const IntegerVector& site_col);
+RcppExport SEXP _tidypopgen_merge_sites_file_cols(SEXP sitesSEXP, SEXP fileSEXP, SEXP site_colSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
+    Rcpp::traits::input_parameter< int >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type site_col(site_colSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_file_cols(sites, file, site_col));
+    return rcpp_result_gen;
+END_RCPP
+}
+// vcf_to_bk
+List vcf_to_bk(std::string filename, std::string bk_file, bool read_names, int n_threads, bool read_genotypes);
+RcppExport SEXP _tidypopgen_vcf_to_bk(SEXP filenameSEXP, SEXP bk_fileSEXP, SEXP read_namesSEXP, SEXP n_threadsSEXP, SEXP read_genotypesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
-    Rcpp::traits::input_parameter< LogicalVector& >::type biallelic(biallelicSEXP);
-    Rcpp::traits::input_parameter< const int >::type missing_value(missing_valueSEXP);
-    Rcpp::traits::input_parameter< const int >::type n_header_lines(n_header_linesSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_genotypes_to_fbm(filename, BM, biallelic, missing_value, n_header_lines));
+    Rcpp::traits::input_parameter< std::string >::type bk_file(bk_fileSEXP);
+    Rcpp::traits::input_parameter< bool >::type read_names(read_namesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    Rcpp::traits::input_parameter< bool >::type read_genotypes(read_genotypesSEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_to_bk(filename, bk_file, read_names, n_threads, read_genotypes));
     return rcpp_result_gen;
+END_RCPP
+}
+// vcf_merge_genotypes
+void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset, const IntegerVector& row, const IntegerVector& col, const LogicalVector& swap, const IntegerVector& ploidy, int missing_value, int n_threads);
+RcppExport SEXP _tidypopgen_vcf_merge_genotypes(SEXP filenameSEXP, SEXP BMSEXP, SEXP row_offsetSEXP, SEXP rowSEXP, SEXP colSEXP, SEXP swapSEXP, SEXP ploidySEXP, SEXP missing_valueSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< int >::type row_offset(row_offsetSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type row(rowSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type col(colSEXP);
+    Rcpp::traits::input_parameter< const LogicalVector& >::type swap(swapSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< int >::type missing_value(missing_valueSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    vcf_merge_genotypes(filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads);
+    return R_NilValue;
 END_RCPP
 }
 // window_sums_cpp
@@ -789,8 +847,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_any_duplicated_strings_cpp", (DL_FUNC) &_tidypopgen_any_duplicated_strings_cpp, 1},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
     {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
-    {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 2},
-    {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 5},
+    {"_tidypopgen_merge_sites_new", (DL_FUNC) &_tidypopgen_merge_sites_new, 3},
+    {"_tidypopgen_merge_sites_add_file", (DL_FUNC) &_tidypopgen_merge_sites_add_file, 5},
+    {"_tidypopgen_merge_sites_result", (DL_FUNC) &_tidypopgen_merge_sites_result, 1},
+    {"_tidypopgen_merge_sites_file_cols", (DL_FUNC) &_tidypopgen_merge_sites_file_cols, 3},
+    {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 5},
+    {"_tidypopgen_vcf_merge_genotypes", (DL_FUNC) &_tidypopgen_vcf_merge_genotypes, 9},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}

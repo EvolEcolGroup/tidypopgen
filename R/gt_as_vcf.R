@@ -7,8 +7,9 @@
 #' @param x a [`gen_tibble`], with population coded as 'population'
 #' @param file the .vcf file name with a path, or NULL (the default) to use the
 #'   location of the backing files.
-#' @param chunk_size the number of loci processed at a time. If left to NULL,
-#'   100,000 loci are processed at a time.
+#' @param chunk_size the number of loci processed at a time (also used for the
+#'   number of chromosomes processed at a time when writing the contig lines
+#'   of the header). If left to NULL, 100,000 loci are processed at a time.
 #' @param overwrite logical, should the file be overwritten if it already
 #'   exists?
 #' @returns the path of the .vcf file
@@ -52,54 +53,31 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
   }
   chunks_vec_index <- c(0, cumsum(chunks_vec))
 
-  # generate the header
-  vcf_header <- c(
+  # generate the header (the contig lines, one per chromosome, are added
+  # between its start and its end when it is written)
+  vcf_header_start <- c(
     "##fileformat=VCFv4.3",
     paste0("##fileDate=", format(Sys.time(), "%Y%m%d")),
     paste0("##source=tidypopgen_v", utils::packageVersion("tidypopgen"))
   )
-  # create copy of loci table
-  loci_tbl <- show_loci(x)
-  # reorder chromosomes levels in the order in which they appear
-  loci_tbl$chromosome <- fct_inorder_base(loci_tbl$chromosome)
-  # get max position for each chromosome
-  chromosome_summary <- loci_tbl %>%
-    group_by(.data$chromosome) %>%
-    summarise(max = max(.data$position))
-  for (chrom_i in seq_len(nrow(chromosome_summary))) {
-    vcf_header <- c(
-      vcf_header,
-      paste0(
-        "##contig=<ID=",
-        chromosome_summary$chromosome[chrom_i],
-        ",length=",
-        format_position(chromosome_summary$max[chrom_i] + 1),
-        ">"
-      )
-    )
-  }
-  vcf_header <- c(
-    vcf_header,
-    '##INFO=<ID=PR,Number=0,Type=Flag,Description="Provisional reference allele, may not be based on real reference genome">' # nolint
-  )
-  vcf_header <- c(
-    vcf_header,
-    '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">'
-  )
-  vcf_header <- c(
-    vcf_header,
+  vcf_header_end <- c(
+    '##INFO=<ID=PR,Number=0,Type=Flag,Description="Provisional reference allele, may not be based on real reference genome">', # nolint
+    '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
     paste0(
       "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t",
       paste(x$id, collapse = "\t")
     )
   )
-  # write it to file
-  utils::write.table(
-    vcf_header,
+  # create copy of loci table
+  loci_tbl <- show_loci(x)
+  # write the header to file
+  vcf_write_header(
     file = file,
-    quote = FALSE,
-    row.names = FALSE,
-    col.names = FALSE
+    header_start = vcf_header_start,
+    header_end = vcf_header_end,
+    chromosome = loci_tbl$chromosome,
+    position = loci_tbl$position,
+    chunk_size = chunk_size
   )
   # create a lookup table with the string for each raw value of the FBM, by
   # recoding its decoded dosages (dosages other than 0, 1 and 2, e.g. imputed
@@ -125,10 +103,15 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
         info = "PR",
         format = "GT"
       )
-    loci_sub[is.na(loci_sub)] <- "."
-    # the start of each line, with the information on the locus (the factor
-    # of chromosomes is pasted as its labels)
-    loci_prefix <- do.call(paste, c(unname(as.list(loci_sub)), sep = "\t"))
+    # write missing values as "." (the columns are converted to text first, as
+    # a factor, e.g. of chromosomes, or integer names can not store ".")
+    loci_sub <- lapply(loci_sub, function(col) {
+      col <- as.character(col)
+      col[is.na(col)] <- "."
+      col
+    })
+    # the start of each line, with the information on the locus
+    loci_prefix <- do.call(paste, c(unname(loci_sub), sep = "\t"))
     # append the lines of this chunk to the file (the genotypes are read and
     # written in C++, one line per locus)
     gt_write_text_by_locus(
@@ -144,6 +127,64 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
   return(file)
 }
 
+
+# write the header of a VCF: the lines in `header_start`, then a ##contig
+# line for each chromosome, then the lines in `header_end`. Chromosomes are
+# listed in the order in which they first appear (missing chromosomes last, as
+# dplyr groups them, with "." as ID), with their largest position + 1 as their
+# length (NA if a position of the chromosome is missing, as max() would
+# give). Some data have millions of chromosomes (e.g. RAD loci assembled de
+# novo), so the lengths are found without grouping or looping over
+# chromosomes, and the contig lines are made and written `chunk_size`
+# chromosomes at a time.
+vcf_write_header <- function(
+  file,
+  header_start,
+  header_end,
+  chromosome,
+  position,
+  chunk_size
+) {
+  file_con <- file(file, open = "w")
+  on.exit(close(file_con))
+  writeLines(header_start, file_con)
+  if (length(chromosome) > 0) {
+    # the integer codes of a factor are faster to match than its labels
+    chrom_key <- chromosome
+    if (is.factor(chrom_key)) {
+      chrom_key <- as.integer(chrom_key)
+    }
+    # the first locus of each chromosome, with missing chromosomes last
+    first <- which(!duplicated(chrom_key))
+    first <- c(first[!is.na(chrom_key[first])], first[is.na(chrom_key[first])])
+    # the index of the chromosome (in the order above) of each locus
+    chrom_index <- match(chrom_key, chrom_key[first])
+    # sort the loci by chromosome and then by position (missing positions
+    # last), so that the last locus of each chromosome has its largest
+    # position
+    ord <- order(chrom_index, position, method = "radix")
+    is_last <- c(diff(chrom_index[ord]) != 0L, TRUE)
+    chrom_max <- position[ord][is_last]
+    # write the contig lines in chunks of chromosomes
+    for (chunk_start in seq(1, length(first), by = chunk_size)) {
+      this_chunk <- chunk_start:min(chunk_start + chunk_size - 1, length(first))
+      # a missing chromosome is written as ".", as in the body of the VCF
+      chrom_id <- as.character(chromosome[first[this_chunk]])
+      chrom_id[is.na(chrom_id)] <- "."
+      writeLines(
+        paste0(
+          "##contig=<ID=",
+          chrom_id,
+          ",length=",
+          format_position(chrom_max[this_chunk] + 1),
+          ">"
+        ),
+        file_con
+      )
+    }
+  }
+  writeLines(header_end, file_con)
+}
 
 # format positions as plain integers for text files (positions stored as
 # doubles would otherwise be written in scientific notation, e.g. 1e+05)

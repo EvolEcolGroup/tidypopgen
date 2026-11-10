@@ -246,3 +246,85 @@ test_that("gt_as_vcf writes subsets of individuals and loci", {
   expected[is.na(expected)] <- "./."
   expect_equal(unname(vcf_body[, 10:11]), unname(expected))
 })
+
+test_that("contig lines follow the order in which chromosomes appear", {
+  # chromosomes are not in alphabetical order, chrB comes back after chrC,
+  # and the largest position of chrB and chrA is not their last
+  test_loci_unsorted <- test_loci
+  test_loci_unsorted$chromosome <-
+    c("chrB", "chrB", "chrA", "chrA", "chrC", "chrB")
+  test_loci_unsorted$position <- as.integer(c(343, 5, 65, 3, 23, 100))
+  test_gt_unsorted <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci_unsorted,
+    indiv_meta = test_indiv_meta,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  # chunks smaller than the number of chromosomes
+  vcf_path <- gt_as_vcf(
+    test_gt_unsorted,
+    file = paste0(tempfile(), ".vcf"),
+    chunk_size = 2
+  )
+  vcf_lines <- readLines(vcf_path)
+  # one contig per chromosome, after the source line, with its largest
+  # position + 1 as length
+  expect_equal(which(startsWith(vcf_lines, "##contig")), 4:6)
+  expect_equal(
+    vcf_lines[4:6],
+    c(
+      "##contig=<ID=chrB,length=344>",
+      "##contig=<ID=chrA,length=66>",
+      "##contig=<ID=chrC,length=24>"
+    )
+  )
+  # the rest of the header and the loci are unchanged
+  expect_true(startsWith(vcf_lines[7], "##INFO=<ID=PR"))
+  expect_true(startsWith(vcf_lines[9], "#CHROM"))
+  vcf_body <- vcf_lines[!startsWith(vcf_lines, "#")]
+  vcf_chrom <- vapply(strsplit(vcf_body, "\t"), `[`, character(1), 1)
+  expect_equal(vcf_chrom, test_loci_unsorted$chromosome)
+})
+
+test_that("missing chromosomes are written as '.'", {
+  test_loci_na <- test_loci
+  test_loci_na$chromosome[c(2, 5)] <- NA
+  test_gt_na <- gen_tibble(
+    x = test_genotypes,
+    loci = test_loci_na,
+    indiv_meta = test_indiv_meta,
+    backingfile = tempfile(),
+    quiet = TRUE
+  )
+  vcf_path <- gt_as_vcf(test_gt_na, file = paste0(tempfile(), ".vcf"))
+  vcf_lines <- readLines(vcf_path)
+  # the missing chromosome has the last contig line, with "." as ID
+  expect_equal(
+    grep("^##contig", vcf_lines, value = TRUE),
+    c(
+      "##contig=<ID=chr1,length=344>",
+      "##contig=<ID=chr2,length=457>",
+      "##contig=<ID=.,length=24>"
+    )
+  )
+  vcf_body <- vcf_lines[!startsWith(vcf_lines, "#")]
+  vcf_chrom <- vapply(strsplit(vcf_body, "\t"), `[`, character(1), 1)
+  expect_equal(vcf_chrom, c("chr1", ".", "chr1", "chr1", ".", "chr2"))
+  # both parsers read "." back as a missing chromosome
+  for (parser in c("cpp", "vcfR")) {
+    test_gt2 <- gen_tibble(
+      vcf_path,
+      quiet = TRUE,
+      parser = parser,
+      backingfile = tempfile()
+    )
+    expect_equal(
+      as.character(show_loci(test_gt2)$chromosome),
+      test_loci_na$chromosome
+    )
+    expect_true(
+      identical(show_genotypes(test_gt_na), show_genotypes(test_gt2))
+    )
+  }
+})
