@@ -307,8 +307,8 @@ the first line of every 1024th line.
 - `test_vcf_int.R` errored once in a run of several test files. It passed in
   five reruns and in the full suite, and the error was not captured. Worth
   watching on CI.
-- `R CMD check` (and so the examples of the new functions, which read the
-  anolis VCF) has not been run.
+- `R CMD check` has not been run. The examples of the new functions (in
+  `man/gt_lookup_loci.Rd`) do run.
 - Windows: the 64-bit seeks (`_fseeki64`) and the binary-mode files have
   not been built on Windows yet. CI will tell.
 - `gt_get_file_names()` does not list the sidecars. `gt_save()` lists them
