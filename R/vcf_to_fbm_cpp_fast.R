@@ -213,20 +213,6 @@ chromosome_index_to_factor <- function(index, chromosome_names) {
   )
 }
 
-# the names of the loci of a VCF, where the missing names (".") are replaced
-# by the chromosome and position (as vcfR does), e.g. "1_752566"
-fill_missing_loci_names <- function(name, chromosome, position) {
-  missing_loci_ids <- which(name == ".")
-  if (length(missing_loci_ids) > 0) {
-    name[missing_loci_ids] <- paste(
-      chromosome[missing_loci_ids],
-      position[missing_loci_ids],
-      sep = "_"
-    )
-  }
-  name
-}
-
 # the order of a character vector of unique strings (with no NAs) as the
 # levels of as.factor(), i.e. in the collation of the locale (as order()
 # does): x[order_as_levels(x)] are the levels.

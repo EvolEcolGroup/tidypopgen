@@ -16,6 +16,7 @@ gt_merge_vcfs(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   names_as_int = TRUE,
+  chromosomes_as_int = FALSE,
   n_cores = 1,
   quiet = FALSE
 )
@@ -69,7 +70,15 @@ to TRUE, unlike in \code{\link[=gen_tibble]{gen_tibble()}} (where it defaults to
 \emph{VCF} files is mostly used for large datasets, in which the loci names
 take most of the memory of the \code{gen_tibble} and are rarely needed (loci
 are identified by their chromosome and position). Set it to FALSE to keep
-the \emph{VCF} IDs.}
+the \emph{VCF} IDs. With integer names, the \emph{VCF} IDs (with the chromosomes
+and positions) are written to a sidecar file next to the backing file,
+from which \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_restore_loci]{gt_restore_loci()}} get them back.}
+
+\item{chromosomes_as_int}{boolean: whether the chromosomes are integer
+codes rather than a factor, which saves memory with many chromosomes
+(e.g. RAD loci assembled de novo); the names are written to a sidecar
+file next to the backing file (see \code{\link[=gen_tibble]{gen_tibble()}} and
+\code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}}). Default is FALSE.}
 
 \item{n_cores}{the number of cores used to decompress bgzipped files and to
 parse the genotypes. Defaults to 1.}

@@ -26,12 +26,14 @@
 // A buffered writer of a new sidecar file, which removes the file if it is
 // destroyed before finish() (e.g. when an error stops the parsing), as the
 // BkWriter of the backing file does. The file is opened in binary mode, so
-// that lines end in "\n" on all platforms.
+// that lines end in "\n" on all platforms. With append = true, lines are
+// added to the end of an existing file (which is then not removed on error:
+// the caller removes it)
 class SidecarWriter {
 public:
-  explicit SidecarWriter(const std::string &filename)
-    : filename(filename), finished(false) {
-    fp = std::fopen(filename.c_str(), "wb");
+  explicit SidecarWriter(const std::string &filename, bool append = false)
+    : filename(filename), finished(false), append(append) {
+    fp = std::fopen(filename.c_str(), append ? "ab" : "wb");
     if (fp == NULL) {
       Rcpp::stop("could not create the file " + filename);
     }
@@ -44,7 +46,9 @@ public:
       if (fp != NULL) {
         std::fclose(fp);
       }
-      std::remove(filename.c_str());
+      if (!append) {
+        std::remove(filename.c_str());
+      }
     }
   }
   void add(const char* x, size_t len) { buffer.append(x, len); }
@@ -88,6 +92,7 @@ private:
   std::string filename;
   std::FILE* fp;
   bool finished;
+  bool append;
   std::string buffer;
   void flush() {
     if (!buffer.empty() &&

@@ -483,6 +483,25 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// sidecar_gather
+double sidecar_gather(std::string path_in, std::string header, IntegerVector index_keys, NumericVector index_offsets, IntegerVector keys, std::string path_out, double first_new_key, bool append, int chunk_size);
+RcppExport SEXP _tidypopgen_sidecar_gather(SEXP path_inSEXP, SEXP headerSEXP, SEXP index_keysSEXP, SEXP index_offsetsSEXP, SEXP keysSEXP, SEXP path_outSEXP, SEXP first_new_keySEXP, SEXP appendSEXP, SEXP chunk_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path_in(path_inSEXP);
+    Rcpp::traits::input_parameter< std::string >::type header(headerSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type index_keys(index_keysSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type index_offsets(index_offsetsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type keys(keysSEXP);
+    Rcpp::traits::input_parameter< std::string >::type path_out(path_outSEXP);
+    Rcpp::traits::input_parameter< double >::type first_new_key(first_new_keySEXP);
+    Rcpp::traits::input_parameter< bool >::type append(appendSEXP);
+    Rcpp::traits::input_parameter< int >::type chunk_size(chunk_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_gather(path_in, header, index_keys, index_offsets, keys, path_out, first_new_key, append, chunk_size));
+    return rcpp_result_gen;
+END_RCPP
+}
 // pairwise_pop_fst_cpp
 List pairwise_pop_fst_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, size_t ngroups, const NumericVector& ploidy, const IntegerMatrix& pairwise_combn, std::string method, bool by_locus, bool return_num_dem, int block_size, int ncores);
 RcppExport SEXP _tidypopgen_pairwise_pop_fst_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP pairwise_combnSEXP, SEXP methodSEXP, SEXP by_locusSEXP, SEXP return_num_demSEXP, SEXP block_sizeSEXP, SEXP ncoresSEXP) {
@@ -922,6 +941,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_sidecar_subset", (DL_FUNC) &_tidypopgen_sidecar_subset, 4},
     {"_tidypopgen_chromosome_int_codes_cpp", (DL_FUNC) &_tidypopgen_chromosome_int_codes_cpp, 1},
     {"_tidypopgen_write_chromosome_sidecar_cpp", (DL_FUNC) &_tidypopgen_write_chromosome_sidecar_cpp, 3},
+    {"_tidypopgen_sidecar_gather", (DL_FUNC) &_tidypopgen_sidecar_gather, 9},
     {"_tidypopgen_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_pairwise_pop_fst_cpp, 12},
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},

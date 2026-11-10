@@ -397,3 +397,152 @@ test_that("window statistics and runs keep integer chromosomes", {
   }
   expect_identical(sort_runs(int_roh), sort_runs(names_roh))
 })
+
+# three files with different samples, with missing IDs, several chromosomes
+# (in different orders), and sites first found in each file
+sidecar_merge_vcfs <- function() {
+  c(
+    write_merge_vcf("a",
+      data.frame(
+        chrom = c("chr2", "chr2", "chr1", "scaf_9"), pos = c(10, 20, 5, 1),
+        id = c(".", "a2", "a3", "a4"), ref = "A", alt = "C"
+      ),
+      genotypes = matrix("0/1", 4, 1)
+    ),
+    write_merge_vcf("b",
+      data.frame(
+        chrom = c("chr1", "chr1", "chr2", "chrX", "chr2"),
+        pos = c(5, 7, 15, 3, 20),
+        id = c("b1", "b2", ".", "b4", "b5"), ref = "A", alt = "C"
+      ),
+      genotypes = matrix("1/1", 5, 1)
+    ),
+    write_merge_vcf("c",
+      data.frame(
+        chrom = c("chr2", "chrX", "chr1", "chr1"), pos = c(20, 3, 1, 5),
+        id = c("c1", "c2", "c3", "c4"), ref = "A", alt = "C"
+      ),
+      genotypes = matrix("0/0", 4, 1)
+    )
+  )
+}
+
+test_that("gt_merge_vcfs writes sidecars that restore the names", {
+  withr::local_options(tidypopgen.sidecar_block = 2L)
+  files <- sidecar_merge_vcfs()
+  for (variants in c("union", "intersection")) {
+    names_gt <- gt_merge_vcfs(files,
+      variants = variants, names_as_int = FALSE,
+      backingfile = tempfile(), quiet = TRUE
+    )
+    for (chromosomes_as_int in c(FALSE, TRUE)) {
+      int_gt <- gt_merge_vcfs(files,
+        variants = variants, chromosomes_as_int = chromosomes_as_int,
+        backingfile = tempfile(), quiet = TRUE
+      )
+      expect_true(is.integer(show_loci(int_gt)$name))
+      expect_identical(
+        is.integer(show_loci(int_gt)$chromosome),
+        chromosomes_as_int
+      )
+      # no temporary files are left
+      expect_identical(
+        list.files(dirname(loci_sidecar_path(int_gt)),
+          pattern = basename(paste0(loci_sidecar_path(int_gt), "."))
+        ),
+        character(0)
+      )
+      expect_identical(
+        show_loci(gt_restore_loci(int_gt)),
+        show_loci(names_gt)
+      )
+      expect_identical(show_genotypes(int_gt), show_genotypes(names_gt))
+    }
+  }
+  # each locus takes the name it has in the first file where it is found
+  expect_identical(
+    show_loci(names_gt)$name,
+    c("a2", "a3")
+  )
+})
+
+test_that("gt_concat_vcfs writes sidecars that restore the names", {
+  withr::local_options(tidypopgen.sidecar_block = 2L)
+  files <- c(
+    write_merge_vcf(c("a", "b"),
+      data.frame(
+        chrom = c("1", "1", "scaf_2"), pos = c(100, 200, 5),
+        id = c("s1", ".", "s3"), ref = "A", alt = "G"
+      ),
+      genotypes = matrix("0/1", 3, 2)
+    ),
+    write_merge_vcf(c("b", "a"),
+      data.frame(
+        chrom = c("2", ".", "chrX"), pos = c(50, 60, 70),
+        id = c("s4", ".", "s6"), ref = "T", alt = "C"
+      ),
+      genotypes = matrix("1/1", 3, 2)
+    )
+  )
+  names_gt <- gt_concat_vcfs(files,
+    names_as_int = FALSE, backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(
+    show_loci(names_gt)$name,
+    c("s1", "1_200", "s3", "s4", "NA_60", "s6")
+  )
+  for (chromosomes_as_int in c(FALSE, TRUE)) {
+    int_gt <- gt_concat_vcfs(files,
+      chromosomes_as_int = chromosomes_as_int,
+      backingfile = tempfile(), quiet = TRUE
+    )
+    expect_identical(
+      show_loci(gt_restore_loci(int_gt)),
+      show_loci(names_gt)
+    )
+    expect_false(file.exists(paste0(loci_sidecar_path(int_gt), ".scan")))
+  }
+  expect_identical(
+    show_loci(int_gt)$chromosome,
+    c(1L, 1L, 3L, 2L, NA, 4L)
+  )
+})
+
+test_that("sidecar_gather writes lines in any order, with new keys", {
+  loci <- data.frame(
+    chrom = "1", pos = 1:5, id = paste0("rs", 1:5), ref = "A", alt = "G"
+  )
+  vcf <- write_merge_vcf("a", loci, matrix("0/1", 5, 1))
+  int_gt <- gen_tibble(vcf,
+    names_as_int = TRUE, backingfile = tempfile(), quiet = TRUE
+  )
+  path <- loci_sidecar_path(int_gt)
+  index <- sidecar_index(path, loci_sidecar_header, 2L)
+  out <- tempfile()
+  # (in chunks of 2 keys, with a repeated key)
+  sidecar_gather(path, loci_sidecar_header,
+    index_keys = index$keys, index_offsets = index$offsets,
+    keys = c(4L, 1L, 4L, 5L, 2L), path_out = out, first_new_key = 1,
+    append = FALSE, chunk_size = 2L
+  )
+  expect_identical(readLines(out), c(
+    loci_sidecar_header,
+    "1\trs4\t1\t4", "2\trs1\t1\t1", "3\trs4\t1\t4", "4\trs5\t1\t5",
+    "5\trs2\t1\t2"
+  ))
+  # all the lines, appended with keys after the last one
+  sidecar_gather(path, loci_sidecar_header,
+    index_keys = integer(0), index_offsets = numeric(0),
+    keys = integer(0), path_out = out, first_new_key = 6, append = TRUE
+  )
+  expect_identical(readLines(out)[7:11], paste0(
+    6:10, "\trs", 1:5, "\t1\t", 1:5
+  ))
+  expect_error(
+    sidecar_gather(path, loci_sidecar_header,
+      index_keys = index$keys, index_offsets = index$offsets,
+      keys = 9L, path_out = tempfile(), first_new_key = 1, append = FALSE
+    ),
+    "has no line for the key 9"
+  )
+})

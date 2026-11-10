@@ -669,9 +669,10 @@ private:
 // Write the line of a biallelic snp to the locus sidecar (see
 // loci_sidecar.h): its key (its integer name, the index of the snp among the
 // biallelic snps of the file), its name, its chromosome and its position. The
-// name is its ID, or, for a missing ID ".", the chromosome and position, as
-// fill_missing_loci_names() makes it in R (where a missing chromosome "." is
-// NA), so that the names are those that names_as_int = FALSE gives
+// name is its ID, or, for a missing ID ".", the chromosome and position (with
+// "NA" for a missing chromosome ".", as vcfR does), as vcf_to_bk() fills the
+// names it reads, so that the names are those that names_as_int = FALSE
+// gives
 inline void write_locus_line(SidecarWriter &writer, size_t key,
                              const char* const* field_start,
                              const size_t* field_len, int32_t position) {

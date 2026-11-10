@@ -19,6 +19,11 @@
   restore them too. `rbind()` matches integer chromosomes by name, and the
   checks of the loci table, window statistics and `windows_indiv_roh()` keep
   integer chromosomes
+* `gt_merge_vcfs()` and `gt_concat_vcfs()` write the sidecar of the original
+  names of the loci (their default is `names_as_int = TRUE`), so that
+  `gt_lookup_loci()` and `gt_restore_loci()` work on merged data, and gain
+  the argument `chromosomes_as_int`. The merge keeps on disk only the loci of
+  the file being read and the names of the merged sites
 * new `gt_merge_vcfs()` reads several VCF files with different samples into
   a single `gen_tibble`, as `bcftools merge` would, in one go (without
   reading each file into its own `gen_tibble` and binding them in pairs with

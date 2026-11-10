@@ -121,6 +121,10 @@ write_chromosome_sidecar_cpp <- function(path, codes, names) {
     invisible(.Call(`_tidypopgen_write_chromosome_sidecar_cpp`, path, codes, names))
 }
 
+sidecar_gather <- function(path_in, header, index_keys, index_offsets, keys, path_out, first_new_key, append, chunk_size = 1048576L) {
+    .Call(`_tidypopgen_sidecar_gather`, path_in, header, index_keys, index_offsets, keys, path_out, first_new_key, append, chunk_size)
+}
+
 pairwise_pop_fst_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores) {
     .Call(`_tidypopgen_pairwise_pop_fst_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, by_locus, return_num_dem, block_size, ncores)
 }

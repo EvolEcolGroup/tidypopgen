@@ -608,3 +608,164 @@ void write_chromosome_sidecar_cpp(std::string path, IntegerVector codes,
   };
   write_chromosome_sidecar(path, codes_cpp, name_of);
 }
+
+/******************************************************************************
+ * Gather the lines of some keys of a sidecar file, in a given order, with
+ * new keys
+ *
+ * This builds the sidecars of gt_merge_vcfs() and gt_concat_vcfs(): e.g. the
+ * loci of a VCF that create new sites are appended to a sidecar of the sites
+ * (keyed by site), and the sites that are kept are then gathered in the order
+ * of the merged loci, keyed 1..n. The output is in the order of `keys`, which
+ * need not be sorted: the keys are taken a chunk at a time, and the lines of
+ * each chunk are found in increasing order of key (as in sidecar_fetch(),
+ * seeking with the sparse index), kept in memory, and written in the order of
+ * the chunk. Memory is bounded by the chunk; when the keys are in nearly
+ * increasing order (as usual), each chunk reads its own part of the file, so
+ * the file is read about once.
+ *
+ * @param path_in the sidecar to read
+ * @param header its expected first line
+ * @param index_keys,index_offsets the sparse index of path_in (from
+ *   sidecar_index()); ignored if keys is empty
+ * @param keys the keys to gather, in the order of the output (it stops if a
+ *   key is not in path_in); empty for all the lines of path_in, in order
+ * @param path_out the sidecar to write
+ * @param first_new_key the new key of the first line written (the next lines
+ *   get the next keys)
+ * @param append whether to add the lines at the end of path_out (which must
+ *   exist, with its header), rather than create it with the header
+ * @param chunk_size the number of keys gathered at a time
+ * @return the number of lines written
+ */
+// [[Rcpp::export]]
+double sidecar_gather(std::string path_in, std::string header,
+                      IntegerVector index_keys, NumericVector index_offsets,
+                      IntegerVector keys, std::string path_out,
+                      double first_new_key, bool append,
+                      int chunk_size = 1048576) {
+  if (chunk_size < 1) {
+    stop("chunk_size must be a positive integer");
+  }
+  SidecarReader reader(path_in);
+  reader.check_header(header);
+  SidecarWriter writer(path_out, append);
+  if (!append) {
+    writer.add(header);
+    writer.end_line();
+  }
+  const char* line = NULL;
+  size_t len = 0;
+  int64_t offset;
+  int64_t new_key = (int64_t) first_new_key;
+  // the part of a line after its key (and its tab)
+  auto rest_of_line = [&](const char* &start, size_t &rest_len) {
+    const char* tab = static_cast<const char*>(std::memchr(line, '\t', len));
+    start = (tab == NULL) ? line + len : tab + 1;
+    rest_len = (line + len) - start;
+  };
+
+  // all the lines, in order
+  if (keys.size() == 0) {
+    double n_written = 0;
+    int previous = 0;
+    while (reader.next_line(line, len, offset)) {
+      int key = parse_key(line, len, path_in);
+      if (key <= previous) {
+        stop("the keys of the file " + path_in + " are not strictly " +
+             "increasing");
+      }
+      previous = key;
+      const char* start;
+      size_t rest_len;
+      rest_of_line(start, rest_len);
+      writer.add_int(new_key++);
+      writer.tab();
+      writer.add(start, rest_len);
+      writer.end_line();
+      n_written++;
+    }
+    writer.finish();
+    return n_written;
+  }
+
+  size_t n = keys.size();
+  for (size_t i = 0; i < n; i++) {
+    if ((keys[i] == NA_INTEGER) || (keys[i] < 1)) {
+      stop("keys must be positive integers");
+    }
+  }
+  std::vector<std::pair<int, size_t> > chunk_keys;
+  std::string arena; // the lines of the chunk (after their keys)
+  std::vector<size_t> line_start;
+  std::vector<size_t> line_len;
+  for (size_t c0 = 0; c0 < n; c0 += chunk_size) {
+    size_t c1 = std::min(n, c0 + (size_t) chunk_size);
+    // the keys of the chunk, sorted, with their slot in the chunk
+    chunk_keys.clear();
+    for (size_t i = c0; i < c1; i++) {
+      chunk_keys.push_back(std::make_pair((int) keys[i], i - c0));
+    }
+    std::sort(chunk_keys.begin(), chunk_keys.end());
+    arena.clear();
+    line_start.assign(c1 - c0, 0);
+    line_len.assign(c1 - c0, 0);
+    // the reader starts again from the block of the first key of the chunk
+    bool started = false;
+    bool at_end = false;
+    int line_key = 0;
+    auto read_line = [&]() {
+      if (reader.next_line(line, len, offset)) {
+        line_key = parse_key(line, len, path_in);
+      } else {
+        at_end = true;
+      }
+    };
+    for (size_t j = 0; j < chunk_keys.size(); j++) {
+      int key = chunk_keys[j].first;
+      size_t slot = chunk_keys[j].second;
+      if ((j > 0) && (key == chunk_keys[j - 1].first)) {
+        // a repeated key: the same line
+        line_start[slot] = line_start[chunk_keys[j - 1].second];
+        line_len[slot] = line_len[chunk_keys[j - 1].second];
+        continue;
+      }
+      IntegerVector::iterator block = std::upper_bound(
+        index_keys.begin(), index_keys.end(), key);
+      bool found = false;
+      if (block != index_keys.begin()) {
+        size_t b = (block - index_keys.begin()) - 1;
+        if (!started || (!at_end && (line_key < index_keys[b]))) {
+          reader.seek((int64_t) index_offsets[b]);
+          at_end = false;
+          started = true;
+          read_line();
+        }
+        while (!at_end && (line_key < key)) {
+          read_line();
+        }
+        found = !at_end && (line_key == key);
+      }
+      if (!found) {
+        stop("the file " + path_in + " has no line for the key " +
+             std::to_string(key));
+      }
+      const char* start;
+      size_t rest_len;
+      rest_of_line(start, rest_len);
+      line_start[slot] = arena.size();
+      line_len[slot] = rest_len;
+      arena.append(start, rest_len);
+    }
+    // write the lines of the chunk in their order, with their new keys
+    for (size_t slot = 0; slot < c1 - c0; slot++) {
+      writer.add_int(new_key++);
+      writer.tab();
+      writer.add(arena.data() + line_start[slot], line_len[slot]);
+      writer.end_line();
+    }
+    checkUserInterrupt();
+  }
+  writer.finish();
+  return (double) n;
+}

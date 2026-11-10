@@ -240,6 +240,12 @@ remove_stale_sidecars <- function(bk_file, keep = character(0)) {
   invisible(NULL)
 }
 
+# the number of lines per block of the sparse index of a sidecar (a smaller
+# block is only used by the tests, to cross block edges)
+sidecar_block <- function() {
+  as.integer(getOption("tidypopgen.sidecar_block", 1024L))
+}
+
 # the sparse indices of the sidecars read in this session, with the size and
 # modification time of each file when it was indexed (a file that changed is
 # indexed again)
@@ -248,8 +254,7 @@ sidecar_cache <- new.env(parent = emptyenv())
 # the sparse index of a sidecar (the key and byte offset of every 1024th
 # line), from the cache if the file has not changed
 sidecar_get_index <- function(path, header) {
-  # (a smaller block is only used by the tests, to cross block edges)
-  block <- as.integer(getOption("tidypopgen.sidecar_block", 1024L))
+  block <- sidecar_block()
   info <- file.info(path, extra_cols = FALSE)
   cache_key <- normalizePath(path)
   cached <- sidecar_cache[[cache_key]]
