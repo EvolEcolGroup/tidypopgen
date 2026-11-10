@@ -18,11 +18,15 @@ open points, and explorations of phase 4.
     sidecar, `gt_lookup_chromosomes()`, and the integer paths;
   - phase 3, `3304b213`: both sidecars and `chromosomes_as_int` in
     `gt_merge_vcfs()` and `gt_concat_vcfs()`;
-  - then the article, the benchmark results and this note (see `git log`).
-- Tests: `tests/testthat/test_loci_sidecar.R` (100 expectations, about a
-  minute at -O0). The test files of the VCF readers, merge, concat, rbind,
-  order, save/load, ROH and windows pass (see "Open points" for the full
-  suite).
+  - `8a4eaa9b`: faster random lookups (the reader reads 64 KB after a seek,
+    and reuses its buffer; see the benchmarks);
+  - `7822d9a4`: the benchmark scripts and results;
+  - `639611c9`: the RAD-seq article;
+  - `d4e9c5d9` and later: this note.
+- Tests: `tests/testthat/test_loci_sidecar.R` has 100 expectations and runs
+  in about a minute at -O0. The full suite passes (93 files, 588 tests, 0
+  failures, 3 skipped, run with `load_all()` on `8a4eaa9b`). `R CMD check`
+  has not been run.
 
 ## What exists
 
@@ -300,8 +304,11 @@ the first line of every 1024th line.
 - `vignettes/articles/big_data.Rmd` (the knitted version) is out of date.
   It was not re-knitted after `3d0f5dfb`, and the source now mentions the
   sidecars. Re-knitting needs the SGDP data (`precompile_big_data.R`).
-- `test_vcf_int.R` errored once in a run of several test files and passed in
-  five reruns. The error was not captured. Worth watching on CI.
+- `test_vcf_int.R` errored once in a run of several test files. It passed in
+  five reruns and in the full suite, and the error was not captured. Worth
+  watching on CI.
+- `R CMD check` (and so the examples of the new functions, which read the
+  anolis VCF) has not been run.
 - Windows: the 64-bit seeks (`_fseeki64`) and the binary-mode files have
   not been built on Windows yet. CI will tell.
 - `gt_get_file_names()` does not list the sidecars. `gt_save()` lists them
