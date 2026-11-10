@@ -922,3 +922,402 @@ test_that("the md5 sum of the FBM is that of its saved rds for VCF inputs", {
     )
   }
 })
+
+test_that("a missing chromosome '.' is NA with both parsers", {
+  skip_if_not_installed("vcfR")
+  # missing chromosomes, a missing ID (named from chromosome and position)
+  # and a missing ALT
+  vcf_path <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+      "chrB\t343\trs1\tA\tT\t.\t.\t.\tGT\t0/1\t1/1",
+      ".\t65\trs2\tC\tG\t.\t.\t.\tGT\t0/0\t0/1",
+      "chrB\t5\t.\tG\tC\t.\t.\t.\tGT\t1/1\t./.",
+      ".\t70\t.\tT\t.\t.\t.\t.\tGT\t0/0\t0/0"
+    ),
+    vcf_path
+  )
+  cpp_gt <- gen_tibble(vcf_path,
+    parser = "cpp", backingfile = tempfile(), quiet = TRUE
+  )
+  vcfr_gt <- gen_tibble(vcf_path,
+    parser = "vcfR", backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(
+    as.character(show_loci(cpp_gt)$chromosome),
+    c("chrB", NA, "chrB", NA)
+  )
+  expect_identical(levels(show_loci(cpp_gt)$chromosome), "chrB")
+  expect_identical(
+    show_loci(cpp_gt)$name,
+    c("rs1", "rs2", "chrB_5", "NA_70")
+  )
+  expect_identical(show_loci(cpp_gt), show_loci(vcfr_gt))
+  expect_identical(show_genotypes(cpp_gt), show_genotypes(vcfr_gt))
+})
+
+test_that("order_as_levels sorts as the levels of as.factor()", {
+  # (unique strings, as the chromosome names given by the cpp parser)
+  examples <- list(
+    paste0("SNP_higher_path_", c(10, 2, 1, 100)),
+    c(paste0("chr", c(10, 2, 1)), "chrX", "chrUn_KI270302v1"),
+    # mixed case and punctuation, which C order and collation can sort
+    # differently
+    c("chr_1", "chr1", "Chr2", "chr10", "a", "B", "b"),
+    "1",
+    character(0)
+  )
+  check_levels <- function() {
+    for (x in examples) {
+      expect_identical(x[order_as_levels(x)], levels(as.factor(x)))
+    }
+  }
+  # in the collation of the tests (C), and in an English locale if available
+  # (checked by setting it, and then restoring the collation)
+  check_levels()
+  old_collate <- Sys.getlocale("LC_COLLATE")
+  has_english <- suppressWarnings(
+    Sys.setlocale("LC_COLLATE", "en_US.UTF-8")
+  ) != ""
+  Sys.setlocale("LC_COLLATE", old_collate)
+  if (has_english) {
+    withr::local_collate("en_US.UTF-8")
+    check_levels()
+  }
+})
+
+test_that("malformed variant lines give clear errors with the cpp parser", {
+  header <- c(
+    "##fileformat=VCFv4.3",
+    '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+    "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+    "chr1\t5\trs1\tA\tT\t.\t.\t.\tGT\t0/1\t1/1"
+  )
+  # a line with fewer than 5 fields
+  short_vcf <- tempfile(fileext = ".vcf")
+  writeLines(c(header, "chr1\t9"), short_vcf)
+  expect_error(
+    gen_tibble(short_vcf,
+      parser = "cpp", backingfile = tempfile(), quiet = TRUE
+    ),
+    "fewer than 5 fields"
+  )
+  # a position that is not a number
+  bad_pos_vcf <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(header, "chr1\t.\trs2\tC\tG\t.\t.\t.\tGT\t0/0\t0/1"),
+    bad_pos_vcf
+  )
+  expect_error(
+    gen_tibble(bad_pos_vcf,
+      parser = "cpp", backingfile = tempfile(), quiet = TRUE
+    ),
+    "not a valid integer"
+  )
+})
+
+test_that("the cpp parser codes missing genotypes once ploidies are known", {
+  # b is missing in the first variants, and has a larger ploidy (4) than the
+  # others, so its ploidy (and the value for missing genotypes, max_ploidy + 1)
+  # is only known after some genotypes have been read
+  vcf_path <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb\tc",
+      "chr1\t5\trs1\tA\tT\t.\t.\t.\tGT\t0/1\t.\t1/1",
+      "chr1\t7\trs2\tA\tT\t.\t.\t.\tGT\t./.\t.\t0/1",
+      "chr1\t9\trs3\tC\tG\t.\t.\t.\tGT\t0/0\t0/1/1/1\t./.",
+      "chr1\t12\trs4\tG\tA\t.\t.\t.\tGT\t1/1\t1/1/0/0\t0/1"
+    ),
+    vcf_path
+  )
+  test_gt <- gen_tibble(vcf_path,
+    parser = "cpp", backingfile = tempfile(), quiet = TRUE
+  )
+  expect_equal(indiv_ploidy(test_gt), c(2, 4, 2))
+  expect_equal(
+    show_genotypes(test_gt),
+    rbind(c(1, NA, 0, 2), c(NA, NA, 3, 2), c(2, 1, NA, 1)),
+    ignore_attr = TRUE
+  )
+  # the backing file stores missing genotypes as max_ploidy + 1 (5)
+  bk_bytes <- readBin(gt_get_file_names(test_gt)[2], what = "raw", n = 12)
+  expect_identical(
+    as.integer(bk_bytes),
+    c(1L, 5L, 2L, 5L, 5L, 1L, 0L, 3L, 5L, 2L, 2L, 1L)
+  )
+})
+
+test_that("the cpp parser leaves no backing files after an error", {
+  # a genotype with more alleles than estimated from the first variant
+  backingfile <- tempfile()
+  expect_error(
+    gen_tibble(
+      system.file("extdata/haploid_first_pop_a.vcf", package = "tidypopgen"),
+      parser = "cpp", backingfile = backingfile, quiet = TRUE
+    ),
+    "a genotype has more than max_ploidy alleles"
+  )
+  expect_length(
+    list.files(dirname(backingfile), pattern = basename(backingfile)),
+    0
+  )
+  # a VCF with no biallelic SNPs (an indel and a multiallelic SNP)
+  vcf_path <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+      "chr1\t5\trs1\tAT\tA\t.\t.\t.\tGT\t0/1\t0/0",
+      "chr1\t9\trs2\tC\tG,T\t.\t.\t.\tGT\t0/0\t0/2"
+    ),
+    vcf_path
+  )
+  backingfile <- tempfile()
+  expect_error(
+    gen_tibble(vcf_path,
+      parser = "cpp", backingfile = backingfile, quiet = TRUE
+    ),
+    "no biallelic SNPs"
+  )
+  expect_length(
+    list.files(dirname(backingfile), pattern = basename(backingfile)),
+    0
+  )
+  # a VCF with more genotypes than samples in the header (an extra tab)
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      '##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">',
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+      "chr1\t5\trs1\tA\tT\t.\t.\t.\tGT\t0/1\t\t1/1"
+    ),
+    vcf_path
+  )
+  backingfile <- tempfile()
+  expect_error(
+    gen_tibble(vcf_path,
+      parser = "cpp", backingfile = backingfile, quiet = TRUE
+    ),
+    "has 3 genotypes, but the header line \\(#CHROM\\) has 2 samples"
+  )
+  expect_length(
+    list.files(dirname(backingfile), pattern = basename(backingfile)),
+    0
+  )
+})
+
+test_that("the cpp parser reads bgzipped VCFs in parallel", {
+  # this VCF is compressed with bgzip (BGZF, made of blocks of at most 64 KB,
+  # which are decompressed in parallel)
+  bgzf_path <- system.file(
+    "extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
+    package = "tidypopgen"
+  )
+  bgzf_gt <- gen_tibble(bgzf_path,
+    parser = "cpp", n_cores = 2, backingfile = tempfile(), quiet = TRUE
+  )
+  # the same VCF compressed with gzip (as a single stream, which is
+  # decompressed sequentially)
+  gzip_path <- tempfile(fileext = ".vcf.gz")
+  gz_con <- gzfile(gzip_path, "w")
+  writeLines(readLines(bgzf_path), gz_con)
+  close(gz_con)
+  gzip_gt <- gen_tibble(gzip_path,
+    parser = "cpp", n_cores = 1, backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(bgzf_gt$id, gzip_gt$id)
+  expect_identical(show_loci(bgzf_gt), show_loci(gzip_gt))
+  expect_identical(show_genotypes(bgzf_gt), show_genotypes(gzip_gt))
+  # a corrupted block gives an error (its CRC32 does not match)
+  bgzf_bytes <- readBin(bgzf_path, what = "raw", n = file.size(bgzf_path))
+  middle <- length(bgzf_bytes) %/% 2
+  bgzf_bytes[middle] <- xor(bgzf_bytes[middle], as.raw(255))
+  corrupt_path <- tempfile(fileext = ".vcf.gz")
+  writeBin(bgzf_bytes, corrupt_path)
+  expect_error(
+    gen_tibble(corrupt_path,
+      parser = "cpp", n_cores = 2, backingfile = tempfile(), quiet = TRUE
+    ),
+    "error decompressing the BGZF file"
+  )
+  # the first block of the file (whose size, minus 1, is in bytes 17-18 of
+  # its header), truncated or followed by bytes that are not a BGZF block
+  block_size <- sum(as.integer(bgzf_bytes[17:18]) * c(1L, 256L)) + 1L
+  truncated_path <- tempfile(fileext = ".vcf.gz")
+  writeBin(bgzf_bytes[seq_len(block_size - 10)], truncated_path)
+  expect_error(
+    gen_tibble(truncated_path, backingfile = tempfile(), quiet = TRUE),
+    "the BGZF file is truncated"
+  )
+  junk_path <- tempfile(fileext = ".vcf.gz")
+  writeBin(c(bgzf_bytes[seq_len(block_size)], charToRaw("junk")), junk_path)
+  expect_error(
+    gen_tibble(junk_path, backingfile = tempfile(), quiet = TRUE),
+    "not a valid BGZF file"
+  )
+  # a block whose uncompressed size (its last 4 bytes) is larger than a BGZF
+  # block can be
+  first_block <- bgzf_bytes[seq_len(block_size)]
+  first_block[block_size - 0:3] <- as.raw(255)
+  big_path <- tempfile(fileext = ".vcf.gz")
+  writeBin(first_block, big_path)
+  expect_error(
+    gen_tibble(big_path, backingfile = tempfile(), quiet = TRUE),
+    "error decompressing the BGZF file"
+  )
+})
+
+test_that("the cpp parser rejects invalid genotypes and positions", {
+  loci <- data.frame(
+    chrom = "1", pos = c(100, 200), id = c("s1", "s2"),
+    ref = c("A", "G"), alt = c("C", "T")
+  )
+  # a VCF with the genotypes geno at its second locus (with FORMAT `format`,
+  # and position `pos`)
+  bad_vcf <- function(geno, format = "GT", pos = "200") {
+    vcf_path <- write_merge_vcf(c("a", "b"), loci,
+      genotypes = rbind(c("0/1", "0/0"), geno)
+    )
+    vcf_lines <- readLines(vcf_path)
+    vcf_lines[5] <- sub("\tGT\t", paste0("\t", format, "\t"), vcf_lines[5])
+    vcf_lines[5] <- sub("\t200\t", paste0("\t", pos, "\t"), vcf_lines[5])
+    writeLines(vcf_lines, vcf_path)
+    vcf_path
+  }
+  # reading it gives an error, and leaves no backing file
+  expect_vcf_error <- function(vcf_path, regexp) {
+    backingfile <- tempfile()
+    expect_error(
+      gen_tibble(vcf_path, backingfile = backingfile, quiet = TRUE),
+      regexp
+    )
+    expect_length(
+      list.files(dirname(backingfile), pattern = basename(backingfile)),
+      0
+    )
+  }
+  # these genotypes are fine (values after the genotype are ignored)
+  good_gt <- gen_tibble(bad_vcf(c("1/1", "0|1:20")),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_equal(show_genotypes(good_gt), cbind(c(1, 0), c(2, 1)))
+  # alleles that a biallelic SNP can not have, an allele with two digits, or
+  # an empty genotype
+  for (geno in list(c("2/1", "0/0"), c("a/1", "0/0"), c("0/12", "0/0"),
+                    c("1/1", ":20"), c("1/1", ""))) {
+    expect_vcf_error(bad_vcf(geno), "is not valid: the alleles of a")
+  }
+  # the genotype is not the first value of each sample
+  expect_vcf_error(
+    bad_vcf(c("20:1/1", "20:0/0"), format = "DP:GT"),
+    "does not start with GT"
+  )
+  # a position that is not an integer
+  expect_vcf_error(bad_vcf(c("1/1", "0/0"), pos = "200x"), "valid integer")
+  # an invalid number of cores
+  vcf_path <- write_merge_vcf(c("a", "b"), loci,
+    genotypes = rbind(c("0/1", "0/0"), c("1/1", "0/1"))
+  )
+  for (n_cores in list(0, NA, Inf, "2")) {
+    expect_error(
+      gen_tibble(vcf_path, n_cores = n_cores, backingfile = tempfile()),
+      "'n_cores' should be a positive integer"
+    )
+  }
+  expect_error(
+    tidypopgen:::vcf_to_bk(vcf_path, bk_file = "", n_threads = 0,
+      read_genotypes = FALSE
+    ),
+    "'n_threads' should be a positive integer"
+  )
+})
+
+test_that("the cpp parser handles unusual but valid VCF files", {
+  loci <- data.frame(
+    chrom = "1", pos = c(100, 200), id = c("s1", "s2"),
+    ref = c("A", "G"), alt = c("C", "T")
+  )
+  vcf_path <- write_merge_vcf(c("a", "b"), loci,
+    genotypes = rbind(c("0/1", "0/0"), c("1/1", "0/1"))
+  )
+  vcf_lines <- readLines(vcf_path)
+  # a file without a newline at the end of its last line
+  no_newline_path <- tempfile(fileext = ".vcf")
+  cat(paste(vcf_lines, collapse = "\n"), file = no_newline_path)
+  no_newline_gt <- gen_tibble(no_newline_path,
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_equal(show_genotypes(no_newline_gt), rbind(c(1, 2), c(0, 1)))
+  # a sample with only missing genotypes is diploid
+  missing_gt <- gen_tibble(
+    write_merge_vcf("a", loci, genotypes = rbind(".", ".")),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(indiv_ploidy(missing_gt), 2L)
+  expect_equal(show_genotypes(missing_gt), rbind(c(NA_real_, NA_real_)))
+  # a variant line (not the first) with too few genotypes is an error
+  n_lines <- length(vcf_lines)
+  vcf_lines[n_lines] <- sub("\t[^\t]*$", "", vcf_lines[n_lines])
+  short_path <- tempfile(fileext = ".vcf")
+  writeLines(vcf_lines, short_path)
+  expect_error(
+    gen_tibble(short_path, backingfile = tempfile(), quiet = TRUE),
+    "fewer genotypes than individuals"
+  )
+})
+
+test_that("vcf_to_fbm_cpp puts the backing file next to the VCF", {
+  vcf_dir <- tempfile()
+  dir.create(vcf_dir)
+  vcf_path <- file.path(vcf_dir, "small.vcf")
+  write_merge_vcf("a",
+    data.frame(chrom = "1", pos = 100, id = "s1", ref = "A", alt = "C"),
+    genotypes = rbind("0/1"), file = vcf_path
+  )
+  small_gt <- vcf_to_fbm_cpp(vcf_path, quiet = TRUE)
+  expect_identical(
+    basename(attr(small_gt$genotypes, "fbm")$backingfile),
+    "small.bk"
+  )
+  # (gen_tibble() gives a new name instead, see change_duplicated_file_name())
+  expect_error(vcf_to_fbm_cpp(vcf_path, quiet = TRUE), "already exists")
+  # a backing file can be given with its extension
+  other_gt <- vcf_to_fbm_cpp(vcf_path,
+    backingfile = file.path(vcf_dir, "other.bk"), quiet = TRUE
+  )
+  expect_identical(
+    basename(attr(other_gt$genotypes, "fbm")$backingfile),
+    "other.bk"
+  )
+})
+
+test_that("the cpp parser finds chromosomes that come back after others", {
+  # (the index of each chromosome is looked up in a hash table of the names
+  # seen so far)
+  chrom <- c("ctg2", "ctg1", "ctg2", "ctg10", "ctg1")
+  vcf_path <- tempfile(fileext = ".vcf")
+  writeLines(
+    c(
+      "##fileformat=VCFv4.3",
+      "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\ta\tb",
+      paste(chrom, 1:5, paste0("rs", 1:5), "A\tT\t.\t.\t.\tGT\t0/1\t1/1",
+        sep = "\t"
+      )
+    ),
+    vcf_path
+  )
+  test_gt <- gen_tibble(vcf_path,
+    parser = "cpp", backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(
+    show_loci(test_gt)$chromosome,
+    factor(chrom, levels = c("ctg1", "ctg10", "ctg2"))
+  )
+})

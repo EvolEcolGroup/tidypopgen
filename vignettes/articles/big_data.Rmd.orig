@@ -34,7 +34,7 @@ This vignette will demonstrate how to work with large datasets in tidypopgen.
 
 This includes whole-genome data. *Note* that tidypopgen only handles variant sites, so if you are using a whole-genome dataset make sure it has been previously subsetted to variant sites only. Think very carefully before merging this kind of data during your pipeline!
 
-The latest version of tidypopgen has implemented a new option to minimise the memory footprint of very large datasets. As a large chunk of memory is occupied by loci names, the `gen_tibble()` function now offers the user the option to switch loci names from character strings to integers, reducing the memory used by the gen_tibble object.
+The latest version of tidypopgen has implemented a new option to minimise the memory footprint of very large datasets. As a large chunk of memory is occupied by loci names, loci names can be stored as integers rather than character strings (with `names_as_int = TRUE`), reducing the memory used by the gen_tibble object. This is the default of `gt_merge_vcfs()`, which we use below to merge many VCF files into a single gen_tibble, and an option of `gen_tibble()`.
 
 # Getting the data
 
@@ -44,17 +44,15 @@ We will demonstrate the new capacity of tidypopgen using a subset of the [Simons
 
 The 50 individuals are listed in the files `afr_subset.txt`, `oceania_subset.txt`, `america_subset.txt`, `west_eur_subset.txt` and `east_asia_subset.txt`, in `data-raw/data_files/sgdp`. These were created by `create_sgdp_subset_s01_metadata.R`, which takes the first 10 fully public individuals from each region in the SGDP metadata.
 
-SGDP provides a VCF for each individual, but distributes them as a single 57 GB archive containing all 279 public individuals. The shell script `create_sgdp_subset_s02.sh` downloads only the parts of the archive that hold our 50 individuals (about 10.8 GB), checks them against the checksums provided by SGDP, and merges them into a single VCF, `all_subset.vcf.gz`, with [bcftools](https://samtools.github.io/bcftools/). You will need `bcftools` and `curl` installed and available on your `PATH`. From the root of a copy of the tidypopgen repository, run:
+SGDP provides a VCF for each individual, but distributes them as a single 57 GB archive containing all 279 public individuals. The shell script `create_sgdp_subset_s02.sh` downloads only the parts of the archive that hold our 50 individuals (about 10.8 GB), and checks them against the checksums provided by SGDP. You will need `curl` installed and available on your `PATH`. From the root of a copy of the tidypopgen repository, run:
 
 ```{bash, eval = FALSE}
 bash data-raw/create_sgdp_subset_s02.sh vignettes/articles/data/sgdp
 ```
 
-This writes `all_subset.vcf.gz` and its index to `vignettes/articles/data/sgdp/`, which is where we read it from below (the paths in this article are relative to `vignettes/articles/`). The individual VCFs are kept in `vignettes/articles/data/sgdp/sgdp_vcfs/`, so that an interrupted download can be resumed by running the script again; once the merged VCF has been created, they can be deleted.
+This writes the 50 VCFs to `vignettes/articles/data/sgdp/sgdp_vcfs/`, which is where we read them from below (the paths in this article are relative to `vignettes/articles/`). An interrupted download can be resumed by running the script again. We do not need any other tool: we merge the VCFs directly in R, with tidypopgen.
 
-Note that each SGDP VCF only contains the sites at which that individual carries a non-reference allele. When merging, a site that is absent from an individual's VCF is therefore set to homozygous for the reference allele (with the `--missing-to-ref` option of `bcftools merge`). Without this option, every homozygous reference genotype would be recorded as missing. The cost is that a site that was not sequenced in an individual is also set to homozygous reference, which is a reasonable approximation for these high-coverage genomes.
-
-## Reading a large VCF into a gen_tibble
+## Setting up
 
 Now that we have our data we can begin by loading the necessary libraries:
 
@@ -63,25 +61,45 @@ library(tidypopgen)
 library(ggplot2)
 ```
 
-In many descriptive population genetic analyses, where the end goal is to visualise populations (e.g., PCA) or calculate a summary statistic (e.g. F~ST~), the names of your loci are not needed for the analysis. In these cases, we can save a lot of memory (over half of the memory footprint of the `gen_tibble`) by switching the loci names from strings to integers.
+Because tidypopgen utilizes disk storage through file-backed matrices (FBM), we can run the following pipeline on a modern laptop without running out of RAM. Here, we use a machine with a `r benchmarkme::get_cpu()` CPU and `r as.character(print(benchmarkme::get_ram(), unit_system = "iec"))` of RAM.
 
-This option is only enabled when loading from a .vcf file. To do this, we need to set parameter `names_as_int` to TRUE when creating the gen_tibble:
+Before we begin, we will limit the number of cores used by the parallelised BLAS library with `bigparallelr::set_blas_ncores()`, and by the package data.table with `data.table::setDTthreads()`. *Note* You may need to adjust `n_cores` according to your own hardware.
+
+```{r}
+n_cores <- 20
+data.table::setDTthreads(n_cores)
+bigparallelr::set_blas_ncores(n_cores)
+```
+
+## Merging the VCFs into a gen_tibble
+
+Each SGDP VCF only contains the sites at which that individual carries a non-reference allele. We merge them into a single `gen_tibble` with `gt_merge_vcfs()`, keeping all the sites found in any of the files (`variants = "union"`). A site that is absent from an individual's VCF is set to homozygous for the reference allele (`missing_to_ref = TRUE`, the equivalent of `bcftools merge --missing-to-ref`). Without this option, every homozygous reference genotype would be recorded as missing. The cost is that a site that was not sequenced in an individual is also set to homozygous reference, which is a reasonable approximation for these high-coverage genomes.
+
+`gt_merge_vcfs()` reads each VCF twice: once to match its loci with those of the other files, and once to write its genotypes straight into the backing file of the merged `gen_tibble`, so that no merged VCF is ever written to disk. With `n_cores`, the bgzipped VCFs are decompressed, and their genotypes parsed, in parallel. (If your data are instead split by chromosome, with one VCF per chromosome for the same individuals, `gt_concat_vcfs()` reads them into a single `gen_tibble` in the same way, as `bcftools concat` would.)
+
+In many descriptive population genetic analyses, where the end goal is to visualise populations (e.g., PCA) or calculate a summary statistic (e.g. F~ST~), the names of your loci are not needed for the analysis. In these cases, we can save a lot of memory (over half of the memory footprint of the `gen_tibble`) by switching the loci names from strings to integers. `gt_merge_vcfs()` does this by default (`names_as_int = TRUE`). *Note* that this differs from `gen_tibble()`, where `names_as_int` defaults to FALSE: to read a single large VCF with integer loci names, set `names_as_int = TRUE` in `gen_tibble()`. Conversely, set `names_as_int = FALSE` in `gt_merge_vcfs()` to keep the IDs (e.g. rsIDs) of the VCF files.
 
 ```{r remove_old_files, include = FALSE}
-# remove the files of a previous run, so that the vcf is read (and timed) again
+# remove the files of a previous run, so that the vcfs are merged (and timed)
+# again
 unlink(paste0("data/sgdp/all_subset", c(".bk", ".rds", ".gt")))
 ```
 
-```{r read_vcf, benchmark = TRUE}
-sgdp <-
-  gen_tibble("data/sgdp/all_subset.vcf.gz",
-    quiet = TRUE,
-    backingfile = "data/sgdp/all_subset",
-    names_as_int = TRUE
-  )
+```{r merge_vcfs, benchmark = TRUE}
+sgdp_files <- list.files("data/sgdp/sgdp_vcfs",
+  pattern = "\\.vcf\\.gz$",
+  full.names = TRUE
+)
+sgdp <- gt_merge_vcfs(sgdp_files,
+  variants = "union",
+  missing_to_ref = TRUE,
+  backingfile = "data/sgdp/all_subset",
+  n_cores = n_cores,
+  quiet = TRUE
+)
 ```
 
-Reading the VCF is the slowest step of this article (see the [performance summary](#performance-summary) at the end), but it only needs to be done once: the `gen_tibble` is saved alongside its backing file, and can be loaded again in a later session with `gt_load()`.
+Merging the VCFs is the slowest step of this article (see the [performance summary](#performance-summary) at the end), but it only needs to be done once: the merged `gen_tibble` is saved alongside its backing file, and can be loaded again in a later session with `gt_load()`.
 
 ```{r add_metadata, results="hide", echo=FALSE, warning=FALSE, message=FALSE}
 metadata <-
@@ -107,18 +125,6 @@ The rsID's of each SNP have been removed, but all other metadata (chromosome, po
 
 ```{r check_size}
 format(object.size(sgdp), units = "auto", digits = 2)
-```
-
-## Setting up cores
-
-Because tidypopgen utilizes disk storage through file-backed matrices (FBM), we can run the following pipeline on a modern laptop without running out of RAM. Here, we use a machine with a `r benchmarkme::get_cpu()` CPU and `r as.character(print(benchmarkme::get_ram(), unit_system = "iec"))` of RAM.
-
-Before we begin, we will limit the number of cores used by the parallelised BLAS library with `bigparallelr::set_blas_ncores()`, and by the package data.table with `data.table::setDTthreads()`. *Note* You may need to adjust `n_cores` according to your own hardware.
-
-```{r}
-n_cores <- 20
-data.table::setDTthreads(n_cores)
-bigparallelr::set_blas_ncores(n_cores)
 ```
 
 # Quality control for large datasets
@@ -307,6 +313,7 @@ The memory is measured with `gc()`, and only covers memory allocated by R. It do
 # Key takeaways
 
 - **Large data don't need a large machine.** `gen_tibble` objects are file-backed, so the genotypes stay on disk and only what you are working on is held in memory.
-- **Use `names_as_int = TRUE` when reading a VCF** to reduce the memory taken by locus names. The trade-off is that the original locus IDs are not kept (chromosome and position are), so `rbind()` matches loci by chromosome and position.
+- **Merge many VCFs directly in R.** `gt_merge_vcfs()` (files with different individuals, as `bcftools merge`) and `gt_concat_vcfs()` (files with the same individuals and different chromosomes, as `bcftools concat`) read them straight into a single `gen_tibble`, without writing a merged VCF.
+- **Use integer locus names** to reduce the memory they take. They are the default of `gt_merge_vcfs()` and `gt_concat_vcfs()`, while `gen_tibble()` needs `names_as_int = TRUE`. The trade-off is that the original locus IDs are not kept (chromosome and position are), so `rbind()` matches loci by chromosome and position.
 - **Set your cores.** Limit BLAS and `data.table` threads at the start, and pass `n_cores` to the functions that support it (e.g. LD clumping and F~ST~).
 - **Large analyses make large outputs.** Reports such as `qc_report_loci()` can be big, so save what you need and `rm()` the rest.

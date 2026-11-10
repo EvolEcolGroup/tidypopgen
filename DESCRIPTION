@@ -1,6 +1,6 @@
 Package: tidypopgen
 Title: Tidy Population Genetics
-Version: 1.0.0
+Version: 1.0.0.9001
 Authors@R: 
     c(person("Evie", "Carter", role = c("aut")),
     person("Eirlys", "Tysall", role = c("aut")),
@@ -68,7 +68,7 @@ Suggests:
     rnaturalearthdata,
     readr,
     reticulate,
-    testthat (>= 3.0.0),
+    testthat (>= 3.1.7),
     vcfR,
     withr,
     xgboost,

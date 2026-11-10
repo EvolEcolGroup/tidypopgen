@@ -14,6 +14,8 @@
 #'   position) or duplicated locus names. Default is FALSE.
 #' @param names_as_int whether to convert locus names to
 #'   integers. Default is FALSE.
+#' @param n_cores the number of cores used to decompress a bgzipped vcf and to
+#'   parse the genotypes. Default is 1.
 #' @param quiet whether to print messages.
 #' @returns an object of the class `gen_tbl`.
 #' @keywords internal
@@ -25,6 +27,7 @@ vcf_to_fbm_cpp <- function(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   names_as_int = FALSE,
+  n_cores = 1,
   quiet = FALSE
 ) {
   if (is.null(backingfile)) {
@@ -36,10 +39,33 @@ vcf_to_fbm_cpp <- function(
     backingfile <- bigstatsr::sub_bk(backingfile, "")
   }
 
-  # create a loci_table, and figure out no_individuals and ploidy from first
-  # marker (locus names are not read if we store them as integers, which saves
-  # a lot of memory with many loci)
-  vcf_meta <- vcf_loci_table(vcf_path, read_names = !names_as_int)
+  if (!is.numeric(n_cores) || length(n_cores) != 1 || !is.finite(n_cores) ||
+        n_cores < 1) {
+    stop("'n_cores' should be a positive integer")
+  }
+
+  # the genotypes are written to the backing file while reading the VCF
+  bk_file <- path.expand(paste0(backingfile, ".bk"))
+  if (file.exists(bk_file)) {
+    stop("the backing file ", bk_file, " already exists")
+  }
+  # remove the backing file if we stop before creating the FBM (also if the
+  # VCF was read, but the loci table could not be created)
+  fbm_created <- FALSE
+  on.exit(if (!fbm_created) unlink(bk_file), add = TRUE)
+  # read the VCF once: create a loci_table, figure out no_individuals and
+  # ploidy from the first marker, and write the genotypes to the backing file
+  # (locus names are not read if we store them as integers, which saves a lot
+  # of memory with many loci). With n_cores > 1, the blocks of a bgzipped VCF
+  # are decompressed in parallel, and the genotypes parsed in parallel
+  vcf_meta <- vcf_to_bk(vcf_path,
+    bk_file = bk_file, read_names = !names_as_int,
+    n_threads = n_cores
+  )
+  # an FBM can not have zero loci (its empty backing file can not be mapped)
+  if (length(vcf_meta$loci_tbl$physical.pos) == 0) {
+    stop("the VCF has no biallelic SNPs")
+  }
   # figure out no_individuals and ploidy
   ploidy <- vcf_meta$ploidy
   no_individuals <- length(ploidy)
@@ -64,28 +90,21 @@ vcf_to_fbm_cpp <- function(
 
   # loci metadata table
   loci <- vcf_meta$loci_tbl
-  # chromosomes are given as an index into their names (in order of
-  # appearance): turn them into a factor, with the levels sorted as in
-  # as.factor() (this avoids creating and sorting a string for each locus)
-  chromosome_names <- vcf_meta$chromosome_names
-  chromosome_levels <- unique(chromosome_names[order(chromosome_names)])
-  loci$chromosome <- structure(
-    match(chromosome_names, chromosome_levels)[loci$chromosome],
-    levels = chromosome_levels,
-    class = "factor"
+  # chromosomes are given as an index into their (unique) names, in order of
+  # appearance: turn them into a factor
+  loci$chromosome <- chromosome_index_to_factor(
+    loci$chromosome,
+    vcf_meta$chromosome_names
   )
   # if we store loci names as characters
   if (!names_as_int) {
     # if loci names are missing, create a name with scaffold and position
     # (same behaviour as vcfR)
-    missing_loci_ids <- which(loci$marker.ID == ".")
-    if (length(missing_loci_ids) > 0) {
-      loci$marker.ID[missing_loci_ids] <- paste(
-        loci$chromosome[missing_loci_ids],
-        loci$physical.pos[missing_loci_ids],
-        sep = "_"
-      )
-    }
+    loci$marker.ID <- fill_missing_loci_names(
+      loci$marker.ID,
+      loci$chromosome,
+      loci$physical.pos
+    )
   } else { # if we store them as integers
     loci$marker.ID <- seq_along(loci$physical.pos)
   }
@@ -109,7 +128,7 @@ vcf_to_fbm_cpp <- function(
     }
   }
 
-  # validate the loci (before creating the backing files)
+  # validate the loci (before creating the FBM)
   loci <- validate_loci(loci,
     check_alphabet = TRUE,
     harmonise_loci = TRUE,
@@ -124,19 +143,15 @@ vcf_to_fbm_cpp <- function(
   code256 <- rep(NA_real_, 256)
   code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
-  # create the file backed matrix
+  # create the file backed matrix, from the backing file written above
   file_backed_matrix <- bigstatsr::FBM.code256(
     nrow = no_individuals,
     ncol = nrow(loci),
     code = code256,
-    backingfile = backingfile
+    backingfile = backingfile,
+    create_bk = FALSE
   )
-
-  vcf_genotypes_to_fbm(vcf_path, file_backed_matrix,
-    biallelic = vcf_meta$biallelic,
-    n_header_lines = vcf_meta$n_header_lines,
-    missing_value = max_ploidy + 1
-  )
+  fbm_created <- TRUE
 
   # construct path, and save the FBM (before its md5 sum is taken by
   # new_vctrs_bigsnp(); this takes the same time whatever the size of the
@@ -159,4 +174,57 @@ vcf_to_fbm_cpp <- function(
     class = "gen_tbl"
   )
   return(new_gen_tbl)
+}
+
+# the chromosomes of the loci of a VCF as a factor, from their index (1-based)
+# into the unique chromosome names (in order of appearance, as returned by
+# vcf_to_bk()), with the levels sorted as in as.factor() (this avoids creating
+# and sorting a string for each locus). A missing chromosome "." is not a
+# level, so that it becomes NA, as in the vcfR parser.
+chromosome_index_to_factor <- function(index, chromosome_names) {
+  level_order <- order_as_levels(chromosome_names)
+  level_order <- level_order[chromosome_names[level_order] != "."]
+  # the code of each chromosome name in the factor is its rank among the
+  # levels (NA for ".")
+  chromosome_codes <- rep(NA_integer_, length(chromosome_names))
+  chromosome_codes[level_order] <- seq_along(level_order)
+  structure(
+    chromosome_codes[index],
+    levels = chromosome_names[level_order],
+    class = "factor"
+  )
+}
+
+# the names of the loci of a VCF, where the missing names (".") are replaced
+# by the chromosome and position (as vcfR does), e.g. "1_752566"
+fill_missing_loci_names <- function(name, chromosome, position) {
+  missing_loci_ids <- which(name == ".")
+  if (length(missing_loci_ids) > 0) {
+    name[missing_loci_ids] <- paste(
+      chromosome[missing_loci_ids],
+      position[missing_loci_ids],
+      sep = "_"
+    )
+  }
+  name
+}
+
+# the order of a character vector of unique strings (with no NAs) as the
+# levels of as.factor(), i.e. in the collation of the locale (as order()
+# does): x[order_as_levels(x)] are the levels.
+# Sorting millions of strings (e.g. the chromosomes of RAD loci assembled de
+# novo) in the collation of the locale is slow, so we first sort them in C
+# order (method = "radix", much faster); if each string then comes strictly
+# after the previous one in the collation of the locale, which only needs a
+# comparison per pair of neighbours (made by is.unsorted(), without the
+# copies of the vector that comparing x[-1] with x[-n] needs), this is the
+# order in the collation of the locale (e.g. for names that only differ in
+# digits). Otherwise (e.g. with mixed case or punctuation) we sort them in the
+# collation of the locale.
+order_as_levels <- function(x) {
+  x_order <- order(x, method = "radix")
+  if (length(x) < 2 || !is.unsorted(x[x_order], strictly = TRUE)) {
+    return(x_order)
+  }
+  order(x)
 }

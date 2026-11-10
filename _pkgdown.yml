@@ -44,6 +44,8 @@ reference:
   - title: "Merging"
     desc: "Functions for merging `gen_tibble` objects."
     contents:
+        - gt_merge_vcfs
+        - gt_concat_vcfs
         - rbind_dry_run
         - rbind.gen_tbl
         - summary.rbind_report

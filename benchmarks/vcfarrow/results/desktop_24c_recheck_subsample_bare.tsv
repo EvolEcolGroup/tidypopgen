@@ -1,0 +1,3 @@
+label	version	n_variants	threads	step	status	elapsed_s	user_s	sys_s	load_s	pss_start_gb	pss_median_gb	pss_peak_gb	rss_peak_gb	proc_maxrss_gb	n_samples	summary
+v1.0.0	1.0.0	4644921	4	subsample_loci_bare	ok	25.99	25.23	0.417	6.21	0.8201	1.984	2.279	2.292	2.32	49	56 indiv x 1000 loci
+vcf_fast	1.0.0.9000	4644921	4	subsample_loci_bare	ok	25.58	24.89	0.361	6.346	0.8184	1.985	2.283	2.297	2.32	49	56 indiv x 1000 loci
