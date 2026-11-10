@@ -35,3 +35,25 @@ Other matrix_int_names_functions:
 [`col_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/col_names.md),
 [`matrix_int_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/matrix_int_names.md),
 [`row_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/row_names.md)
+
+## Examples
+
+``` r
+my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+  row_names = c(10L, 20L),
+  col_names = c(100L, 200L, 300L)
+)
+print(my_mat)
+#> Matrix with integer rownames and integer colnames
+#> Dimensions: 2 x 3 
+#>    100 200 300
+#> 10   1   3   5
+#> 20   2   4   6
+print(my_mat, n = 2)
+#> Matrix with integer rownames and integer colnames
+#> Dimensions: 2 x 3 
+#>    100 200
+#> 10   1   3
+#> 20   2   4
+#> # 1 more columns. Use `print(n = ...)` to see more
+```

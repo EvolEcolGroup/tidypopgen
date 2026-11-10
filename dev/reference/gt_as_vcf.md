@@ -25,8 +25,9 @@ gt_as_vcf(x, file = NULL, chunk_size = NULL, overwrite = FALSE)
 
 - chunk_size:
 
-  the number of loci processed at a time. If left to NULL, 100,000 loci
-  are processed at a time.
+  the number of loci processed at a time (also used for the number of
+  chromosomes processed at a time when writing the contig lines of the
+  header). If left to NULL, 100,000 loci are processed at a time.
 
 - overwrite:
 
@@ -43,5 +44,5 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a vcf file
 example_gt %>% gt_as_vcf()
-#> [1] "/tmp/RtmpkB239F/file1f05a5cfe48.vcf"
+#> [1] "/tmp/Rtmp9UUrqY/file1ef846354234.vcf"
 ```

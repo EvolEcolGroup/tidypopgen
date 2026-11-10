@@ -123,8 +123,11 @@ gen_tibble(
 
 - n_cores:
 
-  currently ignored (reading files is not parallelised); kept for
-  backwards compatibility
+  the number of cores used to read a *VCF* file with `parser = "cpp"`:
+  the genotypes are parsed in parallel, and a *.vcf.gz* file compressed
+  with `bgzip` (as most are) is also decompressed in parallel (other
+  gzipped files are decompressed on a single core). It is ignored for
+  other formats and for `parser = "vcfR"`.
 
 - chunk_size:
 
@@ -134,11 +137,12 @@ gen_tibble(
 - names_as_int:
 
   logical. If TRUE, locus names will be converted to integers. Only used
-  when `x` is a *VCF* file with parser "cpp". Default is FALSE. This can
-  be useful when working with very large datasets where storing the
-  names as string can use a large amount of memory. Integer names are
-  the index of each locus in the *VCF*, so they can not be used to match
-  loci across datasets:
+  when `x` is a *VCF* file with parser "cpp", a PLINK *bed* file or a
+  bigSNP *rds* file. Default is FALSE. This can be useful when working
+  with very large datasets where storing the names as string can use a
+  large amount of memory. Integer names are the index of each locus in
+  the *VCF* (or *bim*) file, so they can not be used to match loci
+  across datasets:
   [rbind()](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind.gen_tbl.md)
   and
   [`rbind_dry_run()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind_dry_run.md)

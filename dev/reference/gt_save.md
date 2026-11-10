@@ -9,6 +9,9 @@ on what subset of the full dataset we are interested in, whilst the
 *.rds* and *.bk* file store the full dataset. To reload a `gen_tibble`,
 you can pass the name of the *.gt* file with
 [`gt_load()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.md).
+The *.gt* file is compressed with gzip at its fastest level, as saving
+the information on millions of loci with the default level of
+[`saveRDS()`](https://rdrr.io/r/base/readRDS.html) is slow.
 
 ## Usage
 
@@ -52,13 +55,13 @@ example_gt <- example_gt %>% filter(id != "a")
 # save filtered gen_tibble object
 gt_save(example_gt, file_name = paste0(tempfile(), "_example_filtered"))
 #> 
-#> gen_tibble saved to /tmp/RtmpkB239F/file1f054761fa4c_example_filtered.gt
-#> using FBM RDS: /tmp/RtmpkB239F/file1f05df46f25.rds
-#> with FBM backing file: /tmp/RtmpkB239F/file1f05df46f25.bk
+#> gen_tibble saved to /tmp/Rtmp9UUrqY/file1ef875a350ca_example_filtered.gt
+#> using FBM RDS: /tmp/Rtmp9UUrqY/file1ef86c715d63.rds
+#> with FBM backing file: /tmp/Rtmp9UUrqY/file1ef86c715d63.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpkB239F/file1f054761fa4c_example_filtered.gt')
-#> [1] "/tmp/RtmpkB239F/file1f054761fa4c_example_filtered.gt"
-#> [2] "/tmp/RtmpkB239F/file1f05df46f25.rds"                 
-#> [3] "/tmp/RtmpkB239F/file1f05df46f25.bk"                  
+#> gt_load('/tmp/Rtmp9UUrqY/file1ef875a350ca_example_filtered.gt')
+#> [1] "/tmp/Rtmp9UUrqY/file1ef875a350ca_example_filtered.gt"
+#> [2] "/tmp/Rtmp9UUrqY/file1ef86c715d63.rds"                
+#> [3] "/tmp/Rtmp9UUrqY/file1ef86c715d63.bk"                 
 ```

@@ -115,12 +115,25 @@ Functions for imputing missing data in a `gen_tibble`.
 
 Functions for merging `gen_tibble` objects.
 
+- [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+  :
+
+  Merge several VCF files into a `gen_tibble`
+
+- [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md)
+  :
+
+  Concatenate VCF files of the same samples into a `gen_tibble`
+
 - [`rbind_dry_run()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind_dry_run.md)
   : Generate a report of what would happen to each SNP in a merge
+
 - [`rbind(`*`<gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind.gen_tbl.md)
   : Combine two gen_tibbles
+
 - [`summary(`*`<rbind_report>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/summary_rbind_dry_run.md)
   : Print a summary of a merge report
+
 - [`cbind(`*`<gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/cbind.gen_tbl.md)
   [`cbind(`*`<grouped_gen_tbl>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/cbind.gen_tbl.md)
   : Combine a gen_tibble to a data.frame or tibble by column
@@ -346,8 +359,7 @@ as in easySFS.
 Functions to compute statistics in sliding windows across loci.
 
 - [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
-  : Detect runs of homozygosity using a sliding-window approach, as
-  PLINK
+  : Detect runs of homozygosity using a sliding-window
 - [`windows_nwise_pop_pbs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_nwise_pop_pbs.md)
   : Compute the Population Branch Statistics over a sliding window
 - [`windows_pairwise_pop_fst()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_pairwise_pop_fst.md)
@@ -362,8 +374,7 @@ Functions to compute statistics in sliding windows across loci.
 Functions to find and summarise runs of homozygosity.
 
 - [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
-  : Detect runs of homozygosity using a sliding-window approach, as
-  PLINK
+  : Detect runs of homozygosity using a sliding-window
 
 - [`gt_roh_froh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_froh.md)
   : Inbreeding from runs of homozygosity (F_ROH)
@@ -600,7 +611,7 @@ Methods for tidyverse verbs for `gen_tibble` objects
 
   A \$ method for `gen_tibble` objects
 
-- [`vec_math.vctrs_bigSNP()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/vec_math.vctrs_bigSNP.md)
+- [`vec_math(`*`<vctrs_bigSNP>`*`)`](https://evolecolgroup.github.io/tidypopgen/dev/reference/vec_math.vctrs_bigSNP.md)
   : Mathematical predicates for vctrs_bigSNP vectors
 
 ## `matrix_int_names`

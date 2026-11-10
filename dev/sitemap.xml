@@ -65,6 +65,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_cluster_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_cluster_pca_best_k.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_dapc.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_extract_f2.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_from_genlight.html</loc></url>
@@ -73,6 +74,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_xgboost.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca_autoSVD.html</loc></url>

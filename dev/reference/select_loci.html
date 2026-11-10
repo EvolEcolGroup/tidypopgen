@@ -15,7 +15,7 @@ at select_loci_if() for that feature."><meta property="og:image" content="https:
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9011</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,7 +34,7 @@ at select_loci_if() for that feature."><meta property="og:image" content="https:
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
-    <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
@@ -64,7 +64,7 @@ at <code><a href="select_loci_if.html">select_loci_if()</a></code> for that feat
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">select_loci</span><span class="op">(</span><span class="va">.data</span>, <span class="va">.sel_arg</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">select_loci</span><span class="op">(</span><span class="va">.data</span>, <span class="va">.sel_arg</span>, .engine <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"tidyselect"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -81,6 +81,13 @@ at <code><a href="select_loci_if.html">select_loci_if()</a></code> for that feat
 can be used as if they were positions in the data frame, so expressions
 like x:y can be used to select a range of variables.</p></dd>
 
+
+<dt id="arg--engine">.engine<a class="anchor" aria-label="anchor" href="#arg--engine"></a></dt>
+<dd><p>how the selection is resolved: "auto" (the default)
+resolves the common selections described in Details directly, and leaves
+the others to <code>tidyselect</code>; "tidyselect" always uses <code>tidyselect</code>, which
+is slow and memory hungry with millions of loci.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -92,15 +99,22 @@ like x:y can be used to select a range of variables.</p></dd>
 but rather it subsets the list of loci to be used stored in the <code>gen_tibble</code>.</p>
 <p>For large datasets (millions of loci), select loci with <code><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">dplyr::all_of()</a></code>
 or <code><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">dplyr::any_of()</a></code>, with helpers that match names (such as
-<code><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">dplyr::starts_with()</a></code> or <code><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">dplyr::everything()</a></code>), or with numeric
-positions written as numbers (e.g. <code>1:100</code> or <code>-c(1, 5)</code>), each
-optionally negated with <code>-</code> or <code>!</code>. These selections are resolved
-directly, which is much faster and uses much less memory than the general
-<code>tidyselect</code> machinery, which has to create an R symbol for every locus
-name (and R never frees symbols). Other expressions (e.g. combinations
-such as <code>c(all_of(x), starts_with("rs"))</code>, bare loci names, or
-expressions such as <code>which(...)</code>) still work, but are slow and memory
-hungry on very large datasets: use <code>all_of(which(...))</code> instead.</p>
+<code><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">dplyr::starts_with()</a></code> or <code><a href="https://tidyselect.r-lib.org/reference/everything.html" class="external-link">dplyr::everything()</a></code>), with numeric positions
+written as numbers (e.g. <code>1:100</code> or <code>-c(1, 5)</code>), with a function call
+that gives positions or names (e.g. <code>which(...)</code>, <code>sample(...)</code> or
+<code>sort(x)</code>), or with a variable that holds positions or names (e.g.
+<code>select_loci(x, idx)</code>), each optionally negated with <code>-</code> or <code>!</code>. These
+selections are resolved directly, which is much faster and uses much less
+memory than the general <code>tidyselect</code> machinery, which has to create an R
+symbol for every locus name (and R never frees symbols). As in
+<code>tidyselect</code>, a locus with the same name as the variable is selected
+instead of the value of the variable, and selecting with a variable gives
+the deprecation warning of <code>tidyselect</code>: prefer <code>all_of(idx)</code>, which can
+not be confused with a locus named <code>idx</code>. Other expressions (e.g.
+combinations such as <code>c(all_of(x), starts_with("rs"))</code>, or bare loci
+names) still work, but are slow and memory hungry on very large datasets.
+To always use <code>tidyselect</code> (e.g. if a selection is not resolved as
+<code>tidyselect</code> would resolve it), set <code>.engine = "tidyselect"</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -131,6 +145,10 @@ hungry on very large datasets: use <code>all_of(which(...))</code> instead.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>         4 rs4   chr1            343            0 G          C         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>         2 rs2   chr1              5            0 T          C         </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>         1 rs1   chr1              3            0 A          T         </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Always use tidyselect to resolve the selection</span></span></span>
+<span class="r-in"><span><span class="va">example_gt_subset</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">select_loci</span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>, .engine <span class="op">=</span> <span class="st">"tidyselect"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.4.4.9011</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9001</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,7 @@
     <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
-    <li><a class="dropdown-item" href="../articles/interpolating.html">Interpolating genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul>
@@ -402,39 +402,34 @@ likely to be in runs, whatever selection did.</p>
 </h2>
 <table class="table">
 <thead><tr class="header">
-<th align="left"></th>
 <th align="left">Step</th>
 <th align="right">Time (s)</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">read_bed</td>
-<td align="left">Read the bed file (gen_tibble())</td>
+<td align="left">Read the bed file (<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>)</td>
 <td align="right">3.33</td>
 </tr>
 <tr class="even">
-<td align="left">roh_1_core</td>
-<td align="left">Find the runs (windows_indiv_roh(), 1 core)</td>
+<td align="left">Find the runs (<code><a href="../reference/windows_indiv_roh.html">windows_indiv_roh()</a></code>, 1
+core)</td>
 <td align="right">3.77</td>
 </tr>
 <tr class="odd">
-<td align="left">roh_4_cores</td>
-<td align="left">Find the runs (windows_indiv_roh(), 4 cores)</td>
+<td align="left">Find the runs (<code><a href="../reference/windows_indiv_roh.html">windows_indiv_roh()</a></code>, 4
+cores)</td>
 <td align="right">1.29</td>
 </tr>
 <tr class="even">
-<td align="left">plink</td>
-<td align="left">PLINK –homozyg (1 thread)</td>
+<td align="left">PLINK <code>--homozyg</code> (1 thread)</td>
 <td align="right">3.55</td>
 </tr>
 <tr class="odd">
-<td align="left">froh</td>
-<td align="left">F_ROH (gt_roh_froh())</td>
+<td align="left">F_ROH (<code><a href="../reference/gt_roh_froh.html">gt_roh_froh()</a></code>)</td>
 <td align="right">0.03</td>
 </tr>
 <tr class="even">
-<td align="left">islands</td>
-<td align="left">ROH islands (gt_roh_islands())</td>
+<td align="left">ROH islands (<code><a href="../reference/gt_roh_islands.html">gt_roh_islands()</a></code>)</td>
 <td align="right">2.43</td>
 </tr>
 </tbody>

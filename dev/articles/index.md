@@ -16,7 +16,7 @@
   HGDP](https://evolecolgroup.github.io/tidypopgen/dev/articles/benchmark_hgdp.md):
 - [Working with big
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/big_data.md):
-- [Interpolating genetic
+- [Spatial interpolation of genetic
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.md):
 - [Runs of homozygosity in the
   HGDP](https://evolecolgroup.github.io/tidypopgen/dev/articles/roh_hgdp.md):

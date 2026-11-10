@@ -383,11 +383,11 @@ likely to be in runs, whatever selection did.
 
 ## Timings
 
-|             | Step                                         | Time (s) |
-|:------------|:---------------------------------------------|---------:|
-| read_bed    | Read the bed file (gen_tibble())             |     3.33 |
-| roh_1_core  | Find the runs (windows_indiv_roh(), 1 core)  |     3.77 |
-| roh_4_cores | Find the runs (windows_indiv_roh(), 4 cores) |     1.29 |
-| plink       | PLINK –homozyg (1 thread)                    |     3.55 |
-| froh        | F_ROH (gt_roh_froh())                        |     0.03 |
-| islands     | ROH islands (gt_roh_islands())               |     2.43 |
+| Step | Time (s) |
+|:---|---:|
+| Read the bed file ([`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)) | 3.33 |
+| Find the runs ([`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md), 1 core) | 3.77 |
+| Find the runs ([`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md), 4 cores) | 1.29 |
+| PLINK `--homozyg` (1 thread) | 3.55 |
+| F_ROH ([`gt_roh_froh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_froh.md)) | 0.03 |
+| ROH islands ([`gt_roh_islands()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_roh_islands.md)) | 2.43 |
