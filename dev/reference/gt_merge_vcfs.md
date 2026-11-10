@@ -232,12 +232,12 @@ merged_gt <- gt_merge_vcfs(c(vcf_a, vcf_b),
 #> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_a.vcf
 #> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_b.vcf
 #> 
-#> gen_tibble saved to /tmp/Rtmp9UUrqY/merged_1ef85c38d08d.gt
-#> using FBM RDS: /tmp/Rtmp9UUrqY/merged_1ef85c38d08d.rds
-#> with FBM backing file: /tmp/Rtmp9UUrqY/merged_1ef85c38d08d.bk
+#> gen_tibble saved to /tmp/RtmpL9nre6/merged_1fae4873a36c.gt
+#> using FBM RDS: /tmp/RtmpL9nre6/merged_1fae4873a36c.rds
+#> with FBM backing file: /tmp/RtmpL9nre6/merged_1fae4873a36c.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/Rtmp9UUrqY/merged_1ef85c38d08d.gt')
+#> gt_load('/tmp/RtmpL9nre6/merged_1fae4873a36c.gt')
 merged_gt
 #> # A gen_tibble: 8 loci
 #> # A tibble:     8 × 2
