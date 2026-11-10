@@ -1162,6 +1162,81 @@ test_that("the cpp parser reads bgzipped VCFs in parallel", {
     gen_tibble(junk_path, backingfile = tempfile(), quiet = TRUE),
     "not a valid BGZF file"
   )
+  # a block whose uncompressed size (its last 4 bytes) is larger than a BGZF
+  # block can be
+  first_block <- bgzf_bytes[seq_len(block_size)]
+  first_block[block_size - 0:3] <- as.raw(255)
+  big_path <- tempfile(fileext = ".vcf.gz")
+  writeBin(first_block, big_path)
+  expect_error(
+    gen_tibble(big_path, backingfile = tempfile(), quiet = TRUE),
+    "error decompressing the BGZF file"
+  )
+})
+
+test_that("the cpp parser rejects invalid genotypes and positions", {
+  loci <- data.frame(
+    chrom = "1", pos = c(100, 200), id = c("s1", "s2"),
+    ref = c("A", "G"), alt = c("C", "T")
+  )
+  # a VCF with the genotypes geno at its second locus (with FORMAT `format`,
+  # and position `pos`)
+  bad_vcf <- function(geno, format = "GT", pos = "200") {
+    vcf_path <- write_merge_vcf(c("a", "b"), loci,
+      genotypes = rbind(c("0/1", "0/0"), geno)
+    )
+    vcf_lines <- readLines(vcf_path)
+    vcf_lines[5] <- sub("\tGT\t", paste0("\t", format, "\t"), vcf_lines[5])
+    vcf_lines[5] <- sub("\t200\t", paste0("\t", pos, "\t"), vcf_lines[5])
+    writeLines(vcf_lines, vcf_path)
+    vcf_path
+  }
+  # reading it gives an error, and leaves no backing file
+  expect_vcf_error <- function(vcf_path, regexp) {
+    backingfile <- tempfile()
+    expect_error(
+      gen_tibble(vcf_path, backingfile = backingfile, quiet = TRUE),
+      regexp
+    )
+    expect_length(
+      list.files(dirname(backingfile), pattern = basename(backingfile)),
+      0
+    )
+  }
+  # these genotypes are fine (values after the genotype are ignored)
+  good_gt <- gen_tibble(bad_vcf(c("1/1", "0|1:20")),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_equal(show_genotypes(good_gt), cbind(c(1, 0), c(2, 1)))
+  # alleles that a biallelic SNP can not have, an allele with two digits, or
+  # an empty genotype
+  for (geno in list(c("2/1", "0/0"), c("a/1", "0/0"), c("0/12", "0/0"),
+                    c("1/1", ":20"), c("1/1", ""))) {
+    expect_vcf_error(bad_vcf(geno), "is not valid: the alleles of a")
+  }
+  # the genotype is not the first value of each sample
+  expect_vcf_error(
+    bad_vcf(c("20:1/1", "20:0/0"), format = "DP:GT"),
+    "does not start with GT"
+  )
+  # a position that is not an integer
+  expect_vcf_error(bad_vcf(c("1/1", "0/0"), pos = "200x"), "valid integer")
+  # an invalid number of cores
+  vcf_path <- write_merge_vcf(c("a", "b"), loci,
+    genotypes = rbind(c("0/1", "0/0"), c("1/1", "0/1"))
+  )
+  for (n_cores in list(0, NA, Inf, "2")) {
+    expect_error(
+      gen_tibble(vcf_path, n_cores = n_cores, backingfile = tempfile()),
+      "'n_cores' should be a positive integer"
+    )
+  }
+  expect_error(
+    tidypopgen:::vcf_to_bk(vcf_path, bk_file = "", n_threads = 0,
+      read_genotypes = FALSE
+    ),
+    "'n_threads' should be a positive integer"
+  )
 })
 
 test_that("the cpp parser handles unusual but valid VCF files", {

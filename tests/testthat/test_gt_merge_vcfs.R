@@ -365,6 +365,115 @@ test_that("gt_merge_vcfs keeps loci at the same position in a file apart", {
   expect_identical(show_loci(merged)$name, c("m2", "s2"))
   expect_identical(show_loci(merged)$allele_alt, c("G", "T"))
   expect_equal(show_genotypes(merged), rbind(c(0, 2), c(2, 1)))
+  # the same, with the split site in the later file: its line with the same
+  # ALT allele is merged first, so that its other lines do not make the site
+  # multiallelic (whatever the order of the lines)
+  vcf_split_2 <- write_merge_vcf("a",
+    data.frame(
+      chrom = "1", pos = c(100, 100, 100, 200),
+      id = c("m1", "m3", "m2", "s2"), ref = c("A", "A", "A", "G"),
+      alt = c("C", "T", "G", "T")
+    ),
+    genotypes = rbind("0/1", "0/0", "0/0", "1/1")
+  )
+  merged <- gt_merge_vcfs(c(vcf_b, vcf_split_2),
+    names_as_int = FALSE, backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(show_loci(merged)$name, c("x", "s2"))
+  expect_equal(show_genotypes(merged), rbind(c(2, 1), c(0, 2)))
+  # with the union, the other lines are kept as separate loci
+  expect_warning(
+    merged <- gt_merge_vcfs(c(vcf_b, vcf_split_2),
+      variants = "union", allow_duplicates = TRUE, names_as_int = FALSE,
+      backingfile = tempfile(), quiet = TRUE
+    ),
+    "duplicated loci"
+  )
+  expect_identical(show_loci(merged)$name, c("x", "m1", "m3", "s2"))
+  # a site with the same alleles is preferred to a monomorphic site (whose
+  # ALT is missing), so that each line is merged with its own site
+  vcf_mono <- write_merge_vcf("c",
+    data.frame(
+      chrom = "1", pos = c(100, 100, 200), id = c("mono", "c1", "s2"),
+      ref = c("A", "A", "G"), alt = c(".", "C", "T")
+    ),
+    genotypes = rbind("0/0", "1/1", "0/1")
+  )
+  expect_warning(
+    merged <- gt_merge_vcfs(c(vcf_mono, vcf_split),
+      allow_duplicates = TRUE, names_as_int = FALSE,
+      backingfile = tempfile(), quiet = TRUE
+    ),
+    "duplicated loci"
+  )
+  expect_identical(show_loci(merged)$name, c("mono", "c1", "s2"))
+  expect_identical(show_loci(merged)$allele_alt, c("G", "C", "T"))
+  expect_equal(show_genotypes(merged), rbind(c(0, 2, 1), c(0, 1, 2)))
+})
+
+test_that("gt_merge_vcfs finds REF mismatches whatever the order of files", {
+  # at 1:100, the first two files have different ALT alleles, A/C and A/G,
+  # and the third file has another REF allele, T/G
+  vcf_ac <- write_merge_vcf("a",
+    data.frame(
+      chrom = "1", pos = c(100, 200), id = ".", ref = c("A", "G"),
+      alt = c("C", "T")
+    ),
+    genotypes = rbind("0/1", "1/1")
+  )
+  vcf_ag <- write_merge_vcf("b",
+    data.frame(
+      chrom = "1", pos = c(100, 200), id = ".", ref = c("A", "G"),
+      alt = c("G", "T")
+    ),
+    genotypes = rbind("0/1", "1/1")
+  )
+  vcf_tg <- write_merge_vcf("c",
+    data.frame(
+      chrom = "1", pos = c(100, 200), id = ".", ref = c("T", "G"),
+      alt = c("G", "T")
+    ),
+    genotypes = rbind("0/1", "1/1")
+  )
+  for (files in list(c(vcf_ac, vcf_ag, vcf_tg), c(vcf_ac, vcf_tg, vcf_ag))) {
+    expect_error(
+      gt_merge_vcfs(files, backingfile = tempfile(), quiet = TRUE),
+      paste0(
+        "the REF alleles of 1 loci differ .* 1:100 \\(A/C in the earlier ",
+        "files, first in .*; T/G in "
+      )
+    )
+    merged <- gt_merge_vcfs(files,
+      ref_mismatch = "drop", backingfile = tempfile(), quiet = TRUE
+    )
+    expect_identical(show_loci(merged)$position, 200L)
+  }
+})
+
+test_that("gt_merge_vcfs swaps genotypes with fewer alleles than the ploidy", {
+  vcf_a <- write_merge_vcf("a",
+    data.frame(
+      chrom = "1", pos = c(100, 200), id = ".", ref = c("A", "G"),
+      alt = c("C", "T")
+    ),
+    genotypes = rbind("0/1", "1/1")
+  )
+  # REF and ALT are swapped in file b, whose (diploid) samples have a
+  # haploid genotype at the second locus
+  vcf_b <- write_merge_vcf(c("b", "c"),
+    data.frame(
+      chrom = "1", pos = c(100, 200), id = ".", ref = c("C", "T"),
+      alt = c("A", "G")
+    ),
+    genotypes = rbind(c("0/1", "1/1"), c("0", "1"))
+  )
+  merged <- gt_merge_vcfs(c(vcf_a, vcf_b),
+    ref_mismatch = "swap", backingfile = tempfile(), quiet = TRUE
+  )
+  expect_identical(indiv_ploidy(merged), c(2L, 2L, 2L))
+  # the haploid T (REF of file b) is the ALT allele of the merged locus G/T,
+  # and the haploid G is its REF allele
+  expect_equal(show_genotypes(merged), rbind(c(1, 2), c(1, 1), c(0, 0)))
 })
 
 test_that("the C++ merge helpers check their inputs", {

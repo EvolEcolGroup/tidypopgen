@@ -73,8 +73,13 @@ gt_as_snpbin_list <- function(x, chunk_size = NULL) {
   # by default, chunks of about 10 million genotypes
   if (is.null(chunk_size)) {
     chunk_size <- 1e7 %/% n_indiv
+  } else if (!is.numeric(chunk_size) || length(chunk_size) != 1 ||
+               is.na(chunk_size) || chunk_size < 1) {
+    stop("'chunk_size' should be a positive number")
   }
-  # chunks hold a multiple of 8 loci, so that their bits fill whole bytes
+  # chunks hold a multiple of 8 loci, so that their bits fill whole bytes (a
+  # chunk larger than the number of loci, e.g. Inf, holds all the loci)
+  chunk_size <- min(chunk_size, n_loci)
   chunk_size <- max(8, ceiling(chunk_size / 8) * 8)
   n_chunks <- ceiling(n_loci / chunk_size)
 

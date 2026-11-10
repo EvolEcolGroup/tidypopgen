@@ -23,7 +23,9 @@
 #' As in [gen_tibble()], the ploidy of each individual is estimated from the
 #' first variants of each file; the ploidy of an individual in the
 #' `gen_tibble` is its largest ploidy across files (e.g. with a file of the X
-#' chromosome in which males are haploid, males are still diploid).
+#' chromosome in which males are haploid, males are still diploid). Files in
+#' which the genotypes of an individual are all missing in the first variants
+#' are ignored for its ploidy (unless they all are).
 #'
 #' Unlike [gen_tibble()], by default (`names_as_int = TRUE`) the loci are
 #' named with integers (their index in the `gen_tibble`), rather than with
@@ -108,11 +110,23 @@ gt_concat_vcfs <- function(
   file_rows <- lapply(row_map, function(x) {
     if (length(x) > 0) x + 1L else seq_along(sample_id)
   })
-  # the ploidy of each individual: its largest ploidy across files
-  ploidy <- scans[[1]]$ploidy
+  # the ploidy of each individual: its largest ploidy across the files in
+  # which it could be estimated. In a file where its genotypes were all
+  # missing in the first variants, its ploidy was only guessed (from the
+  # other individuals of that file), and that guess is only used if its
+  # ploidy could not be estimated in any file (otherwise, e.g. a haploid
+  # individual could get the diploid ploidy of the others)
+  ploidy_known <- rep(NA_integer_, length(sample_id))
+  ploidy_guess <- rep(NA_integer_, length(sample_id))
   for (f in seq_len(n_files)) {
-    ploidy[file_rows[[f]]] <- pmax(ploidy[file_rows[[f]]], scans[[f]]$ploidy)
+    rows <- file_rows[[f]]
+    guessed <- scans[[f]]$ploidy_guessed
+    known <- ifelse(guessed, NA_integer_, scans[[f]]$ploidy)
+    guess <- ifelse(guessed, scans[[f]]$ploidy, NA_integer_)
+    ploidy_known[rows] <- pmax(ploidy_known[rows], known, na.rm = TRUE)
+    ploidy_guess[rows] <- pmax(ploidy_guess[rows], guess, na.rm = TRUE)
   }
+  ploidy <- ifelse(is.na(ploidy_known), ploidy_guess, ploidy_known)
 
   # the loci: those of each file, one file after the other. Each column is
   # taken from all the files, and then dropped from them, so that the loci

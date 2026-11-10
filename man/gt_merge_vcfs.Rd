@@ -96,8 +96,9 @@ are matched across files by chromosome and position (as in \verb{bcftools merge}
 of e.g. 'chr1' and '1' would match no loci). A locus is merged with a site
 at the same chromosome and position if their alleles agree: the same REF
 and ALT alleles, or a missing allele (e.g. the ALT '.' of a monomorphic
-locus), which takes the allele of the other files. Loci whose alleles do not
-agree are handled as follows:
+locus), which takes the allele of the other files (a site with the same
+alleles is preferred to one with a missing allele). Loci whose alleles do
+not agree are handled as follows:
 \itemize{
 \item loci with the same REF but a different ALT allele (e.g. A/C and A/G):
 \verb{bcftools merge} would make a multiallelic site, which a \code{gen_tibble} can
@@ -116,7 +117,10 @@ by PLINK 1.9, which by default set the REF allele to the major allele.
 
 Strands are not flipped (all \emph{VCF} files are on the forward strand). Loci
 at the same position within a file are never merged with each other (as in
-\verb{bcftools merge}).
+\verb{bcftools merge}); if a file has several loci at the same position (e.g. a
+multiallelic site split into biallelic records, as by \verb{bcftools norm -m-}),
+each is merged with the site of the other files that has its alleles, if
+any, before the others are handled as above.
 
 The merged \code{gen_tibble} has the samples of the first file, followed by those
 of the second file, and so on. By default (\code{variants = "intersection"}),

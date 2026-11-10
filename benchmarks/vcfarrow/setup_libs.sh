@@ -32,7 +32,12 @@ for spec in "${refs[@]}"; do
   R CMD INSTALL --no-docs --no-multiarch --no-test-load --library="$lib" "$src" \
     > "$here/logs/install_$tag.log" 2>&1
   so="$lib/tidypopgen/libs/tidypopgen.so"
-  n_o0=$(objdump -d "$so" | grep -c 'call.*vectorI.*ixEm' || true)
+  # (a failed disassembly must not look like a library with no -O0 code)
+  if ! disassembly=$(objdump -d "$so"); then
+    echo "   could not disassemble $so" >&2
+    exit 1
+  fi
+  n_o0=$(grep -c 'call.*vectorI.*ixEm' <<< "$disassembly" || true)
   echo "   non-inlined Rcpp indexing calls (0 = no -O0 code): $n_o0"
   Rscript -e "library(tidypopgen, lib.loc = '$lib'); cat('   loaded', as.character(packageVersion('tidypopgen', lib.loc = '$lib')), '\n')"
 done

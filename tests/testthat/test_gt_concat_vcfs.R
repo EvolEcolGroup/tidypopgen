@@ -124,4 +124,28 @@ test_that("gt_concat_vcfs keeps the largest ploidy of each individual", {
   expect_match(msgs, "concatenating 2 VCF files with 3 samples", all = FALSE)
   expect_identical(indiv_ploidy(x_gt), c(2L, 2L, 2L))
   expect_equal(show_genotypes(x_gt)[, 1], c(1, 1, 2))
+  # a haploid individual (a) whose genotypes are all missing in another file,
+  # where its ploidy can only be guessed (as that of the other individuals):
+  # it stays haploid, whatever the order of the files
+  haploid_vcf <- write_merge_vcf(c("a", "b", "c"),
+    data.frame(
+      chrom = "1", pos = c(10, 20), id = ".", ref = "G", alt = "C"
+    ),
+    rbind(c("1", "0/1", "1/1"), c("0", "0/0", "0/1"))
+  )
+  missing_vcf <- write_merge_vcf(c("a", "b", "c"),
+    data.frame(chrom = "2", pos = 10, id = ".", ref = "G", alt = "C"),
+    rbind(c(".", "0/1", "1/1"))
+  )
+  file_orders <- list(
+    c(haploid_vcf, missing_vcf),
+    c(missing_vcf, haploid_vcf)
+  )
+  for (files in file_orders) {
+    concat_gt <- gt_concat_vcfs(files, backingfile = tempfile(), quiet = TRUE)
+    expect_identical(indiv_ploidy(concat_gt), c(1L, 2L, 2L))
+    chr_1 <- show_loci(concat_gt)$chromosome == "1"
+    expect_equal(show_genotypes(concat_gt)[1, chr_1], c(1, 0))
+    expect_true(is.na(show_genotypes(concat_gt)[1, !chr_1]))
+  }
 })

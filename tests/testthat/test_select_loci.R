@@ -237,6 +237,13 @@ test_that("select_loci leaves unusual selections to tidyselect", {
   expect_identical(count_loci(select_loci(test_gt, c())), 0L)
   # positive and negative positions are combined by tidyselect
   expect_identical(loci_names(select_loci(test_gt, c(1, -2))), "rs1")
+  # a call whose value is a symbol selects the locus of that name, as in
+  # tidyselect
+  expect_identical(
+    select_loci(test_gt, as.name("rs2")),
+    select_loci(test_gt, as.name("rs2"), .engine = "tidyselect")
+  )
+  expect_identical(loci_names(select_loci(test_gt, as.name("rs2"))), "rs2")
   # a variable whose name starts with a dot (like the pronouns of tidyselect)
   .idx <- c(1, 3)
   withr::local_options(lifecycle_verbosity = "quiet")

@@ -20,10 +20,12 @@
 #   done
 #
 # Each run prints: label, file, seconds for vcf_loci_table(), seconds for
-# vcf_genotypes_to_fbm(), number of loci, number of biallelic loci, ploidies
-# (ploidy x number of individuals) and the md5 of the backing file. The md5
-# must be the same for both versions, unless the change is meant to alter the
-# genotypes. Do not run long benchmarks on a laptop that may suspend, as the
+# vcf_genotypes_to_fbm(), total seconds, number of loci, number of biallelic
+# loci, ploidies (ploidy x number of individuals) and the md5 of the backing
+# file. Versions from 1.0.0.9000 read the VCF in a single pass (vcf_to_bk()),
+# so for them only the total is given (and the number of loci, which they do
+# not count, is NA). The md5 must be the same for both versions, unless the
+# change is meant to alter the genotypes. Do not run long benchmarks on a laptop that may suspend, as the
 # elapsed times include the time spent suspended.
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -83,33 +85,50 @@ make_vcf <- function(vcf_path, n_variants, n_samples, ploidy = "2",
   }
 }
 
-# time the two steps of the cpp parser (as used by gen_tibble())
+# time the cpp parser (as used by gen_tibble()): its two steps, or its single
+# pass (vcf_to_bk()) in newer versions
 run_parser <- function(lib, vcf_path, label) {
   suppressPackageStartupMessages(library(tidypopgen, lib.loc = lib))
-  time_loci <- system.time(
-    vcf_meta <- tidypopgen:::vcf_loci_table(vcf_path)
-  )[["elapsed"]]
-  max_ploidy <- max(vcf_meta$ploidy)
-  code256 <- rep(NA_real_, 256)
-  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
   backingfile <- tempfile()
-  fbm <- bigstatsr::FBM.code256(
-    nrow = length(vcf_meta$ploidy),
-    ncol = sum(vcf_meta$biallelic),
-    code = code256,
-    backingfile = backingfile
-  )
-  time_geno <- system.time(
-    tidypopgen:::vcf_genotypes_to_fbm(vcf_path, fbm,
-      biallelic = vcf_meta$biallelic,
-      missing_value = max_ploidy + 1,
-      n_header_lines = vcf_meta$n_header_lines
+  if (exists("vcf_to_bk", envir = asNamespace("tidypopgen"))) {
+    time_loci <- NA
+    time_geno <- NA
+    time_total <- system.time(
+      vcf_meta <- tidypopgen:::vcf_to_bk(vcf_path,
+        bk_file = paste0(backingfile, ".bk")
+      )
+    )[["elapsed"]]
+    n_loci <- NA
+    n_biallelic <- length(vcf_meta$loci_tbl$physical.pos)
+  } else {
+    time_loci <- system.time(
+      vcf_meta <- tidypopgen:::vcf_loci_table(vcf_path)
+    )[["elapsed"]]
+    max_ploidy <- max(vcf_meta$ploidy)
+    code256 <- rep(NA_real_, 256)
+    code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+    fbm <- bigstatsr::FBM.code256(
+      nrow = length(vcf_meta$ploidy),
+      ncol = sum(vcf_meta$biallelic),
+      code = code256,
+      backingfile = backingfile
     )
-  )[["elapsed"]]
+    time_geno <- system.time(
+      tidypopgen:::vcf_genotypes_to_fbm(vcf_path, fbm,
+        biallelic = vcf_meta$biallelic,
+        missing_value = max_ploidy + 1,
+        n_header_lines = vcf_meta$n_header_lines
+      )
+    )[["elapsed"]]
+    time_total <- time_loci + time_geno
+    n_loci <- nrow(vcf_meta$loci_tbl)
+    n_biallelic <- sum(vcf_meta$biallelic)
+  }
   ploidy_counts <- table(vcf_meta$ploidy)
   cat(sprintf(
-    "%s\t%s\t%.2f\t%.2f\t%d\t%d\t%s\t%s\n", label, basename(vcf_path),
-    time_loci, time_geno, nrow(vcf_meta$loci_tbl), sum(vcf_meta$biallelic),
+    "%s\t%s\t%.2f\t%.2f\t%.2f\t%s\t%d\t%s\t%s\n", label,
+    basename(vcf_path), time_loci, time_geno, time_total, n_loci,
+    n_biallelic,
     paste(names(ploidy_counts), ploidy_counts, sep = "x", collapse = ","),
     unname(tools::md5sum(paste0(backingfile, ".bk")))
   ))

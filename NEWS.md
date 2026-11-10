@@ -41,6 +41,11 @@
 * `gen_tibble()` with the "cpp" parser gives a clear error, and leaves no
   backing files, when the first variant of a VCF does not have a genotype
   for each sample in its header
+* `gen_tibble()` with the "cpp" parser gives a clear error, rather than
+  reading wrong genotypes, on malformed VCF files: genotypes of biallelic
+  SNPs with alleles other than 0, 1 or ".", or empty, a FORMAT that does not
+  start with GT, positions that are not integers (e.g. "12x"), and corrupted
+  BGZF blocks; and on an invalid `n_cores` (which could crash R)
 * `gen_tibble()` reads VCF files with many chromosomes (e.g. RAD loci
   assembled de novo) faster: the "cpp" parser looks up chromosome names
   without allocating memory for each, and the chromosome names are sorted in

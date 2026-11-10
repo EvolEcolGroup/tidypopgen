@@ -40,10 +40,24 @@ run_scenario() { # scenario, bcftools subcommand + options, gt mode, files dir
   timed gen_tibble Rscript "$here/gt_step.R" "$LIB" gen_tibble "$T" "$OUT/gen_tibble" "$OUT/combined.vcf.gz"
   # the new route
   timed "$mode" Rscript "$here/gt_step.R" "$LIB" "$mode" "$T" "$OUT/new" "${files[@]}"
-  # same gen_tibble? (samples, loci, ploidy, and the bytes of the backing file)
-  Rscript -e "a <- readRDS('$OUT/gen_tibble_meta.rds'); b <- readRDS('$OUT/new_meta.rds'); stopifnot(identical(a, b))" \
-    && [ "$(md5sum < "$OUT/gen_tibble.bk")" == "$(md5sum < "$OUT/new.bk")" ] \
-    && echo "$SC: identical gen_tibbles" || echo "$SC: DIFFERENT gen_tibbles"
+  # same gen_tibble? (samples, loci, ploidy, and the bytes of the backing
+  # file). Different gen_tibbles stop the benchmark (as does a comparison
+  # that fails, e.g. on a missing file, through set -e)
+  local md5_old md5_new same_meta=0
+  md5_old=$(md5sum < "$OUT/gen_tibble.bk")
+  md5_new=$(md5sum < "$OUT/new.bk")
+  Rscript -e "a <- readRDS('$OUT/gen_tibble_meta.rds'); b <- readRDS('$OUT/new_meta.rds'); quit(status = if (identical(a, b)) 0 else 3)" \
+    || same_meta=$?
+  if [ "$same_meta" -ne 0 ] && [ "$same_meta" -ne 3 ]; then
+    echo "$SC: could not compare the gen_tibbles" >&2
+    return 1
+  fi
+  if [ "$same_meta" -eq 0 ] && [ "$md5_old" == "$md5_new" ]; then
+    echo "$SC: identical gen_tibbles"
+  else
+    echo "$SC: DIFFERENT gen_tibbles" >&2
+    return 1
+  fi
 }
 
 if want concat; then

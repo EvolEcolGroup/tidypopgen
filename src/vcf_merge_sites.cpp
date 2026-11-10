@@ -84,12 +84,13 @@ public:
            "two alleles");
     }
     int f = site_of_locus.size();
-    std::vector<int> site(n_loci);
+    std::vector<int> site(n_loci, -1);
     std::vector<char> swap(n_loci, 0);
     std::vector<int> new_loci;
     const int* chr_ptr = chr.begin();
     const int* pos_ptr = pos.begin();
-    for (R_xlen_t k = 0; k < n_loci; k++) {
+    R_xlen_t k = 0;
+    while (k < n_loci) {
       // with millions of sites, finding the site of a locus is dominated by
       // two cache misses (its slot in the hash table, then the site), so we
       // prefetch the slot of a locus a few loci ahead, and then its first
@@ -113,100 +114,43 @@ public:
 #endif
       int this_chr = chr_ptr[k];
       int this_pos = pos_ptr[k];
-      char this_ref = allele_code(ref, k);
-      char this_alt = allele_code(alt, k);
       int head = find(this_chr, this_pos);
-      // look for a site at this position that agrees with the locus (and
-      // has no locus of this file yet), noting the first other site that
-      // has no locus of this file (with which the locus conflicts)
-      int match = -1;
-      bool swapped = false;
-      int conflict = -1;
-      for (int s = head; s >= 0; s = sites[s].next_at_pos) {
-        const MergedSite &site_s = sites[s];
-        if (site_s.last_file == f) {
-          continue;
-        }
-        if (site_s.status == 0) {
-          if (alleles_agree(this_ref, site_s.allele_ref) &&
-              alleles_agree(this_alt, site_s.allele_alt)) {
-            match = s;
-            break;
-          }
-          if ((ref_rule == 2) &&
-              alleles_agree(this_ref, site_s.allele_alt) &&
-              alleles_agree(this_alt, site_s.allele_ref)) {
-            match = s;
-            swapped = true;
-            break;
-          }
-        }
-        if (conflict < 0) {
-          conflict = s;
-        }
+      // the loci of the file at this position (consecutive loci, e.g. a
+      // multiallelic site split into biallelic records)
+      R_xlen_t group_end = k + 1;
+      while ((group_end < n_loci) && (chr_ptr[group_end] == this_chr) &&
+             (pos_ptr[group_end] == this_pos)) {
+        group_end++;
       }
-      int s;
-      bool new_site = false;
-      if (match >= 0) {
-        // merge the locus with the site, filling in its missing alleles
-        s = match;
-        MergedSite &site_s = sites[s];
-        if (site_s.allele_ref == 0) {
-          site_s.allele_ref = swapped ? this_alt : this_ref;
-        }
-        if (site_s.allele_alt == 0) {
-          site_s.allele_alt = swapped ? this_ref : this_alt;
-        }
-      } else if (conflict >= 0) {
-        s = conflict;
-        // (a site that is already dropped takes the locus as it is)
-        if (sites[s].status == 0) {
-          bool ref_differs = (this_ref != 0) && (sites[s].allele_ref != 0) &&
-            (this_ref != sites[s].allele_ref);
-          if (ref_differs && (ref_rule != 2)) {
-            // a REF mismatch: drop the site (and record it, to stop with an
-            // error if ref_rule is 0)
-            sites[s].status = 2;
-            if (ref_rule == 0) {
-              if (mismatch_site.size() < max_mismatches) {
-                mismatch_site.push_back(s);
-                mismatch_file.push_back(f);
-                mismatch_locus.push_back(k);
-                mismatch_site_ref.push_back(sites[s].allele_ref);
-                mismatch_site_alt.push_back(sites[s].allele_alt);
-                mismatch_locus_ref.push_back(this_ref);
-                mismatch_locus_alt.push_back(this_alt);
-              }
-              n_mismatches++;
-            }
-          } else if (split_alt) {
-            // alleles that can not be merged into a biallelic SNP: a new
-            // site at the same position
-            s = add(this_chr, this_pos, this_ref, this_alt, f, k, head);
-            new_site = true;
-          } else {
-            // a multiallelic site: drop it
-            sites[s].status = 1;
-          }
+      if (group_end == k + 1) {
+        // a single locus (the usual case)
+        if (!match_locus(k, f, head, false, ref, alt, site, swap)) {
+          place_locus(k, f, this_chr, this_pos, head, ref, alt, site,
+                      new_loci);
         }
       } else {
-        // a new site
-        s = add(this_chr, this_pos, this_ref, this_alt, f, k, head);
-        new_site = true;
+        // several loci: they are first merged with the sites with the same
+        // alleles, then with the sites whose alleles agree with theirs, and
+        // only then can the others conflict with a site (so that e.g. the
+        // records A/C and A/G of a file are not dropped because A/C
+        // conflicts with the site A/G of an earlier file, before A/G is
+        // merged with it)
+        for (int exact = 1; exact >= 0; exact--) {
+          for (R_xlen_t j = k; j < group_end; j++) {
+            if (site[j] < 0) {
+              match_locus(j, f, head, exact == 1, ref, alt, site, swap);
+            }
+          }
+        }
+        for (R_xlen_t j = k; j < group_end; j++) {
+          if (site[j] < 0) {
+            // (the first site at the position may be new)
+            place_locus(j, f, this_chr, this_pos, find(this_chr, this_pos),
+                        ref, alt, site, new_loci);
+          }
+        }
       }
-      if (new_site) {
-        new_loci.push_back(k + 1);
-      }
-      // (a new site already counts this file)
-      if (sites[s].last_file != f) {
-        sites[s].last_file = f;
-        sites[s].n_files++;
-      }
-      site[k] = s;
-      if (swapped) {
-        swap[k] = 1;
-        n_swapped++;
-      }
+      k = group_end;
     }
     site_of_locus.push_back(std::vector<int>());
     site_of_locus.back().swap(site);
@@ -238,6 +182,135 @@ private:
   // unobserved allele, e.g. the ALT "." of a monomorphic locus, can be any)
   static bool alleles_agree(char a, char b) {
     return (a == b) || (a == 0) || (b == 0);
+  }
+
+  // merge locus k of file f with a site at its position (head is the first
+  // site there, -1 if none) that is kept and has no locus of this file, and
+  // whose alleles agree with those of the locus, filling in the missing
+  // alleles of the site; returns whether such a site was found. A site with
+  // the same alleles is preferred to one with the same alleles once swapped
+  // (with ref_rule 2), and these to a site whose alleles only agree because
+  // some are missing (e.g. a monomorphic A/.), and, if exact, only a site
+  // with the same alleles (or swapped) is used
+  bool match_locus(R_xlen_t k, int f, int head, bool exact,
+                   const CharacterVector& ref, const CharacterVector& alt,
+                   std::vector<int>& site, std::vector<char>& swap) {
+    char this_ref = allele_code(ref, k);
+    char this_alt = allele_code(alt, k);
+    // the best site so far, and its rank (0 is the best)
+    int match = -1;
+    int match_rank = 4;
+    for (int s = head; s >= 0; s = sites[s].next_at_pos) {
+      const MergedSite &site_s = sites[s];
+      if ((site_s.last_file == f) || (site_s.status != 0)) {
+        continue;
+      }
+      int rank = 4;
+      if ((this_ref == site_s.allele_ref) && (this_alt == site_s.allele_alt)) {
+        rank = 0;
+      } else if ((ref_rule == 2) && (this_ref == site_s.allele_alt) &&
+                 (this_alt == site_s.allele_ref)) {
+        rank = 1;
+      } else if (exact) {
+        continue;
+      } else if (alleles_agree(this_ref, site_s.allele_ref) &&
+                 alleles_agree(this_alt, site_s.allele_alt)) {
+        rank = 2;
+      } else if ((ref_rule == 2) &&
+                 alleles_agree(this_ref, site_s.allele_alt) &&
+                 alleles_agree(this_alt, site_s.allele_ref)) {
+        rank = 3;
+      }
+      if (rank < match_rank) {
+        match = s;
+        match_rank = rank;
+        if (rank == 0) {
+          break;
+        }
+      }
+    }
+    if (match < 0) {
+      return false;
+    }
+    bool swapped = (match_rank == 1) || (match_rank == 3);
+    MergedSite &site_s = sites[match];
+    if (site_s.allele_ref == 0) {
+      site_s.allele_ref = swapped ? this_alt : this_ref;
+    }
+    if (site_s.allele_alt == 0) {
+      site_s.allele_alt = swapped ? this_ref : this_alt;
+    }
+    site_s.last_file = f;
+    site_s.n_files++;
+    site[k] = match;
+    if (swapped) {
+      swap[k] = 1;
+      n_swapped++;
+    }
+    return true;
+  }
+
+  // place locus k of file f, which could not be merged with a site (see
+  // match_locus()): it conflicts with the first site at its position (head,
+  // -1 if none) that has no locus of this file (if any), or becomes a new
+  // site
+  void place_locus(R_xlen_t k, int f, int chr, int pos, int head,
+                   const CharacterVector& ref, const CharacterVector& alt,
+                   std::vector<int>& site, std::vector<int>& new_loci) {
+    char this_ref = allele_code(ref, k);
+    char this_alt = allele_code(alt, k);
+    int conflict = -1;
+    for (int s = head; s >= 0; s = sites[s].next_at_pos) {
+      if (sites[s].last_file != f) {
+        conflict = s;
+        break;
+      }
+    }
+    int s = conflict;
+    if (conflict >= 0) {
+      bool ref_differs = (this_ref != 0) && (sites[s].allele_ref != 0) &&
+        (this_ref != sites[s].allele_ref);
+      if (ref_differs && (ref_rule != 2)) {
+        // a REF mismatch: drop the site (and record it, to stop with an
+        // error if ref_rule is 0), also if it was already dropped because
+        // its ALT alleles differ (so that the mismatch is found whatever the
+        // order of the files)
+        if (sites[s].status != 2) {
+          sites[s].status = 2;
+          if (ref_rule == 0) {
+            if (mismatch_site.size() < max_mismatches) {
+              mismatch_site.push_back(s);
+              mismatch_file.push_back(f);
+              mismatch_locus.push_back(k);
+              mismatch_site_ref.push_back(sites[s].allele_ref);
+              mismatch_site_alt.push_back(sites[s].allele_alt);
+              mismatch_locus_ref.push_back(this_ref);
+              mismatch_locus_alt.push_back(this_alt);
+            }
+            n_mismatches++;
+          }
+        }
+      } else if (sites[s].status == 0) {
+        if (split_alt) {
+          // alleles that can not be merged into a biallelic SNP: a new site
+          // at the same position
+          s = -1;
+        } else {
+          // a multiallelic site: drop it
+          sites[s].status = 1;
+        }
+      }
+      // (otherwise, a site that is already dropped takes the locus as it is)
+    }
+    if (s < 0) {
+      // a new site (which already counts this file)
+      s = add(chr, pos, this_ref, this_alt, f, k, head);
+      new_loci.push_back(k + 1);
+    } else if (sites[s].last_file != f) {
+      sites[s].last_file = f;
+      sites[s].n_files++;
+    }
+    site[k] = s;
   }
 
   // how many loci ahead we prefetch the first site at a position (and twice
@@ -367,14 +440,20 @@ MergedSites* get_merged_sites(SEXP sites) {
  *   mismatch, which bcftools does not allow: with ref_rule 0 ("error") it is
  *   recorded (and gt_merge_vcfs() stops), with ref_rule 1 ("drop") the site
  *   is dropped (and the locus merged with it, so that later loci at the same
- *   position are dropped as well); with ref_rule 2 it is treated as below;
+ *   position are dropped as well); with ref_rule 2 it is treated as below.
+ *   This holds also for a site already dropped for a different ALT (below);
  * - other loci (the same REF, a different ALT: the merged site would be
  *   multiallelic, which a gen_tibble can not store) drop the site (as above),
  *   or, with split_alt (bcftools merge -m none), become a new site at the
  *   same position.
- * A locus is never merged with a site that already has a locus of the same
- * file (so loci at the same position in a file stay apart, as in bcftools),
- * and a locus with no site at its position becomes a new site.
+ * A site with the same alleles as the locus is preferred to one whose
+ * alleles only agree because some are missing. A locus is never merged with
+ * a site that already has a locus of the same file (so loci at the same
+ * position in a file stay apart, as in bcftools); the loci of a file at the
+ * same position (e.g. a multiallelic site split into biallelic records) are
+ * all merged with the sites whose alleles agree with theirs before any of
+ * them conflicts with a site. A locus with no site at its position becomes a
+ * new site.
  *
  * Only the sites, and the site of each locus (with whether its alleles are
  * swapped), are kept: the loci of each file can be dropped once they have

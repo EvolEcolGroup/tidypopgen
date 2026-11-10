@@ -79,7 +79,9 @@ names must be unique within each file.
 As in \code{\link[=gen_tibble]{gen_tibble()}}, the ploidy of each individual is estimated from the
 first variants of each file; the ploidy of an individual in the
 \code{gen_tibble} is its largest ploidy across files (e.g. with a file of the X
-chromosome in which males are haploid, males are still diploid).
+chromosome in which males are haploid, males are still diploid). Files in
+which the genotypes of an individual are all missing in the first variants
+are ignored for its ploidy (unless they all are).
 
 Unlike \code{\link[=gen_tibble]{gen_tibble()}}, by default (\code{names_as_int = TRUE}) the loci are
 named with integers (their index in the \code{gen_tibble}), rather than with

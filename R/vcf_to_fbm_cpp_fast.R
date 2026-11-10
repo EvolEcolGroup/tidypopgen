@@ -39,11 +39,20 @@ vcf_to_fbm_cpp <- function(
     backingfile <- bigstatsr::sub_bk(backingfile, "")
   }
 
+  if (!is.numeric(n_cores) || length(n_cores) != 1 || !is.finite(n_cores) ||
+        n_cores < 1) {
+    stop("'n_cores' should be a positive integer")
+  }
+
   # the genotypes are written to the backing file while reading the VCF
   bk_file <- path.expand(paste0(backingfile, ".bk"))
   if (file.exists(bk_file)) {
     stop("the backing file ", bk_file, " already exists")
   }
+  # remove the backing file if we stop before creating the FBM (also if the
+  # VCF was read, but the loci table could not be created)
+  fbm_created <- FALSE
+  on.exit(if (!fbm_created) unlink(bk_file), add = TRUE)
   # read the VCF once: create a loci_table, figure out no_individuals and
   # ploidy from the first marker, and write the genotypes to the backing file
   # (locus names are not read if we store them as integers, which saves a lot
@@ -53,9 +62,6 @@ vcf_to_fbm_cpp <- function(
     bk_file = bk_file, read_names = !names_as_int,
     n_threads = n_cores
   )
-  # remove the backing file if we stop before creating the FBM
-  fbm_created <- FALSE
-  on.exit(if (!fbm_created) unlink(bk_file), add = TRUE)
   # an FBM can not have zero loci (its empty backing file can not be mapped)
   if (length(vcf_meta$loci_tbl$physical.pos) == 0) {
     stop("the VCF has no biallelic SNPs")

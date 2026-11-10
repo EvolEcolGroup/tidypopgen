@@ -94,12 +94,18 @@ test_that("gt_as_genlight in chunks is the same as from the full matrix", {
     chromosome = show_loci(test_gt)$chromosome,
     position = show_loci(test_gt)$position
   )
-  # the default chunks, chunks of 8 loci, and chunks of 5 loci (rounded up
-  # to 8)
-  for (chunk_size in list(NULL, 8, 5)) {
+  # the default chunks, chunks of 8 loci, chunks of 5 loci (rounded up to 8),
+  # and a single chunk (Inf, or more than the number of loci)
+  for (chunk_size in list(NULL, 8, 5, Inf, 1e6)) {
     expect_identical(
       gt_as_genlight(test_gt, chunk_size = chunk_size),
       ref_genlight
+    )
+  }
+  for (chunk_size in list(0, NA, "8", c(8, 16))) {
+    expect_error(
+      gt_as_genlight(test_gt, chunk_size = chunk_size),
+      "'chunk_size' should be a positive number"
     )
   }
   # also for a subset of individuals and loci, in a different order

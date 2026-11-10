@@ -74,10 +74,11 @@ if ("read_vcf" %in% step_ids) {
   if (!res$ok) quit(status = 1)
   res <- timed("set_groups", "step", function() steps$set_groups$fun(res$value, ctx))
   if (!res$ok) quit(status = 1)
-  timed("gt_save", "io", function() {
+  saved <- timed("gt_save", "io", function() {
     gt_save(res$value, file_name = gt_file, quiet = TRUE)
     "saved"
   })
+  if (!saved$ok) quit(status = 1)
   step_ids <- setdiff(step_ids, c("read_vcf", "set_groups"))
 }
 if (length(step_ids) == 0) quit(status = 0)

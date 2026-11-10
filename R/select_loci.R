@@ -364,39 +364,32 @@ select_loci_symbol_value <- function(sym, sel_quo, .data) {
 #' (e.g. `select_loci(x, idx)`, rather than `select_loci(x, all_of(idx))`,
 #' which can not be confused with a locus named `idx`). When
 #' [select_loci_fast()] resolves such a selection, this gives the warning
-#' that `tidyselect` would give, with the same message and condition class
-#' (`lifecycle_warning_deprecated`). As with any soft deprecation by
-#' `lifecycle`, it is shown only when the selection is made in the global
-#' environment (or in the tests of the package that makes it), and at most
-#' once every 8 hours for each variable name; as the message is the same,
-#' this throttling is shared with the warnings given by `tidyselect` itself.
-#' `env` is the `tidyselect` namespace, so that the message names
-#' `tidyselect` as the package that deprecated this use. If `tidyselect`
-#' ever turns this deprecation into an error, [select_loci_fast()] should
-#' stop resolving bare variables.
+#' that `tidyselect` would give, by letting `tidyselect` itself resolve the
+#' same variable (bound to a single position, in a child of the environment
+#' of the selection) on a vector of one element: the warning is thus the one
+#' of the installed version of `tidyselect` (whose message changes between
+#' versions), with its condition class (`lifecycle_warning_deprecated`), and
+#' it is shown, or not, as `tidyselect` would show it. As with any soft
+#' deprecation by `lifecycle`, it is shown only when the selection is made in
+#' the global environment (or in the tests of the package that makes it),
+#' and at most once every 8 hours for each variable name. If `tidyselect`
+#' ever turns this deprecation into an error, this gives that error.
 #' @param name the name of the variable
 #' @param user_env the environment in which the selection was made
 #' @returns NULL, invisibly
 #' @keywords internal
 #' @noRd
 warn_external_vector <- function(name, user_env) {
-  # the same arguments as in tidyselect:::eval_sym() (tidyselect 1.2.1)
-  lifecycle::deprecate_soft(
-    when = "1.1.0",
-    what = I("Using an external vector in selections"),
-    with = I("`all_of()` or `any_of()`"),
-    details = c(
-      " " = "# Was:",
-      " " = paste0("data %>% select(", name, ")"),
-      "",
-      " " = "# Now:",
-      " " = paste0("data %>% select(all_of(", name, "))"),
-      "",
-      "See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>."
-    ),
-    env = asNamespace("tidyselect"),
-    user_env = user_env
+  env <- rlang::env(user_env)
+  rlang::env_bind(env, !!name := 1L)
+  # (the name of the element starts with a dot, unlike the variable, which
+  # select_loci_symbol_value() would otherwise leave to tidyselect)
+  tidyselect::eval_select(
+    rlang::sym(name),
+    data = c(.tidypopgen_locus = 1L),
+    env = env
   )
+  invisible(NULL)
 }
 
 #' Find the positions of the loci selected by a value

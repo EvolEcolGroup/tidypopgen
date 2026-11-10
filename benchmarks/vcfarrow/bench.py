@@ -132,8 +132,12 @@ def run_process(args, steps, results_jsonl):
             os.killpg(proc.pid, signal.SIGKILL)
         time.sleep(args.interval)
     log.close()
-    with open(results_jsonl) as f:
-        records = [json.loads(line) for line in list(f)[n_before:]]
+    # (a step that died before recording anything may leave no results file)
+    try:
+        with open(results_jsonl) as f:
+            records = [json.loads(line) for line in list(f)[n_before:]]
+    except FileNotFoundError:
+        records = []
     oom = killed and timed_out is None
     return records, samples, maxrss, timed_out, oom
 

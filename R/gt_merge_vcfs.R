@@ -15,8 +15,9 @@
 #' of e.g. 'chr1' and '1' would match no loci). A locus is merged with a site
 #' at the same chromosome and position if their alleles agree: the same REF
 #' and ALT alleles, or a missing allele (e.g. the ALT '.' of a monomorphic
-#' locus), which takes the allele of the other files. Loci whose alleles do not
-#' agree are handled as follows:
+#' locus), which takes the allele of the other files (a site with the same
+#' alleles is preferred to one with a missing allele). Loci whose alleles do
+#' not agree are handled as follows:
 #' - loci with the same REF but a different ALT allele (e.g. A/C and A/G):
 #'   `bcftools merge` would make a multiallelic site, which a `gen_tibble` can
 #'   not store, so by default the site is dropped (`alt_mismatch = "drop"`);
@@ -35,7 +36,10 @@
 #'
 #' Strands are not flipped (all *VCF* files are on the forward strand). Loci
 #' at the same position within a file are never merged with each other (as in
-#' `bcftools merge`).
+#' `bcftools merge`); if a file has several loci at the same position (e.g. a
+#' multiallelic site split into biallelic records, as by `bcftools norm -m-`),
+#' each is merged with the site of the other files that has its alleles, if
+#' any, before the others are handled as above.
 #'
 #' The merged `gen_tibble` has the samples of the first file, followed by those
 #' of the second file, and so on. By default (`variants = "intersection"`),
@@ -334,21 +338,22 @@ merge_vcfs_sample_names <- function(sample_names, force_samples = FALSE) {
 }
 
 # stop because the REF alleles of loci at the same position differ between
-# files, listing the first few
+# files, listing the first few (the alleles of a site may come from several
+# files, e.g. a missing ALT filled in by a later file, so they are described
+# as those of the earlier files)
 stop_ref_mismatch <- function(sites, chromosome_names, files) {
   mm <- sites$ref_mismatch
-  describe <- function(ref, alt, f) {
-    paste0(
-      ifelse(is.na(ref), ".", ref), "/", ifelse(is.na(alt), ".", alt),
-      " in ", basename(files[f])
-    )
+  alleles <- function(ref, alt) {
+    paste0(ifelse(is.na(ref), ".", ref), "/", ifelse(is.na(alt), ".", alt))
   }
   examples <- vapply(seq_along(mm$site), function(i) {
     s <- mm$site[i]
     paste0(
       chromosome_names[sites$chromosome[s]], ":", sites$position[s], " (",
-      describe(mm$site_ref[i], mm$site_alt[i], sites$first_file[s]), ", ",
-      describe(mm$locus_ref[i], mm$locus_alt[i], mm$file[i]), ")"
+      alleles(mm$site_ref[i], mm$site_alt[i]), " in the earlier files, ",
+      "first in ", basename(files[sites$first_file[s]]), "; ",
+      alleles(mm$locus_ref[i], mm$locus_alt[i]), " in ",
+      basename(files[mm$file[i]]), ")"
     )
   }, character(1))
   stop(
@@ -413,7 +418,7 @@ check_vcf_files_args <- function(files, valid_alleles, n_cores) {
     ))
   }
   bad_n_cores <- !is.numeric(n_cores) || length(n_cores) != 1 ||
-    is.na(n_cores) || n_cores < 1
+    !is.finite(n_cores) || n_cores < 1
   if (bad_n_cores) {
     stop("'n_cores' should be a positive integer")
   }
@@ -531,10 +536,10 @@ write_vcfs_gen_tibble <- function(files, loci, sample_id, ploidy, row_offset,
 
   # check alleles (as gen_tibble() does)
   if (has_genotypes_without_alleles(x_gt)) {
-    # (dropping the gen_tibble first, so that its backing file can be
-    # unmapped, see remove_fbm_files())
+    # (dropping the gen_tibble, and the genotypes it was made from, first,
+    # so that its backing file can be unmapped, see remove_fbm_files())
     gt_files <- gt_get_file_names(x_gt)
-    rm(x_gt)
+    rm(x_gt, indiv_meta)
     remove_fbm_files(gt_files)
     stop_genotypes_without_alleles()
   }
