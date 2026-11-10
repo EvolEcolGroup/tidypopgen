@@ -9,8 +9,11 @@ Two additions on top of `vcf_fast`:
    files next to the backing file. New functions read them back, for all
    loci or for a few (e.g. the hits of a selection scan).
 
-Status: **agreed except for one point (section 8); not started.** Work is
-on the branch `vcf_names_tsv`.
+Status: **phases 1 to 3 are done** on the branch `vcf_names_tsv`; phase 4
+is not started. See [loci_sidecar_handover.md](loci_sidecar_handover.md) for
+what was built, how it differs from this plan, the benchmarks, and
+explorations of phase 4. A position mismatch is an error, with
+`check_positions = FALSE` as the way out (section 8).
 
 ## Why
 
@@ -460,9 +463,9 @@ Agreed:
    `gt_lookup_loci()` takes a subset of the loci table and gives back both
    names and chromosomes (section 3).
 5. Branch `vcf_names_tsv`, made from `vcf_fast`.
-
-Open, what to do when a sidecar's positions do not match the table (see
-"Checking" in section 2):
+6. A sidecar's positions that do not match the table are an error, with an
+   off switch (the first option below, chosen by the user). The options
+   were (see "Checking" in section 2):
 
 - **Error, with an off switch (recommended).** `gt_lookup_loci()` and
   `gt_restore_loci()` stop with an error saying that the sidecar does not
