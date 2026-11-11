@@ -66,21 +66,30 @@ original names of the loci that come out of it.
 We use a synthetic dataset with the shape of a real one: the DiscoSnpRad VCF
 of the tree frog *Phyllomedusa vaillantii* (18,579,683 SNPs and 56 samples
 from 3 lineages and an outgroup, 26 GB) used by
-[VCFArrow](https://github.com/legalLab/VCFArrow) to compare tools for large
-VCF files. The full dataset is not public, but VCFArrow ships a subsample of
-10,000 SNPs and 18 samples, from which the script `make_vcf.R`, in the
+[VCFArrow](https://github.com/legalLab/VCFArrow). The full dataset is not
+public, but VCFArrow ships a subsample of 10,000 SNPs and 18 samples, from
+which the script `make_vcf.R`, in the
 [`benchmarks/vcfarrow` folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/benchmarks/vcfarrow)
 of the tidypopgen repository, builds a VCF of any size with the same
 features: each SNP copies the genotypes (with their missingness, about 34%)
 of a random SNP of the subsample, each sample takes the genotypes of a random
 sample of the same lineage, and each RAD locus (`SNP_higher_path_<n>`)
-carries 1 to 5 SNPs, as in the real data. To create it, download the
-subsample and the lineage of each of its samples, and run `make_vcf.R` from
-the `benchmarks/vcfarrow` folder of a copy of the tidypopgen repository (it
-takes about 30 minutes, and needs 27 GB of disk):
+carries 1 to 5 SNPs, as in the real data.
+
+The `r` and `bash` chunks below download the subsample, and run
+`make_vcf.R` This writes the VCF, and the lineage of each of its 56 samples
+(`discosnp.strata.tsv`), to `vignettes/articles/data/rad/`. NOTE: this takes
+about 30 minutes, and needs 27 GB of disk space.
+
+```{r, eval = FALSE}
+# get the absolute path of the folder containing this Rmd (vignettes/articles)
+rmd_dir <- dirname(knitr::current_input(dir = TRUE))
+Sys.setenv(ARTICLE_DIR = normalizePath(rmd_dir))
+```
 
 ```{bash, eval = FALSE}
-cd benchmarks/vcfarrow
+# Use this to construct the paths for download
+cd "$ARTICLE_DIR/../../benchmarks/vcfarrow"
 mkdir -p data ../../vignettes/articles/data/rad
 for f in vaillantii_discosnp_sub.vcf.gz strata; do
   curl -fsSL -o "data/$f" \
@@ -89,31 +98,19 @@ done
 Rscript make_vcf.R 18579683 ../../vignettes/articles/data/rad/discosnp.vcf 1
 ```
 
-This writes the VCF, and the lineage of each of its 56 samples
-(`discosnp.strata.tsv`), to `vignettes/articles/data/rad/`. The paths in this
-article are relative to `vignettes/articles/`.
+# Reading the VCF
+
+First we will load our libraries and set our cores.
+
+We will read the VCF with 4 cores, as in the VCFArrow comparison, on a machine
+with `r parallel::detectCores()` cores. The file is
+`r round(file.size(vcf_path) / 1024^3, 1)` GB.
 
 ```{r}
 library(tidypopgen)
 library(dplyr)
 vcf_path <- "./data/rad/discosnp.vcf"
 n_cores <- 4
-```
-
-We read the VCF with 4 cores, as in the VCFArrow comparison, on a machine
-with `r parallel::detectCores()` cores. The file is
-`r round(file.size(vcf_path) / 1024^3, 1)` GB:
-
-```{bash, eval = FALSE}
-head -c 2000 data/rad/discosnp.vcf | grep -v "^##" | cut -f 1-5 | head -4
-```
-
-```{r echo = FALSE, comment = ""}
-lines <- readLines(vcf_path, n = 200)
-lines <- lines[!startsWith(lines, "##")][1:4]
-cat(vapply(strsplit(lines, "\t"), function(x) {
-  paste(x[1:5], collapse = "\t")
-}, character(1)), sep = "\n")
 ```
 
 ```{r remove_old_files, include = FALSE}
@@ -125,9 +122,8 @@ unlink(list.files("./data/rad",
 ))
 ```
 
-# Reading the VCF
-
-We read the VCF four times: with the default options, with integer names,
+To exemplify the options available in tidypopgen, we read the VCF four times:
+with the default options, with integer names,
 with integer chromosomes, and with both. Each `gen_tibble` has its own
 backing file.
 
@@ -273,8 +269,7 @@ cat(readLines("./data/rad/rad_int.loci.tsv", n = 4), sep = "\n")
 cat(readLines("./data/rad/rad_int.chromosomes.tsv", n = 4), sep = "\n")
 ```
 
-They can be read with any tool, for example
-`data.table::fread("./data/rad/rad_int.loci.tsv", quote = "")`, and joined to
+They can be read with any tool and joined to
 `show_loci()` by `name = int_name` (or `chromosome = int_chromosome`). Keep
 them with the other files of the `gen_tibble`: `gt_save()` lists them in its
 messages. Functions that write a new backing file, such as
@@ -356,6 +351,8 @@ hits_named <- gt_lookup_loci(rad_gt, hits)
 hits_named
 ```
 
+`gt_lookup_loci()` also takes row numbers of the loci table, so we can look up the top 10 hits using `order()`. Since lookups use the integer names, rather than the rows, a table of hits stays valid if the `gen_tibble` is filtered or reordered later.
+
 ```{r lookup_again, benchmark = TRUE}
 top_10 <- gt_lookup_loci(rad_gt, order(freq_diff, decreasing = TRUE)[1:10])
 ```
@@ -363,10 +360,6 @@ top_10 <- gt_lookup_loci(rad_gt, order(freq_diff, decreasing = TRUE)[1:10])
 ```{r}
 top_10
 ```
-
-`gt_lookup_loci()` also takes row numbers of the loci table, as we did here
-with `order()`. Since lookups use the integer names, rather than the rows, a
-table of hits stays valid if the `gen_tibble` is filtered or reordered later.
 
 # Summaries by RAD locus
 

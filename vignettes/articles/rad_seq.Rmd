@@ -41,22 +41,32 @@ original names of the loci that come out of it.
 We use a synthetic dataset with the shape of a real one: the DiscoSnpRad VCF
 of the tree frog *Phyllomedusa vaillantii* (18,579,683 SNPs and 56 samples
 from 3 lineages and an outgroup, 26 GB) used by
-[VCFArrow](https://github.com/legalLab/VCFArrow) to compare tools for large
-VCF files. The full dataset is not public, but VCFArrow ships a subsample of
-10,000 SNPs and 18 samples, from which the script `make_vcf.R`, in the
+[VCFArrow](https://github.com/legalLab/VCFArrow). The full dataset is not
+public, but VCFArrow ships a subsample of 10,000 SNPs and 18 samples, from
+which the script `make_vcf.R`, in the
 [`benchmarks/vcfarrow` folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/benchmarks/vcfarrow)
 of the tidypopgen repository, builds a VCF of any size with the same
 features: each SNP copies the genotypes (with their missingness, about 34%)
 of a random SNP of the subsample, each sample takes the genotypes of a random
 sample of the same lineage, and each RAD locus (`SNP_higher_path_<n>`)
-carries 1 to 5 SNPs, as in the real data. To create it, download the
-subsample and the lineage of each of its samples, and run `make_vcf.R` from
-the `benchmarks/vcfarrow` folder of a copy of the tidypopgen repository (it
-takes about 30 minutes, and needs 27 GB of disk):
+carries 1 to 5 SNPs, as in the real data.
+
+The `r` and `bash` chunks below download the subsample, and run
+`make_vcf.R` This writes the VCF, and the lineage of each of its 56 samples
+(`discosnp.strata.tsv`), to `vignettes/articles/data/rad/`. NOTE: this takes
+about 30 minutes, and needs 27 GB of disk space.
+
+
+``` r
+# get the absolute path of the folder containing this Rmd (vignettes/articles)
+rmd_dir <- dirname(knitr::current_input(dir = TRUE))
+Sys.setenv(ARTICLE_DIR = normalizePath(rmd_dir))
+```
 
 
 ``` bash
-cd benchmarks/vcfarrow
+# Use this to construct the paths for download
+cd "$ARTICLE_DIR/../../benchmarks/vcfarrow"
 mkdir -p data ../../vignettes/articles/data/rad
 for f in vaillantii_discosnp_sub.vcf.gz strata; do
   curl -fsSL -o "data/$f" \
@@ -65,9 +75,13 @@ done
 Rscript make_vcf.R 18579683 ../../vignettes/articles/data/rad/discosnp.vcf 1
 ```
 
-This writes the VCF, and the lineage of each of its 56 samples
-(`discosnp.strata.tsv`), to `vignettes/articles/data/rad/`. The paths in this
-article are relative to `vignettes/articles/`.
+# Reading the VCF
+
+First we will load our libraries and set our cores.
+
+We will read the VCF with 4 cores, as in the VCFArrow comparison, on a machine
+with 22 cores. The file is
+25.3 GB.
 
 
 ``` r
@@ -77,28 +91,10 @@ vcf_path <- "./data/rad/discosnp.vcf"
 n_cores <- 4
 ```
 
-We read the VCF with 4 cores, as in the VCFArrow comparison, on a machine
-with 24 cores. The file is
-25.3 GB:
 
 
-``` bash
-head -c 2000 data/rad/discosnp.vcf | grep -v "^##" | cut -f 1-5 | head -4
-```
-
-
-```
-#CHROM	POS	ID	REF	ALT
-SNP_higher_path_9999998	36	9999998	A	T
-SNP_higher_path_9999997	91	9999997	A	G
-SNP_higher_path_9999994	84	9999994	A	G
-```
-
-
-
-# Reading the VCF
-
-We read the VCF four times: with the default options, with integer names,
+To exemplify the options available in tidypopgen, we read the VCF four times:
+with the default options, with integer names,
 with integer chromosomes, and with both. Each `gen_tibble` has its own
 backing file.
 
@@ -153,10 +149,10 @@ which is held in memory and saved in the `.gt` file:
 
 |options            | time_s| peak_memory_mb| loci_table_mb| bk_mb| gt_mb| sidecars_mb|
 |:------------------|------:|--------------:|-------------:|-----:|-----:|-----------:|
-|default            |   37.9|           3694|          2846|   924|   165|           0|
-|names_as_int       |   19.5|           2552|          1756|   924|   108|         748|
-|chromosomes_as_int |   20.7|           2410|          1751|   924|   125|         407|
-|both               |   12.9|           1188|           660|   924|    68|        1155|
+|default            |   66.2|           4983|          2846|   924|   165|           0|
+|names_as_int       |   57.4|           3403|          1756|   924|   108|         748|
+|chromosomes_as_int |   60.4|           4134|          1751|   924|   125|         407|
+|both               |   52.9|           2857|           660|   924|    68|        1155|
 
 
 
@@ -232,8 +228,7 @@ cat(readLines("./data/rad/rad_int.chromosomes.tsv", n = 4), sep = "\n")
 #> 3	SNP_higher_path_9999994
 ```
 
-They can be read with any tool, for example
-`data.table::fread("./data/rad/rad_int.loci.tsv", quote = "")`, and joined to
+They can be read with any tool and joined to
 `show_loci()` by `name = int_name` (or `chromosome = int_chromosome`). Keep
 them with the other files of the `gen_tibble`: `gt_save()` lists them in its
 messages. Functions that write a new backing file, such as
@@ -312,20 +307,19 @@ hits <- show_loci(rad_gt) %>%
   filter(freq_diff > 0.95)
 hits
 #> # A tibble: 151,233 × 8
-#>    big_index  name chromosome position genetic_dist allele_ref allele_alt
-#>        <int> <int>      <int>    <int>        <dbl> <chr>      <chr>     
-#>  1         1     6          6       48            0 A          T         
-#>  2        17    80         58       88            0 A          C         
-#>  3        27   146        106       45            0 A          G         
-#>  4        80   448        335       32            0 A          G         
-#>  5        84   454        337       97            0 A          G         
-#>  6       139   715        535       68            0 T          G         
-#>  7       229  1142        876       56            0 A          T         
-#>  8       241  1216        938       90            0 C          G         
-#>  9       273  1356       1038       46            0 T          C         
-#> 10       275  1370       1050       63            0 C          T         
+#>    big_index  name chromosome position genetic_dist allele_ref allele_alt freq_diff
+#>        <int> <int>      <int>    <int>        <dbl> <chr>      <chr>          <dbl>
+#>  1         1     6          6       48            0 A          T                  1
+#>  2        17    80         58       88            0 A          C                  1
+#>  3        27   146        106       45            0 A          G                  1
+#>  4        80   448        335       32            0 A          G                  1
+#>  5        84   454        337       97            0 A          G                  1
+#>  6       139   715        535       68            0 T          G                  1
+#>  7       229  1142        876       56            0 A          T                  1
+#>  8       241  1216        938       90            0 C          G                  1
+#>  9       273  1356       1038       46            0 T          C                  1
+#> 10       275  1370       1050       63            0 C          T                  1
 #> # ℹ 151,223 more rows
-#> # ℹ 1 more variable: freq_diff <dbl>
 ```
 
 `gt_lookup_loci()` gives back the same table, with the original names and
@@ -342,21 +336,22 @@ hits_named <- gt_lookup_loci(rad_gt, hits)
 ``` r
 hits_named
 #> # A tibble: 151,233 × 8
-#>    big_index name      chromosome    position genetic_dist allele_ref allele_alt
-#>        <int> <chr>     <chr>            <int>        <dbl> <chr>      <chr>     
-#>  1         1 9999990_1 SNP_higher_p…       48            0 A          T         
-#>  2        17 9999911   SNP_higher_p…       88            0 A          C         
-#>  3        27 9999834   SNP_higher_p…       45            0 A          G         
-#>  4        80 9999438_1 SNP_higher_p…       32            0 A          G         
-#>  5        84 9999435_1 SNP_higher_p…       97            0 A          G         
-#>  6       139 9999075_5 SNP_higher_p…       68            0 T          G         
-#>  7       229 9998494   SNP_higher_p…       56            0 A          T         
-#>  8       241 9998381_2 SNP_higher_p…       90            0 C          G         
-#>  9       273 9998205_1 SNP_higher_p…       46            0 T          C         
-#> 10       275 9998180   SNP_higher_p…       63            0 C          T         
+#>    big_index name      chromosome              position genetic_dist allele_ref allele_alt freq_diff
+#>        <int> <chr>     <chr>                      <int>        <dbl> <chr>      <chr>          <dbl>
+#>  1         1 9999990_1 SNP_higher_path_9999990       48            0 A          T                  1
+#>  2        17 9999911   SNP_higher_path_9999911       88            0 A          C                  1
+#>  3        27 9999834   SNP_higher_path_9999834       45            0 A          G                  1
+#>  4        80 9999438_1 SNP_higher_path_9999438       32            0 A          G                  1
+#>  5        84 9999435_1 SNP_higher_path_9999435       97            0 A          G                  1
+#>  6       139 9999075_5 SNP_higher_path_9999075       68            0 T          G                  1
+#>  7       229 9998494   SNP_higher_path_9998494       56            0 A          T                  1
+#>  8       241 9998381_2 SNP_higher_path_9998381       90            0 C          G                  1
+#>  9       273 9998205_1 SNP_higher_path_9998205       46            0 T          C                  1
+#> 10       275 9998180   SNP_higher_path_9998180       63            0 C          T                  1
 #> # ℹ 151,223 more rows
-#> # ℹ 1 more variable: freq_diff <dbl>
 ```
+
+`gt_lookup_loci()` also takes row numbers of the loci table, so we can look up the top 10 hits using `order()`. Since lookups use the integer names, rather than the rows, a table of hits stays valid if the `gen_tibble` is filtered or reordered later.
 
 
 ``` r
@@ -367,23 +362,19 @@ top_10 <- gt_lookup_loci(rad_gt, order(freq_diff, decreasing = TRUE)[1:10])
 ``` r
 top_10
 #> # A tibble: 10 × 7
-#>    big_index name      chromosome    position genetic_dist allele_ref allele_alt
-#>        <int> <chr>     <chr>            <int>        <dbl> <chr>      <chr>     
-#>  1         1 9999990_1 SNP_higher_p…       48            0 A          T         
-#>  2        17 9999911   SNP_higher_p…       88            0 A          C         
-#>  3        27 9999834   SNP_higher_p…       45            0 A          G         
-#>  4        80 9999438_1 SNP_higher_p…       32            0 A          G         
-#>  5        84 9999435_1 SNP_higher_p…       97            0 A          G         
-#>  6       139 9999075_5 SNP_higher_p…       68            0 T          G         
-#>  7       229 9998494   SNP_higher_p…       56            0 A          T         
-#>  8       241 9998381_2 SNP_higher_p…       90            0 C          G         
-#>  9       273 9998205_1 SNP_higher_p…       46            0 T          C         
-#> 10       275 9998180   SNP_higher_p…       63            0 C          T
+#>    big_index name      chromosome              position genetic_dist allele_ref allele_alt
+#>        <int> <chr>     <chr>                      <int>        <dbl> <chr>      <chr>     
+#>  1         1 9999990_1 SNP_higher_path_9999990       48            0 A          T         
+#>  2        17 9999911   SNP_higher_path_9999911       88            0 A          C         
+#>  3        27 9999834   SNP_higher_path_9999834       45            0 A          G         
+#>  4        80 9999438_1 SNP_higher_path_9999438       32            0 A          G         
+#>  5        84 9999435_1 SNP_higher_path_9999435       97            0 A          G         
+#>  6       139 9999075_5 SNP_higher_path_9999075       68            0 T          G         
+#>  7       229 9998494   SNP_higher_path_9998494       56            0 A          T         
+#>  8       241 9998381_2 SNP_higher_path_9998381       90            0 C          G         
+#>  9       273 9998205_1 SNP_higher_path_9998205       46            0 T          C         
+#> 10       275 9998180   SNP_higher_path_9998180       63            0 C          T
 ```
-
-`gt_lookup_loci()` also takes row numbers of the loci table, as we did here
-with `order()`. Since lookups use the integer names, rather than the rows, a
-table of hits stays valid if the `gen_tibble` is filtered or reordered later.
 
 # Summaries by RAD locus
 
@@ -442,18 +433,18 @@ rad_hits <- rad_gt %>%
 ``` r
 show_loci(rad_hits)
 #> # A tibble: 151,233 × 7
-#>    big_index name      chromosome    position genetic_dist allele_ref allele_alt
-#>        <int> <chr>     <fct>            <int>        <dbl> <chr>      <chr>     
-#>  1         1 9999990_1 SNP_higher_p…       48            0 A          T         
-#>  2        17 9999911   SNP_higher_p…       88            0 A          C         
-#>  3        27 9999834   SNP_higher_p…       45            0 A          G         
-#>  4        80 9999438_1 SNP_higher_p…       32            0 A          G         
-#>  5        84 9999435_1 SNP_higher_p…       97            0 A          G         
-#>  6       139 9999075_5 SNP_higher_p…       68            0 T          G         
-#>  7       229 9998494   SNP_higher_p…       56            0 A          T         
-#>  8       241 9998381_2 SNP_higher_p…       90            0 C          G         
-#>  9       273 9998205_1 SNP_higher_p…       46            0 T          C         
-#> 10       275 9998180   SNP_higher_p…       63            0 C          T         
+#>    big_index name      chromosome              position genetic_dist allele_ref allele_alt
+#>        <int> <chr>     <fct>                      <int>        <dbl> <chr>      <chr>     
+#>  1         1 9999990_1 SNP_higher_path_9999990       48            0 A          T         
+#>  2        17 9999911   SNP_higher_path_9999911       88            0 A          C         
+#>  3        27 9999834   SNP_higher_path_9999834       45            0 A          G         
+#>  4        80 9999438_1 SNP_higher_path_9999438       32            0 A          G         
+#>  5        84 9999435_1 SNP_higher_path_9999435       97            0 A          G         
+#>  6       139 9999075_5 SNP_higher_path_9999075       68            0 T          G         
+#>  7       229 9998494   SNP_higher_path_9998494       56            0 A          T         
+#>  8       241 9998381_2 SNP_higher_path_9998381       90            0 C          G         
+#>  9       273 9998205_1 SNP_higher_path_9998205       46            0 T          C         
+#> 10       275 9998180   SNP_higher_path_9998180       63            0 C          T         
 #> # ℹ 151,223 more rows
 ```
 
@@ -463,19 +454,19 @@ show_loci(rad_hits)
 
 |step                    | time_s| peak_memory_mb|
 |:-----------------------|------:|--------------:|
-|read_default            |  37.95|           3694|
-|read_names_as_int       |  19.52|           2552|
-|read_chromosomes_as_int |  20.67|           2410|
-|read_both_as_int        |  12.90|           1188|
-|load_default            |  19.23|           3755|
-|load_both_as_int        |   3.20|           1272|
-|loci_qc                 |   0.47|           1786|
-|update_backingfile      |   2.02|           1030|
-|scan                    |   0.06|            813|
-|lookup_first            |   0.22|            800|
-|lookup_again            |   0.11|            802|
-|lookup_chromosomes      |   0.02|            867|
-|restore                 |   0.96|           1359|
+|read_default            |  66.19|           4983|
+|read_names_as_int       |  57.36|           3403|
+|read_chromosomes_as_int |  60.39|           4134|
+|read_both_as_int        |  52.90|           2857|
+|load_default            |  24.38|           4408|
+|load_both_as_int        |   5.14|           2216|
+|loci_qc                 |   1.87|           2729|
+|update_backingfile      |   5.12|           1720|
+|scan                    |   0.20|           1502|
+|lookup_first            |   0.67|           1301|
+|lookup_again            |   0.15|           1294|
+|lookup_chromosomes      |   0.03|           1333|
+|restore                 |   1.96|           1560|
 
 
 
