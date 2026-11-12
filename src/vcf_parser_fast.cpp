@@ -513,8 +513,8 @@ inline void stop_phased_genotypes(const std::vector<char*> &line_start,
            " has fewer genotypes than individuals");
     } else if (status == UNPHASED_GENOTYPE) {
       stop("the genotype of " + where + " is unphased (with '/'): phased " +
-           "genotypes need '|' between their alleles (use gen_tibble() to " +
-           "read unphased genotypes)");
+           "genotypes need '|' between their alleles (use phased = FALSE " +
+           "to read the genotypes without their phase)");
     } else if (status == NOT_DIPLOID) {
       stop("the genotype of " + where + " is not diploid: phased " +
            "genotypes can only be read for diploid individuals");
@@ -952,8 +952,9 @@ private:
  *   name of each chromosome), or "" for none (only with chromosomes_as_int)
  * @param phased_lut An empty vector to store the number of alternate alleles
  *   of each genotype, or, to store phased diploid genotypes (see
- *   gen_tibble_phased() in R), the bytes of the genotypes 0|0, 0|1, 1|0 and
- *   1|1 (in this order; see phased_genotype_bytes()). Phased genotypes must
+ *   gen_tibble(phased = TRUE) in R), the bytes of the genotypes 0|0, 0|1,
+ *   1|0 and 1|1 (in this order; see phased_genotype_bytes()). Phased
+ *   genotypes must
  *   all be diploid and phased (any '/' is an error), and missing genotypes
  *   are stored as max_ploidy + 1, as for unphased data
  * Missing IDs (".") are replaced by the chromosome and position (e.g.

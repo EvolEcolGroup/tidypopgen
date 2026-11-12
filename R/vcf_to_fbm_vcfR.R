@@ -13,8 +13,6 @@
 #' @param allow_duplicates whether to allow duplicated loci (same chromosome and
 #'   position) or duplicated locus names. Default is FALSE.
 #' @param quiet whether to print messages
-#' @param phased whether to store phased diploid genotypes (see
-#'   [gen_tibble_phased()]), rather than alternate allele counts.
 #' @param ... further arguments to be passed to [vcfR::read.vcfR()]. Do not pass
 #'   nrows, skip, verbose, or convertNA; these are controlled internally.
 #' @returns an object of the class `gen_tbl`.
@@ -30,7 +28,6 @@ vcf_to_fbm_vcfR <- function(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   quiet = FALSE,
-  phased = FALSE,
   ...
 ) {
   dots <- list(...)
@@ -126,18 +123,11 @@ vcf_to_fbm_vcfR <- function(
   }
   fbm_ploidy <- ploidy
   max_ploidy <- max(ploidy)
-  # phased genotypes are only stored for diploid individuals
-  if (phased) {
-    stopifnot_phased_ploidy(ploidy, colnames(temp_gt))
-  }
 
-  # set up codes for the appropriate ploidy level (or for phased genotypes)
-  if (phased) {
-    code256 <- code_phased
-  } else {
-    code256 <- rep(NA_real_, 256)
-    code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
-  }
+
+  # set up codes for the appropriate ploidy level
+  code256 <- rep(NA_real_, 256)
+  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
 
   indiv_meta <- list(
     id = colnames(temp_gt)
@@ -161,21 +151,13 @@ vcf_to_fbm_vcfR <- function(
   )
 
   for (i in seq_along(chunks_vec)) {
-    # phased genotypes are read as they are written (vcfR would otherwise turn
-    # a field "./." into NA, which could not be told apart from ".|."), and
-    # missing values of the fixed fields are then converted to NA, as vcfR
-    # does by default
     temp_vcf <- vcfR::read.vcfR(
       vcf_path,
       nrows = chunks_vec[i],
       skip = sum(chunks_vec[seq_len(i - 1)]),
       verbose = !quiet,
-      convertNA = !phased,
       ...
     )
-    if (phased) {
-      temp_vcf@fix[temp_vcf@fix == "."] <- NA
-    }
     # filter any marker that is not a biallelic SNP (as in the cpp parser, REF
     # and ALT must be a single character; a missing allele "." is NA)
     is_single_allele <- function(x) is.na(x) | nchar(x) == 1
@@ -187,29 +169,18 @@ vcf_to_fbm_vcfR <- function(
     if (nrow(gt) == 0) {
       next
     }
-    if (phased) {
-      # an individual x locus matrix of phased bytes (as for the dosages
-      # below)
-      gt <- t(vcf_gt_to_phased_bytes(gt,
-        locus = paste0(
-          vcfR::getCHROM(temp_vcf)[bi], ":",
-          vcfR::getPOS(temp_vcf)[bi]
-        )
-      ))
-    } else {
-      # dosages as raw bytes, with individuals as rows (as in the FBM), parsed
-      # in C++: a genotype is missing if any of its alleles is missing, its
-      # dosage is otherwise the sum of its alleles, and genotypes with more
-      # than max_ploidy alleles (or a larger dosage) are an error
-      gt_dosages <- vcf_gt_dosages_cpp(gt, max_ploidy = max_ploidy)
-      if (gt_dosages$error == 1) {
-        stop_max_ploidy()
-      } else if (gt_dosages$error == 2) {
-        stop("the genotypes (GT) contain alleles that are not numbers")
-      }
-      gt <- gt_dosages$dosages
-      rm(gt_dosages)
+    # dosages as raw bytes, with individuals as rows (as in the FBM), parsed
+    # in C++: a genotype is missing if any of its alleles is missing, its
+    # dosage is otherwise the sum of its alleles, and genotypes with more
+    # than max_ploidy alleles (or a larger dosage) are an error
+    gt_dosages <- vcf_gt_dosages_cpp(gt, max_ploidy = max_ploidy)
+    if (gt_dosages$error == 1) {
+      stop_max_ploidy()
+    } else if (gt_dosages$error == 2) {
+      stop("the genotypes (GT) contain alleles that are not numbers")
     }
+    gt <- gt_dosages$dosages
+    rm(gt_dosages)
     # expand the file backed matrix according to the size of the gt matrix
     # get current size
     index_start <- dim(file_backed_matrix)[2] + 1
@@ -278,50 +249,6 @@ vcf_to_fbm_vcfR <- function(
     class = "gen_tbl"
   )
   return(new_gen_tbl)
-}
-
-# convert a matrix of VCF genotypes (loci x individuals, as returned by
-# vcfR::extract.gt(), for biallelic loci) into a matrix of phased bytes (see
-# code_phased): a|b is phased_genotype_byte[1 + 2 * a + b], and a genotype
-# with a missing allele (or a single missing allele ".") is missing (byte 3,
-# as in unphased data). Unphased genotypes (with "/", e.g. "0/1", "0/0" or
-# "./.") and genotypes that are not diploid are errors (naming the first such
-# genotype, by locus and then by individual, as the cpp parser, with `locus`
-# giving the name of each row)
-vcf_gt_to_phased_bytes <- function(gt, locus) {
-  gt[is.na(gt)] <- "."
-  is_diploid <- grepl("^[^/|][/|][^/|]$", gt)
-  a1 <- substr(gt, 1, 1)
-  delim <- substr(gt, 2, 2)
-  a2 <- substr(gt, 3, 3)
-  is_unphased <- is_diploid & delim == "/"
-  is_missing <- (gt == ".") |
-    (is_diploid & !is_unphased & (a1 == "." | a2 == "."))
-  bad <- which(!is_missing & (!is_diploid | is_unphased))
-  if (length(bad) > 0) {
-    bad <- bad[order(row(gt)[bad], col(gt)[bad])][1]
-    where <- paste0(
-      "individual ", colnames(gt)[col(gt)[bad]],
-      " at locus ", locus[row(gt)[bad]]
-    )
-    if (is_unphased[bad]) {
-      stop("the genotype of ", where, " is unphased (with '/'): phased ",
-        "genotypes need '|' between their alleles (use gen_tibble() to read ",
-        "unphased genotypes)",
-        call. = FALSE
-      )
-    } else {
-      stop("the genotype of ", where, " is not diploid: phased genotypes ",
-        "can only be read for diploid individuals",
-        call. = FALSE
-      )
-    }
-  }
-  h1 <- as.integer(a1 == "1")
-  h2 <- as.integer(a2 == "1")
-  bytes <- phased_genotype_byte[1 + 2 * h1 + h2]
-  bytes[is_missing] <- phased_missing_byte
-  matrix(as.raw(bytes), nrow = nrow(gt), ncol = ncol(gt))
 }
 
 # get ploidy for a given individual

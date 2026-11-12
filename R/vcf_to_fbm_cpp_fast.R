@@ -22,7 +22,7 @@
 #'   parse the genotypes. Default is 1.
 #' @param quiet whether to print messages.
 #' @param phased whether to store phased diploid genotypes (see
-#'   [gen_tibble_phased()]), rather than alternate allele counts.
+#'   [gen_tibble()]), rather than alternate allele counts.
 #' @returns an object of the class `gen_tbl`.
 #' @keywords internal
 #' @noRd

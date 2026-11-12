@@ -116,7 +116,7 @@
 #' @param n_cores the number of cores used to decompress bgzipped files and to
 #'   parse the genotypes. Defaults to 1.
 #' @param phased boolean: whether to store phased genotypes, giving a phased
-#'   `gen_tibble` (see [gen_tibble_phased()]). All the files must then be
+#'   `gen_tibble` (see `phased` in [gen_tibble()]). All the files must then be
 #'   phased: any unphased genotype (with '/') or individual that is not
 #'   diploid is an error. Default is FALSE (the phase is ignored, as in
 #'   [gen_tibble()]). The alleles of phased genotypes are never swapped (as in
@@ -589,7 +589,7 @@ vcfs_sidecar_paths <- function(backingfile) {
 # kept), and `swap`, whether the alleles of each SNP are swapped (or an empty
 # vector), and file_ploidy the ploidy of its individuals. ploidy is the
 # ploidy of the individuals of the gen_tibble. With phased = TRUE, phased
-# genotypes are stored (see gen_tibble_phased()), and file_samples gives the
+# genotypes are stored (see gen_tibble()), and file_samples gives the
 # names of the samples of each file (in the order of the file, for errors).
 write_vcfs_gen_tibble <- function(files, loci, sample_id, ploidy, row_offset,
                                   row_map, file_cols, file_ploidy,

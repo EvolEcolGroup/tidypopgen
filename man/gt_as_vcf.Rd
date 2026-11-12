@@ -24,7 +24,7 @@ the path of the .vcf file
 }
 \description{
 This function write a VCF from a \code{gen_tibble}. Phased genotypes (see
-\code{\link[=gen_tibble_phased]{gen_tibble_phased()}}) are written as phased (e.g. \code{0|1}), and unphased
+\code{phased} in \code{\link[=gen_tibble]{gen_tibble()}}) are written as phased (e.g. \code{0|1}), and unphased
 ones as unphased (e.g. \code{0/1}). The genotypes are read and
 written in chunks of loci, so that this works on datasets that do not fit in
 memory.

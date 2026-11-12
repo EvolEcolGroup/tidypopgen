@@ -1,7 +1,7 @@
 #' Convert a `gen_tibble` to a VCF
 #'
 #' This function write a VCF from a `gen_tibble`. Phased genotypes (see
-#' [gen_tibble_phased()]) are written as phased (e.g. `0|1`), and unphased
+#' `phased` in [gen_tibble()]) are written as phased (e.g. `0|1`), and unphased
 #' ones as unphased (e.g. `0/1`). The genotypes are read and
 #' written in chunks of loci, so that this works on datasets that do not fit in
 #' memory.

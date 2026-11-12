@@ -20,7 +20,7 @@
 #' flips and/or swaps alleles according to the reference dataset, not according
 #' to allele frequency.
 #'
-#' If both `gen_tibble`s are phased (see [gen_tibble_phased()]), the merged
+#' If both `gen_tibble`s are phased (see `phased` in [gen_tibble()]), the merged
 #' `gen_tibble` is phased too, and the alleles of phased genotypes are never
 #' swapped or flipped: `rbind` stops with an error if `flip_strand = TRUE`, or
 #' if the reference and alternate alleles of any locus in common are swapped

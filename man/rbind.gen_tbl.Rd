@@ -70,7 +70,7 @@ and allele2 according to minor allele frequency when merging datasets. rbind
 flips and/or swaps alleles according to the reference dataset, not according
 to allele frequency.
 
-If both \code{gen_tibble}s are phased (see \code{\link[=gen_tibble_phased]{gen_tibble_phased()}}), the merged
+If both \code{gen_tibble}s are phased (see \code{phased} in \code{\link[=gen_tibble]{gen_tibble()}}), the merged
 \code{gen_tibble} is phased too, and the alleles of phased genotypes are never
 swapped or flipped: \code{rbind} stops with an error if \code{flip_strand = TRUE}, or
 if the reference and alternate alleles of any locus in common are swapped

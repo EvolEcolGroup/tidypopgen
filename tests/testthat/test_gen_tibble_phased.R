@@ -1,15 +1,9 @@
-# tests of phased gen_tibbles (gen_tibble_phased() and the functions that
-# have to keep, or use, the phase of the genotypes)
+# tests of phased gen_tibbles (gen_tibble(phased = TRUE) and the functions
+# that have to keep, or use, the phase of the genotypes)
 
 phased_vcf <- system.file("extdata", "phased_example.vcf",
   package = "tidypopgen"
 )
-# the vcf parsers to test (vcfR is only suggested)
-vcf_parsers <- if (requireNamespace("vcfR", quietly = TRUE)) {
-  c("cpp", "vcfR")
-} else {
-  "cpp"
-}
 
 # the haplotypes of the biallelic loci of phased_example.vcf (two rows per
 # individual), and the corresponding dosages
@@ -67,46 +61,49 @@ haps_to_dosages <- function(haps) {
 # reading phased vcf files
 ################################################################################
 
-test_that("gen_tibble_phased reads a phased vcf (cpp and vcfR parsers)", {
-  for (parser in vcf_parsers) {
-    x <- gen_tibble_phased(phased_vcf,
-      parser = parser,
-      backingfile = tempfile("phased_"), quiet = TRUE
-    )
-    expect_true(is_phased(x))
-    expect_true(is_phased(x$genotypes))
-    expect_identical(.gt_get_fbm(x)$code256, code_phased)
-    # the multiallelic locus (rs3) is dropped
-    expect_identical(loci_names(x), paste0("rs", c(1, 2, 4:8)))
-    expect_identical(show_haplotypes(x), phased_vcf_haps)
-    # the genotypes are the dosages of the alternate allele
-    expect_identical(
-      show_genotypes(x),
-      unname(haps_to_dosages(phased_vcf_haps) * 1)
-    )
-    # the raw bytes follow the phased encoding (1|0 is byte 4, missing 3)
-    raw_bytes <- .gt_get_fbm(x)$copy(code = as.numeric(0:255))[, ]
-    expect_identical(raw_bytes[, 1], c(0, 1, 4, 2, 1))
-    expect_identical(raw_bytes[5, c(2, 6)], c(3, 3))
-  }
+test_that("gen_tibble(phased = TRUE) reads a phased vcf", {
+  x <- gen_tibble(phased_vcf,
+    phased = TRUE,
+    backingfile = tempfile("phased_"), quiet = TRUE
+  )
+  expect_true(is_phased(x))
+  expect_true(is_phased(x$genotypes))
+  expect_identical(.gt_get_fbm(x)$code256, code_phased)
+  # the multiallelic locus (rs3) is dropped
+  expect_identical(loci_names(x), paste0("rs", c(1, 2, 4:8)))
+  expect_identical(show_haplotypes(x), phased_vcf_haps)
+  # the genotypes are the dosages of the alternate allele
+  expect_identical(
+    show_genotypes(x),
+    unname(haps_to_dosages(phased_vcf_haps) * 1)
+  )
+  # the raw bytes follow the phased encoding (1|0 is byte 4, missing 3)
+  raw_bytes <- .gt_get_fbm(x)$copy(code = as.numeric(0:255))[, ]
+  expect_identical(raw_bytes[, 1], c(0, 1, 4, 2, 1))
+  expect_identical(raw_bytes[5, c(2, 6)], c(3, 3))
 })
 
-test_that("gen_tibble_phased reads gzipped vcf files", {
+test_that("gen_tibble(phased = TRUE) reads gzipped vcf files", {
   vcf_gz <- tempfile(fileext = ".vcf.gz")
   con <- gzfile(vcf_gz, "w")
   writeLines(readLines(phased_vcf), con)
   close(con)
-  x <- gen_tibble_phased(vcf_gz, backingfile = tempfile(), quiet = TRUE)
+  x <- gen_tibble(vcf_gz,
+    phased = TRUE, backingfile = tempfile(),
+    quiet = TRUE
+  )
   expect_true(is_phased(x))
   expect_identical(show_haplotypes(x), phased_vcf_haps)
 })
 
-test_that("gen_tibble_phased stores integer names and chromosomes", {
-  names_gt <- gen_tibble_phased(phased_vcf,
+test_that("gen_tibble(phased = TRUE) stores integer names and chromosomes", {
+  names_gt <- gen_tibble(phased_vcf,
+    phased = TRUE,
     backingfile = tempfile("phased_"), quiet = TRUE
   )
   for (n_cores in c(1, 2)) {
-    int_gt <- gen_tibble_phased(phased_vcf,
+    int_gt <- gen_tibble(phased_vcf,
+      phased = TRUE,
       backingfile = tempfile("phased_"), quiet = TRUE, n_cores = n_cores,
       names_as_int = TRUE, chromosomes_as_int = TRUE
     )
@@ -123,26 +120,19 @@ test_that("gen_tibble_phased stores integer names and chromosomes", {
       show_loci(names_gt)
     )
   }
-  expect_error(
-    gen_tibble_phased(phased_vcf, parser = "vcfR", chromosomes_as_int = TRUE),
-    "only available with parser = 'cpp'"
-  )
 })
 
-test_that("gen_tibble ignores the phase of a phased vcf", {
-  for (parser in vcf_parsers) {
-    x <- gen_tibble(phased_vcf,
-      parser = parser,
-      backingfile = tempfile("unphased_"), quiet = TRUE
-    )
-    expect_false(is_phased(x))
-    expect_identical(.gt_get_fbm(x)$code256, bigsnpr::CODE_012)
-    expect_identical(
-      show_genotypes(x),
-      unname(haps_to_dosages(phased_vcf_haps) * 1)
-    )
-    expect_error(show_haplotypes(x), "not phased")
-  }
+test_that("gen_tibble ignores the phase of a phased vcf by default", {
+  x <- gen_tibble(phased_vcf,
+    backingfile = tempfile("unphased_"), quiet = TRUE
+  )
+  expect_false(is_phased(x))
+  expect_identical(.gt_get_fbm(x)$code256, bigsnpr::CODE_012)
+  expect_identical(
+    show_genotypes(x),
+    unname(haps_to_dosages(phased_vcf_haps) * 1)
+  )
+  expect_error(show_haplotypes(x), "not phased")
 })
 
 # write a small vcf with the given genotypes (one string per individual, for
@@ -166,136 +156,101 @@ write_test_vcf <- function(genotypes, file = tempfile(fileext = ".vcf")) {
   file
 }
 
-test_that("gen_tibble_phased reads missing genotypes", {
+# read a vcf with phased = TRUE
+read_phased <- function(vcf, ...) {
+  gen_tibble(vcf, phased = TRUE, backingfile = tempfile(), quiet = TRUE, ...)
+}
+
+test_that("gen_tibble(phased = TRUE) reads missing genotypes", {
   vcf <- write_test_vcf(list(
     c(".", "0|1", "1|1", ".|."),
     c("0|0", "1|0", "0|.", ".|1"),
     c("1|1", "0|0", "1|0", "0|0")
   ))
-  for (parser in vcf_parsers) {
-    x <- gen_tibble_phased(vcf,
-      parser = parser, backingfile = tempfile(),
-      quiet = TRUE
-    )
-    haps <- unname(show_haplotypes(x))
-    expected <- matrix(c(
-      NA, 0L, 1L,
-      NA, 0L, 1L,
-      0L, 1L, 0L,
-      1L, 0L, 0L,
-      1L, NA, 1L,
-      1L, NA, 0L,
-      NA, NA, 0L,
-      NA, NA, 0L
-    ), ncol = 3, byrow = TRUE)
-    expect_identical(haps, expected)
-  }
+  haps <- unname(show_haplotypes(read_phased(vcf)))
+  expected <- matrix(c(
+    NA, 0L, 1L,
+    NA, 0L, 1L,
+    0L, 1L, 0L,
+    1L, 0L, 0L,
+    1L, NA, 1L,
+    1L, NA, 0L,
+    NA, NA, 0L,
+    NA, NA, 0L
+  ), ncol = 3, byrow = TRUE)
+  expect_identical(haps, expected)
 })
 
-test_that("gen_tibble_phased refuses any unphased genotype", {
+test_that("gen_tibble(phased = TRUE) refuses any unphased genotype", {
   # heterozygotes, homozygotes and missing genotypes
   for (unphased in c("0/1", "1/0", "0/0", "1/1", "./.")) {
     vcf <- write_test_vcf(list(
       c("0|0", "0|1", "1|1"),
       c("0|1", "1|0", unphased)
     ))
-    for (parser in vcf_parsers) {
-      expect_error(
-        gen_tibble_phased(vcf,
-          parser = parser, backingfile = tempfile(),
-          quiet = TRUE
-        ),
-        "individual s3 at locus 1:200 is unphased (with '/')",
-        fixed = TRUE
-      )
-    }
+    expect_error(
+      read_phased(vcf),
+      "individual s3 at locus 1:200 is unphased (with '/')",
+      fixed = TRUE
+    )
   }
-  # both parsers name the first unphased genotype of the file (also when the
-  # cpp parser reads the lines in parallel)
+  # the first unphased genotype of the file is named (also when the lines
+  # are read in parallel)
   vcf <- write_test_vcf(list(
     c("0|0", "0|1", "0/0"),
     c("1/1", "1|0", "0|1")
   ))
-  for (parser in vcf_parsers) {
+  for (n_cores in c(1, 2)) {
     expect_error(
-      gen_tibble_phased(vcf,
-        parser = parser, backingfile = tempfile(),
-        quiet = TRUE
-      ),
+      read_phased(vcf, n_cores = n_cores),
       "individual s3 at locus 1:100 is unphased"
     )
   }
-  expect_error(
-    gen_tibble_phased(vcf, backingfile = tempfile(), n_cores = 2, quiet = TRUE),
-    "individual s3 at locus 1:100 is unphased"
-  )
-  # the same file can be read (unphased) by gen_tibble
+  # the same file can be read (unphased) by default
   x <- gen_tibble(vcf, backingfile = tempfile(), quiet = TRUE)
   expect_identical(show_genotypes(x), rbind(c(0, 2), c(1, 1), c(0, 1)))
   # no backing file is left behind by the failed attempts
   bk <- tempfile()
-  expect_error(gen_tibble_phased(vcf, backingfile = bk, quiet = TRUE))
+  expect_error(gen_tibble(vcf, phased = TRUE, backingfile = bk, quiet = TRUE))
   expect_false(file.exists(paste0(bk, ".bk")))
 })
 
-test_that("gen_tibble_phased refuses genotypes that are not diploid", {
+test_that("gen_tibble(phased = TRUE) refuses genotypes that are not diploid", {
   # haploid individual (found when estimating ploidy)
   vcf <- write_test_vcf(list(c("0|0", "1"), c("0|1", "0")))
-  for (parser in vcf_parsers) {
-    expect_error(
-      gen_tibble_phased(vcf,
-        parser = parser, backingfile = tempfile(),
-        quiet = TRUE
-      ),
-      "only be read for diploid individuals"
-    )
-  }
+  expect_error(read_phased(vcf), "only be read for diploid individuals")
   # a haploid genotype after the first locus
   vcf <- write_test_vcf(list(c("0|0", "1|1"), c("0|1", "1")))
-  for (parser in vcf_parsers) {
-    expect_error(
-      gen_tibble_phased(vcf,
-        parser = parser, backingfile = tempfile(),
-        quiet = TRUE
-      ),
-      "individual s2 at locus 1:200 is not diploid"
-    )
-  }
+  expect_error(
+    read_phased(vcf),
+    "individual s2 at locus 1:200 is not diploid"
+  )
   # a line with fewer genotypes than individuals
   vcf <- write_test_vcf(list(c("0|0", "1|1", "0|1"), c("0|1", "1|0", "1|1")))
   vcf_lines <- readLines(vcf)
   vcf_lines[5] <- sub("\t1|1", "", vcf_lines[5], fixed = TRUE)
   writeLines(vcf_lines, vcf)
   expect_error(
-    gen_tibble_phased(vcf, backingfile = tempfile(), quiet = TRUE),
+    read_phased(vcf),
     "locus 1:200 has fewer genotypes than individuals"
   )
   # a triploid genotype after the first locus
   vcf <- write_test_vcf(list(c("0|0", "1|1"), c("0|1|1", "1|0")))
   expect_error(
-    gen_tibble_phased(vcf, backingfile = tempfile(), quiet = TRUE),
+    read_phased(vcf),
     "individual s1 at locus 1:200 is not diploid"
   )
 })
 
-test_that("gen_tibble_phased only reads vcf files", {
+test_that("phased = TRUE is only available for vcf files with parser cpp", {
   bed_file <- system.file("extdata", "pop_a.bed", package = "tidypopgen")
   expect_error(
-    gen_tibble_phased(bed_file, quiet = TRUE),
-    "can only be read from vcf files"
-  )
-  expect_error(gen_tibble_phased(""), "single vcf file")
-  expect_error(
-    gen_tibble_phased(list(1)),
-    "path to a vcf file, or a numeric matrix"
+    gen_tibble(bed_file, phased = TRUE, quiet = TRUE),
+    "only available for VCF files read with parser = 'cpp'"
   )
   expect_error(
-    gen_tibble_phased(phased_vcf, valid_alleles = c("A", "0")),
-    "cannot be a valid allele"
-  )
-  expect_error(
-    gen_tibble_phased(phased_vcf, backingfile = tempfile(), extra = 1),
-    "parser = 'vcfR'"
+    gen_tibble(phased_vcf, phased = TRUE, parser = "vcfR", quiet = TRUE),
+    "only available for VCF files read with parser = 'cpp'"
   )
 })
 
@@ -303,7 +258,7 @@ test_that("gen_tibble_phased only reads vcf files", {
 # matrix of haplotypes
 ################################################################################
 
-test_that("gen_tibble_phased creates a phased gen_tibble from haplotypes", {
+test_that("gen_tibble(phased = TRUE) creates a gen_tibble from haplotypes", {
   haps <- matrix(c(
     0, 1, 1,
     1, 1, 0,
@@ -315,7 +270,10 @@ test_that("gen_tibble_phased creates a phased gen_tibble from haplotypes", {
     genetic_dist = 0, allele_ref = "A", allele_alt = "T"
   )
   indiv <- data.frame(id = c("a", "b"), population = "pop1")
-  x <- gen_tibble_phased(haps, indiv_meta = indiv, loci = loci, quiet = TRUE)
+  x <- gen_tibble(haps,
+    indiv_meta = indiv, loci = loci, phased = TRUE,
+    quiet = TRUE
+  )
   expect_true(is_phased(x))
   expected <- haps
   expected[4, 3] <- NA # the genotype is missing
@@ -323,11 +281,6 @@ test_that("gen_tibble_phased creates a phased gen_tibble from haplotypes", {
   dimnames(expected) <- list(c("a_1", "a_2", "b_1", "b_2"), loci$name)
   expect_identical(show_haplotypes(x), expected)
   expect_identical(show_genotypes(x), rbind(c(1, 2, 1), c(0, 1, NA)))
-  # a data.frame of haplotypes works too
-  x_df <- gen_tibble_phased(as.data.frame(haps),
-    indiv_meta = indiv, loci = loci, quiet = TRUE
-  )
-  expect_identical(show_haplotypes(x_df), expected)
   # subsets of individuals and loci
   expect_identical(
     show_haplotypes(x, indiv_indices = 2, loci_indices = c(3, 1)),
@@ -339,25 +292,22 @@ test_that("gen_tibble_phased creates a phased gen_tibble from haplotypes", {
   )
 })
 
-test_that("gen_tibble_phased validates the matrix of haplotypes", {
+test_that("gen_tibble(phased = TRUE) validates the matrix of haplotypes", {
   loci <- data.frame(
     name = c("rs1", "rs2"), chromosome = 1, position = c(10, 20),
     genetic_dist = 0, allele_ref = "A", allele_alt = "T"
   )
   indiv <- data.frame(id = c("a", "b"))
-  expect_error(gen_tibble_phased(matrix(0, 3, 2), indiv, loci), "two rows")
-  expect_error(gen_tibble_phased(matrix(2, 4, 2), indiv, loci), "0, 1 or NA")
+  phased_matrix <- function(x, ...) {
+    gen_tibble(x, indiv, loci, phased = TRUE, ...)
+  }
+  expect_error(phased_matrix(matrix(0, 3, 2)), "two rows")
+  expect_error(phased_matrix(matrix(2, 4, 2)), "0, 1 or NA")
+  expect_error(phased_matrix(matrix("0", 4, 2)), "numeric matrix")
+  expect_error(phased_matrix(matrix(0, 4, 2), ploidy = 1), "diploid")
+  # the metadata are validated as for unphased data
   expect_error(
-    gen_tibble_phased(matrix("0", 4, 2), indiv, loci),
-    "numeric matrix"
-  )
-  expect_error(
-    gen_tibble_phased(matrix(0, 4, 2), indiv, loci, ploidy = 1),
-    "diploid"
-  )
-  # the metadata are validated by gen_tibble()
-  expect_error(
-    gen_tibble_phased(matrix(0, 6, 2), indiv, loci),
+    phased_matrix(matrix(0, 6, 2)),
     "mismatch between the number of individuals"
   )
 })
@@ -375,7 +325,8 @@ rand_indiv <- data.frame(
   id = paste0("ind", seq_len(n_ind)),
   population = rep(c("pop1", "pop2", "pop3"), length.out = n_ind)
 )
-phased_gt <- gen_tibble_phased(rand_haps,
+phased_gt <- gen_tibble(rand_haps,
+  phased = TRUE,
   indiv_meta = rand_indiv,
   loci = rand_loci, backingfile = tempfile("rand_phased_"), quiet = TRUE
 )
@@ -512,7 +463,8 @@ test_that("PCA and LD clumping are the same with phased data", {
   # PCA needs complete data (without any missing genotype in the backing
   # file)
   complete_haps <- random_haplotypes(n_ind, 100, p_missing = 0)
-  phased_complete <- gen_tibble_phased(complete_haps,
+  phased_complete <- gen_tibble(complete_haps,
+    phased = TRUE,
     indiv_meta = rand_indiv, loci = random_loci(100),
     backingfile = tempfile(), quiet = TRUE
   )
@@ -606,27 +558,19 @@ test_that("gt_as_vcf writes phased genotypes, which can be read back", {
   gts <- genotypes[grepl("^[0-9.][/|][0-9.]$", genotypes)]
   expect_true(all(gts %in% c("0|0", "0|1", "1|0", "1|1", ".|.")))
   expect_true(all(c("0|1", "1|0", ".|.") %in% gts))
-  # round trip (cpp and vcfR parsers)
-  for (parser in vcf_parsers) {
-    x <- gen_tibble_phased(vcf,
-      parser = parser,
-      backingfile = tempfile(), quiet = TRUE
-    )
-    expect_true(is_phased(x))
-    expect_identical(show_haplotypes(x), show_haplotypes(phased_gt))
-    expect_identical(show_loci(x)$name, show_loci(phased_gt)$name)
-    expect_identical(show_loci(x)$position, show_loci(phased_gt)$position)
-    # the same vcf read by gen_tibble gives the unphased genotypes
-    x_unphased <- gen_tibble(vcf,
-      parser = parser,
-      backingfile = tempfile(), quiet = TRUE
-    )
-    expect_false(is_phased(x_unphased))
-    expect_identical(
-      show_genotypes(x_unphased),
-      show_genotypes(unphased_gt)
-    )
-  }
+  # round trip
+  x <- gen_tibble(vcf, phased = TRUE, backingfile = tempfile(), quiet = TRUE)
+  expect_true(is_phased(x))
+  expect_identical(show_haplotypes(x), show_haplotypes(phased_gt))
+  expect_identical(show_loci(x)$name, show_loci(phased_gt)$name)
+  expect_identical(show_loci(x)$position, show_loci(phased_gt)$position)
+  # the same vcf read without phased = TRUE gives the unphased genotypes
+  x_unphased <- gen_tibble(vcf, backingfile = tempfile(), quiet = TRUE)
+  expect_false(is_phased(x_unphased))
+  expect_identical(
+    show_genotypes(x_unphased),
+    show_genotypes(unphased_gt)
+  )
   # unphased gen_tibbles are still written as unphased
   vcf_unphased <- gt_as_vcf(unphased_gt, file = tempfile(fileext = ".vcf"))
   vcf_lines <- readLines(vcf_unphased)
@@ -653,11 +597,13 @@ rb_expected <- rbind(rb_haps_a, rb_haps_b)
 storage.mode(rb_expected) <- "integer"
 
 test_that("rbind keeps the phase of two phased gen_tibbles", {
-  x_a <- gen_tibble_phased(rb_haps_a,
+  x_a <- gen_tibble(rb_haps_a,
+    phased = TRUE,
     indiv_meta = rb_indiv_a, loci = rb_loci,
     backingfile = tempfile(), quiet = TRUE
   )
-  x_b <- gen_tibble_phased(rb_haps_b,
+  x_b <- gen_tibble(rb_haps_b,
+    phased = TRUE,
     indiv_meta = rb_indiv_b, loci = rb_loci,
     backingfile = tempfile(), quiet = TRUE
   )
@@ -677,15 +623,18 @@ test_that("rbind keeps the phase of two phased gen_tibbles", {
 })
 
 test_that("rbind does not swap or flip the alleles of phased gen_tibbles", {
-  x_a <- gen_tibble_phased(rb_haps_a,
+  x_a <- gen_tibble(rb_haps_a,
+    phased = TRUE,
     indiv_meta = rb_indiv_a, loci = rb_loci,
     backingfile = tempfile(), quiet = TRUE
   )
-  x_b <- gen_tibble_phased(rb_haps_b,
+  x_b <- gen_tibble(rb_haps_b,
+    phased = TRUE,
     indiv_meta = rb_indiv_b, loci = rb_loci,
     backingfile = tempfile(), quiet = TRUE
   )
-  x_b_swapped <- gen_tibble_phased(rb_haps_b_swapped,
+  x_b_swapped <- gen_tibble(rb_haps_b_swapped,
+    phased = TRUE,
     indiv_meta = rb_indiv_b, loci = rb_loci_b_swapped,
     backingfile = tempfile(), quiet = TRUE
   )
@@ -717,11 +666,13 @@ test_that("rbind does not swap or flip the alleles of phased gen_tibbles", {
 })
 
 test_that("rbind of phased and unphased gen_tibbles discards the phase", {
-  x_a <- gen_tibble_phased(rb_haps_a,
+  x_a <- gen_tibble(rb_haps_a,
+    phased = TRUE,
     indiv_meta = rb_indiv_a, loci = rb_loci,
     backingfile = tempfile(), quiet = TRUE
   )
-  x_b_swapped <- gen_tibble_phased(rb_haps_b_swapped,
+  x_b_swapped <- gen_tibble(rb_haps_b_swapped,
+    phased = TRUE,
     indiv_meta = rb_indiv_b, loci = rb_loci_b_swapped,
     backingfile = tempfile(), quiet = TRUE
   )
@@ -798,11 +749,12 @@ test_that("gt_merge_vcfs reads phased vcf files", {
     phased = TRUE, backingfile = tempfile(), quiet = TRUE
   )
   # the same data in a single vcf
-  single_gt <- gen_tibble_phased(
+  single_gt <- gen_tibble(
     write_merge_vcf(
       c("a1", "a2", "b1", "b2"), merge_loci,
       cbind(merge_geno_a, merge_geno_b)
     ),
+    phased = TRUE,
     names_as_int = TRUE, backingfile = tempfile(), quiet = TRUE
   )
   expect_true(is_phased(merged_gt))
@@ -847,7 +799,8 @@ test_that("gt_concat_vcfs reads phased vcf files", {
   concat_gt <- gt_concat_vcfs(c(vcf_1, vcf_2),
     phased = TRUE, backingfile = tempfile(), quiet = TRUE
   )
-  single_gt <- gen_tibble_phased(merge_vcf_a,
+  single_gt <- gen_tibble(merge_vcf_a,
+    phased = TRUE,
     names_as_int = TRUE, backingfile = tempfile(), quiet = TRUE
   )
   expect_true(is_phased(concat_gt))

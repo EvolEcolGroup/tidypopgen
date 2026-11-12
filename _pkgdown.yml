@@ -10,7 +10,6 @@ reference:
     desc: "Functions for creating, saving, and loading `gen_tibble` objects."
     contents:
         - gen_tibble
-        - gen_tibble_phased
         - is_phased
         - phased_encoding
         - gt_save

@@ -1,13 +1,13 @@
 # tidypopgen (development version)
 
-* new `gen_tibble_phased()` creates `gen_tibble`s of phased diploid
-  genotypes from phased VCF files (including large ones, with `n_cores`,
-  `names_as_int` and `chromosomes_as_int`) or from a matrix of haplotypes.
+* new argument `phased` of `gen_tibble()`, `gt_merge_vcfs()` and
+  `gt_concat_vcfs()` creates `gen_tibble`s of phased diploid genotypes from
+  phased VCF files (with the "cpp" parser, also with `n_cores`,
+  `names_as_int` and `chromosomes_as_int`), or from a matrix of haplotypes.
   Phased genotypes are decoded as ordinary dosages, so all other functions
   work on them as usual; `is_phased()` and `show_haplotypes()` give the
   phase, `gt_as_vcf()` writes it, and `rbind()` keeps it when both
-  `gen_tibble`s are phased. `gt_merge_vcfs()` and `gt_concat_vcfs()` read
-  phased VCF files with `phased = TRUE`
+  `gen_tibble`s are phased
 * `gen_tibble(names_as_int = TRUE)` on VCF files writes the original loci
   names to a sidecar file (*.loci.tsv*); new `gt_lookup_loci()` and
   `gt_restore_loci()` retrieve them. `gt_merge_vcfs()`, `gt_concat_vcfs()`,

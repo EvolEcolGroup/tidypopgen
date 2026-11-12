@@ -85,7 +85,7 @@ file next to the backing file (see \code{\link[=gen_tibble]{gen_tibble()}} and
 parse the genotypes. Defaults to 1.}
 
 \item{phased}{boolean: whether to store phased genotypes, giving a phased
-\code{gen_tibble} (see \code{\link[=gen_tibble_phased]{gen_tibble_phased()}}). All the files must then be
+\code{gen_tibble} (see \code{phased} in \code{\link[=gen_tibble]{gen_tibble()}}). All the files must then be
 phased: any unphased genotype (with '/') or individual that is not
 diploid is an error. Default is FALSE (the phase is ignored, as in
 \code{\link[=gen_tibble]{gen_tibble()}}). The alleles of phased genotypes are never swapped (as in

@@ -17,9 +17,8 @@
 #' SNPs are supported. If haploid variants (e.g. sex chromosomes) are included
 #' in the *VCF*, they are not transformed into homozygous calls. Instead,
 #' reference alleles will be coded as 0 and alternative alleles will be coded
-#' as 1.
-#' The phase of phased genotypes (e.g. `0|1`) is ignored: use
-#' [gen_tibble_phased()] to keep it.
+#' as 1. The phase of phased genotypes (e.g. `0|1`) is ignored, unless
+#' `phased = TRUE` (see below).
 #'
 #' - *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual information
 #' (from the .fam file, or the first six columns of the .ped file) is stored
@@ -38,6 +37,34 @@
 #' - *packedancestry* files: When loading *packedancestry* files,
 #' missing alleles will be converted from 'X' to NA
 #'
+#' - Phased genotypes: with `phased = TRUE`, `gen_tibble()` creates a phased
+#' `gen_tibble` of diploid individuals, which also knows which allele of each
+#' genotype is on the first and which on the second haplotype (e.g. `0|1`
+#' versus `1|0`), as needed by haplotype based statistics (such as those of
+#' the package `tidygensel`). Phased genotypes are stored in the same file
+#' backed matrix as unphased ones (see [phased_encoding]), so that all other
+#' functions work on phased `gen_tibble`s as usual, treating their genotypes
+#' as ordinary dosages of the alternate allele. [is_phased()] tests whether a
+#' `gen_tibble` is phased, and [show_haplotypes()] returns its haplotypes.
+#' Phased genotypes can be read from *VCF* files (with parser "cpp"), in which
+#' all individuals have to be diploid and all genotypes phased (with `|`, e.g.
+#' `0|1`): any unphased genotype (with `/`, including `0/0` and `./.`) is an
+#' error, naming the individual and the locus, and a genotype with a missing
+#' allele (e.g. `.|.`, `0|.`, or a single `.`) is missing. They can also be
+#' created from a matrix of haplotypes, with two rows per individual (the
+#' first and second haplotypes of individual `i` are rows `2 * i - 1` and
+#' `2 * i`) and one column per locus, containing 0 (reference allele), 1
+#' (alternate allele) or `NA` (if either haplotype is missing, the genotype is
+#' missing). [gt_merge_vcfs()] and [gt_concat_vcfs()] also read phased *VCF*
+#' files with `phased = TRUE`. Functions that write genotypes keep the phase
+#' where they can: [gt_as_vcf()] writes phased genotypes (`0|1`), subsetting,
+#' [gt_save()], [gt_load()], [gt_order_loci()] and [gt_update_backingfile()]
+#' keep phased data phased, and [rbind()][rbind.gen_tbl] keeps the phase when
+#' both `gen_tibble`s are phased (it then never swaps or flips alleles), and
+#' discards it (with a message) when only one of them is phased. Imputation
+#' ([gt_impute_simple()], [gt_impute_xgboost()]) is not available for phased
+#' `gen_tibble`s.
+#'
 #' @note Helper functions for accessing `gen_tibble` object attributes and
 #'   checking gen_tibble ploidy can be found in gt_helper_functions.R
 #'
@@ -54,6 +81,7 @@
 #'   same file name prefix.
 #' - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
 #'   alternate allele.
+#' - with `phased = TRUE`, a matrix of haplotypes (see Details).
 #' @param indiv_meta a list, data.frame or tibble with compulsory columns 'id'
 #'   and 'population', plus any additional metadata of interest. This is only
 #'   used if `x` is a genotype matrix. Otherwise this information is extracted
@@ -121,6 +149,11 @@
 #'   next to the backing file (*.chromosomes.tsv*), from which
 #'   [gt_lookup_chromosomes()], [gt_lookup_loci()] and [gt_restore_loci()]
 #'   get them back.
+#' @param phased logical. If TRUE, the genotypes are stored with their phase,
+#'   giving a phased `gen_tibble` of diploid individuals (see Details). Only
+#'   available when `x` is a *VCF* file read with parser "cpp", or a matrix of
+#'   haplotypes. Default is FALSE (the phase of phased *VCF* files is
+#'   ignored).
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -146,6 +179,15 @@
 #'     package = "tidypopgen"
 #'   )
 #' gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+#'
+#' # Create a phased gen_tibble from a phased .vcf file
+#' phased_vcf <-
+#'   system.file("extdata", "phased_example.vcf", package = "tidypopgen")
+#' phased_gt <- gen_tibble(phased_vcf,
+#'   phased = TRUE,
+#'   quiet = TRUE, backingfile = tempfile("phased_")
+#' )
+#' show_haplotypes(phased_gt)
 #'
 #' # Create a gen_tibble from a matrix of genotypes:
 #' test_indiv_meta <- data.frame(
@@ -202,6 +244,7 @@ gen_tibble.character <-
            allow_duplicates = FALSE,
            names_as_int = FALSE,
            chromosomes_as_int = FALSE,
+           phased = FALSE,
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
@@ -245,6 +288,12 @@ gen_tibble.character <-
         "with parser = 'cpp'"
       )
     }
+    if (isTRUE(phased) && !(ext %in% c("vcf", "gz") && parser == "cpp")) {
+      stop(
+        "phased = TRUE is only available for VCF files read with ",
+        "parser = 'cpp' (and for matrices of haplotypes)"
+      )
+    }
 
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
@@ -277,6 +326,7 @@ gen_tibble.character <-
         allow_duplicates = allow_duplicates,
         names_as_int = names_as_int,
         chromosomes_as_int = chromosomes_as_int,
+        phased = phased,
         quiet = quiet
       )
     } else if (tolower(file_ext(x)) == "ped") {
@@ -353,9 +403,19 @@ gen_tibble.matrix <- function(
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
+  phased = FALSE,
   quiet = FALSE
 ) {
   rlang::check_dots_empty()
+  # a matrix of haplotypes (see R/phased_genotypes.R)
+  if (isTRUE(phased)) {
+    return(gen_tibble_haplotypes(x,
+      indiv_meta = indiv_meta, loci = loci, ploidy = ploidy,
+      valid_alleles = valid_alleles, missing_alleles = missing_alleles,
+      backingfile = backingfile, allow_duplicates = allow_duplicates,
+      quiet = quiet
+    ))
+  }
 
   # check that valid alleles does not contain zero
   if ("0" %in% valid_alleles) {

@@ -66,7 +66,7 @@
 #' @param n_cores the number of cores used to decompress bgzipped files and to
 #'   parse the genotypes. Defaults to 1.
 #' @param phased boolean: whether to store phased genotypes, giving a phased
-#'   `gen_tibble` (see [gen_tibble_phased()]). All the files must then be
+#'   `gen_tibble` (see `phased` in [gen_tibble()]). All the files must then be
 #'   phased: any unphased genotype (with '/') or individual that is not
 #'   diploid is an error. Default is FALSE (the phase is ignored, as in
 #'   [gen_tibble()]).

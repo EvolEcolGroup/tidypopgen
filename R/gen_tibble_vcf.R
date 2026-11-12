@@ -1,5 +1,5 @@
 # read in a vcf (with phased = TRUE, phased diploid genotypes are stored, see
-# gen_tibble_phased())
+# gen_tibble(); only with the cpp parser)
 gen_tibble_vcf <- function(
   x,
   ...,
@@ -46,7 +46,6 @@ gen_tibble_vcf <- function(
       chunk_size = chunk_size,
       allow_duplicates = allow_duplicates,
       quiet = quiet,
-      phased = phased,
       ...
     )
   }
