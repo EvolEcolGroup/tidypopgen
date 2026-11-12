@@ -5,7 +5,12 @@ Load a `gen_tibble` previously saved with
 If the *.rds* and *.bk* files have not been moved, they should be found
 automatically. If they were moved, use `reattach_to` to point to the
 *.rds* file (the *.bk* file needs to be in the same directory as the
-*.rds* file).
+*.rds* file). Sidecar files with the original names of loci and
+chromosomes stored as integers (*.loci.tsv* and *.chromosomes.tsv*, see
+[`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+and
+[`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md))
+are found next to the *.bk* file, so move any of them with it.
 
 ## Usage
 
@@ -48,16 +53,16 @@ backing_files <- gt_save(example_gt_filtered,
   file_name = paste0(tempfile(), "_example_filtered")
 )
 #> 
-#> gen_tibble saved to /tmp/RtmpL9nre6/file1fae774ba243_example_filtered.gt
-#> using FBM RDS: /tmp/RtmpL9nre6/file1fae1d139200.rds
-#> with FBM backing file: /tmp/RtmpL9nre6/file1fae1d139200.bk
+#> gen_tibble saved to /tmp/RtmpmlLt0o/file1f1d58a77b23_example_filtered.gt
+#> using FBM RDS: /tmp/RtmpmlLt0o/file1f1d1d3edf0b.rds
+#> with FBM backing file: /tmp/RtmpmlLt0o/file1f1d1d3edf0b.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpL9nre6/file1fae774ba243_example_filtered.gt')
+#> gt_load('/tmp/RtmpmlLt0o/file1f1d58a77b23_example_filtered.gt')
 
 # backing_files[1] contains the name of the saved .gt file
 backing_files[1]
-#> [1] "/tmp/RtmpL9nre6/file1fae774ba243_example_filtered.gt"
+#> [1] "/tmp/RtmpmlLt0o/file1f1d58a77b23_example_filtered.gt"
 
 # To load the saved gen_tibble object, use the path to the saved .gt file
 reloaded_gt <- gt_load(backing_files[1])

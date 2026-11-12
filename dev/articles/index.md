@@ -18,6 +18,8 @@
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/big_data.md):
 - [Spatial interpolation of genetic
   data](https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.md):
+- [Working with large RAD-seq
+  datasets](https://evolecolgroup.github.io/tidypopgen/dev/articles/rad_seq.md):
 - [Runs of homozygosity in the
   HGDP](https://evolecolgroup.github.io/tidypopgen/dev/articles/roh_hgdp.md):
 - [Site frequency

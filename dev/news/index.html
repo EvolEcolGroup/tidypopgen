@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9001</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -27,6 +27,7 @@
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
@@ -47,7 +48,11 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="tidypopgen-development-version">tidypopgen (development version)<a class="anchor" aria-label="anchor" href="#tidypopgen-development-version"></a></h2>
-<ul><li>new <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> reads several VCF files with different samples into a single <code>gen_tibble</code>, as <code>bcftools merge</code> would, in one go (without reading each file into its own <code>gen_tibble</code> and binding them in pairs with <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>): loci are matched by chromosome and position, keeping the sites found in all files (<code>variants = "intersection"</code>) or all sites (<code>"union"</code>, with missing or homozygous reference genotypes for the samples of the files without a site); loci with different alleles are dropped, kept apart, or swapped, following the options of <code>bcftools merge</code>. Unlike <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>, it names loci with integers by default (<code>names_as_int = TRUE</code>), to save memory with large datasets</li>
+<ul><li>
+<code>gen_tibble(names_as_int = TRUE)</code> on VCF files writes the original loci names to a sidecar file (<em>.loci.tsv</em>); new <code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code> and <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> retrieve them. <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>, <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code>, <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code>, <code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code> and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> keep the sidecar</li>
+<li>new argument <code>chromosomes_as_int</code> of <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>, <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> and <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> stores chromosomes as integer codes, saving memory with millions of chromosomes (e.g. RAD loci assembled de novo); new <code><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes()</a></code> translates codes back into names</li>
+<li>new article on large RAD-seq datasets</li>
+<li>new <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> reads several VCF files with different samples into a single <code>gen_tibble</code>, as <code>bcftools merge</code> would, in one go (without reading each file into its own <code>gen_tibble</code> and binding them in pairs with <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>): loci are matched by chromosome and position, keeping the sites found in all files (<code>variants = "intersection"</code>) or all sites (<code>"union"</code>, with missing or homozygous reference genotypes for the samples of the files without a site); loci with different alleles are dropped, kept apart, or swapped, following the options of <code>bcftools merge</code>. Unlike <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>, it names loci with integers by default (<code>names_as_int = TRUE</code>), to save memory with large datasets</li>
 <li>new <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> reads several VCF files with the same samples and different loci (e.g. one file per chromosome) into a single <code>gen_tibble</code>, as <code>bcftools concat</code> would, in one go; the samples can be in a different order in each file. As <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>, it names loci with integers by default (<code>names_as_int = TRUE</code>)</li>
 <li>the big data article merges the VCFs of the SGDP individuals with <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>, rather than with <code>bcftools merge</code>
 </li>

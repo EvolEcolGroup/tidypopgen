@@ -22,6 +22,7 @@ gt_concat_vcfs(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   names_as_int = TRUE,
+  chromosomes_as_int = FALSE,
   n_cores = 1,
   quiet = FALSE
 )
@@ -70,7 +71,24 @@ gt_concat_vcfs(
   (where it defaults to FALSE): concatenating *VCF* files is mostly used
   for large datasets, in which the loci names take most of the memory of
   the `gen_tibble` and are rarely needed (loci are identified by their
-  chromosome and position). Set it to FALSE to keep the *VCF* IDs.
+  chromosome and position). Set it to FALSE to keep the *VCF* IDs. With
+  integer names, the *VCF* IDs (with the chromosomes and positions) are
+  written to a sidecar file next to the backing file, from which
+  [`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  and
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  get them back.
+
+- chromosomes_as_int:
+
+  boolean: whether the chromosomes are integer codes rather than a
+  factor, which saves memory with many chromosomes (e.g. RAD loci
+  assembled de novo); the names are written to a sidecar file next to
+  the backing file (see
+  [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+  and
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)).
+  Default is FALSE.
 
 - n_cores:
 
@@ -145,18 +163,18 @@ concat_gt <- gt_concat_vcfs(c(vcf_chr1, vcf_chr2),
   names_as_int = FALSE,
   backingfile = tempfile("concat_")
 )
-#> reading the loci of /tmp/RtmpL9nre6/file1fae1c35f111.vcf
-#> reading the loci of /tmp/RtmpL9nre6/file1fae2051b54a.vcf
+#> reading the loci of /tmp/RtmpmlLt0o/file1f1d3b30f263.vcf
+#> reading the loci of /tmp/RtmpmlLt0o/file1f1d4f0c57f0.vcf
 #> concatenating 2 VCF files with 7 samples: 6 loci (biallelic SNPs)
-#> reading the genotypes of /tmp/RtmpL9nre6/file1fae1c35f111.vcf
-#> reading the genotypes of /tmp/RtmpL9nre6/file1fae2051b54a.vcf
+#> reading the genotypes of /tmp/RtmpmlLt0o/file1f1d3b30f263.vcf
+#> reading the genotypes of /tmp/RtmpmlLt0o/file1f1d4f0c57f0.vcf
 #> 
-#> gen_tibble saved to /tmp/RtmpL9nre6/concat_1fae79f51612.gt
-#> using FBM RDS: /tmp/RtmpL9nre6/concat_1fae79f51612.rds
-#> with FBM backing file: /tmp/RtmpL9nre6/concat_1fae79f51612.bk
+#> gen_tibble saved to /tmp/RtmpmlLt0o/concat_1f1d76512bdd.gt
+#> using FBM RDS: /tmp/RtmpmlLt0o/concat_1f1d76512bdd.rds
+#> with FBM backing file: /tmp/RtmpmlLt0o/concat_1f1d76512bdd.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpL9nre6/concat_1fae79f51612.gt')
+#> gt_load('/tmp/RtmpmlLt0o/concat_1f1d76512bdd.gt')
 concat_gt
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 2

@@ -26,6 +26,12 @@ Functions for creating, saving, and loading `gen_tibble` objects.
 - [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md)
   : Update the backing matrix
 
+- [`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  : Look up the original names of loci and chromosomes stored as
+  integers
+
 - [`gt_add_sf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_add_sf.md)
   :
 

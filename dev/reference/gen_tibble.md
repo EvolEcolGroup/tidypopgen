@@ -28,6 +28,7 @@ gen_tibble(
   backingfile = NULL,
   allow_duplicates = FALSE,
   names_as_int = FALSE,
+  chromosomes_as_int = FALSE,
   quiet = FALSE
 )
 
@@ -146,7 +147,33 @@ gen_tibble(
   [rbind()](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind.gen_tbl.md)
   and
   [`rbind_dry_run()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind_dry_run.md)
-  always match loci with integer names by chromosome and position.
+  always match loci with integer names by chromosome and position. For
+  *VCF* files, the original names (with the chromosomes and positions)
+  are written to a sidecar file next to the backing file (*.loci.tsv*),
+  from which
+  [`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  and
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  get them back.
+
+- chromosomes_as_int:
+
+  logical. If TRUE, chromosomes will be stored as integer codes rather
+  than as a factor. Only used when `x` is a *VCF* file with parser
+  "cpp". Default is FALSE. This saves memory and time with many
+  chromosomes (e.g. RAD loci assembled de novo, each its own
+  "chromosome"). A chromosome whose name is a positive number (after an
+  optional "chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07")
+  keeps that number as its code, unless an earlier name has the same
+  number (e.g. "chr1" after "1"); these names, "0", numbers larger than
+  the largest integer, and other names are numbered after the largest
+  number, in order of first appearance. The names are written to a
+  sidecar file next to the backing file (*.chromosomes.tsv*), from which
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md),
+  [`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  and
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  get them back.
 
 - indiv_meta:
 

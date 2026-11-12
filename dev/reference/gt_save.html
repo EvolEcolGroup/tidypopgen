@@ -25,7 +25,7 @@ default level of saveRDS() is slow."><meta property="og:image" content="https://
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9001</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,6 +45,7 @@ default level of saveRDS() is slow."><meta property="og:image" content="https://
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
@@ -105,6 +106,16 @@ with <em>.gt</em>, the extension will be added.</p></dd>
 and <em>.bk</em> files</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>If the names of the loci are integers (<code>names_as_int = TRUE</code>), their
+original names are in a sidecar file next to the <em>.bk</em> file (<em>.loci.tsv</em>,
+see <code><a href="gt_lookup_loci.html">gt_lookup_loci()</a></code>); if the chromosomes are integers
+(<code>chromosomes_as_int = TRUE</code>), their names are in another sidecar file
+(<em>.chromosomes.tsv</em>, see <code><a href="gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>). Keep any sidecar
+files with the other files (if you move the files, move them too, so that
+<code><a href="gt_load.html">gt_load()</a></code> with <code>reattach_to</code> finds them).</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="gt_load.html">gt_load()</a></code></p></div>
     </div>
@@ -119,15 +130,15 @@ and <em>.bk</em> files</p>
 <span class="r-in"><span><span class="co"># save filtered gen_tibble object</span></span></span>
 <span class="r-in"><span><span class="fu">gt_save</span><span class="op">(</span><span class="va">example_gt</span>, file_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"_example_filtered"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpL9nre6/file1fae366e2bbb_example_filtered.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpL9nre6/file1fae7f10b6fd.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpL9nre6/file1fae7f10b6fd.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpmlLt0o/file1f1d3481d2d0_example_filtered.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpmlLt0o/file1f1d6e27c7e0.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpmlLt0o/file1f1d6e27c7e0.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpL9nre6/file1fae366e2bbb_example_filtered.gt')</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpL9nre6/file1fae366e2bbb_example_filtered.gt"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/tmp/RtmpL9nre6/file1fae7f10b6fd.rds"                </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "/tmp/RtmpL9nre6/file1fae7f10b6fd.bk"                 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpmlLt0o/file1f1d3481d2d0_example_filtered.gt')</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "/tmp/RtmpmlLt0o/file1f1d3481d2d0_example_filtered.gt"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] "/tmp/RtmpmlLt0o/file1f1d6e27c7e0.rds"                </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "/tmp/RtmpmlLt0o/file1f1d6e27c7e0.bk"                 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

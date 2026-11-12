@@ -40,6 +40,20 @@ gt_save(x, file_name = NULL, quiet = FALSE)
 the file name and path of the *.gt* file, together with the *.rds* and
 *.bk* files
 
+## Details
+
+If the names of the loci are integers (`names_as_int = TRUE`), their
+original names are in a sidecar file next to the *.bk* file
+(*.loci.tsv*, see
+[`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md));
+if the chromosomes are integers (`chromosomes_as_int = TRUE`), their
+names are in another sidecar file (*.chromosomes.tsv*, see
+[`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)).
+Keep any sidecar files with the other files (if you move the files, move
+them too, so that
+[`gt_load()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.md)
+with `reattach_to` finds them).
+
 ## See also
 
 [`gt_load()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.md)
@@ -55,13 +69,13 @@ example_gt <- example_gt %>% filter(id != "a")
 # save filtered gen_tibble object
 gt_save(example_gt, file_name = paste0(tempfile(), "_example_filtered"))
 #> 
-#> gen_tibble saved to /tmp/RtmpL9nre6/file1fae366e2bbb_example_filtered.gt
-#> using FBM RDS: /tmp/RtmpL9nre6/file1fae7f10b6fd.rds
-#> with FBM backing file: /tmp/RtmpL9nre6/file1fae7f10b6fd.bk
+#> gen_tibble saved to /tmp/RtmpmlLt0o/file1f1d3481d2d0_example_filtered.gt
+#> using FBM RDS: /tmp/RtmpmlLt0o/file1f1d6e27c7e0.rds
+#> with FBM backing file: /tmp/RtmpmlLt0o/file1f1d6e27c7e0.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpL9nre6/file1fae366e2bbb_example_filtered.gt')
-#> [1] "/tmp/RtmpL9nre6/file1fae366e2bbb_example_filtered.gt"
-#> [2] "/tmp/RtmpL9nre6/file1fae7f10b6fd.rds"                
-#> [3] "/tmp/RtmpL9nre6/file1fae7f10b6fd.bk"                 
+#> gt_load('/tmp/RtmpmlLt0o/file1f1d3481d2d0_example_filtered.gt')
+#> [1] "/tmp/RtmpmlLt0o/file1f1d3481d2d0_example_filtered.gt"
+#> [2] "/tmp/RtmpmlLt0o/file1f1d6e27c7e0.rds"                
+#> [3] "/tmp/RtmpmlLt0o/file1f1d6e27c7e0.bk"                 
 ```

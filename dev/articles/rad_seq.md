@@ -1,0 +1,465 @@
+# Working with large RAD-seq datasets
+
+RAD-seq data assembled de novo (e.g. with
+[DiscoSnpRad](https://github.com/GATB/DiscoSnp),
+[Stacks](https://catchenlab.life.illinois.edu/stacks/) or
+[ipyrad](https://ipyrad.readthedocs.io/)) have an unusual shape: there
+is no reference genome, so each RAD locus is its own “chromosome” in the
+VCF (e.g. `SNP_higher_path_1234` or `RAD_1234`), carrying one or a few
+SNPs. A dataset with millions of SNPs therefore has millions of
+chromosomes, and every SNP also has its own ID. Stored as strings, these
+names take most of the memory of a `gen_tibble`, and much of the time
+needed to read, save and load it.
+
+tidypopgen has two options to deal with this, for *VCF* files read with
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+(and merged with
+[`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+or
+[`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md)):
+
+- `names_as_int = TRUE` stores the names of the loci as integers (the
+  index of each SNP in the *VCF*);
+- `chromosomes_as_int = TRUE` stores the chromosomes as integer codes. A
+  chromosome whose name is a number (e.g. “7” or “chr7”, or the catalog
+  number of a Stacks locus) keeps that number as its code; other names
+  (such as RAD loci assembled by DiscoSnpRad) are numbered in order of
+  appearance.
+
+Nothing is lost: the original names are written to plain text “sidecar”
+files next to the backing file of the `gen_tibble`, from which
+[`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md),
+[`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+and
+[`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+get them back when they are needed, for example to report the hits of a
+scan.
+
+In this article, we read a VCF with 18.6 million SNPs on 13.8 million
+RAD loci with and without these options, compare the time and memory
+they need, and then run a small analysis on the compact `gen_tibble`,
+looking up the original names of the loci that come out of it.
+
+## The data
+
+We use a synthetic dataset with the shape of a real one: the DiscoSnpRad
+VCF of the tree frog *Phyllomedusa vaillantii* (18,579,683 SNPs and 56
+samples from 3 lineages and an outgroup, 26 GB) used by
+[VCFArrow](https://github.com/legalLab/VCFArrow). The full dataset is
+not public, but VCFArrow ships a subsample of 10,000 SNPs and 18
+samples, from which the script `make_vcf.R`, in the
+[`benchmarks/vcfarrow`
+folder](https://github.com/EvolEcolGroup/tidypopgen/tree/HEAD/benchmarks/vcfarrow)
+of the tidypopgen repository, builds a VCF of any size with the same
+features: each SNP copies the genotypes (with their missingness, about
+34%) of a random SNP of the subsample, each sample takes the genotypes
+of a random sample of the same lineage, and each RAD locus
+(`SNP_higher_path_<n>`) carries 1 to 5 SNPs, as in the real data.
+
+The `bash` chunk below downloads the subsample, and runs `make_vcf.R`.
+This writes the VCF, and the lineage of each of its 56 samples
+(`discosnp.strata.tsv`), to `vignettes/articles/data/rad/`. NOTE: this
+takes a few minutes, and needs 27 GB of disk space. As in all the chunks
+of this article, the paths are relative to the folder of the article
+(`vignettes/articles/` in a copy of the tidypopgen repository), which is
+where R Markdown runs the chunks:
+
+``` bash
+cd ../../benchmarks/vcfarrow
+mkdir -p data ../../vignettes/articles/data/rad
+for f in vaillantii_discosnp_sub.vcf.gz strata; do
+  curl -fsSL -o "data/$f" \
+    "https://raw.githubusercontent.com/legalLab/VCFArrow/main/inst/extdata/$f"
+done
+Rscript make_vcf.R 18579683 ../../vignettes/articles/data/rad/discosnp.vcf 1
+```
+
+## Reading the VCF
+
+First we load the packages, and set the path of the VCF and the number
+of cores:
+
+``` r
+
+library(tidypopgen)
+library(dplyr)
+vcf_path <- "./data/rad/discosnp.vcf"
+n_cores <- 4
+```
+
+We read the VCF with 4 cores, as in the VCFArrow comparison, on a
+machine with 24 cores. The file is 25.3 GB.
+
+For RAD-seq data, we read the VCF with both options. This is the
+`gen_tibble` that we use in the rest of the article:
+
+``` r
+
+rad_gt <- gen_tibble(vcf_path,
+  backingfile = "./data/rad/rad_int",
+  names_as_int = TRUE, chromosomes_as_int = TRUE,
+  n_cores = n_cores, quiet = TRUE
+)
+```
+
+To see what each option saves, we also read the VCF (code not shown)
+with the default options, with only `names_as_int = TRUE`, and with only
+`chromosomes_as_int = TRUE`, each time into a new backing file. The
+genotypes are the same in all four `gen_tibble`s, and so are their
+backing files (the `.bk` file, with one byte per genotype). What changes
+is the loci table, which is held in memory and saved in the `.gt` file:
+
+| options            | time_s | peak_memory_mb | loci_table_mb | bk_mb | gt_mb | sidecars_mb |
+|:-------------------|-------:|---------------:|--------------:|------:|------:|------------:|
+| default            |   37.9 |           3694 |          2846 |   924 |   165 |           0 |
+| names_as_int       |   19.5 |           2552 |          1756 |   924 |   108 |         748 |
+| chromosomes_as_int |   20.7 |           2410 |          1751 |   924 |   125 |         407 |
+| both               |   12.9 |           1188 |           660 |   924 |    68 |        1155 |
+
+`time_s` is the time to read the VCF and save the `gen_tibble`;
+`peak_memory_mb` is the largest amount of memory used by R while doing
+so; `loci_table_mb` is the size of the loci table in memory; `bk_mb`,
+`gt_mb` and `sidecars_mb` are the sizes of the backing file, of the
+`.gt` file and of the sidecar files on disk.
+
+With the default options, R creates a string for each of the 18.6
+million names and each of the 13.8 million chromosomes, and has to sort
+the chromosomes to make the levels of a factor. With both options, the
+loci table only holds integers (and the alleles, which are shared single
+letters), and the names are streamed to the sidecar files while the VCF
+is read.
+
+The loci table of `rad_gt` looks like this:
+
+``` r
+
+show_loci(rad_gt)
+#> # A tibble: 17,303,683 × 7
+#>    big_index  name chromosome position genetic_dist allele_ref allele_alt
+#>        <int> <int>      <int>    <int>        <dbl> <chr>      <chr>     
+#>  1         1     1          1       36            0 A          T         
+#>  2         2     2          2       91            0 A          G         
+#>  3         3     3          3       84            0 A          G         
+#>  4         4     4          4       90            0 A          G         
+#>  5         5     5          5       95            0 A          G         
+#>  6         6     6          6       48            0 A          T         
+#>  7         7     7          6       57            0 A          G         
+#>  8         8     8          6       58            0 A          G         
+#>  9         9     9          6       71            0 A          C         
+#> 10        10    10          7       37            0 A          T         
+#> # ℹ 17,303,673 more rows
+```
+
+The `.gt` file is smaller, so loading the `gen_tibble` in a new session
+is faster too:
+
+``` r
+
+reloaded <- gt_load("./data/rad/rad_int.gt")
+```
+
+This takes 3.2 s, against 19.2 s for the `gen_tibble` read with the
+default options (see the performance summary at the end).
+
+## The sidecar files
+
+The sidecars are tab separated text files next to the backing file:
+`rad_int.loci.tsv` has a line for each locus, with its integer name, its
+original name (the VCF ID), its chromosome and its position;
+`rad_int.chromosomes.tsv` has a line for each chromosome, with its code
+and its name.
+
+``` r
+
+cat(readLines("./data/rad/rad_int.loci.tsv", n = 4), sep = "\n")
+#> int_name name    chromosome  position
+#> 1    9999998 SNP_higher_path_9999998 36
+#> 2    9999997 SNP_higher_path_9999997 91
+#> 3    9999994 SNP_higher_path_9999994 84
+cat(readLines("./data/rad/rad_int.chromosomes.tsv", n = 4), sep = "\n")
+#> int_chromosome   chromosome
+#> 1    SNP_higher_path_9999998
+#> 2    SNP_higher_path_9999997
+#> 3    SNP_higher_path_9999994
+```
+
+They can be read with any tool and joined to
+[`show_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_loci.md)
+by `name = int_name` (or `chromosome = int_chromosome`). Keep them with
+the other files of the `gen_tibble`:
+[`gt_save()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.md)
+lists them in its messages. Functions that write a new backing file,
+such as
+[`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md),
+[`gt_order_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.md)
+and [`rbind()`](https://rdrr.io/r/base/cbind.html), write new sidecars
+for it, with the loci that they keep.
+
+## Quality control
+
+We add the lineage of each sample, from the `strata` file of the
+dataset:
+
+``` r
+
+strata <- read.delim("./data/rad/discosnp.strata.tsv")
+rad_gt <- rad_gt %>%
+  mutate(population = strata$pop[match(id, strata$id)])
+table(rad_gt$population)
+#> 
+#> BS GS OG WA 
+#> 18 18  3 17
+```
+
+and remove the loci with more than 20% of missing genotypes, or with a
+minor allele frequency below 5%:
+
+``` r
+
+loci_missing <- loci_missingness(rad_gt, n_cores = n_cores)
+loci_freq <- loci_maf(rad_gt, n_cores = n_cores)
+rad_gt <- rad_gt %>%
+  select_loci(which(loci_missing <= 0.2 & loci_freq >= 0.05))
+count_loci(rad_gt)
+#> [1] 3605716
+```
+
+We then write a new backing file with only these loci. This also writes
+new sidecar files, with the names of the loci that are kept:
+
+``` r
+
+rad_gt <- gt_update_backingfile(rad_gt,
+  backingfile = "./data/rad/rad_int_qc", quiet = TRUE
+)
+```
+
+``` r
+
+file.size(c(
+  "./data/rad/rad_int_qc.loci.tsv",
+  "./data/rad/rad_int_qc.chromosomes.tsv"
+)) / 1024^2
+#> [1] 155.9371 104.4537
+```
+
+## A scan for differentiated loci
+
+As a simple scan, we look for the loci whose allele frequencies differ
+most between two lineages, GS and BS:
+
+``` r
+
+freq <- rad_gt %>%
+  group_by(population) %>%
+  loci_alt_freq(n_cores = n_cores, type = "matrix")
+freq_diff <- abs(freq[, "GS"] - freq[, "BS"])
+```
+
+The loci table gives the integer names and chromosome codes of the hits.
+We keep the frequency difference as an extra column (the synthetic data
+resample the genotypes of a few samples of each lineage, so many loci
+have different fixed alleles in the two lineages):
+
+``` r
+
+hits <- show_loci(rad_gt) %>%
+  mutate(freq_diff = freq_diff) %>%
+  filter(freq_diff > 0.95)
+hits
+#> # A tibble: 151,233 × 8
+#>    big_index  name chromosome position genetic_dist allele_ref allele_alt
+#>        <int> <int>      <int>    <int>        <dbl> <chr>      <chr>     
+#>  1         1     6          6       48            0 A          T         
+#>  2        17    80         58       88            0 A          C         
+#>  3        27   146        106       45            0 A          G         
+#>  4        80   448        335       32            0 A          G         
+#>  5        84   454        337       97            0 A          G         
+#>  6       139   715        535       68            0 T          G         
+#>  7       229  1142        876       56            0 A          T         
+#>  8       241  1216        938       90            0 C          G         
+#>  9       273  1356       1038       46            0 T          C         
+#> 10       275  1370       1050       63            0 C          T         
+#> # ℹ 151,223 more rows
+#> # ℹ 1 more variable: freq_diff <dbl>
+```
+
+[`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+gives back the same table, with the original names and chromosomes. The
+first lookup in a session indexes the sidecar files (a single read
+through each file); later lookups only read the parts of the files that
+hold the loci:
+
+``` r
+
+hits_named <- gt_lookup_loci(rad_gt, hits)
+```
+
+``` r
+
+hits_named
+#> # A tibble: 151,233 × 8
+#>    big_index name      chromosome    position genetic_dist allele_ref allele_alt
+#>        <int> <chr>     <chr>            <int>        <dbl> <chr>      <chr>     
+#>  1         1 9999990_1 SNP_higher_p…       48            0 A          T         
+#>  2        17 9999911   SNP_higher_p…       88            0 A          C         
+#>  3        27 9999834   SNP_higher_p…       45            0 A          G         
+#>  4        80 9999438_1 SNP_higher_p…       32            0 A          G         
+#>  5        84 9999435_1 SNP_higher_p…       97            0 A          G         
+#>  6       139 9999075_5 SNP_higher_p…       68            0 T          G         
+#>  7       229 9998494   SNP_higher_p…       56            0 A          T         
+#>  8       241 9998381_2 SNP_higher_p…       90            0 C          G         
+#>  9       273 9998205_1 SNP_higher_p…       46            0 T          C         
+#> 10       275 9998180   SNP_higher_p…       63            0 C          T         
+#> # ℹ 151,223 more rows
+#> # ℹ 1 more variable: freq_diff <dbl>
+```
+
+[`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+also takes row numbers of the loci table, so we can look up the top 10
+hits using [`order()`](https://rdrr.io/r/base/order.html). Since lookups
+use the integer names, rather than the rows, a table of hits stays valid
+if the `gen_tibble` is filtered or reordered later.
+
+``` r
+
+top_10 <- gt_lookup_loci(rad_gt, order(freq_diff, decreasing = TRUE)[1:10])
+```
+
+``` r
+
+top_10
+#> # A tibble: 10 × 7
+#>    big_index name      chromosome    position genetic_dist allele_ref allele_alt
+#>        <int> <chr>     <chr>            <int>        <dbl> <chr>      <chr>     
+#>  1         1 9999990_1 SNP_higher_p…       48            0 A          T         
+#>  2        17 9999911   SNP_higher_p…       88            0 A          C         
+#>  3        27 9999834   SNP_higher_p…       45            0 A          G         
+#>  4        80 9999438_1 SNP_higher_p…       32            0 A          G         
+#>  5        84 9999435_1 SNP_higher_p…       97            0 A          G         
+#>  6       139 9999075_5 SNP_higher_p…       68            0 T          G         
+#>  7       229 9998494   SNP_higher_p…       56            0 A          T         
+#>  8       241 9998381_2 SNP_higher_p…       90            0 C          G         
+#>  9       273 9998205_1 SNP_higher_p…       46            0 T          C         
+#> 10       275 9998180   SNP_higher_p…       63            0 C          T
+```
+
+## Summaries by RAD locus
+
+Statistics by chromosome have one row per RAD locus, with the code of
+the chromosome. For example, the number of SNPs on each RAD locus:
+
+``` r
+
+snps_per_locus <- show_loci(rad_gt) %>%
+  count(chromosome, name = "n_snps")
+table(snps_per_locus$n_snps)
+#> 
+#>       1       2       3       4       5 
+#> 3116955  209678   21093    1474      46
+```
+
+[`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+gives the names of the codes, e.g. of the RAD loci with the most SNPs
+left after quality control:
+
+``` r
+
+top_loci <- snps_per_locus %>%
+  slice_max(n_snps, n = 5, with_ties = FALSE) %>%
+  mutate(rad_locus = gt_lookup_chromosomes(rad_gt, chromosome))
+```
+
+``` r
+
+top_loci
+#> # A tibble: 5 × 3
+#>   chromosome n_snps rad_locus              
+#>        <int>  <int> <chr>                  
+#> 1      93697      5 SNP_higher_path_9839771
+#> 2     136215      5 SNP_higher_path_9767256
+#> 3     275564      5 SNP_higher_path_9528822
+#> 4     335897      5 SNP_higher_path_9425016
+#> 5     915884      5 SNP_higher_path_8430712
+```
+
+## Restoring the names
+
+When a `gen_tibble` has been filtered down to fewer loci, it can be
+convenient to have the original names back in its loci table,
+e.g. before exporting the data.
+[`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+does this (it gives the same loci table as reading the VCF with the
+default options, for the loci that are kept):
+
+``` r
+
+rad_hits <- rad_gt %>%
+  select_loci(which(freq_diff > 0.95)) %>%
+  gt_restore_loci()
+```
+
+``` r
+
+show_loci(rad_hits)
+#> # A tibble: 151,233 × 7
+#>    big_index name      chromosome    position genetic_dist allele_ref allele_alt
+#>        <int> <chr>     <fct>            <int>        <dbl> <chr>      <chr>     
+#>  1         1 9999990_1 SNP_higher_p…       48            0 A          T         
+#>  2        17 9999911   SNP_higher_p…       88            0 A          C         
+#>  3        27 9999834   SNP_higher_p…       45            0 A          G         
+#>  4        80 9999438_1 SNP_higher_p…       32            0 A          G         
+#>  5        84 9999435_1 SNP_higher_p…       97            0 A          G         
+#>  6       139 9999075_5 SNP_higher_p…       68            0 T          G         
+#>  7       229 9998494   SNP_higher_p…       56            0 A          T         
+#>  8       241 9998381_2 SNP_higher_p…       90            0 C          G         
+#>  9       273 9998205_1 SNP_higher_p…       46            0 T          C         
+#> 10       275 9998180   SNP_higher_p…       63            0 C          T         
+#> # ℹ 151,223 more rows
+```
+
+## Performance summary
+
+| step                    | time_s | peak_memory_mb |
+|:------------------------|-------:|---------------:|
+| read_default            |  37.95 |           3694 |
+| read_names_as_int       |  19.52 |           2552 |
+| read_chromosomes_as_int |  20.67 |           2410 |
+| read_both_as_int        |  12.90 |           1188 |
+| load_default            |  19.23 |           3755 |
+| load_both_as_int        |   3.20 |           1272 |
+| loci_qc                 |   0.47 |           1786 |
+| update_backingfile      |   2.02 |           1030 |
+| scan                    |   0.06 |            813 |
+| lookup_first            |   0.22 |            800 |
+| lookup_again            |   0.11 |            802 |
+| lookup_chromosomes      |   0.02 |            867 |
+| restore                 |   0.96 |           1359 |
+
+`peak_memory_mb` is the memory used by R; the genotypes are in the
+backing files, on disk, and are read a block at a time by the functions
+that use them.
+
+## Key takeaways
+
+- For RAD-seq data assembled de novo, read the *VCF* with
+  `names_as_int = TRUE` and `chromosomes_as_int = TRUE`. The loci table
+  then holds only integers, and reading, saving and loading the
+  `gen_tibble` are faster and use much less memory.
+- Nothing is lost: the original names are in the sidecar files next to
+  the backing file.
+  [`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  gives back the names of the hits of a scan (from a subset of the loci
+  table, or from row numbers),
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  translates chromosome codes, and
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  puts the names back into a (smaller) `gen_tibble`.
+- Keep the sidecar files with the other files of the `gen_tibble`.
+- The same options are available in
+  [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+  and
+  [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md),
+  e.g. to merge several RAD-seq runs (for RAD loci assembled separately
+  in each run, the loci of different runs only match if they have the
+  same chromosome and position, so assemble them together).

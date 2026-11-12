@@ -21,7 +21,7 @@ straight into the merged backing file."><meta property="og:image" content="https
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9001</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,6 +41,7 @@ straight into the merged backing file."><meta property="og:image" content="https
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
@@ -85,6 +86,7 @@ straight into the merged backing file.</p>
 <span>  missing_alleles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0"</span>, <span class="st">"."</span><span class="op">)</span>,</span>
 <span>  allow_duplicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  names_as_int <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  chromosomes_as_int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -163,7 +165,17 @@ to TRUE, unlike in <code><a href="gen_tibble.html">gen_tibble()</a></code> (wher
 <em>VCF</em> files is mostly used for large datasets, in which the loci names
 take most of the memory of the <code>gen_tibble</code> and are rarely needed (loci
 are identified by their chromosome and position). Set it to FALSE to keep
-the <em>VCF</em> IDs.</p></dd>
+the <em>VCF</em> IDs. With integer names, the <em>VCF</em> IDs (with the chromosomes
+and positions) are written to a sidecar file next to the backing file,
+from which <code><a href="gt_lookup_loci.html">gt_lookup_loci()</a></code> and <code><a href="gt_lookup_loci.html">gt_restore_loci()</a></code> get them back.</p></dd>
+
+
+<dt id="arg-chromosomes-as-int">chromosomes_as_int<a class="anchor" aria-label="anchor" href="#arg-chromosomes-as-int"></a></dt>
+<dd><p>boolean: whether the chromosomes are integer
+codes rather than a factor, which saves memory with many chromosomes
+(e.g. RAD loci assembled de novo); the names are written to a sidecar
+file next to the backing file (see <code><a href="gen_tibble.html">gen_tibble()</a></code> and
+<code><a href="gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>). Default is FALSE.</p></dd>
 
 
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
@@ -262,12 +274,12 @@ from files of other formats).</p></div>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_a.vcf</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_b.vcf</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpL9nre6/merged_1fae4873a36c.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpL9nre6/merged_1fae4873a36c.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpL9nre6/merged_1fae4873a36c.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpL9nre6/merged_1fae4873a36c.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.gt')</span>
 <span class="r-in"><span><span class="va">merged_gt</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 8 loci</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble:     8 × 2</span></span>

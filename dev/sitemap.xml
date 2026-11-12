@@ -12,6 +12,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/big_data.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/index.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/interpolating.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/rad_seq.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/roh_hgdp.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/sfs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/articles/tidypopgen.html</loc></url>
@@ -74,6 +75,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_xgboost.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_pca.html</loc></url>

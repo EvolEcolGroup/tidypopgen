@@ -9,7 +9,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9001</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,6 +29,7 @@ here the format"><meta property="og:image" content="https://evolecolgroup.github
     <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
     <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
   </ul></li>
@@ -77,6 +78,7 @@ here the format</p>
 <span>  backingfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  allow_duplicates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  names_as_int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  chromosomes_as_int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -188,7 +190,27 @@ names as string can use a large amount of memory. Integer names are the
 index of each locus in the <em>VCF</em> (or <em>bim</em>) file, so they can not be used
 to match loci across datasets: <a href="rbind.gen_tbl.html">rbind()</a> and
 <code><a href="rbind_dry_run.html">rbind_dry_run()</a></code> always match loci with integer names by chromosome and
-position.</p></dd>
+position. For <em>VCF</em> files, the original names (with the chromosomes and
+positions) are written to a sidecar file next to the backing file
+(<em>.loci.tsv</em>), from which <code><a href="gt_lookup_loci.html">gt_lookup_loci()</a></code> and <code><a href="gt_lookup_loci.html">gt_restore_loci()</a></code> get
+them back.</p></dd>
+
+
+<dt id="arg-chromosomes-as-int">chromosomes_as_int<a class="anchor" aria-label="anchor" href="#arg-chromosomes-as-int"></a></dt>
+<dd><p>logical. If TRUE, chromosomes will be stored as
+integer codes rather than as a factor. Only used when <code>x</code> is a <em>VCF</em> file
+with parser "cpp". Default is FALSE. This saves memory and time with
+many chromosomes (e.g. RAD loci assembled de novo, each its own
+"chromosome"). A chromosome whose name is a positive number (after an
+optional "chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07")
+keeps that number as its code, unless an earlier name has the same
+number (e.g. "chr1" after "1"); these names, "0", numbers larger than
+the largest integer, and other names are numbered after the largest
+number, in order of first appearance. The names are written to a sidecar
+file
+next to the backing file (<em>.chromosomes.tsv</em>), from which
+<code><a href="gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>, <code><a href="gt_lookup_loci.html">gt_lookup_loci()</a></code> and <code><a href="gt_lookup_loci.html">gt_restore_loci()</a></code>
+get them back.</p></dd>
 
 
 <dt id="arg-indiv-meta">indiv_meta<a class="anchor" aria-label="anchor" href="#arg-indiv-meta"></a></dt>

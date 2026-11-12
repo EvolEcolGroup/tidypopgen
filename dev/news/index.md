@@ -2,6 +2,27 @@
 
 ## tidypopgen (development version)
 
+- `gen_tibble(names_as_int = TRUE)` on VCF files writes the original
+  loci names to a sidecar file (*.loci.tsv*); new
+  [`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  and
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  retrieve them.
+  [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md),
+  [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md),
+  [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md),
+  [`gt_order_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.md)
+  and [`rbind()`](https://rdrr.io/r/base/cbind.html) keep the sidecar
+- new argument `chromosomes_as_int` of
+  [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+  [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+  and
+  [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md)
+  stores chromosomes as integer codes, saving memory with millions of
+  chromosomes (e.g. RAD loci assembled de novo); new
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  translates codes back into names
+- new article on large RAD-seq datasets
 - new
   [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
   reads several VCF files with different samples into a single

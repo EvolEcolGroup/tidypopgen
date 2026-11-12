@@ -29,6 +29,7 @@ gt_merge_vcfs(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   names_as_int = TRUE,
+  chromosomes_as_int = FALSE,
   n_cores = 1,
   quiet = FALSE
 )
@@ -107,7 +108,24 @@ gt_merge_vcfs(
   (where it defaults to FALSE): merging *VCF* files is mostly used for
   large datasets, in which the loci names take most of the memory of the
   `gen_tibble` and are rarely needed (loci are identified by their
-  chromosome and position). Set it to FALSE to keep the *VCF* IDs.
+  chromosome and position). Set it to FALSE to keep the *VCF* IDs. With
+  integer names, the *VCF* IDs (with the chromosomes and positions) are
+  written to a sidecar file next to the backing file, from which
+  [`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  and
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  get them back.
+
+- chromosomes_as_int:
+
+  boolean: whether the chromosomes are integer codes rather than a
+  factor, which saves memory with many chromosomes (e.g. RAD loci
+  assembled de novo); the names are written to a sidecar file next to
+  the backing file (see
+  [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+  and
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)).
+  Default is FALSE.
 
 - n_cores:
 
@@ -232,12 +250,12 @@ merged_gt <- gt_merge_vcfs(c(vcf_a, vcf_b),
 #> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_a.vcf
 #> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_b.vcf
 #> 
-#> gen_tibble saved to /tmp/RtmpL9nre6/merged_1fae4873a36c.gt
-#> using FBM RDS: /tmp/RtmpL9nre6/merged_1fae4873a36c.rds
-#> with FBM backing file: /tmp/RtmpL9nre6/merged_1fae4873a36c.bk
+#> gen_tibble saved to /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.gt
+#> using FBM RDS: /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.rds
+#> with FBM backing file: /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpL9nre6/merged_1fae4873a36c.gt')
+#> gt_load('/tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.gt')
 merged_gt
 #> # A gen_tibble: 8 loci
 #> # A tibble:     8 × 2
