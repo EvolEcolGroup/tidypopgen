@@ -1,5 +1,14 @@
 # tidypopgen (development version)
 
+* `gen_tibble(names_as_int = TRUE)` on VCF files writes the original loci
+  names to a sidecar file (*.loci.tsv*); new `gt_lookup_loci()` and
+  `gt_restore_loci()` retrieve them. `gt_merge_vcfs()`, `gt_concat_vcfs()`,
+  `gt_update_backingfile()`, `gt_order_loci()` and `rbind()` keep the sidecar
+* new argument `chromosomes_as_int` of `gen_tibble()`, `gt_merge_vcfs()` and
+  `gt_concat_vcfs()` stores chromosomes as integer codes, saving memory with
+  millions of chromosomes (e.g. RAD loci assembled de novo); new
+  `gt_lookup_chromosomes()` translates codes back into names
+* new article on large RAD-seq datasets
 * new `gt_merge_vcfs()` reads several VCF files with different samples into
   a single `gen_tibble`, as `bcftools merge` would, in one go (without
   reading each file into its own `gen_tibble` and binding them in pairs with

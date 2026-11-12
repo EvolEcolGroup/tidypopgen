@@ -213,6 +213,12 @@ find_duplicated_loci <- function(.x,
 #' @keywords internal
 #' @noRd
 any_unsorted_by_chromosome <- function(x, chromosome) {
+  # integer chromosomes (chromosomes_as_int) are already cast to integers,
+  # each with its own group
+  if (is.integer(chromosome)) {
+    groups <- chromosome_group_codes(chromosome)
+    return(unsorted_by_chromosome_cpp(x, groups$codes, seq_len(groups$n)))
+  }
   if (!is.factor(chromosome)) {
     chromosome <- as.factor(chromosome)
   }
@@ -237,8 +243,37 @@ any_unsorted_by_chromosome <- function(x, chromosome) {
 #' @keywords internal
 #' @noRd
 chromosomes_not_adjacent <- function(chromosome) {
+  groups <- chromosome_group_codes(chromosome)
+  chromosomes_not_adjacent_cpp(groups$codes, groups$n)
+}
+
+# The chromosomes of the loci as group codes 1..n (NA for missing
+# chromosomes), for the C++ helpers that take the codes of a factor: the codes
+# of a factor (with n its number of levels), or, for integer chromosomes
+# (chromosomes_as_int), the integers themselves if they are positive and not
+# much larger than the number of loci (so that the helpers' tables of n
+# groups stay small), or else their index among the unique values (which are
+# then returned as `values`, to map the groups back to the integers). Other
+# vectors are turned into a factor.
+chromosome_group_codes <- function(chromosome) {
+  if (is.integer(chromosome) && !is.factor(chromosome)) {
+    if (length(chromosome) == 0 || all(is.na(chromosome))) {
+      return(list(codes = chromosome, n = 0L))
+    }
+    code_range <- range(chromosome, na.rm = TRUE)
+    if (code_range[1] >= 1 &&
+          code_range[2] <= max(2 * length(chromosome), 1e6)) {
+      return(list(codes = chromosome, n = code_range[2]))
+    }
+    values <- unique(chromosome)
+    return(list(
+      codes = match(chromosome, values, incomparables = NA),
+      n = length(values),
+      values = values
+    ))
+  }
   if (!is.factor(chromosome)) {
     chromosome <- as.factor(chromosome)
   }
-  chromosomes_not_adjacent_cpp(chromosome, nlevels(chromosome))
+  list(codes = chromosome, n = nlevels(chromosome))
 }

@@ -105,7 +105,14 @@
 #'   *VCF* files is mostly used for large datasets, in which the loci names
 #'   take most of the memory of the `gen_tibble` and are rarely needed (loci
 #'   are identified by their chromosome and position). Set it to FALSE to keep
-#'   the *VCF* IDs.
+#'   the *VCF* IDs. With integer names, the *VCF* IDs (with the chromosomes
+#'   and positions) are written to a sidecar file next to the backing file,
+#'   from which [gt_lookup_loci()] and [gt_restore_loci()] get them back.
+#' @param chromosomes_as_int boolean: whether the chromosomes are integer
+#'   codes rather than a factor, which saves memory with many chromosomes
+#'   (e.g. RAD loci assembled de novo); the names are written to a sidecar
+#'   file next to the backing file (see [gen_tibble()] and
+#'   [gt_lookup_chromosomes()]). Default is FALSE.
 #' @param n_cores the number of cores used to decompress bgzipped files and to
 #'   parse the genotypes. Defaults to 1.
 #' @param quiet boolean: whether to omit the report of the merge.
@@ -142,6 +149,7 @@ gt_merge_vcfs <- function(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   names_as_int = TRUE,
+  chromosomes_as_int = FALSE,
   n_cores = 1,
   quiet = FALSE
 ) {
@@ -159,6 +167,24 @@ gt_merge_vcfs <- function(
   backingfile <- default_vcfs_backingfile(backingfile, files, "_merged")
   n_files <- length(files)
 
+  # with integer names (or chromosomes), the original names are written to
+  # sidecars next to the backing file (see R/loci_sidecar.R). Each scan
+  # writes the loci of its file to a temporary sidecar, from which the loci
+  # that create new sites are appended to a sidecar of the sites (keyed by
+  # site), so that only the loci of one file and the sites are on disk at a
+  # time; the sites that are kept are gathered at the end, in the order of
+  # the merged loci. The sidecars are removed if we stop
+  sidecars <- vcfs_sidecar_paths(backingfile)
+  sidecars_done <- FALSE
+  on.exit(
+    {
+      unlink(c(sidecars$scan, sidecars$sites))
+      if (!sidecars_done) unlink(c(sidecars$loci, sidecars$chromosomes))
+    },
+    add = TRUE
+  )
+  n_sites <- 0
+
   # first pass: the loci of each file (no genotypes), with its samples and
   # their ploidy, matched into sites one file at a time (so that only the
   # loci of one file are in memory at a time). Missing alleles (a missing
@@ -175,7 +201,9 @@ gt_merge_vcfs <- function(
   # chromosomes get codes shared by all files, in order of first appearance
   chromosome_names <- character(0)
   for (f in seq_len(n_files)) {
-    scan <- scan_vcf_file(files[f], names_as_int, n_cores, quiet)
+    scan <- scan_vcf_file(files[f], names_as_int, n_cores, quiet,
+      loci_file = if (names_as_int) sidecars$scan else ""
+    )
     sample_names[[f]] <- scan$sample_names
     file_ploidy[[f]] <- scan$ploidy
     # check the samples as soon as possible
@@ -193,7 +221,19 @@ gt_merge_vcfs <- function(
     )
     if (!names_as_int) {
       site_names[[f]] <- scan$loci_tbl$marker.ID[new_loci]
+    } else if (length(new_loci) > 0) {
+      # the sidecar lines of the loci that created new sites, keyed by site
+      scan_index <- sidecar_index(
+        sidecars$scan, loci_sidecar_header, sidecar_block()
+      )
+      sidecar_gather(sidecars$scan, loci_sidecar_header,
+        index_keys = scan_index$keys, index_offsets = scan_index$offsets,
+        keys = new_loci, path_out = sidecars$sites,
+        first_new_key = n_sites + 1, append = file.exists(sidecars$sites)
+      )
     }
+    unlink(sidecars$scan)
+    n_sites <- n_sites + length(new_loci)
     rm(scan, new_loci)
   }
   sites <- merge_sites_result(merged_sites)
@@ -233,19 +273,42 @@ gt_merge_vcfs <- function(
   chromosome_used <- rep(FALSE, length(chromosome_names))
   chromosome_used[sites$chromosome[keep]] <- TRUE
   chromosome_new_index <- cumsum(chromosome_used)
-  loci_chromosome <- chromosome_index_to_factor(
-    chromosome_new_index[sites$chromosome[keep]],
-    chromosome_names[chromosome_used]
-  )
+  used_names <- chromosome_names[chromosome_used]
+  if (chromosomes_as_int) {
+    # integer codes (see gen_tibble()), with their names in the sidecar
+    chromosome_codes <- chromosome_int_codes_cpp(used_names)
+    loci_chromosome <- chromosome_codes[
+      chromosome_new_index[sites$chromosome[keep]]
+    ]
+    write_chromosome_sidecar_cpp(
+      sidecars$chromosomes, chromosome_codes,
+      used_names
+    )
+  } else {
+    loci_chromosome <- chromosome_index_to_factor(
+      chromosome_new_index[sites$chromosome[keep]],
+      used_names
+    )
+  }
   loci_position <- sites$position[keep]
   if (names_as_int) {
     loci_name <- seq_along(keep)
+    # the sidecar lines of the sites that are kept, in the order of the
+    # merged loci (keyed by their integer names)
+    sites_index <- sidecar_index(
+      sidecars$sites, loci_sidecar_header, sidecar_block()
+    )
+    sidecar_gather(sidecars$sites, loci_sidecar_header,
+      index_keys = sites_index$keys, index_offsets = sites_index$offsets,
+      keys = keep, path_out = sidecars$loci,
+      first_new_key = 1, append = FALSE
+    )
+    unlink(sidecars$sites)
   } else {
     # each locus takes the name it has in the first file where it is found
-    loci_name <- fill_missing_loci_names(
-      unlist(site_names)[keep], loci_chromosome,
-      loci_position
-    )
+    # (missing IDs were filled with the chromosome and position when the
+    # file was read)
+    loci_name <- unlist(site_names)[keep]
     rm(site_names)
   }
   loci <- tibble::tibble(
@@ -263,7 +326,8 @@ gt_merge_vcfs <- function(
     check_duplicates = TRUE,
     allow_duplicates = allow_duplicates,
     valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles
+    missing_alleles = missing_alleles,
+    chromosomes_as_int = chromosomes_as_int
   )
 
   # the column of the merged FBM (0-based) of each site (-1 if not kept)
@@ -279,7 +343,7 @@ gt_merge_vcfs <- function(
   # (the columns of the loci of each file are only computed when its
   # genotypes are written)
   rm(sites)
-  write_vcfs_gen_tibble(
+  x_gt <- write_vcfs_gen_tibble(
     files = files,
     loci = loci,
     sample_id = sample_id,
@@ -293,6 +357,8 @@ gt_merge_vcfs <- function(
     n_cores = n_cores,
     quiet = quiet
   )
+  sidecars_done <- TRUE
+  x_gt
 }
 
 # the sample names of the merged VCFs, from a list of the sample names of each
@@ -439,14 +505,17 @@ default_vcfs_backingfile <- function(backingfile, files, suffix) {
 }
 
 # the first pass: the loci of a file (no genotypes), with its samples and
-# their ploidy (locus names are not read if we use integers)
-scan_vcf_file <- function(file, names_as_int, n_cores, quiet) {
+# their ploidy (locus names are not read if we use integers: they are written
+# to the sidecar loci_file instead, if it is not "")
+scan_vcf_file <- function(file, names_as_int, n_cores, quiet,
+                          loci_file = "") {
   if (!quiet) {
     message("reading the loci of ", file)
   }
   scan <- vcf_to_bk(file,
     bk_file = "", read_names = !names_as_int,
-    n_threads = n_cores, read_genotypes = FALSE
+    n_threads = n_cores, read_genotypes = FALSE,
+    loci_file = loci_file
   )
   if (length(scan$sample_names) == 0) {
     stop("the VCF ", file, " has no samples (or no variants)")
@@ -454,10 +523,46 @@ scan_vcf_file <- function(file, names_as_int, n_cores, quiet) {
   scan
 }
 
-# the first pass for all the files
-scan_vcf_files <- function(files, names_as_int, n_cores, quiet) {
-  lapply(files, scan_vcf_file,
-    names_as_int = names_as_int, n_cores = n_cores, quiet = quiet
+# the first pass for all the files; with integer names, the loci of each
+# file are added to the locus sidecar loci_file (keyed by their index in the
+# concatenated files), if it is not ""
+scan_vcf_files <- function(files, names_as_int, n_cores, quiet,
+                           loci_file = "") {
+  scans <- vector("list", length(files))
+  n_loci <- 0
+  for (f in seq_along(files)) {
+    scan_file <- if (loci_file != "") paste0(loci_file, ".scan") else ""
+    scans[[f]] <- scan_vcf_file(files[f], names_as_int, n_cores, quiet,
+      loci_file = scan_file
+    )
+    if (loci_file != "") {
+      # (all the lines of the file, keyed after those of the earlier files)
+      sidecar_gather(scan_file, loci_sidecar_header,
+        index_keys = integer(0), index_offsets = numeric(0),
+        keys = integer(0), path_out = loci_file,
+        first_new_key = n_loci + 1, append = f > 1
+      )
+      unlink(scan_file)
+      n_loci <- n_loci + length(scans[[f]]$loci_tbl$physical.pos)
+    }
+  }
+  scans
+}
+
+# the paths of the sidecars of a gen_tibble made from VCF files, next to its
+# backing file (backingfile, without extension), and of their temporary
+# files; sidecars left there by older files with the same name (which can not
+# belong to the new data) are removed
+vcfs_sidecar_paths <- function(backingfile) {
+  bk_file <- paste0(backingfile, ".bk")
+  remove_stale_sidecars(bk_file)
+  loci <- sidecar_path_from_bk(bk_file, "loci")
+  list(
+    loci = loci,
+    chromosomes = sidecar_path_from_bk(bk_file, "chromosomes"),
+    # (the loci of a file being scanned, and the loci of the merged sites)
+    scan = paste0(loci, ".scan"),
+    sites = paste0(loci, ".sites")
   )
 }
 

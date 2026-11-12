@@ -55,7 +55,14 @@
 #'   files is mostly used for large datasets, in which the loci names take
 #'   most of the memory of the `gen_tibble` and are rarely needed (loci are
 #'   identified by their chromosome and position). Set it to FALSE to keep the
-#'   *VCF* IDs.
+#'   *VCF* IDs. With integer names, the *VCF* IDs (with the chromosomes and
+#'   positions) are written to a sidecar file next to the backing file, from
+#'   which [gt_lookup_loci()] and [gt_restore_loci()] get them back.
+#' @param chromosomes_as_int boolean: whether the chromosomes are integer
+#'   codes rather than a factor, which saves memory with many chromosomes
+#'   (e.g. RAD loci assembled de novo); the names are written to a sidecar
+#'   file next to the backing file (see [gen_tibble()] and
+#'   [gt_lookup_chromosomes()]). Default is FALSE.
 #' @param n_cores the number of cores used to decompress bgzipped files and to
 #'   parse the genotypes. Defaults to 1.
 #' @param quiet boolean: whether to omit the report of the concatenation.
@@ -87,6 +94,7 @@ gt_concat_vcfs <- function(
   missing_alleles = c("0", "."),
   allow_duplicates = FALSE,
   names_as_int = TRUE,
+  chromosomes_as_int = FALSE,
   n_cores = 1,
   quiet = FALSE
 ) {
@@ -97,7 +105,22 @@ gt_concat_vcfs <- function(
 
   # first pass: the loci of each file (no genotypes), with its samples and
   # their ploidy
-  scans <- scan_vcf_files(files, names_as_int, n_cores, quiet)
+  # with integer names (or chromosomes), the original names are written to
+  # sidecars next to the backing file (see R/loci_sidecar.R): the loci of
+  # each file are added to the locus sidecar as the file is scanned (keyed
+  # after those of the earlier files). The sidecars are removed if we stop
+  sidecars <- vcfs_sidecar_paths(backingfile)
+  sidecars_done <- FALSE
+  on.exit(
+    {
+      unlink(sidecars$scan)
+      if (!sidecars_done) unlink(c(sidecars$loci, sidecars$chromosomes))
+    },
+    add = TRUE
+  )
+  scans <- scan_vcf_files(files, names_as_int, n_cores, quiet,
+    loci_file = if (names_as_int) sidecars$loci else ""
+  )
 
   # the samples, in the order of the first file, and the row of each sample of
   # each file (an empty vector if the samples are in the same order)
@@ -151,23 +174,35 @@ gt_concat_vcfs <- function(
     }
     x
   }
-  loci_chromosome <- chromosome_index_to_factor(
-    take_loci_column("chromosome", function(scan) {
-      match(scan$chromosome_names, chromosome_names)[scan$loci_tbl$chromosome]
-    }),
-    chromosome_names
-  )
+  chromosome_index <- take_loci_column("chromosome", function(scan) {
+    match(scan$chromosome_names, chromosome_names)[scan$loci_tbl$chromosome]
+  })
+  if (chromosomes_as_int) {
+    # integer codes (see gen_tibble()), with their names in the sidecar
+    chromosome_codes <- chromosome_int_codes_cpp(chromosome_names)
+    loci_chromosome <- chromosome_codes[chromosome_index]
+    write_chromosome_sidecar_cpp(
+      sidecars$chromosomes, chromosome_codes,
+      chromosome_names
+    )
+  } else {
+    loci_chromosome <- chromosome_index_to_factor(
+      chromosome_index,
+      chromosome_names
+    )
+  }
+  rm(chromosome_index)
   loci_position <- take_loci_column("physical.pos", function(scan) {
     scan$loci_tbl$physical.pos
   })
   if (names_as_int) {
     loci_name <- seq_along(loci_position)
   } else {
-    loci_name <- fill_missing_loci_names(
-      take_loci_column("marker.ID", function(scan) scan$loci_tbl$marker.ID),
-      loci_chromosome,
-      loci_position
-    )
+    # (missing IDs were filled with the chromosome and position when the
+    # files were read)
+    loci_name <- take_loci_column("marker.ID", function(scan) {
+      scan$loci_tbl$marker.ID
+    })
   }
   loci <- tibble::tibble(
     name = loci_name,
@@ -194,7 +229,8 @@ gt_concat_vcfs <- function(
     check_duplicates = TRUE,
     allow_duplicates = allow_duplicates,
     valid_alleles = valid_alleles,
-    missing_alleles = missing_alleles
+    missing_alleles = missing_alleles,
+    chromosomes_as_int = chromosomes_as_int
   )
   if (!quiet) {
     message(
@@ -207,7 +243,7 @@ gt_concat_vcfs <- function(
   # second pass: the genotypes of each file, written straight into the
   # columns of its loci (all the genotypes of the gen_tibble are written)
   col_offset <- c(0L, cumsum(n_loci))
-  write_vcfs_gen_tibble(
+  x_gt <- write_vcfs_gen_tibble(
     files = files,
     loci = loci,
     sample_id = sample_id,
@@ -223,6 +259,8 @@ gt_concat_vcfs <- function(
     n_cores = n_cores,
     quiet = quiet
   )
+  sidecars_done <- TRUE
+  x_gt
 }
 
 # for each file, the 0-based row of each of its samples among the samples of

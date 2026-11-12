@@ -11,6 +11,14 @@
 #' fastest level, as saving the information on millions of loci with the
 #' default level of [saveRDS()] is slow.
 #'
+#' If the names of the loci are integers (`names_as_int = TRUE`), their
+#' original names are in a sidecar file next to the *.bk* file (*.loci.tsv*,
+#' see [gt_lookup_loci()]); if the chromosomes are integers
+#' (`chromosomes_as_int = TRUE`), their names are in another sidecar file
+#' (*.chromosomes.tsv*, see [gt_lookup_chromosomes()]). Keep any sidecar
+#' files with the other files (if you move the files, move them too, so that
+#' [gt_load()] with `reattach_to` finds them).
+#'
 #' @param x a [`gen_tibble`]
 #' @param file_name the file name, including the full path. If it does not end
 #'   with *.gt*, the extension will be added.
@@ -48,6 +56,7 @@ gt_save <- function(x, file_name = NULL, quiet = FALSE) {
     message("\ngen_tibble saved to ", file_name)
     message("using FBM RDS: ", gt_get_file_names(x)[1])
     message("with FBM backing file: ", gt_get_file_names(x)[2])
+    message_sidecar_files(x)
     message("make sure that you do NOT delete those files!")
     message("to reload the gen_tibble in another session, use:")
     message("gt_load('", file_name, "')")
@@ -79,6 +88,7 @@ gt_save_light <- function(x, file_name = NULL, quiet = FALSE) {
     message("\ngen_tibble saved to ", file_name)
     message("using FBM RDS: ", gt_get_file_names(x)[1])
     message("with FBM backing file: ", gt_get_file_names(x)[2])
+    message_sidecar_files(x)
     message("make sure that you do NOT delete those files!")
     message("to reload the gen_tibble in another session, use:")
     message("gt_load('", file_name, "')")

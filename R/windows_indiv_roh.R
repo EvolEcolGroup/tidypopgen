@@ -172,9 +172,15 @@ windows_indiv_roh <- function(
   }
   loci <- show_loci(.x)
   chromosome <- loci$chromosome
-  if (!is.factor(chromosome)) {
+  # integer chromosomes (chromosomes_as_int) are used as codes (a factor
+  # would create a string for each chromosome)
+  int_chromosomes <- is.integer(chromosome) && !is.factor(chromosome)
+  if (!int_chromosomes && !is.factor(chromosome)) {
     chromosome <- as.factor(chromosome)
   }
+  # (the C++ code takes positive codes, with a table as long as the largest:
+  # integer chromosomes are turned into groups 1..n if their codes are large)
+  chromosome_groups <- chromosome_group_codes(chromosome)
   if (anyNA(chromosome)) {
     stop("the chromosomes of the loci should not be missing")
   }
@@ -206,7 +212,7 @@ windows_indiv_roh <- function(
     BM = .gt_get_fbm(.x),
     rowInd = .gt_fbm_rows(.x),
     colInd = .gt_fbm_cols(.x),
-    chrom = chromosome,
+    chrom = chromosome_groups$codes,
     position = loci$position,
     window_size = as.integer(window_snp),
     max_het_window = as.integer(min(window_het, .Machine$integer.max)),
@@ -232,9 +238,17 @@ windows_indiv_roh <- function(
   end <- loci$position[last_locus]
   res <- tibble::tibble(
     id = .x$id[indiv],
-    chromosome = factor(levels(chromosome)[runs$chrom[run_order]],
-      levels = levels(chromosome)
-    ),
+    chromosome = if (int_chromosomes) {
+      if (is.null(chromosome_groups$values)) {
+        runs$chrom[run_order]
+      } else {
+        chromosome_groups$values[runs$chrom[run_order]]
+      }
+    } else {
+      factor(levels(chromosome)[runs$chrom[run_order]],
+        levels = levels(chromosome)
+      )
+    },
     start = start,
     end = end,
     length_bp = end - start + !isTRUE(subtract_1_from_lengths),
