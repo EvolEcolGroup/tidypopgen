@@ -210,7 +210,13 @@ Times and the memory used by R:
 | both | 12.9 s | 1,188 MB | 660 MB | 68 MB | 1,155 MB |
 
 Loading the `.gt` takes 19.2 s with the default options and 3.2 s with
-both. To knit it again, link or create `vignettes/articles/data/rad/
+both. After a review, the article was restructured to show only the read
+with both options (the other reads, and the default load, run in hidden
+chunks before it, so that `rad_gt` is not in their peak memory). It was
+knitted again on 2026-11-12 on a loaded machine (load 2-3): the outputs and
+the peak memory matched the knit above, but the reads were up to twice as
+slow, so the timing and memory numbers in `rad_seq.Rmd` were copied from the
+knit above. To knit it again, link or create `vignettes/articles/data/rad/
 discosnp.vcf` (and `discosnp.strata.tsv`), install the package (not
 `load_all()`), and run, from the root of the repository:
 

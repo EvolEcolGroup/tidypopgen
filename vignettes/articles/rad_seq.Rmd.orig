@@ -76,20 +76,16 @@ of a random SNP of the subsample, each sample takes the genotypes of a random
 sample of the same lineage, and each RAD locus (`SNP_higher_path_<n>`)
 carries 1 to 5 SNPs, as in the real data.
 
-The `r` and `bash` chunks below download the subsample, and run
-`make_vcf.R` This writes the VCF, and the lineage of each of its 56 samples
+The `bash` chunk below downloads the subsample, and runs `make_vcf.R`. This
+writes the VCF, and the lineage of each of its 56 samples
 (`discosnp.strata.tsv`), to `vignettes/articles/data/rad/`. NOTE: this takes
-about 30 minutes, and needs 27 GB of disk space.
-
-```{r, eval = FALSE}
-# get the absolute path of the folder containing this Rmd (vignettes/articles)
-rmd_dir <- dirname(knitr::current_input(dir = TRUE))
-Sys.setenv(ARTICLE_DIR = normalizePath(rmd_dir))
-```
+a few minutes, and needs 27 GB of disk space. As in all the chunks of this
+article, the paths are relative to the folder of the article
+(`vignettes/articles/` in a copy of the tidypopgen repository), which is
+where R Markdown runs the chunks:
 
 ```{bash, eval = FALSE}
-# Use this to construct the paths for download
-cd "$ARTICLE_DIR/../../benchmarks/vcfarrow"
+cd ../../benchmarks/vcfarrow
 mkdir -p data ../../vignettes/articles/data/rad
 for f in vaillantii_discosnp_sub.vcf.gz strata; do
   curl -fsSL -o "data/$f" \
@@ -100,18 +96,19 @@ Rscript make_vcf.R 18579683 ../../vignettes/articles/data/rad/discosnp.vcf 1
 
 # Reading the VCF
 
-First we will load our libraries and set our cores.
+First we load the packages, and set the path of the VCF and the number of
+cores:
 
-We will read the VCF with 4 cores, as in the VCFArrow comparison, on a machine
-with `r parallel::detectCores()` cores. The file is
-`r round(file.size(vcf_path) / 1024^3, 1)` GB.
-
-```{r}
+```{r message = FALSE}
 library(tidypopgen)
 library(dplyr)
 vcf_path <- "./data/rad/discosnp.vcf"
 n_cores <- 4
 ```
+
+We read the VCF with 4 cores, as in the VCFArrow comparison, on a machine
+with `r parallel::detectCores()` cores. The file is
+`r round(file.size(vcf_path) / 1024^3, 1)` GB.
 
 ```{r remove_old_files, include = FALSE}
 # remove the files of a previous run, so that the VCF is read (and timed)
@@ -120,18 +117,6 @@ unlink(list.files("./data/rad",
   pattern = "^rad_.*\\.(bk|rds|gt|tsv)$",
   full.names = TRUE
 ))
-```
-
-To exemplify the options available in tidypopgen, we read the VCF four times:
-with the default options, with integer names,
-with integer chromosomes, and with both. Each `gen_tibble` has its own
-backing file.
-
-```{r read_default, benchmark = TRUE}
-rad_default <- gen_tibble(vcf_path,
-  backingfile = "./data/rad/rad_default",
-  n_cores = n_cores, quiet = TRUE
-)
 ```
 
 ```{r include = FALSE}
@@ -147,12 +132,26 @@ sizes <- function(x) {
     sidecars_mb = size_mb(sum(file.size(sidecars), na.rm = TRUE))
   )
 }
-read_sizes <- list(read_default = sizes(rad_default))
+read_sizes <- list()
+```
+
+```{r read_default, benchmark = TRUE, include = FALSE}
+# The reads with the other options are not shown in the article. They are run
+# before the read with both options, so that `rad_gt`, which is kept, is not in
+# memory (and in their peak memory) while they run.
+rad_default <- gen_tibble(vcf_path,
+  backingfile = "./data/rad/rad_default",
+  n_cores = n_cores, quiet = TRUE
+)
+```
+
+```{r include = FALSE}
+read_sizes$read_default <- sizes(rad_default)
 rm(rad_default)
 invisible(gc())
 ```
 
-```{r read_names_as_int, benchmark = TRUE}
+```{r read_names_as_int, benchmark = TRUE, include = FALSE}
 rad_names <- gen_tibble(vcf_path,
   backingfile = "./data/rad/rad_names",
   names_as_int = TRUE,
@@ -166,7 +165,7 @@ rm(rad_names)
 invisible(gc())
 ```
 
-```{r read_chromosomes_as_int, benchmark = TRUE}
+```{r read_chromosomes_as_int, benchmark = TRUE, include = FALSE}
 rad_chromosomes <- gen_tibble(vcf_path,
   backingfile = "./data/rad/rad_chromosomes",
   chromosomes_as_int = TRUE,
@@ -180,6 +179,9 @@ rm(rad_chromosomes)
 invisible(gc())
 ```
 
+For RAD-seq data, we read the VCF with both options. This is the
+`gen_tibble` that we use in the rest of the article:
+
 ```{r read_both_as_int, benchmark = TRUE}
 rad_gt <- gen_tibble(vcf_path,
   backingfile = "./data/rad/rad_int",
@@ -192,7 +194,10 @@ rad_gt <- gen_tibble(vcf_path,
 read_sizes$read_both_as_int <- sizes(rad_gt)
 ```
 
-The genotypes are the same in all four, and so are their backing files (the
+To see what each option saves, we also read the VCF (code not shown) with the
+default options, with only `names_as_int = TRUE`, and with only
+`chromosomes_as_int = TRUE`, each time into a new backing file. The genotypes
+are the same in all four `gen_tibble`s, and so are their backing files (the
 `.bk` file, with one byte per genotype). What changes is the loci table,
 which is held in memory and saved in the `.gt` file:
 
@@ -235,10 +240,7 @@ The loci table of `rad_gt` looks like this:
 show_loci(rad_gt)
 ```
 
-The `.gt` file is smaller, so loading the `gen_tibble` in a new session is
-faster too:
-
-```{r load_default, benchmark = TRUE}
+```{r load_default, benchmark = TRUE, include = FALSE}
 reloaded <- gt_load("./data/rad/rad_default.gt")
 ```
 
@@ -246,6 +248,9 @@ reloaded <- gt_load("./data/rad/rad_default.gt")
 rm(reloaded)
 invisible(gc())
 ```
+
+The `.gt` file is smaller, so loading the `gen_tibble` in a new session is
+faster too:
 
 ```{r load_both_as_int, benchmark = TRUE}
 reloaded <- gt_load("./data/rad/rad_int.gt")
@@ -255,6 +260,10 @@ reloaded <- gt_load("./data/rad/rad_int.gt")
 rm(reloaded)
 invisible(gc())
 ```
+
+This takes `r round(benchmarks$load_both_as_int[["time"]], 1)` s, against
+`r round(benchmarks$load_default[["time"]], 1)` s for the `gen_tibble` read
+with the default options (see the performance summary at the end).
 
 # The sidecar files
 
@@ -351,7 +360,10 @@ hits_named <- gt_lookup_loci(rad_gt, hits)
 hits_named
 ```
 
-`gt_lookup_loci()` also takes row numbers of the loci table, so we can look up the top 10 hits using `order()`. Since lookups use the integer names, rather than the rows, a table of hits stays valid if the `gen_tibble` is filtered or reordered later.
+`gt_lookup_loci()` also takes row numbers of the loci table, so we can look
+up the top 10 hits using `order()`. Since lookups use the integer names,
+rather than the rows, a table of hits stays valid if the `gen_tibble` is
+filtered or reordered later.
 
 ```{r lookup_again, benchmark = TRUE}
 top_10 <- gt_lookup_loci(rad_gt, order(freq_diff, decreasing = TRUE)[1:10])
