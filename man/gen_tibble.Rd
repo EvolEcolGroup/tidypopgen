@@ -199,9 +199,9 @@ missing alleles will be converted from 'X' to NA
 \item Phased genotypes: with \code{phased = TRUE}, \code{gen_tibble()} creates a phased
 \code{gen_tibble} of diploid individuals, which also knows which allele of each
 genotype is on the first and which on the second haplotype (e.g. \code{0|1}
-versus \code{1|0}), as needed by haplotype based statistics (such as those of
-the package \code{tidygensel}). Phased genotypes are stored in the same file
-backed matrix as unphased ones (see \link{phased_encoding}), so that all other
+versus \code{1|0}), as needed by haplotype based statistics. Phased genotypes
+are stored in the same file backed matrix as unphased ones (see
+\link{phased_encoding}), so that all other
 functions work on phased \code{gen_tibble}s as usual, treating their genotypes
 as ordinary dosages of the alternate allele. \code{\link[=is_phased]{is_phased()}} tests whether a
 \code{gen_tibble} is phased, and \code{\link[=show_haplotypes]{show_haplotypes()}} returns its haplotypes.

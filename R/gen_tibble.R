@@ -40,9 +40,9 @@
 #' - Phased genotypes: with `phased = TRUE`, `gen_tibble()` creates a phased
 #' `gen_tibble` of diploid individuals, which also knows which allele of each
 #' genotype is on the first and which on the second haplotype (e.g. `0|1`
-#' versus `1|0`), as needed by haplotype based statistics (such as those of
-#' the package `tidygensel`). Phased genotypes are stored in the same file
-#' backed matrix as unphased ones (see [phased_encoding]), so that all other
+#' versus `1|0`), as needed by haplotype based statistics. Phased genotypes
+#' are stored in the same file backed matrix as unphased ones (see
+#' [phased_encoding]), so that all other
 #' functions work on phased `gen_tibble`s as usual, treating their genotypes
 #' as ordinary dosages of the alternate allele. [is_phased()] tests whether a
 #' `gen_tibble` is phased, and [show_haplotypes()] returns its haplotypes.
