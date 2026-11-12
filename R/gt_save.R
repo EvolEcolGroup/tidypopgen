@@ -13,8 +13,11 @@
 #'
 #' If the names of the loci are integers (`names_as_int = TRUE`), their
 #' original names are in a sidecar file next to the *.bk* file (*.loci.tsv*,
-#' see [gt_lookup_loci()]): keep it with the other files (if you move the
-#' files, move it too, so that [gt_load()] with `reattach_to` finds it).
+#' see [gt_lookup_loci()]); if the chromosomes are integers
+#' (`chromosomes_as_int = TRUE`), their names are in another sidecar file
+#' (*.chromosomes.tsv*, see [gt_lookup_chromosomes()]). Keep any sidecar
+#' files with the other files (if you move the files, move them too, so that
+#' [gt_load()] with `reattach_to` finds them).
 #'
 #' @param x a [`gen_tibble`]
 #' @param file_name the file name, including the full path. If it does not end

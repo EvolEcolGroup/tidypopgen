@@ -124,10 +124,13 @@ them back.}
 integer codes rather than as a factor. Only used when \code{x} is a \emph{VCF} file
 with parser "cpp". Default is FALSE. This saves memory and time with
 many chromosomes (e.g. RAD loci assembled de novo, each its own
-"chromosome"). A chromosome whose name is a number (after an optional
-"chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07") keeps that
-number as its code; other names are numbered after the largest number,
-in order of first appearance. The names are written to a sidecar file
+"chromosome"). A chromosome whose name is a positive number (after an
+optional "chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07")
+keeps that number as its code, unless an earlier name has the same
+number (e.g. "chr1" after "1"); these names, "0", numbers larger than
+the largest integer, and other names are numbered after the largest
+number, in order of first appearance. The names are written to a sidecar
+file
 next to the backing file (\emph{.chromosomes.tsv}), from which
 \code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}}, \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_restore_loci]{gt_restore_loci()}}
 get them back.}

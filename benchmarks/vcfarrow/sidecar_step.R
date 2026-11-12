@@ -281,6 +281,10 @@ if (action == "update") {
       y <- gt_load(file.path(out, "sub.gt"))
       a <- gt_lookup_loci(y, c(1, count_loci(y)))$name
       b <- gt_lookup_loci(x, keep[c(1, length(keep))])$name
+      if (!identical(a, b)) {
+        stop("the new sidecar gives other names: ", paste(a, collapse = ", "),
+          " rather than ", paste(b, collapse = ", "))
+      }
       list(value = NULL, summary = sprintf("%s; identical: %s",
         paste(a, collapse = ", "), identical(a, b)))
     })

@@ -52,6 +52,12 @@ validate_loci <- function(loci,
       stop("loci$chromosome must be integer codes")
     }
     if (!is.integer(loci$chromosome)) {
+      # (as.integer() would truncate codes that are not whole numbers)
+      codes <- loci$chromosome[!is.na(loci$chromosome)]
+      if (any(codes != round(codes)) ||
+            any(abs(codes) > .Machine$integer.max)) {
+        stop("loci$chromosome must be integer codes (whole numbers)")
+      }
       loci$chromosome <- as.integer(loci$chromosome)
     }
   } else if (!is.factor(loci$chromosome)) {

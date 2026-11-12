@@ -5,8 +5,9 @@
 #' been moved, they should be found automatically. If they were moved, use
 #' `reattach_to` to point to the *.rds* file (the *.bk* file needs to be in the
 #' same directory as the *.rds* file). Sidecar files with the original names
-#' of loci stored as integers (see [gt_lookup_loci()]) are found next to the
-#' *.bk* file, so move them with it.
+#' of loci and chromosomes stored as integers (*.loci.tsv* and
+#' *.chromosomes.tsv*, see [gt_lookup_loci()] and [gt_lookup_chromosomes()])
+#' are found next to the *.bk* file, so move any of them with it.
 #'
 #' @param file the file name, including the full path. If it does not end with
 #'   *.gt*, the extension will be added.

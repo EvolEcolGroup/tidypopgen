@@ -301,6 +301,10 @@ test_that("integer chromosomes are restored, looked up and kept", {
   # the integer chromosomes are kept by the checks and functions of the loci
   # table
   expect_true(is_loci_table_ordered(int_gt))
+  # (replacement codes must be whole numbers, rather than being truncated)
+  new_loci <- show_loci(int_gt)
+  new_loci$chromosome <- new_loci$chromosome + 0.5
+  expect_error(show_loci(int_gt) <- new_loci, "whole numbers")
   keep <- sample(count_loci(int_gt), 200)
   sub_gt <- int_gt %>%
     select_loci(all_of(keep)) %>%
