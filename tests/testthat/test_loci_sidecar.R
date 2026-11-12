@@ -3,6 +3,20 @@ anolis_vcf <- system.file(
   package = "tidypopgen"
 )
 
+# a small VCF: 5 loci on 2 chromosomes ("chr1" gets the code 1, and
+# "scaf_2", which is not a number, the code 2)
+small_loci <- data.frame(
+  chrom = c("chr1", "chr1", "chr1", "scaf_2", "scaf_2"),
+  pos = c(10, 20, 30, 5, 15), id = paste0("rs", 1:5), ref = "A", alt = "G"
+)
+small_vcf <- write_merge_vcf(c("s1", "s2"), small_loci, matrix("0/1", 5, 2))
+
+# write lines to a file with "\n" line ends on every OS (unlike
+# writeLines()); with last_eol = "", the last line has no line end
+write_raw_lines <- function(path, lines, last_eol = "\n") {
+  writeBin(charToRaw(paste0(paste(lines, collapse = "\n"), last_eol)), path)
+}
+
 test_that("the locus sidecar restores the names of names_as_int = FALSE", {
   names_gt <- gen_tibble(anolis_vcf,
     quiet = TRUE, backingfile = tempfile("anolis_")
@@ -197,6 +211,350 @@ test_that("lookups check that the sidecar belongs to the data", {
   expect_false(file.exists(loci_sidecar_path(sub_gt)))
 })
 
+test_that("sidecars with Windows line endings can be read", {
+  int_gt <- gen_tibble(anolis_vcf,
+    quiet = TRUE, backingfile = tempfile("anolis_"),
+    names_as_int = TRUE
+  )
+  expected <- gt_lookup_loci(int_gt, 1:5)
+  path <- loci_sidecar_path(int_gt)
+  lines <- readLines(path)
+  con <- file(path, open = "wb")
+  writeLines(lines, con, sep = "\r\n")
+  close(con)
+  expect_identical(gt_lookup_loci(int_gt, 1:5), expected)
+})
+
+test_that("corrupted, truncated or swapped sidecars give clear errors", {
+  int_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"),
+    names_as_int = TRUE, chromosomes_as_int = TRUE
+  )
+  path <- loci_sidecar_path(int_gt)
+  good <- readLines(path)
+  expect_identical(gt_lookup_loci(int_gt, 1:5)$name, paste0("rs", 1:5))
+  # the chromosome sidecar copied over the locus sidecar (their headers tell
+  # them apart)
+  file.copy(chromosomes_sidecar_path(int_gt), path, overwrite = TRUE)
+  expect_error(
+    gt_lookup_loci(int_gt, 1),
+    "not a sidecar file of tidypopgen of the expected type"
+  )
+  # a copy cut short (its last line has no line end)
+  write_raw_lines(path, good, last_eol = "")
+  expect_error(gt_lookup_loci(int_gt, 1), "is truncated")
+  # a key that is not a number
+  bad <- good
+  bad[3] <- sub("^2\t", "two\t", bad[3])
+  write_raw_lines(path, bad)
+  expect_error(
+    gt_lookup_loci(int_gt, 1),
+    "first field is not a positive integer key"
+  )
+  # a position that is not a number, which is only read to check positions
+  bad <- good
+  bad[4] <- sub("\t30$", "\t30x", bad[4])
+  write_raw_lines(path, bad)
+  expect_error(
+    gt_lookup_loci(int_gt, show_loci(int_gt)[3, ]),
+    "has a value that is not an integer"
+  )
+  expect_identical(
+    gt_lookup_loci(int_gt, show_loci(int_gt)[3, ],
+      check_positions = FALSE
+    )$name,
+    "rs3"
+  )
+  # the good sidecar is indexed again, and read as before
+  write_raw_lines(path, good)
+  expect_identical(gt_lookup_loci(int_gt, 1:5)$name, paste0("rs", 1:5))
+})
+
+test_that("sidecars are copied whole for a new backing file, or not at all", {
+  int_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"),
+    names_as_int = TRUE, chromosomes_as_int = TRUE
+  )
+  # sidecars left at the new path by older data are replaced
+  new_bk <- tempfile("sub_")
+  writeLines("stale", paste0(new_bk, ".loci.tsv"))
+  writeLines("stale", paste0(new_bk, ".chromosomes.tsv"))
+  sub_gt <- gt_update_backingfile(select_loci(int_gt, c(4, 1)),
+    backingfile = new_bk, quiet = TRUE
+  )
+  looked_up <- gt_lookup_loci(sub_gt, 1:2)
+  expect_identical(looked_up$name, c("rs4", "rs1"))
+  expect_identical(looked_up$chromosome, c("scaf_2", "chr1"))
+  # and removed, if the names are not integers
+  names_gt <- gen_tibble(small_vcf, quiet = TRUE, backingfile = tempfile())
+  new_bk <- tempfile("sub_")
+  writeLines("stale", paste0(new_bk, ".loci.tsv"))
+  writeLines("stale", paste0(new_bk, ".chromosomes.tsv"))
+  gt_update_backingfile(names_gt, backingfile = new_bk, quiet = TRUE)
+  expect_false(file.exists(paste0(new_bk, ".loci.tsv")))
+  expect_false(file.exists(paste0(new_bk, ".chromosomes.tsv")))
+  # sidecars that lack a locus (or a chromosome) that is kept are not copied
+  # (a partial sidecar would make some lookups fail much later)
+  loci_lines <- readLines(loci_sidecar_path(int_gt))
+  write_raw_lines(loci_sidecar_path(int_gt), loci_lines[-2])
+  chromosome_lines <- readLines(chromosomes_sidecar_path(int_gt))
+  write_raw_lines(chromosomes_sidecar_path(int_gt), chromosome_lines[-2])
+  warns <- capture_warnings(
+    sub_gt <- gt_update_backingfile(int_gt,
+      backingfile = tempfile("sub_"), quiet = TRUE
+    )
+  )
+  expect_match(warns, "does not have all the loci", all = FALSE)
+  expect_match(warns, "does not have all the chromosomes", all = FALSE)
+  expect_false(file.exists(loci_sidecar_path(sub_gt)))
+  expect_false(file.exists(chromosomes_sidecar_path(sub_gt)))
+  expect_error(gt_restore_loci(sub_gt), "there is no locus sidecar")
+  expect_error(
+    gt_lookup_chromosomes(sub_gt, 1L),
+    "there is no chromosome sidecar"
+  )
+})
+
+test_that("integer names and chromosome codes are checked before lookups", {
+  names_gt <- gen_tibble(small_vcf, quiet = TRUE, backingfile = tempfile())
+  int_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"),
+    names_as_int = TRUE, chromosomes_as_int = TRUE
+  )
+  # names (a factor or strings) are returned as they are, so that the same
+  # code works on data read without the integer options
+  expect_identical(
+    gt_lookup_chromosomes(names_gt, show_loci(names_gt)$chromosome),
+    as.character(show_loci(names_gt)$chromosome)
+  )
+  expect_identical(gt_lookup_chromosomes(int_gt, c("chr1", NA)), c("chr1", NA))
+  expect_error(gt_lookup_chromosomes(int_gt, TRUE), "integer codes")
+  # codes must be positive whole numbers (doubles are fine)
+  expect_identical(
+    gt_lookup_chromosomes(int_gt, c(2, 1, 2)),
+    c("scaf_2", "chr1", "scaf_2")
+  )
+  expect_error(gt_lookup_chromosomes(int_gt, 1.5), "should be integers")
+  expect_error(gt_lookup_chromosomes(int_gt, 0), "positive integers")
+  # a missing name (e.g. from a join that did not find a locus)
+  loci <- show_loci(int_gt)[1:2, ]
+  loci$name[2] <- NA
+  expect_error(gt_lookup_loci(int_gt, loci), "with no NAs")
+  # codes replaced by whole numbers stay integer codes, and are restored
+  loci <- show_loci(int_gt)
+  loci$chromosome <- as.numeric(loci$chromosome)
+  show_loci(int_gt) <- loci
+  expect_true(is.integer(show_loci(int_gt)$chromosome))
+  expect_identical(show_loci(gt_restore_loci(int_gt)), show_loci(names_gt))
+  # a code that is not in the chromosome sidecar can not be restored
+  loci$chromosome[5] <- 99
+  show_loci(int_gt) <- loci
+  expect_error(
+    gt_restore_loci(int_gt),
+    "has no line for some of the chromosome codes"
+  )
+  # .x must be a gen_tibble (or, for lookups, its genotypes)
+  expect_error(gt_restore_loci(int_gt$genotypes), "should be a gen_tibble")
+  expect_error(gt_lookup_loci(show_loci(int_gt), 1), "should be a gen_tibble")
+})
+
+test_that("chromosomes_as_int is only available for VCF files with cpp", {
+  bed_file <- system.file("extdata", "pop_a.bed", package = "tidypopgen")
+  expect_error(
+    gen_tibble(bed_file, chromosomes_as_int = TRUE, quiet = TRUE),
+    "only available for VCF files read with parser = 'cpp'"
+  )
+  expect_error(
+    gen_tibble(small_vcf,
+      parser = "vcfR", chromosomes_as_int = TRUE,
+      backingfile = tempfile(), quiet = TRUE
+    ),
+    "only available for VCF files read with parser = 'cpp'"
+  )
+})
+
+test_that("gt_save lists the sidecars to keep with the files", {
+  int_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"),
+    names_as_int = TRUE, chromosomes_as_int = TRUE
+  )
+  msgs <- capture_messages(gt_save(int_gt))
+  expect_match(
+    msgs, "original names of loci in: .*small_.*\\.loci\\.tsv",
+    all = FALSE
+  )
+  expect_match(
+    msgs, "names of chromosomes in: .*small_.*\\.chromosomes\\.tsv",
+    all = FALSE
+  )
+})
+
+test_that("very long names are kept by the sidecar", {
+  # a name of 2 MB, longer than the buffer of the sidecar reader (1 MB)
+  long_name <- strrep("x", 2^21)
+  loci <- data.frame(
+    chrom = "1", pos = 1:3, id = c("rs1", long_name, "rs3"),
+    ref = "A", alt = "G"
+  )
+  vcf <- write_merge_vcf("s1", loci, matrix("0/1", 3, 1))
+  int_gt <- gen_tibble(vcf,
+    quiet = TRUE, backingfile = tempfile("long_"),
+    names_as_int = TRUE
+  )
+  expect_identical(
+    gt_lookup_loci(int_gt, c(3, 2, 1))$name,
+    c("rs3", long_name, "rs1")
+  )
+  expect_identical(
+    show_loci(gt_restore_loci(int_gt))$name,
+    c("rs1", long_name, "rs3")
+  )
+})
+
+test_that("missing chromosomes stay missing as integer codes", {
+  loci <- data.frame(
+    chrom = ".", pos = c(5, 9, 12), id = c("a", "b", "c"),
+    ref = "A", alt = "G"
+  )
+  vcf <- write_merge_vcf(c("s1", "s2"), loci, matrix("0/1", 3, 2))
+  names_gt <- gen_tibble(vcf, quiet = TRUE, backingfile = tempfile())
+  int_gt <- gen_tibble(vcf,
+    quiet = TRUE, backingfile = tempfile(),
+    chromosomes_as_int = TRUE
+  )
+  expect_identical(show_loci(int_gt)$chromosome, rep(NA_integer_, 3))
+  # the chromosome sidecar only has its header
+  expect_identical(
+    readLines(chromosomes_sidecar_path(int_gt)),
+    chromosomes_sidecar_header
+  )
+  expect_identical(show_loci(gt_restore_loci(int_gt)), show_loci(names_gt))
+  expect_identical(
+    is_loci_table_ordered(int_gt),
+    is_loci_table_ordered(names_gt)
+  )
+  # duplicated positions are found among missing chromosomes too
+  loci$pos[2] <- 5
+  vcf <- write_merge_vcf(c("s1", "s2"), loci, matrix("0/1", 3, 2))
+  for (chromosomes_as_int in c(FALSE, TRUE)) {
+    expect_error(
+      gen_tibble(vcf,
+        quiet = TRUE, backingfile = tempfile(),
+        chromosomes_as_int = chromosomes_as_int
+      ),
+      "duplicated loci"
+    )
+  }
+})
+
+test_that("large chromosome codes are grouped as their names", {
+  # chromosome names that are large numbers keep them as their codes (here
+  # above 2e8), which are too sparse to be the groups of the C++ helpers
+  vcf_lines <- readLines(anolis_vcf)
+  body <- which(!startsWith(vcf_lines, "#"))
+  vcf_lines[body] <- paste0(
+    "chr", 200000000L + as.integer(sub("^locus_([0-9]+)\t.*", "\\1",
+      vcf_lines[body]
+    )),
+    sub("^[^\t]*", "", vcf_lines[body])
+  )
+  big_vcf <- tempfile(fileext = ".vcf")
+  writeLines(vcf_lines, big_vcf)
+  names_gt <- gen_tibble(big_vcf, quiet = TRUE, backingfile = tempfile("big_"))
+  int_gt <- gen_tibble(big_vcf,
+    quiet = TRUE, backingfile = tempfile("big_"),
+    chromosomes_as_int = TRUE
+  )
+  codes <- show_loci(int_gt)$chromosome
+  expect_gt(min(codes), 2e8)
+  expect_identical(
+    codes,
+    as.integer(sub("chr", "", show_loci(names_gt)$chromosome))
+  )
+  # the checks of the order of the loci agree: in order, with the first
+  # chromosome split in two runs (it has several loci), and reversed
+  n <- count_loci(int_gt)
+  ordered <- vapply(
+    list(seq_len(n), c(2:n, 1), rev(seq_len(n))),
+    function(loci_order) {
+      c(
+        is_loci_table_ordered(select_loci(int_gt, all_of(loci_order))),
+        is_loci_table_ordered(select_loci(names_gt, all_of(loci_order)))
+      )
+    },
+    logical(2)
+  )
+  expect_identical(ordered[1, ], ordered[2, ])
+  expect_identical(ordered[1, ], c(TRUE, FALSE, FALSE))
+  # runs of homozygosity are the same, with their codes
+  roh_args <- list(
+    window_snp = 2, window_het = 0, window_missing = 2, min_snp = 2,
+    min_kb = 0, max_kb_per_snp = 1000, n_cores = 1
+  )
+  names_roh <- do.call(windows_indiv_roh, c(list(names_gt), roh_args))
+  int_roh <- do.call(windows_indiv_roh, c(list(int_gt), roh_args))
+  expect_gt(nrow(int_roh), 0)
+  expect_true(all(int_roh$chromosome > 2e8))
+  int_roh$chromosome <- gt_lookup_chromosomes(int_gt, int_roh$chromosome)
+  names_roh$chromosome <- as.character(names_roh$chromosome)
+  sort_runs <- function(x) {
+    attr(x, "chromosome_length") <- NULL
+    as.data.frame(dplyr::arrange(x, .data$id, .data$chromosome, .data$start))
+  }
+  expect_identical(sort_runs(int_roh), sort_runs(names_roh))
+  # a duplicated locus (the same chromosome and position) is found
+  dup <- strsplit(vcf_lines[body[1]], "\t")[[1]]
+  dup[3] <- "dup_id"
+  dup_lines <- append(vcf_lines, paste(dup, collapse = "\t"), after = body[1])
+  writeLines(dup_lines, big_vcf)
+  for (chromosomes_as_int in c(FALSE, TRUE)) {
+    expect_error(
+      gen_tibble(big_vcf,
+        quiet = TRUE, backingfile = tempfile(),
+        chromosomes_as_int = chromosomes_as_int
+      ),
+      "duplicated loci"
+    )
+  }
+})
+
+test_that("sidecar copies and reads check the order and number of lines", {
+  int_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"),
+    names_as_int = TRUE
+  )
+  path <- loci_sidecar_path(int_gt)
+  # whole columns, counting the lines (or checking their number, if given)
+  read_cols <- function(...) {
+    sidecar_read(path, loci_sidecar_header,
+      fields = c(1L, 2L), types = c("integer", "character"), ...
+    )
+  }
+  cols <- read_cols()
+  expect_identical(cols, list(1:5, paste0("rs", 1:5)))
+  expect_identical(read_cols(n = 5), cols)
+  expect_error(read_cols(n = 4), "more lines than expected")
+  expect_error(read_cols(n = 6), "fewer lines than expected")
+  # a file whose keys are not in order is never copied (and the partial copy
+  # is removed)
+  unsorted <- tempfile()
+  write_raw_lines(unsorted, readLines(path)[c(1, 3, 2, 4:6)])
+  out <- tempfile()
+  expect_error(
+    sidecar_subset(unsorted, out, loci_sidecar_header, 1:2),
+    "not strictly increasing"
+  )
+  expect_false(file.exists(out))
+  expect_error(
+    sidecar_gather(unsorted, loci_sidecar_header,
+      index_keys = integer(0), index_offsets = numeric(0),
+      keys = integer(0), path_out = out, first_new_key = 1, append = FALSE
+    ),
+    "not strictly increasing"
+  )
+  expect_false(file.exists(out))
+})
+
 test_that("sidecars left by older files with the same name are removed", {
   backingfile <- tempfile("anolis_")
   stale <- paste0(backingfile, ".loci.tsv")
@@ -250,6 +608,20 @@ test_that("chromosome names that are numbers keep their value as codes", {
     c("0", NA, "chr2")
   )
   expect_error(gt_lookup_chromosomes(int_gt, 3L), "has no line")
+  # names that are only a prefix are other names, and NA is missing (as ".")
+  expect_identical(
+    chromosome_int_codes_cpp(c("chr", "chr3", NA, "Chromosome_")),
+    c(4L, 3L, NA, 5L)
+  )
+  # the largest integer can be a code, but then no other name can be coded
+  expect_identical(
+    chromosome_int_codes_cpp(c("2147483646", "chrX")),
+    c(2147483646L, 2147483647L)
+  )
+  expect_error(
+    chromosome_int_codes_cpp(c("2147483647", "chrX")),
+    "too many chromosomes"
+  )
 })
 
 test_that("integer chromosomes are restored, looked up and kept", {
@@ -287,6 +659,10 @@ test_that("integer chromosomes are restored, looked up and kept", {
   # the integer chromosomes are kept by the checks and functions of the loci
   # table
   expect_true(is_loci_table_ordered(int_gt))
+  # (replacement codes must be whole numbers, rather than being truncated)
+  new_loci <- show_loci(int_gt)
+  new_loci$chromosome <- new_loci$chromosome + 0.5
+  expect_error(show_loci(int_gt) <- new_loci, "whole numbers")
   keep <- sample(count_loci(int_gt), 200)
   sub_gt <- int_gt %>%
     select_loci(all_of(keep)) %>%
@@ -400,36 +776,34 @@ test_that("window statistics and runs keep integer chromosomes", {
 
 # three files with different samples, with missing IDs, several chromosomes
 # (in different orders), and sites first found in each file
-sidecar_merge_vcfs <- function() {
-  c(
-    write_merge_vcf("a",
-      data.frame(
-        chrom = c("chr2", "chr2", "chr1", "scaf_9"), pos = c(10, 20, 5, 1),
-        id = c(".", "a2", "a3", "a4"), ref = "A", alt = "C"
-      ),
-      genotypes = matrix("0/1", 4, 1)
+sidecar_merge_files <- c(
+  write_merge_vcf("a",
+    data.frame(
+      chrom = c("chr2", "chr2", "chr1", "scaf_9"), pos = c(10, 20, 5, 1),
+      id = c(".", "a2", "a3", "a4"), ref = "A", alt = "C"
     ),
-    write_merge_vcf("b",
-      data.frame(
-        chrom = c("chr1", "chr1", "chr2", "chrX", "chr2"),
-        pos = c(5, 7, 15, 3, 20),
-        id = c("b1", "b2", ".", "b4", "b5"), ref = "A", alt = "C"
-      ),
-      genotypes = matrix("1/1", 5, 1)
+    genotypes = matrix("0/1", 4, 1)
+  ),
+  write_merge_vcf("b",
+    data.frame(
+      chrom = c("chr1", "chr1", "chr2", "chrX", "chr2"),
+      pos = c(5, 7, 15, 3, 20),
+      id = c("b1", "b2", ".", "b4", "b5"), ref = "A", alt = "C"
     ),
-    write_merge_vcf("c",
-      data.frame(
-        chrom = c("chr2", "chrX", "chr1", "chr1"), pos = c(20, 3, 1, 5),
-        id = c("c1", "c2", "c3", "c4"), ref = "A", alt = "C"
-      ),
-      genotypes = matrix("0/0", 4, 1)
-    )
+    genotypes = matrix("1/1", 5, 1)
+  ),
+  write_merge_vcf("c",
+    data.frame(
+      chrom = c("chr2", "chrX", "chr1", "chr1"), pos = c(20, 3, 1, 5),
+      id = c("c1", "c2", "c3", "c4"), ref = "A", alt = "C"
+    ),
+    genotypes = matrix("0/0", 4, 1)
   )
-}
+)
 
 test_that("gt_merge_vcfs writes sidecars that restore the names", {
   withr::local_options(tidypopgen.sidecar_block = 2L)
-  files <- sidecar_merge_vcfs()
+  files <- sidecar_merge_files
   for (variants in c("union", "intersection")) {
     names_gt <- gt_merge_vcfs(files,
       variants = variants, names_as_int = FALSE,
@@ -529,6 +903,16 @@ test_that("sidecar_gather writes lines in any order, with new keys", {
     loci_sidecar_header,
     "1\trs4\t1\t4", "2\trs1\t1\t1", "3\trs4\t1\t4", "4\trs5\t1\t5",
     "5\trs2\t1\t2"
+  ))
+  # (a key repeated within a chunk)
+  out_repeated <- tempfile()
+  sidecar_gather(path, loci_sidecar_header,
+    index_keys = index$keys, index_offsets = index$offsets,
+    keys = c(3L, 3L, 1L), path_out = out_repeated, first_new_key = 1,
+    append = FALSE
+  )
+  expect_identical(readLines(out_repeated)[-1], c(
+    "1\trs3\t1\t3", "2\trs3\t1\t3", "3\trs1\t1\t1"
   ))
   # all the lines, appended with keys after the last one
   sidecar_gather(path, loci_sidecar_header,

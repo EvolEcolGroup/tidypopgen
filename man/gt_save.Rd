@@ -33,8 +33,11 @@ default level of \code{\link[=saveRDS]{saveRDS()}} is slow.
 \details{
 If the names of the loci are integers (\code{names_as_int = TRUE}), their
 original names are in a sidecar file next to the \emph{.bk} file (\emph{.loci.tsv},
-see \code{\link[=gt_lookup_loci]{gt_lookup_loci()}}): keep it with the other files (if you move the
-files, move it too, so that \code{\link[=gt_load]{gt_load()}} with \code{reattach_to} finds it).
+see \code{\link[=gt_lookup_loci]{gt_lookup_loci()}}); if the chromosomes are integers
+(\code{chromosomes_as_int = TRUE}), their names are in another sidecar file
+(\emph{.chromosomes.tsv}, see \code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}}). Keep any sidecar
+files with the other files (if you move the files, move them too, so that
+\code{\link[=gt_load]{gt_load()}} with \code{reattach_to} finds them).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

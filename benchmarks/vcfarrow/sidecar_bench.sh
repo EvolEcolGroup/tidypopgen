@@ -159,7 +159,9 @@ for n in $SIZES; do
       if gzip -dc "$f" | cmp -s - "$sidecar"; then
         echo "    $f: gzip -dc gives the sidecar back"
       else
-        echo "    $f: gzip -dc DIFFERS"
+        # (stop, keeping the files to investigate)
+        echo "    $f: gzip -dc DIFFERS" >&2
+        exit 1
       fi
     done
     cli_compress "$n" "$sidecar" "$comp_dir"

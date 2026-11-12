@@ -128,9 +128,10 @@ for n in sizes:
               if r["action"] == "lookup_cold"]
     print(f"| {n:,} | first lookup of 100 rows (builds the index), sidecar "
           f"in page cache | {mean_range(warm_cache, '{:.3f}')} | |")
+    cached_pct = f"{100 * max(cached):.0f}%" if cached else "NA"
     print(f"| {n:,} | first lookup of 100 rows, sidecar evicted from the "
           f"page cache | {mean_range(cold, '{:.3f}')} | "
-          f"{100 * max(cached):.0f}% of the file cached after eviction |")
+          f"{cached_pct} of the file cached after eviction |")
     idx = extra("sidecar", n, "sidecar_index")
     if idx:
         print(f"| {n:,} | sidecar_index() alone (median of 3) | "

@@ -23,8 +23,9 @@ Load a \code{gen_tibble} previously saved with \code{\link[=gt_save]{gt_save()}}
 been moved, they should be found automatically. If they were moved, use
 \code{reattach_to} to point to the \emph{.rds} file (the \emph{.bk} file needs to be in the
 same directory as the \emph{.rds} file). Sidecar files with the original names
-of loci stored as integers (see \code{\link[=gt_lookup_loci]{gt_lookup_loci()}}) are found next to the
-\emph{.bk} file, so move them with it.
+of loci and chromosomes stored as integers (\emph{.loci.tsv} and
+\emph{.chromosomes.tsv}, see \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}})
+are found next to the \emph{.bk} file, so move any of them with it.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

@@ -334,6 +334,9 @@ int main(int argc, char** argv) {
     std::vector<unsigned char> comp = read_file(out_path);
     BlockTable t = parse_blocks(comp);
     if (t.offset.size() != n_blocks) fail("block count");
+    // (the checksum of the scan is stored, so that the compiler can not drop
+    // the scan from the timed path)
+    volatile uint64_t scan_sink = 0;
     auto decompress_all = [&](int nt, bool scan) {
       uint64_t n_lines = 0;
       double t0 = now();
@@ -346,7 +349,7 @@ int main(int argc, char** argv) {
                           output.data() + t.ioffset[b], t.isize[b]);
         }
       }
-      if (scan) scan_lines(output.data(), n, n_lines);
+      if (scan) scan_sink = scan_sink + scan_lines(output.data(), n, n_lines);
       return now() - t0;
     };
     std::vector<double> t_d1, t_dn, t_ds;
