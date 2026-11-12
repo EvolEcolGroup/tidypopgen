@@ -780,6 +780,80 @@ test_that("rbind_byte_luts recodes phased bytes", {
   expect_identical(luts$swap[1:8], c(2L, 1L, 0L, 3L, 6L, 5L, 4L, 7L))
 })
 
+################################################################################
+# merging and concatenating phased vcf files
+################################################################################
+
+merge_loci <- data.frame(
+  chrom = "1", pos = c(100, 200, 300), id = c("rs1", "rs2", "rs3"),
+  ref = "A", alt = "T"
+)
+merge_geno_a <- rbind(c("0|1", "1|1"), c("1|0", ".|."), c("0|0", "0|1"))
+merge_geno_b <- rbind(c("1|0", "0|0"), c("0|1", "1|0"), c("1|1", "0|1"))
+merge_vcf_a <- write_merge_vcf(c("a1", "a2"), merge_loci, merge_geno_a)
+merge_vcf_b <- write_merge_vcf(c("b1", "b2"), merge_loci, merge_geno_b)
+
+test_that("gt_merge_vcfs reads phased vcf files", {
+  merged_gt <- gt_merge_vcfs(c(merge_vcf_a, merge_vcf_b),
+    phased = TRUE, backingfile = tempfile(), quiet = TRUE
+  )
+  # the same data in a single vcf
+  single_gt <- gen_tibble_phased(
+    write_merge_vcf(
+      c("a1", "a2", "b1", "b2"), merge_loci,
+      cbind(merge_geno_a, merge_geno_b)
+    ),
+    names_as_int = TRUE, backingfile = tempfile(), quiet = TRUE
+  )
+  expect_true(is_phased(merged_gt))
+  expect_identical(show_haplotypes(merged_gt), show_haplotypes(single_gt))
+  # by default, the phase is ignored
+  unphased_gt <- gt_merge_vcfs(c(merge_vcf_a, merge_vcf_b),
+    backingfile = tempfile(), quiet = TRUE
+  )
+  expect_false(is_phased(unphased_gt))
+  # unphased genotypes are an error (leaving no backing file)
+  vcf_unphased <- write_merge_vcf(
+    c("b1", "b2"), merge_loci,
+    sub("|", "/", merge_geno_b, fixed = TRUE)
+  )
+  bk <- tempfile()
+  expect_error(
+    gt_merge_vcfs(c(merge_vcf_a, vcf_unphased),
+      phased = TRUE, backingfile = bk, quiet = TRUE
+    ),
+    "individual b1 at locus 1:100 of the VCF"
+  )
+  expect_false(file.exists(paste0(bk, ".bk")))
+  # the alleles of phased genotypes are never swapped
+  expect_error(
+    gt_merge_vcfs(c(merge_vcf_a, merge_vcf_b),
+      phased = TRUE, ref_mismatch = "swap", quiet = TRUE
+    ),
+    "never swapped"
+  )
+})
+
+test_that("gt_concat_vcfs reads phased vcf files", {
+  # the samples are in a different order in the second file
+  vcf_1 <- write_merge_vcf(
+    c("a1", "a2"), merge_loci[1:2, ],
+    merge_geno_a[1:2, ]
+  )
+  vcf_2 <- write_merge_vcf(
+    c("a2", "a1"), merge_loci[3, ],
+    merge_geno_a[3, 2:1, drop = FALSE]
+  )
+  concat_gt <- gt_concat_vcfs(c(vcf_1, vcf_2),
+    phased = TRUE, backingfile = tempfile(), quiet = TRUE
+  )
+  single_gt <- gen_tibble_phased(merge_vcf_a,
+    names_as_int = TRUE, backingfile = tempfile(), quiet = TRUE
+  )
+  expect_true(is_phased(concat_gt))
+  expect_identical(show_haplotypes(concat_gt), show_haplotypes(single_gt))
+})
+
 test_that("is_phased checks its input", {
   expect_error(is_phased(1:3), "should be a gen_tibble")
   expect_error(is_phased(data.frame(a = 1)), "not a gen_tibble")

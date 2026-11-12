@@ -65,6 +65,11 @@
 #'   [gt_lookup_chromosomes()]). Default is FALSE.
 #' @param n_cores the number of cores used to decompress bgzipped files and to
 #'   parse the genotypes. Defaults to 1.
+#' @param phased boolean: whether to store phased genotypes, giving a phased
+#'   `gen_tibble` (see [gen_tibble_phased()]). All the files must then be
+#'   phased: any unphased genotype (with '/') or individual that is not
+#'   diploid is an error. Default is FALSE (the phase is ignored, as in
+#'   [gen_tibble()]).
 #' @param quiet boolean: whether to omit the report of the concatenation.
 #' @returns a [`gen_tibble`] with the data of all files (saved, as with
 #'   [gen_tibble()]).
@@ -96,6 +101,7 @@ gt_concat_vcfs <- function(
   names_as_int = TRUE,
   chromosomes_as_int = FALSE,
   n_cores = 1,
+  phased = FALSE,
   quiet = FALSE
 ) {
   files <- check_vcf_files_args(files, valid_alleles, n_cores)
@@ -125,10 +131,8 @@ gt_concat_vcfs <- function(
   # the samples, in the order of the first file, and the row of each sample of
   # each file (an empty vector if the samples are in the same order)
   sample_id <- scans[[1]]$sample_names
-  row_map <- concat_vcfs_row_maps(
-    lapply(scans, function(x) x$sample_names),
-    files
-  )
+  file_samples <- lapply(scans, function(x) x$sample_names)
+  row_map <- concat_vcfs_row_maps(file_samples, files)
   # the rows (1-based) of the samples of each file
   file_rows <- lapply(row_map, function(x) {
     if (length(x) > 0) x + 1L else seq_along(sample_id)
@@ -257,7 +261,9 @@ gt_concat_vcfs <- function(
     fill_missing = FALSE,
     backingfile = backingfile,
     n_cores = n_cores,
-    quiet = quiet
+    quiet = quiet,
+    phased = phased,
+    file_samples = file_samples
   )
   sidecars_done <- TRUE
   x_gt

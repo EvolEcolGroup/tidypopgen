@@ -115,6 +115,12 @@
 #'   [gt_lookup_chromosomes()]). Default is FALSE.
 #' @param n_cores the number of cores used to decompress bgzipped files and to
 #'   parse the genotypes. Defaults to 1.
+#' @param phased boolean: whether to store phased genotypes, giving a phased
+#'   `gen_tibble` (see [gen_tibble_phased()]). All the files must then be
+#'   phased: any unphased genotype (with '/') or individual that is not
+#'   diploid is an error. Default is FALSE (the phase is ignored, as in
+#'   [gen_tibble()]). The alleles of phased genotypes are never swapped (as in
+#'   [rbind()][rbind.gen_tbl]), so `ref_mismatch = "swap"` is not available.
 #' @param quiet boolean: whether to omit the report of the merge.
 #' @returns a [`gen_tibble`] with the merged data (saved, as with
 #'   [gen_tibble()]).
@@ -151,12 +157,19 @@ gt_merge_vcfs <- function(
   names_as_int = TRUE,
   chromosomes_as_int = FALSE,
   n_cores = 1,
+  phased = FALSE,
   quiet = FALSE
 ) {
   variants <- match.arg(variants)
   alt_mismatch <- match.arg(alt_mismatch)
   ref_mismatch <- match.arg(ref_mismatch)
   files <- check_vcf_files_args(files, valid_alleles, n_cores)
+  if (isTRUE(phased) && ref_mismatch == "swap") {
+    stop(
+      "the alleles of phased genotypes are never swapped (as in rbind()): ",
+      "use ref_mismatch = 'error' or 'drop'"
+    )
+  }
   n_cores <- as.integer(n_cores)
   if (missing_to_ref && variants == "intersection" && !quiet) {
     message(
@@ -355,7 +368,9 @@ gt_merge_vcfs <- function(
     fill_missing = variants == "union" && !missing_to_ref,
     backingfile = backingfile,
     n_cores = n_cores,
-    quiet = quiet
+    quiet = quiet,
+    phased = phased,
+    file_samples = sample_names
   )
   sidecars_done <- TRUE
   x_gt
@@ -573,20 +588,31 @@ vcfs_sidecar_paths <- function(backingfile) {
 # with `col`, the 0-based column of each of its biallelic SNPs (-1 if not
 # kept), and `swap`, whether the alleles of each SNP are swapped (or an empty
 # vector), and file_ploidy the ploidy of its individuals. ploidy is the
-# ploidy of the individuals of the gen_tibble.
+# ploidy of the individuals of the gen_tibble. With phased = TRUE, phased
+# genotypes are stored (see gen_tibble_phased()), and file_samples gives the
+# names of the samples of each file (in the order of the file, for errors).
 write_vcfs_gen_tibble <- function(files, loci, sample_id, ploidy, row_offset,
                                   row_map, file_cols, file_ploidy,
-                                  fill_missing, backingfile, n_cores, quiet) {
+                                  fill_missing, backingfile, n_cores, quiet,
+                                  phased = FALSE, file_samples = NULL) {
   if (anyNA(ploidy) || any(ploidy <= 0)) {
     stop("the ploidy of each individual should be a positive integer")
   }
   indiv_meta <- validate_indiv_meta(data.frame(id = sample_id))
   # the FBM: missing genotypes are its largest ploidy + 1 (all genotypes are
-  # missing at the start if fill_missing, 0 otherwise)
+  # missing at the start if fill_missing, 0 otherwise, which is also 0|0 for
+  # phased genotypes)
   max_ploidy <- max(ploidy)
   missing_value <- max_ploidy + 1
-  code256 <- rep(NA_real_, 256)
-  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+  if (phased) {
+    # phased genotypes are only stored for diploid individuals (their missing
+    # value is then 3, as in unphased data)
+    stopifnot_phased_ploidy(ploidy, sample_id)
+    code256 <- code_phased
+  } else {
+    code256 <- rep(NA_real_, 256)
+    code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+  }
   file_backed_matrix <- bigstatsr::FBM.code256(
     nrow = length(sample_id),
     ncol = nrow(loci),
@@ -620,7 +646,9 @@ write_vcfs_gen_tibble <- function(files, loci, sample_id, ploidy, row_offset,
       swap = this_file$swap,
       ploidy = file_ploidy[[f]],
       missing_value = missing_value,
-      n_threads = n_cores
+      n_threads = n_cores,
+      phased_lut = if (phased) phased_genotype_byte else integer(0),
+      sample_names = if (phased) file_samples[[f]] else character(0)
     )
   }
   # save the FBM (before its md5 sum is taken by new_vctrs_bigsnp())

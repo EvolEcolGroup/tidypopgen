@@ -865,8 +865,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // vcf_merge_genotypes
-void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset, const IntegerVector& row, const IntegerVector& col, const LogicalVector& swap, const IntegerVector& ploidy, int missing_value, int n_threads);
-RcppExport SEXP _tidypopgen_vcf_merge_genotypes(SEXP filenameSEXP, SEXP BMSEXP, SEXP row_offsetSEXP, SEXP rowSEXP, SEXP colSEXP, SEXP swapSEXP, SEXP ploidySEXP, SEXP missing_valueSEXP, SEXP n_threadsSEXP) {
+void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset, const IntegerVector& row, const IntegerVector& col, const LogicalVector& swap, const IntegerVector& ploidy, int missing_value, int n_threads, IntegerVector phased_lut, CharacterVector sample_names);
+RcppExport SEXP _tidypopgen_vcf_merge_genotypes(SEXP filenameSEXP, SEXP BMSEXP, SEXP row_offsetSEXP, SEXP rowSEXP, SEXP colSEXP, SEXP swapSEXP, SEXP ploidySEXP, SEXP missing_valueSEXP, SEXP n_threadsSEXP, SEXP phased_lutSEXP, SEXP sample_namesSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
@@ -878,7 +878,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const IntegerVector& >::type ploidy(ploidySEXP);
     Rcpp::traits::input_parameter< int >::type missing_value(missing_valueSEXP);
     Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
-    vcf_merge_genotypes(filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads);
+    Rcpp::traits::input_parameter< IntegerVector >::type phased_lut(phased_lutSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type sample_names(sample_namesSEXP);
+    vcf_merge_genotypes(filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads, phased_lut, sample_names);
     return R_NilValue;
 END_RCPP
 }
@@ -966,7 +968,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_merge_sites_result", (DL_FUNC) &_tidypopgen_merge_sites_result, 1},
     {"_tidypopgen_merge_sites_file_cols", (DL_FUNC) &_tidypopgen_merge_sites_file_cols, 3},
     {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 9},
-    {"_tidypopgen_vcf_merge_genotypes", (DL_FUNC) &_tidypopgen_vcf_merge_genotypes, 9},
+    {"_tidypopgen_vcf_merge_genotypes", (DL_FUNC) &_tidypopgen_vcf_merge_genotypes, 11},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}
