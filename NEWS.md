@@ -1,33 +1,14 @@
 # tidypopgen (development version)
 
-* `gen_tibble(names_as_int = TRUE)` writes the original names of the loci of
-  a VCF file, with their chromosomes and positions, to a sidecar file next to
-  the backing file (*.loci.tsv*, plain tab separated text), so that integer
-  names lose nothing. New `gt_lookup_loci()` gives back the original names of
-  some loci (e.g. the hits of a scan, as a subset of the loci table or as row
-  numbers), and `gt_restore_loci()` puts them back into the `gen_tibble`.
-  `gt_update_backingfile()`, `gt_order_loci()` and `rbind()` write the
-  sidecar of their new backing file
-* new argument `chromosomes_as_int` of `gen_tibble()` (VCF files read with the
-  "cpp" parser) stores the chromosomes as integer codes rather than as a
-  factor, which saves much memory and time with millions of chromosomes (e.g.
-  RAD loci assembled de novo). Names that are numbers keep their value (e.g.
-  "chr7" is 7), and other names are numbered after the largest number. The
-  names are written to a sidecar file (*.chromosomes.tsv*); new
-  `gt_lookup_chromosomes()` translates codes (e.g. in the results of window
-  statistics) into names, and `gt_lookup_loci()` and `gt_restore_loci()`
-  restore them too. `rbind()` matches integer chromosomes by name, and the
-  checks of the loci table, window statistics and `windows_indiv_roh()` keep
-  integer chromosomes
-* `gt_merge_vcfs()` and `gt_concat_vcfs()` write the sidecar of the original
-  names of the loci (their default is `names_as_int = TRUE`), so that
-  `gt_lookup_loci()` and `gt_restore_loci()` work on merged data, and gain
-  the argument `chromosomes_as_int`. The merge keeps on disk only the loci of
-  the file being read and the names of the merged sites
-* new article on large RAD-seq datasets: it reads 18.6 million SNPs on 13.8
-  million RAD loci with and without `names_as_int` and `chromosomes_as_int`,
-  compares their time and memory, and looks up the original names of the
-  hits of a scan from the sidecar files
+* `gen_tibble(names_as_int = TRUE)` on VCF files writes the original loci
+  names to a sidecar file (*.loci.tsv*); new `gt_lookup_loci()` and
+  `gt_restore_loci()` retrieve them. `gt_merge_vcfs()`, `gt_concat_vcfs()`,
+  `gt_update_backingfile()`, `gt_order_loci()` and `rbind()` keep the sidecar
+* new argument `chromosomes_as_int` of `gen_tibble()`, `gt_merge_vcfs()` and
+  `gt_concat_vcfs()` stores chromosomes as integer codes, saving memory with
+  millions of chromosomes (e.g. RAD loci assembled de novo); new
+  `gt_lookup_chromosomes()` translates codes back into names
+* new article on large RAD-seq datasets
 * new `gt_merge_vcfs()` reads several VCF files with different samples into
   a single `gen_tibble`, as `bcftools merge` would, in one go (without
   reading each file into its own `gen_tibble` and binding them in pairs with
