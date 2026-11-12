@@ -101,6 +101,34 @@ test_that("gen_tibble_phased reads gzipped vcf files", {
   expect_identical(show_haplotypes(x), phased_vcf_haps)
 })
 
+test_that("gen_tibble_phased stores integer names and chromosomes", {
+  names_gt <- gen_tibble_phased(phased_vcf,
+    backingfile = tempfile("phased_"), quiet = TRUE
+  )
+  for (n_cores in c(1, 2)) {
+    int_gt <- gen_tibble_phased(phased_vcf,
+      backingfile = tempfile("phased_"), quiet = TRUE, n_cores = n_cores,
+      names_as_int = TRUE, chromosomes_as_int = TRUE
+    )
+    expect_true(is_phased(int_gt))
+    expect_identical(show_loci(int_gt)$name, 1:7)
+    expect_true(is.integer(show_loci(int_gt)$chromosome))
+    expect_identical(
+      unname(show_haplotypes(int_gt)),
+      unname(phased_vcf_haps)
+    )
+    # the sidecars give back the names and chromosomes
+    expect_identical(
+      show_loci(gt_restore_loci(int_gt)),
+      show_loci(names_gt)
+    )
+  }
+  expect_error(
+    gen_tibble_phased(phased_vcf, parser = "vcfR", chromosomes_as_int = TRUE),
+    "only available with parser = 'cpp'"
+  )
+})
+
 test_that("gen_tibble ignores the phase of a phased vcf", {
   for (parser in vcf_parsers) {
     x <- gen_tibble(phased_vcf,
@@ -182,7 +210,8 @@ test_that("gen_tibble_phased refuses any unphased genotype", {
       )
     }
   }
-  # both parsers name the first unphased genotype of the file
+  # both parsers name the first unphased genotype of the file (also when the
+  # cpp parser reads the lines in parallel)
   vcf <- write_test_vcf(list(
     c("0|0", "0|1", "0/0"),
     c("1/1", "1|0", "0|1")
@@ -196,6 +225,10 @@ test_that("gen_tibble_phased refuses any unphased genotype", {
       "individual s3 at locus 1:100 is unphased"
     )
   }
+  expect_error(
+    gen_tibble_phased(vcf, backingfile = tempfile(), n_cores = 2, quiet = TRUE),
+    "individual s3 at locus 1:100 is unphased"
+  )
   # the same file can be read (unphased) by gen_tibble
   x <- gen_tibble(vcf, backingfile = tempfile(), quiet = TRUE)
   expect_identical(show_genotypes(x), rbind(c(0, 2), c(1, 1), c(0, 1)))
@@ -401,6 +434,10 @@ test_that("population statistics are the same with phased data", {
   )
   expect_equal(pop_tajimas_d(phased_grp), pop_tajimas_d(unphased_grp))
   expect_equal(nwise_pop_pbs(phased_grp), nwise_pop_pbs(unphased_grp))
+  expect_equal(
+    pop_sfs(phased_grp, n_proj = c(10, 10, 10)),
+    pop_sfs(unphased_grp, n_proj = c(10, 10, 10))
+  )
   # windowed and jackknife versions
   expect_equal(
     windows_pairwise_pop_fst(phased_grp, window_size = 50, step_size = 25),
