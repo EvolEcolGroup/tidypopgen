@@ -63,8 +63,9 @@ public:
     at_eof = false;
     read_size = min_read;
   }
-  // the next line (without its "\n"; valid until the next call), and the
-  // byte offset of its start in the file; false at the end of the file
+  // the next line (without its "\n", or "\r\n"; valid until the next call),
+  // and the byte offset of its start in the file; false at the end of the
+  // file
   bool next_line(const char* &line, size_t &len, int64_t &offset) {
     while (true) {
       const char* nl = static_cast<const char*>(
@@ -74,6 +75,11 @@ public:
         len = nl - line;
         offset = buf_offset + start;
         start += len + 1;
+        // (lines ended by "\r\n", e.g. in a sidecar edited on Windows, or
+        // written there by writeLines())
+        if ((len > 0) && (line[len - 1] == '\r')) {
+          len--;
+        }
         return true;
       }
       if (at_eof) {

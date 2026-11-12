@@ -197,6 +197,20 @@ test_that("lookups check that the sidecar belongs to the data", {
   expect_false(file.exists(loci_sidecar_path(sub_gt)))
 })
 
+test_that("sidecars with Windows line endings can be read", {
+  int_gt <- gen_tibble(anolis_vcf,
+    quiet = TRUE, backingfile = tempfile("anolis_"),
+    names_as_int = TRUE
+  )
+  expected <- gt_lookup_loci(int_gt, 1:5)
+  path <- loci_sidecar_path(int_gt)
+  lines <- readLines(path)
+  con <- file(path, open = "wb")
+  writeLines(lines, con, sep = "\r\n")
+  close(con)
+  expect_identical(gt_lookup_loci(int_gt, 1:5), expected)
+})
+
 test_that("sidecars left by older files with the same name are removed", {
   backingfile <- tempfile("anolis_")
   stale <- paste0(backingfile, ".loci.tsv")
@@ -400,36 +414,34 @@ test_that("window statistics and runs keep integer chromosomes", {
 
 # three files with different samples, with missing IDs, several chromosomes
 # (in different orders), and sites first found in each file
-sidecar_merge_vcfs <- function() {
-  c(
-    write_merge_vcf("a",
-      data.frame(
-        chrom = c("chr2", "chr2", "chr1", "scaf_9"), pos = c(10, 20, 5, 1),
-        id = c(".", "a2", "a3", "a4"), ref = "A", alt = "C"
-      ),
-      genotypes = matrix("0/1", 4, 1)
+sidecar_merge_files <- c(
+  write_merge_vcf("a",
+    data.frame(
+      chrom = c("chr2", "chr2", "chr1", "scaf_9"), pos = c(10, 20, 5, 1),
+      id = c(".", "a2", "a3", "a4"), ref = "A", alt = "C"
     ),
-    write_merge_vcf("b",
-      data.frame(
-        chrom = c("chr1", "chr1", "chr2", "chrX", "chr2"),
-        pos = c(5, 7, 15, 3, 20),
-        id = c("b1", "b2", ".", "b4", "b5"), ref = "A", alt = "C"
-      ),
-      genotypes = matrix("1/1", 5, 1)
+    genotypes = matrix("0/1", 4, 1)
+  ),
+  write_merge_vcf("b",
+    data.frame(
+      chrom = c("chr1", "chr1", "chr2", "chrX", "chr2"),
+      pos = c(5, 7, 15, 3, 20),
+      id = c("b1", "b2", ".", "b4", "b5"), ref = "A", alt = "C"
     ),
-    write_merge_vcf("c",
-      data.frame(
-        chrom = c("chr2", "chrX", "chr1", "chr1"), pos = c(20, 3, 1, 5),
-        id = c("c1", "c2", "c3", "c4"), ref = "A", alt = "C"
-      ),
-      genotypes = matrix("0/0", 4, 1)
-    )
+    genotypes = matrix("1/1", 5, 1)
+  ),
+  write_merge_vcf("c",
+    data.frame(
+      chrom = c("chr2", "chrX", "chr1", "chr1"), pos = c(20, 3, 1, 5),
+      id = c("c1", "c2", "c3", "c4"), ref = "A", alt = "C"
+    ),
+    genotypes = matrix("0/0", 4, 1)
   )
-}
+)
 
 test_that("gt_merge_vcfs writes sidecars that restore the names", {
   withr::local_options(tidypopgen.sidecar_block = 2L)
-  files <- sidecar_merge_vcfs()
+  files <- sidecar_merge_files
   for (variants in c("union", "intersection")) {
     names_gt <- gt_merge_vcfs(files,
       variants = variants, names_as_int = FALSE,

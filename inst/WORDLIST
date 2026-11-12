@@ -3,6 +3,7 @@ Af
 Anolis
 Autoplot
 Autoplots
+BGZF
 BIM
 BMC
 BS
@@ -15,11 +16,13 @@ Bougainville
 Busing
 Bustamante
 CMD
+Chr
 Cozzi
 Czabarka
 DAPC
 Devillard
 Dinka
+DiscoSnpRad
 Distruct
 Dusun
 Eam
@@ -29,6 +32,7 @@ FMTA
 FST
 Fst
 GRM
+GS
 GST
 Gaspa
 GenuineIntel
@@ -75,6 +79,7 @@ PED
 PLINK's
 PLoS
 Papuan
+Phyllomedusa
 Procrustes
 Pseudohaploid
 Qiu
@@ -97,6 +102,7 @@ Thia
 Tidyverse
 UpSet
 VCF
+VCFArrow
 VCFs
 Vattikuti
 WG
@@ -119,6 +125,7 @@ autoplots
 backingfile
 backingfiles
 bcftools
+bgzipped
 biallelic
 bigSNP
 bigsnpr
@@ -128,6 +135,7 @@ booleans
 bp
 btq
 cM
+catalog
 centering
 centers
 centiMorgans
@@ -140,7 +148,9 @@ coancestries
 coancestry
 codecov
 com
+concat
 conda
+contig
 countLines
 cpp
 csv
@@ -196,18 +206,23 @@ indiv
 individuals’
 int
 io
+ipyrad
 kmeans
 ld
 lengthBps
+liftover
 linewidth
 loadingPC
 maf
 magrittr
+mb
 mibs
 minilanguage
 multiSFS
+multiallelic
 nSNP
 nolint
+novo
 nwise
 obs
 org
@@ -231,6 +246,7 @@ pseuodhaploid
 pts
 punctatus
 px
+qc
 qpGraph
 qq
 randomSVD
@@ -261,10 +277,12 @@ tmp
 transversion
 transversions
 triallelic
+tsv
 u
 unflip
 unsets
 uqrmaie
+vaillantii
 vcf
 vcfR
 vctrs
