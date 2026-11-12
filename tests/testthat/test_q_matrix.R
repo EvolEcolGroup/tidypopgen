@@ -398,3 +398,21 @@ test_that("autoplot of a q_matrix works with numeric groups", {
   expect_equal(get_group_labels(plt), c("2", "10"))
   expect_equal(get_n_lines(plt), 2)
 })
+
+test_that("the distruct colours are unique, and recycled when needed", {
+  expect_length(distruct_colours, 56)
+  expect_false(anyDuplicated(distruct_colours) > 0)
+  df <- data.frame(group = factor(seq_len(60)), n = 1)
+  # up to 56 groups, each group has its own colour
+  p <- ggplot2::ggplot(df[1:56, ], ggplot2::aes(group, n, fill = group)) +
+    ggplot2::geom_col() +
+    scale_fill_distruct()
+  expect_no_warning(fills <- ggplot2::layer_data(p)$fill)
+  expect_identical(fills, distruct_colours)
+  # with more groups, colours are recycled with a warning
+  p <- ggplot2::ggplot(df, ggplot2::aes(group, n, fill = group)) +
+    ggplot2::geom_col() +
+    scale_fill_distruct()
+  expect_warning(fills <- ggplot2::layer_data(p)$fill, "recycled")
+  expect_identical(fills, rep_len(distruct_colours, 60))
+})

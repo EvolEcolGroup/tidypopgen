@@ -56,6 +56,8 @@
 #' @param parser the name of the parser used for *VCF* files, either "cpp" to
 #'   use a fast C++ parser (the default), or "vcfR" to use the R package
 #'   `vcfR` (see [gen_tibble()]).
+#' @param n_cores the number of cores used to read a *VCF* file with parser
+#'   "cpp" (see [gen_tibble()]). Default is 1.
 #' @param chunk_size the number of loci processed at a time (currently only
 #'   used with parser "vcfR").
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A',
@@ -69,8 +71,14 @@
 #'   are used (which R deletes at the end of the session).
 #' @param allow_duplicates logical. If TRUE, duplicated loci (same chromosome
 #'   and position, or same name) are allowed. Default is FALSE.
-#' @param names_as_int logical. If TRUE, locus names are stored as integers.
-#'   Only used when `x` is a *VCF* file with parser "cpp". Default is FALSE.
+#' @param names_as_int logical. If TRUE, locus names are stored as integers,
+#'   and their original names are written to a sidecar file (see
+#'   [gen_tibble()] and [gt_lookup_loci()]). Only used when `x` is a *VCF*
+#'   file with parser "cpp". Default is FALSE.
+#' @param chromosomes_as_int logical. If TRUE, chromosomes are stored as
+#'   integer codes, and their names are written to a sidecar file (see
+#'   [gen_tibble()] and [gt_lookup_chromosomes()]). Only used when `x` is a
+#'   *VCF* file with parser "cpp". Default is FALSE.
 #' @param quiet if TRUE, no information on the files used to store the data is
 #'   printed.
 #' @returns a phased [`gen_tibble`] (an object of class `gen_tbl`, whose
@@ -137,12 +145,14 @@ gen_tibble_phased.character <- function(
   x,
   ...,
   parser = c("cpp", "vcfR"),
+  n_cores = 1,
   chunk_size = NULL,
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
   names_as_int = FALSE,
+  chromosomes_as_int = FALSE,
   quiet = FALSE
 ) {
   parser <- match.arg(parser)
@@ -164,6 +174,15 @@ gen_tibble_phased.character <- function(
       call. = FALSE
     )
   }
+  # integer names and chromosomes are only available with the cpp parser
+  if (parser != "cpp" &&
+        (isTRUE(names_as_int) || isTRUE(chromosomes_as_int))) {
+    stop(
+      "names_as_int = TRUE and chromosomes_as_int = TRUE are only available ",
+      "with parser = 'cpp'",
+      call. = FALSE
+    )
+  }
   # as in gen_tibble(), do not overwrite existing backing files
   if (is.null(backingfile)) {
     backingfile <- change_duplicated_file_name(x)
@@ -176,44 +195,39 @@ gen_tibble_phased.character <- function(
     x = x,
     ...,
     parser = parser,
+    n_cores = n_cores,
     chunk_size = chunk_size,
     valid_alleles = valid_alleles,
     missing_alleles = missing_alleles,
     backingfile = backingfile,
     allow_duplicates = allow_duplicates,
     names_as_int = names_as_int,
+    chromosomes_as_int = chromosomes_as_int,
     quiet = quiet,
     phased = TRUE
   )
 
-  # check alleles (as in gen_tibble())
-  loci <- show_loci(x_gt)
-  doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
-  if (length(doubles) > 0) {
-    check_missing <- x_gt %>%
-      select_loci(all_of(doubles)) %>%
-      loci_missingness()
-    if (any(check_missing < 1, na.rm = TRUE)) {
-      # clean up files if we are stopping (dropping the gen_tibble first, so
-      # that its backing file can be unmapped, see remove_fbm_files())
-      files <- gt_get_file_names(x_gt)
-      rm(x_gt)
-      remove_fbm_files(files)
-      stop(paste(
-        "Some loci are missing both reference and alternate alleles.",
-        "Genotypes are not missing at these loci.",
-        "Please check the loci and genotype data."
-      ))
-    } else {
-      warning(
-        "Your data contain loci with no genotypes or allele ",
-        "information. Use loci_missingness() to identify them ",
-        "and select_loci() to remove them."
-      )
-    }
+  # sidecars next to the new backing file are left from older files with the
+  # same name (the cpp parser removes them, and writes its own)
+  if (parser != "cpp") {
+    remove_stale_sidecars(gt_get_file_names(x_gt)[2])
   }
 
-  gt_save(x_gt, quiet = quiet)
+  # check alleles (as in gen_tibble())
+  if (has_genotypes_without_alleles(x_gt)) {
+    # clean up files if we are stopping (dropping the gen_tibble first, so
+    # that its backing file can be unmapped, see remove_fbm_files())
+    files <- c(
+      gt_get_file_names(x_gt), loci_sidecar_path(x_gt),
+      chromosomes_sidecar_path(x_gt)
+    )
+    rm(x_gt)
+    remove_fbm_files(files)
+    stop_genotypes_without_alleles()
+  }
+
+  # the readers save the FBM (.rds), so only the gen_tibble is saved
+  gt_save_light(x_gt, quiet = quiet) # nolint
   x_gt
 }
 

@@ -105,10 +105,34 @@
 #' @noRd
 .bind_group_rows <- function(res, groups) {
   idx <- rep(seq_along(res), vapply(res, nrow, integer(1)))
-  dplyr::bind_cols(
-    .group_columns(groups, idx),
-    dplyr::bind_rows(unname(res))
-  )
+  group_cols <- .group_columns(groups, idx)
+  res <- dplyr::bind_rows(unname(res))
+  .check_group_col_names(names(group_cols), names(res))
+  dplyr::bind_cols(group_cols, res)
+}
+
+#' Check that the group columns of a tidy output have their own names
+#'
+#' With several grouping variables, the group columns are named after the
+#' variables, so a variable can have the name of another column of the
+#' output (e.g. `n_sites`). [dplyr::bind_cols()] would then rename both
+#' columns (e.g. to `n_sites...2`), so we stop instead.
+#'
+#' @param group_names the names of the group columns
+#' @param res_names the names of the other columns of the output
+#' @returns TRUE (invisibly), or an error
+#' @keywords internal
+#' @noRd
+.check_group_col_names <- function(group_names, res_names) {
+  clash <- intersect(group_names, res_names)
+  if (length(clash) > 0) {
+    stop(
+      "the group columns would have the names of other columns of the ",
+      "output (", paste(clash, collapse = ", "), "); rename the grouping ",
+      "variables"
+    )
+  }
+  invisible(TRUE)
 }
 
 #' Labels for pairs of groups

@@ -8,7 +8,7 @@ pairwise_allele_sharing(
   x,
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
@@ -21,7 +21,8 @@ symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 compared in a compact bit-packed form, so this has little effect on
 memory use.}
 
-\item{n_cores}{number of cores to be used (default 1).}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 a matrix of allele sharing between all pairs of individuals
@@ -33,6 +34,10 @@ pairs of individuals (for each locus, gives 1 if the two individuals are
 homozygous for the same allele, 0 if they are homozygous for a different
 allele, and 1/2 if at least one individual is heterozygous. Matching is the
 average of these 0, 1/2 and 1s)
+}
+\details{
+Imputed genotypes are used if \code{x} is set to use them (see
+\code{\link[=gt_set_imputed]{gt_set_imputed()}}), and treated as missing otherwise.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

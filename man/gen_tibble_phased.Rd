@@ -20,12 +20,14 @@ gen_tibble_phased(
   x,
   ...,
   parser = c("cpp", "vcfR"),
+  n_cores = 1,
   chunk_size = NULL,
   valid_alleles = c("A", "T", "C", "G"),
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
   names_as_int = FALSE,
+  chromosomes_as_int = FALSE,
   quiet = FALSE
 )
 
@@ -74,11 +76,21 @@ printed.}
 use a fast C++ parser (the default), or "vcfR" to use the R package
 \code{vcfR} (see \code{\link[=gen_tibble]{gen_tibble()}}).}
 
+\item{n_cores}{the number of cores used to read a \emph{VCF} file with parser
+"cpp" (see \code{\link[=gen_tibble]{gen_tibble()}}). Default is 1.}
+
 \item{chunk_size}{the number of loci processed at a time (currently only
 used with parser "vcfR").}
 
-\item{names_as_int}{logical. If TRUE, locus names are stored as integers.
-Only used when \code{x} is a \emph{VCF} file with parser "cpp". Default is FALSE.}
+\item{names_as_int}{logical. If TRUE, locus names are stored as integers,
+and their original names are written to a sidecar file (see
+\code{\link[=gen_tibble]{gen_tibble()}} and \code{\link[=gt_lookup_loci]{gt_lookup_loci()}}). Only used when \code{x} is a \emph{VCF}
+file with parser "cpp". Default is FALSE.}
+
+\item{chromosomes_as_int}{logical. If TRUE, chromosomes are stored as
+integer codes, and their names are written to a sidecar file (see
+\code{\link[=gen_tibble]{gen_tibble()}} and \code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}}). Only used when \code{x} is a
+\emph{VCF} file with parser "cpp". Default is FALSE.}
 
 \item{indiv_meta}{a list, data.frame or tibble with information on each
 individual, with a compulsory column 'id' (as for \code{\link[=gen_tibble]{gen_tibble()}}). Only

@@ -856,6 +856,18 @@ test_that("double positions are not written in scientific notation", {
     colClasses = "character"
   )
   expect_equal(bim$V4, map$V4)
+  # integer positions (written as they are) give the same map file
+  test_gt_int <- test_gt
+  show_loci(test_gt_int)$position <- as.integer(show_loci(test_gt_dbl)$position)
+  int_path <- gt_as_plink(
+    test_gt_int,
+    file = paste0(tempfile(), ".ped"),
+    type = "ped"
+  )
+  expect_identical(
+    readLines(sub("\\.ped$", ".map", int_path)),
+    readLines(sub("\\.ped$", ".map", ped_path))
+  )
 })
 
 test_that("ped and raw write subsets of individuals and loci", {

@@ -28,9 +28,9 @@
 #'   of Allele Sharing returned by [pairwise_allele_sharing()] with
 #'   `as_matrix=TRUE`. As a number of statistics can be derived from the Allele
 #'   Sharing matrix, it is sometimes more efficient to pre-compute this matrix.
-#' @param n_cores number of cores to be used for "Nei87" (it defaults to
-#'   [bigstatsr::nb_cores()]); "WG17" uses the allele sharing matrix, see
-#'   [pairwise_allele_sharing()].
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()] (for "WG17", to compute the allele sharing matrix
+#'   if it is not given, see [pairwise_allele_sharing()])
 #' @returns a vector of population specific fis (plus the global value if
 #'   `include_global=TRUE`)
 #' @export
@@ -85,7 +85,8 @@ pop_fis <- function(
     pop_fis_wg17(
       .x,
       include_global = include_global,
-      allele_sharing_mat = allele_sharing_mat
+      allele_sharing_mat = allele_sharing_mat,
+      n_cores = n_cores
     )
   }
 }
@@ -134,14 +135,18 @@ pop_fis_nei87 <- function(
 pop_fis_wg17 <- function(
   .x,
   include_global = FALSE,
-  allele_sharing_mat = NULL
+  allele_sharing_mat = NULL,
+  n_cores = bigstatsr::nb_cores()
 ) {
   stopifnot_diploid(.x)
   if (!inherits(.x, "grouped_df")) {
     stop(".x should be a grouped gen_tibble")
   }
   if (is.null(allele_sharing_mat)) {
-    allele_sharing_mat <- pairwise_allele_sharing(.x, as_matrix = TRUE)
+    allele_sharing_mat <- pairwise_allele_sharing(.x,
+      as_matrix = TRUE,
+      n_cores = n_cores
+    )
   }
 
   Mij <- allele_sharing_mat

@@ -29,7 +29,7 @@ the group information}
 
 \item{arrange_by_group}{Boolean determining whether to arrange the
 individuals by group. Groups are ordered as by the grouped functions
-(see \code{\link[dplyr:group_data]{dplyr::group_keys()}}): if the grouping variable in the \code{gen_tibble}
+(see \code{\link[dplyr:group_keys]{dplyr::group_keys()}}): if the grouping variable in the \code{gen_tibble}
 or the metadata of the \code{gt_admix} object is a factor, by the levels of the
 factor; numbers in numeric order; otherwise alphabetically. With several
 grouping variables, groups are ordered by the first variable, then by the

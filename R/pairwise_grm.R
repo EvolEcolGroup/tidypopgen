@@ -16,7 +16,7 @@
 #' @param block_size the size of the blocks to use for the computation of the
 #'   allele sharing matrix.
 #' @param n_cores number of cores to be used for the computation of the
-#'   allele sharing matrix (default 1).
+#'   allele sharing matrix, it defaults to [bigstatsr::nb_cores()]
 #' @returns a matrix of GR between all pairs of individuals
 #' @export
 #' @seealso [hierfstat::beta.dosage()]
@@ -33,7 +33,7 @@ pairwise_grm <- function(
   x,
   allele_sharing_mat = NULL,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 ) {
   stopifnot_diploid(x)
   if (is.null(allele_sharing_mat)) {

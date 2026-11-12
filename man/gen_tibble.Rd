@@ -27,6 +27,7 @@ gen_tibble(
   backingfile = NULL,
   allow_duplicates = FALSE,
   names_as_int = FALSE,
+  chromosomes_as_int = FALSE,
   quiet = FALSE
 )
 
@@ -97,17 +98,39 @@ latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 in case your
 \emph{VCF} has an unusual structure.}
 
-\item{n_cores}{currently ignored (reading files is not parallelised); kept
-for backwards compatibility}
+\item{n_cores}{the number of cores used to read a \emph{VCF} file with
+\code{parser = "cpp"}: the genotypes are parsed in parallel, and a \emph{.vcf.gz}
+file compressed with \code{bgzip} (as most are) is also decompressed in
+parallel (other gzipped files are decompressed on a single core). It is
+ignored for other formats and for \code{parser = "vcfR"}.}
 
 \item{chunk_size}{the number of loci or individuals (depending on the format)
 processed at a time (currently used if \code{x} is a vcf with parser "vcfR")}
 
 \item{names_as_int}{logical. If TRUE, locus names will be
 converted to integers. Only used when \code{x} is a \emph{VCF} file with parser
-"cpp". Default is FALSE. This can be useful when working with very large
-datasets where storing the names as string can use a large amount of
-memory.}
+"cpp", a PLINK \emph{bed} file or a bigSNP \emph{rds} file. Default is FALSE. This
+can be useful when working with very large datasets where storing the
+names as string can use a large amount of memory. Integer names are the
+index of each locus in the \emph{VCF} (or \emph{bim}) file, so they can not be used
+to match loci across datasets: \link[=rbind.gen_tbl]{rbind()} and
+\code{\link[=rbind_dry_run]{rbind_dry_run()}} always match loci with integer names by chromosome and
+position. For \emph{VCF} files, the original names (with the chromosomes and
+positions) are written to a sidecar file next to the backing file
+(\emph{.loci.tsv}), from which \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_restore_loci]{gt_restore_loci()}} get
+them back.}
+
+\item{chromosomes_as_int}{logical. If TRUE, chromosomes will be stored as
+integer codes rather than as a factor. Only used when \code{x} is a \emph{VCF} file
+with parser "cpp". Default is FALSE. This saves memory and time with
+many chromosomes (e.g. RAD loci assembled de novo, each its own
+"chromosome"). A chromosome whose name is a number (after an optional
+"chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07") keeps that
+number as its code; other names are numbered after the largest number,
+in order of first appearance. The names are written to a sidecar file
+next to the backing file (\emph{.chromosomes.tsv}), from which
+\code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}}, \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_restore_loci]{gt_restore_loci()}}
+get them back.}
 
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only
@@ -140,11 +163,14 @@ variant is found in a sex chromosome (or mtDNA), the parser will fail with
 such a \emph{VCF}, change the order of variants so that the first chromosome is an
 autosome using a tool such as \code{vcftools}. Individuals with a missing genotype
 ('.') on the first variant get their ploidy from their first genotype that
-is not '.' (or the largest ploidy of the other individuals, if all their
-genotypes are '.'). Currently, only biallelic SNPs are
-supported. If haploid variants (e.g. sex chromosomes) are included in the
-\emph{VCF}, they are not transformed into homozygous calls. Instead, reference
-alleles will be coded as 0 and alternative alleles will be coded as 1.
+is not '.': the \code{cpp} parser looks for it in the next 1,000 variants only
+(so that the search does not slow down parsing), the \code{vcfR} parser in the
+whole file. Individuals with no such genotype get the largest ploidy of the
+other individuals (or 2, if no ploidy is known). Currently, only biallelic
+SNPs are supported. If haploid variants (e.g. sex chromosomes) are included
+in the \emph{VCF}, they are not transformed into homozygous calls. Instead,
+reference alleles will be coded as 0 and alternative alleles will be coded
+as 1.
 The phase of phased genotypes (e.g. \code{0|1}) is ignored: use
 \code{\link[=gen_tibble_phased]{gen_tibble_phased()}} to keep it.
 \item \emph{PLINK} files (.bed, .ped, or a bigSNP .rds): the individual information

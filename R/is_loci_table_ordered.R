@@ -1,16 +1,20 @@
 #' Test if the loci table is ordered
 #'
 #' This functions checks that all SNPs in a chromosome are adjacent in the loci
-#' table, and that positions are sorted within chromosomes.
+#' table, and that positions (and, unless `ignore_genetic_dist = TRUE`,
+#' genetic distances) are sorted within chromosomes. Missing positions (or
+#' missing genetic distances, if they are checked) are an error, as the order
+#' of those loci is unknown.
 #'
 #' @param .x a vector of class `vctrs_bigSNP` (usually the `genotype` column of
 #'   a [`gen_tibble`] object), or a [`gen_tibble`].
 #' @param error_on_false logical, if `TRUE` an error is thrown if the loci are
 #'   not ordered.
-#' @param ignore_genetic_dist logical, if `TRUE` the physical position is not
-#'   checked.
+#' @param ignore_genetic_dist logical, if `TRUE` (the default) only the
+#'   positions are checked, and genetic distances are ignored (they can then
+#'   be missing).
 #' @param ... other arguments passed to specific methods.
-#' @returns a logical vector defining which loci are transversions
+#' @returns `TRUE` if the loci are ordered, `FALSE` otherwise
 #' @rdname is_loci_table_ordered
 #' @export
 #' @examples
@@ -56,12 +60,27 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
   rlang::check_dots_empty()
 
   loci <- show_loci(.x)
-  # integer chromosome of each locus, computed once and used to split
-  # individual columns (rather than splitting the whole loci table)
-  chr_int <- cast_chromosome_to_int(loci$chromosome)
 
-  # check that within each chromosome positions are sorted
-  if (any_unsorted_by_group(loci$position, chr_int)) {
+  # loci with a missing position (or genetic distance, if it is checked) can
+  # not be ordered
+  if (anyNA(loci$position)) {
+    stop(
+      sum(is.na(loci$position)), " loci have a missing position, so the ",
+      "order of the loci table can not be checked"
+    )
+  }
+  if (!ignore_genetic_dist && anyNA(loci$genetic_dist)) {
+    stop(
+      sum(is.na(loci$genetic_dist)), " loci have a missing genetic distance; ",
+      "use ignore_genetic_dist = TRUE to check the order of positions only"
+    )
+  }
+
+  # check that within each chromosome positions are sorted (each check is a
+  # single pass in C++, which does not copy or split the columns of the loci
+  # table)
+  position_order <- any_unsorted_by_chromosome(loci$position, loci$chromosome)
+  if (position_order[["unsorted"]]) {
     if (error_on_false) {
       stop("Your loci are not sorted within chromosomes")
     } else {
@@ -69,23 +88,21 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
     }
   }
 
-  # check that within each chromosome positions are unique
-  if (isFALSE(find_duplicated_loci(
-    .x,
-    error_on_false = error_on_false,
-    list_duplicates = FALSE
-  ))) {
-    return(FALSE)
+  # check that within each chromosome positions are unique; as positions are
+  # now known to be sorted, duplicated positions are equal consecutive
+  # positions within a chromosome
+  if (position_order[["ties"]]) {
+    if (error_on_false) {
+      stop("Your loci table contains duplicates")
+    } else {
+      return(FALSE)
+    }
   }
 
   # check that all positions in a chromosome are adjacent, i.e. that no
-  # chromosome has more than one run of loci; vctrs::vec_unrep() finds the
-  # runs without the several copies of the chromosome codes made by rle()
-  chr_runs <- vctrs::vec_unrep(as.integer(loci$chromosome))
-  # (rle() would split consecutive missing chromosomes into separate runs,
-  # so treat any run of missing chromosomes longer than one as a duplicate)
-  if (anyDuplicated(chr_runs$key) > 0 ||
-        any(is.na(chr_runs$key) & chr_runs$times > 1)) {
+  # chromosome has more than one run of loci (as with rle(), each missing
+  # chromosome is a run of its own, so more than one missing chromosome fails)
+  if (chromosomes_not_adjacent(loci$chromosome)) {
     if (error_on_false) {
       stop("All SNPs in a chromosome should be adjacent in the loci table")
     } else {
@@ -95,7 +112,10 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
 
   # check genetic distance
   if (!ignore_genetic_dist) {
-    if (any_unsorted_by_group(loci$genetic_dist, chr_int)) {
+    if (any_unsorted_by_chromosome(
+      loci$genetic_dist,
+      loci$chromosome
+    )[["unsorted"]]) {
       if (error_on_false) {
         stop("Your genetic distances are not sorted within chromosomes")
       } else {
@@ -175,17 +195,85 @@ find_duplicated_loci <- function(.x,
 }
 
 
-#' Test whether values are unsorted within any group
+#' Test whether values are unsorted within any chromosome
 #'
-#' Equivalent to splitting `x` by `group` and checking whether any of the
-#' groups is unsorted (as [is.unsorted()], so a group with missing values
-#' gives NA), but it only splits `x` rather than a whole table.
-#' @param x a vector
-#' @param group a vector of groups, of the same length as `x`
-#' @returns TRUE, FALSE or NA
+#' Equivalent to splitting `x` by `cast_chromosome_to_int()` of `chromosome`
+#' and checking whether any of the groups is unsorted (as [is.unsorted()], so a
+#' group of more than one value with missing values gives NA), but in a single
+#' pass in C++, without copying or splitting `x`. Chromosomes that cast to the
+#' same integer (e.g. "chr1" and "1") are a single group, as when sorting the
+#' loci table in [gt_order_loci()].
+#' @param x a numeric vector (e.g. the positions of the loci)
+#' @param chromosome the chromosomes of the loci (a factor, as in the loci
+#'   table)
+#' @returns a named logical vector: `unsorted` is TRUE, FALSE or NA as
+#'   described above, and `ties` is TRUE if two consecutive non-missing values
+#'   of a chromosome are equal (when no chromosome is unsorted, this means that
+#'   some pairs of chromosome and value are duplicated)
 #' @keywords internal
 #' @noRd
-any_unsorted_by_group <- function(x, group) {
-  x_by_group <- vctrs::vec_split(x, group)$val
-  any(vapply(x_by_group, is.unsorted, logical(1)))
+any_unsorted_by_chromosome <- function(x, chromosome) {
+  # integer chromosomes (chromosomes_as_int) are already cast to integers,
+  # each with its own group
+  if (is.integer(chromosome)) {
+    groups <- chromosome_group_codes(chromosome)
+    return(unsorted_by_chromosome_cpp(x, groups$codes, seq_len(groups$n)))
+  }
+  if (!is.factor(chromosome)) {
+    chromosome <- as.factor(chromosome)
+  }
+  # cast the levels rather than each locus; levels with the same integer
+  # chromosome get the same group (the index of the first of those levels),
+  # and levels that cast to NA are grouped with the missing chromosomes
+  levels_int <- cast_chromosome_to_int(levels(chromosome))
+  level_group <- match(levels_int, levels_int, incomparables = NA)
+  unsorted_by_chromosome_cpp(x, chromosome, level_group)
+}
+
+
+#' Test whether any chromosome is split into several runs of loci
+#'
+#' Equivalent to finding the runs of chromosomes with [rle()] and checking
+#' whether any chromosome has more than one run (so, as `rle()` does not
+#' merge missing values, more than one missing chromosome gives TRUE), but in
+#' a single pass in C++.
+#' @param chromosome the chromosomes of the loci (a factor, as in the loci
+#'   table)
+#' @returns TRUE or FALSE
+#' @keywords internal
+#' @noRd
+chromosomes_not_adjacent <- function(chromosome) {
+  groups <- chromosome_group_codes(chromosome)
+  chromosomes_not_adjacent_cpp(groups$codes, groups$n)
+}
+
+# The chromosomes of the loci as group codes 1..n (NA for missing
+# chromosomes), for the C++ helpers that take the codes of a factor: the codes
+# of a factor (with n its number of levels), or, for integer chromosomes
+# (chromosomes_as_int), the integers themselves if they are positive and not
+# much larger than the number of loci (so that the helpers' tables of n
+# groups stay small), or else their index among the unique values (which are
+# then returned as `values`, to map the groups back to the integers). Other
+# vectors are turned into a factor.
+chromosome_group_codes <- function(chromosome) {
+  if (is.integer(chromosome) && !is.factor(chromosome)) {
+    if (length(chromosome) == 0 || all(is.na(chromosome))) {
+      return(list(codes = chromosome, n = 0L))
+    }
+    code_range <- range(chromosome, na.rm = TRUE)
+    if (code_range[1] >= 1 &&
+          code_range[2] <= max(2 * length(chromosome), 1e6)) {
+      return(list(codes = chromosome, n = code_range[2]))
+    }
+    values <- unique(chromosome)
+    return(list(
+      codes = match(chromosome, values, incomparables = NA),
+      n = length(values),
+      values = values
+    ))
+  }
+  if (!is.factor(chromosome)) {
+    chromosome <- as.factor(chromosome)
+  }
+  list(codes = chromosome, n = nlevels(chromosome))
 }

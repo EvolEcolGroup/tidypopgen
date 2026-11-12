@@ -32,6 +32,15 @@ coefficients and returns the maximum set of individuals that contains no
 relationships above the given threshold.
 }
 \details{
+Individuals are removed greedily, as in
+\code{caret::findCorrelation()}: individuals are considered in order of
+decreasing mean relatedness, and for each pair related above
+\code{kings_threshold}, the first individual is removed if its mean
+relatedness is larger than the mean of the remaining matrix without the
+second individual, and the second one otherwise. No pair above the
+threshold is left, but the set of individuals kept is not guaranteed to
+be the largest possible.
+
 Missing relationship coefficients (e.g. KING kinship for pairs of
 individuals with no loci genotyped in both) are not evidence of
 relatedness: such pairs are treated as not related, with a warning.

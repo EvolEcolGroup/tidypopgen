@@ -1,0 +1,13 @@
+hap1	popA
+hap2	popA
+hap3	popA
+hap4	popA
+hap5	popA
+hap6	popA
+hap7	popA
+hap8	popB
+hap9	popB
+hap10	popB
+hap11	popB
+hap12	popB
+hap13	popB

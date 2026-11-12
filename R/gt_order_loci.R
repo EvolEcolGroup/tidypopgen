@@ -15,9 +15,11 @@
 #'   reordered manually, will be used, but only if the positions within each
 #'   chromosome are sequential
 #' @param ignore_genetic_dist boolean to ignore the genetic distance when
-#'   checking. Note that, if `genetic_dist` are being ignored and they are not
-#'   sorted, the function will set them to zero to avoid problems with other
-#'   software.
+#'   checking (the default), so that only positions are checked. Note that, if
+#'   `genetic_dist` are being ignored and they are not sorted (or are missing),
+#'   the function will set them to zero to avoid problems with other software.
+#'   Missing positions (or missing genetic distances, when they are not
+#'   ignored) are an error.
 #' @param quiet boolean to suppress information about the files
 #' @param ... other arguments
 #' @return A [gen_tibble]

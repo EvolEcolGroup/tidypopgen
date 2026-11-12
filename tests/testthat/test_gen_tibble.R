@@ -117,6 +117,81 @@ test_that("gen_tibble catches invalid alleles", {
   )
 })
 
+test_that("the allele checks in C++ match %in%", {
+  # the same non-ASCII string in two encodings, NA and the string "NA", and
+  # more distinct strings than the C++ code keeps in its hash table
+  e_utf8 <- "é"
+  e_latin1 <- iconv(e_utf8, "UTF-8", "latin1")
+  x <- c(
+    "A", e_latin1, NA, "NA", "0", ".", e_utf8,
+    as.character(1:300), "A", NA
+  )
+  tables <- list(
+    c("A", "T", "C", "G", "0", ".", NA),
+    c("0", "."),
+    c(e_utf8, "NA"),
+    c(NA, "150", "299"),
+    character(0)
+  )
+  for (table in tables) {
+    expect_identical(which_in_cpp(x, table), which(x %in% table))
+    expect_identical(all_in_cpp(x, table), all(x %in% table))
+    expect_identical(
+      all_in_cpp(x[1:7], table),
+      all(x[1:7] %in% table)
+    )
+  }
+  expect_true(all_in_cpp(c(e_latin1, NA), c(e_utf8, NA)))
+  # missing alleles are set to NA in both columns
+  loci <- data.frame(
+    allele_ref = c("A", "0", ".", "N", NA),
+    allele_alt = c(".", "T", "N", "C", "0")
+  )
+  expect_identical(
+    harmonise_missing_values(loci, missing_alleles = c(".", "N")),
+    data.frame(
+      allele_ref = c("A", NA, NA, NA, NA),
+      allele_alt = c(NA, "T", NA, "C", NA)
+    )
+  )
+})
+
+test_that("the check for duplicated loci names matches anyDuplicated()", {
+  e_utf8 <- "\u00e9"
+  e_latin1 <- iconv(e_utf8, "UTF-8", "latin1")
+  names_list <- list(
+    character(0),
+    paste0("rs", 1:1000),
+    c(paste0("rs", 1:1000), "rs500"),
+    c("a", NA, "b", NA),
+    c("NA", NA),
+    # the same text in two encodings (left to anyDuplicated())
+    c("a", e_utf8, e_latin1),
+    c(1:5, 3L)
+  )
+  for (x in names_list) {
+    expect_identical(
+      as.double(any_duplicated_names(x)),
+      as.double(anyDuplicated(x))
+    )
+  }
+  expect_identical(any_duplicated_strings_cpp(c("a", e_utf8, e_latin1)), -1)
+  # duplicated names are reported by gen_tibble()
+  expect_error(
+    gen_tibble(
+      x = matrix(0, 1, 2),
+      loci = data.frame(
+        name = c("rs1", "rs1"), chromosome = 1L, position = 1:2,
+        genetic_dist = 0, allele_ref = "A", allele_alt = "T"
+      ),
+      indiv_meta = data.frame(id = "a"),
+      quiet = TRUE,
+      backingfile = tempfile()
+    ),
+    "duplicated locus names"
+  )
+})
+
 test_that("valid alleles check for .character method", {
   expect_error(
     pop_b <-
@@ -142,6 +217,41 @@ test_that("loci_from_bim reads loci names and alleles as characters", {
   expect_equal(loci$chromosome, factor(c(1, 2)))
   expect_equal(loci$position, c(100L, 200L))
   expect_equal(loci$genetic_dist, c(0, 0.5))
+})
+
+test_that("gen_tibble reads bed and rds files with integer loci names", {
+  bed_file <- system.file("extdata", "pop_a.bed", package = "tidypopgen")
+  gt_names <- gen_tibble(bed_file, backingfile = tempfile(), quiet = TRUE)
+  gt_int <- gen_tibble(bed_file,
+    backingfile = tempfile(), names_as_int = TRUE, quiet = TRUE
+  )
+  # the names are the index of each locus in the bim file
+  loci_int <- show_loci(gt_int)
+  expect_identical(loci_int$name, seq_len(count_loci(gt_names)))
+  # everything else is unchanged
+  loci_names <- show_loci(gt_names)
+  expect_identical(loci_int[names(loci_int) != "name"],
+    loci_names[names(loci_names) != "name"]
+  )
+  expect_identical(show_genotypes(gt_int), show_genotypes(gt_names))
+  # a bigSNP rds file
+  rds_file <- bigsnpr::snp_readBed(bed_file, backingfile = tempfile())
+  gt_rds <- gen_tibble(rds_file,
+    backingfile = tempfile(), names_as_int = TRUE, quiet = TRUE
+  )
+  expect_identical(show_loci(gt_rds)$name, loci_int$name)
+  expect_identical(show_genotypes(gt_rds), show_genotypes(gt_int))
+  # other formats give an error
+  ped_file <- system.file("extdata", "pop_a.ped", package = "tidypopgen")
+  expect_error(
+    gen_tibble(ped_file, names_as_int = TRUE, quiet = TRUE),
+    "names_as_int = TRUE is only available"
+  )
+  vcf_file <- system.file("extdata", "pop_a.vcf", package = "tidypopgen")
+  expect_error(
+    gen_tibble(vcf_file, parser = "vcfR", names_as_int = TRUE, quiet = TRUE),
+    "names_as_int = TRUE is only available"
+  )
 })
 
 test_that("0 is always accepted as a missing allele", {
@@ -495,6 +605,55 @@ test_that("gen_tibble.matrix validates ploidy and dosages", {
   expect_equal(indiv_ploidy(mixed_gt), c(4, 2, 2))
 })
 
+test_that("dosage matrices are checked and written in C++ as in R", {
+  # the R checks of gen_tibble.matrix(), for reference
+  ref_check <- function(x, ploidy) {
+    if (any(x != round(x) | x < 0, na.rm = TRUE)) {
+      return(1L)
+    }
+    if (any(x > ploidy, na.rm = TRUE)) {
+      return(2L)
+    }
+    0L
+  }
+  x <- matrix(c(0, 1, 2, NA, NaN, 2), nrow = 2)
+  ploidy <- c(2, 2)
+  for (bad in list(1.5, -1, Inf, -Inf, 3, NA)) {
+    x_bad <- x
+    x_bad[2, 3] <- bad
+    for (storage in c("double", "integer")) {
+      if (storage == "integer" && !is.finite(bad) && !is.na(bad)) next
+      storage.mode(x_bad) <- storage
+      expect_identical(
+        check_dosage_matrix_cpp(x_bad, ploidy, check_integer = TRUE),
+        ref_check(x_bad, ploidy)
+      )
+    }
+  }
+  # a different ploidy for each individual (row)
+  expect_identical(
+    check_dosage_matrix_cpp(x, c(2, 1), check_integer = TRUE),
+    ref_check(x, c(2, 1))
+  )
+  # without checking that dosages are integers
+  expect_identical(
+    check_dosage_matrix_cpp(matrix(c(1.5, 3)), 2, check_integer = FALSE),
+    2L
+  )
+  # the bytes of the FBM are those of as.raw(), with missing values as
+  # na_byte
+  fbm <- bigstatsr::FBM.code256(2, 3,
+    code = c(0, 1, 2, rep(NA, 253)),
+    backingfile = tempfile()
+  )
+  write_dosage_matrix_cpp(x, fbm, na_byte = 3)
+  expect_identical(fbm[], matrix(c(0, 1, 2, NA, NA, 2), 2, 3))
+  expect_identical(
+    readBin(fbm$backingfile, "raw", n = 6),
+    as.raw(c(0, 1, 2, 3, 3, 2))
+  )
+})
+
 test_that("gen_tibble identifies wrong loci table columns", {
   wrong_loci <- data.frame(
     a = paste0("rs", 1:6),
@@ -774,4 +933,52 @@ test_that("gen_tibble from a read-only bigSNP rds can be imputed", {
   gt_set_imputed(rds_gt, set = TRUE)
   expect_no_error(gt_save(rds_gt, quiet = TRUE))
   expect_identical(unname(tools::md5sum(bigsnp_files)), md5)
+})
+
+test_that("validate_loci finds duplicated loci, sorted or not", {
+  loci <- data.frame(
+    name = paste0("rs", 1:6),
+    chromosome = c("1", "1", "chr1", "chr1", "2", "2"),
+    position = as.integer(c(10, 20, 10, 20, 10, 30)),
+    genetic_dist = 0,
+    allele_ref = "A",
+    allele_alt = "T"
+  )
+  # sorted within each chromosome, no duplicates ("1" and "chr1" are
+  # different chromosomes in the loci table)
+  expect_no_error(validate_loci(loci, check_duplicates = TRUE))
+  # sorted, with a duplicate
+  loci_dup <- loci
+  loci_dup$position[2] <- 10L
+  expect_error(
+    validate_loci(loci_dup, check_duplicates = TRUE),
+    "duplicated loci"
+  )
+  # not sorted, with and without a duplicate
+  loci_unsorted <- loci[c(2, 1, 3:6), ]
+  loci_unsorted$name <- loci$name
+  expect_no_error(validate_loci(loci_unsorted, check_duplicates = TRUE))
+  loci_unsorted$position[6] <- 10L
+  loci_unsorted$position[5] <- 30L
+  expect_no_error(validate_loci(loci_unsorted, check_duplicates = TRUE))
+  loci_unsorted$position[6] <- 30L
+  expect_error(
+    validate_loci(loci_unsorted, check_duplicates = TRUE),
+    "duplicated loci"
+  )
+})
+
+test_that("is.finite() and friends work on the genotypes column", {
+  example_gt <- load_example_gt("gen_tbl")
+  # the method is registered with vctrs, so it does not need the package
+  # to be attached
+  expect_identical(
+    unname(is.finite(example_gt$genotypes)),
+    rep(TRUE, nrow(example_gt))
+  )
+  expect_identical(
+    unname(is.nan(example_gt$genotypes)),
+    rep(FALSE, nrow(example_gt))
+  )
+  expect_error(exp(example_gt$genotypes), "not implemented")
 })

@@ -158,3 +158,28 @@ test_that("snp_king is correct across bit-packing boundaries", {
   )
   expect_equal(test_king, king_r(geno_mat[rows, cols]), tolerance = 1e-12)
 })
+
+test_that("pairwise_king uses imputed genotypes only if set to", {
+  geno_na <- test_genotypes
+  geno_na[2, 4] <- NA
+  geno_na[3, 2] <- NA
+  gt_na <- gen_tibble(
+    x = geno_na, loci = test_loci, indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  king_na <- pairwise_king(gt_na, as_matrix = TRUE)
+  gt_imputed <- gt_impute_simple(gt_na, method = "mode")
+  # imputed genotypes are missing unless the gen_tibble is set to use them
+  gt_set_imputed(gt_imputed, set = FALSE)
+  expect_identical(pairwise_king(gt_imputed, as_matrix = TRUE), king_na)
+  # when used, they are the same as genotypes that were never missing
+  gt_set_imputed(gt_imputed, set = TRUE)
+  gt_filled <- gen_tibble(
+    x = show_genotypes(gt_imputed), loci = test_loci,
+    indiv_meta = test_indiv_meta, quiet = TRUE
+  )
+  expect_identical(
+    pairwise_king(gt_imputed, as_matrix = TRUE),
+    pairwise_king(gt_filled, as_matrix = TRUE)
+  )
+})

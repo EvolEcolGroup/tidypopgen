@@ -97,3 +97,25 @@ test_that("snp_allele_sharing is correct across bit-packing boundaries", {
   as_ref <- 0.5 * (1 + tcrossprod(dos_1) / tcrossprod(valid))
   expect_equal(test_as, as_ref, tolerance = 1e-12)
 })
+
+test_that("pairwise_allele_sharing uses imputed genotypes only if set to", {
+  # test_gt has missing genotypes
+  as_na <- pairwise_allele_sharing(test_gt, as_matrix = TRUE)
+  gt_imputed <- gt_impute_simple(test_gt, method = "mode")
+  # imputed genotypes are missing unless the gen_tibble is set to use them
+  gt_set_imputed(gt_imputed, set = FALSE)
+  expect_identical(
+    pairwise_allele_sharing(gt_imputed, as_matrix = TRUE),
+    as_na
+  )
+  # when used, they are the same as genotypes that were never missing
+  gt_set_imputed(gt_imputed, set = TRUE)
+  gt_filled <- gen_tibble(
+    x = show_genotypes(gt_imputed), loci = test_loci,
+    indiv_meta = test_indiv_meta, quiet = TRUE
+  )
+  expect_identical(
+    pairwise_allele_sharing(gt_imputed, as_matrix = TRUE),
+    pairwise_allele_sharing(gt_filled, as_matrix = TRUE)
+  )
+})

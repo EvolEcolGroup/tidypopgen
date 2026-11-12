@@ -73,7 +73,8 @@ windows_stats_generic <- function(.x, loci_table,
     loci_table,
     window_size = window_size,
     step_size = step_size,
-    size_unit = size_unit
+    size_unit = size_unit,
+    locus_windows = FALSE
   )
   # sum the values in each window (in the order of the loci, as runner does)
   win_sums <- window_sums_cpp(
@@ -97,16 +98,20 @@ windows_stats_generic <- function(.x, loci_table,
     stat[win_n == 0] <- NA
   } else {
     # apply the custom function with runner, one chromosome at a time
-    stat <- vector("list", length(win$chrom_loci))
-    for (i_chrom in seq_along(win$chrom_loci)) {
+    stat <- vector("list", length(win$chrom_first))
+    for (i_chrom in seq_along(win$chrom_first)) {
       chrom_win <- win$windows_chrom == i_chrom
+      # the loci of this chromosome
+      chrom_loci <- win$loci[
+        seq.int(win$chrom_first[i_chrom], win$chrom_last[i_chrom])
+      ]
       # note that runner measures the window from the end (not the front)
       stat[[i_chrom]] <- runner::runner(
-        x = .x[win$chrom_loci[[i_chrom]]],
+        x = .x[chrom_loci],
         k = window_size,
         at = win$windows$end[chrom_win],
         idx = if (size_unit == "bp") {
-          loci_table$position[win$chrom_loci[[i_chrom]]]
+          loci_table$position[chrom_loci]
         } else {
           integer(0)
         },
@@ -189,55 +194,75 @@ windows_stats_generic <- function(.x, loci_table,
 #' @param window_size the size of the windows
 #' @param step_size the step between windows
 #' @param size_unit either "snp" or "bp"
+#' @param locus_windows whether to return `locus_first` and `locus_last`
+#'   (only needed by kernels that add each locus to its windows; they take 8
+#'   bytes per locus)
 #' @returns a list with elements:
 #' - `windows`: a tibble with the `chromosome`, `start` and `end` of each
 #'   window
-#' - `windows_chrom`: the chromosome (as an index into `chrom_loci`) of each
+#' - `windows_chrom`: the chromosome (as an index into `chrom_first`) of each
 #'   window
-#' - `chrom_loci`: a list with the (1-based) indices of the loci of each
-#'   chromosome, in the order of the loci table
-#' - `loci`: the elements of `chrom_loci` concatenated
+#' - `loci`: the (1-based) indices of the loci, ordered by chromosome (in the
+#'   order of the chromosomes, and of the loci table within each chromosome).
+#'   When the loci of each chromosome are adjacent in the loci table (as
+#'   usual), this is `seq_len(nrow(loci_table))`, kept as a compact sequence
+#'   that takes no memory
+#' - `chrom_first`, `chrom_last`: the loci of chromosome `i` are
+#'   `loci[chrom_first[i]:chrom_last[i]]`
 #' - `lo`, `hi`: window `w` includes the loci `loci[(lo[w] + 1):hi[w]]` (i.e.
 #'   `lo` and `hi` are the 0-based, half-open range of the window in `loci`)
 #' - `complete`: whether each window lies within the range of the loci of its
 #'   chromosome (used to implement `complete = TRUE`)
-#' - `locus_first`, `locus_last`: for each locus (in the order of the loci
-#'   table), the first and last window that include it (0-based, with
-#'   `locus_last < locus_first` if the locus is not in any window)
+#' - `locus_first`, `locus_last`: (only if `locus_windows = TRUE`) for each
+#'   locus (in the order of the loci table), the first and last window that
+#'   include it (0-based, with `locus_last < locus_first` if the locus is not
+#'   in any window)
 #' @keywords internal
 #' @noRd
 .window_definitions <- function(loci_table, window_size, step_size,
-                                size_unit = c("snp", "bp")) {
+                                size_unit = c("snp", "bp"),
+                                locus_windows = TRUE) {
   size_unit <- match.arg(size_unit)
   chrom <- loci_table$chromosome
-  chromosomes <- unique(chrom)
+  chromosomes <- .chromosomes_in_order(chrom)
+  n_chrom <- length(chromosomes)
   # the chromosome of each locus, as an index into chromosomes
   chrom_id <- .chromosome_index(chrom, chromosomes)
-  # the indices of the loci of each chromosome, in the order of the table
-  # (we split by a factor built directly from chrom_id, to avoid converting
-  # it to character)
-  chrom_factor <- structure(
-    chrom_id,
-    levels = as.character(seq_along(chromosomes)),
-    class = "factor"
-  )
-  chrom_loci <- unname(split(seq_along(chrom), chrom_factor))
+  # the loci ordered by chromosome, keeping the order of the table within
+  # each chromosome (the radix sort is stable). As chromosomes are numbered
+  # in order of appearance, chrom_id is sorted when the loci of each
+  # chromosome are adjacent, and the order is then the identity, which we
+  # keep as a compact sequence (rather than splitting the indices of the
+  # loci by chromosome, which takes several bytes per locus)
+  if (is.unsorted(chrom_id)) {
+    loci <- order(chrom_id, method = "radix")
+  } else {
+    loci <- seq_along(chrom_id)
+  }
+  # the loci of chromosome i are loci[chrom_first[i]:chrom_last[i]]
+  chrom_n <- tabulate(chrom_id, nbins = n_chrom)
+  rm(chrom_id)
+  chrom_last <- cumsum(chrom_n)
+  chrom_first <- chrom_last - chrom_n + 1L
   # chromosome names as used in the results (factors are converted to
   # character, as when looping over them)
   if (is.factor(chromosomes)) {
     chromosomes <- as.character(chromosomes)
   }
-  n_chrom <- length(chrom_loci)
   windows_at <- lo <- hi <- complete <- vector("list", n_chrom)
-  locus_first <- locus_last <- integer(length(chrom))
+  if (locus_windows) {
+    locus_first <- locus_last <- integer(length(chrom))
+  }
   # number of loci and windows on the previous chromosomes
   loci_offset <- 0L
   win_offset <- 0L
   for (i_chrom in seq_len(n_chrom)) {
+    # the loci of this chromosome
+    chrom_loci <- loci[seq.int(chrom_first[i_chrom], chrom_last[i_chrom])]
     if (size_unit == "bp") {
-      position_sub <- loci_table$position[chrom_loci[[i_chrom]]]
+      position_sub <- loci_table$position[chrom_loci]
     } else {
-      position_sub <- seq_along(chrom_loci[[i_chrom]])
+      position_sub <- seq_along(chrom_loci)
     }
     # window ends
     window_range <- ceiling(range(position_sub) / window_size)
@@ -274,40 +299,61 @@ windows_stats_generic <- function(.x, loci_table,
     # for each locus (with rank p on the chromosome), the windows that
     # include it are those with lo_chrom < p <= hi_chrom; as lo_chrom and
     # hi_chrom are non-decreasing, these are a contiguous range of windows
-    p <- seq_along(idx)
-    locus_first[chrom_loci[[i_chrom]]] <-
-      win_offset + findInterval(p - 1L, hi_chrom)
-    locus_last[chrom_loci[[i_chrom]]] <-
-      win_offset + findInterval(p - 1L, lo_chrom) - 1L
+    if (locus_windows) {
+      p <- seq_along(idx)
+      locus_first[chrom_loci] <- win_offset + findInterval(p - 1L, hi_chrom)
+      locus_last[chrom_loci] <-
+        win_offset + findInterval(p - 1L, lo_chrom) - 1L
+    }
     loci_offset <- loci_offset + length(idx)
     win_offset <- win_offset + length(at)
   }
   n_windows <- lengths(windows_at)
   window_at <- unlist(windows_at)
-  list(
+  res <- list(
     windows = tibble(
       chromosome = rep(chromosomes, n_windows),
       start = window_at - window_size + 1,
       end = window_at
     ),
     windows_chrom = rep(seq_len(n_chrom), n_windows),
-    chrom_loci = chrom_loci,
-    loci = unlist(chrom_loci),
+    loci = loci,
+    chrom_first = chrom_first,
+    chrom_last = chrom_last,
     lo = unlist(lo),
     hi = unlist(hi),
-    complete = unlist(complete),
-    locus_first = locus_first,
-    locus_last = locus_last
+    complete = unlist(complete)
   )
+  if (locus_windows) {
+    res$locus_first <- locus_first
+    res$locus_last <- locus_last
+  }
+  res
+}
+
+# The chromosomes in order of appearance, i.e. unique(chrom). We take the
+# unique values of the runs of chromosomes, which are few (the loci of a
+# chromosome are usually adjacent), rather than hashing every locus
+.chromosomes_in_order <- function(chrom) {
+  unique(vctrs::vec_unrep(chrom)$key)
 }
 
 # The chromosome of each locus, as an index into the chromosomes in order of
-# appearance (chromosomes, i.e. unique(chrom)). For factors, we match the
-# integer codes, as matching factors would convert them to character vectors
-# (with one element per locus, which are large for big datasets)
-.chromosome_index <- function(chrom, chromosomes = unique(chrom)) {
+# appearance (chromosomes, i.e. unique(chrom)). For factors, we find the
+# index of each level, and index it with the factor (which uses its integer
+# codes without copying them), as matching factors would convert them to
+# character vectors (with one element per locus, which are large for big
+# datasets)
+.chromosome_index <- function(chrom,
+                              chromosomes = .chromosomes_in_order(chrom)) {
   if (is.factor(chrom)) {
-    match(as.integer(chrom), as.integer(chromosomes))
+    level_index <- match(seq_along(levels(chrom)), as.integer(chromosomes))
+    chrom_id <- level_index[chrom]
+    # missing chromosomes have a missing code
+    if (anyNA(chromosomes)) {
+      chrom_id[is.na(chrom_id)] <- which(is.na(chromosomes))
+    }
+    chrom_id
   } else {
     match(chrom, chromosomes)
   }

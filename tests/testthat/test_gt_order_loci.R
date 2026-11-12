@@ -768,3 +768,86 @@ test_that("find_duplicated_loci lists duplicates by chromosome", {
     "should be adjacent"
   )
 })
+
+test_that("order checks in C++ match split() and is.unsorted()", {
+  # reference implementations: split by integer chromosome, and runs with rle()
+  ref_any_unsorted <- function(x, chromosome) {
+    x_by_chr <- split(x, cast_chromosome_to_int(chromosome), drop = TRUE)
+    # split() drops missing chromosomes, so add them as a group of their own
+    x_by_chr <- c(x_by_chr, list(x[is.na(chromosome)]))
+    any(vapply(x_by_chr, is.unsorted, logical(1)))
+  }
+  ref_not_adjacent <- function(chromosome) {
+    anyDuplicated(rle(as.integer(chromosome))$values) > 0
+  }
+  # "chr1" and "1" are the same integer chromosome; chr2 is split in two runs
+  chr <- factor(c("chr1", "1", "1", "chr2", "X", "chr2", NA, "Y", "Y"))
+  positions <- list(
+    c(1L, 2L, 3L, 5L, 1L, 6L, 9L, 1L, 2L), # sorted
+    c(1L, 3L, 2L, 5L, 1L, 6L, 9L, 1L, 2L), # unsorted across "chr1" and "1"
+    c(1L, 2L, 3L, 5L, 1L, 4L, 9L, 1L, 2L), # unsorted across the runs of chr2
+    c(1, 2, 3, 5, 1, 6, NA, 1, 2), # NA alone in its group, as double
+    c(1, 2, 3, 5, NA, 6, 9, 1, 2), # NA in a group of one locus
+    c(1L, 2L, 3L, 5L, 1L, 6L, 9L, NA, 2L), # NA in a group of two loci
+    c(1L, 2L, 3L, 5L, 1L, 4L, 9L, NA, 2L) # unsorted, and NA in another group
+  )
+  for (pos in positions) {
+    expect_identical(
+      any_unsorted_by_chromosome(pos, chr)[["unsorted"]],
+      ref_any_unsorted(pos, chr)
+    )
+  }
+  # ties are equal consecutive values within a chromosome (including across
+  # "chr1" and "1"), but not across chromosomes
+  expect_false(any_unsorted_by_chromosome(positions[[1]], chr)[["ties"]])
+  pos <- c(1L, 1L, 3L, 5L, 1L, 6L, 9L, 1L, 2L)
+  expect_true(any_unsorted_by_chromosome(pos, chr)[["ties"]])
+  pos <- c(1L, 2L, 3L, 1L, 1L, 6L, 9L, 1L, 2L)
+  expect_false(any_unsorted_by_chromosome(pos, chr)[["ties"]])
+  # runs of chromosomes, with missing chromosomes counted as in rle()
+  chr_list <- list(
+    chr,
+    factor(c("1", "1", "2", "2", NA)),
+    factor(c("1", NA, NA, "2")),
+    factor(c(NA, "1", "2", NA)),
+    factor(c("2", "1", "1", "3"), levels = c("3", "2", "1"))
+  )
+  for (this_chr in chr_list) {
+    expect_identical(
+      chromosomes_not_adjacent(this_chr),
+      ref_not_adjacent(this_chr)
+    )
+  }
+})
+
+test_that("missing positions and genetic distances give informative errors", {
+  test_gt <- load_example_gt("gen_tbl")
+  loci <- show_loci(test_gt)
+  loci$genetic_dist <- c(0.1, 0.2, NA, 0.4, 0.5, 0.6)
+  show_loci(test_gt) <- loci
+  # genetic distances are ignored by default, and can then be missing
+  expect_true(is_loci_table_ordered(test_gt))
+  expect_error(
+    is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE),
+    "1 loci have a missing genetic distance"
+  )
+  expect_error(
+    gt_order_loci(test_gt, ignore_genetic_dist = FALSE, quiet = TRUE),
+    "ignore_genetic_dist = TRUE"
+  )
+  # gt_order_loci() then sets the genetic distances to zero
+  # (the other messages, on the new backing files, are not tested)
+  suppressMessages(expect_message(
+    ordered_gt <- gt_order_loci(test_gt, quiet = FALSE),
+    "genetic distances are missing"
+  ))
+  expect_true(all(show_loci(ordered_gt)$genetic_dist == 0))
+  # positions are always needed
+  loci$position[c(2, 5)] <- NA
+  show_loci(test_gt) <- loci
+  expect_error(
+    is_loci_table_ordered(test_gt),
+    "2 loci have a missing position"
+  )
+  expect_error(gt_order_loci(test_gt, quiet = TRUE), "missing position")
+})

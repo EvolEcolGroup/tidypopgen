@@ -39,9 +39,9 @@ of Allele Sharing returned by \code{\link[=pairwise_allele_sharing]{pairwise_all
 \code{as_matrix=TRUE}. As a number of statistics can be derived from the Allele
 Sharing matrix, it is sometimes more efficient to pre-compute this matrix.}
 
-\item{n_cores}{number of cores to be used for "Nei87" (it defaults to
-\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}); "WG17" uses the allele sharing matrix, see
-\code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}}.}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}} (for "WG17", to compute the allele sharing matrix
+if it is not given, see \code{\link[=pairwise_allele_sharing]{pairwise_allele_sharing()}})}
 }
 \value{
 a vector of population specific fis (plus the global value if

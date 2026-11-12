@@ -45,6 +45,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// check_dosage_matrix_cpp
+int check_dosage_matrix_cpp(SEXP x, const NumericVector& ploidy, bool check_integer);
+RcppExport SEXP _tidypopgen_check_dosage_matrix_cpp(SEXP xSEXP, SEXP ploidySEXP, SEXP check_integerSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< bool >::type check_integer(check_integerSEXP);
+    rcpp_result_gen = Rcpp::wrap(check_dosage_matrix_cpp(x, ploidy, check_integer));
+    return rcpp_result_gen;
+END_RCPP
+}
+// write_dosage_matrix_cpp
+void write_dosage_matrix_cpp(SEXP x, Environment BM, int na_byte);
+RcppExport SEXP _tidypopgen_write_dosage_matrix_cpp(SEXP xSEXP, SEXP BMSEXP, SEXP na_byteSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< int >::type na_byte(na_byteSEXP);
+    write_dosage_matrix_cpp(x, BM, na_byte);
+    return R_NilValue;
+END_RCPP
+}
 // fbm256_prod_and_rowSumsSq
 List fbm256_prod_and_rowSumsSq(Environment BM, const IntegerVector& ind_row, const IntegerVector& ind_col, const NumericVector& center, const NumericVector& scale, const NumericMatrix& V, const IntegerVector& ind, const IntegerVector& lsq_pcs);
 RcppExport SEXP _tidypopgen_fbm256_prod_and_rowSumsSq(SEXP BMSEXP, SEXP ind_rowSEXP, SEXP ind_colSEXP, SEXP centerSEXP, SEXP scaleSEXP, SEXP VSEXP, SEXP indSEXP, SEXP lsq_pcsSEXP) {
@@ -331,6 +356,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// unsorted_by_chromosome_cpp
+LogicalVector unsorted_by_chromosome_cpp(SEXP x, const IntegerVector& chromosome, const IntegerVector& level_group);
+RcppExport SEXP _tidypopgen_unsorted_by_chromosome_cpp(SEXP xSEXP, SEXP chromosomeSEXP, SEXP level_groupSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type chromosome(chromosomeSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type level_group(level_groupSEXP);
+    rcpp_result_gen = Rcpp::wrap(unsorted_by_chromosome_cpp(x, chromosome, level_group));
+    return rcpp_result_gen;
+END_RCPP
+}
+// chromosomes_not_adjacent_cpp
+bool chromosomes_not_adjacent_cpp(const IntegerVector& chromosome, int n_levels);
+RcppExport SEXP _tidypopgen_chromosomes_not_adjacent_cpp(SEXP chromosomeSEXP, SEXP n_levelsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector& >::type chromosome(chromosomeSEXP);
+    Rcpp::traits::input_parameter< int >::type n_levels(n_levelsSEXP);
+    rcpp_result_gen = Rcpp::wrap(chromosomes_not_adjacent_cpp(chromosome, n_levels));
+    return rcpp_result_gen;
+END_RCPP
+}
 // loci_qc_cpp
 List loci_qc_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool hwe, uint32_t midp, int ncores, int block_size);
 RcppExport SEXP _tidypopgen_loci_qc_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP hweSEXP, SEXP midpSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
@@ -348,6 +398,108 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
     Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
     rcpp_result_gen = Rcpp::wrap(loci_qc_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, hwe, midp, ncores, block_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sidecar_index
+List sidecar_index(std::string path, std::string header, int block);
+RcppExport SEXP _tidypopgen_sidecar_index(SEXP pathSEXP, SEXP headerSEXP, SEXP blockSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< std::string >::type header(headerSEXP);
+    Rcpp::traits::input_parameter< int >::type block(blockSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_index(path, header, block));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sidecar_fetch
+List sidecar_fetch(std::string path, IntegerVector keys, IntegerVector index_keys, NumericVector index_offsets, IntegerVector fields, CharacterVector types, int check_field, IntegerVector check_values);
+RcppExport SEXP _tidypopgen_sidecar_fetch(SEXP pathSEXP, SEXP keysSEXP, SEXP index_keysSEXP, SEXP index_offsetsSEXP, SEXP fieldsSEXP, SEXP typesSEXP, SEXP check_fieldSEXP, SEXP check_valuesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type keys(keysSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type index_keys(index_keysSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type index_offsets(index_offsetsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type fields(fieldsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type types(typesSEXP);
+    Rcpp::traits::input_parameter< int >::type check_field(check_fieldSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type check_values(check_valuesSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_fetch(path, keys, index_keys, index_offsets, fields, types, check_field, check_values));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sidecar_read
+List sidecar_read(std::string path, std::string header, IntegerVector fields, CharacterVector types, double n);
+RcppExport SEXP _tidypopgen_sidecar_read(SEXP pathSEXP, SEXP headerSEXP, SEXP fieldsSEXP, SEXP typesSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< std::string >::type header(headerSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type fields(fieldsSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type types(typesSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_read(path, header, fields, types, n));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sidecar_subset
+List sidecar_subset(std::string path_in, std::string path_out, std::string header, IntegerVector keys);
+RcppExport SEXP _tidypopgen_sidecar_subset(SEXP path_inSEXP, SEXP path_outSEXP, SEXP headerSEXP, SEXP keysSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path_in(path_inSEXP);
+    Rcpp::traits::input_parameter< std::string >::type path_out(path_outSEXP);
+    Rcpp::traits::input_parameter< std::string >::type header(headerSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type keys(keysSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_subset(path_in, path_out, header, keys));
+    return rcpp_result_gen;
+END_RCPP
+}
+// chromosome_int_codes_cpp
+IntegerVector chromosome_int_codes_cpp(CharacterVector names);
+RcppExport SEXP _tidypopgen_chromosome_int_codes_cpp(SEXP namesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type names(namesSEXP);
+    rcpp_result_gen = Rcpp::wrap(chromosome_int_codes_cpp(names));
+    return rcpp_result_gen;
+END_RCPP
+}
+// write_chromosome_sidecar_cpp
+void write_chromosome_sidecar_cpp(std::string path, IntegerVector codes, CharacterVector names);
+RcppExport SEXP _tidypopgen_write_chromosome_sidecar_cpp(SEXP pathSEXP, SEXP codesSEXP, SEXP namesSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path(pathSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type codes(codesSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type names(namesSEXP);
+    write_chromosome_sidecar_cpp(path, codes, names);
+    return R_NilValue;
+END_RCPP
+}
+// sidecar_gather
+double sidecar_gather(std::string path_in, std::string header, IntegerVector index_keys, NumericVector index_offsets, IntegerVector keys, std::string path_out, double first_new_key, bool append, int chunk_size);
+RcppExport SEXP _tidypopgen_sidecar_gather(SEXP path_inSEXP, SEXP headerSEXP, SEXP index_keysSEXP, SEXP index_offsetsSEXP, SEXP keysSEXP, SEXP path_outSEXP, SEXP first_new_keySEXP, SEXP appendSEXP, SEXP chunk_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type path_in(path_inSEXP);
+    Rcpp::traits::input_parameter< std::string >::type header(headerSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type index_keys(index_keysSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type index_offsets(index_offsetsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type keys(keysSEXP);
+    Rcpp::traits::input_parameter< std::string >::type path_out(path_outSEXP);
+    Rcpp::traits::input_parameter< double >::type first_new_key(first_new_keySEXP);
+    Rcpp::traits::input_parameter< bool >::type append(appendSEXP);
+    Rcpp::traits::input_parameter< int >::type chunk_size(chunk_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(sidecar_gather(path_in, header, index_keys, index_offsets, keys, path_out, first_new_key, append, chunk_size));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -432,9 +584,89 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// roh_sliding_cpp
+List roh_sliding_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& chrom, SEXP position, int window_size, int max_het_window, int max_miss_window, double threshold, double max_gap, double min_snp, double min_bases, double max_bases_per_snp, double max_het, bool old_lengths, int ncores, int block_size);
+RcppExport SEXP _tidypopgen_roh_sliding_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP chromSEXP, SEXP positionSEXP, SEXP window_sizeSEXP, SEXP max_het_windowSEXP, SEXP max_miss_windowSEXP, SEXP thresholdSEXP, SEXP max_gapSEXP, SEXP min_snpSEXP, SEXP min_basesSEXP, SEXP max_bases_per_snpSEXP, SEXP max_hetSEXP, SEXP old_lengthsSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type chrom(chromSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type position(positionSEXP);
+    Rcpp::traits::input_parameter< int >::type window_size(window_sizeSEXP);
+    Rcpp::traits::input_parameter< int >::type max_het_window(max_het_windowSEXP);
+    Rcpp::traits::input_parameter< int >::type max_miss_window(max_miss_windowSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    Rcpp::traits::input_parameter< double >::type max_gap(max_gapSEXP);
+    Rcpp::traits::input_parameter< double >::type min_snp(min_snpSEXP);
+    Rcpp::traits::input_parameter< double >::type min_bases(min_basesSEXP);
+    Rcpp::traits::input_parameter< double >::type max_bases_per_snp(max_bases_per_snpSEXP);
+    Rcpp::traits::input_parameter< double >::type max_het(max_hetSEXP);
+    Rcpp::traits::input_parameter< bool >::type old_lengths(old_lengthsSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(roh_sliding_cpp(BM, rowInd, colInd, chrom, position, window_size, max_het_window, max_miss_window, threshold, max_gap, min_snp, min_bases, max_bases_per_snp, max_het, old_lengths, ncores, block_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sfs_config_counts_cpp
+List sfs_config_counts_cpp(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupIds, int ngroups, const NumericVector& ploidy, bool is_pseudohaploid, const List& spectra, const IntegerVector& min_n, const IntegerVector& polarise, const IntegerVector& block_ids, int n_blocks, int ncores, int block_size);
+RcppExport SEXP _tidypopgen_sfs_config_counts_cpp(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupIdsSEXP, SEXP ngroupsSEXP, SEXP ploidySEXP, SEXP is_pseudohaploidSEXP, SEXP spectraSEXP, SEXP min_nSEXP, SEXP polariseSEXP, SEXP block_idsSEXP, SEXP n_blocksSEXP, SEXP ncoresSEXP, SEXP block_sizeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupIds(groupIdsSEXP);
+    Rcpp::traits::input_parameter< int >::type ngroups(ngroupsSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< bool >::type is_pseudohaploid(is_pseudohaploidSEXP);
+    Rcpp::traits::input_parameter< const List& >::type spectra(spectraSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type min_n(min_nSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type polarise(polariseSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type block_ids(block_idsSEXP);
+    Rcpp::traits::input_parameter< int >::type n_blocks(n_blocksSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    Rcpp::traits::input_parameter< int >::type block_size(block_sizeSEXP);
+    rcpp_result_gen = Rcpp::wrap(sfs_config_counts_cpp(BM, rowInd, colInd, groupIds, ngroups, ploidy, is_pseudohaploid, spectra, min_n, polarise, block_ids, n_blocks, ncores, block_size));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sfs_project_cpp
+List sfs_project_cpp(const List& configs, const List& spectra, const IntegerVector& n_proj, const NumericMatrix& weights, int ncores);
+RcppExport SEXP _tidypopgen_sfs_project_cpp(SEXP configsSEXP, SEXP spectraSEXP, SEXP n_projSEXP, SEXP weightsSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const List& >::type configs(configsSEXP);
+    Rcpp::traits::input_parameter< const List& >::type spectra(spectraSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type n_proj(n_projSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix& >::type weights(weightsSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(sfs_project_cpp(configs, spectra, n_proj, weights, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sfs_preview_cpp
+List sfs_preview_cpp(const IntegerVector& n, const IntegerVector& k, const NumericVector& count, int n_max);
+RcppExport SEXP _tidypopgen_sfs_preview_cpp(SEXP nSEXP, SEXP kSEXP, SEXP countSEXP, SEXP n_maxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const IntegerVector& >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type k(kSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type count(countSEXP);
+    Rcpp::traits::input_parameter< int >::type n_max(n_maxSEXP);
+    rcpp_result_gen = Rcpp::wrap(sfs_preview_cpp(n, k, count, n_max));
+    return rcpp_result_gen;
+END_RCPP
+}
 // increment_as_counts
-void increment_as_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& byte_genotype, int ncores);
-RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP byte_genotypeSEXP, SEXP ncoresSEXP) {
+void increment_as_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
+RcppExport SEXP _tidypopgen_increment_as_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
@@ -442,15 +674,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type byte_genotype(byte_genotypeSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    increment_as_counts(k, k2, BM, rowInd, colInd, byte_genotype, ncores);
+    increment_as_counts(k, k2, BM, rowInd, colInd, ncores);
     return R_NilValue;
 END_RCPP
 }
 // increment_ibs_counts
-void increment_ibs_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& byte_genotype, int ncores);
-RcppExport SEXP _tidypopgen_increment_ibs_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP byte_genotypeSEXP, SEXP ncoresSEXP) {
+void increment_ibs_counts(Environment k, Environment k2, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
+RcppExport SEXP _tidypopgen_increment_ibs_counts(SEXP kSEXP, SEXP k2SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
@@ -458,15 +689,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type byte_genotype(byte_genotypeSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    increment_ibs_counts(k, k2, BM, rowInd, colInd, byte_genotype, ncores);
+    increment_ibs_counts(k, k2, BM, rowInd, colInd, ncores);
     return R_NilValue;
 END_RCPP
 }
 // increment_king_numerator
-void increment_king_numerator(Environment k, Environment n_Aa_i, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& byte_genotype, int ncores);
-RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP kSEXP, SEXP n_Aa_iSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP byte_genotypeSEXP, SEXP ncoresSEXP) {
+void increment_king_numerator(Environment k, Environment n_Aa_i, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
+RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP kSEXP, SEXP n_Aa_iSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
@@ -474,10 +704,59 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
     Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type byte_genotype(byte_genotypeSEXP);
     Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
-    increment_king_numerator(k, n_Aa_i, BM, rowInd, colInd, byte_genotype, ncores);
+    increment_king_numerator(k, n_Aa_i, BM, rowInd, colInd, ncores);
     return R_NilValue;
+END_RCPP
+}
+// king_counts_within_groups
+NumericMatrix king_counts_within_groups(Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const IntegerVector& groupEnd, int ncores);
+RcppExport SEXP _tidypopgen_king_counts_within_groups(SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP groupEndSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type groupEnd(groupEndSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    rcpp_result_gen = Rcpp::wrap(king_counts_within_groups(BM, rowInd, colInd, groupEnd, ncores));
+    return rcpp_result_gen;
+END_RCPP
+}
+// all_in_cpp
+bool all_in_cpp(const CharacterVector& x, const CharacterVector& table);
+RcppExport SEXP _tidypopgen_all_in_cpp(SEXP xSEXP, SEXP tableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type table(tableSEXP);
+    rcpp_result_gen = Rcpp::wrap(all_in_cpp(x, table));
+    return rcpp_result_gen;
+END_RCPP
+}
+// which_in_cpp
+SEXP which_in_cpp(const CharacterVector& x, const CharacterVector& table);
+RcppExport SEXP _tidypopgen_which_in_cpp(SEXP xSEXP, SEXP tableSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type table(tableSEXP);
+    rcpp_result_gen = Rcpp::wrap(which_in_cpp(x, table));
+    return rcpp_result_gen;
+END_RCPP
+}
+// any_duplicated_strings_cpp
+double any_duplicated_strings_cpp(const CharacterVector& x);
+RcppExport SEXP _tidypopgen_any_duplicated_strings_cpp(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const CharacterVector& >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(any_duplicated_strings_cpp(x));
+    return rcpp_result_gen;
 END_RCPP
 }
 // tajimas_d_window_sums_cpp
@@ -502,33 +781,105 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// vcf_loci_table
-List vcf_loci_table(std::string filename, bool read_names);
-RcppExport SEXP _tidypopgen_vcf_loci_table(SEXP filenameSEXP, SEXP read_namesSEXP) {
+// vcf_gt_dosages_cpp
+List vcf_gt_dosages_cpp(const CharacterMatrix& gt, int max_ploidy);
+RcppExport SEXP _tidypopgen_vcf_gt_dosages_cpp(SEXP gtSEXP, SEXP max_ploidySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    Rcpp::traits::input_parameter< bool >::type read_names(read_namesSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_loci_table(filename, read_names));
+    Rcpp::traits::input_parameter< const CharacterMatrix& >::type gt(gtSEXP);
+    Rcpp::traits::input_parameter< int >::type max_ploidy(max_ploidySEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_gt_dosages_cpp(gt, max_ploidy));
     return rcpp_result_gen;
 END_RCPP
 }
-// vcf_genotypes_to_fbm
-bool vcf_genotypes_to_fbm(std::string filename, Environment BM, LogicalVector& biallelic, const int missing_value, const int n_header_lines, const IntegerVector& phased_lut, const CharacterVector& sample_names);
-RcppExport SEXP _tidypopgen_vcf_genotypes_to_fbm(SEXP filenameSEXP, SEXP BMSEXP, SEXP biallelicSEXP, SEXP missing_valueSEXP, SEXP n_header_linesSEXP, SEXP phased_lutSEXP, SEXP sample_namesSEXP) {
+// merge_sites_new
+SEXP merge_sites_new(bool split_alt, int ref_rule, const CharacterVector& missing_alleles);
+RcppExport SEXP _tidypopgen_merge_sites_new(SEXP split_altSEXP, SEXP ref_ruleSEXP, SEXP missing_allelesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< bool >::type split_alt(split_altSEXP);
+    Rcpp::traits::input_parameter< int >::type ref_rule(ref_ruleSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type missing_alleles(missing_allelesSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_new(split_alt, ref_rule, missing_alleles));
+    return rcpp_result_gen;
+END_RCPP
+}
+// merge_sites_add_file
+IntegerVector merge_sites_add_file(SEXP sites, const IntegerVector& chromosome, const IntegerVector& position, const CharacterVector& allele_ref, const CharacterVector& allele_alt);
+RcppExport SEXP _tidypopgen_merge_sites_add_file(SEXP sitesSEXP, SEXP chromosomeSEXP, SEXP positionSEXP, SEXP allele_refSEXP, SEXP allele_altSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type chromosome(chromosomeSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type position(positionSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type allele_ref(allele_refSEXP);
+    Rcpp::traits::input_parameter< const CharacterVector& >::type allele_alt(allele_altSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_add_file(sites, chromosome, position, allele_ref, allele_alt));
+    return rcpp_result_gen;
+END_RCPP
+}
+// merge_sites_result
+List merge_sites_result(SEXP sites);
+RcppExport SEXP _tidypopgen_merge_sites_result(SEXP sitesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_result(sites));
+    return rcpp_result_gen;
+END_RCPP
+}
+// merge_sites_file_cols
+List merge_sites_file_cols(SEXP sites, int file, const IntegerVector& site_col);
+RcppExport SEXP _tidypopgen_merge_sites_file_cols(SEXP sitesSEXP, SEXP fileSEXP, SEXP site_colSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< SEXP >::type sites(sitesSEXP);
+    Rcpp::traits::input_parameter< int >::type file(fileSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type site_col(site_colSEXP);
+    rcpp_result_gen = Rcpp::wrap(merge_sites_file_cols(sites, file, site_col));
+    return rcpp_result_gen;
+END_RCPP
+}
+// vcf_to_bk
+List vcf_to_bk(std::string filename, std::string bk_file, bool read_names, int n_threads, bool read_genotypes, std::string loci_file, bool chromosomes_as_int, std::string chromosomes_file, IntegerVector phased_lut);
+RcppExport SEXP _tidypopgen_vcf_to_bk(SEXP filenameSEXP, SEXP bk_fileSEXP, SEXP read_namesSEXP, SEXP n_threadsSEXP, SEXP read_genotypesSEXP, SEXP loci_fileSEXP, SEXP chromosomes_as_intSEXP, SEXP chromosomes_fileSEXP, SEXP phased_lutSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
-    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
-    Rcpp::traits::input_parameter< LogicalVector& >::type biallelic(biallelicSEXP);
-    Rcpp::traits::input_parameter< const int >::type missing_value(missing_valueSEXP);
-    Rcpp::traits::input_parameter< const int >::type n_header_lines(n_header_linesSEXP);
-    Rcpp::traits::input_parameter< const IntegerVector& >::type phased_lut(phased_lutSEXP);
-    Rcpp::traits::input_parameter< const CharacterVector& >::type sample_names(sample_namesSEXP);
-    rcpp_result_gen = Rcpp::wrap(vcf_genotypes_to_fbm(filename, BM, biallelic, missing_value, n_header_lines, phased_lut, sample_names));
+    Rcpp::traits::input_parameter< std::string >::type bk_file(bk_fileSEXP);
+    Rcpp::traits::input_parameter< bool >::type read_names(read_namesSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    Rcpp::traits::input_parameter< bool >::type read_genotypes(read_genotypesSEXP);
+    Rcpp::traits::input_parameter< std::string >::type loci_file(loci_fileSEXP);
+    Rcpp::traits::input_parameter< bool >::type chromosomes_as_int(chromosomes_as_intSEXP);
+    Rcpp::traits::input_parameter< std::string >::type chromosomes_file(chromosomes_fileSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type phased_lut(phased_lutSEXP);
+    rcpp_result_gen = Rcpp::wrap(vcf_to_bk(filename, bk_file, read_names, n_threads, read_genotypes, loci_file, chromosomes_as_int, chromosomes_file, phased_lut));
     return rcpp_result_gen;
+END_RCPP
+}
+// vcf_merge_genotypes
+void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset, const IntegerVector& row, const IntegerVector& col, const LogicalVector& swap, const IntegerVector& ploidy, int missing_value, int n_threads);
+RcppExport SEXP _tidypopgen_vcf_merge_genotypes(SEXP filenameSEXP, SEXP BMSEXP, SEXP row_offsetSEXP, SEXP rowSEXP, SEXP colSEXP, SEXP swapSEXP, SEXP ploidySEXP, SEXP missing_valueSEXP, SEXP n_threadsSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< std::string >::type filename(filenameSEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< int >::type row_offset(row_offsetSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type row(rowSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type col(colSEXP);
+    Rcpp::traits::input_parameter< const LogicalVector& >::type swap(swapSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type ploidy(ploidySEXP);
+    Rcpp::traits::input_parameter< int >::type missing_value(missing_valueSEXP);
+    Rcpp::traits::input_parameter< int >::type n_threads(n_threadsSEXP);
+    vcf_merge_genotypes(filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads);
+    return R_NilValue;
 END_RCPP
 }
 // window_sums_cpp
@@ -564,6 +915,8 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_alt_freq_dip_pseudo_cpp, 7},
     {"_tidypopgen_alt_freq_polyploid_cpp", (DL_FUNC) &_tidypopgen_alt_freq_polyploid_cpp, 7},
+    {"_tidypopgen_check_dosage_matrix_cpp", (DL_FUNC) &_tidypopgen_check_dosage_matrix_cpp, 3},
+    {"_tidypopgen_write_dosage_matrix_cpp", (DL_FUNC) &_tidypopgen_write_dosage_matrix_cpp, 3},
     {"_tidypopgen_fbm256_prod_and_rowSumsSq", (DL_FUNC) &_tidypopgen_fbm256_prod_and_rowSumsSq, 8},
     {"_tidypopgen_grouped_alt_freq_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_grouped_alt_freq_dip_pseudo_cpp, 10},
     {"_tidypopgen_grouped_het_obs_polyploid", (DL_FUNC) &_tidypopgen_grouped_het_obs_polyploid, 8},
@@ -581,17 +934,39 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_SNPHWE2_R", (DL_FUNC) &_tidypopgen_SNPHWE2_R, 4},
     {"_tidypopgen_hwe_on_matrix", (DL_FUNC) &_tidypopgen_hwe_on_matrix, 2},
     {"_tidypopgen_gt_grouped_hwe", (DL_FUNC) &_tidypopgen_gt_grouped_hwe, 8},
+    {"_tidypopgen_unsorted_by_chromosome_cpp", (DL_FUNC) &_tidypopgen_unsorted_by_chromosome_cpp, 3},
+    {"_tidypopgen_chromosomes_not_adjacent_cpp", (DL_FUNC) &_tidypopgen_chromosomes_not_adjacent_cpp, 2},
     {"_tidypopgen_loci_qc_cpp", (DL_FUNC) &_tidypopgen_loci_qc_cpp, 10},
+    {"_tidypopgen_sidecar_index", (DL_FUNC) &_tidypopgen_sidecar_index, 3},
+    {"_tidypopgen_sidecar_fetch", (DL_FUNC) &_tidypopgen_sidecar_fetch, 8},
+    {"_tidypopgen_sidecar_read", (DL_FUNC) &_tidypopgen_sidecar_read, 5},
+    {"_tidypopgen_sidecar_subset", (DL_FUNC) &_tidypopgen_sidecar_subset, 4},
+    {"_tidypopgen_chromosome_int_codes_cpp", (DL_FUNC) &_tidypopgen_chromosome_int_codes_cpp, 1},
+    {"_tidypopgen_write_chromosome_sidecar_cpp", (DL_FUNC) &_tidypopgen_write_chromosome_sidecar_cpp, 3},
+    {"_tidypopgen_sidecar_gather", (DL_FUNC) &_tidypopgen_sidecar_gather, 9},
     {"_tidypopgen_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_pairwise_pop_fst_cpp, 12},
     {"_tidypopgen_windows_pairwise_pop_fst_cpp", (DL_FUNC) &_tidypopgen_windows_pairwise_pop_fst_cpp, 14},
     {"_tidypopgen_pop_stats_dip_pseudo_cpp", (DL_FUNC) &_tidypopgen_pop_stats_dip_pseudo_cpp, 12},
     {"_tidypopgen_read_packedancestry", (DL_FUNC) &_tidypopgen_read_packedancestry, 3},
-    {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 7},
-    {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 7},
-    {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 7},
+    {"_tidypopgen_roh_sliding_cpp", (DL_FUNC) &_tidypopgen_roh_sliding_cpp, 17},
+    {"_tidypopgen_sfs_config_counts_cpp", (DL_FUNC) &_tidypopgen_sfs_config_counts_cpp, 14},
+    {"_tidypopgen_sfs_project_cpp", (DL_FUNC) &_tidypopgen_sfs_project_cpp, 5},
+    {"_tidypopgen_sfs_preview_cpp", (DL_FUNC) &_tidypopgen_sfs_preview_cpp, 4},
+    {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 6},
+    {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 6},
+    {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 6},
+    {"_tidypopgen_king_counts_within_groups", (DL_FUNC) &_tidypopgen_king_counts_within_groups, 5},
+    {"_tidypopgen_all_in_cpp", (DL_FUNC) &_tidypopgen_all_in_cpp, 2},
+    {"_tidypopgen_which_in_cpp", (DL_FUNC) &_tidypopgen_which_in_cpp, 2},
+    {"_tidypopgen_any_duplicated_strings_cpp", (DL_FUNC) &_tidypopgen_any_duplicated_strings_cpp, 1},
     {"_tidypopgen_tajimas_d_window_sums_cpp", (DL_FUNC) &_tidypopgen_tajimas_d_window_sums_cpp, 12},
-    {"_tidypopgen_vcf_loci_table", (DL_FUNC) &_tidypopgen_vcf_loci_table, 2},
-    {"_tidypopgen_vcf_genotypes_to_fbm", (DL_FUNC) &_tidypopgen_vcf_genotypes_to_fbm, 7},
+    {"_tidypopgen_vcf_gt_dosages_cpp", (DL_FUNC) &_tidypopgen_vcf_gt_dosages_cpp, 2},
+    {"_tidypopgen_merge_sites_new", (DL_FUNC) &_tidypopgen_merge_sites_new, 3},
+    {"_tidypopgen_merge_sites_add_file", (DL_FUNC) &_tidypopgen_merge_sites_add_file, 5},
+    {"_tidypopgen_merge_sites_result", (DL_FUNC) &_tidypopgen_merge_sites_result, 1},
+    {"_tidypopgen_merge_sites_file_cols", (DL_FUNC) &_tidypopgen_merge_sites_file_cols, 3},
+    {"_tidypopgen_vcf_to_bk", (DL_FUNC) &_tidypopgen_vcf_to_bk, 9},
+    {"_tidypopgen_vcf_merge_genotypes", (DL_FUNC) &_tidypopgen_vcf_merge_genotypes, 9},
     {"_tidypopgen_window_sums_cpp", (DL_FUNC) &_tidypopgen_window_sums_cpp, 5},
     {"_tidypopgen_write_to_FBM", (DL_FUNC) &_tidypopgen_write_to_FBM, 5},
     {NULL, NULL, 0}

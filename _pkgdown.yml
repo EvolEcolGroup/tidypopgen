@@ -18,6 +18,7 @@ reference:
         - gt_get_file_names
         - gt_order_loci
         - gt_update_backingfile
+        - gt_lookup_loci
         - gt_add_sf
         - gt_pseudohaploid
   - title: "Show"
@@ -48,6 +49,8 @@ reference:
   - title: "Merging"
     desc: "Functions for merging `gen_tibble` objects."
     contents:
+        - gt_merge_vcfs
+        - gt_concat_vcfs
         - rbind_dry_run
         - rbind.gen_tbl
         - summary.rbind_report
@@ -89,10 +92,30 @@ reference:
         - autoplot_pairwise
         - heatmap_pairwise
         - heatmap_add_dendro
+  - title: "Site frequency spectrum"
+    desc: "Functions to compute site frequency spectra, with missing data handled as in easySFS."
+    contents:
+        - pop_sfs
+        - pop_sfs_preview
+        - pairwise_pop_sfs
+        - nwise_pop_sfs
+        - tidy.sfs
+        - write_sfs
+        - autoplot_sfs
+        - bootstrap_pop_sfs
   - title: "Windows"
     desc: "Functions to compute statistics in sliding windows across loci."
     contents:
         - starts_with("windows_")
+  - title: "Runs of homozygosity"
+    desc: "Functions to find and summarise runs of homozygosity."
+    contents:
+        - windows_indiv_roh
+        - gt_roh_froh
+        - gt_roh_loci
+        - gt_roh_islands
+        - autoplot.indiv_roh
+        - as_detectRUNS
   - title: "Jackknife"
     desc: "Functions to compute genome-wide statistics with block jackknife standard errors."
     contents:

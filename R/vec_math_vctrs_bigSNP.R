@@ -19,7 +19,8 @@
 #' A logical vector for `is.finite()`, `is.infinite()`, and
 #' `is.nan()`.
 #'
-#' @export
+#' @keywords internal
+#' @exportS3Method vctrs::vec_math
 vec_math.vctrs_bigSNP <- function(.fn, .x, ...) { # nolint
 
   # Only allow the three predicate functions that RStudio

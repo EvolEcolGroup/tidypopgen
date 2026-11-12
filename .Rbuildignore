@@ -13,3 +13,4 @@ admixture/
 ^\.positai$
 ^\.claude$
 ^CLAUDE\.md$
+^benchmarks$

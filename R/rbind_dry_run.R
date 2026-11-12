@@ -6,6 +6,11 @@
 #' other dataset will be flipped and/or alleles swapped as needed. SNPs that
 #' have different alleles in the two datasets will also be dropped.
 #'
+#' Loci are matched by name, unless `use_position = TRUE`. If the loci names of
+#' either dataset are integers (as created by `gen_tibble(names_as_int =
+#' TRUE)`), loci are always matched by chromosome and position (see
+#' `use_position`).
+#'
 #' @param ref either a [`gen_tibble`] object, or the path to the PLINK bim file;
 #'   the alleles in this objects will be used as template to flip the ones in
 #'   `target` and/or swap their order as necessary.
@@ -13,7 +18,13 @@
 #'   file
 #' @param use_position boolean of whether a combination of chromosome and
 #'   position should be used for matching SNPs. By default, `rbind` uses the
-#'   locus name, so this is set to FALSE. When using 'use_position=TRUE', make
+#'   locus name, so this is set to FALSE. If the loci names of either dataset
+#'   are integers (as created by `gen_tibble(names_as_int = TRUE)`, which
+#'   numbers the loci in the order in which they are found in the *VCF*), the
+#'   names do not identify the same locus in the two datasets, so loci are
+#'   always matched by position: `use_position` is then set to TRUE
+#'   automatically (even if it was set to FALSE), with a message unless `quiet
+#'   = TRUE`. When using 'use_position=TRUE', make
 #'   sure chromosomes are coded in the same way in both `gen_tibbles` (a mix of
 #'   e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
 #'   large number variants are dropped when merging).
@@ -26,7 +37,8 @@
 #'   dataset, and columns `id` (the index of the locus in the dataset), `new_id`
 #'   (the index of the locus in the merged dataset, NA if the locus is dropped,
 #'   either because it is not found in both datasets, because its alleles do not
-#'   match, or because it is ambiguous), `name` (the locus name), `to_flip`
+#'   match, or because it is ambiguous), `name` (the locus name, also when loci
+#'   are matched by position), `to_flip`
 #'   (boolean, loci whose strand is flipped to match the reference, only in the
 #'   `target` data.frame), `to_swap` (boolean, loci whose alleles, and thus
 #'   genotypes, are swapped in the merge: in `target`, to match the order of
@@ -90,16 +102,14 @@ rbind_dry_run <- function(
   ref_df <- dry_run_loci(ref)
   target_df <- dry_run_loci(target)
 
-  # if use_position is FALSE, then the names can not be integers
-  if (!use_position) {
-    if (!is.character(ref_df$name) ||
-          !is.character(target_df$name)) {
-      stop(
-        "When 'use_position' is FALSE, loci names must be characters.",
-        " Please set 'use_position' to TRUE if you use integers as loci names."
-      )
-    }
-  }
+  # integer loci names can not be used to match loci, so match them by
+  # position
+  use_position <- rbind_use_position(
+    ref_names = ref_df$name,
+    target_names = target_df$name,
+    use_position = use_position,
+    quiet = quiet
+  )
 
   # create a data.frame with loci names, numeric_id, and alleles
   # it requires a specific formatting to work
@@ -116,30 +126,25 @@ rbind_dry_run <- function(
   ref_df$allele_ref[is.na(ref_df$allele_ref)] <- "0"
   target_df$allele_ref[is.na(target_df$allele_ref)] <- "0"
 
-  # replace the names with a combination of chromosome and position
+  # the keys used to match loci: their names, or a combination of chromosome
+  # and position (the loci keep their names in the report)
   if (use_position) {
-    target_df <-
-      target_df %>%
-      mutate(
-        name_old = .data$name,
-        name = paste(.data$chromosome, .data$position, sep = "_")
-      )
-    ref_df <-
-      ref_df %>%
-      mutate(
-        name_old = .data$name,
-        name = paste(.data$chromosome, .data$position, sep = "_")
-      )
+    keys <- position_keys(ref_df, target_df)
+    ref_key <- keys$ref
+    target_key <- keys$target
+  } else {
+    ref_key <- ref_df$name
+    target_key <- target_df$name
   }
 
   # check for duplicates within each dataset
-  if (any(duplicated(target_df$name))) {
+  if (vctrs::vec_duplicate_any(target_key)) {
     stop(
       "The target gen_tibble contains duplicated loci. ",
       "Use 'find_duplicated_loci()' to identify and remove them."
     )
   }
-  if (any(duplicated(ref_df$name))) {
+  if (vctrs::vec_duplicate_any(ref_key)) {
     stop(
       "The reference gen_tibble contains duplicated loci. ",
       "Use 'find_duplicated_loci()' to identify and remove them."
@@ -156,11 +161,68 @@ rbind_dry_run <- function(
   rbind_dry_run_df(
     ref_df = ref_df,
     target_df = target_df,
+    ref_key = ref_key,
+    target_key = target_key,
     flip_strand = flip_strand,
     quiet = quiet
   )
 }
 
+
+# Whether rbind() and rbind_dry_run() should match loci by position: loci
+# names that are not characters (i.e. integers, from gen_tibble(names_as_int =
+# TRUE), which are the index of each locus in its own VCF) do not identify the
+# same locus in two datasets, so loci are then always matched by position
+# (with a message, unless quiet). Returns use_position, set to TRUE if needed.
+rbind_use_position <- function(ref_names, target_names, use_position, quiet) {
+  if (!use_position &&
+        (!is.character(ref_names) || !is.character(target_names))) {
+    if (!quiet) {
+      message(
+        "Loci names are integers in at least one of the two datasets, so ",
+        "loci are matched by chromosome and position (use_position = TRUE)"
+      )
+    }
+    use_position <- TRUE
+  }
+  use_position
+}
+
+# The keys to match loci by chromosome and position: a data.frame for each of
+# ref and target, with the chromosome (as an integer code) and the position of
+# each locus. Pasting chromosome and position into a string would create a new
+# string for every locus (about 90 MB per million loci). Chromosomes are coded
+# over the labels of both datasets, so they match only if their labels are
+# identical (e.g. "chr1" and "1" do not match).
+position_keys <- function(ref_df, target_df) {
+  ref_chr <- chromosome_codes(ref_df$chromosome)
+  target_chr <- chromosome_codes(target_df$chromosome)
+  # missing chromosomes are left as NA (which match each other)
+  all_labels <- union(ref_chr$labels, target_chr$labels)
+  all_labels <- all_labels[!is.na(all_labels)]
+  key <- function(chr, position) {
+    vctrs::data_frame(
+      chromosome = match(chr$labels, all_labels)[chr$codes],
+      position = position
+    )
+  }
+  list(
+    ref = key(ref_chr, ref_df$position),
+    target = key(target_chr, target_df$position)
+  )
+}
+
+# The labels of the chromosomes, and the index of the label of each locus (for
+# a factor, its levels and codes, so that the labels of each locus are not
+# created)
+chromosome_codes <- function(chromosome) {
+  if (is.factor(chromosome)) {
+    list(labels = levels(chromosome), codes = as.integer(chromosome))
+  } else {
+    values <- unique(chromosome)
+    list(labels = as.character(values), codes = match(chromosome, values))
+  }
+}
 
 # get the loci table of a gen_tibble, or read it from the path to a PLINK bim
 # file
@@ -169,7 +231,14 @@ dry_run_loci <- function(x) {
     # duplicated loci are reported by rbind_dry_run()
     loci_from_bim(x, allow_duplicates = TRUE)
   } else {
-    show_loci(x)
+    loci <- show_loci(x)
+    # integer chromosomes (chromosomes_as_int) can not be compared across
+    # datasets (the same code may be different chromosomes), so loci are
+    # matched by the names of their chromosomes, from the chromosome sidecar
+    if (is_int_column(loci$chromosome)) {
+      loci$chromosome <- chromosome_sidecar_factor(x, loci$chromosome)
+    }
+    loci
   }
 }
 
@@ -178,18 +247,22 @@ dry_run_loci <- function(x) {
 # the dataframes
 ##############################################################################
 
-rbind_dry_run_df <- function(ref_df, target_df, flip_strand, quiet) {
-  # match the loci names only once (matching strings is slow for many loci),
-  # and keep the rows of the loci in common in each table: names are unique
-  # within each table, so the loci of target are in the same order as in ref
-  ref_in_target <- match(ref_df$name, target_df$name)
+# ref_key and target_key are the keys used to match the loci of the two tables
+# (their names, or a data.frame of chromosome and position, see
+# position_keys()), unique within each table
+rbind_dry_run_df <- function(ref_df, target_df, ref_key, target_key,
+                             flip_strand, quiet) {
+  # match the loci only once (matching is slow for many loci), and keep the
+  # rows of the loci in common in each table: keys are unique within each
+  # table, so the loci of target are in the same order as in ref
+  ref_in_target <- vctrs::vec_match(ref_key, target_key)
   ref_sub_rows <- which(!is.na(ref_in_target))
   target_sub_rows <- ref_in_target[ref_sub_rows]
   # now filter for alleles in common
   ref_sub <- ref_df[ref_sub_rows, ]
   target_sub <- target_df[target_sub_rows, ]
   # we now have two data.frames with the same loci and in the same order
-  stopifnot(all.equal(target_sub$name, ref_sub$name))
+  # (their names can differ if loci were matched by position)
 
   # fix any missing alleles (the gap can be in either allele column)
   target_sub <- fill_missing_alleles(

@@ -8,7 +8,8 @@
 #'   https://doi.org/10.1093/bioinformatics/btq559.
 #'
 #' @param X a [bigstatsr::FBM.code256] matrix (as found in the `genotypes`
-#' slot of a [bigsnpr::bigSNP] object).
+#' slot of a [bigsnpr::bigSNP] object). Genotypes are decoded with its
+#' `code256`, and values other than 0, 1 and 2 are treated as missing.
 #' @param ind.row An optional vector of the row indices that are used.
 #' If not specified, all rows are used. Don't use negative indices.
 #' @param ind.col An optional vector of the column indices that are used. If not
@@ -16,7 +17,8 @@
 #' @param block.size maximum number of columns read at once. Genotypes are
 #'   compared in a compact bit-packed form, so this has little effect on
 #'   memory use.
-#' @param n_cores number of cores to be used (default 1).
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
 #' @returns a square symmetrical matrix of relationship coefficients between
 #'  individuals
 #' @export
@@ -37,7 +39,7 @@ snp_king <- function(
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
   block.size = bigstatsr::block_size(nrow(X)) * 4,
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 ) {
   # nolint end
   if (!inherits(X, "FBM.code256")) {
@@ -58,8 +60,6 @@ snp_king <- function(
   m <- length(ind.col)
 
   intervals <- CutBySize(m, block.size)
-  # the genotype held by each raw byte (accounting for phased data)
-  byte_genotype <- pairwise_byte_genotypes(X)
 
   # for each block of loci, genotypes are packed into bits and compared
   # with popcounts in C++ (see src/pairwise_bitpacked.h), so no dense
@@ -73,7 +73,6 @@ snp_king <- function(
       X,
       ind.row,
       ind.col.ind,
-      byte_genotype = byte_genotype,
       ncores = n_cores
     )
   }
@@ -92,7 +91,7 @@ snp_king <- function(
       0.25 * (N_Aa_i_sub + N_Aa_j_sub) / pmin(N_Aa_i_sub, N_Aa_j_sub)
   }
   # This works, but could be done with a FBM in c++ for added speed
-  ibs_counts_matrix <- bigstatsr::big_apply(
+  king_matrix <- bigstatsr::big_apply(
     k_numerator, # nolint
     a.FUN = divide_king_sub,
     ind = seq_len(ncol(k_numerator)),
@@ -101,5 +100,5 @@ snp_king <- function(
     a.combine = "cbind",
     block.size = bigstatsr::block_size(nrow(k_numerator))
   )
-  return(ibs_counts_matrix)
+  return(king_matrix)
 }

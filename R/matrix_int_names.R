@@ -68,6 +68,15 @@ matrix_int_names <- function(data, row_names = NULL, col_names = NULL) {
 #'
 #' @param x A matrix_int_names object
 #' @return Integer or character vector of column names, or NULL
+#' @examples
+#' my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+#'   row_names = c(10L, 20L),
+#'   col_names = c(100L, 200L, 300L)
+#' )
+#' col_names(my_mat)
+#' # set character names instead
+#' col_names(my_mat) <- c("a", "b", "c")
+#' col_names(my_mat)
 #' @family matrix_int_names_functions
 #' @export
 col_names <- function(x) {
@@ -200,6 +209,14 @@ row_names.data.frame <- function(x) {
 #' @param x A matrix_int_names object
 #' @param value Integer or character vector of row names, or NULL
 #' @return The modified matrix_int_names object
+#' @examples
+#' my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+#'   row_names = c(10L, 20L),
+#'   col_names = c(100L, 200L, 300L)
+#' )
+#' row_names(my_mat)
+#' row_names(my_mat) <- c(1L, 2L)
+#' row_names(my_mat)
 #' @export
 #' @family matrix_int_names_functions
 #' @rdname row_names
@@ -282,6 +299,18 @@ is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
 #' @param j_names Optional integer column names to subset by
 #' @param drop Logical indicating whether to drop dimensions
 #' @return A subsetted matrix_int_names object
+#' @examples
+#' my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+#'   row_names = c(10L, 20L),
+#'   col_names = c(100L, 200L, 300L)
+#' )
+#' # subset by position
+#' my_mat[1, 2:3, drop = FALSE]
+#' # subset by integer names
+#' my_mat[i_names = 20L, j_names = c(100L, 300L), drop = FALSE]
+#' # assign by integer names
+#' my_mat[i_names = 10L, j_names = 200L] <- 0L
+#' my_mat
 #' @export
 #' @family matrix_int_names_functions
 #' @rdname subset
@@ -490,6 +519,13 @@ is_integer_valued <- function(x, tol = .Machine$double.eps^0.5) {
 #' @param ... Additional arguments passed to print
 #' @param n Optional number of rows/columns to print (default 10)
 #' @return Invisibly returns the original object
+#' @examples
+#' my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+#'   row_names = c(10L, 20L),
+#'   col_names = c(100L, 200L, 300L)
+#' )
+#' print(my_mat)
+#' print(my_mat, n = 2)
 #' @family matrix_int_names_functions
 #' @export
 print.matrix_int_names <- function(x, ..., n = 10L) {
@@ -580,6 +616,8 @@ print.matrix_int_names <- function(x, ..., n = 10L) {
 #' @param optional Ignored, included for compatibility with generic signature
 #' @param ... Additional arguments passed to as.data.frame.matrix
 #' @export
+#' @returns A data.frame with integer row names if present, otherwise character
+#' row names
 #' @family matrix_int_names_functions
 #' @examples
 #' # Create a matrix with integer row and column names

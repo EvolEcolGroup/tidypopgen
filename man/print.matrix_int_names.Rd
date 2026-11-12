@@ -19,6 +19,14 @@ Invisibly returns the original object
 \description{
 Print method for matrix_int_names
 }
+\examples{
+my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+  row_names = c(10L, 20L),
+  col_names = c(100L, 200L, 300L)
+)
+print(my_mat)
+print(my_mat, n = 2)
+}
 \seealso{
 Other matrix_int_names_functions:
 \code{\link[=[.matrix_int_names]{[.matrix_int_names()}},

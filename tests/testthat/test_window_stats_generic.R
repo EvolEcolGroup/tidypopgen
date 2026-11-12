@@ -317,3 +317,35 @@ test_that("windows_stats_generic matches runner on each chromosome", {
     }
   }
 })
+
+test_that(".window_definitions lists the loci by chromosome", {
+  # chromosomes that are not adjacent in the table, and a missing chromosome
+  chrom <- factor(c("2", "2", "1", NA, "2", "1", "1", NA), levels = c("1", "2"))
+  loci_table <- data.frame(chromosome = chrom, position = 1:8)
+  win <- .window_definitions(loci_table,
+    window_size = 2, step_size = 1, size_unit = "snp"
+  )
+  # chromosomes in order of appearance, and the loci of each in table order
+  expect_identical(.chromosomes_in_order(chrom), unique(chrom))
+  expect_identical(.chromosome_index(chrom), c(1L, 1L, 2L, 3L, 1L, 2L, 2L, 3L))
+  chrom_loci <- lapply(seq_along(win$chrom_first), function(i) {
+    win$loci[seq.int(win$chrom_first[i], win$chrom_last[i])]
+  })
+  expect_identical(chrom_loci, list(c(1L, 2L, 5L), c(3L, 6L, 7L), c(4L, 8L)))
+  # the windows of each locus are only returned when asked for
+  expect_length(win$locus_first, 8)
+  win_no_loci <- .window_definitions(loci_table,
+    window_size = 2, step_size = 1, size_unit = "snp", locus_windows = FALSE
+  )
+  expect_null(win_no_loci$locus_first)
+  expect_identical(win_no_loci$lo, win$lo)
+  expect_identical(win_no_loci$hi, win$hi)
+  # adjacent chromosomes: the loci are kept in the order of the table
+  loci_table <- data.frame(chromosome = c("a", "a", "b"), position = 1:3)
+  win <- .window_definitions(loci_table,
+    window_size = 2, step_size = 1, size_unit = "snp"
+  )
+  expect_identical(win$loci, 1:3)
+  expect_identical(win$chrom_first, c(1L, 3L))
+  expect_identical(win$chrom_last, c(2L, 3L))
+})

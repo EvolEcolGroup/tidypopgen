@@ -184,10 +184,10 @@ vcf_to_fbm_vcfR <- function(
       is_single_allele(vcfR::getALT(temp_vcf))
     gt <- vcfR::extract.gt(temp_vcf, convertNA = FALSE)
     gt <- gt[bi, , drop = FALSE]
+    if (nrow(gt) == 0) {
+      next
+    }
     if (phased) {
-      if (nrow(gt) == 0) {
-        next
-      }
       # an individual x locus matrix of phased bytes (as for the dosages
       # below)
       gt <- t(vcf_gt_to_phased_bytes(gt,
@@ -196,18 +196,19 @@ vcf_to_fbm_vcfR <- function(
           vcfR::getPOS(temp_vcf)[bi]
         )
       ))
-    } else if (nrow(gt) > 1) {
-      # @TODO we could parallelise here
-      gt <- t(apply(gt, 2, poly_indiv_dosage, max_ploidy = max_ploidy))
-    } else if (nrow(gt) == 1) {
-      # if we only have one marker
-      gt <-
-        matrix(
-          apply(gt, 2, poly_indiv_dosage, max_ploidy = max_ploidy),
-          ncol = 1
-        )
     } else {
-      next
+      # dosages as raw bytes, with individuals as rows (as in the FBM), parsed
+      # in C++: a genotype is missing if any of its alleles is missing, its
+      # dosage is otherwise the sum of its alleles, and genotypes with more
+      # than max_ploidy alleles (or a larger dosage) are an error
+      gt_dosages <- vcf_gt_dosages_cpp(gt, max_ploidy = max_ploidy)
+      if (gt_dosages$error == 1) {
+        stop_max_ploidy()
+      } else if (gt_dosages$error == 2) {
+        stop("the genotypes (GT) contain alleles that are not numbers")
+      }
+      gt <- gt_dosages$dosages
+      rm(gt_dosages)
     }
     # expand the file backed matrix according to the size of the gt matrix
     # get current size
@@ -256,8 +257,11 @@ vcf_to_fbm_vcfR <- function(
   )
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
-  # construct path
+  # construct path, and save the FBM (before its md5 sum is taken by
+  # new_vctrs_bigsnp(); this takes the same time whatever the size of the
+  # data, as the .rds only holds the description of the FBM)
   fbm_path <- bigstatsr::sub_bk(file_backed_matrix$backingfile, ".rds")
+  saveRDS(file_backed_matrix, fbm_path)
 
   # create genotypes column
   indiv_meta$genotypes <- new_vctrs_bigsnp(
@@ -323,31 +327,6 @@ vcf_gt_to_phased_bytes <- function(gt, locus) {
 # get ploidy for a given individual
 get_ploidy <- function(x) {
   max(sapply(strsplit(x, "[/|]"), function(x) length(x)))
-}
-
-# get dosages for all the genotypes of an individual
-# (x is a vector of genotypes in the standard vcf format)
-poly_indiv_dosage <- function(x, max_ploidy) {
-  sapply(strsplit(x, "[/|]"), poly_genotype_dosage, max_ploidy)
-}
-
-# get dosages for a genotype x and return them as raw for inclusion in the FBM
-poly_genotype_dosage <- function(x, max_ploidy) {
-  # a genotype can not have more alleles than max_ploidy
-  if (length(x) > max_ploidy) {
-    stop_max_ploidy()
-  }
-  # if any allele is missing, the genotype is missing
-  if (length(x) > 0 && !anyNA(x) && !any(x == ".")) {
-    dosage <- sum(as.numeric(x))
-    if (dosage < (max_ploidy + 1)) {
-      return(as.raw(dosage)) # nolint
-    } else {
-      stop_max_ploidy()
-    }
-  } else {
-    return(as.raw(max_ploidy + 1)) # nolint
-  }
 }
 
 # error for genotypes with more alleles than max_ploidy

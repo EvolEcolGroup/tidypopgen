@@ -34,6 +34,16 @@ Integer or character vector of column names, or NULL
 This function reliably returns integer names if present, otherwise character
 dimnames. Use this instead of colnames() if you need guaranteed dispatch.
 }
+\examples{
+my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+  row_names = c(10L, 20L),
+  col_names = c(100L, 200L, 300L)
+)
+col_names(my_mat)
+# set character names instead
+col_names(my_mat) <- c("a", "b", "c")
+col_names(my_mat)
+}
 \seealso{
 Other matrix_int_names_functions:
 \code{\link[=[.matrix_int_names]{[.matrix_int_names()}},

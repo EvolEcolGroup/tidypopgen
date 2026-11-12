@@ -4,7 +4,7 @@
 \alias{select_loci}
 \title{The \code{select} verb for \code{loci}}
 \usage{
-select_loci(.data, .sel_arg)
+select_loci(.data, .sel_arg, .engine = c("auto", "tidyselect"))
 }
 \arguments{
 \item{.data}{a \code{gen_tibble}}
@@ -13,6 +13,11 @@ select_loci(.data, .sel_arg)
 \code{\link[dplyr:select]{dplyr::select()}} to select loci. Variable names
 can be used as if they were positions in the data frame, so expressions
 like x:y can be used to select a range of variables.}
+
+\item{.engine}{how the selection is resolved: "auto" (the default)
+resolves the common selections described in Details directly, and leaves
+the others to \code{tidyselect}; "tidyselect" always uses \code{tidyselect}, which
+is slow and memory hungry with millions of loci.}
 }
 \value{
 a \code{gen_tibble} with a subset of the loci.
@@ -30,15 +35,22 @@ but rather it subsets the list of loci to be used stored in the \code{gen_tibble
 
 For large datasets (millions of loci), select loci with \code{\link[dplyr:all_of]{dplyr::all_of()}}
 or \code{\link[dplyr:any_of]{dplyr::any_of()}}, with helpers that match names (such as
-\code{\link[dplyr:starts_with]{dplyr::starts_with()}} or \code{\link[dplyr:everything]{dplyr::everything()}}), or with numeric
-positions written as numbers (e.g. \code{1:100} or \code{-c(1, 5)}), each
-optionally negated with \code{-} or \code{!}. These selections are resolved
-directly, which is much faster and uses much less memory than the general
-\code{tidyselect} machinery, which has to create an R symbol for every locus
-name (and R never frees symbols). Other expressions (e.g. combinations
-such as \code{c(all_of(x), starts_with("rs"))}, bare loci names, or
-expressions such as \code{which(...)}) still work, but are slow and memory
-hungry on very large datasets: use \code{all_of(which(...))} instead.
+\code{\link[dplyr:starts_with]{dplyr::starts_with()}} or \code{\link[dplyr:everything]{dplyr::everything()}}), with numeric positions
+written as numbers (e.g. \code{1:100} or \code{-c(1, 5)}), with a function call
+that gives positions or names (e.g. \code{which(...)}, \code{sample(...)} or
+\code{sort(x)}), or with a variable that holds positions or names (e.g.
+\code{select_loci(x, idx)}), each optionally negated with \code{-} or \code{!}. These
+selections are resolved directly, which is much faster and uses much less
+memory than the general \code{tidyselect} machinery, which has to create an R
+symbol for every locus name (and R never frees symbols). As in
+\code{tidyselect}, a locus with the same name as the variable is selected
+instead of the value of the variable, and selecting with a variable gives
+the deprecation warning of \code{tidyselect}: prefer \code{all_of(idx)}, which can
+not be confused with a locus named \code{idx}. Other expressions (e.g.
+combinations such as \code{c(all_of(x), starts_with("rs"))}, or bare loci
+names) still work, but are slow and memory hungry on very large datasets.
+To always use \code{tidyselect} (e.g. if a selection is not resolved as
+\code{tidyselect} would resolve it), set \code{.engine = "tidyselect"}.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
@@ -51,6 +63,10 @@ show_loci(example_gt_subset)
 # Select loci by index
 example_gt_subset <- example_gt \%>\% select_loci(all_of(c(4, 2, 1)))
 show_loci(example_gt_subset)
+
+# Always use tidyselect to resolve the selection
+example_gt_subset <- example_gt \%>\%
+  select_loci(all_of(c(4, 2, 1)), .engine = "tidyselect")
 
 }
 \seealso{

@@ -1,14 +1,19 @@
 #' Combine two gen_tibbles
 #'
-#' This function combined two [gen_tibble]s. By defaults, it subsets the loci
-#' and swaps ref and alt alleles to make the two datasets compatible (this
-#' behaviour can be switched off with `as_is`). The first object is used as a
+#' This function combined two [gen_tibble]s. It subsets the loci and swaps ref
+#' and alt alleles to make the two datasets compatible. The first object is
+#' used as a
 #' "reference" , and SNPs in the other dataset will be flipped and/or alleles
 #' swapped as needed. SNPs that have different alleles in the two datasets (i.e.
 #' triallelic) will also be dropped. There are also options (NOT default) to
 #' attempt strand flipping to match alleles (often needed in human datasets from
 #' different SNP chips), and remove ambiguous alleles (C/G and A/T) where the
 #' correct strand can not be guessed.
+#'
+#' Loci are matched by name, unless `use_position = TRUE`. If the loci names of
+#' either `gen_tibble` are integers (as created by `gen_tibble(names_as_int =
+#' TRUE)`), loci are always matched by chromosome and position (see
+#' `use_position`).
 #'
 #' rbind differs from merging data with plink, which swaps the order of allele1
 #' and allele2 according to minor allele frequency when merging datasets. rbind
@@ -28,12 +33,18 @@
 #' @param ... two [`gen_tibble`] objects. Note that this function can not take
 #'   more objects, `rbind` has to be done sequentially for large sets of
 #'   objects.
-#' @param as_is boolean determining whether the loci should be left as they are
-#'   before merging. If FALSE (the defaults), `rbind` will attempt to subset and
-#'   swap alleles as needed.
+#' @param as_is deprecated, and ignored: `rbind` always subsets the loci and
+#'   swaps alleles as needed (setting `as_is = TRUE` never stopped it, and now
+#'   gives a warning).
 #' @param use_position boolean of whether a combination of chromosome and
 #'   position should be used for matching SNPs. By default, `rbind` uses the
-#'   locus name, so this is set to FALSE. In either case, the merged loci keep
+#'   locus name, so this is set to FALSE. If the loci names of either
+#'   `gen_tibble` are integers (as created by `gen_tibble(names_as_int =
+#'   TRUE)`, which numbers the loci in the order in which they are found in the
+#'   *VCF*), the names do not identify the same locus in the two datasets, so
+#'   loci are always matched by position: `use_position` is then set to TRUE
+#'   automatically (even if it was set to FALSE), with a message unless `quiet
+#'   = TRUE`. In either case, the merged loci keep
 #'   the names of the reference dataset. When using 'use_position=TRUE', make
 #'   sure chromosomes are coded in the same way in both `gen_tibbles` (a mix of
 #'   e.g. 'chr1', '1' or 'chromosome1' can be the reasons if an unexpectedly
@@ -122,20 +133,23 @@ rbind.gen_tbl <- function(
       call. = FALSE
     )
   }
-  if (as_is && flip_strand) {
-    stop(paste(
-      "if 'as_is' is set to TRUE, 'flip_strand' and",
-      "'remove_ambiguous' have to be FALSE"
-    ))
+  # deprecation of as_is (which was never implemented: loci were always
+  # harmonised)
+  if (isTRUE(as_is)) {
+    warning(
+      "'as_is' is deprecated and ignored: rbind always harmonises the loci ",
+      "(subsetting them and swapping alleles as needed)"
+    )
   }
-  if (!quiet) {
-    if (as_is) {
-      message(
-        "rbind will not attempt to harmonise the loci (e.g. flip strand,\n",
-        " reorder or subset) set 'as_is' to FALSE to subset to loci in common\n"
-      )
-    }
-  }
+  # integer loci names can not be used to match loci, so match them by
+  # position (rbind_dry_run() is then called with use_position = TRUE, so the
+  # message is only given once)
+  use_position <- rbind_use_position(
+    ref_names = loci_names(ref),
+    target_names = loci_names(target),
+    use_position = use_position,
+    quiet = quiet
+  )
   # sort out paths
   if (is.null(backingfile)) {
     save_path <- dirname(attr(ref$genotypes, "fbm")$backingfile)
@@ -143,17 +157,17 @@ rbind.gen_tbl <- function(
   }
 
   # check for duplicates within each dataset (if we use position, loci are
-  # matched by a combination of chromosome and position, which
-  # rbind_dry_run() creates and checks for duplicates, so the names of the
-  # loci are left as they are)
+  # matched by a combination of chromosome and position, whose duplicates
+  # are checked by rbind_dry_run(), so the names of the loci are left as
+  # they are)
   if (!use_position) {
-    if (anyDuplicated(loci_names(target)) > 0) {
+    if (any_duplicated_names(loci_names(target)) > 0) {
       stop(
         "The target gen_tibble contains duplicated loci. ",
         "Use 'find_duplicated_loci()' to identify and remove them."
       )
     }
-    if (anyDuplicated(loci_names(ref)) > 0) {
+    if (any_duplicated_names(loci_names(ref)) > 0) {
       stop(
         "The reference gen_tibble contains duplicated loci. ",
         "Use 'find_duplicated_loci()' to identify and remove them."
@@ -292,6 +306,11 @@ rbind.gen_tbl <- function(
   )
   # save the FBM (its .rds is used as fbm_file below)
   merged_fbm$save()
+  # with integer loci names (or chromosomes), the merged loci are those of ref
+  # (with their names and chromosomes), so the sidecars of the merged backing
+  # file have the lines of those loci (and chromosomes) from the sidecars of
+  # ref (see R/loci_sidecar.R)
+  copy_sidecars(ref, merged_fbm$backingfile, new_ref_loci_tbl)
 
   # Now we need to create the gen_tibble
   # Make sure that the two tibbles have the same columns

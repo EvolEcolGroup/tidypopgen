@@ -1,0 +1,4 @@
+label	version	n_variants	threads	step	status	elapsed_s	user_s	sys_s	load_s	pss_start_gb	pss_median_gb	pss_peak_gb	rss_peak_gb	proc_maxrss_gb	n_samples	summary
+vcf_fast	1.0.0.9000	18579683	15	read_vcf	ok	35.4	37.28	3.656	NA	0.0003262	3.032	3.558	3.571	3.619	67	56 indiv x 17303683 loci
+vcf_fast	1.0.0.9000	18579683	15	set_groups	ok	0.001	0.001	0	NA	3.558	2.992	2.992	3.006	3.619	2	56 indiv x 17303683 loci
+vcf_fast	1.0.0.9000	18579683	15	read_vcf_int	ok	20.22	22.83	3.087	24.93	2.959	3.607	4.24	4.254	4.302	39	56 indiv x 17303683 loci

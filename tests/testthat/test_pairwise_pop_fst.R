@@ -193,6 +193,64 @@ if (rlang::is_installed("hierfstat")) {
       wc_tidypopgen_missing_var1$value
     )
   })
+
+  test_that("loci with no data in a population are dropped", {
+    # (unlike hierfstat for WC84) a dataset with two populations, where pop2
+    # has no genotypes at rs1 and rs5
+    set.seed(123)
+    n_loci <- 40
+    pops <- rep(c("pop1", "pop2"), each = 10)
+    geno <- matrix(
+      rbinom(length(pops) * n_loci, 2, 0.4),
+      nrow = length(pops)
+    )
+    geno[pops == "pop2", 1:10] <- rbinom(10 * 10, 2, 0.8)
+    empty_loci <- c(1, 5)
+    geno[pops == "pop2", empty_loci] <- NA
+    empty_gt <- gen_tibble(
+      x = geno,
+      loci = data.frame(
+        name = paste0("rs", seq_len(n_loci)),
+        chromosome = "chr1",
+        position = seq_len(n_loci),
+        genetic_dist = 0,
+        allele_ref = "A",
+        allele_alt = "T"
+      ),
+      indiv_meta = data.frame(
+        id = paste0("i", seq_along(pops)),
+        population = pops
+      ),
+      quiet = TRUE
+    ) %>%
+      dplyr::group_by(population)
+    kept_gt <- empty_gt %>% select_loci(-dplyr::all_of(empty_loci))
+    for (method in c("Hudson", "Nei87", "WC84")) {
+      # their Fst by locus is NaN
+      by_locus <- empty_gt %>%
+        pairwise_pop_fst(
+          method = method,
+          by_locus = TRUE,
+          by_locus_type = "matrix"
+        )
+      expect_true(all(is.nan(by_locus$Fst_by_locus[empty_loci, 1])))
+      expect_false(any(is.nan(by_locus$Fst_by_locus[-empty_loci, 1])))
+      # and they do not contribute to the genome wide estimate
+      expect_equal(
+        pairwise_pop_fst(empty_gt, method = method)$value,
+        pairwise_pop_fst(kept_gt, method = method)$value
+      )
+    }
+    # hierfstat gives the same WC84 estimate only once these loci are removed
+    # (it keeps them, with an among-population variance component of 0)
+    wc_tidypopgen <- pairwise_pop_fst(empty_gt, method = "WC84")$value
+    wc_hierfstat_kept <- hierfstat::pairwise.WCfst(gt_as_hierfstat(kept_gt))
+    expect_equal(wc_tidypopgen, wc_hierfstat_kept[1, 2])
+    wc_hierfstat <- hierfstat::pairwise.WCfst(gt_as_hierfstat(empty_gt))
+    expect_lt(wc_hierfstat[1, 2], wc_tidypopgen)
+    hier_per_loc <- hierfstat::wc(gt_as_hierfstat(empty_gt))$per.loc
+    expect_equal(hier_per_loc$FST[empty_loci], c(0, 0))
+  })
 }
 
 test_that("pairwise_pop_fst hudson", {

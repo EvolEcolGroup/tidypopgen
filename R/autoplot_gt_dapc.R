@@ -116,6 +116,10 @@ autoplot.gt_dapc <- function(
       ld <- 1
     }
     if (length(ld) > 1) {
+      # several axes are plotted as hexagonal bins, which need hexbin
+      rlang::check_installed("hexbin",
+        reason = "to plot the loadings of several discriminant axes"
+      )
       all.p <- lapply(ld, function(i) {
         p <- autoplot(object, type = "loadings", ld = i)
         p$layers[[1]] <- NULL

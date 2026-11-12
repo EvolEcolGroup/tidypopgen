@@ -11,8 +11,6 @@
 //    opposite homozygotes
 // k2: FBM (n x n) of tcrossprod(na), where na is 1 for valid genotypes and 0
 //    for missing ones; i.e. the number of loci valid in both individuals
-// byte_genotype: the genotype held by each raw byte (see
-//    pairwise_byte_genotypes() in R)
 // Genotypes are compared with the bit-packed kernel in pairwise_bitpacked.h
 
 // [[Rcpp::export]]
@@ -21,7 +19,6 @@ void increment_as_counts(Environment k,
                          Environment BM,
                          const IntegerVector& rowInd,
                          const IntegerVector& colInd,
-                         const IntegerVector& byte_genotype,
                          int ncores) {
 
   std::size_t n = rowInd.size();
@@ -32,7 +29,7 @@ void increment_as_counts(Environment k,
   // homozygotes, both valid)
   std::vector<std::size_t> tri_start;
   std::vector<uint32_t> counts = pw_bitpacked_counts<PwAlleleSharing>(
-    BM, rowInd, colInd, byte_genotype, tri_start, ncores);
+    BM, rowInd, colInd, tri_start, ncores);
 
   // add them to both triangles of the (symmetric) accumulators
   for (std::size_t i = 0; i < n; i++) {

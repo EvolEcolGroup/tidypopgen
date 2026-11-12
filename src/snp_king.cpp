@@ -10,8 +10,6 @@
 //    they are opposite homozygotes
 // n_Aa_i: FBM (n x n) where element (i, j) is the number of loci at which i
 //    is heterozygous and j has a valid genotype
-// byte_genotype: the genotype held by each raw byte (see
-//    pairwise_byte_genotypes() in R)
 // Genotypes are compared with the bit-packed kernel in pairwise_bitpacked.h
 
 // [[Rcpp::export]]
@@ -20,7 +18,6 @@ void increment_king_numerator(Environment k,
                               Environment BM,
                               const IntegerVector& rowInd,
                               const IntegerVector& colInd,
-                              const IntegerVector& byte_genotype,
                               int ncores) {
 
   std::size_t n = rowInd.size();
@@ -31,7 +28,7 @@ void increment_king_numerator(Environment k,
   // i het & j valid, j het & i valid)
   std::vector<std::size_t> tri_start;
   std::vector<uint32_t> counts =
-    pw_bitpacked_counts<PwKing>(BM, rowInd, colInd, byte_genotype, tri_start, ncores);
+    pw_bitpacked_counts<PwKing>(BM, rowInd, colInd, tri_start, ncores);
 
   for (std::size_t i = 0; i < n; i++) {
     for (std::size_t j = i; j < n; j++) {
@@ -49,6 +46,48 @@ void increment_king_numerator(Environment k,
       }
     }
   }
+}
+
+/******************************************************************************/
+
+// Counts for KING-robust within groups of individuals: rowInd lists the
+// individuals ordered by group, and groupEnd gives, for each of them, the
+// (1-based, inclusive) position in rowInd of the last individual of its
+// group. Only the pairs within each group are visited, packing the genotypes
+// of all individuals once (rather than once for each group).
+// Returns a matrix with a column for each pair (i, j), with i <= j in the
+// same group (in the order of the packed triangle of each group, one group
+// after the other), and 4 rows: the number of loci where both are
+// heterozygous, where they are opposite homozygotes, where i is
+// heterozygous and j has a valid genotype, and where j is heterozygous and i
+// has a valid genotype.
+
+// [[Rcpp::export]]
+NumericMatrix king_counts_within_groups(Environment BM,
+                                        const IntegerVector& rowInd,
+                                        const IntegerVector& colInd,
+                                        const IntegerVector& groupEnd,
+                                        int ncores) {
+  std::size_t n = rowInd.size();
+  if ((std::size_t) groupEnd.size() != n) {
+    Rcpp::stop("groupEnd should have one value per individual.");
+  }
+  std::vector<std::size_t> row_end(n);
+  for (std::size_t i = 0; i < n; i++) {
+    row_end[i] = groupEnd[i]; // the exclusive 0-based end
+  }
+  std::vector<std::size_t> tri_start;
+  std::vector<uint32_t> counts =
+    pw_bitpacked_counts<PwKing>(BM, rowInd, colInd, tri_start, ncores,
+                                row_end);
+  // (a local copy, as the constructor takes a reference)
+  const int n_counts = PwKing::N_COUNTS;
+  std::size_t n_pairs = counts.size() / n_counts;
+  NumericMatrix res(n_counts, n_pairs);
+  for (std::size_t k = 0; k < counts.size(); k++) {
+    res[k] = counts[k];
+  }
+  return res;
 }
 
 /******************************************************************************/

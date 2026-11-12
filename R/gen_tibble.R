@@ -10,11 +10,14 @@
 #' such a *VCF*, change the order of variants so that the first chromosome is an
 #' autosome using a tool such as `vcftools`. Individuals with a missing genotype
 #' ('.') on the first variant get their ploidy from their first genotype that
-#' is not '.' (or the largest ploidy of the other individuals, if all their
-#' genotypes are '.'). Currently, only biallelic SNPs are
-#' supported. If haploid variants (e.g. sex chromosomes) are included in the
-#' *VCF*, they are not transformed into homozygous calls. Instead, reference
-#' alleles will be coded as 0 and alternative alleles will be coded as 1.
+#' is not '.': the `cpp` parser looks for it in the next 1,000 variants only
+#' (so that the search does not slow down parsing), the `vcfR` parser in the
+#' whole file. Individuals with no such genotype get the largest ploidy of the
+#' other individuals (or 2, if no ploidy is known). Currently, only biallelic
+#' SNPs are supported. If haploid variants (e.g. sex chromosomes) are included
+#' in the *VCF*, they are not transformed into homozygous calls. Instead,
+#' reference alleles will be coded as 0 and alternative alleles will be coded
+#' as 1.
 #' The phase of phased genotypes (e.g. `0|1`) is ignored: use
 #' [gen_tibble_phased()] to keep it.
 #'
@@ -68,8 +71,11 @@
 #'   latter is slower but more robust; if "cpp" gives an error, try using "vcfR"
 #'   in case your
 #'   *VCF* has an unusual structure.
-#' @param n_cores currently ignored (reading files is not parallelised); kept
-#'   for backwards compatibility
+#' @param n_cores the number of cores used to read a *VCF* file with
+#'   `parser = "cpp"`: the genotypes are parsed in parallel, and a *.vcf.gz*
+#'   file compressed with `bgzip` (as most are) is also decompressed in
+#'   parallel (other gzipped files are decompressed on a single core). It is
+#'   ignored for other formats and for `parser = "vcfR"`.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #'   'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -94,9 +100,27 @@
 #'   Default is FALSE.
 #' @param names_as_int logical. If TRUE, locus names will be
 #'   converted to integers. Only used when `x` is a *VCF* file with parser
-#'   "cpp". Default is FALSE. This can be useful when working with very large
-#'   datasets where storing the names as string can use a large amount of
-#'   memory.
+#'   "cpp", a PLINK *bed* file or a bigSNP *rds* file. Default is FALSE. This
+#'   can be useful when working with very large datasets where storing the
+#'   names as string can use a large amount of memory. Integer names are the
+#'   index of each locus in the *VCF* (or *bim*) file, so they can not be used
+#'   to match loci across datasets: [rbind()][rbind.gen_tbl] and
+#'   [rbind_dry_run()] always match loci with integer names by chromosome and
+#'   position. For *VCF* files, the original names (with the chromosomes and
+#'   positions) are written to a sidecar file next to the backing file
+#'   (*.loci.tsv*), from which [gt_lookup_loci()] and [gt_restore_loci()] get
+#'   them back.
+#' @param chromosomes_as_int logical. If TRUE, chromosomes will be stored as
+#'   integer codes rather than as a factor. Only used when `x` is a *VCF* file
+#'   with parser "cpp". Default is FALSE. This saves memory and time with
+#'   many chromosomes (e.g. RAD loci assembled de novo, each its own
+#'   "chromosome"). A chromosome whose name is a number (after an optional
+#'   "chr" or "chromosome" prefix, e.g. "7", "chr7" or "Chr07") keeps that
+#'   number as its code; other names are numbered after the largest number,
+#'   in order of first appearance. The names are written to a sidecar file
+#'   next to the backing file (*.chromosomes.tsv*), from which
+#'   [gt_lookup_chromosomes()], [gt_lookup_loci()] and [gt_restore_loci()]
+#'   get them back.
 #' @param quiet provide information on the files used to store the data
 #' @returns an object of the class `gen_tbl`.
 #' @rdname gen_tibble
@@ -177,6 +201,7 @@ gen_tibble.character <-
            backingfile = NULL,
            allow_duplicates = FALSE,
            names_as_int = FALSE,
+           chromosomes_as_int = FALSE,
            quiet = FALSE) {
     # parser for vcf
     parser <- match.arg(parser)
@@ -203,7 +228,23 @@ gen_tibble.character <-
     # normalise path
     x <- normalizePath(x, mustWork = FALSE)
 
-    save_full <- FALSE
+    # integer names of loci are only available for some formats
+    ext <- tolower(file_ext(x))
+    names_as_int_ok <- ext %in% c("bed", "rds") ||
+      (ext %in% c("vcf", "gz") && parser == "cpp")
+    if (isTRUE(names_as_int) && !names_as_int_ok) {
+      stop(
+        "names_as_int = TRUE is only available for PLINK bed files, ",
+        "bigSNP rds files and VCF files read with parser = 'cpp'"
+      )
+    }
+    if (isTRUE(chromosomes_as_int) &&
+          !(ext %in% c("vcf", "gz") && parser == "cpp")) {
+      stop(
+        "chromosomes_as_int = TRUE is only available for VCF files read ",
+        "with parser = 'cpp'"
+      )
+    }
 
     if ((tolower(file_ext(x)) == "bed") || (tolower(file_ext(x)) == "rds")) {
       rlang::check_dots_empty()
@@ -214,6 +255,7 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
+        names_as_int = names_as_int,
         quiet = quiet
       )
     } else if (
@@ -234,9 +276,9 @@ gen_tibble.character <-
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
         names_as_int = names_as_int,
+        chromosomes_as_int = chromosomes_as_int,
         quiet = quiet
       )
-      save_full <- TRUE
     } else if (tolower(file_ext(x)) == "ped") {
       x_gt <- gen_tibble_ped(
         x = x,
@@ -266,39 +308,28 @@ gen_tibble.character <-
       ))
     }
 
+    # sidecars next to the new backing file are left from older files with
+    # the same name (they can not belong to the new data), unless the reader
+    # wrote them (VCF files with the cpp parser)
+    if (!(tolower(file_ext(x)) %in% c("vcf", "gz") && parser == "cpp")) {
+      remove_stale_sidecars(gt_get_file_names(x_gt)[2])
+    }
+
     # check alleles
-    loci <- show_loci(x_gt)
-    doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
-
-    if (length(doubles) > 0) {
-      check_missing <- x_gt %>%
-        select_loci(all_of(doubles)) %>%
-        loci_missingness()
-      if (any(check_missing < 1, na.rm = TRUE)) {
-        # clean up files if we are stopping (dropping the gen_tibble first,
-        # so that its backing file can be unmapped, see remove_fbm_files())
-        files <- gt_get_file_names(x_gt)
-        rm(x_gt)
-        remove_fbm_files(files)
-        stop(paste(
-          "Some loci are missing both reference and alternate alleles.",
-          "Genotypes are not missing at these loci.",
-          "Please check the loci and genotype data."
-        ))
-      } else {
-        warning(
-          "Your data contain loci with no genotypes or allele ",
-          "information. Use loci_missingness() to identify them ",
-          "and select_loci() to remove them."
-        )
-      }
+    if (has_genotypes_without_alleles(x_gt)) {
+      # clean up files if we are stopping (dropping the gen_tibble first,
+      # so that its backing file can be unmapped, see remove_fbm_files())
+      files <- c(
+        gt_get_file_names(x_gt), loci_sidecar_path(x_gt),
+        chromosomes_sidecar_path(x_gt)
+      )
+      rm(x_gt)
+      remove_fbm_files(files)
+      stop_genotypes_without_alleles()
     }
 
-    if (save_full) {
-      gt_save(x_gt, quiet = quiet) # nolint
-    } else {
-      gt_save_light(x_gt, quiet = quiet) # nolint
-    }
+    # the readers save the FBM (.rds), so only the gen_tibble is saved
+    gt_save_light(x_gt, quiet = quiet) # nolint
     return(x_gt)
   }
 
@@ -385,11 +416,17 @@ gen_tibble.matrix <- function(
   if (!(is.matrix(x) && is.numeric(x))) {
     stop("'x' is not a numeric matrix of integers")
   }
-  # check that dosages are non-negative integers, within each ploidy
-  if (any(x != round(x) | x < 0, na.rm = TRUE)) {
+  # check that dosages are non-negative integers, within each ploidy (in a
+  # single pass in C++, which does not create temporary matrices as large as
+  # x)
+  dosage_check <- check_dosage_matrix_cpp(x,
+    ploidy = as.numeric(fbm_ploidy),
+    check_integer = TRUE
+  )
+  if (dosage_check == 1) {
     stop("'x' should only contain non-negative integer dosages (or NA)")
   }
-  if (any(x > fbm_ploidy, na.rm = TRUE)) {
+  if (dosage_check == 2) {
     stop(
       "'x' contains dosages greater than the ploidy of the individual ",
       "(see 'ploidy')"
@@ -584,6 +621,43 @@ tbl_sum.gen_tbl <- function(x, ...) {
 }
 
 
+# whether a gen_tibble has loci whose reference and alternate alleles are both
+# missing (NA), but with genotypes that are not all missing, which the readers
+# of files do not allow (the caller then removes the files of the gen_tibble,
+# and stops with stop_genotypes_without_alleles()). If such loci only have
+# missing genotypes, it gives a warning (and returns FALSE)
+has_genotypes_without_alleles <- function(x_gt) {
+  loci <- show_loci(x_gt)
+  doubles <- which(is.na(loci$allele_ref) & is.na(loci$allele_alt))
+  if (length(doubles) == 0) {
+    return(FALSE)
+  }
+  check_missing <- x_gt %>%
+    select_loci(all_of(doubles)) %>%
+    loci_missingness()
+  if (any(check_missing < 1, na.rm = TRUE)) {
+    return(TRUE)
+  }
+  warning(
+    "Your data contain loci with no genotypes or allele ",
+    "information. Use loci_missingness() to identify them ",
+    "and select_loci() to remove them."
+  )
+  FALSE
+}
+
+# (the error is reported as coming from the caller, e.g. gen_tibble())
+stop_genotypes_without_alleles <- function() {
+  stop(simpleError(
+    paste(
+      "Some loci are missing both reference and alternate alleles.",
+      "Genotypes are not missing at these loci.",
+      "Please check the loci and genotype data."
+    ),
+    call = sys.call(-1)
+  ))
+}
+
 # function to check the allele alphabet
 check_allele_alphabet <- function(
   x,
@@ -592,20 +666,23 @@ check_allele_alphabet <- function(
 ) {
   # 0 is always considered as a missing value (see harmonise_missing_values)
   missing_alleles <- union(missing_alleles, "0")
+  allowed_alleles <- as.character(c(valid_alleles, missing_alleles, NA))
+  # all_in_cpp(x, table) is all(x %in% table), in a single pass that does not
+  # allocate vectors as long as the loci table
   if (
-    any(
-      !x$allele_ref %in% c(valid_alleles, missing_alleles, NA),
-      !x$allele_alt %in% c(valid_alleles, missing_alleles, NA)
-    )
+    !all_in_cpp(as.character(x$allele_ref), allowed_alleles) ||
+      !all_in_cpp(as.character(x$allele_alt), allowed_alleles)
   ) {
     stop(
       "valid alleles are ",
       paste(c(valid_alleles, missing_alleles), collapse = " "),
       " but ",
       paste(
+        # the same as unique(c(allele_ref, allele_alt)), without
+        # concatenating the two columns
         unique(c(
-          x$allele_ref,
-          x$allele_alt
+          unique(x$allele_ref),
+          unique(x$allele_alt)
         )),
         collapse = " "
       ),
@@ -621,8 +698,18 @@ harmonise_missing_values <- function(loci_info, missing_alleles = c("0", ".")) {
   if (!"0" %in% missing_alleles) {
     missing_alleles <- c(missing_alleles, "0")
   }
-  loci_info$allele_ref[loci_info$allele_ref %in% missing_alleles] <- NA
-  loci_info$allele_alt[loci_info$allele_alt %in% missing_alleles] <- NA
+  for (allele_col in c("allele_ref", "allele_alt")) {
+    # which_in_cpp(x, table) is which(x %in% table), in a single pass that
+    # does not allocate vectors as long as the loci table; we only modify the
+    # column if it has missing alleles, as modifying it copies the whole column
+    is_missing <- which_in_cpp(
+      as.character(loci_info[[allele_col]]),
+      as.character(missing_alleles)
+    )
+    if (length(is_missing) > 0) {
+      loci_info[[allele_col]][is_missing] <- NA
+    }
+  }
   return(loci_info)
 }
 

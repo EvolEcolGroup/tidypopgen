@@ -9,12 +9,13 @@ snp_allele_sharing(
   ind.row = bigstatsr::rows_along(X),
   ind.col = bigstatsr::cols_along(X),
   block.size = bigstatsr::block_size(nrow(X)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
 \item{X}{a \link[bigstatsr:FBM.code256]{bigstatsr::FBM.code256} matrix (as found in the \code{genotypes}
-slot of a \link[bigsnpr:bigSNP]{bigsnpr::bigSNP} object).}
+slot of a \link[bigsnpr:bigSNP]{bigsnpr::bigSNP} object). Genotypes are decoded with its
+\code{code256}, and values other than 0, 1 and 2 are treated as missing.}
 
 \item{ind.row}{An optional vector of the row indices that are used. If not
 specified, all rows are used. Don't use negative indices.}
@@ -26,7 +27,8 @@ specified, all columns are used. Don't use negative indices.}
 compared in a compact bit-packed form, so this has little effect on
 memory use.}
 
-\item{n_cores}{number of cores to be used (default 1).}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 a matrix of allele sharing between all pairs of individuals

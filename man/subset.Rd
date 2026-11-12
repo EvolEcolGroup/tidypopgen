@@ -32,6 +32,19 @@ Subsetting method for matrix_int_names
 
 Assignment method for matrix_int_names
 }
+\examples{
+my_mat <- matrix_int_names(matrix(1:6, nrow = 2),
+  row_names = c(10L, 20L),
+  col_names = c(100L, 200L, 300L)
+)
+# subset by position
+my_mat[1, 2:3, drop = FALSE]
+# subset by integer names
+my_mat[i_names = 20L, j_names = c(100L, 300L), drop = FALSE]
+# assign by integer names
+my_mat[i_names = 10L, j_names = 200L] <- 0L
+my_mat
+}
 \seealso{
 Other matrix_int_names_functions:
 \code{\link[=as.data.frame.matrix_int_names]{as.data.frame.matrix_int_names()}},

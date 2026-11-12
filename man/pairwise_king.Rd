@@ -8,7 +8,7 @@ pairwise_king(
   x,
   as_matrix = FALSE,
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = 1
+  n_cores = bigstatsr::nb_cores()
 )
 }
 \arguments{
@@ -21,7 +21,8 @@ symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 compared in a compact bit-packed form, so this has little effect on
 memory use.}
 
-\item{n_cores}{number of cores to be used (default 1).}
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 }
 \value{
 a square symmetrical matrix of relationship coefficients between
@@ -31,6 +32,10 @@ individuals if \code{as_matrix} is TRUE, or a tidied tibble of coefficients if
 \description{
 This function computes the KING-robust estimator of kinship, reimplementing
 the KING algorithm of Manichaikul et al. (2010).
+}
+\details{
+Imputed genotypes are used if \code{x} is set to use them (see
+\code{\link[=gt_set_imputed]{gt_set_imputed()}}), and treated as missing otherwise.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
