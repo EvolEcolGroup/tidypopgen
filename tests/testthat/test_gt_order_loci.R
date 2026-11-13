@@ -713,6 +713,20 @@ test_that("cast_chromosome_to_int keeps numeric names with non-numeric ones", {
   )
   # all non-numeric names
   expect_identical(cast_chromosome_to_int(c("b", "a", "b")), c(1L, 2L, 1L))
+  # prefixes in any case are stripped; names with a prefix and without it
+  # are the same chromosome; a final newline is not a number
+  expect_identical(
+    cast_chromosome_to_int(
+      c("Chr_2", "cHrX", "X", "CHROMOSOME_01", "c", "x", "3\n", "chr")
+    ),
+    c(2L, 3L, 3L, 1L, 4L, 5L, 6L, 7L)
+  )
+  # with unused levels, non-numeric names keep the order of all the levels
+  # ("b" comes first, as "chrb")
+  expect_identical(
+    cast_chromosome_to_int(factor(c("b", "a"), levels = c("chrb", "a", "b"))),
+    c(1L, 2L)
+  )
 
   # gt_order_loci sorts numeric chromosomes numerically
   test_indiv_meta <- data.frame(
