@@ -50,13 +50,18 @@ test_that("with_private_fbm_dir() uses a fresh directory and deletes it", {
     tmp_fbm <- bigstatsr::FBM(2, 2)
     list(
       dir = getOption("FBM.dir"),
-      # (FBM() normalises the path of its backing file)
-      dir_norm = normalizePath(getOption("FBM.dir")),
+      # (FBM() normalises the path of its backing file, with forward slashes
+      # on Windows: both paths are normalised in the same way, while they
+      # still exist)
+      dir_norm = normalizePath(getOption("FBM.dir"), winslash = "/"),
+      bk_dir_norm = normalizePath(dirname(tmp_fbm$backingfile),
+        winslash = "/"
+      ),
       bk = tmp_fbm$backingfile
     )
   })
   # the temporary FBM was created in the private directory
-  expect_identical(dirname(res$bk), res$dir_norm)
+  expect_identical(res$bk_dir_norm, res$dir_norm)
   # and both are gone, and the option is restored
   expect_false(dir.exists(res$dir))
   expect_false(file.exists(res$bk))
