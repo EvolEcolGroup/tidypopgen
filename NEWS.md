@@ -17,6 +17,8 @@
 * faster `select_loci()` with variables and function calls;
   `.engine = "tidyselect"` always uses `tidyselect`
 * `gen_tibble()` and `gt_save()` save the *.gt* file twice as fast
+* `qc_report_loci()` gains `n_cores`, and `hwe = FALSE` to get only the MAF
+  and missingness of loci, in a single pass over the genotypes
 * `gt_impute_simple()` works after removing loci (but not individuals) from a
   `gen_tibble`
 * phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads phased

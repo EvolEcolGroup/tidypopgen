@@ -6,24 +6,41 @@
 \alias{qc_report_loci.grouped_gen_tbl}
 \title{Create a Quality Control report for loci}
 \usage{
-qc_report_loci(.x, ...)
+qc_report_loci(.x, hwe = TRUE, n_cores = bigstatsr::nb_cores(), ...)
 
-\method{qc_report_loci}{gen_tbl}(.x, ...)
+\method{qc_report_loci}{gen_tbl}(.x, hwe = TRUE, n_cores = bigstatsr::nb_cores(), ...)
 
-\method{qc_report_loci}{grouped_gen_tbl}(.x, ...)
+\method{qc_report_loci}{grouped_gen_tbl}(.x, hwe = TRUE, n_cores = bigstatsr::nb_cores(), ...)
 }
 \arguments{
 \item{.x}{a \code{\link{gen_tibble}} object.}
+
+\item{hwe}{boolean, whether to compute the HWE exact test (the default).
+It is never computed for pseudohaploid data.}
+
+\item{n_cores}{number of cores to be used, it defaults to
+\code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
 
 \item{...}{currently unused}
 }
 \value{
 either a tibble with 3 elements (maf, missingness and hwe_p). For
-pseudohaploid data, a tibble with 2 elements (maf and missingness).
+pseudohaploid data, or if \code{hwe = FALSE}, a tibble with 2 elements (maf
+and missingness).
 }
 \description{
 Return QC information to assess loci (MAF, missingness and HWE test). For
 pseudohaploid data, HWE test is not calculated.
+}
+\details{
+The MAF and the missingness are always computed across all individuals:
+grouping only affects the HWE test, which is computed within each group.
+When genotypes are coded as 0, 1, 2 or missing (raw or imputed calls), all
+statistics are computed in a single pass over the genotypes. With
+\code{hwe = FALSE}, \code{qc_report_loci()} thus gives both the MAF and the
+missingness of each locus, identical to \code{\link[=loci_maf]{loci_maf()}} and
+\code{\link[=loci_missingness]{loci_missingness()}} on the ungrouped data, reading the genotypes once
+rather than twice (e.g. to filter loci on both with \code{\link[=select_loci_if]{select_loci_if()}}).
 }
 \examples{
 # Create a gen_tibble of lobster genotypes
@@ -36,6 +53,12 @@ example_gt <- gen_tibble(bed_file,
 
 # Get a QC report for the loci
 example_gt \%>\% qc_report_loci()
+
+# Only MAF and missingness (in a single pass over the genotypes), e.g. to
+# filter loci on both
+loci_qc <- example_gt \%>\% qc_report_loci(hwe = FALSE)
+example_gt \%>\%
+  select_loci_if(loci_qc$maf >= 0.05 & loci_qc$missingness <= 0.2)
 
 # Group by population to calculate HWE within populations
 example_gt <- example_gt \%>\% group_by(population)
