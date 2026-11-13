@@ -20,6 +20,16 @@
 #' flips and/or swaps alleles according to the reference dataset, not according
 #' to allele frequency.
 #'
+#' If both `gen_tibble`s are phased (see `phased` in [gen_tibble()]), the merged
+#' `gen_tibble` is phased too, and the alleles of phased genotypes are never
+#' swapped or flipped: `rbind` stops with an error if `flip_strand = TRUE`, or
+#' if the reference and alternate alleles of any locus in common are swapped
+#' between the two datasets (use [rbind_dry_run()] to find these loci, in the
+#' column `to_swap` of its `target` table, and [select_loci()] to remove
+#' them). If only one of them is phased, the phase of its genotypes is
+#' discarded (with a message), and the two datasets are merged as unphased
+#' data (swapping alleles as needed).
+#'
 #' @param ... two [`gen_tibble`] objects. Note that this function can not take
 #'   more objects, `rbind` has to be done sequentially for large sets of
 #'   objects.
@@ -111,6 +121,18 @@ rbind.gen_tbl <- function(
       " same ID."
     )
   }
+  # phased genotypes stay phased only if both datasets are phased; their
+  # alleles are then never swapped or flipped
+  ref_phased <- is_phased(ref)
+  target_phased <- is_phased(target)
+  keep_phase <- ref_phased && target_phased
+  if (keep_phase && flip_strand) {
+    stop(
+      "strands can not be flipped when merging phased gen_tibbles: ",
+      "use 'flip_strand = FALSE'",
+      call. = FALSE
+    )
+  }
   # deprecation of as_is (which was never implemented: loci were always
   # harmonised)
   if (isTRUE(as_is)) {
@@ -160,6 +182,22 @@ rbind.gen_tbl <- function(
     quiet = quiet,
     use_position = use_position
   )
+  # the alleles of phased genotypes are never swapped
+  if (keep_phase) {
+    in_common <- !is.na(report$target$new_id)
+    n_swapped <- sum(report$target$to_swap[in_common] %in% TRUE) +
+      sum(report$ref$to_swap %in% TRUE)
+    if (n_swapped > 0) {
+      stop(
+        "the reference and alternate alleles of ", n_swapped, " loci are ",
+        "swapped between the two phased gen_tibbles, and rbind() does not ",
+        "swap the alleles of phased genotypes: use rbind_dry_run() to find ",
+        "these loci (column 'to_swap' of its 'target' table) and ",
+        "select_loci() to remove them",
+        call. = FALSE
+      )
+    }
+  }
   # now edit the gen_tibble objects
   ###########
   # we start with the ref object
@@ -208,25 +246,42 @@ rbind.gen_tbl <- function(
   target_loci_order <- order(report$target$new_id, na.last = NA)
   new_target_loci_tbl <- show_loci(target)[target_loci_order, ]
 
+  # if only one of the datasets is phased, its genotypes are unphased (byte
+  # 4, 1|0, becomes the unphased heterozygote, byte 1), and the merged FBM
+  # uses the code of unphased data
+  merged_code <- attr(ref$genotypes, "fbm")$code256
+  if (ref_phased != target_phased) {
+    if (!quiet) {
+      message(
+        "only the ", ifelse(ref_phased, "ref", "target"), " gen_tibble ",
+        "is phased: the phase of its genotypes is discarded, and the ",
+        "merged gen_tibble is not phased"
+      )
+    }
+    if (ref_phased) {
+      merged_code <- code_phased
+      merged_code[(phased_genotype_byte[3] + 1)] <- NA
+    }
+  }
   # now we create the merged FBM, with the individuals of ref followed by
-  # those of target (it uses the code256 of ref)
+  # those of target (it uses the code256 of ref, unless only ref is phased)
   ref_rows <- vctrs::vec_data(ref$genotypes)
   target_rows <- vctrs::vec_data(target$genotypes)
   merged_fbm <- bigstatsr::FBM.code256(
     nrow = length(ref_rows) + length(target_rows),
     ncol = nrow(new_ref_loci_tbl),
-    code = attr(ref$genotypes, "fbm")$code256,
+    code = merged_code,
     backingfile = backingfile,
     init = NULL,
     create_bk = TRUE
   )
   # and copy the raw genotypes of the loci in common directly into it (in
   # C++, without intermediate files), swapping the dosages of the loci whose
-  # alleles are swapped (raw values 0 <-> 2, and imputed values 4 <-> 6): in
-  # ref, loci whose allele_ref is missing in both datasets (only with
-  # flip_strand), and in target, loci swapped to match ref
-  swap_lut <- 0:255
-  swap_lut[c(1, 3, 5, 7)] <- c(2, 0, 6, 4)
+  # alleles are swapped: in ref, loci whose allele_ref is missing in both
+  # datasets (only with flip_strand), and in target, loci swapped to match ref
+  # (there are none if both datasets are phased)
+  ref_luts <- rbind_byte_luts(ref_phased, keep_phase = keep_phase)
+  target_luts <- rbind_byte_luts(target_phased, keep_phase = keep_phase)
   gt_copy_fbm(
     BM_from = attr(ref$genotypes, "fbm"),
     BM_to = merged_fbm,
@@ -235,7 +290,8 @@ rbind.gen_tbl <- function(
     col_offset = 0,
     row_offset = 0,
     swap = report$ref$to_swap[ref_loci_order],
-    swap_lut = swap_lut
+    swap_lut = ref_luts$swap,
+    copy_lut = ref_luts$copy
   )
   gt_copy_fbm(
     BM_from = attr(target$genotypes, "fbm"),
@@ -245,7 +301,8 @@ rbind.gen_tbl <- function(
     col_offset = 0,
     row_offset = length(ref_rows),
     swap = report$target$to_swap[target_loci_order],
-    swap_lut = swap_lut
+    swap_lut = target_luts$swap,
+    copy_lut = target_luts$copy
   )
   # save the FBM (its .rds is used as fbm_file below)
   merged_fbm$save()
@@ -311,4 +368,43 @@ add_missing_cols <- function(x, y) {
     }
   }
   x
+}
+
+# lookup tables used to copy the raw bytes of a dataset into the merged FBM of
+# rbind(): `copy` for the loci whose alleles are not swapped, and `swap` for
+# those whose alleles are swapped. For unphased data, bytes are copied as they
+# are, and swapping exchanges the dosages 0 <-> 2 (raw values 0 <-> 2, and
+# imputed values 4 <-> 6). Phased data (see code_phased) that stay phased
+# (keep_phase, when both datasets are phased) are copied as they are, and
+# never swapped (rbind() stops if any locus would need swapping), so both
+# tables leave the bytes unchanged. Phased data that are not kept phased
+# (when the other dataset is unphased) are unphased (1|0 becomes the unphased
+# heterozygote, byte 1), after swapping the alleles of both haplotypes for
+# swapped loci
+rbind_byte_luts <- function(phased, keep_phase) {
+  copy_lut <- 0:255
+  swap_lut <- 0:255
+  if (!phased) {
+    swap_lut[c(1, 3, 5, 7)] <- c(2L, 0L, 6L, 4L)
+  } else if (!keep_phase) {
+    copy_lut <- phased_byte_lut(function(h1, h2) {
+      list(pmin(h1, h2), pmax(h1, h2))
+    })
+    swap_lut <- phased_byte_lut(function(h1, h2) {
+      list(pmin(1L - h1, 1L - h2), pmax(1L - h1, 1L - h2))
+    })
+  }
+  list(copy = copy_lut, swap = swap_lut)
+}
+
+# a lookup table (for bytes 0 to 255) that recodes each phased genotype h1|h2
+# into the genotype f(h1, h2) (a list of the two new haplotypes); bytes that
+# are not phased genotypes (including missing) are left unchanged
+phased_byte_lut <- function(f) {
+  lut <- 0:255
+  is_genotype <- !is.na(phased_bytes[, 1]) & !is.na(phased_bytes[, 2])
+  new_haps <- f(phased_bytes[is_genotype, 1], phased_bytes[is_genotype, 2])
+  lut[is_genotype] <-
+    phased_genotype_byte[1 + 2 * new_haps[[1]] + new_haps[[2]]]
+  lut
 }

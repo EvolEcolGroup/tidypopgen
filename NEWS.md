@@ -1,68 +1,34 @@
 # tidypopgen (development version)
 
-* `gen_tibble(names_as_int = TRUE)` on VCF files writes the original loci
-  names to a sidecar file (*.loci.tsv*); new `gt_lookup_loci()` and
-  `gt_restore_loci()` retrieve them. `gt_merge_vcfs()`, `gt_concat_vcfs()`,
-  `gt_update_backingfile()`, `gt_order_loci()` and `rbind()` keep the sidecar
-* new argument `chromosomes_as_int` of `gen_tibble()`, `gt_merge_vcfs()` and
-  `gt_concat_vcfs()` stores chromosomes as integer codes, saving memory with
-  millions of chromosomes (e.g. RAD loci assembled de novo); new
-  `gt_lookup_chromosomes()` translates codes back into names
-* new article on large RAD-seq datasets
-* new `gt_merge_vcfs()` reads several VCF files with different samples into
-  a single `gen_tibble`, as `bcftools merge` would, in one go (without
-  reading each file into its own `gen_tibble` and binding them in pairs with
-  `rbind()`): loci are matched by chromosome and position, keeping the sites
-  found in all files (`variants = "intersection"`) or all sites (`"union"`,
-  with missing or homozygous reference genotypes for the samples of the files
-  without a site); loci with different alleles are dropped, kept apart, or
-  swapped, following the options of `bcftools merge`. Unlike `gen_tibble()`,
-  it names loci with integers by default (`names_as_int = TRUE`), to save
-  memory with large datasets
-* new `gt_concat_vcfs()` reads several VCF files with the same samples and
-  different loci (e.g. one file per chromosome) into a single `gen_tibble`,
-  as `bcftools concat` would, in one go; the samples can be in a different
-  order in each file. As `gt_merge_vcfs()`, it names loci with integers by
-  default (`names_as_int = TRUE`)
-* the big data article merges the VCFs of the SGDP individuals with
-  `gt_merge_vcfs()`, rather than with `bcftools merge`
-* `gt_as_vcf()` is much faster, and uses less memory, on data with many
-  chromosomes (e.g. RAD loci assembled de novo, with one chromosome per locus)
+## New features and changes
+
+* new `gt_merge_vcfs()` and `gt_concat_vcfs()` read several VCF files into a
+  single `gen_tibble`, as `bcftools merge` and `bcftools concat`
+* integer chromosomes (`chromosomes_as_int`) for datasets with many
+  chromosomes; the original names of integer loci and chromosomes are kept in
+  sidecar files (`gt_lookup_loci()`, `gt_restore_loci()` and
+  `gt_lookup_chromosomes()`)
+* new article on large RAD-seq datasets; the big data article uses
+  `gt_merge_vcfs()`
+* faster "cpp" VCF parser: a single pass, in parallel with `n_cores`, and
+  faster with many chromosomes
+* faster `gt_as_vcf()` with many chromosomes; `gt_as_genlight()` works in
+  chunks of loci (`chunk_size`)
+* faster `select_loci()` with variables and function calls;
+  `.engine = "tidyselect"` always uses `tidyselect`
+* `gen_tibble()` and `gt_save()` save the *.gt* file twice as fast
+* `gt_impute_simple()` works after removing loci (but not individuals) from a
+  `gen_tibble`
+* phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads phased
+  VCF files; `is_phased()` and `show_haplotypes()` give the
+  phase, `gt_as_vcf()` writes it, and `rbind()` keeps it
+
+## Bug fixes
+
+* `gen_tibble()` with the "cpp" parser: fix malformed VCF files read as wrong
+  genotypes (now an error), missing chromosomes (now `NA`), and backing files
+  left behind on errors
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
-* `gt_as_genlight()` reads the genotypes in chunks of loci (new argument
-  `chunk_size`), instead of loading them all in memory
-* `select_loci()` resolves function calls that give positions or names (e.g.
-  `which(...)` or `sample(...)`) and single values directly, without the slow
-  general `tidyselect` machinery
-* `select_loci()` resolves a variable that holds positions or names (e.g.
-  `select_loci(x, idx)`) directly, as it does `all_of(idx)`: with millions of
-  loci, `tidyselect` took minutes and gigabytes of memory. As in
-  `tidyselect`, a locus named like the variable is selected instead, and the
-  deprecation warning of `tidyselect` (in favour of `all_of(idx)`) is kept
-* `select_loci(.engine = "tidyselect")` always uses `tidyselect`, in case a
-  selection is not resolved by the faster path as `tidyselect` would
-* `gen_tibble()` reads VCF files in a single pass with the "cpp" parser
-  (decompressing a *.vcf.gz* file only once), and gives a clear error for VCF
-  files with no biallelic SNPs
-* `gen_tibble()` uses `n_cores` (previously ignored) to read VCF files with
-  the "cpp" parser in parallel: the genotypes are parsed in parallel, and
-  *.vcf.gz* files compressed with `bgzip` are also decompressed in parallel
-* `gen_tibble()` with the "cpp" parser gives a clear error, and leaves no
-  backing files, when the first variant of a VCF does not have a genotype
-  for each sample in its header
-* `gen_tibble()` with the "cpp" parser gives a clear error, rather than
-  reading wrong genotypes, on malformed VCF files: genotypes of biallelic
-  SNPs with alleles other than 0, 1 or ".", or empty, a FORMAT that does not
-  start with GT, positions that are not integers (e.g. "12x"), and corrupted
-  BGZF blocks; and on an invalid `n_cores` (which could crash R)
-* `gen_tibble()` reads VCF files with many chromosomes (e.g. RAD loci
-  assembled de novo) faster: the "cpp" parser looks up chromosome names
-  without allocating memory for each, and the chromosome names are sorted in
-  C order when this gives the order of the locale
-* `gen_tibble()` and `gt_save()` save the *.gt* file twice as fast, with the
-  fastest gzip compression
-* `gen_tibble()` on VCF files: the "cpp" parser reads a missing chromosome
-  (".") as `NA`, as the "vcfR" parser does
 
 # tidypopgen 1.0.0
 

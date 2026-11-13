@@ -37,8 +37,8 @@ missingness_cpp <- function(BM, rowInd, colInd, ncores, block_size = 100000L) {
     .Call(`_tidypopgen_missingness_cpp`, BM, rowInd, colInd, ncores, block_size)
 }
 
-gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut) {
-    invisible(.Call(`_tidypopgen_gt_copy_fbm`, BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut))
+gt_copy_fbm <- function(BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut, copy_lut) {
+    invisible(.Call(`_tidypopgen_gt_copy_fbm`, BM_from, BM_to, rowInd, colInd, col_offset, row_offset, swap, swap_lut, copy_lut))
 }
 
 gt_grouped_pi_diploid <- function(BM, rowInd, colInd, groupIds, ngroups, ncores, block_size = 100000L, return_n = FALSE) {
@@ -209,12 +209,12 @@ merge_sites_file_cols <- function(sites, file, site_col) {
     .Call(`_tidypopgen_merge_sites_file_cols`, sites, file, site_col)
 }
 
-vcf_to_bk <- function(filename, bk_file, read_names = TRUE, n_threads = 1L, read_genotypes = TRUE, loci_file = "", chromosomes_as_int = FALSE, chromosomes_file = "") {
-    .Call(`_tidypopgen_vcf_to_bk`, filename, bk_file, read_names, n_threads, read_genotypes, loci_file, chromosomes_as_int, chromosomes_file)
+vcf_to_bk <- function(filename, bk_file, read_names = TRUE, n_threads = 1L, read_genotypes = TRUE, loci_file = "", chromosomes_as_int = FALSE, chromosomes_file = "", phased_lut = as.integer( c())) {
+    .Call(`_tidypopgen_vcf_to_bk`, filename, bk_file, read_names, n_threads, read_genotypes, loci_file, chromosomes_as_int, chromosomes_file, phased_lut)
 }
 
-vcf_merge_genotypes <- function(filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads = 1L) {
-    invisible(.Call(`_tidypopgen_vcf_merge_genotypes`, filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads))
+vcf_merge_genotypes <- function(filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads = 1L, phased_lut = as.integer( c()), sample_names = as.character( c())) {
+    invisible(.Call(`_tidypopgen_vcf_merge_genotypes`, filename, BM, row_offset, row, col, swap, ploidy, missing_value, n_threads, phased_lut, sample_names))
 }
 
 window_sums_cpp <- function(x, loci, lo, hi, long_double) {

@@ -9,9 +9,10 @@
 // Column j of `BM_to` is filled with column colInd[j] of `BM_from`, restricted
 // (and ordered) to the rows rowInd, and written from row `row_offset` onwards
 // (so that two FBMs can be stacked by rows, e.g. by rbind()). The raw bytes are
-// copied as they are (so the copy works for any code256), except for the loci
-// flagged in `swap`, whose bytes are recoded with `swap_lut` (a lookup table
-// of 256 values) to swap the reference and alternate alleles.
+// recoded with `copy_lut` (a lookup table of 256 values; usually 0:255, so
+// that bytes are copied as they are, and the copy works for any code256),
+// except for the loci flagged in `swap`, whose bytes are recoded with
+// `swap_lut` to swap the reference and alternate alleles.
 //
 // @param BM_from the FBM.code256 to copy from
 // @param BM_to the FBM.code256 to copy to (with length(colInd) columns, and at
@@ -24,6 +25,8 @@
 //   the loci where alleles are swapped, or an empty vector (no swapping)
 // @param swap_lut a vector of 256 values giving the new raw value of each raw
 //   value at swapped loci
+// @param copy_lut a vector of 256 values giving the new raw value of each raw
+//   value at the other loci (0:255 to copy the bytes as they are)
 // [[Rcpp::export]]
 void gt_copy_fbm(Environment BM_from,
                  Environment BM_to,
@@ -32,7 +35,8 @@ void gt_copy_fbm(Environment BM_from,
                  const int col_offset,
                  const int row_offset,
                  const LogicalVector& swap,
-                 const IntegerVector& swap_lut) {
+                 const IntegerVector& swap_lut,
+                 const IntegerVector& copy_lut) {
   XPtr<FBM> xp_from = BM_from["address"];
   XPtr<FBM_RW> xp_to = BM_to["address_rw"];
   const unsigned char* from_ptr =
@@ -67,13 +71,20 @@ void gt_copy_fbm(Environment BM_from,
   if (any_swap && ((size_t) swap.size() != m)) {
     stop("'swap' should have one value per column");
   }
-  if (swap_lut.size() != 256) {
-    stop("'swap_lut' should have 256 elements");
+  if ((swap_lut.size() != 256) || (copy_lut.size() != 256)) {
+    stop("'swap_lut' and 'copy_lut' should have 256 elements");
   }
-  // lookup tables of raw values: unchanged, and with swapped alleles
+  for (int b = 0; b < 256; b++) {
+    if ((swap_lut[b] < 0) || (swap_lut[b] > 255) ||
+        (copy_lut[b] < 0) || (copy_lut[b] > 255)) {
+      stop("'swap_lut' and 'copy_lut' should only contain values from 0 to 255");
+    }
+  }
+  // lookup tables of raw values: at loci that are not swapped (usually
+  // unchanged), and with swapped alleles
   unsigned char same[256], swapped[256];
   for (int b = 0; b < 256; b++) {
-    same[b] = (unsigned char) b;
+    same[b] = (unsigned char) copy_lut[b];
     swapped[b] = (unsigned char) swap_lut[b];
   }
 

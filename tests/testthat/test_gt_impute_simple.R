@@ -37,22 +37,92 @@ test_that("impute and use the imputation", {
   )
 })
 
-test_that("backingfile error", {
+test_that("backingfile error if individuals do not match the FBM", {
   # remove an individual from missing_gt
   missing_gt_indiv <- missing_gt[-1, ]
   # try to impute
   expect_error(
-    missing_gt <- gt_impute_simple(missing_gt_indiv, method = "mode"),
-    "The number of individuals in the gen_tibble does not match "
+    gt_impute_simple(missing_gt_indiv, method = "mode"),
+    "The individuals in the gen_tibble do not match the rows of the file"
   )
-
-  # remove SNPs from missing_gt
-  missing_gt_snps <- missing_gt %>%
-    select_loci(c(1:100))
-  # try to impute
+  # duplicate an individual, keeping the same number of rows as the FBM
+  missing_gt_dup <- missing_gt[c(1, seq_len(nrow(missing_gt) - 1)), ]
+  expect_identical(nrow(missing_gt_dup), nrow(missing_gt))
   expect_error(
-    missing_gt_imputed <- gt_impute_simple(missing_gt_snps, method = "mode"),
-    "The number of SNPs in the gen_tibble does not match "
+    gt_impute_simple(missing_gt_dup, method = "mode"),
+    "use gt_update_backingfile\\(\\) to create a new file backing matrix"
+  )
+  # neither object was imputed
+  expect_false(gt_has_imputed(missing_gt_indiv))
+  expect_false(gt_has_imputed(missing_gt_dup))
+})
+
+test_that("impute the whole FBM if the gen_tibble has a subset of the loci", {
+  # each gen_tibble has its own FBM, as imputation modifies the FBM in place
+  all_loci_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("all_loci_"),
+    quiet = TRUE
+  )
+  all_loci_gt <- gt_impute_simple(all_loci_gt, method = "mode")
+  gt_set_imputed(all_loci_gt, set = TRUE)
+  all_loci_imputed <- show_genotypes(all_loci_gt)
+
+  # keep a subset of the loci, in a different order
+  loci_kept <- c(150:101, 1:50)
+  subset_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("subset_loci_"),
+    quiet = TRUE
+  ) %>%
+    select_loci(all_of(loci_kept))
+  # there is missing data to impute in the loci that are kept and removed
+  expect_true(anyNA(show_genotypes(subset_gt)))
+  expect_true(anyNA(show_genotypes(missing_gt)[, -loci_kept]))
+  subset_gt <- gt_impute_simple(subset_gt, method = "mode")
+  expect_true(gt_has_imputed(subset_gt))
+  # the imputed values are not used by default
+  expect_false(gt_uses_imputed(subset_gt))
+  expect_true(anyNA(show_genotypes(subset_gt)))
+  # with the imputed values, the loci are the same as when imputing all loci
+  gt_set_imputed(subset_gt, set = TRUE)
+  expect_false(anyNA(show_genotypes(subset_gt)))
+  expect_identical(
+    show_genotypes(subset_gt),
+    all_loci_imputed[, loci_kept]
+  )
+  # the loci that are not in the gen_tibble were imputed as well
+  subset_fbm <- attr(subset_gt$genotypes, "fbm")
+  expect_equal(nrow(subset_fbm), nrow(all_loci_gt))
+  expect_false(anyNA(subset_fbm[]))
+  expect_identical(unname(subset_fbm[]), unname(all_loci_imputed))
+  # functions that need imputed data now work on the subset
+  expect_true(inherits(subset_gt %>% gt_pca_partialSVD(), "gt_pca"))
+})
+
+test_that("impute a gen_tibble with all individuals in a different order", {
+  all_indiv_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("all_indiv_"),
+    quiet = TRUE
+  )
+  imputed_gt <- gt_impute_simple(all_indiv_gt, method = "mode")
+  gt_set_imputed(imputed_gt, set = TRUE)
+  imputed_genotypes <- show_genotypes(imputed_gt)
+
+  reordered_gt <- gen_tibble(
+    bed_file,
+    backingfile = tempfile("reordered_indiv_"),
+    quiet = TRUE
+  )
+  new_order <- rev(seq_len(nrow(reordered_gt)))
+  reordered_gt <- reordered_gt[new_order, ] %>%
+    select_loci(1:200)
+  reordered_gt <- gt_impute_simple(reordered_gt, method = "mode")
+  gt_set_imputed(reordered_gt, set = TRUE)
+  expect_identical(
+    show_genotypes(reordered_gt),
+    imputed_genotypes[new_order, 1:200]
   )
 })
 

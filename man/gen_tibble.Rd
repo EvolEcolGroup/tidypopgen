@@ -28,6 +28,7 @@ gen_tibble(
   allow_duplicates = FALSE,
   names_as_int = FALSE,
   chromosomes_as_int = FALSE,
+  phased = FALSE,
   quiet = FALSE
 )
 
@@ -41,6 +42,7 @@ gen_tibble(
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
+  phased = FALSE,
   quiet = FALSE
 )
 }
@@ -59,6 +61,7 @@ considered.
 same file name prefix.
 \item a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
 alternate allele.
+\item with \code{phased = TRUE}, a matrix of haplotypes (see Details).
 }}
 
 \item{...}{if \code{x} is the name of a vcf file, additional arguments passed to
@@ -135,6 +138,12 @@ next to the backing file (\emph{.chromosomes.tsv}), from which
 \code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}}, \code{\link[=gt_lookup_loci]{gt_lookup_loci()}} and \code{\link[=gt_restore_loci]{gt_restore_loci()}}
 get them back.}
 
+\item{phased}{logical. If TRUE, the genotypes are stored with their phase,
+giving a phased \code{gen_tibble} of diploid individuals (see Details). Only
+available when \code{x} is a \emph{VCF} file read with parser "cpp", or a matrix of
+haplotypes. Default is FALSE (the phase of phased \emph{VCF} files is
+ignored).}
+
 \item{indiv_meta}{a list, data.frame or tibble with compulsory columns 'id'
 and 'population', plus any additional metadata of interest. This is only
 used if \code{x} is a genotype matrix. Otherwise this information is extracted
@@ -173,7 +182,8 @@ other individuals (or 2, if no ploidy is known). Currently, only biallelic
 SNPs are supported. If haploid variants (e.g. sex chromosomes) are included
 in the \emph{VCF}, they are not transformed into homozygous calls. Instead,
 reference alleles will be coded as 0 and alternative alleles will be coded
-as 1.
+as 1. The phase of phased genotypes (e.g. \code{0|1}) is ignored, unless
+\code{phased = TRUE} (see below).
 \item \emph{PLINK} files (.bed, .ped, or a bigSNP .rds): the individual information
 (from the .fam file, or the first six columns of the .ped file) is stored
 in the same columns for all formats: the individual ID as \code{id}; the family
@@ -189,6 +199,33 @@ quantitative one) are NA, and \code{paternal_ID}, \code{maternal_ID}, \code{sex}
 \code{\link[=gt_as_plink]{gt_as_plink()}} writes these columns back to PLINK files.
 \item \emph{packedancestry} files: When loading \emph{packedancestry} files,
 missing alleles will be converted from 'X' to NA
+\item Phased genotypes: with \code{phased = TRUE}, \code{gen_tibble()} creates a phased
+\code{gen_tibble} of diploid individuals, which also knows which allele of each
+genotype is on the first and which on the second haplotype (e.g. \code{0|1}
+versus \code{1|0}), as needed by haplotype based statistics. Phased genotypes
+are stored in the same file backed matrix as unphased ones (see
+\link{phased_encoding}), so that all other
+functions work on phased \code{gen_tibble}s as usual, treating their genotypes
+as ordinary dosages of the alternate allele. \code{\link[=is_phased]{is_phased()}} tests whether a
+\code{gen_tibble} is phased, and \code{\link[=show_haplotypes]{show_haplotypes()}} returns its haplotypes.
+Phased genotypes can be read from \emph{VCF} files (with parser "cpp"), in which
+all individuals have to be diploid and all genotypes phased (with \code{|}, e.g.
+\code{0|1}): any unphased genotype (with \code{/}, including \code{0/0} and \code{./.}) is an
+error, naming the individual and the locus, and a genotype with a missing
+allele (e.g. \code{.|.}, \code{0|.}, or a single \code{.}) is missing. They can also be
+created from a matrix of haplotypes, with two rows per individual (the
+first and second haplotypes of individual \code{i} are rows \code{2 * i - 1} and
+\code{2 * i}) and one column per locus, containing 0 (reference allele), 1
+(alternate allele) or \code{NA} (if either haplotype is missing, the genotype is
+missing). \code{\link[=gt_merge_vcfs]{gt_merge_vcfs()}} and \code{\link[=gt_concat_vcfs]{gt_concat_vcfs()}} also read phased \emph{VCF}
+files with \code{phased = TRUE}. Functions that write genotypes keep the phase
+where they can: \code{\link[=gt_as_vcf]{gt_as_vcf()}} writes phased genotypes (\code{0|1}), subsetting,
+\code{\link[=gt_save]{gt_save()}}, \code{\link[=gt_load]{gt_load()}}, \code{\link[=gt_order_loci]{gt_order_loci()}} and \code{\link[=gt_update_backingfile]{gt_update_backingfile()}}
+keep phased data phased, and \link[=rbind.gen_tbl]{rbind()} keeps the phase when
+both \code{gen_tibble}s are phased (it then never swaps or flips alleles), and
+discards it (with a message) when only one of them is phased. Imputation
+(\code{\link[=gt_impute_simple]{gt_impute_simple()}}, \code{\link[=gt_impute_xgboost]{gt_impute_xgboost()}}) is not available for phased
+\code{gen_tibble}s.
 }
 }
 \note{
@@ -216,6 +253,15 @@ vcf_path <-
     package = "tidypopgen"
   )
 gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
+
+# Create a phased gen_tibble from a phased .vcf file
+phased_vcf <-
+  system.file("extdata", "phased_example.vcf", package = "tidypopgen")
+phased_gt <- gen_tibble(phased_vcf,
+  phased = TRUE,
+  quiet = TRUE, backingfile = tempfile("phased_")
+)
+show_haplotypes(phased_gt)
 
 # Create a gen_tibble from a matrix of genotypes:
 test_indiv_meta <- data.frame(

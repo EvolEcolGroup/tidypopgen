@@ -269,7 +269,7 @@ inline int32_t parse_position(const char* p, size_t len) {
   return static_cast<int32_t>(value);
 }
 
-// the outcome of count_alt_alleles()
+// the outcome of count_alt_alleles() and phased_genotype_bytes()
 enum GenotypeStatus {
   GENOTYPES_OK = 0,
   // the line has fewer genotypes than individuals
@@ -278,7 +278,12 @@ enum GenotypeStatus {
   // or an empty field)
   INVALID_GENOTYPE = 2,
   // the FORMAT of the line does not start with GT
-  NO_GT_FORMAT = 3
+  NO_GT_FORMAT = 3,
+  // (phased genotypes only) a genotype is unphased (with '/', e.g. "0/1",
+  // "0/0" or "./.")
+  UNPHASED_GENOTYPE = 4,
+  // (phased genotypes only) a genotype is not diploid (e.g. "1" or "0|1|1")
+  NOT_DIPLOID = 5
 };
 
 /******************************************************************************
@@ -362,6 +367,96 @@ inline int count_alt_alleles(const char* line, size_t len,
   return invalid ? INVALID_GENOTYPE : GENOTYPES_OK;
 }
 
+/******************************************************************************
+ * the phased bytes of the genotypes of a line
+ *
+ * As count_alt_alleles(), but for phased diploid genotypes (see
+ * `?code_phased` in R): for each individual, this stores phased_lut[2 * a +
+ * b] for a genotype a|b (with a and b equal to 0 for the reference allele
+ * and 1 for the alternate allele), or missing_value if any of its alleles is
+ * missing (e.g. ".|.", "0|."), or if it is a single missing allele (".").
+ *
+ * @param line the line (a C string)
+ * @param len the length of the line
+ * @param bytes the array to store the bytes of the n individuals
+ * @param n the number of individuals
+ * @param missing_value the value stored for missing genotypes
+ * @param phased_lut the bytes of the genotypes 0|0, 0|1, 1|0 and 1|1
+ * @param bad_indiv set to the (0-based) index of the individual whose
+ *   genotype could not be read, if the status is not GENOTYPES_OK
+ * @return a GenotypeStatus: any unphased genotype (with '/') is
+ *   UNPHASED_GENOTYPE, and a genotype with valid alleles that is neither
+ *   diploid nor a single '.' is NOT_DIPLOID
+ */
+inline int phased_genotype_bytes(const char* line, size_t len,
+                                 unsigned char* bytes, size_t n,
+                                 unsigned char missing_value,
+                                 const unsigned char* phased_lut,
+                                 size_t &bad_indiv) {
+  bad_indiv = 0;
+  if (n == 0) {
+    return GENOTYPES_OK;
+  }
+  const char* line_end = line + len;
+  // the FORMAT field (the 9th) must start with GT
+  const char* p = skip_fields(line, 8);
+  if ((p == NULL) || (p >= line_end)) {
+    return TOO_FEW_GENOTYPES;
+  }
+  if ((p[0] != 'G') || (p[1] != 'T') ||
+      ((p[2] != ':') && (p[2] != '\t') && (p[2] != '\0'))) {
+    return NO_GT_FORMAT;
+  }
+  // the start of the 10th field
+  p = skip_fields(p, 1);
+  for (size_t i = 0; i < n; i++) {
+    bad_indiv = i;
+    if ((p == NULL) || (p > line_end)) {
+      return TOO_FEW_GENOTYPES;
+    }
+    const char* field_end = static_cast<const char*>(
+      std::memchr(p, '\t', line_end - p));
+    if (field_end == NULL) {
+      field_end = line_end;
+    }
+    // the genotype ends with its field, or with ':'
+    const char* gt_end = static_cast<const char*>(
+      std::memchr(p, ':', field_end - p));
+    if (gt_end == NULL) {
+      gt_end = field_end;
+    }
+    size_t gt_len = gt_end - p;
+    if ((gt_len == 1) && (p[0] == '.')) {
+      bytes[i] = missing_value;
+    } else if ((gt_len == 3) && ((p[1] == '|') || (p[1] == '/'))) {
+      char a = p[0];
+      char b = p[2];
+      if (((a != '0') && (a != '1') && (a != '.')) ||
+          ((b != '0') && (b != '1') && (b != '.'))) {
+        return INVALID_GENOTYPE;
+      }
+      if (p[1] == '/') {
+        return UNPHASED_GENOTYPE;
+      }
+      bytes[i] = ((a == '.') || (b == '.')) ? missing_value :
+        phased_lut[2 * (a == '1') + (b == '1')];
+    } else {
+      // not a diploid genotype: it is valid (and so not diploid) if its
+      // alleles are single characters ('0', '1' or '.') separated by '/' or
+      // '|'
+      bool valid = (gt_len % 2 == 1);
+      for (size_t k = 0; valid && (k < gt_len); k++) {
+        valid = (k % 2 == 1) ? ((p[k] == '/') || (p[k] == '|')) :
+          ((p[k] == '0') || (p[k] == '1') || (p[k] == '.'));
+      }
+      return valid ? NOT_DIPLOID : INVALID_GENOTYPE;
+    }
+    // move to the next field
+    p = field_end + 1;
+  }
+  return GENOTYPES_OK;
+}
+
 // Function to stop with the error of a GenotypeStatus (other than
 // GENOTYPES_OK), for the VCF `what` (e.g. "the VCF" or "the VCF <file>")
 inline void stop_genotype_status(int status, const std::string &what) {
@@ -377,6 +472,77 @@ inline void stop_genotype_status(int status, const std::string &what) {
     stop("the FORMAT of a variant of " + what + " does not start with GT " +
          "(the genotype should be the first value of each sample)");
   }
+}
+
+// Function to stop with the error of the first phased genotype that could
+// not be read, among the lines `snp_lines` of a chunk (the lines are parsed in
+// parallel, so the first error of the file is found by parsing them again in
+// order, which is only done when there is an error), naming the individual
+// and the locus (chromosome:position), and the VCF `file` (if not "")
+inline void stop_phased_genotypes(const std::vector<char*> &line_start,
+                                  const std::vector<size_t> &line_len,
+                                  const std::vector<size_t> &snp_lines,
+                                  size_t n,
+                                  const unsigned char* phased_lut,
+                                  const std::vector<std::string> &samples,
+                                  const std::string &file = "") {
+  std::vector<unsigned char> bytes(n);
+  for (size_t k = 0; k < snp_lines.size(); k++) {
+    size_t l = snp_lines[k];
+    size_t bad_indiv = 0;
+    int status = phased_genotype_bytes(line_start[l], line_len[l],
+                                       bytes.data(), n, 0, phased_lut,
+                                       bad_indiv);
+    if (status == GENOTYPES_OK) {
+      continue;
+    }
+    // (the locus metadata of this line were found when it was read)
+    const char* field_start[5];
+    size_t field_len[5];
+    find_locus_meta(line_start[l], line_len[l], field_start, field_len);
+    std::string locus = std::string(field_start[0], field_len[0]) + ":" +
+      std::string(field_start[1], field_len[1]);
+    if (!file.empty()) {
+      locus += " of the VCF " + file;
+    }
+    std::string indiv = (bad_indiv < samples.size()) ? samples[bad_indiv] :
+      ("number " + std::to_string(bad_indiv + 1));
+    std::string where = "individual " + indiv + " at locus " + locus;
+    if (status == TOO_FEW_GENOTYPES) {
+      stop("the line of locus " + locus +
+           " has fewer genotypes than individuals");
+    } else if (status == UNPHASED_GENOTYPE) {
+      stop("the genotype of " + where + " is unphased (with '/'): phased " +
+           "genotypes need '|' between their alleles (use phased = FALSE " +
+           "to read the genotypes without their phase)");
+    } else if (status == NOT_DIPLOID) {
+      stop("the genotype of " + where + " is not diploid: phased " +
+           "genotypes can only be read for diploid individuals");
+    }
+    stop_genotype_status(status, file.empty() ? "the VCF" :
+                           "the VCF " + file);
+  }
+}
+
+// Function to check the bytes of phased genotypes (phased_lut, see
+// vcf_to_bk()), copying them into `bytes` (4 values); returns whether the
+// genotypes are phased (phased_lut is not empty)
+inline bool read_phased_lut(const IntegerVector &phased_lut,
+                            unsigned char* bytes) {
+  if (phased_lut.size() == 0) {
+    return false;
+  }
+  if (phased_lut.size() != 4) {
+    stop("'phased_lut' should be empty or have 4 elements");
+  }
+  for (int k = 0; k < 4; k++) {
+    if ((phased_lut[k] == NA_INTEGER) || (phased_lut[k] < 0) ||
+        (phased_lut[k] > 255)) {
+      stop("'phased_lut' should contain bytes (0 to 255)");
+    }
+    bytes[k] = static_cast<unsigned char>(phased_lut[k]);
+  }
+  return true;
 }
 
 // A reader of the lines of a VCF (plain or gzipped), a chunk at a time: each
@@ -784,6 +950,13 @@ private:
  *   them), but written to chromosomes_file, if it is not ""
  * @param chromosomes_file The chromosome sidecar to write (with the code and
  *   name of each chromosome), or "" for none (only with chromosomes_as_int)
+ * @param phased_lut An empty vector to store the number of alternate alleles
+ *   of each genotype, or, to store phased diploid genotypes (see
+ *   gen_tibble(phased = TRUE) in R), the bytes of the genotypes 0|0, 0|1,
+ *   1|0 and 1|1 (in this order; see phased_genotype_bytes()). Phased
+ *   genotypes must
+ *   all be diploid and phased (any '/' is an error), and missing genotypes
+ *   are stored as max_ploidy + 1, as for unphased data
  * Missing IDs (".") are replaced by the chromosome and position (e.g.
  * "1_752566", or "NA_752566" for a missing chromosome ".", as vcfR does), so
  * that the names do not depend on how the chromosomes are returned.
@@ -798,7 +971,11 @@ List vcf_to_bk(std::string filename, std::string bk_file,
                bool read_names = true, int n_threads = 1,
                bool read_genotypes = true, std::string loci_file = "",
                bool chromosomes_as_int = false,
-               std::string chromosomes_file = "") {
+               std::string chromosomes_file = "",
+               IntegerVector phased_lut = IntegerVector::create()) {
+  // are we storing phased genotypes? (as bytes of phased_lut)
+  unsigned char phased_bytes[4] = {0, 0, 0, 0};
+  const bool phased = read_phased_lut(phased_lut, phased_bytes);
   VcfLineReader reader(filename, n_threads);
   // the locus sidecar, written in order as the metadata of the loci are read
   std::unique_ptr<SidecarWriter> loci_writer;
@@ -1022,8 +1199,9 @@ List vcf_to_bk(std::string filename, std::string bk_file,
       continue;
     }
     // count the alternate alleles of each individual at the biallelic snps
-    // of this chunk, in parallel (with the provisional value for missing
-    // genotypes if the ploidies are not yet known)
+    // of this chunk (or store their phased genotypes), in parallel (with the
+    // provisional value for missing genotypes if the ploidies are not yet
+    // known)
     size_t offset = genotypes.size();
     genotypes.resize(offset + snp_lines.size() * n_individuals);
     unsigned char this_missing = ploidy_known ? missing_value :
@@ -1031,14 +1209,33 @@ List vcf_to_bk(std::string filename, std::string bk_file,
     long n_snp_lines = snp_lines.size();
     size_t chunk_max_alleles = 0;
     int status = GENOTYPES_OK;
+    if (phased) {
+      // (phased genotypes are diploid, so they never have more alleles than
+      // max_ploidy)
 #pragma omp parallel for num_threads(n_threads) schedule(static) \
-    reduction(max:chunk_max_alleles) reduction(max:status)
-    for (long k = 0; k < n_snp_lines; k++) {
-      size_t l = snp_lines[k];
-      int line_status = count_alt_alleles(
-        line_start[l], line_len[l], &genotypes[offset + k * n_individuals],
-        n_individuals, this_missing, '1', chunk_max_alleles);
-      status = std::max(status, line_status);
+      reduction(max:status)
+      for (long k = 0; k < n_snp_lines; k++) {
+        size_t l = snp_lines[k];
+        size_t bad_indiv;
+        int line_status = phased_genotype_bytes(
+          line_start[l], line_len[l], &genotypes[offset + k * n_individuals],
+          n_individuals, this_missing, phased_bytes, bad_indiv);
+        status = std::max(status, line_status);
+      }
+      if (status != GENOTYPES_OK) {
+        stop_phased_genotypes(line_start, line_len, snp_lines, n_individuals,
+                              phased_bytes, sample_names);
+      }
+    } else {
+#pragma omp parallel for num_threads(n_threads) schedule(static) \
+      reduction(max:chunk_max_alleles) reduction(max:status)
+      for (long k = 0; k < n_snp_lines; k++) {
+        size_t l = snp_lines[k];
+        int line_status = count_alt_alleles(
+          line_start[l], line_len[l], &genotypes[offset + k * n_individuals],
+          n_individuals, this_missing, '1', chunk_max_alleles);
+        status = std::max(status, line_status);
+      }
     }
     if (status != GENOTYPES_OK) {
       stop_genotype_status(status, "the VCF");
@@ -1152,13 +1349,34 @@ List vcf_to_bk(std::string filename, std::string bk_file,
  * @param missing_value The value of missing genotypes in the merged FBM
  *   (its largest ploidy + 1)
  * @param n_threads The number of threads
+ * @param phased_lut An empty vector to store the number of alternate alleles
+ *   of each genotype, or the bytes of phased genotypes (see vcf_to_bk(); the
+ *   alleles of phased genotypes are never swapped)
+ * @param sample_names The names of the individuals of the file (used in the
+ *   errors of phased genotypes)
  */
 // [[Rcpp::export]]
 void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
                          const IntegerVector& row, const IntegerVector& col,
                          const LogicalVector& swap,
                          const IntegerVector& ploidy, int missing_value,
-                         int n_threads = 1) {
+                         int n_threads = 1,
+                         IntegerVector phased_lut = IntegerVector::create(),
+                         CharacterVector sample_names =
+                           CharacterVector::create()) {
+  // are we storing phased genotypes? (as bytes of phased_lut; their alleles
+  // are never swapped)
+  unsigned char phased_bytes[4] = {0, 0, 0, 0};
+  const bool phased = read_phased_lut(phased_lut, phased_bytes);
+  std::vector<std::string> samples;
+  if (phased) {
+    for (long k = 0; k < swap.size(); k++) {
+      if (swap[k] == TRUE) {
+        stop("the alleles of phased genotypes can not be swapped");
+      }
+    }
+    samples = Rcpp::as<std::vector<std::string> >(sample_names);
+  }
   XPtr<FBM_RW> xp_bm = BM["address_rw"];
   unsigned char* bm = static_cast<unsigned char*>(xp_bm->matrix());
   size_t n_rows = xp_bm->nrow(); // number of rows of the merged FBM
@@ -1272,10 +1490,16 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
       // with swapped alleles, the REF allele of the file is the alternate
       // allele of the merged locus, so we count it instead (which also gives
       // the right dosage for a genotype with fewer alleles than the ploidy
-      // of its individual, e.g. a haploid genotype of a diploid individual)
-      int line_status = count_alt_alleles(
-        line_start[l], line_len[l], dest, n_individuals, missing,
-        swap_vec[snp] ? '0' : '1', chunk_max_alleles);
+      // of its individual, e.g. a haploid genotype of a diploid individual);
+      // phased genotypes are stored as their bytes (and never swapped)
+      size_t bad_indiv;
+      int line_status = phased ?
+        phased_genotype_bytes(line_start[l], line_len[l], dest,
+                              n_individuals, missing, phased_bytes,
+                              bad_indiv) :
+        count_alt_alleles(line_start[l], line_len[l], dest, n_individuals,
+                          missing, swap_vec[snp] ? '0' : '1',
+                          chunk_max_alleles);
       if (line_status != GENOTYPES_OK) {
         status = std::max(status, line_status);
         continue;
@@ -1287,6 +1511,10 @@ void vcf_merge_genotypes(std::string filename, Environment BM, int row_offset,
       }
     }
     if (status != GENOTYPES_OK) {
+      if (phased) {
+        stop_phased_genotypes(line_start, line_len, snp_lines, n_individuals,
+                              phased_bytes, samples, filename);
+      }
       stop_genotype_status(status, "the VCF " + filename);
     }
     if (chunk_max_alleles > max_ploidy) {

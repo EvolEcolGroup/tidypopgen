@@ -21,6 +21,8 @@
 #' @param n_cores the number of cores used to decompress a bgzipped vcf and to
 #'   parse the genotypes. Default is 1.
 #' @param quiet whether to print messages.
+#' @param phased whether to store phased diploid genotypes (see
+#'   [gen_tibble()]), rather than alternate allele counts.
 #' @returns an object of the class `gen_tbl`.
 #' @keywords internal
 #' @noRd
@@ -33,7 +35,8 @@ vcf_to_fbm_cpp <- function(
   names_as_int = FALSE,
   chromosomes_as_int = FALSE,
   n_cores = 1,
-  quiet = FALSE
+  quiet = FALSE,
+  phased = FALSE
 ) {
   if (is.null(backingfile)) {
     backingfile <- vcf_path
@@ -75,13 +78,16 @@ vcf_to_fbm_cpp <- function(
   # of memory with many loci: they are written to the sidecar instead; the
   # same goes for the names of the chromosomes with integer chromosomes).
   # With n_cores > 1, the blocks of a bgzipped VCF are decompressed in
-  # parallel, and the genotypes parsed in parallel
+  # parallel, and the genotypes parsed in parallel. Phased genotypes are
+  # stored as the bytes of phased_genotype_byte (missing genotypes are
+  # max_ploidy + 1 = 3, as in unphased diploid data)
   vcf_meta <- vcf_to_bk(vcf_path,
     bk_file = bk_file, read_names = !names_as_int,
     n_threads = n_cores,
     loci_file = if (names_as_int) loci_file else "",
     chromosomes_as_int = chromosomes_as_int,
-    chromosomes_file = if (chromosomes_as_int) chromosomes_file else ""
+    chromosomes_file = if (chromosomes_as_int) chromosomes_file else "",
+    phased_lut = if (phased) phased_genotype_byte else integer(0)
   )
   # an FBM can not have zero loci (its empty backing file can not be mapped)
   if (length(vcf_meta$loci_tbl$physical.pos) == 0) {
@@ -104,6 +110,10 @@ vcf_to_fbm_cpp <- function(
   }
   fbm_ploidy <- ploidy
   max_ploidy <- max(ploidy)
+  # phased genotypes are only stored for diploid individuals
+  if (phased) {
+    stopifnot_phased_ploidy(ploidy, vcf_meta$sample_names)
+  }
 
   indiv_meta <- list(
     id = vcf_meta$sample_names
@@ -158,8 +168,12 @@ vcf_to_fbm_cpp <- function(
   # validate individuals
   indiv_meta <- validate_indiv_meta(as.data.frame(indiv_meta))
 
-  code256 <- rep(NA_real_, 256)
-  code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+  if (phased) {
+    code256 <- code_phased
+  } else {
+    code256 <- rep(NA_real_, 256)
+    code256[1:(max_ploidy + 1)] <- seq(0, max_ploidy)
+  }
 
   # create the file backed matrix, from the backing file written above
   file_backed_matrix <- bigstatsr::FBM.code256(

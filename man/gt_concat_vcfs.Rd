@@ -13,6 +13,7 @@ gt_concat_vcfs(
   names_as_int = TRUE,
   chromosomes_as_int = FALSE,
   n_cores = 1,
+  phased = FALSE,
   quiet = FALSE
 )
 }
@@ -56,6 +57,12 @@ file next to the backing file (see \code{\link[=gen_tibble]{gen_tibble()}} and
 
 \item{n_cores}{the number of cores used to decompress bgzipped files and to
 parse the genotypes. Defaults to 1.}
+
+\item{phased}{boolean: whether to store phased genotypes, giving a phased
+\code{gen_tibble} (see \code{phased} in \code{\link[=gen_tibble]{gen_tibble()}}). All the files must then be
+phased: any unphased genotype (with '/') or individual that is not
+diploid is an error. Default is FALSE (the phase is ignored, as in
+\code{\link[=gen_tibble]{gen_tibble()}}).}
 
 \item{quiet}{boolean: whether to omit the report of the concatenation.}
 }

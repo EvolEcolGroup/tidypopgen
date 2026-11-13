@@ -69,6 +69,16 @@ rbind differs from merging data with plink, which swaps the order of allele1
 and allele2 according to minor allele frequency when merging datasets. rbind
 flips and/or swaps alleles according to the reference dataset, not according
 to allele frequency.
+
+If both \code{gen_tibble}s are phased (see \code{phased} in \code{\link[=gen_tibble]{gen_tibble()}}), the merged
+\code{gen_tibble} is phased too, and the alleles of phased genotypes are never
+swapped or flipped: \code{rbind} stops with an error if \code{flip_strand = TRUE}, or
+if the reference and alternate alleles of any locus in common are swapped
+between the two datasets (use \code{\link[=rbind_dry_run]{rbind_dry_run()}} to find these loci, in the
+column \code{to_swap} of its \code{target} table, and \code{\link[=select_loci]{select_loci()}} to remove
+them). If only one of them is phased, the phase of its genotypes is
+discarded (with a message), and the two datasets are merged as unphased
+data (swapping alleles as needed).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")

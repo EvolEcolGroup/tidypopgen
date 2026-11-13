@@ -90,7 +90,8 @@ gt_update_backingfile <- function(
       col_offset = chunks_vec[i],
       row_offset = 0,
       swap = logical(0),
-      swap_lut = 0:255
+      swap_lut = 0:255,
+      copy_lut = 0:255
     )
   }
   # with integer loci names (or chromosomes), the sidecars of the new backing

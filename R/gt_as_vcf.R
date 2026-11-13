@@ -1,6 +1,8 @@
 #' Convert a `gen_tibble` to a VCF
 #'
-#' This function write a VCF from a `gen_tibble`. The genotypes are read and
+#' This function write a VCF from a `gen_tibble`. Phased genotypes (see
+#' `phased` in [gen_tibble()]) are written as phased (e.g. `0|1`), and unphased
+#' ones as unphased (e.g. `0/1`). The genotypes are read and
 #' written in chunks of loci, so that this works on datasets that do not fit in
 #' memory.
 #'
@@ -79,14 +81,21 @@ gt_as_vcf <- function(x, file = NULL, chunk_size = NULL, overwrite = FALSE) {
     position = loci_tbl$position,
     chunk_size = chunk_size
   )
-  # create a lookup table with the string for each raw value of the FBM, by
-  # recoding its decoded dosages (dosages other than 0, 1 and 2, e.g. imputed
-  # dosages, are written as numbers)
-  genotypes_lut <- .gt_get_fbm(x)$code256
-  genotypes_lut[genotypes_lut == 0] <- "0/0"
-  genotypes_lut[genotypes_lut == 1] <- "0/1"
-  genotypes_lut[genotypes_lut == 2] <- "1/1"
-  genotypes_lut[is.na(genotypes_lut)] <- "./."
+  if (is_phased(x)) {
+    # phased genotypes: the string of each raw value gives the alleles of the
+    # two haplotypes (see phased_bytes)
+    genotypes_lut <- paste0(phased_bytes[, 1], "|", phased_bytes[, 2])
+    genotypes_lut[is.na(phased_bytes[, 1]) | is.na(phased_bytes[, 2])] <- ".|."
+  } else {
+    # create a lookup table with the string for each raw value of the FBM, by
+    # recoding its decoded dosages (dosages other than 0, 1 and 2, e.g. imputed
+    # dosages, are written as numbers)
+    genotypes_lut <- .gt_get_fbm(x)$code256
+    genotypes_lut[genotypes_lut == 0] <- "0/0"
+    genotypes_lut[genotypes_lut == 1] <- "0/1"
+    genotypes_lut[genotypes_lut == 2] <- "1/1"
+    genotypes_lut[is.na(genotypes_lut)] <- "./."
+  }
   # iterate over loci in chunks and append to the vcf body
   for (chunk_i in seq_along(chunks_vec)) {
     this_chunk <- (chunks_vec_index[chunk_i] + 1):chunks_vec_index[chunk_i + 1]
