@@ -197,8 +197,10 @@ public:
       if (found_newline || at_eof) {
         break;
       }
-      // (a batch of BGZF blocks grows the buffer as needed)
-      if (!is_bgzf) {
+      // grow the buffer once it is full of a line longer than it (a read can
+      // fill only part of the buffer, see read(); a batch of BGZF blocks
+      // grows the buffer as needed)
+      if (!is_bgzf && (n_data == buffer.size())) {
         buffer.resize(buffer.size() * 2);
       }
     }
@@ -371,7 +373,14 @@ private:
   // the end of the file)
   size_t read(char* dest, size_t n) {
     if (gz != NULL) {
-      int n_read = gzread(gz, dest, n);
+      // gzread() reads at most INT_MAX bytes at a time (larger requests are
+      // an error, and its length is an unsigned int), so a large buffer
+      // (e.g. the chunks of a .ped file with millions of loci, read on many
+      // threads) is filled 1 GB at a time; next_chunk() reads again until
+      // it finds a newline
+      const size_t max_gz_read = (size_t) 1 << 30;
+      unsigned int n_request = (unsigned int) std::min(n, max_gz_read);
+      int n_read = gzread(gz, dest, n_request);
       if (n_read < 0) {
         int err;
         stop(std::string("error reading the gzipped file: ") +
