@@ -632,14 +632,14 @@ at each locus, and so it depends on the individuals that are included in the
 different. Therefore, if we have removed individuals from our `gen_tibble`, and
 we want to impute, we need to update the backing files to reflect the new set 
 of individuals. For more complex imputation methods (`gt_impute_xgboost()`), we
- may also need to update the backing files if we have removed loci, as the 
- imputation model has to be trained on the whole backing file.
-The schematic below illustrates a situation when the backing file can be 
-reduced imputation.
+may also need to update the backing files if we have removed loci, as the 
+imputation model has to be trained on the whole backing file.
+The schematic below illustrates a situation when the backing file has to be
+reduced before imputation.
 
 ![Figure 3: Visual representation of updating backingfiles for a gen_tibble object](./img/update_backingfile.jpg){width=630px}
 
-For example, lets assume that, in our QC step we may have filtered out some individuals, like so: 
+For example, let's assume that, in our QC step, we have filtered out some individuals, like so:
 
 ```{r}
 new_example_gt <- new_example_gt %>% filter(!population == "pop1")
