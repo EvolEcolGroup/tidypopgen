@@ -427,6 +427,35 @@ test_that("ped files: a third allele in either position is multi-allelic", {
   }
 })
 
+test_that("ped files: alleles and missing values longer than one character", {
+  # alleles of several characters are looked up in a table (an allele of a
+  # single character is its own id), and so are missing values ("NN")
+  ped_file <- tempfile(fileext = ".ped")
+  writeLines(c(
+    "f1 i1 0 0 1 1 AT AT G G",
+    "f1 i2 0 0 1 1 AT A NN NN",
+    "f1 i3 0 0 1 1 A A G NN"
+  ), ped_file)
+  writeLines(
+    paste("1", paste0("snp", 1:2), 0, (1:2) * 100, sep = "\t"),
+    sub("\\.ped$", ".map", ped_file)
+  )
+  for (n_cores in 1:2) {
+    ped_gt <- gen_tibble(ped_file,
+      backingfile = tempfile(),
+      valid_alleles = c("A", "T", "C", "G", "AT"),
+      missing_alleles = c("0", "NN"),
+      n_cores = n_cores,
+      quiet = TRUE
+    )
+    expect_equal(show_loci(ped_gt)$allele_ref, c("AT", "G"))
+    expect_equal(show_loci(ped_gt)$allele_alt, c("A", NA))
+    # "G NN" counts as "G G"
+    expect_equal(show_genotypes(ped_gt)[, 1], c(0, 1, 2))
+    expect_equal(show_genotypes(ped_gt)[, 2], c(0, NA, 0))
+  }
+})
+
 test_that("ped files with the wrong number of fields give an error", {
   ped_file <- tempfile(fileext = ".ped")
   writeLines(c(
