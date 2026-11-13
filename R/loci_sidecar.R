@@ -214,7 +214,7 @@ sidecar_path_from_bk <- function(bk_file, type = c("loci", "chromosomes")) {
 
 # the path of the locus sidecar of a gen_tibble (or of its genotypes column)
 loci_sidecar_path <- function(x) {
-  sidecar_path_from_bk(gt_get_file_names(x)[2], "loci")
+  sidecar_path_from_bk(fbm_file_names(x)[2], "loci")
 }
 
 # the genotypes column of a gen_tibble (or the column itself)
@@ -376,7 +376,7 @@ chromosomes_sidecar_header <- "int_chromosome\tchromosome"
 # the path of the chromosome sidecar of a gen_tibble (or of its genotypes
 # column)
 chromosomes_sidecar_path <- function(x) {
-  sidecar_path_from_bk(gt_get_file_names(x)[2], "chromosomes")
+  sidecar_path_from_bk(fbm_file_names(x)[2], "chromosomes")
 }
 
 # whether a column of the loci table holds integers (integer names or
@@ -470,7 +470,9 @@ copy_sidecars <- function(x, new_bk_file, loci) {
   invisible(NULL)
 }
 
-# the sidecars of a gen_tibble that exist, for the messages of gt_save()
+# the sidecars that a gen_tibble uses (integer names or chromosomes) and that
+# exist, named by type, loci first (for gt_get_file_names() and the messages
+# of gt_save())
 sidecar_files <- function(x) {
   loci <- show_loci(x)
   paths <- character(0)

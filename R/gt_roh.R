@@ -116,7 +116,11 @@ gt_roh_froh <- function(roh, min_length_mb = 0,
 #'
 #' @param roh an `indiv_roh` object, as returned by [windows_indiv_roh()]
 #' @param loci the loci table of the [`gen_tibble`] used to find the runs
-#'   (i.e. `show_loci(x)`, as the runs refer to its rows)
+#'   (i.e. `show_loci(x)`, as the runs refer to its rows). Integer chromosomes
+#'   (`chromosomes_as_int = TRUE`) are replaced by the names of the
+#'   chromosomes of the runs, so the output is the same as without
+#'   `chromosomes_as_int`; integer names of loci (`names_as_int = TRUE`) are
+#'   kept (see [gt_restore_loci()] to restore them first)
 #' @param by_group if `roh` was found on a grouped [`gen_tibble`], whether to
 #'   count the individuals of each group (the default) or of all groups
 #' @returns a tibble with one row per locus (and per group), with the grouping
@@ -141,6 +145,8 @@ gt_roh_froh <- function(roh, min_length_mb = 0,
 gt_roh_loci <- function(roh, loci, by_group = TRUE) {
   .check_indiv_roh(roh)
   .check_roh_loci(roh, loci)
+  # integer chromosomes get the names of the chromosomes of the runs
+  loci <- roh_loci_chromosomes(roh, loci)
   n_loci <- nrow(loci)
   individuals <- attr(roh, "individuals")
   group_cols <- setdiff(names(individuals), "id")
@@ -217,6 +223,9 @@ gt_roh_islands <- function(roh, loci, threshold = 0.5, by_group = TRUE) {
     stop("threshold should be a proportion larger than 0")
   }
   roh_loci <- gt_roh_loci(roh, loci, by_group = by_group)
+  # (gt_roh_loci() checked loci; its integer chromosomes get the names of the
+  # chromosomes of the runs here too)
+  loci <- roh_loci_chromosomes(roh, loci)
   n_loci <- nrow(loci)
   group_cols <- names(roh_loci)[seq_len(match("name", names(roh_loci)) - 1)]
   n_groups <- nrow(roh_loci) / n_loci
