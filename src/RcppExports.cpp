@@ -694,6 +694,23 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// increment_ibs_counts_weighted
+void increment_ibs_counts_weighted(Environment k, Environment k2, Environment k3, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, const NumericVector& wts, int ncores);
+RcppExport SEXP _tidypopgen_increment_ibs_counts_weighted(SEXP kSEXP, SEXP k2SEXP, SEXP k3SEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP wtsSEXP, SEXP ncoresSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Environment >::type k(kSEXP);
+    Rcpp::traits::input_parameter< Environment >::type k2(k2SEXP);
+    Rcpp::traits::input_parameter< Environment >::type k3(k3SEXP);
+    Rcpp::traits::input_parameter< Environment >::type BM(BMSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type rowInd(rowIndSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector& >::type colInd(colIndSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type wts(wtsSEXP);
+    Rcpp::traits::input_parameter< int >::type ncores(ncoresSEXP);
+    increment_ibs_counts_weighted(k, k2, k3, BM, rowInd, colInd, wts, ncores);
+    return R_NilValue;
+END_RCPP
+}
 // increment_king_numerator
 void increment_king_numerator(Environment k, Environment n_Aa_i, Environment BM, const IntegerVector& rowInd, const IntegerVector& colInd, int ncores);
 RcppExport SEXP _tidypopgen_increment_king_numerator(SEXP kSEXP, SEXP n_Aa_iSEXP, SEXP BMSEXP, SEXP rowIndSEXP, SEXP colIndSEXP, SEXP ncoresSEXP) {
@@ -956,6 +973,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_tidypopgen_sfs_preview_cpp", (DL_FUNC) &_tidypopgen_sfs_preview_cpp, 4},
     {"_tidypopgen_increment_as_counts", (DL_FUNC) &_tidypopgen_increment_as_counts, 6},
     {"_tidypopgen_increment_ibs_counts", (DL_FUNC) &_tidypopgen_increment_ibs_counts, 6},
+    {"_tidypopgen_increment_ibs_counts_weighted", (DL_FUNC) &_tidypopgen_increment_ibs_counts_weighted, 8},
     {"_tidypopgen_increment_king_numerator", (DL_FUNC) &_tidypopgen_increment_king_numerator, 6},
     {"_tidypopgen_king_counts_within_groups", (DL_FUNC) &_tidypopgen_king_counts_within_groups, 5},
     {"_tidypopgen_all_in_cpp", (DL_FUNC) &_tidypopgen_all_in_cpp, 2},
