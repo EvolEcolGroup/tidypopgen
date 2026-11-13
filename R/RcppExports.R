@@ -133,6 +133,14 @@ windows_pairwise_pop_fst_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, 
     .Call(`_tidypopgen_windows_pairwise_pop_fst_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, pairwise_combn, method, locus_first, locus_last, n_windows, both_valid, block_size, ncores)
 }
 
+count_ped_individuals <- function(filename, n_threads = 1L) {
+    .Call(`_tidypopgen_count_ped_individuals`, filename, n_threads)
+}
+
+ped_to_fbm <- function(filename, BM, locus_names, na_strings, n_threads = 1L) {
+    .Call(`_tidypopgen_ped_to_fbm`, filename, BM, locus_names, na_strings, n_threads)
+}
+
 pop_stats_dip_pseudo_cpp <- function(BM, rowInd, colInd, groupIds, ngroups, ploidy, by_locus_ho, by_locus_hs, by_locus_fis, by_locus_global, block_size, ncores) {
     .Call(`_tidypopgen_pop_stats_dip_pseudo_cpp`, BM, rowInd, colInd, groupIds, ngroups, ploidy, by_locus_ho, by_locus_hs, by_locus_fis, by_locus_global, block_size, ncores)
 }

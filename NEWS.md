@@ -22,6 +22,8 @@
 * phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads phased
   VCF files; `is_phased()` and `show_haplotypes()` give the
   phase, `gt_as_vcf()` writes it, and `rbind()` keeps it
+* `gen_tibble()` reads *.ped* files straight into the backing file, much
+  faster and in parallel with `n_cores`
 
 ## Bug fixes
 

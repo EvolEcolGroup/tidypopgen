@@ -16,7 +16,6 @@ are decisions or ideas, not bugs.
 |---|---|
 | `genetic_dist` column | It takes 8 bytes per locus (0.32 GB at 40M loci) and is all zeros for VCF inputs. It is needed for cM blocks and windows, `gt_extract_f2()` and PLINK exports, but could become optional (filled with 0 when exported). |
 | AVX2 popcount | Further idea 11 of the [speed review](speed_review_2026-11.md): compiling the pairwise row kernel for AVX2 was 15% slower; a hand-written Harley-Seal popcount with run-time dispatch remains possible, with CRAN portability risks. |
-| `read_pedfile()` | The genotype matrix is still held in memory (now as integers, never copied); streaming it to the FBM would need the allele coding of each locus, known only once all individuals are read. |
 | `cbind(df, gt)` | With the gen_tibble not first, R dispatches to `cbind.data.frame()`, which returns a plain data.frame (related to #9, see below). |
 | PLINK missingness | `pairwise_ibs()` matches PLINK's `--distance flat-missing`; PLINK 1.9's default correction for missing genotypes is not available (documented in `0c326be2`). Add it only if users ask for it. |
 
@@ -24,6 +23,7 @@ are decisions or ideas, not bugs.
 
 | Topic | Resolution |
 |---|---|
+| `read_pedfile()` | Replaced by `ped_to_fbm()` (C++, branch `ped_streaming`), which writes the genotypes straight into the FBM: as the reference allele is the first one found, the coding of a genotype is final when it is read, and only multi-allelic loci are rewritten at the end. Identical backing files and tables; 2,000 × 50,000 genotypes in about 1 s rather than 47 s (see `benchmarks/ped_reader`). |
 | ROH as PLINK | `windows_indiv_roh()` now follows PLINK 1.9 `--homozyg`, with its parameters and defaults (a gap larger than `max_gap_kb` splits runs, as in PLINK); `gt_roh_window()`, deprecated, keeps the version based on detectRUNS. Tested against PLINK 1.9 itself (`test_plink_roh.R`, with outputs from `data-raw/validate/create_plink_roh_test_data.R`: identical runs in 7 cases with different parameters) and against an R transcription of PLINK's code. |
 | ROH windows across chromosomes | Windows of `windows_indiv_roh()` restart at each chromosome, as in PLINK, so the runs are those of detectRUNS run on each chromosome separately (`0248be2e`). |
 | Duplicated loci names | Duplicated character names are found in C++ (`42c3825e`), in 1.3 s and 256 MB for 40M names rather than 3.3 s and 512 MB with `anyDuplicated()`. |
