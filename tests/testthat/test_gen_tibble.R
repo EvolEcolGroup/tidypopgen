@@ -517,6 +517,77 @@ test_that("truncated or corrupted gzipped ped files give an error", {
   )
 })
 
+test_that("ped files: input checks and messages", {
+  ped_file <- tempfile(fileext = ".ped")
+  map_file <- sub("\\.ped$", ".map", ped_file)
+  writeLines(c(
+    "f1 i1 0 0 1 1 A G 0 0 C C",
+    "f1 i2 0 0 1 1 A A 0 0 C C"
+  ), ped_file)
+  # the map file is needed
+  expect_error(
+    gen_tibble(ped_file, backingfile = tempfile(), quiet = TRUE),
+    "does not exist"
+  )
+  writeLines(
+    paste("1", paste0("snp", 1:3), 0, (1:3) * 100, sep = "\t"),
+    map_file
+  )
+  expect_error(
+    gen_tibble(ped_file, backingfile = tempfile(), n_cores = 0, quiet = TRUE),
+    "'n_cores' should be a positive integer"
+  )
+  # loci with no data (snp2) and monomorphic loci (snp3) are reported
+  messages <- capture_messages(suppressWarnings(
+    gen_tibble(ped_file, backingfile = tempfile(), quiet = FALSE)
+  ))
+  expect_true(any(grepl("^no data for 1 loci", messages)))
+  expect_true(any(grepl("^1 loci were monomorphic", messages)))
+  # individuals with the same family and individual IDs
+  dup_file <- tempfile(fileext = ".ped")
+  writeLines(rep("f1 i1 0 0 1 1 A G 0 0 C C", 2), dup_file)
+  file.copy(map_file, sub("\\.ped$", ".map", dup_file))
+  expect_error(
+    gen_tibble(dup_file, backingfile = tempfile(), quiet = TRUE),
+    "could not create unique subject identifiers"
+  )
+  # a map file without a column of unique names
+  writeLines(rep("1\tsnp1\t0\t100", 3), map_file)
+  expect_error(
+    gen_tibble(ped_file, backingfile = tempfile(), quiet = TRUE),
+    "No unambiguous snp names found on file"
+  )
+  # a ped file with blank lines only
+  writeLines(c("", "  "), ped_file)
+  expect_error(
+    gen_tibble(ped_file, backingfile = tempfile(), quiet = TRUE),
+    "Nothing read"
+  )
+  # ped_to_fbm() checks that the file has as many individuals as when they
+  # were counted (the number of rows of the FBM), in case it changed in
+  # between, and count_ped_individuals() that the file can be opened
+  writeLines(c("f1 i1 0 0 1 1 A G", "f1 i2 0 0 1 1 A A"), ped_file)
+  code256 <- c(0, 1, 2, rep(NA, 253))
+  fbm_1 <- bigstatsr::FBM.code256(1, 1, code = code256)
+  expect_error(
+    ped_to_fbm(ped_file, BM = fbm_1, locus_names = "snp1", na_strings = "0"),
+    "more individuals than when they were counted"
+  )
+  fbm_3 <- bigstatsr::FBM.code256(3, 1, code = code256)
+  expect_error(
+    ped_to_fbm(ped_file, BM = fbm_3, locus_names = "snp1", na_strings = "0"),
+    "fewer individuals than when they were counted"
+  )
+  expect_error(
+    ped_to_fbm(ped_file,
+      BM = fbm_3, locus_names = c("snp1", "snp2"),
+      na_strings = "0"
+    ),
+    "one name per column of the FBM"
+  )
+  expect_error(count_ped_individuals(tempfile()), "Error opening file")
+})
+
 test_that("error if genotypes and loci tables differ in length", {
   test_loci_short <- test_loci[1:5, ]
   expect_error(
