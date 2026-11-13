@@ -11,7 +11,7 @@ locus is imputed independently (and thus linkage information is ignored)."><meta
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9002</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,7 +88,19 @@ allele frequencies</p></li>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>This function is a wrapper around <code><a href="https://privefl.github.io/bigsnpr/reference/snp_fastImputeSimple.html" class="external-link">bigsnpr::snp_fastImputeSimple()</a></code>.</p>
+    <p>This function is a wrapper around <code><a href="https://privefl.github.io/bigsnpr/reference/snp_fastImputeSimple.html" class="external-link">bigsnpr::snp_fastImputeSimple()</a></code>, which
+imputes the whole file backing matrix (FBM). The allele frequencies used to
+impute each locus are therefore estimated from all the individuals in the
+FBM, so the <code>gen_tibble</code> must contain all of them (in any order). If some
+individuals have been removed (e.g. with <code><a href="https://rdrr.io/r/stats/filter.html" class="external-link">filter()</a></code>), use
+<code><a href="gt_update_backingfile.html">gt_update_backingfile()</a></code> to resave the FBM with only the individuals in the
+<code>gen_tibble</code> before imputing.</p>
+<p>As each locus is imputed independently, the <code>gen_tibble</code> does not need to
+contain all the loci in the FBM: the loci that have been removed (e.g. with
+<code><a href="select_loci.html">select_loci()</a></code>) are also imputed, but they do not affect the imputation of
+the loci in the <code>gen_tibble</code>. If only a few of the loci in the FBM are kept,
+resaving the FBM with <code><a href="gt_update_backingfile.html">gt_update_backingfile()</a></code> first avoids the time spent
+imputing loci that are not used.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

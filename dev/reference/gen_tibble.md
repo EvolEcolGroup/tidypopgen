@@ -29,6 +29,7 @@ gen_tibble(
   allow_duplicates = FALSE,
   names_as_int = FALSE,
   chromosomes_as_int = FALSE,
+  phased = FALSE,
   quiet = FALSE
 )
 
@@ -43,6 +44,7 @@ gen_tibble(
   missing_alleles = c("0", "."),
   backingfile = NULL,
   allow_duplicates = FALSE,
+  phased = FALSE,
   quiet = FALSE
 )
 ```
@@ -70,6 +72,8 @@ gen_tibble(
 
   - a genotype matrix of dosages (0, 1, 2, NA) giving the dosage of the
     alternate allele.
+
+  - with `phased = TRUE`, a matrix of haplotypes (see Details).
 
 - ...:
 
@@ -175,6 +179,14 @@ gen_tibble(
   [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
   get them back.
 
+- phased:
+
+  logical. If TRUE, the genotypes are stored with their phase, giving a
+  phased `gen_tibble` of diploid individuals (see Details). Only
+  available when `x` is a *VCF* file read with parser "cpp", or a matrix
+  of haplotypes. Default is FALSE (the phase of phased *VCF* files is
+  ignored).
+
 - indiv_meta:
 
   a list, data.frame or tibble with compulsory columns 'id' and
@@ -217,7 +229,8 @@ an object of the class `gen_tbl`.
   biallelic SNPs are supported. If haploid variants (e.g. sex
   chromosomes) are included in the *VCF*, they are not transformed into
   homozygous calls. Instead, reference alleles will be coded as 0 and
-  alternative alleles will be coded as 1.
+  alternative alleles will be coded as 1. The phase of phased genotypes
+  (e.g. `0|1`) is ignored, unless `phased = TRUE` (see below).
 
 - *PLINK* files (.bed, .ped, or a bigSNP .rds): the individual
   information (from the .fam file, or the first six columns of the .ped
@@ -237,6 +250,50 @@ an object of the class `gen_tbl`.
 
 - *packedancestry* files: When loading *packedancestry* files, missing
   alleles will be converted from 'X' to NA
+
+- Phased genotypes: with `phased = TRUE`, `gen_tibble()` creates a
+  phased `gen_tibble` of diploid individuals, which also knows which
+  allele of each genotype is on the first and which on the second
+  haplotype (e.g. `0|1` versus `1|0`), as needed by haplotype based
+  statistics. Phased genotypes are stored in the same file backed matrix
+  as unphased ones (see
+  [phased_encoding](https://evolecolgroup.github.io/tidypopgen/dev/reference/phased_encoding.md)),
+  so that all other functions work on phased `gen_tibble`s as usual,
+  treating their genotypes as ordinary dosages of the alternate allele.
+  [`is_phased()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/is_phased.md)
+  tests whether a `gen_tibble` is phased, and
+  [`show_haplotypes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_haplotypes.md)
+  returns its haplotypes. Phased genotypes can be read from *VCF* files
+  (with parser "cpp"), in which all individuals have to be diploid and
+  all genotypes phased (with `|`, e.g. `0|1`): any unphased genotype
+  (with `/`, including `0/0` and `./.`) is an error, naming the
+  individual and the locus, and a genotype with a missing allele (e.g.
+  `.|.`, `0|.`, or a single `.`) is missing. They can also be created
+  from a matrix of haplotypes, with two rows per individual (the first
+  and second haplotypes of individual `i` are rows `2 * i - 1` and
+  `2 * i`) and one column per locus, containing 0 (reference allele), 1
+  (alternate allele) or `NA` (if either haplotype is missing, the
+  genotype is missing).
+  [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+  and
+  [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md)
+  also read phased *VCF* files with `phased = TRUE`. Functions that
+  write genotypes keep the phase where they can:
+  [`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md)
+  writes phased genotypes (`0|1`), subsetting,
+  [`gt_save()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.md),
+  [`gt_load()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.md),
+  [`gt_order_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.md)
+  and
+  [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md)
+  keep phased data phased, and
+  [rbind()](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind.gen_tbl.md)
+  keeps the phase when both `gen_tibble`s are phased (it then never
+  swaps or flips alleles), and discards it (with a message) when only
+  one of them is phased. Imputation
+  ([`gt_impute_simple()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.md),
+  [`gt_impute_xgboost()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_xgboost.md))
+  is not available for phased `gen_tibble`s.
 
 ## Note
 
@@ -291,6 +348,26 @@ gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
 #>  9 punc_JFT773        [0,0,...]
 #> 10 punc_LG1299        [0,0,...]
 #> # ℹ 36 more rows
+
+# Create a phased gen_tibble from a phased .vcf file
+phased_vcf <-
+  system.file("extdata", "phased_example.vcf", package = "tidypopgen")
+phased_gt <- gen_tibble(phased_vcf,
+  phased = TRUE,
+  quiet = TRUE, backingfile = tempfile("phased_")
+)
+show_haplotypes(phased_gt)
+#>        rs1 rs2 rs4 rs5 rs6 rs7 rs8
+#> ind1_1   0   1   0   0   1   0   1
+#> ind1_2   0   0   1   0   1   0   0
+#> ind2_1   0   1   0   1   0   0   0
+#> ind2_2   1   1   0   0   1   0   1
+#> ind3_1   1   0   0   0   1   1   0
+#> ind3_2   0   0   0   1   0   1   0
+#> ind4_1   1   0   1   0   0   0   1
+#> ind4_2   1   1   0   0   0   1   1
+#> ind5_1   0  NA   1   1   0  NA   1
+#> ind5_2   1  NA   1   0   1  NA   0
 
 # Create a gen_tibble from a matrix of genotypes:
 test_indiv_meta <- data.frame(

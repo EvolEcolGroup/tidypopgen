@@ -101,6 +101,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_missingness.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/indiv_ploidy.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/is_loci_table_ordered.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/is_phased.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_nwise_pop_pbs.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_pairwise_pop_fst.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/jackknife_pop_tajimas_d.html</loc></url>
@@ -126,6 +127,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_king.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_pop_fst.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_pop_sfs.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/phased_encoding.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pipe.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_fis.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/pop_fst.html</loc></url>
@@ -149,6 +151,7 @@
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci_if.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/show_genotypes.html</loc></url>
+<url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/show_haplotypes.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/show_loci.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/show_ploidy.html</loc></url>
 <url><loc>https://evolecolgroup.github.io/tidypopgen/dev/reference/snp_allele_sharing.html</loc></url>

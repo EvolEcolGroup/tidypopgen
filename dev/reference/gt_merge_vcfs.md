@@ -31,6 +31,7 @@ gt_merge_vcfs(
   names_as_int = TRUE,
   chromosomes_as_int = FALSE,
   n_cores = 1,
+  phased = FALSE,
   quiet = FALSE
 )
 ```
@@ -131,6 +132,19 @@ gt_merge_vcfs(
 
   the number of cores used to decompress bgzipped files and to parse the
   genotypes. Defaults to 1.
+
+- phased:
+
+  boolean: whether to store phased genotypes, giving a phased
+  `gen_tibble` (see `phased` in
+  [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)).
+  All the files must then be phased: any unphased genotype (with '/') or
+  individual that is not diploid is an error. Default is FALSE (the
+  phase is ignored, as in
+  [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)).
+  The alleles of phased genotypes are never swapped (as in
+  [rbind()](https://evolecolgroup.github.io/tidypopgen/dev/reference/rbind.gen_tbl.md)),
+  so `ref_mismatch = "swap"` is not available.
 
 - quiet:
 
@@ -250,12 +264,12 @@ merged_gt <- gt_merge_vcfs(c(vcf_a, vcf_b),
 #> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_a.vcf
 #> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_b.vcf
 #> 
-#> gen_tibble saved to /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.gt
-#> using FBM RDS: /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.rds
-#> with FBM backing file: /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.bk
+#> gen_tibble saved to /tmp/Rtmp1lBsW9/merged_1ff52e6eb8f0.gt
+#> using FBM RDS: /tmp/Rtmp1lBsW9/merged_1ff52e6eb8f0.rds
+#> with FBM backing file: /tmp/Rtmp1lBsW9/merged_1ff52e6eb8f0.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.gt')
+#> gt_load('/tmp/Rtmp1lBsW9/merged_1ff52e6eb8f0.gt')
 merged_gt
 #> # A gen_tibble: 8 loci
 #> # A tibble:     8 × 2

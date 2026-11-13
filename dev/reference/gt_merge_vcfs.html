@@ -21,7 +21,7 @@ straight into the merged backing file."><meta property="og:image" content="https
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9002</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -88,6 +88,7 @@ straight into the merged backing file.</p>
 <span>  names_as_int <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  chromosomes_as_int <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_cores <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  phased <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -183,6 +184,15 @@ file next to the backing file (see <code><a href="gen_tibble.html">gen_tibble()<
 parse the genotypes. Defaults to 1.</p></dd>
 
 
+<dt id="arg-phased">phased<a class="anchor" aria-label="anchor" href="#arg-phased"></a></dt>
+<dd><p>boolean: whether to store phased genotypes, giving a phased
+<code>gen_tibble</code> (see <code>phased</code> in <code><a href="gen_tibble.html">gen_tibble()</a></code>). All the files must then be
+phased: any unphased genotype (with '/') or individual that is not
+diploid is an error. Default is FALSE (the phase is ignored, as in
+<code><a href="gen_tibble.html">gen_tibble()</a></code>). The alleles of phased genotypes are never swapped (as in
+<a href="rbind.gen_tbl.html">rbind()</a>), so <code>ref_mismatch = "swap"</code> is not available.</p></dd>
+
+
 <dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
 <dd><p>boolean: whether to omit the report of the merge.</p></dd>
 
@@ -274,12 +284,12 @@ from files of other formats).</p></div>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_a.vcf</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> reading the genotypes of /home/runner/work/_temp/Library/tidypopgen/extdata/pop_b.vcf</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.gt</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.rds</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.bk</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gen_tibble saved to /tmp/Rtmp1lBsW9/merged_1ff52e6eb8f0.gt</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> using FBM RDS: /tmp/Rtmp1lBsW9/merged_1ff52e6eb8f0.rds</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> with FBM backing file: /tmp/Rtmp1lBsW9/merged_1ff52e6eb8f0.bk</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> make sure that you do NOT delete those files!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> to reload the gen_tibble in another session, use:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/RtmpmlLt0o/merged_1f1d3e1dd5ea.gt')</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gt_load('/tmp/Rtmp1lBsW9/merged_1ff52e6eb8f0.gt')</span>
 <span class="r-in"><span><span class="va">merged_gt</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 8 loci</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble:     8 × 2</span></span>

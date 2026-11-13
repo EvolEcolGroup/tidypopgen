@@ -24,6 +24,7 @@ gt_concat_vcfs(
   names_as_int = TRUE,
   chromosomes_as_int = FALSE,
   n_cores = 1,
+  phased = FALSE,
   quiet = FALSE
 )
 ```
@@ -95,6 +96,16 @@ gt_concat_vcfs(
   the number of cores used to decompress bgzipped files and to parse the
   genotypes. Defaults to 1.
 
+- phased:
+
+  boolean: whether to store phased genotypes, giving a phased
+  `gen_tibble` (see `phased` in
+  [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)).
+  All the files must then be phased: any unphased genotype (with '/') or
+  individual that is not diploid is an error. Default is FALSE (the
+  phase is ignored, as in
+  [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)).
+
 - quiet:
 
   boolean: whether to omit the report of the concatenation.
@@ -163,18 +174,18 @@ concat_gt <- gt_concat_vcfs(c(vcf_chr1, vcf_chr2),
   names_as_int = FALSE,
   backingfile = tempfile("concat_")
 )
-#> reading the loci of /tmp/RtmpmlLt0o/file1f1d3b30f263.vcf
-#> reading the loci of /tmp/RtmpmlLt0o/file1f1d4f0c57f0.vcf
+#> reading the loci of /tmp/Rtmp1lBsW9/file1ff579d758a2.vcf
+#> reading the loci of /tmp/Rtmp1lBsW9/file1ff527af083.vcf
 #> concatenating 2 VCF files with 7 samples: 6 loci (biallelic SNPs)
-#> reading the genotypes of /tmp/RtmpmlLt0o/file1f1d3b30f263.vcf
-#> reading the genotypes of /tmp/RtmpmlLt0o/file1f1d4f0c57f0.vcf
+#> reading the genotypes of /tmp/Rtmp1lBsW9/file1ff579d758a2.vcf
+#> reading the genotypes of /tmp/Rtmp1lBsW9/file1ff527af083.vcf
 #> 
-#> gen_tibble saved to /tmp/RtmpmlLt0o/concat_1f1d76512bdd.gt
-#> using FBM RDS: /tmp/RtmpmlLt0o/concat_1f1d76512bdd.rds
-#> with FBM backing file: /tmp/RtmpmlLt0o/concat_1f1d76512bdd.bk
+#> gen_tibble saved to /tmp/Rtmp1lBsW9/concat_1ff55d83fdb4.gt
+#> using FBM RDS: /tmp/Rtmp1lBsW9/concat_1ff55d83fdb4.rds
+#> with FBM backing file: /tmp/Rtmp1lBsW9/concat_1ff55d83fdb4.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpmlLt0o/concat_1f1d76512bdd.gt')
+#> gt_load('/tmp/Rtmp1lBsW9/concat_1ff55d83fdb4.gt')
 concat_gt
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 2

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9002</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9003</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,41 +48,32 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="tidypopgen-development-version">tidypopgen (development version)<a class="anchor" aria-label="anchor" href="#tidypopgen-development-version"></a></h2>
-<ul><li>
-<code>gen_tibble(names_as_int = TRUE)</code> on VCF files writes the original loci names to a sidecar file (<em>.loci.tsv</em>); new <code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code> and <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> retrieve them. <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>, <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code>, <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code>, <code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code> and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> keep the sidecar</li>
-<li>new argument <code>chromosomes_as_int</code> of <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>, <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> and <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> stores chromosomes as integer codes, saving memory with millions of chromosomes (e.g. RAD loci assembled de novo); new <code><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes()</a></code> translates codes back into names</li>
-<li>new article on large RAD-seq datasets</li>
-<li>new <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> reads several VCF files with different samples into a single <code>gen_tibble</code>, as <code>bcftools merge</code> would, in one go (without reading each file into its own <code>gen_tibble</code> and binding them in pairs with <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>): loci are matched by chromosome and position, keeping the sites found in all files (<code>variants = "intersection"</code>) or all sites (<code>"union"</code>, with missing or homozygous reference genotypes for the samples of the files without a site); loci with different alleles are dropped, kept apart, or swapped, following the options of <code>bcftools merge</code>. Unlike <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>, it names loci with integers by default (<code>names_as_int = TRUE</code>), to save memory with large datasets</li>
-<li>new <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> reads several VCF files with the same samples and different loci (e.g. one file per chromosome) into a single <code>gen_tibble</code>, as <code>bcftools concat</code> would, in one go; the samples can be in a different order in each file. As <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>, it names loci with integers by default (<code>names_as_int = TRUE</code>)</li>
-<li>the big data article merges the VCFs of the SGDP individuals with <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>, rather than with <code>bcftools merge</code>
+<div class="section level3">
+<h3 id="new-features-and-changes-development-version">New features and changes<a class="anchor" aria-label="anchor" href="#new-features-and-changes-development-version"></a></h3>
+<ul><li>new <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> and <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> read several VCF files into a single <code>gen_tibble</code>, as <code>bcftools merge</code> and <code>bcftools concat</code>
+</li>
+<li>integer chromosomes (<code>chromosomes_as_int</code>) for datasets with many chromosomes; the original names of integer loci and chromosomes are kept in sidecar files (<code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code>, <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> and <code><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>)</li>
+<li>new article on large RAD-seq datasets; the big data article uses <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>
+</li>
+<li>faster “cpp” VCF parser: a single pass, in parallel with <code>n_cores</code>, and faster with many chromosomes</li>
+<li>faster <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> with many chromosomes; <code><a href="../reference/gt_as_genlight.html">gt_as_genlight()</a></code> works in chunks of loci (<code>chunk_size</code>)</li>
+<li>faster <code><a href="../reference/select_loci.html">select_loci()</a></code> with variables and function calls; <code>.engine = "tidyselect"</code> always uses <code>tidyselect</code>
 </li>
 <li>
-<code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> is much faster, and uses less memory, on data with many chromosomes (e.g. RAD loci assembled de novo, with one chromosome per locus)</li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> and <code><a href="../reference/gt_save.html">gt_save()</a></code> save the <em>.gt</em> file twice as fast</li>
+<li>
+<code><a href="../reference/gt_impute_simple.html">gt_impute_simple()</a></code> works after removing loci (but not individuals) from a <code>gen_tibble</code>
+</li>
+<li>phased genotypes (experimental): <code>gen_tibble(phased = TRUE)</code> reads phased VCF files; <code><a href="../reference/is_phased.html">is_phased()</a></code> and <code><a href="../reference/show_haplotypes.html">show_haplotypes()</a></code> give the phase, <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> writes it, and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> keeps it</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
+<ul><li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> with the “cpp” parser: fix malformed VCF files read as wrong genotypes (now an error), missing chromosomes (now <code>NA</code>), and backing files left behind on errors</li>
 <li>
 <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>: fix loci with missing chromosomes (now written as “.”)</li>
-<li>
-<code><a href="../reference/gt_as_genlight.html">gt_as_genlight()</a></code> reads the genotypes in chunks of loci (new argument <code>chunk_size</code>), instead of loading them all in memory</li>
-<li>
-<code><a href="../reference/select_loci.html">select_loci()</a></code> resolves function calls that give positions or names (e.g. <code>which(...)</code> or <code>sample(...)</code>) and single values directly, without the slow general <code>tidyselect</code> machinery</li>
-<li>
-<code><a href="../reference/select_loci.html">select_loci()</a></code> resolves a variable that holds positions or names (e.g. <code>select_loci(x, idx)</code>) directly, as it does <code>all_of(idx)</code>: with millions of loci, <code>tidyselect</code> took minutes and gigabytes of memory. As in <code>tidyselect</code>, a locus named like the variable is selected instead, and the deprecation warning of <code>tidyselect</code> (in favour of <code>all_of(idx)</code>) is kept</li>
-<li>
-<code>select_loci(.engine = "tidyselect")</code> always uses <code>tidyselect</code>, in case a selection is not resolved by the faster path as <code>tidyselect</code> would</li>
-<li>
-<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> reads VCF files in a single pass with the “cpp” parser (decompressing a <em>.vcf.gz</em> file only once), and gives a clear error for VCF files with no biallelic SNPs</li>
-<li>
-<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> uses <code>n_cores</code> (previously ignored) to read VCF files with the “cpp” parser in parallel: the genotypes are parsed in parallel, and <em>.vcf.gz</em> files compressed with <code>bgzip</code> are also decompressed in parallel</li>
-<li>
-<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> with the “cpp” parser gives a clear error, and leaves no backing files, when the first variant of a VCF does not have a genotype for each sample in its header</li>
-<li>
-<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> with the “cpp” parser gives a clear error, rather than reading wrong genotypes, on malformed VCF files: genotypes of biallelic SNPs with alleles other than 0, 1 or “.”, or empty, a FORMAT that does not start with GT, positions that are not integers (e.g. “12x”), and corrupted BGZF blocks; and on an invalid <code>n_cores</code> (which could crash R)</li>
-<li>
-<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> reads VCF files with many chromosomes (e.g. RAD loci assembled de novo) faster: the “cpp” parser looks up chromosome names without allocating memory for each, and the chromosome names are sorted in C order when this gives the order of the locale</li>
-<li>
-<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> and <code><a href="../reference/gt_save.html">gt_save()</a></code> save the <em>.gt</em> file twice as fast, with the fastest gzip compression</li>
-<li>
-<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> on VCF files: the “cpp” parser reads a missing chromosome (“.”) as <code>NA</code>, as the “vcfR” parser does</li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="tidypopgen-100">tidypopgen 1.0.0<a class="anchor" aria-label="anchor" href="#tidypopgen-100"></a></h2><p class="text-muted">CRAN release: 2026-11-07</p>
 <div class="section level3">

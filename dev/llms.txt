@@ -101,6 +101,17 @@ Functions for creating, saving, and loading `gen_tibble` objects.
 
   Constructor for a `gen_tibble`
 
+- [`is_phased()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/is_phased.md)
+  :
+
+  Test whether a `gen_tibble` contains phased genotypes
+
+- [`code_phased`](https://evolecolgroup.github.io/tidypopgen/dev/reference/phased_encoding.md)
+  [`phased_bytes`](https://evolecolgroup.github.io/tidypopgen/dev/reference/phased_encoding.md)
+  :
+
+  Encoding of phased genotypes in a `gen_tibble`
+
 - [`gt_save()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.md)
   : Save a gen_tibble
 
@@ -143,6 +154,11 @@ Functions to view loci and genotype information stored in a
   :
 
   Show the genotypes of a `gen_tibble`
+
+- [`show_haplotypes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_haplotypes.md)
+  :
+
+  Show the haplotypes of a phased `gen_tibble`
 
 - [`show_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_loci.md)
   [`` `show_loci<-`() ``](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_loci.md)
