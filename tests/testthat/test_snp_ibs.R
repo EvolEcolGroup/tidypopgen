@@ -324,6 +324,20 @@ test_that("missing_correction = 'allele_freq' without missing genotypes", {
     ),
     "all loci are monomorphic"
   )
+  expect_error(
+    pairwise_ibs(gt_na,
+      missing_correction = "allele_freq",
+      allele_freqs = rep(0.5, 5)
+    ),
+    "allele_freqs should have one value per locus"
+  )
+  expect_error(
+    pairwise_ibs(gt_na,
+      missing_correction = "allele_freq",
+      allele_freqs = c(rep(0.5, 5), 1.5)
+    ),
+    "allele_freqs should be between 0 and 1"
+  )
 })
 
 test_that("pairwise functions delete their temporary FBMs", {
