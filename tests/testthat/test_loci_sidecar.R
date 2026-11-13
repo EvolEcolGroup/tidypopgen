@@ -1,3 +1,6 @@
+# delete the backing files of this file when it ends (see helper_cleanup.R)
+local_tempdir_cleanup()
+
 anolis_vcf <- system.file(
   "extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
   package = "tidypopgen"

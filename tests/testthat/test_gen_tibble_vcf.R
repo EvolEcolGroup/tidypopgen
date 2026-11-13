@@ -1,3 +1,6 @@
+# delete the backing files of this file when it ends (see helper_cleanup.R)
+local_tempdir_cleanup()
+
 # limit number of threads for tests
 data.table::setDTthreads(2)
 if (rlang::is_installed("RhpcBLASctl")) {

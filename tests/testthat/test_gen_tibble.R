@@ -1,3 +1,6 @@
+# delete the backing files of this file when it ends (see helper_cleanup.R)
+local_tempdir_cleanup()
+
 # create file
 test_indiv_meta <- data.frame(
   id = c("a", "b", "c"),
