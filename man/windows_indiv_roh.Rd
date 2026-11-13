@@ -75,7 +75,10 @@ position, with columns:
 per grouping variable);
 \item \code{id}: the individual;
 \item \code{chromosome}: the chromosome of the run (a factor, with the levels of
-the loci table);
+the loci table; integer chromosomes, from \code{chromosomes_as_int = TRUE},
+are replaced by their names from the chromosome sidecar, see
+\code{\link[=gt_lookup_chromosomes]{gt_lookup_chromosomes()}}, so the runs are the same as without
+\code{chromosomes_as_int});
 \item \code{start}, \code{end}: the positions of the first and last locus of the run
 (in bp; PLINK \code{POS1} and \code{POS2});
 \item \code{length_bp}: \code{end - start + 1} (or \code{end - start} with

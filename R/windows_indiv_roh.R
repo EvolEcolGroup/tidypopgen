@@ -80,7 +80,10 @@
 #'   per grouping variable);
 #'   - `id`: the individual;
 #'   - `chromosome`: the chromosome of the run (a factor, with the levels of
-#'   the loci table);
+#'   the loci table; integer chromosomes, from `chromosomes_as_int = TRUE`,
+#'   are replaced by their names from the chromosome sidecar, see
+#'   [gt_lookup_chromosomes()], so the runs are the same as without
+#'   `chromosomes_as_int`);
 #'   - `start`, `end`: the positions of the first and last locus of the run
 #'   (in bp; PLINK `POS1` and `POS2`);
 #'   - `length_bp`: `end - start + 1` (or `end - start` with
@@ -171,9 +174,13 @@ windows_indiv_roh <- function(
     stop("window_threshold should be between 0 and 1")
   }
   loci <- show_loci(.x)
-  chromosome <- loci$chromosome
-  # integer chromosomes (chromosomes_as_int) are used as codes (a factor
-  # would create a string for each chromosome)
+  # integer chromosomes (chromosomes_as_int) with a chromosome sidecar become
+  # the factor that a read without chromosomes_as_int gives, so that the runs
+  # are ordered by chromosome name and the outputs hold names (only the
+  # distinct codes are looked up, and the factor needs no string per locus)
+  chromosome <- roh_chromosome_factor(.x, loci$chromosome)
+  # integer chromosomes without a sidecar (e.g. numbers in a loci table) are
+  # used as codes (a factor would create a string for each chromosome)
   int_chromosomes <- is.integer(chromosome) && !is.factor(chromosome)
   if (!int_chromosomes && !is.factor(chromosome)) {
     chromosome <- as.factor(chromosome)
@@ -288,6 +295,47 @@ windows_indiv_roh <- function(
   )
 }
 
+
+# the chromosomes of the loci of .x for the runs of homozygosity: integer
+# chromosomes (chromosomes_as_int) become a factor of their names, from the
+# chromosome sidecar, with the levels that a read without chromosomes_as_int
+# gives (see chromosome_sidecar_factor()), so that the runs are the same
+# with and without integer chromosomes. Other chromosomes, and integer
+# chromosomes without a sidecar (e.g. numbers from a bed file), are returned
+# unchanged
+roh_chromosome_factor <- function(.x, chromosome) {
+  if (is_int_column(chromosome) &&
+        file.exists(chromosomes_sidecar_path(.x))) {
+    chromosome <- chromosome_sidecar_factor(.x, chromosome)
+  }
+  chromosome
+}
+
+# the loci table given to gt_roh_loci() and gt_roh_islands(), with integer
+# chromosomes (chromosomes_as_int) replaced by the chromosomes of the runs,
+# if windows_indiv_roh() found them as names (see roh_chromosome_factor()):
+# the attribute chromosome_length of roh has a row for each stretch of
+# loci of the same chromosome, in the order of the loci table, so each
+# stretch of loci gets the chromosome of its row (after checking that the
+# stretches and their last positions match)
+roh_loci_chromosomes <- function(roh, loci) {
+  chromosome_length <- attr(roh, "chromosome_length")
+  if (!is_int_column(loci$chromosome) ||
+        is_int_column(chromosome_length$chromosome)) {
+    return(loci)
+  }
+  chrom_runs <- vctrs::vec_unrep(loci$chromosome)
+  last_positions <- as.numeric(loci$position[cumsum(chrom_runs$times)])
+  if (nrow(chrom_runs) != nrow(chromosome_length) ||
+        !identical(last_positions, as.numeric(chromosome_length$length_bp))) {
+    stop(
+      "loci should be the loci table (show_loci()) of the gen_tibble ",
+      "used to find the runs"
+    )
+  }
+  loci$chromosome <- rep(chromosome_length$chromosome, times = chrom_runs$times)
+  loci
+}
 
 #' Convert runs of homozygosity to the format of `detectRUNS`
 #'
@@ -446,6 +494,9 @@ gt_roh_window <- function(
       "bps" = "position"
     ) %>%
     as.data.frame()
+  # integer chromosomes (chromosomes_as_int) get their names, as without
+  # chromosomes_as_int
+  map$Chrom <- roh_chromosome_factor(.x, map$Chrom)
 
   # compute the gaps between snps
   gaps <- diff(map$bps)

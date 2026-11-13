@@ -10,6 +10,8 @@
   `gt_lookup_chromosomes()`)
 * `gt_get_file_names()` and `gt_save()` list the sidecar files after the
   *.rds* and *.bk* files
+* `windows_indiv_roh()` and the `gt_roh_*()` functions give the same runs,
+  with chromosome names, with `chromosomes_as_int`
 * new article on large RAD-seq datasets; the big data article uses
   `gt_merge_vcfs()`
 * faster "cpp" VCF parser: a single pass, in parallel with `n_cores`, and
