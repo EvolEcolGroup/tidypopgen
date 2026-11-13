@@ -551,17 +551,19 @@ test_that("ped files: input checks and messages", {
     gen_tibble(dup_file, backingfile = tempfile(), quiet = TRUE),
     "could not create unique subject identifiers"
   )
+  # a ped file with blank lines only (with a valid map file)
+  blank_file <- tempfile(fileext = ".ped")
+  writeLines(c("", "  "), blank_file)
+  file.copy(map_file, sub("\\.ped$", ".map", blank_file))
+  expect_error(
+    gen_tibble(blank_file, backingfile = tempfile(), quiet = TRUE),
+    "Nothing read"
+  )
   # a map file without a column of unique names
   writeLines(rep("1\tsnp1\t0\t100", 3), map_file)
   expect_error(
     gen_tibble(ped_file, backingfile = tempfile(), quiet = TRUE),
     "No unambiguous snp names found on file"
-  )
-  # a ped file with blank lines only
-  writeLines(c("", "  "), ped_file)
-  expect_error(
-    gen_tibble(ped_file, backingfile = tempfile(), quiet = TRUE),
-    "Nothing read"
   )
   # ped_to_fbm() checks that the file has as many individuals as when they
   # were counted (the number of rows of the FBM), in case it changed in
