@@ -183,11 +183,17 @@ local_private_fbm_dir <- function(envir = parent.frame()) {
   # the directory is new and empty; it is made inside FBM.dir, so that
   # temporary FBMs stay where the user wants them (bigstatsr sets FBM.dir to
   # tempdir() when it is loaded)
-  fbm_dir <- tempfile(
-    "fbm_tmp_",
-    tmpdir = getOption("FBM.dir", default = tempdir())
-  )
-  dir.create(fbm_dir)
+  parent_dir <- getOption("FBM.dir", default = tempdir())
+  fbm_dir <- tempfile("fbm_tmp_", tmpdir = parent_dir)
+  # (an FBM.dir that does not exist, or can not be written to, would
+  # otherwise only give an unclear error when the first FBM is made)
+  if (!dir.create(fbm_dir, showWarnings = FALSE)) {
+    stop(
+      "could not create a directory for temporary backing files in '",
+      parent_dir, "' (set with options(FBM.dir = ...))",
+      call. = FALSE
+    )
+  }
   old_opts <- options(FBM.dir = fbm_dir)
   # register the clean up in the caller's frame (with add = TRUE, so as not to
   # replace its own on.exit() code); on Windows unlink() can fail on files

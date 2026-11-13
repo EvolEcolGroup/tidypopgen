@@ -87,6 +87,14 @@ test_that("with_private_fbm_dir() uses a fresh directory and deletes it", {
   )
   expect_false(dir.exists(private_dir))
   expect_identical(getOption("FBM.dir"), user_dir)
+  # a clear error if FBM.dir does not exist (and the option is unchanged)
+  missing_dir <- file.path(user_dir, "not_a_dir")
+  withr::local_options(FBM.dir = missing_dir)
+  expect_error(
+    with_private_fbm_dir(bigstatsr::FBM(2, 2)),
+    "could not create a directory for temporary backing files"
+  )
+  expect_identical(getOption("FBM.dir"), missing_dir)
 })
 
 test_that("S statistic is the correct length", {
