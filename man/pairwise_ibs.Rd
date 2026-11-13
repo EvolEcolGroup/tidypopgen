@@ -80,12 +80,8 @@ which give the same values when no genotypes are missing:
 (\verb{--distance ibs flat-missing} for "proportion", \verb{--distance flat-missing} for "adjusted_counts"): all loci have the same weight, so
 the number of alleles that differ between individuals \code{i} and \code{j},
 \code{d_ij}, is scaled up by \code{n_loci / n_ij}, where \code{n_ij} is the number of loci
-genotyped in both ("adjusted_counts"), and "proportion" is `1 - d_ij / (2
-}
-\itemize{
-\item n_ij)`.
-}
-\itemize{
+genotyped in both ("adjusted_counts"), and "proportion" is
+\code{1 - d_ij / (2 * n_ij)}.
 \item "allele_freq", as PLINK 1.9's default (\verb{--distance ibs} and
 \code{--distance}): loci are weighted by their expected contribution to the
 distance, which depends on their allele frequency \code{p}. Under Hardy-Weinberg
@@ -105,7 +101,7 @@ only (unless \code{--nonfounders} is used), or reads them with \code{--read-freq
 PLINK when all individuals are founders, as in data without a pedigree),
 unless they are given with \code{allele_freqs} (e.g. from the founders, with
 \code{\link[=loci_alt_freq]{loci_alt_freq()}}). Loci without any genotype have a frequency of 0.5, as
-in PLINK. PLINK's \code{1-ibs} modifier (\verb{--distance 1-ibs}, written to a .mdist
+in PLINK. PLINK's \code{1-ibs} modifier (\verb{--distance 1-ibs}, written to a \code{.mdist}
 file) gives \code{1 - proportion} with either correction.
 }
 

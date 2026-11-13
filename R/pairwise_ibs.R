@@ -16,8 +16,8 @@
 #' flat-missing` for "adjusted_counts"): all loci have the same weight, so
 #' the number of alleles that differ between individuals `i` and `j`,
 #' `d_ij`, is scaled up by `n_loci / n_ij`, where `n_ij` is the number of loci
-#' genotyped in both ("adjusted_counts"), and "proportion" is `1 - d_ij / (2
-#' * n_ij)`.
+#' genotyped in both ("adjusted_counts"), and "proportion" is
+#' `1 - d_ij / (2 * n_ij)`.
 #' - "allele_freq", as PLINK 1.9's default (`--distance ibs` and
 #' `--distance`): loci are weighted by their expected contribution to the
 #' distance, which depends on their allele frequency `p`. Under Hardy-Weinberg
@@ -38,7 +38,7 @@
 #' PLINK when all individuals are founders, as in data without a pedigree),
 #' unless they are given with `allele_freqs` (e.g. from the founders, with
 #' [loci_alt_freq()]). Loci without any genotype have a frequency of 0.5, as
-#' in PLINK. PLINK's `1-ibs` modifier (`--distance 1-ibs`, written to a .mdist
+#' in PLINK. PLINK's `1-ibs` modifier (`--distance 1-ibs`, written to a `.mdist`
 #' file) gives `1 - proportion` with either correction.
 #'
 #' Pairs of individuals without any locus genotyped in both (or, with
