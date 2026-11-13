@@ -111,21 +111,25 @@ struct PwIbsWeighted {
   }
 };
 
-// Add the counts of a word; only PwIbsWeighted uses the weights of the loci
-// (the other statistics ignore them, and the compiler removes the unused
-// pointer arithmetic)
+// Add the counts of word w; only PwIbsWeighted uses the weights of the loci
+// of the chunk, wts (the other statistics ignore them). The offset of the
+// weights of word w is only computed here, as wts is nullptr for the other
+// statistics, and an offset added to a null pointer is undefined behaviour
+// (even if the result is never used)
 template <class Stat>
 struct PwAdd {
   static PW_ALWAYS_INLINE void run(const uint64_t* wi, const uint64_t* wj,
-                                   uint32_t* c, const uint32_t*) {
+                                   uint32_t* c, const uint32_t*,
+                                   std::size_t) {
     Stat::add(wi, wj, c);
   }
 };
 template <>
 struct PwAdd<PwIbsWeighted> {
   static PW_ALWAYS_INLINE void run(const uint64_t* wi, const uint64_t* wj,
-                                   uint32_t* c, const uint32_t* wts) {
-    PwIbsWeighted::add(wi, wj, c, wts);
+                                   uint32_t* c, const uint32_t* wts,
+                                   std::size_t w) {
+    PwIbsWeighted::add(wi, wj, c, wts + w * 64);
   }
 };
 
@@ -186,7 +190,7 @@ PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t n,
     uint32_t c[Stat::N_COUNTS] = {0};
     for (std::size_t w = 0; w < n_words; w++) {
       PwAdd<Stat>::run(pi + w * Stat::N_PLANES, pj + w * Stat::N_PLANES, c,
-                       wts + w * 64);
+                       wts, w);
     }
     uint32_t* cnt_ij = cnt_i + (j - i) * Stat::N_COUNTS;
     for (int k = 0; k < Stat::N_COUNTS; k++) {
