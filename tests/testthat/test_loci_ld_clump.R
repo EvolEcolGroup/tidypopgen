@@ -76,6 +76,17 @@ test_that("with_private_fbm_dir() uses a fresh directory and deletes it", {
   )
   expect_false(dir.exists(err_dir))
   expect_identical(getOption("FBM.dir"), fbm_dir_before)
+  # the private directory is made inside the FBM.dir set by the user
+  user_dir <- withr::local_tempdir()
+  withr::local_options(FBM.dir = user_dir)
+  private_dir <- with_private_fbm_dir(getOption("FBM.dir"))
+  # (normalised, as dirname() changes the separators on Windows)
+  expect_identical(
+    normalizePath(dirname(private_dir), winslash = "/"),
+    normalizePath(user_dir, winslash = "/")
+  )
+  expect_false(dir.exists(private_dir))
+  expect_identical(getOption("FBM.dir"), user_dir)
 })
 
 test_that("S statistic is the correct length", {

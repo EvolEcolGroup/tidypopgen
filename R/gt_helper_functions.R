@@ -154,7 +154,9 @@ stopifnot_no_pseudohaploid <- function(x) {
 # anolis example) leave thousands of .bk files in tempdir(), and each later
 # temporary FBM of the session risks a clash. A fresh, empty directory for
 # each call avoids any clash with earlier files, and the leaked files are
-# deleted with it.
+# deleted with it. The private directory is made inside the directory set by
+# the user for temporary FBMs (`options(FBM.dir)`, `tempdir()` by default),
+# e.g. a scratch volume with room for large matrices.
 #
 # Only use it around code whose value holds no FBM (the FBMs created in the
 # private directory are deleted on exit).
@@ -178,8 +180,13 @@ with_private_fbm_dir <- function(code) {
 # @noRd
 local_private_fbm_dir <- function(envir = parent.frame()) {
   # tempfile() checks the bare name, which here is the directory itself, so
-  # the directory is new and empty
-  fbm_dir <- tempfile("fbm_tmp_")
+  # the directory is new and empty; it is made inside FBM.dir, so that
+  # temporary FBMs stay where the user wants them (bigstatsr sets FBM.dir to
+  # tempdir() when it is loaded)
+  fbm_dir <- tempfile(
+    "fbm_tmp_",
+    tmpdir = getOption("FBM.dir", default = tempdir())
+  )
   dir.create(fbm_dir)
   old_opts <- options(FBM.dir = fbm_dir)
   # register the clean up in the caller's frame (with add = TRUE, so as not to
