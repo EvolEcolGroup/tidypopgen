@@ -197,9 +197,8 @@ public:
       if (found_newline || at_eof) {
         break;
       }
-      // grow the buffer once it is full of a line longer than it (a read can
-      // fill only part of the buffer, see read(); a batch of BGZF blocks
-      // grows the buffer as needed)
+      // grow the buffer once it is full of a line longer than it (a batch of
+      // BGZF blocks grows the buffer as needed)
       if (!is_bgzf && (n_data == buffer.size())) {
         buffer.resize(buffer.size() * 2);
       }
@@ -369,36 +368,41 @@ private:
     return total;
   }
 
-  // read up to n bytes into dest, returning the number of bytes read (0 at
-  // the end of the file)
+  // read n bytes into dest (fewer only at the end of the file), returning
+  // the number of bytes read (0 at the end of the file)
   size_t read(char* dest, size_t n) {
     if (gz != NULL) {
       // gzread() reads at most INT_MAX bytes at a time (larger requests are
       // an error, and its length is an unsigned int), so a large buffer
       // (e.g. the chunks of a .ped file with millions of loci, read on many
-      // threads) is filled 1 GB at a time; next_chunk() reads again until
-      // it finds a newline
+      // threads) is filled 1 GB at a time, until it is full or the file ends
       const size_t max_gz_read = (size_t) 1 << 30;
-      unsigned int n_request = (unsigned int) std::min(n, max_gz_read);
-      int n_read = gzread(gz, dest, n_request);
-      if (n_read < 0) {
-        int err;
-        stop(std::string("error reading the gzipped file: ") +
-          gzerror(gz, &err));
-      }
-      // gzread() reads fewer bytes than requested only at the end of the
-      // file; if the file ends in the middle of a gzip stream, it returns
-      // the data decompressed so far (not an error), and gzerror() gives
-      // Z_BUF_ERROR, so a truncated file would be read as a shorter one
-      if ((unsigned int) n_read < n_request) {
-        int err;
-        gzerror(gz, &err);
-        if (err != Z_OK) {
-          stop("the gzipped file is truncated (it ends in the middle of a "
-                 "gzip stream)");
+      size_t n_total = 0;
+      while (n_total < n) {
+        unsigned int n_request =
+          (unsigned int) std::min(n - n_total, max_gz_read);
+        int n_read = gzread(gz, dest + n_total, n_request);
+        if (n_read < 0) {
+          int err;
+          stop(std::string("error reading the gzipped file: ") +
+            gzerror(gz, &err));
+        }
+        n_total += n_read;
+        // gzread() reads fewer bytes than requested only at the end of the
+        // file; if the file ends in the middle of a gzip stream, it returns
+        // the data decompressed so far (not an error), and gzerror() gives
+        // Z_BUF_ERROR, so a truncated file would be read as a shorter one
+        if ((unsigned int) n_read < n_request) {
+          int err;
+          gzerror(gz, &err);
+          if (err != Z_OK) {
+            stop("the gzipped file is truncated (it ends in the middle of "
+                   "a gzip stream)");
+          }
+          break;
         }
       }
-      return n_read;
+      return n_total;
     }
     size_t n_read = std::fread(dest, 1, n, fp);
     if ((n_read < n) && std::ferror(fp)) {
