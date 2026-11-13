@@ -885,24 +885,44 @@ cast_chromosome_to_int <- function(chromosome) {
   if (is.character(chromosome)) {
     # attempt to strip chr from the chromosome
     strip_chr <- function(x) {
-      gsub("^(chromosome_|chr_|chromosome|chr)", "", x, ignore.case = TRUE)
+      # only names starting with "c" or "C" can be stripped, so the (slow)
+      # regular expression is only applied to them: with millions of
+      # chromosomes (e.g. RAD loci), gsub() on all of them takes seconds
+      maybe_chr <- which(startsWith(x, "c") | startsWith(x, "C"))
+      if (length(maybe_chr) > 0) {
+        x[maybe_chr] <- gsub("^(chromosome_|chr_|chromosome|chr)", "",
+          x[maybe_chr],
+          ignore.case = TRUE
+        )
+      }
+      x
     }
     chromosome <- strip_chr(chromosome)
-    # numeric names keep their own value
-    is_numeric <- grepl("^[0-9]+$", chromosome)
+    # numeric names keep their own value (PCRE is several times faster than
+    # the default engine here; "\\z" is the very end of the string, as "$" is
+    # for the default engine, whereas "$" in PCRE also matches before a final
+    # newline)
+    is_numeric <- grepl("^[0-9]+\\z", chromosome, perl = TRUE)
     chr_int <- rep(NA_integer_, length(chromosome))
     chr_int[is_numeric] <- as.integer(chromosome[is_numeric])
     # other names are coded above the largest numeric value, in order of first
     # appearance (or in the order of the levels for a factor)
     is_other <- !is_numeric & !is.na(chromosome)
     if (any(is_other)) {
-      if (is.null(chr_levels)) {
-        other_names <- unique(chromosome[is_other])
+      other <- chromosome[is_other]
+      if (is.null(chr_levels) || all(used_levels)) {
+        # the code of each name is the rank of its first appearance (for a
+        # factor whose levels are all used, this is their order), as with
+        # match(other, unique(other)), but with a single hash table: the
+        # first occurrence of each name, and a running count of new names
+        first <- match(other, other)
+        other_codes <- cumsum(first == seq_along(first))[first]
       } else {
-        other_names <- intersect(strip_chr(chr_levels), chromosome[is_other])
+        # with unused levels, the order of the levels (all of them) is kept
+        other_names <- intersect(strip_chr(chr_levels), other)
+        other_codes <- match(other, other_names)
       }
-      chr_int[is_other] <- max(c(0L, chr_int[is_numeric])) +
-        match(chromosome[is_other], other_names)
+      chr_int[is_other] <- max(c(0L, chr_int[is_numeric])) + other_codes
     }
     chromosome <- chr_int
   }

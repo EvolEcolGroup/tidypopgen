@@ -3,10 +3,24 @@
 #' Return QC information to assess loci (MAF, missingness and HWE test). For
 #' pseudohaploid data, HWE test is not calculated.
 #'
+#' The MAF and the missingness are always computed across all individuals:
+#' grouping only affects the HWE test, which is computed within each group.
+#' When genotypes are coded as 0, 1, 2 or missing (raw or imputed calls), all
+#' statistics are computed in a single pass over the genotypes. With
+#' `hwe = FALSE`, `qc_report_loci()` thus gives both the MAF and the
+#' missingness of each locus, identical to [loci_maf()] and
+#' [loci_missingness()] on the ungrouped data, reading the genotypes once
+#' rather than twice (e.g. to filter loci on both with [select_loci_if()]).
+#'
 #' @param .x a [`gen_tibble`] object.
+#' @param hwe boolean, whether to compute the HWE exact test (the default).
+#'   It is never computed for pseudohaploid data.
+#' @param n_cores number of cores to be used, it defaults to
+#'   [bigstatsr::nb_cores()]
 #' @param ... currently unused
 #' @returns either a tibble with 3 elements (maf, missingness and hwe_p). For
-#'   pseudohaploid data, a tibble with 2 elements (maf and missingness).
+#'   pseudohaploid data, or if `hwe = FALSE`, a tibble with 2 elements (maf
+#'   and missingness).
 #' @rdname qc_report_loci
 #' @export
 #' @examples
@@ -21,25 +35,40 @@
 #' # Get a QC report for the loci
 #' example_gt %>% qc_report_loci()
 #'
+#' # Only MAF and missingness (in a single pass over the genotypes), e.g. to
+#' # filter loci on both
+#' loci_qc <- example_gt %>% qc_report_loci(hwe = FALSE)
+#' example_gt %>%
+#'   select_loci_if(loci_qc$maf >= 0.05 & loci_qc$missingness <= 0.2)
+#'
 #' # Group by population to calculate HWE within populations
 #' example_gt <- example_gt %>% group_by(population)
 #' example_gt %>% qc_report_loci()
 #'
-qc_report_loci <- function(.x, ...) {
+qc_report_loci <- function(.x, hwe = TRUE, n_cores = bigstatsr::nb_cores(),
+                           ...) {
   UseMethod("qc_report_loci", .x)
 }
 
 #' @export
 #' @rdname qc_report_loci
-qc_report_loci.gen_tbl <- function(.x, ...) {
+qc_report_loci.gen_tbl <- function(.x, hwe = TRUE,
+                                   n_cores = bigstatsr::nb_cores(), ...) {
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
-    qc_report <- qc_report_loci_pseudohaploid(.x)
+    qc_report <- qc_report_loci_pseudohaploid(.x, n_cores = n_cores)
     return(qc_report)
   }
 
   stopifnot_diploid(.x$genotypes)
+  if (!hwe) {
+    # only maf and missingness (in a single pass over the genotypes, unless
+    # they are dosages)
+    qc_report <- qc_report_loci_stats(.x, hwe = FALSE, n_cores = n_cores)
+    class(qc_report) <- c("qc_report_loci", class(qc_report))
+    return(qc_report)
+  }
   message(paste(
     "This gen_tibble is not grouped. For Hardy-Weinberg equilibrium,",
     "`qc_report_loci()` will assume individuals are part of the same",
@@ -50,15 +79,18 @@ qc_report_loci.gen_tbl <- function(.x, ...) {
   ))
   # compute maf, missingness and hwe (treating all individuals as a single
   # group)
-  qc_report <- qc_report_loci_stats(.x, hwe = TRUE)
+  qc_report <- qc_report_loci_stats(.x, hwe = TRUE, n_cores = n_cores)
   class(qc_report) <- c("qc_report_loci", class(qc_report))
   return(qc_report)
 }
 
-qc_report_loci_pseudohaploid <- function(.x, ...) {
+qc_report_loci_pseudohaploid <- function(.x, n_cores, ...) {
   rlang::check_dots_empty()
   # maf and missingness are computed across all individuals, without HWE
-  qc_report <- qc_report_loci_stats(ungroup(.x), hwe = FALSE)
+  qc_report <- qc_report_loci_stats(ungroup(.x),
+    hwe = FALSE,
+    n_cores = n_cores
+  )
   class(qc_report) <- c("qc_report_loci", class(qc_report))
   return(qc_report)
 }
@@ -77,11 +109,12 @@ qc_report_loci_pseudohaploid <- function(.x, ...) {
 #'
 #' @param .x a [`gen_tibble`] object, possibly grouped.
 #' @param hwe boolean, whether the HWE test should be computed.
+#' @param n_cores number of cores to be used.
 #' @returns a tibble with columns `snp_id`, `maf`, `missingness` and (if
 #'   `hwe = TRUE`) `hwe_p`, the smallest p-value across groups.
 #' @keywords internal
 #' @noRd
-qc_report_loci_stats <- function(.x, hwe) {
+qc_report_loci_stats <- function(.x, hwe, n_cores) {
   geno_fbm <- .gt_get_fbm(.x)
   # group of each individual (all in one group if not grouped)
   if (inherits(.x, "grouped_df")) {
@@ -107,14 +140,14 @@ qc_report_loci_stats <- function(.x, hwe) {
       ploidy = indiv_ploidy(.x),
       hwe = hwe,
       midp = TRUE,
-      ncores = bigstatsr::nb_cores(),
+      ncores = n_cores,
       block_size = bigstatsr::block_size(nrow(.x), 1)
     )
   } else {
     # compute each statistic separately
     qc_stats <- list(
-      maf = loci_maf(.x$genotypes),
-      missingness = loci_missingness(.x$genotypes)
+      maf = loci_maf(.x$genotypes, n_cores = n_cores),
+      missingness = loci_missingness(.x$genotypes, n_cores = n_cores)
     )
     if (hwe) {
       if (inherits(.x, "grouped_df")) {
@@ -122,10 +155,10 @@ qc_report_loci_stats <- function(.x, hwe) {
         # empty groups, which are NA
         qc_stats$hwe_p <- do.call(
           pmin,
-          c(loci_hwe(.x, type = "list"), na.rm = TRUE)
+          c(loci_hwe(.x, type = "list", n_cores = n_cores), na.rm = TRUE)
         )
       } else {
-        qc_stats$hwe_p <- loci_hwe(.x$genotypes)
+        qc_stats$hwe_p <- loci_hwe(.x$genotypes, n_cores = n_cores)
       }
     }
   }
@@ -142,15 +175,22 @@ qc_report_loci_stats <- function(.x, hwe) {
 
 #' @export
 #' @rdname qc_report_loci
-qc_report_loci.grouped_gen_tbl <- function(.x, ...) {
+qc_report_loci.grouped_gen_tbl <- function(.x, hwe = TRUE,
+                                           n_cores = bigstatsr::nb_cores(),
+                                           ...) {
   rlang::check_dots_empty()
 
   if (show_ploidy(.x) == -2) {
-    qc_report <- qc_report_loci_pseudohaploid(.x)
+    qc_report <- qc_report_loci_pseudohaploid(.x, n_cores = n_cores)
     return(qc_report)
   }
 
   stopifnot_diploid(.x$genotypes)
+  if (!hwe) {
+    # groups are only used for HWE: maf and missingness are computed across
+    # all individuals, as for the ungrouped gen_tibble
+    return(qc_report_loci(ungroup(.x), hwe = FALSE, n_cores = n_cores))
+  }
 
   # Find the number of groups tested for HWE (empty groups, which only exist
   # if the user asked for them, are not tested)
@@ -158,7 +198,7 @@ qc_report_loci.grouped_gen_tbl <- function(.x, ...) {
 
   # Calculate maf and missingness across all individuals, and the smallest
   # hwe p-value across groups (in a single pass over the genotypes)
-  qc_report <- qc_report_loci_stats(.x, hwe = TRUE)
+  qc_report <- qc_report_loci_stats(.x, hwe = TRUE, n_cores = n_cores)
   # Bonferroni correction of the smallest p-value, capped at 1
   qc_report$hwe_p <- pmin(1, qc_report$hwe_p * pops)
   class(qc_report) <- c("qc_report_loci", class(qc_report))

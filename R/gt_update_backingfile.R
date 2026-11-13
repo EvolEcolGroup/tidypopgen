@@ -110,16 +110,20 @@ gt_update_backingfile <- function(
   if (rm_unsorted_dist) {
     # missing genetic distances can not be used either; otherwise, check the
     # genetic distances within each chromosome (in a single pass, without
-    # copying the column)
+    # copying the column). If they are sorted across the whole table (e.g.
+    # all zero, as when read from a VCF), they are sorted within each
+    # chromosome, and we skip grouping the loci by chromosome, which takes
+    # seconds with millions of chromosomes (e.g. RAD loci)
     if (anyNA(show_loci(.x)$genetic_dist)) {
       if (!quiet) {
         message("Some genetic distances are missing, setting them all to zero")
       }
       show_loci(.x)$genetic_dist <- 0
-    } else if (any_unsorted_by_chromosome(
-      show_loci(.x)$genetic_dist,
-      show_loci(.x)$chromosome
-    )[["unsorted"]]) {
+    } else if (is.unsorted(show_loci(.x)$genetic_dist) &&
+      any_unsorted_by_chromosome(
+        show_loci(.x)$genetic_dist,
+        show_loci(.x)$chromosome
+      )[["unsorted"]]) {
       if (!quiet) {
         message("Genetic distances are not sorted, setting them to zero")
       }

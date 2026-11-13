@@ -162,3 +162,48 @@ test_that("grouped qc_report_loci ignores empty groups", {
   expect_false(anyNA(keep_report$hwe_p))
   expect_equal(keep_report, drop_report)
 })
+
+test_that("qc_report_loci(hwe = FALSE) matches loci_maf and loci_missingness", {
+  example_gt <- load_example_gt("gen_tbl")
+  # identical to the two functions, with no message and no hwe_p column
+  expect_no_message(loci_report <- qc_report_loci(example_gt, hwe = FALSE))
+  expect_s3_class(loci_report, "qc_report_loci")
+  expect_named(loci_report, c("snp_id", "maf", "missingness"))
+  expect_identical(loci_report$maf, loci_maf(example_gt))
+  expect_identical(loci_report$missingness, loci_missingness(example_gt))
+  # and to the report with hwe, without its last column
+  expect_identical(
+    unclass(loci_report),
+    unclass(suppressMessages(qc_report_loci(example_gt, n_cores = 1))[1:3])
+  )
+  # grouping only affects hwe: maf and missingness use all individuals
+  expect_identical(
+    qc_report_loci(example_gt %>% group_by(population), hwe = FALSE),
+    loci_report
+  )
+  # on a subset of individuals and loci
+  sub_gt <- example_gt %>%
+    filter(population != "pop1") %>%
+    select_loci(c(5, 2, 4))
+  sub_report <- qc_report_loci(sub_gt, hwe = FALSE)
+  expect_identical(sub_report$maf, loci_maf(sub_gt))
+  expect_identical(sub_report$missingness, loci_missingness(sub_gt))
+  # dosages are computed separately, with the same results (the FBM is a
+  # reference object, so its code is set back afterwards)
+  attr(example_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_DOSAGE
+  expect_identical(qc_report_loci(example_gt, hwe = FALSE), loci_report)
+  attr(example_gt$genotypes, "fbm")$code256 <- bigsnpr::CODE_012
+  # imputed genotypes, used or not
+  imputed_gt <- gt_impute_simple(example_gt, method = "mode")
+  for (use_imputed in c(TRUE, FALSE)) {
+    gt_set_imputed(imputed_gt, use_imputed)
+    imputed_report <- qc_report_loci(imputed_gt, hwe = FALSE)
+    expect_identical(imputed_report$maf, loci_maf(imputed_gt))
+    expect_identical(
+      imputed_report$missingness,
+      loci_missingness(imputed_gt)
+    )
+  }
+  # (the last report used the observed genotypes, with missing values)
+  expect_true(any(imputed_report$missingness > 0))
+})

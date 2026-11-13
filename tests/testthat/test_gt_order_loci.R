@@ -408,6 +408,38 @@ test_that("gt_update_backingfile catches unsorted and duplicated genetic_dist", 
   expect_equal(show_loci(test_gt)$genetic_dist, c(0, 0, 0, 0, 0, 0))
 })
 
+test_that("genetic_dist sorted within chromosomes are kept", {
+  test_genotypes <- rbind(
+    c(1, 1, 0, 1, 1, 0),
+    c(2, 1, 0, 0, 0, 0),
+    c(2, 2, 0, 0, 1, 1)
+  )
+  # sorted within each chromosome, but restarting at each chromosome (so
+  # unsorted across the table), or sorted across the whole table
+  for (gen_dist in list(
+    c(0.1, 0.2, 0.3, 0, 0.5, 0.6),
+    c(0.1, 0.2, 0.3, 0.3, 0.5, 0.6)
+  )) {
+    test_gt <- gen_tibble(
+      x = test_genotypes,
+      loci = data.frame(
+        name = paste0("rs", 1:6),
+        chromosome = c("chr1", "chr1", "chr1", "chr2", "chr2", "chr2"),
+        position = as.integer(c(3, 5, 25, 4, 65, 343)),
+        genetic_dist = gen_dist,
+        allele_ref = c("A", "T", "C", "G", "C", "T"),
+        allele_alt = c("T", "C", NA, "C", "G", "A")
+      ),
+      indiv_meta = data.frame(id = c("a", "b", "c")),
+      quiet = TRUE,
+      backingfile = tempfile()
+    )
+    expect_true(is_loci_table_ordered(test_gt, ignore_genetic_dist = FALSE))
+    test_gt <- gt_update_backingfile(test_gt, quiet = TRUE)
+    expect_equal(show_loci(test_gt)$genetic_dist, gen_dist)
+  }
+})
+
 
 test_that("is_loci_table_ordered catches unsorted genetic_dist", { # nolint
   # is_loci_table_ordered catches unsorted genetic_dist
@@ -681,6 +713,20 @@ test_that("cast_chromosome_to_int keeps numeric names with non-numeric ones", {
   )
   # all non-numeric names
   expect_identical(cast_chromosome_to_int(c("b", "a", "b")), c(1L, 2L, 1L))
+  # prefixes in any case are stripped; names with a prefix and without it
+  # are the same chromosome; a final newline is not a number
+  expect_identical(
+    cast_chromosome_to_int(
+      c("Chr_2", "cHrX", "X", "CHROMOSOME_01", "c", "x", "3\n", "chr")
+    ),
+    c(2L, 3L, 3L, 1L, 4L, 5L, 6L, 7L)
+  )
+  # with unused levels, non-numeric names keep the order of all the levels
+  # ("b" comes first, as "chrb")
+  expect_identical(
+    cast_chromosome_to_int(factor(c("b", "a"), levels = c("chrb", "a", "b"))),
+    c(1L, 2L)
+  )
 
   # gt_order_loci sorts numeric chromosomes numerically
   test_indiv_meta <- data.frame(
