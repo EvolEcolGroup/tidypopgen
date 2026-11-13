@@ -386,6 +386,18 @@ private:
         stop(std::string("error reading the gzipped file: ") +
           gzerror(gz, &err));
       }
+      // gzread() reads fewer bytes than requested only at the end of the
+      // file; if the file ends in the middle of a gzip stream, it returns
+      // the data decompressed so far (not an error), and gzerror() gives
+      // Z_BUF_ERROR, so a truncated file would be read as a shorter one
+      if ((unsigned int) n_read < n_request) {
+        int err;
+        gzerror(gz, &err);
+        if (err != Z_OK) {
+          stop("the gzipped file is truncated (it ends in the middle of a "
+                 "gzip stream)");
+        }
+      }
       return n_read;
     }
     size_t n_read = std::fread(dest, 1, n, fp);

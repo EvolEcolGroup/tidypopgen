@@ -447,6 +447,47 @@ test_that("ped files with the wrong number of fields give an error", {
   expect_false(file.exists(paste0(bk, ".rds")))
 })
 
+test_that("truncated or corrupted gzipped ped files give an error", {
+  # a ped file compressed with gzip (not bgzip)
+  gz_file <- tempfile(fileext = ".ped")
+  gz_con <- gzfile(gz_file, "w")
+  writeLines(c(
+    "f1 i1 0 0 1 1 A A G G",
+    "f1 i2 0 0 1 1 A G G T"
+  ), gz_con)
+  close(gz_con)
+  writeLines(
+    paste("1", paste0("snp", 1:2), 0, (1:2) * 100, sep = "\t"),
+    sub("\\.ped$", ".map", gz_file)
+  )
+  gz_bytes <- readBin(gz_file, "raw", n = file.size(gz_file))
+  n_bytes <- length(gz_bytes)
+  # without the last 4 bytes of the gzip trailer (the length of the data),
+  # all the lines can be decompressed, but the gzip stream is incomplete
+  truncated_file <- tempfile(fileext = ".ped")
+  writeBin(gz_bytes[seq_len(n_bytes - 4)], truncated_file)
+  file.copy(
+    sub("\\.ped$", ".map", gz_file),
+    sub("\\.ped$", ".map", truncated_file)
+  )
+  expect_error(
+    gen_tibble(truncated_file, backingfile = tempfile(), quiet = TRUE),
+    "the gzipped file is truncated"
+  )
+  # with a wrong CRC (the 4 bytes before the length), the data is corrupted
+  corrupted_file <- tempfile(fileext = ".ped")
+  gz_bytes[n_bytes - 7] <- xor(gz_bytes[n_bytes - 7], as.raw(255))
+  writeBin(gz_bytes, corrupted_file)
+  file.copy(
+    sub("\\.ped$", ".map", gz_file),
+    sub("\\.ped$", ".map", corrupted_file)
+  )
+  expect_error(
+    gen_tibble(corrupted_file, backingfile = tempfile(), quiet = TRUE),
+    "error reading the gzipped file"
+  )
+})
+
 test_that("error if genotypes and loci tables differ in length", {
   test_loci_short <- test_loci[1:5, ]
   expect_error(
