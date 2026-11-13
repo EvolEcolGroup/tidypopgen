@@ -21,8 +21,15 @@ for rep in $(seq 1 "$reps"); do
     bk="$work/${label}_$rep"
     rm -f "$bk".bk "$bk".rds "$bk".gt "$bk"_meta.rds
     load=$(cut -d' ' -f1 /proc/loadavg)
-    out=$( { /usr/bin/time -f "MAXRSS %M" Rscript "$here/bench_step.R" \
-      "$src" "$ped" "$bk" "$cores"; } 2>&1 )
+    # (stop at the first failed run, showing its output, rather than
+    # printing a row with empty timings)
+    if ! out=$( { /usr/bin/time -f "MAXRSS %M" Rscript "$here/bench_step.R" \
+      "$src" "$ped" "$bk" "$cores"; } 2>&1 ); then
+      echo "run $label (rep $rep) failed:" >&2
+      echo "$out" >&2
+      rm -f "$bk".bk
+      exit 1
+    fi
     step=$(echo "$out" | grep '^STEP')
     rss=$(echo "$out" | grep '^MAXRSS' | cut -d' ' -f2)
     elapsed=$(echo "$step" | cut -d' ' -f2)
