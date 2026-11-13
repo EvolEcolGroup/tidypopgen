@@ -106,6 +106,11 @@ predict.gt_pca <- function(
     if (!inherits(new_data, "gen_tbl")) {
       stop("new_data should be a gen_tibble")
     }
+    # the FBMs of the projections are temporary (the result is a matrix or a
+    # tibble): make them in a private directory, deleted on exit, so that
+    # their names cannot clash with other .bk files (see
+    # with_private_fbm_dir())
+    local_private_fbm_dir()
     # get id of loci in new_data, and check that new_data have all the loci
     # used to build the pca (a single match() hashes the loci names once)
     loci_subset <- match(object$loci$name, show_loci(new_data)$name)

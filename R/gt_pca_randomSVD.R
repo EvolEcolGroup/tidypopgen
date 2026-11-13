@@ -110,7 +110,9 @@ gt_pca_randomSVD <- function(
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
 
-  this_svd <- bigstatsr::big_randomSVD(
+  # big_randomSVD() makes a temporary FBM when run in parallel: keep it in a
+  # private directory, deleted on exit (see with_private_fbm_dir())
+  this_svd <- with_private_fbm_dir(bigstatsr::big_randomSVD(
     X,
     k = k,
     ind.row = .gt_fbm_rows(x),
@@ -121,7 +123,7 @@ gt_pca_randomSVD <- function(
     ncores = n_cores,
     fun.prod = fun_prod,
     fun.cprod = fun_cprod
-  ) # TODO check that this is correct and expose it,
+  )) # TODO check that this is correct and expose it,
   # maybe create convenience function to get the values
   # add names to the scores (to match them to data later)
   row.names(this_svd$u) <- x$id

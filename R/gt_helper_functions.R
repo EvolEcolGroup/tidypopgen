@@ -163,18 +163,33 @@ stopifnot_no_pseudohaploid <- function(x) {
 # @keywords internal
 # @noRd
 with_private_fbm_dir <- function(code) {
+  local_private_fbm_dir()
+  # force the promise now that FBM.dir points to the private directory
+  code
+}
+
+# the same as with_private_fbm_dir(), for the rest of the calling function:
+# the private directory is deleted, and FBM.dir restored, when `envir` exits
+# (as withr::local_*() functions). Call it once the function has made any
+# FBM that it returns (or only on the paths that return no FBM).
+# @param envir the frame whose exit deletes the directory
+# @returns the path of the private directory, invisibly
+# @keywords internal
+# @noRd
+local_private_fbm_dir <- function(envir = parent.frame()) {
   # tempfile() checks the bare name, which here is the directory itself, so
   # the directory is new and empty
   fbm_dir <- tempfile("fbm_tmp_")
   dir.create(fbm_dir)
   old_opts <- options(FBM.dir = fbm_dir)
-  on.exit(
-    {
-      options(old_opts)
-      unlink(fbm_dir, recursive = TRUE)
-    },
-    add = TRUE
-  )
-  # force the promise now that FBM.dir points to the private directory
-  code
+  # register the clean up in the caller's frame (with add = TRUE, so as not to
+  # replace its own on.exit() code); on Windows unlink() can fail on files
+  # still mapped, but names drawn in the directory still cannot clash with
+  # files elsewhere
+  cleanup <- bquote({
+    options(.(old_opts))
+    unlink(.(fbm_dir), recursive = TRUE)
+  })
+  do.call(base::on.exit, list(cleanup, add = TRUE), envir = envir)
+  invisible(fbm_dir)
 }

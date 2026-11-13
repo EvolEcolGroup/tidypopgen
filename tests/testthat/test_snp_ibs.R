@@ -219,3 +219,19 @@ test_that("pairwise_ibs uses imputed genotypes only if set to", {
   expect_identical(ibs_used$ibs[], ibs_filled$ibs[])
   expect_identical(ibs_used$valid_n[], ibs_filled$valid_n[])
 })
+
+test_that("pairwise functions delete their temporary FBMs", {
+  # their temporary .bk files used to accumulate in tempdir(), where a new
+  # tempfile() name could clash with them (see with_private_fbm_dir())
+  test_fbm <- tidypopgen:::.gt_get_fbm(test_gt)
+  n_bk <- function() length(list.files(tempdir(), pattern = "\\.bk$"))
+  bk_before <- n_bk()
+  snp_ibs(test_fbm, type = "proportion")
+  snp_king(test_fbm)
+  snp_allele_sharing(test_fbm)
+  expect_identical(n_bk(), bk_before)
+  # the raw counts are returned as FBMs, so their files are kept
+  test_ibs <- snp_ibs(test_fbm, type = "raw_counts")
+  expect_true(file.exists(test_ibs$ibs$backingfile))
+  expect_true(file.exists(test_ibs$valid_n$backingfile))
+})
