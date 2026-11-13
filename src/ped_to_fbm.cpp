@@ -88,6 +88,10 @@ double count_ped_individuals(std::string filename, int n_threads = 1) {
   std::vector<size_t> line_len;
   double n = 0;
   while (reader.next_chunk(line_start, line_len)) {
+    // (reading a large file takes a while: allow the user to interrupt it,
+    // as in ped_to_fbm(); the reader closes the file as the exception
+    // unwinds the stack)
+    checkUserInterrupt();
     for (size_t l = 0; l < line_start.size(); l++) {
       if (!is_blank_line(line_start[l], line_len[l])) {
         n++;
