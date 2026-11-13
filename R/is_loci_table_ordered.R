@@ -110,12 +110,15 @@ is_loci_table_ordered.vctrs_bigSNP <- function(
     }
   }
 
-  # check genetic distance
+  # check genetic distance (if they are sorted across the whole table, e.g.
+  # all zero, they are sorted within each chromosome, and we skip grouping
+  # the loci by chromosome; missing values were ruled out above)
   if (!ignore_genetic_dist) {
-    if (any_unsorted_by_chromosome(
-      loci$genetic_dist,
-      loci$chromosome
-    )[["unsorted"]]) {
+    if (is.unsorted(loci$genetic_dist) &&
+      any_unsorted_by_chromosome(
+        loci$genetic_dist,
+        loci$chromosome
+      )[["unsorted"]]) {
       if (error_on_false) {
         stop("Your genetic distances are not sorted within chromosomes")
       } else {
