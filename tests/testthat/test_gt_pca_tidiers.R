@@ -98,6 +98,20 @@ test_that("augment and augment_loci work with a single component", {
     autoplot(test_pca, type = "scores", k = 1),
     "for 'scores' plots, 'k' should be a pair of values"
   )
+  # the loadings of several components are plotted with geom_hex(), which
+  # needs hexbin (bigstatsr combines the panels with cowplot into a ggplot)
+  if (rlang::is_installed("hexbin")) {
+    expect_s3_class(
+      autoplot(test_pca, type = "loadings", k = c(1, 2)),
+      "ggplot"
+    )
+  } else {
+    rlang::local_interactive(FALSE)
+    expect_error(
+      autoplot(test_pca, type = "loadings", k = c(1, 2)),
+      class = "rlib_error_package_not_found"
+    )
+  }
 })
 
 test_that("augment_loci works with gt_pca_autoSVD", {

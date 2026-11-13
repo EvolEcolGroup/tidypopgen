@@ -17,7 +17,8 @@
 #' @param type the type of plot (one of "screeplot", "scores", "loadings", and
 #'  "components")
 #' @param ld the principal components to be plotted: for scores, a pair of
-#'   values e.g. c(1,2); for `loadings` either one or more values.
+#'   values e.g. c(1,2); for `loadings` either one or more values. Plotting the
+#'   loadings of more than one axis requires the `hexbin` package.
 #' @param group a vector of group memberships to order the individuals in
 #'   "components" plot. If NULL, the clusters used for the DAPC will be used.
 #' @param n_col for `loadings` plots, if multiple LD axis are plotted, how many

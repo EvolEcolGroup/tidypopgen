@@ -13,7 +13,8 @@
 \item{type}{the type of plot (one of "screeplot", "scores" and "loadings")}
 
 \item{k}{the principal components to be plotted: for scores, a pair of values
-e.g. c(1,2); for \code{loadings} either one or more values.}
+e.g. c(1,2); for \code{loadings} either one or more values. Plotting the
+loadings of more than one component requires the \code{hexbin} package.}
 
 \item{...}{not currently used.}
 }

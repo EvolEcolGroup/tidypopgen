@@ -106,6 +106,21 @@ test_that("gt_dapc_and_tidiers", {
   augmented_gt <- test_dapc %>% augment(k = 3)
   # expect augmented to have 3 additional columns plus one for .rownames
   expect_true(ncol(augmented_gt) == 3 + 1)
+  #######################
+  # loadings of several axes are plotted with geom_hex(), which needs hexbin
+  expect_s3_class(autoplot(test_dapc, type = "loadings", ld = 1), "ggplot")
+  if (rlang::is_installed("hexbin")) {
+    expect_s3_class(
+      autoplot(test_dapc, type = "loadings", ld = c(1, 2)),
+      "patchwork"
+    )
+  } else {
+    rlang::local_interactive(FALSE)
+    expect_error(
+      autoplot(test_dapc, type = "loadings", ld = c(1, 2)),
+      class = "rlib_error_package_not_found"
+    )
+  }
 })
 
 test_that("scores plot error if only 2 populations", {

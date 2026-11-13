@@ -20,7 +20,8 @@
 "components")}
 
 \item{ld}{the principal components to be plotted: for scores, a pair of
-values e.g. c(1,2); for \code{loadings} either one or more values.}
+values e.g. c(1,2); for \code{loadings} either one or more values. Plotting the
+loadings of more than one axis requires the \code{hexbin} package.}
 
 \item{group}{a vector of group memberships to order the individuals in
 "components" plot. If NULL, the clusters used for the DAPC will be used.}
