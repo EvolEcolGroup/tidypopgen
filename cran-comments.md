@@ -3,9 +3,9 @@
 This is an update to 1.0.0, released on 2026-11-07. I am sorry for the quick
 resubmission. Its main reason is a fix for intermittent test failures:
 
-* `gt_pca_autoSVD()`, `loci_ld_clump()` and `gt_pca_partialSVD()` call
-  `bigsnpr` functions that leave temporary backing files in `tempdir()` (one
-  per chromosome for LD clumping). R's `tempfile()` checks only the name
+* several functions (PCA, LD clumping, KING, IBS and allele sharing) call
+  `bigsnpr`/`bigstatsr` functions that leave temporary backing files in
+  `tempdir()` (one per chromosome for LD clumping). R's `tempfile()` checks only the name
   without the `.bk` extension, so with thousands of leftover files a later
   temporary backing file could occasionally get a name already in use, and
   the tests failed with "File '...bk' already exists". tidypopgen now
