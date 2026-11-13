@@ -307,22 +307,6 @@ rad_gt <- rad_gt %>%
 count_loci(rad_gt)
 ```
 
-We then write a new backing file with only these loci. This also writes new
-sidecar files, with the names of the loci that are kept:
-
-```{r update_backingfile, benchmark = TRUE}
-rad_gt <- gt_update_backingfile(rad_gt,
-  backingfile = "./data/rad/rad_int_qc", quiet = TRUE
-)
-```
-
-```{r}
-file.size(c(
-  "./data/rad/rad_int_qc.loci.tsv",
-  "./data/rad/rad_int_qc.chromosomes.tsv"
-)) / 1024^2
-```
-
 # A scan for differentiated loci
 
 As a simple scan, we look for the loci whose allele frequencies differ most
@@ -422,7 +406,7 @@ show_loci(rad_hits)
 steps <- c(
   "read_default", "read_names_as_int", "read_chromosomes_as_int",
   "read_both_as_int", "load_default", "load_both_as_int", "loci_qc",
-  "update_backingfile", "scan", "lookup_first", "lookup_again",
+  "scan", "lookup_first", "lookup_again",
   "lookup_chromosomes", "restore"
 )
 steps <- steps[steps %in% names(benchmarks)]

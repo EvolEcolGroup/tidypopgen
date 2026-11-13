@@ -1,5 +1,5 @@
 ---
-title: "Working with big data"
+title: "Working with large VCFs"
 output: html_document
 date: "2026-11-04"
 ---
@@ -30,11 +30,20 @@ knitr::knit_hooks$set(benchmark = function(before, options) {
 })
 ```
 
-This vignette will demonstrate how to work with large datasets in tidypopgen.
+This vignette will demonstrate how to work with large datasets in tidypopgen,
+including whole-genome data. For this type of data, tidypopgen implements an
+option to minimise the memory footprint of very large datasets. As a large
+chunk of memory is occupied by loci names, loci names can be stored as
+integers rather than character strings (with `names_as_int = TRUE`),
+reducing the memory used by the gen_tibble object. This is the default
+of `gt_merge_vcfs()`, which we use below to merge many VCF files into
+a single gen_tibble, and an option of `gen_tibble()`.
 
-This includes whole-genome data. *Note* that tidypopgen only handles variant sites, so if you are using a whole-genome dataset make sure it has been previously subsetted to variant sites only. Think very carefully before merging this kind of data during your pipeline!
+*Note* that tidypopgen only handles variant sites,
+so if you are using a whole-genome dataset make sure it has been previously
+subsetted to variant sites only. Think very carefully before merging this
+kind of data during your pipeline!
 
-The latest version of tidypopgen has implemented a new option to minimise the memory footprint of very large datasets. As a large chunk of memory is occupied by loci names, loci names can be stored as integers rather than character strings (with `names_as_int = TRUE`), reducing the memory used by the gen_tibble object. This is the default of `gt_merge_vcfs()`, which we use below to merge many VCF files into a single gen_tibble, and an option of `gen_tibble()`.
 
 # Getting the data
 
@@ -78,6 +87,8 @@ Each SGDP VCF only contains the sites at which that individual carries a non-ref
 `gt_merge_vcfs()` reads each VCF twice: once to match its loci with those of the other files, and once to write its genotypes straight into the backing file of the merged `gen_tibble`, so that no merged VCF is ever written to disk. With `n_cores`, the bgzipped VCFs are decompressed, and their genotypes parsed, in parallel. (If your data are instead split by chromosome, with one VCF per chromosome for the same individuals, `gt_concat_vcfs()` reads them into a single `gen_tibble` in the same way, as `bcftools concat` would.)
 
 In many descriptive population genetic analyses, where the end goal is to visualise populations (e.g., PCA) or calculate a summary statistic (e.g. F~ST~), the names of your loci are not needed for the analysis. In these cases, we can save a lot of memory (over half of the memory footprint of the `gen_tibble`) by switching the loci names from strings to integers. `gt_merge_vcfs()` does this by default (`names_as_int = TRUE`). *Note* that this differs from `gen_tibble()`, where `names_as_int` defaults to FALSE: to read a single large VCF with integer loci names, set `names_as_int = TRUE` in `gen_tibble()`. Conversely, set `names_as_int = FALSE` in `gt_merge_vcfs()` to keep the IDs (e.g. rsIDs) of the VCF files. The IDs are not lost with integer names: `gt_merge_vcfs()` writes them, with the chromosome and position of each locus, to a sidecar file next to the backing file (`.loci.tsv`), from which `gt_lookup_loci()` gives back the names of any loci (e.g. the hits of a scan), and `gt_restore_loci()` puts them back into the `gen_tibble` (see the article on [large RAD-seq datasets](rad_seq.html)).
+
+For RAD-seq data assembled de novo, each RAD locus is its own chromosome, so the names of the chromosomes also take a lot of memory: set `chromosomes_as_int = TRUE` as well as `names_as_int = TRUE` (see the article on [large RAD-seq datasets](rad_seq.html)).
 
 ```{r remove_old_files, include = FALSE}
 # remove the files of a previous run, so that the vcfs are merged (and timed)
@@ -186,18 +197,7 @@ sgdp <- sgdp %>%
 cat("Loci remaining:", count_loci(sgdp))
 ```
 
-With other datasets, we would also remove loci with too many missing genotypes (e.g. with `select_loci_if(loci_missingness(genotypes) < 0.1)`), and then impute the remaining missing genotypes with `gt_impute_simple()`, as LD clumping and PCA do not accept missing values. Our dataset has no missing genotypes, so we can skip both steps.
-
-## Updating the backing file
-
-After removing loci, we update the file backing matrix with `gt_update_backingfile()`, so that it only contains the loci that we kept:
-
-```{r update_backingfile, benchmark = TRUE}
-sgdp <- gt_update_backingfile(sgdp, quiet = TRUE,
-                              backingfile = tempfile())
-```
-
-This will help us with the next step (LD clumping).
+With other datasets, we would also remove loci with too many missing genotypes (e.g. with `select_loci_if(loci_missingness(genotypes) < 0.1)`), and then impute the remaining missing genotypes with `gt_impute_simple()`, as LD clumping and PCA do not accept missing values. Our dataset has no missing genotypes, so we can skip both steps. There is no need to rewrite the backing file with `gt_update_backingfile()` after filtering: the following steps only use the loci that are left in the `gen_tibble`.
 
 ## LD clumping
 
@@ -230,7 +230,7 @@ autoplot(sgdp_pca, type = "scores") +
   labs(color = "Region")
 ```
 
-Our PCA separates the five regions. PC1 (5.23% of the variance) runs from the African individuals on the left, through West Eurasia, Oceania and East Asia, to the American individuals on the right, and PC2 (3.86%) separates the Oceanian and East Asian individuals at the top from the American individuals at the bottom. The individuals from America, West Eurasia and East Asia form fairly tight clusters, whereas the African individuals are spread out along PC1: the Mbuti, Ju/'hoan North, Yoruba, Mandenka and Dinka individuals are on the far left, followed by the Masai and Somali individuals from East Africa, while the two Mozabite individuals from Algeria lie close to the West Eurasian cluster. This is consistent with North and East African populations carrying some West Eurasian-related ancestry. The Oceanian individuals are also spread out: the Papuan, Bougainville and Australian individuals are at the top, the Maori individual is closer to the centre of the plot, and the Hawaiian individual and the two Dusun individuals (from Borneo) lie within the East Asian cluster. This reflects the Austronesian ancestry of these populations, which is largely related to East Asian populations.
+Our PCA separates the five regions. PC1 (5.20% of the variance) runs from the American individuals on the left, through East Asia, Oceania and West Eurasia, to the African individuals on the right, and PC2 (3.85%) separates the American individuals at the top from the Oceanian and East Asian individuals at the bottom. The individuals from America, West Eurasia and East Asia form fairly tight clusters, whereas the African individuals are spread out along PC1: the Mbuti, Ju/'hoan North, Yoruba, Mandenka and Dinka individuals are on the far right, followed by the Masai and Somali individuals from East Africa, while the two Mozabite individuals from Algeria lie close to the West Eurasian cluster. This is consistent with North and East African populations carrying some West Eurasian-related ancestry. The Oceanian individuals are also spread out: the Papuan, Bougainville and Australian individuals are at the bottom, the Maori individual is closer to the centre of the plot, and the Hawaiian individual and the two Dusun individuals (from Borneo) lie within the East Asian cluster. This reflects the Austronesian ancestry of these populations, which is largely related to East Asian populations.
 
 ## DAPC
 
@@ -246,7 +246,7 @@ sgdp_dapc <- gt_dapc(sgdp_pca,
 autoplot(sgdp_dapc, type = "components")
 ```
 
-Our DAPC autoplot shows that most individuals are assigned to their own region's group with a probability close to one, showing that there is genetic differentiation between the continental regions. The exceptions are consistent with the PCA above: the two Mozabite individuals are assigned to the West Eurasian group (with probabilities of 0.93 and 0.99), the two Dusun individuals and the Hawaiian individual are assigned to the East Asian group (with probabilities of 0.96, 0.98 and 0.91), and the Maori individual has a probability of 0.10 of East Asian membership. These individuals may have admixed ancestry, or (as for the Dusun) be closer to the East Asian populations than to the other Oceanian populations in our sample.
+Our DAPC autoplot shows that most individuals are assigned to their own region's group with a probability close to one, showing that there is genetic differentiation between the continental regions. The exceptions are consistent with the PCA above: the two Mozabite individuals are assigned to the West Eurasian group (with probabilities of 0.93 and 0.99), the two Dusun individuals and the Hawaiian individual are assigned to the East Asian group (with probabilities of 0.96, 0.98 and 0.90), and the Maori individual has a probability of 0.09 of East Asian membership. These individuals may have admixed ancestry, or (as for the Dusun) be closer to the East Asian populations than to the other Oceanian populations in our sample.
 
 # Pairwise F~ST~
 
@@ -276,7 +276,7 @@ autoplot(pairwise_fst,
   )
 ```
 
-The pairwise F~ST~ values are all small (between 0.02 and 0.08), as is typical of human populations. America is the most differentiated region, and Africa and America are the most differentiated pair (F~ST~ = 0.079); America is closest to East Asia (0.043). East Asia and Oceania are the least differentiated pair (0.017), reflecting the East Asian-related ancestry of the Dusun, Hawaiian and Maori individuals in our Oceanian sample. Africa is closest to West Eurasia (0.038), which partly reflects the West Eurasian-related ancestry of the Mozabite, Somali and Masai individuals in our African sample. Note that with only 10 individuals per region, these estimates are imprecise.
+The pairwise F~ST~ values are all small (between 0.02 and 0.08), as is typical of human populations. America is the most differentiated region, and Africa and America are the most differentiated pair (F~ST~ = 0.079); America is closest to East Asia (0.044). East Asia and Oceania are the least differentiated pair (0.018), reflecting the East Asian-related ancestry of the Dusun, Hawaiian and Maori individuals in our Oceanian sample. Africa is closest to West Eurasia (0.038), which partly reflects the West Eurasian-related ancestry of the Mozabite, Somali and Masai individuals in our African sample. Note that with only 10 individuals per region, these estimates are imprecise.
 
 # Performance summary
 

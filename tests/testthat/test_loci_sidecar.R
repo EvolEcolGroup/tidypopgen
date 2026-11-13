@@ -351,11 +351,36 @@ test_that("integer names and chromosome codes are checked before lookups", {
   show_loci(int_gt) <- loci
   expect_error(
     gt_restore_loci(int_gt),
-    "has no line for some of the chromosome codes"
+    "has no line for 1 of the chromosome codes"
   )
   # .x must be a gen_tibble (or, for lookups, its genotypes)
   expect_error(gt_restore_loci(int_gt$genotypes), "should be a gen_tibble")
   expect_error(gt_lookup_loci(show_loci(int_gt), 1), "should be a gen_tibble")
+})
+
+test_that("restoring a subset of loci keeps only their chromosomes", {
+  names_gt <- gen_tibble(small_vcf, quiet = TRUE, backingfile = tempfile())
+  int_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"),
+    names_as_int = TRUE, chromosomes_as_int = TRUE
+  )
+  # the loci of "scaf_2" only, in reverse order, and with a missing chromosome
+  sub_gt <- select_loci(int_gt, c(5, 4))
+  restored <- show_loci(gt_restore_loci(sub_gt))
+  expected <- show_loci(select_loci(names_gt, c(5, 4)))
+  expected$chromosome <- droplevels(expected$chromosome)
+  expect_identical(restored, expected)
+  expect_identical(levels(restored$chromosome), "scaf_2")
+  # missing codes stay missing
+  loci <- show_loci(int_gt)
+  loci$chromosome[2] <- NA
+  show_loci(int_gt) <- loci
+  restored <- show_loci(gt_restore_loci(int_gt))$chromosome
+  expect_identical(
+    as.character(restored),
+    c("chr1", NA, "chr1", "scaf_2", "scaf_2")
+  )
+  expect_identical(levels(restored), c("chr1", "scaf_2"))
 })
 
 test_that("chromosomes_as_int is only available for VCF files with cpp", {

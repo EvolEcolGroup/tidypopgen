@@ -1,5 +1,5 @@
 ---
-title: "Benchmark on the HGDP"
+title: "Benchmark with the HGDP"
 ---
 
 ```{r setup, include=FALSE}

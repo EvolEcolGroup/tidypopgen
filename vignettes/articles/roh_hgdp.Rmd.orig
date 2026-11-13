@@ -1,5 +1,5 @@
 ---
-title: "Runs of homozygosity in the HGDP"
+title: "Runs of homozygosity"
 ---
 
 ```{r setup, include=FALSE}

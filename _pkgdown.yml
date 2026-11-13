@@ -191,3 +191,18 @@ reference:
         - snp_allele_sharing
         - snp_ibs
         - snp_king
+articles:
+  - title: Articles
+    navbar: ~
+    contents:
+      - a01_overview
+      - a02_qc
+      - a03_example_clustering_and_dapc
+      - articles/aDNA_pseudohaploids
+      - articles/interpolating
+      - articles/roh_hgdp
+      - articles/sfs
+      - articles/big_data
+      - articles/rad_seq
+      - articles/benchmark_hgdp
+      - a99_plink_cheatsheet

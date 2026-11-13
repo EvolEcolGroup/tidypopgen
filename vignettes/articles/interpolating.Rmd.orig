@@ -15,7 +15,7 @@ In this vignette, we will demonstrate how to interpolate principal component sco
 across geographic space using the tidypopgen integration with the `sf` package.
 
 To do so, we will use a dataset of *Anolis punctatus* lizards from South America,
-introduced in the vignette 'Population genetic analysis with tidypopgen'. For a full analysis of this dataset using `tidypopgen`, and details on how to download the data, please refer to this previous vignette.
+introduced in the vignette 'Population genetic analysis'. For a full analysis of this dataset using `tidypopgen`, and details on how to download the data, please refer to this previous vignette.
 
 Let's begin by reading in the data and attaching the metadata:
 

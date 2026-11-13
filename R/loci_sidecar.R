@@ -82,8 +82,10 @@
 #'
 #'   `gt_restore_loci()` returns `.x`, with the original names in its loci
 #'   table (as if it had been read without the integer options: names as a
-#'   character vector, and chromosomes as a factor). It does not save it: use
-#'   [gt_save()].
+#'   character vector, and chromosomes as a factor). The levels of the factor
+#'   are the chromosomes of the loci in `.x` (unused levels are dropped, as
+#'   by [droplevels()]), so that restoring a few loci of data with millions
+#'   of chromosomes is quick. It does not save it: use [gt_save()].
 #' @rdname gt_lookup_loci
 #' @export
 #' @examples
@@ -421,26 +423,19 @@ chromosome_sidecar_names <- function(x, codes) {
 }
 
 # the chromosome codes of x as a factor of their names (as gen_tibble()
-# gives without chromosomes_as_int: the levels are the names in the
-# chromosome sidecar, sorted as as.factor() sorts them), reading the whole
-# sidecar (one line per chromosome) and creating no string per locus
+# gives without chromosomes_as_int, but with only the chromosomes of the loci
+# as levels, sorted as as.factor() sorts them). Only the lines of the codes
+# that are used are read from the chromosome sidecar (through its index), so
+# that restoring a few loci of data with millions of chromosomes (e.g. RAD
+# loci assembled de novo) does not read and sort the names of all of them
 chromosome_sidecar_factor <- function(x, codes) {
-  path <- chromosomes_sidecar_path(x)
-  check_chromosome_sidecar(path)
-  index <- sidecar_get_index(path, chromosomes_sidecar_header)
-  sidecar <- sidecar_read(path, chromosomes_sidecar_header,
-    fields = c(1L, 2L), types = c("integer", "character"), n = index$n
-  )
-  chromosome_index <- match(codes, sidecar[[1]])
-  not_found <- is.na(chromosome_index) & !is.na(codes)
-  if (any(not_found)) {
-    stop(
-      "the chromosome sidecar ", path, " has no line for some of the ",
-      "chromosome codes (e.g. ", codes[not_found][1], "): they are not ",
-      "chromosomes of this gen_tibble"
-    )
-  }
-  chromosome_index_to_factor(chromosome_index, sidecar[[2]])
+  values <- unique(codes)
+  values <- values[!is.na(values)]
+  # (checks the sidecar, and errors on codes that are not in it)
+  chromosome_names <- chromosome_sidecar_names(x, values)
+  # a missing name ("." in the sidecar, NA here) gives NA in the factor
+  chromosome_names[is.na(chromosome_names)] <- "."
+  chromosome_index_to_factor(match(codes, values), chromosome_names)
 }
 
 # write the chromosome sidecar of a new backing file (new_bk_file), with the

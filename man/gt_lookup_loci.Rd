@@ -48,8 +48,10 @@ factor or a character vector) are returned as a character vector.
 
 \code{gt_restore_loci()} returns \code{.x}, with the original names in its loci
 table (as if it had been read without the integer options: names as a
-character vector, and chromosomes as a factor). It does not save it: use
-\code{\link[=gt_save]{gt_save()}}.
+character vector, and chromosomes as a factor). The levels of the factor
+are the chromosomes of the loci in \code{.x} (unused levels are dropped, as
+by \code{\link[=droplevels]{droplevels()}}), so that restoring a few loci of data with millions
+of chromosomes is quick. It does not save it: use \code{\link[=gt_save]{gt_save()}}.
 }
 \description{
 With \code{names_as_int = TRUE} and \code{chromosomes_as_int = TRUE}, \code{\link[=gen_tibble]{gen_tibble()}}
