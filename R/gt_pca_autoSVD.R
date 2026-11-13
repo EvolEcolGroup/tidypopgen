@@ -153,7 +153,11 @@ gt_pca_autoSVD <- function(
 
   tryCatch(
     expr = {
-      this_svd <- bigsnpr::snp_autoSVD(
+      # snp_autoSVD() leaks a temporary FBM per chromosome (in its clumping
+      # step): keep them in a private directory, deleted on exit, so that
+      # their names cannot clash with other .bk files (see
+      # with_private_fbm_dir())
+      this_svd <- with_private_fbm_dir(bigsnpr::snp_autoSVD(
         X, # nolint
         infos.chr = infos_chr,
         infos.pos = infos_pos,
@@ -170,7 +174,7 @@ gt_pca_autoSVD <- function(
         max.iter = max_iter,
         ncores = n_cores,
         verbose = verbose
-      )
+      ))
     },
     error = function(e) {
       if (grepl("Parameter 'size' is too large.",

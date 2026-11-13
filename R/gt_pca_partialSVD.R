@@ -92,14 +92,16 @@ gt_pca_partialSVD <- function(
   x_ind_col <- show_loci(x)$big_index
   x_ind_row <- vctrs::vec_data(x$genotypes)
 
-  this_svd <- bigstatsr::big_SVD(
+  # big_SVD() leaks a temporary FBM (an n x n crossproduct): keep it in a
+  # private directory, deleted on exit (see with_private_fbm_dir())
+  this_svd <- with_private_fbm_dir(bigstatsr::big_SVD(
     X, # nolint
     k = k,
     ind.row = x_ind_row,
     ind.col = x_ind_col,
     fun.scaling = fun_scaling,
     block.size = bigstatsr::block_size(nrow(X))
-  ) # TODO check that this is correct and expose it, maybe create convenience
+  )) # TODO check that this is correct and expose it, maybe create convenience
   # function to get the values
   # add names to the scores (to match them to data later)
   row.names(this_svd$u) <- x$id

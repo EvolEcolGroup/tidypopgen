@@ -139,3 +139,42 @@ stopifnot_no_pseudohaploid <- function(x) {
     )
   }
 }
+
+# evaluate `code` with the temporary FBMs of bigstatsr and bigsnpr in a
+# private directory, which is deleted on exit.
+#
+# bigstatsr's FBM() names its temporary backing files with
+# `tempfile(tmpdir = getOption("FBM.dir"))` and appends ".bk". tempfile()
+# only checks that the bare name is free, not "<name>.bk", and its random
+# suffix has 31 bits, so a new name can match one of the .bk files already in
+# the directory (a birthday collision); FBM() then fails with
+# "File '<name>.bk' already exists". bigsnpr's snp_clumping() (used by
+# snp_autoSVD()) creates a temporary FBM for each chromosome and never
+# removes it, so data with many contigs (e.g. the 1341 scaffolds of the
+# anolis example) leave thousands of .bk files in tempdir(), and each later
+# temporary FBM of the session risks a clash. A fresh, empty directory for
+# each call avoids any clash with earlier files, and the leaked files are
+# deleted with it.
+#
+# Only use it around code whose value holds no FBM (the FBMs created in the
+# private directory are deleted on exit).
+# @param code the code to evaluate (lazily, in the caller's frame)
+# @returns the value of `code`
+# @keywords internal
+# @noRd
+with_private_fbm_dir <- function(code) {
+  # tempfile() checks the bare name, which here is the directory itself, so
+  # the directory is new and empty
+  fbm_dir <- tempfile("fbm_tmp_")
+  dir.create(fbm_dir)
+  old_opts <- options(FBM.dir = fbm_dir)
+  on.exit(
+    {
+      options(old_opts)
+      unlink(fbm_dir, recursive = TRUE)
+    },
+    add = TRUE
+  )
+  # force the promise now that FBM.dir points to the private directory
+  code
+}

@@ -310,9 +310,12 @@ the first line of every 1024th line.
 - `vignettes/articles/big_data.Rmd` (the knitted version) is out of date.
   It was not re-knitted after `3d0f5dfb`, and the source now mentions the
   sidecars. Re-knitting needs the SGDP data (`precompile_big_data.R`).
-- `test_vcf_int.R` errored once in a run of several test files. It passed in
-  five reruns and in the full suite, and the error was not captured. Worth
-  watching on CI.
+- `test_vcf_int.R` errored once in a run of several test files (and again on
+  CI: "File '...bk' already exists" in `gt_pca_autoSVD()`). Fixed: bigsnpr's
+  clumping leaked a temporary FBM per chromosome (1341 for the anolis data)
+  into `tempdir()`, where `tempfile()`, which does not check `<name>.bk`,
+  could draw the name of one again. These temporaries now go to a private
+  directory, deleted on exit (`with_private_fbm_dir()`).
 - `R CMD check` has not been run. The examples of the new functions (in
   `man/gt_lookup_loci.Rd`) do run.
 - Windows: the 64-bit seeks (`_fseeki64`) and the binary-mode files have

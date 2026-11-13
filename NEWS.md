@@ -29,6 +29,9 @@
   genotypes (now an error), missing chromosomes (now `NA`), and backing files
   left behind on errors
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
+* `gt_pca_autoSVD()`, `loci_ld_clump()` and `gt_pca_partialSVD()` delete
+  their temporary backing files, which could clash with later ones
+  ("File '...bk' already exists")
 
 # tidypopgen 1.0.0
 

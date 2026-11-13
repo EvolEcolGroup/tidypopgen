@@ -30,6 +30,49 @@ test_that("ld clumping runs", {
   expect_true(all.equal(keep, c(1, 2, 3, 4, 6)) == TRUE)
 })
 
+test_that("ld clumping leaves no temporary FBMs in tempdir()", {
+  # bigsnpr::snp_clumping() creates (and never removes) a temporary FBM for
+  # each chromosome; their .bk files used to accumulate in tempdir(), where
+  # a new tempfile() name could clash with them (tempfile() only checks the
+  # name without the .bk)
+  n_bk <- function() length(list.files(tempdir(), pattern = "\\.bk$"))
+  bk_before <- n_bk()
+  fbm_dir_before <- getOption("FBM.dir")
+  keep <- loci_ld_clump(test_gt, thr_r2 = 0.2, return_id = TRUE)
+  expect_identical(n_bk(), bk_before)
+  # the option is restored
+  expect_identical(getOption("FBM.dir"), fbm_dir_before)
+})
+
+test_that("with_private_fbm_dir() uses a fresh directory and deletes it", {
+  fbm_dir_before <- getOption("FBM.dir")
+  res <- with_private_fbm_dir({
+    tmp_fbm <- bigstatsr::FBM(2, 2)
+    list(
+      dir = getOption("FBM.dir"),
+      # (FBM() normalises the path of its backing file)
+      dir_norm = normalizePath(getOption("FBM.dir")),
+      bk = tmp_fbm$backingfile
+    )
+  })
+  # the temporary FBM was created in the private directory
+  expect_identical(dirname(res$bk), res$dir_norm)
+  # and both are gone, and the option is restored
+  expect_false(dir.exists(res$dir))
+  expect_false(file.exists(res$bk))
+  expect_identical(getOption("FBM.dir"), fbm_dir_before)
+  # the option and the directory are cleaned up on error too
+  expect_error(
+    with_private_fbm_dir({
+      err_dir <- getOption("FBM.dir")
+      stop("boom")
+    }),
+    "boom"
+  )
+  expect_false(dir.exists(err_dir))
+  expect_identical(getOption("FBM.dir"), fbm_dir_before)
+})
+
 test_that("S statistic is the correct length", {
   s_stat <- loci_maf(test_gt)
   s_stat_subset <- s_stat[1:5]
