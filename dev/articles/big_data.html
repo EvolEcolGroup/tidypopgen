@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Working with big data • tidypopgen</title>
+<title>Working with large VCFs • tidypopgen</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -14,7 +14,7 @@
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Working with big data">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Working with large VCFs">
 <meta name="robots" content="noindex">
 </head>
 <body>
@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,15 +41,15 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
-    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
-    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
-    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
-    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
-    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with large VCFs</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark with the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -71,7 +71,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Working with big data</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Working with large VCFs</h1>
             
             <h4 data-toc-skip class="date">2026-11-04</h4>
       
@@ -82,20 +82,18 @@
     
     
 <p>This vignette will demonstrate how to work with large datasets in
-tidypopgen.</p>
-<p>This includes whole-genome data. <em>Note</em> that tidypopgen only
-handles variant sites, so if you are using a whole-genome dataset make
-sure it has been previously subsetted to variant sites only. Think very
-carefully before merging this kind of data during your pipeline!</p>
-<p>The latest version of tidypopgen has implemented a new option to
-minimise the memory footprint of very large datasets. As a large chunk
-of memory is occupied by loci names, the <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>
-function now offers the user the option to switch loci names from
-character strings to integers, reducing the memory used by the
-gen_tibble object.</p>
-<div class="section level2">
-<h2 id="getting-the-data">Getting the data<a class="anchor" aria-label="anchor" href="#getting-the-data"></a>
-</h2>
+tidypopgen, including whole-genome data. For this type of data,
+tidypopgen implements an option to minimise the memory footprint of very
+large datasets. As a large chunk of memory is occupied by loci names,
+loci names can be stored as integers rather than character strings (with
+<code>names_as_int = TRUE</code>), reducing the memory used by the
+gen_tibble object. This is the default of <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>,
+which we use below to merge many VCF files into a single gen_tibble, and
+an option of <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>.</p>
+<p><em>Note</em> that tidypopgen only handles variant sites, so if you
+are using a whole-genome dataset make sure it has been previously
+subsetted to variant sites only. Think very carefully before merging
+this kind of data during your pipeline! # Getting the data</p>
 <div class="section level3">
 <h3 id="downloading-the-sgdp-data">Downloading the SGDP data<a class="anchor" aria-label="anchor" href="#downloading-the-sgdp-data"></a>
 </h3>
@@ -117,32 +115,20 @@ fully public individuals from each region in the SGDP metadata.</p>
 <p>SGDP provides a VCF for each individual, but distributes them as a
 single 57 GB archive containing all 279 public individuals. The shell
 script <code>create_sgdp_subset_s02.sh</code> downloads only the parts
-of the archive that hold our 50 individuals (about 10.8 GB), checks them
-against the checksums provided by SGDP, and merges them into a single
-VCF, <code>all_subset.vcf.gz</code>, with <a href="https://samtools.github.io/bcftools/" class="external-link">bcftools</a>. You will need
-<code>bcftools</code> and <code>curl</code> installed and available on
-your <code>PATH</code>. From the root of a copy of the tidypopgen
-repository, run:</p>
+of the archive that hold our 50 individuals (about 10.8 GB), and checks
+them against the checksums provided by SGDP. You will need
+<code>curl</code> installed and available on your <code>PATH</code>.
+From the root of a copy of the tidypopgen repository, run:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">bash</span> data-raw/create_sgdp_subset_s02.sh vignettes/articles/data/sgdp</span></code></pre></div>
-<p>This writes <code>all_subset.vcf.gz</code> and its index to
-<code>vignettes/articles/data/sgdp/</code>, which is where we read it
-from below (the paths in this article are relative to
-<code>vignettes/articles/</code>). The individual VCFs are kept in
-<code>vignettes/articles/data/sgdp/sgdp_vcfs/</code>, so that an
-interrupted download can be resumed by running the script again; once
-the merged VCF has been created, they can be deleted.</p>
-<p>Note that each SGDP VCF only contains the sites at which that
-individual carries a non-reference allele. When merging, a site that is
-absent from an individual’s VCF is therefore set to homozygous for the
-reference allele (with the <code>--missing-to-ref</code> option of
-<code>bcftools merge</code>). Without this option, every homozygous
-reference genotype would be recorded as missing. The cost is that a site
-that was not sequenced in an individual is also set to homozygous
-reference, which is a reasonable approximation for these high-coverage
-genomes.</p>
+<p>This writes the 50 VCFs to
+<code>vignettes/articles/data/sgdp/sgdp_vcfs/</code>, which is where we
+read them from below (the paths in this article are relative to
+<code>vignettes/articles/</code>). An interrupted download can be
+resumed by running the script again. We do not need any other tool: we
+merge the VCFs directly in R, with tidypopgen.</p>
 </div>
 <div class="section level3">
-<h3 id="reading-a-large-vcf-into-a-gen_tibble">Reading a large VCF into a gen_tibble<a class="anchor" aria-label="anchor" href="#reading-a-large-vcf-into-a-gen_tibble"></a>
+<h3 id="setting-up">Setting up<a class="anchor" aria-label="anchor" href="#setting-up"></a>
 </h3>
 <p>Now that we have our data we can begin by loading the necessary
 libraries:</p>
@@ -159,27 +145,89 @@ libraries:</p>
 <span><span class="co">#&gt;     intersect, setdiff, setequal, union</span></span>
 <span><span class="co">#&gt; Loading required package: tibble</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span></code></pre></div>
+<p>Because tidypopgen utilizes disk storage through file-backed matrices
+(FBM), we can run the following pipeline on a modern laptop without
+running out of RAM. Here, we use a machine with a GenuineIntel, 13th Gen
+Intel(R) Core(TM) i9-13900, 24 CPU and 126 GiB of RAM.</p>
+<p>Before we begin, we will limit the number of cores used by the
+parallelised BLAS library with
+<code><a href="https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html" class="external-link">bigparallelr::set_blas_ncores()</a></code>, and by the package
+data.table with <code><a href="https://rdrr.io/pkg/data.table/man/openmp-utils.html" class="external-link">data.table::setDTthreads()</a></code>. <em>Note</em>
+You may need to adjust <code>n_cores</code> according to your own
+hardware.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">n_cores</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
+<span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/openmp-utils.html" class="external-link">setDTthreads</a></span><span class="op">(</span><span class="va">n_cores</span><span class="op">)</span></span>
+<span><span class="fu">bigparallelr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html" class="external-link">set_blas_ncores</a></span><span class="op">(</span><span class="va">n_cores</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="merging-the-vcfs-into-a-gen_tibble">Merging the VCFs into a gen_tibble<a class="anchor" aria-label="anchor" href="#merging-the-vcfs-into-a-gen_tibble"></a>
+</h3>
+<p>Each SGDP VCF only contains the sites at which that individual
+carries a non-reference allele. We merge them into a single
+<code>gen_tibble</code> with <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>, keeping all
+the sites found in any of the files (<code>variants = "union"</code>). A
+site that is absent from an individual’s VCF is set to homozygous for
+the reference allele (<code>missing_to_ref = TRUE</code>, the equivalent
+of <code>bcftools merge --missing-to-ref</code>). Without this option,
+every homozygous reference genotype would be recorded as missing. The
+cost is that a site that was not sequenced in an individual is also set
+to homozygous reference, which is a reasonable approximation for these
+high-coverage genomes.</p>
+<p><code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> reads each VCF twice: once to match its
+loci with those of the other files, and once to write its genotypes
+straight into the backing file of the merged <code>gen_tibble</code>, so
+that no merged VCF is ever written to disk. With <code>n_cores</code>,
+the bgzipped VCFs are decompressed, and their genotypes parsed, in
+parallel. (If your data are instead split by chromosome, with one VCF
+per chromosome for the same individuals, <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code>
+reads them into a single <code>gen_tibble</code> in the same way, as
+<code>bcftools concat</code> would.)</p>
 <p>In many descriptive population genetic analyses, where the end goal
 is to visualise populations (e.g., PCA) or calculate a summary statistic
 (e.g. F<sub>ST</sub>), the names of your loci are not needed for the
 analysis. In these cases, we can save a lot of memory (over half of the
 memory footprint of the <code>gen_tibble</code>) by switching the loci
-names from strings to integers.</p>
-<p>This option is only enabled when loading from a .vcf file. To do
-this, we need to set parameter <code>names_as_int</code> to TRUE when
-creating the gen_tibble:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span></span>
-<span>  <span class="fu"><a href="../reference/gen_tibble.html">gen_tibble</a></span><span class="op">(</span><span class="st">"data/sgdp/all_subset.vcf.gz"</span>,</span>
-<span>    quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>    backingfile <span class="op">=</span> <span class="st">"data/sgdp/all_subset"</span>,</span>
-<span>    names_as_int <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span>  <span class="op">)</span></span></code></pre></div>
+names from strings to integers. <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> does this
+by default (<code>names_as_int = TRUE</code>). <em>Note</em> that this
+differs from <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>, where <code>names_as_int</code>
+defaults to FALSE: to read a single large VCF with integer loci names,
+set <code>names_as_int = TRUE</code> in <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code>.
+Conversely, set <code>names_as_int = FALSE</code> in
+<code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> to keep the IDs (e.g. rsIDs) of the VCF
+files. The IDs are not lost with integer names:
+<code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> writes them, with the chromosome and
+position of each locus, to a sidecar file next to the backing file
+(<code>.loci.tsv</code>), from which <code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code> gives
+back the names of any loci (e.g. the hits of a scan), and
+<code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> puts them back into the
+<code>gen_tibble</code> (see the article on <a href="rad_seq.html">large
+RAD-seq datasets</a>).</p>
+<p>For RAD-seq data assembled de novo, each RAD locus is its own
+chromosome, so the names of the chromosomes also take a lot of memory:
+set <code>chromosomes_as_int = TRUE</code> as well as
+<code>names_as_int = TRUE</code> (see the article on <a href="rad_seq.html">large RAD-seq datasets</a>).</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sgdp_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="st">"data/sgdp/sgdp_vcfs"</span>,</span>
+<span>  pattern <span class="op">=</span> <span class="st">"\\.vcf\\.gz$"</span>,</span>
+<span>  full.names <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs</a></span><span class="op">(</span><span class="va">sgdp_files</span>,</span>
+<span>  variants <span class="op">=</span> <span class="st">"union"</span>,</span>
+<span>  missing_to_ref <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  backingfile <span class="op">=</span> <span class="st">"data/sgdp/all_subset"</span>,</span>
+<span>  n_cores <span class="op">=</span> <span class="va">n_cores</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>Merging the VCFs is the slowest step of this article (see the <a href="#performance-summary">performance summary</a> at the end), but it
+only needs to be done once: the merged <code>gen_tibble</code> is saved
+alongside its backing file, and can be loaded again in a later session
+with <code><a href="../reference/gt_load.html">gt_load()</a></code>.</p>
 <p>When we now call our loci tibble with <code><a href="../reference/show_loci.html">show_loci()</a></code>, we
 can see that the loci names are now integers:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 20,728,532 × 7</span></span>
+<span><span class="co">#&gt; # A tibble: 20,761,293 × 7</span></span>
 <span><span class="co">#&gt;    big_index  name chromosome position genetic_dist allele_ref allele_alt</span></span>
 <span><span class="co">#&gt;        &lt;int&gt; &lt;int&gt; &lt;fct&gt;         &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;     </span></span>
 <span><span class="co">#&gt;  1         1     1 1             10109            0 A          T         </span></span>
@@ -192,32 +240,13 @@ can see that the loci names are now integers:</p>
 <span><span class="co">#&gt;  8         8     8 1             10250            0 A          C         </span></span>
 <span><span class="co">#&gt;  9         9     9 1             10255            0 A          T         </span></span>
 <span><span class="co">#&gt; 10        10    10 1             10257            0 A          C         </span></span>
-<span><span class="co">#&gt; # ℹ 20,728,522 more rows</span></span></code></pre></div>
+<span><span class="co">#&gt; # ℹ 20,761,283 more rows</span></span></code></pre></div>
 <p>The rsID’s of each SNP have been removed, but all other metadata
 (chromosome, position, genetic distance, and alleles) are retained. We
 can check the memory footprint of the gen_tibble using:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"auto"</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "790.76 Mb"</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="setting-up-cores">Setting up cores<a class="anchor" aria-label="anchor" href="#setting-up-cores"></a>
-</h3>
-<p>Because tidypopgen utilizes disk storage through file-backed matrices
-(FBM), we can run the following pipeline on a modern laptop without
-running out of RAM. Here, we use a machine with a GenuineIntel, 13th Gen
-Intel(R) Core(TM) i9-13900, 24 CPU and 126 GiB of RAM.</p>
-<p>Before we begin, we will limit the number of cores used by the
-parallelised BLAS library with
-<code><a href="https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html" class="external-link">bigparallelr::set_blas_ncores()</a></code>, and by the package
-data.table with <code><a href="https://rdrr.io/pkg/data.table/man/openmp-utils.html" class="external-link">data.table::setDTthreads()</a></code>. <em>Note</em>
-You may need to adjust <code>n_cores</code> according to your own
-hardware.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">n_cores</span> <span class="op">&lt;-</span> <span class="fl">20</span></span>
-<span><span class="fu">data.table</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/data.table/man/openmp-utils.html" class="external-link">setDTthreads</a></span><span class="op">(</span><span class="va">n_cores</span><span class="op">)</span></span>
-<span><span class="fu">bigparallelr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/get_blas_ncores.html" class="external-link">set_blas_ncores</a></span><span class="op">(</span><span class="va">n_cores</span><span class="op">)</span></span></code></pre></div>
-</div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"auto"</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "792.01 Mb"</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quality-control-for-large-datasets">Quality control for large datasets<a class="anchor" aria-label="anchor" href="#quality-control-for-large-datasets"></a>
@@ -229,19 +258,17 @@ hardware.</p>
 <code>qc_report</code> functions exemplify:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sgdp_indiv_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_indiv.html">qc_report_indiv</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span></span></code></pre></div>
-<p>indiv_report: 537ms</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span></span>
 <span><span class="va">sgdp_loci_rep</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/qc_report_loci.html">qc_report_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span></span>
 <span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">ungroup</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>loci_report: 406ms</p>
 <p>However, it is important to be mindful that analyses on very large
 datasets will produce large outputs:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"auto"</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "553.51 Mb"</span></span></code></pre></div>
-<p>In this case, a loci report on 20728532 loci for 50 individuals
-occupies approximately 553.51 Mb of memory.</p>
+<span><span class="co">#&gt; [1] "554.39 Mb"</span></span></code></pre></div>
+<p>In this case, a loci report on 20761293 loci for 50 individuals
+occupies approximately 554.39 Mb of memory.</p>
 <p>Let’s plot the overview of the loci report:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">sgdp_loci_rep</span>,</span>
@@ -279,27 +306,17 @@ MAF greater than 5%:</p>
 <code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_alt_freq.html">loci_maf</a></span><span class="op">(</span><span class="va">genotypes</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0.05</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Loci remaining:"</span>, <span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loci remaining: 7456643</span></span></code></pre></div>
-<p>maf_filter: 463ms</p>
+<span><span class="co">#&gt; Loci remaining: 7482060</span></span></code></pre></div>
 <p>With other datasets, we would also remove loci with too many missing
 genotypes (e.g. with
 <code>select_loci_if(loci_missingness(genotypes) &lt; 0.1)</code>), and
 then impute the remaining missing genotypes with
 <code><a href="../reference/gt_impute_simple.html">gt_impute_simple()</a></code>, as LD clumping and PCA do not accept
 missing values. Our dataset has no missing genotypes, so we can skip
-both steps.</p>
-</div>
-<div class="section level3">
-<h3 id="updating-the-backing-file">Updating the backing file<a class="anchor" aria-label="anchor" href="#updating-the-backing-file"></a>
-</h3>
-<p>After removing loci, we update the file backing matrix with
-<code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code>, so that it only contains the loci
-that we kept:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_update_backingfile.html">gt_update_backingfile</a></span><span class="op">(</span><span class="va">sgdp</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                              backingfile <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>update_backingfile: 6.1s</p>
-<p>This will help us with the next step (LD clumping).</p>
+both steps. There is no need to rewrite the backing file with
+<code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> after filtering: the following
+steps only use the loci that are left in the
+<code>gen_tibble</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="ld-clumping">LD clumping<a class="anchor" aria-label="anchor" href="#ld-clumping"></a>
@@ -309,15 +326,14 @@ disequilibrium.</p>
 <p>With many loci, this step can be a little more time consuming, so it
 is important to remember to specify the <code>n_cores</code> parameter
 to speed things up:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="fu"><a href="../reference/loci_ld_clump.html">loci_ld_clump</a></span><span class="op">(</span><span class="va">genotypes</span>,</span>
 <span>    n_cores <span class="op">=</span> <span class="va">n_cores</span>,</span>
 <span>    thr_r2 <span class="op">=</span> <span class="fl">0.2</span></span>
 <span>  <span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Loci remaining:"</span>, <span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Loci remaining: 507481</span></span></code></pre></div>
-<p>ld_clump: 7.9s</p>
+<span><span class="co">#&gt; Loci remaining: 511652</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -328,45 +344,44 @@ to speed things up:</p>
 </h3>
 <p>Now that we have a clean dataset, we can proceed with our analysis by
 plotting a PCA:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sgdp_pca</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/gt_pca_partialSVD.html">gt_pca_partialSVD</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>pca: 612ms</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">sgdp_pca</span>, type <span class="op">=</span> <span class="st">"scores"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="va">sgdp</span><span class="op">$</span><span class="va">Region</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>color <span class="op">=</span> <span class="st">"Region"</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="figure/big_data/PCA-1.png" alt="plot of chunk PCA"><div class="figcaption">plot of chunk PCA</div>
 </div>
-<p>Our PCA separates the five regions. PC1 (5.23% of the variance) runs
-from the African individuals on the left, through West Eurasia, Oceania
-and East Asia, to the American individuals on the right, and PC2 (3.86%)
-separates the Oceanian and East Asian individuals at the top from the
-American individuals at the bottom. The individuals from America, West
-Eurasia and East Asia form fairly tight clusters, whereas the African
-individuals are spread out along PC1: the Mbuti, Ju/’hoan North, Yoruba,
-Mandenka and Dinka individuals are on the far left, followed by the
-Masai and Somali individuals from East Africa, while the two Mozabite
-individuals from Algeria lie close to the West Eurasian cluster. This is
-consistent with North and East African populations carrying some West
-Eurasian-related ancestry. The Oceanian individuals are also spread out:
-the Papuan, Bougainville and Australian individuals are at the top, the
-Maori individual is closer to the centre of the plot, and the Hawaiian
-individual and the two Dusun individuals (from Borneo) lie within the
-East Asian cluster. This reflects the Austronesian ancestry of these
-populations, which is largely related to East Asian populations.</p>
+<p>Our PCA separates the five regions. PC1 (5.20% of the variance) runs
+from the American individuals on the left, through East Asia, Oceania
+and West Eurasia, to the African individuals on the right, and PC2
+(3.85%) separates the American individuals at the top from the Oceanian
+and East Asian individuals at the bottom. The individuals from America,
+West Eurasia and East Asia form fairly tight clusters, whereas the
+African individuals are spread out along PC1: the Mbuti, Ju/’hoan North,
+Yoruba, Mandenka and Dinka individuals are on the far right, followed by
+the Masai and Somali individuals from East Africa, while the two
+Mozabite individuals from Algeria lie close to the West Eurasian
+cluster. This is consistent with North and East African populations
+carrying some West Eurasian-related ancestry. The Oceanian individuals
+are also spread out: the Papuan, Bougainville and Australian individuals
+are at the bottom, the Maori individual is closer to the centre of the
+plot, and the Hawaiian individual and the two Dusun individuals (from
+Borneo) lie within the East Asian cluster. This reflects the
+Austronesian ancestry of these populations, which is largely related to
+East Asian populations.</p>
 </div>
 <div class="section level3">
 <h3 id="dapc">DAPC<a class="anchor" aria-label="anchor" href="#dapc"></a>
 </h3>
 <p>We can also perform a discriminant analysis of principal components
 (DAPC) using <code>gt_dapc</code>.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sgdp_dapc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_dapc.html">gt_dapc</a></span><span class="op">(</span><span class="va">sgdp_pca</span>,</span>
 <span>  pop <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">sgdp</span><span class="op">$</span><span class="va">Region</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>dapc: 29ms</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">sgdp_dapc</span>, type <span class="op">=</span> <span class="st">"components"</span><span class="op">)</span></span></code></pre></div>
 <div class="float">
 <img src="figure/big_data/DAPC_components_plot-1.png" alt="plot of chunk DAPC_components_plot"><div class="figcaption">plot of chunk DAPC_components_plot</div>
@@ -378,7 +393,7 @@ exceptions are consistent with the PCA above: the two Mozabite
 individuals are assigned to the West Eurasian group (with probabilities
 of 0.93 and 0.99), the two Dusun individuals and the Hawaiian individual
 are assigned to the East Asian group (with probabilities of 0.96, 0.98
-and 0.91), and the Maori individual has a probability of 0.10 of East
+and 0.90), and the Maori individual has a probability of 0.09 of East
 Asian membership. These individuals may have admixed ancestry, or (as
 for the Dusun) be closer to the East Asian populations than to the other
 Oceanian populations in our sample.</p>
@@ -389,7 +404,7 @@ Oceanian populations in our sample.</p>
 </h2>
 <p>Finally, to examine the differentiation between regions, we can
 calculate pairwise F<sub>ST</sub>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">grouped_sgdp</span> <span class="op">&lt;-</span> <span class="va">sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Region</span><span class="op">)</span></span>
 <span><span class="va">pairwise_fst</span> <span class="op">&lt;-</span> <span class="va">grouped_sgdp</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/pairwise_pop_fst.html">pairwise_pop_fst</a></span><span class="op">(</span></span>
 <span>  n_cores <span class="op">=</span> <span class="va">n_cores</span>,</span>
@@ -411,13 +426,15 @@ calculate pairwise F<sub>ST</sub>.</p>
 <span>    y <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_blank</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>    fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/expression.html" class="external-link">expression</a></span><span class="op">(</span><span class="st">"Pairwise F"</span><span class="op">[</span><span class="va">ST</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
-<p><img src="figure/big_data/pairwise_fst-1.png" alt="plot of chunk pairwise_fst">pairwise_fst: 188ms</p>
+<div class="float">
+<img src="figure/big_data/pairwise_fst-1.png" alt="plot of chunk pairwise_fst"><div class="figcaption">plot of chunk pairwise_fst</div>
+</div>
 <p>The pairwise F<sub>ST</sub> values are all small (between 0.02 and
 0.08), as is typical of human populations. America is the most
 differentiated region, and Africa and America are the most
 differentiated pair (F<sub>ST</sub> = 0.079); America is closest to East
-Asia (0.043). East Asia and Oceania are the least differentiated pair
-(0.017), reflecting the East Asian-related ancestry of the Dusun,
+Asia (0.044). East Asia and Oceania are the least differentiated pair
+(0.018), reflecting the East Asian-related ancestry of the Dusun,
 Hawaiian and Maori individuals in our Oceanian sample. Africa is closest
 to West Eurasia (0.038), which partly reflects the West Eurasian-related
 ancestry of the Mozabite, Somali and Masai individuals in our African
@@ -427,18 +444,26 @@ are imprecise.</p>
 <div class="section level2">
 <h2 id="performance-summary">Performance summary<a class="anchor" aria-label="anchor" href="#performance-summary"></a>
 </h2>
-<p>Here is a summary of the time taken (in seconds) to perform each step
-using a large dataset:</p>
-<pre><code><span><span class="co">#&gt;                 step  time</span></span>
-<span><span class="co">#&gt; 1       indiv_report  0.54</span></span>
-<span><span class="co">#&gt; 2        loci_report  0.41</span></span>
-<span><span class="co">#&gt; 3         maf_filter  0.46</span></span>
-<span><span class="co">#&gt; 4 update_backingfile  6.06</span></span>
-<span><span class="co">#&gt; 5           ld_clump  7.86</span></span>
-<span><span class="co">#&gt; 6                pca  0.61</span></span>
-<span><span class="co">#&gt; 7               dapc  0.03</span></span>
-<span><span class="co">#&gt; 8       pairwise_fst  0.19</span></span>
-<span><span class="co">#&gt; 9              Total 16.16</span></span></code></pre>
+<p>Here is a summary of the time taken (in seconds) by each step on our
+large dataset, and of the peak memory used by R during each step (in MB,
+including the objects that were already in memory, such as the
+<code>gen_tibble</code> itself):</p>
+<pre><code><span><span class="co">#&gt;                              step time_s peak_memory_mb</span></span>
+<span><span class="co">#&gt; 1                      merge_vcfs  65.99           1991</span></span>
+<span><span class="co">#&gt; 2                    indiv_report   0.44           1115</span></span>
+<span><span class="co">#&gt; 3                     loci_report   0.28           1678</span></span>
+<span><span class="co">#&gt; 4                      maf_filter   0.37           1969</span></span>
+<span><span class="co">#&gt; 5                        ld_clump   8.56           2042</span></span>
+<span><span class="co">#&gt; 6                             pca   0.66            979</span></span>
+<span><span class="co">#&gt; 7                            dapc   0.03            415</span></span>
+<span><span class="co">#&gt; 8                    pairwise_fst   0.17            374</span></span>
+<span><span class="co">#&gt; 9 Total (time) / maximum (memory)  76.50           2042</span></span></code></pre>
+<p>The memory is measured with <code><a href="https://rdrr.io/r/base/gc.html" class="external-link">gc()</a></code>, and only covers memory
+allocated by R. It does not include the genotypes, which stay in the
+backing file on disk (the operating system caches the parts that are
+read, but this cache can be freed whenever memory is needed), nor memory
+allocated directly by compiled code (for example, by the VCF parser
+while it reads the file).</p>
 </div>
 <div class="section level2">
 <h2 id="key-takeaways">Key takeaways<a class="anchor" aria-label="anchor" href="#key-takeaways"></a>
@@ -449,10 +474,21 @@ using a large dataset:</p>
 <code>gen_tibble</code> objects are file-backed, so the genotypes stay
 on disk and only what you are working on is held in memory.</li>
 <li>
-<strong>Use <code>names_as_int = TRUE</code> when reading a
-VCF</strong> to reduce the memory taken by locus names. The trade-off is
-that the original locus IDs are not kept (chromosome and position are),
-so <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> matches loci by chromosome and position.</li>
+<strong>Merge many VCFs directly in R.</strong>
+<code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> (files with different individuals, as
+<code>bcftools merge</code>) and <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> (files
+with the same individuals and different chromosomes, as
+<code>bcftools concat</code>) read them straight into a single
+<code>gen_tibble</code>, without writing a merged VCF.</li>
+<li>
+<strong>Use integer locus names</strong> to reduce the memory they
+take. They are the default of <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> and
+<code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code>, while <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> needs
+<code>names_as_int = TRUE</code>. The original locus IDs are kept on
+disk, in a sidecar file next to the backing file, from which
+<code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code> and <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> get
+them back; integer names can not be matched across datasets, so
+<code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> matches loci by chromosome and position.</li>
 <li>
 <strong>Set your cores.</strong> Limit BLAS and
 <code>data.table</code> threads at the start, and pass

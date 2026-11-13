@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9003</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9004</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,15 +41,15 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/a01_overview.html">The grammar of population genetics</a></li>
     <li><a class="dropdown-item" href="../articles/a02_qc.html">Quality Control</a></li>
-    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis with tidypopgen</a></li>
-    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
-    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseuodhaploid samples</a></li>
-    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark on the HGDP</a></li>
-    <li><a class="dropdown-item" href="../articles/big_data.html">Working with big data</a></li>
+    <li><a class="dropdown-item" href="../articles/a03_example_clustering_and_dapc.html">Population genetic analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/aDNA_pseudohaploids.html">Working with aDNA pseudohaploids</a></li>
     <li><a class="dropdown-item" href="../articles/interpolating.html">Spatial interpolation of genetic data</a></li>
-    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
-    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity in the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/roh_hgdp.html">Runs of homozygosity</a></li>
     <li><a class="dropdown-item" href="../articles/sfs.html">Site frequency spectra</a></li>
+    <li><a class="dropdown-item" href="../articles/big_data.html">Working with large VCFs</a></li>
+    <li><a class="dropdown-item" href="../articles/rad_seq.html">Working with large RAD-seq datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/benchmark_hgdp.html">Benchmark with the HGDP</a></li>
+    <li><a class="dropdown-item" href="../articles/a99_plink_cheatsheet.html">PLINK cheatsheet</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -196,8 +196,8 @@ file:</p>
 <tbody>
 <tr class="odd">
 <td align="left">default</td>
-<td align="right">37.9</td>
-<td align="right">3694</td>
+<td align="right">37.7</td>
+<td align="right">3708</td>
 <td align="right">2846</td>
 <td align="right">924</td>
 <td align="right">165</td>
@@ -205,7 +205,7 @@ file:</p>
 </tr>
 <tr class="even">
 <td align="left">names_as_int</td>
-<td align="right">19.5</td>
+<td align="right">19.9</td>
 <td align="right">2552</td>
 <td align="right">1756</td>
 <td align="right">924</td>
@@ -214,7 +214,7 @@ file:</p>
 </tr>
 <tr class="odd">
 <td align="left">chromosomes_as_int</td>
-<td align="right">20.7</td>
+<td align="right">19.9</td>
 <td align="right">2410</td>
 <td align="right">1751</td>
 <td align="right">924</td>
@@ -223,7 +223,7 @@ file:</p>
 </tr>
 <tr class="even">
 <td align="left">both</td>
-<td align="right">12.9</td>
+<td align="right">12.7</td>
 <td align="right">1188</td>
 <td align="right">660</td>
 <td align="right">924</td>
@@ -266,7 +266,7 @@ is read.</p>
 <code>gen_tibble</code> in a new session is faster too:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">reloaded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_load.html">gt_load</a></span><span class="op">(</span><span class="st">"./data/rad/rad_int.gt"</span><span class="op">)</span></span></code></pre></div>
-<p>This takes 3.2 s, against 19.2 s for the <code>gen_tibble</code> read
+<p>This takes 3.1 s, against 18 s for the <code>gen_tibble</code> read
 with the default options (see the performance summary at the end).</p>
 </div>
 <div class="section level2">
@@ -319,25 +319,13 @@ a minor allele frequency below 5%:</p>
 <span>  <span class="fu"><a href="../reference/select_loci.html">select_loci</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">loci_missing</span> <span class="op">&lt;=</span> <span class="fl">0.2</span> <span class="op">&amp;</span> <span class="va">loci_freq</span> <span class="op">&gt;=</span> <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/count_loci.html">count_loci</a></span><span class="op">(</span><span class="va">rad_gt</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 3605716</span></span></code></pre></div>
-<p>We then write a new backing file with only these loci. This also
-writes new sidecar files, with the names of the loci that are kept:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rad_gt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_update_backingfile.html">gt_update_backingfile</a></span><span class="op">(</span><span class="va">rad_gt</span>,</span>
-<span>  backingfile <span class="op">=</span> <span class="st">"./data/rad/rad_int_qc"</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/file.info.html" class="external-link">file.size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"./data/rad/rad_int_qc.loci.tsv"</span>,</span>
-<span>  <span class="st">"./data/rad/rad_int_qc.chromosomes.tsv"</span></span>
-<span><span class="op">)</span><span class="op">)</span> <span class="op">/</span> <span class="fl">1024</span><span class="op">^</span><span class="fl">2</span></span>
-<span><span class="co">#&gt; [1] 155.9371 104.4537</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="a-scan-for-differentiated-loci">A scan for differentiated loci<a class="anchor" aria-label="anchor" href="#a-scan-for-differentiated-loci"></a>
 </h2>
 <p>As a simple scan, we look for the loci whose allele frequencies
 differ most between two lineages, GS and BS:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">freq</span> <span class="op">&lt;-</span> <span class="va">rad_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/loci_alt_freq.html">loci_alt_freq</a></span><span class="op">(</span>n_cores <span class="op">=</span> <span class="va">n_cores</span>, type <span class="op">=</span> <span class="st">"matrix"</span><span class="op">)</span></span>
@@ -346,7 +334,7 @@ differ most between two lineages, GS and BS:</p>
 hits. We keep the frequency difference as an extra column (the synthetic
 data resample the genotypes of a few samples of each lineage, so many
 loci have different fixed alleles in the two lineages):</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="va">rad_gt</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>freq_diff <span class="op">=</span> <span class="va">freq_diff</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">freq_diff</span> <span class="op">&gt;</span> <span class="fl">0.95</span><span class="op">)</span></span>
@@ -354,39 +342,39 @@ loci have different fixed alleles in the two lineages):</p>
 <span><span class="co">#&gt; # A tibble: 151,233 × 8</span></span>
 <span><span class="co">#&gt;    big_index  name chromosome position genetic_dist allele_ref allele_alt</span></span>
 <span><span class="co">#&gt;        &lt;int&gt; &lt;int&gt;      &lt;int&gt;    &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;     </span></span>
-<span><span class="co">#&gt;  1         1     6          6       48            0 A          T         </span></span>
-<span><span class="co">#&gt;  2        17    80         58       88            0 A          C         </span></span>
-<span><span class="co">#&gt;  3        27   146        106       45            0 A          G         </span></span>
-<span><span class="co">#&gt;  4        80   448        335       32            0 A          G         </span></span>
-<span><span class="co">#&gt;  5        84   454        337       97            0 A          G         </span></span>
-<span><span class="co">#&gt;  6       139   715        535       68            0 T          G         </span></span>
-<span><span class="co">#&gt;  7       229  1142        876       56            0 A          T         </span></span>
-<span><span class="co">#&gt;  8       241  1216        938       90            0 C          G         </span></span>
-<span><span class="co">#&gt;  9       273  1356       1038       46            0 T          C         </span></span>
-<span><span class="co">#&gt; 10       275  1370       1050       63            0 C          T         </span></span>
+<span><span class="co">#&gt;  1         6     6          6       48            0 A          T         </span></span>
+<span><span class="co">#&gt;  2        80    80         58       88            0 A          C         </span></span>
+<span><span class="co">#&gt;  3       146   146        106       45            0 A          G         </span></span>
+<span><span class="co">#&gt;  4       448   448        335       32            0 A          G         </span></span>
+<span><span class="co">#&gt;  5       454   454        337       97            0 A          G         </span></span>
+<span><span class="co">#&gt;  6       715   715        535       68            0 T          G         </span></span>
+<span><span class="co">#&gt;  7      1142  1142        876       56            0 A          T         </span></span>
+<span><span class="co">#&gt;  8      1216  1216        938       90            0 C          G         </span></span>
+<span><span class="co">#&gt;  9      1356  1356       1038       46            0 T          C         </span></span>
+<span><span class="co">#&gt; 10      1370  1370       1050       63            0 C          T         </span></span>
 <span><span class="co">#&gt; # ℹ 151,223 more rows</span></span>
 <span><span class="co">#&gt; # ℹ 1 more variable: freq_diff &lt;dbl&gt;</span></span></code></pre></div>
 <p><code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code> gives back the same table, with the
 original names and chromosomes. The first lookup in a session indexes
 the sidecar files (a single read through each file); later lookups only
 read the parts of the files that hold the loci:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hits_named</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_lookup_loci.html">gt_lookup_loci</a></span><span class="op">(</span><span class="va">rad_gt</span>, <span class="va">hits</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hits_named</span></span>
 <span><span class="co">#&gt; # A tibble: 151,233 × 8</span></span>
 <span><span class="co">#&gt;    big_index name      chromosome    position genetic_dist allele_ref allele_alt</span></span>
 <span><span class="co">#&gt;        &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;            &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;     </span></span>
-<span><span class="co">#&gt;  1         1 9999990_1 SNP_higher_p…       48            0 A          T         </span></span>
-<span><span class="co">#&gt;  2        17 9999911   SNP_higher_p…       88            0 A          C         </span></span>
-<span><span class="co">#&gt;  3        27 9999834   SNP_higher_p…       45            0 A          G         </span></span>
-<span><span class="co">#&gt;  4        80 9999438_1 SNP_higher_p…       32            0 A          G         </span></span>
-<span><span class="co">#&gt;  5        84 9999435_1 SNP_higher_p…       97            0 A          G         </span></span>
-<span><span class="co">#&gt;  6       139 9999075_5 SNP_higher_p…       68            0 T          G         </span></span>
-<span><span class="co">#&gt;  7       229 9998494   SNP_higher_p…       56            0 A          T         </span></span>
-<span><span class="co">#&gt;  8       241 9998381_2 SNP_higher_p…       90            0 C          G         </span></span>
-<span><span class="co">#&gt;  9       273 9998205_1 SNP_higher_p…       46            0 T          C         </span></span>
-<span><span class="co">#&gt; 10       275 9998180   SNP_higher_p…       63            0 C          T         </span></span>
+<span><span class="co">#&gt;  1         6 9999990_1 SNP_higher_p…       48            0 A          T         </span></span>
+<span><span class="co">#&gt;  2        80 9999911   SNP_higher_p…       88            0 A          C         </span></span>
+<span><span class="co">#&gt;  3       146 9999834   SNP_higher_p…       45            0 A          G         </span></span>
+<span><span class="co">#&gt;  4       448 9999438_1 SNP_higher_p…       32            0 A          G         </span></span>
+<span><span class="co">#&gt;  5       454 9999435_1 SNP_higher_p…       97            0 A          G         </span></span>
+<span><span class="co">#&gt;  6       715 9999075_5 SNP_higher_p…       68            0 T          G         </span></span>
+<span><span class="co">#&gt;  7      1142 9998494   SNP_higher_p…       56            0 A          T         </span></span>
+<span><span class="co">#&gt;  8      1216 9998381_2 SNP_higher_p…       90            0 C          G         </span></span>
+<span><span class="co">#&gt;  9      1356 9998205_1 SNP_higher_p…       46            0 T          C         </span></span>
+<span><span class="co">#&gt; 10      1370 9998180   SNP_higher_p…       63            0 C          T         </span></span>
 <span><span class="co">#&gt; # ℹ 151,223 more rows</span></span>
 <span><span class="co">#&gt; # ℹ 1 more variable: freq_diff &lt;dbl&gt;</span></span></code></pre></div>
 <p><code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code> also takes row numbers of the loci
@@ -394,30 +382,30 @@ table, so we can look up the top 10 hits using <code><a href="https://rdrr.io/r/
 Since lookups use the integer names, rather than the rows, a table of
 hits stays valid if the <code>gen_tibble</code> is filtered or reordered
 later.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">top_10</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gt_lookup_loci.html">gt_lookup_loci</a></span><span class="op">(</span><span class="va">rad_gt</span>, <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">freq_diff</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">top_10</span></span>
 <span><span class="co">#&gt; # A tibble: 10 × 7</span></span>
 <span><span class="co">#&gt;    big_index name      chromosome    position genetic_dist allele_ref allele_alt</span></span>
 <span><span class="co">#&gt;        &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;            &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;     </span></span>
-<span><span class="co">#&gt;  1         1 9999990_1 SNP_higher_p…       48            0 A          T         </span></span>
-<span><span class="co">#&gt;  2        17 9999911   SNP_higher_p…       88            0 A          C         </span></span>
-<span><span class="co">#&gt;  3        27 9999834   SNP_higher_p…       45            0 A          G         </span></span>
-<span><span class="co">#&gt;  4        80 9999438_1 SNP_higher_p…       32            0 A          G         </span></span>
-<span><span class="co">#&gt;  5        84 9999435_1 SNP_higher_p…       97            0 A          G         </span></span>
-<span><span class="co">#&gt;  6       139 9999075_5 SNP_higher_p…       68            0 T          G         </span></span>
-<span><span class="co">#&gt;  7       229 9998494   SNP_higher_p…       56            0 A          T         </span></span>
-<span><span class="co">#&gt;  8       241 9998381_2 SNP_higher_p…       90            0 C          G         </span></span>
-<span><span class="co">#&gt;  9       273 9998205_1 SNP_higher_p…       46            0 T          C         </span></span>
-<span><span class="co">#&gt; 10       275 9998180   SNP_higher_p…       63            0 C          T</span></span></code></pre></div>
+<span><span class="co">#&gt;  1         6 9999990_1 SNP_higher_p…       48            0 A          T         </span></span>
+<span><span class="co">#&gt;  2        80 9999911   SNP_higher_p…       88            0 A          C         </span></span>
+<span><span class="co">#&gt;  3       146 9999834   SNP_higher_p…       45            0 A          G         </span></span>
+<span><span class="co">#&gt;  4       448 9999438_1 SNP_higher_p…       32            0 A          G         </span></span>
+<span><span class="co">#&gt;  5       454 9999435_1 SNP_higher_p…       97            0 A          G         </span></span>
+<span><span class="co">#&gt;  6       715 9999075_5 SNP_higher_p…       68            0 T          G         </span></span>
+<span><span class="co">#&gt;  7      1142 9998494   SNP_higher_p…       56            0 A          T         </span></span>
+<span><span class="co">#&gt;  8      1216 9998381_2 SNP_higher_p…       90            0 C          G         </span></span>
+<span><span class="co">#&gt;  9      1356 9998205_1 SNP_higher_p…       46            0 T          C         </span></span>
+<span><span class="co">#&gt; 10      1370 9998180   SNP_higher_p…       63            0 C          T</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="summaries-by-rad-locus">Summaries by RAD locus<a class="anchor" aria-label="anchor" href="#summaries-by-rad-locus"></a>
 </h2>
 <p>Statistics by chromosome have one row per RAD locus, with the code of
 the chromosome. For example, the number of SNPs on each RAD locus:</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">snps_per_locus</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="va">rad_gt</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">chromosome</span>, name <span class="op">=</span> <span class="st">"n_snps"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">snps_per_locus</span><span class="op">$</span><span class="va">n_snps</span><span class="op">)</span></span>
@@ -426,11 +414,11 @@ the chromosome. For example, the number of SNPs on each RAD locus:</p>
 <span><span class="co">#&gt; 3116955  209678   21093    1474      46</span></span></code></pre></div>
 <p><code><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes()</a></code> gives the names of the codes,
 e.g. of the RAD loci with the most SNPs left after quality control:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">top_loci</span> <span class="op">&lt;-</span> <span class="va">snps_per_locus</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_max</a></span><span class="op">(</span><span class="va">n_snps</span>, n <span class="op">=</span> <span class="fl">5</span>, with_ties <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>rad_locus <span class="op">=</span> <span class="fu"><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes</a></span><span class="op">(</span><span class="va">rad_gt</span>, <span class="va">chromosome</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">top_loci</span></span>
 <span><span class="co">#&gt; # A tibble: 5 × 3</span></span>
 <span><span class="co">#&gt;   chromosome n_snps rad_locus              </span></span>
@@ -449,25 +437,25 @@ it can be convenient to have the original names back in its loci table,
 e.g. before exporting the data. <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> does this
 (it gives the same loci table as reading the VCF with the default
 options, for the loci that are kept):</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rad_hits</span> <span class="op">&lt;-</span> <span class="va">rad_gt</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/select_loci.html">select_loci</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">freq_diff</span> <span class="op">&gt;</span> <span class="fl">0.95</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/gt_lookup_loci.html">gt_restore_loci</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/show_loci.html">show_loci</a></span><span class="op">(</span><span class="va">rad_hits</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 151,233 × 7</span></span>
 <span><span class="co">#&gt;    big_index name      chromosome    position genetic_dist allele_ref allele_alt</span></span>
 <span><span class="co">#&gt;        &lt;int&gt; &lt;chr&gt;     &lt;fct&gt;            &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;     </span></span>
-<span><span class="co">#&gt;  1         1 9999990_1 SNP_higher_p…       48            0 A          T         </span></span>
-<span><span class="co">#&gt;  2        17 9999911   SNP_higher_p…       88            0 A          C         </span></span>
-<span><span class="co">#&gt;  3        27 9999834   SNP_higher_p…       45            0 A          G         </span></span>
-<span><span class="co">#&gt;  4        80 9999438_1 SNP_higher_p…       32            0 A          G         </span></span>
-<span><span class="co">#&gt;  5        84 9999435_1 SNP_higher_p…       97            0 A          G         </span></span>
-<span><span class="co">#&gt;  6       139 9999075_5 SNP_higher_p…       68            0 T          G         </span></span>
-<span><span class="co">#&gt;  7       229 9998494   SNP_higher_p…       56            0 A          T         </span></span>
-<span><span class="co">#&gt;  8       241 9998381_2 SNP_higher_p…       90            0 C          G         </span></span>
-<span><span class="co">#&gt;  9       273 9998205_1 SNP_higher_p…       46            0 T          C         </span></span>
-<span><span class="co">#&gt; 10       275 9998180   SNP_higher_p…       63            0 C          T         </span></span>
+<span><span class="co">#&gt;  1         6 9999990_1 SNP_higher_p…       48            0 A          T         </span></span>
+<span><span class="co">#&gt;  2        80 9999911   SNP_higher_p…       88            0 A          C         </span></span>
+<span><span class="co">#&gt;  3       146 9999834   SNP_higher_p…       45            0 A          G         </span></span>
+<span><span class="co">#&gt;  4       448 9999438_1 SNP_higher_p…       32            0 A          G         </span></span>
+<span><span class="co">#&gt;  5       454 9999435_1 SNP_higher_p…       97            0 A          G         </span></span>
+<span><span class="co">#&gt;  6       715 9999075_5 SNP_higher_p…       68            0 T          G         </span></span>
+<span><span class="co">#&gt;  7      1142 9998494   SNP_higher_p…       56            0 A          T         </span></span>
+<span><span class="co">#&gt;  8      1216 9998381_2 SNP_higher_p…       90            0 C          G         </span></span>
+<span><span class="co">#&gt;  9      1356 9998205_1 SNP_higher_p…       46            0 T          C         </span></span>
+<span><span class="co">#&gt; 10      1370 9998180   SNP_higher_p…       63            0 C          T         </span></span>
 <span><span class="co">#&gt; # ℹ 151,223 more rows</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -482,68 +470,63 @@ options, for the loci that are kept):</p>
 <tbody>
 <tr class="odd">
 <td align="left">read_default</td>
-<td align="right">37.95</td>
-<td align="right">3694</td>
+<td align="right">37.73</td>
+<td align="right">3708</td>
 </tr>
 <tr class="even">
 <td align="left">read_names_as_int</td>
-<td align="right">19.52</td>
+<td align="right">19.89</td>
 <td align="right">2552</td>
 </tr>
 <tr class="odd">
 <td align="left">read_chromosomes_as_int</td>
-<td align="right">20.67</td>
+<td align="right">19.93</td>
 <td align="right">2410</td>
 </tr>
 <tr class="even">
 <td align="left">read_both_as_int</td>
-<td align="right">12.90</td>
+<td align="right">12.70</td>
 <td align="right">1188</td>
 </tr>
 <tr class="odd">
 <td align="left">load_default</td>
-<td align="right">19.23</td>
+<td align="right">18.00</td>
 <td align="right">3755</td>
 </tr>
 <tr class="even">
 <td align="left">load_both_as_int</td>
-<td align="right">3.20</td>
+<td align="right">3.10</td>
 <td align="right">1272</td>
 </tr>
 <tr class="odd">
 <td align="left">loci_qc</td>
-<td align="right">0.47</td>
+<td align="right">0.44</td>
 <td align="right">1786</td>
 </tr>
 <tr class="even">
-<td align="left">update_backingfile</td>
-<td align="right">2.02</td>
-<td align="right">1030</td>
+<td align="left">scan</td>
+<td align="right">0.08</td>
+<td align="right">811</td>
 </tr>
 <tr class="odd">
-<td align="left">scan</td>
-<td align="right">0.06</td>
-<td align="right">813</td>
+<td align="left">lookup_first</td>
+<td align="right">0.65</td>
+<td align="right">798</td>
 </tr>
 <tr class="even">
-<td align="left">lookup_first</td>
-<td align="right">0.22</td>
+<td align="left">lookup_again</td>
+<td align="right">0.11</td>
 <td align="right">800</td>
 </tr>
 <tr class="odd">
-<td align="left">lookup_again</td>
-<td align="right">0.11</td>
-<td align="right">802</td>
-</tr>
-<tr class="even">
 <td align="left">lookup_chromosomes</td>
 <td align="right">0.02</td>
-<td align="right">867</td>
+<td align="right">865</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">restore</td>
-<td align="right">0.96</td>
-<td align="right">1359</td>
+<td align="right">0.37</td>
+<td align="right">879</td>
 </tr>
 </tbody>
 </table>

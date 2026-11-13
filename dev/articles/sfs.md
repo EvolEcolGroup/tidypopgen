@@ -21,10 +21,9 @@ whole workflow:
 ## The data
 
 We use the RAD-seq data of *Anolis punctatus* lizards shipped with the
-package (see the vignette ‘Population genetic analysis with
-tidypopgen’). We group the 46 individuals into three populations: the
-Atlantic Forest (`AF`), and the eastern (`Eam`) and western (`Wam`)
-Amazonian Forest.
+package (see the vignette ‘Population genetic analysis’). We group the
+46 individuals into three populations: the Atlantic Forest (`AF`), and
+the eastern (`Eam`) and western (`Wam`) Amazonian Forest.
 
 ``` r
 

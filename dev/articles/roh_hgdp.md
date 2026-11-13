@@ -1,4 +1,4 @@
-# Runs of homozygosity in the HGDP
+# Runs of homozygosity
 
 Runs of homozygosity (ROH) are stretches of the genome where both copies
 of a chromosome are identical, because the individual inherited them

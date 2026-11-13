@@ -1,4 +1,4 @@
-# Benchmark on the HGDP
+# Benchmark with the HGDP
 
 This vignette is a benchmark of a few key functions in the tidypopgen
 package. The Human Genome Diversity Project (HGDP) SNP dataset is used

@@ -1,4 +1,4 @@
-# Working with aDNA pseuodhaploid samples
+# Working with aDNA pseudohaploids
 
 The following article shows how to handle ancient DNA in tidypopgen,
 using example data from Lazaridis et al. (2016). First, we will

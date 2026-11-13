@@ -111,10 +111,10 @@ is the loci table, which is held in memory and saved in the `.gt` file:
 
 | options            | time_s | peak_memory_mb | loci_table_mb | bk_mb | gt_mb | sidecars_mb |
 |:-------------------|-------:|---------------:|--------------:|------:|------:|------------:|
-| default            |   37.9 |           3694 |          2846 |   924 |   165 |           0 |
-| names_as_int       |   19.5 |           2552 |          1756 |   924 |   108 |         748 |
-| chromosomes_as_int |   20.7 |           2410 |          1751 |   924 |   125 |         407 |
-| both               |   12.9 |           1188 |           660 |   924 |    68 |        1155 |
+| default            |   37.7 |           3708 |          2846 |   924 |   165 |           0 |
+| names_as_int       |   19.9 |           2552 |          1756 |   924 |   108 |         748 |
+| chromosomes_as_int |   19.9 |           2410 |          1751 |   924 |   125 |         407 |
+| both               |   12.7 |           1188 |           660 |   924 |    68 |        1155 |
 
 `time_s` is the time to read the VCF and save the `gen_tibble`;
 `peak_memory_mb` is the largest amount of memory used by R while doing
@@ -158,7 +158,7 @@ is faster too:
 reloaded <- gt_load("./data/rad/rad_int.gt")
 ```
 
-This takes 3.2 s, against 19.2 s for the `gen_tibble` read with the
+This takes 3.1 s, against 18 s for the `gen_tibble` read with the
 default options (see the performance summary at the end).
 
 ## The sidecar files
@@ -224,25 +224,6 @@ count_loci(rad_gt)
 #> [1] 3605716
 ```
 
-We then write a new backing file with only these loci. This also writes
-new sidecar files, with the names of the loci that are kept:
-
-``` r
-
-rad_gt <- gt_update_backingfile(rad_gt,
-  backingfile = "./data/rad/rad_int_qc", quiet = TRUE
-)
-```
-
-``` r
-
-file.size(c(
-  "./data/rad/rad_int_qc.loci.tsv",
-  "./data/rad/rad_int_qc.chromosomes.tsv"
-)) / 1024^2
-#> [1] 155.9371 104.4537
-```
-
 ## A scan for differentiated loci
 
 As a simple scan, we look for the loci whose allele frequencies differ
@@ -270,16 +251,16 @@ hits
 #> # A tibble: 151,233 × 8
 #>    big_index  name chromosome position genetic_dist allele_ref allele_alt
 #>        <int> <int>      <int>    <int>        <dbl> <chr>      <chr>     
-#>  1         1     6          6       48            0 A          T         
-#>  2        17    80         58       88            0 A          C         
-#>  3        27   146        106       45            0 A          G         
-#>  4        80   448        335       32            0 A          G         
-#>  5        84   454        337       97            0 A          G         
-#>  6       139   715        535       68            0 T          G         
-#>  7       229  1142        876       56            0 A          T         
-#>  8       241  1216        938       90            0 C          G         
-#>  9       273  1356       1038       46            0 T          C         
-#> 10       275  1370       1050       63            0 C          T         
+#>  1         6     6          6       48            0 A          T         
+#>  2        80    80         58       88            0 A          C         
+#>  3       146   146        106       45            0 A          G         
+#>  4       448   448        335       32            0 A          G         
+#>  5       454   454        337       97            0 A          G         
+#>  6       715   715        535       68            0 T          G         
+#>  7      1142  1142        876       56            0 A          T         
+#>  8      1216  1216        938       90            0 C          G         
+#>  9      1356  1356       1038       46            0 T          C         
+#> 10      1370  1370       1050       63            0 C          T         
 #> # ℹ 151,223 more rows
 #> # ℹ 1 more variable: freq_diff <dbl>
 ```
@@ -301,16 +282,16 @@ hits_named
 #> # A tibble: 151,233 × 8
 #>    big_index name      chromosome    position genetic_dist allele_ref allele_alt
 #>        <int> <chr>     <chr>            <int>        <dbl> <chr>      <chr>     
-#>  1         1 9999990_1 SNP_higher_p…       48            0 A          T         
-#>  2        17 9999911   SNP_higher_p…       88            0 A          C         
-#>  3        27 9999834   SNP_higher_p…       45            0 A          G         
-#>  4        80 9999438_1 SNP_higher_p…       32            0 A          G         
-#>  5        84 9999435_1 SNP_higher_p…       97            0 A          G         
-#>  6       139 9999075_5 SNP_higher_p…       68            0 T          G         
-#>  7       229 9998494   SNP_higher_p…       56            0 A          T         
-#>  8       241 9998381_2 SNP_higher_p…       90            0 C          G         
-#>  9       273 9998205_1 SNP_higher_p…       46            0 T          C         
-#> 10       275 9998180   SNP_higher_p…       63            0 C          T         
+#>  1         6 9999990_1 SNP_higher_p…       48            0 A          T         
+#>  2        80 9999911   SNP_higher_p…       88            0 A          C         
+#>  3       146 9999834   SNP_higher_p…       45            0 A          G         
+#>  4       448 9999438_1 SNP_higher_p…       32            0 A          G         
+#>  5       454 9999435_1 SNP_higher_p…       97            0 A          G         
+#>  6       715 9999075_5 SNP_higher_p…       68            0 T          G         
+#>  7      1142 9998494   SNP_higher_p…       56            0 A          T         
+#>  8      1216 9998381_2 SNP_higher_p…       90            0 C          G         
+#>  9      1356 9998205_1 SNP_higher_p…       46            0 T          C         
+#> 10      1370 9998180   SNP_higher_p…       63            0 C          T         
 #> # ℹ 151,223 more rows
 #> # ℹ 1 more variable: freq_diff <dbl>
 ```
@@ -332,16 +313,16 @@ top_10
 #> # A tibble: 10 × 7
 #>    big_index name      chromosome    position genetic_dist allele_ref allele_alt
 #>        <int> <chr>     <chr>            <int>        <dbl> <chr>      <chr>     
-#>  1         1 9999990_1 SNP_higher_p…       48            0 A          T         
-#>  2        17 9999911   SNP_higher_p…       88            0 A          C         
-#>  3        27 9999834   SNP_higher_p…       45            0 A          G         
-#>  4        80 9999438_1 SNP_higher_p…       32            0 A          G         
-#>  5        84 9999435_1 SNP_higher_p…       97            0 A          G         
-#>  6       139 9999075_5 SNP_higher_p…       68            0 T          G         
-#>  7       229 9998494   SNP_higher_p…       56            0 A          T         
-#>  8       241 9998381_2 SNP_higher_p…       90            0 C          G         
-#>  9       273 9998205_1 SNP_higher_p…       46            0 T          C         
-#> 10       275 9998180   SNP_higher_p…       63            0 C          T
+#>  1         6 9999990_1 SNP_higher_p…       48            0 A          T         
+#>  2        80 9999911   SNP_higher_p…       88            0 A          C         
+#>  3       146 9999834   SNP_higher_p…       45            0 A          G         
+#>  4       448 9999438_1 SNP_higher_p…       32            0 A          G         
+#>  5       454 9999435_1 SNP_higher_p…       97            0 A          G         
+#>  6       715 9999075_5 SNP_higher_p…       68            0 T          G         
+#>  7      1142 9998494   SNP_higher_p…       56            0 A          T         
+#>  8      1216 9998381_2 SNP_higher_p…       90            0 C          G         
+#>  9      1356 9998205_1 SNP_higher_p…       46            0 T          C         
+#> 10      1370 9998180   SNP_higher_p…       63            0 C          T
 ```
 
 ## Summaries by RAD locus
@@ -405,16 +386,16 @@ show_loci(rad_hits)
 #> # A tibble: 151,233 × 7
 #>    big_index name      chromosome    position genetic_dist allele_ref allele_alt
 #>        <int> <chr>     <fct>            <int>        <dbl> <chr>      <chr>     
-#>  1         1 9999990_1 SNP_higher_p…       48            0 A          T         
-#>  2        17 9999911   SNP_higher_p…       88            0 A          C         
-#>  3        27 9999834   SNP_higher_p…       45            0 A          G         
-#>  4        80 9999438_1 SNP_higher_p…       32            0 A          G         
-#>  5        84 9999435_1 SNP_higher_p…       97            0 A          G         
-#>  6       139 9999075_5 SNP_higher_p…       68            0 T          G         
-#>  7       229 9998494   SNP_higher_p…       56            0 A          T         
-#>  8       241 9998381_2 SNP_higher_p…       90            0 C          G         
-#>  9       273 9998205_1 SNP_higher_p…       46            0 T          C         
-#> 10       275 9998180   SNP_higher_p…       63            0 C          T         
+#>  1         6 9999990_1 SNP_higher_p…       48            0 A          T         
+#>  2        80 9999911   SNP_higher_p…       88            0 A          C         
+#>  3       146 9999834   SNP_higher_p…       45            0 A          G         
+#>  4       448 9999438_1 SNP_higher_p…       32            0 A          G         
+#>  5       454 9999435_1 SNP_higher_p…       97            0 A          G         
+#>  6       715 9999075_5 SNP_higher_p…       68            0 T          G         
+#>  7      1142 9998494   SNP_higher_p…       56            0 A          T         
+#>  8      1216 9998381_2 SNP_higher_p…       90            0 C          G         
+#>  9      1356 9998205_1 SNP_higher_p…       46            0 T          C         
+#> 10      1370 9998180   SNP_higher_p…       63            0 C          T         
 #> # ℹ 151,223 more rows
 ```
 
@@ -422,19 +403,18 @@ show_loci(rad_hits)
 
 | step                    | time_s | peak_memory_mb |
 |:------------------------|-------:|---------------:|
-| read_default            |  37.95 |           3694 |
-| read_names_as_int       |  19.52 |           2552 |
-| read_chromosomes_as_int |  20.67 |           2410 |
-| read_both_as_int        |  12.90 |           1188 |
-| load_default            |  19.23 |           3755 |
-| load_both_as_int        |   3.20 |           1272 |
-| loci_qc                 |   0.47 |           1786 |
-| update_backingfile      |   2.02 |           1030 |
-| scan                    |   0.06 |            813 |
-| lookup_first            |   0.22 |            800 |
-| lookup_again            |   0.11 |            802 |
-| lookup_chromosomes      |   0.02 |            867 |
-| restore                 |   0.96 |           1359 |
+| read_default            |  37.73 |           3708 |
+| read_names_as_int       |  19.89 |           2552 |
+| read_chromosomes_as_int |  19.93 |           2410 |
+| read_both_as_int        |  12.70 |           1188 |
+| load_default            |  18.00 |           3755 |
+| load_both_as_int        |   3.10 |           1272 |
+| loci_qc                 |   0.44 |           1786 |
+| scan                    |   0.08 |            811 |
+| lookup_first            |   0.65 |            798 |
+| lookup_again            |   0.11 |            800 |
+| lookup_chromosomes      |   0.02 |            865 |
+| restore                 |   0.37 |            879 |
 
 `peak_memory_mb` is the memory used by R; the genotypes are in the
 backing files, on disk, and are read a block at a time by the functions

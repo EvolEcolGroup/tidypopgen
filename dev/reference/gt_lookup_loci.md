@@ -82,7 +82,11 @@ factor or a character vector) are returned as a character vector.
 
 `gt_restore_loci()` returns `.x`, with the original names in its loci
 table (as if it had been read without the integer options: names as a
-character vector, and chromosomes as a factor). It does not save it: use
+character vector, and chromosomes as a factor). The levels of the factor
+are the chromosomes of the loci in `.x` (unused levels are dropped, as
+by [`droplevels()`](https://rdrr.io/r/base/droplevels.html)), so that
+restoring a few loci of data with millions of chromosomes is quick. It
+does not save it: use
 [`gt_save()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.md).
 
 ## Details

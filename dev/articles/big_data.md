@@ -1,22 +1,21 @@
-# Working with big data
+# Working with large VCFs
 
 This vignette will demonstrate how to work with large datasets in
-tidypopgen.
+tidypopgen, including whole-genome data. For this type of data,
+tidypopgen implements an option to minimise the memory footprint of very
+large datasets. As a large chunk of memory is occupied by loci names,
+loci names can be stored as integers rather than character strings (with
+`names_as_int = TRUE`), reducing the memory used by the gen_tibble
+object. This is the default of
+[`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md),
+which we use below to merge many VCF files into a single gen_tibble, and
+an option of
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md).
 
-This includes whole-genome data. *Note* that tidypopgen only handles
-variant sites, so if you are using a whole-genome dataset make sure it
-has been previously subsetted to variant sites only. Think very
-carefully before merging this kind of data during your pipeline!
-
-The latest version of tidypopgen has implemented a new option to
-minimise the memory footprint of very large datasets. As a large chunk
-of memory is occupied by loci names, the
-[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
-function now offers the user the option to switch loci names from
-character strings to integers, reducing the memory used by the
-gen_tibble object.
-
-## Getting the data
+*Note* that tidypopgen only handles variant sites, so if you are using a
+whole-genome dataset make sure it has been previously subsetted to
+variant sites only. Think very carefully before merging this kind of
+data during your pipeline! \# Getting the data
 
 ### Downloading the SGDP data
 
@@ -39,34 +38,22 @@ fully public individuals from each region in the SGDP metadata.
 SGDP provides a VCF for each individual, but distributes them as a
 single 57 GB archive containing all 279 public individuals. The shell
 script `create_sgdp_subset_s02.sh` downloads only the parts of the
-archive that hold our 50 individuals (about 10.8 GB), checks them
-against the checksums provided by SGDP, and merges them into a single
-VCF, `all_subset.vcf.gz`, with
-[bcftools](https://samtools.github.io/bcftools/). You will need
-`bcftools` and `curl` installed and available on your `PATH`. From the
-root of a copy of the tidypopgen repository, run:
+archive that hold our 50 individuals (about 10.8 GB), and checks them
+against the checksums provided by SGDP. You will need `curl` installed
+and available on your `PATH`. From the root of a copy of the tidypopgen
+repository, run:
 
 ``` bash
 bash data-raw/create_sgdp_subset_s02.sh vignettes/articles/data/sgdp
 ```
 
-This writes `all_subset.vcf.gz` and its index to
-`vignettes/articles/data/sgdp/`, which is where we read it from below
-(the paths in this article are relative to `vignettes/articles/`). The
-individual VCFs are kept in `vignettes/articles/data/sgdp/sgdp_vcfs/`,
-so that an interrupted download can be resumed by running the script
-again; once the merged VCF has been created, they can be deleted.
+This writes the 50 VCFs to `vignettes/articles/data/sgdp/sgdp_vcfs/`,
+which is where we read them from below (the paths in this article are
+relative to `vignettes/articles/`). An interrupted download can be
+resumed by running the script again. We do not need any other tool: we
+merge the VCFs directly in R, with tidypopgen.
 
-Note that each SGDP VCF only contains the sites at which that individual
-carries a non-reference allele. When merging, a site that is absent from
-an individual’s VCF is therefore set to homozygous for the reference
-allele (with the `--missing-to-ref` option of `bcftools merge`). Without
-this option, every homozygous reference genotype would be recorded as
-missing. The cost is that a site that was not sequenced in an individual
-is also set to homozygous reference, which is a reasonable approximation
-for these high-coverage genomes.
-
-### Reading a large VCF into a gen_tibble
+### Setting up
 
 Now that we have our data we can begin by loading the necessary
 libraries:
@@ -87,62 +74,6 @@ library(tidypopgen)
 library(ggplot2)
 ```
 
-In many descriptive population genetic analyses, where the end goal is
-to visualise populations (e.g., PCA) or calculate a summary statistic
-(e.g. F_(ST)), the names of your loci are not needed for the analysis.
-In these cases, we can save a lot of memory (over half of the memory
-footprint of the `gen_tibble`) by switching the loci names from strings
-to integers.
-
-This option is only enabled when loading from a .vcf file. To do this,
-we need to set parameter `names_as_int` to TRUE when creating the
-gen_tibble:
-
-``` r
-
-sgdp <-
-  gen_tibble("data/sgdp/all_subset.vcf.gz",
-    quiet = TRUE,
-    backingfile = "data/sgdp/all_subset",
-    names_as_int = TRUE
-  )
-```
-
-When we now call our loci tibble with
-[`show_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_loci.md),
-we can see that the loci names are now integers:
-
-``` r
-
-show_loci(sgdp)
-#> # A tibble: 20,728,532 × 7
-#>    big_index  name chromosome position genetic_dist allele_ref allele_alt
-#>        <int> <int> <fct>         <int>        <dbl> <chr>      <chr>     
-#>  1         1     1 1             10109            0 A          T         
-#>  2         2     2 1             10177            0 A          C         
-#>  3         3     3 1             10180            0 T          C         
-#>  4         4     4 1             10231            0 C          A         
-#>  5         5     5 1             10234            0 C          G         
-#>  6         6     6 1             10241            0 T          A         
-#>  7         7     7 1             10248            0 A          T         
-#>  8         8     8 1             10250            0 A          C         
-#>  9         9     9 1             10255            0 A          T         
-#> 10        10    10 1             10257            0 A          C         
-#> # ℹ 20,728,522 more rows
-```
-
-The rsID’s of each SNP have been removed, but all other metadata
-(chromosome, position, genetic distance, and alleles) are retained. We
-can check the memory footprint of the gen_tibble using:
-
-``` r
-
-format(object.size(sgdp), units = "auto", digits = 2)
-#> [1] "790.76 Mb"
-```
-
-### Setting up cores
-
 Because tidypopgen utilizes disk storage through file-backed matrices
 (FBM), we can run the following pipeline on a modern laptop without
 running out of RAM. Here, we use a machine with a GenuineIntel, 13th Gen
@@ -162,6 +93,117 @@ data.table::setDTthreads(n_cores)
 bigparallelr::set_blas_ncores(n_cores)
 ```
 
+### Merging the VCFs into a gen_tibble
+
+Each SGDP VCF only contains the sites at which that individual carries a
+non-reference allele. We merge them into a single `gen_tibble` with
+[`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md),
+keeping all the sites found in any of the files (`variants = "union"`).
+A site that is absent from an individual’s VCF is set to homozygous for
+the reference allele (`missing_to_ref = TRUE`, the equivalent of
+`bcftools merge --missing-to-ref`). Without this option, every
+homozygous reference genotype would be recorded as missing. The cost is
+that a site that was not sequenced in an individual is also set to
+homozygous reference, which is a reasonable approximation for these
+high-coverage genomes.
+
+[`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+reads each VCF twice: once to match its loci with those of the other
+files, and once to write its genotypes straight into the backing file of
+the merged `gen_tibble`, so that no merged VCF is ever written to disk.
+With `n_cores`, the bgzipped VCFs are decompressed, and their genotypes
+parsed, in parallel. (If your data are instead split by chromosome, with
+one VCF per chromosome for the same individuals,
+[`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md)
+reads them into a single `gen_tibble` in the same way, as
+`bcftools concat` would.)
+
+In many descriptive population genetic analyses, where the end goal is
+to visualise populations (e.g., PCA) or calculate a summary statistic
+(e.g. F_(ST)), the names of your loci are not needed for the analysis.
+In these cases, we can save a lot of memory (over half of the memory
+footprint of the `gen_tibble`) by switching the loci names from strings
+to integers.
+[`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+does this by default (`names_as_int = TRUE`). *Note* that this differs
+from
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md),
+where `names_as_int` defaults to FALSE: to read a single large VCF with
+integer loci names, set `names_as_int = TRUE` in
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md).
+Conversely, set `names_as_int = FALSE` in
+[`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+to keep the IDs (e.g. rsIDs) of the VCF files. The IDs are not lost with
+integer names:
+[`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+writes them, with the chromosome and position of each locus, to a
+sidecar file next to the backing file (`.loci.tsv`), from which
+[`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+gives back the names of any loci (e.g. the hits of a scan), and
+[`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+puts them back into the `gen_tibble` (see the article on [large RAD-seq
+datasets](https://evolecolgroup.github.io/tidypopgen/dev/articles/rad_seq.md)).
+
+For RAD-seq data assembled de novo, each RAD locus is its own
+chromosome, so the names of the chromosomes also take a lot of memory:
+set `chromosomes_as_int = TRUE` as well as `names_as_int = TRUE` (see
+the article on [large RAD-seq
+datasets](https://evolecolgroup.github.io/tidypopgen/dev/articles/rad_seq.md)).
+
+``` r
+
+sgdp_files <- list.files("data/sgdp/sgdp_vcfs",
+  pattern = "\\.vcf\\.gz$",
+  full.names = TRUE
+)
+sgdp <- gt_merge_vcfs(sgdp_files,
+  variants = "union",
+  missing_to_ref = TRUE,
+  backingfile = "data/sgdp/all_subset",
+  n_cores = n_cores,
+  quiet = TRUE
+)
+```
+
+Merging the VCFs is the slowest step of this article (see the
+[performance summary](#performance-summary) at the end), but it only
+needs to be done once: the merged `gen_tibble` is saved alongside its
+backing file, and can be loaded again in a later session with
+[`gt_load()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.md).
+
+When we now call our loci tibble with
+[`show_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_loci.md),
+we can see that the loci names are now integers:
+
+``` r
+
+show_loci(sgdp)
+#> # A tibble: 20,761,293 × 7
+#>    big_index  name chromosome position genetic_dist allele_ref allele_alt
+#>        <int> <int> <fct>         <int>        <dbl> <chr>      <chr>     
+#>  1         1     1 1             10109            0 A          T         
+#>  2         2     2 1             10177            0 A          C         
+#>  3         3     3 1             10180            0 T          C         
+#>  4         4     4 1             10231            0 C          A         
+#>  5         5     5 1             10234            0 C          G         
+#>  6         6     6 1             10241            0 T          A         
+#>  7         7     7 1             10248            0 A          T         
+#>  8         8     8 1             10250            0 A          C         
+#>  9         9     9 1             10255            0 A          T         
+#> 10        10    10 1             10257            0 A          C         
+#> # ℹ 20,761,283 more rows
+```
+
+The rsID’s of each SNP have been removed, but all other metadata
+(chromosome, position, genetic distance, and alleles) are retained. We
+can check the memory footprint of the gen_tibble using:
+
+``` r
+
+format(object.size(sgdp), units = "auto", digits = 2)
+#> [1] "792.01 Mb"
+```
+
 ## Quality control for large datasets
 
 ### Individual and loci reports
@@ -174,8 +216,6 @@ All the normal functionality of tidypopgen is preserved, as our
 sgdp_indiv_rep <- qc_report_indiv(sgdp)
 ```
 
-indiv_report: 537ms
-
 ``` r
 
 sgdp <- sgdp %>% group_by(Region)
@@ -183,19 +223,17 @@ sgdp_loci_rep <- qc_report_loci(sgdp)
 sgdp <- sgdp %>% ungroup()
 ```
 
-loci_report: 406ms
-
 However, it is important to be mindful that analyses on very large
 datasets will produce large outputs:
 
 ``` r
 
 format(object.size(sgdp_loci_rep), units = "auto", digits = 2)
-#> [1] "553.51 Mb"
+#> [1] "554.39 Mb"
 ```
 
-In this case, a loci report on 20728532 loci for 50 individuals occupies
-approximately 553.51 Mb of memory.
+In this case, a loci report on 20761293 loci for 50 individuals occupies
+approximately 554.39 Mb of memory.
 
 Let’s plot the overview of the loci report:
 
@@ -249,10 +287,8 @@ greater than 5%:
 sgdp <- sgdp %>%
   select_loci_if(loci_maf(genotypes) > 0.05)
 cat("Loci remaining:", count_loci(sgdp))
-#> Loci remaining: 7456643
+#> Loci remaining: 7482060
 ```
-
-maf_filter: 463ms
 
 With other datasets, we would also remove loci with too many missing
 genotypes (e.g. with
@@ -260,23 +296,11 @@ genotypes (e.g. with
 the remaining missing genotypes with
 [`gt_impute_simple()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.md),
 as LD clumping and PCA do not accept missing values. Our dataset has no
-missing genotypes, so we can skip both steps.
-
-### Updating the backing file
-
-After removing loci, we update the file backing matrix with
-[`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md),
-so that it only contains the loci that we kept:
-
-``` r
-
-sgdp <- gt_update_backingfile(sgdp, quiet = TRUE,
-                              backingfile = tempfile())
-```
-
-update_backingfile: 6.1s
-
-This will help us with the next step (LD clumping).
+missing genotypes, so we can skip both steps. There is no need to
+rewrite the backing file with
+[`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md)
+after filtering: the following steps only use the loci that are left in
+the `gen_tibble`.
 
 ### LD clumping
 
@@ -295,10 +319,8 @@ sgdp <- sgdp %>%
     thr_r2 = 0.2
   ))
 cat("Loci remaining:", count_loci(sgdp))
-#> Loci remaining: 507481
+#> Loci remaining: 511652
 ```
-
-ld_clump: 7.9s
 
 ## Analysis
 
@@ -312,8 +334,6 @@ plotting a PCA:
 sgdp_pca <- sgdp %>% gt_pca_partialSVD()
 ```
 
-pca: 612ms
-
 ``` r
 
 autoplot(sgdp_pca, type = "scores") +
@@ -325,23 +345,24 @@ autoplot(sgdp_pca, type = "scores") +
 
 plot of chunk PCA
 
-Our PCA separates the five regions. PC1 (5.23% of the variance) runs
-from the African individuals on the left, through West Eurasia, Oceania
-and East Asia, to the American individuals on the right, and PC2 (3.86%)
-separates the Oceanian and East Asian individuals at the top from the
-American individuals at the bottom. The individuals from America, West
-Eurasia and East Asia form fairly tight clusters, whereas the African
-individuals are spread out along PC1: the Mbuti, Ju/’hoan North, Yoruba,
-Mandenka and Dinka individuals are on the far left, followed by the
-Masai and Somali individuals from East Africa, while the two Mozabite
-individuals from Algeria lie close to the West Eurasian cluster. This is
-consistent with North and East African populations carrying some West
-Eurasian-related ancestry. The Oceanian individuals are also spread out:
-the Papuan, Bougainville and Australian individuals are at the top, the
-Maori individual is closer to the centre of the plot, and the Hawaiian
-individual and the two Dusun individuals (from Borneo) lie within the
-East Asian cluster. This reflects the Austronesian ancestry of these
-populations, which is largely related to East Asian populations.
+Our PCA separates the five regions. PC1 (5.20% of the variance) runs
+from the American individuals on the left, through East Asia, Oceania
+and West Eurasia, to the African individuals on the right, and PC2
+(3.85%) separates the American individuals at the top from the Oceanian
+and East Asian individuals at the bottom. The individuals from America,
+West Eurasia and East Asia form fairly tight clusters, whereas the
+African individuals are spread out along PC1: the Mbuti, Ju/’hoan North,
+Yoruba, Mandenka and Dinka individuals are on the far right, followed by
+the Masai and Somali individuals from East Africa, while the two
+Mozabite individuals from Algeria lie close to the West Eurasian
+cluster. This is consistent with North and East African populations
+carrying some West Eurasian-related ancestry. The Oceanian individuals
+are also spread out: the Papuan, Bougainville and Australian individuals
+are at the bottom, the Maori individual is closer to the centre of the
+plot, and the Hawaiian individual and the two Dusun individuals (from
+Borneo) lie within the East Asian cluster. This reflects the
+Austronesian ancestry of these populations, which is largely related to
+East Asian populations.
 
 ### DAPC
 
@@ -354,8 +375,6 @@ sgdp_dapc <- gt_dapc(sgdp_pca,
   pop = as.factor(sgdp$Region)
 )
 ```
-
-dapc: 29ms
 
 ``` r
 
@@ -374,7 +393,7 @@ are consistent with the PCA above: the two Mozabite individuals are
 assigned to the West Eurasian group (with probabilities of 0.93 and
 0.99), the two Dusun individuals and the Hawaiian individual are
 assigned to the East Asian group (with probabilities of 0.96, 0.98 and
-0.91), and the Maori individual has a probability of 0.10 of East Asian
+0.90), and the Maori individual has a probability of 0.09 of East Asian
 membership. These individuals may have admixed ancestry, or (as for the
 Dusun) be closer to the East Asian populations than to the other
 Oceanian populations in our sample.
@@ -409,14 +428,15 @@ autoplot(pairwise_fst,
   )
 ```
 
-![plot of chunk
-pairwise_fst](figure/big_data/pairwise_fst-1.png)pairwise_fst: 188ms
+![plot of chunk pairwise_fst](figure/big_data/pairwise_fst-1.png)
+
+plot of chunk pairwise_fst
 
 The pairwise F_(ST) values are all small (between 0.02 and 0.08), as is
 typical of human populations. America is the most differentiated region,
 and Africa and America are the most differentiated pair (F_(ST) =
-0.079); America is closest to East Asia (0.043). East Asia and Oceania
-are the least differentiated pair (0.017), reflecting the East
+0.079); America is closest to East Asia (0.044). East Asia and Oceania
+are the least differentiated pair (0.018), reflecting the East
 Asian-related ancestry of the Dusun, Hawaiian and Maori individuals in
 our Oceanian sample. Africa is closest to West Eurasia (0.038), which
 partly reflects the West Eurasian-related ancestry of the Mozabite,
@@ -425,28 +445,54 @@ Somali and Masai individuals in our African sample. Note that with only
 
 ## Performance summary
 
-Here is a summary of the time taken (in seconds) to perform each step
-using a large dataset:
+Here is a summary of the time taken (in seconds) by each step on our
+large dataset, and of the peak memory used by R during each step (in MB,
+including the objects that were already in memory, such as the
+`gen_tibble` itself):
 
-    #>                 step  time
-    #> 1       indiv_report  0.54
-    #> 2        loci_report  0.41
-    #> 3         maf_filter  0.46
-    #> 4 update_backingfile  6.06
-    #> 5           ld_clump  7.86
-    #> 6                pca  0.61
-    #> 7               dapc  0.03
-    #> 8       pairwise_fst  0.19
-    #> 9              Total 16.16
+    #>                              step time_s peak_memory_mb
+    #> 1                      merge_vcfs  65.99           1991
+    #> 2                    indiv_report   0.44           1115
+    #> 3                     loci_report   0.28           1678
+    #> 4                      maf_filter   0.37           1969
+    #> 5                        ld_clump   8.56           2042
+    #> 6                             pca   0.66            979
+    #> 7                            dapc   0.03            415
+    #> 8                    pairwise_fst   0.17            374
+    #> 9 Total (time) / maximum (memory)  76.50           2042
+
+The memory is measured with [`gc()`](https://rdrr.io/r/base/gc.html),
+and only covers memory allocated by R. It does not include the
+genotypes, which stay in the backing file on disk (the operating system
+caches the parts that are read, but this cache can be freed whenever
+memory is needed), nor memory allocated directly by compiled code (for
+example, by the VCF parser while it reads the file).
 
 ## Key takeaways
 
 - **Large data don’t need a large machine.** `gen_tibble` objects are
   file-backed, so the genotypes stay on disk and only what you are
   working on is held in memory.
-- **Use `names_as_int = TRUE` when reading a VCF** to reduce the memory
-  taken by locus names. The trade-off is that the original locus IDs are
-  not kept (chromosome and position are), so
+- **Merge many VCFs directly in R.**
+  [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+  (files with different individuals, as `bcftools merge`) and
+  [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md)
+  (files with the same individuals and different chromosomes, as
+  `bcftools concat`) read them straight into a single `gen_tibble`,
+  without writing a merged VCF.
+- **Use integer locus names** to reduce the memory they take. They are
+  the default of
+  [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
+  and
+  [`gt_concat_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_concat_vcfs.md),
+  while
+  [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+  needs `names_as_int = TRUE`. The original locus IDs are kept on disk,
+  in a sidecar file next to the backing file, from which
+  [`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  and
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  get them back; integer names can not be matched across datasets, so
   [`rbind()`](https://rdrr.io/r/base/cbind.html) matches loci by
   chromosome and position.
 - **Set your cores.** Limit BLAS and `data.table` threads at the start,

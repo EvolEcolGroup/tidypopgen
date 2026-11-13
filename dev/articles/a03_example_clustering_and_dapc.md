@@ -1,4 +1,4 @@
-# Population genetic analysis with tidypopgen
+# Population genetic analysis
 
 ### An example workflow with real data
 
@@ -30,6 +30,17 @@ vcf_path <-
 anole_gt <-
   gen_tibble(vcf_path, quiet = TRUE, backingfile = tempfile("anolis_"))
 ```
+
+This *VCF* is small, so we read it with the default options. For large
+*VCF* files, set `names_as_int = TRUE` in
+[`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+to store the names of the loci as integers, which greatly reduces the
+memory used by the `gen_tibble` (see the article [Working with large
+VCFs](https://evolecolgroup.github.io/tidypopgen/articles/big_data.html)).
+For RAD-seq data assembled de novo, where each RAD locus is its own
+chromosome, also set `chromosomes_as_int = TRUE` (see the article
+[Working with large RAD-seq
+datasets](https://evolecolgroup.github.io/tidypopgen/articles/rad_seq.html)).
 
 Now let’s inspect our `gen_tibble`:
 
