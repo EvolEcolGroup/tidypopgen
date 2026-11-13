@@ -36,10 +36,11 @@ using namespace Rcpp;
  * the first allele of the locus) and `two` (an allele equals the second):
  * one only gives 0, both 1, two only 2, and neither (both alleles missing)
  * is missing. As in snpStats, a genotype with a single missing allele counts
- * its other allele (e.g. "A 0" is coded as "A A"), and a third allele only
- * makes a locus multi-allelic if neither earlier allele of the genotype
- * matched (e.g. "C A", with alleles A and G, does, but "A C" does not, and is
- * coded as "A A"); we keep these quirks so that the results do not change.
+ * its other allele (e.g. "A 0" is coded as "A A"; we keep this quirk so
+ * that the results do not change). Any third allele, in either position of a
+ * genotype (e.g. "C A" or "A C", with alleles A and G), makes the locus
+ * multi-allelic (snpStats, and the previous reader, missed it in the second
+ * position if the first allele matched, and coded "A C" as "A A").
  *
  * The lines are read a chunk at a time (see VcfLineReader in line_reader.h).
  * The lines of a chunk are split in parallel (with n_threads threads), each
@@ -388,12 +389,11 @@ List ped_to_fbm(std::string filename, Environment BM,
               }
               if (ak == a2) {
                 two = true;
+              } else {
+                // a third allele (in either position of the genotype)
+                // makes the locus multi-allelic
+                multi = true;
               }
-            }
-            // a third allele (unless an earlier allele of this genotype
-            // matched, see above) makes the locus multi-allelic
-            if (!(one || two)) {
-              multi = true;
             }
           }
           out[b] = one ? (two ? 1 : 0) : (two ? 2 : na_byte);

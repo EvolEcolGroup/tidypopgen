@@ -27,6 +27,8 @@
 
 ## Bug fixes
 
+* `gen_tibble()` on .ped files: a third allele always flags the locus as
+  multi-allelic
 * `gen_tibble()` with the "cpp" parser: fix malformed VCF files read as wrong
   genotypes (now an error), missing chromosomes (now `NA`), and backing files
   left behind on errors
