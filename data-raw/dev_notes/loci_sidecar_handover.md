@@ -310,16 +310,22 @@ the first line of every 1024th line.
 - `vignettes/articles/big_data.Rmd` (the knitted version) is out of date.
   It was not re-knitted after `3d0f5dfb`, and the source now mentions the
   sidecars. Re-knitting needs the SGDP data (`precompile_big_data.R`).
-- `test_vcf_int.R` errored once in a run of several test files. It passed in
-  five reruns and in the full suite, and the error was not captured. Worth
-  watching on CI.
+- `test_vcf_int.R` errored once in a run of several test files (and again on
+  CI: "File '...bk' already exists" in `gt_pca_autoSVD()`). Fixed: bigsnpr's
+  clumping leaked a temporary FBM per chromosome (1341 for the anolis data)
+  into `tempdir()`, where `tempfile()`, which does not check `<name>.bk`,
+  could draw the name of one again. These temporaries now go to a private
+  directory, deleted on exit (`with_private_fbm_dir()`).
 - `R CMD check` has not been run. The examples of the new functions (in
   `man/gt_lookup_loci.Rd`) do run.
 - Windows: the 64-bit seeks (`_fseeki64`) and the binary-mode files have
   not been built on Windows yet. CI will tell.
-- `gt_get_file_names()` does not list the sidecars. `gt_save()` lists them
-  in its messages, but its return value is unchanged, so as not to break
-  code that indexes it.
-- The ROH output with integer chromosomes is ordered by code, not by name
-  (as `order()` on integers would). Its `chromosome_length` attribute also
-  has codes.
+- Done (branch `sidecar_followups`): `gt_get_file_names()`, and so the value
+  of `gt_save()`, list the sidecars that the `gen_tibble` uses and that
+  exist, after the *.rds* and *.bk* files (which keep positions 1 and 2).
+- Done (branch `sidecar_followups`): with a chromosome sidecar,
+  `windows_indiv_roh()` and `gt_roh_window()` turn integer chromosomes into
+  the factor of a read without `chromosomes_as_int`, so the runs are ordered
+  by name and `chromosome_length` has names; `gt_roh_loci()` and
+  `gt_roh_islands()` take the names from the runs. The outputs are identical
+  to those without `chromosomes_as_int` (`test_window_indiv_roh.R`).

@@ -1,3 +1,6 @@
+# delete the backing files of this file when it ends (see helper_cleanup.R)
+local_tempdir_cleanup()
+
 anolis_vcf <- system.file(
   "extdata/anolis/punctatus_t70_s10_n46_filtered.recode.vcf.gz",
   package = "tidypopgen"
@@ -414,6 +417,44 @@ test_that("gt_save lists the sidecars to keep with the files", {
   )
 })
 
+test_that("gt_get_file_names and gt_save list the sidecars in use", {
+  int_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"),
+    names_as_int = TRUE, chromosomes_as_int = TRUE
+  )
+  files <- gt_get_file_names(int_gt)
+  # the .rds and .bk files keep their positions, the sidecars follow (loci
+  # first), and all of them exist
+  expect_length(files, 4)
+  expect_match(files[1], "\\.rds$")
+  expect_match(files[2], "\\.bk$")
+  expect_identical(
+    files[3:4],
+    c(loci_sidecar_path(int_gt), chromosomes_sidecar_path(int_gt))
+  )
+  expect_true(all(file.exists(files)))
+  # the genotypes column gives the same files
+  expect_identical(gt_get_file_names(int_gt$genotypes), files)
+  # gt_save() returns the .gt file, then the same files
+  expect_identical(gt_save(int_gt, quiet = TRUE)[-1], files)
+
+  # only the sidecar in use is listed
+  name_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_"), names_as_int = TRUE
+  )
+  expect_identical(
+    gt_get_file_names(name_gt)[-(1:2)], loci_sidecar_path(name_gt)
+  )
+  # without integer names or chromosomes, only the two files of the FBM
+  plain_gt <- gen_tibble(small_vcf,
+    quiet = TRUE, backingfile = tempfile("small_")
+  )
+  expect_length(gt_get_file_names(plain_gt), 2)
+  # a sidecar that is missing is not listed
+  unlink(loci_sidecar_path(name_gt))
+  expect_length(gt_get_file_names(name_gt), 2)
+})
+
 test_that("very long names are kept by the sidecar", {
   # a name of 2 MB, longer than the buffer of the sidecar reader (1 MB)
   long_name <- strrep("x", 2^21)
@@ -511,7 +552,8 @@ test_that("large chromosome codes are grouped as their names", {
   )
   expect_identical(ordered[1, ], ordered[2, ])
   expect_identical(ordered[1, ], c(TRUE, FALSE, FALSE))
-  # runs of homozygosity are the same, with their codes
+  # runs of homozygosity are the same, with the names of the chromosomes
+  # (from the chromosome sidecar)
   roh_args <- list(
     window_snp = 2, window_het = 0, window_missing = 2, min_snp = 2,
     min_kb = 0, max_kb_per_snp = 1000, n_cores = 1
@@ -519,14 +561,22 @@ test_that("large chromosome codes are grouped as their names", {
   names_roh <- do.call(windows_indiv_roh, c(list(names_gt), roh_args))
   int_roh <- do.call(windows_indiv_roh, c(list(int_gt), roh_args))
   expect_gt(nrow(int_roh), 0)
+  expect_identical(int_roh, names_roh)
+  # without the sidecar, the runs have the codes (sorted as the names here,
+  # as all the names have the same number of digits)
+  unlink(chromosomes_sidecar_path(int_gt))
+  int_roh <- do.call(windows_indiv_roh, c(list(int_gt), roh_args))
   expect_true(all(int_roh$chromosome > 2e8))
-  int_roh$chromosome <- gt_lookup_chromosomes(int_gt, int_roh$chromosome)
-  names_roh$chromosome <- as.character(names_roh$chromosome)
-  sort_runs <- function(x) {
-    attr(x, "chromosome_length") <- NULL
-    as.data.frame(dplyr::arrange(x, .data$id, .data$chromosome, .data$start))
-  }
-  expect_identical(sort_runs(int_roh), sort_runs(names_roh))
+  expect_identical(
+    int_roh$chromosome,
+    as.integer(sub("chr", "", names_roh$chromosome))
+  )
+  # (the attribute chromosome_length has the codes too)
+  expect_equal(
+    dplyr::select(int_roh, -"chromosome"),
+    dplyr::select(names_roh, -"chromosome"),
+    ignore_attr = TRUE
+  )
   # a duplicated locus (the same chromosome and position) is found
   dup <- strsplit(vcf_lines[body[1]], "\t")[[1]]
   dup[3] <- "dup_id"
@@ -785,18 +835,9 @@ test_that("window statistics and runs keep integer chromosomes", {
   names_roh <- do.call(windows_indiv_roh, c(list(names_gt), roh_args))
   int_roh <- do.call(windows_indiv_roh, c(list(int_gt), roh_args))
   expect_gt(nrow(int_roh), 0)
-  expect_true(is.integer(int_roh$chromosome))
-  # the same runs (ordered by the codes of the chromosomes, rather than by
-  # their names)
-  int_roh$chromosome <- gt_lookup_chromosomes(int_gt, int_roh$chromosome)
-  names_roh$chromosome <- as.character(names_roh$chromosome)
-  # (the lengths of the chromosomes, an attribute, have their codes)
-  expect_true(is.integer(attr(int_roh, "chromosome_length")$chromosome))
-  sort_runs <- function(x) {
-    attr(x, "chromosome_length") <- NULL
-    as.data.frame(dplyr::arrange(x, .data$id, .data$chromosome, .data$start))
-  }
-  expect_identical(sort_runs(int_roh), sort_runs(names_roh))
+  # the same runs, in the same order, with the names of the chromosomes
+  # (also in the attribute with the lengths of the chromosomes)
+  expect_identical(int_roh, names_roh)
 })
 
 # three files with different samples, with missing IDs, several chromosomes

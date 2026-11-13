@@ -1,3 +1,6 @@
+# delete the backing files of this file when it ends (see helper_cleanup.R)
+local_tempdir_cleanup()
+
 # small parameters, for the small examples below
 small_par <- list(
   window_snp = 3, min_snp = 2, min_kb = 0, max_kb_per_snp = 50,
@@ -353,4 +356,83 @@ test_that("gt_roh_window is the deprecated version based on detectRUNS", {
     rohet <- gt_roh_window(sim_gt, heterozygosity = TRUE, window_size = 10)
   ))
   expect_identical(names(rohet), names(roh_old))
+})
+
+test_that("the runs are the same with and without chromosomes_as_int", {
+  # four chromosomes, in the VCF in an order that is neither that of their
+  # names (the levels: "1", "10", "2", "X") nor that of their integer codes
+  # (numbers keep their value, and "X" comes after them: 1, 2, 10, 11)
+  set.seed(42)
+  n_per_chrom <- 20
+  chrom_names <- c("2", "10", "1", "X")
+  loci <- data.frame(
+    chrom = rep(chrom_names, each = n_per_chrom),
+    pos = rep(seq_len(n_per_chrom) * 1000, 4),
+    id = paste0("rs", seq_len(4 * n_per_chrom)), ref = "A", alt = "G"
+  )
+  # homozygous genotypes with a few heterozygous ones, which break some runs
+  dosage <- matrix(
+    sample(c(0, 2), 4 * n_per_chrom * 4, replace = TRUE),
+    ncol = 4
+  )
+  dosage[sample(length(dosage), 12)] <- 1
+  genotypes <- matrix(c("0/0", "0/1", "1/1")[dosage + 1], nrow = nrow(dosage))
+  vcf <- write_merge_vcf(paste0("s", 1:4), loci, genotypes)
+  # the same VCF read with names or integer codes of chromosomes (grouped, to
+  # check the group columns too)
+  read_vcf <- function(chromosomes_as_int) {
+    gen_tibble(vcf,
+      quiet = TRUE, backingfile = tempfile("roh_"), parser = "cpp",
+      chromosomes_as_int = chromosomes_as_int
+    ) |>
+      dplyr::mutate(population = c("p1", "p1", "p2", "p2")) |>
+      dplyr::group_by(population)
+  }
+  name_gt <- read_vcf(FALSE)
+  int_gt <- read_vcf(TRUE)
+  expect_true(is.integer(show_loci(int_gt)$chromosome))
+
+  roh_args <- list(window_snp = 5, min_snp = 5, min_kb = 0, n_cores = 1)
+  name_roh <- do.call(windows_indiv_roh, c(list(name_gt), roh_args))
+  int_roh <- do.call(windows_indiv_roh, c(list(int_gt), roh_args))
+  # runs on several chromosomes, so that their order is tested
+  expect_gt(length(unique(name_roh$chromosome)), 2)
+  # the runs, their order and their attributes (chromosome_length holds
+  # names, in the order of the loci) are identical
+  expect_identical(int_roh, name_roh)
+  expect_identical(
+    as.character(attr(int_roh, "chromosome_length")$chromosome),
+    chrom_names
+  )
+
+  # and so are the outputs of the functions that use them
+  expect_identical(gt_roh_froh(int_roh), gt_roh_froh(name_roh))
+  expect_identical(
+    gt_roh_froh(int_roh, by = "chromosome"),
+    gt_roh_froh(name_roh, by = "chromosome")
+  )
+  expect_identical(
+    gt_roh_loci(int_roh, show_loci(int_gt)),
+    gt_roh_loci(name_roh, show_loci(name_gt))
+  )
+  expect_identical(
+    gt_roh_islands(int_roh, show_loci(int_gt), threshold = 0.5),
+    gt_roh_islands(name_roh, show_loci(name_gt), threshold = 0.5)
+  )
+  expect_identical(as_detectRUNS(int_roh), as_detectRUNS(name_roh))
+  # (the chromosomes of a loci table of other data do not match the runs)
+  expect_error(
+    gt_roh_loci(int_roh, show_loci(int_gt)[c(2:80, 1), ]),
+    "loci table"
+  )
+
+  skip_if_not_installed("detectRUNS")
+  expect_identical(
+    suppressWarnings(suppressMessages(
+      gt_roh_window(int_gt, window_size = 5, min_snp = 5)
+    )),
+    suppressWarnings(suppressMessages(
+      gt_roh_window(name_gt, window_size = 5, min_snp = 5)
+    ))
+  )
 })

@@ -159,7 +159,10 @@ loci_ld_clump.vctrs_bigSNP <- function(
   }
 
   # as long as we have more than one individual
-  snp_clump_ids <- bigsnpr::snp_clumping(
+  # (snp_clumping() leaks a temporary FBM per chromosome: keep them in a
+  # private directory, deleted on exit, so that their names cannot clash with
+  # other .bk files; see with_private_fbm_dir())
+  snp_clump_ids <- with_private_fbm_dir(bigsnpr::snp_clumping(
     G = geno_fbm,
     # infos.chr = show_loci(.x)$chr_int, #nolint start
     # TEMP HACK using the info from the bigsnpr object
@@ -172,7 +175,7 @@ loci_ld_clump.vctrs_bigSNP <- function(
     size = size,
     exclude = exclude,
     ncores = n_cores
-  )
+  ))
   to_keep_id <- match(snp_clump_ids, show_loci(.x)$big_index)
 
   if (return_id) {

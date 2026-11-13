@@ -102,8 +102,9 @@
 #' @param n_cores the number of cores used to read a *VCF* file with
 #'   `parser = "cpp"`: the genotypes are parsed in parallel, and a *.vcf.gz*
 #'   file compressed with `bgzip` (as most are) is also decompressed in
-#'   parallel (other gzipped files are decompressed on a single core). It is
-#'   ignored for other formats and for `parser = "vcfR"`.
+#'   parallel (other gzipped files are decompressed on a single core). For
+#'   a PLINK *.ped* file, the lines are split and the genotypes coded in
+#'   parallel. It is ignored for other formats and for `parser = "vcfR"`.
 #' @param valid_alleles a vector of valid allele values; it defaults to 'A','T',
 #'   'C' and 'G'.
 #' @param missing_alleles a vector of values in the BIM file/loci dataframe that
@@ -340,6 +341,7 @@ gen_tibble.character <-
         missing_alleles = missing_alleles,
         backingfile = backingfile,
         allow_duplicates = allow_duplicates,
+        n_cores = n_cores,
         quiet = quiet
       )
     } else if (tolower(file_ext(x)) == "geno") {
@@ -371,9 +373,11 @@ gen_tibble.character <-
     # check alleles
     if (has_genotypes_without_alleles(x_gt)) {
       # clean up files if we are stopping (dropping the gen_tibble first,
-      # so that its backing file can be unmapped, see remove_fbm_files())
+      # so that its backing file can be unmapped, see remove_fbm_files());
+      # the sidecars are listed by path, as gt_get_file_names() would list
+      # them too (and twice) only when the loci table uses them
       files <- c(
-        gt_get_file_names(x_gt), loci_sidecar_path(x_gt),
+        fbm_file_names(x_gt), loci_sidecar_path(x_gt),
         chromosomes_sidecar_path(x_gt)
       )
       rm(x_gt)
@@ -881,24 +885,44 @@ cast_chromosome_to_int <- function(chromosome) {
   if (is.character(chromosome)) {
     # attempt to strip chr from the chromosome
     strip_chr <- function(x) {
-      gsub("^(chromosome_|chr_|chromosome|chr)", "", x, ignore.case = TRUE)
+      # only names starting with "c" or "C" can be stripped, so the (slow)
+      # regular expression is only applied to them: with millions of
+      # chromosomes (e.g. RAD loci), gsub() on all of them takes seconds
+      maybe_chr <- which(startsWith(x, "c") | startsWith(x, "C"))
+      if (length(maybe_chr) > 0) {
+        x[maybe_chr] <- gsub("^(chromosome_|chr_|chromosome|chr)", "",
+          x[maybe_chr],
+          ignore.case = TRUE
+        )
+      }
+      x
     }
     chromosome <- strip_chr(chromosome)
-    # numeric names keep their own value
-    is_numeric <- grepl("^[0-9]+$", chromosome)
+    # numeric names keep their own value (PCRE is several times faster than
+    # the default engine here; "\\z" is the very end of the string, as "$" is
+    # for the default engine, whereas "$" in PCRE also matches before a final
+    # newline)
+    is_numeric <- grepl("^[0-9]+\\z", chromosome, perl = TRUE)
     chr_int <- rep(NA_integer_, length(chromosome))
     chr_int[is_numeric] <- as.integer(chromosome[is_numeric])
     # other names are coded above the largest numeric value, in order of first
     # appearance (or in the order of the levels for a factor)
     is_other <- !is_numeric & !is.na(chromosome)
     if (any(is_other)) {
-      if (is.null(chr_levels)) {
-        other_names <- unique(chromosome[is_other])
+      other <- chromosome[is_other]
+      if (is.null(chr_levels) || all(used_levels)) {
+        # the code of each name is the rank of its first appearance (for a
+        # factor whose levels are all used, this is their order), as with
+        # match(other, unique(other)), but with a single hash table: the
+        # first occurrence of each name, and a running count of new names
+        first <- match(other, other)
+        other_codes <- cumsum(first == seq_along(first))[first]
       } else {
-        other_names <- intersect(strip_chr(chr_levels), chromosome[is_other])
+        # with unused levels, the order of the levels (all of them) is kept
+        other_names <- intersect(strip_chr(chr_levels), other)
+        other_codes <- match(other, other_names)
       }
-      chr_int[is_other] <- max(c(0L, chr_int[is_numeric])) +
-        match(chromosome[is_other], other_names)
+      chr_int[is_other] <- max(c(0L, chr_int[is_numeric])) + other_codes
     }
     chromosome <- chr_int
   }

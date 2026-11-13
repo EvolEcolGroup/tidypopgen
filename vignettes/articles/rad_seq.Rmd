@@ -210,8 +210,8 @@ cat(readLines("./data/rad/rad_int.chromosomes.tsv", n = 4), sep = "\n")
 
 They can be read with any tool and joined to
 `show_loci()` by `name = int_name` (or `chromosome = int_chromosome`). Keep
-them with the other files of the `gen_tibble`: `gt_save()` lists them in its
-messages. Functions that write a new backing file, such as
+them with the other files of the `gen_tibble`: `gt_get_file_names()` and
+`gt_save()` list them. Functions that write a new backing file, such as
 `gt_update_backingfile()`, `gt_order_loci()` and `rbind()`, write new
 sidecars for it, with the loci that they keep.
 

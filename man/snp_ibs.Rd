@@ -10,7 +10,9 @@ snp_ibs(
   ind.col = bigstatsr::cols_along(X),
   type = c("proportion", "adjusted_counts", "raw_counts"),
   block.size = bigstatsr::block_size(nrow(X)),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  missing_correction = c("flat", "allele_freq"),
+  allele_freqs = NULL
 )
 }
 \arguments{
@@ -34,9 +36,12 @@ writes it to a .mibs file).
 number of alleles that differ between two individuals, scaled up by the
 number of loci over the number of loci genotyped in both individuals, to
 correct for missing genotypes. It equals \code{2 * n_loci * (1 - proportion)}, where \code{n_loci} is the number of loci used, so it is 0 for
-identical individuals and at most \code{2 * n_loci}. Note that, without
-\code{flat-missing}, PLINK corrects for missing genotypes differently, which
-gives slightly different values when genotypes are missing.
+identical individuals and, with the default \code{missing_correction = "flat"}, at most \code{2 * n_loci}. Note that, without \code{flat-missing}, PLINK
+corrects for missing genotypes differently, which gives slightly
+different values when genotypes are missing (see \code{missing_correction});
+with that correction (\code{missing_correction = "allele_freq"}), it can
+exceed \code{2 * n_loci}, and "proportion" can be negative (see
+\code{\link[=pairwise_ibs]{pairwise_ibs()}}).
 \item "raw_counts": the counts of identical alleles and of non-missing
 alleles, from which the two other quantities are computed.
 }}
@@ -47,6 +52,19 @@ memory use.}
 
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
+
+\item{missing_correction}{the correction for missing genotypes of
+"proportion" and "adjusted_counts": "flat" (the default, as PLINK 1.9's
+\code{flat-missing} modifier) or "allele_freq" (PLINK 1.9's default, which
+weights the missing loci by their allele frequencies). See
+\code{\link[=pairwise_ibs]{pairwise_ibs()}} for details. It must be "flat" for "raw_counts".}
+
+\item{allele_freqs}{only used if \code{missing_correction = "allele_freq"}: the
+frequency of the alternate allele at each locus in \code{ind.col} (as PLINK's
+\code{--read-freq}); either allele can be used, as the weights are the same
+for both. If \code{NULL} (the default), it is computed from the genotypes of
+the individuals in \code{ind.row}. Missing values are set to 0.5, as PLINK
+does for loci without genotypes.}
 }
 \value{
 for "proportion" and "adjusted_counts", a matrix with one row and
@@ -61,6 +79,9 @@ This function computes the IBS matrix.
 \details{
 Note that monomorphic sites are counted (as in PLINK). Remove monomorphic
 sites beforehand if this is a concern.
+
+See \code{\link[=pairwise_ibs]{pairwise_ibs()}} for the two corrections for missing genotypes
+(\code{missing_correction}).
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
@@ -78,5 +99,8 @@ snp_ibs(X, block.size = 2)
 snp_ibs(X, type = "proportion")
 snp_ibs(X, type = "adjusted_counts")
 snp_ibs(X, type = "raw_counts")
+
+# PLINK 1.9's default correction for missing genotypes
+snp_ibs(X, type = "adjusted_counts", missing_correction = "allele_freq")
 
 }

@@ -9,7 +9,9 @@ pairwise_ibs(
   as_matrix = FALSE,
   type = c("proportion", "adjusted_counts", "raw_counts"),
   block_size = bigstatsr::block_size(nrow(x)),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  missing_correction = c("flat", "allele_freq"),
+  allele_freqs = NULL
 )
 }
 \arguments{
@@ -22,13 +24,16 @@ symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)}
 \itemize{
 \item "proportion" (the default): the proportion of alleles that are identical
 by state, a similarity (as \verb{--distance ibs flat-missing} in PLINK, which
-writes it to a .mibs file).
+writes it to a .mibs file; with \code{missing_correction = "allele_freq"}, as
+\verb{--distance ibs}, see Details).
 \item "adjusted_counts": the allele count distance, a dissimilarity (as
 \verb{--distance flat-missing} in PLINK, which writes it to a .dist file): the
 number of alleles that differ between two individuals, scaled up by the
 number of loci over the number of loci genotyped in both individuals, to
-correct for missing genotypes. It equals \code{2 * n_loci * (1 - proportion)}, so it is 0 for identical individuals and at most \code{2 * n_loci}. PLINK's default correction for missing genotypes (without
-\code{flat-missing}) is not available (see Details).
+correct for missing genotypes. It equals \code{2 * n_loci * (1 - proportion)}, so it is 0 for identical individuals and, with the
+default \code{missing_correction = "flat"}, at most \code{2 * n_loci}. With
+\code{missing_correction = "allele_freq"}, as \code{--distance} in PLINK (without
+\code{flat-missing}), it can exceed \code{2 * n_loci}, see Details.
 \item "raw_counts": the counts of identical alleles and of non-missing
 alleles, from which the two other quantities are computed.
 }}
@@ -39,6 +44,17 @@ memory use.}
 
 \item{n_cores}{number of cores to be used, it defaults to
 \code{\link[bigstatsr:nb_cores]{bigstatsr::nb_cores()}}}
+
+\item{missing_correction}{the correction for missing genotypes, for
+"proportion" and "adjusted_counts": "flat" (the default, as PLINK 1.9
+with the \code{flat-missing} modifier) or "allele_freq" (as PLINK 1.9's
+default, which weights loci by their allele frequencies); see Details.
+It must be "flat" for "raw_counts".}
+
+\item{allele_freqs}{only used if \code{missing_correction = "allele_freq"}: the
+frequency of the alternate allele at each locus (as PLINK's
+\code{--read-freq}). If \code{NULL} (the default), it is computed from all the
+individuals of \code{x} (using imputed genotypes if \code{x} is set to use them).}
 }
 \value{
 for "proportion" and "adjusted_counts", a tidy tibble with one row
@@ -58,16 +74,49 @@ monomorphic sites before running \code{pairwise_ibs()} if this is a concern.
 Imputed genotypes are used if \code{x} is set to use them (see
 \code{\link[=gt_set_imputed]{gt_set_imputed()}}), and treated as missing otherwise.
 
-Missing genotypes are handled as in PLINK with the \code{flat-missing} modifier
-(\verb{--distance ibs flat-missing} for "proportion", \verb{--distance flat-missing} for "adjusted_counts"): each pair of individuals is compared
-only on the loci genotyped in both, and all loci have the same weight. By
-default (without \code{flat-missing}), PLINK 1.9 instead divides each distance
-by one minus the sum of the average contributions to the distance of the
-loci missing in the pair, which depend on their allele frequencies. This
-default correction is not available in \code{pairwise_ibs()}, so, when
-genotypes are missing, its values are only comparable to those of PLINK
-run with \code{flat-missing}. Without missing genotypes, both corrections give
-the same values.
+Each pair of individuals is compared only on the loci genotyped in both.
+Two corrections for missing genotypes are available (\code{missing_correction}),
+which give the same values when no genotypes are missing:
+\itemize{
+\item "flat" (the default), as PLINK 1.9 with the \code{flat-missing} modifier
+(\verb{--distance ibs flat-missing} for "proportion", \verb{--distance flat-missing} for "adjusted_counts"): all loci have the same weight, so
+the number of alleles that differ between individuals \code{i} and \code{j},
+\code{d_ij}, is scaled up by \code{n_loci / n_ij}, where \code{n_ij} is the number of loci
+genotyped in both ("adjusted_counts"), and "proportion" is
+\code{1 - d_ij / (2 * n_ij)}.
+\item "allele_freq", as PLINK 1.9's default (\verb{--distance ibs} and
+\code{--distance}): loci are weighted by their expected contribution to the
+distance, which depends on their allele frequency \code{p}. Under Hardy-Weinberg
+equilibrium, the expected number of alleles that differ between two
+individuals at a locus is \code{4 * p * (1 - p) * (p^2 - p + 1)}, and PLINK
+uses \code{w = p * (1 - p) * (p^2 - p + 1)} as the weight of the locus (0 for
+monomorphic loci). "adjusted_counts" is then \code{d_ij * W / W_ij}, where \code{W}
+is the sum of the weights of all loci and \code{W_ij} that of the loci genotyped
+in both individuals, and "proportion" is \code{1 - adjusted_counts / (2 * n_loci)}. As \code{W / W_ij} depends on which loci are genotyped in both
+individuals, "adjusted_counts" can exceed \code{2 * n_loci} (and "proportion"
+can be negative) for pairs genotyped in both mostly at loci with small
+weights (loci with a rare allele), as in PLINK. For example, with two loci
+with frequencies 0.1 and 0.5, a pair of opposite homozygotes at the first
+locus, missing at the second, has "adjusted_counts" of about 6.58 (more
+than \code{2 * n_loci = 4}). As in PLINK, the weights are scaled to sum to just
+under \code{2^32} and rounded to integers (so values are identical to PLINK's),
+\code{W_ij} excludes each locus missing in either individual or in both (its
+weight is removed once), and monomorphic loci have no weight (a missing
+genotype at a monomorphic locus does not change the distance, but the
+locus still counts in \code{n_loci}). PLINK 1.9 computes the allele frequencies
+from the founders only (unless \code{--nonfounders} is used), or reads them with
+\code{--read-freq};
+\code{pairwise_ibs()} computes them from all individuals of \code{x} (the same as
+PLINK when all individuals are founders, as in data without a pedigree),
+unless they are given with \code{allele_freqs} (e.g. from the founders, with
+\code{\link[=loci_alt_freq]{loci_alt_freq()}}). Loci without any genotype have a frequency of 0.5, as
+in PLINK. PLINK's \code{1-ibs} modifier (\verb{--distance 1-ibs}, written to a \code{.mdist}
+file) gives \code{1 - proportion} with either correction.
+}
+
+Pairs of individuals without any locus genotyped in both (or, with
+"allele_freq", without any polymorphic locus genotyped in both) have
+\code{NaN} (or \code{Inf}) values.
 }
 \examples{
 example_gt <- load_example_gt("gen_tbl")
@@ -83,4 +132,10 @@ pairwise_ibs(example_gt, block_size = 2)
 # Change type
 pairwise_ibs(example_gt, type = "adjusted_counts")
 pairwise_ibs(example_gt, type = "raw_counts")
+
+# PLINK 1.9's default correction for missing genotypes
+pairwise_ibs(example_gt,
+  type = "adjusted_counts",
+  missing_correction = "allele_freq"
+)
 }

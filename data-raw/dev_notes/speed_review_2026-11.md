@@ -227,8 +227,10 @@ along the loci dimension, except in the following places:
 
 - `select_loci()` with name helpers (`starts_with()`, ...) converts them
   transiently (about 3.8 GB at 40M, then freed).
-- `select_loci()` with bare names or `which(...)` still goes through
-  tidyselect, at the old cost (see [Findings not fixed](#findings-not-fixed)).
+- `select_loci()` with bare loci names, or combinations of selections,
+  still goes through tidyselect, at the old cost (see item 4 of
+  [Findings not fixed](#findings-not-fixed)); function calls such as
+  `which(...)` (`02f12754`) and bare variables (`2826366e`) no longer do.
 - `rbind()`/`rbind_dry_run()` with `use_position = TRUE` built a
   "chromosome_position" string per locus, and `gt_as_plink()` built one
   string per position for `.map` files; both are fixed on `dev`
@@ -431,10 +433,21 @@ After the merge of `speed_extra` (`af93029d`), the full test suite passes (4246 
    of R, so this suggests a `compress` argument or an option rather than a
    new default. `gt_save()` runs on every `gen_tibble()` and
    `gt_update_backingfile()`.
-4. **`select_loci()` with bare names or `which(...)`** still goes through
-   tidyselect, with the cost and the never-freed symbols described in
-   `e7cf07b9`. The documentation now recommends `all_of()` for large data.
-   An alternative would be to warn on large datasets.
+4. *Mostly done on dev.* **`select_loci()` without `all_of()`.** Function
+   calls (`which(...)`, `sample(...)`, `sort(x)`) are evaluated as tidyselect
+   would and resolved directly since `02f12754`, and bare variables
+   (`select_loci(x, idx)`, which tidyselect deprecates) since `2826366e`:
+   on the VCFArrow benchmark (13 November 2026, -O2, 1,000 positions),
+   0.06 s, 0.09 s and 0.27 s at 2.2 M, 4.3 M and 17.3 M loci (against 7 s,
+   26 s and 355 s with 8.9 GB before), with no extra memory; the remaining
+   cost is one scan of the loci names, to check that no locus is named like
+   the variable. Still left to tidyselect, with the cost and the never-freed
+   symbols described in `e7cf07b9`: bare loci names (or a variable named
+   like a locus), combinations such as `c(all_of(x), 1)` or
+   `starts_with("a") & !ends_with("b")`, binary `-`, `where()`, and
+   selections that tidyselect turns into errors. These take 8 s and 1.3 GB
+   at 2.2 M loci and 27 s and 2.4 GB at 4.3 M (about 6 min at 17.3 M).
+   The documentation recommends `all_of()` for large data.
 5. *Done in `bc83e6d2`.* **Default `n_cores`** of the pairwise functions is 1, unlike most
    functions (`bigstatsr::nb_cores()`).
 6. **Tidy outputs at 40M loci are inherently huge.** For example, the grouped

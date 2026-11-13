@@ -1,3 +1,6 @@
+# delete the backing files of this file when it ends (see helper_cleanup.R)
+local_tempdir_cleanup()
+
 # tests of phased gen_tibbles (gen_tibble(phased = TRUE) and the functions
 # that have to keep, or use, the phase of the genotypes)
 
@@ -437,6 +440,10 @@ test_that("tibbles that lost the gen_tbl class keep the phase", {
 
 test_that("pairwise statistics of individuals are the same with phased data", {
   expect_equal(pairwise_ibs(phased_gt), pairwise_ibs(unphased_gt))
+  expect_equal(
+    pairwise_ibs(phased_gt, missing_correction = "allele_freq"),
+    pairwise_ibs(unphased_gt, missing_correction = "allele_freq")
+  )
   ibs_counts_phased <- pairwise_ibs(phased_gt, type = "raw_counts")
   ibs_counts_unphased <- pairwise_ibs(unphased_gt, type = "raw_counts")
   expect_identical(ibs_counts_phased$ibs[], ibs_counts_unphased$ibs[])

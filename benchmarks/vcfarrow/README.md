@@ -140,16 +140,98 @@ At 18.6 M variants (17.3 M biallelic SNPs), vcf_fast:
   10.3 min);
 - runs every other function of the comparison in under 20 s.
 
-Where tidypopgen is still slow:
+Where tidypopgen was still slow in this run:
 - `subsample_loci_bare` (a bare index vector, without `all_of()`): 5.9 min
   and 8.9 GB in both versions, and quadratic in the number of loci (7 s, 26 s
   and 355 s at the three sizes), because `tidyselect` creates an R symbol for
   every locus name. The first run of vcf_fast at 4.6 M variants gave 32.9 s,
   but other work was running at the time; on a quiet machine both versions
-  take 26 s (`results/desktop_24c_recheck_subsample_bare.tsv`).
+  take 26 s (`results/desktop_24c_recheck_subsample_bare.tsv`). Fixed later
+  that day on dev (`2826366e`), see below.
 - `to_ped` (20 s, to write 3.9 GB of text) and `filter_chain_update` (17 s:
   the filters of the VCFArrow vignette, then `gt_update_backingfile()`,
-  which writes a new copy of the data; not profiled).
+  which writes a new copy of the data), profiled below.
+
+## Rechecks on dev (desktop, 13 November 2026)
+
+### `select_loci()` with a bare variable
+
+`results/recheck_subsample_bare_dev.tsv`: dev at `216165b7` (installed by
+`setup_libs.sh`, -O2), 4 threads, 3 runs per size (load average 1.4-2.1 on
+24 cores). `select_loci(gt, idx)` is now resolved without `tidyselect`
+(`2826366e`), and is linear in the number of loci:
+
+| variants (loci) | `all_of(idx)` | bare `idx` (best of 3) | bare `idx` on 9 Nov |
+|---|---|---|---|
+| 2.3 M (2.16 M) | 0.004 s | 0.06 s | 7 s |
+| 4.6 M (4.33 M) | 0.006 s | 0.09 s | 26 s |
+| 18.6 M (17.3 M) | 0.003 s | 0.27 s | 355 s, 8.9 GB |
+
+Peak PSS stays that of the loaded gen_tibble (2.96 GB at 18.6 M; at most
++0.2 GB). The bare form still costs more than `all_of()` because it scans
+the loci names once, to check that no locus is named like the variable
+(which `tidyselect` would select instead); a vector of names given by name
+is resolved in the same way (0.09 s and 0.16 s at the two smaller sizes).
+
+What still goes through `tidyselect` (and its data mask of every locus
+name, never freed): a bare locus name (`select_loci(gt, rs1)`, or a
+variable named like a locus), combinations (`c(all_of(idx), 1)`,
+`starts_with("a") & !ends_with("b")`, binary `-`), `where()`, anything
+`.engine = "tidyselect"`, and any selection the fast path cannot resolve
+(e.g. missing or out-of-range positions, which `tidyselect` turns into its
+errors). Measured on dev in a fresh process per call (`select_loci()` alone,
+1 thread; a bare locus name, `c(all_of(idx), 1)` and `all_of(idx)` with
+`.engine = "tidyselect"` all cost the same):
+
+| loci | time (best of 3) | max RSS of the process | `all_of(idx)` |
+|---|---|---|---|
+| 2.16 M | 7.6-10.5 s | 1.26-1.31 GB | 0.00 s, 0.51 GB |
+| 4.33 M | 27-28 s | 2.41-2.49 GB | 0.00 s, 0.89 GB |
+
+So still superlinear (3.5 times longer for twice the loci, about 355 s at
+17.3 M as measured on 9 November), and about 350 bytes per locus. Other
+agents were compiling and testing on the machine during these runs (load
+average 1.5-8 at 2.16 M, 9-18 at 4.33 M), but the 4.33 M times match the
+26 s of the quiet run on 9 November.
+
+### `filter_chain_update`
+
+At 18.6 M variants (17.3 M loci, 13 M chromosomes), 4 threads, best of 3
+runs, dev (`216165b7`) against the branch `select_filter_speed`, both
+installed by `setup_libs.sh`. Load average 2-8 during the whole step
+(`results/recheck_filter_chain.tsv`) and 9-12 during the parts (each part
+after a full `gc()`):
+
+| part | dev | branch |
+|---|---|---|
+| whole step (harness) | 18.4 s, 5.6 GB | 8.1 s, 5.2 GB |
+| `filter(population != "OG")` | 0.00 s | 0.00 s |
+| `select_loci_if(loci_maf() >= 0.03)` | 3.2 s | 3.1 s |
+| - of which `loci_maf()` | 0.24 s | 0.23 s |
+| `select_loci_if(loci_missingness() <= 0.2)` | 0.29 s | 0.30 s |
+| `filter(indiv_missingness() <= 0.3)` | 0.13 s | 0.12 s |
+| `gt_update_backingfile()` | 12.6 s | 4.0 s |
+| - check of genetic distances | 8.3 s | skipped (3.1 s if run) |
+| - `.gt` file (`gt_save_light()`) | 3.8 s | 3.7 s |
+
+- `gt_update_backingfile()` checked that genetic distances are sorted within
+  each chromosome, casting the 13 M chromosome names to integers (`gsub()`,
+  `grepl()`, `unique()` and `match()` on 13 M strings), although they are
+  all zero. The check is now skipped when the distances are sorted across
+  the whole table, and `cast_chromosome_to_int()` takes 2.5 s rather than
+  7.8 s (it is also used by `is_loci_table_ordered()`, `gt_order_loci()` and
+  others). The copy of the genotypes takes about 0.3 s.
+- What remains is the `.gt` file (saving the loci table, left unchanged on
+  purpose) and garbage collection: the first `select_loci_if()` spends
+  almost all its time in R's garbage collector, which has to scan the
+  ~30 M live strings (loci and chromosome names) on each full collection;
+  `loci_maf()` itself takes 0.24 s.
+- MAF and missingness in a single pass (`qc_report_loci(x, hwe = FALSE)`,
+  new on the branch) gives the same loci: the two kernels take 0.26 s +
+  0.13 s against 0.25 s for the single pass on 4 threads (0.38 s + 0.22 s
+  against 0.50 s on 1 thread), and the two `select_loci_if()` 1.6 s against
+  0.65 s for `qc_report_loci()` and one `select_loci_if()` (the saving is
+  mostly one garbage collection less). Load average 9 during these runs.
 
 Light work (single-core, niced compiles and small tests) ran on the machine
 during part of the run (vcf_fast at 4.6 M variants and the first steps of

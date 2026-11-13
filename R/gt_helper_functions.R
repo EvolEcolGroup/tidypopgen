@@ -139,3 +139,70 @@ stopifnot_no_pseudohaploid <- function(x) {
     )
   }
 }
+
+# evaluate `code` with the temporary FBMs of bigstatsr and bigsnpr in a
+# private directory, which is deleted on exit.
+#
+# bigstatsr's FBM() names its temporary backing files with
+# `tempfile(tmpdir = getOption("FBM.dir"))` and appends ".bk". tempfile()
+# only checks that the bare name is free, not "<name>.bk", and its random
+# suffix has 31 bits, so a new name can match one of the .bk files already in
+# the directory (a birthday collision); FBM() then fails with
+# "File '<name>.bk' already exists". bigsnpr's snp_clumping() (used by
+# snp_autoSVD()) creates a temporary FBM for each chromosome and never
+# removes it, so data with many contigs (e.g. the 1341 scaffolds of the
+# anolis example) leave thousands of .bk files in tempdir(), and each later
+# temporary FBM of the session risks a clash. A fresh, empty directory for
+# each call avoids any clash with earlier files, and the leaked files are
+# deleted with it. The private directory is made inside the directory set by
+# the user for temporary FBMs (`options(FBM.dir)`, `tempdir()` by default),
+# e.g. a scratch volume with room for large matrices.
+#
+# Only use it around code whose value holds no FBM (the FBMs created in the
+# private directory are deleted on exit).
+# @param code the code to evaluate (lazily, in the caller's frame)
+# @returns the value of `code`
+# @keywords internal
+# @noRd
+with_private_fbm_dir <- function(code) {
+  local_private_fbm_dir()
+  # force the promise now that FBM.dir points to the private directory
+  code
+}
+
+# the same as with_private_fbm_dir(), for the rest of the calling function:
+# the private directory is deleted, and FBM.dir restored, when `envir` exits
+# (as withr::local_*() functions). Call it once the function has made any
+# FBM that it returns (or only on the paths that return no FBM).
+# @param envir the frame whose exit deletes the directory
+# @returns the path of the private directory, invisibly
+# @keywords internal
+# @noRd
+local_private_fbm_dir <- function(envir = parent.frame()) {
+  # tempfile() checks the bare name, which here is the directory itself, so
+  # the directory is new and empty; it is made inside FBM.dir, so that
+  # temporary FBMs stay where the user wants them (bigstatsr sets FBM.dir to
+  # tempdir() when it is loaded)
+  parent_dir <- getOption("FBM.dir", default = tempdir())
+  fbm_dir <- tempfile("fbm_tmp_", tmpdir = parent_dir)
+  # (an FBM.dir that does not exist, or can not be written to, would
+  # otherwise only give an unclear error when the first FBM is made)
+  if (!dir.create(fbm_dir, showWarnings = FALSE)) {
+    stop(
+      "could not create a directory for temporary backing files in '",
+      parent_dir, "' (set with options(FBM.dir = ...))",
+      call. = FALSE
+    )
+  }
+  old_opts <- options(FBM.dir = fbm_dir)
+  # register the clean up in the caller's frame (with add = TRUE, so as not to
+  # replace its own on.exit() code); on Windows unlink() can fail on files
+  # still mapped, but names drawn in the directory still cannot clash with
+  # files elsewhere
+  cleanup <- bquote({
+    options(.(old_opts))
+    unlink(.(fbm_dir), recursive = TRUE)
+  })
+  do.call(base::on.exit, list(cleanup, add = TRUE), envir = envir)
+  invisible(fbm_dir)
+}
