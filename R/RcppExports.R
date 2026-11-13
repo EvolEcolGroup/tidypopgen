@@ -165,6 +165,10 @@ increment_ibs_counts <- function(k, k2, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_ibs_counts`, k, k2, BM, rowInd, colInd, ncores))
 }
 
+increment_ibs_counts_weighted <- function(k, k2, k3, BM, rowInd, colInd, wts, ncores) {
+    invisible(.Call(`_tidypopgen_increment_ibs_counts_weighted`, k, k2, k3, BM, rowInd, colInd, wts, ncores))
+}
+
 increment_king_numerator <- function(k, n_Aa_i, BM, rowInd, colInd, ncores) {
     invisible(.Call(`_tidypopgen_increment_king_numerator`, k, n_Aa_i, BM, rowInd, colInd, ncores))
 }

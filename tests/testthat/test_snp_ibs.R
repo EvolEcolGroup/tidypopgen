@@ -219,3 +219,109 @@ test_that("pairwise_ibs uses imputed genotypes only if set to", {
   expect_identical(ibs_used$ibs[], ibs_filled$ibs[])
   expect_identical(ibs_used$valid_n[], ibs_filled$valid_n[])
 })
+
+test_that("missing_correction = 'allele_freq' gives the same values as plink", {
+  # Read in results from (PLINK v1.9.0 64-bit, 27 Sep 2026; see
+  # data-raw/validate/create_plink_ibs_missing_data.R), for 24 individuals and
+  # 300 loci with 33% of missing genotypes:
+  # plink --bfile ibs_missing --distance square bin allele-ct ibs
+  # [flat-missing], and, with the frequencies of the first 16 individuals
+  # (the founders of ibs_missing_nonfounders.fam):
+  # plink --bfile ibs_missing --fam ibs_missing_nonfounders.fam
+  #   --distance square bin allele-ct
+  # The .bin files hold the matrices as doubles, at full precision
+  read_plink_bin <- function(file) {
+    file <- system.file("extdata/related", file, package = "tidypopgen")
+    matrix(readBin(file, "double", n = 24 * 24), 24, 24)
+  }
+  bed_path <- system.file(
+    "extdata/related/ibs_missing.bed",
+    package = "tidypopgen"
+  )
+  ibs_gt <- gen_tibble(
+    bed_path,
+    quiet = TRUE,
+    valid_alleles = c("A", "T"),
+    backingfile = tempfile()
+  )
+  ibs_fbm <- tidypopgen:::.gt_get_fbm(ibs_gt)
+  # the weighted correction: the operations are those of PLINK, so the values
+  # are identical (with several blocks and cores too)
+  w_dist <- snp_ibs(ibs_fbm,
+    type = "adjusted_counts",
+    missing_correction = "allele_freq", block.size = 70, n_cores = 2
+  )
+  expect_identical(w_dist, read_plink_bin("ibs_missing.dist.bin"))
+  w_prop <- pairwise_ibs(ibs_gt,
+    missing_correction = "allele_freq",
+    as_matrix = TRUE
+  )
+  expect_identical(
+    unclass(unname(w_prop)),
+    read_plink_bin("ibs_missing.mibs.bin")
+  )
+  # allele frequencies of the founders only
+  founder_freqs <- loci_alt_freq(ibs_gt[1:16, ])
+  w_dist_founders <- pairwise_ibs(ibs_gt,
+    type = "adjusted_counts",
+    missing_correction = "allele_freq", allele_freqs = founder_freqs,
+    as_matrix = TRUE
+  )
+  expect_identical(
+    unclass(unname(w_dist_founders)),
+    read_plink_bin("ibs_missing_nonfounders.dist.bin")
+  )
+  # the flat correction (the default), up to rounding
+  expect_equal(
+    unname(snp_ibs(ibs_fbm, type = "adjusted_counts")),
+    read_plink_bin("ibs_missing_flat.dist.bin")
+  )
+  expect_equal(
+    unname(snp_ibs(ibs_fbm)),
+    read_plink_bin("ibs_missing_flat.mibs.bin")
+  )
+})
+
+test_that("missing_correction = 'allele_freq' without missing genotypes", {
+  geno_na <- test_genotypes
+  geno_na[2, 4] <- NA
+  geno_na[3, 2] <- NA
+  gt_na <- gen_tibble(
+    x = geno_na, loci = test_loci, indiv_meta = test_indiv_meta,
+    quiet = TRUE
+  )
+  # the two corrections differ with missing genotypes
+  expect_false(isTRUE(all.equal(
+    pairwise_ibs(gt_na, missing_correction = "allele_freq"),
+    pairwise_ibs(gt_na)
+  )))
+  # but not without them (here, with imputed genotypes)
+  gt_imputed <- gt_impute_simple(gt_na, method = "mode")
+  gt_set_imputed(gt_imputed, set = TRUE)
+  expect_equal(
+    pairwise_ibs(gt_imputed,
+      type = "adjusted_counts",
+      missing_correction = "allele_freq"
+    ),
+    pairwise_ibs(gt_imputed, type = "adjusted_counts")
+  )
+  # invalid combinations of arguments
+  expect_error(
+    pairwise_ibs(gt_na,
+      type = "raw_counts",
+      missing_correction = "allele_freq"
+    ),
+    "can not be used with"
+  )
+  expect_error(
+    pairwise_ibs(gt_na, allele_freqs = rep(0.5, 6)),
+    "only used with"
+  )
+  expect_error(
+    pairwise_ibs(gt_na,
+      missing_correction = "allele_freq",
+      allele_freqs = rep(0, 6)
+    ),
+    "all loci are monomorphic"
+  )
+})

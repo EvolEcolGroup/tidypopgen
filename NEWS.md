@@ -22,6 +22,8 @@
 * phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads phased
   VCF files; `is_phased()` and `show_haplotypes()` give the
   phase, `gt_as_vcf()` writes it, and `rbind()` keeps it
+* `pairwise_ibs(missing_correction = "allele_freq")` corrects for missing
+  genotypes as PLINK 1.9's `--distance` without `flat-missing`
 
 ## Bug fixes
 

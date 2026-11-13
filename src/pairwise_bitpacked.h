@@ -88,6 +88,47 @@ struct PwIbs {
   }
 };
 
+// IBS with PLINK 1.9's weighted correction for missing genotypes (see
+// snp_ibs.cpp): the counts of PwIbs, plus the sum of the (integer) weights of
+// the loci missing in both individuals. The weights of the 64 loci of the
+// word are in wts (0 for the padding bits past the last locus, which are not
+// valid in either individual). Loci missing in both individuals are usually
+// rare, so their bits are visited one at a time, as in PLINK.
+struct PwIbsWeighted {
+  static const int N_PLANES = 3;
+  static const int N_COUNTS = 3;
+  static uint8_t planes(int g) {
+    return PwIbs::planes(g);
+  }
+  static PW_ALWAYS_INLINE void add(const uint64_t* wi, const uint64_t* wj,
+                                   uint32_t* c, const uint32_t* wts) {
+    PwIbs::add(wi, wj, c);
+    uint64_t missing = ~(wi[0] | wj[0]);
+    while (missing) {
+      c[2] += wts[__builtin_ctzll(missing)];
+      missing &= missing - 1; // clear the lowest set bit
+    }
+  }
+};
+
+// Add the counts of a word; only PwIbsWeighted uses the weights of the loci
+// (the other statistics ignore them, and the compiler removes the unused
+// pointer arithmetic)
+template <class Stat>
+struct PwAdd {
+  static PW_ALWAYS_INLINE void run(const uint64_t* wi, const uint64_t* wj,
+                                   uint32_t* c, const uint32_t*) {
+    Stat::add(wi, wj, c);
+  }
+};
+template <>
+struct PwAdd<PwIbsWeighted> {
+  static PW_ALWAYS_INLINE void run(const uint64_t* wi, const uint64_t* wj,
+                                   uint32_t* c, const uint32_t* wts) {
+    PwIbsWeighted::add(wi, wj, c, wts);
+  }
+};
+
 // KING: planes are valid, heterozygous (g == 1), homozygous reference (g == 0)
 // and homozygous alternate (g == 2); counts are the number of loci at which
 // both are heterozygous, the number at which they are opposite homozygotes,
@@ -131,18 +172,21 @@ struct PwAlleleSharing {
 
 // Counts for individual i against all individuals j with i <= j < n, over
 // n_words words of the current chunk; cnt_i points at the counts of pair
-// (i, i) in the packed lower triangle.
+// (i, i) in the packed lower triangle; wts points at the weights of the loci
+// of the chunk (only used by PwIbsWeighted, nullptr otherwise).
 template <class Stat>
 PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t n,
                                   std::size_t n_words,
-                                  const uint64_t* planes, uint32_t* cnt_i) {
+                                  const uint64_t* planes, uint32_t* cnt_i,
+                                  const uint32_t* wts) {
   const std::size_t stride = n_words * Stat::N_PLANES;
   const uint64_t* pi = planes + i * stride;
   for (std::size_t j = i; j < n; j++) {
     const uint64_t* pj = planes + j * stride;
     uint32_t c[Stat::N_COUNTS] = {0};
     for (std::size_t w = 0; w < n_words; w++) {
-      Stat::add(pi + w * Stat::N_PLANES, pj + w * Stat::N_PLANES, c);
+      PwAdd<Stat>::run(pi + w * Stat::N_PLANES, pj + w * Stat::N_PLANES, c,
+                       wts + w * 64);
     }
     uint32_t* cnt_ij = cnt_i + (j - i) * Stat::N_COUNTS;
     for (int k = 0; k < Stat::N_COUNTS; k++) {
@@ -154,8 +198,9 @@ PW_ALWAYS_INLINE void pw_row_body(std::size_t i, std::size_t n,
 // generic version (software popcount on x86 without POPCNT)
 template <class Stat>
 void pw_row_generic(std::size_t i, std::size_t n, std::size_t n_words,
-                    const uint64_t* planes, uint32_t* cnt_i) {
-  pw_row_body<Stat>(i, n, n_words, planes, cnt_i);
+                    const uint64_t* planes, uint32_t* cnt_i,
+                    const uint32_t* wts) {
+  pw_row_body<Stat>(i, n, n_words, planes, cnt_i, wts);
 }
 
 #ifdef PW_X86_POPCNT
@@ -163,8 +208,9 @@ void pw_row_generic(std::size_t i, std::size_t n, std::size_t n_words,
 template <class Stat>
 __attribute__((target("popcnt")))
 void pw_row_popcnt(std::size_t i, std::size_t n, std::size_t n_words,
-                   const uint64_t* planes, uint32_t* cnt_i) {
-  pw_row_body<Stat>(i, n, n_words, planes, cnt_i);
+                   const uint64_t* planes, uint32_t* cnt_i,
+                   const uint32_t* wts) {
+  pw_row_body<Stat>(i, n, n_words, planes, cnt_i, wts);
 }
 #endif
 
@@ -180,6 +226,8 @@ void pw_row_popcnt(std::size_t i, std::size_t n, std::size_t n_words,
 // group of individual i in rowInd, and individual i is only paired with
 // individuals j with i <= j < row_end[i] (so the packed triangles of the
 // groups follow one another).
+// locus_wts (only for PwIbsWeighted) holds one integer weight per selected
+// locus (colInd).
 template <class Stat>
 std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
                                           const IntegerVector& rowInd,
@@ -188,7 +236,10 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
                                           int ncores,
                                           const std::vector<std::size_t>&
                                             row_end =
-                                            std::vector<std::size_t>()) {
+                                            std::vector<std::size_t>(),
+                                          const std::vector<uint32_t>&
+                                            locus_wts =
+                                            std::vector<uint32_t>()) {
 
   XPtr<FBM> xpBM = BM["address"];
   // raw (undecoded) bytes of the FBM, stored column-major
@@ -238,6 +289,20 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
     n_pairs += pair_end[i] - i;
   }
   std::vector<uint32_t> counts(n_pairs * Stat::N_COUNTS, 0);
+
+  // weights of the loci, padded with zeros to a whole number of words (so
+  // that the padding bits of the last word, which look missing in both
+  // individuals, have no weight); chunks start at multiples of 64 loci, so
+  // the weights of a chunk start at p_wts + l0
+  std::vector<uint32_t> wts_padded;
+  if (!locus_wts.empty()) {
+    if (locus_wts.size() != m) {
+      Rcpp::stop("locus_wts should have one value per locus.");
+    }
+    wts_padded.assign((m + 63) / 64 * 64, 0);
+    std::copy(locus_wts.begin(), locus_wts.end(), wts_padded.begin());
+  }
+  const uint32_t* p_wts = wts_padded.empty() ? nullptr : wts_padded.data();
 
   // planes for each possible raw byte, decoded through the code256 of the
   // FBM (NA, and values other than 0, 1 and 2, are missing)
@@ -319,14 +384,15 @@ std::vector<uint32_t> pw_bitpacked_counts(Environment BM,
       for (std::size_t i = 0; i < n; i++) {
         uint32_t* cnt_i = p_counts + tri_start[i] * Stat::N_COUNTS;
         std::size_t end_i = pair_end[i];
+        const uint32_t* wts_chunk = p_wts ? p_wts + l0 : nullptr;
 #ifdef PW_X86_POPCNT
         if (use_popcnt) {
-          pw_row_popcnt<Stat>(i, end_i, n_words, p_planes, cnt_i);
+          pw_row_popcnt<Stat>(i, end_i, n_words, p_planes, cnt_i, wts_chunk);
         } else {
-          pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i);
+          pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i, wts_chunk);
         }
 #else
-        pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i);
+        pw_row_generic<Stat>(i, end_i, n_words, p_planes, cnt_i, wts_chunk);
 #endif
       }
       // (implicit barrier: the planes can be overwritten by the next chunk)
