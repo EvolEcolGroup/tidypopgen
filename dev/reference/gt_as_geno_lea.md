@@ -52,5 +52,5 @@ example_gt <- load_example_gt("gen_tbl")
 
 # Write a geno file
 gt_as_geno_lea(example_gt, file = paste0(tempfile(), "_example.geno"))
-#> [1] "/tmp/Rtmp1lBsW9/file1ff51cde8ad6_example.geno"
+#> [1] "/tmp/RtmpX2GcQQ/file1ef12dff887f_example.geno"
 ```

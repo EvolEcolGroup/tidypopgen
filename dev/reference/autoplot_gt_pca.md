@@ -31,7 +31,8 @@ autoplot(object, type = c("screeplot", "scores", "loadings"), k = NULL, ...)
 - k:
 
   the principal components to be plotted: for scores, a pair of values
-  e.g. c(1,2); for `loadings` either one or more values.
+  e.g. c(1,2); for `loadings` either one or more values. Plotting the
+  loadings of more than one component requires the `hexbin` package.
 
 - ...:
 
