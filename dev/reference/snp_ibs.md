@@ -11,7 +11,9 @@ snp_ibs(
   ind.col = bigstatsr::cols_along(X),
   type = c("proportion", "adjusted_counts", "raw_counts"),
   block.size = bigstatsr::block_size(nrow(X)),
-  n_cores = bigstatsr::nb_cores()
+  n_cores = bigstatsr::nb_cores(),
+  missing_correction = c("flat", "allele_freq"),
+  allele_freqs = NULL
 )
 ```
 
@@ -50,10 +52,14 @@ snp_ibs(
     scaled up by the number of loci over the number of loci genotyped in
     both individuals, to correct for missing genotypes. It equals
     `2 * n_loci * (1 - proportion)`, where `n_loci` is the number of
-    loci used, so it is 0 for identical individuals and at most
-    `2 * n_loci`. Note that, without `flat-missing`, PLINK corrects for
-    missing genotypes differently, which gives slightly different values
-    when genotypes are missing.
+    loci used, so it is 0 for identical individuals and, with the
+    default `missing_correction = "flat"`, at most `2 * n_loci`. Note
+    that, without `flat-missing`, PLINK corrects for missing genotypes
+    differently, which gives slightly different values when genotypes
+    are missing (see `missing_correction`); with that correction
+    (`missing_correction = "allele_freq"`), it can exceed `2 * n_loci`,
+    and "proportion" can be negative (see
+    [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md)).
 
   - "raw_counts": the counts of identical alleles and of non-missing
     alleles, from which the two other quantities are computed.
@@ -68,6 +74,24 @@ snp_ibs(
   number of cores to be used, it defaults to
   [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
 
+- missing_correction:
+
+  the correction for missing genotypes of "proportion" and
+  "adjusted_counts": "flat" (the default, as PLINK 1.9's `flat-missing`
+  modifier) or "allele_freq" (PLINK 1.9's default, which weights the
+  missing loci by their allele frequencies). See
+  [`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md)
+  for details. It must be "flat" for "raw_counts".
+
+- allele_freqs:
+
+  only used if `missing_correction = "allele_freq"`: the frequency of
+  the alternate allele at each locus in `ind.col` (as PLINK's
+  `--read-freq`); either allele can be used, as the weights are the same
+  for both. If `NULL` (the default), it is computed from the genotypes
+  of the individuals in `ind.row`. Missing values are set to 0.5, as
+  PLINK does for loci without genotypes.
+
 ## Value
 
 for "proportion" and "adjusted_counts", a matrix with one row and one
@@ -81,6 +105,10 @@ genotyped in both individuals).
 
 Note that monomorphic sites are counted (as in PLINK). Remove
 monomorphic sites beforehand if this is a concern.
+
+See
+[`pairwise_ibs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/pairwise_ibs.md)
+for the two corrections for missing genotypes (`missing_correction`).
 
 ## Examples
 
@@ -144,4 +172,15 @@ snp_ibs(X, type = "raw_counts")
 #> $valid_n
 #> A Filebacked Big Matrix of type 'double' with 7 rows and 7 columns.
 #> 
+
+# PLINK 1.9's default correction for missing genotypes
+snp_ibs(X, type = "adjusted_counts", missing_correction = "allele_freq")
+#>          [,1]     [,2]     [,3]     [,4]     [,5]     [,6]     [,7]
+#> [1,] 0.000000 2.395837 3.747789 2.000000 3.000000 4.997052 3.593755
+#> [2,] 2.395837 0.000000 3.148350 2.395837 5.989592 6.296700 5.974047
+#> [3,] 3.747789 3.148350 0.000000 4.997052 3.747789 3.328097 4.722525
+#> [4,] 2.000000 2.395837 4.997052 0.000000 5.000000 3.747789 5.989592
+#> [5,] 3.000000 5.989592 3.747789 5.000000 0.000000 4.997052 5.989592
+#> [6,] 4.997052 6.296700 3.328097 3.747789 4.997052 0.000000 3.148350
+#> [7,] 3.593755 5.974047 4.722525 5.989592 5.989592 3.148350 0.000000
 ```

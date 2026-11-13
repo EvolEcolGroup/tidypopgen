@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -291,11 +291,11 @@ chromosome, with its code and its name.</p>
 <p>They can be read with any tool and joined to <code><a href="../reference/show_loci.html">show_loci()</a></code>
 by <code>name = int_name</code> (or
 <code>chromosome = int_chromosome</code>). Keep them with the other
-files of the <code>gen_tibble</code>: <code><a href="../reference/gt_save.html">gt_save()</a></code> lists them
-in its messages. Functions that write a new backing file, such as
-<code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code>, <code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code> and
-<code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>, write new sidecars for it, with the loci that they
-keep.</p>
+files of the <code>gen_tibble</code>: <code><a href="../reference/gt_get_file_names.html">gt_get_file_names()</a></code>
+and <code><a href="../reference/gt_save.html">gt_save()</a></code> list them. Functions that write a new backing
+file, such as <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code>,
+<code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code> and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>, write new
+sidecars for it, with the loci that they keep.</p>
 </div>
 <div class="section level2">
 <h2 id="quality-control">Quality control<a class="anchor" aria-label="anchor" href="#quality-control"></a>

@@ -37,8 +37,9 @@ gt_save(x, file_name = NULL, quiet = FALSE)
 
 ## Value
 
-the file name and path of the *.gt* file, together with the *.rds* and
-*.bk* files
+the file name and path of the *.gt* file, followed by those of the
+*.rds* and *.bk* files and of any sidecar files (as given by
+[`gt_get_file_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_get_file_names.md))
 
 ## Details
 
@@ -49,8 +50,9 @@ original names are in a sidecar file next to the *.bk* file
 if the chromosomes are integers (`chromosomes_as_int = TRUE`), their
 names are in another sidecar file (*.chromosomes.tsv*, see
 [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)).
-Keep any sidecar files with the other files (if you move the files, move
-them too, so that
+The sidecars are listed in the messages and in the value returned, after
+the *.bk* file. Keep them with the other files (if you move the files,
+move them too, so that
 [`gt_load()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_load.md)
 with `reattach_to` finds them).
 
@@ -69,13 +71,13 @@ example_gt <- example_gt %>% filter(id != "a")
 # save filtered gen_tibble object
 gt_save(example_gt, file_name = paste0(tempfile(), "_example_filtered"))
 #> 
-#> gen_tibble saved to /tmp/RtmpggvtNv/file1f3741bc6330_example_filtered.gt
-#> using FBM RDS: /tmp/RtmpggvtNv/file1f374dfcbece.rds
-#> with FBM backing file: /tmp/RtmpggvtNv/file1f374dfcbece.bk
+#> gen_tibble saved to /tmp/RtmpJMtr74/file1fc26bfb0072_example_filtered.gt
+#> using FBM RDS: /tmp/RtmpJMtr74/file1fc256ea312.rds
+#> with FBM backing file: /tmp/RtmpJMtr74/file1fc256ea312.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpggvtNv/file1f3741bc6330_example_filtered.gt')
-#> [1] "/tmp/RtmpggvtNv/file1f3741bc6330_example_filtered.gt"
-#> [2] "/tmp/RtmpggvtNv/file1f374dfcbece.rds"                
-#> [3] "/tmp/RtmpggvtNv/file1f374dfcbece.bk"                 
+#> gt_load('/tmp/RtmpJMtr74/file1fc26bfb0072_example_filtered.gt')
+#> [1] "/tmp/RtmpJMtr74/file1fc26bfb0072_example_filtered.gt"
+#> [2] "/tmp/RtmpJMtr74/file1fc256ea312.rds"                 
+#> [3] "/tmp/RtmpJMtr74/file1fc256ea312.bk"                  
 ```

@@ -9,7 +9,7 @@ pseudohaploid data, HWE test is not calculated."><meta property="og:image" conte
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,13 +56,13 @@ pseudohaploid data, HWE test is not calculated.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">qc_report_loci</span><span class="op">(</span><span class="va">.x</span>, <span class="va">...</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">qc_report_loci</span><span class="op">(</span><span class="va">.x</span>, hwe <span class="op">=</span> <span class="cn">TRUE</span>, n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'gen_tbl'</span></span>
-<span><span class="fu">qc_report_loci</span><span class="op">(</span><span class="va">.x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu">qc_report_loci</span><span class="op">(</span><span class="va">.x</span>, hwe <span class="op">=</span> <span class="cn">TRUE</span>, n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'grouped_gen_tbl'</span></span>
-<span><span class="fu">qc_report_loci</span><span class="op">(</span><span class="va">.x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">qc_report_loci</span><span class="op">(</span><span class="va">.x</span>, hwe <span class="op">=</span> <span class="cn">TRUE</span>, n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -73,6 +73,16 @@ pseudohaploid data, HWE test is not calculated.</p>
 <dd><p>a <code><a href="gen_tibble.html">gen_tibble</a></code> object.</p></dd>
 
 
+<dt id="arg-hwe">hwe<a class="anchor" aria-label="anchor" href="#arg-hwe"></a></dt>
+<dd><p>boolean, whether to compute the HWE exact test (the default).
+It is never computed for pseudohaploid data.</p></dd>
+
+
+<dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
+<dd><p>number of cores to be used, it defaults to
+<code><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">bigstatsr::nb_cores()</a></code></p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>currently unused</p></dd>
 
@@ -80,7 +90,19 @@ pseudohaploid data, HWE test is not calculated.</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>either a tibble with 3 elements (maf, missingness and hwe_p). For
-pseudohaploid data, a tibble with 2 elements (maf and missingness).</p>
+pseudohaploid data, or if <code>hwe = FALSE</code>, a tibble with 2 elements (maf
+and missingness).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The MAF and the missingness are always computed across all individuals:
+grouping only affects the HWE test, which is computed within each group.
+When genotypes are coded as 0, 1, 2 or missing (raw or imputed calls), all
+statistics are computed in a single pass over the genotypes. With
+<code>hwe = FALSE</code>, <code>qc_report_loci()</code> thus gives both the MAF and the
+missingness of each locus, identical to <code><a href="loci_alt_freq.html">loci_maf()</a></code> and
+<code><a href="loci_missingness.html">loci_missingness()</a></code> on the ungrouped data, reading the genotypes once
+rather than twice (e.g. to filter loci on both with <code><a href="select_loci_if.html">select_loci_if()</a></code>).</p>
     </div>
 
     <div class="section level2">
@@ -110,6 +132,27 @@ pseudohaploid data, a tibble with 2 elements (maf and missingness).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> rs11291 0.244      0.045<span style="text-decoration: underline;">5</span> 0.000<span style="text-decoration: underline;">000</span>944</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> rs12971 0.312      0.062<span style="text-decoration: underline;">5</span> 0.024<span style="text-decoration: underline;">2</span>     </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 69 more rows</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Only MAF and missingness (in a single pass over the genotypes), e.g. to</span></span></span>
+<span class="r-in"><span><span class="co"># filter loci on both</span></span></span>
+<span class="r-in"><span><span class="va">loci_qc</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">qc_report_loci</span><span class="op">(</span>hwe <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="select_loci_if.html">select_loci_if</a></span><span class="op">(</span><span class="va">loci_qc</span><span class="op">$</span><span class="va">maf</span> <span class="op">&gt;=</span> <span class="fl">0.05</span> <span class="op">&amp;</span> <span class="va">loci_qc</span><span class="op">$</span><span class="va">missingness</span> <span class="op">&lt;=</span> <span class="fl">0.2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A gen_tibble: 79 loci</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble:     176 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    id    population  genotypes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;vctr_SNP&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> Ale04 Ale         [0,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> Ale05 Ale         [1,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> Ale06 Ale         [.,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> Ale08 Ale         [.,2,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> Ale13 Ale         [0,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> Ale15 Ale         [1,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> Ale16 Ale         [0,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> Ale17 Ale         [1,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> Ale18 Ale         [0,0,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> Ale19 Ale         [2,.,...]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 166 more rows</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Group by population to calculate HWE within populations</span></span></span>
 <span class="r-in"><span><span class="va">example_gt</span> <span class="op">&lt;-</span> <span class="va">example_gt</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">population</span><span class="op">)</span></span></span>

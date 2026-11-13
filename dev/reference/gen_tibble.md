@@ -131,8 +131,9 @@ gen_tibble(
   the number of cores used to read a *VCF* file with `parser = "cpp"`:
   the genotypes are parsed in parallel, and a *.vcf.gz* file compressed
   with `bgzip` (as most are) is also decompressed in parallel (other
-  gzipped files are decompressed on a single core). It is ignored for
-  other formats and for `parser = "vcfR"`.
+  gzipped files are decompressed on a single core). For a PLINK *.ped*
+  file, the lines are split and the genotypes coded in parallel. It is
+  ignored for other formats and for `parser = "vcfR"`.
 
 - chunk_size:
 

@@ -174,18 +174,18 @@ concat_gt <- gt_concat_vcfs(c(vcf_chr1, vcf_chr2),
   names_as_int = FALSE,
   backingfile = tempfile("concat_")
 )
-#> reading the loci of /tmp/RtmpggvtNv/file1f3745c75c5b.vcf
-#> reading the loci of /tmp/RtmpggvtNv/file1f3712fc9712.vcf
+#> reading the loci of /tmp/RtmpJMtr74/file1fc22023591f.vcf
+#> reading the loci of /tmp/RtmpJMtr74/file1fc252de5f00.vcf
 #> concatenating 2 VCF files with 7 samples: 6 loci (biallelic SNPs)
-#> reading the genotypes of /tmp/RtmpggvtNv/file1f3745c75c5b.vcf
-#> reading the genotypes of /tmp/RtmpggvtNv/file1f3712fc9712.vcf
+#> reading the genotypes of /tmp/RtmpJMtr74/file1fc22023591f.vcf
+#> reading the genotypes of /tmp/RtmpJMtr74/file1fc252de5f00.vcf
 #> 
-#> gen_tibble saved to /tmp/RtmpggvtNv/concat_1f374abb5ba0.gt
-#> using FBM RDS: /tmp/RtmpggvtNv/concat_1f374abb5ba0.rds
-#> with FBM backing file: /tmp/RtmpggvtNv/concat_1f374abb5ba0.bk
+#> gen_tibble saved to /tmp/RtmpJMtr74/concat_1fc266eb4f42.gt
+#> using FBM RDS: /tmp/RtmpJMtr74/concat_1fc266eb4f42.rds
+#> with FBM backing file: /tmp/RtmpJMtr74/concat_1fc266eb4f42.bk
 #> make sure that you do NOT delete those files!
 #> to reload the gen_tibble in another session, use:
-#> gt_load('/tmp/RtmpggvtNv/concat_1f374abb5ba0.gt')
+#> gt_load('/tmp/RtmpJMtr74/concat_1fc266eb4f42.gt')
 concat_gt
 #> # A gen_tibble: 6 loci
 #> # A tibble:     7 × 2

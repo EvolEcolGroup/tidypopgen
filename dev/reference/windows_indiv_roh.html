@@ -13,7 +13,7 @@ are analysed in a single pass over the genotypes."><meta property="og:image" con
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -162,7 +162,10 @@ position, with columns:</p><ul><li><p>the grouping variable(s), if the <code><a 
 per grouping variable);</p></li>
 <li><p><code>id</code>: the individual;</p></li>
 <li><p><code>chromosome</code>: the chromosome of the run (a factor, with the levels of
-the loci table);</p></li>
+the loci table; integer chromosomes, from <code>chromosomes_as_int = TRUE</code>,
+are replaced by their names from the chromosome sidecar, see
+<code><a href="gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>, so the runs are the same as without
+<code>chromosomes_as_int</code>);</p></li>
 <li><p><code>start</code>, <code>end</code>: the positions of the first and last locus of the run
 (in bp; PLINK <code>POS1</code> and <code>POS2</code>);</p></li>
 <li><p><code>length_bp</code>: <code>end - start + 1</code> (or <code>end - start</code> with

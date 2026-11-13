@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,9 @@
 <span>  as_matrix <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"proportion"</span>, <span class="st">"adjusted_counts"</span>, <span class="st">"raw_counts"</span><span class="op">)</span>,</span>
 <span>  block_size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  missing_correction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"flat"</span>, <span class="st">"allele_freq"</span><span class="op">)</span>,</span>
+<span>  allele_freqs <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -78,13 +80,16 @@ symmetrical matrix (TRUE), or a tidied tibble (FALSE, the default)</p></dd>
 <dt id="arg-type">type<a class="anchor" aria-label="anchor" href="#arg-type"></a></dt>
 <dd><p>one of:</p><ul><li><p>"proportion" (the default): the proportion of alleles that are identical
 by state, a similarity (as <code>--distance ibs flat-missing</code> in PLINK, which
-writes it to a .mibs file).</p></li>
+writes it to a .mibs file; with <code>missing_correction = "allele_freq"</code>, as
+<code>--distance ibs</code>, see Details).</p></li>
 <li><p>"adjusted_counts": the allele count distance, a dissimilarity (as
 <code>--distance flat-missing</code> in PLINK, which writes it to a .dist file): the
 number of alleles that differ between two individuals, scaled up by the
 number of loci over the number of loci genotyped in both individuals, to
-correct for missing genotypes. It equals <code>2 * n_loci * (1 - proportion)</code>, so it is 0 for identical individuals and at most <code>2 * n_loci</code>. PLINK's default correction for missing genotypes (without
-<code>flat-missing</code>) is not available (see Details).</p></li>
+correct for missing genotypes. It equals <code>2 * n_loci * (1 - proportion)</code>, so it is 0 for identical individuals and, with the
+default <code>missing_correction = "flat"</code>, at most <code>2 * n_loci</code>. With
+<code>missing_correction = "allele_freq"</code>, as <code>--distance</code> in PLINK (without
+<code>flat-missing</code>), it can exceed <code>2 * n_loci</code>, see Details.</p></li>
 <li><p>"raw_counts": the counts of identical alleles and of non-missing
 alleles, from which the two other quantities are computed.</p></li>
 </ul></dd>
@@ -99,6 +104,21 @@ memory use.</p></dd>
 <dt id="arg-n-cores">n_cores<a class="anchor" aria-label="anchor" href="#arg-n-cores"></a></dt>
 <dd><p>number of cores to be used, it defaults to
 <code><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">bigstatsr::nb_cores()</a></code></p></dd>
+
+
+<dt id="arg-missing-correction">missing_correction<a class="anchor" aria-label="anchor" href="#arg-missing-correction"></a></dt>
+<dd><p>the correction for missing genotypes, for
+"proportion" and "adjusted_counts": "flat" (the default, as PLINK 1.9
+with the <code>flat-missing</code> modifier) or "allele_freq" (as PLINK 1.9's
+default, which weights loci by their allele frequencies); see Details.
+It must be "flat" for "raw_counts".</p></dd>
+
+
+<dt id="arg-allele-freqs">allele_freqs<a class="anchor" aria-label="anchor" href="#arg-allele-freqs"></a></dt>
+<dd><p>only used if <code>missing_correction = "allele_freq"</code>: the
+frequency of the alternate allele at each locus (as PLINK's
+<code>--read-freq</code>). If <code>NULL</code> (the default), it is computed from all the
+individuals of <code>x</code> (using imputed genotypes if <code>x</code> is set to use them).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -116,16 +136,45 @@ number of loci genotyped in both individuals).</p>
 monomorphic sites before running <code>pairwise_ibs()</code> if this is a concern.</p>
 <p>Imputed genotypes are used if <code>x</code> is set to use them (see
 <code><a href="gt_set_imputed.html">gt_set_imputed()</a></code>), and treated as missing otherwise.</p>
-<p>Missing genotypes are handled as in PLINK with the <code>flat-missing</code> modifier
-(<code>--distance ibs flat-missing</code> for "proportion", <code>--distance flat-missing</code> for "adjusted_counts"): each pair of individuals is compared
-only on the loci genotyped in both, and all loci have the same weight. By
-default (without <code>flat-missing</code>), PLINK 1.9 instead divides each distance
-by one minus the sum of the average contributions to the distance of the
-loci missing in the pair, which depend on their allele frequencies. This
-default correction is not available in <code>pairwise_ibs()</code>, so, when
-genotypes are missing, its values are only comparable to those of PLINK
-run with <code>flat-missing</code>. Without missing genotypes, both corrections give
-the same values.</p>
+<p>Each pair of individuals is compared only on the loci genotyped in both.
+Two corrections for missing genotypes are available (<code>missing_correction</code>),
+which give the same values when no genotypes are missing:</p><ul><li><p>"flat" (the default), as PLINK 1.9 with the <code>flat-missing</code> modifier
+(<code>--distance ibs flat-missing</code> for "proportion", <code>--distance flat-missing</code> for "adjusted_counts"): all loci have the same weight, so
+the number of alleles that differ between individuals <code>i</code> and <code>j</code>,
+<code>d_ij</code>, is scaled up by <code>n_loci / n_ij</code>, where <code>n_ij</code> is the number of loci
+genotyped in both ("adjusted_counts"), and "proportion" is
+<code>1 - d_ij / (2 * n_ij)</code>.</p></li>
+<li><p>"allele_freq", as PLINK 1.9's default (<code>--distance ibs</code> and
+<code>--distance</code>): loci are weighted by their expected contribution to the
+distance, which depends on their allele frequency <code>p</code>. Under Hardy-Weinberg
+equilibrium, the expected number of alleles that differ between two
+individuals at a locus is <code>4 * p * (1 - p) * (p^2 - p + 1)</code>, and PLINK
+uses <code>w = p * (1 - p) * (p^2 - p + 1)</code> as the weight of the locus (0 for
+monomorphic loci). "adjusted_counts" is then <code>d_ij * W / W_ij</code>, where <code>W</code>
+is the sum of the weights of all loci and <code>W_ij</code> that of the loci genotyped
+in both individuals, and "proportion" is <code>1 - adjusted_counts / (2 * n_loci)</code>. As <code>W / W_ij</code> depends on which loci are genotyped in both
+individuals, "adjusted_counts" can exceed <code>2 * n_loci</code> (and "proportion"
+can be negative) for pairs genotyped in both mostly at loci with small
+weights (loci with a rare allele), as in PLINK. For example, with two loci
+with frequencies 0.1 and 0.5, a pair of opposite homozygotes at the first
+locus, missing at the second, has "adjusted_counts" of about 6.58 (more
+than <code>2 * n_loci = 4</code>). As in PLINK, the weights are scaled to sum to just
+under <code>2^32</code> and rounded to integers (so values are identical to PLINK's),
+<code>W_ij</code> excludes each locus missing in either individual or in both (its
+weight is removed once), and monomorphic loci have no weight (a missing
+genotype at a monomorphic locus does not change the distance, but the
+locus still counts in <code>n_loci</code>). PLINK 1.9 computes the allele frequencies
+from the founders only (unless <code>--nonfounders</code> is used), or reads them with
+<code>--read-freq</code>;
+<code>pairwise_ibs()</code> computes them from all individuals of <code>x</code> (the same as
+PLINK when all individuals are founders, as in data without a pedigree),
+unless they are given with <code>allele_freqs</code> (e.g. from the founders, with
+<code><a href="loci_alt_freq.html">loci_alt_freq()</a></code>). Loci without any genotype have a frequency of 0.5, as
+in PLINK. PLINK's <code>1-ibs</code> modifier (<code>--distance 1-ibs</code>, written to a <code>.mdist</code>
+file) gives <code>1 - proportion</code> with either correction.</p></li>
+</ul><p>Pairs of individuals without any locus genotyped in both (or, with
+"allele_freq", without any polymorphic locus genotyped in both) have
+<code>NaN</code> (or <code>Inf</code>) values.</p>
     </div>
 
     <div class="section level2">
@@ -201,6 +250,26 @@ the same values.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $valid_n</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> A Filebacked Big Matrix of type 'double' with 7 rows and 7 columns.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># PLINK 1.9's default correction for missing genotypes</span></span></span>
+<span class="r-in"><span><span class="fu">pairwise_ibs</span><span class="op">(</span><span class="va">example_gt</span>,</span></span>
+<span class="r-in"><span>  type <span class="op">=</span> <span class="st">"adjusted_counts"</span>,</span></span>
+<span class="r-in"><span>  missing_correction <span class="op">=</span> <span class="st">"allele_freq"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 21 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    item1 item2 value</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> a     b      2.40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> a     c      3.75</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> a     d      2   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> a     e      3   </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> a     f      5.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> a     g      3.59</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> b     c      3.15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> b     d      2.40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> b     e      5.99</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> b     f      6.30</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 11 more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

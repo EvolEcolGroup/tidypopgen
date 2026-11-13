@@ -1,6 +1,6 @@
 # Changelog
 
-## tidypopgen (development version)
+## tidypopgen 1.1.0
 
 ### New features and changes
 
@@ -16,16 +16,34 @@
   ([`gt_lookup_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md),
   [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
   and
-  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md))
-- new article on large RAD-seq datasets; the big data article uses
-  [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
-- faster “cpp” VCF parser: a single pass, in parallel with `n_cores`,
-  and faster with many chromosomes
-- faster
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)),
+  which
+  [`gt_get_file_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_get_file_names.md)
+  and
+  [`gt_save()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.md)
+  list
+- phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads
+  phased VCF files;
+  [`is_phased()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/is_phased.md)
+  and
+  [`show_haplotypes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_haplotypes.md)
+  give the phase,
   [`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md)
+  writes it, and [`rbind()`](https://rdrr.io/r/base/cbind.html) keeps it
+- `pairwise_ibs(missing_correction = "allele_freq")` corrects for
+  missing genotypes as PLINK 1.9’s `--distance` without `flat-missing`
+- `qc_report_loci(hwe = FALSE)` gives the MAF and missingness of loci in
+  a single pass
+- faster VCF reading (in parallel with `n_cores`), and faster reading of
+  *.ped* files straight into the backing file
+- faster
+  [`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md),
+  [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md)
+  and
+  [`gt_order_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.md)
   with many chromosomes;
   [`gt_as_genlight()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_genlight.md)
-  works in chunks of loci (`chunk_size`)
+  works in chunks of loci
 - faster
   [`select_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci.md)
   with variables and function calls; `.engine = "tidyselect"` always
@@ -35,18 +53,21 @@
   [`gt_save()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.md)
   save the *.gt* file twice as fast
 - [`gt_impute_simple()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_impute_simple.md)
-  works after removing loci (but not individuals) from a `gen_tibble`
-- phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads
-  phased VCF files;
-  [`is_phased()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/is_phased.md)
-  and
-  [`show_haplotypes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_haplotypes.md)
-  give the phase,
-  [`gt_as_vcf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_as_vcf.md)
-  writes it, and [`rbind()`](https://rdrr.io/r/base/cbind.html) keeps it
+  works after removing loci (but not individuals)
+- new article on large RAD-seq datasets; the big data article uses
+  [`gt_merge_vcfs()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_merge_vcfs.md)
 
 ### Bug fixes
 
+- functions using temporary backing files (PCA, LD clumping, KING, IBS
+  and allele sharing) delete them, fixing occasional “File ‘…bk’ already
+  exists” errors
+- [`windows_indiv_roh()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/windows_indiv_roh.md)
+  and the `gt_roh_*()` functions give chromosome names with
+  `chromosomes_as_int`
+- [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
+  on *.ped* files: a third allele always flags the locus as
+  multi-allelic
 - [`gen_tibble()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
   with the “cpp” parser: fix malformed VCF files read as wrong genotypes
   (now an error), missing chromosomes (now `NA`), and backing files left

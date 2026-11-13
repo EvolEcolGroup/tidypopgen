@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,9 @@
 <span>  ind.col <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/seq-dim.html" class="external-link">cols_along</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"proportion"</span>, <span class="st">"adjusted_counts"</span>, <span class="st">"raw_counts"</span><span class="op">)</span>,</span>
 <span>  block.size <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://privefl.github.io/bigstatsr/reference/block_size.html" class="external-link">block_size</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  n_cores <span class="op">=</span> <span class="fu">bigstatsr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">nb_cores</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  missing_correction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"flat"</span>, <span class="st">"allele_freq"</span><span class="op">)</span>,</span>
+<span>  allele_freqs <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -92,9 +94,12 @@ writes it to a .mibs file).</p></li>
 number of alleles that differ between two individuals, scaled up by the
 number of loci over the number of loci genotyped in both individuals, to
 correct for missing genotypes. It equals <code>2 * n_loci * (1 - proportion)</code>, where <code>n_loci</code> is the number of loci used, so it is 0 for
-identical individuals and at most <code>2 * n_loci</code>. Note that, without
-<code>flat-missing</code>, PLINK corrects for missing genotypes differently, which
-gives slightly different values when genotypes are missing.</p></li>
+identical individuals and, with the default <code>missing_correction = "flat"</code>, at most <code>2 * n_loci</code>. Note that, without <code>flat-missing</code>, PLINK
+corrects for missing genotypes differently, which gives slightly
+different values when genotypes are missing (see <code>missing_correction</code>);
+with that correction (<code>missing_correction = "allele_freq"</code>), it can
+exceed <code>2 * n_loci</code>, and "proportion" can be negative (see
+<code><a href="pairwise_ibs.html">pairwise_ibs()</a></code>).</p></li>
 <li><p>"raw_counts": the counts of identical alleles and of non-missing
 alleles, from which the two other quantities are computed.</p></li>
 </ul></dd>
@@ -110,6 +115,23 @@ memory use.</p></dd>
 <dd><p>number of cores to be used, it defaults to
 <code><a href="https://rdrr.io/pkg/bigparallelr/man/nb_cores.html" class="external-link">bigstatsr::nb_cores()</a></code></p></dd>
 
+
+<dt id="arg-missing-correction">missing_correction<a class="anchor" aria-label="anchor" href="#arg-missing-correction"></a></dt>
+<dd><p>the correction for missing genotypes of
+"proportion" and "adjusted_counts": "flat" (the default, as PLINK 1.9's
+<code>flat-missing</code> modifier) or "allele_freq" (PLINK 1.9's default, which
+weights the missing loci by their allele frequencies). See
+<code><a href="pairwise_ibs.html">pairwise_ibs()</a></code> for details. It must be "flat" for "raw_counts".</p></dd>
+
+
+<dt id="arg-allele-freqs">allele_freqs<a class="anchor" aria-label="anchor" href="#arg-allele-freqs"></a></dt>
+<dd><p>only used if <code>missing_correction = "allele_freq"</code>: the
+frequency of the alternate allele at each locus in <code>ind.col</code> (as PLINK's
+<code>--read-freq</code>); either allele can be used, as the weights are the same
+for both. If <code>NULL</code> (the default), it is computed from the genotypes of
+the individuals in <code>ind.row</code>. Missing values are set to 0.5, as PLINK
+does for loci without genotypes.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -123,6 +145,8 @@ number of loci genotyped in both individuals).</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Note that monomorphic sites are counted (as in PLINK). Remove monomorphic
 sites beforehand if this is a concern.</p>
+<p>See <code><a href="pairwise_ibs.html">pairwise_ibs()</a></code> for the two corrections for missing genotypes
+(<code>missing_correction</code>).</p>
     </div>
 
     <div class="section level2">
@@ -186,6 +210,17 @@ sites beforehand if this is a concern.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $valid_n</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> A Filebacked Big Matrix of type 'double' with 7 rows and 7 columns.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># PLINK 1.9's default correction for missing genotypes</span></span></span>
+<span class="r-in"><span><span class="fu">snp_ibs</span><span class="op">(</span><span class="va">X</span>, type <span class="op">=</span> <span class="st">"adjusted_counts"</span>, missing_correction <span class="op">=</span> <span class="st">"allele_freq"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          [,1]     [,2]     [,3]     [,4]     [,5]     [,6]     [,7]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,] 0.000000 2.395837 3.747789 2.000000 3.000000 4.997052 3.593755</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,] 2.395837 0.000000 3.148350 2.395837 5.989592 6.296700 5.974047</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,] 3.747789 3.148350 0.000000 4.997052 3.747789 3.328097 4.722525</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,] 2.000000 2.395837 4.997052 0.000000 5.000000 3.747789 5.989592</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5,] 3.000000 5.989592 3.747789 5.000000 0.000000 4.997052 5.989592</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6,] 4.997052 6.296700 3.328097 3.747789 4.997052 0.000000 3.148350</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [7,] 3.593755 5.974047 4.722525 5.989592 5.989592 3.148350 0.000000</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

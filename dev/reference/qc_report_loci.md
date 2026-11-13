@@ -6,13 +6,13 @@ For pseudohaploid data, HWE test is not calculated.
 ## Usage
 
 ``` r
-qc_report_loci(.x, ...)
+qc_report_loci(.x, hwe = TRUE, n_cores = bigstatsr::nb_cores(), ...)
 
 # S3 method for class 'gen_tbl'
-qc_report_loci(.x, ...)
+qc_report_loci(.x, hwe = TRUE, n_cores = bigstatsr::nb_cores(), ...)
 
 # S3 method for class 'grouped_gen_tbl'
-qc_report_loci(.x, ...)
+qc_report_loci(.x, hwe = TRUE, n_cores = bigstatsr::nb_cores(), ...)
 ```
 
 ## Arguments
@@ -23,6 +23,16 @@ qc_report_loci(.x, ...)
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
   object.
 
+- hwe:
+
+  boolean, whether to compute the HWE exact test (the default). It is
+  never computed for pseudohaploid data.
+
+- n_cores:
+
+  number of cores to be used, it defaults to
+  [`bigstatsr::nb_cores()`](https://rdrr.io/pkg/bigparallelr/man/nb_cores.html)
+
 - ...:
 
   currently unused
@@ -30,7 +40,23 @@ qc_report_loci(.x, ...)
 ## Value
 
 either a tibble with 3 elements (maf, missingness and hwe_p). For
-pseudohaploid data, a tibble with 2 elements (maf and missingness).
+pseudohaploid data, or if `hwe = FALSE`, a tibble with 2 elements (maf
+and missingness).
+
+## Details
+
+The MAF and the missingness are always computed across all individuals:
+grouping only affects the HWE test, which is computed within each group.
+When genotypes are coded as 0, 1, 2 or missing (raw or imputed calls),
+all statistics are computed in a single pass over the genotypes. With
+`hwe = FALSE`, `qc_report_loci()` thus gives both the MAF and the
+missingness of each locus, identical to
+[`loci_maf()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_alt_freq.md)
+and
+[`loci_missingness()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/loci_missingness.md)
+on the ungrouped data, reading the genotypes once rather than twice
+(e.g. to filter loci on both with
+[`select_loci_if()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/select_loci_if.md)).
 
 ## Examples
 
@@ -60,6 +86,27 @@ example_gt %>% qc_report_loci()
 #>  9 rs11291 0.244      0.0455 0.000000944
 #> 10 rs12971 0.312      0.0625 0.0242     
 #> # ℹ 69 more rows
+
+# Only MAF and missingness (in a single pass over the genotypes), e.g. to
+# filter loci on both
+loci_qc <- example_gt %>% qc_report_loci(hwe = FALSE)
+example_gt %>%
+  select_loci_if(loci_qc$maf >= 0.05 & loci_qc$missingness <= 0.2)
+#> # A gen_tibble: 79 loci
+#> # A tibble:     176 × 3
+#>    id    population  genotypes
+#>    <chr> <chr>      <vctr_SNP>
+#>  1 Ale04 Ale         [0,.,...]
+#>  2 Ale05 Ale         [1,0,...]
+#>  3 Ale06 Ale         [.,0,...]
+#>  4 Ale08 Ale         [.,2,...]
+#>  5 Ale13 Ale         [0,.,...]
+#>  6 Ale15 Ale         [1,0,...]
+#>  7 Ale16 Ale         [0,.,...]
+#>  8 Ale17 Ale         [1,.,...]
+#>  9 Ale18 Ale         [0,0,...]
+#> 10 Ale19 Ale         [2,.,...]
+#> # ℹ 166 more rows
 
 # Group by population to calculate HWE within populations
 example_gt <- example_gt %>% group_by(population)

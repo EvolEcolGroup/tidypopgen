@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,28 +47,38 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="tidypopgen-development-version">tidypopgen (development version)<a class="anchor" aria-label="anchor" href="#tidypopgen-development-version"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.1.0" id="tidypopgen-110">tidypopgen 1.1.0<a class="anchor" aria-label="anchor" href="#tidypopgen-110"></a></h2>
 <div class="section level3">
-<h3 id="new-features-and-changes-development-version">New features and changes<a class="anchor" aria-label="anchor" href="#new-features-and-changes-development-version"></a></h3>
+<h3 id="new-features-and-changes-1-1-0">New features and changes<a class="anchor" aria-label="anchor" href="#new-features-and-changes-1-1-0"></a></h3>
 <ul><li>new <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code> and <code><a href="../reference/gt_concat_vcfs.html">gt_concat_vcfs()</a></code> read several VCF files into a single <code>gen_tibble</code>, as <code>bcftools merge</code> and <code>bcftools concat</code>
 </li>
-<li>integer chromosomes (<code>chromosomes_as_int</code>) for datasets with many chromosomes; the original names of integer loci and chromosomes are kept in sidecar files (<code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code>, <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> and <code><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>)</li>
-<li>new article on large RAD-seq datasets; the big data article uses <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>
+<li>integer chromosomes (<code>chromosomes_as_int</code>) for datasets with many chromosomes; the original names of integer loci and chromosomes are kept in sidecar files (<code><a href="../reference/gt_lookup_loci.html">gt_lookup_loci()</a></code>, <code><a href="../reference/gt_lookup_loci.html">gt_restore_loci()</a></code> and <code><a href="../reference/gt_lookup_loci.html">gt_lookup_chromosomes()</a></code>), which <code><a href="../reference/gt_get_file_names.html">gt_get_file_names()</a></code> and <code><a href="../reference/gt_save.html">gt_save()</a></code> list</li>
+<li>phased genotypes (experimental): <code>gen_tibble(phased = TRUE)</code> reads phased VCF files; <code><a href="../reference/is_phased.html">is_phased()</a></code> and <code><a href="../reference/show_haplotypes.html">show_haplotypes()</a></code> give the phase, <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> writes it, and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> keeps it</li>
+<li>
+<code>pairwise_ibs(missing_correction = "allele_freq")</code> corrects for missing genotypes as PLINK 1.9’s <code>--distance</code> without <code>flat-missing</code>
 </li>
-<li>faster “cpp” VCF parser: a single pass, in parallel with <code>n_cores</code>, and faster with many chromosomes</li>
-<li>faster <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> with many chromosomes; <code><a href="../reference/gt_as_genlight.html">gt_as_genlight()</a></code> works in chunks of loci (<code>chunk_size</code>)</li>
+<li>
+<code>qc_report_loci(hwe = FALSE)</code> gives the MAF and missingness of loci in a single pass</li>
+<li>faster VCF reading (in parallel with <code>n_cores</code>), and faster reading of <em>.ped</em> files straight into the backing file</li>
+<li>faster <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>, <code><a href="../reference/gt_update_backingfile.html">gt_update_backingfile()</a></code> and <code><a href="../reference/gt_order_loci.html">gt_order_loci()</a></code> with many chromosomes; <code><a href="../reference/gt_as_genlight.html">gt_as_genlight()</a></code> works in chunks of loci</li>
 <li>faster <code><a href="../reference/select_loci.html">select_loci()</a></code> with variables and function calls; <code>.engine = "tidyselect"</code> always uses <code>tidyselect</code>
 </li>
 <li>
 <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> and <code><a href="../reference/gt_save.html">gt_save()</a></code> save the <em>.gt</em> file twice as fast</li>
 <li>
-<code><a href="../reference/gt_impute_simple.html">gt_impute_simple()</a></code> works after removing loci (but not individuals) from a <code>gen_tibble</code>
+<code><a href="../reference/gt_impute_simple.html">gt_impute_simple()</a></code> works after removing loci (but not individuals)</li>
+<li>new article on large RAD-seq datasets; the big data article uses <code><a href="../reference/gt_merge_vcfs.html">gt_merge_vcfs()</a></code>
 </li>
-<li>phased genotypes (experimental): <code>gen_tibble(phased = TRUE)</code> reads phased VCF files; <code><a href="../reference/is_phased.html">is_phased()</a></code> and <code><a href="../reference/show_haplotypes.html">show_haplotypes()</a></code> give the phase, <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code> writes it, and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> keeps it</li>
 </ul></div>
 <div class="section level3">
-<h3 id="bug-fixes-development-version">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-development-version"></a></h3>
-<ul><li>
+<h3 id="bug-fixes-1-1-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-1-0"></a></h3>
+<ul><li>functions using temporary backing files (PCA, LD clumping, KING, IBS and allele sharing) delete them, fixing occasional “File ‘…bk’ already exists” errors</li>
+<li>
+<code><a href="../reference/windows_indiv_roh.html">windows_indiv_roh()</a></code> and the <code>gt_roh_*()</code> functions give chromosome names with <code>chromosomes_as_int</code>
+</li>
+<li>
+<code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> on <em>.ped</em> files: a third allele always flags the locus as multi-allelic</li>
+<li>
 <code><a href="../reference/gen_tibble.html">gen_tibble()</a></code> with the “cpp” parser: fix malformed VCF files read as wrong genotypes (now an error), missing chromosomes (now <code>NA</code>), and backing files left behind on errors</li>
 <li>
 <code><a href="../reference/gt_as_vcf.html">gt_as_vcf()</a></code>: fix loci with missing chromosomes (now written as “.”)</li>

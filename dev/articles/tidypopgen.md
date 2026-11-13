@@ -226,9 +226,12 @@ the `genotypes` column of our `gen_tibble`.
 lobsters <- lobsters %>% select_loci_if(loci_missingness(genotypes) < 0.05)
 ```
 
-Through our filtering, we have removed a few individuals and loci. We
-should now update the file backing matrix to reflect these changes,
-using the function `gt_update_backingfile`:
+Through our filtering, we have removed a few individuals and loci. Most
+functions work directly on the remaining data, but imputation depends on
+which individuals are included, so `gt_impute_simple` needs a backing
+file with only the individuals that are left. Because we have removed
+individuals and want to impute, we write a new backing file with
+`gt_update_backingfile`:
 
 ``` r
 
@@ -238,18 +241,19 @@ lobsters <- gt_update_backingfile(lobsters, backingfile = tempfile())
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/Rtmp2idWu2/file2c886c5ad452.rds
+    ## using FBM RDS: /tmp/Rtmpoc2lOz/file2d433bcb7770.rds
 
-    ## with FBM backing file: /tmp/Rtmp2idWu2/file2c886c5ad452.bk
+    ## with FBM backing file: /tmp/Rtmpoc2lOz/file2d433bcb7770.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/Rtmp2idWu2/file2c886c5ad452.gt')
+    ## gt_load('/tmp/Rtmpoc2lOz/file2d433bcb7770.gt')
 
-Now our data are clean and the backingfile is updated, we are ready to
-create a PCA.
+After removing only loci, there would be no need to update the backing
+file. Now that our data are clean, we are ready to impute and create a
+PCA.
 
 ## Impute
 

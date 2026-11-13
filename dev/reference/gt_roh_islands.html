@@ -13,7 +13,7 @@ which can point to regions under selection."><meta property="og:image" content="
 
     <a class="navbar-brand me-2" href="../index.html">tidypopgen</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9004</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.0.0.9010</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,11 @@ which can point to regions under selection.</p>
 
 <dt id="arg-loci">loci<a class="anchor" aria-label="anchor" href="#arg-loci"></a></dt>
 <dd><p>the loci table of the <code><a href="gen_tibble.html">gen_tibble</a></code> used to find the runs
-(i.e. <code>show_loci(x)</code>, as the runs refer to its rows)</p></dd>
+(i.e. <code>show_loci(x)</code>, as the runs refer to its rows). Integer chromosomes
+(<code>chromosomes_as_int = TRUE</code>) are replaced by the names of the
+chromosomes of the runs, so the output is the same as without
+<code>chromosomes_as_int</code>; integer names of loci (<code>names_as_int = TRUE</code>) are
+kept (see <code><a href="gt_lookup_loci.html">gt_restore_loci()</a></code> to restore them first)</p></dd>
 
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>

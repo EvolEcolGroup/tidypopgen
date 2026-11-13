@@ -187,9 +187,10 @@ They can be read with any tool and joined to
 [`show_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/show_loci.md)
 by `name = int_name` (or `chromosome = int_chromosome`). Keep them with
 the other files of the `gen_tibble`:
+[`gt_get_file_names()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_get_file_names.md)
+and
 [`gt_save()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_save.md)
-lists them in its messages. Functions that write a new backing file,
-such as
+list them. Functions that write a new backing file, such as
 [`gt_update_backingfile()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_update_backingfile.md),
 [`gt_order_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_order_loci.md)
 and [`rbind()`](https://rdrr.io/r/base/cbind.html), write new sidecars

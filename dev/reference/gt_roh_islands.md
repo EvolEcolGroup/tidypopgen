@@ -23,7 +23,12 @@ gt_roh_islands(roh, loci, threshold = 0.5, by_group = TRUE)
   the loci table of the
   [`gen_tibble`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gen_tibble.md)
   used to find the runs (i.e. `show_loci(x)`, as the runs refer to its
-  rows)
+  rows). Integer chromosomes (`chromosomes_as_int = TRUE`) are replaced
+  by the names of the chromosomes of the runs, so the output is the same
+  as without `chromosomes_as_int`; integer names of loci
+  (`names_as_int = TRUE`) are kept (see
+  [`gt_restore_loci()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md)
+  to restore them first)
 
 - threshold:
 

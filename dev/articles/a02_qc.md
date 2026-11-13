@@ -363,15 +363,15 @@ data <- gt_update_backingfile(data)
     ## 
     ## gen_backing files updated, now
 
-    ## using FBM RDS: /tmp/RtmpE3IhdU/file2a0f42933a78_v2.rds
+    ## using FBM RDS: /tmp/Rtmp43HpKK/file2ac351e3a99a_v2.rds
 
-    ## with FBM backing file: /tmp/RtmpE3IhdU/file2a0f42933a78_v2.bk
+    ## with FBM backing file: /tmp/Rtmp43HpKK/file2ac351e3a99a_v2.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpE3IhdU/file2a0f42933a78_v2.gt')
+    ## gt_load('/tmp/Rtmp43HpKK/file2ac351e3a99a_v2.gt')
 
 And then we can impute using:
 
@@ -416,21 +416,21 @@ gt_save(ld_data, file_name = tempfile())
 ```
 
     ## 
-    ## gen_tibble saved to /tmp/RtmpE3IhdU/file2a0f54897119.gt
+    ## gen_tibble saved to /tmp/Rtmp43HpKK/file2ac39d9ed29.gt
 
-    ## using FBM RDS: /tmp/RtmpE3IhdU/file2a0f42933a78_v2.rds
+    ## using FBM RDS: /tmp/Rtmp43HpKK/file2ac351e3a99a_v2.rds
 
-    ## with FBM backing file: /tmp/RtmpE3IhdU/file2a0f42933a78_v2.bk
+    ## with FBM backing file: /tmp/Rtmp43HpKK/file2ac351e3a99a_v2.bk
 
     ## make sure that you do NOT delete those files!
 
     ## to reload the gen_tibble in another session, use:
 
-    ## gt_load('/tmp/RtmpE3IhdU/file2a0f54897119.gt')
+    ## gt_load('/tmp/Rtmp43HpKK/file2ac39d9ed29.gt')
 
-    ## [1] "/tmp/RtmpE3IhdU/file2a0f54897119.gt"    
-    ## [2] "/tmp/RtmpE3IhdU/file2a0f42933a78_v2.rds"
-    ## [3] "/tmp/RtmpE3IhdU/file2a0f42933a78_v2.bk"
+    ## [1] "/tmp/Rtmp43HpKK/file2ac39d9ed29.gt"     
+    ## [2] "/tmp/Rtmp43HpKK/file2ac351e3a99a_v2.rds"
+    ## [3] "/tmp/Rtmp43HpKK/file2ac351e3a99a_v2.bk"
 
 ## Grouping data
 

@@ -112,7 +112,10 @@ position, with columns:
 - `id`: the individual;
 
 - `chromosome`: the chromosome of the run (a factor, with the levels of
-  the loci table);
+  the loci table; integer chromosomes, from `chromosomes_as_int = TRUE`,
+  are replaced by their names from the chromosome sidecar, see
+  [`gt_lookup_chromosomes()`](https://evolecolgroup.github.io/tidypopgen/dev/reference/gt_lookup_loci.md),
+  so the runs are the same as without `chromosomes_as_int`);
 
 - `start`, `end`: the positions of the first and last locus of the run
   (in bp; PLINK `POS1` and `POS2`);
