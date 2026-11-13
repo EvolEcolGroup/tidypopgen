@@ -1,0 +1,7 @@
+label	version	n_variants	threads	step	status	elapsed_s	user_s	sys_s	load_s	pss_start_gb	pss_median_gb	pss_peak_gb	rss_peak_gb	proc_maxrss_gb	n_samples	summary
+dev	1.0.0.9004	18579683	4	filter_chain_update	ok	18.37	17.63	0.958	25.38	2.96	5.241	5.618	5.631	5.803	35	53 indiv x 4224260 loci
+select_filter_speed	1.0.0.9005	18579683	4	filter_chain_update	ok	8.051	7.772	0.514	25.31	2.96	4.836	5.154	5.167	5.17	16	53 indiv x 4224260 loci
+dev	1.0.0.9004	18579683	4	filter_chain_update	ok	29.76	28.89	1.298	25.92	2.958	5.239	5.616	5.631	5.804	56	53 indiv x 4224260 loci
+select_filter_speed	1.0.0.9005	18579683	4	filter_chain_update	ok	8.212	8.005	0.498	27.28	2.958	4.91	5.153	5.167	5.171	16	53 indiv x 4224260 loci
+dev	1.0.0.9004	18579683	4	filter_chain_update	ok	18.4	17.6	0.949	26.19	2.958	5.239	5.616	5.631	5.804	32	53 indiv x 4224260 loci
+select_filter_speed	1.0.0.9005	18579683	4	filter_chain_update	ok	13.01	12.64	0.727	39.44	2.958	4.921	5.153	5.167	5.171	26	53 indiv x 4224260 loci
