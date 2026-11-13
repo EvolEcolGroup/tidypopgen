@@ -1,4 +1,4 @@
-# tidypopgen (development version)
+# tidypopgen 1.1.0
 
 ## New features and changes
 
@@ -7,46 +7,38 @@
 * integer chromosomes (`chromosomes_as_int`) for datasets with many
   chromosomes; the original names of integer loci and chromosomes are kept in
   sidecar files (`gt_lookup_loci()`, `gt_restore_loci()` and
-  `gt_lookup_chromosomes()`)
-* `gt_get_file_names()` and `gt_save()` list the sidecar files after the
-  *.rds* and *.bk* files
-* `windows_indiv_roh()` and the `gt_roh_*()` functions give the same runs,
-  with chromosome names, with `chromosomes_as_int`
-* new article on large RAD-seq datasets; the big data article uses
-  `gt_merge_vcfs()`
-* faster "cpp" VCF parser: a single pass, in parallel with `n_cores`, and
-  faster with many chromosomes
-* faster `gt_as_vcf()` with many chromosomes; `gt_as_genlight()` works in
-  chunks of loci (`chunk_size`)
+  `gt_lookup_chromosomes()`), which `gt_get_file_names()` and `gt_save()` list
+* phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads phased
+  VCF files; `is_phased()` and `show_haplotypes()` give the phase,
+  `gt_as_vcf()` writes it, and `rbind()` keeps it
+* `pairwise_ibs(missing_correction = "allele_freq")` corrects for missing
+  genotypes as PLINK 1.9's `--distance` without `flat-missing`
+* `qc_report_loci(hwe = FALSE)` gives the MAF and missingness of loci in a
+  single pass
+* faster VCF reading (in parallel with `n_cores`), and faster reading of
+  *.ped* files straight into the backing file
+* faster `gt_as_vcf()`, `gt_update_backingfile()` and `gt_order_loci()` with
+  many chromosomes; `gt_as_genlight()` works in chunks of loci
 * faster `select_loci()` with variables and function calls;
   `.engine = "tidyselect"` always uses `tidyselect`
 * `gen_tibble()` and `gt_save()` save the *.gt* file twice as fast
-* `qc_report_loci()` gains `n_cores`, and `hwe = FALSE` to get only the MAF
-  and missingness of loci, in a single pass over the genotypes
-* faster `gt_update_backingfile()` with millions of chromosomes, when genetic
-  distances are sorted (e.g. all zero)
-* faster `is_loci_table_ordered()`, `gt_order_loci()` and other functions that
-  cast chromosome names to integers, with millions of chromosomes
-* `gt_impute_simple()` works after removing loci (but not individuals) from a
-  `gen_tibble`
-* phased genotypes (experimental): `gen_tibble(phased = TRUE)` reads phased
-  VCF files; `is_phased()` and `show_haplotypes()` give the
-  phase, `gt_as_vcf()` writes it, and `rbind()` keeps it
-* `pairwise_ibs(missing_correction = "allele_freq")` corrects for missing
-  genotypes as PLINK 1.9's `--distance` without `flat-missing`
-* `gen_tibble()` reads *.ped* files straight into the backing file, much
-  faster and in parallel with `n_cores`
+* `gt_impute_simple()` works after removing loci (but not individuals)
+* new article on large RAD-seq datasets; the big data article uses
+  `gt_merge_vcfs()`
 
 ## Bug fixes
 
-* `gen_tibble()` on .ped files: a third allele always flags the locus as
+* functions using temporary backing files (PCA, LD clumping, KING, IBS and
+  allele sharing) delete them, fixing occasional "File '...bk' already
+  exists" errors
+* `windows_indiv_roh()` and the `gt_roh_*()` functions give chromosome names
+  with `chromosomes_as_int`
+* `gen_tibble()` on *.ped* files: a third allele always flags the locus as
   multi-allelic
 * `gen_tibble()` with the "cpp" parser: fix malformed VCF files read as wrong
   genotypes (now an error), missing chromosomes (now `NA`), and backing files
   left behind on errors
 * `gt_as_vcf()`: fix loci with missing chromosomes (now written as ".")
-* `gt_pca_*()`, `loci_ld_clump()`, `predict()`, and the KING, IBS and allele
-  sharing functions delete their temporary backing files
 
 # tidypopgen 1.0.0
 
